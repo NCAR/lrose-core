@@ -50,6 +50,15 @@ typedef struct {
   ui32 spare[2];
 } compress_buf_hdr_t;
 
+typedef struct {
+  ui32 flag_64;
+  ui32 magic_cookie;
+  ui64 nbytes_uncompressed;
+  ui64 nbytes_compressed; /* including this header */
+  ui64 nbytes_coded; /* nbytes_compressed - sizeof(hdr) */
+  ui64 spare[2];
+} compress_buf_hdr_64_t;
+
 typedef enum {
   TA_COMPRESSION_NA =   -1,  /* not applicable
                               * raw data, no compression, no header */
@@ -65,6 +74,7 @@ typedef enum {
  * magic cookies for various compression states
  */
 
+#define TA_COMPRESS_FLAG_64 0x64646464U
 #define TA_NOT_COMPRESSED 0x2f2f2f2fU
 #define LZO_COMPRESSED 0xf1f1f1f1U
 #define LZO_NOT_COMPRESSED 0xf2f2f2f2U
@@ -89,8 +99,19 @@ typedef enum {
  **********************************************************************/
 
 extern int ta_is_compressed(const void *compressed_buffer,
-                            int compressed_len);
+                            ui64 compressed_len);
 
+/**********************************************************************
+ * ta_is_compressed_64() - tests whether buffer is compressed
+ * using toolsa, compression, with 64-bit headers
+ *
+ * Returns TRUE or FALSE
+ *
+ **********************************************************************/
+
+extern int ta_is_compressed_64(const void *compressed_buffer,
+                               ui64 compressed_len);
+     
 /**********************************************************************
  * ta_compression_method() - returns type of ta compression
  *
@@ -100,7 +121,7 @@ extern int ta_is_compressed(const void *compressed_buffer,
 
 extern ta_compression_method_t
   ta_compression_method(const void *compressed_buffer,
-                        int compressed_len);
+                        ui64 compressed_len);
      
 /**********************************************************************
  * ta_compressed() - tests whether buffer is compressed using toolsa
@@ -156,8 +177,8 @@ extern int ta_gzip_buffer(const void *compressed_buffer);
 
 extern void *ta_compress(ta_compression_method_t method,
 			 const void *uncompressed_buffer,
-			 unsigned int nbytes_uncompressed,
-			 unsigned int *nbytes_compressed_p);
+			 ui64 nbytes_uncompressed,
+			 ui64 *nbytes_compressed_p);
 
 /***********************
  * generic decompression
@@ -182,7 +203,7 @@ extern void *ta_compress(ta_compression_method_t method,
  **********************************************************************/
 
 extern void *ta_decompress(const void *compressed_buffer,
-			   unsigned int *nbytes_uncompressed_p);
+			   ui64 *nbytes_uncompressed_p);
      
 /**********************************************************************
  * ta_compress_free() - free up buffer allocated and returned by
@@ -226,8 +247,8 @@ extern void ta_compress_free(void *buffer);
  **********************************************************************/
 
 extern void *lzo_compress(const void *uncompressed_buffer,
-			  unsigned int nbytes_uncompressed,
-			  unsigned int *nbytes_compressed_p);
+			  ui32 nbytes_uncompressed,
+			  ui32 *nbytes_compressed_p);
 
 /**********************************************************************
  * lzo_decompress()
@@ -245,7 +266,7 @@ extern void *lzo_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 extern void *lzo_decompress(const void *compressed_buffer,
-			    unsigned int *nbytes_uncompressed_p);
+			    ui32 *nbytes_uncompressed_p);
      
 #endif
      
@@ -282,8 +303,12 @@ extern void *lzo_decompress(const void *compressed_buffer,
  **********************************************************************/
 
 extern void *bzip_compress(const void *uncompressed_buffer,
-			   unsigned int nbytes_uncompressed,
-			   unsigned int *nbytes_compressed_p);
+			   ui32 nbytes_uncompressed,
+			   ui32 *nbytes_compressed_p);
+
+extern void *bzip_compress64(const void *uncompressed_buffer,
+                             ui64 nbytes_uncompressed,
+                             ui64 *nbytes_compressed_p);
 
 /**********************************************************************
  * bzip_decompress()
@@ -301,7 +326,10 @@ extern void *bzip_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 extern void *bzip_decompress(const void *compressed_buffer,
-			     unsigned int *nbytes_uncompressed_p);
+			     ui32 *nbytes_uncompressed_p);
+
+extern void *bzip_decompress64(const void *compressed_buffer,
+                               ui64 *nbytes_uncompressed_p);
 
 /***************
  * GZIP routines
@@ -336,8 +364,12 @@ extern void *bzip_decompress(const void *compressed_buffer,
  **********************************************************************/
 
 extern void *gzip_compress(const void *uncompressed_buffer,
-			   unsigned int nbytes_uncompressed,
-			   unsigned int *nbytes_compressed_p);
+			   ui32 nbytes_uncompressed,
+			   ui32 *nbytes_compressed_p);
+
+extern void *gzip_compress64(const void *uncompressed_buffer,
+                             ui64 nbytes_uncompressed,
+                             ui64 *nbytes_compressed_p);
 
 /**********************************************************************
  * gzip_decompress()
@@ -355,7 +387,10 @@ extern void *gzip_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 extern void *gzip_decompress(const void *compressed_buffer,
-			     unsigned int *nbytes_uncompressed_p);
+			     ui32 *nbytes_uncompressed_p);
+     
+extern void *gzip_decompress64(const void *compressed_buffer,
+                               ui64 *nbytes_uncompressed_p);
      
 /**********************************************************************
  * gunzip_known_len()
@@ -374,8 +409,8 @@ extern void *gzip_decompress(const void *compressed_buffer,
  **********************************************************************/
 
 extern void *gunzip_known_len(const void *compressed_buffer,
-                              unsigned int nbytes_compressed,
-                              unsigned int nbytes_uncompressed);
+                              ui32 nbytes_compressed,
+                              ui32 nbytes_uncompressed);
      
 /******************************************************************
  * RLE routines
@@ -411,8 +446,8 @@ extern void *gunzip_known_len(const void *compressed_buffer,
  **********************************************************************/
 
 extern void *rle_compress(const void *uncompressed_buffer,
-			  unsigned int nbytes_uncompressed,
-			  unsigned int *nbytes_compressed_p);
+			  ui32 nbytes_uncompressed,
+			  ui32 *nbytes_compressed_p);
 
 /**********************************************************************
  * rle_decompress()
@@ -430,7 +465,7 @@ extern void *rle_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 extern void *rle_decompress(const void *compressed_buffer,
-			    unsigned int *nbytes_uncompressed_p);
+			    ui32 *nbytes_uncompressed_p);
 
 /***************
  * ZLIB routines
@@ -465,8 +500,8 @@ extern void *rle_decompress(const void *compressed_buffer,
  **********************************************************************/
 
 extern void *zlib_compress(const void *uncompressed_buffer,
-			   unsigned int nbytes_uncompressed,
-			   unsigned int *nbytes_compressed_p);
+			   ui32 nbytes_uncompressed,
+			   ui32 *nbytes_compressed_p);
 
 /**********************************************************************
  * zlib_decompress()
@@ -484,16 +519,21 @@ extern void *zlib_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 extern void *zlib_decompress(const void *compressed_buffer,
-			     unsigned int *nbytes_uncompressed_p);
+			     ui32 *nbytes_uncompressed_p);
 
 /*
  * private routines for use internally by the compression routines
  */
 
-extern void *_ta_no_compress(unsigned int magic_cookie,
+extern void *_ta_no_compress(ui32 magic_cookie,
 			     const void *uncompressed_buffer,
-			     unsigned int nbytes_uncompressed,
-			     unsigned int *nbytes_compressed_p);
+			     ui32 nbytes_uncompressed,
+			     ui32 *nbytes_compressed_p);
+
+extern void *_ta_no_compress64(ui32 magic_cookie,
+                               const void *uncompressed_buffer,
+                               ui64 nbytes_uncompressed,
+                               ui64 *nbytes_compressed_p);
 
 /*************************
  * Deprecated RLE routines

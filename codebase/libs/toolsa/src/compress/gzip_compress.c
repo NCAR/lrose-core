@@ -56,6 +56,10 @@ static uLong _mkTrailer(uLong inlen,
 			uLong totcmplen,
 			unsigned char *cmpbuf);
 
+static uLong _mkTrailer2(uLong inlen,
+                         const unsigned char *inbuf,
+                         unsigned char *trailer);
+
 static int _checkHeader(uLong totcmplen,
 			const unsigned char * cmpbuf);
 
@@ -65,6 +69,14 @@ static void _insertLong(uLong pos,
 
 static uLong _getLong(uLong pos,
 		      const unsigned char * cmpbuf);
+
+static void compress_buf_hdr_64_to_BE(compress_buf_hdr_64_t *hdr);
+     
+static void compress_buf_hdr_64_from_BE(compress_buf_hdr_64_t *hdr);
+
+static void compress_buf_hdr_to_BE(compress_buf_hdr_t *hdr);
+     
+static void compress_buf_hdr_from_BE(compress_buf_hdr_t *hdr);
 
 /**********************************************************************
  * gzip_compress()
@@ -401,6 +413,238 @@ void *gzip_decompress(const void *compressed_buffer,
 }
 
 /**********************************************************************
+ * gzip_compress64()
+ *
+ * The compressed buffer will contain the following in order:
+ *
+ *   (1a)  compress_buf_hdr_t    (toolsa 32-bit header, 24 bytes)
+ *     or for large buffers (len > INT_MAX)
+ *   (1b)  compress_buf_hdr_64_t (toolsa 64-bit header, 48 bytes)
+ *
+ *   (2)  gzip header (10 bytes)
+ *   (3)  compressed data
+ *   (4)  gzip trailer (8 bytes)
+ *   
+ * The toolsa header is in BE byte order.
+ *
+ * If the buffer is not compressed, the magic_cookie is set to GZIP_NOT_COMPRESSED.
+ *
+ * The memory for the encoded buffer is allocated by this routine,
+ * and passed back to the caller.
+ * This should be freed by the calling routine using ta_compress_free();
+ *
+ * The length of the compressed data buffer (*nbytes_compressed_p) is set.
+ *
+ * Returns pointer to the compressed buffer.
+ *
+ **********************************************************************/
+
+#define GZ_HEADER_LEN 10
+#define GZ_TRAILER_LEN 8
+
+void *gzip_compress64(const void *uncompressed_buffer,
+                      ui64 nbytes_uncompressed,
+                      ui64 *nbytes_compressed_p)
+  
+{
+
+  /* return value */
+
+  int iret = 0;
+
+  /* toolsa compressed header */
+  
+  compress_buf_hdr_64_t toolsaHdr64;
+  compress_buf_hdr_64_t *toolsaHdr64Ptr;
+
+  /* gzip header, follows toolsa compressed header */
+
+  unsigned char gzHeader[GZ_HEADER_LEN];
+  unsigned char gzTrailer[GZ_TRAILER_LEN];
+  
+  /* working buffer, for temp storage of compressed output */
+  
+  ui64 workLen = 256 * 1024 * 1024; /* 256 MB working buffer size */
+  MEMbuf *workBuf = NULL;
+  unsigned char *work = NULL;
+
+  /* final buffer, for the full output */
+
+  MEMbuf *finalBuf = NULL;
+  unsigned char *final = NULL;
+
+  /* counters */
+
+  ui64 nLeftIn = nbytes_uncompressed;
+  ui64 nOutThisCycle = 0;
+  ui64 nCompressed = 0;
+  
+  /* z stream, and flags to indicate flush or finish */
+
+  z_stream strm;
+  int flush = Z_NO_FLUSH; /* initilize */
+  
+  /* create the memory buffers */
+  
+  workBuf = MEMbufCreate();
+  work = (unsigned char*) MEMbufPrepare(workBuf, workLen);
+
+  finalBuf = MEMbufCreate();
+  final = (unsigned char*) MEMbufPtr(finalBuf);
+  
+  /*
+   * add toolsa compression header to start final buffer
+   * we will return and fill this out at the end
+   */
+  
+  memset(&toolsaHdr64, 0, sizeof(toolsaHdr64));
+  MEMbufAdd(finalBuf, &toolsaHdr64, sizeof(toolsaHdr64));
+  
+  /* create 10-byte gzip header, add to final buffer */
+  
+  _mkHeader(gzHeader);
+  MEMbufAdd(finalBuf, &gzHeader, sizeof(gzHeader));
+  
+  /* Set up the z_stream handle */
+  
+  memset(&strm, 0, sizeof(strm));
+  strm.zalloc = Z_NULL; /* use default allocator */
+  strm.zfree = Z_NULL; /* use default free */
+  strm.opaque = Z_NULL; /* default */
+  strm.next_in = (Bytef*) uncompressed_buffer;
+  if (nLeftIn > workLen) {
+    strm.avail_in = workLen;
+  } else {
+    strm.avail_in = nLeftIn;
+  }
+  strm.next_out = work;
+  strm.avail_out = workLen;
+  
+  /*
+   * Initialize with deflateInit2 with windowBits negative
+   * this suppresses the zlib header and trailer.
+   * We manually add the gzip header and trailer instead.
+   */
+
+  if (deflateInit2(&strm,
+                   Z_DEFAULT_COMPRESSION, /* compression level = 6.  0 <= x <= 9 */
+                   Z_DEFLATED,            /* method */
+                   -MAX_WBITS,            /* neg max window bits: suppress wrapper */
+                   8,                     /* internal state memory level.
+                                           *  1 <= x <= 9.
+                                           * See doc zconf.h, MAX_MEM_LEVEL.
+                                           * default: DEF_MEM_LEVEL, in zutil.h */
+                   Z_DEFAULT_STRATEGY)) { /* compression strategy */
+    iret = -1;
+  }
+  if (iret != Z_OK) {
+    MEMbufFree(workBuf);
+    MEMbufFree(finalBuf);
+    return NULL;
+  }
+  
+  /*
+   * compress in a while loop using the smaller work buffer
+   * for the actual compression
+   * and then concatenate to form the final buffer
+   */
+
+  do {
+
+    if (nLeftIn == 0) {
+      flush = Z_FINISH;
+    } else {
+      flush = Z_SYNC_FLUSH;
+    }
+
+    /* compress */
+    
+    iret = deflate(&strm, flush);
+    if (iret == Z_STREAM_ERROR) {
+      MEMbufFree(workBuf);
+      MEMbufFree(finalBuf);
+      return NULL;
+    }
+
+    /* add output to final buffer */
+    
+    nOutThisCycle = workLen - strm.avail_out;
+    MEMbufAdd(finalBuf, work, nOutThisCycle);
+    nCompressed += nOutThisCycle;
+
+    /* update zstream for next pass */
+    
+    strm.avail_out = workLen;
+    strm.next_out = work;
+    nLeftIn = nbytes_uncompressed - strm.total_in;
+    if (nLeftIn > workLen) {
+      strm.avail_in = workLen;
+    } else {
+      strm.avail_in = nLeftIn;
+    }
+    strm.next_in = (Bytef*) ((char *) uncompressed_buffer + strm.total_in);
+    
+  } while (iret != Z_STREAM_END);
+  
+  /* finalize the compression */
+
+  if (deflateEnd(&strm)) {
+    fprintf(stderr, "GZIP compress failed\n");
+    fprintf(stderr, "  Uncompressed size: %ld\n", nbytes_uncompressed);
+    MEMbufFree(workBuf);
+    MEMbufFree(finalBuf);
+    return NULL;
+  }
+
+  fprintf(stderr, "gzip_compress2 succeeded\n");
+  fprintf(stderr, "  Uncompressed size: %ld\n", nbytes_uncompressed);
+  fprintf(stderr, "  Compressed size: %ld\n", nCompressed);
+  
+  /* Make 8-byte trailer and add to final buffer */
+
+  _mkTrailer2(nbytes_uncompressed,
+              (const unsigned char *) uncompressed_buffer,
+              gzTrailer);
+  MEMbufAdd(finalBuf, gzTrailer, sizeof(gzTrailer));
+
+  /* set the compressed size in the return args */
+
+  if (nbytes_compressed_p != NULL) {
+    *nbytes_compressed_p = MEMbufLen(finalBuf);
+  }
+  
+  /* fill out toolsa hdr at the start of the buffer, and swap */
+  
+  final = (unsigned char*) MEMbufPtr(finalBuf);
+  toolsaHdr64Ptr = (compress_buf_hdr_64_t *) final;
+  toolsaHdr64Ptr->flag_64 = TA_COMPRESS_FLAG_64;
+  toolsaHdr64Ptr->magic_cookie = GZIP_COMPRESSED;
+  toolsaHdr64Ptr->nbytes_uncompressed = nbytes_uncompressed;
+  toolsaHdr64Ptr->nbytes_compressed = MEMbufLen(finalBuf);
+  toolsaHdr64Ptr->nbytes_coded = toolsaHdr64Ptr->nbytes_compressed - sizeof(compress_buf_hdr_64_t);
+  toolsaHdr64Ptr->spare[0] = 0;
+  compress_buf_hdr_64_to_BE(toolsaHdr64Ptr);
+
+  /* free up working buffer */
+
+  MEMbufDelete(workBuf);
+
+  /*
+   * Free up handle to final buffer but save the pointer to the
+   * compressed data, to return to the caller.
+   * This will need to be freed by the caller.
+   */
+
+  /* return compressed buffer */
+  {
+    void *compBuf = MEMbufPtr(finalBuf);
+    MEMbufDeleteHandle(finalBuf);
+    return compBuf;
+  }
+  
+}
+  
+/**********************************************************************
  * gunzip_known_len()
  *
  * Perform GZIP decompression on a standard GZIP buffer.
@@ -432,9 +676,9 @@ void *gunzip_known_len(const void *compressed_buffer,
   unsigned char *gzbuf = NULL;
   unsigned char *uncompressed_data;
 
+  z_stream zstm;
   compress_buf_hdr_t hdr;
   MEM_zero(hdr);
-  z_stream zstm;
   
   if (compressed_buffer == NULL) {
     return (NULL);
@@ -560,6 +804,21 @@ static uLong _mkTrailer(uLong inlen,            /* len of inbuf */
   return pos; /* return total len: header + cmpdata + trailer */
 }
 
+static uLong _mkTrailer2(uLong inlen,            /* len of inbuf */
+                         const unsigned char *inbuf,  /* original uncompressed data */
+                         unsigned char *trailer) /* trailer array */
+     
+{
+  uLong pos = 0;
+  uLong crc = crc32(0L, NULL, 0);
+  crc = crc32_fast(inbuf, inlen);
+  _insertLong(pos, crc, trailer); /* insert CRC */
+  pos += 4;
+  _insertLong(pos, inlen & 0xffffffff, trailer); /* insert uncomp len */
+  pos += 4;
+  return pos; /* return total len: header + cmpdata + trailer */
+}
+
 /****************************************************
  * Check a header for validity.
  *
@@ -680,5 +939,41 @@ static uLong _getLong(uLong pos,
     val |= (gzbuf[ pos + 4 - 1 - ii] & 0xff);
   }
   return val;
+}
+
+/*****************************************************
+ * Convert header buffer to/from BigEndian.
+ * 64-bit.
+ */
+
+void compress_buf_hdr_64_to_BE(compress_buf_hdr_64_t *hdr)
+     
+{
+  BE_from_array_32(hdr, 2 * sizeof(ui32));
+  BE_from_array_64(&hdr->nbytes_uncompressed, 5 * sizeof(ui64));
+}
+
+void compress_buf_hdr_64_from_BE(compress_buf_hdr_64_t *hdr)
+     
+{
+  BE_to_array_32(hdr, 2 * sizeof(ui32));
+  BE_to_array_64(&hdr->nbytes_uncompressed, 5 * sizeof(ui64));
+}
+
+/*****************************************************
+ * Convert header buffer to/from BigEndian.
+ * 32-bit.
+ */
+
+void compress_buf_hdr_to_BE(compress_buf_hdr_t *hdr)
+     
+{
+  BE_from_array_32(hdr, sizeof(compress_buf_hdr_t));
+}
+
+void compress_buf_hdr_from_BE(compress_buf_hdr_t *hdr)
+     
+{
+  BE_to_array_32(hdr, sizeof(compress_buf_hdr_t));
 }
 

@@ -630,8 +630,6 @@ const lzo_byte __lzo_copyright[] =
     "\n\n\n"
     "LZO real-time data compression library.\n"
     "Copyright (C) 1996, 1997, 1998 Markus Franz Xaver Johannes Oberhumer\n"
-    "<markus.oberhumer@jk.uni-linz.ac.at>\n"
-    "http://wildsau.idv.uni-linz.ac.at/mfx/lzo.html\n"
     "\n"
     "LZO version: v" LZO_VERSION_STRING ", " LZO_VERSION_DATE "\n"
     "LZO build date: " __DATE__ " " __TIME__ "\n\n"
@@ -685,21 +683,8 @@ const lzo_byte __lzo_copyright[] =
     "$Id: LZO " LZO_VERSION_STRING " built " __DATE__ " " __TIME__
 #if defined(__GNUC__) && defined(__VERSION__)
     " by gcc " __VERSION__
-#elif defined(__BORLANDC__)
-    " by Borland C " _LZO_MEXPAND(__BORLANDC__)
-#elif defined(_MSC_VER)
-    " by Microsoft C " _LZO_MEXPAND(_MSC_VER)
-#elif defined(__PUREC__)
-    " by Pure C " _LZO_MEXPAND(__PUREC__)
-#elif defined(__SC__)
-    " by Symantec C " _LZO_MEXPAND(__SC__)
-#elif defined(__TURBOC__)
-    " by Turbo C " _LZO_MEXPAND(__TURBOC__)
-#elif defined(__WATCOMC__)
-    " by Watcom C " _LZO_MEXPAND(__WATCOMC__)
 #endif
-    " $\n"
-    "$Copyright: LZO (C) 1996, 1997, 1998 Markus Franz Xaver Johannes Oberhumer $\n";
+    " $\n";
 
 LZO_PUBLIC(const lzo_byte *)
 lzo_copyright(void)
