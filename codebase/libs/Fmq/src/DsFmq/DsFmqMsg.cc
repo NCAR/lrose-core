@@ -345,7 +345,7 @@ void DsFmqMsg::addWriteData(int msgType, int msgSubtype,
 
   } else {
     
-    unsigned int clen = msgLen;
+    ui64 clen = msgLen;
     const void *cmsg = msg;
 
     if (compress) {

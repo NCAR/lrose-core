@@ -97,7 +97,7 @@ public:
    //                 queue at the start or end, or ready to
    //                 read last item
    //   compression: for writes, do compression or not?
-   //                Compression method defaults to ZLIB.
+   //                Compression method defaults to GZIP.
    //                See setCompressionMethod().
    //   numSlots: for creates, number of slots in queue.
    //   bufSize: for creates, total size of data buffer.

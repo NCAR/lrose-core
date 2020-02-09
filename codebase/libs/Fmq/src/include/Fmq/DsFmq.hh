@@ -82,7 +82,7 @@ public:
   //                 queue at the start or end, or ready to
   //                 read last item
   //   compression: for writes, do compression or not?
-  //                Compression method defaults to ZLIB.
+  //                Compression method defaults to GZIP.
   //                See setCompressionMethod().
   //   numSlots: for creates, number of slots in queue.
   //   bufSize: for creates, total size of data buffer.
@@ -211,7 +211,7 @@ public:
   
   virtual int closeMsgQueue();
   
-  // setting the compression method - default is ZLIB compression
+  // setting the compression method - default is GZIP compression
   // Returns 0 on success, -1 on error
 
   virtual int setCompressionMethod(ta_compression_method_t method);

@@ -66,7 +66,7 @@ Fmq::Fmq()
 
   _createdOnOpen = false;
   _server = false;
-  _compressMethod = TA_COMPRESSION_ZLIB;
+  _compressMethod = TA_COMPRESSION_GZIP;
 
   MEM_zero(_stat);
   MEM_zero(_slot);
@@ -128,7 +128,7 @@ Fmq::~Fmq()
 //                 queue at the start or end, or ready to
 //                 read last item
 //   compress: for writes, do compression or not?
-//             Compression method defaults to ZLIB.
+//             Compression method defaults to GZIP.
 //             See setCompressionMethod().
 //   numSlots: for creates, number of slots in queue.
 //   bufSize: for creates, total size of data buffer.
@@ -389,12 +389,17 @@ Fmq::closeMsgQueue()
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
-// setting the compression method - default is ZLIB compression
+// setting the compression method
+// only use GZIP compression, others are deprecated
 // Returns 0 on success, -1 on error
 
 int Fmq::setCompressionMethod(ta_compression_method_t method)
 {
-  _compressMethod = method;
+  if (method == TA_COMPRESSION_NONE) {
+    _compressMethod = TA_COMPRESSION_NONE;
+  } else {
+    _compressMethod = TA_COMPRESSION_GZIP;
+  }
   return 0;
 }
 
@@ -2091,7 +2096,7 @@ int Fmq::_read_msg (int slot_num)
 
   q_slot_t *slot;
   int id_posn;
-  unsigned int nfull;
+  ui64 nfull;
   si32 magic_cookie;
   si32 slot_num_check;
   si32 id_check;
@@ -2262,7 +2267,7 @@ int Fmq::_load_read_msg(int msg_type,
      
 {
 
-  unsigned int nfull;
+  ui64 nfull;
 
   _slot.type    = msg_type;
   _slot.subtype = msg_subtype;
@@ -2611,7 +2616,7 @@ int Fmq::_write_msg(void *msg, int msg_len,
   int nbytes_padded;
   int iret;
   int do_compress;
-  unsigned int clen;
+  ui64 clen;
   void *cmsg;
   q_slot_t *slot;
   
