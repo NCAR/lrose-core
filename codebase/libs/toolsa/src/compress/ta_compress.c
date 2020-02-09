@@ -125,7 +125,7 @@ int ta_is_compressed(const void *compressed_buffer,
     }
 
     memcpy(&hdr, compressed_buffer, sizeof(hdr));
-    BE_to_array_32(&hdr, sizeof(hdr));
+    compress_buf_hdr_from_BE(&hdr);
 
     if (hdr.nbytes_compressed - hdr.nbytes_coded != 24) {
       return FALSE;
@@ -380,7 +380,6 @@ extern void ta_compression_debug(const void *compressed_buffer){
 	   sizeof(ui32));
     BE_to_array_32(&key, sizeof(ui32));
 
-
     memcpy(&nbytes_buffer, 
 	   (unsigned char *) compressed_buffer + 2*sizeof(ui32),
 	   sizeof(ui32));
@@ -494,7 +493,9 @@ int ta_gzip_buffer(const void *compressed_buffer)
  *
  * The length of the compressed data buffer (*nbytes_compressed_p) is set.
  *
- * Returns pointer to the encoded buffer, NULL on error.
+ * Returns pointer to the encoded buffer.
+ * If compression fails, a buffer with uncompressed data is returned.
+ * Guaranteed to return a valid buffer.
  *
  **********************************************************************/
 
@@ -508,7 +509,7 @@ void *ta_compress(ta_compression_method_t method,
   /* check whether we need to use 64-bit headers */
   
   int use64bit = FALSE;
-  if (nbytes_uncompressed > UI32_MAX) {
+  if (nbytes_uncompressed >= UI32_MAX) {
     use64bit = TRUE;
   }
   
@@ -517,56 +518,131 @@ void *ta_compress(ta_compression_method_t method,
     /* for 64-bit, only use bzip and gzip */
     
     if (method == TA_COMPRESSION_NONE) {
+      
+      /*
+       * create uncompressed buffer with ta_compress header 
+       */
 
-      return _ta_no_compress64(TA_NOT_COMPRESSED,
-                               uncompressed_buffer,
-                               nbytes_uncompressed,
-                               nbytes_compressed_p);
+      ui64 nbytes_compressed_64;
+      void *buf = _ta_no_compress64(TA_NOT_COMPRESSED,
+                                    uncompressed_buffer,
+                                    nbytes_uncompressed,
+                                    &nbytes_compressed_64);
+      *nbytes_compressed_p = nbytes_compressed_64;
+      return buf;
 
     } else if (method == TA_COMPRESSION_BZIP) {
 
-      return bzip_compress64(uncompressed_buffer,
-                             nbytes_uncompressed, nbytes_compressed_p);
+      /* bzip 64 compression for large buffers */
+      
+      ui64 nbytes_compressed_64;
+      void *buf = bzip_compress64(uncompressed_buffer,
+                                  nbytes_uncompressed,
+                                  &nbytes_compressed_64);
+      
+      if (buf == NULL) {
+        /*
+         * compression failed
+         * create uncompressed buffer with ta_compress header 
+         */
+        buf = _ta_no_compress64(BZIP_NOT_COMPRESSED,
+                                uncompressed_buffer,
+                                nbytes_uncompressed,
+                                &nbytes_compressed_64);
+      }
 
+      *nbytes_compressed_p = nbytes_compressed_64;
+      return buf;
+      
     } else {
+      
+      /* gzip 64 compression for large buffers */
+      
+      ui64 nbytes_compressed_64;
+      void *buf = gzip_compress64(uncompressed_buffer,
+                                  nbytes_uncompressed,
+                                  nbytes_compressed_p);
+      
+      if (buf == NULL) {
+        /*
+         * compression failed
+         * create uncompressed buffer with ta_compress header 
+         */
+        buf = _ta_no_compress64(BZIP_NOT_COMPRESSED,
+                                uncompressed_buffer,
+                                nbytes_uncompressed,
+                                &nbytes_compressed_64);
+      }
 
-      return gzip_compress64(uncompressed_buffer,
-                             nbytes_uncompressed, nbytes_compressed_p);
+      *nbytes_compressed_p = nbytes_compressed_64;
+      return buf;
 
     }
     
   } else {
     
-    /* 32 bit */
-
+    /* 32 bit compression, buf size < UI32_MAX */
+    
     if (method == TA_COMPRESSION_NONE) {
-
+      
+      /* no compression, just add header */
+      
       ui32 nbytes_compressed_32;
-      void *compBuf = _ta_no_compress(TA_NOT_COMPRESSED,
-                                      uncompressed_buffer,
-                                      (ui32) nbytes_uncompressed,
-                                      &nbytes_compressed_32);
+      void *buf = _ta_no_compress(TA_NOT_COMPRESSED,
+                                  uncompressed_buffer,
+                                  (ui32) nbytes_uncompressed,
+                                  &nbytes_compressed_32);
       *nbytes_compressed_p = nbytes_compressed_32;
-      return compBuf;
+      return buf;
 
     } else if (method == TA_COMPRESSION_BZIP) {
+      
+      /* bzip compression */
 
       ui32 nbytes_compressed_32;
-      void *compBuf = bzip_compress(uncompressed_buffer,
-                                    (ui32) nbytes_uncompressed,
-                                    &nbytes_compressed_32);
+      void *buf = bzip_compress(uncompressed_buffer,
+                                (ui32) nbytes_uncompressed,
+                                &nbytes_compressed_32);
+
+      if (buf == NULL) {
+        /*
+         * compression failed
+         * create uncompressed buffer with ta_compress header 
+         */
+        buf = _ta_no_compress(BZIP_NOT_COMPRESSED,
+                              uncompressed_buffer,
+                              nbytes_uncompressed,
+                              &nbytes_compressed_32);
+        
+      }
+      
       *nbytes_compressed_p = nbytes_compressed_32;
-      return compBuf;
+      return buf;
       
     } else {
 
-      ui32 nbytes_compressed_32;
-      void *compBuf = gzip_compress(uncompressed_buffer,
-                                    (ui32) nbytes_uncompressed,
-                                    &nbytes_compressed_32);
-      *nbytes_compressed_p = nbytes_compressed_32;
-      return compBuf;
+      /* gzip compression */
 
+      ui32 nbytes_compressed_32;
+      void *buf = gzip_compress(uncompressed_buffer,
+                                (ui32) nbytes_uncompressed,
+                                &nbytes_compressed_32);
+
+      if (buf == NULL) {
+        /*
+         * compression failed
+         * create uncompressed buffer with ta_compress header 
+         */
+        buf = _ta_no_compress(GZIP_NOT_COMPRESSED,
+                              uncompressed_buffer,
+                              nbytes_uncompressed,
+                              &nbytes_compressed_32);
+        
+      }
+      
+      *nbytes_compressed_p = nbytes_compressed_32;
+      return buf;
+      
     }
     
   } /* if (use64bit) */
@@ -611,53 +687,45 @@ void *ta_decompress(const void *compressed_buffer,
   }
   BE_to_array_32(&magic_cookie, sizeof(ui32));
 
-  if (magic_cookie == TA_NOT_COMPRESSED) {
-
+  if (magic_cookie == TA_NOT_COMPRESSED ||
+      magic_cookie == LZO_NOT_COMPRESSED ||
+      magic_cookie == BZIP_NOT_COMPRESSED ||
+      magic_cookie == GZIP_NOT_COMPRESSED ||
+      magic_cookie == ZLIB_NOT_COMPRESSED) {
+    
+    /* buf has toolsa header, but is not compressed */
+    /* strip off header, return data */
+    
     if (is64bit) {
-
+      /* 64-bit header */
       compress_buf_hdr_64_t hdr;
-      char *uncompressed_data;
+      char *decomp;
       char *compressed_data;
-      
       memcpy(&hdr, compressed_buffer, sizeof(hdr));
-      BE_to_array_32(&hdr, sizeof(hdr));
-      
-      uncompressed_data = (char *) umalloc_min_1 (hdr.nbytes_uncompressed);
+      compress_buf_hdr_64_from_BE(&hdr);
+      decomp = (char *) umalloc_min_1 (hdr.nbytes_uncompressed);
       *nbytes_uncompressed_p = hdr.nbytes_uncompressed;
-      
       compressed_data = (char *) compressed_buffer + sizeof(hdr);
-      memcpy(uncompressed_data, compressed_data, hdr.nbytes_uncompressed);
-      return (uncompressed_data);
-
+      memcpy(decomp, compressed_data, hdr.nbytes_uncompressed);
+      return decomp;
     } else {
-
+      /* 32-bit header */
       compress_buf_hdr_t hdr;
-      char *uncompressed_data;
+      char *decomp;
       char *compressed_data;
-      
       memcpy(&hdr, compressed_buffer, sizeof(hdr));
-      BE_to_array_32(&hdr, sizeof(hdr));
-      
-      uncompressed_data = (char *) umalloc_min_1 (hdr.nbytes_uncompressed);
+      compress_buf_hdr_from_BE(&hdr);
+      decomp = (char *) umalloc_min_1 (hdr.nbytes_uncompressed);
       *nbytes_uncompressed_p = hdr.nbytes_uncompressed;
-      
       compressed_data = (char *) compressed_buffer + sizeof(hdr);
-      memcpy(uncompressed_data, compressed_data, hdr.nbytes_uncompressed);
-      return (uncompressed_data);
-
+      memcpy(decomp, compressed_data, hdr.nbytes_uncompressed);
+      return decomp;
     }
 
-  } else if (magic_cookie == LZO_COMPRESSED ||
-	     magic_cookie == LZO_NOT_COMPRESSED) {
+  } else if (magic_cookie == BZIP_COMPRESSED) {
+    
+    /* bzip */
 
-    ui32 nbytes_uncompressed;
-    void *decomp = lzo_decompress(compressed_buffer, &nbytes_uncompressed);
-    *nbytes_uncompressed_p = nbytes_uncompressed;
-    return decomp;
-    
-  } else if (magic_cookie == BZIP_COMPRESSED ||
-	     magic_cookie == BZIP_NOT_COMPRESSED) {
-    
     if (is64bit) {
       ui64 nbytes_uncompressed;
       void *decomp = bzip_decompress64(compressed_buffer, &nbytes_uncompressed);
@@ -670,8 +738,9 @@ void *ta_decompress(const void *compressed_buffer,
       return decomp;
     }
 
-  } else if (magic_cookie == GZIP_COMPRESSED ||
-	     magic_cookie == GZIP_NOT_COMPRESSED) {
+  } else if (magic_cookie == GZIP_COMPRESSED) {
+
+    /* gzip */
     
     if (is64bit) {
       ui64 nbytes_uncompressed;
@@ -685,27 +754,39 @@ void *ta_decompress(const void *compressed_buffer,
       return decomp;
     }
 
+  } else if (magic_cookie == ZLIB_COMPRESSED) {
+    
+    /* only 32-bit compression for ZLIB */
+
+    ui32 nbytes_uncompressed;
+    void *decomp = zlib_decompress(compressed_buffer, &nbytes_uncompressed);
+    *nbytes_uncompressed_p = nbytes_uncompressed;
+    return decomp;
+    
+  } else if (magic_cookie == LZO_COMPRESSED) {
+
+    /* only 32-bit compression for LZO */
+
+    ui32 nbytes_uncompressed;
+    void *decomp = lzo_decompress(compressed_buffer, &nbytes_uncompressed);
+    *nbytes_uncompressed_p = nbytes_uncompressed;
+    return decomp;
+    
   } else if (magic_cookie == RLE_COMPRESSED ||
 	     magic_cookie == _RLE_COMPRESSED ||
 	     magic_cookie == __RLE_COMPRESSED) {
     
+    /* only 32-bit compression for RLE */
+
     ui32 nbytes_uncompressed;
     void *decomp = rle_decompress(compressed_buffer, &nbytes_uncompressed);
-    *nbytes_uncompressed_p = nbytes_uncompressed;
-    return decomp;
-
-  } else if (magic_cookie == ZLIB_COMPRESSED ||
-	     magic_cookie == ZLIB_NOT_COMPRESSED) {
-    
-    ui32 nbytes_uncompressed;
-    void *decomp = zlib_decompress(compressed_buffer, &nbytes_uncompressed);
     *nbytes_uncompressed_p = nbytes_uncompressed;
     return decomp;
 
   }
 
   *nbytes_uncompressed_p = 0;
-  return (NULL);
+  return NULL;
 
 }
 
@@ -753,7 +834,7 @@ void *_ta_no_compress(ui32 magic_cookie,
   hdr->nbytes_uncompressed = nbytes_uncompressed;
   hdr->nbytes_compressed = nbytes_buffer;
   hdr->nbytes_coded = nbytes_uncompressed;
-  BE_from_array_32(hdr, sizeof(compress_buf_hdr_t));
+  compress_buf_hdr_to_BE(hdr);
   
   if (nbytes_compressed_p != NULL) {
     *nbytes_compressed_p = nbytes_buffer;
@@ -766,13 +847,19 @@ void *_ta_no_compress(ui32 magic_cookie,
   memcpy((char *) out_buffer + sizeof(compress_buf_hdr_t),
 	 uncompressed_buffer, nbytes_uncompressed);
   
-  /*
-   * swap header
-   */
-  
-  return (out_buffer);
+  return out_buffer;
 
 }
+
+/*****************************************************
+ * _ta_no_compress_64 - 64-bit version
+ *
+ * Load up compressed_buffer with uncompressed data
+ *
+ * returns output buffer of header plus original data
+ *
+ * private routine for use only by other compression routines.
+ */
 
 void *_ta_no_compress64(ui32 magic_cookie,
                         const void *uncompressed_buffer,
@@ -782,20 +869,21 @@ void *_ta_no_compress64(ui32 magic_cookie,
 {
   
   ui64 nbytes_buffer =
-    nbytes_uncompressed + sizeof(compress_buf_hdr_t);
+    nbytes_uncompressed + sizeof(compress_buf_hdr_64_t);
   void *out_buffer = umalloc_min_1(nbytes_buffer);
-  compress_buf_hdr_t *hdr = (compress_buf_hdr_t *) out_buffer;
+  compress_buf_hdr_64_t *hdr = (compress_buf_hdr_64_t *) out_buffer;
   
   /*
    * load header and swap
    */
   
   MEM_zero(*hdr);
+  hdr->flag_64 = TA_COMPRESS_FLAG_64;
   hdr->magic_cookie = magic_cookie;
   hdr->nbytes_uncompressed = nbytes_uncompressed;
   hdr->nbytes_compressed = nbytes_buffer;
   hdr->nbytes_coded = nbytes_uncompressed;
-  BE_from_array_32(hdr, sizeof(compress_buf_hdr_t));
+  compress_buf_hdr_64_to_BE(hdr);
   
   if (nbytes_compressed_p != NULL) {
     *nbytes_compressed_p = nbytes_buffer;
@@ -805,14 +893,10 @@ void *_ta_no_compress64(ui32 magic_cookie,
    * load buffer
    */
   
-  memcpy((char *) out_buffer + sizeof(compress_buf_hdr_t),
+  memcpy((char *) out_buffer + sizeof(compress_buf_hdr_64_t),
 	 uncompressed_buffer, nbytes_uncompressed);
   
-  /*
-   * swap header
-   */
-  
-  return (out_buffer);
+  return out_buffer;
 
 }
 

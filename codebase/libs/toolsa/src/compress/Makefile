@@ -44,7 +44,13 @@ TARGET_FILE = ../libtoolsa.a
 #
 
 HDRS = \
-	../include/toolsa/lzo_compress.h
+	../include/toolsa/compress.h \
+	../include/toolsa/bzip_compress.h \
+	../include/toolsa/gzip_compress.h \
+	../include/toolsa/lzo_compress.h \
+	../include/toolsa/rle_compress.h \
+	../include/toolsa/ta_crc32.h \
+	../include/toolsa/zlib_compress.h
 
 SRCS = \
 	bzip_compress.c \
@@ -53,6 +59,7 @@ SRCS = \
 	minilzo.c \
 	rle_compress.c \
 	ta_compress.c \
+	ta_crc32.c \
 	zlib_compress.c
 
 #
