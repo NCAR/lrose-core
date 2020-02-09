@@ -251,7 +251,7 @@ int DsFileCopy::putAfterEnquire(ta_compression_method_t
   if (compression_type == TA_COMPRESSION_NONE) {
     buf = _msg.assemblePutAfterEnquire(_fileBuf, _fileLen);
   } else {
-    unsigned int nbytes_compressed;
+    ui64 nbytes_compressed;
     void *cbuf = ta_compress(compression_type, _fileBuf, _fileLen,
 			     &nbytes_compressed);
     if (_debug){
@@ -410,7 +410,7 @@ int DsFileCopy::putForced(const string &data_dir,
 				 fileStat.st_mtime, _fileLen,
 				 _fileBuf, _fileLen);
   } else {
-    unsigned int nbytes_compressed;
+    ui64 nbytes_compressed;
     void *cbuf = ta_compress(compression_type, _fileBuf, _fileLen,
 			     &nbytes_compressed);
     if (_debug){
