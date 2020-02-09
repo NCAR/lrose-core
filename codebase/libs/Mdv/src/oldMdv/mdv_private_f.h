@@ -57,7 +57,7 @@ void mf_field_hdr_from_fortran(si32 *field_hdr_ints,
 			       char *field_units,
 			       char *field_transform,
 			       char *field_unused_char,
-			       MDV_field_header_t *field_hdr);;
+			       MDV_field_header_t *field_hdr);
 
 /***********************************************************************
  * mf_field_hdr_to_fortran:  Fills in the FORTRAN arrays from the given

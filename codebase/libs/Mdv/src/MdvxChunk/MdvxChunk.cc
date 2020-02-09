@@ -192,7 +192,7 @@ int MdvxChunk::_read_data(TaFile &infile)
 
   // allocate buffer
   
-  ssize_t size = _chdr.size;
+  size_t size = _chdr.size;
   _dataBuf.prepare(_chdr.size);
 
   // read in
@@ -236,7 +236,7 @@ int MdvxChunk::_write_data(TaFile &outfile,
   char errstr[512];
   clearErrStr();
   
-  ssize_t chunk_size = _chdr.size;
+  size_t chunk_size = _chdr.size;
   ui32 be_size = BE_from_ui32(chunk_size);
   
   // Set the constant values in the header.

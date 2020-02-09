@@ -774,7 +774,7 @@ protected:
   void _write_to_xml_chunk_hdr(string &hdr, int chunkNum) const;
   
   int _write_buffer_to_file(const string &pathStr,
-                            int len, const void *data) const;
+                            size_t len, const void *data) const;
 
   int _read_volume_xml(bool fill_missing,
                        bool do_decimate,

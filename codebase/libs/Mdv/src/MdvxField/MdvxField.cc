@@ -5409,44 +5409,14 @@ int MdvxField::compress(int compression_type) const
 
   for (int iz = 0; iz < nz; iz++) {
 
-    void *compressed_plane;
-    void *uncompressed_plane;
-    unsigned int nbytes_compressed;
+    // only use GZIP compression - all others are deprecated
     
-    uncompressed_plane = ((char *) _volBuf.getPtr() + iz * nbytes_plane);
-    
-    switch (compression_type) {
-      
-    case Mdvx::COMPRESSION_RLE:
-      compressed_plane = rle_compress(uncompressed_plane, nbytes_plane,
-				      &nbytes_compressed);
-      break;
-
-    case Mdvx::COMPRESSION_LZO:
-      compressed_plane = lzo_compress(uncompressed_plane, nbytes_plane,
-				      &nbytes_compressed);
-      break;
-
-    case Mdvx::COMPRESSION_GZIP:
-      compressed_plane = gzip_compress(uncompressed_plane, nbytes_plane,
-				       &nbytes_compressed);
-      break;
-      
-    case Mdvx::COMPRESSION_BZIP:
-      compressed_plane = bzip_compress(uncompressed_plane, nbytes_plane,
-				       &nbytes_compressed);
-      break;
-
-    case Mdvx::COMPRESSION_ZLIB:
-      compressed_plane = zlib_compress(uncompressed_plane, nbytes_plane,
-				       &nbytes_compressed);
-      break;
-      
-    default:
-      _errStr += "ERROR - MdvxField::compress.\n";
-      _errStr +=  "  Unknown compression type\n";
-      return -1;
-    }
+    void *uncompressed_plane = ((char *) _volBuf.getPtr() + iz * nbytes_plane);
+    ui64 nbytes_compressed;
+    void *compressed_plane = ta_compress(TA_COMPRESSION_GZIP,
+                                         uncompressed_plane,
+                                         nbytes_plane,
+                                         &nbytes_compressed);
     
     if (compressed_plane == NULL) {
       _errStr += "ERROR - MdvxField::_compress.\n";
@@ -5508,9 +5478,11 @@ int MdvxField::_compressGzipVol() const
   // compress vol into single buffer
   
   void *uncompressed_vol = _volBuf.getPtr();
-  unsigned int nbytes_compressed;
-  void *compressed_vol = gzip_compress(uncompressed_vol, nbytes_vol,
-                                       &nbytes_compressed);
+  ui64 nbytes_compressed;
+  void *compressed_vol = ta_compress(TA_COMPRESSION_GZIP,
+                                     uncompressed_vol,
+                                     nbytes_vol,
+                                     &nbytes_compressed);
   
   if (compressed_vol == NULL) {
     _errStr += "ERROR - MdvxField::_compressGzipVol.\n";
@@ -5577,7 +5549,7 @@ int MdvxField::decompress() const
 
     void *compressed_plane;
     void *uncompressed_plane;
-    unsigned int nbytes_uncompressed;
+    ui64 nbytes_uncompressed;
     ui32 this_offset = plane_offsets[iz] + 2 * index_array_size;
     
     compressed_plane = ((char *) _volBuf.getPtr() + this_offset);
@@ -5595,7 +5567,7 @@ int MdvxField::decompress() const
       _errStr += "ERROR - MdvxField::decompress.\n";
       _errStr +=  "  Wrong number of bytes in plane.\n";
       char errstr[128];
-      sprintf(errstr, "  %ld expected, %d found.\n",
+      sprintf(errstr, "  %ld expected, %ld found.\n",
 	      nbytes_plane, nbytes_uncompressed);
       _errStr += errstr;
       ta_compress_free(uncompressed_plane);
@@ -5654,7 +5626,7 @@ int MdvxField::_decompressGzipVol() const
   // uncompress buffer
   
   void *compressed_vol = _volBuf.getPtr();
-  unsigned int nbytes_uncompressed;
+  ui64 nbytes_uncompressed;
   void *uncompressed_vol =
     ta_decompress(compressed_vol, &nbytes_uncompressed);
     
@@ -5670,7 +5642,7 @@ int MdvxField::_decompressGzipVol() const
     _errStr += "ERROR - MdvxField::_decompressGzipVol.\n";
     _errStr +=  "  Wrong number of bytes in vol.\n";
     char errstr[128];
-    sprintf(errstr, "  %ld expected, %d found.\n",
+    sprintf(errstr, "  %ld expected, %ld found.\n",
             nbytes_vol, nbytes_uncompressed);
     _errStr += errstr;
     ta_compress_free(uncompressed_vol);
@@ -5951,7 +5923,7 @@ int MdvxField::_read_volume(TaFile &infile,
     return -1;
   }
 
-  int64_t volume_size = _fhdr.volume_size;
+  size_t volume_size = _fhdr.volume_size;
   void *buf = _volBuf.prepare(volume_size);
 
   if (infile.fread(buf, 1, volume_size) != volume_size) {

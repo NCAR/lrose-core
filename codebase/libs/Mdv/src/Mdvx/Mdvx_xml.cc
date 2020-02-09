@@ -538,7 +538,7 @@ void Mdvx::_write_to_xml_chunk_hdr(string &hdr, int chunkNum) const
 // write buffer to file
 
 int Mdvx::_write_buffer_to_file(const string &pathStr,
-                                int len,
+                                size_t len,
                                 const void *data) const
 
 {
@@ -632,7 +632,7 @@ int Mdvx::_read_volume_xml(bool fill_missing,
     return -1;
   }
   stat_struct_t &fileStat = xmlFile.getStat();
-  off_t fileLen = fileStat.st_size;
+  size_t fileLen = fileStat.st_size;
   
   // read in buffer
 
@@ -1519,7 +1519,7 @@ MdvxField *Mdvx::_read_xml_field(const field_header_t &fhdr,
 
   // create an array to read into
 
-  int len = fhdr.volume_size;
+  size_t len = fhdr.volume_size;
   TaArray<char> data_;
   char *data = data_.alloc(len);
 
@@ -1677,7 +1677,7 @@ MdvxChunk *Mdvx::_read_xml_chunk(const chunk_header_t &chdr,
 
   // create an array to read into
 
-  int len = chdr.size;
+  size_t len = chdr.size;
   TaArray<char> data_;
   char *data = data_.alloc(len);
 

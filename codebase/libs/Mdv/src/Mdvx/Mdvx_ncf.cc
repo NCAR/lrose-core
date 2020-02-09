@@ -193,7 +193,7 @@ int Mdvx::_read_volume_ncf()
     return -1;
   }
   stat_struct_t &fileStat = ncfFile.getStat();
-  off_t fileLen = fileStat.st_size;
+  size_t fileLen = fileStat.st_size;
   
   // read in buffer
 

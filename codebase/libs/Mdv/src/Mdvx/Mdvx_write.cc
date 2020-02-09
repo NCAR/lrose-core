@@ -768,8 +768,8 @@ int Mdvx::writeUsingBuf(const string &output_path) const
 
   // write the buffer
 
-  int64_t size = buf.getLen();
-  if (outfile.fwrite(buf.getPtr(), 1, size) != size) {
+  size_t fsize = buf.getLen();
+  if (outfile.fwrite(buf.getPtr(), 1, fsize) != fsize) {
     int errNum = errno;
     _errStr += "ERROR - Mdvx::writeUsingBuf\n";
     _errStr += "  Cannot write to path: ";

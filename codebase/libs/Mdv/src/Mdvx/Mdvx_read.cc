@@ -2003,12 +2003,12 @@ int Mdvx::readUsingBuf()
     _errStr += "\n";
     return -1; 
   }
-  int64_t size = infile.getStat().st_size;
+  size_t fsize = infile.getStat().st_size;
 
   // prepare mem buffer
 
   MemBuf buf;
-  buf.reserve(size);
+  buf.reserve(fsize);
   if ( !buf.getPtr()) {
    _errStr += "ERROR - Mdvx::readUsingBuf\n";
    _errStr += "Error allocating mem in MemBuf object" ;
@@ -2016,7 +2016,7 @@ int Mdvx::readUsingBuf()
   } 
   // read in entire buffer
   
-  if((infile.fread(buf.getPtr(), 1, size)) != size) {
+  if((infile.fread(buf.getPtr(), 1, fsize)) != fsize) {
     int errNum = errno;
     _errStr += "ERROR - Mdvx::readUsingBuf\n";
     _errStr += "File: ";

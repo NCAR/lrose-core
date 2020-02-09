@@ -387,7 +387,6 @@ static ui08 *convert_plane_rle8_to_int8(ui08 *plane_rle8_data,
   static char *routine_name = "convert_plane_rle8_to_int8";
 
   si32 *vlevel_loc;
-  // si32 *vlevel_size;
     
   ui08 *int8_data;
   
@@ -417,7 +416,6 @@ static ui08 *convert_plane_rle8_to_int8(ui08 *plane_rle8_data,
    */
 
   vlevel_loc = (si32 *)plane_rle8_data;
-  // vlevel_size = (si32 *)plane_rle8_data + nz;
   encoded_volume = plane_rle8_data + (2 * nz * sizeof(si32));
   
   /*

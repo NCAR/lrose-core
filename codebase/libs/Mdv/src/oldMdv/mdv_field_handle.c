@@ -2242,7 +2242,7 @@ static int _decompress(MDV_field_handle_t *handle)
 
     void *compressed_plane;
     void *uncompressed_plane;
-    unsigned int nbytes_uncompressed;
+    ui64 nbytes_uncompressed;
     ui32 this_offset = plane_offsets[iz] + 2 * index_array_size;
     
     compressed_plane = ((char *) MEMbufPtr(handle->volBuf) + this_offset);
@@ -2260,7 +2260,7 @@ static int _decompress(MDV_field_handle_t *handle)
     if (nbytes_uncompressed != nbytes_plane) {
       fprintf(stderr, "ERROR - MDV_decompress_field().\n");
       fprintf(stderr, "  Wrong number of bytes in plane.\n");
-      fprintf(stderr, "  %d expected, %d found.\n",
+      fprintf(stderr, "  %d expected, %ld found.\n",
 	      nbytes_plane, nbytes_uncompressed);
       MEMbufDelete(work_buf);
       return (-1);
@@ -2279,8 +2279,8 @@ static int _decompress(MDV_field_handle_t *handle)
   if (MEMbufLen(work_buf) != nbytes_vol) {
     fprintf(stderr, "ERROR - MDV_decompress_field().\n");
     fprintf(stderr, "  Wrong number of bytes in vol.\n");
-    fprintf(stderr, "  %d expected, %lld found.\n",
-	    nbytes_vol, (long long) MEMbufLen(work_buf));
+    fprintf(stderr, "  %d expected, %ld found.\n",
+	    nbytes_vol, MEMbufLen(work_buf));
     MEMbufDelete(work_buf);
     return (-1);
   }
