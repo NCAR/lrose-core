@@ -149,7 +149,7 @@ size_t   NcxxEnumType::getMemberCount() const{
   size_t num_membersp;
   ncxxCheck(nc_inq_enum(groupId,myId,charName,base_nc_typep,base_sizep,&num_membersp),__FILE__,__LINE__);
   return num_membersp;
-};
+}
   
 // Returns the member name for the given zero-based index.
 string NcxxEnumType::getMemberNameFromIndex(int index) const{
@@ -157,4 +157,4 @@ string NcxxEnumType::getMemberNameFromIndex(int index) const{
   char charName[NC_MAX_NAME+1];
   ncxxCheck(nc_inq_enum_member(groupId,myId,index,charName,value),__FILE__,__LINE__);
   return static_cast<string> (charName);
-};
+}

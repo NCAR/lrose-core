@@ -148,15 +148,15 @@ string  NcxxType::getName() const{
   ncxxCheck(nc_inq_type(g_ncid,myId,charName,sizep),__FILE__,__LINE__);
   return string(charName);
 
-};
+}
 
 // Returns the size in bytes
-size_t NcxxType::getSize() const{
+size_t NcxxType::getSize() const {
   char* charName=NULL;
   size_t sizep;
   ncxxCheck(nc_inq_type(g_ncid,myId,charName,&sizep),__FILE__,__LINE__);
   return sizep;
-};
+}
 
 // The type class returned as an enumeration type.
 NcxxType::ncxxType NcxxType::getTypeClass() const{

@@ -61,7 +61,7 @@ NcxxByte::NcxxByte() : NcxxType(NC_BYTE){
 NcxxByte::~NcxxByte() {
 }
 
-int NcxxByte::sizeoff(){char a;return sizeof(a);};
+int NcxxByte::sizeoff(){char a;return sizeof(a);}
 
 
 // equivalence operator
