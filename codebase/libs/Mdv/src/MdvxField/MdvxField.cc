@@ -5370,23 +5370,41 @@ int MdvxField::_decimate_rgba(int64_t max_nxy)
 int MdvxField::compress(int compression_type) const
 
 {
-  
-  if (compression_type == _fhdr.compression_type ||
-      compression_type == Mdvx::COMPRESSION_ASIS) {
+
+  // check if we are already properly compressed
+  // now use gzip for all compression
+
+  if (compression_type == Mdvx::COMPRESSION_ASIS) {
     return 0;
   }
   
+  if (compression_type == Mdvx::COMPRESSION_GZIP_VOL &&
+      _fhdr.compression_type == Mdvx::COMPRESSION_GZIP_VOL) {
+    return 0;
+  }
+
+  if (compression_type == Mdvx::COMPRESSION_GZIP &&
+      _fhdr.compression_type == Mdvx::COMPRESSION_GZIP) {
+    return 0;
+  }
+
+  // uncompress
+
   if (decompress()) {
     return -1;
   }
   
   if (compression_type == Mdvx::COMPRESSION_NONE) {
+    // no compression
     return 0;
   }
 
   if (compression_type == Mdvx::COMPRESSION_GZIP_VOL) {
+    // special case
     return _compressGzipVol();
   }
+
+  // proceed with gzip compression
 
   int nz = _fhdr.nz;
   int64_t npoints_plane = _fhdr.nx * _fhdr.ny;
@@ -5426,7 +5444,6 @@ int MdvxField::compress(int compression_type) const
 
     plane_offsets[iz] = next_offset;
     plane_sizes[iz] = nbytes_compressed;
-
     
     workBuf.add(compressed_plane, nbytes_compressed);
     ta_compress_free(compressed_plane);
@@ -5449,7 +5466,7 @@ int MdvxField::compress(int compression_type) const
 
   // adjust header
 
-  _fhdr.compression_type = compression_type;
+  _fhdr.compression_type = Mdvx::COMPRESSION_GZIP;
   _fhdr.volume_size = next_offset + 2 * index_array_size;
 
   return 0;
