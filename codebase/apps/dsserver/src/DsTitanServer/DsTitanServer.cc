@@ -163,7 +163,7 @@ int DsTitanServer::handleDataCommand(Socket * socket,
   int msgLen = retMsg.lengthAssembled();
   int iret = 0;
   if (compressReply) {
-    unsigned int nbytesCompressed;
+    ui64 nbytesCompressed;
     void *compressedBuf = ta_compress(TA_COMPRESSION_GZIP,
 				      msgToSend, msgLen, &nbytesCompressed);
     iret = socket->writeMessage(0, compressedBuf, nbytesCompressed);
