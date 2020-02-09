@@ -536,6 +536,18 @@ extern void *_ta_no_compress64(ui32 magic_cookie,
                                ui64 *nbytes_compressed_p);
 
 /*************************
+ * Header byte swapping
+ *************************/
+
+extern void compress_buf_hdr_64_to_BE(compress_buf_hdr_64_t *hdr);
+     
+extern void compress_buf_hdr_64_from_BE(compress_buf_hdr_64_t *hdr);
+
+extern void compress_buf_hdr_to_BE(compress_buf_hdr_t *hdr);
+     
+extern void compress_buf_hdr_from_BE(compress_buf_hdr_t *hdr);
+
+/*************************
  * Deprecated RLE routines
  *************************/
 
