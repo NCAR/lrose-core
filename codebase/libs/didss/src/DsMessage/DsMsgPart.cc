@@ -94,8 +94,8 @@ DsMsgPart &DsMsgPart::operator=(const DsMsgPart &rhs)
 }
 
 ////////////////////////////////////////////////////////////
-// load a part from an incoming message which is assumed to
-// be in BE byte order
+// Load a part from an incoming message.
+// Parts are assumed to be in BE byte order.
 //
 // If msg_len is provided, the part is checked to make
 // sure it does not run over the end of the message.
@@ -118,6 +118,56 @@ int DsMsgPart::loadFromMsg(const ssize_t part_num,
 	 sizeof(DsMsgPart_t));
 
   BE_to_DsMsgPart(&msgPart);
+
+  _type = msgPart.dataType;
+  _length = msgPart.len;
+  _paddedLength = ((_length / 8) + 1) * 8;
+  _offset = msgPart.offset;
+  
+  if (msg_len > 0 && (_offset + _length) > msg_len) {
+    cerr << "ERROR - DsMsgPart::loadFromMsg.\n";
+    cerr << "  End of part " << part_num << " is beyond end of message.\n";
+    cerr << "  End of part offset: " << _offset + _length << endl;
+    cerr << "  End of message offset: " << msg_len << endl;
+    return (-1);
+  }
+
+  if (_bufIsLocal) {
+    _allocBuf();
+    memcpy(_buf, inBuf + _offset, _length);
+  } else {
+    _buf = inBuf + _offset;
+  }
+
+  return (0);
+
+}
+
+////////////////////////////////////////////////////////////
+// Load a part from an incoming message, with 64-bit parts.
+// Parts are assumed to be in BE byte order.
+//
+// If msg_len is provided, the part is checked to make
+// sure it does not run over the end of the message.
+//
+// Returns 0 on success, -1 on error
+// Error occurs if end of part is beyond end of message.
+
+int DsMsgPart::loadFromMsg64(const ssize_t part_num,
+                             const void *in_msg,
+                             const ssize_t msg_len /* = -1*/ )
+  
+{
+
+  ui08 *inBuf = (ui08 *) in_msg;
+
+  DsMsgPart64_t msgPart;
+
+  memcpy(&msgPart,
+	 inBuf + sizeof(DsMsgHdr_t) + part_num * sizeof(DsMsgPart64_t),
+	 sizeof(DsMsgPart64_t));
+
+  BE_to_DsMsgPart64(&msgPart);
 
   _type = msgPart.dataType;
   _length = msgPart.len;

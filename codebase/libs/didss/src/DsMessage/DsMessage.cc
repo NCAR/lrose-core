@@ -38,6 +38,10 @@
 #include <didss/DsMsgPart.hh>
 #include <cstring>
 #include <iostream>
+
+#define SI32_MAX 2147483647L
+#define UI32_MAX 4294967295U
+
 using namespace std;
 
 //////////////
@@ -135,6 +139,7 @@ int DsMessage::decodeHeader(const void *in_msg, ssize_t msg_len /* = -1*/ )
   _category = hdr.category;
   _error = hdr.error;
   _nParts = hdr.nParts;
+  _partsAre64Bit = hdr.partsAre64Bit;
 
   return 0;
 }
@@ -164,13 +169,23 @@ int DsMessage::disassemble(const void *in_msg, const ssize_t msg_len /* = -1*/ )
   }
   
   _allocParts(_nParts);
+
   for (ssize_t i = 0; i < _nParts; i++) {
-    if (_parts[i]->loadFromMsg(i, in_msg, msg_len)) {
-      printHeader(cerr, "  ");
-      return (-1);
+    if (_partsAre64Bit) {
+      if (_parts[i]->loadFromMsg64(i, in_msg, msg_len)) {
+        printHeader(cerr, "  ");
+        return (-1);
+      }
+    } else {
+      if (_parts[i]->loadFromMsg(i, in_msg, msg_len)) {
+        printHeader(cerr, "  ");
+        return (-1);
+      }
     }
   }
+
   return (0);
+
 }
 
 ////////////////////////////////////////////////
@@ -285,6 +300,7 @@ void DsMessage::clearAll()
   _category = 0;
   _error = 0;
   _nParts = 0;
+  _partsAre64Bit = 0;
 }
 
 ////////////////////////////
@@ -316,9 +332,28 @@ ui08 *DsMessage::assemble()
   _lengthAssembled = 0;
   _lengthAssembled += sizeof(DsMsgHdr_t);
   _lengthAssembled += _nParts * sizeof(DsMsgPart_t);
-
   for (ssize_t i = 0; i < _nParts; i++) {
     _lengthAssembled += _parts[i]->getPaddedLength();
+  }
+
+  // check assembled length and decide whether we need to use
+  // 64-bit part headers
+
+  if (_lengthAssembled < SI32_MAX) {
+    _partsAre64Bit = 0;
+  } else {
+    _partsAre64Bit = 1;
+  }
+
+  // for 64-bit parts, recompute length assembled
+
+  if (_partsAre64Bit) {
+    _lengthAssembled = 0;
+    _lengthAssembled += sizeof(DsMsgHdr_t);
+    _lengthAssembled += _nParts * sizeof(DsMsgPart64_t);
+    for (ssize_t i = 0; i < _nParts; i++) {
+      _lengthAssembled += _parts[i]->getPaddedLength();
+    }
   }
 
   // allocate memory
@@ -339,27 +374,46 @@ ui08 *DsMessage::assemble()
   header.category = _category;
   header.error = _error;
   header.nParts = _nParts;
+  header.partsAre64Bit = _partsAre64Bit;
   BE_from_DsMsgHdr(&header);
   memcpy(_assembledMsg, &header, sizeof(DsMsgHdr_t));
 
   // load up parts
 
-  ssize_t partHdrOffset = sizeof(DsMsgHdr_t);
-  ssize_t partDataOffset = partHdrOffset + _nParts * sizeof(DsMsgPart_t);
-
-  for (ssize_t i = 0; i < _nParts; i++) {
-    DsMsgPart_t msgPart;
-    memset(&msgPart, 0, sizeof(DsMsgPart_t));
-    msgPart.dataType = _parts[i]->getType();
-    msgPart.len = _parts[i]->getLength();
-    _parts[i]->setOffset(partDataOffset);
-    msgPart.offset = partDataOffset;
-    BE_from_DsMsgPart(&msgPart);
-    memcpy(_assembledMsg + partHdrOffset, &msgPart, sizeof(DsMsgPart_t));
-    memcpy(_assembledMsg + partDataOffset,
-	   _parts[i]->getBuf(), _parts[i]->getLength());
-    partHdrOffset += sizeof(DsMsgPart_t);
-    partDataOffset += _parts[i]->getPaddedLength();
+  if (_partsAre64Bit) {
+    ssize_t partHdrOffset = sizeof(DsMsgHdr_t);
+    ssize_t partDataOffset = partHdrOffset + _nParts * sizeof(DsMsgPart64_t);
+    for (ssize_t i = 0; i < _nParts; i++) {
+      DsMsgPart64_t msgPart;
+      memset(&msgPart, 0, sizeof(DsMsgPart64_t));
+      msgPart.dataType = _parts[i]->getType();
+      msgPart.len = _parts[i]->getLength();
+      _parts[i]->setOffset(partDataOffset);
+      msgPart.offset = partDataOffset;
+      BE_from_DsMsgPart64(&msgPart);
+      memcpy(_assembledMsg + partHdrOffset, &msgPart, sizeof(DsMsgPart64_t));
+      memcpy(_assembledMsg + partDataOffset,
+             _parts[i]->getBuf(), _parts[i]->getLength());
+      partHdrOffset += sizeof(DsMsgPart64_t);
+      partDataOffset += _parts[i]->getPaddedLength();
+    }
+  } else {
+    ssize_t partHdrOffset = sizeof(DsMsgHdr_t);
+    ssize_t partDataOffset = partHdrOffset + _nParts * sizeof(DsMsgPart_t);
+    for (ssize_t i = 0; i < _nParts; i++) {
+      DsMsgPart_t msgPart;
+      memset(&msgPart, 0, sizeof(DsMsgPart_t));
+      msgPart.dataType = _parts[i]->getType();
+      msgPart.len = _parts[i]->getLength();
+      _parts[i]->setOffset(partDataOffset);
+      msgPart.offset = partDataOffset;
+      BE_from_DsMsgPart(&msgPart);
+      memcpy(_assembledMsg + partHdrOffset, &msgPart, sizeof(DsMsgPart_t));
+      memcpy(_assembledMsg + partDataOffset,
+             _parts[i]->getBuf(), _parts[i]->getLength());
+      partHdrOffset += sizeof(DsMsgPart_t);
+      partDataOffset += _parts[i]->getPaddedLength();
+    }
   }
 
   return (_assembledMsg);

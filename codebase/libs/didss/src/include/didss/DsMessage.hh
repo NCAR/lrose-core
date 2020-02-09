@@ -298,6 +298,7 @@ protected:
   int _category;
   int _error;
   ssize_t _nParts;
+  int _partsAre64Bit;
 
   // individual parts
 

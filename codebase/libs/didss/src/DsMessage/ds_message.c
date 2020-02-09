@@ -45,7 +45,6 @@
  */
 
 void BE_to_DsMsgHdr(DsMsgHdr_t *hdr)
-     
 {
   BE_to_array_32(hdr, sizeof(DsMsgHdr_t));
 }
@@ -57,7 +56,6 @@ void BE_to_DsMsgHdr(DsMsgHdr_t *hdr)
  */
 
 void BE_from_DsMsgHdr(DsMsgHdr_t *hdr)
-
 {
   BE_from_array_32(hdr, sizeof(DsMsgHdr_t));
 }
@@ -69,9 +67,13 @@ void BE_from_DsMsgHdr(DsMsgHdr_t *hdr)
  */
 
 void BE_to_DsMsgPart(DsMsgPart_t *part)
-
 {
   BE_to_array_32(part, sizeof(DsMsgPart_t));
+}
+
+void BE_to_DsMsgPart64(DsMsgPart64_t *part)
+{
+  BE_to_array_64(part, sizeof(DsMsgPart64_t));
 }
 
 /***************************
@@ -81,7 +83,12 @@ void BE_to_DsMsgPart(DsMsgPart_t *part)
  */
 
 void BE_from_DsMsgPart(DsMsgPart_t *part)
-
 {
   BE_from_array_32(part, sizeof(DsMsgPart_t));
 }
+
+void BE_from_DsMsgPart64(DsMsgPart64_t *part)
+{
+  BE_from_array_64(part, sizeof(DsMsgPart64_t));
+}
+

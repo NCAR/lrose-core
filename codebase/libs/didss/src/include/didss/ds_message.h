@@ -90,7 +90,8 @@ typedef struct {
   si32 category;
   si32 error;
   si32 nParts;
-  si32 spare[6];
+  si32 partsAre64Bit;
+  si32 spare[5];
   
 } DsMsgHdr_t;
 
@@ -111,6 +112,15 @@ typedef struct {
   si32 spare[3];
 
 } DsMsgPart_t;
+
+typedef struct {
+
+  si64 dataType;
+  si64 offset;
+  si64 len;
+  si64 spare[3];
+
+} DsMsgPart64_t;
 
 /*
  * prototypes
@@ -139,6 +149,7 @@ extern void BE_from_DsMsgHdr(DsMsgHdr_t *hdr);
  */
 
 extern void BE_to_DsMsgPart(DsMsgPart_t *part);
+extern void BE_to_DsMsgPart64(DsMsgPart64_t *part);
 
 /***************************
  * BE_from_DsMsgPart()
@@ -147,6 +158,7 @@ extern void BE_to_DsMsgPart(DsMsgPart_t *part);
  */
 
 extern void BE_from_DsMsgPart(DsMsgPart_t *part);
+extern void BE_from_DsMsgPart64(DsMsgPart64_t *part);
 
 #ifdef __cplusplus
 }

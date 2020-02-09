@@ -72,8 +72,8 @@ public:
   DsMsgPart &operator=(const DsMsgPart &rhs);
 
   ////////////////////////////////////////////////////////////
-  // load a part from an incoming message which is assumed to
-  // be in BE byte order
+  // Load a part from an incoming message.
+  // Parts are assumed to be in BE byte order.
   //
   // If msg_len is provided, the part is checked to make
   // sure it does not run over the end of the message.
@@ -85,6 +85,20 @@ public:
 		  const void *in_msg,
 		  const ssize_t msg_len = -1);
 
+  ////////////////////////////////////////////////////////////
+  // Load a part from an incoming message, with 64-bit parts.
+  // Parts are assumed to be in BE byte order.
+  //
+  // If msg_len is provided, the part is checked to make
+  // sure it does not run over the end of the message.
+  //
+  // Returns 0 on success, -1 on error
+  // Error occurs if end of part is beyond end of message.
+  
+  int loadFromMsg64(const ssize_t part_num,
+                    const void *in_msg,
+                    const ssize_t msg_len /* = -1*/ );
+  
   ////////////////////////////////////////////////////
   // load a part from memory which is assumed to be in
   // host byte order
