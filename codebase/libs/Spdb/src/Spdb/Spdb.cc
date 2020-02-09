@@ -219,7 +219,7 @@ void Spdb::addPutChunk(int data_type,
   // handle compression if required
 
   void *compressedBuf = NULL;
-  unsigned int nbytesCompressed = chunk_len;
+  ui64 nbytesCompressed = chunk_len;
   
   if (_chunkCompressOnPut == COMPRESSION_GZIP) {
     compressedBuf = ta_compress(TA_COMPRESSION_GZIP,
@@ -2012,7 +2012,7 @@ void Spdb::uncompressGetChunks()
     // otherwise add it unchanged to the buffers
     
     if (ta_is_compressed(chunk, refCopy.len)) {
-      unsigned int nbytesUncompressed;
+      ui64 nbytesUncompressed;
       void *uncompressed  = ta_decompress(chunk, &nbytesUncompressed);
       if (uncompressed != NULL) {
         memcpy(chunk, uncompressed, nbytesUncompressed);
@@ -2521,7 +2521,7 @@ int Spdb::_writeIndxFile(bool write_refs /* = true*/ )
     // write out refs
     
     if (ta_fwrite(workBuf.getPtr(), 1,
-                  workBuf.getLen(), _indxFile) != (int) workBuf.getLen()) {
+                  workBuf.getLen(), _indxFile) != workBuf.getLen()) {
       int errNum = errno;
       _errStr += "ERROR - Spdb::_writeIndxFile\n";
       _addStrErr("  Product: ", _hdr.prod_label);
@@ -3551,7 +3551,7 @@ int Spdb::_readChunk(chunk_ref_t &ref,
   // uncompress chunk if it is compressed
 
   if (doUncompress && ta_is_compressed(chunk, ref.len)) {
-    unsigned int nbytesUncompressed;
+    ui64 nbytesUncompressed;
     void *uncompressed  = ta_decompress(chunk, &nbytesUncompressed);
     if (uncompressed == NULL) {
       _errStr += "WARNING - Spdb::_readChunk\n";
@@ -4090,7 +4090,7 @@ int Spdb::_writeChunk(chunk_ref_t &inref,
   // write data
   
   if (ta_fwrite(input_data, 1, inref.len, _dataFile)
-      != (int) inref.len) {
+      != inref.len) {
     int errNum = errno;
     _errStr += "ERROR - Spdb::_writeChunk\n";
     _addStrErr("  Product label: ", _hdr.prod_label);

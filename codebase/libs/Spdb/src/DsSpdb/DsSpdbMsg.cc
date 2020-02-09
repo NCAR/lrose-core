@@ -1012,7 +1012,7 @@ void DsSpdbMsg::compressDataBuf(Spdb::compression_t compression)
   
   // compress
 
-  unsigned int nbytesCompressed;
+  ui64 nbytesCompressed;
   void *compressedData = ta_compress(compress_method,
                                      _dataBuf.getPtr(),
                                      _dataBuf.getLen(),
@@ -1055,7 +1055,7 @@ void DsSpdbMsg::uncompressDataBuf()
 
   // uncompress
 
-  unsigned int nbytesUncompressed;
+  ui64 nbytesUncompressed;
   void *uncompressed  = ta_decompress(_dataBuf.getPtr(), &nbytesUncompressed);
   if (uncompressed == NULL) {
     cerr << "WARNING - DsSpdbMsg::uncompressDataBuf" << endl;
