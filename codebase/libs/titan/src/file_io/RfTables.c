@@ -712,7 +712,6 @@ int RfReadRcTable(rc_table_file_handle_t *rc_handle,
   si32 nelevations;
   si32 nazimuths;
   si32 nplanes;
-  // si32 nheights;
   si32 nlist;
   
   rc_table_params_t *tparams;
@@ -819,7 +818,6 @@ int RfReadRcTable(rc_table_file_handle_t *rc_handle,
   nelevations = tparams->nelevations;
   nazimuths = tparams->nazimuths;
   nplanes = tparams->cart.nz;
-  // nheights = N_PLANE_HEIGHT_VALUES * nplanes;
   nlist = tparams->nlist;
   
   stable->nelevations = tparams->nelevations;
@@ -993,7 +991,6 @@ int RfReadSlaveTable(slave_table_file_handle_t *slave_handle,
   si32 nelevations;
   si32 nazimuths;
   si32 nplanes;
-  // si32 nheights;
   si32 nlist;
   
   rc_table_params_t *tparams;
@@ -1100,7 +1097,6 @@ int RfReadSlaveTable(slave_table_file_handle_t *slave_handle,
   nelevations = slave_handle->table_params->nelevations;
   nazimuths = slave_handle->table_params->nazimuths;
   nplanes = slave_handle->table_params->cart.nz;
-  // nheights = N_PLANE_HEIGHT_VALUES * nplanes;
   nlist = slave_handle->table_params->nlist;
   
   stable->nelevations = tparams->nelevations;

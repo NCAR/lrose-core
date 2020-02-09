@@ -52,6 +52,8 @@ int Rf_file_uncompress(char *file_path)
 
   if (!strncmp(ext, ".Z", 2)) {
 
+    int iret;
+
     /*
      * alter file path to remove extension
      */
@@ -60,7 +62,7 @@ int Rf_file_uncompress(char *file_path)
 
     sprintf(call_str, "uncompress %s", file_path);
     errno = 0;
-    int iret = system (call_str);
+    iret = system (call_str);
 	
     if (errno) {
 
@@ -85,6 +87,8 @@ int Rf_file_uncompress(char *file_path)
 
   if (!strncmp(ext, ".gz", 3)) {
 
+    int iret;
+
     /*
      * alter file path to remove extension
      */
@@ -93,7 +97,7 @@ int Rf_file_uncompress(char *file_path)
     
     sprintf(call_str, "gunzip %s", file_path);
     errno = 0;
-    int iret = system (call_str);
+    iret = system (call_str);
 	
     if (errno) {
 
@@ -117,14 +121,16 @@ int Rf_file_uncompress(char *file_path)
   sprintf(compressed_path, "%s.Z", file_path);
 
   if (!stat(compressed_path, &file_stat)) {
-    
+
+    int iret;
+
     /*
      * uncompress file
      */
     
     sprintf(call_str, "uncompress %s", compressed_path);
     errno = 0;
-    int iret = system (call_str);
+    iret = system (call_str);
     
     if (errno) {
       
@@ -148,14 +154,16 @@ int Rf_file_uncompress(char *file_path)
   sprintf(compressed_path, "%s.gz", file_path);
   
   if (!stat(compressed_path, &file_stat)) {
-    
+
+    int iret;
+
     /*
      * gunzip file
      */
     
     sprintf(call_str, "gunzip %s", compressed_path);
     errno = 0;
-    int iret = system (call_str);
+    iret = system (call_str);
     
     if (errno) {
       

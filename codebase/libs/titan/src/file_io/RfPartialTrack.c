@@ -167,15 +167,12 @@ int RfFindPartialTrack(rf_partial_track_t *part,
   int n_sub_trees;
   
   bd_tree_vertex_t *vertex;
-  // track_file_header_t *header;
   complex_track_params_t *ct_params;
   simple_track_params_t *st_params;
   simple_track_params_t *sparams;
 
   assert(part->init_flag == RF_PARTIAL_INIT_FLAG);
   
-  // header = part->t_handle->header;
-
   part->past_period = past_period;
   part->future_period = future_period;
 
