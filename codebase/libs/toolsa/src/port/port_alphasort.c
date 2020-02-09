@@ -30,7 +30,7 @@ int PORTalphasort(const struct dirent ** a,
                   const struct dirent ** b)
 {
 
-  // alphasort is now posix, so use the standard call
+  /* alphasort is now posix, so use the standard call */
 
   return alphasort(a, b);
 

@@ -738,9 +738,9 @@ int tdrpLoadStruct(token_handle_t *handle,
 
       for (ii = ifield + 1; ii < def->nfields; ii++) {
 	
-	// Make sure that there are defaults specified for the field
-	// values.  If there are no defaults specified, print out an
-	// error message
+	/* Make sure that there are defaults specified for the field */
+	/* values.  If there are no defaults specified, print out an */
+	/* error message */
 
 	if (tt->struct_vals == 0) {
 	  fprintf(stderr, "\n");
@@ -752,35 +752,37 @@ int tdrpLoadStruct(token_handle_t *handle,
 	  fprintf(stderr, "    Update your parameter file and try again\n");
 	  return (-1);
 	}
-	
-	tdrpToken_t tmp_tok;
-	tmp_tok.tok = sprintf_val(tt->struct_def.fields[ii].ptype,
-				  &tt->struct_def.fields[ii].enum_def,
-				  tt->struct_vals + ii);
-	tmp_tok.used = 1;
-	tmp_tok.line_num = tokens[itok].line_num;
-	if (tt->struct_def.fields[ii].ptype == STRING_TYPE) {
-	  /* remove the quotes */
-	  int len = strlen(tmp_tok.tok);
-	  memmove(tmp_tok.tok, tmp_tok.tok + 1, len - 2);
-	  tmp_tok.tok[len - 2] = '\0';
-	  tmp_tok.is_string = 1;
-	} else {
-	  tmp_tok.is_string = 0;
-	}
 
-	tdrpTokenListAdd(handle, &tmp_tok);
-
-	fprintf(stderr, "\n");
-	fprintf(stderr, ">>> TDRP_WARNING <<< - struct parameter '%s'\n",
-		tt->param_name);
-	fprintf(stderr,
-		"    Missing field '%s': setting to default value: %s\n",
-		def->fields[ii].fname, tmp_tok.tok);
-	fprintf(stderr, "    %s\n", tdrpLineInfo(handle, &tokens[itok]));
-	fprintf(stderr, "    Update your file using -print_params\n");
-
-	tdrpFree(tmp_tok.tok);
+        {
+          tdrpToken_t tmp_tok;
+          tmp_tok.tok = sprintf_val(tt->struct_def.fields[ii].ptype,
+                                    &tt->struct_def.fields[ii].enum_def,
+                                    tt->struct_vals + ii);
+          tmp_tok.used = 1;
+          tmp_tok.line_num = tokens[itok].line_num;
+          if (tt->struct_def.fields[ii].ptype == STRING_TYPE) {
+            /* remove the quotes */
+            int len = strlen(tmp_tok.tok);
+            memmove(tmp_tok.tok, tmp_tok.tok + 1, len - 2);
+            tmp_tok.tok[len - 2] = '\0';
+            tmp_tok.is_string = 1;
+          } else {
+            tmp_tok.is_string = 0;
+          }
+          
+          tdrpTokenListAdd(handle, &tmp_tok);
+          
+          fprintf(stderr, "\n");
+          fprintf(stderr, ">>> TDRP_WARNING <<< - struct parameter '%s'\n",
+                  tt->param_name);
+          fprintf(stderr,
+                  "    Missing field '%s': setting to default value: %s\n",
+                  def->fields[ii].fname, tmp_tok.tok);
+          fprintf(stderr, "    %s\n", tdrpLineInfo(handle, &tokens[itok]));
+          fprintf(stderr, "    Update your file using -print_params\n");
+          
+          tdrpFree(tmp_tok.tok);
+        }
 
       } /* ii */
 

@@ -587,8 +587,8 @@ int fmq_load_read_msg (FMQ_handle_t *handle,
 		       int uncompressed_len)
      
 {
-
-  unsigned int nfull;
+  
+  ui64 nfull;
 
   handle->fslot.type    = msg_type;
   handle->fslot.subtype = msg_subtype;
@@ -804,7 +804,7 @@ static int read_msg (FMQ_handle_t *handle, int slot_num)
 
   fmq_slot_t *slot;
   int id_posn;
-  unsigned int nfull;
+  ui64 nfull;
   si32 magic_cookie;
   si32 slot_num_check;
   si32 id_check;

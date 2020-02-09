@@ -38,7 +38,7 @@ int PORTscandir(const char *dirp,
 
 {
 
-  // scandir is now posix, so use the standard call
+  /*  scandir is now posix, so use the standard call */
 
   return scandir(dirp, namelist, filter, compar);
 

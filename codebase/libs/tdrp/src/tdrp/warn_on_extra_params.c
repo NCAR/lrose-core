@@ -61,15 +61,16 @@ void tdrpWarnOnExtraParams(token_handle_t *handle,
 			   TDRPtable *table,
 			   tdrpToken_t *tokens, int ntok)
 {
-  if (do_warn == 0)
-    return;
-  
+
   int itok;
   int param_found = FALSE;
   int n_unpaired = 0;
   char *param_name;
   TDRPtable *tt = table;
 
+  if (do_warn == 0)
+    return;
+  
   /*
    * search for all '=' characters outside braces
    * braces

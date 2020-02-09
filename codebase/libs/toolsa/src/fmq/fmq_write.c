@@ -286,7 +286,7 @@ static int _fmq_write(FMQ_handle_t *handle, void *msg, int msg_len,
   int nbytes_padded;
   int iret;
   int do_compress;
-  unsigned int clen;
+  ui64 clen;
   void *cmsg;
   fmq_slot_t *slot;
   
@@ -426,7 +426,7 @@ static int _fmq_write(FMQ_handle_t *handle, void *msg, int msg_len,
     offset = handle->fstat.begin_insert;
   }
 
-// #define DEBUG_PRINT
+  /* #define DEBUG_PRINT */
 #ifdef DEBUG_PRINT
   fprintf(stderr, "bi, ei, ba, am, ln, ys, os, off: %9d %9d %9d %2d %8d %5d %5d %9d\n",
           handle->fstat.begin_insert,

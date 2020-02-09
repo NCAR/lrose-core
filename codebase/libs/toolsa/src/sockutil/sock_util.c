@@ -249,10 +249,10 @@ int SKU_open_client(const char *hostname, int port)
   int sockfd; /* socket file descriptor */
   struct sockaddr_in rem_soc;
   
+  struct hostent *hostport; /* host port info */
+
   /* Initialize rem_soc */
   memset((void*)&rem_soc, 0, sizeof(rem_soc));
-
-  struct hostent *hostport; /* host port info */
 
   hostport = gethostbyname(hostname); /* get the remote host info */
   if(!hostport) return(-1);
@@ -317,12 +317,10 @@ int SKU_open_client_timed(const char *hostname, int port, long wait_msecs)
   
   int sockfd; /* socket file descriptor */
   struct sockaddr_in rem_soc;
+  struct hostent *hostport; /* host port info */
+  int select_status;
   /* initalize rem_soc */
   memset((void*) &rem_soc, 0, sizeof(rem_soc));
-  
-  struct hostent *hostport; /* host port info */
-  
-  int select_status;
   
   hostport = gethostbyname(hostname); /* get the remote host info */
   if(!hostport) return(-1);
@@ -643,6 +641,7 @@ int SKU_get_client_timed(int protofd, long wait_msecs)
   
   int ret;
   int sockfd; /* socket file descriptor */
+  socklen_t name_len = sizeof(struct sockaddr_in);
   
   union sunion {
     struct sockaddr_in sin;
@@ -658,7 +657,6 @@ int SKU_get_client_timed(int protofd, long wait_msecs)
    * something ready to accept
    */
 
-  socklen_t name_len = sizeof(struct sockaddr_in);
   errno = 0;
   if(0 > (sockfd = accept(protofd, (struct sockaddr *) &sadd,
 			   &name_len))) {

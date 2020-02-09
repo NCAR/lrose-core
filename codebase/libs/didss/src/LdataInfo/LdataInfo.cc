@@ -1751,7 +1751,7 @@ int LdataInfo::_readXml(int max_valid_age, bool forced, bool &newData)
 // returns 0 on success, -1 on failure
 ///
 
-int LdataInfo::_doReadXml(const char *file_path, int file_len)
+int LdataInfo::_doReadXml(const char *file_path, size_t file_len)
   
 {
 

@@ -789,7 +789,7 @@ protected:
   int _doReadAscii(const char *file_path);
   int _scanFileAscii(FILE *in);
   int _readXml(int max_valid_age, bool forced, bool &newData);
-  int _doReadXml(const char *file_path, int file_len);
+  int _doReadXml(const char *file_path, size_t file_len);
   int _readFmq(int max_valid_age, bool &newData);
   int _openReadFmq(int max_valid_age);
   void _closeReadFmq();

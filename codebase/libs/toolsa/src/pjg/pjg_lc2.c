@@ -152,7 +152,7 @@ void PJGs_lc2_xy2latlon(PJGstruct *ps, double x, double y, double *lat, double *
 	double inv_sin0, to_sin0, loc_x;
 
 	if (Lc2_2tan_line){
-		// See Bottom of Pg 105 - Snyder, Projections used by the USGS
+          /* See Bottom of Pg 105 - Snyder, Projections used by the USGS */
 		if (cs->Lc2_n < 0.0) {
 	      yd = (-cs->Lc2_rho + y);
 	      theta = atan2(-x, yd);

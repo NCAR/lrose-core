@@ -2205,6 +2205,7 @@ time_t get_forecast_time(char *filename, char* g_string, char *date_string)
   static char *routine_name = "_get_forecast_time()";
 #endif
 
+  int forecast;
   date_time_t data_time;
 
   /** Retrieve the date information from the date string */
@@ -2218,7 +2219,7 @@ time_t get_forecast_time(char *filename, char* g_string, char *date_string)
   }
 
    /** Retrieve the forecast seconds from the file name, add to time */
-  int forecast = get_forecast_seconds(filename);
+  forecast = get_forecast_seconds(filename);
   uconvert_to_utime(&data_time);
   data_time.unix_time = data_time.unix_time + forecast;
   uconvert_from_utime(&data_time);
@@ -2285,11 +2286,11 @@ int is_date(char *name){
  */
 int match_expression(char *str, char *expr)
 {
+  int i;
   unsigned int len = strlen(expr);
   if(strlen(str) < len) {
     return -1;
   }
-  int i;
   for(i=0; i<len; i++) {
     if(expr[i] == '#') {
       if(!isdigit(str[i])) {

@@ -34,7 +34,7 @@
 #define NULL (void *) 0
 #endif
 
-   // #define hidden char
+   /* #define hidden char */
 
 #ifndef EOS
 #define EOS ((char) 0)

@@ -295,20 +295,20 @@ void PMU_register(const char *prog_name, const char *instance,
   }
 
   if (pthread_mutex_trylock(&_mutex) == EBUSY) {
-    // already busy, do not need to register
+    /* already busy, do not need to register */
     return;
   }
 
   PMU_register_pid(prog_name, instance, max_reg_interval,
 		   status_str, (int)getpid(), Start_time);
 
-  // unlock
+  /*  unlock */
   pthread_mutex_unlock(&_mutex);
 
   if (Verbose || Debug_msgs) {
+    time_t t = time(0);
     fprintf(stderr, "-------------------------------------------------------\n");
     fprintf(stderr, "PMU_register - verbose mode\n");
-    time_t t = time(0);
     fprintf(stderr, "Now: %s\n", utimstr(t));
     fprintf(stderr, "Prog_name: '%s', instance '%s'\n", prog_name, instance);
     fprintf(stderr, "Max_reg_interval: %d\n", max_reg_interval);
@@ -657,10 +657,10 @@ void PMU_auto_init(const char *prog_name,
   Max_reg_interval = reg_interval * 2;
   Reg_interval = reg_interval;
 
-  // In verbose mode, the PMU_auto_register funciton will register with procmap on
-  // every call without checking how long it's been since the previous registration.
-  // This is useful in an operational system when firguring out where a process is
-  // spending too much time without registering and so is being restarted.
+  /* In verbose mode, the PMU_auto_register funciton will register with procmap on */
+  /* every call without checking how long it's been since the previous registration. */
+  /* This is useful in an operational system when firguring out where a process is */
+  /* spending too much time without registering and so is being restarted. */
 
   env_str = getenv("PROCMAP_VERBOSE");
   if (env_str && STRequal(env_str, "true")) {
@@ -669,8 +669,8 @@ void PMU_auto_init(const char *prog_name,
     Verbose = FALSE;
   }
 
-  // In debug_msgs mode, the PMU functions will print out some debug messages while
-  // they work.  This is meant for debugging the PMU functions.
+  /* In debug_msgs mode, the PMU functions will print out some debug messages while */
+  /* they work.  This is meant for debugging the PMU functions. */
 
   env_str = getenv("PROCMAP_DEBUG_MSGS");
   if (env_str && STRequal(env_str, "true")) {
@@ -720,8 +720,8 @@ void PMU_auto_register(const char *status_str)
 
   if (Verbose) {
 
-    // In Verbose mode, we register with procmap on every call, regardless of
-    // when the previous call was made
+    /* In Verbose mode, we register with procmap on every call, regardless of */
+    /* when the previous call was made */
 
     PMU_register(Name, Instance, Max_reg_interval, status_str);
 

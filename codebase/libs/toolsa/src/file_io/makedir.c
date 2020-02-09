@@ -213,17 +213,18 @@ int ta_makedir_for_file(const char *file_path)
    * dir path extends to last delim
    */
 
-  int dirPathLen = lastDelim - file_path;
-  char *dir_path = (char *) umalloc(dirPathLen + 1);
-  strncpy(dir_path, file_path, dirPathLen);
-  dir_path[dirPathLen] = '\0';
-
-  if (ta_makedir_recurse(dir_path)) {
+  {
+    int dirPathLen = lastDelim - file_path;
+    char *dir_path = (char *) umalloc(dirPathLen + 1);
+    strncpy(dir_path, file_path, dirPathLen);
+    dir_path[dirPathLen] = '\0';
+    if (ta_makedir_recurse(dir_path)) {
+      free(dir_path);
+      return -1;
+    }
     free(dir_path);
-    return -1;
   }
 
-  free(dir_path);
   return 0;
 
 }

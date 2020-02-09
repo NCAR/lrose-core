@@ -46,9 +46,13 @@
 #include <sys/stat.h>
 #define LDATA_INFO_TMP_NAME "latest_data_info.tmp"
 
-// Need reasonable number here to remove code weakness of 
-// unchecked bound. 
+/*
+ * Need reasonable number here to remove code weakness of 
+ * unchecked bound. 
+ */
+
 #define NUM_FCSTS_MAX 512 
+
 /*
  * file scope prototypes
  */
@@ -701,9 +705,11 @@ static int do_read(LDATA_handle_t *handle, FILE *in)
   if (fgets(line, BUFSIZ, in) == NULL) {
     return (-1);
   }
-  size_t len = strlen(line);
-  if(len == 0  || line[len-1] != '\n'){
-    return(-1);
+  {
+    size_t len = strlen(line);
+    if(len == 0  || line[len-1] != '\n'){
+      return(-1);
+    }
   }
    
   if (sscanf(line, "%d", &n_fcasts) != 1) {

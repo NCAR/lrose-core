@@ -496,7 +496,7 @@ int
 
       return 0;
 
-  } // switch
+  } /* switch */
 
 #else
 

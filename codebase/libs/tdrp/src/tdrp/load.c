@@ -66,24 +66,23 @@ void tdrpUsage(FILE *out)
 
 {
 
-  fprintf(out, "%s",
-	  "TDRP args: [options as below]\n"
-	  "   [ -params/--params path ] specify params file path\n"
-	  "   [ -check_params/--check_params] check which params are not set\n"
-	  "   [ -print_params/--print_params [mode]] print parameters\n"
-	  "     using following modes, default mode is 'norm'\n"
-	  "       short:   main comments only, no help or descriptions\n"
-	  "                structs and arrays on a single line\n"
-	  "       norm:    short + descriptions and help\n"
-	  "       long:    norm  + arrays and structs expanded\n"
-	  "       verbose: long  + private params included\n"
-	  "       short_expand:   short with env vars expanded\n"
-	  "       norm_expand:    norm with env vars expanded\n"
-	  "       long_expand:    long with env vars expanded\n"
-	  "       verbose_expand: verbose with env vars expanded\n"
-	  "   [ -tdrp_debug] debugging prints for tdrp\n"
-	  "   [ -tdrp_usage] print this usage\n"
-	  "\n");
+  fprintf(out, "TDRP args: [options as below]\n");
+  fprintf(out, "   [ -params/--params path ] specify params file path\n");
+  fprintf(out, "   [ -check_params/--check_params] check which params are not set\n");
+  fprintf(out, "   [ -print_params/--print_params [mode]] print parameters\n");
+  fprintf(out, "     using following modes, default mode is 'norm'\n");
+  fprintf(out, "       short:   main comments only, no help or descriptions\n");
+  fprintf(out, "                structs and arrays on a single line\n");
+  fprintf(out, "       norm:    short + descriptions and help\n");
+  fprintf(out, "       long:    norm  + arrays and structs expanded\n");
+  fprintf(out, "       verbose: long  + private params included\n");
+  fprintf(out, "       short_expand:   short with env vars expanded\n");
+  fprintf(out, "       norm_expand:    norm with env vars expanded\n");
+  fprintf(out, "       long_expand:    long with env vars expanded\n");
+  fprintf(out, "       verbose_expand: verbose with env vars expanded\n");
+  fprintf(out, "   [ -tdrp_debug] debugging prints for tdrp\n");
+  fprintf(out, "   [ -tdrp_usage] print this usage\n");
+  fprintf(out, "\n");
   
 }
 

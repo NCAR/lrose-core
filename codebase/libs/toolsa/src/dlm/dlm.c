@@ -539,15 +539,17 @@ void DLMdump( DLMlist *head)
       DLMnode *node;
 
       printf("\nDLM dump: head %p first %p last %p current %p size %d\n",
-         head, head->first, head->last, head->current, (int) head->data_size);
-
+             (void *) head, (void *) head->first,
+             (void *) head->last, (void *) head->current,
+             (int) head->data_size);
+      
       node = head->first;
-      while ( NULL != node)
-         {
-         printf("node %p list %p prev %p next %p\n",
-            node, node->list, node->prev, node->next);
-         node = node->next;
-         }
+      while ( NULL != node) {
+        printf("node %p list %p prev %p next %p\n",
+               (void *) node, (void *) node->list,
+               (void *) node->prev, (void *) node->next);
+        node = node->next;
+      }
    }
 
 #ifdef TEST
