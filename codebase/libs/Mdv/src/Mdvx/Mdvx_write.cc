@@ -935,7 +935,7 @@ int Mdvx::_write_field_header(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_write_field_header\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to field header offset: %ld\n", offset);
+    sprintf(tmpstr, "Cannot seek to field header offset: %lld\n", offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1028,7 +1028,7 @@ int Mdvx::_write_vlevel_header(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_write_vlevel_header\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to vlevel header offset: %ld\n", offset);
+    sprintf(tmpstr, "Cannot seek to vlevel header offset: %lld\n", offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1111,7 +1111,7 @@ int Mdvx::_write_chunk_header(const int chunk_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_write_chunk_header\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to chunk header offset: %ld\n", offset);
+    sprintf(tmpstr, "Cannot seek to chunk header offset: %lld\n", offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";

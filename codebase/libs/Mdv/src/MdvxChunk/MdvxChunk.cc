@@ -135,7 +135,7 @@ void MdvxChunk::clear()
 // If the chunk id is not recognized by Mdvx, not automatic swapping
 // will occur.
 
-void MdvxChunk::setData(const void *chunkData, ssize_t size)
+void MdvxChunk::setData(const void *chunkData, int64_t size)
 {
   _dataBuf.free();
   _dataBuf.add(chunkData, size);
@@ -179,10 +179,10 @@ int MdvxChunk::_read_data(TaFile &infile)
 
   // Seek to the proper position in the input file.
 
-  ssize_t offset = _chdr.chunk_data_offset;
+  int64_t offset = _chdr.chunk_data_offset;
   if (infile.fseek(offset, SEEK_SET) != 0) {
     _errStr += "ERROR - MdvxChunk::_read_data.\n";
-    sprintf(errstr, "  Seeking chunk data at offset %ld\n", offset);
+    sprintf(errstr, "  Seeking chunk data at offset %lld\n", (long long) offset);
     _errStr += errstr;
     _errStr += " Chunk info: ";
     _errStr += _chdr.info;
@@ -192,14 +192,14 @@ int MdvxChunk::_read_data(TaFile &infile)
 
   // allocate buffer
   
-  size_t size = _chdr.size;
+  int64_t size = _chdr.size;
   _dataBuf.prepare(_chdr.size);
 
   // read in
   
   if (infile.fread(_dataBuf.getPtr(), 1, size) != size) {
     _errStr += "ERROR - MdvxChunk::_read_data.\n";
-    sprintf(errstr, "  Cannot read chunk. size %ld\n", size);
+    sprintf(errstr, "  Cannot read chunk. size %lld\n", (long long) size);
     _errStr += errstr;
     _errStr += " Chunk info: ";
     _errStr += _chdr.info;
@@ -228,8 +228,8 @@ int MdvxChunk::_read_data(TaFile &infile)
 // Returns 0 on success, -1 on failure.
 
 int MdvxChunk::_write_data(TaFile &outfile,
-			   ssize_t this_offset,
-			   ssize_t &next_offset) const
+			   int64_t this_offset,
+			   int64_t &next_offset) const
 
 {
 
@@ -254,7 +254,7 @@ int MdvxChunk::_write_data(TaFile &outfile,
 
   if (outfile.fseek(this_offset, SEEK_SET) != 0) {
     _errStr += "ERROR - MdvxChunk::_write_data.\n";
-    sprintf(errstr, "  Seeking chunk data at this_offset %ld\n", this_offset);
+    sprintf(errstr, "  Seeking chunk data at this_offset %lld\n", (long long) this_offset);
     _errStr += errstr;
     _errStr += " Chunk info: ";
     _errStr += _chdr.info;

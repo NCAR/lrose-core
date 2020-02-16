@@ -97,7 +97,7 @@ public:
   const Mdvx::chunk_header_t &getHeader() const { return (_chdr); }
 
   int getId() const { return (_chdr.chunk_id); }
-  ssize_t getSize() const { return (_chdr.size); }
+  int64_t getSize() const { return (_chdr.size); }
   string getInfo() const { return (_chdr.info); }
 
   // pointer to data
@@ -115,7 +115,7 @@ public:
   // If the chunk id is not recognized by Mdvx, not automatic swapping
   // will occur.
   
-  void setData(const void *chunkData, ssize_t size);
+  void setData(const void *chunkData, int64_t size);
 
   // set ID and info
 
@@ -143,8 +143,8 @@ protected:
   int _read_data(TaFile &infile);
 
   int _write_data(TaFile &outfile,
-		  ssize_t this_offset,
-		  ssize_t &next_offset) const;
+		  int64_t this_offset,
+		  int64_t &next_offset) const;
 
 private:
 

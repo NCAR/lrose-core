@@ -69,6 +69,7 @@ MdvxField::MdvxField()
   MEM_zero(_vhdr);
   _fhdrFile = NULL;
   _vhdrFile = NULL;
+  _deferredCompression = Mdvx::COMPRESSION_NONE;
   
 }
 
@@ -149,6 +150,7 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
       cerr << "  Volume size: " << _fhdr.volume_size << endl;
     }
   }
+  _deferredCompression = (Mdvx::compression_type_t) _fhdr.compression_type;
 
   // check nz does not exceed max allowable
 
@@ -5584,8 +5586,8 @@ int MdvxField::decompress() const
       _errStr += "ERROR - MdvxField::decompress.\n";
       _errStr +=  "  Wrong number of bytes in plane.\n";
       char errstr[128];
-      sprintf(errstr, "  %ld expected, %ld found.\n",
-	      nbytes_plane, nbytes_uncompressed);
+      sprintf(errstr, "  %lld expected, %lld found.\n",
+	      (long long) nbytes_plane, (long long) nbytes_uncompressed);
       _errStr += errstr;
       ta_compress_free(uncompressed_plane);
       return -1;
@@ -5602,8 +5604,8 @@ int MdvxField::decompress() const
     _errStr += "ERROR - MdvxField::decompress.\n";
     _errStr +=  "  Wrong number of bytes in vol.\n";
     char errstr[128];
-    sprintf(errstr, "  %ld expected, %d found.\n",
-	    nbytes_vol, (int) workBuf.getLen());
+    sprintf(errstr, "  %lld expected, %lld found.\n",
+	    (long long) nbytes_vol, (long long) workBuf.getLen());
     _errStr += errstr;
     return -1;
   }
@@ -5659,8 +5661,8 @@ int MdvxField::_decompressGzipVol() const
     _errStr += "ERROR - MdvxField::_decompressGzipVol.\n";
     _errStr +=  "  Wrong number of bytes in vol.\n";
     char errstr[128];
-    sprintf(errstr, "  %ld expected, %ld found.\n",
-            nbytes_vol, nbytes_uncompressed);
+    sprintf(errstr, "  %lld expected, %lld found.\n",
+            (long long) nbytes_vol, (long long) nbytes_uncompressed);
     _errStr += errstr;
     ta_compress_free(uncompressed_vol);
     return -1;
@@ -6177,7 +6179,7 @@ int MdvxField::_write_volume(TaFile &outfile,
   if (outfile.fseek(this_offset, SEEK_SET) != 0) {
     _errStr += "ERROR - MdvxField::_write_volume.\n";
     char errstr[128];
-    sprintf(errstr, "  Seeking volume data at this_offset %ld\n", this_offset);
+    sprintf(errstr, "  Seeking volume data at this_offset %lld\n", (long long) this_offset);
     _errStr += errstr;
     _errStr += " Field name: ";
     _errStr += _fhdr.field_name;
@@ -6205,11 +6207,11 @@ int MdvxField::_write_volume(TaFile &outfile,
     _errStr += "ERROR - MdvxField::writeVol\n";
     _errStr += string("  Cannot write data for field: ")
       + _fhdr.field_name + "\n";
-    sprintf(errstr, "%ld", (int64_t) copyBuf.getLen());
+    sprintf(errstr, "%lld", (long long) copyBuf.getLen());
     _errStr += string("    copyBuf has ") + errstr + " bytes\n";
-    sprintf(errstr, "%ld", volume_size);
+    sprintf(errstr, "%lld", (long long) volume_size);
     _errStr += string("    should have ") + errstr + " bytes.\n";
-    sprintf(errstr, "%ld", nwritten);
+    sprintf(errstr, "%lld", (long long) nwritten);
     _errStr += string("    nwritten: ") + errstr + " bytes.\n";
     _errStr += strerror(errNum);
     _errStr += "\n";

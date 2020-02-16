@@ -787,7 +787,12 @@ protected:
   mutable vector<int64_t> _planeSizes;
   mutable vector<int64_t> _planeOffsets;
 
-  // error string
+  // deferred compression
+  // compression is delayed until field is delivered to caller
+  
+  Mdvx::compression_type_t _deferredCompression;
+
+   // error string
 
   mutable string _errStr;
 
