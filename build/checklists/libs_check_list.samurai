@@ -6,7 +6,6 @@ libRadx.a
 libdataport.a
 libkd.a
 libphysics.a
-libradar.a   # Depends on fftw3 library
 librapmath.a
 libtdrp.a
 libtoolsa.a
