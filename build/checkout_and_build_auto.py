@@ -758,8 +758,9 @@ def doFinalInstall():
 
     # install color scales
 
-    os.chdir(displaysDir)
-    shellCmd("rsync -av color_scales " + shareDir)
+    if (os.path.isdir(displaysDir)):
+        os.chdir(displaysDir)
+        shellCmd("rsync -av color_scales " + shareDir)
 
     # install binaries and libs
 
