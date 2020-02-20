@@ -284,9 +284,10 @@ def main():
 
     # run qmake for QT apps to create moc_ files
 
-    logPath = prepareLogFile("create-qt-moc-files");
-    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
-    createQtMocFiles(hawkEyeDir)
+    if (options.package != "samurai"):
+        logPath = prepareLogFile("create-qt-moc-files");
+        hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
+        createQtMocFiles(hawkEyeDir)
 
     # prune any empty directories
 

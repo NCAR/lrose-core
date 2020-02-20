@@ -12,7 +12,6 @@ SUB_DIRS = \
 	dataport \
 	kd \
 	physics \
-	radar \
 	rapmath \
 	tdrp \
 	toolsa
