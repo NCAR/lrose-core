@@ -425,8 +425,10 @@ def gitCheckout():
 
     # color scales and maps in displays repo
 
-    shellCmd("/bin/rm -rf lrose-displays")
-    shellCmd("git clone https://github.com/NCAR/lrose-displays")
+    if (options.package != "lrose-radx" and
+        options.package != "samurai") :
+        shellCmd("/bin/rm -rf lrose-displays")
+        shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
 ########################################################################
 # set up autoconf for configure etc
