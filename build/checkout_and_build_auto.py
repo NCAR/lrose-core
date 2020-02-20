@@ -342,20 +342,20 @@ def main():
 
     # build CSU packages
 
-    logPath = prepareLogFile("geolib");
     if (options.build_geolib):
+        logPath = prepareLogFile("geolib");
         buildGeolib()
 
-    logPath = prepareLogFile("fractl");
     if (options.build_fractl):
+        logPath = prepareLogFile("fractl");
         buildFractl()
 
-    logPath = prepareLogFile("vortrac");
     if (options.build_vortrac):
+        logPath = prepareLogFile("vortrac");
         buildVortrac()
 
-    logPath = prepareLogFile("samurai");
     if (options.build_samurai):
+        logPath = prepareLogFile("samurai");
         buildSamurai()
 
     sys.exit(0)
