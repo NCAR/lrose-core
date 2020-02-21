@@ -9,11 +9,16 @@ TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 SUB_DIRS = \
         Ncxx \
 	Radx \
-	dataport \
 	kd \
-	physics \
-	rapmath \
-	tdrp \
-	toolsa
+	tdrp
+
+#       Ncxx \
+#	Radx \
+#	dataport \
+#	kd \
+#	physics \
+#	rapmath \
+#	tdrp \
+#	toolsa
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
