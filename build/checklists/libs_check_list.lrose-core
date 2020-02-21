@@ -1,5 +1,5 @@
 ####################################
-# list of requried LROSE libraries
+# list of required LROSE libraries
 ####################################
 libFiltAlg.a
 libFmq.a

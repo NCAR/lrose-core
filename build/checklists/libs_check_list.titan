@@ -1,5 +1,5 @@
 ####################################
-# list of requried TITAN libraries
+# list of required TITAN libraries
 ####################################
 libFmq.a
 libMdv.a

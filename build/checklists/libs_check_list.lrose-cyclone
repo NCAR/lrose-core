@@ -1,5 +1,5 @@
 ####################################
-# list of requried RADX libraries
+# list of required RADX libraries
 ####################################
 libFmq.a
 libMdv.a
