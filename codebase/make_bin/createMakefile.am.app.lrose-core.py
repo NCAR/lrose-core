@@ -603,7 +603,7 @@ def writeMakefileAm():
 
     fo.write("# compile flags\n")
     fo.write("\n")
-    fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
+    fo.write("AM_CFLAGS += -fPIC\n")
     fo.write("\n")
 
     if (needQt == True):
@@ -622,13 +622,15 @@ def writeMakefileAm():
         fo.write("AM_CFLAGS += -I/usr/local/opt/flex/include\n")
     if (needQt == True):
         fo.write("# for QT\n")
-        fo.write("AM_CFLAGS += -fPIC\n")
         fo.write("AM_CFLAGS += -std=c++11\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Core)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Gui)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Widgets)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Network)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Qml)\n")
+    fo.write("\n")
+
+    fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
 
     fo.write("# load flags\n")
