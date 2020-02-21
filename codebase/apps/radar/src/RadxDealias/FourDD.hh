@@ -57,9 +57,11 @@
 //
 // Radius of earth in kilometers. 
 // 
-#define A 6372.0 
+#define RADIUS_OF_EARTH_KM 6372.0 
 
 #define PI 3.1415927 
+
+#define MISSING_THRESHOLD 0.0001
 
 #include <cstdlib>
 #include <math.h>
@@ -83,7 +85,6 @@ public:
 	 float avg_wind_v = 0.0,
 	 bool prep = false,
 	 bool filt = false,
-	 bool output_soundVol = false,
 	 float max_shear = .05,
 	 int sign = -1,
 	 int del_num_bins = 0,
@@ -116,7 +117,8 @@ public:
                int firstbin, int lastbin, float std_thresh,
                bool* success);
 
-  void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins, float missingVal,
+  void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
+		   float velocityMissingValue, float dbzMissingValue,
                    float low_dbz, float high_dbz, bool dbz_rm_rv);
 
   int findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int 
@@ -140,6 +142,7 @@ public:
                   int del_num_bins);
 
   void InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *soundVolume, Volume *original,
+                         float velocityMissingValue,
 			 int sweepIndex, int del_num_bins, short **STATE, bool filt, float fraction,
                          float ck_val, bool strict_first_pass, int max_count);
 
@@ -226,9 +229,9 @@ private:
   float  _std_thresh;
 
   float  _epsilon;
-  float  _missingVal;
+  // float  _missingVal;
 
-  bool _isMissing(float value);
+  bool _isMissing(float dataValue, float missingValue);
 
 };
 

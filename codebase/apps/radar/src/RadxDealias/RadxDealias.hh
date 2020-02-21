@@ -83,7 +83,8 @@ private:
   // Dealias _currRadarVol if possible
   //
   void _processVol(Volume *_prevVelVol, Volume *_currVelVol,
-		   Volume *currDbzVol, time_t volTime);
+		   Volume *currDbzVol, time_t volTime,
+		   bool output_soundVol);
   //
   // Write beams in _currRadarVol to fmq
   //
@@ -122,6 +123,7 @@ private:
 
   void _insertFieldData(RadxVol *radxVol, string fieldName, Volume *volume);
 
+  void _outputSoundVolume(Volume *currVelVol, Volume *soundVolume);
 
   //
   // Dealiser methods

@@ -77,7 +77,7 @@ FirstGuess::~FirstGuess()
 }
 
 void FirstGuess::outputSoundVolume() {
-  /*
+  /* moved to RadxDealias ...
       int nSweeps = currVelVol->h.nsweeps;
       int nRays = currVelVol->sweep[0]->h.nrays;
       int nBins = currVelVol->sweep[0]->ray[0]->h.nbins;
