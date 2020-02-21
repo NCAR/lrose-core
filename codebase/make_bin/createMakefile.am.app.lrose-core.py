@@ -603,6 +603,7 @@ def writeMakefileAm():
 
     fo.write("# compile flags\n")
     fo.write("\n")
+    fo.write("AM_CFLAGS = -I.\n")
     fo.write("AM_CFLAGS += -fPIC\n")
     fo.write("\n")
 
@@ -610,7 +611,6 @@ def writeMakefileAm():
         fo.write("PKG_CONFIG_PATH = /usr/lib/pkgconfig\n")
         fo.write("PKG_CONFIG_PATH += /usr/local/opt/qt/lib/pkgconfig\n")
 
-    fo.write("AM_CFLAGS = -I.\n")
     if (isDebianBased):
         fo.write("# NOTE: add in Debian location of HDF5\n")
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
