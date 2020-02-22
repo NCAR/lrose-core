@@ -217,6 +217,30 @@ paramdef double {
 } dwell_stats_max_fraction_missing;
 
 commentdef {
+  p_header = "OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the stats method for individual fields.";
+  p_help = "The global stats method is set by the 'dwell_stats_method' parameter. If 'set_stats_method_for_individual_fields' is true, we can set the stats method on particular fields. Fields not specified here will use the global parameter.";
+} set_stats_method_for_individual_fields;
+
+typedef struct {
+  string field_name; 
+  dwell_stats_method_t stats_method;
+} stats_method_field_t;
+
+paramdef struct stats_method_field_t {
+  p_default = {
+    { "FLAG", DWELL_STATS_MEDIAN},
+    { "ANTENNA_FLAG", DWELL_STATS_MIDDLE}
+  };
+  p_descr = "Stats methods for individual fields.";
+  p_help = "Applies if 'set_stats_method_for_individual_fields' is true. The global stats method is set by the 'dwell_stats_method' parameter. Fields not specified here will use the global parameter.";
+} stats_method_fields[];
+
+commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
 }
 

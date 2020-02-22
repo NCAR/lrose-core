@@ -140,6 +140,11 @@ public:
   } field_folds_t;
 
   typedef struct {
+    char* field_name;
+    dwell_stats_method_t stats_method;
+  } stats_method_field_t;
+
+  typedef struct {
     char* name;
     double min_valid_value;
     double max_valid_value;
@@ -509,6 +514,11 @@ public:
 
   double dwell_stats_max_fraction_missing;
 
+  tdrp_bool_t set_stats_method_for_individual_fields;
+
+  stats_method_field_t *_stats_method_fields;
+  int stats_method_fields_n;
+
   char* radar_name_override;
 
   char* site_name_override;
@@ -621,7 +631,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[91];
+  mutable TDRPtable _table[94];
 
   const char *_className;
 

@@ -1170,9 +1170,13 @@ public:
                     const string &standardName,
                     const string &longName);
   
-  /// compute field stats for rays currently in the volume
+  /// compute field stats for all field for
+  /// all rays currently in the volume
   ///
-  /// Pass in a stats method type, and a vector of fields
+  /// Pass in:
+  ///   * a global stats method type
+  ///   * optionally a field-name specific list of stats methods
+  ///   * max fraction missing for a valid result
   ///
   /// The requested stats on computed for each field,
   /// and on a point-by-point basis.
@@ -1181,12 +1185,15 @@ public:
   ///
   /// maxFractionMissing indicates the maximum fraction of the input data field
   /// that can be missing for valid statistics. Should be between 0 and 1.
+  /// If the min is not met, the result is set to missing.
   /// 
   /// Returns NULL if no rays are present in the volume.
   /// Otherwise, returns ray containing results.
   
-  RadxRay *computeFieldStats(RadxField::StatsMethod_t method,
-                             double maxFractionMissing = 0.25);
+  RadxRay *computeFieldStats
+    (RadxField::StatsMethod_t globalMethod,
+     vector<RadxField::NamedStatsMethod> namedMethods,  
+     double maxFractionMissing = 0.25);
 
   //@}
 
