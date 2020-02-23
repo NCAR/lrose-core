@@ -1701,7 +1701,7 @@ void DsMdvx::clearMdv2Ncf()
   _ncfComment.clear();
   _mdv2NcfTransArray.clear();
   _ncfCompress = true;
-  _ncfCompressionLevel = 9;
+  _ncfCompressionLevel = 4;
   _ncfFileFormat = NCF_FORMAT_NETCDF4;
   _ncfOutputLatlonArrays = true;
   _ncfOutputMdvAttr = true;
@@ -2710,7 +2710,10 @@ string DsMdvx::_computeNcfOutputPath(const string &outputDir)
 
   char *writeCompStr = getenv("MDV_NCF_COMPRESSION_LEVEL");
   if (writeCompStr != NULL) {
-    int level = atoi(writeCompStr);
+    int level = 4;
+    if (sscanf(writeCompStr, "%d", &level) != 1) {
+      level = 4;
+    }
     _ncfCompress = true;
     _ncfCompressionLevel = level;
   }

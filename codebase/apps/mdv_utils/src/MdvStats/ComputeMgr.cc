@@ -655,26 +655,20 @@ inline int ComputeMgr::_setupOutput(const DsMdvx &inMdvx) {
       numCovFieldName.c_str()
     );
 
-    if (
-      curr_cov_field == 0 && curr_num_cov_field != 0 ||
-      curr_cov_field != 0 && curr_num_cov_field == 0
-    ) {
+    if ((curr_cov_field == 0 && curr_num_cov_field != 0) ||
+        (curr_cov_field != 0 && curr_num_cov_field == 0)) {
       cerr << "fields do not match for covariance calculation." << endl;
       cerr << "cov_field and num_cov_field" << endl;
       return -1;
     }
-    if (
-      curr_mean_field1 == 0 && curr_num_mean_field1 != 0 ||
-      curr_mean_field1 != 0 && curr_num_mean_field1 == 0
-    ) {
+    if ((curr_mean_field1 == 0 && curr_num_mean_field1 != 0) ||
+        (curr_mean_field1 != 0 && curr_num_mean_field1 == 0)) {
       cerr << "fields do not match for covariance calculation." << endl;
       cerr << "mean_field1 and num_mean_field1" << endl;
       return -1;
     }
-    if (
-      curr_mean_field2 == 0 && curr_num_mean_field2 != 0 ||
-      curr_mean_field2 != 0 && curr_num_mean_field2 == 0
-    ) {
+    if ((curr_mean_field2 == 0 && curr_num_mean_field2 != 0) ||
+        (curr_mean_field2 != 0 && curr_num_mean_field2 == 0)) {
       cerr << "fields do not match for covariance calculation." << endl;
       cerr << "mean_field2 and num_mean_field2" << endl;
       return -1;
@@ -1493,12 +1487,10 @@ bool ComputeMgr::_fieldsMatch(
       //  I'm assuming that if the type is set to 0,
       // then it really wasn't set at all and the check should be ignored.
 
-      if (
-        vlevel_hdr1.type[z] != 0 &&
-        vlevel_hdr2.type[z] != 0 &&
-        vlevel_hdr1.type[z] != vlevel_hdr2.type[z] ||
-        vlevel_hdr1.level[z] != vlevel_hdr2.level[z]
-      ) {
+      if ((vlevel_hdr1.type[z] != 0 &&
+           vlevel_hdr2.type[z] != 0 &&
+           vlevel_hdr1.type[z] != vlevel_hdr2.type[z]) ||
+          (vlevel_hdr1.level[z] != vlevel_hdr2.level[z])) {
         stringstream ss;
         ss << "Field vertical levels do not match:" << endl;
         ss << fhdr1.field_name_long << endl;
@@ -1570,9 +1562,9 @@ int ComputeMgr::writeOutput() {
     if (_params.debug >= Params::DEBUG_VERBOSE)
       cerr << "Sum output" << endl;
 
-    iret != _write(stats_Sum, SUM);
+    iret |= _write(stats_Sum, SUM);
   }
-
+  
   if (covNFields > 0) {
 
     if (_params.debug >= Params::DEBUG_VERBOSE)
@@ -1611,7 +1603,7 @@ int ComputeMgr::_write(DsMdvx& outMdvx, const string& stats) {
     field->computeMinAndMax(true);
 
     if (_params.compress_stats_fields) {
-      field->compress(Mdvx::COMPRESSION_ZLIB);
+      field->requestCompression(Mdvx::COMPRESSION_ZLIB);
     }
   }
 

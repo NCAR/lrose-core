@@ -145,9 +145,11 @@ void Mdvx::setWriteFormat(mdv_format_t format)
   _writeFormat = format;
 }
 
+// default is netcdf
+
 void Mdvx::clearWriteFormat()
 {
-  _writeFormat = FORMAT_MDV;
+  _writeFormat = FORMAT_NCF;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -173,6 +175,34 @@ void Mdvx::setWriteLdataInfo()
 void Mdvx::clearWriteLdataInfo()
 {
   _writeLdataInfo = false;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Get the size of an MDV file that would be written
+// using 32-bit headers
+
+si64 Mdvx::getWriteLen32() const
+  
+{
+
+  si64 len = 0;
+  len += sizeof(master_header_32_t);
+  
+  for (size_t i = 0; i < _fields.size(); i++) {
+    len += sizeof(field_header_32_t);
+    len += sizeof(vlevel_header_32_t);
+    field_header_64_t fhdr = _fields[i]->_fhdr;
+    si64 fieldLen = fhdr.nx * fhdr.ny * fhdr.nz * fhdr.data_element_nbytes;
+    len += fieldLen;
+  }
+
+  for (size_t i = 0; i < _chunks.size(); i++) {
+    len += sizeof(chunk_header_32_t);
+    len += _chunks[i]->_chdr.size;
+  }
+
+  return len;
+
 }
 
 //////////////////////////////////////////////////////
@@ -266,17 +296,43 @@ int Mdvx::writeToPath(const string &output_path)
 
 {
 
+  // init
+  
   clearErrStr();
+
+  // update the master header with the write time
+
   updateMasterHeader();
   time_t now = time(NULL);
   _mhdr.time_written = (si32) now;
 
+  // check the environment vars for write format
+
+  _checkEnvBeforeWrite();
+  
+  // compute write length
+
+  si64 writeLen = getWriteLen32();
+
+  // get the date of the data
+  
+  DateTime dtime(_mhdr.time_centroid);
+
+  // force NetCDF output for large files or
+  // data beyond a specified date
+  
+  if (writeLen >= SI32_MAX ||
+      dtime.getYear() >= 2025 ||
+      _currentFormat == FORMAT_NCF) {
+    _writeFormat = FORMAT_NCF;
+  }
+  
   // if to be written as XML, call XML method
   
-  if (_writeFormat == FORMAT_XML) {
-    return _write_as_xml(output_path);
-  } else if (_currentFormat == FORMAT_NCF) {
+  if (_writeFormat == FORMAT_NCF) {
     return _write_as_ncf(output_path);
+  } else if (_writeFormat == FORMAT_XML) {
+    return _write_as_xml(output_path);
   }
     
   string fullOutPath;
@@ -935,7 +991,8 @@ int Mdvx::_write_field_header(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_write_field_header\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to field header offset: %lld\n", offset);
+    sprintf(tmpstr, "Cannot seek to field header offset: %lld\n",
+            (long long) offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1028,7 +1085,8 @@ int Mdvx::_write_vlevel_header(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_write_vlevel_header\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to vlevel header offset: %lld\n", offset);
+    sprintf(tmpstr, "Cannot seek to vlevel header offset: %lld\n", 
+            (long long) offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1111,7 +1169,8 @@ int Mdvx::_write_chunk_header(const int chunk_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_write_chunk_header\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to chunk header offset: %lld\n", offset);
+    sprintf(tmpstr, "Cannot seek to chunk header offset: %lld\n",
+            (long long) offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1181,6 +1240,7 @@ void Mdvx::_checkEnvBeforeWrite() const
 
   // check environment for write control
 
+  _writeFormat = FORMAT_NCF;
   char *writeFormatStr = getenv("MDV_WRITE_FORMAT");
   if (writeFormatStr != NULL) {
     if (!strcmp(writeFormatStr, "FORMAT_MDV")) {
@@ -1213,6 +1273,11 @@ void Mdvx::_checkEnvBeforeWrite() const
 void Mdvx::_checkWrite32BitHeaders() const
 {
 
+  // force 32-bit headers
+  // never write with 64-bit headers - use NetCDF instead
+  
+  setWrite32BitHeaders(true);
+
   char *write64BitHeaders = getenv("MDV_WRITE_64_BIT_HEADERS");
   if (write64BitHeaders != NULL) {
     if (!strcasecmp(write64BitHeaders, "TRUE")) {
@@ -1220,12 +1285,14 @@ void Mdvx::_checkWrite32BitHeaders() const
         cerr << "DEBUG - Mdvx::_checkWrite64BitHeaders()"
              << " - env var MDV_WRITE_64_BIT_HEADERS set to true" << endl;
       }
-      setWrite32BitHeaders(false);
+      _writeFormat = FORMAT_NCF;
+      // setWrite32BitHeaders(false);
     }
   }
   if (_debug && _write32BitHeaders) {
     cerr << "DEBUG - Mdvx::_checkWrite32BitHeaders() - writing 32-bit headers" << endl;
   }
+
 }
 
 //////////////////////////////////////////////////////

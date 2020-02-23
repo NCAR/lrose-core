@@ -466,13 +466,7 @@ void Wsim2mdv::_processFile(char *file_name)
 				       vlevel_hdr,
 				       _wsimFile->getData());
   
-  if (dbz_field->compress(Mdvx::COMPRESSION_RLE) != 0)
-  {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Error compressing output field" << endl;
-    cerr << "Storing field in uncompressed format" << endl;
-  }
-  
+  dbz_field->requestCompression(Mdvx::COMPRESSION_GZIP);
   mdv_obj.addField(dbz_field);
   
   // Write the MDV file

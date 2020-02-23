@@ -913,6 +913,9 @@ void DsMdvxMsg::_addFieldData(const MdvxField& field)
   if (field.getVolLen() > 0) {
     buf.add(field.getVol(), field.getVolLen());
   }
+
+  // compress as requested
+
   
   // swap if data is not compressed
   if (!field.isCompressed()) {

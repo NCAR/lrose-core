@@ -1458,7 +1458,7 @@ int Ncf2MdvTrans::_finalizeFields()
 			    _mdv->_readVlevelType,
 			    false);
       
-      fld->compress(Mdvx::COMPRESSION_GZIP);
+      fld->requestCompression(Mdvx::COMPRESSION_GZIP);
 
     } // ifield
       
@@ -1483,7 +1483,7 @@ int Ncf2MdvTrans::_finalizeFields()
     fld->_apply_read_constraints(*_mdv, _mdv->_readFillMissing,
 				 _mdv->_readDecimate, true,
 				 remapLut, false, -360.0, 360.0);
-    fld->compress(Mdvx::COMPRESSION_GZIP);
+    fld->requestCompression(Mdvx::COMPRESSION_GZIP);
   }
 
   return 0;
@@ -1520,7 +1520,7 @@ int Ncf2MdvTrans::_finalizeFieldsRhi(bool respectUserDistance /* = false*/)
     fld->_apply_read_constraints(*_mdv, _mdv->_readFillMissing,
 				 _mdv->_readDecimate, true,
 				 remapLut, false, -360.0, 360.0);
-    fld->compress(Mdvx::COMPRESSION_GZIP);
+    fld->requestCompression(Mdvx::COMPRESSION_GZIP);
   }
 
   _mdv->updateMasterHeader();

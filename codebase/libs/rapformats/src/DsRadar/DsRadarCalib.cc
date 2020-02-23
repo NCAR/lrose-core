@@ -680,7 +680,7 @@ int DsRadarCalib::readFromXmlFile(const string &calPath, string &errStr)
     TaStr::AddStr(errStr, "  ", strerror(errNum));
     return -1;
   }
-  int fileLen = calStat.st_size;
+  size_t fileLen = calStat.st_size;
 
   // open file
   

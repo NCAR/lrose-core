@@ -555,6 +555,23 @@ public:
 			  int &lower_plane,
 			  int &upper_plane);
   
+  // Request the compression type.
+  // Compression will be deferred until the data is written
+  // to a file, or to a message.
+  
+  void requestCompression(int compression_type = Mdvx::COMPRESSION_GZIP) const {
+    _requestedCompression = compression_type;
+  };
+
+  // compress the data volume if compression has previously
+  // been requested
+  //
+  // Compressed buffer is stored in BE byte order.
+  //
+  // returns 0 on success, -1 on failure
+  
+  int compressIfRequested() const;
+
   // compress the data volume
   //
   // The compressed buffer comprises the following in order:
@@ -787,10 +804,11 @@ protected:
   mutable vector<int64_t> _planeSizes;
   mutable vector<int64_t> _planeOffsets;
 
-  // deferred compression
-  // compression is delayed until field is delivered to caller
+  // requested compression
+  // compression is deferred until field is delivered to caller
+  // or the data will be writted to a file
   
-  Mdvx::compression_type_t _deferredCompression;
+  mutable int _requestedCompression;
 
    // error string
 

@@ -449,7 +449,7 @@ bool Process::_set_fld(Params::filter_parm_t &f, Params *P)
   {
   case Params::ENCODING_INT8 :
     if (fld->convertRounded(Mdvx::ENCODING_INT8,
-			    Mdvx::COMPRESSION_ZLIB) != 0)
+			    Mdvx::COMPRESSION_GZIP) != 0)
     {
       cerr << "convertRounded failed - I cannot go on." << endl;
       delete fld;
@@ -459,7 +459,7 @@ bool Process::_set_fld(Params::filter_parm_t &f, Params *P)
     
   case Params::ENCODING_INT16 :
     if (fld->convertRounded(Mdvx::ENCODING_INT16,
-			    Mdvx::COMPRESSION_ZLIB) != 0)
+			    Mdvx::COMPRESSION_GZIP) != 0)
     {
       cerr << "convertRounded failed - I cannot go on." << endl;
       delete fld;
@@ -468,12 +468,7 @@ bool Process::_set_fld(Params::filter_parm_t &f, Params *P)
     break;
   
   case Params::ENCODING_FLOAT32 :
-    if (fld->compress(Mdvx::COMPRESSION_ZLIB) != 0)
-    {
-      cerr << "compress failed - I cannot go on." << endl;
-      delete fld;
-      return false;
-    }
+    fld->requestCompression(Mdvx::COMPRESSION_GZIP);
     break;
   }
 

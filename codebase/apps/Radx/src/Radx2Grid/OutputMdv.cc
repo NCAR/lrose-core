@@ -349,7 +349,7 @@ void OutputMdv::addConvStratBool(const RadxVol &vol,
 
   MdvxField *fld = new MdvxField(fhdr, vhdr, data);
   if (_params.output_format == Params::MDV) {
-    fld->compress(Mdvx::COMPRESSION_GZIP);
+    fld->requestCompression(Mdvx::COMPRESSION_GZIP);
   }
 
   if (_params.auto_remap_flat_to_latlon &&

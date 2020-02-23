@@ -204,7 +204,7 @@ int MdvComp::Run()
     
     for (int i = 0; i < outMdvx.getNFields(); i++) {
       MdvxField *field = outMdvx.getFieldByNum(i);
-      field->compress(_params.output_compression_type);
+      field->requestCompression(_params.output_compression_type);
     }
 
     // add any chunks

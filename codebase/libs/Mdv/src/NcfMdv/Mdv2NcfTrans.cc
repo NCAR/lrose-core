@@ -460,17 +460,17 @@ int Mdv2NcfTrans::_parseMdv()
     }
 
     // Create NcfFieldData object
-
+    
     NcfFieldData *fieldData = new NcfFieldData(_debug, field, gridInfo, vlevelInfo,
-                                         mdvFieldName, ncfFieldName,
-                                         ncfStandardName, ncfLongName,
-                                         ncfUnits, doLinearTransform,
-                                         linearMult, linearOffset,
-                                         packing,
-                                         _outputLatlonArrays,
-                                         _mdv->_ncfCompress,
-                                         _mdv->_ncfCompressionLevel,
-                                         _ncFormat);
+                                               mdvFieldName, ncfFieldName,
+                                               ncfStandardName, ncfLongName,
+                                               ncfUnits, doLinearTransform,
+                                               linearMult, linearOffset,
+                                               packing,
+                                               _outputLatlonArrays,
+                                               _mdv->_ncfCompress,
+                                               _mdv->_ncfCompressionLevel,
+                                               _ncFormat);
     
     _fieldData.push_back(fieldData);
     

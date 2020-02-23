@@ -728,7 +728,7 @@ bool GridForecast::_writeForecast(const string &image_file_url,
   
   // Compress the output field
   
-  forecast_field->compress(Mdvx::COMPRESSION_GZIP);
+  forecast_field->requestCompression(Mdvx::COMPRESSION_GZIP);
 
   // add to vol
 

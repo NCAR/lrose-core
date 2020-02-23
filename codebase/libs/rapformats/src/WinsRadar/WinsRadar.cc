@@ -120,7 +120,7 @@ int WinsRadar::readFile (const string &file_path)
 
   // allocate the data array
 
-  int nbytes = _header.nx * _header.ny;
+  size_t nbytes = _header.nx * _header.ny;
   TaArray<ui08> tmpArray;
   ui08 *tmpData = tmpArray.alloc(nbytes);
   _data = new ui08[nbytes];
@@ -214,7 +214,7 @@ int WinsRadar::writeFile (const string &file_path)
 
   // invert the data lines to start in the north
 
-  int nbytes = _header.nx * _header.ny;
+  size_t nbytes = _header.nx * _header.ny;
   TaArray<ui08> tmpArray;
   ui08 *tmpData = tmpArray.alloc(nbytes);
   int source = 0;

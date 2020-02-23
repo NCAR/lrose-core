@@ -37,6 +37,11 @@
 static const string FILE_LABEL;
 static const int REVISION_NUMBER = 2;
 
+// max size for signed and unsigned 32-bit ints
+
+#define SI32_MAX 2147483647L
+#define UI32_MAX 4294967295U
+
 // magic cookies
 
 static const int MASTER_HEAD_MAGIC_COOKIE_32 = 14142;

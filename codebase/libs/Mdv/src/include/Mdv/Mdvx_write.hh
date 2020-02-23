@@ -97,6 +97,11 @@ void setWrite32BitHeaders(bool val) const;
 void setWriteLdataInfo();
 void clearWriteLdataInfo();
 
+// Get the size of an MDV file that would be written
+// using 32-bit headers
+
+si64 getWriteLen32() const;
+
 //////////////////////////////////////////////////////
 // Write to directory
 //

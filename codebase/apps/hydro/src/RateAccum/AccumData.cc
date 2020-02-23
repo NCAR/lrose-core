@@ -415,7 +415,7 @@ int AccumData::write(const string &output_url)
     // create field
     
     MdvxField *field = new MdvxField(fhdr, vhdr, adjusted);
-    field->compress(Mdvx::COMPRESSION_GZIP);
+    field->requestCompression(Mdvx::COMPRESSION_GZIP);
     
     // add field to mdvx object
     

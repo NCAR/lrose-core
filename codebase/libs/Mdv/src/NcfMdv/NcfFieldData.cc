@@ -41,41 +41,41 @@
 #include <Mdv/NcfFieldData.hh>
 
 NcfFieldData::NcfFieldData(bool debug,
-                     const MdvxField *mdvField,
-                     const NcfGridInfo *gridInfo,
-                     const NcfVlevelInfo *vlevelInfo,
-                     const string &mdvFieldName,
-                     const string &ncfFieldName,
-                     const string &ncfStandardName,
-                     const string &ncfLongName,
-                     const string &ncfUnits,
-                     bool doLinearTransform,
-                     double linearMult,
-                     double linearOffset,
-                     DsMdvx::ncf_pack_t packing,
-                     bool output_latlon_arrays,
-                     bool compress,
-                     int compression_level,
-                     Nc3File::FileFormat format) :
-        _debug(debug),
-        _mdvField(*mdvField),
-        _gridInfo(gridInfo),
-        _vlevelInfo(vlevelInfo),
-        _mdvName(mdvFieldName),
-        _ncfName(ncfFieldName),
-        _ncfStandardName(ncfStandardName),
-        _ncfLongName(ncfLongName),
-        _ncfUnits(ncfUnits),
-        _doLinearTransform(doLinearTransform),
-        _linearMult(linearMult),
-        _linearOffset(linearOffset),
-        _packingRequested(packing),
-        _outputLatlonArrays(output_latlon_arrays),
-        _compress(compress),
-        _compressionLevel(compression_level),
-        _ncFormat(format),
-        _ncVar(NULL)
-
+                           const MdvxField *mdvField,
+                           const NcfGridInfo *gridInfo,
+                           const NcfVlevelInfo *vlevelInfo,
+                           const string &mdvFieldName,
+                           const string &ncfFieldName,
+                           const string &ncfStandardName,
+                           const string &ncfLongName,
+                           const string &ncfUnits,
+                           bool doLinearTransform,
+                           double linearMult,
+                           double linearOffset,
+                           DsMdvx::ncf_pack_t packing,
+                           bool output_latlon_arrays,
+                           bool compress,
+                           int compression_level,
+                           Nc3File::FileFormat format) :
+  _debug(debug),
+  _mdvField(*mdvField),
+  _gridInfo(gridInfo),
+  _vlevelInfo(vlevelInfo),
+  _mdvName(mdvFieldName),
+  _ncfName(ncfFieldName),
+  _ncfStandardName(ncfStandardName),
+  _ncfLongName(ncfLongName),
+  _ncfUnits(ncfUnits),
+  _doLinearTransform(doLinearTransform),
+  _linearMult(linearMult),
+  _linearOffset(linearOffset),
+  _packingRequested(packing),
+  _outputLatlonArrays(output_latlon_arrays),
+  _compress(compress),
+  _compressionLevel(compression_level),
+  _ncFormat(format),
+  _ncVar(NULL)
+  
 {
   
   // save the incoming field header
@@ -291,7 +291,7 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
 
   if ( _ncfStandardName.size() > 0) {
     iret |= !_ncVar->add_att(NcfMdv::standard_name,
-                                _ncfStandardName.c_str());
+                             _ncfStandardName.c_str());
   }
   
   iret |= !_ncVar->add_att(NcfMdv::long_name, _ncfLongName.c_str());

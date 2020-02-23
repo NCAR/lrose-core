@@ -369,7 +369,7 @@ void OutputMdv::addField(const char *field_name,
     }
 
     fld->computeMinAndMax(true);
-    fld->compress(compression);
+    fld->requestCompression(compression);
   
   } else {
     

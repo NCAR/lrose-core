@@ -355,7 +355,7 @@ int Process::Derive(Params *P, time_t T){
     {
     case Params::ENCODING_INT8 :
       if (fld->convertRounded(Mdvx::ENCODING_INT8,
-			      Mdvx::COMPRESSION_ZLIB) != 0)
+			      Mdvx::COMPRESSION_GZIP) != 0)
       {
 	cerr << "convertRounded failed - I cannot go on." << endl;
 	return -1;
@@ -364,7 +364,7 @@ int Process::Derive(Params *P, time_t T){
     
     case Params::ENCODING_INT16 :
       if (fld->convertRounded(Mdvx::ENCODING_INT16,
-			      Mdvx::COMPRESSION_ZLIB) != 0)
+			      Mdvx::COMPRESSION_GZIP) != 0)
       {
 	cerr << "convertRounded failed - I cannot go on." << endl;
 	return -1;
@@ -372,11 +372,7 @@ int Process::Derive(Params *P, time_t T){
       break;
   
     case Params::ENCODING_FLOAT32 :
-      if (fld->compress(Mdvx::COMPRESSION_ZLIB) != 0)
-      {
-	cerr << "compress failed - I cannot go on." << endl;
-	return -1;
-      }
+      fld->requestCompression(Mdvx::COMPRESSION_GZIP);
       break;
     } /* endswitch - P->output_encoding_type */
     

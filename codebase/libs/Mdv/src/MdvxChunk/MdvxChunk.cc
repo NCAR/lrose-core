@@ -192,7 +192,7 @@ int MdvxChunk::_read_data(TaFile &infile)
 
   // allocate buffer
   
-  int64_t size = _chdr.size;
+  size_t size = _chdr.size;
   _dataBuf.prepare(_chdr.size);
 
   // read in

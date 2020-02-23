@@ -69,7 +69,7 @@ MdvxField::MdvxField()
   MEM_zero(_vhdr);
   _fhdrFile = NULL;
   _vhdrFile = NULL;
-  _deferredCompression = Mdvx::COMPRESSION_NONE;
+  _requestedCompression = Mdvx::COMPRESSION_NONE;
   
 }
 
@@ -150,7 +150,7 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
       cerr << "  Volume size: " << _fhdr.volume_size << endl;
     }
   }
-  _deferredCompression = (Mdvx::compression_type_t) _fhdr.compression_type;
+  _requestedCompression = (Mdvx::compression_type_t) _fhdr.compression_type;
 
   // check nz does not exceed max allowable
 
@@ -296,10 +296,10 @@ MdvxField::MdvxField(const MdvxField &rhs, int plane_num)
       int64_t in_plane_offset = plane_len * plane_num;
       void *plane_ptr = (ui08 *) rhs_vol + in_plane_offset;
       _volBuf.add(plane_ptr, plane_len);
+      
+      // set compression
 
-      // re-compress
-
-      compress(Mdvx::COMPRESSION_GZIP_VOL);
+      requestCompression(Mdvx::COMPRESSION_GZIP_VOL);
       
     } else {
       
@@ -346,9 +346,9 @@ MdvxField::MdvxField(const MdvxField &rhs, int plane_num)
     _volBuf = tmpBuf;
     _fhdr.ny = 1;
 
-    // compress as required
+    // set compress as required
     
-    compress(compression_type);
+    requestCompression(compression_type);
     
   }
 
@@ -445,6 +445,8 @@ MdvxField &MdvxField::_copy(const MdvxField &rhs)
 
   _fhdr = rhs._fhdr;
   _vhdr = rhs._vhdr;
+
+  _requestedCompression = rhs._requestedCompression;
 
   if (_fhdrFile) {
     delete _fhdrFile;
@@ -850,9 +852,7 @@ int MdvxField::convertType
       if (computeMinAndMax()) {
 	return -1;
       }
-      if (compress(output_compression)) {
-	return -1;
-      }
+      requestCompression(output_compression);
       return 0;
 
     }
@@ -923,11 +923,9 @@ int MdvxField::convertType
 
   }
 
-  // compress
+  // set compression type
   
-  if (compress(output_compression)) {
-    return -1;
-  }
+  requestCompression(output_compression);
       
   return 0;
 
@@ -1474,10 +1472,7 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
   STRconcat(_fhdr.field_name_long, "_composite", MDV_LONG_FIELD_LEN);
 
   if (recompress) {
-    if (compress(compression_type)) {
-      _errStr += "ERROR - MdvxField::convert2Composite\n";
-      return -1;
-    }
+    requestCompression(compression_type);
   }
 
   return 0;
@@ -3063,10 +3058,9 @@ int MdvxField::remap(MdvxRemapLut &lut,
 
   _volBuf = workBuf;
 
-  if (compress(compression_type)) {
-    _errStr += "ERROR - MdvxField::remap\n";
-    return -1;
-  }
+  // set compression
+
+  requestCompression(compression_type);
 
   return 0;
 
@@ -3199,10 +3193,7 @@ int MdvxField::decimate(int64_t max_nxy)
   _volBuf = targetBuf;
 
   if (recompress) {
-    if (compress(compression_type)) {
-      _errStr += "ERROR - MdvxField::decimate\n";
-      return -1;
-    }
+    requestCompression(compression_type);
   }
 
   return 0;
@@ -5206,10 +5197,7 @@ int MdvxField::_decimate_radar_horiz(int64_t max_nxy)
   _volBuf = targetBuf;
 
   if (recompress) {
-    if (compress(compression_type)) {
-      _errStr += "ERROR - MdvxField::decimate\n";
-      return -1;
-    }
+    requestCompression(compression_type);
   }
 
   return 0;
@@ -5347,14 +5335,27 @@ int MdvxField::_decimate_rgba(int64_t max_nxy)
   _volBuf = targetBuf;
 
   if (recompress) {
-    if (compress(compression_type)) {
-      _errStr += "ERROR - MdvxField::decimate\n";
-      return -1;
-    }
+    requestCompression(compression_type);
   }
 
   return 0;
 
+}
+
+///////////////////////////////////////////////////////////////
+// compress the data volume if compression has previously
+// been requested
+//
+// Compressed buffer is stored in BE byte order.
+//
+// returns 0 on success, -1 on failure
+
+int MdvxField::compressIfRequested() const
+{
+  if (_requestedCompression == Mdvx::COMPRESSION_NONE) {
+    return 0;
+  }
+  return compress(_requestedCompression);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -5862,7 +5863,7 @@ int MdvxField::computeMinAndMax(bool force /* = false*/ )
   // set compression back
 
   if (wasCompressed) {
-    compress(compression_type);
+    requestCompression(compression_type);
   }
 
   return 0;
@@ -6145,6 +6146,12 @@ int MdvxField::_write_volume(TaFile &outfile,
 {
 
   clearErrStr();
+
+  // compress if previously requested
+
+  compressIfRequested();
+
+  // get sizes
 
   int64_t volume_size = _fhdr.volume_size;
   ui32 be_volume_size = BE_from_ui32(volume_size);

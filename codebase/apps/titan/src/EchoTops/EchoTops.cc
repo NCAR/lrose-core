@@ -147,8 +147,6 @@ EchoTops::~EchoTops()
 int EchoTops::Run()
 {
   
-  int iret = 0;
-
   // create unique list of fields to read
   
   set<string, less<string> > readFields;
@@ -280,7 +278,7 @@ int EchoTops::_processFile(DsMdvx &inMdvx)
 
   for (int i = 0; i < outMdvx.getNFields(); i++) {
     MdvxField *field = outMdvx.getFieldByNum(i);
-    field->compress(Mdvx::COMPRESSION_GZIP);
+    field->requestCompression(Mdvx::COMPRESSION_GZIP);
   }
   
   // add any chunks

@@ -300,7 +300,7 @@ int ClutterRemove::_processFile(DsMdvx &mdvx)
   // compress the fields
 
   for (int ii = 0; ii < mdvx.getNFields(); ii++) {
-    mdvx.getField(ii)->compress(_params.output_compression);
+    mdvx.getField(ii)->requestCompression(_params.output_compression);
   }
 
   // append to the info in the master header
