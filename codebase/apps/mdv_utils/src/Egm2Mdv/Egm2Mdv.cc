@@ -42,7 +42,6 @@
 #include <toolsa/Path.hh>
 #include <toolsa/DateTime.hh>
 #include <Mdv/MdvxField.hh>
-#include <Mdv/NcfMdvx.hh>
 #include <dataport/bigend.h>
 #include <dataport/bigend.h>
 #include "Egm2Mdv.hh"
