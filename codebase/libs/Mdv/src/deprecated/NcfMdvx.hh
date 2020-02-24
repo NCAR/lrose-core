@@ -73,19 +73,46 @@ public:
   
   NcfMdvx & operator=(const NcfMdvx &rhs);
 
-  // overload convert to/from NetCDF CF
-  // return 0 on success, -1 on failure
-  
+  // convert MDV to NETCDF CF
+  // stores the NetCdf version in _ncfBuf
+  // returns 0 on success, -1 on failure
+
   virtual int convertMdv2Ncf(const string &url);
+
+  // convert NETCDF CF to MDV
+  // given an object containing a netcdf file buffer
+  // returns 0 on success, -1 on failure
+
   virtual int convertNcf2Mdv(const string &url);
+
+  // constrain NETCDF CF using read qualifiers
+  // returns 0 on success, -1 on failure
+
   virtual int constrainNcf(const string &url);
 
-  // read NCF and RADX type files
+  // Read the headers from a NETCDF CF file into MDV, given the file path
+  // Convert to NCF at the end if required
+  // Currently we read all of the data, which will include the headers.
   // returns 0 on success, -1 on failure
   
   virtual int readAllHeadersNcf(const string &url);
+
+  // Read a NETCDF CF file into MDV, given the file path
+  // Convert to NCF at the end if required
+  // returns 0 on success, -1 on failure
+
   virtual int readNcf(const string &url);
+
+  // Read the metadata from a RADX file, given the file path
+  // Fill out the Mdv file headers
+  // returns 0 on success, -1 on failure
+
   virtual int readAllHeadersRadx(const string &url);
+
+  // Read a RADX-type file, convert to MDV
+  // Convert to RADX at the end if required
+  // returns 0 on success, -1 on failure
+
   virtual int readRadx(const string &url);
 
   // write to directory

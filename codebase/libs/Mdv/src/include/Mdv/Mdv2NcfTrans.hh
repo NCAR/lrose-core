@@ -66,6 +66,8 @@ class MdvxRadar;
 // Mdv2NcfTrans object extracts data from DsMdvx object and stores
 // in objects including NcfGridInfo, NcfFieldData, NcfVlevelInfo.
 //
+// Writes CF and CfRadial files.
+//
 // NcfGridInfo stores projection meta data for a netCDF projection information
 // variable, as well as 2D grid information for field datasets.
 // and is used to define netCDF dimensions,  coordinate variables, and auxiliary 
@@ -96,18 +98,21 @@ public:
 
   // set the heartbeat function
 
-  void setHeartbeatFunction(const Mdvx::heartbeat_t heartbeat_func) { _heartbeatFunc = heartbeat_func; }
+  void setHeartbeatFunction(const Mdvx::heartbeat_t heartbeat_func)
+  { 
+    _heartbeatFunc = heartbeat_func;
+  }
 
-  /// perform translation, write file to path
+  /// perform translation to CF, write file to path
   /// returns 0 on success, -1 on failure
   
-  int translate(const DsMdvx &mdv, const string &ncFilePath);
+  int writeCf(const DsMdvx &mdv, const string &ncFilePath);
   
   /// perform translation to CfRadial, write file to dir
   /// returns 0 on success, -1 on failure
   /// Use getNcFilePath() to get path of file written
   
-  int translateToCfRadial(const DsMdvx &mdv, const string &dir);
+  int writeCfRadial(const DsMdvx &mdv, const string &dir);
 
   // Convert to Radx volume
   // returns 0 on success, -1 on failure
@@ -157,8 +162,8 @@ protected:
   string _errStr;
 
   /// heartbeat function
+
   Mdvx::heartbeat_t _heartbeatFunc;
-  
 
   /// grid info, vert level info and field data
 

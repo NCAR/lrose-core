@@ -413,7 +413,7 @@ int Mdv2NetCDF::_processData(time_t inputTime, int leadTime,
       trans.setRadialFileType(DsMdvx::RADIAL_TYPE_CF_RADIAL);
     }
     _outputDir = _params.output_dir;
-    if (trans.translateToCfRadial(mdvx, _outputDir)) {
+    if (trans.writeCfRadial(mdvx, _outputDir)) {
       cerr << "ERROR - Mdv2NetCDF::_processData()" << endl;
       cerr << trans.getErrStr() << endl;
       return 1;
@@ -433,7 +433,7 @@ int Mdv2NetCDF::_processData(time_t inputTime, int leadTime,
 #ifndef NO_RADX_DATA
     trans.setRadialFileType(DsMdvx::RADIAL_TYPE_CF);
 #endif
-    if (trans.translate(mdvx, outputPath)) {
+    if (trans.writeCf(mdvx, outputPath)) {
       cerr << "ERROR - Mdv2NetCDF::_processData()" << endl;
       cerr << trans.getErrStr() << endl;
       return 1;

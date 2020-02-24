@@ -56,15 +56,12 @@ Applications
                                   files into the Mdvx class _ncfBuf
 
   apps/dsserver/src/NcMdvServer : server for translating between
-                                  MDV and NCF
+                                  MDV and NCF - deprecated
 
 Performing translations
 -----------------------
 
-The MDV/NCF/MDV translation service is provided by the NcMdvServer. This
-server does not write or read files (other than temporary files). The
-DsMdvx class has methods which contact this server when a translation 
-is required.
+The MDV/NCF/MDV translation service is provided by the Mdv2NcfTrans class.
 
 So, all applications built on the DsMdvx class can make use of this
 translation service. These include:
@@ -72,10 +69,6 @@ translation service. These include:
   DsMdvServer
   PrintMdv
   MdvConvert
-
-The DsMdvServer/NcMdvServer combination provides on-the-fly translations
-between NCF and MDV in both directions, for volumes and vertical sections.
-Time-height profiles are not yet supported in NCF format.
 
 There are 2 stand-alone applications for translation:
 
@@ -88,34 +81,10 @@ NcfMdvx class (see below).
 Dependencies
 ------------
 
-It was decided that libs/Mdv should remain independent of the Unidata
-netcdf library. This is important because with netcdf4, applications must
-link in the hdf5 library, the Unidata netcdf library (for version 4) and
-the Unidata udunits2 library.
-
-The dependencies are:
-
-  libs/Mdv
-  apps/mdv_utils/src/PrintMdv
-  apps/mdv_utils/src/MdvConvert
-  apps/dsserver/src/DsMdvServer
-
-depend on RAL libraries:
-
-  dataport, toolsa, euclid, rapformats, didss, dsserver
-
-  libs/NcfMdv
-  apps/mdv_utils/src/Mdv2NetCDF
-  apps/mdv_utils/src/NetCDF2Mdv
-
-depend on RAL libraries:
-
-  dataport, toolsa, euclid, rapformats, didss, dsserver
-
-and external libraries:
+The Mdv library is dependent on both the netcdf and hdf5 libraries.
 
   netcdf (Unidata)
-  udunits2 (Unidata)
+  udunits2 (Unidata) - no longer needed
   hdf5 (NASA)
 
 C++ class hierarchy

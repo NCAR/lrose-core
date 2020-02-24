@@ -509,7 +509,8 @@ public:
   // Returns assembled message.
   
   void *assembleCompileTimeHeightReturn(const DsMdvx &mdvx);
-  
+
+#ifdef NOTNOW  
   // assemble message to convert to ncf
   // Returns assembled message on success, NULL on error.
   // getErrorStr() returns the error string.
@@ -564,6 +565,8 @@ public:
   void *assembleConstrainNcf(const DsMdvx &mdvx,
                              const string &trans_url);
   void *assembleConstrainNcfReturn(const DsMdvx &mdvx);
+
+#endif
 
   // assemble an error return message
 

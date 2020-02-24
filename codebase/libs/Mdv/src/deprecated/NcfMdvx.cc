@@ -24,15 +24,14 @@
 ///////////////////////////////////////////////////////////////
 // NcfMdvx.cc
 //
-// NcfMdvx object
-//
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// October 1999
+// July 2008
 //
 ///////////////////////////////////////////////////////////////
 //
-// The NcfMdvx object adds server capability to the Mdvx class.
+// The NcfMdvx extends the DsMdvx class, adding the capability
+// to locally convert to/from netCDF CF.
 //
 ///////////////////////////////////////////////////////////////
 
@@ -104,6 +103,7 @@ NcfMdvx &NcfMdvx::_copy(const NcfMdvx &rhs)
 
 ////////////////////////////////////////////////
 // convert MDV to NETCDF CF
+// stores the NetCdf version in _ncfBuf
 // returns 0 on success, -1 on failure
 
 int NcfMdvx::convertMdv2Ncf(const string &url)
@@ -133,7 +133,7 @@ int NcfMdvx::convertMdv2Ncf(const string &url)
   trans.clearData();
   trans.setDebug(_debug);
   
-  if (trans.translate(*this, tmpFilePath)) {
+  if (trans.writeCf(*this, tmpFilePath)) {
     _errStr += "ERROR - NcfMdvx::convertMdv2Ncf.\n";
     TaStr::AddStr(_errStr, "  Url: ", url);
     _errStr += trans.getErrStr();
@@ -809,7 +809,7 @@ int NcfMdvx::_convertMdvToNcfAndWrite(const string &url)
     Mdv2NcfTrans trans;
     trans.setDebug(_debug);
     trans.setRadialFileType(_ncfRadialFileType);
-    if (trans.translateToCfRadial(*this, outputDir)) {
+    if (trans.writeCfRadial(*this, outputDir)) {
       TaStr::AddStr(_errStr, "ERROR - NcfMdvx::_convertMdvToNcfAndWrite()");
       TaStr::AddStr(_errStr, trans.getErrStr());
       return -1;
@@ -831,7 +831,7 @@ int NcfMdvx::_convertMdvToNcfAndWrite(const string &url)
     outputPath = _computeNcfOutputPath(outputDir);
     Mdv2NcfTrans trans;
     trans.setDebug(_debug);
-    if (trans.translate(*this, outputPath)) {
+    if (trans.writeCf(*this, outputPath)) {
       cerr << "ERROR - NcfMdvx::_convertMdvToNcfAndWrite()" << endl;
       cerr << trans.getErrStr() << endl;
       return -1;

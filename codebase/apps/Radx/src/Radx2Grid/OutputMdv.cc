@@ -912,7 +912,7 @@ int OutputMdv::_writeAsCfNetCDF()
 
   Mdv2NcfTrans trans;
   trans.setDebug(_params.debug);
-  if (trans.translate(_mdvx, outputPath)) {
+  if (trans.writeCf(_mdvx, outputPath)) {
     cerr << "ERROR - Mdv2NetCDF::_processData()" << endl;
     cerr << trans.getErrStr() << endl;
     return -1;

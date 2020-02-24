@@ -300,6 +300,13 @@ int Mdvx::writeToPath(const string &output_path)
   
   clearErrStr();
 
+  // if already converted into netcdf buffer, write it out directly
+  // from the buffer
+
+  if (_currentFormat == FORMAT_NCF) {
+    return _write_ncf_buf_to_file(output_path);
+  }
+  
   // update the master header with the write time
 
   updateMasterHeader();
@@ -311,30 +318,27 @@ int Mdvx::writeToPath(const string &output_path)
   _checkEnvBeforeWrite();
   
   // compute write length
-
+  
   si64 writeLen = getWriteLen32();
 
   // get the date of the data
   
   DateTime dtime(_mhdr.time_centroid);
 
-  // force NetCDF output for large files or
-  // data beyond a specified date
-  
-  if (writeLen >= SI32_MAX ||
-      dtime.getYear() >= 2025 ||
-      _currentFormat == FORMAT_NCF) {
-    _writeFormat = FORMAT_NCF;
-  }
-  
   // if to be written as XML, call XML method
   
-  if (_writeFormat == FORMAT_NCF) {
-    return _write_as_ncf(output_path);
-  } else if (_writeFormat == FORMAT_XML) {
+  if (_writeFormat == FORMAT_XML) {
     return _write_as_xml(output_path);
   }
     
+  // force NetCDF output instaed of MDV for large files
+  // or data beyond a specified date (2025)
+  
+  if (writeLen >= SI32_MAX ||
+      dtime.getYear() >= 2025) {
+    _writeFormat = FORMAT_NCF;
+  }
+  
   string fullOutPath;
   RapDataDir.fillPath(output_path, fullOutPath);
   _pathInUse = fullOutPath;
@@ -343,10 +347,10 @@ int Mdvx::writeToPath(const string &output_path)
     cerr << "Mdvx - writing to path: " << fullOutPath << endl;
   }
   
-  // remove compressed file if it exists
+  // remove gzipped file if it already exists
   
   ta_remove_compressed(fullOutPath.c_str());
-
+  
   // check write 32-bit headers
   
   _checkWrite32BitHeaders();

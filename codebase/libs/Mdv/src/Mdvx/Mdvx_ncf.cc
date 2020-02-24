@@ -165,10 +165,10 @@ bool Mdvx::isNcf(mdv_format_t format) const
 }
 
 ////////////////////////////////////////////////////
-// read volume method for NCF files
+// read NetCDF volume into buffer _ncfBuf
 // returns 0 on success, -1 on failure
 
-int Mdvx::_read_volume_ncf()
+int Mdvx::_read_volume_into_ncf_buf()
   
 {
 
@@ -177,7 +177,7 @@ int Mdvx::_read_volume_ncf()
   TaFile ncfFile;
   if (ncfFile.fopenUncompress(_pathInUse.c_str(), "rb") == NULL) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_ncf\n";
+    _errStr += "ERROR - Mdvx::_read_volume_into_ncf_buf\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
     return -1;
@@ -187,7 +187,7 @@ int Mdvx::_read_volume_ncf()
 
   if (ncfFile.fstat()) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_ncf\n";
+    _errStr += "ERROR - Mdvx::_read_volume_into_ncf_buf\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
     return -1;
@@ -200,7 +200,7 @@ int Mdvx::_read_volume_ncf()
   _ncfBuf.reserve(fileLen);
   if (ncfFile.fread(_ncfBuf.getPtr(), 1, fileLen) != fileLen) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_ncf\n";
+    _errStr += "ERROR - Mdvx::_read_volume_into_ncf_buf\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
     ncfFile.fclose();
@@ -214,7 +214,7 @@ int Mdvx::_read_volume_ncf()
   // set current format
 
   _currentFormat = FORMAT_NCF;
-
+  
   // flag that read constraints have not been applied
 
   _ncfConstrained = false;
@@ -222,7 +222,7 @@ int Mdvx::_read_volume_ncf()
   // set times etc
 
   if (_set_times_ncf()) {
-    _errStr += "ERROR - Mdvx::_read_volume_ncf\n";
+    _errStr += "ERROR - Mdvx::_read_volume_into_ncf_buf\n";
     return -1;
   }
 
@@ -387,11 +387,11 @@ int Mdvx::_set_times_ncf()
 }
 
 /////////////////////////////////////////////////////////
-// Write to path as NCF
+// Write NetCDF data buffer, in _ncfBuf, to path
 // File is written to files based on the specified path.
 // Returns 0 on success, -1 on error.
 
-int Mdvx::_write_as_ncf(const string &output_path) const
+int Mdvx::_write_ncf_buf_to_file(const string &output_path) const
 
 {
 
@@ -404,7 +404,7 @@ int Mdvx::_write_as_ncf(const string &output_path) const
   _pathInUse = ncfPathStr;
 
   if (_debug) {
-    cerr << "Mdvx - writing to NCF path: " << ncfPathStr << endl;
+    cerr << "Mdvx - writing NCF buffer to path: " << ncfPathStr << endl;
   }
 
   // remove compressed file if it exists
@@ -412,7 +412,7 @@ int Mdvx::_write_as_ncf(const string &output_path) const
   ta_remove_compressed(ncfPathStr.c_str());
 
   if (_write_buffer_to_file(ncfPathStr, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
-    cerr << "ERROR - Mdvx::_write_as_ncf" << endl;
+    TaStr::AddStr(_errStr, "ERROR - Mdvx::_write_ncf_buf_to_file");
     return -1;
   }
 
@@ -465,5 +465,3 @@ string Mdvx::getNcfExt() const
   return ext;
 
 }
-
-

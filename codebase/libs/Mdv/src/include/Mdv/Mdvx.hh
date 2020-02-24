@@ -828,9 +828,9 @@ protected:
 
   // netcdf
   
-  int _read_volume_ncf();
+  int _read_volume_into_ncf_buf();
   int _set_times_ncf();
-  int _write_as_ncf(const string &output_path) const;
+  int _write_ncf_buf_to_file(const string &output_path) const;
 
   // vertical sections
 

@@ -1078,7 +1078,7 @@ int MdvPull::_performWrite(DsMdvx &mdvx)
     } else {
       trans.setRadialFileType(DsMdvx::RADIAL_TYPE_CF_RADIAL);
     }
-    if (trans.translateToCfRadial(mdvx, outputDir)) {
+    if (trans.writeCfRadial(mdvx, outputDir)) {
       cerr << "ERROR - Mdv2NetCDF::_processData()" << endl;
       cerr << trans.getErrStr() << endl;
       return 1;
@@ -1095,7 +1095,7 @@ int MdvPull::_performWrite(DsMdvx &mdvx)
     Mdv2NcfTrans trans;
     trans.setDebug(_params.debug);
     trans.setRadialFileType(DsMdvx::RADIAL_TYPE_CF);
-    if (trans.translate(mdvx, outputPath)) {
+    if (trans.writeCf(mdvx, outputPath)) {
       cerr << "ERROR - Mdv2NetCDF::_processData()" << endl;
       cerr << trans.getErrStr() << endl;
       return 1;

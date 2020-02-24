@@ -32,9 +32,22 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Mdv2NcfTrans class. Read the Mdv file, record time information and create
-// unique NcfFieldData, NcfGridInfo and NcfVlevelInfo
-// objects as necessary
+// Mdv2NcfTrans object extracts data from DsMdvx object and stores
+// in objects including NcfGridInfo, NcfFieldData, NcfVlevelInfo.
+//
+// Writes CF and CfRadial files.
+//
+// NcfGridInfo stores projection meta data for a netCDF projection information
+// variable, as well as 2D grid information for field datasets.
+// and is used to define netCDF dimensions,  coordinate variables, and auxiliary 
+// coordinate variables for field datasets.
+//
+// NcfVlevelInfo objects contain vertical 
+// level information and are used to define dimensions and coordinate variables 
+// for vertical coordinates.
+//
+// NcfFieldData objects contain the mdv field data and associate 
+// the data to relevant grid,vertical level, and projection information. 
 //
 ///////////////////////////////////////////////////////////////////////
 
@@ -122,12 +135,10 @@ void Mdv2NcfTrans::clearData()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Parse Mdv data and record time information and create  unique NcfFieldData,
-// NcfGridInfo, and NcfVlevelInfo objects as necessary
-//
-// Returns 0 on success, -1 on failure
+/// perform translation to CF, write file to path
+/// returns 0 on success, -1 on failure
 
-int Mdv2NcfTrans::translate(const DsMdvx &mdv, const string &ncFilePath)
+int Mdv2NcfTrans::writeCf(const DsMdvx &mdv, const string &ncFilePath)
 
 {
 
@@ -175,7 +186,7 @@ int Mdv2NcfTrans::translate(const DsMdvx &mdv, const string &ncFilePath)
   // parse the MDV file
 
   if (_parseMdv()) {
-    TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::translate");
+    TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCf");
     TaStr::AddStr(_errStr, "  Parsing MDV file, path:", _mdv->getPathInUse());
     return -1;
   }
@@ -183,7 +194,7 @@ int Mdv2NcfTrans::translate(const DsMdvx &mdv, const string &ncFilePath)
   // open the output Nc file
 
   if (_openNcFile(_ncFilePath)) {
-    TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::translate");
+    TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCf");
     TaStr::AddStr(_errStr, "  Opening Nc File, path: ", _ncFilePath);
     return -1;
   }
@@ -191,7 +202,7 @@ int Mdv2NcfTrans::translate(const DsMdvx &mdv, const string &ncFilePath)
   // write the Nc file
 
   if (_writeNcFile()) {
-    TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::translate");
+    TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCf");
     TaStr::AddStr(_errStr, "  Writing Nc File, path: ", _ncFilePath);
     return -1;
   }
@@ -1551,14 +1562,14 @@ string Mdv2NcfTrans::_getUniqueFieldName(const string &requestedName)
 // returns 0 on success, -1 on failure
 // Use getNcFilePath() to get path of file written
 
-int Mdv2NcfTrans::translateToCfRadial(const DsMdvx &mdv, const string &dir)
+int Mdv2NcfTrans::writeCfRadial(const DsMdvx &mdv, const string &dir)
 {
-
+  
   // convert to a RadxVol
 
   RadxVol vol;
   if (convertToRadxVol(mdv, vol)) {
-    TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::translateToCfRadial");
+    TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCfRadial");
     TaStr::AddStr(_errStr, "  Writing to dir: ", dir);
     return -1;
   }
@@ -1578,7 +1589,7 @@ int Mdv2NcfTrans::translateToCfRadial(const DsMdvx &mdv, const string &dir)
   if (_radialFileType == DsMdvx::RADIAL_TYPE_DORADE) {
     DoradeRadxFile file;
     if (file.writeToDir(vol, dir, true, addYearSubdir)) {
-      TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::translateToCfRadial");
+      TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCfRadial");
       TaStr::AddStr(_errStr, "  Writing Dorade File, dir: ", dir);
       TaStr::AddStr(_errStr, file.getErrStr());
       return -1;
@@ -1587,7 +1598,7 @@ int Mdv2NcfTrans::translateToCfRadial(const DsMdvx &mdv, const string &dir)
   } else if (_radialFileType == DsMdvx::RADIAL_TYPE_UF) {
     UfRadxFile file;
     if (file.writeToDir(vol, dir, true, addYearSubdir)) {
-      TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::translateToCfRadial");
+      TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCfRadial");
       TaStr::AddStr(_errStr, "  Writing UF File, dir: ", dir);
       TaStr::AddStr(_errStr, file.getErrStr());
       return -1;
@@ -1597,7 +1608,7 @@ int Mdv2NcfTrans::translateToCfRadial(const DsMdvx &mdv, const string &dir)
     NcfRadxFile file;
     file.setNcFormat(_radxNcFormat);
     if (file.writeToDir(vol, dir, true, addYearSubdir)) {
-      TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::translateToCfRadial");
+      TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCfRadial");
       TaStr::AddStr(_errStr, "  Writing Nc File, dir: ", dir);
       TaStr::AddStr(_errStr, file.getErrStr());
       return -1;

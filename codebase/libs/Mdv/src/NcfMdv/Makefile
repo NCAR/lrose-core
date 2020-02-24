@@ -28,7 +28,6 @@ CPPC_SRCS = \
 	NcfFieldData.cc \
 	NcfGridInfo.cc \
 	NcfMdv.cc \
-	NcfMdvx.cc \
 	NcfVlevelInfo.cc
 
 #

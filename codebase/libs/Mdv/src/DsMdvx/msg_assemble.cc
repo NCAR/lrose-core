@@ -937,6 +937,7 @@ void *DsMdvxMsg::assembleCompileTimeHeightReturn(const DsMdvx &mdvx)
 
 }
 
+#ifdef NOTNOW
 /////////////////////////////////////////////
 // assemble message to convert mdv to ncf
 // Returns assembled message, NULL on failure
@@ -1914,6 +1915,8 @@ void *DsMdvxMsg::assembleConstrainNcfReturn(const DsMdvx &mdvx)
   return msg;
 
 }
+
+#endif
 
 ///////////////////////////////////
 // assemble an error return message

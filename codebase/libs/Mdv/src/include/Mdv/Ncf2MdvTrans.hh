@@ -64,8 +64,6 @@ class Ncf2MdvTrans {
   
 public:
 
-  friend class NcfMdvx;
-  
   //
   // constructor
   //
