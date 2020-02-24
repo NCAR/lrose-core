@@ -31,7 +31,6 @@ SUB_DIRS = \
          Ltg2Symprod \
          Mad2Symprod \
          Metar2Symprod \
-         NcMdvServer \
          Pirep2Symprod \
          PosnRpt2Symprod \
          PrintDataMap \
