@@ -601,32 +601,32 @@ short FourDD::Filter3x3(Volume *original, int i, int currIndex, int sweepIndex,
   if (i > del_num_bins) {
     // TODO: RED FLAG!!! here, missingVal as float is compared with data value as short? or unscaled?
     // This is ok; we are assuming all range values are scaled as well as missingVal
-    if (original->sweep[sweepIndex]->ray[left]->range[prev] != missingVal) {
+    if (!_isMissing(original->sweep[sweepIndex]->ray[left]->range[prev], missingVal)) {
       numberOfNonMissingNeighbors += 1;
     }
-    if (original->sweep[sweepIndex]->ray[currIndex]->range[prev] !=missingVal) {
+    if (!_isMissing(original->sweep[sweepIndex]->ray[currIndex]->range[prev], missingVal)) {
       numberOfNonMissingNeighbors += 1;
     }
-    if (original->sweep[sweepIndex]->ray[right]->range[prev] !=missingVal) {
+    if (!_isMissing(original->sweep[sweepIndex]->ray[right]->range[prev], missingVal)) {
       numberOfNonMissingNeighbors += 1;
     }
   }
 
-  if (original->sweep[sweepIndex]->ray[left]->range[i] != missingVal) {
+  if (!_isMissing(original->sweep[sweepIndex]->ray[left]->range[i], missingVal)) {
     numberOfNonMissingNeighbors += 1;
   }
-  if (original->sweep[sweepIndex]->ray[right]->range[i] != missingVal) {
+  if (!_isMissing(original->sweep[sweepIndex]->ray[right]->range[i], missingVal)) {
     numberOfNonMissingNeighbors += 1;
   }
 
   if (i<numBins-1) {  
-    if (original->sweep[sweepIndex]->ray[left]->range[next] !=missingVal) {
+    if (!_isMissing(original->sweep[sweepIndex]->ray[left]->range[next], missingVal)) {
       numberOfNonMissingNeighbors += 1;
     }
-    if (original->sweep[sweepIndex]->ray[currIndex]->range[next] !=missingVal) {
+    if (!_isMissing(original->sweep[sweepIndex]->ray[currIndex]->range[next], missingVal)) {
       numberOfNonMissingNeighbors += 1;
     }
-    if ( original->sweep[sweepIndex]->ray[right]->range[next] != missingVal) {
+    if (!_isMissing( original->sweep[sweepIndex]->ray[right]->range[next], missingVal)) {
       numberOfNonMissingNeighbors += 1;
     }
   }
@@ -784,20 +784,20 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
 
   // determine case ... 
   if (lastVolumeIsNull && 
-      soundValue != missingValue && abValue == missingValue) {
+      !_isMissing(soundValue, missingValue) && _isMissing(abValue, missingValue)) {
     cval = soundValue;
     dcase = 1;
   } else if (lastVolumeIsNull && 
-	   soundValue != missingValue && abValue!= missingValue) {
+	     !_isMissing(soundValue, missingValue) && !_isMissing(abValue, missingValue)) {
     cval = abValue;
     dcase = 2;
-  } else if (prevValue != missingValue && 
-	   abValue!=missingValue && !first_pass_only) {	       
+  } else if (!_isMissing(prevValue, missingValue) && 
+	     !_isMissing(abValue, missingValue) && !first_pass_only) {	       
     cval = prevValue;
     dcase=3;
   } else if (first_pass_only && 
-	   prevValue != missingValue && abValue != missingValue &&
-	   soundValue != missingValue) {
+	     !_isMissing(prevValue ,missingValue) && !_isMissing(abValue, missingValue) &&
+	     !_isMissing(soundValue, missingValue)) {
     cval = prevValue;
     dcase = 4;
   } else { 
@@ -1259,8 +1259,8 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
       for (int currIndex=startindex; currIndex!=endindex; currIndex=currIndex+step) {
 		
 	float val = original->sweep[sweepIndex]->ray[currIndex]->range[i];
-        printf("working val = %g ... \n", val);
-        if (val != missingVal) {
+        // printf("working val = %g ... \n", val);
+        if (!_isMissing(val, missingVal)) {
           int numtimes = 0;          // <<======
           while (STATE[i][currIndex] == TBD  && numtimes <= max_count) {
             numtimes = numtimes + 1; // <<====
@@ -1317,7 +1317,7 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
           }
         } // end if val != missing
 
-        printf("flag = %d STATE[%1d][%1d] = %d\n", flag, i, currIndex, STATE[i][currIndex]);
+        // printf("flag = %d STATE[%1d][%1d] = %d\n", flag, i, currIndex, STATE[i][currIndex]);
       }// end for (currIndex= ...
     } // end for (i=del_num_bins;i<numBins;i++)
   } // while flag == 1
@@ -1365,7 +1365,7 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	float encodedWinval = window(rvVolume, sweepIndex, startray, endray, 
 				     firstbin, lastbin, std_thresh, &success);
 
-	if (encodedWinval == missingVal && !success) { // Expand the window:  
+	if (_isMissing(encodedWinval, missingVal) && !success) { // Expand the window:  
 	  startray=currIndex-2 * proximity;
 	  endray=currIndex+2 * proximity;
 	  firstbin=i-2 * proximity;
@@ -1378,7 +1378,7 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 			       firstbin, lastbin, std_thresh, &success);
 	}
 
-	if (encodedWinval != missingVal) { // TODO: why not check for success?
+	if (!_isMissing(encodedWinval, missingVal)) { // TODO: why not check for success?
 	  float winval = encodedWinval;			
           float unfoldedVal = Unfold(val, winval, _max_count, NyqVelocity);
           float diff = winval - unfoldedVal;
@@ -1460,7 +1460,7 @@ void FourDD::SecondPassUsingSoundVolumeOnly(short **STATE, Volume *soundVolume, 
 	float valcheck=val;
 	float soundVal = soundVolume->sweep[sweepIndex]->ray[currIndex]->range[i];
 	        
-	if (soundVal != missingVal && val != missingVal) {
+	if (!_isMissing(soundVal, missingVal) && !_isMissing(val, missingVal)) {
 	  float unfoldedVal = Unfold(val, soundVal, max_count, NyqVelocity);
 	  float diff = soundVal - unfoldedVal;
 	  if (diff < fraction2*NyqVelocity && fabs(valcheck) > ck_val) {
@@ -1505,7 +1505,7 @@ void FourDD::SecondPassUsingSoundVolumeOnly(short **STATE, Volume *soundVolume, 
 	if (STATE[i][currIndex]==TBD) {
 	  float val = original->sweep[sweepIndex]->ray[currIndex]->range[i];
 
-          if (val != missingVal) {
+          if (!_isMissing(val, missingVal)) {
 	    // valcheck=val;
 
             int in, out;
@@ -1791,7 +1791,7 @@ float FourDD::window(Volume* rvVolume, int sweepIndex, int startray,
 	       {
 		 encodedVal = rvVolume->sweep[sweepIndex]->ray[currIndex]->range[rangeIndex];
 		 
-		 if (encodedVal != missingVal) 
+		 if (!_isMissing(encodedVal, missingVal)) 
 		   {
 		     // applyScaleAndBias
 		     val=(float)rvVolume->sweep[sweepIndex]->ray[currIndex]->h.scale 
@@ -1813,7 +1813,7 @@ float FourDD::window(Volume* rvVolume, int sweepIndex, int startray,
 	       {
 		 encodedVal = rvVolume->sweep[sweepIndex]->ray[currIndex]->range[rangeIndex];
 
-		 if (encodedVal != missingVal) 
+		 if (!_isMissing(encodedVal, missingVal)) 
 		   {
 		     // applyScaleAndBias
 		     val=(float)rvVolume->sweep[sweepIndex]->ray[currIndex]->
@@ -1878,6 +1878,7 @@ float FourDD::Unfold(float foldedValue, float referenceValue,
       direction = -1;
     } else direction = 1;
   }
+  printf("%g unfolded to %g\n", foldedValue, val);
   return val;
 }
 

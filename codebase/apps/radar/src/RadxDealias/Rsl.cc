@@ -331,7 +331,7 @@ void Rsl::print_ray(Ray *ray)
     // print the data
     if (ray->range != NULL) {
       Range *bin = ray->range;
-      int maxToPrint = min(10, ray->h.nbins);
+      int maxToPrint = min(20, ray->h.nbins);
       for (int i = 0; i < maxToPrint; i++) {
 	cout << bin[i] << " ";
       }
