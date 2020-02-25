@@ -76,11 +76,11 @@ void *OldDsMdvxNcfMsg::assembleConvertMdv2Ncf(const DsMdvx &mdvx,
   clearAll();
   _clearErrStr();
   
-  if (mdvx._currentFormat != Mdvx::FORMAT_MDV) {
+  if (mdvx._internalFormat != Mdvx::FORMAT_MDV) {
     TaStr::AddStr(_errStr, "ERROR - OldDsMdvxNcfMsg::assembleConvertMdv2Ncf");
     TaStr::AddStr(_errStr, "  Format must be MDV");
     TaStr::AddStr(_errStr, "  Current format is: ",
-                  Mdvx::format2Str(mdvx._currentFormat));
+                  Mdvx::format2Str(mdvx._internalFormat));
     return NULL;
   }
   
@@ -108,7 +108,7 @@ void *OldDsMdvxNcfMsg::assembleConvertMdv2Ncf(const DsMdvx &mdvx,
 
   // add formats
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
   
   // add mdv data
 
@@ -157,7 +157,7 @@ void *OldDsMdvxNcfMsg::assembleConvertMdv2NcfReturn(const DsMdvx &mdvx)
 
   // add formats part
 
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
 
   // add the ncf data
   
@@ -194,11 +194,11 @@ void *OldDsMdvxNcfMsg::assembleConvertNcf2Mdv(const DsMdvx &mdvx,
   clearAll();
   _clearErrStr();
   
-  if (mdvx._currentFormat != Mdvx::FORMAT_NCF) {
+  if (mdvx._internalFormat != Mdvx::FORMAT_NCF) {
     TaStr::AddStr(_errStr, "ERROR - OldDsMdvxNcfMsg::assembleConvertNcf2Mdv");
     TaStr::AddStr(_errStr, "  Format must be NCF");
     TaStr::AddStr(_errStr, "  Current format is: ",
-                  Mdvx::format2Str(mdvx._currentFormat));
+                  Mdvx::format2Str(mdvx._internalFormat));
     return NULL;
   }
   
@@ -226,7 +226,7 @@ void *OldDsMdvxNcfMsg::assembleConvertNcf2Mdv(const DsMdvx &mdvx,
 
   // add formats
 
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
 
   // add read qualifiers
 
@@ -279,7 +279,7 @@ void *OldDsMdvxNcfMsg::assembleConvertNcf2MdvReturn(const DsMdvx &mdvx)
   
   // add formats part
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
   
   // add mdv data
 
@@ -321,11 +321,11 @@ void *OldDsMdvxNcfMsg::assembleReadAllHdrsNcf(const DsMdvx &mdvx,
   clearAll();
   _clearErrStr();
   
-  if (mdvx._currentFormat != Mdvx::FORMAT_NCF) {
+  if (mdvx._internalFormat != Mdvx::FORMAT_NCF) {
     TaStr::AddStr(_errStr, "ERROR - OldDsMdvxNcfMsg::assembleReadAllHdrsNcf");
     TaStr::AddStr(_errStr, "  Format must be NCF");
     TaStr::AddStr(_errStr, "  Current format is: ",
-                  Mdvx::format2Str(mdvx._currentFormat));
+                  Mdvx::format2Str(mdvx._internalFormat));
     return NULL;
   }
   
@@ -353,7 +353,7 @@ void *OldDsMdvxNcfMsg::assembleReadAllHdrsNcf(const DsMdvx &mdvx,
 
   // add formats
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
   _addReadFormat(mdvx._readFormat);
   
   // add path in use
@@ -401,10 +401,10 @@ void *OldDsMdvxNcfMsg::assembleReadAllHdrsNcfReturn(const DsMdvx &mdvx)
   // add formats part
   // echo back the read format in case it has been changed
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
   _addReadFormat(mdvx._readFormat);
 
-  if (mdvx._currentFormat == Mdvx::FORMAT_NCF) {
+  if (mdvx._internalFormat == Mdvx::FORMAT_NCF) {
     
     // add the ncf headers
     
@@ -484,11 +484,11 @@ void *OldDsMdvxNcfMsg::assembleReadNcf(const DsMdvx &mdvx,
   clearAll();
   _clearErrStr();
   
-  if (mdvx._currentFormat != Mdvx::FORMAT_NCF) {
+  if (mdvx._internalFormat != Mdvx::FORMAT_NCF) {
     TaStr::AddStr(_errStr, "ERROR - OldDsMdvxNcfMsg::assembleReadNcf");
     TaStr::AddStr(_errStr, "  Format must be NCF");
     TaStr::AddStr(_errStr, "  Current format is: ",
-                  Mdvx::format2Str(mdvx._currentFormat));
+                  Mdvx::format2Str(mdvx._internalFormat));
     return NULL;
   }
   
@@ -516,7 +516,7 @@ void *OldDsMdvxNcfMsg::assembleReadNcf(const DsMdvx &mdvx,
 
   // add formats
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
   
   // add read qualifiers
   
@@ -570,9 +570,9 @@ void *OldDsMdvxNcfMsg::assembleReadNcfReturn(const DsMdvx &mdvx)
   
   // add formats part
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
 
-  if (mdvx._currentFormat == Mdvx::FORMAT_NCF) {
+  if (mdvx._internalFormat == Mdvx::FORMAT_NCF) {
     
     // add the ncf data
     
@@ -626,11 +626,11 @@ void *OldDsMdvxNcfMsg::assembleReadAllHdrsRadx(const DsMdvx &mdvx,
   clearAll();
   _clearErrStr();
   
-  if (mdvx._currentFormat != Mdvx::FORMAT_RADX) {
+  if (mdvx._internalFormat != Mdvx::FORMAT_RADX) {
     TaStr::AddStr(_errStr, "ERROR - OldDsMdvxNcfMsg::assembleReadAllHdrsRadx");
     TaStr::AddStr(_errStr, "  Format must be RADX");
     TaStr::AddStr(_errStr, "  Current format is: ",
-                  Mdvx::format2Str(mdvx._currentFormat));
+                  Mdvx::format2Str(mdvx._internalFormat));
     return NULL;
   }
   
@@ -658,7 +658,7 @@ void *OldDsMdvxNcfMsg::assembleReadAllHdrsRadx(const DsMdvx &mdvx,
 
   // add formats
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
   _addReadFormat(mdvx._readFormat);
   
   // add path in use
@@ -706,10 +706,10 @@ void *OldDsMdvxNcfMsg::assembleReadAllHdrsRadxReturn(const DsMdvx &mdvx)
   // add formats part
   // echo back the read format in case it has been changed
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
   _addReadFormat(mdvx._readFormat);
   
-  if (mdvx._currentFormat == Mdvx::FORMAT_NCF) {
+  if (mdvx._internalFormat == Mdvx::FORMAT_NCF) {
     
     // add the ncf headers
     
@@ -790,11 +790,11 @@ void *OldDsMdvxNcfMsg::assembleReadRadx(const DsMdvx &mdvx,
   clearAll();
   _clearErrStr();
   
-  if (mdvx._currentFormat != Mdvx::FORMAT_RADX) {
+  if (mdvx._internalFormat != Mdvx::FORMAT_RADX) {
     TaStr::AddStr(_errStr, "ERROR - OldDsMdvxNcfMsg::assembleReadRadx");
     TaStr::AddStr(_errStr, "  Format must be RADX");
     TaStr::AddStr(_errStr, "  Current format is: ",
-                  Mdvx::format2Str(mdvx._currentFormat));
+                  Mdvx::format2Str(mdvx._internalFormat));
     return NULL;
   }
   
@@ -822,7 +822,7 @@ void *OldDsMdvxNcfMsg::assembleReadRadx(const DsMdvx &mdvx,
   
   // add formats
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
 
   // add read qualifiers
 
@@ -876,9 +876,9 @@ void *OldDsMdvxNcfMsg::assembleReadRadxReturn(const DsMdvx &mdvx)
   
   // add formats part
   
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
 
-  if (mdvx._currentFormat == Mdvx::FORMAT_NCF) {
+  if (mdvx._internalFormat == Mdvx::FORMAT_NCF) {
     
     // add the ncf data
     
@@ -932,11 +932,11 @@ void *OldDsMdvxNcfMsg::assembleConstrainNcf(const DsMdvx &mdvx,
   clearAll();
   _clearErrStr();
   
-  if (mdvx._currentFormat != Mdvx::FORMAT_NCF) {
+  if (mdvx._internalFormat != Mdvx::FORMAT_NCF) {
     TaStr::AddStr(_errStr, "ERROR - OldDsMdvxNcfMsg::assembleConstrainNcf");
     TaStr::AddStr(_errStr, "  Format must be NCF");
     TaStr::AddStr(_errStr, "  Current format is: ",
-                  Mdvx::format2Str(mdvx._currentFormat));
+                  Mdvx::format2Str(mdvx._internalFormat));
     return NULL;
   }
   
@@ -964,7 +964,7 @@ void *OldDsMdvxNcfMsg::assembleConstrainNcf(const DsMdvx &mdvx,
 
   // add formats
 
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
   
   // add read qualifiers
 
@@ -1017,7 +1017,7 @@ void *OldDsMdvxNcfMsg::assembleConstrainNcfReturn(const DsMdvx &mdvx)
 
   // add formats part
 
-  _addCurrentFormat(mdvx._currentFormat);
+  _addCurrentFormat(mdvx._internalFormat);
   
   // add the ncf data
   

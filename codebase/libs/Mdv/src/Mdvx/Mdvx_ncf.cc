@@ -34,9 +34,22 @@
 //////////////////////////////////////////////////////////
 
 #include <Mdv/Mdvx.hh>
+#include <Mdv/MdvxChunk.hh>
+#include <Mdv/DsMdvxMsg.hh>
+#include <Mdv/Mdv2NcfTrans.hh>
+#include <Mdv/Ncf2MdvTrans.hh>
+#include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
+#include <Radx/RadxField.hh>
 #include <didss/RapDataDir.hh>
+#include <didss/DsURL.hh>
+#include <dsserver/DsLocator.hh>
+#include <dsserver/DmapAccess.hh>
 #include <toolsa/TaStr.hh>
+#include <toolsa/mem.h>
 #include <cerrno>
+#include <cstdlib>
+#include <unistd.h>
 using namespace std;
 
 /////////////////////////////////////////////////////////////////
@@ -80,7 +93,7 @@ void Mdvx::setNcfHeader(time_t validTime,
 
 {
   
-  _currentFormat = FORMAT_NCF;
+  _internalFormat = FORMAT_NCF;
 
   _ncfValidTime = validTime;
   _ncfEpoch = epoch;
@@ -108,7 +121,7 @@ void Mdvx::setNcfBuffer(const void *ncBuf,
 
 {
   
-  _currentFormat = FORMAT_NCF;
+  _internalFormat = FORMAT_NCF;
 
   _ncfBuf.free();
   _ncfBuf.add(ncBuf, nbytes);
@@ -123,7 +136,7 @@ void Mdvx::clearNcf()
   
 {
   _ncfBuf.free();
-  _currentFormat = FORMAT_MDV;
+  _internalFormat = FORMAT_MDV;
   _ncfValidTime = 0;
   _ncfGenTime = 0;
   _ncfForecastTime = 0;
@@ -166,6 +179,7 @@ bool Mdvx::isNcf(mdv_format_t format) const
 
 ////////////////////////////////////////////////////
 // read NetCDF volume into buffer _ncfBuf
+// assumes _pathInUse has been set by caller
 // returns 0 on success, -1 on failure
 
 int Mdvx::_read_volume_into_ncf_buf()
@@ -213,7 +227,7 @@ int Mdvx::_read_volume_into_ncf_buf()
 
   // set current format
 
-  _currentFormat = FORMAT_NCF;
+  _internalFormat = FORMAT_NCF;
   
   // flag that read constraints have not been applied
 
@@ -232,6 +246,7 @@ int Mdvx::_read_volume_into_ncf_buf()
 
 ////////////////////////////////////////////////////
 // Set times related to NCF files, from path
+// assumes _pathInUse has been set by caller
 // Returns 0 on success, -1 on failure
 
 int Mdvx::_set_times_ncf()
@@ -386,40 +401,6 @@ int Mdvx::_set_times_ncf()
 
 }
 
-/////////////////////////////////////////////////////////
-// Write NetCDF data buffer, in _ncfBuf, to path
-// File is written to files based on the specified path.
-// Returns 0 on success, -1 on error.
-
-int Mdvx::_write_ncf_buf_to_file(const string &output_path) const
-
-{
-
-  // compute path
-  
-  string outPathStr;
-  RapDataDir.fillPath(output_path, outPathStr);
-
-  string ncfPathStr = outPathStr + getNcfExt();
-  _pathInUse = ncfPathStr;
-
-  if (_debug) {
-    cerr << "Mdvx - writing NCF buffer to path: " << ncfPathStr << endl;
-  }
-
-  // remove compressed file if it exists
-  
-  ta_remove_compressed(ncfPathStr.c_str());
-
-  if (_write_buffer_to_file(ncfPathStr, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
-    TaStr::AddStr(_errStr, "ERROR - Mdvx::_write_ncf_buf_to_file");
-    return -1;
-  }
-
-  return 0;
-
-}
-
 ///////////////////////////////////////////////////////
 // print ncf info
 
@@ -427,7 +408,7 @@ void Mdvx::printNcfInfo(ostream &out) const
 
 {
 
-  if (_currentFormat == FORMAT_NCF) {
+  if (_internalFormat == FORMAT_NCF) {
     out << endl;
     out << "NetCDF CF FORMAT file" << endl;
     out << "---------------------" << endl;
@@ -465,3 +446,1177 @@ string Mdvx::getNcfExt() const
   return ext;
 
 }
+
+/////////////////////////////////////////////////////////
+// Get output CF NetCDF path, based on MDV path
+// Returns CF path.
+
+string Mdvx::getNcfPath(const string &output_path) const
+
+{
+
+  // compute path relative to $DATA_DIR
+  
+  string outPathStr;
+  RapDataDir.fillPath(output_path, outPathStr);
+
+  string cfPathStr = "cf-";
+  cfPathStr += outPathStr;
+  cfPathStr += getNcfExt();
+
+  return cfPathStr;
+
+}
+
+/////////////////////////////////////////////////////////
+// compute output path for Ncf files
+
+string Mdvx::_computeNcfOutputPath(const string &outputDir)
+{
+  
+  // check environment for write control directives
+  
+  _checkEnvBeforeWrite();
+
+  // compute path
+  
+  char yearSubdir[MAX_PATH_LEN];
+  char outputBase[MAX_PATH_LEN];
+  int forecastDelta = getForecastLeadSecs();
+  bool writeAsForecast = _getWriteAsForecast();
+  
+  if (writeAsForecast) {
+    
+    if (_mhdr.data_collection_type != Mdvx::DATA_FORECAST && 
+        _mhdr.data_collection_type != Mdvx::DATA_EXTRAPOLATED)
+      _mhdr.data_collection_type = Mdvx::DATA_FORECAST;
+ 
+    date_time_t genTime;
+    genTime.unix_time = getGenTime();
+    uconvert_from_utime(&genTime);
+    
+    sprintf(yearSubdir, "%.4d", genTime.year);
+
+    if (!_useExtendedPaths) {
+      sprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.8d",
+              genTime.year, genTime.month, genTime.day,
+              PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
+              PATH_DELIM, forecastDelta);
+    } else {
+      sprintf(outputBase,
+              "%.4d%.2d%.2d%s"
+              "g_%.2d%.2d%.2d%s"
+              "%.4d%.2d%.2d_g_%.2d%.2d%.2d_f_%.8d",
+              genTime.year, genTime.month, genTime.day, PATH_DELIM,
+              genTime.hour, genTime.min, genTime.sec, PATH_DELIM,
+              genTime.year, genTime.month, genTime.day,
+              genTime.hour, genTime.min, genTime.sec,
+              forecastDelta);
+    }
+
+  } else {
+
+    date_time_t validTime;
+    validTime.unix_time = getValidTime();
+    uconvert_from_utime(&validTime);
+    sprintf(yearSubdir, "%.4d", validTime.year);
+    if (!_useExtendedPaths) {
+      sprintf(outputBase, "%.4d%.2d%.2d%s%.2d%.2d%.2d",
+              validTime.year, validTime.month, validTime.day,
+              PATH_DELIM, validTime.hour, validTime.min, validTime.sec);
+    } else {
+      sprintf(outputBase,
+              "%.4d%.2d%.2d%s"
+              "%.4d%.2d%.2d_%.2d%.2d%.2d",
+              validTime.year, validTime.month, validTime.day, PATH_DELIM,
+              validTime.year, validTime.month, validTime.day,
+              validTime.hour, validTime.min, validTime.sec);
+    }
+
+  }
+
+  string outputName = "cf-";
+  if (_writeAddYearSubdir) {
+    outputName += yearSubdir;
+    outputName += PATH_DELIM;
+  }
+  outputName += outputBase;
+  outputName += ".mdv.nc";
+
+  string outputPath(outputDir);
+  outputPath += PATH_DELIM;
+  outputPath += outputName;
+
+  return outputPath;
+
+}
+
+////////////////////////////////
+// MDV to netCDF CF conversion
+
+// set mdv to ncf conversion attributes
+// For conversion of MDV into netCDF.
+
+void Mdvx::setMdv2NcfAttr(const string &institution,
+                          const string &references,
+                          const string &comment)
+
+{
+
+  _ncfInstitution = institution;
+  _ncfReferences = references;
+  _ncfComment = comment;
+
+}
+
+// replace comment attribute with input string.
+
+void Mdvx::setMdv2NcfCommentAttr(const string &comment)
+{
+  _ncfComment = comment;
+}
+
+// set compression - uses HDF5
+
+void Mdvx::setMdv2NcfCompression(bool compress,
+                                 int compressionLevel)
+  
+{
+  
+  _ncfCompress = compress;
+  _ncfCompressionLevel = compressionLevel;
+
+}
+
+// set the output format of the netCDF file
+
+void Mdvx::setMdv2NcfFormat(nc_file_format_t fileFormat)
+
+{
+  _ncfFileFormat = fileFormat;
+}
+
+// set the file type for polar radar files
+
+void Mdvx::setRadialFileType(radial_file_type_t fileType)
+
+{
+  _ncfRadialFileType = fileType;
+}
+
+// set output parameters - what should be included
+
+void Mdvx::setMdv2NcfOutput(bool outputLatlonArrays,
+                            bool outputMdvAttr,
+                            bool outputMdvChunks,
+                            bool outputStartEndTimes)
+
+{
+
+  _ncfOutputLatlonArrays = outputLatlonArrays;
+  _ncfOutputMdvAttr = outputMdvAttr;
+  _ncfOutputMdvChunks = outputMdvChunks;
+  _ncfOutputStartEndTimes = outputStartEndTimes;
+}
+
+//////////////////////////////////////////
+// add mdv to ncf field translation info
+// For conversion of MDV into netCDF.
+
+void Mdvx::addMdv2NcfTrans(string mdvFieldName,
+                           string ncfFieldName,
+                           string ncfStandardName,
+                           string ncfLongName,
+                           string ncfUnits,
+                           bool doLinearTransform,
+                           double linearMult,
+                           double linearOffset,
+                           ncf_pack_t packing)
+  
+{
+  
+  Mdv2NcfFieldTrans trans;
+
+  trans.mdvFieldName = mdvFieldName;
+  trans.ncfFieldName = ncfFieldName;
+  trans.ncfStandardName = ncfStandardName;
+  trans.ncfLongName = ncfLongName;
+  trans.ncfUnits = ncfUnits;
+  trans.doLinearTransform = doLinearTransform;
+  trans.linearMult = linearMult;
+  trans.linearOffset = linearOffset;
+  trans.packing = packing;
+
+
+  _mdv2NcfTransArray.push_back(trans);
+  
+}
+  
+// clear MDV to NetCDF parameters
+
+void Mdvx::clearMdv2Ncf()
+  
+{
+  _ncfInstitution.clear();
+  _ncfReferences.clear();
+  _ncfComment.clear();
+  _mdv2NcfTransArray.clear();
+  _ncfCompress = true;
+  _ncfCompressionLevel = 4;
+  _ncfFileFormat = NCF_FORMAT_NETCDF4;
+  _ncfOutputLatlonArrays = true;
+  _ncfOutputMdvAttr = true;
+  _ncfOutputMdvChunks = true;
+  _ncfOutputStartEndTimes = true;
+  _ncfRadialFileType = RADIAL_TYPE_CF;
+
+}
+
+////////////////////////////////////////////////
+// return string representation of packing type
+
+string Mdvx::ncfPack2Str(const ncf_pack_t packing)
+
+{
+
+  switch(packing)  {
+    case NCF_PACK_FLOAT:
+      return "NCF_PACK_FLOAT"; 
+    case NCF_PACK_SHORT:
+      return "NCF_PACK_SHORT"; 
+    case NCF_PACK_BYTE:
+      return "NCF_PACK_BYTE"; 
+    case NCF_PACK_ASIS:
+      return "NCF_PACK_ASIS"; 
+    default:
+      return "NCF_PACK_FLOAT";
+  }
+
+}
+
+////////////////////////////////////////////////
+// return enum representation of packing type
+
+Mdvx::ncf_pack_t Mdvx::ncfPack2Enum(const string &packing)
+
+{
+
+  if (!packing.compare("NCF_PACK_FLOAT")) {
+    return NCF_PACK_FLOAT;
+  } else if (!packing.compare("NCF_PACK_SHORT")) {
+    return NCF_PACK_SHORT;
+  } else if (!packing.compare("NCF_PACK_BYTE")) {
+    return NCF_PACK_BYTE;
+  } else if (!packing.compare("NCF_PACK_ASIS")) {
+    return NCF_PACK_ASIS;
+  } else {
+    return NCF_PACK_FLOAT;
+  }
+
+}
+
+////////////////////////////////////////////////
+// return string representation of nc format
+
+string Mdvx::ncFormat2Str(const nc_file_format_t format)
+
+{
+  
+  switch(format)  {
+    case NCF_FORMAT_NETCDF4:
+      return "NCF_FORMAT_NETCDF4";
+    case NCF_FORMAT_CLASSIC:
+      return "NCF_FORMAT_CLASSIC"; 
+    case NCF_FORMAT_OFFSET64BITS:
+      return "NCF_FORMAT_OFFSET64BITS"; 
+    case NCF_FORMAT_NETCFD4_CLASSIC:
+      return "NCF_FORMAT_NETCFD4_CLASSIC"; 
+    default:
+      return "NCF_FORMAT_NETCDF4";
+  }
+  
+}
+
+////////////////////////////////////////////////
+// return enum representation of nc format
+
+Mdvx::nc_file_format_t Mdvx::ncFormat2Enum(const string &format)
+
+{
+
+  if (!format.compare("NCF_FORMAT_NETCDF4")) {
+    return NCF_FORMAT_NETCDF4;
+  } else if (!format.compare("NCF_FORMAT_CLASSIC")) {
+    return NCF_FORMAT_CLASSIC;
+  } else if (!format.compare("NCF_FORMAT_OFFSET64BITS")) {
+    return NCF_FORMAT_OFFSET64BITS;
+  } else if (!format.compare("NCF_FORMAT_NETCFD4_CLASSIC")) {
+    return NCF_FORMAT_NETCFD4_CLASSIC;
+  } else {
+    return NCF_FORMAT_NETCDF4;
+  }
+
+}
+
+
+////////////////////////////////////////////////
+// return string representation of file type
+
+string Mdvx::radialFileType2Str(const radial_file_type_t ftype)
+
+{
+  
+  switch(ftype)  {
+    case RADIAL_TYPE_CF_RADIAL:
+      return "RADIAL_TYPE_CF_RADIAL"; 
+    case RADIAL_TYPE_DORADE:
+      return "RADIAL_TYPE_DORADE"; 
+    case RADIAL_TYPE_UF:
+      return "RADIAL_TYPE_UF"; 
+    case RADIAL_TYPE_CF:
+    default:
+      return "RADIAL_TYPE_CF";
+  }
+  
+}
+
+////////////////////////////////////////////////
+// return enum representation of file type
+
+Mdvx::radial_file_type_t Mdvx::radialFileType2Enum(const string &ftype)
+
+{
+
+  if (!ftype.compare("RADIAL_TYPE_CF_RADIAL")) {
+    return RADIAL_TYPE_CF_RADIAL;
+  } else if (!ftype.compare("RADIAL_TYPE_DORADE")) {
+    return RADIAL_TYPE_DORADE;
+  } else if (!ftype.compare("RADIAL_TYPE_UF")) {
+    return RADIAL_TYPE_UF;
+  } else {
+    return RADIAL_TYPE_CF;
+  }
+
+}
+
+
+////////////////////////////////////////////////
+// converts format to/from NCF on read
+// returns 0 on success, -1 on failure
+
+int Mdvx::_convertFormatOnRead(const string &read_url)
+  
+{
+  
+  if (_readFormat == FORMAT_NCF && _internalFormat == FORMAT_MDV) {
+    if (_convertMdv2Ncf(read_url)) {
+      _errStr += "ERROR - COMM - Mdvx::convertFormatOnRead.\n";
+      _errStr += "  Converting MDV to NCF\n";
+      return -1;
+    }
+  } else if (_readFormat == FORMAT_MDV && _internalFormat == FORMAT_NCF) {
+    if (_convertNcf2Mdv(read_url)) {
+      _errStr += "ERROR - COMM - Mdvx::convertFormatOnRead.\n";
+      _errStr += "  Converting NCF to MDV\n";
+      return -1;
+    }
+  } else if (!_ncfConstrained &&
+             _readFormat == FORMAT_NCF && _internalFormat == FORMAT_NCF) {
+    if (_constrainNcf(read_url)) {
+      _errStr += "ERROR - COMM - Mdvx::convertFormatOnRead.\n";
+      _errStr += "  Constraining NCF using read specifications\n";
+      return -1;
+    }
+  }
+  
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// convert format to/from NCF on write
+// returns 0 on success, -1 on failure
+
+int Mdvx::_convertFormatOnWrite(const string &url)
+  
+{
+
+  if (_writeFormat == FORMAT_NCF && _internalFormat == FORMAT_MDV) {
+    if (_convertMdv2Ncf(url)) {
+      _errStr += "ERROR - COMM - Mdvx::convertFormatOnWrite.\n";
+      _errStr += "  Converting MDV to NCF\n";
+      return -1;
+    }
+  } else if (_writeFormat == FORMAT_MDV && _internalFormat == FORMAT_NCF) {
+    if (_convertNcf2Mdv(url)) {
+      _errStr += "ERROR - COMM - Mdvx::convertFormatOnWrite.\n";
+      _errStr += "  Converting NCF to MDV\n";
+      return -1;
+    }
+  }
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// Write NetCDF data buffer, in _ncfBuf, to path
+// File name is based on the specified path.
+// Returns 0 on success, -1 on error.
+
+int Mdvx::_write_ncf_buf_to_file(const string &output_path) const
+
+{
+
+  // compute path relative to $DATA_DIR
+  
+  _pathInUse = getNcfPath(output_path);
+  if (_debug) {
+    cerr << "Mdvx - writing CF NetCDF buffer to path: " << _pathInUse << endl;
+  }
+
+  // remove compressed file if it exists
+  
+  ta_remove_compressed(_pathInUse.c_str());
+
+  // write the buffer to the file
+
+  if (_write_buffer_to_file(_pathInUse, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
+    TaStr::AddStr(_errStr, "ERROR - Mdvx::_write_ncf_buf_to_file");
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// Write out in CF-NetCDF format, to path.
+// File name is based on the specified path.
+// Conversion is carried out during the write.
+// Returns 0 on success, -1 on error.
+
+int Mdvx::_writeAsCf(const string &output_path) const
+
+{
+
+  // compute path relative to $DATA_DIR
+  
+  _pathInUse = getNcfPath(output_path);
+  if (_debug) {
+    cerr << "Mdvx - writing CF NetCDF buffer to path: " << _pathInUse << endl;
+  }
+
+  // remove compressed file if it exists
+  
+  ta_remove_compressed(_pathInUse.c_str());
+
+  // write as CF
+  
+  Mdv2NcfTrans trans;
+  trans.clearData();
+  trans.setDebug(_debug);
+  if(_heartbeatFunc != NULL) {
+    trans.setHeartbeatFunction(_heartbeatFunc);
+  }
+  
+  if (trans.writeCf(*this, _pathInUse)) {
+    _errStr += "ERROR - Mdvx::_convertMdv2Ncf.\n";
+    TaStr::AddStr(_errStr, "  Path: ", _pathInUse);
+    _errStr += trans.getErrStr();
+    return -1;
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// convert MDV format to NETCDF CF format
+// returns 0 on success, -1 on failure
+
+int Mdvx::_convertMdv2Ncf(const string &path)
+  
+{
+  
+  if (_internalFormat != FORMAT_MDV) {
+    _errStr += "ERROR - Mdvx::_convertMdv2Ncf.\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_MDV));
+    return -1;
+  }
+  
+  // ensure master header is consistent with file body
+
+  updateMasterHeader();
+
+  // compute temporary file path
+
+  time_t now = time(NULL);
+  DateTime dnow(now);
+  pid_t pid = getpid();
+  char tmpFilePath[FILENAME_MAX];
+  sprintf(tmpFilePath,
+          "/tmp/Mdvx_convertMdv2Ncf_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
+          dnow.getYear(), dnow.getMonth(), dnow.getDay(),
+          dnow.getHour(), dnow.getMin(), dnow.getSec(), pid);
+          
+  Mdv2NcfTrans trans;
+  trans.clearData();
+  trans.setDebug(_debug);
+  if(_heartbeatFunc != NULL) {
+    trans.setHeartbeatFunction(_heartbeatFunc);
+  }
+  
+  if (trans.writeCf(*this, tmpFilePath)) {
+    _errStr += "ERROR - Mdvx::_convertMdv2Ncf.\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    _errStr += trans.getErrStr();
+    return -1;
+  }
+
+  // open NCF file
+  
+  TaFile ncfFile;
+  if (ncfFile.fopen(tmpFilePath, "rb") == NULL) {
+    int errNum = errno;
+    _errStr += "ERROR - Mdvx::_convertMdv2Ncf\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    TaStr::AddStr(_errStr, "  Cannot open tmp file: ", tmpFilePath);
+    _errStr += strerror(errNum);
+    _errStr += "\n";
+    unlink(tmpFilePath);
+    return -1;
+  }
+
+  // stat the file to get size
+  
+  if (ncfFile.fstat()) {
+    int errNum = errno;
+    _errStr += "ERROR - Mdvx::_convertMdv2Ncf\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    TaStr::AddStr(_errStr, "  Cannot stat tmp file: ", tmpFilePath);
+    _errStr += strerror(errNum);
+    _errStr += "\n";
+    ncfFile.fclose();
+    unlink(tmpFilePath);
+    return -1;
+  }
+  stat_struct_t &fileStat = ncfFile.getStat();
+  size_t fileLen = fileStat.st_size;
+  
+  // read in buffer
+  
+  _ncfBuf.reserve(fileLen);
+  if (ncfFile.fread(_ncfBuf.getPtr(), 1, fileLen) != fileLen) {
+    int errNum = errno;
+    _errStr += "ERROR - Mdvx::_convertMdv2Ncf\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    TaStr::AddStr(_errStr, "  Cannot read tmp file: ", tmpFilePath);
+    _errStr += strerror(errNum);
+    _errStr += "\n";
+    ncfFile.fclose();
+    unlink(tmpFilePath);
+    return -1;
+  }
+  
+  // close tmp file and remove
+  
+  ncfFile.fclose();
+  unlink(tmpFilePath);
+
+  // set current format
+  
+  _internalFormat = FORMAT_NCF;
+
+  // set times etc
+
+  _ncfValidTime = _mhdr.time_centroid;
+  _ncfGenTime = _mhdr.time_gen;
+  _ncfForecastTime = _mhdr.forecast_time;
+  _ncfForecastDelta = _mhdr.forecast_delta;
+  if (_mhdr.data_collection_type == Mdvx::DATA_FORECAST ||
+      _mhdr.data_collection_type == Mdvx::DATA_EXTRAPOLATED) {
+    _ncfIsForecast = true;
+  } else {
+    _ncfIsForecast = false;
+  }
+  _ncfEpoch = _mhdr.epoch;
+
+  // clear MDV format data
+
+  clearFields();
+  clearChunks();
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// convert NETCDF CF to MDV
+// given an object containing a netcdf file buffer
+// returns 0 on success, -1 on failure
+
+int Mdvx::_convertNcf2Mdv(const string &path)
+  
+{
+
+  if (_internalFormat != FORMAT_NCF) {
+    _errStr += "ERROR - Mdvx::_convertNcf2Mdv.\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
+    return -1;
+  }
+
+  // save read details
+
+  Mdvx::encoding_type_t readEncodingType = _readEncodingType;
+  Mdvx::compression_type_t readCompressionType = _readCompressionType;
+  Mdvx::scaling_type_t readScalingType = _readScalingType;
+  double readScale = _readScale;
+  double readBias = _readBias;
+
+  // compute temporary file path
+  
+  time_t now = time(NULL);
+  DateTime dnow(now);
+  pid_t pid = getpid();
+  char tmpFilePath[FILENAME_MAX];
+  sprintf(tmpFilePath,
+          "/tmp/Mdvx_convertNcf2Mdv_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
+          dnow.getYear(), dnow.getMonth(), dnow.getDay(),
+          dnow.getHour(), dnow.getMin(), dnow.getSec(), pid);
+
+  // write nc buffer to file
+
+  if (_write_buffer_to_file(tmpFilePath, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
+    _errStr += "ERROR - Mdvx::_convertNcf2Mdv\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    TaStr::AddStr(_errStr, "  Cannot write buffe to tmp file: ", tmpFilePath);
+    return -1;
+  }
+          
+  // create translator
+  
+  Ncf2MdvTrans trans;
+  trans.setDebug(_debug);
+  
+  // perform translation
+  // returns 0 on success, -1 on failure
+
+  if (trans.readCf(tmpFilePath, *this)) {
+    _errStr += "ERROR - Mdvx::_convertNcf2Mdv\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    TaStr::AddStr(_errStr, "  Cannot translate file: ", tmpFilePath);
+    TaStr::AddStr(_errStr, trans.getErrStr());
+    unlink(tmpFilePath);
+    return -1;
+  }
+
+  // remove tmp file
+  
+  unlink(tmpFilePath);
+
+  // remove netcdf data
+  
+  clearNcf();
+
+  // set format to MDV
+  
+  _internalFormat = FORMAT_MDV;
+
+  // convert the output fields appropriately
+
+  for (int ii = 0; ii < (int) _fields.size(); ii++) {
+    _fields[ii]->convertType(readEncodingType,
+                             readCompressionType,
+                             readScalingType,
+                             readScale, readBias);
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////
+// Read the headers from a NETCDF CF file into MDV, given the file path
+// Convert to NCF at the end if required
+// Currently we read all of the data, which will include the headers.
+// returns 0 on success, -1 on failure
+
+int Mdvx::_readAllHeadersNcf(const string &path)
+  
+{
+
+  // First read in the whole file.  We do this because we don't have a way
+  // to easily read the field header information without reading the field
+  // data also.
+
+  if (_readNcf(path)) {
+    _errStr += "ERROR - Mdvx::_readAllHeadersNcf\n";
+    TaStr::AddStr(_errStr, "  Error reading NCF file and translating to MDV");
+    return -1;
+  }
+  
+  // Now fill in the file headers.  This isn't done in the translation because
+  // the translation doesn't know that we are reading the entire file to get
+  // the headers.
+
+  _mhdrFile = _mhdr;
+  
+  for (size_t i = 0; i < _fields.size(); ++i) {
+    MdvxField *field = _fields[i];
+    _fhdrsFile.push_back(field->getFieldHeader());
+    _vhdrsFile.push_back(field->getVlevelHeader());
+  }
+  
+  for (size_t i = 0; i < _chunks.size(); ++i) {
+    MdvxChunk *chunk = _chunks[i];
+    _chdrsFile.push_back(chunk->getHeader());
+  }
+  
+  return 0;
+}
+
+//////////////////////////////////////////////////////
+// Read a NETCDF CF file into MDV
+// Convert to NCF at the end if required
+// returns 0 on success, -1 on failure
+
+int Mdvx::_readNcf(const string &path)
+  
+{
+
+  if (_internalFormat != FORMAT_NCF) {
+    _errStr += "ERROR - Mdvx::_readNcf\n";
+    TaStr::AddStr(_errStr, "  Path ", path);
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
+    return -1;
+  }
+
+  // save read details
+  
+  Mdvx::encoding_type_t readEncodingType = _readEncodingType;
+  Mdvx::compression_type_t readCompressionType = _readCompressionType;
+  Mdvx::scaling_type_t readScalingType = _readScalingType;
+  double readScale = _readScale;
+  double readBias = _readBias;
+
+  // create translator
+  
+  Ncf2MdvTrans trans;
+  trans.setDebug(_debug);
+  
+  // perform translation
+  // returns 0 on success, -1 on failure
+  
+  if (trans.readCf(path, *this)) {
+    _errStr += "ERROR - Mdvx::_readNcf\n";
+    TaStr::AddStr(_errStr, "  Path ", path);
+    TaStr::AddStr(_errStr, "  Cannot translate file to MDV");
+    TaStr::AddStr(_errStr, trans.getErrStr());
+    return -1;
+  }
+
+  // remove netcdf data
+  
+  clearNcf();
+
+  // set nc-specific times from path
+
+  _set_times_ncf();
+  
+  // set format to MDV
+  
+  _internalFormat = FORMAT_MDV;
+
+  // convert back to NCF if needed
+  // with read constraints having been applied
+  
+  if (_readFormat == FORMAT_NCF) {
+    if (_convertMdv2Ncf(path)) {
+      _errStr += "ERROR - Mdvx::_readNcf\n";
+      TaStr::AddStr(_errStr, "  Path ", path);
+      TaStr::AddStr(_errStr, "  Cannot translate file to NCF");
+      TaStr::AddStr(_errStr, trans.getErrStr());
+      return -1;
+    }
+  }
+
+  // for MDV format, convert the output fields appropriately
+  
+  if (_internalFormat == FORMAT_MDV) {
+    for (int ii = 0; ii < (int) _fields.size(); ii++) {
+      _fields[ii]->convertType(readEncodingType,
+                               readCompressionType,
+                               readScalingType,
+                               readScale, readBias);
+    }
+  }
+
+  // copy the main headers to file headers
+
+  _copyMainHeadersToFileHeaders();
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////
+// Read the metadata from a RADX file
+// Fill out the Mdv file headers
+// returns 0 on success, -1 on failure
+
+int Mdvx::_readAllHeadersRadx(const string &path)
+  
+{
+
+  // set up object for reading file
+  
+  RadxFile inFile;
+  if (_debug) {
+    inFile.setDebug(true);
+  }
+
+  inFile.setReadMetadataOnly(true);
+  inFile.setReadRemoveLongRange(true);
+  
+  // read file in to RadxVol object
+  
+  RadxVol vol;
+  if (inFile.readFromPath(path, vol)) {
+    _errStr += "ERROR - Mdvx::readAllHeadersRadx.\n";
+    _errStr += "Cannot read in files.\n";
+    TaStr::AddStr(_errStr, "  path: ", path);
+    _errStr += inFile.getErrStr();
+    return -1;
+  }
+  
+  // read in first field with data
+
+  RadxVol vol0;
+  if (vol.getNFields() > 0) {
+    RadxField *rfld = vol.getField(0);
+    string firstFieldName = rfld->getName();
+    RadxFile inFile0;
+    inFile0.addReadField(firstFieldName);
+    if (inFile0.readFromPath(path, vol0) == 0) {
+      vol0.computeMaxNGates();
+    }
+  }
+  
+  // make sure sweeps are in ascending order, as required by MDV
+
+  vol.reorderSweepsAsInFileAscendingAngle();
+  vol.reorderSweepsAscendingAngle();
+
+  // set format to MDV
+  
+  _internalFormat = FORMAT_MDV;
+
+  // Now fill in the file headers.  This isn't done in the translation because
+  // the translation doesn't know that we are reading the entire file to get
+  // the headers.
+
+  clear();
+
+  // set master header
+
+  setBeginTime(vol.getStartTimeSecs());
+  setEndTime(vol.getEndTimeSecs());
+  setValidTime(vol.getEndTimeSecs());
+  setDataCollectionType(Mdvx::DATA_MEASURED);
+  _mhdr.native_vlevel_type = Mdvx::VERT_TYPE_ELEV;
+  _mhdr.vlevel_type = Mdvx::VERT_TYPE_ELEV;
+  _mhdr.n_fields = vol.getNFields();
+  
+  _mhdr.sensor_lat = vol.getLatitudeDeg();
+  _mhdr.sensor_lon = vol.getLongitudeDeg();
+  _mhdr.sensor_alt = vol.getAltitudeKm();
+
+  _mhdr.max_nx = 0;
+  _mhdr.max_ny = 0;
+  _mhdr.max_nz = 0;
+
+  const vector<RadxSweep *> &sweepsInFile = vol.getSweepsAsInFile();
+
+  // add field headers
+
+  for (size_t ii = 0; ii < vol.getNFields(); ii++) {
+
+    RadxField *rfld = vol.getField(ii);
+    Mdvx::field_header_t fhdr;
+    Mdvx::vlevel_header_t vhdr;
+    MEM_zero(fhdr);
+    MEM_zero(vhdr);
+
+    fhdr.nx = vol0.getMaxNGates();
+    fhdr.ny = vol0.getNRays();
+    fhdr.nz = sweepsInFile.size();
+    
+    if (fhdr.nx > _mhdr.max_nx) _mhdr.max_nx = fhdr.nx;
+    if (fhdr.ny > _mhdr.max_ny) _mhdr.max_ny = fhdr.ny;
+    if (fhdr.nz > _mhdr.max_nz) _mhdr.max_nz = fhdr.nz;
+
+    fhdr.proj_type = Mdvx::PROJ_POLAR_RADAR;
+    fhdr.native_vlevel_type = Mdvx::VERT_TYPE_ELEV;
+    fhdr.vlevel_type = Mdvx::VERT_TYPE_ELEV;
+    fhdr.dz_constant = false;
+
+    fhdr.proj_origin_lat = vol.getLatitudeDeg();
+    fhdr.proj_origin_lon = vol.getLongitudeDeg();
+
+    fhdr.grid_dx = 0.0;
+    fhdr.grid_dy = 0.0;
+    fhdr.grid_dz = 0.0;
+    
+    fhdr.grid_minx = 0.0;
+    fhdr.grid_miny = 0.0;
+    fhdr.grid_minz = 0.0;
+
+    if (vol0.getNRays() > 0) {
+      const RadxRay *ray0 = vol0.getRays()[0];
+      fhdr.grid_dx = ray0->getGateSpacingKm();
+      fhdr.grid_minx = ray0->getStartRangeKm();
+      if (vol0.checkIsRhi()) {
+        fhdr.grid_miny = ray0->getElevationDeg();
+      } else {
+        fhdr.grid_miny = ray0->getAzimuthDeg();
+      }
+    }
+    
+    if (vol0.getNSweeps() > 0) {
+      const RadxSweep *sweep0 = vol0.getSweeps()[0];
+      fhdr.grid_dy = sweep0->getAngleResDeg();
+      fhdr.grid_minz = sweep0->getFixedAngleDeg();
+    }
+    
+    STRncopy(fhdr.field_name_long,
+             rfld->getLongName().c_str(), MDV_LONG_FIELD_LEN);
+    
+    STRncopy(fhdr.field_name,
+             rfld->getName().c_str(), MDV_SHORT_FIELD_LEN);
+
+    STRncopy(fhdr.units,
+             rfld->getUnits().c_str(), MDV_UNITS_LEN);
+
+    for (size_t jj = 0; jj < sweepsInFile.size(); jj++) {
+      const RadxSweep *swp = sweepsInFile[jj];
+      if (swp->getSweepMode() == Radx::SWEEP_MODE_RHI) {
+        fhdr.native_vlevel_type = Mdvx::VERT_TYPE_AZ;
+        fhdr.vlevel_type = Mdvx::VERT_TYPE_AZ;
+        vhdr.type[jj] = Mdvx::VERT_TYPE_AZ;
+      } else {
+        vhdr.type[jj] = Mdvx::VERT_TYPE_ELEV;
+      }
+      vhdr.level[jj] = swp->getFixedAngleDeg();
+    }
+    
+    _fhdrsFile.push_back(fhdr);
+    _vhdrsFile.push_back(vhdr);
+
+  } // ii
+  
+  _mhdrFile = _mhdr;
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// Read a RADX-type file, convert to MDV
+// Convert to RADX at the end if required
+// returns 0 on success, -1 on failure
+
+int Mdvx::_readRadx(const string &path)
+  
+{
+
+  if (_internalFormat != FORMAT_RADX) {
+    _errStr += "ERROR - Mdvx::_readRadx.\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
+    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_RADX));
+    return -1;
+  }
+
+  // save read details
+  
+  Mdvx::encoding_type_t readEncodingType = _readEncodingType;
+  Mdvx::compression_type_t readCompressionType = _readCompressionType;
+  Mdvx::scaling_type_t readScalingType = _readScalingType;
+  double readScale = _readScale;
+  double readBias = _readBias;
+
+  // set up object for reading files
+  
+  RadxFile inFile;
+  if (_debug) {
+    inFile.setDebug(true);
+  }
+  // set vertical limits
+  if (_readVlevelLimitsSet) {
+    inFile.setReadFixedAngleLimits(_readMinVlevel, _readMaxVlevel);
+    inFile.setReadStrictAngleLimits(false);
+  } else if (_readPlaneNumLimitsSet) {
+    inFile.setReadSweepNumLimits(_readMinPlaneNum, _readMaxPlaneNum);
+    inFile.setReadStrictAngleLimits(false);
+  }
+  // set field names
+  if (_readFieldNames.size() > 0) {
+    for (size_t ii = 0; ii < _readFieldNames.size(); ii++) {
+      inFile.addReadField(_readFieldNames[ii]);
+    }
+  }
+
+  // ignore rays with antenna transitions
+  // inFile.setReadIgnoreTransitions(true);
+
+  // remove long-range rays from NEXRAD
+  // inFile.setReadRemoveLongRange(true);
+
+  // read file in to RadxVol object
+  
+  RadxVol vol;
+  if (inFile.readFromPath(path, vol)) {
+    _errStr += "ERROR - Mdvx::_readRadx.\n";
+    _errStr += "Cannot read in files.\n";
+    TaStr::AddStr(_errStr, "  path: ", path);
+    _errStr += inFile.getErrStr();
+    return -1;
+  }
+  
+  // make sure sweeps are in ascending order, as required by MDV
+  
+  vol.reorderSweepsAsInFileAscendingAngle();
+  vol.reorderSweepsAscendingAngle();
+
+  // make sure gate geom is constant
+
+  vol.remapToPredomGeom();
+  
+  // convert into Mdv
+  
+  Ncf2MdvTrans trans;
+  trans.setDebug(_debug);
+  if (trans.translateRadxVol2Mdv(path, vol, *this)) {
+    _errStr += "ERROR - Mdvx::_readRadx.\n";
+    _errStr += "  Cannot translate RadxVol.\n";
+    return -1;
+  }
+
+  // copy the main headers to file headers
+
+  _copyMainHeadersToFileHeaders();
+  
+  // set format to MDV
+  
+  _internalFormat = FORMAT_MDV;
+
+  // convert to NCF if needed
+  
+  if (_readFormat == FORMAT_NCF) {
+    if (_convertMdv2Ncf(path)) {
+      _errStr += "ERROR - Mdvx::_readRadx\n";
+      TaStr::AddStr(_errStr, "  Path: ", path);
+      TaStr::AddStr(_errStr, "  Cannot translate file to NCF");
+      TaStr::AddStr(_errStr, trans.getErrStr());
+      return -1;
+    }
+  }
+
+  // for MDV format, convert the output fields appropriately
+
+  if (_internalFormat == FORMAT_MDV) {
+    for (int ii = 0; ii < (int) _fields.size(); ii++) {
+      _fields[ii]->convertType(readEncodingType,
+                               readCompressionType,
+                               readScalingType,
+                               readScale, readBias);
+    }
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// constrain NETCDF CF using read qualifiers
+// returns 0 on success, -1 on failure
+
+int Mdvx::_constrainNcf(const string &path)
+  
+{
+
+  // convert the NCF data to MDV format
+  // This will also apply the read qualifiers
+  
+  if (_convertNcf2Mdv(path)) {
+    _errStr += "ERROR - Mdvx::constrainNcf.\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    return -1;
+  }
+    
+  // convert back to NCF
+
+  if (_convertMdv2Ncf(path)) {
+    _errStr += "ERROR - Mdvx::constrainNcf.\n";
+    TaStr::AddStr(_errStr, "  Path: ", path);
+    return -1;
+  }
+  
+  return 0;
+
+}
+
+///////////////////////////////////////
+// print mdv to ncf convert request
+
+void Mdvx::printConvertMdv2NcfRequest(ostream &out) const
+
+{
+
+  out << "Mdvx convert MDV to NCF request" << endl;
+  out << "---------------------------------" << endl;
+
+  cerr << "  Institution: " << _ncfInstitution << endl;
+  cerr << "  References: " << _ncfReferences << endl;
+  cerr << "  Comment: " << _ncfComment << endl;
+  cerr << "  Compress? " << (_ncfCompress? "Y" : "N") << endl;
+  cerr << "  Compression level: " << _ncfCompressionLevel << endl;
+  cerr << "  NC format: " << ncFormat2Str(_ncfFileFormat) << endl;
+  cerr << "  Polar radar file type: "
+       << radialFileType2Str(_ncfRadialFileType) << endl;
+  cerr << "  OutputLatlonArrays? "
+       << (_ncfOutputLatlonArrays? "Y" : "N") << endl;
+  cerr << "  OutputMdvAttr? "
+       << (_ncfOutputMdvAttr? "Y" : "N") << endl;
+  cerr << "  OutputMdvChunks? "
+       << (_ncfOutputMdvChunks? "Y" : "N") << endl;
+  cerr << "  OutputStartEndTimes? "
+       << (_ncfOutputStartEndTimes? "Y" : "N") << endl;
+
+  cerr << endl;
+
+  for (int ii = 0; ii < (int) _mdv2NcfTransArray.size(); ii++) {
+    const Mdv2NcfFieldTrans &trans = _mdv2NcfTransArray[ii];
+    cerr << "  ------------------" << endl;
+    cerr << "  Field translation:" << endl;
+    cerr << "    mdvFieldName: " << trans.mdvFieldName << endl;
+    cerr << "    ncfFieldName: " << trans.ncfFieldName << endl;
+    cerr << "    ncfStandardName: " << trans.ncfStandardName << endl;
+    cerr << "    ncfLongName: " << trans.ncfLongName << endl;
+    cerr << "    ncfUnits: " << trans.ncfUnits << endl;
+    cerr << "    doLinearTransform? "
+         << (trans.doLinearTransform? "Y" : "N") << endl;
+    cerr << "    linearMult: " << trans.linearMult << endl;
+    cerr << "    linearOffset: " << trans.linearOffset << endl;
+    cerr << "    packing: " << ncfPack2Str(trans.packing) << endl;
+  }
+  cerr << endl;
+
+}
+

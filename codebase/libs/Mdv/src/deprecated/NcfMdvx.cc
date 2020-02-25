@@ -110,10 +110,10 @@ int NcfMdvx::convertMdv2Ncf(const string &url)
   
 {
   
-  if (_currentFormat != FORMAT_MDV) {
+  if (_internalFormat != FORMAT_MDV) {
     _errStr += "ERROR - NcfMdvx::convertMdv2Ncf.\n";
     TaStr::AddStr(_errStr, "  Url: ", url);
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_MDV));
     return -1;
   }
@@ -192,7 +192,7 @@ int NcfMdvx::convertMdv2Ncf(const string &url)
 
   // set current format
   
-  _currentFormat = FORMAT_NCF;
+  _internalFormat = FORMAT_NCF;
 
   // set times etc
 
@@ -226,10 +226,10 @@ int NcfMdvx::convertNcf2Mdv(const string &url)
   
 {
 
-  if (_currentFormat != FORMAT_NCF) {
+  if (_internalFormat != FORMAT_NCF) {
     _errStr += "ERROR - NcfMdvx::convertNcf2Mdv.\n";
     TaStr::AddStr(_errStr, "  Url: ", url);
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
     return -1;
   }
@@ -285,7 +285,7 @@ int NcfMdvx::convertNcf2Mdv(const string &url)
 
   // set format to MDV
   
-  _currentFormat = FORMAT_MDV;
+  _internalFormat = FORMAT_MDV;
 
   return 0;
 
@@ -344,11 +344,11 @@ int NcfMdvx::readNcf(const string &url)
   
 {
 
-  if (_currentFormat != FORMAT_NCF) {
+  if (_internalFormat != FORMAT_NCF) {
     _errStr += "ERROR - NcfMdvx::readNcf\n";
     TaStr::AddStr(_errStr, "  Url: ", url);
     TaStr::AddStr(_errStr, "  Path ", _pathInUse);
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
     return -1;
   }
@@ -384,7 +384,7 @@ int NcfMdvx::readNcf(const string &url)
 
   // set format to MDV
   
-  _currentFormat = FORMAT_MDV;
+  _internalFormat = FORMAT_MDV;
 
   // convert back to NCF if needed
   // with read constraints having been applied
@@ -455,7 +455,7 @@ int NcfMdvx::readAllHeadersRadx(const string &url)
 
   // set format to MDV
   
-  _currentFormat = FORMAT_MDV;
+  _internalFormat = FORMAT_MDV;
 
   // Now fill in the file headers.  This isn't done in the translation because
   // the translation doesn't know that we are reading the entire file to get
@@ -575,11 +575,11 @@ int NcfMdvx::readRadx(const string &url)
   
 {
   
-  if (_currentFormat != FORMAT_RADX) {
+  if (_internalFormat != FORMAT_RADX) {
     _errStr += "ERROR - NcfMdvx::readRadx.\n";
     TaStr::AddStr(_errStr, "  Url: ", url);
     TaStr::AddStr(_errStr, "  Path: ", _pathInUse);
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_RADX));
     return -1;
   }
@@ -646,7 +646,7 @@ int NcfMdvx::readRadx(const string &url)
 
   // set format to MDV
   
-  _currentFormat = FORMAT_MDV;
+  _internalFormat = FORMAT_MDV;
 
   // convert to NCF if needed
   
@@ -705,11 +705,11 @@ int NcfMdvx::writeToDir(const string &url)
   if (_debug) {
     cerr << "WRITE TO DIR" << endl;
     printWriteOptions(cerr);
-    cerr << "  current format: " << format2Str(_currentFormat) << endl;
+    cerr << "  current format: " << format2Str(_internalFormat) << endl;
     cerr << "  write format: " << format2Str(_writeFormat) << endl;
   }
 
-  if (_currentFormat == FORMAT_NCF && _writeFormat == FORMAT_NCF) {
+  if (_internalFormat == FORMAT_NCF && _writeFormat == FORMAT_NCF) {
     // NCF to NCF - apply constraints
     if(_constrainNcfAndWrite(url)) {
       _errStr += "ERROR - NcfMdvx::writeToDir\n";
@@ -719,7 +719,7 @@ int NcfMdvx::writeToDir(const string &url)
     }
   }
 
-  if (_currentFormat == FORMAT_NCF && _writeFormat == FORMAT_MDV) {
+  if (_internalFormat == FORMAT_NCF && _writeFormat == FORMAT_MDV) {
     // convert NCF to MDV and write
     if (_convertNcfToMdvAndWrite(url)) {
       _errStr += "ERROR - NcfMdvx::writeToDir\n";
@@ -729,7 +729,7 @@ int NcfMdvx::writeToDir(const string &url)
     }
   }
 
-  if (_currentFormat == FORMAT_MDV && _writeFormat == FORMAT_NCF) {
+  if (_internalFormat == FORMAT_MDV && _writeFormat == FORMAT_NCF) {
     // convert MDV to NCF and write
     if (_convertMdvToNcfAndWrite(url)) {
       _errStr += "ERROR - NcfMdvx::writeToDir\n";
@@ -879,7 +879,7 @@ bool NcfMdvx::_getWriteAsForecast()
 {
   
   if (_ifForecastWriteAsForecast) {
-    if (_currentFormat == FORMAT_NCF) {
+    if (_internalFormat == FORMAT_NCF) {
       if (_ncfIsForecast) {
         return true;
       }

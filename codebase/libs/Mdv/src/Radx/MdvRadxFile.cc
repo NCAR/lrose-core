@@ -140,7 +140,7 @@ int MdvRadxFile::writeToDir(const RadxVol &vol,
   Mdvx mdv;
   Ncf2MdvTrans trans;
   RadxVol copy(vol);
-  if (trans.translateRadxVol(vol.getPathInUse(), copy, mdv)) {
+  if (trans.translateRadxVol2Mdv(vol.getPathInUse(), copy, mdv)) {
     _addErrStr("ERROR - MdvRadxFile::writeToDir");
     _addErrStr("  Cannot convert RadxVol to Mdv");
     _addErrStr(trans.getErrStr());
@@ -202,7 +202,7 @@ int MdvRadxFile::writeToPath(const RadxVol &vol,
   Mdvx mdv;
   Ncf2MdvTrans trans;
   RadxVol copy(vol);
-  if (trans.translateRadxVol(vol.getPathInUse(), copy, mdv)) {
+  if (trans.translateRadxVol2Mdv(vol.getPathInUse(), copy, mdv)) {
     _addErrStr("ERROR - MdvRadxFile::writeToPath");
     _addErrStr("  Cannot convert RadxVol to Mdv");
     _addErrStr(trans.getErrStr());

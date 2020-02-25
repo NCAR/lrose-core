@@ -63,7 +63,7 @@ class MdvxRadar;
 
 ////////////////////////
 // 
-// Mdv2NcfTrans object extracts data from DsMdvx object and stores
+// Mdv2NcfTrans object extracts data from Mdvx object and stores
 // in objects including NcfGridInfo, NcfFieldData, NcfVlevelInfo.
 //
 // Writes CF and CfRadial files.
@@ -106,23 +106,23 @@ public:
   /// perform translation to CF, write file to path
   /// returns 0 on success, -1 on failure
   
-  int writeCf(const DsMdvx &mdv, const string &ncFilePath);
+  int writeCf(const Mdvx &mdv, const string &ncFilePath);
   
   /// perform translation to CfRadial, write file to dir
   /// returns 0 on success, -1 on failure
   /// Use getNcFilePath() to get path of file written
   
-  int writeCfRadial(const DsMdvx &mdv, const string &dir);
+  int writeCfRadial(const Mdvx &mdv, const string &dir);
 
   // Convert to Radx volume
   // returns 0 on success, -1 on failure
   
-  int convertToRadxVol(const DsMdvx &mdv, RadxVol &vol);
+  int convertToRadxVol(const Mdvx &mdv, RadxVol &vol);
   
   /// set the output file type for polar radar data
   /// default is CF
 
-  void setRadialFileType(DsMdvx::radial_file_type_t val) {
+  void setRadialFileType(Mdvx::radial_file_type_t val) {
     _radialFileType = val;
   }
 
@@ -146,7 +146,7 @@ public:
 protected:  
 
   bool _debug;
-  const DsMdvx *_mdv;
+  const Mdvx *_mdv;
   
   string _ncFilePath;
   Nc3File *_ncFile;
@@ -208,7 +208,7 @@ protected:
 
   /// File type for polar radar and lidar
 
-  DsMdvx::radial_file_type_t _radialFileType;
+  Mdvx::radial_file_type_t _radialFileType;
 
   /// CfRadial-specific support
 

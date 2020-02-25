@@ -1501,9 +1501,12 @@ int Mdvx::readAllHeaders()
     cerr << "Mdvx::readAllHeaders - reading file: " << _pathInUse << endl;
   }
 
-  // For XML-based file, read in volume to get at headers
-  
+  // check file format
+
   if (isXmlFile(_pathInUse)) {
+
+    // For XML-based file, read in volume to get at headers
+  
     if (_read_volume_xml(false, false, false, false, -180, 180)) {
       _errStr += "ERROR - Mdvx::readAllHeaders\n";
       _errStr += "  Reading XML format file\n";
@@ -1518,14 +1521,47 @@ int Mdvx::readAllHeaders()
     for (int ii = 0; ii < (int) _chunks.size(); ii++) {
       _chdrsFile.push_back(_chunks[ii]->getHeader());
     }
+
     clearFields();
     clearChunks();
-    return 0;
+
+  } else if (isNcfFile(_pathInUse)) {
+
+    // NetCDF file
+
+    _internalFormat = FORMAT_NCF;
+    if (_readAllHeadersNcf(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readAllHeaders.\n";
+      TaStr::AddStr(_errStr, "  Reading headers from NCF file");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+    
+  } else if (isRadxFile(_pathInUse)) {
+
+    // read RADX radial radar format file
+
+    _internalFormat = FORMAT_RADX;
+    if (_readAllHeadersRadx(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::_readAllHeadersLocal.\n";
+      TaStr::AddStr(_errStr, "  Reading headers from RADX file");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+
+  } else {
+
+    // MDV native format
+    
+    if (_read_all_headers_mdv()) {
+      return -1;
+    }
+    
   }
 
-  // read MDV headers
+  // success
 
-  return _read_all_headers();
+  return 0;
 
 }
 
@@ -1571,7 +1607,13 @@ int Mdvx::readVolume()
 
 {
 
+  // clear pertinent components
   
+  clearErrStr();
+  clearMasterHeader();
+  clearFields();
+  clearChunks();
+
   // read time list as appropriate
 
   if (_readTimeListAlso) {
@@ -1592,10 +1634,55 @@ int Mdvx::readVolume()
   if (_debug) {
     cerr << "Mdvx::readVolume - reading file: " << _pathInUse << endl;
   }
+
+  // check file format
+
+  if (isNcfFile(_pathInUse)) {
+
+    // read NCF file
+    
+    _internalFormat = FORMAT_NCF;
+    if (_readNcf(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readVolume.\n";
+      TaStr::AddStr(_errStr, "  Reading NCF file");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+
+  } else if (isRadxFile(_pathInUse)) {
+    
+    // read RADX radial radar format file
+
+    _internalFormat = FORMAT_RADX;
+    if (_readRadx(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readVolume.\n";
+      TaStr::AddStr(_errStr, "  Reading RADX file");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+
+  } else {
   
-  if (_read_volume(_readFillMissing, _readDecimate, true)) {
-    return -1;
+    // native MDV or MDV-XML
+    
+    if (_read_volume_mdv(_readFillMissing, _readDecimate, true)) {
+      return -1;
+    }
+
   }
+
+  // convert to NetCDF buffer if requested
+
+  if (_readFormat == FORMAT_NCF) {
+    if (_convertMdv2Ncf(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readVolume.\n";
+      TaStr::AddStr(_errStr, "  Converting format after read");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+  }
+
+  // success
 
   return 0;
   
@@ -1610,7 +1697,7 @@ int Mdvx::readVolume()
 int Mdvx::readVsection()
   
 {
-
+  
   // read time list as appropriate
 
   if (_readTimeListAlso) {
@@ -1631,8 +1718,53 @@ int Mdvx::readVsection()
     cerr << "Mdvx::readVsection - reading file: " << _pathInUse << endl;
   }
 
-  return _read_vsection();
+  // Check file format
   
+  if (isNcfFile(_pathInUse)) {
+
+    // read NCF file
+    _internalFormat = FORMAT_NCF;
+    if (_readNcf(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readVsection.\n";
+      TaStr::AddStr(_errStr, "  Reading NCF file");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+
+  } else if (isRadxFile(_pathInUse)) {
+
+    // read RADX radial radar format file
+    _internalFormat = FORMAT_RADX;
+    if (_readRadx(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readVsection.\n";
+      TaStr::AddStr(_errStr, "  Reading RADX file");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+
+  } else {
+
+    // native MDV or MDV-XML
+    
+    if (_read_vsection_mdv()) {
+      return -1;
+    }
+
+  }
+    
+  // convert to NetCDF buffer if requested
+
+  if (_readFormat == FORMAT_NCF) {
+    if (_convertMdv2Ncf(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readVsection.\n";
+      TaStr::AddStr(_errStr, "  Converting format after read");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+  }
+
+  return 0;
+
 }
 
 //////////////////////////////////////////////////////////
@@ -2557,7 +2689,7 @@ int Mdvx::_read_chunk_header(const int chunk_num,
 // This method assumes that compileTimeList() and
 // _computeReadPath() have been called appropriately
 
-int Mdvx::_read_all_headers()
+int Mdvx::_read_all_headers_mdv()
 {
 
   // check for 64 bit
@@ -2720,12 +2852,12 @@ int Mdvx::_read_all_headers()
 ////////////////////////////////////////////////////
 // private read volume method
 
-int Mdvx::_read_volume(bool fill_missing,
-		       bool do_decimate,
-		       bool do_final_convert,
-		       bool is_vsection,
-		       double vsection_min_lon,
-		       double vsection_max_lon)
+int Mdvx::_read_volume_mdv(bool fill_missing,
+                           bool do_decimate,
+                           bool do_final_convert,
+                           bool is_vsection,
+                           double vsection_min_lon,
+                           double vsection_max_lon)
   
 {
 
@@ -2737,8 +2869,6 @@ int Mdvx::_read_volume(bool fill_missing,
   clearChunks();
 
   // check file extension to determine which type of file it is
-
-  Path currentPath(_pathInUse);
 
   if (isXmlFile(_pathInUse)) {
     
@@ -2763,8 +2893,8 @@ int Mdvx::_read_volume(bool fill_missing,
 
   // read in all the headers
 
-  if (_read_all_headers()) {
-    _errStr += "ERROR - Mdvx::_read_volume\n";
+  if (_read_all_headers_mdv()) {
+    _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
     return -1;
   }
   _mhdr = _mhdrFile;
@@ -2775,7 +2905,7 @@ int Mdvx::_read_volume(bool fill_missing,
   
   if (infile.fopenUncompress(_pathInUse.c_str(), "rb") == NULL) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume\n";
+    _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
     _errStr += "File: ";
     _errStr += _pathInUse;
     _errStr += "\n";
@@ -2789,7 +2919,7 @@ int Mdvx::_read_volume(bool fill_missing,
   if (_readFieldNums.size() > 0) {
     for (size_t i = 0; i < _readFieldNums.size(); i++) {
       if (_readFieldNums[i] > _mhdr.n_fields - 1) {
-        _errStr += "ERROR - Mdvx::_read_volume\n";
+        _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
         _errStr += "  Requested field number out of range\n";
         TaStr::AddInt(_errStr, "  Requested field number: ",
 		      _readFieldNums[i]);
@@ -2831,7 +2961,7 @@ int Mdvx::_read_volume(bool fill_missing,
         }
       } // j
       if (!fieldFound) {
-        _errStr += "ERROR - Mdvx::_read_volume\n";
+        _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
         _errStr += "  Field: ";
         _errStr += _readFieldNames[i];
         _errStr += " not found in file: ";
@@ -2859,7 +2989,7 @@ int Mdvx::_read_volume(bool fill_missing,
   if (_readChunkNums.size() > 0) {
     for (size_t i = 0; i < _readChunkNums.size(); i++) {
       if (_readChunkNums[i] > _mhdr.n_chunks - 1) {
-        _errStr += "ERROR - Mdvx::_read_volume\n";
+        _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
         _errStr += "  Requested chunk number out of range\n";
         TaStr::AddInt(_errStr, "  Requested chunk number: ",
 		      _readChunkNums[i]);
@@ -2903,7 +3033,7 @@ int Mdvx::_read_volume(bool fill_missing,
     MdvxField *field = new MdvxField(_fhdrsFile[_readFieldNums[i]],
                                       _vhdrsFile[_readFieldNums[i]], NULL);
     if (field == NULL) {
-       _errStr += "ERROR - Mdvx::_read_volume.\n";
+       _errStr += "ERROR - Mdvx::_read_volume_mdv.\n";
        char errstr[128];
        sprintf(errstr, " Allocating field mem");
        _errStr += errstr;
@@ -2913,7 +3043,7 @@ int Mdvx::_read_volume(bool fill_missing,
     if (field->_read_volume(infile, *this, fill_missing,
 			    do_decimate, do_final_convert, remapLut,
 			    is_vsection, vsection_min_lon, vsection_max_lon)) {
-      _errStr += "ERROR - Mdvx::_read_volume.\n";
+      _errStr += "ERROR - Mdvx::_read_volume_mdv.\n";
       char errstr[128];
       sprintf(errstr, "  Reading field %d\n", (int) i);
       _errStr += errstr;
@@ -2925,7 +3055,7 @@ int Mdvx::_read_volume(bool fill_missing,
     _fields.push_back(field);
 
     if (_heartbeatFunc != NULL) {
-      _heartbeatFunc("Mdvx::_read_volume");
+      _heartbeatFunc("Mdvx::_read_volume_mdv");
     }
 
   }
@@ -2936,7 +3066,7 @@ int Mdvx::_read_volume(bool fill_missing,
     
     MdvxChunk *chunk = new MdvxChunk(_chdrsFile[_readChunkNums[i]], NULL);
     if (chunk == NULL){
-       _errStr += "ERROR - Mdvx::_read_volume.\n";
+       _errStr += "ERROR - Mdvx::_read_volume_mdv.\n";
        char errstr[128];
        sprintf(errstr, " Allocating chunk mem");
        _errStr += errstr;
@@ -2944,7 +3074,7 @@ int Mdvx::_read_volume(bool fill_missing,
     }
    
     if (chunk->_read_data(infile)) {
-      _errStr += "ERROR - Mdvx::_read_volume.\n";
+      _errStr += "ERROR - Mdvx::_read_volume_mdv.\n";
       char errstr[128];
       sprintf(errstr, "  Reading chunk %d\n", (int) i);
       _errStr += errstr;
@@ -2975,7 +3105,7 @@ int Mdvx::_read_volume(bool fill_missing,
 // Private read vertical section method
 // Returns 0 on success, -1 on failure
 
-int Mdvx::_read_vsection()
+int Mdvx::_read_vsection_mdv()
   
 {
 
@@ -2996,8 +3126,8 @@ int Mdvx::_read_vsection()
 
   // read in the volume - do not fill missing or decimate
   
-  if (_read_volume(false, false, false, true, min_lon, max_lon)) {
-    _errStr += "ERROR - _read_vsection\n";
+  if (_read_volume_mdv(false, false, false, true, min_lon, max_lon)) {
+    _errStr += "ERROR - _read_vsection_mdv\n";
     return -1;
   }
 
@@ -3019,7 +3149,7 @@ int Mdvx::_read_vsection()
 				     !_vsectDisableInterp,
 				     _readSpecifyVlevelType,
 				     _readVlevelType, false)) {
-      _errStr += "ERROR - _read_vsection\n";
+      _errStr += "ERROR - _read_vsection_mdv\n";
       return -1;
     }
   }
@@ -3032,7 +3162,7 @@ int Mdvx::_read_vsection()
 				_readScalingType,
 				_readScale,
 				_readBias)) {
-      _errStr += "ERROR - _read_vsection\n";
+      _errStr += "ERROR - _read_vsection_mdv\n";
       return -1;
     }
   }
@@ -3068,7 +3198,7 @@ int Mdvx::_read_rhi(bool respectUserDistance /* = false */)
 
   // read in the volume - do not fill missing or decimate
   
-  if (_read_volume(false, false, false)) {
+  if (_read_volume_mdv(false, false, false)) {
     _errStr += "ERROR - _read_rhi\n";
     return -1;
   }

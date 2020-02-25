@@ -50,9 +50,9 @@ int OldDsMdvxNcf::_convertMdv2NcfViaServer(const string &url)
   
 {
   
-  if (_currentFormat != FORMAT_MDV) {
+  if (_internalFormat != FORMAT_MDV) {
     _errStr += "ERROR - OldDsMdvxNcf::convertMdv2Ncf.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_MDV));
     return -1;
   }
@@ -127,9 +127,9 @@ int OldDsMdvxNcf::_convertNcf2MdvViaServer(const string &url)
   
 {
 
-  if (_currentFormat != FORMAT_NCF) {
+  if (_internalFormat != FORMAT_NCF) {
     _errStr += "ERROR - OldDsMdvxNcf::convertNcf2Mdv.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
     return -1;
   }
@@ -219,9 +219,9 @@ int OldDsMdvxNcf::_readAllHeadersNcfViaServer(const string &url)
   
 {
 
-  if (_currentFormat != FORMAT_NCF) {
+  if (_internalFormat != FORMAT_NCF) {
     _errStr += "ERROR - OldDsMdvxNcf::readAllHeadersNcf.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
     return -1;
   }
@@ -294,9 +294,9 @@ int OldDsMdvxNcf::_readNcfViaServer(const string &url)
   
 {
   
-  if (_currentFormat != FORMAT_NCF) {
+  if (_internalFormat != FORMAT_NCF) {
     _errStr += "ERROR - OldDsMdvxNcf::readNcf.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
     return -1;
   }
@@ -366,7 +366,7 @@ int OldDsMdvxNcf::_readNcfViaServer(const string &url)
   
   // for MDV format, convert the output fields appropriately
   
-  if (_currentFormat == FORMAT_MDV) {
+  if (_internalFormat == FORMAT_MDV) {
     for (int ii = 0; ii < (int) _fields.size(); ii++) {
       _fields[ii]->convertType(readEncodingType,
                                readCompressionType,
@@ -388,9 +388,9 @@ int OldDsMdvxNcf::_readAllHeadersRadxViaServer(const string &url)
   
 {
 
-  if (_currentFormat != FORMAT_RADX) {
+  if (_internalFormat != FORMAT_RADX) {
     _errStr += "ERROR - OldDsMdvxNcf::readAllHeadersRadx.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_RADX));
     return -1;
   }
@@ -463,9 +463,9 @@ int OldDsMdvxNcf::_readRadxViaServer(const string &url)
   
 {
   
-  if (_currentFormat != FORMAT_RADX) {
+  if (_internalFormat != FORMAT_RADX) {
     _errStr += "ERROR - OldDsMdvxNcf::readRadx.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_RADX));
     return -1;
   }
@@ -535,7 +535,7 @@ int OldDsMdvxNcf::_readRadxViaServer(const string &url)
   
   // for MDV format, convert the output fields appropriately
 
-  if (_currentFormat == FORMAT_MDV) {
+  if (_internalFormat == FORMAT_MDV) {
     for (int ii = 0; ii < (int) _fields.size(); ii++) {
       _fields[ii]->convertType(readEncodingType,
                                readCompressionType,
@@ -558,9 +558,9 @@ int OldDsMdvxNcf::_constrainNcfViaServer(const string &url)
   
 {
 
-  if (_currentFormat != FORMAT_NCF) {
+  if (_internalFormat != FORMAT_NCF) {
     _errStr += "ERROR - OldDsMdvxNcf::constrainNcf.\n";
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_currentFormat));
+    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
     return -1;
   }
@@ -623,5 +623,217 @@ int OldDsMdvxNcf::_constrainNcfViaServer(const string &url)
 
   return 0;
 
+}
+
+////////////////////////////////////////////////
+// Constrain NCF and write
+// First convert to MDV, which applies constraints.
+// The convert back to NCF and write.
+// returns 0 on success, -1 on failure
+
+int Mdvx::_constrainNcfAndWrite(const string &path)
+  
+{
+  
+  if (_convertNcf2Mdv(path)) {
+    _errStr += "ERROR - Mdvx::_constrainNcfToMdvAndWrite()\n";
+    return -1;
+  }
+
+  if (_convertMdvToNcfAndWrite(path)) {
+    _errStr += "ERROR - Mdvx::_constrainNcfToMdvAndWrite()\n";
+    return -1;
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// Convert NCF format to MDV format, and write
+// returns 0 on success, -1 on failure
+
+int Mdvx::_convertNcfToMdvAndWrite(const string &path)
+  
+{
+  
+  if (_convertNcf2Mdv(path)) {
+    _errStr += "ERROR - Mdvx::_convertNcfToMdvAndWrite()\n";
+    return -1;
+  }
+
+  // local - direct write
+  DsPATH dsPath(path);
+  string writeDir(dsPath.getFile());
+  if (Mdvx::writeToDir(writeDir)) {
+    _errStr += "ERROR - Mdvx::_convertNcfToMdvAndWrite()\n";
+    return -1;
+  }
+    
+  // reg with data mapper - the base class uses LdataInfo which does
+  // not register
+
+  DmapAccess dmap;
+  string dataType = "mdv";
+  if (_writeAsForecast) {
+    int forecast_delta = _mhdr.time_centroid - _mhdr.time_gen;
+    dmap.regLatestInfo(_mhdr.time_gen, writeDir, dataType, forecast_delta);
+  } else {
+    dmap.regLatestInfo(_mhdr.time_centroid, writeDir, dataType);
+  }
+  
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// Convert MDV format to NCF format, and write
+// returns 0 on success, -1 on failure
+
+int Mdvx::_convertMdvToNcfAndWrite(const string &path)
+  
+{
+
+  // compute paths
+
+  DsPATH dsPath(path);
+  string outputDir;
+  RapDataDir.fillPath(dsPath.getFile(), outputDir);
+  string outputPath;
+  string dataType = "ncf";
+
+  if (getProjection() == Mdvx::PROJ_POLAR_RADAR) {
+    
+    //radial data type
+    
+    Mdv2NcfTrans trans;
+    trans.setDebug(_debug);
+    if(_heartbeatFunc != NULL) {
+      trans.setHeartbeatFunction(_heartbeatFunc);
+    }
+    trans.setRadialFileType(_ncfRadialFileType);
+    if (trans.writeCfRadial(*this, outputDir)) {
+      TaStr::AddStr(_errStr, "ERROR - Mdvx::_convertMdvToNcfAndWrite()");
+      TaStr::AddStr(_errStr, trans.getErrStr());
+      return -1;
+    }
+    outputPath = trans.getNcFilePath();
+    
+    if (_ncfRadialFileType == Mdvx::RADIAL_TYPE_CF_RADIAL) {
+      dataType = "cfradial";
+    } else if (_ncfRadialFileType == Mdvx::RADIAL_TYPE_DORADE) {
+      dataType = "dorade";
+    } else if (_ncfRadialFileType == Mdvx::RADIAL_TYPE_UF) {
+      dataType = "uf";
+    }
+    
+  } else {
+    
+    // basic CF - translate from Mdv
+    
+    outputPath = _computeNcfOutputPath(outputDir);
+    Mdv2NcfTrans trans;
+    trans.setDebug(_debug);
+    if(_heartbeatFunc != NULL) {
+      trans.setHeartbeatFunction(_heartbeatFunc);
+    }
+
+    if (trans.writeCf(*this, outputPath)) {
+      cerr << "ERROR - Mdvx::_convertMdvToNcfAndWrite()" << endl;
+      cerr << trans.getErrStr() << endl;
+      return -1;
+    }
+    
+  }
+    
+  // write latest data info
+    
+  _doWriteLdataInfo(outputDir, outputPath, dataType);
+  _pathInUse = outputPath;
+
+  return 0;
+
+}
+
+#ifdef NOT_DEPRECATED
+  int _convertNcfToMdvAndWrite(const string &url);
+  int _convertMdvToNcfAndWrite(const string &url);
+  int _constrainNcfAndWrite(const string &url);
+  int _writeNcfToDir(const string &url);
+#endif
+
+////////////////////////////////////////////////
+// write NCF file, using the NcMdvServer
+// returns 0 on success, -1 on failure
+
+int DsMdvx::_writeNcfToDir(const string &url)
+                      
+{
+  
+  // set up URL for doing conversion via NcMdvServer
+  
+  DsURL trans_url(url);
+  trans_url.setProtocol("mdvp");
+  trans_url.setTranslator("NcMdvServer");
+  
+  if (_debug) {
+    cerr << "_writeNcfToDir(): Reading NCF-type file" << endl;
+    cerr << "  URL: " << trans_url.getURLStr() << endl;
+  }
+
+  DsLOCATOR locator;
+  bool contact_server;
+  if (locator.resolve(trans_url, &contact_server, false)) {
+    _errStr += "ERROR - COMM - Mdvx::_writeNcfToDir\n";
+    _errStr += "  Cannot resolve URL: ";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+  
+  // assemble message packet
+  
+  DsMdvxMsg msg;
+  if (_debug) {
+    msg.setDebug();
+  }
+  if (_read32BitHeaders) {
+    msg._setUse32BitHeaders(true);
+  } else {
+    msg._setUse32BitHeaders(false);
+  }
+
+  void *msgBuf =
+    msg.assembleWrite(DsMdvxMsg::MDVP_WRITE_TO_DIR, *this, trans_url.getURLStr());
+
+  if (msgBuf == NULL) {
+    _errStr += "ERROR - Mdvx::_writeNcfToDir\n";
+    _errStr += "  Assembling outgoing message, URL:\n";
+    _errStr += trans_url.getURLStr();
+    _errStr += "\n";
+    return -1;
+  }
+
+  // communicate with server
+  
+  if (_communicate(trans_url, msg, msgBuf, msg.lengthAssembled())) {
+    _errStr += "ERROR - COMM - Mdvx::_writeNcfToDir\n";
+    _errStr += "  Communicating with server\n";
+    return -1;
+  }
+  
+  if (msg.getError()) {
+    return -1;
+  }
+
+  if (msg.getSubType() != DsMdvxMsg::MDVP_WRITE_TO_DIR) {
+    _errStr += "ERROR - Mdvx::_writeNcfToDir\n";
+    TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
+    _errStr += "  Should be: MDVP_WRITE_TO_DIR\n";
+    return -1;
+  }
+  
+  return 0;
+  
 }
 

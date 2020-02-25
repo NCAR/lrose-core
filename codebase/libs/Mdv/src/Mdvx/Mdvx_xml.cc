@@ -534,71 +534,6 @@ void Mdvx::_write_to_xml_chunk_hdr(string &hdr, int chunkNum) const
 
 }
 
-////////////////////////////////////////////////
-// write buffer to file
-
-int Mdvx::_write_buffer_to_file(const string &pathStr,
-                                size_t len,
-                                const void *data) const
-
-{
-
-  // write to tmp file
-  
-  Path path(pathStr);
-  path.makeDirRecurse();
-  string tmpPathStr = path.computeTmpPath();
-  
-  TaFile out;
-  out.setRemoveOnDestruct();
-
-  if (out.fopen(tmpPathStr.c_str(), "wb") == NULL) {
-    int errNum = errno;
-    _errStr += "ERROR - Mdvx::_writeBufferToFile\n";
-    _errStr += "  Cannot open file for writing: ";
-    _errStr += tmpPathStr;
-    _errStr += "\n    ";
-    _errStr += strerror(errNum);
-    _errStr += "\n";
-    return -1;
-  }
-  
-  if (out.fwrite(data, 1, len) != len) {
-    int errNum = errno;
-    _errStr += "ERROR - Mdvx::_writeBufferToFile\n";
-    _errStr += "  Cannot write to path: ";
-    _errStr += tmpPathStr;
-    _errStr += "\n    ";
-    _errStr += strerror(errNum);
-    _errStr += "\n";
-    return -1;
-  }
-
-  // close the  file
-  
-  out.fclose();
-  
-  // rename the tmp  file 
-  
-  if (rename(tmpPathStr.c_str(), pathStr.c_str())) {
-    int errNum = errno;
-    _errStr += "ERROR - Mdvx::_writeBufferToFile\n";
-    _errStr += "  Cannot rename tmp file: ";
-    _errStr += tmpPathStr;
-    _errStr += " to: ";
-    _errStr += pathStr;
-    _errStr += "\n  ";
-    _errStr += strerror(errNum);
-    _errStr += "\n";
-    return -1;
-  }
-  
-  out.clearRemoveOnDestruct();
-
-  return 0;
-
-}
-
 ////////////////////////////////////////////////////
 // XML read volume method
 
@@ -780,14 +715,6 @@ int Mdvx::_read_volume_xml(bool fill_missing,
     _fhdrsFile.push_back(fhdr);
     _vhdrsFile.push_back(vhdr);
 
-    // bool readThisField = (_readFieldNums.size() == 0);
-    // for (int jj = 0; jj < (int) _readFieldNums.size(); jj++) {
-    //   if (fieldNum == _readFieldNums[jj]) {
-    //     readThisField = true;
-    //     break;
-    //   }
-    // }
-
     MdvxField *fld = _read_xml_field(fhdr, vhdr, bufFile);
     if (fld == NULL) {
       _errStr += "ERROR - Mdvx::_read_volume_xml\n";
@@ -859,14 +786,6 @@ int Mdvx::_read_volume_xml(bool fill_missing,
     }
     
     _chdrsFile.push_back(chdr);
-
-    // bool readThisChunk = (_readChunkNums.size() == 0);
-    // for (int jj = 0; jj < (int) _readChunkNums.size(); jj++) {
-    //   if (chunkNum == _readChunkNums[jj]) {
-    //     readThisChunk = true;
-    //     break;
-    //   }
-    // }
 
     MdvxChunk *chunk = _read_xml_chunk(chdr, bufFile);
     if (chunk == NULL) {

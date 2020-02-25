@@ -39,8 +39,9 @@
 #include <toolsa/umisc.h>
 #include <toolsa/Path.hh>
 #include <dataport/bigend.h>
-#include <didss/LdataInfo.hh>
 #include <didss/RapDataDir.hh>
+#include <dsserver/DsLdataInfo.hh>
+#include <dsserver/DmapAccess.hh>
 using namespace std;
 
 //////////////////////////////
@@ -229,7 +230,7 @@ int Mdvx::writeToDir(const string &output_dir)
 
   // perform the write
   
-  if (writeToPath(outputPath.c_str())) {
+  if (writeToPath(outputPath)) {
     _errStr += "ERROR - Mdvx::writeToDir\n";
     return -1;
   }
@@ -244,7 +245,7 @@ int Mdvx::writeToDir(const string &output_dir)
     if (_writeFormat == FORMAT_XML) {
       ldata.setDataFileExt("xml");
       ldata.setDataType("xml");
-    } else if (_currentFormat == FORMAT_NCF) {
+    } else if (_internalFormat == FORMAT_NCF) {
       ldata.setDataFileExt("nc");
       ldata.setDataType("nc");
     } else {
@@ -256,7 +257,7 @@ int Mdvx::writeToDir(const string &output_dir)
     string relName = outputName;
     if (_writeFormat == FORMAT_XML) {
       relName += ".xml";
-    } else if (_currentFormat == FORMAT_NCF) {
+    } else if (_internalFormat == FORMAT_NCF) {
       relName += getNcfExt();
     }
     ldata.setRelDataPath(relName.c_str());
@@ -303,7 +304,7 @@ int Mdvx::writeToPath(const string &output_path)
   // if already converted into netcdf buffer, write it out directly
   // from the buffer
 
-  if (_currentFormat == FORMAT_NCF) {
+  if (_internalFormat == FORMAT_NCF) {
     return _write_ncf_buf_to_file(output_path);
   }
   
@@ -495,6 +496,50 @@ int Mdvx::writeToPath(const string &output_path)
   }
 
   outfile.clearRemoveOnDestruct();
+  
+  return 0;
+
+}
+
+////////////////////////////////////////////////
+// write MDV to specified directory, locally
+// returns 0 on success, -1 on failure
+
+int Mdvx::_writeAsMdv(const string &url)
+  
+{
+  
+  DsURL dsUrl(url);
+  string writeDir(dsUrl.getFile());
+
+  // local - direct write
+  if (Mdvx::writeToDir(writeDir)) {
+    _errStr += "ERROR - DsMdvx::_writeAsMdv\n";
+    return -1;
+  }
+  
+  // reg with data mapper - the base class uses LdataInfo which does
+  // not register
+  
+  time_t latestTime;
+  if (_writeAsForecast) {
+    latestTime = _mhdr.time_gen;
+  } else {
+    latestTime = _mhdr.time_centroid;
+  }
+  DmapAccess dmap;
+  string dataType = "mdv";
+  if (_writeFormat == FORMAT_XML) {
+    dataType = "xml";
+  } else if (_writeFormat == FORMAT_NCF) {
+    dataType = "nc";
+  }
+  if (_writeAsForecast) {
+    int forecast_delta = _mhdr.time_centroid - _mhdr.time_gen;
+    dmap.regLatestInfo(latestTime, writeDir, dataType, forecast_delta);
+  } else {
+    dmap.regLatestInfo(latestTime, writeDir, dataType);
+  }
   
   return 0;
 
@@ -1270,6 +1315,16 @@ void Mdvx::_checkEnvBeforeWrite() const
     }
   }
   
+  char *writeCompStr = getenv("MDV_NCF_COMPRESSION_LEVEL");
+  if (writeCompStr != NULL) {
+    int level = 4;
+    if (sscanf(writeCompStr, "%d", &level) != 1) {
+      level = 4;
+    }
+    _ncfCompress = true;
+    _ncfCompressionLevel = level;
+  }
+  
   _checkWrite32BitHeaders();
 
 }
@@ -1320,7 +1375,7 @@ void Mdvx::_computeOutputPath(const string &outputDir,
   writeAsForecast = _writeAsForecast;
   
   if (_ifForecastWriteAsForecast) {
-    if (_currentFormat == FORMAT_NCF) {
+    if (_internalFormat == FORMAT_NCF) {
       if (_ncfIsForecast) {
         writeAsForecast = true;
       }
@@ -1346,18 +1401,19 @@ void Mdvx::_computeOutputPath(const string &outputDir,
     sprintf(yearSubdir, "%.4d", genTime.year);
 
     if (!_useExtendedPaths) {
-      if (forecastDelta < 0)
+      if (forecastDelta < 0)  {
         sprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.7d",
                 genTime.year, genTime.month, genTime.day,
                 PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
                 PATH_DELIM, forecastDelta);
-      else
+      } else {
         sprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.8d",
                 genTime.year, genTime.month, genTime.day,
                 PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
                 PATH_DELIM, forecastDelta);
+      }
     } else {
-      if (forecastDelta < 0)
+      if (forecastDelta < 0) {
         sprintf(outputBase,
                 "%.4d%.2d%.2d%s"
                 "g_%.2d%.2d%.2d%s"
@@ -1367,7 +1423,7 @@ void Mdvx::_computeOutputPath(const string &outputDir,
                 genTime.year, genTime.month, genTime.day,
                 genTime.hour, genTime.min, genTime.sec,
                 forecastDelta);
-      else
+      } else {
         sprintf(outputBase,
                 "%.4d%.2d%.2d%s"
                 "g_%.2d%.2d%.2d%s"
@@ -1377,9 +1433,10 @@ void Mdvx::_computeOutputPath(const string &outputDir,
                 genTime.year, genTime.month, genTime.day,
                 genTime.hour, genTime.min, genTime.sec,
                 forecastDelta);
-    }
+      }
+    } // if (!_useExtendedPaths)
 
-  } else {
+  } else { // if (writeAsForecast)
 
     date_time_t validTime;
     validTime.unix_time = getValidTime();
@@ -1398,7 +1455,7 @@ void Mdvx::_computeOutputPath(const string &outputDir,
               validTime.hour, validTime.min, validTime.sec);
     }
 
-  }
+  } // if (writeAsForecast)
 
   outputName.clear();
   if (_writeAddYearSubdir) {
@@ -1413,4 +1470,188 @@ void Mdvx::_computeOutputPath(const string &outputDir,
   outputPath += outputName;
 
 }
+
+#ifdef JUNK
   
+////////////////////////////////////////////////
+// Convert MDV format to NCF format, and write
+// returns 0 on success, -1 on failure
+
+int Mdvx::_convertMdvToNcfAndWrite(const string &path)
+  
+{
+
+  // compute paths
+
+  DsPATH dsPath(path);
+  string outputDir;
+  RapDataDir.fillPath(dsPath.getFile(), outputDir);
+  string outputPath;
+  string dataType = "ncf";
+
+  if (getProjection() == Mdvx::PROJ_POLAR_RADAR) {
+    
+    //radial data type
+    
+    Mdv2NcfTrans trans;
+    trans.setDebug(_debug);
+    if(_heartbeatFunc != NULL) {
+      trans.setHeartbeatFunction(_heartbeatFunc);
+    }
+    trans.setRadialFileType(_ncfRadialFileType);
+    if (trans.writeCfRadial(*this, outputDir)) {
+      TaStr::AddStr(_errStr, "ERROR - Mdvx::_convertMdvToNcfAndWrite()");
+      TaStr::AddStr(_errStr, trans.getErrStr());
+      return -1;
+    }
+    outputPath = trans.getNcFilePath();
+    
+    if (_ncfRadialFileType == Mdvx::RADIAL_TYPE_CF_RADIAL) {
+      dataType = "cfradial";
+    } else if (_ncfRadialFileType == Mdvx::RADIAL_TYPE_DORADE) {
+      dataType = "dorade";
+    } else if (_ncfRadialFileType == Mdvx::RADIAL_TYPE_UF) {
+      dataType = "uf";
+    }
+    
+  } else {
+    
+    // basic CF - translate from Mdv
+    
+    outputPath = _computeNcfOutputPath(outputDir);
+    Mdv2NcfTrans trans;
+    trans.setDebug(_debug);
+    if(_heartbeatFunc != NULL) {
+      trans.setHeartbeatFunction(_heartbeatFunc);
+    }
+
+    if (trans.writeCf(*this, outputPath)) {
+      cerr << "ERROR - Mdvx::_convertMdvToNcfAndWrite()" << endl;
+      cerr << trans.getErrStr() << endl;
+      return -1;
+    }
+    
+  }
+    
+  // write latest data info
+    
+  _doWriteLdataInfo(outputDir, outputPath, dataType);
+  _pathInUse = outputPath;
+
+  return 0;
+
+}
+
+#endif
+
+//////////////////////////////////////
+
+void Mdvx::_doWriteLdataInfo(const string &outputDir,
+                             const string &outputPath,
+                             const string &dataType)
+{
+  
+  DsLdataInfo ldata(outputDir, _debug);
+  ldata.setPathAndTime(outputDir, outputPath);
+  time_t latestTime;
+  if (_getWriteAsForecast()) {
+    latestTime = getGenTime();
+    int leadtime = _mhdr.forecast_delta;
+    ldata.setLeadTime(leadtime);
+    ldata.setIsFcast(true);
+  } else {
+    latestTime = getValidTime();
+  }
+  ldata.setDataType(dataType);
+  ldata.write(latestTime);
+
+}
+
+/////////////////////////////////////////////////////////
+// write as forecast?
+
+bool Mdvx::_getWriteAsForecast()
+{
+  
+  if (_ifForecastWriteAsForecast) {
+    if (_internalFormat == FORMAT_NCF) {
+      if (_ncfIsForecast) {
+        return true;
+      }
+    } else {
+      if (_mhdr.data_collection_type == Mdvx::DATA_FORECAST ||
+          _mhdr.data_collection_type == Mdvx::DATA_EXTRAPOLATED) {
+        return true;
+      }
+    }
+  }
+
+  return _writeAsForecast;
+
+}
+  
+////////////////////////////////////////////////
+// write generic buffer to file
+
+int Mdvx::_write_buffer_to_file(const string &pathStr,
+                                size_t len,
+                                const void *data) const
+
+{
+
+  // write to tmp file
+  
+  Path path(pathStr);
+  path.makeDirRecurse();
+  string tmpPathStr = path.computeTmpPath();
+  
+  TaFile out;
+  out.setRemoveOnDestruct();
+
+  if (out.fopen(tmpPathStr.c_str(), "wb") == NULL) {
+    int errNum = errno;
+    _errStr += "ERROR - Mdvx::_writeBufferToFile\n";
+    _errStr += "  Cannot open file for writing: ";
+    _errStr += tmpPathStr;
+    _errStr += "\n    ";
+    _errStr += strerror(errNum);
+    _errStr += "\n";
+    return -1;
+  }
+  
+  if (out.fwrite(data, 1, len) != len) {
+    int errNum = errno;
+    _errStr += "ERROR - Mdvx::_writeBufferToFile\n";
+    _errStr += "  Cannot write to path: ";
+    _errStr += tmpPathStr;
+    _errStr += "\n    ";
+    _errStr += strerror(errNum);
+    _errStr += "\n";
+    return -1;
+  }
+
+  // close the  file
+  
+  out.fclose();
+  
+  // rename the tmp  file 
+  
+  if (rename(tmpPathStr.c_str(), pathStr.c_str())) {
+    int errNum = errno;
+    _errStr += "ERROR - Mdvx::_writeBufferToFile\n";
+    _errStr += "  Cannot rename tmp file: ";
+    _errStr += tmpPathStr;
+    _errStr += " to: ";
+    _errStr += pathStr;
+    _errStr += "\n  ";
+    _errStr += strerror(errNum);
+    _errStr += "\n";
+    return -1;
+  }
+  
+  out.clearRemoveOnDestruct();
+
+  return 0;
+
+}
+

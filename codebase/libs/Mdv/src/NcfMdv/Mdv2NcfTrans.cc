@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Mdv2NcfTrans object extracts data from DsMdvx object and stores
+// Mdv2NcfTrans object extracts data from Mdvx object and stores
 // in objects including NcfGridInfo, NcfFieldData, NcfVlevelInfo.
 //
 // Writes CF and CfRadial files.
@@ -89,7 +89,7 @@ Mdv2NcfTrans::Mdv2NcfTrans()
   _radxNcFormat = RadxFile::NETCDF4;
   _ncErr = NULL;
 
-  _radialFileType = DsMdvx::RADIAL_TYPE_CF;
+  _radialFileType = Mdvx::RADIAL_TYPE_CF;
 
 
   _initVars();
@@ -138,7 +138,7 @@ void Mdv2NcfTrans::clearData()
 /// perform translation to CF, write file to path
 /// returns 0 on success, -1 on failure
 
-int Mdv2NcfTrans::writeCf(const DsMdvx &mdv, const string &ncFilePath)
+int Mdv2NcfTrans::writeCf(const Mdvx &mdv, const string &ncFilePath)
 
 {
 
@@ -253,19 +253,19 @@ void Mdv2NcfTrans::_setTransParams()
   // set nc file type
   
   switch (_mdv->_ncfFileFormat) {
-    case DsMdvx::NCF_FORMAT_NETCDF4:
+    case Mdvx::NCF_FORMAT_NETCDF4:
       _ncFormat = Nc3File::Netcdf4;
       _radxNcFormat = RadxFile::NETCDF4;
       break;
-    case DsMdvx::NCF_FORMAT_CLASSIC:
+    case Mdvx::NCF_FORMAT_CLASSIC:
       _ncFormat = Nc3File::Classic;
       _radxNcFormat = RadxFile::NETCDF_CLASSIC;
       break;
-    case DsMdvx::NCF_FORMAT_OFFSET64BITS:
+    case Mdvx::NCF_FORMAT_OFFSET64BITS:
       _ncFormat = Nc3File::Offset64Bits;
       _radxNcFormat = RadxFile::NETCDF_OFFSET_64BIT;
       break;
-    case DsMdvx::NCF_FORMAT_NETCFD4_CLASSIC:
+    case Mdvx::NCF_FORMAT_NETCFD4_CLASSIC:
       _ncFormat = Nc3File::Netcdf4Classic;
       _radxNcFormat = RadxFile::NETCDF4_CLASSIC;
       break;
@@ -330,7 +330,7 @@ int Mdv2NcfTrans::_parseMdv()
     bool doLinearTransform = false;
     double linearMult = 1.0;
     double linearOffset = 0.0;
-    DsMdvx::ncf_pack_t packing = DsMdvx::NCF_PACK_ASIS;
+    Mdvx::ncf_pack_t packing = Mdvx::NCF_PACK_ASIS;
     
     // check if this field has been specified for translation
     
@@ -338,7 +338,7 @@ int Mdv2NcfTrans::_parseMdv()
       
       // check for match on MDV field name
       
-      const DsMdvx::Mdv2NcfFieldTrans &trans = _mdv->_mdv2NcfTransArray[jj];
+      const Mdvx::Mdv2NcfFieldTrans &trans = _mdv->_mdv2NcfTransArray[jj];
 
       if (mdvFieldName.compare(trans.mdvFieldName) == 0 ||
 	  mdvLongFieldName.compare(trans.mdvFieldName) == 0) {
@@ -1562,7 +1562,7 @@ string Mdv2NcfTrans::_getUniqueFieldName(const string &requestedName)
 // returns 0 on success, -1 on failure
 // Use getNcFilePath() to get path of file written
 
-int Mdv2NcfTrans::writeCfRadial(const DsMdvx &mdv, const string &dir)
+int Mdv2NcfTrans::writeCfRadial(const Mdvx &mdv, const string &dir)
 {
   
   // convert to a RadxVol
@@ -1586,7 +1586,7 @@ int Mdv2NcfTrans::writeCfRadial(const DsMdvx &mdv, const string &dir)
 
   // write the file(s)
 
-  if (_radialFileType == DsMdvx::RADIAL_TYPE_DORADE) {
+  if (_radialFileType == Mdvx::RADIAL_TYPE_DORADE) {
     DoradeRadxFile file;
     if (file.writeToDir(vol, dir, true, addYearSubdir)) {
       TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCfRadial");
@@ -1595,7 +1595,7 @@ int Mdv2NcfTrans::writeCfRadial(const DsMdvx &mdv, const string &dir)
       return -1;
     }
     _ncFilePath = file.getPathInUse();
-  } else if (_radialFileType == DsMdvx::RADIAL_TYPE_UF) {
+  } else if (_radialFileType == Mdvx::RADIAL_TYPE_UF) {
     UfRadxFile file;
     if (file.writeToDir(vol, dir, true, addYearSubdir)) {
       TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCfRadial");
@@ -1626,7 +1626,7 @@ int Mdv2NcfTrans::writeCfRadial(const DsMdvx &mdv, const string &dir)
 // Convert to Radx volume
 // returns 0 on success, -1 on failure
 
-int Mdv2NcfTrans::convertToRadxVol(const DsMdvx &mdv, RadxVol &vol)
+int Mdv2NcfTrans::convertToRadxVol(const Mdvx &mdv, RadxVol &vol)
 {
   
   _mdv = &mdv;
@@ -2122,13 +2122,13 @@ void Mdv2NcfTrans::_addFieldsToRays(RadxVol &vol, vector<RadxRay *> rays)
     // bool doLinearTransform = false;
     // double linearMult = 1.0;
     // double linearOffset = 0.0;
-    DsMdvx::ncf_pack_t packing = DsMdvx::NCF_PACK_ASIS;
+    Mdvx::ncf_pack_t packing = Mdvx::NCF_PACK_ASIS;
 
     // check if this field has been specified for translation
     
     for (int jj = 0; jj < (int) _mdv->_mdv2NcfTransArray.size(); jj++) {
       // check for match on MDV field name
-      const DsMdvx::Mdv2NcfFieldTrans &trans = _mdv->_mdv2NcfTransArray[jj];
+      const Mdvx::Mdv2NcfFieldTrans &trans = _mdv->_mdv2NcfTransArray[jj];
       if (mdvFieldName.compare(trans.mdvFieldName) == 0 ||
 	  mdvLongFieldName.compare(trans.mdvFieldName) == 0) {
         // match - so set accordingly
@@ -2147,13 +2147,13 @@ void Mdv2NcfTrans::_addFieldsToRays(RadxVol &vol, vector<RadxRay *> rays)
     // get output data encoding type
 
     Radx::DataType_t outputType = Radx::FL32;
-    if (packing != DsMdvx::NCF_PACK_ASIS) {
+    if (packing != Mdvx::NCF_PACK_ASIS) {
       switch (packing) {
-        case DsMdvx::NCF_PACK_SHORT: {
+        case Mdvx::NCF_PACK_SHORT: {
           outputType = Radx::SI16;
           break;
         }
-        case DsMdvx::NCF_PACK_BYTE: {
+        case Mdvx::NCF_PACK_BYTE: {
           outputType = Radx::SI08;
           break;
         }

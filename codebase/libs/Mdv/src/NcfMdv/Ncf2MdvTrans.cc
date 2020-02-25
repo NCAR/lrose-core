@@ -144,10 +144,10 @@ int Ncf2MdvTrans::inspectTimes(const string &path, Mdvx &mdv)
 
   
 /////////////////////////////////////////
-// Parse Ncf data, populate Mdvx object
+// Read NetCDF CF file, populate Mdvx object
 // Returns 0 on success, -1 on failure
 
-int Ncf2MdvTrans::translate(const string &path, Mdvx &mdv)
+int Ncf2MdvTrans::readCf(const string &path, Mdvx &mdv)
 
 {
 
@@ -156,8 +156,8 @@ int Ncf2MdvTrans::translate(const string &path, Mdvx &mdv)
   
   RadxFile radxFile;
   if (radxFile.isSupported(path)) {
-    if (translateRadx(path, mdv)) {
-      TaStr::AddStr(_errStr, "ERROR - Ncf2MdvTrans::translate");
+    if (readRadx(path, mdv)) {
+      TaStr::AddStr(_errStr, "ERROR - Ncf2MdvTrans::readCf");
       return -1;
     } else {
       return 0;
@@ -174,7 +174,7 @@ int Ncf2MdvTrans::translate(const string &path, Mdvx &mdv)
   
   int status = _parseNc();
   if (status) {
-    TaStr::AddStr(_errStr, "ERROR - Ncf2MdvTrans::translate");
+    TaStr::AddStr(_errStr, "ERROR - Ncf2MdvTrans::readCf");
     TaStr::AddStr(_errStr, "  Parsing Nc File, path: ", path);
   }
 
@@ -186,11 +186,11 @@ int Ncf2MdvTrans::translate(const string &path, Mdvx &mdv)
 }
 
 ///////////////////////////////////////////////////////////////
-// Translate Radx file
+// Read Radx file, populate Mdvx object
 // Returns 0 on success, -1 on failure
 
-int Ncf2MdvTrans::translateRadx(const string &path, Mdvx &mdv)
-
+int Ncf2MdvTrans::readRadx(const string &path, Mdvx &mdv)
+  
 {
 
   // initialize Mdvx object
@@ -238,7 +238,7 @@ int Ncf2MdvTrans::translateRadx(const string &path, Mdvx &mdv)
 
   // translate the vol to MDV
 
-  if (_translateRadxVol(path, vol)) {
+  if (_translateRadxVol2Mdv(path, vol)) {
     return -1;
   }
 
@@ -247,12 +247,12 @@ int Ncf2MdvTrans::translateRadx(const string &path, Mdvx &mdv)
 }
 
 ///////////////////////////////////////////////////////////////
-// Translate from RadxVol
+// Translate RadxVol object to Mdvx object
 // Returns 0 on success, -1 on failure
 
-int Ncf2MdvTrans::translateRadxVol(const string &path,
-				   RadxVol &vol,
-				   Mdvx &mdv)
+int Ncf2MdvTrans::translateRadxVol2Mdv(const string &path,
+                                       RadxVol &vol,
+                                       Mdvx &mdv)
   
 {
 
@@ -262,7 +262,7 @@ int Ncf2MdvTrans::translateRadxVol(const string &path,
   
   // translate the vol to MDV
   
-  if (_translateRadxVol(path, vol)) {
+  if (_translateRadxVol2Mdv(path, vol)) {
     return -1;
   }
 
@@ -1744,11 +1744,11 @@ string Ncf2MdvTrans::asString(const Nc3TypedComponent *component,
 }
 
 /////////////////////////////////////////////////////////
-// translate RadxVol to Mdv
+// perform translation from RadxVol object into MDV
 // Assumes _initMdv has been called
 
-int Ncf2MdvTrans::_translateRadxVol(const string &path,
-				    RadxVol &vol)
+int Ncf2MdvTrans::_translateRadxVol2Mdv(const string &path,
+                                        RadxVol &vol)
   
 {
 

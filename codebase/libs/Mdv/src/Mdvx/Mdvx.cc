@@ -110,10 +110,11 @@ void Mdvx::clear()
   clearWrite();
   clearTimeListMode();
   clearNcf();
+  clearMdv2Ncf();
   clearFields();
   clearChunks();
-  _currentFormat = FORMAT_MDV;
-  _useExtendedPaths = false;
+  _internalFormat = FORMAT_MDV;
+  _useExtendedPaths = true;
   _writeAddYearSubdir = false;
 }
 
@@ -190,7 +191,7 @@ Mdvx &Mdvx::_copy(const Mdvx &rhs)
 
   // formats
 
-  _currentFormat = rhs._currentFormat;
+  _internalFormat = rhs._internalFormat;
   _readFormat = rhs._readFormat;
   _writeFormat = rhs._writeFormat;
 
@@ -305,6 +306,21 @@ Mdvx &Mdvx::_copy(const Mdvx &rhs)
   _ncfFileSuffix = rhs._ncfFileSuffix;
   _ncfConstrained = rhs._ncfConstrained;
 
+  _ncfInstitution = rhs._ncfInstitution;
+  _ncfReferences = rhs._ncfReferences;
+  _ncfComment = rhs._ncfComment;
+  _mdv2NcfTransArray = rhs._mdv2NcfTransArray;
+
+  _ncfCompress = rhs._ncfCompress;
+  _ncfCompressionLevel = rhs._ncfCompressionLevel;
+
+  _ncfFileFormat = rhs._ncfFileFormat;
+  _ncfOutputLatlonArrays = rhs._ncfOutputLatlonArrays;
+  _ncfOutputMdvAttr = rhs._ncfOutputMdvAttr;
+  _ncfOutputMdvChunks = rhs._ncfOutputMdvChunks;
+  _ncfOutputStartEndTimes =  rhs._ncfOutputStartEndTimes;
+  _ncfRadialFileType = rhs._ncfRadialFileType;
+
   return *this;
 
 }
@@ -386,7 +402,7 @@ int Mdvx::deleteChunk(MdvxChunk *toBeDeleted)
 
 time_t Mdvx::getValidTime() const
 {
-  if (isNcf(_currentFormat)) {
+  if (isNcf(_internalFormat)) {
     return _ncfValidTime;
   } else {
     return _mhdr.time_centroid;
@@ -397,7 +413,7 @@ time_t Mdvx::getValidTime() const
 
 time_t Mdvx::getGenTime() const
 {
-  if (isNcf(_currentFormat)) {
+  if (isNcf(_internalFormat)) {
     return _ncfGenTime;
   } else {
     return _mhdr.time_gen;
@@ -408,7 +424,7 @@ time_t Mdvx::getGenTime() const
 
 time_t Mdvx::getForecastTime() const
 {
-  if (isNcf(_currentFormat)) {
+  if (isNcf(_internalFormat)) {
     return _ncfForecastTime;
   } else {
     return _mhdr.forecast_time;
@@ -419,7 +435,7 @@ time_t Mdvx::getForecastTime() const
 
 time_t Mdvx::getForecastLeadSecs() const
 {
-  if (isNcf(_currentFormat)) {
+  if (isNcf(_internalFormat)) {
     return _ncfForecastDelta;
   } else {
     return _mhdr.forecast_delta;
@@ -485,7 +501,7 @@ const Mdvx::chunk_header_t
 
 void Mdvx::setValidTime(time_t valid_time)
 {
-  if (isNcf(_currentFormat)) {
+  if (isNcf(_internalFormat)) {
     _ncfValidTime = valid_time;
   } else {
     _mhdr.time_centroid = valid_time;
@@ -496,7 +512,7 @@ void Mdvx::setValidTime(time_t valid_time)
 
 void Mdvx::setGenTime(time_t gen_time)
 {
-  if (isNcf(_currentFormat)) {
+  if (isNcf(_internalFormat)) {
     _ncfGenTime = gen_time;
   } else {
     _mhdr.time_gen = gen_time;
@@ -507,7 +523,7 @@ void Mdvx::setGenTime(time_t gen_time)
 
 void Mdvx::setForecastTime(time_t forecast_time)
 {
-  if (isNcf(_currentFormat)) {
+  if (isNcf(_internalFormat)) {
     _ncfForecastTime = forecast_time;
   } else {
     _mhdr.forecast_time = forecast_time;
@@ -521,7 +537,7 @@ void Mdvx::setForecastTime(time_t forecast_time)
 
 void Mdvx::setForecastLeadSecs(int lead_secs)
 {
-  if (isNcf(_currentFormat)) {
+  if (isNcf(_internalFormat)) {
     _ncfForecastDelta = lead_secs;
   } else {
     _mhdr.forecast_delta = lead_secs;
@@ -535,14 +551,14 @@ void Mdvx::setForecastLeadSecs(int lead_secs)
 
 void Mdvx::setBeginTime(time_t begin_time)
 {
-  if (!isNcf(_currentFormat)) {
+  if (!isNcf(_internalFormat)) {
     _mhdr.time_begin = begin_time;
   }
 }
 
 void Mdvx::setEndTime(time_t end_time)
 {
-  if (!isNcf(_currentFormat)) {
+  if (!isNcf(_internalFormat)) {
     _mhdr.time_end = end_time;
   }
 }

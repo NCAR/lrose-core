@@ -91,10 +91,10 @@ int DsMdvxMsg::_getCurrentFormat(DsMdvx &mdvx)
   }
 
   string formatStr(_part2Str(part));
-  mdvx._currentFormat = Mdvx::str2Format(formatStr);
+  mdvx._internalFormat = Mdvx::str2Format(formatStr);
   if (_debug) {
     cerr << "Found MDVP_CURRENT_FORMAT_PART: "
-         << Mdvx::format2Str(mdvx._currentFormat) << endl;
+         << Mdvx::format2Str(mdvx._internalFormat) << endl;
   }
 
   return 0;

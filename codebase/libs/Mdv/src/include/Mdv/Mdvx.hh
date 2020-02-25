@@ -60,6 +60,7 @@ class DsMdvClimoServer;
 class WMS2MdvServer;
 class Ncf2MdvTrans;
 class Ncf2MdvField;
+class Mdv2NcfTrans;
 
 class Mdvx
 {
@@ -70,6 +71,7 @@ class Mdvx
   friend class DsMdvClimoServer;
   friend class DsMdvxMsg;
   friend class WMS2MdvServer;
+  friend class Mdv2NcfTrans;
   friend class Ncf2MdvTrans;
   friend class Ncf2MdvField;
   
@@ -222,7 +224,7 @@ public:
   ////////////////////////
   // get the formats
 
-  mdv_format_t getCurrentFormat() const { return _currentFormat; }
+  mdv_format_t getCurrentFormat() const { return _internalFormat; }
   mdv_format_t getReadFormat() const { return _readFormat; }
   mdv_format_t getWriteFormat() const { return _writeFormat; }
 
@@ -543,7 +545,7 @@ protected:
 
   // format - how is data represented
 
-  mdv_format_t _currentFormat; // how data is stored in mdvx object
+  mdv_format_t _internalFormat; // how data is stored in mdvx object
   mdv_format_t _readFormat;    // requested format on read
   mutable mdv_format_t _writeFormat;   // requested format on write
 
@@ -649,6 +651,25 @@ protected:
   bool _ncfConstrained;
   mutable MemBuf _ncfBuf;
 
+  //////////////////////////////
+  // converting MDV to netCDF CF
+
+  string _ncfInstitution;
+  string _ncfReferences;
+  string _ncfComment;
+  vector<Mdv2NcfFieldTrans> _mdv2NcfTransArray;
+  
+  mutable bool _ncfCompress;
+  mutable int _ncfCompressionLevel;
+
+  nc_file_format_t _ncfFileFormat;
+  radial_file_type_t _ncfRadialFileType;
+
+  bool _ncfOutputLatlonArrays;
+  bool _ncfOutputMdvAttr;
+  bool _ncfOutputMdvChunks;
+  bool _ncfOutputStartEndTimes;
+
   // string and buffer for XML representation
 
   mutable string _xmlHdr;
@@ -712,16 +733,16 @@ protected:
                          chunk_header_t &chdr,
                          TaFile &infile);
   
-  int _read_all_headers();
+  int _read_all_headers_mdv();
 
-  int _read_volume(bool fill_missing,
-                   bool do_decimate,
-                   bool do_final_convert,
-                   bool is_vsection = false,
-                   double vsection_min_lon = -360.0,
-                   double vsection_max_lon = 360.0);
+  int _read_volume_mdv(bool fill_missing,
+                       bool do_decimate,
+                       bool do_final_convert,
+                       bool is_vsection = false,
+                       double vsection_min_lon = -360.0,
+                       double vsection_max_lon = 360.0);
   
-  int _read_vsection();
+  int _read_vsection_mdv();
   
   int _read_rhi(bool respectUserDistance = false);
   int _load_closest_rhi(bool respectUserDistance);
@@ -752,6 +773,17 @@ protected:
 
   void _writeToBuffer32(MemBuf &buf) const;
 
+  int _writeAsMdv(const string &url);
+  void _doWriteLdataInfo(const string &outputDir,
+                         const string &outputPath,
+                         const string &dataType);
+  bool _getWriteAsForecast();
+
+  string _computeNcfOutputPath(const string &outputDir);
+
+  int _write_buffer_to_file(const string &pathStr,
+                            size_t len, const void *data) const;
+
   // print
   
   static const char *_timeStr(const time_t ttime);
@@ -773,15 +805,12 @@ protected:
   
   void _write_to_xml_chunk_hdr(string &hdr, int chunkNum) const;
   
-  int _write_buffer_to_file(const string &pathStr,
-                            size_t len, const void *data) const;
-
   int _read_volume_xml(bool fill_missing,
                        bool do_decimate,
                        bool do_final_convert,
-                       bool is_vsection,
-                       double vsection_min_lon,
-                       double vsection_max_lon);
+                       bool is_vsection = false,
+                       double vsection_min_lon = -360.0,
+                       double vsection_max_lon = 360.0);
 
   int _read_xml_to_master_hdr(const string &xml,
                               int &forecast_delta);
@@ -831,6 +860,17 @@ protected:
   int _read_volume_into_ncf_buf();
   int _set_times_ncf();
   int _write_ncf_buf_to_file(const string &output_path) const;
+
+  int _convertFormatOnRead(const string &path);
+  int _convertFormatOnWrite(const string &path);
+  int _writeAsCf(const string &output_path) const;
+  int _convertMdv2Ncf(const string &path);
+  int _convertNcf2Mdv(const string &path);
+  int _readAllHeadersNcf(const string &path);
+  int _readNcf(const string &path);
+  int _readAllHeadersRadx(const string &path);
+  int _readRadx(const string &path);
+  int _constrainNcf(const string &path);
 
   // vertical sections
 

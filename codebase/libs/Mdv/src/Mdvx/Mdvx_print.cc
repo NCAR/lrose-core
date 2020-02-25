@@ -57,7 +57,7 @@ void Mdvx::printFormats(ostream &out, bool force /* = false */) const
 {
 
   if (!force) {
-    if (_currentFormat == FORMAT_MDV &&
+    if (_internalFormat == FORMAT_MDV &&
         _readFormat == FORMAT_MDV &&
         _writeFormat == FORMAT_MDV) {
       return;
@@ -67,7 +67,7 @@ void Mdvx::printFormats(ostream &out, bool force /* = false */) const
   out << endl;
   out << "-------------------------------" << endl;
   out << "MDV format states" << endl;
-  out << "  Current format: " << format2Str(_currentFormat) << endl;
+  out << "  Current format: " << format2Str(_internalFormat) << endl;
   out << "  Read format: " << format2Str(_readFormat) << endl;
   out << "  Write format: " << format2Str(_writeFormat) << endl;
   out << "-------------------------------" << endl;
@@ -138,7 +138,7 @@ void Mdvx::printMasterHeader(ostream &out) const
 
 {
 
-  if (_currentFormat == FORMAT_NCF) {
+  if (_internalFormat == FORMAT_NCF) {
     printNcfInfo(out);
     return;
   }
@@ -695,7 +695,7 @@ void Mdvx::printChunks(ostream &out) const
 
 {
 
-  if (_currentFormat == FORMAT_NCF) {
+  if (_internalFormat == FORMAT_NCF) {
     return;
   }
 

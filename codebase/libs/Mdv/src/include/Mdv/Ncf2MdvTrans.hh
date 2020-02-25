@@ -107,7 +107,7 @@ public:
   }
 
 
-  // perform translation populating Mdvx object
+  // read NetCDF CF file, populating Mdvx object
   // returns 0 on success, -1 on failure
   //
   // NOTE: If inspectTimes()/setExpectedNumTimes()/setTimeIndex() 
@@ -121,16 +121,16 @@ public:
   // data one time, with num_data_times set to 1
   // 
 
-  int translate(const string &path, Mdvx &mdv);
+  int readCf(const string &path, Mdvx &mdv);
 
-  // perform translation from Radx file
+  // read Radx file and translate into MDV
   // returns 0 on success, -1 on failure
   
-  int translateRadx(const string &path, Mdvx &mdv);
-
-  // perform translation from RadxVol
+  int readRadx(const string &path, Mdvx &mdv);
   
-  int translateRadxVol(const string &path, RadxVol &vol, Mdvx &mdv);
+  // perform translation from RadxVol object into MDV
+  
+  int translateRadxVol2Mdv(const string &path, RadxVol &vol, Mdvx &mdv);
 
   // finalization steps in normal circumstances, made public because used
   // outside the lib
@@ -392,7 +392,7 @@ protected:
 
   // translate CfRadial using Radx
 
-  int _translateRadxVol(const string &path, RadxVol &vol);
+  int _translateRadxVol2Mdv(const string &path, RadxVol &vol);
   void _computeAngRes(const RadxVol &vol);
   void _setMasterHeaderCfRadial(const string &path, const RadxVol &vol);
   void _addFieldCfRadial(const RadxVol &vol, const RadxField &radxField,
