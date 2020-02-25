@@ -785,17 +785,27 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
 
   // Sweeps
   for (int i=0; i<volume->h.nsweeps; i++) {
+
+    const RadxSweep *radxSweep = radxVol.getSweepByNumber(i);
+
     Sweep **sweeps = volume->sweep;
-    Sweep *newSweep = Rsl::new_sweep(radxVol.getNRays());
+    Sweep *newSweep = Rsl::new_sweep(radxSweep->getNRays());
     sweeps[i] = newSweep;
 
     // Rays    
     Ray **rays = newSweep->ray;
 
+    size_t startRayIndex = radxSweep->getStartRayIndex();
+    size_t endRayIndex = radxSweep->getEndRayIndex();
+    cout << "for RadxSweep " << i << ": startRayIndex=" << startRayIndex <<
+      " endRayIndex=" << endRayIndex << endl;
+
     vector<RadxRay *> radxRays = radxVol.getRays();      
     for (int j=0; j<newSweep->h.nrays; j++) {
 
-      RadxRay *radxRay = radxRays.at(j);
+      if (startRayIndex+j > endRayIndex)
+        throw "ERROR: _extractFieldData: Ray index out of bounds";
+      RadxRay *radxRay = radxRays.at(startRayIndex+j);
 
       // convert the rays
       Ray *newRay = Rsl::new_ray(radxRay->getNGates());
@@ -843,8 +853,8 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
 	}
       }
 
-      newRay->h.bias = radxField->getOffset();
-      newRay->h.scale = radxField->getScale();
+      newRay->h.bias = 0.0; //  radxField->getOffset();
+      newRay->h.scale = 1.0; // radxField->getScale();
 
       // pull the missing value  from the associated RadxField
       // TODO: this gets set multiple times, but I cannot think
@@ -1006,59 +1016,37 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
 
   Radx::fl32 missing = 0.0;
 
+  string unfoldedName = fieldName + "_UNF";
+
+
   // Sweeps
    for (int i=0; i<volume->h.nsweeps; i++) {
      //Sweep **sweeps = volume->sweep;
+
+     const RadxSweep *radxSweep = radxVol->getSweepByNumber(i);
 
     // Rays    
     //Ray **rays = newSweep->ray;
      Sweep *newSweep = volume->sweep[i];
 
+     size_t startRayIndex = radxSweep->getStartRayIndex();
+     size_t endRayIndex = radxSweep->getEndRayIndex();
+     cout << "for RadxSweep " << i << ": startRayIndex=" << startRayIndex <<
+       " endRayIndex=" << endRayIndex << endl;
+
     vector<RadxRay *> radxRays = radxVol->getRays();      
     for (int j=0; j<newSweep->h.nrays; j++) {
 
-      RadxRay *radxRay = radxRays.at(j);
-
-      // convert the rays
-      //Ray *newRay = Rsl::new_ray(radxRay->getNGates());
-      //rays[j] = newRay;
-      //newRay->h.azimuth = radxRay->getAzimuthDeg();
-      //newRay->h.elev = radxRay->getElevationDeg();
-
-      //if (override_nyquist_vel != 0.0) {
-      //	newRay->h.nyq_vel = override_nyquist_vel;
-      //} else {
-      //	newRay->h.nyq_vel = radxRay->getNyquistMps();
-      //}
-      //if (_params.debug >= Params::DEBUG_VERBOSE) {
-      //	cout << "Using " << newRay->h.nyq_vel << " as Nyquist Velocity" << endl;
-      //}
-
-      // TRMM RSL wants altitude in meters
-      // newRay->h.alt = radxVol.getAltitudeKm()*1000.0;
-
-      // get the Range Geometry
-      //if (!radxRay->getRangeGeomSet())
-      //radxRay->copyRangeGeomFromFields();
-      // trmm rsl expects gate size and distance to first gate in meters 
-      //newRay->h.gate_size = radxRay->getStartRangeKm() * 1000.0; 
-      //newRay->h.range_bin1 = radxRay->getGateSpacingKm() * 1000.0;
-
-      // move the field data
-      //RadxField *velocityField = radxRay->getField(fieldName);
-      // check the original data type
-      //Radx::DataType_t originalDataType = velocityField->getDataType();
-      //if (originalDataType != Radx::FL32)
-      //  throw "Error - Expected float 32 data";
-      //Radx::fl32 *data = velocityField->getDataFl32();
-
-      // copy the data ...
-
-      //----- 
       int sweepNumber = i;
-      int rayNum = j;
-      Radx::fl32 *newData = volume->sweep[sweepNumber]->ray[rayNum]->range;
-      int nGates = volume->sweep[sweepNumber]->ray[rayNum]->h.nbins;
+      int rayNumRadx = startRayIndex+j;
+      int rayNumVolume = j;
+
+      if (rayNumRadx > endRayIndex)
+        throw "ERROR: _insertFieldData: Ray index out of bounds";
+      RadxRay *radxRay = radxRays.at(rayNumRadx);
+
+      Radx::fl32 *newData = volume->sweep[sweepNumber]->ray[rayNumVolume]->range;
+      int nGates = volume->sweep[sweepNumber]->ray[rayNumVolume]->h.nbins;
       // pull the missing value  from the associated RadxField
       RadxField *radxField = radxRay->getField(fieldName);
 
@@ -1067,7 +1055,6 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
       
       // get the units; this should be pulled from the associate RadxRay
       string units = radxField->getUnits();
-      string unfoldedName = "VELH_UNF";
       bool isLocal = TRUE;
       // Note: discarding the field returned, after adding it to the ray, since we don't need it.
       radxRay->addField(unfoldedName, units, nGates, missingValue, newData, isLocal);
