@@ -99,7 +99,8 @@ private:
   // combining
 
   RadxVol _dwellVol;
-  RadxField::StatsMethod_t _dwellStatsMethod;
+  RadxField::StatsMethod_t _globalMethod;
+  vector<RadxField::NamedStatsMethod> _namedMethods;
   RadxTime _dwellStartTime, _dwellEndTime;
   RadxTime _latestRayTime, _dwellMidTime;
 
@@ -136,7 +137,8 @@ private:
 
   int _combineDwells(RadxVol &vol);
   int _combineDwellsCentered(RadxVol &vol);
-  void _setDwellStatsMethod();
+  RadxField::StatsMethod_t
+    _getDwellStatsMethod(Params::dwell_stats_method_t method);
 
   int _readFmqMsg(bool &gotMsg);
   void _loadRadarParams();

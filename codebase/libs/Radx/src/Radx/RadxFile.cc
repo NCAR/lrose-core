@@ -3110,7 +3110,10 @@ int RadxFile::_doReadRaysInInterval(const string &dir,
           }
         } else {
           // compute stats
-          RadxRay *dwellRay = statsVol.computeFieldStats(_readDwellStatsMethod);
+          vector<RadxField::NamedStatsMethod> namedMethods; // empty
+          RadxRay *dwellRay =
+            statsVol.computeFieldStats(_readDwellStatsMethod,
+                                       namedMethods);
           vol.addRay(dwellRay);
         }
         // reset

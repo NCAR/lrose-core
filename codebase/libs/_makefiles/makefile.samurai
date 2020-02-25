@@ -7,7 +7,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-        Ncxx \
+	Ncxx \
 	Radx \
 	dataport \
 	kd \

@@ -84,7 +84,19 @@ RadxDwellCombine::RadxDwellCombine(int argc, char **argv)
 
   // set dwell stats method
 
-  _setDwellStatsMethod();
+  _globalMethod = _getDwellStatsMethod(_params.dwell_stats_method);
+  
+  if (_params.set_stats_method_for_individual_fields) {
+    for (int ii = 0; ii < _params.stats_method_fields_n; ii++) {
+      const Params::stats_method_field_t &paramsMethod = 
+        _params._stats_method_fields[ii];
+      string fieldName = paramsMethod.field_name;
+      RadxField::StatsMethod_t method =
+        _getDwellStatsMethod(paramsMethod.stats_method);
+      RadxField::NamedStatsMethod namedMethod(fieldName, method);
+      _namedMethods.push_back(namedMethod);
+    } // ii
+  }
 
   // init process mapper registration
 
@@ -957,7 +969,8 @@ int RadxDwellCombine::_combineDwells(RadxVol &vol)
         cerr << "INFO: _combineDwells, using nrays: " << nRaysDwell << endl;
       }
       RadxRay *dwellRay =
-        _dwellVol.computeFieldStats(_dwellStatsMethod,
+        _dwellVol.computeFieldStats(_globalMethod,
+                                    _namedMethods,
                                     _params.dwell_stats_max_fraction_missing);
       if (dwellRay->getRadxTime() >= vol.getStartRadxTime() - 60) {
         combRays.push_back(dwellRay);
@@ -1062,7 +1075,7 @@ int RadxDwellCombine::_combineDwellsCentered(RadxVol &vol)
       // compute ray for dwell
       
       RadxRay *dwellRay =
-        _dwellVol.computeFieldStats(_dwellStatsMethod,
+        _dwellVol.computeFieldStats(_globalMethod, _namedMethods,
                                     _params.dwell_stats_max_fraction_missing);
       dwellRay->setTime(_dwellMidTime);
 
@@ -1104,27 +1117,28 @@ int RadxDwellCombine::_combineDwellsCentered(RadxVol &vol)
 ////////////////////////////////////////////////////////
 // set dwell stats method from params
 
-void RadxDwellCombine::_setDwellStatsMethod()
-
+RadxField::StatsMethod_t
+  RadxDwellCombine::_getDwellStatsMethod(Params::dwell_stats_method_t method)
+  
 {
 
-  switch (_params.dwell_stats_method) {
+  switch (method) {
 
     case Params::DWELL_STATS_MEAN:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MEAN;
+      return RadxField::STATS_METHOD_MEAN;
       break;
     case Params::DWELL_STATS_MEDIAN:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MEDIAN;
+      return RadxField::STATS_METHOD_MEDIAN;
       break;
     case Params::DWELL_STATS_MAXIMUM:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MAXIMUM;
+      return RadxField::STATS_METHOD_MAXIMUM;
       break;
     case Params::DWELL_STATS_MINIMUM:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MINIMUM;
+      return RadxField::STATS_METHOD_MINIMUM;
       break;
     case Params::DWELL_STATS_MIDDLE:
     default:
-      _dwellStatsMethod = RadxField::STATS_METHOD_MIDDLE;
+      return RadxField::STATS_METHOD_MIDDLE;
 
   }
 
@@ -1242,7 +1256,8 @@ int RadxDwellCombine::_runFmq()
         if (_params.debug >= Params::DEBUG_VERBOSE) {
           cerr << "INFO: _runFmq, using nrays: " << nRaysDwell << endl;
         }
-        RadxRay *dwellRay = _dwellVol.computeFieldStats(_dwellStatsMethod);
+        RadxRay *dwellRay = _dwellVol.computeFieldStats(_globalMethod,
+                                                        _namedMethods);
 
         RadxTime dwellRayTime(dwellRay->getRadxTime());
         double deltaSecs = dwellRayTime - prevDwellRayTime;

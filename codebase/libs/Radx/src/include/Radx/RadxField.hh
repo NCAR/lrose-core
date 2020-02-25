@@ -968,6 +968,10 @@ public:
 
   } StatsMethod_t;
 
+  /// stats method for a specified field name
+
+  typedef pair<string, StatsMethod_t> NamedStatsMethod;
+
   /// compute stats from a series of fields
   ///
   /// Pass in a method type, and a vector of fields
