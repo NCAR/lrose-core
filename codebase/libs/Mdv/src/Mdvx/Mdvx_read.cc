@@ -831,117 +831,117 @@ int Mdvx::setReadRemap(const MdvxProj &proj)
 
   switch (proj.getProjType()){
 
-  case Mdvx::PROJ_LATLON: {
-    setReadRemapLatlon(coord.nx, coord.ny, 
-		       coord.minx, coord.miny,
-		       coord.dx, coord.dy);
-    break;
-  }
-    
-  case Mdvx::PROJ_FLAT: {
-    setReadRemapFlat(coord.nx, coord.ny, 
-		     coord.minx, coord.miny,
-		     coord.dx, coord.dy,
-		     coord.proj_origin_lat,
-		     coord.proj_origin_lon,
-		     coord.proj_params.flat.rotation);
-    break;
-  }
-    
-  case Mdvx::PROJ_LAMBERT_CONF: {
-    setReadRemapLambertConf(coord.nx, coord.ny, 
-			    coord.minx, coord.miny,
-			    coord.dx, coord.dy,
-			    coord.proj_origin_lat,
-			    coord.proj_origin_lon,
-			    coord.proj_params.lc2.lat1,
-			    coord.proj_params.lc2.lat2);
-    break;
-  }
-    
-  case Mdvx::PROJ_POLAR_STEREO: {
-    pole_type_t poleType = POLE_NORTH;
-    if (coord.proj_params.ps.pole_type != 0) {
-      poleType = POLE_SOUTH;
+    case Mdvx::PROJ_LATLON: {
+      setReadRemapLatlon(coord.nx, coord.ny, 
+                         coord.minx, coord.miny,
+                         coord.dx, coord.dy);
+      break;
     }
-    setReadRemapPolarStereo(coord.nx, coord.ny, 
-			    coord.minx, coord.miny,
-			    coord.dx, coord.dy,
-			    coord.proj_origin_lat, 
-			    coord.proj_origin_lon,
-			    coord.proj_params.ps.tan_lon,
-			    poleType,
-			    coord.proj_params.ps.central_scale);
-    break;
-  }
-
-  case Mdvx::PROJ_OBLIQUE_STEREO: {
-    setReadRemapObliqueStereo(coord.nx, coord.ny, 
-			      coord.minx, coord.miny,
-			      coord.dx, coord.dy,
-			      coord.proj_origin_lat, 
-			      coord.proj_origin_lon,
-			      coord.proj_params.os.tan_lat,
-			      coord.proj_params.os.tan_lon,
-                              coord.proj_params.os.central_scale);
-    break;
-  }
-
-  case Mdvx::PROJ_MERCATOR: {
-    setReadRemapMercator(coord.nx, coord.ny, 
-			 coord.minx, coord.miny,
-			 coord.dx, coord.dy,
-			 coord.proj_origin_lat, 
-			 coord.proj_origin_lon);
-    break;
-  }
-
-  case Mdvx::PROJ_TRANS_MERCATOR: {
-    setReadRemapTransverseMercator(coord.nx, coord.ny, 
-				   coord.minx, coord.miny,
-				   coord.dx, coord.dy,
-				   coord.proj_origin_lat, 
-				   coord.proj_origin_lon,
-				   coord.proj_params.tmerc.central_scale);
-    break;
-  }
-
-  case Mdvx::PROJ_ALBERS: {
-    setReadRemapAlbers(coord.nx, coord.ny, 
-		       coord.minx, coord.miny,
-		       coord.dx, coord.dy,
-		       coord.proj_origin_lat,
-		       coord.proj_origin_lon,
-		       coord.proj_params.albers.lat1,
-		       coord.proj_params.albers.lat2);
-    break;
-  }
     
-  case Mdvx::PROJ_LAMBERT_AZIM: {
-    setReadRemapLambertAzimuthal(coord.nx, coord.ny, 
-				 coord.minx, coord.miny,
-				 coord.dx, coord.dy,
-				 coord.proj_origin_lat, 
-				 coord.proj_origin_lon);
-    break;
-  }
-
-  case Mdvx::PROJ_VERT_PERSP: {
-    setReadRemapVertPersp(coord.nx, coord.ny, 
-                          coord.minx, coord.miny,
-                          coord.dx, coord.dy,
-                          coord.proj_origin_lat, 
-                          coord.proj_origin_lon,
-                          coord.proj_params.vp.persp_radius);
-    break;
-  }
+    case Mdvx::PROJ_FLAT: {
+      setReadRemapFlat(coord.nx, coord.ny, 
+                       coord.minx, coord.miny,
+                       coord.dx, coord.dy,
+                       coord.proj_origin_lat,
+                       coord.proj_origin_lon,
+                       coord.proj_params.flat.rotation);
+      break;
+    }
     
-  default: {
-    _errStr += "ERROR - Mdvx::setReadRemap\n";
-    _errStr += string("Unsupported projection: ")
-      + Mdvx::projType2Str(proj.getProjType()) + "\n";
-    return -1;
-  }
+    case Mdvx::PROJ_LAMBERT_CONF: {
+      setReadRemapLambertConf(coord.nx, coord.ny, 
+                              coord.minx, coord.miny,
+                              coord.dx, coord.dy,
+                              coord.proj_origin_lat,
+                              coord.proj_origin_lon,
+                              coord.proj_params.lc2.lat1,
+                              coord.proj_params.lc2.lat2);
+      break;
+    }
+    
+    case Mdvx::PROJ_POLAR_STEREO: {
+      pole_type_t poleType = POLE_NORTH;
+      if (coord.proj_params.ps.pole_type != 0) {
+        poleType = POLE_SOUTH;
+      }
+      setReadRemapPolarStereo(coord.nx, coord.ny, 
+                              coord.minx, coord.miny,
+                              coord.dx, coord.dy,
+                              coord.proj_origin_lat, 
+                              coord.proj_origin_lon,
+                              coord.proj_params.ps.tan_lon,
+                              poleType,
+                              coord.proj_params.ps.central_scale);
+      break;
+    }
+
+    case Mdvx::PROJ_OBLIQUE_STEREO: {
+      setReadRemapObliqueStereo(coord.nx, coord.ny, 
+                                coord.minx, coord.miny,
+                                coord.dx, coord.dy,
+                                coord.proj_origin_lat, 
+                                coord.proj_origin_lon,
+                                coord.proj_params.os.tan_lat,
+                                coord.proj_params.os.tan_lon,
+                                coord.proj_params.os.central_scale);
+      break;
+    }
+
+    case Mdvx::PROJ_MERCATOR: {
+      setReadRemapMercator(coord.nx, coord.ny, 
+                           coord.minx, coord.miny,
+                           coord.dx, coord.dy,
+                           coord.proj_origin_lat, 
+                           coord.proj_origin_lon);
+      break;
+    }
+
+    case Mdvx::PROJ_TRANS_MERCATOR: {
+      setReadRemapTransverseMercator(coord.nx, coord.ny, 
+                                     coord.minx, coord.miny,
+                                     coord.dx, coord.dy,
+                                     coord.proj_origin_lat, 
+                                     coord.proj_origin_lon,
+                                     coord.proj_params.tmerc.central_scale);
+      break;
+    }
+
+    case Mdvx::PROJ_ALBERS: {
+      setReadRemapAlbers(coord.nx, coord.ny, 
+                         coord.minx, coord.miny,
+                         coord.dx, coord.dy,
+                         coord.proj_origin_lat,
+                         coord.proj_origin_lon,
+                         coord.proj_params.albers.lat1,
+                         coord.proj_params.albers.lat2);
+      break;
+    }
+    
+    case Mdvx::PROJ_LAMBERT_AZIM: {
+      setReadRemapLambertAzimuthal(coord.nx, coord.ny, 
+                                   coord.minx, coord.miny,
+                                   coord.dx, coord.dy,
+                                   coord.proj_origin_lat, 
+                                   coord.proj_origin_lon);
+      break;
+    }
+
+    case Mdvx::PROJ_VERT_PERSP: {
+      setReadRemapVertPersp(coord.nx, coord.ny, 
+                            coord.minx, coord.miny,
+                            coord.dx, coord.dy,
+                            coord.proj_origin_lat, 
+                            coord.proj_origin_lon,
+                            coord.proj_params.vp.persp_radius);
+      break;
+    }
+    
+    default: {
+      _errStr += "ERROR - Mdvx::setReadRemap\n";
+      _errStr += string("Unsupported projection: ")
+        + Mdvx::projType2Str(proj.getProjType()) + "\n";
+      return -1;
+    }
 
   } // switch
 
@@ -960,38 +960,38 @@ int Mdvx::setReadRemap(const MdvxPjg &proj)
 
   switch (proj.getProjType()) {
 
-  case Mdvx::PROJ_LATLON: {
-    setReadRemapLatlon(proj.getNx(), proj.getNy(),
-		       proj.getMinx(), proj.getMiny(),
-		       proj.getDx(), proj.getDy());
-    break;
-  }
+    case Mdvx::PROJ_LATLON: {
+      setReadRemapLatlon(proj.getNx(), proj.getNy(),
+                         proj.getMinx(), proj.getMiny(),
+                         proj.getDx(), proj.getDy());
+      break;
+    }
     
-  case Mdvx::PROJ_FLAT: {
-    setReadRemapFlat(proj.getNx(), proj.getNy(),
-		     proj.getMinx(), proj.getMiny(),
-		     proj.getDx(), proj.getDy(),
-		     proj.getOriginLat(), proj.getOriginLon(),
-		     proj.getRotation());
-    break;
-  }
+    case Mdvx::PROJ_FLAT: {
+      setReadRemapFlat(proj.getNx(), proj.getNy(),
+                       proj.getMinx(), proj.getMiny(),
+                       proj.getDx(), proj.getDy(),
+                       proj.getOriginLat(), proj.getOriginLon(),
+                       proj.getRotation());
+      break;
+    }
     
-  case Mdvx::PROJ_LAMBERT_CONF: {
-    setReadRemapLc2(proj.getNx(), proj.getNy(),
-		    proj.getMinx(), proj.getMiny(),
-		    proj.getDx(), proj.getDy(),
-		    proj.getOriginLat(), proj.getOriginLon(),
-		    proj.getLat1(), proj.getLat2());
-    break;
-  }
+    case Mdvx::PROJ_LAMBERT_CONF: {
+      setReadRemapLc2(proj.getNx(), proj.getNy(),
+                      proj.getMinx(), proj.getMiny(),
+                      proj.getDx(), proj.getDy(),
+                      proj.getOriginLat(), proj.getOriginLon(),
+                      proj.getLat1(), proj.getLat2());
+      break;
+    }
     
-  default: {
-    _errStr += "ERROR - Mdvx::setReadRemap\n";
-    _errStr += string("Unsupported projection: ")
-      + Mdvx::projType2Str(proj.getProjType()) + "\n";
-    return -1;
+    default: {
+      _errStr += "ERROR - Mdvx::setReadRemap\n";
+      _errStr += string("Unsupported projection: ")
+        + Mdvx::projType2Str(proj.getProjType()) + "\n";
+      return -1;
     
-  }
+    }
     
   } // switch
   
@@ -1283,26 +1283,26 @@ void Mdvx::printReadRequest(ostream &out)
   if (_readTimeSet) {
 
     switch (_readSearchMode) {
-    case READ_LAST:
-      out << "  Search mode: READ_LAST" << endl;
-      break;
-    case READ_CLOSEST:
-      out << "  Search mode: READ_CLOSEST" << endl;
-      break;
-    case READ_FIRST_BEFORE:
-      out << "  Search mode: READ_FIRST_BEFORE" << endl;
-      break;
-    case READ_FIRST_AFTER:
-      out << "  Search mode: READ_FIRST_AFTER" << endl;
-      break;
-    case READ_BEST_FORECAST:
-      out << "  Search mode: READ_BEST_FORECAST" << endl;
-      break;
-    case READ_SPECIFIED_FORECAST:
-      out << "  Search mode: READ_SPECIFIED_FORECAST" << endl;
-      break;
-    default:
-      out << "  Search mode: UNKNOWN" << endl;
+      case READ_LAST:
+        out << "  Search mode: READ_LAST" << endl;
+        break;
+      case READ_CLOSEST:
+        out << "  Search mode: READ_CLOSEST" << endl;
+        break;
+      case READ_FIRST_BEFORE:
+        out << "  Search mode: READ_FIRST_BEFORE" << endl;
+        break;
+      case READ_FIRST_AFTER:
+        out << "  Search mode: READ_FIRST_AFTER" << endl;
+        break;
+      case READ_BEST_FORECAST:
+        out << "  Search mode: READ_BEST_FORECAST" << endl;
+        break;
+      case READ_SPECIFIED_FORECAST:
+        out << "  Search mode: READ_SPECIFIED_FORECAST" << endl;
+        break;
+      default:
+        out << "  Search mode: UNKNOWN" << endl;
     }
 
     if (_readSearchMode != READ_LAST) {
@@ -1507,7 +1507,7 @@ int Mdvx::readAllHeaders()
 
     // For XML-based file, read in volume to get at headers
   
-    if (_read_volume_xml(false, false, false, false, -180, 180)) {
+    if (_readVolumeXml(false, false, false, false, -180, 180)) {
       _errStr += "ERROR - Mdvx::readAllHeaders\n";
       _errStr += "  Reading XML format file\n";
       TaStr::AddStr(_errStr, "  File: ", _pathInUse);
@@ -1553,7 +1553,7 @@ int Mdvx::readAllHeaders()
 
     // MDV native format
     
-    if (_read_all_headers_mdv()) {
+    if (_readAllHeadersMdv()) {
       return -1;
     }
     
@@ -1665,7 +1665,7 @@ int Mdvx::readVolume()
   
     // native MDV or MDV-XML
     
-    if (_read_volume_mdv(_readFillMissing, _readDecimate, true)) {
+    if (_readVolumeMdv(_readFillMissing, _readDecimate, true)) {
       return -1;
     }
 
@@ -1746,7 +1746,7 @@ int Mdvx::readVsection()
 
     // native MDV or MDV-XML
     
-    if (_read_vsection_mdv()) {
+    if (_readVsectionMdv()) {
       return -1;
     }
 
@@ -2142,9 +2142,9 @@ int Mdvx::readUsingBuf()
   MemBuf buf;
   buf.reserve(fsize);
   if ( !buf.getPtr()) {
-   _errStr += "ERROR - Mdvx::readUsingBuf\n";
-   _errStr += "Error allocating mem in MemBuf object" ;
-   return -1;
+    _errStr += "ERROR - Mdvx::readUsingBuf\n";
+    _errStr += "Error allocating mem in MemBuf object" ;
+    return -1;
   } 
   // read in entire buffer
   
@@ -2217,180 +2217,180 @@ int Mdvx::_computeReadPath()
   
   switch (_readSearchMode) {
 
-  case READ_LAST: {
-    MdvxTimeList tlist;
-    tlist.setModeLast(_readDir);
-    if (_timeList.checkLatestValidModTime()) {
-      tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+    case READ_LAST: {
+      MdvxTimeList tlist;
+      tlist.setModeLast(_readDir);
+      if (_timeList.checkLatestValidModTime()) {
+        tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+      }
+      tlist.compile();
+      if (tlist.getValidTimes().size() == 0) {
+        _errStr += "ERROR - computeReadPath\n";
+        TaStr::AddStr(_errStr, " Read last failed, dir: ", _readDir);
+        _noFilesFoundOnRead = true;
+        return -1;
+      }
+      _pathInUse = tlist.getPathList()[0];
+      if (_overwriteValidTimeByGenTime) {
+        _genTimeForOverwrite = tlist.getValidTimes()[0];
+      }
+      break;
     }
-    tlist.compile();
-    if (tlist.getValidTimes().size() == 0) {
-      _errStr += "ERROR - computeReadPath\n";
-      TaStr::AddStr(_errStr, " Read last failed, dir: ", _readDir);
-      _noFilesFoundOnRead = true;
-      return -1;
-    }
-    _pathInUse = tlist.getPathList()[0];
-    if (_overwriteValidTimeByGenTime) {
-      _genTimeForOverwrite = tlist.getValidTimes()[0];
-    }
-    break;
-  }
   
-  case READ_CLOSEST: {
-    MdvxTimeList tlist;
-    tlist.setModeClosest(_readDir, _readSearchTime, _readSearchMargin);
-    if (_timeList.checkLatestValidModTime()) {
-      tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+    case READ_CLOSEST: {
+      MdvxTimeList tlist;
+      tlist.setModeClosest(_readDir, _readSearchTime, _readSearchMargin);
+      if (_timeList.checkLatestValidModTime()) {
+        tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+      }
+      if (_timeList.getConstrainFcastLeadTimes()) {
+        tlist.setConstrainFcastLeadTimes
+          (_timeList.getMinFcastLeadTime(),
+           _timeList.getMaxFcastLeadTime(),
+           _timeList.getSpecifyFcastByGenTime());
+      }
+      tlist.setValidTimeSearchWt(getValidTimeSearchWt());
+      tlist.compile();
+      if (tlist.getValidTimes().size() == 0) {
+        _errStr += "ERROR - computeReadPath\n";
+        TaStr::AddStr(_errStr, "  Read closest failed, dir: ", _readDir);
+        TaStr::AddInt(_errStr, "  Search margin (secs): ", _readSearchMargin);
+        char timeErrStr[1024];
+        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        TaStr::AddStr(_errStr, timeErrStr);
+        _noFilesFoundOnRead = true;
+        return -1;
+      }
+      _pathInUse = tlist.getPathList()[0];
+      if (_overwriteValidTimeByGenTime) {
+        _genTimeForOverwrite = tlist.getValidTimes()[0];
+      }
+      break;
     }
-    if (_timeList.getConstrainFcastLeadTimes()) {
-      tlist.setConstrainFcastLeadTimes
-	(_timeList.getMinFcastLeadTime(),
-	 _timeList.getMaxFcastLeadTime(),
-	 _timeList.getSpecifyFcastByGenTime());
-    }
-    tlist.setValidTimeSearchWt(getValidTimeSearchWt());
-    tlist.compile();
-    if (tlist.getValidTimes().size() == 0) {
-      _errStr += "ERROR - computeReadPath\n";
-      TaStr::AddStr(_errStr, "  Read closest failed, dir: ", _readDir);
-      TaStr::AddInt(_errStr, "  Search margin (secs): ", _readSearchMargin);
-      char timeErrStr[1024];
-      sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
-      TaStr::AddStr(_errStr, timeErrStr);
-      _noFilesFoundOnRead = true;
-      return -1;
-    }
-    _pathInUse = tlist.getPathList()[0];
-    if (_overwriteValidTimeByGenTime) {
-      _genTimeForOverwrite = tlist.getValidTimes()[0];
-    }
-    break;
-  }
     
-  case READ_FIRST_BEFORE: {
-    MdvxTimeList tlist;
-    tlist.setModeFirstBefore(_readDir, _readSearchTime, _readSearchMargin);
-    if (_timeList.checkLatestValidModTime()) {
-      tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+    case READ_FIRST_BEFORE: {
+      MdvxTimeList tlist;
+      tlist.setModeFirstBefore(_readDir, _readSearchTime, _readSearchMargin);
+      if (_timeList.checkLatestValidModTime()) {
+        tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+      }
+      if (_timeList.getConstrainFcastLeadTimes()) {
+        tlist.setConstrainFcastLeadTimes
+          (_timeList.getMinFcastLeadTime(),
+           _timeList.getMaxFcastLeadTime(),
+           _timeList.getSpecifyFcastByGenTime());
+      }
+      tlist.setValidTimeSearchWt(getValidTimeSearchWt());
+      tlist.compile();
+      if (tlist.getValidTimes().size() == 0) {
+        _errStr += "ERROR - computeReadPath\n";
+        TaStr::AddStr(_errStr, " Read first before failed, dir: ", _readDir);
+        TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
+        char timeErrStr[1024];
+        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        _noFilesFoundOnRead = true;
+        return -1;
+      }
+      _pathInUse = tlist.getPathList()[0];
+      if (_overwriteValidTimeByGenTime) {
+        _genTimeForOverwrite = tlist.getValidTimes()[0];
+      }
+      break;
     }
-    if (_timeList.getConstrainFcastLeadTimes()) {
-      tlist.setConstrainFcastLeadTimes
-	(_timeList.getMinFcastLeadTime(),
-	 _timeList.getMaxFcastLeadTime(),
-	 _timeList.getSpecifyFcastByGenTime());
-    }
-    tlist.setValidTimeSearchWt(getValidTimeSearchWt());
-    tlist.compile();
-    if (tlist.getValidTimes().size() == 0) {
-      _errStr += "ERROR - computeReadPath\n";
-      TaStr::AddStr(_errStr, " Read first before failed, dir: ", _readDir);
-      TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
-      char timeErrStr[1024];
-      sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
-      _noFilesFoundOnRead = true;
-      return -1;
-    }
-    _pathInUse = tlist.getPathList()[0];
-    if (_overwriteValidTimeByGenTime) {
-      _genTimeForOverwrite = tlist.getValidTimes()[0];
-    }
-    break;
-  }
     
-  case READ_FIRST_AFTER: {
-    MdvxTimeList tlist;
-    tlist.setModeFirstAfter(_readDir, _readSearchTime, _readSearchMargin);
-    if (_timeList.checkLatestValidModTime()) {
-      tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+    case READ_FIRST_AFTER: {
+      MdvxTimeList tlist;
+      tlist.setModeFirstAfter(_readDir, _readSearchTime, _readSearchMargin);
+      if (_timeList.checkLatestValidModTime()) {
+        tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+      }
+      if (_timeList.getConstrainFcastLeadTimes()) {
+        tlist.setConstrainFcastLeadTimes
+          (_timeList.getMinFcastLeadTime(),
+           _timeList.getMaxFcastLeadTime(),
+           _timeList.getSpecifyFcastByGenTime());
+      }
+      tlist.setValidTimeSearchWt(getValidTimeSearchWt());
+      tlist.compile();
+      if (tlist.getValidTimes().size() == 0) {
+        _errStr += "ERROR - computeReadPath\n";
+        TaStr::AddStr(_errStr, " Read first after failed, dir: ", _readDir);
+        TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
+        char timeErrStr[1024];
+        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        _noFilesFoundOnRead = true;
+        return -1;
+      }
+      _pathInUse = tlist.getPathList()[0];
+      if (_overwriteValidTimeByGenTime) {
+        _genTimeForOverwrite = tlist.getValidTimes()[0];
+      }
+      break;
     }
-    if (_timeList.getConstrainFcastLeadTimes()) {
-      tlist.setConstrainFcastLeadTimes
-	(_timeList.getMinFcastLeadTime(),
-	 _timeList.getMaxFcastLeadTime(),
-	 _timeList.getSpecifyFcastByGenTime());
-    }
-    tlist.setValidTimeSearchWt(getValidTimeSearchWt());
-    tlist.compile();
-    if (tlist.getValidTimes().size() == 0) {
-      _errStr += "ERROR - computeReadPath\n";
-      TaStr::AddStr(_errStr, " Read first after failed, dir: ", _readDir);
-      TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
-      char timeErrStr[1024];
-      sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
-      _noFilesFoundOnRead = true;
-      return -1;
-    }
-    _pathInUse = tlist.getPathList()[0];
-    if (_overwriteValidTimeByGenTime) {
-      _genTimeForOverwrite = tlist.getValidTimes()[0];
-    }
-    break;
-  }
     
-  case READ_BEST_FORECAST: {
-    MdvxTimeList tlist;
-    tlist.setModeBestForecast(_readDir, _readSearchTime, _readSearchMargin);
-    if (_timeList.checkLatestValidModTime()) {
-      tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+    case READ_BEST_FORECAST: {
+      MdvxTimeList tlist;
+      tlist.setModeBestForecast(_readDir, _readSearchTime, _readSearchMargin);
+      if (_timeList.checkLatestValidModTime()) {
+        tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+      }
+      if (_timeList.getConstrainFcastLeadTimes()) {
+        tlist.setConstrainFcastLeadTimes
+          (_timeList.getMinFcastLeadTime(),
+           _timeList.getMaxFcastLeadTime(),
+           _timeList.getSpecifyFcastByGenTime());
+      }
+      tlist.setValidTimeSearchWt(getValidTimeSearchWt());
+      tlist.compile();
+      if (tlist.getValidTimes().size() == 0) {
+        _errStr += "ERROR - computeReadPath\n";
+        TaStr::AddStr(_errStr, " Read best forecast failed, dir: ", _readDir);
+        TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
+        char timeErrStr[1024];
+        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        _noFilesFoundOnRead = true;
+        return -1;
+      }
+      _pathInUse = tlist.getPathList()[0];
+      if (_overwriteValidTimeByGenTime) {
+        _genTimeForOverwrite = tlist.getValidTimes()[0];
+      }
+      break;
     }
-    if (_timeList.getConstrainFcastLeadTimes()) {
-      tlist.setConstrainFcastLeadTimes
-	(_timeList.getMinFcastLeadTime(),
-	 _timeList.getMaxFcastLeadTime(),
-	 _timeList.getSpecifyFcastByGenTime());
-    }
-    tlist.setValidTimeSearchWt(getValidTimeSearchWt());
-    tlist.compile();
-    if (tlist.getValidTimes().size() == 0) {
-      _errStr += "ERROR - computeReadPath\n";
-      TaStr::AddStr(_errStr, " Read best forecast failed, dir: ", _readDir);
-      TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
-      char timeErrStr[1024];
-      sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
-      _noFilesFoundOnRead = true;
-      return -1;
-    }
-    _pathInUse = tlist.getPathList()[0];
-    if (_overwriteValidTimeByGenTime) {
-      _genTimeForOverwrite = tlist.getValidTimes()[0];
-    }
-    break;
-  }
 
-  case READ_SPECIFIED_FORECAST: {
-    MdvxTimeList tlist;
-    time_t genTime = _readSearchTime;
-    time_t validTime = _readSearchTime + _readForecastLeadTime;
-    tlist.setModeSpecifiedForecast(_readDir, genTime, validTime,
-				   _readSearchMargin);
-    if (_timeList.checkLatestValidModTime()) {
-      tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+    case READ_SPECIFIED_FORECAST: {
+      MdvxTimeList tlist;
+      time_t genTime = _readSearchTime;
+      time_t validTime = _readSearchTime + _readForecastLeadTime;
+      tlist.setModeSpecifiedForecast(_readDir, genTime, validTime,
+                                     _readSearchMargin);
+      if (_timeList.checkLatestValidModTime()) {
+        tlist.setCheckLatestValidModTime(_timeList.getLatestValidModTime());
+      }
+      tlist.compile();
+      if (tlist.getValidTimes().size() == 0) {
+        _errStr += "ERROR - computeReadPath\n";
+        TaStr::AddStr(_errStr,
+                      " Read specified forecast failed, dir: ", _readDir);
+        TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
+        char timeErrStr[1024];
+        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        _noFilesFoundOnRead = true;
+        return -1;
+      }
+      _pathInUse = tlist.getPathList()[0];
+      if (_overwriteValidTimeByGenTime) {
+        _genTimeForOverwrite = tlist.getValidTimes()[0];
+      }
+      break;
     }
-    tlist.compile();
-    if (tlist.getValidTimes().size() == 0) {
+
+    default: {
       _errStr += "ERROR - computeReadPath\n";
-      TaStr::AddStr(_errStr,
-		    " Read specified forecast failed, dir: ", _readDir);
-      TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
-      char timeErrStr[1024];
-      sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
-      _noFilesFoundOnRead = true;
+      sprintf(errstr, "  Unknown search mode: %d\n", _readSearchMode);
+      _errStr += errstr;
       return -1;
     }
-    _pathInUse = tlist.getPathList()[0];
-    if (_overwriteValidTimeByGenTime) {
-      _genTimeForOverwrite = tlist.getValidTimes()[0];
-    }
-    break;
-  }
-
-  default: {
-    _errStr += "ERROR - computeReadPath\n";
-    sprintf(errstr, "  Unknown search mode: %d\n", _readSearchMode);
-    _errStr += errstr;
-    return -1;
-  }
     
   } // switch
 
@@ -2399,14 +2399,14 @@ int Mdvx::_computeReadPath()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// _read_master_header()
+// _readMasterHeader()
 //
 // Read mdv master header. Swaps to host byte order
 //
 // returns 0 on success, -1 on failure.
 
-int Mdvx::_read_master_header(master_header_t &mhdr,
-                              TaFile &infile)
+int Mdvx::_readMasterHeader(master_header_t &mhdr,
+                            TaFile &infile)
   
 {
 
@@ -2454,15 +2454,15 @@ int Mdvx::_read_master_header(master_header_t &mhdr,
 }
  
 ///////////////////////////////////////////////////////////////////////////
-// _read_field_header()
+// _readFieldHeader()
 //
 // Read mdv field header. Swaps to host byte order
 //
 // returns 0 on success, -1 on failure.
 
-int Mdvx::_read_field_header(const int field_num,
-                             field_header_t &fhdr,
-                             TaFile &infile)
+int Mdvx::_readFieldHeader(const int field_num,
+                           field_header_t &fhdr,
+                           TaFile &infile)
 
 {
   
@@ -2472,13 +2472,13 @@ int Mdvx::_read_field_header(const int field_num,
     int64_t hdr_offset =
       sizeof(master_header_t) + (field_num * sizeof(field_header_t));
     if (infile.fseek(hdr_offset, SEEK_SET)) {
-      _errStr += "ERROR - Mdvx::_read_field_header\n";
+      _errStr += "ERROR - Mdvx::_readFieldHeader\n";
       sprintf(errstr, "Cannot seek to field header, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
     if((infile.fread(&fhdr, sizeof(field_header_t), 1)) != 1) {
-      _errStr += "ERROR - Mdvx::_read_field_header\n";
+      _errStr += "ERROR - Mdvx::_readFieldHeader\n";
       sprintf(errstr, "Cannot read field header, field %d\n", field_num);
       _errStr += errstr;
       return -1;
@@ -2490,14 +2490,14 @@ int Mdvx::_read_field_header(const int field_num,
     int64_t hdr_offset =
       sizeof(master_header_32_t) + (field_num * sizeof(field_header_32_t));
     if (infile.fseek(hdr_offset, SEEK_SET)) {
-      _errStr += "ERROR - Mdvx::_read_field_header\n";
+      _errStr += "ERROR - Mdvx::_readFieldHeader\n";
       sprintf(errstr, "Cannot seek to field header 32, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
     field_header_32_t fhdr32;
     if((infile.fread(&fhdr32, sizeof(field_header_32_t), 1)) != 1) {
-      _errStr += "ERROR - Mdvx::_read_field_header\n";
+      _errStr += "ERROR - Mdvx::_readFieldHeader\n";
       sprintf(errstr, "Cannot read field header 32, field %d\n", field_num);
       _errStr += errstr;
       return -1;
@@ -2544,7 +2544,7 @@ int Mdvx::_read_field_header(const int field_num,
   // check the data_element_nbytes
 
   if (fhdr.data_element_nbytes == 0) {
-    cerr << "WARNING - Mdvx::_read_field_header" << endl;
+    cerr << "WARNING - Mdvx::_readFieldHeader" << endl;
     cerr << "  fhdr.data_element_nbytes == 0" << endl;
     cerr << "  Setting according to encoding type" << endl;
     fhdr.data_element_nbytes =
@@ -2558,18 +2558,18 @@ int Mdvx::_read_field_header(const int field_num,
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// _read_vlevel_header()
+// _readVlevelHeader()
 //
 // Read mdv vlevel header. Swaps to host byte order.
 // Note: first_vlevel_offset is the offset to the first vlevel in the file.
 //
 // returns 0 on success, -1 on failure.
 
-int Mdvx::_read_vlevel_header(const int field_num,
-                              const int first_vlevel_offset,
-                              const field_header_t &fhdr,
-                              vlevel_header_t &vhdr,
-                              TaFile &infile)
+int Mdvx::_readVlevelHeader(const int field_num,
+                            const int first_vlevel_offset,
+                            const field_header_t &fhdr,
+                            vlevel_header_t &vhdr,
+                            TaFile &infile)
 
 {
   
@@ -2578,13 +2578,13 @@ int Mdvx::_read_vlevel_header(const int field_num,
   if (_is64Bit) {
     int64_t offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_t));
     if (infile.fseek(offset, SEEK_SET)) {
-      _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
+      _errStr += "ERROR - Mdvx::_readVlevelHeader\n";
       sprintf(errstr, "Cannot seek to vlevel header, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
     if((infile.fread(&vhdr, sizeof(vlevel_header_t), 1)) != 1) {
-      _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
+      _errStr += "ERROR - Mdvx::_readVlevelHeader\n";
       sprintf(errstr, "Cannot read vlevel header, field %d\n", field_num);
       _errStr += errstr;
       return -1;
@@ -2594,14 +2594,14 @@ int Mdvx::_read_vlevel_header(const int field_num,
     // 32 bit headers
     int64_t offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_32_t));
     if (infile.fseek(offset, SEEK_SET)) {
-      _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
+      _errStr += "ERROR - Mdvx::_readVlevelHeader\n";
       sprintf(errstr, "Cannot seek to vlevel header 32, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
     vlevel_header_32_t vhdr32;
     if((infile.fread(&vhdr32, sizeof(vlevel_header_32_t), 1)) != 1) {
-      _errStr += "ERROR - Mdvx::_read_vlevel_header\n";
+      _errStr += "ERROR - Mdvx::_readVlevelHeader\n";
       sprintf(errstr, "Cannot read vlevel header 32, field %d\n", field_num);
       _errStr += errstr;
       return -1;
@@ -2622,17 +2622,17 @@ int Mdvx::_read_vlevel_header(const int field_num,
 
 
 ///////////////////////////////////////////////////////////////////////////
-// _read_chunk_header()
+// _readChunkHeader()
 //
 // Read mdv chunk header. Swaps to host byte order
 // Note: first_chunk_offset is the offset to the first chunk in the file.
 //
 // returns 0 on success, -1 on failure.
 
-int Mdvx::_read_chunk_header(const int chunk_num,
-                             const int first_chunk_offset,
-                             chunk_header_t &chdr,
-                             TaFile &infile)
+int Mdvx::_readChunkHeader(const int chunk_num,
+                           const int first_chunk_offset,
+                           chunk_header_t &chdr,
+                           TaFile &infile)
 
 {
 
@@ -2641,13 +2641,13 @@ int Mdvx::_read_chunk_header(const int chunk_num,
   if (_is64Bit) {
     int64_t offset = first_chunk_offset + chunk_num * sizeof(chunk_header_t);
     if(infile.fseek(offset, SEEK_SET)) {
-      _errStr += "ERROR - Mdvx::_read_chunk_header\n";
+      _errStr += "ERROR - Mdvx::_readChunkHeader\n";
       sprintf(errstr, "Cannot seek to chunk header, field %d\n", chunk_num);
       _errStr += errstr;
       return -1;
     }
     if((infile.fread(&chdr, sizeof(chunk_header_t), 1)) != 1) {
-      _errStr += "ERROR - Mdvx::_read_chunk_header\n";
+      _errStr += "ERROR - Mdvx::_readChunkHeader\n";
       sprintf(errstr, "Cannot read chunk header, field %d\n", chunk_num);
       _errStr += errstr;
       return -1;
@@ -2657,14 +2657,14 @@ int Mdvx::_read_chunk_header(const int chunk_num,
     // 32 bit headers
     int64_t offset = first_chunk_offset + chunk_num * sizeof(chunk_header_32_t);
     if(infile.fseek(offset, SEEK_SET)) {
-      _errStr += "ERROR - Mdvx::_read_chunk_header\n";
+      _errStr += "ERROR - Mdvx::_readChunkHeader\n";
       sprintf(errstr, "Cannot seek to chunk header 32, field %d\n", chunk_num);
       _errStr += errstr;
       return -1;
     }
     chunk_header_32_t chdr32;
     if((infile.fread(&chdr32, sizeof(chunk_header_32_t), 1)) != 1) {
-      _errStr += "ERROR - Mdvx::_read_chunk_header\n";
+      _errStr += "ERROR - Mdvx::_readChunkHeader\n";
       sprintf(errstr, "Cannot read chunk header 32, field %d\n", chunk_num);
       _errStr += errstr;
       return -1;
@@ -2689,7 +2689,7 @@ int Mdvx::_read_chunk_header(const int chunk_num,
 // This method assumes that compileTimeList() and
 // _computeReadPath() have been called appropriately
 
-int Mdvx::_read_all_headers_mdv()
+int Mdvx::_readAllHeadersMdv()
 {
 
   // check for 64 bit
@@ -2714,7 +2714,7 @@ int Mdvx::_read_all_headers_mdv()
 
   // master header
 
-  if (_read_master_header(_mhdrFile, infile)) {
+  if (_readMasterHeader(_mhdrFile, infile)) {
     _errStr += "ERROR - Mdvx::readAllHeaders\n";
     _errStr += "File: ";
     _errStr += _pathInUse;
@@ -2733,7 +2733,7 @@ int Mdvx::_read_all_headers_mdv()
   _fhdrsFile.clear();
   for (int i = 0; i < _mhdrFile.n_fields; i++) {
     field_header_t fhdr;
-    if (_read_field_header(i, fhdr, infile)) {
+    if (_readFieldHeader(i, fhdr, infile)) {
       _errStr += "ERROR - Mdvx::readAllHeaders\n";
       _errStr += "File: ";
       _errStr += _pathInUse;
@@ -2766,8 +2766,8 @@ int Mdvx::_read_all_headers_mdv()
       
       // read vlevel header from file
       
-      if (_read_vlevel_header(i, _mhdrFile.vlevel_hdr_offset,
-                              fhdr, vhdr, infile)) {
+      if (_readVlevelHeader(i, _mhdrFile.vlevel_hdr_offset,
+                            fhdr, vhdr, infile)) {
         _errStr += "ERROR - Mdvx::readAllHeaders\n";
         _errStr += "File: ";
         _errStr += _pathInUse;
@@ -2814,8 +2814,8 @@ int Mdvx::_read_all_headers_mdv()
   for (int i = 0; i < _mhdrFile.n_chunks; i++) {
 
     chunk_header_t chdr;
-    if (_read_chunk_header(i, _mhdrFile.chunk_hdr_offset,
-                           chdr, infile)) {
+    if (_readChunkHeader(i, _mhdrFile.chunk_hdr_offset,
+                         chdr, infile)) {
       _errStr += "ERROR - Mdvx::readAllHeaders\n";
       _errStr += "File: ";
       _errStr += _pathInUse;
@@ -2852,12 +2852,12 @@ int Mdvx::_read_all_headers_mdv()
 ////////////////////////////////////////////////////
 // private read volume method
 
-int Mdvx::_read_volume_mdv(bool fill_missing,
-                           bool do_decimate,
-                           bool do_final_convert,
-                           bool is_vsection,
-                           double vsection_min_lon,
-                           double vsection_max_lon)
+int Mdvx::_readVolumeMdv(bool fill_missing,
+                         bool do_decimate,
+                         bool do_final_convert,
+                         bool is_vsection,
+                         double vsection_min_lon,
+                         double vsection_max_lon)
   
 {
 
@@ -2874,12 +2874,12 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
     
     // this is an xml file, so call the XML read method
     
-    if (_read_volume_xml(fill_missing,
-                         do_decimate,
-                         do_final_convert,
-                         is_vsection,
-                         vsection_min_lon,
-                         vsection_max_lon)) {
+    if (_readVolumeXml(fill_missing,
+                       do_decimate,
+                       do_final_convert,
+                       is_vsection,
+                       vsection_min_lon,
+                       vsection_max_lon)) {
       _errStr += "ERROR - Mdvx::_read_volume\n";
       _errStr += "  Reading XML format file\n";
       _errStr += "  File: ";
@@ -2893,8 +2893,8 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
 
   // read in all the headers
 
-  if (_read_all_headers_mdv()) {
-    _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
+  if (_readAllHeadersMdv()) {
+    _errStr += "ERROR - Mdvx::_readVolumeMdv\n";
     return -1;
   }
   _mhdr = _mhdrFile;
@@ -2905,7 +2905,7 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
   
   if (infile.fopenUncompress(_pathInUse.c_str(), "rb") == NULL) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
+    _errStr += "ERROR - Mdvx::_readVolumeMdv\n";
     _errStr += "File: ";
     _errStr += _pathInUse;
     _errStr += "\n";
@@ -2919,7 +2919,7 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
   if (_readFieldNums.size() > 0) {
     for (size_t i = 0; i < _readFieldNums.size(); i++) {
       if (_readFieldNums[i] > _mhdr.n_fields - 1) {
-        _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
+        _errStr += "ERROR - Mdvx::_readVolumeMdv\n";
         _errStr += "  Requested field number out of range\n";
         TaStr::AddInt(_errStr, "  Requested field number: ",
 		      _readFieldNums[i]);
@@ -2961,7 +2961,7 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
         }
       } // j
       if (!fieldFound) {
-        _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
+        _errStr += "ERROR - Mdvx::_readVolumeMdv\n";
         _errStr += "  Field: ";
         _errStr += _readFieldNames[i];
         _errStr += " not found in file: ";
@@ -2989,7 +2989,7 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
   if (_readChunkNums.size() > 0) {
     for (size_t i = 0; i < _readChunkNums.size(); i++) {
       if (_readChunkNums[i] > _mhdr.n_chunks - 1) {
-        _errStr += "ERROR - Mdvx::_read_volume_mdv\n";
+        _errStr += "ERROR - Mdvx::_readVolumeMdv\n";
         _errStr += "  Requested chunk number out of range\n";
         TaStr::AddInt(_errStr, "  Requested chunk number: ",
 		      _readChunkNums[i]);
@@ -3031,19 +3031,19 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
   for (size_t i = 0; i < _readFieldNums.size(); i++) {
     
     MdvxField *field = new MdvxField(_fhdrsFile[_readFieldNums[i]],
-                                      _vhdrsFile[_readFieldNums[i]], NULL);
+                                     _vhdrsFile[_readFieldNums[i]], NULL);
     if (field == NULL) {
-       _errStr += "ERROR - Mdvx::_read_volume_mdv.\n";
-       char errstr[128];
-       sprintf(errstr, " Allocating field mem");
-       _errStr += errstr;
-       return -1;
+      _errStr += "ERROR - Mdvx::_readVolumeMdv.\n";
+      char errstr[128];
+      sprintf(errstr, " Allocating field mem");
+      _errStr += errstr;
+      return -1;
     }
     
     if (field->_read_volume(infile, *this, fill_missing,
 			    do_decimate, do_final_convert, remapLut,
 			    is_vsection, vsection_min_lon, vsection_max_lon)) {
-      _errStr += "ERROR - Mdvx::_read_volume_mdv.\n";
+      _errStr += "ERROR - Mdvx::_readVolumeMdv.\n";
       char errstr[128];
       sprintf(errstr, "  Reading field %d\n", (int) i);
       _errStr += errstr;
@@ -3055,7 +3055,7 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
     _fields.push_back(field);
 
     if (_heartbeatFunc != NULL) {
-      _heartbeatFunc("Mdvx::_read_volume_mdv");
+      _heartbeatFunc("Mdvx::_readVolumeMdv");
     }
 
   }
@@ -3066,15 +3066,15 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
     
     MdvxChunk *chunk = new MdvxChunk(_chdrsFile[_readChunkNums[i]], NULL);
     if (chunk == NULL){
-       _errStr += "ERROR - Mdvx::_read_volume_mdv.\n";
-       char errstr[128];
-       sprintf(errstr, " Allocating chunk mem");
-       _errStr += errstr;
-       return -1;
+      _errStr += "ERROR - Mdvx::_readVolumeMdv.\n";
+      char errstr[128];
+      sprintf(errstr, " Allocating chunk mem");
+      _errStr += errstr;
+      return -1;
     }
    
     if (chunk->_read_data(infile)) {
-      _errStr += "ERROR - Mdvx::_read_volume_mdv.\n";
+      _errStr += "ERROR - Mdvx::_readVolumeMdv.\n";
       char errstr[128];
       sprintf(errstr, "  Reading chunk %d\n", (int) i);
       _errStr += errstr;
@@ -3105,14 +3105,14 @@ int Mdvx::_read_volume_mdv(bool fill_missing,
 // Private read vertical section method
 // Returns 0 on success, -1 on failure
 
-int Mdvx::_read_vsection_mdv()
+int Mdvx::_readVsectionMdv()
   
 {
 
   // special case - read RHI
   
   if (_readVsectAsRhi) {
-    return _read_rhi(_readRhiRespectUserDist);
+    return _readRhi(_readRhiRespectUserDist);
   }
   
   // compute min_lon and max_lon
@@ -3126,8 +3126,8 @@ int Mdvx::_read_vsection_mdv()
 
   // read in the volume - do not fill missing or decimate
   
-  if (_read_volume_mdv(false, false, false, true, min_lon, max_lon)) {
-    _errStr += "ERROR - _read_vsection_mdv\n";
+  if (_readVolumeMdv(false, false, false, true, min_lon, max_lon)) {
+    _errStr += "ERROR - _readVsectionMdv\n";
     return -1;
   }
 
@@ -3149,7 +3149,7 @@ int Mdvx::_read_vsection_mdv()
 				     !_vsectDisableInterp,
 				     _readSpecifyVlevelType,
 				     _readVlevelType, false)) {
-      _errStr += "ERROR - _read_vsection_mdv\n";
+      _errStr += "ERROR - _readVsectionMdv\n";
       return -1;
     }
   }
@@ -3162,7 +3162,7 @@ int Mdvx::_read_vsection_mdv()
 				_readScalingType,
 				_readScale,
 				_readBias)) {
-      _errStr += "ERROR - _read_vsection_mdv\n";
+      _errStr += "ERROR - _readVsectionMdv\n";
       return -1;
     }
   }
@@ -3192,14 +3192,14 @@ int Mdvx::_read_vsection_mdv()
 // Returns 0 on success, -1 on failure
 // getErrStr() retrieves the error string.
 
-int Mdvx::_read_rhi(bool respectUserDistance /* = false */)
+int Mdvx::_readRhi(bool respectUserDistance /* = false */)
   
 {
 
   // read in the volume - do not fill missing or decimate
   
-  if (_read_volume_mdv(false, false, false)) {
-    _errStr += "ERROR - _read_rhi\n";
+  if (_readVolumeMdv(false, false, false)) {
+    _errStr += "ERROR - _readRhi\n";
     return -1;
   }
 
@@ -3213,7 +3213,7 @@ int Mdvx::_read_rhi(bool respectUserDistance /* = false */)
     }
   }
 
-  if (_load_closest_rhi(respectUserDistance)) {
+  if (_loadClosestRhi(respectUserDistance)) {
     return -1;
   }
 
@@ -3225,7 +3225,7 @@ int Mdvx::_read_rhi(bool respectUserDistance /* = false */)
 				_readScalingType,
 				_readScale,
 				_readBias)) {
-      _errStr += "ERROR - _read_rhi\n";
+      _errStr += "ERROR - _readRhi\n";
       return -1;
     }
   }
@@ -3241,7 +3241,7 @@ int Mdvx::_read_rhi(bool respectUserDistance /* = false */)
 // Returns 0 on success, -1 on failure
 // getErrStr() retrieves the error string.
 
-int Mdvx::_load_closest_rhi(bool respectUserDistance)
+int Mdvx::_loadClosestRhi(bool respectUserDistance)
   
 {
 
@@ -3418,13 +3418,13 @@ int Mdvx::_load_closest_rhi(bool respectUserDistance)
     if (_readRhiAsPolar) {
       if (_fields[i]->convert2SingleRhi(_mhdr, rhiIndex,
 					_vsectWayPts, lut, false)) {
-	_errStr += "ERROR - _load_closest_rhi\n";
+	_errStr += "ERROR - _loadClosestRhi\n";
 	return -1;
       }
     } else {
       if (_fields[i]->convertRhi2Vsect(_mhdr, rhiIndex,
 				       _vsectWayPts, lut, false)) {
-	_errStr += "ERROR - _load_closest_rhi\n";
+	_errStr += "ERROR - _loadClosestRhi\n";
 	return -1;
       }
     }

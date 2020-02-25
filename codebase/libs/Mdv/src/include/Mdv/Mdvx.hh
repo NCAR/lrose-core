@@ -715,37 +715,37 @@ protected:
   
   int _computeReadPath();
   
-  int _read_master_header(master_header_t &mhdr,
-                          TaFile &infile);
+  int _readMasterHeader(master_header_t &mhdr,
+                        TaFile &infile);
   
-  int _read_field_header(const int field_num,
-                         field_header_t &fhdr,
-                         TaFile &infile);
+  int _readFieldHeader(const int field_num,
+                       field_header_t &fhdr,
+                       TaFile &infile);
   
-  int _read_vlevel_header(const int field_num,
-                          const int first_vlevel_offset,
-                          const field_header_t &fhdr,
-                          vlevel_header_t &vhdr,
-                          TaFile &infile);
+  int _readVlevelHeader(const int field_num,
+                        const int first_vlevel_offset,
+                        const field_header_t &fhdr,
+                        vlevel_header_t &vhdr,
+                        TaFile &infile);
   
-  int _read_chunk_header(const int chunk_num,
-                         const int first_chunk_offset,
-                         chunk_header_t &chdr,
-                         TaFile &infile);
+  int _readChunkHeader(const int chunk_num,
+                       const int first_chunk_offset,
+                       chunk_header_t &chdr,
+                       TaFile &infile);
   
-  int _read_all_headers_mdv();
+  int _readAllHeadersMdv();
 
-  int _read_volume_mdv(bool fill_missing,
-                       bool do_decimate,
-                       bool do_final_convert,
-                       bool is_vsection = false,
-                       double vsection_min_lon = -360.0,
-                       double vsection_max_lon = 360.0);
+  int _readVolumeMdv(bool fill_missing,
+                     bool do_decimate,
+                     bool do_final_convert,
+                     bool is_vsection = false,
+                     double vsection_min_lon = -360.0,
+                     double vsection_max_lon = 360.0);
   
-  int _read_vsection_mdv();
+  int _readVsectionMdv();
   
-  int _read_rhi(bool respectUserDistance = false);
-  int _load_closest_rhi(bool respectUserDistance);
+  int _readRhi(bool respectUserDistance = false);
+  int _loadClosestRhi(bool respectUserDistance);
   
   int _compileTimeHeight();
 
@@ -753,16 +753,16 @@ protected:
 
   // write
   
-  int _write_master_header(TaFile &outfile) const;
+  int _writeMasterHeader(TaFile &outfile) const;
   
-  int _write_field_header(const int field_num,
-                          TaFile &outfile) const;
+  int _writeFieldHeader(const int field_num,
+                        TaFile &outfile) const;
   
-  int _write_vlevel_header(const int field_num,
-                           TaFile &outfile) const;
+  int _writeVlevelHeader(const int field_num,
+                         TaFile &outfile) const;
   
-  int _write_chunk_header(const int chunk_num,
-                          TaFile &outfile) const;
+  int _writeChunkHeader(const int chunk_num,
+                        TaFile &outfile) const;
 
   void _checkEnvBeforeWrite() const;
   void _checkWrite32BitHeaders() const;
@@ -777,8 +777,8 @@ protected:
                          const string &dataType);
   bool _getWriteAsForecast();
   
-  int _write_buffer_to_file(const string &pathStr,
-                            size_t len, const void *data) const;
+  int _writeBufferToFile(const string &pathStr,
+                         size_t len, const void *data) const;
 
   // print
   
@@ -792,44 +792,44 @@ protected:
   
   int _writeAsXml(const string &output_path) const;
   
-  void _write_to_xml_hdr(string &hdr,
-                         const string &bufFileName) const;
+  void _writeToXmlHdr(string &hdr,
+                      const string &bufFileName) const;
   
-  void _write_to_xml_master_hdr(string &hdr) const;
+  void _writeToXmlMasterHdr(string &hdr) const;
   
-  void _write_to_xml_field_hdr(string &hdr, int fieldNum) const;
+  void _writeToXmlFieldHdr(string &hdr, int fieldNum) const;
   
-  void _write_to_xml_chunk_hdr(string &hdr, int chunkNum) const;
+  void _writeToXmlChunkHdr(string &hdr, int chunkNum) const;
   
-  int _read_volume_xml(bool fill_missing,
-                       bool do_decimate,
-                       bool do_final_convert,
-                       bool is_vsection = false,
-                       double vsection_min_lon = -360.0,
-                       double vsection_max_lon = 360.0);
+  int _readVolumeXml(bool fill_missing,
+                     bool do_decimate,
+                     bool do_final_convert,
+                     bool is_vsection = false,
+                     double vsection_min_lon = -360.0,
+                     double vsection_max_lon = 360.0);
 
-  int _read_xml_to_master_hdr(const string &xml,
-                              int &forecast_delta);
+  int _readXmlToMasterHdr(const string &xml,
+                          int &forecast_delta);
   
-  int _load_xml_read_field_nums(const vector<string> &fieldXmls);
+  int _loadXmlReadFieldNums(const vector<string> &fieldXmls);
 
-  int _read_xml_to_field_headers(const string &xml,
-                                 time_t forecast_time,
-                                 int forecast_delta,
-                                 field_header_t &fhdr,
-                                 vlevel_header_t &vhdr);
+  int _readXmlToFieldHeaders(const string &xml,
+                             time_t forecast_time,
+                             int forecast_delta,
+                             field_header_t &fhdr,
+                             vlevel_header_t &vhdr);
   
-  MdvxField *_read_xml_field(const field_header_t &fhdr,
-                             const vlevel_header_t &vhdr,
-                             TaFile &bufFile);
+  MdvxField *_readXmlField(const field_header_t &fhdr,
+                           const vlevel_header_t &vhdr,
+                           TaFile &bufFile);
   
-  int _load_xml_read_chunk_nums();
+  int _loadXmlReadChunkNums();
 
-  int _read_xml_to_chunk_header(const string &xml,
-                                chunk_header_t &chdr);
+  int _readXmlToChunkHeader(const string &xml,
+                            chunk_header_t &chdr);
     
-  MdvxChunk *_read_xml_chunk(const chunk_header_t &chdr,
-                             TaFile &bufFile);
+  MdvxChunk *_readXmlChunk(const chunk_header_t &chdr,
+                           TaFile &bufFile);
   
   static string _xmlProjType2Str(int proj_type);
   static string _xmlVertType2Str(int vert_type);
@@ -853,9 +853,9 @@ protected:
 
   // netcdf
   
-  int _read_volume_into_ncf_buf();
-  int _set_times_ncf();
-  int _write_ncf_buf_to_file(const string &output_path) const;
+  int _readVolumeIntoNcfBuf();
+  int _setTimesNcf();
+  int _writeNcfBufToFile(const string &output_path) const;
 
   int _convertFormatOnRead(const string &path);
   int _convertFormatOnWrite(const string &path);
@@ -905,7 +905,7 @@ protected:
 
   void _copyMainHeadersToFileHeaders();
 
-  private:
+private:
 
 };
 

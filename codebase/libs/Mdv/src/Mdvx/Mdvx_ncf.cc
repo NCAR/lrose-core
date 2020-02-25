@@ -182,7 +182,7 @@ bool Mdvx::isNcf(mdv_format_t format) const
 // assumes _pathInUse has been set by caller
 // returns 0 on success, -1 on failure
 
-int Mdvx::_read_volume_into_ncf_buf()
+int Mdvx::_readVolumeIntoNcfBuf()
   
 {
 
@@ -191,7 +191,7 @@ int Mdvx::_read_volume_into_ncf_buf()
   TaFile ncfFile;
   if (ncfFile.fopenUncompress(_pathInUse.c_str(), "rb") == NULL) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_into_ncf_buf\n";
+    _errStr += "ERROR - Mdvx::_readVolumeIntoNcfBuf\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
     return -1;
@@ -201,7 +201,7 @@ int Mdvx::_read_volume_into_ncf_buf()
 
   if (ncfFile.fstat()) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_into_ncf_buf\n";
+    _errStr += "ERROR - Mdvx::_readVolumeIntoNcfBuf\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
     return -1;
@@ -214,7 +214,7 @@ int Mdvx::_read_volume_into_ncf_buf()
   _ncfBuf.reserve(fileLen);
   if (ncfFile.fread(_ncfBuf.getPtr(), 1, fileLen) != fileLen) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_into_ncf_buf\n";
+    _errStr += "ERROR - Mdvx::_readVolumeIntoNcfBuf\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
     ncfFile.fclose();
@@ -235,8 +235,8 @@ int Mdvx::_read_volume_into_ncf_buf()
 
   // set times etc
 
-  if (_set_times_ncf()) {
-    _errStr += "ERROR - Mdvx::_read_volume_into_ncf_buf\n";
+  if (_setTimesNcf()) {
+    _errStr += "ERROR - Mdvx::_readVolumeIntoNcfBuf\n";
     return -1;
   }
 
@@ -249,7 +249,7 @@ int Mdvx::_read_volume_into_ncf_buf()
 // assumes _pathInUse has been set by caller
 // Returns 0 on success, -1 on failure
 
-int Mdvx::_set_times_ncf()
+int Mdvx::_setTimesNcf()
   
 {
 
@@ -318,7 +318,7 @@ int Mdvx::_set_times_ncf()
   // if got here, must be short format
   
   if (nParts < 3) {
-    TaStr::AddStr(_errStr, "ERROR - Mdvx::_set_times_ncf");
+    TaStr::AddStr(_errStr, "ERROR - Mdvx::_setTimesNcf");
     TaStr::AddStr(_errStr, "  pathInUse: ", _pathInUse);
     TaStr::AddStr(_errStr, "  Cannot parse path to get times");
     TaStr::AddInt(_errStr, "  Too few directories in path: ", nParts);
@@ -340,7 +340,7 @@ int Mdvx::_set_times_ncf()
     int hour, min, sec;
     if (sscanf(parts[nParts-2].c_str(),
                "g_%2d%2d%2d", &hour, &min, &sec) != 3) {
-      TaStr::AddStr(_errStr, "ERROR - Mdvx::_set_times_ncf");
+      TaStr::AddStr(_errStr, "ERROR - Mdvx::_setTimesNcf");
       TaStr::AddStr(_errStr, "  pathInUse: ", _pathInUse);
       TaStr::AddStr(_errStr, "  Cannot parse path for gen time");
       return -1;
@@ -349,7 +349,7 @@ int Mdvx::_set_times_ncf()
     int year, month, day;
     if (sscanf(parts[nParts-3].c_str(),
                "%4d%2d%2d", &year, &month, &day) != 3) {
-      TaStr::AddStr(_errStr, "ERROR - Mdvx::_set_times_ncf");
+      TaStr::AddStr(_errStr, "ERROR - Mdvx::_setTimesNcf");
       TaStr::AddStr(_errStr, "  pathInUse: ", _pathInUse);
       TaStr::AddStr(_errStr, "  Cannot parse path for gen date");
       return -1;
@@ -371,7 +371,7 @@ int Mdvx::_set_times_ncf()
     int hour, min, sec;
     if (sscanf(parts[nParts-1].c_str(),
                "%2d%2d%2d", &hour, &min, &sec) != 3) {
-      TaStr::AddStr(_errStr, "ERROR - Mdvx::_set_times_ncf");
+      TaStr::AddStr(_errStr, "ERROR - Mdvx::_setTimesNcf");
       TaStr::AddStr(_errStr, "  pathInUse: ", _pathInUse);
       TaStr::AddStr(_errStr, "  Cannot parse path for valid time");
       return -1;
@@ -380,7 +380,7 @@ int Mdvx::_set_times_ncf()
     int year, month, day;
     if (sscanf(parts[nParts-2].c_str(),
                "%4d%2d%2d", &year, &month, &day) != 3) {
-      TaStr::AddStr(_errStr, "ERROR - Mdvx::_set_times_ncf");
+      TaStr::AddStr(_errStr, "ERROR - Mdvx::_setTimesNcf");
       TaStr::AddStr(_errStr, "  pathInUse: ", _pathInUse);
       TaStr::AddStr(_errStr, "  Cannot parse path for valid date");
       return -1;
@@ -781,7 +781,7 @@ int Mdvx::_convertFormatOnWrite(const string &url)
 // File name is based on the specified path.
 // Returns 0 on success, -1 on error.
 
-int Mdvx::_write_ncf_buf_to_file(const string &output_path) const
+int Mdvx::_writeNcfBufToFile(const string &output_path) const
 
 {
 
@@ -798,8 +798,8 @@ int Mdvx::_write_ncf_buf_to_file(const string &output_path) const
 
   // write the buffer to the file
 
-  if (_write_buffer_to_file(_pathInUse, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
-    TaStr::AddStr(_errStr, "ERROR - Mdvx::_write_ncf_buf_to_file");
+  if (_writeBufferToFile(_pathInUse, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
+    TaStr::AddStr(_errStr, "ERROR - Mdvx::_writeNcfBufToFile");
     return -1;
   }
 
@@ -1008,7 +1008,7 @@ int Mdvx::_convertNcf2Mdv(const string &path)
 
   // write nc buffer to file
 
-  if (_write_buffer_to_file(tmpFilePath, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
+  if (_writeBufferToFile(tmpFilePath, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
     _errStr += "ERROR - Mdvx::_convertNcf2Mdv\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
     TaStr::AddStr(_errStr, "  Cannot write buffe to tmp file: ", tmpFilePath);
@@ -1144,7 +1144,7 @@ int Mdvx::_readNcf(const string &path)
 
   // set nc-specific times from path
 
-  _set_times_ncf();
+  _setTimesNcf();
   
   // set format to MDV
   

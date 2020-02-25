@@ -1189,7 +1189,7 @@ void Ncf2MdvTrans::_inspectDim(Nc3Dim *dim, int jdim, ArrayDim &arrayDim)
     }
     return;
   }
- }
+}
 
 //////////////////////////
 // Look a a field in another way and adjust arrayDim if appropriate
@@ -1507,7 +1507,7 @@ int Ncf2MdvTrans::_finalizeFieldsRhi(bool respectUserDistance /* = false*/)
   // closest RHI to the way pts requested
 
   if (_mdv->_vsectWayPts.size() >= 2) {
-    if (_mdv->_load_closest_rhi(respectUserDistance)) {
+    if (_mdv->_loadClosestRhi(respectUserDistance)) {
       return -1;
     }
   }
@@ -2655,22 +2655,22 @@ int Ncf2MdvTrans::_getDsRadarType(Radx::PlatformType_t ptype)
 
 {
   switch (ptype) {
-  case Radx::PLATFORM_TYPE_VEHICLE:
-    return DS_RADAR_VEHICLE_TYPE;
-  case Radx::PLATFORM_TYPE_SHIP:
-    return DS_RADAR_SHIPBORNE_TYPE;
-  case Radx::PLATFORM_TYPE_AIRCRAFT_FORE:
-    return DS_RADAR_AIRBORNE_FORE_TYPE;
-  case Radx::PLATFORM_TYPE_AIRCRAFT_AFT:
-    return DS_RADAR_AIRBORNE_AFT_TYPE;
-  case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL:
-    return DS_RADAR_AIRBORNE_TAIL_TYPE;
-  case Radx::PLATFORM_TYPE_AIRCRAFT_BELLY:
-    return DS_RADAR_AIRBORNE_LOWER_TYPE;
-  case Radx::PLATFORM_TYPE_AIRCRAFT_ROOF:
-    return DS_RADAR_AIRBORNE_UPPER_TYPE;
-  default:
-    return DS_RADAR_GROUND_TYPE;
+    case Radx::PLATFORM_TYPE_VEHICLE:
+      return DS_RADAR_VEHICLE_TYPE;
+    case Radx::PLATFORM_TYPE_SHIP:
+      return DS_RADAR_SHIPBORNE_TYPE;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_FORE:
+      return DS_RADAR_AIRBORNE_FORE_TYPE;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_AFT:
+      return DS_RADAR_AIRBORNE_AFT_TYPE;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL:
+      return DS_RADAR_AIRBORNE_TAIL_TYPE;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_BELLY:
+      return DS_RADAR_AIRBORNE_LOWER_TYPE;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_ROOF:
+      return DS_RADAR_AIRBORNE_UPPER_TYPE;
+    default:
+      return DS_RADAR_GROUND_TYPE;
   }
 }
 
@@ -2678,29 +2678,29 @@ int Ncf2MdvTrans::_getDsScanMode(Radx::SweepMode_t mode)
 
 {
   switch (mode) {
-  case Radx::SWEEP_MODE_SECTOR:
-    return DS_RADAR_SECTOR_MODE;
-  case Radx::SWEEP_MODE_COPLANE:
-    return DS_RADAR_COPLANE_MODE;
-  case Radx::SWEEP_MODE_RHI:
-    return DS_RADAR_RHI_MODE;
-  case Radx::SWEEP_MODE_VERTICAL_POINTING:
-    return DS_RADAR_VERTICAL_POINTING_MODE;
-  case Radx::SWEEP_MODE_IDLE:
-    return DS_RADAR_IDLE_MODE;
-  case Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE:
-    return DS_RADAR_SURVEILLANCE_MODE;
-  case Radx::SWEEP_MODE_SUNSCAN:
-    return DS_RADAR_SUNSCAN_MODE;
-  case Radx::SWEEP_MODE_POINTING:
-    return DS_RADAR_POINTING_MODE;
-  case Radx::SWEEP_MODE_MANUAL_PPI:
-    return DS_RADAR_MANUAL_MODE;
-  case Radx::SWEEP_MODE_MANUAL_RHI:
-    return DS_RADAR_MANUAL_MODE;
-  case Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE:
-  default:
-    return DS_RADAR_SURVEILLANCE_MODE;
+    case Radx::SWEEP_MODE_SECTOR:
+      return DS_RADAR_SECTOR_MODE;
+    case Radx::SWEEP_MODE_COPLANE:
+      return DS_RADAR_COPLANE_MODE;
+    case Radx::SWEEP_MODE_RHI:
+      return DS_RADAR_RHI_MODE;
+    case Radx::SWEEP_MODE_VERTICAL_POINTING:
+      return DS_RADAR_VERTICAL_POINTING_MODE;
+    case Radx::SWEEP_MODE_IDLE:
+      return DS_RADAR_IDLE_MODE;
+    case Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE:
+      return DS_RADAR_SURVEILLANCE_MODE;
+    case Radx::SWEEP_MODE_SUNSCAN:
+      return DS_RADAR_SUNSCAN_MODE;
+    case Radx::SWEEP_MODE_POINTING:
+      return DS_RADAR_POINTING_MODE;
+    case Radx::SWEEP_MODE_MANUAL_PPI:
+      return DS_RADAR_MANUAL_MODE;
+    case Radx::SWEEP_MODE_MANUAL_RHI:
+      return DS_RADAR_MANUAL_MODE;
+    case Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE:
+    default:
+      return DS_RADAR_SURVEILLANCE_MODE;
   }
 }
 
@@ -2708,18 +2708,18 @@ int Ncf2MdvTrans::_getDsFollowMode(Radx::FollowMode_t mode)
 
 {
   switch (mode) {
-  case Radx::FOLLOW_MODE_SUN:
-    return DS_RADAR_FOLLOW_MODE_SUN;
-  case Radx::FOLLOW_MODE_VEHICLE:
-    return DS_RADAR_FOLLOW_MODE_VEHICLE;
-  case Radx::FOLLOW_MODE_AIRCRAFT:
-    return DS_RADAR_FOLLOW_MODE_AIRCRAFT;
-  case Radx::FOLLOW_MODE_TARGET:
-    return DS_RADAR_FOLLOW_MODE_TARGET;
-  case Radx::FOLLOW_MODE_MANUAL:
-    return DS_RADAR_FOLLOW_MODE_MANUAL;
-  default:
-    return DS_RADAR_FOLLOW_MODE_NONE;
+    case Radx::FOLLOW_MODE_SUN:
+      return DS_RADAR_FOLLOW_MODE_SUN;
+    case Radx::FOLLOW_MODE_VEHICLE:
+      return DS_RADAR_FOLLOW_MODE_VEHICLE;
+    case Radx::FOLLOW_MODE_AIRCRAFT:
+      return DS_RADAR_FOLLOW_MODE_AIRCRAFT;
+    case Radx::FOLLOW_MODE_TARGET:
+      return DS_RADAR_FOLLOW_MODE_TARGET;
+    case Radx::FOLLOW_MODE_MANUAL:
+      return DS_RADAR_FOLLOW_MODE_MANUAL;
+    default:
+      return DS_RADAR_FOLLOW_MODE_NONE;
   }
 }
 
@@ -2727,18 +2727,18 @@ int Ncf2MdvTrans::_getDsPolarizationMode(Radx::PolarizationMode_t mode)
 
 {
   switch (mode) {
-  case Radx::POL_MODE_HORIZONTAL:
-    return DS_POLARIZATION_HORIZ_TYPE;
-  case Radx::POL_MODE_VERTICAL:
-    return DS_POLARIZATION_VERT_TYPE;
-  case Radx::POL_MODE_HV_ALT:
-    return DS_POLARIZATION_DUAL_HV_ALT;
-  case Radx::POL_MODE_HV_SIM:
-    return DS_POLARIZATION_DUAL_HV_SIM;
-  case Radx::POL_MODE_CIRCULAR:
-    return DS_POLARIZATION_RIGHT_CIRC_TYPE;
-  default:
-    return DS_POLARIZATION_HORIZ_TYPE;
+    case Radx::POL_MODE_HORIZONTAL:
+      return DS_POLARIZATION_HORIZ_TYPE;
+    case Radx::POL_MODE_VERTICAL:
+      return DS_POLARIZATION_VERT_TYPE;
+    case Radx::POL_MODE_HV_ALT:
+      return DS_POLARIZATION_DUAL_HV_ALT;
+    case Radx::POL_MODE_HV_SIM:
+      return DS_POLARIZATION_DUAL_HV_SIM;
+    case Radx::POL_MODE_CIRCULAR:
+      return DS_POLARIZATION_RIGHT_CIRC_TYPE;
+    default:
+      return DS_POLARIZATION_HORIZ_TYPE;
   }
 }
 
@@ -2746,12 +2746,12 @@ int Ncf2MdvTrans::_getDsPrfMode(Radx::PrtMode_t mode)
 
 {
   switch (mode) {
-  case Radx::PRT_MODE_FIXED:
-    return DS_RADAR_PRF_MODE_FIXED;
-  case Radx::PRT_MODE_STAGGERED:
-    return DS_RADAR_PRF_MODE_STAGGERED_2_3;
-  default:
-    return DS_RADAR_PRF_MODE_FIXED;
+    case Radx::PRT_MODE_FIXED:
+      return DS_RADAR_PRF_MODE_FIXED;
+    case Radx::PRT_MODE_STAGGERED:
+      return DS_RADAR_PRF_MODE_STAGGERED_2_3;
+    default:
+      return DS_RADAR_PRF_MODE_FIXED;
   }
 }
 

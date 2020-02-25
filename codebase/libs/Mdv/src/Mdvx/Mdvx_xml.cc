@@ -127,7 +127,7 @@ void Mdvx::writeToXmlBuffer(string &hdr, MemBuf &buf,
   
   // write the XML header
 
-  _write_to_xml_hdr(hdr, bufFileName);
+  _writeToXmlHdr(hdr, bufFileName);
 
 }
 
@@ -181,12 +181,12 @@ int Mdvx::_writeAsXml(const string &output_path) const
   ta_remove_compressed(xmlPathStr.c_str());
   ta_remove_compressed(bufPathStr.c_str());
 
-  if (_write_buffer_to_file(bufPathStr, _xmlBuf.getLen(), _xmlBuf.getPtr())) {
+  if (_writeBufferToFile(bufPathStr, _xmlBuf.getLen(), _xmlBuf.getPtr())) {
     cerr << "ERROR - Mdvx::_write_as_xml" << endl;
     return -1;
   }
 
-  if (_write_buffer_to_file(xmlPathStr, _xmlHdr.size(), _xmlHdr.c_str())) {
+  if (_writeBufferToFile(xmlPathStr, _xmlHdr.size(), _xmlHdr.c_str())) {
     cerr << "ERROR - Mdvx::_write_as_xml" << endl;
     return -1;
   }
@@ -198,8 +198,8 @@ int Mdvx::_writeAsXml(const string &output_path) const
 /////////////////////////////////////////////////////////////////////////
 // Write XML header
 
-void Mdvx::_write_to_xml_hdr(string &hdr,
-                             const string &bufFileName) const
+void Mdvx::_writeToXmlHdr(string &hdr,
+                          const string &bufFileName) const
   
 {
 
@@ -231,18 +231,18 @@ void Mdvx::_write_to_xml_hdr(string &hdr,
     hdr += TaXml::writeString("buf-file-name", 1, bufFileName);
   }
 
-  _write_to_xml_master_hdr(hdr);
+  _writeToXmlMasterHdr(hdr);
 
   // fields
 
   for (int ifield = 0; ifield < (int) _fields.size(); ifield++) {
-    _write_to_xml_field_hdr(hdr, ifield);
+    _writeToXmlFieldHdr(hdr, ifield);
   }
 
   // chunks
 
   for (int ichunk = 0; ichunk < (int) _chunks.size(); ichunk++) {
-    _write_to_xml_chunk_hdr(hdr, ichunk);
+    _writeToXmlChunkHdr(hdr, ichunk);
   }
 
   // end tag
@@ -254,7 +254,7 @@ void Mdvx::_write_to_xml_hdr(string &hdr,
 /////////////////////////////////////////////////////////////////////////
 // Write XML master header
 
-void Mdvx::_write_to_xml_master_hdr(string &hdr) const
+void Mdvx::_writeToXmlMasterHdr(string &hdr) const
   
 {
 
@@ -348,7 +348,7 @@ void Mdvx::_write_to_xml_master_hdr(string &hdr) const
 /////////////////////////////////////////////////////////////////////////
 // Write XML field header
 
-void Mdvx::_write_to_xml_field_hdr(string &hdr, int fieldNum) const
+void Mdvx::_writeToXmlFieldHdr(string &hdr, int fieldNum) const
   
 {
 
@@ -519,7 +519,7 @@ void Mdvx::_write_to_xml_field_hdr(string &hdr, int fieldNum) const
 /////////////////////////////////////////////////////////////////////////
 // Write XML chunk header
 
-void Mdvx::_write_to_xml_chunk_hdr(string &hdr, int chunkNum) const
+void Mdvx::_writeToXmlChunkHdr(string &hdr, int chunkNum) const
   
 {
 
@@ -537,12 +537,12 @@ void Mdvx::_write_to_xml_chunk_hdr(string &hdr, int chunkNum) const
 ////////////////////////////////////////////////////
 // XML read volume method
 
-int Mdvx::_read_volume_xml(bool fill_missing,
-                           bool do_decimate,
-                           bool do_final_convert,
-                           bool is_vsection,
-                           double vsection_min_lon,
-                           double vsection_max_lon)
+int Mdvx::_readVolumeXml(bool fill_missing,
+                         bool do_decimate,
+                         bool do_final_convert,
+                         bool is_vsection,
+                         double vsection_min_lon,
+                         double vsection_max_lon)
   
 {
 
@@ -551,7 +551,7 @@ int Mdvx::_read_volume_xml(bool fill_missing,
   TaFile xmlFile;
   if (xmlFile.fopenUncompress(_pathInUse.c_str(), "rb") == NULL) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
     return -1;
@@ -561,7 +561,7 @@ int Mdvx::_read_volume_xml(bool fill_missing,
 
   if (xmlFile.fstat()) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
     return -1;
@@ -575,7 +575,7 @@ int Mdvx::_read_volume_xml(bool fill_missing,
   char *fileBuf = fileBuf_.alloc(fileLen + 1);
   if (xmlFile.fread(fileBuf, 1, fileLen) != fileLen) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
     xmlFile.fclose();
@@ -606,7 +606,7 @@ int Mdvx::_read_volume_xml(bool fill_missing,
   
   string mdvBuf;
   if (TaXml::readString(xmlBuf, "mdv", mdvBuf)) {
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     _errStr += "  Cannot decode XML - no mdv section\n";
     return -1;
   }
@@ -632,7 +632,7 @@ int Mdvx::_read_volume_xml(bool fill_missing,
   TaFile bufFile;
   if (bufFile.fopenUncompress(bufFilePath.c_str(), "rb") == NULL) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     TaStr::AddStr(_errStr, "  Cannot open bufFilePath: ",
                   bufFilePath);
     _errStr += strerror(errNum);
@@ -644,14 +644,14 @@ int Mdvx::_read_volume_xml(bool fill_missing,
 
   string masterBuf;
   if (TaXml::readString(mdvBuf, "master-header", masterBuf)) {
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     _errStr += "  Cannot decode XML - no master header section\n";
     return -1;
   }
 
   int forecast_delta = -1;
-  if (_read_xml_to_master_hdr(masterBuf, forecast_delta)) {
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+  if (_readXmlToMasterHdr(masterBuf, forecast_delta)) {
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     _errStr += "  Cannot decode master header\n";
     return -1;
   }
@@ -664,14 +664,14 @@ int Mdvx::_read_volume_xml(bool fill_missing,
   
   vector<string> fieldXmls;
   if (TaXml::readStringArray(mdvBuf, "field", fieldXmls)) {
-    _errStr += "WARNING - Mdvx::_read_volume_xml\n";
+    _errStr += "WARNING - Mdvx::_readVolumeXml\n";
     _errStr += "  No fields found\n";
   }
 
   // check the number of fields
 
   if ((int) fieldXmls.size() != _mhdr.n_fields) {
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     _errStr += "  Incorrect number of fields found in XML\n";
     TaStr::AddInt(_errStr, "  Master header n_fields: ",
                   _mhdr.n_fields);
@@ -682,9 +682,9 @@ int Mdvx::_read_volume_xml(bool fill_missing,
 
   // load up the read field number array
 
-  if (_load_xml_read_field_nums(fieldXmls)) {
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+  if (_loadXmlReadFieldNums(fieldXmls)) {
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     _errStr += "  Cannot determine which fields are to be read\n";
     return -1;
   }
@@ -703,11 +703,11 @@ int Mdvx::_read_volume_xml(bool fill_missing,
     if (forecast_delta >= 0) {
       forecast_time = _mhdr.time_gen + forecast_delta;
     }
-    if (_read_xml_to_field_headers(fieldXml,
-                                   forecast_time,
-                                   forecast_delta,
-                                   fhdr, vhdr)) {
-      _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    if (_readXmlToFieldHeaders(fieldXml,
+                               forecast_time,
+                               forecast_delta,
+                               fhdr, vhdr)) {
+      _errStr += "ERROR - Mdvx::_readVolumeXml\n";
       _errStr += "  Cannot decode field headers\n";
       return -1;
     }
@@ -715,9 +715,9 @@ int Mdvx::_read_volume_xml(bool fill_missing,
     _fhdrsFile.push_back(fhdr);
     _vhdrsFile.push_back(vhdr);
 
-    MdvxField *fld = _read_xml_field(fhdr, vhdr, bufFile);
+    MdvxField *fld = _readXmlField(fhdr, vhdr, bufFile);
     if (fld == NULL) {
-      _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+      _errStr += "ERROR - Mdvx::_readVolumeXml\n";
       TaStr::AddStr(_errStr, "  Cannot read field, name: ", fhdr.field_name);
       return -1;
     }
@@ -736,7 +736,7 @@ int Mdvx::_read_volume_xml(bool fill_missing,
                                        do_decimate, do_final_convert,
                                        remapLut, is_vsection,
                                        vsection_min_lon, vsection_max_lon)) {
-      _errStr += "ERROR - Mdvx::_read_volume_xml.\n";
+      _errStr += "ERROR - Mdvx::_readVolumeXml.\n";
       char errstr[128];
       sprintf(errstr, "  Converting field: %s\n",
               field->getFieldHeader().field_name);
@@ -754,7 +754,7 @@ int Mdvx::_read_volume_xml(bool fill_missing,
   // check the number of chunks
   
   if ((int) chunkXmls.size() != _mhdr.n_chunks) {
-    _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    _errStr += "ERROR - Mdvx::_readVolumeXml\n";
     _errStr += "  Incorrect number of chunks found in XML\n";
     TaStr::AddInt(_errStr, "  Master header n_chunks: ",
                   _mhdr.n_chunks);
@@ -765,8 +765,8 @@ int Mdvx::_read_volume_xml(bool fill_missing,
 
   // load up the read chunk number array
 
-  if (_load_xml_read_chunk_nums()) {
-    _errStr += "ERROR - Mdvx::_read_volume_xml.\n";
+  if (_loadXmlReadChunkNums()) {
+    _errStr += "ERROR - Mdvx::_readVolumeXml.\n";
     return -1;
   }
 
@@ -779,17 +779,17 @@ int Mdvx::_read_volume_xml(bool fill_missing,
     
     chunk_header_t chdr;
     
-    if (_read_xml_to_chunk_header(chunkXml, chdr)) {
-      _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+    if (_readXmlToChunkHeader(chunkXml, chdr)) {
+      _errStr += "ERROR - Mdvx::_readVolumeXml\n";
       _errStr += "  Cannot decode chunk header\n";
       return -1;
     }
     
     _chdrsFile.push_back(chdr);
 
-    MdvxChunk *chunk = _read_xml_chunk(chdr, bufFile);
+    MdvxChunk *chunk = _readXmlChunk(chdr, bufFile);
     if (chunk == NULL) {
-      _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+      _errStr += "ERROR - Mdvx::_readVolumeXml\n";
       TaStr::AddInt(_errStr, "  Cannot read chunk, id: ", chdr.chunk_id);
       return -1;
     }
@@ -808,8 +808,8 @@ int Mdvx::_read_volume_xml(bool fill_missing,
 ////////////////////////////////////////////////
 // read the master header from XML
 
-int Mdvx::_read_xml_to_master_hdr(const string &xml,
-                                  int &forecast_delta)
+int Mdvx::_readXmlToMasterHdr(const string &xml,
+                              int &forecast_delta)
 
 {
 
@@ -941,7 +941,7 @@ int Mdvx::_read_xml_to_master_hdr(const string &xml,
 ////////////////////////////////////////////////
 // load up field numbers to be read
 
-int Mdvx::_load_xml_read_field_nums(const vector<string> &fieldXmls)
+int Mdvx::_loadXmlReadFieldNums(const vector<string> &fieldXmls)
 
 {
 
@@ -999,7 +999,7 @@ int Mdvx::_load_xml_read_field_nums(const vector<string> &fieldXmls)
         } 
       } // j
       if (!fieldFound) {
-        _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+        _errStr += "ERROR - Mdvx::_readVolumeXml\n";
         _errStr += "  Field: ";
         _errStr += _readFieldNames[ii];
         _errStr += " not found in file: ";
@@ -1028,11 +1028,11 @@ int Mdvx::_load_xml_read_field_nums(const vector<string> &fieldXmls)
 ////////////////////////////////////////////////
 // read field headers from XML
 
-int Mdvx::_read_xml_to_field_headers(const string &xml,
-                                     time_t forecast_time,
-                                     int forecast_delta,
-                                     field_header_t &fhdr,
-                                     vlevel_header_t &vhdr)
+int Mdvx::_readXmlToFieldHeaders(const string &xml,
+                                 time_t forecast_time,
+                                 int forecast_delta,
+                                 field_header_t &fhdr,
+                                 vlevel_header_t &vhdr)
   
 {
 
@@ -1419,9 +1419,9 @@ int Mdvx::_read_xml_to_field_headers(const string &xml,
 //
 // returns NULL on failure
 
-MdvxField *Mdvx::_read_xml_field(const field_header_t &fhdr,
-                                 const vlevel_header_t &vhdr,
-                                 TaFile &bufFile)
+MdvxField *Mdvx::_readXmlField(const field_header_t &fhdr,
+                               const vlevel_header_t &vhdr,
+                               TaFile &bufFile)
   
 {
   
@@ -1491,14 +1491,14 @@ MdvxField *Mdvx::_read_xml_field(const field_header_t &fhdr,
 ////////////////////////////////////////////////
 // load up chunk numbers to be read
 
-int Mdvx::_load_xml_read_chunk_nums()
+int Mdvx::_loadXmlReadChunkNums()
 
 {
   
   if (_readChunkNums.size() > 0) {
     for (size_t i = 0; i < _readChunkNums.size(); i++) {
       if (_readChunkNums[i] > _mhdr.n_chunks - 1) {
-        _errStr += "ERROR - Mdvx::_read_volume_xml\n";
+        _errStr += "ERROR - Mdvx::_readVolumeXml\n";
         _errStr += "  Requested chunk number out of range\n";
         TaStr::AddInt(_errStr, "  Requested chunk number: ",
 		      _readChunkNums[i]);
@@ -1537,8 +1537,8 @@ int Mdvx::_load_xml_read_chunk_nums()
 ////////////////////////////////////////////////
 // read chunk headers from XML
 
-int Mdvx::_read_xml_to_chunk_header(const string &xml,
-                                    chunk_header_t &chdr)
+int Mdvx::_readXmlToChunkHeader(const string &xml,
+                                chunk_header_t &chdr)
   
 {
 
@@ -1578,8 +1578,8 @@ int Mdvx::_read_xml_to_chunk_header(const string &xml,
 //
 // returns NULL on failure
 
-MdvxChunk *Mdvx::_read_xml_chunk(const chunk_header_t &chdr,
-                                 TaFile &bufFile)
+MdvxChunk *Mdvx::_readXmlChunk(const chunk_header_t &chdr,
+                               TaFile &bufFile)
   
 {
   
@@ -1899,40 +1899,40 @@ string Mdvx::_xmlTransformType2Str(int transform_type)
 
   switch(transform_type) {
 
-  case DATA_TRANSFORM_NONE:
-    return("none");
-  case DATA_TRANSFORM_LOG:
-    return("log");
-  case DATA_TRANSFORM_POINT:
-    return("point");
-  case DATA_TRANSFORM_SUM:
-    return("sum");
-  case DATA_TRANSFORM_DIFF:
-    return("diff");
-  case DATA_TRANSFORM_PROD:
-    return("product");
-  case DATA_TRANSFORM_MAXIMUM:
-    return("max");
-  case DATA_TRANSFORM_MINIMUM:
-    return("min");
-  case DATA_TRANSFORM_MEAN:
-    return("mean");
-  case DATA_TRANSFORM_MEDIAN:
-    return("median");
-  case DATA_TRANSFORM_MODE:
-    return("mode");
-  case DATA_TRANSFORM_MID_RANGE:
-    return("mid");
-  case DATA_TRANSFORM_STDDEV:
-    return("stddev");
-  case DATA_TRANSFORM_VAR:
-    return("variance");
-  case DATA_TRANSFORM_COVAR:
-    return("covariance");
-  case DATA_TRANSFORM_NORM:
-    return("normalized");
-  default:
-    return ("unknown");
+    case DATA_TRANSFORM_NONE:
+      return("none");
+    case DATA_TRANSFORM_LOG:
+      return("log");
+    case DATA_TRANSFORM_POINT:
+      return("point");
+    case DATA_TRANSFORM_SUM:
+      return("sum");
+    case DATA_TRANSFORM_DIFF:
+      return("diff");
+    case DATA_TRANSFORM_PROD:
+      return("product");
+    case DATA_TRANSFORM_MAXIMUM:
+      return("max");
+    case DATA_TRANSFORM_MINIMUM:
+      return("min");
+    case DATA_TRANSFORM_MEAN:
+      return("mean");
+    case DATA_TRANSFORM_MEDIAN:
+      return("median");
+    case DATA_TRANSFORM_MODE:
+      return("mode");
+    case DATA_TRANSFORM_MID_RANGE:
+      return("mid");
+    case DATA_TRANSFORM_STDDEV:
+      return("stddev");
+    case DATA_TRANSFORM_VAR:
+      return("variance");
+    case DATA_TRANSFORM_COVAR:
+      return("covariance");
+    case DATA_TRANSFORM_NORM:
+      return("normalized");
+    default:
+      return ("unknown");
   }
 
 }
