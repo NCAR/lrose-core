@@ -136,7 +136,7 @@ void Mdvx::writeToXmlBuffer(string &hdr, MemBuf &buf,
 // File is written to files based on the specified path.
 // Returns 0 on success, -1 on error.
 
-int Mdvx::_write_as_xml(const string &output_path) const
+int Mdvx::_writeAsXml(const string &output_path) const
 
 {
 

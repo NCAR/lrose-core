@@ -468,89 +468,6 @@ string Mdvx::getNcfPath(const string &output_path) const
 
 }
 
-/////////////////////////////////////////////////////////
-// compute output path for Ncf files
-
-string Mdvx::_computeNcfOutputPath(const string &outputDir)
-{
-  
-  // check environment for write control directives
-  
-  _checkEnvBeforeWrite();
-
-  // compute path
-  
-  char yearSubdir[MAX_PATH_LEN];
-  char outputBase[MAX_PATH_LEN];
-  int forecastDelta = getForecastLeadSecs();
-  bool writeAsForecast = _getWriteAsForecast();
-  
-  if (writeAsForecast) {
-    
-    if (_mhdr.data_collection_type != Mdvx::DATA_FORECAST && 
-        _mhdr.data_collection_type != Mdvx::DATA_EXTRAPOLATED)
-      _mhdr.data_collection_type = Mdvx::DATA_FORECAST;
- 
-    date_time_t genTime;
-    genTime.unix_time = getGenTime();
-    uconvert_from_utime(&genTime);
-    
-    sprintf(yearSubdir, "%.4d", genTime.year);
-
-    if (!_useExtendedPaths) {
-      sprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.8d",
-              genTime.year, genTime.month, genTime.day,
-              PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
-              PATH_DELIM, forecastDelta);
-    } else {
-      sprintf(outputBase,
-              "%.4d%.2d%.2d%s"
-              "g_%.2d%.2d%.2d%s"
-              "%.4d%.2d%.2d_g_%.2d%.2d%.2d_f_%.8d",
-              genTime.year, genTime.month, genTime.day, PATH_DELIM,
-              genTime.hour, genTime.min, genTime.sec, PATH_DELIM,
-              genTime.year, genTime.month, genTime.day,
-              genTime.hour, genTime.min, genTime.sec,
-              forecastDelta);
-    }
-
-  } else {
-
-    date_time_t validTime;
-    validTime.unix_time = getValidTime();
-    uconvert_from_utime(&validTime);
-    sprintf(yearSubdir, "%.4d", validTime.year);
-    if (!_useExtendedPaths) {
-      sprintf(outputBase, "%.4d%.2d%.2d%s%.2d%.2d%.2d",
-              validTime.year, validTime.month, validTime.day,
-              PATH_DELIM, validTime.hour, validTime.min, validTime.sec);
-    } else {
-      sprintf(outputBase,
-              "%.4d%.2d%.2d%s"
-              "%.4d%.2d%.2d_%.2d%.2d%.2d",
-              validTime.year, validTime.month, validTime.day, PATH_DELIM,
-              validTime.year, validTime.month, validTime.day,
-              validTime.hour, validTime.min, validTime.sec);
-    }
-
-  }
-
-  string outputName = "cf-";
-  if (_writeAddYearSubdir) {
-    outputName += yearSubdir;
-    outputName += PATH_DELIM;
-  }
-  outputName += outputBase;
-  outputName += ".mdv.nc";
-
-  string outputPath(outputDir);
-  outputPath += PATH_DELIM;
-  outputPath += outputName;
-
-  return outputPath;
-
-}
-
 ////////////////////////////////
 // MDV to netCDF CF conversion
 
@@ -896,7 +813,7 @@ int Mdvx::_write_ncf_buf_to_file(const string &output_path) const
 // Conversion is carried out during the write.
 // Returns 0 on success, -1 on error.
 
-int Mdvx::_writeAsCf(const string &output_path) const
+int Mdvx::_writeAsNcf(const string &output_path) const
 
 {
 

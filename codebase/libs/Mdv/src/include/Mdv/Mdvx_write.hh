@@ -127,10 +127,21 @@ virtual int writeToPath(const string &output_path);
 
 /////////////////////////////////////////////////////////
 // Write to buffer
-//
 // Write Mdvx object to a buffer as if written to file.
 
 void writeToBuffer(MemBuf &buf) const;
+
+/////////////////////////////////////////////////////////
+// Write to buffer - 64-bit headers
+// Write Mdvx object to a buffer as if written to file.
+
+void writeToBuffer64(MemBuf &buf) const;
+
+/////////////////////////////////////////////////////////
+// Write to buffer - 32-bit headers
+// Write Mdvx object to a buffer as if written to file.
+
+void writeToBuffer32(MemBuf &buf) const;
 
 ///////////////////////////////////////////////////////
 // Write to path using the buffer routine.

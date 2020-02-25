@@ -216,18 +216,26 @@ si64 Mdvx::getWriteLen32() const
 // Returns 0 on success, -1 on error.
 // getErrStr() retrieves the error string.
 
-int Mdvx::writeToDir(const string &output_dir)
+int Mdvx::writeToDir(const string &outputDir)
 {
 
   clearErrStr();
   updateMasterHeader();
 
+  // if the internal format is a NetCDF buffer
+  // force NCF write
+
+  if (_internalFormat == FORMAT_NCF) {
+    _writeFormat = FORMAT_NCF;
+  }
+  
   // compute output name and path
 
   string outputName, outputPath;
   bool writeAsForecast;
-  _computeOutputPath(output_dir, outputName, outputPath, writeAsForecast);
-
+  _computeOutputPath(outputDir, outputName, outputPath, writeAsForecast);
+  _pathInUse = outputPath;
+  
   // perform the write
   
   if (writeToPath(outputPath)) {
@@ -239,28 +247,15 @@ int Mdvx::writeToDir(const string &output_dir)
 
   if (_writeLdataInfo) {
 
+    Path opath(outputPath);
     LdataInfo ldata;
-    ldata.setDir(output_dir);
+    ldata.setDir(outputDir);
     ldata.setDebug(_debug);
-    if (_writeFormat == FORMAT_XML) {
-      ldata.setDataFileExt("xml");
-      ldata.setDataType("xml");
-    } else if (_internalFormat == FORMAT_NCF) {
-      ldata.setDataFileExt("nc");
-      ldata.setDataType("nc");
-    } else {
-      ldata.setDataFileExt("mdv");
-      ldata.setDataType("mdv");
-    }
-    ldata.setWriter(_appName.c_str());
-
+    ldata.setDataFileExt(opath.getExt());
+    ldata.setDataType(opath.getExt());
+    ldata.setWriter(_appName);
     string relName = outputName;
-    if (_writeFormat == FORMAT_XML) {
-      relName += ".xml";
-    } else if (_internalFormat == FORMAT_NCF) {
-      relName += getNcfExt();
-    }
-    ldata.setRelDataPath(relName.c_str());
+    ldata.setRelDataPath(relName);
     time_t latestTime;
     if (writeAsForecast) {
       ldata.setIsFcast();
@@ -293,7 +288,7 @@ int Mdvx::writeToDir(const string &output_dir)
 // Returns 0 on success, -1 on error.
 // getErrStr() retrieves the error string.
 
-int Mdvx::writeToPath(const string &output_path)
+int Mdvx::writeToPath(const string &outputPath)
 
 {
 
@@ -301,24 +296,17 @@ int Mdvx::writeToPath(const string &output_path)
   
   clearErrStr();
 
-  // if already converted into netcdf buffer, write it out directly
-  // from the buffer
-
-  if (_internalFormat == FORMAT_NCF) {
-    return _write_ncf_buf_to_file(output_path);
-  }
-  
   // update the master header with the write time
 
   updateMasterHeader();
   time_t now = time(NULL);
   _mhdr.time_written = (si32) now;
 
-  // check the environment vars for write format
+  // check the environment vars for write details
 
   _checkEnvBeforeWrite();
   
-  // compute write length
+  // compute 32-bit MDV write length
   
   si64 writeLen = getWriteLen32();
 
@@ -326,31 +314,55 @@ int Mdvx::writeToPath(const string &output_path)
   
   DateTime dtime(_mhdr.time_centroid);
 
-  // if to be written as XML, call XML method
-  
-  if (_writeFormat == FORMAT_XML) {
-    return _write_as_xml(output_path);
-  }
-    
   // force NetCDF output instaed of MDV for large files
   // or data beyond a specified date (2025)
   
-  if (writeLen >= SI32_MAX ||
+  if (_internalFormat == FORMAT_NCF ||
+      writeLen >= SI32_MAX ||
       dtime.getYear() >= 2025) {
     _writeFormat = FORMAT_NCF;
   }
   
-  string fullOutPath;
-  RapDataDir.fillPath(output_path, fullOutPath);
-  _pathInUse = fullOutPath;
+  // if already converted into netcdf buffer, write it out directly
+  // from the buffer
 
+  if (_internalFormat == FORMAT_NCF) {
+    return _write_ncf_buf_to_file(outputPath);
+  }
+  
+  // if to be written as XML, call XML method
+  
+  if (_writeFormat == FORMAT_XML) {
+    return _writeAsXml(outputPath);
+  }
+    
+  // if to be written as NCF, call NCF method
+  
+  if (_writeFormat == FORMAT_NCF) {
+    return _writeAsNcf(outputPath);
+  }
+
+  // otherwise write as MDV
+
+  return _writeAsMdv(outputPath);
+
+}
+
+////////////////////////////////////////////////
+// write as MDV
+// returns 0 on success, -1 on failure
+
+int Mdvx::_writeAsMdv(const string &outputPath)
+  
+{
+  
   if (_debug) {
-    cerr << "Mdvx - writing to path: " << fullOutPath << endl;
+    cerr << "Mdvx - writing to path: " << outputPath << endl;
   }
   
   // remove gzipped file if it already exists
   
-  ta_remove_compressed(fullOutPath.c_str());
+  ta_remove_compressed(outputPath.c_str());
   
   // check write 32-bit headers
   
@@ -358,7 +370,7 @@ int Mdvx::writeToPath(const string &output_path)
 
   // open tmp file
 
-  Path outPath(fullOutPath);
+  Path outPath(outputPath);
   outPath.makeDirRecurse();
   string tmpPath = outPath.computeTmpPath();
   
@@ -367,7 +379,7 @@ int Mdvx::writeToPath(const string &output_path)
   
   if (outfile.fopen(tmpPath.c_str(), "wb") == NULL) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::writeToPath\n";
+    _errStr += "ERROR - Mdvx::_writeAsMdv\n";
     _errStr += "  Cannot open file for writing: ";
     _errStr += tmpPath;
     _errStr += "\n    ";
@@ -397,7 +409,7 @@ int Mdvx::writeToPath(const string &output_path)
   for (int i = 0; i < _mhdr.n_fields; i++) {
 
     if (_heartbeatFunc != NULL) {
-      _heartbeatFunc("Mdvx::writeToPath");
+      _heartbeatFunc("Mdvx::_writeAsMdv");
     }
 
     if (_fields[i]->_write_volume(outfile, writeOffset, nextOffset)) {
@@ -406,10 +418,10 @@ int Mdvx::writeToPath(const string &output_path)
       char field_string[10];
       sprintf(field_string, "%d", i);
       
-      _errStr += "ERROR - Mdvx::writeToPath\n";
+      _errStr += "ERROR - Mdvx::_writeAsMdv\n";
       _errStr += string("  Error writing volume for field ")
 	+ field_string + "\n";
-      _errStr += "  Path: " + fullOutPath + "\n";
+      _errStr += "  Path: " + outputPath + "\n";
       return -1;
     }
     writeOffset = nextOffset;
@@ -421,9 +433,9 @@ int Mdvx::writeToPath(const string &output_path)
   for (int i = 0; i < _mhdr.n_chunks; i++) {
     if (_chunks[i]->_write_data(outfile, writeOffset, nextOffset)) {
       _errStr += _chunks[i]->getErrStr();
-      _errStr += "ERROR - Mdvx::writeToPath\n";
+      _errStr += "ERROR - Mdvx::_writeAsMdv\n";
       _errStr += "  Path: ";
-      _errStr += fullOutPath;
+      _errStr += outputPath;
       _errStr += "\n";
       return -1;
     }
@@ -433,9 +445,9 @@ int Mdvx::writeToPath(const string &output_path)
   // write the master header
 
   if (_write_master_header(outfile)) {
-    _errStr += "ERROR - Mdvx::writeToPath\n";
+    _errStr += "ERROR - Mdvx::_writeAsMdv\n";
     _errStr += "  Path: ";
-    _errStr += fullOutPath;
+    _errStr += outputPath;
     _errStr += "\n";
     return -1;
   }
@@ -444,9 +456,9 @@ int Mdvx::writeToPath(const string &output_path)
 
   for (int i = 0; i < _mhdr.n_fields; i++) {
     if (_write_field_header(i, outfile)) {
-      _errStr += "ERROR - Mdvx::writeToPath\n";
+      _errStr += "ERROR - Mdvx::_writeAsMdv\n";
       _errStr += "  Path: ";
-      _errStr += fullOutPath;
+      _errStr += outputPath;
       _errStr += "\n";
       return -1;
     }
@@ -456,9 +468,9 @@ int Mdvx::writeToPath(const string &output_path)
   
   for (int i = 0; i < _mhdr.n_fields; i++) {
     if (_write_vlevel_header(i, outfile)) {
-      _errStr += "ERROR - Mdvx::writeToPath\n";
+      _errStr += "ERROR - Mdvx::_writeAsMdv\n";
       _errStr += "  Path: ";
-      _errStr += fullOutPath;
+      _errStr += outputPath;
       _errStr += "\n";
       return -1;
     }
@@ -468,9 +480,9 @@ int Mdvx::writeToPath(const string &output_path)
 
   for (int i = 0; i < _mhdr.n_chunks; i++) {
     if (_write_chunk_header(i, outfile)) {
-      _errStr += "ERROR - Mdvx::writeToPath\n";
+      _errStr += "ERROR - Mdvx::_writeAsMdv\n";
       _errStr += "  Path: ";
-      _errStr += fullOutPath;
+      _errStr += outputPath;
       _errStr += "\n";
       return -1;
     }
@@ -482,13 +494,13 @@ int Mdvx::writeToPath(const string &output_path)
 
   // rename the tmp to final output file path
 
-  if (rename(tmpPath.c_str(), fullOutPath.c_str())) {
+  if (rename(tmpPath.c_str(), outputPath.c_str())) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::writeToPath\n";
+    _errStr += "ERROR - Mdvx::_writeAsMdv\n";
     _errStr += "  Cannot rename tmp file: ";
     _errStr += tmpPath;
     _errStr += " to: ";
-    _errStr += fullOutPath;
+    _errStr += outputPath;
     _errStr += "\n  ";
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -496,50 +508,6 @@ int Mdvx::writeToPath(const string &output_path)
   }
 
   outfile.clearRemoveOnDestruct();
-  
-  return 0;
-
-}
-
-////////////////////////////////////////////////
-// write MDV to specified directory, locally
-// returns 0 on success, -1 on failure
-
-int Mdvx::_writeAsMdv(const string &url)
-  
-{
-  
-  DsURL dsUrl(url);
-  string writeDir(dsUrl.getFile());
-
-  // local - direct write
-  if (Mdvx::writeToDir(writeDir)) {
-    _errStr += "ERROR - DsMdvx::_writeAsMdv\n";
-    return -1;
-  }
-  
-  // reg with data mapper - the base class uses LdataInfo which does
-  // not register
-  
-  time_t latestTime;
-  if (_writeAsForecast) {
-    latestTime = _mhdr.time_gen;
-  } else {
-    latestTime = _mhdr.time_centroid;
-  }
-  DmapAccess dmap;
-  string dataType = "mdv";
-  if (_writeFormat == FORMAT_XML) {
-    dataType = "xml";
-  } else if (_writeFormat == FORMAT_NCF) {
-    dataType = "nc";
-  }
-  if (_writeAsForecast) {
-    int forecast_delta = _mhdr.time_centroid - _mhdr.time_gen;
-    dmap.regLatestInfo(latestTime, writeDir, dataType, forecast_delta);
-  } else {
-    dmap.regLatestInfo(latestTime, writeDir, dataType);
-  }
   
   return 0;
 
@@ -553,9 +521,26 @@ int Mdvx::_writeAsMdv(const string &url)
 void Mdvx::writeToBuffer(MemBuf &buf) const
 
 {
+  
+  if (_write32BitHeaders) {
+    writeToBuffer32(buf);
+  } else {
+    writeToBuffer64(buf);
+  }
+
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Write to 64-bit buffer
+//
+// Write Mdvx object to a buffer as if written to file.
+
+void Mdvx::writeToBuffer64(MemBuf &buf) const
+
+{
 
   if (_write32BitHeaders) {
-    _writeToBuffer32(buf);
+    writeToBuffer32(buf);
     return;
   }
 
@@ -687,7 +672,7 @@ void Mdvx::writeToBuffer(MemBuf &buf) const
 //
 // Write Mdvx object to a buffer as if written to file.
 
-void Mdvx::_writeToBuffer32(MemBuf &buf) const
+void Mdvx::writeToBuffer32(MemBuf &buf) const
 
 {
 
@@ -831,7 +816,7 @@ void Mdvx::_writeToBuffer32(MemBuf &buf) const
 // Returns 0 on success, -1 on error.
 // getErrStr() retrieves the error string.
 
-int Mdvx::writeUsingBuf(const string &output_path) const
+int Mdvx::writeUsingBuf(const string &outputPath) const
 
 {
 
@@ -839,21 +824,17 @@ int Mdvx::writeUsingBuf(const string &output_path) const
   MemBuf buf;
   writeToBuffer(buf);
   
-  string fullOutPath;
-  RapDataDir.fillPath(output_path, fullOutPath);
-  _pathInUse = fullOutPath;
-
   if (_debug) {
-    cerr << "Mdvx::writeUsingBuf to path: " << fullOutPath << endl;
+    cerr << "Mdvx::writeUsingBuf to path: " << outputPath << endl;
   }
 
   // remove compressed file if it exists
   
-  ta_remove_compressed(fullOutPath.c_str());
+  ta_remove_compressed(outputPath.c_str());
 
   // open tmp file
 
-  Path outPath(fullOutPath);
+  Path outPath(outputPath);
   outPath.makeDirRecurse();
   string tmpPath = outPath.computeTmpPath();
   
@@ -890,13 +871,13 @@ int Mdvx::writeUsingBuf(const string &output_path) const
 
   // rename the tmp to final output file path
 
-  if (rename(tmpPath.c_str(), fullOutPath.c_str())) {
+  if (rename(tmpPath.c_str(), outputPath.c_str())) {
     int errNum = errno;
     _errStr += "ERROR - Mdvx::writeUsingBuf\n";
     _errStr += "  Cannot rename tmp file: ";
     _errStr += tmpPath;
     _errStr += " to: ";
-    _errStr += fullOutPath;
+    _errStr += outputPath;
     _errStr += "\n  ";
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1329,6 +1310,9 @@ void Mdvx::_checkEnvBeforeWrite() const
 
 }
 
+/////////////////////////////////////////////////////////////
+// are we writing 32-bit headers?
+
 void Mdvx::_checkWrite32BitHeaders() const
 {
 
@@ -1349,7 +1333,8 @@ void Mdvx::_checkWrite32BitHeaders() const
     }
   }
   if (_debug && _write32BitHeaders) {
-    cerr << "DEBUG - Mdvx::_checkWrite32BitHeaders() - writing 32-bit headers" << endl;
+    cerr << "DEBUG - Mdvx::_checkWrite32BitHeaders()" << endl;
+    cerr << "DEBUG - writing 32-bit headers" << endl;
   }
 
 }
@@ -1375,7 +1360,7 @@ void Mdvx::_computeOutputPath(const string &outputDir,
   writeAsForecast = _writeAsForecast;
   
   if (_ifForecastWriteAsForecast) {
-    if (_internalFormat == FORMAT_NCF) {
+    if (_writeFormat == FORMAT_NCF) {
       if (_ncfIsForecast) {
         writeAsForecast = true;
       }
@@ -1465,84 +1450,17 @@ void Mdvx::_computeOutputPath(const string &outputDir,
   outputName += outputBase;
   outputName += ".mdv";
 
-  outputPath = outputDir;
+  if (_writeFormat == FORMAT_NCF) {
+    outputName += ".cf.nc";
+  } else if (_writeFormat == FORMAT_XML) {
+    outputName += ".xml";
+  }
+
+  RapDataDir.fillPath(outputDir, outputPath);
   outputPath += PATH_DELIM;
   outputPath += outputName;
 
 }
-
-#ifdef JUNK
-  
-////////////////////////////////////////////////
-// Convert MDV format to NCF format, and write
-// returns 0 on success, -1 on failure
-
-int Mdvx::_convertMdvToNcfAndWrite(const string &path)
-  
-{
-
-  // compute paths
-
-  DsPATH dsPath(path);
-  string outputDir;
-  RapDataDir.fillPath(dsPath.getFile(), outputDir);
-  string outputPath;
-  string dataType = "ncf";
-
-  if (getProjection() == Mdvx::PROJ_POLAR_RADAR) {
-    
-    //radial data type
-    
-    Mdv2NcfTrans trans;
-    trans.setDebug(_debug);
-    if(_heartbeatFunc != NULL) {
-      trans.setHeartbeatFunction(_heartbeatFunc);
-    }
-    trans.setRadialFileType(_ncfRadialFileType);
-    if (trans.writeCfRadial(*this, outputDir)) {
-      TaStr::AddStr(_errStr, "ERROR - Mdvx::_convertMdvToNcfAndWrite()");
-      TaStr::AddStr(_errStr, trans.getErrStr());
-      return -1;
-    }
-    outputPath = trans.getNcFilePath();
-    
-    if (_ncfRadialFileType == Mdvx::RADIAL_TYPE_CF_RADIAL) {
-      dataType = "cfradial";
-    } else if (_ncfRadialFileType == Mdvx::RADIAL_TYPE_DORADE) {
-      dataType = "dorade";
-    } else if (_ncfRadialFileType == Mdvx::RADIAL_TYPE_UF) {
-      dataType = "uf";
-    }
-    
-  } else {
-    
-    // basic CF - translate from Mdv
-    
-    outputPath = _computeNcfOutputPath(outputDir);
-    Mdv2NcfTrans trans;
-    trans.setDebug(_debug);
-    if(_heartbeatFunc != NULL) {
-      trans.setHeartbeatFunction(_heartbeatFunc);
-    }
-
-    if (trans.writeCf(*this, outputPath)) {
-      cerr << "ERROR - Mdvx::_convertMdvToNcfAndWrite()" << endl;
-      cerr << trans.getErrStr() << endl;
-      return -1;
-    }
-    
-  }
-    
-  // write latest data info
-    
-  _doWriteLdataInfo(outputDir, outputPath, dataType);
-  _pathInUse = outputPath;
-
-  return 0;
-
-}
-
-#endif
 
 //////////////////////////////////////
 
@@ -1574,7 +1492,7 @@ bool Mdvx::_getWriteAsForecast()
 {
   
   if (_ifForecastWriteAsForecast) {
-    if (_internalFormat == FORMAT_NCF) {
+    if (_writeFormat == FORMAT_NCF) {
       if (_ncfIsForecast) {
         return true;
       }

@@ -771,16 +771,12 @@ protected:
                           string &outputPath,
                           bool &writeAsForecast) const;
 
-  void _writeToBuffer32(MemBuf &buf) const;
-
-  int _writeAsMdv(const string &url);
+  int _writeAsMdv(const string &outputPath);
   void _doWriteLdataInfo(const string &outputDir,
                          const string &outputPath,
                          const string &dataType);
   bool _getWriteAsForecast();
-
-  string _computeNcfOutputPath(const string &outputDir);
-
+  
   int _write_buffer_to_file(const string &pathStr,
                             size_t len, const void *data) const;
 
@@ -794,7 +790,7 @@ protected:
   
   // xml
   
-  int _write_as_xml(const string &output_path) const;
+  int _writeAsXml(const string &output_path) const;
   
   void _write_to_xml_hdr(string &hdr,
                          const string &bufFileName) const;
@@ -863,7 +859,7 @@ protected:
 
   int _convertFormatOnRead(const string &path);
   int _convertFormatOnWrite(const string &path);
-  int _writeAsCf(const string &output_path) const;
+  int _writeAsNcf(const string &output_path) const;
   int _convertMdv2Ncf(const string &path);
   int _convertNcf2Mdv(const string &path);
   int _readAllHeadersNcf(const string &path);

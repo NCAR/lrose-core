@@ -1043,9 +1043,9 @@ int DsMdvx::writeToPath(const string &output_url)
 
   if (!contactServer) {
     // local - direct write
-    return (Mdvx::writeToPath(url.getFile().c_str()));
+    return Mdvx::writeToPath(url.getFile());
   }
-
+  
   // assemble message packet
 
   DsMdvxMsg msg;
