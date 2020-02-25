@@ -428,46 +428,6 @@ void Mdvx::printNcfInfo(ostream &out) const
 
 }
 
-////////////////////////////////////
-// get ncf file extension
-// Adds in suffix if appropriate
-
-string Mdvx::getNcfExt() const
-
-{
-
-  string ext;
-  if (_ncfFileSuffix.size() > 0) {
-    ext += ".";
-    ext += _ncfFileSuffix;
-  }
-  ext += ".nc";
-
-  return ext;
-
-}
-
-/////////////////////////////////////////////////////////
-// Get output CF NetCDF path, based on MDV path
-// Returns CF path.
-
-string Mdvx::getNcfPath(const string &output_path) const
-
-{
-
-  // compute path relative to $DATA_DIR
-  
-  string outPathStr;
-  RapDataDir.fillPath(output_path, outPathStr);
-
-  string cfPathStr = "cf-";
-  cfPathStr += outPathStr;
-  cfPathStr += getNcfExt();
-
-  return cfPathStr;
-
-}
-
 ////////////////////////////////
 // MDV to netCDF CF conversion
 
@@ -781,24 +741,17 @@ int Mdvx::_convertFormatOnWrite(const string &url)
 // File name is based on the specified path.
 // Returns 0 on success, -1 on error.
 
-int Mdvx::_writeNcfBufToFile(const string &output_path) const
+int Mdvx::_writeNcfBufToFile(const string &outputPath) const
 
 {
 
-  // compute path relative to $DATA_DIR
-  
-  _pathInUse = getNcfPath(output_path);
-  if (_debug) {
-    cerr << "Mdvx - writing CF NetCDF buffer to path: " << _pathInUse << endl;
-  }
-
   // remove compressed file if it exists
   
-  ta_remove_compressed(_pathInUse.c_str());
+  ta_remove_compressed(outputPath.c_str());
 
   // write the buffer to the file
 
-  if (_writeBufferToFile(_pathInUse, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
+  if (_writeBufferToFile(outputPath, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
     TaStr::AddStr(_errStr, "ERROR - Mdvx::_writeNcfBufToFile");
     return -1;
   }
@@ -813,20 +766,13 @@ int Mdvx::_writeNcfBufToFile(const string &output_path) const
 // Conversion is carried out during the write.
 // Returns 0 on success, -1 on error.
 
-int Mdvx::_writeAsNcf(const string &output_path) const
+int Mdvx::_writeAsNcf(const string &outputPath) const
 
 {
 
-  // compute path relative to $DATA_DIR
-  
-  _pathInUse = getNcfPath(output_path);
-  if (_debug) {
-    cerr << "Mdvx - writing CF NetCDF buffer to path: " << _pathInUse << endl;
-  }
-
   // remove compressed file if it exists
   
-  ta_remove_compressed(_pathInUse.c_str());
+  ta_remove_compressed(outputPath.c_str());
 
   // write as CF
   
@@ -837,9 +783,9 @@ int Mdvx::_writeAsNcf(const string &output_path) const
     trans.setHeartbeatFunction(_heartbeatFunc);
   }
   
-  if (trans.writeCf(*this, _pathInUse)) {
+  if (trans.writeCf(*this, outputPath)) {
     _errStr += "ERROR - Mdvx::_convertMdv2Ncf.\n";
-    TaStr::AddStr(_errStr, "  Path: ", _pathInUse);
+    TaStr::AddStr(_errStr, "  Path: ", outputPath);
     _errStr += trans.getErrStr();
     return -1;
   }

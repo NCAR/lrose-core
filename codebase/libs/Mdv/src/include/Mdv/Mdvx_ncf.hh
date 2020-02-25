@@ -211,16 +211,6 @@ void printNcfInfo(ostream &out) const;
 
 void printConvertMdv2NcfRequest(ostream &out) const;
 
-// get ncf file extension
-// Adds in suffix if appropriate
-
-string getNcfExt() const;
-
-// Get output CF NetCDF path, based on MDV path
-// Returns CF path.
-
-string getNcfPath(const string &output_path) const;
-
 #endif
 
     

@@ -1723,6 +1723,8 @@ int Mdvx::readVsection()
   if (isNcfFile(_pathInUse)) {
 
     // read NCF file
+    // vsection taken care of by Ncf2MdvTrans
+
     _internalFormat = FORMAT_NCF;
     if (_readNcf(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVsection.\n";
@@ -1734,6 +1736,8 @@ int Mdvx::readVsection()
   } else if (isRadxFile(_pathInUse)) {
 
     // read RADX radial radar format file
+    // vsection taken care of by Ncf2MdvTrans
+
     _internalFormat = FORMAT_RADX;
     if (_readRadx(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVsection.\n";
