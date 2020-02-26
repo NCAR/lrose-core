@@ -38,7 +38,7 @@ TARGET_FILE = VerifyTracks
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ltitan \
-	-lrapmath -ldidss -lrapformats -ltoolsa -lpthread \
+	-lrapmath -ldsserver -ldidss -lrapformats -ltoolsa -lpthread \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lm
 

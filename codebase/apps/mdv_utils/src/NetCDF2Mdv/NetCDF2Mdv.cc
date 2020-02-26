@@ -262,7 +262,7 @@ int NetCDF2Mdv::_processData(char *inputPath)
 	mdv.addReadField(_params._field_names[i]);
 
       // translate into MDV
-      if (trans.translate(inputPath, mdv)) {
+      if (trans.readCf(inputPath, mdv)) {
 	cerr << "ERROR - NetCDF2Mdv::_processData()" << endl;
 	cerr << "  Cannot translate file: " <<  inputPath << endl; 
 	cerr << trans.getErrStr() << endl;
@@ -288,7 +288,7 @@ int NetCDF2Mdv::_processData(char *inputPath)
     Ncf2MdvTrans trans;
     trans.setDebug(_params.debug >= Params::DEBUG_VERBOSE);
 
-    if (trans.translate(inputPath, mdv)) {
+    if (trans.readCf(inputPath, mdv)) {
       cerr << "ERROR - NetCDF2Mdv::_processData()" << endl;
       cerr << "  Cannot translate file: " <<  inputPath << endl;
       cerr << trans.getErrStr() << endl;

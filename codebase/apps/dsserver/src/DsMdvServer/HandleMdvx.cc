@@ -1501,7 +1501,7 @@ void DsMdvServer::_printHeadersDebug(const DsMdvx &mdvx) const
   
 {
   
-  if (_isVerbose && mdvx._currentFormat == Mdvx::FORMAT_MDV) {
+  if (_isVerbose && mdvx._internalFormat == Mdvx::FORMAT_MDV) {
     cerr << "!!!!!!!!!!!! START FILE HEADERS !!!!!!!!!!!!!!!!!!!!!" << endl;
     cerr << "!!!!! The following headers are as in the file" << endl;
     mdvx.printAllFileHeaders(cerr);

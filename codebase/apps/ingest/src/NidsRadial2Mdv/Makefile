@@ -39,7 +39,7 @@ TARGET_FILE = NidsRadial2Mdv
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lrapformats -lrapmath \
-	-ldidss -leuclid -ltoolsa -ldataport -ltdrp \
+	-ldsserver -ldidss -leuclid -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
