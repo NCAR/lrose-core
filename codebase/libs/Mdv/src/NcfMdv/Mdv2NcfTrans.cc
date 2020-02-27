@@ -185,15 +185,11 @@ int Mdv2NcfTrans::writeCf(const Mdvx &mdv, const string &ncFilePath)
 
   // parse the MDV file
 
-  cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
-
   if (_parseMdv()) {
     TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::writeCf");
     TaStr::AddStr(_errStr, "  Parsing MDV file, path:", _mdv->getPathInUse());
     return -1;
   }
-
-  cerr << "mmmmmmmmmmmmmmmmmmmmmmmmmmmmm" << endl;
 
   // open the output Nc file
 
@@ -202,8 +198,6 @@ int Mdv2NcfTrans::writeCf(const Mdvx &mdv, const string &ncFilePath)
     TaStr::AddStr(_errStr, "  Opening Nc File, path: ", _ncFilePath);
     return -1;
   }
-
-  cerr << "NNNNNNNNNNNNNNNNNNNNNNN" << endl;
 
   // write the Nc file
 
@@ -214,8 +208,6 @@ int Mdv2NcfTrans::writeCf(const Mdvx &mdv, const string &ncFilePath)
   }
 
   // close the Nc file
-
-  cerr << "OOOOOOOOOOOOOOOOOOOOOO" << endl;
 
   _closeNcFile();
 
@@ -324,13 +316,11 @@ int Mdv2NcfTrans::_parseMdv()
   
   for (int i = 0; i < _mdv->getNFields(); i++) {    
 
-    cerr << "qqqqqqqqqqqqqqqqqqqqqqqqqqq, i: " << i << endl;
-
     const MdvxField *field = _mdv->getField(i);     
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
     string mdvFieldName = fhdr.field_name;
     string mdvLongFieldName = fhdr.field_name_long;
-    
+
     // set up field names etc
 
     string ncfFieldName = mdvFieldName;
@@ -408,8 +398,6 @@ int Mdv2NcfTrans::_parseMdv()
       }	
     }
       
-    cerr << "rrrrrrrrrrrrrrrrrrrr, i: " << i << endl;
-
     if (gridIsNew) {
 
       if (_isXSect) {	
@@ -450,8 +438,6 @@ int Mdv2NcfTrans::_parseMdv()
 
     }
       
-    cerr << "sssssssssssssssssssssssss, i: " << i << endl;
-
     // Create NcfVlevelInfo object for vlevel_header_t struct
 
     Mdvx::vlevel_header_t vlev = field->getVlevelHeader();
@@ -490,11 +476,13 @@ int Mdv2NcfTrans::_parseMdv()
 
     bool compress = false;
     int compressionLevel = 4;
-    if (field->getRequestedCompression() != Mdvx::COMPRESSION_NONE) {
-      cerr << "ttttttttttttttttttttt, compress is true, i: " << i << endl;
+    if (fhdr.requested_compression != Mdvx::COMPRESSION_NONE) {
       compress = true;
     }
-    
+    if (_debug && compress) {
+      cerr << "Mdv2NcfTrans::_parseMdv: compress is true, field: " << i << endl;
+    }
+      
     NcfFieldData *fieldData = new NcfFieldData(_debug, field, gridInfo, vlevelInfo,
                                                mdvFieldName, ncfFieldName,
                                                ncfStandardName, ncfLongName,
@@ -506,8 +494,6 @@ int Mdv2NcfTrans::_parseMdv()
                                                compressionLevel,
                                                _ncFormat);
     
-    cerr << "uuuuuuuuuuuuuuuuuuuuuuu, i: " << i << endl;
-
     _fieldData.push_back(fieldData);
     
   } // for all fields

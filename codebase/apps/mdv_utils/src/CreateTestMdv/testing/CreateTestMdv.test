@@ -471,6 +471,7 @@ fields = {
 //
 
 output_dir = "mdvp:://localhost:0:/tmp/MdvTest";
+// output_dir = "/tmp/MdvTest";
 
 ///////////// compression /////////////////////////////
 //

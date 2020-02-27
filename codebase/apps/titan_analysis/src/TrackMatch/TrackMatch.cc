@@ -228,7 +228,7 @@ int TrackMatch::Run ()
   }
 
   fprintf(stdout, "\n");
-  case_track_print(stdout, "", &this_case);
+  case_track_print(stdout, (char *) "", &this_case);
   fprintf(stdout, "\n");
   fflush(stdout);
 

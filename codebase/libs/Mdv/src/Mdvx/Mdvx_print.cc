@@ -381,6 +381,8 @@ void Mdvx::printFieldHeader(const field_header_t &fhdr,
   }
   out << "compression_type:       "
       << compressionType2Str(fhdr.compression_type) << endl;
+  out << "requested_compression:  "
+      << compressionType2Str(fhdr.requested_compression) << endl;
   out << "transform_type:         "
       << transformType2Str(fhdr.transform_type) << endl;
   if (fhdr.encoding_type == ENCODING_FLOAT32 ||
@@ -485,6 +487,8 @@ void Mdvx::printFieldHeader(const field_header_32_t &fhdr32,
   }
   out << "compression_type:       "
       << compressionType2Str(fhdr32.compression_type) << endl;
+  out << "requested_compression:  "
+      << compressionType2Str(fhdr32.requested_compression) << endl;
   out << "transform_type:         "
       << transformType2Str(fhdr32.transform_type) << endl;
   if (fhdr32.encoding_type == ENCODING_FLOAT32 ||

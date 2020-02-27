@@ -93,9 +93,9 @@ void Mdvx::setNcfHeader(time_t validTime,
 
 {
 
-  cerr << "1111111111111111111111111" << endl;
-
-  _internalFormat = FORMAT_NCF;
+  if (_debug) {
+    cerr << "DEBUG - Mdvx::setNcfHeader" << endl;
+  }
 
   _ncfValidTime = validTime;
   _ncfEpoch = epoch;
@@ -112,6 +112,8 @@ void Mdvx::setNcfHeader(time_t validTime,
     _ncfIsForecast = false;
   }
 
+  _internalFormat = FORMAT_NCF;
+
 }
 
 
@@ -123,13 +125,14 @@ void Mdvx::setNcfBuffer(const void *ncBuf,
 
 {
   
-  cerr << "2222222222222222222222222" << endl;
-
-  _internalFormat = FORMAT_NCF;
+  if (_debug) {
+    cerr << "DEBUG - Mdvx::setNcfBuffer" << endl;
+  }
 
   _ncfBuf.free();
   _ncfBuf.add(ncBuf, nbytes);
-  
+  _internalFormat = FORMAT_NCF;
+
 }
 
 
@@ -221,7 +224,6 @@ int Mdvx::_readVolumeIntoNcfBuf()
 
   // set current format
 
-  cerr << "33333333333333333333333" << endl;
   _internalFormat = FORMAT_NCF;
   
   // set times etc
@@ -733,14 +735,16 @@ int Mdvx::_writeAsNcf(const string &outputPath) const
 // convert MDV format to NETCDF CF format
 // returns 0 on success, -1 on failure
 
-int Mdvx::_convertMdv2Ncf(const string &path)
+int Mdvx::_writeToNcfBuf(const string &path)
   
 {
   
-  cerr << "eeeeeeeeeeeeeeeeeeeeeeee" << endl;
+  if (_debug) {
+    cerr << "DEBUG - Mdvx::_writeToNcfBuf" << endl;
+  }
 
   if (_internalFormat != FORMAT_MDV) {
-    _errStr += "ERROR - Mdvx::_convertMdv2Ncf.\n";
+    _errStr += "ERROR - Mdvx::_writeToNcfBuf.\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
     TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_MDV));
@@ -758,7 +762,7 @@ int Mdvx::_convertMdv2Ncf(const string &path)
   pid_t pid = getpid();
   char tmpFilePath[FILENAME_MAX];
   sprintf(tmpFilePath,
-          "/tmp/Mdvx_convertMdv2Ncf_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
+          "/tmp/Mdvx_writeToNcfBuf_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
           dnow.getYear(), dnow.getMonth(), dnow.getDay(),
           dnow.getHour(), dnow.getMin(), dnow.getSec(), pid);
           
@@ -770,7 +774,7 @@ int Mdvx::_convertMdv2Ncf(const string &path)
   }
   
   if (trans.writeCf(*this, tmpFilePath)) {
-    _errStr += "ERROR - Mdvx::_convertMdv2Ncf.\n";
+    _errStr += "ERROR - Mdvx::_writeToNcfBuf.\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
     _errStr += trans.getErrStr();
     return -1;
@@ -781,7 +785,7 @@ int Mdvx::_convertMdv2Ncf(const string &path)
   TaFile ncfFile;
   if (ncfFile.fopen(tmpFilePath, "rb") == NULL) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_convertMdv2Ncf\n";
+    _errStr += "ERROR - Mdvx::_writeToNcfBuf\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
     TaStr::AddStr(_errStr, "  Cannot open tmp file: ", tmpFilePath);
     _errStr += strerror(errNum);
@@ -794,7 +798,7 @@ int Mdvx::_convertMdv2Ncf(const string &path)
   
   if (ncfFile.fstat()) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_convertMdv2Ncf\n";
+    _errStr += "ERROR - Mdvx::_writeToNcfBuf\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
     TaStr::AddStr(_errStr, "  Cannot stat tmp file: ", tmpFilePath);
     _errStr += strerror(errNum);
@@ -811,7 +815,7 @@ int Mdvx::_convertMdv2Ncf(const string &path)
   _ncfBuf.reserve(fileLen);
   if (ncfFile.fread(_ncfBuf.getPtr(), 1, fileLen) != fileLen) {
     int errNum = errno;
-    _errStr += "ERROR - Mdvx::_convertMdv2Ncf\n";
+    _errStr += "ERROR - Mdvx::_writeToNcfBuf\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
     TaStr::AddStr(_errStr, "  Cannot read tmp file: ", tmpFilePath);
     _errStr += strerror(errNum);
@@ -828,7 +832,9 @@ int Mdvx::_convertMdv2Ncf(const string &path)
 
   // set current format
   
-  cerr << "555555555555555555555" << endl;
+  if (_debug) {
+    cerr << "DEBUG - Mdvx::_writeToNcfBuf - setting to FORMAT_NCF" << endl;
+  }
   _internalFormat = FORMAT_NCF;
 
   // set times etc
@@ -859,12 +865,12 @@ int Mdvx::_convertMdv2Ncf(const string &path)
 // given an object containing a netcdf file buffer
 // returns 0 on success, -1 on failure
 
-int Mdvx::_convertNcf2Mdv(const string &path)
+int Mdvx::_readFromNcfBuf(const string &path)
   
 {
 
   if (_internalFormat != FORMAT_NCF) {
-    _errStr += "ERROR - Mdvx::_convertNcf2Mdv.\n";
+    _errStr += "ERROR - Mdvx::_readFromNcfBuf.\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
     TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
     TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
@@ -886,14 +892,14 @@ int Mdvx::_convertNcf2Mdv(const string &path)
   pid_t pid = getpid();
   char tmpFilePath[FILENAME_MAX];
   sprintf(tmpFilePath,
-          "/tmp/Mdvx_convertNcf2Mdv_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
+          "/tmp/Mdvx_readFromNcfBuf_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
           dnow.getYear(), dnow.getMonth(), dnow.getDay(),
           dnow.getHour(), dnow.getMin(), dnow.getSec(), pid);
 
   // write nc buffer to file
 
   if (_writeBufferToFile(tmpFilePath, _ncfBuf.getLen(), _ncfBuf.getPtr())) {
-    _errStr += "ERROR - Mdvx::_convertNcf2Mdv\n";
+    _errStr += "ERROR - Mdvx::_readFromNcfBuf\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
     TaStr::AddStr(_errStr, "  Cannot write buffe to tmp file: ", tmpFilePath);
     return -1;
@@ -908,7 +914,7 @@ int Mdvx::_convertNcf2Mdv(const string &path)
   // returns 0 on success, -1 on failure
 
   if (trans.readCf(tmpFilePath, *this)) {
-    _errStr += "ERROR - Mdvx::_convertNcf2Mdv\n";
+    _errStr += "ERROR - Mdvx::_readFromNcfBuf\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
     TaStr::AddStr(_errStr, "  Cannot translate file: ", tmpFilePath);
     TaStr::AddStr(_errStr, trans.getErrStr());
@@ -930,11 +936,13 @@ int Mdvx::_convertNcf2Mdv(const string &path)
 
   // convert the output fields appropriately
 
-  for (int ii = 0; ii < (int) _fields.size(); ii++) {
-    _fields[ii]->convertType(readEncodingType,
-                             readCompressionType,
-                             readScalingType,
-                             readScale, readBias);
+  if (_readFormat == FORMAT_MDV) {
+    for (int ii = 0; ii < (int) _fields.size(); ii++) {
+      _fields[ii]->convertType(readEncodingType,
+                               readCompressionType,
+                               readScalingType,
+                               readScale, readBias);
+    }
   }
 
   return 0;
@@ -990,14 +998,6 @@ int Mdvx::_readNcf(const string &path)
   
 {
 
-  if (_internalFormat != FORMAT_NCF) {
-    _errStr += "ERROR - Mdvx::_readNcf\n";
-    TaStr::AddStr(_errStr, "  Path ", path);
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
-    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_NCF));
-    return -1;
-  }
-
   // save read details
   
   Mdvx::encoding_type_t readEncodingType = _readEncodingType;
@@ -1034,29 +1034,13 @@ int Mdvx::_readNcf(const string &path)
   
   _internalFormat = FORMAT_MDV;
 
-  // convert back to NCF if needed
-  // with read constraints having been applied
+  // convert the output fields appropriately
   
-  if (_readFormat == FORMAT_NCF) {
-    cerr << "fffffffffffffffffffffffff" << endl;
-    if (_convertMdv2Ncf(path)) {
-      _errStr += "ERROR - Mdvx::_readNcf\n";
-      TaStr::AddStr(_errStr, "  Path ", path);
-      TaStr::AddStr(_errStr, "  Cannot translate file to NCF");
-      TaStr::AddStr(_errStr, trans.getErrStr());
-      return -1;
-    }
-  }
-
-  // for MDV format, convert the output fields appropriately
-  
-  if (_internalFormat == FORMAT_MDV) {
-    for (int ii = 0; ii < (int) _fields.size(); ii++) {
-      _fields[ii]->convertType(readEncodingType,
-                               readCompressionType,
-                               readScalingType,
-                               readScale, readBias);
-    }
+  for (int ii = 0; ii < (int) _fields.size(); ii++) {
+    _fields[ii]->convertType(readEncodingType,
+                             readCompressionType,
+                             readScalingType,
+                             readScale, readBias);
   }
 
   // copy the main headers to file headers
@@ -1114,10 +1098,6 @@ int Mdvx::_readAllHeadersRadx(const string &path)
 
   vol.reorderSweepsAsInFileAscendingAngle();
   vol.reorderSweepsAscendingAngle();
-
-  // set format to MDV
-  
-  _internalFormat = FORMAT_MDV;
 
   // Now fill in the file headers.  This isn't done in the translation because
   // the translation doesn't know that we are reading the entire file to get
@@ -1224,6 +1204,10 @@ int Mdvx::_readAllHeadersRadx(const string &path)
   
   _mhdrFile = _mhdr;
 
+  // set internal format to MDV
+  
+  _internalFormat = FORMAT_MDV;
+
   return 0;
 
 }
@@ -1236,14 +1220,6 @@ int Mdvx::_readAllHeadersRadx(const string &path)
 int Mdvx::_readRadx(const string &path)
   
 {
-
-  if (_internalFormat != FORMAT_RADX) {
-    _errStr += "ERROR - Mdvx::_readRadx.\n";
-    TaStr::AddStr(_errStr, "  Path: ", path);
-    TaStr::AddStr(_errStr, "  Incorrect format: ", format2Str(_internalFormat));
-    TaStr::AddStr(_errStr, "  Should be: ", format2Str(FORMAT_RADX));
-    return -1;
-  }
 
   // save read details
   
@@ -1318,22 +1294,9 @@ int Mdvx::_readRadx(const string &path)
   
   _internalFormat = FORMAT_MDV;
 
-  // convert to NCF if needed
-  
-  if (_readFormat == FORMAT_NCF) {
-    cerr << "gggggggggggggggggggggggggg" << endl;
-    if (_convertMdv2Ncf(path)) {
-      _errStr += "ERROR - Mdvx::_readRadx\n";
-      TaStr::AddStr(_errStr, "  Path: ", path);
-      TaStr::AddStr(_errStr, "  Cannot translate file to NCF");
-      TaStr::AddStr(_errStr, trans.getErrStr());
-      return -1;
-    }
-  }
-
   // for MDV format, convert the output fields appropriately
 
-  if (_internalFormat == FORMAT_MDV) {
+  if (_readFormat == FORMAT_MDV) {
     for (int ii = 0; ii < (int) _fields.size(); ii++) {
       _fields[ii]->convertType(readEncodingType,
                                readCompressionType,

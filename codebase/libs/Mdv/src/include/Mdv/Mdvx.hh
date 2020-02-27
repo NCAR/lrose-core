@@ -743,6 +743,8 @@ protected:
   
   int _readVsectionMdv();
   
+  int _convertFormatOnRead(const string &caller);
+
   int _readRhi(bool respectUserDistance = false);
   int _loadClosestRhi(bool respectUserDistance);
   
@@ -857,8 +859,8 @@ protected:
   int _writeNcfBufToFile(const string &output_path) const;
 
   int _writeAsNcf(const string &output_path) const;
-  int _convertMdv2Ncf(const string &path);
-  int _convertNcf2Mdv(const string &path);
+  int _writeToNcfBuf(const string &path);
+  int _readFromNcfBuf(const string &path);
   int _readAllHeadersNcf(const string &path);
   int _readNcf(const string &path);
   int _readAllHeadersRadx(const string &path);

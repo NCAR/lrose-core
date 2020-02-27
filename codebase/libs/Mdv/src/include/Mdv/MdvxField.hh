@@ -560,11 +560,10 @@ public:
   // to a file, or to a message.
   
   void requestCompression(int compression_type = Mdvx::COMPRESSION_GZIP) const {
-    cerr << "RRRRRRRRRRR requestCompression, type: " << compression_type << endl;
-    _requestedCompression = compression_type;
+    _fhdr.requested_compression = compression_type;
   };
 
-  int getRequestedCompression() const { return _requestedCompression; }
+  int getRequestedCompression() const { return _fhdr.requested_compression; }
   
   // compress the data volume if compression has previously
   // been requested
@@ -806,12 +805,6 @@ protected:
   mutable vector<void *> _planeData;
   mutable vector<int64_t> _planeSizes;
   mutable vector<int64_t> _planeOffsets;
-
-  // requested compression
-  // compression is deferred until field is delivered to caller
-  // or the data will be writted to a file
-  
-  mutable int _requestedCompression;
 
    // error string
 

@@ -1430,6 +1430,7 @@ int DsMdvServer::_writeMdvxToDir(DsMdvx &mdvx)
 
     if (_isDebug) {
       cerr << "Wrote to dir: " << writeDir << endl;
+      cerr << "Wrote to path: " << mdvx.getPathInUse() << endl;
     }
 
     // reg with data mapper

@@ -376,7 +376,7 @@ typedef struct {
                                //   users for their own purposes.
   
   mutable 
-    si32 compression_type;     // 27: data compression type used
+    si32 compression_type;     // 27: data compression type in use
                                //   e.g. COMPRESSION_NONE,
                                //        COMPRESSION_RLE, etc
 
@@ -410,7 +410,10 @@ typedef struct {
                                //       file data and requested zoom
                                //     1 if no overlap
 
-  si32 unused_si32[4];         // 36-39 Spare, set to 0
+  mutable
+    si32 requested_compression;// compression deferred until write
+
+  si32 unused_si32[3];         // 37-39 Spare, set to 0
 
   // 32-bit floats
     

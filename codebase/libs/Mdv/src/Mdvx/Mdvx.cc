@@ -1094,6 +1094,7 @@ void Mdvx::_copyFieldHeader32to64(const field_header_32_t &fhdr32,
   fhdr64.data_dimension = fhdr32.data_dimension;
   fhdr64.zoom_clipped = fhdr32.zoom_clipped;
   fhdr64.zoom_no_overlap = fhdr32.zoom_no_overlap;
+  fhdr64.requested_compression = fhdr32.requested_compression;
   memcpy(fhdr64.unused_si32, fhdr32.unused_si32,
          sizeof(fhdr32.unused_si32));
   fhdr64.proj_origin_lat = fhdr32.proj_origin_lat;
@@ -1173,6 +1174,7 @@ void Mdvx::_copyFieldHeader64to32(const field_header_64_t &fhdr64,
   fhdr32.data_dimension = fhdr64.data_dimension;
   fhdr32.zoom_clipped = fhdr64.zoom_clipped;
   fhdr32.zoom_no_overlap = fhdr64.zoom_no_overlap;
+  fhdr32.requested_compression = fhdr64.requested_compression;
   memcpy(fhdr32.unused_si32, fhdr64.unused_si32,
          sizeof(fhdr32.unused_si32));
   fhdr32.proj_origin_lat = fhdr64.proj_origin_lat;

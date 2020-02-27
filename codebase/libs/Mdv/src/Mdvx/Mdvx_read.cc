@@ -1667,16 +1667,10 @@ int Mdvx::readVolume()
 
   }
 
-  // convert to NetCDF buffer if requested
+  // convert to NetCDF or XML buffers if requested
 
-  if (_readFormat == FORMAT_NCF) {
-    cerr << "aaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
-    if (_convertMdv2Ncf(_pathInUse)) {
-      _errStr += "ERROR - Mdvx::readVolume.\n";
-      TaStr::AddStr(_errStr, "  Converting format after read");
-      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
-      return -1;
-    }
+  if (_convertFormatOnRead("readVolume")) {
+    return -1;
   }
 
   // success
@@ -1751,22 +1745,52 @@ int Mdvx::readVsection()
 
   }
     
-  // convert to NetCDF buffer if requested
+  // convert to NetCDF or XML buffers if requested
 
-  if (_readFormat == FORMAT_NCF) {
-    cerr << "bbbbbbbbbbbbbbbbbbbb" << endl;
-    if (_convertMdv2Ncf(_pathInUse)) {
-      _errStr += "ERROR - Mdvx::readVsection.\n";
-      TaStr::AddStr(_errStr, "  Converting format after read");
-      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
-      return -1;
-    }
+  if (_convertFormatOnRead("readVsection")) {
+    return -1;
   }
 
   return 0;
 
 }
 
+///////////////////////////////////////////////////
+// convert internal representation format on read
+
+int Mdvx::_convertFormatOnRead(const string &caller)
+
+{
+
+  if (_readFormat == FORMAT_NCF) {
+
+    if (_debug) {
+      cerr << "DEBUG - Mdvx::_convertFormatOnRead - to FORMAT_NCF" << endl;
+    }
+
+    if (_writeToNcfBuf(_pathInUse)) {
+      TaStr::AddStr(_errStr, "ERROR - Mdvx::", caller);
+      TaStr::AddStr(_errStr, "  Converting format after read");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+    _internalFormat = FORMAT_NCF;
+
+  } else if (_readFormat == FORMAT_XML) {
+
+    if (_debug) {
+      cerr << "DEBUG - Mdvx::_convertFormatOnRead - to FORMAT_XML" << endl;
+    }
+
+    writeToXmlBuffer(_xmlHdr, _xmlBuf, _pathInUse);
+    _internalFormat = FORMAT_XML;
+    
+  }
+
+  return 0;
+
+}
+  
 //////////////////////////////////////////////////////////
 // Compute the number of samples for a vsection
 
