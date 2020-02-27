@@ -214,7 +214,8 @@ public:
   
   static string ncTypeToStr(nc_type nctype);
   static string ncxxTypeToStr(NcxxType nctype);
-  string portTypeToStr(PortType_t ptype);
+  static string portTypeToStr(PortType_t ptype);
+  static string ncErrToStr(int errtype);
   
   // strip redundant null from string
   

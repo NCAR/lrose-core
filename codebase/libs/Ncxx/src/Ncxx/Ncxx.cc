@@ -149,6 +149,36 @@ int Ncxx::getByteWidth(PortType_t ptype)
 }
 
 ////////////////////////////////////////
+// convert error enum to string
+
+string Ncxx::ncErrToStr(int errtype)
+  
+{
+  
+  switch (errtype) {
+    case NC_NOERR:
+      return "NC_NOERR";
+    case NC_EBADID:
+      return "NC_EBADID - bad ncid";
+    case NC_ENOTNC4:
+      return "NC_ENOTNC4 - not a netCDF-4 file";
+    case NC_ENOTVAR:
+      return "NC_ENOTVAR - can't find this variable";
+    case NC_ELATEDEF:
+      return "NC_ELATEDEF - nc_enddef already called";
+    case NC_ENOTINDEFINE:
+      return "NC_ENOTINDEFINE - not in define mode";
+    case NC_ESTRICTNC3:
+      return "NC_ESTRICTNC3 - chunk size may be too big";
+    case NC_EPERM:
+      return "NC_EPERM - read-only mode, can't create object";
+    default:
+      return "NC_ERR_UNKNOWN";
+  }
+
+}
+
+////////////////////////////////////////
 // convert type enum to string
 
 string Ncxx::ncTypeToStr(nc_type nctype)
