@@ -2529,11 +2529,6 @@ int DsMdvxMsg::_getNcfHeaderParts(DsMdvx &mdvx)
     suffix.clear();
   }
 
-  bool constrained = false;
-  if (TaXml::readBoolean(xml, "constrained", constrained)) {
-    constrained = false;
-  }
-  
   // set ncf details
   
   mdvx.setNcfHeader((time_t) validTime,
@@ -2542,7 +2537,6 @@ int DsMdvxMsg::_getNcfHeaderParts(DsMdvx &mdvx)
 		    epoch);
 
   mdvx.setNcfFileSuffix(suffix);
-  mdvx.setConstrained(constrained);
 
   return 0;
 

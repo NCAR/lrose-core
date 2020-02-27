@@ -1136,7 +1136,6 @@ void DsMdvxMsg::_addNcfHdr(const DsMdvx &mdvx)
   bool is_forecast = mdvx._ncfIsForecast;
   int epoch = mdvx._ncfEpoch;
   string suffix = mdvx._ncfFileSuffix;
-  bool constrained = mdvx._ncfConstrained;
   
   string xml;
   xml += TaXml::writeStartTag("ncf-header", 0);
@@ -1148,7 +1147,6 @@ void DsMdvxMsg::_addNcfHdr(const DsMdvx &mdvx)
   xml += TaXml::writeBoolean("is_forecast", 1, is_forecast);
   xml += TaXml::writeInt("epoch", 1, epoch);
   xml += TaXml::writeString("suffix", 1, suffix);
-  xml += TaXml::writeBoolean("constrained", 1, constrained);
   
   xml += TaXml::writeEndTag("ncf-header", 0);
   

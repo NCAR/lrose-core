@@ -148,7 +148,6 @@ void Mdvx::clearNcf()
   _ncfIsForecast = false;
   _ncfEpoch = 0;
   _ncfFileSuffix.clear();
-  _ncfConstrained = true;
 }
 
 // set the suffix for the netCDF file
@@ -158,15 +157,6 @@ void Mdvx::setNcfFileSuffix(const string &suffix)
   
 {
   _ncfFileSuffix = suffix;
-}
-
-// set whether NCF data is constrained
-// i.e. have read constraints been applied?
-
-void Mdvx::setConstrained(bool state)
-
-{
-  _ncfConstrained = state;
 }
 
 //////////////////////////////////////////
@@ -234,10 +224,6 @@ int Mdvx::_readVolumeIntoNcfBuf()
   cerr << "33333333333333333333333" << endl;
   _internalFormat = FORMAT_NCF;
   
-  // flag that read constraints have not been applied
-
-  _ncfConstrained = false;
-
   // set times etc
 
   if (_setTimesNcf()) {
@@ -425,7 +411,6 @@ void Mdvx::printNcfInfo(ostream &out) const
       out << "forecast_delta(secs):   " << _ncfForecastDelta << endl;
     }
     out << "epoch:                  " << _ncfEpoch << endl;
-    out << "constraints applied?    " << _ncfConstrained << endl;
     out << "data length (bytes):    " << _ncfBuf.getLen() << endl;
     out << endl;
     return;
@@ -1357,36 +1342,6 @@ int Mdvx::_readRadx(const string &path)
     }
   }
 
-  return 0;
-
-}
-
-////////////////////////////////////////////////
-// constrain NETCDF CF using read qualifiers
-// returns 0 on success, -1 on failure
-
-int Mdvx::_constrainNcf(const string &path)
-  
-{
-
-  // convert the NCF data to MDV format
-  // This will also apply the read qualifiers
-  
-  if (_convertNcf2Mdv(path)) {
-    _errStr += "ERROR - Mdvx::constrainNcf.\n";
-    TaStr::AddStr(_errStr, "  Path: ", path);
-    return -1;
-  }
-    
-  // convert back to NCF
-
-  cerr << "hhhhhhhhhhhhhhhhhhhh" << endl;
-  if (_convertMdv2Ncf(path)) {
-    _errStr += "ERROR - Mdvx::constrainNcf.\n";
-    TaStr::AddStr(_errStr, "  Path: ", path);
-    return -1;
-  }
-  
   return 0;
 
 }

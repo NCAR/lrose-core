@@ -174,11 +174,6 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
           return -1;
         }
         break;
-      case MDVP_CONSTRAIN_NCF:
-        if (_disassembleConstrainNcf(mdvx)) {
-          return -1;
-        }
-        break;
     } // switch
     
   } else {
@@ -244,11 +239,6 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
         break;
       case MDVP_READ_ALL_HDRS_RADX:
         if (_disassembleReadAllHdrsRadxReturn(mdvx)) {
-          return -1;
-        }
-        break;
-      case MDVP_CONSTRAIN_NCF:
-        if (_disassembleConstrainNcfReturn(mdvx)) {
           return -1;
         }
         break;
@@ -1370,71 +1360,4 @@ int DsMdvxMsg::_disassembleReadRadxReturn(DsMdvx &mdvx)
   return 0;
 
 }
-
-/////////////////////////////////////////////////////
-// disassemble constrain NCF message,
-// load into Mdvx object
-//
-// Returns 0 on success, -1 on error.
-// getErrorStr() returns the error str for this call.
-
-int DsMdvxMsg::_disassembleConstrainNcf(DsMdvx &mdvx)
-  
-{
-
-  if (_debug) {
-    cerr << "--->> disassembleConstrainNcf <<-----" << endl;
-  }
-  
-  // get format
-  
-  _getInternalFormat(mdvx);
-
-  if (_getReadQualifiers(mdvx)) {
-    _errStr += "ERROR - DsMdvxMsg::_disassembleConstrainNcf.\n";
-    return -1;
-  }
-
-  if (_getReadVsectQualifiers(mdvx)) {
-    _errStr += "ERROR - DsMdvxMsg::_disassembleConstrainNcf.\n";
-    return -1;
-  }
-  
-  if (_getNcfParts(mdvx)) {
-    _errStr += "ERROR - DsMdvxMsg::_disassembleConstrainNcf\n";
-    return -1;
-  }
-  
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////
-// disassemble convert MDV to NCF return message,
-// load into Mdvx object
-//
-// Returns 0 on success, -1 on error.
-// getErrorStr() returns the error str for this call.
-
-int DsMdvxMsg::_disassembleConstrainNcfReturn(DsMdvx &mdvx)
-  
-{
-
-  if (_debug) {
-    cerr << "--->> disassembleConstrainNcfReturn <<-----" << endl;
-  }
-  
-  // get format
-  
-  _getInternalFormat(mdvx);
-
- if (_getNcfParts(mdvx)) {
-    _errStr += "ERROR - DsMdvxMsg::_disassembleConstrainNcfReturn\n";
-    return -1;
-  }
-  
-  return 0;
-
-}
-
 

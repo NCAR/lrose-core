@@ -304,7 +304,6 @@ Mdvx &Mdvx::_copy(const Mdvx &rhs)
   _ncfEpoch = rhs._ncfEpoch;
   _ncfBuf = rhs._ncfBuf;
   _ncfFileSuffix = rhs._ncfFileSuffix;
-  _ncfConstrained = rhs._ncfConstrained;
 
   _ncfInstitution = rhs._ncfInstitution;
   _ncfReferences = rhs._ncfReferences;

@@ -187,13 +187,6 @@ void setNcfBuffer(const void *ncBuf,
 
 void setNcfFileSuffix(const string &suffix);
 
-// set whether NCF data is constrained
-// i.e. have read constraints been applied?
-// When a file is first read, _ncfContrained is set false.
-// It is set true after constrainNcf() is called.
-
-void setConstrained(bool state);
-
 // clear NC format representation
 
 void clearNcf();

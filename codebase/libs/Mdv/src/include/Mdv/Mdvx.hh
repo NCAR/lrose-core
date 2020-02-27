@@ -648,7 +648,6 @@ protected:
   bool _ncfIsForecast;
   int _ncfEpoch;
   string _ncfFileSuffix;
-  bool _ncfConstrained;
   mutable MemBuf _ncfBuf;
 
   //////////////////////////////
@@ -864,7 +863,6 @@ protected:
   int _readNcf(const string &path);
   int _readAllHeadersRadx(const string &path);
   int _readRadx(const string &path);
-  int _constrainNcf(const string &path);
 
   // vertical sections
 

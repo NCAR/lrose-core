@@ -61,7 +61,6 @@ public:
     MDVP_COMPILE_TIME_HEIGHT   = 27160,
     MDVP_CONVERT_MDV_TO_NCF    = 27170,
     MDVP_CONVERT_NCF_TO_MDV    = 27180,
-    MDVP_CONSTRAIN_NCF         = 27190,
     MDVP_READ_NCF              = 27200,
     MDVP_READ_RADX             = 27210,
     MDVP_READ_ALL_HDRS_NCF     = 27220,
@@ -510,64 +509,6 @@ public:
   
   void *assembleCompileTimeHeightReturn(const DsMdvx &mdvx);
 
-#ifdef NOTNOW  
-  // assemble message to convert to ncf
-  // Returns assembled message on success, NULL on error.
-  // getErrorStr() returns the error string.
-  
-  void *assembleConvertMdv2Ncf(const DsMdvx &mdvx,
-                               const string &trans_url);
-  void *assembleConvertMdv2NcfReturn(const DsMdvx &mdvx);
-  
-  // assemble message to convert ncf format to mdv
-  // Returns assembled message, NULL on failure
-  
-  void *assembleConvertNcf2Mdv(const DsMdvx &mdvx,
-                               const string &trans_url);
-  void *assembleConvertNcf2MdvReturn(const DsMdvx &mdvx);
-
-  // assemble message to read all headers from NCF type files
-  // these are CF-compliant netCDF
-  // Returns assembled message, NULL on failure
-  
-  void *assembleReadAllHdrsNcf(const DsMdvx &mdvx,
-			       const string &trans_url);
-  void *assembleReadAllHdrsNcfReturn(const DsMdvx &mdvx);
-  
-  // assemble message to read NCF type files
-  // these are CF-compliant netCDF
-  // Returns assembled message, NULL on failure
-  
-  void *assembleReadNcf(const DsMdvx &mdvx,
-                        const string &trans_url);
-  void *assembleReadNcfReturn(const DsMdvx &mdvx);
-  
-  // assemble message to read all headers from Radx type files
-  // these are radial radar data
-  // Returns assembled message, NULL on failure
-  
-  void *assembleReadAllHdrsRadx(const DsMdvx &mdvx,
-			       const string &trans_url);
-  void *assembleReadAllHdrsRadxReturn(const DsMdvx &mdvx);
-  
-  // assemble message to read RADX type files
-  // these are radial radar data
-  // Returns assembled message, NULL on failure
-  
-  void *assembleReadRadx(const DsMdvx &mdvx,
-                         const string &trans_url);
-  void *assembleReadRadxReturn(const DsMdvx &mdvx);
-
-  // assemble message to constrain ncf using
-  // read MDVX read constraints
-  // Returns assembled message, NULL on failure
-  
-  void *assembleConstrainNcf(const DsMdvx &mdvx,
-                             const string &trans_url);
-  void *assembleConstrainNcfReturn(const DsMdvx &mdvx);
-
-#endif
-
   // assemble an error return message
 
   void *assembleErrorReturn(const int requestSubtype,
@@ -842,9 +783,6 @@ protected:
   
   int _disassembleReadRadx(DsMdvx &mdvx);
   int _disassembleReadRadxReturn(DsMdvx &mdvx);
-
-  int _disassembleConstrainNcf(DsMdvx &mdvx);
-  int _disassembleConstrainNcfReturn(DsMdvx &mdvx);
 
   // print methods
 
