@@ -683,12 +683,6 @@ int DsMdvx::_readVolumeRemote(const DsURL &url)
     return -1;
   }
 
-  if (_convertFormatOnRead(url.getURLStr())) {
-    _errStr += "ERROR - DsMdvx::_readVolumeRemote.\n";
-    TaStr::AddStr(_errStr, "  Converting format after read");
-    return -1;
-  }
-
   return 0;
 
 }
@@ -758,12 +752,6 @@ int DsMdvx::_readVsectionRemote(const DsURL &url)
   if (msg.getSubType() != DsMdvxMsg::MDVP_READ_VSECTION) {
     _errStr += "ERROR - DsMdvx::_readVsectionRemote.\n";
     TaStr::AddInt(_errStr, "  Incorrect return subType: ", msg.getSubType());
-    return -1;
-  }
-  
-  if (_convertFormatOnRead(url.getURLStr())) {
-    _errStr += "ERROR - DsMdvx::_readVsectionRemote.\n";
-    TaStr::AddStr(_errStr, "  Converting format after read");
     return -1;
   }
   
@@ -1026,11 +1014,6 @@ int DsMdvx::writeToPath(const string &output_url)
 {
 
   clearErrStr();
-  
-  if (_convertFormatOnWrite(output_url)) {
-    _errStr += "ERROR - COMM - DsMdvx::writeToPath.\n";
-    return -1;
-  }
   
   // resolve server details
 

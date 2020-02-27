@@ -86,7 +86,7 @@ void Mdvx::clearRead()
   clearReadFormat();
   clearCheckLatestValidModTime();
   clearConstrainFcastLeadTimes();
-  setRead32BitHeaders(true);
+  setRead32BitHeaders(false);
   _readQualifiersActive = false;
 }
 
@@ -1529,7 +1529,6 @@ int Mdvx::readAllHeaders()
 
     // NetCDF file
 
-    _internalFormat = FORMAT_NCF;
     if (_readAllHeadersNcf(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readAllHeaders.\n";
       TaStr::AddStr(_errStr, "  Reading headers from NCF file");
@@ -1541,7 +1540,6 @@ int Mdvx::readAllHeaders()
 
     // read RADX radial radar format file
 
-    _internalFormat = FORMAT_RADX;
     if (_readAllHeadersRadx(_pathInUse)) {
       _errStr += "ERROR - Mdvx::_readAllHeadersLocal.\n";
       TaStr::AddStr(_errStr, "  Reading headers from RADX file");
@@ -1641,7 +1639,6 @@ int Mdvx::readVolume()
 
     // read NCF file
     
-    _internalFormat = FORMAT_NCF;
     if (_readNcf(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVolume.\n";
       TaStr::AddStr(_errStr, "  Reading NCF file");
@@ -1653,7 +1650,6 @@ int Mdvx::readVolume()
     
     // read RADX radial radar format file
 
-    _internalFormat = FORMAT_RADX;
     if (_readRadx(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVolume.\n";
       TaStr::AddStr(_errStr, "  Reading RADX file");
@@ -1674,6 +1670,7 @@ int Mdvx::readVolume()
   // convert to NetCDF buffer if requested
 
   if (_readFormat == FORMAT_NCF) {
+    cerr << "aaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
     if (_convertMdv2Ncf(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVolume.\n";
       TaStr::AddStr(_errStr, "  Converting format after read");
@@ -1725,7 +1722,6 @@ int Mdvx::readVsection()
     // read NCF file
     // vsection taken care of by Ncf2MdvTrans
 
-    _internalFormat = FORMAT_NCF;
     if (_readNcf(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVsection.\n";
       TaStr::AddStr(_errStr, "  Reading NCF file");
@@ -1738,7 +1734,6 @@ int Mdvx::readVsection()
     // read RADX radial radar format file
     // vsection taken care of by Ncf2MdvTrans
 
-    _internalFormat = FORMAT_RADX;
     if (_readRadx(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVsection.\n";
       TaStr::AddStr(_errStr, "  Reading RADX file");
@@ -1759,6 +1754,7 @@ int Mdvx::readVsection()
   // convert to NetCDF buffer if requested
 
   if (_readFormat == FORMAT_NCF) {
+    cerr << "bbbbbbbbbbbbbbbbbbbb" << endl;
     if (_convertMdv2Ncf(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVsection.\n";
       TaStr::AddStr(_errStr, "  Converting format after read");

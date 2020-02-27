@@ -224,7 +224,7 @@ public:
   ////////////////////////
   // get the formats
 
-  mdv_format_t getCurrentFormat() const { return _internalFormat; }
+  mdv_format_t getInternalFormat() const { return _internalFormat; }
   mdv_format_t getReadFormat() const { return _readFormat; }
   mdv_format_t getWriteFormat() const { return _writeFormat; }
 
@@ -300,11 +300,11 @@ public:
   
   const vector<MdvxField *> &getFields() const { return _fields; }
   MdvxField *getField(int field_num) const
-  { return( getFieldByNum( field_num )); }
+  { return getFieldByNum(field_num); }
   MdvxField *getFieldByNum(int field_num) const;
-
+  
   MdvxField *getField(const char *field_name) const
-  { return( getFieldByName( field_name )); }
+  { return getFieldByName(field_name); }
   MdvxField *getFieldByName(const char *field_name) const;
   MdvxField *getFieldByName(const string &field_name) const
   { return (getFieldByName(field_name.c_str())); }
@@ -406,24 +406,24 @@ public:
   // access to the directory and path strings
 
   // read dir as set by setReadTime()
-  const string &getReadDir() const { return(_readDir); }
+  const string &getReadDir() const { return _readDir; }
 
   // read path as set by setReadPath()
-  const string &getReadPath() const { return(_readPath); }
+  const string &getReadPath() const { return _readPath; }
 
   // get writeAsForecast flag
-  bool getWriteAsForecast() const { return(_writeAsForecast); }
+  bool getWriteAsForecast() const { return _writeAsForecast; }
 
   // get ifForecastWriteAsForecast flag
   bool getIfForecastWriteAsForecast() const {
-    return(_ifForecastWriteAsForecast);
+    return _ifForecastWriteAsForecast;
   }
 
   // get write32BitHeaders flag
-  bool getWrite32BitHeaders() const { return(_write32BitHeaders); }
+  bool getWrite32BitHeaders() const { return _write32BitHeaders; }
 
   // path actually  used for the read or write
-  const string &getPathInUse() const { return(_pathInUse); }
+  const string &getPathInUse() const { return _pathInUse; }
 
   // get name of application
   const string &getAppName() const { return _appName; }
@@ -432,7 +432,7 @@ public:
   // to read. This allows you to distinguish between a genuine
   // read error and one which occurred through a lack of data.
 
-  bool getNoFilesFoundOnRead() { return(_noFilesFoundOnRead); }
+  bool getNoFilesFoundOnRead() { return _noFilesFoundOnRead; }
 
   // return data element size (bytes) for given encoding type
 
@@ -857,8 +857,6 @@ protected:
   int _setTimesNcf();
   int _writeNcfBufToFile(const string &output_path) const;
 
-  int _convertFormatOnRead(const string &path);
-  int _convertFormatOnWrite(const string &path);
   int _writeAsNcf(const string &output_path) const;
   int _convertMdv2Ncf(const string &path);
   int _convertNcf2Mdv(const string &path);

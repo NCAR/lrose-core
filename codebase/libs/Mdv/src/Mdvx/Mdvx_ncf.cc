@@ -92,7 +92,9 @@ void Mdvx::setNcfHeader(time_t validTime,
 			int epoch /* = 0 */)
 
 {
-  
+
+  cerr << "1111111111111111111111111" << endl;
+
   _internalFormat = FORMAT_NCF;
 
   _ncfValidTime = validTime;
@@ -121,6 +123,8 @@ void Mdvx::setNcfBuffer(const void *ncBuf,
 
 {
   
+  cerr << "2222222222222222222222222" << endl;
+
   _internalFormat = FORMAT_NCF;
 
   _ncfBuf.free();
@@ -227,6 +231,7 @@ int Mdvx::_readVolumeIntoNcfBuf()
 
   // set current format
 
+  cerr << "33333333333333333333333" << endl;
   _internalFormat = FORMAT_NCF;
   
   // flag that read constraints have not been applied
@@ -677,65 +682,6 @@ Mdvx::radial_file_type_t Mdvx::radialFileType2Enum(const string &ftype)
 }
 
 
-////////////////////////////////////////////////
-// converts format to/from NCF on read
-// returns 0 on success, -1 on failure
-
-int Mdvx::_convertFormatOnRead(const string &read_url)
-  
-{
-  
-  if (_readFormat == FORMAT_NCF && _internalFormat == FORMAT_MDV) {
-    if (_convertMdv2Ncf(read_url)) {
-      _errStr += "ERROR - COMM - Mdvx::convertFormatOnRead.\n";
-      _errStr += "  Converting MDV to NCF\n";
-      return -1;
-    }
-  } else if (_readFormat == FORMAT_MDV && _internalFormat == FORMAT_NCF) {
-    if (_convertNcf2Mdv(read_url)) {
-      _errStr += "ERROR - COMM - Mdvx::convertFormatOnRead.\n";
-      _errStr += "  Converting NCF to MDV\n";
-      return -1;
-    }
-  } else if (!_ncfConstrained &&
-             _readFormat == FORMAT_NCF && _internalFormat == FORMAT_NCF) {
-    if (_constrainNcf(read_url)) {
-      _errStr += "ERROR - COMM - Mdvx::convertFormatOnRead.\n";
-      _errStr += "  Constraining NCF using read specifications\n";
-      return -1;
-    }
-  }
-  
-  return 0;
-
-}
-
-////////////////////////////////////////////////
-// convert format to/from NCF on write
-// returns 0 on success, -1 on failure
-
-int Mdvx::_convertFormatOnWrite(const string &url)
-  
-{
-
-  if (_writeFormat == FORMAT_NCF && _internalFormat == FORMAT_MDV) {
-    if (_convertMdv2Ncf(url)) {
-      _errStr += "ERROR - COMM - Mdvx::convertFormatOnWrite.\n";
-      _errStr += "  Converting MDV to NCF\n";
-      return -1;
-    }
-  } else if (_writeFormat == FORMAT_MDV && _internalFormat == FORMAT_NCF) {
-    if (_convertNcf2Mdv(url)) {
-      _errStr += "ERROR - COMM - Mdvx::convertFormatOnWrite.\n";
-      _errStr += "  Converting NCF to MDV\n";
-      return -1;
-    }
-  }
-  
-  return 0;
-
-}
-
 /////////////////////////////////////////////////////////
 // Write NetCDF data buffer, in _ncfBuf, to path
 // File name is based on the specified path.
@@ -770,6 +716,10 @@ int Mdvx::_writeAsNcf(const string &outputPath) const
 
 {
 
+  if (_debug) {
+    cerr << "DEBUG - Mdvx::_writeAsNcf" << endl;
+  }
+
   // remove compressed file if it exists
   
   ta_remove_compressed(outputPath.c_str());
@@ -784,7 +734,7 @@ int Mdvx::_writeAsNcf(const string &outputPath) const
   }
   
   if (trans.writeCf(*this, outputPath)) {
-    _errStr += "ERROR - Mdvx::_convertMdv2Ncf.\n";
+    _errStr += "ERROR - Mdvx::_writeAsNcf.\n";
     TaStr::AddStr(_errStr, "  Path: ", outputPath);
     _errStr += trans.getErrStr();
     return -1;
@@ -802,6 +752,8 @@ int Mdvx::_convertMdv2Ncf(const string &path)
   
 {
   
+  cerr << "eeeeeeeeeeeeeeeeeeeeeeee" << endl;
+
   if (_internalFormat != FORMAT_MDV) {
     _errStr += "ERROR - Mdvx::_convertMdv2Ncf.\n";
     TaStr::AddStr(_errStr, "  Path: ", path);
@@ -891,6 +843,7 @@ int Mdvx::_convertMdv2Ncf(const string &path)
 
   // set current format
   
+  cerr << "555555555555555555555" << endl;
   _internalFormat = FORMAT_NCF;
 
   // set times etc
@@ -1100,6 +1053,7 @@ int Mdvx::_readNcf(const string &path)
   // with read constraints having been applied
   
   if (_readFormat == FORMAT_NCF) {
+    cerr << "fffffffffffffffffffffffff" << endl;
     if (_convertMdv2Ncf(path)) {
       _errStr += "ERROR - Mdvx::_readNcf\n";
       TaStr::AddStr(_errStr, "  Path ", path);
@@ -1382,6 +1336,7 @@ int Mdvx::_readRadx(const string &path)
   // convert to NCF if needed
   
   if (_readFormat == FORMAT_NCF) {
+    cerr << "gggggggggggggggggggggggggg" << endl;
     if (_convertMdv2Ncf(path)) {
       _errStr += "ERROR - Mdvx::_readRadx\n";
       TaStr::AddStr(_errStr, "  Path: ", path);
@@ -1425,6 +1380,7 @@ int Mdvx::_constrainNcf(const string &path)
     
   // convert back to NCF
 
+  cerr << "hhhhhhhhhhhhhhhhhhhh" << endl;
   if (_convertMdv2Ncf(path)) {
     _errStr += "ERROR - Mdvx::constrainNcf.\n";
     TaStr::AddStr(_errStr, "  Path: ", path);

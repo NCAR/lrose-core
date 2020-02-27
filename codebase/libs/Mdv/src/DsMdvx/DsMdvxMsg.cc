@@ -64,7 +64,7 @@ DsMdvxMsg::~DsMdvxMsg()
 // check parts for consistency - 32-bit or 64-bit?
 // returns 0 on success, -1 on failure
 
-int DsMdvxMsg::checkParts() const
+void DsMdvxMsg::checkParts() const
 {
   bool has32Bit = _has32BitParts();
   bool has64Bit = _has64BitParts();
@@ -72,13 +72,7 @@ int DsMdvxMsg::checkParts() const
     _setUse32BitHeaders(false);
   } else if (has32Bit) {
     _setUse32BitHeaders(true);
-  } else {
-    cerr << "ERROR - DsMdvxMsg::checkParts()" << endl;
-    cerr << "Message does not have either 32 or 64 bit headers" << endl;
-    print(cerr, "  ");
-    return -1;
   }
-  return 0;
 }
 
 //////////////////////////////////////////
@@ -226,8 +220,8 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
 				"MDVP_READ_FORMAT_PART"));
   labels.insert(PartHeaderLabel(MDVP_WRITE_FORMAT_PART,
 				"MDVP_WRITE_FORMAT_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CURRENT_FORMAT_PART,
-				"MDVP_CURRENT_FORMAT_PART"));
+  labels.insert(PartHeaderLabel(MDVP_INTERNAL_FORMAT_PART,
+				"MDVP_INTERNAL_FORMAT_PART"));
 
   labels.insert(PartHeaderLabel(MDVP_READ_FIELD_NUM_PART,
 				"MDVP_READ_FIELD_NUM_PART"));

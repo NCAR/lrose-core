@@ -110,6 +110,10 @@ int CreateTestMdv::Run ()
 {
 
   DsMdvx mdvx;
+  if (_params.debug) {
+    mdvx.setDebug(true);
+  }
+
   if (_createMdvx(mdvx)) {
     cerr << "ERROR - CreateTestMdv::Run" << endl;
     cerr << "  creating mdvx object" << endl;

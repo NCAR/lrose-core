@@ -90,7 +90,7 @@ public:
 
     MDVP_READ_FORMAT_PART                = 50106,
     MDVP_WRITE_FORMAT_PART               = 50107,
-    MDVP_CURRENT_FORMAT_PART             = 50108,
+    MDVP_INTERNAL_FORMAT_PART            = 50108,
 
     // read specs
 
@@ -593,9 +593,9 @@ public:
   virtual void printHeader(ostream &out, const char *spacer) const;
 
   // check parts for consistency - 32-bit or 64-bit?
-  // returns 0 on success, -1 on failure
+  // sets _use32BitHeaders appropriately
   
-  int checkParts() const;
+  void checkParts() const;
 
 protected:
 
@@ -610,7 +610,7 @@ protected:
 
   void _addReadFormat(Mdvx::mdv_format_t read_format);
   void _addWriteFormat(Mdvx::mdv_format_t write_format);
-  void _addCurrentFormat(Mdvx::mdv_format_t current_format);
+  void _addInternalFormat(Mdvx::mdv_format_t current_format);
 
   int _addReadSearch(const DsMdvx &mdvx);
   void _addReadQualifiers(const DsMdvx &mdvx);
@@ -732,7 +732,7 @@ protected:
   
   int _getReadFormat(DsMdvx &mdvx);
   int _getWriteFormat(DsMdvx &mdvx);
-  int _getCurrentFormat(DsMdvx &mdvx);
+  int _getInternalFormat(DsMdvx &mdvx);
 
   int _getReadSearch(DsMdvx &mdvx);
   int _getReadQualifiers(DsMdvx &mdvx);

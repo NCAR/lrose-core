@@ -68,12 +68,12 @@ debug = DEBUG_OFF;
 //
 
 grid_xy_geom = {
-    nx = 400,
-    ny = 400,
+    nx = 500,
+    ny = 500,
     minx = -199.5,
     miny = -199.5,
-    dx = 1,
-    dy = 1
+    dx = 0.5,
+    dy = 0.5
 };
 
 //======================================================================
@@ -410,7 +410,7 @@ z_level_array = {
 //     ENCODING_FLOAT32
 //
 
-encoding_type = ENCODING_INT16;
+encoding_type = ENCODING_FLOAT32;
 
 ///////////// fields //////////////////////////////////
 //
@@ -452,7 +452,7 @@ fields = {
     units = "m/s",
     min_val = -25,
     max_val = 25,
-    encoding = ENCODING_INT16
+    encoding = ENCODING_FLOAT32
   }
 };
 
@@ -470,7 +470,7 @@ fields = {
 // Type: string
 //
 
-output_dir = "/tmp/MdvTest";
+output_dir = "mdvp:://localhost:0:/tmp/MdvTest";
 
 ///////////// compression /////////////////////////////
 //

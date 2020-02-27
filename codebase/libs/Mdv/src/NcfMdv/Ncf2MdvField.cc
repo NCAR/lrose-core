@@ -52,9 +52,6 @@ Ncf2MdvField::Ncf2MdvField(bool debug,
                            int timeIndex,
                            time_t forecastTime,
                            int forecastDelta,
-#ifdef USE_UDUNITS
-                           ut_system *uds,
-#endif
                            Nc3File *ncFile, Nc3Error *ncErr,
                            Nc3Var *dataVar,
                            Nc3Dim *tDim, Nc3Var *tVar,
@@ -62,9 +59,6 @@ Ncf2MdvField::Ncf2MdvField(bool debug,
                            Nc3Dim *yDim, Nc3Var *yVar,
                            Nc3Dim *xDim, Nc3Var *xVar) :
         _debug(debug),
-#ifdef USE_UDUNITS
-       _uds(uds),
-#endif
         _ncFile(ncFile), _ncErr(ncErr),
         _dataVar(dataVar),
         _tDim(tDim), _tVar(tVar),
@@ -767,46 +761,12 @@ int Ncf2MdvField::_setXYAxis(const string &axisName,
     return 0;
   }
 
-#ifdef USE_UDUNITS
-
-  ut_unit *kmUnit = ut_parse(_uds, "km", UT_ASCII);
-  if (kmUnit == NULL) {
-    return 0;
-  }
-
-  ut_unit *udUnit = ut_parse(_uds, units.c_str(), UT_ASCII);
-  if (udUnit == NULL) {
-    ut_free(kmUnit);
-    return 0;
-  }
-
-  if (!ut_are_convertible(kmUnit, udUnit)) {
-    ut_free(kmUnit);
-    ut_free(udUnit);
-    return 0;
-  }
-  
-  // convert to km
-
-  cv_converter *conv = ut_get_converter(udUnit, kmUnit);
-  if (conv != NULL) {
-    minVal = cv_convert_double(conv, minVal);
-    dVal = cv_convert_double(conv, dVal);
-    cv_free(conv);
-  }
-  ut_free(udUnit);
-  ut_free(kmUnit);
-
-#else
-
   // convert to km
 
   double kmMult = _getKmMult(units);
   minVal *= kmMult;
   dVal *= kmMult;
 
-#endif
-  
   return 0;
 
 }
@@ -918,48 +878,6 @@ void Ncf2MdvField::_setZAxis()
     return;
   }
   
-#ifdef USE_UDUNITS
-
-  ut_unit *kmUnit = ut_parse(_uds, "km", UT_ASCII);
-  if (kmUnit == NULL) {
-    return;
-  }
-
-  ut_unit *udUnit = ut_parse(_uds, units.c_str(), UT_ASCII);
-  if (udUnit == NULL) {
-    ut_free(kmUnit);
-    return;
-  }
-
-  if (!ut_are_convertible(kmUnit, udUnit)) {
-    ut_free(kmUnit);
-    ut_free(udUnit);
-    return;
-  }
-  
-  // convert to km
-
-  cv_converter *conv = ut_get_converter(udUnit, kmUnit);
-  if (conv == NULL) {
-    return;
-  }
-
-  _fhdr.grid_minz = cv_convert_double(conv, minz);
-  _fhdr.grid_dz = cv_convert_double(conv, dz);
-
-
-
-  
-  for (int ii = 0; ii < nz; ii++) {
-    _vhdr.level[ii] = cv_convert_double(conv, vlevels[ii]);
-  }
-
-  cv_free(conv);
-  ut_free(udUnit);
-  ut_free(kmUnit);
-
-#else
-
   // convert units to km as required
   
   double mult = _getKmMult(units);
@@ -969,12 +887,10 @@ void Ncf2MdvField::_setZAxis()
     _vhdr.level[ii] = vlevels[ii] * mult;
   }
 
-#endif
-
   return;
 
 }
-  
+
 ///////////////////////////////////////////////////////////////
 // Set grid data
 // Returns 0 on success, -1 on failure

@@ -67,9 +67,9 @@ void Mdvx::printFormats(ostream &out, bool force /* = false */) const
   out << endl;
   out << "-------------------------------" << endl;
   out << "MDV format states" << endl;
-  out << "  Current format: " << format2Str(_internalFormat) << endl;
-  out << "  Read format: " << format2Str(_readFormat) << endl;
-  out << "  Write format: " << format2Str(_writeFormat) << endl;
+  out << "  Internal format: " << format2Str(_internalFormat) << endl;
+  out << "  Read     format: " << format2Str(_readFormat) << endl;
+  out << "  Write    format: " << format2Str(_writeFormat) << endl;
   out << "-------------------------------" << endl;
   out << endl;
 

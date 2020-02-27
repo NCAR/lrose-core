@@ -82,10 +82,10 @@ int DsMdvxMsg::_getWriteFormat(DsMdvx &mdvx)
 
 }
 
-int DsMdvxMsg::_getCurrentFormat(DsMdvx &mdvx)
+int DsMdvxMsg::_getInternalFormat(DsMdvx &mdvx)
 {
 
-  DsMsgPart * part = getPartByType(MDVP_CURRENT_FORMAT_PART);
+  DsMsgPart * part = getPartByType(MDVP_INTERNAL_FORMAT_PART);
   if (part == NULL) {
     return -1;
   }
@@ -93,7 +93,7 @@ int DsMdvxMsg::_getCurrentFormat(DsMdvx &mdvx)
   string formatStr(_part2Str(part));
   mdvx._internalFormat = Mdvx::str2Format(formatStr);
   if (_debug) {
-    cerr << "Found MDVP_CURRENT_FORMAT_PART: "
+    cerr << "Found MDVP_INTERNAL_FORMAT_PART: "
          << Mdvx::format2Str(mdvx._internalFormat) << endl;
   }
 

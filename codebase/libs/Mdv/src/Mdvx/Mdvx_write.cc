@@ -219,6 +219,10 @@ si64 Mdvx::getWriteLen32() const
 int Mdvx::writeToDir(const string &outputDir)
 {
 
+  if (_debug) {
+    cerr << "DEBUG - Mdvx::writeToDir" << endl;
+  }
+
   clearErrStr();
   updateMasterHeader();
 
@@ -292,6 +296,11 @@ int Mdvx::writeToPath(const string &outputPath)
 
 {
 
+  if (_debug) {
+    cerr << "DEBUG - Mdvx::writeToPath" << endl;
+    printFormats(cerr, true);
+  }
+
   // init
   
   clearErrStr();
@@ -357,7 +366,7 @@ int Mdvx::_writeAsMdv(const string &outputPath)
 {
   
   if (_debug) {
-    cerr << "Mdvx - writing to path: " << outputPath << endl;
+    cerr << "DEBUG - Mdvx::_writeAsMdv - writing to path: " << outputPath << endl;
   }
   
   // remove gzipped file if it already exists

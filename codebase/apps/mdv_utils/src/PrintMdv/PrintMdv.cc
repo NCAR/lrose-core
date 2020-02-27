@@ -452,7 +452,7 @@ int PrintMdv::_handleVolume(DsMdvx *mdvx)
       return iret;
     }
 
-  } else if (mdvx->getCurrentFormat() == Mdvx::FORMAT_NCF) {
+  } else if (mdvx->getInternalFormat() == Mdvx::FORMAT_NCF) {
 
     // save to tmp file, so it can be printed
     
@@ -601,7 +601,7 @@ int PrintMdv::_handleVsection(DsMdvx *mdvx)
       return iret;
     }
 
-  } else if (mdvx->getCurrentFormat() == Mdvx::FORMAT_NCF) {
+  } else if (mdvx->getInternalFormat() == Mdvx::FORMAT_NCF) {
 
     // save to tmp file, so it can be printed
     
@@ -951,7 +951,7 @@ void PrintMdv::_doPrintVol(const DsMdvx *mdvx) const
 
   mdvx->printFormats(cout);
   
-  if (mdvx->getCurrentFormat() != Mdvx::FORMAT_NCF) {
+  if (mdvx->getInternalFormat() != Mdvx::FORMAT_NCF) {
     
     Mdvx::printVol(cout,
                    mdvx,

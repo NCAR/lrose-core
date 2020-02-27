@@ -67,15 +67,15 @@ void DsMdvxMsg::_addWriteFormat(Mdvx::mdv_format_t write_format)
 
 }
 
-void DsMdvxMsg::_addCurrentFormat(Mdvx::mdv_format_t current_format)
+void DsMdvxMsg::_addInternalFormat(Mdvx::mdv_format_t internal_format)
   
 {
 
-  string formatStr = Mdvx::format2Str(current_format);
+  string formatStr = Mdvx::format2Str(internal_format);
   if (_debug) {
-    cerr << "Adding current format: " << formatStr << endl;
+    cerr << "Adding internal format: " << formatStr << endl;
   }
-  addPart(MDVP_CURRENT_FORMAT_PART, formatStr.size() + 1, formatStr.c_str());
+  addPart(MDVP_INTERNAL_FORMAT_PART, formatStr.size() + 1, formatStr.c_str());
 
 }
 
@@ -137,10 +137,10 @@ int DsMdvxMsg::_addReadSearch(const DsMdvx &mdvx)
 
   // 64-bit
 
-  if (!_use32BitHeaders) {
-    BE_from_array_64(&fsearch, sizeof(fsearch));
-    addPart(MDVP_FILE_SEARCH_PART_64, sizeof(fsearch), &fsearch);
-  }
+  // if (!_use32BitHeaders) {
+  BE_from_array_64(&fsearch, sizeof(fsearch));
+  addPart(MDVP_FILE_SEARCH_PART_64, sizeof(fsearch), &fsearch);
+  // }
 
   // optional part to constrain forecast lead times
 
@@ -505,10 +505,10 @@ void DsMdvxMsg::_addReadRemap(const Mdvx::coord_t &coords)
 
   // 64-bit
 
-  if (!_use32BitHeaders) {
-    BE_from_array_64(&remap, sizeof(remap));
-    addPart(MDVP_READ_REMAP_PART_64, sizeof(remap), &remap);
-  }
+  // if (!_use32BitHeaders) {
+  BE_from_array_64(&remap, sizeof(remap));
+  addPart(MDVP_READ_REMAP_PART_64, sizeof(remap), &remap);
+  // }
 
 }
 
@@ -756,10 +756,10 @@ void DsMdvxMsg::_addTimeListOptions(Mdvx::time_list_mode_t mode,
 
   // 64-bit
 
-  if (!_use32BitHeaders) {
-    BE_from_array_64(&options, sizeof(options));
-    addPart(MDVP_TIME_LIST_OPTIONS_PART_64, sizeof(options), &options);
-  }
+  // if (!_use32BitHeaders) {
+  BE_from_array_64(&options, sizeof(options));
+  addPart(MDVP_TIME_LIST_OPTIONS_PART_64, sizeof(options), &options);
+  // }
 
 }
 
@@ -1322,10 +1322,10 @@ void DsMdvxMsg::_addClimoDataRange(const time_t start_time,
 
   // 64-bit
 
-  if (!_use32BitHeaders) {
-    BE_from_array_64(&data_range, sizeof(data_range));
-    addPart(MDVP_CLIMO_DATA_RANGE_PART_64, sizeof(data_range), &data_range);
-  }
+  // if (!_use32BitHeaders) {
+  BE_from_array_64(&data_range, sizeof(data_range));
+  addPart(MDVP_CLIMO_DATA_RANGE_PART_64, sizeof(data_range), &data_range);
+  // }
 
 }
 

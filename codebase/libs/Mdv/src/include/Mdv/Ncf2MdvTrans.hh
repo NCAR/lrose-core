@@ -40,11 +40,6 @@
 #ifndef NCF2MDV_TRANS_HH
 #define NCF2MDV_TRANS_HH
 
-// #define USE_UDUNITS
-#ifdef USE_UDUNITS
-#include <Radx/Udunits2.hh>
-#endif
-
 #include <Mdv/Mdvx.hh>
 #include <Radx/Radx.hh>
 #include <Ncxx/Nc3xFile.hh>
@@ -164,12 +159,6 @@ protected:
   Mdvx::master_header_t _mhdr;
   string _dataSetInfo;
 
-#ifdef USE_UDUNITS
-  // udunits
-
-  Udunits2 _udunits;
-#endif
-  
   // time dimensions
   // there may be multiple time dimensions in the file
   // each field could have a different time dimension and values, but that is

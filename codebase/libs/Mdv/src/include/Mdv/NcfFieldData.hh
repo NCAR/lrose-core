@@ -131,6 +131,7 @@ private:
   DsMdvx::ncf_pack_t _packingRequested;
   DsMdvx::ncf_pack_t _packingUsed;
   Nc3Type _ncType;
+  int _ncElemSize;
   
   float _addOffset;
   float _scaleFactor;
@@ -145,6 +146,10 @@ private:
   // set compression
 
   int _setCompression(Nc3File *ncFile, string &errStr);
+
+  // set chunking
+
+  int _setChunking(Nc3File *ncFile, string &errStr);
 
 };
 

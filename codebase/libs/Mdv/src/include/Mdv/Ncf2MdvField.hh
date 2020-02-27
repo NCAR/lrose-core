@@ -40,18 +40,12 @@
 #ifndef NCF2MDV_FIELD_HH
 #define NCF2MDV_FIELD_HH
 
-// #define USE_UDUNITS
-#ifdef USE_UDUNITS
-#include <udunits2.h>
-#endif
-
 #include <toolsa/TaArray.hh>
 #include <Mdv/MdvxField.hh>
 #include <Ncxx/Nc3xFile.hh>
 using namespace std;
 
-////////////////////////
-// 
+/////////////////////////////////////////////////////////////////////
 // Ncf2MdvField object extracts data from a CF-compliant NetCDF file,
 // and populates an MdvxField object with the data from the file.
 
@@ -66,9 +60,6 @@ public:
                int timeIndex,
                time_t forecastTime,
                int forecastDelta,
-#ifdef USE_UDUNITS
-               ut_system *uds,
-#endif
                Nc3File *ncFile, Nc3Error *ncErr,
                Nc3Var *dataVar,
                Nc3Dim *tDim, Nc3Var *tVar,
@@ -108,12 +99,6 @@ protected:
   int _timeIndex; // index into data for sets with multiple times
   Mdvx::field_header_t _fhdr;
   Mdvx::vlevel_header_t _vhdr;
-
-#ifdef USE_UDUNITS  
-  // unidata units handling
-  
-  ut_system *_uds;
-#endif
 
   // netCDF file
 

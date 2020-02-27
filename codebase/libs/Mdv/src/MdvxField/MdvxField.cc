@@ -347,7 +347,8 @@ MdvxField::MdvxField(const MdvxField &rhs, int plane_num)
     _fhdr.ny = 1;
 
     // set compress as required
-    
+
+    cerr << "AAAAAAAAAAAAAAAAAAAAAAA" << endl;
     requestCompression(compression_type);
     
   }
@@ -852,6 +853,7 @@ int MdvxField::convertType
       if (computeMinAndMax()) {
 	return -1;
       }
+      cerr << "BBBBBBBBBBBBBBBBBB" << endl;
       requestCompression(output_compression);
       return 0;
 
@@ -925,6 +927,7 @@ int MdvxField::convertType
 
   // set compression type
   
+  cerr << "VVVVVVVVVVVVVVVVVVVVV" << endl;
   requestCompression(output_compression);
       
   return 0;
@@ -1472,6 +1475,7 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
   STRconcat(_fhdr.field_name_long, "_composite", MDV_LONG_FIELD_LEN);
 
   if (recompress) {
+    cerr << "DDDDDDDDDDDDDDDDDDDDDD" << endl;
     requestCompression(compression_type);
   }
 
@@ -3060,6 +3064,7 @@ int MdvxField::remap(MdvxRemapLut &lut,
 
   // set compression
 
+  cerr << "EEEEEEEEEEEEEEEEEEE" << endl;
   requestCompression(compression_type);
 
   return 0;
@@ -3193,6 +3198,7 @@ int MdvxField::decimate(int64_t max_nxy)
   _volBuf = targetBuf;
 
   if (recompress) {
+    cerr << "FFFFFFFFFFFFFFFFF" << endl;
     requestCompression(compression_type);
   }
 
@@ -5197,6 +5203,7 @@ int MdvxField::_decimate_radar_horiz(int64_t max_nxy)
   _volBuf = targetBuf;
 
   if (recompress) {
+    cerr << "GGGGGGGGGGGGGGG" << endl;
     requestCompression(compression_type);
   }
 
@@ -5335,6 +5342,7 @@ int MdvxField::_decimate_rgba(int64_t max_nxy)
   _volBuf = targetBuf;
 
   if (recompress) {
+    cerr << "HHHHHHHHHHHHHHH" << endl;
     requestCompression(compression_type);
   }
 
@@ -5373,6 +5381,8 @@ int MdvxField::compressIfRequested() const
 int MdvxField::compress(int compression_type) const
 
 {
+
+  cerr << "CCCCCCCCCCCC compress CCCCCCCCCCC" << endl;
 
   // check if we are already properly compressed
   // now use gzip for all compression
@@ -5487,6 +5497,8 @@ int MdvxField::_compressGzipVol() const
 
 {
 
+  cerr << "GGGGGGGGGGGGG _compressGzipVol GGGGGGGGGGGGGGGG" << endl;
+
   int64_t npoints_plane = _fhdr.nx * _fhdr.ny;
   int64_t nbytes_plane = npoints_plane * _fhdr.data_element_nbytes;
   int64_t nbytes_vol = nbytes_plane * _fhdr.nz;
@@ -5542,6 +5554,8 @@ int MdvxField::decompress() const
   if (!isCompressed()) {
     return 0;
   }
+
+  cerr << "DDDDDDDDDDDDDDD decompress DDDDDDDDDDDDDDD" << endl;
 
   if (ta_gzip_buffer(_volBuf.getPtr())) {
     return _decompressGzipVol();
@@ -5863,6 +5877,7 @@ int MdvxField::computeMinAndMax(bool force /* = false*/ )
   // set compression back
 
   if (wasCompressed) {
+    cerr << "IIIIIIIIIIIIIIIIII" << endl;
     requestCompression(compression_type);
   }
 

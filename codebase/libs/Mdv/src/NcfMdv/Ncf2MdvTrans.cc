@@ -781,34 +781,6 @@ void Ncf2MdvTrans::_setTimeInfoForVar(Nc3Var *var)
   string units = asString(unitsAtt);
   delete unitsAtt;
 
-#ifdef USE_UDUNITS
-
-  // check if this is a time variable, using units
-    
-  ut_unit *udUnit = ut_parse(_udunits.getSystem(), units.c_str(), UT_ASCII);
-  if (udUnit == NULL) {
-    // cannot parse as a unit
-    return;
-  }
-    
-  // is this a time variable?
-    
-  if (ut_are_convertible(udUnit, _udunits.getEpoch()) == 0) {
-    // not a time variable
-    ut_free(udUnit);
-    return;
-  }
-      
-  // convert to unix time 
-  // cv_converter and udUnit freed below, we may need 
-  // if we have more than one forecast time
-    
-  cv_converter *conv = ut_get_converter(udUnit, _udunits.getEpoch());
-  double storedTime = var->as_double(0);
-  double unixTime = cv_convert_double(conv, storedTime);
-
-#else
-
   DateTime rtime;
   double mult = 1.0;
   if (units.find("seconds") != string::npos) {
@@ -829,8 +801,6 @@ void Ncf2MdvTrans::_setTimeInfoForVar(Nc3Var *var)
   }
   double storedTime = var->as_double(0) * mult;
   double unixTime = storedTime + rtime.getTimeAsDouble();
-
-#endif
 
   // forecast_reference_time?
     
@@ -877,20 +847,11 @@ void Ncf2MdvTrans::_setTimeInfoForVar(Nc3Var *var)
   tdim.var = var;
   for (int jj = 0; jj < dim->size(); jj++){
     double storedForecastTime = var->as_double(jj);
-#ifdef USE_UDUNITS
-    double unixForecastTime = cv_convert_double(conv, storedForecastTime);
-#else
     double unixForecastTime = storedForecastTime + rtime.getTimeAsDouble();
-#endif
     tdim.times.push_back((time_t) (unixForecastTime + 0.5));
   }
   _timeDims.push_back(tdim);
 
-#ifdef USE_UDUNITS
-  cv_free(conv);
-  ut_free(udUnit);
-#endif
-    
 }
   
 ///////////////////////////////////////////////////////////////
@@ -1362,9 +1323,6 @@ int Ncf2MdvTrans::_addOneTimeDataField(int itime, TimeDim *tdim,
 					 itime,
 					 forecastTime,
 					 forecastDelta,
-#ifdef USE_UDUNITS
-					 _udunits.getSystem(),
-#endif
 					 _ncFile, _ncErr,
 					 dataVar,
 					 tdim->dim, tdim->var,
@@ -2129,7 +2087,9 @@ void Ncf2MdvTrans::_addFieldCfRadial(const RadxVol &vol,
   delete[] mdvData;
 
   // convert mdv field based on byte width, compress
-  
+
+  cerr << "ppppppppppppppppppppppp" << endl;
+
   if (origByteWidth == 1) {
     mdvxField->convertType(Mdvx::ENCODING_INT8, Mdvx::COMPRESSION_GZIP);
   } else if (origByteWidth == 2) {

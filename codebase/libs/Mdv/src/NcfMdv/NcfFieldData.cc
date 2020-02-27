@@ -36,6 +36,7 @@
 //
 //////////////////////////////////////////////////////////////
 
+#include <Ncxx/Ncxx.hh>
 #include <toolsa/TaStr.hh>
 #include <Mdv/NcfMdv.hh>
 #include <Mdv/NcfFieldData.hh>
@@ -58,7 +59,7 @@ NcfFieldData::NcfFieldData(bool debug,
                            int compression_level,
                            Nc3File::FileFormat format) :
   _debug(debug),
-  _mdvField(*mdvField),
+  _mdvField(*mdvField), // make a copy
   _gridInfo(gridInfo),
   _vlevelInfo(vlevelInfo),
   _mdvName(mdvFieldName),
@@ -102,26 +103,32 @@ NcfFieldData::NcfFieldData(bool debug,
   // determine packing
 
   _ncType = nc3Float;
+  _ncElemSize = 4;
   if (_packingRequested == DsMdvx::NCF_PACK_ASIS) {
     // ASIS packing
     // inspect the original header to determine packing
     if (_fhdrIn.encoding_type == Mdvx::ENCODING_INT8) {
       _packingUsed = DsMdvx::NCF_PACK_BYTE;
       _ncType = nc3Byte;
+      _ncElemSize = 1;
     } else if (_fhdrIn.encoding_type == Mdvx::ENCODING_INT16) {
       _packingUsed = DsMdvx::NCF_PACK_SHORT;
       _ncType = nc3Short;
+      _ncElemSize = 2;
     } else {
       _packingUsed = DsMdvx::NCF_PACK_FLOAT;
       _ncType = nc3Float;
+      _ncElemSize = 4;
     }
   } else {
     // Specified packing
     _packingUsed = _packingRequested;
     if (_packingRequested == DsMdvx::NCF_PACK_BYTE) {
       _ncType = nc3Byte;
+      _ncElemSize = 1;
     } else if (_packingRequested == DsMdvx::NCF_PACK_SHORT) {
       _ncType = nc3Short;
+      _ncElemSize = 2;
     }
   }
 
@@ -346,6 +353,16 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
     iret |= !_ncVar->add_att(NcfMdv::mdv_transform, _fhdrIn.transform);
   }
 
+  // Set chunking if we are working with netCDF4 hdf files
+  
+  if (_ncFormat == Nc3File::Netcdf4 || _ncFormat == Nc3File::Netcdf4Classic) {
+    if (_setChunking(ncFile, errStr)) {
+      cerr << "WARNING: NcfFieldData::addToNcf" << endl;
+      cerr << "  Chunking failed" << endl;
+      return -1;
+    }
+  }
+
   // Set compression if we are working with netCDF4 hdf files
 
   if (_compress &&
@@ -501,6 +518,73 @@ int NcfFieldData::_setCompression(Nc3File *ncFile,
   if (iret != NC_NOERR) {
     cerr << "WARNING: NcfFieldData::_setCompression" << endl;
     cerr << "  Problem setting compression for var: " << _ncVar->name() << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Set chunking
+// We want to be able to read in a single vertical plan efficiently
+// So we want to chunk a plane at a time.
+// That way, during decompression, only the chunks that contain the
+// data for the plane, plus a bit on either side, will be decompressed.
+
+int NcfFieldData::_setChunking(Nc3File *ncFile,
+                               string &errStr)
+  
+{
+  
+  if (_ncVar == NULL) {
+    return -1;
+  }
+
+  // get xy dimensions
+  
+  int nx = _fhdrFl32.nx;
+  int ny = _fhdrFl32.ny;
+      
+  // compute chunking size
+  
+  int maxChunkSize = 2000000; // 2 MB
+  int nbytesRow = nx * _ncElemSize;
+  int nyChunk = maxChunkSize / nbytesRow;
+  if (nyChunk < 1) {
+    nyChunk = 1;
+  } else if (nyChunk > ny) {
+    nyChunk = ny;
+  }
+  int nxChunk = nx;
+
+  // set the chunk size array
+  // dimensions are [time=1][z][y][x]
+
+  size_t chunkSize[4];
+  chunkSize[0] = 1;
+  chunkSize[1] = 1;
+  chunkSize[2] = nyChunk;
+  chunkSize[3] = nxChunk;
+
+  if (_debug) {
+    cerr << "NcfFieldData::_setChunking()" << endl;
+    cerr << "  Field: " << _ncVar->name() << endl;
+    cerr << "  nyChunk: " << nyChunk << endl;
+    cerr << "  nxChunk: " << nxChunk << endl;
+  }
+  
+  // deflateLevel is the desire level of compression, an integer from 1 to 9.
+  
+  int fileId = ncFile->id();
+  int varId = _ncVar->id();
+  int iret = nc_def_var_chunking(fileId, varId, NC_CHUNKED, chunkSize);
+  if (iret != NC_NOERR) {
+    cerr << "ERROR - NcfFieldData::_setChunking" << endl;
+    cerr << "  Problem setting chunking for var: " << _ncVar->name() << endl;
+    cerr << Ncxx::ncErrToStr(iret) << endl;
+    cerr << "  nyChunk: " << nyChunk << endl;
+    cerr << "  nxChunk: " << nxChunk << endl;
     return -1;
   }
 

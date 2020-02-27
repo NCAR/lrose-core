@@ -89,12 +89,8 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
   // check we are not mixing 32-bit and 64-bit header parts
   // this also sets _use32BitHeaders
 
-  if (checkParts()) {
-    _errStr += "ERROR - DsMdvxMsg::disassemble\n";
-    _errStr += "  Message contains both 32-bit and 64-bit header parts\n";
-    return -1;
-  }
-  
+  checkParts();
+
   // error message?
   
   mdvx.clearErrStr();
@@ -322,7 +318,7 @@ int DsMdvxMsg::_disassembleReadAllHdrsReturn(DsMdvx &mdvx)
   // get formats
   
   _getReadFormat(mdvx);
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (_getHeaders(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleReadAllHdrsReturn\n";
@@ -411,7 +407,7 @@ int DsMdvxMsg::_disassembleReadVolumeReturn(DsMdvx &mdvx)
   // get formats
   
   _getReadFormat(mdvx);
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (partExists(MDVP_XML_HEADER_PART)) {
 
@@ -531,7 +527,7 @@ int DsMdvxMsg::_disassembleReadVsectionReturn(DsMdvx &mdvx)
   // get formats
   
   _getReadFormat(mdvx);
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (partExists(MDVP_XML_HEADER_PART)) {
     
@@ -605,7 +601,7 @@ int DsMdvxMsg::_disassembleWrite(DsMdvx &mdvx)
   // get formats
   
   _getWriteFormat(mdvx);
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (_getWriteUrl(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleWrite\n";
@@ -747,7 +743,7 @@ int DsMdvxMsg::_disassembleCompileTimeListReturn(DsMdvx &mdvx)
   // get formats
   
   _getReadFormat(mdvx);
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (_getTimeLists(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleCompileTimeListReturn\n";
@@ -830,7 +826,7 @@ int DsMdvxMsg::_disassembleCompileTimeHeightReturn(DsMdvx &mdvx)
   // get formats
   
   _getReadFormat(mdvx);
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (partExists(MDVP_XML_HEADER_PART)) {
     
@@ -911,7 +907,7 @@ int DsMdvxMsg::_disassembleConvertMdv2Ncf(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (_getHeadersAndData(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleConvertMdv2Ncf\n";
@@ -951,7 +947,7 @@ int DsMdvxMsg::_disassembleConvertMdv2NcfReturn(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (_getNcfParts(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleConvertMdv2NcfReturn\n";
@@ -979,7 +975,7 @@ int DsMdvxMsg::_disassembleConvertNcf2Mdv(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (_getReadQualifiers(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleConvertNcf2Mdv.\n";
@@ -1017,7 +1013,7 @@ int DsMdvxMsg::_disassembleConvertNcf2MdvReturn(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (partExists(MDVP_SINGLE_BUFFER_PART)) {
     if (_getSingleBuffer(mdvx)) {
@@ -1057,7 +1053,7 @@ int DsMdvxMsg::_disassembleReadAllHdrsNcf(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
   
   if (_getReadQualifiers(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleReadAllHdrsNcf.\n";
@@ -1089,7 +1085,7 @@ int DsMdvxMsg::_disassembleReadAllHdrsNcfReturn(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
   
   if (mdvx._internalFormat == Mdvx::FORMAT_NCF) {
     
@@ -1132,7 +1128,7 @@ int DsMdvxMsg::_disassembleReadNcf(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
   
   if (_getReadQualifiers(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleReadNcf.\n";
@@ -1169,7 +1165,7 @@ int DsMdvxMsg::_disassembleReadNcfReturn(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
   
   if (mdvx._internalFormat == Mdvx::FORMAT_NCF) {
     
@@ -1224,7 +1220,7 @@ int DsMdvxMsg::_disassembleReadAllHdrsRadx(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
   
   if (_getReadQualifiers(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleReadAllHdrsRadx.\n";
@@ -1256,7 +1252,7 @@ int DsMdvxMsg::_disassembleReadAllHdrsRadxReturn(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
   
   if (mdvx._internalFormat == Mdvx::FORMAT_NCF) {
     
@@ -1299,7 +1295,7 @@ int DsMdvxMsg::_disassembleReadRadx(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (_getReadQualifiers(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleReadRadx.\n";
@@ -1336,7 +1332,7 @@ int DsMdvxMsg::_disassembleReadRadxReturn(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (mdvx._internalFormat == Mdvx::FORMAT_NCF) {
     
@@ -1392,7 +1388,7 @@ int DsMdvxMsg::_disassembleConstrainNcf(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
   if (_getReadQualifiers(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleConstrainNcf.\n";
@@ -1430,7 +1426,7 @@ int DsMdvxMsg::_disassembleConstrainNcfReturn(DsMdvx &mdvx)
   
   // get format
   
-  _getCurrentFormat(mdvx);
+  _getInternalFormat(mdvx);
 
  if (_getNcfParts(mdvx)) {
     _errStr += "ERROR - DsMdvxMsg::_disassembleConstrainNcfReturn\n";
