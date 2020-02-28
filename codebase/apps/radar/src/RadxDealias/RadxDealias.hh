@@ -123,7 +123,7 @@ private:
 
   void _insertFieldData(RadxVol *radxVol, string fieldName, Volume *volume);
 
-  void _outputSoundVolume(Volume *currVelVol, Volume *soundVolume);
+  void _replaceVelocityWithSounding(Volume *currVelVol, Volume *soundVolume);
 
   //
   // Dealiser methods

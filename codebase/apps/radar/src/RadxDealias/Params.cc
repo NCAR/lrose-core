@@ -1133,7 +1133,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("strict_first_pass");
-    tt->descr = tdrpStrDup("If strict_first_pass is true, a gate in which a dealiasattempt has been made will have to be within comp_thresh*NyqVelocityof the relevant above, previous, sounding values in order to beconsidered properly dealiased");
+    tt->descr = tdrpStrDup("If strict_first_pass is true, a gate in which a dealias attempt has been made will have to be within comp_thresh*NyqVelocity of the relevant above, previous, sounding values in order to be considered properly dealiased");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &strict_first_pass - &_start_;
     tt->single_val.b = pFALSE;

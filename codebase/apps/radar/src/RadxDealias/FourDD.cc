@@ -808,14 +808,14 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
   if (dcase>0) {
  
     float potentialUnfoldedValue = Unfold(startingValue, cval, max_count, NyqVelocity);
-    printf("case: %d potentialUnfoldedValue = %g\n", dcase, potentialUnfoldedValue);
+    //printf("case: %d potentialUnfoldedValue = %g\n", dcase, potentialUnfoldedValue);
 
     float diff = cval - potentialUnfoldedValue;
     float fractionNyqVelocity = fraction * NyqVelocity;
 
         float v1 = fabs(abValue-potentialUnfoldedValue); // < fractionNyqVelocity
 	float v2 = fabs(soundValue-potentialUnfoldedValue); //  < fractionNyqVelocity) {
-        printf("v1=%g v2=%g\n", v1, v2);
+        //printf("v1=%g v2=%g\n", v1, v2);
 
 
     bool good = false;
@@ -1242,7 +1242,7 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
 
   // exit the loop when no change has been made; or max number of loops?
   while (flag==1) {
-    printf("loopcount = %d ", loopcount);
+    //printf("loopcount = %d ", loopcount);
     loopcount=loopcount+1;
     flag=0;
     if (step==1) {
@@ -1274,7 +1274,7 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
                                 &in, &out, &numpos, &numneg, &noHope);
 
             int numberOfDealiasedNeighbors = in + out;
-            printf("number of dealiased neighbors = %d \n", numberOfDealiasedNeighbors);
+            //printf("number of dealiased neighbors = %d \n", numberOfDealiasedNeighbors);
             // Perform last step of Bergen and Albers filter:  
             //	  if (loopcount == 1 && numberOfTbdNeighbors+numberOfDealiasedNeighbors < 1)
             if (loopcount == 1 && noHope)
@@ -1306,7 +1306,7 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
                   if (loopcount>4) STATE[i][currIndex] = UNSUCCESSFUL;
                 }
               } // end else (in == 0 || out != 0)
-              printf("numtimes = %d val = %g\n", numtimes, val);
+              //printf("numtimes = %d val = %g\n", numtimes, val);
               //} // end while still unfolding (STATE == TBD)
             } // end if (numberOfDealiasedNeighbors>=1)
 
@@ -1669,12 +1669,12 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
       // a _comp_thresh of the Nyquist velocity). This produces a number
       // of good data points from which to begin unfolding assuming spatial
       // continuity.  
-
+      printf("Initial Dealiasing ...\n");
       InitialDealiasing(rvVolume, lastVolume, soundVolume, original,
 			velocityMissingValue,
                         sweepIndex, del_num_bins, STATE, filt, fraction,
                         _ck_val, _strict_first_pass, _max_count);
-
+      printf("Unfold Assuming Spatial Continuity ...\n");
       // Now, unfold STATE=TBD bins assuming spatial continuity:  
       UnfoldTbdBinsAssumingSpatialContinuity(STATE, original, rvVolume, sweepIndex, 
                                              del_num_bins, 
@@ -1686,7 +1686,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
       //   using a window with dimensions 2(_proximity)+1 x 2(_proximity)+1:
       //   if still no luck delete data (or unfold against VAD if _pass2).
       //
-
+      printf("Unfold Using Window ...\n");
       UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(STATE, rvVolume, original,
                                                     sweepIndex, del_num_bins,
                                                     pfraction, _proximity, _std_thresh,
@@ -1697,6 +1697,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
       // Beginning second pass through the data, this time using 
       //  soundVolume only:  
       //
+      printf("Second Pass Using Sound Volume Only ...\n");
       if (lastVolume!=NULL && soundVolume!=NULL) {
         SecondPassUsingSoundVolumeOnly(STATE, soundVolume, original, rvVolume,
                                        sweepIndex, del_num_bins,
@@ -1872,13 +1873,13 @@ float FourDD::Unfold(float foldedValue, float referenceValue,
     val = val + NyqInterval*direction;
     numtimes = numtimes + 1;
     diff = cval-val;
-    printf("%d: val=%g diff=%g\n",  numtimes, val, diff);
+    //printf("%d: val=%g diff=%g\n",  numtimes, val, diff);
     if (diff<0.0) {
       diff = -diff;
       direction = -1;
     } else direction = 1;
   }
-  printf("%g unfolded to %g\n", foldedValue, val);
+  //printf("%g unfolded to %g\n", foldedValue, val);
   return val;
 }
 
