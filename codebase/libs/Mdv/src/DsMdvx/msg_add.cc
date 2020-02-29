@@ -137,10 +137,8 @@ int DsMdvxMsg::_addReadSearch(const DsMdvx &mdvx)
 
   // 64-bit
 
-  // if (!_use32BitHeaders) {
   BE_from_array_64(&fsearch, sizeof(fsearch));
   addPart(MDVP_FILE_SEARCH_PART_64, sizeof(fsearch), &fsearch);
-  // }
 
   // optional part to constrain forecast lead times
 
@@ -505,10 +503,8 @@ void DsMdvxMsg::_addReadRemap(const Mdvx::coord_t &coords)
 
   // 64-bit
 
-  // if (!_use32BitHeaders) {
   BE_from_array_64(&remap, sizeof(remap));
   addPart(MDVP_READ_REMAP_PART_64, sizeof(remap), &remap);
-  // }
 
 }
 
@@ -548,12 +544,23 @@ void DsMdvxMsg::_addReadVsectWayPts(const vector<Mdvx::vsect_waypt_t> &wayPts)
   
 {
 
-  MemBuf buf;
-  Mdvx::assembleVsectWayPtsBuf(wayPts, buf);
+  // add 32-bit version
+
+  MemBuf buf32;
+  Mdvx::assembleVsectWayPtsBuf32(wayPts, buf32);
   if (_debug) {
-    Mdvx::printVsectWayPtsBuf(buf, cerr);
+    Mdvx::printVsectWayPtsBuf32(buf32, cerr);
   }
-  addPart(MDVP_READ_VSECT_WAYPTS_PART, buf.getLen(), buf.getPtr());
+  addPart(MDVP_READ_VSECT_WAYPTS_PART_32, buf32.getLen(), buf32.getPtr());
+
+  // add 64-bit version
+
+  MemBuf buf64;
+  Mdvx::assembleVsectWayPtsBuf64(wayPts, buf64);
+  if (_debug) {
+    Mdvx::printVsectWayPtsBuf64(buf64, cerr);
+  }
+  addPart(MDVP_READ_VSECT_WAYPTS_PART_64, buf64.getLen(), buf64.getPtr());
 
 }
 
@@ -756,10 +763,8 @@ void DsMdvxMsg::_addTimeListOptions(Mdvx::time_list_mode_t mode,
 
   // 64-bit
 
-  // if (!_use32BitHeaders) {
   BE_from_array_64(&options, sizeof(options));
   addPart(MDVP_TIME_LIST_OPTIONS_PART_64, sizeof(options), &options);
-  // }
 
 }
 
@@ -951,12 +956,23 @@ void DsMdvxMsg::_addVsectSamplePts
   
 {
 
-  MemBuf buf;
-  Mdvx::assembleVsectSamplePtsBuf(samplePts, dx_km, buf);
+  // add 32-bit version
+
+  MemBuf buf32;
+  Mdvx::assembleVsectSamplePtsBuf32(samplePts, dx_km, buf32);
   if (_debug) {
-    Mdvx::printVsectSamplePtsBuf(buf, cerr);
+    Mdvx::printVsectSamplePtsBuf32(buf32, cerr);
   }
-  addPart(MDVP_VSECT_SAMPLE_PTS_PART, buf.getLen(), buf.getPtr());
+  addPart(MDVP_VSECT_SAMPLE_PTS_PART_32, buf32.getLen(), buf32.getPtr());
+
+  // add 64-bit version
+
+  MemBuf buf64;
+  Mdvx::assembleVsectSamplePtsBuf64(samplePts, dx_km, buf64);
+  if (_debug) {
+    Mdvx::printVsectSamplePtsBuf64(buf64, cerr);
+  }
+  addPart(MDVP_VSECT_SAMPLE_PTS_PART_64, buf64.getLen(), buf64.getPtr());
 
 }
 
@@ -968,12 +984,23 @@ void DsMdvxMsg::_addVsectSegments
 
 {
 
-  MemBuf buf;
-  Mdvx::assembleVsectSegmentsBuf(segments, totalLength, buf);
+  // add 32-bit version
+
+  MemBuf buf32;
+  Mdvx::assembleVsectSegmentsBuf32(segments, totalLength, buf32);
   if (_debug) {
-    Mdvx::printVsectSegmentsBuf(buf, cerr);
+    Mdvx::printVsectSegmentsBuf32(buf32, cerr);
   }
-  addPart(MDVP_VSECT_SEGMENTS_PART, buf.getLen(), buf.getPtr());
+  addPart(MDVP_VSECT_SEGMENTS_PART_32, buf32.getLen(), buf32.getPtr());
+
+  // add 64-bit version
+
+  MemBuf buf64;
+  Mdvx::assembleVsectSegmentsBuf64(segments, totalLength, buf64);
+  if (_debug) {
+    Mdvx::printVsectSegmentsBuf64(buf64, cerr);
+  }
+  addPart(MDVP_VSECT_SEGMENTS_PART_64, buf64.getLen(), buf64.getPtr());
 
 }
 
@@ -1320,10 +1347,8 @@ void DsMdvxMsg::_addClimoDataRange(const time_t start_time,
 
   // 64-bit
 
-  // if (!_use32BitHeaders) {
   BE_from_array_64(&data_range, sizeof(data_range));
   addPart(MDVP_CLIMO_DATA_RANGE_PART_64, sizeof(data_range), &data_range);
-  // }
 
 }
 

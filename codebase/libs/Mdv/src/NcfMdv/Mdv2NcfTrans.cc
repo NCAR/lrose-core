@@ -404,24 +404,40 @@ int Mdv2NcfTrans::_parseMdv()
 
         // If this is Xsection, then get the lat/lons from the samplePoints
         
-        MdvxChunk *pChunk= _mdv->getChunkById(Mdvx::CHUNK_VSECT_SAMPLE_PTS);
-        if(pChunk == NULL){
-            TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::_parseMdv");
-            TaStr::AddStr(_errStr, "ERROR - No chunks found...exiting");
-            return -1;
-
-        }
-        MemBuf buf;
-        buf.add(pChunk->getData(), pChunk->getSize());	  
         vector<Mdvx::vsect_samplept_t> pts;
         double dxKm;
-        string errStr;
-	      
-        if (Mdvx::disassembleVsectSamplePtsBuf(buf, pts, dxKm, errStr)) {
-          TaStr::AddStr(_errStr,
-                        "ERROR - disassembleVSectSamplePtsBuf",
-                        "  Bad sample point buffer\n");
-        }
+
+        // frist try 64-bit
+
+        MdvxChunk *pChunk64 = _mdv->getChunkById(Mdvx::CHUNK_VSECT_SAMPLE_PTS_64);
+        if(pChunk64 != NULL){
+          MemBuf buf64;
+          buf64.add(pChunk64->getData(), pChunk64->getSize());	  
+          string errStr;
+          if (Mdvx::disassembleVsectSamplePtsBuf64(buf64, pts, dxKm, errStr)) {
+            TaStr::AddStr(_errStr,
+                          "ERROR - disassembleVSectSamplePtsBuf64",
+                          "  Bad sample point buffer\n");
+            return -1;
+          }
+        } else {
+          // try 32-bit
+          MdvxChunk *pChunk32 = _mdv->getChunkById(Mdvx::CHUNK_VSECT_SAMPLE_PTS_32);
+          if(pChunk32 == NULL){
+            TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::_parseMdv");
+            TaStr::AddStr(_errStr, "  Xsect - no 64 or 32 bit chunks found");
+            return -1;
+          }
+          MemBuf buf32;
+          buf32.add(pChunk32->getData(), pChunk32->getSize());	  
+          string errStr;
+          
+          if (Mdvx::disassembleVsectSamplePtsBuf32(buf32, pts, dxKm, errStr)) {
+            TaStr::AddStr(_errStr,
+                          "ERROR - disassembleVSectSamplePtsBuf32",
+                          "  Bad sample point buffer\n");
+          }
+        } // if (pChunk32 ...
         
         gridInfo->setCoordinateVarsFromSamplePoints(pts);
 	      

@@ -3204,7 +3204,7 @@ int Mdvx::_readVsectionMdv()
 
   // add vert-section-specific chunks
   
-  _addVsectChunks();
+  _addVsectChunks32();
 
   return 0;
 

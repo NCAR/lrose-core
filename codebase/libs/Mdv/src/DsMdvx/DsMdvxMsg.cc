@@ -251,8 +251,10 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
 				"MDVP_READ_AUTO_REMAP_TO_LATLON_PART"));
   labels.insert(PartHeaderLabel(MDVP_READ_FIELD_FILE_HEADERS_PART,
 				"MDVP_READ_FIELD_FILE_HEADERS_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_VSECT_WAYPTS_PART,
-				"MDVP_READ_VSECT_WAYPTS_PART"));
+  labels.insert(PartHeaderLabel(MDVP_READ_VSECT_WAYPTS_PART_32,
+				"MDVP_READ_VSECT_WAYPTS_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_READ_VSECT_WAYPTS_PART_64,
+				"MDVP_READ_VSECT_WAYPTS_PART_64"));
   labels.insert(PartHeaderLabel(MDVP_READ_VSECT_NSAMPLES_PART,
 				"MDVP_READ_VSECT_NSAMPLES_PART"));
   labels.insert(PartHeaderLabel(MDVP_READ_VSECT_MAXSAMPLES_PART,
@@ -319,10 +321,14 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
   labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_FILE_PART_64,
 				"MDVP_CHUNK_HEADER_FILE_PART_64"));
 
-  labels.insert(PartHeaderLabel(MDVP_VSECT_SAMPLE_PTS_PART,
-				"MDVP_VSECT_SAMPLE_PTS_PART"));
-  labels.insert(PartHeaderLabel(MDVP_VSECT_SEGMENTS_PART,
-				"MDVP_VSECT_SEGMENTS_PART"));
+  labels.insert(PartHeaderLabel(MDVP_VSECT_SAMPLE_PTS_PART_32,
+				"MDVP_VSECT_SAMPLE_PTS_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_VSECT_SAMPLE_PTS_PART_64,
+				"MDVP_VSECT_SAMPLE_PTS_PART_64"));
+  labels.insert(PartHeaderLabel(MDVP_VSECT_SEGMENTS_PART_32,
+				"MDVP_VSECT_SEGMENTS_PART_32"));
+  labels.insert(PartHeaderLabel(MDVP_VSECT_SEGMENTS_PART_64,
+				"MDVP_VSECT_SEGMENTS_PART_64"));
 
   labels.insert(PartHeaderLabel(MDVP_VALID_TIMES_PART,
 				"MDVP_VALID_TIMES_PART"));

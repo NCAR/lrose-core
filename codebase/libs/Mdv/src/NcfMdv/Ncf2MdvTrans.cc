@@ -1427,7 +1427,7 @@ int Ncf2MdvTrans::_finalizeFields()
     _mdv->_vsectSegments = vsectLut.getSegments();
     _mdv->_vsectDxKm = vsectLut.getDxKm();
     _mdv->_vsectTotalLength = vsectLut.getTotalLength();
-    _mdv->_addVsectChunks();
+    _mdv->_addVsectChunks32();
 
     return 0;
 
@@ -2087,8 +2087,6 @@ void Ncf2MdvTrans::_addFieldCfRadial(const RadxVol &vol,
   delete[] mdvData;
 
   // convert mdv field based on byte width, compress
-
-  cerr << "ppppppppppppppppppppppp" << endl;
 
   if (origByteWidth == 1) {
     mdvxField->convertType(Mdvx::ENCODING_INT8, Mdvx::COMPRESSION_GZIP);

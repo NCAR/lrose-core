@@ -901,6 +901,7 @@ int DsMdvxMsg::_getReadLatestValidModTime(DsMdvx &mdvx)
 int DsMdvxMsg::_getReadVlevelType(DsMdvx &mdvx)
   
 {
+
   DsMsgPart * part;
   part = getPartByType(MDVP_READ_VLEVEL_TYPE_PART);
   if (part == NULL) {
@@ -936,27 +937,49 @@ int DsMdvxMsg::_getReadVsectWaypts(DsMdvx &mdvx)
   
 {
 
-  DsMsgPart *part = getPartByType(MDVP_READ_VSECT_WAYPTS_PART);
-  if (part == NULL) {
-    _errStr += "ERROR - DsMdvxMsg::_getReadVsectWaypts.\n";
-    _errStr += "  Cannot find waypts part.\n";
-    return -1;
-  }
-
-  MemBuf buf;
-  buf.add(part->getBuf(), part->getLength());
-
-  string errStr;
   vector<Mdvx::vsect_waypt_t> wayPts;
-  if (Mdvx::disassembleVsectWayPtsBuf(buf, wayPts, errStr)) {
-    _errStr += "ERROR - DsMdvxMsg::_getReadVsectWaypts.\n";
-    _errStr += errStr;
-    return -1;
-  }
-  
-  if (_debug) {
-    Mdvx::printVsectWayPtsBuf(buf, cerr);
-  }
+  cerr << "222222222222222 _use32BitHeaders: " << _use32BitHeaders << endl;
+
+  // try 64-bit version
+
+  DsMsgPart *part64 = getPartByType(MDVP_READ_VSECT_WAYPTS_PART_64);
+  if (part64 != NULL) {
+
+    MemBuf buf64;
+    buf64.add(part64->getBuf(), part64->getLength());
+    string errStr;
+    if (Mdvx::disassembleVsectWayPtsBuf64(buf64, wayPts, errStr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadVsectWaypts.\n";
+      _errStr += errStr;
+      return -1;
+    }
+    if (_debug) {
+      Mdvx::printVsectWayPtsBuf64(buf64, cerr);
+    }
+
+  } else {
+
+    // try 32-bit
+
+    DsMsgPart *part32 = getPartByType(MDVP_READ_VSECT_WAYPTS_PART_32);
+    if (part32 == NULL) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadVsectWaypts.\n";
+      _errStr += "  Cannot find waypts part.\n";
+      return -1;
+    }
+    MemBuf buf32;
+    buf32.add(part32->getBuf(), part32->getLength());
+    string errStr;
+    if (Mdvx::disassembleVsectWayPtsBuf32(buf32, wayPts, errStr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadVsectWaypts.\n";
+      _errStr += errStr;
+      return -1;
+    }
+    if (_debug) {
+      Mdvx::printVsectWayPtsBuf32(buf32, cerr);
+    }
+
+  } // if (part64 ...
   
   mdvx.clearReadWayPts();
   for (int ii = 0; ii < (int) wayPts.size(); ii++) {
@@ -2033,29 +2056,49 @@ int DsMdvxMsg::_getChunk(Mdvx &mdvx, int chunk_num)
 int DsMdvxMsg::_getVsectSegments(DsMdvx &mdvx)
 {
 
-  DsMsgPart * part;
-  part = getPartByType(MDVP_VSECT_SEGMENTS_PART);
-  if (part == NULL) {
-    _errStr += "ERROR - DsMdvxMsg::_getVsectSegments.\n";
-    _errStr += "  Cannot find segments part.\n";
-    return -1;
-  }
-
-  MemBuf buf;
-  buf.add(part->getBuf(), part->getLength());
-
-  string errStr;
   vector<Mdvx::vsect_segment_t> segments;
-  double totalLength;
-  if (Mdvx::disassembleVsectSegmentsBuf(buf, segments, totalLength, errStr)) {
-    _errStr += "ERROR - DsMdvxMsg::_getReadVsectSegments.\n";
-    _errStr += errStr;
-    return -1;
-  }
+  double totalLength = 0;
+
+  // try 64-bit version
+
+  DsMsgPart *part64 = getPartByType(MDVP_VSECT_SEGMENTS_PART_64);
+  if (part64 != NULL) {
+
+    MemBuf buf64;
+    buf64.add(part64->getBuf(), part64->getLength());
+    string errStr;
+    if (Mdvx::disassembleVsectSegmentsBuf64(buf64, segments, totalLength, errStr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadVsectSegments.\n";
+      _errStr += errStr;
+      return -1;
+    }
+    if (_debug) {
+      Mdvx::printVsectSegmentsBuf64(buf64, cerr);
+    }
+
+  } else {
   
-  if (_debug) {
-    Mdvx::printVsectSegmentsBuf(buf, cerr);
-  }
+    // try 32-bit version
+    
+    DsMsgPart *part32 = getPartByType(MDVP_VSECT_SEGMENTS_PART_32);
+    if (part32 == NULL) {
+      _errStr += "ERROR - DsMdvxMsg::_getVsectSegments.\n";
+      _errStr += "  Cannot find segments part.\n";
+      return -1;
+    }
+    MemBuf buf32;
+    buf32.add(part32->getBuf(), part32->getLength());
+    string errStr;
+    if (Mdvx::disassembleVsectSegmentsBuf32(buf32, segments, totalLength, errStr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadVsectSegments.\n";
+      _errStr += errStr;
+      return -1;
+    }
+    if (_debug) {
+      Mdvx::printVsectSegmentsBuf32(buf32, cerr);
+    }
+
+  } // if (part64 ...
   
   mdvx._vsectTotalLength = totalLength;
   mdvx._vsectSegments.clear();
@@ -2074,29 +2117,49 @@ int DsMdvxMsg::_getVsectSamplepts(DsMdvx &mdvx)
   
 {
 
-  DsMsgPart * part;
-  part = getPartByType(MDVP_VSECT_SAMPLE_PTS_PART);
-  if (part == NULL) {
-    _errStr += "ERROR - DsMdvxMsg::_getVsectSamplepts.\n";
-    _errStr += "  Cannot find samplepts part.\n";
-    return -1;
-  }
-
-  MemBuf buf;
-  buf.add(part->getBuf(), part->getLength());
-
-  string errStr;
   vector<Mdvx::vsect_samplept_t> samplePts;
-  double dxKm;
-  if (Mdvx::disassembleVsectSamplePtsBuf(buf, samplePts, dxKm, errStr)) {
-    _errStr += "ERROR - DsMdvxMsg::_getReadVsectSamplepts.\n";
-    _errStr += errStr;
-    return -1;
-  }
+  double dxKm = 0.0;
+
+  // try 64 bit
   
-  if (_debug) {
-    Mdvx::printVsectSamplePtsBuf(buf, cerr);
-  }
+  DsMsgPart *part64 = getPartByType(MDVP_VSECT_SAMPLE_PTS_PART_64);
+  if (part64 != NULL) {
+
+    MemBuf buf64;
+    buf64.add(part64->getBuf(), part64->getLength());
+    string errStr;
+    if (Mdvx::disassembleVsectSamplePtsBuf64(buf64, samplePts, dxKm, errStr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadVsectSamplepts.\n";
+      _errStr += errStr;
+      return -1;
+    }
+    if (_debug) {
+      Mdvx::printVsectSamplePtsBuf64(buf64, cerr);
+    }
+
+  } else {
+
+    // try 32 bit
+    
+    DsMsgPart *part32 = getPartByType(MDVP_VSECT_SAMPLE_PTS_PART_32);
+    if (part32 == NULL) {
+      _errStr += "ERROR - DsMdvxMsg::_getVsectSamplepts.\n";
+      _errStr += "  Cannot find samplepts part.\n";
+      return -1;
+    }
+    MemBuf buf32;
+    buf32.add(part32->getBuf(), part32->getLength());
+    string errStr;
+    if (Mdvx::disassembleVsectSamplePtsBuf32(buf32, samplePts, dxKm, errStr)) {
+      _errStr += "ERROR - DsMdvxMsg::_getReadVsectSamplepts.\n";
+      _errStr += errStr;
+      return -1;
+    }
+    if (_debug) {
+      Mdvx::printVsectSamplePtsBuf32(buf32, cerr);
+    }
+
+  } // if (part64 ...
 
   mdvx._vsectDxKm = dxKm;
   mdvx._vsectSamplePts.clear();

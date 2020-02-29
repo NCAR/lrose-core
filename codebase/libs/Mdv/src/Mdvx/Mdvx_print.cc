@@ -740,27 +740,51 @@ void Mdvx::printChunks(ostream &out) const
 
       } break;
 
-      case CHUNK_VSECT_WAY_PTS: {
+      case CHUNK_VSECT_WAY_PTS_32: {
 
         MemBuf buf;
         buf.add(chunk.getData(), chunk.getSize());
-        printVsectWayPtsBuf(buf, out);
+        printVsectWayPtsBuf32(buf, out);
 
       } break;
       
-      case CHUNK_VSECT_SAMPLE_PTS: {
+      case CHUNK_VSECT_WAY_PTS_64: {
+        
+        MemBuf buf;
+        buf.add(chunk.getData(), chunk.getSize());
+        printVsectWayPtsBuf64(buf, out);
+
+      } break;
+      
+      case CHUNK_VSECT_SAMPLE_PTS_32: {
 
         MemBuf buf;
         buf.add(chunk.getData(), chunk.getSize());
-        printVsectSamplePtsBuf(buf, out);
+        printVsectSamplePtsBuf32(buf, out);
 
       } break;
 
-      case CHUNK_VSECT_SEGMENTS: {
+      case CHUNK_VSECT_SAMPLE_PTS_64: {
 
         MemBuf buf;
         buf.add(chunk.getData(), chunk.getSize());
-        printVsectSegmentsBuf(buf, out);
+        printVsectSamplePtsBuf64(buf, out);
+
+      } break;
+
+      case CHUNK_VSECT_SEGMENTS_32: {
+
+        MemBuf buf;
+        buf.add(chunk.getData(), chunk.getSize());
+        printVsectSegmentsBuf32(buf, out);
+
+      } break;
+
+      case CHUNK_VSECT_SEGMENTS_64: {
+
+        MemBuf buf;
+        buf.add(chunk.getData(), chunk.getSize());
+        printVsectSegmentsBuf64(buf, out);
 
       } break;
 
@@ -1296,14 +1320,23 @@ const char *Mdvx::chunkId2Str(const int chunk_id)
   case CHUNK_DSRADAR_CALIB:
     return ("CHUNK_DSRADAR_CALIB");
     break;
-  case CHUNK_VSECT_WAY_PTS:
-    return ("CHUNK_VSECT_WAY_PTS");
+  case CHUNK_VSECT_WAY_PTS_32:
+    return ("CHUNK_VSECT_WAY_PTS_32");
     break;
-  case CHUNK_VSECT_SAMPLE_PTS:
-    return ("CHUNK_VSECT_SAMPLE_PTS");
+  case CHUNK_VSECT_WAY_PTS_64:
+    return ("CHUNK_VSECT_WAY_PTS_64");
     break;
-  case CHUNK_VSECT_SEGMENTS:
-    return ("CHUNK_VSECT_SEGMENTS");
+  case CHUNK_VSECT_SAMPLE_PTS_32:
+    return ("CHUNK_VSECT_SAMPLE_PTS_32");
+    break;
+  case CHUNK_VSECT_SAMPLE_PTS_64:
+    return ("CHUNK_VSECT_SAMPLE_PTS_64");
+    break;
+  case CHUNK_VSECT_SEGMENTS_32:
+    return ("CHUNK_VSECT_SEGMENTS_32");
+    break;
+  case CHUNK_VSECT_SEGMENTS_64:
+    return ("CHUNK_VSECT_SEGMENTS_64");
     break;
   default:
     return (_labelledInt("Unknown chunk type", chunk_id));

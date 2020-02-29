@@ -58,9 +58,9 @@
 // valid time, a single valid time will be returned.
 
 virtual void
-setTimeListModeValid(const string &dir,
-			   time_t start_time,
-			   time_t end_time);
+  setTimeListModeValid(const string &dir,
+                       time_t start_time,
+                       time_t end_time);
 
 /////////////////////////////////////////////////////////////////
 // setTimeListModeGen
@@ -69,9 +69,9 @@ setTimeListModeValid(const string &dir,
 // generate times between the start and end times
 
 virtual void
-setTimeListModeGen(const string &dir,
-			 time_t start_gen_time,
-			 time_t end_gen_time);
+  setTimeListModeGen(const string &dir,
+                     time_t start_gen_time,
+                     time_t end_gen_time);
 
 /////////////////////////////////////////////////////////////////
 // setTimeListModeForecast
@@ -81,12 +81,12 @@ setTimeListModeGen(const string &dir,
 // times for the given generate time.
 
 virtual void
-setTimeListModeForecast(const string &dir,
-			      time_t gen_time);
+  setTimeListModeForecast(const string &dir,
+                          time_t gen_time);
 
 virtual void
-setTimeListModeLead(const string &dir,
-			  time_t gen_time);
+  setTimeListModeLead(const string &dir,
+                      time_t gen_time);
 
 /////////////////////////////////////////////////////////////////
 // setTimeListModeGenPlusForecasts
@@ -98,9 +98,9 @@ setTimeListModeLead(const string &dir,
 // _forecastTimesArray, which is represented by vector<vector<time_t> >
   
 virtual void
-setTimeListModeGenPlusForecasts(const string &url,
-				      time_t start_gen_time,
-				      time_t end_gen_time);
+  setTimeListModeGenPlusForecasts(const string &url,
+                                  time_t start_gen_time,
+                                  time_t end_gen_time);
 
 /////////////////////////////////////////////////////////////////
 // setModeValidMultGen
@@ -112,9 +112,9 @@ setTimeListModeGenPlusForecasts(const string &url,
 // The generate times will be available in the _genTimes array.
 
 virtual void
-setTimeListModeValidMultGen(const string &dir,
-				  time_t start_time,
-				  time_t end_time);
+  setTimeListModeValidMultGen(const string &dir,
+                              time_t start_time,
+                              time_t end_time);
  
 /////////////////////////////////////////////////////////////////
 // setTimeListModeFirst
@@ -137,9 +137,9 @@ virtual void setTimeListModeLast(const string &dir);
 // to the search time within the search margin
 
 virtual void
-setTimeListModeClosest(const string &dir,
-			     time_t search_time,
-			     int time_margin);
+  setTimeListModeClosest(const string &dir,
+                         time_t search_time,
+                         int time_margin);
 
 /////////////////////////////////////////////////////////////////
 // setTimeListModeFirstBefore
@@ -148,9 +148,9 @@ setTimeListModeClosest(const string &dir,
 // before the search time within the search margin
 
 virtual void
-setTimeListModeFirstBefore(const string &dir,
-				 time_t search_time,
-				 int time_margin);
+  setTimeListModeFirstBefore(const string &dir,
+                             time_t search_time,
+                             int time_margin);
 
 /////////////////////////////////////////////////////////////////
 // setTimeListModeFirstAfter
@@ -159,9 +159,9 @@ setTimeListModeFirstBefore(const string &dir,
 // after the search time within the search margin
 
 virtual void
-setTimeListModeFirstAfter(const string &dir,
-				time_t search_time,
-				int time_margin);
+  setTimeListModeFirstAfter(const string &dir,
+                            time_t search_time,
+                            int time_margin);
 
 /////////////////////////////////////////////////////////////////
 // setTimeListModeBestForecast
@@ -170,9 +170,9 @@ setTimeListModeFirstAfter(const string &dir,
 // for the search time, within the time margin
 
 virtual void
-setTimeListModeBestForecast(const string &dir,
-				  time_t search_time,
-				  int time_margin);
+  setTimeListModeBestForecast(const string &dir,
+                              time_t search_time,
+                              int time_margin);
 
 /////////////////////////////////////////////////////////////////
 // setTimeListModeSpecifiedForecast
@@ -181,10 +181,10 @@ setTimeListModeBestForecast(const string &dir,
 // generate time, closest to the search time, within the time margin
 
 virtual void
-setTimeListModeSpecifiedForecast(const string &dir,
-				       time_t gen_time,
-				       time_t search_time,
-				       int time_margin);
+  setTimeListModeSpecifiedForecast(const string &dir,
+                                   time_t gen_time,
+                                   time_t search_time,
+                                   int time_margin);
 
 /////////////////////////////////////////////////////////////////
 // clearTimeListMode
@@ -248,10 +248,3 @@ virtual int compileTimeList();
 virtual int compileTimeHeight();
 
 #endif
-
-    
-
-
-
-
-

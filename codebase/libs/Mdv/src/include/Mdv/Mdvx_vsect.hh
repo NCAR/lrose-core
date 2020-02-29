@@ -37,63 +37,100 @@
 //////////////////////////////////////////////////
 // assemble vsection waypoint buffer
 // handle byte-swapping into BE order
+// 32-bit and 64-bit version
 
 static void
-  assembleVsectWayPtsBuf(const vector<Mdvx::vsect_waypt_t> &wayPts,
-                         MemBuf &buf);
+  assembleVsectWayPtsBuf32(const vector<Mdvx::vsect_waypt_t> &wayPts,
+                           MemBuf &buf);
+
+static void
+  assembleVsectWayPtsBuf64(const vector<Mdvx::vsect_waypt_t> &wayPts,
+                           MemBuf &buf);
 
 //////////////////////////////////////////////////
 // assemble vsection sample pt buffer
 // handle byte-swapping into BE order
+// 32-bit and 64-bit version
 
 static void
-  assembleVsectSamplePtsBuf(const vector<Mdvx::vsect_samplept_t> &samplePts,
-                            double dx_km,
-                            MemBuf &buf);
+  assembleVsectSamplePtsBuf32(const vector<Mdvx::vsect_samplept_t> &samplePts,
+                              double dx_km,
+                              MemBuf &buf);
+
+static void
+  assembleVsectSamplePtsBuf64(const vector<Mdvx::vsect_samplept_t> &samplePts,
+                              double dx_km,
+                              MemBuf &buf);
 
 //////////////////////////////////////////////////
 // assemble vsection segments buffer
 // handle byte-swapping into BE order
+// 32-bit and 64-bit version
 
 static void
-  assembleVsectSegmentsBuf(const vector<Mdvx::vsect_segment_t> &segments,
-                           double totalLength,
-                           MemBuf &buf);
+  assembleVsectSegmentsBuf32(const vector<Mdvx::vsect_segment_t> &segments,
+                             double totalLength,
+                             MemBuf &buf);
+
+static void
+  assembleVsectSegmentsBuf64(const vector<Mdvx::vsect_segment_t> &segments,
+                             double totalLength,
+                             MemBuf &buf);
 
 //////////////////////////////////////////////////
 // disassemble vsection waypoints buffer
 // handle byte-swapping from BE order
 // returns 0 on success, -1 on failure
 // on failure, sets error string
+// 32-bit and 64-bit version
 
 static int
-  disassembleVsectWayPtsBuf(const MemBuf &buf,
-                            vector<Mdvx::vsect_waypt_t> &wayPts,
-                            string &errStr);
+  disassembleVsectWayPtsBuf32(const MemBuf &buf,
+                              vector<Mdvx::vsect_waypt_t> &wayPts,
+                              string &errStr);
+
+static int
+  disassembleVsectWayPtsBuf64(const MemBuf &buf,
+                              vector<Mdvx::vsect_waypt_t> &wayPts,
+                              string &errStr);
 
 //////////////////////////////////////////////////
 // disassemble vsection samplepts buffer
 // handle byte-swapping from BE order
 // returns 0 on success, -1 on failure
 // on failure, sets error string
+// 32-bit and 64-bit version
 
 static int
-  disassembleVsectSamplePtsBuf(const MemBuf &buf,
-                               vector<Mdvx::vsect_samplept_t> &samplePts,
-                               double &dxKm,
-                               string &errStr);
+  disassembleVsectSamplePtsBuf32(const MemBuf &buf,
+                                 vector<Mdvx::vsect_samplept_t> &samplePts,
+                                 double &dxKm,
+                                 string &errStr);
+
+static int
+  disassembleVsectSamplePtsBuf64(const MemBuf &buf,
+                                 vector<Mdvx::vsect_samplept_t> &samplePts,
+                                 double &dxKm,
+                                 string &errStr);
 
 //////////////////////////////////////////////////
 // disassemble vsection segments buffer
 // handle byte-swapping from BE order
 // returns 0 on success, -1 on failure
 // on failure, sets error string
+// 32-bit and 64-bit version
 
 static int
-  disassembleVsectSegmentsBuf(const MemBuf &buf,
-                              vector<Mdvx::vsect_segment_t> &segments,
-                              double &totalLength,
-                              string &errStr);
+  disassembleVsectSegmentsBuf32(const MemBuf &buf,
+                                vector<Mdvx::vsect_segment_t> &segments,
+                                double &totalLength,
+                                string &errStr);
+  
+static int
+  disassembleVsectSegmentsBuf64(const MemBuf &buf,
+                                vector<Mdvx::vsect_segment_t> &segments,
+                                double &totalLength,
+                                string &errStr);
   
 #endif
 

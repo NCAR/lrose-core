@@ -488,14 +488,23 @@ public:
   
   // debug prints
 
-  static void printVsectWayPtsBuf(const MemBuf &buf,
-                                  ostream &out);
-  
-  static void printVsectSamplePtsBuf(const MemBuf &buf,
-                                     ostream &out);
-  
-  static void printVsectSegmentsBuf(const MemBuf &buf,
+  static void printVsectWayPtsBuf32(const MemBuf &buf,
                                     ostream &out);
+  
+  static void printVsectWayPtsBuf64(const MemBuf &buf,
+                                    ostream &out);
+  
+  static void printVsectSamplePtsBuf32(const MemBuf &buf,
+                                       ostream &out);
+  
+  static void printVsectSamplePtsBuf64(const MemBuf &buf,
+                                       ostream &out);
+  
+  static void printVsectSegmentsBuf32(const MemBuf &buf,
+                                      ostream &out);
+  
+  static void printVsectSegmentsBuf64(const MemBuf &buf,
+                                      ostream &out);
   
 protected:
 
@@ -869,7 +878,8 @@ protected:
   // vertical sections
 
   int _computeNVsectSamples() const;
-  void _addVsectChunks();
+  void _addVsectChunks32();
+  void _addVsectChunks64();
   int _loadVsectInfoFromChunks();
 
   // copy between 32-bit and 64-bit versions, and vice versa
