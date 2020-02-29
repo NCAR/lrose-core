@@ -938,7 +938,6 @@ int DsMdvxMsg::_getReadVsectWaypts(DsMdvx &mdvx)
 {
 
   vector<Mdvx::vsect_waypt_t> wayPts;
-  cerr << "222222222222222 _use32BitHeaders: " << _use32BitHeaders << endl;
 
   // try 64-bit version
 
