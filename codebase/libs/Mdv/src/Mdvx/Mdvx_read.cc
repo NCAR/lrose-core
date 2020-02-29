@@ -3220,6 +3220,10 @@ int Mdvx::_readRhi(bool respectUserDistance /* = false */)
   
 {
 
+  if (_debug) {
+    cerr << "start - Mdvx::_readRhi" << endl;
+  }
+
   // read in the volume - do not fill missing or decimate
   
   if (_readVolumeMdv(false, false, false)) {
@@ -3268,6 +3272,10 @@ int Mdvx::_readRhi(bool respectUserDistance /* = false */)
 int Mdvx::_loadClosestRhi(bool respectUserDistance)
   
 {
+
+  if (_debug) {
+    cerr << "start - Mdvx::_loadClosestRhi" << endl;
+  }
 
   // For this to be a measured RHI, both the start and end point
   // must be on much the same azimuth relative to the radar.

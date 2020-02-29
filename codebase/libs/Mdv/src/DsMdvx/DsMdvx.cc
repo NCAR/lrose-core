@@ -859,7 +859,7 @@ int DsMdvx::compileTimeHeight()
   DsURL url;
   bool contactServer;
   if (_resolveTimeListUrl(url, &contactServer)) {
-    _errStr += "ERROR - COMM - DsMdvx::compileTimeList.\n";
+    _errStr += "ERROR - COMM - DsMdvx::compileTimeHeight.\n";
     return -1;
   }
 
