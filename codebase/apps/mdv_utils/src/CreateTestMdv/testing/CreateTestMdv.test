@@ -68,8 +68,8 @@ debug = DEBUG_OFF;
 //
 
 grid_xy_geom = {
-    nx = 500,
-    ny = 500,
+    nx = 300,
+    ny = 300,
     minx = -199.5,
     miny = -199.5,
     dx = 0.5,
@@ -345,7 +345,7 @@ vlevel_type = VERT_TYPE_Z;
 //
 
 grid_z_geom = {
-    nz = 40,
+    nz = 10,
     minz = 0.5,
     dz = 0.5
 };
