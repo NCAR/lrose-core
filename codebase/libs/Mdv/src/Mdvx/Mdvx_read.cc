@@ -1525,17 +1525,6 @@ int Mdvx::readAllHeaders()
     clearFields();
     clearChunks();
 
-  } else if (isNcfFile(_pathInUse)) {
-
-    // NetCDF file
-
-    if (_readAllHeadersNcf(_pathInUse)) {
-      _errStr += "ERROR - Mdvx::readAllHeaders.\n";
-      TaStr::AddStr(_errStr, "  Reading headers from NCF file");
-      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
-      return -1;
-    }
-    
   } else if (isRadxFile(_pathInUse)) {
 
     // read RADX radial radar format file
@@ -1547,6 +1536,17 @@ int Mdvx::readAllHeaders()
       return -1;
     }
 
+  } else if (isNcfFile(_pathInUse)) {
+
+    // NetCDF file
+
+    if (_readAllHeadersNcf(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readAllHeaders.\n";
+      TaStr::AddStr(_errStr, "  Reading headers from NCF file");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+    
   } else {
 
     // MDV native format
@@ -1635,24 +1635,24 @@ int Mdvx::readVolume()
 
   // check file format
 
-  if (isNcfFile(_pathInUse)) {
-
-    // read NCF file
-    
-    if (_readNcf(_pathInUse)) {
-      _errStr += "ERROR - Mdvx::readVolume.\n";
-      TaStr::AddStr(_errStr, "  Reading NCF file");
-      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
-      return -1;
-    }
-
-  } else if (isRadxFile(_pathInUse)) {
+  if (isRadxFile(_pathInUse)) {
     
     // read RADX radial radar format file
 
     if (_readRadx(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVolume.\n";
       TaStr::AddStr(_errStr, "  Reading RADX file");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+
+  } else if (isNcfFile(_pathInUse)) {
+
+    // read NCF file
+    
+    if (_readNcf(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readVolume.\n";
+      TaStr::AddStr(_errStr, "  Reading NCF file");
       TaStr::AddStr(_errStr, "  File: ", _pathInUse);
       return -1;
     }
@@ -1711,19 +1711,7 @@ int Mdvx::readVsection()
 
   // Check file format
   
-  if (isNcfFile(_pathInUse)) {
-
-    // read NCF file
-    // vsection taken care of by Ncf2MdvTrans
-
-    if (_readNcf(_pathInUse)) {
-      _errStr += "ERROR - Mdvx::readVsection.\n";
-      TaStr::AddStr(_errStr, "  Reading NCF file");
-      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
-      return -1;
-    }
-
-  } else if (isRadxFile(_pathInUse)) {
+  if (isRadxFile(_pathInUse)) {
 
     // read RADX radial radar format file
     // vsection taken care of by Ncf2MdvTrans
@@ -1731,6 +1719,18 @@ int Mdvx::readVsection()
     if (_readRadx(_pathInUse)) {
       _errStr += "ERROR - Mdvx::readVsection.\n";
       TaStr::AddStr(_errStr, "  Reading RADX file");
+      TaStr::AddStr(_errStr, "  File: ", _pathInUse);
+      return -1;
+    }
+
+  } else if (isNcfFile(_pathInUse)) {
+
+    // read NCF file
+    // vsection taken care of by Ncf2MdvTrans
+
+    if (_readNcf(_pathInUse)) {
+      _errStr += "ERROR - Mdvx::readVsection.\n";
+      TaStr::AddStr(_errStr, "  Reading NCF file");
       TaStr::AddStr(_errStr, "  File: ", _pathInUse);
       return -1;
     }
