@@ -419,9 +419,6 @@ public:
     return _ifForecastWriteAsForecast;
   }
 
-  // get write32BitHeaders flag
-  bool getWrite32BitHeaders() const { return _write32BitHeaders; }
-
   // path actually  used for the read or write
   const string &getPathInUse() const { return _pathInUse; }
 
@@ -630,7 +627,6 @@ protected:
   bool _ifForecastWriteAsForecast; /* writes as forecast only if
                                     * data_collection_type is
                                     * EXTRAPOLATED or FORECAST */
-  mutable bool _write32BitHeaders; // write old version 32-bit headers
 
   // write path or dir - used if the arg in the write call is NULL
 
@@ -763,25 +759,34 @@ protected:
 
   // write
   
-  int _writeMasterHeader(TaFile &outfile) const;
+  int _writeMasterHeader32(TaFile &outfile) const;
+  int _writeMasterHeader64(TaFile &outfile) const;
   
-  int _writeFieldHeader(const int field_num,
-                        TaFile &outfile) const;
+  int _writeFieldHeader32(const int field_num,
+                          TaFile &outfile) const;
+  int _writeFieldHeader64(const int field_num,
+                          TaFile &outfile) const;
   
-  int _writeVlevelHeader(const int field_num,
-                         TaFile &outfile) const;
+  int _writeVlevelHeader32(const int field_num,
+                           TaFile &outfile) const;
+  int _writeVlevelHeader64(const int field_num,
+                           TaFile &outfile) const;
   
-  int _writeChunkHeader(const int chunk_num,
-                        TaFile &outfile) const;
+  int _writeChunkHeader32(const int chunk_num,
+                          TaFile &outfile) const;
+  int _writeChunkHeader64(const int chunk_num,
+                          TaFile &outfile) const;
 
   void _checkEnvBeforeWrite() const;
-  void _checkWrite32BitHeaders() const;
+
   void _computeOutputPath(const string &outputDir,
                           string &outputName,
                           string &outputPath,
                           bool &writeAsForecast) const;
 
-  int _writeAsMdv(const string &outputPath);
+  int _writeAsMdv32(const string &outputPath);
+  int _writeAsMdv64(const string &outputPath);
+
   void _doWriteLdataInfo(const string &outputDir,
                          const string &outputPath,
                          const string &dataType);

@@ -268,7 +268,6 @@ Mdvx &Mdvx::_copy(const Mdvx &rhs)
   _writeAsForecast = rhs._writeAsForecast;
   _useExtendedPaths = rhs._useExtendedPaths;
   _writeAddYearSubdir = rhs._writeAddYearSubdir;
-  _write32BitHeaders = rhs._write32BitHeaders;
 
   // path in use - the path being used for reading/writing
 
