@@ -81,14 +81,6 @@ int DsMdvServer::handleMdvxCommand(Socket *socket,
     return 0;
   }
 
-  // should we use 32-bit headers
-
-  if (msg.getUse32BitHeaders()) {
-    mdvx.setWrite32BitHeaders(true);
-  } else {
-    mdvx.setWrite32BitHeaders(false);
-  }
-
   // check security
   
   if (msg.getSubType() == DsMdvxMsg::MDVP_WRITE_TO_DIR ||

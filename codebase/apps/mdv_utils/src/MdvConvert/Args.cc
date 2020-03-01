@@ -195,11 +195,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "ncf_compression_level = 4;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-32bit")) {
-      
-      sprintf(tmp_str, "output_32_bit_headers = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
     } else if (!strcmp(argv[i], "-field")) {
       
       if (i < argc - 1) {

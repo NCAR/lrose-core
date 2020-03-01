@@ -1010,18 +1010,6 @@
     tt->single_val.e = OUTPUT_FORMAT_MDV;
     tt++;
     
-    // Parameter 'output_32_bit_headers'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_32_bit_headers");
-    tt->descr = tdrpStrDup("Set to output the data with old 32-bit headers.");
-    tt->help = tdrpStrDup("The default is the new 64-bit headers.");
-    tt->val_offset = (char *) &output_32_bit_headers - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'write_to_path'
     // ctype is 'tdrp_bool_t'
     

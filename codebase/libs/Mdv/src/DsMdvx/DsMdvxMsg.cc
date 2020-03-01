@@ -66,12 +66,10 @@ DsMdvxMsg::~DsMdvxMsg()
 
 void DsMdvxMsg::checkParts() const
 {
-  bool has32Bit = _has32BitParts();
-  bool has64Bit = _has64BitParts();
-  if (has64Bit) {
+  _use32BitHeaders = true;
+  if (_has64BitParts()) {
+    // use 64-bit headers as appropriate
     _setUse32BitHeaders(false);
-  } else if (has32Bit) {
-    _setUse32BitHeaders(true);
   }
 }
 

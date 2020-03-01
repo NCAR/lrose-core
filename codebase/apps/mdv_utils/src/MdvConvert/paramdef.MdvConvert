@@ -243,12 +243,6 @@ paramdef enum output_format_t {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Set to output the data with old 32-bit headers.";
-  p_help = "The default is the new 64-bit headers.";
-} output_32_bit_headers;
-
-paramdef boolean {
-  p_default = false;
   p_descr = "Write the file to a specified path.";
   p_help = "This overrides output_url.";
 } write_to_path;
