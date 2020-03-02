@@ -215,7 +215,7 @@ commentdef {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and lower that low_dbz will be automatically deleted.";
+  p_descr = "Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and lower that low_dbz will be automatically deleted by setting to missing value. Related to no_dbz_rm_rv";
   p_help = "";
 } prep ;
 
@@ -241,9 +241,9 @@ commentdef {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "If true, all radial velocity bins with dbz values missing will be deleted";
+  p_descr = "If true, all radial velocity bins with dbz values missing will be deleted, if prep is set to true.";
   p_help = "";
-} no_dbz_rm_rv;
+} dbz_rm_rv;
 
 
 paramdef  int {

@@ -154,7 +154,7 @@ int RadxDealias::Run()
   bool param_debug = (_params.debug > Params::DEBUG_NORM);  // convert from debug_t
   bool param_prep = tdrp_bool_t_to_bool(_params.prep);   
   bool param_filt = tdrp_bool_t_to_bool(_params.filt); 
-  bool param_no_dbz_rm_rv = tdrp_bool_t_to_bool(_params.no_dbz_rm_rv);
+  bool param_dbz_rm_rv = tdrp_bool_t_to_bool(_params.dbz_rm_rv);
   bool param_strict_first_pass = tdrp_bool_t_to_bool(_params.strict_first_pass);
 
   if (sizeof(Radx::fl32) != sizeof(float))
@@ -174,7 +174,7 @@ int RadxDealias::Run()
 		      (float) _params.max_shear,         
 		      _params.sign,
 		      _params.del_num_bins,
-		      param_no_dbz_rm_rv,
+		      param_dbz_rm_rv,
 		      (float) _params.low_dbz,
 		      (float) _params.high_dbz,
 		      (float) _params.angle_variance,
@@ -776,6 +776,7 @@ void RadxDealias::_replaceVelocityWithSounding(Volume *currVelVol, Volume *sound
      // TODO: do we need to make the number of rays the same for each sweep?
      // Q: Will the FourDD algorithm work if the number of rays differ among the sweeps?
      // A: Maybe.  Let's try it.
+     // NOTE: the number of gates can vary between different sweeps
      for (int i = 0; i < nSweeps;  i++) {
        int nRays = currVelVol->sweep[i]->h.nrays;
 
@@ -880,6 +881,9 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
       if (startRayIndex+j > endRayIndex)
         throw "ERROR: _extractFieldData: Ray index out of bounds";
       RadxRay *radxRay = radxRays.at(startRayIndex+j);
+
+      size_t nGates = radxRay->getNGates();
+      Rsl::setMaxBinsInSweep(newSweep, nGates);
 
       // convert the rays
       Ray *newRay = Rsl::new_ray(radxRay->getNGates());
@@ -1018,6 +1022,9 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
       if (startRayIndex+j > endRayIndex) 
 	throw "ERROR: _extractVelocityFieldData: Ray index out of bounds";
       RadxRay *radxRay = radxRays.at(startRayIndex+j);
+
+      size_t nGates = radxRay->getNGates();
+      Rsl::setMaxBinsInSweep(newSweep, nGates);
 
       // convert the rays
       Ray *newRay = Rsl::new_ray(radxRay->getNGates());

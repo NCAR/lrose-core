@@ -88,7 +88,7 @@ public:
 	 float max_shear = .05,
 	 int sign = -1,
 	 int del_num_bins = 0,
-	 bool no_dbz_rm_rv = false,
+	 bool dbz_rm_rv = false,
 	 float low_dbz = 0.0,
 	 float high_dbz = 80.0,
 	 float angle_variance = 0.10,
@@ -114,7 +114,7 @@ public:
                     unsigned short* success);
 
   float window(Volume* rvVolume, int sweepIndex, int startray, int endray,
-               int firstbin, int lastbin, float std_thresh,
+               size_t firstbin, size_t lastbin, float std_thresh,
                bool* success);
 
   void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
@@ -135,7 +135,7 @@ public:
 
   float getNyqInterval(float nyqVelocity);
 
-  int getNumBins(Volume *volume, int sweepIndex);
+  int getNumBins(Volume *volume, size_t sweepIndex, size_t rayIndex);
   int getNumRays(Volume *volume, int sweepIndex);
 
   short Filter3x3(Volume *VALS, int i, int currIndex, int sweepIndex,
@@ -190,6 +190,9 @@ public:
   short **CreateSTATE(Volume *rvVolume, short initialValue = TBD);
   void  DestroySTATE(short **STATE, int nbins);
 
+  bool _missing(Volume *original, size_t sweepIndex, size_t rayIndex, size_t rangeIndex,
+                       float missingValue);
+
   const static short UNSUCCESSFUL = -2;
   const static short MISSING      = -1;
   const static short TBD          =  0; // To Be Dealiased
@@ -214,7 +217,7 @@ private:
   float  _max_shear;
   int    _sign;
   int    _del_num_bins;
-  bool   _no_dbz_rm_rv;
+  bool   _dbz_rm_rv;
   float  _low_dbz;
   float  _high_dbz;
   float  _angle_variance;

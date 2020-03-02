@@ -980,7 +980,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("prep");
-    tt->descr = tdrpStrDup("Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and lower that low_dbz will be automatically deleted.");
+    tt->descr = tdrpStrDup("Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and lower that low_dbz will be automatically deleted by setting to missing value. Related to no_dbz_rm_rv");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &prep - &_start_;
     tt->single_val.b = pFALSE;
@@ -1019,15 +1019,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'no_dbz_rm_rv'
+    // Parameter 'dbz_rm_rv'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("no_dbz_rm_rv");
-    tt->descr = tdrpStrDup("If true, all radial velocity bins with dbz values missing will be deleted");
+    tt->param_name = tdrpStrDup("dbz_rm_rv");
+    tt->descr = tdrpStrDup("If true, all radial velocity bins with dbz values missing will be deleted, if prep is set to true.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &no_dbz_rm_rv - &_start_;
+    tt->val_offset = (char *) &dbz_rm_rv - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

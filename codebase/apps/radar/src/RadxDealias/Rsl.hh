@@ -103,7 +103,7 @@ typedef struct {
   Radx::fl32 nyq_vel;    /* Nyquist velocity. m/s */
   //Radx::fl32 (*f)(Range x);       /* Data conversion function. f(x). */
   //Range (*invf)(Radx::fl32 x);    /* Data conversion function. invf(x). */
-  Radx::si32   nbins;               /* Number of array elements for 'Range'. */
+  size_t   nbins;               /* Number of array elements for 'Range'. */
   bool binDataAllocated;
 } Ray_header;
 
@@ -125,7 +125,8 @@ typedef struct {
   Radx::fl32 beam_width;   /* This is in the ray header too. */
   Radx::fl32 vert_half_bw; /* Vertical beam width divided by 2 */
   Radx::fl32 horz_half_bw; /* Horizontal beam width divided by 2 */
-  Radx::si32 nrays;
+  size_t nrays;
+  size_t maxBinsInSweep; 
   //Radx::fl32 (*f)(Range x); /* Data conversion function. f(x). */
   //Range (*invf)(Radx::fl32 x); /* Data conversion function. invf(x). */
 } Sweep_header;
@@ -141,7 +142,7 @@ typedef struct {
 
 typedef struct {
   char *type_str;  /* One of:'Reflectivity', 'Velocity' or 'Spectrum width' */
-  Radx::si32 nsweeps;
+  size_t nsweeps;
   Radx::fl32 calibr_const;        /* Calibration constant. */
   Radx::fl32 missing;             /* missing data value */
   //Radx::fl32 (*f)(Range x);       /* Data conversion function. f(x). */
@@ -309,6 +310,11 @@ public:
                 bool debug=false);
   static void verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol);
   static void findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays, bool debug=false);
+  static void setMaxBinsInSweep(Sweep *sweep, size_t nBins);
+  static size_t getMaxBinsInSweep(Volume *volume, size_t sweepIndex);
+  static float getValue(Volume *volume, size_t sweepIndex, size_t rayIndex, size_t binIndex);
+
 };
+
 
 #endif
