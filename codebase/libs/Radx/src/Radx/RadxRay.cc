@@ -201,9 +201,19 @@ RadxRay &RadxRay::_copy(const RadxRay &rhs)
   // copy the fields
 
   clearFields();
+
+  // fields
+
   for (size_t ii = 0; ii < rhs._fields.size(); ii++) {
     RadxField *field = new RadxField(*rhs._fields[ii]);
     _fields.push_back(field);
+  }
+
+  // scalars
+
+  for (size_t ii = 0; ii < rhs._scalars.size(); ii++) {
+    RadxField *scalar = new RadxField(*rhs._scalars[ii]);
+    _scalars.push_back(scalar);
   }
 
   // load up map of field names
@@ -332,31 +342,49 @@ void RadxRay::setMetadataFromSweep(const RadxSweep &sweep)
 void RadxRay::loadFieldNameMap()
   
 {
+
+  // fields
+
   _fieldNameMap.clear();
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     string name = _fields[ii]->getName();
-    string mapName = _addToFieldNameMap(name, ii);
+    string mapName = _addToFieldNameMap(name, ii, _fieldNameMap);
     if (mapName != name) {
       // rename the field
       _fields[ii]->setName(mapName);
     }
   }
+
+  // scalars
+
+  _scalarNameMap.clear();
+  for (size_t ii = 0; ii < _scalars.size(); ii++) {
+    string name = _scalars[ii]->getName();
+    string mapName = _addToFieldNameMap(name, ii, _scalarNameMap);
+    if (mapName != name) {
+      // rename the scalar
+      _scalars[ii]->setName(mapName);
+    }
+  }
+
 }
 
 /////////////////////////////////////////////////////////
-// add an entry to the field name map
+// add an entry to a name map
 //
 // returns the unique name actually added
 // this may be altered to avoid duplicates
 
-string RadxRay::_addToFieldNameMap(const string &name, int index)
+string RadxRay::_addToFieldNameMap(const string &name, 
+                                   int index,
+                                   FieldNameMap &nameMap)
   
 {
   
   // try to insert name
   
   pair<FieldNameMapIt, bool> insRet =
-    _fieldNameMap.insert(FieldNameMapPair(name, index));
+    nameMap.insert(FieldNameMapPair(name, index));
 
   if (insRet.second == true) {
     // success
@@ -376,7 +404,7 @@ string RadxRay::_addToFieldNameMap(const string &name, int index)
     modName += numStr;
 
     pair<FieldNameMapIt, bool> insRet =
-      _fieldNameMap.insert(FieldNameMapPair(modName, index));
+      nameMap.insert(FieldNameMapPair(modName, index));
 
     if (insRet.second == true) {
       // success
@@ -401,11 +429,23 @@ string RadxRay::_addToFieldNameMap(const string &name, int index)
 void RadxRay::clearFields()
   
 {
+
+  // fields
+
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     delete _fields[ii];
   }
   _fields.clear();
   _fieldNameMap.clear();
+
+  // scalars
+
+  for (size_t ii = 0; ii < _scalars.size(); ii++) {
+    delete _scalars[ii];
+  }
+  _scalars.clear();
+  _scalarNameMap.clear();
+
 }
 
 /////////////////////////////////////////////////////////
@@ -414,6 +454,9 @@ void RadxRay::clearFields()
 int RadxRay::removeField(const string &name)
   
 {
+
+  // fields
+
   for (vector<RadxField*>::iterator ii = _fields.begin();
        ii != _fields.end(); ii++) {
     RadxField *field = *ii;
@@ -424,10 +467,25 @@ int RadxRay::removeField(const string &name)
       return 0;
     }
   }
+
+  // scalars
+
+  for (vector<RadxField*>::iterator ii = _scalars.begin();
+       ii != _scalars.end(); ii++) {
+    RadxField *scalar = *ii;
+    if (scalar->getName() == name) {
+      delete scalar;
+      _scalars.erase(ii);
+      loadFieldNameMap();
+      return 0;
+    }
+  }
+
   cerr << "ERROR - RadxRay::removeField" << endl;
   cerr << "  Cannot find field: " << name << endl;
   cerr << "  Field not removed" << endl;
   return -1;
+
 }
 
 /////////////////////////////////////////////////////////
@@ -442,6 +500,8 @@ int RadxRay::replaceField(RadxField *newField)
 
   string newName = newField->getName();
 
+  // fields
+
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     RadxField *fld = _fields[ii];
     if (fld->getName() == newName) {
@@ -451,6 +511,19 @@ int RadxRay::replaceField(RadxField *newField)
       return 0;
     }
   }
+
+  // scalars
+
+  for (size_t ii = 0; ii < _scalars.size(); ii++) {
+    RadxField *fld = _scalars[ii];
+    if (fld->getName() == newName) {
+      delete fld;
+      _scalars[ii] = newField;
+      loadFieldNameMap();
+      return 0;
+    }
+  }
+
   cerr << "ERROR - RadxRay::replaceField" << endl;
   cerr << "  Cannot find field: " << newName << endl;
   cerr << "  Field not replaced" << endl;
@@ -684,20 +757,28 @@ RadxField* RadxRay::addField(const string &name,
                              size_t nGates,
                              Radx::fl64 missingValue,
                              const Radx::fl64 *data,
-                             bool isLocal)
+                             bool isLocal, 
+                             bool isScalar)
   
 {
-  if (_fields.size() > 0) {
-    _nGates = _fields[0]->getNPoints();
-    assert(_nGates == nGates);
-  } else {
-    _nGates = nGates;
-  }
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeFl64(missingValue);
+  string mapName;
+  if (isScalar) {
+    assert(nGates == 1);
+    fld->setIsScalar(true);
+    mapName = _addToFieldNameMap(name, _fields.size(), _scalarNameMap);
+  } else {
+    if (_fields.size() > 0) {
+      _nGates = _fields[0]->getNPoints();
+      assert(_nGates == nGates);
+    } else {
+      _nGates = nGates;
+    }
+    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
+  }
   fld->setDataFl64(nGates, data, isLocal);
-  string mapName = _addToFieldNameMap(name, _fields.size());
   if (mapName != name) {
     fld->setName(mapName);
   }
@@ -713,20 +794,28 @@ RadxField* RadxRay::addField(const string &name,
                              size_t nGates,
                              Radx::fl32 missingValue,
                              const Radx::fl32 *data,
-                             bool isLocal)
+                             bool isLocal,
+                             bool isScalar)
 
 {
-  if (_fields.size() > 0) {
-    _nGates = _fields[0]->getNPoints();
-    assert(_nGates == nGates);
-  } else {
-    _nGates = nGates;
-  }
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeFl32(missingValue);
+  string mapName;
+  if (isScalar) {
+    assert(nGates == 1);
+    fld->setIsScalar(true);
+    mapName = _addToFieldNameMap(name, _fields.size(), _scalarNameMap);
+  } else {
+    if (_fields.size() > 0) {
+      _nGates = _fields[0]->getNPoints();
+      assert(_nGates == nGates);
+    } else {
+      _nGates = nGates;
+    }
+    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
+  }
   fld->setDataFl32(nGates, data, isLocal);
-  string mapName = _addToFieldNameMap(name, _fields.size());
   if (mapName != name) {
     fld->setName(mapName);
   }
@@ -744,20 +833,28 @@ RadxField* RadxRay::addField(const string &name,
                              const Radx::si32 *data,
                              double scale,
                              double offset,
-                             bool isLocal)
+                             bool isLocal,
+                             bool isScalar)
 
 {
-  if (_fields.size() > 0) {
-    _nGates = _fields[0]->getNPoints();
-    assert(_nGates == nGates);
-  } else {
-    _nGates = nGates;
-  }
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeSi32(missingValue, scale, offset);
+  string mapName;
+  if (isScalar) {
+    assert(nGates == 1);
+    fld->setIsScalar(true);
+    mapName = _addToFieldNameMap(name, _fields.size(), _scalarNameMap);
+  } else {
+    if (_fields.size() > 0) {
+      _nGates = _fields[0]->getNPoints();
+      assert(_nGates == nGates);
+    } else {
+      _nGates = nGates;
+    }
+    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
+  }
   fld->setDataSi32(nGates, data, isLocal);
-  string mapName = _addToFieldNameMap(name, _fields.size());
   if (mapName != name) {
     fld->setName(mapName);
   }
@@ -775,20 +872,28 @@ RadxField* RadxRay::addField(const string &name,
                              const Radx::si16 *data,
                              double scale,
                              double offset,
-                             bool isLocal)
+                             bool isLocal,
+                             bool isScalar)
 
 {
-  if (_fields.size() > 0) {
-    _nGates = _fields[0]->getNPoints();
-    assert(_nGates == nGates);
-  } else {
-    _nGates = nGates;
-  }
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeSi16(missingValue, scale, offset);
+  string mapName;
+  if (isScalar) {
+    assert(nGates == 1);
+    fld->setIsScalar(true);
+    mapName = _addToFieldNameMap(name, _fields.size(), _scalarNameMap);
+  } else {
+    if (_fields.size() > 0) {
+      _nGates = _fields[0]->getNPoints();
+      assert(_nGates == nGates);
+    } else {
+      _nGates = nGates;
+    }
+    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
+  }
   fld->setDataSi16(nGates, data, isLocal);
-  string mapName = _addToFieldNameMap(name, _fields.size());
   if (mapName != name) {
     fld->setName(mapName);
   }
@@ -806,20 +911,28 @@ RadxField* RadxRay::addField(const string &name,
                              const Radx::si08 *data,
                              double scale,
                              double offset,
-                             bool isLocal)
+                             bool isLocal, 
+                             bool isScalar)
 
 {
-  if (_fields.size() > 0) {
-    _nGates = _fields[0]->getNPoints();
-    assert(_nGates == nGates);
-  } else {
-    _nGates = nGates;
-  }
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeSi08(missingValue, scale, offset);
+  string mapName;
+  if (isScalar) {
+    assert(nGates == 1);
+    fld->setIsScalar(true);
+    mapName = _addToFieldNameMap(name, _fields.size(), _scalarNameMap);
+  } else {
+    if (_fields.size() > 0) {
+      _nGates = _fields[0]->getNPoints();
+      assert(_nGates == nGates);
+    } else {
+      _nGates = nGates;
+    }
+    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
+  }
   fld->setDataSi08(nGates, data, isLocal);
-  string mapName = _addToFieldNameMap(name, _fields.size());
   if (mapName != name) {
     fld->setName(mapName);
   }
@@ -835,35 +948,37 @@ RadxField* RadxRay::addField(const string &name,
 ///
 ///
 
-void RadxRay::addField(RadxField *field,
-                       bool addToFront /* = false */)
+void RadxRay::addField(RadxField *field)
 {
 
-  if (_fields.size() > 0) {
-    size_t fieldNGates = field->getNPoints();
-    if (fieldNGates < _nGates) {
-      // pad the field to be added to match prev ngates
-      field->setNGates(_nGates);
-    } else if (fieldNGates > _nGates) {
-      // pad the previously added fields to match new ngates
-      _nGates = fieldNGates;
-      for (size_t ii = 0; ii < _fields.size(); ii++) {
-        _fields[ii]->setNGates(_nGates);
-      }
-    }
-  } else {
-    _nGates = field->getNPoints();
-  }
+  if (field->getIsScalar()) {
 
-  if (addToFront) {
-    vector<RadxField *> tmp = _fields;
-    _fields.clear();
-    _fields.push_back(field);
-    for (size_t ii = 0; ii < tmp.size(); ii++) {
-      _fields.push_back(tmp[ii]);
-    }
+    // scalar
+
+    _scalars.push_back(field);
+    
   } else {
+
+    // not scalar
+
+    if (_fields.size() > 0) {
+      size_t fieldNGates = field->getNPoints();
+      if (fieldNGates < _nGates) {
+        // pad the field to be added to match prev ngates
+        field->setNGates(_nGates);
+      } else if (fieldNGates > _nGates) {
+        // pad the previously added fields to match new ngates
+        _nGates = fieldNGates;
+        for (size_t ii = 0; ii < _fields.size(); ii++) {
+          _fields[ii]->setNGates(_nGates);
+        }
+      }
+    } else {
+      _nGates = field->getNPoints();
+    }
+    
     _fields.push_back(field);
+
   }
 
   loadFieldNameMap();
@@ -879,6 +994,9 @@ void RadxRay::setDataLocal()
 {
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->setDataLocal();
+  }
+  for (size_t ii = 0; ii < _scalars.size(); ii++) {
+    _scalars[ii]->setDataLocal();
   }
 }
 
@@ -1560,6 +1678,12 @@ void RadxRay::printWithFieldMeta(ostream &out) const
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->print(out);
   }
+  if (_scalars.size() > 0) {
+    out << "=========== RadxRay Scalars ================" << endl;
+    for (size_t ii = 0; ii < _scalars.size(); ii++) {
+      _scalars[ii]->print(out);
+    }
+  }
   out << "===========================================" << endl;
 
 }
@@ -1576,6 +1700,12 @@ void RadxRay::printWithFieldData(ostream &out) const
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->printWithData(out);
   }
+  if (_scalars.size() > 0) {
+    out << "=========== RadxRay Scalars ================" << endl;
+    for (size_t ii = 0; ii < _scalars.size(); ii++) {
+      _scalars[ii]->printWithData(out);
+    }
+  }
   out << "===========================================" << endl;
 
 }
@@ -1590,6 +1720,22 @@ void RadxRay::printFieldNameMap(ostream &out) const
   out << "======== RadxRay FieldNameMap ===========" << endl;
   for (FieldNameMapConstIt ii = _fieldNameMap.begin();
        ii != _fieldNameMap.end(); ii++) {
+    out << "  name, index: " << ii->first << ", " << ii->second << endl;
+  }
+  out << "=========================================" << endl;
+
+}
+
+/////////////////////////////////////////////////////////
+// print the scalar name map
+
+void RadxRay::printScalarNameMap(ostream &out) const
+  
+{
+  
+  out << "======== RadxRay ScalarNameMap ===========" << endl;
+  for (FieldNameMapConstIt ii = _scalarNameMap.begin();
+       ii != _scalarNameMap.end(); ii++) {
     out << "  name, index: " << ii->first << ", " << ii->second << endl;
   }
   out << "=========================================" << endl;

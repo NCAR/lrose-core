@@ -113,6 +113,7 @@ void RadxField::_init()
   _foldRange = 0.0;
 
   _isDiscrete = false;
+  _isScalar = false;
   
   _minVal = Radx::missingMetaDouble;
   _maxVal = Radx::missingMetaDouble;
@@ -161,6 +162,7 @@ RadxField &RadxField::copyMetaData(const RadxField &rhs)
   _foldRange = rhs._foldRange;
 
   _isDiscrete = rhs._isDiscrete;
+  _isScalar = rhs._isScalar;
 
   _missingFl64 = rhs._missingFl64;
   _missingFl32 = rhs._missingFl32;
@@ -1270,6 +1272,7 @@ void RadxField::setDataRemote(const RadxField &other,
   _foldLimitUpper = other._foldLimitUpper;
   _foldRange = other._foldRange;
   _isDiscrete = other._isDiscrete;
+  _isScalar = other._isScalar;
 
   _dataType = other._dataType;
   _byteWidth = other._byteWidth;
@@ -2716,6 +2719,7 @@ void RadxField::print(ostream &out) const
     out << "    foldRange: " << _foldRange << endl;
   }
   out << "  isDiscrete: " << (_isDiscrete? "Y":"N") << endl;
+  out << "  isScalar: " << (_isScalar? "Y":"N") << endl;
   if (_minVal!= Radx::missingMetaDouble) {
     out << "  minVal: " << _minVal << endl;
   }
@@ -3715,6 +3719,7 @@ void RadxField::_loadMetaNumbersToMsg()
   _metaNumbers.byteWidth = _byteWidth;
   _metaNumbers.fieldFolds = _fieldFolds;
   _metaNumbers.isDiscrete = _isDiscrete;
+  _metaNumbers.isScalar = _isScalar;
   _metaNumbers.missingSi32 = _missingSi32;
   _metaNumbers.missingSi16 = _missingSi16;
   _metaNumbers.missingSi08 = _missingSi08;
@@ -3776,6 +3781,7 @@ int RadxField::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
   _byteWidth = _metaNumbers.byteWidth;
   _fieldFolds = _metaNumbers.fieldFolds;
   _isDiscrete = _metaNumbers.isDiscrete;
+  _isScalar = _metaNumbers.isScalar;
   _missingSi32 = _metaNumbers.missingSi32;
   _missingSi16 = (Radx::si16) _metaNumbers.missingSi16;
   _missingSi08 = (Radx::si08) _metaNumbers.missingSi08;

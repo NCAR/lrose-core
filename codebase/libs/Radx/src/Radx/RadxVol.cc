@@ -219,6 +219,13 @@ RadxVol &RadxVol::_copy(const RadxVol &rhs)
     _fields.push_back(field);
   }
 
+  // scalar fields
+
+  for (size_t ii = 0; ii < rhs._scalars.size(); ii++) {
+    RadxField *scalar = new RadxField(*rhs._scalars[ii]);
+    _scalars.push_back(scalar);
+  }
+
   return *this;
   
 }
@@ -523,8 +530,12 @@ void RadxVol::addCalib(RadxRcalib *calib)
 void RadxVol::addField(RadxField *field)
   
 {
-  _fields.push_back(field);
-  copyRangeGeom(*field);
+  if (field->getIsScalar()) {
+    _scalars.push_back(field);
+  } else {
+    _fields.push_back(field);
+    copyRangeGeom(*field);
+  }
 }
 
 ////////////////////////////////////////////////////////////////
@@ -802,7 +813,7 @@ vector<string> RadxVol::getUniqueFieldNameList() const
   
   vector<string> fieldNames;
 
-  // find the set of fields names
+  // find the set of field names
 
   set<string> nameSet;
   for (size_t iray = 0; iray < _rays.size(); iray++) {
@@ -818,6 +829,37 @@ vector<string> RadxVol::getUniqueFieldNameList() const
   }
 
   return fieldNames;
+
+}
+
+//////////////////////////////////////////////////////////////////
+/// Get the list of unique scalar names, compiled by
+/// searching through all rays.
+///
+/// The order of the field names found is preserved
+
+vector<string> RadxVol::getUniqueScalarNameList() const
+
+{
+  
+  vector<string> scalarNames;
+
+  // find the set of scalar names
+
+  set<string> nameSet;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    const RadxRay &ray = *_rays[iray];
+    for (size_t iscalar = 0; iscalar < ray.getNScalars(); iscalar++) {
+      string name = ray.getScalar(iscalar)->getName();
+      pair<set<string>::const_iterator, bool> ret = nameSet.insert(name);
+      if (ret.second == true) {
+        // scalar name not previously in set, so add to vector
+        scalarNames.push_back(name);
+      }
+    }
+  }
+
+  return scalarNames;
 
 }
 
@@ -929,6 +971,29 @@ const RadxField *RadxVol::getFieldFromRay(const string &name) const
 }
 
 //////////////////////////////////////////////////////////////////
+/// Get a scalar from a ray, given the name.
+/// Find the first available scalar on a suitable ray.
+/// Returns scalar pointer on success, NULL on failure.
+
+const RadxField *RadxVol::getScalarFromRay(const string &name) const
+
+{
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    const RadxRay &ray = *_rays[iray];
+    const vector<RadxField *> &scalars = ray.getScalars();
+    for (size_t iscalar = 0; iscalar < scalars.size(); iscalar++) {
+      if (scalars[iscalar]->getName() == name) {
+        return scalars[iscalar];
+      }
+    }
+  }
+
+  return NULL;
+
+}
+
+//////////////////////////////////////////////////////////////////
 /// Load contiguous fields on the volume, from fields in the rays.
 ///
 /// The fields in the rays are then set to point to the contiguous
@@ -1017,6 +1082,46 @@ void RadxVol::loadFieldsFromRays(bool nFieldsConstantPerRay /* = false */)
     }      
   } // ifield
 
+  // get the set of unique scalars names in this volume
+
+  vector<string> scalarNames = getUniqueScalarNameList();
+
+  // make copies of the scalars, and add them to the volume
+
+  for (size_t ii = 0; ii < scalarNames.size(); ii++) {
+    RadxField *scalar = copyScalar(scalarNames[ii]);
+    if (scalar != NULL) {
+      addField(scalar);
+    }
+  } // ii
+      
+  // Free up scalar data in rays, point them to the contiguous scalars.
+  // This process also adjusts the scale and bias in the ray scalars to
+  // the same as in the global scalars.
+
+  for (size_t iscalar = 0; iscalar < _scalars.size(); iscalar++) {
+    RadxField &scalar = *_scalars[iscalar];
+    for (size_t iray = 0; iray < _rays.size(); iray++) {
+      RadxRay &ray = *_rays[iray];
+      RadxField *rayScalar = ray.getScalar(scalar.getName());
+      if (rayScalar != NULL) {
+        size_t nPts;
+        const void *data = scalar.getData(iray, nPts);
+        rayScalar->setDataRemote(scalar, data, nPts);
+      } else {
+        if (nFieldsConstantPerRay) {
+          // add any missing scalars
+          rayScalar = new RadxField(scalar.getName(), scalar.getUnits());
+          rayScalar->copyMetaData(scalar);
+          size_t nPts;
+          const void *data = scalar.getData(iray, nPts);
+          rayScalar->setDataRemote(scalar, data, nPts);
+          ray.addField(rayScalar);
+        }
+      }
+    }      
+  } // iscalar
+
   // load the sweep info from rays
   
   loadSweepInfoFromRays();
@@ -1037,7 +1142,7 @@ void RadxVol::loadRaysFromFields()
   
 {
 
-  if (_fields.size() < 1) {
+  if (_fields.size() == 0 && _scalars.size() == 0) {
     return;
   }
 
@@ -1071,9 +1176,14 @@ void RadxVol::setRayFieldPointers()
     ray->clearFields();
     ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
 
-    for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+    vector<RadxField *> allFields(_fields);
+    for (size_t iscalar = 0; iscalar < _scalars.size(); iscalar++) {
+      allFields.push_back(_scalars[iscalar]);
+    }
+    
+    for (size_t ifield = 0; ifield < allFields.size(); ifield++) {
 
-      const RadxField *field = _fields[ifield];
+      const RadxField *field = allFields[ifield];
       const string &name = field->getName();
       const string &standardName = field->getStandardName();
       const string &longName = field->getLongName();
@@ -1081,13 +1191,16 @@ void RadxVol::setRayFieldPointers()
       const string &units = field->getUnits();
       const string &thresholdFieldName = field->getThresholdFieldName();
       double thresholdValue = field->getThresholdValue();
-      int nGates = field->getRayNGates(iray);
+      int nPts = 1;
+      if (!field->getIsScalar()) {
+        nPts = field->getRayNGates(iray);
+      }
       int index = field->getRayStartIndex(iray);
       
       switch (field->getDataType()) {
         case Radx::FL64: {
           const Radx::fl64 *dptr = (Radx::fl64 *) field->getData();
-          RadxField *rfld = ray->addField(name, units, nGates,
+          RadxField *rfld = ray->addField(name, units, nPts,
                                           field->getMissingFl64(),
                                           dptr + index, false);
           rfld->setStandardName(standardName);
@@ -1099,7 +1212,7 @@ void RadxVol::setRayFieldPointers()
         }
         case Radx::FL32: {
           const Radx::fl32 *dptr = (Radx::fl32 *) field->getData();
-          RadxField *rfld = ray->addField(name, units, nGates,
+          RadxField *rfld = ray->addField(name, units, nPts,
                                           field->getMissingFl32(),
                                           dptr + index, false);
           rfld->setStandardName(standardName);
@@ -1111,7 +1224,7 @@ void RadxVol::setRayFieldPointers()
         }
         case Radx::SI32: {
           const Radx::si32 *dptr = (Radx::si32 *) field->getData();
-          RadxField *rfld = ray->addField(name, units, nGates,
+          RadxField *rfld = ray->addField(name, units, nPts,
                                           field->getMissingSi32(),
                                           dptr + index,
                                           field->getScale(),
@@ -1126,7 +1239,7 @@ void RadxVol::setRayFieldPointers()
         }
         case Radx::SI16: {
           const Radx::si16 *dptr = (Radx::si16 *) field->getData();
-          RadxField *rfld = ray->addField(name, units, nGates,
+          RadxField *rfld = ray->addField(name, units, nPts,
                                           field->getMissingSi16(),
                                           dptr + index,
                                           field->getScale(),
@@ -1141,7 +1254,7 @@ void RadxVol::setRayFieldPointers()
         }
         case Radx::SI08: {
           const Radx::si08 *dptr = (Radx::si08 *) field->getData();
-          RadxField *rfld = ray->addField(name, units, nGates,
+          RadxField *rfld = ray->addField(name, units, nPts,
                                           field->getMissingSi08(),
                                           dptr + index,
                                           field->getScale(),
@@ -1316,6 +1429,169 @@ RadxField *RadxVol::copyField(const string &fieldName) const
         RadxField rcopy(*rfld);
         rcopy.convertToFl32();
         copy->addDataFl32(nGates, rcopy.getDataFl32());
+      }
+    } // iray
+    
+    // convert to final type
+    copy->convertToType(dataType);
+
+  } // if (dataType == Radx::FL64)
+
+  return copy;
+
+}
+
+//////////////////////////////////////////////////////////////////
+/// Make a copy of the scalar with the specified name.
+/// This forms a contiguous scalar from the ray data.
+/// Returns a pointer to the scalar on success, NULL on failure.
+
+RadxField *RadxVol::copyScalar(const string &scalarName) const
+  
+{
+
+  // check we have data
+  
+  if (_rays.size() < 1) {
+    return NULL;
+  }
+  
+  // create the scalar
+  // use the first available scalar in any ray as a template
+  
+  RadxField *copy = NULL;
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    const RadxRay &ray = *_rays[iray];
+    const RadxField *rayScalar = ray.getField(scalarName);
+    if (rayScalar != NULL) {
+      // create new scalar using name, units and type
+      copy = new RadxField(rayScalar->getName(), rayScalar->getUnits());
+      copy->copyMetaData(*rayScalar);
+      break;
+    }
+    if (copy != NULL) {
+      break;
+    }
+  } // iray
+  
+  if (copy == NULL) {
+    // no suitable scalar
+    return NULL;
+  }
+
+  // check if the scalars on the rays are uniform -
+  // i.e. all have the same type, scale and offset
+  
+  bool scalarsAreUniform = true;
+  Radx::DataType_t dataType = copy->getDataType();
+  double scale = copy->getScale();
+  double offset = copy->getOffset();
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    const RadxRay &ray = *_rays[iray];
+    const RadxField *rayScalar = ray.getField(scalarName);
+    if (rayScalar == NULL) {
+      continue;
+    }
+    if (rayScalar->getDataType() != dataType) {
+      // different scalar data types
+      scalarsAreUniform = false;
+      break;
+    }
+    if (dataType == Radx::FL32 || dataType == Radx::FL64) {
+      // for float types don't worry about scale and bias
+      continue;
+    }
+    if (fabs(rayScalar->getScale() - scale) > 1.0e-5) {
+      // different scale
+      scalarsAreUniform = false;
+      break;
+    }
+    if (fabs(rayScalar->getOffset() - offset) > 1.0e-5) {
+      // different offset
+      scalarsAreUniform = false;
+      break;
+    }
+  } // iray
+
+  // load up data from the rays
+
+  size_t nPts = 1;
+
+  if (scalarsAreUniform) {
+
+    // type, scale and offset constant
+
+    for (size_t iray = 0; iray < _rays.size(); iray++) {
+      RadxRay &ray = *_rays[iray];
+      RadxField *rfld = ray.getField(scalarName);
+      if (rfld == NULL) {
+        copy->addDataMissing(nPts);
+      } else {
+        RadxField rcopy(*rfld);
+        if (dataType == Radx::FL64) {
+          rcopy.setMissingFl64(copy->getMissingFl64());
+          copy->addDataFl64(nPts, rcopy.getDataFl64());
+        } else if (dataType == Radx::FL32) {
+          rcopy.setMissingFl32(copy->getMissingFl32());
+          copy->addDataFl32(nPts, rcopy.getDataFl32());
+        } else if (dataType == Radx::SI32) {
+          rcopy.setMissingSi32(copy->getMissingSi32());
+          copy->addDataSi32(nPts, rcopy.getDataSi32());
+        } else if (dataType == Radx::SI16) {
+          rcopy.setMissingSi16(copy->getMissingSi16());
+          copy->addDataSi16(nPts, rcopy.getDataSi16());
+        } else if (dataType == Radx::SI08) {
+          rcopy.setMissingSi08(copy->getMissingSi08());
+          copy->addDataSi08(nPts, rcopy.getDataSi08());
+        }
+      }
+    } // iray
+
+    return copy;
+
+  }
+
+  // scalars are not uniform and must be converted to a common type
+
+  if (dataType == Radx::FL64) {
+    
+    // 64-bit floats
+    
+    copy->setTypeFl64(Radx::missingFl64);
+    
+    for (size_t iray = 0; iray < _rays.size(); iray++) {
+      RadxRay &ray = *_rays[iray];
+      RadxField *rfld = ray.getField(scalarName);
+      if (rfld == NULL) {
+        copy->addDataMissing(nPts);
+      } else {
+        RadxField rcopy(*rfld);
+        rcopy.convertToFl64();
+        copy->addDataFl64(nPts, rcopy.getDataFl64());
+      }
+    } // iray
+    
+    // convert to final type
+    copy->convertToType(dataType);
+
+  } else {
+    
+    // all others
+    // convert to fl32 for now
+    
+    copy->setTypeFl32(Radx::missingFl32);
+    
+    for (size_t iray = 0; iray < _rays.size(); iray++) {
+      RadxRay &ray = *_rays[iray];
+      size_t nPts = ray.getNGates();
+      RadxField *rfld = ray.getScalar(scalarName);
+      if (rfld == NULL) {
+        copy->addDataMissing(nPts);
+      } else {
+        RadxField rcopy(*rfld);
+        rcopy.convertToFl32();
+        copy->addDataFl32(nPts, rcopy.getDataFl32());
       }
     } // iray
     
@@ -1582,10 +1858,20 @@ void RadxVol::clearRcalibs()
 void RadxVol::clearFields()
   
 {
+  // fields
+
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     delete _fields[ii];
   }
   _fields.clear();
+
+  // scalars
+
+  for (size_t ii = 0; ii < _scalars.size(); ii++) {
+    delete _scalars[ii];
+  }
+  _scalars.clear();
+
 }
 
 /////////////////////////////////////////////////////////
@@ -1656,6 +1942,15 @@ void RadxVol::print(ostream &out) const
       out << "    field[" << ii << "]: " << fieldNames[ii] << endl;
     }
   }
+  vector<string> scalarNames = getUniqueScalarNameList();
+  if (_scalars.size() > 0) {
+    out << "  n scalars: " << _scalars.size() << endl;
+  } else {
+    out << "  n scalars: " << scalarNames.size() << endl;
+    for (size_t ii = 0; ii < scalarNames.size(); ii++) {
+      out << "    scalar[" << ii << "]: " << scalarNames[ii] << endl;
+    }
+  }
   RadxRangeGeom::print(out);
   RadxPacking::printSummary(out);
   out << "===========================================" << endl;
@@ -1681,12 +1976,24 @@ void RadxVol::print(ostream &out) const
     for (size_t ii = 0; ii < _fields.size(); ii++) {
       _fields[ii]->print(out);
     }
+    for (size_t ii = 0; ii < _scalars.size(); ii++) {
+      _scalars[ii]->print(out);
+    }
   } else {
     for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
       string fieldName = fieldNames[ifield];
       const RadxField *fld = getFieldFromRay(fieldName);
       if (fld != NULL) {
         out << "===== NOTE: Field is from first ray =====" << endl;
+        fld->print(out);
+        out << "=========================================" << endl;
+      }
+    }
+    for (size_t iscalar = 0; iscalar < scalarNames.size(); iscalar++) {
+      string scalarName = scalarNames[iscalar];
+      const RadxField *fld = getFieldFromRay(scalarName);
+      if (fld != NULL) {
+        out << "===== NOTE: Scalar is from first ray =====" << endl;
         fld->print(out);
         out << "=========================================" << endl;
       }
@@ -5016,8 +5323,8 @@ void RadxVol::convertField(const string &name,
 }
 
 ///////////////////////////////////////////////////////////////////
-/// compute field stats for all field for
-/// all rays currently in the volume
+/// compute field stats for all fields
+/// for all rays currently in the volume
 ///
 /// Pass in:
 ///   * a global stats method type
@@ -5103,6 +5410,101 @@ RadxRay *RadxVol::computeFieldStats
     }
 
   } // ifield
+
+  // return resulting ray
+
+  return result;
+  
+}
+
+///////////////////////////////////////////////////////////////////
+/// compute field stats for all scalars for all
+/// rays currently in the volume
+///
+/// Pass in:
+///   * a global stats method type
+///   * optionally a field-name specific list of stats methods
+///   * max fraction missing for a valid result
+///
+/// The requested stats on computed for each scalar,
+/// and on a point-by-point basis.
+///
+/// If the geometry is not constant, remap to the predominant geom.
+///
+/// maxFractionMissing indicates the maximum fraction of the input data scalar
+/// that can be missing for valid statistics. Should be between 0 and 1.
+/// If the min is not met, the result is set to missing.
+/// 
+/// Returns NULL if no rays are present in the volume.
+/// Otherwise, returns ray containing results.
+
+RadxRay *RadxVol::computeScalarStats
+  (RadxField::StatsMethod_t globalMethod,
+   vector<RadxField::NamedStatsMethod> namedMethods,  
+   double maxFractionMissing /* = 0.25 */)
+
+{
+  
+  // check we have some data
+
+  if (_rays.size() == 0) {
+    return NULL;
+  }
+
+  // remap rays to predominant geometry
+
+  remapToPredomGeom();
+
+  // find middle ray, copy the metadata
+
+  size_t iMid = _rays.size() / 2;
+  RadxRay *result = new RadxRay;
+  result->copyMetaData(*_rays[iMid]);
+
+  // compute and set the number of samples
+
+  int nSamplesSum = 0;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    nSamplesSum += _rays[iray]->getNSamples();
+  }
+  result->setNSamples(nSamplesSum);
+  
+  // get the scalar name list, and loop through them
+  
+  vector<string> scalarNames = getUniqueScalarNameList();
+  for (size_t iscalar = 0; iscalar < scalarNames.size(); iscalar++) {
+    
+    string scalarName = scalarNames[iscalar];
+    
+    // assemble vector of this scalar on the ray
+
+    RadxField *scalar = _rays[0]->getScalar(scalarName);
+
+    vector<const RadxField *> rayScalars;
+    for (size_t iray = 0; iray < _rays.size(); iray++) {
+      RadxField *rayScalar = _rays[iray]->getScalar(scalarName);
+      if (rayScalar != NULL) {
+        rayScalars.push_back(rayScalar);
+      }
+    }
+
+    // compute the stats for this scalar
+    // add scalar to ray
+
+    RadxField::StatsMethod_t method = globalMethod;
+    for (size_t jj = 0; jj < namedMethods.size(); jj++) {
+      if (namedMethods[jj].first == scalarName) {
+        method = namedMethods[jj].second;
+        break;
+      }
+    }
+    RadxField *statsScalar = 
+      scalar->computeStats(method, rayScalars, maxFractionMissing);
+    if (statsScalar != NULL) {
+      result->addField(statsScalar);
+    }
+
+  } // iscalar
 
   // return resulting ray
 
@@ -5678,13 +6080,14 @@ void RadxVol::reorderFieldsByName(const vector<string> &names)
 int RadxVol::removeField(const string &name)
   
 {
-  
+
   int iret = 0;
+
+  // fields
 
   if (_fields.size()) {
     
     // fields are contiguous
-
     // copy good fields to temp array
 
     vector<RadxField *> temp;
@@ -5697,12 +6100,33 @@ int RadxVol::removeField(const string &name)
       }
     } // ii
 
-    if (_fields.size() == temp.size()) {
-      // field not found
-      iret = -1;
+    if (_fields.size() < temp.size()) {
+      // field found and removed
+      _fields = temp;
+      return 0;
+    }
+    
+    // check on scalars
+    
+    temp.clear();
+    for (size_t ii = 0; ii < _scalars.size(); ii++) {
+      RadxField *scalar = _scalars[ii];
+      if (scalar->getName() == name) {
+        delete scalar;
+      } else {
+        temp.push_back(scalar);
+      }
+    } // ii
+
+    if (_scalars.size() < temp.size()) {
+      // scalar found and removed
+      _scalars = temp;
+      return 0;
     }
 
-    _fields = temp;
+    // error - field not found
+
+    iret = -1;
 
   } else {
 
@@ -5710,7 +6134,7 @@ int RadxVol::removeField(const string &name)
 
     for (size_t ii = 0; ii < _rays.size(); ii++) {
       if (_rays[ii]->removeField(name)) {
-        return iret;
+        iret = -1;
       }
     }
 

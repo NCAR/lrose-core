@@ -380,7 +380,8 @@ public:
                       size_t nGates,
                       Radx::fl64 missingValue,
                       const Radx::fl64 *data,
-                      bool isLocal);
+                      bool isLocal, 
+                      bool isScalar = false);
   
   /// Create a 32-bit float RadxField object and add it to the ray.
   ///
@@ -401,7 +402,8 @@ public:
                       size_t nGates,
                       Radx::fl32 missingValue,
                       const Radx::fl32 *data,
-                      bool isLocal);
+                      bool isLocal,
+                      bool isScalar = false);
   
   /// Create a 32-bit scaled integer RadxField object and add it to
   /// the ray.
@@ -426,7 +428,8 @@ public:
                       const Radx::si32 *data,
                       double scale,
                       double offset,
-                      bool isLocal);
+                      bool isLocal, 
+                      bool isScalar = false);
   
   /// Create a 16-bit scaled integer RadxField object and add it to
   /// the ray.
@@ -451,7 +454,8 @@ public:
                       const Radx::si16 *data,
                       double scale,
                       double offset,
-                      bool isLocal);
+                      bool isLocal, 
+                      bool isScalar = false);
   
   /// Create an 8-bit scaled integer RadxField object and add it to the
   /// ray.
@@ -476,18 +480,15 @@ public:
                       const Radx::si08 *data,
                       double scale,
                       double offset,
-                      bool isLocal);
+                      bool isLocal, 
+                      bool isScalar = false);
   
   /// Add a previously-created field to the ray. The field must have
   /// been dynamically allocted using new(). Memory management for
   /// this field passes to the ray, which will free the field object
   /// using delete().
-  ///
-  /// If addToFront is true, the field is added at the beginning of the
-  /// field list. Otherwise it is added at the end.
   
-  void addField(RadxField *field,
-                bool addToFront = false);
+  void addField(RadxField *field);
 
   //@}
 
@@ -991,11 +992,15 @@ public:
   /// Get number of fields on this ray.
 
   inline size_t getNFields() const { return (int) _fields.size(); }
+  inline size_t getNScalars() const { return (int) _scalars.size(); }
 
   /// Get vector of field pointers for this ray.
   
   inline const vector<RadxField *> &getFields() const { return _fields; }
   inline vector<RadxField *> getFields() { return _fields; }
+
+  inline const vector<RadxField *> &getScalars() const { return _scalars; }
+  inline vector<RadxField *> getScalars() { return _scalars; }
 
   /// get map of field names
 
@@ -1005,12 +1010,12 @@ public:
   typedef FieldNameMap::const_iterator FieldNameMapConstIt;
 
   inline const FieldNameMap &getFieldNameMap() const { return _fieldNameMap; }
+  inline const FieldNameMap &getScalarNameMap() const { return _scalarNameMap; }
 
+  /////////////////////////////////////////////////////////////////////////////
   /// Get pointer to a particular field, based on the position in the
   /// field vector.
-  ///
   /// Returns NULL on failure.
-
   /// const version
 
   inline const RadxField *getField(int index) const {
@@ -1031,10 +1036,9 @@ public:
     }
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   /// Get pointer to a particular field, based on the name.
-  ///
   /// Returns NULL on failure.
-  
   /// const version
   
   inline const RadxField *getField(const string &name) const {
@@ -1057,6 +1061,56 @@ public:
     }
   }
 
+  /////////////////////////////////////////////////////////////////////////////
+  /// Get pointer to a particular scalar, based on the position in the
+  /// scalar vector.
+  /// Returns NULL on failure.
+  /// const version
+
+  inline const RadxField *getScalar(int index) const {
+    if (index < (int) _scalars.size()) {
+      return _scalars[index];
+    } else {
+      return NULL;
+    }
+  }
+
+  /// non-const version
+
+  inline RadxField *getScalar(int index) {
+    if (index < (int) _scalars.size()) {
+      return _scalars[index];
+    } else {
+      return NULL;
+    }
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  /// Get pointer to a particular field, based on the name.
+  /// Returns NULL on failure.
+  /// const version
+  
+  inline const RadxField *getScalar(const string &name) const {
+    FieldNameMapConstIt it = _scalarNameMap.find(name);
+    if (it != _scalarNameMap.end()) {
+      return _scalars[it->second];
+    } else {
+      return NULL;
+    }
+  }
+
+  /// non-const version
+  
+  inline RadxField *getScalar(const string &name) {
+    FieldNameMapConstIt it = _scalarNameMap.find(name);
+    if (it != _scalarNameMap.end()) {
+      return _scalars[it->second];
+    } else {
+      return NULL;
+    }
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
   /// Check if the data at all gates in all fields is missing?
   /// Returns true if all missing, false otherwise.
   
@@ -1087,6 +1141,10 @@ public:
   /// print the field name map
   
   void printFieldNameMap(ostream &out) const;
+  
+  /// print the scalar name map
+  
+  void printScalarNameMap(ostream &out) const;
   
   //@}
 
@@ -1213,10 +1271,13 @@ private:
   // data fields
   
   vector<RadxField *> _fields;
+  vector<RadxField *> _scalars;
+  vector<RadxField *> _allFields;
 
   // map of data field names
 
   FieldNameMap _fieldNameMap;
+  FieldNameMap _scalarNameMap;
 
   // keeping track of clients using this object
 
@@ -1228,7 +1289,11 @@ private:
   void _init();
   RadxRay & _copy(const RadxRay &rhs);
   
-  string _addToFieldNameMap(const string &name, int index);
+  string _addToFieldNameMap(const string &name, 
+                            int index,
+                            FieldNameMap &nameMap);
+
+  void _computeAllFields();
 
   /////////////////////////////////////////////////
   // serialization

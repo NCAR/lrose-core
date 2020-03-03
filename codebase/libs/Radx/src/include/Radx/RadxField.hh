@@ -105,6 +105,12 @@ using namespace std;
 /// data held by the volume fields. Once that is complete the
 /// management of the memory has passed from the fields in the rays to
 /// the fields in the volume.
+///
+/// Scalars:
+/// Most fields represent data along the ray, i.e. at each range gate.
+/// Scalar fields represent scalar values per ray. For example,
+/// in a downward looking aircraft radar, the surface altitude could
+/// be represented by a scalar.
 
 class RadxField : public RadxRangeGeom, public RadxPacking {
 
@@ -196,6 +202,11 @@ public:
   /// discrete values, such as particle ID
   
   void setIsDiscrete(bool val = true) { _isDiscrete = val; }
+
+  /// Set whether this is a scalar field. Scalar fields have only one
+  /// value per ray, instead of a gate-based array.
+  
+  void setIsScalar(bool val = true) { _isScalar = val; }
 
   //////////////////////////////////////////////////////////////////
   /// Set thresholding field name.
@@ -754,6 +765,11 @@ public:
   
   bool getIsDiscrete() const { return _isDiscrete; }
 
+  /// Is this a scalar field? In other words does it only have
+  /// a single value per ray, rather than a gate-based array.
+  
+  bool getIsScalar() const { return _isScalar; }
+
   /// Get missing value for 64-bit floating point data.
 
   Radx::fl64 getMissingFl64() const { return _missingFl64; }
@@ -1068,6 +1084,11 @@ private:
   
   bool _isDiscrete;
 
+  // Is this a scalar field? Scalars store just a
+  // single value per ray, instead of gate-based array.
+  
+  bool _isScalar;
+
   // max and min values in field
 
   mutable double _minVal;
@@ -1183,6 +1204,7 @@ private:
     Radx::si32 byteWidth;
     Radx::si32 fieldFolds;
     Radx::si32 isDiscrete;
+    Radx::si32 isScalar;
     Radx::si32 missingSi32;
     Radx::si32 missingSi16;
     Radx::si32 missingSi08;
