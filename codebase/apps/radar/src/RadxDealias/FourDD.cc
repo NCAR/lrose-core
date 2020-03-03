@@ -538,7 +538,7 @@ void FourDD::prepVolume(Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
 	if (del_num_bins > numBins) {
 	  last_bin = numBins;
 	}
-        printf("last_bin = %d\n", last_bin);
+        //printf("last_bin = %d\n", last_bin);
 	for (i = 0; i < last_bin; i++) {	     
 	  rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = velocityMissingValue;
 	  DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = dbzMissingValue;
@@ -1265,13 +1265,15 @@ void FourDD::AssessNeighborhood2(short **STATE, Volume *rvVolume, int sweepIndex
 
 void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
 						    Volume *original, Volume *rvVolume,
-						    int sweepIndex, int del_num_bins, 
+						    size_t sweepIndex, int del_num_bins, 
                                                     float NyqVelocity, float pfraction,
                                                     int max_count) {
 
+  if ((original == NULL) || (rvVolume == NULL))
+    throw std::invalid_argument("original volume or rvVolume is NULL");
 
-  if (sweepIndex < 0)
-    throw std::invalid_argument("sweepIndex negative");
+  if ((sweepIndex > original->h.nsweeps) || (sweepIndex > rvVolume->h.nsweeps))
+    throw std::invalid_argument("sweepIndex out of bounds");
 
   //  sanity check the Nyquist velocity
   if (fabs(NyqVelocity*pfraction) < 1)
@@ -1682,9 +1684,8 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
                           int del_num_bins, float velocityMissingValue, unsigned short filt,
                           unsigned short* success) {
 
-  int sweepIndex;
-  int numSweeps; //numRays;
-  //int   numBins;
+  size_t sweepIndex;
+  size_t numSweeps;
   float NyqVelocity, NyqInterval, fraction;
   float fraction2;
   float pfraction; 
@@ -1718,7 +1719,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
   if (soundVolume!=NULL || lastVolume!=NULL) {
     for (sweepIndex=numSweeps-1;sweepIndex>=0;sweepIndex--) {
 
-      printf("Sweep: %d\n", sweepIndex);
+      printf("Sweep: %lu\n", sweepIndex);
 
       NyqVelocity = rvVolume->sweep[sweepIndex]->ray[0]->h.nyq_vel;
       // TODO: validate NyqVelocity is NOT TOO SMALL!

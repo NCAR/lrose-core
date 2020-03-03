@@ -168,7 +168,7 @@ public:
 
   void UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
 					      Volume *original, Volume *rvVolume,
-					      int sweepIndex, int del_num_bins,
+					      size_t sweepIndex, int del_num_bins,
                                               float NyqVelocity, float pfraction,
                                               int max_count); 
   // , float missingVal);
