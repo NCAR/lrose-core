@@ -987,6 +987,78 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'set_stats_method_for_individual_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_stats_method_for_individual_fields");
+    tt->descr = tdrpStrDup("Set the stats method for individual fields.");
+    tt->help = tdrpStrDup("The global stats method is set by the 'dwell_stats_method' parameter. If 'set_stats_method_for_individual_fields' is true, we can set the stats method on particular fields. Fields not specified here will use the global parameter.");
+    tt->val_offset = (char *) &set_stats_method_for_individual_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'stats_method_fields'
+    // ctype is '_stats_method_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("stats_method_fields");
+    tt->descr = tdrpStrDup("Stats methods for individual fields.");
+    tt->help = tdrpStrDup("Applies if 'set_stats_method_for_individual_fields' is true. The global stats method is set by the 'dwell_stats_method' parameter. Fields not specified here will use the global parameter.");
+    tt->array_offset = (char *) &_stats_method_fields - &_start_;
+    tt->array_n_offset = (char *) &stats_method_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(stats_method_field_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("stats_method_field_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_stats_method_fields->field_name - (char *) _stats_method_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("dwell_stats_method_t");
+      tt->struct_def.fields[1].fname = tdrpStrDup("stats_method");
+      tt->struct_def.fields[1].ptype = ENUM_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_stats_method_fields->stats_method - (char *) _stats_method_fields;
+        tt->struct_def.fields[1].enum_def.name = tdrpStrDup("dwell_stats_method_t");
+        tt->struct_def.fields[1].enum_def.nfields = 5;
+        tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("DWELL_STATS_MEAN");
+        tt->struct_def.fields[1].enum_def.fields[0].val = DWELL_STATS_MEAN;
+        tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("DWELL_STATS_MEDIAN");
+        tt->struct_def.fields[1].enum_def.fields[1].val = DWELL_STATS_MEDIAN;
+        tt->struct_def.fields[1].enum_def.fields[2].name = tdrpStrDup("DWELL_STATS_MAXIMUM");
+        tt->struct_def.fields[1].enum_def.fields[2].val = DWELL_STATS_MAXIMUM;
+        tt->struct_def.fields[1].enum_def.fields[3].name = tdrpStrDup("DWELL_STATS_MINIMUM");
+        tt->struct_def.fields[1].enum_def.fields[3].val = DWELL_STATS_MINIMUM;
+        tt->struct_def.fields[1].enum_def.fields[4].name = tdrpStrDup("DWELL_STATS_MIDDLE");
+        tt->struct_def.fields[1].enum_def.fields[4].val = DWELL_STATS_MIDDLE;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("FLAG");
+      tt->struct_vals[1].e = DWELL_STATS_MEDIAN;
+      tt->struct_vals[2].s = tdrpStrDup("ANTENNA_FLAG");
+      tt->struct_vals[3].e = DWELL_STATS_MIDDLE;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1099,11 +1171,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("CENSORING");
     tt->comment_text = tdrpStrDup("You have the option of censoring the data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression.");
     tt++;
@@ -1223,11 +1295,11 @@
       tt->array_vals[1].s = tdrpStrDup("DBMVC");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1384,11 +1456,11 @@
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1431,11 +1503,11 @@
     tt->single_val.e = OUTPUT_ENCODING_ASIS;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.");
     tt->comment_text = tdrpStrDup("These transforms are fixed. The same transform is applied to all files.");
     tt++;
@@ -1496,11 +1568,11 @@
       tt->struct_vals[5].d = 0;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1557,11 +1629,11 @@
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1590,11 +1662,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1623,11 +1695,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("WRITE CFRADIAL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1836,11 +1908,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OUTPUT IN FMQ MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -1,18 +1,11 @@
 ####################################
-# list of required RADX libraries
+# list of required LROSE libraries
 ####################################
-libFmq.a
-libMdv.a
-#libNcfMdv.a
+libNcxx.a
 libRadx.a
-libSpdb.a
 libdataport.a
-libdidss.a
-libdsserver.a
-libeuclid.a
 libkd.a
-libradar.a
-librapformats.a
+libphysics.a
 librapmath.a
 libtdrp.a
 libtoolsa.a

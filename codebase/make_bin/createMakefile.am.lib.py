@@ -463,6 +463,8 @@ def writeMakefileAm():
     fo.write("# compile flags - include header subdirectory\n")
     fo.write("\n")
     fo.write("AM_CFLAGS = -I./include\n")
+    fo.write("AM_CFLAGS += -fPIC\n")
+    fo.write("\n")
     if (isDebianBased):
         fo.write("# NOTE: add in Debian location of HDF5\n")
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")

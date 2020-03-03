@@ -48,7 +48,7 @@
  * @author Automatically generated
  *
  */
-#include "VirtVolParams.hh"
+#include <FiltAlgVirtVol/VirtVolParams.hh>
 #include <cstring>
 
   ////////////////////////////////////////////

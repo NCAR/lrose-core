@@ -57,9 +57,11 @@
 //
 // Radius of earth in kilometers. 
 // 
-#define A 6372.0 
+#define RADIUS_OF_EARTH_KM 6372.0 
 
 #define PI 3.1415927 
+
+#define MISSING_THRESHOLD 0.0001
 
 #include <cstdlib>
 #include <math.h>
@@ -83,11 +85,10 @@ public:
 	 float avg_wind_v = 0.0,
 	 bool prep = false,
 	 bool filt = false,
-	 bool output_soundVol = false,
 	 float max_shear = .05,
 	 int sign = -1,
 	 int del_num_bins = 0,
-	 bool no_dbz_rm_rv = false,
+	 bool dbz_rm_rv = false,
 	 float low_dbz = 0.0,
 	 float high_dbz = 80.0,
 	 float angle_variance = 0.10,
@@ -113,10 +114,11 @@ public:
                     unsigned short* success);
 
   float window(Volume* rvVolume, int sweepIndex, int startray, int endray,
-               int firstbin, int lastbin, float std_thresh,
+               size_t firstbin, size_t lastbin, int min_good, float std_thresh,
                bool* success);
 
-  void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins, float missingVal,
+  void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
+		   float velocityMissingValue, float dbzMissingValue,
                    float low_dbz, float high_dbz, bool dbz_rm_rv);
 
   int findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int 
@@ -133,13 +135,14 @@ public:
 
   float getNyqInterval(float nyqVelocity);
 
-  int getNumBins(Volume *volume, int sweepIndex);
+  int getNumBins(Volume *volume, size_t sweepIndex, size_t rayIndex);
   int getNumRays(Volume *volume, int sweepIndex);
 
   short Filter3x3(Volume *VALS, int i, int currIndex, int sweepIndex,
                   int del_num_bins);
 
   void InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *soundVolume, Volume *original,
+                         float velocityMissingValue,
 			 int sweepIndex, int del_num_bins, short **STATE, bool filt, float fraction,
                          float ck_val, bool strict_first_pass, int max_count);
 
@@ -165,7 +168,7 @@ public:
 
   void UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
 					      Volume *original, Volume *rvVolume,
-					      int sweepIndex, int del_num_bins,
+					      size_t sweepIndex, int del_num_bins,
                                               float NyqVelocity, float pfraction,
                                               int max_count); 
   // , float missingVal);
@@ -173,6 +176,7 @@ public:
   void UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume *rvVolume, Volume *original,
                                                      int sweepIndex, int del_num_bins,
                                                      float pfraction, int proximity,
+						     int min_good,
                                                      float std_thresh, float NyqVelocity,
                                                      bool soundVolumeNull, bool lastVolumeNull);
 
@@ -186,6 +190,9 @@ public:
 
   short **CreateSTATE(Volume *rvVolume, short initialValue = TBD);
   void  DestroySTATE(short **STATE, int nbins);
+
+  bool _missing(Volume *original, size_t sweepIndex, size_t rayIndex, size_t rangeIndex,
+                       float missingValue);
 
   const static short UNSUCCESSFUL = -2;
   const static short MISSING      = -1;
@@ -211,7 +218,7 @@ private:
   float  _max_shear;
   int    _sign;
   int    _del_num_bins;
-  bool   _no_dbz_rm_rv;
+  bool   _dbz_rm_rv;
   float  _low_dbz;
   float  _high_dbz;
   float  _angle_variance;
@@ -226,9 +233,9 @@ private:
   float  _std_thresh;
 
   float  _epsilon;
-  float  _missingVal;
+  // float  _missingVal;
 
-  bool _isMissing(float value);
+  bool _isMissing(float dataValue, float missingValue);
 
 };
 

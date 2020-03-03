@@ -215,7 +215,7 @@ commentdef {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and lower that low_dbz will be automatically deleted.";
+  p_descr = "Prep volume before unfolding. Velocity gates with DBZ >  high_dbz and lower that low_dbz will be automatically deleted by setting to missing value. Related to no_dbz_rm_rv";
   p_help = "";
 } prep ;
 
@@ -241,9 +241,9 @@ commentdef {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "If true, all radial velocity bins with dbz values missing will be deleted";
+  p_descr = "If true, all radial velocity bins with dbz values missing will be deleted, if prep is set to true.";
   p_help = "";
-} no_dbz_rm_rv;
+} dbz_rm_rv;
 
 
 paramdef  int {
@@ -298,10 +298,7 @@ paramdef float{
 
 paramdef boolean{
   p_default = false;
-  p_descr = "If strict_first_pass is true, a gate in which a dealias
-attempt has been made will have to be within comp_thresh*NyqVelocity
-of the relevant above, previous, sounding values in order to be
-considered properly dealiased";
+  p_descr = "If strict_first_pass is true, a gate in which a dealias attempt has been made will have to be within comp_thresh*NyqVelocity of the relevant above, previous, sounding values in order to be considered properly dealiased";
 } strict_first_pass ;
 
 commentdef {

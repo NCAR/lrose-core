@@ -446,7 +446,7 @@ public:
 
   float high_dbz;
 
-  tdrp_bool_t no_dbz_rm_rv;
+  tdrp_bool_t dbz_rm_rv;
 
   int del_num_bins;
 

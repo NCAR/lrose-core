@@ -30,6 +30,7 @@
 #include <iostream>
 #include <climits>
 #include <cmath>
+#include <algorithm>
 #include "Rsl.hh"
 
 Radar *Rsl::new_radar(Radx::si32 nvolumes) {
@@ -73,6 +74,7 @@ Sweep *Rsl::new_sweep(Radx::si32 max_rays) {
   sweep = (Sweep *) malloc(sizeof(Sweep));
   if (sweep != NULL) {
     sweep->h.nrays = max_rays;
+    sweep->h.maxBinsInSweep = 0;
     sweep->ray = (Ray **) malloc(sizeof(Ray *) * max_rays);
   }
   if (sweep->ray == NULL)
@@ -200,6 +202,7 @@ Sweep *Rsl::copy_sweep(Sweep *sweep) {
   sweepCopy = Rsl::new_sweep(sweep->h.nrays);
   //memcpy(&(sweepCopy->h), &(sweep->h), sizeof(Sweep_header));
   sweepCopy->h.nrays = sweep->h.nrays;
+  sweepCopy->h.maxBinsInSweep = sweep->h.maxBinsInSweep;
 
   // copy the rays
   for (int i=0; i<sweep->h.nrays; i++) {
@@ -331,7 +334,7 @@ void Rsl::print_ray(Ray *ray)
     // print the data
     if (ray->range != NULL) {
       Range *bin = ray->range;
-      int maxToPrint = min(10, ray->h.nbins);
+      int maxToPrint = min<size_t>(20, ray->h.nbins);
       for (int i = 0; i < maxToPrint; i++) {
 	cout << bin[i] << " ";
       }
@@ -364,13 +367,28 @@ void Rsl::print_sweep(Sweep *sweep)
     // print each ray
     if (sweep->ray != NULL) {
       Ray **ray = sweep->ray;
-      int maxToPrint = min(5, sweep->h.nrays);
+      int maxToPrint = min<size_t>(5, sweep->h.nrays);
       for (int i = 0; i < maxToPrint; i++) {
         cout << "  Ray " << i << endl;
 	print_ray(ray[i]);
       }
     }
   }
+}
+
+void Rsl::setMaxBinsInSweep(Sweep *sweep, size_t nBins) {
+  if (nBins > sweep->h.maxBinsInSweep)
+    sweep->h.maxBinsInSweep = nBins;
+}
+
+size_t Rsl::getMaxBinsInSweep(Volume *volume, size_t sweepIndex) {
+  if (volume == NULL)
+    throw std::invalid_argument("getMaxBinsInSweep: volume is NULL");
+  if (sweepIndex >= volume->h.nsweeps)
+    throw std::invalid_argument("getMaxBinsInSweep: sweepIndex outside range");
+  if (volume->sweep[sweepIndex] == NULL)
+    throw std::invalid_argument("getMaxBinsInSweep: volume->sweep[sweepIndex] is NULL");
+  return volume->sweep[sweepIndex]->h.maxBinsInSweep; 
 }
 
 void Rsl::findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays, bool debug) {
@@ -524,4 +542,23 @@ void Rsl::verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol, Volume *curr
   if (debug) 
     cout << " found " << *maxNBins << " bins and " << *maxNRays << " rays" << endl;
 
+}
+
+
+float Rsl::getValue(Volume *volume, size_t sweepIndex, size_t rayIndex, size_t binIndex) {
+  if (volume == NULL) 
+    throw std::invalid_argument("getValue: volume is NULL");
+  if (sweepIndex >= volume->h.nsweeps) 
+    throw std::invalid_argument("getValue: sweepIndex outside range");
+  if (volume->sweep[sweepIndex] == NULL) 
+    throw std::invalid_argument("getValue: volume->sweep[sweepIndex] is NULL");
+  if (rayIndex >= volume->sweep[sweepIndex]->h.nrays) 
+    throw std::invalid_argument("getValue: rayIndex outside range");
+  if (volume->sweep[sweepIndex]->ray[rayIndex] == NULL) 
+    throw std::invalid_argument("getValue: volume->sweep[sweepIndex]->ray[rayIndex] is NULL");
+  if (binIndex >= volume->sweep[sweepIndex]->ray[rayIndex]->h.nbins) 
+    throw std::invalid_argument("getValue: binIndex outside range");
+  if (volume->sweep[sweepIndex]->ray[rayIndex]->range == NULL) 
+    throw std::invalid_argument("getValue: volume->sweep[sweepIndex]->ray[rayIndex]->range is NULL");
+  return volume->sweep[sweepIndex]->ray[rayIndex]->range[binIndex];
 }

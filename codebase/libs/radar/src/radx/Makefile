@@ -54,11 +54,11 @@ include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
 
 depend: depend_generic
 
-RadxAppParams.hh: RadxAppParams.cc
-	$(CP) RadxAppParams.hh ../include/radar
-
 RadxAppParams.cc: paramdef.RadxApp
-	tdrp_gen -f paramdef.RadxApp -c++ -class RadxAppParams
-	$(CP) RadxAppParams.hh ../include/radar
+	tdrp_gen -f paramdef.RadxApp -c++ -class RadxAppParams -lib radar
+	/bin/mv -f RadxAppParams.hh ../include/radar
+
+/bin/mv clean_tdrp:
+	$(RM) RadxAppParams.cc ../include/radar/RadxAppParams.hh
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

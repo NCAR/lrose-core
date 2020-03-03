@@ -1,5 +1,5 @@
 ####################################
-# list of requried CIDD libraries
+# list of required CIDD libraries
 ####################################
 libFmq.a
 libMdv.a

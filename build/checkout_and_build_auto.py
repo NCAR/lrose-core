@@ -72,7 +72,7 @@ def main():
     parser.add_option('--package',
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
-                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd')
+                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd, samurai')
     parser.add_option('--releaseDate',
                       dest='releaseDate', default='latest',
                       help='Tag to check out lrose-core')
@@ -147,9 +147,10 @@ def main():
         options.package != "lrose-blaze" and
         options.package != "lrose-cyclone" and
         options.package != "lrose-radx" and
-        options.package != "lrose-cidd") :
+        options.package != "lrose-cidd" and
+        options.package != "samurai") :
         print("ERROR: invalid package name: %s:" % options.package, file=sys.stderr)
-        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd",
+        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd, samurai",
               file=sys.stderr)
         sys.exit(1)
 
@@ -283,9 +284,10 @@ def main():
 
     # run qmake for QT apps to create moc_ files
 
-    logPath = prepareLogFile("create-qt-moc-files");
-    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
-    createQtMocFiles(hawkEyeDir)
+    if (options.package != "samurai"):
+        logPath = prepareLogFile("create-qt-moc-files");
+        hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
+        createQtMocFiles(hawkEyeDir)
 
     # prune any empty directories
 
@@ -340,20 +342,20 @@ def main():
 
     # build CSU packages
 
-    logPath = prepareLogFile("geolib");
     if (options.build_geolib):
+        logPath = prepareLogFile("geolib");
         buildGeolib()
 
-    logPath = prepareLogFile("fractl");
     if (options.build_fractl):
+        logPath = prepareLogFile("fractl");
         buildFractl()
 
-    logPath = prepareLogFile("vortrac");
     if (options.build_vortrac):
+        logPath = prepareLogFile("vortrac");
         buildVortrac()
 
-    logPath = prepareLogFile("samurai");
     if (options.build_samurai):
+        logPath = prepareLogFile("samurai");
         buildSamurai()
 
     sys.exit(0)
@@ -423,8 +425,10 @@ def gitCheckout():
 
     # color scales and maps in displays repo
 
-    shellCmd("/bin/rm -rf lrose-displays")
-    shellCmd("git clone https://github.com/NCAR/lrose-displays")
+    if (options.package != "lrose-radx" and
+        options.package != "samurai") :
+        shellCmd("/bin/rm -rf lrose-displays")
+        shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
 ########################################################################
 # set up autoconf for configure etc
@@ -754,8 +758,9 @@ def doFinalInstall():
 
     # install color scales
 
-    os.chdir(displaysDir)
-    shellCmd("rsync -av color_scales " + shareDir)
+    if (os.path.isdir(displaysDir)):
+        os.chdir(displaysDir)
+        shellCmd("rsync -av color_scales " + shareDir)
 
     # install binaries and libs
 

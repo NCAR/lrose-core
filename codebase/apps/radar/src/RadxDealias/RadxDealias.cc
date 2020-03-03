@@ -27,6 +27,7 @@
 // 
 /////////////////////////////////////////////////////////
 
+#include <stdexcept>
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
 #include <toolsa/mem.h>
@@ -153,8 +154,7 @@ int RadxDealias::Run()
   bool param_debug = (_params.debug > Params::DEBUG_NORM);  // convert from debug_t
   bool param_prep = tdrp_bool_t_to_bool(_params.prep);   
   bool param_filt = tdrp_bool_t_to_bool(_params.filt); 
-  bool param_output_soundVol = tdrp_bool_t_to_bool(_params.output_soundVol);
-  bool param_no_dbz_rm_rv = tdrp_bool_t_to_bool(_params.no_dbz_rm_rv);
+  bool param_dbz_rm_rv = tdrp_bool_t_to_bool(_params.dbz_rm_rv);
   bool param_strict_first_pass = tdrp_bool_t_to_bool(_params.strict_first_pass);
 
   if (sizeof(Radx::fl32) != sizeof(float))
@@ -171,11 +171,10 @@ int RadxDealias::Run()
 		      (float) _params.avg_wind_v,
 		      param_prep,
 		      param_filt,
-		      param_output_soundVol,
 		      (float) _params.max_shear,         
 		      _params.sign,
 		      _params.del_num_bins,
-		      param_no_dbz_rm_rv,
+		      param_dbz_rm_rv,
 		      (float) _params.low_dbz,
 		      (float) _params.high_dbz,
 		      (float) _params.angle_variance,
@@ -270,6 +269,13 @@ int RadxDealias::_processOne(string filePath)
   _readFile(filePath, vol);
 
   vol.loadFieldsFromRays();
+
+  // TODO: force same geometry ...
+  //void remapToPredomGeom(); 
+  //then                      
+  //remapRangeGeom(double startRangeKm,
+  //             double gateSpacingKm, 
+  //             bool interp = false);  
   vol.remapToFinestGeom();
 
   vol.setNGatesConstant();
@@ -286,34 +292,49 @@ int RadxDealias::_processOne(string filePath)
   }
 
   // convert from RadxVol to Volume structures
+  
+  // extract the reflectivity field 
   currDbzVol = _extractFieldData(vol, _params._required_fields[0]);
   // override Nyquist frequency if directed from params file
   //  currVelVol = _extractFieldData(vol, _params._required_fields[1], _params.nyquist_mps);
 
-  /*  TODO:  here ... 
-  // override missing values                                                                                            
+  /*  
+  // override missing values             
+  // missing values are kept with a RadxField                                                                               
   if (_params.override_missing_field_values) {
     // TODO: use these variables? or missing_velocity?
-    Radx::setMissingFl32(_params.missing_field_fl32);
+    Radx::fl32 missingValue = _params.missing_field_fl32; 
+    RadxField *field;
+    field->setMissingFl32(missingValue);
+    cout << "overriding missing value from " << vol.getMissingFl32();
+    vol.setMissingFl32(missingValue);
+    cout << " to " << vol.getMissingFl32 << endl;
   }
-  */ 
+  */
+  
   currVelVol = _extractVelocityFieldData(vol, velocityFieldName, nyquist_mps, 
     _params.override_missing_field_values, _params.velocity_field_missing_value);
-
+  
   if ((currDbzVol == NULL) || (currVelVol == NULL))
-    throw "Error, velocity or reflectivity field could not be read from data file";
+    throw "ERROR, velocity or reflectivity field could not be read from data file";
 
   time_t volTime = vol.getStartTimeSecs();
 
-  _processVol(prevVelVol, currVelVol, currDbzVol, volTime);
+  bool param_output_soundVol = tdrp_bool_t_to_bool(_params.output_soundVol);
+
+  _processVol(prevVelVol, currVelVol, currDbzVol, volTime, param_output_soundVol);
 
   // move the unfolded data back into the RadxVol structure
   // first, move the data back to the rays, so that we can add a couple
   // new fields to the rays                                                                                             
-  vol.loadRaysFromFields();
+  //vol.loadRaysFromFields();
 
+  try {
   // only the velocity should change; NOT the reflectivity
   _insertFieldData(&vol, _params._required_fields[1], currVelVol);
+  } catch (const char* ex) {
+    cout << ex << endl;
+  }
 
   // load the data back into the fields
   vol.loadFieldsFromRays();
@@ -361,10 +382,10 @@ int RadxDealias::_runWithCompleteFileList(vector<string> fileList)
     try {
       _processOne(fileList[ii]);
       nGood++;
-    } catch (const char*  errorMsg) {
+    } catch (...) { // const char*  errorMsg) {
       iret = -1;
       nError++;
-      cerr << errorMsg << endl;
+      //      cout << errorMsg << endl;
     }
 
     statusReport(nError, nGood);
@@ -645,41 +666,80 @@ void RadxDealias::_writeVol(RadxVol &vol)
 //              size we dont do the dealiasing. 
 //
 void RadxDealias::_processVol(Volume *prevVelVol, Volume *currVelVol,
-			      Volume *currDbzVol, time_t volTime) {
+			      Volume *currDbzVol, time_t volTime,
+			      bool output_soundVol) {
 
   if (_params.debug) {
-      cerr << "_processVol(): " << endl;
+    cerr << "_processVol(): " << endl;
   }
  
+  if (currVelVol == NULL) {
+    throw std::invalid_argument("currVelVol is NULL");
+  }
+
   // If there is a previous volume, make 
   // sure the previous and the current volumes are the same
   // size before dealiasing. The James dealiaser presently 
   // requires it.
-  bool okToProceed = TRUE;
 
   if (prevVelVol != NULL) {
     if (prevVelVol->h.nsweeps != currVelVol->h.nsweeps) {
-      okToProceed = FALSE;
+      fprintf(stderr, "Cannot dealias velocity volumes of different sizes. Time associated with volume %ld\n", volTime);
+      return; 
     }
   }
 
   Volume *soundVolume = NULL;
+  // copy velocity to soundVolume
+  soundVolume = Rsl::copy_volume(currVelVol);
 
-  if (!okToProceed) {
-    fprintf(stderr, "Cannot dealias velocity volumes of different sizes. Time associated with volume %ld\n", volTime);
-  } else { 
-    FirstGuess firstGuess(
-		      _params.debug,
-		      _params.sounding_url,
-		      (float) _params.sounding_look_back,
-		      (float) _params.wind_alt_min,
-		      (float) _params.wind_alt_max,
-		      (float) _params.avg_wind_u,
-		      (float) _params.avg_wind_v,
-		      (float) _params.max_shear,         
-		      _params.sign);
-    soundVolume = Rsl::copy_volume(currVelVol);
-    bool firstGuessSuccess = firstGuess.firstGuess(soundVolume, volTime); 
+  FirstGuess firstGuess(
+			_params.debug,
+			_params.sounding_url,
+			(float) _params.sounding_look_back,
+			(float) _params.wind_alt_min,
+			(float) _params.wind_alt_max,
+			(float) _params.avg_wind_u,
+			(float) _params.avg_wind_v,
+			(float) _params.max_shear,         
+			_params.sign);
+  // try to find a good sounding
+  bool firstGuessSuccess = firstGuess.firstGuess(soundVolume, volTime); 
+
+  bool firstGuessFailed = !firstGuessSuccess;
+  if (firstGuessFailed) {
+    // clean up
+      Rsl::free_volume(soundVolume);
+      soundVolume = NULL;
+  }
+
+  if (output_soundVol) {
+    // write and exit; do not unfold
+    if (soundVolume != NULL) {
+      _replaceVelocityWithSounding(currVelVol, soundVolume);
+      Rsl::free_volume(soundVolume);
+    }
+  } else {
+    // Unfold Volume if we have either a previous volume or VAD data
+    if (soundVolume != NULL  || prevVelVol != NULL) {
+      _fourDD->Dealias(prevVelVol, currVelVol, currDbzVol, soundVolume);
+    }
+  }
+
+  // TODO: maybe we need a final clean up to free any memory from Rsl::Volume structure
+
+    /* -------
+
+  if (output_soundVol) {
+    // write sound volume and exit; do not unfold
+    if (soundVolume != NULL) {
+      _outputSoundVolume(currVelVol, soundVolume);
+      Rsl::free_volume(soundVolume);
+    } else {
+      fprintf(stderr, "\nFirst guess using sounding failed\n");
+    } 
+  } else {
+    // try to unfold
     if (!firstGuessSuccess) {
       Rsl::free_volume(soundVolume);
       soundVolume = NULL;
@@ -691,25 +751,55 @@ void RadxDealias::_processVol(Volume *prevVelVol, Volume *currVelVol,
     if (firstGuessSuccess  || prevVelVol != NULL) {
       _fourDD->Dealias(prevVelVol, currVelVol, currDbzVol, soundVolume);
     }
-    if(soundVolume != NULL) {
-      /* TODO: work out this logic ...
-      if (_output_soundVol) {
-	int nSweeps = currVelVol->h.nsweeps;
-	int nRays = currVelVol->sweep[0]->h.nrays;
-	int nBins = currVelVol->sweep[0]->ray[0]->h.nbins;
-
-	for (int i = 0; i < nSweeps;  i++)
-	  for (int j = 0; j < nRays ; j ++)
-	    for (int k = 0; k < nBins  ; k++) {
-	      currVelVol->sweep[i]->ray[j]->range[k] = soundVolume->sweep[i]->ray[j]->range[k];
-	    }
-	fprintf(stderr, "\nREPLACED VELOCITY DATA WITH SOUNDING DATA!!\n");
-      }
-      */
-      Rsl::free_volume(soundVolume);
-    }
   }
+    */
+
 }
+
+void RadxDealias::_replaceVelocityWithSounding(Volume *currVelVol, Volume *soundVolume) {
+
+  int nSweeps = currVelVol->h.nsweeps;
+
+  /*
+(lldb) p nSweeps
+(int) $0 = 11
+(lldb) p nRays
+(int) $1 = 482
+(lldb) p nBins
+(int) $2 = 996
+  */
+  // currVelVol->sweep[1]->ray[481] = NULL = soundVolume->sweep[i]->ray[j]
+  // (lldb) p currVelVol->sweep[i]->ray[j]
+  // (Ray *) $7 = 0x0000000000000000
+
+     // NOTE: the number of rays can be different for each sweep!
+     // TODO: do we need to make the number of rays the same for each sweep?
+     // Q: Will the FourDD algorithm work if the number of rays differ among the sweeps?
+     // A: Maybe.  Let's try it.
+     // NOTE: the number of gates can vary between different sweeps
+     for (int i = 0; i < nSweeps;  i++) {
+       int nRays = currVelVol->sweep[i]->h.nrays;
+
+       for (int j = 0; j < nRays; j ++) {
+	 int nBins = currVelVol->sweep[i]->ray[j]->h.nbins;
+
+	 for (int k = 0; k < nBins; k++) {
+	   //cout << "currVelVol->sweep[" << i << "]->ray[" << j << "]->range[" << k <<"] = " <<
+	   //currVelVol->sweep[i]->ray[j]->range[k] <<
+	   //" => " <<
+	   //"soundVolume->sweep[" << i << "]->ray[" << j << "]->range[" << k << "]= " <<
+	   //soundVolume->sweep[i]->ray[j]->range[k] << endl;
+
+  	   currVelVol->sweep[i]->ray[j]->range[k] = soundVolume->sweep[i]->ray[j]->range[k];
+	 }
+       }
+     }
+
+  fprintf(stderr, "\nREPLACED VELOCITY DATA WITH SOUNDING DATA!!\n");
+
+}
+
+
 
 // convert from RadxVol to Volume structures
 // These variables need to be filled:
@@ -728,6 +818,8 @@ void RadxDealias::_processVol(Volume *prevVelVol, Volume *currVelVol,
 
 Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName) {
 
+  char message[1024];
+
   if (_params.debug) {
     cerr << " looking for data in field " << fieldName << endl;
   }
@@ -743,26 +835,55 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
     }
   }
   if (!found) {
-    cerr << "ERROR - no field found in data " << fieldName << endl;
-    return NULL;
+    sprintf(message, "ERROR - no field %s found in data", fieldName.c_str());
+    cout << message << endl;
+    throw std::invalid_argument(message);
   }
 
   // Volume
   Volume *volume = Rsl::new_volume(radxVol.getNSweeps());  
 
   // Sweeps
-  for (int i=0; i<volume->h.nsweeps; i++) {
+  vector<RadxSweep *> radxSweeps = radxVol.getSweeps();
+  size_t rslVolumeIdx = 0;
+  std::vector<RadxSweep *>::iterator itSweep;
+  for (itSweep = radxSweeps.begin(); itSweep != radxSweeps.end(); ++itSweep) {
+    //for (int i=0; i<volume->h.nsweeps; i++) {
+
+    // TODO: sometimes the sweeps are numbered 0 ... n-1, sometimes 1 ... n
+    // So, get a vector of the sweeps?
+    // The problem is Rsl::Volume has the array index tied to the sweep number
+    //  Fix? Maybe just loop through the sweeps in order and NOT index by sweep number???
+    // 
+    const RadxSweep *radxSweep = *itSweep; // radxVol.getSweepByNumber(i);
+    //    if (radxSweep == NULL) {
+    //  sprintf(message, "ERROR - sweep %d not found for field %s in data", i, fieldName.c_str());
+    //  cout << message << endl;
+      // TODO: free memory allocated; clean up ...
+    //  throw message;
+    //}
+
     Sweep **sweeps = volume->sweep;
-    Sweep *newSweep = Rsl::new_sweep(radxVol.getNRays());
-    sweeps[i] = newSweep;
+    Sweep *newSweep = Rsl::new_sweep(radxSweep->getNRays());
+    sweeps[rslVolumeIdx] = newSweep;
 
     // Rays    
     Ray **rays = newSweep->ray;
 
+    size_t startRayIndex = radxSweep->getStartRayIndex();
+    size_t endRayIndex = radxSweep->getEndRayIndex();
+    cout << "for RadxSweep " << rslVolumeIdx << ": startRayIndex=" << startRayIndex <<
+      " endRayIndex=" << endRayIndex << endl;
+
     vector<RadxRay *> radxRays = radxVol.getRays();      
     for (int j=0; j<newSweep->h.nrays; j++) {
 
-      RadxRay *radxRay = radxRays.at(j);
+      if (startRayIndex+j > endRayIndex)
+        throw "ERROR: _extractFieldData: Ray index out of bounds";
+      RadxRay *radxRay = radxRays.at(startRayIndex+j);
+
+      size_t nGates = radxRay->getNGates();
+      Rsl::setMaxBinsInSweep(newSweep, nGates);
 
       // convert the rays
       Ray *newRay = Rsl::new_ray(radxRay->getNGates());
@@ -810,8 +931,8 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
 	}
       }
 
-      newRay->h.bias = radxField->getOffset();
-      newRay->h.scale = radxField->getScale();
+      newRay->h.bias = 0.0; //  radxField->getOffset();
+      newRay->h.scale = 1.0; // radxField->getScale();
 
       // pull the missing value  from the associated RadxField
       // TODO: this gets set multiple times, but I cannot think
@@ -820,11 +941,13 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
 
       // copy the data ...
 
-      newRay->range = (Range *) malloc(sizeof(Range) * newRay->h.nbins);
+      newRay->range = new Range[newRay->h.nbins]; // (Range *) malloc(sizeof(Range) * newRay->h.nbins);
       newRay->h.binDataAllocated = true;
       memcpy(newRay->range, data, sizeof(Range) * newRay->h.nbins);
 
     } // for each ray
+    rslVolumeIdx += 1;
+
   } // for each sweep  
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -863,19 +986,45 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
   // Volume
   Volume *volume = Rsl::new_volume(radxVol.getNSweeps());  
 
+
   // Sweeps
-  for (int i=0; i<volume->h.nsweeps; i++) {
+  vector<RadxSweep *> radxSweeps = radxVol.getSweeps();
+  size_t rslVolumeIdx = 0;
+  std::vector<RadxSweep *>::iterator itSweep;
+  for (itSweep = radxSweeps.begin(); itSweep != radxSweeps.end(); ++itSweep) {
+    //for (int i=0; i<volume->h.nsweeps; i++) {
+
+    // TODO: sometimes the sweeps are numbered 0 ... n-1, sometimes 1 ... n
+    // So, get a vector of the sweeps?
+    // The problem is Rsl::Volume has the array index tied to the sweep number
+    //  Fix? Maybe just loop through the sweeps in order and NOT index by sweep number???
+    // 
+    const RadxSweep *radxSweep = *itSweep; // radxVol.getSweepByNumber(i);
+
     Sweep **sweeps = volume->sweep;
-    Sweep *newSweep = Rsl::new_sweep(radxVol.getNRays());
-    sweeps[i] = newSweep;
+    Sweep *newSweep = Rsl::new_sweep(radxSweep->getNRays());
+    sweeps[rslVolumeIdx] = newSweep;
 
     // Rays    
     Ray **rays = newSweep->ray;
 
+    size_t startRayIndex = radxSweep->getStartRayIndex();
+    size_t endRayIndex = radxSweep->getEndRayIndex();
+    cout << "for RadxSweep " << rslVolumeIdx << ": startRayIndex=" << startRayIndex <<
+      " endRayIndex=" << endRayIndex << endl;
+
     vector<RadxRay *> radxRays = radxVol.getRays();      
     for (int j=0; j<newSweep->h.nrays; j++) {
+ 
+      if (j == 481)
+        bool here = TRUE;
 
-      RadxRay *radxRay = radxRays.at(j);
+      if (startRayIndex+j > endRayIndex) 
+	throw "ERROR: _extractVelocityFieldData: Ray index out of bounds";
+      RadxRay *radxRay = radxRays.at(startRayIndex+j);
+
+      size_t nGates = radxRay->getNGates();
+      Rsl::setMaxBinsInSweep(newSweep, nGates);
 
       // convert the rays
       Ray *newRay = Rsl::new_ray(radxRay->getNGates());
@@ -888,9 +1037,9 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
       } else {
 	newRay->h.nyq_vel = radxRay->getNyquistMps();
       }
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-	cout << "Using " << newRay->h.nyq_vel << " as Nyquist Velocity" << endl;
-      }
+      //      if (_params.debug >= Params::DEBUG_VERBOSE) {
+      //	cout << "Using " << newRay->h.nyq_vel << " as Nyquist Velocity" << endl;
+      //      }
 
       // TRMM RSL wants altitude in meters
       newRay->h.alt = radxVol.getAltitudeKm()*1000.0;
@@ -913,11 +1062,15 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
       if (data == NULL) 
 	cout << "data values are NULL" << endl;
       else {
-        if (0) { // _params.debug) {
-	  cout << "data values for " << fieldName << " " ;
-	  for (int i = 0; i< 10; i++) 
-	    cout << data[i] << " ";
-	  cout << endl;
+        if (_params.debug) {
+	  // print the first 10 rays and the last ray's data
+	  if ((j < 10) || (j == newSweep->h.nrays-1)) {
+	    cout << "data values for sweep=" << rslVolumeIdx << 
+	      " ray=" << j << " fieldName=" << fieldName << " " ;
+	    for (int i = 0; i< 50; i++) 
+	      cout << data[i] << " ";
+	    cout << endl;
+	  }
 	}
       }
 
@@ -939,6 +1092,7 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
       memcpy(newRay->range, data, sizeof(Range) * newRay->h.nbins);
 
     } // for each ray
+    rslVolumeIdx += 1;
   } // for each sweep  
 
   if (override_missing_field_values) {
@@ -955,6 +1109,71 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
 }
 
 
+// insert in the same order as the extraction; the rays should NOT have moved
+void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *volume) {
+
+  Radx::fl32 missing = 0.0;
+
+  string unfoldedName = fieldName + "_UNF";
+
+
+  // Sweeps
+  vector<RadxSweep *> radxSweeps = radxVol->getSweeps();
+  size_t rslVolumeIdx = 0;
+  std::vector<RadxSweep *>::iterator itSweep;
+  for (itSweep = radxSweeps.begin(); itSweep != radxSweeps.end(); ++itSweep) {
+    //for (int i=0; i<volume->h.nsweeps; i++) {
+
+    // TODO: sometimes the sweeps are numbered 0 ... n-1, sometimes 1 ... n
+    // So, get a vector of the sweeps?
+    // The problem is Rsl::Volume has the array index tied to the sweep number
+    //  Fix? Maybe just loop through the sweeps in order and NOT index by sweep number???
+    // 
+    const RadxSweep *radxSweep = *itSweep; // radxVol.getSweepByNumber(i);
+
+    // Rays    
+    //Ray **rays = newSweep->ray;
+    Sweep *newSweep = volume->sweep[rslVolumeIdx];
+
+    size_t startRayIndex = radxSweep->getStartRayIndex();
+    size_t endRayIndex = radxSweep->getEndRayIndex();
+    cout << "for RadxSweep " << rslVolumeIdx << ": startRayIndex=" << startRayIndex <<
+      " endRayIndex=" << endRayIndex << endl;
+
+    vector<RadxRay *> radxRays = radxVol->getRays();      
+    for (int j=0; j<newSweep->h.nrays; j++) {
+
+      int sweepNumber = rslVolumeIdx;
+      int rayNumRadx = startRayIndex+j;
+      int rayNumVolume = j;
+
+      if (rayNumRadx > endRayIndex)
+        throw "ERROR: _insertFieldData: Ray index out of bounds";
+      RadxRay *radxRay = radxRays.at(rayNumRadx);
+
+      Radx::fl32 *newData = volume->sweep[sweepNumber]->ray[rayNumVolume]->range;
+      int nGates = volume->sweep[sweepNumber]->ray[rayNumVolume]->h.nbins;
+      // pull the missing value  from the associated RadxField
+      RadxField *radxField = radxRay->getField(fieldName);
+
+      //  pull the missing and nyquist values from the RSL structures; they should have propogated ...
+      double missingValue = volume->h.missing; // (double) radxField->getMissingFl32();
+      
+      // get the units; this should be pulled from the associate RadxRay
+      string units = radxField->getUnits();
+      bool isLocal = TRUE;
+      // Note: discarding the field returned, after adding it to the ray, since we don't need it.
+      radxRay->addField(unfoldedName, units, nGates, missingValue, newData, isLocal);
+      //---------
+
+    } // for each ray
+    rslVolumeIdx += 1;
+  } // for each sweep  
+}
+
+/*
+
+// insert in the same order as the extraction; the rays should NOT have moved
 void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *volume) {
 
   if (_params.debug) {
@@ -975,20 +1194,49 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
     return;
   }
 
+  // first, move the data back to the rays, so that we can add a couple
+  // new fields to the rays                                                                                             
+  //radxVol->loadRaysFromFields();
+
+
   // loop over the rays in the RadxVol, and pull the specific data from the trmml Volume->Sweep... structure
   // fetch the total number of rays (#sweeps * #rays)                                                                   
   vector<RadxRay *> currentRays = radxVol->getRays();
 
   int rayNum = 0;
   string unfoldedName = fieldName + "_UNF";
+  char errorMsg[1024];
+
+  // for each sweep ...
+  int radxVolNSweeps = radxVol->getNSweeps();
+  if (radxVolNSweeps != volume->h.nsweeps)
+    throw "ERROR: _insertFieldData: number of sweeps in RadxVol and unfolded volume are different\n";
+
+  int sweepNumber = 0;
 
   // for each ray of data                                                                                             
   for (vector<RadxRay *>::iterator r=currentRays.begin(); r<currentRays.end(); r++) {
-      RadxRay *radxRay = *r;
+    RadxRay *radxRay = *r;
 
-	// TODO: verify this ... we may want the management to go to the RadxVol?
-      bool isLocal = true;
-      int sweepNumber = radxRay->getSweepNumber() - 1;
+    // TODO: verify this ... we may want the management to go to the RadxVol?
+    bool isLocal = true;
+    // TODO: the sweepNumber is NOT in the radxRay 
+    int sweepNumber = radxRay->getSweepNumber();
+    int rayNumber = radxRay->getRayNumber();
+    cout << "sweepNumber=" << sweepNumber << " rayNumber=" << rayNumber << endl;
+
+    //for (int sweepNumber=0; sweepNumber<volume->h.nsweeps; sweepNumber++) {
+
+      // validate data bounds before access
+      if ((sweepNumber < 0) || (sweepNumber >= volume->h.nsweeps)) {
+	sprintf(errorMsg, "_insertFieldData: sweepNumber %d out of bounds %d", sweepNumber, volume->h.nsweeps);
+	throw errorMsg; 
+      }
+      int maxRays = volume->sweep[sweepNumber]->h.nrays;
+      if ((rayNum < 0) || (rayNum >= maxRays)) {
+	sprintf(errorMsg, "_insertFieldData: rayNum %d out of bounds %d", rayNum, maxRays);
+	throw errorMsg; 
+      }
       Radx::fl32 *newData = volume->sweep[sweepNumber]->ray[rayNum]->range;
       int nGates = volume->sweep[sweepNumber]->ray[rayNum]->h.nbins;
       // pull the missing value  from the associated RadxField
@@ -1003,14 +1251,26 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
       // Note: discarding the field returned, after adding it to the ray, since we don't need it.
       radxRay->addField(unfoldedName, units, nGates, missingValue, newData, isLocal);
 
-      rayNum += 1;
+      if (newData == NULL) 
+	cout << "data values are NULL" << endl;
+      else {
+	if (_params.debug) {
+	  cout << "data values for sweep=" << sweepNumber << " ray=" << rayNum << " fieldName=" << unfoldedName << " " ;
+	  for (int i = 0; i< 10; i++) 
+	    cout << newData[i] << " ";
+	  cout << endl;
+	}
+      }
 
-    } // for each ray
+      // }
+    rayNum += 1;
+    sweepNumber += 1;
+  } // for each ray
 
-    vector<string> fieldNamesNew = radxVol->getUniqueFieldNameList();
+  vector<string> fieldNamesNew = radxVol->getUniqueFieldNameList();
 
 }
-
+*/
 void RadxDealias::jamesCopyright()
 {
    cerr << "** RadxDealias executes 4DD which is the Four Dimensional Dealiasing algorithm\n"

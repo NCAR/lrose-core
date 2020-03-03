@@ -603,14 +603,14 @@ def writeMakefileAm():
 
     fo.write("# compile flags\n")
     fo.write("\n")
-    fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
+    fo.write("AM_CFLAGS = -I.\n")
+    fo.write("AM_CFLAGS += -fPIC\n")
     fo.write("\n")
 
     if (needQt == True):
         fo.write("PKG_CONFIG_PATH = /usr/lib/pkgconfig\n")
         fo.write("PKG_CONFIG_PATH += /usr/local/opt/qt/lib/pkgconfig\n")
 
-    fo.write("AM_CFLAGS = -I.\n")
     if (isDebianBased):
         fo.write("# NOTE: add in Debian location of HDF5\n")
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
@@ -622,13 +622,15 @@ def writeMakefileAm():
         fo.write("AM_CFLAGS += -I/usr/local/opt/flex/include\n")
     if (needQt == True):
         fo.write("# for QT\n")
-        fo.write("AM_CFLAGS += -fPIC\n")
         fo.write("AM_CFLAGS += -std=c++11\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Core)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Gui)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Widgets)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Network)\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Qml)\n")
+    fo.write("\n")
+
+    fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
 
     fo.write("# load flags\n")

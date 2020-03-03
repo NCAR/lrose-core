@@ -53,7 +53,11 @@ The distribution will be in the lrose-core subdirectory:
   cd ~/git/lrose-core
 ```
 
-### Clone the NetCDF support rom GitHub
+### Clone the NetCDF support from GitHub - if necessary
+
+This step is generally no longer required, provided the netcdf-devel and hdf5-devel package dependencies are installed.
+
+See: [LROSE package dependencies](./lrose_package_dependencies.md)
 
 ```
   cd ~/git
@@ -137,9 +141,13 @@ Several other variables are set as well.
 
 ## 4. Build
 
-### First build the NetCDF support.
+### First build the NetCDF support - if necessary.
 
-See [NCAR_netcdf_build.linux.md](./NCAR_netcdf_build.linux.md)
+This step is generally no longer required, provided the netcdf-devel and hdf5-devel package dependencies are installed.
+
+See: [LROSE package dependencies](./lrose_package_dependencies.md)
+
+To do the build see [NCAR_netcdf_build.linux.md](./NCAR_netcdf_build.linux.md)
 
 Install NetCDF in $LROSE_INSTALL_DIR, which will normally be `~/lrose`.
 
@@ -188,7 +196,7 @@ For the **titan** distribtion, run the following:
 ```
   cd $LROSE_CORE_DIR/codebase/libs/tdrp/src
   make opt install
-  cd $LROSE_CORE_DIR/codebase/apps/tdrp/src
+  cd $LROSE_CORE_DIR/codebase/apps/tdrp/src/tdrp_gen
   make opt install
 ```
 

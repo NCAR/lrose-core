@@ -5016,9 +5016,13 @@ void RadxVol::convertField(const string &name,
 }
 
 ///////////////////////////////////////////////////////////////////
-/// compute field stats for rays currently in the volume
+/// compute field stats for all field for
+/// all rays currently in the volume
 ///
-/// Pass in a stats method type, and a vector of fields
+/// Pass in:
+///   * a global stats method type
+///   * optionally a field-name specific list of stats methods
+///   * max fraction missing for a valid result
 ///
 /// The requested stats on computed for each field,
 /// and on a point-by-point basis.
@@ -5027,15 +5031,18 @@ void RadxVol::convertField(const string &name,
 ///
 /// maxFractionMissing indicates the maximum fraction of the input data field
 /// that can be missing for valid statistics. Should be between 0 and 1.
+/// If the min is not met, the result is set to missing.
 /// 
 /// Returns NULL if no rays are present in the volume.
 /// Otherwise, returns ray containing results.
 
-RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method,
-                                    double maxFractionMissing /* = 0.25 */)
+RadxRay *RadxVol::computeFieldStats
+  (RadxField::StatsMethod_t globalMethod,
+   vector<RadxField::NamedStatsMethod> namedMethods,  
+   double maxFractionMissing /* = 0.25 */)
 
 {
-
+  
   // check we have some data
 
   if (_rays.size() == 0) {
@@ -5065,13 +5072,15 @@ RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method,
   vector<string> fieldNames = getUniqueFieldNameList();
   for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
 
+    string fieldName = fieldNames[ifield];
+
     // assemble vector of this field on the ray
 
-    RadxField *field = _rays[0]->getField(fieldNames[ifield]);
+    RadxField *field = _rays[0]->getField(fieldName);
 
     vector<const RadxField *> rayFields;
     for (size_t iray = 0; iray < _rays.size(); iray++) {
-      RadxField *rayField = _rays[iray]->getField(fieldNames[ifield]);
+      RadxField *rayField = _rays[iray]->getField(fieldName);
       if (rayField != NULL) {
         rayFields.push_back(rayField);
       }
@@ -5080,6 +5089,13 @@ RadxRay *RadxVol::computeFieldStats(RadxField::StatsMethod_t method,
     // compute the stats for this field
     // add field to ray
 
+    RadxField::StatsMethod_t method = globalMethod;
+    for (size_t jj = 0; jj < namedMethods.size(); jj++) {
+      if (namedMethods[jj].first == fieldName) {
+        method = namedMethods[jj].second;
+        break;
+      }
+    }
     RadxField *statsField = 
       field->computeStats(method, rayFields, maxFractionMissing);
     if (statsField != NULL) {
