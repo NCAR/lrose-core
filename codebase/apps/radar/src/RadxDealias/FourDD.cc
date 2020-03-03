@@ -1426,7 +1426,9 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	bool success = false;
         //float std_thresh;
 	float encodedWinval = window(rvVolume, sweepIndex, startray, endray, 
-				     firstbin, lastbin, min_good, std_thresh, &success);
+				     firstbin, lastbin, min_good, 
+				     std_thresh, NyqVelocity,
+				     missingVal, &success);
 
 	if (_isMissing(encodedWinval, missingVal) && !success) { // Expand the window:  
 	  startray=currIndex-2 * proximity;
@@ -1438,7 +1440,9 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	  if (firstbin<0) firstbin=0;
 	  if (lastbin>numBins-1) lastbin=numBins-1;
 	  encodedWinval=window(rvVolume, sweepIndex, startray, endray, 
-			       firstbin, lastbin, min_good, std_thresh, &success);
+			       firstbin, lastbin, min_good,
+			       std_thresh, NyqVelocity, 
+			       missingVal, &success);
 	}
 
 	if (!_isMissing(encodedWinval, missingVal)) { // TODO: why not check for success?
@@ -1797,29 +1801,34 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
 //  DESCRIPTION:
 //      This routine averages the values in a range and azimuth window of a
 //      sweep and computes the standard deviation.
-//
+//      If the number of non-missing values >= min_good,
+//         Returns the average. 
+//         Returns success = true, if standard deviation is <= std_thresh * NyqVelocity
+//      otherwise,
+//         Returns missing value and success = true
 //  DEVELOPER:
 //	Curtis N. James    26 Jan 1999
-//
+//      Brenda Javornik    03 Mar 2020
 //
 //
 //
 float FourDD::window(Volume* rvVolume, int sweepIndex, int startray, 
 		     int endray, size_t firstbin, size_t lastbin,
-		     int min_good, float std_thresh, bool* success) {
+		     int min_good, float std_thresh, float NyqVelocity,
+		     float missingVal, bool* success) {
 
      int num, currIndex, rangeIndex, numRays;
-     float val, sum, sumsq, ave, NyqVelocity;
+     float val, sum, sumsq, ave; // , NyqVelocity;
      
      float encodedVal, retVal;
 
      *success=false;
-     NyqVelocity = rvVolume->sweep[sweepIndex]->ray[0]->
-	 h.nyq_vel;
+     //NyqVelocity = rvVolume->sweep[sweepIndex]->ray[0]->
+     //	 h.nyq_vel;
      numRays = rvVolume->sweep[sweepIndex]->h.nrays;
      // TODO: here! numBins depends on which ray we are accessing
      //int numBins = rvVolume->sweep[sweepIndex]->ray[0]->h.nbins;
-     float missingVal = getMissingValue(rvVolume);
+     // float missingVal = getMissingValue(rvVolume);
 
      // Now, sum the data in the window region between startray, 
      //  endray, firstbin, lastbin.  

@@ -115,7 +115,7 @@ public:
 
   float window(Volume* rvVolume, int sweepIndex, int startray, int endray,
                size_t firstbin, size_t lastbin, int min_good, float std_thresh,
-               bool* success);
+               float NyqVelocity, float missingVal, bool* success);
 
   void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
 		   float velocityMissingValue, float dbzMissingValue,
