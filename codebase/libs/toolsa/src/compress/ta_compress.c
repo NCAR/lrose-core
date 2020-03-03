@@ -35,7 +35,6 @@
 #include <toolsa/compress.h>
 #include <toolsa/umisc.h>
 #include <dataport/bigend.h>
-#include <limits.h>
 
 /**********************************************************************
  * ta_is_compressed() - tests whether buffer is compressed using toolsa
@@ -48,13 +47,9 @@
  **********************************************************************/
 
 int ta_is_compressed(const void *compressed_buffer,
-                     si64 compressed_len)
+                     int compressed_len)
      
 {
-
-  if (ta_is_compressed_64(compressed_buffer, compressed_len)) {
-    return TRUE;
-  }
 
   if (compressed_len < sizeof(compress_buf_hdr_t)) {
     return FALSE;
@@ -127,81 +122,6 @@ int ta_is_compressed(const void *compressed_buffer,
 }
 
 /**********************************************************************
- * ta_is_compressed_64() - tests whether buffer is compressed
- * using toolsa, compression, with 64-bit headers
- *
- * Returns TRUE or FALSE
- *
- **********************************************************************/
-
-int ta_is_compressed_64(const void *compressed_buffer,
-                        si64 compressed_len)
-     
-{
-
-  /* buffers with 64-bit compression will start with the
-   * compress_buf_hdr_64_t struct:
-   * 
-   * ui32 flag_64; (0x64646464U)
-   * ui32 magic_cookie;
-   * ui64 nbytes_uncompressed;
-   * ui64 nbytes_compressed;
-   * ui64 nbytes_coded;
-   * ui64 spare[2];
-   */
-
-  if (compressed_len < sizeof(compress_buf_hdr_64_t)) {
-    return FALSE;
-  }
-  
-  /*
-   * check the 64-bit flag
-   */
-
-  ui32 flag_64;
-  memcpy(&flag_64, compressed_buffer, sizeof(ui32));
-  BE_to_array_32(&flag_64, sizeof(ui32));
-  if (flag_64 != TA_COMPRESS_FLAG_64) {
-    return FALSE;
-  }
-
-  /*
-   * check the magic cookie
-   */
-  
-  ui32 magic_cookie;
-  memcpy(&magic_cookie,
-         (char *) compressed_buffer + sizeof(ui32),
-         sizeof(ui32));
-  BE_to_array_32(&magic_cookie, sizeof(ui32));
-
-  /*
-   * Note that we also test for several NOT_COMPRESSED
-   * cases, which may seem a little odd, but what we're
-   * really testing for is if this is a compression header, and
-   * if the magic cookie is one of these NOT_COMPRESSED cases, then
-   * it is (otherwise we won't strip the header off on decompress).
-   */
-
-  if (magic_cookie != LZO_COMPRESSED &&
-      magic_cookie != BZIP_COMPRESSED &&
-      magic_cookie != GZIP_COMPRESSED &&
-      magic_cookie != LZO_NOT_COMPRESSED &&
-      magic_cookie != BZIP_NOT_COMPRESSED &&
-      magic_cookie != GZIP_NOT_COMPRESSED &&
-      magic_cookie != RLE_COMPRESSED &&
-      magic_cookie != _RLE_COMPRESSED &&
-      magic_cookie != __RLE_COMPRESSED &&
-      magic_cookie != ZLIB_COMPRESSED &&
-      magic_cookie != ZLIB_NOT_COMPRESSED) {
-    return FALSE;
-  }
-
-  return TRUE;
-
-}
-
-/**********************************************************************
  * ta_compression_method() - returns type of ta compression
  *
  * Use after calling ta_is_compressed() to get the compression type.
@@ -209,11 +129,11 @@ int ta_is_compressed_64(const void *compressed_buffer,
  **********************************************************************/
 
 ta_compression_method_t ta_compression_method(const void *compressed_buffer,
-                                              si64 compressed_len)
+                                              int compressed_len)
      
 {
 
-  if (!ta_is_compressed(compressed_buffer, compressed_len)) {
+  if (compressed_len < sizeof(compress_buf_hdr_t)) {
     return TA_COMPRESSION_NA;
   }
 
@@ -222,11 +142,7 @@ ta_compression_method_t ta_compression_method(const void *compressed_buffer,
    */
 
   ui32 magic_cookie;
-  if (ta_is_compressed_64(compressed_buffer, compressed_len)) {
-    memcpy(&magic_cookie, (char *) compressed_buffer + sizeof(ui32), sizeof(ui32));
-  } else {
-    memcpy(&magic_cookie, compressed_buffer, sizeof(ui32));
-  }
+  memcpy(&magic_cookie, compressed_buffer, sizeof(ui32));
   BE_to_array_32(&magic_cookie, sizeof(ui32));
   
   if (magic_cookie == TA_NOT_COMPRESSED) {
@@ -263,7 +179,6 @@ ta_compression_method_t ta_compression_method(const void *compressed_buffer,
 
 }
 
-#ifdef USE_DEPRECATED
 /**********************************************************************
  * ta_compressed() - tests whether buffer is compressed using toolsa
  *                   compression
@@ -316,7 +231,6 @@ int ta_compressed(const void *compressed_buffer)
   }
     
 }
-#endif
 
 /**********************************************************************
  * ta_compression_debug() - prints info to stderr about a buffer.
@@ -328,17 +242,11 @@ int ta_compressed(const void *compressed_buffer)
 extern void ta_compression_debug(const void *compressed_buffer){
 
   ui32 magic_cookie;
-  int is64bit = FALSE;
 
   memcpy(&magic_cookie, compressed_buffer, sizeof(ui32));
-  if (magic_cookie == TA_COMPRESS_FLAG_64) {
-    // 64-bit compression, magic cookie is second in header
-    is64bit = TRUE;
-    memcpy(&magic_cookie, (char *) compressed_buffer + sizeof(ui32), sizeof(ui32));
-  }
   BE_to_array_32(&magic_cookie, sizeof(ui32));
 
-  switch (magic_cookie) {
+  switch ( magic_cookie) {
 
   case LZO_COMPRESSED :
     fprintf(stderr, "Compression type : LZO_COMPRESSED\n");
@@ -433,36 +341,8 @@ extern void ta_compression_debug(const void *compressed_buffer){
     fprintf(stderr,"nbytes uncompressed : %d\n", nbytes_uncompressed);
     fprintf(stderr,"nbytes compressed : %d\n", nbytes_compressed);
     
-  } else if (is64bit) {
-
-    // 64-bit headers
-
-    ui64 nbytes_uncompressed;
-    ui64 nbytes_compressed;
-    ui64 nbytes_coded;
-    memcpy(&nbytes_uncompressed, 
-	   (unsigned char *) compressed_buffer + sizeof(ui64),
-	   sizeof(ui64));
-    BE_to_array_64(&nbytes_uncompressed, sizeof(ui64));
-
-    memcpy(&nbytes_compressed, 
-	   (unsigned char *) compressed_buffer + 2*sizeof(ui64),
-	   sizeof(ui64));
-    BE_to_array_64(&nbytes_compressed, sizeof(ui64));
-
-    memcpy(&nbytes_coded, 
-	   (unsigned char *) compressed_buffer + 3*sizeof(ui64),
-	   sizeof(ui64));
-    BE_to_array_64(&nbytes_coded, sizeof(ui64));
-
-    fprintf(stderr,"nbytes uncompressed : %ld\n", nbytes_uncompressed);
-    fprintf(stderr,"nbytes compressed : %ld\n", nbytes_compressed);
-    fprintf(stderr,"nbytes coded : %ld\n", nbytes_coded);
-
   } else {
-
-    // 32-bit headers
-
+    
     ui32 nbytes_uncompressed;
     ui32 nbytes_compressed;
     ui32 nbytes_coded;
@@ -528,86 +408,56 @@ int ta_gzip_buffer(const void *compressed_buffer)
 
 void *ta_compress(ta_compression_method_t method,
 		  const void *uncompressed_buffer,
-		  ui64 nbytes_uncompressed,
-		  ui64 *nbytes_compressed_p)
+		  unsigned int nbytes_uncompressed,
+		  unsigned int *nbytes_compressed_p)
 
 {
 
-  // check whether we need to use 64-bit headers
-  
-  int use64bit = FALSE;
-  if (nbytes_uncompressed > INT_MAX) {
-    use64bit = TRUE;
-  }
+  switch (method) {
 
-  // only use bzip and gzip, deprecate the rest
-
-  if (use64bit) {
+  case TA_COMPRESSION_NONE:
+    return (_ta_no_compress(TA_NOT_COMPRESSED,
+			    uncompressed_buffer,
+			    nbytes_uncompressed,
+			    nbytes_compressed_p));
+    break;
     
-    // for 64-bit, only use bzip and gzip
+  case TA_COMPRESSION_RLE:
+    // uze gzip
+    return (zlib_compress(uncompressed_buffer,
+                          nbytes_uncompressed, nbytes_compressed_p));
+    break;
     
-    if (method == TA_COMPRESSION_NONE) {
-      return ta_no_compress(TA_NOT_COMPRESSED,
-                            uncompressed_buffer,
-                            nbytes_uncompressed,
-                            nbytes_compressed_p);
-    } else if (method == TA_COMPRESSION_BZIP) {
-      return bzip_compress(uncompressed_buffer,
-                           nbytes_uncompressed, nbytes_compressed_p);
-    } else {
-      return gzip_compress(uncompressed_buffer,
-                           nbytes_uncompressed, nbytes_compressed_p);
-    }
-
-  } else {
-
-    switch (method) {
-      
-      case TA_COMPRESSION_NONE:
-        return (ta_no_compress(TA_NOT_COMPRESSED,
-                               uncompressed_buffer,
-                               nbytes_uncompressed,
-                               nbytes_compressed_p));
-        break;
-        
-      case TA_COMPRESSION_RLE:
-        // uze gzip
-        return (zlib_compress(uncompressed_buffer,
-                              nbytes_uncompressed, nbytes_compressed_p));
-        break;
-        
 #ifndef EXCLUDE_LZO
-      case TA_COMPRESSION_LZO:
-        // uze gzip
-        return (zlib_compress(uncompressed_buffer,
-                              nbytes_uncompressed, nbytes_compressed_p));
-        break;
+  case TA_COMPRESSION_LZO:
+    // uze gzip
+    return (zlib_compress(uncompressed_buffer,
+			 nbytes_uncompressed, nbytes_compressed_p));
+    break;
 #endif
-        
-      case TA_COMPRESSION_ZLIB:
-        // uze gzip
-        return (zlib_compress(uncompressed_buffer,
-                              nbytes_uncompressed, nbytes_compressed_p));
-        break;
-        
-      case TA_COMPRESSION_BZIP:
-        return (bzip_compress(uncompressed_buffer,
-                              nbytes_uncompressed, nbytes_compressed_p));
-        break;
-        
-      case TA_COMPRESSION_GZIP:
-        return (gzip_compress(uncompressed_buffer,
-                              nbytes_uncompressed, nbytes_compressed_p));
-        break;
-        
-      default:
-        fprintf(stderr, "ERROR - ta_compress\n");
-        fprintf(stderr, "  Unsupported compression method: %d\n", method);
-        return NULL;
 
-    } // switch
+  case TA_COMPRESSION_ZLIB:
+    // uze gzip
+    return (zlib_compress(uncompressed_buffer,
+			  nbytes_uncompressed, nbytes_compressed_p));
+    break;
+    
+  case TA_COMPRESSION_BZIP:
+    return (bzip_compress(uncompressed_buffer,
+			  nbytes_uncompressed, nbytes_compressed_p));
+    break;
+    
+  case TA_COMPRESSION_GZIP:
+    return (gzip_compress(uncompressed_buffer,
+			  nbytes_uncompressed, nbytes_compressed_p));
+    break;
 
-  } // if (use64bit)
+  default:
+    fprintf(stderr, "ERROR - ta_compress\n");
+    fprintf(stderr, "  Unsupported compression method: %d\n", method);
+    return NULL;
+
+  }
 
 }
 
@@ -630,7 +480,7 @@ void *ta_compress(ta_compression_method_t method,
  **********************************************************************/
 
 void *ta_decompress(const void *compressed_buffer,
-		    ui64 *nbytes_uncompressed_p)
+		    unsigned int *nbytes_uncompressed_p)
      
 {
 
@@ -716,7 +566,7 @@ void ta_compress_free(void *buffer)
 
 
 /*****************************************************
- * ta_no_compress()
+ * _ta_no_compress()
  *
  * Load up compressed_buffer with uncompressed data
  *
@@ -725,119 +575,45 @@ void ta_compress_free(void *buffer)
  * private routine for use only by other compression routines.
  */
 
-void *ta_no_compress(ui32 magic_cookie,
-                     const void *uncompressed_buffer,
-                     ui64 nbytes_uncompressed,
-                     ui64 *nbytes_compressed_p)
+void *_ta_no_compress(unsigned int magic_cookie,
+		      const void *uncompressed_buffer,
+		      unsigned int nbytes_uncompressed,
+		      unsigned int *nbytes_compressed_p)
      
 {
+ 
+  unsigned int nbytes_buffer =
+    nbytes_uncompressed + sizeof(compress_buf_hdr_t);
+  void *out_buffer = umalloc_min_1(nbytes_buffer);
+  compress_buf_hdr_t *hdr = (compress_buf_hdr_t *) out_buffer;
   
-  int is64bit = FALSE;
-  void *out_buffer = NULL;
-
-  if (nbytes_uncompressed > INT_MAX) {
-    is64bit = TRUE;
+  /*
+   * load header and swap
+   */
+  
+  MEM_zero(*hdr);
+  hdr->magic_cookie = magic_cookie;
+  hdr->nbytes_uncompressed = nbytes_uncompressed;
+  hdr->nbytes_compressed = nbytes_buffer;
+  hdr->nbytes_coded = nbytes_uncompressed;
+  BE_from_array_32(hdr, sizeof(compress_buf_hdr_t));
+  
+  if (nbytes_compressed_p != NULL) {
+    *nbytes_compressed_p = nbytes_buffer;
   }
   
-  if (is64bit) {
-
-    ui64 nbytes_buffer =
-      nbytes_uncompressed + sizeof(compress_buf_hdr_64_t);
-    out_buffer = umalloc_min_1(nbytes_buffer);
-    compress_buf_hdr_64_t *hdr = (compress_buf_hdr_64_t *) out_buffer;
-    
-    /*
-     * load header and swap
-     */
-    
-    MEM_zero(*hdr);
-    hdr->flag_64 = TA_COMPRESS_FLAG_64;
-    hdr->magic_cookie = magic_cookie;
-    hdr->nbytes_uncompressed = nbytes_uncompressed;
-    hdr->nbytes_compressed = nbytes_buffer;
-    hdr->nbytes_coded = nbytes_uncompressed;
-
-    compress_buf_hdr_64_to_BE(hdr);
-
-    if (nbytes_compressed_p != NULL) {
-      *nbytes_compressed_p = nbytes_buffer;
-    }
-    
-    /*
-     * load buffer
-     */
-    
-    memcpy((char *) out_buffer + sizeof(compress_buf_hdr_64_t),
-           uncompressed_buffer, nbytes_uncompressed);
-    
-  } else {
-
-    ui32 nbytes_buffer =
-      nbytes_uncompressed + sizeof(compress_buf_hdr_t);
-    out_buffer = umalloc_min_1(nbytes_buffer);
-    compress_buf_hdr_t *hdr = (compress_buf_hdr_t *) out_buffer;
-    
-    /*
-     * load header and swap
-     */
-    
-    MEM_zero(*hdr);
-    hdr->magic_cookie = magic_cookie;
-    hdr->nbytes_uncompressed = nbytes_uncompressed;
-    hdr->nbytes_compressed = nbytes_buffer;
-    hdr->nbytes_coded = nbytes_uncompressed;
-    compress_buf_hdr_to_BE(hdr);
-    
-    if (nbytes_compressed_p != NULL) {
-      *nbytes_compressed_p = nbytes_buffer;
-    }
-    
-    /*
-     * load buffer
-     */
-    
-    memcpy((char *) out_buffer + sizeof(compress_buf_hdr_t),
-           uncompressed_buffer, nbytes_uncompressed);
-
-  }
+  /*
+   * load buffer
+   */
+  
+  memcpy((char *) out_buffer + sizeof(compress_buf_hdr_t),
+	 uncompressed_buffer, nbytes_uncompressed);
+  
+  /*
+   * swap header
+   */
   
   return (out_buffer);
 
-}
-
-/*****************************************************
- * Convert header buffer to/from BigEndian.
- * 64-bit.
- */
-
-void compress_buf_hdr_64_to_BE(compress_buf_hdr_64_t *hdr)
-     
-{
-  BE_from_array_32(hdr, 2 * sizeof(ui32));
-  BE_from_array_64(&hdr->nbytes_uncompressed, 5 * sizeof(ui64));
-}
-
-void compress_buf_hdr_64_from_BE(compress_buf_hdr_64_t *hdr)
-     
-{
-  BE_to_array_32(hdr, 2 * sizeof(ui32));
-  BE_to_array_64(&hdr->nbytes_uncompressed, 5 * sizeof(ui64));
-}
-
-/*****************************************************
- * Convert header buffer to/from BigEndian.
- * 32-bit.
- */
-
-void compress_buf_hdr_to_BE(compress_buf_hdr_t *hdr)
-     
-{
-  BE_from_array_32(hdr, sizeof(compress_buf_hdr_t));
-}
-
-void compress_buf_hdr_from_BE(compress_buf_hdr_t *hdr)
-     
-{
-  BE_to_array_32(hdr, sizeof(compress_buf_hdr_t));
 }
 

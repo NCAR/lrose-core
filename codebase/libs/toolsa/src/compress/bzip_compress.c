@@ -70,18 +70,18 @@
  **********************************************************************/
 
 void *bzip_compress(const void *uncompressed_buffer,
-		    ui64 nbytes_uncompressed,
-		    ui64 *nbytes_compressed_p)
+		    unsigned int nbytes_uncompressed,
+		    unsigned int *nbytes_compressed_p)
      
 {
 
   int iret;
-  ui64 nbytes_buffer;
+  unsigned int nbytes_buffer;
   char *compressed_buffer;
   char *truncated_buffer;
-  ui64 nbytes_alloc;
+  unsigned int nbytes_alloc;
   compress_buf_hdr_t *hdr;
-  ui64 out_len;
+  unsigned int out_len;
  
   /*
    * initial allocation of encoded buffer, the size of the original buffer
@@ -122,10 +122,10 @@ void *bzip_compress(const void *uncompressed_buffer,
      */
 
     ufree(compressed_buffer);
-    return (ta_no_compress(BZIP_NOT_COMPRESSED,
-                           uncompressed_buffer,
-                           nbytes_uncompressed,
-                           nbytes_compressed_p));
+    return (_ta_no_compress(BZIP_NOT_COMPRESSED,
+			    uncompressed_buffer,
+			    nbytes_uncompressed,
+			    nbytes_compressed_p));
     
   }
   
@@ -182,7 +182,7 @@ void *bzip_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 void *bzip_decompress(const void *compressed_buffer,
-		      ui64 *nbytes_uncompressed_p)
+		      unsigned int *nbytes_uncompressed_p)
      
 {
 
@@ -190,7 +190,7 @@ void *bzip_decompress(const void *compressed_buffer,
   char *uncompressed_data;
   char *compressed_data;
   int iret;
-  ui64 out_len;
+  unsigned int out_len;
   compress_buf_hdr_t hdr;
 
   if (compressed_buffer == NULL) {

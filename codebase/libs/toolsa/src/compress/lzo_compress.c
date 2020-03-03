@@ -79,16 +79,16 @@ static HEAP_ALLOC(Wrkmem, LZO1X_1_MEM_COMPRESS);
  **********************************************************************/
 
 void *lzo_compress(const void *uncompressed_buffer,
-		   ui64 nbytes_uncompressed,
-		   ui64 *nbytes_compressed_p)
+		   unsigned int nbytes_uncompressed,
+		   unsigned int *nbytes_compressed_p)
      
 {
 
   int iret;
-  ui64 nbytes_buffer;
+  unsigned int nbytes_buffer;
   unsigned char *compressed_buffer;
   unsigned char *truncated_buffer;
-  ui64 nbytes_alloc;
+  unsigned int nbytes_alloc;
   compress_buf_hdr_t *hdr;
   lzo_uint out_len;
  
@@ -117,10 +117,10 @@ void *lzo_compress(const void *uncompressed_buffer,
 #endif
 
     ufree(compressed_buffer);
-    return(ta_no_compress(LZO_NOT_COMPRESSED,
-                          uncompressed_buffer,
-                          nbytes_uncompressed,
-                          nbytes_compressed_p));
+    return(_ta_no_compress(LZO_NOT_COMPRESSED,
+			   uncompressed_buffer,
+			   nbytes_uncompressed,
+			   nbytes_compressed_p));
     
   }
 
@@ -152,10 +152,10 @@ void *lzo_compress(const void *uncompressed_buffer,
      */
     
     ufree(compressed_buffer);
-    return(ta_no_compress(LZO_NOT_COMPRESSED,
-                          uncompressed_buffer,
-                          nbytes_uncompressed,
-                          nbytes_compressed_p));
+    return(_ta_no_compress(LZO_NOT_COMPRESSED,
+			   uncompressed_buffer,
+			   nbytes_uncompressed,
+			   nbytes_compressed_p));
     
   }
 
@@ -212,7 +212,7 @@ void *lzo_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 void *lzo_decompress(const void *compressed_buffer,
-		     ui64 *nbytes_uncompressed_p)
+		     unsigned int *nbytes_uncompressed_p)
      
 {
 
