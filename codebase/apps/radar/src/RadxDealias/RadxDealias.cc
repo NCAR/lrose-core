@@ -941,7 +941,7 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
 
       // copy the data ...
 
-      newRay->range = (Range *) malloc(sizeof(Range) * newRay->h.nbins);
+      newRay->range = new Range[newRay->h.nbins]; // (Range *) malloc(sizeof(Range) * newRay->h.nbins);
       newRay->h.binDataAllocated = true;
       memcpy(newRay->range, data, sizeof(Range) * newRay->h.nbins);
 

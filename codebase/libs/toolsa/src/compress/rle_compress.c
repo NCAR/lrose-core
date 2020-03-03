@@ -31,6 +31,7 @@
 #include <toolsa/mem.h>
 #include <toolsa/compress.h>
 #include <dataport/bigend.h>
+#include <limits.h>
 #include <memory.h>
 #include <netinet/in.h>
 
@@ -42,7 +43,7 @@
 #define FALSE 0
 #endif
 
-/* #define DEBUG_PRINT */
+#define DEBUG_PRINT
 
 /**********************************************************************
  * rle_compress()
@@ -71,13 +72,23 @@
  **********************************************************************/
 
 void *rle_compress(const void *uncompressed_buffer,
-		   unsigned int nbytes_uncompressed,
-		   unsigned int *nbytes_compressed_p)
+		   ui64 nbytes_uncompressed,
+		   ui64 *nbytes_compressed_p)
 
 {
 
   ui08 *compressed_buffer;
   ui32 nbytes_compressed;
+
+  if (nbytes_uncompressed > INT_MAX) {
+    fprintf(stderr, "WARNING - rle_compress\n");
+    fprintf(stderr, "  RLE compression does not support buf len > INT_MAX\n");
+    fprintf(stderr, "  nbytes_uncompressed_size: %ld\n", nbytes_uncompressed);
+    *nbytes_compressed_p = nbytes_uncompressed;
+    compressed_buffer = umalloc(nbytes_uncompressed);
+    memcpy(compressed_buffer, uncompressed_buffer, nbytes_uncompressed);
+    return compressed_buffer;
+  }
 
   compressed_buffer = uRLEncode8(uncompressed_buffer,
 				 nbytes_uncompressed,
@@ -90,7 +101,8 @@ void *rle_compress(const void *uncompressed_buffer,
 #ifdef DEBUG_PRINT
   fprintf(stderr, "RLE compress successful\n");
   fprintf(stderr, "  compressed_size: %d\n", nbytes_compressed);
-  fprintf(stderr, "  uncompressed_size: %d\n", nbytes_uncompressed);
+
+  fprintf(stderr, "  uncompressed_size: %ld\n", nbytes_uncompressed);
 #endif
 
   return (compressed_buffer);
@@ -114,7 +126,7 @@ void *rle_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 void *rle_decompress(const void *compressed_buffer,
-		     unsigned int *nbytes_uncompressed_p)
+		     ui64 *nbytes_uncompressed_p)
 
 {
 

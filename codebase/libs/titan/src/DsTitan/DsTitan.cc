@@ -185,7 +185,7 @@ int DsTitan::_communicate(DsURL &url,
   // disassemble the reply, checking for compression
   
   int iret = 0;
-  if (client.getReplyLen() >= 4 && ta_compressed(client.getReplyBuf())) {
+  if (ta_is_compressed(client.getReplyBuf(), client.getReplyLen())) {
     unsigned int bufLen;
     void *bufPtr = ta_decompress(client.getReplyBuf(), &bufLen);
     iret = msg.disassemble(bufPtr, bufLen, *this);

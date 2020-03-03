@@ -114,7 +114,7 @@ public:
                     unsigned short* success);
 
   float window(Volume* rvVolume, int sweepIndex, int startray, int endray,
-               size_t firstbin, size_t lastbin, float std_thresh,
+               size_t firstbin, size_t lastbin, int min_good, float std_thresh,
                bool* success);
 
   void prepVolume (Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
@@ -168,7 +168,7 @@ public:
 
   void UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
 					      Volume *original, Volume *rvVolume,
-					      int sweepIndex, int del_num_bins,
+					      size_t sweepIndex, int del_num_bins,
                                               float NyqVelocity, float pfraction,
                                               int max_count); 
   // , float missingVal);
@@ -176,6 +176,7 @@ public:
   void UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume *rvVolume, Volume *original,
                                                      int sweepIndex, int del_num_bins,
                                                      float pfraction, int proximity,
+						     int min_good,
                                                      float std_thresh, float NyqVelocity,
                                                      bool soundVolumeNull, bool lastVolumeNull);
 

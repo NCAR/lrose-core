@@ -95,16 +95,16 @@ static uLong _getLong(uLong pos,
  **********************************************************************/
 
 void *gzip_compress(const void *uncompressed_buffer,
-		    unsigned int nbytes_uncompressed,
-		    unsigned int *nbytes_compressed_p)
+		    ui64 nbytes_uncompressed,
+		    ui64 *nbytes_compressed_p)
      
 {
   
   int iret = 0;
   int gzHdrLen;
 
-  unsigned int nbytes_alloc;
-  unsigned int nbytes_used;
+  ui64 nbytes_alloc;
+  ui64 nbytes_used;
   uLongf datacmplen, totcmplen;
 
   unsigned char *working_buffer;
@@ -176,10 +176,10 @@ void *gzip_compress(const void *uncompressed_buffer,
      * compression failed
      */
     ufree(working_buffer);
-    return (_ta_no_compress(GZIP_NOT_COMPRESSED,
-			    uncompressed_buffer,
-			    nbytes_uncompressed,
-			    nbytes_compressed_p));
+    return (ta_no_compress(GZIP_NOT_COMPRESSED,
+                           uncompressed_buffer,
+                           nbytes_uncompressed,
+                           nbytes_compressed_p));
   }
   
   /*
@@ -203,10 +203,10 @@ void *gzip_compress(const void *uncompressed_buffer,
      * compression failed or data not compressible
      */
     ufree(working_buffer);
-    return (_ta_no_compress(GZIP_NOT_COMPRESSED,
-			    uncompressed_buffer,
-			    nbytes_uncompressed,
-			    nbytes_compressed_p));
+    return (ta_no_compress(GZIP_NOT_COMPRESSED,
+                           uncompressed_buffer,
+                           nbytes_uncompressed,
+                           nbytes_compressed_p));
   }
   
   /*
@@ -258,7 +258,7 @@ void *gzip_compress(const void *uncompressed_buffer,
  **********************************************************************/
 
 void *gzip_decompress(const void *compressed_buffer,
-		      unsigned int *nbytes_uncompressed_p)
+		      ui64 *nbytes_uncompressed_p)
      
 {
 
@@ -417,8 +417,8 @@ void *gzip_decompress(const void *compressed_buffer,
  **********************************************************************/
 
 void *gunzip_known_len(const void *compressed_buffer,
-                       unsigned int nbytes_compressed,
-                       unsigned int nbytes_uncompressed)
+                       ui64 nbytes_compressed,
+                       ui64 nbytes_uncompressed)
      
 {
 
