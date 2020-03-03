@@ -531,17 +531,20 @@ void FourDD::prepVolume(Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
     // missing values may differ for DBZ and velocity
     // float dbzMissingValue = getMissingValue(DBZVolume);
     // float velocityMissingValue = getMissingValue(rvVolume);
-    if (del_num_bins > 0) {
+    if (0) { /// del_num_bins > 0) {
       for (currIndex=0;currIndex<numRays;currIndex++) {
 	numBins = rvVolume->sweep[sweepIndex]->ray[currIndex]->h.nbins; // <---- NOT all rays have the same number of bins!
 	size_t last_bin = del_num_bins;
 	if (del_num_bins > numBins) {
 	  last_bin = numBins;
 	}
+        printf("last_bin = %d\n", last_bin);
 	for (i = 0; i < last_bin; i++) {	     
 	  rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = velocityMissingValue;
 	  DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = dbzMissingValue;
 	}
+        printf("after zeroing ray %d ...\n", currIndex);
+	Rsl::print_volume(rvVolume);
       }
     }
     // if  dbz_rm_rv is true ...	 
@@ -551,26 +554,28 @@ void FourDD::prepVolume(Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
     //    limit = numBins;
     for (currIndex=0; currIndex<numRays; currIndex++) {
 	numBins = rvVolume->sweep[sweepIndex]->ray[currIndex]->h.nbins; // <---- NOT all rays have the same number of bins!
-	size_t last_bin = del_num_bins;
-	if (del_num_bins > numBins) {
-	  last_bin = numBins;
-	}
+	//size_t last_bin = del_num_bins;
+	//if (del_num_bins > numBins) {
+	//  last_bin = numBins;
+	//}
 
-	for (i=del_num_bins; i < last_bin; i++) {
-          float dbzValue = DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[i]; 
-
-	  if ((dbz_rm_rv) && _isMissing(dbzValue, dbzMissingValue)) {
-            rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = velocityMissingValue;
-          } else {
-	    if ((dbzValue < low_dbz) || (dbzValue > high_dbz)) {
+	for (i=0; i < numBins; i++) {
+          if (i < del_num_bins) {
+	    rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = velocityMissingValue;
+	    DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = dbzMissingValue;
+	  } else {
+	    float dbzValue = DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[i]; 
+	    if ((dbz_rm_rv) && _isMissing(dbzValue, dbzMissingValue)) {
 	      rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = velocityMissingValue;
+	    } else {
+	      if ((dbzValue < low_dbz) || (dbzValue > high_dbz)) {
+		rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = velocityMissingValue;
+	      }
 	    }
 	  }
 	} //end for i=del_num_bins
     } // end for each ray (currIndex=0) ...
-
   } //for each sweep
-
 }
 
 
@@ -1381,6 +1386,7 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
 void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume *rvVolume, Volume *original,
                                                            int sweepIndex, int del_num_bins,
 							   float pfraction, int proximity,
+							   int min_good,
                                                            float std_thresh, float NyqVelocity,
                                                            bool soundVolumeNull, bool lastVolumeNull) {
 
@@ -1418,7 +1424,7 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	bool success = false;
         //float std_thresh;
 	float encodedWinval = window(rvVolume, sweepIndex, startray, endray, 
-				     firstbin, lastbin, std_thresh, &success);
+				     firstbin, lastbin, min_good, std_thresh, &success);
 
 	if (_isMissing(encodedWinval, missingVal) && !success) { // Expand the window:  
 	  startray=currIndex-2 * proximity;
@@ -1430,7 +1436,7 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	  if (firstbin<0) firstbin=0;
 	  if (lastbin>numBins-1) lastbin=numBins-1;
 	  encodedWinval=window(rvVolume, sweepIndex, startray, endray, 
-			       firstbin, lastbin, std_thresh, &success);
+			       firstbin, lastbin, min_good, std_thresh, &success);
 	}
 
 	if (!_isMissing(encodedWinval, missingVal)) { // TODO: why not check for success?
@@ -1747,7 +1753,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
       printf("Unfold Using Window ...\n");
       UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(STATE, rvVolume, original,
                                                     sweepIndex, del_num_bins,
-                                                    pfraction, _proximity, _std_thresh,
+                                                    pfraction, _proximity, _min_good, _std_thresh,
                                                     NyqVelocity,
                                                     soundVolume==NULL, lastVolume==NULL);
 	 
@@ -1798,8 +1804,8 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
 //
 //
 float FourDD::window(Volume* rvVolume, int sweepIndex, int startray, 
-	int endray, size_t firstbin, size_t lastbin,
-                     float _std_thresh, bool* success) {
+		     int endray, size_t firstbin, size_t lastbin,
+		     int min_good, float std_thresh, bool* success) {
 
      int num, currIndex, rangeIndex, numRays;
      float val, sum, sumsq, ave, NyqVelocity;
@@ -1878,12 +1884,12 @@ float FourDD::window(Volume* rvVolume, int sweepIndex, int startray,
 	 }
      }
 
-     if (num>=_min_good) {
+     if (num >= min_good) {
 	 ave=sum/num;
 	 retVal = ave;
 	 
 	 std=sqrt(fabs((sumsq-(sum*sum)/num)/(num-1)));
-	 if (std<=_std_thresh*NyqVelocity) 
+	 if (std <= std_thresh*NyqVelocity) 
 	   *success = true;
 	 // printf("ave=%0.2f, std=%0.2f, sum=%0.2f\n", ave, *std, sum);  
      } else {
