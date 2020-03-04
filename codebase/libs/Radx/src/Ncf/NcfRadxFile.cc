@@ -69,6 +69,8 @@ NcfRadxFile::NcfRadxFile() : RadxFile(), RadxNcfStr()
   _writeVol = NULL;
   _readVol = NULL;
 
+  _createRayVarNameSet();
+
   clear();
 
 }
@@ -588,3 +590,4 @@ Radx::fl32 NcfRadxFile::_checkMissingFloat(float val)
   return val;
 
 }
+

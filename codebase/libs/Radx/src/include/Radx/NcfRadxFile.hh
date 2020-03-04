@@ -40,6 +40,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include <Radx/Radx.hh>
 #include <Radx/RadxFile.hh>
@@ -551,7 +552,7 @@ private:
   vector<double> _geoRollRate;
   vector<double> _geoDriveAngle1;
   vector<double> _geoDriveAngle2;
-
+  
   // private methods for NcfRadial.cc
   
   int _writeSweepsToDir(const RadxVol &vol, const string &dir,
@@ -599,6 +600,7 @@ private:
   int _readCalibrationVariables();
   int _readCal(RadxRcalib &cal, int index);
   int _readFieldVariables(bool metaOnly);
+  int _readScalarVariables(bool metaOnly);
   
   int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals, bool required = true);
@@ -629,32 +631,48 @@ private:
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
+                          bool isScalar = false,
+                          bool isDiscrete = false,
+                          bool fieldFolds = false,
+                          float foldLimitLower = 0.0,
+                          float foldLimitUpper = 0.0);
   int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
+                          bool isScalar = false,
+                          bool isDiscrete = false,
+                          bool fieldFolds = false,
+                          float foldLimitLower = 0.0,
+                          float foldLimitUpper = 0.0);
   int _addSi32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
-                          double scale, double offset,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
+                          double scale,
+                          double offset,
+                          bool isScalar = false,
+                          bool isDiscrete = false,
+                          bool fieldFolds = false,
+                          float foldLimitLower = 0.0,
+                          float foldLimitUpper = 0.0);
   int _addSi16FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           double scale, double offset,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper,
+                          bool isScalar = false,
+                          bool isDiscrete = false,
+                          bool fieldFolds = false,
+                          float foldLimitLower = 0.0,
+                          float foldLimitUpper = 0.0,
 			  float samplingRatio = 1.0);
   int _addSi08FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           double scale, double offset,
-                          bool isDiscrete, bool fieldFolds,
-                          float foldLimitLower, float foldLimitUpper);
+                          bool isScalar = false,
+                          bool isDiscrete = false,
+                          bool fieldFolds = false,
+                          float foldLimitLower = 0.0,
+                          float foldLimitUpper = 0.0);
 
   void _loadReadVolume();
 

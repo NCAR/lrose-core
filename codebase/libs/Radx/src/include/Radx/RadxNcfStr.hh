@@ -42,6 +42,7 @@
 #define RadxNcfStr_HH
 
 #include <string>
+#include <set>
 using namespace std;
 
 class RadxNcfStr
@@ -57,8 +58,17 @@ public:
   /// Destructor
   
   virtual ~RadxNcfStr();
-  
+
+  // is this a ray variable name?
+
+  bool isRayVarName(const string &varName) const;
+
 protected:
+
+  // create set of ray variable names
+
+  void _createRayVarNameSet();
+  set<string> _rayVarNames;
 
   // string constants
   
@@ -378,6 +388,7 @@ protected:
   const char* SWEEP_START_RAY_INDEX;
   const char* SYSTEM_PHIDP;
   const char* TARGET_SCAN_RATE;
+  const char* TELESCOPE_ROLL_ANGLE_OFFSET;
   const char* TEST_POWER_H;
   const char* TEST_POWER_V;
   const char* THRESHOLDING_XML;

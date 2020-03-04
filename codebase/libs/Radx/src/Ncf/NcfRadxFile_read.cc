@@ -1629,10 +1629,10 @@ int NcfRadxFile::_readRayVariables()
   // read azimuth and elevation
   // for HSRL, look for telescope_roll_angle_offset variable
   
-  Nc3Var *rollAngleOffsetVar = _getRayVar("telescope_roll_angle_offset", false);
+  Nc3Var *rollAngleOffsetVar = _getRayVar(TELESCOPE_ROLL_ANGLE_OFFSET, false);
   if (rollAngleOffsetVar) {
     // is HSRL
-    if (_readRayVar(_elevationVar, "telescope_roll_angle_offset",
+    if (_readRayVar(_elevationVar, TELESCOPE_ROLL_ANGLE_OFFSET,
                     _rayElevations, true) == 0) {
       for (size_t ii = 0; ii < _rayElevations.size(); ii++) {
         _rayElevations[ii] *= -1.0;
@@ -2670,7 +2670,7 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
     switch (var->type()) {
       case nc3Double: {
         if (_addFl64FieldToRays(var, name, units, standardName, longName,
-                                isDiscrete, fieldFolds,
+                                false, isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
         }
@@ -2678,7 +2678,7 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
       }
       case nc3Float: {
         if (_addFl32FieldToRays(var, name, units, standardName, longName,
-                                isDiscrete, fieldFolds,
+                                false, isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
         }
@@ -2687,7 +2687,7 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
       case nc3Int: {
         if (_addSi32FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
-                                isDiscrete, fieldFolds,
+                                false, isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
         }
@@ -2696,7 +2696,7 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
       case nc3Short: {
         if (_addSi16FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
-                                isDiscrete, fieldFolds,
+                                false, isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper,
                                 samplingRatio)) {
           iret = -1;
@@ -2706,8 +2706,222 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
       case nc3Byte: {
         if (_addSi08FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
-                                isDiscrete, fieldFolds,
+                                false, isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
+          iret = -1;
+        }
+        break;
+      }
+      default: {
+        iret = -1;
+        // will not reach here because of earlier check on type
+      }
+
+    } // switch
+    
+    if (iret) {
+      _addErrStr("ERROR - NcfRadxFile::_readFieldVariables");
+      _addErrStr("  cannot read field name: ", name);
+      _addErrStr(_file.getNc3Error()->get_errmsg());
+      return -1;
+    }
+
+  } // ivar
+
+  return 0;
+
+}
+
+////////////////////////////////////////////
+// read the scalar variables
+
+int NcfRadxFile::_readScalarVariables(bool metaOnly)
+
+{
+
+  // loop through the variables, adding data scalars as appropriate
+  // these have time dimension
+  
+  for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
+    
+    Nc3Var* var = _file.getNc3File()->get_var(ivar);
+    if (var == NULL) {
+      continue;
+    }
+    
+    // check that we have the correct dimensions
+
+    int numDims = var->num_dims();
+    if (numDims != 1) {
+      continue;
+    }
+    
+    Nc3Dim* timeDim = var->get_dim(0);
+    if (timeDim != _timeDim) {
+      continue;
+    }
+
+    // check the type
+    Nc3Type ftype = var->type();
+    if (ftype != nc3Double && ftype != nc3Float && ftype != nc3Int &&
+        ftype != nc3Short && ftype != nc3Byte) {
+      // not a valid type
+      continue;
+    }
+
+    // check that this is a scalar rather than a ray variable
+    
+    string fieldName = var->name();
+    if (isRayVarName(fieldName)) {
+      // standard ray variable
+      continue;
+    }
+    
+    if (!isFieldRequiredOnRead(fieldName)) {
+      if (_verbose) {
+        cerr << "DEBUG - NcfRadxFile::_readFieldVariables" << endl;
+        cerr << "  -->> rejecting scalar: " << fieldName << endl;
+      }
+      continue;
+    }
+    
+    if (_verbose) {
+      cerr << "DEBUG - NcfRadxFile::_readScalarVariables" << endl;
+      cerr << "  -->> adding scalar field: " << fieldName << endl;
+    }
+
+    // set names, units, etc
+    
+    string name = var->name();
+
+    string standardName;
+    Nc3Att *standardNameAtt = var->get_att(STANDARD_NAME);
+    if (standardNameAtt != NULL) {
+      standardName = Nc3xFile::asString(standardNameAtt);
+      delete standardNameAtt;
+    } else {
+      // check also for 'proposed_standard_name'
+      standardNameAtt = var->get_att(PROPOSED_STANDARD_NAME);
+      if (standardNameAtt != NULL) {
+        standardName = Nc3xFile::asString(standardNameAtt);
+        delete standardNameAtt;
+      }
+    }
+    
+    string longName;
+    Nc3Att *longNameAtt = var->get_att(LONG_NAME);
+    if (longNameAtt != NULL) {
+      longName = Nc3xFile::asString(longNameAtt);
+      delete longNameAtt;
+    }
+
+    string units;
+    Nc3Att *unitsAtt = var->get_att(UNITS);
+    if (unitsAtt != NULL) {
+      units = Nc3xFile::asString(unitsAtt);
+      delete unitsAtt;
+    }
+
+    string fieldComment;
+    Nc3Att *commentAtt = var->get_att(COMMENT);
+    if (commentAtt != NULL) {
+      fieldComment = Nc3xFile::asString(commentAtt);
+      delete commentAtt;
+    }
+
+    // is this field discrete
+    
+    bool isDiscrete = false;
+    Nc3Att *isDiscreteAtt = var->get_att(IS_DISCRETE);
+    if (isDiscreteAtt != NULL) {
+      string isDiscreteStr = Nc3xFile::asString(isDiscreteAtt);
+      if (isDiscreteStr == "true"
+          || isDiscreteStr == "TRUE"
+          || isDiscreteStr == "True") {
+        isDiscrete = true;
+      }
+      delete isDiscreteAtt;
+    }
+    
+    // get offset and scale
+
+    double offset = 0.0;
+    Nc3Att *offsetAtt = var->get_att(ADD_OFFSET);
+    if (offsetAtt != NULL) {
+      offset = offsetAtt->as_double(0);
+      delete offsetAtt;
+    }
+
+    double scale = 1.0;
+    Nc3Att *scaleAtt = var->get_att(SCALE_FACTOR);
+    if (scaleAtt != NULL) {
+      scale = scaleAtt->as_double(0);
+      delete scaleAtt;
+    }
+    
+    // if metadata only, don't read in fields
+    
+    if (metaOnly) {
+      bool fieldAlreadyAdded = false;
+      for (size_t ii = 0; ii < _readVol->getNFields(); ii++) {
+        if (_readVol->getField(ii)->getName() == name) {
+          fieldAlreadyAdded = true;
+          break;
+        }
+      }
+      if (!fieldAlreadyAdded) {
+        RadxField *field = new RadxField(name, units);
+        field->setLongName(longName);
+        field->setStandardName(standardName);
+        field->setIsDiscrete(true);
+        if (isDiscrete) {
+          field->setIsDiscrete(true);
+        }
+        if (fieldComment.size() > 0) {
+          field->setComment(fieldComment);
+        }
+        _readVol->addField(field);
+      }
+      continue;
+    }
+
+    int iret = 0;
+    
+    switch (var->type()) {
+      case nc3Double: {
+        if (_addFl64FieldToRays(var, name, units, standardName, longName,
+                                true, isDiscrete)) {
+          iret = -1;
+        }
+        break;
+      }
+      case nc3Float: {
+        if (_addFl32FieldToRays(var, name, units, standardName, longName,
+                                true, isDiscrete)) {
+          iret = -1;
+        }
+        break;
+      }
+      case nc3Int: {
+        if (_addSi32FieldToRays(var, name, units, standardName, longName,
+                                scale, offset,
+                                true, isDiscrete)) {
+          iret = -1;
+        }
+        break;
+      }
+      case nc3Short: {
+        if (_addSi16FieldToRays(var, name, units, standardName, longName,
+                                scale, offset,
+                                true, isDiscrete)) {
+          iret = -1;
+        }
+        break;
+      }
+      case nc3Byte: {
+        if (_addSi08FieldToRays(var, name, units, standardName, longName,
+                                scale, offset,
+                                true, isDiscrete)) {
           iret = -1;
         }
         break;
@@ -3366,6 +3580,7 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                      const string &units,
                                      const string &standardName,
                                      const string &longName,
+                                     bool isScalar,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
@@ -3468,6 +3683,7 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                      const string &units,
                                      const string &standardName,
                                      const string &longName,
+                                     bool isScalar,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
@@ -3571,6 +3787,7 @@ int NcfRadxFile::_addSi32FieldToRays(Nc3Var* var,
                                      const string &standardName,
                                      const string &longName,
                                      double scale, double offset,
+                                     bool isScalar,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
@@ -3667,6 +3884,7 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
                                      const string &standardName,
                                      const string &longName,
                                      double scale, double offset,
+                                     bool isScalar,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
@@ -3765,6 +3983,7 @@ int NcfRadxFile::_addSi08FieldToRays(Nc3Var* var,
                                      const string &standardName,
                                      const string &longName,
                                      double scale, double offset,
+                                     bool isScalar,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
