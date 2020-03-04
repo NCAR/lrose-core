@@ -1411,7 +1411,7 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
     for (int currIndex=0;currIndex<numRays;currIndex++) { 
 
       if (STATE[i][currIndex]==TBD || STATE[i][currIndex]==UNSUCCESSFUL) {
-	float val = original->sweep[sweepIndex]->ray[currIndex]->range[i];
+	float originalValue = original->sweep[sweepIndex]->ray[currIndex]->range[i];
 
 	int startray = currIndex - proximity;
 	int endray = currIndex + proximity;
@@ -1424,13 +1424,14 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	if (lastbin>numBins-1) lastbin=numBins-1;
 
 	bool success = false;
-        //float std_thresh;
-	float encodedWinval = window(rvVolume, sweepIndex, startray, endray, 
+	float averageVelocity = window(rvVolume, sweepIndex, startray, endray, 
 				     firstbin, lastbin, min_good, 
 				     std_thresh, NyqVelocity,
 				     missingVal, &success);
 
-	if (_isMissing(encodedWinval, missingVal) && !success) { // Expand the window:  
+	// if the averageVelocity == missingVal, then expand the window
+	// NOTE:  Here, should probably be && success ==> too many missing values found
+	if (_isMissing(averageVelocity, missingVal) && success) {   
 	  startray=currIndex-2 * proximity;
 	  endray=currIndex+2 * proximity;
 	  firstbin=i-2 * proximity;
@@ -1439,15 +1440,15 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	  if (endray>numRays-1) endray=endray-numRays;
 	  if (firstbin<0) firstbin=0;
 	  if (lastbin>numBins-1) lastbin=numBins-1;
-	  encodedWinval=window(rvVolume, sweepIndex, startray, endray, 
+	  averageVelocity = window(rvVolume, sweepIndex, startray, endray, 
 			       firstbin, lastbin, min_good,
 			       std_thresh, NyqVelocity, 
 			       missingVal, &success);
 	}
 
-	if (!_isMissing(encodedWinval, missingVal)) { // TODO: why not check for success?
-	  float winval = encodedWinval;			
-          float unfoldedVal = Unfold(val, winval, _max_count, NyqVelocity);
+	if (!_isMissing(averageVelocity, missingVal)) {
+	  float winval = averageVelocity;			
+          float unfoldedVal = Unfold(originalValue, winval, _max_count, NyqVelocity);
           float diff = winval - unfoldedVal;
 
 	  if (diff<pfraction*NyqVelocity) {
@@ -1464,10 +1465,9 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	    STATE[i][currIndex]=MISSING;
 	  }
 	} //end  if (winval!=missingVal) 
-	else // winval == missingVal) 
-	  { 
-	    if (success) { // TODO: how can this be tested?  it's only set in the preceeding if stmt
-	      // Remove bin  
+	else {// winval == missingVal) 
+	    if (success) {
+	      // Remove bin; not enough good gates in the window
 	      STATE[i][currIndex]=MISSING;
 	    } else if (soundVolumeNull || lastVolumeNull) {
 	      if (STATE[i][currIndex]==TBD ) {
@@ -1838,6 +1838,7 @@ float FourDD::window(Volume* rvVolume, int sweepIndex, int startray,
      sum=0.0;
      sumsq=0.0;
        
+     // TODO: this is weird logic; not sure what to do here.
      // We don't know the numBins ahead of time since they can vary for each ray
      //     if (firstbin>=numBins || lastbin>=numBins || firstbin<0 || lastbin<0)
      if (firstbin<0 || lastbin<0)
@@ -1901,7 +1902,6 @@ float FourDD::window(Volume* rvVolume, int sweepIndex, int startray,
 	 std=sqrt(fabs((sumsq-(sum*sum)/num)/(num-1)));
 	 if (std <= std_thresh*NyqVelocity) 
 	   *success = true;
-	 // printf("ave=%0.2f, std=%0.2f, sum=%0.2f\n", ave, *std, sum);  
      } else {
 	 retVal = missingVal;
 	 std=0.0;
