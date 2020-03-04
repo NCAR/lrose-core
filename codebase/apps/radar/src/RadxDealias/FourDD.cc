@@ -1392,21 +1392,32 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
                                                            float std_thresh, float NyqVelocity,
                                                            bool soundVolumeNull, bool lastVolumeNull) {
 
+  
+  // TODO: Q: Are these checks made when validating params?
+  if (STATE == NULL)
+    throw std::invalid_argument("STATE is NULL");
+  if (rvVolume == NULL)
+    throw std::invalid_argument("rvVolume is NULL");
+  if (original == NULL)
+    throw std::invalid_argument("original volume is NULL");
+  if ((sweepIndex < 0) || (sweepIndex >= rvVolume->h.nsweeps) || (sweepIndex >= original->h.nsweeps))
+    throw std::invalid_argument("sweepIndex must be >= 0 and less than number of sweeps");
+  if (del_num_bins < 0)
+    throw std::invalid_argument("del_num_bins must be >= 0");
+  if (pfraction < 0)
+    throw std::invalid_argument("pfraction must be >= 0");
+  if (proximity < 0)
+    throw std::invalid_argument("proximity must be >= 0");
+  if (min_good < 0)
+    throw std::invalid_argument("min_good must be >= 0");
+  if (std_thresh < 0)
+    throw std::invalid_argument("std_thresh  must be >= 0");
+  
   size_t maxBinsForSweep = Rsl::getMaxBinsInSweep(original, sweepIndex);
 
-  //int numBins = getNumBins(rvVolume, sweepIndex);
   int numRays = getNumRays(rvVolume, sweepIndex);
   float missingVal = getMissingValue(rvVolume);
   
-  /*
-         NyqVelocity = rvVolume->sweep[sweepIndex]->ray[0]->
-           h.nyq_vel;
-         NyqInterval = 2.0 * NyqVelocity;
-         numRays = rvVolume->sweep[sweepIndex]->h.nrays;
-         numBins = rvVolume->sweep[sweepIndex]->ray[0]->h.nbins;
-  */
-
-
   for (size_t i=del_num_bins;i<maxBinsForSweep;i++) {
     for (int currIndex=0;currIndex<numRays;currIndex++) { 
 
@@ -1449,7 +1460,7 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	if (!_isMissing(averageVelocity, missingVal)) {
 	  float winval = averageVelocity;			
           float unfoldedVal = Unfold(originalValue, winval, _max_count, NyqVelocity);
-          float diff = winval - unfoldedVal;
+          float diff = fabs(winval - unfoldedVal);
 
 	  if (diff<pfraction*NyqVelocity) {
 	    // Return the value.  
@@ -1466,13 +1477,13 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	  }
 	} //end  if (winval!=missingVal) 
 	else {// winval == missingVal) 
-	    if (success) {
-	      // Remove bin; not enough good gates in the window
+	    if (!success) {
+	      // Remove bin; could not examine entire window
 	      STATE[i][currIndex]=MISSING;
 	    } else if (soundVolumeNull || lastVolumeNull) {
 	      if (STATE[i][currIndex]==TBD ) {
 		// Leave bin untouched.  
-		val = original->sweep[sweepIndex]->ray[currIndex]->range[i];				 
+		float val = original->sweep[sweepIndex]->ray[currIndex]->range[i];				 
 		rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = val;
 		STATE[i][currIndex]=MISSING; // Don't use to unfold other bins 
 	      } else {
@@ -1838,8 +1849,8 @@ float FourDD::window(Volume* rvVolume, int sweepIndex, int startray,
      sum=0.0;
      sumsq=0.0;
        
-     // TODO: this is weird logic; not sure what to do here.
      // We don't know the numBins ahead of time since they can vary for each ray
+     // just check the lower bound on the bin indexes
      //     if (firstbin>=numBins || lastbin>=numBins || firstbin<0 || lastbin<0)
      if (firstbin<0 || lastbin<0)
        return missingVal;
