@@ -384,7 +384,8 @@ int NcfRadxFile::writeToPath(const RadxVol &vol,
 
   // get the set of unique field name
 
-  _uniqueFieldNames = _writeVol->getUniqueFieldNameList();
+  _uniqueNormalFieldNames = _writeVol->getUniqueFieldNameList();
+  _uniqueScalarFieldNames = _writeVol->getUniqueScalarNameList();
 
   // check if georeferences and/or corrections are active
   // and count georef fields
@@ -472,8 +473,11 @@ int NcfRadxFile::writeToPath(const RadxVol &vol,
       return _closeOnError("_writeGeorefVariables");
     }
   }
-  if (_writeFieldVariables()) {
-    return _closeOnError("_writeFieldVariables");
+  if (_writeNormalFields()) {
+    return _closeOnError("_writeNormalFields");
+  }
+  if (_writeScalarFields()) {
+    return _closeOnError("_writeScalarFields");
   }
 
   // close output file
@@ -3343,21 +3347,21 @@ int NcfRadxFile::_writeFrequencyVariable()
 }
 
 ////////////////////////////////////////////////
-// write field variables
+// write normal fields
 
-int NcfRadxFile::_writeFieldVariables()
+int NcfRadxFile::_writeNormalFields()
 {
 
   if (_verbose) {
-    cerr << "NcfRadxFile::_writeFieldVariables()" << endl;
+    cerr << "NcfRadxFile::_writeNormalFields()" << endl;
   }
 
   // loop through the list of unique fields names in this volume
 
   int iret = 0;
-  for (size_t ifield = 0; ifield < _uniqueFieldNames.size(); ifield++) {
+  for (size_t ifield = 0; ifield < _uniqueNormalFieldNames.size(); ifield++) {
       
-    const string &name = _uniqueFieldNames[ifield];
+    const string &name = _uniqueNormalFieldNames[ifield];
 
     // make copy of the field
     
@@ -3379,7 +3383,7 @@ int NcfRadxFile::_writeFieldVariables()
         iret = -1;
       }
     } else {
-      _addErrStr("ERROR - NcfRadxFile::_writeFieldVariables");
+      _addErrStr("ERROR - NcfRadxFile::_writeNormalFields");
       _addErrStr("  Cannot create field: ", name);
       delete copy;
       return -1;
@@ -3393,7 +3397,66 @@ int NcfRadxFile::_writeFieldVariables()
   } // ifield
 
   if (iret) {
-    _addErrStr("ERROR - NcfRadxFile::_writeFieldVariables");
+    _addErrStr("ERROR - NcfRadxFile::_writeNormalFields");
+    return -1;
+  } else {
+    return 0;
+  }
+
+}
+
+////////////////////////////////////////////////
+// write scalar fields
+
+int NcfRadxFile::_writeScalarFields()
+{
+
+  if (_verbose) {
+    cerr << "NcfRadxFile::_writeScalarVariables()" << endl;
+  }
+
+  // loop through the list of unique scalars names in this volume
+
+  int iret = 0;
+  for (size_t iscalar = 0; iscalar < _uniqueScalarFieldNames.size(); iscalar++) {
+      
+    const string &name = _uniqueScalarFieldNames[iscalar];
+
+    // make copy of the scalar
+    
+    RadxField *copy = _writeVol->copyField(name);
+    if (copy == NULL) {
+      if (_debug) {
+        cerr << "  ... cannot find field: " << name
+             << " .... skipping" << endl;
+      }
+      continue;
+    }
+    
+    // write it out
+    
+    // create variable
+    Nc3Var *var = _createFieldVar(*copy);
+    if (var != NULL) {
+      if (_writeFieldVar(var, copy)) {
+        iret = -1;
+      }
+    } else {
+      _addErrStr("ERROR - NcfRadxFile::_writeNormalFields");
+      _addErrStr("  Cannot create field: ", name);
+      delete copy;
+      return -1;
+    }
+    // free up
+    delete copy;
+    if (_debug) {
+      cerr << "  ... writing field: " << name << endl;
+    }
+    
+  } // ifield
+
+  if (iret) {
+    _addErrStr("ERROR - NcfRadxFile::_writeNormalFields");
     return -1;
   } else {
     return 0;
@@ -3455,7 +3518,9 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
 
   Nc3Var *var = NULL;
 
-  if (_nGatesVary) {
+  if (field.getIsScalar()) {
+    var = _file.getNc3File()->add_var(fieldName.c_str(), ncType, _timeDim);
+  } else if (_nGatesVary) {
     var = _file.getNc3File()->add_var(fieldName.c_str(), ncType, _nPointsDim);
   } else {
     var = _file.getNc3File()->add_var(fieldName.c_str(), ncType, _timeDim, _rangeDim);
@@ -3588,8 +3653,34 @@ int NcfRadxFile::_writeFieldVar(Nc3Var *var, RadxField *field)
 
   int iret = 0;
   const void *data = field->getData();
-  
-  if (_nGatesVary) {
+
+  if (field->getIsScalar()) {
+
+    switch (var->type()) {
+      case nc3Double: {
+        iret = !var->put((double *) data, _writeVol->getNRays());
+        break;
+      }
+      case nc3Float:
+      default: {
+        iret = !var->put((float *) data, _writeVol->getNRays());
+        break;
+      }
+      case nc3Int: {
+        iret = !var->put((int *) data, _writeVol->getNRays());
+        break;
+      }
+      case nc3Short: {
+        iret = !var->put((short *) data, _writeVol->getNRays());
+        break;
+      }
+      case nc3Byte: {
+        iret = !var->put((ncbyte *) data, _writeVol->getNRays());
+        break;
+      }
+    } // switch
+
+  } else if (_nGatesVary) {
 
     switch (var->type()) {
       case nc3Double: {

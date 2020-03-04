@@ -403,7 +403,8 @@ private:
 
   // unique field names for writing
 
-  vector<string> _uniqueFieldNames;
+  vector<string> _uniqueNormalFieldNames;
+  vector<string> _uniqueScalarFieldNames;
 
   // objects to be set on read
 
@@ -599,9 +600,26 @@ private:
   int _readRayNgatesAndOffsets();
   int _readCalibrationVariables();
   int _readCal(RadxRcalib &cal, int index);
-  int _readFieldVariables(bool metaOnly);
-  int _readScalarVariables(bool metaOnly);
+
+  int _readNormalFields(bool metaOnly);
+  int _readScalarFields(bool metaOnly);
   
+  void _readFieldAttributes(Nc3Var *var,
+                            string &name,
+                            string &units,
+                            string &standardName,
+                            string &longName,
+                            string &commentStr,
+                            string &legendXml,
+                            string &thresholdingXml,
+                            double &samplingRatio,
+                            bool &isDiscrete,
+                            bool &fieldFolds,
+                            double &foldLimitLower,
+                            double &foldLimitUpper,
+                            double &offset,
+                            double &scale);
+
   int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals, bool required = true);
   int _readRayVar(Nc3Var* &var, const string &name, 
@@ -707,7 +725,9 @@ private:
   int _writeCalibVariables();
   int _writeFrequencyVariable();
 
-  int _writeFieldVariables();
+  int _writeNormalFields();
+  int _writeScalarFields();
+
   Nc3Var *_createFieldVar(const RadxField &field);
   int _writeFieldVar(Nc3Var *var, RadxField *field);
   int _closeOnError(const string &caller);

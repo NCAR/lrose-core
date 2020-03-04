@@ -267,7 +267,12 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
 
     // read field variables
     
-    if (_readFieldVariables(true)) {
+    if (_readNormalFields(true)) {
+      _addErrStr(errStr);
+      return -1;
+    }
+    
+    if (_readScalarFields(true)) {
       _addErrStr(errStr);
       return -1;
     }
@@ -298,7 +303,12 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
     
     // add field variables to file rays
     
-    if (_readFieldVariables(false)) {
+    if (_readNormalFields(false)) {
+      _addErrStr(errStr);
+      return -1;
+    }
+
+    if (_readScalarFields(false)) {
       _addErrStr(errStr);
       return -1;
     }
@@ -2443,7 +2453,7 @@ int NcfRadxFile::_readCal(RadxRcalib &cal, int index)
 ////////////////////////////////////////////
 // read the field variables
 
-int NcfRadxFile::_readFieldVariables(bool metaOnly)
+int NcfRadxFile::_readNormalFields(bool metaOnly)
 
 {
 
@@ -2494,142 +2504,39 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
     string fieldName = var->name();
     if (!isFieldRequiredOnRead(fieldName)) {
       if (_verbose) {
-        cerr << "DEBUG - NcfRadxFile::_readFieldVariables" << endl;
+        cerr << "DEBUG - NcfRadxFile::_readNormalFields" << endl;
         cerr << "  -->> rejecting field: " << fieldName << endl;
       }
       continue;
     }
     if (fieldName == "range") {
       if (_verbose) {
-        cerr << "DEBUG - NcfRadxFile::_readFieldVariables" << endl;
+        cerr << "DEBUG - NcfRadxFile::_readNormalFields" << endl;
         cerr << "  -->> ignoring dimension variable: " << fieldName << endl;
       }
       continue;
     }
 
     if (_verbose) {
-      cerr << "DEBUG - NcfRadxFile::_readFieldVariables" << endl;
+      cerr << "DEBUG - NcfRadxFile::_readNormalFields" << endl;
       cerr << "  -->> adding field: " << fieldName << endl;
     }
 
-    // set names, units, etc
+    // set attributes
     
-    string name = var->name();
-
-    string standardName;
-    Nc3Att *standardNameAtt = var->get_att(STANDARD_NAME);
-    if (standardNameAtt != NULL) {
-      standardName = Nc3xFile::asString(standardNameAtt);
-      delete standardNameAtt;
-    } else {
-      // check also for 'proposed_standard_name'
-      standardNameAtt = var->get_att(PROPOSED_STANDARD_NAME);
-      if (standardNameAtt != NULL) {
-        standardName = Nc3xFile::asString(standardNameAtt);
-        delete standardNameAtt;
-      }
-    }
+    string name, units, standardName, longName, commentStr, legendXml, thresholdingXml;
+    double samplingRatio, foldLimitLower, foldLimitUpper, offset, scale;
+    bool isDiscrete, fieldFolds;
+    _readFieldAttributes(var,
+                         name, units, 
+                         standardName, longName, 
+                         commentStr, legendXml, thresholdingXml,
+                         samplingRatio, isDiscrete,
+                         fieldFolds, foldLimitLower, foldLimitUpper,
+                         offset, scale);
     
-    string longName;
-    Nc3Att *longNameAtt = var->get_att(LONG_NAME);
-    if (longNameAtt != NULL) {
-      longName = Nc3xFile::asString(longNameAtt);
-      delete longNameAtt;
-    }
-
-    string units;
-    Nc3Att *unitsAtt = var->get_att(UNITS);
-    if (unitsAtt != NULL) {
-      units = Nc3xFile::asString(unitsAtt);
-      delete unitsAtt;
-    }
-
-    string fieldComment;
-    Nc3Att *commentAtt = var->get_att(COMMENT);
-    if (commentAtt != NULL) {
-      fieldComment = Nc3xFile::asString(commentAtt);
-      delete commentAtt;
-    }
-
-    string legendXml;
-    Nc3Att *legendXmlAtt = var->get_att(LEGEND_XML);
-    if (legendXmlAtt != NULL) {
-      legendXml = Nc3xFile::asString(legendXmlAtt);
-      delete legendXmlAtt;
-    }
-
-    string thresholdingXml;
-    Nc3Att *thresholdingXmlAtt = var->get_att(THRESHOLDING_XML);
-    if (thresholdingXmlAtt != NULL) {
-      thresholdingXml = Nc3xFile::asString(thresholdingXmlAtt);
-      delete thresholdingXmlAtt;
-    }
-
-    float samplingRatio = Radx::missingMetaFloat;
-    Nc3Att *samplingRatioAtt = var->get_att(SAMPLING_RATIO);
-    if (samplingRatioAtt != NULL) {
-      samplingRatio = samplingRatioAtt->as_float(0);
-      delete samplingRatioAtt;
-    }
-
-    // folding
-
-    bool fieldFolds = false;
-    float foldLimitLower = Radx::missingMetaFloat;
-    float foldLimitUpper = Radx::missingMetaFloat;
-    Nc3Att *fieldFoldsAtt = var->get_att(FIELD_FOLDS);
-    if (fieldFoldsAtt != NULL) {
-      string fieldFoldsStr = Nc3xFile::asString(fieldFoldsAtt);
-      if (fieldFoldsStr == "true"
-          || fieldFoldsStr == "TRUE"
-          || fieldFoldsStr == "True") {
-        fieldFolds = true;
-        Nc3Att *foldLimitLowerAtt = var->get_att(FOLD_LIMIT_LOWER);
-        if (foldLimitLowerAtt != NULL) {
-          foldLimitLower = foldLimitLowerAtt->as_float(0);
-          delete foldLimitLowerAtt;
-        }
-        Nc3Att *foldLimitUpperAtt = var->get_att(FOLD_LIMIT_UPPER);
-        if (foldLimitUpperAtt != NULL) {
-          foldLimitUpper = foldLimitUpperAtt->as_float(0);
-          delete foldLimitUpperAtt;
-        }
-      }
-      delete fieldFoldsAtt;
-    }
-
-    // is this field discrete
-
-    bool isDiscrete = false;
-    Nc3Att *isDiscreteAtt = var->get_att(IS_DISCRETE);
-    if (isDiscreteAtt != NULL) {
-      string isDiscreteStr = Nc3xFile::asString(isDiscreteAtt);
-      if (isDiscreteStr == "true"
-          || isDiscreteStr == "TRUE"
-          || isDiscreteStr == "True") {
-        isDiscrete = true;
-      }
-      delete isDiscreteAtt;
-    }
-
-    // get offset and scale
-
-    double offset = 0.0;
-    Nc3Att *offsetAtt = var->get_att(ADD_OFFSET);
-    if (offsetAtt != NULL) {
-      offset = offsetAtt->as_double(0);
-      delete offsetAtt;
-    }
-
-    double scale = 1.0;
-    Nc3Att *scaleAtt = var->get_att(SCALE_FACTOR);
-    if (scaleAtt != NULL) {
-      scale = scaleAtt->as_double(0);
-      delete scaleAtt;
-    }
-
     // if metadata only, don't read in fields
-
+    
     if (metaOnly) {
       bool fieldAlreadyAdded = false;
       for (size_t ii = 0; ii < _readVol->getNFields(); ii++) {
@@ -2643,6 +2550,7 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
         field->setLongName(longName);
         field->setStandardName(standardName);
         field->setSamplingRatio(samplingRatio);
+        field->setIsScalar(false);
         if (fieldFolds &&
             foldLimitLower != Radx::missingMetaFloat &&
             foldLimitUpper != Radx::missingMetaFloat) {
@@ -2657,8 +2565,8 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
         if (thresholdingXml.size() > 0) {
           field->setThresholdingXml(thresholdingXml);
         }
-        if (fieldComment.size() > 0) {
-          field->setComment(fieldComment);
+        if (commentStr.size() > 0) {
+          field->setComment(commentStr);
         }
         _readVol->addField(field);
       }
@@ -2720,7 +2628,7 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
     } // switch
     
     if (iret) {
-      _addErrStr("ERROR - NcfRadxFile::_readFieldVariables");
+      _addErrStr("ERROR - NcfRadxFile::_readNormalFields");
       _addErrStr("  cannot read field name: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
@@ -2733,9 +2641,9 @@ int NcfRadxFile::_readFieldVariables(bool metaOnly)
 }
 
 ////////////////////////////////////////////
-// read the scalar variables
+// read the scalar fields variables
 
-int NcfRadxFile::_readScalarVariables(bool metaOnly)
+int NcfRadxFile::_readScalarFields(bool metaOnly)
 
 {
 
@@ -2749,7 +2657,7 @@ int NcfRadxFile::_readScalarVariables(bool metaOnly)
       continue;
     }
     
-    // check that we have the correct dimensions
+    // check that we have the correct dimension - time
 
     int numDims = var->num_dims();
     if (numDims != 1) {
@@ -2762,6 +2670,7 @@ int NcfRadxFile::_readScalarVariables(bool metaOnly)
     }
 
     // check the type
+
     Nc3Type ftype = var->type();
     if (ftype != nc3Double && ftype != nc3Float && ftype != nc3Int &&
         ftype != nc3Short && ftype != nc3Byte) {
@@ -2779,7 +2688,7 @@ int NcfRadxFile::_readScalarVariables(bool metaOnly)
     
     if (!isFieldRequiredOnRead(fieldName)) {
       if (_verbose) {
-        cerr << "DEBUG - NcfRadxFile::_readFieldVariables" << endl;
+        cerr << "DEBUG - NcfRadxFile::_readScalarFields" << endl;
         cerr << "  -->> rejecting scalar: " << fieldName << endl;
       }
       continue;
@@ -2790,74 +2699,18 @@ int NcfRadxFile::_readScalarVariables(bool metaOnly)
       cerr << "  -->> adding scalar field: " << fieldName << endl;
     }
 
-    // set names, units, etc
+    // set attributes
     
-    string name = var->name();
-
-    string standardName;
-    Nc3Att *standardNameAtt = var->get_att(STANDARD_NAME);
-    if (standardNameAtt != NULL) {
-      standardName = Nc3xFile::asString(standardNameAtt);
-      delete standardNameAtt;
-    } else {
-      // check also for 'proposed_standard_name'
-      standardNameAtt = var->get_att(PROPOSED_STANDARD_NAME);
-      if (standardNameAtt != NULL) {
-        standardName = Nc3xFile::asString(standardNameAtt);
-        delete standardNameAtt;
-      }
-    }
-    
-    string longName;
-    Nc3Att *longNameAtt = var->get_att(LONG_NAME);
-    if (longNameAtt != NULL) {
-      longName = Nc3xFile::asString(longNameAtt);
-      delete longNameAtt;
-    }
-
-    string units;
-    Nc3Att *unitsAtt = var->get_att(UNITS);
-    if (unitsAtt != NULL) {
-      units = Nc3xFile::asString(unitsAtt);
-      delete unitsAtt;
-    }
-
-    string fieldComment;
-    Nc3Att *commentAtt = var->get_att(COMMENT);
-    if (commentAtt != NULL) {
-      fieldComment = Nc3xFile::asString(commentAtt);
-      delete commentAtt;
-    }
-
-    // is this field discrete
-    
-    bool isDiscrete = false;
-    Nc3Att *isDiscreteAtt = var->get_att(IS_DISCRETE);
-    if (isDiscreteAtt != NULL) {
-      string isDiscreteStr = Nc3xFile::asString(isDiscreteAtt);
-      if (isDiscreteStr == "true"
-          || isDiscreteStr == "TRUE"
-          || isDiscreteStr == "True") {
-        isDiscrete = true;
-      }
-      delete isDiscreteAtt;
-    }
-    
-    // get offset and scale
-
-    double offset = 0.0;
-    Nc3Att *offsetAtt = var->get_att(ADD_OFFSET);
-    if (offsetAtt != NULL) {
-      offset = offsetAtt->as_double(0);
-      delete offsetAtt;
-    }
-
-    double scale = 1.0;
-    Nc3Att *scaleAtt = var->get_att(SCALE_FACTOR);
-    if (scaleAtt != NULL) {
-      scale = scaleAtt->as_double(0);
-      delete scaleAtt;
-    }
+    string name, units, standardName, longName, commentStr, legendXml, thresholdingXml;
+    double samplingRatio, foldLimitLower, foldLimitUpper, offset, scale;
+    bool isDiscrete, fieldFolds;
+    _readFieldAttributes(var,
+                         name, units, 
+                         standardName, longName, 
+                         commentStr, legendXml, thresholdingXml,
+                         samplingRatio, isDiscrete,
+                         fieldFolds, foldLimitLower, foldLimitUpper,
+                         offset, scale);
     
     // if metadata only, don't read in fields
     
@@ -2873,12 +2726,13 @@ int NcfRadxFile::_readScalarVariables(bool metaOnly)
         RadxField *field = new RadxField(name, units);
         field->setLongName(longName);
         field->setStandardName(standardName);
-        field->setIsDiscrete(true);
+        field->setIsScalar(true);
+        field->setIsDiscrete(false);
         if (isDiscrete) {
           field->setIsDiscrete(true);
         }
-        if (fieldComment.size() > 0) {
-          field->setComment(fieldComment);
+        if (commentStr.size() > 0) {
+          field->setComment(commentStr);
         }
         _readVol->addField(field);
       }
@@ -2934,7 +2788,7 @@ int NcfRadxFile::_readScalarVariables(bool metaOnly)
     } // switch
     
     if (iret) {
-      _addErrStr("ERROR - NcfRadxFile::_readFieldVariables");
+      _addErrStr("ERROR - NcfRadxFile::_readScalarFields");
       _addErrStr("  cannot read field name: ", name);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
@@ -2944,6 +2798,157 @@ int NcfRadxFile::_readScalarVariables(bool metaOnly)
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////////////////
+// Read var attributes for a field
+
+void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
+                                       string &name,
+                                       string &units,
+                                       string &standardName,
+                                       string &longName,
+                                       string &commentStr,
+                                       string &legendXml,
+                                       string &thresholdingXml,
+                                       double &samplingRatio,
+                                       bool &isDiscrete,
+                                       bool &fieldFolds,
+                                       double &foldLimitLower,
+                                       double &foldLimitUpper,
+                                       double &offset,
+                                       double &scale)
+
+{
+
+  // name
+  
+  name = var->name();
+  
+  // standard name
+
+  standardName = name;
+  Nc3Att *standardNameAtt = var->get_att(STANDARD_NAME);
+  if (standardNameAtt != NULL) {
+    standardName = Nc3xFile::asString(standardNameAtt);
+    delete standardNameAtt;
+  } else {
+    // check also for 'proposed_standard_name'
+    standardNameAtt = var->get_att(PROPOSED_STANDARD_NAME);
+    if (standardNameAtt != NULL) {
+      standardName = Nc3xFile::asString(standardNameAtt);
+      delete standardNameAtt;
+    }
+  }
+  
+  // long name
+  
+  longName = name;
+  Nc3Att *longNameAtt = var->get_att(LONG_NAME);
+  if (longNameAtt != NULL) {
+    longName = Nc3xFile::asString(longNameAtt);
+    delete longNameAtt;
+  }
+  
+  // units
+
+  units.clear();
+  Nc3Att *unitsAtt = var->get_att(UNITS);
+  if (unitsAtt != NULL) {
+    units = Nc3xFile::asString(unitsAtt);
+    delete unitsAtt;
+  }
+
+  // comment
+
+  commentStr.clear();
+  Nc3Att *commentAtt = var->get_att(COMMENT);
+  if (commentAtt != NULL) {
+    commentStr = Nc3xFile::asString(commentAtt);
+    delete commentAtt;
+  }
+  
+  // xml
+
+  legendXml.clear();
+  Nc3Att *legendXmlAtt = var->get_att(LEGEND_XML);
+  if (legendXmlAtt != NULL) {
+    legendXml = Nc3xFile::asString(legendXmlAtt);
+    delete legendXmlAtt;
+  }
+  
+  thresholdingXml.clear();
+  Nc3Att *thresholdingXmlAtt = var->get_att(THRESHOLDING_XML);
+  if (thresholdingXmlAtt != NULL) {
+    thresholdingXml = Nc3xFile::asString(thresholdingXmlAtt);
+    delete thresholdingXmlAtt;
+  }
+  
+  // sampling ratio
+  
+  samplingRatio = Radx::missingMetaFloat;
+  Nc3Att *samplingRatioAtt = var->get_att(SAMPLING_RATIO);
+  if (samplingRatioAtt != NULL) {
+    samplingRatio = samplingRatioAtt->as_double(0);
+    delete samplingRatioAtt;
+  }
+  
+  // folding
+  
+  fieldFolds = false;
+  foldLimitLower = Radx::missingMetaFloat;
+  foldLimitUpper = Radx::missingMetaFloat;
+  Nc3Att *fieldFoldsAtt = var->get_att(FIELD_FOLDS);
+  if (fieldFoldsAtt != NULL) {
+    string fieldFoldsStr = Nc3xFile::asString(fieldFoldsAtt);
+    if (fieldFoldsStr == "true"
+        || fieldFoldsStr == "TRUE"
+        || fieldFoldsStr == "True") {
+      fieldFolds = true;
+      Nc3Att *foldLimitLowerAtt = var->get_att(FOLD_LIMIT_LOWER);
+      if (foldLimitLowerAtt != NULL) {
+        foldLimitLower = foldLimitLowerAtt->as_double(0);
+        delete foldLimitLowerAtt;
+      }
+      Nc3Att *foldLimitUpperAtt = var->get_att(FOLD_LIMIT_UPPER);
+      if (foldLimitUpperAtt != NULL) {
+        foldLimitUpper = foldLimitUpperAtt->as_double(0);
+        delete foldLimitUpperAtt;
+      }
+    }
+    delete fieldFoldsAtt;
+  }
+  
+  // is this field discrete
+  
+  isDiscrete = false;
+  Nc3Att *isDiscreteAtt = var->get_att(IS_DISCRETE);
+  if (isDiscreteAtt != NULL) {
+    string isDiscreteStr = Nc3xFile::asString(isDiscreteAtt);
+    if (isDiscreteStr == "true"
+        || isDiscreteStr == "TRUE"
+        || isDiscreteStr == "True") {
+      isDiscrete = true;
+    }
+    delete isDiscreteAtt;
+  }
+  
+  // get offset and scale
+  
+  offset = 0.0;
+  Nc3Att *offsetAtt = var->get_att(ADD_OFFSET);
+  if (offsetAtt != NULL) {
+    offset = offsetAtt->as_double(0);
+    delete offsetAtt;
+  }
+  
+  scale = 1.0;
+  Nc3Att *scaleAtt = var->get_att(SCALE_FACTOR);
+  if (scaleAtt != NULL) {
+    scale = scaleAtt->as_double(0);
+    delete scaleAtt;
+  }
+  
 }
 
 ///////////////////////////////////

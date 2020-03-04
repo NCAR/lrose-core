@@ -642,6 +642,7 @@ void RadxNcfStr::_createRayVarNameSet()
     // alread created
     return;
   }
+  _rayVarNames.insert(RadxNcfStr::TIME);
   _rayVarNames.insert(RadxNcfStr::GEOREF_TIME);
   _rayVarNames.insert(RadxNcfStr::LATITUDE);
   _rayVarNames.insert(RadxNcfStr::LONGITUDE);
