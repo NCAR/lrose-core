@@ -1509,6 +1509,7 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 //
 // g. Auxiliary dealiasing
 //
+// NOTE: this method is untested by unit tests
 void FourDD::SecondPassUsingSoundVolumeOnly(short **STATE, Volume *soundVolume, Volume *original, Volume *rvVolume, 
                                             int sweepIndex, int del_num_bins,
                                             float fraction2, float pfraction,
@@ -1699,7 +1700,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
                           int del_num_bins, float velocityMissingValue, unsigned short filt,
                           unsigned short* success) {
 
-  size_t sweepIndex;
+  int sweepIndex;
   size_t numSweeps;
   float NyqVelocity, NyqInterval, fraction;
   float fraction2;
@@ -1713,7 +1714,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
   for(int i=0; i < max_bins; i++) 
     STATE[i] = new short[max_rays];
 
-  numSweeps = rvVolume->h.nsweeps;
+  numSweeps = (size_t) rvVolume->h.nsweeps;
 
   // VALS is supposed to be the encoded form of the Volume data; with separate scale & bias
   // original is now the untouched velocity values with scale and bias applied
@@ -1734,7 +1735,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
   if (soundVolume!=NULL || lastVolume!=NULL) {
     for (sweepIndex=numSweeps-1;sweepIndex>=0;sweepIndex--) {
 
-      printf("Sweep: %lu\n", sweepIndex);
+      printf("Sweep: %d\n", sweepIndex);
 
       NyqVelocity = rvVolume->sweep[sweepIndex]->ray[0]->h.nyq_vel;
       // TODO: validate NyqVelocity is NOT TOO SMALL!

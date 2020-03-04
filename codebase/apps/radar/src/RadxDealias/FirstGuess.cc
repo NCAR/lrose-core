@@ -173,6 +173,7 @@ bool FirstGuess::firstGuess(Volume* soundVolume, time_t soundingTime)
 
   int k = 1;
   float missingValue = sounding.getMissingValue();
+  cout << "sounding missing value = " << missingValue << endl;
   for( int i = 0 ; i < numPoints; i++)
     {
       //
