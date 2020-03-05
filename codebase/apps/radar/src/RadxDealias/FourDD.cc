@@ -356,6 +356,10 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
        throw std::invalid_argument("rayIndex out of bounds");
      // end of argument validation 
 
+     // Take care of this stinkin' degenerate case ...
+     if (numRays2 == 1)
+       return 0;
+
      float targetAz = rvVolume1->sweep[sweepIndex1]->ray[rayIndex]->h.azimuth;
      float scale = 360.0/numRays2;
      float baseAz = rvVolume2->sweep[sweepIndex2]->ray[0]->h.azimuth;
@@ -368,19 +372,39 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
      int nsteps = fabs(diff)/scale;
      int index = sign * nsteps;  // (sign * nsteps) % numRays2;
      if (index < 0) index = numRays2 + index;
-     // search from here ...
+     // search from here ... like Newton's method for root finding
+     float minAzDiff;
+     int minIndex = index;
      float currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
-     while (currentAz < targetAz) {
-       index = (index - sign) % numRays2;
-       if (index < 0) index = numRays2 + index;
-       currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+     if (currentAz < targetAz) {
+       // move until we cross targetAz in the rays
+       minAzDiff = fabs(targetAz - currentAz);
+       while (currentAz < targetAz) {
+	 index = (index + sign) % numRays2;
+	 if (index < 0) index = numRays2 + index;
+	 currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+         float currentDiff = fabs(targetAz - currentAz);
+         if (currentDiff < minAzDiff) {
+	   minAzDiff = currentDiff;
+	   minIndex = index;
+	 }
+       }
+     } else {
+       // move until we cross targetAz
+       // move until we cross targetAz in the rays
+       minAzDiff = fabs(targetAz - currentAz);
+       while (currentAz > targetAz) {
+	 index = (index - sign) % numRays2;
+	 if (index < 0) index = numRays2 + index;
+	 currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+         float currentDiff = fabs(targetAz - currentAz);
+         if (currentDiff < minAzDiff) {
+	   minAzDiff = currentDiff;
+	   minIndex = index;
+	 }
+       }
      }
-     while (currentAz > targetAz) {
-       index = (index + sign) % numRays2;
-       if (index < 0) index = numRays2 + index;
-       currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
-     }
-     return index;
+     return minIndex;
      /*
      // the closest ray will be the estimated index or estimated index +/- 1
      float diff1 = fabs(rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth - targetAz);

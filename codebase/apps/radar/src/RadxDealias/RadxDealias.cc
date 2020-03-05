@@ -880,8 +880,10 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
 
     size_t startRayIndex = radxSweep->getStartRayIndex();
     size_t endRayIndex = radxSweep->getEndRayIndex();
-    cout << "for RadxSweep " << rslVolumeIdx << ": startRayIndex=" << startRayIndex <<
-      " endRayIndex=" << endRayIndex << endl;
+    if (_params.debug) {
+      cout << "for RadxSweep " << rslVolumeIdx << ": startRayIndex=" << startRayIndex <<
+        " endRayIndex=" << endRayIndex << endl;
+    }
 
     vector<RadxRay *> radxRays = radxVol.getRays();      
     for (int j=0; j<newSweep->h.nrays; j++) {
@@ -1018,8 +1020,10 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
 
     size_t startRayIndex = radxSweep->getStartRayIndex();
     size_t endRayIndex = radxSweep->getEndRayIndex();
-    cout << "for RadxSweep " << rslVolumeIdx << ": startRayIndex=" << startRayIndex <<
-      " endRayIndex=" << endRayIndex << endl;
+    if (_params.debug) {
+      cout << "for RadxSweep " << rslVolumeIdx << ": startRayIndex=" << startRayIndex <<
+        " endRayIndex=" << endRayIndex << endl;
+    }
 
     vector<RadxRay *> radxRays = radxVol.getRays();      
     for (int j=0; j<newSweep->h.nrays; j++) {
@@ -1145,8 +1149,10 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
 
     size_t startRayIndex = radxSweep->getStartRayIndex();
     size_t endRayIndex = radxSweep->getEndRayIndex();
-    cout << "for RadxSweep " << rslVolumeIdx << ": startRayIndex=" << startRayIndex <<
-      " endRayIndex=" << endRayIndex << endl;
+    if (_params.debug) {
+      cout << "for RadxSweep " << rslVolumeIdx << ": startRayIndex=" << startRayIndex <<
+        " endRayIndex=" << endRayIndex << endl;
+    }
 
     vector<RadxRay *> radxRays = radxVol->getRays();      
     for (int j=0; j<newSweep->h.nrays; j++) {
