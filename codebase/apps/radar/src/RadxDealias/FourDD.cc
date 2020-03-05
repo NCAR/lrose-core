@@ -1,5 +1,6 @@
 
 #include "FourDD.hh"
+#include <iostream>
 #include <cmath>
 #include <stdexcept>
 #include <algorithm>
@@ -358,8 +359,29 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
      float targetAz = rvVolume1->sweep[sweepIndex1]->ray[rayIndex]->h.azimuth;
      float scale = 360.0/numRays2;
      float baseAz = rvVolume2->sweep[sweepIndex2]->ray[0]->h.azimuth;
-     int closestEstimate = fabs(targetAz - baseAz)/scale;
-     int index = closestEstimate % numRays2;
+     float diff = targetAz - baseAz;
+     int sign = 1.0;
+     if (diff < 0) sign = -1.0;
+     // if sweeps in volume2 are NOT increasing, then flip the sign
+     if ((baseAz - rvVolume2->sweep[sweepIndex2]->ray[1]->h.azimuth) > 0)
+       sign = sign * -1.0;
+     int nsteps = fabs(diff)/scale;
+     int index = sign * nsteps;  // (sign * nsteps) % numRays2;
+     if (index < 0) index = numRays2 + index;
+     // search from here ...
+     float currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+     while (currentAz < targetAz) {
+       index = (index - sign) % numRays2;
+       if (index < 0) index = numRays2 + index;
+       currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+     }
+     while (currentAz > targetAz) {
+       index = (index + sign) % numRays2;
+       if (index < 0) index = numRays2 + index;
+       currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+     }
+     return index;
+     /*
      // the closest ray will be the estimated index or estimated index +/- 1
      float diff1 = fabs(rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth - targetAz);
      int indexPlus1 = (index + 1) % numRays2;
@@ -373,6 +395,7 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
        if (diffPlus1 < diffMinus1) return indexPlus1;
        else return indexMinus1;
      }
+     */
      /*     
      // TODO: numRays1 or numRays2?    HERE !!!!
      az0 = rvVolume1->sweep[sweepIndex1]->ray[rayIndex]->h.azimuth;
@@ -763,7 +786,7 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
         if ((STATE[i][rayIndex] == TBD) &&  (fabs(startingValue) > ck_val)) {
             float unfoldedValue;
             bool successful;
-
+	   
             float prevVal = velocityMissingValue;
             if (lastVolume != NULL) {
               // TODO: what if prevIndex is out of bounds?
@@ -777,7 +800,16 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
             float aboveVal = velocityMissingValue;
             if (sweepIndex<numSweeps-1) {
               aboveVal = rvVolume->sweep[sweepIndex+1]->ray[aboveIndex]->range[i];
+              //if (lastVolume != NULL && !_isMissing(aboveVal, velocityMissingValue))
+	      //std::cerr << "aboveVal is NOT missing: sweep[" << sweepIndex << "]->ray[" << aboveIndex << "]->range[" << i <<
+	      //    "]= " << aboveVal << std::endl;
             }
+	    // NOTE: Special case to seed the subsequent data files ...
+	    // if there is a previously dealiased volume, AND this is the top sweep, 
+	    // use the t-1 velocity value as the above velocity value
+	    if ((sweepIndex == numSweeps-1) && (lastVolume != NULL)) {
+	      aboveVal = prevVal;
+	    }
             // TODO: where do we want to get the NyqVelocity? from original? or rvVolume?
             float NyqVelocity = getNyqVelocity(rvVolume, sweepIndex);
             //float fractionNyqVelocity = fraction * NyqVelocity;

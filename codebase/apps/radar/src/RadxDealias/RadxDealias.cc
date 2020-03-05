@@ -180,6 +180,7 @@ int RadxDealias::Run()
 		      (float) _params.angle_variance,
 		      (float) _params.comp_thresh,
 		      (float) _params.comp_thresh2,
+                      (float) _params.thresh,
 		      param_strict_first_pass,
 		      _params.max_count,                   
 		      (float) _params.ck_val,
@@ -348,8 +349,15 @@ int RadxDealias::_processOne(string filePath)
   Rsl::free_volume(prevVelVol);
   Rsl::free_volume(currDbzVol);
 
+  // TODO: HERE <<=== trying to figure out why previous volume is all missing
   // seed the next unfolding with the results
-  prevVelVol = currVelVol;
+  //prevVelVol = currVelVol;
+
+  // TODO: does this affect currVelVol?
+  bool copy_with_debug = false;
+  prevVelVol = Rsl::copy_volume(currVelVol, copy_with_debug);
+  //Volume *Rsl::copy_volume(Volume *v, bool debug)
+  // TODO: free prevVelVol?? 
 
   // clear all data on volume object
   vol.clear();
