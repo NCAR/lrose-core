@@ -100,7 +100,7 @@ public:
   ///
   /// Returns true on success, false on failure.
   
-  bool isLeosphere(const string &path);
+  bool isLeosphereCfRadial2(const string &path);
   
   //@}
   
@@ -212,7 +212,7 @@ private:
   double _elLimit1, _elLimit2;
   double _fixedAngle;
   bool _rhiMode;
-
+  
   class Field {
   public:
     string label;
@@ -227,7 +227,8 @@ private:
       folds = false;
     }
   };
-  vector<Field> _fields;
+  vector<Field> _LeosphereFields;
+  
   set<string> _fieldNames;
   map<string, size_t> _fieldCols;
 
@@ -235,21 +236,21 @@ private:
 
   // file handle
 
-  FILE *_file;
+  //FILE *_file;
 
   // private methods
   
-  void _clearRays();
+  //void _clearRays();
 
-  int _readHeaderData(string &xml);
+  // int _readHeaderData(string &xml);
   void _findFieldsModel200();
-  void _findFieldsModel70();
+  //void _findFieldsModel70();
   int _readRayDataModel200();
-  int _readRayDataModel70();
+  //int _readRayDataModel70();
   int _openRead(const string &path);
   void _close();
 
-  int _loadReadVolume();
+  //int _loadReadVolume();
   
   int _printConfig(const string &path, ostream &out);
   int _loadConfigXml(const string &path);
@@ -261,16 +262,7 @@ private:
   
   // from Cf2RadxFile ...
 
-  
-  /// clear all data
-  
-  virtual void clear();
-
-  /// Check if specified file is a CfRadialFile
-  /// Returns true on success, false on failure
-  
-  virtual bool isSupported(const string &path);
-    
+     
   /// Check if specified file is a CfRadialXx file.
   /// Returns true on success, false on failure
   
@@ -297,12 +289,13 @@ private:
   /// Use getErrStr() to get error message if error occurs.
   /// Use getDirInUse() for directory to which the data was written.
   /// Use getPathInUse() for path to which the data was written.
-  
+
+  /*  
   virtual int writeToDir(const RadxVol &vol,
                          const string &dir,
                          bool addDaySubDir,
                          bool addYearSubDir);
-
+  */
   //////////////////////////////////////////////////////////////
   /// Write data from RadxVol volume to the specified path.
   //
@@ -310,16 +303,16 @@ private:
   //
   /// Use getErrStr() to get error message if error occurs.
   /// Use getPathInUse() for path to which the data was written.
-  
+  /*
   virtual int writeToPath(const RadxVol &vol,
                           const string &path);
-
+  */
   //@}
 
   //////////////////////////////////////////////////////////////
   /// \name Perform the read:
   //@{
-  
+  /*
   /// Read in data file from specified path,
   /// load up volume object.
   /// Returns 0 on success, -1 on failure
@@ -357,7 +350,7 @@ private:
   int getTimeFromPath(const string &path, RadxTime &rtime);
 
   //@}
-
+  */
 protected:
 private:
 
@@ -408,10 +401,10 @@ private:
   string _created;
   string _statusXml;
 
-  string _siteName;
+  //string _siteName;
   string _scanName;
   int _scanId;
-  string _instrumentName;
+  //string _instrumentName;
 
   vector<double> _rayTimes;
   time_t _refTimeSecsFile;
@@ -422,9 +415,9 @@ private:
   Radx::PlatformType_t _platformType;
   Radx::PrimaryAxis_t _primaryAxis;
 
-  double _latitude;
-  double _longitude;
-  double _altitudeM;
+  //double _latitude;
+  //double _longitude;
+  //double _altitudeM;
   double _altitudeAglM;
 
   vector<double> _frequency;

@@ -51,18 +51,26 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <Radx/Cf2RadxFile.hh>
+#include <Radx/RadxRcalib.hh>
+#include <Radx/RadxArray.hh>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <algorithm>
 using namespace std;
+
+
 
 //////////////
 // Constructor
 
-LeoLeoCf2RadxFile::LeoCf2RadxFile() : RadxFile()
+LeoCf2RadxFile::LeoCf2RadxFile() : RadxFile()
   
 {
 
   _configFileName = "Config_AP.ini";
   _readVol = NULL;
-  _file = NULL;
+  // _file = NULL;
   clear();
 
   _latitude = 0.0;
@@ -79,7 +87,7 @@ LeoLeoCf2RadxFile::LeoCf2RadxFile() : RadxFile()
 /////////////
 // destructor
 
-LeoLeoCf2RadxFile::~LeoCf2RadxFile()
+LeoCf2RadxFile::~LeoCf2RadxFile()
 
 {
   clear();
@@ -88,7 +96,7 @@ LeoLeoCf2RadxFile::~LeoCf2RadxFile()
 /////////////////////////////////////////////////////////
 // clear the data in the object
 
-void LeoLeoCf2RadxFile::clear()
+void LeoCf2RadxFile::clear()
   
 {
 
@@ -100,7 +108,7 @@ void LeoLeoCf2RadxFile::clear()
 
 }
 
-void LeoLeoCf2RadxFile::_clearRays()
+void LeoCf2RadxFile::_clearRays()
 {
   for (int ii = 0; ii < (int) _rays.size(); ii++) {
     delete _rays[ii];
@@ -112,11 +120,11 @@ void LeoLeoCf2RadxFile::_clearRays()
 // Check if specified file is Leosphere format
 // Returns true if supported, false otherwise
 
-bool LeoLeoCf2RadxFile::isSupported(const string &path)
+bool LeoCf2RadxFile::isSupported(const string &path)
 
 {
   
-  if (isLeosphere(path)) {
+  if (isLeosphereCfRadial2(path)) {
     return true;
   }
   return false;
@@ -127,7 +135,7 @@ bool LeoLeoCf2RadxFile::isSupported(const string &path)
 // Check if this is a Leosphere file
 // Returns true on success, false on failure
 
-bool LeoLeoCf2RadxFile::isLeosphere(const string &path)
+bool LeoCf2RadxFile::isLeosphereCfRadial2(const string &path)
   
 {
 
@@ -136,24 +144,50 @@ bool LeoLeoCf2RadxFile::isLeosphere(const string &path)
   // open file
   
   if (_openRead(path)) {
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::isLeosphere");
+    _addErrStr("ERROR - LeoCf2RadxFile::isLeosphereCfRadial2");
     return false;
   }
   
-  // read first line
-
-  char line[128];
-  if (fgets(line, 128, _file) == NULL) {
-    _close();
+  try {
+    _file.open(path, NcxxFile::read);
+  } catch (NcxxException& e) {
+    if (_verbose) {
+      cerr << "DEBUG - not CfRadial file: " << path << endl;
+    }
     return false;
   }
-  _close();
-  
-  if (strncmp(line, "HeaderSize", 10) == 0) {
-    return true;
+
+  // read dimensions                                                                                        
+
+  try {
+    _readRootDimensions();
+  } catch (NcxxException& e) {
+    _file.close();
+    if (_verbose) {
+      cerr << "DEBUG - not LeoSphere CfRadial2 file" << endl;
+      cerr << _errStr << endl;
+    }
+    return false;
   }
 
-  return false;
+  // read global attributes                                                                                 
+
+  try {
+    _readGlobalAttributes();
+  } catch (NcxxException& e) {
+    _file.close();
+    if (_verbose) {
+      cerr << "DEBUG - not LeoSphere CfRadial2 file" << endl;
+      cerr << _errStr << endl;
+    }
+    return false;
+  }
+
+  // file has the correct dimensions and attributes,                                                        
+  // so it is a CfRadial2 file                                                                              
+
+  _file.close();
+  return true;
 
 }
 
@@ -163,8 +197,9 @@ bool LeoLeoCf2RadxFile::isLeosphere(const string &path)
 // Returns 0 on success, -1 on failure
 //
 // Use getErrStr() if error occurs
-
-int LeoLeoCf2RadxFile::readFromPath(const string &path,
+// This is for older Leosphere format
+/*
+int LeoCf2RadxFile::readFromPath(const string &path,
                               RadxVol &vol)
   
 {
@@ -173,8 +208,8 @@ int LeoLeoCf2RadxFile::readFromPath(const string &path,
 
   // is this a Leosphere file?
   
-  if (!isLeosphere(_pathInUse)) {
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::readFromPath");
+  if (!isLeosphereCfRadial2(_pathInUse)) {
+    _addErrStr("ERROR - LeoCf2RadxFile::readFromPath");
     _addErrStr("  Not a leosphere file: ", _pathInUse);
     return -1;
   }
@@ -196,7 +231,7 @@ int LeoLeoCf2RadxFile::readFromPath(const string &path,
   // open data file
   
   if (_openRead(_pathInUse)) {
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::readFromPath");
+    _addErrStr("ERROR - LeoCf2RadxFile::readFromPath");
     return -1;
   }
 
@@ -205,7 +240,7 @@ int LeoLeoCf2RadxFile::readFromPath(const string &path,
 
   _configXml += RadxXml::writeStartTag("Header", 1);
   if (_readHeaderData(_configXml)) {
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::readFromPath");
+    _addErrStr("ERROR - LeoCf2RadxFile::readFromPath");
     _close();
     return -1;
   }
@@ -233,7 +268,7 @@ int LeoLeoCf2RadxFile::readFromPath(const string &path,
   // sanity check - need at least 2 gates
 
   if (_ranges.size() < 2) {
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::readFromPath");
+    _addErrStr("ERROR - LeoCf2RadxFile::readFromPath");
     _addErrStr("  No range array (Altitudes) found");
     _addErrStr("  File: ", _pathInUse);
     _close();
@@ -262,7 +297,7 @@ int LeoLeoCf2RadxFile::readFromPath(const string &path,
   }
 
   if (_timeStampIndex < 0) {
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::readFromPath");
+    _addErrStr("ERROR - LeoCf2RadxFile::readFromPath");
     _addErrStr("  Cannot find TimeStamp in column headers");
     _addErrStr("  File: ", _pathInUse);
     _close();
@@ -271,7 +306,7 @@ int LeoLeoCf2RadxFile::readFromPath(const string &path,
 
   if (_modelStr.find("WLS200") != string::npos) {
     if (_elevationIndex < 0 || _azimuthIndex < 0) {
-      _addErrStr("ERROR - LeoLeoCf2RadxFile::readFromPath");
+      _addErrStr("ERROR - LeoCf2RadxFile::readFromPath");
       _addErrStr("  Cannot find Elevation or Azimuth in column headers");
       _addErrStr("  File: ", _pathInUse);
       _close();
@@ -306,7 +341,7 @@ int LeoLeoCf2RadxFile::readFromPath(const string &path,
     iret = _readRayDataModel200();
   }
   if (iret) {
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::readFromPath");
+    _addErrStr("ERROR - LeoCf2RadxFile::readFromPath");
     _close();
     return -1;
   }
@@ -323,9 +358,7 @@ int LeoLeoCf2RadxFile::readFromPath(const string &path,
 
   // load the data into the read volume
 
-  if (_loadReadVolume()) {
-    return -1;
-  }
+  _loadReadVolume();
 
   // set the packing from the rays
 
@@ -338,12 +371,13 @@ int LeoLeoCf2RadxFile::readFromPath(const string &path,
   return 0;
 
 }
+*/
 
 ////////////////////////////////////////////////////////////
 // Read in metadata
 // Returns 0 on success, -1 on failure
-
-int LeoLeoCf2RadxFile::_readHeaderData(string &xml)
+ /*
+int LeoCf2RadxFile::_readHeaderData(string &xml)
   
 {
 
@@ -498,7 +532,7 @@ int LeoLeoCf2RadxFile::_readHeaderData(string &xml)
         }
       }
       if (_ranges.size() != toks.size()) {
-        _addErrStr("ERROR - LeoLeoCf2RadxFile::_readHeaderData");
+        _addErrStr("ERROR - LeoCf2RadxFile::_readHeaderData");
         _addErrStr("  Bad range array: ", valStr);
         return -1;
       }
@@ -520,11 +554,12 @@ int LeoLeoCf2RadxFile::_readHeaderData(string &xml)
   return -1;
 
 }
+*/
 
 ////////////////////////////////////////////////////////////
 // Set up the field names and units for model 200
 
-void LeoLeoCf2RadxFile::_findFieldsModel200()
+void LeoCf2RadxFile::_findFieldsModel200()
   
 {
 
@@ -660,7 +695,7 @@ void LeoLeoCf2RadxFile::_findFieldsModel200()
 ////////////////////////////////////////////////////////////
 // Set up the field names and units for model 70
 
-void LeoLeoCf2RadxFile::_findFieldsModel70()
+void LeoCf2RadxFile::_findFieldsModel70()
   
 {
 
@@ -841,7 +876,7 @@ void LeoLeoCf2RadxFile::_findFieldsModel70()
 // Read in ray data for model 200
 // Returns 0 on success, -1 on failure
 
-int LeoLeoCf2RadxFile::_readRayDataModel200()
+int LeoCf2RadxFile::_readRayDataModel200()
   
 {
 
@@ -980,7 +1015,7 @@ int LeoLeoCf2RadxFile::_readRayDataModel200()
 // Read in ray data for model 70
 // Returns 0 on success, -1 on failure
 
-int LeoLeoCf2RadxFile::_readRayDataModel70()
+int LeoCf2RadxFile::_readRayDataModel70()
   
 {
 
@@ -1139,7 +1174,7 @@ int LeoLeoCf2RadxFile::_readRayDataModel70()
 // open netcdf file for reading
 // Returns 0 on success, -1 on failure
 
-int LeoLeoCf2RadxFile::_openRead(const string &path)
+int LeoCf2RadxFile::_openRead(const string &path)
   
 {
 
@@ -1150,7 +1185,7 @@ int LeoLeoCf2RadxFile::_openRead(const string &path)
   
   if (_file == NULL) {
     int errNum = errno;
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::_openRead");
+    _addErrStr("ERROR - LeoCf2RadxFile::_openRead");
     _addErrStr("  Cannot open file for reading, path: ", path);
     _addErrStr("  ", strerror(errNum));
     return -1;
@@ -1164,7 +1199,7 @@ int LeoLeoCf2RadxFile::_openRead(const string &path)
 // close netcdf file if open
 // remove error object if it exists
 
-void LeoLeoCf2RadxFile::_close()
+void LeoCf2RadxFile::_close()
   
 {
   
@@ -1180,14 +1215,14 @@ void LeoLeoCf2RadxFile::_close()
 /////////////////////////////////////////////////////////
 // load up the read volume with the data from this object
 
-int LeoLeoCf2RadxFile::_loadReadVolume()
+int LeoCf2RadxFile::_loadReadVolume()
   
 {
 
   int nRays = _rays.size();
   if (nRays < 1) {
     if (_debug) {
-      cerr << "WARNING - LeoLeoCf2RadxFile::_loadReadVolume" << endl;
+      cerr << "WARNING - LeoCf2RadxFile::_loadReadVolume" << endl;
       cerr << "  No rays" << endl;
     }
     return -1;
@@ -1246,7 +1281,7 @@ int LeoLeoCf2RadxFile::_loadReadVolume()
   if (_readFixedAngleLimitsSet) {
     if (_readVol->constrainByFixedAngle(_readMinFixedAngle, _readMaxFixedAngle,
                                         _readStrictAngleLimits)) {
-      _addErrStr("ERROR - LeoLeoCf2RadxFile::_loadReadVolume");
+      _addErrStr("ERROR - LeoCf2RadxFile::_loadReadVolume");
       _addErrStr("  No data found within fixed angle limits");
       _addErrDbl("  min fixed angle: ", _readMinFixedAngle);
       _addErrDbl("  max fixed angle: ", _readMaxFixedAngle);
@@ -1255,7 +1290,7 @@ int LeoLeoCf2RadxFile::_loadReadVolume()
   } else if (_readSweepNumLimitsSet) {
     if (_readVol->constrainBySweepNum(_readMinSweepNum, _readMaxSweepNum,
                                         _readStrictAngleLimits)) {
-      _addErrStr("ERROR - LeoLeoCf2RadxFile::_loadReadVolume");
+      _addErrStr("ERROR - LeoCf2RadxFile::_loadReadVolume");
       _addErrStr("  No data found within sweep num limits");
       _addErrInt("  min sweep num: ", _readMinSweepNum);
       _addErrInt("  max sweep num: ", _readMaxSweepNum);
@@ -1293,7 +1328,7 @@ int LeoLeoCf2RadxFile::_loadReadVolume()
 // Use getDirInUse() for dir written
 // Use getPathInUse() for path written
 
-int LeoLeoCf2RadxFile::writeToDir(const RadxVol &vol,
+int LeoCf2RadxFile::writeToDir(const RadxVol &vol,
                             const string &dir,
                             bool addDaySubDir,
                             bool addYearSubDir)
@@ -1303,7 +1338,7 @@ int LeoLeoCf2RadxFile::writeToDir(const RadxVol &vol,
   // Writing Leosphere files is not supported
   // therefore write in CF Radial format instead
 
-  cerr << "WARNING - LeoLeoCf2RadxFile::writeToDir" << endl;
+  cerr << "WARNING - LeoCf2RadxFile::writeToDir" << endl;
   cerr << "  Writing Leosphere format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
@@ -1334,7 +1369,7 @@ int LeoLeoCf2RadxFile::writeToDir(const RadxVol &vol,
 // Use getErrStr() if error occurs
 // Use getPathInUse() for path written
 
-int LeoLeoCf2RadxFile::writeToPath(const RadxVol &vol,
+int LeoCf2RadxFile::writeToPath(const RadxVol &vol,
                              const string &path)
   
 {
@@ -1342,7 +1377,7 @@ int LeoLeoCf2RadxFile::writeToPath(const RadxVol &vol,
   // Writing Leosphere files is not supported
   // therefore write in CF Radial format instead
 
-  cerr << "WARNING - LeoLeoCf2RadxFile::writeToPath" << endl;
+  cerr << "WARNING - LeoCf2RadxFile::writeToPath" << endl;
   cerr << "  Writing Leosphere format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
@@ -1367,7 +1402,7 @@ int LeoLeoCf2RadxFile::writeToPath(const RadxVol &vol,
 /////////////////////////////////////////////////////////
 // print data after read
 
-void LeoLeoCf2RadxFile::print(ostream &out) const
+void LeoCf2RadxFile::print(ostream &out) const
   
 {
   
@@ -1392,7 +1427,7 @@ void LeoLeoCf2RadxFile::print(ostream &out) const
 // Returns 0 on success, -1 on failure
 // Use getErrStr() if error occurs
 
-int LeoLeoCf2RadxFile::printNative(const string &path, ostream &out,
+int LeoCf2RadxFile::printNative(const string &path, ostream &out,
                              bool printRays, bool printData)
   
 {
@@ -1401,8 +1436,8 @@ int LeoLeoCf2RadxFile::printNative(const string &path, ostream &out,
 
   // is this a Leosphere file?
   
-  if (!isLeosphere(path)) {
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::printNative");
+  if (!isLeosphereCfRadial2(path)) {
+    _addErrStr("ERROR - LeoCf2RadxFile::printNative");
     _addErrStr("  Not a leoshpere file: ", path);
     return -1;
   }
@@ -1414,7 +1449,7 @@ int LeoLeoCf2RadxFile::printNative(const string &path, ostream &out,
   // open file
   
   if (_openRead(path)) {
-    _addErrStr("ERROR - LeoLeoCf2RadxFile::printNative");
+    _addErrStr("ERROR - LeoCf2RadxFile::printNative");
     return -1;
   }
   
@@ -1425,7 +1460,7 @@ int LeoLeoCf2RadxFile::printNative(const string &path, ostream &out,
   while (!feof(_file)) {
     if (fgets(line, 65536, _file) == NULL) {
       if (!gotData) {
-        _addErrStr("ERROR - LeoLeoCf2RadxFile::printNative");
+        _addErrStr("ERROR - LeoCf2RadxFile::printNative");
         _addErrStr("  Premature end of file: ", path);
         _close();
         return -1;
@@ -1448,7 +1483,7 @@ int LeoLeoCf2RadxFile::printNative(const string &path, ostream &out,
 ////////////////////////////////////////////////////////////////
 // print the config file
 
-int LeoLeoCf2RadxFile::_printConfig(const string &path, ostream &out)
+int LeoCf2RadxFile::_printConfig(const string &path, ostream &out)
   
 {
 
@@ -1491,7 +1526,7 @@ int LeoLeoCf2RadxFile::_printConfig(const string &path, ostream &out)
 ////////////////////////////////////////////////////////////////
 // read in the config and load up XML
 
-int LeoLeoCf2RadxFile::_loadConfigXml(const string &path)
+int LeoCf2RadxFile::_loadConfigXml(const string &path)
   
 {
 
@@ -1576,7 +1611,7 @@ int LeoLeoCf2RadxFile::_loadConfigXml(const string &path)
 ////////////////////////////////////////////////////////////////
 // set status from XML
 
-void LeoLeoCf2RadxFile::_setStatusFromXml(const string &xml)
+void LeoCf2RadxFile::_setStatusFromXml(const string &xml)
   
 {
 
@@ -1614,7 +1649,7 @@ void LeoLeoCf2RadxFile::_setStatusFromXml(const string &xml)
 ////////////////////////////////////////////////////////////////
 // set angles from XML
 
-void LeoLeoCf2RadxFile::_setAnglesFromXml(const string &xml)
+void LeoCf2RadxFile::_setAnglesFromXml(const string &xml)
   
 {
 
@@ -1652,7 +1687,7 @@ void LeoLeoCf2RadxFile::_setAnglesFromXml(const string &xml)
 ////////////////////////////////////////
 // substitute cc for spaces in a string
 
-string LeoLeoCf2RadxFile::_substituteChar(const string &source, char find, char replace)
+string LeoCf2RadxFile::_substituteChar(const string &source, char find, char replace)
   
 {
 
@@ -1673,7 +1708,7 @@ string LeoLeoCf2RadxFile::_substituteChar(const string &source, char find, char 
 ////////////////////////////////////////
 // strip eol from line
 
-string LeoLeoCf2RadxFile::_stripLine(const char *line)
+string LeoCf2RadxFile::_stripLine(const char *line)
   
 {
 
@@ -1696,24 +1731,7 @@ string LeoLeoCf2RadxFile::_stripLine(const char *line)
   return stripped;
 
 }
-
-#include <Radx/Cf2RadxFile.hh>
-#include <Radx/RadxTime.hh>
-#include <Radx/RadxVol.hh>
-#include <Radx/RadxField.hh>
-#include <Radx/RadxRay.hh>
-#include <Radx/RadxGeoref.hh>
-#include <Radx/RadxSweep.hh>
-#include <Radx/RadxRcalib.hh>
-#include <Radx/RadxPath.hh>
-#include <Radx/RadxArray.hh>
-#include <cstring>
-#include <cstdio>
-#include <cmath>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <algorithm>
-using namespace std;
+// --- start of code from Cf2RadxFile ...
 
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
