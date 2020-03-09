@@ -113,17 +113,17 @@ void Mdv2NcfTrans::clearData()
 
   // Memory cleanup
 
-  for (int i = 0; i < (int)_gridInfo.size(); i++) {
+  for (size_t i = 0; i < _gridInfo.size(); i++) {
     delete _gridInfo[i];
   }
   _gridInfo.clear();
   
-  for (int i = 0; i < (int)_vlevelInfo.size(); i++) {
+  for (size_t i = 0; i < _vlevelInfo.size(); i++) {
     delete _vlevelInfo[i];
   }
   _vlevelInfo.clear();
 
-  for (int i = 0; i < (int)_fieldData.size(); i++) {
+  for (size_t i = 0; i < _fieldData.size(); i++) {
     delete _fieldData[i]; 
   }
   _fieldData.clear();
@@ -334,7 +334,7 @@ int Mdv2NcfTrans::_parseMdv()
     
     // check if this field has been specified for translation
     
-    for (int jj = 0; jj < (int) _mdv->_mdv2NcfTransArray.size(); jj++) {
+    for (size_t jj = 0; jj < _mdv->_mdv2NcfTransArray.size(); jj++) {
       
       // check for match on MDV field name
       
@@ -389,7 +389,7 @@ int Mdv2NcfTrans::_parseMdv()
     // seen before.
 
     bool gridIsNew = true;
-    for (int j = 0; j < (int)_gridInfo.size(); j++) {
+    for (size_t j = 0; j < _gridInfo.size(); j++) {
       if (*gridInfo == *_gridInfo[j]) {
         delete gridInfo;
         gridIsNew = false;
@@ -469,7 +469,7 @@ int Mdv2NcfTrans::_parseMdv()
 
     bool vlevelIsNew = true;
       
-    for (int j = 0; j < (int)_vlevelInfo.size(); j++) {
+    for (size_t j = 0; j < _vlevelInfo.size(); j++) {
       if ( *vlevelInfo == *_vlevelInfo[j] ) {
         delete vlevelInfo;
         vlevelIsNew = false;
@@ -772,7 +772,7 @@ int Mdv2NcfTrans::_addDimensions()
   // Add dimensions of the different 2D grids
   //
   
-  for (int i = 0; i < (int) _gridInfo.size(); i++) {
+  for (size_t i = 0; i < _gridInfo.size(); i++) {
     if (_gridInfo[i]->addXyDim(i, _ncFile, _errStr)) {
       TaStr::AddStr(_errStr, "Mdv2NcfTrans::_addDimensions");
       TaStr::AddStr(_errStr, "  Cannot add XY grid dimensions");
@@ -782,7 +782,7 @@ int Mdv2NcfTrans::_addDimensions()
 
   // Add dimensions of different vertical levels
   
-  for (int i = 0; i <  (int) _vlevelInfo.size(); i++) {
+  for (size_t i = 0; i < _vlevelInfo.size(); i++) {
     if (_vlevelInfo[i]->addDim(i, _ncFile, _errStr)) {
       TaStr::AddStr(_errStr, "Mdv2NcfTrans::_addDimensions");
       TaStr::AddStr(_errStr, "  Cannot add Vlevel grid dimensions");
@@ -829,7 +829,7 @@ int Mdv2NcfTrans::_addCoordinateVariables()
   // so we will use the same naming scheme for vars as we did for dimensions
   // in method _addDimensions()
 
-  for (int i = 0; i < (int) _gridInfo.size(); i++) {	
+  for (size_t i = 0; i < _gridInfo.size(); i++) {	
 
     if (_gridInfo[i]->addCoordVars(i, _outputLatlonArrays,
                                    _ncFile, _errStr)) {
@@ -842,7 +842,7 @@ int Mdv2NcfTrans::_addCoordinateVariables()
 
   // Add vertical coordinate variables
 
-  for (int i = 0; i < (int) _vlevelInfo.size(); i++) {
+  for (size_t i = 0; i < _vlevelInfo.size(); i++) {
     if (_vlevelInfo[i]->addVlevelVar(i, _ncFile, _errStr)) {
       return -1;
     }
@@ -865,7 +865,7 @@ int Mdv2NcfTrans::_addVsectCoordinateVariables()
   // If this is a XSection, add x, y, lat, long, alt
   // We should only have one grid in an mdv Xsection.
   
-  for (int i = 0; i < (int) _gridInfo.size(); i++) {	
+  for (size_t i = 0; i < _gridInfo.size(); i++) {	
     if (_gridInfo[i]->addVsectCoordVars(i, _ncFile, _errStr)) {
       TaStr::AddStr(_errStr, "Mdv2NcfTrans::_addCoordinateVariables");
       TaStr::AddStr(_errStr, "  Cannot add coordinate vars");
@@ -875,7 +875,7 @@ int Mdv2NcfTrans::_addVsectCoordinateVariables()
   
   // Add vertical coordinate variable
   
-  for (int i = 0; i < (int) _vlevelInfo.size(); i++) {
+  for (size_t i = 0; i < _vlevelInfo.size(); i++) {
     if (_vlevelInfo[i]->addVlevelVar(i, _ncFile, _errStr)) {
       return -1;
     }
@@ -891,7 +891,7 @@ int Mdv2NcfTrans::_addVsectCoordinateVariables()
 int Mdv2NcfTrans::_addProjectionVariables()
 {
 
-  for(int i = 0; i < (int) _gridInfo.size(); i++) {
+  for(size_t i = 0; i < _gridInfo.size(); i++) {
     if (_gridInfo[i]->addProjVar(i, _ncFile, _errStr)) {
       return -1;
     }
@@ -1014,7 +1014,7 @@ int Mdv2NcfTrans::_addFieldDataVariables()
     cerr << "Mdv2NcfTrans::addFieldVariables()" << endl;
   }
 
-  for (int i = 0; i < (int) _fieldData.size(); i++) {
+  for (size_t i = 0; i < _fieldData.size(); i++) {
     if (_fieldData[i]->addToNc(_ncFile, _timeDim,
                                _mdv->_ncfOutputMdvAttr, _errStr)) {
       return -1;
@@ -1344,7 +1344,7 @@ int  Mdv2NcfTrans::_putCoordinateVariables()
 
   // Put the coordinate variable data
 
-  for (int i = 0; i < (int) _gridInfo.size(); i++) {
+  for (size_t i = 0; i < _gridInfo.size(); i++) {
 
     if (_gridInfo[i]->writeCoordDataToFile(_ncFile, _errStr)) {
       TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::_putCoordinateVariables");
@@ -1355,7 +1355,7 @@ int  Mdv2NcfTrans::_putCoordinateVariables()
 
   // Put zlevel data
 
-  for (int i = 0; i < (int) _vlevelInfo.size(); i++) {
+  for (size_t i = 0; i < _vlevelInfo.size(); i++) {
     if (_vlevelInfo[i]->writeDataToFile(_ncFile, _errStr)) {
       TaStr::AddStr(_errStr, "ERROR - Mdv2NcfTrans::_putCoordinateVariables");
       return -1;
@@ -1434,7 +1434,7 @@ int  Mdv2NcfTrans::_putFieldDataVariables()
     cerr << "Mdv2NcfTrans::_putFieldDataVariables()" << endl;
   }
 
-  for (int i = 0; i < (int) _fieldData.size(); i++) {
+  for (size_t i = 0; i < _fieldData.size(); i++) {
 
     if (_heartbeatFunc != NULL) {
       _heartbeatFunc("Mdv2NcfTrans::_putFieldDataVariables");
@@ -1509,7 +1509,7 @@ string Mdv2NcfTrans::_getCfCompliantName(const string &requestedName)
     compliantName = "ncf_";
     compliantName += requestedName;
   }
-  for (int ii = 0; ii < (int) compliantName.size(); ii++) {
+  for (size_t ii = 0; ii < compliantName.size(); ii++) {
     if (!isalnum(compliantName[ii]) && compliantName[ii] != '_') {
       compliantName[ii] = '_';
     }
@@ -1544,10 +1544,10 @@ string Mdv2NcfTrans::_getUniqueFieldName(const string &requestedName)
 
   // name is already in use, so create a modified version
 
-  for (int ii = 2; ii < 10000; ii++) {
+  for (size_t ii = 2; ii < 10000; ii++) {
 
     char version[128];
-    sprintf(version, "_%d", ii);
+    sprintf(version, "_%ld", ii);
     string uniqueName = requestedName;
     uniqueName += version;
 
@@ -1732,7 +1732,7 @@ int Mdv2NcfTrans::convertToRadxVol(const Mdvx &mdv, RadxVol &vol)
 void Mdv2NcfTrans::_findFieldsWithUniformGeom()
 {
 
-  int nFieldsMdv = _mdv->getMasterHeader().n_fields;
+  size_t nFieldsMdv = _mdv->getMasterHeader().n_fields;
   assert(nFieldsMdv > 0);
   _uniformFieldIndexes.clear();
 
@@ -1743,7 +1743,7 @@ void Mdv2NcfTrans::_findFieldsWithUniformGeom()
   // check other fields against first field
 
   const Mdvx::field_header_t &fhdr0 = _mdv->getField(0)->getFieldHeader();
-  for (int ii = 1; ii < nFieldsMdv; ii++) {
+  for (size_t ii = 1; ii < nFieldsMdv; ii++) {
     const Mdvx::field_header_t &fhdr = _mdv->getField(ii)->getFieldHeader();
     // check for uniform geom
     if (fhdr0.nx != fhdr.nx ||
@@ -1979,7 +1979,7 @@ void Mdv2NcfTrans::_cfRadialSetCalib(RadxVol &vol)
 void Mdv2NcfTrans::_cfRadialAddRays(RadxVol &vol)
 {
 
-  int nFieldsMdv = _mdv->getMasterHeader().n_fields;
+  size_t nFieldsMdv = _mdv->getMasterHeader().n_fields;
   assert(nFieldsMdv > 0);
   const MdvxField &field = *_mdv->getField(0);
   const Mdvx::field_header_t &fhdr = field.getFieldHeader();
@@ -1993,9 +1993,9 @@ void Mdv2NcfTrans::_cfRadialAddRays(RadxVol &vol)
     rparamsAvail = true;
   }
 
-  int nSweeps = fhdr.nz;
-  int nAngles = fhdr.ny;
-  int nRays = nSweeps * nAngles;
+  size_t nSweeps = fhdr.nz;
+  size_t nAngles = fhdr.ny;
+  size_t nRays = nSweeps * nAngles;
 
   vol.setRangeGeom(fhdr.grid_minx, fhdr.grid_dx);
 
@@ -2007,17 +2007,17 @@ void Mdv2NcfTrans::_cfRadialAddRays(RadxVol &vol)
   double startAngle = fhdr.grid_miny;
   double deltaAngle = fhdr.grid_dy;
 
-  int rayCount = 0;
+  size_t rayCount = 0;
 
   // loop through sweeps, and angles in each sweep
 
   vector<RadxRay *> rays;
 
-  for (int isweep = 0; isweep < nSweeps; isweep++) {
+  for (size_t isweep = 0; isweep < nSweeps; isweep++) {
 
     double fixedAngle = vhdr.level[isweep];
     
-    for (int iangle = 0; iangle < nAngles; iangle++, rayCount++) {
+    for (size_t iangle = 0; iangle < nAngles; iangle++, rayCount++) {
 
       // create ray, copying geometry from volume
 
@@ -2120,11 +2120,11 @@ void Mdv2NcfTrans::_addFieldsToRays(RadxVol &vol, vector<RadxRay *> rays)
 {
 
   
-  for (int ii = 0; ii < (int) _uniformFieldIndexes.size(); ii++) {
+  for (size_t ii = 0; ii < _uniformFieldIndexes.size(); ii++) {
     
     // use field numbers from uniform geometry list
     
-    int ifield = _uniformFieldIndexes[ii];
+    size_t ifield = _uniformFieldIndexes[ii];
     
     // copy Mdvx field
     
@@ -2133,9 +2133,9 @@ void Mdv2NcfTrans::_addFieldsToRays(RadxVol &vol, vector<RadxRay *> rays)
     if (_debug) {
       cerr << "Mdv2NcfTrans adding field: " << fhdr.field_name << endl;
     }
-    int nSweeps = fhdr.nz;
-    int nAngles = fhdr.ny;
-    int nGates = fhdr.nx;
+    size_t nSweeps = fhdr.nz;
+    size_t nAngles = fhdr.ny;
+    size_t nGates = fhdr.nx;
     
     string mdvFieldName = fhdr.field_name;
     string mdvLongFieldName = fhdr.field_name_long;
@@ -2153,7 +2153,7 @@ void Mdv2NcfTrans::_addFieldsToRays(RadxVol &vol, vector<RadxRay *> rays)
 
     // check if this field has been specified for translation
     
-    for (int jj = 0; jj < (int) _mdv->_mdv2NcfTransArray.size(); jj++) {
+    for (size_t jj = 0; jj < _mdv->_mdv2NcfTransArray.size(); jj++) {
       // check for match on MDV field name
       const Mdvx::Mdv2NcfFieldTrans &trans = _mdv->_mdv2NcfTransArray[jj];
       if (mdvFieldName.compare(trans.mdvFieldName) == 0 ||
@@ -2212,9 +2212,9 @@ void Mdv2NcfTrans::_addFieldsToRays(RadxVol &vol, vector<RadxRay *> rays)
     // loop through sweeps and angles, adding field to rays
 
     const fl32 *fdata = (const fl32 *) mdvField.getVol();
-    int rayNum = 0;
-    for (int isweep = 0; isweep < nSweeps; isweep++) {
-      for (int iangle = 0; iangle < nAngles;
+    size_t rayNum = 0;
+    for (size_t isweep = 0; isweep < nSweeps; isweep++) {
+      for (size_t iangle = 0; iangle < nAngles;
            iangle++, fdata += nGates, rayNum++) {
         RadxField *rfld = new RadxField(ncfFieldName, ncfUnits);
         rfld->setLongName(ncfLongName);
@@ -2240,7 +2240,7 @@ void Mdv2NcfTrans::_cfRadialAddSweeps(RadxVol &vol)
 
   // get info from field headers
 
-  int nFieldsMdv = _mdv->getMasterHeader().n_fields;
+  size_t nFieldsMdv = _mdv->getMasterHeader().n_fields;
   assert(nFieldsMdv > 0);
   const MdvxField &field = *_mdv->getField(0);
   const Mdvx::field_header_t &fhdr = field.getFieldHeader();
@@ -2256,13 +2256,13 @@ void Mdv2NcfTrans::_cfRadialAddSweeps(RadxVol &vol)
     rparamsAvail = true;
   }
 
-  int nSweeps = fhdr.nz;
-  int nAngles = fhdr.ny;
+  size_t nSweeps = fhdr.nz;
+  size_t nAngles = fhdr.ny;
   double deltaAngle = fhdr.grid_dy;
 
   // loop through sweeps, and angles in each sweep
   
-  for (int isweep = 0; isweep < nSweeps; isweep++) {
+  for (size_t isweep = 0; isweep < nSweeps; isweep++) {
     
     // create sweep
     
@@ -2276,7 +2276,7 @@ void Mdv2NcfTrans::_cfRadialAddSweeps(RadxVol &vol)
     sweep->setSweepNumber(isweep);
     sweep->setFixedAngleDeg(fixedAngle);
 
-    int startIndex = isweep * nAngles;
+    size_t startIndex = isweep * nAngles;
     sweep->setStartRayIndex(startIndex);
     sweep->setEndRayIndex(startIndex + nAngles - 1);
     

@@ -59,7 +59,7 @@ public:
 
   // constructor specifying number of elements in array
 
-  TaArray(int nelem);
+  TaArray(size_t nelem);
 
   // destructor
 
@@ -75,7 +75,7 @@ public:
 
   // Alloc array
 
-  T *alloc(int nelem);
+  T *alloc(size_t nelem);
 
   // free array
 
@@ -83,7 +83,7 @@ public:
 
   // get size
 
-  int size() const { return _nelem; }
+  size_t size() const { return _nelem; }
 
   // get pointer to buffer
 
@@ -93,7 +93,7 @@ public:
 private:
 
   T *_buf;
-  int _nelem;
+  size_t _nelem;
   
   TaArray &_copy(const TaArray &rhs);
 
@@ -113,7 +113,7 @@ TaArray<T>::TaArray()
 // constructor specifying array size
 
 template <class T>
-TaArray<T>::TaArray(int nelem)
+TaArray<T>::TaArray(size_t nelem)
 {
   _buf = new T[nelem];
   _nelem = nelem;
@@ -148,7 +148,7 @@ TaArray<T>& TaArray<T>::operator=(const TaArray<T> &rhs) {
 // allocation
 
 template <class T>
-T *TaArray<T>::alloc(int nelem)
+T *TaArray<T>::alloc(size_t nelem)
 {
   if (nelem == _nelem) {
     return _buf;

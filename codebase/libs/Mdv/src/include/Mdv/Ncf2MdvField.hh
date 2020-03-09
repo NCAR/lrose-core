@@ -185,7 +185,7 @@ protected:
                  const Nc3Var *axisVar,
                  const string &latlonStdName,
                  const Nc3Dim *axisDim,
-                 int &nn,
+                 size_t &nn,
                  double &minVal,
                  double &dVal);
   

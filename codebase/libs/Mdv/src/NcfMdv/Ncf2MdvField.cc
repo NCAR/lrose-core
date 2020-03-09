@@ -653,7 +653,7 @@ int Ncf2MdvField::_setGridDimensions()
 
   // x dimension
   
-  int nx;
+  size_t nx;
   double minx, dx;
   
   if(_setXYAxis("X", _xVar, "longitude", _xDim, nx, minx, dx)) {
@@ -672,7 +672,7 @@ int Ncf2MdvField::_setGridDimensions()
 
   // y dimension
   
-  int ny;
+  size_t ny;
   double miny, dy;
   
   if(_setXYAxis("Y", _yVar, "latitude", _yDim, ny, miny, dy)) {
@@ -705,7 +705,7 @@ int Ncf2MdvField::_setXYAxis(const string &axisName,
                              const Nc3Var *axisVar,
                              const string &latlonStdName,
                              const Nc3Dim *axisDim,
-                             int &nn,
+                             size_t &nn,
                              double &minVal,
                              double &dVal)
   
@@ -844,7 +844,7 @@ void Ncf2MdvField::_setZAxis()
              
   // load up raw coord values
 
-  int nz = _zDim->size();
+  size_t nz = _zDim->size();
   double minz = _zVar->as_double(0);
   double dz = 1.0;
   if (nz > 1) {
@@ -854,7 +854,7 @@ void Ncf2MdvField::_setZAxis()
 
   TaArray<double> vlevels_;
   double *vlevels = vlevels_.alloc(nz);
-  for (int ii = 0; ii < nz; ii++) {
+  for (size_t ii = 0; ii < nz; ii++) {
     vlevels[ii] = _zVar->as_double(ii);
   }
 
@@ -862,7 +862,7 @@ void Ncf2MdvField::_setZAxis()
   _fhdr.grid_minz = minz;
   _fhdr.grid_dz = dz;
 
-  for (int ii = 0; ii < nz; ii++) {
+  for (size_t ii = 0; ii < nz; ii++) {
     _vhdr.level[ii] = vlevels[ii];
     _vhdr.type[ii] = vlevelType;
   }
@@ -883,7 +883,7 @@ void Ncf2MdvField::_setZAxis()
   double mult = _getKmMult(units);
   _fhdr.grid_minz = minz * mult;
   _fhdr.grid_dz = dz * mult;
-  for (int ii = 0; ii < nz; ii++) {
+  for (size_t ii = 0; ii < nz; ii++) {
     _vhdr.level[ii] = vlevels[ii] * mult;
   }
 
@@ -901,16 +901,16 @@ int Ncf2MdvField::_setGridData()
   
   // compute data size, allocate array
 
-  int nPtsVol = _fhdr.nx * _fhdr.ny * _fhdr.nz;
+  size_t nPtsVol = _fhdr.nx * _fhdr.ny * _fhdr.nz;
 
-  int tDimSize = 1; 
+  size_t tDimSize = 1; 
   if (_tVar!= NULL && _tDim != NULL) {
     tDimSize = _tDim->size();
   }
   
   // compute number of points contained in _dataVar
 
-  int nPtsTotal =  _fhdr.nx * _fhdr.ny * _fhdr.nz * tDimSize;
+  size_t nPtsTotal =  _fhdr.nx * _fhdr.ny * _fhdr.nz * tDimSize;
 
   // get scale and offset
 
@@ -997,7 +997,7 @@ int Ncf2MdvField::_setGridData()
       ncbyte *inData = inData_.alloc(nPtsTotal);
       Nc3Bool iret = 0;
 
-      int ndims = _dataVar->num_dims();
+      size_t ndims = _dataVar->num_dims();
       if (ndims == 2) {
         iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
       } else if (ndims == 3) {
@@ -1033,7 +1033,7 @@ int Ncf2MdvField::_setGridData()
 
       inData = inData + _timeIndex * nPtsVol;
 
-      for (int ii = 0; ii < nPtsVol; ii++) {
+      for (size_t ii = 0; ii < nPtsVol; ii++) {
         if ((hasFillValue && inData[ii] == fillValue) ||
             (hasValidMin && inData[ii] < validMin) ||
             (hasValidMax && inData[ii] > validMax)) {
@@ -1110,7 +1110,7 @@ int Ncf2MdvField::_setGridData()
       short *inData = inData_.alloc(nPtsTotal);
       Nc3Bool iret = 0;
     
-      int ndims = _dataVar->num_dims();
+      size_t ndims = _dataVar->num_dims();
       if (ndims == 2) {
         iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
       } else if (ndims == 3) {
@@ -1144,7 +1144,7 @@ int Ncf2MdvField::_setGridData()
       inData = inData + _timeIndex * nPtsVol;
 
       ui16 *ui16Data = (ui16 *) _data;
-      for (int ii = 0; ii < nPtsVol; ii++) {
+      for (size_t ii = 0; ii < nPtsVol; ii++) {
         if ((hasFillValue && inData[ii] == fillValue) ||
             (hasValidMin && inData[ii] < validMin) ||
             (hasValidMax && inData[ii] > validMax)) {
@@ -1215,7 +1215,7 @@ int Ncf2MdvField::_setGridData()
       int *inData = inData_.alloc(nPtsTotal);
       Nc3Bool iret = 0;
 
-      int ndims = _dataVar->num_dims();
+      size_t ndims = _dataVar->num_dims();
       if (ndims == 2) {
         iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
       } else if (ndims == 3) {
@@ -1249,7 +1249,7 @@ int Ncf2MdvField::_setGridData()
       inData = inData + _timeIndex * nPtsVol;
 
       fl32 *fl32Data = (fl32 *) _data;
-      for (int ii = 0; ii < nPtsVol; ii++) {
+      for (size_t ii = 0; ii < nPtsVol; ii++) {
         if ((hasFillValue && inData[ii] == fillValue) ||
             (hasValidMin && inData[ii] < validMin) ||
             (hasValidMax && inData[ii] > validMax)) {
@@ -1269,7 +1269,7 @@ int Ncf2MdvField::_setGridData()
       
       _data_.free();
       _data = _data_.alloc(_fhdr.volume_size);
-      
+
       bool hasFillValue = false;
       float fillValue = -9.0e33;
       Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
@@ -1318,7 +1318,7 @@ int Ncf2MdvField::_setGridData()
       float *inData = inData_.alloc(nPtsTotal);
       Nc3Bool iret = 0;
 
-      int ndims = _dataVar->num_dims();
+      size_t ndims = _dataVar->num_dims();
       if (ndims == 2) {
         iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
       } else if (ndims == 3) {
@@ -1352,7 +1352,7 @@ int Ncf2MdvField::_setGridData()
       inData = inData + _timeIndex * nPtsVol;
       
       fl32 *fl32Data = (fl32 *) _data;
-      for (int ii = 0; ii < nPtsVol; ii++) {
+      for (size_t ii = 0; ii < nPtsVol; ii++) {
         if ((hasFillValue && inData[ii] == fillValue) ||
             (hasValidMin && inData[ii] < validMin) ||
             (hasValidMax && inData[ii] > validMax)) {
@@ -1443,7 +1443,7 @@ int Ncf2MdvField::_setGridData()
       inData = inData + _timeIndex * nPtsVol;
 
       fl32 *fl32Data = (fl32 *) _data;
-      for (int ii = 0; ii < nPtsVol; ii++) {
+      for (size_t ii = 0; ii < nPtsVol; ii++) {
         if ((hasFillValue && inData[ii] == fillValue) ||
             (hasValidMin && inData[ii] < validMin) ||
             (hasValidMax && inData[ii] > validMax)) {
