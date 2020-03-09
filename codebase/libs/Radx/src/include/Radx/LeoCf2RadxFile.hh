@@ -236,16 +236,16 @@ private:
 
   // file handle
 
-  //FILE *_file;
+  FILE *_plainFile;
 
   // private methods
   
   //void _clearRays();
 
   // int _readHeaderData(string &xml);
-  void _findFieldsModel200();
+  //void _findFieldsModel200();
   //void _findFieldsModel70();
-  int _readRayDataModel200();
+  //int _readRayDataModel200();
   //int _readRayDataModel70();
   int _openRead(const string &path);
   void _close();
@@ -266,7 +266,7 @@ private:
   /// Check if specified file is a CfRadialXx file.
   /// Returns true on success, false on failure
   
-  bool isCfRadial2(const string &path);
+  //bool isCfRadial2(const string &path);
     
   //////////////////////////////////////////////////////////////
   /// \name Perform writing:
@@ -290,7 +290,7 @@ private:
   /// Use getDirInUse() for directory to which the data was written.
   /// Use getPathInUse() for path to which the data was written.
 
-  /*  
+  /*
   virtual int writeToDir(const RadxVol &vol,
                          const string &dir,
                          bool addDaySubDir,
@@ -346,11 +346,11 @@ private:
 
   /// Get the date and time from a dorade file path.
   /// returns 0 on success, -1 on failure
-
-  int getTimeFromPath(const string &path, RadxTime &rtime);
+  */
+  //int getTimeFromPath(const string &path, RadxTime &rtime);
 
   //@}
-  */
+ 
 protected:
 private:
 
@@ -529,17 +529,17 @@ private:
 
   // private methods for NcfRadial.cc
   
-  int _writeSweepsToDir(const RadxVol &vol, const string &dir,
-                        bool addDaySubDir, bool addYearSubDir);
-  int _writeSweepToDir(const RadxVol &vol, const string &dir,
-                       bool addDaySubDir, bool addYearSubDir);
+  //int _writeSweepsToDir(const RadxVol &vol, const string &dir,
+  //                      bool addDaySubDir, bool addYearSubDir);
+  //int _writeSweepToDir(const RadxVol &vol, const string &dir,
+  //                     bool addDaySubDir, bool addYearSubDir);
   
   void _clearRays();
-  void _clearSweeps();
-  void _clearCals();
-  void _clearFields();
+  //void _clearSweeps();
+  //void _clearCals();
+  //void _clearFields();
   
-  NcxxType _getNcxxType(Radx::DataType_t dtype);
+  //NcxxType _getNcxxType(Radx::DataType_t dtype);
   
   // private methods for NcfRadial_read.cc
   
@@ -549,11 +549,12 @@ private:
                       int minHour, int maxHour, vector<string> &paths);
 
   int _loadSweepInfo(const vector<string> &paths);
-  int _appendSweepInfo(const string &path);
+ int _appendSweepInfo(const string &path);
 
   void _readRootDimensions();
   void _readGlobalAttributes();
 
+  
   void _readTimes();
   void _readSweepTimes(NcxxGroup &group,
                        vector<double> &times);
@@ -728,6 +729,8 @@ private:
                            const RadxTime &fileTime,
                            int fileMillisecs,
                            const string &dir);
+
+  
 
 };
 

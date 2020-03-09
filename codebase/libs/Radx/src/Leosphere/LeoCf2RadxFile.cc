@@ -101,7 +101,7 @@ void LeoCf2RadxFile::clear()
 {
 
   clearErrStr();
-  _close();
+  //_close();
   _ranges.clear();
   _clearRays();
   _modelStr.clear();
@@ -139,7 +139,7 @@ bool LeoCf2RadxFile::isLeosphereCfRadial2(const string &path)
   
 {
 
-  _close();
+  //_close();
   
   // open file
   
@@ -555,7 +555,7 @@ int LeoCf2RadxFile::_readHeaderData(string &xml)
 
 }
 */
-
+  /*
 ////////////////////////////////////////////////////////////
 // Set up the field names and units for model 200
 
@@ -563,7 +563,7 @@ void LeoCf2RadxFile::_findFieldsModel200()
   
 {
 
-  _fields.clear();
+  _LeosphereFields.clear();
 
   // loop through the column labels
 
@@ -648,7 +648,7 @@ void LeoCf2RadxFile::_findFieldsModel200()
         field.standardName = "upward_wind";
       }
 
-      _fields.push_back(field);
+      _LeosphereFields.push_back(field);
 
     }
 
@@ -656,8 +656,8 @@ void LeoCf2RadxFile::_findFieldsModel200()
 
   // add in the indexes into the ray data
 
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    Field &field = _fields[ii];
+  for (size_t ii = 0; ii < _LeosphereFields.size(); ii++) {
+    Field &field = _LeosphereFields[ii];
     for (size_t jj = 0; jj < _columnLabels.size(); jj++) {
       string search = "m ";
       search += field.label;
@@ -669,8 +669,8 @@ void LeoCf2RadxFile::_findFieldsModel200()
 
   if (_debug) {
     cerr << "Fields:" << endl;
-    for (size_t ii = 0; ii < _fields.size(); ii++) {
-      const Field &field = _fields[ii];
+    for (size_t ii = 0; ii < _LeosphereFields.size(); ii++) {
+      const Field &field = _LeosphereFields[ii];
       cerr << "  Field: " << field.name << endl;
       cerr << "    label: " << field.label << endl;
       cerr << "    orig name: " << field.origName << endl;
@@ -690,188 +690,10 @@ void LeoCf2RadxFile::_findFieldsModel200()
   }
 
 }
+*/
 
 
-////////////////////////////////////////////////////////////
-// Set up the field names and units for model 70
-
-void LeoCf2RadxFile::_findFieldsModel70()
-  
-{
-
-  _fields.clear();
-  _fieldNames.clear();
-  _fieldCols.clear();
-
-  // loop through the column labels, finding the fields and
-  // saving out their information
-
-  for (size_t icol = 0; icol < _columnLabels.size(); icol++) {
-
-    // read the range if possible
-
-    string colLabel = _columnLabels[icol];
-
-    // check for variable with name followed by range bin number
-
-    size_t firstDigitPos = 0;
-    for (size_t jj = 0; jj < colLabel.size(); jj++) {
-      if (isdigit(colLabel[jj])) {
-        firstDigitPos = jj;
-        break;
-      }
-    }
-    
-    size_t lastDigitPos = 0;
-    for (size_t jj = firstDigitPos; jj < colLabel.size(); jj++) {
-      if (isdigit(colLabel[jj])) {
-        lastDigitPos = jj;
-      }
-    }
-
-    if ((firstDigitPos > 0) && (lastDigitPos == colLabel.size() - 1)) {
-      // valid field
-      string fieldName = colLabel.substr(0, firstDigitPos);
-      _fieldNames.insert(fieldName); // adding to field set
-      _fieldCols[colLabel] = icol; // adding to column map
-    }
-
-  } // icol
-
-  if (_verbose) {
-    map<string, size_t>::iterator it;
-    for (it = _fieldCols.begin(); it != _fieldCols.end(); it++) {
-      cerr << "  ==>> fieldName, colIndex: " 
-           << it->first << ", " << it->second << endl;
-    }
-  }
-
-  // loop through the field names set, creating fields for each one
-
-  set<string>::iterator ifield;
-  for (ifield = _fieldNames.begin(); ifield != _fieldNames.end(); ifield++) {
-    
-    string fieldName = *ifield;
-
-    Field field;
-    field.name = fieldName;
-    
-    if (fieldName.find("Vhm") != string::npos) {
-      field.standardName = "Vhm";
-      field.longName = "Vhm";
-      field.units = "m/s";
-    } else if (fieldName.find("dVh") != string::npos) {
-      field.standardName = "dVh";
-      field.longName = "dVh";
-      field.units = "m/s";
-    } else if (fieldName.find("VhMax") != string::npos) {
-      field.standardName = "VhMax";
-      field.longName = "VhMax";
-      field.units = "m/s";
-    } else if (fieldName.find("VhMin") != string::npos) {
-      field.standardName = "VhMin";
-      field.longName = "VhMin";
-      field.units = "m/s";
-    } else if (fieldName.find("Dir") != string::npos) {
-      field.standardName = "Dir";
-      field.longName = "Dir";
-      field.units = "m/s";
-    } else if (fieldName.find("um") != string::npos) {
-      field.standardName = "um";
-      field.longName = "um";
-      field.units = "m/s";
-    } else if (fieldName.find("du") != string::npos) {
-      field.standardName = "du";
-      field.longName = "du";
-      field.units = "m/s";
-    } else if (fieldName.find("vm") != string::npos) {
-      field.standardName = "vm";
-      field.longName = "vm";
-      field.units = "m/s";
-    } else if (fieldName.find("dv") != string::npos) {
-      field.standardName = "dv";
-      field.longName = "dv";
-      field.units = "m/s";
-    } else if (fieldName.find("wm") != string::npos) {
-      field.standardName = "wm";
-      field.longName = "wm";
-      field.units = "m/s";
-    } else if (fieldName.find("dw") != string::npos) {
-      field.standardName = "dw";
-      field.longName = "dw";
-      field.units = "m/s";
-    } else if (fieldName.find("CNRm") != string::npos) {
-      field.standardName = "CNRm";
-      field.longName = "CNRm";
-      field.units = "m/s";
-    } else if (fieldName.find("dCNR") != string::npos) {
-      field.standardName = "dCNR";
-      field.longName = "dCNR";
-      field.units = "m/s";
-    } else if (fieldName.find("CNRmax") != string::npos) {
-      field.standardName = "CNRmax";
-      field.longName = "CNRmax";
-      field.units = "m/s";
-    } else if (fieldName.find("CNRmin") != string::npos) {
-      field.standardName = "CNRmin";
-      field.longName = "CNRmin";
-      field.units = "m/s";
-    } else if (fieldName.find("sigmaFreqm") != string::npos) {
-      field.standardName = "sigmaFreqm";
-      field.longName = "sigmaFreqm";
-      field.units = "m/s";
-    } else if (fieldName.find("Avail") != string::npos) {
-      field.standardName = "Avail";
-      field.longName = "Avail";
-      field.units = "m/s";
-    }
-
-    _fields.push_back(field);
-
-  } // ifield
-  
-  // add in the indexes into the ray data
-  
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    Field &field = _fields[ii];
-    field.index.clear();
-    for (size_t kk = 0; kk < _ranges.size(); kk++) {
-      char searchName[1024];
-      sprintf(searchName, "%s%d", field.name.c_str(), (int) kk + 1);
-      for (size_t jj = 0; jj < _columnLabels.size(); jj++) {
-        if (_columnLabels[jj] == searchName) {
-          field.index.push_back(jj);
-          break;
-        }
-      } // jj
-    } // kk
-  } // ii
-
-  if (_debug) {
-    cerr << "Fields:" << endl;
-    for (size_t ii = 0; ii < _fields.size(); ii++) {
-      const Field &field = _fields[ii];
-      cerr << "  Field: " << field.name << endl;
-      cerr << "    label: " << field.label << endl;
-      cerr << "    name: " << field.name << endl;
-      cerr << "    long name: " << field.longName << endl;
-      cerr << "    standard name: " << field.standardName << endl;
-      cerr << "    units: " << field.units << endl;
-      cerr << "    folds: " << string(field.folds?"Y":"N") << endl;
-      cerr << "    nRanges: " << field.index.size() << endl;
-      if (_verbose) {
-        cerr << "    indexes:";
-        for (size_t kk = 0; kk < field.index.size(); kk++) {
-          cerr << " " << field.index[kk];
-        }
-        cerr << endl;
-      }
-    } // ii
-  }
-
-}
-
-
+/*
 ////////////////////////////////////////////////////////////
 // Read in ray data for model 200
 // Returns 0 on success, -1 on failure
@@ -965,9 +787,9 @@ int LeoCf2RadxFile::_readRayDataModel200()
     
     // fields
 
-    for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+    for (size_t ifield = 0; ifield < _LeosphereFields.size(); ifield++) {
       
-      const Field &field = _fields[ifield];
+      const Field &field = _LeospherFields[ifield];
       
       if (isFieldRequiredOnRead(field.name)) {
         
@@ -1010,7 +832,8 @@ int LeoCf2RadxFile::_readRayDataModel200()
   return 0;
 
 }
-
+*/
+/*
 ////////////////////////////////////////////////////////////
 // Read in ray data for model 70
 // Returns 0 on success, -1 on failure
@@ -1169,7 +992,8 @@ int LeoCf2RadxFile::_readRayDataModel70()
   return 0;
 
 }
-
+*/
+ 
 //////////////////////////////////////
 // open netcdf file for reading
 // Returns 0 on success, -1 on failure
@@ -1179,11 +1003,11 @@ int LeoCf2RadxFile::_openRead(const string &path)
 {
 
   _close();
-  _file = fopen(path.c_str(), "r");
+  _plainFile = fopen(path.c_str(), "r");
   
   // Check that constructor succeeded
   
-  if (_file == NULL) {
+  if (_plainFile == NULL) {
     int errNum = errno;
     _addErrStr("ERROR - LeoCf2RadxFile::_openRead");
     _addErrStr("  Cannot open file for reading, path: ", path);
@@ -1205,13 +1029,14 @@ void LeoCf2RadxFile::_close()
   
   // close file if open
   
-  if (_file) {
-    fclose(_file);
-    _file = NULL;
+  if (_plainFile) {
+    fclose(_plainFile);
+    _plainFile = NULL;
   }
   
 }
 
+/*
 /////////////////////////////////////////////////////////
 // load up the read volume with the data from this object
 
@@ -1309,7 +1134,7 @@ int LeoCf2RadxFile::_loadReadVolume()
   return 0;
   
 }
-
+*/
 /////////////////////////////////////////////////////////
 // Write data from volume to specified directory
 //
@@ -1343,7 +1168,6 @@ int LeoCf2RadxFile::writeToDir(const RadxVol &vol,
   cerr << "  Will write CfRadial file instead" << endl;
 
   // set up NcfRadxFile object
-
   NcfRadxFile ncfFile;
   ncfFile.copyWriteDirectives(*this);
 
@@ -1381,6 +1205,8 @@ int LeoCf2RadxFile::writeToPath(const RadxVol &vol,
   cerr << "  Writing Leosphere format files not supported" << endl;
   cerr << "  Will write CfRadial file instead" << endl;
 
+  cerr << "Not implemented" << endl;
+  /*
   // set up NcfRadxFile object
 
   NcfRadxFile ncfFile;
@@ -1396,7 +1222,8 @@ int LeoCf2RadxFile::writeToPath(const RadxVol &vol,
   _pathInUse = ncfFile.getPathInUse();
 
   return iret;
-
+  */ 
+  return 0;
 }
 
 /////////////////////////////////////////////////////////
@@ -1432,6 +1259,8 @@ int LeoCf2RadxFile::printNative(const string &path, ostream &out,
   
 {
 
+  cout << "Not implemented" << endl;
+  /*
   clear();
 
   // is this a Leosphere file?
@@ -1474,7 +1303,7 @@ int LeoCf2RadxFile::printNative(const string &path, ostream &out,
       }
     }
   } // while
-
+  */
   _close();
   return 0;
 
@@ -1752,7 +1581,7 @@ int LeoCf2RadxFile::readFromPath(const string &path,
   // vector.
 
   vector<string> paths;
-  if (_readAggregateSweeps) {
+  if (_readAggregateSweeps) {    
     int volNum = _getVolumePaths(path, paths);
     if (_debug) {
       cerr << "INFO - _readAggregatePaths" << endl;
@@ -1768,13 +1597,13 @@ int LeoCf2RadxFile::readFromPath(const string &path,
   }
 
   // load sweep information from files
-
+  
   if (_loadSweepInfo(paths)) {
     _addErrStr("ERROR - LeoCf2RadxFile::readFromPath");
     _addErrStr("  Loading sweep info");
     return -1;
   }
-
+  
   // read from all paths
 
   for (size_t ii = 0; ii < paths.size(); ii++) {
@@ -1803,10 +1632,12 @@ int LeoCf2RadxFile::readFromPath(const string &path,
   // set format as read
 
   _fileFormat = FILE_FORMAT_CFRADIAL2;
-
+  
   return 0;
 
 }
+
+
 
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
@@ -1992,6 +1823,7 @@ int LeoCf2RadxFile::_readPath(const string &path, size_t pathNum)
 
 }
 
+
 //////////////////////////////////////////////////////////
 // get list of paths for the volume for the specified path
 // returns the volume number
@@ -2058,7 +1890,7 @@ int LeoCf2RadxFile::_getVolumePaths(const string &path,
   // if time is close to start of day, search previous directory
 
   RadxTime rtime;
-  if (getTimeFromPath(path, rtime)) {
+  if (NcfRadxFile::getTimeFromPath(path, rtime)) {
     return volNum;
   }
   int rhour = rtime.getHour();
@@ -2129,7 +1961,7 @@ void LeoCf2RadxFile::_addToPathList(const string &dir,
     }
 
     RadxTime rtime;
-    if (getTimeFromPath(fileName, rtime)) {
+    if (NcfRadxFile::getTimeFromPath(fileName, rtime)) {
       continue;
     }
     int hour = rtime.getHour();
@@ -2264,6 +2096,7 @@ int LeoCf2RadxFile::_loadSweepInfo(const vector<string> &paths)
   return 0;
 
 }
+
 
 int LeoCf2RadxFile::_appendSweepInfo(const string &path)
 {
@@ -2653,6 +2486,7 @@ void LeoCf2RadxFile::_readSweepsMetaAsInFile()
 
 }
 
+
 ///////////////////////////////////
 // read the sweep meta-data
 // throws exception on error
@@ -2857,6 +2691,7 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
     
 }
 
+  
 //////////////////////////////////////////////////////////////
 // read the root level scalar variables
 // throws exception on read
@@ -2955,6 +2790,7 @@ void LeoCf2RadxFile::_readLidarParameters()
   }
 
 }
+
 
 ///////////////////////////////////
 // read the frequency variable
@@ -3432,6 +3268,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
  }
 
+ 
  ////////////////////////////////////////
  // read the lidar calibrations
  // throws exception on error
@@ -3669,10 +3506,10 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    }
 
  }
-
+ 
  ///////////////////////////////////
  // clear the ray variables
-
+ 
  void LeoCf2RadxFile::_clearRayVariables()
 
  {
@@ -3890,6 +3727,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
  }
 
+ 
  ///////////////////////////////////
  // create the rays to be read in
  // for a sweep, and set meta data
@@ -4082,11 +3920,11 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    } // ii
 
  }
-
+ 
  ////////////////////////////////////////////
  // read the field variables
  // throws exception on error
-
+ 
  void LeoCf2RadxFile::_readFieldVariables(bool metaOnly)
 
  {
@@ -4722,6 +4560,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    }
 
  }
+
 
  //////////////////////////////////////////////////////////////
  // Add fl32 fields to _sweepRays

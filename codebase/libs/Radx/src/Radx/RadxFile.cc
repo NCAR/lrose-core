@@ -46,6 +46,7 @@
 #include <Radx/GemRadxFile.hh>
 #include <Radx/HrdRadxFile.hh>
 #include <Radx/LeoRadxFile.hh>
+#include <Radx/LeoCf2RadxFile.hh>
 #include <Radx/NcxxRadxFile.hh>
 #include <Radx/NcfRadxFile.hh>
 #include <Radx/NexradCmdRadxFile.hh>
@@ -1079,7 +1080,6 @@ int RadxFile::readFromPath(const string &path,
   clearErrStr();
 
   // first check for NetCDF
-
   if (isNetCDF(path)) {
     if (_readFromPathNetCDF(path, vol) == 0) {
       return 0;
@@ -1087,7 +1087,6 @@ int RadxFile::readFromPath(const string &path,
       return -1;
     }
   }
-
   // then check for HDF5
 
   if (isHdf5(path)) {
@@ -1177,6 +1176,33 @@ int RadxFile::_readFromPathNetCDF(const string &path,
       return iret;
     }
   }
+
+  // -----
+  // try Leosphere CFRadial2 next
+
+  {
+    LeoCf2RadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isLeosphereCfRadial2(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read CfRadial2 LEOSPHERE file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // -----
+
 
   // try CF Ncxx next
 
