@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
   // Get the CLI arguments.
 
-  Args *_args = new Args(argc, argv, "GribNc2Mdv");
+  Args *_args = new Args(argc, argv, (char *) "GribNc2Mdv");
   if (!_args->OK) {
     fprintf(stderr, "ERROR: GribNc2Mdv\n");
     fprintf(stderr, "Problem with command line args\n");

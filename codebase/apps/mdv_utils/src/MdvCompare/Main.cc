@@ -140,6 +140,7 @@ int main(int argc, char *argv[]){
       (BFhdr.nz != AFhdr.nz)
       ){
     cerr << argv[1] << " and " << argv[3] << "have different grid sizes.";
+    cerr << "time centroid: " << AMhdr.time_centroid << endl;
     cerr << "Program terminated." << endl;
     exit(-1);
   }

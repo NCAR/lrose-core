@@ -270,7 +270,7 @@ MdvFixTimes::run()
     mdvx.clearWrite(); 
  
 
-    int num_fields;
+    int num_fields = 0;
     if (_params->set_field_names) {
       for (int i = 0; i < _params->field_names_n; i++) {
 	mdvx.addReadField(_params->_field_names[i]);

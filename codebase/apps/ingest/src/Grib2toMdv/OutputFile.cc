@@ -96,7 +96,7 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
     Mdvx::encoding_type_t encoding = mdvEncoding(_paramsPtr->encoding_type);
     Mdvx::compression_type_t compression = mdvCompression(_paramsPtr->compression_type);
 
-    for (int ii = 0; ii < _mdvObj->getNFields(); ii++) {
+    for (size_t ii = 0; ii < _mdvObj->getNFields(); ii++) {
       MdvxField *field = _mdvObj->getField(ii);
       field->convertType(encoding, compression);
     } // ii
@@ -107,7 +107,7 @@ OutputFile::writeVol( time_t genTime, long int leadSecs )
 
     Mdvx::compression_type_t compression = mdvCompression(_paramsPtr->compression_type);
     
-    for (int ii = 0; ii < _mdvObj->getNFields(); ii++) {
+    for (size_t ii = 0; ii < _mdvObj->getNFields(); ii++) {
       MdvxField *field = _mdvObj->getField(ii);
       string fieldName(field->getFieldHeader().field_name);
       // find encoding for this particular fields

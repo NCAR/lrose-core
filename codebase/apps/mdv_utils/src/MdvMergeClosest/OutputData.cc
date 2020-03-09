@@ -70,7 +70,7 @@ void OutputData::init(const Data &data)
 void OutputData::write(const time_t &t)
 {
   // copy all the fields into the MDV data
-  for (int i=0; i<_mdv.getNFields(); ++i)
+  for (size_t i=0; i<_mdv.getNFields(); ++i)
   {
     // make sure it is the one we think it is
     string name = _mdv.getFieldName(i);

@@ -304,13 +304,13 @@ int Mdv2ZebraNetCDF::_remapFields(DsMdvx &mdvx)
     _isLatLon = false;
   }
   MdvxProj proj(mhdr, fhdr0);
-  for (int ifield = 1; ifield < mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 1; ifield < mdvx.getNFields(); ifield++) {
     MdvxField *field = mdvx.getField(ifield);
     field->remap(lut, proj);
   }
 
   int nz = fhdr0.nz;
-  for (int ifield = 1; ifield < mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 1; ifield < mdvx.getNFields(); ifield++) {
     MdvxField *field = mdvx.getField(ifield);
     if (field->getFieldHeader().nz != nz) {
       cerr << "ERROR - field nz differs, field name: "
@@ -467,7 +467,7 @@ int Mdv2ZebraNetCDF::_writeLatLonNetCDF(const DsMdvx mdvx)
   lonVar->add_att("valid_max", 360.0);
 
   vector<Nc3Var *> dataVars;
-  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++) {
     MdvxField *field = mdvx.getField(ifield);
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
     Nc3Var *dataVar =
@@ -524,7 +524,7 @@ int Mdv2ZebraNetCDF::_writeLatLonNetCDF(const DsMdvx mdvx)
 
   // write the field data
 
-  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++) {
     MdvxField *field = mdvx.getField(ifield);
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
     if (_params.debug) {
@@ -696,7 +696,7 @@ int Mdv2ZebraNetCDF::_writeXYNetCDF(const DsMdvx mdvx)
   zSpacingVar->add_att("units", "km");
   
   vector<Nc3Var *> dataVars;
-  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++) {
     MdvxField *field = mdvx.getField(ifield);
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
     Nc3Var *dataVar =
@@ -744,7 +744,7 @@ int Mdv2ZebraNetCDF::_writeXYNetCDF(const DsMdvx mdvx)
 
   // write the field data
   
-  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++) {
     MdvxField *field = mdvx.getField(ifield);
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
     if (_params.debug) {

@@ -126,6 +126,7 @@ void *DsMdvxMsg::assembleReadAllHdrsReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleReadAllHdrsReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -151,13 +152,13 @@ void *DsMdvxMsg::assembleReadAllHdrsReturn(const DsMdvx &mdvx)
   if (_use32BitHeaders) {
     // 32-bit headers
     _addMasterHeader32(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_32);
-    for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
-      _addFieldHeader32(mdvx._fhdrsFile[i],
-                        MDVP_FIELD_HEADER_FILE_PART_32);
-    }
-    for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
-      _addVlevelHeader32(mdvx._vhdrsFile[i],
-                         MDVP_VLEVEL_HEADER_FILE_PART_32);
+    size_t nFields = MIN(mdvx._fhdrsFile.size(), mdvx._vhdrsFile.size());
+    for (size_t i = 0; i < nFields; i++) {
+      Mdvx::field_header_t fhdr = mdvx._fhdrsFile[i];
+      Mdvx::vlevel_header_t vhdr = mdvx._vhdrsFile[i];
+      _addFieldHeader32(fhdr, MDVP_FIELD_HEADER_FILE_PART_32);
+      _addVlevelHeader32(vhdr, MDVP_VLEVEL_HEADER_FILE_PART_32,
+                         fhdr.nz, fhdr.field_name);
     }
     for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
       _addChunkHeader32(mdvx._chdrsFile[i],
@@ -166,13 +167,13 @@ void *DsMdvxMsg::assembleReadAllHdrsReturn(const DsMdvx &mdvx)
   } else {
     // 64-bit headers
     _addMasterHeader64(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_64);
-    for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
-      _addFieldHeader64(mdvx._fhdrsFile[i],
-                        MDVP_FIELD_HEADER_FILE_PART_64);
-    }
-    for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
-      _addVlevelHeader64(mdvx._vhdrsFile[i],
-                         MDVP_VLEVEL_HEADER_FILE_PART_64);
+    size_t nFields = MIN(mdvx._fhdrsFile.size(), mdvx._vhdrsFile.size());
+    for (size_t i = 0; i < nFields; i++) {
+      Mdvx::field_header_t fhdr = mdvx._fhdrsFile[i];
+      Mdvx::vlevel_header_t vhdr = mdvx._vhdrsFile[i];
+      _addFieldHeader64(fhdr, MDVP_FIELD_HEADER_FILE_PART_64);
+      _addVlevelHeader64(vhdr, MDVP_VLEVEL_HEADER_FILE_PART_64,
+                         fhdr.nz, fhdr.field_name);
     }
     for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
       _addChunkHeader64(mdvx._chdrsFile[i],
@@ -295,6 +296,7 @@ void *DsMdvxMsg::assembleReadVolumeReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleReadVolumeReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -448,6 +450,7 @@ void *DsMdvxMsg::assembleReadVsectionReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleReadVsectionReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -592,6 +595,7 @@ void *DsMdvxMsg::assembleWriteReturn(msg_subtype_t subtype,
   
   if (_debug) {
     cerr << "--->> assembleWriteReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -717,6 +721,7 @@ void *DsMdvxMsg::assembleCompileTimeListReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleCompileTimeListReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -848,6 +853,7 @@ void *DsMdvxMsg::assembleCompileTimeHeightReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleCompileTimeHeightReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
   
   clearAll();
@@ -885,7 +891,11 @@ void *DsMdvxMsg::assembleCompileTimeHeightReturn(const DsMdvx &mdvx)
       // add object as single buffer
       
       MemBuf buf;
-      mdvx.writeToBuffer(buf);
+      if (_use32BitHeaders) {
+        mdvx.writeToBuffer32(buf);
+      } else {
+        mdvx.writeToBuffer64(buf);
+      }
       _addSingleBuffer(buf);
       
     } else {
@@ -893,21 +903,23 @@ void *DsMdvxMsg::assembleCompileTimeHeightReturn(const DsMdvx &mdvx)
       if (_use32BitHeaders) {
         // 32-bit
         _addMasterHeader32(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_32);
-        for (int i = 0; i < mdvx.getNFields(); i++) {
-          _addFieldHeader32(mdvx.getFieldByNum(i)->getFieldHeader(),
-                            MDVP_FIELD_HEADER_PART_32);
-          _addVlevelHeader32(mdvx.getFieldByNum(i)->getVlevelHeader(),
-                             MDVP_VLEVEL_HEADER_PART_32);
+        for (size_t i = 0; i < mdvx.getNFields(); i++) {
+          Mdvx::field_header_t fhdr = mdvx.getFieldByNum(i)->getFieldHeader();
+          Mdvx::vlevel_header_t vhdr = mdvx.getFieldByNum(i)->getVlevelHeader();
+          _addFieldHeader32(fhdr, MDVP_FIELD_HEADER_PART_32);
+          _addVlevelHeader32(vhdr, MDVP_VLEVEL_HEADER_PART_32,
+                             fhdr.nz, fhdr.field_name);
           _addFieldData(*mdvx.getFieldByNum(i));
         }
       } else {
         // 64-bit
         _addMasterHeader64(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_64);
-        for (int i = 0; i < mdvx.getNFields(); i++) {
-          _addFieldHeader64(mdvx.getFieldByNum(i)->getFieldHeader(),
-                            MDVP_FIELD_HEADER_PART_64);
-          _addVlevelHeader64(mdvx.getFieldByNum(i)->getVlevelHeader(),
-                             MDVP_VLEVEL_HEADER_PART_64);
+        for (size_t i = 0; i < mdvx.getNFields(); i++) {
+          Mdvx::field_header_t fhdr = mdvx.getFieldByNum(i)->getFieldHeader();
+          Mdvx::vlevel_header_t vhdr = mdvx.getFieldByNum(i)->getVlevelHeader();
+          _addFieldHeader64(fhdr, MDVP_FIELD_HEADER_PART_64);
+          _addVlevelHeader64(vhdr, MDVP_VLEVEL_HEADER_PART_64,
+                             fhdr.nz, fhdr.field_name);
           _addFieldData(*mdvx.getFieldByNum(i));
         }
       }
@@ -1019,6 +1031,7 @@ void *DsMdvxMsg::assembleConvertMdv2NcfReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleConvertMdv2NcfReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -1141,6 +1154,7 @@ void *DsMdvxMsg::assembleConvertNcf2MdvReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleConvertNcf2MdvReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -1262,6 +1276,7 @@ void *DsMdvxMsg::assembleReadAllHdrsNcfReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleReadAllHdrsNcfReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
   
   clearAll();
@@ -1293,30 +1308,30 @@ void *DsMdvxMsg::assembleReadAllHdrsNcfReturn(const DsMdvx &mdvx)
     // add header parts
 
     if (_use32BitHeaders) {
-      // 32-bit
+      // 32-bit headers
       _addMasterHeader32(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_32);
-      for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
-        _addFieldHeader32(mdvx._fhdrsFile[i],
-                          MDVP_FIELD_HEADER_FILE_PART_32);
-      }
-      for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
-        _addVlevelHeader32(mdvx._vhdrsFile[i],
-                           MDVP_VLEVEL_HEADER_FILE_PART_32);
+      size_t nFields = MIN(mdvx._fhdrsFile.size(), mdvx._vhdrsFile.size());
+      for (size_t i = 0; i < nFields; i++) {
+        Mdvx::field_header_t fhdr = mdvx._fhdrsFile[i];
+        Mdvx::vlevel_header_t vhdr = mdvx._vhdrsFile[i];
+        _addFieldHeader32(fhdr, MDVP_FIELD_HEADER_FILE_PART_32);
+        _addVlevelHeader32(vhdr, MDVP_VLEVEL_HEADER_FILE_PART_32,
+                           fhdr.nz, fhdr.field_name);
       }
       for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
         _addChunkHeader32(mdvx._chdrsFile[i],
                           MDVP_CHUNK_HEADER_FILE_PART_32);
       }
     } else {
-      // 64-bit
+      // 64-bit headers
       _addMasterHeader64(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_64);
-      for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
-        _addFieldHeader64(mdvx._fhdrsFile[i],
-                          MDVP_FIELD_HEADER_FILE_PART_64);
-      }
-      for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
-        _addVlevelHeader64(mdvx._vhdrsFile[i],
-                           MDVP_VLEVEL_HEADER_FILE_PART_64);
+      size_t nFields = MIN(mdvx._fhdrsFile.size(), mdvx._vhdrsFile.size());
+      for (size_t i = 0; i < nFields; i++) {
+        Mdvx::field_header_t fhdr = mdvx._fhdrsFile[i];
+        Mdvx::vlevel_header_t vhdr = mdvx._vhdrsFile[i];
+        _addFieldHeader64(fhdr, MDVP_FIELD_HEADER_FILE_PART_64);
+        _addVlevelHeader64(vhdr, MDVP_VLEVEL_HEADER_FILE_PART_64,
+                           fhdr.nz, fhdr.field_name);
       }
       for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
         _addChunkHeader64(mdvx._chdrsFile[i],
@@ -1432,6 +1447,7 @@ void *DsMdvxMsg::assembleReadNcfReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleReadNcfReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -1567,6 +1583,7 @@ void *DsMdvxMsg::assembleReadAllHdrsRadxReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleReadAllHdrsRadxReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
   
   clearAll();
@@ -1598,30 +1615,30 @@ void *DsMdvxMsg::assembleReadAllHdrsRadxReturn(const DsMdvx &mdvx)
     // add header parts
 
     if (_use32BitHeaders) {
-      // 32-bit
+      // 32-bit headers
       _addMasterHeader32(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_32);
-      for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
-        _addFieldHeader32(mdvx._fhdrsFile[i],
-                          MDVP_FIELD_HEADER_FILE_PART_32);
-      }
-      for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
-        _addVlevelHeader32(mdvx._vhdrsFile[i],
-                           MDVP_VLEVEL_HEADER_FILE_PART_32);
+      size_t nFields = MIN(mdvx._fhdrsFile.size(), mdvx._vhdrsFile.size());
+      for (size_t i = 0; i < nFields; i++) {
+        Mdvx::field_header_t fhdr = mdvx._fhdrsFile[i];
+        Mdvx::vlevel_header_t vhdr = mdvx._vhdrsFile[i];
+        _addFieldHeader32(fhdr, MDVP_FIELD_HEADER_FILE_PART_32);
+        _addVlevelHeader32(vhdr, MDVP_VLEVEL_HEADER_FILE_PART_32,
+                           fhdr.nz, fhdr.field_name);
       }
       for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
         _addChunkHeader32(mdvx._chdrsFile[i],
                           MDVP_CHUNK_HEADER_FILE_PART_32);
       }
     } else {
-      // 64-bit
+      // 64-bit headers
       _addMasterHeader64(mdvx._mhdrFile, MDVP_MASTER_HEADER_FILE_PART_64);
-      for (size_t i = 0; i < mdvx._fhdrsFile.size(); i++) {
-        _addFieldHeader64(mdvx._fhdrsFile[i],
-                          MDVP_FIELD_HEADER_FILE_PART_64);
-      }
-      for (size_t i = 0; i < mdvx._vhdrsFile.size(); i++) {
-        _addVlevelHeader64(mdvx._vhdrsFile[i],
-                           MDVP_VLEVEL_HEADER_FILE_PART_64);
+      size_t nFields = MIN(mdvx._fhdrsFile.size(), mdvx._vhdrsFile.size());
+      for (size_t i = 0; i < nFields; i++) {
+        Mdvx::field_header_t fhdr = mdvx._fhdrsFile[i];
+        Mdvx::vlevel_header_t vhdr = mdvx._vhdrsFile[i];
+        _addFieldHeader64(fhdr, MDVP_FIELD_HEADER_FILE_PART_64);
+        _addVlevelHeader64(vhdr, MDVP_VLEVEL_HEADER_FILE_PART_64,
+                           fhdr.nz, fhdr.field_name);
       }
       for (size_t i = 0; i < mdvx._chdrsFile.size(); i++) {
         _addChunkHeader64(mdvx._chdrsFile[i],
@@ -1629,8 +1646,7 @@ void *DsMdvxMsg::assembleReadAllHdrsRadxReturn(const DsMdvx &mdvx)
       }
     }
 
-
-  }
+  } // if (mdvx._internalFormat == Mdvx::FORMAT_NCF)
 
   // add path in use
 
@@ -1738,6 +1754,7 @@ void *DsMdvxMsg::assembleReadRadxReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleReadRadxReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -1879,6 +1896,7 @@ void *DsMdvxMsg::assembleConstrainNcfReturn(const DsMdvx &mdvx)
   
   if (_debug) {
     cerr << "--->> assembleConstrainNcfReturn <<-----" << endl;
+    _printReturnHeaderType(cerr);
   }
 
   clearAll();
@@ -1964,6 +1982,18 @@ void *DsMdvxMsg::assembleErrorReturn(const int requestSubtype,
 
 }
 
+/////////////////////////////////////////
+// print type of headers being returned
+
+void DsMdvxMsg::_printReturnHeaderType(ostream &out) const
+{
+  if (_use32BitHeaders) {
+    out << "=====>> returning 32-bit headers <<=====" << endl;
+  } else {
+    out << "=====>> returning 64-bit headers <<=====" << endl;
+  }
+}
+
 ////////////////////////
 // add headers and data
 
@@ -1975,14 +2005,15 @@ void DsMdvxMsg::_addHdrsAndData(const DsMdvx &mdvx)
   if (_use32BitHeaders) {
     // 32-bit
     _addMasterHeader32(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_32);
-    for (int i = 0; i < mdvx.getNFields(); i++) {
-      _addFieldHeader32(mdvx.getFieldByNum(i)->getFieldHeader(),
-                        MDVP_FIELD_HEADER_PART_32);
-      _addVlevelHeader32(mdvx.getFieldByNum(i)->getVlevelHeader(),
-                         MDVP_VLEVEL_HEADER_PART_32);
+    for (size_t i = 0; i < mdvx.getNFields(); i++) {
+      Mdvx::field_header_t fhdr = mdvx.getFieldByNum(i)->getFieldHeader();
+      Mdvx::vlevel_header_t vhdr = mdvx.getFieldByNum(i)->getVlevelHeader();
+      _addFieldHeader32(fhdr, MDVP_FIELD_HEADER_PART_32);
+      _addVlevelHeader32(vhdr, MDVP_VLEVEL_HEADER_PART_32,
+                         fhdr.nz, fhdr.field_name);
       _addFieldData(*mdvx.getFieldByNum(i));
     }
-    for (int i = 0; i < mdvx.getNChunks(); i++) {
+    for (size_t i = 0; i < mdvx.getNChunks(); i++) {
       _addChunkHeader32(mdvx.getChunkByNum(i)->getHeader(),
                         MDVP_CHUNK_HEADER_PART_32);
       _addChunkData(*mdvx.getChunkByNum(i));
@@ -1990,14 +2021,15 @@ void DsMdvxMsg::_addHdrsAndData(const DsMdvx &mdvx)
   } else {
     // 64-bit
     _addMasterHeader64(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_64);
-    for (int i = 0; i < mdvx.getNFields(); i++) {
-      _addFieldHeader64(mdvx.getFieldByNum(i)->getFieldHeader(),
-                        MDVP_FIELD_HEADER_PART_64);
-      _addVlevelHeader64(mdvx.getFieldByNum(i)->getVlevelHeader(),
-                         MDVP_VLEVEL_HEADER_PART_64);
+    for (size_t i = 0; i < mdvx.getNFields(); i++) {
+      Mdvx::field_header_t fhdr = mdvx.getFieldByNum(i)->getFieldHeader();
+      Mdvx::vlevel_header_t vhdr = mdvx.getFieldByNum(i)->getVlevelHeader();
+      _addFieldHeader64(fhdr, MDVP_FIELD_HEADER_PART_64);
+      _addVlevelHeader64(vhdr, MDVP_VLEVEL_HEADER_PART_64,
+                         fhdr.nz, fhdr.field_name);
       _addFieldData(*mdvx.getFieldByNum(i));
     }
-    for (int i = 0; i < mdvx.getNChunks(); i++) {
+    for (size_t i = 0; i < mdvx.getNChunks(); i++) {
       _addChunkHeader64(mdvx.getChunkByNum(i)->getHeader(),
                         MDVP_CHUNK_HEADER_PART_64);
       _addChunkData(*mdvx.getChunkByNum(i));
@@ -2024,31 +2056,28 @@ void DsMdvxMsg::_addHdrsAndDataExtended(const DsMdvx &mdvx)
     // add single buffer for mdvx object
     
     MemBuf buf;
-    mdvx.writeToBuffer(buf);
+    if (_use32BitHeaders) {
+      mdvx.writeToBuffer32(buf);
+    } else {
+      mdvx.writeToBuffer64(buf);
+    }
     _addSingleBuffer(buf);
     
     // if requested, add headers exactly as in the file
-    for (int i = 0; i < mdvx.getNFields(); i++) {
-      if (mdvx.getFieldByNum(i)->getFieldHeaderFile() != NULL) {
+    for (size_t i = 0; i < mdvx.getNFields(); i++) {
+      const Mdvx::field_header_t *fhdrFile = mdvx.getFieldByNum(i)->getFieldHeaderFile();
+      const Mdvx::vlevel_header_t *vhdrFile = mdvx.getFieldByNum(i)->getVlevelHeaderFile();
+      if (fhdrFile != NULL && vhdrFile != NULL) {
         if (_use32BitHeaders) {
           // 32-bit
-          _addFieldHeader32(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
-                            MDVP_FIELD_HEADER_FILE_FIELD_PART_32);
+          _addFieldHeader32(*fhdrFile, MDVP_FIELD_HEADER_FILE_FIELD_PART_32);
+          _addVlevelHeader32(*vhdrFile, MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32,
+                             fhdrFile->nz, fhdrFile->field_name);
         } else {
           // 64-bit
-          _addFieldHeader64(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
-                            MDVP_FIELD_HEADER_FILE_FIELD_PART_64);
-        }
-      }
-      if (mdvx.getFieldByNum(i)->getVlevelHeaderFile() != NULL) {
-        if (_use32BitHeaders) {
-          // 32-bit
-          _addVlevelHeader32(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
-                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32);
-        } else {
-          // 64-bit
-          _addVlevelHeader64(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
-                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64);
+          _addFieldHeader64(*fhdrFile, MDVP_FIELD_HEADER_FILE_FIELD_PART_64);
+          _addVlevelHeader64(*vhdrFile, MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64,
+                             fhdrFile->nz, fhdrFile->field_name);
         }
       }
     }
@@ -2060,23 +2089,25 @@ void DsMdvxMsg::_addHdrsAndDataExtended(const DsMdvx &mdvx)
       // add master header
       _addMasterHeader32(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_32);
       // add fields
-      for (int i = 0; i < mdvx.getNFields(); i++) {
-        _addFieldHeader32(mdvx.getFieldByNum(i)->getFieldHeader(),
-                          MDVP_FIELD_HEADER_PART_32);
-        _addVlevelHeader32(mdvx.getFieldByNum(i)->getVlevelHeader(),
-                           MDVP_VLEVEL_HEADER_PART_32);
-        if (mdvx.getFieldByNum(i)->getFieldHeaderFile() != NULL) {
-          _addFieldHeader32(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
-                            MDVP_FIELD_HEADER_FILE_FIELD_PART_32);
-        }
-        if (mdvx.getFieldByNum(i)->getVlevelHeaderFile() != NULL) {
-          _addVlevelHeader32(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
-                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32);
+      for (size_t i = 0; i < mdvx.getNFields(); i++) {
+        // field headers
+        Mdvx::field_header_t fhdr = mdvx.getFieldByNum(i)->getFieldHeader();
+        Mdvx::vlevel_header_t vhdr = mdvx.getFieldByNum(i)->getVlevelHeader();
+        _addFieldHeader32(fhdr, MDVP_FIELD_HEADER_PART_32);
+        _addVlevelHeader32(vhdr, MDVP_VLEVEL_HEADER_PART_32,
+                           fhdr.nz, fhdr.field_name);
+        // field headers as in file
+        const Mdvx::field_header_t *fhdrFile = mdvx.getFieldByNum(i)->getFieldHeaderFile();
+        const Mdvx::vlevel_header_t *vhdrFile = mdvx.getFieldByNum(i)->getVlevelHeaderFile();
+        if (fhdrFile != NULL && vhdrFile != NULL) {
+          _addFieldHeader32(*fhdrFile, MDVP_FIELD_HEADER_FILE_FIELD_PART_32);
+          _addVlevelHeader32(*vhdrFile, MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32,
+                             fhdrFile->nz, fhdrFile->field_name);
         }
         _addFieldData(*mdvx.getFieldByNum(i));
       } // i
       // add chunks
-      for (int i = 0; i < mdvx.getNChunks(); i++) {
+      for (size_t i = 0; i < mdvx.getNChunks(); i++) {
         _addChunkHeader32(mdvx.getChunkByNum(i)->getHeader(),
                           MDVP_CHUNK_HEADER_PART_32);
         _addChunkData(*mdvx.getChunkByNum(i));
@@ -2085,24 +2116,26 @@ void DsMdvxMsg::_addHdrsAndDataExtended(const DsMdvx &mdvx)
       // 64-bit
       // add master header
       _addMasterHeader64(mdvx.getMasterHeader(), MDVP_MASTER_HEADER_PART_64);
-      // add fields
-      for (int i = 0; i < mdvx.getNFields(); i++) {
-        _addFieldHeader64(mdvx.getFieldByNum(i)->getFieldHeader(),
-                          MDVP_FIELD_HEADER_PART_64);
-        _addVlevelHeader64(mdvx.getFieldByNum(i)->getVlevelHeader(),
-                           MDVP_VLEVEL_HEADER_PART_64);
-        if (mdvx.getFieldByNum(i)->getFieldHeaderFile() != NULL) {
-          _addFieldHeader64(*(mdvx.getFieldByNum(i)->getFieldHeaderFile()),
-                            MDVP_FIELD_HEADER_FILE_FIELD_PART_64);
-        }
-        if (mdvx.getFieldByNum(i)->getVlevelHeaderFile() != NULL) {
-          _addVlevelHeader64(*(mdvx.getFieldByNum(i)->getVlevelHeaderFile()),
-                             MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64);
+      // fields
+      for (size_t i = 0; i < mdvx.getNFields(); i++) {
+        // field headers
+        Mdvx::field_header_t fhdr = mdvx.getFieldByNum(i)->getFieldHeader();
+        Mdvx::vlevel_header_t vhdr = mdvx.getFieldByNum(i)->getVlevelHeader();
+        _addFieldHeader64(fhdr, MDVP_FIELD_HEADER_PART_64);
+        _addVlevelHeader64(vhdr, MDVP_VLEVEL_HEADER_PART_64,
+                           fhdr.nz, fhdr.field_name);
+        // field headers as in file
+        const Mdvx::field_header_t *fhdrFile = mdvx.getFieldByNum(i)->getFieldHeaderFile();
+        const Mdvx::vlevel_header_t *vhdrFile = mdvx.getFieldByNum(i)->getVlevelHeaderFile();
+        if (fhdrFile != NULL && vhdrFile != NULL) {
+          _addFieldHeader64(*fhdrFile, MDVP_FIELD_HEADER_FILE_FIELD_PART_64);
+          _addVlevelHeader64(*vhdrFile, MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64,
+                             fhdrFile->nz, fhdrFile->field_name);
         }
         _addFieldData(*mdvx.getFieldByNum(i));
       } // i
       // add chunks
-      for (int i = 0; i < mdvx.getNChunks(); i++) {
+      for (size_t i = 0; i < mdvx.getNChunks(); i++) {
         _addChunkHeader64(mdvx.getChunkByNum(i)->getHeader(),
                           MDVP_CHUNK_HEADER_PART_64);
         _addChunkData(*mdvx.getChunkByNum(i));

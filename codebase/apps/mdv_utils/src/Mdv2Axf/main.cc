@@ -105,7 +105,7 @@ int main(int argc, char *argv[]){
     //
     // Time-triggered mode. Makes web display look neat.
     //
-    RealtimeTimeTrigger Trig("Mdv2Axf", P);
+    RealtimeTimeTrigger Trig((char *) "Mdv2Axf", P);
     time_t triggerTime;
     
     while ((triggerTime = Trig.next()) >= 0) {

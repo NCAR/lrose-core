@@ -50,6 +50,7 @@ DsMdvxMsg::DsMdvxMsg(memModel_t mem_model /* = CopyMem */) :
   DsServerMsg(mem_model)
 {
   _use32BitHeaders = false;
+  _loadPartIdLabelMap();
 }
 
 //////////////////////////////////////////
@@ -71,6 +72,16 @@ void DsMdvxMsg::checkParts() const
     // use 64-bit headers as appropriate
     _setUse32BitHeaders(false);
   }
+}
+
+//////////////////////////////////////////////////
+// get the label for a part
+
+string DsMdvxMsg::getLabelForPart(int id) const
+{
+  
+  PartHeaderLabelMap::const_iterator pos = _partIdLabels.find(id);
+  return pos->second;
 }
 
 //////////////////////////////////////////
@@ -174,6 +185,200 @@ bool DsMdvxMsg::_has64BitParts() const
 }
 
 //////////////////////////////////////////
+// load the part header label map
+//
+
+void DsMdvxMsg::_loadPartIdLabelMap()
+{
+
+  _partIdLabels.clear();
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_URL_PART,
+                                       "MDVP_READ_URL_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_ERR_STRING_PART,
+                                       "MDVP_ERR_STRING_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CLIENT_USER_PART,
+                                       "MDVP_CLIENT_USER_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CLIENT_HOST_PART,
+                                       "MDVP_CLIENT_HOST_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CLIENT_IPADDR_PART,
+                                       "MDVP_CLIENT_IPADDR_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FILE_SEARCH_PART_32,
+                                       "MDVP_FILE_SEARCH_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FILE_SEARCH_PART_64,
+                                       "MDVP_FILE_SEARCH_PART_64"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_APP_NAME_PART,
+                                       "MDVP_APP_NAME_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_FORMAT_PART,
+                                       "MDVP_READ_FORMAT_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_WRITE_FORMAT_PART,
+                                       "MDVP_WRITE_FORMAT_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_INTERNAL_FORMAT_PART,
+                                       "MDVP_INTERNAL_FORMAT_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_FIELD_NUM_PART,
+                                       "MDVP_READ_FIELD_NUM_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_FIELD_NAME_PART,
+                                       "MDVP_READ_FIELD_NAME_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_CHUNK_NUM_PART,
+                                       "MDVP_READ_CHUNK_NUM_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_HORIZ_LIMITS_PART,
+                                       "MDVP_READ_HORIZ_LIMITS_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_VLEVEL_LIMITS_PART,
+                                       "MDVP_READ_VLEVEL_LIMITS_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_PLANE_NUM_LIMITS_PART,
+                                       "MDVP_READ_PLANE_NUM_LIMITS_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_COMPOSITE_PART,
+                                       "MDVP_READ_COMPOSITE_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_FILL_MISSING_PART,
+                                       "MDVP_READ_FILL_MISSING_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_ENCODING_PART,
+                                       "MDVP_READ_ENCODING_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_REMAP_PART_32,
+                                       "MDVP_READ_REMAP_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_REMAP_PART_64,
+                                       "MDVP_READ_REMAP_PART_64"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_AUTO_REMAP_TO_LATLON_PART,
+                                       "MDVP_READ_AUTO_REMAP_TO_LATLON_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_FIELD_FILE_HEADERS_PART,
+                                       "MDVP_READ_FIELD_FILE_HEADERS_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_VSECT_WAYPTS_PART_32,
+                                       "MDVP_READ_VSECT_WAYPTS_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_VSECT_WAYPTS_PART_64,
+                                       "MDVP_READ_VSECT_WAYPTS_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_VSECT_NSAMPLES_PART,
+                                       "MDVP_READ_VSECT_NSAMPLES_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_VSECT_MAXSAMPLES_PART,
+                                       "MDVP_READ_VSECT_MAXSAMPLES_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_VSECT_DISABLE_INTERP_PART,
+                                       "MDVP_READ_VSECT_DISABLE_INTERP_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_VSECT_AS_RHI_PART,
+                                       "MDVP_READ_VSECT_AS_RHI_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_AS_SINGLE_BUFFER_PART,
+                                       "MDVP_READ_AS_SINGLE_BUFFER_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_WRITE_OPTIONS_PART,
+                                       "MDVP_WRITE_OPTIONS_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_TIME_LIST_OPTIONS_PART_32,
+                                       "MDVP_TIME_LIST_OPTIONS_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_TIME_LIST_OPTIONS_PART_64,
+                                       "MDVP_TIME_LIST_OPTIONS_PART_64"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_PART_32,
+                                       "MDVP_MASTER_HEADER_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_FILE_PART_32,
+                                       "MDVP_MASTER_HEADER_FILE_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_PART_32,
+                                       "MDVP_FIELD_HEADER_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_PART_32,
+                                       "MDVP_FIELD_HEADER_FILE_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_FIELD_PART_32,
+                                       "MDVP_FIELD_HEADER_FILE_FIELD_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_PART_32,
+                                       "MDVP_VLEVEL_HEADER_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_PART_32,
+                                       "MDVP_VLEVEL_HEADER_FILE_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32,
+                                       "MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_PART_32,
+                                       "MDVP_CHUNK_HEADER_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_FILE_PART_32,
+                                       "MDVP_CHUNK_HEADER_FILE_PART_32"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FIELD_DATA_PART,
+                                       "MDVP_FIELD_DATA_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CHUNK_DATA_PART,
+                                       "MDVP_CHUNK_DATA_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_PART_64,
+                                       "MDVP_MASTER_HEADER_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_FILE_PART_64,
+                                       "MDVP_MASTER_HEADER_FILE_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_PART_64,
+                                       "MDVP_FIELD_HEADER_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_PART_64,
+                                       "MDVP_FIELD_HEADER_FILE_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_FIELD_PART_64,
+                                       "MDVP_FIELD_HEADER_FILE_FIELD_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_PART_64,
+                                       "MDVP_VLEVEL_HEADER_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_PART_64,
+                                       "MDVP_VLEVEL_HEADER_FILE_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64,
+                                       "MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_PART_64,
+                                       "MDVP_CHUNK_HEADER_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_FILE_PART_64,
+                                       "MDVP_CHUNK_HEADER_FILE_PART_64"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VSECT_SAMPLE_PTS_PART_32,
+                                       "MDVP_VSECT_SAMPLE_PTS_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VSECT_SAMPLE_PTS_PART_64,
+                                       "MDVP_VSECT_SAMPLE_PTS_PART_64"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VSECT_SEGMENTS_PART_32,
+                                       "MDVP_VSECT_SEGMENTS_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VSECT_SEGMENTS_PART_64,
+                                       "MDVP_VSECT_SEGMENTS_PART_64"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_VALID_TIMES_PART,
+                                       "MDVP_VALID_TIMES_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_GEN_TIMES_PART,
+                                       "MDVP_GEN_TIMES_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_FORECAST_TIMES_PART,
+                                       "MDVP_FORECAST_TIMES_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_PATH_IN_USE_PART,
+                                       "MDVP_PATH_IN_USE_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_SINGLE_BUFFER_PART,
+                                       "MDVP_SINGLE_BUFFER_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_XML_HEADER_PART,
+                                       "MDVP_XML_HEADER_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_XML_BUFFER_PART,
+                                       "MDVP_XML_BUFFER_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_NO_FILES_FOUND_ON_READ_PART,
+                                       "MDVP_NO_FILES_FOUND_ON_READ_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_DECIMATE_PART,
+                                       "MDVP_READ_DECIMATE_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_VLEVEL_TYPE_PART,
+                                       "MDVP_READ_VLEVEL_TYPE_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_TIME_LIST_ALSO_PART,
+                                       "MDVP_READ_TIME_LIST_ALSO_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_READ_LATEST_VALID_MOD_TIME_PART,
+                                       "MDVP_READ_LATEST_VALID_MOD_TIME_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CONSTRAIN_LEAD_TIMES_PART,
+                                       "MDVP_CONSTRAIN_LEAD_TIMES_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_NCF_HEADER_PART,
+                                       "MDVP_NCF_HEADER_PART"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_NCF_BUFFER_PART,
+                                       "MDVP_NCF_BUFFER_PART"));
+  // _partIdLabels.insert(PartHeaderLabel(MDVP_CONVERT_MDV_TO_NCF_PART,
+  //                                      "MDVP_CONVERT_MDV_TO_NCF_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CLIMO_STATISTIC_TYPE_PART,
+                                       "MDVP_CLIMO_STATISTIC_TYPE_PART"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CLIMO_DATA_RANGE_PART_32,
+                                       "MDVP_CLIMO_DATA_RANGE_PART_32"));
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CLIMO_DATA_RANGE_PART_64,
+                                       "MDVP_CLIMO_DATA_RANGE_PART_64"));
+
+  _partIdLabels.insert(PartHeaderLabel(MDVP_CLIMO_TIME_RANGE_PART,
+                                       "MDVP_CLIMO_TIME_RANGE_PART"));
+
+}
+  
+//////////////////////////////////////////
 // print out main header and parts headers
 //
 
@@ -191,196 +396,9 @@ void DsMdvxMsg::print(ostream &out, const char *spacer) const
     out << "Contains 64-bit header parts" << endl;
   }
 
-  // create map of ids and labels
-
-  PartHeaderLabelMap labels;
-
-  labels.insert(PartHeaderLabel(MDVP_READ_URL_PART,
-				"MDVP_READ_URL_PART"));
-  labels.insert(PartHeaderLabel(MDVP_ERR_STRING_PART,
-				"MDVP_ERR_STRING_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CLIENT_USER_PART,
-				"MDVP_CLIENT_USER_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CLIENT_HOST_PART,
-				"MDVP_CLIENT_HOST_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CLIENT_IPADDR_PART,
-				"MDVP_CLIENT_IPADDR_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_FILE_SEARCH_PART_32,
-				"MDVP_FILE_SEARCH_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_FILE_SEARCH_PART_64,
-				"MDVP_FILE_SEARCH_PART_64"));
-
-  labels.insert(PartHeaderLabel(MDVP_APP_NAME_PART,
-				"MDVP_APP_NAME_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_READ_FORMAT_PART,
-				"MDVP_READ_FORMAT_PART"));
-  labels.insert(PartHeaderLabel(MDVP_WRITE_FORMAT_PART,
-				"MDVP_WRITE_FORMAT_PART"));
-  labels.insert(PartHeaderLabel(MDVP_INTERNAL_FORMAT_PART,
-				"MDVP_INTERNAL_FORMAT_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_READ_FIELD_NUM_PART,
-				"MDVP_READ_FIELD_NUM_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_FIELD_NAME_PART,
-				"MDVP_READ_FIELD_NAME_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_CHUNK_NUM_PART,
-				"MDVP_READ_CHUNK_NUM_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_HORIZ_LIMITS_PART,
-				"MDVP_READ_HORIZ_LIMITS_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_VLEVEL_LIMITS_PART,
-				"MDVP_READ_VLEVEL_LIMITS_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_PLANE_NUM_LIMITS_PART,
-				"MDVP_READ_PLANE_NUM_LIMITS_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_COMPOSITE_PART,
-				"MDVP_READ_COMPOSITE_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_FILL_MISSING_PART,
-				"MDVP_READ_FILL_MISSING_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_ENCODING_PART,
-				"MDVP_READ_ENCODING_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_READ_REMAP_PART_32,
-				"MDVP_READ_REMAP_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_READ_REMAP_PART_64,
-				"MDVP_READ_REMAP_PART_64"));
-
-  labels.insert(PartHeaderLabel(MDVP_READ_AUTO_REMAP_TO_LATLON_PART,
-				"MDVP_READ_AUTO_REMAP_TO_LATLON_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_FIELD_FILE_HEADERS_PART,
-				"MDVP_READ_FIELD_FILE_HEADERS_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_VSECT_WAYPTS_PART_32,
-				"MDVP_READ_VSECT_WAYPTS_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_READ_VSECT_WAYPTS_PART_64,
-				"MDVP_READ_VSECT_WAYPTS_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_READ_VSECT_NSAMPLES_PART,
-				"MDVP_READ_VSECT_NSAMPLES_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_VSECT_MAXSAMPLES_PART,
-				"MDVP_READ_VSECT_MAXSAMPLES_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_VSECT_DISABLE_INTERP_PART,
-				"MDVP_READ_VSECT_DISABLE_INTERP_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_VSECT_AS_RHI_PART,
-				"MDVP_READ_VSECT_AS_RHI_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_AS_SINGLE_BUFFER_PART,
-				"MDVP_READ_AS_SINGLE_BUFFER_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_WRITE_OPTIONS_PART,
-				"MDVP_WRITE_OPTIONS_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_TIME_LIST_OPTIONS_PART_32,
-				"MDVP_TIME_LIST_OPTIONS_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_TIME_LIST_OPTIONS_PART_64,
-				"MDVP_TIME_LIST_OPTIONS_PART_64"));
-
-  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_PART_32,
-				"MDVP_MASTER_HEADER_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_FILE_PART_32,
-				"MDVP_MASTER_HEADER_FILE_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_PART_32,
-				"MDVP_FIELD_HEADER_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_PART_32,
-				"MDVP_FIELD_HEADER_FILE_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_FIELD_PART_32,
-				"MDVP_FIELD_HEADER_FILE_FIELD_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_PART_32,
-				"MDVP_VLEVEL_HEADER_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_PART_32,
-				"MDVP_VLEVEL_HEADER_FILE_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32,
-				"MDVP_VLEVEL_HEADER_FILE_FIELD_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_PART_32,
-				"MDVP_CHUNK_HEADER_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_FILE_PART_32,
-				"MDVP_CHUNK_HEADER_FILE_PART_32"));
-
-  labels.insert(PartHeaderLabel(MDVP_FIELD_DATA_PART,
-				"MDVP_FIELD_DATA_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CHUNK_DATA_PART,
-				"MDVP_CHUNK_DATA_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_PART_64,
-				"MDVP_MASTER_HEADER_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_MASTER_HEADER_FILE_PART_64,
-				"MDVP_MASTER_HEADER_FILE_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_PART_64,
-				"MDVP_FIELD_HEADER_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_PART_64,
-				"MDVP_FIELD_HEADER_FILE_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_FIELD_HEADER_FILE_FIELD_PART_64,
-				"MDVP_FIELD_HEADER_FILE_FIELD_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_PART_64,
-				"MDVP_VLEVEL_HEADER_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_PART_64,
-				"MDVP_VLEVEL_HEADER_FILE_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64,
-				"MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_PART_64,
-				"MDVP_CHUNK_HEADER_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_CHUNK_HEADER_FILE_PART_64,
-				"MDVP_CHUNK_HEADER_FILE_PART_64"));
-
-  labels.insert(PartHeaderLabel(MDVP_VSECT_SAMPLE_PTS_PART_32,
-				"MDVP_VSECT_SAMPLE_PTS_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_VSECT_SAMPLE_PTS_PART_64,
-				"MDVP_VSECT_SAMPLE_PTS_PART_64"));
-  labels.insert(PartHeaderLabel(MDVP_VSECT_SEGMENTS_PART_32,
-				"MDVP_VSECT_SEGMENTS_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_VSECT_SEGMENTS_PART_64,
-				"MDVP_VSECT_SEGMENTS_PART_64"));
-
-  labels.insert(PartHeaderLabel(MDVP_VALID_TIMES_PART,
-				"MDVP_VALID_TIMES_PART"));
-  labels.insert(PartHeaderLabel(MDVP_GEN_TIMES_PART,
-				"MDVP_GEN_TIMES_PART"));
-  labels.insert(PartHeaderLabel(MDVP_FORECAST_TIMES_PART,
-				"MDVP_FORECAST_TIMES_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_PATH_IN_USE_PART,
-				"MDVP_PATH_IN_USE_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_SINGLE_BUFFER_PART,
-				"MDVP_SINGLE_BUFFER_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_XML_HEADER_PART,
-				"MDVP_XML_HEADER_PART"));
-  labels.insert(PartHeaderLabel(MDVP_XML_BUFFER_PART,
-				"MDVP_XML_BUFFER_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_NO_FILES_FOUND_ON_READ_PART,
-				"MDVP_NO_FILES_FOUND_ON_READ_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_READ_DECIMATE_PART,
-				"MDVP_READ_DECIMATE_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_VLEVEL_TYPE_PART,
-				"MDVP_READ_VLEVEL_TYPE_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_TIME_LIST_ALSO_PART,
-				"MDVP_READ_TIME_LIST_ALSO_PART"));
-  labels.insert(PartHeaderLabel(MDVP_READ_LATEST_VALID_MOD_TIME_PART,
-				"MDVP_READ_LATEST_VALID_MOD_TIME_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CONSTRAIN_LEAD_TIMES_PART,
-				"MDVP_CONSTRAIN_LEAD_TIMES_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_NCF_HEADER_PART,
-				"MDVP_NCF_HEADER_PART"));
-  labels.insert(PartHeaderLabel(MDVP_NCF_BUFFER_PART,
-				"MDVP_NCF_BUFFER_PART"));
-  labels.insert(PartHeaderLabel(MDVP_CONVERT_MDV_TO_NCF_PART,
-				"MDVP_CONVERT_MDV_TO_NCF_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_CLIMO_STATISTIC_TYPE_PART,
-				"MDVP_CLIMO_STATISTIC_TYPE_PART"));
-
-  labels.insert(PartHeaderLabel(MDVP_CLIMO_DATA_RANGE_PART_32,
-				"MDVP_CLIMO_DATA_RANGE_PART_32"));
-  labels.insert(PartHeaderLabel(MDVP_CLIMO_DATA_RANGE_PART_64,
-				"MDVP_CLIMO_DATA_RANGE_PART_64"));
-
-  labels.insert(PartHeaderLabel(MDVP_CLIMO_TIME_RANGE_PART,
-				"MDVP_CLIMO_TIME_RANGE_PART"));
-  
   // print parts using the labels
   
-  printPartHeaders(out, spacer, labels);
+  printPartHeaders(out, spacer, _partIdLabels);
 
 }
 

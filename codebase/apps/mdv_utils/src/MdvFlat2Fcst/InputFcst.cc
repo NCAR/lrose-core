@@ -142,7 +142,7 @@ void InputFcst::_updateTimes(Mdvx &fcst_mdvx)
   
   // Update the times in each of the fields
 
-  for (int i = 0; i < fcst_mdvx.getNFields(); ++i)
+  for (size_t i = 0; i < fcst_mdvx.getNFields(); ++i)
   {
     MdvxField *field = fcst_mdvx.getField(i);
     

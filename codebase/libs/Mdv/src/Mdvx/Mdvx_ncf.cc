@@ -962,27 +962,51 @@ int Mdvx::_readAllHeadersNcf(const string &path)
   // First read in the whole file.  We do this because we don't have a way
   // to easily read the field header information without reading the field
   // data also.
+  
+  // create translator
+  
+  Ncf2MdvTrans trans;
+  trans.setDebug(_debug);
+  
+  // perform translation into temporary mdvx object
+  // returns 0 on success, -1 on failure
 
-  if (_readNcf(path)) {
-    _errStr += "ERROR - Mdvx::_readAllHeadersNcf\n";
-    TaStr::AddStr(_errStr, "  Error reading NCF file and translating to MDV");
+  Mdvx mdvx;
+  if (trans.readCf(path, mdvx)) {
+    _errStr += "ERROR - Mdvx::_readNcf\n";
+    TaStr::AddStr(_errStr, "  Path ", path);
+    TaStr::AddStr(_errStr, "  Cannot translate file to MDV");
+    TaStr::AddStr(_errStr, trans.getErrStr());
     return -1;
   }
+
+  // clear this object
+
+  clearFields();
+  clearChunks();
+  _fhdrsFile.clear();
+  _vhdrsFile.clear();
+  _chdrsFile.clear();
   
   // Now fill in the file headers.  This isn't done in the translation because
   // the translation doesn't know that we are reading the entire file to get
   // the headers.
 
-  _mhdrFile = _mhdr;
+  _mhdrFile = mdvx.getMasterHeaderFile();
   
-  for (size_t i = 0; i < _fields.size(); ++i) {
-    MdvxField *field = _fields[i];
-    _fhdrsFile.push_back(field->getFieldHeader());
-    _vhdrsFile.push_back(field->getVlevelHeader());
+  for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
+    MdvxField *field = mdvx.getField(ii);
+    Mdvx::field_header_t fhdr = field->getFieldHeader();
+    Mdvx::vlevel_header_t vhdr = field->getVlevelHeader();
+    addField(new MdvxField(fhdr, vhdr));
+    _fhdrsFile.push_back(fhdr);
+    _vhdrsFile.push_back(vhdr);
   }
   
-  for (size_t i = 0; i < _chunks.size(); ++i) {
-    MdvxChunk *chunk = _chunks[i];
+  for (size_t ii = 0; ii < mdvx.getNChunks(); ii++) {
+    MdvxChunk *chunk = mdvx.getChunkByNum(ii);
+    Mdvx::chunk_header_t chdr = chunk->getHeader();
+    addChunk(new MdvxChunk(chdr));
     _chdrsFile.push_back(chunk->getHeader());
   }
   
@@ -1127,9 +1151,9 @@ int Mdvx::_readAllHeadersRadx(const string &path)
 
   // add field headers
 
-  for (size_t ii = 0; ii < vol.getNFields(); ii++) {
+  for (size_t ifield = 0; ifield < vol.getNFields(); ifield++) {
 
-    RadxField *rfld = vol.getField(ii);
+    RadxField *rfld = vol.getField(ifield);
     Mdvx::field_header_t fhdr;
     Mdvx::vlevel_header_t vhdr;
     MEM_zero(fhdr);
@@ -1199,8 +1223,9 @@ int Mdvx::_readAllHeadersRadx(const string &path)
     
     _fhdrsFile.push_back(fhdr);
     _vhdrsFile.push_back(vhdr);
-
-  } // ii
+    addField(new MdvxField(fhdr, vhdr));
+    
+  } // ifield
   
   _mhdrFile = _mhdr;
 

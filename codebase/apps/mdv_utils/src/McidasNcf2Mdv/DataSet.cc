@@ -1059,6 +1059,8 @@ void DataSet::_printAtt(Nc3Att *att)
     }
   }
   break;
+
+  default: {}
   
   }
   
@@ -1127,6 +1129,15 @@ void DataSet::_printVarVals(Nc3Var *var)
   }
   break;
   
+  case nc3Int64: {
+    cout << "(int64)";
+    int64_t *vals = (int64_t *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
   case nc3Float: {
     cout << "(float)";
     float *vals = (float *) values->base();
@@ -1144,7 +1155,7 @@ void DataSet::_printVarVals(Nc3Var *var)
     }
   }
   break;
-  
+
   }
   
   cout << endl;

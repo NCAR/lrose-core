@@ -61,7 +61,7 @@ protected:
 private:
 
   Params *_params;
-  void _checkStatus(int status, char *exitStr);
+  void _checkStatus(int status, const char *exitStr);
 
 };
 

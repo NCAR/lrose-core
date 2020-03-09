@@ -113,20 +113,35 @@ void Mdvx::printAllHeaders(ostream &out) const
 void Mdvx::printAllFileHeaders(ostream &out) const
 
 {
-  
-  printMasterHeader(_mhdrFile, out);
 
-  for (size_t i = 0; i < _fhdrsFile.size(); i++) {
-    printFieldHeader(_fhdrsFile[i], out);
-  }
-  
-  for (size_t i = 0; i < _fhdrsFile.size(); i++) {
-    printVlevelHeader(_vhdrsFile[i], _fhdrsFile[i].nz,
-		      _fhdrsFile[i].field_name, out);
+  if (_mhdrFile.struct_id != MASTER_HEAD_MAGIC_COOKIE_64) {
+    out << "==>> File master header not yet read" << endl;
+  } else {
+    printMasterHeader(_mhdrFile, out);
   }
 
+  for (size_t i = 0; i < _fhdrsFile.size(); i++) {
+    if (_fhdrsFile[i].struct_id != FIELD_HEAD_MAGIC_COOKIE_64) {
+      out << "==>> File field header not yet read, field num: " << i << endl;
+    } else {
+      printFieldHeader(_fhdrsFile[i], out);
+    }
+    if (_vhdrsFile.size() > i) {
+      if (_vhdrsFile[i].struct_id != VLEVEL_HEAD_MAGIC_COOKIE_64) {
+        out << "==>> File vlevel header not yet read, field num: " << i << endl;
+      } else {
+        printVlevelHeader(_vhdrsFile[i], _fhdrsFile[i].nz,
+                          _fhdrsFile[i].field_name, out);
+      }
+    }
+  }
+  
   for (size_t i = 0; i < _chdrsFile.size(); i++) {
-    printChunkHeader(_chdrsFile[i], out);
+    if (_chdrsFile[i].struct_id != CHUNK_HEAD_MAGIC_COOKIE_64) {
+      out << "==>> File chunk header not yet read, chunk num: " << i << endl;
+    } else {
+      printChunkHeader(_chdrsFile[i], out);
+    }
   }
 
 }
@@ -157,8 +172,8 @@ void Mdvx::printMasterHeader(const master_header_t &mhdr,
 {
 
   out << endl;
-  out << "Master header - 64-bit" << endl;
-  out << "----------------------" << endl;
+  out << "Master header" << endl;
+  out << "-------------" << endl;
   out << endl;
 
   out << "record_len1:          " << mhdr.record_len1 << endl;
@@ -347,8 +362,8 @@ void Mdvx::printFieldHeader(const field_header_t &fhdr,
 {
   
   out << endl;
-  out << "Field header - 64 bit" << endl;
-  out << "---------------------" << endl;
+  out << "Field header" << endl;
+  out << "------------" << endl;
   out << endl;
   out << "field_name_long:        " << fhdr.field_name_long << endl;
   out << "field_name:             " << fhdr.field_name << endl;
@@ -453,7 +468,7 @@ void Mdvx::printFieldHeader(const field_header_32_t &fhdr32,
 {
   
   out << endl;
-  out << "Field header - 32 bit" << endl;
+  out << "Field header - 32-bit" << endl;
   out << "---------------------" << endl;
   out << endl;
   out << "field_name_long:        " << fhdr32.field_name_long << endl;
@@ -658,8 +673,8 @@ void Mdvx::printChunkHeader(const chunk_header_t &chdr,
 {
 
   out << endl;
-  out << "Chunk header - 64-bit" << endl;
-  out << "---------------------" << endl;
+  out << "Chunk header" << endl;
+  out << "------------" << endl;
   out << "record_len1:           " << chdr.record_len1 << endl;
   out << "struct_id:             " << chdr.struct_id << endl;
   out << "chunk_id:              " << chdr.chunk_id << endl;
@@ -678,7 +693,7 @@ void Mdvx::printChunkHeader(const chunk_header_32_t &chdr32,
 {
 
   out << endl;
-  out << "Chunk header - 64-bit" << endl;
+  out << "Chunk header - 32-bit" << endl;
   out << "---------------------" << endl;
   out << "record_len1:           " << chdr32.record_len1 << endl;
   out << "struct_id:             " << chdr32.struct_id << endl;
@@ -1439,7 +1454,7 @@ void Mdvx::printVol(ostream &out,
   
   // fields
   
-  for (int i = 0; i < mdvx->getNFields(); i++) {
+  for (size_t i = 0; i < mdvx->getNFields(); i++) {
 
     MdvxField *field = mdvx->getField(i);
 
@@ -1504,7 +1519,7 @@ void Mdvx::printVolSummary(ostream &out,
   
   // fields
   
-  for (int i = 0; i < mdvx->getNFields(); i++) {
+  for (size_t i = 0; i < mdvx->getNFields(); i++) {
     MdvxField *field = mdvx->getField(i);
     MdvxProj proj(field->getFieldHeader());
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
@@ -2083,7 +2098,7 @@ void Mdvx::printTimeHeight(ostream &out,
   
   // fields
   
-  for (int i = 0; i < mdvx->getNFields(); i++) {
+  for (size_t i = 0; i < mdvx->getNFields(); i++) {
 
     MdvxField *field = mdvx->getField(i);
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();

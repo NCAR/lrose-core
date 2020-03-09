@@ -266,12 +266,12 @@ int MdvCircularFilt::Run ()
       if (_processData(triggerInfo.getIssueTime(), 
 		       triggerInfo.getForecastTime() - triggerInfo.getIssueTime(),
 		       triggerInfo.getFilePath()))
-	{
-	  cerr << "MdvCircularFilt::Run" <<"  Errors in processing time: " <<  triggerInfo.getIssueTime()
-	       << " input file: " << triggerInfo.getFilePath() << endl;
-	  
-	  return 1;
-	}
+      {
+        cerr << "MdvCircularFilt::Run" <<"  Errors in processing time: " <<  triggerInfo.getIssueTime()
+             << " input file: " << triggerInfo.getFilePath() << endl;
+        cerr << "  inputTime: " << DateTime::strm(inputTime) << endl;
+        return 1;
+      }
     } // while
   
   _clear();

@@ -122,7 +122,7 @@ int HtInterp::interpVlevelsToHeight(DsMdvx *mdvObj)
 
   // interpolate each field
 
-  for (int ifield = 0; ifield < mdvObj->getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < mdvObj->getNFields(); ifield++) {
     MdvxField *fld = mdvObj->getField(ifield);
     _interpField(fld, interpPts, htsOut);
   }

@@ -149,6 +149,7 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
           return -1;
         }
         break;
+#ifdef NOTNOW
       case MDVP_CONVERT_NCF_TO_MDV:
         if (_disassembleConvertNcf2Mdv(mdvx)) {
           return -1;
@@ -174,6 +175,7 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
           return -1;
         }
         break;
+#endif
     } // switch
     
   } else {
@@ -217,6 +219,7 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
           return -1;
         }
         break;
+#ifdef NOTNOW
       case MDVP_CONVERT_NCF_TO_MDV:
         if (_disassembleConvertNcf2MdvReturn(mdvx)) {
           return -1;
@@ -242,6 +245,7 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
           return -1;
         }
         break;
+#endif
     } // switch
     
   }
@@ -948,6 +952,8 @@ int DsMdvxMsg::_disassembleConvertMdv2NcfReturn(DsMdvx &mdvx)
 
 }
 
+#ifdef NOTNOW
+
 /////////////////////////////////////////////////////
 // disassemble convert NCF to MDV message,
 // load into Mdvx object
@@ -1361,3 +1367,4 @@ int DsMdvxMsg::_disassembleReadRadxReturn(DsMdvx &mdvx)
 
 }
 
+#endif

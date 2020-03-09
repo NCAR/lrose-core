@@ -672,8 +672,8 @@ public:
   // If you want to alter the headers, make a local copy,
   // amend it and then call the set() functions.
 
-  const Mdvx::field_header_t &getFieldHeader() const { return (_fhdr); }
-  const Mdvx::vlevel_header_t &getVlevelHeader() const { return (_vhdr); }
+  const Mdvx::field_header_t &getFieldHeader() const { return _fhdr; }
+  const Mdvx::vlevel_header_t &getVlevelHeader() const { return _vhdr; }
 
   // Getting pointers to file headers for inspection.
   // Field and vlevel headers exactly as they appear in the file.
@@ -681,9 +681,9 @@ public:
   // the read. They are NULL if not set.
 
   const Mdvx::field_header_t *getFieldHeaderFile() const
-  { return (_fhdrFile); }
+  { return _fhdrFile; }
   const Mdvx::vlevel_header_t *getVlevelHeaderFile() const
-  { return (_vhdrFile); }
+  { return _vhdrFile; }
   
   // setting the entire headers
 
@@ -697,10 +697,10 @@ public:
 
   // getting string parts of the header
 
-  const char *getFieldName() const { return (_fhdr.field_name); }
-  const char *getFieldNameLong() const { return (_fhdr.field_name_long); }
-  const char *getUnits() const { return (_fhdr.units); }
-  const char *getTransform() const { return (_fhdr.transform); }
+  const char *getFieldName() const { return _fhdr.field_name; }
+  const char *getFieldNameLong() const { return _fhdr.field_name_long; }
+  const char *getUnits() const { return _fhdr.units; }
+  const char *getTransform() const { return _fhdr.transform; }
 
   // setting string parts of the header
 
@@ -744,19 +744,20 @@ public:
 
   // access to the data as a volume
   
-  const void *getVol() const { return (_volBuf.getPtr()); }
-  int64_t getVolLen() const { return (_volBuf.getLen()); }
-  int64_t getVolNumValues() const { return (_volBuf.getLen() /
-                                           _fhdr.data_element_nbytes); }
+  const void *getVol() const { return _volBuf.getPtr(); }
+  int64_t getVolLen() const { return _volBuf.getLen(); }
+  int64_t getVolNumValues() const {
+    return (_volBuf.getLen() / _fhdr.data_element_nbytes);
+  }
 
   // access to the data as a plane
   //
   // Note: you must call setPlanePtrs() just prior to
   //       using these functions.
   
-  const void *getPlane(int i) const { return (_planeData[i]); }
-  int64_t getPlaneSize(int i) const { return (_planeSizes[i]); }
-  int64_t getPlaneOffset(int i) const { return (_planeOffsets[i]); }
+  const void *getPlane(int i) const { return _planeData[i]; }
+  int64_t getPlaneSize(int i) const { return _planeSizes[i]; }
+  int64_t getPlaneOffset(int i) const { return _planeOffsets[i]; }
   
   // Set the plane pointers into the data
   //

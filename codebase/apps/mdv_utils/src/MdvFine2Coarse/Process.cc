@@ -101,7 +101,7 @@ int Process::Derive(Params *TDRP, time_t T){
   // information, such as the setup parameters for a radar.
   // Here, we just pass them on from input to output.
   //
-  for (int ii = 0; ii < New.getNChunks(); ii++) {
+  for (size_t ii = 0; ii < New.getNChunks(); ii++) {
     MdvxChunk *chunk = new MdvxChunk(*New.getChunkByNum(ii));
     _Out.addChunk(chunk);
   }

@@ -111,7 +111,7 @@ TXSchoolnet2Spdb::TXSchoolnet2Spdb(int argc, char **argv) : _tokens(0)
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,

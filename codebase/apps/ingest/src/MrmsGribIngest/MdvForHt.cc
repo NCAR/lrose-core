@@ -81,7 +81,7 @@ int MdvForHt::writeVol()
 
   // convert field encoding and compression
   
-  for (int ii = 0; ii < _mdvx.getNFields(); ii++) {
+  for (size_t ii = 0; ii < _mdvx.getNFields(); ii++) {
     // _encodeField(_mdvx.getField(ii));
   }
 

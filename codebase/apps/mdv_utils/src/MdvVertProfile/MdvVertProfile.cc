@@ -115,7 +115,7 @@ MdvVertProfile::MdvVertProfile(int argc, char **argv) :
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,
@@ -573,7 +573,7 @@ bool MdvVertProfile::_readData(DsMdvx &mdvx,
   Mdvx::field_header_t field_hdr0 = mdvx.getField(0)->getFieldHeader();
   Mdvx::vlevel_header_t vlevel_hdr0 = mdvx.getField(0)->getVlevelHeader();
   
-  for (int i = 1; i < mdvx.getNFields(); ++i)
+  for (size_t i = 1; i < mdvx.getNFields(); ++i)
   {
     MdvxField *field = mdvx.getField(i);
     Mdvx::field_header_t field_hdr = field->getFieldHeader();

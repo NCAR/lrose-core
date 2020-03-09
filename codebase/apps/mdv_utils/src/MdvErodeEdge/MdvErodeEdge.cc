@@ -98,7 +98,7 @@ MdvErodeEdge::MdvErodeEdge(int argc, char **argv) :
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,
@@ -551,7 +551,7 @@ void MdvErodeEdge::_fillMissingField(MdvxField &field) const
 
 void MdvErodeEdge::_fillMissingFields(Mdvx &mdvx) const
 {
-  for (int i = 0; i < mdvx.getNFields(); ++i)
+  for (size_t i = 0; i < mdvx.getNFields(); ++i)
   {
     MdvxField *field = mdvx.getField(i);
     
@@ -682,7 +682,7 @@ bool MdvErodeEdge::_processData(const DateTime &trigger_time)
   
   // Write the output file
   
-  for (int i = 0; i < mdvx.getNFields(); ++i)
+  for (size_t i = 0; i < mdvx.getNFields(); ++i)
   {
     MdvxField *field = mdvx.getField(i);
     

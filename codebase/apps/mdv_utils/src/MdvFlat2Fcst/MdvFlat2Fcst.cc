@@ -111,7 +111,7 @@ MdvFlat2Fcst::MdvFlat2Fcst(int argc, char **argv) :
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,
@@ -437,7 +437,7 @@ bool MdvFlat2Fcst::_processData(const TriggerInfo &trigger)
 
 void MdvFlat2Fcst::_updateFieldNames(Mdvx &fcst_mdvx)
 {
-  for (int i = 0; i < fcst_mdvx.getNFields(); ++i)
+  for (size_t i = 0; i < fcst_mdvx.getNFields(); ++i)
   {
     MdvxField *field = fcst_mdvx.getField(i);
     

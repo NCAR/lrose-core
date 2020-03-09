@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
   
   // Get the CLI arguments.
 
-  Args *_args = new Args(argc, argv, "MdvFromCircles");
+  Args *_args = new Args(argc, argv, (char *) "MdvFromCircles");
   if (!_args->OK) {
     fprintf(stderr, "ERROR: MdvFromCircles\n");
     fprintf(stderr, "Problem with command line args\n");

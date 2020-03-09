@@ -37,6 +37,7 @@
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxChunk.hh>
 #include <vector>
+#include <map>
 #include <iostream>
 using namespace std;
 
@@ -59,13 +60,19 @@ public:
     MDVP_WRITE_TO_PATH         = 27140,
     MDVP_COMPILE_TIME_LIST     = 27150,
     MDVP_COMPILE_TIME_HEIGHT   = 27160,
-    MDVP_CONVERT_MDV_TO_NCF    = 27170,
+    MDVP_CONVERT_MDV_TO_NCF    = 27170
+  } msg_subtype_t;
+
+  // the following are deprecated - will be removed later
+  // keep in here for now, so no other enum uses these vals
+ 
+  typedef enum {
     MDVP_CONVERT_NCF_TO_MDV    = 27180,
     MDVP_READ_NCF              = 27200,
     MDVP_READ_RADX             = 27210,
     MDVP_READ_ALL_HDRS_NCF     = 27220,
     MDVP_READ_ALL_HDRS_RADX    = 27230
-  } msg_subtype_t;
+  } msg_subtype_deprecated_t;
 
   typedef enum {
     MDVP_INCOMPLETE_REQUEST  = 30000,
@@ -542,14 +549,23 @@ public:
   
   void checkParts() const;
 
+  // get the label for a part id
+
+  string getLabelForPart(int id) const;
+
 protected:
 
   string _errStr;
 
   mutable bool _use32BitHeaders;  // using 32-bit headers
 
-  void _clearErrStr() { _errStr = ""; }
+  PartHeaderLabelMap _partIdLabels;
+  void _loadPartIdLabelMap();
 
+  void _clearErrStr() { _errStr = ""; }
+  
+  void _printReturnHeaderType(ostream &out) const;
+  
   void _addHdrsAndData(const DsMdvx &mdvx);
   void _addHdrsAndDataExtended(const DsMdvx &mdvx);
 
@@ -622,12 +638,14 @@ protected:
 
   void _addMasterHeader64(const Mdvx::master_header_t & header, int part_id);
   void _addFieldHeader64(const Mdvx::field_header_t & header, int part_id);
-  void _addVlevelHeader64(const Mdvx::vlevel_header_t &header, int part_id);
+  void _addVlevelHeader64(const Mdvx::vlevel_header_t &header, int part_id,
+                          int nz = 0, const char *field_name = "unknown");
   void _addChunkHeader64(const Mdvx::chunk_header_t &header, int part_id);
 
   void _addMasterHeader32(const Mdvx::master_header_t & header, int part_id);
   void _addFieldHeader32(const Mdvx::field_header_t & header, int part_id);
-  void _addVlevelHeader32(const Mdvx::vlevel_header_t &header, int part_id);
+  void _addVlevelHeader32(const Mdvx::vlevel_header_t &header, int part_id,
+                          int nz = 0, const char *field_name = "unknown");
   void _addChunkHeader32(const Mdvx::chunk_header_t &header, int part_id);
 
   void _addFieldData(const MdvxField &field);
@@ -773,6 +791,7 @@ protected:
   int _disassembleConvertMdv2Ncf(DsMdvx &mdvx);
   int _disassembleConvertMdv2NcfReturn(DsMdvx &mdvx);
 
+#ifdef NOTNOW
   int _disassembleConvertNcf2Mdv(DsMdvx &mdvx);
   int _disassembleConvertNcf2MdvReturn(DsMdvx &mdvx);
 
@@ -787,6 +806,7 @@ protected:
   
   int _disassembleReadRadx(DsMdvx &mdvx);
   int _disassembleReadRadxReturn(DsMdvx &mdvx);
+#endif
 
   // print methods
 

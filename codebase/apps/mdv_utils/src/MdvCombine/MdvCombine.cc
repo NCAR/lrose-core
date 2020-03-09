@@ -391,7 +391,7 @@ MdvCombine::execute()
 	  new_field_hdr.proj_rotation = input_field_hdr.proj_rotation;
 
 	  string output_field_name;
-	  if(_params->_field_info[i].field_name != "")
+	  if(strlen(_params->_field_info[i].field_name) > 0)
           {
 	    output_field_name = _params->_field_info[i].field_name;
 	  }
@@ -461,7 +461,7 @@ MdvCombine::execute()
 DsTrigger *MdvCombine::_createTrigger()
 {
 
-  DsTrigger *trigger;
+  DsTrigger *trigger = NULL;
 
   // create the trigger
 

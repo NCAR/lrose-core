@@ -335,8 +335,8 @@ int MdvSigmaP2P::_performConvert() {
 
     // adding the rest fields
 
-    int n_added_fields = outMdvx.getNFields();
-    int n_in_fields = inMdvx.getNFields();
+    size_t n_added_fields = outMdvx.getNFields();
+    size_t n_in_fields = inMdvx.getNFields();
 
     if (n_added_fields < n_in_fields) {
 

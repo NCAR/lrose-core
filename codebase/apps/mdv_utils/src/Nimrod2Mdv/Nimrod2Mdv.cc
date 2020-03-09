@@ -849,7 +849,7 @@ void Nimrod2Mdv::_remap(DsMdvx &mdvx)
 
 {
 
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
     
@@ -1007,7 +1007,7 @@ void Nimrod2Mdv::_autoRemapToLatLon(DsMdvx &mdvx)
   
 {
   
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
     

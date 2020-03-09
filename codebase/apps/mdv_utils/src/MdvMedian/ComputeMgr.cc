@@ -155,7 +155,7 @@ int ComputeMgr::scanFiles(DsMdvxInput &input)
     
     // check sizes
     
-    for (int i = 0; i < inMdvx.getNFields(); i++) {
+    for (size_t i = 0; i < inMdvx.getNFields(); i++) {
       const MdvxField *fld = inMdvx.getField(i);
       const Mdvx::field_header_t &fhdr = fld->getFieldHeader();
       int nPoints = fhdr.nx * fhdr.ny * fhdr.nz;

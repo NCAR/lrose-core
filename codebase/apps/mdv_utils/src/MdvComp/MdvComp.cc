@@ -202,7 +202,7 @@ int MdvComp::Run()
     
     // set output compression
     
-    for (int i = 0; i < outMdvx.getNFields(); i++) {
+    for (size_t i = 0; i < outMdvx.getNFields(); i++) {
       MdvxField *field = outMdvx.getFieldByNum(i);
       field->requestCompression(_params.output_compression_type);
     }
@@ -210,7 +210,7 @@ int MdvComp::Run()
     // add any chunks
 
     outMdvx.clearChunks();
-    for (int i = 0; i < inMdvx.getNChunks(); i++) {
+    for (size_t i = 0; i < inMdvx.getNChunks(); i++) {
       MdvxChunk *chunk = new MdvxChunk(*inMdvx.getChunkByNum(i));
       outMdvx.addChunk(chunk);
     }
@@ -300,7 +300,7 @@ void MdvComp::_computeFullComp(const DsMdvx &inMdvx,
 {
 
 
-  for (int i = 0; i < inMdvx.getNFields(); i++) {
+  for (size_t i = 0; i < inMdvx.getNFields(); i++) {
     MdvxField *field = new MdvxField(*inMdvx.getFieldByNum(i));
     if (_params.debug) {
       cerr << "Creating full composite for field: " <<
@@ -320,7 +320,7 @@ void MdvComp::_computeLayeredComp(const DsMdvx &inMdvx,
   
 {
 
-  for (int ifield = 0; ifield < inMdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < inMdvx.getNFields(); ifield++) {
 
     MdvxField inField(*inMdvx.getFieldByNum(ifield));
     inField.decompress();

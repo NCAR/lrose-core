@@ -1259,7 +1259,7 @@ int OutputMdv::_writeZebraLatLonNetCDF()
   lonVar->add_att("valid_max", 360.0);
 
   vector<Nc3Var *> dataVars;
-  for (int ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
     MdvxField *field = _mdvx.getField(ifield);
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
     Nc3Var *dataVar =
@@ -1323,7 +1323,7 @@ int OutputMdv::_writeZebraLatLonNetCDF()
 
   // write the field data
 
-  for (int ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
     if (dataVars[ifield] == NULL) {
       continue;
     }
@@ -1503,7 +1503,7 @@ int OutputMdv::_writeZebraXYNetCDF()
   zSpacingVar->add_att("units", "km");
   
   vector<Nc3Var *> dataVars;
-  for (int ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
     MdvxField *field = _mdvx.getField(ifield);
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
     Nc3Var *dataVar =
@@ -1558,7 +1558,7 @@ int OutputMdv::_writeZebraXYNetCDF()
 
   // write the field data
   
-  for (int ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < _mdvx.getNFields(); ifield++) {
     if (dataVars[ifield] == NULL) {
       continue;
     }

@@ -30,6 +30,7 @@
 #include <math.h>
 #include <toolsa/str.h>
 #include <toolsa/pjg_flat.h>
+#include <toolsa/DateTime.hh>
 #include <Mdv/MdvxProj.hh>
 
 using namespace std;
@@ -45,7 +46,7 @@ Process::Process(){
 //
 // Main method - process data at a given time.
 //
-int Process::Derive(Params *TDRP_params, TriggerInfo T){
+int Process::Derive(Params *TDRP_params, TriggerInfo T, time_t inputTime){
 
   OutputUrl = STRdup(TDRP_params->OutUrl);
 
@@ -72,6 +73,7 @@ int Process::Derive(Params *TDRP_params, TriggerInfo T){
   if (New.readVolume()){
     cerr << "Read failed at " << utimstr(T.getForecastTime()) << " from ";
     cerr << TDRP_params->TriggerUrl  << endl;
+    cerr << "  inputTime: " << DateTime::strm(inputTime) << endl;
     return -1;
   }     
 

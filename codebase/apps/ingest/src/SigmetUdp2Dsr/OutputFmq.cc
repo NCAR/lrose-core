@@ -248,7 +248,7 @@ int OutputFmq::writeBeam(const Beam &iBeam, int volNum)
   // data
 
   int fieldNum = 0;
-  for (int i = 0; i < iBeam.getNFields(); i++) {
+  for (size_t i = 0; i < iBeam.getNFields(); i++) {
 
     if (Fields::isSupported(iBeam.getVolHdr().momData[i])) {
 

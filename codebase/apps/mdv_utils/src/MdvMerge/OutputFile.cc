@@ -252,7 +252,7 @@ void OutputFile::clearVol()
 {
   Mdvx::coord_t coords = _grid->getCoord();
   int npoints_vol = coords.nx * coords.ny * coords.nz;
-  for (int out_field = 0; out_field < _handle->getNFields(); out_field++) {
+  for (size_t out_field = 0; out_field < _handle->getNFields(); out_field++) {
     MdvxField *field = _handle->getFieldByNum(out_field);
     assert(field != 0);
     Mdvx::field_header_t fhdr = field->getFieldHeader();

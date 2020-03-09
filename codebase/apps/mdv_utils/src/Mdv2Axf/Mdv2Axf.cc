@@ -96,7 +96,7 @@ int Mdv2Axf::Begin(Mdvx::field_header_t Fhdr, time_t t, Params *P){
   //
   fprintf(AxfFp,"%s\n","[DESCRIPTION]");
   fprintf(AxfFp,"%s\n","system[30]=\"ANC\"");
-  fprintf(AxfFp,"product[%d]=\"%s\"\n",
+  fprintf(AxfFp,"product[%ld]=\"%s\"\n",
 	  strlen(P->VarName),P->VarName);
   fprintf(AxfFp,"%s\n","radar[30]=\"Kurnell\"");
 
@@ -141,8 +141,8 @@ int Mdv2Axf::Begin(Mdvx::field_header_t Fhdr, time_t t, Params *P){
   fprintf(AxfFp,"nw_corner_lon=%g\n",nw_lon);
   fprintf(AxfFp,"grid_spacing_units=\"%s\"\n",gridSpacingUnits);
   fprintf(AxfFp,"grid_spacing=%g\n",Fhdr.grid_dx);
-  fprintf(AxfFp,"x_dimension=%d\n",Fhdr.nx);
-  fprintf(AxfFp,"y_dimension=%d\n",Fhdr.ny);
+  fprintf(AxfFp,"x_dimension=%ld\n",Fhdr.nx);
+  fprintf(AxfFp,"y_dimension=%ld\n",Fhdr.ny);
   //
   // The units are specified in the parameter file rather than
   // in the MDV file. This is unfortunate since it means they are
@@ -183,7 +183,7 @@ int Mdv2Axf::Process(time_t t, MdvxField *field,
   float  value;
 
   fprintf(AxfFp,"[GRID%d]\n",GridNum);
-  fprintf(AxfFp,"%s[%d]\n",FieldName, Fhdr.nx);
+  fprintf(AxfFp,"%s[%ld]\n",FieldName, Fhdr.nx);
 
   int NumGood=0, NumTot=0;
   float min,max;

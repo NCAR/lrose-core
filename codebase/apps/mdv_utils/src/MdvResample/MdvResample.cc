@@ -584,7 +584,7 @@ bool MdvResample::_processData(const TriggerInfo &trigger_info)
   
   // Resample the fields and add them to the output file
 
-  for (int i = 0; i < input_file.getNFields(); ++i)
+  for (size_t i = 0; i < input_file.getNFields(); ++i)
   {
     MdvxField *output_field;
     
@@ -666,7 +666,7 @@ bool MdvResample::_readInputFile(DsMdvx &mdvx,
   
   // Make sure that all of the fields use either a lat/lon or flat projection.
 
-  for (int i = 0; i < mdvx.getNFields(); ++i)
+  for (size_t i = 0; i < mdvx.getNFields(); ++i)
   {
     MdvxPjg proj(mdvx.getField(i)->getFieldHeader());
     

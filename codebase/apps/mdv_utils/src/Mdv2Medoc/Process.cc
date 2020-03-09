@@ -208,7 +208,7 @@ int Process::Derive(Params *P, time_t T){
 	      D.day, D.month, D.year, D.hour, D.min, D.sec );
       fprintf(ofp,"          %02d           %02d         %04d           %02d           %02d           %02d\n",
 	      D.day, D.month, D.year, D.hour, D.min, D.sec ); 
-      fprintf(ofp,"%12d %12d %12d %12d %12d %12d\n",
+      fprintf(ofp,"%12ld %12ld %12ld %12d %12d %12d\n",
 	      InMhdr.max_nx, InMhdr.max_ny, InMhdr.max_nz, 0, 
 	      P->In3DFieldName_n, n_2d_fields);
       fprintf(ofp,"%12d %12d %12d %12d %12d %12d\n",

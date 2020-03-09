@@ -241,7 +241,7 @@ int NcGeneric2Mdv::_processFile(const char *input_path)
 
     if (_params.perform_sun_angle_correction) {
       _sunAngle.initForTime(_validTime);
-      for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+      for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
         MdvxField *field = mdvx.getField(ii);
         bool applyCorrection = false;
         for (int jj = 0; jj < _params.sun_correction_fields_n; jj++) {
@@ -1708,7 +1708,7 @@ void NcGeneric2Mdv::_remapOutput(DsMdvx &mdvx)
     return;
   }
 
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
     
@@ -1866,7 +1866,7 @@ void NcGeneric2Mdv::_autoRemapToLatLon(DsMdvx &mdvx)
 
 {
   
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
     

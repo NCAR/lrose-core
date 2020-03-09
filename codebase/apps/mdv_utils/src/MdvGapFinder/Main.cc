@@ -56,7 +56,7 @@ int main(int argc, char **argv)
   CmdArgs C(argc, argv);
 
   Params P;
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   tdrp_override_t override;
   TDRP_init_override(&override);
   if (P.loadFromArgs(argc, argv, override.list, &params_path))

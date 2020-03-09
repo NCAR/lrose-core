@@ -230,7 +230,7 @@ int ClutterRemove::_processFile(DsMdvx &mdvx)
   
   if (_params.remove_from_all_fields) {
     
-    for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+    for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
 
       const MdvxField *ifld = mdvx.getField(ii);
       const Mdvx::field_header_t &ifhdr = ifld->getFieldHeader();
@@ -299,7 +299,7 @@ int ClutterRemove::_processFile(DsMdvx &mdvx)
   
   // compress the fields
 
-  for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+  for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
     mdvx.getField(ii)->requestCompression(_params.output_compression);
   }
 

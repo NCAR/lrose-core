@@ -92,7 +92,7 @@ void Process::outputTotalCounts(Params *params,
     fprintf(fp,"%4.3f\t%4.3f\t", 100.0*double(_totalCounts[ib].count)/double(grandTotal),
 	    100.0*double(runningTotal)/double(grandTotal));
 
-    fprintf(fp,"%d\t%d", _totalCounts[ib].count, runningTotal);
+    fprintf(fp,"%ld\t%d", _totalCounts[ib].count, runningTotal);
     
     fprintf(fp,"\n");
   }
@@ -135,11 +135,11 @@ bool Process::outputIndividualCountsPlain(const string &output_path,
   {
     if (ib == counts.size() - 1)
     {
-      fprintf(fp, "%d\n", counts[ib].count);
+      fprintf(fp, "%ld\n", counts[ib].count);
     }
     else
     {
-      fprintf(fp, "%d\t", counts[ib].count);
+      fprintf(fp, "%ld\t", counts[ib].count);
     }	     
   }
 
@@ -179,7 +179,7 @@ bool Process::outputIndividualCountsFormatted(const string &output_path,
   fprintf(fp, "   Min       Max    Counts\n");
   
   for (size_t ib=0; ib < counts.size(); ib++)
-    fprintf(fp, "%7.2f   %7.2f   %d\n",
+    fprintf(fp, "%7.2f   %7.2f   %ld\n",
 	    counts[ib].start, counts[ib].end, counts[ib].count);
 
   fclose(fp);
@@ -210,7 +210,7 @@ int Process::Derive(Params *params, time_t trigger_time, int leadTime){
     return -1;
   
   Mdvx::field_header_t InFhdr = InField->getFieldHeader();
-  Mdvx::vlevel_header_t InVhdr = InField->getVlevelHeader();
+  // Mdvx::vlevel_header_t InVhdr = InField->getVlevelHeader();
 
   fl32 *InData = (fl32 *) InField->getVol();
 
@@ -385,7 +385,7 @@ MdvxField *Process::readField(const Params *params,
   }     
 
   Mdvx::master_header_t InMhdr = mdvx.getMasterHeader();
-  gen_time = mdvx.getMasterHeader().time_gen;
+  gen_time = InMhdr.time_gen;
   
   //
   // Get the desired field.

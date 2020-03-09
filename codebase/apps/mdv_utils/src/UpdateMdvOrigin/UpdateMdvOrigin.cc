@@ -267,7 +267,7 @@ bool UpdateMdvOrigin::_processData(const DateTime &data_time)
   }
 
 
-  for (int i = 0; i < mdvx.getNFields(); ++i)
+  for (size_t i = 0; i < mdvx.getNFields(); ++i)
   {
     MdvxField *field = mdvx.getField(i);
     Mdvx::field_header_t field_hdr = field->getFieldHeader();

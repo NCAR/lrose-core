@@ -218,9 +218,9 @@ int MdvBlend::_processRealtime() {
   DsLdataInfo shLdata(_params.input_sh_url, _params.debug);
   DsLdataInfo nhLdata(_params.input_nh_url, _params.debug);
 
-  int readOut = outLdata.read();
-  int readSh = shLdata.read();
-  int readNh = nhLdata.read();
+  /* int readOut = */ outLdata.read();
+  /* int readSh = */ shLdata.read();
+  /* int readNh = */ nhLdata.read();
 
   time_t outLatestTime = outLdata.getLatestTime();
   time_t shLatestTime = shLdata.getLatestTime();

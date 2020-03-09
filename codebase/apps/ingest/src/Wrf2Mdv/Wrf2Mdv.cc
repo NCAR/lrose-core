@@ -538,7 +538,7 @@ void Wrf2Mdv::_loadCrossOutputFields(WRFData &inData,
   // get representative field header
   
   const Mdvx::field_header_t *fhdr = NULL;
-  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++)
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++)
   {
     MdvxField *fld = mdvx.getField(ifield);
     // make sure we don't have an edge field
@@ -1356,7 +1356,7 @@ void Wrf2Mdv::_loadUEdgeOutputFields(WRFData &inData,
   // get representative field header
   
   const Mdvx::field_header_t *fhdr = NULL;
-  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++)
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++)
   {
     MdvxField *fld = mdvx.getField(ifield);
   
@@ -1449,7 +1449,7 @@ void Wrf2Mdv::_loadVEdgeOutputFields(WRFData &inData,
   // get representative field header
   
   const Mdvx::field_header_t *fhdr = NULL;
-  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++)
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++)
   {
     MdvxField *fld = mdvx.getField(ifield);
 

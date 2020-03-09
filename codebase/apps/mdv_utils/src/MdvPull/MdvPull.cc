@@ -665,7 +665,7 @@ void MdvPull::_remap(DsMdvx &mdvx)
 
 {
 
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
     
@@ -823,7 +823,7 @@ void MdvPull::_autoRemapToLatLon(DsMdvx &mdvx)
 
 {
   
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
     
@@ -846,7 +846,7 @@ void MdvPull::_convertOutput(DsMdvx &mdvx)
   
 {
 
-  for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+  for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
     
     MdvxField *field = mdvx.getField(ii);
     // Mdvx::field_header_t fhdr = field->getFieldHeader();
@@ -889,7 +889,7 @@ void MdvPull::_convertOutput(DsMdvx &mdvx)
 void MdvPull::_renameFields(DsMdvx &mdvx)
 {
 
-  for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+  for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
 
     MdvxField *field = mdvx.getField(ii);
       

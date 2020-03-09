@@ -83,14 +83,12 @@ int UrlWatcher::init( int argc, char **argv ){
 
 int UrlWatcher::run(){
 
-  int inputTime;
-
   while (!_dataTrigger->endOfData())
   {
     TriggerInfo triggerInfo;
-    inputTime = _dataTrigger->next(triggerInfo);
+    time_t inputTime = _dataTrigger->next(triggerInfo);
     Process S;
-    S.Derive(&TDRP_params, triggerInfo);
+    S.Derive(&TDRP_params, triggerInfo, inputTime);
   } // while
     
   if (_dataTrigger)

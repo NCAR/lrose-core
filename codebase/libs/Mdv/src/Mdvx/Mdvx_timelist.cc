@@ -416,7 +416,7 @@ int Mdvx::_compileTimeHeight()
   fl32 missing = -9999.0;
   vector<MdvxField *> fields;
   
-  for (int ifield = 0; ifield < vsect0.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < vsect0.getNFields(); ifield++) {
     
     const MdvxField *fileField = vsect0.getField(ifield);
     if (fileField != NULL) {
@@ -490,7 +490,7 @@ int Mdvx::_compileTimeHeight()
                     "  Cannot read in vsection for path: ", paths[ix]);
       _errStr += vsect.getErrStr();
       // free up fields
-      for (int jj = 0; jj < (int) fields.size(); jj++) {
+      for (size_t jj = 0; jj < fields.size(); jj++) {
         delete fields[jj];
       }
       return -1;
@@ -498,7 +498,7 @@ int Mdvx::_compileTimeHeight()
 
     // loop through fields
 
-    for (int ifield = 0; ifield < (int) fields.size(); ifield++) {
+    for (size_t ifield = 0; ifield < fields.size(); ifield++) {
       
       MdvxField *fld = fields[ifield];
       field_header_t &fhdr = fld->_fhdr;

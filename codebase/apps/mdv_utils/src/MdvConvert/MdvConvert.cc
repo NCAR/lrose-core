@@ -307,7 +307,7 @@ int MdvConvert:: _processData(time_t inputTime, int leadTime,
   // to force scale change, convert field data to floats
   
   if (_params.force_scale_change) {
-    for (int i = 0; i < mdvx.getNFields(); ++i) {
+    for (size_t i = 0; i < mdvx.getNFields(); ++i) {
       mdvx.getField(i)->convertType(Mdvx::ENCODING_FLOAT32,
                                     Mdvx::COMPRESSION_NONE);
     }
@@ -324,7 +324,7 @@ int MdvConvert:: _processData(time_t inputTime, int leadTime,
   // this does affect the data files
 
   if (_params.remap_z_to_constant_grid) {
-    for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+    for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
       MdvxField *field = mdvx.getField(ii);
       if (field) {
         field->remapVlevels(_params.remap_z_grid.nz,
@@ -737,7 +737,7 @@ void MdvConvert::_remap(DsMdvx &mdvx)
 
 {
 
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
     
@@ -895,7 +895,7 @@ void MdvConvert::_autoRemapToLatLon(DsMdvx &mdvx)
 
 {
   
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
     
@@ -917,7 +917,7 @@ void MdvConvert::_autoRemapToLatLon(DsMdvx &mdvx)
 void MdvConvert::_invertVertically(DsMdvx &mdvx)
 
 {
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
 
     MdvxField *field = mdvx.getField(ifld);
     Mdvx::field_header_t fhdr = field->getFieldHeader();
@@ -961,7 +961,7 @@ void MdvConvert::_overrideOrigin(DsMdvx &mdvx)
 
 {
 
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     MdvxField *field = mdvx.getField(ifld);
     Mdvx::field_header_t fhdr = field->getFieldHeader();
     fhdr.proj_origin_lat = _params.origin_latitude_deg;
@@ -978,7 +978,7 @@ void MdvConvert::_overrideVlevels(DsMdvx &mdvx)
 
 {
 
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     MdvxField *field = mdvx.getField(ifld);
     Mdvx::field_header_t fhdr = field->getFieldHeader();
     Mdvx::vlevel_header_t vhdr = field->getVlevelHeader();
@@ -1054,7 +1054,7 @@ void MdvConvert::_convertOutput(DsMdvx &mdvx)
   
 {
 
-  for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+  for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
     
     MdvxField *field = mdvx.getField(ii);
     // Mdvx::field_header_t fhdr = field->getFieldHeader();
@@ -1104,7 +1104,7 @@ void MdvConvert::_convertOutput(DsMdvx &mdvx)
 void MdvConvert::_renameFields(DsMdvx &mdvx)
 {
 
-  for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+  for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
 
     MdvxField *field = mdvx.getField(ii);
       
@@ -1129,7 +1129,7 @@ void MdvConvert::_applyThresholds(DsMdvx &mdvx)
 
 {
 
-  for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+  for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
 
     MdvxField *field = mdvx.getField(ii);
       
@@ -1436,7 +1436,7 @@ int MdvConvert::_writeCedricFile(DsMdvx &mdvx)
 
   // add fields
 
-  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++) {
 
     MdvxField *field = mdvx.getFieldByNum(ifield);
     if (field == NULL) {

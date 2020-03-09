@@ -621,7 +621,7 @@ bool Mdv2Grib::_processData(const TriggerInfo &trigger_info)
       continue;
     }
 
-    DataConverter *converter;
+    DataConverter *converter = NULL;
     switch (_params->_output_fields[field_num].data_convert_type)
     {
     case Params::DATA_CONVERT_NONE :

@@ -109,7 +109,7 @@ MdvInterpMissing::MdvInterpMissing(int argc, char **argv) :
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,
@@ -289,8 +289,8 @@ void MdvInterpMissing::_fillMissingField(MdvxField &field) const
 	int npts_filled = 0;
 	int npts_in_template = 0;
 	double data_sum = 0.0;
-	double min_data_val;
-	double max_data_val;
+	double min_data_val = 0.0;
+	double max_data_val = 0.0;
 	
 	for (point = _template.getFirstInGrid(x, y,
 					      field_hdr.nx, field_hdr.ny);
@@ -367,7 +367,7 @@ void MdvInterpMissing::_fillMissingField(MdvxField &field) const
 
 void MdvInterpMissing::_fillMissingFields(Mdvx &mdvx) const
 {
-  for (int i = 0; i < mdvx.getNFields(); ++i)
+  for (size_t i = 0; i < mdvx.getNFields(); ++i)
   {
     MdvxField *field = mdvx.getField(i);
     
@@ -509,7 +509,7 @@ bool MdvInterpMissing::_processData(const DateTime &trigger_time)
   
   PMU_auto_register("Writing output file");
   
-  for (int i = 0; i < mdvx.getNFields(); ++i)
+  for (size_t i = 0; i < mdvx.getNFields(); ++i)
   {
     MdvxField *field = mdvx.getField(i);
     

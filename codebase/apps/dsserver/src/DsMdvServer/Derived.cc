@@ -288,7 +288,7 @@ int DsMdvServer::_handleDerivedFields(DsMdvx &mdvx,
     }
   }
 
-  for (int ii = 0; ii < base.getNChunks(); ii++) {
+  for (size_t ii = 0; ii < base.getNChunks(); ii++) {
     MdvxChunk *chunk = base.getChunkByNum(ii);
     if (chunk) {
       MdvxChunk *copy = new MdvxChunk(*chunk);

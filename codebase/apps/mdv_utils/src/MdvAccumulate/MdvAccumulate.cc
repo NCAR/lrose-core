@@ -112,7 +112,7 @@ MdvAccumulate::MdvAccumulate(int argc, char **argv) :
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,
@@ -353,7 +353,7 @@ bool MdvAccumulate::_createAccumulation(const Mdvx &input_file,
 
   DateTime bkgnd_time = DateTime::NEVER;
   
-  for (int field_num = 0; field_num < input_file.getNFields(); ++field_num)
+  for (size_t field_num = 0; field_num < input_file.getNFields(); ++field_num)
   {
     // See if we have a background field available
 
@@ -915,7 +915,7 @@ bool MdvAccumulate::_updateAccumBackground(const DateTime &data_time,
 
   DateTime bkgnd_time = DateTime::NEVER;
   
-  for (int field_num = 0; field_num < accum_file.getNFields(); ++field_num)
+  for (size_t field_num = 0; field_num < accum_file.getNFields(); ++field_num)
   {
     MdvxField *accum_field = accum_file.getField(field_num);
     Mdvx::field_header_t accum_field_hdr = accum_field->getFieldHeader();
@@ -1157,7 +1157,7 @@ bool MdvAccumulate::_updateAccumulation(const Mdvx &input_file,
     cerr << "     expire time: " << DateTime::str(expire_time) << endl;
   }
   
-  for (int field_num = 0; field_num < accum_file.getNFields(); ++field_num)
+  for (size_t field_num = 0; field_num < accum_file.getNFields(); ++field_num)
   {
     MdvxField *field = accum_file.getField(field_num);
     
@@ -1178,7 +1178,7 @@ bool MdvAccumulate::_updateAccumulation(const Mdvx &input_file,
   
   // Update each of the accumulation fields with the new data
 
-  for (int field_num = 0; field_num < input_file.getNFields(); ++field_num)
+  for (size_t field_num = 0; field_num < input_file.getNFields(); ++field_num)
   {
     MdvxField *input_field = input_file.getField(field_num);
     MdvxField *accum_field =

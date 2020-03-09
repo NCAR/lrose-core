@@ -1895,10 +1895,16 @@ int Mdvx::readFromBuffer(const MemBuf &buf)
     master_header_t mhdr;
     memcpy(&mhdr, buf.getPtr(), 2 * sizeof(si32));
     si32 magic_cookie = BE_to_si32(mhdr.struct_id);
-    if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_32) {
-      _is64Bit = false;
-    } else if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_64) {
+    if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_64) {
       _is64Bit = true;
+      if (_debug) {
+        cerr << "  Found 64-bit master header" << endl;
+      }
+    } else if (magic_cookie == MASTER_HEAD_MAGIC_COOKIE_32) {
+      _is64Bit = false;
+      if (_debug) {
+        cerr << "  Found 32-bit master header" << endl;
+      }
     } else {
       _errStr += "ERROR - Mdvx::readFromBuffer.\n";
       _errStr += "  Bad magic cookie in master header.\n";

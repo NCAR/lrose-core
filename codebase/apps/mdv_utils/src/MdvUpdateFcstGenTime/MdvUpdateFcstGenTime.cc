@@ -356,7 +356,7 @@ bool MdvUpdateFcstGenTime::_processData(const TriggerInfo &trigger_info)
   
   // Update the field headers
 
-  for (int i = 0; i < mdvx.getNFields(); ++i)
+  for (size_t i = 0; i < mdvx.getNFields(); ++i)
   {
     MdvxField *field = mdvx.getField(i);
     

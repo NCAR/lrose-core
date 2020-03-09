@@ -295,7 +295,7 @@ void TestMdv::getVsection(const DsURL & url, const DateTime & time)
     vsect.printRequest(cerr);
     vsect.printSampleSummary(cerr);
     cerr << "Nfields: " << vsect.getNFields() << endl;
-    for (int ifield = 0; ifield < vsect.getNFields(); ifield++) {
+    for (size_t ifield = 0; ifield < vsect.getNFields(); ifield++) {
       vsect.printFieldSummary(cerr, ifield);
       vsect.printFieldData(cerr, ifield);
     }

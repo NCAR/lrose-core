@@ -150,8 +150,8 @@ int Blender::blendFiles(DsMdvx &shMdvx, DsMdvx &nhMdvx) {
 
   // check if fields match
 
-  int nFields = shMdvx.getNFields();
-  for (int field_index = 0; field_index < nFields; field_index++) {
+  size_t nFields = shMdvx.getNFields();
+  for (size_t field_index = 0; field_index < nFields; field_index++) {
     MdvxField *shField = shMdvx.getFieldByNum(field_index);
     MdvxField *nhField = nhMdvx.getField(shField->getFieldName());
     if (nhField == NULL) {
@@ -183,7 +183,7 @@ int Blender::blendFiles(DsMdvx &shMdvx, DsMdvx &nhMdvx) {
   double southern_limit = _params.blending_zone.southern_limit;
   double northern_limit = _params.blending_zone.northern_limit;
 
-  for (int field_index = 0; field_index < nFields; field_index++) {
+  for (size_t field_index = 0; field_index < nFields; field_index++) {
     MdvxField *shField = outMdvx.getFieldByNum(field_index);
     MdvxField *nhField = nhMdvx.getFieldByName(shField->getFieldName());
     const Mdvx::field_header_t &sh_fhdr = shField->getFieldHeader();
@@ -519,12 +519,10 @@ bool Blender::_fields_match(
       //  I'm assuming that if the type is set to 0,
       // then it really wasn't set at all and the check should be ignored.
 
-      if (
-        vlevel_hdr1.type[z] != 0 &&
-        vlevel_hdr2.type[z] != 0 &&
-        vlevel_hdr1.type[z] != vlevel_hdr2.type[z] ||
-        vlevel_hdr1.level[z] != vlevel_hdr2.level[z]
-      ) {
+      if ((vlevel_hdr1.type[z] != 0 &&
+           vlevel_hdr2.type[z] != 0 &&
+           vlevel_hdr1.type[z] != vlevel_hdr2.type[z]) ||
+          (vlevel_hdr1.level[z] != vlevel_hdr2.level[z])) {
         stringstream ss;
         ss << "Field vertical levels do not match:" << endl;
         ss << fhdr1.field_name_long << endl;
@@ -553,7 +551,7 @@ char *Blender::_timeStr(const time_t ttime)
 
 {
   if (ttime == -1 || ttime == 0) {
-    return "not set";
+    return (char *) "not set";
   } else {
     return (utimstr(ttime));
   }

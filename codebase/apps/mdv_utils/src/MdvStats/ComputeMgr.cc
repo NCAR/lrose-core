@@ -1518,12 +1518,12 @@ int ComputeMgr::writeOutput() {
 
   int iret = 0;
 
-  int stdNFields = stats_StdDev.getNFields();
-  int meanNFields = stats_Mean.getNFields();
-  int minNFields = stats_Min.getNFields();
-  int maxNFields = stats_Max.getNFields();
-  int sumNFields = stats_Sum.getNFields();
-  int covNFields = stats_Cov.getNFields();
+  size_t stdNFields = stats_StdDev.getNFields();
+  size_t meanNFields = stats_Mean.getNFields();
+  size_t minNFields = stats_Min.getNFields();
+  size_t maxNFields = stats_Max.getNFields();
+  size_t sumNFields = stats_Sum.getNFields();
+  size_t covNFields = stats_Cov.getNFields();
 
   if (stdNFields > 0) {
 
@@ -1596,8 +1596,8 @@ int ComputeMgr::_write(DsMdvx& outMdvx, const string& stats) {
   outMdvx.setDataSetInfo(_params.output_data_set_info);
   outMdvx.setDataSetName(_params.output_data_set_info);
 
-  int nFields = outMdvx.getNFields();
-  for (int i = 0; i < nFields; i++) {
+  size_t nFields = outMdvx.getNFields();
+  for (size_t i = 0; i < nFields; i++) {
 
     MdvxField *field = outMdvx.getField(i);
     field->computeMinAndMax(true);

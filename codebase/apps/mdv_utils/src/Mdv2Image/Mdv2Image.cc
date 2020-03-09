@@ -313,7 +313,7 @@ void Mdv2Image::_output_mdv_obj(const DsMdvx *mdvx)
   
   // fields
   
-  for (int i = 0; i < mdvx->getNFields(); i++) {
+  for (size_t i = 0; i < mdvx->getNFields(); i++) {
     MdvxField *field = mdvx->getField(i);
 
     MdvxProj proj(field->getFieldHeader());

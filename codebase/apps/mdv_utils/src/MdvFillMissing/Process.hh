@@ -42,7 +42,7 @@ public:
   //
   // Main method - run.
   //
-  int Derive(Params *TDRP_params, TriggerInfo T);
+  int Derive(Params *TDRP_params, TriggerInfo T, time_t inputTime);
 
   //
   // Destructor

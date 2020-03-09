@@ -193,7 +193,7 @@ int MdvSurfLevelProj::Run()
     
     // set output compression
     
-    for (int i = 0; i < outMdvx.getNFields(); i++) {
+    for (size_t i = 0; i < outMdvx.getNFields(); i++) {
       MdvxField *field = outMdvx.getFieldByNum(i);
       field->compress(_params.output_compression_type);
     }
@@ -370,7 +370,7 @@ int MdvSurfLevelProj::_doProjection(DsMdvx &inMdvx,
   //
   // Now project all other fields
   //
-  for (int i = 0; i < inMdvx.getNFields(); i++) 
+  for (size_t i = 0; i < inMdvx.getNFields(); i++) 
     {
       PMU_auto_register("Projecting field");
 

@@ -112,7 +112,7 @@ TamdarNcSndg2Spdb::TamdarNcSndg2Spdb(int argc, char **argv) :
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = "unknown";
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,

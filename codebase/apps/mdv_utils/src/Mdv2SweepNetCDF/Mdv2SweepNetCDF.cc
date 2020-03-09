@@ -235,7 +235,7 @@ int Mdv2SweepNetCDF::_checkMdvFile(const DsMdvx &mdvx)
   
   int nx = 0, ny = 0, nz = 0;
   
-  for (int ifield = 0; ifield < mdvx.getNFields(); ifield++) {
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++) {
     
     MdvxField *fld = mdvx.getField(ifield);
     const Mdvx::field_header_t &fhdr = fld->getFieldHeader();

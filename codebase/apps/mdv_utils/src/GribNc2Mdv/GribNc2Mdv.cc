@@ -455,7 +455,7 @@ void GribNc2Mdv::GribNc2MdvFile( char *FilePath ){
 
 }
 
-void GribNc2Mdv::_checkStatus(int status, char *exitStr){
+void GribNc2Mdv::_checkStatus(int status, const char *exitStr){
 
   if (status != NC_NOERR){
     cerr << exitStr << endl;

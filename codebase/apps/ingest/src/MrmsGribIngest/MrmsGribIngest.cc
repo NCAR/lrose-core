@@ -535,7 +535,7 @@ void MrmsGribIngest::_remapProjection(DsMdvx &mdvx)
 
 {
 
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
 
@@ -691,7 +691,7 @@ void MrmsGribIngest::_encodeFields(DsMdvx &mdvx)
 
 {
 
-  for (int ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
     
     MdvxField *field = mdvx.getField(ifld);
     

@@ -797,6 +797,7 @@ void DsMdvxMsg::_addMasterHeader64(const Mdvx::master_header_t &header,
                                    int part_id)
 {
   if (_debug) {
+    cerr << "====>> Part: " << getLabelForPart(part_id) << " <<====" << endl;
     Mdvx::printMasterHeader(header, cerr);
   }
   // make local copy for swapping
@@ -810,6 +811,7 @@ void DsMdvxMsg::_addMasterHeader32(const Mdvx::master_header_t &header,
                                    int part_id)
 {
   if (_debug) {
+    cerr << "====>> Part: " << getLabelForPart(part_id) << " <<====" << endl;
     Mdvx::printMasterHeader(header, cerr);
   }
   // make 32-bit copy
@@ -826,8 +828,9 @@ void DsMdvxMsg::_addMasterHeader32(const Mdvx::master_header_t &header,
 void DsMdvxMsg::_addFieldHeader64(const Mdvx::field_header_t &header,
                                   int part_id)
 {
-  
+
   if (_debug) {
+    cerr << "====>> Part: " << getLabelForPart(part_id) << " <<====" << endl;
     Mdvx::printFieldHeader(header, cerr);
   }
   // make local copy for swapping
@@ -842,6 +845,7 @@ void DsMdvxMsg::_addFieldHeader32(const Mdvx::field_header_t &header,
 {
 
   if (_debug) {
+    cerr << "====>> Part: " << getLabelForPart(part_id) << " <<====" << endl;
     Mdvx::printFieldHeader(header, cerr);
   }
   // make 32-bit copy
@@ -856,8 +860,14 @@ void DsMdvxMsg::_addFieldHeader32(const Mdvx::field_header_t &header,
 // add vlevel header part
 
 void DsMdvxMsg::_addVlevelHeader64(const Mdvx::vlevel_header_t &header,
-                                   int part_id)
+                                   int part_id,
+                                   int nz,
+                                   const char *field_name)
 {
+  if (_debug) {
+    cerr << "====>> Part: " << getLabelForPart(part_id) << " <<====" << endl;
+    Mdvx::printVlevelHeader(header, nz, field_name, cerr);
+  }
   // make local copy for swapping
   Mdvx::vlevel_header_t locHdr = header;
   Mdvx::vlevel_header_to_BE(locHdr);
@@ -866,8 +876,14 @@ void DsMdvxMsg::_addVlevelHeader64(const Mdvx::vlevel_header_t &header,
 }
 
 void DsMdvxMsg::_addVlevelHeader32(const Mdvx::vlevel_header_t &header,
-                                   int part_id)
+                                   int part_id,
+                                   int nz,
+                                   const char *field_name)
 {
+  if (_debug) {
+    cerr << "====>> Part: " << getLabelForPart(part_id) << " <<====" << endl;
+    Mdvx::printVlevelHeader(header, nz, field_name, cerr);
+  }
   // make 32-bit copy
   Mdvx::vlevel_header_32_t hdr32;
   Mdvx::_copyVlevelHeader64to32(header, hdr32);
@@ -883,6 +899,7 @@ void DsMdvxMsg::_addChunkHeader64(const Mdvx::chunk_header_t &header,
                                   int part_id)
 {
   if (_debug) {
+    cerr << "====>> Part: " << getLabelForPart(part_id) << " <<====" << endl;
     Mdvx::printChunkHeader(header, cerr);
   }
   // make local copy for swapping
@@ -896,6 +913,7 @@ void DsMdvxMsg::_addChunkHeader32(const Mdvx::chunk_header_t &header,
                                   int part_id)
 {
   if (_debug) {
+    cerr << "====>> Part: " << getLabelForPart(part_id) << " <<====" << endl;
     Mdvx::printChunkHeader(header, cerr);
   }
   // make 32-bit copy
@@ -1184,6 +1202,7 @@ void DsMdvxMsg::_addNcfHdr(const DsMdvx &mdvx)
   addPart(MDVP_NCF_HEADER_PART, xml.size() + 1, xml.c_str());
   
 }
+
 
 ////////////////////////////
 // add convert mdv2ncf part

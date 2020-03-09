@@ -124,7 +124,7 @@ int InputFile::readFile (const string &file_path)
 
   TaArray<si32> zlevels_;
   si32 *zlevels = zlevels_.alloc(_nz);
-  if (in.fread(zlevels, sizeof(si32), _nz) != _nz) {
+  if (in.fread(zlevels, sizeof(si32), _nz) != (size_t) _nz) {
     cerr << "ERROR - InputFile::readFile" << endl;
     cerr << "  Cannot read zlevels." << endl;
     return -1;
@@ -236,7 +236,7 @@ int InputFile::readFile (const string &file_path)
 
   // read in data
   
-  int npoints = _nx * _ny * _nz;
+  size_t npoints = _nx * _ny * _nz;
   si16 *fieldData = new si16[npoints];
   if (in.fread(fieldData, sizeof(si16), npoints) != npoints) {
     cerr << "ERROR - InputFile::readFile" << endl;
@@ -251,7 +251,7 @@ int InputFile::readFile (const string &file_path)
     delete[] _fieldData;
   }
   _fieldData = new fl32[npoints];
-  for (int i = 0; i < npoints; i++) {
+  for (size_t i = 0; i < npoints; i++) {
     _fieldData[i] = (double) fieldData[i] / (double) varScale;
     if (_fieldData[i] < _params.reflectivity_min_value) {
       _fieldData[i] = _missing;

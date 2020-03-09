@@ -280,8 +280,8 @@ public:
 
   // get number of fields and number of chunks
 
-  int getNFields() const { return (_fields.size()); }
-  int getNChunks() const { return (_chunks.size()); }
+  size_t getNFields() const { return (_fields.size()); }
+  size_t getNChunks() const { return (_chunks.size()); }
 
   // get name of specified field
   // Returns name on success, NULL on failure

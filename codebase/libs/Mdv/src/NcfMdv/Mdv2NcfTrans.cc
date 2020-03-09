@@ -314,7 +314,7 @@ int Mdv2NcfTrans::_parseMdv()
   // For each field we create new ones if necessary
   // otherwise set pointers to the appropriate objects.
   
-  for (int i = 0; i < _mdv->getNFields(); i++) {    
+  for (size_t i = 0; i < _mdv->getNFields(); i++) {    
 
     const MdvxField *field = _mdv->getField(i);     
     const Mdvx::field_header_t &fhdr = field->getFieldHeader();
@@ -793,10 +793,10 @@ int Mdv2NcfTrans::_addDimensions()
   // Add dimensions for chunks
 
   if (_mdv->_ncfOutputMdvChunks) {
-    for (int i = 0; i < _mdv->getNChunks(); i++) {
+    for (size_t i = 0; i < _mdv->getNChunks(); i++) {
       const MdvxChunk *chunk = _mdv->getChunkByNum(i);
       char chunkName[128];
-      sprintf(chunkName, "%s_%.4d", NcfMdv::nbytes_mdv_chunk, i);
+      sprintf(chunkName, "%s_%.4lu", NcfMdv::nbytes_mdv_chunk, i);
       Nc3Dim *chunkDim = _ncFile->add_dim(chunkName, chunk->getSize());
       if (chunkDim == NULL) {
         return -1;
@@ -1107,14 +1107,14 @@ int Mdv2NcfTrans::_addMdvChunkVariables()
     cerr << "Mdv2NcfTrans::addMdvChunkVariables()" << endl;
   }
   
-  for (int i = 0; i < _mdv->getNChunks(); i++) {
+  for (size_t i = 0; i < _mdv->getNChunks(); i++) {
 
-    if (i >= (int) _chunkDims.size()) {
+    if (i >= _chunkDims.size()) {
       break;
     }
     const MdvxChunk *chunk = _mdv->getChunkByNum(i);
     char chunkName[128];
-    sprintf(chunkName, "%s_%.4d", NcfMdv::mdv_chunk, i);
+    sprintf(chunkName, "%s_%.4lu", NcfMdv::mdv_chunk, i);
     
      Nc3Var *chunkVar =
        _ncFile->add_var(chunkName, nc3Byte, _timeDim, _chunkDims[i]);
@@ -1463,9 +1463,9 @@ int Mdv2NcfTrans::_putMdvChunkVariables()
     cerr << "Mdv2NcfTrans::putMdvChunkVariables()" << endl;
   }
   
-  for (int i = 0; i < _mdv->getNChunks(); i++) {
+  for (size_t i = 0; i < _mdv->getNChunks(); i++) {
     
-    if (i >= (int) _chunkVars.size()) {
+    if (i >= _chunkVars.size()) {
       break;
     }
 
