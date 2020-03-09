@@ -583,6 +583,7 @@ bool SweepFile::_updateMdvFieldData(const string &field_name,
   case nc3Char :
   case nc3Int :
   case nc3Double :
+    default:
   {
     cerr << "ERROR: " << method_name << endl;
     cerr << "Don't yet handle this netCDF data type" << endl;

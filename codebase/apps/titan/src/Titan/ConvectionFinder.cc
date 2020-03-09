@@ -290,7 +290,7 @@ int ConvectionFinder::_doWrite(const DsMdvx &inMdvx,
   
   // copy any chunks
   
-  for (int i = 0; i < inMdvx.getNChunks(); i++) {
+  for (size_t i = 0; i < inMdvx.getNChunks(); i++) {
     MdvxChunk *chunk = new MdvxChunk(*inMdvx.getChunkByNum(i));
     outMdvx.addChunk(chunk);
   }

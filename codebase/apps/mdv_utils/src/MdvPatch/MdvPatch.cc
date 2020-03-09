@@ -428,6 +428,7 @@ int MdvPatch::_performPatch(bool fix_data) {
                << inFHdr.units << endl;
             ss << "Missing value: " << inFHdr.missing_data_value << " "
                << inFHdr.units << endl;
+            ss << "HasVlevel: " << has_vlevel<< endl;
             ss << "Data value:    " << in_data[i] << " "
                << inFHdr.units << endl;
             if (fix_data) {

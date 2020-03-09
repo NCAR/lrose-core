@@ -132,7 +132,7 @@ int ComputeMgr::scanFiles(DsMdvxInput &input)
 
     const Mdvx::master_header_t &mhdr = inMdvx.getMasterHeader();
     
-    if (inMdvx.getNFields() != _params.field_names_n) {
+    if ((int) inMdvx.getNFields() != _params.field_names_n) {
       cerr << "ERROR - ComputeMgr::scanFiles" << endl;
       cerr << "  Wrong number of fields in input data" << endl;
       cerr << "  Expecting: " << _params.field_names_n << endl;

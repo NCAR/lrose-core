@@ -230,12 +230,12 @@ int PlanTransform::writeVol(const DsRadarParams &radarParams,
   mdv.addChunks(radarParams, radarCalib, statusXml, _elevArray);
 
   string url = _mdvUrl;
-  bool separateScanTypes = false;
+  // bool separateScanTypes = false;
   if (_params.separate_vert_files &&
       scanMode == SCAN_MODE_VERT) {
     url += PATH_DELIM;
     url += _params.vert_subdirectory;
-    separateScanTypes = true;
+    // separateScanTypes = true;
   } else if (scanMode == SCAN_MODE_RHI) {
     // use path as entered in param file
   } else if (_params.separate_sector_files) {
@@ -245,7 +245,7 @@ int PlanTransform::writeVol(const DsRadarParams &radarParams,
     } else {
       url += _params.sector_subdirectory;
     }
-    separateScanTypes = true;
+    // separateScanTypes = true;
   }
 
   if (mdv.writeVol(url.c_str())) {

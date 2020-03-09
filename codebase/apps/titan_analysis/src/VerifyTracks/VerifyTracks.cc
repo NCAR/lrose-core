@@ -178,7 +178,7 @@ int VerifyTracks::Run ()
 	  doVerify.getDx(), doVerify.getDy());
   fprintf(stdout, "  minx, miny                      : %g, %g\n",
 	  doVerify.getMinx(), doVerify.getMiny());
-  fprintf(stdout, "  nx, ny                          : %ld, %ld\n",
+  fprintf(stdout, "  nx, ny                          : %d, %d\n",
 	  doVerify.getNx(), doVerify.getNy());
   fprintf(stdout, "\n");
 

@@ -647,7 +647,7 @@ int OpticalFlow::_writeResults(DsMdvx &out)
 
   // convert and compress the fields
   
-  for (int ii = 0; ii < out.getNFields(); ii++) {
+  for (size_t ii = 0; ii < out.getNFields(); ii++) {
     MdvxField *field = out.getField(ii);
     if (_params.output_encoding_type == Params::ENCODING_INT8) {
       field->convertDynamic(Mdvx::ENCODING_INT8,

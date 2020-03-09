@@ -322,8 +322,8 @@ double UpdateStormFields::_calculateStormDistance(tstorm_spdb_header_t *storm_hd
   // centroid of the storm.  The shortest distance here will determine which
   // radial from the base storm to use as the closest radial.
 
-  double min_distance;
-  int base_radial;
+  double min_distance = 0;
+  int base_radial = 0;
   
   for (int i = 0; i < base_hdr->n_poly_sides; i++)
   {

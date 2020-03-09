@@ -307,7 +307,7 @@ void RadMon::_printBeam(int contents,
             fprintf(stdout, "\n%10s %8s %4s %5s %5s\n",
                     "Date", "Time", "Vnum", "az", "elev");
           } else {
-            fprintf(stdout, "\n%10s %8s %5s %5s\n",
+            fprintf(stdout, "\n%10s %8s %5s\n",
                     "Date", "Time", "elev");
           }
         }

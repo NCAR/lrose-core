@@ -35,13 +35,6 @@
 #include "verify_grid.h"
 
 /*
- * macro to constrain value to given limits
- */
-
-#define CONSTRAIN(x, low, high) if ((x) < (low)) (x) = (low); \
-                                else if ((x) > (high)) (x) = (high)
-
-/*
  * prototypes
  */
 

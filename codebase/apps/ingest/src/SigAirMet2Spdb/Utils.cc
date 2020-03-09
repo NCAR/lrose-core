@@ -618,16 +618,16 @@ bool SigAirMet2Spdb::_isLocationIndicator(const size_t &startIdx,
 
   // Look for the specific pattern of VALID plus a time
 
-  size_t validIdx=0;
+  // size_t validIdx=0;
   size_t timeIdx=0;
-  bool foundValid=false;
+  // bool foundValid=false;
   bool foundTime=false;
   for (size_t ii=startIdx; ii<endIdx; ii++) {
 
-    if (toks[ii] == "VALID") {
-      foundValid=true;
-      validIdx=ii;
-    }
+    // if (toks[ii] == "VALID") {
+    //   foundValid=true;
+    //   validIdx=ii;
+    // }
 
     time_t isTime;
     if (_computeStartEndTimes(toks[ii], isTime, isTime) == 0) {
@@ -2287,7 +2287,7 @@ int SigAirMet2Spdb::_findFlightLevels(const vector <string> &toks,
 
       bool hasPrevTok=false;
       bool hasNextTok=false;
-      bool hasNextNextTok=false;
+      // bool hasNextNextTok=false;
       string nextTok="NULL";
       string prevTok="NULL";
       string nextNextTok="NULL";
@@ -2297,7 +2297,7 @@ int SigAirMet2Spdb::_findFlightLevels(const vector <string> &toks,
       }
       if (ii+2 < endIdx) {
 	nextNextTok = toks[ii+2];
-	hasNextNextTok=true;
+	// hasNextNextTok=true;
       }
       if (ii-1 >= startIdx) {
 	prevTok = toks[ii-1];

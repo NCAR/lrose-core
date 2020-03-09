@@ -927,7 +927,7 @@ bool Ctrec::_processFiles(const DsMdvx &prev_mdv_file,
 
   MdvxField *prev_field = prev_mdv_file.getFieldByNum(0);
   MdvxField *curr_field = curr_mdv_file.getFieldByNum(0);
-  Mdvx::field_header_t prev_field_hdr = prev_field->getFieldHeader();
+  // Mdvx::field_header_t prev_field_hdr = prev_field->getFieldHeader();
   Mdvx::field_header_t curr_field_hdr = curr_field->getFieldHeader();
      
    

@@ -276,11 +276,11 @@ int ModelTrackData::loadNextEntry(int *no_more_entries_p)
     double darea = precipArea * areaHist[i] / 100.0;
     precipFlux += precip_rate * darea;
   }
-  double precipVolM3 = precipFlux * scanIntervalSecs;
-  double precipDepthMm = 0.0;
-  if (precipArea > 0) {
-    precipDepthMm = (precipVolM3 / precipArea) / 1000.0;
-  }
+  // double precipVolM3 = precipFlux * scanIntervalSecs;
+  // double precipDepthMm = 0.0;
+  // if (precipArea > 0) {
+  //   precipDepthMm = (precipVolM3 / precipArea) / 1000.0;
+  // }
   
   // debug print
 

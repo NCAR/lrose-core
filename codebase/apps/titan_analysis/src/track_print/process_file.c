@@ -262,13 +262,8 @@ static void print_simple(storm_file_handle_t *s_handle,
 
 {
   
-  storm_file_params_t *sparams;
-  track_file_params_t *tparams;
   complex_track_params_t *ct_params;
   simple_track_params_t *st_params;
-
-  sparams = &s_handle->header->params;
-  tparams = &t_handle->header->params;
 
   /*
    * read in complex tracks
@@ -338,7 +333,6 @@ static void print_gprops(storm_file_handle_t *s_handle,
   
   long istorm, ientry;
   storm_file_global_props_t *gprops;
-  track_file_entry_t *entry;
 
   fprintf(stdout, "%4s %10s %8s %7s %7s %7s %7s %7s %7s %8s %8s\n",
 	  "scan", "date", "time", "refl-x", "refl-y", "refl-z", "delta-z",
@@ -354,8 +348,6 @@ static void print_gprops(storm_file_handle_t *s_handle,
     if (RfReadTrackEntry(t_handle, "print_gprops") != R_SUCCESS) {
       tidy_and_exit(-1);
     }
-    
-    entry = t_handle->entry;
     
     if (RfReadStormScan(s_handle, t_handle->entry->scan_num,
 			"print_gprops") != R_SUCCESS) {

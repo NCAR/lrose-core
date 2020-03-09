@@ -50,7 +50,6 @@ using namespace std;
 // file scope
 
 static void tidy_and_exit (int sig);
-static void cleanChildren(int sig);
 static void out_of_store();
 static MdvPatch *_prog;
 static int _argc;

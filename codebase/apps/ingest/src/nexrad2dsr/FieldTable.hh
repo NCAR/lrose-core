@@ -139,12 +139,13 @@ public:
    //
    // Initialization struct for supported field types
    //
-   typedef struct { fieldId_t  id;
-                    char*      name;
-                    char*      units;
-                    float      scale;
-                    float      bias;
-                  } fieldTypeInfo_t;
+   typedef struct {
+     fieldId_t  id;
+     const char* name;
+     const char* units;
+     float scale;
+     float bias;
+   } fieldTypeInfo_t;
 
    static const fieldTypeInfo_t fieldTypeInfo[];
 

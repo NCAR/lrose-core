@@ -58,7 +58,7 @@ class axfFieldData
   bool valid;
   bool readFieldData(char *fieldstr, int pos); // read description line
                                            // pos is line no./field pos
-  bool fieldNameMatch(char *matchstr);
+  bool fieldNameMatch(const char *matchstr);
 };
   
 

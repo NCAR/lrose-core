@@ -318,7 +318,7 @@ time_t TopsFilter::_getRadarData(void)
 
 bool TopsFilter::_getTopsData(time_t radar_data_time)
 {
-  static char *routine_name = "_getTopsData()";
+  static const char *routine_name = "_getTopsData()";
   
   PMU_auto_register("Reading tops data");
 
@@ -574,7 +574,7 @@ bool TopsFilter::_filterTops(void)
 
 void TopsFilter::_writeOutputFile(void)
 {
-  static char *routine_name = "_writeOutputFile()";
+  static const char *routine_name = "_writeOutputFile()";
   
   // Create the output file
 

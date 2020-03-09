@@ -552,7 +552,7 @@ bool Hiq2Dsr::_initReader(void)
 
   // Create the appropriate message factory
 
-  MsgFactory *msg_factory;
+  MsgFactory *msg_factory = NULL;
   
   switch (_params->msg_type)
   {

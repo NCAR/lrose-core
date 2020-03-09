@@ -71,7 +71,7 @@ void parse_args(int argc, char **argv)
    * set defaults
    */
   
-  malloc_debug_str = "0";
+  malloc_debug_str = (char *) "0";
   Glob->full = FALSE;
   Glob->summary = FALSE;
   Glob->min_duration = -1;

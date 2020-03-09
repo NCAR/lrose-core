@@ -35,8 +35,8 @@
 #include "FieldType.hh"
 using namespace std;
 
-FieldType::FieldType( char* fieldName, char* fieldUnits,
-                      float fieldScale, float fieldBias )
+FieldType::FieldType(const char* fieldName, const char* fieldUnits,
+                     float fieldScale, float fieldBias )
 {
    //
    // Create the DsFieldParams which is needed for

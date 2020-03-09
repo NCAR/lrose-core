@@ -1837,7 +1837,7 @@ void CtrecAlg::_trackEchoes(const MdvxField &prev_field,
       }
       
       int cormax_x, cormax_y;
-      int cormax_count;
+      int cormax_count = 0;
       
       GridPoint cormax_point;
       

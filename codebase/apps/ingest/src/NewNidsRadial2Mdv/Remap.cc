@@ -36,7 +36,6 @@
 #include <toolsa/umisc.h>
 #include <toolsa/file_io.h>
 #include <toolsa/toolsa_macros.h>
-#include <Mdv/mdv/mdv_utils.h>
 using namespace std;
 
 // constructor

@@ -45,8 +45,8 @@ class FieldType
 {
 public:
 
-   FieldType( char* fieldName, char* fieldUnits,
-              float fieldScale, float fieldBias );
+  FieldType(const char* fieldName, const char* fieldUnits,
+            float fieldScale, float fieldBias );
   ~FieldType();
 
    //

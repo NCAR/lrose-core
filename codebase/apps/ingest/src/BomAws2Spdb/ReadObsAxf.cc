@@ -105,7 +105,7 @@ bool axfFieldData::readFieldData(char *fieldstr, int pos)
   return valid;
 }
 
-bool axfFieldData::fieldNameMatch(char *matchstr)
+bool axfFieldData::fieldNameMatch(const char *matchstr)
 {
   return (matchstr && (fieldName == matchstr));
 }  

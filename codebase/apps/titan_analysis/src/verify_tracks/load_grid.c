@@ -43,7 +43,7 @@
  * macro to constrain value to given limits
  */
 
-#define CONSTRAIN(x, low, high) if ((x) < (low)) (x) = (low); \
+#define DO_CONSTRAIN(x, low, high) if ((x) < (low)) (x) = (low); \
                                 else if ((x) > (high)) (x) = (high)
 
 #define RAD_TO_DEG 57.29577951308092
@@ -749,10 +749,10 @@ load_polygon_forecast_grid(storm_file_params_t *sparams,
     min_iy = (long) ((min_y - Glob->miny) / Glob->dy + 0.5) - 1;
     max_iy = (long) ((max_y - Glob->miny) / Glob->dy + 0.5) + 1;
     
-    CONSTRAIN(min_ix, 1, Glob->nx - 1);
-    CONSTRAIN(max_ix, 1, Glob->nx - 1);
-    CONSTRAIN(min_iy, 1, Glob->ny - 1);
-    CONSTRAIN(max_iy, 1, Glob->ny - 1);
+    DO_CONSTRAIN(min_ix, 1, Glob->nx - 1);
+    DO_CONSTRAIN(max_ix, 1, Glob->nx - 1);
+    DO_CONSTRAIN(min_iy, 1, Glob->ny - 1);
+    DO_CONSTRAIN(max_iy, 1, Glob->ny - 1);
     
     search_y = Glob->miny + ((double) min_iy - 0.5) * Glob->dy;
     
@@ -866,10 +866,10 @@ static void load_polygon_truth_grid(storm_file_params_t *sparams,
   min_iy = (long) ((min_y - Glob->miny) / Glob->dy + 0.5) - 1;
   max_iy = (long) ((max_y - Glob->miny) / Glob->dy + 0.5) + 1;
 
-  CONSTRAIN(min_ix, 1, Glob->nx - 1);
-  CONSTRAIN(max_ix, 1, Glob->nx - 1);
-  CONSTRAIN(min_iy, 1, Glob->ny - 1);
-  CONSTRAIN(max_iy, 1, Glob->ny - 1);
+  DO_CONSTRAIN(min_ix, 1, Glob->nx - 1);
+  DO_CONSTRAIN(max_ix, 1, Glob->nx - 1);
+  DO_CONSTRAIN(min_iy, 1, Glob->ny - 1);
+  DO_CONSTRAIN(max_iy, 1, Glob->ny - 1);
   
   search_y = Glob->miny + ((double) min_iy - 0.5) * Glob->dy;
   

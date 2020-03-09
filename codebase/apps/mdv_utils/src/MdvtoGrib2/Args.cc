@@ -60,9 +60,9 @@ using namespace std;
  */
 
 Args::Args (int argc, char **argv, char *prog_name) :
-  _progName(prog_name),
   start_time(DateTime::NEVER),
-  end_time(DateTime::NEVER)
+  end_time(DateTime::NEVER),
+  _progName(prog_name)
 {
   string tmp_str;
 

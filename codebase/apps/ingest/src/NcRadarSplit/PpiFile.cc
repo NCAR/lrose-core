@@ -552,7 +552,7 @@ int PpiFile::_createTmp(const char *tmp_path,
       // the rest
 
       Nc3Values *vals = varIn->values();
-      bool success;
+      bool success = false;
       switch (varIn->type()) {
       case nc3Byte:
 	success = var->put((char *) vals->base(), dimSizes);

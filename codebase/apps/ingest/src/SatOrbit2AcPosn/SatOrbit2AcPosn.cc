@@ -112,13 +112,6 @@ int SatOrbit2AcPosn::Run ()
   
   PMU_auto_register("Run");
 
-  // check if start and end time is set
-  
-  bool checkTimes = false;
-  if (_args.startTime != 0 && _args.endTime != 0) {
-    checkTimes = true;
-  }
-
   // create Spdb output object
 
   DsSpdb spdb;

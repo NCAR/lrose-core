@@ -34,7 +34,7 @@
 
 #include "track_grid_stats.h"
 
-#define CONSTRAIN(x, low, high) if ((x) < (low)) (x) = (low); \
+#define DO_CONSTRAIN(x, low, high) if ((x) < (low)) (x) = (low); \
                                 else if ((x) > (high)) (x) = (high)
 
 #define SMALL_ANGLE 0.000001
@@ -95,8 +95,8 @@ void load_stats_grid(storm_file_handle_t *s_handle,
 
   si32 icomplex, isimple, ientry;
   si32 ix, iy;
-  si32 start_ix, start_iy;
-  si32 end_ix, end_iy;
+  si32 start_ix = 0, start_iy = 0;
+  si32 end_ix = 0, end_iy = 0;
   si32 complex_track_num;
   si32 simple_track_num;
   si32 n_scans_for_max_precip;
@@ -124,7 +124,6 @@ void load_stats_grid(storm_file_handle_t *s_handle,
   storm_file_header_t *sheader;
   track_file_header_t *theader;
   storm_file_params_t *sparams;
-  track_file_params_t *tparams;
   storm_file_global_props_t *gprops;
   track_file_forecast_props_t *fprops;
   grid_stats_t *stat;
@@ -136,7 +135,6 @@ void load_stats_grid(storm_file_handle_t *s_handle,
   sheader = s_handle->header;
   theader = t_handle->header;
   sparams = &sheader->params;
-  tparams = &theader->params;
   
   inv_grid_sq_area = 1.0 / (Glob->params.grid.dx * Glob->params.grid.dy);
   
@@ -563,19 +561,19 @@ static void set_ellipse_grid(double ellipse_x,
 
   start_ix = (si32) ((start_x - Glob->params.grid.minx) /
 		     Glob->params.grid.dx + 0.49);
-  CONSTRAIN(start_ix, 0, Glob->params.grid.nx - 1);
+  DO_CONSTRAIN(start_ix, 0, Glob->params.grid.nx - 1);
 
   start_iy = (si32) ((start_y - Glob->params.grid.miny) /
 		     Glob->params.grid.dy + 0.49);
-  CONSTRAIN(start_iy, 0, Glob->params.grid.ny - 1);
+  DO_CONSTRAIN(start_iy, 0, Glob->params.grid.ny - 1);
 
   end_ix = (si32) ((end_x - Glob->params.grid.minx) /
 		   Glob->params.grid.dx + 0.51);
-  CONSTRAIN(end_ix, 0, Glob->params.grid.nx - 1);
+  DO_CONSTRAIN(end_ix, 0, Glob->params.grid.nx - 1);
 
   end_iy = (si32) ((end_y - Glob->params.grid.miny) /
 		   Glob->params.grid.dy + 0.51);
-  CONSTRAIN(end_iy, 0, Glob->params.grid.ny - 1);
+  DO_CONSTRAIN(end_iy, 0, Glob->params.grid.ny - 1);
 
   *start_ix_p = start_ix;
   *start_iy_p = start_iy;

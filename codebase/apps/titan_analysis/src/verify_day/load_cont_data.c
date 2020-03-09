@@ -189,13 +189,8 @@ static void update_cont_data(storm_file_handle_t *s_handle,
   double forecast_dx, forecast_dy;
 
   storm_file_global_props_t *gprops;
-  storm_file_params_t *sparams;
-  track_file_params_t *tparams;
   track_file_entry_t *entry;
   track_file_forecast_props_t *fprops;
-
-  sparams = &s_handle->header->params;
-  tparams = &t_handle->header->params;
 
   /*
    * zero out the forecast_grid

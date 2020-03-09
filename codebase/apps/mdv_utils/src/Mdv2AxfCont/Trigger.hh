@@ -51,7 +51,7 @@ public:
 
   // constructor
 
-  Trigger(char *prog_name, Params *P);
+  Trigger(const char *prog_name, Params *P);
 
   // destructor
   
@@ -85,7 +85,7 @@ public:
 
   // constructor
 
-  ArchiveTimeTrigger(char *prog_name, Params *params,
+  ArchiveTimeTrigger(const char *prog_name, Params *params,
 		     time_t start_time, time_t end_time);
 
   // destructor
@@ -124,7 +124,7 @@ public:
 
   // constructor
 
-  ArchiveFileTrigger(char *prog_name, Params *params,
+  ArchiveFileTrigger(const char *prog_name, Params *params,
 		     time_t start_time, time_t end_time);
 
   // destructor
@@ -158,7 +158,7 @@ public:
 
   // constructor
   
-  RealtimeTimeTrigger(char *prog_name, Params *params);
+  RealtimeTimeTrigger(const char *prog_name, Params *params);
 
   // destructor
   
@@ -194,7 +194,7 @@ public:
   
   // constructor
 
-  RealtimeFileTrigger(char *prog_name, Params *params);
+  RealtimeFileTrigger(const char *prog_name, Params *params);
 
   // destructor
   

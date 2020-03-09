@@ -269,8 +269,8 @@ public:
 
     // Set up the min/max values for the loops
 
-    int x_start, x_end, x_increment;
-    int y_start, y_end, y_increment;
+    int x_start = 0, x_end = 0, x_increment = 0;
+    int y_start = 0, y_end = 0, y_increment = 0;
     
     _setLoopValues(min_x, max_x, min_y, max_y,
 		   x_start, x_end, x_increment,
@@ -365,8 +365,8 @@ public:
 
     // Set up the min/max values for the loops
 
-    int x_start, x_end, x_increment;
-    int y_start, y_end, y_increment;
+    int x_start = 0, x_end = 0, x_increment = 0;
+    int y_start = 0, y_end = 0, y_increment = 0;
     
     _setLoopValues(min_x, max_x, min_y, max_y,
 		   x_start, x_end, x_increment,

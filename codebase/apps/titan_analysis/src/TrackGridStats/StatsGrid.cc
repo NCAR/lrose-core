@@ -1092,7 +1092,7 @@ int StatsGrid::writeOutputFile()
   
   MdvxRemapLut lut;
   
-  for (int i = 0; i < mdvx.getNFields(); i++) {
+  for (size_t i = 0; i < mdvx.getNFields(); i++) {
     
     MdvxField *fld = mdvx.getField(i);
     

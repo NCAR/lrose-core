@@ -105,12 +105,12 @@ int Process::Derive(Params *P, time_t T, string argUrl){
   // Get the field and vlevel headers.
   //
   Mdvx::field_header_t UFhdr = UField->getFieldHeader();
-  Mdvx::vlevel_header_t UVhdr = UField->getVlevelHeader();
   //
-  Mdvx::field_header_t VFhdr = VField->getFieldHeader();
-  Mdvx::vlevel_header_t VVhdr = VField->getVlevelHeader();
-  //
-  Mdvx::field_header_t TFhdr = TField->getFieldHeader();
+  // Mdvx::vlevel_header_t UVhdr = UField->getVlevelHeader();
+  // Mdvx::field_header_t VFhdr = VField->getFieldHeader();
+  // Mdvx::vlevel_header_t VVhdr = VField->getVlevelHeader();
+  // Mdvx::field_header_t TFhdr = TField->getFieldHeader();
+
   Mdvx::vlevel_header_t TVhdr = TField->getVlevelHeader();
   //
 

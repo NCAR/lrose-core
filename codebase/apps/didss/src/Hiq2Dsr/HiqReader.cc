@@ -267,9 +267,9 @@ HiqMsg *HiqReader::getNextMsg()
 
     // See if we've read the entire message
 
-    if (message_len <= _messageBuffer.getBufLen())
+    if (message_len <= (int) _messageBuffer.getBufLen())
     {
-      if (_debug || message_len < _messageBuffer.getBufLen())
+      if (_debug || message_len < (int) _messageBuffer.getBufLen())
       {
 	cerr << "**** Finished reading message bytes" << endl;
 	cerr << "     Expected " << message_len 
@@ -304,7 +304,7 @@ HiqMsg *HiqReader::getNextMsg()
   // getting buffers that we can't interpret and this is the only way to
   // recover from this problem.
 
-  if (_messageBuffer.getBufLen() == message_len ||
+  if ((int) _messageBuffer.getBufLen() == message_len ||
       msg == 0)
   {
     _messageBuffer.reset();

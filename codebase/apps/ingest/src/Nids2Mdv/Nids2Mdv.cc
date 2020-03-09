@@ -267,11 +267,11 @@ int Nids2Mdv::_runRealtime ()
           }
 
           // Register with the DataMapper, if desired.
-          if ( _params.dmapDir != "" && latestTime != 0 ) {
+          if (strlen(_params.dmapDir) > 0 && latestTime != 0 ) {
             DmapAccess dm;
             dm.setRespectDataDir(FALSE);
 
-            int status = dm.regLatestInfo(latestTime, _params.dmapDir, "mdv");
+            dm.regLatestInfo(latestTime, _params.dmapDir, "mdv");
           }
 
 		  if (_params.postProcessOutput) {

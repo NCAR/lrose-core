@@ -33,8 +33,6 @@
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
-MODULE_TYPE=progcpp
-
 TARGET_FILE = mdv_bin_data
 
 LOC_INCLUDES = $(NETCDF4_INCS)
@@ -66,27 +64,28 @@ CPPC_SRCS = \
 	MdvBinData.cc
 
 #
-# standard targets
+# tdrp macros
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+
+#
+# standard C targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+
+#
+# tdrp targets
+#
+
+include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
 
 #
 # local targets
 #
 
 depend: depend_generic
-
-#
-# TDRP support
-#
-
-Params.cc: paramdef.$(TARGET_FILE)
-	tdrp_gen -f paramdef.$(TARGET_FILE) -c++ \
-		-prog $(TARGET_FILE)
-
-clean_tdrp:
-	$(RM) Params.hh Params.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

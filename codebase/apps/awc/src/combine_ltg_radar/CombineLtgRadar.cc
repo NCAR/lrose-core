@@ -21,18 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/07 01:51:41 $
-//   $Id: CombineLtgRadar.cc,v 1.20 2016/03/07 01:51:41 dixon Exp $
-//   $Revision: 1.20 $
-//   $State: Exp $
-//
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
  * CombineLtgRadar.cc: combine_ltg_radar program object.
  *
@@ -117,7 +105,7 @@ CombineLtgRadar::CombineLtgRadar(int argc, char **argv)
   // Get TDRP parameters.
 
   _params = new Params();
-  char *params_path = (char *) "unknown" ;
+  char *params_path = (char *) "unknown";
   
   if (_params->loadFromArgs(argc, argv,
 			    _args->override.list,
@@ -685,7 +673,7 @@ MdvxField *CombineLtgRadar::_combineFields(const time_t data_time,
   MdvxField *combined_field = _createCombinedField(data_time,
 						   radar_field_hdr,
 						   radar_vlevel_hdr);
-  Mdvx::field_header_t combined_field_hdr = combined_field->getFieldHeader();
+  // Mdvx::field_header_t combined_field_hdr = combined_field->getFieldHeader();
   
   // Get the data for the input fields
 
@@ -764,7 +752,7 @@ MdvxField
   MdvxField *combined_field = _createCombinedField(data_time,
 						   radar_field_hdr,
 						   radar_vlevel_hdr);
-  Mdvx::field_header_t combined_field_hdr = combined_field->getFieldHeader();
+  // Mdvx::field_header_t combined_field_hdr = combined_field->getFieldHeader();
   
   // Get the data for the fields
 

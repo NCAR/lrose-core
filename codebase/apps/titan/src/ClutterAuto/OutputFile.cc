@@ -128,7 +128,7 @@ int OutputFile::write(time_t start_time,
     
     // create field
     
-    MdvxField *field;
+    MdvxField *field = NULL;
     if (oField == _fracFieldNum) {
       field = new MdvxField(fhdr, vhdr, frac);
     } else if (oField == _meanFieldNum) {
@@ -165,8 +165,10 @@ int OutputFile::write(time_t start_time,
     }
     
     // add field to mdvx object
-    
-    mdvx.addField(field);
+
+    if (field) {
+      mdvx.addField(field);
+    }
     
   } // oField
   

@@ -388,12 +388,14 @@ bool MdvtoGrib2::_processData(TriggerInfo &trigger_info)
 {
   static const string method_name = "MdvtoGrib2::_processData()";
 
-  if (_params->debug)
-    if(_params->trigger_mode == Params::FILE_LIST)
+  if (_params->debug) {
+    if(_params->trigger_mode == Params::FILE_LIST) {
       cerr << "*** Processing file: " << trigger_info.getFilePath() << endl;
-    else
+    } else {
       cerr << endl << "*** Processing data for time: "
            << DateTime(trigger_info.getIssueTime()) << endl;
+    }
+  }
 
   //
   // Read in the input file
@@ -432,7 +434,7 @@ bool MdvtoGrib2::_processData(TriggerInfo &trigger_info)
       }
     }
   } else if(mdv_file_path.size() >= 19 && mdv_file_path[mdv_file_path.size() - 11] == '/') {
-    int year, month, day, hour, minute, second, forecast_seconds;
+    int year, month, day, hour, minute, second;
     if (6 == sscanf(mdv_file_path.c_str() + (mdv_file_path.size() - 19),
                     "%4d%2d%2d/%2d%2d%2d.mdv",
                     &year, &month, &day, &hour, &minute, &second)) {
@@ -494,8 +496,8 @@ bool MdvtoGrib2::_processData(TriggerInfo &trigger_info)
       localTables = 1;
 
 
-    if(_params->_output_fields[field_num].override_surface_type &&
-       (_params->_output_fields[field_num].first_surface_type >= 192 &&
+    if((_params->_output_fields[field_num].override_surface_type &&
+        _params->_output_fields[field_num].first_surface_type >= 192 &&
 	_params->_output_fields[field_num].first_surface_type < 255) ||
        (_params->_output_fields[field_num].second_surface_type >= 192 &&
         _params->_output_fields[field_num].second_surface_type <255))
@@ -503,9 +505,9 @@ bool MdvtoGrib2::_processData(TriggerInfo &trigger_info)
 
     if(_params->_output_fields[field_num].process_type == 8) {
       file_data_type = 192;              // Other observation data
-      if(_params->discipline_number = 0 && _params->_output_fields[field_num].param_category == 15)
+      if(_params->discipline_number == 0 && _params->_output_fields[field_num].param_category == 15)
         file_data_type = 7;              // Radar observation data
-      if(_params->discipline_number = 3 && _params->_output_fields[field_num].param_category == 0)
+      if(_params->discipline_number == 3 && _params->_output_fields[field_num].param_category == 0)
         file_data_type = 6;              // Satellite observation data
     }
     if((_params->_output_fields[field_num].data_type == 1 || _params->_output_fields[field_num].data_type == 11)
@@ -592,7 +594,7 @@ bool MdvtoGrib2::_processData(TriggerInfo &trigger_info)
     // Process the field
     //
     Mdvx::field_header_t field_hdr = (*field).getFieldHeader();
-    Mdvx::vlevel_header_t vlevel_hdr = (*field).getVlevelHeader();
+    // Mdvx::vlevel_header_t vlevel_hdr = (*field).getVlevelHeader();
 
     if (_params->debug) {
       cerr << "---> Processing field: " << field_hdr.field_name_long << endl;
@@ -1003,9 +1005,9 @@ int MdvtoGrib2::_createGDSTemplate(MdvxField *field, int lastGridDefNum, Grib2::
                                    Grib2::GribProj **gribProj)
 {
   Mdvx::field_header_t field_hdr = (*field).getFieldHeader();
-  Mdvx::vlevel_header_t vlevel_hdr = (*field).getVlevelHeader();
+  // Mdvx::vlevel_header_t vlevel_hdr = (*field).getVlevelHeader();
 
-  int plane_size = field_hdr.nx * field_hdr.ny;
+  // int plane_size = field_hdr.nx * field_hdr.ny;
   int gridDefNum = -1;
 
   if(field_hdr.proj_type == Mdvx::PROJ_LATLON)
@@ -1235,7 +1237,7 @@ int MdvtoGrib2::_createPDSTemplate(MdvxField *field, int field_num, int z, time_
   int data_type = _params->_output_fields[field_num].data_type;
   int lastProcessType = -1;
   if(field_num > 0)
-    _params->_output_fields[field_num-1].process_type;
+    lastProcessType = _params->_output_fields[field_num-1].process_type;
   //
   // Checks that process_type and data_type for each field make sense
   if(process_type == 8 && !(data_type == 0 || data_type == 8) ) {

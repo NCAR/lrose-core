@@ -296,7 +296,7 @@ void InputFile::_computeXYLookup()
 void InputFile::_computeZLookup()
 
 {
-  Mdvx::coord_t input_coords = _grid->getCoord();
+  // Mdvx::coord_t input_coords = _grid->getCoord();
   if(_isDzConstant) {
     _computeZLookupByDz();
   }

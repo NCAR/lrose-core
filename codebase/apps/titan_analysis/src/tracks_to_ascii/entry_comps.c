@@ -83,11 +83,9 @@ void entry_comps(storm_file_handle_t *s_handle,
   storm_file_params_t *sparams;
   storm_file_global_props_t *gprops;
   track_file_entry_t *entry;
-  track_file_params_t *tparams;
   track_file_forecast_props_t *fprops;
 
   sparams = &s_handle->header->params;
-  tparams = &t_handle->header->params;
   gprops = s_handle->gprops + t_handle->entry->storm_num;
   entry = t_handle->entry;
   fprops = &entry->dval_dt;

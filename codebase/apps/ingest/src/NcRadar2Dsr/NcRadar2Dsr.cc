@@ -529,6 +529,15 @@ void NcRadar2Dsr::_printAtt(Nc3Att *att)
   }
   break;
   
+  case nc3Int64: {
+    cout << "INT64: ";
+    int64_t *vals = (int64_t *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
   case nc3Float: {
     cout << "FLOAT: ";
     float *vals = (float *) values->base();
@@ -605,6 +614,15 @@ void NcRadar2Dsr::_printVarVals(Nc3Var *var)
   case nc3Int: {
     cout << "(int)";
     int *vals = (int *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Int64: {
+    cout << "(int64)";
+    int64_t *vals = (int64_t *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
       cout << " " << vals[ii];
     }

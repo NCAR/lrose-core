@@ -271,7 +271,7 @@ WsimFileStatus_t WsimFile::read(FILE *wsi_file,
   }
 
   if (_debugFlag)
-    fprintf(stderr, "WsimFile::read(): nbytes = %d\n", wsi_file_len);
+    fprintf(stderr, "WsimFile::read(): nbytes = %ld\n", wsi_file_len);
 
   if (wsi_file_len <= 0)
   {
@@ -300,7 +300,7 @@ WsimFileStatus_t WsimFile::read(FILE *wsi_file,
     if (*byte_in != WSI_FLAG1 || *(byte_in+1) != WSI_FLAG2)
     {
       fprintf(stderr,
-	      "Invalid values in input file at byte %d:  %x %x\n"
+	      "Invalid values in input file at byte %ld:  %x %x\n"
 	      "    Expecting command flags: %x %x\n",
 	      byte_in - wsi_buffer, *byte_in, *(byte_in+1),
 	      WSI_FLAG1, WSI_FLAG2);
@@ -344,7 +344,7 @@ WsimFileStatus_t WsimFile::read(FILE *wsi_file,
 	
     default:
       fprintf(stderr,
-	      "Invalid WSI command flag: %x at byte %d in input file -- skipping to next command flag\n",
+	      "Invalid WSI command flag: %x at byte %ld in input file -- skipping to next command flag\n",
 	      *byte_in,
 	      byte_in - wsi_buffer);
 
@@ -553,7 +553,8 @@ ui08 *WsimFile::_addLineToBuffer(ui08 *buffin,
 //		"color = %d\n", 
 //		line_num, column, color);
 
-      high_nibble = (WSI_FLAG2 << 4);
+      int hn = (WSI_FLAG2 << 4);
+      high_nibble = (ui08) hn;
 
       buffin += 3;
     }

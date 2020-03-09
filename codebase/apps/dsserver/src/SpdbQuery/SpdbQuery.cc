@@ -827,7 +827,7 @@ int SpdbQuery::_setAuxXml(DsSpdb *spdb)
     cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
-  int fileLen = fileStat.st_size;
+  size_t fileLen = fileStat.st_size;
   
   // open file
   

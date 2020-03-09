@@ -168,7 +168,7 @@ int InputMdv::read(time_t data_time)
   // requires that
 
   if (_params.remap_z_to_constant_grid) {
-    for (int ii = 0; ii < mdvx.getNFields(); ii++) {
+    for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
       MdvxField *field = mdvx.getField(ii);
       if (field) {
         field->remapVlevels(_params.remap_z_grid.nz,

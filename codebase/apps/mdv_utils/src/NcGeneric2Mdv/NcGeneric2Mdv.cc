@@ -1536,6 +1536,8 @@ void NcGeneric2Mdv::_printAtt(Nc3Att *att)
     }
   }
   break;
+
+    default: {}
   
   }
   
@@ -1621,6 +1623,8 @@ void NcGeneric2Mdv::_printVarVals(Nc3Var *var)
     }
   }
   break;
+
+    default: {}
   
   }
   

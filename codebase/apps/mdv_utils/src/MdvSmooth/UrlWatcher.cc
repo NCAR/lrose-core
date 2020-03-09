@@ -153,9 +153,6 @@ int UrlWatcher::run(){
   // to the process class.
   //
  
-  int leadTime = -1;
-  time_t Time;
-
   while (!_dataTrigger->endOfData()) {
     TriggerInfo triggerInfo;
     _dataTrigger->next(triggerInfo);

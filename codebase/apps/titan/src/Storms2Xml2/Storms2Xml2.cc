@@ -225,8 +225,7 @@ int Storms2Xml2::_run(time_t start, time_t end)
   }
 
   // read radar name from params file 
-  char *radarName; 
-  radarName = _params.radar_name;
+  // char *radarName = _params.radar_name;
 
   // get current time rjp 23/5/2006
   /*
@@ -661,14 +660,12 @@ int Storms2Xml2::_openOutput(time_t when){
   }
 
   // read radar name from params file 
-  char *radarName; 
-  radarName = _params.radar_name;
+  char *radarName = _params.radar_name;
   
   // Read radar lat, long, alt from params file 
-  double _radarLat=0., _radarLon=0., _radarAlt=0.;
+  double _radarLat=0., _radarLon=0.;
   _radarLat = _params.radar_location.latitude;
   _radarLon = _params.radar_location.longitude;
-  _radarAlt = _params.radar_location.altitude;
   
   //
   //Print header lines for XML file  

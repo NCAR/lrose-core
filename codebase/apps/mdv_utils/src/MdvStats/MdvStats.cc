@@ -230,7 +230,7 @@ int MdvStats::Run ()
     }
 
     // process this input
-    for (int i = 0; i < vvTimeList.size(); i++) {
+    for (size_t i = 0; i < vvTimeList.size(); i++) {
       vector<time_t> oneSet = vvTimeList.at(i);
       iret = _processArchive(oneSet);
     }
@@ -301,7 +301,6 @@ int MdvStats::_generateTimeList() {
 
   vector<time_t> oneSet;
 
-  char tmpBuffer[256];
   int iret = 0;
 
   if (_params.debug == Params::DEBUG_VERBOSE) {

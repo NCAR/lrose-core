@@ -124,7 +124,7 @@ void tidy_and_exit(int sig);
 char *Program_name;
 wsi_ingest_tdrp_struct Params;
 
-char wxBuf[kSerIOBufSz];
+ui08 wxBuf[kSerIOBufSz];
 
 /********************** main *****************************************/
 

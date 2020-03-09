@@ -101,7 +101,7 @@ private:
    static const float vcp212[];
 
    typedef struct { int     id;
-                    char*   name;
+                    const   char* name;
                     float   pulseWidth;
                     size_t  numElev;
                     float*  elevList;

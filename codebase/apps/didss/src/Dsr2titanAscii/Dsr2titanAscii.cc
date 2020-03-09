@@ -248,7 +248,7 @@ void Dsr2titanAscii::_processMessage(int contents,
 
     if (_params.debug) cerr << "Radar params found" << endl;
 
-    const DsRadarParams &radarParams = radarMsg.getRadarParams();
+    // const DsRadarParams &radarParams = radarMsg.getRadarParams();
 
     if (_ofp != NULL){
 

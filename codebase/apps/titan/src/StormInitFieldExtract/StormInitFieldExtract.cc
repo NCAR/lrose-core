@@ -279,7 +279,7 @@ int StormInitFieldExtract::Run(time_t start, time_t end)
 
       Mdvx::master_header_t InMhdr = Mdv.getMasterHeader();
       Mdvx::field_header_t InFhdr = InField->getFieldHeader();
-      Mdvx::vlevel_header_t InVhdr = InField->getVlevelHeader();
+      // Mdvx::vlevel_header_t InVhdr = InField->getVlevelHeader();
 
       MdvxProj Proj(InMhdr, InFhdr);
 

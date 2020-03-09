@@ -141,11 +141,11 @@ int StormInitClimatology::Run(time_t start, time_t end)
       maxArea = G.get1DVal(fn);
     }
 
-    double maxDbz = badVal;
-    fn = G.getFieldNum("dbz_max");
-    if (fn != -1){
-      maxDbz = G.get1DVal(fn);
-    }
+    // double maxDbz = badVal;
+    // fn = G.getFieldNum("dbz_max");
+    // if (fn != -1){
+    //   maxDbz = G.get1DVal(fn);
+    // }
 
     double Duration = badVal;
     fn = G.getFieldNum("duration");

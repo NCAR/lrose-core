@@ -100,7 +100,7 @@ CaseProps::CaseProps (const char *prog_name,
   for (int i = 0; i < n_global_props; i++) {
     _addGlobalProp(global_props[i]);
   }
-  _addGroup("Global properties", n_global_props);
+  _addGroup((char *) "Global properties", n_global_props);
 
   // load up the time series props
 

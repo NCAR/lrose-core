@@ -37,6 +37,7 @@
 #include <sys/times.h>
 #include <dataport/port_types.h>
 
+#ifdef NOT_NOW
 static int connection_good()
 
 {
@@ -57,7 +58,7 @@ static int connection_good()
   }
 
 }
-
+#endif
 
 static void pr_times(clock_t real, struct tms *start, struct tms *end)
 

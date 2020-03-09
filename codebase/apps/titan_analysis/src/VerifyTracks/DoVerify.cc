@@ -358,7 +358,7 @@ int DoVerify::_performVerification()
   
   complex_track_params_t *ct_params;
 
-  storm_file_params_t *sparams;
+  // storm_file_params_t *sparams;
   track_file_params_t *tparams;
   track_file_forecast_props_t props_current;
   track_file_forecast_props_t props_forecast;
@@ -372,7 +372,7 @@ int DoVerify::_performVerification()
   vt_count_t complex_count;
 
   n_scans = _sHandle.header->n_scans;
-  sparams = &_sHandle.header->params;
+  // sparams = &_sHandle.header->params;
   tparams = &_tHandle.header->params;
   
   MEM_zero(file_count);
@@ -1086,13 +1086,13 @@ bool DoVerify::_loadProps(const track_file_entry_t *entry,
   fl32 *f_props_ptr;
   fl32 *dval_dt_ptr;
 
-  const storm_file_params_t *sparams;
+  // const storm_file_params_t *sparams;
   track_file_forecast_props_t current;
   const track_file_forecast_props_t *fprops;
-  const track_file_params_t *tparams;
+  // const track_file_params_t *tparams;
   
-  sparams = &_sHandle.header->params;
-  tparams = &_tHandle.header->params;
+  // sparams = &_sHandle.header->params;
+  // tparams = &_tHandle.header->params;
   fprops = &entry->dval_dt;
   lead_time_hr = lead_time / 3600.0;
   growth_period_hr = _params.time_to_zero_growth / 3600.0;

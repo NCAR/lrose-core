@@ -195,7 +195,7 @@ int WsiNidsIngest::Run ()
       if (_params.debug) {
 	fprintf(stderr, "----------> %c%c%c %d %d %d %d\n",
 		cc1, cc2, cc3, cc4, cc5, cc6, cc7);
-	fprintf(stderr, "---> bytes read: %d\n", _input->getTotalRead());
+	fprintf(stderr, "---> bytes read: %ld\n", _input->getTotalRead());
       }
 
       // read in whole message header, starting 2 bytes into

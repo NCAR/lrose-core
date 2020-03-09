@@ -192,6 +192,7 @@ int StormInit2Field::Run(time_t start, time_t end)
 
     if (_params->debug){
       cerr << "Adding point " << point << " at time " << utimstr( spdbTime ) << endl;
+      cerr << "  maxDBZ: " << maxDbz << endl;
     }
 
 

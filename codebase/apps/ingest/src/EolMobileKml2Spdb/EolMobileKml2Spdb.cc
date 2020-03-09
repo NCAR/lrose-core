@@ -207,7 +207,7 @@ int EolMobileKml2Spdb::_processFile(const char *inputPath)
   
   TaArray<char> kml_;
   char *kml = kml_.alloc(fileStat.st_size + 1);
-  if (inFile.fread(kml, 1, fileStat.st_size) != fileStat.st_size) {
+  if (inFile.fread(kml, 1, fileStat.st_size) != (size_t) fileStat.st_size) {
     int errNum = errno;
     cerr << "ERROR - EolMobileKml2Spdb::_processFile()" << endl;
     cerr << "  cannot read input file: " << inputPath << endl;

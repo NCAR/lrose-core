@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
   // Get the CLI arguments.
 
-  Args *_args = new Args(argc, argv, "WrfVIL2Mdv");
+  Args *_args = new Args(argc, argv, (char *) "WrfVIL2Mdv");
   if (!_args->OK) {
     fprintf(stderr, "ERROR: WrfVIL2Mdv\n");
     fprintf(stderr, "Problem with command line args\n");

@@ -63,13 +63,9 @@ int load_props(storm_file_handle_t *s_handle,
   fl32 *f_props_ptr;
   fl32 *dval_dt_ptr;
 
-  storm_file_params_t *sparams;
   track_file_forecast_props_t current;
   track_file_forecast_props_t *fprops;
-  track_file_params_t *tparams;
   
-  sparams = &s_handle->header->params;
-  tparams = &t_handle->header->params;
   fprops = &entry->dval_dt;
   lead_time_hr = lead_time / 3600.0;
   growth_period_hr = Glob->forecast_growth_period / 3600.0;

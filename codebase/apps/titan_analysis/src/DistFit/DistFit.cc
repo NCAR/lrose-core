@@ -353,7 +353,7 @@ int DistFit::_loadXYData()
   double miny = LARGE_DOUBLE, maxy = -LARGE_DOUBLE;
   
   xy_list_t *this_point, *prev_point = NULL;
-  xy_list_t *first_point; 
+  xy_list_t *first_point = NULL; 
 
   _nData = 0;
 

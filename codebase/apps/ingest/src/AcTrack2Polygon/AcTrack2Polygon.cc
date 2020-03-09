@@ -190,6 +190,7 @@ int AcTrack2Polygon::Run ()
           cerr << "Error - AcTrack2Polygon::Run" << endl;
           cerr << "  Errors in processing time: " <<  triggerInfo.getIssueTime()
 	       << " input file: " << triggerInfo.getFilePath() << endl;
+          cerr << " inputTime: " << DateTime::strm(inputTime) << endl;
 	  return 1;
         }
     } // while

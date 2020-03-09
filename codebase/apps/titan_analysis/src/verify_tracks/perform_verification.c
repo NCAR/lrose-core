@@ -57,7 +57,7 @@ void perform_verification(storm_file_handle_t *s_handle,
   long nvalid, nverify;
   long nstorms;
   long n_scans;
-  long forecast_scan;
+  long forecast_scan = 0;
   long complex_track_num;
   long simple_track_num;
   long n_simple_tracks;
@@ -70,7 +70,6 @@ void perform_verification(storm_file_handle_t *s_handle,
   
   complex_track_params_t *ct_params;
 
-  storm_file_params_t *sparams;
   track_file_params_t *tparams;
   track_file_forecast_props_t props_current;
   track_file_forecast_props_t props_forecast;
@@ -85,7 +84,6 @@ void perform_verification(storm_file_handle_t *s_handle,
   vt_count_t complex_count;
 
   n_scans = s_handle->header->n_scans;
-  sparams = &s_handle->header->params;
   tparams = &t_handle->header->params;
   
   /*

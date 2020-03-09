@@ -71,7 +71,7 @@ StartTime::StartTime(char *prog_name, Params *params)
 
   _eventStartTodCdf =
     new GenFromCdf(nstartHist, startProb, startVals,
-		   "event_start_tod_hist");
+		   (char *) "event_start_tod_hist");
   if (!_eventStartTodCdf) {
     OK = FALSE;
   }

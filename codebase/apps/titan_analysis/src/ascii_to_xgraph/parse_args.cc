@@ -101,7 +101,7 @@ void parse_args(int argc, char **argv)
       
     } else if (!strcmp(argv[i], "-debug")) {
       
-      debug_str = "true";
+      debug_str = (char *) "true";
       
     } else if (!strcmp(argv[i], "-mdebug")) {
 	

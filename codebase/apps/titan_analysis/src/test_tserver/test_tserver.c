@@ -251,13 +251,10 @@ static void read_product(char *host,
 
   int sockfd;
   int forever = TRUE;
-  int flat_proj;
   int polygon_size;
 
   long ientry;
   long data_len;
-
-  double radius_factor;
 
   SKU_header_t mess_header;
   tdata_product_header_t *header;
@@ -302,14 +299,6 @@ static void read_product(char *host,
   
     BE_to_array_32((ui32 *) header,
 		   (ui32) sizeof(tdata_product_header_t));
-    
-    if (header->grid_type == PJG_FLAT) {
-      flat_proj = TRUE;
-      radius_factor = 10.0;
-    } else {
-      flat_proj = FALSE;
-      radius_factor = 1000.0;
-    }
     
     polygon_size = sizeof(si32) + header->n_poly_sides * sizeof(ui08);
 

@@ -545,6 +545,15 @@ void NcRadarSplit::_printAtt(Nc3Att *att)
   }
   break;
   
+  case nc3Int64: {
+    cerr << "INT64: ";
+    int64_t *vals = (int64_t *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cerr << " " << vals[ii];
+    }
+  }
+  break;
+  
   case nc3Float: {
     cerr << "FLOAT: ";
     float *vals = (float *) values->base();
@@ -621,6 +630,15 @@ void NcRadarSplit::_printVarVals(Nc3Var *var)
   case nc3Int: {
     cerr << "(int)";
     int *vals = (int *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cerr << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Int64: {
+    cerr << "(int64)";
+    int64_t *vals = (int64_t *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
       cerr << " " << vals[ii];
     }

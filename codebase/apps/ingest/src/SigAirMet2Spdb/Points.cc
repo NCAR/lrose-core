@@ -1046,10 +1046,8 @@ int SigAirMet2Spdb::_removeSmallAngles(vector<double> &lats,
 {
 
   int startIndex = 1;
-  int minPoints = 3;
   if (isClosed) {
     startIndex = 0;
-    minPoints = 4;
   }
 
   // check vertices
@@ -1162,14 +1160,12 @@ bool SigAirMet2Spdb::_isValidPolygon(vector<double> &inlats,
   size_t nDups=0;
   for (size_t ii=0; ii<nPts; ii++) {
 
-    bool foundDup=false;
     for (size_t jj=0; jj<nPts; jj++) {
       
       // do not compare against ourselves
       if (jj != ii) {
 	if ((inlats[ii] == inlats[jj]) &&
 	    (inlons[ii] == inlons[jj])) {
-	  foundDup=true;
 	  nDups++;
 
 	}
@@ -1576,6 +1572,7 @@ int SigAirMet2Spdb::_findPoints(const vector<string> &toks,
        validTimeTok=ii;
        if (_params.debug >= Params::DEBUG_VERBOSE) {
 	 cerr << "   SKIP token: is a time string " << endl;
+	 cerr << "   validTimeTok: " << validTimeTok << endl;
        }
      }
 
@@ -1869,6 +1866,10 @@ int SigAirMet2Spdb::_findPoints(const vector<string> &toks,
    }
    if (nImbedComma > 0) {
      doReplaceSpacer=_replaceSpacerRetokenize(",", " , ", " \r\n\t", startIn, polygonToks, polygonToks);
+   }
+
+   if (_params.debug >= Params::DEBUG_VERBOSE) {
+     cerr << "doReplaceSpacer: " << doReplaceSpacer << endl;
    }
 
    // Set up for search for lats, lons

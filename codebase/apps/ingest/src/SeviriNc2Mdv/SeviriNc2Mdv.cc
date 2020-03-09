@@ -281,13 +281,9 @@ SeviriNc2Mdv::_initialize(int argc, char **argv)
   // get TDRP params
   _params = new Params();
 
-<<<<<<< SeviriNc2Mdv.cc
   char *paramsPath = (char *) "unknown";
   if (_params->loadFromArgs(argc, argv, _args->override.list,
 			  &paramsPath)) {
-=======
-  if (_params->loadFromArgs(argc, argv, _args->override.list, NULL)) {
->>>>>>> 1.11
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with TDRP parameters" << endl;
     _isOK = false;

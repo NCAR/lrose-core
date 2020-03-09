@@ -229,7 +229,7 @@ bool AcarsNc2GenPt::init()
   
   for (int i = 0; i < _params->data_fields_n; ++i)
   {
-    Converter *converter;
+    Converter *converter = NULL;
     
     switch (_params->_data_fields[i].conversion_type)
     {

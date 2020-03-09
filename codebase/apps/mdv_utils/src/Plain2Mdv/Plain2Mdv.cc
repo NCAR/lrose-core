@@ -240,7 +240,7 @@ int Plain2Mdv::_processFile(const char *input_path)
     return -1;
   }
   const struct stat &fileStat = inFile.getStat();
-  int nBytesFile = fileStat.st_size;
+  size_t nBytesFile = fileStat.st_size;
 
   // check file size is large enough for expected data fields
 
@@ -250,9 +250,9 @@ int Plain2Mdv::_processFile(const char *input_path)
   int nxyz = nx * ny * nz;
   int nxy = nx * ny;
 
-  int nFields = _params.n_fields;
+  size_t nFields = _params.n_fields;
 
-  int nBytesExpected = 0;
+  size_t nBytesExpected = 0;
 
   switch (_params.input_encoding) {
     case Params::ENCODING_INT8:
@@ -313,7 +313,7 @@ int Plain2Mdv::_processFile(const char *input_path)
 
   // load up field data
 
-  for (int ifield = 0; ifield < nFields; ifield++) {
+  for (size_t ifield = 0; ifield < nFields; ifield++) {
 
     fl32 *data = new fl32[nxyz];
     ui08 *buf = NULL; 

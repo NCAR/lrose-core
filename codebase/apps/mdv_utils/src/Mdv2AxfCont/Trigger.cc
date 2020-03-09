@@ -49,7 +49,7 @@ using namespace std;
 // constructor
 //
 
-Trigger::Trigger(char *prog_name, Params *params)
+Trigger::Trigger(const char *prog_name, Params *params)
 
 {
 
@@ -83,7 +83,7 @@ Trigger::~Trigger()
 //////////////
 // Constructor
 
-RealtimeTimeTrigger::RealtimeTimeTrigger(char *prog_name, Params *params)
+RealtimeTimeTrigger::RealtimeTimeTrigger(const char *prog_name, Params *params)
   : Trigger(prog_name, params)
     
 {

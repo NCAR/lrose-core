@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
   
 
   float *data,min,max;
-  int NumOut;
+  int NumOut = 0;
 
   data = (float *)umalloc(params->Nx * params->Ny*sizeof(float));
   float lat,lon;

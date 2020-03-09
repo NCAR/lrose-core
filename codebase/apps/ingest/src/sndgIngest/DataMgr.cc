@@ -202,7 +202,7 @@ DataMgr::ingest()
    int             nFiles, fileIndex = 0;
    string          currentFileName;
    struct dirent **fileList;
-   char date[15];
+   char date[16];
    DateTime file_time;
    //
    // Get list of files
@@ -753,7 +753,7 @@ DataMgr::findFirstData()
 int
 DataMgr::readData()
 {
-   int             targetCol, icol, status;
+   int             targetCol, icol;
    double          value, *dataArray;
    char            line[BUFSIZ], lineCopy[BUFSIZ], *fptr;
    const char           *BLANK = " ";
@@ -799,7 +799,6 @@ DataMgr::readData()
          // for this field of interest 
          // and stick it in the appropriate data array
          //
-         status = 1;
          targetCol = (*item).first;
          strncpy( lineCopy, line, BUFSIZ );
 

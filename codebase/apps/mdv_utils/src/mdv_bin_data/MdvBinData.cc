@@ -78,7 +78,7 @@ const int FOREVER = true;
 
 MdvBinData::MdvBinData(int argc, char **argv)
 {
-  static char *routine_name = "Constructor";
+  static const char *routine_name = "Constructor";
   
   // Make sure the singleton wasn't already created.
 

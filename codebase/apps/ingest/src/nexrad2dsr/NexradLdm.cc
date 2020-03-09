@@ -342,10 +342,10 @@ NexradLdm::readPhysicalRecord( size_t& physicalBytes )
          return( Status::BAD_INPUT_STREAM );
       }
 
-      if ( 
-	  (strncmp( ((RIDDS_vol_title*)ldmBuffer)->filename, "ARCHIVE2", 8 )) &&
-	  (strncmp( ((RIDDS_vol_title*)ldmBuffer)->filename, "AR2V", 4 ))
-	  ) {
+      RIDDS_vol_title title;
+      memcpy(&title, ldmBuffer, sizeof(title));
+      if ((strncmp(title.filename, "ARCHIVE2", 8)) &&
+	  (strncmp(title.filename, "AR2V", 4 ))) {
          //
          // Nope, not a volume title, rewind to the beginning of the file
          // so we can read in the entire nexrad record
@@ -381,9 +381,12 @@ NexradLdm::readPhysicalRecord( size_t& physicalBytes )
 	 char name[9];
 	 char ext[5];
 	 name[8] = ext[4] = '\0';
-	 
-	 strncpy( name, ((RIDDS_vol_title *)ldmBuffer)->filename, 8 );
-	 strncpy( ext, ((RIDDS_vol_title *)ldmBuffer)->extension, 4 );
+
+         RIDDS_vol_title title;
+         memcpy(&title, ldmBuffer, sizeof(title));
+           
+         strncpy(name, title.filename, 8);
+	 strncpy(ext, title.extension, 3);
 	 
 	 if ( DEBUG_ENABLED ) {
 	   POSTMSG( DEBUG, "Volume title: %s.%s", name, ext );

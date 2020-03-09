@@ -373,7 +373,7 @@ void ArcBeamWriter::_writeBeam(ArcBeamMsg &beam_msg)
   // beginning so we don't flag skipped beams as missing.
 
   int curr_beam_num = beam_msg.getBeamNum();
-  bool missing_previous_beams;
+  // bool missing_previous_beams;
 
   if (_prevBeamNum >= 0 &&
       curr_beam_num != _prevBeamNum + 1)
@@ -383,11 +383,11 @@ void ArcBeamWriter::_writeBeam(ArcBeamMsg &beam_msg)
     cerr << "   current beam number = " << curr_beam_num << endl;
     cerr << "   previous beam number = " << _prevBeamNum << endl;
 
-    missing_previous_beams = true;
+    // missing_previous_beams = true;
   }
   else
   {
-    missing_previous_beams = false;
+    // missing_previous_beams = false;
   }
 
   _prevBeamNum = curr_beam_num;

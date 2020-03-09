@@ -880,7 +880,7 @@ decode_return_t SigAirMet2Spdb::_decodeMsg(const string &messageStr)
       _overwriteCancelled();
     }
     if ((_params.token_threshold_for_cancel < 0) || 
-	(_msgToks.size() < _params.token_threshold_for_cancel))
+	((int) _msgToks.size() < _params.token_threshold_for_cancel))
     return DECODE_MSG_NO_SAVE;
   }
 
@@ -1451,8 +1451,9 @@ void SigAirMet2Spdb::_setObsOrFcast()
   // Decode info
 
   if (_params.print_decode_problems_to_stderr) {
-    cerr << "OBS and/or FCST: OBS: " <<
-      foundObs << ", FCST: " << foundFcst << endl;
+    cerr << "OBS and/or FCST: OBS: " << foundObs
+         << ", FCST: " << foundFcst << endl;
+    cerr << "obsfcst: " << obsfcst << endl;
   }
 
   // ICAO special check
@@ -2667,10 +2668,10 @@ int SigAirMet2Spdb::_verticesFromLine(const size_t &startIdx,
   // find LINE token
 
   bool foundLine = false;
-  size_t lineTokNum;
+  // size_t lineTokNum;
   for (size_t ii = startIdx; ii < endIdx; ii++) {
     if (_isLineTok(toks[ii])) {
-      lineTokNum = ii;
+      // lineTokNum = ii;
       foundLine = true;
       break;
     }
@@ -2838,7 +2839,7 @@ int SigAirMet2Spdb::_verticesFromCenter(const size_t &startIdx,
 
   bool foundCenter = false, foundWI=false, foundDiam=false;
   int nNm=0, nLatLon=0;
-  size_t centerTokNum;
+  // size_t centerTokNum;
   size_t endInd=endIdx;
 
   for (size_t ii = startIdx; ii < endIdx; ii++) {
@@ -2847,7 +2848,7 @@ int SigAirMet2Spdb::_verticesFromCenter(const size_t &startIdx,
 
     if (tok == "CENTER" ||
         tok == "CENTRE") {
-      centerTokNum = ii;
+      // centerTokNum = ii;
       foundCenter = true;
       break;
     }
@@ -2861,7 +2862,7 @@ int SigAirMet2Spdb::_verticesFromCenter(const size_t &startIdx,
         tok == "WITHIN" ||
         tok == "WTN") {
       foundWI=true;
-      centerTokNum=ii;
+      // centerTokNum=ii;
     }
     if ((foundWI) && (tok == "NM")) {
       nNm++;
@@ -3261,7 +3262,7 @@ void SigAirMet2Spdb::_handleSfcWindAndVis(int start_pos, string &wx_type)
 {
   // search for end of weather component by looking forward to a 'OBS' token
   // offset start_pos by two token, because it points to 'SFC' in _msgToks
-  for (int i = start_pos+2; i < _msgToks.size(); i++) {
+  for (size_t i = start_pos+2; i < _msgToks.size(); i++) {
     if ((_msgToks[i] == "OBS") || (_msgToks[i] == "FCST")) {
       break;
     }

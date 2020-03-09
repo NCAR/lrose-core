@@ -829,8 +829,8 @@ void RdasSim::_handleCommand(si32 command, si32 len, ui08 *buf)
   TaArray<fl32> fArray_;
   fl32 *fArray = fArray_.alloc(fArrayLen);
   config_t config;
-  si32 dacChannel;
-  si32 dacValue;
+  si32 dacChannel = 0;
+  si32 dacValue = 0;
   
   switch (command) {
 	    

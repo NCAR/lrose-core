@@ -78,7 +78,7 @@ static int compare_y_coords();
  * macro to constrain value to given limits
  */
 
-#define CONSTRAIN(x, low, high) if ((x) < (low)) (x) = (low); \
+#define DO_CONSTRAIN(x, low, high) if ((x) < (low)) (x) = (low); \
                                 else if ((x) > (high)) (x) = (high)
 
 void triangle_pts(point_t *pt0,
@@ -130,10 +130,10 @@ void triangle_pts(point_t *pt0,
 
   } /* i */
   
-  CONSTRAIN(min_ix, 0, nx - 1);
-  CONSTRAIN(min_iy, 0, ny - 1);
-  CONSTRAIN(max_ix, 0, nx - 1);
-  CONSTRAIN(max_iy, 0, ny - 1);
+  DO_CONSTRAIN(min_ix, 0, nx - 1);
+  DO_CONSTRAIN(min_iy, 0, ny - 1);
+  DO_CONSTRAIN(max_ix, 0, nx - 1);
+  DO_CONSTRAIN(max_iy, 0, ny - 1);
 
   /*
    * fill in the grid my moving up through the
@@ -173,8 +173,8 @@ void triangle_pts(point_t *pt0,
   iy1 = (long) ceil((tri[0].y - miny) / dy + 0.5);
   iy2 = (long) ceil((tri[1].y - miny) / dy + 0.5);
 
-  CONSTRAIN(iy1, min_iy, max_iy);
-  CONSTRAIN(iy2, min_iy, max_iy + 1);
+  DO_CONSTRAIN(iy1, min_iy, max_iy);
+  DO_CONSTRAIN(iy2, min_iy, max_iy + 1);
 
   for (iy = iy1; iy < iy2; iy++) {
 
@@ -189,8 +189,8 @@ void triangle_pts(point_t *pt0,
 /*    if (ix1 < 0 || ix2 < 0)
       Glob->debug = TRUE; */
 
-    CONSTRAIN(ix1, min_ix, max_ix);
-    CONSTRAIN(ix2, min_ix, max_ix + 1);
+    DO_CONSTRAIN(ix1, min_ix, max_ix);
+    DO_CONSTRAIN(ix2, min_ix, max_ix + 1);
 
     for (ix = ix1; ix < ix2; ix++)
       grid[iy][ix] = 1;
@@ -200,8 +200,8 @@ void triangle_pts(point_t *pt0,
   iy1 = (long) ceil((tri[1].y - miny) / dy);
   iy2 = (long) ceil((tri[2].y - miny) / dy);
 
-  CONSTRAIN(iy1, min_iy, max_iy);
-  CONSTRAIN(iy2, min_iy, max_iy + 1);
+  DO_CONSTRAIN(iy1, min_iy, max_iy);
+  DO_CONSTRAIN(iy2, min_iy, max_iy + 1);
 
   for (iy = iy1; iy < iy2; iy++) {
 
@@ -216,8 +216,8 @@ void triangle_pts(point_t *pt0,
 /*    if (ix1 < 0 || ix2 < 0)
       Glob->debug = TRUE; */
 
-    CONSTRAIN(ix1, min_ix, max_ix);
-    CONSTRAIN(ix2, min_ix, max_ix + 1);
+    DO_CONSTRAIN(ix1, min_ix, max_ix);
+    DO_CONSTRAIN(ix2, min_ix, max_ix + 1);
 
     for (ix = ix1; ix < ix2; ix++)
       grid[iy][ix] = 1;
@@ -261,8 +261,8 @@ void triangle_pts(point_t *pt0,
 /*  if (ix1 < 0 || ix2 < 0)
     Glob->debug = TRUE; */
 
-  CONSTRAIN(ix1, min_ix, max_ix);
-  CONSTRAIN(ix2, min_ix, max_ix + 1);
+  DO_CONSTRAIN(ix1, min_ix, max_ix);
+  DO_CONSTRAIN(ix2, min_ix, max_ix + 1);
 
   for (ix = ix1; ix < ix2; ix++) {
 
@@ -274,8 +274,8 @@ void triangle_pts(point_t *pt0,
     iy1 = (long) floor ((yy1 - miny) / dy + 0.5);
     iy2 = (long) ceil ((yy2 - miny) / dy + 0.5);
 
-    CONSTRAIN(iy1, min_iy, max_iy);
-    CONSTRAIN(iy2, min_iy, max_iy + 1);
+    DO_CONSTRAIN(iy1, min_iy, max_iy);
+    DO_CONSTRAIN(iy2, min_iy, max_iy + 1);
 
     for (iy = iy1; iy < iy2; iy++)
       grid[iy][ix] = 1;
@@ -288,8 +288,8 @@ void triangle_pts(point_t *pt0,
 /*  if (ix1 < 0 || ix2 < 0)
     Glob->debug = TRUE; */
 
-  CONSTRAIN(ix1, min_ix, max_ix);
-  CONSTRAIN(ix2, min_ix, max_ix + 1);
+  DO_CONSTRAIN(ix1, min_ix, max_ix);
+  DO_CONSTRAIN(ix2, min_ix, max_ix + 1);
 
   for (ix = ix1; ix < ix2; ix++) {
 
@@ -301,8 +301,8 @@ void triangle_pts(point_t *pt0,
     iy1 = (long) floor ((yy1 - miny) / dy + 0.5);
     iy2 = (long) ceil ((yy2 - miny) / dy + 0.5);
 
-    CONSTRAIN(iy1, min_iy, max_iy);
-    CONSTRAIN(iy2, min_iy, max_iy + 1);
+    DO_CONSTRAIN(iy1, min_iy, max_iy);
+    DO_CONSTRAIN(iy2, min_iy, max_iy + 1);
 
     for (iy = iy1; iy < iy2; iy++)
       grid[iy][ix] = 1;

@@ -264,8 +264,9 @@ int Process::Derive(Params *P, const time_t trigger_time, const int leadTime){
   }
 
   MdvxField *MaskField;
-  fl32 *MaskData;
+  fl32 *MaskData = NULL;
   Mdvx::field_header_t MaskFhdr;
+  MEM_zero(MaskFhdr);
 
   if( ! retVal) // Mask available for processing.
   {

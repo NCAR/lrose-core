@@ -595,7 +595,7 @@ void RefractInput::_repositionData(DsMdvx &mdvx) const
 {
   // Handle each field individually
 
-  for (int field_num = 0; field_num < mdvx.getNFields(); ++field_num)
+  for (size_t field_num = 0; field_num < mdvx.getNFields(); ++field_num)
   {
     MdvxField *field = mdvx.getField(field_num);
     

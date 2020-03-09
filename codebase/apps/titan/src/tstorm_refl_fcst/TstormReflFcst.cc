@@ -760,7 +760,7 @@ bool TstormReflFcst::_thresholdedForecast(MdvxField &output_field,
     // fill_polygon routine.  Get the bounding box while we're
     // here
 
-    double min_x, min_y, max_x, max_y;
+    double min_x = 0, min_y = 0, max_x = 0, max_y = 0;
     
     for (int i = 0; i < num_vertices; i++)
     {

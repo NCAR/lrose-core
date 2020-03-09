@@ -131,7 +131,7 @@ void  WrfVIL2Mdv::WrfVIL2MdvFile( char *filename )
   }
 
   vector< FieldHandler* >::iterator handler_iter;
-  bool first_field;
+  bool first_field = false;
 
   vector< time_t > times;
   times = _fieldHandlerList[0]->extractTimes(ncID);

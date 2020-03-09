@@ -66,9 +66,14 @@ int main(int argc, char **argv)
   TDRP_init_override(&override); 
 
   for(int a = 0; a < argc; a++) {
-    if(argv[a] == "-help" || argv[a] == "-h" || argv[a] == "--help" || argv[a] == "--h") {
+    if(!strcmp(argv[a],  "-help") ||
+       !strcmp(argv[a],  "-h") ||
+       !strcmp(argv[a],  "--help") ||
+       !strcmp(argv[a],  "--h")) {
+
       usage(argv[0]);
       return -2;
+
     } else if (!strcmp(argv[a], "-debug")) {
       
       sprintf(tmp_str, "debug = TRUE;");
@@ -113,7 +118,7 @@ int main(int argc, char **argv)
 				     argv[a+5], argv[a+6], argv[a+7], 
 				     argv[a+8], argv[a+9]);
       }
-    } else if(strcmp(argv[a], "-Earthquake") == 0)
+    } else if (strcmp(argv[a], "-Earthquake") == 0) {
       if(argc < a + 19) {
 	usage(argv[0]);
 	return -2;
@@ -125,6 +130,7 @@ int main(int argc, char **argv)
 					argv[a+11], argv[a+12], argv[a+13], argv[a+14],
 					argv[a+15], argv[a+16], argv[a+17], argv[a+18]);
       }
+    }
   }
 
   usage(argv[0]);

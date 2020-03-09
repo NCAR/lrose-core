@@ -140,8 +140,6 @@ int main(int argc, char *argv[])
     // And use the input paths.
     PMU_auto_register("Waiting for data");
     
-    char *FilePath;
-  
     for (int i=0; i < numLocationsToWatch; i++){
       _input[i]->reset();
     }
@@ -163,7 +161,6 @@ int main(int argc, char *argv[])
 	// a second to avoid thrashing wildly.
 	//
 	sleep(1);
-	FilePath = _input[i]->latest();
 	//
 	// The above does not work - FilePath is always NULL.
 	// So - must fiddle about to get filename and see

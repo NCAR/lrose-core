@@ -279,11 +279,11 @@ int TitanTrackData::loadNextEntry(int *no_more_entries_p)
   dbzMax = gprops->dbz_max;
 
   precipFlux = gprops->precip_flux;
-  double precipVolM3 = precipFlux * scanIntervalSecs;
-  double precipDepthMm = 0.0;
-  if (precipArea > 0) {
-    precipDepthMm = (precipVolM3 / precipArea) / 1000.0;
-  }
+  // double precipVolM3 = precipFlux * scanIntervalSecs;
+  // double precipDepthMm = 0.0;
+  // if (precipArea > 0) {
+  //   precipDepthMm = (precipVolM3 / precipArea) / 1000.0;
+  // }
 
   track_file_forecast_props_t *fprops = &entry->dval_dt;
 

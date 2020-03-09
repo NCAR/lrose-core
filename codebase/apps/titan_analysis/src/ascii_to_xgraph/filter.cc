@@ -117,19 +117,19 @@ int filter(FILE *log_file)
   int nfit;
   int *n_observed;
 
-  double xmean, ymean;
-  double xsdev, ysdev;
-  double chi_sq;
+  double xmean = 0, ymean = 0;
+  double xsdev = 0, ysdev = 0;
+  double chi_sq = 0;
   double minx, maxx;
   double miny, maxy;
   double rangex, deltax;
-  double hist_min;
+  double hist_min = 0;
   double *binx, *biny;
   double *expected_y;
   double *xfit, *yfit;
   double *x, *y, *xp, *yp;
   double *aa = NULL;
-  double **percentile_vals;
+  double **percentile_vals = NULL;
 
   /*
    * set debugging
@@ -626,7 +626,7 @@ static int compute_stats(double minx,
   double xval, yval;
   double expected, observed;
   double x_diff, chi_diff;
-  double pxi, xx;
+  double pxi = 0, xx;
   double beta, beta1, beta2, eta;
   double one_over_beta;
   double gamma_k;
@@ -982,8 +982,8 @@ static int load_xy_data(int xpos,
   double minx = LARGE_DOUBLE, maxx = -LARGE_DOUBLE;
   double miny = LARGE_DOUBLE, maxy = -LARGE_DOUBLE;
 
-  xy_list_t *this_point, *prev_point = NULL;
-  xy_list_t *first_point; 
+  xy_list_t *this_point = NULL, *prev_point = NULL;
+  xy_list_t *first_point = NULL;
 
   while (!feof(stdin)) {
 

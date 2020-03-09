@@ -39,7 +39,7 @@ using namespace std;
 
 // Constructor
 
-Args::Args (int argc, char **argv, char *prog_name)
+Args::Args (int argc, char **argv, const char *prog_name)
 
 {
 
@@ -132,7 +132,7 @@ Args::~Args ()
   TDRP_free_override(&override);
 }
 
-void Args::usage(char *prog_name, ostream &out)
+void Args::usage(const char *prog_name, ostream &out)
 {
 
   out << "Usage: " << prog_name << " [options as below]\n"

@@ -194,21 +194,13 @@ MdvxField *WrfVILFieldHandler::extractField(const int nc_file_id, const time_t d
     cerr << "lat1 = " << lat1 << endl;
     cerr << "lat2 = " << lat2 << endl;
   }
-
-//  Pjg *MP = new Pjg();
   
-//  MP->initLc2(origin_lat, origin_lon,
-//	      lat1, lat2);
-  
-//  MP->latlon2xy(min_lat, min_lon, minx, miny);
-//  delete MP;
-
   minx = - ( nx * .5 * dx );
   miny = - ( ny * .5 * dx );
   
-  float missing_value;
+  float missing_value = -9999.0;
   
-// Create the field header for the field
+  // Create the field header for the field
 
   Mdvx::field_header_t fhdr;
   MEM_zero(fhdr);

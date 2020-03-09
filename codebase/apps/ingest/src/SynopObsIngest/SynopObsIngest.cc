@@ -1325,12 +1325,12 @@ int SynopObsIngest::_decodeObsWx(const string &tok)
     iwx = ival;
   }
 
-  int pwx1 = -1, pwx2 = -1;
-  int ival1, ival2;
-  if (sscanf(tok.c_str() + 3, "%1d%1d", &ival1, &ival2) == 2) {
-    pwx1 = ival1;
-    pwx2 = ival2;
-  }
+  // int pwx1 = -1, pwx2 = -1;
+  // int ival1, ival2;
+  // if (sscanf(tok.c_str() + 3, "%1d%1d", &ival1, &ival2) == 2) {
+  //   pwx1 = ival1;
+  //   pwx2 = ival2;
+  // }
 
   switch (iwx) {
     case 99:

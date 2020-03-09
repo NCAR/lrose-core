@@ -1000,7 +1000,7 @@ static void _draw_y_ticks(int dev,
 {
 
   double ytick_length;
-  double ytick_margin;
+  // double ytick_margin;
 
   /*
    * set variables
@@ -1008,10 +1008,10 @@ static void _draw_y_ticks(int dev,
   
   if (dev == XDEV) {
     ytick_length = Glob->x_tick_length / frame->x->xscale;
-    ytick_margin = ytick_length * TICK_CLEARANCE_FRACTION;
+    // ytick_margin = ytick_length * TICK_CLEARANCE_FRACTION;
   } else {
     ytick_length = Glob->ps_tick_length / frame->ps->xscale;
-    ytick_margin = ytick_length * TICK_CLEARANCE_FRACTION;
+    // ytick_margin = ytick_length * TICK_CLEARANCE_FRACTION;
     PsSetLineWidth(frame->psgc->file,
 		   Glob->ps_tick_line_width);
     PsSetFont(frame->psgc->file, frame->psgc->fontname,

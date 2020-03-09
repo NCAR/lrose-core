@@ -664,7 +664,7 @@ bool Rip2Mdv::_readRipHeader(FILE *rip_file, const string &rip_file_path)
   if (_params->debug)
     cerr << "   record len: " << record_len << endl;
   
-  time_t gen_time;
+  time_t gen_time = 0;
   if(_params->use_gen_time) 
   {
     int numtokens;
@@ -701,7 +701,7 @@ bool Rip2Mdv::_readRipHeader(FILE *rip_file, const string &rip_file_path)
 
   if(_params->use_gen_time) 
   {
-      field_hdr.forecast_delta =  field_hdr.forecast_time - gen_time;
+      field_hdr.forecast_delta = field_hdr.forecast_time - gen_time;
   }
 
   field_hdr.nx = ihrip.nx;

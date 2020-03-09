@@ -289,7 +289,7 @@ static void print_full(storm_file_handle_t *s_handle,
 	   * print out s_handle->scan info
 	   */
 	  
-	  RfPrintStormScan(stdout, "    ", sparams, s_handle->scan);
+	  RfPrintStormScan(stdout, "    ", sparams, scan);
 	  
 	  if (RfReadStormProps(s_handle, entry->storm_num,
 			       "print_track") != R_SUCCESS) {
@@ -339,15 +339,15 @@ static void print_summary(storm_file_handle_t *s_handle,
   si32 simple_track_num;
   si32 complex_track_num;
   track_file_verify_t *verify;
-  storm_file_params_t *sparams;
+  // storm_file_params_t *sparams;
   storm_file_global_props_t *gprops;
-  track_file_params_t *tparams;
+  // track_file_params_t *tparams;
   complex_track_params_t *ct_params;
   simple_track_params_t *st_params;
-  track_file_entry_t *entry;
+  // track_file_entry_t *entry;
 
-  sparams = &s_handle->header->params;
-  tparams = &t_handle->header->params;
+  // sparams = &s_handle->header->params;
+  // tparams = &t_handle->header->params;
 
   /*
    * complex tracks
@@ -427,7 +427,6 @@ static void print_summary(storm_file_handle_t *s_handle,
 	if (RfReadTrackEntry(t_handle, "load_stats_grid") != R_SUCCESS)
 	  exit(-1);
       
-	entry = t_handle->entry;
 
 	if (RfReadStormScan(s_handle, t_handle->entry->scan_num,
 			    "print_tracks") != R_SUCCESS) {

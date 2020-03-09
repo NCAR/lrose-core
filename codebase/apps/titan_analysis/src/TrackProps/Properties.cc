@@ -722,7 +722,7 @@ _compute_elliptical_dbz_fit(storm_file_params_t *sparams,
 
   int ii;
   int n_intervals = gprops->n_dbz_intervals;
-  double max_dbz, rel_dbz, density;
+  double max_dbz = 0, rel_dbz, density;
   double a, b, y;
   double fit_a;
   double sum_sq_error, min_sum_sq_error, error;

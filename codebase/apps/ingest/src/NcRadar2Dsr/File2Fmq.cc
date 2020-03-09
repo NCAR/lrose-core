@@ -166,12 +166,12 @@ void File2Fmq::_findFields()
     
     Nc3Var *var = _ncf.get_var(ivar);
     int nDims = var->num_dims();
-    const Nc3Dim *dims[nDims];
-    long dimSizes[nDims];
-    for (int ii = 0; ii < nDims; ii++) {
-      dims[ii] = var->get_dim(ii);
-      dimSizes[ii] = dims[ii]->size();
-    }
+    // const Nc3Dim *dims[nDims];
+    // long dimSizes[nDims];
+    // for (int ii = 0; ii < nDims; ii++) {
+    //   dims[ii] = var->get_dim(ii);
+    //   dimSizes[ii] = dims[ii]->size();
+    // }
 
     if (nDims == 2 &&
 	var->get_dim(0)->id() == _timeDimId &&

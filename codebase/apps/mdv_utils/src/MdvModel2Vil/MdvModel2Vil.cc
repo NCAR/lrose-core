@@ -542,20 +542,18 @@ bool MdvModel2Vil::_processData(const DateTime &gen_time,
 {
   static const string method_name = "MdvModel2Vil::_processData()";
   
-  if (_params->debug) 
+  if (_params->debug) {
     if ( _params->trigger_mode != Params::TIME_LIST_NONFCST_DATA &&
-         _params->trigger_mode != Params::LATEST_NONFCST_DATA)
-      {
-	cerr << _params->trigger_mode  << endl;
-	cerr << endl << "*** Processing data:" << endl;
-	cerr << "      Gen time: " << gen_time << endl;
-	cerr << "      Fcst time: " << fcst_time << endl;
-      }
-    else
-      {
-	cerr << endl << "*** Processing data:" << endl;
-	cerr << "      request time: " << gen_time << endl;
-      }
+         _params->trigger_mode != Params::LATEST_NONFCST_DATA) {
+      cerr << _params->trigger_mode  << endl;
+      cerr << endl << "*** Processing data:" << endl;
+      cerr << "      Gen time: " << gen_time << endl;
+      cerr << "      Fcst time: " << fcst_time << endl;
+    } else {
+      cerr << endl << "*** Processing data:" << endl;
+      cerr << "      request time: " << gen_time << endl;
+    }
+  }
   
   // Get the RWP field from the input file
 

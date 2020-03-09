@@ -70,7 +70,7 @@ FieldTable::FieldTable()
       fieldType = new FieldType( fieldTypeInfo[i].name,
                                  fieldTypeInfo[i].units,
                                  fieldTypeInfo[i].scale,
-                                 fieldTypeInfo[i].bias );
+                                 fieldTypeInfo[i].bias);
       fieldTypes[fieldTypeInfo[i].id] = fieldType;
    }
 }

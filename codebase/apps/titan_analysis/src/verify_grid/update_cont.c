@@ -65,7 +65,7 @@ void update_cont(char *detect_file_path,
   cart_params_t *truth_cart;
   cart_params_t *detect_cart;
 
-  FILE *scan_cont_file;
+  FILE *scan_cont_file = NULL;
 
   /*
    * initialize
@@ -484,10 +484,7 @@ static void cont_specified_grid(contingency_t *cont,
 
   if (Glob->params.output_intermediate_grids)
   {
-    int field;
-    
     MDV_master_header_t *master_hdr = Glob->inter_dataset.master_hdr;
-    MDV_field_header_t *field_hdr;
     
     UTIMstruct time_struct;
     char output_directory[MAX_PATH_LEN];
@@ -505,15 +502,6 @@ static void cont_specified_grid(contingency_t *cont,
     master_hdr->time_centroid =
       Rfrtime2utime(&truth_index->vol_params->mid_time);
     master_hdr->time_expire = master_hdr->time_end;
-    
-    /*
-     * Fill in field header information.
-     */
-
-    for (field = 0; field < 2; field++)
-    {
-      field_hdr = Glob->inter_dataset.fld_hdrs[field];
-    } /* endfor - field */
     
     /*
      * Set the data pointers.

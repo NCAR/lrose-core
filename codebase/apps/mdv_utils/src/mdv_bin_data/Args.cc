@@ -91,7 +91,7 @@ Args::Args (int argc, char **argv, char *prog_name)
     {
       if (i < argc - 1)
       {
-        if ((_endTime = _parseTime(argv[i+1], prog_name, "endtime")) < 0)
+        if ((_endTime = _parseTime(argv[i+1], prog_name, (char *) "endtime")) < 0)
         {
           okay = FALSE;
         }
@@ -121,7 +121,7 @@ Args::Args (int argc, char **argv, char *prog_name)
     {
       if (i < argc - 1)
       {
-        if ((_startTime = _parseTime(argv[i+1], prog_name, "starttime")) < 0)
+        if ((_startTime = _parseTime(argv[i+1], prog_name, (char *) "starttime")) < 0)
         {
           okay = FALSE;
         }

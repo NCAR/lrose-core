@@ -44,7 +44,7 @@ public:
 
   // constructor
 
-  Args (int argc, char **argv, char *prog_name);
+  Args (int argc, char **argv, const char *prog_name);
 
   // destructor
 
@@ -62,7 +62,7 @@ protected:
   
 private:
 
-  void usage(char *prog_name, ostream &out);
+  void usage(const char *prog_name, ostream &out);
   
 };
 

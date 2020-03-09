@@ -443,8 +443,8 @@ MdvxField *ThetaEAdvect::_calcThetaEAdvectField(const MdvxField &u_field,
   Mdvx::field_header_t theta_e_adv_field_hdr =
     theta_e_adv_field->getFieldHeader();
   
-  Mdvx::vlevel_header_t theta_e_vlevel_hdr =
-    theta_e_field.getVlevelHeader();
+  // Mdvx::vlevel_header_t theta_e_vlevel_hdr =
+  //   theta_e_field.getVlevelHeader();
   
   MdvxPjg u_proj(u_field_hdr);
   MdvxPjg v_proj(v_field_hdr);

@@ -627,7 +627,7 @@ int Rdas2Dsr::_readCalib()
 
   delete[] calibBuf;
 
-  return 0;
+  return iret;
 
 }
 

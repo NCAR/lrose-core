@@ -162,7 +162,7 @@ int VerifyGrid::Run ()
 
   _printHeader(stdout);
 
-  Comps *comps;
+  Comps *comps = NULL;
 
   if (_params->method == Params::GRID_CONT_METHOD) {
 

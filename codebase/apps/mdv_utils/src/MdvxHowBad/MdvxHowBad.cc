@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     // after this point pertains to MDV data reading.
     //
 
-    fprintf(stdout,"Field %d : %s (Units %s ) %d by %d by %d\n",
+    fprintf(stdout,"Field %d : %s (Units %s ) %ld by %ld by %ld\n",
 	    i+1,InFhdr.field_name,InFhdr.units,
 	    InFhdr.nx,InFhdr.ny,InFhdr.nz);
 
