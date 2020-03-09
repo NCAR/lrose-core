@@ -1057,11 +1057,15 @@ static lzo_bool ptr_check(void)
 
 	if (r == 1)
 	{
-	    lzo_uint32 v0 = * (lzo_uint32 *) &x[k];
-	    lzo_uint32 v1 = * (lzo_uint32 *) &x[k+n];
-
-	    r &= __lzo_assert(v0 > 0);
-	    r &= __lzo_assert(v1 > 0);
+          lzo_uint32 v0, v1;
+          memcpy(&v0, &x[k], sizeof(v0));
+          memcpy(&v1, &x[k+n], sizeof(v0));
+          
+          /* lzo_uint32 v0 = * (lzo_uint32 *) &x[k]; */
+          /* lzo_uint32 v1 = * (lzo_uint32 *) &x[k+n]; */
+          
+          r &= __lzo_assert(v0 > 0);
+          r &= __lzo_assert(v1 > 0);
 	}
     }
 
