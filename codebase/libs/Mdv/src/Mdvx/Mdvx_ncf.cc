@@ -963,14 +963,11 @@ int Mdvx::_readAllHeadersNcf(const string &path)
   // to easily read the field header information without reading the field
   // data also.
   
-  // create translator
-  
-  Ncf2MdvTrans trans;
-  trans.setDebug(_debug);
-  
-  // perform translation into temporary mdvx object
+  // perform read into temporary mdvx object
   // returns 0 on success, -1 on failure
 
+  Ncf2MdvTrans trans;
+  trans.setDebug(_debug);
   Mdvx mdvx;
   if (trans.readCf(path, mdvx)) {
     _errStr += "ERROR - Mdvx::_readNcf\n";
@@ -988,11 +985,10 @@ int Mdvx::_readAllHeadersNcf(const string &path)
   _vhdrsFile.clear();
   _chdrsFile.clear();
   
-  // Now fill in the file headers.  This isn't done in the translation because
-  // the translation doesn't know that we are reading the entire file to get
-  // the headers.
+  // Now set the normal and file headers.
 
-  _mhdrFile = mdvx.getMasterHeaderFile();
+  _mhdr = mdvx.getMasterHeader();
+  _mhdrFile = mdvx.getMasterHeader();
   
   for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
     MdvxField *field = mdvx.getField(ii);
