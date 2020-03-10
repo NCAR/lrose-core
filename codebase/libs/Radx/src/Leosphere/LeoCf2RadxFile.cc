@@ -3341,7 +3341,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    }
 
    try {
-     _rangeDimSweep = _sweepGroup.getDim(RANGE);
+     _rangeDimSweep = _sweepGroup.getDim("gate_index"); // RANGE);
    } catch (NcxxException e) {
      err.addErrStr("  ERROR - no range dimension");
      err.addErrStr("  exception: ", e.what());
@@ -3422,7 +3422,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
  {
 
-   NcxxVar rangeVar = group.getVar(RANGE);
+   NcxxVar rangeVar = group.getVar("gate_index"); // RANGE);
    if (rangeVar.isNull() || rangeVar.numVals() < 1) {
      NcxxErrStr err;
      err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepRange");
