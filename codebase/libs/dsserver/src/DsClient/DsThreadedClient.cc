@@ -99,11 +99,11 @@ int DsThreadedClient::communicateAutoFwd(DsURL &url,
   
   // compute comm timeout
   
-  int commTimeoutMsecs = DS_DEFAULT_COMM_TIMEOUT_MSECS;
+  ssize_t commTimeoutMsecs = DS_DEFAULT_COMM_TIMEOUT_MSECS;
   char *DS_COMM_TIMEOUT_MSECS = getenv("DS_COMM_TIMEOUT_MSECS");
   if (DS_COMM_TIMEOUT_MSECS != NULL) {
-    int timeout;
-    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%d", &timeout) == 1) {
+    ssize_t timeout;
+    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%ld", &timeout) == 1) {
       commTimeoutMsecs = timeout;
     }
   }

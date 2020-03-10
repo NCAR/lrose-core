@@ -62,6 +62,23 @@ public:
 		     bool cr = true);
 
   ///////////////////////////////////////////
+  // add long integer value to target string,
+  // with optional following carriage return.
+  
+  static void AddLong(string &target,
+                      long larg,
+                      bool cr = false);
+  
+  ///////////////////////////////////////////////
+  // add labelled long integer value to target string,
+  // with optional following carriage return.
+  
+  static void AddLong(string &target,
+                      string label,
+                      const long larg,
+                      bool cr = true);
+
+  ///////////////////////////////////////////
   // add double value to target string,
   // with optional following carriage return.
   // Default format is %g.

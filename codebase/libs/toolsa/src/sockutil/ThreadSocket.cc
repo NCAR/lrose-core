@@ -87,7 +87,7 @@ ThreadSocket::ThreadSocket(int sd) :
 
 int ThreadSocket::open(const char *hostname,
 		       const int port,
-		       const int wait_msecs /* = -1*/ )
+		       const ssize_t wait_msecs /* = -1*/ )
 {
 
   if (hasState(STATE_SERVER_OPENED)) {
@@ -174,7 +174,7 @@ int ThreadSocket::open(const char *hostname,
 
 int ThreadSocket::_openClient(const char *hostname,
 			      const int port,
-			      const int wait_msecs /* = -1*/ )
+			      const ssize_t wait_msecs /* = -1*/ )
 
 { 
   

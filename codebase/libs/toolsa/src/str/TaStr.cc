@@ -68,6 +68,35 @@ void TaStr::AddInt(string &target,
 }
 
 ///////////////////////////////////////////
+// add long integer value to target string,
+// with optional following carriage return.
+
+void TaStr::AddLong(string &target,
+                    long larg,
+                    bool cr)
+{
+  AddLong(target, "", larg, cr);
+}
+
+/////////////////////////////////////////////////////
+// add labelled long integer value to target string,
+// with optional following carriage return.
+
+void TaStr::AddLong(string &target,
+                    string label,
+                    long larg,
+                    bool cr)
+{
+  target += label;
+  char str[32];
+  sprintf(str, "%ld", larg);
+  target += str;
+  if (cr) {
+    target += "\n";
+  }
+}
+
+///////////////////////////////////////////
 // add double value to target string,
 // with optional following carriage return.
 // Default format is %g.

@@ -148,7 +148,7 @@ void Socket::freeData()
 
 int Socket::open(const char *hostname,
                  const int port,
-                 const int wait_msecs /* = -1*/ )
+                 const ssize_t wait_msecs /* = -1*/ )
 {
 
   if (hasState(STATE_SERVER_OPENED)) {
@@ -250,7 +250,7 @@ void Socket::close()
 //  SELECT_FAILED: select failed
 //  UNEXPECTED:    unknown error returned from the SKU_ functions.
 //
-int Socket::readSelect(int const wait_msecs /* = -1*/ )
+int Socket::readSelect(const ssize_t wait_msecs /* = -1*/ )
 {
 
   removeState(STATE_WROTELAST);
@@ -290,7 +290,7 @@ int Socket::readSelect(int const wait_msecs /* = -1*/ )
 //  SELECT_FAILED: select failed
 //  UNEXPECTED:    unknown error returned from the SKU_ functions.
 //
-int Socket::readSelectPmu(int const wait_msecs /* = -1*/ )
+int Socket::readSelectPmu(const ssize_t wait_msecs /* = -1*/ )
 {
 
   removeState(STATE_WROTELAST);
@@ -328,7 +328,7 @@ int Socket::readSelectPmu(int const wait_msecs /* = -1*/ )
 //  SELECT_FAILED: select failed
 //  UNEXPECTED     Unknown error returned from the SKU_ functions.
 //
-int Socket::writeSelect(const int wait_msecs /* = -1*/ )
+int Socket::writeSelect(const ssize_t wait_msecs /* = -1*/ )
 {
 
   removeState(STATE_WROTELAST);
@@ -371,7 +371,7 @@ int Socket::writeSelect(const int wait_msecs /* = -1*/ )
 //
 int Socket::readBuffer(void * const buf,
                        const ssize_t len,
-                       const int wait_msecs /* = -1*/ )
+                       const ssize_t wait_msecs /* = -1*/ )
 {
 
   removeState(STATE_WROTELAST);
@@ -421,7 +421,7 @@ int Socket::readBuffer(void * const buf,
 //
 int Socket::peek(void * const buf,
 		 const ssize_t len,
-		 const int wait_msecs /* = -1*/ )
+		 const ssize_t wait_msecs /* = -1*/ )
 {
   
   removeState(STATE_WROTELAST);
@@ -480,7 +480,7 @@ int Socket::readBufferHb(void * const buf,
                          const ssize_t len,
                          const ssize_t chunk_size,
                          const heartbeat_t heartbeat_func,
-                         const int wait_msecs /* = -1*/ )
+                         const ssize_t wait_msecs /* = -1*/ )
 {
   
   removeState(STATE_WROTELAST);
@@ -530,7 +530,7 @@ int Socket::readBufferHb(void * const buf,
 //
 int Socket::writeBuffer(const void *buf,
                         const ssize_t len,
-                        const int wait_msecs /* = -1*/ )
+                        const ssize_t wait_msecs /* = -1*/ )
 {
 
   removeState(STATE_READLAST);
@@ -589,7 +589,7 @@ int Socket::writeBuffer(const void *buf,
 //   BAD_MAGIC_COOKIE
 //   READ_HEADER_FAILED
 //
-int Socket::readHeader(const int wait_msecs /* = -1*/ )
+int Socket::readHeader(const ssize_t wait_msecs /* = -1*/ )
 {
 
   removeState(STATE_WROTELAST);
@@ -698,7 +698,7 @@ int Socket::readHeader(const int wait_msecs /* = -1*/ )
 int Socket::writeHeader(const ssize_t len,
                         const ssize_t product_id,
                         const ssize_t seq_no,
-                        const int wait_msecs /* = -1*/ )
+                        const ssize_t wait_msecs /* = -1*/ )
 {
   removeState(STATE_READLAST);
   addState(STATE_WROTELAST);
@@ -802,7 +802,7 @@ int Socket::writeHeader(const ssize_t len,
 //  BAD_MAGIC_COOKIE:    incorrect magic cookie in header
 //  READ_HEADER_FAILED:  error reading header
 // 
-int Socket::readMessage(const int wait_msecs /* = -1*/ )
+int Socket::readMessage(const ssize_t wait_msecs /* = -1*/ )
 {
   removeState(STATE_WROTELAST);
   addState(STATE_READLAST);
@@ -861,7 +861,7 @@ int Socket::readMessage(const int wait_msecs /* = -1*/ )
 int Socket::writeMessage(const int product_id,
                          const void *data,
                          const ssize_t data_len,
-                         const int wait_msecs /* = -1*/ )
+                         const ssize_t wait_msecs /* = -1*/ )
 {
   removeState(STATE_READLAST);
   addState(STATE_WROTELAST);
@@ -899,7 +899,7 @@ int Socket::writeMessage(const int product_id,
 // Returns 0 on success, -1 on failure
 
 int Socket::stripHttpHeader(string &header,
-			    const int wait_msecs /* = -1*/ )
+			    const ssize_t wait_msecs /* = -1*/ )
   
 {
 
@@ -979,7 +979,7 @@ int Socket::stripHttpHeader(string &header,
 
 int Socket::_openClient(const char *hostname,
 			const int port,
-			const int wait_msecs /* = -1*/ )
+			const ssize_t wait_msecs /* = -1*/ )
 
 { 
   
@@ -1054,7 +1054,7 @@ int Socket::_openClient(const char *hostname,
 //
 
 ssize_t Socket::_read(void *mess, const ssize_t len, 
-                      const int wait_msecs /* = -1*/ )
+                      const ssize_t wait_msecs /* = -1*/ )
   
 {
 
@@ -1121,7 +1121,7 @@ ssize_t Socket::_read(void *mess, const ssize_t len,
 // Returns nbytes read. If successful, nbytes == len.
 
 ssize_t Socket::_peek(void *mess, const ssize_t len, 
-                      const int wait_msecs /* = -1*/ )
+                      const ssize_t wait_msecs /* = -1*/ )
   
 {
   
@@ -1197,7 +1197,7 @@ ssize_t Socket::_peek(void *mess, const ssize_t len,
 ssize_t Socket::_readHb(void *mess, const ssize_t len,
                         const ssize_t chunk_size,
                         const heartbeat_t heartbeat_func /* = NULL*/,
-                        const int wait_msecs /* = -1*/ )
+                        const ssize_t wait_msecs /* = -1*/ )
 
 {
 

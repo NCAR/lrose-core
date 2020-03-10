@@ -121,7 +121,7 @@ public:
   //
   virtual int open(const char *hostname,
 		   const int port,
-		   const int wait_msecs = -1);
+		   const ssize_t wait_msecs = -1);
 
   ///////////////
   // close()
@@ -151,7 +151,7 @@ public:
   //  SOCKET_FAILED: select failed
   //  UNEXPECTED:    unknown error returned from the functions.
   //
-  int readSelect(const int wait_msecs = -1);
+  int readSelect(const ssize_t wait_msecs = -1);
 
   ////////////////////////////////////////////////////////
   // readSelectPmu()
@@ -169,7 +169,7 @@ public:
   //  SELECT_FAILED: select failed
   //  UNEXPECTED:    unknown error returned from the SKU_ functions.
   //
-  int readSelectPmu(int const wait_msecs = -1);
+  int readSelectPmu(ssize_t const wait_msecs = -1);
 
   /////////////////////////////////////////////////
   // writeSelect()
@@ -185,7 +185,7 @@ public:
   //  SELECT_FAILED: select failed
   //  UNEXPECTED     Unknown error returned from the functions.
   //
-  int writeSelect(const int wait_msecs);
+  int writeSelect(const ssize_t wait_msecs);
 
   ////////////////////////////////////////////////////////
   // readBuffer()
@@ -206,7 +206,7 @@ public:
   //
   int readBuffer(void * const buf,
                  const ssize_t len,
-                 const int wait_msecs = -1);
+                 const ssize_t wait_msecs = -1);
 
   ////////////////////////////////////////////////////////
   // peek()
@@ -228,7 +228,7 @@ public:
   //
   int peek(void * const buf,
 	   const ssize_t len,
-	   const int wait_msecs = -1);
+	   const ssize_t wait_msecs = -1);
 
   ////////////////////////////////////////////////////////
   // readBufferHb()
@@ -260,7 +260,7 @@ public:
                    const ssize_t len,
                    const ssize_t chunk_size,
                    const heartbeat_t heartbeat_func,
-                   const int wait_msecs = -1);
+                   const ssize_t wait_msecs = -1);
 
   ////////////////////////////////////////////////////////
   // writeBuffer()
@@ -282,7 +282,7 @@ public:
   //
   int writeBuffer(const void *buf,
                   const ssize_t len,
-                  const int wait_msecs = -1);
+                  const ssize_t wait_msecs = -1);
   
   ////////////////////////////////////////////////////////
   // readHeader()
@@ -300,7 +300,7 @@ public:
   // 
   // On failure, getErrNum() will return BAD_BYTE_COUNT.
   //
-  virtual int readHeader(const int wait_msecs = -1);
+  virtual int readHeader(const ssize_t wait_msecs = -1);
 
   ////////////////////////////////////////////////////////
   // writeHeader()
@@ -320,7 +320,7 @@ public:
   virtual int writeHeader(const ssize_t len,
                           const ssize_t product_id,
                           const ssize_t seq_no,
-                          const int wait_msecs = -1);
+                          const ssize_t wait_msecs = -1);
   
   ///////////////////////////////////////////////////////////////////
   // readMessage()
@@ -349,7 +349,7 @@ public:
   //  BAD_MAGIC_COOKIE:    incorrect magic cookie in header
   //  READ_HEADER_FAILED:  error reading header
   // 
-  int readMessage(const int wait_msecs = -1);
+  int readMessage(const ssize_t wait_msecs = -1);
 
   ////////////////////////////////////////////////////////
   // writeMessage()
@@ -380,7 +380,7 @@ public:
   int writeMessage(const int product_id,
                    const void *data,
                    const ssize_t len,
-                   const int wait_msecs = -1);
+                   const ssize_t wait_msecs = -1);
 
   /////////////////////////////////////////////////////////////
   // strip an HTTP header off a socket message
@@ -396,7 +396,7 @@ public:
   // Returns 0 on success, -1 on failure
   
   int stripHttpHeader(string &header,
-		      const int wait_msecs = -1);
+		      const ssize_t wait_msecs = -1);
   
   //////////////////////////////////////
   // number of bytes read or written, not including the header (if a message).
@@ -433,13 +433,13 @@ protected:
 
   int _openClient(const char *hostname,
 		  const int port,
-		  const int wait_msecs = -1);
-  ssize_t _read(void *mess, const ssize_t len, const int wait_msecs = -1);
-  ssize_t _peek(void *mess, const ssize_t len, const int wait_msecs = -1);
+		  const ssize_t wait_msecs = -1);
+  ssize_t _read(void *mess, const ssize_t len, const ssize_t wait_msecs = -1);
+  ssize_t _peek(void *mess, const ssize_t len, const ssize_t wait_msecs = -1);
   ssize_t _readHb(void *mess, const ssize_t len,
                   const ssize_t chunk_size,
                   const heartbeat_t heartbeat_func = NULL,
-                  const int wait_msecs = -1);
+                  const ssize_t wait_msecs = -1);
   ssize_t _write(const void *mess, const ssize_t len);
   
 private:

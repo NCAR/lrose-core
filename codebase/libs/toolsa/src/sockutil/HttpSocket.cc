@@ -102,7 +102,7 @@ HttpSocket::~HttpSocket()
 //   BAD_MAGIC_COOKIE
 //   READ_HEADER_FAILED
 //
-int HttpSocket::readHeader(const int wait_msecs /* = -1*/ )
+int HttpSocket::readHeader(const ssize_t wait_msecs /* = -1*/ )
 {
 
   removeState(STATE_WROTELAST);
@@ -241,7 +241,7 @@ int HttpSocket::readHeader(const int wait_msecs /* = -1*/ )
 int HttpSocket::writeHeader(const ssize_t len,
                             const ssize_t product_id,
                             const ssize_t seq_no,
-                            const int wait_msecs /* = -1*/ )
+                            const ssize_t wait_msecs /* = -1*/ )
 {
   removeState(STATE_READLAST);
   addState(STATE_WROTELAST);

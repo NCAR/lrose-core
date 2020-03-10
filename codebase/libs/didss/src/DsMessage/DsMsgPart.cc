@@ -175,7 +175,7 @@ int DsMsgPart::loadFromMsg64(const ssize_t part_num,
   _offset = msgPart.offset;
   
   if (msg_len > 0 && (_offset + _length) > msg_len) {
-    cerr << "ERROR - DsMsgPart::loadFromMsg.\n";
+    cerr << "ERROR - DsMsgPart::loadFromMsg64.\n";
     cerr << "  End of part " << part_num << " is beyond end of message.\n";
     cerr << "  End of part offset: " << _offset + _length << endl;
     cerr << "  End of message offset: " << msg_len << endl;

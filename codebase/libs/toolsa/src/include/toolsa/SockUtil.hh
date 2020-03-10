@@ -171,13 +171,13 @@ class SockUtil {
   void _setSocketOptions(const int sd);
 
   int _readSelectPmu(const int sd,
-		     const int wait_msecs = -1);
+		     const ssize_t wait_msecs = -1);
 
   int _readSelect(const int sd,
-		  const int wait_msecs = -1);
+		  const ssize_t wait_msecs = -1);
 
   int _writeSelect(const int sd,
-		   const int wait_msecs = -1);
+		   const ssize_t wait_msecs = -1);
 
   private:
 

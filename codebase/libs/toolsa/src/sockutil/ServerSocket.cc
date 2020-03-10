@@ -175,7 +175,7 @@ int ServerSocket::openServer(const int port)
 //   UNEXPECTED           = Unknown error returned
 //
 
-Socket * ServerSocket::getClient(const int wait_msecs /* = -1*/ )
+Socket * ServerSocket::getClient(const ssize_t wait_msecs /* = -1*/ )
 {
 
   addState(STATE_WAITING_FOR_CLIENT);
@@ -250,7 +250,7 @@ Socket * ServerSocket::getClient(const int wait_msecs /* = -1*/ )
 //   UNEXPECTED           = Unknown error returned
 //
 
-ThreadSocket * ServerSocket::getThreadClient(const int wait_msecs /* = -1*/ )
+ThreadSocket * ServerSocket::getThreadClient(const ssize_t wait_msecs /* = -1*/ )
 {
 
   addState(STATE_WAITING_FOR_CLIENT);
@@ -323,7 +323,7 @@ ThreadSocket * ServerSocket::getThreadClient(const int wait_msecs /* = -1*/ )
 //   UNEXPECTED           = Unknown error returned
 //
 
-HttpSocket * ServerSocket::getHttpClient(const int wait_msecs /* = -1*/ )
+HttpSocket * ServerSocket::getHttpClient(const ssize_t wait_msecs /* = -1*/ )
 {
 
   addState(STATE_WAITING_FOR_CLIENT);

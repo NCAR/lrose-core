@@ -49,7 +49,7 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
 {
 
   if (_debug) {
-    cerr << "--->> disassemble <<-----" << endl;
+    cerr << "--->> disassemble, msg_len: " << msg_len << "  <<-----" << endl;
   }
   
   // initialize

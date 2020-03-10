@@ -79,7 +79,7 @@ public:
   // 
   // On failure, getErrNum() will return BAD_BYTE_COUNT.
   //
-  virtual int readHeader(const int wait_msecs = -1);
+  virtual int readHeader(const ssize_t wait_msecs = -1);
 
   ////////////////////////////////////////////////////////
   // writeHeader()
@@ -99,7 +99,7 @@ public:
   virtual int writeHeader(const ssize_t len,
                           const ssize_t product_id,
                           const ssize_t seq_no,
-                          const int wait_msecs = -1);
+                          const ssize_t wait_msecs = -1);
   
 private:
   bool _requestHadHttpHeader;

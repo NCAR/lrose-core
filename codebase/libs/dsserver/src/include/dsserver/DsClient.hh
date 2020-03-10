@@ -124,6 +124,7 @@ protected:
 
   void _writeDebug(const string &label, const string &msg = "");
   void _writeDebug(const string &label, int ival);
+  void _writeDebug(const string &label, long lval);
   
 private:
 

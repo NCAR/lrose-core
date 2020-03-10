@@ -155,7 +155,7 @@ void SockUtil::_setSocketOptions(const int sd)
 //
 
 int SockUtil::_readSelectPmu(const int sd,
-			     const int wait_msecs /* = -1*/ )
+			     const ssize_t wait_msecs /* = -1*/ )
 
 {
 
@@ -213,7 +213,7 @@ int SockUtil::_readSelectPmu(const int sd,
 //
 
 int SockUtil::_readSelect(const int sd,
-			  const int wait_msecs /* = -1*/ )
+			  const ssize_t wait_msecs /* = -1*/ )
 
 {
 
@@ -235,7 +235,7 @@ int SockUtil::_readSelect(const int sd,
     if (wait_msecs < 0) {
       waitp = NULL;
     } else {
-      int msecs = wait_msecs;
+      ssize_t msecs = wait_msecs;
       wait.tv_sec = msecs / 1000;
       msecs -= wait.tv_sec * 1000;
       wait.tv_usec = msecs * 1000;
@@ -270,7 +270,7 @@ int SockUtil::_readSelect(const int sd,
 //
 
 int SockUtil::_writeSelect(const int sd,
-			   const int wait_msecs /* = -1*/ )
+			   const ssize_t wait_msecs /* = -1*/ )
 
 {
 
@@ -293,7 +293,7 @@ int SockUtil::_writeSelect(const int sd,
     if (wait_msecs < 0) {
       waitp = NULL;
     } else {
-      int msecs = wait_msecs;
+      ssize_t msecs = wait_msecs;
       wait.tv_sec = msecs / 1000;
       msecs -= wait.tv_sec * 1000;
       wait.tv_usec = msecs * 1000;

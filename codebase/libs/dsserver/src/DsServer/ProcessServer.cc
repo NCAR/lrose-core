@@ -100,8 +100,8 @@ ProcessServer::ProcessServer(const string & executableName,
   
   char *DS_COMM_TIMEOUT_MSECS = getenv("DS_COMM_TIMEOUT_MSECS");
   if (DS_COMM_TIMEOUT_MSECS != NULL) {
-    int timeout;
-    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%d", &timeout) == 1) {
+    ssize_t timeout;
+    if (sscanf(DS_COMM_TIMEOUT_MSECS, "%ld", &timeout) == 1) {
       _commTimeoutMsecs = timeout;
     }
   }

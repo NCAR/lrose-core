@@ -227,7 +227,7 @@ protected:
 
   // communications timeout in msecs
 
-  int _commTimeoutMsecs;
+  ssize_t _commTimeoutMsecs;
 
   ////////////////////////////////////////////////////////////
   // ACCESS FUNCTIONS FOR DATA MEMBERS

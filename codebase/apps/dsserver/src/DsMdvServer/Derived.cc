@@ -543,7 +543,7 @@ MdvxField *DsMdvServer::_createSpeedFromUV(Params::derived_field_t *derived,
   fl32 uMissing = ufhdr.missing_data_value;
   fl32 vMissing = vfhdr.missing_data_value;
   fl32 sMissing = sfhdr.missing_data_value;
-  int npts = sfhdr.nx * sfhdr.ny * sfhdr.nz;
+  ssize_t npts = sfhdr.nx * sfhdr.ny * sfhdr.nz;
 
   for (int ii = 0; ii < npts; ii++, spd++, uu++, vv++) {
     fl32 uVal = *uu;
@@ -617,7 +617,7 @@ MdvxField *DsMdvServer::_createDirnFromUV(Params::derived_field_t *derived,
   fl32 uMissing = ufhdr.missing_data_value;
   fl32 vMissing = vfhdr.missing_data_value;
   fl32 dMissing = dfhdr.missing_data_value;
-  int npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
+  ssize_t npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
 
   for (int ii = 0; ii < npts; ii++, dirn++, uu++, vv++) {
     fl32 uVal = *uu;
@@ -702,7 +702,7 @@ MdvxField *DsMdvServer::_createDiffFieldsSameFile(Params::derived_field_t *deriv
   fl32 uMissing = fhdr1.missing_data_value;
   fl32 vMissing = fhdr2.missing_data_value;
   fl32 dMissing = dfhdr.missing_data_value;
-  int npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
+  ssize_t npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
   
   for (int ii = 0; ii < npts; ii++, diff++, f1++, f2++) {
     fl32 val1 = *f1;
@@ -828,7 +828,7 @@ MdvxField *DsMdvServer::_createDiffFields(Params::derived_field_t *derived,
   fl32 uMissing = fhdr1.missing_data_value;
   fl32 vMissing = fhdr2.missing_data_value;
   fl32 dMissing = dfhdr.missing_data_value;
-  int npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
+  ssize_t npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
   
   for (int ii = 0; ii < npts; ii++, diff++, f1++, f2++) {
     fl32 val1 = *f1;
@@ -947,7 +947,7 @@ MdvxField *DsMdvServer::_createDiffInTime(Params::derived_field_t *derived,
   fl32 uMissing = fhdr1.missing_data_value;
   fl32 vMissing = fhdr2.missing_data_value;
   fl32 dMissing = dfhdr.missing_data_value;
-  int npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
+  ssize_t npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
   
   for (int ii = 0; ii < npts; ii++, diff++, f1++, f2++) {
     fl32 val1 = *f1;
@@ -1172,7 +1172,7 @@ MdvxField *DsMdvServer::_createPseudoColorImage(Params::derived_field_t *derived
   fl32 uMissing = fhdr1.missing_data_value;
   fl32 vMissing = fhdr2.missing_data_value;
   fl32 dMissing = dfhdr.missing_data_value;
-  int npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
+  ssize_t npts = dfhdr.nx * dfhdr.ny * dfhdr.nz;
   
   for (int ii = 0; ii < npts; ii++, diff++, f1++, f2++) {
     fl32 val1 = *f1;

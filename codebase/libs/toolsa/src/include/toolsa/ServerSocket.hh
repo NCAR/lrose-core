@@ -107,7 +107,7 @@ public:
   //   UNEXPECTED           = Unknown error returned
   //
   
-  Socket * getClient(const int wait_msecs = -1);
+  Socket * getClient(const ssize_t wait_msecs = -1);
     
   ///////////////////////////////////////////////////////////////
   // getThreadClient()
@@ -126,7 +126,7 @@ public:
   //   UNEXPECTED           = Unknown error returned
   //
   
-  ThreadSocket * getThreadClient(const int wait_msecs = -1);
+  ThreadSocket * getThreadClient(const ssize_t wait_msecs = -1);
 
   ///////////////////////////////////////////////////////////////
   // getHttpClient()
@@ -145,7 +145,7 @@ public:
   //   UNEXPECTED           = Unknown error returned
   //
   
-  HttpSocket * getHttpClient(const int wait_msecs = -1);
+  HttpSocket * getHttpClient(const ssize_t wait_msecs = -1);
     
   ///////////////
   // close()

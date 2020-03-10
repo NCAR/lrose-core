@@ -73,7 +73,7 @@ public:
   //
   virtual int open(const char *hostname,
 		   const int port,
-		   const int wait_msecs = -1);
+		   const ssize_t wait_msecs = -1);
 
   ///////////////////////////////////////////////////////////////////
   // readMessageIncr()
@@ -141,7 +141,7 @@ protected:
   
   int _openClient(const char *hostname,
                   const int port,
-                  const int wait_msecs = -1);
+                  const ssize_t wait_msecs = -1);
 
   int _readHeaderIncr();
   

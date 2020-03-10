@@ -346,6 +346,7 @@ void *DsMdvxMsg::assembleReadVolumeReturn(const DsMdvx &mdvx)
   if (_debug) {
     cerr << "--->> assembleReadVolumeReturn <<-----" << endl;
     print(cerr, "  ");
+    cerr << "--->> message length assembled: " << _lengthAssembled << endl;
   }
 
   return msg;

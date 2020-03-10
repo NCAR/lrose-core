@@ -253,7 +253,7 @@ int DsMdvServer::handleMdvxCommand(Socket *socket,
   // send reply
 
   void *msgToSend = msg.assembledMsg();
-  int msgLen = msg.lengthAssembled();
+  ssize_t msgLen = msg.lengthAssembled();
   if (socket->writeMessage(0, msgToSend, msgLen)) {
     cerr << "ERROR - COMM -HandleMdvxCommand." << endl;
     cerr << "  Sending reply to client." << endl;
