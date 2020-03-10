@@ -148,7 +148,8 @@ int main(int argc, char **argv)
   int indices[100];
   Point_d pts[100];
 
-  // Set up points array
+  /* Set up points array */
+
   pts[0].x = 0;
   pts[0].y = 0;
 

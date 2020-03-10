@@ -2260,8 +2260,8 @@ static int _decompress(MDV_field_handle_t *handle)
     if (nbytes_uncompressed != nbytes_plane) {
       fprintf(stderr, "ERROR - MDV_decompress_field().\n");
       fprintf(stderr, "  Wrong number of bytes in plane.\n");
-      fprintf(stderr, "  %lld expected, %lld found.\n",
-	      (long long) nbytes_plane, (long long) nbytes_uncompressed);
+      fprintf(stderr, "  %ld expected, %ld found.\n",
+	      (long) nbytes_plane, (long) nbytes_uncompressed);
       MEMbufDelete(work_buf);
       return (-1);
     }

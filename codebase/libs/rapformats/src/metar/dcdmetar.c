@@ -745,18 +745,20 @@ static void parseCldData( char *token, Decoded_METAR *Mptr, int next)
 static int isSkyCond( char **skycond, Decoded_METAR *Mptr,
                       int *NDEX )
 {
- 
-// Code replaced by S Sullivan, 2007-06-11
-//   ubool first_layer,
-//        second_layer,
-//        third_layer;
-//   int next;
-// End code replaced by S Sullivan, 2007-06-11
 
+  /* 
+     Code replaced by S Sullivan, 2007-06-11
+     ubool first_layer,
+     second_layer,
+     third_layer;
+     int next;
+     End code replaced by S Sullivan, 2007-06-11
+  */
+  
  
-      /********************************************************/
-      /* INTERROGATE skycond TO DETERMINE IF "CLR" IS PRESENT */
-      /********************************************************/
+  /********************************************************/
+  /* INTERROGATE skycond TO DETERMINE IF "CLR" IS PRESENT */
+  /********************************************************/
  
    if( strcmp(*skycond,"CLR") == 0)
    {
@@ -846,7 +848,7 @@ static int isSkyCond( char **skycond, Decoded_METAR *Mptr,
    {
 
 
-// New code by S Sullivan, 2007-06-11
+     /* New code by S Sullivan, 2007-06-11 */
       int ilayer = 0;
       while (ilayer < 6) {
         if (skycond[ilayer] == NULL || ! isCldLayer( skycond[ilayer]))
@@ -857,61 +859,61 @@ static int isSkyCond( char **skycond, Decoded_METAR *Mptr,
       }
       if (ilayer > 0) return 1;
       else return 0;
-// End new code by S Sullivan, 2007-06-11
+      /* End new code by S Sullivan, 2007-06-11 */
 
 
-// Code replaced by above, by S Sullivan, 2007-06-11
-//      next = 0;
-// 
-//      first_layer = FALSE;
-//      second_layer = FALSE;
-//      third_layer = FALSE;
-//
-//      if( *skycond && isCldLayer( *skycond ))
-//      {
-//         parseCldData( *skycond , Mptr, next );
-//         first_layer = TRUE;
-//         next++;
-//      }
-//
-//      ++skycond;
-//      if( first_layer && *skycond && isCldLayer( *skycond ) )
-//      {
-//         parseCldData( *skycond, Mptr, next );
-//         second_layer = TRUE;
-//         next++;
-//      }
-//      ++skycond;
-//      if( first_layer && second_layer && *skycond && isCldLayer( *skycond ) )
-//      {
-//         parseCldData( *skycond , Mptr, next );
-//         third_layer = TRUE;
-//      }
-// 
-//      if( third_layer )
-//      {
-//         (*NDEX)++;
-//         (*NDEX)++;
-//         (*NDEX)++;
-//         return 1;
-//      }
-//      else if( second_layer )
-//      {
-//         (*NDEX)++;
-//         (*NDEX)++;
-//         return 1;
-//      }
-//      else if( first_layer )
-//      {
-//         (*NDEX)++;
-//         return 1;
-//      }
-//      else
-//         return 0;
-// End code replaced by above, by S Sullivan, 2007-06-11
-
-
-   } // else if *skycond is OVC or SKT or ...
+      /* // Code replaced by above, by S Sullivan, 2007-06-11 */
+      /* //      next = 0; */
+      /* //  */
+      /* //      first_layer = FALSE; */
+      /* //      second_layer = FALSE; */
+      /* //      third_layer = FALSE; */
+      /* // */
+      /* //      if( *skycond && isCldLayer( *skycond )) */
+      /* //      { */
+      /* //         parseCldData( *skycond , Mptr, next ); */
+      /* //         first_layer = TRUE; */
+      /* //         next++; */
+      /* //      } */
+      /* // */
+      /* //      ++skycond; */
+      /* //      if( first_layer && *skycond && isCldLayer( *skycond ) ) */
+      /* //      { */
+      /* //         parseCldData( *skycond, Mptr, next ); */
+      /* //         second_layer = TRUE; */
+      /* //         next++; */
+      /* //      } */
+      /* //      ++skycond; */
+      /* //      if( first_layer && second_layer && *skycond && isCldLayer( *skycond ) ) */
+      /* //      { */
+      /* //         parseCldData( *skycond , Mptr, next ); */
+      /* //         third_layer = TRUE; */
+      /* //      } */
+      /* //  */
+      /* //      if( third_layer ) */
+      /* //      { */
+      /* //         (*NDEX)++; */
+      /* //         (*NDEX)++; */
+      /* //         (*NDEX)++; */
+      /* //         return 1; */
+      /* //      } */
+      /* //      else if( second_layer ) */
+      /* //      { */
+      /* //         (*NDEX)++; */
+      /* //         (*NDEX)++; */
+      /* //         return 1; */
+      /* //      } */
+      /* //      else if( first_layer ) */
+      /* //      { */
+      /* //         (*NDEX)++; */
+      /* //         return 1; */
+      /* //      } */
+      /* //      else */
+      /* //         return 0; */
+      /* // End code replaced by above, by S Sullivan, 2007-06-11 */
+      
+      
+   } /* else if *skycond is OVC or SKT or ... */
 
 
    else
@@ -1424,7 +1426,7 @@ static ubool isAltimStng( char *token, Decoded_METAR *Mptr, int *NDEX )
   int val;
   char tmpstr[8];
 
-  // ubool foundQA = FALSE; 
+  /* ubool foundQA = FALSE;  */
   
   if(token == NULL) {
     return FALSE;
@@ -1436,11 +1438,11 @@ static ubool isAltimStng( char *token, Decoded_METAR *Mptr, int *NDEX )
     return FALSE;
   }
 
-  // special case to decode Q&A when given: Q1007(A2974)
+  /* special case to decode Q&A when given: Q1007(A2974) */
   if (token[0] == 'Q' && token[6] == 'A')
     {
-      char QAstr[strlen(token)+1];
-      strcpy(QAstr,token);
+      char QAstr[1024];
+      strncpy(QAstr,token, 1023);
       QAstr[5] = '\0';
       QAstr[11] = '\0';
       if (sscanf(QAstr+1, "%d", &val) == 1) {

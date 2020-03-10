@@ -130,9 +130,10 @@ double STATS_normal_skewness(int nx, double *x,
     sum += pow(xx, 3.0);
   }
 
-  double skewness = (sum / nx) / pow(sdev, 3.0);
-
-  return skewness;
+  {
+    double skewness = (sum / nx) / pow(sdev, 3.0);
+    return skewness;
+  }
 
 }
 
@@ -159,9 +160,10 @@ double STATS_normal_kurtosis(int nx, double *x,
     sum += pow(xx, 4.0);
   }
 
-  double kurtosis = ((sum / nx) / pow(sdev, 4.0)) - 3.0;
-
-  return kurtosis;
+  {
+    double kurtosis = ((sum / nx) / pow(sdev, 4.0)) - 3.0;
+    return kurtosis;
+  }
 
 }
 

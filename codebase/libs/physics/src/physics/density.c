@@ -734,7 +734,8 @@ double PHYdenLCL(double pressure, double height,
 
   double tk = TEMP_C_TO_K(temp);
   
-  double parcel_mixing_ratio = mixing_ratio / 1000.0;  // Convert from g/kg to g/g
+  double parcel_mixing_ratio = mixing_ratio / 1000.0;  /* Convert from g/kg to g/g */
+
   double cpm = CP * (1.0 + CPMD * parcel_mixing_ratio);
   double e = MAX(1.0e-20,
 	  parcel_mixing_ratio * pressure /

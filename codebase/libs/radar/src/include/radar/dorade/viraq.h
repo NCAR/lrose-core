@@ -105,7 +105,7 @@ typedef struct  {
 		float           roll;           /* platform roll in degrees */
                                 float           gate0mag;       /* gate zero magnitude in rel dB */
                                 float           dacv;           /* dac voltage value or afc freq */
-                                long long    pulsenum;       /* pulsenum of first pulse in dwell starting 1970 */
+                                long    pulsenum;       /* pulsenum of first pulse in dwell starting 1970 */
                                 char            spare[72]; 
 		} HEADERV;
 

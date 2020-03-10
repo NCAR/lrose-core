@@ -65,19 +65,25 @@ void tstorm_spdb_load_centroid(tstorm_spdb_header_t *header,
      */
     
     titan_grid_comps_t comps;
+    double dirn_in_rad;
+    double delta_x;
+    double delta_y;
+    double centroid_x, centroid_y;
+    double forecast_x;
+    double forecast_y;
+
     TITAN_init_flat(header->grid.proj_origin_lat,
                     header->grid.proj_origin_lon, 0, &comps);
 
-    double dirn_in_rad = entry->direction * DEG_TO_RAD;
-    double delta_x = dist * sin(dirn_in_rad);
-    double delta_y = dist * cos(dirn_in_rad);
+    dirn_in_rad = entry->direction * DEG_TO_RAD;
+    delta_x = dist * sin(dirn_in_rad);
+    delta_y = dist * cos(dirn_in_rad);
     
-    double centroid_x, centroid_y;
     TITAN_latlon2xy(&comps, entry->latitude, entry->longitude,
                     &centroid_x, &centroid_y);
 
-    double forecast_x = centroid_x + delta_x;
-    double forecast_y = centroid_y + delta_y;
+    forecast_x = centroid_x + delta_x;
+    forecast_y = centroid_y + delta_y;
 
     *lat_p = forecast_y;
     *lon_p = forecast_x;

@@ -244,17 +244,19 @@ void TITAN_init_lc2(double origin_lat,
 
   if (comps->lc2_2_tan_lines) {
 
-    // 2 distinct tan lines
+    /* 2 distinct tan lines */
 
-    double t1 = tan(M_PI_4 + comps->lc2_lat1_rad / 2.0);
-    double t2 = tan(M_PI_4 + comps->lc2_lat2_rad / 2.0);
+    double t1, t2, t1n, t0n;
+
+    t1 = tan(M_PI_4 + comps->lc2_lat1_rad / 2.0);
+    t2 = tan(M_PI_4 + comps->lc2_lat2_rad / 2.0);
     comps->lc2_n = (log( cos(comps->lc2_lat1_rad)/cos(comps->lc2_lat2_rad)) /
                     log(t2/t1));
     
-    double t1n = pow(t1, comps->lc2_n);
+    t1n = pow(t1, comps->lc2_n);
     comps->lc2_F = cos(comps->lc2_lat1_rad) * t1n / comps->lc2_n;
     
-    double t0n = pow(tan(M_PI_4 + comps->origin_lat_rad/2), comps->lc2_n);
+    t0n = pow(tan(M_PI_4 + comps->origin_lat_rad/2), comps->lc2_n);
     comps->lc2_rho = PJG_get_earth_radius() * comps->lc2_F / t0n;
     
     comps->latlon2xy = lc2_latlon2xy_2_tan;
@@ -591,22 +593,31 @@ static void lc2_xy2latlon_1_tan(const titan_grid_comps_t *comps,
 
   double loc_x = x;
   double inv_sin0 = 1.0 / comps->lc2_sin0;
+
+  double del_lon;
+  double lon_rad;
+  double lat_rad;
   
+  double sin_lon;
+  double r;
+  double to_sin0;
+  double f1;
+
   if (fabs(loc_x) < TINY_FLOAT) {
     loc_x = 0.001;
   }
 
-  double del_lon = inv_sin0 * atan2(loc_x, (comps->lc2_rho - y));
-  double lon_rad = comps->origin_lon_rad + del_lon;
+  del_lon = inv_sin0 * atan2(loc_x, (comps->lc2_rho - y));
+  lon_rad = comps->origin_lon_rad + del_lon;
   
-  double sin_lon = sin(del_lon * comps->lc2_sin0);
-  double r = comps->lc2_rho * sin_lon;
-  double to_sin0 = pow((loc_x / r), inv_sin0);
-  double f1 = 2.0 * atan(comps->lc2_tan0 * to_sin0);
+  sin_lon = sin(del_lon * comps->lc2_sin0);
+  r = comps->lc2_rho * sin_lon;
+  to_sin0 = pow((loc_x / r), inv_sin0);
+  f1 = 2.0 * atan(comps->lc2_tan0 * to_sin0);
 
   *lon = PJGrange180(lon_rad * RAD_TO_DEG);
  
-  double lat_rad = (M_PI_2 - f1);
+  lat_rad = (M_PI_2 - f1);
   *lat = PJGrange180(lat_rad * RAD_TO_DEG);
 
 }

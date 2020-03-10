@@ -208,14 +208,14 @@ typedef struct {
 #define PRESSURE_STATION_REPORT_NBYTES_32 88
 #define METAR_WITH_REMARKS_REPORT_NBYTES_32 76
 
-// LWE intensity
+   /* LWE intensity */
 #define LWE_NONE 0
 #define LWE_VLIGHT 1
 #define LWE_LIGHT 2
 #define LWE_MODERATE 3
 #define LWE_HEAVY 4
 
-// LWE wx types
+   /* LWE wx types */
 #define LWE_NOPRECIP 0
 #define LWE_RAIN 1
 #define LWE_SNOW 2

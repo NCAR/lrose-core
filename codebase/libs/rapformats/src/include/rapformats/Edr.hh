@@ -117,7 +117,7 @@ public:
     si32 QcDescriptionBitFlags;      /*!< Bit flag - set to VALUE_UNKNOWN if undefined */
     si32 computedAirspeed;           /*!< Delta MDCRS specific data */
     si32 is767;                      /*!< Is aircraft a 767 (0 = FALSE, 1 = TRUE); */
-    si32 spareInts[NUM_SPARE_INTS];  /*!< Currently zero - may want to add space for future use */
+    /* si32 spareInts[NUM_SPARE_INTS];  Currently zero - may want to add space for future use */
 
     char aircraftRegNum[TAILNUM_NAME_LEN];  /*!< Aircraft registry number */
     char encodedAircraftRegNum[TAILNUM_NAME_LEN];  /*!< Optional Encoded Aircraft registry number */

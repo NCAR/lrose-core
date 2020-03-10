@@ -1796,12 +1796,14 @@ char *slash_path( dst, srs )
 
 int d_inSector( double ang, double ang1, double ang2)
 {
-    // assumes sector defined from ang1 clockwise to ang2
+  /* assumes sector defined from ang1 clockwise to ang2 */
 
-    if(ang1 > ang2)		// crosses 360.
-	{ return(ang >= ang1 || ang < ang2); }
+  /* crosses 360. */
+  if(ang1 > ang2) {
+    return(ang >= ang1 || ang < ang2); 
+  }
 
-    return(ang >= ang1 && ang < ang2);
+  return(ang >= ang1 && ang < ang2);
 }
 
 /* c------------------------------------------------------------------------ */

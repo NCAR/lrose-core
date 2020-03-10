@@ -87,7 +87,7 @@ void VAR_ELEV_print(FILE *outfile, void *data, int size)
 		len, *naz);
     }
 
-    f = (fl32 *)(data + sizeof(ui32));
+    f = (fl32 *) data + sizeof(fl32);
     for (i=0; i<*naz; ++i)
 	fprintf(outfile, "elevation[%d] = %6.2f\n", i, f[i]);
     return;
