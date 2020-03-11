@@ -2356,6 +2356,7 @@ void LeoCf2RadxFile::_readSweepTimes(NcxxGroup &group,
   
   // read the time variable
 
+  
   NcxxVar timeVar = group.getVar(TIME);
   if (timeVar.isNull()) {
     NcxxErrStr err;
@@ -2381,7 +2382,8 @@ void LeoCf2RadxFile::_readSweepTimes(NcxxGroup &group,
     err.addErrStr("  group: ", group.getName());
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
-  
+ 
+  /*
   // get units attribute
   
   try {
@@ -2389,6 +2391,11 @@ void LeoCf2RadxFile::_readSweepTimes(NcxxGroup &group,
     string units = unitsAtt.asString();
     // parse the time units reference time
     RadxTime stime(units);
+  // TODO: check for a reference time
+    // units = "seconds since time_reference"
+    // so, we need to grab the time string from the variable: time_reference
+ 
+    // TODO: this doesn't work ...
     _refTimeSecsFile = stime.utime();
   } catch (NcxxException& e) {
     NcxxErrStr err;
@@ -2397,7 +2404,47 @@ void LeoCf2RadxFile::_readSweepTimes(NcxxGroup &group,
     err.addErrStr("  group: ", group.getName());
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
+  */
+
+  // get time_reference
+  time_t time_reference = 0;
+  try {
+    NcxxVar var = group.getVar("time_reference");
+    if (!var.isNull()) {
+      size_t len = var.getDimCount();
+      if (len != 0) {
+        NcxxErrStr err;
+        err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepTimes");
+        err.addErrStr("  Reading var: ", "time_reference");
+        err.addErrInt("  Bad dimCount, should be 0, found: ", len);
+        throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+      }
+            char *val;
+            var.getVal(&val);
+    // scan the string to get the time                                                                              
+    //const char *timeStr = timeStrings[index].c_str();
+    int year, month, day, hour, min, sec;
+    if (sscanf(val, "%4d-%2d-%2dT%2d:%2d:%2dZ",
+	       &year, &month, &day, &hour, &min, &sec) != 6) {
+      NcxxErrStr err;
+      err.addErrStr("ERROR - LeoCf2RadxFile::_readCalTime");
+      err.addErrStr("  Cannot parse cal time string: ", val);
+      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    }
+    RadxTime ctime(year, month, day, hour, min, sec);
+    time_reference = ctime.utime();
+
+    }
+  } catch (NcxxException& e) {
+    NcxxErrStr err;
+    err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepTimes");
+    err.addErrStr("  Reference Time not found");
+    err.addErrStr("  group: ", group.getName());
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  }
   
+  _refTimeSecsFile = time_reference;
+
   // set the time array
   
   size_t nTimes = varTimeDim.getSize();
@@ -2412,8 +2459,12 @@ void LeoCf2RadxFile::_readSweepTimes(NcxxGroup &group,
     err.addErrStr("  exception: ", e.what());
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
+  //RadxTime refTime(time_reference);
   for (size_t ii = 0; ii < nTimes; ii++) {
-    times.push_back(dtimes[ii]);
+    //RadxTime rayTime;
+    //rayTime = refTime + dtimes[ii];
+    //double theTime = rayTime.utime();
+    times.push_back(dtimes[ii]); //  + time_reference);
   }
 
 }
@@ -3567,6 +3618,20 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
    }
 
+   /*
+   // timestamps are of the form "YYYY-MM-DD..."
+   // time variable is a double, but require offset by time_reference which is in the form "YYYY-MM-DD..."
+   try {
+     _readRayVar(_sweepGroup, _timeDimSweep, "timestamp", _rayTimestamps, true);
+   } catch (NcxxException& e) {
+     NcxxErrStr err;
+     err.addErrStr("ERROR - LeoCf2RadxFile::_readRayVariables");
+     err.addErrStr("  Ray must have timestamp");
+     err.addErrStr("  exception: ", e.what());
+     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+   }
+   */
+
    _readRayVar(_sweepGroup, _timeDimSweep, PULSE_WIDTH, _rayPulseWidths, false);
    _readRayVar(_sweepGroup, _timeDimSweep, PRT, _rayPrts, false);
    _readRayVar(_sweepGroup, _timeDimSweep, PRT_RATIO, _rayPrtRatios, false);
@@ -3749,7 +3814,9 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      // set time
 
      double rayTimeDouble = _sweepTimes[iray];
-     time_t rayUtimeSecs = _refTimeSecsFile + (time_t) rayTimeDouble;
+     RadxTime refTime(_refTimeSecsFile);
+     RadxTime rayTime = refTime + rayTimeDouble; // (time_t) rayTimeDouble;
+     time_t rayUtimeSecs = rayTime.utime(); // _refTimeSecsFile + (time_t) rayTimeDouble;
      double rayIntSecs;
      double rayFracSecs = modf(rayTimeDouble, &rayIntSecs);
      int rayNanoSecs = (int) (rayFracSecs * 1.0e9);
@@ -4977,6 +5044,13 @@ void LeoCf2RadxFile::_loadReadVolume()
   _readVol->setScanName(_scanName);
   _readVol->setScanId(_scanId);
   _readVol->setInstrumentName(_instrumentName);
+
+  _readVol->setStartTime(_raysVol[0]->getTimeSecs(),
+                          _raysVol[0]->getNanoSecs());
+  int nRays = _raysVol.size();
+  _readVol->setEndTime(_raysVol[nRays-1]->getTimeSecs(),
+                       _raysVol[nRays-1]->getNanoSecs());
+
 
   _readVol->setLatitudeDeg(_latitude);
   _readVol->setLongitudeDeg(_longitude);
