@@ -2220,6 +2220,10 @@ void LeoCf2RadxFile::_readGlobalAttributes()
       throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
     }
   }
+  // substitue the / for a -
+  size_t slash = _conventions.find("/");
+  if (slash != string::npos)
+    _conventions.replace(slash, 1, "-");
 
   // check for conventions
   /*
@@ -2238,9 +2242,11 @@ void LeoCf2RadxFile::_readGlobalAttributes()
     err.addErrStr("  Invalid sub_conventions attribute: ", _subconventions);
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
-
+  */
   // check for version
   
+  _version = _conventions;
+  /* 
   try {
     NcxxGroupAtt att = _file.getAtt(VERSION);
     _version = att.asString();
@@ -2750,9 +2756,9 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
   void LeoCf2RadxFile::_readRootScalarVariables()
   
 {
-
+  bool required = true;
   try {
-    _file.readIntVar(VOLUME_NUMBER, _volumeNumber, Radx::missingMetaInt);
+    _file.readIntVar(VOLUME_NUMBER, _volumeNumber, Radx::missingMetaInt, !required);
   } catch (NcxxException e) {
     _volumeNumber = 0;
   }
@@ -5067,15 +5073,15 @@ void LeoCf2RadxFile::_loadReadVolume()
     _readVol->addFrequencyHz(_frequency[ii]);
   }
 
-  _readVol->setRadarAntennaGainDbH(_radarAntennaGainDbH);
-  _readVol->setRadarAntennaGainDbV(_radarAntennaGainDbV);
-  _readVol->setRadarBeamWidthDegH(_radarBeamWidthDegH);
-  _readVol->setRadarBeamWidthDegV(_radarBeamWidthDegV);
-  if (_radarRxBandwidthHz > 0) {
-    _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz / 1.0e6);
-  } else {
-    _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz); // missing
-  }
+  //_readVol->setRadarAntennaGainDbH(_radarAntennaGainDbH);
+  //_readVol->setRadarAntennaGainDbV(_radarAntennaGainDbV);
+  //_readVol->setRadarBeamWidthDegH(_radarBeamWidthDegH);
+  //_readVol->setRadarBeamWidthDegV(_radarBeamWidthDegV);
+  //if (_radarRxBandwidthHz > 0) {
+  //  _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz / 1.0e6);
+  //} else {
+  //  _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz); // missing
+  //}
 
   _readVol->setVersion(_version);
   _readVol->setTitle(_title);
