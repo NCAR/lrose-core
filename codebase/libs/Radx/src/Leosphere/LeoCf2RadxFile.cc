@@ -3385,6 +3385,9 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _timeDimSweep = _sweepGroup.getDim(TIME);
+     if (_timeDimSweep.isNull()) {
+       throw NcxxException("cannot read time for sweep", __FILE__, __LINE__);
+     }
    } catch (NcxxException e) {
      err.addErrStr("  ERROR - no time dimension");
      err.addErrStr("  exception: ", e.what());
@@ -3393,6 +3396,8 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _rangeDimSweep = _sweepGroup.getDim("gate_index"); // RANGE);
+     if (_rangeDimSweep.isNull())
+       cout << "cannot read range for sweep" << endl;
    } catch (NcxxException e) {
      err.addErrStr("  ERROR - no range dimension");
      err.addErrStr("  exception: ", e.what());
@@ -3470,10 +3475,35 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
  void LeoCf2RadxFile::_readSweepRange(NcxxGroup &group, NcxxDim &dim,
                                    vector<double> rangeKm)
-
  {
 
-   NcxxVar rangeVar = group.getVar("gate_index"); // RANGE);
+   /*
+   //--
+   //const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
+
+   //for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
+   //     iter != vars.end(); iter++) {
+
+   //NcxxVar var = iter->second;
+   //  if (var.isNull()) {
+   //    continue;
+   //  }
+     string name = var.getName();
+     int numDims = var.getDimCount();
+     if (numDims != 2) {
+       continue;
+     }
+     // check that we have the correct dimensions
+     const NcxxDim &timeDim = var.getDim(0);
+     const NcxxDim &rangeDim = var.getDim(1);
+     if (timeDim != _timeDimSweep || rangeDim != _rangeDimSweep) {
+       continue;
+     }
+
+     //--
+     */
+
+   NcxxVar rangeVar = group.getVar(RANGE); // "gate_index"); // RANGE);
    if (rangeVar.isNull() || rangeVar.numVals() < 1) {
      NcxxErrStr err;
      err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepRange");
@@ -3483,23 +3513,41 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    }
 
    rangeKm.clear();
-   _nRangeInSweep = dim.getSize();
 
-   if (rangeVar.getDimCount() != 1) {
+   if (rangeVar.getDimCount() != 2) {
      NcxxErrStr err;
      err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepRange");
      err.addErrStr("  group: ", group.getName());
      err.addErrInt("  range nDims = ", rangeVar.getDimCount());
-     err.addErrStr("  should be 1");
+     err.addErrStr("  should be 2");
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
    }
+   // get the 2 dimensions of the range
+   // check that we have the correct dimensions
+   const NcxxDim &timeDim = rangeVar.getDim(0);
+   const NcxxDim &rangeDim = rangeVar.getDim(1);
+   size_t nTimes = timeDim.getSize();
+   size_t nRange = rangeDim.getSize();
+   _nRangeInSweep = nRange;
+
+   if (0) { // timeDim != _timeDimSweep || rangeDim != _rangeDimSweep) {
+     NcxxErrStr err;
+     err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepRange");
+     err.addErrStr("  group: ", group.getName());
+     err.addErrInt("  time dimension not expected ", timeDim.getSize());
+     err.addErrInt("  should be ", _timeDimSweep.getSize());
+     err.addErrInt("  range dimension not expected ", rangeDim.getSize());
+     err.addErrInt("  should be ", _rangeDimSweep.getSize());
+     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));       
+   }
+   size_t nVals = nTimes * nRange;
 
    RadxArray<double> rangeMeters_;
-   double *rangeMeters = rangeMeters_.alloc(_nRangeInSweep);
+   double *rangeMeters = rangeMeters_.alloc(nVals);
    try {
      rangeVar.getVal(rangeMeters);
      double *rr = rangeMeters;
-     for (size_t ii = 0; ii < _nRangeInSweep; ii++, rr++) {
+     for (size_t ii = 0; ii < nVals; ii++, rr++) {
        rangeKm.push_back(*rr / 1000.0);
      }
    } catch (NcxxException& e) {
@@ -3516,6 +3564,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    _gateSpacingIsConstant = _remapSweep.getGateSpacingIsConstant();
    _geomSweep.setRangeGeom(_remapSweep.getStartRangeKm(), _remapSweep.getGateSpacingKm());
 
+   /*
    // get attributes and check for geometry
 
    double startRangeKm = Radx::missingMetaDouble;
@@ -3555,7 +3604,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
        gateSpacingKm != Radx::missingMetaDouble) {
      _geomSweep.setRangeGeom(startRangeKm, gateSpacingKm);
    }
-
+   */
  }
  
  ///////////////////////////////////
@@ -3993,7 +4042,6 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
  // throws exception on error
  
  void LeoCf2RadxFile::_readFieldVariables(bool metaOnly)
-
  {
 
    // loop through the variables, adding data fields as appropriate
@@ -5074,6 +5122,8 @@ void LeoCf2RadxFile::_loadReadVolume()
   if (_readSetMaxRange) {
     _readVol->setMaxRangeKm(_readMaxRangeKm);
   }
+
+  _readVol->computeMaxNGates();
   
   // memory responsibility has passed to the volume object, so clear
   // the vectors without deleting the objects to which they point
