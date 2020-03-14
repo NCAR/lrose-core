@@ -4094,14 +4094,16 @@ void NcfRadxFile::_loadReadVolume()
     _readVol->addFrequencyHz(_frequency[ii]);
   }
 
-  _readVol->setRadarAntennaGainDbH(_radarAntennaGainDbH);
-  _readVol->setRadarAntennaGainDbV(_radarAntennaGainDbV);
-  _readVol->setRadarBeamWidthDegH(_radarBeamWidthDegH);
-  _readVol->setRadarBeamWidthDegV(_radarBeamWidthDegV);
-  if (_radarRxBandwidthHz > 0) {
-    _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz / 1.0e6);
-  } else {
-    _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz); // missing
+  if (_instrumentType != Radx::INSTRUMENT_TYPE_LIDAR) {
+    _readVol->setRadarAntennaGainDbH(_radarAntennaGainDbH);
+    _readVol->setRadarAntennaGainDbV(_radarAntennaGainDbV);
+    _readVol->setRadarBeamWidthDegH(_radarBeamWidthDegH);
+    _readVol->setRadarBeamWidthDegV(_radarBeamWidthDegV);
+    if (_radarRxBandwidthHz > 0) {
+      _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz / 1.0e6);
+    } else {
+      _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz); // missing
+    }
   }
 
   _readVol->setVersion(_version);
