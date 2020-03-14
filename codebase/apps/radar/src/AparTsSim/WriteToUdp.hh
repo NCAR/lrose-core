@@ -42,6 +42,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 #include <cstdio>
 #include <Radx/RadxTime.hh>
 
@@ -92,8 +93,25 @@ private:
   ui64 _sampleSeqNum; // for UDP only
   vector<IwrfTsPulse *> _dwellPulses;
 
-  // data rate
+  // size_t _currentGateIndex;
+  // size_t _nGatesPulse;
+  // MemBuf _pulseBuf;
+  
+  // packet details
 
+  size_t _nBytesHeader;
+  size_t _nBytesPacket;
+  size_t _nGatesPacket;
+  size_t _nBytesData;
+  MemBuf _sampleBuf;
+
+  // between-pulse data
+
+  size_t _nGatesRemaining;
+  deque<si16> _iqQueue;
+
+  // data rate
+  
   RadxTime _rateStartTime;
   double _nBytesForRate;
   

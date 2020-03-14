@@ -75,6 +75,18 @@ WriteToUdp::WriteToUdp(const string &progName,
   
 {
 
+  // debug print
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "Running WriteToUdp - extra verbose debug mode" << endl;
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Running WriteToUdp - verbose debug mode" << endl;
+  } else if (_params.debug) {
+    cerr << "Running WriteToUdp - debug mode" << endl;
+  }
+
+  // init
+
   _sampleSeqNum = 0;
   _pulseSeqNum = 0;
   _dwellSeqNum = 0;
@@ -83,12 +95,35 @@ WriteToUdp::WriteToUdp(const string &progName,
   _rateStartTime.set(RadxTime::NEVER);
   _nBytesForRate = 0;
 
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Running WriteToUdp - extra verbose debug mode" << endl;
-  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Running WriteToUdp - verbose debug mode" << endl;
-  } else if (_params.debug) {
-    cerr << "Running WriteToUdp - debug mode" << endl;
+  // compute packet header length
+  // by creating a dummy header and
+  // getting the length of the resulting buffer
+  
+  MemBuf buf;
+  _addAparHeader(0, 0, 0,
+                 0, 0, 0,
+                 0.0, 0.0,
+                 true, true, true,
+                 1000, buf);
+  _nBytesHeader = buf.getLen();
+
+  // compute number of IQ samples (gates) per packet
+  // the number of samples per packet must be a multiple of 16
+  // so round down to the nearest 16
+
+  int maxNbytesDataPerPacket = _params.udp_max_packet_size - _nBytesHeader;
+  _nGatesPacket = maxNbytesDataPerPacket / (2 * 2); // I/Q, short for each
+  _nGatesPacket = (_nGatesPacket / 16) * 16;
+  _nBytesData = _nGatesPacket * (2 * 2); // I/Q, short for each
+  _nBytesPacket = _nBytesHeader + _nBytesData;
+  _nGatesRemaining = 0;
+
+  if (_params.debug) {
+    cerr << "WriteToUdp constructor" << endl;
+    cerr << "  _nBytesHeader: " << _nBytesHeader << endl;
+    cerr << "  _nGatesPacket: " << _nGatesPacket << endl;
+    cerr << "  _nBytesData: " << _nBytesData << endl;
+    cerr << "  _nBytesPacket: " << _nBytesPacket << endl;
   }
 
 }
@@ -157,11 +192,6 @@ int WriteToUdp::_convertToUdp(const string &inputPath)
   // create reader for just that one file
 
   IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
-  // if (_params.debug >= Params::DEBUG_EXTRA) {
-  //   iwrfDebug = IWRF_DEBUG_VERBOSE;
-  // } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-  //   iwrfDebug = IWRF_DEBUG_NORM;
-  // } 
   IwrfTsReaderFile reader(fileList, iwrfDebug);
   const IwrfTsInfo &tsInfo = reader.getOpsInfo();
 
@@ -443,7 +473,7 @@ void WriteToUdp::_fillIqData(IwrfTsPulse *iwrfPulse,
 }
 
 ////////////////////////////////////////////////////////////////////////
-// create a packet buffer
+// Send data for a pulse
 
 int WriteToUdp::_sendPulse(si64 secondsTime,
                            ui32 nanoSecs,
@@ -459,94 +489,47 @@ int WriteToUdp::_sendPulse(si64 secondsTime,
   
 {
 
-  // create packet buffer
+  // add new IQ samples to unused IQ buffer
 
-  MemBuf buf;
-
-  // add header to buffer, compute header length
-  
-  ui32 pulseStartIndex = 0;
-  
-  _addAparHeader(secondsTime, nanoSecs,
-                 pulseStartIndex,
-                 dwellNum, beamNumInDwell, visitNumInBeam,
-                 uu, vv,
-                 true, isXmitH, isCoPolRx,
-                 nGates,
-                 buf);
-  
-  size_t headerLen = buf.getLen();
-
-  // compute number of packets per pulse
-  // the number of gates (samples) per packet must be a multiple of 16
-  // so round down to the nearest 16
-
-  int maxNbytesDataPerPacket = _params.udp_max_packet_size - headerLen;
-  int maxNGatesPerPacket = maxNbytesDataPerPacket / 4;
-  maxNGatesPerPacket = (maxNGatesPerPacket / 16) * 16;
-  int nPacketsPerPulse = (_params.udp_n_gates / maxNGatesPerPacket) + 1;
-
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "==>> UDP headerLen: " << headerLen << endl;
-    cerr << "==>> UDP maxNbytesDataPerPacket: "
-         << maxNbytesDataPerPacket << endl;
-    cerr << "==>> UDP maxNGatesPerPacket: "
-         << maxNGatesPerPacket << endl;
-    cerr << "==>> UDP nPacketsPerPulse: "
-         << nPacketsPerPulse << endl;
+  for (size_t ii = 0; ii < iqApar.size(); ii++) {
+    _iqQueue.push_back(iqApar[ii]);
   }
-
+  
   // create the pulse packets
 
-  int nGatesRemaining = nGates;
+  ui32 pulseStartIndex = _nGatesRemaining;
+  _nGatesRemaining += nGates;
   int nGatesSoFar = 0;
-
-  for (int ipkt = 0; ipkt < nPacketsPerPulse; ipkt++) {
-
-    //  init
-
-    buf.clear();
-    bool isFirstPacket = (ipkt == 0);
-
-    // compute number of gates for this packet
+  int pktNum = 0;
+  bool isFirstPacket = true;
   
-    int nGatesThisPacket = maxNGatesPerPacket;
-    int nGatesPad = 0;
-    if (nGatesThisPacket > nGatesRemaining) {
-      nGatesThisPacket = nGatesRemaining;
-      if (nGatesThisPacket % 16 != 0) {
-        nGatesPad = 16 - (nGatesThisPacket % 16);
-      }
-      if (nGatesPad != 0) {
-        // need to pad packet
-        nGatesThisPacket += nGatesPad;
-      }
-    }
-
+  while (_nGatesRemaining >= _nGatesPacket) {
+    
+    // create packet buffer
+  
+    MemBuf buf;
+  
     // add header to buffer
-  
+    
     _addAparHeader(secondsTime, nanoSecs,
                    pulseStartIndex,
                    dwellNum, beamNumInDwell, visitNumInBeam,
                    uu, vv,
                    isFirstPacket, isXmitH, isCoPolRx,
-                   nGatesThisPacket,
+                   _nGatesPacket,
                    buf);
 
     // add IQ data to buffer
 
-    buf.add(iqApar.data() + nGatesSoFar * 2,
-            (nGatesThisPacket - nGatesPad) * 2 * 2);
-
-    // add zero pad if necessary
-
-    if (nGatesPad != 0) {
-      si16 *zeros = new si16[nGatesPad * 2];
-      memset(zeros, 0, nGatesPad * 2 * 2);
-      buf.add(zeros, nGatesPad * 2 * 2);
-      delete[] zeros;
-    }
-
+    for (size_t ii = 0; ii < _nGatesPacket; ii++) {
+      si16 ival = _iqQueue.front();
+      _iqQueue.pop_front();
+      si16 qval = _iqQueue.front();
+      _iqQueue.pop_front();
+      buf.add(&ival, sizeof(si16));
+      buf.add(&qval, sizeof(si16));
+    } // ii
+      
     // write the packet to UDP
     
     if (_writeBufToUdp(buf)) {
@@ -557,22 +540,20 @@ int WriteToUdp::_sendPulse(si64 secondsTime,
     
     // increment / decrement
 
-    nGatesSoFar += nGatesThisPacket;
-    nGatesRemaining -= nGatesThisPacket;
-    _sampleSeqNum += nGatesThisPacket;
-    double n16s = nGatesThisPacket / 16.0;
-
+    isFirstPacket = false;
+    pktNum++;
+    nGatesSoFar += _nGatesPacket;
+    _nGatesRemaining -= _nGatesPacket;
+    _sampleSeqNum += _nGatesPacket;
+    
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "====>> UDP ipkt: " << ipkt << endl;
+      cerr << "====>> UDP pktNum: " << pktNum << endl;
       cerr << "====>> UDP nGatesSoFar: " << nGatesSoFar << endl;
-      cerr << "====>> UDP nGatesRemaining: " << nGatesRemaining << endl;
-      cerr << "====>> UDP nGatesThisPacket: " << nGatesThisPacket << endl;
-      cerr << "====>> UDP nGatesPad: " << nGatesPad << endl;
-      cerr << "====>> UDP n16s: " << n16s << endl;
+      cerr << "====>> UDP _nGatesRemaining: " << _nGatesRemaining << endl;
       cerr << "====>> UDP _sampleSeqNum: " << _sampleSeqNum << endl;
     }
     
-  } // ipkt
+  } // while
 
   // sent 1 pulse
 
