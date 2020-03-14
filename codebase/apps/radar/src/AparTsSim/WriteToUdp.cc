@@ -367,7 +367,6 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         bool isXmitH = iwrfPulse->isHoriz();
         bool isCoPolRx = true;
 
-
         if (_params.debug >= Params::DEBUG_EXTRA) {
 
           cerr << "================================================" << endl;
@@ -489,6 +488,18 @@ int WriteToUdp::_sendPulse(si64 secondsTime,
   
 {
 
+  double fractionSecs = nanoSecs / 1.0e9;
+  DateTime pulseTime(secondsTime, true, fractionSecs);
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "------------------------------------------------" << endl;
+    cerr << "==>> UDP start of pulse" << endl;
+    cerr << "==>>   pulseTime: " << pulseTime.asString(3) << endl;
+    cerr << "==>>   nGates remaining from prev: " << _nGatesRemaining << endl;
+    cerr << "==>>   nGates this pulse: " << nGates << endl;
+    cerr << "==>>   nGates total: " << _nGatesRemaining + iqApar.size() / 2 << endl;
+  }
+
   // add new IQ samples to unused IQ buffer
 
   for (size_t ii = 0; ii < iqApar.size(); ii++) {
@@ -501,10 +512,10 @@ int WriteToUdp::_sendPulse(si64 secondsTime,
   _nGatesRemaining += nGates;
   int nGatesSoFar = 0;
   int pktNum = 0;
-  bool isFirstPacket = true;
-  
+  bool isFirstPktInPulse = true;
+
   while (_nGatesRemaining >= _nGatesPacket) {
-    
+  
     // create packet buffer
   
     MemBuf buf;
@@ -515,12 +526,21 @@ int WriteToUdp::_sendPulse(si64 secondsTime,
                    pulseStartIndex,
                    dwellNum, beamNumInDwell, visitNumInBeam,
                    uu, vv,
-                   isFirstPacket, isXmitH, isCoPolRx,
+                   isFirstPktInPulse, isXmitH, isCoPolRx,
                    _nGatesPacket,
                    buf);
+    
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "=====>> adding packet <<=====" << endl;
+      cerr << "  pktNum: " << pktNum << endl;
+      cerr << "  isFirstPktInPulse: " << isFirstPktInPulse << endl;
+      cerr << "  pulseStartIndex: " << pulseStartIndex << endl;
+      cerr << "  starting sampleSeqNum: " << _sampleSeqNum << endl;
+      cerr << "  nGatesPacket: " << _nGatesPacket << endl;
+    }
 
     // add IQ data to buffer
-
+    
     for (size_t ii = 0; ii < _nGatesPacket; ii++) {
       si16 ival = _iqQueue.front();
       _iqQueue.pop_front();
@@ -540,17 +560,17 @@ int WriteToUdp::_sendPulse(si64 secondsTime,
     
     // increment / decrement
 
-    isFirstPacket = false;
+    isFirstPktInPulse = false;
+    pulseStartIndex = 0;
     pktNum++;
     nGatesSoFar += _nGatesPacket;
     _nGatesRemaining -= _nGatesPacket;
     _sampleSeqNum += _nGatesPacket;
     
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "====>> UDP pktNum: " << pktNum << endl;
-      cerr << "====>> UDP nGatesSoFar: " << nGatesSoFar << endl;
-      cerr << "====>> UDP _nGatesRemaining: " << _nGatesRemaining << endl;
-      cerr << "====>> UDP _sampleSeqNum: " << _sampleSeqNum << endl;
+      cerr << "=====>> packet sent <<=====" << endl;
+      cerr << "  nGatesSoFar: " << nGatesSoFar << endl;
+      cerr << "  _nGatesRemaining: " << _nGatesRemaining << endl;
     }
     
   } // while
@@ -559,7 +579,7 @@ int WriteToUdp::_sendPulse(si64 secondsTime,
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "==>> UDP done, _pulseSeqNum: " << _pulseSeqNum << endl;
-    cerr << "==>> UDP done, n gates sent: " << nGatesSoFar << endl;
+    cerr << "==>> UDP done, nGatesSoFar: " << nGatesSoFar << endl;
     cerr << "================================================" << endl;
   }
 
