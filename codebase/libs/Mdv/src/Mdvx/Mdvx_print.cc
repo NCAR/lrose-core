@@ -530,7 +530,7 @@ void Mdvx::printFieldHeader(const field_header_32_t &fhdr32,
   out << "proj_origin_lon:        " << fhdr32.proj_origin_lon << endl;
   out << "proj_origin_lat:        " << fhdr32.proj_origin_lat << endl;
   out << "proj_rotation:          " << fhdr32.proj_rotation << endl;
-  for (int i = 0; i < MDV_MAX_PROJ_PARAMS; i++) {
+  for (int i = 0; i < MDV32_MAX_PROJ_PARAMS; i++) {
     out << "proj_param[" << i << "]:          "
 	<< fhdr32.proj_param[i] << endl;
   }
