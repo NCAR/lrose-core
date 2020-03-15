@@ -5563,11 +5563,23 @@ int MdvxField::decompress() const
   
   for (int iz = 0; iz < nz; iz++) {
 
-    void *compressed_plane;
+    char *compressed_plane;
     void *uncompressed_plane;
     ui64 nbytes_uncompressed;
     ui32 this_offset = plane_offsets[iz] + 2 * index_array_size;
-    
+
+    // check for valid offset
+
+    if (this_offset > _volBuf.getLen() - 1) {
+      _errStr += "ERROR - MdvxField::decompress.\n";
+      char errstr[128];
+      sprintf(errstr, "  Field, plane: %s, %d\n", getFieldName(), iz);
+      _errStr += errstr;
+      sprintf(errstr, "  Bad field offset: %ud\n", this_offset);
+      _errStr += errstr;
+      return -1;
+    }
+
     compressed_plane = ((char *) _volBuf.getPtr() + this_offset);
     
     uncompressed_plane =
