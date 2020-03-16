@@ -276,32 +276,41 @@ bool D3rNcRadxFile::isD3rNc(const string &path)
 
   Nc3Var *var2 = _file.getNc3File()->get_var("TxFrequency_Short");
   if (var2 == NULL) {
-    _file.close();
-    if (_verbose) {
-      cerr << "DEBUG - not D3rNc file" << endl;
-      cerr << "  TxFrequency_Short variable missing" << endl;
+    var2 = _file.getNc3File()->get_var("TxFrequency");
+    if (var2 == NULL) {
+      _file.close();
+      if (_verbose) {
+	cerr << "DEBUG - not D3rNc file" << endl;
+	cerr << "  TxFrequency_Short variable missing" << endl;
+      }
+      return false;
     }
-    return false;
   }
 
   Nc3Var *var3 = _file.getNc3File()->get_var("TxLength_Short");
   if (var3 == NULL) {
-    _file.close();
-    if (_verbose) {
-      cerr << "DEBUG - not D3rNc file" << endl;
-      cerr << "  TxLength_Short variable missing" << endl;
+    var3 = _file.getNc3File()->get_var("TxLength");
+    if (var3 == NULL) {
+      _file.close();
+      if (_verbose) {
+	cerr << "DEBUG - not D3rNc file" << endl;
+	cerr << "  TxLength_Short variable missing" << endl;
+      }
+      return false;
     }
-    return false;
   }
 
   Nc3Var *var4 = _file.getNc3File()->get_var("StartGate_Short");
   if (var4 == NULL) {
-    _file.close();
-    if (_verbose) {
-      cerr << "DEBUG - not D3rNc file" << endl;
-      cerr << "  StartGate_Short variable missing" << endl;
+    var4 = _file.getNc3File()->get_var("StartGate");
+    if (var4 == NULL) {
+      _file.close();
+      if (_verbose) {
+	cerr << "DEBUG - not D3rNc file" << endl;
+	cerr << "  StartGate_Short variable missing" << endl;
+      }
+      return false;
     }
-    return false;
   }
 
   // file has the correct dims and variables, so it is a D3rNc file
