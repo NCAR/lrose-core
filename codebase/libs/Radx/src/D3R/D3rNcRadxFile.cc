@@ -1127,7 +1127,7 @@ int D3rNcRadxFile::_readRangeVariables()
   }
   
   // start gate
-  
+  // is an index
   if (_readRayVar(_startGateVar, "StartGate", _startGate, true)) {
     _startGate.clear();
     for (size_t ii = 0; ii < _startRange.size(); ii++) {
@@ -1139,7 +1139,15 @@ int D3rNcRadxFile::_readRangeVariables()
 
   _rangeKm.clear();
   double gateSpacingKm = _gateWidth[0];
-  double startRangeKm = _startRange[0] + gateSpacingKm * (_startGate[0] - 1);
+  double startRangeKm = 0.0;
+  if (_startGate[0] == 0) {
+    // then the index is zero-based
+    //   StartRange + GateWidth * (StartGate + 0.5)
+    // which would be 48 meters.
+    startRangeKm = _startRange[0]; //  + gateSpacingKm * 0.5;
+  } else {
+    startRangeKm = _startRange[0] + gateSpacingKm * (_startGate[0] - 1);
+  }
   for (size_t ii = 0; ii < _nRangeInFile; ii++) {
     _rangeKm.push_back(startRangeKm + ii * gateSpacingKm);
   }
@@ -1297,8 +1305,17 @@ int D3rNcRadxFile::_createRays(const string &path)
     RadxRay *ray = new RadxRay;
     
     double gateSpacingKm = _gateWidth[rayIndex];
-    double startRangeKm =
-      _startRange[rayIndex] + gateSpacingKm * (_startGate[rayIndex] - 1);
+    // HERE!!!
+
+    double startRangeKm = 0.0;
+    if (_startGate[rayIndex] == 0) {
+      // then the index is zero-based
+      //   StartRange + GateWidth * (StartGate + 0.5)
+      // which would be 48 meters.
+      startRangeKm = _startRange[rayIndex]; //  + gateSpacingKm * 0.5;
+    } else {
+      startRangeKm = _startRange[rayIndex] + gateSpacingKm * (_startGate[rayIndex] - 1);
+    }
     ray->setRangeGeom(startRangeKm, gateSpacingKm);
 
     // set time
