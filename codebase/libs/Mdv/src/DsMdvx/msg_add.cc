@@ -936,9 +936,10 @@ void DsMdvxMsg::_addFieldData(const MdvxField& field)
   if (field.getVolLen() > 0) {
     buf.add(field.getVol(), field.getVolLen());
   }
-
+  
   // compress as requested
-
+  
+  field.compressIfRequested();
   
   // swap if data is not compressed
   if (!field.isCompressed()) {
@@ -950,6 +951,35 @@ void DsMdvxMsg::_addFieldData(const MdvxField& field)
     cerr << "Adding field data, len: " << field.getVolLen() << endl;
   }
 
+  // Add to the message.
+  addPart(MDVP_FIELD_DATA_PART, buf.getLen(), buf.getPtr());
+
+}
+
+void DsMdvxMsg::_addFieldData64(const MdvxField& field)
+{
+
+  // tmp memory buffer for data
+  
+  MemBuf buf;
+  if (field.getVolLen() > 0) {
+    buf.add(field.getVol(), field.getVolLen());
+  }
+  
+  // compress as requested
+  
+  field.compressIfRequested64();
+
+  // swap if data is not compressed
+  if (!field.isCompressed()) {
+    MdvxField::buffer_to_BE(buf.getPtr(), buf.getLen(),
+			    field.getFieldHeader().encoding_type);
+  }
+  
+  if (_debug) {
+    cerr << "Adding field data, len: " << field.getVolLen() << endl;
+  }
+  
   // Add to the message.
   addPart(MDVP_FIELD_DATA_PART, buf.getLen(), buf.getPtr());
 

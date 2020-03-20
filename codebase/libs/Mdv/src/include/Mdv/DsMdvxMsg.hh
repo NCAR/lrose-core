@@ -649,6 +649,7 @@ protected:
   void _addChunkHeader32(const Mdvx::chunk_header_t &header, int part_id);
 
   void _addFieldData(const MdvxField &field);
+  void _addFieldData64(const MdvxField &field);
   void _addChunkData(const MdvxChunk& chunk);
   
   void _addVsectSamplePts(const vector<Mdvx::vsect_samplept_t> &samplePts,

@@ -921,7 +921,7 @@ void *DsMdvxMsg::assembleCompileTimeHeightReturn(const DsMdvx &mdvx)
           _addFieldHeader64(fhdr, MDVP_FIELD_HEADER_PART_64);
           _addVlevelHeader64(vhdr, MDVP_VLEVEL_HEADER_PART_64,
                              fhdr.nz, fhdr.field_name);
-          _addFieldData(*mdvx.getFieldByNum(i));
+          _addFieldData64(*mdvx.getFieldByNum(i));
         }
       }
 
@@ -2028,7 +2028,7 @@ void DsMdvxMsg::_addHdrsAndData(const DsMdvx &mdvx)
       _addFieldHeader64(fhdr, MDVP_FIELD_HEADER_PART_64);
       _addVlevelHeader64(vhdr, MDVP_VLEVEL_HEADER_PART_64,
                          fhdr.nz, fhdr.field_name);
-      _addFieldData(*mdvx.getFieldByNum(i));
+      _addFieldData64(*mdvx.getFieldByNum(i));
     }
     for (size_t i = 0; i < mdvx.getNChunks(); i++) {
       _addChunkHeader64(mdvx.getChunkByNum(i)->getHeader(),
@@ -2133,7 +2133,7 @@ void DsMdvxMsg::_addHdrsAndDataExtended(const DsMdvx &mdvx)
           _addVlevelHeader64(*vhdrFile, MDVP_VLEVEL_HEADER_FILE_FIELD_PART_64,
                              fhdrFile->nz, fhdrFile->field_name);
         }
-        _addFieldData(*mdvx.getFieldByNum(i));
+        _addFieldData64(*mdvx.getFieldByNum(i));
       } // i
       // add chunks
       for (size_t i = 0; i < mdvx.getNChunks(); i++) {

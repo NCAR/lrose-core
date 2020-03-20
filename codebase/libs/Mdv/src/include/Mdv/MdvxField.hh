@@ -71,6 +71,9 @@
 #include <toolsa/MemBuf.hh>
 #include <toolsa/TaFile.hh>
 #include <vector>
+
+#define MDV_FLAG_64 0x64646464U
+
 using namespace std;
 
 class DsMdvxMsg;
@@ -567,25 +570,32 @@ public:
   
   // compress the data volume if compression has previously
   // been requested
-  //
   // Compressed buffer is stored in BE byte order.
-  //
   // returns 0 on success, -1 on failure
   
   int compressIfRequested() const;
+  int compressIfRequested64() const;
 
-  // compress the data volume
-  //
+  // compress the data volume - 32-bit version
   // The compressed buffer comprises the following in order:
   //   Array of nz ui32s: compressed plane offsets
   //   Array of nz ui32s: compressed plane sizes
   //   All of the compressed planes packed together.
-  //
   // Compressed buffer is stored in BE byte order.
-  //
   // returns 0 on success, -1 on failure
   
   int compress(int compression_type) const;
+
+  // compress the data volume - 64-bit version
+  // The compressed buffer comprises the following in order:
+  //   Flags_64[2]: 2 x ui32: each with 0x64646464U - indicates 64 bit
+  //   Array of nz ui64s: compressed plane offsets
+  //   Array of nz ui64s: compressed plane sizes
+  //   All of the compressed planes packed together.
+  // Compressed buffer is stored in BE byte order.
+  // returns 0 on success, -1 on failure
+  
+  int compress64(int compression_type) const;
 
   // decompress the field
   //
@@ -846,7 +856,7 @@ protected:
 
   int _compressGzipVol() const;
   int _decompressGzipVol() const;
-
+  int _decompress64() const;
   // constraining the domain in the horizontal and vertical dimensions
 
   int _constrain_radar_horiz(const Mdvx &mdvx);

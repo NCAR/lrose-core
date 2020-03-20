@@ -5354,6 +5354,14 @@ int MdvxField::compressIfRequested() const
   return compress(_fhdr.requested_compression);
 }
 
+int MdvxField::compressIfRequested64() const
+{
+  if (_fhdr.requested_compression == Mdvx::COMPRESSION_NONE) {
+    return 0;
+  }
+  return compress64(_fhdr.requested_compression);
+}
+
 ///////////////////////////////////////////////////////////////
 // compress the data volume
 //
@@ -5473,6 +5481,127 @@ int MdvxField::compress(int compression_type) const
 }
 
 ///////////////////////////////////////////////////////////////
+// compress the data volume - 64-bit version
+//
+// The compressed buffer comprises the following in order:
+//   Flags_64[2]: 2 x ui32: each with 0x64646464U - indicates 64 bit
+//   Array of nz ui64s: compressed plane offsets
+//   Array of nz ui64s: compressed plane sizes
+//   All of the compressed planes packed together.
+//
+// Compressed buffer is stored in BE byte order.
+//
+// returns 0 on success, -1 on failure
+
+int MdvxField::compress64(int compression_type) const
+
+{
+
+  // check if we are already properly compressed
+  // now use gzip for all compression
+
+  if (compression_type == Mdvx::COMPRESSION_ASIS) {
+    return 0;
+  }
+  
+  if (compression_type == Mdvx::COMPRESSION_GZIP_VOL &&
+      _fhdr.compression_type == Mdvx::COMPRESSION_GZIP_VOL) {
+    return 0;
+  }
+
+  if (compression_type == Mdvx::COMPRESSION_GZIP &&
+      _fhdr.compression_type == Mdvx::COMPRESSION_GZIP) {
+    return 0;
+  }
+
+  // uncompress
+
+  if (decompress()) {
+    return -1;
+  }
+  
+  if (compression_type == Mdvx::COMPRESSION_NONE) {
+    // no compression
+    return 0;
+  }
+
+  if (compression_type == Mdvx::COMPRESSION_GZIP_VOL) {
+    // special case
+    return _compressGzipVol();
+  }
+
+  // proceed with gzip compression
+
+  ui32 flags64[2] = { MDV_FLAG_64, MDV_FLAG_64 };
+  int nz = _fhdr.nz;
+  int64_t npoints_plane = _fhdr.nx * _fhdr.ny;
+  int64_t nbytes_plane = npoints_plane * _fhdr.data_element_nbytes;
+  int64_t nbytes_vol = nbytes_plane * nz;
+  int64_t next_offset = 0;
+
+  // swap volume data to BE as appropriate
+
+  buffer_to_BE(_volBuf.getPtr(), nbytes_vol, _fhdr.encoding_type);
+
+  // create working buffer
+  
+  MemBuf workBuf;
+  
+  // compress plane-by-plane
+  
+  ui64 plane_offsets[MDV_MAX_VLEVELS];
+  ui64 plane_sizes[MDV_MAX_VLEVELS];
+
+  for (int iz = 0; iz < nz; iz++) {
+
+    // only use GZIP compression - all others are deprecated
+    
+    void *uncompressed_plane = ((char *) _volBuf.getPtr() + iz * nbytes_plane);
+    ui64 nbytes_compressed;
+    void *compressed_plane = ta_compress(TA_COMPRESSION_GZIP,
+                                         uncompressed_plane,
+                                         nbytes_plane,
+                                         &nbytes_compressed);
+    
+    if (compressed_plane == NULL) {
+      _errStr += "ERROR - MdvxField::_compress.\n";
+      _errStr +=  "  Compression failed.\n";
+      return -1;
+    }
+
+    plane_offsets[iz] = next_offset;
+    plane_sizes[iz] = nbytes_compressed;
+    
+    workBuf.add(compressed_plane, nbytes_compressed);
+    ta_compress_free(compressed_plane);
+    next_offset += nbytes_compressed;
+
+  } // iz
+
+  // swap plane offset and size arrays
+
+  int64_t index_array_size = nz * sizeof(ui64);
+  BE_from_array_64(plane_offsets, index_array_size);
+  BE_from_array_64(plane_sizes, index_array_size);
+
+  // assemble compressed buffer
+  
+  _volBuf.free();
+  _volBuf.add(flags64, sizeof(flags64));
+  _volBuf.add(plane_offsets, index_array_size);
+  _volBuf.add(plane_sizes, index_array_size);
+  _volBuf.add(workBuf.getPtr(), workBuf.getLen());
+
+  // adjust header
+
+  _fhdr.compression_type = Mdvx::COMPRESSION_GZIP;
+  _fhdr.volume_size = next_offset + 2 * index_array_size;
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
 // compress the data volume into a single GZIP buffer
 //
 // Compressed buffer is stored in BE byte order.
@@ -5539,8 +5668,21 @@ int MdvxField::decompress() const
     return 0;
   }
 
+  // check for GzipVol compression
+
   if (ta_gzip_buffer(_volBuf.getPtr())) {
     return _decompressGzipVol();
+  }
+
+  // check for 64-bit
+
+  ui32 flags64[2] = { MDV_FLAG_64, MDV_FLAG_64 };
+  if (_volBuf.getLen() >= sizeof(flags64)) {
+    memcpy(flags64, _volBuf.getPtr(), sizeof(flags64));
+    if (flags64[0] == MDV_FLAG_64 &&
+        flags64[1] == MDV_FLAG_64) {
+      return _decompress64();
+    }
   }
   
   int nz = _fhdr.nz;
@@ -5595,8 +5737,8 @@ int MdvxField::decompress() const
       _errStr += "ERROR - MdvxField::decompress.\n";
       _errStr +=  "  Wrong number of bytes in plane.\n";
       char errstr[128];
-      sprintf(errstr, "  %lld expected, %lld found.\n",
-	      (long long) nbytes_plane, (long long) nbytes_uncompressed);
+      sprintf(errstr, "  %ld expected, %ld found.\n",
+	      (long) nbytes_plane, (long) nbytes_uncompressed);
       _errStr += errstr;
       ta_compress_free(uncompressed_plane);
       return -1;
@@ -5613,8 +5755,117 @@ int MdvxField::decompress() const
     _errStr += "ERROR - MdvxField::decompress.\n";
     _errStr +=  "  Wrong number of bytes in vol.\n";
     char errstr[128];
-    sprintf(errstr, "  %lld expected, %lld found.\n",
-	    (long long) nbytes_vol, (long long) workBuf.getLen());
+    sprintf(errstr, "  %ld expected, %ld found.\n",
+	    (long) nbytes_vol, (long) workBuf.getLen());
+    _errStr += errstr;
+    return -1;
+  }
+  
+  // copy work buf to volume buf
+  
+  _volBuf.reset();
+  _volBuf.add(workBuf.getPtr(), nbytes_vol);
+
+  // swap volume data from BE as appropriate
+
+  buffer_from_BE(_volBuf.getPtr(), nbytes_vol, _fhdr.encoding_type);
+
+  // update header
+
+  _fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  _fhdr.volume_size = nbytes_vol;
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
+// decompress a field compressed with 64-bit
+// Decompresses the volume buffer if necessary
+// returns 0 on success, -1 on failure
+
+int MdvxField::_decompress64() const
+
+{
+
+  int nz = _fhdr.nz;
+  int64_t npoints_plane = _fhdr.nx * _fhdr.ny;
+  int64_t nbytes_plane = npoints_plane * _fhdr.data_element_nbytes;
+  int64_t nbytes_vol = nz * nbytes_plane;
+  int64_t index_array_size =  nz * sizeof(ui64);
+
+  // get plane offsets and sizes
+  // these follow the 64-bit flag
+
+  ui32 flags64[2];
+  char *offsetsStart = (char *) _volBuf.getPtr() + sizeof(flags64);
+  
+  ui64 *plane_offsets = (ui64 *) offsetsStart;
+  ui64 *plane_sizes = plane_offsets + nz;
+
+  // swap offsets and sizes
+
+  BE_to_array_64(plane_offsets, index_array_size);
+  BE_to_array_64(plane_sizes, index_array_size);
+
+  // create work buffer
+
+  MemBuf workBuf;
+  
+  for (int iz = 0; iz < nz; iz++) {
+    
+    char *compressed_plane;
+    void *uncompressed_plane;
+    ui64 nbytes_uncompressed;
+    ui64 this_offset = plane_offsets[iz] + sizeof(flags64) + 2 * index_array_size;
+
+    // check for valid offset
+
+    if (this_offset > _volBuf.getLen() - 1) {
+      _errStr += "ERROR - MdvxField::decompress64.\n";
+      char errstr[128];
+      sprintf(errstr, "  Field, plane: %s, %d\n", getFieldName(), iz);
+      _errStr += errstr;
+      sprintf(errstr, "  Bad field offset: %lu\n", (unsigned long) this_offset);
+      _errStr += errstr;
+      return -1;
+    }
+
+    compressed_plane = ((char *) _volBuf.getPtr() + this_offset);
+    
+    uncompressed_plane =
+      ta_decompress(compressed_plane, &nbytes_uncompressed);
+    
+    if (uncompressed_plane == NULL) {
+      _errStr += "ERROR - MdvxField::decompress64.\n";
+      _errStr +=  "  Field not compressed.\n";
+      return -1;
+    }
+
+    if ((int) nbytes_uncompressed != nbytes_plane) {
+      _errStr += "ERROR - MdvxField::decompress64.\n";
+      _errStr +=  "  Wrong number of bytes in plane.\n";
+      char errstr[128];
+      sprintf(errstr, "  %ld expected, %ld found.\n",
+	      (long) nbytes_plane, (long) nbytes_uncompressed);
+      _errStr += errstr;
+      ta_compress_free(uncompressed_plane);
+      return -1;
+    }
+    
+    workBuf.add(uncompressed_plane, nbytes_plane);
+    ta_compress_free(uncompressed_plane);
+
+  } // iz
+
+  // check
+  
+  if ((int) workBuf.getLen() != nbytes_vol) {
+    _errStr += "ERROR - MdvxField::decompress.\n";
+    _errStr +=  "  Wrong number of bytes in vol.\n";
+    char errstr[128];
+    sprintf(errstr, "  %ld expected, %ld found.\n",
+	    (long) nbytes_vol, (long) workBuf.getLen());
     _errStr += errstr;
     return -1;
   }
@@ -5670,8 +5921,8 @@ int MdvxField::_decompressGzipVol() const
     _errStr += "ERROR - MdvxField::_decompressGzipVol.\n";
     _errStr +=  "  Wrong number of bytes in vol.\n";
     char errstr[128];
-    sprintf(errstr, "  %lld expected, %lld found.\n",
-            (long long) nbytes_vol, (long long) nbytes_uncompressed);
+    sprintf(errstr, "  %ld expected, %ld found.\n",
+            (long) nbytes_vol, (long) nbytes_uncompressed);
     _errStr += errstr;
     ta_compress_free(uncompressed_vol);
     return -1;
@@ -6194,7 +6445,7 @@ int MdvxField::_write_volume(TaFile &outfile,
   if (outfile.fseek(this_offset, SEEK_SET) != 0) {
     _errStr += "ERROR - MdvxField::_write_volume.\n";
     char errstr[128];
-    sprintf(errstr, "  Seeking volume data at this_offset %lld\n", (long long) this_offset);
+    sprintf(errstr, "  Seeking volume data at this_offset %ld\n", (long) this_offset);
     _errStr += errstr;
     _errStr += " Field name: ";
     _errStr += _fhdr.field_name;
@@ -6222,11 +6473,11 @@ int MdvxField::_write_volume(TaFile &outfile,
     _errStr += "ERROR - MdvxField::writeVol\n";
     _errStr += string("  Cannot write data for field: ")
       + _fhdr.field_name + "\n";
-    sprintf(errstr, "%lld", (long long) copyBuf.getLen());
+    sprintf(errstr, "%ld", (long) copyBuf.getLen());
     _errStr += string("    copyBuf has ") + errstr + " bytes\n";
-    sprintf(errstr, "%lld", (long long) volume_size);
+    sprintf(errstr, "%ld", (long) volume_size);
     _errStr += string("    should have ") + errstr + " bytes.\n";
-    sprintf(errstr, "%lld", (long long) nwritten);
+    sprintf(errstr, "%ld", (long) nwritten);
     _errStr += string("    nwritten: ") + errstr + " bytes.\n";
     _errStr += strerror(errNum);
     _errStr += "\n";
