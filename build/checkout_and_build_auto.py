@@ -51,7 +51,7 @@ def main():
 
     # parse the command line
 
-    usage = "usage: %prog [options]"
+    usage = "usage: " + thisScriptName + " [options]"
     homeDir = os.environ['HOME']
     prefixDirDefault = os.path.join(homeDir, 'lrose')
     buildDirDefault = '/tmp/lrose_build'
