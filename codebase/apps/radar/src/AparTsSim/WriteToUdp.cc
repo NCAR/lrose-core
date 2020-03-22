@@ -311,15 +311,22 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
   double endEl = dwellPulses.back()->getEl();
   double elRange = AparTsSim::conditionAngle360(endEl - startEl);
   double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
-
+  
   vector<double> beamAz, beamEl;
   for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
+
     double az = AparTsSim::conditionAngle360(startAz + 
                                              (ii + 0.5) * deltaAzPerBeam);
     double el = AparTsSim::conditionAngle180(startEl + 
                                              (ii + 0.5) * deltaElPerBeam);
-    beamAz.push_back(az);
-    beamEl.push_back(el);
+
+    // for APAR, az ranges from -60 to +60
+    // and el from -90 to +90
+    // so we adjust accordingly
+
+    beamAz.push_back((az / 3.0) - 60.0);
+    beamEl.push_back(el / 1.5);
+
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -357,10 +364,12 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         // for APAR, az ranges from -60 to +60
         // and el from -90 to +90
         
-        double az = beamAz[ibeam] / 3.0 - 60.0;
-        double el = beamEl[ibeam] / 1.5;
+        // double az = beamAz[ibeam] / 3.0 - 60.0;
+        // double el = beamEl[ibeam] / 1.5;
+        double az = beamAz[ibeam];
+        double el = beamEl[ibeam];
         double azRad = az * DEG_TO_RAD;
-        double elRad = beamEl[ibeam] * DEG_TO_RAD;
+        double elRad = el * DEG_TO_RAD;
         double uu = cos(elRad) * sin(azRad);
         double vv = sin(elRad);
         
