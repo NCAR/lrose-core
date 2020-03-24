@@ -693,6 +693,23 @@ int Pjg::latlon2xyIndex(const double lat, const double lon,
   
 
 /**********************************************************************
+ * latlon2xyIndexExact() - Computes the the data x, y indices for the given
+ *                          lat/lon location. This method returns the
+ *                          exact grid location rather than the nearest
+ *                          point in the grid. This is useful if you
+ *                          need to interpolate the surrounding grid values.
+ *
+ * NOTE: This method can return values outside of the grid.
+ */
+
+void Pjg::latlon2xyIndexExact(const double lat, const double lon,
+                              double &x_index, double &y_index) const
+{
+  return _calculator->latlon2xyIndexExact(lat, lon, x_index, y_index);
+}
+      
+  
+/**********************************************************************
  * latlon2arrayIndex() - Computes the index into the data array.
  *
  * Returns 0 on success, -1 on failure (data outside grid).
