@@ -106,11 +106,11 @@ using namespace std;
 /// management of the memory has passed from the fields in the rays to
 /// the fields in the volume.
 ///
-/// Scalars:
+/// Ray qualifiers:
 /// Most fields represent data along the ray, i.e. at each range gate.
-/// Scalar fields represent scalar values per ray. For example,
+/// Qualifier fields represent scalar values per ray. For example,
 /// in a downward looking aircraft radar, the surface altitude could
-/// be represented by a scalar.
+/// be represented by a qualifier.
 
 class RadxField : public RadxRangeGeom, public RadxPacking {
 
@@ -203,10 +203,10 @@ public:
   
   void setIsDiscrete(bool val = true) { _isDiscrete = val; }
 
-  /// Set whether this is a scalar field. Scalar fields have only one
+  /// Set whether this is a RayQualifier field. RayQualifier fields have only one
   /// value per ray, instead of a gate-based array.
   
-  void setIsScalar(bool val = true) { _isScalar = val; }
+  void setIsRayQualifier(bool val = true) { _isRayQualifier = val; }
 
   //////////////////////////////////////////////////////////////////
   /// Set thresholding field name.
@@ -765,10 +765,10 @@ public:
   
   bool getIsDiscrete() const { return _isDiscrete; }
 
-  /// Is this a scalar field? In other words does it only have
+  /// Is this a RayQualifier field? In other words does it only have
   /// a single value per ray, rather than a gate-based array.
   
-  bool getIsScalar() const { return _isScalar; }
+  bool getIsRayQualifier() const { return _isRayQualifier; }
 
   /// Get missing value for 64-bit floating point data.
 
@@ -1084,10 +1084,10 @@ private:
   
   bool _isDiscrete;
 
-  // Is this a scalar field? Scalars store just a
+  // Is this a RayQualifier field? RayQualifiers store just a
   // single value per ray, instead of gate-based array.
   
-  bool _isScalar;
+  bool _isRayQualifier;
 
   // max and min values in field
 
@@ -1204,7 +1204,7 @@ private:
     Radx::si32 byteWidth;
     Radx::si32 fieldFolds;
     Radx::si32 isDiscrete;
-    Radx::si32 isScalar;
+    Radx::si32 isRayQualifier;
     Radx::si32 missingSi32;
     Radx::si32 missingSi16;
     Radx::si32 missingSi08;

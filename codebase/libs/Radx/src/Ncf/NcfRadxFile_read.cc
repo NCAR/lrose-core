@@ -272,7 +272,7 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
       return -1;
     }
     
-    if (_readScalarFields(true)) {
+    if (_readQualifierFields(true)) {
       _addErrStr(errStr);
       return -1;
     }
@@ -308,7 +308,7 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
       return -1;
     }
 
-    if (_readScalarFields(false)) {
+    if (_readQualifierFields(false)) {
       _addErrStr(errStr);
       return -1;
     }
@@ -2550,7 +2550,7 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
         field->setLongName(longName);
         field->setStandardName(standardName);
         field->setSamplingRatio(samplingRatio);
-        field->setIsScalar(false);
+        field->setIsRayQualifier(false);
         if (fieldFolds &&
             foldLimitLower != Radx::missingMetaFloat &&
             foldLimitUpper != Radx::missingMetaFloat) {
@@ -2641,13 +2641,13 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
 }
 
 ////////////////////////////////////////////
-// read the scalar fields variables
+// read the qualifier fields variables
 
-int NcfRadxFile::_readScalarFields(bool metaOnly)
+int NcfRadxFile::_readQualifierFields(bool metaOnly)
 
 {
 
-  // loop through the variables, adding data scalars as appropriate
+  // loop through the variables, adding data qualifiers as appropriate
   // these have time dimension
   
   for (int ivar = 0; ivar < _file.getNc3File()->num_vars(); ivar++) {
@@ -2678,7 +2678,7 @@ int NcfRadxFile::_readScalarFields(bool metaOnly)
       continue;
     }
 
-    // check that this is a scalar rather than a ray variable
+    // check that this is a qualifier rather than a ray variable
     
     string fieldName = var->name();
     if (isRayVarName(fieldName)) {
@@ -2688,15 +2688,15 @@ int NcfRadxFile::_readScalarFields(bool metaOnly)
     
     if (!isFieldRequiredOnRead(fieldName)) {
       if (_verbose) {
-        cerr << "DEBUG - NcfRadxFile::_readScalarFields" << endl;
-        cerr << "  -->> rejecting scalar: " << fieldName << endl;
+        cerr << "DEBUG - NcfRadxFile::_readQualifierFields" << endl;
+        cerr << "  -->> rejecting field: " << fieldName << endl;
       }
       continue;
     }
     
     if (_verbose) {
-      cerr << "DEBUG - NcfRadxFile::_readScalarVariables" << endl;
-      cerr << "  -->> adding scalar field: " << fieldName << endl;
+      cerr << "DEBUG - NcfRadxFile::_readQualifierVariables" << endl;
+      cerr << "  -->> adding field: " << fieldName << endl;
     }
 
     // set attributes
@@ -2726,7 +2726,7 @@ int NcfRadxFile::_readScalarFields(bool metaOnly)
         RadxField *field = new RadxField(name, units);
         field->setLongName(longName);
         field->setStandardName(standardName);
-        field->setIsScalar(true);
+        field->setIsRayQualifier(true);
         field->setIsDiscrete(false);
         if (isDiscrete) {
           field->setIsDiscrete(true);

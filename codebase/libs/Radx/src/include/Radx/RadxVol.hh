@@ -589,11 +589,11 @@ public:
 
   RadxField *copyField(const string &fieldName) const;
 
-  /// Make a copy of the scalar with the specified name.
-  /// This forms a contiguous scalar from the ray data.
-  /// Returns a pointer to the scalar on success, NULL on failure.
+  /// Make a copy of the RayQualifier with the specified name.
+  /// This forms a contiguous RayQualifier from the ray data.
+  /// Returns a pointer to the RayQualifier on success, NULL on failure.
   
-  RadxField *copyScalar(const string &scalarName) const;
+  RadxField *copyRayQualifier(const string &RayQualifierName) const;
   
   /// Rename a field
   /// returns 0 on success, -1 if field does not exist in any ray
@@ -1201,7 +1201,7 @@ public:
      vector<RadxField::NamedStatsMethod> namedMethods,  
      double maxFractionMissing = 0.25);
 
-  /// compute field stats for all scalars for all
+  /// compute field stats for all RayQualifiers for all
   /// rays currently in the volume
   ///
   /// Pass in:
@@ -1209,19 +1209,20 @@ public:
   ///   * optionally a field-name specific list of stats methods
   ///   * max fraction missing for a valid result
   ///
-  /// The requested stats on computed for each scalar,
+  /// The requested stats on computed for each RayQualifier,
   /// and on a point-by-point basis.
   ///
   /// If the geometry is not constant, remap to the predominant geom.
   ///
-  /// maxFractionMissing indicates the maximum fraction of the input data scalar
-  /// that can be missing for valid statistics. Should be between 0 and 1.
+  /// maxFractionMissing indicates the maximum fraction of the input
+  /// data RayQualifier that can be missing for valid statistics.
+  /// Should be between 0 and 1.
   /// If the min is not met, the result is set to missing.
   /// 
   /// Returns NULL if no rays are present in the volume.
   /// Otherwise, returns ray containing results.
   
-  RadxRay *computeScalarStats
+  RadxRay *computeRayQualifierStats
     (RadxField::StatsMethod_t globalMethod,
      vector<RadxField::NamedStatsMethod> namedMethods,  
      double maxFractionMissing = 0.25);
@@ -1376,9 +1377,9 @@ public:
 
   inline size_t getNFields() const { return _fields.size(); }
 
-  /// Get number of scalar fields in volume.
+  /// Get number of RayQualifier fields in volume.
 
-  inline size_t getNScalars() const { return _scalars.size(); }
+  inline size_t getNRayQualifiers() const { return _rayQualifiers.size(); }
   
   /// Get the list of unique field names, compiled by
   /// searching through all rays.
@@ -1386,7 +1387,7 @@ public:
   /// The order of the field names found is preserved
 
   vector<string> getUniqueFieldNameList() const;
-  vector<string> getUniqueScalarNameList() const;
+  vector<string> getUniqueRayQualifierNameList() const;
 
   /// convert all fields to same data type
   /// widening as required
@@ -1421,25 +1422,25 @@ public:
     return NULL;
   }
 
-  /// Get scalar, based on index.
+  /// Get RayQualifier, based on index.
   ///
   /// Returns NULL on failure.
 
-  inline RadxField *getScalar(int index) const {
-    if (index < (int) _scalars.size()) {
-      return _scalars[index];
+  inline RadxField *getRayQualifier(int index) const {
+    if (index < (int) _rayQualifiers.size()) {
+      return _rayQualifiers[index];
     } else {
       return NULL;
     }
   }
 
-  /// Get scalar on the volume, based on name.
+  /// Get RayQualifier on the volume, based on name.
   /// Returns NULL on failure.
 
-  RadxField *getScalar(const string &name) const {
-    for (size_t ii = 0; ii < _scalars.size(); ii++) {
-      if (_scalars[ii]->getName() == name) {
-        return _scalars[ii];
+  RadxField *getRayQualifier(const string &name) const {
+    for (size_t ii = 0; ii < _rayQualifiers.size(); ii++) {
+      if (_rayQualifiers[ii]->getName() == name) {
+        return _rayQualifiers[ii];
       }
     }
     return NULL;
@@ -1451,21 +1452,23 @@ public:
   
   const RadxField *getFieldFromRay(const string &name) const;
 
-  /// Get a scalar from a ray, given the name.
-  /// Find the first available scalar on a suitable ray.
-  /// Returns scalar pointer on success, NULL on failure.
+  /// Get a RayQualifier from a ray, given the name.
+  /// Find the first available RayQualifier on a suitable ray.
+  /// Returns RayQualifier pointer on success, NULL on failure.
   
-  const RadxField *getScalarFromRay(const string &name) const;
+  const RadxField *getRayQualifierFromRay(const string &name) const;
 
   /// Get vector of fields.
 
   inline const vector<RadxField *> &getFields() const { return _fields; }
   inline vector<RadxField *> &getFields() { return _fields; }
 
-  /// Get vector of scalars.
+  /// Get vector of RayQualifiers.
 
-  inline const vector<RadxField *> &getScalars() const { return _scalars; }
-  inline vector<RadxField *> &getScalars() { return _scalars; }
+  inline const vector<RadxField *> &getRayQualifiers() const {
+    return _rayQualifiers;
+  }
+  inline vector<RadxField *> &getRayQualifiers() { return _rayQualifiers; }
 
   /// Get sweep by sweep number (not the index).
   /// Returns NULL on failure.
@@ -1952,7 +1955,7 @@ private:
   // fields
   
   vector<RadxField *> _fields;
-  vector<RadxField *> _scalars;
+  vector<RadxField *> _rayQualifiers;
 
   // transitions array used in removeTransitionRays()
   // not required in serialization

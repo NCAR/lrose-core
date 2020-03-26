@@ -404,7 +404,7 @@ private:
   // unique field names for writing
 
   vector<string> _uniqueNormalFieldNames;
-  vector<string> _uniqueScalarFieldNames;
+  vector<string> _uniqueQualifierFieldNames;
 
   // objects to be set on read
 
@@ -602,7 +602,7 @@ private:
   int _readCal(RadxRcalib &cal, int index);
 
   int _readNormalFields(bool metaOnly);
-  int _readScalarFields(bool metaOnly);
+  int _readQualifierFields(bool metaOnly);
   
   void _readFieldAttributes(Nc3Var *var,
                             string &name,
@@ -649,7 +649,7 @@ private:
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
-                          bool isScalar = false,
+                          bool isQualifier = false,
                           bool isDiscrete = false,
                           bool fieldFolds = false,
                           float foldLimitLower = 0.0,
@@ -657,7 +657,7 @@ private:
   int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
-                          bool isScalar = false,
+                          bool isQualifier = false,
                           bool isDiscrete = false,
                           bool fieldFolds = false,
                           float foldLimitLower = 0.0,
@@ -667,7 +667,7 @@ private:
                           const string &standardName, const string &longName,
                           double scale,
                           double offset,
-                          bool isScalar = false,
+                          bool isQualifier = false,
                           bool isDiscrete = false,
                           bool fieldFolds = false,
                           float foldLimitLower = 0.0,
@@ -676,7 +676,7 @@ private:
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           double scale, double offset,
-                          bool isScalar = false,
+                          bool isQualifier = false,
                           bool isDiscrete = false,
                           bool fieldFolds = false,
                           float foldLimitLower = 0.0,
@@ -686,7 +686,7 @@ private:
                           const string &name, const string &units,
                           const string &standardName, const string &longName,
                           double scale, double offset,
-                          bool isScalar = false,
+                          bool isQualifier = false,
                           bool isDiscrete = false,
                           bool fieldFolds = false,
                           float foldLimitLower = 0.0,
@@ -726,7 +726,7 @@ private:
   int _writeFrequencyVariable();
 
   int _writeNormalFields();
-  int _writeScalarFields();
+  int _writeQualifierFields();
 
   Nc3Var *_createFieldVar(const RadxField &field);
   int _writeFieldVar(Nc3Var *var, RadxField *field);

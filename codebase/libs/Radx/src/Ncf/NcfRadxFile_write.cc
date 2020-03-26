@@ -385,7 +385,7 @@ int NcfRadxFile::writeToPath(const RadxVol &vol,
   // get the set of unique field name
 
   _uniqueNormalFieldNames = _writeVol->getUniqueFieldNameList();
-  _uniqueScalarFieldNames = _writeVol->getUniqueScalarNameList();
+  _uniqueQualifierFieldNames = _writeVol->getUniqueRayQualifierNameList();
 
   // check if georeferences and/or corrections are active
   // and count georef fields
@@ -476,8 +476,8 @@ int NcfRadxFile::writeToPath(const RadxVol &vol,
   if (_writeNormalFields()) {
     return _closeOnError("_writeNormalFields");
   }
-  if (_writeScalarFields()) {
-    return _closeOnError("_writeScalarFields");
+  if (_writeQualifierFields()) {
+    return _closeOnError("_writeQualifierFields");
   }
 
   // close output file
@@ -3406,23 +3406,23 @@ int NcfRadxFile::_writeNormalFields()
 }
 
 ////////////////////////////////////////////////
-// write scalar fields
+// write qualifier fields
 
-int NcfRadxFile::_writeScalarFields()
+int NcfRadxFile::_writeQualifierFields()
 {
 
   if (_verbose) {
-    cerr << "NcfRadxFile::_writeScalarVariables()" << endl;
+    cerr << "NcfRadxFile::_writeQualifierVariables()" << endl;
   }
 
-  // loop through the list of unique scalars names in this volume
+  // loop through the list of unique qualifiers names in this volume
 
   int iret = 0;
-  for (size_t iscalar = 0; iscalar < _uniqueScalarFieldNames.size(); iscalar++) {
+  for (size_t iqualifier = 0; iqualifier < _uniqueQualifierFieldNames.size(); iqualifier++) {
       
-    const string &name = _uniqueScalarFieldNames[iscalar];
+    const string &name = _uniqueQualifierFieldNames[iqualifier];
 
-    // make copy of the scalar
+    // make copy of the field
     
     RadxField *copy = _writeVol->copyField(name);
     if (copy == NULL) {
@@ -3518,7 +3518,7 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
 
   Nc3Var *var = NULL;
 
-  if (field.getIsScalar()) {
+  if (field.getIsRayQualifier()) {
     var = _file.getNc3File()->add_var(fieldName.c_str(), ncType, _timeDim);
   } else if (_nGatesVary) {
     var = _file.getNc3File()->add_var(fieldName.c_str(), ncType, _nPointsDim);
@@ -3654,7 +3654,7 @@ int NcfRadxFile::_writeFieldVar(Nc3Var *var, RadxField *field)
   int iret = 0;
   const void *data = field->getData();
 
-  if (field->getIsScalar()) {
+  if (field->getIsRayQualifier()) {
 
     switch (var->type()) {
       case nc3Double: {

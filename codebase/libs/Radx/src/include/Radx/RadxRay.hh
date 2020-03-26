@@ -381,7 +381,7 @@ public:
                       Radx::fl64 missingValue,
                       const Radx::fl64 *data,
                       bool isLocal, 
-                      bool isScalar = false);
+                      bool isQualifier = false);
   
   /// Create a 32-bit float RadxField object and add it to the ray.
   ///
@@ -403,7 +403,7 @@ public:
                       Radx::fl32 missingValue,
                       const Radx::fl32 *data,
                       bool isLocal,
-                      bool isScalar = false);
+                      bool isQualifier = false);
   
   /// Create a 32-bit scaled integer RadxField object and add it to
   /// the ray.
@@ -429,7 +429,7 @@ public:
                       double scale,
                       double offset,
                       bool isLocal, 
-                      bool isScalar = false);
+                      bool isQualifier = false);
   
   /// Create a 16-bit scaled integer RadxField object and add it to
   /// the ray.
@@ -455,7 +455,7 @@ public:
                       double scale,
                       double offset,
                       bool isLocal, 
-                      bool isScalar = false);
+                      bool isQualifier = false);
   
   /// Create an 8-bit scaled integer RadxField object and add it to the
   /// ray.
@@ -481,7 +481,7 @@ public:
                       double scale,
                       double offset,
                       bool isLocal, 
-                      bool isScalar = false);
+                      bool isQualifier = false);
   
   /// Add a previously-created field to the ray. The field must have
   /// been dynamically allocted using new(). Memory management for
@@ -992,15 +992,15 @@ public:
   /// Get number of fields on this ray.
 
   inline size_t getNFields() const { return (int) _fields.size(); }
-  inline size_t getNScalars() const { return (int) _scalars.size(); }
+  inline size_t getNQualifiers() const { return (int) _qualifiers.size(); }
 
   /// Get vector of field pointers for this ray.
   
   inline const vector<RadxField *> &getFields() const { return _fields; }
   inline vector<RadxField *> getFields() { return _fields; }
 
-  inline const vector<RadxField *> &getScalars() const { return _scalars; }
-  inline vector<RadxField *> getScalars() { return _scalars; }
+  inline const vector<RadxField *> &getQualifiers() const { return _qualifiers; }
+  inline vector<RadxField *> getQualifiers() { return _qualifiers; }
 
   /// get map of field names
 
@@ -1010,7 +1010,7 @@ public:
   typedef FieldNameMap::const_iterator FieldNameMapConstIt;
 
   inline const FieldNameMap &getFieldNameMap() const { return _fieldNameMap; }
-  inline const FieldNameMap &getScalarNameMap() const { return _scalarNameMap; }
+  inline const FieldNameMap &getQualifierNameMap() const { return _qualifierNameMap; }
 
   /////////////////////////////////////////////////////////////////////////////
   /// Get pointer to a particular field, based on the position in the
@@ -1062,14 +1062,14 @@ public:
   }
 
   /////////////////////////////////////////////////////////////////////////////
-  /// Get pointer to a particular scalar, based on the position in the
-  /// scalar vector.
+  /// Get pointer to a particular qualifier, based on the position in the
+  /// qualifier vector.
   /// Returns NULL on failure.
   /// const version
 
-  inline const RadxField *getScalar(int index) const {
-    if (index < (int) _scalars.size()) {
-      return _scalars[index];
+  inline const RadxField *getQualifier(int index) const {
+    if (index < (int) _qualifiers.size()) {
+      return _qualifiers[index];
     } else {
       return NULL;
     }
@@ -1077,9 +1077,9 @@ public:
 
   /// non-const version
 
-  inline RadxField *getScalar(int index) {
-    if (index < (int) _scalars.size()) {
-      return _scalars[index];
+  inline RadxField *getQualifier(int index) {
+    if (index < (int) _qualifiers.size()) {
+      return _qualifiers[index];
     } else {
       return NULL;
     }
@@ -1090,10 +1090,10 @@ public:
   /// Returns NULL on failure.
   /// const version
   
-  inline const RadxField *getScalar(const string &name) const {
-    FieldNameMapConstIt it = _scalarNameMap.find(name);
-    if (it != _scalarNameMap.end()) {
-      return _scalars[it->second];
+  inline const RadxField *getQualifier(const string &name) const {
+    FieldNameMapConstIt it = _qualifierNameMap.find(name);
+    if (it != _qualifierNameMap.end()) {
+      return _qualifiers[it->second];
     } else {
       return NULL;
     }
@@ -1101,10 +1101,10 @@ public:
 
   /// non-const version
   
-  inline RadxField *getScalar(const string &name) {
-    FieldNameMapConstIt it = _scalarNameMap.find(name);
-    if (it != _scalarNameMap.end()) {
-      return _scalars[it->second];
+  inline RadxField *getQualifier(const string &name) {
+    FieldNameMapConstIt it = _qualifierNameMap.find(name);
+    if (it != _qualifierNameMap.end()) {
+      return _qualifiers[it->second];
     } else {
       return NULL;
     }
@@ -1142,9 +1142,9 @@ public:
   
   void printFieldNameMap(ostream &out) const;
   
-  /// print the scalar name map
+  /// print the qualifier name map
   
-  void printScalarNameMap(ostream &out) const;
+  void printQualifierNameMap(ostream &out) const;
   
   //@}
 
@@ -1271,13 +1271,13 @@ private:
   // data fields
   
   vector<RadxField *> _fields;
-  vector<RadxField *> _scalars;
+  vector<RadxField *> _qualifiers;
   vector<RadxField *> _allFields;
 
   // map of data field names
 
   FieldNameMap _fieldNameMap;
-  FieldNameMap _scalarNameMap;
+  FieldNameMap _qualifierNameMap;
 
   // keeping track of clients using this object
 
