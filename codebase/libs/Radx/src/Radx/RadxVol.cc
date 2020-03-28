@@ -975,7 +975,7 @@ const RadxField *RadxVol::getFieldFromRay(const string &name) const
 /// Find the first available rayQualifier on a suitable ray.
 /// Returns rayQualifier pointer on success, NULL on failure.
 
-const RadxField *RadxVol::getRayQualifierFromRay(const string &name) const
+const RadxField *RadxVol::getQualifierFromRay(const string &name) const
 
 {
   
@@ -1103,20 +1103,20 @@ void RadxVol::loadFieldsFromRays(bool nFieldsConstantPerRay /* = false */)
     RadxField &rayQualifier = *_rayQualifiers[iqual];
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxRay &ray = *_rays[iray];
-      RadxField *rayRayQualifier = ray.getQualifier(rayQualifier.getName());
-      if (rayRayQualifier != NULL) {
+      RadxField *rayQual = ray.getQualifier(rayQualifier.getName());
+      if (rayQual != NULL) {
         size_t nPts;
         const void *data = rayQualifier.getData(iray, nPts);
-        rayRayQualifier->setDataRemote(rayQualifier, data, nPts);
+        rayQual->setDataRemote(rayQualifier, data, nPts);
       } else {
         if (nFieldsConstantPerRay) {
           // add any missing rayQualifiers
-          rayRayQualifier = new RadxField(rayQualifier.getName(), rayQualifier.getUnits());
-          rayRayQualifier->copyMetaData(rayQualifier);
+          rayQual = new RadxField(rayQualifier.getName(), rayQualifier.getUnits());
+          rayQual->copyMetaData(rayQualifier);
           size_t nPts;
           const void *data = rayQualifier.getData(iray, nPts);
-          rayRayQualifier->setDataRemote(rayQualifier, data, nPts);
-          ray.addField(rayRayQualifier);
+          rayQual->setDataRemote(rayQualifier, data, nPts);
+          ray.addField(rayQual);
         }
       }
     }      
@@ -1463,11 +1463,11 @@ RadxField *RadxVol::copyRayQualifier(const string &rayQualifierName) const
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     const RadxRay &ray = *_rays[iray];
-    const RadxField *rayRayQualifier = ray.getField(rayQualifierName);
-    if (rayRayQualifier != NULL) {
+    const RadxField *rayQual = ray.getQualifier(rayQualifierName);
+    if (rayQual != NULL) {
       // create new rayQualifier using name, units and type
-      copy = new RadxField(rayRayQualifier->getName(), rayRayQualifier->getUnits());
-      copy->copyMetaData(*rayRayQualifier);
+      copy = new RadxField(rayQual->getName(), rayQual->getUnits());
+      copy->copyMetaData(*rayQual);
       break;
     }
     if (copy != NULL) {
@@ -1489,11 +1489,11 @@ RadxField *RadxVol::copyRayQualifier(const string &rayQualifierName) const
   double offset = copy->getOffset();
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     const RadxRay &ray = *_rays[iray];
-    const RadxField *rayRayQualifier = ray.getField(rayQualifierName);
-    if (rayRayQualifier == NULL) {
+    const RadxField *rayQual = ray.getQualifier(rayQualifierName);
+    if (rayQual == NULL) {
       continue;
     }
-    if (rayRayQualifier->getDataType() != dataType) {
+    if (rayQual->getDataType() != dataType) {
       // different rayQualifier data types
       rayQualifiersAreUniform = false;
       break;
@@ -1502,12 +1502,12 @@ RadxField *RadxVol::copyRayQualifier(const string &rayQualifierName) const
       // for float types don't worry about scale and bias
       continue;
     }
-    if (fabs(rayRayQualifier->getScale() - scale) > 1.0e-5) {
+    if (fabs(rayQual->getScale() - scale) > 1.0e-5) {
       // different scale
       rayQualifiersAreUniform = false;
       break;
     }
-    if (fabs(rayRayQualifier->getOffset() - offset) > 1.0e-5) {
+    if (fabs(rayQual->getOffset() - offset) > 1.0e-5) {
       // different offset
       rayQualifiersAreUniform = false;
       break;
@@ -1524,7 +1524,7 @@ RadxField *RadxVol::copyRayQualifier(const string &rayQualifierName) const
 
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxRay &ray = *_rays[iray];
-      RadxField *rfld = ray.getField(rayQualifierName);
+      RadxField *rfld = ray.getQualifier(rayQualifierName);
       if (rfld == NULL) {
         copy->addDataMissing(nPts);
       } else {
@@ -1562,7 +1562,7 @@ RadxField *RadxVol::copyRayQualifier(const string &rayQualifierName) const
     
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxRay &ray = *_rays[iray];
-      RadxField *rfld = ray.getField(rayQualifierName);
+      RadxField *rfld = ray.getQualifier(rayQualifierName);
       if (rfld == NULL) {
         copy->addDataMissing(nPts);
       } else {
@@ -1982,7 +1982,7 @@ void RadxVol::print(ostream &out) const
   } else {
     for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
       string fieldName = fieldNames[ifield];
-      const RadxField *fld = getFieldFromRay(fieldName);
+      const RadxField *fld = getQualifierFromRay(fieldName);
       if (fld != NULL) {
         out << "===== NOTE: Field is from first ray =====" << endl;
         fld->print(out);
@@ -1991,7 +1991,7 @@ void RadxVol::print(ostream &out) const
     }
     for (size_t iqual = 0; iqual < rayQualifierNames.size(); iqual++) {
       string rayQualifierName = rayQualifierNames[iqual];
-      const RadxField *fld = getFieldFromRay(rayQualifierName);
+      const RadxField *fld = getQualifierFromRay(rayQualifierName);
       if (fld != NULL) {
         out << "===== NOTE: RayQualifier is from first ray =====" << endl;
         fld->print(out);
@@ -5480,11 +5480,11 @@ RadxRay *RadxVol::computeRayQualifierStats
 
     RadxField *rayQualifier = _rays[0]->getQualifier(rayQualifierName);
 
-    vector<const RadxField *> rayRayQualifiers;
+    vector<const RadxField *> rayQuals;
     for (size_t iray = 0; iray < _rays.size(); iray++) {
-      RadxField *rayRayQualifier = _rays[iray]->getQualifier(rayQualifierName);
-      if (rayRayQualifier != NULL) {
-        rayRayQualifiers.push_back(rayRayQualifier);
+      RadxField *rayQual = _rays[iray]->getQualifier(rayQualifierName);
+      if (rayQual != NULL) {
+        rayQuals.push_back(rayQual);
       }
     }
 
@@ -5499,7 +5499,7 @@ RadxRay *RadxVol::computeRayQualifierStats
       }
     }
     RadxField *statsRayQualifier = 
-      rayQualifier->computeStats(method, rayRayQualifiers, maxFractionMissing);
+      rayQualifier->computeStats(method, rayQuals, maxFractionMissing);
     if (statsRayQualifier != NULL) {
       result->addField(statsRayQualifier);
     }

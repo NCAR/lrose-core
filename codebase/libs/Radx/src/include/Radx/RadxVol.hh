@@ -1456,7 +1456,7 @@ public:
   /// Find the first available RayQualifier on a suitable ray.
   /// Returns RayQualifier pointer on success, NULL on failure.
   
-  const RadxField *getRayQualifierFromRay(const string &name) const;
+  const RadxField *getQualifierFromRay(const string &name) const;
 
   /// Get vector of fields.
 

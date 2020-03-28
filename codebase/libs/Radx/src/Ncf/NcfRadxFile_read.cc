@@ -2744,14 +2744,16 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
     switch (var->type()) {
       case nc3Double: {
         if (_addFl64FieldToRays(var, name, units, standardName, longName,
-                                true, isDiscrete)) {
+                                true, isDiscrete, fieldFolds,
+                                foldLimitLower, foldLimitUpper)) {
           iret = -1;
         }
         break;
       }
       case nc3Float: {
         if (_addFl32FieldToRays(var, name, units, standardName, longName,
-                                true, isDiscrete)) {
+                                true, isDiscrete, fieldFolds,
+                                foldLimitLower, foldLimitUpper)) {
           iret = -1;
         }
         break;
@@ -2759,7 +2761,8 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
       case nc3Int: {
         if (_addSi32FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
-                                true, isDiscrete)) {
+                                true, isDiscrete, fieldFolds,
+                                foldLimitLower, foldLimitUpper)) {
           iret = -1;
         }
         break;
@@ -2767,7 +2770,9 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
       case nc3Short: {
         if (_addSi16FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
-                                true, isDiscrete)) {
+                                true, isDiscrete, fieldFolds,
+                                foldLimitLower, foldLimitUpper,
+                                samplingRatio)) {
           iret = -1;
         }
         break;
@@ -2775,7 +2780,8 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
       case nc3Byte: {
         if (_addSi08FieldToRays(var, name, units, standardName, longName,
                                 scale, offset,
-                                true, isDiscrete)) {
+                                true, isDiscrete, fieldFolds,
+                                foldLimitLower, foldLimitUpper)) {
           iret = -1;
         }
         break;
@@ -3585,7 +3591,7 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                      const string &units,
                                      const string &standardName,
                                      const string &longName,
-                                     bool isScalar,
+                                     bool isQualifier,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
@@ -3595,9 +3601,15 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
 
   // get data from array
 
-  Radx::fl64 *data = new Radx::fl64[_nPoints];
+  size_t nData = _nPoints;
+  if (isQualifier) {
+    nData = _nTimesInFile;
+  }
+  Radx::fl64 *data = new Radx::fl64[nData];
   int iret = 0;
-  if (_nGatesVary) {
+  if (isQualifier) {
+    iret = !var->get(data, _nTimesInFile);
+  } else if (_nGatesVary) {
     iret = !var->get(data, _nPoints);
   } else {
     iret = !var->get(data, _nTimesInFile, _nRangeInFile);
@@ -3624,7 +3636,7 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
 
   // reset nans to missing
   
-  for (int ii = 0; ii < _nPoints; ii++) {
+  for (size_t ii = 0; ii < nData; ii++) {
     if (!isfinite(data[ii])) {
       data[ii] = missingVal;
     }
@@ -3645,19 +3657,26 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
       continue;
     }
     
-    int nGates = _nRangeInFile;
-    int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
+    RadxField *field = NULL;
+    if (isQualifier) {
+      field = _raysFromFile[ii]->addField(name, units, 1,
+                                          missingVal,
+                                          data + rayIndex,
+                                          true, true);
+      field->setIsRayQualifier(true);
+    } else {
+      int nGates = _nRangeInFile;
+      int startIndex = rayIndex * _nRangeInFile;
+      if (_nGatesVary) {
+        nGates = _rayNGates[rayIndex];
+        startIndex = _rayStartIndex[rayIndex];
+      }
+      field = _raysFromFile[ii]->addField(name, units, nGates,
+                                          missingVal,
+                                          data + startIndex,
+                                          true, false);
     }
     
-    RadxField *field =
-      _raysFromFile[ii]->addField(name, units, nGates,
-                                  missingVal,
-                                  data + startIndex,
-                                  true);
-
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
@@ -3688,7 +3707,7 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                      const string &units,
                                      const string &standardName,
                                      const string &longName,
-                                     bool isScalar,
+                                     bool isQualifier,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
@@ -3698,9 +3717,15 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
 
   // get data from array
 
-  Radx::fl32 *data = new Radx::fl32[_nPoints];
+  size_t nData = _nPoints;
+  if (isQualifier) {
+    nData = _nTimesInFile;
+  }
+  Radx::fl32 *data = new Radx::fl32[nData];
   int iret = 0;
-  if (_nGatesVary) {
+  if (isQualifier) {
+    iret = !var->get(data, _nTimesInFile);
+  } else if (_nGatesVary) {
     iret = !var->get(data, _nPoints);
   } else {
     iret = !var->get(data, _nTimesInFile, _nRangeInFile);
@@ -3727,7 +3752,7 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
   
   // reset nans to missing
   
-  for (int ii = 0; ii < _nPoints; ii++) {
+  for (size_t ii = 0; ii < nData; ii++) {
     if (!isfinite(data[ii])) {
       data[ii] = missingVal;
     }
@@ -3748,18 +3773,25 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
       continue;
     }
     
-    int nGates = _nRangeInFile;
-    int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
+    RadxField *field = NULL;
+    if (isQualifier) {
+      field = _raysFromFile[ii]->addField(name, units, 1,
+                                          missingVal,
+                                          data + rayIndex,
+                                          true, true);
+      field->setIsRayQualifier(true);
+    } else {
+      int nGates = _nRangeInFile;
+      int startIndex = rayIndex * _nRangeInFile;
+      if (_nGatesVary) {
+        nGates = _rayNGates[rayIndex];
+        startIndex = _rayStartIndex[rayIndex];
+      }
+      field = _raysFromFile[ii]->addField(name, units, nGates,
+                                          missingVal,
+                                          data + startIndex,
+                                          true, false);
     }
-
-    RadxField *field =
-      _raysFromFile[ii]->addField(name, units, nGates,
-                                  missingVal,
-                                  data + startIndex,
-                                  true);
 
     field->setStandardName(standardName);
     field->setLongName(longName);
@@ -3792,7 +3824,7 @@ int NcfRadxFile::_addSi32FieldToRays(Nc3Var* var,
                                      const string &standardName,
                                      const string &longName,
                                      double scale, double offset,
-                                     bool isScalar,
+                                     bool isQualifier,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
@@ -3802,9 +3834,15 @@ int NcfRadxFile::_addSi32FieldToRays(Nc3Var* var,
 
   // get data from array
 
-  Radx::si32 *data = new Radx::si32[_nPoints];
+  size_t nData = _nPoints;
+  if (isQualifier) {
+    nData = _nTimesInFile;
+  }
+  Radx::si32 *data = new Radx::si32[nData];
   int iret = 0;
-  if (_nGatesVary) {
+  if (isQualifier) {
+    iret = !var->get(data, _nTimesInFile);
+  } else if (_nGatesVary) {
     iret = !var->get(data, _nPoints);
   } else {
     iret = !var->get(data, _nTimesInFile, _nRangeInFile);
@@ -3844,19 +3882,27 @@ int NcfRadxFile::_addSi32FieldToRays(Nc3Var* var,
       continue;
     }
     
-    int nGates = _nRangeInFile;
-    int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
+    RadxField *field = NULL;
+    if (isQualifier) {
+      field = _raysFromFile[ii]->addField(name, units, 1,
+                                          missingVal,
+                                          data + rayIndex,
+                                          scale, offset,
+                                          true, true);
+      field->setIsRayQualifier(true);
+    } else {
+      int nGates = _nRangeInFile;
+      int startIndex = rayIndex * _nRangeInFile;
+      if (_nGatesVary) {
+        nGates = _rayNGates[rayIndex];
+        startIndex = _rayStartIndex[rayIndex];
+      }
+      field = _raysFromFile[ii]->addField(name, units, nGates,
+                                          missingVal,
+                                          data + startIndex,
+                                          scale, offset,
+                                          true, false);
     }
-    
-    RadxField *field =
-      _raysFromFile[ii]->addField(name, units, nGates,
-                                  missingVal,
-                                  data + startIndex,
-                                  scale, offset,
-                                  true);
 
     field->setStandardName(standardName);
     field->setLongName(longName);
@@ -3889,7 +3935,7 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
                                      const string &standardName,
                                      const string &longName,
                                      double scale, double offset,
-                                     bool isScalar,
+                                     bool isQualifier,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
@@ -3900,9 +3946,15 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
 
   // get data from array
 
-  Radx::si16 *data = new Radx::si16[_nPoints];
+  size_t nData = _nPoints;
+  if (isQualifier) {
+    nData = _nTimesInFile;
+  }
+  Radx::si16 *data = new Radx::si16[nData];
   int iret = 0;
-  if (_nGatesVary) {
+  if (isQualifier) {
+    iret = !var->get(data, _nTimesInFile);
+  } else if (_nGatesVary) {
     iret = !var->get(data, _nPoints);
   } else {
     iret = !var->get(data, _nTimesInFile, _nRangeInFile);
@@ -3942,19 +3994,27 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
       continue;
     }
     
-    int nGates = _nRangeInFile;
-    int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
+    RadxField *field = NULL;
+    if (isQualifier) {
+      field = _raysFromFile[ii]->addField(name, units, 1,
+                                          missingVal,
+                                          data + rayIndex,
+                                          scale, offset,
+                                          true, true);
+      field->setIsRayQualifier(true);
+    } else {
+      int nGates = _nRangeInFile;
+      int startIndex = rayIndex * _nRangeInFile;
+      if (_nGatesVary) {
+        nGates = _rayNGates[rayIndex];
+        startIndex = _rayStartIndex[rayIndex];
+      }
+      field = _raysFromFile[ii]->addField(name, units, nGates,
+                                          missingVal,
+                                          data + startIndex,
+                                          scale, offset,
+                                          true, false);
     }
-    
-    RadxField *field =
-      _raysFromFile[ii]->addField(name, units, nGates,
-                                  missingVal,
-                                  data + startIndex,
-                                  scale, offset,
-                                  true);
 
     field->setStandardName(standardName);
     field->setLongName(longName);
@@ -3988,7 +4048,7 @@ int NcfRadxFile::_addSi08FieldToRays(Nc3Var* var,
                                      const string &standardName,
                                      const string &longName,
                                      double scale, double offset,
-                                     bool isScalar,
+                                     bool isQualifier,
                                      bool isDiscrete,
                                      bool fieldFolds,
                                      float foldLimitLower,
@@ -3998,9 +4058,15 @@ int NcfRadxFile::_addSi08FieldToRays(Nc3Var* var,
 
   // get data from array
 
-  Radx::si08 *data = new Radx::si08[_nPoints];
+  size_t nData = _nPoints;
+  if (isQualifier) {
+    nData = _nTimesInFile;
+  }
+  Radx::si08 *data = new Radx::si08[nData];
   int iret = 0;
-  if (_nGatesVary) {
+  if (isQualifier) {
+    iret = !var->get((ncbyte *) data, _nTimesInFile);
+  } else if (_nGatesVary) {
     iret = !var->get((ncbyte *) data, _nPoints);
   } else {
     iret = !var->get((ncbyte *) data, _nTimesInFile, _nRangeInFile);
@@ -4040,19 +4106,27 @@ int NcfRadxFile::_addSi08FieldToRays(Nc3Var* var,
       continue;
     }
     
-    int nGates = _nRangeInFile;
-    int startIndex = rayIndex * _nRangeInFile;
-    if (_nGatesVary) {
-      nGates = _rayNGates[rayIndex];
-      startIndex = _rayStartIndex[rayIndex];
+    RadxField *field = NULL;
+    if (isQualifier) {
+      field = _raysFromFile[ii]->addField(name, units, 1,
+                                          missingVal,
+                                          data + rayIndex,
+                                          scale, offset,
+                                          true, true);
+      field->setIsRayQualifier(true);
+    } else {
+      int nGates = _nRangeInFile;
+      int startIndex = rayIndex * _nRangeInFile;
+      if (_nGatesVary) {
+        nGates = _rayNGates[rayIndex];
+        startIndex = _rayStartIndex[rayIndex];
+      }
+      field = _raysFromFile[ii]->addField(name, units, nGates,
+                                          missingVal,
+                                          data + startIndex,
+                                          scale, offset,
+                                          true, false);
     }
-    
-    RadxField *field =
-      _raysFromFile[ii]->addField(name, units, nGates,
-                                  missingVal,
-                                  data + startIndex,
-                                  scale, offset,
-                                  true);
 
     field->setStandardName(standardName);
     field->setLongName(longName);

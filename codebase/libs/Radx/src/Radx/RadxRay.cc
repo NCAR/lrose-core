@@ -768,7 +768,7 @@ RadxField* RadxRay::addField(const string &name,
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _fields.size(), _qualifierNameMap);
+    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -782,7 +782,11 @@ RadxField* RadxRay::addField(const string &name,
   if (mapName != name) {
     fld->setName(mapName);
   }
-  _fields.push_back(fld);
+  if (isQualifier) {
+    _qualifiers.push_back(fld);
+  } else {
+    _fields.push_back(fld);
+  }
   return fld;
 }
 
@@ -805,7 +809,7 @@ RadxField* RadxRay::addField(const string &name,
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _fields.size(), _qualifierNameMap);
+    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -819,7 +823,11 @@ RadxField* RadxRay::addField(const string &name,
   if (mapName != name) {
     fld->setName(mapName);
   }
-  _fields.push_back(fld);
+  if (isQualifier) {
+    _qualifiers.push_back(fld);
+  } else {
+    _fields.push_back(fld);
+  }
   return fld;
 }
 
@@ -844,7 +852,7 @@ RadxField* RadxRay::addField(const string &name,
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _fields.size(), _qualifierNameMap);
+    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -858,7 +866,11 @@ RadxField* RadxRay::addField(const string &name,
   if (mapName != name) {
     fld->setName(mapName);
   }
-  _fields.push_back(fld);
+  if (isQualifier) {
+    _qualifiers.push_back(fld);
+  } else {
+    _fields.push_back(fld);
+  }
   return fld;
 }
 
@@ -883,7 +895,7 @@ RadxField* RadxRay::addField(const string &name,
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _fields.size(), _qualifierNameMap);
+    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -897,7 +909,11 @@ RadxField* RadxRay::addField(const string &name,
   if (mapName != name) {
     fld->setName(mapName);
   }
-  _fields.push_back(fld);
+  if (isQualifier) {
+    _qualifiers.push_back(fld);
+  } else {
+    _fields.push_back(fld);
+  }
   return fld;
 }
 
@@ -922,7 +938,7 @@ RadxField* RadxRay::addField(const string &name,
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _fields.size(), _qualifierNameMap);
+    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -936,7 +952,11 @@ RadxField* RadxRay::addField(const string &name,
   if (mapName != name) {
     fld->setName(mapName);
   }
-  _fields.push_back(fld);
+  if (isQualifier) {
+    _qualifiers.push_back(fld);
+  } else {
+    _fields.push_back(fld);
+  }
   return fld;
 }
 

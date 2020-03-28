@@ -3412,7 +3412,7 @@ int NcfRadxFile::_writeQualifierFields()
 {
 
   if (_verbose) {
-    cerr << "NcfRadxFile::_writeQualifierVariables()" << endl;
+    cerr << "NcfRadxFile::_writeQualifierFields()" << endl;
   }
 
   // loop through the list of unique qualifiers names in this volume
@@ -3424,7 +3424,7 @@ int NcfRadxFile::_writeQualifierFields()
 
     // make copy of the field
     
-    RadxField *copy = _writeVol->copyField(name);
+    RadxField *copy = _writeVol->copyRayQualifier(name);
     if (copy == NULL) {
       if (_debug) {
         cerr << "  ... cannot find field: " << name
@@ -3442,7 +3442,7 @@ int NcfRadxFile::_writeQualifierFields()
         iret = -1;
       }
     } else {
-      _addErrStr("ERROR - NcfRadxFile::_writeNormalFields");
+      _addErrStr("ERROR - NcfRadxFile::_writeQualifierFields");
       _addErrStr("  Cannot create field: ", name);
       delete copy;
       return -1;
@@ -3456,7 +3456,7 @@ int NcfRadxFile::_writeQualifierFields()
   } // ifield
 
   if (iret) {
-    _addErrStr("ERROR - NcfRadxFile::_writeNormalFields");
+    _addErrStr("ERROR - NcfRadxFile::_writeQualifierFields");
     return -1;
   } else {
     return 0;
