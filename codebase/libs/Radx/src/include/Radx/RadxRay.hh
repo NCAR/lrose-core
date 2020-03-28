@@ -1062,7 +1062,7 @@ public:
   }
 
   /////////////////////////////////////////////////////////////////////////////
-  /// Get pointer to a particular qualifier, based on the position in the
+  /// Get pointer to a particular qualifier field, based on the position in the
   /// qualifier vector.
   /// Returns NULL on failure.
   /// const version
@@ -1086,7 +1086,7 @@ public:
   }
 
   /////////////////////////////////////////////////////////////////////////////
-  /// Get pointer to a particular field, based on the name.
+  /// Get pointer to a particular qualifier field, based on the name.
   /// Returns NULL on failure.
   /// const version
   
