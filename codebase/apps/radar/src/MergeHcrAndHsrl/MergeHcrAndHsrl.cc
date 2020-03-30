@@ -269,8 +269,9 @@ int MergeHcrAndHsrl::_processFile(const string &hcrPath)
   for (size_t ii = 0; ii < hcrRays.size(); ii++) {
     RadxRay *hcrRay = hcrRays[ii];
     // rename fields on hcr ray
-    for (size_t ifld = 0; ifld < hcrRay->getNFields(); ifld++) {
-      RadxField *pField = hcrRay->getField(ifld);
+    vector<RadxField *> pFlds = hcrRay->getFields(Radx::FIELD_RETRIEVAL_ALL);
+    for (size_t ifld = 0; ifld < pFlds.size(); ifld++) {
+      RadxField *pField = pFlds[ifld];
       for (int ii = 0; ii < _params.hcr_fields_n; ii++) {
         string inputName = _params._hcr_fields[ii].input_field_name;
         if (inputName == pField->getName()) {
@@ -549,8 +550,9 @@ int MergeHcrAndHsrl::_readHsrlVol(RadxTime &searchTime)
   
   if (_hsrlVol.getNRays() > 0) {
     const RadxRay *ray1 = _hsrlVol.getRays()[0];
-    for (size_t ifld = 0; ifld < ray1->getNFields(); ifld++) {
-      const RadxField *hField = ray1->getField(ifld);
+    vector<RadxField *> hflds = ray1->getFields();
+    for (size_t ifld = 0; ifld < hflds.size(); ifld++) {
+      const RadxField *hField = hflds[ifld];
       for (int ii = 0; ii < _params.hsrl_fields_n; ii++) {
         string inputName = _params._hsrl_fields[ii].input_field_name;
         if (inputName == hField->getName()) {
@@ -597,9 +599,9 @@ void MergeHcrAndHsrl::_mergeRay(RadxRay *hcrRay,
                            hcrRay->getGateSpacingKm());
   }
   
-  const vector<RadxField *> &hsrlFields = hsrlRay->getFields();
+  vector<RadxField *> hsrlFields = hsrlRay->getFields();
   int nGatesHcr = hcrRay->getNGates();
-
+  
   for (size_t ifield = 0; ifield < hsrlFields.size(); ifield++) {
     
     const RadxField *hsrlField = hsrlFields[ifield];
