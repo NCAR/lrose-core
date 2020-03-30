@@ -606,7 +606,7 @@ RadxNcfStr::RadxNcfStr()
 
   // create the set of ray variable names
 
-  _createRayVarNameSet();
+  _createRayMetaNameSet();
 
 }
 
@@ -620,12 +620,12 @@ RadxNcfStr::~RadxNcfStr()
 }
 
 //////////////////////////////////////////////////////////////////
-// check if a variable is a standard ray variable name
+// check if a variable is a standard ray metadat name
 
-bool RadxNcfStr::isRayVarName(const string &varName) const
+bool RadxNcfStr::isRayMetaName(const string &varName) const
 
 {
-  if (_rayVarNames.find(varName) != _rayVarNames.end()) {
+  if (_rayMetaNames.find(varName) != _rayMetaNames.end()) {
     return true;
   } else {
     return false;
@@ -635,59 +635,59 @@ bool RadxNcfStr::isRayVarName(const string &varName) const
 //////////////////////////////////////////////////////////////////
 // create set of ray variable names
 
-void RadxNcfStr::_createRayVarNameSet()
+void RadxNcfStr::_createRayMetaNameSet()
 
 {
-  if(_rayVarNames.size() > 0) {
+  if(_rayMetaNames.size() > 0) {
     // alread created
     return;
   }
-  _rayVarNames.insert(RadxNcfStr::TIME);
-  _rayVarNames.insert(RadxNcfStr::GEOREF_TIME);
-  _rayVarNames.insert(RadxNcfStr::LATITUDE);
-  _rayVarNames.insert(RadxNcfStr::LONGITUDE);
-  _rayVarNames.insert(RadxNcfStr::ALTITUDE);
-  _rayVarNames.insert(RadxNcfStr::ALTITUDE_AGL);
-  _rayVarNames.insert(RadxNcfStr::GEOREF_UNIT_NUM);
-  _rayVarNames.insert(RadxNcfStr::GEOREF_UNIT_ID);
-  _rayVarNames.insert(RadxNcfStr::EASTWARD_VELOCITY);
-  _rayVarNames.insert(RadxNcfStr::NORTHWARD_VELOCITY);
-  _rayVarNames.insert(RadxNcfStr::VERTICAL_VELOCITY);
-  _rayVarNames.insert(RadxNcfStr::HEADING);
-  _rayVarNames.insert(RadxNcfStr::ROLL);
-  _rayVarNames.insert(RadxNcfStr::PITCH);
-  _rayVarNames.insert(RadxNcfStr::DRIFT);
-  _rayVarNames.insert(RadxNcfStr::ROTATION);
-  _rayVarNames.insert(RadxNcfStr::TILT);
-  _rayVarNames.insert(RadxNcfStr::EASTWARD_WIND);
-  _rayVarNames.insert(RadxNcfStr::NORTHWARD_WIND);
-  _rayVarNames.insert(RadxNcfStr::VERTICAL_WIND);
-  _rayVarNames.insert(RadxNcfStr::HEADING_CHANGE_RATE);
-  _rayVarNames.insert(RadxNcfStr::PITCH_CHANGE_RATE);
-  _rayVarNames.insert(RadxNcfStr::DRIVE_ANGLE_1);
-  _rayVarNames.insert(RadxNcfStr::DRIVE_ANGLE_2);
-  _rayVarNames.insert(RadxNcfStr::TELESCOPE_ROLL_ANGLE_OFFSET);
-  _rayVarNames.insert(RadxNcfStr::ELEVATION);
-  _rayVarNames.insert(RadxNcfStr::AZIMUTH);
-  _rayVarNames.insert(RadxNcfStr::PULSE_WIDTH);
-  _rayVarNames.insert(RadxNcfStr::PRT);
-  _rayVarNames.insert(RadxNcfStr::PRT_RATIO);
-  _rayVarNames.insert(RadxNcfStr::NYQUIST_VELOCITY);
-  _rayVarNames.insert(RadxNcfStr::UNAMBIGUOUS_RANGE);
-  _rayVarNames.insert(RadxNcfStr::ANTENNA_TRANSITION);
-  _rayVarNames.insert(RadxNcfStr::GEOREFS_APPLIED);
-  _rayVarNames.insert(RadxNcfStr::N_SAMPLES);
-  _rayVarNames.insert(RadxNcfStr::R_CALIB_INDEX);
-  _rayVarNames.insert(RadxNcfStr::RADAR_MEASURED_TRANSMIT_POWER_H);
-  _rayVarNames.insert(RadxNcfStr::RADAR_MEASURED_TRANSMIT_POWER_V);
-  _rayVarNames.insert(RadxNcfStr::SCAN_RATE);
-  _rayVarNames.insert(RadxNcfStr::RADAR_ESTIMATED_NOISE_DBM_HC);
-  _rayVarNames.insert(RadxNcfStr::RADAR_ESTIMATED_NOISE_DBM_VC);
-  _rayVarNames.insert(RadxNcfStr::RADAR_ESTIMATED_NOISE_DBM_HX);
-  _rayVarNames.insert(RadxNcfStr::RADAR_ESTIMATED_NOISE_DBM_VX);
-  _rayVarNames.insert(RadxNcfStr::RAY_START_RANGE);
-  _rayVarNames.insert(RadxNcfStr::RAY_GATE_SPACING);
-  _rayVarNames.insert(RadxNcfStr::RAY_N_GATES);
-  _rayVarNames.insert(RadxNcfStr::RAY_START_INDEX);
+  _rayMetaNames.insert(RadxNcfStr::TIME);
+  _rayMetaNames.insert(RadxNcfStr::GEOREF_TIME);
+  _rayMetaNames.insert(RadxNcfStr::LATITUDE);
+  _rayMetaNames.insert(RadxNcfStr::LONGITUDE);
+  _rayMetaNames.insert(RadxNcfStr::ALTITUDE);
+  _rayMetaNames.insert(RadxNcfStr::ALTITUDE_AGL);
+  _rayMetaNames.insert(RadxNcfStr::GEOREF_UNIT_NUM);
+  _rayMetaNames.insert(RadxNcfStr::GEOREF_UNIT_ID);
+  _rayMetaNames.insert(RadxNcfStr::EASTWARD_VELOCITY);
+  _rayMetaNames.insert(RadxNcfStr::NORTHWARD_VELOCITY);
+  _rayMetaNames.insert(RadxNcfStr::VERTICAL_VELOCITY);
+  _rayMetaNames.insert(RadxNcfStr::HEADING);
+  _rayMetaNames.insert(RadxNcfStr::ROLL);
+  _rayMetaNames.insert(RadxNcfStr::PITCH);
+  _rayMetaNames.insert(RadxNcfStr::DRIFT);
+  _rayMetaNames.insert(RadxNcfStr::ROTATION);
+  _rayMetaNames.insert(RadxNcfStr::TILT);
+  _rayMetaNames.insert(RadxNcfStr::EASTWARD_WIND);
+  _rayMetaNames.insert(RadxNcfStr::NORTHWARD_WIND);
+  _rayMetaNames.insert(RadxNcfStr::VERTICAL_WIND);
+  _rayMetaNames.insert(RadxNcfStr::HEADING_CHANGE_RATE);
+  _rayMetaNames.insert(RadxNcfStr::PITCH_CHANGE_RATE);
+  _rayMetaNames.insert(RadxNcfStr::DRIVE_ANGLE_1);
+  _rayMetaNames.insert(RadxNcfStr::DRIVE_ANGLE_2);
+  _rayMetaNames.insert(RadxNcfStr::TELESCOPE_ROLL_ANGLE_OFFSET);
+  _rayMetaNames.insert(RadxNcfStr::ELEVATION);
+  _rayMetaNames.insert(RadxNcfStr::AZIMUTH);
+  _rayMetaNames.insert(RadxNcfStr::PULSE_WIDTH);
+  _rayMetaNames.insert(RadxNcfStr::PRT);
+  _rayMetaNames.insert(RadxNcfStr::PRT_RATIO);
+  _rayMetaNames.insert(RadxNcfStr::NYQUIST_VELOCITY);
+  _rayMetaNames.insert(RadxNcfStr::UNAMBIGUOUS_RANGE);
+  _rayMetaNames.insert(RadxNcfStr::ANTENNA_TRANSITION);
+  _rayMetaNames.insert(RadxNcfStr::GEOREFS_APPLIED);
+  _rayMetaNames.insert(RadxNcfStr::N_SAMPLES);
+  _rayMetaNames.insert(RadxNcfStr::R_CALIB_INDEX);
+  _rayMetaNames.insert(RadxNcfStr::RADAR_MEASURED_TRANSMIT_POWER_H);
+  _rayMetaNames.insert(RadxNcfStr::RADAR_MEASURED_TRANSMIT_POWER_V);
+  _rayMetaNames.insert(RadxNcfStr::SCAN_RATE);
+  _rayMetaNames.insert(RadxNcfStr::RADAR_ESTIMATED_NOISE_DBM_HC);
+  _rayMetaNames.insert(RadxNcfStr::RADAR_ESTIMATED_NOISE_DBM_VC);
+  _rayMetaNames.insert(RadxNcfStr::RADAR_ESTIMATED_NOISE_DBM_HX);
+  _rayMetaNames.insert(RadxNcfStr::RADAR_ESTIMATED_NOISE_DBM_VX);
+  _rayMetaNames.insert(RadxNcfStr::RAY_START_RANGE);
+  _rayMetaNames.insert(RadxNcfStr::RAY_GATE_SPACING);
+  _rayMetaNames.insert(RadxNcfStr::RAY_N_GATES);
+  _rayMetaNames.insert(RadxNcfStr::RAY_START_INDEX);
 
 }

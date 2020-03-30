@@ -2536,16 +2536,9 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
                          offset, scale);
     
     // if metadata only, don't read in fields
-    
+
     if (metaOnly) {
-      bool fieldAlreadyAdded = false;
-      for (size_t ii = 0; ii < _readVol->getNFields(); ii++) {
-        if (_readVol->getField(ii)->getName() == name) {
-          fieldAlreadyAdded = true;
-          break;
-        }
-      }
-      if (!fieldAlreadyAdded) {
+      if (!_readVol->fieldExists(name)) {
         RadxField *field = new RadxField(name, units);
         field->setLongName(longName);
         field->setStandardName(standardName);
@@ -2678,10 +2671,10 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
       continue;
     }
 
-    // check that this is a qualifier rather than a ray variable
+    // check that this is a qualifier rather than a metadata variable
     
     string fieldName = var->name();
-    if (isRayVarName(fieldName)) {
+    if (isRayMetaName(fieldName)) {
       // standard ray variable
       continue;
     }
@@ -2715,14 +2708,7 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
     // if metadata only, don't read in fields
     
     if (metaOnly) {
-      bool fieldAlreadyAdded = false;
-      for (size_t ii = 0; ii < _readVol->getNFields(); ii++) {
-        if (_readVol->getField(ii)->getName() == name) {
-          fieldAlreadyAdded = true;
-          break;
-        }
-      }
-      if (!fieldAlreadyAdded) {
+      if (!_readVol->fieldExists(name)) {
         RadxField *field = new RadxField(name, units);
         field->setLongName(longName);
         field->setStandardName(standardName);
@@ -3714,7 +3700,7 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                      float foldLimitUpper)
   
 {
-
+ 
   // get data from array
 
   size_t nData = _nPoints;
@@ -3792,7 +3778,7 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                           data + startIndex,
                                           true, false);
     }
-
+    
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);

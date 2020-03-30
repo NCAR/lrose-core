@@ -1664,7 +1664,7 @@ int UfRadxFile::_loadWriteRecordFromRay(const RadxVol &vol, int rayNumber)
   int sweepNum = fl32Ray.getSweepNumber();
   const RadxSweep *sweep = vol.getSweepByNumber(sweepNum);
   
-  int numFields = fl32Ray.getNFields();
+  int numFields = fl32Ray.getFields().size();
   int numGates = fl32Ray.getNGates();
   
   double elevation = fl32Ray.getElevationDeg();
@@ -1935,8 +1935,9 @@ int UfRadxFile::_loadWriteRecordFromRay(const RadxVol &vol, int rayNumber)
     
     UfData::field_info_t info;
     memset(&info, 0, sizeof(info));
-    
-    const RadxField &field = *ray.getFields()[ifield];
+
+    vector<RadxField *> flds = ray.getFields();
+    const RadxField &field = *flds[ifield];
     string shortName = field.getName();
     string ufName = UfData::label(shortName.c_str(), 2);
     for (size_t ii = 0; ii < _nameTable.size(); ii++) {
@@ -1965,7 +1966,8 @@ int UfRadxFile::_loadWriteRecordFromRay(const RadxVol &vol, int rayNumber)
     
     UfData::field_header_t fhdr;
     fhdr.data_pos = fieldDataPos[ifield];
-    RadxField *field = fl32Ray.getFields()[ifield];
+    vector<RadxField *> flds = fl32Ray.getFields();
+    RadxField *field = flds[ifield];
     field->computeMinAndMax();
     
     // set the scale factor to 100 except for fields which need

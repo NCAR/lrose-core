@@ -143,8 +143,9 @@ int OutputFmq::writeParams(const RadxRay *ray)
   vector<DsFieldParams*> &fp = msg.getFieldParams();
 
   _nFields = 0;
-  for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-    const RadxField *field = ray->getField(ifield);
+  vector<RadxField *> flds = ray->getFields();
+  for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+    const RadxField *field = flds[ifield];
     DsFieldParams* fparams =
       new DsFieldParams(field->getName().c_str(), field->getUnits().c_str(),
                         1.0, 0.0, sizeof(fl32));
@@ -326,8 +327,9 @@ int OutputFmq::writeRay(const RadxRay *ray)
   // There are multiple fields for each gate
 
   vector<const Radx::fl32 *> fldPtrs;
-  for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-    const RadxField *field = ray->getField(ifield);
+  vector<RadxField *> flds = ray->getFields();
+  for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+    const RadxField *field = flds[ifield];
     const Radx::fl32 *fptr = field->getDataFl32();
     fldPtrs.push_back(fptr);
   } // ifield
@@ -335,7 +337,7 @@ int OutputFmq::writeRay(const RadxRay *ray)
   // set data array
   
   size_t nGates = ray->getNGates();
-  size_t nFields = ray->getNFields();
+  size_t nFields = ray->getFields().size();
   size_t nData = nGates * nFields;
   fl32 *data = new fl32[nData];
   memset(data, 0, nData * sizeof(fl32));

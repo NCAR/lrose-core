@@ -1109,7 +1109,7 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int useless, int c) {
       table->setRowCount(nPoints);
       vector<float> dataVector = *data;
       float *dp = &dataVector[0];
-      for (int r=0; r<nPoints; r++) {
+      for (int r=0; r<(int)nPoints; r++) {
       // 752019 for (std::size_t r=0; r<data.size(); r++) {
         //    sprintf(formattedData, format, data[0]);
         sprintf(formattedData, "%g", *dp); // data->at(r));

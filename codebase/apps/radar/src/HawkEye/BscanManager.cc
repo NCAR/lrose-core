@@ -2040,8 +2040,10 @@ void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray
     _fields[ii]->setDialogText("----");
   }
   
-  for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-    const RadxField *field = ray->getField(ifield);
+  
+  vector<RadxField *> rflds = ray->getFields();
+  for (size_t ifield = 0; ifield < rflds.size(); ifield++) {
+    const RadxField *field = rflds[ifield];
     const string fieldName = field->getName();
     if (fieldName.size() == 0) {
       continue;

@@ -1821,7 +1821,7 @@ void NexradRadxFile::_checkIsLongRange(RadxRay *ray)
     waveformType = (int) _vcpPpis[ray->getSweepNumber()].waveform_type;
   }
 
-  if (waveformType == 1 && ray->getNFields() == 1) {
+  if (waveformType == 1 && ray->getFields().size() == 1) {
     ray->setIsLongRange(true);
     _startRangeKmLong = ray->getStartRangeKm();
     _gateSpacingKmLong = ray->getGateSpacingKm();
@@ -1836,7 +1836,7 @@ void NexradRadxFile::_checkIsLongRange(RadxRay *ray)
                        ray->getNGates() * ray->getGateSpacingKm());
     cerr << "-->> ray vcp, nfields, el, az, sweepNum, maxRangeKm, waveformType: "
          << _vcpNum << ", "
-         << ray->getNFields() << ", "
+         << ray->getFields().size() << ", "
          << ray->getElevationDeg() << ", "
          << ray->getAzimuthDeg() << ", "
          << ray->getSweepNumber() << " "
@@ -3389,11 +3389,11 @@ int NexradRadxFile::_loadField(const RadxRay &ray,
   // in the list exactly
 
   const RadxField *field = NULL;
+  vector<RadxField *> flds = ray.getFields();
   for (size_t jj = 0; jj < toks.size(); jj++) {
-    for (size_t ii = 0; ii < ray.getNFields(); ii++) {
-      const RadxField *fld = ray.getFields()[ii];
-      if (fld->getName() == toks[jj]) {
-        field = fld;
+    for (size_t ii = 0; ii < flds.size(); ii++) {
+      if (flds[ii]->getName() == toks[jj]) {
+        field = flds[ii];
         break;
       }
     } // ii
@@ -3405,8 +3405,8 @@ int NexradRadxFile::_loadField(const RadxRay &ray,
     if (field != NULL) {
       break;
     }
-    for (size_t ii = 0; ii < ray.getNFields(); ii++) {
-      const RadxField *fld = ray.getFields()[ii];
+    for (size_t ii = 0; ii < flds.size(); ii++) {
+      const RadxField *fld = flds[ii];
       string partName(fld->getName().substr(0, toks[jj].size()));
       if (partName == toks[jj]) {
         field = fld;
@@ -3506,9 +3506,10 @@ void NexradRadxFile::_computeMaxAbsVel(const RadxVol &vol)
 
     const RadxRay &ray = *vol.getRays()[iray];
 
-    for (size_t ifield = 0; ifield < ray.getNFields(); ifield++) {
-
-      const RadxField &field = *ray.getFields()[ifield];
+    vector<RadxField *> flds = ray.getFields();
+    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+      
+      const RadxField &field = *flds[ifield];
 
       if (field.getName()[0] != 'V') {
         // not a velocity field

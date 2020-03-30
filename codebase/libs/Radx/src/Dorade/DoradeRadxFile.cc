@@ -4111,7 +4111,8 @@ int DoradeRadxFile::_writeParameter(int fieldNum)
     _addErrInt("  max field number: ", (int) _writeVol->getFields().size() - 1);
     return -1;
   }
-  const RadxField &field = *_writeVol->getFields()[fieldNum];
+  vector<RadxField *> flds = _writeVol->getFields();
+  const RadxField &field = *flds[fieldNum];
 
   // fill
 
@@ -4626,8 +4627,9 @@ int DoradeRadxFile::_writeRayData(int rayNum, int fieldNum)
   }
   
   // make a copy of the field
-  
-  RadxField field(*xray.getFields()[fieldNum]);
+
+  vector<RadxField *> flds = xray.getFields();
+  RadxField field(*flds[fieldNum]);
   
   // convert to int16,
 

@@ -989,18 +989,18 @@ public:
   inline double getMaxRangeKm() const
     { return getGateRangeKm(_nGates) + (getGateSpacingKm() / 2.0); }
   
-  /// Get number of fields on this ray.
-
-  inline size_t getNFields() const { return (int) _fields.size(); }
-  inline size_t getNQualifiers() const { return (int) _qualifiers.size(); }
-
   /// Get vector of field pointers for this ray.
   
-  inline const vector<RadxField *> &getFields() const { return _fields; }
-  inline vector<RadxField *> getFields() { return _fields; }
+  const vector<RadxField *>
+    getFields(Radx::FieldRetrieval_t rtype = Radx::FIELD_RETRIEVAL_DATA) const;
+  vector<RadxField *>
+    getFields(Radx::FieldRetrieval_t rtype = Radx::FIELD_RETRIEVAL_DATA);
 
-  inline const vector<RadxField *> &getQualifiers() const { return _qualifiers; }
-  inline vector<RadxField *> getQualifiers() { return _qualifiers; }
+  /// Get pointer to a particular field, based on the name.
+  /// Returns NULL on failure.
+  
+  const RadxField *getField(const string &name) const;
+  RadxField *getField(const string &name);
 
   /// get map of field names
 
@@ -1010,105 +1010,6 @@ public:
   typedef FieldNameMap::const_iterator FieldNameMapConstIt;
 
   inline const FieldNameMap &getFieldNameMap() const { return _fieldNameMap; }
-  inline const FieldNameMap &getQualifierNameMap() const { return _qualifierNameMap; }
-
-  /////////////////////////////////////////////////////////////////////////////
-  /// Get pointer to a particular field, based on the position in the
-  /// field vector.
-  /// Returns NULL on failure.
-  /// const version
-
-  inline const RadxField *getField(int index) const {
-    if (index < (int) _fields.size()) {
-      return _fields[index];
-    } else {
-      return NULL;
-    }
-  }
-
-  /// non-const version
-
-  inline RadxField *getField(int index) {
-    if (index < (int) _fields.size()) {
-      return _fields[index];
-    } else {
-      return NULL;
-    }
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  /// Get pointer to a particular field, based on the name.
-  /// Returns NULL on failure.
-  /// const version
-  
-  inline const RadxField *getField(const string &name) const {
-    FieldNameMapConstIt it = _fieldNameMap.find(name);
-    if (it != _fieldNameMap.end()) {
-      return _fields[it->second];
-    } else {
-      return NULL;
-    }
-  }
-
-  /// non-const version
-  
-  inline RadxField *getField(const string &name) {
-    FieldNameMapConstIt it = _fieldNameMap.find(name);
-    if (it != _fieldNameMap.end()) {
-      return _fields[it->second];
-    } else {
-      return NULL;
-    }
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  /// Get pointer to a particular qualifier field, based on the position in the
-  /// qualifier vector.
-  /// Returns NULL on failure.
-  /// const version
-
-  inline const RadxField *getQualifier(int index) const {
-    if (index < (int) _qualifiers.size()) {
-      return _qualifiers[index];
-    } else {
-      return NULL;
-    }
-  }
-
-  /// non-const version
-
-  inline RadxField *getQualifier(int index) {
-    if (index < (int) _qualifiers.size()) {
-      return _qualifiers[index];
-    } else {
-      return NULL;
-    }
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  /// Get pointer to a particular qualifier field, based on the name.
-  /// Returns NULL on failure.
-  /// const version
-  
-  inline const RadxField *getQualifier(const string &name) const {
-    FieldNameMapConstIt it = _qualifierNameMap.find(name);
-    if (it != _qualifierNameMap.end()) {
-      return _qualifiers[it->second];
-    } else {
-      return NULL;
-    }
-  }
-
-  /// non-const version
-  
-  inline RadxField *getQualifier(const string &name) {
-    FieldNameMapConstIt it = _qualifierNameMap.find(name);
-    if (it != _qualifierNameMap.end()) {
-      return _qualifiers[it->second];
-    } else {
-      return NULL;
-    }
-  }
 
   /////////////////////////////////////////////////////////////////////////////
   /// Check if the data at all gates in all fields is missing?
@@ -1141,10 +1042,6 @@ public:
   /// print the field name map
   
   void printFieldNameMap(ostream &out) const;
-  
-  /// print the qualifier name map
-  
-  void printQualifierNameMap(ostream &out) const;
   
   //@}
 
@@ -1271,13 +1168,10 @@ private:
   // data fields
   
   vector<RadxField *> _fields;
-  vector<RadxField *> _qualifiers;
-  vector<RadxField *> _allFields;
 
   // map of data field names
 
   FieldNameMap _fieldNameMap;
-  FieldNameMap _qualifierNameMap;
 
   // keeping track of clients using this object
 

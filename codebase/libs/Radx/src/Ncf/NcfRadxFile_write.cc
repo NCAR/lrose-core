@@ -384,8 +384,7 @@ int NcfRadxFile::writeToPath(const RadxVol &vol,
 
   // get the set of unique field name
 
-  _uniqueNormalFieldNames = _writeVol->getUniqueFieldNameList();
-  _uniqueQualifierFieldNames = _writeVol->getUniqueRayQualifierNameList();
+  _uniqueFieldNames = _writeVol->getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
 
   // check if georeferences and/or corrections are active
   // and count georef fields
@@ -473,11 +472,8 @@ int NcfRadxFile::writeToPath(const RadxVol &vol,
       return _closeOnError("_writeGeorefVariables");
     }
   }
-  if (_writeNormalFields()) {
-    return _closeOnError("_writeNormalFields");
-  }
-  if (_writeQualifierFields()) {
-    return _closeOnError("_writeQualifierFields");
+  if (_writeFields()) {
+    return _closeOnError("_writeFields");
   }
 
   // close output file
@@ -3347,21 +3343,21 @@ int NcfRadxFile::_writeFrequencyVariable()
 }
 
 ////////////////////////////////////////////////
-// write normal fields
+// write fields
 
-int NcfRadxFile::_writeNormalFields()
+int NcfRadxFile::_writeFields()
 {
 
   if (_verbose) {
-    cerr << "NcfRadxFile::_writeNormalFields()" << endl;
+    cerr << "NcfRadxFile::_writeFields()" << endl;
   }
 
   // loop through the list of unique fields names in this volume
 
   int iret = 0;
-  for (size_t ifield = 0; ifield < _uniqueNormalFieldNames.size(); ifield++) {
+  for (size_t ifield = 0; ifield < _uniqueFieldNames.size(); ifield++) {
       
-    const string &name = _uniqueNormalFieldNames[ifield];
+    const string &name = _uniqueFieldNames[ifield];
 
     // make copy of the field
     
@@ -3383,7 +3379,7 @@ int NcfRadxFile::_writeNormalFields()
         iret = -1;
       }
     } else {
-      _addErrStr("ERROR - NcfRadxFile::_writeNormalFields");
+      _addErrStr("ERROR - NcfRadxFile::_writeFields");
       _addErrStr("  Cannot create field: ", name);
       delete copy;
       return -1;
@@ -3397,66 +3393,7 @@ int NcfRadxFile::_writeNormalFields()
   } // ifield
 
   if (iret) {
-    _addErrStr("ERROR - NcfRadxFile::_writeNormalFields");
-    return -1;
-  } else {
-    return 0;
-  }
-
-}
-
-////////////////////////////////////////////////
-// write qualifier fields
-
-int NcfRadxFile::_writeQualifierFields()
-{
-
-  if (_verbose) {
-    cerr << "NcfRadxFile::_writeQualifierFields()" << endl;
-  }
-
-  // loop through the list of unique qualifiers names in this volume
-
-  int iret = 0;
-  for (size_t iqualifier = 0; iqualifier < _uniqueQualifierFieldNames.size(); iqualifier++) {
-      
-    const string &name = _uniqueQualifierFieldNames[iqualifier];
-
-    // make copy of the field
-    
-    RadxField *copy = _writeVol->copyRayQualifier(name);
-    if (copy == NULL) {
-      if (_debug) {
-        cerr << "  ... cannot find field: " << name
-             << " .... skipping" << endl;
-      }
-      continue;
-    }
-    
-    // write it out
-    
-    // create variable
-    Nc3Var *var = _createFieldVar(*copy);
-    if (var != NULL) {
-      if (_writeFieldVar(var, copy)) {
-        iret = -1;
-      }
-    } else {
-      _addErrStr("ERROR - NcfRadxFile::_writeQualifierFields");
-      _addErrStr("  Cannot create field: ", name);
-      delete copy;
-      return -1;
-    }
-    // free up
-    delete copy;
-    if (_debug) {
-      cerr << "  ... writing field: " << name << endl;
-    }
-    
-  } // ifield
-
-  if (iret) {
-    _addErrStr("ERROR - NcfRadxFile::_writeQualifierFields");
+    _addErrStr("ERROR - NcfRadxFile::_writeFields");
     return -1;
   } else {
     return 0;
@@ -3656,6 +3593,8 @@ int NcfRadxFile::_writeFieldVar(Nc3Var *var, RadxField *field)
 
   if (field->getIsRayQualifier()) {
 
+    // 1D qualifier field, dim(times)
+
     switch (var->type()) {
       case nc3Double: {
         iret = !var->put((double *) data, _writeVol->getNRays());
@@ -3682,6 +3621,8 @@ int NcfRadxFile::_writeFieldVar(Nc3Var *var, RadxField *field)
 
   } else if (_nGatesVary) {
 
+    // staggered array, dim(nPoints)
+
     switch (var->type()) {
       case nc3Double: {
         iret = !var->put((double *) data, _writeVol->getNPoints());
@@ -3707,6 +3648,8 @@ int NcfRadxFile::_writeFieldVar(Nc3Var *var, RadxField *field)
     } // switch
 
   } else {
+
+    // 2D rectangular array, dim(time, range)
 
     // get the max number of gates
     

@@ -69,7 +69,7 @@ NcfRadxFile::NcfRadxFile() : RadxFile(), RadxNcfStr()
   _writeVol = NULL;
   _readVol = NULL;
 
-  _createRayVarNameSet();
+  _createRayMetaNameSet();
 
   clear();
 

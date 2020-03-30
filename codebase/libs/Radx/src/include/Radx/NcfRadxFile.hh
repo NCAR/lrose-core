@@ -403,8 +403,7 @@ private:
 
   // unique field names for writing
 
-  vector<string> _uniqueNormalFieldNames;
-  vector<string> _uniqueQualifierFieldNames;
+  vector<string> _uniqueFieldNames;
 
   // objects to be set on read
 
@@ -725,8 +724,7 @@ private:
   int _writeCalibVariables();
   int _writeFrequencyVariable();
 
-  int _writeNormalFields();
-  int _writeQualifierFields();
+  int _writeFields();
 
   Nc3Var *_createFieldVar(const RadxField &field);
   int _writeFieldVar(Nc3Var *var, RadxField *field);

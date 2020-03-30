@@ -59,16 +59,16 @@ public:
   
   virtual ~RadxNcfStr();
 
-  // is this a ray variable name?
+  // is this a ray metadata variable name?
 
-  bool isRayVarName(const string &varName) const;
+  bool isRayMetaName(const string &varName) const;
 
 protected:
 
   // create set of ray variable names
 
-  void _createRayVarNameSet();
-  set<string> _rayVarNames;
+  void _createRayMetaNameSet();
+  set<string> _rayMetaNames;
 
   // string constants
   

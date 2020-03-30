@@ -586,12 +586,13 @@ void NidsRadxFile::_removeUnwantedFields()
 
     // add fields are requested
 
+    vector<RadxField *> flds = ray->getFields();
     for (size_t jj = 0; jj < _readFieldNames.size(); jj++) {
-      string readField = _readFieldNames[jj];
-      for (size_t kk = 0; kk < ray->getNFields(); kk++) {
-        string rayField = ray->getFields()[kk]->getName();
-        if (rayField == readField) {
-          RadxField *field = new RadxField(*ray->getFields()[kk]);
+      string readFieldName = _readFieldNames[jj];
+      for (size_t kk = 0; kk < flds.size(); kk++) {
+        string rayFieldName = flds[kk]->getName();
+        if (rayFieldName == readFieldName) {
+          RadxField *field = new RadxField(*flds[kk]);
           good->addField(field);
         }
       } // kk

@@ -2694,14 +2694,7 @@ int NcxxRadxFile::_readFieldVariables(bool metaOnly)
     // if metadata only, don't read in fields
     
     if (metaOnly) {
-      bool fieldAlreadyAdded = false;
-      for (size_t ii = 0; ii < _readVol->getNFields(); ii++) {
-        if (_readVol->getField(ii)->getName() == name) {
-          fieldAlreadyAdded = true;
-          break;
-        }
-      }
-      if (!fieldAlreadyAdded) {
+      if (!_readVol->fieldExists(name)) {
         RadxField *field = new RadxField(name, units);
         field->setLongName(longName);
         field->setStandardName(standardName);

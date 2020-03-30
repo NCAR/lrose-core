@@ -125,25 +125,25 @@ NORM_SRCS = \
 MOC_SRCS = \
 	BscanManager.cc \
 	BscanWidget.cc \
+	ClickableLabel.cc \
+	ColorBar.cc \
+	ColorMapTemplates.cc \
 	DisplayManager.cc \
+	FieldColorController.cc \
 	FieldRenderer.cc \
+	FunctionEditor.cc \
+	ParameterColorView.cc \
 	PolarManager.cc \
 	PolarWidget.cc \
 	PpiWidget.cc \
 	RhiWidget.cc \
 	RhiWindow.cc \
-	TimeScaleWidget.cc \
-	ParameterColorView.cc \
-	FieldColorController.cc \
-	ColorBar.cc \
-	ColorMapTemplates.cc \
-	ClickableLabel.cc \
-	TextEdit.cc \
 	SoloFunctions.cc \
-	SpreadSheetView.cc \
 	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
-	FunctionEditor.cc 
+	SpreadSheetView.cc \
+	TextEdit.cc \
+	TimeScaleWidget.cc
 
 MOC_OUTPUT = \
 	moc_BscanManager.cpp \

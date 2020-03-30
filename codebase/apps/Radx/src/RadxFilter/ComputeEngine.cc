@@ -98,9 +98,10 @@ RadxRay *ComputeEngine::compute(RadxRay *inputRay)
 
   // loop through the fields in the ray
 
-  for (size_t ifield = 0; ifield < inputRay->getNFields(); ifield++) {
+  vector<RadxField *> flds = inputRay->getFields();
+  for (size_t ifield = 0; ifield < flds.size(); ifield++) {
     
-    const RadxField *inputField = inputRay->getField(ifield);
+    const RadxField *inputField = flds[ifield];
 
     // find specified filter parameters
 

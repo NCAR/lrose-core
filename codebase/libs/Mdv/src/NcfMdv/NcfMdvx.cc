@@ -168,7 +168,7 @@ int NcfMdvx::convertMdv2Ncf(const string &url)
     return -1;
   }
   stat_struct_t &fileStat = ncfFile.getStat();
-  off_t fileLen = fileStat.st_size;
+  size_t fileLen = fileStat.st_size;
   
   // read in buffer
   
@@ -429,8 +429,9 @@ int NcfMdvx::readAllHeadersRadx(const string &url)
   // read in first field with data
 
   RadxVol vol0;
-  if (vol.getNFields() > 0) {
-    RadxField *rfld = vol.getField(0);
+  const vector<RadxField *> &vflds = vol.getFields();
+  if (vflds.size() > 0) {
+    RadxField *rfld = vflds[0];
     string firstFieldName = rfld->getName();
     RadxFile inFile0;
     inFile0.addReadField(firstFieldName);
@@ -462,7 +463,7 @@ int NcfMdvx::readAllHeadersRadx(const string &url)
   setDataCollectionType(Mdvx::DATA_MEASURED);
   _mhdr.native_vlevel_type = Mdvx::VERT_TYPE_ELEV;
   _mhdr.vlevel_type = Mdvx::VERT_TYPE_ELEV;
-  _mhdr.n_fields = vol.getNFields();
+  _mhdr.n_fields = vol.getFields().size();
   
   _mhdr.sensor_lat = vol.getLatitudeDeg();
   _mhdr.sensor_lon = vol.getLongitudeDeg();
@@ -476,9 +477,9 @@ int NcfMdvx::readAllHeadersRadx(const string &url)
 
   // add field headers
 
-  for (size_t ii = 0; ii < vol.getNFields(); ii++) {
+  for (size_t ii = 0; ii < vflds.size(); ii++) {
 
-    RadxField *rfld = vol.getField(ii);
+    RadxField *rfld = vflds[ii];
     Mdvx::field_header_t fhdr;
     Mdvx::vlevel_header_t vhdr;
     MEM_zero(fhdr);

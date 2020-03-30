@@ -818,8 +818,9 @@ int NoxpNcRadxFile::_setRangeGeometry()
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     RadxRay *ray = _rays[iray];
     ray->copyRangeGeom(_geom);
-    for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-      RadxField *field = ray->getField(ifield);
+    vector<RadxField *> flds = ray->getFields();
+    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+      RadxField *field = flds[ifield];
       field->copyRangeGeom(_geom);
     }
   }  
@@ -1058,14 +1059,7 @@ int NoxpNcRadxFile::_readFieldVariables(bool metaOnly)
     // if metadata only, don't read in fields
 
     if (metaOnly) {
-      bool fieldAlreadyAdded = false;
-      for (size_t ii = 0; ii < _readVol->getNFields(); ii++) {
-        if (_readVol->getField(ii)->getName() == name) {
-          fieldAlreadyAdded = true;
-          break;
-        }
-      }
-      if (!fieldAlreadyAdded) {
+      if (!_readVol->fieldExists(name)) {
         RadxField *field = new RadxField(name, units);
         field->setLongName(longName);
         field->setStandardName(standardName);

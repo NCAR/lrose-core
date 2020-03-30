@@ -219,13 +219,6 @@ RadxVol &RadxVol::_copy(const RadxVol &rhs)
     _fields.push_back(field);
   }
 
-  // rayQualifier fields
-
-  for (size_t ii = 0; ii < rhs._rayQualifiers.size(); ii++) {
-    RadxField *rayQualifier = new RadxField(*rhs._rayQualifiers[ii]);
-    _rayQualifiers.push_back(rayQualifier);
-  }
-
   return *this;
   
 }
@@ -530,10 +523,8 @@ void RadxVol::addCalib(RadxRcalib *calib)
 void RadxVol::addField(RadxField *field)
   
 {
-  if (field->getIsRayQualifier()) {
-    _rayQualifiers.push_back(field);
-  } else {
-    _fields.push_back(field);
+  _fields.push_back(field);
+  if (!field->getIsRayQualifier()) {
     copyRangeGeom(*field);
   }
 }
@@ -802,12 +793,30 @@ void RadxVol::getFinestRayGeom(double &startRangeKm,
 }
 
 //////////////////////////////////////////////////////////////////
+/// check if a field exists in the volume, given the name
+
+bool RadxVol::fieldExists(const string &name) const
+
+{
+
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    if (_fields[ii]->getName() == name) {
+      return true;
+    }
+  }
+
+  return false;
+  
+}
+
+
+//////////////////////////////////////////////////////////////////
 /// Get the list of unique field names, compiled by
 /// searching through all rays.
 ///
 /// The order of the field names found is preserved
 
-vector<string> RadxVol::getUniqueFieldNameList() const
+vector<string> RadxVol::getUniqueFieldNameList(Radx::FieldRetrieval_t rtype) const
 
 {
   
@@ -818,8 +827,9 @@ vector<string> RadxVol::getUniqueFieldNameList() const
   set<string> nameSet;
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     const RadxRay &ray = *_rays[iray];
-    for (size_t ifield = 0; ifield < ray.getNFields(); ifield++) {
-      string name = ray.getField(ifield)->getName();
+    vector<RadxField *> flds = ray.getFields(rtype);
+    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+      string name = flds[ifield]->getName();
       pair<set<string>::const_iterator, bool> ret = nameSet.insert(name);
       if (ret.second == true) {
         // field name not previously in set, so add to vector
@@ -832,34 +842,74 @@ vector<string> RadxVol::getUniqueFieldNameList() const
 
 }
 
-//////////////////////////////////////////////////////////////////
-/// Get the list of unique rayQualifier names, compiled by
-/// searching through all rays.
-///
-/// The order of the field names found is preserved
-
-vector<string> RadxVol::getUniqueRayQualifierNameList() const
-
-{
+/////////////////////////////////////////////////////////////////////////////
+/// Get vector of field pointers for this ray.
   
-  vector<string> rayQualifierNames;
+const vector<RadxField *>
+  RadxVol::getFields(Radx::FieldRetrieval_t rtype) const
+{
 
-  // find the set of rayQualifier names
-
-  set<string> nameSet;
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-    const RadxRay &ray = *_rays[iray];
-    for (size_t iqual = 0; iqual < ray.getNQualifiers(); iqual++) {
-      string name = ray.getQualifier(iqual)->getName();
-      pair<set<string>::const_iterator, bool> ret = nameSet.insert(name);
-      if (ret.second == true) {
-        // rayQualifier name not previously in set, so add to vector
-        rayQualifierNames.push_back(name);
+  switch (rtype) {
+    case Radx::FIELD_RETRIEVAL_ALL:
+      {
+        return _fields;
       }
-    }
-  }
+    case Radx::FIELD_RETRIEVAL_QUALIFIER:
+      {
+        vector<RadxField *> qflds;
+        for (size_t ii = 0; ii < _fields.size(); ii++) {
+          if (_fields[ii]->getIsRayQualifier()) {
+            qflds.push_back(_fields[ii]);
+          }
+        }
+        return qflds;
+      }
+    case Radx::FIELD_RETRIEVAL_DATA:
+    default:
+      {
+        vector<RadxField *> dflds;
+        for (size_t ii = 0; ii < _fields.size(); ii++) {
+          if (!_fields[ii]->getIsRayQualifier()) {
+            dflds.push_back(_fields[ii]);
+          }
+        }
+        return dflds;
+      }
+  } // switch
 
-  return rayQualifierNames;
+}
+
+vector<RadxField *>
+  RadxVol::getFields(Radx::FieldRetrieval_t rtype)
+{ 
+
+  switch (rtype) {
+    case Radx::FIELD_RETRIEVAL_ALL:
+      {
+        return _fields;
+      }
+    case Radx::FIELD_RETRIEVAL_QUALIFIER:
+      {
+        vector<RadxField *> qflds;
+        for (size_t ii = 0; ii < _fields.size(); ii++) {
+          if (_fields[ii]->getIsRayQualifier()) {
+            qflds.push_back(_fields[ii]);
+          }
+        }
+        return qflds;
+      }
+    case Radx::FIELD_RETRIEVAL_DATA:
+    default:
+      {
+        vector<RadxField *> dflds;
+        for (size_t ii = 0; ii < _fields.size(); ii++) {
+          if (!_fields[ii]->getIsRayQualifier()) {
+            dflds.push_back(_fields[ii]);
+          }
+        }
+        return dflds;
+      }
+  } // switch
 
 }
 
@@ -958,33 +1008,10 @@ const RadxField *RadxVol::getFieldFromRay(const string &name) const
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     const RadxRay &ray = *_rays[iray];
-    const vector<RadxField *> &fields = ray.getFields();
+    vector<RadxField *> fields = ray.getFields();
     for (size_t ifield = 0; ifield < fields.size(); ifield++) {
       if (fields[ifield]->getName() == name) {
         return fields[ifield];
-      }
-    }
-  }
-
-  return NULL;
-
-}
-
-//////////////////////////////////////////////////////////////////
-/// Get a rayQualifier from a ray, given the name.
-/// Find the first available rayQualifier on a suitable ray.
-/// Returns rayQualifier pointer on success, NULL on failure.
-
-const RadxField *RadxVol::getQualifierFromRay(const string &name) const
-
-{
-  
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-    const RadxRay &ray = *_rays[iray];
-    const vector<RadxField *> &rayQualifiers = ray.getQualifiers();
-    for (size_t iqual = 0; iqual < rayQualifiers.size(); iqual++) {
-      if (rayQualifiers[iqual]->getName() == name) {
-        return rayQualifiers[iqual];
       }
     }
   }
@@ -1044,7 +1071,7 @@ void RadxVol::loadFieldsFromRays(bool nFieldsConstantPerRay /* = false */)
   
   // get the set of unique fields names in this volume
 
-  vector<string> fieldNames = getUniqueFieldNameList();
+  vector<string> fieldNames = getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
 
   // make copies of the fields, and add them to the volume
 
@@ -1082,46 +1109,6 @@ void RadxVol::loadFieldsFromRays(bool nFieldsConstantPerRay /* = false */)
     }      
   } // ifield
 
-  // get the set of unique rayQualifiers names in this volume
-
-  vector<string> rayQualifierNames = getUniqueRayQualifierNameList();
-
-  // make copies of the rayQualifiers, and add them to the volume
-
-  for (size_t ii = 0; ii < rayQualifierNames.size(); ii++) {
-    RadxField *rayQualifier = copyRayQualifier(rayQualifierNames[ii]);
-    if (rayQualifier != NULL) {
-      addField(rayQualifier);
-    }
-  } // ii
-      
-  // Free up rayQualifier data in rays, point them to the contiguous rayQualifiers.
-  // This process also adjusts the scale and bias in the ray rayQualifiers to
-  // the same as in the global rayQualifiers.
-
-  for (size_t iqual = 0; iqual < _rayQualifiers.size(); iqual++) {
-    RadxField &rayQualifier = *_rayQualifiers[iqual];
-    for (size_t iray = 0; iray < _rays.size(); iray++) {
-      RadxRay &ray = *_rays[iray];
-      RadxField *rayQual = ray.getQualifier(rayQualifier.getName());
-      if (rayQual != NULL) {
-        size_t nPts;
-        const void *data = rayQualifier.getData(iray, nPts);
-        rayQual->setDataRemote(rayQualifier, data, nPts);
-      } else {
-        if (nFieldsConstantPerRay) {
-          // add any missing rayQualifiers
-          rayQual = new RadxField(rayQualifier.getName(), rayQualifier.getUnits());
-          rayQual->copyMetaData(rayQualifier);
-          size_t nPts;
-          const void *data = rayQualifier.getData(iray, nPts);
-          rayQual->setDataRemote(rayQualifier, data, nPts);
-          ray.addField(rayQual);
-        }
-      }
-    }      
-  } // iqual
-
   // load the sweep info from rays
   
   loadSweepInfoFromRays();
@@ -1142,7 +1129,7 @@ void RadxVol::loadRaysFromFields()
   
 {
 
-  if (_fields.size() == 0 && _rayQualifiers.size() == 0) {
+  if (_fields.size() == 0) {
     return;
   }
 
@@ -1176,14 +1163,9 @@ void RadxVol::setRayFieldPointers()
     ray->clearFields();
     ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
 
-    vector<RadxField *> allFields(_fields);
-    for (size_t iqual = 0; iqual < _rayQualifiers.size(); iqual++) {
-      allFields.push_back(_rayQualifiers[iqual]);
-    }
-    
-    for (size_t ifield = 0; ifield < allFields.size(); ifield++) {
+    for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
 
-      const RadxField *field = allFields[ifield];
+      const RadxField *field = _fields[ifield];
       const string &name = field->getName();
       const string &standardName = field->getStandardName();
       const string &longName = field->getLongName();
@@ -1359,27 +1341,30 @@ RadxField *RadxVol::copyField(const string &fieldName) const
 
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxRay &ray = *_rays[iray];
-      size_t nGates = ray.getNGates();
       RadxField *rfld = ray.getField(fieldName);
+      size_t nData = ray.getNGates();
+      if (copy->getIsRayQualifier()) {
+        nData = 1;
+      }
       if (rfld == NULL) {
-        copy->addDataMissing(nGates);
+        copy->addDataMissing(nData);
       } else {
         RadxField rcopy(*rfld);
         if (dataType == Radx::FL64) {
           rcopy.setMissingFl64(copy->getMissingFl64());
-          copy->addDataFl64(nGates, rcopy.getDataFl64());
+          copy->addDataFl64(nData, rcopy.getDataFl64());
         } else if (dataType == Radx::FL32) {
           rcopy.setMissingFl32(copy->getMissingFl32());
-          copy->addDataFl32(nGates, rcopy.getDataFl32());
+          copy->addDataFl32(nData, rcopy.getDataFl32());
         } else if (dataType == Radx::SI32) {
           rcopy.setMissingSi32(copy->getMissingSi32());
-          copy->addDataSi32(nGates, rcopy.getDataSi32());
+          copy->addDataSi32(nData, rcopy.getDataSi32());
         } else if (dataType == Radx::SI16) {
           rcopy.setMissingSi16(copy->getMissingSi16());
-          copy->addDataSi16(nGates, rcopy.getDataSi16());
+          copy->addDataSi16(nData, rcopy.getDataSi16());
         } else if (dataType == Radx::SI08) {
           rcopy.setMissingSi08(copy->getMissingSi08());
-          copy->addDataSi08(nGates, rcopy.getDataSi08());
+          copy->addDataSi08(nData, rcopy.getDataSi08());
         }
       }
     } // iray
@@ -1398,14 +1383,17 @@ RadxField *RadxVol::copyField(const string &fieldName) const
     
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxRay &ray = *_rays[iray];
-      size_t nGates = ray.getNGates();
+      size_t nData = ray.getNGates();
+      if (copy->getIsRayQualifier()) {
+        nData = 1;
+      }
       RadxField *rfld = ray.getField(fieldName);
       if (rfld == NULL) {
-        copy->addDataMissing(nGates);
+        copy->addDataMissing(nData);
       } else {
         RadxField rcopy(*rfld);
         rcopy.convertToFl64();
-        copy->addDataFl64(nGates, rcopy.getDataFl64());
+        copy->addDataFl64(nData, rcopy.getDataFl64());
       }
     } // iray
     
@@ -1421,177 +1409,17 @@ RadxField *RadxVol::copyField(const string &fieldName) const
     
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxRay &ray = *_rays[iray];
-      size_t nGates = ray.getNGates();
+      size_t nData = ray.getNGates();
+      if (copy->getIsRayQualifier()) {
+        nData = 1;
+      }
       RadxField *rfld = ray.getField(fieldName);
       if (rfld == NULL) {
-        copy->addDataMissing(nGates);
+        copy->addDataMissing(nData);
       } else {
         RadxField rcopy(*rfld);
         rcopy.convertToFl32();
-        copy->addDataFl32(nGates, rcopy.getDataFl32());
-      }
-    } // iray
-    
-    // convert to final type
-    copy->convertToType(dataType);
-
-  } // if (dataType == Radx::FL64)
-
-  return copy;
-
-}
-
-//////////////////////////////////////////////////////////////////
-/// Make a copy of the rayQualifier with the specified name.
-/// This forms a contiguous rayQualifier from the ray data.
-/// Returns a pointer to the rayQualifier on success, NULL on failure.
-
-RadxField *RadxVol::copyRayQualifier(const string &rayQualifierName) const
-  
-{
-
-  // check we have data
-  
-  if (_rays.size() < 1) {
-    return NULL;
-  }
-  
-  // create the rayQualifier
-  // use the first available rayQualifier in any ray as a template
-  
-  RadxField *copy = NULL;
-  
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-    const RadxRay &ray = *_rays[iray];
-    const RadxField *rayQual = ray.getQualifier(rayQualifierName);
-    if (rayQual != NULL) {
-      // create new rayQualifier using name, units and type
-      copy = new RadxField(rayQual->getName(), rayQual->getUnits());
-      copy->copyMetaData(*rayQual);
-      break;
-    }
-    if (copy != NULL) {
-      break;
-    }
-  } // iray
-  
-  if (copy == NULL) {
-    // no suitable rayQualifier
-    return NULL;
-  }
-
-  // check if the rayQualifiers on the rays are uniform -
-  // i.e. all have the same type, scale and offset
-  
-  bool rayQualifiersAreUniform = true;
-  Radx::DataType_t dataType = copy->getDataType();
-  double scale = copy->getScale();
-  double offset = copy->getOffset();
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-    const RadxRay &ray = *_rays[iray];
-    const RadxField *rayQual = ray.getQualifier(rayQualifierName);
-    if (rayQual == NULL) {
-      continue;
-    }
-    if (rayQual->getDataType() != dataType) {
-      // different rayQualifier data types
-      rayQualifiersAreUniform = false;
-      break;
-    }
-    if (dataType == Radx::FL32 || dataType == Radx::FL64) {
-      // for float types don't worry about scale and bias
-      continue;
-    }
-    if (fabs(rayQual->getScale() - scale) > 1.0e-5) {
-      // different scale
-      rayQualifiersAreUniform = false;
-      break;
-    }
-    if (fabs(rayQual->getOffset() - offset) > 1.0e-5) {
-      // different offset
-      rayQualifiersAreUniform = false;
-      break;
-    }
-  } // iray
-
-  // load up data from the rays
-
-  size_t nPts = 1;
-
-  if (rayQualifiersAreUniform) {
-
-    // type, scale and offset constant
-
-    for (size_t iray = 0; iray < _rays.size(); iray++) {
-      RadxRay &ray = *_rays[iray];
-      RadxField *rfld = ray.getQualifier(rayQualifierName);
-      if (rfld == NULL) {
-        copy->addDataMissing(nPts);
-      } else {
-        RadxField rcopy(*rfld);
-        if (dataType == Radx::FL64) {
-          rcopy.setMissingFl64(copy->getMissingFl64());
-          copy->addDataFl64(nPts, rcopy.getDataFl64());
-        } else if (dataType == Radx::FL32) {
-          rcopy.setMissingFl32(copy->getMissingFl32());
-          copy->addDataFl32(nPts, rcopy.getDataFl32());
-        } else if (dataType == Radx::SI32) {
-          rcopy.setMissingSi32(copy->getMissingSi32());
-          copy->addDataSi32(nPts, rcopy.getDataSi32());
-        } else if (dataType == Radx::SI16) {
-          rcopy.setMissingSi16(copy->getMissingSi16());
-          copy->addDataSi16(nPts, rcopy.getDataSi16());
-        } else if (dataType == Radx::SI08) {
-          rcopy.setMissingSi08(copy->getMissingSi08());
-          copy->addDataSi08(nPts, rcopy.getDataSi08());
-        }
-      }
-    } // iray
-
-    return copy;
-
-  }
-
-  // rayQualifiers are not uniform and must be converted to a common type
-
-  if (dataType == Radx::FL64) {
-    
-    // 64-bit floats
-    
-    copy->setTypeFl64(Radx::missingFl64);
-    
-    for (size_t iray = 0; iray < _rays.size(); iray++) {
-      RadxRay &ray = *_rays[iray];
-      RadxField *rfld = ray.getQualifier(rayQualifierName);
-      if (rfld == NULL) {
-        copy->addDataMissing(nPts);
-      } else {
-        RadxField rcopy(*rfld);
-        rcopy.convertToFl64();
-        copy->addDataFl64(nPts, rcopy.getDataFl64());
-      }
-    } // iray
-    
-    // convert to final type
-    copy->convertToType(dataType);
-
-  } else {
-    
-    // all others
-    // convert to fl32 for now
-    
-    copy->setTypeFl32(Radx::missingFl32);
-    
-    for (size_t iray = 0; iray < _rays.size(); iray++) {
-      RadxRay &ray = *_rays[iray];
-      size_t nPts = ray.getNGates();
-      RadxField *rfld = ray.getQualifier(rayQualifierName);
-      if (rfld == NULL) {
-        copy->addDataMissing(nPts);
-      } else {
-        RadxField rcopy(*rfld);
-        rcopy.convertToFl32();
-        copy->addDataFl32(nPts, rcopy.getDataFl32());
+        copy->addDataFl32(nData, rcopy.getDataFl32());
       }
     } // iray
     
@@ -1858,19 +1686,11 @@ void RadxVol::clearRcalibs()
 void RadxVol::clearFields()
   
 {
-  // fields
 
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     delete _fields[ii];
   }
   _fields.clear();
-
-  // rayQualifiers
-
-  for (size_t ii = 0; ii < _rayQualifiers.size(); ii++) {
-    delete _rayQualifiers[ii];
-  }
-  _rayQualifiers.clear();
 
 }
 
@@ -1933,22 +1753,13 @@ void RadxVol::print(ostream &out) const
   out << "  n sweeps: " << _sweeps.size() << endl;
   out << "  n rays: " << _rays.size() << endl;
   out << "  n calibs: " << _rcalibs.size() << endl;
-  vector<string> fieldNames = getUniqueFieldNameList();
+  vector<string> fieldNames = getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
   if (_fields.size() > 0) {
     out << "  n fields: " << _fields.size() << endl;
   } else {
     out << "  n fields: " << fieldNames.size() << endl;
     for (size_t ii = 0; ii < fieldNames.size(); ii++) {
       out << "    field[" << ii << "]: " << fieldNames[ii] << endl;
-    }
-  }
-  vector<string> rayQualifierNames = getUniqueRayQualifierNameList();
-  if (_rayQualifiers.size() > 0) {
-    out << "  n rayQualifiers: " << _rayQualifiers.size() << endl;
-  } else {
-    out << "  n rayQualifiers: " << rayQualifierNames.size() << endl;
-    for (size_t ii = 0; ii < rayQualifierNames.size(); ii++) {
-      out << "    rayQualifier[" << ii << "]: " << rayQualifierNames[ii] << endl;
     }
   }
   RadxRangeGeom::print(out);
@@ -1976,24 +1787,12 @@ void RadxVol::print(ostream &out) const
     for (size_t ii = 0; ii < _fields.size(); ii++) {
       _fields[ii]->print(out);
     }
-    for (size_t ii = 0; ii < _rayQualifiers.size(); ii++) {
-      _rayQualifiers[ii]->print(out);
-    }
   } else {
     for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
       string fieldName = fieldNames[ifield];
-      const RadxField *fld = getQualifierFromRay(fieldName);
+      const RadxField *fld = getFieldFromRay(fieldName);
       if (fld != NULL) {
         out << "===== NOTE: Field is from first ray =====" << endl;
-        fld->print(out);
-        out << "=========================================" << endl;
-      }
-    }
-    for (size_t iqual = 0; iqual < rayQualifierNames.size(); iqual++) {
-      string rayQualifierName = rayQualifierNames[iqual];
-      const RadxField *fld = getQualifierFromRay(rayQualifierName);
-      if (fld != NULL) {
-        out << "===== NOTE: RayQualifier is from first ray =====" << endl;
         fld->print(out);
         out << "=========================================" << endl;
       }
@@ -2062,7 +1861,7 @@ void RadxVol::printWithFieldData(ostream &out) const
 
   bool raysHaveFields = false;
   for (size_t ii = 0; ii < _rays.size(); ii++) {
-    if (_rays[ii]->getFields().size() > 0) {
+    if (_rays[ii]->getFields(Radx::FIELD_RETRIEVAL_ALL).size() > 0) {
       raysHaveFields = true;
       break;
     }
@@ -5376,7 +5175,7 @@ RadxRay *RadxVol::computeFieldStats
   
   // get the field name list, and loop through them
   
-  vector<string> fieldNames = getUniqueFieldNameList();
+  vector<string> fieldNames = getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
   for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
 
     string fieldName = fieldNames[ifield];
@@ -5410,101 +5209,6 @@ RadxRay *RadxVol::computeFieldStats
     }
 
   } // ifield
-
-  // return resulting ray
-
-  return result;
-  
-}
-
-///////////////////////////////////////////////////////////////////
-/// compute field stats for all rayQualifiers for all
-/// rays currently in the volume
-///
-/// Pass in:
-///   * a global stats method type
-///   * optionally a field-name specific list of stats methods
-///   * max fraction missing for a valid result
-///
-/// The requested stats on computed for each rayQualifier,
-/// and on a point-by-point basis.
-///
-/// If the geometry is not constant, remap to the predominant geom.
-///
-/// maxFractionMissing indicates the maximum fraction of the input data rayQualifier
-/// that can be missing for valid statistics. Should be between 0 and 1.
-/// If the min is not met, the result is set to missing.
-/// 
-/// Returns NULL if no rays are present in the volume.
-/// Otherwise, returns ray containing results.
-
-RadxRay *RadxVol::computeRayQualifierStats
-  (RadxField::StatsMethod_t globalMethod,
-   vector<RadxField::NamedStatsMethod> namedMethods,  
-   double maxFractionMissing /* = 0.25 */)
-
-{
-  
-  // check we have some data
-
-  if (_rays.size() == 0) {
-    return NULL;
-  }
-
-  // remap rays to predominant geometry
-
-  remapToPredomGeom();
-
-  // find middle ray, copy the metadata
-
-  size_t iMid = _rays.size() / 2;
-  RadxRay *result = new RadxRay;
-  result->copyMetaData(*_rays[iMid]);
-
-  // compute and set the number of samples
-
-  int nSamplesSum = 0;
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-    nSamplesSum += _rays[iray]->getNSamples();
-  }
-  result->setNSamples(nSamplesSum);
-  
-  // get the rayQualifier name list, and loop through them
-  
-  vector<string> rayQualifierNames = getUniqueRayQualifierNameList();
-  for (size_t iqual = 0; iqual < rayQualifierNames.size(); iqual++) {
-    
-    string rayQualifierName = rayQualifierNames[iqual];
-    
-    // assemble vector of this rayQualifier on the ray
-
-    RadxField *rayQualifier = _rays[0]->getQualifier(rayQualifierName);
-
-    vector<const RadxField *> rayQuals;
-    for (size_t iray = 0; iray < _rays.size(); iray++) {
-      RadxField *rayQual = _rays[iray]->getQualifier(rayQualifierName);
-      if (rayQual != NULL) {
-        rayQuals.push_back(rayQual);
-      }
-    }
-
-    // compute the stats for this rayQualifier
-    // add rayQualifier to ray
-
-    RadxField::StatsMethod_t method = globalMethod;
-    for (size_t jj = 0; jj < namedMethods.size(); jj++) {
-      if (namedMethods[jj].first == rayQualifierName) {
-        method = namedMethods[jj].second;
-        break;
-      }
-    }
-    RadxField *statsRayQualifier = 
-      rayQualifier->computeStats(method, rayQuals, maxFractionMissing);
-    if (statsRayQualifier != NULL) {
-      result->addField(statsRayQualifier);
-    }
-
-  } // iqual
 
   // return resulting ray
 
@@ -5944,9 +5648,10 @@ void RadxVol::_augmentSweepFields(size_t targetIndex, size_t sourceIndex)
       // got a valid ray in source
       // loop through the fields in the source
       
-      for (size_t ifield = 0; ifield < raySource->getNFields(); ifield++) {
+      vector<RadxField *> flds = raySource->getFields();
+      for (size_t ifield = 0; ifield < flds.size(); ifield++) {
         
-        const RadxField *fldSource = raySource->getField(ifield);
+        const RadxField *fldSource = flds[ifield];
         
         // make a copy of the field
         
@@ -6037,8 +5742,9 @@ void RadxVol::_makeFieldsUniform(size_t startIndex, size_t endIndex)
   vector<const RadxField *> tplate;
   for (size_t iray = startIndex; iray <= endIndex; iray++) {
     const RadxRay &ray = *_rays[iray];
-    for (size_t ifield = 0; ifield < ray.getNFields(); ifield++) {
-      const RadxField *fld = ray.getField(ifield);
+    vector<RadxField *> flds = ray.getFields();
+    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+      RadxField *fld = flds[ifield];
       string name = fld->getName();
       pair<set<string>::const_iterator, bool> ret = nameSet.insert(name);
       if (ret.second == true) {
@@ -6106,24 +5812,6 @@ int RadxVol::removeField(const string &name)
       return 0;
     }
     
-    // check on rayQualifiers
-    
-    temp.clear();
-    for (size_t ii = 0; ii < _rayQualifiers.size(); ii++) {
-      RadxField *rayQualifier = _rayQualifiers[ii];
-      if (rayQualifier->getName() == name) {
-        delete rayQualifier;
-      } else {
-        temp.push_back(rayQualifier);
-      }
-    } // ii
-
-    if (_rayQualifiers.size() < temp.size()) {
-      // rayQualifier found and removed
-      _rayQualifiers = temp;
-      return 0;
-    }
-
     // error - field not found
 
     iret = -1;

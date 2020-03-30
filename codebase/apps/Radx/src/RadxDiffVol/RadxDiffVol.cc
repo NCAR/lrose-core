@@ -843,18 +843,18 @@ int RadxDiffVol::_diffFields(int iray,
   int iret = 0;
   
   if (_params.check_number_of_fields &&
-      ray1->getNFields() != ray2->getNFields()) {
+      ray1->getFields().size() != ray2->getFields().size()) {
     
     *_out << "Difference in NFields for ray index: " << iray << endl;
-    *_out << "  ray1 NFields: " << ray1->getNFields() << endl;
-    *_out << "  ray2 NFields: " << ray2->getNFields() << endl;
+    *_out << "  ray1 NFields: " << ray1->getFields().size() << endl;
+    *_out << "  ray2 NFields: " << ray2->getFields().size() << endl;
     iret = -1;
     
   } else if (_params.check_fields) {
     
-    size_t nFieldsCheck = ray1->getNFields();
-    if (nFieldsCheck > ray2->getNFields()) {
-      nFieldsCheck = ray2->getNFields();
+    size_t nFieldsCheck = ray1->getFields().size();
+    if (nFieldsCheck > ray2->getFields().size()) {
+      nFieldsCheck = ray2->getFields().size();
     }
     for (size_t ifield = 0; ifield < nFieldsCheck; ifield++) {
       

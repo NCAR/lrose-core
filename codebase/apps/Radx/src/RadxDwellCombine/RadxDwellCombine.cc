@@ -1639,15 +1639,15 @@ int RadxDwellCombine::_writeParams(const RadxRay *ray)
   DsRadarMsg msg;
   DsRadarParams &rparams = msg.getRadarParams();
   rparams = _rparams;
-  rparams.numFields = ray->getNFields();
+  rparams.numFields = ray->getFields().size();
   
   // field parameters - all fields are fl32
   
   vector<DsFieldParams* > &fieldParams = msg.getFieldParams();
-  
-  for (int ifield = 0; ifield < (int) ray->getNFields(); ifield++) {
+  vector<RadxField *> flds = ray->getFields();
+  for (size_t ifield = 0; ifield < flds.size(); ifield++) {
     
-    const RadxField &fld = *ray->getFields()[ifield];
+    const RadxField &fld = *flds[ifield];
     double dsScale = 1.0, dsBias = 0.0;
     int dsMissing = (int) floor(fld.getMissingFl32() + 0.5);
     
@@ -1687,7 +1687,7 @@ int RadxDwellCombine::_writeRay(const RadxRay *ray)
 
   int nGates = ray->getNGates();
   const vector<RadxField *> &fields = ray->getFields();
-  int nFields = ray->getNFields();
+  int nFields = ray->getFields().size();
   int nPoints = nGates * nFields;
   
   // meta-data

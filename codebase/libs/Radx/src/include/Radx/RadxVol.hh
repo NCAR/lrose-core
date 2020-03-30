@@ -589,12 +589,6 @@ public:
 
   RadxField *copyField(const string &fieldName) const;
 
-  /// Make a copy of the RayQualifier with the specified name.
-  /// This forms a contiguous RayQualifier from the ray data.
-  /// Returns a pointer to the RayQualifier on success, NULL on failure.
-  
-  RadxField *copyRayQualifier(const string &RayQualifierName) const;
-  
   /// Rename a field
   /// returns 0 on success, -1 if field does not exist in any ray
 
@@ -1201,32 +1195,6 @@ public:
      vector<RadxField::NamedStatsMethod> namedMethods,  
      double maxFractionMissing = 0.25);
 
-  /// compute field stats for all RayQualifiers for all
-  /// rays currently in the volume
-  ///
-  /// Pass in:
-  ///   * a global stats method type
-  ///   * optionally a field-name specific list of stats methods
-  ///   * max fraction missing for a valid result
-  ///
-  /// The requested stats on computed for each RayQualifier,
-  /// and on a point-by-point basis.
-  ///
-  /// If the geometry is not constant, remap to the predominant geom.
-  ///
-  /// maxFractionMissing indicates the maximum fraction of the input
-  /// data RayQualifier that can be missing for valid statistics.
-  /// Should be between 0 and 1.
-  /// If the min is not met, the result is set to missing.
-  /// 
-  /// Returns NULL if no rays are present in the volume.
-  /// Otherwise, returns ray containing results.
-  
-  RadxRay *computeRayQualifierStats
-    (RadxField::StatsMethod_t globalMethod,
-     vector<RadxField::NamedStatsMethod> namedMethods,  
-     double maxFractionMissing = 0.25);
-
   //@}
 
   //////////////////////////////////////////////////////////////////
@@ -1373,21 +1341,13 @@ public:
   
   size_t getNRaysNonTransition() const;
 
-  /// Get number of fields in volume.
-
-  inline size_t getNFields() const { return _fields.size(); }
-
-  /// Get number of RayQualifier fields in volume.
-
-  inline size_t getNRayQualifiers() const { return _rayQualifiers.size(); }
-  
   /// Get the list of unique field names, compiled by
   /// searching through all rays.
   ///
   /// The order of the field names found is preserved
 
-  vector<string> getUniqueFieldNameList() const;
-  vector<string> getUniqueRayQualifierNameList() const;
+  vector<string> 
+    getUniqueFieldNameList(Radx::FieldRetrieval_t rtype = Radx::FIELD_RETRIEVAL_DATA) const;
 
   /// convert all fields to same data type
   /// widening as required
@@ -1397,18 +1357,6 @@ public:
   /// set all fields to same data type
 
   void setFieldsToUniformType(Radx::DataType_t dataType);
-
-  /// Get field, based on index.
-  ///
-  /// Returns NULL on failure.
-
-  inline RadxField *getField(int index) const {
-    if (index < (int) _fields.size()) {
-      return _fields[index];
-    } else {
-      return NULL;
-    }
-  }
 
   /// Get field on the volume, based on name.
   /// Returns NULL on failure.
@@ -1422,53 +1370,22 @@ public:
     return NULL;
   }
 
-  /// Get RayQualifier, based on index.
-  ///
-  /// Returns NULL on failure.
-
-  inline RadxField *getRayQualifier(int index) const {
-    if (index < (int) _rayQualifiers.size()) {
-      return _rayQualifiers[index];
-    } else {
-      return NULL;
-    }
-  }
-
-  /// Get RayQualifier on the volume, based on name.
-  /// Returns NULL on failure.
-
-  RadxField *getRayQualifier(const string &name) const {
-    for (size_t ii = 0; ii < _rayQualifiers.size(); ii++) {
-      if (_rayQualifiers[ii]->getName() == name) {
-        return _rayQualifiers[ii];
-      }
-    }
-    return NULL;
-  }
-
   /// Get a field from a ray, given the name.
   /// Find the first available field on a suitable ray.
   /// Returns field pointer on success, NULL on failure.
   
   const RadxField *getFieldFromRay(const string &name) const;
 
-  /// Get a RayQualifier from a ray, given the name.
-  /// Find the first available RayQualifier on a suitable ray.
-  /// Returns RayQualifier pointer on success, NULL on failure.
+  /// Get vector of field pointers for this ray.
   
-  const RadxField *getQualifierFromRay(const string &name) const;
+  const vector<RadxField *>
+    getFields(Radx::FieldRetrieval_t rtype = Radx::FIELD_RETRIEVAL_DATA) const;
+  vector<RadxField *>
+    getFields(Radx::FieldRetrieval_t rtype = Radx::FIELD_RETRIEVAL_DATA);
 
-  /// Get vector of fields.
+  /// check if a field exists in the volume, given the name
 
-  inline const vector<RadxField *> &getFields() const { return _fields; }
-  inline vector<RadxField *> &getFields() { return _fields; }
-
-  /// Get vector of RayQualifiers.
-
-  inline const vector<RadxField *> &getRayQualifiers() const {
-    return _rayQualifiers;
-  }
-  inline vector<RadxField *> &getRayQualifiers() { return _rayQualifiers; }
+  bool fieldExists(const string &name) const;
 
   /// Get sweep by sweep number (not the index).
   /// Returns NULL on failure.
@@ -1955,7 +1872,6 @@ private:
   // fields
   
   vector<RadxField *> _fields;
-  vector<RadxField *> _rayQualifiers;
 
   // transitions array used in removeTransitionRays()
   // not required in serialization

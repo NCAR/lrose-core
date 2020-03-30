@@ -489,7 +489,7 @@ int Radx2Dsr::_writeParams(const RadxVol &vol,
   
   rparams.radarId = 0;
   rparams.radarType = _getDsRadarType(vol.getPlatformType());
-  rparams.numFields = ray.getNFields();
+  rparams.numFields = ray.getFields().size();
   rparams.numGates = ray.getNGates();
   rparams.samplesPerBeam = ray.getNSamples();
   rparams.scanType = 0;
@@ -728,7 +728,7 @@ int Radx2Dsr::_writeBeam(const RadxVol &vol,
 
   int nGates = ray.getNGates();
   const vector<RadxField *> &fields = vol.getFields();
-  int nFields = vol.getNFields();
+  int nFields = vol.getFields().size();
   int nPoints = nGates * nFields;
 
   bool needWriteParams = false;

@@ -594,7 +594,7 @@ int OutputMdv::_getDsrParams(const RadxVol &vol,
 
   rparams.radarId = 0;
   rparams.radarType = _getDsRadarType(vol.getPlatformType());
-  rparams.numFields = ray0->getNFields();
+  rparams.numFields = ray0->getFields().size();
   rparams.numGates = ray0->getNGates();
   rparams.samplesPerBeam = ray0->getNSamples();
   rparams.scanType = 0;

@@ -950,8 +950,9 @@ void MattNcFile::_convertPressureToHpa()
 
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     RadxRay *ray = _rays[iray];
-    for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-      RadxField *field = ray->getField(ifield);
+    vector<RadxField *> flds = ray->getFields();
+    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+      RadxField *field = flds[ifield];
       if (field->getUnits() == "Pa") {
         field->convertToFl64(); 
         Radx::fl64 *data = field->getDataFl64();

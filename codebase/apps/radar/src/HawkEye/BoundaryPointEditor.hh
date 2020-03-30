@@ -108,8 +108,8 @@ public:
 		if (pts.size() < 4)
 			return(false);
 
-		for (int i=1; i < pts.size()-1; i++)
-			for (int j=1; j < pts.size()-1; j++)
+		for (int i=1; i < (int) pts.size()-1; i++)
+                  for (int j=1; j < (int) pts.size()-1; j++)
 			{
 				bool isCommonPt = (i == j || pts[i-1].equals(pts[j]));
 
@@ -129,9 +129,9 @@ public:
 		if (pts.size() < 4)
 			return;
 
-		for (int i=1; i < pts.size()-1; i++)
+		for (int i=1; i < (int) pts.size()-1; i++)
 		{
-			for (int j=1; j < pts.size()-1; j++)
+                  for (int j=1; j < (int) pts.size()-1; j++)
 			{
 				bool isCommonPt = (i == j || pts[i-1].equals(pts[j]));
 
@@ -152,7 +152,7 @@ public:
 		p2.y = 1000;
 		int cntOfCrosses = 0;
 
-		for (int i=0; i < polyPts.size()-1; i++)
+		for (int i=0; i <(int)  polyPts.size()-1; i++)
 			if (PolygonUtils::doSegmentsIntersect(p, p2, polyPts[i], polyPts[i+1], false))
 				cntOfCrosses++;
 

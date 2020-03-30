@@ -806,8 +806,9 @@ void RadxMergeFields::_mergeRay(RadxRay &primaryRay,
 
   // rename fields on primary ray
 
-  for (size_t ifld = 0; ifld < primaryRay.getNFields(); ifld++) {
-    RadxField *pField = primaryRay.getField(ifld);
+  vector<RadxField *> pflds = primaryRay.getFields();
+  for (size_t ifld = 0; ifld < pflds.size(); ifld++) {
+    RadxField *pField = pflds[ifld];
     for (size_t ii = 0; ii < _primaryGroup.fields.size(); ii++) {
       string inputName = _primaryGroup.fields[ii].input_field_name;
       if (inputName == pField->getName()) {

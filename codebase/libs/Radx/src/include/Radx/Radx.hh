@@ -384,6 +384,18 @@ public:
 
   } EventCause_t;
 
+  /// retrieving fields by type
+
+  typedef enum {
+    
+    FIELD_RETRIEVAL_NOT_SET = 0,
+    FIELD_RETRIEVAL_DATA = 1, /**< normal data fields */
+    FIELD_RETRIEVAL_QUALIFIER = 2, /**< ray qualifier fields */
+    FIELD_RETRIEVAL_ALL = 3, /**< data plus qualifier fields */
+    FIELD_RETRIEVAL_LAST /**< not used */
+
+  } FieldRetrieval_t;
+
   /// \name Missing values for enums, by type:
   //@{
 

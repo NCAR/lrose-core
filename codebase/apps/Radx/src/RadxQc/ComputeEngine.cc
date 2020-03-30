@@ -1288,7 +1288,7 @@ int ComputeEngine::_loadFieldArray(RadxRay *inputRay,
     cerr << "  El, az: "
          << inputRay->getElevationDeg() << ", "
          << inputRay->getAzimuthDeg() << endl;
-    cerr << "  N fields in ray: " << inputRay->getNFields() << endl;
+    cerr << "  N fields in ray: " << inputRay->getFields().size() << endl;
     pthread_mutex_unlock(&_debugPrintMutex);
     return -1;
   }

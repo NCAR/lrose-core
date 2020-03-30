@@ -209,13 +209,6 @@ RadxRay &RadxRay::_copy(const RadxRay &rhs)
     _fields.push_back(field);
   }
 
-  // qualifiers
-
-  for (size_t ii = 0; ii < rhs._qualifiers.size(); ii++) {
-    RadxField *qualifier = new RadxField(*rhs._qualifiers[ii]);
-    _qualifiers.push_back(qualifier);
-  }
-
   // load up map of field names
 
   loadFieldNameMap();
@@ -355,18 +348,6 @@ void RadxRay::loadFieldNameMap()
     }
   }
 
-  // qualifiers
-
-  _qualifierNameMap.clear();
-  for (size_t ii = 0; ii < _qualifiers.size(); ii++) {
-    string name = _qualifiers[ii]->getName();
-    string mapName = _addToFieldNameMap(name, ii, _qualifierNameMap);
-    if (mapName != name) {
-      // rename the qualifier
-      _qualifiers[ii]->setName(mapName);
-    }
-  }
-
 }
 
 /////////////////////////////////////////////////////////
@@ -430,21 +411,11 @@ void RadxRay::clearFields()
   
 {
 
-  // fields
-
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     delete _fields[ii];
   }
   _fields.clear();
   _fieldNameMap.clear();
-
-  // qualifiers
-
-  for (size_t ii = 0; ii < _qualifiers.size(); ii++) {
-    delete _qualifiers[ii];
-  }
-  _qualifiers.clear();
-  _qualifierNameMap.clear();
 
 }
 
@@ -463,19 +434,6 @@ int RadxRay::removeField(const string &name)
     if (field->getName() == name) {
       delete field;
       _fields.erase(ii);
-      loadFieldNameMap();
-      return 0;
-    }
-  }
-
-  // qualifiers
-
-  for (vector<RadxField*>::iterator ii = _qualifiers.begin();
-       ii != _qualifiers.end(); ii++) {
-    RadxField *qualifier = *ii;
-    if (qualifier->getName() == name) {
-      delete qualifier;
-      _qualifiers.erase(ii);
       loadFieldNameMap();
       return 0;
     }
@@ -507,18 +465,6 @@ int RadxRay::replaceField(RadxField *newField)
     if (fld->getName() == newName) {
       delete fld;
       _fields[ii] = newField;
-      loadFieldNameMap();
-      return 0;
-    }
-  }
-
-  // qualifiers
-
-  for (size_t ii = 0; ii < _qualifiers.size(); ii++) {
-    RadxField *fld = _qualifiers[ii];
-    if (fld->getName() == newName) {
-      delete fld;
-      _qualifiers[ii] = newField;
       loadFieldNameMap();
       return 0;
     }
@@ -764,11 +710,9 @@ RadxField* RadxRay::addField(const string &name,
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeFl64(missingValue);
-  string mapName;
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -776,17 +720,13 @@ RadxField* RadxRay::addField(const string &name,
     } else {
       _nGates = nGates;
     }
-    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   }
+  string mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   fld->setDataFl64(nGates, data, isLocal);
   if (mapName != name) {
     fld->setName(mapName);
   }
-  if (isQualifier) {
-    _qualifiers.push_back(fld);
-  } else {
-    _fields.push_back(fld);
-  }
+  _fields.push_back(fld);
   return fld;
 }
 
@@ -805,11 +745,9 @@ RadxField* RadxRay::addField(const string &name,
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeFl32(missingValue);
-  string mapName;
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -817,17 +755,13 @@ RadxField* RadxRay::addField(const string &name,
     } else {
       _nGates = nGates;
     }
-    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   }
+  string mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   fld->setDataFl32(nGates, data, isLocal);
   if (mapName != name) {
     fld->setName(mapName);
   }
-  if (isQualifier) {
-    _qualifiers.push_back(fld);
-  } else {
-    _fields.push_back(fld);
-  }
+  _fields.push_back(fld);
   return fld;
 }
 
@@ -848,11 +782,9 @@ RadxField* RadxRay::addField(const string &name,
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeSi32(missingValue, scale, offset);
-  string mapName;
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -860,17 +792,13 @@ RadxField* RadxRay::addField(const string &name,
     } else {
       _nGates = nGates;
     }
-    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   }
+  string mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   fld->setDataSi32(nGates, data, isLocal);
   if (mapName != name) {
     fld->setName(mapName);
   }
-  if (isQualifier) {
-    _qualifiers.push_back(fld);
-  } else {
-    _fields.push_back(fld);
-  }
+  _fields.push_back(fld);
   return fld;
 }
 
@@ -891,11 +819,9 @@ RadxField* RadxRay::addField(const string &name,
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeSi16(missingValue, scale, offset);
-  string mapName;
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -903,17 +829,13 @@ RadxField* RadxRay::addField(const string &name,
     } else {
       _nGates = nGates;
     }
-    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   }
+  string mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   fld->setDataSi16(nGates, data, isLocal);
   if (mapName != name) {
     fld->setName(mapName);
   }
-  if (isQualifier) {
-    _qualifiers.push_back(fld);
-  } else {
-    _fields.push_back(fld);
-  }
+  _fields.push_back(fld);
   return fld;
 }
 
@@ -934,11 +856,9 @@ RadxField* RadxRay::addField(const string &name,
   RadxField *fld = new RadxField(name, units);
   fld->copyRangeGeom(*this);
   fld->setTypeSi08(missingValue, scale, offset);
-  string mapName;
   if (isQualifier) {
     assert(nGates == 1);
     fld->setIsRayQualifier(true);
-    mapName = _addToFieldNameMap(name, _qualifiers.size(), _qualifierNameMap);
   } else {
     if (_fields.size() > 0) {
       _nGates = _fields[0]->getNPoints();
@@ -946,17 +866,13 @@ RadxField* RadxRay::addField(const string &name,
     } else {
       _nGates = nGates;
     }
-    mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   }
+  string mapName = _addToFieldNameMap(name, _fields.size(), _fieldNameMap);
   fld->setDataSi08(nGates, data, isLocal);
   if (mapName != name) {
     fld->setName(mapName);
   }
-  if (isQualifier) {
-    _qualifiers.push_back(fld);
-  } else {
-    _fields.push_back(fld);
-  }
+  _fields.push_back(fld);
   return fld;
 }
 
@@ -975,7 +891,7 @@ void RadxRay::addField(RadxField *field)
 
     // qualifier
 
-    _qualifiers.push_back(field);
+    _fields.push_back(field);
     
   } else {
 
@@ -1014,9 +930,6 @@ void RadxRay::setDataLocal()
 {
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->setDataLocal();
-  }
-  for (size_t ii = 0; ii < _qualifiers.size(); ii++) {
-    _qualifiers[ii]->setDataLocal();
   }
 }
 
@@ -1626,9 +1539,6 @@ void RadxRay::print(ostream &out) const
     out << "  endOfVolumeFlag: "
         << string(_endOfVolumeFlag?"Y":"N") << endl;
   }
-  // if (_utilityFlag) {
-  //   out << "  utilityFlag: Y"<< endl;
-  // }
   if (_isLongRange) {
     out << "  isLongRange: Y" << endl;
   }
@@ -1698,12 +1608,6 @@ void RadxRay::printWithFieldMeta(ostream &out) const
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->print(out);
   }
-  if (_qualifiers.size() > 0) {
-    out << "=========== RadxRay Qualifiers ================" << endl;
-    for (size_t ii = 0; ii < _qualifiers.size(); ii++) {
-      _qualifiers[ii]->print(out);
-    }
-  }
   out << "===========================================" << endl;
 
 }
@@ -1720,12 +1624,6 @@ void RadxRay::printWithFieldData(ostream &out) const
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->printWithData(out);
   }
-  if (_qualifiers.size() > 0) {
-    out << "=========== RadxRay Qualifiers ================" << endl;
-    for (size_t ii = 0; ii < _qualifiers.size(); ii++) {
-      _qualifiers[ii]->printWithData(out);
-    }
-  }
   out << "===========================================" << endl;
 
 }
@@ -1740,22 +1638,6 @@ void RadxRay::printFieldNameMap(ostream &out) const
   out << "======== RadxRay FieldNameMap ===========" << endl;
   for (FieldNameMapConstIt ii = _fieldNameMap.begin();
        ii != _fieldNameMap.end(); ii++) {
-    out << "  name, index: " << ii->first << ", " << ii->second << endl;
-  }
-  out << "=========================================" << endl;
-
-}
-
-/////////////////////////////////////////////////////////
-// print the qualifier name map
-
-void RadxRay::printQualifierNameMap(ostream &out) const
-  
-{
-  
-  out << "======== RadxRay QualifierNameMap ===========" << endl;
-  for (FieldNameMapConstIt ii = _qualifierNameMap.begin();
-       ii != _qualifierNameMap.end(); ii++) {
     out << "  name, index: " << ii->first << ", " << ii->second << endl;
   }
   out << "=========================================" << endl;
@@ -1975,6 +1857,102 @@ void RadxRay::incrementGeorefNotMissingCount(RadxGeoref &count)
 {
   if (_georef != NULL) {
     _georef->incrementIfNotMissing(count);
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/// Get vector of field pointers for this ray.
+  
+const vector<RadxField *>
+  RadxRay::getFields(Radx::FieldRetrieval_t rtype) const
+{
+
+  switch (rtype) {
+    case Radx::FIELD_RETRIEVAL_ALL:
+      {
+        return _fields;
+      }
+    case Radx::FIELD_RETRIEVAL_QUALIFIER:
+      {
+        vector<RadxField *> qflds;
+        for (size_t ii = 0; ii < _fields.size(); ii++) {
+          if (_fields[ii]->getIsRayQualifier()) {
+            qflds.push_back(_fields[ii]);
+          }
+        }
+        return qflds;
+      }
+    case Radx::FIELD_RETRIEVAL_DATA:
+    default:
+      {
+        vector<RadxField *> dflds;
+        for (size_t ii = 0; ii < _fields.size(); ii++) {
+          if (!_fields[ii]->getIsRayQualifier()) {
+            dflds.push_back(_fields[ii]);
+          }
+        }
+        return dflds;
+      }
+  } // switch
+
+}
+
+vector<RadxField *>
+  RadxRay::getFields(Radx::FieldRetrieval_t rtype)
+{ 
+
+  switch (rtype) {
+    case Radx::FIELD_RETRIEVAL_ALL:
+      {
+        return _fields;
+      }
+    case Radx::FIELD_RETRIEVAL_QUALIFIER:
+      {
+        vector<RadxField *> qflds;
+        for (size_t ii = 0; ii < _fields.size(); ii++) {
+          if (_fields[ii]->getIsRayQualifier()) {
+            qflds.push_back(_fields[ii]);
+          }
+        }
+        return qflds;
+      }
+    case Radx::FIELD_RETRIEVAL_DATA:
+    default:
+      {
+        vector<RadxField *> dflds;
+        for (size_t ii = 0; ii < _fields.size(); ii++) {
+          if (!_fields[ii]->getIsRayQualifier()) {
+            dflds.push_back(_fields[ii]);
+          }
+        }
+        return dflds;
+      }
+  } // switch
+
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/// Get pointer to a particular field, based on the name.
+/// Returns NULL on failure.
+/// const version
+
+const RadxField *RadxRay::getField(const string &name) const {
+  FieldNameMapConstIt it = _fieldNameMap.find(name);
+  if (it != _fieldNameMap.end()) {
+    return _fields[it->second];
+  } else {
+    return NULL;
+  }
+}
+
+/// non-const version
+
+RadxField *RadxRay::getField(const string &name) {
+  FieldNameMapConstIt it = _fieldNameMap.find(name);
+  if (it != _fieldNameMap.end()) {
+    return _fields[it->second];
+  } else {
+    return NULL;
   }
 }
 

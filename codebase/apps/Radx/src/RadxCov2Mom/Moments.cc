@@ -1596,7 +1596,7 @@ const RadxField *Moments::_getField(const RadxRay *covRay,
       cerr << "  El, az: "
            << covRay->getElevationDeg() << ", "
            << covRay->getAzimuthDeg() << endl;
-      cerr << "  N fields in ray: " << covRay->getNFields() << endl;
+      cerr << "  N fields in ray: " << covRay->getFields().size() << endl;
       pthread_mutex_unlock(&_debugPrintMutex);
     }
     return NULL;

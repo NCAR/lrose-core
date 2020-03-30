@@ -609,7 +609,7 @@ int ForayNcRadxFile::_addDimensions()
 
   // add number of fields dimension
 
-  if (_file.addDim(_fieldsDim, "fields", _writeVol->getNFields())) {
+  if (_file.addDim(_fieldsDim, "fields", _writeVol->getFields().size())) {
     return -1;
   }
 
@@ -1080,13 +1080,14 @@ int ForayNcRadxFile::_addDataFieldVariables()
   
   _dataFieldVars.clear();
 
-  for (size_t ifield = 0; ifield < _writeVol->getNFields(); ifield++) {
+  vector<RadxField *> flds = _writeVol->getFields();
+  for (size_t ifield = 0; ifield < flds.size(); ifield++) {
     
-    RadxField &field = *_writeVol->getFields()[ifield];
+    RadxField &field = *flds[ifield];
     field.convertToSi16();
     
     Nc3Var *var = _file.getNc3File()->add_var(field.getName().c_str(),
-                                            nc3Short, _TimeDim, _maxCellsDim);
+                                              nc3Short, _TimeDim, _maxCellsDim);
     if (var == NULL) {
       _addErrStr("ERROR - ForayNcRadxFile::_addDataFieldVariables");
       _addErrStr("  Cannot add data field var, name: ", field.getName());
@@ -1399,11 +1400,11 @@ int ForayNcRadxFile::_writeFieldNamesVariable()
     cerr << "ForayNcRadxFile::_writeFieldNamesVariable()" << endl;
   }
   
-  size_t nFields = _writeVol->getNFields();
-  ShortString_t *strings = new ShortString_t[nFields];
+  vector<RadxField *> flds = _writeVol->getFields();
+  ShortString_t *strings = new ShortString_t[flds.size()];
   
-  for (size_t ii = 0; ii < nFields; ii++) {
-    const RadxField &field = *_writeVol->getFields()[ii];
+  for (size_t ii = 0; ii < flds.size(); ii++) {
+    const RadxField &field = *flds[ii];
     memset(strings[ii], 0, sizeof(ShortString_t));
     strncpy(strings[ii], field.getName().c_str(),
             sizeof(ShortString_t) - 1);
@@ -1809,8 +1810,9 @@ int ForayNcRadxFile::_writeDataFieldVariables()
   }
 
   int iret = 0;
-  for (size_t ifield = 0; ifield < _writeVol->getNFields(); ifield++) {
-    RadxField &field = *_writeVol->getFields()[ifield];
+  vector<RadxField *> flds = _writeVol->getFields();
+  for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+    RadxField &field = *flds[ifield];
     Nc3Var *var = _dataFieldVars[ifield];
     iret |= !var->put((short *) field.getData(),
                       _writeVol->getNRays(), _writeVol->getMaxNGates());

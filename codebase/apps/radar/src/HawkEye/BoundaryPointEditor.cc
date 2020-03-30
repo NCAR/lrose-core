@@ -96,7 +96,7 @@ void BoundaryPointEditor::checkToMovePointToOriginIfVeryClose(Point &pt)
 // adds a polygon point (relevant with the Polygon Tool)
 void BoundaryPointEditor::addPoint(float x, float y)
 {
-	currentTool == BoundaryToolType::polygon;
+	currentTool = BoundaryToolType::polygon;
 
 	if (!isAClosedPolygon())
 	{
@@ -120,7 +120,7 @@ bool BoundaryPointEditor::doesLastSegmentIntersectAnyOtherSegment(Point &lastPoi
 {
 	cout << "points.size()=" << points.size() << endl;
 
-	for (int i=0; i < points.size()-2; i++)
+	for (int i=0; i < (int) points.size()-2; i++)
 	{
 //		cout << "checking (" << points[i].x << "," << points[i].y << ") (" << points[i+1].x << "," << points[i+1].y << ") and (" << points[points.size()-1].x << "," << points[points.size()-1].y << ") (" << lastPoint.x << "," << lastPoint.y << ")" << endl;
 		if (PolygonUtils::doSegmentsIntersect(points[i], points[i+1], points[points.size()-1], lastPoint, true))
@@ -143,7 +143,7 @@ void BoundaryPointEditor::insertPoint(float x, float y)
 
 	//figure out which of the two possible segments (x,y) is closer to
 	int afterPtIndex = nearestPtIndex+1;
-	if (afterPtIndex >= points.size()-1)
+	if (afterPtIndex >= (int) points.size()-1)
 		afterPtIndex = 0;
 	float afterPtDistance = pt.distToLineSegment(nearestPt.x, nearestPt.y, points[afterPtIndex].x, points[afterPtIndex].y);
 
@@ -164,7 +164,7 @@ void BoundaryPointEditor::insertPoint(float x, float y)
 	}
 	else
 	{
-		if (beforePtIndex == points.size()-1)
+          if (beforePtIndex == (int) points.size()-1)
 			points.insert(points.begin() + points.size()-2, pt);
 		else
 			points.insert(points.begin() + beforePtIndex+1, pt);
@@ -177,7 +177,7 @@ void BoundaryPointEditor::insertPoint(float x, float y)
 void BoundaryPointEditor::delNearestPoint(float x, float y)
 {
   int nearestPtIndex = getNearestPointIndex(x, y, points);
-  if (nearestPtIndex == 0 || nearestPtIndex == points.size()-1)
+  if (nearestPtIndex == 0 || nearestPtIndex == (int) points.size()-1)
   {
   	eraseLastPoint();
     points.erase(points.begin());  //erase first point
@@ -213,7 +213,7 @@ int BoundaryPointEditor::getNearestPointIndex(float x, float y, vector<Point> &p
 	int nearestPointIndex;
 	float nearestDistance = 99999;
 
-	for (int i=0; i < pts.size(); i++)
+	for (int i=0; i < (int) pts.size(); i++)
 	{
 		float distance = pts[i].distanceTo(x, y);
 		if (distance < nearestDistance)
@@ -243,7 +243,7 @@ void BoundaryPointEditor::moveNearestPointTo(float x, float y)
 // (relevant with the Polygon Tool)
 bool BoundaryPointEditor::isOverAnyPoint(float x, float y)
 {
-	for (int i=0; i < points.size(); i++)
+  for (int i=0; i < (int) points.size(); i++)
 		if (points[i].distanceTo(x, y) < CLOSE_DISTANCE)
 			return(true);
 	return(false);
@@ -261,7 +261,7 @@ void BoundaryPointEditor::coutPoints(vector<Point> &pts)
 {
 	cout << pts.size() << " total boundary editor points: " << endl;
 
-	for (int i=0; i < pts.size(); i++)
+	for (int i=0; i < (int) pts.size(); i++)
 		cout << "(" << pts[i].x << " " << pts[i].y << ") ";
 	cout << endl;
 }
@@ -272,7 +272,7 @@ void BoundaryPointEditor::draw(WorldPlot worldPlot, QPainter &painter)
 	painter.setPen(Qt::yellow);
 	bool isFinished = isAClosedPolygon();
 
-	for (int i=1; i < points.size(); i++)
+	for (int i=1; i < (int) points.size(); i++)
 	{
 		worldPlot.drawLine(painter, points[i-1].x, points[i-1].y, points[i].x, points[i].y);
 		if (isFinished && currentTool == BoundaryToolType::polygon)
@@ -381,10 +381,10 @@ void BoundaryPointEditor::addToBrushShape(float x, float y)
 
 			int nearestIndex = getNearestPointIndex(points[firstIndexErased].x, points[firstIndexErased].y, mergePoints);
 			nearestIndex++;
-			for (int i=0; i < mergePoints.size(); i++)
+			for (int i=0; i < (int) mergePoints.size(); i++)
 			{
 				int mergePointsIndexToUse = i+nearestIndex;
-				if (mergePointsIndexToUse >= mergePoints.size())
+				if (mergePointsIndexToUse >= (int) mergePoints.size())
 					mergePointsIndexToUse -= mergePoints.size();
 				points.insert(points.begin() + firstIndexErased++, mergePoints[mergePointsIndexToUse]);
 			}
@@ -427,7 +427,7 @@ int BoundaryPointEditor::getAvgDistBetweenPoints()
 	int cntUsed = 0;
 	float totalDist = 0;
 
-	for (int i=1; i < points.size(); i++)
+	for (int i=1; i < (int) points.size(); i++)
 	{
 		float dist = points[i].distanceTo(points[i-1]);
 		if (dist < getBrushWorldRadius())
@@ -457,19 +457,19 @@ void BoundaryPointEditor::removePointsExceedingMaxGap()
 		if (points.size() < 3)  //we've removed too many points in this loop, give up
 			return;
 
-		for (int i=1; i < points.size()-1; i++)
+		for (int i=1; i < (int) points.size()-1; i++)
 		{
 			float dist = points[i].distanceTo(points[i-1]);
 
 			if (dist > maxGap)
 			{
-				if (i < points.size()-1)
+                          if (i < (int) points.size()-1)
 				{
 					float dist2 = points[i+1].distanceTo(points[i-1]);
 //cout << i << "_dist=" << dist << " and i+1_dist=" << dist2 << endl;
 					if (dist2 > dist)
 					{
-						if (i+2 < points.size())
+                                          if (i+2 < (int) points.size())
 						{
 							float dist3 = points[i+2].distanceTo(points[i-1]);
 //cout << i << "_dist2=" << dist2 << " and i+2_dist=" << dist3 << endl;
@@ -504,7 +504,7 @@ void BoundaryPointEditor::removePointsExceedingMaxGap()
 float BoundaryPointEditor::getMaxGapInPoints()
 {
 	float maxDist = -99999;
-	for (int i=1; i < points.size(); i++)
+	for (int i=1; i < (int) points.size(); i++)
 	{
 			float dist = points[i].distanceTo(points[i-1].x, points[i-1].y);
 			if (dist > maxDist)
@@ -523,10 +523,10 @@ void BoundaryPointEditor::reorderPointsSoStartingPointIsOppositeOfXY(int x, int 
 	int furthestIndex = getFurthestPtIndex(x, y);
 
 	vector<Point> tempPoints;
-	for (int i=0; i < points.size(); i++)
+	for (int i=0; i < (int) points.size(); i++)
 	{
 		int tempIndex = furthestIndex + i;
-		if (tempIndex > points.size()-1)
+		if (tempIndex > (int) points.size()-1)
 			tempIndex -= points.size();
 		tempPoints.push_back(points[tempIndex]);
 	}
@@ -552,7 +552,7 @@ int BoundaryPointEditor::erasePointsCloseToXYandReturnFirstIndexErased(int x, in
 	while (!isDone)
 	{
 		int indexToErase = -1;
-		for (int i=0; i < points.size(); i++)
+		for (int i=0; i < (int) points.size(); i++)
 		{
 			if (points[i].distanceTo(x, y) < thresholdDistance)
 			{
@@ -586,7 +586,7 @@ int BoundaryPointEditor::getFurthestPtIndex(int x, int y)
 	float maxDist = -99999;
 	float indexAtMaxDist = -1;
 
-	for (int i=0; i < points.size(); i++)
+	for (int i=0; i < (int) points.size(); i++)
 	{
 		float dist = points[i].distanceTo(x, y);
 		if (dist > maxDist)
@@ -668,7 +668,7 @@ void BoundaryPointEditor::save(string path)
 	fwrite(&brushRadius, sizeof(int), 1, file);
 
 	//now write the points
-	for (int i=0; i < points.size(); i++)
+	for (int i=0; i < (int) points.size(); i++)
 	{
 		fwrite(&points[i].x, sizeof(float), 1, file);
 		fwrite(&points[i].y, sizeof(float), 1, file);

@@ -372,7 +372,8 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
 
   // get the set of unique field name
 
-  _uniqueFieldNames = _writeVol->getUniqueFieldNameList();
+  _uniqueFieldNames =
+    _writeVol->getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
 
   // check if georeferences and/or corrections are active
   // and count georef fields
@@ -2558,7 +2559,8 @@ void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
 
   // loop through the list of unique fields names in this volume
 
-  vector<string> uniqueFieldNames = sweepVol.getUniqueFieldNameList();
+  vector<string> uniqueFieldNames =
+    sweepVol.getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
 
   for (size_t ifield = 0; ifield < uniqueFieldNames.size(); ifield++) {
       
