@@ -212,6 +212,8 @@ private:
   double _elLimit1, _elLimit2;
   double _fixedAngle;
   bool _rhiMode;
+  bool _ppiMode;
+  bool _dbsMode;
   
   class Field {
   public:
@@ -582,6 +584,10 @@ private:
   void _readSweeps();
   void _readSweep(RadxSweep *sweep);
   void _readSweepRange(NcxxGroup &group,
+                       NcxxDim &dim,
+                       vector<double> rangeKm);
+
+  void _readSweepGateIndex(NcxxGroup &group,
                        NcxxDim &dim,
                        vector<double> rangeKm);
 

@@ -3400,12 +3400,21 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
    }
 
+   // If we can read the "range" variable, then this is sweep_mode = "rhi" or "ppi"
    try {
-     _rangeDimSweep = _sweepGroup.getDim("gate_index"); // RANGE);
-     if (_rangeDimSweep.isNull())
-       cout << "cannot read range for sweep" << endl;
+     _rangeDimSweep = _sweepGroup.getDim(RANGE);
+     _dbsMode = false;
+     if (_rangeDimSweep.isNull()) {
+       cout << "cannot read range for sweep; trying gate_index" << endl;
+
+       // If we can read the "gate_index" variable, then this is sweep_mode = "dbs"
+       _rangeDimSweep = _sweepGroup.getDim("gate_index");
+       _dbsMode = true;
+       if (_rangeDimSweep.isNull())
+	 cout << "cannot read gate_index for sweep" << endl;
+     }
    } catch (NcxxException e) {
-     err.addErrStr("  ERROR - no range dimension");
+     err.addErrStr("  ERROR - no gate_index dimension");
      err.addErrStr("  exception: ", e.what());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
    }
@@ -3425,7 +3434,11 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    _sweepRangeKm.clear();
    try {
-     _readSweepRange(_sweepGroup, _rangeDimSweep, _sweepRangeKm);
+     if (_dbsMode) {
+       _readSweepGateIndex(_sweepGroup, _rangeDimSweep, _sweepRangeKm);
+     } else { // rhi or ppi mode
+       _readSweepRange(_sweepGroup, _rangeDimSweep, _sweepRangeKm);
+     }
    } catch (NcxxException e) {
      err.addErrStr("  ERROR reading range table");
      err.addErrStr("  exception: ", e.what());
@@ -3480,6 +3493,145 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
  // read the range variable for a sweep
 
  void LeoCf2RadxFile::_readSweepRange(NcxxGroup &group, NcxxDim &dim,
+                                   vector<double> rangeKm)
+ {
+
+   /*
+   //--
+   //const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
+
+   //for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
+   //     iter != vars.end(); iter++) {
+
+   //NcxxVar var = iter->second;
+   //  if (var.isNull()) {
+   //    continue;
+   //  }
+     string name = var.getName();
+     int numDims = var.getDimCount();
+     if (numDims != 2) {
+       continue;
+     }
+     // check that we have the correct dimensions
+     const NcxxDim &timeDim = var.getDim(0);
+     const NcxxDim &rangeDim = var.getDim(1);
+     if (timeDim != _timeDimSweep || rangeDim != _rangeDimSweep) {
+       continue;
+     }
+
+     //--
+     */
+
+   NcxxVar rangeVar = group.getVar(RANGE);
+   NcxxVar timeVar = group.getVar(TIME);
+   if (rangeVar.isNull() || rangeVar.numVals() < 1) {
+     NcxxErrStr err;
+     err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepRange");
+     err.addErrStr("  group: ", group.getName());
+     err.addErrStr("  Cannot find range variable");
+     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+   }
+
+   rangeKm.clear();
+
+   if (rangeVar.getDimCount() != 1) {
+     NcxxErrStr err;
+     err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepRange");
+     err.addErrStr("  group: ", group.getName());
+     err.addErrInt("  range nDims = ", rangeVar.getDimCount());
+     err.addErrStr("  should be 1");
+     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+   }
+   // get the 2 dimensions of the range
+   // check that we have the correct dimensions
+   const NcxxDim &timeDim = timeVar.getDim(0);
+   const NcxxDim &rangeDim = rangeVar.getDim(0);
+   size_t nTimes = timeDim.getSize();
+   size_t nRange = rangeDim.getSize();
+   _nRangeInSweep = nRange;
+
+   if (0) { // timeDim != _timeDimSweep || rangeDim != _rangeDimSweep) {
+     NcxxErrStr err;
+     err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepRange");
+     err.addErrStr("  group: ", group.getName());
+     err.addErrInt("  time dimension not expected ", timeDim.getSize());
+     err.addErrInt("  should be ", _timeDimSweep.getSize());
+     err.addErrInt("  range dimension not expected ", rangeDim.getSize());
+     err.addErrInt("  should be ", _rangeDimSweep.getSize());
+     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));       
+   }
+   size_t nVals = nTimes * nRange;
+
+   RadxArray<double> rangeMeters_;
+   double *rangeMeters = rangeMeters_.alloc(nVals);
+   try {
+     rangeVar.getVal(rangeMeters);
+     double *rr = rangeMeters;
+     for (size_t ii = 0; ii < nVals; ii++, rr++) {
+       rangeKm.push_back(*rr / 1000.0);
+     }
+   } catch (NcxxException& e) {
+     NcxxErrStr err;
+     err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepRange");
+     err.addErrStr("  Cannot read range data");
+     err.addErrStr("  exception: ", e.what());
+     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+   }
+
+   // set the geometry from the range vector
+
+   _remapSweep.computeRangeLookup(rangeKm);
+   _gateSpacingIsConstant = _remapSweep.getGateSpacingIsConstant();
+   _geomSweep.setRangeGeom(_remapSweep.getStartRangeKm(), _remapSweep.getGateSpacingKm());
+
+   /*
+   // get attributes and check for geometry
+
+   double startRangeKm = Radx::missingMetaDouble;
+   double gateSpacingKm = Radx::missingMetaDouble;
+
+   map<string, NcxxVarAtt> atts = rangeVar.getAtts();
+   for (map<string, NcxxVarAtt>::iterator ii = atts.begin();
+        ii != atts.end(); ii++) {
+
+     NcxxVarAtt att = ii->second;
+
+     if (att.isNull()) {
+       continue;
+     }
+
+     if (att.getName().find(METERS_TO_CENTER_OF_FIRST_GATE) != string::npos) {
+       vector<double> vals;
+       try {
+         att.getValues(vals);
+         startRangeKm = vals[0] / 1000.0;
+       } catch (NcxxException& e) {
+       }
+     }
+
+     if (att.getName().find(METERS_BETWEEN_GATES) != string::npos) {
+       vector<double> vals;
+       try {
+         att.getValues(vals);
+         gateSpacingKm = vals[0] / 1000.0;
+       } catch (NcxxException& e) {
+       }
+     }
+
+   } // ii
+
+   if (startRangeKm != Radx::missingMetaDouble &&
+       gateSpacingKm != Radx::missingMetaDouble) {
+     _geomSweep.setRangeGeom(startRangeKm, gateSpacingKm);
+   }
+   */
+ }
+
+
+ ////////////////////////////////////////
+ // read the gate index variable for a sweep
+
+ void LeoCf2RadxFile::_readSweepGateIndex(NcxxGroup &group, NcxxDim &dim,
                                    vector<double> rangeKm)
  {
 
@@ -3570,47 +3722,6 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    _gateSpacingIsConstant = _remapSweep.getGateSpacingIsConstant();
    _geomSweep.setRangeGeom(_remapSweep.getStartRangeKm(), _remapSweep.getGateSpacingKm());
 
-   /*
-   // get attributes and check for geometry
-
-   double startRangeKm = Radx::missingMetaDouble;
-   double gateSpacingKm = Radx::missingMetaDouble;
-
-   map<string, NcxxVarAtt> atts = rangeVar.getAtts();
-   for (map<string, NcxxVarAtt>::iterator ii = atts.begin();
-        ii != atts.end(); ii++) {
-
-     NcxxVarAtt att = ii->second;
-
-     if (att.isNull()) {
-       continue;
-     }
-
-     if (att.getName().find(METERS_TO_CENTER_OF_FIRST_GATE) != string::npos) {
-       vector<double> vals;
-       try {
-         att.getValues(vals);
-         startRangeKm = vals[0] / 1000.0;
-       } catch (NcxxException& e) {
-       }
-     }
-
-     if (att.getName().find(METERS_BETWEEN_GATES) != string::npos) {
-       vector<double> vals;
-       try {
-         att.getValues(vals);
-         gateSpacingKm = vals[0] / 1000.0;
-       } catch (NcxxException& e) {
-       }
-     }
-
-   } // ii
-
-   if (startRangeKm != Radx::missingMetaDouble &&
-       gateSpacingKm != Radx::missingMetaDouble) {
-     _geomSweep.setRangeGeom(startRangeKm, gateSpacingKm);
-   }
-   */
  }
  
  ///////////////////////////////////
