@@ -3560,7 +3560,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      err.addErrInt("  should be ", _rangeDimSweep.getSize());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));       
    }
-   size_t nVals = nTimes * nRange;
+   size_t nVals = nRange;
 
    RadxArray<double> rangeMeters_;
    double *rangeMeters = rangeMeters_.alloc(nVals);
