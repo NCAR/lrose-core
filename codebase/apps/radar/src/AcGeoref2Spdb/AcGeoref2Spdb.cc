@@ -1126,6 +1126,11 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
   
 {
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> AcGeoref2Spdb::_readTimeSeriesVar(), reading var: "
+         << varName << endl;
+  }
+
   // initialize
 
   _setTimeSeriesVarToMissing(array);
@@ -1289,6 +1294,11 @@ void AcGeoref2Spdb::_getHcrTempsFromStatusXml(const string &statusXml,
                                               double &tailconeTemp)
   
 {
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> getting temp from Status XML: "
+         << statusXml << endl;
+  }
 
   // get cmigits temp
 
