@@ -1126,14 +1126,19 @@ int AcGeoref2Spdb::_readTimeSeriesVar(TaArray<double> &array,
   
 {
 
+  // initialize
+
+  _setTimeSeriesVarToMissing(array);
+
+  if (varName.size() == 0) {
+    // empty string, don't read var
+    return 0;
+  }
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> AcGeoref2Spdb::_readTimeSeriesVar(), reading var: "
          << varName << endl;
   }
-
-  // initialize
-
-  _setTimeSeriesVarToMissing(array);
 
   // get the variable
   
