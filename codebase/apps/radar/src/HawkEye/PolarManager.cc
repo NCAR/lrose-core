@@ -172,7 +172,7 @@ PolarManager::PolarManager(const Params &params,
   // set up ray locators
 
   _ppiRays = new RayLoc[RayLoc::RAY_LOC_N];
-  _ppiRayLoc = _ppiRays + RayLoc::RAY_LOC_OFFSET;
+  _ppiRayLoc = _ppiRays; // + RayLoc::RAY_LOC_OFFSET;
 
   // set up windows
 
@@ -840,7 +840,7 @@ void PolarManager::_changeSweep(bool value) {
     return;
   }
 
-  for (int sweepIndex = 0; sweepIndex < (int) _sweepRButtons->size(); sweepIndex++) {
+  for (int sweepIndex = 0; sweepIndex < _sweepRButtons->size(); sweepIndex++) {
     if (_sweepRButtons->at(sweepIndex)->isChecked()) {
       if (_params.debug) {
         cerr << "sweepRButton " << sweepIndex << " is checked" << endl;
@@ -1289,6 +1289,28 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   
 {
 
+  static bool seenIt = false;
+  if (ray->getAzimuthDeg() == 0.0) {
+    if (seenIt) {
+      cout << "IGNORING SECOND RAY AT 0 DEGREES" << endl;
+      // return;
+      // print RayLoc
+      for (int rli=0; rli <= 3600; rli++) {
+        cout << "rayLoc[" << rli << "].startIndex= " << _ppiRayLoc[rli].startIndex << endl;
+        cout << "rayLoc[" << rli << "].endIndex= " << _ppiRayLoc[rli].endIndex << endl;
+        cout << "rayLoc[" << rli << "].active= " << _ppiRayLoc[rli].active << endl;
+	if (_ppiRayLoc[rli].ray == NULL) {
+	  cout << "rayLoc[" << rli << "].ray= " << "NULL" << endl;
+	} else {
+	  cout << "rayLoc[" << rli << "].ray= " << _ppiRayLoc[rli].ray->getAzimuthDeg() << endl;
+	}
+	cout << endl;
+      }
+    } else {
+      seenIt = true;
+    }
+  }
+
   // do we need to reconfigure the PPI?
 
   _nGates = ray->getNGates();
@@ -1408,6 +1430,25 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     double az = ray->getAzimuthDeg();
     _storeRayLoc(ray, az, platform.getRadarBeamWidthDegH(), _ppiRayLoc);
 
+
+    if (seenIt) {
+      cout << "AFTER STORE RAY LOC AT 0 DEGREES" << endl;
+      // return;                                                                                            
+      // print RayLoc                                                                                       
+      for (int rli=0; rli <= 3600; rli++) {
+        cout << "rayLoc[" << rli << "].startIndex= " << _ppiRayLoc[rli].startIndex << endl;
+        cout << "rayLoc[" << rli << "].endIndex= " << _ppiRayLoc[rli].endIndex << endl;
+        cout << "rayLoc[" << rli << "].active= " << _ppiRayLoc[rli].active << endl;
+	if (_ppiRayLoc[rli].ray == NULL) {
+	  cout << "rayLoc[" << rli << "].ray= " << "NULL" << endl;
+	} else {
+	  cout << "rayLoc[" << rli << "].ray= " << _ppiRayLoc[rli].ray->getAzimuthDeg() << endl;
+	}
+
+        cout <<endl;
+      }
+    } 
+
     // Save the angle information for the next iteration
 
     _prevAz = az;
@@ -1427,7 +1468,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
                                 const double beam_width, RayLoc *ray_loc)
 {
-
   // Determine the extent of this ray
 
   if (_params.ppi_override_rendering_beam_width) {
@@ -1455,24 +1495,63 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
   }
     
   // store
+  // HERE !!! fix up negative values here or in clearRayOverlap??
+  if (_startAz < 0) _startAz += 360.0;
+  if (_endAz < 0) _endAz += 360.0;
+  if (_startAz >= 360) _startAz -= 360.0;
+  if (_endAz >= 360) _endAz -= 360.0;
     
   int startIndex = (int) (_startAz * RayLoc::RAY_LOC_RES);
   int endIndex = (int) (_endAz * RayLoc::RAY_LOC_RES + 1);
 
+  startIndex = _fixIndexForCircularBoundary(startIndex);
+  endIndex = _fixIndexForCircularBoundary(endIndex);
+
   // Clear out any rays in the locations list that are overlapped by the
   // new ray
     
-  _clearRayOverlap(startIndex, endIndex, ray_loc);
+  //_clearRayOverlapPrep(startIndex, endIndex, ray_loc);
 
-  // Set the locations associated with this ray
+  //---- new
+  if (startIndex > endIndex) {
+    // area crosses the 360; 0 boundary; must break into two sections
+    _clearRayOverlap(startIndex, 3600, ray_loc); // RayLoc::RAY_LOC_N, ray_loc);
+    // Set the locations associated with this ray
 
-  for (int ii = startIndex; ii <= endIndex; ii++) {
-    ray_loc[ii].ray = ray;
-    ray_loc[ii].active = true;
-    // ray_loc[ii].master = false;
-    ray_loc[ii].startIndex = startIndex;
-    ray_loc[ii].endIndex = endIndex;
+    for (int ii = startIndex; ii <= 3600; ii++) { // RayLoc::RAY_LOC_N; ii++) {
+      ray_loc[ii].ray = ray;
+      ray_loc[ii].active = true;
+      // ray_loc[ii].master = false;
+      ray_loc[ii].startIndex = startIndex;
+      ray_loc[ii].endIndex = 3600; // RayLoc::RAY_LOC_N;
+    }
+
+    _clearRayOverlap(0, endIndex, ray_loc);
+    // Set the locations associated with this ray
+
+    for (int ii = 0; ii <= endIndex; ii++) {
+      ray_loc[ii].ray = ray;
+      ray_loc[ii].active = true;
+      // ray_loc[ii].master = false;
+      ray_loc[ii].startIndex = 0;
+      ray_loc[ii].endIndex = endIndex;
+    }
+
+  } else {
+    _clearRayOverlap(startIndex, endIndex, ray_loc);
+
+
+    // Set the locations associated with this ray
+
+    for (int ii = startIndex; ii <= endIndex; ii++) {
+      ray_loc[ii].ray = ray;
+      ray_loc[ii].active = true;
+      // ray_loc[ii].master = false;
+      ray_loc[ii].startIndex = startIndex;
+      ray_loc[ii].endIndex = endIndex;
+    }
   }
+  //---- end new
 
   // indicate which ray is the master
   // i.e. it is responsible for ray memory
@@ -1482,17 +1561,47 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
 
 }
 
+ 
+int PolarManager::_fixIndexForCircularBoundary(const int index)
+{
+  int new_index = index;
+
+  // Let's do some boundary checking ...
+  while (new_index < 0) { 
+    new_index = 3600 + new_index; // RayLoc::RAY_LOC_N + new_index;
+  }
+
+  while (new_index > 3600) { // RayLoc::RAY_LOC_N) {
+    new_index = new_index - 3600; // RayLoc::RAY_LOC_N;
+  }
+  return new_index;
+}
+
 ///////////////////////////////////////////////////////////
 // clear any locations that are overlapped by the given ray
 
 void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
                                     RayLoc *ray_loc)
 {
+
+  cout << "_clearRayOverlap enter " << " start_index=" << start_index <<
+    "end_index = " << end_index << endl;
+
+  if ((start_index < 0) || (start_index > 3600)) {
+    cout << "ERROR: _clearRayOverlap start_index out of bounds " << start_index << endl;
+    return;
+  }
+  if ((end_index < 0) || (end_index > 3600)) {
+    cout << "ERROR: _clearRayOverlap end_index out of bounds " << end_index << endl;
+    return;
+  }
+
   // Loop through the ray locations, clearing out old information
 
   int i = start_index;
   
   while (i <= end_index) {
+
 
     RayLoc &loc = ray_loc[i];
     
@@ -1505,7 +1614,23 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
     
     int loc_start_index = loc.startIndex;
     int loc_end_index = loc.endIndex;
-      
+
+    if ((loc_start_index < 0) || (loc_start_index > 3600)) {
+      cout << "ERROR: _clearRayOverlap loc_start_index out of bounds " << loc_start_index << endl;
+      ++i;
+      continue;
+    }
+    if ((loc_end_index < 0) || (loc_end_index > 3600)) {
+      cout << "ERROR: _clearRayOverlap loc_end_index out of bounds " << loc_end_index << endl;
+      ++i;
+      continue;
+    }
+
+    if (loc_end_index < i) {
+      cout << " OH NO! We are HERE" << endl;
+      ++i;
+      continue;
+    }
     // If we get here, this location is active.  We now have 4 possible
     // situations:
 
@@ -1514,6 +1639,10 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
       // The overlap area covers the end of the current beam.  Reduce the
       // current beam down to just cover the area before the overlap area.
 
+      cout << "Case 1a:" << endl;
+      cout << " i = " << i << endl;
+      cout << "clearing from start_index=" << start_index <<
+	" to loc_end_index=" << loc_end_index << endl;
       for (int j = start_index; j <= loc_end_index; ++j) {
 	// If the master is in the overlap area, then it needs to be moved
 	// outside of this area
@@ -1529,6 +1658,9 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
       // Update the end indices for the remaining locations in the current
       // beam
 
+      cout << "Case 1b:" << endl;
+      cout << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
+	" to start_index=" << start_index << endl;
       for (int j = loc_start_index; j < start_index; ++j)
 	ray_loc[j].endIndex = start_index - 1;
 
@@ -1538,6 +1670,10 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
       // happen, so go ahead and just clear out the locations for the current
       // beam.
 
+      cout << "Case 2:" << endl;
+      cout << " i = " << i << endl;
+      cout << "clearing from loc_start_index=" << loc_start_index <<
+	" to loc_end_index=" << loc_end_index << endl;
       for (int j = loc_start_index; j <= loc_end_index; ++j) {
         ray_loc[j].clear();
       }
@@ -1546,6 +1682,11 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
       
       // The overlap area covers the beginning of the current beam.  Reduce the
       // current beam down to just cover the area after the overlap area.
+
+      cout << "Case 3a:" << endl;
+      cout << " i = " << i << endl;
+      cout << "clearing from loc_start_index=" << loc_start_index <<
+	" to end_index=" << end_index << endl;
 
       for (int j = loc_start_index; j <= end_index; ++j) {
 	// If the master is in the overlap area, then it needs to be moved
@@ -1560,6 +1701,9 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
       // Update the start indices for the remaining locations in the current
       // beam
 
+      cout << "Case 3b:" << endl;
+      cout << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
+	" to loc_end_index=" << loc_end_index << endl;
       for (int j = end_index + 1; j <= loc_end_index; ++j) {
 	ray_loc[j].startIndex = end_index + 1;
       }
@@ -1568,7 +1712,10 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
       
       // The current beam is completely covered by the overlap area.  Clear
       // out all of the locations for the current beam.
-
+      cout << "Case 4:" << endl;
+      cout << " i = " << i << endl;
+      cout << "clearing from loc_start_index=" << loc_start_index <<
+	" to loc_end_index=" << loc_end_index << endl;
       for (int j = loc_start_index; j <= loc_end_index; ++j) {
         ray_loc[j].clear();
       }
@@ -1578,6 +1725,7 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
     i = loc_end_index + 1;
 
   } /* endwhile - i */
+  cout << "_clearRayOverlap exit " << endl;
   
 }
 
@@ -1847,10 +1995,13 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     _fields[ii]->setSelectValue(-9999.0);
     _fields[ii]->setDialogText("----");
   }
-  
+
   vector<RadxField *> rflds = ray->getFields();
   for (size_t ifield = 0; ifield < rflds.size(); ifield++) {
     const RadxField *field = rflds[ifield];
+  
+    //for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
+    //const RadxField *field = ray->getField(ifield);
     const string fieldName = field->getName();
     if (fieldName.size() == 0) {
       continue;

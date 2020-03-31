@@ -141,7 +141,7 @@ void PpiBeam::paint(QImage *image,
 
       polygon[2] = QPointF(_polygons[igate].pts[1].x, _polygons[igate].pts[1].y);
       polygon[3] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);
-    
+
       painter.setBrush(*prev_brush);
       painter.drawPolygon(polygon);
 

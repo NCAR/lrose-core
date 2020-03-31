@@ -320,6 +320,7 @@ private:
 
   void _storeRayLoc(const RadxRay *ray, const double az,
 		    const double beam_width, RayLoc *ray_loc);
+  int _fixIndexForCircularBoundary(const int index);
   void _clearRayOverlap(const int start_index, const int end_index,
 			RayLoc *ray_loc);
 
