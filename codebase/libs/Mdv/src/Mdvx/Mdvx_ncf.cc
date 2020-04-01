@@ -1104,7 +1104,7 @@ int Mdvx::_readAllHeadersRadx(const string &path)
   // read in first field with data
 
   RadxVol vol0;
-  if (vol.getNFields() > 0) {
+  if (vol.getFields().size() > 0) {
     RadxField *rfld = vol.getField(0);
     string firstFieldName = rfld->getName();
     RadxFile inFile0;
@@ -1133,7 +1133,7 @@ int Mdvx::_readAllHeadersRadx(const string &path)
   setDataCollectionType(Mdvx::DATA_MEASURED);
   _mhdr.native_vlevel_type = Mdvx::VERT_TYPE_ELEV;
   _mhdr.vlevel_type = Mdvx::VERT_TYPE_ELEV;
-  _mhdr.n_fields = vol.getNFields();
+  _mhdr.n_fields = vol.getFields().size();
   
   _mhdr.sensor_lat = vol.getLatitudeDeg();
   _mhdr.sensor_lon = vol.getLongitudeDeg();
@@ -1147,9 +1147,10 @@ int Mdvx::_readAllHeadersRadx(const string &path)
 
   // add field headers
 
-  for (size_t ifield = 0; ifield < vol.getNFields(); ifield++) {
+  vector<RadxField *> flds = vol.getFields();
+  for (size_t ifield = 0; ifield < flds.size(); ifield++) {
 
-    RadxField *rfld = vol.getField(ifield);
+    RadxField *rfld = flds[ifield];
     Mdvx::field_header_t fhdr;
     Mdvx::vlevel_header_t vhdr;
     MEM_zero(fhdr);

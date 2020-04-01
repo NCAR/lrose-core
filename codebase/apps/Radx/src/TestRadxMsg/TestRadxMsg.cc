@@ -277,9 +277,10 @@ int TestRadxMsg::_testRadxFields()
 
     RadxRay *ray = rays[iray];
 
-    for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
+    vector<RadxField *> flds = ray->getFields();
+    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
 
-      RadxField *field = ray->getField(ifield);
+      RadxField *field = flds[ifield];
   
       // print the contents of the before field for comparison
       
