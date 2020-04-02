@@ -1446,7 +1446,7 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
 
     double max_half_angle = beam_width_min / 2.0;
     double prev_offset = max_half_angle;
-    if (_prevAz >= 0.0) {
+    if (_prevAz > 0.0) { // >= 0.0) {
       double az_diff = az - _prevAz;
       if (az_diff < 0.0)
 	az_diff += 360.0;
