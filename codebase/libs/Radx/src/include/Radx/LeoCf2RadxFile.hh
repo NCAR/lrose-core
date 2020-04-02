@@ -599,6 +599,8 @@ private:
 
   void _createSweepRays(const RadxSweep *sweep);
 
+  void _moveToSeparateSweep();
+
   void _readFieldVariables(bool metaOnly);
   
   NcxxVar _readRayVar(NcxxGroup &group, NcxxDim &dim, const string &name, 
