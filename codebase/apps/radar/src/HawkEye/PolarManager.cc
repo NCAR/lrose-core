@@ -1289,28 +1289,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   
 {
 
-  static bool seenIt = false;
-  if (ray->getAzimuthDeg() == 0.0) {
-    if (seenIt) {
-      cout << "IGNORING SECOND RAY AT 0 DEGREES" << endl;
-      // return;
-      // print RayLoc
-      for (int rli=0; rli <= 3600; rli++) {
-        cout << "rayLoc[" << rli << "].startIndex= " << _ppiRayLoc[rli].startIndex << endl;
-        cout << "rayLoc[" << rli << "].endIndex= " << _ppiRayLoc[rli].endIndex << endl;
-        cout << "rayLoc[" << rli << "].active= " << _ppiRayLoc[rli].active << endl;
-	if (_ppiRayLoc[rli].ray == NULL) {
-	  cout << "rayLoc[" << rli << "].ray= " << "NULL" << endl;
-	} else {
-	  cout << "rayLoc[" << rli << "].ray= " << _ppiRayLoc[rli].ray->getAzimuthDeg() << endl;
-	}
-	cout << endl;
-      }
-    } else {
-      seenIt = true;
-    }
-  }
-
   // do we need to reconfigure the PPI?
 
   _nGates = ray->getNGates();
@@ -1429,25 +1407,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     double az = ray->getAzimuthDeg();
     _storeRayLoc(ray, az, platform.getRadarBeamWidthDegH(), _ppiRayLoc);
-
-
-    if (seenIt) {
-      cout << "AFTER STORE RAY LOC AT 0 DEGREES" << endl;
-      // return;                                                                                            
-      // print RayLoc                                                                                       
-      for (int rli=0; rli <= 3600; rli++) {
-        cout << "rayLoc[" << rli << "].startIndex= " << _ppiRayLoc[rli].startIndex << endl;
-        cout << "rayLoc[" << rli << "].endIndex= " << _ppiRayLoc[rli].endIndex << endl;
-        cout << "rayLoc[" << rli << "].active= " << _ppiRayLoc[rli].active << endl;
-	if (_ppiRayLoc[rli].ray == NULL) {
-	  cout << "rayLoc[" << rli << "].ray= " << "NULL" << endl;
-	} else {
-	  cout << "rayLoc[" << rli << "].ray= " << _ppiRayLoc[rli].ray->getAzimuthDeg() << endl;
-	}
-
-        cout <<endl;
-      }
-    } 
 
     // Save the angle information for the next iteration
 
