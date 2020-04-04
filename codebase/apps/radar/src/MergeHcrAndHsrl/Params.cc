@@ -278,6 +278,18 @@
   }
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  int Params::isArgValidN(const char *arg)
+  {
+    return (tdrpIsArgValidN(arg));
+  }
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -718,21 +730,21 @@
     tt++;
     
     // Parameter 'hcr_fields'
-    // ctype is '_field_t'
+    // ctype is '_hcr_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("hcr_fields");
     tt->descr = tdrpStrDup("Specs of HCR fields to be included.");
-    tt->help = tdrpStrDup("\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.");
+    tt->help = tdrpStrDup("\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.\n\napply_flag: apply HCR flag field to censor non-weather echoes. See 'hcr_flag_field_name' and 'hcr_flag_values' parameters below.");
     tt->array_offset = (char *) &_hcr_fields - &_start_;
     tt->array_n_offset = (char *) &hcr_fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(field_t);
+    tt->array_elem_size = sizeof(hcr_field_t);
     tt->array_n = 7;
-    tt->struct_def.name = tdrpStrDup("field_t");
-    tt->struct_def.nfields = 2;
+    tt->struct_def.name = tdrpStrDup("hcr_field_t");
+    tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -745,27 +757,70 @@
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
         (char *) &_hcr_fields->output_field_name - (char *) _hcr_fields;
-    tt->n_struct_vals = 14;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[2].fname = tdrpStrDup("apply_flag");
+      tt->struct_def.fields[2].ptype = BOOL_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_hcr_fields->apply_flag - (char *) _hcr_fields;
+    tt->n_struct_vals = 21;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("DBZ");
       tt->struct_vals[1].s = tdrpStrDup("HCR_DBZ");
-      tt->struct_vals[2].s = tdrpStrDup("VEL_CORR");
-      tt->struct_vals[3].s = tdrpStrDup("HCR_VEL");
-      tt->struct_vals[4].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[5].s = tdrpStrDup("HCR_WIDTH");
-      tt->struct_vals[6].s = tdrpStrDup("LDR");
-      tt->struct_vals[7].s = tdrpStrDup("HCR_LDR");
-      tt->struct_vals[8].s = tdrpStrDup("NCP");
-      tt->struct_vals[9].s = tdrpStrDup("HCR_NCP");
-      tt->struct_vals[10].s = tdrpStrDup("SNR");
-      tt->struct_vals[11].s = tdrpStrDup("HCR_SNR");
-      tt->struct_vals[12].s = tdrpStrDup("DBMVC");
-      tt->struct_vals[13].s = tdrpStrDup("HCR_DBM");
+      tt->struct_vals[2].b = pFALSE;
+      tt->struct_vals[3].s = tdrpStrDup("VEL_CORR");
+      tt->struct_vals[4].s = tdrpStrDup("HCR_VEL");
+      tt->struct_vals[5].b = pFALSE;
+      tt->struct_vals[6].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[7].s = tdrpStrDup("HCR_WIDTH");
+      tt->struct_vals[8].b = pFALSE;
+      tt->struct_vals[9].s = tdrpStrDup("LDR");
+      tt->struct_vals[10].s = tdrpStrDup("HCR_LDR");
+      tt->struct_vals[11].b = pFALSE;
+      tt->struct_vals[12].s = tdrpStrDup("NCP");
+      tt->struct_vals[13].s = tdrpStrDup("HCR_NCP");
+      tt->struct_vals[14].b = pFALSE;
+      tt->struct_vals[15].s = tdrpStrDup("SNR");
+      tt->struct_vals[16].s = tdrpStrDup("HCR_SNR");
+      tt->struct_vals[17].b = pFALSE;
+      tt->struct_vals[18].s = tdrpStrDup("DBMVC");
+      tt->struct_vals[19].s = tdrpStrDup("HCR_DBM");
+      tt->struct_vals[20].b = pFALSE;
+    tt++;
+    
+    // Parameter 'hcr_flag_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("hcr_flag_field_name");
+    tt->descr = tdrpStrDup("Name of flag field in HCR data - if available.");
+    tt->help = tdrpStrDup("See hcr_fields above. We can optionally use the flag field to censor non-weather data from the HCR fields.");
+    tt->val_offset = (char *) &hcr_flag_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("FLAG");
+    tt++;
+    
+    // Parameter 'hcr_valid_flag_values'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("hcr_valid_flag_values");
+    tt->descr = tdrpStrDup("Array of flag values that indicate the a valid echo.");
+    tt->help = tdrpStrDup("If 'apply_flag' is TRUE (see 'hcr_fields' above) we check the flag values at each gate and censor the field if the flag value is not in this valid list.");
+    tt->array_offset = (char *) &_hcr_valid_flag_values - &_start_;
+    tt->array_n_offset = (char *) &hcr_valid_flag_values_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(int);
+    tt->array_n = 1;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].i = 1;
     tt++;
     
     // Parameter 'hsrl_fields'
-    // ctype is '_field_t'
+    // ctype is '_hsrl_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
@@ -776,9 +831,9 @@
     tt->array_n_offset = (char *) &hsrl_fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(field_t);
+    tt->array_elem_size = sizeof(hsrl_field_t);
     tt->array_n = 5;
-    tt->struct_def.name = tdrpStrDup("field_t");
+    tt->struct_def.name = tdrpStrDup("hsrl_field_t");
     tt->struct_def.nfields = 2;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));

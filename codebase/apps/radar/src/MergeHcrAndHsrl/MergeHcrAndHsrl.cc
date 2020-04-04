@@ -79,6 +79,21 @@ MergeHcrAndHsrl::MergeHcrAndHsrl(int argc, char **argv)
     return;
   }
 
+  // create map for applying flag
+
+  _flagMap.clear();
+  for (int ii = 0; ii < _params.hcr_fields_n; ii++) {
+    _flagMap[_params._hcr_fields[ii].input_field_name] =
+      _params._hcr_fields[ii].apply_flag;
+  }
+
+  // create set for flag checking
+
+  _flagSet.clear();
+  for (int ii = 0; ii < _params.hcr_valid_flag_values_n; ii++) {
+    _flagSet.insert(_params._hcr_valid_flag_values[ii]);
+  }
+
   // process the params
 
   if (_checkParams()) {
@@ -234,7 +249,7 @@ int MergeHcrAndHsrl::_processFile(const string &hcrPath)
     cerr << "INFO - MergeHcrAndHsrl::_processFile" << endl;
     cerr << "  HCR input path: " << hcrPath << endl;
   }
-  
+
   // read in hcr file
   
   NcfRadxFile hcrFile;
@@ -246,8 +261,7 @@ int MergeHcrAndHsrl::_processFile(const string &hcrPath)
     cerr << hcrFile.getErrStr() << endl;
     return -1;
   }
-  hcrVol.convertToFl32();
-  
+
   time_t hcrTime = hcrVol.getEndTimeSecs();
   bool dateOnly;
   if (DataFileNames::getDataTime(hcrPath, hcrTime, dateOnly)) {
@@ -256,46 +270,38 @@ int MergeHcrAndHsrl::_processFile(const string &hcrPath)
     return -1;
   }
 
+  // convert all fields except flag to fl32
+
+  string flagFieldName(_params.hcr_flag_field_name);
+  const vector<RadxRay *> &hcrRays = hcrVol.getRays();
+  for (size_t iray = 0; iray < hcrRays.size(); iray++) {
+    RadxRay *hcrRay = hcrRays[iray];
+    vector<RadxField *> hFlds = hcrRay->getFields(Radx::FIELD_RETRIEVAL_DATA);
+    for (size_t ifld = 0; ifld < hFlds.size(); ifld++) {
+      RadxField *hField = hFlds[ifld];
+      string fieldName = hField->getName();
+      if (fieldName == flagFieldName) {
+        hField->convertToSi16(1.0, 0.0);
+      } else {
+        hField->convertToFl32();
+      }
+    } // ifld
+  } // iray
+      
   if (_params.debug) {
     cerr << "Time for hcr file: " << RadxTime::strm(hcrTime) << endl;
+  }
+
+  // apply flag field as needed to HCR volume
+
+  if (_needFlagField) {
+    _applyFlagField(hcrVol);
   }
 
   // merge the hcr and seconday volumes, using the hcr
   // volume to hold the merged data
   
-  // loop through all rays in hcr vol
-
-  const vector<RadxRay *> &hcrRays = hcrVol.getRays();
-  for (size_t ii = 0; ii < hcrRays.size(); ii++) {
-    RadxRay *hcrRay = hcrRays[ii];
-    // rename fields on hcr ray
-    vector<RadxField *> pFlds = hcrRay->getFields(Radx::FIELD_RETRIEVAL_ALL);
-    for (size_t ifld = 0; ifld < pFlds.size(); ifld++) {
-      RadxField *pField = pFlds[ifld];
-      for (int ii = 0; ii < _params.hcr_fields_n; ii++) {
-        string inputName = _params._hcr_fields[ii].input_field_name;
-        if (inputName == pField->getName()) {
-          pField->setName(_params._hcr_fields[ii].output_field_name);
-          break;
-        }
-      } // ii
-    } // ifld
-    hcrRay->loadFieldNameMap();
-    // find the matching HSRL ray
-    RadxRay *hsrlRay = _findHsrlRay(hcrRay);
-    if (hsrlRay == NULL) {
-      _addEmptyHsrlFieldsToRay(hcrRay);
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "-";
-      }
-    } else {
-      // merge
-      _mergeRay(hcrRay, hsrlRay);
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "+";
-      }
-    }
-  } // ii
+  _mergeHsrlRays(hcrVol);
 
   // finalize the volume
 
@@ -303,12 +309,25 @@ int MergeHcrAndHsrl::_processFile(const string &hcrPath)
   hcrVol.loadVolumeInfoFromRays();
   hcrVol.loadSweepInfoFromRays();
   hcrVol.remapToPredomGeom();
-  
-  // write out merged file
+
+  // convert non-flag output fields
 
   if (_params.output_encoding == Params::ENCODING_INT16) {
-    _hsrlVol.convertToSi16();
+    for (size_t iray = 0; iray < hcrRays.size(); iray++) {
+      RadxRay *hcrRay = hcrRays[iray];
+      vector<RadxField *> hFlds = hcrRay->getFields(Radx::FIELD_RETRIEVAL_DATA);
+      for (size_t ifld = 0; ifld < hFlds.size(); ifld++) {
+        RadxField *hField = hFlds[ifld];
+        string fieldName = hField->getName();
+        if (fieldName != flagFieldName) {
+          hField->convertToSi16();
+        }
+      } // ifld
+    } // iray
   }
+      
+  // write out merged file
+
   if (_writeVol(hcrVol)) {
     return -1;
   }
@@ -326,9 +345,27 @@ void MergeHcrAndHsrl::_setupHcrRead(RadxFile &file)
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.setDebug(true);
   }
-  
+
+  // determine whether (a) we need to read in the flag field and
+  // (b) whether we need to write it out
+
+  _needFlagField = false;
+  _writeFlagField = false;
+
+  // create map for applying flag
+
   for (int ii = 0; ii < _params.hcr_fields_n; ii++) {
     file.addReadField(_params._hcr_fields[ii].input_field_name);
+    if (_params._hcr_fields[ii].apply_flag) {
+      _needFlagField = true;
+    }
+    if (strcmp(_params._hcr_fields[ii].input_field_name,
+               _params.hcr_flag_field_name) == 0) {
+      _writeFlagField = true;
+    }
+  }
+  if (_needFlagField) {
+    file.addReadField(_params.hcr_flag_field_name);
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -337,6 +374,131 @@ void MergeHcrAndHsrl::_setupHcrRead(RadxFile &file)
     cerr << "=============================================" << endl;
   }
   
+}
+
+//////////////////////////////////////////////////
+// apply the flag field to fields in hcr rays
+
+void MergeHcrAndHsrl::_applyFlagField(RadxVol &hcrVol)
+{
+  
+
+  // loop through all rays in hcr vol
+  
+  const vector<RadxRay *> &hcrRays = hcrVol.getRays();
+  int nRaysMissingFlag = 0;
+  for (size_t iray = 0; iray < hcrRays.size(); iray++) {
+    
+    RadxRay *hcrRay = hcrRays[iray];
+
+    // get the flag field
+    
+    RadxField *flagField = hcrRay->getField(_params.hcr_flag_field_name);
+    if (flagField == NULL) {
+      nRaysMissingFlag++;
+      continue;
+    }
+    const Radx::si16 *flagData = flagField->getDataSi16();
+    Radx::si16 flagMiss = flagField->getMissingSi16();
+    
+    // loop through the HCR fields
+    
+    vector<RadxField *> hFlds = hcrRay->getFields(Radx::FIELD_RETRIEVAL_DATA);
+    for (size_t ifld = 0; ifld < hFlds.size(); ifld++) {
+
+      // do not apply flag to itself
+      RadxField *hField = hFlds[ifld];
+      if (hField == flagField) {
+        continue;
+      }
+
+      // check if we need to apply the flag
+      bool applyFlag = _flagMap[hField->getName()];
+      if (!applyFlag) {
+        continue;
+      }
+
+      // apply the flag to non-missing data
+      
+      Radx::fl32 *hData = hField->getDataFl32();
+      Radx::fl32 hMiss = hField->getMissingFl32();
+      
+      for (size_t ii = 0; ii < hField->getNPoints(); ii++) {
+        Radx::si16 flagVal = flagData[ii];
+        if (flagVal == flagMiss) {
+          continue;
+        }
+        Radx::fl32 dataVal = hData[ii];
+        if (dataVal == hMiss) {
+          continue;
+        }
+        if (_flagSet.find(flagVal) == _flagSet.end()) {
+          hData[ii] = hMiss;
+        }
+      } // ii
+      
+    } // ifld
+
+  } // iray
+
+  if (nRaysMissingFlag > 0) {
+    cerr << "WARNING - flag field missing on some rays: "
+         << _params.hcr_flag_field_name << endl;
+    cerr << "          n rays missing: " << nRaysMissingFlag << endl;
+  }
+  
+}
+
+//////////////////////////////////////////////////
+// merge HSRL data into HCR volume
+// merge the hcr and seconday volumes, using the hcr
+// volume to hold the merged data
+
+void MergeHcrAndHsrl::_mergeHsrlRays(RadxVol &hcrVol)
+{
+  
+  // loop through all rays in hcr vol
+  
+  const vector<RadxRay *> &hcrRays = hcrVol.getRays();
+  for (size_t iray = 0; iray < hcrRays.size(); iray++) {
+
+    RadxRay *hcrRay = hcrRays[iray];
+
+    // rename fields on hcr ray
+
+    vector<RadxField *> pFlds = hcrRay->getFields(Radx::FIELD_RETRIEVAL_ALL);
+    for (size_t ifld = 0; ifld < pFlds.size(); ifld++) {
+      RadxField *pField = pFlds[ifld];
+      for (int ifield = 0; ifield < _params.hcr_fields_n; ifield++) {
+        string inputName = _params._hcr_fields[ifield].input_field_name;
+        if (inputName == pField->getName()) {
+          pField->setName(_params._hcr_fields[ifield].output_field_name);
+          break;
+        }
+      } // ifield
+    } // ifld
+
+    // update the field name mapping
+    
+    hcrRay->loadFieldNameMap();
+
+    // find the matching HSRL ray
+    RadxRay *hsrlRay = _findHsrlRay(hcrRay);
+    if (hsrlRay == NULL) {
+      _addEmptyHsrlFieldsToRay(hcrRay);
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "-";
+      }
+    } else {
+      // merge
+      _mergeRay(hcrRay, hsrlRay);
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "+";
+      }
+    }
+
+  } // iray
+
 }
 
 /////////////////////////////////////////////////////

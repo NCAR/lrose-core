@@ -90,7 +90,13 @@ public:
   typedef struct {
     char* input_field_name;
     char* output_field_name;
-  } field_t;
+    tdrp_bool_t apply_flag;
+  } hcr_field_t;
+
+  typedef struct {
+    char* input_field_name;
+    char* output_field_name;
+  } hsrl_field_t;
 
   ///////////////////////////
   // Member functions
@@ -194,6 +200,15 @@ public:
   //
 
   static bool isArgValid(const char *arg);
+
+  ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  static int isArgValidN(const char *arg);
 
   ////////////////////////////////////////////
   // load()
@@ -395,10 +410,15 @@ public:
 
   double ray_match_elevation_tolerance_deg;
 
-  field_t *_hcr_fields;
+  hcr_field_t *_hcr_fields;
   int hcr_fields_n;
 
-  field_t *_hsrl_fields;
+  char* hcr_flag_field_name;
+
+  int *_hcr_valid_flag_values;
+  int hcr_valid_flag_values_n;
+
+  hsrl_field_t *_hsrl_fields;
   int hsrl_fields_n;
 
   int compression_level;
@@ -418,7 +438,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[26];
 
   const char *_className;
 

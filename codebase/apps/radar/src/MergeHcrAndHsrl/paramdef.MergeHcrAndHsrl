@@ -101,23 +101,41 @@ commentdef {
 typedef struct {
   string input_field_name;
   string output_field_name;
-} field_t;
+  boolean apply_flag;
+} hcr_field_t;
 
-paramdef struct field_t {
+paramdef struct hcr_field_t {
   p_default = {
-    { "DBZ", "HCR_DBZ" },
-    { "VEL_CORR", "HCR_VEL" },
-    { "WIDTH", "HCR_WIDTH" },
-    { "LDR", "HCR_LDR" },
-    { "NCP", "HCR_NCP" },
-    { "SNR", "HCR_SNR" },
-    { "DBMVC", "HCR_DBM" }
+    { "DBZ", "HCR_DBZ", FALSE },
+    { "VEL_CORR", "HCR_VEL", FALSE },
+    { "WIDTH", "HCR_WIDTH", FALSE },
+    { "LDR", "HCR_LDR", FALSE },
+    { "NCP", "HCR_NCP", FALSE },
+    { "SNR", "HCR_SNR", FALSE },
+    { "DBMVC", "HCR_DBM", FALSE }
   };
   p_descr = "Specs of HCR fields to be included.";
-  p_help = "\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.";
+  p_help = "\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.\n\napply_flag: apply HCR flag field to censor non-weather echoes. See 'hcr_flag_field_name' and 'hcr_flag_values' parameters below.";
 } hcr_fields[];
 
-paramdef struct field_t {
+paramdef string {
+  p_default = "FLAG";
+  p_descr = "Name of flag field in HCR data - if available.";
+  p_help = "See hcr_fields above. We can optionally use the flag field to censor non-weather data from the HCR fields.";
+} hcr_flag_field_name;
+
+paramdef int {
+  p_default = { 1 };
+  p_descr = "Array of flag values that indicate the a valid echo.";
+  p_help = "If 'apply_flag' is TRUE (see 'hcr_fields' above) we check the flag values at each gate and censor the field if the flag value is not in this valid list.";
+} hcr_valid_flag_values[];
+
+typedef struct {
+  string input_field_name;
+  string output_field_name;
+} hsrl_field_t;
+
+paramdef struct hsrl_field_t {
   p_default = {
     { "Aerosol_Backscatter_Coefficient", "Backscat_Coeff" },
     { "Particle_Linear_Depolarization_Ratio", "Particle_LDR" },

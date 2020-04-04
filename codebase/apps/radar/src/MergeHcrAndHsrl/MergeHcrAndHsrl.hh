@@ -41,6 +41,8 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
+#include <map>
+#include <set>
 #include <Radx/RadxVol.hh>
 class RadxFile;
 class RadxRay;
@@ -81,7 +83,13 @@ private:
   RadxTime _searchFailureLowerLimit;
   RadxTime _searchFailureUpperLimit;
   size_t _hsrlRayIndex;
-  
+
+  bool _needFlagField;
+  bool _writeFlagField;
+
+  map<string, bool> _flagMap;
+  set<int> _flagSet;
+
   typedef enum {
     FIND_CLOSEST,
     FIND_FIRST_BEFORE,
@@ -100,6 +108,8 @@ private:
   int _processFile(const string &hcrPath);
 
   void _setupHcrRead(RadxFile &file);
+  void _applyFlagField(RadxVol &hcrVol);
+  void _mergeHsrlRays(RadxVol &hcrVol);
 
   RadxRay *_findHsrlRay(RadxRay *hcrRay);
   void _setupHsrlRead(RadxFile &file);
@@ -110,11 +120,6 @@ private:
   
   void _addEmptyHsrlFieldsToRay(RadxRay *hcrRay);
   
-  int _addFields(RadxVol &vol);
-  
-  int _addField(RadxVol &vol,
-                const Params::field_t &fld);
-
   void _setupWrite(RadxFile &file);
   int _writeVol(RadxVol &vol);
 
