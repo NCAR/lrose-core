@@ -1822,18 +1822,17 @@ int LeoCf2RadxFile::_readPath(const string &path, size_t pathNum)
     }
   }
 
-   // Try it here ...
-
    // _regroupRaysByElevation();
-   _moveToSeparateSweep();
+  if (_dbsMode)
+    _moveToSeparateSweep();
 
-   // compute fixed angles if not found
-   // TODO: for each sweep ...   
-   //if (!_fixedAngleFound) {
-   //  _computeFixedAngle(sweep);
-   //}
-   // end Try it here ...
- 
+  // compute fixed angles if not found
+  vector<RadxSweep *>::iterator it;
+  for (it = _sweeps.begin(); it != _sweeps.end(); ++it) {   
+    // if (!_fixedAngleFound) {
+    _computeFixedAngle(*it);
+  }
+
   // append to read paths
 
   _readPaths.push_back(path);
@@ -4204,91 +4203,50 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
  // throws exception on error
  
  void LeoCf2RadxFile::_moveToSeparateSweep() {
-   /*
-  
-  RadxVol has this method.  Maybe we could use it here?
-  /// Before calling this routine you need to ensure that the fixed
-  /// sweep angle and measured ray angle has been set on the rays.
-  
-  void adjustSweepLimitsUsingAngles();
-   */
 
-
-   // a little investigation
-   // go through the rays; print the elevation angle for each ray
    vector<RadxRay *>::iterator it;
-   size_t num = 0;
-   cout << "Rays from _sweepRays ..." << endl;
-   for (it = _sweepRays.begin(); it != _sweepRays.end(); ++it) {
-     cout << "ray " << num << " elevation=" << (*it)->getElevationDeg() << 
-       " SweepNumber=" << (*it)->getSweepNumber() << endl;
-     num += 1;
-   } 
-
-   // HERE
-   num = 0;
-   cout << "Rays from _raysVol ..." << endl;
-   for (it = _raysVol.begin(); it != _raysVol.end(); ++it) {
-     cout << "ray " << num << " elevation=" << (*it)->getElevationDeg() << 
-       " SweepNumber=" << (*it)->getSweepNumber() << endl;
-     num += 1;
-   } 
-   // end ... HERE
-
-   // go through the sweeps; print the elevation angle for each sweep
-   cout << endl << "from _sweeps ..." << endl;
    vector<RadxSweep *>::iterator itSweep;
-   num = 0;
-   for (itSweep = _sweeps.begin(); itSweep != _sweeps.end(); ++itSweep) {
-     // From RadxSweep ....
-     // setFixedAngleDeg(double val) { _fixedAngle = val; }
-     // double getFixedAngleDeg() const { return _fixedAngle; }
-     //
-     cout << "sweep " << num << " elevation=" << (*itSweep)->getFixedAngleDeg() << endl;
-     num += 1;
-   } 
+   size_t num = 0;
 
-   // go through the sweeps; print the elevation angle for each sweep
-   cout << endl << "from _sweepsToRead ..." << endl;
-   vector<SweepInfo>::iterator itSweepInfo;
-   num = 0;
-   for (itSweepInfo = _sweepsOrig.begin(); itSweepInfo != _sweepsOrig.end(); ++itSweepInfo) {
-     //
-     // using SweepInfo ...
-     // vector<SweepInfo> _sweepsOrig, _sweepsToRead;
-     cout << "sweep " << num << " sweepNum=" << itSweepInfo->sweepNum << 
-       " elevation=" << itSweepInfo->fixedAngle << endl;
-     num += 1;
-   } 
+   if (_verbose) {
+     // a little investigation
+     // go through the rays; print the elevation angle for each ray
+     cout << "Rays from _sweepRays ..." << endl;
+     for (it = _sweepRays.begin(); it != _sweepRays.end(); ++it) {
+       cout << "ray " << num << " elevation=" << (*it)->getElevationDeg() << 
+	 " SweepNumber=" << (*it)->getSweepNumber() << endl;
+       num += 1;
+     } 
 
-   /*
-   // go through each _rayElevation and insert it into the list of RadxSweeps
-   // 
-   vector<double>::iterator itElevation;
-   for (itElevation = _rayElevations.begin(); itElevation != _rayElevations.end(); ++itElevation) {
-     vector<RadxSweep *>::iterator itSweep;
      num = 0;
-     bool found = false;
-     itSweep = _sweeps.begin(); 
-     while (itSweep != _sweeps.end() && !found) {
-       delta = fabs(itSweep->getFixedAngle - *itElevation); 
-       if (delta > 180.0) {
-	 delta = fabs(delta - 360.0);  // correct for north crossing in PPI
-       }
-       if (delta < 0.01) {
-	 found = true; // fixed angles essentially the same
-       } else {
-	 num += 1;
-	 ++itSweep;
-       }
-     }
-     if (!found) {
-       RadxSweep *newSweep = new RadxSweep();
-       newSweep->setFixedAngle(*itElevation);
-       _sweeps.push_back(newSweep);
-     }
+     cout << "Rays from _raysVol ..." << endl;
+     for (it = _raysVol.begin(); it != _raysVol.end(); ++it) {
+       cout << "ray " << num << " elevation=" << (*it)->getElevationDeg() << 
+	 " SweepNumber=" << (*it)->getSweepNumber() << endl;
+       num += 1;
+     } 
+  
+     // go through the sweeps; print the elevation angle for each sweep
+     cout << endl << "from _sweeps ..." << endl;
+     num = 0;
+     for (itSweep = _sweeps.begin(); itSweep != _sweeps.end(); ++itSweep) {
+       cout << "sweep " << num << " elevation=" << (*itSweep)->getFixedAngleDeg() << endl;
+       num += 1;
+     } 
+
+     // go through the sweeps; print the elevation angle for each sweep
+     cout << endl << "from _sweepsToRead ..." << endl;
+     vector<SweepInfo>::iterator itSweepInfo;
+     num = 0;
+     for (itSweepInfo = _sweepsOrig.begin(); itSweepInfo != _sweepsOrig.end(); ++itSweepInfo) {
+       //
+       // using SweepInfo ...
+       // vector<SweepInfo> _sweepsOrig, _sweepsToRead;
+       cout << "sweep " << num << " sweepNum=" << itSweepInfo->sweepNum << 
+	 " elevation=" << itSweepInfo->fixedAngle << endl;
+       num += 1;
+     } 
    }
-   */
 
    // go through the sweeps and their rays; move rays of different elevation to 
    // separate sweeps
@@ -4297,16 +4255,14 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    bool moreSweeps;
    do {
      moreSweeps = false;
-     // From RadxSweep ....
-     // setFixedAngleDeg(double val) { _fixedAngle = val; }
-     // double getFixedAngleDeg() const { return _fixedAngle; }
-     //
      RadxSweep *itSweep = _sweeps.at(sweepIdx);
 
+     if (_verbose) {
           cout << "sweep " << num << " elevation=" << itSweep->getFixedAngleDeg() << 
        " startRayIdx=" << itSweep->getStartRayIndex() << 
        " endRayIdx=" << itSweep->getEndRayIndex() << 
        endl;
+     }
 
      size_t startRayIndex = itSweep->getStartRayIndex();
      size_t endRayIndex = itSweep->getEndRayIndex();
@@ -4317,7 +4273,15 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      bool done = false;
      while ((rayIdx <= endRayIndex) && !done) {
        ray = _raysVol.at(rayIdx);
-       if (ray->getElevationDeg() != firstElevation) {
+
+       // compare to a delta ... 
+       double delta = fabs(ray->getElevationDeg() - firstElevation);
+       if (delta > 180.0) {
+	 delta = fabs(delta - 360.0);  // correct for north crossing in PPI
+       }
+       if (delta > 0.1) {
+	 // elevations are too different
+	 //if (ray->getElevationDeg() != firstElevation) {
 	 // copy this sweep and add this ray to it
          RadxSweep *newSweep = new RadxSweep(*itSweep);
          newSweep->setStartRayIndex(rayIdx);
@@ -4343,70 +4307,29 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    // TODO: set SweepMode!!!
 
-   // go through the sweeps; print the elevation angle for each sweep
-   cout << endl << "after setting elevation in  _sweeps ..." << endl;
-   // vector<RadxSweep *>::iterator itSweep;
-   num = 0;
-   for (itSweep = _sweeps.begin(); itSweep != _sweeps.end(); ++itSweep) {
-     // From RadxSweep ....
-     // setFixedAngleDeg(double val) { _fixedAngle = val; }
-     // double getFixedAngleDeg() const { return _fixedAngle; }
-     //
-     cout << "sweep " << num << "*itSweep=" <<  *itSweep << " elevation=" << (*itSweep)->getFixedAngleDeg() << 
-       " startRayIdx=" << (*itSweep)->getStartRayIndex() << 
-       " endRayIdx=" << (*itSweep)->getEndRayIndex() << 
-       endl;
+   if (_verbose) {
+     // go through the sweeps; print the elevation angle for each sweep
+     cout << endl << "after setting elevation in  _sweeps ..." << endl;
+     // vector<RadxSweep *>::iterator itSweep;
+     num = 0;
+     for (itSweep = _sweeps.begin(); itSweep != _sweeps.end(); ++itSweep) {
+       cout << "sweep " << num << "*itSweep=" <<  *itSweep << " elevation=" << (*itSweep)->getFixedAngleDeg() << 
+	 " startRayIdx=" << (*itSweep)->getStartRayIndex() << 
+	 " endRayIdx=" << (*itSweep)->getEndRayIndex() << 
+	 endl;
 
-     num += 1;
-   } 
+       num += 1;
+     } 
 
+     num = 0;
+     cout << "Rays from _raysVol ..." << endl;
+     for (it = _raysVol.begin(); it != _raysVol.end(); ++it) {
+       cout << "ray " << num << " elevation=" << (*it)->getElevationDeg() << 
+	 " SweepNumber=" << (*it)->getSweepNumber() << endl;
+       num += 1;
+     } 
+   }
 
-
-   // HERE
-   num = 0;
-   cout << "Rays from _raysVol ..." << endl;
-   for (it = _raysVol.begin(); it != _raysVol.end(); ++it) {
-     cout << "ray " << num << " elevation=" << (*it)->getElevationDeg() << 
-       " SweepNumber=" << (*it)->getSweepNumber() << endl;
-     num += 1;
-   } 
-   // end ... HERE
-
-
-   // TODO: now, go through the rays and associate them with a sweep based on elevation
-   //vector<RadxRay *>::iterator itRay;
-   //for (itRay = _sweepRays.begin(); itRay != _sweepRays.end(); ++itRay) {
-   //  
-   //}
-   /*
-  size_t isweep = 0;
-  bool found = false; 
-  while ((isweep < _sweeps.size()) && !found) {
-    
-    RadxSweep *sweepThis = _sweeps[isweep];
-    RadxSweep *sweepNext = _sweeps[isweep + 1];
-
-    // get fixed angles, and compute the change between them
-    
-    double fixedAngleThis = sweepThis->getFixedAngleDeg();
-    double fixedAngleNext = sweepNext->getFixedAngleDeg();
-
-    if (delta > 180.0) {
-      delta = fabs(delta - 360.0);  // correct for north crossing in PPI
-    }
-    if (delta < 0.01) {
-      found = true; // fixed angles essentially the same
-      _sweeps[isweep]->push_back(ray);
-    }
-    isweep++;
-  }
-  if (!found) {
-    // TODO: add a new sweep for this ray
-    RadxSweep *newSweep = new RadxSweep();
-    newSweep->push_back(ray);
-    _sweeps->push_back(newSweep);
-  }
-   */
  }
  
  ////////////////////////////////////////////
