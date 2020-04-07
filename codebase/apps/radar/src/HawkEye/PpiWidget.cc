@@ -503,7 +503,6 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
   }
   else
   {
-	  cerr << "Jeff: Zoom occurred" << endl;
 
     // mouse moved more than 20 pixels, so a zoom occurred
     

@@ -160,8 +160,9 @@ private:
   int _nGates;
   double _maxRangeKm;
 
-  RayLoc* _ppiRayLoc; // for use, allows negative indices at north line
-  RayLoc* _ppiRays;   // for new and delete
+  // ray locations
+
+  vector<RayLoc> _rayLoc;
 
   // input data
   
@@ -319,10 +320,8 @@ private:
   // ray handling for display
 
   void _storeRayLoc(const RadxRay *ray, const double az,
-		    const double beam_width, RayLoc *ray_loc);
-  int _fixIndexForCircularBoundary(const int index);
-  void _clearRayOverlap(const int start_index, const int end_index,
-			RayLoc *ray_loc);
+		    const double beam_width);
+  void _clearRayOverlap(const int start_index, const int end_index);
 
   // modes
 
@@ -373,7 +372,7 @@ private slots:
   void _rhiLocationClicked(double xkm, double ykm,
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
-                        RayLoc *ray_loc, const RadxRay *ray);
+                        const RadxRay *ray);
 
   // modes
   

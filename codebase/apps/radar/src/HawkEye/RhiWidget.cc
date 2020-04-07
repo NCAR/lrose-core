@@ -43,7 +43,6 @@ RhiWidget::RhiWidget(QWidget* parent,
 
 {
   
-  _locArray = NULL;
   _prevElev = -9999.0;
   _prevAz = -9999.0;
   _prevTime = 0;
@@ -68,8 +67,7 @@ RhiWidget::RhiWidget(QWidget* parent,
 
   // set up ray locators
 
-  _locArray = new RayLoc[RayLoc::RAY_LOC_N];
-  _rayLoc = _locArray + RayLoc::RAY_LOC_OFFSET;
+  _rayLoc.resize(RayLoc::RAY_LOC_N);
 
   // archive mode
 
@@ -98,10 +96,6 @@ RhiWidget::~RhiWidget()
     Beam::deleteIfUnused(_rhiBeams[i]);
   }
   _rhiBeams.clear();
-
-  if (_locArray) {
-    delete[] _locArray;
-  }
 
 }
 
@@ -675,16 +669,9 @@ void RhiWidget::_storeRayLoc(const RadxRay *ray)
   for (int ii = startIndex; ii <= endIndex; ii++) {
     _rayLoc[ii].ray = ray;
     _rayLoc[ii].active = true;
-    // _rayLoc[ii].master = false;
     _rayLoc[ii].startIndex = startIndex;
     _rayLoc[ii].endIndex = endIndex;
   }
-
-  // indicate which ray is the master
-  // i.e. it is responsible for ray memory
-    
-  // int midIndex = (int) (ray->getElevationDeg() * RayLoc::RAY_LOC_RES);
-  // _rayLoc[midIndex].master = true;
 
 }
 
@@ -723,15 +710,8 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
 
       for (int j = startIndex; j <= locEndIndex; ++j)
       {
-	// If the master is in the overlap area, then it needs to be moved
-	// outside of this area
-
-	// if (_rayLoc[j].master)
-	//   _rayLoc[startIndex-1].master = true;
-	
 	_rayLoc[j].ray = NULL;
 	_rayLoc[j].active = false;
-	// _rayLoc[j].master = false;
       }
 
       // Update the end indices for the remaining locations in the current
@@ -758,15 +738,8 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
 
       for (int j = locStartIndex; j <= endIndex; ++j)
       {
-	// If the master is in the overlap area, then it needs to be moved
-	// outside of this area
-
-	// if (_rayLoc[j].master)
-	//   _rayLoc[endIndex+1].master = true;
-	
 	_rayLoc[j].ray = NULL;
 	_rayLoc[j].active = false;
-	// _rayLoc[j].master = false;
       }
 
       // Update the start indices for the remaining locations in the current

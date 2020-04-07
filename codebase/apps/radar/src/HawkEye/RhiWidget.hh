@@ -92,10 +92,6 @@ class DLL_EXPORT RhiWidget : public PolarWidget
                const std::vector< std::vector< double > > &beam_data,
                const std::vector< DisplayField* > &fields);
 
-  // get ray locations in RHI
-
-  RayLoc *getRayLoc() { return _rayLoc; }
-  
   // are we in archive mode? and if so are we at the start of a sweep?
 
   void setArchiveMode(bool state) { _isArchiveMode = state; }
@@ -201,8 +197,7 @@ protected:
 
   // ray locations
 
-  RayLoc* _rayLoc;
-  RayLoc* _locArray; // for new and delete
+  vector<RayLoc> _rayLoc;
   BeamHeight _beamHt;
 
   // computing angle limits of rays

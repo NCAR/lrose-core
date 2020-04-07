@@ -106,6 +106,9 @@ DisplayManager::DisplayManager(const Params &params,
   _radarLon = -9999.0;
   _radarAltKm = -9999.0;
 
+  _prevAltKm = 0.0;
+  _altRateMps = 0.0;
+
   _altitudeInFeet = false;
 
 }
