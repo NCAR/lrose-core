@@ -37,7 +37,7 @@ TARGET_FILE = MergeHcrAndHsrl
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
+LOC_LIBS = -lMdv -lRadx -lNcxx -lradar -ldsserver -ldidss \
 	-lrapformats -ltdrp -ldataport \
 	-leuclid -ltoolsa -lpthread $(NETCDF4_LIBS) -lbz2 -lz
 

@@ -82,13 +82,14 @@ private:
   RadxTime _hsrlVolEndTime;
   RadxTime _searchFailureLowerLimit;
   RadxTime _searchFailureUpperLimit;
-  size_t _hsrlRayIndex;
 
   bool _needFlagField;
   bool _writeFlagField;
 
   map<string, bool> _flagMap;
   set<int> _flagSet;
+
+  vector<bool> _hcrIsPointing;
 
   typedef enum {
     FIND_CLOSEST,
@@ -109,9 +110,12 @@ private:
 
   void _setupHcrRead(RadxFile &file);
   void _applyFlagField(RadxVol &hcrVol);
+  void _getScanningMode(RadxVol &hcrVol);
   void _mergeHsrlRays(RadxVol &hcrVol);
 
   RadxRay *_findHsrlRay(RadxRay *hcrRay);
+  RadxRay *_matchHsrlRayInTime(RadxRay *hcrRay);
+
   void _setupHsrlRead(RadxFile &file);
   int _readHsrlVol(RadxTime &searchTime);
 

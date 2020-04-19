@@ -80,11 +80,6 @@ public:
     FILELIST = 2
   } mode_t;
 
-  typedef enum {
-    ENCODING_FLOAT32 = 0,
-    ENCODING_INT16 = 1
-  } encoding_t;
-
   // struct typedefs
 
   typedef struct {
@@ -421,9 +416,9 @@ public:
   hsrl_field_t *_hsrl_fields;
   int hsrl_fields_n;
 
-  int compression_level;
+  double max_hcr_elev_sdev_for_pointing;
 
-  encoding_t output_encoding;
+  int n_dwells_for_hcr_elev_sdev;
 
   char* output_dir;
 

@@ -717,7 +717,7 @@
     tt->descr = tdrpStrDup("Angular elevation tolerance for matching the HSRL rays to the HCR rays (deg).");
     tt->help = tdrpStrDup("Only rays within this tolerance are used. The HSRL points 4 degrees off vertical, so this values should always be > 4. Also, when the aircraft banks, the HSRL elevation changes, whereas the HCR antenna control should keep the beam vertical.");
     tt->val_offset = (char *) &ray_match_elevation_tolerance_deg - &_start_;
-    tt->single_val.d = 7.5;
+    tt->single_val.d = 10;
     tt++;
     
     // Parameter 'Comment 4'
@@ -867,40 +867,32 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("OUTPUT DETAILS");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("DETERMING WHETHER THE ANTENNA IS SCANNING OR POINTING");
+    tt->comment_text = tdrpStrDup("Sometimes the HCR antenna is scanning - say for a sea surface cal. In that case we don't want to merge the HCR data with HSRL in the normal manner. The HSRL is still valid, so we preserve that.");
     tt++;
     
-    // Parameter 'compression_level'
+    // Parameter 'max_hcr_elev_sdev_for_pointing'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_hcr_elev_sdev_for_pointing");
+    tt->descr = tdrpStrDup("Max SDEV of elevation angle for pointing ops (deg).");
+    tt->help = tdrpStrDup("We compute the standard deviation of the HCR elevation angle, over a series of dwells, to determine whether the antenna is scanning or pointing. This is the max sdev for pointing ops.");
+    tt->val_offset = (char *) &max_hcr_elev_sdev_for_pointing - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'n_dwells_for_hcr_elev_sdev'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("compression_level");
-    tt->descr = tdrpStrDup("Compression level for output, if compressed.");
-    tt->help = tdrpStrDup("Applies to netCDF only. Dorade compression is run-length encoding, and has not options..");
-    tt->val_offset = (char *) &compression_level - &_start_;
-    tt->single_val.i = 4;
-    tt++;
-    
-    // Parameter 'output_encoding'
-    // ctype is '_encoding_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_encoding");
-    tt->descr = tdrpStrDup("Encoding for output fields.");
-    tt->help = tdrpStrDup("Encoding with smaller types improves compression.");
-    tt->val_offset = (char *) &output_encoding - &_start_;
-    tt->enum_def.name = tdrpStrDup("encoding_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("ENCODING_FLOAT32");
-      tt->enum_def.fields[0].val = ENCODING_FLOAT32;
-      tt->enum_def.fields[1].name = tdrpStrDup("ENCODING_INT16");
-      tt->enum_def.fields[1].val = ENCODING_INT16;
-    tt->single_val.e = ENCODING_INT16;
+    tt->param_name = tdrpStrDup("n_dwells_for_hcr_elev_sdev");
+    tt->descr = tdrpStrDup("Number of dwells for computing the standard deviation of HCR elevation angle.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &n_dwells_for_hcr_elev_sdev - &_start_;
+    tt->single_val.i = 7;
     tt++;
     
     // Parameter 'Comment 6'

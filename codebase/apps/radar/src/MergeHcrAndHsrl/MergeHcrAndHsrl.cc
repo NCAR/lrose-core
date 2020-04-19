@@ -41,6 +41,7 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxRay.hh>
+#include <radar/FilterUtils.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DataFileNames.hh>
 #include <toolsa/pmu.h>
@@ -298,6 +299,10 @@ int MergeHcrAndHsrl::_processFile(const string &hcrPath)
     _applyFlagField(hcrVol);
   }
 
+  // determine whether the antenna is pointing or scanning
+
+  _getScanningMode(hcrVol);
+
   // merge the hcr and seconday volumes, using the hcr
   // volume to hold the merged data
   
@@ -310,22 +315,6 @@ int MergeHcrAndHsrl::_processFile(const string &hcrPath)
   hcrVol.loadSweepInfoFromRays();
   hcrVol.remapToPredomGeom();
 
-  // convert non-flag output fields
-
-  if (_params.output_encoding == Params::ENCODING_INT16) {
-    for (size_t iray = 0; iray < hcrRays.size(); iray++) {
-      RadxRay *hcrRay = hcrRays[iray];
-      vector<RadxField *> hFlds = hcrRay->getFields(Radx::FIELD_RETRIEVAL_DATA);
-      for (size_t ifld = 0; ifld < hFlds.size(); ifld++) {
-        RadxField *hField = hFlds[ifld];
-        string fieldName = hField->getName();
-        if (fieldName != flagFieldName) {
-          hField->convertToSi16();
-        }
-      } // ifld
-    } // iray
-  }
-      
   // write out merged file
 
   if (_writeVol(hcrVol)) {
@@ -450,6 +439,41 @@ void MergeHcrAndHsrl::_applyFlagField(RadxVol &hcrVol)
 }
 
 //////////////////////////////////////////////////
+// determine if antenna is pointing or scanning
+
+void MergeHcrAndHsrl::_getScanningMode(RadxVol &hcrVol)
+{
+
+  // load up elevation angles
+
+  vector<double> elevs;
+  const vector<RadxRay *> &hcrRays = hcrVol.getRays();
+  for (size_t iray = 0; iray < hcrRays.size(); iray++) {
+    RadxRay *hcrRay = hcrRays[iray];
+    elevs.push_back(hcrRay->getElevationDeg());
+  }
+  
+  // compute sdev of elevation
+
+  vector<double> elevSdev;
+  FilterUtils::computeSdev(elevs, elevSdev,
+                           _params.n_dwells_for_hcr_elev_sdev,
+                           -9999.0);
+
+  // set pointing flag
+  
+  _hcrIsPointing.resize(elevSdev.size());
+  for (size_t ii = 0; ii < elevSdev.size(); ii++) {
+    if (elevSdev[ii] > _params.max_hcr_elev_sdev_for_pointing) {
+      _hcrIsPointing[ii] = false;
+    } else {
+      _hcrIsPointing[ii] = true;
+    }
+  }
+
+}
+
+//////////////////////////////////////////////////
 // merge HSRL data into HCR volume
 // merge the hcr and seconday volumes, using the hcr
 // volume to hold the merged data
@@ -482,20 +506,40 @@ void MergeHcrAndHsrl::_mergeHsrlRays(RadxVol &hcrVol)
     
     hcrRay->loadFieldNameMap();
 
-    // find the matching HSRL ray
-    RadxRay *hsrlRay = _findHsrlRay(hcrRay);
+    // find the matching HSRL ray in time
+
+    RadxRay *hsrlRay = _matchHsrlRayInTime(hcrRay);
     if (hsrlRay == NULL) {
+      // no hsrl ray matched in time
+      // add empty fields hsrl to ray
       _addEmptyHsrlFieldsToRay(hcrRay);
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "-";
-      }
-    } else {
-      // merge
-      _mergeRay(hcrRay, hsrlRay);
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "+";
-      }
+      continue;
     }
+
+    // are they pointing in the same direction?
+
+    double hcrEl = hcrRay->getElevationDeg();
+    double hsrlEl = hsrlRay->getElevationDeg();
+    
+    if ((hcrEl > 60.0 && hsrlEl < 60.0) ||
+        (hcrEl < -60.0 && hsrlEl > -60.0)) {
+      // no hsrl ray matched in pointing
+      // add empty fields hsrl to ray
+      _addEmptyHsrlFieldsToRay(hcrRay);
+      continue;
+    }
+      
+    // if hcr is scanning, set the ray elevation
+    // to the HSRL value, since we want to 
+    // preserve the HSRL data integrity
+    
+    if (!_hcrIsPointing[iray]) {
+      hcrRay->setElevationDeg(hsrlEl);
+    }
+    
+    // merge hsrl data into hcr ray
+
+    _mergeRay(hcrRay, hsrlRay);
 
   } // iray
 
@@ -520,7 +564,7 @@ RadxRay *MergeHcrAndHsrl::_findHsrlRay(RadxRay *hcrRay)
   double hcrEl = hcrRay->getElevationDeg();
   
   const vector<RadxRay *> &hsrlRays = _hsrlVol.getRays();
-  for (size_t jj = _hsrlRayIndex; jj < hsrlRays.size(); jj++) {
+  for (size_t jj = 0; jj < hsrlRays.size(); jj++) {
     
     RadxRay *hsrlRay = hsrlRays[jj];
     RadxTime hsrlTime = hsrlRay->getRadxTime();
@@ -542,7 +586,6 @@ RadxRay *MergeHcrAndHsrl::_findHsrlRay(RadxRay *hcrRay)
              << diffEl << endl;
       }
       
-      _hsrlRayIndex = jj;
       return hsrlRay;
 
     }
@@ -550,6 +593,61 @@ RadxRay *MergeHcrAndHsrl::_findHsrlRay(RadxRay *hcrRay)
   } // jj
 
   return NULL;
+
+}
+
+/////////////////////////////////////////////////////
+// Match HSRL ray with hcr ray in time
+// Returns NULL if no suitable ray found
+
+RadxRay *MergeHcrAndHsrl::_matchHsrlRayInTime(RadxRay *hcrRay)
+  
+{
+
+  // do we have a good volume?
+  
+  RadxTime hcrRayTime = hcrRay->getRadxTime();
+  if (_readHsrlVol(hcrRayTime)) {
+    return NULL;
+  }
+  
+  // find closest ray in time match
+  // within the specified tolerance
+
+  const vector<RadxRay *> &hsrlRays = _hsrlVol.getRays();
+  double minDiffTime = 1.0e9;
+  ssize_t minIndex = -1;
+
+  RadxTime hcrTime = hcrRay->getRadxTime();
+  RadxTime hsrlTime = hsrlRays[0]->getRadxTime();
+
+  for (size_t jj = 0; jj < hsrlRays.size(); jj++) {
+    
+    RadxRay *hsrlRay = hsrlRays[jj];
+    hsrlTime = hsrlRay->getRadxTime();
+
+    double diffTime = fabs(hcrTime - hsrlTime);
+    if (diffTime <= _params.ray_match_time_tolerance_sec) {
+      if (diffTime < minDiffTime) {
+        minIndex = jj;
+        minDiffTime = diffTime;
+      }
+    }
+
+  }
+
+  if (minIndex < 0) {
+    return NULL;
+  }
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "Matched rays in time - hcr time, hsrl time: "
+         << hcrTime.asString(3) << ", "
+         << hsrlTime.asString(3) << ", "
+         << minDiffTime << endl;
+  }
+  
+  return hsrlRays[minIndex];
 
 }
 
@@ -640,7 +738,6 @@ int MergeHcrAndHsrl::_readHsrlVol(RadxTime &searchTime)
 
   _hsrlVol.clear();
   _hsrlPath.clear();
-  _hsrlRayIndex = 0;
   
   for (size_t ipath = 0; ipath < pathList.size(); ipath++) {
 
@@ -800,6 +897,10 @@ void MergeHcrAndHsrl::_mergeRay(RadxRay *hcrRay,
 
   } // ifield
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "+";
+  }
+
 }
 
 //////////////////////////////////////////////////////////////
@@ -823,6 +924,10 @@ void MergeHcrAndHsrl::_addEmptyHsrlFieldsToRay(RadxRay *hcrRay)
     
   } // ifield
   
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "-";
+  }
+
 }
 
 //////////////////////////////////////////////////
@@ -840,7 +945,7 @@ void MergeHcrAndHsrl::_setupWrite(RadxFile &file)
 
   file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
   file.setWriteCompressed(true);
-  file.setCompressionLevel(_params.compression_level);
+  file.setCompressionLevel(4);
   file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
   file.setNcFormat(RadxFile::NETCDF4);
   
