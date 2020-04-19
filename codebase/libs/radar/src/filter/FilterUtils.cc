@@ -324,6 +324,98 @@ void FilterUtils::computeSdevInRange(const double *field,
 }
 
 /////////////////////////////////////////////////////////////////
+// compute standard deviation of a field of data,
+// at each point in the array,
+// given a kernel size.
+// If data in the array is missing, it should be set to missingVal.
+// If the sdev at a point cannot be computed, because of lack of
+// data, it is set to missing at that point.
+
+void FilterUtils::computeSdev(const vector<double> &field,
+                              vector<double> &sdev,
+                              int kernelSize,
+                              double missingVal)
+  
+{
+
+  // initialize
+
+  sdev.resize(field.size());
+  int kernelHalf = kernelSize / 2;
+  kernelSize = 2 * kernelHalf + 1;
+  int nData = field.size();
+  for (int ii = 0; ii < nData; ii++) {
+    sdev[ii] = missingVal;
+  }
+
+  // sanity check
+
+  if (kernelSize > (int) field.size()) {
+    return;
+  }
+  
+  // set up compute position start and end limits
+  // at each end of array, we don't want to go outside the array bounds
+  // so we change the limits accordingly
+  
+  vector<int> startPos;
+  vector<int> endPos;
+  for (int ii = 0; ii < nData; ii++) {
+    int start = ii - kernelHalf;
+    if (start < 0) {
+      start = 0;
+    }
+    int end = ii + kernelHalf;
+    if (end > nData - 1) {
+      end = nData - 1;
+    }
+    int len = end - start + 1;
+    if (len < kernelSize) {
+      if (start == 0) {
+        end = start + kernelSize - 1;
+      } else if (end == nData - 1) {
+        start = end - kernelSize + 1;
+      }
+    }
+    startPos.push_back(start);
+    endPos.push_back(end);
+  } // ii
+  
+  // sdev computed in range
+  
+  for (int ii = 0; ii < nData; ii++) {
+
+    // compute sums etc. for stats over the kernel space
+    
+    double nVal = 0.0;
+    double sumVal = 0.0;
+    double sumValSq = 0.0;
+    
+    for (int jj = startPos[ii]; jj <= endPos[ii]; jj++) {
+      
+      double zz = field[jj];
+      if (zz != missingVal) {
+        sumVal += zz;
+        sumValSq += (zz * zz);
+        nVal++;
+      }
+      
+    } // jj
+    
+    if (nVal > 2) {
+      double meanVal = sumVal / nVal;
+      double term1 = sumValSq / nVal;
+      double term2 = meanVal * meanVal;
+      if (term1 >= term2) {
+        sdev[ii] = sqrt(term1 - term2);
+      }
+    }
+    
+  } // ii
+
+}
+
+/////////////////////////////////////////////////////////////////
 // compute trend deviation of a field, over a kernel in range
 //
 // Set field values to missingVal if they are missing.

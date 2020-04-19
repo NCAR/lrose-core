@@ -127,6 +127,18 @@ public:
 				 int nGatesKernel,
 				 double missingVal);
   
+  // compute standard deviation of a field of data,
+  // at each point in the array,
+  // given a kernel size.
+  // If data in the array is missing, it should be set to missingVal.
+  // If the sdev at a point cannot be computed, because of lack of
+  // data, it is set to missing at that point.
+  
+  static void computeSdev(const vector<double> &field,
+                          vector<double> &sdev,
+                          int kernelSize,
+                          double missingVal);
+
   // compute trend deviation of a field, over a kernel in range
   //
   // Set field values to missingVal if they are missing.
