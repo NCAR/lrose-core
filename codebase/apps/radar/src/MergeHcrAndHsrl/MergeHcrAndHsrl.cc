@@ -532,9 +532,11 @@ void MergeHcrAndHsrl::_mergeHsrlRays(RadxVol &hcrVol)
     // if hcr is scanning, set the ray elevation
     // to the HSRL value, since we want to 
     // preserve the HSRL data integrity
+    // also set the HCR data to missing
     
     if (!_hcrIsPointing[iray]) {
       hcrRay->setElevationDeg(hsrlEl);
+      hcrRay->setGatesToMissing(0, hcrRay->getNGates());
     }
     
     // merge hsrl data into hcr ray
