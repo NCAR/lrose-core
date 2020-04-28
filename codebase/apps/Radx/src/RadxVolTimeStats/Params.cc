@@ -599,8 +599,70 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("SIMULATED RADAR PARAMETERS");
+    tt->comment_hdr = tdrpStrDup("MODE");
+    tt->comment_text = tdrpStrDup("Read in a file, or specify radar and scan parameters");
+    tt++;
+    
+    // Parameter 'specify_mode'
+    // ctype is '_specify_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("specify_mode");
+    tt->descr = tdrpStrDup("Mode for determining radar parameters");
+    tt->help = tdrpStrDup("\nSPECIFY_FILE: read in a file, and use that volume for computations.\n\nSPECIFY_RADAR_PARAMS: create a volume based on specified parameters in params file.");
+    tt->val_offset = (char *) &specify_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("specify_mode_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SPECIFY_FILE");
+      tt->enum_def.fields[0].val = SPECIFY_FILE;
+      tt->enum_def.fields[1].name = tdrpStrDup("SPECIFY_RADAR_PARAMS");
+      tt->enum_def.fields[1].val = SPECIFY_RADAR_PARAMS;
+    tt->single_val.e = SPECIFY_RADAR_PARAMS;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("SPECIFIED FILE");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'specified_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("specified_file_path");
+    tt->descr = tdrpStrDup("Path for specified file.");
+    tt->help = tdrpStrDup("Applies to SPECIFY_FILE mode.");
+    tt->val_offset = (char *) &specified_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("./template_cfradial_file.nc");
+    tt++;
+    
+    // Parameter 'set_max_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_max_range");
+    tt->descr = tdrpStrDup("Set the maximum range for file that is read");
+    tt->help = tdrpStrDup("If TRUE, then max_range_km is applied on read");
+    tt->val_offset = (char *) &set_max_range - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("SPECIFIED RADAR PARAMETERS");
+    tt->comment_text = tdrpStrDup("Applies to SPECIFY_RADAR_PARAMS mode.");
     tt++;
     
     // Parameter 'radar_name'
@@ -612,7 +674,7 @@
     tt->descr = tdrpStrDup("Name of radar");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("SIM");
+    tt->single_val.s = tdrpStrDup("VIRTUAL");
     tt++;
     
     // Parameter 'radar_location'
@@ -792,11 +854,11 @@
       tt->struct_vals[35].d = 25.62;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY");
     tt->comment_text = tdrpStrDup("");
     tt++;

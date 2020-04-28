@@ -73,6 +73,11 @@ public:
     DEBUG_VERBOSE = 2
   } debug_t;
 
+  typedef enum {
+    SPECIFY_FILE = 0,
+    SPECIFY_RADAR_PARAMS = 1
+  } specify_mode_t;
+
   // struct typedefs
 
   typedef struct {
@@ -382,6 +387,12 @@ public:
 
   debug_t debug;
 
+  specify_mode_t specify_mode;
+
+  char* specified_file_path;
+
+  tdrp_bool_t set_max_range;
+
   char* radar_name;
 
   radar_location_t radar_location;
@@ -410,7 +421,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[16];
+  mutable TDRPtable _table[21];
 
   const char *_className;
 

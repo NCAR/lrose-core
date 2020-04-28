@@ -108,29 +108,56 @@ RadxVolTimeStats::~RadxVolTimeStats()
 int RadxVolTimeStats::Run()
 {
 
+  // create a volume depending on mode
   
-  // create a volume
-
   RadxVol vol;
+  if (_params.specify_mode == Params::SPECIFY_RADAR_PARAMS) {
+    _createVol(vol);
+  } else {
+    if (_readFile(_params.specified_file_path, vol)) {
+      cerr << "ERROR - cannot read file: " << _params.specified_file_path << endl;
+      return -1;
+    }
+  }
+
+  // add the timing fields
+
+  _addTimingFields(vol);
+
+  // write the file
+
+  if (_writeVol(vol)) {
+    cerr << "ERROR - RadxConvert::_processFile" << endl;
+    cerr << "  Cannot write volume to file" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// create a volume from specified params
+
+void RadxVolTimeStats::_createVol(RadxVol &vol)
+{
+  
+  vol.clear();
   RadxTime startTime(RadxTime::NOW);
   double timeSinceStart = 0.0;
   double startRangeKm = _params.gate_spacing_m / 2000.0;
   double gateSpacingKm = _params.gate_spacing_m / 1000.0;
-  int nGates = (int) (_params.max_range_km / gateSpacingKm + 0.5);
-  cerr << "111111111111111111111 nGates: " << nGates << endl;
-  double beamWidthRad = _params.beam_width_deg * DEG_TO_RAD;
-  BeamHeight beamHt;
-
-  // loop through sweeps
+  
+  // loop through specified sweeps
   
   for (int isweep = 0; isweep < _params.sweeps_n; isweep++) {
     
     double el = _params._sweeps[isweep].elev_deg;
 
-    // loop through azimuths
+    // azimuths every degree
     
     for (int iray = 0; iray < 360; iray++) {
-
+      
       double deltaTime = 1.0 / _params._sweeps[isweep].az_rate_deg_per_sec;
       timeSinceStart += deltaTime;
       
@@ -156,79 +183,6 @@ int RadxVolTimeStats::Run()
       // add ray to vol - vol will free it later
       
       vol.addRay(ray);
-
-      // add the fields
-
-      // range in km
-
-      {
-        RadxField *range = new RadxField("gateRange", "km");
-        range->setStandardName("range_to_center_of_gate");
-        range->setLongName("range_to_center_of_gate");
-        range->setMissingFl32(-9999.0);
-        range->setRangeGeom(startRangeKm, gateSpacingKm);
-        Radx::fl32 *data = new Radx::fl32[nGates];
-        for (int ii = 0; ii < nGates; ii++) {
-          data[ii] = startRangeKm + ii * gateSpacingKm;
-        }
-        range->addDataFl32(nGates, data);
-        ray->addField(range);
-      }
-      
-      // sample volume in km3
-
-      {
-        RadxField *sampleVol = new RadxField("sampleVol", "km3");
-        sampleVol->setStandardName("radar_sample_volume");
-        sampleVol->setLongName("radar_sample_volume_per_gate");
-        sampleVol->setMissingFl32(-9999.0);
-        sampleVol->setRangeGeom(startRangeKm, gateSpacingKm);
-        Radx::fl32 *data = new Radx::fl32[nGates];
-        for (int ii = 0; ii < nGates; ii++) {
-          double rangeKm = startRangeKm + ii * gateSpacingKm;
-          double widthKm = rangeKm * beamWidthRad;
-          double areaKm2 = (M_PI * widthKm * widthKm) / 4.0;
-          double volKm3 = areaKm2 * gateSpacingKm;
-          data[ii] = volKm3;
-        }
-        sampleVol->addDataFl32(nGates, data);
-        ray->addField(sampleVol);
-      }
-
-      // height in km
-
-      {
-        RadxField *height = new RadxField("height", "km");
-        height->setStandardName("beam_height_above_radar");
-        height->setLongName("beam_height_above_radar");
-        height->setMissingFl32(-9999.0);
-        height->setRangeGeom(startRangeKm, gateSpacingKm);
-        Radx::fl32 *data = new Radx::fl32[nGates];
-        for (int ii = 0; ii < nGates; ii++) {
-          double rangeKm = startRangeKm + ii * gateSpacingKm;
-          double beamHtKm = beamHt.computeHtKm(el, rangeKm);
-          data[ii] = beamHtKm;
-        }
-        height->addDataFl32(nGates, data);
-        ray->addField(height);
-      }
-
-      // age in secs since start
-
-      {
-        RadxField *age = new RadxField("age", "secs");
-        age->setStandardName("age_since_start_of_vol");
-        age->setLongName("age_since_start_of_vol");
-        age->setMissingFl32(-9999.0);
-        age->setRangeGeom(startRangeKm, gateSpacingKm);
-        Radx::fl32 *data = new Radx::fl32[nGates];
-        for (int ii = 0; ii < nGates; ii++) {
-          data[ii] = timeSinceStart;
-        }
-        age->addDataFl32(nGates, data);
-        ray->addField(age);
-      }
-      
       
     } // iray
     
@@ -258,15 +212,152 @@ int RadxVolTimeStats::Run()
   vol.setRadarBeamWidthDegH(_params.beam_width_deg);
   vol.setRadarBeamWidthDegV(_params.beam_width_deg);
 
-  // write the file
+}
 
-  if (_writeVol(vol)) {
-    cerr << "ERROR - RadxConvert::_processFile" << endl;
-    cerr << "  Cannot write volume to file" << endl;
+//////////////////////////////////////////////////
+// Read in a specified file
+// Returns 0 on success
+//         -1 on failure
+
+int RadxVolTimeStats::_readFile(const string &readPath,
+                                RadxVol &vol)
+{
+  
+  // clear all data on volume object
+
+  vol.clear();
+  
+  if (_params.debug) {
+    cerr << "INFO - RadxConvert::Run" << endl;
+    cerr << "  Input path: " << readPath << endl;
+  }
+  
+  GenericRadxFile inFile;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    inFile.setDebug(true);
+  }
+  if (_params.set_max_range) {
+    inFile.setReadMaxRangeKm(_params.max_range_km);
+  }
+
+  // read in file
+
+  if (inFile.readFromPath(readPath, vol)) {
+    cerr << "ERROR - RadxVolTimeStats::_readFile" << endl;
+    cerr << "  path: " << readPath << endl;
+    cerr << inFile.getErrStr() << endl;
     return -1;
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "  ==>> read in file: " << readPath << endl;
   }
 
   return 0;
+
+}
+
+//////////////////////////////////////////////////
+// add timing fields from which to determine stats
+
+void RadxVolTimeStats::_addTimingFields(RadxVol &vol)
+{
+
+  
+  RadxTime startTime = vol.getStartRadxTime();
+
+  double beamWidthRad = vol.getRadarBeamWidthDegH() * DEG_TO_RAD;
+  BeamHeight beamHt; // default init to get height above radar
+
+  // loop through rays
+
+  for (size_t iray = 0; iray < vol.getNRays(); iray++) {
+
+    RadxRay *ray = vol.getRays()[iray];
+    RadxTime rayTime = ray->getRadxTime();
+    double secsSinceStart = rayTime - startTime;
+    double el = ray->getElevationDeg();
+    int nGates = ray->getNGates();
+    double startRangeKm = ray->getStartRangeKm();
+    double gateSpacingKm = ray->getGateSpacingKm();
+
+    // add the fields
+    
+    // range in km
+    
+    {
+      RadxField *range = new RadxField("gateRange", "km");
+      range->setStandardName("range_to_center_of_gate");
+      range->setLongName("range_to_center_of_gate");
+      range->setMissingFl32(-9999.0);
+      range->copyRangeGeom(*ray);
+      Radx::fl32 *data = new Radx::fl32[nGates];
+      for (int ii = 0; ii < nGates; ii++) {
+        data[ii] = startRangeKm + ii * gateSpacingKm;
+      }
+      range->addDataFl32(nGates, data);
+      ray->addField(range);
+    }
+    
+    // sample volume in km3
+    
+    {
+      RadxField *sampleVol = new RadxField("sampleVol", "km3");
+      sampleVol->setStandardName("radar_sample_volume");
+      sampleVol->setLongName("radar_sample_volume_per_gate");
+      sampleVol->setMissingFl32(-9999.0);
+      sampleVol->copyRangeGeom(*ray);
+      Radx::fl32 *data = new Radx::fl32[nGates];
+      for (int ii = 0; ii < nGates; ii++) {
+        double rangeKm = startRangeKm + ii * gateSpacingKm;
+        double widthKm = rangeKm * beamWidthRad;
+        double areaKm2 = (M_PI * widthKm * widthKm) / 4.0;
+        double volKm3 = areaKm2 * gateSpacingKm;
+        data[ii] = volKm3;
+      }
+      sampleVol->addDataFl32(nGates, data);
+      ray->addField(sampleVol);
+    }
+    
+    // height in km
+    
+    {
+      RadxField *height = new RadxField("height", "km");
+      height->setStandardName("beam_height_above_radar");
+      height->setLongName("beam_height_above_radar");
+      height->setMissingFl32(-9999.0);
+      height->copyRangeGeom(*ray);
+      Radx::fl32 *data = new Radx::fl32[nGates];
+      for (int ii = 0; ii < nGates; ii++) {
+        double rangeKm = startRangeKm + ii * gateSpacingKm;
+        double beamHtKm = beamHt.computeHtKm(el, rangeKm);
+        data[ii] = beamHtKm;
+      }
+      height->addDataFl32(nGates, data);
+      ray->addField(height);
+    }
+    
+    // age in secs since start
+    
+    {
+      RadxField *age = new RadxField("age", "secs");
+      age->setStandardName("age_since_start_of_vol");
+      age->setLongName("age_since_start_of_vol");
+      age->setMissingFl32(-9999.0);
+      age->copyRangeGeom(*ray);
+      Radx::fl32 *data = new Radx::fl32[nGates];
+      for (int ii = 0; ii < nGates; ii++) {
+        data[ii] = secsSinceStart;
+      }
+      age->addDataFl32(nGates, data);
+      ray->addField(age);
+    }
+    
+  } // iray
+    
+  // update metadata from rays
+  
+  vol.loadVolumeInfoFromRays();
+  vol.loadSweepInfoFromRays();
 
 }
 

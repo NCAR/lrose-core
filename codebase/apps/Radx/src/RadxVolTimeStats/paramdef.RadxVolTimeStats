@@ -27,11 +27,43 @@ paramdef enum debug_t {
 } debug;
 
 commentdef {
-  p_header = "SIMULATED RADAR PARAMETERS";
+  p_header = "MODE";
+  p_text = "Read in a file, or specify radar and scan parameters";
+}
+
+typedef enum {
+  SPECIFY_FILE, SPECIFY_RADAR_PARAMS
+} specify_mode_t;
+
+paramdef enum specify_mode_t {
+  p_default = SPECIFY_RADAR_PARAMS;
+  p_descr = "Mode for determining radar parameters";
+  p_help = "\nSPECIFY_FILE: read in a file, and use that volume for computations.\n\nSPECIFY_RADAR_PARAMS: create a volume based on specified parameters in params file.";
+} specify_mode;
+
+commentdef {
+  p_header = "SPECIFIED FILE";
 }
 
 paramdef string {
-  p_default = "SIM";
+  p_default = "./template_cfradial_file.nc";
+  p_descr = "Path for specified file.";
+  p_help = "Applies to SPECIFY_FILE mode.";
+} specified_file_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set the maximum range for file that is read";
+  p_help = "If TRUE, then max_range_km is applied on read";
+} set_max_range;
+
+commentdef {
+  p_header = "SPECIFIED RADAR PARAMETERS";
+  p_text = "Applies to SPECIFY_RADAR_PARAMS mode.";
+}
+
+paramdef string {
+  p_default = "VIRTUAL";
   p_descr = "Name of radar";
 } radar_name;
 

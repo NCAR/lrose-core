@@ -90,6 +90,15 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-f")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "specify_mode = SPECIFY_FILE;");
+	TDRP_add_override(&override, tmp_str);
+	sprintf(tmp_str, "specified_file_path = \"%s\";", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      }
+	
     } // if
     
   } // i
@@ -110,7 +119,7 @@ void Args::_usage(ostream &out)
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -debug ] print debug messages\n"
-      << "       [ -path ?] path to test\n"
+      << "       [ -f ?] path to radar file if specified\n"
       << "       [ -verbose ] print verbose debug messages\n"
       << endl;
 

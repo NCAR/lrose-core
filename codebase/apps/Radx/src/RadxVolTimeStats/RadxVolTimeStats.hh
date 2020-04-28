@@ -74,6 +74,9 @@ private:
   Params _params;
   char *_paramsPath;
 
+  int _readFile(const string &readPath, RadxVol &vol);
+  void _createVol(RadxVol &vol);
+  void _addTimingFields(RadxVol &vol);
   void _setupWrite(RadxFile &file);
   int _writeVol(RadxVol &vol);
 
