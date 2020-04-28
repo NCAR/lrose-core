@@ -412,6 +412,10 @@ public:
   sweep_t *_sweeps;
   int sweeps_n;
 
+  int n_bins_age_histogram;
+
+  double age_hist_max_ht_km;
+
   char* output_dir;
 
   char _end_; // end of data region
@@ -421,7 +425,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[21];
+  mutable TDRPtable _table[24];
 
   const char *_className;
 

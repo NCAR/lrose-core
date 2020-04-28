@@ -859,6 +859,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("DATA AGE ANALYSIS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'n_bins_age_histogram'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_bins_age_histogram");
+    tt->descr = tdrpStrDup("Number of bins in the age histogram");
+    tt->help = tdrpStrDup("Age is expressed as a fraction of the time to complete the volume");
+    tt->val_offset = (char *) &n_bins_age_histogram - &_start_;
+    tt->single_val.i = 20;
+    tt++;
+    
+    // Parameter 'age_hist_max_ht_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("age_hist_max_ht_km");
+    tt->descr = tdrpStrDup("Max height of data used in age histogram (km)");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &age_hist_max_ht_km - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY");
     tt->comment_text = tdrpStrDup("");
     tt++;

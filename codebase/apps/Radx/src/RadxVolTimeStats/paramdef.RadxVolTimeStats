@@ -140,6 +140,21 @@ paramdef struct sweep_t {
 } sweeps[];
 
 commentdef {
+  p_header = "DATA AGE ANALYSIS";
+}
+
+paramdef int {
+  p_default = 20;
+  p_descr = "Number of bins in the age histogram";
+  p_help = "Age is expressed as a fraction of the time to complete the volume";
+} n_bins_age_histogram;
+
+paramdef double {
+  p_default = 20;
+  p_descr = "Max height of data used in age histogram (km)";
+} age_hist_max_ht_km;
+
+commentdef {
   p_header = "OUTPUT DIRECTORY";
 }
 

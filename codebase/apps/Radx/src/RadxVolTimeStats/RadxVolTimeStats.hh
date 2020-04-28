@@ -79,6 +79,7 @@ private:
   void _addTimingFields(RadxVol &vol);
   void _setupWrite(RadxFile &file);
   int _writeVol(RadxVol &vol);
+  void _computeAgeHist(RadxVol &vol);
 
 };
 
