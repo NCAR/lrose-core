@@ -147,6 +147,8 @@ void RadxVolTimeStats::_createVol(RadxVol &vol)
   double timeSinceStart = 0.0;
   double startRangeKm = _params.gate_spacing_m / 2000.0;
   double gateSpacingKm = _params.gate_spacing_m / 1000.0;
+  double maxRangeKm = _params.max_range_km;
+  int nGates = (int) (maxRangeKm / gateSpacingKm + 0.5);
   
   // loop through specified sweeps
   
@@ -179,6 +181,7 @@ void RadxVolTimeStats::_createVol(RadxVol &vol)
       ray->setAngleResDeg(1.0);
       ray->setNSamples(1);
       ray->setRangeGeom(startRangeKm, gateSpacingKm);
+      ray->setNGates(nGates);
 
       // add ray to vol - vol will free it later
       
