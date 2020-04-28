@@ -1,0 +1,119 @@
+/*********************************************************
+ * parameter definitions for RadxVolTimeStats
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * April 2020
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "RadxVolTimeStats compute timing statistics for (a) an example Radx volume or (b) a scan strategy specified in the parameter file. The statistics are aimed at understanding the age of fractions of the measured volume.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "SIMULATED RADAR PARAMETERS";
+}
+
+paramdef string {
+  p_default = "SIM";
+  p_descr = "Name of radar";
+} radar_name;
+
+typedef struct {
+  double latitudeDeg;
+  double longitudeDeg;
+  double altitudeKm;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 40.0, -105.0, 1500.0 };
+  p_descr = "Radar location";
+  p_help = "Note that the altitude is in meters MSL.";
+} radar_location;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Radar wavelength, cm";
+} radar_wavelength_cm;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Radar beamwidth (deg)";
+} beam_width_deg;
+
+paramdef string {
+  p_default = "VCP215";
+  p_descr = "Volume coverage pattern";
+} scan_name;
+
+paramdef double {
+  p_default = 250;
+  p_descr = "Gate spacing for simulation (m)";
+} gate_spacing_m;
+
+paramdef double {
+  p_default = 250;
+  p_descr = "Max range (km)";
+} max_range_km;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Rate of rotation in elevation (deg/s)";
+} elev_rate_deg_per_sec;
+
+typedef struct {
+  double elev_deg;
+  double az_rate_deg_per_sec;
+} sweep_t;
+
+paramdef struct sweep_t {
+  p_default = {
+    { 0.5, 11.46 },
+    { 0.5, 17.10 },
+    { 0.9, 13.38 },
+    { 0.9, 17.10 },
+    { 1.3, 13.38 },
+    { 1.3, 17.10 },
+    { 1.8, 13.38 },
+    { 2.4, 18.06 },
+    { 3.1, 18.06 },
+    { 4.0, 20.52 },
+    { 5.1, 20.52 },
+    { 6.4, 20.52 },
+    { 8.0, 24.84 },
+    { 10.0, 25.62 },
+    { 12.0, 25.62 },
+    { 14.0, 25.62 },
+    { 16.7, 25.62 },
+    { 19.5, 25.62 }
+  };
+  p_descr = "Definition of each sweep.";
+  p_help = "Elevation angle (deg), azimuth rate (deg/sec).";
+} sweeps[];
+
+commentdef {
+  p_header = "OUTPUT DIRECTORY";
+}
+
+paramdef string {
+  p_default = "./output/RadxVolTimeStats/";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
