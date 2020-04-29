@@ -404,14 +404,14 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
 
   double totalVol = 0.0;
   double totalWtAge = 0.0;
-  vector<double> binVol, binFrac, cumFrac;
+  vector<double> binVol, binFreq, cumFreq;
   binVol.resize(_params.n_bins_age_histogram);
-  binFrac.resize(_params.n_bins_age_histogram);
-  cumFrac.resize(_params.n_bins_age_histogram);
+  binFreq.resize(_params.n_bins_age_histogram);
+  cumFreq.resize(_params.n_bins_age_histogram);
   for (size_t ibin = 0; ibin < binVol.size(); ibin++) {
     binVol[ibin] = 0.0;
-    binFrac[ibin] = 0.0;
-    cumFrac[ibin] = 0.0;
+    binFreq[ibin] = 0.0;
+    cumFreq[ibin] = 0.0;
   }
   
   // accumulate volume in each bin
@@ -474,34 +474,33 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
   // normalize volume by total to get fraction
   
   for (size_t ibin = 0; ibin < binVol.size(); ibin++) {
-    binFrac[ibin] = binVol[ibin] / totalVol;
+    binFreq[ibin] = binVol[ibin] / totalVol;
   }
-  cumFrac[0] = binFrac[0];
+  cumFreq[0] = binFreq[0];
   for (size_t ibin = 1; ibin < binVol.size(); ibin++) {
-    cumFrac[ibin] = cumFrac[ibin - 1] + binFrac[ibin];
+    cumFreq[ibin] = cumFreq[ibin - 1] + binFreq[ibin];
   }
-
-  // print out
-
-  fprintf(stdout, 
-          "%10s %10s %10s %10s %10s %10s\n",
-          "binNum", "binAge", "binVol", "binFrac", "cumFrac", "revFrac");
-
-  for (size_t ibin = 0; ibin < binVol.size(); ibin++) {
-
-    double binAge = ((ibin + 0.5) / binVol.size()) * volDurationSecs;
-    
-    fprintf(stdout, 
-            "%10ld %10.2f %10.2e %10.6f %10.6f %10.6f\n",
-            ibin, binAge, 
-            binVol[ibin], binFrac[ibin], 
-            cumFrac[ibin], 1.0-cumFrac[ibin]);
-    
-  } // ibin
 
   double meanAge = totalWtAge / totalVol;
 
-  fprintf(stdout, "==>> meanAge: %10.2f\n", meanAge);
+  // print to stdout
+  
+  fprintf(stdout, "#########################################################\n");
+  fprintf(stdout, "# scanName: %s\n", _params.scan_name);
+  fprintf(stdout, "# meanAge : %.3f\n", meanAge);
+  fprintf(stdout, 
+          "# %10s %10s %10s %10s %10s %10s %10s\n",
+          "binNum", "binAge", "binPos", "binVol", "binFreq", "cumFreq", "revFreq");
+  for (size_t ibin = 0; ibin < binVol.size(); ibin++) {
+    double binAge = ((ibin + 0.5) / binVol.size()) * volDurationSecs;
+    double binPos = ((ibin + 0.5) / binVol.size());
+    fprintf(stdout, 
+            "  %10ld %10.2f %10.3f %10.2e %10.6f %10.6f %10.6f\n",
+            ibin, binAge, binPos,
+            binVol[ibin], binFreq[ibin], 
+            cumFreq[ibin], 1.0-cumFreq[ibin]);
+  } // ibin
+  fprintf(stdout, "#########################################################\n");
   
 }
 

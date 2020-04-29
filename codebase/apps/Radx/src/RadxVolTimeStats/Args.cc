@@ -121,6 +121,13 @@ int Args::parse (const int argc, const char **argv)
 	TDRP_add_override(&override, tmp_str);
       }
 	
+    } else if (!strcmp(argv[i], "-scan")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "scan_name = \"%s\";", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      }
+	
     } else if (!strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
