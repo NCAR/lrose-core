@@ -1,9 +1,10 @@
+#! /bin/csh
 
 RadxVolTimeStats -f ~/data/meso/nexrad/KDGX/KDGX/20200412/KDGX20200412_232611_V06 > testing/VCP212_timing.txt
 
 RadxVolTimeStats -f ~/data/meso/nexrad/KDGX/KDGX/20200412/KDGX20200412_000155_V06 > testing/VCP215_timing.txt
 
-RadxVolTimeStats -f ~/data/meso/nexrad/KGWX/KGWX/20200412/KGWX20200412_000101_V06 > testing/VCP35_timing.tx
+RadxVolTimeStats -f ~/data/meso/nexrad/KGWX/KGWX/20200412/KGWX20200412_000101_V06 > testing/VCP35_timing.txt
 
 RadxVolTimeStats -f ~/data/bom/cfradial/T_Hills/20200215/cfrad.20200215_073631.000_to_20200215_074046.000_AU71_SUR_SUR.nc -scan THills > testing/THills_timing.txt
 

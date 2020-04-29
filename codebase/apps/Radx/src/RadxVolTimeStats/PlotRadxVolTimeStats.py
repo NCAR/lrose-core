@@ -24,7 +24,7 @@ def main():
 
     global options
     global scanName, colHeaders, colData
-    global heights, meanAgeFwd, meanAgeRev, volDuration
+    global heights, elevs, meanAgeFwd, meanAgeRev, volDuration
 
 # parse the command line
 
@@ -79,7 +79,7 @@ def main():
 
 def readColumnHeaders(filePath):
 
-    global scanName, heights, meanAgeFwd, meanAgeRev, volDuration, colHeaders
+    global scanName, heights, elevs, meanAgeFwd, meanAgeRev, volDuration, colHeaders
     colHeaders = []
     heights = []
     meanAgeFwd = []
@@ -112,6 +112,12 @@ def readColumnHeaders(filePath):
         if (line.find("duration") > 0):
             parts = line.strip().split()
             volDuration = parts[-1]
+            continue
+
+        # elevations
+        if (line.find("elevs") > 0):
+            parts = line.strip().split()
+            elevs = parts[-1]
             continue
 
         # analysis heights
@@ -242,7 +248,7 @@ def doPlot():
     ax1.set_ylabel('Fraction of volume')
     ax1.set_xlabel('Normalized age - cumulative - vol duration: ' + volDuration + 's')
     #ax2.set_xlabel('Normalized age - per bin')
-    #ax1.set_title('Mean normalized age Fwd/Rev: ' + meanAgeFwd + '/' + meanAgeRev, fontsize=14)
+    ax1.set_title('Elevs: ' + elevs, fontsize=10)
     ax1.grid(True)
 
     legend1 = ax1.legend(loc='upper left', ncol=1)

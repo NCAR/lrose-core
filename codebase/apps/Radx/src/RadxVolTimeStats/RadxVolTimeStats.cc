@@ -47,6 +47,7 @@
 #include <radar/BeamHeight.hh>
 
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
@@ -120,6 +121,8 @@ int RadxVolTimeStats::Run()
       return -1;
     }
   }
+
+  cerr << "==>> Read file: " << _params.specified_file_path << endl;
 
   // add the gate geometry fields
 
@@ -543,6 +546,16 @@ void RadxVolTimeStats::_writeAgeResults(RadxVol &vol,
   fprintf(stdout, "#########################################################\n");
   fprintf(stdout, "# scanName   : %s\n", scanName);
   fprintf(stdout, "# duration   : %.0f\n", volDurationSecs);
+  fprintf(stdout, "# elevs      : ");
+  const vector<RadxSweep *> &sweeps = vol.getSweeps();
+  for (size_t ii = 0; ii < sweeps.size(); ii++) {
+    fprintf(stdout, "%.2f", sweeps[ii]->getFixedAngleDeg());
+    if (ii != sweeps.size()-1) {
+      fprintf(stdout, ",");
+    } else {
+      fprintf(stdout, "\n");
+    }
+  }
   fprintf(stdout, "# heights    : ");
   for (int ii = 0; ii < nHts; ii++) {
     fprintf(stdout, "%g", maxHtKm[ii]);
@@ -556,7 +569,6 @@ void RadxVolTimeStats::_writeAgeResults(RadxVol &vol,
     fprintf(stdout, "# meanAgeFwd[%g] : %.3f\n", maxHtKm[ii], meanAgeFwd[ii]);
     fprintf(stdout, "# meanAgeRev[%g] : %.3f\n", maxHtKm[ii], meanAgeRev[ii]);
   }
-  
   
   fprintf(stdout, 
           "# %8s %8s %8s",
