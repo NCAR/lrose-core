@@ -616,7 +616,6 @@ void RadxVolTimeStats::_setupWrite(RadxFile &file)
   file.setCompressionLevel(4);
   file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
   file.setNcFormat(RadxFile::NETCDF4);
-
   
 }
 

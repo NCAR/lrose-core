@@ -250,10 +250,21 @@ def doPlot():
     #ax2.set_xlabel('Normalized age - per bin')
     ax1.set_title('Elevs: ' + elevs, fontsize=10)
     ax1.grid(True)
+    
+    #ax1.grid(which='minor', alpha=0.1)
+    #ax1.grid(which='major', alpha=0.2)
+    #major_ticks = np.arange(0, 1, 0.2)
+    #minor_ticks = np.arange(0.1, 0.9, 0.2)
+    #ax1.set_xticks(major_ticks)
+    #ax1.set_xticks(minor_ticks, minor=True)
+    #ax1.set_yticks(major_ticks)
+    #ax1.set_yticks(minor_ticks, minor=True)
 
     legend1 = ax1.legend(loc='upper left', ncol=1)
     for label in legend1.get_texts():
         label.set_fontsize('x-small')
+
+    fig1.savefig("vol_timing_stats." + scanName + ".png")
 
    # show
 
