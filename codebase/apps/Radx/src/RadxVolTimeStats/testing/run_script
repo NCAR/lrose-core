@@ -1,0 +1,20 @@
+
+RadxVolTimeStats -f ~/data/meso/nexrad/KDGX/KDGX/20200412/KDGX20200412_232611_V06 > testing/VCP212_timing.txt
+
+RadxVolTimeStats -f ~/data/meso/nexrad/KDGX/KDGX/20200412/KDGX20200412_000155_V06 > testing/VCP215_timing.txt
+
+RadxVolTimeStats -f ~/data/meso/nexrad/KGWX/KGWX/20200412/KGWX20200412_000101_V06 > testing/VCP35_timing.tx
+
+RadxVolTimeStats -f ~/data/bom/cfradial/T_Hills/20200215/cfrad.20200215_073631.000_to_20200215_074046.000_AU71_SUR_SUR.nc -scan THills > testing/THills_timing.txt
+
+RadxVolTimeStats -f ~/data/bom/cfradial/Melb/20200304/cfrad.20200304_150031.000_to_20200304_150448.000_AU02_SUR_SUR.nc -scan Melb > testing/Melb_timing.txt
+
+RadxVolTimeStats -f ~/data/daniel/RB5_for_PID/cfradial/raw/20190730/cfrad.20190730_200003.000_to_20190730_200546.684_CAS2-Blainville_SUR.nc -scan CAS2 > testing/CAS2_timing.txt
+
+PlotRadxVolTimeStats.py --file testing/VCP212_timing.txt &
+PlotRadxVolTimeStats.py --file testing/VCP215_timing.txt &
+PlotRadxVolTimeStats.py --file testing/VCP35_timing.txt &
+PlotRadxVolTimeStats.py --file testing/CAS2_timing.txt &
+PlotRadxVolTimeStats.py --file testing/Melb_timing.txt &
+PlotRadxVolTimeStats.py --file testing/THills_timing.txt &
+
