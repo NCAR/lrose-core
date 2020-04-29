@@ -23,7 +23,8 @@ def main():
 #   globals
 
     global options
-    global scanName, meanAgeFwd, meanAgeRev, colHeaders, colData
+    global scanName, colHeaders, colData
+    global meanAgeFwd, meanAgeRev, volDuration
 
 # parse the command line
 
@@ -78,7 +79,7 @@ def main():
 
 def readColumnHeaders(filePath):
 
-    global scanName, meanAgeFwd, meanAgeRev, colHeaders
+    global scanName, meanAgeFwd, meanAgeRev, volDuration, colHeaders
     colHeaders = []
 
     fp = open(filePath, 'r')
@@ -112,6 +113,12 @@ def readColumnHeaders(filePath):
         if (line.find("meanAgeRev") > 0):
             parts = line.strip().split()
             meanAgeRev = parts[-1]
+            continue
+
+        # volume duration
+        if (line.find("duration") > 0):
+            parts = line.strip().split()
+            volDuration = parts[-1]
             continue
 
         # col headers?
@@ -185,29 +192,29 @@ def doPlot():
     title = (options.title + ' for Scan: ' + scanName)
     fig1.suptitle(title, fontsize=16)
     ax1 = fig1.add_subplot(1,1,1,xmargin=0.0)
-    ax2 = ax1.twinx() # instantiate a second axes that shares the same x-axis
+    # ax2 = ax1.twinx() # instantiate a second axes that shares the same x-axis
 
     ax1.set_xlim([0.0, 1.0])
     ax1.set_ylim([0.0, 1.0])
-    ax2.set_ylim([0.0, 0.2])
+    # ax2.set_ylim([0.0, 0.2])
 
     # plot the frequency
 
-    ax2.plot(binPos, binFreqFwd, \
-             linewidth=1, label = 'FreqFwd', color = 'blue')
+    #ax2.plot(binPos, binFreqFwd, \
+    #         linewidth=1, label = 'FreqFwd', color = 'blue')
     
     ax1.plot(binPos, cumFreqFwd, \
              linewidth=1, label = 'CumFreqFwd', color = 'red')
 
-    ax2.plot(binPos, binFreqRev, \
-             linewidth=1, label = 'FreqRev', color = 'green')
+    #ax2.plot(binPos, binFreqRev, \
+    #         linewidth=1, label = 'FreqRev', color = 'green')
     
     ax1.plot(binPos, cumFreqRev, \
              linewidth=1, label = 'CumFreqRev', color = 'orange')
 
     ax1.set_ylabel('Fraction of volume')
-    ax1.set_xlabel('Normalized age - cumulative')
-    ax2.set_xlabel('Normalized age - per bin')
+    ax1.set_xlabel('Normalized age - cumulative - vol duration (secs): ' + volDuration)
+    #ax2.set_xlabel('Normalized age - per bin')
     ax1.set_title('Mean normalized age Fwd/Rev: ' + meanAgeFwd + '/' + meanAgeRev, fontsize=14)
     ax1.grid(True)
 

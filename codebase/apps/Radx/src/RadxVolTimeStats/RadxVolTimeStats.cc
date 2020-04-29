@@ -249,6 +249,7 @@ int RadxVolTimeStats::_readFile(const string &readPath,
   if (_params.set_max_range) {
     inFile.setReadMaxRangeKm(_params.max_range_km);
   }
+  inFile.setReadPreserveSweeps(true);
 
   // read in file
 
@@ -452,9 +453,16 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
 
   // print to stdout
   
+  char scanName[128];
+  if (vol.getScanId() > 0) {
+    snprintf(scanName, 128, "VCP%d", vol.getScanId());
+  } else {
+    snprintf(scanName, 128, "%s", _params.scan_name);
+  }
+
   fprintf(stdout, "#########################################################\n");
-  fprintf(stdout, "# scanName   : %s\n", _params.scan_name);
-  fprintf(stdout, "# duration   : %.3f\n", volDurationSecs);
+  fprintf(stdout, "# scanName   : %s\n", scanName);
+  fprintf(stdout, "# duration   : %.0f\n", volDurationSecs);
   fprintf(stdout, "# meanAgeFwd : %.3f\n", meanAgeFwd);
   fprintf(stdout, "# meanAgeRev : %.3f\n", meanAgeRev);
   fprintf(stdout, 

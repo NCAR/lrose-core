@@ -746,7 +746,7 @@
     tt->descr = tdrpStrDup("Volume coverage pattern");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &scan_name - &_start_;
-    tt->single_val.s = tdrpStrDup("VCP215");
+    tt->single_val.s = tdrpStrDup("Unknown");
     tt++;
     
     // Parameter 'gate_spacing_m'

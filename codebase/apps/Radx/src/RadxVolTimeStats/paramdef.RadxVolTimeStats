@@ -90,7 +90,7 @@ paramdef double {
 } beam_width_deg;
 
 paramdef string {
-  p_default = "VCP215";
+  p_default = "Unknown";
   p_descr = "Volume coverage pattern";
 } scan_name;
 
