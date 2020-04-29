@@ -77,7 +77,17 @@ private:
   int _readFile(const string &readPath, RadxVol &vol);
   void _createVol(RadxVol &vol);
   void _addGeomFields(RadxVol &vol);
-  void _computeAgeHist(RadxVol &vol);
+  void _computeAgeHist(RadxVol &vol, double maxHtKm,
+                       double &meanAgeFwd,
+                       double &meanAgeRev,
+                       vector<double> &cumFreqFwd,
+                       vector<double> &cumFreqRev);
+  void _writeAgeResults(RadxVol &vol,
+                        vector<double> &maxHtKm,
+                        vector<double> &meanAgeFwd,
+                        vector<double> &meanAgeRev,
+                        vector< vector<double> > &cumFreqFwd,
+                        vector< vector<double> > &cumFreqRev);
   void _setupWrite(RadxFile &file);
   int _writeVol(RadxVol &vol);
 

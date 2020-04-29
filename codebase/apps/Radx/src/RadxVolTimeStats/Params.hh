@@ -414,7 +414,8 @@ public:
 
   int n_bins_age_histogram;
 
-  double age_hist_max_ht_km;
+  double *_age_hist_max_ht_km;
+  int age_hist_max_ht_km_n;
 
   tdrp_bool_t write_volume_to_output_file;
 

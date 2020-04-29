@@ -150,9 +150,9 @@ paramdef int {
 } n_bins_age_histogram;
 
 paramdef double {
-  p_default = 20;
-  p_descr = "Max height of data used in age histogram (km)";
-} age_hist_max_ht_km;
+  p_default = { 5.0, 10.0, 20.0 };
+  p_descr = "Max heights to be used in age histogram (km)";
+} age_hist_max_ht_km[];
 
 commentdef {
   p_header = "WRITING FILES TO OUTPUT DIRECTORY";

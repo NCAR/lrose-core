@@ -59,7 +59,7 @@ using namespace std;
 // Constructor
 
 RadxVolTimeStats::RadxVolTimeStats(int argc, char **argv) :
-  _args("RadxVolTimeStats")
+        _args("RadxVolTimeStats")
 
 {
 
@@ -135,10 +135,37 @@ int RadxVolTimeStats::Run()
     }
   }
 
-  // compute the age histogram
+  // set up results vectors for different max heights
 
-  _computeAgeHist(vol);
+  vector<double> maxHtKm;
+  vector<double> meanAgeFwd, meanAgeRev;
+  vector< vector<double> > cumFreqFwd;
+  vector< vector<double> > cumFreqRev;
 
+  maxHtKm.resize(_params.age_hist_max_ht_km_n);
+  meanAgeFwd.resize(_params.age_hist_max_ht_km_n);
+  meanAgeRev.resize(_params.age_hist_max_ht_km_n);
+  cumFreqFwd.resize(_params.age_hist_max_ht_km_n);
+  cumFreqRev.resize(_params.age_hist_max_ht_km_n);
+  
+  for (int ii = 0; ii < _params.age_hist_max_ht_km_n; ii++) {
+    maxHtKm[ii] = _params._age_hist_max_ht_km[ii];
+  }
+  
+  // compute the age histograms
+  
+  for (int ii = 0; ii < _params.age_hist_max_ht_km_n; ii++) {
+    _computeAgeHist(vol, maxHtKm[ii],
+                    meanAgeFwd[ii], meanAgeRev[ii],
+                    cumFreqFwd[ii], cumFreqRev[ii]);
+  } // ii
+
+  // write results to stdout
+
+  _writeAgeResults(vol, maxHtKm,
+                   meanAgeFwd, meanAgeRev,
+                   cumFreqFwd, cumFreqRev);
+  
   return 0;
 
 }
@@ -332,19 +359,20 @@ void RadxVolTimeStats::_addGeomFields(RadxVol &vol)
 
 }
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 // compute the age histogram
 
-void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
+void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
+                                       double &meanAgeFwd, double &meanAgeRev,
+                                       vector<double> &cumFreqFwd,
+                                       vector<double> &cumFreqRev)
 {
 
   // get time limits, and vol duration
-
+  
   RadxTime startTime = vol.getStartRadxTime();
   RadxTime endTime = vol.getEndRadxTime();
   double volDurationSecs = endTime - startTime;
-  if (_params.debug) {
-  }
   
   // initialize counter arrays
 
@@ -365,7 +393,7 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
   for (size_t iray = 0; iray < vol.getNRays(); iray++) {
     
     // get ray
-
+    
     RadxRay *ray = vol.getRays()[iray];
     int nGates = ray->getNGates();
     RadxTime rayTime = ray->getRadxTime();
@@ -389,7 +417,7 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
 
       // check height
       
-      if (height[igate] > _params.age_hist_max_ht_km) {
+      if (height[igate] > maxHtKm) {
         continue;
       }
 
@@ -427,7 +455,7 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
 
   // normalize volume by total to get fraction
 
-  vector<double> binFreqFwd, cumFreqFwd;
+  vector<double> binFreqFwd;
   binFreqFwd.resize(_params.n_bins_age_histogram);
   cumFreqFwd.resize(_params.n_bins_age_histogram);
   for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
@@ -437,9 +465,9 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
   for (size_t ibin = 1; ibin < binVolFwd.size(); ibin++) {
     cumFreqFwd[ibin] = cumFreqFwd[ibin - 1] + binFreqFwd[ibin];
   }
-  double meanAgeFwd = totalWtFwd / totalVol;
+  meanAgeFwd = totalWtFwd / totalVol;
 
-  vector<double> binFreqRev, cumFreqRev;
+  vector<double> binFreqRev;
   binFreqRev.resize(_params.n_bins_age_histogram);
   cumFreqRev.resize(_params.n_bins_age_histogram);
   for (size_t ibin = 0; ibin < binVolRev.size(); ibin++) {
@@ -449,8 +477,58 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
   for (size_t ibin = 1; ibin < binVolRev.size(); ibin++) {
     cumFreqRev[ibin] = cumFreqRev[ibin - 1] + binFreqRev[ibin];
   }
-  double meanAgeRev = totalWtRev / totalVol;
+  meanAgeRev = totalWtRev / totalVol;
 
+  // print to stdout
+  
+  // char scanName[128];
+  // if (vol.getScanId() > 0) {
+  //   snprintf(scanName, 128, "VCP%d", vol.getScanId());
+  // } else {
+  //   snprintf(scanName, 128, "%s", _params.scan_name);
+  // }
+
+  // fprintf(stdout, "#########################################################\n");
+  // fprintf(stdout, "# scanName   : %s\n", scanName);
+  // fprintf(stdout, "# duration   : %.0f\n", volDurationSecs);
+  // fprintf(stdout, "# meanAgeFwd : %.3f\n", meanAgeFwd);
+  // fprintf(stdout, "# meanAgeRev : %.3f\n", meanAgeRev);
+  // fprintf(stdout, 
+  //         "# %10s %10s %10s %10s %10s %10s %10s\n",
+  //         "binNum", "binAge", "binPos", "binFreqFwd", "cumFreqFwd", "binFreqRev", "cumFreqRev");
+  // for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
+  //   double binAge = ((ibin + 0.5) / binVolFwd.size()) * volDurationSecs;
+  //   double binPos = ((ibin + 0.5) / binVolFwd.size());
+  //   fprintf(stdout, 
+  //           "  %10ld %10.2f %10.3f %10.6f %10.6f %10.6f %10.6f\n",
+  //           ibin, binAge, binPos,
+  //           binFreqFwd[ibin], cumFreqFwd[ibin],
+  //           binFreqRev[ibin], cumFreqRev[ibin]);
+  // } // ibin
+  // fprintf(stdout, "#########################################################\n");
+  
+}
+
+////////////////////////////////////////////////////////////////////
+// Write out the results to a text file
+
+void RadxVolTimeStats::_writeAgeResults(RadxVol &vol,
+                                        vector<double> &maxHtKm,
+                                        vector<double> &meanAgeFwd,
+                                        vector<double> &meanAgeRev,
+                                        vector< vector<double> > &cumFreqFwd,
+                                        vector< vector<double> > &cumFreqRev)
+  
+{
+
+  // get time limits, and vol duration
+
+  RadxTime startTime = vol.getStartRadxTime();
+  RadxTime endTime = vol.getEndRadxTime();
+  double volDurationSecs = endTime - startTime;
+  int nBins = cumFreqFwd[0].size();
+  int nHts = maxHtKm.size();
+  
   // print to stdout
   
   char scanName[128];
@@ -460,22 +538,49 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
     snprintf(scanName, 128, "%s", _params.scan_name);
   }
 
+  // header
+
   fprintf(stdout, "#########################################################\n");
   fprintf(stdout, "# scanName   : %s\n", scanName);
   fprintf(stdout, "# duration   : %.0f\n", volDurationSecs);
-  fprintf(stdout, "# meanAgeFwd : %.3f\n", meanAgeFwd);
-  fprintf(stdout, "# meanAgeRev : %.3f\n", meanAgeRev);
+  fprintf(stdout, "# heights    : ");
+  for (int ii = 0; ii < nHts; ii++) {
+    fprintf(stdout, "%g", maxHtKm[ii]);
+    if (ii != nHts-1) {
+      fprintf(stdout, ",");
+    } else {
+      fprintf(stdout, "\n");
+    }
+  }
+  for (int ii = 0; ii < nHts; ii++) {
+    fprintf(stdout, "# meanAgeFwd[%g] : %.3f\n", maxHtKm[ii], meanAgeFwd[ii]);
+    fprintf(stdout, "# meanAgeRev[%g] : %.3f\n", maxHtKm[ii], meanAgeRev[ii]);
+  }
+  
+  
   fprintf(stdout, 
-          "# %10s %10s %10s %10s %10s %10s %10s\n",
-          "binNum", "binAge", "binPos", "binFreqFwd", "cumFreqFwd", "binFreqRev", "cumFreqRev");
-  for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
-    double binAge = ((ibin + 0.5) / binVolFwd.size()) * volDurationSecs;
-    double binPos = ((ibin + 0.5) / binVolFwd.size());
+          "# %8s %8s %8s",
+          "binNum", "binAge", "binPos");
+
+  for (int ii = 0; ii < nHts; ii++) {
+    char label[128];
+    snprintf(label, 128, "cumFreqFwd[%g]", maxHtKm[ii]);
+    fprintf(stdout, " %14s", label);
+    snprintf(label, 128, "cumFreqRev[%g]", maxHtKm[ii]);
+    fprintf(stdout, " %14s", label);
+  }
+  fprintf(stdout, "\n");
+  
+  for (int ibin = 0; ibin < nBins; ibin++) {
+    double binAge = ((ibin + 0.5) / nBins) * volDurationSecs;
+    double binPos = ((ibin + 0.5) / nBins);
     fprintf(stdout, 
-            "  %10ld %10.2f %10.3f %10.6f %10.6f %10.6f %10.6f\n",
-            ibin, binAge, binPos,
-            binFreqFwd[ibin], cumFreqFwd[ibin],
-            binFreqRev[ibin], cumFreqRev[ibin]);
+            "  %8d %8.2f %8.3f",
+            ibin, binAge, binPos);
+    for (int ii = 0; ii < nHts; ii++) {
+      fprintf(stdout, " %14.6f %14.6f", cumFreqFwd[ii][ibin], cumFreqRev[ii][ibin]);
+    }
+    fprintf(stdout, "\n");
   } // ibin
   fprintf(stdout, "#########################################################\n");
   

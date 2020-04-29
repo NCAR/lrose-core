@@ -881,10 +881,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("age_hist_max_ht_km");
-    tt->descr = tdrpStrDup("Max height of data used in age histogram (km)");
+    tt->descr = tdrpStrDup("Max heights to be used in age histogram (km)");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &age_hist_max_ht_km - &_start_;
-    tt->single_val.d = 20;
+    tt->array_offset = (char *) &_age_hist_max_ht_km - &_start_;
+    tt->array_n_offset = (char *) &age_hist_max_ht_km_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 3;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 5;
+      tt->array_vals[1].d = 10;
+      tt->array_vals[2].d = 20;
     tt++;
     
     // Parameter 'Comment 6'

@@ -24,7 +24,7 @@ def main():
 
     global options
     global scanName, colHeaders, colData
-    global meanAgeFwd, meanAgeRev, volDuration
+    global heights, meanAgeFwd, meanAgeRev, volDuration
 
 # parse the command line
 
@@ -44,11 +44,11 @@ def main():
                       help='Title for plot')
     parser.add_option('--width',
                       dest='figWidthMm',
-                      default=200,
+                      default=250,
                       help='Width of figure in mm')
     parser.add_option('--height',
                       dest='figHeightMm',
-                      default=150,
+                      default=200,
                       help='Height of figure in mm')
     (options, args) = parser.parse_args()
     
@@ -79,8 +79,11 @@ def main():
 
 def readColumnHeaders(filePath):
 
-    global scanName, meanAgeFwd, meanAgeRev, volDuration, colHeaders
+    global scanName, heights, meanAgeFwd, meanAgeRev, volDuration, colHeaders
     colHeaders = []
+    heights = []
+    meanAgeFwd = []
+    meanAgeRev = []
 
     fp = open(filePath, 'r')
     lines = fp.readlines()
@@ -105,22 +108,38 @@ def readColumnHeaders(filePath):
             scanName = parts[-1]
             continue
 
-        # mean age
-        if (line.find("meanAgeFwd") > 0):
-            parts = line.strip().split()
-            meanAgeFwd = parts[-1]
-            continue
-        if (line.find("meanAgeRev") > 0):
-            parts = line.strip().split()
-            meanAgeRev = parts[-1]
-            continue
-
         # volume duration
         if (line.find("duration") > 0):
             parts = line.strip().split()
             volDuration = parts[-1]
             continue
 
+        # analysis heights
+        if (line.find("heights") > 0):
+            parts = line.strip().split()
+            heightList = parts[-1]
+            heights = heightList.split(',')
+            continue
+
+        # mean age - by height
+
+        if (len(heights) > 0):
+            for ht in heights:
+
+                fwdLabel = "meanAgeFwd[" + ht + "]"
+                if (line.find(fwdLabel) > 0):
+                    parts = line.strip().split()
+                    ageFwd = parts[-1]
+                    meanAgeFwd.append(ageFwd)
+                    continue
+
+                revLabel = "meanAgeRev[" + ht + "]"
+                if (line.find(revLabel) > 0):
+                    parts = line.strip().split()
+                    ageRev = parts[-1]
+                    meanAgeRev.append(ageRev)
+                    continue
+                    
         # col headers?
         if (line.find("binNum") > 0):
             colHeaders = line.lstrip("# ").rstrip("\n").split()
@@ -180,10 +199,6 @@ def readInputData(filePath):
 def doPlot():
 
     binPos = np.array(colData["binPos"]).astype(np.double)
-    binFreqFwd = np.array(colData["binFreqFwd"]).astype(np.double)
-    cumFreqFwd = np.array(colData["cumFreqFwd"]).astype(np.double)
-    binFreqRev = np.array(colData["binFreqRev"]).astype(np.double)
-    cumFreqRev = np.array(colData["cumFreqRev"]).astype(np.double)
 
     widthIn = float(options.figWidthMm) / 25.4
     htIn = float(options.figHeightMm) / 25.4
@@ -198,27 +213,39 @@ def doPlot():
     ax1.set_ylim([0.0, 1.0])
     # ax2.set_ylim([0.0, 0.2])
 
-    # plot the frequency
+    # plot the frequency, for each ht limit
 
-    #ax2.plot(binPos, binFreqFwd, \
-    #         linewidth=1, label = 'FreqFwd', color = 'blue')
-    
-    ax1.plot(binPos, cumFreqFwd, \
-             linewidth=1, label = 'CumFreqFwd', color = 'red')
+    count = 0
+    dash = 8
+    space = 0
+    for ht in heights:
 
-    #ax2.plot(binPos, binFreqRev, \
-    #         linewidth=1, label = 'FreqRev', color = 'green')
-    
-    ax1.plot(binPos, cumFreqRev, \
-             linewidth=1, label = 'CumFreqRev', color = 'orange')
+        nameFwd = "cumFreqFwd[" + ht + "]"
+        nameRev = "cumFreqRev[" + ht + "]"
+
+        cumFreqFwd = np.array(colData[nameFwd]).astype(np.double)
+        cumFreqRev = np.array(colData[nameRev]).astype(np.double)
+
+        labelFwd = "FwdHt" + ht + "km meanAge: " + meanAgeFwd[count]
+        labelRev = "RevHt" + ht + "km meanAge: " + meanAgeRev[count]
+
+        ax1.plot(binPos, cumFreqFwd, \
+                 linewidth=1, dashes = [dash, space], label = labelFwd, color = 'red')
+
+        ax1.plot(binPos, cumFreqRev, \
+                 linewidth=1, dashes = [dash, space], label = labelRev, color = 'blue')
+
+        count = count + 1
+        dash = dash - 2
+        space = space + 2
 
     ax1.set_ylabel('Fraction of volume')
-    ax1.set_xlabel('Normalized age - cumulative - vol duration (secs): ' + volDuration)
+    ax1.set_xlabel('Normalized age - cumulative - vol duration: ' + volDuration + 's')
     #ax2.set_xlabel('Normalized age - per bin')
-    ax1.set_title('Mean normalized age Fwd/Rev: ' + meanAgeFwd + '/' + meanAgeRev, fontsize=14)
+    #ax1.set_title('Mean normalized age Fwd/Rev: ' + meanAgeFwd + '/' + meanAgeRev, fontsize=14)
     ax1.grid(True)
 
-    legend1 = ax1.legend(loc='upper left', ncol=2)
+    legend1 = ax1.legend(loc='upper left', ncol=1)
     for label in legend1.get_texts():
         label.set_fontsize('x-small')
 
