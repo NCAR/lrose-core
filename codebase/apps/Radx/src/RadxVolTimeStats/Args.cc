@@ -95,11 +95,6 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "write_volume_to_output_file = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-reverse")) {
-      
-      sprintf(tmp_str, "reverse_sweep_order = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
     } else if (!strcmp(argv[i], "-maxht")) {
       
       if (i < argc - 1) {
@@ -161,7 +156,6 @@ void Args::_usage(ostream &out)
       << "       [ -outdir ?] set the output directory for file\n"
       << "       [ -maxht ?] set max ht in km\n"
       << "       [ -nbins ?] set number of bins in histogram\n"
-      << "       [ -reverse ] reverse sweep order\n"
       << "       [ -verbose ] print verbose debug messages\n"
       << "       [ -write_cfradial ] write volume to cfradial file\n"
       << endl;

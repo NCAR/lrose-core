@@ -144,7 +144,7 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 20;
+  p_default = 25;
   p_descr = "Number of bins in the age histogram";
   p_help = "Age is expressed as a fraction of the time to complete the volume";
 } n_bins_age_histogram;
@@ -153,12 +153,6 @@ paramdef double {
   p_default = 20;
   p_descr = "Max height of data used in age histogram (km)";
 } age_hist_max_ht_km;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Reverse the order of the sweeps in the volume";
-  p_help = "This allows you to test the opposite scanning order";
-} reverse_sweep_order;
 
 commentdef {
   p_header = "WRITING FILES TO OUTPUT DIRECTORY";

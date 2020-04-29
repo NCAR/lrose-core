@@ -416,8 +416,6 @@ public:
 
   double age_hist_max_ht_km;
 
-  tdrp_bool_t reverse_sweep_order;
-
   tdrp_bool_t write_volume_to_output_file;
 
   char* output_dir;
@@ -429,7 +427,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[26];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 

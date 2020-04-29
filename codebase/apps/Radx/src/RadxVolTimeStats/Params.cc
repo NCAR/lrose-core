@@ -872,7 +872,7 @@
     tt->descr = tdrpStrDup("Number of bins in the age histogram");
     tt->help = tdrpStrDup("Age is expressed as a fraction of the time to complete the volume");
     tt->val_offset = (char *) &n_bins_age_histogram - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 25;
     tt++;
     
     // Parameter 'age_hist_max_ht_km'
@@ -885,18 +885,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &age_hist_max_ht_km - &_start_;
     tt->single_val.d = 20;
-    tt++;
-    
-    // Parameter 'reverse_sweep_order'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("reverse_sweep_order");
-    tt->descr = tdrpStrDup("Reverse the order of the sweeps in the volume");
-    tt->help = tdrpStrDup("This allows you to test the opposite scanning order");
-    tt->val_offset = (char *) &reverse_sweep_order - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 6'

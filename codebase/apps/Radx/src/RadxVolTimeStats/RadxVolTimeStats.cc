@@ -121,9 +121,9 @@ int RadxVolTimeStats::Run()
     }
   }
 
-  // add the timing fields
+  // add the gate geometry fields
 
-  _addTimingFields(vol);
+  _addGeomFields(vol);
 
   // write the file
 
@@ -267,75 +267,210 @@ int RadxVolTimeStats::_readFile(const string &readPath,
 }
 
 //////////////////////////////////////////////////
-// add timing fields from which to determine stats
+// add geometry fields
 
-void RadxVolTimeStats::_addTimingFields(RadxVol &vol)
+void RadxVolTimeStats::_addGeomFields(RadxVol &vol)
 {
 
   
   RadxTime startTime = vol.getStartRadxTime();
 
-  double beamWidthRad = vol.getRadarBeamWidthDegH() * DEG_TO_RAD;
+  double beamWidthRad = _params.beam_width_deg * DEG_TO_RAD;
   BeamHeight beamHt; // default init to get height above radar
 
   // loop through rays
 
   for (size_t iray = 0; iray < vol.getNRays(); iray++) {
-
+    
     RadxRay *ray = vol.getRays()[iray];
-    RadxTime rayTime = ray->getRadxTime();
     double el = ray->getElevationDeg();
     int nGates = ray->getNGates();
     double startRangeKm = ray->getStartRangeKm();
     double gateSpacingKm = ray->getGateSpacingKm();
 
-    // add the fields
-    
     // sample volume in km3
     
-    {
-      RadxField *sampleVol = new RadxField("sampleVol", "km3");
-      sampleVol->setStandardName("radar_sample_volume");
-      sampleVol->setLongName("radar_sample_volume_per_gate");
-      sampleVol->setMissingFl32(-9999.0);
-      sampleVol->copyRangeGeom(*ray);
-      Radx::fl32 *data = new Radx::fl32[nGates];
-      for (int ii = 0; ii < nGates; ii++) {
-        double rangeKm = startRangeKm + ii * gateSpacingKm;
-        double widthKm = rangeKm * beamWidthRad;
-        double areaKm2 = (M_PI * widthKm * widthKm) / 4.0;
-        double volKm3 = areaKm2 * gateSpacingKm;
-        data[ii] = volKm3;
-      }
-      sampleVol->addDataFl32(nGates, data);
-      ray->addField(sampleVol);
+    RadxField *sampleVol = new RadxField("sampleVol", "km3");
+    sampleVol->setStandardName("radar_sample_volume");
+    sampleVol->setLongName("radar_sample_volume_per_gate");
+    sampleVol->setMissingFl32(-9999.0);
+    sampleVol->copyRangeGeom(*ray);
+    Radx::fl32 *volData = new Radx::fl32[nGates];
+    for (int ii = 0; ii < nGates; ii++) {
+      double rangeKm = startRangeKm + ii * gateSpacingKm;
+      double widthKm = rangeKm * beamWidthRad;
+      double areaKm2 = (M_PI * widthKm * widthKm) / 4.0;
+      double volKm3 = areaKm2 * gateSpacingKm;
+      volData[ii] = volKm3;
     }
+    sampleVol->addDataFl32(nGates, volData);
+    ray->addField(sampleVol);
     
-    // height in km
+    // add height in km
     
-    {
-      RadxField *height = new RadxField("height", "km");
-      height->setStandardName("beam_height_above_radar");
-      height->setLongName("beam_height_above_radar");
-      height->setMissingFl32(-9999.0);
-      height->copyRangeGeom(*ray);
-      Radx::fl32 *data = new Radx::fl32[nGates];
-      for (int ii = 0; ii < nGates; ii++) {
-        double rangeKm = startRangeKm + ii * gateSpacingKm;
-        double beamHtKm = beamHt.computeHtKm(el, rangeKm);
-        data[ii] = beamHtKm;
-      }
-      height->addDataFl32(nGates, data);
-      ray->addField(height);
+    RadxField *height = new RadxField("height", "km");
+    height->setStandardName("beam_height_above_radar");
+    height->setLongName("beam_height_above_radar");
+    height->setMissingFl32(-9999.0);
+    height->copyRangeGeom(*ray);
+    Radx::fl32 *htData = new Radx::fl32[nGates];
+    for (int ii = 0; ii < nGates; ii++) {
+      double rangeKm = startRangeKm + ii * gateSpacingKm;
+      double beamHtKm = beamHt.computeHtKm(el, rangeKm);
+      htData[ii] = beamHtKm;
     }
+    height->addDataFl32(nGates, htData);
+    ray->addField(height);
     
   } // iray
-    
+  
   // update metadata from rays
   
   vol.loadVolumeInfoFromRays();
   vol.loadSweepInfoFromRays();
 
+}
+
+//////////////////////////////////////////////////
+// compute the age histogram
+
+void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
+{
+
+  // get time limits, and vol duration
+
+  RadxTime startTime = vol.getStartRadxTime();
+  RadxTime endTime = vol.getEndRadxTime();
+  double volDurationSecs = endTime - startTime;
+  if (_params.debug) {
+  }
+  
+  // initialize counter arrays
+
+  double totalVol = 0.0;
+  double totalWtFwd = 0.0;
+  double totalWtRev = 0.0;
+
+  vector<double> binVolFwd, binVolRev;
+  binVolFwd.resize(_params.n_bins_age_histogram);
+  binVolRev.resize(_params.n_bins_age_histogram);
+  for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
+    binVolFwd[ibin] = 0.0;
+    binVolRev[ibin] = 0.0;
+  }
+  
+  // accumulate volume in each bin
+  
+  for (size_t iray = 0; iray < vol.getNRays(); iray++) {
+    
+    // get ray
+
+    RadxRay *ray = vol.getRays()[iray];
+    int nGates = ray->getNGates();
+    RadxTime rayTime = ray->getRadxTime();
+    double ageFwd = endTime - rayTime;
+    double ageRev = rayTime - startTime;
+
+    // get fields, check they are non-null
+
+    RadxField *sampleVolField = ray->getField("sampleVol");
+    RadxField *heightField = ray->getField("height");
+    
+    assert(sampleVolField);
+    assert(heightField);
+
+    Radx::fl32 *sampleVol = sampleVolField->getDataFl32();
+    Radx::fl32 *height = heightField->getDataFl32();
+
+    // loop through the gates
+
+    for (int igate = 0; igate < nGates; igate++) {
+
+      // check height
+      
+      if (height[igate] > _params.age_hist_max_ht_km) {
+        continue;
+      }
+
+      // compute age as fraction of vol duration
+      
+      double ageFracFwd = ageFwd / volDurationSecs;
+      if (ageFracFwd < 0.0) {
+        ageFracFwd = 0.0;
+      } else if (ageFracFwd >= 1.0) {
+        ageFracFwd = 0.999999;
+      }
+      int ageBinFwd = (int) (ageFracFwd * _params.n_bins_age_histogram);
+      
+      double ageFracRev = ageRev / volDurationSecs;
+      if (ageFracRev < 0.0) {
+        ageFracRev = 0.0;
+      } else if (ageFracRev >= 1.0) {
+        ageFracRev = 0.999999;
+      }
+      int ageBinRev = (int) (ageFracRev * _params.n_bins_age_histogram);
+      
+      // accumulate bin vol
+
+      double vol = sampleVol[igate];
+      binVolFwd[ageBinFwd] += vol;
+      binVolRev[ageBinRev] += vol;
+
+      totalVol += vol;
+      totalWtFwd += vol * ageFracFwd;
+      totalWtRev += vol * ageFracRev;
+
+    } // igate
+
+  } // iray
+
+  // normalize volume by total to get fraction
+
+  vector<double> binFreqFwd, cumFreqFwd;
+  binFreqFwd.resize(_params.n_bins_age_histogram);
+  cumFreqFwd.resize(_params.n_bins_age_histogram);
+  for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
+    binFreqFwd[ibin] = binVolFwd[ibin] / totalVol;
+  }
+  cumFreqFwd[0] = binFreqFwd[0];
+  for (size_t ibin = 1; ibin < binVolFwd.size(); ibin++) {
+    cumFreqFwd[ibin] = cumFreqFwd[ibin - 1] + binFreqFwd[ibin];
+  }
+  double meanAgeFwd = totalWtFwd / totalVol;
+
+  vector<double> binFreqRev, cumFreqRev;
+  binFreqRev.resize(_params.n_bins_age_histogram);
+  cumFreqRev.resize(_params.n_bins_age_histogram);
+  for (size_t ibin = 0; ibin < binVolRev.size(); ibin++) {
+    binFreqRev[ibin] = binVolRev[ibin] / totalVol;
+  }
+  cumFreqRev[0] = binFreqRev[0];
+  for (size_t ibin = 1; ibin < binVolRev.size(); ibin++) {
+    cumFreqRev[ibin] = cumFreqRev[ibin - 1] + binFreqRev[ibin];
+  }
+  double meanAgeRev = totalWtRev / totalVol;
+
+  // print to stdout
+  
+  fprintf(stdout, "#########################################################\n");
+  fprintf(stdout, "# scanName   : %s\n", _params.scan_name);
+  fprintf(stdout, "# duration   : %.3f\n", volDurationSecs);
+  fprintf(stdout, "# meanAgeFwd : %.3f\n", meanAgeFwd);
+  fprintf(stdout, "# meanAgeRev : %.3f\n", meanAgeRev);
+  fprintf(stdout, 
+          "# %10s %10s %10s %10s %10s %10s %10s\n",
+          "binNum", "binAge", "binPos", "binFreqFwd", "cumFreqFwd", "binFreqRev", "cumFreqRev");
+  for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
+    double binAge = ((ibin + 0.5) / binVolFwd.size()) * volDurationSecs;
+    double binPos = ((ibin + 0.5) / binVolFwd.size());
+    fprintf(stdout, 
+            "  %10ld %10.2f %10.3f %10.6f %10.6f %10.6f %10.6f\n",
+            ibin, binAge, binPos,
+            binFreqFwd[ibin], cumFreqFwd[ibin],
+            binFreqRev[ibin], cumFreqRev[ibin]);
+  } // ibin
+  fprintf(stdout, "#########################################################\n");
+  
 }
 
 //////////////////////////////////////////////////
@@ -383,124 +518,5 @@ int RadxVolTimeStats::_writeVol(RadxVol &vol)
 
   return 0;
 
-}
-
-//////////////////////////////////////////////////
-// compute the age histogram
-
-void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
-{
-
-  // get time limits, and vol duration
-
-  RadxTime startTime = vol.getStartRadxTime();
-  RadxTime endTime = vol.getEndRadxTime();
-  double volDurationSecs = endTime - startTime;
-  if (_params.debug) {
-    cerr << "==>> volDurationSecs: " << volDurationSecs << endl;
-  }
-  
-  // initialize counter arrays
-
-  double totalVol = 0.0;
-  double totalWtAge = 0.0;
-  vector<double> binVol, binFreq, cumFreq;
-  binVol.resize(_params.n_bins_age_histogram);
-  binFreq.resize(_params.n_bins_age_histogram);
-  cumFreq.resize(_params.n_bins_age_histogram);
-  for (size_t ibin = 0; ibin < binVol.size(); ibin++) {
-    binVol[ibin] = 0.0;
-    binFreq[ibin] = 0.0;
-    cumFreq[ibin] = 0.0;
-  }
-  
-  // accumulate volume in each bin
-
-  for (size_t iray = 0; iray < vol.getNRays(); iray++) {
-
-    // get ray
-
-    RadxRay *ray = vol.getRays()[iray];
-    RadxTime rayTime = ray->getRadxTime();
-    double ageAtEnd = endTime - rayTime;
-    if (_params.reverse_sweep_order) {
-      ageAtEnd = rayTime - startTime;
-    }
-    int nGates = ray->getNGates();
-
-    // get fields, check they are non-null
-
-    RadxField *sampleVolField = ray->getField("sampleVol");
-    RadxField *heightField = ray->getField("height");
-
-    assert(sampleVolField);
-    assert(heightField);
-
-    Radx::fl32 *sampleVol = sampleVolField->getDataFl32();
-    Radx::fl32 *height = heightField->getDataFl32();
-
-    // loop through the gates
-
-    for (int igate = 0; igate < nGates; igate++) {
-
-      // check height
-
-      if (height[igate] > _params.age_hist_max_ht_km) {
-        continue;
-      }
-
-      // compute age as fraction of vol duration
-      
-      double ageFraction = ageAtEnd / volDurationSecs;
-      if (ageFraction < 0.0) {
-        ageFraction = 0.0;
-      } else if (ageFraction >= 1.0) {
-        ageFraction = 0.9999;
-      }
-      int ageBin = (int) (ageFraction * _params.n_bins_age_histogram);
-      
-      // accumulate bin vol
-
-      double vol = sampleVol[igate];
-      binVol[ageBin] += vol;
-      totalVol += vol;
-
-      totalWtAge += vol * ageFraction;
-
-    } // igate
-
-  } // iray
-
-  // normalize volume by total to get fraction
-  
-  for (size_t ibin = 0; ibin < binVol.size(); ibin++) {
-    binFreq[ibin] = binVol[ibin] / totalVol;
-  }
-  cumFreq[0] = binFreq[0];
-  for (size_t ibin = 1; ibin < binVol.size(); ibin++) {
-    cumFreq[ibin] = cumFreq[ibin - 1] + binFreq[ibin];
-  }
-
-  double meanAge = totalWtAge / totalVol;
-
-  // print to stdout
-  
-  fprintf(stdout, "#########################################################\n");
-  fprintf(stdout, "# scanName: %s\n", _params.scan_name);
-  fprintf(stdout, "# meanAge : %.3f\n", meanAge);
-  fprintf(stdout, 
-          "# %10s %10s %10s %10s %10s %10s %10s\n",
-          "binNum", "binAge", "binPos", "binVol", "binFreq", "cumFreq", "revFreq");
-  for (size_t ibin = 0; ibin < binVol.size(); ibin++) {
-    double binAge = ((ibin + 0.5) / binVol.size()) * volDurationSecs;
-    double binPos = ((ibin + 0.5) / binVol.size());
-    fprintf(stdout, 
-            "  %10ld %10.2f %10.3f %10.2e %10.6f %10.6f %10.6f\n",
-            ibin, binAge, binPos,
-            binVol[ibin], binFreq[ibin], 
-            cumFreq[ibin], 1.0-cumFreq[ibin]);
-  } // ibin
-  fprintf(stdout, "#########################################################\n");
-  
 }
 

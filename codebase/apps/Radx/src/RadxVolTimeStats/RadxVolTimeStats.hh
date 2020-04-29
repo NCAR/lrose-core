@@ -76,10 +76,10 @@ private:
 
   int _readFile(const string &readPath, RadxVol &vol);
   void _createVol(RadxVol &vol);
-  void _addTimingFields(RadxVol &vol);
+  void _addGeomFields(RadxVol &vol);
+  void _computeAgeHist(RadxVol &vol);
   void _setupWrite(RadxFile &file);
   int _writeVol(RadxVol &vol);
-  void _computeAgeHist(RadxVol &vol);
 
 };
 

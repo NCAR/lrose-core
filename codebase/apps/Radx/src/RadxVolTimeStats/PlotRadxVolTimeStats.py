@@ -23,7 +23,7 @@ def main():
 #   globals
 
     global options
-    global scanName, meanAge, colHeaders, colData
+    global scanName, meanAgeFwd, meanAgeRev, colHeaders, colData
 
 # parse the command line
 
@@ -39,7 +39,7 @@ def main():
                       help='File path for timing data')
     parser.add_option('--title',
                       dest='title',
-                      default='RADAR SCAN TIMING',
+                      default='Volume Timing Stats',
                       help='Title for plot')
     parser.add_option('--width',
                       dest='figWidthMm',
@@ -78,7 +78,7 @@ def main():
 
 def readColumnHeaders(filePath):
 
-    global scanName, meanAge, colHeaders
+    global scanName, meanAgeFwd, meanAgeRev, colHeaders
     colHeaders = []
 
     fp = open(filePath, 'r')
@@ -102,24 +102,22 @@ def readColumnHeaders(filePath):
         if (line.find("scanName") > 0):
             parts = line.strip().split()
             scanName = parts[-1]
-            if (options.debug):
-                print("  scanName: ", scanName, file=sys.stderr)
             continue
 
-        # scan name
-        if (line.find("meanAge") > 0):
+        # mean age
+        if (line.find("meanAgeFwd") > 0):
             parts = line.strip().split()
-            meanAge = parts[-1]
-            if (options.debug):
-                print("  meanAge: ", meanAge, file=sys.stderr)
+            meanAgeFwd = parts[-1]
+            continue
+        if (line.find("meanAgeRev") > 0):
+            parts = line.strip().split()
+            meanAgeRev = parts[-1]
             continue
 
         # col headers?
         if (line.find("binNum") > 0):
             colHeaders = line.lstrip("# ").rstrip("\n").split()
             gotHeaders = True
-            if (options.debug):
-                print("colHeaders: ", colHeaders, file=sys.stderr)
 
     if (gotHeaders == False):
         print("ERROR - readColumnHeaders", file=sys.stderr)
@@ -175,9 +173,10 @@ def readInputData(filePath):
 def doPlot():
 
     binPos = np.array(colData["binPos"]).astype(np.double)
-    binFreq = np.array(colData["binFreq"]).astype(np.double)
-    cumFreq = np.array(colData["cumFreq"]).astype(np.double)
-    revFreq = np.array(colData["revFreq"]).astype(np.double)
+    binFreqFwd = np.array(colData["binFreqFwd"]).astype(np.double)
+    cumFreqFwd = np.array(colData["cumFreqFwd"]).astype(np.double)
+    binFreqRev = np.array(colData["binFreqRev"]).astype(np.double)
+    cumFreqRev = np.array(colData["cumFreqRev"]).astype(np.double)
 
     widthIn = float(options.figWidthMm) / 25.4
     htIn = float(options.figHeightMm) / 25.4
@@ -186,25 +185,30 @@ def doPlot():
     title = (options.title + ' for Scan: ' + scanName)
     fig1.suptitle(title, fontsize=16)
     ax1 = fig1.add_subplot(1,1,1,xmargin=0.0)
-    #ax2 = fig1.add_subplot(2,1,2,xmargin=0.0)
+    ax2 = ax1.twinx() # instantiate a second axes that shares the same x-axis
 
     ax1.set_xlim([0.0, 1.0])
     ax1.set_ylim([0.0, 1.0])
+    ax2.set_ylim([0.0, 0.2])
 
     # plot the frequency
 
-    #ax1.plot(binPos, binFreq, \
-    #         linewidth=1, label = 'Freq', color = 'blue')
+    ax2.plot(binPos, binFreqFwd, \
+             linewidth=1, label = 'FreqFwd', color = 'blue')
+    
+    ax1.plot(binPos, cumFreqFwd, \
+             linewidth=1, label = 'CumFreqFwd', color = 'red')
 
-    ax1.plot(binPos, cumFreq, \
-             linewidth=1, label = 'CumFreq', color = 'red')
+    ax2.plot(binPos, binFreqRev, \
+             linewidth=1, label = 'FreqRev', color = 'green')
+    
+    ax1.plot(binPos, cumFreqRev, \
+             linewidth=1, label = 'CumFreqRev', color = 'orange')
 
-    ax1.plot(binPos, revFreq, \
-             linewidth=1, label = 'RevFreq', color = 'blue')
-
-    ax1.set_xlabel('Freq')
-    ax1.set_ylabel('Age fraction')
-    ax1.set_title('Mean age: ' + meanAge, fontsize=14)
+    ax1.set_ylabel('Fraction of volume')
+    ax1.set_xlabel('Normalized age - cumulative')
+    ax2.set_xlabel('Normalized age - per bin')
+    ax1.set_title('Mean normalized age Fwd/Rev: ' + meanAgeFwd + '/' + meanAgeRev, fontsize=14)
     ax1.grid(True)
 
     legend1 = ax1.legend(loc='upper left', ncol=2)
