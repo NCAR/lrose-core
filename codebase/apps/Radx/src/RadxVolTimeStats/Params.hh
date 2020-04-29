@@ -416,6 +416,10 @@ public:
 
   double age_hist_max_ht_km;
 
+  tdrp_bool_t reverse_sweep_order;
+
+  tdrp_bool_t write_volume_to_output_file;
+
   char* output_dir;
 
   char _end_; // end of data region
@@ -425,7 +429,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[26];
 
   const char *_className;
 

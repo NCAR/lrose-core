@@ -154,9 +154,21 @@ paramdef double {
   p_descr = "Max height of data used in age histogram (km)";
 } age_hist_max_ht_km;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Reverse the order of the sweeps in the volume";
+  p_help = "This allows you to test the opposite scanning order";
+} reverse_sweep_order;
+
 commentdef {
-  p_header = "OUTPUT DIRECTORY";
+  p_header = "WRITING FILES TO OUTPUT DIRECTORY";
 }
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write the volume to a CfRadial output file";
+  p_help = "If TRUE, the volume is written to output_dir";
+} write_volume_to_output_file;
 
 paramdef string {
   p_default = "./output/RadxVolTimeStats/";

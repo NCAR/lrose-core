@@ -127,10 +127,12 @@ int RadxVolTimeStats::Run()
 
   // write the file
 
-  if (_writeVol(vol)) {
-    cerr << "ERROR - RadxConvert::_processFile" << endl;
-    cerr << "  Cannot write volume to file" << endl;
-    return -1;
+  if (_params.write_volume_to_output_file) {
+    if (_writeVol(vol)) {
+      cerr << "ERROR - RadxConvert::_processFile" << endl;
+      cerr << "  Cannot write volume to file" << endl;
+      return -1;
+    }
   }
 
   // compute the age histogram
@@ -282,29 +284,12 @@ void RadxVolTimeStats::_addTimingFields(RadxVol &vol)
 
     RadxRay *ray = vol.getRays()[iray];
     RadxTime rayTime = ray->getRadxTime();
-    double secsSinceStart = rayTime - startTime;
     double el = ray->getElevationDeg();
     int nGates = ray->getNGates();
     double startRangeKm = ray->getStartRangeKm();
     double gateSpacingKm = ray->getGateSpacingKm();
 
     // add the fields
-    
-    // range in km
-    
-    {
-      RadxField *range = new RadxField("gateRange", "km");
-      range->setStandardName("range_to_center_of_gate");
-      range->setLongName("range_to_center_of_gate");
-      range->setMissingFl32(-9999.0);
-      range->copyRangeGeom(*ray);
-      Radx::fl32 *data = new Radx::fl32[nGates];
-      for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = startRangeKm + ii * gateSpacingKm;
-      }
-      range->addDataFl32(nGates, data);
-      ray->addField(range);
-    }
     
     // sample volume in km3
     
@@ -342,22 +327,6 @@ void RadxVolTimeStats::_addTimingFields(RadxVol &vol)
       }
       height->addDataFl32(nGates, data);
       ray->addField(height);
-    }
-    
-    // time in secs since start
-    
-    {
-      RadxField *timeSinceStart = new RadxField("timeSinceStart", "secs");
-      timeSinceStart->setStandardName("time_since_start_of_vol");
-      timeSinceStart->setLongName("time_since_start_of_vol");
-      timeSinceStart->setMissingFl32(-9999.0);
-      timeSinceStart->copyRangeGeom(*ray);
-      Radx::fl32 *data = new Radx::fl32[nGates];
-      for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = secsSinceStart;
-      }
-      timeSinceStart->addDataFl32(nGates, data);
-      ray->addField(timeSinceStart);
     }
     
   } // iray
@@ -434,6 +403,7 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
   // initialize counter arrays
 
   double totalVol = 0.0;
+  double totalWtAge = 0.0;
   vector<double> binVol, binFrac, cumFrac;
   binVol.resize(_params.n_bins_age_histogram);
   binFrac.resize(_params.n_bins_age_histogram);
@@ -453,21 +423,21 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
     RadxRay *ray = vol.getRays()[iray];
     RadxTime rayTime = ray->getRadxTime();
     double ageAtEnd = endTime - rayTime;
+    if (_params.reverse_sweep_order) {
+      ageAtEnd = rayTime - startTime;
+    }
     int nGates = ray->getNGates();
 
     // get fields, check they are non-null
 
     RadxField *sampleVolField = ray->getField("sampleVol");
     RadxField *heightField = ray->getField("height");
-    // RadxField *timeSinceStartField = ray->getField("timeSinceStart");
 
     assert(sampleVolField);
     assert(heightField);
-    // assert(timeSinceStartField);
 
     Radx::fl32 *sampleVol = sampleVolField->getDataFl32();
     Radx::fl32 *height = heightField->getDataFl32();
-    // Radx::fl32 *timeSinceStart = timeSinceStartField->getDataFl32();
 
     // loop through the gates
 
@@ -495,6 +465,8 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
       binVol[ageBin] += vol;
       totalVol += vol;
 
+      totalWtAge += vol * ageFraction;
+
     } // igate
 
   } // iray
@@ -511,18 +483,25 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol)
 
   // print out
 
+  fprintf(stdout, 
+          "%10s %10s %10s %10s %10s %10s\n",
+          "binNum", "binAge", "binVol", "binFrac", "cumFrac", "revFrac");
+
   for (size_t ibin = 0; ibin < binVol.size(); ibin++) {
 
     double binAge = ((ibin + 0.5) / binVol.size()) * volDurationSecs;
     
-    cerr << "binNum, binAge, binVol, binFrac, cumFrac: "
-         << ibin << ", "
-         << binAge << ", "
-         << binVol[ibin] << ", "
-         << binFrac[ibin] << ", "
-         << cumFrac[ibin] << endl;
-
+    fprintf(stdout, 
+            "%10ld %10.2f %10.2e %10.6f %10.6f %10.6f\n",
+            ibin, binAge, 
+            binVol[ibin], binFrac[ibin], 
+            cumFrac[ibin], 1.0-cumFrac[ibin]);
+    
   } // ibin
+
+  double meanAge = totalWtAge / totalVol;
+
+  fprintf(stdout, "==>> meanAge: %10.2f\n", meanAge);
   
 }
 

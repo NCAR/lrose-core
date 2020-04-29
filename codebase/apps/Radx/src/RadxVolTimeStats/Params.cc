@@ -887,13 +887,37 @@
     tt->single_val.d = 20;
     tt++;
     
+    // Parameter 'reverse_sweep_order'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("reverse_sweep_order");
+    tt->descr = tdrpStrDup("Reverse the order of the sweeps in the volume");
+    tt->help = tdrpStrDup("This allows you to test the opposite scanning order");
+    tt->val_offset = (char *) &reverse_sweep_order - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY");
+    tt->comment_hdr = tdrpStrDup("WRITING FILES TO OUTPUT DIRECTORY");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'write_volume_to_output_file'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_volume_to_output_file");
+    tt->descr = tdrpStrDup("Write the volume to a CfRadial output file");
+    tt->help = tdrpStrDup("If TRUE, the volume is written to output_dir");
+    tt->val_offset = (char *) &write_volume_to_output_file - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'output_dir'
