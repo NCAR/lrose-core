@@ -40,11 +40,11 @@ def main():
                       help='File path for timing data')
     parser.add_option('--title',
                       dest='title',
-                      default='Volume Timing Stats',
+                      default='Volume Age Stats',
                       help='Title for plot')
     parser.add_option('--width',
                       dest='figWidthMm',
-                      default=250,
+                      default=275,
                       help='Width of figure in mm')
     parser.add_option('--height',
                       dest='figHeightMm',
@@ -210,7 +210,7 @@ def doPlot():
     htIn = float(options.figHeightMm) / 25.4
     
     fig1 = plt.figure(1, (widthIn, htIn))
-    title = (options.title + ' for Scan: ' + scanName)
+    title = (options.title + ' for scan: ' + scanName + ', vol duration: ' + volDuration + ' sec')
     fig1.suptitle(title, fontsize=16)
     ax1 = fig1.add_subplot(1,1,1,xmargin=0.0)
     # ax2 = ax1.twinx() # instantiate a second axes that shares the same x-axis
@@ -229,11 +229,14 @@ def doPlot():
         nameFwd = "cumFreqFwd[" + ht + "]"
         nameRev = "cumFreqRev[" + ht + "]"
 
+        if (len(ht) == 1):
+            ht = ' ' + ht
+
         cumFreqFwd = np.array(colData[nameFwd]).astype(np.double)
         cumFreqRev = np.array(colData[nameRev]).astype(np.double)
 
-        labelFwd = "FwdHt" + ht + "km meanAge: " + meanAgeFwd[count]
-        labelRev = "RevHt" + ht + "km meanAge: " + meanAgeRev[count]
+        labelFwd = "Fwd up to " + ht + "km meanAge: " + meanAgeFwd[count]
+        labelRev = "Rev up to " + ht + "km meanAge: " + meanAgeRev[count]
 
         ax1.plot(binPos, cumFreqFwd, \
                  linewidth=1, dashes = [dash, space], label = labelFwd, color = 'red')
@@ -246,7 +249,7 @@ def doPlot():
         space = space + 2
 
     ax1.set_ylabel('Fraction of volume')
-    ax1.set_xlabel('Normalized age - cumulative - vol duration: ' + volDuration + 's')
+    ax1.set_xlabel('Normalized age at end of volume - cumulative')
     #ax2.set_xlabel('Normalized age - per bin')
     ax1.set_title('Elevs: ' + elevs, fontsize=10)
     ax1.grid(True)
