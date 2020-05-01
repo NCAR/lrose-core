@@ -39,7 +39,7 @@ codebaseDir=${runDir}/codebase
 # defaults
 
 prefix=${HOME}/lrose
-package=lrose
+package=lrose-core
 debug=true
 
 #--------------------------------------------------------------------
@@ -52,7 +52,7 @@ function usage() {
     echo "  -h   :  produce this usage list"
     echo "  -d   :  turn debugging on"
     echo "  -p ? :  set package"
-    echo "           default is 'lrose'"
+    echo "           default is 'lrose-core'"
     echo "  -x ? :  set prefix"
     echo "           default is '${LROSE_INSTALL_DIR}'"
     echo
@@ -104,75 +104,6 @@ export LROSE_INSTALL_DIR=${prefix}
 export HOST_OS=LINUX_LROSE
 if [ "$package" == "lrose-cidd" ]
 then
-  export HOST_OS=LINUX_64_CIDD32
-fi
-
-export RAP_MAKE_INC_DIR=$LROSE_CORE_DIR/codebase/make_include
-export RAP_MAKE_BIN_DIR=$LROSE_CORE_DIR/codebase/make_bin
-
-export RAP_INC_DIR=$LROSE_INSTALL_DIR/include
-export RAP_LIB_DIR=$LROSE_INSTALL_DIR/lib
-export RAP_BIN_DIR=$LROSE_INSTALL_DIR/bin
-export RAP_MAN_DIR=$LROSE_INSTALL_DIR/man
-export RAP_DOC_DIR=$LROSE_INSTALL_DIR/doc
-
-export RAP_SHARED_INC_DIR=$LROSE_INSTALL_DIR/include
-export RAP_SHARED_LIB_DIR=$LROSE_INSTALL_DIR/lib
-export RAP_SHARED_BIN_DIR=$LROSE_INSTALL_DIR/bin
-export RAP_SHARED_MAN_DIR=$LROSE_INSTALL_DIR/man
-export RAP_SHARED_DOC_DIR=$LROSE_INSTALL_DIR/doc
-
-export RAP_INST_LIB_DIR=$LROSE_INSTALL_DIR/lib
-export RAP_INST_BIN_DIR=$LROSE_INSTALL_DIR/bin
-
-export PATH=$RAP_BIN_DIR:$PATH
-export LD_LIBRARY_PATH=$RAP_LIB_DIR:$LD_LIBRARY_PATH
-
-
-# Build lrose - libraries and binaries
-# ------------------------------------
-
-cd $codebaseDir
-./make_bin/installPackageMakefiles.py --package $package
-
-cd $codebaseDir/libs/tdrp/src
-make -j 8 opt
-make install
-
-cd $codebaseDir/apps/tdrp/src/tdrp_gen
-make -j 8 opt
-make install
-
-cd $codebaseDir/libs
-make -j 8 -k install_include
-make -j 8 -k opt
-make -j 8 -k install
-
-cd $codebaseDir/apps
-make -j 8 -k opt
-make -j 8 -k install
-
-cd $codebaseDir/apps/scripts/src
-make install
-
-cd $codebaseDir/apps/procmap/src/scripts
-make install
-
-# Install perl lib modules
-#-------------------------
-
-if [ "$package" == "lrose-core" -o "$package" == "titan" ]
-then
-  cd $codebaseDir
-  cd libs/perl5/src
-  mkdir -p ${prefix}/lib/perl5
-  rsync -av *pm ${prefix}/lib/perl5
-fi
-
-# Install scripts
-#----------------
-
-if [ "$package" == "lrose-core" -o "$package" == "titan" ]
 then
 
   cd $codebaseDir/apps/procmap/src/scripts
