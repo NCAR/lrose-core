@@ -247,6 +247,15 @@ void OutputMdv::addField(const RadxVol &vol,
       fld->convertType(Mdvx::ENCODING_FLOAT32,
                        Mdvx::COMPRESSION_GZIP);
     }
+  } else if (_params.output_format == Params::CF_NETCDF) {
+    if (inputDataType == Radx::SI08 ||
+        inputDataType == Radx::UI08 ||
+        inputDataType == Radx::SI16 ||
+        inputDataType == Radx::UI16) {
+      fld->convertType(Mdvx::ENCODING_INT16);
+    } else {
+      fld->convertType(Mdvx::ENCODING_FLOAT32);
+    }
   }
 
   if (_params.auto_remap_flat_to_latlon &&
@@ -891,7 +900,7 @@ int OutputMdv::_writeAsCfNetCDF()
   } else {
     _mdvx.setMdv2NcfFormat(DsMdvx::NCF_FORMAT_NETCDF4);
   }
-
+  
   _mdvx.setMdv2NcfCompression(_params.netcdf_compressed,
                               _params.netcdf_compression_level);
   
