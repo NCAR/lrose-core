@@ -18,7 +18,12 @@ global thisScriptName
 
 def write_pkgconfig_file(prefix, version, cc, cpp, libs):
 
-    filename = os.path.join(prefix, 'lib', 'pkgconfig',  'lrose.pc')
+    # ensure directory exists
+    
+    dirname = os.path.join(prefix, 'lib', 'pkgconfig')
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    filename = os.path.join(dirname,  'lrose.pc')
     with open(filename, 'w') as f:
         f.write("prefix=${" + prefix + "}\n")
         f.write("exec_prefix=${prefix}\n")
@@ -95,7 +100,15 @@ def write_variables_one_architecture(prefix, host_architecture, variable_defs):
     core_dir = os.environ['LROSE_CORE_DIR']
     key_arch = host_architecture
 
-    filename = os.path.join(install_dir, 'bin', 'lrose-config')
+    # ensure dir path exists
+
+    dirname = os.path.join(install_dir, 'bin')
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+    # open config file
+
+    filename = os.path.join(dirname, 'lrose-config')
     f = open(filename, 'w')
     f.write("#! /bin/sh\n")
     f.write("prefix=" + install_dir + "\n")
