@@ -6,6 +6,8 @@
 #
 #===========================================================================
 
+from __future__ import print_function
+
 import os
 import sys
 import glob
@@ -15,9 +17,9 @@ global thisScriptName
 
 
 def write_pkgconfig_file(prefix, version, cc, cpp, libs):
+
     filename = os.path.join(prefix, 'lib', 'pkgconfig',  'lrose.pc')
     with open(filename, 'w') as f:
-
         f.write("prefix=${" + prefix + "}\n")
         f.write("exec_prefix=${prefix}\n")
         f.write("libdir=${exec_prefix}/lib\n")
@@ -34,6 +36,8 @@ def write_pkgconfig_file(prefix, version, cc, cpp, libs):
         f.write("Libs:  -L${libdir} " + libs + "\n") # -lnetcdf\n")
         f.write("Cflags: -I${includedir}\n")
         f.write("\n")
+
+        print("==>> writing file: " + filename, file=sys.stderr)
 
 # write to lrose-config.flags 
 def write_common_flags(prefix, lib_info, app_info, combining_apps_libs):
@@ -71,9 +75,9 @@ def write_dictionary(prefix, info, mode):
 
     filename = os.path.join(install_dir, 'bin', 'lrose-config.flags')
     f = open(filename, mode)
-    for key, value in info.iteritems():
+    for key, value in info.items():
         f.write("#" + key + "\n") 
-        for key2, value2 in value.iteritems():
+        for key2, value2 in value.items():
             result = "   " + key + '_' + key2 + '='
             if (len(value2) > 0):
                 if (key2.find('lib') > -1):
@@ -104,7 +108,7 @@ def write_variables_one_architecture(prefix, host_architecture, variable_defs):
     f.write(tmp + "\n")
 
     value_defs = variable_defs[key_arch]
-    for key, value2 in value_defs.iteritems():
+    for key, value2 in value_defs.items():
         result = key + "="
         if (len(value2) > 0):
             result += formatted(value2)                                     
@@ -123,7 +127,7 @@ def write_variables_all_architectures(prefix, variable_defs):
     install_dir = prefix
     core_dir = os.environ['LROSE_CORE_DIR']
 
-    for key_arch, value_defs in variable_defs.iteritems():
+    for key_arch, value_defs in variable_defs.items():
         filename = os.path.join(install_dir, 'bin', 'lrose-config.' + key_arch)
         f = open(filename, 'w')
         f.write("#! /bin/sh\n")
@@ -135,7 +139,7 @@ def write_variables_all_architectures(prefix, variable_defs):
         tmp = os.path.join("libdir=${exec_prefix}", "lib")
         f.write(tmp + "\n")
 
-        for key, value2 in value_defs.iteritems():
+        for key, value2 in value_defs.items():
             result = key + "="
             if (len(value2) > 0):
                 result += formatted(value2)                                     
@@ -190,6 +194,14 @@ def detect_variable(astring):
         return m2.group(1)
  
 def main(path, module_keyword):
+
+    scriptName = os.path.basename(__file__)
+    print("Running script: " + scriptName, file=sys.stderr)
+    print("  python version: " + sys.version, file=sys.stderr)
+    print("  path: " + path, file=sys.stderr)
+    print("  module_keyword: " + module_keyword, file=sys.stderr)
+    print("  note - should be run from codebase dir", file=sys.stderr)
+
     info = {} # info is a dictionary with module names as keys
     loc_includes = set()
     loc_libs = set()
