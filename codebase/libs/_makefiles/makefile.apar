@@ -1,5 +1,5 @@
 #
-# Recursive make for HCR
+# Recursive make for LROSE libraries
 #
 
 include $(RAP_MAKE_INC_DIR)/rap_make_macros
@@ -7,29 +7,34 @@ include $(RAP_MAKE_INC_DIR)/rap_make_macros
 TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	tdrp \
-        dataport \
-        euclid \
-	physics \
-        Ncxx \
-        Radx \
-        radar \
-        toolsa \
-        didss \
-	dsserver \
-        dsdata \
-	rapformats \
-	rapplot \
-	rapmath \
-        titan \
-	Mdv \
+	FiltAlg \
+	FiltAlgVirtVol \
 	Fmq \
-	Spdb
+	Mdv \
+        Ncxx \
+	Radx \
+        Refract \
+	Spdb \
+	advect \
+	cidd \
+	contour \
+	dataport \
+	didss \
+	dsdata \
+	dsserver \
+	euclid \
+	grib \
+	grib2 \
+	hydro \
+	kd \
+	physics \
+	radar \
+	rapformats \
+	rapmath \
+	rapplot \
+	shapelib \
+	tdrp \
+	titan \
+	toolsa
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
-
-
-
-
-
-

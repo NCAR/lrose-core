@@ -1,5 +1,5 @@
 #
-# makefile as template for configure, for hcr
+# makefile as template for configure, for apar
 # does not include scripts
 #
 
@@ -10,18 +10,17 @@ TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 SUB_DIRS = \
 	tdrp \
 	procmap \
+	titan \
 	didss \
+	ingest \
 	dsserver \
+	mdv_utils \
+        physics \
+	spdb_utils \
 	filters \
+	interp \
 	radar \
         Radx
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
-
-
-
-
-
-
-
 
