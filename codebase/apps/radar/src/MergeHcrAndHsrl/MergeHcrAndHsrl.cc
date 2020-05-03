@@ -535,7 +535,7 @@ void MergeHcrAndHsrl::_mergeHsrlRays(RadxVol &hcrVol)
     
     if (!_hcrIsPointing[iray]) {
 
-      hcrRay->setElevationDeg(hsrlEl);
+      // hcrRay->setElevationDeg(hsrlEl);
       
       // also set the HCR field data to missing
       // if requested
@@ -857,7 +857,8 @@ void MergeHcrAndHsrl::_mergeRay(RadxRay *hcrRay,
   
   // adjust HSRL ray geom to account for elevation being non-vertical
 
-  double elCorr = fabs(sin(hsrlRay->getElevationDeg() * DEG_TO_RAD));
+  double elCorr = fabs(sin(hsrlRay->getElevationDeg() * DEG_TO_RAD)/
+                       sin(hcrRay->getElevationDeg() * DEG_TO_RAD));
   hsrlRay->setRangeGeom(hsrlRay->getStartRangeKm() * elCorr,
                         hsrlRay->getGateSpacingKm() * elCorr);
   
