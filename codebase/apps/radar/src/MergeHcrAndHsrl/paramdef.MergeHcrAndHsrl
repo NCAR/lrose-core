@@ -102,17 +102,108 @@ typedef struct {
   string input_field_name;
   string output_field_name;
   boolean apply_flag;
+  boolean set_to_missing_if_scanning;
 } hcr_field_t;
 
 paramdef struct hcr_field_t {
   p_default = {
-    { "DBZ", "HCR_DBZ", FALSE },
-    { "VEL_CORR", "HCR_VEL", FALSE },
-    { "WIDTH", "HCR_WIDTH", FALSE },
-    { "LDR", "HCR_LDR", FALSE },
-    { "NCP", "HCR_NCP", FALSE },
-    { "SNR", "HCR_SNR", FALSE },
-    { "DBMVC", "HCR_DBM", FALSE }
+    {
+      input_field_name = "DBZ",
+      output_field_name = "HCR_DBZ",
+      apply_flag = TRUE,
+      set_to_missing_if_scanning = TRUE
+    }
+    ,
+    {
+      input_field_name = "VEL_CORR",
+      output_field_name = "HCR_VEL",
+      apply_flag = TRUE,
+      set_to_missing_if_scanning = TRUE
+    }
+    ,
+    {
+      input_field_name = "WIDTH",
+      output_field_name = "HCR_WIDTH",
+      apply_flag = TRUE,
+      set_to_missing_if_scanning = TRUE
+    }
+    ,
+    {
+      input_field_name = "LDR",
+      output_field_name = "HCR_LDR",
+      apply_flag = TRUE,
+      set_to_missing_if_scanning = TRUE
+    }
+    ,
+    {
+      input_field_name = "NCP",
+      output_field_name = "HCR_NCP",
+      apply_flag = TRUE,
+      set_to_missing_if_scanning = TRUE
+    }
+    ,
+    {
+      input_field_name = "SNR",
+      output_field_name = "HCR_SNR",
+      apply_flag = TRUE,
+      set_to_missing_if_scanning = TRUE
+    }
+    ,
+    {
+      input_field_name = "DBMVC",
+      output_field_name = "HCR_DBMVC",
+      apply_flag = FALSE,
+      set_to_missing_if_scanning = TRUE
+    }
+    ,
+    {
+      input_field_name = "PRESS",
+      output_field_name = "PRESS",
+      apply_flag = FALSE,
+      set_to_missing_if_scanning = FALSE
+    }
+    ,
+    {
+      input_field_name = "TEMP",
+      output_field_name = "TEMP",
+      apply_flag = FALSE,
+      set_to_missing_if_scanning = FALSE
+    }
+    ,
+    {
+      input_field_name = "RH",
+      output_field_name = "RH",
+      apply_flag = FALSE,
+      set_to_missing_if_scanning = FALSE
+    }
+    ,
+    {
+      input_field_name = "SST",
+      output_field_name = "SST",
+      apply_flag = FALSE,
+      set_to_missing_if_scanning = FALSE
+    }
+    ,
+    {
+      input_field_name = "TOPO",
+      output_field_name = "TOPO",
+      apply_flag = FALSE,
+      set_to_missing_if_scanning = FALSE
+    }
+    ,
+    {
+      input_field_name = "U_SURF",
+      output_field_name = "U_SURF",
+      apply_flag = FALSE,
+      set_to_missing_if_scanning = FALSE
+    }
+    ,
+    {
+      input_field_name = "V_SURF",
+      output_field_name = "V_SURF",
+      apply_flag = FALSE,
+      set_to_missing_if_scanning = FALSE
+    }
   };
   p_descr = "Specs of HCR fields to be included.";
   p_help = "\n\ninput_field_name: name of field in input file.\n\noutput_field_name: name of field in output file.\n\nencoding: output encoding for the field.\n\napply_flag: apply HCR flag field to censor non-weather echoes. See 'hcr_flag_field_name' and 'hcr_flag_values' parameters below.";

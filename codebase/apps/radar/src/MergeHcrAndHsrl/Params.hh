@@ -86,6 +86,7 @@ public:
     char* input_field_name;
     char* output_field_name;
     tdrp_bool_t apply_flag;
+    tdrp_bool_t set_to_missing_if_scanning;
   } hcr_field_t;
 
   typedef struct {

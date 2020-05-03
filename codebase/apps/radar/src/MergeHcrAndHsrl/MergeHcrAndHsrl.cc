@@ -532,12 +532,29 @@ void MergeHcrAndHsrl::_mergeHsrlRays(RadxVol &hcrVol)
     // if hcr is scanning, set the ray elevation
     // to the HSRL value, since we want to 
     // preserve the HSRL data integrity
-    // also set the HCR data to missing
     
     if (!_hcrIsPointing[iray]) {
+
       hcrRay->setElevationDeg(hsrlEl);
-      hcrRay->setGatesToMissing(0, hcrRay->getNGates());
-    }
+      
+      // also set the HCR field data to missing
+      // if requested
+      
+      vector<RadxField *> rayFields = hcrRay->getFields();
+      for (size_t ifld = 0; ifld < rayFields.size(); ifld++) {
+        RadxField *rfld = rayFields[ifld];
+        for (int jfld = 0; jfld < _params.hcr_fields_n; jfld++) {
+          const Params::hcr_field_t &hfld = _params._hcr_fields[jfld];
+          string outputName = hfld.output_field_name;
+          if (outputName == rfld->getName()) {
+            if (hfld.set_to_missing_if_scanning) {
+              rfld->setGatesToMissing(0, hcrRay->getNGates());
+            }
+          }
+        } // jfld
+      } // ifld
+
+    } // if (!_hcrIsPointing[iray]) {
     
     // merge hsrl data into hcr ray
 
