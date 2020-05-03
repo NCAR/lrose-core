@@ -7938,7 +7938,7 @@ void MdvxField::_check_finite(const void *vol_data)
     if (!isfinite(*floatData)) {
       numNans++;
       *floatData = bad;
-      cerr << "+";
+      // cerr << "+";
     }
     
   }
