@@ -529,17 +529,11 @@ void MergeHcrAndHsrl::_mergeHsrlRays(RadxVol &hcrVol)
       continue;
     }
       
-    // if hcr is scanning, set the ray elevation
-    // to the HSRL value, since we want to 
-    // preserve the HSRL data integrity
-    
+    // if hcr is scanning, set the HCR field data to missing
+    // if appropriate
+
     if (!_hcrIsPointing[iray]) {
 
-      // hcrRay->setElevationDeg(hsrlEl);
-      
-      // also set the HCR field data to missing
-      // if requested
-      
       vector<RadxField *> rayFields = hcrRay->getFields();
       for (size_t ifld = 0; ifld < rayFields.size(); ifld++) {
         RadxField *rfld = rayFields[ifld];
@@ -567,6 +561,7 @@ void MergeHcrAndHsrl::_mergeHsrlRays(RadxVol &hcrVol)
 /////////////////////////////////////////////////////
 // Get HSRL ray for hcr ray
 // Returns NULL if no suitable ray found
+// deprecated - use matchHsrlRayInTime() instead.
 
 RadxRay *MergeHcrAndHsrl::_findHsrlRay(RadxRay *hcrRay)
   
