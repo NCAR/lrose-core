@@ -1554,7 +1554,7 @@ void WRFData::_loadREFL3D()
 {
   _heartbeatFunc("Entering WRFData::_loadREFL3D()");
   
-  _load3dField("REFL_10CM", _nEta+1, _nLat, _nLon, _REFL3D);
+  _load3dField("REFL_10CM", _nEta, _nLat, _nLon, _REFL3D);
 }
 
 //////////////
