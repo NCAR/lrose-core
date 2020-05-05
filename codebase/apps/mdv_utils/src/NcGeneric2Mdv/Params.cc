@@ -722,7 +722,7 @@
     tt->descr = tdrpStrDup("Specify the extension of the files to be read.");
     tt->help = tdrpStrDup("If blank, all extensions will be used.");
     tt->val_offset = (char *) &file_name_ext - &_start_;
-    tt->single_val.s = tdrpStrDup("ncf");
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'file_name_substr'
@@ -734,7 +734,7 @@
     tt->descr = tdrpStrDup("Specify a seach string for the names of the files to be read.");
     tt->help = tdrpStrDup("If blank, no check will be performed.");
     tt->val_offset = (char *) &file_name_substr - &_start_;
-    tt->single_val.s = tdrpStrDup("TRMM");
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 3'
@@ -810,7 +810,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("netcdf_var_base_time");
     tt->descr = tdrpStrDup("Data set times are relative to this base time");
-    tt->help = tdrpStrDup("Specify 'none' if there is no base time variable. In this case the time will be taken as absolute, using the units specified in the file.");
+    tt->help = tdrpStrDup("Specify 'none' if there is no base time variable. In the units of the time variable will be used.");
     tt->val_offset = (char *) &netcdf_var_base_time - &_start_;
     tt->single_val.s = tdrpStrDup("base_time");
     tt++;

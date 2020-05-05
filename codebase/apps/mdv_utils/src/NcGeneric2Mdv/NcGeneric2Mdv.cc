@@ -40,6 +40,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
+#include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
 #include <Mdv/MdvxField.hh>
 #include <dsserver/DsLdataInfo.hh>
@@ -470,7 +471,7 @@ int NcGeneric2Mdv::_loadMetaData()
     _baseTimeVar = _ncFile->get_var(_params.netcdf_var_base_time);
     if (_baseTimeVar == NULL) {
       cerr << "ERROR - NcGeneric2Mdv::_loadMetaData" << endl;
-      cerr << "  base time var variable missing" << _params.netcdf_var_base_time << endl;
+      cerr << "  base time var variable missing: " << _params.netcdf_var_base_time << endl;
       return -1;
     }
   }
@@ -478,7 +479,7 @@ int NcGeneric2Mdv::_loadMetaData()
   _timeOffsetVar = _ncFile->get_var(_params.netcdf_var_time_offset);
   if (_timeOffsetVar == NULL) {
     cerr << "ERROR - NcGeneric2Mdv::_loadMetaData" << endl;
-    cerr << "  time offset variable missing" << _params.netcdf_var_time_offset << endl;
+    cerr << "  time offset variable missing: " << _params.netcdf_var_time_offset << endl;
     return -1;
   }
 
@@ -488,7 +489,7 @@ int NcGeneric2Mdv::_loadMetaData()
     _zVar = _ncFile->get_var(_params.netcdf_var_z);
     if (_zVar == NULL) {
       cerr << "ERROR - NcGeneric2Mdv::_loadMetaData" << endl;
-      cerr << "  z variable missing" << _params.netcdf_var_z << endl;
+      cerr << "  z variable missing: " << _params.netcdf_var_z << endl;
     return -1;
     }
   }
@@ -496,14 +497,14 @@ int NcGeneric2Mdv::_loadMetaData()
   _yVar = _ncFile->get_var(_params.netcdf_var_y);
   if (_yVar == NULL) {
     cerr << "ERROR - NcGeneric2Mdv::_loadMetaData" << endl;
-    cerr << "  y variable missing" << _params.netcdf_var_y << endl;
+    cerr << "  y variable missing: " << _params.netcdf_var_y << endl;
     return -1;
   }
 
   _xVar = _ncFile->get_var(_params.netcdf_var_x);
   if (_xVar == NULL) {
     cerr << "ERROR - NcGeneric2Mdv::_loadMetaData" << endl;
-    cerr << "  x variable missing" << _params.netcdf_var_x << endl;
+    cerr << "  x variable missing: " << _params.netcdf_var_x << endl;
     return -1;
   }
 
@@ -726,24 +727,34 @@ int NcGeneric2Mdv::_setMasterHeader(DsMdvx &mdvx, int itime)
     baseTimeUtc = btime.utime();
   }
 
-  bool offsetIsDays = false;
+  // check time units
+  
+  double offsetMult = 1.0; // secs
   Nc3Att *timeUnits = _timeOffsetVar->get_att("units");
   if (timeUnits != NULL) {
-    string units = timeUnits->as_string(0);
-    if (units.find("day") != string::npos) {
-      offsetIsDays = true;
+    string unitsStr = timeUnits->as_string(0);
+    if (unitsStr.find("day") != string::npos) {
+      offsetMult = 86400.0;
+    } else if (unitsStr.find("hour") != string::npos) {
+      offsetMult = 3600.0;
+    } else if (unitsStr.find("min") != string::npos) {
+      offsetMult = 60.0;
+    }
+    DateTime refTime;
+    if (refTime.setFromW3c(unitsStr.c_str()) == 0) {
+      baseTimeUtc = refTime.utime();
     }
     delete timeUnits;
   }
   
-  int timeOffsetSecs = 0;
-  if (offsetIsDays) {
-    double timeOffsetDays = _timeOffsetVar->as_double(itime);
-    timeOffsetSecs = (int) (timeOffsetDays * 86400.0 + 0.5);
+  double timeOffsetSecs = 0;
+  if (offsetMult == 1.0) {
+    timeOffsetSecs = _timeOffsetVar->as_double(itime);
   } else {
-    timeOffsetSecs = _timeOffsetVar->as_int(itime);
+    double timeOffsetDays = _timeOffsetVar->as_double(itime);
+    timeOffsetSecs = timeOffsetDays * offsetMult;
   }
-  _validTime = baseTimeUtc + timeOffsetSecs;
+  _validTime = baseTimeUtc + (time_t) (timeOffsetSecs + 0.5);
   mdvx.setValidTime(_validTime);
 
   if (_params.debug) {
@@ -782,6 +793,7 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
       continue;
     }
 
+    bool xySwapped = false;
     if (_zDim) {
       if (var->num_dims() < 4) {
         continue;
@@ -789,20 +801,22 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
       if (var->get_dim(1) != _zDim) {
         continue;
       }
-      if (var->get_dim(2) != _yDim) {
-        continue;
-      }
-      if (var->get_dim(3) != _xDim) {
+      if (var->get_dim(2) == _yDim && var->get_dim(3) == _xDim) {
+        xySwapped = false;
+      } else if (var->get_dim(3) == _yDim && var->get_dim(2) == _xDim) {
+        xySwapped = true;
+      } else {
         continue;
       }
     } else {
       if (var->num_dims() < 3) {
         continue;
       }
-      if (var->get_dim(1) != _yDim) {
-        continue;
-      }
-      if (var->get_dim(2) != _xDim) {
+      if (var->get_dim(1) == _yDim && var->get_dim(2) == _xDim) {
+        xySwapped = false;
+      } else if (var->get_dim(2) == _yDim && var->get_dim(1) == _xDim) {
+        xySwapped = true;
+      } else {
         continue;
       }
     }
@@ -814,7 +828,7 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
       cerr << "  N dims: " << var->num_dims() << endl;
     }
 
-    _addDataField(var, mdvx, itime);
+    _addDataField(var, mdvx, itime, xySwapped);
 
   } // ivar
   
@@ -822,13 +836,13 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
 
 }
 
-
 /////////////////////////////////////////////////
 // Add the data field
 //
 // Returns 0 on success, -1 on failure
 
-int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
+int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
+                                 int itime, bool xySwapped)
 
 {
 
@@ -867,9 +881,17 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
 
     int iret = 0;
     if (_zDim) {
-      iret = var->get(fvals, 1, _nz, _ny, _nx);
+      if (xySwapped) {
+        iret = var->get(fvals, 1, _nz, _nx, _ny);
+      } else {
+        iret = var->get(fvals, 1, _nz, _ny, _nx);
+      }
     } else {
-      iret = var->get(fvals, 1, _ny, _nx);
+      if (xySwapped) {
+        iret = var->get(fvals, 1, _nx, _ny);
+      } else {
+        iret = var->get(fvals, 1, _ny, _nx);
+      }
     }
 
     if (iret == 0) {
@@ -884,7 +906,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
     
     float missing = missingAtt->as_float(0);
     for (int ii = 0; ii < npts; ii++) {
-      if (fvals[ii] == missing) {
+      if (isnan(fvals[ii]) || fvals[ii] == missing) {
         vals[ii] = _missingFloat;
       } else {
         vals[ii] = fvals[ii];
@@ -900,9 +922,17 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
 
     int iret = 0;
     if (_zDim) {
-      iret = var->get(dvals, 1, _nz, _ny, _nx);
+      if (xySwapped) {
+        iret = var->get(dvals, 1, _nz, _nx, _ny);
+      } else {
+        iret = var->get(dvals, 1, _nz, _ny, _nx);
+      }
     } else {
-      iret = var->get(dvals, 1, _ny, _nx);
+      if (xySwapped) {
+        iret = var->get(dvals, 1, _nx, _ny);
+      } else {
+        iret = var->get(dvals, 1, _ny, _nx);
+      }
     }
     if (iret == 0) {
       cerr << "ERROR - NcGeneric2Mdv::_addDataField" << endl;
@@ -916,7 +946,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
     
     double missing = missingAtt->as_double(0);
     for (int ii = 0; ii < npts; ii++) {
-      if (dvals[ii] == missing) {
+      if (isnan(dvals[ii]) || dvals[ii] == missing) {
         vals[ii] = _missingFloat;
       } else {
         vals[ii] = dvals[ii];
@@ -965,9 +995,17 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
       
       int iret = 0;
       if (_zDim) {
-        iret = var->get(ivals, 1, _nz, _ny, _nx);
+        if (xySwapped) {
+          iret = var->get(ivals, 1, _nz, _nx, _ny);
+        } else {
+          iret = var->get(ivals, 1, _nz, _ny, _nx);
+        }
       } else {
-        iret = var->get(ivals, 1, _ny, _nx);
+        if (xySwapped) {
+          iret = var->get(ivals, 1, _nx, _ny);
+        } else {
+          iret = var->get(ivals, 1, _ny, _nx);
+        }
       }
       if (iret == 0) {
         cerr << "ERROR - NcGeneric2Mdv::_addDataField" << endl;
@@ -997,9 +1035,17 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
       
       int iret = 0;
       if (_zDim) {
-        iret = var->get(svals, 1, _nz, _ny, _nx);
+        if (xySwapped) {
+          iret = var->get(svals, 1, _nz, _nx, _ny);
+        } else {
+          iret = var->get(svals, 1, _nz, _ny, _nx);
+        }
       } else {
-        iret = var->get(svals, 1, _ny, _nx);
+        if (xySwapped) {
+          iret = var->get(svals, 1, _nx, _ny);
+        } else {
+          iret = var->get(svals, 1, _ny, _nx);
+        }
       }
       if (iret == 0) {
         cerr << "ERROR - NcGeneric2Mdv::_addDataField" << endl;
@@ -1032,9 +1078,17 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
       
       int iret = 0;
       if (_zDim) {
-        iret = var->get(bvals, 1, _nz, _ny, _nx);
+        if (xySwapped) {
+          iret = var->get(bvals, 1, _nz, _nx, _ny);
+        } else {
+          iret = var->get(bvals, 1, _nz, _ny, _nx);
+        }
       } else {
-        iret = var->get(bvals, 1, _ny, _nx);
+        if (xySwapped) {
+          iret = var->get(bvals, 1, _nx, _ny);
+        } else {
+          iret = var->get(bvals, 1, _ny, _nx);
+        }
       }
       if (iret == 0) {
         cerr << "ERROR - NcGeneric2Mdv::_addDataField" << endl;
@@ -1068,6 +1122,29 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
 
   delete missingAtt;
 
+  // swap (x,y) if required
+
+  if (xySwapped) {
+
+    TaArray<float> tmpVals_;
+    float *tmpVals = tmpVals_.alloc(npts);
+    memcpy(tmpVals, vals, npts * sizeof(float));
+
+    int nptsPlane = _ny * _nx;
+
+    for (int iz = 0; iz < _nz; iz ++) {
+      int planeOffset = iz * nptsPlane;
+      for (int iy = 0; iy < _ny; iy ++) {
+        for (int ix = 0; ix < _nx; ix ++) {
+          float *src = tmpVals + planeOffset + ix * _ny + iy;
+          float *dest = vals + planeOffset + iy * _nx + ix;
+          *dest = *src;
+        } // ix
+      } // iy
+    } // iz
+    
+  } // if (xySwapped) 
+
   // reverse y order if it was in reverse order in the file
 
   if (_yIsReversed) {
@@ -1087,7 +1164,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx, int itime)
       } // iy
     } // iz
     
-  }
+  } // if (_yIsReversed) 
   
   // get field name and units
 

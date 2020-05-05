@@ -114,13 +114,13 @@ paramdef boolean {
 } process_latest_file_only;
 
 paramdef string {
-  p_default = "ncf";
+  p_default = "";
   p_descr = "Specify the extension of the files to be read.";
   p_help = "If blank, all extensions will be used.";
 } file_name_ext;
 
 paramdef string {
-  p_default = "TRMM";
+  p_default = "";
   p_descr = "Specify a seach string for the names of the files to be read.";
   p_help = "If blank, no check will be performed.";
 } file_name_substr;
@@ -159,7 +159,7 @@ commentdef {
 paramdef string {
   p_default = "base_time";
   p_descr = "Data set times are relative to this base time";
-  p_help = "Specify 'none' if there is no base time variable. In this case the time will be taken as absolute, using the units specified in the file.";
+  p_help = "Specify 'none' if there is no base time variable. In the units of the time variable will be used.";
 } netcdf_var_base_time;
 
 paramdef string {
