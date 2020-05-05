@@ -115,19 +115,19 @@ bool RadxFile::isSupported(const string &path)
 
 {
 
-  if (isNetCDF(path)) {
-
-    // netCDF files
-  
-    if (_isSupportedNetCDF(path)) {
+  if (isHdf5(path)) {
+    
+    // HDF5 file
+    
+    if (_isSupportedHdf5(path)) {
       return true;
     }
 
-  } else if (isHdf5(path)) {
+  } else if (isNetCDF(path)) {
 
-    // netCDF files
-    
-    if (_isSupportedHdf5(path)) {
+    // netCDF file
+  
+    if (_isSupportedNetCDF(path)) {
       return true;
     }
 
@@ -387,7 +387,10 @@ bool RadxFile::isNetCDF(const string &path)
 {
 
   RadxPath rpath(path);
-  if (rpath.getExt() == "h5") {
+  string ext = rpath.getExt();
+  if ((ext == "h5") ||
+      (ext == "hd5") || 
+      (ext == "hdf5")) {
     return false;
   }
 
@@ -1079,18 +1082,19 @@ int RadxFile::readFromPath(const string &path,
 
   clearErrStr();
 
-  // first check for NetCDF
-  if (isNetCDF(path)) {
-    if (_readFromPathNetCDF(path, vol) == 0) {
+  // check for HDF5
+  
+  if (isHdf5(path)) {
+    if (_readFromPathHdf5(path, vol) == 0) {
       return 0;
     } else {
       return -1;
     }
   }
-  // then check for HDF5
-
-  if (isHdf5(path)) {
-    if (_readFromPathHdf5(path, vol) == 0) {
+  
+  // first check for NetCDF
+  if (isNetCDF(path)) {
+    if (_readFromPathNetCDF(path, vol) == 0) {
       return 0;
     } else {
       return -1;

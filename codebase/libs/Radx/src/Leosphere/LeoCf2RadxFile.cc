@@ -70,7 +70,7 @@ LeoCf2RadxFile::LeoCf2RadxFile() : RadxFile()
 
   _configFileName = "Config_AP.ini";
   _readVol = NULL;
-  // _file = NULL;
+  _plainFile = NULL;
   clear();
 
   _latitude = 0.0;
@@ -101,7 +101,8 @@ void LeoCf2RadxFile::clear()
 {
 
   clearErrStr();
-  //_close();
+  _file.close();
+  _close();
   _ranges.clear();
   _clearRays();
   _modelStr.clear();
@@ -3576,7 +3577,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    // check that we have the correct dimensions
    const NcxxDim &timeDim = timeVar.getDim(0);
    const NcxxDim &rangeDim = rangeVar.getDim(0);
-   size_t nTimes = timeDim.getSize();
+   // size_t nTimes = timeDim.getSize();
    size_t nRange = rangeDim.getSize();
    _nRangeInSweep = nRange;
 
