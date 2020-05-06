@@ -36,6 +36,7 @@ SUB_DIRS = \
 	RadxQpe \
 	RadxRate \
 	RadxSunMon \
-        RadxTimeMedian
+        RadxTimeMedian \
+        RadxVolTimeStats
 
 include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
