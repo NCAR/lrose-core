@@ -211,7 +211,7 @@ def doPlot():
     
     fig1 = plt.figure(1, (widthIn, htIn))
     title = (options.title + ' for scan: ' + scanName + ', vol duration: ' + volDuration + ' sec')
-    fig1.suptitle(title, fontsize=12)
+    fig1.suptitle(title, fontsize=11)
     ax1 = fig1.add_subplot(1,1,1,xmargin=0.0)
     # ax2 = ax1.twinx() # instantiate a second axes that shares the same x-axis
 
@@ -250,8 +250,7 @@ def doPlot():
 
     ax1.set_ylabel('Fraction of volume')
     ax1.set_xlabel('Normalized age at end of volume - cumulative')
-    #ax2.set_xlabel('Normalized age - per bin')
-    ax1.set_title('Elevs: ' + elevs, fontsize=10)
+    ax1.set_title('Elevs: ' + elevs, fontsize=8)
     ax1.grid(True)
     
     #ax1.grid(which='minor', alpha=0.1)
@@ -263,11 +262,14 @@ def doPlot():
     #ax1.set_yticks(major_ticks)
     #ax1.set_yticks(minor_ticks, minor=True)
 
-    legend1 = ax1.legend(loc='upper left', ncol=1)
+    legend1 = ax1.legend(loc='upper left', ncol=1, framealpha=0.5, fancybox=True)
     for label in legend1.get_texts():
         label.set_fontsize('x-small')
 
-    fig1.savefig("vol_timing_stats." + scanName + ".png")
+    homeDir = os.environ['HOME']
+    downloadsDir = os.path.join(homeDir, 'Downloads')
+    savePath = os.path.join(downloadsDir, "vol_timing_stats." + scanName + ".png")
+    fig1.savefig(savePath)
 
    # show
 

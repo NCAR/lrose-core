@@ -1,21 +1,25 @@
 #! /bin/csh
 
-RadxVolTimeStats -f ~/data/meso/nexrad/KDGX/KDGX/20200412/KDGX20200412_232611_V06 > testing/VCP212_timing.txt
+RadxVolTimeStats -f ~/data/volscan-timing/bom/cfrad.20200304_132430.000_to_20200304_132849.000_AU02_SUR.BOM.nc -scan BOM-VOL > testing/BOM-VOL_timing.txt
 
-RadxVolTimeStats -f ~/data/meso/nexrad/KDGX/KDGX/20200412/KDGX20200412_000155_V06 > testing/VCP215_timing.txt
+RadxVolTimeStats -f ~/data/volscan-timing/canada/cfrad.20190730_200003.000_to_20190730_200546.684_CAS2-Blainville_SUR.nc -scan CAN-VOL > testing/CAN-VOL_timing.txt
 
-RadxVolTimeStats -f ~/data/meso/nexrad/KGWX/KGWX/20200412/KGWX20200412_000101_V06 > testing/VCP35_timing.txt
+RadxVolTimeStats -f ~/data/volscan-timing/dwd/cfrad.20200503_220035.973_to_20200503_220403.437_EDZW84_SUR.DWD-VOL.nc -scan DWD-VOL > testing/DWD-VOL_timing.txt
 
-RadxVolTimeStats -f ~/data/bom/cfradial/T_Hills/20200215/cfrad.20200215_073631.000_to_20200215_074046.000_AU71_SUR_SUR.nc -scan THills > testing/THills_timing.txt
+RadxVolTimeStats -f ~/data/volscan-timing/uae/cfrad.20200430_171007_to_20200430_171554_OMAD.UAE.nc -scan UAE-VOL > testing/UAE-VOL_timing.txt
 
-RadxVolTimeStats -f ~/data/bom/cfradial/Melb/20200304/cfrad.20200304_150031.000_to_20200304_150448.000_AU02_SUR_SUR.nc -scan Melb > testing/Melb_timing.txt
+RadxVolTimeStats -f ~/data/volscan-timing/vcp212/cfrad.20200412_180312.617_to_20200412_180852.746_KGWX.SAILS.all_sweeps.nc -scan VCP212-SAILS > testing/VCP212-SAILS_timing.txt
 
-RadxVolTimeStats -f ~/data/daniel/RB5_for_PID/cfradial/raw/20190730/cfrad.20190730_200003.000_to_20190730_200546.684_CAS2-Blainville_SUR.nc -scan CAS2 > testing/CAS2_timing.txt
+RadxVolTimeStats -f ~/data/volscan-timing/vcp215/cfrad.20200412_060516.286_to_20200412_061120.444_KGWX.VCP215.all_sweeps.nc -scan VCP215 > testing/VCP215_timing.txt
 
-PlotRadxVolTimeStats.py --file testing/VCP212_timing.txt &
+RadxVolTimeStats -f ~/data/volscan-timing/vcp35/cfrad.20200413_120649.084_to_20200413_121526.965_KGWX.VCP35.all_sweeps.nc -scan VCP35-SAILS > testing/VCP35-SAILS_timing.txt
+
+
+PlotRadxVolTimeStats.py --file testing/BOM-VOL_timing.txt &
+PlotRadxVolTimeStats.py --file testing/CAN-VOL_timing.txt &
+PlotRadxVolTimeStats.py --file testing/DWD-VOL_timing.txt &
+PlotRadxVolTimeStats.py --file testing/UAE-VOL_timing.txt &
+PlotRadxVolTimeStats.py --file testing/VCP212-SAILS_timing.txt &
 PlotRadxVolTimeStats.py --file testing/VCP215_timing.txt &
-PlotRadxVolTimeStats.py --file testing/VCP35_timing.txt &
-PlotRadxVolTimeStats.py --file testing/CAS2_timing.txt &
-PlotRadxVolTimeStats.py --file testing/Melb_timing.txt &
-PlotRadxVolTimeStats.py --file testing/THills_timing.txt &
+PlotRadxVolTimeStats.py --file testing/VCP35-SAILS_timing.txt &
 

@@ -482,34 +482,6 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
   }
   meanAgeRev = totalWtRev / totalVol;
 
-  // print to stdout
-  
-  // char scanName[128];
-  // if (vol.getScanId() > 0) {
-  //   snprintf(scanName, 128, "VCP%d", vol.getScanId());
-  // } else {
-  //   snprintf(scanName, 128, "%s", _params.scan_name);
-  // }
-
-  // fprintf(stdout, "#########################################################\n");
-  // fprintf(stdout, "# scanName   : %s\n", scanName);
-  // fprintf(stdout, "# duration   : %.0f\n", volDurationSecs);
-  // fprintf(stdout, "# meanAgeFwd : %.3f\n", meanAgeFwd);
-  // fprintf(stdout, "# meanAgeRev : %.3f\n", meanAgeRev);
-  // fprintf(stdout, 
-  //         "# %10s %10s %10s %10s %10s %10s %10s\n",
-  //         "binNum", "binAge", "binPos", "binFreqFwd", "cumFreqFwd", "binFreqRev", "cumFreqRev");
-  // for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
-  //   double binAge = ((ibin + 0.5) / binVolFwd.size()) * volDurationSecs;
-  //   double binPos = ((ibin + 0.5) / binVolFwd.size());
-  //   fprintf(stdout, 
-  //           "  %10ld %10.2f %10.3f %10.6f %10.6f %10.6f %10.6f\n",
-  //           ibin, binAge, binPos,
-  //           binFreqFwd[ibin], cumFreqFwd[ibin],
-  //           binFreqRev[ibin], cumFreqRev[ibin]);
-  // } // ibin
-  // fprintf(stdout, "#########################################################\n");
-  
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -535,7 +507,7 @@ void RadxVolTimeStats::_writeAgeResults(RadxVol &vol,
   // print to stdout
   
   char scanName[128];
-  if (vol.getScanId() > 0) {
+  if (vol.getScanId() > 0 && string(_params.scan_name) == "Unknown") {
     snprintf(scanName, 128, "VCP%d", vol.getScanId());
   } else {
     snprintf(scanName, 128, "%s", _params.scan_name);
