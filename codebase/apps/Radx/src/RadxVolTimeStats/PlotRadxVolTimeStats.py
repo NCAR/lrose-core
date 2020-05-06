@@ -44,11 +44,11 @@ def main():
                       help='Title for plot')
     parser.add_option('--width',
                       dest='figWidthMm',
-                      default=275,
+                      default=200,
                       help='Width of figure in mm')
     parser.add_option('--height',
                       dest='figHeightMm',
-                      default=200,
+                      default=125,
                       help='Height of figure in mm')
     (options, args) = parser.parse_args()
     
@@ -211,7 +211,7 @@ def doPlot():
     
     fig1 = plt.figure(1, (widthIn, htIn))
     title = (options.title + ' for scan: ' + scanName + ', vol duration: ' + volDuration + ' sec')
-    fig1.suptitle(title, fontsize=16)
+    fig1.suptitle(title, fontsize=12)
     ax1 = fig1.add_subplot(1,1,1,xmargin=0.0)
     # ax2 = ax1.twinx() # instantiate a second axes that shares the same x-axis
 
