@@ -1124,6 +1124,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
   // swap (x,y) if required
 
+#ifdef JUNK
   if (xySwapped) {
 
     TaArray<float> tmpVals_;
@@ -1144,6 +1145,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
     } // iz
     
   } // if (xySwapped) 
+#endif
 
   // reverse y order if it was in reverse order in the file
 
