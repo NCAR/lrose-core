@@ -1,0 +1,333 @@
+/**********************************************************************
+ * TDRP params for RadxVolTimeStats
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxVolTimeStats compute timing statistics for (a) an example Radx 
+//   volume or (b) a scan strategy specified in the parameter file. The 
+//   statistics are aimed at understanding the age of fractions of the 
+//   measured volume.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// MODE.
+//
+// Read in a file, or specify radar and scan parameters.
+//
+//======================================================================
+ 
+///////////// specify_mode ////////////////////////////
+//
+// Mode for determining radar parameters.
+//
+
+// SPECIFY_FILE: read in a file, and use that volume for computations.
+//
+// SPECIFY_RADAR_PARAMS: create a volume based on specified parameters 
+//   in params file.
+//
+//
+// Type: enum
+// Options:
+//     SPECIFY_FILE
+//     SPECIFY_RADAR_PARAMS
+//
+
+specify_mode = SPECIFY_RADAR_PARAMS;
+
+//======================================================================
+//
+// SPECIFIED FILE.
+//
+//======================================================================
+ 
+///////////// specified_file_path /////////////////////
+//
+// Path for specified file.
+//
+// Applies to SPECIFY_FILE mode.
+//
+//
+// Type: string
+//
+
+specified_file_path = "./template_cfradial_file.nc";
+
+///////////// set_max_range ///////////////////////////
+//
+// Set the maximum range for file that is read.
+//
+// If TRUE, then max_range_km is applied on read.
+//
+//
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+//======================================================================
+//
+// SPECIFIED RADAR PARAMETERS.
+//
+// Applies to SPECIFY_RADAR_PARAMS mode.
+//
+//======================================================================
+ 
+///////////// radar_name //////////////////////////////
+//
+// Name of radar.
+//
+//
+// Type: string
+//
+
+radar_name = "SAWS";
+
+///////////// radar_location //////////////////////////
+//
+// Radar location.
+//
+// Note that the altitude is in meters MSL.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double latitudeDeg;
+//      double longitudeDeg;
+//      double altitudeKm;
+//   }
+//
+//
+
+radar_location = {
+    latitudeDeg = -25.9118,
+    longitudeDeg = 28.2108,
+    altitudeKm = 1.560
+};
+
+///////////// radar_wavelength_cm /////////////////////
+//
+// Radar wavelength, cm.
+//
+//
+// Type: double
+//
+
+radar_wavelength_cm = 10.46;
+
+///////////// beam_width_deg //////////////////////////
+//
+// Radar beamwidth (deg).
+//
+//
+// Type: double
+//
+
+beam_width_deg = 0.93;
+
+///////////// scan_name ///////////////////////////////
+//
+// Volume coverage pattern.
+//
+//
+// Type: string
+//
+
+scan_name = "SAWS-VOL";
+
+///////////// gate_spacing_m //////////////////////////
+//
+// Gate spacing for simulation (m).
+//
+//
+// Type: double
+//
+
+gate_spacing_m = 500;
+
+///////////// max_range_km ////////////////////////////
+//
+// Max range (km).
+//
+//
+// Type: double
+//
+
+max_range_km = 300;
+
+///////////// elev_rate_deg_per_sec ///////////////////
+//
+// Rate of rotation in elevation (deg/s).
+//
+//
+// Type: double
+//
+
+elev_rate_deg_per_sec = 6;
+
+///////////// sweeps //////////////////////////////////
+//
+// Definition of each sweep.
+//
+// Elevation angle (deg), azimuth rate (deg/sec).
+//
+//
+// Type: struct
+//   typedef struct {
+//      double elev_deg;
+//      double az_rate_deg_per_sec;
+//   }
+//
+// 1D array - variable length.
+//
+
+sweeps = {
+  {
+    elev_deg = 30.0,
+    az_rate_deg_per_sec = 30.0
+  }
+  ,
+  {
+    elev_deg = 22.0,
+    az_rate_deg_per_sec = 27.0
+  }
+  ,
+  {
+    elev_deg = 16.8,
+    az_rate_deg_per_sec = 24.0
+  }
+  ,
+  {
+    elev_deg = 12.2,
+    az_rate_deg_per_sec = 20.0
+  }
+  ,
+  {
+    elev_deg = 9.9,
+    az_rate_deg_per_sec = 17.0
+  }
+  ,
+  {
+    elev_deg = 7.9,
+    az_rate_deg_per_sec = 14.0
+  }
+  ,
+  {
+    elev_deg = 6.2,
+    az_rate_deg_per_sec = 12.0
+  }
+  ,
+  {
+    elev_deg = 4.7,
+    az_rate_deg_per_sec = 12.0
+  }
+  ,
+  {
+    elev_deg = 3.4,
+    az_rate_deg_per_sec = 12.0
+  }
+  ,
+  {
+    elev_deg = 2.3,
+    az_rate_deg_per_sec = 12.0
+  }
+  ,
+  {
+    elev_deg = 1.3,
+    az_rate_deg_per_sec = 11.0
+  }
+  ,
+  {
+    elev_deg = 0.5,
+    az_rate_deg_per_sec = 10.0
+  }
+};
+
+//======================================================================
+//
+// DATA AGE ANALYSIS.
+//
+//======================================================================
+ 
+///////////// n_bins_age_histogram ////////////////////
+//
+// Number of bins in the age histogram.
+//
+// Age is expressed as a fraction of the time to complete the volume.
+//
+//
+// Type: int
+//
+
+n_bins_age_histogram = 50;
+
+///////////// age_hist_max_ht_km //////////////////////
+//
+// Max heights to be used in age histogram (km).
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+age_hist_max_ht_km = {
+ 5,
+ 10,
+ 20
+};
+
+//======================================================================
+//
+// WRITING FILES TO OUTPUT DIRECTORY.
+//
+//======================================================================
+ 
+///////////// write_volume_to_output_file /////////////
+//
+// Write the volume to a CfRadial output file.
+//
+// If TRUE, the volume is written to output_dir.
+//
+//
+// Type: boolean
+//
+
+write_volume_to_output_file = FALSE;
+
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "./output/RadxVolTimeStats/";
+

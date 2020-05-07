@@ -710,7 +710,7 @@
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].d = 40;
       tt->struct_vals[1].d = -105;
-      tt->struct_vals[2].d = 1500;
+      tt->struct_vals[2].d = 0;
     tt++;
     
     // Parameter 'radar_wavelength_cm'
@@ -872,7 +872,7 @@
     tt->descr = tdrpStrDup("Number of bins in the age histogram");
     tt->help = tdrpStrDup("Age is expressed as a fraction of the time to complete the volume");
     tt->val_offset = (char *) &n_bins_age_histogram - &_start_;
-    tt->single_val.i = 25;
+    tt->single_val.i = 50;
     tt++;
     
     // Parameter 'age_hist_max_ht_km'

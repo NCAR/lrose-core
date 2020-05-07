@@ -188,11 +188,20 @@ void RadxVolTimeStats::_createVol(RadxVol &vol)
   int nGates = (int) (maxRangeKm / gateSpacingKm + 0.5);
   
   // loop through specified sweeps
+
+  double prevEl = _params._sweeps[0].elev_deg;
   
   for (int isweep = 0; isweep < _params.sweeps_n; isweep++) {
     
     double el = _params._sweeps[isweep].elev_deg;
 
+    // move to elevation angle
+
+    double deltaEl = fabs(el - prevEl);
+    double slewTime = deltaEl / _params.elev_rate_deg_per_sec;
+    timeSinceStart += slewTime;
+    prevEl = el;
+    
     // azimuths every degree
     
     for (int iray = 0; iray < 360; iray++) {
@@ -376,6 +385,12 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
   RadxTime startTime = vol.getStartRadxTime();
   RadxTime endTime = vol.getEndRadxTime();
   double volDurationSecs = endTime - startTime;
+
+  if (_params.debug) {
+    cerr << "volStartTime : " << startTime.asString(3) << endl;
+    cerr << "volEndTime   : " << endTime.asString(3) << endl;
+    cerr << "duration     : " << volDurationSecs << endl;
+  }
   
   // initialize counter arrays
 
@@ -398,10 +413,17 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
     // get ray
     
     RadxRay *ray = vol.getRays()[iray];
+    // double el = ray->getElevationDeg();
+    // double az = ray->getAzimuthDeg();
     int nGates = ray->getNGates();
     RadxTime rayTime = ray->getRadxTime();
     double ageFwd = endTime - rayTime;
     double ageRev = rayTime - startTime;
+
+    // cerr << "1111111 iray, el, az, ageFwd, ageRev: "
+    //      << iray << ", " << el << ", "
+    //      << az << ", "
+    //      << ageFwd << ", " << ageRev << endl;
 
     // get fields, check they are non-null
 
