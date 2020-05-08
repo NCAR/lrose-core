@@ -56,7 +56,7 @@ public:
 
   // constructor
   
-  AparTsInfo(AparTsDebug_t debug = APAR_TS_DEBUG_OFF);
+  AparTsInfo(AparTsDebug_t debug = AparTsDebug_t::OFF);
 
   // copy constructor
   
@@ -68,7 +68,7 @@ public:
 
   // destructor
   
-  ~AparTsInfo();
+  virtual ~AparTsInfo();
 
   // clear all data
 

@@ -83,7 +83,7 @@ Beam::Beam(const string &progName,
   _targetEl = 0;
   _targetAz = 0;
 
-  _scanMode = APAR_TS_SCAN_MODE_NOT_SET;
+  _scanMode = static_cast<int>(apar_ts_scan_mode_t::NOT_SET);
   _sweepNum = 0;
   _volNum = 0;
   _endOfSweepFlag = false;
@@ -292,7 +292,7 @@ void Beam::_prepareForComputeMoments()
 
   // scan details
 
-  _scanMode = midPulse->getScanMode();
+  _scanMode = static_cast<int>(midPulse->getScanMode());
   _sweepNum = _getSweepNum();
   _volNum = _getVolNum();
 
@@ -332,11 +332,11 @@ void Beam::_prepareForComputeMoments()
   }
 
   if (_params.spectrum_width_method == Params::WIDTH_METHOD_R0R1) {
-    _mom->setSpectrumWidthMethod(AparMoments::WIDTH_METHOD_R0R1);
+    _mom->setSpectrumWidthMethod(AparMoments::spectrum_width_method_t::R0R1);
   } else if (_params.spectrum_width_method == Params::WIDTH_METHOD_R1R2) {
-    _mom->setSpectrumWidthMethod(AparMoments::WIDTH_METHOD_R1R2);
+    _mom->setSpectrumWidthMethod(AparMoments::spectrum_width_method_t::R1R2);
   } else if (_params.spectrum_width_method == Params::WIDTH_METHOD_HYBRID) {
-    _mom->setSpectrumWidthMethod(AparMoments::WIDTH_METHOD_HYBRID);
+    _mom->setSpectrumWidthMethod(AparMoments::spectrum_width_method_t::HYBRID);
   }
 
   if (_params.threshold_zdr_using_snr) {

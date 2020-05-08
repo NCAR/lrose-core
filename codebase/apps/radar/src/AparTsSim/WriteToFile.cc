@@ -70,11 +70,11 @@ WriteToFile::WriteToFile(const string &progName,
   _pulseSeqNum = 0;
   _dwellSeqNum = 0;
 
-  _aparTsDebug = APAR_TS_DEBUG_OFF;
+  _aparTsDebug = AparTsDebug_t::OFF;
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    _aparTsDebug = APAR_TS_DEBUG_VERBOSE;
+    _aparTsDebug = AparTsDebug_t::VERBOSE;
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _aparTsDebug = APAR_TS_DEBUG_NORM;
+    _aparTsDebug = AparTsDebug_t::NORM;
   }
   _aparTsInfo = new AparTsInfo(_aparTsDebug);
 

@@ -147,7 +147,7 @@ void AparMoments::_init()
   _velSign = 1.0;
   _velSignStaggered = 1.0;
   _phidpSign = 1.0;
-  _widthMethod = WIDTH_METHOD_R0R1;
+  _widthMethod = spectrum_width_method_t::R0R1;
 
   _windowR1 = 1.0;
   _windowR2 = 1.0;
@@ -1899,14 +1899,14 @@ double AparMoments::_computeHybridWidth(double r0,
   // r0/r1 estimator
 
   double r0r1 = _computeR0R1Width(r0,r1,nyquist)/nyquist;
-  if (_widthMethod == WIDTH_METHOD_R0R1) {
+  if (_widthMethod == spectrum_width_method_t::R0R1) {
     return r0r1 * nyquist;
   }
 
   // r1/r2 estimator
 
   double r1r2 = _computeR1R2Width(r1,r2,nyquist)/nyquist;
-  if (_widthMethod == WIDTH_METHOD_R1R2) {
+  if (_widthMethod == spectrum_width_method_t::R1R2) {
     return r1r2 * nyquist;
   }
 
@@ -1995,16 +1995,16 @@ double AparMoments::getCalNoisePower(channel_t channel)
 {
 
   switch (channel) {
-    case CHANNEL_HC:
+    case channel_t::CHANNEL_HC:
       return _calNoisePowerHc;
       break;
-    case CHANNEL_VC:
+    case channel_t::CHANNEL_VC:
       return _calNoisePowerVc;
       break;
-    case CHANNEL_HX:
+    case channel_t::CHANNEL_HX:
       return _calNoisePowerHx;
       break;
-    case CHANNEL_VX:
+    case channel_t::CHANNEL_VX:
       return _calNoisePowerVx;
       break;
     default:
@@ -2021,16 +2021,16 @@ double AparMoments::getNoisePower(channel_t channel)
 {
 
   switch (channel) {
-    case CHANNEL_HC:
+    case channel_t::CHANNEL_HC:
       return _noisePowerHc;
       break;
-    case CHANNEL_VC:
+    case channel_t::CHANNEL_VC:
       return _noisePowerVc;
       break;
-    case CHANNEL_HX:
+    case channel_t::CHANNEL_HX:
       return _noisePowerHx;
       break;
-    case CHANNEL_VX:
+    case channel_t::CHANNEL_VX:
       return _noisePowerVx;
       break;
     default:
@@ -2047,16 +2047,16 @@ double AparMoments::getReceiverGain(channel_t channel)
 {
 
   switch (channel) {
-    case CHANNEL_HC:
+    case channel_t::CHANNEL_HC:
       return _receiverGainDbHc;
       break;
-    case CHANNEL_VC:
+    case channel_t::CHANNEL_VC:
       return _receiverGainDbVc;
       break;
-    case CHANNEL_HX:
+    case channel_t::CHANNEL_HX:
       return _receiverGainDbHx;
       break;
-    case CHANNEL_VX:
+    case channel_t::CHANNEL_VX:
       return _receiverGainDbVx;
       break;
     default:
@@ -2073,16 +2073,16 @@ double AparMoments::getBaseDbz1km(channel_t channel)
 {
 
   switch (channel) {
-    case CHANNEL_HC:
+    case channel_t::CHANNEL_HC:
       return _baseDbz1kmHc;
       break;
-    case CHANNEL_VC:
+    case channel_t::CHANNEL_VC:
       return _baseDbz1kmVc;
       break;
-    case CHANNEL_HX:
+    case channel_t::CHANNEL_HX:
       return _baseDbz1kmHx;
       break;
-    case CHANNEL_VX:
+    case channel_t::CHANNEL_VX:
       return _baseDbz1kmVx;
       break;
     default:

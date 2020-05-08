@@ -204,14 +204,20 @@ extern bool apar_ts_georef_correction_swap(apar_ts_georef_correction_t &val);
 // string representation of enums
 
 extern string apar_ts_packet_id_to_str(int packet_id);
-extern string apar_ts_prf_mode_to_str(int prf_mode);
-extern string apar_ts_pulse_shape_to_str(int pulse_shape);
-extern string apar_ts_pol_mode_to_str(int pol_mode);
-extern string apar_ts_scan_mode_to_str(int scan_mode);
-extern string apar_ts_scan_mode_to_short_str(int scan_mode);
-extern string apar_ts_radar_platform_to_str(int radar_platform);
-extern string apar_ts_cal_type_to_str(int cal_type);
-extern string apar_ts_iq_encoding_to_str(int iq_encoding);
+
+extern string apar_ts_prf_mode_to_str(apar_ts_prf_mode_t prf_mode);
+extern string apar_ts_prf_mode_to_str(int prf_mode_int);
+extern string apar_ts_pulse_shape_to_str(apar_ts_pulse_shape_t pulse_shape);
+extern string apar_ts_pulse_shape_to_str(int pulse_shape_int);
+extern string apar_ts_pol_mode_to_str(apar_ts_pol_mode_t pol_mode);
+extern string apar_ts_pol_mode_to_str(int pol_mode_int);
+extern string apar_ts_scan_mode_to_str(apar_ts_scan_mode_t scan_mode);
+extern string apar_ts_scan_mode_to_str(int scan_mode_int);
+extern string apar_ts_scan_mode_to_short_str(apar_ts_scan_mode_t scan_mode);
+extern string apar_ts_scan_mode_to_short_str(int scan_mode_int);
+extern string apar_ts_radar_platform_to_str(apar_ts_radar_platform_t radar_platform);
+extern string apar_ts_iq_encoding_to_str(apar_ts_iq_encoding_t iq_encoding);
+extern string apar_ts_iq_encoding_to_str(int iq_encoding_int);
 
 //////////////////////////////////////////////////////////////////
 // printing routines

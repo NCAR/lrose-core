@@ -278,11 +278,14 @@ codebase/apps/ingest/src/superResNexradLdmUnzip/superResNexradLdmUnzip
 codebase/apps/interp/src/SurfInterp/SurfInterp
 codebase/apps/interp/src/surf_interp/surf_interp
 
+codebase/apps/mdv_utils/src/Affirm/Affirm
 codebase/apps/mdv_utils/src/Binary2Mdv/Binary2Mdv
 codebase/apps/mdv_utils/src/CreateTestMdv/CreateTestMdv
 codebase/apps/mdv_utils/src/CwbRadar2Mdv/CwbRadar2Mdv
 codebase/apps/mdv_utils/src/Egm2Mdv/Egm2Mdv
 codebase/apps/mdv_utils/src/GribNc2Mdv/GribNc2Mdv
+codebase/apps/mdv_utils/src/KochSurface2Mdv/KochSurface2Mdv
+codebase/apps/mdv_utils/src/LatLonBIL2Mdv/LatLonBIL2Mdv
 codebase/apps/mdv_utils/src/MaliSat2Mdv/MaliSat2Mdv
 codebase/apps/mdv_utils/src/McidasNcf2Mdv/McidasNcf2Mdv
 codebase/apps/mdv_utils/src/Mdv2Ascii/Mdv2Ascii
@@ -292,7 +295,9 @@ codebase/apps/mdv_utils/src/Mdv2AxfCont/Mdv2AxfCont
 codebase/apps/mdv_utils/src/Mdv2Grib/Mdv2Grib
 codebase/apps/mdv_utils/src/Mdv2Medoc/Mdv2Medoc
 codebase/apps/mdv_utils/src/Mdv2NetCDF/Mdv2NetCDF
+codebase/apps/mdv_utils/src/Mdv2NewZealand/Mdv2NewZealand
 codebase/apps/mdv_utils/src/Mdv2Plain/Mdv2Plain
+codebase/apps/mdv_utils/src/Mdv2Raob/Mdv2Raob
 codebase/apps/mdv_utils/src/Mdv2SoundingSpdb/Mdv2SoundingSpdb
 codebase/apps/mdv_utils/src/Mdv2SweepNetCDF/Mdv2SweepNetCDF
 codebase/apps/mdv_utils/src/Mdv2TextHdr/Mdv2TextHdr
@@ -310,6 +315,7 @@ codebase/apps/mdv_utils/src/MdvComp/MdvComp
 codebase/apps/mdv_utils/src/MdvCompare/MdvCompare
 codebase/apps/mdv_utils/src/MdvContour/MdvContour
 codebase/apps/mdv_utils/src/MdvConvert/MdvConvert
+codebase/apps/mdv_utils/src/MdvExtract1Point/MdvExtract1Point
 codebase/apps/mdv_utils/src/MdvExtractPoint/MdvExtractPoint
 codebase/apps/mdv_utils/src/MdvFillMissing/MdvFillMissing
 codebase/apps/mdv_utils/src/MdvFindStormTops/MdvFindStormTops
@@ -319,6 +325,8 @@ codebase/apps/mdv_utils/src/MdvFlat2Fcst/MdvFlat2Fcst
 codebase/apps/mdv_utils/src/MdvFromCircles/MdvFromCircles
 codebase/apps/mdv_utils/src/MdvGetLatestTime/MdvGetLatestTime
 codebase/apps/mdv_utils/src/MdvGrad/MdvGrad
+codebase/apps/mdv_utils/src/MdvGridDiagnostic/MdvGridDiagnostic
+codebase/apps/mdv_utils/src/MdvHeaders2Xml/MdvHeaders2Xml
 codebase/apps/mdv_utils/src/MdvHist/MdvHist
 codebase/apps/mdv_utils/src/MdvInterpMissing/MdvInterpMissing
 codebase/apps/mdv_utils/src/MdvLinearComb/MdvLinearComb
@@ -361,6 +369,7 @@ codebase/apps/mdv_utils/src/UpdateMdvStartEndTimes/UpdateMdvStartEndTimes
 codebase/apps/mdv_utils/src/UpdateMdvVlevelTypes/UpdateMdvVlevelTypes
 codebase/apps/mdv_utils/src/WorldTerrain/WorldTerrain
 codebase/apps/mdv_utils/src/ascii2mdv/ascii2mdv
+codebase/apps/mdv_utils/src/distBetweenTwoPoints/distBetweenTwoPoints
 codebase/apps/mdv_utils/src/mdv2netCDF/mdv2netCDF
 codebase/apps/mdv_utils/src/mdv_be2le/mdv_be2le
 codebase/apps/mdv_utils/src/mdv_bin_data/mdv_bin_data

@@ -123,135 +123,135 @@ typedef si32 apar_ts_event_flags_t;
 /************************************************************************/
 /************************************************************************/
 
-typedef enum {
-  APAR_TS_DEBUG_OFF = 0,
-  APAR_TS_DEBUG_NORM,
-  APAR_TS_DEBUG_VERBOSE,
-  APAR_TS_DEBUG_EXTRA
-} AparTsDebug_t;
+enum class AparTsDebug_t {
+  OFF = 0,
+  NORM,
+  VERBOSE,
+  EXTRAVERBOSE
+};
 
 /************************************************************************/
 /**
- * \enum apar_ts_prf_mode
+ * \enum apar_ts_prf_mode_t
  *
  * PRF mode - fixed or dual-prt.
  *
  ************************************************************************/
 
-typedef enum apar_ts_prf_mode {
+enum class apar_ts_prf_mode_t {
 
-  APAR_TS_PRF_MODE_NOT_SET = 0,
-  APAR_TS_PRF_MODE_FIXED = 1, /**< fixed pulsing mode */
-  APAR_TS_PRF_MODE_STAGGERED_2_3 = 2, /**< staggered PRT, 2/3 ratio */
-  APAR_TS_PRF_MODE_STAGGERED_3_4 = 3, /**< staggered PRT, 3/4 ratio */
-  APAR_TS_PRF_MODE_STAGGERED_4_5 = 4, /**< staggered PRT, 4/5 ratio */
-  APAR_TS_PRF_MODE_MULTI_PRT = 5,     /**< staggered mode, more than 2 PRT's */
-  APAR_TS_PRF_MODE_LAST /**< not used */
+  NOT_SET = 0,
+  FIXED = 1, /**< fixed pulsing mode */
+  STAGGERED_2_3 = 2, /**< staggered PRT, 2/3 ratio */
+  STAGGERED_3_4 = 3, /**< staggered PRT, 3/4 ratio */
+  STAGGERED_4_5 = 4, /**< staggered PRT, 4/5 ratio */
+  MULTI_PRT = 5,     /**< staggered mode, more than 2 PRT's */
+  LAST /**< not used */
 
-} apar_ts_prf_mode_t;
+};
 
 /************************************************************************/
 /**
- * \enum apar_ts_pulse_type
+ * \enum apar_ts_pulse_type_t
  *
  ************************************************************************/
 
-typedef enum apar_ts_pulse_shape {
+enum class apar_ts_pulse_shape_t {
 
-  APAR_TS_PULSE_SHAPE_NOT_SET = 0,
-  APAR_TS_PULSE_SHAPE_RECT = 1, /**< rectangular pulse */
-  APAR_TS_PULSE_SHAPE_GAUSSIAN = 2, /**< gaussian-weighted pulse */
-  APAR_TS_PULSE_SHAPE_CUSTOM = 3, /**< custom- downloaded to waveform generator */
-  APAR_TS_PULSE_SHAPE_LAST /**< not used */
+  NOT_SET = 0,
+  RECT = 1, /**< rectangular pulse */
+  GAUSSIAN = 2, /**< gaussian-weighted pulse */
+  CUSTOM = 3, /**< custom- downloaded to waveform generator */
+  LAST /**< not used */
   
-} apar_ts_pulse_shape_t;
+};
 
 /************************************************************************/
 /**
- * \enum apar_ts_pol_mode - polarization
+ * \enum apar_ts_pol_mode_t - polarization
  *
  ************************************************************************/
 
-typedef enum apar_ts_pol_mode {
+enum class apar_ts_pol_mode_t {
   
-  APAR_TS_POL_MODE_NOT_SET = 0,
-  APAR_TS_POL_MODE_H = 1, /**< H pulse */
-  APAR_TS_POL_MODE_V = 2, /**< V pulse */
-  APAR_TS_POL_MODE_MIXED = 3, /**< Mixture of H and V */
-  APAR_TS_POL_MODE_LAST /**< not used */
+  NOT_SET = 0,
+  H = 1, /**< H pulse */
+  V = 2, /**< V pulse */
+  MIXED = 3, /**< Mixture of H and V */
+  LAST /**< not used */
   
-} apar_ts_pol_mode_t;
+};
 
 /************************************************************************/
 /**
- * \enum apar_ts_scan_mode
+ * \enum apar_ts_scan_mode_t
  *
  * Antenna scanning mode - these are legacy NCAR codes, with the CHILL
  * FIXED, MANPPI and MANRHI appended
  *
  ************************************************************************/
 
-typedef enum apar_ts_scan_mode {
+enum class apar_ts_scan_mode_t {
 
-  APAR_TS_SCAN_MODE_NOT_SET = 0,
-  APAR_TS_SCAN_MODE_PPI = 1, /**< PPI sector */
-  APAR_TS_SCAN_MODE_RHI = 2, /**< RHI vertical slice */
-  APAR_TS_SCAN_MODE_COPLANE = 3, /**< co-plane dual doppler mode */
-  APAR_TS_SCAN_MODE_VPOINT = 4, /**< vertical pointing for calibration */
-  APAR_TS_SCAN_MODE_SUNSCAN = 5, /**< scanning the sun for calibrations */
-  APAR_TS_SCAN_MODE_POINTING = 6, /**< fixed pointing */
-  APAR_TS_SCAN_MODE_IDLE = 7, /**< between scans */
-  APAR_TS_SCAN_MODE_LAST /**< not used */
+  NOT_SET = 0,
+  PPI = 1, /**< PPI sector */
+  RHI = 2, /**< RHI vertical slice */
+  COPLANE = 3, /**< co-plane dual doppler mode */
+  VPOINT = 4, /**< vertical pointing for calibration */
+  SUNSCAN = 5, /**< scanning the sun for calibrations */
+  POINTING = 6, /**< fixed pointing */
+  IDLE = 7, /**< between scans */
+  LAST /**< not used */
 
-} apar_ts_scan_mode_t;
+};
 
 /************************************************************************/
 /**
- * \enum apar_ts_radar_platform
+ * \enum apar_ts_radar_platform_t
  *
  * The type of platform on which the radar is mounted.
  *
  ************************************************************************/
 
-typedef enum apar_ts_radar_platform {
+enum class apar_ts_radar_platform_t {
 
-  APAR_TS_RADAR_PLATFORM_NOT_SET = 0,
-  APAR_TS_RADAR_PLATFORM_FIXED = 1, /**< Radar is in a fixed location */
-  APAR_TS_RADAR_PLATFORM_VEHICLE = 2, /**< Radar is mounted on a land vehicle */
-  APAR_TS_RADAR_PLATFORM_SHIP = 3, /**< Radar is mounted on a ship */
-  APAR_TS_RADAR_PLATFORM_AIRCRAFT = 4, /**< Radar is mounted on an aircraft */
-  APAR_TS_RADAR_PLATFORM_LAST /**< not used */
+  NOT_SET = 0,
+  FIXED = 1, /**< Radar is in a fixed location */
+  VEHICLE = 2, /**< Radar is mounted on a land vehicle */
+  SHIP = 3, /**< Radar is mounted on a ship */
+  AIRCRAFT = 4, /**< Radar is mounted on an aircraft */
+  LAST /**< not used */
 
-} apar_ts_radar_platform_t;
+};
 
 /************************************************************************/
 /**
- * \enum apar_ts_iq_encoding
+ * \enum apar_ts_iq_encoding_t
  *
  * How the IQ data is encoded and packed.
  *
  ************************************************************************/
 
-typedef enum apar_ts_iq_encoding {
+enum class apar_ts_iq_encoding_t {
 
-  APAR_TS_IQ_ENCODING_NOT_SET = 0,
+  NOT_SET = 0,
 
-  APAR_TS_IQ_ENCODING_FL32 = 1, /**< 4-byte floats, volts */
+  FL32 = 1, /**< 4-byte floats, volts */
 
-  APAR_TS_IQ_ENCODING_SCALED_SI16 = 2, /**< voltages scaled as signed 16-bit ints,<br>
+  SCALED_SI16 = 2, /**< voltages scaled as signed 16-bit ints,<br>
 				     * volts = (si16 * scale) + offset */
   
-  APAR_TS_IQ_ENCODING_DBM_PHASE_SI16 = 3, /**< 16-bit signed ints,
+  DBM_PHASE_SI16 = 3, /**< 16-bit signed ints,
 					* storing power_dbm and phase,<br>
 					* power_dbm = (si16 * scale) + offset<br>
 					* phase = (si16 * 360.0) / 65536.0  */
   
-  APAR_TS_IQ_ENCODING_SCALED_SI32 = 5, /**< voltages scaled as signed 32-bit ints,<br>
+  SCALED_SI32 = 5, /**< voltages scaled as signed 32-bit ints,<br>
                                         * volts = (si32 * scale) + offset */
   
-  APAR_TS_IQ_ENCODING_LAST /**< not used */
+  LAST /**< not used */
 
-} apar_ts_iq_encoding_t;
+};
 
 /************************************************************************/
 /************************************************************************/
@@ -264,7 +264,7 @@ typedef enum apar_ts_iq_encoding {
 
 /************************************************************************/
 /**
- * \struct apar_ts_packet_info
+ * \struct apar_ts_packet_info_
  *
  * Struct included at top of all other structs.
  * packet_id is set to the id relevant to that packet type.
@@ -397,8 +397,8 @@ typedef struct apar_ts_scan_segment
   
   /** Sun Scan sector widths */
 
-  fl32 sun_scan_sector_width_az; /**< sector width (deg) when follwing sun */
-  fl32 sun_scan_sector_width_el; /**< sector width (deg) when follwing sun */
+  fl32 sun_scan_sector_width_az; /**< sector width (deg) when following sun */
+  fl32 sun_scan_sector_width_el; /**< sector width (deg) when following sun */
 
   si32 unused[456]; /**< for future expansion */
   

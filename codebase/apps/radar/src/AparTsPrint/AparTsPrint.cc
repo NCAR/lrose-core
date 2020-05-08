@@ -112,13 +112,13 @@ AparTsPrint::AparTsPrint(int argc, char **argv)
   
   // create the pulse reader
   
-  AparTsDebug_t aparDebug = APAR_TS_DEBUG_OFF;
+  AparTsDebug_t aparDebug = AparTsDebug_t::OFF;
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    aparDebug = APAR_TS_DEBUG_EXTRA;
+    aparDebug = AparTsDebug_t::EXTRAVERBOSE;
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    aparDebug = APAR_TS_DEBUG_VERBOSE;
+    aparDebug = AparTsDebug_t::VERBOSE;
   } else if (_params.debug) {
-    aparDebug = APAR_TS_DEBUG_NORM;
+    aparDebug = AparTsDebug_t::NORM;
   } 
     
   if (_params.input_mode == Params::TS_FMQ_INPUT) {
@@ -979,11 +979,11 @@ AparTsPulse *AparTsPrint::_getNextPulse()
     // reformat pulse as needed
     
     if (_params.packing_type == Params::PACKING_FL32) {
-      pulse->convertToPacked(APAR_TS_IQ_ENCODING_FL32);
+      pulse->convertToPacked(apar_ts_iq_encoding_t::FL32);
     } else if (_params.packing_type == Params::PACKING_SCALED_SI16) {
-      pulse->convertToPacked(APAR_TS_IQ_ENCODING_SCALED_SI16);
+      pulse->convertToPacked(apar_ts_iq_encoding_t::SCALED_SI16);
     } else if (_params.packing_type == Params::PACKING_DBM_PHASE_SI16) {
-      pulse->convertToPacked(APAR_TS_IQ_ENCODING_DBM_PHASE_SI16);
+      pulse->convertToPacked(apar_ts_iq_encoding_t::DBM_PHASE_SI16);
     }
 
   }
@@ -1900,7 +1900,7 @@ void AparTsPrint::_printOpsInfo(ostream &out, const AparTsPulse *pulse)
       << info.getProcStartRangeM() << ","
       << info.getProcGateSpacingM() << ","
       << info.getScanMode() << ","
-      << info.getProcPrfMode() << ","
+      << static_cast<int>(info.getProcPrfMode()) << ","
       << info.getRadarWavelengthCm() << ","
       << info.getRadarBeamwidthDegH() << ","
       << info.getRadarBeamwidthDegV() << endl;

@@ -148,11 +148,11 @@ BeamReader::BeamReader(const string &prog_name,
     
   // create the pulse reader
   
-  AparTsDebug_t aparDebug = APAR_TS_DEBUG_OFF;
+  AparTsDebug_t aparDebug = AparTsDebug_t::OFF;
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    aparDebug = APAR_TS_DEBUG_VERBOSE;
+    aparDebug = AparTsDebug_t::VERBOSE;
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    aparDebug = APAR_TS_DEBUG_NORM;
+    aparDebug = AparTsDebug_t::NORM;
   } 
     
   if (_params.mode == Params::FMQ) {
