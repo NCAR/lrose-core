@@ -324,7 +324,18 @@ void RadxVolTimeStats::_addGeomFields(RadxVol &vol)
   
   RadxTime startTime = vol.getStartRadxTime();
 
-  double beamWidthRad = _params.beam_width_deg * DEG_TO_RAD;
+  double beamWidthDeg = _params.beam_width_deg;
+  double beamWidthDegH = vol.getRadarBeamWidthDegH();
+  double beamWidthDegV = vol.getRadarBeamWidthDegV();
+  if (beamWidthDegH > 0 && beamWidthDegV > 0) {
+    beamWidthDeg = (beamWidthDegH + beamWidthDegV) / 2.0;
+  } else if (beamWidthDegH > 0) {
+    beamWidthDeg = beamWidthDegH;
+  } else if (beamWidthDegV > 0) {
+    beamWidthDeg = beamWidthDegV;
+  }
+  double beamWidthRad = beamWidthDeg * DEG_TO_RAD;
+
   BeamHeight beamHt; // default init to get height above radar
 
   // loop through rays
@@ -428,11 +439,6 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
     RadxTime rayTime = ray->getRadxTime();
     double ageFwd = endTime - rayTime;
     double ageRev = rayTime - startTime;
-
-    // cerr << "1111111 iray, el, az, ageFwd, ageRev: "
-    //      << iray << ", " << el << ", "
-    //      << az << ", "
-    //      << ageFwd << ", " << ageRev << endl;
 
     // get fields, check they are non-null
 
@@ -656,8 +662,19 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
 
   // init for computing heights
 
-  const vector<RadxSweep *> &sweeps = vol.getSweeps();
   double beamWidthDeg = _params.beam_width_deg;
+  double beamWidthDegH = vol.getRadarBeamWidthDegH();
+  double beamWidthDegV = vol.getRadarBeamWidthDegV();
+
+  if (beamWidthDegH > 0 && beamWidthDegV > 0) {
+    beamWidthDeg = (beamWidthDegH + beamWidthDegV) / 2.0;
+  } else if (beamWidthDegH > 0) {
+    beamWidthDeg = beamWidthDegH;
+  } else if (beamWidthDegV > 0) {
+    beamWidthDeg = beamWidthDegV;
+  }
+
+  const vector<RadxSweep *> &sweeps = vol.getSweeps();
   BeamHeight beamHt; // default init to get height above radar
   vol.computeMaxNGates();
   int nGates = vol.getMaxNGates();
@@ -667,6 +684,15 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
   double gateSpacingKm = ray0->getGateSpacingKm();
   double maxRangeKm = startRangeKm + (nGates - 1) * gateSpacingKm;
 
+  // create set of unique angles, 2 decimal accuracy
+
+  set<double> uniqueElev;
+  for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
+    double elDeg = sweeps[isweep]->getFixedAngleDeg();
+    double elRounded = floor(elDeg * 100.0 + 0.5) / 100.0;
+    uniqueElev.insert(elRounded);
+  }
+  
   // print to stdout
   
   char scanName[128];
@@ -685,32 +711,24 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
   fprintf(stdout, "# beamWidth  : %.2f\n", beamWidthDeg);
   fprintf(stdout, "# elevs      : ");
   
-  for (size_t ii = 0; ii < sweeps.size(); ii++) {
-    fprintf(stdout, "%.2f", sweeps[ii]->getFixedAngleDeg());
-    if (ii != sweeps.size()-1) {
+  set<double>::iterator itElev;
+  size_t count = 0;
+  for (itElev = uniqueElev.begin(); itElev != uniqueElev.end(); itElev++, count++) {
+    double el = *itElev;
+    fprintf(stdout, "%.2f", el);
+    if (count < uniqueElev.size() - 1) {
       fprintf(stdout, ",");
     } else {
       fprintf(stdout, "\n");
     }
   }
 
-  // create set of unique angles, 2 decimal accuracy
-
-  set<double> uniqueElev;
-  for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
-    double elDeg = sweeps[isweep]->getFixedAngleDeg();
-    double elRounded = floor(elDeg * 100.0 + 0.5) / 100.0;
-    uniqueElev.insert(elRounded);
-  }
-  // std::sort(uniqueElev.begin(), uniqueElev.end());
-  
   // column headers
   
   fprintf(stdout, "#%10s %10s", "gateNum", "rangeKm");
   
-  set<double>::iterator it;
-  for (it = uniqueElev.begin(); it != uniqueElev.end(); it++) {
-    double elDeg = *it;
+  for (itElev = uniqueElev.begin(); itElev != uniqueElev.end(); itElev++) {
+    double elDeg = *itElev;
     char elevText[128];
     snprintf(elevText, 128, "%.2f", elDeg);
     string elevStr(elevText);
@@ -735,9 +753,9 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
   
     // loop through sweeps
     
-    for (it = uniqueElev.begin(); it != uniqueElev.end(); it++) {
+    for (itElev = uniqueElev.begin(); itElev != uniqueElev.end(); itElev++) {
       
-      double elMid = *it;
+      double elMid = *itElev;
       double elBot = elMid - beamWidthDeg / 2.0;
       double elTop = elMid + beamWidthDeg / 2.0;
 

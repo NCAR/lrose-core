@@ -224,8 +224,6 @@ def doPlot():
 
     colors = [ 'red', 'blue', 'orange', 'green' ]
     count = 0
-    dash = 4
-    space = 4
     elevsUsed = []
 
     for elev in elevs:
@@ -234,8 +232,6 @@ def doPlot():
             continue
 
         elevsUsed.append(elev)
-
-        print("11111111111 elev, elevsUsed: ", elev, elevsUsed, file=sys.stderr)
 
         gndRange = rangeKm * math.cos(math.radians(float(elev)))
 
@@ -249,44 +245,27 @@ def doPlot():
 
         col = colors[count % 4]
 
-        for igate in range(0, int(nGates) - 2):
-
-            x = []
-            y = []
-
+        x = []
+        y = []
+        
+        for igate in range(0, int(nGates) - 1, 1):
             x.append(gndRange[igate])
             y.append(htKmBot[igate])
 
-            x.append(gndRange[igate+1])
-            y.append(htKmBot[igate+1])
-
-            x.append(gndRange[igate+1])
-            y.append(htKmTop[igate+1])
-
+        for igate in range(int(nGates) - 1, 0, -1):
             x.append(gndRange[igate])
             y.append(htKmTop[igate])
 
-            x.append(gndRange[igate])
-            y.append(htKmBot[igate])
-
-            ax1.fill(x, y, color = col, alpha = 0.2)
-
-
-        print("11111111111 len(gndRange): ", len(gndRange), file=sys.stderr)
-        print("11111111111 len(htKmBot): ", len(htKmBot), file=sys.stderr)
-        print("11111111111 len(htKmMid): ", len(htKmMid), file=sys.stderr)
-        print("11111111111 len(htKmTop): ", len(htKmTop), file=sys.stderr)
+        ax1.fill(x, y, color = col, alpha = 0.2)
 
         ax1.plot(gndRange, htKmBot, linewidth=1, color = col)
-        ax1.plot(gndRange, htKmMid, linewidth=1, dashes = [dash, space], color = col)
+        ax1.plot(gndRange, htKmMid, linewidth=1, dashes = [4, 4], color = col)
         ax1.plot(gndRange, htKmTop, linewidth=1, color = col)
 
         count = count + 1
-        #dash = dash - 2
-        #space = space + 2
 
-    ax1.set_ylabel('Height (km)')
-    ax1.set_xlabel('Range (km)')
+    ax1.set_ylabel('Height above radar (km)')
+    ax1.set_xlabel('Ground range (km)')
     ax1.set_title('Elevs: ' + elevList, fontsize=8)
     ax1.grid(True)
     
