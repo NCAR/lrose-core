@@ -138,6 +138,13 @@ int RadxVolTimeStats::Run()
     }
   }
 
+  // optionally print the range-height table to stdout
+
+  if (_params.print_range_height_table) {
+    _printRangeHeightTable(vol);
+    return 0;
+  }
+
   // set up results vectors for different max heights
 
   vector<double> maxHtKm;
@@ -577,6 +584,8 @@ void RadxVolTimeStats::_writeAgeResults(RadxVol &vol,
   }
   fprintf(stdout, "\n");
   
+  fprintf(stdout, "#########################################################\n");
+
   for (int ibin = 0; ibin < nBins; ibin++) {
     double binAge = ((ibin + 0.5) / nBins) * volDurationSecs;
     double binPos = ((ibin + 0.5) / nBins);
@@ -588,7 +597,6 @@ void RadxVolTimeStats::_writeAgeResults(RadxVol &vol,
     }
     fprintf(stdout, "\n");
   } // ibin
-  fprintf(stdout, "#########################################################\n");
   
 }
 
@@ -636,5 +644,108 @@ int RadxVolTimeStats::_writeVol(RadxVol &vol)
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////
+// print the range height table to stdout
+
+void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
+{
+
+  // get time limits, and vol duration
+
+  RadxTime startTime = vol.getStartRadxTime();
+  RadxTime endTime = vol.getEndRadxTime();
+  double volDurationSecs = endTime - startTime;
+  const vector<RadxSweep *> &sweeps = vol.getSweeps();
+  
+  // print to stdout
+  
+  char scanName[128];
+  if (vol.getScanId() > 0 && string(_params.scan_name) == "Unknown") {
+    snprintf(scanName, 128, "VCP%d", vol.getScanId());
+  } else {
+    snprintf(scanName, 128, "%s", _params.scan_name);
+  }
+
+  // metadata headers
+
+  fprintf(stdout, "#########################################################\n");
+  fprintf(stdout, "# scanName   : %s\n", scanName);
+  fprintf(stdout, "# duration   : %.0f\n", volDurationSecs);
+  fprintf(stdout, "# elevs      : ");
+  
+  for (size_t ii = 0; ii < sweeps.size(); ii++) {
+    fprintf(stdout, "%.2f", sweeps[ii]->getFixedAngleDeg());
+    if (ii != sweeps.size()-1) {
+      fprintf(stdout, ",");
+    } else {
+      fprintf(stdout, "\n");
+    }
+  }
+  
+  // column headers
+
+  fprintf(stdout, "#%10s %10s", "gateNum", "rangeKm");
+  
+  for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
+    double elDeg = sweeps[isweep]->getFixedAngleDeg();
+    char elevText[128];
+    snprintf(elevText, 128, "%.2f", elDeg);
+    string elevStr(elevText);
+    string label = "htKmBot[" + elevStr + "]";
+    fprintf(stdout, " %15s", label.c_str());
+    label = "htKmMid[" + elevStr + "]";
+    fprintf(stdout, " %15s", label.c_str());
+    label = "htKmTop[" + elevStr + "]";
+    fprintf(stdout, " %15s", label.c_str());
+    if (isweep == sweeps.size()-1) {
+      fprintf(stdout, "\n");
+    }
+  }
+
+  fprintf(stdout, "#########################################################\n");
+
+  // init for computing heights
+
+  double beamWidthDeg = _params.beam_width_deg;
+  BeamHeight beamHt; // default init to get height above radar
+  vol.computeMaxNGates();
+  int nGates = vol.getMaxNGates();
+  vol.remapToPredomGeom();
+  RadxRay *ray0 = vol.getRays()[0];
+  double startRangeKm = ray0->getStartRangeKm();
+  double gateSpacingKm = ray0->getGateSpacingKm();
+
+  // loop through gates
+
+  for (int igate = 0; igate < nGates; igate++) {
+    
+    double rangeKm = startRangeKm + igate * gateSpacingKm;
+    
+    fprintf(stdout, " %10d %10.2f", igate, rangeKm);
+  
+    // loop through sweeps
+    
+    for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
+      
+      double elMid = sweeps[isweep]->getFixedAngleDeg();
+      double elBot = elMid - beamWidthDeg / 2.0;
+      double elTop = elMid + beamWidthDeg / 2.0;
+
+      double htMid = beamHt.computeHtKm(elMid, rangeKm);
+      double htBot = beamHt.computeHtKm(elBot, rangeKm);
+      double htTop = beamHt.computeHtKm(elTop, rangeKm);
+
+      fprintf(stdout, " %15.2f %15.2f %15.2f", htBot, htMid, htTop);
+      
+      if (isweep == sweeps.size()-1) {
+        fprintf(stdout, "\n");
+      }
+
+    } // isweep
+    
+  } // igate
+    
 }
 

@@ -901,7 +901,28 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("WRITING FILES TO OUTPUT DIRECTORY");
+    tt->comment_hdr = tdrpStrDup("WRITING OUT RANGE-HEIGHT TABLE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'print_range_height_table'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_range_height_table");
+    tt->descr = tdrpStrDup("Print range-height table to stdout");
+    tt->help = tdrpStrDup("If TRUE, the height of the sweep elevation angles, vs range, are written to stdout");
+    tt->val_offset = (char *) &print_range_height_table - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("WRITING CFRADIAL FILES TO OUTPUT DIRECTORY");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

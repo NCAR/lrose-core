@@ -90,6 +90,7 @@ private:
                         vector< vector<double> > &cumFreqRev);
   void _setupWrite(RadxFile &file);
   int _writeVol(RadxVol &vol);
+  void _printRangeHeightTable(RadxVol &vol);
 
 };
 

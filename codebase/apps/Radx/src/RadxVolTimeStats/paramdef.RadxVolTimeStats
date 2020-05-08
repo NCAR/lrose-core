@@ -155,7 +155,17 @@ paramdef double {
 } age_hist_max_ht_km[];
 
 commentdef {
-  p_header = "WRITING FILES TO OUTPUT DIRECTORY";
+  p_header = "WRITING OUT RANGE-HEIGHT TABLE";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print range-height table to stdout";
+  p_help = "If TRUE, the height of the sweep elevation angles, vs range, are written to stdout";
+} print_range_height_table;
+
+commentdef {
+  p_header = "WRITING CFRADIAL FILES TO OUTPUT DIRECTORY";
 }
 
 paramdef boolean {
