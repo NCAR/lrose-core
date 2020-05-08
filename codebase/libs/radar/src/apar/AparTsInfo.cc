@@ -309,7 +309,7 @@ bool AparTsInfo::isEssentialInfoReady() const
     return true;
   }
 
-  if (_debug) {
+  if (_debug != AparTsDebug_t::OFF) {
     if (_debugPrintCount % 2500 == 0) {
       if (!_radar_info_active) {
         cerr << "INFO - AparTsInfo::isEssentialInfoReady()" << endl;
@@ -809,7 +809,7 @@ void AparTsInfo::printMetaQueue(FILE *out, bool clearQueue) const
     return;
   }
 
-  if (_debug >= APAR_TS_DEBUG_VERBOSE) {
+  if (_debug >= AparTsDebug_t::VERBOSE) {
     cerr << "DEBUG - AparTsInfo::printMetaQueue()" << endl;
     cerr << "  _metaQueue.size(): " << _metaQueue.size() << endl;
   }
@@ -1004,7 +1004,7 @@ int AparTsInfo::writeMetaQueueToFile(FILE *out, bool clearQueue) const
     return -1;
   }
 
-  if (_debug >= APAR_TS_DEBUG_VERBOSE) {
+  if (_debug >= AparTsDebug_t::VERBOSE) {
     cerr << "DEBUG - AparTsInfo::writeMetaQueueToFile()" << endl;
     cerr << "  _metaQueue.size(): " << _metaQueue.size() << endl;
   }
@@ -1042,7 +1042,7 @@ void AparTsInfo::addMetaQueueToMsg(DsMessage &msg, bool clearQueue) const
   
 {
 
-  if (_debug >= APAR_TS_DEBUG_VERBOSE) {
+  if (_debug >= AparTsDebug_t::VERBOSE) {
     cerr << "DEBUG - AparTsInfo::addMetaQueueToMsg()" << endl;
     cerr << "  _metaQueue.size(): " << _metaQueue.size() << endl;
   }

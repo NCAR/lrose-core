@@ -68,7 +68,7 @@ AparTsPulse::AparTsPulse(AparTsInfo &info,
     _chanIq[ii]= NULL;
   }
 
-  _packedEncoding = APAR_TS_IQ_ENCODING_LAST;
+  _packedEncoding = apar_ts_iq_encoding_t::LAST;
   _packedScale = 1.0;
   _packedOffset = 0.0;
   _packed = NULL;
@@ -198,7 +198,7 @@ int AparTsPulse::setFromBuffer(const void *buf, int len,
   memcpy(copy, buf, len);
   apar_ts_packet_swap(copy, len);
 
-  if (_debug >= APAR_TS_DEBUG_EXTRA) {
+  if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
     apar_ts_packet_print(stderr, copy, len);
   }
 
@@ -222,7 +222,7 @@ int AparTsPulse::setFromBuffer(const void *buf, int len,
   int nGatesTotal = _hdr.n_gates;
   int nDataMin = _hdr.n_channels * (nGatesTotal) * 2;
   if ((int) _hdr.n_data < nDataMin) {
-    if (_debug >= APAR_TS_DEBUG_VERBOSE) {
+    if (_debug >= AparTsDebug_t::VERBOSE) {
       cerr << "WARNING: AparTsPulse::setFromTsBuffer: ndata set to low" << endl;
       cerr << "  nData in pulse header: " << _hdr.n_data << endl;
       cerr << "  Setting to min required: " << nDataMin << endl;
@@ -236,11 +236,14 @@ int AparTsPulse::setFromBuffer(const void *buf, int len,
   _prf = 1.0 / _hdr.prt;
   
   // load up IQ data
+  apar_ts_iq_encoding_t iqEncoding =
+          static_cast<apar_ts_iq_encoding_t>(_hdr.iq_encoding);
   
   int requiredLen = 
     (int) sizeof(apar_ts_pulse_header_t) + _hdr.n_data * sizeof(si16);
-  if (_hdr.iq_encoding == APAR_TS_IQ_ENCODING_FL32 ||
-      _hdr.iq_encoding == APAR_TS_IQ_ENCODING_SCALED_SI32) {
+
+  if (iqEncoding == apar_ts_iq_encoding_t::FL32 ||
+      iqEncoding == apar_ts_iq_encoding_t::SCALED_SI32) {
     requiredLen =
       (int) sizeof(apar_ts_pulse_header_t) + _hdr.n_data * sizeof(fl32);
   }
@@ -255,13 +258,13 @@ int AparTsPulse::setFromBuffer(const void *buf, int len,
     return -1;
   }
   
-  if (_hdr.iq_encoding == APAR_TS_IQ_ENCODING_FL32) {
+  if (iqEncoding == apar_ts_iq_encoding_t::FL32) {
     
     _clearPacked();
     fl32 *iq = (fl32 *) (copy + sizeof(apar_ts_pulse_header_t));
     _iqData = (fl32 *) _iqBuf.load(iq, _hdr.n_data * sizeof(fl32));
 
-  } else if (_hdr.iq_encoding == APAR_TS_IQ_ENCODING_SCALED_SI32) {
+  } else if (iqEncoding == apar_ts_iq_encoding_t::SCALED_SI32) {
     
     _clearPacked();
     si32 *siq = (si32 *) (copy + sizeof(apar_ts_pulse_header_t));
@@ -281,7 +284,7 @@ int AparTsPulse::setFromBuffer(const void *buf, int len,
 
   }
 
-  _packedEncoding = (apar_ts_iq_encoding_t) _hdr.iq_encoding;
+  _packedEncoding = iqEncoding;
   _packedScale = _hdr.scale;
   _packedOffset = _hdr.offset;
   
@@ -310,12 +313,12 @@ void AparTsPulse::setIqFloats(int nGates,
   _hdr.n_gates = nGates;
   _hdr.n_channels = nChannels;
   _hdr.n_data = nChannels * nGates * 2;
-  _hdr.iq_encoding = APAR_TS_IQ_ENCODING_FL32;
+  _hdr.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::FL32);
   
   _iqData = (fl32 *) _iqBuf.load(iq, _hdr.n_data * sizeof(fl32));
 
   _clearPacked();
-  _packedEncoding = APAR_TS_IQ_ENCODING_FL32;
+  _packedEncoding = apar_ts_iq_encoding_t::FL32;
   _packedScale = _hdr.scale;
   _packedOffset = _hdr.offset;
 
@@ -335,7 +338,7 @@ void AparTsPulse::setIqFromScaledSi32(int nGates,
   _hdr.n_gates = nGates;
   _hdr.n_channels = nChannels;
   _hdr.n_data = nChannels * nGates * 2;
-  _hdr.iq_encoding = APAR_TS_IQ_ENCODING_FL32;
+  _hdr.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::FL32);
   
   _iqData = (fl32 *) _iqBuf.prepare(_hdr.n_data * sizeof(fl32));
   fl32 *iq = _iqData;
@@ -346,7 +349,7 @@ void AparTsPulse::setIqFromScaledSi32(int nGates,
   }
   
   _clearPacked();
-  _packedEncoding = APAR_TS_IQ_ENCODING_FL32;
+  _packedEncoding = apar_ts_iq_encoding_t::FL32;
   _packedScale = 1.0;
   _packedOffset = 0.0;
 
@@ -368,7 +371,7 @@ void AparTsPulse::setIqPacked(int nGates, int nChannels,
   _hdr.n_gates = nGates;
   _hdr.n_channels = nChannels;
   _hdr.n_data = nChannels * nGates * 2;
-  _hdr.iq_encoding = encoding;
+  _hdr.iq_encoding = static_cast<si32>(encoding);
   _hdr.scale = scale;
   _hdr.offset = offset;
   
@@ -408,7 +411,7 @@ void AparTsPulse::convertToFL32()
   
 {
 
-  if (_packedEncoding == APAR_TS_IQ_ENCODING_FL32) {
+  if (_packedEncoding == apar_ts_iq_encoding_t::FL32) {
     _setDataPointers();
     _fixZeroPower();
     return;
@@ -416,7 +419,8 @@ void AparTsPulse::convertToFL32()
 
   _iqData = (fl32 *) _iqBuf.prepare(_hdr.n_data * sizeof(fl32));
   
-  if (_hdr.iq_encoding == APAR_TS_IQ_ENCODING_SCALED_SI16) {
+  apar_ts_iq_encoding_t iqEncoding = static_cast<apar_ts_iq_encoding_t>(_hdr.iq_encoding);
+  if (iqEncoding == apar_ts_iq_encoding_t::SCALED_SI16) {
     
     // compute from signed scaled values
     
@@ -428,7 +432,7 @@ void AparTsPulse::convertToFL32()
       }
     }
     
-  } else if (_hdr.iq_encoding == APAR_TS_IQ_ENCODING_DBM_PHASE_SI16) {
+  } else if (iqEncoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
 
     // compute from power and phase
     
@@ -452,7 +456,7 @@ void AparTsPulse::convertToFL32()
   
   _hdr.scale = 1.0;
   _hdr.offset = 0.0;
-  _hdr.iq_encoding = APAR_TS_IQ_ENCODING_FL32;
+  _hdr.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::FL32);
   
   _setDataPointers();
 
@@ -516,12 +520,12 @@ void AparTsPulse::getIq(int chanNum,
 
   // floats? return as is
 
-  if (_packedEncoding == APAR_TS_IQ_ENCODING_FL32) {
+  if (_packedEncoding == apar_ts_iq_encoding_t::FL32) {
 
     ival = _iqData[offset];
     qval = _iqData[offset + 1];
 
-  } else if (_packedEncoding == APAR_TS_IQ_ENCODING_SCALED_SI16) {
+  } else if (_packedEncoding == apar_ts_iq_encoding_t::SCALED_SI16) {
     
     // unscale
     
@@ -530,7 +534,7 @@ void AparTsPulse::getIq(int chanNum,
     ival = ipacked * _packedScale + _packedOffset;
     qval = qpacked * _packedScale + _packedOffset;
     
-  } else if (_packedEncoding == APAR_TS_IQ_ENCODING_DBM_PHASE_SI16) {
+  } else if (_packedEncoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
 
     // compute from power and phase
     
@@ -558,19 +562,19 @@ void AparTsPulse::convertToPacked(apar_ts_iq_encoding_t encoding)
     // nothing to do
     _hdr.scale = _packedScale;
     _hdr.offset = _packedOffset;
-    _hdr.iq_encoding = _packedEncoding;
+    _hdr.iq_encoding = static_cast<si32>(_packedEncoding);
     return;
   }
   
-  if (encoding == APAR_TS_IQ_ENCODING_FL32 && _iqData != NULL) {
+  if (encoding == apar_ts_iq_encoding_t::FL32 && _iqData != NULL) {
     // use float data as packed data
     _clearPacked();
     _hdr.scale = 1.0;
     _hdr.offset = 0.0;
-    _hdr.iq_encoding = APAR_TS_IQ_ENCODING_FL32;
+    _hdr.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::FL32);
     _packedScale = 1.0;
     _packedOffset = 0.0;
-    _packedEncoding = APAR_TS_IQ_ENCODING_FL32;
+    _packedEncoding = apar_ts_iq_encoding_t::FL32;
     return;
   }
 
@@ -585,7 +589,7 @@ void AparTsPulse::convertToPacked(apar_ts_iq_encoding_t encoding)
   
   // fill packed array
   
-  if (encoding == APAR_TS_IQ_ENCODING_SCALED_SI16) {
+  if (encoding == apar_ts_iq_encoding_t::SCALED_SI16) {
     
     // compute max absolute val
     
@@ -620,7 +624,7 @@ void AparTsPulse::convertToPacked(apar_ts_iq_encoding_t encoding)
     _packedScale = scale;
     _packedOffset = offset;
     
-  } else if (encoding == APAR_TS_IQ_ENCODING_DBM_PHASE_SI16) {
+  } else if (encoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
 
     // compute power and phase, save in arrays
     // also compute min and max power in db
@@ -694,7 +698,7 @@ void AparTsPulse::convertToPacked(apar_ts_iq_encoding_t encoding)
 
   _hdr.scale = _packedScale;
   _hdr.offset = _packedOffset;
-  _hdr.iq_encoding = _packedEncoding;
+  _hdr.iq_encoding = static_cast<si32>(_packedEncoding);
 
 }
 
@@ -706,7 +710,7 @@ void AparTsPulse::convertToScaledSi16(double scale,
   
 {
   
-  if (_packedEncoding != APAR_TS_IQ_ENCODING_FL32 || _iqData == NULL) {
+  if (_packedEncoding != apar_ts_iq_encoding_t::FL32 || _iqData == NULL) {
     // make sure we have float 32 data available
     convertToFL32();
   }
@@ -736,10 +740,10 @@ void AparTsPulse::convertToScaledSi16(double scale,
 
   // save values
 
-  _packedEncoding = APAR_TS_IQ_ENCODING_SCALED_SI16;
+  _packedEncoding = apar_ts_iq_encoding_t::SCALED_SI16;
   _hdr.scale = _packedScale;
   _hdr.offset = _packedOffset;
-  _hdr.iq_encoding = _packedEncoding;
+  _hdr.iq_encoding = static_cast<si32>(_packedEncoding);
 
 }
 
@@ -752,7 +756,7 @@ void AparTsPulse::setScaleAndOffsetForSi16(double scale,
   
 {
   
-  if (_packedEncoding != APAR_TS_IQ_ENCODING_SCALED_SI16) {
+  if (_packedEncoding != apar_ts_iq_encoding_t::SCALED_SI16) {
     // do nothing, not si16 encoding
     return;
   }
@@ -844,14 +848,15 @@ void AparTsPulse::assemble(MemBuf &buf) const
 {
   apar_ts_pulse_header_t hdr = _hdr;
   int nbytesIq = 0;
-  if (hdr.iq_encoding == APAR_TS_IQ_ENCODING_FL32) {
+  apar_ts_iq_encoding_t iqEncoding = static_cast<apar_ts_iq_encoding_t>(hdr.iq_encoding);
+  if (iqEncoding == apar_ts_iq_encoding_t::FL32) {
     nbytesIq = hdr.n_data * sizeof(fl32);
   } else {
     nbytesIq = hdr.n_data * sizeof(si16);
   }
   hdr.packet.len_bytes = sizeof(apar_ts_pulse_header_t) + nbytesIq;
   buf.add(&hdr, sizeof(hdr));
-  if (_hdr.iq_encoding == APAR_TS_IQ_ENCODING_FL32) {
+  if (iqEncoding == apar_ts_iq_encoding_t::FL32) {
     buf.add(_iqData, nbytesIq);
   } else {
     buf.add(_packed, nbytesIq);
@@ -889,7 +894,7 @@ const void *AparTsPulse::getPackedData() const
 
 {
 
-  if (_hdr.iq_encoding == APAR_TS_IQ_ENCODING_FL32) {
+  if (_hdr.iq_encoding == static_cast<si32>(apar_ts_iq_encoding_t::FL32)) {
     return _iqData;
   } else {
     return _packed;
@@ -1237,7 +1242,7 @@ void AparTsPulse::computeElAzFromGeoref()
   setElevation(elevationRad * RAD_TO_DEG);
   setAzimuth(azimuthRad * RAD_TO_DEG);
 
-  if (_debug >= APAR_TS_DEBUG_EXTRA) {
+  if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
     cerr << "========== AparTsPulse::computeElAzFromGeoref() ========" << endl;
     cerr << "  roll: " << _georef.roll_deg << endl;
     cerr << "  pitch: " << _georef.pitch_deg << endl;
@@ -1304,7 +1309,7 @@ void AparTsPulse::_fixZeroPower()
   
 {
 
-  if (_packedEncoding != APAR_TS_IQ_ENCODING_FL32) {
+  if (_packedEncoding != apar_ts_iq_encoding_t::FL32) {
     convertToFL32();
   }
   
@@ -1351,9 +1356,9 @@ void AparTsPulse::_doPrintData(FILE *out, int channel, int startGate, int endGat
   fprintf(out, " %5s %15s %15s %15s %15s",
 	  "gate", "i(volts)", "q(volts)", "power(dBm)", "phase(deg)");
   if (_packed != NULL) {
-    if (_packedEncoding == APAR_TS_IQ_ENCODING_SCALED_SI16) {
+    if (_packedEncoding == apar_ts_iq_encoding_t::SCALED_SI16) {
       fprintf(out, " %14s %14s", "i(scaled)", "q(scaled)");
-    } else if (_packedEncoding == APAR_TS_IQ_ENCODING_DBM_PHASE_SI16) {
+    } else if (_packedEncoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
       fprintf(out, " %14s %14s", "power(scaled)", "phase(scaled)");
     }
   }
@@ -1386,9 +1391,9 @@ void AparTsPulse::_doPrintData(FILE *out, int channel, int startGate, int endGat
     if (_packed != NULL) {
       si16 ipacked = packed[ii];
       si16 qpacked = packed[ii + 1];
-      if (_packedEncoding == APAR_TS_IQ_ENCODING_SCALED_SI16) {
+      if (_packedEncoding == apar_ts_iq_encoding_t::SCALED_SI16) {
 	fprintf(out, " %14d %14d", ipacked, qpacked);
-      } else if (_packedEncoding == APAR_TS_IQ_ENCODING_DBM_PHASE_SI16) {
+      } else if (_packedEncoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
 	fprintf(out, " %14d %14d", ipacked, qpacked);
       }
     }

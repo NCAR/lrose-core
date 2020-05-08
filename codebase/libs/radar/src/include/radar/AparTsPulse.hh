@@ -56,7 +56,7 @@ public:
   // constructor
 
   AparTsPulse(AparTsInfo &info,
-	      AparTsDebug_t debug = APAR_TS_DEBUG_OFF);
+	      AparTsDebug_t debug = AparTsDebug_t::OFF);
 
   // copy constructor
   
@@ -236,7 +236,7 @@ public:
   bool isHoriz() const; // is horizontally polarized
 
   apar_ts_scan_mode_t getScanMode() const {
-    return ( apar_ts_scan_mode_t) _hdr.scan_mode;
+    return static_cast<apar_ts_scan_mode_t>(_hdr.scan_mode);
   }
 
   inline si64 getPktSeqNum() const { return _hdr.packet.seq_num; }

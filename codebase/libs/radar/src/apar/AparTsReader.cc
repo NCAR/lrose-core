@@ -195,7 +195,7 @@ AparTsReaderFile::AparTsReaderFile(const char *input_dir,
 {
   
   _input = new DsInputPath("AparTsReaderFile",
-                           _debug >= APAR_TS_DEBUG_NORM,
+                           _debug >= AparTsDebug_t::NORM,
                            input_dir,
                            max_realtime_age_secs,
                            heartbeat_func,
@@ -214,9 +214,10 @@ AparTsReaderFile::AparTsReaderFile(const vector<string> &fileList,
   
 {
   
-  _input = new DsInputPath("AparTsReaderFile", debug, _fileList);
+  _input = new DsInputPath("AparTsReaderFile", (debug != AparTsDebug_t::OFF),
+                           _fileList);
   _in = NULL;
-  if (_debug) {
+  if (_debug != AparTsDebug_t::OFF) {
     cerr << "INFO - AparTsReaderFile" << endl;
     const vector<string> &pathList = _input->getPathList();
     for (size_t ii = 0; ii < pathList.size(); ii++) {
@@ -306,7 +307,7 @@ AparTsPulse*
 	pulse->convertToFL32();
       }
       _updatePulse(*pulse);
-      if (_debug >= APAR_TS_DEBUG_VERBOSE) {
+      if (_debug >= AparTsDebug_t::VERBOSE) {
         pulse->printHeader(stderr);
       }
       _setEventFlags(*pulse);
@@ -316,7 +317,7 @@ AparTsPulse*
     
     // failure with this file
     
-    if (_debug && !feof(_in)) {
+    if ((_debug != AparTsDebug_t::OFF) && !feof(_in)) {
       cerr << "ERROR - AparTsReader::_processFile" << endl;
       cerr << "  Cannot read in pulse headers and data" << endl;
       cerr << "  File: " << _inputPath << endl;
@@ -364,7 +365,7 @@ int AparTsReaderFile::_openNextFile()
   }
   _inputPath = inputPath;
 
-  if (_debug) {
+  if (_debug != AparTsDebug_t::OFF) {
     cerr << "Opening input file: " << _inputPath << endl;
   }
 
@@ -408,7 +409,7 @@ int AparTsReaderFile::_readPulse(AparTsPulse &pulse)
     si32 packetId = packetTop[0];
     si32 packetLen = packetTop[1];
 
-    if (_debug >= APAR_TS_DEBUG_VERBOSE) {
+    if (_debug >= AparTsDebug_t::VERBOSE) {
       fprintf(stderr, "Found packet, id, len: 0x%x, %d\n",
               packetId, packetLen);
     }
@@ -437,7 +438,7 @@ int AparTsReaderFile::_readPulse(AparTsPulse &pulse)
       return -1;
     }
 
-    if (_debug >= APAR_TS_DEBUG_EXTRA) {
+    if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
       cerr << "======================================================" << endl;
       apar_ts_packet_print(stderr, _pktBuf.getPtr(), _pktBuf.getLen());
       cerr << "======================================================" << endl;
@@ -457,7 +458,7 @@ int AparTsReaderFile::_readPulse(AparTsPulse &pulse)
 	return -1;
       }
 
-      if (_debug >= APAR_TS_DEBUG_VERBOSE) {
+      if (_debug >= AparTsDebug_t::VERBOSE) {
         _opsInfo.print(stderr);
       }
 
@@ -489,7 +490,7 @@ int AparTsReaderFile::_resync()
   
 {
 
-  if (_debug) {
+  if (_debug != AparTsDebug_t::OFF) {
     cerr << "Trying to resync ....." << endl;
   }
   
@@ -506,7 +507,7 @@ int AparTsReaderFile::_resync()
     if (check[0] == APAR_TS_SYNC_VAL_00 &&
 	check[1] == APAR_TS_SYNC_VAL_01) {
       // back in sync
-      if (_debug) {
+      if (_debug != AparTsDebug_t::OFF) {
 	cerr << "Found sync packet, back in sync" << endl;
       }
       return 0;
@@ -517,7 +518,7 @@ int AparTsReaderFile::_resync()
 	_opsInfo.isInfo(swapped)) {
       // found start of a packet
       // seek back 8 bytes, so we are back to the top of packet
-      if (_debug) {
+      if (_debug != AparTsDebug_t::OFF) {
 	cerr << "Found top of packet, back in sync" << endl;
       }
       if (fseek(_in, -8L, SEEK_CUR)) {
@@ -628,7 +629,7 @@ AparTsPulse*
       return NULL;
     }
     
-    if (_debug >= APAR_TS_DEBUG_EXTRA) {
+    if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
       apar_ts_packet_print(stderr, _part->getBuf(), _part->getLength());
     }
 
@@ -669,7 +670,7 @@ AparTsPulse*
       
       _opsInfo.setFromBuffer((void *) _part->getBuf(), _part->getLength());
       
-      if (_debug >= APAR_TS_DEBUG_VERBOSE) {
+      if (_debug >= AparTsDebug_t::VERBOSE) {
         _opsInfo.print(stderr);
       }
 
@@ -724,13 +725,13 @@ int AparTsReaderFmq::_getNextPart()
     if (_nonBlocking) {
       iret = _fmq.initReadOnly(_inputFmq.c_str(),
                                "AparTsReader",
-                               _debug >= APAR_TS_DEBUG_NORM,
+                               _debug >= AparTsDebug_t::NORM,
                                initPos, 
                                _msecsWait);
     } else {
       iret = _fmq.initReadBlocking(_inputFmq.c_str(),
                                    "AparTsReader",
-                                   _debug >= APAR_TS_DEBUG_NORM,
+                                   _debug >= AparTsDebug_t::NORM,
                                    initPos);
     }
     
@@ -769,7 +770,7 @@ int AparTsReaderFmq::_getNextPart()
       }
     }
 
-    if (_debug >= APAR_TS_DEBUG_EXTRA) {
+    if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
       cerr << "--->> Got FMQ message" << endl;
     }
 
@@ -895,7 +896,7 @@ AparTsPulse*
       return NULL;
     }
     
-    if (_debug >= APAR_TS_DEBUG_EXTRA) {
+    if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
       apar_ts_packet_print(stderr, buf.getPtr(), buf.getLen());
     }
 
@@ -1094,7 +1095,7 @@ int AparTsReaderTcp::_reSync()
 {
   int sync_count = 0;
 
-  if (_debug) {
+  if (_debug != AparTsDebug_t::OFF) {
     cerr << "Trying to resync ....." << endl;
   }
   
@@ -1118,7 +1119,7 @@ int AparTsReaderTcp::_reSync()
     // Search for the sync packet 
     if (check[0] == APAR_TS_SYNC_VAL_00 && check[1] == APAR_TS_SYNC_VAL_01) {
       // These are "sync packet" bytes read the 8 sync bytes and move on
-      if (_debug) {
+      if (_debug != AparTsDebug_t::OFF) {
 	cerr << "Found sync packet, back in sync" << endl;
       }
       if (_sock.readBufferHb(check, sizeof(check), sizeof(check),

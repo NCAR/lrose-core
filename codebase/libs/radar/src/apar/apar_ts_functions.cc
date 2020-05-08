@@ -128,7 +128,7 @@ void apar_ts_radar_info_init(apar_ts_radar_info &val)
   val.latitude_deg = APAR_TS_MISSING_FLOAT;
   val.longitude_deg = APAR_TS_MISSING_FLOAT;
   val.altitude_m = APAR_TS_MISSING_FLOAT;
-  val.platform_type = APAR_TS_RADAR_PLATFORM_NOT_SET;
+  val.platform_type = static_cast<si32>(apar_ts_radar_platform_t::NOT_SET);
 
   val.beamwidth_deg_h = APAR_TS_MISSING_FLOAT;
   val.beamwidth_deg_v = APAR_TS_MISSING_FLOAT;
@@ -153,7 +153,7 @@ void apar_ts_scan_segment_init(apar_ts_scan_segment &val)
   val.packet.version_num = 1;
   apar_ts_set_packet_time_to_now(val.packet);
 
-  val.scan_mode = APAR_TS_SCAN_MODE_NOT_SET;
+  val.scan_mode = static_cast<si32>(apar_ts_scan_mode_t::NOT_SET);
   val.volume_num = APAR_TS_MISSING_INT;
   val.sweep_num = APAR_TS_MISSING_INT;
 
@@ -189,9 +189,9 @@ void apar_ts_processing_init(apar_ts_processing_t &val)
   val.packet.version_num = 1;
   apar_ts_set_packet_time_to_now(val.packet);
 
-  val.pol_mode = APAR_TS_POL_MODE_NOT_SET;
-  val.prf_mode = APAR_TS_PRF_MODE_NOT_SET;
-  val.pulse_shape = APAR_TS_PULSE_SHAPE_NOT_SET;
+  val.pol_mode = static_cast<si32>(apar_ts_pol_mode_t::NOT_SET);
+  val.prf_mode = static_cast<si32>(apar_ts_prf_mode_t::NOT_SET);
+  val.pulse_shape = static_cast<si32>(apar_ts_pulse_shape_t::NOT_SET);
 
   val.pulse_width_us = APAR_TS_MISSING_FLOAT;
 
@@ -319,7 +319,7 @@ void apar_ts_event_notice_init(apar_ts_event_notice_t &val)
   val.start_of_volume = 0;
   val.end_of_volume = 0;
   
-  val.scan_mode = APAR_TS_SCAN_MODE_NOT_SET;
+  val.scan_mode = static_cast<si32>(apar_ts_scan_mode_t::NOT_SET);
   val.volume_num = APAR_TS_MISSING_INT;
   val.sweep_num = APAR_TS_MISSING_INT;
   
@@ -347,7 +347,7 @@ void apar_ts_pulse_header_init(apar_ts_pulse_header_t &val)
   val.beam_num_in_dwell = 0;
   val.visit_num_in_beam = 0;
 
-  val.scan_mode = APAR_TS_SCAN_MODE_NOT_SET;
+  val.scan_mode = static_cast<si32>(apar_ts_scan_mode_t::NOT_SET);
   val.sweep_num = APAR_TS_MISSING_INT;
   val.volume_num = APAR_TS_MISSING_INT;
 
@@ -367,7 +367,7 @@ void apar_ts_pulse_header_init(apar_ts_pulse_header_t &val)
   val.hv_flag = APAR_TS_MISSING_INT;
   val.phase_cohered = APAR_TS_MISSING_INT;
 
-  val.iq_encoding = APAR_TS_IQ_ENCODING_NOT_SET;
+  val.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::NOT_SET);
   val.n_channels = 1;
   val.n_data = 0;
 
@@ -868,7 +868,7 @@ bool apar_ts_georef_correction_swap(apar_ts_georef_correction_t &val)
 string apar_ts_packet_id_to_str(int packet_id)
 
 {
-  
+
   switch (packet_id) {
     case APAR_TS_SYNC_ID: return "APAR_TS_SYNC_ID";
     case APAR_TS_RADAR_INFO_ID: return "APAR_TS_RADAR_INFO_ID";
@@ -888,118 +888,205 @@ string apar_ts_packet_id_to_str(int packet_id)
 
 // string representation of prf_mode
 
-string apar_ts_prf_mode_to_str(int prf_mode)
+string apar_ts_prf_mode_to_str(apar_ts_prf_mode_t prf_mode)
 
 {
   
   switch (prf_mode) {
-    case APAR_TS_PRF_MODE_FIXED: return "APAR_TS_PRF_MODE_FIXED";
-    case APAR_TS_PRF_MODE_STAGGERED_2_3: return "APAR_TS_PRF_MODE_STAGGERED_2_3";
-    case APAR_TS_PRF_MODE_STAGGERED_3_4: return "APAR_TS_PRF_MODE_STAGGERED_3_4";
-    case APAR_TS_PRF_MODE_STAGGERED_4_5: return "APAR_TS_PRF_MODE_STAGGERED_4_5";
-    case APAR_TS_PRF_MODE_MULTI_PRT: return "APAR_TS_PRF_MODE_MULTI_PRT";
-    default: return "UNKNOWN";
+    case apar_ts_prf_mode_t::FIXED:
+        return "FIXED";
+    case apar_ts_prf_mode_t::STAGGERED_2_3:
+        return "STAGGERED_2_3";
+    case apar_ts_prf_mode_t::STAGGERED_3_4:
+        return "STAGGERED_3_4";
+    case apar_ts_prf_mode_t::STAGGERED_4_5:
+        return "STAGGERED_4_5";
+    case apar_ts_prf_mode_t::MULTI_PRT:
+        return "MULTI_PRT";
+    default:
+        return "UNKNOWN";
   }
 
+}
+
+string apar_ts_prf_mode_to_str(int prf_mode_int)
+
+{
+    apar_ts_prf_mode_t prf_mode = static_cast<apar_ts_prf_mode_t>(prf_mode_int);
+    return apar_ts_prf_mode_to_str(prf_mode);
 }
 
 // string representation of pulse_shape
 
-string apar_ts_pulse_shape_to_str(int pulse_shape)
+string apar_ts_pulse_shape_to_str(apar_ts_pulse_shape_t pulse_shape)
   
 {
   
   switch (pulse_shape) {
-    case APAR_TS_PULSE_SHAPE_RECT: return "APAR_TS_PULSE_SHAPE_RECT";
-    case APAR_TS_PULSE_SHAPE_GAUSSIAN: return "APAR_TS_PULSE_SHAPE_GAUSSIAN";
-    case APAR_TS_PULSE_SHAPE_CUSTOM: return "APAR_TS_PULSE_SHAPE_CUSTOM";
-    default: return "UNKNOWN";
+    case apar_ts_pulse_shape_t::RECT:
+        return "RECT";
+    case apar_ts_pulse_shape_t::GAUSSIAN:
+        return "GAUSSIAN";
+    case apar_ts_pulse_shape_t::CUSTOM:
+        return "CUSTOM";
+    default:
+        return "UNKNOWN";
   }
 
+}
+
+string apar_ts_pulse_shape_to_str(int pulse_shape_int)
+
+{
+    apar_ts_pulse_shape_t pulse_shape =
+            static_cast<apar_ts_pulse_shape_t>(pulse_shape_int);
+    return apar_ts_pulse_shape_to_str(pulse_shape);
 }
 
 // string representation of pulse_polarization
 
-string apar_ts_pol_mode_to_str(int pol_mode)
+string apar_ts_pol_mode_to_str(apar_ts_pol_mode_t pol_mode)
 
 {
   
   switch (pol_mode) {
-    case APAR_TS_POL_MODE_H: return "APAR_TS_POL_MODE_H";
-    case APAR_TS_POL_MODE_V: return "APAR_TS_POL_MODE_V";
-    case APAR_TS_POL_MODE_MIXED: return "APAR_TS_POL_MODE_MIXED";
-    default: return "UNKNOWN";
+    case apar_ts_pol_mode_t::H:
+        return "H";
+    case apar_ts_pol_mode_t::V:
+        return "V";
+    case apar_ts_pol_mode_t::MIXED:
+        return "MIXED";
+    default:
+        return "UNKNOWN";
   }
 
+}
+
+string apar_ts_pol_mode_to_str(int pol_mode_int)
+
+{
+    apar_ts_pol_mode_t pol_mode = static_cast<apar_ts_pol_mode_t>(pol_mode_int);
+    return apar_ts_pol_mode_to_str(pol_mode);
 }
 
 // string representation of scan_mode
 
-string apar_ts_scan_mode_to_str(int scan_mode)
+string apar_ts_scan_mode_to_str(apar_ts_scan_mode_t scan_mode)
 
 {
   
   switch (scan_mode) {
-    case APAR_TS_SCAN_MODE_PPI: return "APAR_TS_SCAN_MODE_PPI";
-    case APAR_TS_SCAN_MODE_RHI: return "APAR_TS_SCAN_MODE_RHI";
-    case APAR_TS_SCAN_MODE_COPLANE: return "APAR_TS_SCAN_MODE_COPLANE";
-    case APAR_TS_SCAN_MODE_VPOINT: return "APAR_TS_SCAN_MODE_VPOINT";
-    case APAR_TS_SCAN_MODE_SUNSCAN: return "APAR_TS_SCAN_MODE_SUNSCAN";
-    case APAR_TS_SCAN_MODE_POINTING: return "APAR_TS_SCAN_MODE_POINTING";
-    case APAR_TS_SCAN_MODE_IDLE: return "APAR_TS_SCAN_MODE_IDLE";
+    case apar_ts_scan_mode_t::PPI:
+        return "PPI";
+    case apar_ts_scan_mode_t::RHI:
+        return "RHI";
+    case apar_ts_scan_mode_t::COPLANE:
+        return "COPLANE";
+    case apar_ts_scan_mode_t::VPOINT:
+        return "VPOINT";
+    case apar_ts_scan_mode_t::SUNSCAN:
+        return "SUNSCAN";
+    case apar_ts_scan_mode_t::POINTING:
+        return "POINTING";
+    case apar_ts_scan_mode_t::IDLE:
+        return "IDLE";
     default: return "UNKNOWN";
   }
 
 }
 
-string apar_ts_scan_mode_to_short_str(int scan_mode)
+string apar_ts_scan_mode_to_str(int scan_mode_int)
 
 {
-  
+    apar_ts_scan_mode_t scan_mode = static_cast<apar_ts_scan_mode_t>(scan_mode_int);
+    return apar_ts_scan_mode_to_str(scan_mode);
+}
+
+string apar_ts_scan_mode_to_short_str(apar_ts_scan_mode_t scan_mode)
+
+{
   switch (scan_mode) {
-    case APAR_TS_SCAN_MODE_PPI: return "PPI";
-    case APAR_TS_SCAN_MODE_RHI: return "RHI";
-    case APAR_TS_SCAN_MODE_COPLANE: return "COPLANE";
-    case APAR_TS_SCAN_MODE_VPOINT: return "VPOINT";
-    case APAR_TS_SCAN_MODE_SUNSCAN: return "SUN";
-    case APAR_TS_SCAN_MODE_POINTING: return "POINT";
-    case APAR_TS_SCAN_MODE_IDLE: return "IDLE";
-    default: return "UNKNOWN";
+    case apar_ts_scan_mode_t::PPI:
+        return "PPI";
+    case apar_ts_scan_mode_t::RHI:
+        return "RHI";
+    case apar_ts_scan_mode_t::COPLANE:
+        return "COPLANE";
+    case apar_ts_scan_mode_t::VPOINT:
+        return "VPOINT";
+    case apar_ts_scan_mode_t::SUNSCAN:
+        return "SUN";
+    case apar_ts_scan_mode_t::POINTING:
+        return "POINT";
+    case apar_ts_scan_mode_t::IDLE:
+        return "IDLE";
+    default:
+        return "UNKNOWN";
   }
 
+}
+
+string apar_ts_scan_mode_to_short_str(int scan_mode_int)
+{
+    apar_ts_scan_mode_t scan_mode = static_cast<apar_ts_scan_mode_t>(scan_mode_int);
+    return apar_ts_scan_mode_to_short_str(scan_mode);
 }
 
 // string representation of radar_platform
 
-string apar_ts_radar_platform_to_str(int radar_platform)
+string apar_ts_radar_platform_to_str(apar_ts_radar_platform_t radar_platform)
 
 {
   
   switch (radar_platform) {
-    case APAR_TS_RADAR_PLATFORM_FIXED: return "APAR_TS_RADAR_PLATFORM_FIXED";
-    case APAR_TS_RADAR_PLATFORM_VEHICLE: return "APAR_TS_RADAR_PLATFORM_VEHICLE";
-    case APAR_TS_RADAR_PLATFORM_SHIP: return "APAR_TS_RADAR_PLATFORM_SHIP";
-    case APAR_TS_RADAR_PLATFORM_AIRCRAFT: return "APAR_TS_RADAR_PLATFORM_AIRCRAFT";
-    default: return "UNKNOWN";
+    case apar_ts_radar_platform_t::FIXED:
+        return "FIXED";
+    case apar_ts_radar_platform_t::VEHICLE:
+        return "VEHICLE";
+    case apar_ts_radar_platform_t::SHIP:
+        return "SHIP";
+    case apar_ts_radar_platform_t::AIRCRAFT:
+        return "AIRCRAFT";
+    default:
+        return "UNKNOWN";
   }
 
 }
 
+string apar_ts_radar_platform_to_str(int radar_platform_int)
+
+{
+    apar_ts_radar_platform_t radar_platform =
+            static_cast<apar_ts_radar_platform_t>(radar_platform_int);
+    return apar_ts_radar_platform_to_str(radar_platform);
+}
+
 // string representation of iq_encoding
 
-string apar_ts_iq_encoding_to_str(int iq_encoding)
+string apar_ts_iq_encoding_to_str(apar_ts_iq_encoding_t iq_encoding)
 
 {
   
   switch (iq_encoding) {
-    case APAR_TS_IQ_ENCODING_FL32: return "APAR_TS_IQ_ENCODING_FL32";
-    case APAR_TS_IQ_ENCODING_SCALED_SI16: return "APAR_TS_IQ_ENCODING_SCALED_SI16";
-    case APAR_TS_IQ_ENCODING_DBM_PHASE_SI16:
-      return "APAR_TS_IQ_ENCODING_DBM_PHASE_SI16";
-    case APAR_TS_IQ_ENCODING_SCALED_SI32: return "APAR_TS_IQ_ENCODING_SCALED_SI32";
-    default: return "UNKNOWN";
+    case apar_ts_iq_encoding_t::FL32:
+        return "FL32";
+    case apar_ts_iq_encoding_t::SCALED_SI16:
+        return "SCALED_SI16";
+    case apar_ts_iq_encoding_t::DBM_PHASE_SI16:
+        return "DBM_PHASE_SI16";
+    case apar_ts_iq_encoding_t::SCALED_SI32:
+        return "SCALED_SI32";
+    default:
+        return "UNKNOWN";
   }
 
+}
+
+string apar_ts_iq_encoding_to_str(int iq_encoding_int)
+
+{
+    apar_ts_iq_encoding_t iq_encoding = static_cast<apar_ts_iq_encoding_t>(iq_encoding_int);
+    return apar_ts_iq_encoding_to_str(iq_encoding);
 }
 
 //////////////////////////////////////////////////////////////////

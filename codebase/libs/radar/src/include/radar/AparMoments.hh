@@ -58,9 +58,12 @@ public:
 
   // receiver channel identification
 
-  typedef enum {
-    CHANNEL_HC, CHANNEL_VC, CHANNEL_HX, CHANNEL_VX
-  } channel_t;
+  enum class channel_t {
+    CHANNEL_HC,
+    CHANNEL_VC,
+    CHANNEL_HX,
+    CHANNEL_VX,
+  };
 
   // default constructor
 
@@ -153,11 +156,11 @@ public:
   // WIDTH_METHOD_R1R2: use R1R2
   // Default is R0
 
-  typedef enum {
-    WIDTH_METHOD_R0R1,
-    WIDTH_METHOD_R1R2,
-    WIDTH_METHOD_HYBRID
-  } spectrum_width_method_t;
+  enum class spectrum_width_method_t {
+    R0R1,
+    R1R2,
+    HYBRID
+  };
 
   void setSpectrumWidthMethod(spectrum_width_method_t method) {
     _widthMethod = method;

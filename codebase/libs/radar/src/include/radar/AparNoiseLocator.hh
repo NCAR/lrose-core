@@ -314,10 +314,10 @@ private:
 
   // compute method
   
-  typedef enum {
+  enum class compute_method_t {
     RAY_BY_RAY,
     RUNNING_MEDIAN
-  } compute_method_t;
+  };
   
   int _minNGatesRayMedian;
 

@@ -96,11 +96,11 @@ ReadFromUdp::ReadFromUdp(const string &progName,
     cerr << "Running ReadFromUdp - debug mode" << endl;
   }
 
-  _aparTsDebug = APAR_TS_DEBUG_OFF;
+  _aparTsDebug = AparTsDebug_t::OFF;
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    _aparTsDebug = APAR_TS_DEBUG_VERBOSE;
+    _aparTsDebug = AparTsDebug_t::VERBOSE;
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _aparTsDebug = APAR_TS_DEBUG_NORM;
+    _aparTsDebug = AparTsDebug_t::NORM;
   }
   _aparTsInfo = new AparTsInfo(_aparTsDebug);
 
@@ -587,7 +587,7 @@ int ReadFromUdp::_writePulseToFmq()
   pulse.setTime(_secs, _nsecs);
   int nGates = _iqApar.size() / 2;
   pulse.setIqPacked(nGates, 1,
-                    APAR_TS_IQ_ENCODING_SCALED_SI16,
+                    apar_ts_iq_encoding_t::SCALED_SI16,
                     _iqApar.data(),
                     _params.udp_iq_scale_for_si16, 0.0);
   

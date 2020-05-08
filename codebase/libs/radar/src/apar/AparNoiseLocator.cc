@@ -49,7 +49,7 @@ pthread_mutex_t AparNoiseLocator::_runningMedianMutex = PTHREAD_MUTEX_INITIALIZE
 // method for computing the median noise
 
 AparNoiseLocator::compute_method_t AparNoiseLocator::_computeMethod
-  = AparNoiseLocator::RAY_BY_RAY;
+  = AparNoiseLocator::compute_method_t::RAY_BY_RAY;
 
 // grid for storing previous noise values
 
@@ -159,7 +159,7 @@ void AparNoiseLocator::setComputeRayMedian(int minNGatesRayMedian)
 {
   
   pthread_mutex_lock(&_computeMethodMutex);
-  _computeMethod = RAY_BY_RAY;
+  _computeMethod = compute_method_t::RAY_BY_RAY;
   _minNGatesRayMedian = minNGatesRayMedian;
   pthread_mutex_unlock(&_computeMethodMutex);
 
@@ -176,7 +176,7 @@ void AparNoiseLocator::setComputeRunningMedian(int nGatesMedian)
   
   pthread_mutex_lock(&_computeMethodMutex);
 
-  _computeMethod = RUNNING_MEDIAN;
+  _computeMethod = compute_method_t::RUNNING_MEDIAN;
   _nGatesRunningMedian = nGatesMedian;
 
   if (nGatesMedian != (int) _runningValsDbmHc.size()) {
@@ -225,7 +225,7 @@ void AparNoiseLocator::printParams(ostream &out)
     _interestMapDbmSdevForSignal->printParams(out);
   }
 
-  if (_computeMethod == RAY_BY_RAY) {
+  if (_computeMethod == compute_method_t::RAY_BY_RAY) {
     out << "Median method: RAY_BY_RAY" << endl;
   } else {
     out << "Median method: RUNNING_MEDIAN" << endl;
@@ -548,7 +548,7 @@ void AparNoiseLocator::computeNoiseSinglePolH(AparMomFields *mfields)
   
   locate(mfields);
   
-  if (_computeMethod == RAY_BY_RAY) {
+  if (_computeMethod == compute_method_t::RAY_BY_RAY) {
   
     // compute median noise for ray
     
@@ -650,7 +650,7 @@ void AparNoiseLocator::computeNoiseSinglePolV(AparMomFields *mfields)
   
   locate(mfields);
   
-  if (_computeMethod == RAY_BY_RAY) {
+  if (_computeMethod == compute_method_t::RAY_BY_RAY) {
   
     // compute median noise for ray
     
@@ -757,7 +757,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoOnly(AparMomFields *mfields)
   
   locate(mfields);
   
-  if (_computeMethod == RAY_BY_RAY) {
+  if (_computeMethod == compute_method_t::RAY_BY_RAY) {
   
     // compute median noise for ray
     
@@ -887,7 +887,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoCross(AparMomFields *mfields)
   
   locate(mfields);
   
-  if (_computeMethod == RAY_BY_RAY) {
+  if (_computeMethod == compute_method_t::RAY_BY_RAY) {
   
     // compute median noise for ray
     
@@ -1041,7 +1041,7 @@ void AparNoiseLocator::computeNoiseDpSimHv(AparMomFields *mfields)
   
   locate(mfields);
   
-  if (_computeMethod == RAY_BY_RAY) {
+  if (_computeMethod == compute_method_t::RAY_BY_RAY) {
   
     // compute median noise for ray
     
@@ -1162,7 +1162,7 @@ void AparNoiseLocator::computeNoiseDpHOnly(AparMomFields *mfields)
   
   locate(mfields);
 
-  if (_computeMethod == RAY_BY_RAY) {
+  if (_computeMethod == compute_method_t::RAY_BY_RAY) {
   
     // compute median noise for ray
     
@@ -1284,7 +1284,7 @@ void AparNoiseLocator::computeNoiseDpVOnly(AparMomFields *mfields)
   
   locate(mfields);
   
-  if (_computeMethod == RAY_BY_RAY) {
+  if (_computeMethod == compute_method_t::RAY_BY_RAY) {
   
     // compute median noise for ray
     

@@ -149,9 +149,9 @@ int OutputFmq::writeParams(const Beam &beam)
   rp.scanType = opsInfo.getScanMode();
   rp.scanMode = beam.getScanMode();
 
-  if (beam.getOpsInfo().getProcPolMode() == APAR_TS_POL_MODE_H) {
+  if (beam.getOpsInfo().getProcPolMode() == apar_ts_pol_mode_t::H) {
     rp.polarization = DS_POLARIZATION_HORIZ_TYPE;
-  } else if (beam.getOpsInfo().getProcPolMode() == APAR_TS_POL_MODE_V) {
+  } else if (beam.getOpsInfo().getProcPolMode() == apar_ts_pol_mode_t::V) {
     rp.polarization = DS_POLARIZATION_VERT_TYPE;
   } else {
     rp.polarization = DS_POLARIZATION_DUAL_HV_ALT;

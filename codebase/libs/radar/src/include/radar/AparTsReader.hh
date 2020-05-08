@@ -37,6 +37,7 @@
 #include <string>
 #include <toolsa/pmu.h>
 #include <Fmq/DsFmq.hh>
+#include <toolsa/MemBuf.hh>
 #include <toolsa/Socket.hh>
 #include <didss/DsInputPath.hh>
 #include <didss/DsMessage.hh>
@@ -54,7 +55,7 @@ public:
 
   // constructor
   
-  AparTsReader(AparTsDebug_t debug = APAR_TS_DEBUG_OFF);
+  AparTsReader(AparTsDebug_t debug = AparTsDebug_t::OFF);
   
   // destructor
   
@@ -209,13 +210,13 @@ public:
   AparTsReaderFile(const char *input_dir,
                    int max_realtime_age_secs = 3600,
                    DsInput_heartbeat_t heartbeat_func = PMU_auto_register,
-                   bool use_ldata_info = TRUE,
-                   AparTsDebug_t debug = APAR_TS_DEBUG_OFF);
+                   bool use_ldata_info = true,
+                   AparTsDebug_t debug = AparTsDebug_t::OFF);
   
   // ARCHIVE mode - specify list of files to be read
   
   AparTsReaderFile(const vector<string> &fileList,
-                   AparTsDebug_t debug = APAR_TS_DEBUG_OFF);
+                   AparTsDebug_t debug = AparTsDebug_t::OFF);
  
   // destructor
   
@@ -282,8 +283,8 @@ public:
   // constructor
   
   AparTsReaderFmq(const char *input_fmq,
-                   AparTsDebug_t debug = APAR_TS_DEBUG_OFF,
-                   bool position_fmq_at_start = FALSE);
+                   AparTsDebug_t debug = AparTsDebug_t::OFF,
+                   bool position_fmq_at_start = false);
   
   // destructor
   
@@ -349,7 +350,7 @@ public:
   
   AparTsReaderTcp(const char *server_host,
                   int server_port,
-                  AparTsDebug_t debug = APAR_TS_DEBUG_OFF);
+                  AparTsDebug_t debug = AparTsDebug_t::OFF);
   
   // destructor
   
