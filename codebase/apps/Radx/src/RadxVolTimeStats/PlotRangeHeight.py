@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 from optparse import OptionParser
 import subprocess
+import math
 
 def main():
 
@@ -46,7 +47,7 @@ def main():
                       help='File path for timing data')
     parser.add_option('--title',
                       dest='title',
-                      default='Volume Age Stats',
+                      default='Range-Height Plot',
                       help='Title for plot')
     parser.add_option('--width',
                       dest='figWidthMm',
@@ -73,7 +74,9 @@ def main():
         sys.exit(1)
 
     if (options.debug):
+        print("nGates: ", nGates, file=sys.stderr)
         print("maxRangeKm: ", maxRangeKm, file=sys.stderr)
+        print("beamWidth: ", beamWidth, file=sys.stderr)
         print("elevs: ", elevs, file=sys.stderr)
         print("colHeaders: ", colHeaders, file=sys.stderr)
 
@@ -94,7 +97,7 @@ def main():
 
 def readColumnHeaders(filePath):
 
-    global scanName, elevList, elevs, maxRangeKm, colHeaders
+    global scanName, nGates, elevList, elevs, beamWidth, maxRangeKm, colHeaders
     colHeaders = []
     elevs = []
 
@@ -122,9 +125,21 @@ def readColumnHeaders(filePath):
             continue
 
         # max range
+        if (line.find("nGates") > 0):
+            parts = line.strip().split()
+            nGates = parts[-1]
+            continue
+
+        # max range
         if (line.find("maxRangeKm") > 0):
             parts = line.strip().split()
             maxRangeKm = parts[-1]
+            continue
+
+        # beam width
+        if (line.find("beamWidth") > 0):
+            parts = line.strip().split()
+            beamWidth = parts[-1]
             continue
 
         # elevations
@@ -193,12 +208,12 @@ def readInputData(filePath):
 def doPlot():
 
     rangeKm = np.array(colData["rangeKm"]).astype(np.double)
-
+    
     widthIn = float(options.figWidthMm) / 25.4
     htIn = float(options.figHeightMm) / 25.4
     
     fig1 = plt.figure(1, (widthIn, htIn))
-    title = (options.title + ' for scan: ' + scanName)
+    title = (options.title + ' for scan: ' + scanName + '  beam width = ' + beamWidth + ' deg')
     fig1.suptitle(title, fontsize=11)
     ax1 = fig1.add_subplot(1,1,1,xmargin=0.0)
 
@@ -211,7 +226,18 @@ def doPlot():
     count = 0
     dash = 4
     space = 4
+    elevsUsed = []
+
     for elev in elevs:
+
+        if elev in elevsUsed:
+            continue
+
+        elevsUsed.append(elev)
+
+        print("11111111111 elev, elevsUsed: ", elev, elevsUsed, file=sys.stderr)
+
+        gndRange = rangeKm * math.cos(math.radians(float(elev)))
 
         htBotLabel = "htKmBot[" + elev + "]"
         htMidLabel = "htKmMid[" + elev + "]"
@@ -221,19 +247,39 @@ def doPlot():
         htKmMid = np.array(colData[htMidLabel]).astype(np.double)
         htKmTop = np.array(colData[htTopLabel]).astype(np.double)
 
-        #labelFwd = "Fwd up to " + ht + "km meanAge: " + meanAgeFwd[count]
-        #labelRev = "Rev up to " + ht + "km meanAge: " + meanAgeRev[count]
+        col = colors[count % 4]
 
-        color = colors[count % 4]
-        ax1.plot(rangeKm, htKmBot, \
-                 linewidth=1, color = color)
-        ax1.plot(rangeKm, htKmMid, \
-                 linewidth=1, dashes = [dash, space], label = htMidLabel, color = color)
-        ax1.plot(rangeKm, htKmTop, \
-                 linewidth=1, color = color)
+        for igate in range(0, int(nGates) - 2):
 
-        #ax1.plot(binPos, cumFreqRev, \
-        #         linewidth=1, dashes = [dash, space], label = labelRev, color = 'blue')
+            x = []
+            y = []
+
+            x.append(gndRange[igate])
+            y.append(htKmBot[igate])
+
+            x.append(gndRange[igate+1])
+            y.append(htKmBot[igate+1])
+
+            x.append(gndRange[igate+1])
+            y.append(htKmTop[igate+1])
+
+            x.append(gndRange[igate])
+            y.append(htKmTop[igate])
+
+            x.append(gndRange[igate])
+            y.append(htKmBot[igate])
+
+            ax1.fill(x, y, color = col, alpha = 0.2)
+
+
+        print("11111111111 len(gndRange): ", len(gndRange), file=sys.stderr)
+        print("11111111111 len(htKmBot): ", len(htKmBot), file=sys.stderr)
+        print("11111111111 len(htKmMid): ", len(htKmMid), file=sys.stderr)
+        print("11111111111 len(htKmTop): ", len(htKmTop), file=sys.stderr)
+
+        ax1.plot(gndRange, htKmBot, linewidth=1, color = col)
+        ax1.plot(gndRange, htKmMid, linewidth=1, dashes = [dash, space], color = col)
+        ax1.plot(gndRange, htKmTop, linewidth=1, color = col)
 
         count = count + 1
         #dash = dash - 2

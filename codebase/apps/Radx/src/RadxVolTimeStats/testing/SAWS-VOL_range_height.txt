@@ -1,6 +1,8 @@
 #########################################################
 # scanName   : SAWS-VOL
+# nGates     : 600
 # maxRangeKm : 300
+# beamWidth  : 0.93
 # elevs      : 30.00,22.00,16.80,12.20,9.90,7.90,6.20,4.70,3.40,2.30,1.30,0.50
 #   gateNum    rangeKm  htKmBot[30.00]  htKmMid[30.00]  htKmTop[30.00]  htKmBot[22.00]  htKmMid[22.00]  htKmTop[22.00]  htKmBot[16.80]  htKmMid[16.80]  htKmTop[16.80]  htKmBot[12.20]  htKmMid[12.20]  htKmTop[12.20]   htKmBot[9.90]   htKmMid[9.90]   htKmTop[9.90]   htKmBot[7.90]   htKmMid[7.90]   htKmTop[7.90]   htKmBot[6.20]   htKmMid[6.20]   htKmTop[6.20]   htKmBot[4.70]   htKmMid[4.70]   htKmTop[4.70]   htKmBot[3.40]   htKmMid[3.40]   htKmTop[3.40]   htKmBot[2.30]   htKmMid[2.30]   htKmTop[2.30]   htKmBot[1.30]   htKmMid[1.30]   htKmTop[1.30]   htKmBot[0.50]   htKmMid[0.50]   htKmTop[0.50]
 #########################################################

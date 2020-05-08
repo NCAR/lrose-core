@@ -39,6 +39,8 @@
 #include "RadxVolTimeStats.hh"
 #include <string>
 #include <vector>
+#include <set>
+#include <algorithm>
 #include <iostream>
 #include <cmath>
 #include <toolsa/uusleep.h>
@@ -678,7 +680,9 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
 
   fprintf(stdout, "#########################################################\n");
   fprintf(stdout, "# scanName   : %s\n", scanName);
+  fprintf(stdout, "# nGates     : %d\n", nGates);
   fprintf(stdout, "# maxRangeKm : %.0f\n", maxRangeKm);
+  fprintf(stdout, "# beamWidth  : %.2f\n", beamWidthDeg);
   fprintf(stdout, "# elevs      : ");
   
   for (size_t ii = 0; ii < sweeps.size(); ii++) {
@@ -689,13 +693,24 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
       fprintf(stdout, "\n");
     }
   }
-  
-  // column headers
 
-  fprintf(stdout, "#%10s %10s", "gateNum", "rangeKm");
-  
+  // create set of unique angles, 2 decimal accuracy
+
+  set<double> uniqueElev;
   for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
     double elDeg = sweeps[isweep]->getFixedAngleDeg();
+    double elRounded = floor(elDeg * 100.0 + 0.5) / 100.0;
+    uniqueElev.insert(elRounded);
+  }
+  // std::sort(uniqueElev.begin(), uniqueElev.end());
+  
+  // column headers
+  
+  fprintf(stdout, "#%10s %10s", "gateNum", "rangeKm");
+  
+  set<double>::iterator it;
+  for (it = uniqueElev.begin(); it != uniqueElev.end(); it++) {
+    double elDeg = *it;
     char elevText[128];
     snprintf(elevText, 128, "%.2f", elDeg);
     string elevStr(elevText);
@@ -705,10 +720,8 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
     fprintf(stdout, " %15s", label.c_str());
     label = "htKmTop[" + elevStr + "]";
     fprintf(stdout, " %15s", label.c_str());
-    if (isweep == sweeps.size()-1) {
-      fprintf(stdout, "\n");
-    }
   }
+  fprintf(stdout, "\n");
 
   fprintf(stdout, "#########################################################\n");
 
@@ -722,9 +735,9 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
   
     // loop through sweeps
     
-    for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
+    for (it = uniqueElev.begin(); it != uniqueElev.end(); it++) {
       
-      double elMid = sweeps[isweep]->getFixedAngleDeg();
+      double elMid = *it;
       double elBot = elMid - beamWidthDeg / 2.0;
       double elTop = elMid + beamWidthDeg / 2.0;
 
@@ -734,11 +747,9 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
 
       fprintf(stdout, " %15.2f %15.2f %15.2f", htBot, htMid, htTop);
       
-      if (isweep == sweeps.size()-1) {
-        fprintf(stdout, "\n");
-      }
-
     } // isweep
+
+    fprintf(stdout, "\n");
     
   } // igate
     
