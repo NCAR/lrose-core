@@ -147,7 +147,7 @@ void AparMoments::_init()
   _velSign = 1.0;
   _velSignStaggered = 1.0;
   _phidpSign = 1.0;
-  _widthMethod = spectrum_width_method_t::WIDTH_METHOD_R0R1;
+  _widthMethod = spectrum_width_method_t::R0R1;
 
   _windowR1 = 1.0;
   _windowR2 = 1.0;
@@ -1899,14 +1899,14 @@ double AparMoments::_computeHybridWidth(double r0,
   // r0/r1 estimator
 
   double r0r1 = _computeR0R1Width(r0,r1,nyquist)/nyquist;
-  if (_widthMethod == spectrum_width_method_t::WIDTH_METHOD_R0R1) {
+  if (_widthMethod == spectrum_width_method_t::R0R1) {
     return r0r1 * nyquist;
   }
 
   // r1/r2 estimator
 
   double r1r2 = _computeR1R2Width(r1,r2,nyquist)/nyquist;
-  if (_widthMethod == spectrum_width_method_t::WIDTH_METHOD_R1R2) {
+  if (_widthMethod == spectrum_width_method_t::R1R2) {
     return r1r2 * nyquist;
   }
 
