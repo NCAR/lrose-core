@@ -652,13 +652,19 @@ int RadxVolTimeStats::_writeVol(RadxVol &vol)
 void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
 {
 
-  // get time limits, and vol duration
+  // init for computing heights
 
-  RadxTime startTime = vol.getStartRadxTime();
-  RadxTime endTime = vol.getEndRadxTime();
-  double volDurationSecs = endTime - startTime;
   const vector<RadxSweep *> &sweeps = vol.getSweeps();
-  
+  double beamWidthDeg = _params.beam_width_deg;
+  BeamHeight beamHt; // default init to get height above radar
+  vol.computeMaxNGates();
+  int nGates = vol.getMaxNGates();
+  vol.remapToPredomGeom();
+  RadxRay *ray0 = vol.getRays()[0];
+  double startRangeKm = ray0->getStartRangeKm();
+  double gateSpacingKm = ray0->getGateSpacingKm();
+  double maxRangeKm = startRangeKm + (nGates - 1) * gateSpacingKm;
+
   // print to stdout
   
   char scanName[128];
@@ -672,7 +678,7 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
 
   fprintf(stdout, "#########################################################\n");
   fprintf(stdout, "# scanName   : %s\n", scanName);
-  fprintf(stdout, "# duration   : %.0f\n", volDurationSecs);
+  fprintf(stdout, "# maxRangeKm : %.0f\n", maxRangeKm);
   fprintf(stdout, "# elevs      : ");
   
   for (size_t ii = 0; ii < sweeps.size(); ii++) {
@@ -705,17 +711,6 @@ void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
   }
 
   fprintf(stdout, "#########################################################\n");
-
-  // init for computing heights
-
-  double beamWidthDeg = _params.beam_width_deg;
-  BeamHeight beamHt; // default init to get height above radar
-  vol.computeMaxNGates();
-  int nGates = vol.getMaxNGates();
-  vol.remapToPredomGeom();
-  RadxRay *ray0 = vol.getRays()[0];
-  double startRangeKm = ray0->getStartRangeKm();
-  double gateSpacingKm = ray0->getGateSpacingKm();
 
   // loop through gates
 

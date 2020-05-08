@@ -22,6 +22,9 @@ def main():
 
 #   globals
 
+    global appName
+    appName = os.path.basename(__file__)
+
     global options
     global scanName, colHeaders, colData
     global heights, elevs, meanAgeFwd, meanAgeRev, volDuration
@@ -53,7 +56,7 @@ def main():
     (options, args) = parser.parse_args()
     
     if (options.debug):
-        print("Running %prog", file=sys.stderr)
+        print("Running: ", appName, file=sys.stderr)
         print("  data file: ", options.file, file=sys.stderr)
 
     # read in headers
