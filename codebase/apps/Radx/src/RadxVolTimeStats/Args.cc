@@ -99,6 +99,11 @@ int Args::parse (const int argc, const char **argv)
       
       sprintf(tmp_str, "print_range_height_table = TRUE;");
       TDRP_add_override(&override, tmp_str);
+
+    } else if (!strcmp(argv[i], "-reverse_sweep_order")) {
+      
+      sprintf(tmp_str, "reverse_sweep_order_in_vol = TRUE;");
+      TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-maxht")) {
       
@@ -162,6 +167,8 @@ void Args::_usage(ostream &out)
       << "       [ -maxht ?] set max ht in km\n"
       << "       [ -nbins ?] set number of bins in histogram\n"
       << "       [ -print_height_table ] print range-ht table to stdout\n"
+      << "       [ -reverse_sweep_order ] reverse sweep order in volume but\n"
+      << "          preserve times on rays. Used for debugging and testing.\n"
       << "       [ -verbose ] print verbose debug messages\n"
       << "       [ -write_cfradial ] write volume to cfradial file\n"
       << endl;
@@ -169,10 +176,5 @@ void Args::_usage(ostream &out)
   Params::usage(out);
 
 }
-
-
-
-
-
 
 

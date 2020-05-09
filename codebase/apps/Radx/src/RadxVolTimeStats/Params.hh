@@ -412,6 +412,8 @@ public:
   sweep_t *_sweeps;
   int sweeps_n;
 
+  tdrp_bool_t reverse_sweep_order_in_vol;
+
   int n_bins_age_histogram;
 
   double *_age_hist_max_ht_km;
@@ -430,7 +432,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[27];
+  mutable TDRPtable _table[28];
 
   const char *_className;
 

@@ -854,6 +854,18 @@
       tt->struct_vals[35].d = 25.62;
     tt++;
     
+    // Parameter 'reverse_sweep_order_in_vol'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("reverse_sweep_order_in_vol");
+    tt->descr = tdrpStrDup("Reverse the order of the sweeps in the volume, but preserve times.");
+    tt->help = tdrpStrDup("If TRUE, reverse the order in which the sweeps are stored in the volume. But do not change the times on the rays. This is used for testing purposes and checking for bugs in the analysis.");
+    tt->val_offset = (char *) &reverse_sweep_order_in_vol - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));

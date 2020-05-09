@@ -278,9 +278,9 @@ def doPlot():
     #ax1.set_yticks(major_ticks)
     #ax1.set_yticks(minor_ticks, minor=True)
 
-    legend1 = ax1.legend(loc='upper left', ncol=3, framealpha=0.5, fancybox=True)
-    for label in legend1.get_texts():
-        label.set_fontsize('x-small')
+    #legend1 = ax1.legend(loc='upper left', ncol=3, framealpha=0.5, fancybox=True)
+    #for label in legend1.get_texts():
+    #    label.set_fontsize('x-small')
 
     homeDir = os.environ['HOME']
     downloadsDir = os.path.join(homeDir, 'Downloads')

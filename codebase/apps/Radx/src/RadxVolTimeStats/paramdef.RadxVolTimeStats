@@ -139,6 +139,12 @@ paramdef struct sweep_t {
   p_help = "Elevation angle (deg), azimuth rate (deg/sec).";
 } sweeps[];
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Reverse the order of the sweeps in the volume, but preserve times.";
+  p_help = "If TRUE, reverse the order in which the sweeps are stored in the volume. But do not change the times on the rays. This is used for testing purposes and checking for bugs in the analysis.";
+} reverse_sweep_order_in_vol;
+
 commentdef {
   p_header = "DATA AGE ANALYSIS";
 }

@@ -122,13 +122,20 @@ int RadxVolTimeStats::Run()
       cerr << "ERROR - cannot read file: " << _params.specified_file_path << endl;
       return -1;
     }
+    if (_params.debug) {
+      cerr << "==>> Read file: " << _params.specified_file_path << endl;
+    }
   }
-
-  cerr << "==>> Read file: " << _params.specified_file_path << endl;
 
   // add the gate geometry fields
 
   _addGeomFields(vol);
+
+  // reverse sweep order if requested
+
+  if (_params.reverse_sweep_order_in_vol) {
+    vol.reverseSweepOrder();
+  }
 
   // write the file
 
