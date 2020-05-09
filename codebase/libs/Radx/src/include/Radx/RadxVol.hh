@@ -944,6 +944,11 @@ public:
   
   void reorderSweepsAsInFileAscendingAngle();
 
+  /// Reverse the order of the sweeps in the volume.
+  /// the sweep numbers are changed accordingly
+
+  void reverseSweepOrder();
+
   /// Apply a time offset, in seconds to all rays in the volume
   /// This applies to the rays currently in the volume, not to
   /// any future reads.

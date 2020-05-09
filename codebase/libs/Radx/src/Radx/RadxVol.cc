@@ -2796,7 +2796,7 @@ void RadxVol::reorderSweepsAscendingAngle()
 
   } else {
 
-    // load up sorted array vector with elevation angles in ascending order
+    // load up sorted ray vector with elevation angles in ascending order
     
     vector<RadxRay *> sortedRays;
     multimap< double, RadxSweep* >::iterator iter;
@@ -2865,6 +2865,42 @@ void RadxVol::reorderSweepsAsInFileAscendingAngle()
     _sweepsAsInFile.push_back(sweep);
   }
 
+}
+
+////////////////////////////////////////////////////////////
+// Reverse the order of the sweeps in the volume.
+// the sweep numbers are changed accordingly
+
+void RadxVol::reverseSweepOrder()
+{
+
+  if (_sweeps.size() < 1) {
+    return;
+  }
+
+  // load up ray vector with sweep order reversed
+  
+  vector<RadxRay *> sortedRays;
+  for (ssize_t isweep = (ssize_t) _sweeps.size() - 1; isweep >= 0; isweep--) {
+    RadxSweep *sweep = _sweeps[isweep];
+    ssize_t newSweepNum = (ssize_t) _sweeps.size() - isweep; // starts at 1
+    for (size_t iray = sweep->getStartRayIndex();
+         iray <= sweep->getEndRayIndex(); iray++) {
+      RadxRay *ray = _rays[iray];
+      ray->setSweepNumber(newSweepNum);
+      sortedRays.push_back(ray);
+    }
+  }
+
+  // copy sorted rays to main array
+  
+  _rays = sortedRays;
+  
+  // load up the sweep information from the rays
+  
+  loadSweepInfoFromRays();
+  loadVolumeInfoFromRays();
+  
 }
 
 //////////////////////////////////////////////////////////////////
