@@ -153,7 +153,7 @@ int RadxVolTimeStats::Run()
 
   if (_params.write_volume_to_output_file) {
     if (_writeVol(vol)) {
-      cerr << "ERROR - RadxConvert::_processFile" << endl;
+      cerr << "ERROR - RadxVolTimeStats::_processFile" << endl;
       cerr << "  Cannot write volume to file" << endl;
       return -1;
     }
@@ -305,7 +305,7 @@ int RadxVolTimeStats::_readFile(const string &readPath,
   vol.clear();
   
   if (_params.debug) {
-    cerr << "INFO - RadxConvert::Run" << endl;
+    cerr << "INFO - RadxVolTimeStats::Run" << endl;
     cerr << "  Input path: " << readPath << endl;
   }
   
@@ -654,7 +654,7 @@ int RadxVolTimeStats::_writeVol(RadxVol &vol)
   // write to dir
   
   if (outFile.writeToDir(vol, _params.output_dir, true, false)) {
-    cerr << "ERROR - RadxConvert::_writeVol" << endl;
+    cerr << "ERROR - RadxVolTimeStats::_writeVol" << endl;
     cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
     cerr << outFile.getErrStr() << endl;
     return -1;
