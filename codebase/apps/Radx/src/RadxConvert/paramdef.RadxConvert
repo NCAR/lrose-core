@@ -595,7 +595,7 @@ paramdef boolean {
 } adjust_sweep_limits_using_angles;
 
 commentdef {
-  p_header = "OPTION TO SORT SWEEPS BY FIXED ANGLE";
+  p_header = "OPTION TO REORDER SWEEPS";
 }
 
 paramdef boolean {
@@ -604,15 +604,27 @@ paramdef boolean {
   p_help = "For some volumes, the sweep fixed angles may not be in increasing order. This option allows you to reorder the sweeps, and rays, into the correct order.";
 } sort_sweeps_by_fixed_angle;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Reverse the order of the sweeps in the volume, but preserve ray order in sweeps.";
+  p_help = "If TRUE, reverse the order in which the sweeps are stored in the volume. The order of the rays in the sweeps is preserved.";
+} reverse_sweep_order_in_vol;
+
 commentdef {
   p_header = "OPTION TO SORT RAYS BY TIME";
 }
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Sort the rays in time-ascending order.";
-  p_help = "For some volumes, the rays are not strictly in ascending time order. If this is set, the rays will be sorted by time.";
+  p_descr = "Sort the rays in increasing time order.";
+  p_help = "For some volumes, the rays are not strictly in time order. If this is set, the rays will be sorted by time, in increasing order.";
 } sort_rays_by_time;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Sort the rays in decreasing time order.";
+  p_help = "If this is set, the rays will be sorted by time, in decreasing order.";
+} sort_rays_by_time_decreasing;
 
 commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";

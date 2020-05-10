@@ -681,9 +681,23 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "sort_sweeps_by_fixed_angle = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-reverse_sweep_order")) {
+      
+      sprintf(tmp_str, "reverse_sweep_order_in_vol = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-sort_rays_by_time")) {
       
       sprintf(tmp_str, "sort_rays_by_time = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      sprintf(tmp_str, "sort_rays_by_time_decreasing = FALSE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-sort_rays_by_time_decreasing")) {
+      
+      sprintf(tmp_str, "sort_rays_by_time_decreasing = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      sprintf(tmp_str, "sort_rays_by_time = FALSE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-radar_num")) {
@@ -1087,7 +1101,13 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -rem_trans ] remove rays with antenna transitions\n"
       << "\n"
-      << "  [ -sort_rays_by_time] sort rays in ascending time order\n"
+      << "  [ -reverse_sweep_order ] reverse sweep order in volume but\n"
+      << "     preserve ray order in eachsweep.\n"
+      << "\n"
+      << "  [ -sort_rays_by_time] sort rays in increasing time order\n"
+      << "     Sweep information will be recomputed after the sort.\n"
+      << "\n"
+      << "  [ -sort_rays_by_time_decreasing] sort rays in decreasing time order\n"
       << "     Sweep information will be recomputed after the sort.\n"
       << "\n"
       << "  [ -sort_sweeps ] sort sweeps by fixed angle\n"

@@ -558,6 +558,9 @@ int RadxConvert::_readFile(const string &readPath,
     }
     vol.setPlatform(platform);
   }
+  if (_params.reverse_sweep_order_in_vol) {
+    vol.reverseSweepOrder();
+  }
 
   return 0;
 
@@ -731,9 +734,14 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
 
   if (_params.sort_rays_by_time) {
     if (_params.debug) {
-      cerr << "DEBUG - sorting rays by time in ascending order" << endl;
+      cerr << "DEBUG - sorting rays by increasing time order" << endl;
     }
     vol.sortRaysByTime();
+  } else if (_params.sort_rays_by_time_decreasing) {
+    if (_params.debug) {
+      cerr << "DEBUG - sorting rays by decreasing time order" << endl;
+    }
+    vol.sortRaysByTimeDecreasing();
   }
   
   // censor as needed

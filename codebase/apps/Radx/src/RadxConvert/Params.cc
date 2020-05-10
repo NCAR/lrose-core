@@ -1707,7 +1707,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 14");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SORT SWEEPS BY FIXED ANGLE");
+    tt->comment_hdr = tdrpStrDup("OPTION TO REORDER SWEEPS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1720,6 +1720,18 @@
     tt->descr = tdrpStrDup("Sort the sweeps by fixed angle.");
     tt->help = tdrpStrDup("For some volumes, the sweep fixed angles may not be in increasing order. This option allows you to reorder the sweeps, and rays, into the correct order.");
     tt->val_offset = (char *) &sort_sweeps_by_fixed_angle - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'reverse_sweep_order_in_vol'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("reverse_sweep_order_in_vol");
+    tt->descr = tdrpStrDup("Reverse the order of the sweeps in the volume, but preserve ray order in sweeps.");
+    tt->help = tdrpStrDup("If TRUE, reverse the order in which the sweeps are stored in the volume. The order of the rays in the sweeps is preserved.");
+    tt->val_offset = (char *) &reverse_sweep_order_in_vol - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -1738,9 +1750,21 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("sort_rays_by_time");
-    tt->descr = tdrpStrDup("Sort the rays in time-ascending order.");
-    tt->help = tdrpStrDup("For some volumes, the rays are not strictly in ascending time order. If this is set, the rays will be sorted by time.");
+    tt->descr = tdrpStrDup("Sort the rays in increasing time order.");
+    tt->help = tdrpStrDup("For some volumes, the rays are not strictly in time order. If this is set, the rays will be sorted by time, in increasing order.");
     tt->val_offset = (char *) &sort_rays_by_time - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'sort_rays_by_time_decreasing'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("sort_rays_by_time_decreasing");
+    tt->descr = tdrpStrDup("Sort the rays in decreasing time order.");
+    tt->help = tdrpStrDup("If this is set, the rays will be sorted by time, in decreasing order.");
+    tt->val_offset = (char *) &sort_rays_by_time_decreasing - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
