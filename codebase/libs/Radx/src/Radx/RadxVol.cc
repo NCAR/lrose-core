@@ -4327,7 +4327,7 @@ void RadxVol::interpRayTimes()
 }
 
 /////////////////////////////////////////////////////////////////
-// Sort rays by time
+// Sort rays by increasing time
 
 bool RadxVol::SortByRayTime::operator()
   (const RayPtr &lhs, const RayPtr &rhs) const
@@ -4346,22 +4346,65 @@ void RadxVol::sortRaysByTime()
   }
 
   // create set with sorted ray pointers
-
+  // increasing in time
+  
   multiset<RayPtr, SortByRayTime> sortedRayPtrs;
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     RayPtr rptr(_rays[iray]);
     sortedRayPtrs.insert(rptr);
   }
-
+  
   // reload _rays array in time-sorted order
-
+  
   _rays.clear();
   for (multiset<RayPtr, SortByRayTime>::iterator ii = sortedRayPtrs.begin();
        ii != sortedRayPtrs.end(); ii++) {
     _rays.push_back(ii->ptr);
   }
-
+  
   // set sweep info from rays
+
+  loadSweepInfoFromRays();
+    
+}
+
+/////////////////////////////////////////////////////////////////
+// Sort rays by decreasing time
+
+bool RadxVol::SortByRayTimeDecrease::operator()
+  (const RayPtr &lhs, const RayPtr &rhs) const
+{
+  return lhs.ptr->getRadxTime() > rhs.ptr->getRadxTime();
+}
+
+void RadxVol::sortRaysByTimeDecreasing()
+
+{
+
+  // sanity check
+
+  if (_rays.size() < 2) {
+    return;
+  }
+
+  // create set with sorted ray pointers
+  // decreasing in time
+  
+  multiset<RayPtr, SortByRayTimeDecrease> sortedRayPtrs;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RayPtr rptr(_rays[iray]);
+    sortedRayPtrs.insert(rptr);
+  }
+  
+  // reload _rays array in time-sorted order
+  
+  _rays.clear();
+  for (multiset<RayPtr, SortByRayTimeDecrease>::iterator ii = sortedRayPtrs.begin();
+       ii != sortedRayPtrs.end(); ii++) {
+    _rays.push_back(ii->ptr);
+  }
+  
+ // set sweep info from rays
 
   loadSweepInfoFromRays();
     

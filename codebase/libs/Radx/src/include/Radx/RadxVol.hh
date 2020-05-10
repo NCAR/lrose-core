@@ -815,9 +815,14 @@ public:
   void interpRayTimes();
 
   /////////////////////////////////////////////////////////////////
-  /// Sort rays by time
+  /// Sort rays by increasing time order
   
   void sortRaysByTime();
+
+  /////////////////////////////////////////////////////////////////
+  /// Sort rays by decreasing time order
+  
+  void sortRaysByTimeDecreasing();
 
   /////////////////////////////////////////////////////////////////
   // Sort sweeps by fixed angle, reordering the rays accordingly
@@ -1775,6 +1780,11 @@ private:
   };
 
   class SortByRayTime {
+  public:
+    bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
+  };
+
+  class SortByRayTimeDecrease {
   public:
     bool operator()(const RayPtr &lhs, const RayPtr &rhs) const;
   };
