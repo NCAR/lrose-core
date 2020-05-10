@@ -253,7 +253,7 @@ def doPlot():
             ax1.plot(binPos, cumFreqFwd, \
                      linewidth=1, linestyle = linestyles[count], label = labelFwd, color = 'red')
             ax1.plot(binPos, cumFreqRev, \
-                     linewidth=1, linestyle = linestyles[count], label = labelFwd, color = 'blue')
+                     linewidth=1, linestyle = linestyles[count], label = labelRev, color = 'blue')
         else:
             ax1.plot(binPos, cumFreqFwd, \
                      linewidth=1, dashes = [dash, space], label = labelFwd, color = 'red')

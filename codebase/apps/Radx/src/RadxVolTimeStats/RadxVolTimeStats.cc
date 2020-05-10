@@ -525,7 +525,7 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
     binFreqRev[ibin] = binVolRev[ibin] / totalVol;
   }
   cumFreqRev[0] = 0.0;
-  for (size_t ibin = 1; ibin < binVolRev.size(); ibin++) {
+  for (size_t ibin = 0; ibin < binVolRev.size(); ibin++) {
     cumFreqRev[ibin + 1] = cumFreqRev[ibin] + binFreqRev[ibin];
   }
   meanAgeRev = totalWtRev / totalVol;

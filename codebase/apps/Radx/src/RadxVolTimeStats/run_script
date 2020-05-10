@@ -1,28 +1,31 @@
 #! /bin/csh
 
-RadxVolTimeStats -f ~/data/volscan-timing/bom/cfrad.20200304_132430.000_to_20200304_132849.000_AU02_SUR.BOM.nc -scan BOM-VOL > testing/BOM-VOL_timing.txt
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/bom_australia/cfrad.20200304_132430.000_to_20200304_132849.000_AU02_SUR.BOM.nc -scan BOM-VOL > testing/BOM-VOL_timing.txt
 
-RadxVolTimeStats -f ~/data/volscan-timing/canada/cfrad.20190730_200003.000_to_20190730_200546.684_CAS2-Blainville_SUR.nc -scan CAN-VOL > testing/CAN-VOL_timing.txt
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/env_canada/cfrad.20190730_200003.000_to_20190730_200546.684_CAS2-Blainville_SUR.nc -scan CAN-VOL > testing/CAN-VOL_timing.txt
 
-RadxVolTimeStats -f ~/data/volscan-timing/dwd/cfrad.20200503_220035.973_to_20200503_220403.437_EDZW84_SUR.DWD-VOL.nc -scan DWD-VOL > testing/DWD-VOL_timing.txt
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/dwd_germany/cfrad.20200503_220035.973_to_20200503_220403.437_EDZW84_SUR.DWD-VOL.nc -scan DWD-VOL > testing/DWD-VOL_timing.txt
 
-RadxVolTimeStats -f ~/data/volscan-timing/uae/cfrad.20200430_171007_to_20200430_171554_OMAD.UAE.nc -scan UAE-VOL > testing/UAE-VOL_timing.txt
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/ncms_uae/cfrad.20200430_171007_to_20200430_171554_OMAD.UAE.nc -scan UAE-VOL > testing/UAE-VOL_timing.txt
 
-RadxVolTimeStats -f ~/data/volscan-timing/vcp212/cfrad.20200412_120223.045_to_20200412_120655.788_KGWX.VCP212.all_sweeps.nc -scan VCP212 > testing/VCP212_timing.txt
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/saws_safrica/cfrad.20200510_011820.142_to_20200510_012318.977_SAWS-VOL.nc -scan SAWS-VOL > testing/SAWS-VOL_timing.txt
 
-RadxVolTimeStats -f ~/data/volscan-timing/vcp212/cfrad.20200412_180312.617_to_20200412_180852.746_KGWX.VCP212-SAILS.all_sweeps.nc -scan VCP212-SAILS > testing/VCP212-SAILS_timing.txt
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/nexrad_vcp212/cfrad.20200412_120223.045_to_20200412_120655.788_KGWX.VCP212.nc -scan VCP212 > testing/VCP212_timing.txt
 
-RadxVolTimeStats -f ~/data/volscan-timing/vcp215/cfrad.20200412_060516.286_to_20200412_061120.444_KGWX.VCP215.all_sweeps.nc -scan VCP215 > testing/VCP215_timing.txt
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/nexrad_vcp212/cfrad.20200412_180312.617_to_20200412_180852.746_KGWX.VCP212-SAILS.nc -scan VCP212-SAILS > testing/VCP212-SAILS_timing.txt
 
-RadxVolTimeStats -f ~/data/volscan-timing/vcp215/cfrad.20200412_020011.690_to_20200412_020446.076_KGWX.VCP215-AVSET.all_sweeps.nc -scan VCP215-AVSET > testing/VCP215-AVSET_timing.txt
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/nexrad_vcp215/cfrad.20200412_060516.286_to_20200412_061120.444_KGWX.VCP215.nc -scan VCP215 > testing/VCP215_timing.txt
 
-RadxVolTimeStats -f ~/data/volscan-timing/vcp35/cfrad.20200413_120649.084_to_20200413_121526.965_KGWX.VCP35.all_sweeps.nc -scan VCP35-SAILS > testing/VCP35-SAILS_timing.txt
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/nexrad_vcp215/cfrad.20200412_020011.690_to_20200412_020446.076_KGWX.VCP215-AVSET.nc -scan VCP215-AVSET > testing/VCP215-AVSET_timing.txt
+
+RadxVolTimeStats -debug -max_range 225 -f ~/data/volscan-timing/nexrad_vcp35/cfrad.20200413_120649.084_to_20200413_121526.965_KGWX.VCP35.nc -scan VCP35-SAILS > testing/VCP35-SAILS_timing.txt
 
 
 PlotVolTimeStats.py --file testing/BOM-VOL_timing.txt &
 PlotVolTimeStats.py --file testing/CAN-VOL_timing.txt &
 PlotVolTimeStats.py --file testing/DWD-VOL_timing.txt &
 PlotVolTimeStats.py --file testing/UAE-VOL_timing.txt &
+PlotVolTimeStats.py --file testing/SAWS-VOL_timing.txt &
 PlotVolTimeStats.py --file testing/VCP212_timing.txt &
 PlotVolTimeStats.py --file testing/VCP212-SAILS_timing.txt &
 PlotVolTimeStats.py --file testing/VCP215_timing.txt &
