@@ -770,7 +770,7 @@
     tt->descr = tdrpStrDup("Max range (km)");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 250;
+    tt->single_val.d = 225;
     tt++;
     
     // Parameter 'elev_rate_deg_per_sec'
@@ -884,7 +884,7 @@
     tt->descr = tdrpStrDup("Number of bins in the age histogram");
     tt->help = tdrpStrDup("Age is expressed as a fraction of the time to complete the volume");
     tt->val_offset = (char *) &n_bins_age_histogram - &_start_;
-    tt->single_val.i = 50;
+    tt->single_val.i = 51;
     tt++;
     
     // Parameter 'age_hist_max_ht_km'

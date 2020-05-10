@@ -127,6 +127,18 @@ int RadxVolTimeStats::Run()
     }
   }
 
+  // time limits, and vol duration
+  
+  RadxTime startTime = vol.getStartRadxTime();
+  RadxTime endTime = vol.getEndRadxTime();
+  double volDurationSecs = endTime - startTime;
+  if (_params.debug) {
+    cerr << "volStartTime : " << startTime.asString(3) << endl;
+    cerr << "volEndTime   : " << endTime.asString(3) << endl;
+    cerr << "duration     : " << volDurationSecs << endl;
+  }
+  
+
   // add the gate geometry fields
 
   _addGeomFields(vol);
@@ -413,12 +425,6 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
   RadxTime endTime = vol.getEndRadxTime();
   double volDurationSecs = endTime - startTime;
 
-  if (_params.debug) {
-    cerr << "volStartTime : " << startTime.asString(3) << endl;
-    cerr << "volEndTime   : " << endTime.asString(3) << endl;
-    cerr << "duration     : " << volDurationSecs << endl;
-  }
-  
   // initialize counter arrays
 
   double totalVol = 0.0;
@@ -440,13 +446,29 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
     // get ray
     
     RadxRay *ray = vol.getRays()[iray];
-    // double el = ray->getElevationDeg();
-    // double az = ray->getAzimuthDeg();
     int nGates = ray->getNGates();
     RadxTime rayTime = ray->getRadxTime();
-    double ageFwd = endTime - rayTime;
-    double ageRev = rayTime - startTime;
 
+    // compute age as fraction of vol duration
+    
+    double ageFwd = endTime - rayTime;
+    double ageFracFwd = ageFwd / volDurationSecs;
+    if (ageFracFwd < 0.0) {
+      ageFracFwd = 0.0;
+    } else if (ageFracFwd >= 1.0) {
+      ageFracFwd = 0.999999999;
+    }
+    int ageBinFwd = (int) (ageFracFwd * _params.n_bins_age_histogram);
+    
+    double ageRev = rayTime - startTime;
+    double ageFracRev = ageRev / volDurationSecs;
+    if (ageFracRev < 0.0) {
+      ageFracRev = 0.0;
+    } else if (ageFracRev >= 1.0) {
+      ageFracRev = 0.999999999;
+    }
+    int ageBinRev = (int) (ageFracRev * _params.n_bins_age_histogram);
+      
     // get fields, check they are non-null
 
     RadxField *sampleVolField = ray->getField("sampleVol");
@@ -468,24 +490,6 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
         continue;
       }
 
-      // compute age as fraction of vol duration
-      
-      double ageFracFwd = ageFwd / volDurationSecs;
-      if (ageFracFwd < 0.0) {
-        ageFracFwd = 0.0;
-      } else if (ageFracFwd >= 1.0) {
-        ageFracFwd = 0.999999;
-      }
-      int ageBinFwd = (int) (ageFracFwd * _params.n_bins_age_histogram);
-      
-      double ageFracRev = ageRev / volDurationSecs;
-      if (ageFracRev < 0.0) {
-        ageFracRev = 0.0;
-      } else if (ageFracRev >= 1.0) {
-        ageFracRev = 0.999999;
-      }
-      int ageBinRev = (int) (ageFracRev * _params.n_bins_age_histogram);
-      
       // accumulate bin vol
 
       double vol = sampleVol[igate];
@@ -504,25 +508,25 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
 
   vector<double> binFreqFwd;
   binFreqFwd.resize(_params.n_bins_age_histogram);
-  cumFreqFwd.resize(_params.n_bins_age_histogram);
+  cumFreqFwd.resize(_params.n_bins_age_histogram + 1);
   for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
     binFreqFwd[ibin] = binVolFwd[ibin] / totalVol;
   }
-  cumFreqFwd[0] = binFreqFwd[0];
-  for (size_t ibin = 1; ibin < binVolFwd.size(); ibin++) {
-    cumFreqFwd[ibin] = cumFreqFwd[ibin - 1] + binFreqFwd[ibin];
+  cumFreqFwd[0] = 0.0;
+  for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
+    cumFreqFwd[ibin + 1] = cumFreqFwd[ibin] + binFreqFwd[ibin];
   }
   meanAgeFwd = totalWtFwd / totalVol;
 
   vector<double> binFreqRev;
   binFreqRev.resize(_params.n_bins_age_histogram);
-  cumFreqRev.resize(_params.n_bins_age_histogram);
+  cumFreqRev.resize(_params.n_bins_age_histogram + 1);
   for (size_t ibin = 0; ibin < binVolRev.size(); ibin++) {
     binFreqRev[ibin] = binVolRev[ibin] / totalVol;
   }
-  cumFreqRev[0] = binFreqRev[0];
+  cumFreqRev[0] = 0.0;
   for (size_t ibin = 1; ibin < binVolRev.size(); ibin++) {
-    cumFreqRev[ibin] = cumFreqRev[ibin - 1] + binFreqRev[ibin];
+    cumFreqRev[ibin + 1] = cumFreqRev[ibin] + binFreqRev[ibin];
   }
   meanAgeRev = totalWtRev / totalVol;
 
@@ -602,8 +606,8 @@ void RadxVolTimeStats::_writeAgeResults(RadxVol &vol,
   fprintf(stdout, "#########################################################\n");
 
   for (int ibin = 0; ibin < nBins; ibin++) {
-    double binAge = ((ibin + 0.5) / nBins) * volDurationSecs;
-    double binPos = ((ibin + 0.5) / nBins);
+    double binAge = ((double) ibin / (nBins - 1.0)) * volDurationSecs;
+    double binPos = ((double) ibin / (nBins - 1.0));
     fprintf(stdout, 
             "  %8d %8.2f %8.3f",
             ibin, binAge, binPos);

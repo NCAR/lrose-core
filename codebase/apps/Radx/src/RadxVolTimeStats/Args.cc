@@ -105,10 +105,19 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "reverse_sweep_order_in_vol = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-maxht")) {
+    } else if (!strcmp(argv[i], "-max_ht")) {
       
       if (i < argc - 1) {
 	sprintf(tmp_str, "age_hist_max_ht_km = %s;", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      }
+	
+    } else if (!strcmp(argv[i], "-max_range")) {
+      
+      sprintf(tmp_str, "set_max_range = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      if (i < argc - 1) {
+	sprintf(tmp_str, "max_range_km = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       }
 	
@@ -164,7 +173,8 @@ void Args::_usage(ostream &out)
       << "       [ -debug ] print debug messages\n"
       << "       [ -f ?] path to radar file if specified\n"
       << "       [ -outdir ?] set the output directory for file\n"
-      << "       [ -maxht ?] set max ht in km\n"
+      << "       [ -max_ht ?] set max ht in km\n"
+      << "       [ -max_range ?] set max range in km\n"
       << "       [ -nbins ?] set number of bins in histogram\n"
       << "       [ -print_height_table ] print range-ht table to stdout\n"
       << "       [ -reverse_sweep_order ] reverse sweep order in volume but\n"

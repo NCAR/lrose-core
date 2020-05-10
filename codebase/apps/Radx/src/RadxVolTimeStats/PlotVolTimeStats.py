@@ -224,8 +224,10 @@ def doPlot():
 
     # plot the frequency, for each ht limit
 
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted']
+
     count = 0
-    dash = 8
+    dash = 10
     space = 0
     for ht in heights:
 
@@ -238,14 +240,25 @@ def doPlot():
         cumFreqFwd = np.array(colData[nameFwd]).astype(np.double)
         cumFreqRev = np.array(colData[nameRev]).astype(np.double)
 
-        labelFwd = "Fwd up to " + ht + "km meanAge: " + meanAgeFwd[count]
-        labelRev = "Rev up to " + ht + "km meanAge: " + meanAgeRev[count]
+        meanAgeFwdFloat = float(meanAgeFwd[count])
+        meanAgeRevFloat = float(meanAgeRev[count])
 
-        ax1.plot(binPos, cumFreqFwd, \
-                 linewidth=1, dashes = [dash, space], label = labelFwd, color = 'red')
+        meanAgeFwdSecs = int(meanAgeFwdFloat * float(volDuration) + 0.5)
+        meanAgeRevSecs = int(meanAgeRevFloat * float(volDuration) + 0.5)
 
-        ax1.plot(binPos, cumFreqRev, \
-                 linewidth=1, dashes = [dash, space], label = labelRev, color = 'blue')
+        labelFwd = "Fwd " + ht + "km meanAge: " + meanAgeFwd[count] + " = " + str(meanAgeFwdSecs) + " s"
+        labelRev = "Rev " + ht + "km meanAge: " + meanAgeRev[count] + " = " + str(meanAgeRevSecs) + " s"
+
+        if (count < 4):
+            ax1.plot(binPos, cumFreqFwd, \
+                     linewidth=1, linestyle = linestyles[count], label = labelFwd, color = 'red')
+            ax1.plot(binPos, cumFreqRev, \
+                     linewidth=1, linestyle = linestyles[count], label = labelFwd, color = 'blue')
+        else:
+            ax1.plot(binPos, cumFreqFwd, \
+                     linewidth=1, dashes = [dash, space], label = labelFwd, color = 'red')
+            ax1.plot(binPos, cumFreqRev, \
+                     linewidth=1, dashes = [dash, space], label = labelRev, color = 'blue')
 
         count = count + 1
         dash = dash - 2
@@ -256,15 +269,6 @@ def doPlot():
     ax1.set_title('Elevs: ' + elevs, fontsize=8)
     ax1.grid(True)
     
-    #ax1.grid(which='minor', alpha=0.1)
-    #ax1.grid(which='major', alpha=0.2)
-    #major_ticks = np.arange(0, 1, 0.2)
-    #minor_ticks = np.arange(0.1, 0.9, 0.2)
-    #ax1.set_xticks(major_ticks)
-    #ax1.set_xticks(minor_ticks, minor=True)
-    #ax1.set_yticks(major_ticks)
-    #ax1.set_yticks(minor_ticks, minor=True)
-
     legend1 = ax1.legend(loc='upper left', ncol=1, framealpha=0.5, fancybox=True)
     for label in legend1.get_texts():
         label.set_fontsize('x-small')

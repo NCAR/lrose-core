@@ -88,7 +88,7 @@ specified_file_path = "./template_cfradial_file.nc";
 // Type: boolean
 //
 
-set_max_range = FALSE;
+set_max_range = TRUE;
 
 //======================================================================
 //
@@ -127,7 +127,7 @@ radar_name = "SAWS";
 radar_location = {
     latitudeDeg = -25.9118,
     longitudeDeg = 28.2108,
-    altitudeKm = 1.560
+    altitudeKm = 1.56
 };
 
 ///////////// radar_wavelength_cm /////////////////////
@@ -168,7 +168,7 @@ scan_name = "SAWS-VOL";
 // Type: double
 //
 
-gate_spacing_m = 500;
+gate_spacing_m = 250;
 
 ///////////// max_range_km ////////////////////////////
 //
@@ -178,7 +178,7 @@ gate_spacing_m = 500;
 // Type: double
 //
 
-max_range_km = 300;
+max_range_km = 225;
 
 ///////////// elev_rate_deg_per_sec ///////////////////
 //
@@ -208,65 +208,79 @@ elev_rate_deg_per_sec = 6;
 
 sweeps = {
   {
-    elev_deg = 30.0,
-    az_rate_deg_per_sec = 30.0
+    elev_deg = 30,
+    az_rate_deg_per_sec = 30
   }
   ,
   {
-    elev_deg = 22.0,
-    az_rate_deg_per_sec = 27.0
+    elev_deg = 22,
+    az_rate_deg_per_sec = 27
   }
   ,
   {
     elev_deg = 16.8,
-    az_rate_deg_per_sec = 24.0
+    az_rate_deg_per_sec = 24
   }
   ,
   {
     elev_deg = 12.2,
-    az_rate_deg_per_sec = 20.0
+    az_rate_deg_per_sec = 20
   }
   ,
   {
     elev_deg = 9.9,
-    az_rate_deg_per_sec = 17.0
+    az_rate_deg_per_sec = 17
   }
   ,
   {
     elev_deg = 7.9,
-    az_rate_deg_per_sec = 14.0
+    az_rate_deg_per_sec = 14
   }
   ,
   {
     elev_deg = 6.2,
-    az_rate_deg_per_sec = 12.0
+    az_rate_deg_per_sec = 12
   }
   ,
   {
     elev_deg = 4.7,
-    az_rate_deg_per_sec = 12.0
+    az_rate_deg_per_sec = 12
   }
   ,
   {
     elev_deg = 3.4,
-    az_rate_deg_per_sec = 12.0
+    az_rate_deg_per_sec = 12
   }
   ,
   {
     elev_deg = 2.3,
-    az_rate_deg_per_sec = 12.0
+    az_rate_deg_per_sec = 12
   }
   ,
   {
     elev_deg = 1.3,
-    az_rate_deg_per_sec = 11.0
+    az_rate_deg_per_sec = 11
   }
   ,
   {
     elev_deg = 0.5,
-    az_rate_deg_per_sec = 10.0
+    az_rate_deg_per_sec = 10
   }
 };
+
+///////////// reverse_sweep_order_in_vol //////////////
+//
+// Reverse the order of the sweeps in the volume, but preserve times.
+//
+// If TRUE, reverse the order in which the sweeps are stored in the 
+//   volume. But do not change the times on the rays. This is used for 
+//   testing purposes and checking for bugs in the analysis.
+//
+//
+// Type: boolean
+//
+
+reverse_sweep_order_in_vol = FALSE;
 
 //======================================================================
 //
@@ -303,7 +317,26 @@ age_hist_max_ht_km = {
 
 //======================================================================
 //
-// WRITING FILES TO OUTPUT DIRECTORY.
+// WRITING OUT RANGE-HEIGHT TABLE.
+//
+//======================================================================
+ 
+///////////// print_range_height_table ////////////////
+//
+// Print range-height table to stdout.
+//
+// If TRUE, the height of the sweep elevation angles, vs range, are 
+//   written to stdout.
+//
+//
+// Type: boolean
+//
+
+print_range_height_table = FALSE;
+
+//======================================================================
+//
+// WRITING CFRADIAL FILES TO OUTPUT DIRECTORY.
 //
 //======================================================================
  
@@ -329,5 +362,5 @@ write_volume_to_output_file = FALSE;
 // Type: string
 //
 
-output_dir = "./output/RadxVolTimeStats/";
+output_dir = "$(HOME)/data/volscan-timing/saws";
 

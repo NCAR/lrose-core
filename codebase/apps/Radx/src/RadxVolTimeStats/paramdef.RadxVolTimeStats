@@ -100,7 +100,7 @@ paramdef double {
 } gate_spacing_m;
 
 paramdef double {
-  p_default = 250;
+  p_default = 225;
   p_descr = "Max range (km)";
 } max_range_km;
 
@@ -150,7 +150,7 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 50;
+  p_default = 51;
   p_descr = "Number of bins in the age histogram";
   p_help = "Age is expressed as a fraction of the time to complete the volume";
 } n_bins_age_histogram;
