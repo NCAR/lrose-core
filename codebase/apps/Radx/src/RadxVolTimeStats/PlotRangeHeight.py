@@ -285,7 +285,7 @@ def doPlot():
     homeDir = os.environ['HOME']
     downloadsDir = os.path.join(homeDir, 'Downloads')
     savePath = os.path.join(downloadsDir, "range_height." + scanName + ".png")
-    # fig1.savefig(savePath)
+    fig1.savefig(savePath)
 
    # show
 
