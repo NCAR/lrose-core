@@ -82,9 +82,9 @@ int main(int argc, char *argv[])
       exit(-1);
     }
 
-    fprintf(stdout,"%d files :\n",_args->inputFileList.size());
+    fprintf(stdout,"%ld files :\n",_args->inputFileList.size());
     for (size_t i=0;i<_args->inputFileList.size();i++){
-      fprintf(stdout,"[ %d ] %s\n",i+1,_args->inputFileList[i].c_str());
+      fprintf(stdout,"[ %ld ] %s\n",i+1,_args->inputFileList[i].c_str());
     }
 
     _input = new DsInputPath("Sigmet2Dsr",
