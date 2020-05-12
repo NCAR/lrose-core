@@ -305,7 +305,6 @@ int PjgCalc::latlon2xyIndex(const double lat, const double lon,
 void PjgCalc::latlon2xyIndexExact(const double lat, const double lon,
                                   double &x_index, double &y_index) const
 {
-  int iret = 0;
   double x, y;
 
   latlon2xy(lat, lon, x, y);
