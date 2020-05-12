@@ -205,9 +205,13 @@ void RSL_radar_to_uf_fp(Radar *r, FILE *fp)
     ray_num = 0;
   if (radar_verbose_flag) 
     fprintf(stderr,"Processing sweep %d for %d rays.", i, nrays);
-  if (radar_verbose_flag)
-    if (little_endian()) fprintf(stderr," ... On Little endian.\n");
-    else fprintf(stderr,"\n");
+  if (radar_verbose_flag) {
+    if (little_endian()) {
+      fprintf(stderr," ... On Little endian.\n");
+    }
+  } else {
+    fprintf(stderr,"\n");
+  }
 
 
 /* Now LOOP for all rays within this particular sweep (i).

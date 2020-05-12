@@ -270,13 +270,13 @@ void get_wsr88d_unamb_and_nyq_vel(Wsr88d_ray_m31 *wsr88d_ray, float *unamb_rng,
     found = 0;
     ray_hdr_len = sizeof(wsr88d_ray->ray_hdr);
     dbptr = wsr88d_ray->ray_hdr.dbptr_radial_const - ray_hdr_len;
-    if (strncmp(&wsr88d_ray->data[dbptr], "RRAD", 4) == 0) found = 1;
+    if (strncmp((const char *) &wsr88d_ray->data[dbptr], "RRAD", 4) == 0) found = 1;
     else {
 	dbptr = wsr88d_ray->ray_hdr.dbptr_elev_const - ray_hdr_len;
-	if (strncmp(&wsr88d_ray->data[dbptr], "RRAD", 4) == 0) found = 1;
+	if (strncmp((const char *) &wsr88d_ray->data[dbptr], "RRAD", 4) == 0) found = 1;
 	else {
 	    dbptr = wsr88d_ray->ray_hdr.dbptr_vol_const - ray_hdr_len;
-	    if (strncmp(&wsr88d_ray->data[dbptr], "RRAD", 4) == 0) found = 1;
+	    if (strncmp((const char *) &wsr88d_ray->data[dbptr], "RRAD", 4) == 0) found = 1;
 	}
     }
     if (found) {
@@ -387,6 +387,18 @@ void wsr88d_load_ray_hdr(Wsr88d_ray_m31 wsr88d_ray, Ray *ray)
     ray->h.wavelength = 0.1071;
 }
 
+int wsr88d_get_vol_index(char* dataname)
+{
+    int vol_index;
+
+    if (strncmp(dataname, "DREF", 4) == 0) vol_index = DZ_INDEX;
+    if (strncmp(dataname, "DVEL", 4) == 0) vol_index = VR_INDEX;
+    if (strncmp(dataname, "DSW", 3) == 0) vol_index = SW_INDEX;
+    /* TODO: Add the other data moments. */
+
+    return vol_index;
+}
+
 
 void wsr88d_load_ray(Wsr88d_ray_m31 wsr88d_ray, int data_ptr,
 	int isweep, int iray, Radar *radar)
@@ -394,13 +406,13 @@ void wsr88d_load_ray(Wsr88d_ray_m31 wsr88d_ray, int data_ptr,
     /* Load data into ray structure for this field or data moment. */
 
     Data_moment_hdr data_hdr;
-    int ngates;
+    int ngates = 0;
     int i, hdr_size;
     float value, scale, offset;
     unsigned char *data;
     Range (*invf)(float x);
     float (*f)(Range x);
-    Ray *ray;
+    Ray *ray = NULL;
     int vol_index, waveform;
 
     enum waveforms {surveillance=1, doppler_w_amb_res, doppler_no_amb_res,
@@ -467,18 +479,6 @@ void wsr88d_load_ray(Wsr88d_ray_m31 wsr88d_ray, int data_ptr,
     ray->h.nbins = ngates;
 }
 
-
-int wsr88d_get_vol_index(char* dataname)
-{
-    int vol_index;
-
-    if (strncmp(dataname, "DREF", 4) == 0) vol_index = DZ_INDEX;
-    if (strncmp(dataname, "DVEL", 4) == 0) vol_index = VR_INDEX;
-    if (strncmp(dataname, "DSW", 3) == 0) vol_index = SW_INDEX;
-    /* TODO: Add the other data moments. */
-
-    return vol_index;
-}
 
 
 void wsr88d_load_ray_into_radar(Wsr88d_ray_m31 wsr88d_ray, int isweep, int iray,

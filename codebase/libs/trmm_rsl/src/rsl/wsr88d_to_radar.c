@@ -215,7 +215,7 @@ Radar *RSL_wsr88d_to_radar(char *infile, char *call_or_first_tape_file)
  * Volumes of data.
  */
 {
-  Radar *radar;
+  Radar *radar = NULL;
   Volume *new_volume;
   Wsr88d_file *wf;
   Wsr88d_sweep wsr88d_sweep;

@@ -130,7 +130,7 @@ int nsig_endianess(NSIG_Record1 *rec1)
       do_swap = little_endian();
     else
       do_swap = big_endian();
-  } else if ((rec1->struct_head.id[1] == 0)) { /* Possible big-endian */
+  } else if (rec1->struct_head.id[1] == 0) { /* Possible big-endian */
     if (rec1->struct_head.id[0] <= 7)
       /* This is a little-endian file.  Version 1. */
       do_swap = big_endian();
@@ -173,7 +173,7 @@ void nsig_free_sweep(NSIG_Sweep **s)
   for (itype=0; itype<nparams; itype++) {
     if (s[itype] == NULL) continue;
     
-    if (s[itype]->idh.data_type == NSIG_DTB_EXH)
+    if ((int) s[itype]->idh.data_type == NSIG_DTB_EXH)
       free(s[itype]->ray[i]);
     else {
       for (i=0; i<NSIG_I2(s[itype]->idh.num_rays_act); i++)
@@ -392,12 +392,11 @@ NSIG_Ray *nsig_read_ray(FILE *fp)
 NSIG_Sweep **nsig_read_sweep(FILE *fp, NSIG_Product_file *prod_file)
 {
   NSIG_Sweep **s;
-  int i, j, n;
+  int i, n;
   static NSIG_Ingest_data_header **idh = NULL;
   static NSIG_Raw_prod_bhdr *bhdr = NULL;
   NSIG_Ray *nsig_ray;
   int data_mask, iray, nrays[12], max_rays;
-  int masks[5];
   int nparams;
   int is_new_ray;
   int idtype[12];

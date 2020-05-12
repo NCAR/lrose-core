@@ -80,7 +80,10 @@ void get_xyz_coord(double *x,double *y,double *z,
 	*/
    double azim_rad,elev_rad;
 
+#ifndef M_PI
 #  define M_PI		3.14159265358979323846
+#endif
+   
    azim_rad = azim *  M_PI / 180.0;
    elev_rad = elev *  M_PI / 180.0;
    

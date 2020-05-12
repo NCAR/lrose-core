@@ -28,6 +28,8 @@
 #include <unistd.h>
 #include "rainbow.h"
 
+extern void read_rainbow_header(Rainbow_hdr *rainbow_header, FILE *fp);
+
 struct dms {
     int deg;
     int minute;

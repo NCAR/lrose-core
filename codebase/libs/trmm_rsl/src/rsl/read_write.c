@@ -314,7 +314,7 @@ int RSL_write_radar_fp(Radar *radar, FILE *fp)
   if (radar == NULL) return 0;
   
   memset(title, 0, sizeof(title));
-  (void)sprintf(title, "RSL v%s. sizeof(Range) %d", RSL_VERSION_STR, sizeof(Range));
+  snprintf(title, 100, "RSL v%s. sizeof(Range) %ld", RSL_VERSION_STR, sizeof(Range));
   n += fwrite(title, sizeof(char), sizeof(title), fp);
   
   memset(header_buf, 0, sizeof(header_buf));

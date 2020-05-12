@@ -150,7 +150,7 @@ extern FILE *yyin, *yyout;
 		} \
 	while ( 0 )
 
-#define unput(c) yyunput( c, yytext_ptr )
+/* #define unput(c) yyunput( c, yytext_ptr ) */
 
 /* The following is because we cannot portably get our hands on size_t
  * (without autoconf's help, which isn't available because we want
@@ -631,9 +631,11 @@ extern int yywrap YY_PROTO(( void ));
 #endif
 #endif
 
+/*
 #ifndef YY_NO_UNPUT
 static void yyunput YY_PROTO(( int c, char *buf_ptr ));
 #endif
+*/
 
 #ifndef yytext_ptr
 static void yy_flex_strncpy YY_PROTO(( char *, yyconst char *, int ));
@@ -643,13 +645,13 @@ static void yy_flex_strncpy YY_PROTO(( char *, yyconst char *, int ));
 static int yy_flex_strlen YY_PROTO(( yyconst char * ));
 #endif
 
-#ifndef YY_NO_INPUT
-#ifdef __cplusplus
-static int yyinput YY_PROTO(( void ));
-#else
-static int input YY_PROTO(( void ));
-#endif
-#endif
+/* #ifndef YY_NO_INPUT */
+/* #ifdef __cplusplus */
+/* static int yyinput YY_PROTO(( void )); */
+/* #else */
+/* static int input YY_PROTO(( void )); */
+/* #endif */
+/* #endif */
 
 #if YY_STACK_USED
 static int yy_start_stack_ptr = 0;
@@ -1491,122 +1493,121 @@ yy_state_type yy_current_state;
 	}
 
 
-#ifndef YY_NO_UNPUT
-#ifdef YY_USE_PROTOS
-static void yyunput( int c, register char *yy_bp )
-#else
-static void yyunput( c, yy_bp )
-int c;
-register char *yy_bp;
-#endif
-	{
-	register char *yy_cp = yy_c_buf_p;
+/* #ifndef YY_NO_UNPUT */
+/* #ifdef YY_USE_PROTOS */
+/* static void yyunput( int c, register char *yy_bp ) */
+/* #else */
+/* static void yyunput( c, yy_bp ) */
+/* int c; */
+/* register char *yy_bp; */
+/* #endif */
+/* 	{ */
+/* 	register char *yy_cp = yy_c_buf_p; */
 
-	/* undo effects of setting up yytext */
-	*yy_cp = yy_hold_char;
+/* 	/\* undo effects of setting up yytext *\/ */
+/* 	*yy_cp = yy_hold_char; */
 
-	if ( yy_cp < yy_current_buffer->yy_ch_buf + 2 )
-		{ /* need to shift things up to make room */
-		/* +2 for EOB chars. */
-		register int number_to_move = yy_n_chars + 2;
-		register char *dest = &yy_current_buffer->yy_ch_buf[
-					yy_current_buffer->yy_buf_size + 2];
-		register char *source =
-				&yy_current_buffer->yy_ch_buf[number_to_move];
+/* 	if ( yy_cp < yy_current_buffer->yy_ch_buf + 2 ) */
+/* 		{ /\* need to shift things up to make room *\/ */
+/* 		/\* +2 for EOB chars. *\/ */
+/* 		register int number_to_move = yy_n_chars + 2; */
+/* 		register char *dest = &yy_current_buffer->yy_ch_buf[ */
+/* 					yy_current_buffer->yy_buf_size + 2]; */
+/* 		register char *source = */
+/* 				&yy_current_buffer->yy_ch_buf[number_to_move]; */
 
-		while ( source > yy_current_buffer->yy_ch_buf )
-			*--dest = *--source;
+/* 		while ( source > yy_current_buffer->yy_ch_buf ) */
+/* 			*--dest = *--source; */
 
-		yy_cp += (int) (dest - source);
-		yy_bp += (int) (dest - source);
-		yy_current_buffer->yy_n_chars =
-			yy_n_chars = yy_current_buffer->yy_buf_size;
+/* 		yy_cp += (int) (dest - source); */
+/* 		yy_bp += (int) (dest - source); */
+/* 		yy_current_buffer->yy_n_chars = */
+/* 			yy_n_chars = yy_current_buffer->yy_buf_size; */
 
-		if ( yy_cp < yy_current_buffer->yy_ch_buf + 2 )
-			YY_FATAL_ERROR( "flex scanner push-back overflow" );
-		}
+/* 		if ( yy_cp < yy_current_buffer->yy_ch_buf + 2 ) */
+/* 			YY_FATAL_ERROR( "flex scanner push-back overflow" ); */
+/* 		} */
 
-	*--yy_cp = (char) c;
-
-
-	yytext_ptr = yy_bp;
-	yy_hold_char = *yy_cp;
-	yy_c_buf_p = yy_cp;
-	}
-#endif	/* ifndef YY_NO_UNPUT */
+/* 	*--yy_cp = (char) c; */
 
 
-#ifdef __cplusplus
-static int yyinput()
-#else
-static int input()
-#endif
-	{
-	int c;
+/* 	yytext_ptr = yy_bp; */
+/* 	yy_hold_char = *yy_cp; */
+/* 	yy_c_buf_p = yy_cp; */
+/* 	} */
+/* #endif	/\* ifndef YY_NO_UNPUT *\/ */
 
-	*yy_c_buf_p = yy_hold_char;
+/* #ifdef __cplusplus */
+/* static int yyinput() */
+/* #else */
+/* static int input() */
+/* #endif */
+/* 	{ */
+/* 	int c; */
 
-	if ( *yy_c_buf_p == YY_END_OF_BUFFER_CHAR )
-		{
-		/* yy_c_buf_p now points to the character we want to return.
-		 * If this occurs *before* the EOB characters, then it's a
-		 * valid NUL; if not, then we've hit the end of the buffer.
-		 */
-		if ( yy_c_buf_p < &yy_current_buffer->yy_ch_buf[yy_n_chars] )
-			/* This was really a NUL. */
-			*yy_c_buf_p = '\0';
+/* 	*yy_c_buf_p = yy_hold_char; */
 
-		else
-			{ /* need more input */
-			int offset = yy_c_buf_p - yytext_ptr;
-			++yy_c_buf_p;
+/* 	if ( *yy_c_buf_p == YY_END_OF_BUFFER_CHAR ) */
+/* 		{ */
+/* 		/\* yy_c_buf_p now points to the character we want to return. */
+/* 		 * If this occurs *before* the EOB characters, then it's a */
+/* 		 * valid NUL; if not, then we've hit the end of the buffer. */
+/* 		 *\/ */
+/* 		if ( yy_c_buf_p < &yy_current_buffer->yy_ch_buf[yy_n_chars] ) */
+/* 			/\* This was really a NUL. *\/ */
+/* 			*yy_c_buf_p = '\0'; */
 
-			switch ( yy_get_next_buffer() )
-				{
-				case EOB_ACT_LAST_MATCH:
-					/* This happens because yy_g_n_b()
-					 * sees that we've accumulated a
-					 * token and flags that we need to
-					 * try matching the token before
-					 * proceeding.  But for input(),
-					 * there's no matching to consider.
-					 * So convert the EOB_ACT_LAST_MATCH
-					 * to EOB_ACT_END_OF_FILE.
-					 */
+/* 		else */
+/* 			{ /\* need more input *\/ */
+/* 			int offset = yy_c_buf_p - yytext_ptr; */
+/* 			++yy_c_buf_p; */
 
-					/* Reset buffer status. */
-					yyrestart( yyin );
+/* 			switch ( yy_get_next_buffer() ) */
+/* 				{ */
+/* 				case EOB_ACT_LAST_MATCH: */
+/* 					/\* This happens because yy_g_n_b() */
+/* 					 * sees that we've accumulated a */
+/* 					 * token and flags that we need to */
+/* 					 * try matching the token before */
+/* 					 * proceeding.  But for input(), */
+/* 					 * there's no matching to consider. */
+/* 					 * So convert the EOB_ACT_LAST_MATCH */
+/* 					 * to EOB_ACT_END_OF_FILE. */
+/* 					 *\/ */
 
-					/* fall through */
+/* 					/\* Reset buffer status. *\/ */
+/* 					yyrestart( yyin ); */
 
-				case EOB_ACT_END_OF_FILE:
-					{
-					if ( yywrap() )
-						return EOF;
+/* 					/\* fall through *\/ */
 
-					if ( ! yy_did_buffer_switch_on_eof )
-						YY_NEW_FILE;
-#ifdef __cplusplus
-					return yyinput();
-#else
-					return input();
-#endif
-					}
+/* 				case EOB_ACT_END_OF_FILE: */
+/* 					{ */
+/* 					if ( yywrap() ) */
+/* 						return EOF; */
 
-				case EOB_ACT_CONTINUE_SCAN:
-					yy_c_buf_p = yytext_ptr + offset;
-					break;
-				}
-			}
-		}
+/* 					if ( ! yy_did_buffer_switch_on_eof ) */
+/* 						YY_NEW_FILE; */
+/* #ifdef __cplusplus */
+/* 					return yyinput(); */
+/* #else */
+/* 					return input(); */
+/* #endif */
+/* 					} */
 
-	c = *(unsigned char *) yy_c_buf_p;	/* cast for 8-bit char's */
-	*yy_c_buf_p = '\0';	/* preserve yytext */
-	yy_hold_char = *++yy_c_buf_p;
+/* 				case EOB_ACT_CONTINUE_SCAN: */
+/* 					yy_c_buf_p = yytext_ptr + offset; */
+/* 					break; */
+/* 				} */
+/* 			} */
+/* 		} */
+
+/* 	c = *(unsigned char *) yy_c_buf_p;	/\* cast for 8-bit char's *\/ */
+/* 	*yy_c_buf_p = '\0';	/\* preserve yytext *\/ */
+/* 	yy_hold_char = *++yy_c_buf_p; */
 
 
-	return c;
-	}
+/* 	return c; */
+/* 	} */
 
 
 #ifdef YY_USE_PROTOS

@@ -132,7 +132,7 @@ int nsig2_endianess(NSIG_Record1 *rec1)
       do_swap = little_endian();
     else
       do_swap = big_endian();
-  } else if ((rec1->struct_head.id[1] == 0)) { /* Possible big-endian */
+  } else if (rec1->struct_head.id[1] == 0) { /* Possible big-endian */
     if (rec1->struct_head.id[0] <= 7)
       /* This is a little-endian file.  Version 1. */
       do_swap = big_endian();
@@ -175,7 +175,7 @@ void nsig_free_sweep(NSIG_Sweep **s)
   for (itype=0; itype<nparams; itype++) {
     if (s[itype] == NULL) continue;
     
-    if (s[itype]->idh.data_type == NSIG_DTB_EXH)
+    if ((int) s[itype]->idh.data_type == NSIG_DTB_EXH)
       free(s[itype]->ray[i]);
     else {
       for (i=0; i<NSIG_I2(s[itype]->idh.num_rays_act); i++)
@@ -1305,7 +1305,7 @@ Radar * RSL_nsig2_to_radar(char *filename)
         fprintf(stderr, "     nsig_sweep[%d], data_type = %d, rays(expected) = %d, nrays(actual) = %d\n", itype, data_type, num_rays, NSIG_I2(nsig_sweep[itype]->idh.num_rays_act));
 
       if (data_type != NSIG_DTB_EXH) {
-        if ((radar->v[ifield] == NULL)) {
+        if (radar->v[ifield] == NULL) {
           if (rsl_qfield[ifield]) {
              radar->v[ifield] = RSL_new_volume(numsweep);
              radar->v[ifield]->h.f = f;
@@ -1524,7 +1524,7 @@ Radar * RSL_nsig2_to_radar(char *filename)
             case NSIG_DTB_ZDR2:
             case NSIG_DTB_KDP2:
 	      memmove(&nsig_u2byte, &ray_p->range[2*k], 2);
-	      nsig_u2byte = NSIG_I2(&nsig_u2byte);
+	      nsig_u2byte = NSIG_I2((unsigned char *) &nsig_u2byte);
 	      if (nsig_u2byte == 0 || nsig_u2byte == 65535)
 	        ray_data = NSIG_NO_ECHO2;
 	      else ray_data = (float)(nsig_u2byte-32768)/100.;
@@ -1532,7 +1532,7 @@ Radar * RSL_nsig2_to_radar(char *filename)
 
             case NSIG_DTB_WID2:
 	      memmove(&nsig_u2byte, &ray_p->range[2*k], 2);
-	      nsig_u2byte = NSIG_I2(&nsig_u2byte);
+	      nsig_u2byte = NSIG_I2((unsigned char *) &nsig_u2byte);
 	      if (nsig_u2byte == 0 || nsig_u2byte == 65535)
 	        ray_data = NSIG_NO_ECHO2;
 	      else ray_data = (float)nsig_u2byte/100.;
@@ -1540,7 +1540,7 @@ Radar * RSL_nsig2_to_radar(char *filename)
 
             case NSIG_DTB_PHIDP2:
 	      memmove(&nsig_u2byte, &ray_p->range[2*k], 2);
-	      nsig_u2byte = NSIG_I2(&nsig_u2byte);
+	      nsig_u2byte = NSIG_I2((unsigned char *) &nsig_u2byte);
 	      if (nsig_u2byte == 0 || nsig_u2byte == 65535)
 	        ray_data = NSIG_NO_ECHO;
 	      else
@@ -1550,7 +1550,7 @@ Radar * RSL_nsig2_to_radar(char *filename)
             case NSIG_DTB_SQI2:
             case NSIG_DTB_RHOHV2:
 	      memmove(&nsig_u2byte, &ray_p->range[2*k], 2);
-	      nsig_u2byte = NSIG_I2(&nsig_u2byte);
+	      nsig_u2byte = NSIG_I2((unsigned char *) &nsig_u2byte);
 	      if (nsig_u2byte == 0 || nsig_u2byte == 65535)
 	        ray_data = NSIG_NO_ECHO2;
 	      else ray_data = (float)(nsig_u2byte-1)/65533.;
@@ -1558,7 +1558,7 @@ Radar * RSL_nsig2_to_radar(char *filename)
 
             case NSIG_DTB_HCLASS2:
 	      memmove(&nsig_u2byte, &ray_p->range[2*k], 2);
-	      nsig_u2byte = NSIG_I2(&nsig_u2byte);
+	      nsig_u2byte = NSIG_I2((unsigned char *) &nsig_u2byte);
 	      if (nsig_u2byte == 0 || nsig_u2byte == 65535)
 	        ray_data = NSIG_NO_ECHO2;
 	      else
