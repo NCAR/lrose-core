@@ -331,8 +331,8 @@ long find_best_data_time(long begin,
 
   dist = MAX_LONG;
   for(i=0; i < num_entries; i++) {
-    if(abs(list[i] - mid) < dist) {
-      dist = abs(list[i] - mid);
+    if(labs(list[i] - mid) < dist) {
+      dist = labs(list[i] - mid);
       index = i;
     }
   }
