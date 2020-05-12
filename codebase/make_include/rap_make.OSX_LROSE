@@ -102,7 +102,7 @@ SYS_CPPC_LIBS =
 SYS_X_LIBS = -lXext -lXt -lX11 -lSM -lICE
 SYS_LDFLAGS =
 SYS_CPPC_LDFLAGS =
-SYS_X_LDFLAGS = -L/usr/X11R6/lib -L/sw/lib
+SYS_X_LDFLAGS = -L/usr/X11R6/lib -L/sw/lib -L/opt/X11/lib
 SYS_F_LDFLAGS =
 SYS_XVIEW_LDFLAGS =
 SYS_MOTIF_LDFLAGS = 
@@ -194,8 +194,8 @@ JAVA_MAKE_JAR = $(RAP_BIN_DIR)/make_jar
 # Qt
 #
 
-QJSENGINE = -F/usr/local/Cellar/qt/5.12.0/lib -framework QtQml
-PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig:$(HOME)/homebrew/opt/qt/lib/pkgconfig
+QJSENGINE = -F/usr/local/Cellar/qt/5.14.2/lib -framework QtQml
+PKG_CONFIG_PATH = /usr/local/opt/qt5/lib/pkgconfig
 QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
 QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt5Gui)
 QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui)
