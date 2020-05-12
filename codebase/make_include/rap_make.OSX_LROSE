@@ -39,7 +39,7 @@ DATE = date -u
 #
 
 #SYS_INCLUDES = -I/usr/include -I/usr/include/sys
-SYS_X_INCLUDES = -I/usr/X11R6/include  -I/sw/include
+SYS_X_INCLUDES = -I/usr/X11R6/include  -I/sw/include -I/opt/X11/include
 SYS_XVIEW_INCLUDES =
 
 #
