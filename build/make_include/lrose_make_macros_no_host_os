@@ -1,0 +1,123 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+###########################################################
+#
+# Makefile macros to be included at start of all Makefiles
+# Without including a HOST_OS
+#
+# Mike Dixon
+#
+# EOL,NCAR,Boulder,Colorado,80307,USA
+#
+############################################################
+
+#
+# flags
+#
+
+INCLUDES = $(LOC_INCLUDES) -I$(LROSE_INC_DIR) $(SYS_INCLUDES) $(LAST_INCLUDES)
+CPPC_INCLUDES = $(LOC_INCLUDES) -I$(LROSE_INC_DIR) \
+	      $(SYS_CPPC_INCLUDES) $(LAST_INCLUDES)
+
+CFLAGS = $(LOC_CFLAGS) $(DEBUG_CFLAGS) $(SYS_CFLAGS)
+FFLAGS = $(LOC_FFLAGS) $(DEBUG_FFLAGS) $(SYS_FFLAGS) $(GCC_WARNINGS)
+CPPC_CFLAGS = $(LOC_CPPC_CFLAGS) $(DEBUG_CFLAGS) $(SYS_CPPC_CFLAGS)
+
+IFORTFFLAGS = $(LOC_IFORTFFLAGS) $(DEBUG_IFORTFFLAGS) $(SYS_IFORTFFLAGS)
+
+YACCFLAGS   = $(LOC_YACCFLAGS) $(SYS_YACCFLAGS)
+YACC_TEMPNAME    = temp000
+LEXFLAGS   = $(LOC_LEXFLAGS) $(SYS_LEXFLAGS)
+
+LINTFLAGS = $(SYS_LINTFLAGS)
+CPPCHECKFLAGS= $(SYS_CPPCHECKFLAGS) $(MY_CPPCHECKFLAGS)
+
+LDFLAGS = -L$(LROSE_LIB_DIR) $(LOC_LDFLAGS) $(SYS_LDFLAGS)
+LIBS = $(LOC_LIBS) $(DEBUG_LIBS) $(SYS_LIBS)
+
+#
+# default behavior for compilers
+#
+
+_CC = $(CC)
+_CPPC = $(CPPC)
+_FC = $(FC)
+_F90 = $(F90)
+_F95 = $(F95)
+_F90C = $(F90C)
+_F95C = $(F95C)
+_YACC = $(YACC)
+_LEX = $(LEX)
+
+#
+# install path
+#
+
+INSTALL_BIN_PATH = $(LROSE_BIN_DIR)/$(TARGET_FILE)
+
+INSTALL_BIN_DIR  = $(LROSE_BIN_DIR)
+INSTALL_LIB  = $(LROSE_LIB_DIR)/$(TARGET_FILE)
+
+# 
+# for multiple executables in a single directory 
+# TARGET_FILES will be redefined locally.
+#
+
+TARGET_FILES = 
+ACTION_TYPE = build
+
+# for rpcgen
+
+EDIT_RPCGEN = $(PERL) -ne "s/\<rpc\/rpc.h\>/\<twutil\/rpc.h\>/g"
+
+#
+# objects and lint files
+#
+
+OBJS = $(SRCS:.c=.o) \
+	$(C_SRCS:.c=.o) \
+	$(F_SRCS:.f=.o) \
+	$(F_CPP_SRCS:.F=.o) \
+	$(F90_SRCS:.f90=.o) \
+	$(F90_CPP_SRCS:.F90=.o) \
+	$(F95_SRCS:.f95=.o) \
+	$(CC_SRCS:.cc=.o) \
+	$(CPPC_SRCS:.cc=.o) \
+	$(CPP_SRCS:.cpp=.o) \
+	$(CXX_SRCS:.cxx=.o)
+
+LLNS = $(SRCS:.c=.ln) \
+	$(C_SRCS:.c=.ln) \
+	$(CPPC_SRCS:.cc=.ln) \
+	$(CPP_SRCS:.cpp=.ln)
+
+#
+# target lists
+#
+
+GENERAL_TARGETS = \
+	all debug profile opt opt3 opt4 dbgopt static staticopt \
+	lint depend cppcheck \
+	clean clean_bin clean_tdrp \
+	clean_depend clean_all clean_yacc clean_lex \
+	install_bin copy_bin strip \
+	add2readme copyright
+
+LIB_TARGETS = \
+	clean_lib \
+	install_include install_lib \
+	install_debug_lib install_profile_lib \
+	install_llib \
+	cppcheck_lib_incs
+
+DOC_TARGETS = \
+	install_doc install_man
+
+INSTALL_TARGETS = \
+	install	install_copyright

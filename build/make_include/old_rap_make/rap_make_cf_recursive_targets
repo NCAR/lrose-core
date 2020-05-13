@@ -1,0 +1,121 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile recursvie targets for C, C++ and FORTRAN
+#
+# Debug is the default target.
+# Include this if you want to force a debug compile.
+#
+# Mike Dixon
+#
+# RAP,NCAR,Boulder,Colorado,80307,USA
+# 
+# Nov 1998
+#
+###########################################################################
+
+norm: debug
+
+opt:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(OPT_FLAG)" target 
+
+optopt:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="-O3" target 
+
+opt4:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="-O4" target 
+
+debug:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" target
+
+profile:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" \
+	_F95C="$(F95C)" \
+	DEBUG_LDFLAGS="-L$(RAP_PROFILE_LIB_DIR) $(PROF_LDFLAGS)" \
+	SYS_LIBS="$(PROF_LIBS)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG) $(PROFILE_FLAG)" target 
+
+insure:
+	$(MAKE) _CC=insure _CPPC=insure \
+	SYS_CFLAGS="-D$(HOST_OS)" \
+	DEBUG_LDFLAGS="-L$(RAP_INSURE_LIB_DIR) $(INSURE_LDFLAGS) " \
+	SYS_LIBS="$(INSURE_LIBS)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" target 
+
+pure:
+	$(MAKE) _CC="$(PURE) $(SYS_PURE_FLAGS) $(CC_PURE_COLLECTOR) $(CC)" \
+	_CPPC="$(PURE) $(SYS_PURE_FLAGS) $(CPPC_PURE_COLLECTOR) $(CPPC)" \
+	SYS_CFLAGS="-D$(HOST_OS)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" target 
+
+quant:
+	$(MAKE) _CC="quantify $(SYS_QUANT_FLAGS) $(CC)" \
+	_CPPC="quantify $(SYS_QUANT_FLAGS) $(CPPC)" \
+	SYS_CFLAGS="-D$(HOST_OS)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" target 
+
+pgi:
+	echo "pgi in rap_make_recursive_targets"
+	$(MAKE) _CC="$(PGI_CC)" SYS_CFLAGS="$(PGI_SYS_CFLAGS)" \
+	_CPPC="$(PGI_CPPC)" SYS_CPPC_CFLAGS="$(PGI_SYS_CPPC_CFLAGS)" \
+	_F90C="$(PGI_F90C)" _F95C="$(PGI_F95C)" _FC="$(PGI_FC)" \
+	F90FLAGS="$(PGF90FLAGS)" F95FLAGS="$(PGF95FLAGS)" \
+	SYS_FFLAGS="$(PGI_SYS_FFLAGS)" \
+	SYS_LIBS="$(PGI_SYS_LIBS)" \
+	FFLAGS="$(PGFFLAGS)" \
+	GCC_WARNINGS="" \
+	NETCDF_INCS="$(PGI_NETCDF_INCS)" NETCDF_LDFLAGS="$(PGI_NETCDF_LDFLAGS)" \
+	NETCDF4_INCS="$(PGI_NETCDF4_INCS)" NETCDF4_LDFLAGS="$(PGI_NETCDF4_LDFLAGS)" \
+	MADIS_LIBS="$(PGI_MADIS_LIBS)" \
+	DEBUG_LDFLAGS="-L$(RAP_PGI_LIB_DIR) $(PGI_LDFLAGS)" \
+	RAP_LIB_DIR="$(RAP_PGI_LIB_DIR)" RAP_SHARED_LIB_DIR="$(RAP_PGI_LIB_DIR)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" target 
+
+intel:
+	echo "intel in rap_make_recursive_targets"
+	$(MAKE) _CC="$(INTEL_CC)" SYS_CFLAGS="$(INTEL_SYS_CFLAGS)" \
+	_CPPC="$(INTEL_CPPC)" SYS_CPPC_CFLAGS="$(INTEL_SYS_CPPC_CFLAGS)" \
+	_F90C="$(INTEL_F90C)" _F95C="$(INTEL_F95C)" _FC="$(INTEL_FC)" \
+	F90FLAGS="$(IFORT90FLAGS)" F95FLAGS="$(IFORT95FLAGS)" \
+	SYS_FFLAGS="$(INTEL_SYS_FFLAGS)" \
+	SYS_LIBS="$(INTEL_SYS_LIBS)" \
+	FFLAGS="$(IFORTFFLAGS)" \
+	GCC_WARNINGS="" \
+	NETCDF_INCS="$(INTEL_NETCDF_INCS)" NETCDF_LDFLAGS="$(INTEL_NETCDF_LDFLAGS)" \
+	NETCDF4_INCS="$(INTEL_NETCDF4_INCS)" NETCDF4_LDFLAGS="$(INTEL_NETCDF4_LDFLAGS)" \
+	MADIS_LIBS="$(INTEL_MADIS_LIBS)" \
+	DEBUG_LDFLAGS="-L$(RAP_INTEL_LIB_DIR) $(INTEL_LDFLAGS)" \
+	RAP_LIB_DIR="$(RAP_INTEL_LIB_DIR)" RAP_SHARED_LIB_DIR="$(RAP_INTEL_LIB_DIR)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" target 
+
+dbgopt:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(OPT_FLAG) $(DEBUG_FLAG)" target 
+
+static:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" \
+	DEBUG_LDFLAGS="$(STATIC_FLAG)" target 
+
+staticopt:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(OPT_FLAG)" \
+	DEBUG_LDFLAGS="$(STATIC_FLAG)" target 

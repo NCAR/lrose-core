@@ -1,0 +1,84 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile targets for doc files
+#
+# Mike Dixon
+#
+# RAP,NCAR,Boulder,Colorado,80307,USA
+# 
+# Dec 1995
+#
+###########################################################################
+
+install_doc:
+	if $(TEST) -d $(RAP_DOC_DIR); then :; else \
+		$(MKDIR) $(RAP_DOC_DIR); fi
+	$(CP) doc/*.doc* $(RAP_DOC_DIR)
+
+install_man:
+	if $(TEST) -d $(RAP_MAN_DIR); then :; else \
+		$(MKDIR) $(RAP_MAN_DIR); fi
+	if $(TEST) -d man1; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/man1; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/man1; fi; \
+		$(CP) man1/*.1 $(RAP_MAN_DIR)/man1; \
+	fi
+	if $(TEST) -d man2; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/man2; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/man2; fi; \
+		$(CP) man2/*.2 $(RAP_MAN_DIR)/man2; \
+	fi
+	if $(TEST) -d man3; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/man3; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/man3; fi; \
+		$(CP) man3/*.3 $(RAP_MAN_DIR)/man3; \
+	fi
+	if $(TEST) -d man4; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/man4; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/man4; fi; \
+		$(CP) man4/*.4 $(RAP_MAN_DIR)/man4; \
+	fi
+	if $(TEST) -d man5; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/man5; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/man5; fi; \
+		$(CP) man5/*.5 $(RAP_MAN_DIR)/man5; \
+	fi
+	if $(TEST) -d man6; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/man6; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/man6; fi; \
+		$(CP) man6/*.6 $(RAP_MAN_DIR)/man6; \
+	fi
+	if $(TEST) -d man7; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/man7; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/man7; fi; \
+		$(CP) man7/*.7 $(RAP_MAN_DIR)/man7; \
+	fi
+	if $(TEST) -d man8; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/man8; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/man8; fi; \
+		$(CP) man8/*.8 $(RAP_MAN_DIR)/man8; \
+	fi
+	if $(TEST) -d manl; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/manl; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/manl; fi; \
+		$(CP) manl/*.l $(RAP_MAN_DIR)/manl; \
+	fi
+	if $(TEST) -d mann; \
+	then if $(TEST) -d $(RAP_MAN_DIR)/mann; then :; else \
+		$(MKDIR) $(RAP_MAN_DIR)/mann; fi; \
+		$(CP) mann/*.n $(RAP_MAN_DIR)/mann; \
+	fi
+
+install_shared_doc:
+	$(MAKE) RAP_DOC_DIR=$(RAP_SHARED_DOC_DIR) install_doc
+
+install_shared_man:
+	$(MAKE) RAP_MAN_DIR=$(RAP_SHARED_MAN_DIR) install_man

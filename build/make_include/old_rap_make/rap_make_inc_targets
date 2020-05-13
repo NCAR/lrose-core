@@ -1,0 +1,37 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile targets for library include files
+#
+# Modified: 5-DEC-1995 Deirdre Garvey
+#
+# Mike Dixon
+#
+# RAP,NCAR,Boulder,Colorado,80307,USA
+# 
+# Dec 1995
+#
+###########################################################################
+
+# using -rf for $(CP) to force copy
+
+install_include: mk_inc_dir
+	if $(TEST) -d include/$(MODULE_NAME); then \
+	$(CP) -rf include/$(MODULE_NAME) $(RAP_INC_DIR); else \
+	$(CP) -rf include/*h $(RAP_INC_DIR); fi
+
+mk_inc_dir:
+	if $(TEST) -d $(RAP_INC_DIR)/$(MODULE_NAME); then :; else \
+		$(MKDIR) $(RAP_INC_DIR)/$(MODULE_NAME); fi
+
+cppcheck_lib_incs:
+	if $(TEST) -d include/$(MODULE_NAME); then \
+	   CppRuleCheck $(CPPCHECKFLAGS) include/$(MODULE_NAME)/*.h include/$(MODULE_NAME)/*.hh ; fi
+
