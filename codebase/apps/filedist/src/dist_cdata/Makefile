@@ -29,16 +29,16 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 MODULE_TYPE=program
 
 TARGET_FILE = dist_cdata
  
-LOC_INCLUDES = -I$(RAP_INC_DIR)
+LOC_INCLUDES = -I$(LROSE_INC_DIR)
 LOC_CFLAGS = $(DEBUG_CFLAGS)
 LOC_CPPFLAGS =
-LOC_LDFLAGS = -L$(RAP_LIB_DIR)
+LOC_LDFLAGS = -L$(LROSE_LIB_DIR)
 LOC_LIBS = \
 	-ltoolsa -lpthread -ldataport $(DEBUG_LIBS) -lbz2 \
 	-lz -lm
@@ -68,7 +68,7 @@ LLNS = $(SRCS:.c=.ln)
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_targets
 
 #
 # local targets

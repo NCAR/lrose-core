@@ -8,7 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################
 #
-# rap_make_enum_to_string_targets
+# lrose_make_enum_to_string_targets
 #
 # targets to be included for using the program enum_to_string.
 #
@@ -18,7 +18,7 @@
 #
 # Design:
 #
-#    see rap_make_enum_to_string_macros for the design and requirements
+#    see lrose_make_enum_to_string_macros for the design and requirements
 #
 # Note:
 #

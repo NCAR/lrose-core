@@ -9,7 +9,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
@@ -22,7 +22,7 @@ MODULE_TYPE=library
 #
 
 HDRS = \
-	$(RAP_INC_DIR)/shapelib/shapefil.h
+	$(LROSE_INC_DIR)/shapelib/shapefil.h
 
 SRCS = \
 	shpopen.c \
@@ -33,7 +33,7 @@ SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
 
 #
 # local targets

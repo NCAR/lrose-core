@@ -3,7 +3,7 @@
 # does not include scripts dir
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
@@ -14,4 +14,4 @@ SUB_DIRS = \
 	procmap_unregister \
 	test_procmap
 
-include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_recursive_dir_targets

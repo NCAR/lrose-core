@@ -29,16 +29,16 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 MODULE_TYPE=progcpp
 
 TARGET_FILE = kav6l2mdv
  
-LOC_INCLUDES = -I$(RAP_INC_DIR) -I../include
+LOC_INCLUDES = -I$(LROSE_INC_DIR) -I../include
 LOC_CFLAGS = $(DEBUG_CFLAGS)
 LOC_CPPFLAGS =
-LOC_LDFLAGS = -L$(RAP_LIB_DIR)
+LOC_LDFLAGS = -L$(LROSE_LIB_DIR)
 LOC_LIBS = \
 	-lmdv -lrapformats -ldataport -ltoolsa -lpthread \
 	$(DEBUG_LIBS) -lbz2 -lz -lm
@@ -57,7 +57,7 @@ CPPC_SRCS = kav6l2mdv.cc \
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
 
 #
 # local targets

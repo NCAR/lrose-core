@@ -7,7 +7,7 @@
 # ** 2010/10/7 23:12:37 
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = ../libdsdata.a
 
@@ -30,7 +30,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
 
 #
 # local targets

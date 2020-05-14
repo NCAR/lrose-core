@@ -8,7 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################
 #
-# rap_make_yacc_macros
+# lrose_make_yacc_macros
 #
 # macros to be included for using yacc
 #
@@ -38,8 +38,8 @@
 #
 #   You must include these files:
 #
-#     rap_make_yacc_macros
-#     rap_make_yacc_targets 
+#     lrose_make_yacc_macros
+#     lrose_make_yacc_targets 
 #
 #   To compile the generated .cc file(s), the user must also indicate
 #   $(YACC_CPPC_SRCS) somewhere, which is the list of names of the
@@ -53,9 +53,9 @@
 #      CPPC_SRCS = \
 #            $(YACC_CPPC_SRCS) mycode.cc
 #
-#      include $(LROSE_MAKE_INC_DIR)/rap_make_yacc_macros
-#      include $(LROSE_MAKE_INC_DIR)/rap_make_targets
-#      include $(LROSE_MAKE_INC_DIR)/rap_make_yacc_targets
+#      include $(LROSE_MAKE_INC_DIR)/lrose_make_yacc_macros
+#      include $(LROSE_MAKE_INC_DIR)/lrose_make_targets
+#      include $(LROSE_MAKE_INC_DIR)/lrose_make_yacc_targets
 #
 #
 #   If one does:

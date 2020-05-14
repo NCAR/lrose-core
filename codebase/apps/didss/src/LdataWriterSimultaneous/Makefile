@@ -32,7 +32,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = LdataWriterSimultaneous
 
@@ -56,20 +56,20 @@ CPPC_SRCS = $(PARAMS_CC) \
 # tdrp macros
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
 
 
 #
 # standard C++ targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
 
 #
 # tdrp targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c++_targets
 
 #
 # local targets

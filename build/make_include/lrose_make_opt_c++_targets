@@ -25,7 +25,7 @@
 
 all: opt
 
-include $(LROSE_MAKE_INC_DIR)/rap_make_cf_recursive_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_cf_recursive_targets
 
 #
 # compile target
@@ -50,13 +50,13 @@ $(TARGET_FILE): $(OBJS) Makefile
 # Include the bin targets for C, C++ and FORTRAN
 #
 
-include $(LROSE_MAKE_INC_DIR)/rap_make_cf_bin_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_cf_bin_targets
 
 #
 # miscellaneous targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/rap_make_misc_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_misc_targets
 
 clean_all: clean clean_bin
 
@@ -64,5 +64,5 @@ clean_all: clean clean_bin
 # Include the suffixes
 #
 
-include $(LROSE_MAKE_INC_DIR)/rap_make_suffixes
+include $(LROSE_MAKE_INC_DIR)/lrose_make_suffixes
 

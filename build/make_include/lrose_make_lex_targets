@@ -8,7 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################
 #
-# rap_make_lex_targets
+# lrose_make_lex_targets
 #
 # targets to be included for using lex with C++ 
 #
@@ -18,7 +18,7 @@
 #
 # Design:
 #
-#   See rap_make_lex_macros
+#   See lrose_make_lex_macros
 #
 ############################################################
 

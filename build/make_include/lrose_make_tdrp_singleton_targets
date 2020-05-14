@@ -8,7 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################
 #
-# rap_make_tdrp_singleton_targets
+# lrose_make_tdrp_singleton_targets
 #
 # targets to be included for using tdrp with C++ programs
 # that need a singleton class for Params.

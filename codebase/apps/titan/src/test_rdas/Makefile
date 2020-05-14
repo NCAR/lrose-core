@@ -27,7 +27,7 @@
 
 # set includes and cflags
 
-CFLAGS = -g -Wall -I$(RAP_INC_DIR) -D$(HOST_OS)
+CFLAGS = -g -Wall -I$(LROSE_INC_DIR) -D$(HOST_OS)
 
 OBJS = test_rdas.o
 

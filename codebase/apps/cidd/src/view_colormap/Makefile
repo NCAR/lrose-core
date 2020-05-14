@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = view_colormap
 
@@ -54,7 +54,7 @@ SRCS = \
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_targets
 
 #
 # local targets

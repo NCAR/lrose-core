@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
@@ -29,9 +29,9 @@ MODULE_TYPE=library
 #
 
 HDRS = \
-	$(RAP_INC_DIR)/hydro/Basin.hh \
-	$(RAP_INC_DIR)/hydro/BasinField.hh \
-	$(RAP_INC_DIR)/hydro/BasinList.hh
+	$(LROSE_INC_DIR)/hydro/Basin.hh \
+	$(LROSE_INC_DIR)/hydro/BasinField.hh \
+	$(LROSE_INC_DIR)/hydro/BasinList.hh
 
 CPPC_SRCS = \
 	Basin.cc \
@@ -42,7 +42,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
 
 #
 # local targets

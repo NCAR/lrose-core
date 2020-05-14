@@ -149,7 +149,7 @@ SYS_LEXFLAGS =
 # Important: in Debian lenny netCDF3 was the default, starting with Debian
 #            squeeze netCDF4 is the default. netCDF 4 has an implicit dependency
 #            on HDF5 and udunits that was not the case in netCDF 3. Please
-#            use HOST_OS set to rap_make.LINUX_64_squeeze for squeeze.
+#            use HOST_OS set to lrose_make.LINUX_64_squeeze for squeeze.
 #       HDF5_INCLUDES    defines location of HDF5 include files
 #       HDF5_LD_FLAGS    defines location of HDF5 linker flags
 #       HDF5_LIBS        defines list of HDF5 libraries in correct order

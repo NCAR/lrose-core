@@ -7,7 +7,7 @@
 # ** 2010/10/7 23:12:34 
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = ../libdidss.a
 
@@ -15,8 +15,8 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 
 HDRS = \
-	$(RAP_INC_DIR)/didss/DsURL.hh \
-	$(RAP_INC_DIR)/didss/DsUrlQueue.hh
+	$(LROSE_INC_DIR)/didss/DsURL.hh \
+	$(LROSE_INC_DIR)/didss/DsUrlQueue.hh
 
 CPPC_SRCS = \
 	DsURL.cc \
@@ -26,7 +26,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
 
 #
 # local targets

@@ -20,9 +20,9 @@
 # Include the recursive targets for C, C++ and FORTRAN
 #
 
-all: debug
+all: opt
 
-include $(LROSE_MAKE_INC_DIR)/rap_make_cf_recursive_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_cf_recursive_targets
 
 #
 # QT meta object compiler
@@ -65,13 +65,13 @@ $(TARGET_FILE): $(OBJS) Makefile
 # Include the bin targets for C, C++ and FORTRAN
 #
 
-include $(LROSE_MAKE_INC_DIR)/rap_make_cf_bin_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_cf_bin_targets
 
 #
 # miscellaneous targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/rap_make_misc_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_misc_targets
 
 clean_moc:
 	$(RM) moc_*.cc moc_*.cpp Makefile.qmake
@@ -85,5 +85,5 @@ clean_all: clean clean_bin clean_moc clean_qmake
 # Include the suffixes
 #
 
-include $(LROSE_MAKE_INC_DIR)/rap_make_suffixes
+include $(LROSE_MAKE_INC_DIR)/lrose_make_suffixes
 

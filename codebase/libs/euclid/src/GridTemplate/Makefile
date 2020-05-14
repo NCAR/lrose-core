@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
@@ -29,17 +29,17 @@ MODULE_TYPE=library
 #
 
 HDRS = \
-	$(RAP_INC_DIR)/euclid/CircularTemplate.hh \
-	$(RAP_INC_DIR)/euclid/CircularTemplateList.hh \
-	$(RAP_INC_DIR)/euclid/EllipticalTemplate.hh \
-	$(RAP_INC_DIR)/euclid/GridOffset.hh \
-	$(RAP_INC_DIR)/euclid/GridPoint.hh \
-	$(RAP_INC_DIR)/euclid/GridTemplate.hh \
-	$(RAP_INC_DIR)/euclid/GridTemplateList.hh \
-	$(RAP_INC_DIR)/euclid/GlobalCircularTemplate.hh \
-	$(RAP_INC_DIR)/euclid/GlobalGridTemplate.hh \
-	$(RAP_INC_DIR)/euclid/RectangularTemplate.hh \
-	$(RAP_INC_DIR)/euclid/CenteredRectangularTemplate.hh
+	$(LROSE_INC_DIR)/euclid/CircularTemplate.hh \
+	$(LROSE_INC_DIR)/euclid/CircularTemplateList.hh \
+	$(LROSE_INC_DIR)/euclid/EllipticalTemplate.hh \
+	$(LROSE_INC_DIR)/euclid/GridOffset.hh \
+	$(LROSE_INC_DIR)/euclid/GridPoint.hh \
+	$(LROSE_INC_DIR)/euclid/GridTemplate.hh \
+	$(LROSE_INC_DIR)/euclid/GridTemplateList.hh \
+	$(LROSE_INC_DIR)/euclid/GlobalCircularTemplate.hh \
+	$(LROSE_INC_DIR)/euclid/GlobalGridTemplate.hh \
+	$(LROSE_INC_DIR)/euclid/RectangularTemplate.hh \
+	$(LROSE_INC_DIR)/euclid/CenteredRectangularTemplate.hh
 
 CPPC_SRCS = \
 	CircularTemplate.cc \
@@ -58,7 +58,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
 
 #
 # local targets

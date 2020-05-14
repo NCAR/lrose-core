@@ -29,7 +29,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 MODULE_TYPE=progcpp
 
@@ -60,13 +60,13 @@ CPPC_SRCS = \
 #
 # tdrp support
 #
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
 
 #
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_targets
 
 #
 # local targets

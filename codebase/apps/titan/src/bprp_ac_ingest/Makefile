@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = bprp_ac_ingest
 
@@ -51,8 +51,8 @@ SRCS = \
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_targets
 
 #
 # local targets

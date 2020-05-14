@@ -4,7 +4,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 LOC_INC_DIR = ../include
 MY_CPPCHECKFLAGS = -E RefParams.hh -E RefParams.cc -E ../include/Refract/RefParams.hh
@@ -23,7 +23,7 @@ CPPC_SRCS = \
 #
 # general targets
 #
-include $(RAP_MAKE_INC_DIR)/rap_make_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_targets
 
 RefParams.hh: RefParams.cc
 	$(CP) RefParams.hh ../include/Refract

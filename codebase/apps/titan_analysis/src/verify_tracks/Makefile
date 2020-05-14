@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = verify_tracks
 
@@ -78,8 +78,8 @@ SRCS = \
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c_targets
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_c_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c_targets
 
 #
 # local targets

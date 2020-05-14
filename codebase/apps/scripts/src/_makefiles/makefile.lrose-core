@@ -6,7 +6,7 @@
 
 #	Default INSTALL_DIR, should be overridden on command line
 
-INSTALL_DIR=$(RAP_BIN_DIR)
+INSTALL_DIR=$(LROSE_BIN_DIR)
 
 #	Script files to be installed
 
@@ -78,7 +78,7 @@ SCRIPTS = \
 all: install
 
 install_shared:
-	$(MAKE) RAP_BIN_DIR=$(RAP_SHARED_BIN_DIR) install
+	$(MAKE) LROSE_BIN_DIR=$(LROSE_SHARED_BIN_DIR) install
 
 install: create_subdir
 	if test $(INSTALL_DIR) != . ;\

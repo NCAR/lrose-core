@@ -30,7 +30,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = spdb_query
 
@@ -56,7 +56,7 @@ CPPC_SRCS = \
 # standard C++ targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
 
 #
 # local targets

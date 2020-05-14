@@ -8,7 +8,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = ../libradar.a
 
@@ -32,14 +32,14 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
 
 #
 # local targets
 #
 
 test: ttest.o
-	gcc -I$(RAP_INC_DIR) -o ttest ttest.c
+	gcc -I$(LROSE_INC_DIR) -o ttest ttest.c
 
 depend: depend_generic
 

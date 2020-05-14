@@ -8,7 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################
 #
-# rap_make_tdrp_c_targets
+# lrose_make_tdrp_c_targets
 #
 # targets to be included for tdrp with C programs
 # using the new style without a module name

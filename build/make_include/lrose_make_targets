@@ -19,7 +19,7 @@
 all:
 	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
 	_F95C="$(F95C)" \
-	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" target
+	DBUG_OPT_FLAGS="$(OPT_FLAG)" target
 
 debug:
 	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
@@ -222,4 +222,4 @@ cppcheck:
 # Include the suffixes
 #
 
-include $(LROSE_MAKE_INC_DIR)/rap_make_suffixes
+include $(LROSE_MAKE_INC_DIR)/lrose_make_suffixes

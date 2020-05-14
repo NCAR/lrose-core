@@ -8,7 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################
 #
-# rap_make_math_config_macros
+# lrose_make_math_config_macros
 #
 # macros to be included for using math_config_gen
 #
@@ -31,7 +31,7 @@
 #    User should add $(MATH_CONFIG_LIBS) to the link libraries.
 #
 #    User should include this file, and should include
-#    rap_make_math_config_targets after more general targets
+#    lrose_make_math_config_targets after more general targets
 #
 #
 #    If one is making a standard rap library, the user should also

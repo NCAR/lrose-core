@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
@@ -29,10 +29,10 @@ MODULE_TYPE=library
 #
 
 HDRS = \
-	$(RAP_INC_DIR)/euclid/FuzzyFcn.hh \
-	$(RAP_INC_DIR)/euclid/Grid.hh \
-	$(RAP_INC_DIR)/euclid/TypeGrid.hh \
-	$(RAP_INC_DIR)/euclid/GridGeom.hh
+	$(LROSE_INC_DIR)/euclid/FuzzyFcn.hh \
+	$(LROSE_INC_DIR)/euclid/Grid.hh \
+	$(LROSE_INC_DIR)/euclid/TypeGrid.hh \
+	$(LROSE_INC_DIR)/euclid/GridGeom.hh
 
 CPPC_SRCS = \
 	Grid.cc \
@@ -42,7 +42,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
 
 #
 # local targets

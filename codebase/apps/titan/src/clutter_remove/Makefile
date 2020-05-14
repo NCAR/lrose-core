@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = clutter_remove
 
@@ -60,13 +60,13 @@ SRCS = \
 # tdrp support
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
 
 #
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_c_targets
 
 #
 # local targets
@@ -74,7 +74,7 @@ include $(RAP_MAKE_INC_DIR)/rap_make_c_targets
 
 depend: $(TDRP_C) depend_generic
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

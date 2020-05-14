@@ -20,7 +20,7 @@
 # system-dependent macros
 #
 
-include $(LROSE_MAKE_INC_DIR)/rap_make.$(HOST_OS)
+include $(LROSE_MAKE_INC_DIR)/lrose_make.$(HOST_OS)
 
 #
 # flags

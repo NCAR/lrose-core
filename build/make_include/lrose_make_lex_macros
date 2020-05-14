@@ -8,7 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################
 #
-# rap_make_lex_macros
+# lrose_make_lex_macros
 #
 # macros to be included for using lex
 #
@@ -26,8 +26,8 @@
 #
 #   and must include these files:
 #
-#     rap_make_lex_macros
-#     rap_make_lex_targets 
+#     lrose_make_lex_macros
+#     lrose_make_lex_targets 
 #
 #   To compile the generated .cc file(s), the user must also indicate
 #   $(LEX_CPPC_SRCS) somewhere, which is the list of names of the generated
@@ -40,9 +40,9 @@
 #      CPPC_SRCS = \
 #            $(LEX_CPPC_SRCS) mycode.cc
 #
-#      include $(LROSE_MAKE_INC_DIR)/rap_make_lex_macros
-#      include $(LROSE_MAKE_INC_DIR)/rap_make_targets
-#      include $(LROSE_MAKE_INC_DIR)/rap_make_lex_targets
+#      include $(LROSE_MAKE_INC_DIR)/lrose_make_lex_macros
+#      include $(LROSE_MAKE_INC_DIR)/lrose_make_targets
+#      include $(LROSE_MAKE_INC_DIR)/lrose_make_lex_targets
 #
 #
 #   If one does:

@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = ../libFmq.a
 
@@ -24,8 +24,8 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 
 HDRS = \
-	$(RAP_INC_DIR)/Fmq/NowcastProcess.hh \
-	$(RAP_INC_DIR)/Fmq/NowcastQueue.hh
+	$(LROSE_INC_DIR)/Fmq/NowcastProcess.hh \
+	$(LROSE_INC_DIR)/Fmq/NowcastQueue.hh
 
 CPPC_SRCS = \
 	NowcastProcess.cc \
@@ -35,7 +35,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
 
 #
 # local targets

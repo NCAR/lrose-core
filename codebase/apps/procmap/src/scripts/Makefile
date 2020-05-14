@@ -29,7 +29,7 @@
 
 #	Default INSTALL_DIR, should be overridden on command line
 
-INSTALL_DIR=$(RAP_BIN_DIR)
+INSTALL_DIR=$(LROSE_BIN_DIR)
 
 #	Script files to be installed
 
@@ -46,13 +46,13 @@ SCRIPTS = \
 
 #	Targets
 
-include $(RAP_MAKE_INC_DIR)/rap_make_script_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_script_targets
 
 # Need to override specific targets because this is a mixed case of 
 # scripts and perl libs in one directory
 
 install_shared:
-	$(MAKE) RAP_BIN_DIR=$(RAP_SHARED_BIN_DIR) RAP_LIB_DIR=$(RAP_SHARED_LIB_DIR) install
+	$(MAKE) LROSE_BIN_DIR=$(LROSE_SHARED_BIN_DIR) LROSE_LIB_DIR=$(LROSE_SHARED_LIB_DIR) install
 
 install: create_subdir
 	if test $(INSTALL_DIR) != . ;\

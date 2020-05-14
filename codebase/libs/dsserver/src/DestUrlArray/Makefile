@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
 
 TARGET_FILE = ../libdsserver.a
 
@@ -24,7 +24,7 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 
 HDRS = \
-	$(RAP_INC_DIR)/dsserver/DestUrlArray.hh
+	$(LROSE_INC_DIR)/dsserver/DestUrlArray.hh
 
 CPPC_SRCS = \
 	DestUrlArray.cc
@@ -33,7 +33,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
 
 #
 # local targets
