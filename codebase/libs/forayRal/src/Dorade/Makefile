@@ -6,7 +6,7 @@
 # ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 LOC_CFLAGS =
@@ -54,7 +54,7 @@ CPP_SRCS = \
 # general targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

@@ -32,7 +32,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = TerrainHtServer
 
@@ -46,7 +46,7 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_CFLAGS =
 
 MDV_LIBS = \
-	-L$(LROSE_LIB_DIR) \
+	-L$(LROSE_INSTALL_DIR)/lib \
 	-lMdv -lRadx \
 	-lrapformats \
 	-leuclid \
@@ -99,19 +99,19 @@ CPPC_SRCS = \
 # tdrp macros
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # standard C++ targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # tdrp targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets
@@ -124,7 +124,7 @@ TestClientTerrainHt: TestClientTerrainHt.cc
 	TestClientTerrainHt.cc $(XMLRPC_LIBS)
 
 WorldTerrain: WorldTerrain.cc
-	g++ $(DBUG_OPT_FLAGS) -I$(LROSE_INC_DIR) -o WorldTerrain \
+	g++ $(DBUG_OPT_FLAGS) -I$(LROSE_INSTALL_DIR)/include -o WorldTerrain \
 	WorldTerrain.cc $(XMLRPC_LIBS) $(MDV_LIBS)
 
 cleaner: clean_all

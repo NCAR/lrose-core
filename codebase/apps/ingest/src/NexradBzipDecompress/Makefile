@@ -22,7 +22,7 @@
 # ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = NexradBzipDecompress
 
@@ -41,19 +41,19 @@ CPPC_SRCS = \
 # tdrp macros
 #
 
-##include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
+##include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # standard C++ targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # tdrp targets
 #
 
-##nclude $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c++_targets
+##nclude $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets

@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = resolve_host
 
@@ -49,7 +49,7 @@ SRCS = resolve_host.c
 # C targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c_targets
 
 #
 # local targets

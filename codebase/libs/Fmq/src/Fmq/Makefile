@@ -12,7 +12,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
@@ -24,7 +24,7 @@ TARGET_FILE = ../libFmq.a
 #
 
 HDRS = \
-	$(LROSE_INC_DIR)/Fmq/Fmq.hh
+	$(LROSE_INSTALL_DIR)/include/Fmq/Fmq.hh
 
 CPPC_SRCS = \
 	Fmq.cc \
@@ -36,7 +36,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

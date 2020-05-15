@@ -2,7 +2,7 @@
 # Recursive make - makes the subdirectory code
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS)
 
@@ -14,16 +14,16 @@ SUB_DIRS = \
 	cdata_util \
 	images
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_inc_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_inc_targets
 
 # install_include: FORCE
-# 	if $(TEST) -d $(LROSE_INC_DIR)/cidd; then :; else \
-# 		$(MKDIR) $(LROSE_INC_DIR)/cidd; fi
-# 	$(CP) include/cidd/*.h $(LROSE_INC_DIR)/cidd
+# 	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/cidd; then :; else \
+# 		$(MKDIR) $(LROSE_INSTALL_DIR)/include/cidd; fi
+# 	$(CP) include/cidd/*.h $(LROSE_INSTALL_DIR)/include/cidd
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_targets
 
 FORCE:
 

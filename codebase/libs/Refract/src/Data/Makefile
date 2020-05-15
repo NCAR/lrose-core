@@ -12,7 +12,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_INC_DIR = ../include
@@ -26,13 +26,13 @@ MODULE_TYPE = library
 #
 
 HDRS = \
-	$(LROSE_INC_DIR)/Refract/MdvCreate.hh \
-	$(LROSE_INC_DIR)/Refract/RefractUtil.hh \
-	$(LROSE_INC_DIR)/Refract/RefractConstants.hh \
-	$(LROSE_INC_DIR)/Refract/FieldDataPair.hh \
-	$(LROSE_INC_DIR)/Refract/FieldWithData.hh \
-	$(LROSE_INC_DIR)/Refract/IQ.hh \
-	$(LROSE_INC_DIR)/Refract/VectorIQ.hh
+	$(LROSE_INSTALL_DIR)/include/Refract/MdvCreate.hh \
+	$(LROSE_INSTALL_DIR)/include/Refract/RefractUtil.hh \
+	$(LROSE_INSTALL_DIR)/include/Refract/RefractConstants.hh \
+	$(LROSE_INSTALL_DIR)/include/Refract/FieldDataPair.hh \
+	$(LROSE_INSTALL_DIR)/include/Refract/FieldWithData.hh \
+	$(LROSE_INSTALL_DIR)/include/Refract/IQ.hh \
+	$(LROSE_INSTALL_DIR)/include/Refract/VectorIQ.hh
 
 CPPC_SRCS = \
 	IQ.cc \
@@ -47,7 +47,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

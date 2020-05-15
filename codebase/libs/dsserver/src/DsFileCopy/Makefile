@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = ../libdsserver.a
 
@@ -24,7 +24,7 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 
 HDRS = \
-	$(LROSE_INC_DIR)/dsserver/DsFileCopy.hh
+	$(LROSE_INSTALL_DIR)/include/dsserver/DsFileCopy.hh
 
 CPPC_SRCS = \
 	DsFileCopy.cc \
@@ -34,7 +34,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

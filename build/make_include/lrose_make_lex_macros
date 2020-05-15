@@ -40,9 +40,9 @@
 #      CPPC_SRCS = \
 #            $(LEX_CPPC_SRCS) mycode.cc
 #
-#      include $(LROSE_MAKE_INC_DIR)/lrose_make_lex_macros
-#      include $(LROSE_MAKE_INC_DIR)/lrose_make_targets
-#      include $(LROSE_MAKE_INC_DIR)/lrose_make_lex_targets
+#      include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lex_macros
+#      include $(LROSE_CORE_DIR)/build/make_include/lrose_make_targets
+#      include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lex_targets
 #
 #
 #   If one does:

@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
@@ -29,17 +29,17 @@ MODULE_TYPE=library
 #
 
 HDRS = \
-	$(LROSE_INC_DIR)/rapmath/PtFunction.hh \
-	$(LROSE_INC_DIR)/rapmath/LagrangePtFunc.hh \
-	$(LROSE_INC_DIR)/rapmath/LinearPtFunc.hh \
-	$(LROSE_INC_DIR)/rapmath/NewtonPtFunc.hh \
-	$(LROSE_INC_DIR)/rapmath/FuzzyFunction.hh \
-	$(LROSE_INC_DIR)/rapmath/FuzzyF.hh \
-	$(LROSE_INC_DIR)/rapmath/Fuzzy2d.hh \
-	$(LROSE_INC_DIR)/rapmath/ParamsFuzzyFunction.hh \
-	$(LROSE_INC_DIR)/rapmath/PtFuzzyFunc.hh \
-	$(LROSE_INC_DIR)/rapmath/ScaleFuzzyFunc.hh \
-	$(LROSE_INC_DIR)/rapmath/StepPtFunc.hh
+	$(LROSE_INSTALL_DIR)/include/rapmath/PtFunction.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/LagrangePtFunc.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/LinearPtFunc.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/NewtonPtFunc.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/FuzzyFunction.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/FuzzyF.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/Fuzzy2d.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/ParamsFuzzyFunction.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/PtFuzzyFunc.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/ScaleFuzzyFunc.hh \
+	$(LROSE_INSTALL_DIR)/include/rapmath/StepPtFunc.hh
 
 CPPC_SRCS = \
 	PtFunction.cc \
@@ -60,7 +60,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

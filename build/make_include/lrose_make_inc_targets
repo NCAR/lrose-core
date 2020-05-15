@@ -22,12 +22,12 @@
 
 install_include: mk_inc_dir
 	if $(TEST) -d include/$(MODULE_NAME); then \
-	$(CP) -rf include/$(MODULE_NAME) $(LROSE_INC_DIR); else \
-	$(CP) -rf include/*h $(LROSE_INC_DIR); fi
+	$(CP) -rf include/$(MODULE_NAME) $(LROSE_INSTALL_DIR)/include; else \
+	$(CP) -rf include/*h $(LROSE_INSTALL_DIR)/include; fi
 
 mk_inc_dir:
-	if $(TEST) -d $(LROSE_INC_DIR)/$(MODULE_NAME); then :; else \
-		$(MKDIR) $(LROSE_INC_DIR)/$(MODULE_NAME); fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/$(MODULE_NAME); then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/$(MODULE_NAME); fi
 
 cppcheck_lib_incs:
 	if $(TEST) -d include/$(MODULE_NAME); then \

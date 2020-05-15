@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INC_DIR = .
 MY_CPPCHECKFLAGS = -E Params.cc -E Params.hh -AddStyleFAA -exclude-rules="4.16,4.09,4.14,4.12"
@@ -70,19 +70,19 @@ CPPC_SRCS = \
 # tdrp macros
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # C++ targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # tdrp targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets

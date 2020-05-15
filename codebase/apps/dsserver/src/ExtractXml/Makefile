@@ -27,7 +27,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = ExtractXml
 
@@ -51,19 +51,19 @@ CPPC_SRCS = ExtractXml.cc
 # tdrp macros
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # standard C++ targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # tdrp targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets

@@ -11,7 +11,7 @@
 # Recursive make - makes the subdirectory code
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS)
 
@@ -25,24 +25,24 @@ SUB_DIRS = \
 	FirLoc \
 	StationLoc
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_targets
 
 # -------------------------------------------------------
 # This is a special case due to multiple include subdirectories
 #
 
 install_include: mk_inc_dir FORCE
-	$(CP) include/rapplot/*.h  $(LROSE_INC_DIR)/rapplot
-	$(CP) include/rapplot/*.hh $(LROSE_INC_DIR)/rapplot
-	$(CP) include/prologues/*.ps $(LROSE_INC_DIR)/prologues
+	$(CP) include/rapplot/*.h  $(LROSE_INSTALL_DIR)/include/rapplot
+	$(CP) include/rapplot/*.hh $(LROSE_INSTALL_DIR)/include/rapplot
+	$(CP) include/prologues/*.ps $(LROSE_INSTALL_DIR)/include/prologues
 
 mk_inc_dir:
-	if $(TEST) -d $(LROSE_INC_DIR)/rapplot; then :; else \
-		$(MKDIR) $(LROSE_INC_DIR)/rapplot; fi
-	if $(TEST) -d $(LROSE_INC_DIR)/prologues; then :; else \
-		$(MKDIR) $(LROSE_INC_DIR)/prologues; fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/rapplot; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/rapplot; fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/prologues; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/prologues; fi
 
 
 

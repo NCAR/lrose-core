@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = MrmsGribIngest
 MODULE_TYPE = progcpp
@@ -62,15 +62,15 @@ CPPC_SRCS = \
 	MrmsGribIngest.cc \
 	Main.cc
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 # standard targets
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 # tdrp
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # local targets
 

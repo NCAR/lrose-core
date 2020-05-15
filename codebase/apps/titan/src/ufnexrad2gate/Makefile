@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = ufnexrad2gate
 
@@ -65,13 +65,13 @@ SRCS = \
 # tdrp support
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # standard targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # local targets
@@ -79,7 +79,7 @@ include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
 
 depend: $(TDRP_C) depend_generic
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

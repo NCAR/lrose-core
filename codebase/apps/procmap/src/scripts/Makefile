@@ -29,7 +29,7 @@
 
 #	Default INSTALL_DIR, should be overridden on command line
 
-INSTALL_DIR=$(LROSE_BIN_DIR)
+INSTALL_DIR=$(LROSE_INSTALL_DIR)/bin
 
 #	Script files to be installed
 
@@ -46,13 +46,10 @@ SCRIPTS = \
 
 #	Targets
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_script_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_script_targets
 
 # Need to override specific targets because this is a mixed case of 
 # scripts and perl libs in one directory
-
-install_shared:
-	$(MAKE) LROSE_BIN_DIR=$(LROSE_SHARED_BIN_DIR) LROSE_LIB_DIR=$(LROSE_SHARED_LIB_DIR) install
 
 install: create_subdir
 	if test $(INSTALL_DIR) != . ;\

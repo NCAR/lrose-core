@@ -2,7 +2,7 @@
 # Recursive make - makes the subdirectory code
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS)
 
@@ -57,44 +57,44 @@ SUB_DIRS = \
 	toolsa_utim\
 	toolsa_umisc
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 
 install_include: mk_inc_dir FORCE
-	$(CP) include/*.h $(LROSE_INC_DIR)
-	$(CP) include/Mdv/*h $(LROSE_INC_DIR)/Mdv
-	$(CP) include/dataport/*h $(LROSE_INC_DIR)/dataport
-	$(CP) include/didss/*h $(LROSE_INC_DIR)/didss
-	$(CP) include/dsserver/*h $(LROSE_INC_DIR)/dsserver
-	$(CP) include/rapformats/*h $(LROSE_INC_DIR)/rapformats
-	$(CP) include/toolsa/*h $(LROSE_INC_DIR)/toolsa
+	$(CP) include/*.h $(LROSE_INSTALL_DIR)/include
+	$(CP) include/Mdv/*h $(LROSE_INSTALL_DIR)/include/Mdv
+	$(CP) include/dataport/*h $(LROSE_INSTALL_DIR)/include/dataport
+	$(CP) include/didss/*h $(LROSE_INSTALL_DIR)/include/didss
+	$(CP) include/dsserver/*h $(LROSE_INSTALL_DIR)/include/dsserver
+	$(CP) include/rapformats/*h $(LROSE_INSTALL_DIR)/include/rapformats
+	$(CP) include/toolsa/*h $(LROSE_INSTALL_DIR)/include/toolsa
 
 mk_inc_dir:
-	if $(TEST) -d $(LROSE_INC_DIR); then :; else \
-		$(MKDIR) $(LROSE_INC_DIR); fi
-	if $(TEST) -d $(LROSE_INC_DIR)/Mdv; then :; else \
-		$(MKDIR) $(LROSE_INC_DIR)/Mdv; fi
-	if $(TEST) -d $(LROSE_INC_DIR)/didss; then :; else \
-		$(MKDIR) $(LROSE_INC_DIR)/didss; fi
-	if $(TEST) -d $(LROSE_INC_DIR)/dataport; then :; else \
-		$(MKDIR) $(LROSE_INC_DIR)/dataport; fi
-	if $(TEST) -d $(LROSE_INC_DIR)/dsserver; then :; else \
-		$(MKDIR) $(LROSE_INC_DIR)/dsserver; fi
-	if $(TEST) -d $(LROSE_INC_DIR)/rapformats; then :; else \
-		$(MKDIR) $(LROSE_INC_DIR)/rapformats; fi
-	if $(TEST) -d $(LROSE_INC_DIR)/toolsa; then :; else \
-		$(MKDIR) $(LROSE_INC_DIR)/toolsa; fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include; fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/Mdv; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/Mdv; fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/didss; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/didss; fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/dataport; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/dataport; fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/dsserver; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/dsserver; fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/rapformats; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/rapformats; fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/toolsa; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/toolsa; fi
 
 install_lib: mk_lib_dir all
 	ar $(ARFLAGS) $(LIBNAME) */*.o
-	$(CP) $(LIBNAME) $(LROSE_LIB_DIR)
+	$(CP) $(LIBNAME) $(LROSE_INSTALL_DIR)/lib
 	if $(TEST) -f $(RANLIB);\
 	then\
-		$(RANLIB) $(LROSE_LIB_DIR)/$(LIBNAME);\
+		$(RANLIB) $(LROSE_INSTALL_DIR)/lib/$(LIBNAME);\
 	fi
 
 mk_lib_dir:
-	if $(TEST) -d $(LROSE_LIB_DIR); then :; else \
-		$(MKDIR) $(LROSE_LIB_DIR); fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/lib; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/lib; fi
 
 install: \
         install_include install_lib

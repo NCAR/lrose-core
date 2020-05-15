@@ -57,7 +57,7 @@ SYS_LINTFLAGS = -aux -DLINT -D$(HOST_OS)
 #
 # cppcheck
 #
-SYS_CPPCHECKFLAGS=$(LOC_INCLUDES) -d $(LROSE_INC_DIR)
+SYS_CPPCHECKFLAGS=$(LOC_INCLUDES) -d $(LROSE_INSTALL_DIR)/include
 SYS_CPPCHECKFLAGS2=-I$(LOC_INC_DIR)
 
 #
@@ -112,8 +112,8 @@ SYS_CPPC_LIBS =
 # Don't include -lXm, -lXpm as it fails with the libc6 version of libX11
 SYS_X_LIBS = -lXext -lXt -lX11 -lSM -lICE
 
-SYS_LDFLAGS = -L/usr/lib64 $(MY_LDFLAGS) "-Wl,-rpath,$(LROSE_LIB_DIR)"
-SYS_CPPC_LDFLAGS = -L/usr/lib64 $(MY_CPPC_LDFLAGS) "-Wl,-rpath,$(LROSE_LIB_DIR)"
+SYS_LDFLAGS = -L/usr/lib64 $(MY_LDFLAGS) "-Wl,-rpath,$(LROSE_INSTALL_DIR)/lib"
+SYS_CPPC_LDFLAGS = -L/usr/lib64 $(MY_CPPC_LDFLAGS) "-Wl,-rpath,$(LROSE_INSTALL_DIR)/lib"
 
 SYS_X_LDFLAGS = -L/usr/X11R6/lib64
 SYS_F_LDFLAGS = $(MY_F_LDFLAGS)

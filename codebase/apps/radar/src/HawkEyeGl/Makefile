@@ -32,7 +32,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = HawkEyeGl
 
@@ -87,19 +87,19 @@ CPP_SRCS = $(MOC_OUTPUT)
 # tdrp macros
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # QT C++ targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_qt_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_qt_targets
 
 #
 # tdrp targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets

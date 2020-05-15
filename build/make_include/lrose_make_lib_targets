@@ -17,15 +17,15 @@
 ###########################################################################
 
 install_lib: mk_lib_dir all
-	$(CP) $(LIBNAME) $(LROSE_LIB_DIR)
+	$(CP) $(LIBNAME) $(LROSE_INSTALL_DIR)/lib
 	if $(TEST) $(HAVE_RANLIB) = TRUE;\
 	then\
-		$(RANLIB) $(LROSE_LIB_DIR)/$(LIBNAME);\
+		$(RANLIB) $(LROSE_INSTALL_DIR)/lib/$(LIBNAME);\
 	fi
 
 mk_lib_dir:
-	if $(TEST) -d $(LROSE_LIB_DIR); then :; else \
-		$(MKDIR) $(LROSE_LIB_DIR); fi
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/lib; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/lib; fi
 
 install_profile_lib:
 	if $(TEST) -d $(LROSE_PROFILE_LIB_DIR); then :; else \

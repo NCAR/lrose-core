@@ -25,7 +25,7 @@
 # Makefile for use with RAL's standard make system
 # Particularly tuned for the macros established when HOST_OS == NNT
 #
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = mrms_to_CFncdf
 
@@ -62,6 +62,6 @@ CPPC_SRCS = \
 # standard targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 

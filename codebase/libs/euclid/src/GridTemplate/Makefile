@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
@@ -29,17 +29,17 @@ MODULE_TYPE=library
 #
 
 HDRS = \
-	$(LROSE_INC_DIR)/euclid/CircularTemplate.hh \
-	$(LROSE_INC_DIR)/euclid/CircularTemplateList.hh \
-	$(LROSE_INC_DIR)/euclid/EllipticalTemplate.hh \
-	$(LROSE_INC_DIR)/euclid/GridOffset.hh \
-	$(LROSE_INC_DIR)/euclid/GridPoint.hh \
-	$(LROSE_INC_DIR)/euclid/GridTemplate.hh \
-	$(LROSE_INC_DIR)/euclid/GridTemplateList.hh \
-	$(LROSE_INC_DIR)/euclid/GlobalCircularTemplate.hh \
-	$(LROSE_INC_DIR)/euclid/GlobalGridTemplate.hh \
-	$(LROSE_INC_DIR)/euclid/RectangularTemplate.hh \
-	$(LROSE_INC_DIR)/euclid/CenteredRectangularTemplate.hh
+	$(LROSE_INSTALL_DIR)/include/euclid/CircularTemplate.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/CircularTemplateList.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/EllipticalTemplate.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/GridOffset.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/GridPoint.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/GridTemplate.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/GridTemplateList.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/GlobalCircularTemplate.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/GlobalGridTemplate.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/RectangularTemplate.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/CenteredRectangularTemplate.hh
 
 CPPC_SRCS = \
 	CircularTemplate.cc \
@@ -58,7 +58,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

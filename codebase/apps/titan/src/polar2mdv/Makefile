@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = polar2mdv
 
@@ -63,8 +63,8 @@ SRCS = \
 # standard targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c_targets
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c_targets
 
 #
 # local targets

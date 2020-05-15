@@ -2,7 +2,7 @@
 # Recursive make - makes the subdirectory code
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS)
 
@@ -19,8 +19,8 @@ $(TARGETS): FORCE
 $(SUB_DIRS): FORCE
 	cd $@; $(MAKE) $(TARGET)
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_inc_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_inc_targets
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_targets
 
 FORCE:

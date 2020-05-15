@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CPPC_CFLAGS =
@@ -29,10 +29,10 @@ MODULE_TYPE = library
 #
 
 HDRS = \
-	$(LROSE_INC_DIR)/advect/GridAdvect.hh \
-	$(LROSE_INC_DIR)/advect/Advector.hh \
-	$(LROSE_INC_DIR)/advect/SoundingAdvector.hh \
-	$(LROSE_INC_DIR)/advect/VectorsAdvector.hh
+	$(LROSE_INSTALL_DIR)/include/advect/GridAdvect.hh \
+	$(LROSE_INSTALL_DIR)/include/advect/Advector.hh \
+	$(LROSE_INSTALL_DIR)/include/advect/SoundingAdvector.hh \
+	$(LROSE_INSTALL_DIR)/include/advect/VectorsAdvector.hh
 
 CPPC_SRCS = \
 	GridAdvect.cc \
@@ -43,7 +43,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

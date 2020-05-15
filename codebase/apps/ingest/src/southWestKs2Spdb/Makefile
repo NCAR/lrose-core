@@ -32,7 +32,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = southWestKs2Spdb
 
@@ -63,7 +63,7 @@ CPPC_SRCS = \
 # tdrp
 #
 
-#include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
+#include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 Params.cc: paramdef.$(TARGET_FILE)
 	tdrp_gen -f paramdef.$(TARGET_FILE) -c++ -prog $(TARGET_FILE)
@@ -75,13 +75,13 @@ clean_tdrp:
 # standard C++ targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # tdrp targets
 #
 
-#include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c++_targets
+#include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets

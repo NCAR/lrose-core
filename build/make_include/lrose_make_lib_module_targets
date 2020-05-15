@@ -22,7 +22,7 @@
 
 all: opt
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_cf_recursive_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_cf_recursive_targets
 
 #
 # compile target
@@ -56,7 +56,7 @@ lib_so: $(OBJS)
 # miscellaneous targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_misc_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_misc_targets
 
 clean_all: clean
 
@@ -64,6 +64,6 @@ clean_all: clean
 # Include the suffixes
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_suffixes
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_suffixes
 
 

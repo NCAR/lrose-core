@@ -29,7 +29,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 MODULE_TYPE=program
 
@@ -49,7 +49,7 @@ SRCS =  print_spdb_index.c
 # standard targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_targets
 
 #
 # local targets

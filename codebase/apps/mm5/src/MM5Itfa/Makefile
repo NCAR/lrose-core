@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = MM5Itfa
 
@@ -60,19 +60,19 @@ CPPC_SRCS = \
 # tdrp
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # standard targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_opt_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_opt_c++_targets
 
 #
 # tdrp
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets

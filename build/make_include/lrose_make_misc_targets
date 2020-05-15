@@ -52,10 +52,10 @@ clean_depend:
 add2readme:
 	grep_line=`egrep ^TARGET_FILE Makefile | egrep \.a$ | wc -l` ;\
 	if $(TEST) $${grep_line} -lt 1; then \
-		LROSE_BIN_DIR=$(LROSE_LIB_DIR) ;\
+		LROSE_BIN_DIR=$(LROSE_INSTALL_DIR)/lib ;\
 	fi
 	if $(TEST) -f $(TARGET_FILE) ; then \
-		echo "$(TARGET_FILE) -- source: `pwd`, `date`" >> $(LROSE_BIN_DIR)/README.src_dir_info ;\
+		echo "$(TARGET_FILE) -- source: `pwd`, `date`" >> $(LROSE_INSTALL_DIR)/bin/README.src_dir_info ;\
 	fi
 
 # Run source code compliance checker

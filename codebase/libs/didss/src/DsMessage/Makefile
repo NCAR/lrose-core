@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = ../libdidss.a
 
@@ -24,10 +24,10 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 
 HDRS = \
-	$(LROSE_INC_DIR)/didss/ds_message.h \
-	$(LROSE_INC_DIR)/didss/ds_msg_handle.h \
-	$(LROSE_INC_DIR)/didss/DsMessage.hh \
-	$(LROSE_INC_DIR)/didss/DsMsgPart.hh
+	$(LROSE_INSTALL_DIR)/include/didss/ds_message.h \
+	$(LROSE_INSTALL_DIR)/include/didss/ds_msg_handle.h \
+	$(LROSE_INSTALL_DIR)/include/didss/DsMessage.hh \
+	$(LROSE_INSTALL_DIR)/include/didss/DsMsgPart.hh
 
 C_SRCS = \
 	ds_message.c \
@@ -41,7 +41,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(LROSE_MAKE_INC_DIR)/lrose_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

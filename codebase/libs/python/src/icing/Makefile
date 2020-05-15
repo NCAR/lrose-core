@@ -14,11 +14,11 @@
 
 #	Default INSTALL_DIR, should be overridden on command line
 
-INSTALL_DIR=$(LROSE_BIN_DIR)
+INSTALL_DIR=$(LROSE_INSTALL_DIR)/bin
 
 #	Default LIB install dir for Python library
 
-INSTALL_LIB_DIR=$(LROSE_LIB_DIR)/python
+INSTALL_LIB_DIR=$(LROSE_INSTALL_DIR)/lib/python
 
 #	Script files to be installed
 
@@ -32,9 +32,6 @@ LIBS = \
 #	Targets
 
 all: install
-
-install_shared:
-	make LROSE_BIN_DIR=$(LROSE_SHARED_BIN_DIR) LROSE_LIB_DIR=$(LROSE_SHARED_LIB_DIR) install
 
 install: create_subdir create_sub_libdir
 	if test $(INSTALL_LIB_DIR) != . ;\
