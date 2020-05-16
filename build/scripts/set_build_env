@@ -61,6 +61,8 @@ endif
 # Create the build_env file, with the required environment
 # variables for the build
 
+setenv LROSE_INSTALL_DIR $BUILD_DIR
+
 setenv RAP_MAKE_INC_DIR $BUILD_DIR/make_include
 setenv RAP_MAKE_BIN_DIR $BUILD_DIR/make_bin
 setenv RAP_INC_DIR $BUILD_DIR/include

@@ -217,7 +217,7 @@ def main():
     os.chdir(runDir)
 
     if (sys.platform != "darwin"):
-        shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
+        shellCmd("./build/scripts/installOriginLibFiles.py --binDir " + \
                  buildDir + "/bin " + \
                  "--relDir " + package + "_runtime_libs --debug")
 
@@ -257,13 +257,13 @@ def main():
     logPath = prepareLogFile("no-logging");
     os.chdir(runDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_libs.py " + \
+    shellCmd("./build/scripts/checkLibs.py " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + buildDir + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_apps.py " + \
+    shellCmd("./build/scripts/checkApps.py " + \
              "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + buildDir + "/bin " + \
              "--label " + package + " --maxAge 3600")

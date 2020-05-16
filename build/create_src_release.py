@@ -90,7 +90,8 @@ def main():
         options.package != "lrose-radx" and
         options.package != "lrose-cidd") :
         print("ERROR: invalid package name: %s:" % options.package, file=sys.stderr)
-        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd", file=sys.stderr)
+        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd",
+              file=sys.stderr)
         sys.exit(1)
 
     # for CIDD, set to static linkage
@@ -170,8 +171,7 @@ def main():
 
     logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
-    cmd = "./make_bin/installPackageMakefiles.py --package " + \
-          options.package + " --codedir . "
+    cmd = "./build/scripts/installPackageMakefiles.py --package " + options.package
     if (options.osx):
         cmd = cmd + " --osx "
     shellCmd(cmd)
@@ -314,7 +314,7 @@ def setupAutoconf():
 
     # create files for configure
 
-    shutil.copy("../build/Makefile.top", "Makefile")
+    shutil.copy("../build/autoconf/Makefile.top", "Makefile")
 
     if (options.static):
 
@@ -325,7 +325,7 @@ def setupAutoconf():
              shutil.copy("../build/autoconf/configure.base",
                          "./configure.base")
 
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+        shellCmd("../build/autoconf/createConfigure.am.py --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + options.package + argsStr)
     else:
@@ -340,7 +340,7 @@ def setupAutoconf():
             shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
 
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+        shellCmd("../build/autoconf/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + options.package + argsStr)
 
@@ -560,7 +560,10 @@ def trimToMakefiles(subDir):
     for entry in entries:
         theName = os.path.join(dirPath, entry)
         print("considering: " + theName, file=logFp)
-        if (entry == "scripts") or (entry == "include") or (entry == "images") or (entry == "resources"):
+        if ((entry == "scripts") or
+            (entry == "include") or
+            (entry == "images") or
+            (entry == "resources")):
             # always keep scripts directories
             continue
         if (os.path.isdir(theName)):

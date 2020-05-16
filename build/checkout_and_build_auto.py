@@ -25,8 +25,8 @@ def main():
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
-    global buildScriptTopDir
-    buildScriptTopDir = os.path.dirname(__file__)
+    global thisScriptDir
+    thisScriptDir = os.path.dirname(__file__)
 
     global options
     global package
@@ -445,7 +445,7 @@ def setupAutoconf():
 
     # create files for configure
 
-    shutil.copy("../build/Makefile.top", "Makefile")
+    shutil.copy("../build/autoconf/Makefile.top", "Makefile")
 
     if (options.static):
         if (package == "lrose-cidd"):
@@ -463,6 +463,7 @@ def setupAutoconf():
         else:
             shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
+        scriptPath = getScriptPath("autoconf", "createConfigure.am.py")
         shellCmd("./make_bin/createConfigure.am.py --dir ." +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + package + debugStr)
@@ -784,7 +785,7 @@ def checkInstall():
 
     os.chdir(coreDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_libs.py " + \
+    shellCmd("./build/scripts/checkLibs.py " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
@@ -792,7 +793,7 @@ def checkInstall():
 
     if (options.no_core_apps == False):
         print(("============= Checking apps for " + package + " ============="))
-        shellCmd("./codebase/make_bin/check_apps.py " + \
+        shellCmd("./build/scripts/checkApps.py " + \
                  "--listPath ./build/checklists/apps_check_list." + package + " " + \
                  "--appDir " + prefix + "/bin " + \
                  "--label " + package + " --maxAge 3600")
@@ -1059,7 +1060,7 @@ def prepareLogFile(logFileName):
 
 def getScriptPath(buildSubDir, scriptName):
 
-    subDirPath = os.path.join(buildScriptTopDir, buildSubDir)
+    subDirPath = os.path.join(thisScriptDir, buildSubDir)
     scriptPath = os.path.join(subDirPath, scriptName)
 
     return scriptPath
