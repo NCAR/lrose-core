@@ -406,14 +406,6 @@ def buildPackage():
 
     global logPath
 
-    # args = ""
-    # args = args + " --prefix " + buildDir
-    # args = args + " --package " + package
-    # if (options.installScripts):
-    #     args = args + " --scripts "
-
-    # shellCmd("./build/build_lrose.py " + args)
-
     # set the environment
 
     runtimeLibRelDir = package + "_runtime_libs"

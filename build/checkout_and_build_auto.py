@@ -25,8 +25,8 @@ def main():
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
-    global thisScriptDir
-    thisScriptDir = os.path.dirname(__file__)
+    global buildScriptTopDir
+    buildScriptTopDir = os.path.dirname(__file__)
 
     global options
     global package
@@ -268,8 +268,9 @@ def main():
 
     logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
-    shellCmd("./make_bin/installPackageMakefiles.py --package " + 
-             package + " --codedir .")
+
+    scriptPath = getScriptPath("scripts", "installPackageMakefiles.py")
+    shellCmd(scriptPath + " --package " + package + " --codedir .")
 
     # trim libs and apps to those required by distribution makefiles
 
@@ -312,8 +313,9 @@ def main():
     #     bin/${package}_runtime_libs
 
     if (options.installAllRuntimeLibs):
+        scriptPath = getScriptPath("scripts", "installOriginLibFiles.py")
         os.chdir(codebaseDir)
-        cmd = "./make_bin/installOriginLibFiles.py" + \
+        cmd = scriptPath + \
               " --binDir " + tmpBinDir + \
               " --relDir " + runtimeLibRelDir
         if (options.verbose):
@@ -322,8 +324,9 @@ def main():
             cmd = cmd + " --debug"
         shellCmd(cmd)
     elif (options.installLroseRuntimeLibs):
+        scriptPath = getScriptPath("scripts", "installOriginLroseLibs.py")
         os.chdir(codebaseDir)
-        cmd = "./make_bin/installOriginLroseLibs.py" + \
+        cmd = scriptPath + \
               " --binDir " + tmpBinDir + \
               " --libDir " + tmpLibDir + \
               " --relDir " + runtimeLibRelDir
@@ -449,7 +452,8 @@ def setupAutoconf():
              shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
         else:
              shutil.copy("../build/autoconf/configure.base", "./configure.base")
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+        scriptPath = getScriptPath("autoconf", "createConfigure.am.py")
+        shellCmd(scriptPath + " --dir ." +
                  " --baseName configure.base" +
                  " --pkg " + package + debugStr)
     else:
@@ -1050,6 +1054,16 @@ def prepareLogFile(logFileName):
 
     return logPath
 
+########################################################################
+# compute script path, assuming the sub dir is within build
+
+def getScriptPath(buildSubDir, scriptName):
+
+    subDirPath = os.path.join(buildScriptTopDir, buildSubDir)
+    scriptPath = os.path.join(subDirPath, scriptName)
+
+    return scriptPath
+    
 ########################################################################
 # Run a command in a shell, wait for it to complete
 

@@ -26,47 +26,47 @@ def main():
     # parse the command line
 
     usage = "usage: %prog [options]"
-    try:
-        coreDir = os.environ['LROSE_CORE_DIR']
-    except:
-        coreDir = os.getcwd()
-    defaultCodeDir = os.path.join(coreDir, "codebase")
+
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default=False,
+                      dest='debug', default=True,
                       action="store_true",
                       help='Set debugging on')
-    parser.add_option('--codedir',
-                      dest='codedir', default=defaultCodeDir,
-                      help='Code dir from which we search for makefiles')
     parser.add_option('--package',
                       dest='package', default="lrose-core",
                       help='Name of distribution for which we are building')
-    parser.add_option('--osx',
-                      dest='osx', default=False,
-                      action="store_true",
-                      help='Configure for MAC OSX')
 
     (options, args) = parser.parse_args()
 
-    # set flag to indicate OSX
-    # If we are on a mac, force this to true
+    # set flag to indicate OSX on a mac
+    # For OSX, Makefile and makefile are confused because the
+    # file system is not properly case-sensitive
 
     isOsx = False
     if (platform == "darwin"):
         isOsx = True
-    if (options.osx):
-        isOsx = True
     
     if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
-        print("  codedir:", options.codedir, file=sys.stderr)
         print("  package:", options.package, file=sys.stderr)
         print("  osx: ", isOsx, file=sys.stderr)
 
-    # go to the code dir
+    # script is in lrose-core/build/scripts
 
-    os.chdir(options.codedir)
+    global thisScriptDir
+    thisScriptDir = os.path.dirname(__file__)
+
+    # compute codebase dir relative to script dir
+
+    codebaseDir = os.path.join(thisScriptDir, "../../codebase")
+
+    # go to the codebase dir
+    # get the complete path
+    
+    os.chdir(codebaseDir)
+    codebaseDir = os.getcwd()
+    if (options.debug):
+        print("  codebaseDir: %s" % codebaseDir, file=sys.stderr)
 
     # install the makefiles
 

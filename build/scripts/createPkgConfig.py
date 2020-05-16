@@ -46,6 +46,7 @@ def write_pkgconfig_file(prefix, version, cc, cpp, libs):
 
 # write to lrose-config.flags 
 def write_common_flags(prefix, lib_info, app_info, combining_apps_libs):
+
     install_dir = prefix
     core_dir = os.environ['LROSE_CORE_DIR']
 
@@ -173,12 +174,16 @@ def write_the_script(prefix, host_architecture, variables,idict_libs, idict_apps
     write_common_flags(prefix, idict_libs, idict_apps, using_apps)
 
 # create a dictionary with keys of target architecture and
-#                          values that are dictionaries with keys that are variable names
-#                                                            values are lists of strings
+# values that are dictionaries with keys that are variable names
+# values are lists of strings
+
 def get_variables(variables_to_find, path):
+
     variable_defs = {}
-    filelist = glob.glob(path + '/rap_make.*')
+    filelist = glob.glob(path + '/lrose_make.*')
+
     for file in filelist:
+
         filename, file_extension = os.path.splitext(file)
         var_defs_for_architecture = {}
         var_defs_for_architecture = getKeyValuesFromFile(file, variables_to_find)
@@ -197,6 +202,7 @@ def get_variables(variables_to_find, path):
 #                formatted = '\"' + " ".join(value2) + '\"'
 #                print >> sys.stdout, result
 #        print >> sys.stdout, " "
+
     return variable_defs
 
 def detect_variable(astring):
@@ -339,7 +345,7 @@ def formatted(set_or_list):
 
 #
 # order the libraries based on the file defining the order
-# ..... lrose-core/codebase/make_bin/lrose_libs_order.txt
+# ..... lrose-core/build/templates/lrose_libs_order.txt
 # return the list of libraries in the correct order
 def ordered(set_or_list):
 
@@ -348,12 +354,12 @@ def ordered(set_or_list):
     # read the prescribed order for the libraries
     # and create a dictionary of them, with the number of votes as their value
     order = []
-    path = './make_bin/lrose_libs_order.txt'
+    libsOrderPath = os.path.join(templatesPath, "lrose_libs_order.txt")
     try:
-        fp = open(path, 'r')
+        fp = open(libsOrderPath, 'r')
     except IOError as e:
         print >>sys.stdout, "ERROR - ", thisScriptName
-        print >>sys.stdout, "  Cannot open file:", path
+        print >>sys.stdout, "  Cannot open file:", libsOrderPath
         return orderedList
 
     lines = fp.readlines()
@@ -497,36 +503,39 @@ def getKeyValuesFromFile(path, keys):
     return valueList
 
 ########################################################################
-
-
                                                                           
 # Run - entry point
 
 if __name__ == "__main__":
 
+    global thisScriptName, thisScriptName, libsPath, appsPath
+    global makeIncludePath, templatesPath
     thisScriptName = os.path.basename(__file__)
+    thisScriptDir = os.path.dirname(__file__)
+    libsPath = os.path.join(thisScriptDir, "../../codebase/libs")
+    appsPath = os.path.join(thisScriptDir, "../../codebase/apps")
+    makeIncludePath = os.path.join(thisScriptDir, "../make_include")
+    templatesPath = os.path.join(thisScriptDir, "../templates")
+    
     using_apps = False
 
-    libs_path = './libs'
     module_keyword = 'MODULE_NAME'
-    variables_libs, idict_libs = main(libs_path, module_keyword)
+    variables_libs, idict_libs = main(libsPath, module_keyword)
 
     if (using_apps):
-        apps_path = './apps'
         module_keyword = 'TARGET_FILE'
-        variables_apps, idict_apps = main(apps_path, module_keyword)  
+        variables_apps, idict_apps = main(appsPath, module_keyword)  
     else:
         variables_apps = set()
         idict_apps = {}
 
-    path = './make_include'
     variables = variables_libs.union(variables_apps)
     # 'variables' contains a list of variables ($(var)) that we need expansion
-    # their values should be in the make_include/rap_make.$(ARCH) files
-    #  but, let's add our own set of variables to expand ...
+    #   their values should be in the make_include/lrose_make.$(ARCH) files
+    #   but, let's add our own set of variables to expand ...
     addtnl_vars = set(['CC', 'CPPC', 'FC', 'F90C'])
     variables = variables.union(addtnl_vars)
-    variable_defs = get_variables(variables, path)
+    variable_defs = get_variables(variables, makeIncludePath)
 
     prefix  = os.environ['LROSE_INSTALL_DIR']
     host_architecture = os.environ['HOST_OS']

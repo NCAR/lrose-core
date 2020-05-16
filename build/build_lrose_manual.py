@@ -5,9 +5,9 @@
 # Building LROSE and required libraries
 # =====================================
 #
-# This requires automake makefile.am files
+# This is the manual build, using the LROSE make system.
 #
-# This script must be run from the top level of lrose-core'.
+# This script will be executed from the top level of lrose-core.
 # 
 # By default the libraries and applications will be installed in:
 #
@@ -20,7 +20,7 @@
 #
 # For example:
 #
-#   build_lrose.py --prefix /usr/local/lrose
+#   build_lrose_automake.py --prefix /usr/local/lrose
 #
 # will install in:
 #
@@ -58,7 +58,7 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
-    global codebasePath
+    global codebaseDir
     global dateStr
     global timeStr
     global debugStr
@@ -113,110 +113,164 @@ def main():
     dateStr = nowTime.strftime("%Y%m%d")
     timeStr = nowTime.strftime("%Y%m%d%H%M%S")
     dateTimeStr = nowTime.strftime("%Y/%m/%d-%H:%M:%S")
-    corePath = os.getcwd()
+    
+    # script is in lrose-core/build
+    
+    global thisScriptDir
+    thisScriptDir = os.path.dirname(__file__)
+
+    # compute core dir relative to script dir
+
+    coreDir = os.path.join(thisScriptDir, "..")
+    os.chdir(coreDir)
+    coreDir = os.getcwd()
     
     # check we are in the correct place
 
-    codebasePath = os.path.join(corePath, "codebase")
-    if (os.path.isdir(codebasePath) == False):
+    codebaseDir = os.path.join(coreDir, "codebase")
+    if (os.path.isdir(codebaseDir) == False):
         print("ERROR - script: ", thisScriptName, file=sys.stderr)
-        print("  Incorrect run directory: ", corePath, file=sys.stderr)
+        print("  Incorrect run directory: ", coreDir, file=sys.stderr)
         print("  Must be run just above codebase dir", file=sys.stderr)
         sys.exit(1)
 
-    # run qmake for QT apps to create moc_ files
+    # set flag to indicate OSX on a mac
+    # For OSX, Makefile and makefile are confused because the
+    # file system is not properly case-sensitive
 
-    hawkEyeDir = os.path.join(codebasePath, "apps/radar/src/HawkEye")
-    createQtMocFiles(hawkEyeDir)
-
+    isOsx = False
+    if (platform == "darwin"):
+        isOsx = True
+    
     # set the environment
 
-    os.environ["LDFLAGS"] = "-L" + prefix + "/lib " + \
-                            " -Wl,-rpath,'$$ORIGIN/" + package + "_runtime_libs:" + \
-                            prefix + "/lib'"
-    os.environ["FC"] = "gfortran"
-    os.environ["F77"] = "gfortran"
-    os.environ["F90"] = "gfortran"
+    os.environ["LROSE_CORE_DIR"] = coreDir
+    os.environ["LROSE_INSTALL_DIR"] = prefix
 
+    os.environ["HOST_OS"] = "LINUX_LROSE"
     if (platform == "darwin"):
-        os.environ["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
-    else:
-        os.environ["CXXFLAGS"] = " -std=c++11 "
+        os.environ["HOST_OS"] = "OSX_LROSE"
+    elif (package == "lrose-cidd"):
+        os.environ["HOST_OS"] = "LINUX_64_CIDD32"
 
-    cmd = "env"
     print("=========================================", file=sys.stderr)
-    shellCmd(cmd)
+    shellCmd("env")
     print("=========================================", file=sys.stderr)
 
-    # do the build and install
+    # install makefiles for this package
 
-    os.chdir(codebasePath)
-    cmd = "./configure --with-hdf5=" + prefix + \
-          " --with-netcdf=" + prefix + \
-          " --prefix=" + prefix
-    shellCmd(cmd)
+    print("==== installing package makefiles =======", file=sys.stderr)
+    shellCmd("./build/scripts/installPackageMakefiles.py --package " + package)
+    print("==== finished installing makefiles ======", file=sys.stderr)
 
-    os.chdir(os.path.join(codebasePath, "libs"))
-    cmd = "make -k -j 8"
-    shellCmd(cmd)
-    cmd = "make -k install-strip"
-    shellCmd(cmd)
+    # build and install tdrp lib
 
-    os.chdir(os.path.join(codebasePath, "apps"))
-    cmd = "make -k -j 8"
-    shellCmd(cmd)
-    cmd = "make -k install-strip"
-    shellCmd(cmd)
+    print("==== installing tdrp lib =================", file=sys.stderr)
+    os.chdir(os.path.join(codebaseDir, "libs/tdrp/src"))
+    shellCmd("make -j 8 install")
+    print("==== finished installing tdrp lib =======", file=sys.stderr)
+    
+    # build and install tdrp_gen
 
+    print("==== installing tdrp_gen =================", file=sys.stderr)
+    os.chdir(os.path.join(codebaseDir, "apps/tdrp/src/tdrp_gen"))
+    shellCmd("make -j 8 install")
+    print("==== finished installing tdrp_gen =======", file=sys.stderr)
+    
+    # build and install libs
+
+    print("==== installing all libs =================", file=sys.stderr)
+    os.chdir(os.path.join(codebaseDir, "libs"))
+    shellCmd("make -j 8 -k install")
+    print("==== finished installing all libs =======", file=sys.stderr)
+    
+    # build and install apps
+
+    print("==== installing all apps ================", file=sys.stderr)
+    os.chdir(os.path.join(codebaseDir, "apps"))
+    shellCmd("make -j 8 -k install")
+    print("==== finished installing all apps =======", file=sys.stderr)
+    
+    # create pkgconfig scripys
+
+    print("==== installing pkgconfig ===============", file=sys.stderr)
+    os.chdir(coreDir)
+    shellCmd("./build/scripts/createPkgConfig.py " + prefix)
+    shellCmd("rsync -av " + coreDir + "/build/templates/lrose-config.template " + prefix + "/bin")
+    shellCmd("chmod u+x " + prefix + "/bin/lrose-config")
+    print("==== finished installing pkgconfig ======", file=sys.stderr)
+    
     # optionally install the scripts
 
     if (options.installScripts):
 
         # install perl5
         
-        perl5Dir = os.path.join(prefix, "lib/perl5")
+        print("==== installing perl5 modules ===========", file=sys.stderr)
+        perl5TargetDir = os.path.join(prefix, "lib/perl5")
         try:
-            os.makedirs(perl5Dir)
+            os.makedirs(perl5TargetDir)
         except:
-            print("Dir exists: " + perl5Dir, file=sys.stderr)
-
-        perl5LibDir = os.path.join(codebasePath, "libs/perl5/src")
-        if (os.path.isdir(perl5LibDir)):
-            os.chdir(os.path.join(codebasePath, "libs/perl5/src"))
-            shellCmd("rsync -av *pm " + perl5Dir)
+            print("Dir exists: " + perl5TargetDir, file=sys.stderr)
+        perl5SourceDir = os.path.join(codebaseDir, "libs/perl5/src")
+        if (os.path.isdir(perl5SourceDir)):
+            os.chdir(perl5SourceDir)
+            shellCmd("rsync -av *pm " + perl5TargetDir)
+        print("==== finished installing perl5 modules ==", file=sys.stderr)
 
         # procmap
 
-        procmapScriptsDir = os.path.join(codebasePath, "apps/procmap/src/scripts")
+        procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
         if (os.path.isdir(procmapScriptsDir)):
             os.chdir(procmapScriptsDir)
             shellCmd("./install_scripts.lrose " + prefix + "bin")
 
         # general
 
-        generalScriptsDir = os.path.join(codebasePath, "apps/scripts/src")
+        generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
             shellCmd("./install_scripts.lrose " + prefix + "bin")
 
     # check the install
 
-    checkInstall(corePath)
+    checkInstall(coreDir)
+
+    # check the build
+    
+    print("==== checking libs ======================", file=sys.stderr)
+    os.chdir(coreDir)
+    cmd = "./build/scripts/checkLibs.py " + \
+          "--listPath ./build/checklists/libs_check_list." + package + \
+          "--libDir " + prefix + "/lib" + \
+          "--label " + package + " --maxAge 3600" 
+    shellCmd(cmd)
+    print("==== finished checking libs ============", file=sys.stderr)
+
+    print("==== checking apps ======================", file=sys.stderr)
+    os.chdir(coreDir)
+    cmd = "./build/scripts/checkApps.py " + \
+          "--listPath ./build/checklists/apps_check_list." + package + \
+          "--appDir " + prefix + "/app" + \
+          "--label " + package + " --maxAge 3600" 
+    shellCmd(cmd)
+    print("==== finished checking apps ============", file=sys.stderr)
+
 
 ########################################################################
 # check the install
 
-def checkInstall(corePath):
+def checkInstall(coreDir):
 
-    os.chdir(corePath)
+    os.chdir(coreDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_libs.py " + \
+    shellCmd("./build/scripts/checkLibs.py " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_apps.py " + \
+    shellCmd("./build/scripts/checkApps.py " + \
              "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + prefix + "/bin " + \
              "--label " + package + " --maxAge 3600")

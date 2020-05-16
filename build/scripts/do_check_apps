@@ -1,6 +1,6 @@
 #! /bin/bash -f
 #
-# check_libs: Check build for libraries
+# check_apps: Check build for applications
 #
 
 #--------------------------------------------------------------------
@@ -9,7 +9,7 @@
 
 function usage() {
     echo
-    echo "Usage: check_libs [options below] prefix"
+    echo "Usage: do_check_apps [options below] prefix"
     echo "  -h:  produce this usage list"
     echo "  -d:  turn debugging on"
     echo "  -p:  set package name (default is lrose)"
@@ -20,7 +20,7 @@ function usage() {
 #--------------------------------------------------------------------
 # check args
 
-package=lrose
+package=lrose-core
 prefix=${HOME}
 debug=false
 
@@ -54,9 +54,9 @@ shift `expr $OPTIND - 1`
 
 echo "Checking $package build"
 
-./codebase/make_bin/check_libs.py \
-  --listPath ./build/checklists/libs_check_list.${package} \
-  --libDir $prefix/lib \
+./build/scripts/checkApps.py \
+  --listPath ./build/checklists/apps_check_list.${package} \
+  --appDir $prefix/bin \
   --label $package --maxAge 900 || exit 1
 
 

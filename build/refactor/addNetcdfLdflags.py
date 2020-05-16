@@ -29,7 +29,7 @@ def main():
     # parse the command line
 
     usage = "usage: %prog [options]"
-    homeDir = os.environ['HOME']
+    # homeDir = os.environ['HOME']
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=False,

@@ -2,7 +2,8 @@
 
 #===========================================================================
 #
-# Check that all apps are installed
+# Check that all libs are installed
+# Checks against a list of expected apps
 #
 #===========================================================================
 
@@ -17,9 +18,10 @@ from datetime import datetime
 def main():
 
     global options
-    global requiredApps
-    global missingApps
-    global oldApps
+    global requiredLibs
+    global requiredLibsLine
+    global missingLibs
+    global oldLibs
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
@@ -33,12 +35,12 @@ def main():
                       dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
-    parser.add_option('--appDir',
-                      dest='appDir', default='.',
-                      help='Dir with installed apps')
+    parser.add_option('--libDir',
+                      dest='libDir', default='.',
+                      help='Dir with installed libs')
     parser.add_option('--listPath',
                       dest='listPath', default='.',
-                      help='Path with requried list')
+                      help='Path with required list')
     parser.add_option('--label',
                       dest='label', default="LROSE",
                       help='Label for messages')
@@ -50,7 +52,7 @@ def main():
     
     if (options.debug == True):
         print("Running %s:" % thisScriptName, file=sys.stderr)
-        print("  appDir:", options.appDir, file=sys.stderr)
+        print("  libDir:", options.libDir, file=sys.stderr)
         print("  listPath:", options.listPath, file=sys.stderr)
         print("  label:", options.label, file=sys.stderr)
         print("  maxAge:", options.maxAge, file=sys.stderr)
@@ -62,27 +64,27 @@ def main():
         
     # check required files exist
 
-    checkForApps()
+    checkForLibs()
 
-    if (len(missingApps) > 0):
+    if (len(missingLibs) > 0):
         print("==================>> ERROR <<====================", file=sys.stderr)
-        print("=====>> INCOMPLETE " + options.label + " APPS INSTALLATION <<====", file=sys.stderr)
-        print("  n applications missing: " + str(len(missingApps)), file=sys.stderr)
-        for app in missingApps:
-            print("    missing app: " + app, file=sys.stderr)
-        print("=================================================", file=sys.stderr)
+        print("=====>> INCOMPLETE " + options.label + " LIBS INSTALLATION <<====", file=sys.stderr)
+        print("  n libraries missing: " + str(len(missingLibs)), file=sys.stderr)
+        for index, lib in enumerate(missingLibs):
+            print("    missing lib: " + requiredLibsLine[lib], file=sys.stderr)
     else:
-        print("================>> SUCCESS <<==================", file=sys.stderr)
-        print("=========>> ALL " + options.label + " APPS INSTALLED <<========", file=sys.stderr)
-        print("===============================================", file=sys.stderr)
+        print("=================>> SUCCESS <<===================", file=sys.stderr)
+        print("=========>> ALL " + options.label + " LIBS INSTALLED <<========", file=sys.stderr)
 
-    if (len(oldApps) > 0):
-        print("==================>> WARNING <<====================", file=sys.stderr)
-        print("=====>> SOME " + options.label + " APPS ARE OLD <<====", file=sys.stderr)
-        print("  n old apps: " + str(len(oldApps)), file=sys.stderr)
-        for app in oldApps:
-            print("    old app: " + app, file=sys.stderr)
-        print("=================================================", file=sys.stderr)
+    if (len(oldLibs) > 0):
+        print("=================>> WARNING <<===================", file=sys.stderr)
+        print("===========>> SOME " + options.label + " LIBS ARE OLD <<=========", file=sys.stderr)
+        print("  n old libs: " + str(len(oldLibs)), file=sys.stderr)
+        print("  These libs may not have been built", file=sys.stderr)
+        for lib in oldLibs:
+            print("    lib out-of-date: " + lib, file=sys.stderr)
+
+    print("=================================================", file=sys.stderr)
 
     sys.exit(0)
 
@@ -91,14 +93,16 @@ def main():
 
 def readRequiredList(path):
 
-    global requiredApps
-    requiredApps = []
-
+    global requiredLibs
+    global requiredLibsLine
+    requiredLibs = []
+    requiredLibsLine = {}
+    
     try:
         fp = open(path, 'r')
     except IOError as e:
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot open app list file:", path, file=sys.stderr)
+        print("  Cannot open lib list file:", path, file=sys.stderr)
         return -1
 
     lines = fp.readlines()
@@ -110,42 +114,46 @@ def readRequiredList(path):
             continue
         if (line[0] == '#'):
             continue
-        requiredApps.append(line)
+        toks = line.split(" ")
+        if (len(toks) > 0):
+            libName = toks[0]
+            requiredLibs.append(libName)
+            requiredLibsLine[libName] = line
 
     if (options.debug == True):
-        print("Required apps:", file=sys.stderr)
-        for name in requiredApps:
-            print("    ", name, file=sys.stderr)
+        print("Required libs:", file=sys.stderr)
+        for name in requiredLibs:
+            print("    ", requiredLibsLine[name], file=sys.stderr)
 
     return 0
 
 ########################################################################
-# check that the app list is installed
+# check that the lib list is installed
 
-def checkForApps():
+def checkForLibs():
 
-    global missingApps
-    global oldApps
-    missingApps = []
-    oldApps = []
+    global missingLibs
+    global oldLibs
+    missingLibs = []
+    oldLibs = []
     
-    for name in requiredApps:
+    for name in requiredLibs:
 
-        path = os.path.join(options.appDir, name)
+        path = os.path.join(options.libDir, name)
 
         if (options.debug == True):
-            print("Checking for installed app: ", path, file=sys.stderr)
+            print("Checking for installed lib: ", path, file=sys.stderr)
 
         if (os.path.isfile(path) == False):
             if (options.debug == True):
                 print("   .... missing", file=sys.stderr)
-            missingApps.append(path)
+            missingLibs.append(name)
         else:
             if (options.debug == True):
                 print("   .... found", file=sys.stderr)
             age = getFileAge(path)
             if (age > float(options.maxAge)):
-                oldApps.append(path)
+                oldLibs.append(name)
                 if (options.debug == True):
                     print("   file is old, age: ", age, file=sys.stderr)
 
