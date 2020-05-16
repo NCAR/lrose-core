@@ -25,6 +25,9 @@ def main():
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
+    global thisScriptDir
+    thisScriptDir = os.path.dirname(__file__)
+
     global options
     global package
     global prefix
