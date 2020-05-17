@@ -110,10 +110,10 @@ def main():
                       dest='noScripts', default=False,
                       action="store_true",
                       help='Do not install runtime scripts as well as binaries')
-    parser.add_option('--useSystemNetcdf',
-                      dest='useSystemNetcdf', default=False,
+    parser.add_option('--buildNetcdf',
+                      dest='buildNetcdf', default=False,
                       action="store_true",
-                      help='Use system install of NetCDF and HDF5 instead of building it here')
+                      help='Build netcdf and hdf5 from source')
     parser.add_option('--fractl',
                       dest='build_fractl', default=False,
                       action="store_true",
@@ -229,7 +229,7 @@ def main():
         print("  libDir: ", libDir, file=sys.stderr)
         print("  includeDir: ", includeDir, file=sys.stderr)
         print("  shareDir: ", shareDir, file=sys.stderr)
-        print("  useSystemNetcdf: ", options.useSystemNetcdf, file=sys.stderr)
+        print("  buildNetcdf: ", options.buildNetcdf, file=sys.stderr)
         print("  package: ", package, file=sys.stderr)
         print("  use_cmake3: ", options.use_cmake3, file=sys.stderr)
         print("  build_geolib: ", options.build_geolib, file=sys.stderr)
@@ -298,7 +298,7 @@ def main():
 
     # build netcdf support
     
-    if (options.useSystemNetcdf == False):
+    if (options.buildNetcdf):
         logPath = prepareLogFile("build-netcdf");
         buildNetcdf()
 
@@ -424,7 +424,7 @@ def gitCheckout():
 
     # netcdf and hdf5
 
-    if (options.useSystemNetcdf == False):
+    if (options.buildNetcdf):
         shellCmd("/bin/rm -rf lrose-netcdf")
         shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
 
@@ -661,12 +661,12 @@ def buildPackage():
 
     logPath = prepareLogFile("run-configure");
     os.chdir(codebaseDir)
-    if (options.useSystemNetcdf):
-        cmd = "./configure --prefix=" + scratchBuildDir
-    else:
+    if (options.buildNetcdf):
         cmd = "./configure --with-hdf5=" + scratchBuildDir + \
               " --with-netcdf=" + scratchBuildDir + \
                                 " --prefix=" + scratchBuildDir
+    else:
+        cmd = "./configure --prefix=" + scratchBuildDir
     shellCmd(cmd)
 
     # build the libraries

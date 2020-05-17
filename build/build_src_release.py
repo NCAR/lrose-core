@@ -125,7 +125,7 @@ def main():
 
     # build netcdf support
 
-    if (platform != "darwin"):
+    if (package == "lrose-cidd"):
         buildNetcdf()
 
     # build and install the package
