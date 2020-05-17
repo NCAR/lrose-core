@@ -80,10 +80,10 @@ def main():
                       dest='installScripts', default=False,
                       action="store_true",
                       help='Install scripts as well as binaries')
-    parser.add_option('--useSystemNetcdf',
-                      dest='useSystemNetcdf', default=False,
+    parser.add_option('--buildNetcdf',
+                      dest='buildNetcdf', default=False,
                       action="store_true",
-                      help='Use system install of NetCDF and HDF5 instead of building it here')
+                      help='Build netcdf and hdf5 from source')
 
     (options, args) = parser.parse_args()
 
@@ -201,7 +201,7 @@ def main():
 
     # build netcdf support
 
-    if (options.useSystemNetcdf == False):
+    if (options.buildNetcdf):
         logPath = prepareLogFile("build-netcdf");
         buildNetcdf()
 
@@ -440,12 +440,12 @@ def buildPackage():
     # run configure
 
     logPath = prepareLogFile("run-configure");
-    if (options.useSystemNetcdf):
-        cmd = "./configure --prefix=" + buildDir
-    else:
+    if (options.buildNetcdf):
         cmd = "./configure --with-hdf5=" + buildDir + \
               " --with-netcdf=" + buildDir + \
                                 " --prefix=" + buildDir
+    else:
+        cmd = "./configure --prefix=" + buildDir
     shellCmd(cmd)
 
     # build the libraries
