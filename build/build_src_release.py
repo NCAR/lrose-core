@@ -274,7 +274,7 @@ def shellCmd(cmd):
         else:
             if (options.verbose):
                 print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
+    except OSError as e:
         print >>sys.stderr, "Execution failed:", e
         sys.exit(1)
 
