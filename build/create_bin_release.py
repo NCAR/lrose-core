@@ -181,6 +181,7 @@ def main():
     print("  releaseName: ", releaseName, file=sys.stderr)
     print("  tarName: ", tarName, file=sys.stderr)
     print("  tarDir: ", tarDir, file=sys.stderr)
+    print("  buildNetcdf: ", options.buildNetcdf, file=sys.stderr)
     print("  installScripts: ", options.installScripts, file=sys.stderr)
     print("*****************************************************************",
           file=sys.stderr)
