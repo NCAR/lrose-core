@@ -192,6 +192,10 @@ def main():
                                int(options.releaseDate[6:8]))
         releaseTag = options.package + "-" + options.releaseDate[0:8]
         releaseName = releaseTag
+
+    # TODO - remove this
+
+    releaseTag = "new_build"
     
     # set directories
     
@@ -267,8 +271,7 @@ def main():
 
     logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
-
-    scriptPath = getScriptPath("scripts", "installPackageMakefiles.py")
+    scriptPath = "../build/scripts/installPackageMakefiles.py"
     shellCmd(scriptPath + " --debug --package " + package)
 
     # trim libs and apps to those required by distribution makefiles
@@ -311,9 +314,9 @@ def main():
     # to the binary install dir:
     #     bin/${package}_runtime_libs
 
+    os.chdir(codebaseDir)
     if (options.installAllRuntimeLibs):
-        scriptPath = getScriptPath("scripts", "installOriginLibFiles.py")
-        os.chdir(codebaseDir)
+        scriptPath = "../build/scripts/installOriginLibFiles.py"
         cmd = scriptPath + \
               " --binDir " + tmpBinDir + \
               " --relDir " + runtimeLibRelDir
@@ -323,8 +326,7 @@ def main():
             cmd = cmd + " --debug"
         shellCmd(cmd)
     elif (options.installLroseRuntimeLibs):
-        scriptPath = getScriptPath("scripts", "installOriginLroseLibs.py")
-        os.chdir(codebaseDir)
+        scriptPath = "../build/scripts/installOriginLroseLibs.py"
         cmd = scriptPath + \
               " --binDir " + tmpBinDir + \
               " --libDir " + tmpLibDir + \
@@ -382,8 +384,8 @@ def createBuildDir():
 
     if (os.path.isdir(options.buildDir)):
 
-        print(("WARNING: you are about to remove all contents in dir: " + 
-              options.buildDir))
+        print("WARNING: you are about to remove all contents in dir: " + 
+              options.buildDir)
         print("===============================================")
         contents = os.listdir(options.buildDir)
         for filename in contents:
@@ -443,15 +445,17 @@ def setupAutoconf():
 
     # create files for configure
 
-    shutil.copy("../build/autoconf/Makefile.top", "Makefile")
-
+    shutil.copy("../build/autoconf/Makefile.top",
+                "./Makefile")
+    
     if (options.static):
         if (package == "lrose-cidd"):
-             shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
+            shutil.copy("../build/autoconf/configure.base.cidd",
+                        "./configure.base")
         else:
-             shutil.copy("../build/autoconf/configure.base", "./configure.base")
-        scriptPath = getScriptPath("autoconf", "createConfigure.am.py")
-        shellCmd(scriptPath + " --dir ." +
+            shutil.copy("../build/autoconf/configure.base",
+                        "./configure.base")
+        shellCmd("../build/autoconf/createConfigure.am.py --dir . " +
                  " --baseName configure.base" +
                  " --pkg " + package + debugStr)
     else:
@@ -461,8 +465,10 @@ def setupAutoconf():
         else:
             shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
-        scriptPath = getScriptPath("autoconf", "createConfigure.am.py")
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+        cmd = "../build/autoconf/createConfigure.am.py --dir . " + \
+              " --baseName configure.base.shared --shared" + \
+              " --pkg " + package + debugStr
+        shellCmd("../build/autoconf/createConfigure.am.py --dir . " +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + package + debugStr)
 
@@ -1053,16 +1059,6 @@ def prepareLogFile(logFileName):
 
     return logPath
 
-########################################################################
-# compute script path, assuming the sub dir is within build
-
-def getScriptPath(buildSubDir, scriptName):
-
-    subDirPath = os.path.join(thisScriptDir, buildSubDir)
-    scriptPath = os.path.join(subDirPath, scriptName)
-
-    return scriptPath
-    
 ########################################################################
 # Run a command in a shell, wait for it to complete
 
