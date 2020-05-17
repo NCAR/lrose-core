@@ -238,8 +238,9 @@ def findLibsForFile(filePath, validLibs):
 
     for line in lines:
 
-        line.strip()
-        lineToks = line.split()
+        lineStr = bytes.decode(line)
+        lineStr.strip()
+        lineToks = lineStr.split()
         libName = ''
         libPath = ''
 
@@ -249,9 +250,9 @@ def findLibsForFile(filePath, validLibs):
 
             if (len(lineToks) < 2):
                 continue
-            if (line.find('compatibility') < 0):
+            if (lineStr.find('compatibility') < 0):
                 continue;
-            if (line.find('dylib') < 0):
+            if (lineStr.find('dylib') < 0):
                 continue;
             libPath = lineToks[0]
             libToks = libPath.split('/')
@@ -308,7 +309,7 @@ def fileIsBinary(filePath):
     # check the file is binary
 
     if (options.verbose):
-        print("  Checking file is binary: ", filePath, file=sys.stderr)
+        print("==>> Checking file is binary: ", filePath, file=sys.stderr)
 
     pipe = subprocess.Popen('file ' + filePath, shell=True,
                             stdout=subprocess.PIPE).stdout
@@ -316,26 +317,24 @@ def fileIsBinary(filePath):
     isExecFile = False
 
     if (platform == "darwin"):
-
         # MAC OSX
-
         for line in lines:
-            if (line.find('Mach-O') >= 0):
+            lineStr = bytes.decode(line)
+            if (lineStr.find('Mach-O') >= 0):
                 isExecFile = True
                 break
 
     else:
-
         # LINUX
-    
         for line in lines:
-            if (line.find('ELF') >= 0):
+            lineStr = bytes.decode(line)
+            if (lineStr.find('ELF') >= 0):
                 isExecFile = True
                 break
 
     if (isExecFile):
         if (options.verbose):
-            print("INFO - isExecutable: ", filePath, file=sys.stderr)
+            print("      isExecutable: ", filePath, file=sys.stderr)
 
     return isExecFile
 
