@@ -32,6 +32,10 @@ def main():
                       dest='debug', default=True,
                       action="store_true",
                       help='Set debugging on')
+    parser.add_option('--osx',
+                      dest='osx', default=False,
+                      action="store_true",
+                      help='Configure for MAC OSX')
     parser.add_option('--package',
                       dest='package', default="lrose-core",
                       help='Name of distribution for which we are building')
@@ -44,6 +48,8 @@ def main():
 
     isOsx = False
     if (platform == "darwin"):
+        isOsx = True
+    if (options.osx):
         isOsx = True
     
     if (options.debug):

@@ -296,7 +296,7 @@ def createTmpDir():
 def gitCheckout():
 
     os.chdir(tmpDir)
-    shellCmd("git clone https://github.com/NCAR/lrose-core")
+    shellCmd("git clone --branch new_build https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
     shellCmd("git clone https://github.com/NCAR/lrose-displays")
     os.chdir(os.path.join(tmpDir, "lrose-core"))
