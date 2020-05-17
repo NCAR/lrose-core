@@ -83,7 +83,7 @@ def main():
     parser.add_option('--package',
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
-                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd')
+                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-cidd')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDefault,
                       help='Prefix name for install location')
