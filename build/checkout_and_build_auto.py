@@ -269,7 +269,7 @@ def main():
     os.chdir(codebaseDir)
 
     scriptPath = getScriptPath("scripts", "installPackageMakefiles.py")
-    shellCmd(scriptPath + " --package " + package + " --codedir .")
+    shellCmd(scriptPath + " --debug --package " + package)
 
     # trim libs and apps to those required by distribution makefiles
 
