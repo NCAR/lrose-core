@@ -2,7 +2,19 @@
 
 #===========================================================================
 #
-# Build LROSE release, using autoconf and configure
+# Checkout and build LROSE, using autoconf and configure.
+#
+# This script performs the following steps:
+#
+#   1. clone lrose-core from git
+#   2. setup autoconf Makefile.am files
+#   3. run configure to create makefiles
+#   4. perform the build and install
+#   5. check the build
+#
+# You can optionally specify a release date.
+#
+# Use --help to see the command line options.
 #
 #===========================================================================
 
@@ -78,6 +90,9 @@ def main():
                       'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-cidd, samurai')
     parser.add_option('--releaseDate',
                       dest='releaseDate', default='latest',
+                      help='Date from which to compute tag to check out lrose-core')
+    parser.add_option('--tag',
+                      dest='tag', default='not-set',
                       help='Tag to check out lrose-core')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDirDefault,
@@ -179,7 +194,11 @@ def main():
 
     # set release tag
 
-    if (options.releaseDate == "latest"):
+    if (options.tag != "not-set"):
+        releaseTag = options.tag
+        releaseName = options.tag
+        releaseDate = "not-set"
+    elif (options.releaseDate == "latest"):
         releaseDate = datetime(int(dateStr[0:4]),
                                int(dateStr[4:6]),
                                int(dateStr[6:8]))

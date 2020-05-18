@@ -65,6 +65,9 @@ def main():
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
+    parser.add_option('--tag',
+                      dest='tag', default="master",
+                      help='Tag for checking out from git')
     parser.add_option('--logDir',
                       dest='logDir', default=logDirDefault,
                       help='Logging dir')
@@ -296,7 +299,8 @@ def createTmpDir():
 def gitCheckout():
 
     os.chdir(tmpDir)
-    shellCmd("git clone --branch new_build https://github.com/NCAR/lrose-core")
+    shellCmd("git clone --branch " + options.tag +
+             " https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
     shellCmd("git clone https://github.com/NCAR/lrose-displays")
     os.chdir(os.path.join(tmpDir, "lrose-core"))

@@ -4,6 +4,9 @@
 #
 # Create an LROSE source tar file suitable for building
 #
+# This checks out a version of lrose from git, run autoconf,
+# and creates a tar file containg the distribution.
+#
 #===========================================================================
 
 from __future__ import print_function
@@ -62,6 +65,9 @@ def main():
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
+    parser.add_option('--tag',
+                      dest='tag', default="master",
+                      help='Tag for checking out from git')
     parser.add_option('--force',
                       dest='force', default=False,
                       action="store_true",
@@ -263,7 +269,8 @@ def createTmpDir():
 def gitCheckout():
 
     os.chdir(tmpDir)
-    shellCmd("git clone --branch new_build https://github.com/NCAR/lrose-core")
+    shellCmd("git clone --branch " + options.tag + 
+             " https://github.com/NCAR/lrose-core")
 
 ########################################################################
 # set up autoconf for configure etc
