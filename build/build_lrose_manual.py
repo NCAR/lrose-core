@@ -148,7 +148,7 @@ def main():
     os.environ["LROSE_INSTALL_DIR"] = prefix
 
     os.environ["HOST_OS"] = "LINUX_LROSE"
-    if (platform == "darwin"):
+    if (isOsx):
         os.environ["HOST_OS"] = "OSX_LROSE"
     elif (package == "lrose-cidd"):
         os.environ["HOST_OS"] = "LINUX_64_CIDD32"
@@ -160,7 +160,13 @@ def main():
     # install makefiles for this package
 
     print("==== installing package makefiles =======", file=sys.stderr)
-    shellCmd("./build/scripts/installPackageMakefiles.py --package " + package)
+    if (isOsx):
+        shellCmd("./build/scripts/installPackageMakefiles.py --package " +
+                 package + " --osx")
+    else:
+        shellCmd("./build/scripts/installPackageMakefiles.py --package " +
+                 package)
+
     print("==== finished installing makefiles ======", file=sys.stderr)
 
     # build and install tdrp lib
@@ -236,27 +242,6 @@ def main():
 
     checkInstall(coreDir)
 
-    # check the build
-    
-    print("==== checking libs ======================", file=sys.stderr)
-    os.chdir(coreDir)
-    cmd = "./build/scripts/checkLibs.py " + \
-          "--listPath ./build/checklists/libs_check_list." + package + \
-          "--libDir " + prefix + "/lib" + \
-          "--label " + package + " --maxAge 3600" 
-    shellCmd(cmd)
-    print("==== finished checking libs ============", file=sys.stderr)
-
-    print("==== checking apps ======================", file=sys.stderr)
-    os.chdir(coreDir)
-    cmd = "./build/scripts/checkApps.py " + \
-          "--listPath ./build/checklists/apps_check_list." + package + \
-          "--appDir " + prefix + "/app" + \
-          "--label " + package + " --maxAge 3600" 
-    shellCmd(cmd)
-    print("==== finished checking apps ============", file=sys.stderr)
-
-
 ########################################################################
 # check the install
 
@@ -264,16 +249,16 @@ def checkInstall(coreDir):
 
     os.chdir(coreDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./build/scripts/checkLibs.py " + \
-             "--listPath ./build/checklists/libs_check_list." + package + " " + \
-             "--libDir " + prefix + "/lib " + \
-             "--label " + package + " --maxAge 3600")
+    shellCmd("./build/scripts/checkLibs.py" + \
+             " --listPath ./build/checklists/libs_check_list." + package + \
+             " --libDir " + prefix + "/lib" + \
+             " --label " + package + " --maxAge 3600")
     print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./build/scripts/checkApps.py " + \
-             "--listPath ./build/checklists/apps_check_list." + package + " " + \
-             "--appDir " + prefix + "/bin " + \
-             "--label " + package + " --maxAge 3600")
+    shellCmd("./build/scripts/checkApps.py" + \
+             " --listPath ./build/checklists/apps_check_list." + package + \
+             " --appDir " + prefix + "/bin" + \
+             " --label " + package + " --maxAge 3600")
     print("====================================================")
     
     print("**************************************************")
