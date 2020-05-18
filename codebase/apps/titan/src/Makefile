@@ -34,6 +34,7 @@ SUB_DIRS = \
 	TitanVectors2Mdv \
 	TstormTemporalSmooth \
 	Tstorms2GenPoly \
+	Tstorms2Shapefile \
 	Tstorms2Spdb \
 	Tstorms2Xml \
 	UpdateStormFields \

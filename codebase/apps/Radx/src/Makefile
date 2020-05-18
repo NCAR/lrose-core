@@ -7,13 +7,10 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	Ascii2Radx \
 	Dsr2Radx \
 	FixCfradialPaths \
 	FixRadxPointing \
 	FixRadxValues \
-	GroundEchoStats \
-	Makefile \
 	Radx2Dsr \
 	Radx2Grid \
 	RadxBeamBlock \
@@ -43,8 +40,7 @@ SUB_DIRS = \
 	RadxQpe \
 	RadxRate \
 	RadxSunMon \
-	RadxTest \
-	RadxTimeMedian \
-	TestRadxMsg
+        RadxTimeMedian \
+        RadxVolTimeStats
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets

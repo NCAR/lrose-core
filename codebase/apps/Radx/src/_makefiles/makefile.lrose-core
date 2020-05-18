@@ -10,6 +10,7 @@ SUB_DIRS = \
 	Dsr2Radx \
 	FixCfradialPaths \
 	FixRadxPointing \
+	FixRadxValues \
 	Radx2Dsr \
 	Radx2Grid \
 	RadxBeamBlock \
@@ -19,17 +20,20 @@ SUB_DIRS = \
 	RadxClutMon \
 	RadxConvert \
 	RadxCov2Mom \
+	RadxCreateVol \
 	RadxDiffFields \
 	RadxDiffVol \
 	RadxDwellCombine \
 	RadxEvad \
 	RadxFilter \
+	RadxHca \
 	RadxKdp \
 	RadxMergeFields \
 	RadxMergeVols \
-	RadxMon \
 	RadxModelQc \
+	RadxMon \
 	RadxPartRain \
+	RadxPersistentClutter \
 	RadxPid \
 	RadxPrint \
 	RadxQc \

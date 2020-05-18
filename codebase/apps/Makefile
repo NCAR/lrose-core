@@ -17,7 +17,6 @@ SUB_DIRS = \
 	ingest \
 	dsserver \
 	mdv_utils \
-        mm5 \
         physics \
         satApps \
 	spdb_utils \

@@ -10,9 +10,6 @@ SUB_DIRS = \
 	AcGeoref2Spdb \
 	AcGeorefCompare \
 	AltCpCompute \
-	AparTsPrint \
-	AparTsSim \
-	AparTs2Moments \
 	CalCompute \
 	CedricPrint \
 	ChillCal2Xml \
@@ -37,6 +34,7 @@ SUB_DIRS = \
 	Mdv2Vad \
 	MdvFold \
 	MdvRadarShear \
+        MergeHcrAndHsrl \
 	NexradPowerStats \
 	PointingCpCompute \
 	PowerInfo2Spdb \
