@@ -263,7 +263,7 @@ def createTmpDir():
 def gitCheckout():
 
     os.chdir(tmpDir)
-    shellCmd("git clone https://github.com/NCAR/lrose-core")
+    shellCmd("git clone --branch new_build https://github.com/NCAR/lrose-core")
 
 ########################################################################
 # set up autoconf for configure etc
