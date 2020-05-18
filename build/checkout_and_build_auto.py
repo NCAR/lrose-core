@@ -90,10 +90,10 @@ def main():
                       'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-cidd, samurai')
     parser.add_option('--releaseDate',
                       dest='releaseDate', default='latest',
-                      help='Date from which to compute tag to check out lrose-core')
+                      help='Date from which to compute tag for git clone. Applies if --tag is not used.')
     parser.add_option('--tag',
-                      dest='tag', default='not-set',
-                      help='Tag to check out lrose-core')
+                      dest='tag', default='master',
+                      help='Tag to check out lrose. Overrides --releaseDate')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDirDefault,
                       help='Install directory, default is ~/lrose')
@@ -194,7 +194,7 @@ def main():
 
     # set release tag
 
-    if (options.tag != "not-set"):
+    if (options.tag != "master"):
         releaseTag = options.tag
         releaseName = options.tag
         releaseDate = "not-set"
@@ -212,10 +212,6 @@ def main():
         releaseTag = options.package + "-" + options.releaseDate[0:8]
         releaseName = releaseTag
 
-    # TODO - remove this
-
-    releaseTag = "new_build"
-    
     # set directories
     
     scratchBuildDir = os.path.join(options.buildDir, 'scratch')
@@ -440,8 +436,11 @@ def gitCheckout():
     # lrose core
 
     shellCmd("/bin/rm -rf lrose-core")
-    shellCmd("git clone --branch " + releaseTag + \
-             " https://github.com/NCAR/lrose-core")
+    if (options.tag == "master"):
+        shellCmd("git clone https://github.com/NCAR/lrose-core")
+    else:
+        shellCmd("git clone --branch " + releaseTag + \
+                 " https://github.com/NCAR/lrose-core")
 
     # netcdf and hdf5
 
