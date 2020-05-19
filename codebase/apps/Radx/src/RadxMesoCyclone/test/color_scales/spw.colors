@@ -1,0 +1,24 @@
+# colorscale for width field
+
+# Mike Dixon, Jan 2002
+
+0  	0.25 	gray30
+0.25  	0.5 	gray50
+0.5	0.75	gray70
+0.75	1	deep sky blue
+1. 	1.25 	royal blue
+1.25 	1.5 	blue
+1.5 	2	ForestGreen
+2	2.5	OliveDrab
+2.5	3 	tan3
+3	4 	tan1
+4	5	gold1
+5	6	yellow
+6	7	salmon1
+7	8	tomato
+8	9	brown1
+9	10	red
+10	12	firebrick
+12	15       maroon3
+15	20 	maroon1
+20	25	dark orchid

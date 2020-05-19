@@ -1,0 +1,56 @@
+# NAME discrete.colors
+
+-100     0      gray25
+1 	5 	blue4
+5 	10 	medium blue
+10 	15 	slate blue
+15 	20 	cornflower blue
+20 	25 	medium turquoise
+25 	30 	dark olive green
+30 	35 	dark green 	!
+35 	40 	SpringGreen4 	!
+40 	45 	medium sea green 	!
+45 	50 	lime green 	!
+50 	55 	chartreuse 	!
+55 	60 	DarkOliveGreen1 	!
+60 	65 	dark goldenrod 	!
+65 	70 	goldenrod 	!
+70 	75 	gold1 	!
+75 	80 	yellow 	!
+80 	85 	brown 	!
+85 	90 	red3 	!
+90 	95 	brown2 	!
+95 	100 	firebrick1 	!
+100 	105 	magenta 	!
+105 	110 	gray 	!
+110 	115 	light gray 	!
+115 	120 	snow 	!
+120 	125 	blue4
+125 	130 	DarkOrchid4
+130 	135 	HotPink4
+135 	140 	maroon
+140 	145 	sienna
+145 	150 	chocolate
+150 	155 	goldenrod
+155 	160 	yellow
+160 	165 	dark salmon
+165 	170 	salmon
+170 	175 	firebrick2
+175 	180 	DeepPink1
+180 	185 	gray21
+185 	190 	blue4
+190 	195 	DarkOrchid4
+195 	200 	HotPink4
+200 	205 	maroon
+205 	210 	sienna
+210 	215 	chocolate
+215	220 	yellow
+220	225 	blue4
+225 	230 	medium blue
+230 	235 	slate blue
+235 	240 	cornflower blue
+240 	245	medium turquoise
+245 	250 	dark olive green
+250 	255 	dark green
+255     1000    snow
+

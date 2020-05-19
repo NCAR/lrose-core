@@ -1,0 +1,23 @@
+# NAME dbm.colors
+#
+# Niles for IHOP 2002
+#
+-125 	-110 	gray30
+-110 	-95 	maroon
+-95 	-80 	dark orchid
+-80 	-65 	blue
+-65 	-50 	royal blue
+-50 	-35 	deep sky blue
+-35 	-20 	medium spring green
+-20 	-5 	forest green
+-5 	10 	gray
+10 	25 	tan2
+25 	40 	gold1
+40 	55 	yellow
+55 	70 	salmon1
+70 	85 	tomato
+85 	100 	brown1
+100 	115 	red
+115 	130 	firebrick
+#
+#

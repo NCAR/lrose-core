@@ -1,0 +1,32 @@
+# NAME refract_N_color2_pecan
+#
+# Rita for PECAN  2015.
+#
+#220 	225     brown 	
+#220 	250     sienna 	
+250 	255     brown 	
+255 	260     red 	
+260 	265     tomato	
+265 	270     salmon1	
+270     275     orange 
+275     280     yellow 
+280     285     gold1
+285     290     goldenrod2
+290	295     goldenrod3 	
+295	300     wheat 
+300     305     medium spring green
+305	310     medium aquamarine	
+310 	315     medium sea green	
+315	320     SpringGreen3	
+320	325     forest green	
+325	330     dark green	
+330	335     cyan
+335     340     deep sky blue
+340     345     blue
+345	350     cornflower blue	
+350	355     medium slate blue	
+355	360     Orchid1 	
+360	365     purple 	
+365	370     MediumOrchid4 	
+370	375     DeepPink1 	
+#

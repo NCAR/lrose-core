@@ -1,0 +1,27 @@
+# NAME humid.colors
+# awdl 	7/10/1993 14:42:15
+#MIN     MAX     NAME        COLOR LABEL
+-100    0       red
+0 	1 	midnight blue 	
+1 	2 	medium blue 	
+2 	3 	blue 	
+3 	4 	royal blue 	
+4 	5 	SpringGreen4 	
+5 	6 	dark green 	
+6 	7 	dark olive green 	
+7 	8 	sienna 	
+8 	9 	saddle brown 	
+9 	10 	DarkOrange3 	
+10 	11 	peru 	
+11 	12 	tan2 	
+12 	13 	goldenrod 	
+13 	14 	goldenrod1 	
+14 	15 	HotPink4 	
+15 	16 	VioletRed4 	
+16 	17 	maroon 	
+17 	18 	hot pink 	
+18 	19 	DeepPink1 	
+19 	20 	PaleVioletRed3 	
+20 	21 	dark salmon 	
+21 	22 	salmon 	
+22 	100 	snow 	

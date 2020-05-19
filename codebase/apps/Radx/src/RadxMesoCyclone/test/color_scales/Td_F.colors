@@ -1,0 +1,22 @@
+# NAME Td_F.colors - matches Td.colors.
+# MIN    MAX    NAME        COLOR LABEL
+-58	 -18.4	violet red 	!
+-18.4	 -13	maroon 	!
+-13	 -5.8	red3 	!
+-5.8	 -0.4	red 	!
+-0.4	 5	orange red 	!
+5	 10.4	dark orange 	!
+10.4	 15.8	orange 	!
+15.8	 21.2	gold 	!
+21.2	 26.6	yellow2 	!
+26.6	 32	yellow 	!
+32	 35.6	khaki1 	!
+35.6	 39.2	DarkOliveGreen1 	!
+39.2	 42.8	pale green 	!
+42.8	 46.4	spring green 	!
+46.4	 50	SpringGreen3 	!
+50	 53.6	SpringGreen4 	!
+53.6	 57.2	dark olive green 	!
+57.2	 60.8	dark green 	!
+60.8	 64.4	blue3 	!
+64.4	 122	blue1 	!

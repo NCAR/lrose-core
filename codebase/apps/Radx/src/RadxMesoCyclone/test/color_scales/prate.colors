@@ -1,0 +1,21 @@
+# precip_rate
+# Color coded Precip Rate 
+
+# Frank Hage 2003
+	
+-0.0	.1	DarkGreen
+.1 	.2 	ForestGreen
+.2	.4 	YellowGreen
+.4 	.6	NavyBlue
+.6 	.8 	MediumBlue
+.8 	1.0 Blue
+1.0	1.2	DarkSlateBlue
+1.2	1.5	SkyBlue
+1.5	2.0	MediumVioletRed
+2.0	2.5	Coral
+2.5	3.0	Orange
+3.0	5.0	Gold
+5.0	7.0	Yellow
+7.0	10.0	OrangeRed
+10.0 20.0	Red
+20.0 80.0	White

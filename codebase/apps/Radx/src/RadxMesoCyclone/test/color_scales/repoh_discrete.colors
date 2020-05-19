@@ -1,0 +1,53 @@
+# NAME dbz.colors
+
+# fhage 	6/9/1993 11:56:22
+
+-100    0.5     red
+0.5 	1.5 	dark green
+1.5 	2.5 	dark olive green
+2.5 	3.5 	forest green
+3.5 	4.5 	SpringGreen3
+4.5 	5.5 	medium sea green
+5.5 	6.5 	medium aquamarine
+6.5 	7.5 	medium slate blue
+7.5 	8.5 	blue
+8.5 	9.5 	blue4
+9.5 	10.5 	DarkOrchid4
+10.5 	11.5 	HotPink4
+11.5 	12.5 	maroon
+12.5 	13.5 	VioletRed4
+13.5 	14.5 	sienna
+14.5 	15.5 	chocolate
+15.5 	16.5 	goldenrod
+16.5 	17.5 	yellow
+17.5 	18.5 	dark salmon
+18.5 	19.5 	salmon
+19.5 	20.5 	firebrick2
+20.5 	21.5 	DeepPink1
+21.5 	22.5 	light grey
+22.5 	23.5 	snow
+23.5	24.5	red
+24.5 	25.5 	dark green
+25.5 	26.5 	dark olive green
+26.5 	27.5 	forest green
+27.5 	28.5 	SpringGreen3
+28.5 	29.5 	medium sea green
+29.5 	30.5 	medium aquamarine
+30.5 	31.5 	medium slate blue
+31.5 	32.5 	blue
+32.5 	33.5 	blue4
+33.5 	34.5 	DarkOrchid4
+34.5 	35.5 	HotPink4
+35.5 	36.5 	maroon
+36.5 	37.5 	VioletRed4
+37.5 	38.5 	sienna
+38.5 	39.5 	chocolate
+39.5 	40.5 	goldenrod
+40.5 	41.5 	yellow
+41.5 	42.5 	dark salmon
+42.5 	43.5 	salmon
+43.5 	44.5 	firebrick2
+44.5 	45.5 	DeepPink1
+45.5 	46.5 	light grey
+46.5 	47.5 	snow
+47.5	100.0	red

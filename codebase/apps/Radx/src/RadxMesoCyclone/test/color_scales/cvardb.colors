@@ -1,0 +1,16 @@
+# power cvar db colors
+
+-50	-10	white
+-10 	-9 	light grey
+-9	-8 	DeepPink1
+-8      -7      red1
+-7	-6 	firebrick
+-6      -5      orange
+-5	-4  	yellow2
+-4      -3      darkolivegreen2
+-3      -2      olivedrab3
+-2      -1      green4
+-1      0       slateblue4
+0       1       royalblue4
+1       2       darkblue
+2       10      gray10

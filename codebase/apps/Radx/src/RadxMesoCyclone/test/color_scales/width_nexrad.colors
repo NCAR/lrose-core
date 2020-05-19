@@ -1,0 +1,21 @@
+# colorscale for width field
+
+# Mike Dixon, April 1991
+
+00.00   00.25   DarkSlateBlue
+00.25   00.75   NavyBlue
+00.75   01.25   Blue
+01.25   01.75   MediumBlue
+01.75   02.25   SkyBlue
+02.25   02.75   DarkGreen
+02.75   03.75   ForestGreen
+03.75   04.75   YellowGreen
+04.75   05.75   Gold
+05.75   06.75   Yellow
+06.75   07.75   Coral
+07.75   09.75   Orange
+09.75   12.75   MediumVioletRed
+12.75   15.25   OrangeRed
+15.25   20.25   Red
+20.25   25.25   Gray50
+25.25   50.25   gray20

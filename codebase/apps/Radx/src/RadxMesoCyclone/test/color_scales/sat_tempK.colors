@@ -1,0 +1,42 @@
+# NAME sat_highres deg K
+
+330     360     black   
+325     330	gray0   
+320     325 	gray11  
+315     320     gray16  
+311     315     gray21  
+308     311 	gray25  
+304     308 	gray28  
+301     304 	gray30  
+297     301     gray31  
+294     297     gray34  
+291     294 	gray37  
+288     291     gray41  
+285     288     gray44  
+281     285     gray47  
+277     281  	gray51  
+273     277   	gray53  
+270     273   	linen   
+266     270   	blanched almond  
+263     266     bisque           
+260     263 	pale turquoise   
+257     260     cyan             
+254     257	deep sky blue    
+251     254	cornflower blue  
+248     251	medium slate blue
+245     248	slate blue       
+242     245     blue4            
+238     242	MediumPurple4    
+233     238	DarkOrchid4      
+227     233	MediumOrchid4    
+221     227     dark orchid      
+212     221     purple           
+208     212     medium purple    
+203     208     red4             
+198     203     red3             
+193     198     red2             
+188     193     red1             
+183     188     coral1           
+178     183     sienna1          
+173     178 	orange           
+168     173 	DarkGoldenrod1   

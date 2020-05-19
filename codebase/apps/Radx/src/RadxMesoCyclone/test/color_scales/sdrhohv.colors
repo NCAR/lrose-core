@@ -1,0 +1,48 @@
+# sdrhohv
+
+0.00	0.02	DarkSlateBlue
+0.02 	0.03 	NavyBlue
+0.03	0.04 	Blue
+0.04 	0.05	MediumBlue
+0.05 	0.06 	SkyBlue
+0.06 	0.07 	DarkGreen
+0.07	0.08	ForestGreen
+0.08	0.09	YellowGreen
+0.09	0.10	Gold
+0.10	0.12 	Yellow
+0.12	0.14	Coral
+0.14	0.16	Orange
+0.16	0.18	MediumVioletRed
+0.18	0.20	DarkRed
+0.20	0.25	OrangeRed
+0.25	1.00	Red
+
+#0.0 	0.01 	gray
+#0.01	0.03   wheat	
+#0.03	0.05	tan2
+#0.05 	0.06	gold1
+#0.06	0.07	yellow
+#0.07	0.08	salmon1
+#0.08	0.09	tomato
+#0.09	0.1     brown1	
+#0.1	0.2 	red
+#0.2 	1.0 	firebrick
+
+#0 	0.0055 	DeepPink1
+#0.0055 	0.011 	firebrick2
+#0.011 	0.0165 	salmon
+#0.0165 	0.022 	dark salmon
+#0.022 	0.0275 	yellow
+#0.0275 	0.033 	goldenrod
+#0.033 	0.0385 	chocolate
+#0.0385 	0.044 	sienna
+#0.044 	0.0495 	maroon
+#0.0495 	0.055 	HotPink4
+#0.055 	0.0605 	DarkOrchid4
+#0.0605 	0.066 	blue4
+#0.066 	0.0715 	gray97
+#0.0715 	0.077 	gray73
+#0.077 	0.0825 	gray51
+#0.0825 	0.088 	gray41
+#0.088 	0.0935 	gray31
+#0.0935 	0.099 	gray21

@@ -1,0 +1,44 @@
+# NAME sat_highres
+
+# roberts 	3/29/1996 
+
+330     360     black    ! 87C
+325     330	gray0    ! 57C
+320     325 	gray11   ! 52C
+315     320     gray16   ! 47C
+311     315     gray21   ! 42C
+308     311 	gray25   ! 38C
+304     308 	gray28   ! 35C
+301     304 	gray30   ! 31C
+297     301     gray31   ! 28C
+294     297     gray34   ! 24C
+291     294 	gray37   ! 21C
+288     291     gray41   ! 18C
+285     288     gray44   ! 15C
+281     285     gray47   ! 12C
+277     281  	gray51   ! 8C 
+273     277   	gray53   ! 4C 
+270     273   	linen    ! 0C   
+266     270   	blanched almond   ! -3C
+263     266     bisque            ! -7C
+260     263 	pale turquoise    ! -10C
+257     260     cyan              ! -13C 
+254     257	deep sky blue     ! -16C
+251     254	cornflower blue   ! -19C
+248     251	medium slate blue ! -22C
+245     248	slate blue        ! -25C
+242     245     blue4             ! -28C
+238     242	MediumPurple4     ! -31C
+233     238	DarkOrchid4       ! -35C
+227     233	MediumOrchid4     ! -40C
+221     227     dark orchid       ! -46C
+212     221     purple            ! -52C
+208     212     medium purple     ! -61C
+203     208     red4              ! -65C
+198     203     red3              ! -70C
+193     198     red2              ! -75C   
+188     193     red1              ! -80C    
+183     188     coral1            ! -85C     
+178     183     sienna1           ! -90C
+173     178 	orange            ! -95C
+168     173 	DarkGoldenrod1    ! -99C

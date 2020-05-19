@@ -1,0 +1,25 @@
+# colorscale for kdp at sband
+
+-5.0	-4.0	dodgerblue3
+-4.0	-3.0	royalblue3
+-3.0    -2.0	blue
+-2.0    -1.0    mediumblue
+-1.0    0.00    navyblue
+0.00    0.25    midnightblue
+0.25    0.50    seagreen
+0.50    0.75    forestgreen
+0.75    1.00    olivedrab
+1.00    1.25    yellowgreen
+1.25	1.50	Gold3
+1.50	1.75  	gold
+1.75	2.00	yellow
+2.00	2.50 	orange
+2.50	3.00 	coral
+3.00    3.50    tomato
+3.50    4.00    firebrick1
+4.00	5.00    OrangeRed
+5.00	6.00 	Red
+6.00	7.00 	DeepPink
+7.00	8.00	Maroon1
+8.00    9.00    HotPink
+9.00	10.0	Pink

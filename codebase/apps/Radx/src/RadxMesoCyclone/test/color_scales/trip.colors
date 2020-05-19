@@ -1,0 +1,6 @@
+# trip number color scale
+
+0.5	1.5     darkgreen	!TRIP1
+1.5	2.5	red		!TRIP2
+2.5	4.5	gold		!TRIP3
+4.5	255	blue		!TRIP4

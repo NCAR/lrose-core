@@ -1,0 +1,30 @@
+# NAME Refract_dry.colors
+#
+# Niles for IHOP 2002.
+#
+#220 	225     brown 	
+100 	225     brown 	
+225 	230     red 	
+230 	235     tomato 	
+235 	240 	salmon1
+240 	245     orange	
+245     250     goldenrod3 
+250     255     goldenrod2 
+255	260     yellow 
+260	265     salmon 	
+265	270     pink 	
+270	275     wheat 	
+275	280     medium aquamarine	
+280 	285     medium sea green	
+285	290     SpringGreen3	
+290	295     forest green	
+295	300     dark olive green	
+300	305     dark green	
+305	310     cyan	
+310	315     cornflower blue	
+315	320     medium slate blue	
+320	325     Orchid1 	
+325	330     purple 	
+330	335     MediumOrchid4 	
+335	360     magenta 	
+#

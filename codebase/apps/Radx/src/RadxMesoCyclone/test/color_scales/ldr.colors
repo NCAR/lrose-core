@@ -1,0 +1,27 @@
+# colorscale for ldr field
+
+# Mike Dixon, April 1991
+
+-50 	-45 	dark green
+-45 	-40 	dark olive green
+-40	-35 	forest green
+-35 	-30 	SpringGreen3
+-30 	-25 	medium sea green
+-25 	-20 	medium aquamarine
+-20 	-15 	medium slate blue
+-15	-10 	blue
+-10 	-5 	blue4
+-5 	0 	DarkOrchid4
+0 	5 	HotPink4
+5 	10 	maroon
+10 	15 	VioletRed4
+15 	20 	sienna
+20	25 	chocolate
+25 	30 	goldenrod
+30 	35 	yellow
+35 	40 	dark salmon
+40 	45 	salmon
+45 	50	firebrick2
+50	55	DeepPink1
+55	60	light grey
+60	65 	snow

@@ -1,0 +1,27 @@
+# NAME psob.colors
+
+-40    -30      dodgerblue3
+-30    -25      royalblue3
+-25    -20      blue
+-20    -15      mediumblue
+-15    -10      navyblue
+-10    -05      midnightblue
+-05     00      dimgray
+ 00     05      slategray
+ 05     10      seagreen
+ 10     15      forestgreen
+ 15     20      olivedrab
+ 20     25      yellowgreen
+ 25     30      Gold3
+ 30     35      gold
+ 35     40      yellow
+ 40     45	orange
+ 45     50	coral
+ 50     55      tomato
+ 55     60      firebrick1
+ 60     70 	OrangeRed
+ 70     80	Red
+ 80     90 	DeepPink
+ 90    120	Maroon1
+120    150      HotPink
+150    180	Pink
