@@ -92,11 +92,8 @@ private:
   ui64 _pulseSeqNum;
   ui64 _sampleSeqNum; // for UDP only
   vector<IwrfTsPulse *> _dwellPulses;
+  si64 _realtimeDeltaSecs;
 
-  // size_t _currentGateIndex;
-  // size_t _nGatesPulse;
-  // MemBuf _pulseBuf;
-  
   // packet details
 
   size_t _nBytesHeader;

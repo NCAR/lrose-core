@@ -94,6 +94,7 @@ WriteToUdp::WriteToUdp(const string &progName,
   _errCount = 0;
   _rateStartTime.set(RadxTime::NEVER);
   _nBytesForRate = 0;
+  _realtimeDeltaSecs = 0;
 
   // compute packet header length
   // by creating a dummy header and
@@ -156,16 +157,27 @@ int WriteToUdp::Run ()
   
   int iret = 0;
   while (true) {
+
     if (_params.debug) {
       cerr << "N input files: " << _inputFileList.size() << endl;
     }
+    
+    // initialize time delta for realtime correction
+    // this is redone every time we go through the file list
+
+    _realtimeDeltaSecs = 0;
+
+    // loop through files
+
     for (size_t ii = 0; ii < _inputFileList.size(); ii++) {
       if (_convertToUdp(_inputFileList[ii])) {
         iret = -1;
       }
     }
+
     umsleep(1000);
-  }
+
+  } // while
   
   return iret;
 
@@ -353,8 +365,15 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         // set the metadata
         
         IwrfTsPulse *iwrfPulse = dwellPulses[pulseNumInDwell];
+
+        // change to realtime if appropriate
+
+        if (_params.set_udp_time_to_now && _realtimeDeltaSecs == 0) {
+          time_t now = time(NULL);
+          _realtimeDeltaSecs = now - iwrfPulse->getTime();
+        }
         
-        si64 secondsTime = iwrfPulse->getTime();
+        si64 secondsTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
         ui32 nanoSecs = iwrfPulse->getNanoSecs();
         
         ui64 dwellNum = _dwellSeqNum;

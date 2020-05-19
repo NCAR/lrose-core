@@ -408,6 +408,8 @@ public:
 
   double udp_sim_data_rate;
 
+  tdrp_bool_t set_udp_time_to_now;
+
   char* output_fmq_path;
 
   int output_fmq_size;
@@ -427,7 +429,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[32];
 
   const char *_className;
 

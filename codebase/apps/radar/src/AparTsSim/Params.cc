@@ -834,6 +834,18 @@
     tt->single_val.d = 20;
     tt++;
     
+    // Parameter 'set_udp_time_to_now'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_udp_time_to_now");
+    tt->descr = tdrpStrDup("Set the pulse times to real-time.");
+    tt->help = tdrpStrDup("Overwrite the times in the pulse headers with real-time values.");
+    tt->val_offset = (char *) &set_udp_time_to_now - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));

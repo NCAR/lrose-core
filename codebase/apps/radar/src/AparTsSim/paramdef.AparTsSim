@@ -142,6 +142,12 @@ paramdef double {
   p_help = "We use periodic sleeps to achieve the target data rate.";
 } udp_sim_data_rate;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the pulse times to real-time.";
+  p_help = "Overwrite the times in the pulse headers with real-time values.";
+} set_udp_time_to_now;
+
 commentdef {
   p_header = "READ UDP MODE";
 };
