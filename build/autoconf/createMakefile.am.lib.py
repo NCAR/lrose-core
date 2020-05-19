@@ -41,11 +41,11 @@ def main():
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
-    distName = platform.dist()[0].lower()
+    osType = getOsType()
     isDebianBased = False
-    if ("debian" in distName):
+    if (osType == "debian"):
         isDebianBased = True
-    if ("ubuntu" in distName):
+    if (osType == "ubuntu"):
         isDebianBased = True
 
     # parse the command line
@@ -519,6 +519,40 @@ def writeMakefileAm():
 
     fo.close
 
+########################################################################                        
+# get the LINUX type from the /etc/os-release file
+# or 'darwin' if OSX
+
+def getOsType():                                                                                  
+
+    # check for Mac OSX
+
+    if sys.platform == "darwin":
+        return "osx"
+    elif sys.platform == "linux":
+        osrelease_file = open("/etc/os-release", "rt")
+        lines = osrelease_file.readlines()
+        osrelease_file.close()
+        osType = "unknown"
+        for line in lines:
+            if (line.find('PRETTY_NAME') == 0):
+                lineParts = line.split('=')
+                osParts = lineParts[1].split('"')
+                osType = osParts[1].lower()
+                if (osType.find("debian") >= 0):
+                    return "debian"
+                if (osType.find("ubuntu") >= 0):
+                    return "ubuntu"
+                if (osType.find("centos") >= 0):
+                    return "centos"
+                if (osType.find("rhel") >= 0):
+                    return "rhel"
+                if (osType.find("opensuse") >= 0):
+                    return "opensuse"
+                
+
+    return "unknown"
+            
 ########################################################################
 # Run - entry point
 

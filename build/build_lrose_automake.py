@@ -92,7 +92,7 @@ def main():
     parser.add_option('--autoconf',
                       dest='autoconf', default=False,
                       action="store_true",
-                      help='Run autoconf to generate Makefile.am files')
+                      help='Force to run autoconf to generate Makefile.am files')
     parser.add_option('--scripts',
                       dest='installScripts', default=False,
                       action="store_true",
@@ -143,7 +143,8 @@ def main():
         
     # set up autoconf if needed
 
-    if (options.autoconf):
+    os.chdir(codebaseDir)
+    if (os.path.isfile("configure") or options.autoconf):
         setupAutoconf()
 
     # run qmake for QT apps to create moc_ files
@@ -269,6 +270,13 @@ def createQtMocFiles(appDir):
 # set up autoconf for configure etc
 
 def setupAutoconf():
+
+    if (os.platform == "darwin"):
+        print("ERROR - setupAutoconf", file=sys.stderr)
+        print("  Cannot run autoconf on OSX", file=sys.stderr)
+        print("  This must be run in a LINUX host", file=sys.stderr)
+        print("  On OSX, use a tar file which contains autoconf files", file=sys.stderr)
+        sys.exit(1)
 
     os.chdir(codebaseDir)
 
