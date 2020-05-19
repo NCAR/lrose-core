@@ -371,6 +371,10 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         if (_params.set_udp_time_to_now && _realtimeDeltaSecs == 0) {
           time_t now = time(NULL);
           _realtimeDeltaSecs = now - iwrfPulse->getTime();
+          si64 newTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
+          if (_params.debug) {
+            cerr << "====>> recomputing pulse time offset, newTime: " << RadxTime::strm(newTime) << endl;
+          }
         }
         
         si64 secondsTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
