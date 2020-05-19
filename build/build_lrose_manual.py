@@ -174,37 +174,44 @@ def main():
     print("==== installing tdrp lib =================", file=sys.stderr)
     os.chdir(os.path.join(codebaseDir, "libs/tdrp/src"))
     shellCmd("make -j 8 install")
-    print("==== finished installing tdrp lib =======", file=sys.stderr)
+    print("==== finished installing tdrp lib ========", file=sys.stderr)
     
     # build and install tdrp_gen
 
     print("==== installing tdrp_gen =================", file=sys.stderr)
     os.chdir(os.path.join(codebaseDir, "apps/tdrp/src/tdrp_gen"))
     shellCmd("make -j 8 install")
-    print("==== finished installing tdrp_gen =======", file=sys.stderr)
+    print("==== finished installing tdrp_gen ========", file=sys.stderr)
+    
+    # install include files
+
+    print("==== installing all includes =============", file=sys.stderr)
+    os.chdir(os.path.join(codebaseDir, "libs"))
+    shellCmd("make -j 8 -k install_include")
+    print("==== finished installing all includes ====", file=sys.stderr)
     
     # build and install libs
 
     print("==== installing all libs =================", file=sys.stderr)
     os.chdir(os.path.join(codebaseDir, "libs"))
     shellCmd("make -j 8 -k install")
-    print("==== finished installing all libs =======", file=sys.stderr)
+    print("==== finished installing all libs ========", file=sys.stderr)
     
     # build and install apps
 
-    print("==== installing all apps ================", file=sys.stderr)
+    print("==== installing all apps =================", file=sys.stderr)
     os.chdir(os.path.join(codebaseDir, "apps"))
     shellCmd("make -j 8 -k install")
-    print("==== finished installing all apps =======", file=sys.stderr)
+    print("==== finished installing all apps ========", file=sys.stderr)
     
     # create pkgconfig scripys
 
-    print("==== installing pkgconfig ===============", file=sys.stderr)
+    print("==== installing pkgconfig ================", file=sys.stderr)
     os.chdir(coreDir)
     shellCmd("./build/scripts/createPkgConfig.py " + prefix)
     shellCmd("rsync -av " + coreDir + "/build/templates/lrose-config.template " + prefix + "/bin")
     shellCmd("chmod u+x " + prefix + "/bin/lrose-config")
-    print("==== finished installing pkgconfig ======", file=sys.stderr)
+    print("==== finished installing pkgconfig =======", file=sys.stderr)
     
     # optionally install the scripts
 
