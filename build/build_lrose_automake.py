@@ -97,6 +97,10 @@ def main():
                       dest='installScripts', default=False,
                       action="store_true",
                       help='Install scripts as well as binaries')
+    parser.add_option('--static',
+                      dest='static', default=False,
+                      action="store_true",
+                      help='use static linking, default is dynamic')
 
     (options, args) = parser.parse_args()
 
@@ -144,7 +148,7 @@ def main():
     # set up autoconf if needed
 
     os.chdir(codebaseDir)
-    if (os.path.isfile("configure") or options.autoconf):
+    if ((os.path.isfile("configure") == False) or options.autoconf):
         setupAutoconf()
 
     # run qmake for QT apps to create moc_ files
@@ -271,7 +275,7 @@ def createQtMocFiles(appDir):
 
 def setupAutoconf():
 
-    if (os.platform == "darwin"):
+    if (platform == "darwin"):
         print("ERROR - setupAutoconf", file=sys.stderr)
         print("  Cannot run autoconf on OSX", file=sys.stderr)
         print("  This must be run in a LINUX host", file=sys.stderr)
