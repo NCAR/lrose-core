@@ -483,9 +483,6 @@ def setupAutoconf():
         else:
             shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
-        cmd = "../build/autoconf/createConfigure.am.py --dir . " + \
-              " --baseName configure.base.shared --shared" + \
-              " --pkg " + package + debugStr
         shellCmd("../build/autoconf/createConfigure.am.py --dir . " +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + package + debugStr)

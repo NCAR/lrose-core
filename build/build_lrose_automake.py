@@ -5,11 +5,13 @@
 # Building LROSE and required libraries
 # =====================================
 #
-# This requires automake makefile.am files
-# configure is first run to create the makefiles.
+# Build lrose using configure based on the automake system.
 #
 # This script will be executed from the top level of lrose-core.
 # 
+# If --autoconf is specified, the Makefile.am files will be generated.
+# If not, automake must already have been run to generate makefile.am files.
+#
 # By default the libraries and applications will be installed in:
 #
 #   ${HOME}/lrose/include
@@ -59,7 +61,7 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
-    global codebasePath
+    global codebaseDir
     global dateStr
     global timeStr
     global debugStr
@@ -87,6 +89,10 @@ def main():
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDefault,
                       help='Prefix name for install location')
+    parser.add_option('--autoconf',
+                      dest='autoconf', default=False,
+                      action="store_true",
+                      help='Run autoconf to generate Makefile.am files')
     parser.add_option('--scripts',
                       dest='installScripts', default=False,
                       action="store_true",
@@ -128,16 +134,21 @@ def main():
     
     # check we are in the correct place
 
-    codebasePath = os.path.join(coreDir, "codebase")
-    if (os.path.isdir(codebasePath) == False):
+    codebaseDir = os.path.join(coreDir, "codebase")
+    if (os.path.isdir(codebaseDir) == False):
         print("ERROR - script: ", thisScriptName, file=sys.stderr)
         print("  Incorrect run directory: ", coreDir, file=sys.stderr)
         print("  Must be run just above codebase dir", file=sys.stderr)
         sys.exit(1)
+        
+    # set up autoconf if needed
+
+    if (options.autoconf):
+        setupAutoconf()
 
     # run qmake for QT apps to create moc_ files
-
-    hawkEyeDir = os.path.join(codebasePath, "apps/radar/src/HawkEye")
+                                           
+    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
     createQtMocFiles(hawkEyeDir)
 
     # set the environment
@@ -161,19 +172,19 @@ def main():
 
     # do the build and install
 
-    os.chdir(codebasePath)
+    os.chdir(codebaseDir)
     cmd = "./configure --with-hdf5=" + prefix + \
           " --with-netcdf=" + prefix + \
           " --prefix=" + prefix
     shellCmd(cmd)
 
-    os.chdir(os.path.join(codebasePath, "libs"))
+    os.chdir(os.path.join(codebaseDir, "libs"))
     cmd = "make -k -j 8"
     shellCmd(cmd)
     cmd = "make -k install-strip"
     shellCmd(cmd)
 
-    os.chdir(os.path.join(codebasePath, "apps"))
+    os.chdir(os.path.join(codebaseDir, "apps"))
     cmd = "make -k -j 8"
     shellCmd(cmd)
     cmd = "make -k install-strip"
@@ -191,21 +202,21 @@ def main():
         except:
             print("Dir exists: " + perl5Dir, file=sys.stderr)
 
-        perl5LibDir = os.path.join(codebasePath, "libs/perl5/src")
+        perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
         if (os.path.isdir(perl5LibDir)):
-            os.chdir(os.path.join(codebasePath, "libs/perl5/src"))
+            os.chdir(os.path.join(codebaseDir, "libs/perl5/src"))
             shellCmd("rsync -av *pm " + perl5Dir)
 
         # procmap
 
-        procmapScriptsDir = os.path.join(codebasePath, "apps/procmap/src/scripts")
+        procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
         if (os.path.isdir(procmapScriptsDir)):
             os.chdir(procmapScriptsDir)
             shellCmd("./install_scripts.lrose " + prefix + "bin")
 
         # general
 
-        generalScriptsDir = os.path.join(codebasePath, "apps/scripts/src")
+        generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
             shellCmd("./install_scripts.lrose " + prefix + "bin")
@@ -253,6 +264,39 @@ def createQtMocFiles(appDir):
     else:
         shellCmd("qmake-qt5 -o Makefile.qmake");
     shellCmd("make -f Makefile.qmake mocables");
+
+########################################################################
+# set up autoconf for configure etc
+
+def setupAutoconf():
+
+    os.chdir(codebaseDir)
+
+    # create files for configure
+
+    shutil.copy("../build/autoconf/Makefile.top",
+                "./Makefile")
+    
+    if (options.static):
+        if (package == "lrose-cidd"):
+            shutil.copy("../build/autoconf/configure.base.cidd",
+                        "./configure.base")
+        else:
+            shutil.copy("../build/autoconf/configure.base",
+                        "./configure.base")
+        shellCmd("../build/autoconf/createConfigure.am.py --dir . " +
+                 " --baseName configure.base" +
+                 " --pkg " + package + debugStr)
+    else:
+        if (package == "lrose-cidd"):
+            shutil.copy("../build/autoconf/configure.base.shared.cidd",
+                        "./configure.base.shared")
+        else:
+            shutil.copy("../build/autoconf/configure.base.shared",
+                        "./configure.base.shared")
+        shellCmd("../build/autoconf/createConfigure.am.py --dir . " +
+                 " --baseName configure.base.shared --shared" +
+                 " --pkg " + package + debugStr)
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
