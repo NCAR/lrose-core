@@ -61,6 +61,7 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
+    global coreDir
     global codebaseDir
     global dateStr
     global timeStr
@@ -223,29 +224,31 @@ def main():
 
     # check the install
 
-    checkInstall(coreDir)
+    checkInstall()
 
 ########################################################################
 # check the install
 
-def checkInstall(coreDir):
+def checkInstall():
 
     os.chdir(coreDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_libs.py " + \
+    shellCmd("./build/scripts/checkLibs.py " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
-    print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_apps.py " + \
-             "--listPath ./build/checklists/apps_check_list." + package + " " + \
-             "--appDir " + prefix + "/bin " + \
-             "--label " + package + " --maxAge 3600")
-    print("====================================================")
+
+    if (options.no_core_apps == False):
+        print(("============= Checking apps for " + package + " ============="))
+        shellCmd("./build/scripts/checkApps.py " + \
+                 "--listPath ./build/checklists/apps_check_list." + package + " " + \
+                 "--appDir " + prefix + "/bin " + \
+                 "--label " + package + " --maxAge 3600")
+        print("====================================================")
     
     print("**************************************************")
-    print(("*** Done building package: " + package))
+    print("*** Done building auto release *******************")
     print(("*** Installed in dir: " + prefix + " ***"))
     print("**************************************************")
 
