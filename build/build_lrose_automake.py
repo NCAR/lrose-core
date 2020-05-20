@@ -159,8 +159,11 @@ def main():
     # set the environment
 
     os.environ["LDFLAGS"] = "-L" + prefix + "/lib " + \
-                            " -Wl,-rpath,'$$ORIGIN/" + package + "_runtime_libs:" + \
-                            prefix + "/lib'"
+                            "-Wl,--enable-new-dtags," + \
+                            "-rpath," + \
+                            "'$$ORIGIN/" + package + "_runtime_libs" + \
+                            ":$$ORIGIN/../lib" + \
+                            ":" + prefix + "/lib'"
     os.environ["FC"] = "gfortran"
     os.environ["F77"] = "gfortran"
     os.environ["F90"] = "gfortran"
@@ -170,30 +173,22 @@ def main():
     else:
         os.environ["CXXFLAGS"] = " -std=c++11 "
 
-    cmd = "env"
     print("=========================================", file=sys.stderr)
-    shellCmd(cmd)
+    shellCmd("env")
     print("=========================================", file=sys.stderr)
 
     # do the build and install
 
     os.chdir(codebaseDir)
-    cmd = "./configure --with-hdf5=" + prefix + \
-          " --with-netcdf=" + prefix + \
-          " --prefix=" + prefix
-    shellCmd(cmd)
+    shellCmd("./configure --prefix=" + prefix)
 
     os.chdir(os.path.join(codebaseDir, "libs"))
-    cmd = "make -k -j 8"
-    shellCmd(cmd)
-    cmd = "make -k install-strip"
-    shellCmd(cmd)
+    shellCmd("make -k -j 8")
+    shellCmd("make -k install-strip")
 
     os.chdir(os.path.join(codebaseDir, "apps"))
-    cmd = "make -k -j 8"
-    shellCmd(cmd)
-    cmd = "make -k install-strip"
-    shellCmd(cmd)
+    shellCmd("make -k -j 8")
+    shellCmd("make -k install-strip")
 
     # optionally install the scripts
 
