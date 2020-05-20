@@ -103,61 +103,35 @@ The distribution will be in the lrose-core subdirectory:
 
 ## 3. Setting up your environment
 
-The software development system at NCAR/RAL (formerly RAP) and NCAR/EOL makes use of a recursive makefile approach, using environment variables to identify the various directories used during the build.
+The LROSE manual build uses a recursive makefile approach, using environment variables to identify the various directories used during the build.
 
-Therefore, before performing the build, you need to set up the correct environment, as follows:
+Therefore, before performing the build, you need to set up the correct environment.
 
-### Set an environment variable for the install directory:
+### Set environment variables for the build:
+
 For sh or bash:
 ```
+export HOST_OS=OSX_LROSE
 export LROSE_INSTALL_DIR=/Users/myname/lrose
 export LROSE_CORE_DIR=/Users/myname/git/lrose-core
 ```
 
 For csh or tcsh:
 ```
+setenv HOST_OS OSX_LROSE
 setenv LROSE_INSTALL_DIR /Users/myname/lrose
 setenv LROSE_CORE_DIR /Users/myname/git/lrose-core
 ```
 
-The software is automatically installed in:
+Preferably, you should permanently set these directly in your `.cshrc` or `.bashrc` file.
+Then the environment will always be correctly set.
 
+The software is installed in:
 ```
   $LROSE_INSTALL_DIR/bin
   $LROSE_INSTALL_DIR/lib
   $LROSE_INSTALL_DIR/include
 ```
-
-### Setup the environment by running the source command.
-
-For sh or bash:
-```
-  cd $LROSE_CORE_DIR
-  source build/set_build_env.osx.sh
-```  
-
-For csh or tcsh:
-```
-  cd $LROSE_CORE_DIR
-  source build/set_build_env.osx.csh
-```
-
-Preferably, you should permanently copy the contents of these files
-directly into your `.cshrc` or `.bashrc` file.
-Then the environment will always be correctly set.
-
-This will set the following important environment variables:
-
-```
- $HOST_OS: should be OSX_LROSE
- $RAP_MAKE_INC_DIR: include files used by the makefiles
- $RAP_MAKE_BIN_DIR: scripts for the make
- $RAP_INC_DIR: the include install directory
- $RAP_LIB_DIR: the library install directory
- $RAP_BIN_DIR: the binary install directory
-```
-
-Several other variables are set as well.
 
 Note: if there are errors related to Qt, try setting this variable
 ```
@@ -177,33 +151,26 @@ The codebase is checked in with upper-case Makefiles throughout the tree.
 
 To get the build you want, you must install the lower-case makefiles relevant to the package you need.
 
-To install the **lrose** standard package makefiles, perform the following:
+To install the **lrose-core** standard package makefiles, perform the following:
 
 ```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/installPackageMakefiles.py
+  cd $LROSE_CORE_DIR
+  ./build/scripts/installPackageMakefiles.py
 ```
 This is equivalent to the following
 
 ```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/installPackageMakefiles.py --package lrose
+  cd $LROSE_CORE_DIR
+  ./build/scripts/installPackageMakefiles.py --package lrose-core
 ```
 
 If you want to perform a specific package package, you can specify that on the command line.
 
-For the **radx** distribtion, run the following:
+For example, for the **samurai** distribtion, run the following:
 
 ```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/installPackageMakefiles.py --package radx
-```
-
-For the **titan** distribtion, run the following:
-
-```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/installPackageMakefiles.py --package titan
+  cd $LROSE_CORE_DIR
+  ./build/scripts/installPackageMakefiles.py --package samurai
 ```
 
 ### Perform the build
@@ -221,7 +188,7 @@ For the **titan** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase/libs/
-  make install_include
+  make -j 8 install_include
   make -j 8 opt
   make -j 8 install
 ```
