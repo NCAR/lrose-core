@@ -1,0 +1,19 @@
+# NAME topography.colors
+# awdl 	1/6/1994 11:54:16
+#MIN     MAX     NAME        COLOR LABEL
+0 	250 	DarkGreen 	!
+250 	500 	SpringGreen4 	!
+500 	750 	SpringGreen3	!
+750 	1000 	SpringGreen2 	!
+1000 	1250 	SpringGreen1	!
+1250 	1500 	LightGreen 	!
+1500 	1750 	peru 		!
+1750 	2000 	goldenrod1 	!
+2000 	2250 	gold 		!
+2250 	2500 	light goldenrod	!
+2500 	2750 	PeachPuff2 	!
+2750 	3000 	wheat 		!
+3000 	3250 	bisque 		!
+3250 	3500 	blanched almond	!
+3500 	3750 	gray94 		!
+3750 	4000 	snow 		!

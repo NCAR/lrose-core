@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = precip_map
 
@@ -74,19 +74,19 @@ SRCS = \
 # tdrp support
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c_targets
 
 #
 # tdrp support
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c_targets
 
 #
 # local targets

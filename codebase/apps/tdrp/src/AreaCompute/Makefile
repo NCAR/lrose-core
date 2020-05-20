@@ -35,9 +35,9 @@ PROGNAME = AreaCompute
 
 CPPC = g++
 RM = /bin/rm -f
-INCLUDES = -I$(RAP_INC_DIR)
+INCLUDES = -I$(LROSE_INSTALL_DIR)/include
 CFLAGS = -g
-LDFLAGS = -L$(RAP_LIB_DIR) -ltdrp
+LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib -ltdrp
 
 SRCS = \
 	Params.cc \

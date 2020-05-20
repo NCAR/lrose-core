@@ -125,12 +125,12 @@ def main():
 
     # build netcdf support
 
-    if (platform != "darwin"):
+    if (package == "lrose-cidd"):
         buildNetcdf()
 
     # build and install the package
 
-    buildPackage()
+    buildPackageAutomake()
 
     #--------------------------------------------------------------------
     # done
@@ -244,9 +244,9 @@ def buildNetcdf():
             shellCmd("./build_and_install_netcdf -x " + installDir)
 
 ########################################################################
-# build package
+# build package using automake
 
-def buildPackage():
+def buildPackageAutomake():
 
     os.chdir(runDir)
 
@@ -256,7 +256,7 @@ def buildPackage():
     if (options.installScripts):
         args = args + " --scripts "
 
-    shellCmd("./build/build_lrose.py " + args)
+    shellCmd("./build/build_lrose_automake.py " + args)
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
@@ -274,7 +274,7 @@ def shellCmd(cmd):
         else:
             if (options.verbose):
                 print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
+    except OSError as e:
         print >>sys.stderr, "Execution failed:", e
         sys.exit(1)
 

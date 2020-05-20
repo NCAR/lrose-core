@@ -1,0 +1,27 @@
+# NAME noise_dbm.sband.colors
+
+-3.00  -2.50  dodgerblue3
+-2.50  -2.00  royalblue3
+-2.00  -1.50  blue
+-1.50  -1.00  mediumblue
+-1.00  -0.50  navyblue
+-0.50  -0.25  midnightblue
+-0.25  +0.25  dimgray
++0.25  +0.50  slategray
++0.50  +0.75  seagreen
++0.75  +1.00  forestgreen
++1.00  +1.25  olivedrab
++1.25  +1.50  yellowgreen
++1.50  +1.25  Gold3
++1.25  +2.00  gold
++2.00  +2.25  yellow
++2.25  +2.50  orange
++2.50  +2.75  coral
++2.75  +3.00  tomato
++3.00  +4.00  firebrick1
++4.00  +5.00  OrangeRed
++5.00  +6.00  Red
++6.00  +7.00  DeepPink
++7.00  +8.00  Maroon1
++8.00  +9.00  HotPink
++9.00  10.00  Pink

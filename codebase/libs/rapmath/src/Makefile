@@ -10,7 +10,7 @@
 # Recursive make - makes the subdirectory code
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS)
 
@@ -32,8 +32,8 @@ SUB_DIRS = \
 	trig \
 	umath
 
-include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 
-include $(RAP_MAKE_INC_DIR)/rap_make_inc_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_inc_targets
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_targets

@@ -1,0 +1,23 @@
+# NAME topo_enh.colors
+# Roberts 4/20/1998 11:54:16
+#MIN     MAX     NAME        COLOR LABEL
+0 	1 	skyblue  	! 
+1 	100 	forest green 	! 
+100 	200 	medium sea green 	! 
+200 	300 	rosy brown 	! 
+300 	400 	saddle brown 	! 
+400 	500 	sienna 		! 
+500 	600 	DarkOrange3 	!
+600 	700 	dark orange 	!
+700 	800 	orange 		! 
+800 	900 	tan2 		! 
+900 	1000 	peru 		!
+1000 	1100 	dark goldenrod 	!
+1100 	1200 	goldenrod	!
+1200 	1300 	gold1   	!
+1300 	1400 	PeachPuff2 	!
+1400 	1500 	wheat 		!
+1500 	1600 	bisque 		! 
+1600 	1700 	blanched almond	! 
+1700 	1800 	linen    	!
+1800 	2000 	snow 		!

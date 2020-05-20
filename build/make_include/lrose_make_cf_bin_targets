@@ -1,0 +1,69 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile targets for C, C++ and FORTRAN program binaries
+#
+# Mike Dixon
+#
+# EOL,NCAR,Boulder,Colorado,80307,USA
+# 
+###########################################################################
+
+install_bin: install_bin_path
+
+install_bin_path: all
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/bin; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/bin; fi ; \
+	if $(TEST) -f $(INSTALL_BIN_PATH) ;\
+	then \
+	 	$(MV) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+		$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH) ;\
+		$(RM) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+	else \
+		$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH); \
+	fi
+	if $(TEST) "$(DO_SRC_README)" = "" ; then :; else \
+	        echo "$(TARGET_FILE) -- source: `$(PWD)`" >> $(LROSE_INSTALL_DIR)/bin/README.src_dir_info ;\
+	fi
+
+install: install_bin
+
+install_cgi:
+	$(MAKE) LROSE_BIN_DIR=$(LROSE_CGI_BIN_DIR) install_bin
+
+copy_bin:
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/bin; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/bin; fi ; \
+	if $(TEST) -f $(TARGET_FILE) ; then \
+		if $(TEST) -f $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE) ;\
+		then \
+			$(MV) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+			$(CP) $(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin ;\
+			$(RM) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+		else \
+			$(CP) $(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin; \
+		fi ;\
+	else \
+		echo "ERROR: $(TARGET_FILE) does not exist" ;\
+	fi
+
+clean_bin:
+	$(RM) $(TARGET_FILE)
+
+strip:
+	strip $(TARGET_FILE)
+
+install_copyright:
+	if $(TEST) -f copyright_notice.txt ; then \
+		if $(TEST) -d $(LROSE_COPYRIGHT_DIR); then :; else \
+			$(MKDIR) $(LROSE_COPYRIGHT_DIR); fi ;\
+		$(CP) copyright_notice.txt $(LROSE_COPYRIGHT_DIR)/$(TARGET_FILE)_copyright_notice.txt ;\
+	fi
+

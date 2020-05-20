@@ -1,0 +1,8 @@
+# number color scale
+
+# Mike Dixon, June 1991
+
+0.5	1.5     darkgreen	!SNR
+1.5	2.5	red		!RATIO
+2.5	4.5	gold		!REPL
+4.5	255	blue		!OTHER

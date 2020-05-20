@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = fmq_print
 
@@ -57,7 +57,7 @@ SRCS = \
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c_targets
 
 #
 # local targets

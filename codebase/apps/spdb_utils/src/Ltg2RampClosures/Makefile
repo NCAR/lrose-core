@@ -28,7 +28,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 MODULE_TYPE = progcpp
 TARGET_FILE = Ltg2RampClosures
@@ -63,19 +63,19 @@ CPPC_SRCS = \
 # TDRP support
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # local targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

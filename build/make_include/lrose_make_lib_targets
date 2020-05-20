@@ -1,0 +1,62 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile targets for library files
+#
+# Mike Dixon
+#
+# EOL,NCAR,Boulder,Colorado,80307,USA
+# 
+###########################################################################
+
+install_lib: mk_lib_dir all
+	$(CP) $(LIBNAME) $(LROSE_INSTALL_DIR)/lib
+	if $(TEST) $(HAVE_RANLIB) = TRUE;\
+	then\
+		$(RANLIB) $(LROSE_INSTALL_DIR)/lib/$(LIBNAME);\
+	fi
+
+mk_lib_dir:
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/lib; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/lib; fi
+
+install_profile_lib:
+	if $(TEST) -d $(LROSE_PROFILE_LIB_DIR); then :; else \
+		$(MKDIR) $(LROSE_PROFILE_LIB_DIR); fi
+	$(CP) $(LIBNAME) $(LROSE_PROFILE_LIB_DIR)
+	if $(TEST) -f $(RANLIB);\
+	then\
+		$(RANLIB) $(LROSE_PROFILE_LIB_DIR)/$(LIBNAME);\
+	fi
+
+install_debug_lib:
+	if $(TEST) -d $(LROSE_DEBUG_LIB_DIR); then :; else \
+		$(MKDIR) $(LROSE_DEBUG_LIB_DIR); fi
+	$(CP) $(LIBNAME) $(LROSE_DEBUG_LIB_DIR)
+	if $(TEST) -f $(RANLIB);\
+	then\
+		$(RANLIB) $(LROSE_DEBUG_LIB_DIR)/$(LIBNAME);\
+	fi
+
+install_copyright:
+	if $(TEST) -f copyright_notice.txt ; then \
+		if $(TEST) -d $(LROSE_COPYRIGHT_DIR); then :; else \
+			$(MKDIR) $(LROSE_COPYRIGHT_DIR); fi ;\
+		$(CP) copyright_notice.txt $(LROSE_COPYRIGHT_DIR)/$(LIBNAME)_copyright_notice.txt ;\
+	fi
+
+install: \
+        install_include install_lib install_copyright
+
+clean_lib:
+	$(RM) $(LIBNAME)
+
+clean_all: clean clean_lib
+

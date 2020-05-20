@@ -1,0 +1,23 @@
+# colorscale for phase fields
+
+# Mike Dixon, April 1991
+
+-180	-160    DarkSlateBlue
+-160	-140	NavyBlue
+-140	-120	Blue
+-120 	-100	MediumBlue
+-100	-80	SkyBlue
+-80	-60 	DarkGreen
+-60	-40	ForestGreen
+-40 	-20	YellowGreen
+-20	0	Gray
+0  	20 	Wheat
+20  	40 	Gold
+40  	60 	Yellow
+60 	80 	goldenrod
+80	100	Coral
+100	120	Orange
+120	140	MediumVioletRed
+140	160	OrangeRed
+160	180	Red
+

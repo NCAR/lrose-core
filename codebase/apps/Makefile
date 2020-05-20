@@ -3,7 +3,7 @@
 # does not include scripts
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
@@ -17,7 +17,6 @@ SUB_DIRS = \
 	ingest \
 	dsserver \
 	mdv_utils \
-        mm5 \
         physics \
         satApps \
 	spdb_utils \
@@ -31,4 +30,4 @@ SUB_DIRS = \
         spol \
         xpol
 
-include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets

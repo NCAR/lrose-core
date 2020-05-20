@@ -2,7 +2,19 @@
 
 #===========================================================================
 #
-# Build LROSE release, using autoconf and configure
+# Checkout and build LROSE, using autoconf and configure.
+#
+# This script performs the following steps:
+#
+#   1. clone lrose-core from git
+#   2. setup autoconf Makefile.am files
+#   3. run configure to create makefiles
+#   4. perform the build and install
+#   5. check the build
+#
+# You can optionally specify a release date.
+#
+# Use --help to see the command line options.
 #
 #===========================================================================
 
@@ -24,6 +36,9 @@ def main():
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
+
+    global thisScriptDir
+    thisScriptDir = os.path.dirname(__file__)
 
     global options
     global package
@@ -72,10 +87,13 @@ def main():
     parser.add_option('--package',
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
-                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd, samurai')
+                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-cidd, samurai')
     parser.add_option('--releaseDate',
                       dest='releaseDate', default='latest',
-                      help='Tag to check out lrose-core')
+                      help='Date from which to compute tag for git clone. Applies if --tag is not used.')
+    parser.add_option('--tag',
+                      dest='tag', default='master',
+                      help='Tag to check out lrose. Overrides --releaseDate')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDirDefault,
                       help='Install directory, default is ~/lrose')
@@ -107,10 +125,10 @@ def main():
                       dest='noScripts', default=False,
                       action="store_true",
                       help='Do not install runtime scripts as well as binaries')
-    parser.add_option('--useSystemNetcdf',
-                      dest='useSystemNetcdf', default=False,
+    parser.add_option('--buildNetcdf',
+                      dest='buildNetcdf', default=False,
                       action="store_true",
-                      help='Use system install of NetCDF and HDF5 instead of building it here')
+                      help='Build netcdf and hdf5 from source')
     parser.add_option('--fractl',
                       dest='build_fractl', default=False,
                       action="store_true",
@@ -146,11 +164,10 @@ def main():
     if (options.package != "lrose-core" and
         options.package != "lrose-blaze" and
         options.package != "lrose-cyclone" and
-        options.package != "lrose-radx" and
         options.package != "lrose-cidd" and
         options.package != "samurai") :
         print("ERROR: invalid package name: %s:" % options.package, file=sys.stderr)
-        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd, samurai",
+        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-cidd, samurai",
               file=sys.stderr)
         sys.exit(1)
 
@@ -177,7 +194,11 @@ def main():
 
     # set release tag
 
-    if (options.releaseDate == "latest"):
+    if (options.tag != "master"):
+        releaseTag = options.tag
+        releaseName = options.tag
+        releaseDate = "not-set"
+    elif (options.releaseDate == "latest"):
         releaseDate = datetime(int(dateStr[0:4]),
                                int(dateStr[4:6]),
                                int(dateStr[6:8]))
@@ -190,7 +211,7 @@ def main():
                                int(options.releaseDate[6:8]))
         releaseTag = options.package + "-" + options.releaseDate[0:8]
         releaseName = releaseTag
-    
+
     # set directories
     
     scratchBuildDir = os.path.join(options.buildDir, 'scratch')
@@ -227,7 +248,7 @@ def main():
         print("  libDir: ", libDir, file=sys.stderr)
         print("  includeDir: ", includeDir, file=sys.stderr)
         print("  shareDir: ", shareDir, file=sys.stderr)
-        print("  useSystemNetcdf: ", options.useSystemNetcdf, file=sys.stderr)
+        print("  buildNetcdf: ", options.buildNetcdf, file=sys.stderr)
         print("  package: ", package, file=sys.stderr)
         print("  use_cmake3: ", options.use_cmake3, file=sys.stderr)
         print("  build_geolib: ", options.build_geolib, file=sys.stderr)
@@ -265,8 +286,8 @@ def main():
 
     logPath = prepareLogFile("install-package-makefiles");
     os.chdir(codebaseDir)
-    shellCmd("./make_bin/installPackageMakefiles.py --package " + 
-             package + " --codedir .")
+    scriptPath = "../build/scripts/installPackageMakefiles.py"
+    shellCmd(scriptPath + " --debug --package " + package)
 
     # trim libs and apps to those required by distribution makefiles
 
@@ -295,7 +316,7 @@ def main():
 
     # build netcdf support
     
-    if (options.useSystemNetcdf == False):
+    if (options.buildNetcdf):
         logPath = prepareLogFile("build-netcdf");
         buildNetcdf()
 
@@ -308,9 +329,10 @@ def main():
     # to the binary install dir:
     #     bin/${package}_runtime_libs
 
+    os.chdir(codebaseDir)
     if (options.installAllRuntimeLibs):
-        os.chdir(codebaseDir)
-        cmd = "./make_bin/installOriginLibFiles.py" + \
+        scriptPath = "../build/scripts/installOriginLibFiles.py"
+        cmd = scriptPath + \
               " --binDir " + tmpBinDir + \
               " --relDir " + runtimeLibRelDir
         if (options.verbose):
@@ -319,8 +341,8 @@ def main():
             cmd = cmd + " --debug"
         shellCmd(cmd)
     elif (options.installLroseRuntimeLibs):
-        os.chdir(codebaseDir)
-        cmd = "./make_bin/installOriginLroseLibs.py" + \
+        scriptPath = "../build/scripts/installOriginLroseLibs.py"
+        cmd = scriptPath + \
               " --binDir " + tmpBinDir + \
               " --libDir " + tmpLibDir + \
               " --relDir " + runtimeLibRelDir
@@ -377,8 +399,8 @@ def createBuildDir():
 
     if (os.path.isdir(options.buildDir)):
 
-        print(("WARNING: you are about to remove all contents in dir: " + 
-              options.buildDir))
+        print("WARNING: you are about to remove all contents in dir: " + 
+              options.buildDir)
         print("===============================================")
         contents = os.listdir(options.buildDir)
         for filename in contents:
@@ -414,19 +436,21 @@ def gitCheckout():
     # lrose core
 
     shellCmd("/bin/rm -rf lrose-core")
-    shellCmd("git clone --branch " + releaseTag + \
-             " https://github.com/NCAR/lrose-core")
+    if (options.tag == "master"):
+        shellCmd("git clone https://github.com/NCAR/lrose-core")
+    else:
+        shellCmd("git clone --branch " + releaseTag + \
+                 " https://github.com/NCAR/lrose-core")
 
     # netcdf and hdf5
 
-    if (options.useSystemNetcdf == False):
+    if (options.buildNetcdf):
         shellCmd("/bin/rm -rf lrose-netcdf")
         shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
 
     # color scales and maps in displays repo
 
-    if (options.package != "lrose-radx" and
-        options.package != "samurai") :
+    if (options.package != "samurai") :
         shellCmd("/bin/rm -rf lrose-displays")
         shellCmd("git clone https://github.com/NCAR/lrose-displays")
 
@@ -439,14 +463,17 @@ def setupAutoconf():
 
     # create files for configure
 
-    shutil.copy("../build/Makefile.top", "Makefile")
-
+    shutil.copy("../build/autoconf/Makefile.top",
+                "./Makefile")
+    
     if (options.static):
         if (package == "lrose-cidd"):
-             shutil.copy("../build/autoconf/configure.base.cidd", "./configure.base")
+            shutil.copy("../build/autoconf/configure.base.cidd",
+                        "./configure.base")
         else:
-             shutil.copy("../build/autoconf/configure.base", "./configure.base")
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+            shutil.copy("../build/autoconf/configure.base",
+                        "./configure.base")
+        shellCmd("../build/autoconf/createConfigure.am.py --dir . " +
                  " --baseName configure.base" +
                  " --pkg " + package + debugStr)
     else:
@@ -456,7 +483,7 @@ def setupAutoconf():
         else:
             shutil.copy("../build/autoconf/configure.base.shared",
                         "./configure.base.shared")
-        shellCmd("./make_bin/createConfigure.am.py --dir ." +
+        shellCmd("../build/autoconf/createConfigure.am.py --dir . " +
                  " --baseName configure.base.shared --shared" +
                  " --pkg " + package + debugStr)
 
@@ -655,12 +682,12 @@ def buildPackage():
 
     logPath = prepareLogFile("run-configure");
     os.chdir(codebaseDir)
-    if (options.useSystemNetcdf):
-        cmd = "./configure --prefix=" + scratchBuildDir
-    else:
+    if (options.buildNetcdf):
         cmd = "./configure --with-hdf5=" + scratchBuildDir + \
               " --with-netcdf=" + scratchBuildDir + \
                                 " --prefix=" + scratchBuildDir
+    else:
+        cmd = "./configure --prefix=" + scratchBuildDir
     shellCmd(cmd)
 
     # build the libraries
@@ -777,7 +804,7 @@ def checkInstall():
 
     os.chdir(coreDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_libs.py " + \
+    shellCmd("./build/scripts/checkLibs.py " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + prefix + "/lib " + \
              "--label " + package + " --maxAge 3600")
@@ -785,7 +812,7 @@ def checkInstall():
 
     if (options.no_core_apps == False):
         print(("============= Checking apps for " + package + " ============="))
-        shellCmd("./codebase/make_bin/check_apps.py " + \
+        shellCmd("./build/scripts/checkApps.py " + \
                  "--listPath ./build/checklists/apps_check_list." + package + " " + \
                  "--appDir " + prefix + "/bin " + \
                  "--label " + package + " --maxAge 3600")

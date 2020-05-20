@@ -68,75 +68,36 @@ See: [LROSE package dependencies](./lrose_package_dependencies.md)
 
 ## 3. Setting up your environment
 
-The software development system at NCAR/RAL (formerly RAP) and NCAR/EOL makes use of a recursive makefile approach, using environment variables to identify the various directories used during the build.
+The LROSE manual build uses a recursive makefile approach, using environment variables to identify the various directories used during the build.
 
-Therefore, before performing the build, you need to set up the correct environment, as follows:
+Therefore, before performing the build, you need to set up the correct environment.
 
-### Set the environment variable for the directory into which you wish to install the build:
+### Set environment variables for the build:
 
+For sh or bash:
 ```
-  $LROSE_INSTALL_DIR
-```
-
-This will normally be:
-
-```
-  ~/lrose
+export HOST_OS=LINUX_LROSE
+export LROSE_INSTALL_DIR=$HOME/lrose
+export LROSE_CORE_DIR=$HOME/git/lrose-core
 ```
 
-The build will be installed in:
+For csh or tcsh:
+```
+setenv HOST_OS OSX_LROSE
+setenv LROSE_INSTALL_DIR $HOME/lrose
+setenv LROSE_CORE_DIR $HOME/git/lrose-core
+```
 
+Preferably, you should permanently set these directly in your `.cshrc` or `.bashrc` file.
+Then the environment will always be correctly set.
+
+The software is installed in:
 ```
   $LROSE_INSTALL_DIR/bin
   $LROSE_INSTALL_DIR/lib
   $LROSE_INSTALL_DIR/include
 ```
-
-### Set the environment variable to point to the git lrose-core directory:
-
-```
-  $LROSE_CORE_DIR
-```
-
-This should point to the top of the distribution, i.e. lrose-core.
-
-This will normally be:
-
-```
-  ~/git/lrose-core
-```
-
-### Source the environment, depending on the shell you are using:
-
-For sh or bash:
-```
-  cd $LROSE_CORE_DIR
-  source build/set_build_env.sh
-```  
-
-For csh or tcsh:
-```
-  cd $LROSE_CORE_DIR
-  source build/set_build_env.csh
-```
-
-Preferably, you should permanently copy the contents of these these files
-directly into your `.cshrc` or `.bashrc` file.
-That way the environment will always be correcty set.
-
-This will set the following important environment variables:
-
-```
- $HOST_OS: the flavor of OS for your system.
- $RAP_MAKE_INC_DIR: include files used by the makefiles
- $RAP_MAKE_BIN_DIR: scripts for the make
- $RAP_INC_DIR: the include install directory
- $RAP_LIB_DIR: the library install directory
- $RAP_BIN_DIR: the binary install directory
-```
-
-Several other variables are set as well.
-
+ 
 <a name="build"/>
 
 ## 4. Build
@@ -160,33 +121,33 @@ The codebase is checked in with upper-case Makefiles throughout the tree.
 
 To get the build you want, you must install the lower-case makefiles relevant to the package you need.
 
-To install the **lrose** standard package makefiles, perform the following:
+To install the **lrose-core** standard package makefiles, perform the following:
 
 ```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/installPackageMakefiles.py
+  cd $LROSE_CORE_DIR
+  ./build/scripts/installPackageMakefiles.py
 ```
 This is equivalent to the following
 
 ```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/installPackageMakefiles.py --package lrose
+  cd $LROSE_CORE_DIR
+  ./build/scripts/installPackageMakefiles.py --package lrose-core
 ```
 
-If you want to perform a specific package package, you can specify that on the command line.
-
-For the **radx** distribtion, run the following:
-
-```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/installPackageMakefiles.py --package radx
-```
+If you want to build a specific version, you can specify that on the command line.
 
 For the **titan** distribtion, run the following:
 
 ```
-  cd $LROSE_CORE_DIR/codebase
-  ./make_bin/installPackageMakefiles.py --package titan
+  cd $LROSE_CORE_DIR
+  ./build/scripts/installPackageMakefiles.py --package titan
+```
+
+For the **samurai** distribtion, run the following:
+
+```
+  cd $LROSE_CORE_DIR
+  ./build/scripts/installPackageMakefiles.py --package samurai
 ```
 
 ### Perform the build
@@ -204,7 +165,7 @@ For the **titan** distribtion, run the following:
 
 ```
   cd $LROSE_CORE_DIR/codebase/libs/
-  make install_include
+  make -j 8 install_include
   make -j 8 opt
   make -j 8 install
 ```

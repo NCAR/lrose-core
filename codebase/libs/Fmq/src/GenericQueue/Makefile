@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = ../libFmq.a
 
@@ -24,7 +24,7 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 
 HDRS = \
-	$(RAP_INC_DIR)/Fmq/GenericQueue.hh
+	$(LROSE_INSTALL_DIR)/include/Fmq/GenericQueue.hh
 
 CPPC_SRCS = \
 	GenericQueue.cc
@@ -33,7 +33,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

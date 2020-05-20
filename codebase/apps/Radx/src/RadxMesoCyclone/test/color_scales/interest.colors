@@ -1,0 +1,23 @@
+# NAME interest.colors
+
+# awdl 	6/15/1993 15:20:31
+
+0.0000  0.0001  gray99
+0.0001 	0.055 	gray97
+0.055 	0.11 	gray73
+0.11 	0.165 	gray51
+0.165 	0.22 	gray41
+0.22 	0.275 	gray31
+0.275 	0.33 	gray21
+0.33 	0.385 	blue4
+0.385 	0.44 	DarkOrchid4
+0.44 	0.495 	HotPink4
+0.495 	0.55 	maroon
+0.55 	0.605 	sienna
+0.605 	0.66 	chocolate
+0.66 	0.715 	goldenrod
+0.715 	0.77 	yellow
+0.77 	0.825 	dark salmon
+0.825 	0.88 	salmon
+0.88 	0.935 	firebrick2
+0.935 	1.01 	DeepPink1

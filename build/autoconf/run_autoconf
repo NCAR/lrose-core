@@ -118,7 +118,7 @@ startingDir=`pwd`
 cd codebase
 /bin/cp ../build/autoconf/configure.base .
 /bin/cp ../build/autoconf/configure.base.shared .
-/bin/cp ../build/Makefile.top ./Makefile
+/bin/cp ../build/autoconf/Makefile.top ./Makefile
 
 if [ "$package" == "lrose-cidd" ]
 then

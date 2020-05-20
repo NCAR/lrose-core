@@ -1,0 +1,12 @@
+#
+# supersite with labels
+#
+ICONDEF SSITE 6
+-6 0
+0  6
+6 0
+0 -6
+-6 0
+32767 32767
+#
+ICON SSITE 22.7394 120.6206 0 0

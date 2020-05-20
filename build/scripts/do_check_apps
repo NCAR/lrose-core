@@ -1,0 +1,63 @@
+#! /bin/bash -f
+#
+# check_apps: Check build for applications
+#
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Usage: do_check_apps [options below] prefix"
+    echo "  -h:  produce this usage list"
+    echo "  -d:  turn debugging on"
+    echo "  -p:  set package name (default is lrose)"
+    echo "  -x:  set prefix (default is ${HOME})"
+    echo
+}
+
+#--------------------------------------------------------------------
+# check args
+
+package=lrose-core
+prefix=${HOME}
+debug=false
+
+# Parse command line options.
+while getopts hdp:x: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            package=$OPTARG
+            ;;
+        x)
+            prefix=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# Remove the switches we parsed above.
+shift `expr $OPTIND - 1`
+
+echo "Checking $package build"
+
+./build/scripts/checkApps.py \
+  --listPath ./build/checklists/apps_check_list.${package} \
+  --appDir $prefix/bin \
+  --label $package --maxAge 900 || exit 1
+
+
+

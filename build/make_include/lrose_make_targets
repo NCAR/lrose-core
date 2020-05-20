@@ -1,0 +1,225 @@
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+# ** Copyright UCAR (c) 1992 - 2010 
+# ** University Corporation for Atmospheric Research(UCAR) 
+# ** National Center for Atmospheric Research(NCAR) 
+# ** Research Applications Laboratory(RAL) 
+# ** P.O.Box 3000, Boulder, Colorado, 80307-3000, USA 
+# ** 2010/10/7 16:53:3 
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+##########################################################################
+#
+# Makefile targets for programs
+#
+# Mike Dixon
+#
+# EOL,NCAR,Boulder,Colorado,80307,USA
+# 
+###########################################################################
+
+all:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(OPT_FLAG)" target
+
+debug:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DEBUG_LDFLAGS="-L$(LROSE_DEBUG_LIB_DIR)" \
+	DEBUG_CFLAGS="-DDEBUG" "$(LOC_DEBUG_CFLAGS)" \
+	DEBUG_LIBS="-ldbmalloc" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" target 
+
+profile:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DEBUG_LDFLAGS="-L$(LROSE_PROFILE_LIB_DIR) $(PROF_LDFLAGS)" \
+	SYS_LIBS="$(PROF_LIBS)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG) $(PROFILE_FLAG)" target 
+
+opt:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(OPT_FLAG)" target 
+
+opt3:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="-O3" target 
+
+opt4:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="-O4" target 
+
+dbgopt:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(OPT_FLAG) $(DEBUG_FLAG)" target 
+
+static:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(DEBUG_FLAG)" \
+	DEBUG_LDFLAGS="$(STATIC_FLAG)" target 
+
+staticopt:
+	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" _FC="$(FC)" _F90C="$(F90C)" \
+	_F95C="$(F95C)" \
+	DBUG_OPT_FLAGS="$(OPT_FLAG)" \
+	DEBUG_LDFLAGS="$(STATIC_FLAG)" target 
+
+target:
+	if $(TEST) $(MODULE_TYPE) = library; \
+	then \
+		echo Making library ... ; \
+		$(MAKE) _CC="$(_CC)" _CPPC="$(_CPPC)" DBUG_OPT_FLAGS="$(DBUG_OPT_FLAGS)" DEBUG_CFLAGS="$(DEBUG_CFLAGS)" DEBUG_LIBS="$(DEBUG_LIBS)" DEBUG_LDFLAGS="$(DEBUG_LDFLAGS)" SYS_LIBS="$(SYS_LIBS)" SYS_CFLAGS="$(SYS_CFLAGS)" lib; \
+	elif $(TEST) $(MODULE_TYPE) = library_so; \
+	then \
+		echo Making library ... ; \
+		$(MAKE) _CC="$(_CC)" _CPPC="$(_CPPC)" DBUG_OPT_FLAGS="$(DBUG_OPT_FLAGS)" DEBUG_CFLAGS="$(DEBUG_CFLAGS)" DEBUG_LIBS="$(DEBUG_LIBS)" DEBUG_LDFLAGS="$(DEBUG_LDFLAGS)" SYS_LIBS="$(SYS_LIBS)" SYS_CFLAGS="$(SYS_CFLAGS)" lib_so; \
+	else \
+		echo Making program ... ; \
+		$(MAKE) _CC="$(_CC)" _CPPC="$(_CPPC)" _FC="$(_FC)" DBUG_OPT_FLAGS="$(DBUG_OPT_FLAGS)" DEBUG_CFLAGS="$(DEBUG_CFLAGS)" DEBUG_LIBS="$(DEBUG_LIBS)" DEBUG_LDFLAGS="$(DEBUG_LDFLAGS)" SYS_LIBS="$(SYS_LIBS)" SYS_CFLAGS="$(SYS_CFLAGS)" $(TARGET_FILE); \
+	fi
+
+lib:	$(OBJS)
+	echo Archiving library ...
+	$(AR) $(ARFLAGS) $(TARGET_FILE) $(OBJS)
+
+lib_so:	$(OBJS)
+	echo Making shared object library...
+	ld -shared $(OBJS) -o $(TARGET_FILE)
+
+$(TARGET_FILE): $(OBJS) Makefile
+	if $(TEST) $(MODULE_TYPE) = program; \
+	then \
+		echo Linking C program ...; \
+		LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LOC_LD_LIBRARY_PATH):$(SYS_LD_LIBRARY_PATH); \
+		$(RM) $(TARGET_FILE); \
+		$(_CC) $(DBUG_OPT_FLAGS) -o $(TARGET_FILE) \
+		$(OBJS) $(DEBUG_LDFLAGS) $(LDFLAGS) \
+		$(LIBS); \
+	elif $(TEST) $(MODULE_TYPE) = progcpp; \
+	then \
+		echo Linking C++ program ...; \
+		LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LOC_LD_LIBRARY_PATH):$(SYS_LD_LIBRARY_PATH); \
+		$(RM) $(TARGET_FILE); \
+		$(_CPPC) $(DBUG_OPT_FLAGS) -o $(TARGET_FILE) \
+		$(OBJS) $(DEBUG_LDFLAGS) $(LDFLAGS) \
+		$(LIBS); \
+	elif $(TEST) $(MODULE_TYPE) = progf77; \
+	then \
+		echo Linking FORTRAN program ...; \
+		$(RM) $(TARGET_FILE); \
+		$(_FC) $(DBUG_OPT_FLAGS) -o $(TARGET_FILE) \
+		$(OBJS) $(DEBUG_LDFLAGS) $(LDFLAGS) \
+		$(LIBS); \
+	else \
+		echo WARNING - unknown module type '$(MODULE_TYPE)'; \
+		exit -1; \
+	fi
+
+install_bin: $(INSTALL_BIN_PATH)
+
+$(INSTALL_BIN_PATH): all
+	if $(TEST) $(MODULE_TYPE) = program || \
+	   $(TEST) $(MODULE_TYPE) = progf77 || \
+	   $(TEST) $(MODULE_TYPE) = progcpp ; \
+	then \
+		if $(TEST) -d $(LROSE_INSTALL_DIR)/bin; then :; else \
+			$(MKDIR) $(LROSE_INSTALL_DIR)/bin; fi ; \
+		if $(TEST) -f $(INSTALL_BIN_PATH) ;\
+		then \
+		 	$(MV) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+			$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH) ;\
+			$(RM) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+		else \
+			$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH); \
+		fi \
+	fi
+	if $(TEST) "$(DO_SRC_README)" = "" ; then :; else \
+	        echo "$(TARGET_FILE) -- source: `$(PWD)`" >> $(LROSE_INSTALL_DIR)/bin/README.src_dir_info ;\
+	fi
+
+install: install_bin
+
+install_cgi:
+	$(MAKE) LROSE_BIN_DIR=$(LROSE_CGI_BIN_DIR) install_bin
+
+copy_bin:
+	if $(TEST) $(MODULE_TYPE) = program || \
+	   $(TEST) $(MODULE_TYPE) = progf77 || \
+	   $(TEST) $(MODULE_TYPE) = progcpp ; \
+	then \
+		if $(TEST) -d $(LROSE_INSTALL_DIR)/bin; then :; else \
+			$(MKDIR) $(LROSE_INSTALL_DIR)/bin; fi ; \
+		if $(TEST) -f $(TARGET_FILE) ; then \
+			if $(TEST) -f $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE) ;\
+			then \
+				$(MV) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+				$(CP) $(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin ;\
+				$(RM) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+			else \
+				$(CP) $(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin; \
+			fi ;\
+		else \
+			echo "ERROR: $(TARGET_FILE) does not exist" ;\
+		fi ;\
+	fi
+
+install_copyright:
+	if $(TEST) -f copyright_notice.txt ; then \
+		if $(TEST) -d $(LROSE_COPYRIGHT_DIR); then :; else \
+			$(MKDIR) $(LROSE_COPYRIGHT_DIR); fi ;\
+		$(CP) copyright_notice.txt $(LROSE_COPYRIGHT_DIR)/$(TARGET_FILE)_copyright_notice.txt ;\
+	fi
+
+add2readme:
+	if $(TEST) -f $(TARGET_FILE) ; then \
+		echo "$(TARGET_FILE) -- source: `$(PWD)`, `$(DATE)`" >> $(LROSE_INSTALL_DIR)/bin/README.src_dir_info ;\
+	fi
+
+clean:
+	$(RM) core a.out
+	$(RM) *.i *.o  *.ln *.class *~ *.mod
+
+clean_bin:
+	$(RM) $(TARGET_FILE)
+
+clean_all: clean clean_bin
+
+lintall:
+	$(RM) *.ln
+	$(MAKE) lint
+
+lint:	lhcheck lcheck
+
+copyright:
+	copyright_remove $(SRCS) $(C_SRCS) $(CPPC_SRCS) $(CPP_SRCS) $(HDRS)
+	copyright_prepend $(SRCS) $(C_SRCS) $(CPPC_SRCS) $(CPP_SRCS) $(HDRS)
+
+rcs_keys:
+	rcs_keys_remove $(SRCS) $(C_SRCS) $(CPPC_SRCS) $(CPP_SRCS) $(HDRS)
+	rcs_keys_prepend $(SRCS) $(C_SRCS) $(CPPC_SRCS) $(CPP_SRCS) $(HDRS)
+
+tags:
+	etags -t $(SRCS) $(C_SRCS) $(CPPC_SRCS) $(CPP_SRCS) $(HDRS) Makefile
+
+depend_generic:
+	makedepend -Y $(INCLUDES) -- $(CFLAGS) -- $(SRCS) $(C_SRCS) $(CPPC_SRCS) $(CPP_SRCS)
+
+clean_depend:
+	makedepend
+
+cppcheck:
+	if $(TEST) -d $(LOC_INC_DIR) ; then \
+	   CppRuleCheck $(SYS_CPPCHECKFLAGS2) $(CPPCHECKFLAGS) $(SRCS) $(C_SRCS) $(CPPC_SRCS) $(CPP_SRCS) *.h *.hh ;\
+	else \
+	   CppRuleCheck $(CPPCHECKFLAGS) $(SRCS) $(C_SRCS) $(CPPC_SRCS) $(CPP_SRCS) *.h *.hh ;\
+	fi
+
+#
+# Include the suffixes
+#
+
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_suffixes

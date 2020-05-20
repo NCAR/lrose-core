@@ -1,0 +1,23 @@
+# NAME deg_C.colors - matches Deg_K.colors.
+# fhage 	4/20/2004 11:36:0
+# MIN    MAX    NAME        COLOR LABEL
+-50	 -28	violet red 	!
+-28	 -25	maroon 	!
+-25	 -21	red3 	!
+-21	 -18	red 	!
+-18	 -15	orange red 	!
+-15	 -12	dark orange 	!
+-12	 -9	orange 	!
+-9	 -6	gold 	!
+-6	 -3	yellow2 	!
+-3	 0	yellow 	!
+0	 2	khaki1 	!
+2	 4	DarkOliveGreen1 	!
+4	 6	pale green 	!
+6	 8	spring green 	!
+8	 10	SpringGreen3 	!
+10	 12	SpringGreen4 	!
+12	 14	dark olive green 	!
+14	 16	dark green 	!
+16	 18	blue3 	!
+18	 50	blue1 	!

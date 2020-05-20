@@ -2,7 +2,7 @@
 # Recursive make for LROSE libraries
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
@@ -22,13 +22,11 @@ SUB_DIRS = \
 	didss \
 	dsdata \
 	dsserver \
-        edge \
 	euclid \
 	grib \
 	grib2 \
 	hydro \
 	kd \
-        mm5 \
 	physics \
 	radar \
 	rapformats \
@@ -37,7 +35,6 @@ SUB_DIRS = \
 	shapelib \
 	tdrp \
 	titan \
-	toolsa \
-	trmm_rsl
+	toolsa
 
-include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets

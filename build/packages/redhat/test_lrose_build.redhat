@@ -130,7 +130,6 @@ if [ "$os_type" = centos -a "$os_version" = 6 ] ; then
         --prefix /usr/local/lrose \
         --buildDir /tmp/lrose_build \
         --logDir /logs \
-        --useSystemNetcdf
 elif [ "$os_type" = centos -a "$os_version" = 7 ] ; then
     docker run \
         -v ${scriptsDir}:/scripts \
@@ -140,7 +139,6 @@ elif [ "$os_type" = centos -a "$os_version" = 7 ] ; then
         --prefix /usr/local/lrose \
         --buildDir /tmp/lrose_build \
         --logDir /logs \
-        --useSystemNetcdf \
         --cmake3 --fractl --vortrac --samurai
 elif [ "$os_type" = centos -a "$os_version" = 8 ] ; then
     docker run \
@@ -151,7 +149,6 @@ elif [ "$os_type" = centos -a "$os_version" = 8 ] ; then
         --prefix /usr/local/lrose \
         --buildDir /tmp/lrose_build \
         --logDir /logs \
-        --useSystemNetcdf \
         --geolib --fractl --vortrac --samurai
 else
     docker run \
@@ -162,7 +159,6 @@ else
         --prefix /usr/local/lrose \
         --buildDir /tmp/lrose_build \
         --logDir /logs \
-        --useSystemNetcdf \
         --fractl --vortrac --samurai
 fi
 

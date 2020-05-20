@@ -1,0 +1,32 @@
+#
+# Binaries
+#
+setenv BIN_DIR          $PWD/../../ncar/rap/bin
+
+#
+# where is CIDD?
+#
+setenv DISPLAY_BIN_DIR /rap/bin
+
+
+#
+#  Incoming Radar data
+#
+setenv DATA_URL  'mdvp:://hail.eol.ucar.edu::/scr/hail1/rsfdata/eolbase/cfradial/kftg/moments'
+
+#
+#  Local top level data path and host
+#
+setenv RAP_DATA_DIR     $PWD/../data_dir
+setenv ALG_HOST         jerk.rap.ucar.edu
+
+#
+# Top level Refract related output path, relative to $RAP_DATA_DIR
+# (all the output will go to $RAP_DATA_DIR/$ALG_PATH/<something>)    
+#
+setenv ALG_PATH        MesoCyclone/mdv
+
+
+setenv TSTART 20180619030000
+setenv TEND   20180619040000
+setenv DEMO_TIME  '03:00 06/19/2018'

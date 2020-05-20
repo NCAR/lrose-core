@@ -2,32 +2,34 @@
 # Recursive make - makes the subdirectory code
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-	Affirm \
-	distBetweenTwoPoints \
+	Binary2Mdv \
+	CwbRadar2Mdv \
 	Egm2Mdv \
 	GribNc2Mdv \
-	KochSurface2Mdv \
-	LatLonBIL2Mdv \
+	McidasNcf2Mdv \
+	Mdv2Ascii \
+	Mdv2AsciiContour \
 	Mdv2Axf \
 	Mdv2AxfCont \
 	Mdv2Grib \
 	Mdv2Medoc \
 	Mdv2NetCDF \
-	Mdv2NewZealand \
 	Mdv2Plain \
-	Mdv2Raob \
+	Mdv2SoundingSpdb \
 	Mdv2SweepNetCDF \
 	Mdv2TextHdr \
 	Mdv2Vil \
 	Mdv3Dto2D \
 	MdvAccumulate \
+	MdvAreaCoverage \
 	MdvArithmetic \
 	MdvBlend \
+	MdvCircularFilt \
 	MdvClump \
 	MdvCombine \
 	MdvComp \
@@ -35,94 +37,61 @@ SUB_DIRS = \
 	MdvContour \
 	MdvConvert \
 	MdvExtractPoint \
-	MdvExtract1Point \
 	MdvFillMissing \
+	MdvFindStormTops \
 	MdvFine2Coarse \
+	MdvFixTimes \
 	MdvFlat2Fcst \
 	MdvFromCircles \
+	MdvGetLatestTime \
 	MdvGrad \
-	MdvGridDiagnostic \
-	MdvHeaders2Xml \
 	MdvHist \
-	MdvHowBad \
-	MdvHowSimilar \
-	MdvKonvert \
+	MdvInterpMissing \
 	MdvLinearComb \
-	MdvMakeCurrent \
-	MdvMatch \
 	MdvMask \
+	MdvMatch \
 	MdvMedian \
 	MdvMerge \
 	MdvMerge2 \
-	MdvMosaic \
+	MdvModel2Vil \
 	MdvMultFilt \
 	MdvOffsetField \
-	MdvOutlier \
 	MdvPatch \
 	MdvPointExtract \
 	MdvPull \
-	MdvQuickCompare \
-	MdvQuickStat \
-	mdvRadialDecimate \
-	MdvRepeatDay \
-	MdvReplaceValues \
-	MdvResample \
-	MdvResampleTerrain \
 	MdvScatterPlot \
-	MdvSigmaP2P \
 	MdvSmooth \
 	MdvSpdDir2UV \
 	MdvStats \
 	MdvTComp \
-	MdvTerrainDistance \
-	MdvThresh \
-	MdvTrim \
 	MdvTSmooth \
+	MdvThresh \
+	MdvUV2SpdDir \
+	MdvVerify \
+	MdvVertProfile \
 	MdvtoGrib2 \
+	Mdvx2Vil \
 	MdvxHowBad \
+	NcGeneric2Mdv \
 	NetCDF2Mdv \
+	Plain2Mdv \
 	PrintMdv \
 	ReadDEM \
 	ReadRUCDEM \
+	Rip2Mdv \
+	SweepNetCDF2Mdv \
 	UpdateMdvFieldNames \
 	UpdateMdvOrigin \
+	UpdateMdvStartEndTimes \
 	UpdateMdvVlevelTypes \
-	WinsRadar2Mdv \
 	WorldTerrain \
-	adjointDump2mdv \
 	ascii2mdv \
-	cedric2mdv \
-	extractDay \
-	gint2mdv \
-	kav6h2mdv \
-	kav6l2mdv \
-	medoc2mdv \
-	mdvDeleteMissing \
-	mdvFindGaps \
-	mdvForecastStatistics \
+	mdv_be2le \
 	mdv_bin_data \
-	mdv_thin \
-	mdv_thresh_cnt \
 	mdv_constant_data \
+	mdv_le2be \
 	mdv_repeat_day \
-	mdv_update_levels \
-	mdv_update_origin \
-	mdvRhiExtract \
-	mdv2prf \
-	mdv2VectorFile \
-	mdvMonitorYesterday \
-	nsslMosaic2Mdv \
-	ppi2comp \
 	print_mdv \
-	rescale_mdv \
-	smooth_mdv \
-	stage4ToMdv \
-	tec2mdv \
-	threshOnHeight \
-	unisysm2mdv \
-	update_mdv_times \
-	wrfFreezingLevel \
-	wrfLtgPotential \
-	MdvInterpMissing
+	update_mdv_times
 
-include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets

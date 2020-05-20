@@ -2,7 +2,7 @@
 # Recursive make - makes the subdirectory code
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
@@ -10,9 +10,6 @@ SUB_DIRS = \
 	AcGeoref2Spdb \
 	AcGeorefCompare \
 	AltCpCompute \
-	AparTsPrint \
-	AparTsSim \
-	AparTs2Moments \
 	CalCompute \
 	CedricPrint \
 	ChillCal2Xml \
@@ -37,6 +34,7 @@ SUB_DIRS = \
 	Mdv2Vad \
 	MdvFold \
 	MdvRadarShear \
+        MergeHcrAndHsrl \
 	NexradPowerStats \
 	PointingCpCompute \
 	PowerInfo2Spdb \
@@ -74,4 +72,4 @@ SUB_DIRS = \
 	VertCompute \
 	ZdrCalSimHv
 
-include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets

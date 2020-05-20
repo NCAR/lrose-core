@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = rucIngest
 MODULE_TYPE = progcpp
@@ -78,19 +78,19 @@ CPPC_SRCS = \
 	RucIngest.cc \
 	main.cc
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # standard targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # tdrp
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets

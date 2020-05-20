@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
@@ -28,12 +28,12 @@ TARGET_FILE = ../libFmq.a
 #
 
 HDRS = \
-	$(RAP_INC_DIR)/Fmq/DsFmq.hh \
-	$(RAP_INC_DIR)/Fmq/FmqMgr.hh \
-	$(RAP_INC_DIR)/Fmq/FmqMgrLocal.hh \
-	$(RAP_INC_DIR)/Fmq/FmqMgrSocket.hh \
-	$(RAP_INC_DIR)/Fmq/FmqMgrClient.hh \
-	$(RAP_INC_DIR)/Fmq/FmqMgrServer.hh
+	$(LROSE_INSTALL_DIR)/include/Fmq/DsFmq.hh \
+	$(LROSE_INSTALL_DIR)/include/Fmq/FmqMgr.hh \
+	$(LROSE_INSTALL_DIR)/include/Fmq/FmqMgrLocal.hh \
+	$(LROSE_INSTALL_DIR)/include/Fmq/FmqMgrSocket.hh \
+	$(LROSE_INSTALL_DIR)/include/Fmq/FmqMgrClient.hh \
+	$(LROSE_INSTALL_DIR)/include/Fmq/FmqMgrServer.hh
 
 CPPC_SRCS = \
 	DsFmq.cc \
@@ -43,7 +43,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

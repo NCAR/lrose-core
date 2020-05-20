@@ -14,11 +14,11 @@
 
 #	Default INSTALL_DIR, should be overridden on command line
 
-INSTALL_DIR=$(RAP_BIN_DIR)
+INSTALL_DIR=$(LROSE_INSTALL_DIR)/bin
 
 #	Default LIB install dir for Python library
 
-INSTALL_LIB_DIR=$(RAP_LIB_DIR)/python
+INSTALL_LIB_DIR=$(LROSE_INSTALL_DIR)/lib/python
 
 #	Script files to be installed
 
@@ -31,9 +31,6 @@ LIBS = \
 #	Targets
 
 all: install
-
-install_shared:
-	make RAP_BIN_DIR=$(RAP_SHARED_BIN_DIR) RAP_LIB_DIR=$(RAP_SHARED_LIB_DIR) install
 
 install: create_subdir create_sub_libdir
 	if test $(INSTALL_LIB_DIR) != . ;\
@@ -58,7 +55,6 @@ create_sub_libdir:
 	fi
 
 install_bin: install
-install_shared_bin: install_shared
 
 # unused targets - needed to prevent make failures
 

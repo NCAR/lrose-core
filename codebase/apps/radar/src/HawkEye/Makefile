@@ -32,13 +32,13 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = HawkEye
 
 LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
-# Note: QJSENGINE is defined in rap_make.OSX_LINUX
+# Note: QJSENGINE is defined in lrose_make.OSX_LINUX
 
 LOC_LIBS = \
           -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
@@ -177,19 +177,19 @@ CPP_SRCS = $(MOC_OUTPUT)
 # tdrp macros
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # QT C++ targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_qt_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_qt_targets
 
 #
 # tdrp targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets

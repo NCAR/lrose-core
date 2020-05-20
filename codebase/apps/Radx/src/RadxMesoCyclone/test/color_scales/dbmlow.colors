@@ -1,0 +1,21 @@
+# NAME dbmlow.colors
+#
+-120 	-110 	gray30
+-110 	-105 	maroon
+-105	-100 	dark orchid
+-100	-95 	blue
+-95	-90 	royal blue
+-90	-85 	deep sky blue
+-85 	-80 	medium spring green
+-80 	-75	forest green
+-75	-70	gray
+-70	-60	tan2
+-60	-50	gold1
+-50	-40	yellow
+-40	-30	salmon1
+-30	-20	tomato
+-20	-10 	brown1
+-10 	0 	red
+0 	20 	firebrick
+#
+#

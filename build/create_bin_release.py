@@ -80,10 +80,10 @@ def main():
                       dest='installScripts', default=False,
                       action="store_true",
                       help='Install scripts as well as binaries')
-    parser.add_option('--useSystemNetcdf',
-                      dest='useSystemNetcdf', default=False,
+    parser.add_option('--buildNetcdf',
+                      dest='buildNetcdf', default=False,
                       action="store_true",
-                      help='Use system install of NetCDF and HDF5 instead of building it here')
+                      help='Build netcdf and hdf5 from source')
 
     (options, args) = parser.parse_args()
 
@@ -181,6 +181,7 @@ def main():
     print("  releaseName: ", releaseName, file=sys.stderr)
     print("  tarName: ", tarName, file=sys.stderr)
     print("  tarDir: ", tarDir, file=sys.stderr)
+    print("  buildNetcdf: ", options.buildNetcdf, file=sys.stderr)
     print("  installScripts: ", options.installScripts, file=sys.stderr)
     print("*****************************************************************",
           file=sys.stderr)
@@ -201,7 +202,7 @@ def main():
 
     # build netcdf support
 
-    if (options.useSystemNetcdf == False):
+    if (options.buildNetcdf):
         logPath = prepareLogFile("build-netcdf");
         buildNetcdf()
 
@@ -217,7 +218,7 @@ def main():
     os.chdir(runDir)
 
     if (sys.platform != "darwin"):
-        shellCmd("./codebase/make_bin/installOriginLibFiles.py --binDir " + \
+        shellCmd("./build/scripts/installOriginLibFiles.py --binDir " + \
                  buildDir + "/bin " + \
                  "--relDir " + package + "_runtime_libs --debug")
 
@@ -257,13 +258,13 @@ def main():
     logPath = prepareLogFile("no-logging");
     os.chdir(runDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_libs.py " + \
+    shellCmd("./build/scripts/checkLibs.py " + \
              "--listPath ./build/checklists/libs_check_list." + package + " " + \
              "--libDir " + buildDir + "/lib " + \
              "--label " + package + " --maxAge 3600")
     print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./codebase/make_bin/check_apps.py " + \
+    shellCmd("./build/scripts/checkApps.py " + \
              "--listPath ./build/checklists/apps_check_list." + package + " " + \
              "--appDir " + buildDir + "/bin " + \
              "--label " + package + " --maxAge 3600")
@@ -406,14 +407,6 @@ def buildPackage():
 
     global logPath
 
-    # args = ""
-    # args = args + " --prefix " + buildDir
-    # args = args + " --package " + package
-    # if (options.installScripts):
-    #     args = args + " --scripts "
-
-    # shellCmd("./build/build_lrose.py " + args)
-
     # set the environment
 
     runtimeLibRelDir = package + "_runtime_libs"
@@ -448,12 +441,12 @@ def buildPackage():
     # run configure
 
     logPath = prepareLogFile("run-configure");
-    if (options.useSystemNetcdf):
-        cmd = "./configure --prefix=" + buildDir
-    else:
+    if (options.buildNetcdf):
         cmd = "./configure --with-hdf5=" + buildDir + \
               " --with-netcdf=" + buildDir + \
                                 " --prefix=" + buildDir
+    else:
+        cmd = "./configure --prefix=" + buildDir
     shellCmd(cmd)
 
     # build the libraries

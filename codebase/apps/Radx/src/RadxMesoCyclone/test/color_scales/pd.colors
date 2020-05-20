@@ -1,0 +1,21 @@
+# number color scale
+
+# Mike Dixon, June 1991
+
+0.5	1.5	#d1d0b8    !cld-drops
+1.5	2.5	#fed89a	   !drizzle
+2.5	3.5	#fe9605	   !lt-rain
+3.5	4.5	#cd770f	   !mod-rain
+4.5	5.5	#ff2f2f	   !hvy-rain
+5.5	6.5	#fbfb2f	   !hail
+6.5	7.5	#1fde14	   !rain/hail
+7.5	8.5	#1fa51f	   !gr/sm-hail
+8.5	9.5	#0e8d0f	   !gr/rain
+9.5	10.5	#4edfff	   !dry-snow
+10.5	11.5	#6394f0	   !wet-snow
+11.5	12.5	#5f54c5	   !ice
+12.5	13.5	#ffcbff	   !irreg-ice
+13.5	14.5	#f89bb7	   !slw
+14.5	15.5	#ffffff	   !insects
+15.5	16.5	#a2a180	   !birds
+16.5	17.5	#c51ea5	   !clutter

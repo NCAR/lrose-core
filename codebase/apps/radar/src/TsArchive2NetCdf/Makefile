@@ -35,9 +35,9 @@
 TARGET_FILE = TsArchive2NetCdf
 RM = /bin/rm -f
 NETCDF_INSTALL_DIR = /opt/local
-INCLUDES = -I$(NETCDF_INSTALL_DIR)/include -I$(RAP_INC_DIR)
+INCLUDES = -I$(NETCDF_INSTALL_DIR)/include -I$(LROSE_INSTALL_DIR)/include
 CFLAGS = -g
-LDFLAGS = -L$(NETCDF_INSTALL_DIR)/lib -L$(RAP_LIB_DIR) -lNcxx -lnetcdf
+LDFLAGS = -L$(NETCDF_INSTALL_DIR)/lib -L$(LROSE_INSTALL_DIR)/lib -lNcxx -lnetcdf
 C++ = g++
 
 SRCS = \
@@ -85,7 +85,7 @@ clean_all: clean clean_bin
 # install
 
 install: $(TARGET_FILE)
-	cp $(TARGET_FILE) $(RAP_BIN_DIR)
+	cp $(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin
 
 # suffixes
 

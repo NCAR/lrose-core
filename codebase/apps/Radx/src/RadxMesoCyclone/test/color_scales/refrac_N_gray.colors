@@ -1,0 +1,11 @@
+# NAME Refract_N_gray.colors
+#
+# Rita for REFRACTT 2005.
+#
+220     240     gray30 
+240	260     gray60 
+260	280     gray70 	
+280	300     gray80	
+300	320     gray90 	
+320	340     snow 	
+#

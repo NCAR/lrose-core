@@ -1,0 +1,28 @@
+# NAME kelvin.colors
+# jaimi 	12/8/1998 14:10:56
+# MIN    MAX    NAME        COLOR LABEL
+265 	270 	gray25 	!
+270 	275 	blue4 	!
+275 	280 	medium blue 	!
+280 	285 	slate blue 	!
+285 	290 	cornflower blue 	!
+290 	295 	medium turquoise 	!
+295 	300 	dark green 	!
+300 	305 	dark olive green 	!
+305 	310 	SpringGreen4 	!
+310 	315 	SpringGreen3 	!
+315 	320 	lime green 	!
+320 	325 	chartreuse 	!
+325 	330 	DarkOliveGreen1 	!
+330 	335 	DarkOrange3 	!
+335 	340 	goldenrod 	!
+340 	345 	gold1 	!
+345 	350 	yellow 	!
+350 	355 	light goldenrod 	!
+355 	360 	dark salmon 	!
+360 	365 	salmon 	!
+365 	370 	PaleVioletRed3 	!
+370 	375 	firebrick 	!
+375 	380 	red 	!
+380 	385 	DeepPink1 	!
+385 	390 	gray 	!

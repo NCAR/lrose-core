@@ -1,0 +1,29 @@
+# colorscale for precip
+
+0.01 	1 	dark green
+1 	2 	dark olive green
+2 	5 	forest green
+5 	10 	SpringGreen3
+10 	15 	medium sea green
+15 	20 	medium aquamarine
+20 	25 	medium slate blue
+25 	30 	blue
+30 	40 	blue4
+40 	50 	DarkOrchid4
+50 	60 	HotPink4
+60 	80 	maroon
+80 	100 	VioletRed4
+100 	125 	sienna
+125 	150	chocolate
+150 	175 	goldenrod
+175 	200 	yellow
+200 	250 	dark salmon
+250 	300 	salmon
+300 	400 	firebrick2
+400 	500 	DeepPink1
+500 	600 	light grey
+600 	2000 	snow
+
+
+
+

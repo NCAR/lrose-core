@@ -1,0 +1,20 @@
+# NAME phase.colors
+
+-180    -160    HotPink
+-160    -140	DeepPink1
+-140    -120 	maroon
+-120    -100 	dark orchid
+-100    -080 	blue
+-080    -060	royal blue
+-060    -040 	deep sky blue
+-040    -020 	medium spring green
+-020    +000 	forest green
++000 	+020 	gray
++020	+040 	tan2
++040	+060 	gold1
++060	+080 	yellow
++080	+100 	salmon1
++100	+120 	tomato
++120	+140 	brown1
++140	+160 	red
++160	+180 	firebrick

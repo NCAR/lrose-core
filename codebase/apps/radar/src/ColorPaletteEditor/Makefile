@@ -15,7 +15,7 @@ CXX           = /Library/Developer/CommandLineTools/usr/bin/clang++
 DEFINES       = -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_QML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g $(EXPORT_ARCH_ARGS) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk -mmacosx-version-min=10.13 -Wall -W -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -stdlib=libc++ -g -std=gnu++11 $(EXPORT_ARCH_ARGS) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk -mmacosx-version-min=10.13 -Wall -W -fPIC $(DEFINES)
-INCPATH       = -I. -I/Users/brenda/lrose/include -I$(HOME)/rap/include -I$(RAP_INC_DIR) -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I. -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/AGL.framework/Headers -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -F/usr/local/Cellar/qt/5.12.0/lib
+INCPATH       = -I. -I/Users/brenda/lrose/include -I$(HOME)/rap/include -I$(LROSE_INSTALL_DIR)/include -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I. -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/AGL.framework/Headers -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -F/usr/local/Cellar/qt/5.12.0/lib
 QMAKE         = /usr/local/opt/qt/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -38,7 +38,7 @@ DISTNAME      = StandardDialogs1.0.0
 DISTDIR = /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/.tmp/StandardDialogs1.0.0
 LINK          = /Library/Developer/CommandLineTools/usr/bin/clang++
 LFLAGS        = -stdlib=libc++ -headerpad_max_install_names $(EXPORT_ARCH_ARGS) -Wl,-syslibroot,/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk -mmacosx-version-min=10.13 -Wl,-rpath,@executable_path/Frameworks
-LIBS          = $(SUBLIBS) -F/usr/local/Cellar/qt/5.12.0/lib -L$(HOME)/lrose/lib -L$(RAP_LIB_DIR) -lFmq -ldsserver -ldidss -lRadx -lradar -lrapformats -ltoolsa -ldataport -ltdrp -lNcxx -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat -lpthread -lm -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework QtScript -framework QtQml -framework QtNetwork -framework OpenGL -framework AGL   
+LIBS          = $(SUBLIBS) -F/usr/local/Cellar/qt/5.12.0/lib -L$(HOME)/lrose/lib -L$(LROSE_INSTALL_DIR)/lib -lFmq -ldsserver -ldidss -lRadx -lradar -lrapformats -ltoolsa -ldataport -ltdrp -lNcxx -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat -lpthread -lm -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework QtScript -framework QtQml -framework QtNetwork -framework OpenGL -framework AGL   
 AR            = /Library/Developer/CommandLineTools/usr/bin/ar cq
 RANLIB        = /Library/Developer/CommandLineTools/usr/bin/ranlib -s
 SED           = sed
@@ -775,7 +775,7 @@ StandardDialogs.app/Contents/PkgInfo:
 StandardDialogs.app/Contents/Resources/empty.lproj: 
 	@test -d StandardDialogs.app/Contents/Resources || mkdir -p StandardDialogs.app/Contents/Resources
 	@touch StandardDialogs.app/Contents/Resources/empty.lproj
-	
+
 StandardDialogs.app/Contents/Info.plist: 
 	@test -d StandardDialogs.app/Contents || mkdir -p StandardDialogs.app/Contents
 	@$(DEL_FILE) StandardDialogs.app/Contents/Info.plist
@@ -976,7 +976,7 @@ moc_Dialog.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QWid
 		Dialog.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib Dialog.hh -o moc_Dialog.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib Dialog.hh -o moc_Dialog.cpp
 
 moc_ColorBar.cpp: ../HawkEye/ColorMap.hh \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QWidget \
@@ -992,7 +992,7 @@ moc_ColorBar.cpp: ../HawkEye/ColorMap.hh \
 		../HawkEye/ColorBar.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../HawkEye/ColorBar.hh -o moc_ColorBar.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../HawkEye/ColorBar.hh -o moc_ColorBar.cpp
 
 moc_ParameterColorDialog.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QtWidgets \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/qtwidgetsglobal.h \
@@ -1136,7 +1136,7 @@ moc_ParameterColorDialog.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framewor
 		ParameterColorDialog.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ParameterColorDialog.hh -o moc_ParameterColorDialog.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ParameterColorDialog.hh -o moc_ParameterColorDialog.cpp
 
 moc_ColorMapTemplates.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QDialog \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/qdialog.h \
@@ -1145,7 +1145,7 @@ moc_ColorMapTemplates.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/H
 		ColorMapTemplates.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ColorMapTemplates.hh -o moc_ColorMapTemplates.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ColorMapTemplates.hh -o moc_ColorMapTemplates.cpp
 
 moc_ClickableLabel.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QLabel \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/qlabel.h \
@@ -1156,7 +1156,7 @@ moc_ClickableLabel.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Head
 		ClickableLabel.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ClickableLabel.hh -o moc_ClickableLabel.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ClickableLabel.hh -o moc_ClickableLabel.cpp
 
 moc_TextEdit.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QTextEdit \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/qtextedit.h \
@@ -1165,7 +1165,7 @@ moc_TextEdit.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QT
 		../ExamineEdit/TextEdit.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/TextEdit.hh -o moc_TextEdit.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/TextEdit.hh -o moc_TextEdit.cpp
 
 moc_SpreadSheetView.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QMainWindow \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/qmainwindow.h \
@@ -1179,19 +1179,19 @@ moc_SpreadSheetView.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Hea
 		/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers/qstring.h \
 		../ExamineEdit/SpreadSheetController.hh \
 		../ExamineEdit/SpreadSheetModel.hh \
-		$(RAP_INC_DIR)/Radx/RadxFile.hh \
-		$(RAP_INC_DIR)/Radx/Radx.hh \
-		$(RAP_INC_DIR)/Radx/RadxTimeList.hh \
-		$(RAP_INC_DIR)/Radx/RadxTime.hh \
-		$(RAP_INC_DIR)/Radx/RadxField.hh \
-		$(RAP_INC_DIR)/Radx/RadxRangeGeom.hh \
-		$(RAP_INC_DIR)/Radx/RadxPacking.hh \
-		$(RAP_INC_DIR)/Radx/RadxBuf.hh \
-		$(RAP_INC_DIR)/Radx/RadxMsg.hh \
-		$(RAP_INC_DIR)/Radx/RadxRemap.hh \
-		$(RAP_INC_DIR)/Radx/RadxVol.hh \
-		$(RAP_INC_DIR)/Radx/RadxPlatform.hh \
-		$(RAP_INC_DIR)/Radx/RadxArray.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxFile.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/Radx.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTimeList.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTime.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxField.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRangeGeom.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPacking.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxBuf.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxMsg.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRemap.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxVol.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPlatform.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxArray.hh \
 		../ExamineEdit/SpreadSheetDelegate.hh \
 		../ExamineEdit/FunctionEditor.hh \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QDialog \
@@ -1214,7 +1214,7 @@ moc_SpreadSheetView.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Hea
 		../ExamineEdit/SpreadSheetView.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/SpreadSheetView.hh -o moc_SpreadSheetView.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/SpreadSheetView.hh -o moc_SpreadSheetView.cpp
 
 moc_spreadsheetdelegate.cpp: ../ExamineEdit/FunctionEditor.hh \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QDialog \
@@ -1226,7 +1226,7 @@ moc_spreadsheetdelegate.cpp: ../ExamineEdit/FunctionEditor.hh \
 		../ExamineEdit/spreadsheetdelegate.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/spreadsheetdelegate.hh -o moc_spreadsheetdelegate.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/spreadsheetdelegate.hh -o moc_spreadsheetdelegate.cpp
 
 moc_FunctionEditor.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QDialog \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/qdialog.h \
@@ -1235,7 +1235,7 @@ moc_FunctionEditor.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Head
 		../ExamineEdit/FunctionEditor.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/FunctionEditor.hh -o moc_FunctionEditor.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/FunctionEditor.hh -o moc_FunctionEditor.cpp
 
 moc_SoloFunctions.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QtWidgets \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/qtwidgetsglobal.h \
@@ -1374,23 +1374,23 @@ moc_SoloFunctions.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Heade
 		/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers/qjsvalue.h \
 		../ExamineEdit/SpreadSheetController.hh \
 		../ExamineEdit/SpreadSheetModel.hh \
-		$(RAP_INC_DIR)/Radx/RadxFile.hh \
-		$(RAP_INC_DIR)/Radx/Radx.hh \
-		$(RAP_INC_DIR)/Radx/RadxTimeList.hh \
-		$(RAP_INC_DIR)/Radx/RadxTime.hh \
-		$(RAP_INC_DIR)/Radx/RadxField.hh \
-		$(RAP_INC_DIR)/Radx/RadxRangeGeom.hh \
-		$(RAP_INC_DIR)/Radx/RadxPacking.hh \
-		$(RAP_INC_DIR)/Radx/RadxBuf.hh \
-		$(RAP_INC_DIR)/Radx/RadxMsg.hh \
-		$(RAP_INC_DIR)/Radx/RadxRemap.hh \
-		$(RAP_INC_DIR)/Radx/RadxVol.hh \
-		$(RAP_INC_DIR)/Radx/RadxPlatform.hh \
-		$(RAP_INC_DIR)/Radx/RadxArray.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxFile.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/Radx.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTimeList.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTime.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxField.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRangeGeom.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPacking.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxBuf.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxMsg.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRemap.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxVol.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPlatform.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxArray.hh \
 		../ExamineEdit/SoloFunctions.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/SoloFunctions.hh -o moc_SoloFunctions.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/SoloFunctions.hh -o moc_SoloFunctions.cpp
 
 moc_DataField.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QtWidgets \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/qtwidgetsglobal.h \
@@ -1530,7 +1530,7 @@ moc_DataField.cpp: /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/Q
 		../ExamineEdit/DataField.hh \
 		moc_predefs.h \
 		/usr/local/Cellar/qt/5.12.0/bin/moc
-	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(RAP_INC_DIR)' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/DataField.hh -o moc_DataField.cpp
+	/usr/local/Cellar/qt/5.12.0/bin/moc $(DEFINES) --include /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/moc_predefs.h -I/usr/local/Cellar/qt/5.12.0/mkspecs/macx-clang -I/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor -I/Users/brenda/lrose/include -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(HOME)/rap/include' -I'/Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/$(LROSE_INSTALL_DIR)/include' -I/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include -I/Library/Developer/CommandLineTools/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include -F/usr/local/Cellar/qt/5.12.0/lib ../ExamineEdit/DataField.hh -o moc_DataField.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -1709,19 +1709,19 @@ Dialog.o: Dialog.cc /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/
 		/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers/qstring.h \
 		../ExamineEdit/SpreadSheetController.hh \
 		../ExamineEdit/SpreadSheetModel.hh \
-		$(RAP_INC_DIR)/Radx/RadxFile.hh \
-		$(RAP_INC_DIR)/Radx/Radx.hh \
-		$(RAP_INC_DIR)/Radx/RadxTimeList.hh \
-		$(RAP_INC_DIR)/Radx/RadxTime.hh \
-		$(RAP_INC_DIR)/Radx/RadxField.hh \
-		$(RAP_INC_DIR)/Radx/RadxRangeGeom.hh \
-		$(RAP_INC_DIR)/Radx/RadxPacking.hh \
-		$(RAP_INC_DIR)/Radx/RadxBuf.hh \
-		$(RAP_INC_DIR)/Radx/RadxMsg.hh \
-		$(RAP_INC_DIR)/Radx/RadxRemap.hh \
-		$(RAP_INC_DIR)/Radx/RadxVol.hh \
-		$(RAP_INC_DIR)/Radx/RadxPlatform.hh \
-		$(RAP_INC_DIR)/Radx/RadxArray.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxFile.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/Radx.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTimeList.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTime.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxField.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRangeGeom.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPacking.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxBuf.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxMsg.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRemap.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxVol.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPlatform.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxArray.hh \
 		../ExamineEdit/SpreadSheetDelegate.hh \
 		../ExamineEdit/FunctionEditor.hh \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QItemDelegate \
@@ -1735,11 +1735,11 @@ Dialog.o: Dialog.cc /usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/
 
 ColorMap.o: ../HawkEye/ColorMap.cc ../HawkEye/ColorMap.hh \
 		../HawkEye/rgb.hh \
-		$(RAP_INC_DIR)/toolsa/TaXml.hh \
-		$(RAP_INC_DIR)/toolsa/TaFile.hh \
-		$(RAP_INC_DIR)/toolsa/file_io.h \
-		$(RAP_INC_DIR)/toolsa/heartbeat.h \
-		$(RAP_INC_DIR)/toolsa/MemBuf.hh
+		$(LROSE_INSTALL_DIR)/include/toolsa/TaXml.hh \
+		$(LROSE_INSTALL_DIR)/include/toolsa/TaFile.hh \
+		$(LROSE_INSTALL_DIR)/include/toolsa/file_io.h \
+		$(LROSE_INSTALL_DIR)/include/toolsa/heartbeat.h \
+		$(LROSE_INSTALL_DIR)/include/toolsa/MemBuf.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ColorMap.o ../HawkEye/ColorMap.cc
 
 ColorBar.o: ../HawkEye/ColorBar.cc ../HawkEye/ColorBar.hh \
@@ -2380,19 +2380,19 @@ SpreadSheetController.o: ../ExamineEdit/SpreadSheetController.cc /usr/local/Cell
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/qtwidgetsversion.h \
 		../ExamineEdit/SpreadSheetController.hh \
 		../ExamineEdit/SpreadSheetModel.hh \
-		$(RAP_INC_DIR)/Radx/RadxFile.hh \
-		$(RAP_INC_DIR)/Radx/Radx.hh \
-		$(RAP_INC_DIR)/Radx/RadxTimeList.hh \
-		$(RAP_INC_DIR)/Radx/RadxTime.hh \
-		$(RAP_INC_DIR)/Radx/RadxField.hh \
-		$(RAP_INC_DIR)/Radx/RadxRangeGeom.hh \
-		$(RAP_INC_DIR)/Radx/RadxPacking.hh \
-		$(RAP_INC_DIR)/Radx/RadxBuf.hh \
-		$(RAP_INC_DIR)/Radx/RadxMsg.hh \
-		$(RAP_INC_DIR)/Radx/RadxRemap.hh \
-		$(RAP_INC_DIR)/Radx/RadxVol.hh \
-		$(RAP_INC_DIR)/Radx/RadxPlatform.hh \
-		$(RAP_INC_DIR)/Radx/RadxArray.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxFile.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/Radx.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTimeList.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTime.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxField.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRangeGeom.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPacking.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxBuf.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxMsg.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRemap.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxVol.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPlatform.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxArray.hh \
 		../ExamineEdit/spreadsheetdelegate.hh \
 		../ExamineEdit/FunctionEditor.hh \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QDialog \
@@ -2552,19 +2552,19 @@ SpreadSheetView.o: ../ExamineEdit/SpreadSheetView.cc /usr/local/Cellar/qt/5.12.0
 		/usr/local/Cellar/qt/5.12.0/lib/QtCore.framework/Headers/qstring.h \
 		../ExamineEdit/SpreadSheetController.hh \
 		../ExamineEdit/SpreadSheetModel.hh \
-		$(RAP_INC_DIR)/Radx/RadxFile.hh \
-		$(RAP_INC_DIR)/Radx/Radx.hh \
-		$(RAP_INC_DIR)/Radx/RadxTimeList.hh \
-		$(RAP_INC_DIR)/Radx/RadxTime.hh \
-		$(RAP_INC_DIR)/Radx/RadxField.hh \
-		$(RAP_INC_DIR)/Radx/RadxRangeGeom.hh \
-		$(RAP_INC_DIR)/Radx/RadxPacking.hh \
-		$(RAP_INC_DIR)/Radx/RadxBuf.hh \
-		$(RAP_INC_DIR)/Radx/RadxMsg.hh \
-		$(RAP_INC_DIR)/Radx/RadxRemap.hh \
-		$(RAP_INC_DIR)/Radx/RadxVol.hh \
-		$(RAP_INC_DIR)/Radx/RadxPlatform.hh \
-		$(RAP_INC_DIR)/Radx/RadxArray.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxFile.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/Radx.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTimeList.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTime.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxField.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRangeGeom.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPacking.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxBuf.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxMsg.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRemap.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxVol.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPlatform.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxArray.hh \
 		../ExamineEdit/SpreadSheetDelegate.hh \
 		../ExamineEdit/FunctionEditor.hh \
 		/usr/local/Cellar/qt/5.12.0/lib/QtWidgets.framework/Headers/QDialog \
@@ -2582,19 +2582,19 @@ SpreadSheetView.o: ../ExamineEdit/SpreadSheetView.cc /usr/local/Cellar/qt/5.12.0
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SpreadSheetView.o ../ExamineEdit/SpreadSheetView.cc
 
 SpreadSheetModel.o: ../ExamineEdit/SpreadSheetModel.cc ../ExamineEdit/SpreadSheetModel.hh \
-		$(RAP_INC_DIR)/Radx/RadxFile.hh \
-		$(RAP_INC_DIR)/Radx/Radx.hh \
-		$(RAP_INC_DIR)/Radx/RadxTimeList.hh \
-		$(RAP_INC_DIR)/Radx/RadxTime.hh \
-		$(RAP_INC_DIR)/Radx/RadxField.hh \
-		$(RAP_INC_DIR)/Radx/RadxRangeGeom.hh \
-		$(RAP_INC_DIR)/Radx/RadxPacking.hh \
-		$(RAP_INC_DIR)/Radx/RadxBuf.hh \
-		$(RAP_INC_DIR)/Radx/RadxMsg.hh \
-		$(RAP_INC_DIR)/Radx/RadxRemap.hh \
-		$(RAP_INC_DIR)/Radx/RadxVol.hh \
-		$(RAP_INC_DIR)/Radx/RadxPlatform.hh \
-		$(RAP_INC_DIR)/Radx/RadxArray.hh
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxFile.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/Radx.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTimeList.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTime.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxField.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRangeGeom.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPacking.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxBuf.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxMsg.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRemap.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxVol.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPlatform.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxArray.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SpreadSheetModel.o ../ExamineEdit/SpreadSheetModel.cc
 
 SpreadSheetItem.o: ../ExamineEdit/SpreadSheetItem.cc ../ExamineEdit/spreadsheetitem.hh \
@@ -2904,19 +2904,19 @@ SoloFunctions.o: ../ExamineEdit/SoloFunctions.cc ../ExamineEdit/SoloFunctions.hh
 		/usr/local/Cellar/qt/5.12.0/lib/QtQml.framework/Headers/qjsvalue.h \
 		../ExamineEdit/SpreadSheetController.hh \
 		../ExamineEdit/SpreadSheetModel.hh \
-		$(RAP_INC_DIR)/Radx/RadxFile.hh \
-		$(RAP_INC_DIR)/Radx/Radx.hh \
-		$(RAP_INC_DIR)/Radx/RadxTimeList.hh \
-		$(RAP_INC_DIR)/Radx/RadxTime.hh \
-		$(RAP_INC_DIR)/Radx/RadxField.hh \
-		$(RAP_INC_DIR)/Radx/RadxRangeGeom.hh \
-		$(RAP_INC_DIR)/Radx/RadxPacking.hh \
-		$(RAP_INC_DIR)/Radx/RadxBuf.hh \
-		$(RAP_INC_DIR)/Radx/RadxMsg.hh \
-		$(RAP_INC_DIR)/Radx/RadxRemap.hh \
-		$(RAP_INC_DIR)/Radx/RadxVol.hh \
-		$(RAP_INC_DIR)/Radx/RadxPlatform.hh \
-		$(RAP_INC_DIR)/Radx/RadxArray.hh
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxFile.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/Radx.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTimeList.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxTime.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxField.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRangeGeom.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPacking.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxBuf.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxMsg.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxRemap.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxVol.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxPlatform.hh \
+		$(LROSE_INSTALL_DIR)/include/Radx/RadxArray.hh
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SoloFunctions.o ../ExamineEdit/SoloFunctions.cc
 
 SoloFunctionsModel.o: ../ExamineEdit/SoloFunctionsModel.cc 
@@ -3117,7 +3117,7 @@ moc_DataField.o: moc_DataField.cpp
 install_target: first FORCE
 	@test -d $(INSTALL_ROOT)/usr/local/Cellar/qt/5.12.0/examples/widgets/dialogs/standarddialogs || mkdir -p $(INSTALL_ROOT)/usr/local/Cellar/qt/5.12.0/examples/widgets/dialogs/standarddialogs
 	$(DEL_FILE) -r $(INSTALL_ROOT)/usr/local/Cellar/qt/5.12.0/examples/widgets/dialogs/standarddialogs/StandardDialogs.app
-	
+
 	-$(QINSTALL) StandardDialogs.app $(INSTALL_ROOT)/usr/local/Cellar/qt/5.12.0/examples/widgets/dialogs/standarddialogs/StandardDialogs.app
 
 uninstall_target: FORCE

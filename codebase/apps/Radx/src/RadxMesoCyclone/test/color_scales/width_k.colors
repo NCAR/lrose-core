@@ -1,0 +1,20 @@
+# colorscale for width for K-band
+
+0	0.1     DarkSlateBlue
+0.1 	0.2	NavyBlue
+0.2	0.3 	Blue
+0.3 	0.4	MediumBlue
+0.4 	0.5 	SkyBlue
+0.5 	0.6 	DarkGreen
+0.6	0.75	ForestGreen
+0.75 	1.0	YellowGreen
+1.0 	1.25 	Gold
+1.25	1.5 	Yellow
+1.5	1.75	Coral
+1.75	2.00	Orange
+2.00	2.25	MediumVioletRed
+2.25	2.50	OrangeRed
+2.50	3.00	Red
+3.00	4.00	Gray50
+4.00	10.0	gray20
+

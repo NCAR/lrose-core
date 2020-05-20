@@ -16,7 +16,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
@@ -29,11 +29,11 @@ MODULE_TYPE=library
 #
 
 HDRS = \
-	$(RAP_INC_DIR)/euclid/ProjFlat.hh \
-	$(RAP_INC_DIR)/euclid/ProjLatlon.hh \
-	$(RAP_INC_DIR)/euclid/ProjRUC2Lambert.hh \
-	$(RAP_INC_DIR)/euclid/ProjType.hh \
-	$(RAP_INC_DIR)/euclid/Projection.hh
+	$(LROSE_INSTALL_DIR)/include/euclid/ProjFlat.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/ProjLatlon.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/ProjRUC2Lambert.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/ProjType.hh \
+	$(LROSE_INSTALL_DIR)/include/euclid/Projection.hh
 
 CPPC_SRCS = \
 	ProjFlat.cc \
@@ -44,7 +44,7 @@ CPPC_SRCS = \
 # general targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_module_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
 # local targets

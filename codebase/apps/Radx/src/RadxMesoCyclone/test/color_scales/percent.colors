@@ -1,0 +1,21 @@
+# colorscale for percent
+
+# Mike Dixon, April 1991
+	
+0	1	DarkSlateBlue
+1 	2 	NavyBlue
+2	4 	Blue
+4 	6	MediumBlue
+6 	8 	SkyBlue
+8 	10 	DarkGreen
+10	13	ForestGreen
+13	16	YellowGreen
+16	20	Gold
+20	25 	Yellow
+25	30	Coral
+30	40	Orange
+40	50	MediumVioletRed
+50	60	OrangeRed
+60	80	Red
+80	100	Gray
+

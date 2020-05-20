@@ -16,6 +16,7 @@ RUN \
     --releaseDate ${RELEASE_DATE} \
     --prefix /usr/local/cidd \
     --buildDir /tmp/cidd_build \
+    --buildNetcdf \
     --logDir /tmp/cidd_build_logs
 
 # clean up

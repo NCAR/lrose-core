@@ -2,7 +2,7 @@
 # Recursive make - makes the subdirectory code
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
@@ -28,7 +28,6 @@ SUB_DIRS = \
 	LdmDynamic2Static \
 	LdmMetars2File \
 	Ltg2Spdb \
-	madis2Spdb \
 	Metar2Spdb \
 	Mrms2Mdv \
 	MrmsGribIngest \
@@ -57,10 +56,11 @@ SUB_DIRS = \
 	WrfVIL2Mdv \
 	WsiNidsIngest \
 	file_repeat_day \
+	madis2Spdb \
 	nexrad2dsr \
 	noaaportLtg2Spdb \
 	sndgIngest \
 	superResNexradII2Dsr \
 	superResNexradLdmUnzip
 
-include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets

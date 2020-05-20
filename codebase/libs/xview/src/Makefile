@@ -2,7 +2,7 @@
 # Recursive make - makes the subdirectory code
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGETS = $(GENERAL_TARGETS)
 
@@ -48,14 +48,14 @@ SUB_DIRS = \
 	window \
 	wmgr
 
-include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 
 install_include: FORCE
-	if $(TEST) -d $(RAP_INC_DIR)/xview; then :; else \
-		$(MKDIR) $(RAP_INC_DIR)/xview; fi
-	$(CP) include/xview/*.h $(RAP_INC_DIR)/xview
-	if $(TEST) -d $(RAP_INC_DIR)/pixrect; then :; else \
-		$(MKDIR) $(RAP_INC_DIR)/pixrect; fi
-	$(CP) include/pixrect/*.h $(RAP_INC_DIR)/pixrect
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/xview; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/xview; fi
+	$(CP) include/xview/*.h $(LROSE_INSTALL_DIR)/include/xview
+	if $(TEST) -d $(LROSE_INSTALL_DIR)/include/pixrect; then :; else \
+		$(MKDIR) $(LROSE_INSTALL_DIR)/include/pixrect; fi
+	$(CP) include/pixrect/*.h $(LROSE_INSTALL_DIR)/include/pixrect
 
-include $(RAP_MAKE_INC_DIR)/rap_make_lib_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_targets
