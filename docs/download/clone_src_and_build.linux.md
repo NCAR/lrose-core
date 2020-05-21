@@ -79,13 +79,10 @@ To see the usage:
     --buildDir=BUILDDIR   Temporary build dir, default is /tmp/lrose_build
     --logDir=LOGDIR       Logging dir, default is /tmp/lrose_build/logs
     --static              use static linking, default is dynamic
-    --useSystemNetcdf     Use system install of NetCDF and HDF5 instead of
-                          building it here
+    --buildNetcdf         Build NetCDF and HDF5 instead of using the system libs
     --fractl              Checkout and build fractl after core build is complete
-    --vortrac             Checkout and build vortrac after core build is
-                          complete
-    --samurai             Checkout and build samurai after core build is
-                          complete
+    --vortrac             Checkout and build vortrac after core build is complete
+    --samurai             Checkout and build samurai after core build is complete
     --cmake3              Use cmake3 instead of cmake for samurai
     --geolib              Build and install geolib - for fractl, samurai
 
