@@ -57,7 +57,6 @@ Use the following if you need to set up an environment suitable for code develop
 | [codebase/libs](./codebase/libs) | library source code |
 | [codebase/apps](./codebase/apps) | application source code |
 | [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
-| [RadxDualPolApps.md](./docs/apps/radx/dualpol/README_RadxDualpolApps.md) | Documentation index |
 
 ### DOCUMENTATION
 
