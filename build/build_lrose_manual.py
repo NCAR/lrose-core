@@ -121,6 +121,7 @@ def main():
 
     # compute core dir relative to script dir
 
+    global coreDir
     coreDir = os.path.join(thisScriptDir, "..")
     os.chdir(coreDir)
     coreDir = os.getcwd()
@@ -247,25 +248,23 @@ def main():
 
     # check the install
 
-    checkInstall(coreDir)
+    checkInstall()
 
 ########################################################################
 # check the install
 
-def checkInstall(coreDir):
+def checkInstall():
 
     os.chdir(coreDir)
     print(("============= Checking libs for " + package + " ============="))
     shellCmd("./build/scripts/checkLibs.py" + \
-             " --listPath ./build/checklists/libs_check_list." + package + \
-             " --libDir " + prefix + "/lib" + \
-             " --label " + package + " --maxAge 3600")
+             " --prefix " + prefix + \
+             " --package " + package)
     print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
     shellCmd("./build/scripts/checkApps.py" + \
-             " --listPath ./build/checklists/apps_check_list." + package + \
-             " --appDir " + prefix + "/bin" + \
-             " --label " + package + " --maxAge 3600")
+             " --prefix " + prefix + \
+             " --package " + package)
     print("====================================================")
     
     print("**************************************************")

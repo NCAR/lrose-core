@@ -232,23 +232,21 @@ def main():
 def checkInstall():
 
     os.chdir(coreDir)
-    print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./build/scripts/checkLibs.py " + \
-             "--listPath ./build/checklists/libs_check_list." + package + " " + \
-             "--libDir " + prefix + "/lib " + \
-             "--label " + package + " --maxAge 3600")
-    print("====================================================")
 
+    print(("============= Checking libs for " + package + " ============="))
+    shellCmd("./build/scripts/checkLibs.py" + \
+             " --prefix " + prefix + \
+             " --package " + package)
+    print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./build/scripts/checkApps.py " + \
-             "--listPath ./build/checklists/apps_check_list." + package + " " + \
-             "--appDir " + prefix + "/bin " + \
-             "--label " + package + " --maxAge 3600")
+    shellCmd("./build/scripts/checkApps.py" + \
+             " --prefix " + prefix + \
+             " --package " + package)
     print("====================================================")
     
     print("**************************************************")
     print("*** Done building auto release *******************")
-    print("*** Installed in dir: " + prefix + " ***")
+    print(("*** Installed in dir: " + prefix + " ***"))
     print("**************************************************")
 
 ########################################################################

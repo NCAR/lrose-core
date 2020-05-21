@@ -804,18 +804,16 @@ def checkInstall():
 
     os.chdir(coreDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./build/scripts/checkLibs.py " + \
-             "--listPath ./build/checklists/libs_check_list." + package + " " + \
-             "--libDir " + prefix + "/lib " + \
-             "--label " + package + " --maxAge 3600")
+    shellCmd("./build/scripts/checkLibs.py" + \
+             " --prefix " + prefix + \
+             " --package " + package)
     print("====================================================")
 
     if (options.no_core_apps == False):
         print(("============= Checking apps for " + package + " ============="))
-        shellCmd("./build/scripts/checkApps.py " + \
-                 "--listPath ./build/checklists/apps_check_list." + package + " " + \
-                 "--appDir " + prefix + "/bin " + \
-                 "--label " + package + " --maxAge 3600")
+        shellCmd("./build/scripts/checkApps.py" + \
+                 " --prefix " + prefix + \
+                 " --package " + package)
         print("====================================================")
     
     print("**************************************************")
