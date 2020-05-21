@@ -56,8 +56,6 @@ Use the following if you need to set up an environment suitable for code develop
 | [build](./build) | build scripts, release scripts and associated files |
 | [codebase/libs](./codebase/libs) | library source code |
 | [codebase/apps](./codebase/apps) | application source code |
-| [codebase/make_bin](./codebase/make_bin) | scripts to support release and build tasks |
-| [codebase/make_include](./codebase/make_include) | macros and rules for NCAR-style make system |
 | [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
 | [RadxDualPolApps.md](./docs/apps/radx/dualpol/README_RadxDualpolApps.md) | Documentation index |
 
@@ -70,5 +68,5 @@ Use the following if you need to set up an environment suitable for code develop
 
 ### This page is published at:
 
-  [https://ncar.github.io/lrose-core](https://ncar.github.io/lrose-core)
+[https://ncar.github.io/lrose-core](https://ncar.github.io/lrose-core)
 
