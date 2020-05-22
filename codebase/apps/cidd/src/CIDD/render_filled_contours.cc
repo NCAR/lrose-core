@@ -326,7 +326,7 @@ void draw_filled_contours_d( Drawable xid,  met_record_t *mr)
    gd.proj.latlon2xy(lat,lon,x_km,y_km); // World to Map
    disp_proj_to_pixel(&(gd.h_win.margin),x_km,y_km,&x1,&y1);
 
-   mr->proj->xyIndex2latlon(fhdr.nx-1,fhdr.ny-1,lat,lon); // Grid to World 
+   mr->proj->xyIndex2latlon((int)fhdr.nx-1,(int)fhdr.ny-1,lat,lon); // Grid to World 
    gd.proj.latlon2xy(lat,lon,x_km,y_km); // World to Map
    disp_proj_to_pixel(&(gd.h_win.margin),x_km,y_km,&x2,&y2);
 
