@@ -115,7 +115,7 @@ You will run the CIDD build from within the ```lrose-core/build``` directory.
 
 ```
   cd lrose-core/build  
-  ./checkout_and_build_auto.py --package lrose-cidd --prefix $HOME/cidd
+  ./checkout_and_build_auto.py --package lrose-cidd --prefix $HOME/cidd --buildNetcdf
 ```
 
 ## Build output and log files
