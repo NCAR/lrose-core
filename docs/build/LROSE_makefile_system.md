@@ -8,11 +8,15 @@ On Unix-type systems (LINUX, OSX) running the compiler is most commonly managed 
  
 ```make``` uses configuration files to decide what to do. These are either named:
 
-```  Makefile```
+```
+  Makefile
+```
 
 or
 
-```  makefile```
+```
+  makefile
+```
 
 If both ```Makefile``` and ```makefile``` are present, the lower-case version takes precedence.
 
