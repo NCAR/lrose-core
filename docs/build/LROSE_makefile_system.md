@@ -16,9 +16,9 @@ or
 
 If both ```Makefile``` and ```makefile``` are present, the lower-case version takes precedence.
 
-In LROSE, the ```Makefile``` is the primary name. 
+In LROSE, ```Makefile``` is the primary name, and these files are checked in permanently in git. Various procedures may then cause a ```makefile``` to be written to a directory, which will then override the ```Makefile```.
 
-## Anatomy of a Makefile
+## Anatomy of an LROSE Makefile
 
 A Makefile contains several types of information:
 
@@ -31,6 +31,9 @@ There are many tutorials on-line for Makefiles. For example see:
 
   [Makefile Tutorial](https://www.tutorialspoint.com/makefile/makefile_macros.htm)
 
+In LROSE, the main Makefiles are relatively short, created by filling out elements in a simple template. The complexity is added by ```including``` partial makefiles, each with a specific purpose. These partial include makefiles reside in the directory:
+
+  [lrose-core/build/make_include](../../build/make_include)
 
 
 LROSE has the following package options:
