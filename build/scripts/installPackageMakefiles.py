@@ -112,7 +112,12 @@ def doInstall():
         for dir in dirs:
             if (dir == "_makefiles"):
                 dirPath = os.path.join(root, dir)
-                makefilePath = os.path.join(root, "makefile")
+                if (options.package == "lrose-core"):
+                    # for the core, use Makefile instead of makefile
+                    # since this will reinstall the defaults
+                    makefilePath = os.path.join(root, "Makefile")
+                else:
+                    makefilePath = os.path.join(root, "makefile")
                 # check if package makefile exists
                 packageMakefilePath = os.path.join(dirPath, packageMakefileName)
                 if (os.path.isfile(packageMakefilePath)):
