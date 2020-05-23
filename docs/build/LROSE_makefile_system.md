@@ -6,17 +6,10 @@ LROSE depends on ```make``` and the associated ```Makefiles```.
 
 On Unix-type systems (LINUX, OSX) running the compiler is most commonly managed by the ```make``` application.
  
-```make``` uses configuration files to decide what to do. These are either named:
+```make``` uses configuration files to decide what to do. These are named one of the following:
 
-```
-  Makefile
-```
-
-or
-
-```
-  makefile
-```
+* ```Makefile```
+* ```makefile```
 
 If both ```Makefile``` and ```makefile``` are present, the lower-case version takes precedence.
 
