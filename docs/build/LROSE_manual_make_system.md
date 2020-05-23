@@ -169,3 +169,64 @@ Similarly, for the RadxConvert application, we have the following, from the top 
 * [codebase/apps/Radx/src/Makefile](../../codebase/apps/Radx/src/Makefile)
 * [codebase/apps/Radx/src/RadxConvert/Makefile](../../codebase/apps/Radx/src/RadxConvert/Makefile)
 
+## Package-specific makefiles
+
+The Makefiles checked in under the LROSE code tree are applicable for the standard lrose-code build. We refer to this as the **lrose-core package**.
+
+For some purposes, it is desirable to build a different package. For example, we need to be able to build the **rose-cidd** package, which include the ```CIDD``` display and other display utilities that depend on the xview library, which only works properly in 32-bit mode.
+
+To support package-specific builds, we have a series of special-purpose directories nameed ```_makefiles```. These contain package-specific lower-case ```makefiles```.
+
+For the **lrose-cidd** package, the following makefiles reside in the code tree:
+
+```
+  codebase/libs/_makefiles/makefile.lrose-cidd
+  codebase/apps/dsserver/src/_makefiles/makefile.lrose-cidd
+  codebase/apps/_makefiles/makefile.lrose-cidd
+  codebase/apps/tdrp/src/_makefiles/makefile.lrose-cidd
+  codebase/apps/scripts/src/_makefiles/makefile.lrose-cidd
+  codebase/apps/procmap/src/_makefiles/makefile.lrose-cidd
+  codebase/apps/radar/src/_makefiles/makefile.lrose-cidd
+  codebase/apps/cidd/src/_makefiles/makefile.lrose-cidd
+```
+
+If we wish to build a specific package, we first run the ```installPackageMakefiles.py``` script.
+
+This script resides in ```lrose-core/build/scripts```.
+
+The usage is:
+
+```
+  ./build/scripts/installPackageMakefiles.py --help
+  Usage: installPackageMakefiles.py [options]
+  Options:
+    -h, --help         show this help message and exit
+    --debug            Set debugging on
+    --osx              Configure for MAC OSX
+    --package=PACKAGE  Name of distribution for which we are building
+```
+
+To set up the build for the **lrose-cidd** package, we would run:
+
+```
+  ./build/scripts/installPackageMakefiles.py --package lrose-cidd --debug
+```
+
+That will copy the various instances of ```makefile.lrose-cidd``` up one directory, and change the name to the lowwe-case ```makefile``.
+
+The effect would be as follows:
+
+```
+  cp codebase/libs/_makefiles/makefile.lrose-cidd codebase/libs/makefile
+  cp codebase/apps/dsserver/src/_makefiles/makefile.lrose-cidd codebase/apps/dsserver/src/makefile.lrose-cidd
+  cp codebase/apps/_makefiles/makefile.lrose-cidd codebase/apps/makefile
+  cp codebase/apps/tdrp/src/_makefiles/makefile.lrose-cidd codebase/apps/tdrp/src/makefile
+  cp codebase/apps/scripts/src/_makefiles/makefile.lrose-cidd codebase/apps/scripts/src/makefile
+  cp codebase/apps/procmap/src/_makefiles/makefile.lrose-cidd codebase/apps/procmap/src/makefile
+  cp codebase/apps/radar/src/_makefiles/makefile.lrose-cidd codebase/apps/radar/src/makefile
+  cp codebase/apps/cidd/src/_makefiles/makefile.lrose-cidd codebase/apps/cidd/src/makefile
+```
+
+These lower-case ```makefile```s will then take precedence over the uppercase ```Makefile```s that exist at those locations.
+
+
