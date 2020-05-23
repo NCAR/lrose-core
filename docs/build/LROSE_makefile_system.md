@@ -34,7 +34,7 @@ There are many tutorials on-line for Makefiles. For example see:
 
 ### LROSE Makefile templates
 
-In LROSE, the main Makefiles are relatively short, created by filling out elements in a simple template. The complexity is added by ```including``` partial makefiles, each with a specific purpose. These partial include makefiles reside in the directory:
+In LROSE, the main Makefiles are relatively short, created by filling out elements in a simple template. The complexity is added by including partial makefiles, each with a specific purpose. These partial makefiles reside in the directory:
 
 * [lrose-core/build/make_include](../../build/make_include)
 
@@ -72,7 +72,7 @@ The following template is for an application code directory:
   # include main macros
   include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
   # main target - application name
-  TARGET_FILE = RadxConvert
+  TARGET_FILE =
   # local macros
   LOC_INCLUDES =
   LOC_LIBS =
@@ -80,8 +80,12 @@ The following template is for an application code directory:
   LOC_CFLAGS =
   # header code files
   HDRS =
-  # C++ sources
+  # list of C sources
+  SRCS =
+  # list of C++ sources
   CPPC_SRCS =
+  # list of FORTRAN sources
+  F_SRCS =
   # tdrp macros
   include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
   # C++ targets
@@ -96,9 +100,15 @@ For application examples, see:
 * [codebase/apps/mdv_utils/src/PrintMdv/Makefile](../../codebase/apps/mdv_utils/src/PrintMdv/Makefile)
 * [codebase/apps/radar/src/HawkEye/Makefile](../../codebase/apps/radar/src/HawkEye/Makefile)
 
-## more stuff
+The HawkEye example is more complicated, because it is a QT application, so we need to handle the QT complexities.
 
+## Recursion for make through the code tree
 
+```
+* [codebase/apps/Radx/src/RadxConvert/Makefile](../../codebase/apps/Radx/src/RadxConvert/Makefile)
+* [codebase/apps/mdv_utils/src/PrintMdv/Makefile](../../codebase/apps/mdv_utils/src/PrintMdv/Makefile)
+* [codebase/apps/radar/src/HawkEye/Makefile](../../codebase/apps/radar/src/HawkEye/Makefile)
+```
 
 
 LROSE has the following package options:
