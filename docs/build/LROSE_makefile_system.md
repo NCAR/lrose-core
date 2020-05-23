@@ -2,7 +2,7 @@
 
 ## Introduction
 
-LROSE depende on ```make``` and the associated ```Makfiles```.
+LROSE depends on ```make``` and the associated ```Makefiles```.
 
 On Unix-type systems (LINUX, OSX) running the compiler is most commonly managed by the ```make``` application.
  
@@ -14,14 +14,23 @@ or
 
   ```makefile```
 
-
 If both ```Makefile``` and ```makefile``` are present, the lower-case version takes precedence.
 
-## What is a Makefile?
+In LROSE, the ```Makefile``` is the primary name. 
 
-Makefile
+## Anatomy of a Makefile
 
-[Makefile Tutorial](https://www.tutorialspoint.com/makefile/makefile_macros.htm)
+A Makefile contains several types of information:
+
+  * macros - these store values that are used elsewhere in the file
+  * targets - what is to be built
+  * rules - on how to build targets
+  * suffix rules - automatic rules depending in the suffix of a file
+
+There are many tutorials on-line for Makefiles. For example see:
+
+  [Makefile Tutorial](https://www.tutorialspoint.com/makefile/makefile_macros.htm)
+
 
 
 LROSE has the following package options:
