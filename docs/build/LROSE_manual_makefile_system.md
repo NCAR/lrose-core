@@ -1,4 +1,4 @@
-# The LROSE manual make System
+# The LROSE manual make system
 
 ## Introduction
 
@@ -23,7 +23,7 @@ The LROSE manual make procedures depend on the following environment variables:
 | ------------- |:--------:|
 | **HOST_OS** | Flavor of the HOST OS. See [host_os](#host_os) |
 | **LROSE_CORE_DIR** | Top-level directory of lrose-core, checked out from git |
-| **LROSE_INSTALL_DIR** | Location of installation. Will contain ```include, lib, bin``` |
+| **LROSE_INSTALL_DIR** | Target location of installation. Will contain ```include, lib, bin``` |
 
 ## Anatomy of an LROSE Makefile
 
