@@ -100,6 +100,12 @@ paramdef int {
   p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
 } max_realtime_valid_age;
 
+paramdef int {
+  p_default = 5000;
+  p_descr = "Max number of pulses per dwell";
+  p_help = "If the pulse count exceeds this, the current set of pulses is discarded and a new dwell starts.";
+} max_pulses_per_dwell;
+
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to invert the sense of the HV flag in alternating mode.";

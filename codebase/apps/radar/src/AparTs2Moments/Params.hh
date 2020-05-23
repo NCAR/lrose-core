@@ -593,6 +593,8 @@ public:
 
   int max_realtime_valid_age;
 
+  int max_pulses_per_dwell;
+
   tdrp_bool_t invert_hv_flag;
 
   tdrp_bool_t change_velocity_sign;
@@ -760,7 +762,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[102];
+  mutable TDRPtable _table[103];
 
   const char *_className;
 

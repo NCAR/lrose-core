@@ -552,6 +552,14 @@ void BeamReader::_addPulseToDwell(AparTsPulse *pulse)
 	 << _dwellPulses.size() << ", "
 	 << _pulseCount << endl;
   }
+
+  // check that dwell has not grown too large
+
+  if ((int) _dwellPulses.size() > _params.max_pulses_per_dwell) {
+    cerr << "Too many pulses in dwell: " << _dwellPulses.size() << endl;
+    cerr << "Clearing dwell pulses and starting again" << endl;
+    _clearDwellPulses();
+  }
   
 }
 

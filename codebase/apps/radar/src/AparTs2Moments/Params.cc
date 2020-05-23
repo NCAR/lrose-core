@@ -752,6 +752,18 @@
     tt->single_val.i = 360;
     tt++;
     
+    // Parameter 'max_pulses_per_dwell'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("max_pulses_per_dwell");
+    tt->descr = tdrpStrDup("Max number of pulses per dwell");
+    tt->help = tdrpStrDup("If the pulse count exceeds this, the current set of pulses is discarded and a new dwell starts.");
+    tt->val_offset = (char *) &max_pulses_per_dwell - &_start_;
+    tt->single_val.i = 5000;
+    tt++;
+    
     // Parameter 'invert_hv_flag'
     // ctype is 'tdrp_bool_t'
     
