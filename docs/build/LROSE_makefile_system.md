@@ -60,9 +60,7 @@ In [lrose_make_macros](../../build/make_include/lrose_make_macros), you will see
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make.$(HOST_OS)
 ```
 
-This includes a file that defines macros specific to the OS you are running.
-
-For this to work, you need to set the **HOST_OS** environment variable.
+This includes a file that defines macros specific to the OS you are running. For this to work, you need to set the **HOST_OS** environment variable.
 
 The common OS versions supported, along with the include files, are listed in the following table:
 
@@ -71,6 +69,8 @@ The common OS versions supported, along with the include files, are listed in th
 | LINUX_LROSE | [lrose_make.LINUX_LROSE](../../build/make_include/lrose_make.LINUX_LROSE) | normal LINUX build |
 | OSX_LROSE | [lrose_make.OSX_LROSE](../../build/make_include/lrose_make.OSX_LROSE) | build on Mac OSX |
 | CIDD_32 | [lrose_make.CIDD_32](../../build/make_include/lrose_make.CIDD_32) | 32-bit build for CIDD on LINUX |
+
+The ```CIDD``` display application is dependent on the ```xview``` library, which will only work properly if built in 32-bit mode.
 
 ### LROSE Makefile templates
 
