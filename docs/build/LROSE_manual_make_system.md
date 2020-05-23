@@ -212,8 +212,8 @@ To set up the build for the **lrose-cidd** package, we would run:
   installPackageMakefiles.py --package lrose-cidd --debug
 ```
 
-That will copy the various instances of ```makefile.lrose-cidd``` up one directory, and change the name to the lower-case ```makefile```.
-
+That will copy the various instances of ```makefile.lrose-cidd``` up one directory to the parent level, and change the name to the lower-case ```makefile```.
+  
 The effect would be as follows:
 
 ```
@@ -229,8 +229,8 @@ The effect would be as follows:
 
 These lower-case ```makefiles``` will then take precedence over the uppercase ```Makefiles``` that exist at those locations. The build will use these lower-case versions instead.
 
-The exception is on Mac OSX, which for odd reasons has a filesystem that is not properly case-sensitive. On OSX, ```installPackageMakefiles.py```
-will copy to upper-case ```Makefiles```, overwriting the Makefiles that already exist at those locations. So if you run this procedure on OSX, make sure you do not check the resulting files into git, otherwise you will overwrite the **lrose-core** Makefiles.
+The exception is on Mac OSX, which for odd reasons has a filesystem that is not properly case-sensitive. On OSX, ```installPackageMakefiles.py --osx```
+will copy to upper-case ```Makefiles``` instead, overwriting the Makefiles that already exist at those parent locations. So if you run this procedure on OSX, make sure you do not check the resulting files into git, otherwise you will overwrite the **lrose-core** Makefiles.
 
 To revert to the correct makefiles for **lrose-core**, you can always run:
 
