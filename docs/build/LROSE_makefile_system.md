@@ -40,7 +40,7 @@ These partial makefiles reside in the directory:
 
 * [lrose-core/build/make_include](../../build/make_include)
 
-The following table lists the more common includes:
+The following table lists the common top-level includes:
 
 | Include file  | Purpose      |
 | ------------- |:-------------:|
@@ -51,6 +51,26 @@ The following table lists the more common includes:
 | [lrose_make_c_targets](../../build/make_include/lrose_make_c_targets) | targets for C apps |
 | [lrose_make_c++_targets](../../build/make_include/lrose_make_c_targets) | targets for C++ apps |
 | [lrose_make_qt_targets](../../build/make_include/lrose_make_qt_targets) | extra targets for QT apps |
+
+### Macros for specific OS versions
+
+In [lrose_make_macros](../../build/make_include/lrose_make_macros), you will see the following line:
+
+```
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make.$(HOST_OS)
+```
+
+This includes a file that defines macros specific to the OS you are running.
+
+For this to work, you need to set the **HOST_OS** environment variable.
+
+The common OS versions supported, along with the include files, are listed in the following table:
+
+| HOST_OS  | Include file       | Comments |
+| ------------- |:-------------:|:--------:|
+| [lrose_make.LINUX_LROSE](../../build/make_include/lrose_make.LINUX_LROSE) | normal LINUX build |
+| [lrose_make.OSX_LROSE](../../build/make_include/lrose_make.OSX_LROSE) | build on Mac OSX |
+| [lrose_make.CIDD_32](../../build/make_include/lrose_make.CIDD_32) | 32-bit build for CIDD on LINUX |
 
 ### LROSE Makefile templates
 
