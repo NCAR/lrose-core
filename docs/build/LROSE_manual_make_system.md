@@ -15,6 +15,10 @@ If both ```Makefile``` and ```makefile``` are present, the lower-case version ta
 
 In LROSE, ```Makefile``` is the primary name, and these files are checked in permanently in git. Various procedures you can run will cause a ```makefile``` to be written to a directory, which will then override the ```Makefile```.
 
+There are many tutorials on-line for Makefiles. For example see:
+
+* [Makefile Tutorial](https://www.tutorialspoint.com/makefile/makefile_macros.htm)
+
 ## Environment variables
 
 The LROSE manual make procedures depend on the following environment variables:
@@ -35,12 +39,6 @@ A Makefile contains several types of information:
   * targets - what is to be built
   * rules - on how to build targets
   * suffix rules - automatic rules depending in the suffix of a file
-
-### Makefile tutorials
-
-There are many tutorials on-line for Makefiles. For example see:
-
-* [Makefile Tutorial](https://www.tutorialspoint.com/makefile/makefile_macros.htm)
 
 ### LROSE Makefile includes
 
@@ -84,7 +82,7 @@ The common OS versions supported, along with the include files, are listed in th
 
 The ```CIDD``` display application is dependent on the ```xview``` library, which will only work properly if built in 32-bit mode.
 
-### LROSE Makefile templates
+## LROSE Makefile templates
 
 The actual Makefiles are created by filling out elements in a template. As mentioend above, the complexity is added by including partial makefiles.
 
