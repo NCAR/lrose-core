@@ -169,7 +169,7 @@ Similarly, for the RadxConvert application, we have the following, from the top 
 * [codebase/apps/Radx/src/Makefile](../../codebase/apps/Radx/src/Makefile)
 * [codebase/apps/Radx/src/RadxConvert/Makefile](../../codebase/apps/Radx/src/RadxConvert/Makefile)
 
-## Package-specific makefiles
+## Installing package-specific makefiles
 
 The Makefiles checked in under the LROSE code tree are applicable for the standard lrose-core build. We refer to this as the **lrose-core package**.
 
