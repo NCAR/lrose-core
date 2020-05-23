@@ -44,13 +44,13 @@ The following table lists the more common includes:
 
 | Include file  | Purpose      |
 | ------------- |:-------------:|
-| [lrose_make_macros](../../make_include/lrose_make_macros) | main macro definitions |
-| [lrose_make_targets](../../make_include/lrose_make_targets) | general target rules |
-| [lrose_make_suffixes](../../make_include/lrose_make_suffixes) | suffix rules |
-| [lrose_make_lib_targets](../../make_include/lrose_make_lib_targets) | targets for C libraries |
-| [lrose_make_c_targets](../../make_include/lrose_make_c_targets) | targets for C apps |
-| [lrose_make_c++_targets](../../make_include/lrose_make_c_targets) | targets for C++ apps |
-| [lrose_make_qt_targets](../../make_include/lrose_make_qt_targets) | extra targets for QT apps |
+| [lrose_make_macros](../../build/make_include/lrose_make_macros) | main macro definitions |
+| [lrose_make_targets](../../build/make_include/lrose_make_targets) | general target rules |
+| [lrose_make_suffixes](../../build/make_include/lrose_make_suffixes) | suffix rules |
+| [lrose_make_lib_targets](../../build/make_include/lrose_make_lib_targets) | targets for C libraries |
+| [lrose_make_c_targets](../../build/make_include/lrose_make_c_targets) | targets for C apps |
+| [lrose_make_c++_targets](../../build/make_include/lrose_make_c_targets) | targets for C++ apps |
+| [lrose_make_qt_targets](../../build/make_include/lrose_make_qt_targets) | extra targets for QT apps |
 
 ### LROSE Makefile templates
 
