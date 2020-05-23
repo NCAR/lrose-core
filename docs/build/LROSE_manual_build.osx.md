@@ -226,6 +226,15 @@ since lrose-core is the default package.
   make -j 8 install
 ```
 
+#### (d) Install runtime scripts if needed
+
+```
+  cd $LROSE_CORE_DIR/codebase/apps/scripts/src
+  make install
+  cd $LROSE_CORE_DIR/codebase/apps/procmap/src/scripts
+  make install
+```
+
 ### Building individual applications
 
 Once you have set up the environment specified above, you are free

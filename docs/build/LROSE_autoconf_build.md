@@ -1,4 +1,4 @@
-# Clone LROSE from GitHub and build from source - LINUX
+# Clone LROSE from GitHub and build from source using autoconf - LINUX
 
 This will checkout and build the latest source from GitHub.
 
