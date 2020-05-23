@@ -107,19 +107,19 @@ The HawkEye example is more complicated, because it is a QT application, so we n
 LROSE sets up Makefiles at all levels of the code tree, both for the libraries and applications.
 Except for the lowest level, where the actual code files reside, the Makefiles handle recursion to lower levels in the code tree.
 
-As an example, for the dataport library, we have the following:
+As an example, for the dataport library, we have the following, from the top level to the bottom level:
 
 * [codebase/libs/Makefile](../../codebase/libs/Makefile)
- * [codebase/libs/dataport/Makefile](../../codebase/libs/dataport/Makefile)
-  * [codebase/libs/dataport/src/Makefile](../../codebase/libs/dataport/src/Makefile)
-   * [codebase/libs/dataport/src/bigend/Makefile](../../codebase/libs/dataport/src/bigend/Makefile)
+* [codebase/libs/dataport/Makefile](../../codebase/libs/dataport/Makefile)
+* [codebase/libs/dataport/src/Makefile](../../codebase/libs/dataport/src/Makefile)
+* [codebase/libs/dataport/src/bigend/Makefile](../../codebase/libs/dataport/src/bigend/Makefile)
 
+Similarly, for the RadxConvert application, we have the following, from the top level to the bottom level:
 
-```
+* [codebase/apps/Makefile](../../codebase/apps/Makefile)
+* [codebase/apps/Radx/Makefile](../../codebase/apps/Radx/Makefile)
+* [codebase/apps/Radx/src/Makefile](../../codebase/apps/Radx/src/Makefile)
 * [codebase/apps/Radx/src/RadxConvert/Makefile](../../codebase/apps/Radx/src/RadxConvert/Makefile)
-* [codebase/apps/mdv_utils/src/PrintMdv/Makefile](../../codebase/apps/mdv_utils/src/PrintMdv/Makefile)
-* [codebase/apps/radar/src/HawkEye/Makefile](../../codebase/apps/radar/src/HawkEye/Makefile)
-```
 
 
 LROSE has the following package options:
