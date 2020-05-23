@@ -171,7 +171,7 @@ Similarly, for the RadxConvert application, we have the following, from the top 
 
 ## Installing package-specific makefiles
 
-The Makefiles checked in under the LROSE code tree are applicable for the standard lrose-core build. We refer to this as the **lrose-core package**.
+The Makefiles checked in under the LROSE code tree are applicable for the standard lrose-core build. We refer to this as the **lrose-core** package.
 
 For some purposes, it is desirable to build a different package. For example, we need to be able to build the **lrose-cidd** package, which includes the ```CIDD``` display and other display utilities that depend on the xview library, which only works properly in 32-bit mode.
 
