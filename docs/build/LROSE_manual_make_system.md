@@ -175,9 +175,9 @@ The Makefiles checked in under the LROSE code tree are applicable for the standa
 
 For some purposes, it is desirable to build a different package. For example, we need to be able to build the **lrose-cidd** package, which includes the ```CIDD``` display and other display utilities that depend on the xview library, which only works properly in 32-bit mode.
 
-To support package-specific builds, we have a series of special-purpose directories nameed ```_makefiles```. These contain package-specific lower-case ```makefile```s.
+To support package-specific builds, we have a series of special-purpose directories nameed ```_makefiles```. These contain package-specific lower-case ```makefiles```.
 
-For the **lrose-cidd** package, the following makefiles reside in the code tree:
+As an example, for the **lrose-cidd** package, the following makefiles reside in the code tree:
 
 ```
   codebase/libs/_makefiles/makefile.lrose-cidd
@@ -197,7 +197,7 @@ This script resides in ```lrose-core/build/scripts```.
 The usage is:
 
 ```
-  ./build/scripts/installPackageMakefiles.py --help
+  installPackageMakefiles.py --help
   Usage: installPackageMakefiles.py [options]
   Options:
     -h, --help         show this help message and exit
@@ -209,10 +209,10 @@ The usage is:
 To set up the build for the **lrose-cidd** package, we would run:
 
 ```
-  ./build/scripts/installPackageMakefiles.py --package lrose-cidd --debug
+  installPackageMakefiles.py --package lrose-cidd --debug
 ```
 
-That will copy the various instances of ```makefile.lrose-cidd``` up one directory, and change the name to the lowwe-case ```makefile``.
+That will copy the various instances of ```makefile.lrose-cidd``` up one directory, and change the name to the lower-case ```makefile```.
 
 The effect would be as follows:
 
@@ -227,6 +227,15 @@ The effect would be as follows:
   cp codebase/apps/cidd/src/_makefiles/makefile.lrose-cidd codebase/apps/cidd/src/makefile
 ```
 
-These lower-case ```makefile```s will then take precedence over the uppercase ```Makefile```s that exist at those locations.
+These lower-case ```makefiles``` will then take precedence over the uppercase ```Makefiles``` that exist at those locations. The build will use these lower-case versions instead.
+
+The exception is on Mac OSX, which for odd reasons has a filesystem that is not properly case-sensitive. On OSX, ```installPackageMakefiles.py```
+will copy to upper-case ```Makefiles```, overwriting the Makefiles that already exist at those locations. So if you run this procedure on OSX, make sure you do not check the resulting files into git, otherwise you will overwrite the **lrose-core** Makefiles.
+
+To revert to the correct makefiles for **lrose-core**, you can always run:
+
+```
+  installPackageMakefiles.py --package lrose-core --debug
+```
 
 
