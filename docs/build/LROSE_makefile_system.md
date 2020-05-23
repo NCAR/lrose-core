@@ -32,11 +32,29 @@ There are many tutorials on-line for Makefiles. For example see:
 
 * [Makefile Tutorial](https://www.tutorialspoint.com/makefile/makefile_macros.htm)
 
-### LROSE Makefile templates
+### LROSE Makefile includes
 
-In LROSE, the main Makefiles are relatively short, created by filling out elements in a simple template. The complexity is added by including partial makefiles, each with a specific purpose. These partial makefiles reside in the directory:
+The LROSE Makefiles are relatively short. The complexity is added by including partial makefiles, each with a specific purpose.
+
+These partial makefiles reside in the directory:
 
 * [lrose-core/build/make_include](../../build/make_include)
+
+The following table lists the more common includes:
+
+| Include file  | Purpose      |
+| ------------- |:-------------:|
+| [lrose_make_macros](../../make_include/lrose_make_macros) | main macro definitions |
+| [lrose_make_targets](../../make_include/lrose_make_targets) | general target rules |
+| [lrose_make_suffixes](../../make_include/lrose_make_suffixes) | suffix rules |
+| [lrose_make_lib_targets](../../make_include/lrose_make_lib_targets) | targets for C libraries |
+| [lrose_make_c_targets](../../make_include/lrose_make_c_targets) | targets for C apps |
+| [lrose_make_c++_targets](../../make_include/lrose_make_c_targets) | targets for C++ apps |
+| [lrose_make_qt_targets](../../make_include/lrose_make_qt_targets) | extra targets for QT apps |
+
+### LROSE Makefile templates
+
+The actual Makefiles are created by filling out elements in a template. As mentioend above, the complexity is added by including partial makefiles.
 
 The following template is for a library code subdirectory:
 
