@@ -2,6 +2,8 @@
 
 ## Introduction
 
+LROSE depende on ```make``` and the associated ```Makfiles```.
+
 On Unix-type systems (LINUX, OSX) running the compiler is most commonly managed by the ```make``` application.
  
 ```make``` uses configuration files to decide what to do. These are either named:
@@ -12,11 +14,8 @@ or
 
   ```makefile```
 
-in the directory from which ```make``` is to be invoked.
 
 If both ```Makefile``` and ```makefile``` are present, the lower-case version takes precedence.
-
-LROSE depende on ```make``` and the associated ```Makfiles```.
 
 ## What is a Makefile?
 
