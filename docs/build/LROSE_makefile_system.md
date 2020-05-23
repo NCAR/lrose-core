@@ -102,7 +102,18 @@ For application examples, see:
 
 The HawkEye example is more complicated, because it is a QT application, so we need to handle the QT complexities.
 
-## Recursion for make through the code tree
+## Recursion through the code tree
+
+LROSE sets up Makefiles at all levels of the code tree, both for the libraries and applications.
+Except for the lowest level, where the actual code files reside, the Makefiles handle recursion to lower levels in the code tree.
+
+As an example, for the dataport library, we have the following:
+
+* [codebase/libs/Makefile](../../codebase/libs/Makefile)
+ * [codebase/libs/dataport/Makefile](../../codebase/libs/dataport/Makefile)
+  * [codebase/libs/dataport/src/Makefile](../../codebase/libs/dataport/src/Makefile)
+   * [codebase/libs/dataport/src/bigend/Makefile](../../codebase/libs/dataport/src/bigend/Makefile)
+
 
 ```
 * [codebase/apps/Radx/src/RadxConvert/Makefile](../../codebase/apps/Radx/src/RadxConvert/Makefile)
