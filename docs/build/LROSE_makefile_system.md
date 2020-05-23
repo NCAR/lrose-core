@@ -68,9 +68,9 @@ The common OS versions supported, along with the include files, are listed in th
 
 | HOST_OS  | Include file       | Comments |
 | ------------- |:-------------:|:--------:|
-| [lrose_make.LINUX_LROSE](../../build/make_include/lrose_make.LINUX_LROSE) | normal LINUX build |
-| [lrose_make.OSX_LROSE](../../build/make_include/lrose_make.OSX_LROSE) | build on Mac OSX |
-| [lrose_make.CIDD_32](../../build/make_include/lrose_make.CIDD_32) | 32-bit build for CIDD on LINUX |
+| LINUX_LROSE | [lrose_make.LINUX_LROSE](../../build/make_include/lrose_make.LINUX_LROSE) | normal LINUX build |
+| OSX_LROSE | [lrose_make.OSX_LROSE](../../build/make_include/lrose_make.OSX_LROSE) | build on Mac OSX |
+| CIDD_32 | [lrose_make.CIDD_32](../../build/make_include/lrose_make.CIDD_32) | 32-bit build for CIDD on LINUX |
 
 ### LROSE Makefile templates
 
