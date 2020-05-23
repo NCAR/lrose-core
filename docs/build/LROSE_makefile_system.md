@@ -8,17 +8,19 @@ On Unix-type systems (LINUX, OSX) running the compiler is most commonly managed 
  
 ```make``` uses configuration files to decide what to do. These are either named:
 
-  ```Makefile```
+```  Makefile```
 
 or
 
-  ```makefile```
+```  makefile```
 
 If both ```Makefile``` and ```makefile``` are present, the lower-case version takes precedence.
 
-In LROSE, ```Makefile``` is the primary name, and these files are checked in permanently in git. Various procedures may then cause a ```makefile``` to be written to a directory, which will then override the ```Makefile```.
+In LROSE, ```Makefile``` is the primary name, and these files are checked in permanently in git. Various procedures you can run will cause a ```makefile``` to be written to a directory, which will then override the ```Makefile```.
 
 ## Anatomy of an LROSE Makefile
+
+### Makefile elements
 
 A Makefile contains several types of information:
 
@@ -27,13 +29,79 @@ A Makefile contains several types of information:
   * rules - on how to build targets
   * suffix rules - automatic rules depending in the suffix of a file
 
+### Makefile tutorials
+
 There are many tutorials on-line for Makefiles. For example see:
 
-  [Makefile Tutorial](https://www.tutorialspoint.com/makefile/makefile_macros.htm)
+* [Makefile Tutorial](https://www.tutorialspoint.com/makefile/makefile_macros.htm)
+
+### LROSE Makefile templates
 
 In LROSE, the main Makefiles are relatively short, created by filling out elements in a simple template. The complexity is added by ```including``` partial makefiles, each with a specific purpose. These partial include makefiles reside in the directory:
 
-  [lrose-core/build/make_include](../../build/make_include)
+* [lrose-core/build/make_include](../../build/make_include)
+
+The following template is for a library code subdirectory:
+
+```
+  # main macros
+  include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
+  # local macros
+  LOC_INCLUDES =
+  LOC_CFLAGS =
+  # target - library .a file
+  TARGET_FILE =
+  # list of headers
+  HDRS =
+  # list of C sources
+  SRCS =
+  # list of C++ sources
+  CPPC_SRCS =
+  # list of FORTRAN sources
+  F_SRCS =
+  # general targets
+  include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
+```
+
+For library code examples, see:
+
+* [codebase/libs/dataport/src/bigend/Makefile](../../codebase/libs/dataport/src/bigend/Makefile)
+* [codebase/libs/toolsa/src/pjg/Makefile](../../codebase/libs/toolsa/src/pjg/Makefile)
+* [codebase/libs/Mdv/src/Mdvx/Makefile](../../codebase/libs/Mdv/src/Mdvx/Makefile)
+
+The following template is for an application code directory:
+
+```
+  # include main macros
+  include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
+  # main target - application name
+  TARGET_FILE = RadxConvert
+  # local macros
+  LOC_INCLUDES =
+  LOC_LIBS =
+  LOC_LDFLAGS =
+  LOC_CFLAGS =
+  # header code files
+  HDRS =
+  # C++ sources
+  CPPC_SRCS =
+  # tdrp macros
+  include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
+  # C++ targets
+  include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
+  # tdrp targets
+  include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
+```
+
+For application examples, see:
+
+* [codebase/apps/Radx/src/RadxConvert/Makefile](../../codebase/apps/Radx/src/RadxConvert/Makefile)
+* [codebase/apps/mdv_utils/src/PrintMdv/Makefile](../../codebase/apps/mdv_utils/src/PrintMdv/Makefile)
+* [codebase/apps/radar/src/HawkEye/Makefile](../../codebase/apps/radar/src/HawkEye/Makefile)
+
+## more stuff
+
+
 
 
 LROSE has the following package options:
