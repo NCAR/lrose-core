@@ -1,4 +1,4 @@
-# Building LROSE manually - LINUX
+# Building LROSE manually - OSX
 
 Setting up the manual build environment allows a user to
 develop LROSE-specific code in an efficient environment.
