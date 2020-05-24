@@ -174,7 +174,7 @@ If you get an install error, try:
   make install
 ```
 
-#### (c) Build and instal the applications
+#### (c) Build and install the applications
 
 ```
   cd $LROSE_CORE_DIR/codebase/apps
@@ -210,3 +210,30 @@ to the relevant directory and perform the build locally there.
   make
   make install
 ```
+
+### Summary command list
+
+The following is the full list of commands to run, in order.
+
+You can cut-and-paste these into a terminal window to run the procedure.
+
+```
+  cd $LROSE_CORE_DIR
+  ./build/scripts/installPackageMakefiles.py
+  cd $LROSE_CORE_DIR/codebase/libs/tdrp/src
+  make install
+  cd $LROSE_CORE_DIR/codebase/apps/tdrp/src/tdrp_gen
+  make install
+  cd $LROSE_CORE_DIR/codebase/libs/
+  make -j 8 install_include
+  make -j 8 install
+  make install
+  cd $LROSE_CORE_DIR/codebase/apps
+  make -j 8 install
+  make install
+  cd $LROSE_CORE_DIR/codebase/apps/scripts/src
+  make install
+  cd $LROSE_CORE_DIR/codebase/apps/procmap/src/scripts
+  make install
+```
+
