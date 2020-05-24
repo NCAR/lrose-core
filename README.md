@@ -48,7 +48,7 @@ To download this repository from GitHub, run:
 | [fractl build](./docs/build/build_fractl.md) |
 | [samurai build](./docs/build/build_samurai.md) |
 | [NetCdf build - LINUX](./docs/build/NETCDF_build.linux.md) |
-| [LROSE package dependencies](./docs/build/lrose_package_dependencies.md) |
+| [LROSE package dependencies - core](./docs/build/lrose_package_dependencies.md) |
 | [LROSE package dependencies - CIDD](./docs/build/lrose_package_dependencies.cidd.md) |
 
 ### CODE DEVELOPMENT
