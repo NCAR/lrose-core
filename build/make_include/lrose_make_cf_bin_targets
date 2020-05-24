@@ -21,13 +21,13 @@ install_bin: install_bin_path
 install_bin_path: all
 	if $(TEST) -d $(LROSE_INSTALL_DIR)/bin; then :; else \
 		$(MKDIR) $(LROSE_INSTALL_DIR)/bin; fi ; \
-	if $(TEST) -f $(INSTALL_BIN_PATH) ;\
+	if $(TEST) -f $(LROSE_INSTALL_DIR)/bin ;\
 	then \
 	 	$(MV) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
-		$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH) ;\
+		$(CP) $(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin ;\
 		$(RM) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
 	else \
-		$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH); \
+		$(CP) $(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin; \
 	fi
 	if $(TEST) "$(DO_SRC_README)" = "" ; then :; else \
 	        echo "$(TARGET_FILE) -- source: `$(PWD)`" >> $(LROSE_INSTALL_DIR)/bin/README.src_dir_info ;\
