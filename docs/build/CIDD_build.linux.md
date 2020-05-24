@@ -8,7 +8,7 @@ And to run CIDD, you must have the required 32-bit packages installed.
 
 ## Required LINUX packages for the CIDD build
 
-See: [LROSE package dependencies](./lrose_package_dependencies.md)
+See: [lrose_package_dependencies.cidd.md](./lrose_package_dependencies.cidd.md)
 
 ## Choose your install directory (prefix)
 
