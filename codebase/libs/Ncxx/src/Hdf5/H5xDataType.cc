@@ -75,6 +75,7 @@ DataType::DataType(const H5T_class_t type_class, size_t size) : H5Object(), enco
     }
 }
 
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    DataType overload constructor - dereference
 ///\brief       Given a reference, ref, to an hdf5 group, creates a
@@ -90,6 +91,7 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
+#endif // HDF5_V10
 
 //--------------------------------------------------------------------------
 // Function:    DataType overload constructor - dereference
@@ -769,7 +771,11 @@ H5std_string DataType::getTag() const
     if (tag_Cstr != NULL)
     {
         H5std_string tag = H5std_string(tag_Cstr); // C string to string object
+#ifdef HDF5_V10
         H5free_memory(tag_Cstr); // free the C string
+#else
+        HDfree(tag_Cstr); // free the C string
+#endif
         return (tag); // return the tag
     }
     else

@@ -725,6 +725,7 @@ void DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char* name, 
     }
 }
 
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList::setVirtual
 ///\brief       Maps elements of a virtual dataset to elements of the source
@@ -775,6 +776,7 @@ void DSetCreatPropList::setVirtual(const DataSpace& vspace, const H5std_string s
 {
     setVirtual(vspace, src_fname.c_str(), src_dsname.c_str(), sspace);
 }
+#endif
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList destructor

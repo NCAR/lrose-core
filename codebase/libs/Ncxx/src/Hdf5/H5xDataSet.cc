@@ -17,6 +17,7 @@
 #include <iostream>
 #endif
 #include <string>
+#include <cstring>
 
 #ifndef HDfree
     #define HDfree(M)    free(M)
@@ -67,6 +68,7 @@ DataSet::DataSet(const DataSet& original) : H5Object(), AbstractDs(), id(origina
     incRefCount(); // increment number of references to this id
 }
 
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    DataSet overload constructor - dereference
 ///\brief       Given a reference, ref, to an hdf5 location, creates a
@@ -102,6 +104,7 @@ DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type, co
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
+#endif // HDF5_V10
 
 //--------------------------------------------------------------------------
 // Function:    DataSet::getSpace
@@ -340,6 +343,7 @@ hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space) co
 //    return(getVlenBufSize(type, space));
 //}
 
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    DataSet::vlenReclaim
 ///\brief       Reclaims VL datatype memory buffers.
@@ -392,6 +396,8 @@ void DataSet::vlenReclaim(void* buf, const DataType& type, const DataSpace& spac
         throw DataSetIException("DataSet::vlenReclaim", "H5Treclaim failed");
     }
 }
+
+#endif
 
 //--------------------------------------------------------------------------
 // Function:    DataSet::read

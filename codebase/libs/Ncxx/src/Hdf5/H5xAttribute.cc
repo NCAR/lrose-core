@@ -17,6 +17,7 @@
 #include <iostream>
 #endif
 #include <string>
+#include <cstring>
 
 #ifndef HDfree
     #define HDfree(M)    free(M)

@@ -86,6 +86,7 @@ Group::Group(const hid_t existing_id) : H5Object(), CommonFG(), id(existing_id)
     incRefCount(); // increment number of references to this id
 }
 
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    Group overload constructor - dereference
 ///\brief       Given a reference, ref, to an hdf5 group, creates a Group object
@@ -103,6 +104,7 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const 
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
+#endif
 
 //--------------------------------------------------------------------------
 // Function:    Group::getNumObjs

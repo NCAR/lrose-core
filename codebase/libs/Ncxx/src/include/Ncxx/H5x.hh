@@ -781,6 +781,7 @@ namespace H5x {
     // indexing chunked datasets.
     void setIstorek(unsigned ik) const;
 
+#ifdef HDF5_V10
     // Sets the strategy and the threshold value that the library will
     // will employ in managing file space.
     void setFileSpaceStrategy(H5F_fspace_strategy_t strategy, hbool_t persist, hsize_t threshold) const;
@@ -794,6 +795,7 @@ namespace H5x {
     // Returns the threshold value that the library uses in tracking free
     // space sections.
     hsize_t getFileSpacePagesize() const;
+#endif
 
     ///\brief Returns this class name.
     virtual H5std_string fromClass() const { return("FileCreatPropList"); }
@@ -977,9 +979,11 @@ namespace H5x {
     // Sets N-bit compression method.
     void setNbit() const;
 
+#ifdef HDF5_V10
     // Maps elements of a virtual dataset to elements of the source dataset.
     void setVirtual(const DataSpace& vspace, const char *src_fname, const char *src_dsname, const DataSpace& sspace) const;
     void setVirtual(const DataSpace& vspace, const H5std_string src_fname, const H5std_string src_dsname, const DataSpace& sspace) const;
+#endif
 
     ///\brief Returns this class name.
     virtual H5std_string fromClass () const { return("DSetCreatPropList"); }
@@ -1346,11 +1350,14 @@ namespace H5x {
     void reference(void* ref, const H5std_string& name, const DataSpace& dataspace,
                    H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
+#ifdef HDF5_V10
     // Open a referenced object whose location is specified by either
     // a file, an HDF5 object, or an attribute.
     void dereference(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
     // Removed in 1.10.1, because H5Location is baseclass
     //void dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+#endif
+
 
     // Retrieves a dataspace with the region pointed to selected.
     DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
@@ -1383,12 +1390,14 @@ namespace H5x {
     DataSet openDataSet(const char* name, const DSetAccPropList& dapl = DSetAccPropList::DEFAULT) const;
     DataSet openDataSet(const H5std_string& name, const DSetAccPropList& dapl = DSetAccPropList::DEFAULT) const;
 
+#ifdef HDF5_V10
     H5L_info2_t getLinkInfo(const char* link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
     H5L_info2_t getLinkInfo(const H5std_string& link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
 
     // Returns the value of a symbolic link.
     H5std_string getLinkval(const char* link_name, size_t size=0) const;
     H5std_string getLinkval(const H5std_string& link_name, size_t size=0) const;
+#endif
 
     // Returns the number of objects in this group.
     // Deprecated - moved to H5::Group in 1.10.2.
@@ -1400,6 +1409,7 @@ namespace H5x {
     ssize_t getObjnameByIdx(hsize_t idx, char* name, size_t size) const;
     ssize_t getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) const;
 
+#ifdef HDF5_V10
     // Retrieves the type of an object in this file or group, given the
     // object's name
     H5O_type_t childObjType(const H5std_string& objname) const;
@@ -1411,6 +1421,9 @@ namespace H5x {
     unsigned childObjVersion(const char* objname) const;
     unsigned childObjVersion(const H5std_string& objname) const;
 
+#endif
+
+#ifdef HDF5_V10
     // Retrieves information about an HDF5 object.
     void getObjinfo(H5O_info2_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
 
@@ -1452,6 +1465,7 @@ namespace H5x {
                           H5_iter_order_t order, hsize_t idx, H5O_native_info_t& objinfo,
                           unsigned fields = H5O_NATIVE_INFO_HDR,
                           const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+#endif
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     // Returns the type of an object in this group, given the
@@ -1588,8 +1602,10 @@ namespace H5x {
     // Creates a reference to an HDF5 object or a dataset region.
     void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
 
+#ifdef HDF5_V10
     // Dereferences a ref into an HDF5 id.
     hid_t p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type, const PropList& plist, const char* from_func);
+#endif
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     // Retrieves the type of object that an object reference points to.
@@ -1640,11 +1656,13 @@ namespace H5x {
                                   const H5std_string attr_name,
                                   void *operator_data);
 
+#ifdef HDF5_V10
   // Define the operator function pointer for H5Ovisit3().
   typedef int (*visit_operator_t)(H5Object& obj,
                                   const H5std_string attr_name,
                                   const H5O_info2_t *oinfo,
                                   void *operator_data);
+#endif
 
   // User data for attribute iteration
   class UserData4Aiterate {
@@ -1655,12 +1673,14 @@ namespace H5x {
   };
 
   // User data for visit iteration
+#ifdef HDF5_V10
   class UserData4Visit {
   public:
     visit_operator_t op;
     void* opData;
     H5Object* obj;
   };
+#endif
 
   class H5_DLLCPP H5Object : public H5Location {
   public:
@@ -1681,11 +1701,13 @@ namespace H5x {
     // Iterate user's function over the attributes of this object.
     int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL, void* op_data = NULL);
 
+#ifdef HDF5_V10
     // Recursively visit elements reachable from this object.
     void visit(H5_index_t idx_type, H5_iter_order_t order, visit_operator_t user_op, void *op_data, unsigned int fields);
 
     // Returns the object header version of an object
     unsigned objVersion() const;
+#endif
 
     // Determines the number of attributes belong to this object.
     int getNumAttrs() const;
@@ -1898,9 +1920,11 @@ namespace H5x {
     DataType(const H5Location& loc, const char* name);
     DataType(const H5Location& loc, const H5std_string& name);
 
+#ifdef HDF5_V10
     // Creates a datatype by way of dereference.
     DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
     //        DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+#endif
 
     // Closes this datatype.
     virtual void close();
@@ -3009,9 +3033,11 @@ namespace H5x {
     hsize_t getVlenBufSize(const DataType& type, const DataSpace& space) const;
     //hsize_t getVlenBufSize(DataType& type, DataSpace& space) const; // removed from 1.8.18 and 1.10.1
 
+#ifdef HDF5_V10
     // Reclaims VL datatype memory buffers.
     static void vlenReclaim(const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist, void* buf);
     static void vlenReclaim(void *buf, const DataType& type, const DataSpace& space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT);
+#endif
 
     // Reads the data of this dataset and stores it in the provided buffer.
     // The memory and file dataspaces and the transferring property list
@@ -3031,9 +3057,11 @@ namespace H5x {
     ///\brief Returns this class name.
     virtual H5std_string fromClass () const { return("DataSet"); }
 
+#ifdef HDF5_V10
     // Creates a dataset by way of dereference.
     DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
     DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+#endif
 
     // Default constructor.
     DataSet();
@@ -3181,10 +3209,12 @@ September 2017:
     // for CommonFG to get the file id.
     virtual hid_t getLocId() const;
 
+#ifdef HDF5_V10
     // Creates a group by way of dereference.
     Group(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
     // Removed in 1.10.1, because H5Location is baseclass
     //        Group(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+#endif
 
     // Returns the number of objects in this group.
     hsize_t getNumObjs() const;
@@ -3255,8 +3285,10 @@ September 2017:
     // Gets a copy of the creation property list of this file.
     FileCreatPropList getCreatePlist() const;
 
+#ifdef HDF5_V10
     // Gets general information about this file.
     void getFileInfo(H5F_info2_t& file_info) const;
+#endif
 
     // Returns the amount of free space in the file.
     hssize_t getFreeSpace() const;
@@ -3277,8 +3309,10 @@ September 2017:
     // Returns the file size of the HDF5 file.
     hsize_t getFileSize() const;
 
+#ifdef HDF5_V10
     // Returns the 'file number' of the HDF5 file.
     unsigned long getFileNum() const;
+#endif
 
     // Determines if a file, specified by its name, is in HDF5 format
     static bool isHdf5(const char* name);

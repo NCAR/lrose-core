@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#include <cstring>
 
 #ifndef HDmemset
     #define HDmemset(X,C,Z)    memset(X,C,Z)

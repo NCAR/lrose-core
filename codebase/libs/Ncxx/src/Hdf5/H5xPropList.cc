@@ -18,10 +18,14 @@
 #endif
 
 #include <string>
+#include <cstring>
 
 #ifndef HDmemset
     #define HDmemset(X,C,Z)    memset(X,C,Z)
 #endif /* HDmemset */
+#ifndef HDfree
+#define HDfree(M)    free(M)
+#endif /* HDfree */
 
 #include <Ncxx/H5x.hh>
 
@@ -149,7 +153,9 @@ PropList::PropList(const hid_t plist_id) : IdComponent()
         case H5I_DATASET:
         case H5I_ATTR:
         case H5I_VFL:
+#ifdef HDF5_V10
         case H5I_VOL:
+#endif
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
@@ -550,7 +556,11 @@ H5std_string PropList::getClassName() const
     if (temp_str != NULL)
     {
         H5std_string class_name(temp_str);
+#ifdef HDF5_V10
         H5free_memory(temp_str);
+#else
+        HDfree(temp_str);
+#endif
         return(class_name);
     }
     else
@@ -587,7 +597,11 @@ size_t PropList::getNumProps() const
 //--------------------------------------------------------------------------
 void PropList::setProperty(const char* name, const void* value) const
 {
+#ifdef HDF5_V10
     herr_t ret_value = H5Pset(id, name, value);
+#else
+    herr_t ret_value = H5Pset(id, name, (void *) value);
+#endif
     if (ret_value < 0)
     {
         throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
@@ -624,7 +638,11 @@ void PropList::setProperty(const char* name, void* value) const
 //--------------------------------------------------------------------------
 void PropList::setProperty(const char* name, const char* charptr) const
 {
+#ifdef HDF5_V10
     herr_t ret_value = H5Pset(id, name, (const void*)charptr);
+#else
+    herr_t ret_value = H5Pset(id, name, (void*)charptr);
+#endif
     if (ret_value < 0)
     {
         throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");

@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#include <cstring>
 
 #ifndef HDmemset
     #define HDmemset(X,C,Z)    memset(X,C,Z)
@@ -33,6 +34,7 @@ extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
     return 0;
 }
 
+#ifdef HDF5_V10
 // userVisitOpWrpr interfaces between the user's function and the
 // C library function H5Ovisit3
 extern "C" herr_t userVisitOpWrpr(hid_t obj_id, const char *attr_name,
@@ -43,6 +45,7 @@ extern "C" herr_t userVisitOpWrpr(hid_t obj_id, const char *attr_name,
     int status = myData->op(*myData->obj, s_attr_name, obj_info, myData->opData);
     return status;
 }
+#endif // HDF5_V10
 
 //--------------------------------------------------------------------------
 // Function:    H5Object default constructor (protected)
@@ -217,6 +220,7 @@ int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_dat
         throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
 }
 
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    H5Object::visit
 ///\brief       Recursively visits all HDF5 objects accessible from this object.
@@ -302,6 +306,7 @@ unsigned H5Object::objVersion() const
     }
     return(version);
 }
+#endif // HDF5_V10
 
 //--------------------------------------------------------------------------
 // Function:    H5Object::getNumAttrs
@@ -312,9 +317,15 @@ unsigned H5Object::objVersion() const
 //--------------------------------------------------------------------------
 int H5Object::getNumAttrs() const
 {
-    H5O_info2_t oinfo;    /* Object info */
 
+
+#ifdef HDF5_V10
+    H5O_info2_t oinfo;    /* Object info */
     if(H5Oget_info3(getId(), &oinfo, H5O_INFO_NUM_ATTRS) < 0)
+#else
+    H5O_info_t oinfo;    /* Object info */
+    if(H5Oget_info(getId(), &oinfo) < 0)
+#endif
         throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
     else
         return(static_cast<int>(oinfo.num_attrs));

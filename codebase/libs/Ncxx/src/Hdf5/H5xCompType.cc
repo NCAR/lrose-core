@@ -12,8 +12,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-
+#include <H5public.h>
 #include <Ncxx/H5x.hh>
+
+#ifndef HDfree
+    #define HDfree(M)    free(M)
+#endif /* HDfree */
 
 namespace H5x {
 
@@ -167,7 +171,11 @@ H5std_string CompType::getMemberName(unsigned member_num) const
              "H5Tget_member_name returns NULL for member name");
     }
     H5std_string member_name = H5std_string(member_name_C); // convert C string to string
+#ifdef HDF5_V10
     H5free_memory(member_name_C); // free the C string
+#else
+    HDfree(member_name_C); // free the C string
+#endif
     return(member_name); // return the member name string
 }
 

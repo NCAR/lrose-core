@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#include <cstring>
 #include <iostream>
 using namespace std;
 
@@ -487,6 +488,7 @@ void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_t
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    H5Location::p_dereference (protected)
 // Purpose      Dereference a ref into an hdf5 object.
@@ -516,8 +518,10 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
 
     return(temp_id);
 }
+#endif
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    H5Location::dereference
 ///\brief       Dereferences a reference into an HDF5 object, given an HDF5 object.
@@ -552,6 +556,8 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
    p_setId(p_dereference(attr.getId(), ref, ref_type, plist, "dereference"));
 }
  */ 
+
+#endif
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
@@ -1386,6 +1392,8 @@ void H5Location::unlink(const H5std_string& name, const LinkAccPropList& lapl) c
     unlink(name.c_str(), lapl);
 }
 
+#ifdef HDF5_V10
+
 //--------------------------------------------------------------------------
 // Function:    H5Location::getNativeObjinfo
 ///\brief       Retrieves native information about an HDF5 object.
@@ -1624,6 +1632,7 @@ void H5Location::getObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
 {
     getObjinfo(grp_name.c_str(), idx_type, order, idx, objinfo, fields, lapl);
 }
+#endif // HDF5_V10
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
@@ -1685,6 +1694,7 @@ void H5Location::getObjinfo(const H5std_string& name, H5G_stat_t& statbuf) const
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    H5Location::getLinkInfo
 ///\brief       Returns the information of the named link.
@@ -1773,6 +1783,8 @@ H5std_string H5Location::getLinkval(const H5std_string& name, size_t size) const
 {
     return(getLinkval( name.c_str(), size));
 }
+
+#endif // HDF5_V10
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::mount
@@ -2019,6 +2031,7 @@ ssize_t H5Location::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size
     return (name_len);
 }
 
+#ifdef HDF5_V10
 //--------------------------------------------------------------------------
 // Function:    H5Location::childObjType
 ///\brief       Returns the type of an object in this file/group, given the
@@ -2191,6 +2204,9 @@ unsigned H5Location::childObjVersion(const H5std_string& objname) const
     unsigned version = childObjVersion(objname.c_str());
     return(version);
 }
+
+#endif // HDF5_V10
+
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

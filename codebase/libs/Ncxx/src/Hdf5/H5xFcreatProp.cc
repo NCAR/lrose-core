@@ -287,6 +287,7 @@ unsigned FileCreatPropList::getIstorek() const
     return(ik);
 }
 
+#ifdef HDV5_V10
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList::setFileSpaceStrategy
 ///\brief       Sets the strategy and the threshold value that the library
@@ -371,6 +372,8 @@ hsize_t FileCreatPropList::getFileSpacePagesize() const
     }
     return(fsp_psize);
 }
+
+#endif
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList destructor
