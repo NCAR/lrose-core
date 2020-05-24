@@ -215,7 +215,7 @@ to the relevant directory and perform the build locally there.
 
 The following is the full list of commands to run, in order.
 
-You can cut-and-paste these into a terminal window to run the procedure.
+You can cut-and-paste these into a terminal window to run the full procedure.
 
 ```
   cd $LROSE_CORE_DIR
