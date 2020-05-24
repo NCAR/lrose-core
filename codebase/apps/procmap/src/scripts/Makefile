@@ -48,13 +48,3 @@ SCRIPTS = \
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_script_targets
 
-# Need to override specific targets because this is a mixed case of 
-# scripts and perl libs in one directory
-
-install: create_subdir
-	if test $(INSTALL_DIR) != . ;\
-	then \
-		cp $(SCRIPTS) $(INSTALL_DIR) ;\
-	fi ;\
-
-copy_bin: install

@@ -75,41 +75,5 @@ SCRIPTS = \
 
 #	Targets
 
-all: install
-
-install: create_subdir
-	if test $(INSTALL_DIR) != . ;\
-	then \
-		cp $(SCRIPTS) $(INSTALL_DIR) ;\
-	fi
-
-create_subdir:
-	if test -d $(INSTALL_DIR) ;\
-	then \
-		cd . ;\
-	else \
-		mkdir $(INSTALL_DIR) ;\
-	fi
-
-install_bin: install
-
-# unused targets - needed to prevent make failures
-
-clean:
-debug:
-dbgopt:
-profile:
-opt:
-optopt:
-opt4:
-lint:
-depend:
-pure:
-insure:
-clean_bin:
-clean_tdrp:
-clean_insure:
-clean_depend:
-clean_all:
-
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_script_targets
 
