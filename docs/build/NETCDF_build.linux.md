@@ -1,5 +1,12 @@
 # Building netcdf for NCAR LROSE development
 
+## NOTE:
+
+Generally this is no longer needed, and we use the
+system-installed Hdf5 and NetCDF libs.
+
+## To install NetCDF
+
 Follow these steps to build HDF5 and NetCDF support for the
 NCAR LROSE development and build environment.
 
