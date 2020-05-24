@@ -219,11 +219,23 @@ since lrose-core is the default package.
   make -j 8 install
 ```
 
+If you get an install error, try:
+
+```
+  make install
+```
+
 #### (c) Build and instal the applications
 
 ```
   cd $LROSE_CORE_DIR/codebase/apps
   make -j 8 install
+```
+
+If you get an install error, try:
+
+```
+  make install
 ```
 
 #### (d) Install runtime scripts if needed
