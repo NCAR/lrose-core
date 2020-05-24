@@ -26,32 +26,31 @@ To download this repository from GitHub, run:
 
 ### DOWNLOADS
 
-| Download instructions |
+| Download and install |
 | --------------------- |
-| [LINUX - git clone and build latest source - recommended](./docs/download/clone_src_and_build.linux.md) |
-| [LINUX - download and build source release](./docs/download/download_src_release_and_build.linux.md) |
-| [OSX - homebrew build and install - recommended](./docs/download/homebrew_install.mac_osx.md) |
-| [OSX - install HawkEye from DMG file](./docs/download/hawkeye_install_from_dmg.md) |
 | [LINUX - install from RedHat .rpm package](./docs/download/download_rpm_and_install.md) |
 | [LINUX - install from Debian .deb package](./docs/download/download_deb_and_install.md) |
+| [OSX - homebrew build and install - recommended](./docs/download/homebrew_install.mac_osx.md) |
+| [OSX - install HawkEye from DMG file](./docs/download/hawkeye_install_from_dmg.md) |
+| [homebrew notes](./docs/download/homebrew_notes.md) |
 | [Cyclone release](https://github.com/nsf-lrose/lrose-cyclone) |
 
 ### BUILDS
 
-| Build instructions |
+| Build and install |
 | --------------------- |
-| [LINUX - git clone and build latest source - recommended](./docs/download/clone_src_and_build.linux.md) |
-| [LINUX - download and build source release](./docs/download/download_src_release_and_build.linux.md) |
-| [OSX - homebrew build and install - recommended](./docs/download/homebrew_install.mac_osx.md) |
+| [Build overview](./docs/build/LROSE_build_overview.md) |
+| [LROSE make system](./docs/build/LROSE_manual_make_system.md) |
+| [Build manually - LINUX](./docs/build/LROSE_manual_build.linux.md) |
+| [Build manually - OSX](./docs/build/LROSE_manual_build.osx.md) |
+| [Build using autoconf - LINUX](./docs/build/LROSE_autoconf_build.linux.md) |
+| [Build source release](./docs/build/LROSE_build_src_release.md) |
 | [CIDD build - 32-bit mode - LINUX](./docs/build/CIDD_build.linux.md) |
-| [LROSE build options](./docs/build/LROSE_build_options.md) |
-| [NCAR build options for OSX](./docs/build/NCAR_build_OSX.md) |
-| [NCAR build environment for LINUX](./docs/build/NCAR_build_environment.linux.md) |
-| [NCAR build environment for OSX](./docs/build/NCAR_build_environment.osx.md) |
-| [NCAR netcdf build for LINUX](./docs/build/NCAR_netcdf_build.linux.md) |
 | [fractl build](./docs/build/build_fractl.md) |
 | [samurai build](./docs/build/build_samurai.md) |
+| [NetCdf build - LINUX](./docs/build/NETCDF_build.linux.md) |
 | [LROSE package dependencies](./docs/build/lrose_package_dependencies.md) |
+| [LROSE package dependencies - CIDD](./docs/build/lrose_package_dependencies.cidd.md) |
 
 ### CODE DEVELOPMENT
 
@@ -59,9 +58,8 @@ Use the following if you need to set up an environment suitable for code develop
 
 | Setup instructions |
 | --------------------- |
-| [Set up NCAR build environment - LINUX](./docs/build/NCAR_build_environment.linux.md) |
-| [Build NetCDF for the NCAR environment - LINUX](./docs/build/NCAR_netcdf_build.linux.md) |
-| [Set up NCAR build environment - OSX](./docs/build/NCAR_build_environment.osx.md) |
+| [Build manually - LINUX](./docs/build/LROSE_manual_build.linux.md) |
+| [Build manually - OSX](./docs/build/LROSE_manual_build.osx.md) |
 
 ### REPOSITORY ORGANIZATION
 

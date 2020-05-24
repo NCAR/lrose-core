@@ -47,19 +47,19 @@ Download the source tar file from:
 A typical source release would be:
 
 ```
-  lrose-20160823.src.tgz
+  lrose-20200110.src.tgz
 ```
 
 ### Untar
 
 ```
-  tar xvfz lrose-20160823.src.tgz
+  tar xvfz lrose-20200110.src.tgz
 ```
 
 The distribution will be unpacked into a subdirectory:
 
 ```
-  cd ~/lrose_build/lrose-20160823.src
+  cd ~/lrose_build/lrose-20200110.src
 ```
 
 <a name="build"/>
