@@ -46,18 +46,12 @@
 #include <H5Epublic.h>
 #include <H5Gpublic.h>
 
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
 using std::cout;
 using std::endl;
-#endif  // H5_NO_STD
-#endif
 
-#include <H5Cpp.h>
+#include <Ncxx/H5x.hh>
 
-#ifndef H5_NO_NAMESPACE
-using namespace H5;
-#endif
+using namespace H5x;
 using namespace std;
 
 

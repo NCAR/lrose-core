@@ -170,7 +170,7 @@ int Hdf5xx::loadCompVar(CompType compType,
   try {
     index = compType.getMemberIndex(varName.c_str());
   }
-  catch (const H5::Exception &e) {
+  catch (const H5x::Exception &e) {
     _addErrStr("Cannot find comp variable: ", varName);
     return -1;
   }
@@ -392,7 +392,7 @@ int Hdf5xx::loadAttribute(H5Object &obj,
   try {
     attr = new Attribute(obj.openAttribute(name));
   }
-  catch (const H5::Exception &e) {
+  catch (const H5x::Exception &e) {
     _addErrStr("Hdf5xx::loadAttribute");
     _addErrStr("  Cannot find attribute, name: ", name);
     _addErrStr("  Context: ", context);
@@ -627,7 +627,7 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
   try {
     attr = new Attribute(obj.openAttribute(name));
   }
-  catch (const H5::Exception &e) {
+  catch (const H5x::Exception &e) {
     _addErrStr("Hdf5xx::loadArrayAttribute");
     _addErrStr("  Cannot find attribute, name: ", name);
     _addErrStr("  Context: ", context);
@@ -900,9 +900,9 @@ Attribute Hdf5xx::addAttr(H5Object &obj,
   DataSpace attrDataspace = DataSpace(H5S_SCALAR);
   
   // Create datatype for attribute
-  IntType intDatatype(H5::PredType::STD_I64LE);
+  IntType intDatatype(H5x::PredType::STD_I64LE);
   if (ByteOrder::hostIsBigEndian()) {
-    intDatatype = H5::PredType::STD_I64BE;
+    intDatatype = H5x::PredType::STD_I64BE;
   }
 
   // Create attribute and write to it
@@ -926,9 +926,9 @@ Attribute Hdf5xx::addAttr(H5Object &obj,
   DataSpace attrDataspace = DataSpace(H5S_SCALAR);
   
   // Create datatype for attribute
-  FloatType floatDatatype(H5::PredType::IEEE_F64LE);
+  FloatType floatDatatype(H5x::PredType::IEEE_F64LE);
   if (ByteOrder::hostIsBigEndian()) {
-    floatDatatype = H5::PredType::IEEE_F64BE;
+    floatDatatype = H5x::PredType::IEEE_F64BE;
   }
 
   // Create attribute and write to it
@@ -953,9 +953,9 @@ Attribute Hdf5xx::addAttr(H5Object &obj,
   DataSpace attrDataspace = DataSpace(1, &dim);
   
   // Create datatype for attribute
-  FloatType floatDatatype(H5::PredType::IEEE_F64LE);
+  FloatType floatDatatype(H5x::PredType::IEEE_F64LE);
   if (ByteOrder::hostIsBigEndian()) {
-    floatDatatype = H5::PredType::IEEE_F64BE;
+    floatDatatype = H5x::PredType::IEEE_F64BE;
   }
 
   // Create attribute and write to it
