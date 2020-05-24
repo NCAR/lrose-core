@@ -30,7 +30,7 @@ To download this repository from GitHub, run:
 | --------------------- |
 | [LINUX - install from RedHat .rpm package](./docs/download/download_rpm_and_install.md) |
 | [LINUX - install from Debian .deb package](./docs/download/download_deb_and_install.md) |
-| [OSX - homebrew build and install - recommended](./docs/download/homebrew_install.mac_osx.md) |
+| [OSX - homebrew build and install](./docs/download/homebrew_install.mac_osx.md) |
 | [OSX - install HawkEye from DMG file](./docs/download/hawkeye_install_from_dmg.md) |
 | [homebrew notes](./docs/download/homebrew_notes.md) |
 | [Cyclone release](https://github.com/nsf-lrose/lrose-cyclone) |
