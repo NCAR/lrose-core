@@ -44,7 +44,6 @@ To download this repository from GitHub, run:
 | [Build manually - LINUX](./docs/build/LROSE_manual_build.linux.md) |
 | [Build manually - OSX](./docs/build/LROSE_manual_build.osx.md) |
 | [Build using autoconf - LINUX](./docs/build/LROSE_autoconf_build.linux.md) |
-| [Build source release](./docs/build/LROSE_build_src_release.md) |
 | [CIDD build - 32-bit mode - LINUX](./docs/build/CIDD_build.linux.md) |
 | [fractl build](./docs/build/build_fractl.md) |
 | [samurai build](./docs/build/build_samurai.md) |
