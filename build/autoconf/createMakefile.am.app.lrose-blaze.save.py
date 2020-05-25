@@ -512,7 +512,7 @@ def getLoadLibList():
     extendLibs = [ 'Ncxx',
                    # 'netcdf_c++',
                    'netcdf',
-                   'hdf5_cpp',
+                   #'hdf5_cpp',
                    'hdf5_hl',
                    'hdf5',
                    # 'expat',

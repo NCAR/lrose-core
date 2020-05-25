@@ -496,7 +496,7 @@ def decodeLibLine(line):
             libs.append("Ncxx")
             # libs.append("netcdf_c++")
             libs.append("netcdf")
-            libs.append("hdf5_cpp")
+            #libs.append("hdf5_cpp")
             libs.append("hdf5_hl")
             libs.append("hdf5")
             # libs.append("udunits2")
@@ -536,7 +536,7 @@ def getLoadLibList():
     extendLibs = [ 'Ncxx',
                    # 'netcdf_c++',
                    'netcdf',
-                   'hdf5_cpp',
+                   #'hdf5_cpp',
                    'hdf5_hl',
                    'hdf5',
                    # 'udunits2',

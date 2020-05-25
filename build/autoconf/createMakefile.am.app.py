@@ -453,7 +453,7 @@ def appendToLibList(line):
             loadLibList.append("-lNcxx")
             # loadLibList.append("-lnetcdf_c++")
             loadLibList.append("-lnetcdf")
-            loadLibList.append("-lhdf5_cpp")
+            #loadLibList.append("-lhdf5_cpp")
             loadLibList.append("-lhdf5_hl")
             loadLibList.append("-lhdf5")
             # loadLibList.append("-ludunits2")
