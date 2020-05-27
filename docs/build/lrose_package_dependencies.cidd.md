@@ -8,12 +8,18 @@ See also the following for the main packages:
 
 For the CIDD display, we need to perform a 32-bit build.
 
-## Redhat and CENTOS
+## Redhat and CENTOS 6, 7
+
+These apply to:
+
+  * RedHat 6 and 7
+  * CentOS 6 and 7 (based on RedHat)
+  * Fedora (based on RedHat)
 
 On Redhat-based hosts you can achieve this by running:
 
 ```
-yum install -y tcsh perl perl-Env ftp git svn cvs tkcvs emacs \
+yum install -y tcsh perl perl-Env ftp git svn cvs emacs \
 gcc gcc-c++ gcc-gfortran \
 glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
 libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 \
@@ -25,6 +31,28 @@ xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi \
 xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi \
 xorg-x11-fonts-misc
 ```
+
+## CENTOS 8 and RHEL 8
+
+```
+  dnf install -y epel-release ; \
+  dnf install -y 'dnf-command(config-manager)' ; \
+  dnf config-manager --set-enabled PowerTools ; \
+  dnf install -y \
+    tcsh perl perl-Env ftp git svn cvs tkcvs emacs \
+    gcc gcc-c++ gcc-gfortran \
+    glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
+    libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 \
+    libstdc++-devel.i686 libtiff-devel.i686 \
+    zlib-devel.i686 expat-devel.i686 flex-devel.i686 \
+    fftw-devel.i686 bzip2-devel.i686 xrdb Xvfb \
+    gnuplot ImageMagick-devel ImageMagick-c++-devel \
+    xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi \
+    xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi \
+    xorg-x11-fonts-misc
+  alternatives --set python /usr/bin/python3
+```
+
 
 ## Debian-based systems
 

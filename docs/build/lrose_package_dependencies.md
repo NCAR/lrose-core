@@ -35,11 +35,11 @@ These apply to:
 ## CENTOS 8 and RHEL 8
 
 ```
-  dnf install -y epel-release
-  dnf install -y 'dnf-command(config-manager)'
-  dnf config-manager --set-enabled PowerTools
-  dnf install -y python3
-  dnf install -y python2-devel platform-python-devel
+  dnf install -y epel-release ; \
+  dnf install -y 'dnf-command(config-manager)' ; \
+  dnf config-manager --set-enabled PowerTools ; \
+  dnf install -y python3 ; \
+  dnf install -y python2-devel platform-python-devel ; \
   dnf install -y \
     tcsh wget git \
     emacs rsync python2 python3 mlocate \
@@ -54,7 +54,7 @@ These apply to:
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
-    rpm-devel rpmdevtools
+    rpm-devel rpmdevtools ; \
   alternatives --set python /usr/bin/python3
 ```
 
