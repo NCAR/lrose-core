@@ -17,8 +17,9 @@ RUN apt-get update && \
     qtbase5-dev qtdeclarative5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
     libcurl4-openssl-dev \
-    libarmadillo-dev libopenmpi-dev \
-    libnetcdf-dev libhdf5-dev hdf5-tools
+    libarmadillo-dev libopenmpi-dev
+
+#    libnetcdf-dev libhdf5-dev hdf5-tools
 
 # create link for qmake
 
