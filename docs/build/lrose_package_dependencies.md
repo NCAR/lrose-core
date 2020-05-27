@@ -19,7 +19,7 @@ These apply to:
     tcsh wget git \
     tkcvs emacs rsync python mlocate \
     m4 make cmake libtool autoconf automake \
-    gcc gcc-c++ gcc-gfortran glibc-devel \
+    gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
     GeographicLib-devel eigen3-devel armadillo-devel \
@@ -44,7 +44,7 @@ These apply to:
     tcsh wget git \
     emacs rsync python2 python3 mlocate \
     m4 make cmake libtool autoconf automake \
-    gcc gcc-c++ gcc-gfortran glibc-devel \
+    gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
     eigen3-devel armadillo-devel \

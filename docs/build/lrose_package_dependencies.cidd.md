@@ -23,7 +23,7 @@ yum install -y tcsh perl perl-Env ftp git svn cvs emacs \
 gcc gcc-c++ gcc-gfortran \
 glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
 libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 \
-libstdc++-devel.i686 libtiff-devel.i686 \
+libstdc++-devel.i686 libtiff-devel.i686 libgcc.i686 \
 zlib-devel.i686 expat-devel.i686 flex-devel.i686 \
 fftw-devel.i686 bzip2-devel.i686 xrdb Xvfb \
 gnuplot ImageMagick-devel ImageMagick-c++-devel \
@@ -39,8 +39,8 @@ xorg-x11-fonts-misc
   dnf install -y 'dnf-command(config-manager)' ; \
   dnf config-manager --set-enabled PowerTools ; \
   dnf install -y \
-    tcsh perl perl-Env ftp git svn cvs tkcvs emacs \
-    gcc gcc-c++ gcc-gfortran \
+    tcsh perl perl-Env ftp git svn cvs emacs \
+    gcc gcc-c++ gcc-gfortran libgcc.i686 \
     glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
     libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 \
     libstdc++-devel.i686 libtiff-devel.i686 \
