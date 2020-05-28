@@ -1188,7 +1188,13 @@ static int 	step();
 #endif
 #endif /* SVR4 */
 
+#if defined(__APPLE__)
+#include <regex.h>
+#elif (__GNUC__ < 5)
 #include <regexp.h>
+#else
+#include <regex.h>
+#endif
 
 static void
 flist_compile_regex( private )

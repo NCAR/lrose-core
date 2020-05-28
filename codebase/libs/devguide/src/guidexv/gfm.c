@@ -736,8 +736,10 @@ double_click(last_sel, then, this_sel, now)
 
 #if defined(__APPLE__)
 #include <regex.h>
-#else
+#elif (__GNUC__ < 5)
 #include <regexp.h>
+#else
+#include <regex.h>
 #endif
 
 static char	regex_buf[MAXPATHLEN];
