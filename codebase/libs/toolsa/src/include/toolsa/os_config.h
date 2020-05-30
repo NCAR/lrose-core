@@ -268,7 +268,7 @@ extern int setitimer (int which,
 
 extern int ftruncate(int fd, off_t length);
 
-extern int wait3(union wait *statusp, int options,
+extern int wait3(int *statusp, int options,
 		 struct rusage *rusage);
 
 extern int getopt (int argc, char * const argv[], const char *optstring);
