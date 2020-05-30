@@ -119,12 +119,13 @@ xv_expand_name(name)
 	length += status;
     }
     (void) close(pivec[0]);
-#ifndef SVR4
-    while (wait((union wait *) & status) != pid);
-#else /* SVR4 */
+/* #ifndef SVR4 */
+/*     while (wait((union wait *) & status) != pid); */
+/* #else /\* SVR4 *\/ */
+/*     while (wait( & status) != pid); */
+/* #endif /\* SVR4 *\/ */
+/*     ; */
     while (wait( & status) != pid);
-#endif /* SVR4 */
-    ;
     status &= 0377;
     if (status != 0 && status != SIGPIPE) {
 	xv_error(XV_ZERO,

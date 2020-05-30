@@ -225,7 +225,8 @@ extern	struct itimerval NOTIFY_NO_ITIMER;	/* {{0,0},{0,0}} */
  * PUBLIC functions 
  */
 
-typedef union wait union_wait_t;
+/* typedef union wait union_wait_t; */
+typedef int union_wait_t;
 
 #ifndef _NOTIFY_MIN_SYMBOLS
 

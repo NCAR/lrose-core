@@ -534,11 +534,11 @@ static
 tty_quit_on_death(client, pid, status, rusage)
     caddr_t         client;
     int             pid;
-#ifndef SVR4
-    union wait     *status;
-#else
+/* #ifndef SVR4 */
+/*     union wait     *status; */
+/* #else */
     int     *status;
-#endif
+/* #endif */
     struct rusage  *rusage;
 {
     Ttysw_folio     ttysw = (Ttysw_folio) client;
@@ -586,11 +586,11 @@ static
 tty_handle_death(tty_folio_private, pid, status, rusage)
     Ttysw_folio     tty_folio_private;
     int             pid;
-#ifndef SVR4
-    union wait     *status;
-#else
+/* #ifndef SVR4 */
+/*     union wait     *status; */
+/* #else */
     int     *status;
-#endif
+/* #endif */
     struct rusage  *rusage;
 {
     if (!(WIFSTOPPED(*status))) {
