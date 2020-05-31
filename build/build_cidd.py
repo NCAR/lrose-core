@@ -82,24 +82,13 @@ def main():
     parser.add_option('--logDir',
                       dest='logDir', default=logDirDefault,
                       help='Logging dir, default is /tmp/lrose_build/logs')
-    parser.add_option('--installAllRuntimeLibs',
-                      dest='installAllRuntimeLibs', default=False,
-                      action="store_true",
-                      help=\
-                      'Install dynamic runtime libraries for all binaries, ' + \
-                      'in a directory relative to the bin dir. ' + \
-                      'System libraries are included.')
     parser.add_option('--installLroseRuntimeLibs',
                       dest='installLroseRuntimeLibs', default=False,
                       action="store_true",
                       help=\
-                      'Install dynamic runtime lrose libraries for all binaries, ' + \
+                      'Install dynamic runtime lrose libraries for cidd binaries, ' + \
                       'in a directory relative to the bin dir. ' + \
                       'System libraries are not included.')
-    parser.add_option('--buildNetcdf',
-                      dest='buildNetcdf', default=True,
-                      action="store_true",
-                      help='Build netcdf and hdf5 from source')
 
     (options, args) = parser.parse_args()
     
@@ -154,7 +143,7 @@ def main():
         if (options.tag != "master"):
             print("  tag: ", options.tag, file=sys.stderr)
         else:
-            print("  releaseDate: ", releaseDate, file=sys.stderr)
+            print("  releaseDate: ", options.releaseDate, file=sys.stderr)
         print("  buildDir: ", options.buildDir, file=sys.stderr)
         print("  logDir: ", options.logDir, file=sys.stderr)
         print("  prefixDir: ", options.prefix, file=sys.stderr)
