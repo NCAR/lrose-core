@@ -76,15 +76,15 @@ protected:
   static const int _blankPixelSpacing;
   static const int _stipple_bitmap_width;
   static const int _stipple_bitmap_height;
-  static const char _stipple10_bitmap_bits[];
-  static const char _stipple20_bitmap_bits[];
-  static const char _stipple30_bitmap_bits[];
-  static const char _stipple40_bitmap_bits[];
-  static const char _stipple50_bitmap_bits[];
-  static const char _stipple60_bitmap_bits[];
-  static const char _stipple70_bitmap_bits[];
-  static const char _stipple80_bitmap_bits[];
-  static const char _stipple90_bitmap_bits[];
+  static const unsigned char _stipple10_bitmap_bits[];
+  static const unsigned char _stipple20_bitmap_bits[];
+  static const unsigned char _stipple30_bitmap_bits[];
+  static const unsigned char _stipple40_bitmap_bits[];
+  static const unsigned char _stipple50_bitmap_bits[];
+  static const unsigned char _stipple60_bitmap_bits[];
+  static const unsigned char _stipple70_bitmap_bits[];
+  static const unsigned char _stipple80_bitmap_bits[];
+  static const unsigned char _stipple90_bitmap_bits[];
 
   void _setXColors(char *foreground_color, char *background_color,
 		   RenderContext &context);

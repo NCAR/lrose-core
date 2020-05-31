@@ -49,55 +49,55 @@ const int SymprodRenderObj::_stipple_bitmap_width = 10;
 const int SymprodRenderObj::_stipple_bitmap_height = 10;
 const int SymprodRenderObj::_blankPixelSpacing = 10;
 
-const char SymprodRenderObj::_stipple10_bitmap_bits[] =
+const unsigned char SymprodRenderObj::_stipple10_bitmap_bits[] =
 {  0x82, 0x00, 0x04, 0x10, 0x40,
    0x00, 0x01, 0x10, 0x02, 0x04,
    0x20, 0x00, 0x00 
 };
 
-const char SymprodRenderObj::_stipple20_bitmap_bits[] =
+const unsigned char SymprodRenderObj::_stipple20_bitmap_bits[] =
 {  0x92, 0x14, 0x04, 0x90, 0x41,
    0x40, 0x81, 0x12, 0x02, 0x04,
    0x20, 0x42, 0x00 
 };
 
-const char SymprodRenderObj::_stipple30_bitmap_bits[] =
+const unsigned char SymprodRenderObj::_stipple30_bitmap_bits[] =
 {  0x92, 0x15, 0x14, 0x98, 0x41,
    0x42, 0x85, 0x52, 0x82, 0x44,
    0x24, 0x42, 0x20 
 };
 
-const char SymprodRenderObj::_stipple40_bitmap_bits[] =
+const unsigned char SymprodRenderObj::_stipple40_bitmap_bits[] =
 {  0x92, 0x95, 0x54, 0x9a, 0x49,
    0x4a, 0xa5, 0x52, 0xa2, 0x45,
    0x24, 0x62, 0xa0 
 };
 
-const char SymprodRenderObj::_stipple50_bitmap_bits[] =
+const unsigned char SymprodRenderObj::_stipple50_bitmap_bits[] =
 {  0xba, 0x95, 0x54, 0xda, 0xc9,
    0xca, 0xa5, 0x56, 0xaa, 0x4d,
    0x64, 0x66, 0xa0 
 };
 
-const char SymprodRenderObj::_stipple60_bitmap_bits[] =
+const unsigned char SymprodRenderObj::_stipple60_bitmap_bits[] =
 {  0xba, 0xd5, 0x5d, 0xda, 0xcd,
    0xda, 0xf5, 0x56, 0xaa, 0x5f,
    0x64, 0x6e, 0xa0 
 };
 
-const char SymprodRenderObj::_stipple70_bitmap_bits[] =
+const unsigned char SymprodRenderObj::_stipple70_bitmap_bits[] =
 {  0xbb, 0xf5, 0x5f, 0xde, 0xbb,
    0xba, 0xf5, 0x77, 0xab, 0x5f,
    0x65, 0x6e, 0xb0 
 };
 
-const char SymprodRenderObj::_stipple80_bitmap_bits[] =
+const unsigned char SymprodRenderObj::_stipple80_bitmap_bits[] =
 {  0xfb, 0xf7, 0x7f, 0xde, 0xdd,
    0xdb, 0xff, 0x77, 0xeb, 0x5f,
    0x6d, 0x7f, 0xb0 
 };
 
-const char SymprodRenderObj::_stipple90_bitmap_bits[] =
+const unsigned char SymprodRenderObj::_stipple90_bitmap_bits[] =
 {  0xff, 0xf7, 0x7f, 0xff, 0xff,
    0xfb, 0xff, 0x7f, 0xeb, 0x7f,
    0x6f, 0xff, 0xb0 
@@ -1848,63 +1848,63 @@ void SymprodRenderObj::setStipple(Symprod::fill_t filltype,
   case Symprod::FILL_STIPPLE10 :
     pixmap =
       XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    _stipple10_bitmap_bits,
+			    (char *) _stipple10_bitmap_bits,
 			    _stipple_bitmap_width, _stipple_bitmap_height);
     break;
     
   case Symprod::FILL_STIPPLE20 :
     pixmap =
       XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    _stipple20_bitmap_bits,
+			    (char *) _stipple20_bitmap_bits,
 			    _stipple_bitmap_width, _stipple_bitmap_height);
     break;
     
   case Symprod::FILL_STIPPLE30 :
     pixmap =
       XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    _stipple30_bitmap_bits,
+			    (char *) _stipple30_bitmap_bits,
 			    _stipple_bitmap_width, _stipple_bitmap_height);
     break;
     
   case Symprod::FILL_STIPPLE40 :
     pixmap =
       XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    _stipple40_bitmap_bits,
+			    (char *) _stipple40_bitmap_bits,
 			    _stipple_bitmap_width, _stipple_bitmap_height);
     break;
     
   case Symprod::FILL_STIPPLE50 :
     pixmap =
       XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    _stipple50_bitmap_bits,
+			    (char *) _stipple50_bitmap_bits,
 			    _stipple_bitmap_width, _stipple_bitmap_height);
     break;
     
   case Symprod::FILL_STIPPLE60 :
     pixmap =
       XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    _stipple60_bitmap_bits,
+			    (char *) _stipple60_bitmap_bits,
 			    _stipple_bitmap_width, _stipple_bitmap_height);
     break;
     
   case Symprod::FILL_STIPPLE70 :
     pixmap =
       XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    _stipple70_bitmap_bits,
+			    (char *) _stipple70_bitmap_bits,
 			    _stipple_bitmap_width, _stipple_bitmap_height);
     break;
     
   case Symprod::FILL_STIPPLE80 :
     pixmap =
       XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    _stipple80_bitmap_bits,
+			    (char *) _stipple80_bitmap_bits,
 			    _stipple_bitmap_width, _stipple_bitmap_height);
     break;
     
   case Symprod::FILL_STIPPLE90 :
     pixmap =
       XCreateBitmapFromData(context.display, RootWindow(context.display, 0),
-			    _stipple90_bitmap_bits,
+			    (char *) _stipple90_bitmap_bits,
 			    _stipple_bitmap_width, _stipple_bitmap_height);
     break;
 

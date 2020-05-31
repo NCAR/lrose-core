@@ -463,7 +463,10 @@ extern Attr_attribute  MENU_KEY;
 
 //*************************** Global values and macros ***********************/
 
-#define DEG_TO_RAD  0.01745329251994372   // degrees to radians conversion 
+#ifndef DEG_TO_RAD
+#define DEG_TO_RAD  0.01745329251994372   // degrees to radians conversion
+#endif
+
 #define RADIAN90    1.570795      // radian value for 90 degrees 
 #define RADIAN180   3.14159       // radian value for 180 degrees 
 #define RADIAN270   4.712385      // radian value for 270 degrees 

@@ -122,7 +122,11 @@
 #define YEARLY_INTERVAL 2       /* Climo mode */
 
 #define DEG_RAD 57.29577951    /* degrees per radian */
+
+#ifndef KM_PER_DEG_AT_EQ
 #define KM_PER_DEG_AT_EQ 111.198487
+#endif
+
 #define PSEUDO_RADIUS 8533.0  
 /* Methods of rendering Gridded false colored data */
 #define POLYGONS  0
