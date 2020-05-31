@@ -75,7 +75,7 @@ Wevent::Wevent(char *buffer)
 	if((start_text = strstr(buffer,"\nstart ")) != NULL) {
 		start_text++; // move past the newline.
 		 if((nl_ptr = strchr(start_text,10)) != NULL) { // search for a new line
-			 nl_ptr = '\0';
+                   nl_ptr = NULL;
 		 }
 
 		date_time_t Start, Finish;
