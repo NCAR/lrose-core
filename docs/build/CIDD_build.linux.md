@@ -29,11 +29,30 @@ So, for a CIDD build we recommend you use a separate prefix location, for exampl
 
 ## Run the CIDD checkout and build
 
-You will run the CIDD build from within the ```lrose-core/build``` directory.
+You can run the CIDD build from within the ```lrose-core/build``` directory.
 
 ```
   cd lrose-core/build  
+  ./build_cidd.py
+```
+
+```build_cidd``` is a wrapper script which runs the following:
+
+
+```
   ./checkout_and_build_auto.py --package lrose-cidd --prefix $HOME/cidd --buildNetcdf
+```
+
+CIDD is always built with static linking. The default build location is:
+
+```
+  /tmp/cidd_build
+```
+
+and the logs will be in:
+
+```
+  /tmp/cidd_build/logs
 ```
 
 ## Build output and log files
@@ -43,94 +62,94 @@ The build process creates log files as it proceeds. You should see the following
 ```
 ========================= git-checkout =========================
 Running cmd: git clone --branch master https://github.com/NCAR/lrose-core
-Log file is: /tmp/lrose_build/logs/git-checkout.log
+Log file is: /tmp/cidd_build/logs/git-checkout.log
     ....
     done
 Running cmd: git clone https://github.com/NCAR/lrose-netcdf
-Log file is: /tmp/lrose_build/logs/git-checkout.log
+Log file is: /tmp/cidd_build/logs/git-checkout.log
     ....
     done
 Running cmd: git clone https://github.com/NCAR/lrose-displays
-Log file is: /tmp/lrose_build/logs/git-checkout.log
+Log file is: /tmp/cidd_build/logs/git-checkout.log
     ....
     done
 ========================= install-package-makefiles =========================
 Running cmd: ./make_bin/installPackageMakefiles.py --package lrose-cidd --codedir .
-Log file is: /tmp/lrose_build/logs/install-package-makefiles.log
+Log file is: /tmp/cidd_build/logs/install-package-makefiles.log
     ....
     done
 ========================= setup-autoconf =========================
 Running cmd: ./make_bin/createConfigure.am.py --dir . --baseName configure.base --pkg lrose-cidd --debug 
-Log file is: /tmp/lrose_build/logs/setup-autoconf.log
+Log file is: /tmp/cidd_build/logs/setup-autoconf.log
     ....
     done
 ========================= create-qt-moc-files =========================
 ========================= build-netcdf =========================
-Running cmd: ./build_and_install_netcdf.m32 -x /tmp/lrose_build/scratch
-Log file is: /tmp/lrose_build/logs/build-netcdf.log
+Running cmd: ./build_and_install_netcdf.m32 -x /tmp/cidd_build/scratch
+Log file is: /tmp/cidd_build/logs/build-netcdf.log
     ....
     done
 ========================= print-environment =========================
 Running cmd: env
-Log file is: /tmp/lrose_build/logs/print-environment.log
+Log file is: /tmp/cidd_build/logs/print-environment.log
     ....
     done
 ========================= run-configure =========================
-Running cmd: ./configure --with-hdf5=/tmp/lrose_build/scratch --with-netcdf=/tmp/lrose_build/scratch --prefix=/tmp/lrose_build/scratch
-Log file is: /tmp/lrose_build/logs/run-configure.log
+Running cmd: ./configure --with-hdf5=/tmp/cidd_build/scratch --with-netcdf=/tmp/cidd_build/scratch --prefix=/tmp/cidd_build/scratch
+Log file is: /tmp/cidd_build/logs/run-configure.log
     ....
     done
 ========================= build-libs =========================
 Running cmd: make -k -j 8
-Log file is: /tmp/lrose_build/logs/build-libs.log
+Log file is: /tmp/cidd_build/logs/build-libs.log
     ....
     done
 ========================= install-libs-to-tmp =========================
 Running cmd: make -k install-strip
-Log file is: /tmp/lrose_build/logs/install-libs-to-tmp.log
+Log file is: /tmp/cidd_build/logs/install-libs-to-tmp.log
     ....
     done
 ========================= build-apps =========================
 Running cmd: make -k -j 8
-Log file is: /tmp/lrose_build/logs/build-apps.log
+Log file is: /tmp/cidd_build/logs/build-apps.log
     ....
     done
 ========================= install-apps-to-tmp =========================
 Running cmd: make -k install-strip
-Log file is: /tmp/lrose_build/logs/install-apps-to-tmp.log
+Log file is: /tmp/cidd_build/logs/install-apps-to-tmp.log
     ....
     done
 ========================= do-final-install =========================
 Running cmd: rsync -av LICENSE.txt /tmp/cidd
-Log file is: /tmp/lrose_build/logs/do-final-install.log
+Log file is: /tmp/cidd_build/logs/do-final-install.log
     ....
     done
 Running cmd: rsync -av release_notes /tmp/cidd
-Log file is: /tmp/lrose_build/logs/do-final-install.log
+Log file is: /tmp/cidd_build/logs/do-final-install.log
     ....
     done
 Running cmd: rsync -av docs /tmp/cidd
-Log file is: /tmp/lrose_build/logs/do-final-install.log
+Log file is: /tmp/cidd_build/logs/do-final-install.log
     ....
     done
 Running cmd: rsync -av ./codebase/apps/cidd/src/CIDD/scripts /tmp/cidd
-Log file is: /tmp/lrose_build/logs/do-final-install.log
+Log file is: /tmp/cidd_build/logs/do-final-install.log
     ....
     done
 Running cmd: rsync -av color_scales /tmp/cidd/share
-Log file is: /tmp/lrose_build/logs/do-final-install.log
+Log file is: /tmp/cidd_build/logs/do-final-install.log
     ....
     done
 Running cmd: rsync -av bin /tmp/cidd
-Log file is: /tmp/lrose_build/logs/do-final-install.log
+Log file is: /tmp/cidd_build/logs/do-final-install.log
     ....
     done
 Running cmd: rsync -av lib /tmp/cidd
-Log file is: /tmp/lrose_build/logs/do-final-install.log
+Log file is: /tmp/cidd_build/logs/do-final-install.log
     ....
     done
 Running cmd: rsync -av include /tmp/cidd
-Log file is: /tmp/lrose_build/logs/do-final-install.log
+Log file is: /tmp/cidd_build/logs/do-final-install.log
     ....
     done
 ============= Checking libs for lrose-cidd =============
