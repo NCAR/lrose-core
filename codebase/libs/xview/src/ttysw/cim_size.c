@@ -174,19 +174,19 @@ xv_tty_free_image_and_mode()
     }
 #else
     if (lines_ptr) {
-        cfree((CHAR *) (lines_ptr));
+        free((CHAR *) (lines_ptr));
 	lines_ptr = NULL;
     }
     if (image) {
-        cfree((CHAR **) image);
+        free((CHAR **) image);
 	image = NULL;
     }
     if (mode_ptr) {
-	cfree((char *) (mode_ptr));
+	free((char *) (mode_ptr));
 	mode_ptr = NULL;
     }
     if (screenmode) {
-	cfree((char **) screenmode);
+	free((char **) screenmode);
 	screenmode = NULL;
     }
 #endif

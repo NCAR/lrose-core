@@ -201,18 +201,18 @@ xv_free_filter_table(table)
 {
     int             i;
     for (i = 0; table[i] != NULL; i++) {
-#if defined (__APPLE__)
+/* #if defined (__APPLE__) */
         free((char *) table[i]->call);
-#else
-        cfree((char *) table[i]->call);
-#endif
+/* #else */
+/*         cfree((char *) table[i]->call); */
+/* #endif */
 	free((char *) table[i]);
     }
-#if defined (__APPLE__)
+/* #if defined (__APPLE__) */
     free((char *) table);
-#else
-    cfree((char *) table);
-#endif
+/* #else */
+/*     cfree((char *) table); */
+/* #endif */
 }
 
 static struct CharAction digits(char c)
