@@ -14,13 +14,13 @@ RUN \
     dnf install -y epel-release; \
     dnf install -y 'dnf-command(config-manager)'; \
     dnf config-manager --set-enabled PowerTools; \
-    dnf install -y \
+    dnf install -y --allowerasing \
       tcsh wget git \
       emacs rsync python2 python3 mlocate \
       python2-devel platform-python-devel \
       m4 make cmake libtool autoconf automake \
       gcc gcc-c++ gcc-gfortran glibc-devel \
-      libX11-devel libXext-devel \
+      libX11-devel libXext-devel libcurl-devel \
       libpng-devel libtiff-devel zlib-devel libzip-devel \
       eigen3-devel armadillo-devel \
       expat-devel libcurl-devel openmpi-devel \
@@ -44,9 +44,10 @@ RUN \
 # 32-bit libs etc for CIDD build
 
 RUN \
-    dnf install -y \
+    dnf install -y --allowerasing \
     xrdb \
     glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
+    libcurl-devel.i686 \
     libtiff-devel.i686 libpng-devel.i686 \
     libstdc++-devel.i686 libtiff-devel.i686 \
     zlib-devel.i686 expat-devel.i686 flex-devel.i686 \

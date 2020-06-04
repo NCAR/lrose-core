@@ -19,7 +19,21 @@ RUN \
     --logDir /tmp/build_logs \
     --cmake3 --fractl --vortrac --samurai
 
+# build CIDD
+
+RUN \
+    /scripts/checkout_and_build_auto.py \
+    --package lrose-cidd \
+    --releaseDate ${RELEASE_DATE} \
+    --prefix /usr/local/cidd \
+    --buildDir /tmp/cidd_build \
+    --logDir /tmp/cidd_logs  \
+    --static \
+    --buildNetcdf \
+    --noScripts \
+    --installLroseRuntimeLibs
+
 # clean up
 
 RUN \
-    /bin/rm -rf /tmp/lrose_build
+    /bin/rm -rf /tmp/lrose_build /tmp/cidd_build

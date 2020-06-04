@@ -16,7 +16,7 @@ RUN \
     --releaseDate ${RELEASE_DATE} \
     --prefix /usr/local/lrose \
     --buildDir /tmp/lrose_build \
-    --logDir /tmp/build_logs
+    --logDir /tmp/lrose_logs
 
 # clean up
 
