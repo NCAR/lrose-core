@@ -64,7 +64,7 @@ public:
   void printInventory(ostream &stream) const;
     
   vector< const GribRecord* > getRecords(const int parameter_id,
-					 const int level_id)
+					 const int level_id) const
   {
     vector< const GribRecord* > record_list;
     
@@ -79,6 +79,27 @@ public:
     } /* endfor - inventory_record */
     
     return record_list;
+  }
+  
+  vector< const GribRecord* > getRecords() const
+  {
+    vector< const GribRecord* > record_list;
+    
+    vector< file_inventory_t >::const_iterator inventory_record;
+    
+    for (inventory_record = _inventory.begin();
+	 inventory_record != _inventory.end(); ++inventory_record)
+      record_list.push_back(inventory_record->record);
+    
+    return record_list;
+  }
+
+  const GribRecord *getRecord(const size_t record_index) const
+  {
+    if (record_index >= _inventory.size())
+      return 0;
+
+    return _inventory[0].record;
   }
   
 
