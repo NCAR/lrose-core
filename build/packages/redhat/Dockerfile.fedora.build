@@ -1,11 +1,11 @@
 #===================================================
-# build lrose in redhat container
+# build lrose in redhat fedora container
 
 ARG LROSE_PKG=core
 ARG RELEASE_DATE=latest
 
 RUN \
-    echo "Building lrose in redhat container"; \
+    echo "Building lrose in redhat fedora container"; \
     echo "  package is: ${LROSE_PKG}" 
 
 # run the checkout and build script
@@ -16,8 +16,8 @@ RUN \
     --releaseDate ${RELEASE_DATE} \
     --prefix /usr/local/lrose \
     --buildDir /tmp/lrose_build \
-    --logDir /tmp/build_logs \
-    --cmake3 --fractl --vortrac --samurai
+    --logDir /tmp/lrose_build.logs \
+    --fractl --samurai
 
 # build CIDD
 
@@ -27,7 +27,7 @@ RUN \
     --releaseDate ${RELEASE_DATE} \
     --prefix /usr/local/cidd \
     --buildDir /tmp/cidd_build \
-    --logDir /tmp/cidd_logs  \
+    --logDir /tmp/cidd_build.logs  \
     --static \
     --buildNetcdf \
     --noScripts \
@@ -36,5 +36,5 @@ RUN \
 # clean up
 
 RUN \
-    /bin/rm -rf /tmp/lrose_build /tmp/cidd_build
- 
+    /bin/rm -rf /tmp/lrose_build
+
