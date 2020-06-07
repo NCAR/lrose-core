@@ -43,7 +43,7 @@ def main():
                         ',libpthread,libdl,libX,libxpc'
     else:
         # LINUX
-        ignoreDefault = 'libc.so,libpthread.so,libdl.so'
+        ignoreDefault = 'libc.so,libpthread.so,libdl.so,libm.so'
 
     parser = OptionParser(usage)
     parser.add_option('--debug',
