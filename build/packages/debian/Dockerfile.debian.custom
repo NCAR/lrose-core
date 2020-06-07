@@ -17,9 +17,8 @@ RUN apt-get update && \
     qtbase5-dev qtdeclarative5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
     libarmadillo-dev libopenmpi-dev \
-    libnetcdf-dev libhdf5-dev hdf5-tools
-
-#    libcurl4-openssl-dev
+    libnetcdf-dev libhdf5-dev hdf5-tools \
+    libcurl4-openssl-dev
 
 # create link for qmake
 
@@ -30,7 +29,7 @@ RUN \
     ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
 
 
-# install packages for CIDD
+# install packages for running CIDD
 
 RUN \
     /usr/bin/dpkg --add-architecture i386 && \
@@ -39,12 +38,24 @@ RUN \
     libx11-dev:i386 \
     libxext-dev:i386 \
     libfftw3-dev:i386 \
-    libexpat1-dev:i386 \
-    libstdc++-6-dev:i386 \
-    lib32stdc++-6-dev \
+    libexpat-dev:i386 \
     libpng-dev:i386 \
     libfl-dev:i386 \
     libbz2-dev:i386 \
     libzip-dev:i386
 
+#RUN \
+#    /usr/bin/dpkg --add-architecture i386 && \
+#    apt-get -y update && \
+#    apt-get install -y \
+#    libx11-dev:i386 \
+#    libxext-dev:i386 \
+#    libfftw3-dev:i386 \
+#    libexpat1-dev:i386 \
+#    libstdc++-6-dev:i386 \
+#    lib32stdc++-6-dev \
+#    libpng-dev:i386 \
+#    libfl-dev:i386 \
+#    libbz2-dev:i386 \
+#    libzip-dev:i386 \
 #    libcurl3-dev:i386

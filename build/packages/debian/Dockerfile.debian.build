@@ -17,25 +17,25 @@ RUN \
     --prefix /usr/local/lrose \
     --buildDir /tmp/lrose_build \
     --logDir /tmp/lrose_build/logs \
-    --fractl --samurai \
-    --buildNetcdf
-
-# build CIDD
-
-RUN \
-    /scripts/checkout_and_build_auto.py \
-    --package lrose-cidd \
-    --releaseDate ${RELEASE_DATE} \
-    --prefix /usr/local/cidd \
-    --buildDir /tmp/cidd_build \
-    --logDir /tmp/cidd_build.logs  \
-    --static \
     --buildNetcdf \
-    --noScripts \
-    --installLroseRuntimeLibs
+    --fractl --vortrac --samurai
 
 # clean up
 
+RUN \
+    /bin/rm -rf /tmp/lrose_build
+
+# build CIDD
+
 #RUN \
-#    /bin/rm -rf /tmp/lrose_build
+#    /scripts/checkout_and_build_auto.py \
+#    --package lrose-cidd \
+#    --releaseDate ${RELEASE_DATE} \
+#    --prefix /usr/local/cidd \
+#    --buildDir /tmp/cidd_build \
+#    --logDir /tmp/cidd_build.logs  \
+#    --static \
+#    --buildNetcdf \
+#    --noScripts \
+#    --installLroseRuntimeLibs
 
