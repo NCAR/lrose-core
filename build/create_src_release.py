@@ -421,9 +421,14 @@ def createTarFile():
     displaysSubDir = os.path.join(tarDir, "share/")
     os.makedirs(displaysSubDir)
     shellCmd("rsync -av " + displaysDir + " " + displaysSubDir)
-    
+
+    # copy scripts for netcdf build
+
     if (options.package == "lrose-cidd"):
         name = "build_and_install_netcdf.cidd_linux32"
+        os.rename(os.path.join(netcdfDir, name),
+                  os.path.join(netcdfSubDir, name))
+        name = "fix_hdf5_configure.py"
         os.rename(os.path.join(netcdfDir, name),
                   os.path.join(netcdfSubDir, name))
     else:
