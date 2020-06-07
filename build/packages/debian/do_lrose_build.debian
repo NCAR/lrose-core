@@ -92,15 +92,15 @@ echo "#" >> ${DockerfilePath}
 
 # append the body of the Dockerfile
 
-cat Dockerfile.debian.build >> ${DockerfilePath}
+#cat Dockerfile.debian.build >> ${DockerfilePath}
 
-#if [ "$os_type" = debian -a "$os_version" = 10 ] ; then
-#    cat Dockerfile.debian10.build >> ${DockerfilePath}
+if [ "$os_type" = debian -a "$os_version" = 10 ] ; then
+    cat Dockerfile.debian10.build >> ${DockerfilePath}
 #elif [ "$os_type" = ubuntu -a "$os_version" = 19.10 ] ; then
 #    cat Dockerfile.ubuntu1910.build >> ${DockerfilePath}
-#else
-#    cat Dockerfile.debian.build >> ${DockerfilePath}
-#fi
+else
+    cat Dockerfile.debian.build >> ${DockerfilePath}
+fi
 
 
 # remove any old image

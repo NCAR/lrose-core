@@ -423,7 +423,7 @@ def createTarFile():
     shellCmd("rsync -av " + displaysDir + " " + displaysSubDir)
     
     if (options.package == "lrose-cidd"):
-        name = "build_and_install_netcdf.m32"
+        name = "build_and_install_netcdf.cidd_linux32"
         os.rename(os.path.join(netcdfDir, name),
                   os.path.join(netcdfSubDir, name))
     else:
