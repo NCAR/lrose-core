@@ -32,14 +32,14 @@ RUN \
 
 # 32-bit libs etc for CIDD build
 
-#RUN \
-#    zypper install -y \
-#    xrdb \
-#    glibc-devel-32bit libX11-devel-32bit libXext-devel-32bit \
-#    libtiff-devel-32bit libpng-devel-32bit libcurl-devel-32bit \
-#    libstdc++-devel-32bit libtiff-devel-32bit \
-#    zlib-devel-32bit libexpat-devel-32bit flex-32bit \
-#    libfftw3-3-32bit libbz2-devel-32bit \
-#    gnuplot ImageMagick-devel-32bit \
-#    xorg-x11 xorg-x11-devel xorg-x11-fonts xorg-x11-fonts-core
+RUN \
+    zypper install -y \
+    xrdb \
+    glibc-devel-32bit libX11-devel-32bit libXext-devel-32bit \
+    libtiff-devel-32bit libpng-devel-32bit libcurl-devel-32bit \
+    libstdc++-devel-32bit libtiff-devel-32bit \
+    zlib-devel-32bit libexpat-devel-32bit flex-32bit \
+    libfftw3-3-32bit libbz2-devel-32bit \
+    gnuplot ImageMagick-devel-32bit \
+    xorg-x11 xorg-x11-devel xorg-x11-fonts xorg-x11-fonts-core
 
