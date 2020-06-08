@@ -299,6 +299,90 @@ def installPackagesFedora():
     shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
 
 ########################################################################
+# install packages for Debian
+
+def installPackagesDebian():
+
+    # install main packages
+    
+    shellCmd("apt-get -y update")
+    shellCmd("apt-get install -y " +
+             "tcsh git gcc g++ gfortran rsync chrpath " +
+             "automake make cmake mlocate libtool pkg-config python " +
+             "libcurl3-dev curl " +
+             "libfl-dev libbz2-dev libx11-dev libpng-dev " +
+             "libfftw3-dev libexpat1-dev " +
+             "qtbase5-dev qtdeclarative5-dev " +
+             "libgeographic-dev libeigen3-dev libzip-dev " +
+             "libarmadillo-dev libopenmpi-dev " +
+             "libnetcdf-dev libhdf5-dev hdf5-tools " +
+             "libcurl4-openssl-dev")
+
+    # create link for qmake
+
+    shellCmd("cd /usr/bin; " +
+             "/bin/rm -f qmake qmake-qt5; " +
+             "ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; " +
+             "ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5")
+
+    # install packages for running CIDD
+
+    shellCmd("/usr/bin/dpkg --add-architecture i386")
+    shellCmd("apt-get -y update")
+    shellCmd("apt-get install -y " +
+             "libx11-dev:i386 " +
+             "libxext-dev:i386 " +
+             "libfftw3-dev:i386 " +
+             "libexpat-dev:i386 " +
+             "libpng-dev:i386 " +
+             "libfl-dev:i386 " +
+             "libbz2-dev:i386 " +
+             "libzip-dev:i386")
+
+########################################################################
+# install packages for suse
+
+def installPackagesSuse():
+
+    # install epel
+
+    shellCmd("yum install -y epel-release")
+
+    # install main packages
+
+    shellCmd("zypper install -y tcsh wget git " +
+             "tkdiff emacs rsync python docker " +
+             "m4 make cmake libtool autoconf automake " +
+             "gcc gcc-c++ gcc-fortran glibc-devel " +
+             "libX11-devel libXext-devel " +
+             "libpng-devel libtiff-devel zlib-devel " +
+             "libexpat-devel libcurl-devel " +
+             "flex fftw3-devel " +
+             "libbz2-devel libzip-devel " +
+             "libqt5-qtbase-devel libqt5-qtdeclarative-devel " +
+             "eigen3-devel " +
+             "hdf5-devel netcdf-devel " +
+             "armadillo-devel openmpi-devel " +
+             "xorg-x11-xauth " +
+             "rpm-build rpm-devel rpmdevtools")
+
+    # install packages for CIDD
+
+    shellCmd("zypper install -y " +
+             "xrdb " +
+             "glibc-devel-32bit libX11-devel-32bit libXext-devel-32bit " +
+             "libtiff-devel-32bit libpng-devel-32bit libcurl-devel-32bit " +
+             "libstdc++-devel-32bit libtiff-devel-32bit " +
+             "zlib-devel-32bit libexpat-devel-32bit flex-32bit " +
+             "libfftw3-3-32bit libbz2-devel-32bit " +
+             "gnuplot ImageMagick-devel-32bit " +
+             "xorg-x11 xorg-x11-devel xorg-x11-fonts xorg-x11-fonts-core")
+
+    # create link for qtmake
+
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    
+########################################################################
 # get the OS type from the /etc/os-release file in linux
 
 def getOsType():

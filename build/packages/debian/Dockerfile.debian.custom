@@ -44,18 +44,3 @@ RUN \
     libbz2-dev:i386 \
     libzip-dev:i386
 
-#RUN \
-#    /usr/bin/dpkg --add-architecture i386 && \
-#    apt-get -y update && \
-#    apt-get install -y \
-#    libx11-dev:i386 \
-#    libxext-dev:i386 \
-#    libfftw3-dev:i386 \
-#    libexpat1-dev:i386 \
-#    libstdc++-6-dev:i386 \
-#    lib32stdc++-6-dev \
-#    libpng-dev:i386 \
-#    libfl-dev:i386 \
-#    libbz2-dev:i386 \
-#    libzip-dev:i386 \
-#    libcurl3-dev:i386
