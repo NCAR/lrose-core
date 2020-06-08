@@ -74,11 +74,26 @@ def main():
     print("  OS version: ", osVersion, file=sys.stderr)
     print("****************************************************", file=sys.stderr)
 
-    # do the install
-    
-    #if (os.path.isdir("bin")):
-    #    shellCmd("rsync -av bin " + installDir)
+    # install the relevant packages
 
+    if (osType == "centos"):
+        if (osVersion == 6):
+            installPackagesCentos6()
+        elif (osVersion == 7):
+            installPackagesCentos7()
+        elif (osVersion == 8):
+            installPackagesCentos8()
+    elif (osType == "fedora"):
+         installPackagesFedora()
+    elif (osType == "debian"):
+         installPackagesDebian()
+    elif (osType == "ubuntu"):
+         installPackagesDebian()
+    elif (osType == "suse"):
+         installPackagesSuse()
+    else:
+        print("ERROR - unsupported OS type: ", osType, " version: ", osVersion, file=sys.stderr)
+            
     # done
     
     print("****************************************************", file=sys.stderr)
@@ -88,6 +103,60 @@ def main():
     sys.exit(0)
 
 ########################################################################
+# install packages for CENTOS 6
+
+def installPackagesCentos6():
+
+    # install epel
+
+    shellCmd("yum install -y epel-release;")
+
+    # install main packages
+
+    shellCmd("yum install -y tcsh wget git tkcvs " +
+            "emacs rsync python " +
+            "m4 make cmake libtool autoconf automake " +
+            "gcc gcc-c++ gcc-gfortran glibc-devel " +
+            "libX11-devel libXext-devel " +
+            "libpng-devel libtiff-devel zlib-devel " +
+            "expat-devel libcurl-devel " +
+            "flex-devel fftw3-devel " +
+            "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+            "hdf5-devel netcdf-devel " +
+            "xorg-x11-xauth xorg-x11-apps " +
+            "rpm-build redhat-rpm-config " +
+                 "rpm-devel rpmdevtools ")
+
+    # install required 32-bit packages for CIDD
+    
+    shellCmd("yum install -y " +
+                 "xrdb Xvfb gnuplot " +
+                 "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
+                 "libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 " +
+                 "libstdc++-devel.i686 libgcc.i686 " +
+                 "expat-devel.i686 flex-devel.i686 " +
+                 "fftw-devel.i686 zlib-devel.i686 bzip2-devel.i686 " +
+                 "ImageMagick-devel ImageMagick-c++-devel " +
+                 "xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi " +
+                 "xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi " +
+                 "xorg-x11-fonts-mis")
+
+    # create link for qtmake
+
+    shellCmd("cd /usr/bin; ln -s qmake-qt5 qmake")
+    
+    # install updated gcc and g++ toolchain
+
+    shellCmd("wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo")
+    shellCmd("yum install -y devtoolset-2-gcc devtoolset-2-binutils")
+    shellCmd("yum install -y devtoolset-2-gcc-c++ devtoolset-2-gcc-gfortran")
+
+    # copy the updated compilers into /usr
+    # so that they become the system default
+
+    shellCmd("cd /opt/rh/devtoolset-2/root; rsync -av usr /")
+    
+########################################################################
 # get the OS type from the /etc/os-release file in linux
 
 def getOsType():
@@ -96,30 +165,32 @@ def getOsType():
 
     # Mac OSX?
 
-    # if (platform == "darwin"):
-    #     osType = "OSX"
-    #     osVersion = 10
-    #     return
+    if (platform == "darwin"):
+        osType = "OSX"
+        osVersion = 10
+        return
 
     # not linux?
 
-    # if (platform != "linux"):
-    #     osType = "unknown"
-    #     osVersion = 0
-    #     return
+    if (platform != "linux"):
+        osType = "unknown"
+        osVersion = 0
+        return
 
     # Centos 6?
 
-    # if (os.path.isfile("/etc/redhat-release")):
-    #     rhrelease_file = open("/etc/redhat-release", "rt")
-    #     lines = rhrelease_file.readlines()
-    #     rhrelease_file.close()
-    #     for line in lines:
-    #       if (line.find("CentOS release 6") == 0):
-    #         osType = "centos"
-    #         osVersion = 6
-    #         return
-          
+    if (os.path.isfile("/etc/redhat-release")):
+        rhrelease_file = open("/etc/redhat-release", "rt")
+        lines = rhrelease_file.readlines()
+        rhrelease_file.close()
+        for line in lines:
+          if (line.find("CentOS release 6") == 0):
+            osType = "centos"
+            osVersion = 6
+            return
+
+    # get os info from /etc/os-release file
+  
     _file = open(options.osFile, "rt")
     lines = _file.readlines()
     _file.close()
