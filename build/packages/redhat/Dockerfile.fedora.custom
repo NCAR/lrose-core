@@ -9,7 +9,6 @@ ARG OS_VERSION=30
 # install required packages
 
 RUN \
-    yum install -y epel-release; \
     yum install -y \
     tcsh wget git \
     tkcvs emacs rsync python mlocate \

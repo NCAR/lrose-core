@@ -27,8 +27,6 @@ RUN \
 
 # install required 32-bit packages for CIDD
 
-# install required 32-bit packages for CIDD
-
 RUN \
     yum install -y \
     xrdb Xvfb gnuplot \

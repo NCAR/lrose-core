@@ -17,21 +17,7 @@ RUN \
     --prefix /usr/local/lrose \
     --buildDir /tmp/lrose_build \
     --logDir /tmp/build_logs \
-    --geolib --fractl --samurai
-
-# build CIDD
-
-#RUN \
-#    /scripts/checkout_and_build_auto.py \
-#    --package lrose-cidd \
-#    --releaseDate ${RELEASE_DATE} \
-#    --prefix /usr/local/cidd \
-#    --buildDir /tmp/cidd_build \
-#    --logDir /tmp/cidd_logs  \
-#    --static \
-#    --buildNetcdf \
-#    --noScripts \
-#    --installLroseRuntimeLibs
+    --fractl --samurai -vortrac
 
 # clean up
 
