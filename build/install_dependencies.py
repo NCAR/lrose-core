@@ -344,10 +344,6 @@ def installPackagesDebian():
 
 def installPackagesSuse():
 
-    # install epel
-
-    shellCmd("yum install -y epel-release")
-
     # install main packages
 
     shellCmd("zypper install -y tcsh wget git " +
