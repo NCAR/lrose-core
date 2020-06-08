@@ -6,7 +6,6 @@ docker image rm -f custom/centos:6
 docker image rm -f custom/centos:7
 docker image rm -f custom/centos:8
 
-docker image rm -f custom/fedora:28
 docker image rm -f custom/fedora:29
 docker image rm -f custom/fedora:30
 docker image rm -f custom/fedora:31

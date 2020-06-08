@@ -1,0 +1,293 @@
+[root@32831b84f8e2 /]# cat /etc/redhat-release 
+CentOS release 6.10 (Final)
+[root@32831b84f8e2 /]# exit
+
+(titan.eol.ucar.edu) build 107 % docker run -it 297a0aaee922
+[root@e0135dabcb5b /]# cat /etc/redhat-release 
+CentOS Linux release 7.6.1810 (Core) 
+[root@e0135dabcb5b /]# cat /etc/os-release 
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+CENTOS_MANTISBT_PROJECT="CentOS-7"
+CENTOS_MANTISBT_PROJECT_VERSION="7"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="7"
+
+
+(titan.eol.ucar.edu) build 108 % docker run -it 821202141baf
+[root@56f426ffa540 /]# cat /etc/redhat-release 
+CentOS Linux release 8.0.1905 (Core) 
+[root@56f426ffa540 /]# cat /etc/os-release 
+NAME="CentOS Linux"
+VERSION="8 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="8"
+PLATFORM_ID="platform:el8"
+PRETTY_NAME="CentOS Linux 8 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:8"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+CENTOS_MANTISBT_PROJECT="CentOS-8"
+CENTOS_MANTISBT_PROJECT_VERSION="8"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="8"
+
+
+
+
+
+[root@eaa14aaf077b /]# cat /etc/redhat-release 
+Fedora release 28 (Twenty Eight)
+[root@eaa14aaf077b /]# cat /etc/os-release 
+NAME=Fedora
+VERSION="28 (Twenty Eight)"
+ID=fedora
+VERSION_ID=28
+PLATFORM_ID="platform:f28"
+PRETTY_NAME="Fedora 28 (Twenty Eight)"
+ANSI_COLOR="0;34"
+CPE_NAME="cpe:/o:fedoraproject:fedora:28"
+HOME_URL="https://fedoraproject.org/"
+SUPPORT_URL="https://fedoraproject.org/wiki/Communicating_and_getting_help"
+BUG_REPORT_URL="https://bugzilla.redhat.com/"
+REDHAT_BUGZILLA_PRODUCT="Fedora"
+REDHAT_BUGZILLA_PRODUCT_VERSION=28
+REDHAT_SUPPORT_PRODUCT="Fedora"
+REDHAT_SUPPORT_PRODUCT_VERSION=28
+PRIVACY_POLICY_URL="https://fedoraproject.org/wiki/Legal:PrivacyPolicy"
+[root@eaa14aaf077b /]# 
+
+
+
+(titan.eol.ucar.edu) build 114 % docker run -it 83d0fc804d5e
+[root@1fe1107c4aae /]# cat /etc/redhat-release 
+Fedora release 29 (Twenty Nine)
+[root@1fe1107c4aae /]# cat /etc/os-release 
+NAME=Fedora
+VERSION="29 (Container Image)"
+ID=fedora
+VERSION_ID=29
+VERSION_CODENAME=""
+PLATFORM_ID="platform:f29"
+PRETTY_NAME="Fedora 29 (Container Image)"
+ANSI_COLOR="0;34"
+LOGO=fedora-logo-icon
+CPE_NAME="cpe:/o:fedoraproject:fedora:29"
+HOME_URL="https://fedoraproject.org/"
+DOCUMENTATION_URL="https://docs.fedoraproject.org/en-US/fedora/f29/system-administrators-guide/"
+SUPPORT_URL="https://fedoraproject.org/wiki/Communicating_and_getting_help"
+BUG_REPORT_URL="https://bugzilla.redhat.com/"
+REDHAT_BUGZILLA_PRODUCT="Fedora"
+REDHAT_BUGZILLA_PRODUCT_VERSION=29
+REDHAT_SUPPORT_PRODUCT="Fedora"
+REDHAT_SUPPORT_PRODUCT_VERSION=29
+PRIVACY_POLICY_URL="https://fedoraproject.org/wiki/Legal:PrivacyPolicy"
+VARIANT="Container Image"
+VARIANT_ID=container
+[root@1fe1107c4aae /]# exit
+
+
+
+(titan.eol.ucar.edu) build 116 % docker run -it 1baeddf1b7b5
+[root@8f1997db7939 /]# cat /etc/redhat-release 
+Fedora release 30 (Thirty)
+[root@8f1997db7939 /]# cat /etc/os-release 
+NAME=Fedora
+VERSION="30 (Container Image)"
+ID=fedora
+VERSION_ID=30
+VERSION_CODENAME=""
+PLATFORM_ID="platform:f30"
+PRETTY_NAME="Fedora 30 (Container Image)"
+ANSI_COLOR="0;34"
+LOGO=fedora-logo-icon
+CPE_NAME="cpe:/o:fedoraproject:fedora:30"
+HOME_URL="https://fedoraproject.org/"
+DOCUMENTATION_URL="https://docs.fedoraproject.org/en-US/fedora/f30/system-administrators-guide/"
+SUPPORT_URL="https://fedoraproject.org/wiki/Communicating_and_getting_help"
+BUG_REPORT_URL="https://bugzilla.redhat.com/"
+REDHAT_BUGZILLA_PRODUCT="Fedora"
+REDHAT_BUGZILLA_PRODUCT_VERSION=30
+REDHAT_SUPPORT_PRODUCT="Fedora"
+REDHAT_SUPPORT_PRODUCT_VERSION=30
+PRIVACY_POLICY_URL="https://fedoraproject.org/wiki/Legal:PrivacyPolicy"
+VARIANT="Container Image"
+VARIANT_ID=container
+[root@8f1997db7939 /]# exit
+
+
+(titan.eol.ucar.edu) build 117 % docker run -it 973c3e923ca8
+[root@9fe682057da2 /]# cat /etc/redhat-release 
+Fedora release 31 (Thirty One)
+[root@9fe682057da2 /]# cat /etc/os-release 
+NAME=Fedora
+VERSION="31 (Container Image)"
+ID=fedora
+VERSION_ID=31
+VERSION_CODENAME=""
+PLATFORM_ID="platform:f31"
+PRETTY_NAME="Fedora 31 (Container Image)"
+ANSI_COLOR="0;34"
+LOGO=fedora-logo-icon
+CPE_NAME="cpe:/o:fedoraproject:fedora:31"
+HOME_URL="https://fedoraproject.org/"
+DOCUMENTATION_URL="https://docs.fedoraproject.org/en-US/fedora/f31/system-administrators-guide/"
+SUPPORT_URL="https://fedoraproject.org/wiki/Communicating_and_getting_help"
+BUG_REPORT_URL="https://bugzilla.redhat.com/"
+REDHAT_BUGZILLA_PRODUCT="Fedora"
+REDHAT_BUGZILLA_PRODUCT_VERSION=31
+REDHAT_SUPPORT_PRODUCT="Fedora"
+REDHAT_SUPPORT_PRODUCT_VERSION=31
+PRIVACY_POLICY_URL="https://fedoraproject.org/wiki/Legal:PrivacyPolicy"
+VARIANT="Container Image"
+VARIANT_ID=container
+[root@9fe682057da2 /]# 
+
+
+root@19e2bee01f31:/# cat /etc/debian_version 
+9.9
+root@19e2bee01f31:/# cat /etc/os-release     
+PRETTY_NAME="Debian GNU/Linux 9 (stretch)"
+NAME="Debian GNU/Linux"
+VERSION_ID="9"
+VERSION="9 (stretch)"
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
+
+
+root@5c0c9deedc64:/# cat /etc/debian_version 
+10.2
+PRETTY_NAME="Debian GNU/Linux 10 (buster)"
+NAME="Debian GNU/Linux"
+VERSION_ID="10"
+VERSION="10 (buster)"
+VERSION_CODENAME=buster
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
+root@5c0c9deedc64:/# 
+
+root@87005eb43b33:/# cat /etc/debian_version 
+stretch/sid
+root@87005eb43b33:/# cat /etc/os-release     
+NAME="Ubuntu"
+VERSION="16.04.6 LTS (Xenial Xerus)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 16.04.6 LTS"
+VERSION_ID="16.04"
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
+VERSION_CODENAME=xenial
+UBUNTU_CODENAME=xenial
+
+root@82d4e72a05fc:/# cat /etc/debian_version 
+buster/sid
+root@82d4e72a05fc:/# cat /etc/os-release 
+NAME="Ubuntu"
+VERSION="18.04.2 LTS (Bionic Beaver)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 18.04.2 LTS"
+VERSION_ID="18.04"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=bionic
+UBUNTU_CODENAME=bionic
+
+
+root@e7a5f2727247:/# cat /etc/debian_version 
+buster/sid
+root@e7a5f2727247:/# cat /etc/os-release     
+NAME="Ubuntu"
+VERSION="18.10 (Cosmic Cuttlefish)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 18.10"
+VERSION_ID="18.10"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=cosmic
+UBUNTU_CODENAME=cosmic
+
+root@f9768497a3de:/# cat /etc/debian_version 
+buster/sid
+root@f9768497a3de:/# cat /etc/debian_version 
+buster/sid
+root@f9768497a3de:/# cat /etc/os-release     
+NAME="Ubuntu"
+VERSION="19.04 (Disco Dingo)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 19.04"
+VERSION_ID="19.04"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=disco
+UBUNTU_CODENAME=disco
+
+
+root@7f8749998f5b:/# cat /etc/debian_version 
+buster/sid
+root@7f8749998f5b:/# cat /etc/os-release     
+NAME="Ubuntu"
+VERSION="19.10 (Eoan Ermine)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 19.10"
+VERSION_ID="19.10"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=eoan
+UBUNTU_CODENAME=eoan
+
+1b59339adbec:/etc # cat os-release 
+NAME="openSUSE Leap"
+VERSION="42.3"
+ID=opensuse
+ID_LIKE="suse"
+VERSION_ID="42.3"
+PRETTY_NAME="openSUSE Leap 42.3"
+ANSI_COLOR="0;32"
+CPE_NAME="cpe:/o:opensuse:leap:42.3"
+BUG_REPORT_URL="https://bugs.opensuse.org"
+HOME_URL="https://www.opensuse.org/"
+
+
+9731340e8e79:/ # cat /etc/os-release 
+NAME="openSUSE Leap"
+VERSION="42.3"
+ID=opensuse
+ID_LIKE="suse"
+VERSION_ID="42.3"
+PRETTY_NAME="openSUSE Leap 42.3"
+ANSI_COLOR="0;32"
+CPE_NAME="cpe:/o:opensuse:leap:42.3"
+BUG_REPORT_URL="https://bugs.opensuse.org"
+HOME_URL="https://www.opensuse.org/"
+
+
