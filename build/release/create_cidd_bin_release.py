@@ -40,6 +40,9 @@ def main():
     thisScriptDir = os.path.dirname(__file__)
     os.chdir(thisScriptDir)
     thisScriptDir = os.getcwd()
+
+    homeDir = os.environ['HOME']
+    releaseDirDefault = os.path.join(homeDir, 'releases')
     
     global options
 
@@ -63,7 +66,7 @@ def main():
                       dest='tag', default='master',
                       help='Tag to check out lrose. Overrides --releaseDate')
     parser.add_option('--releaseDir',
-                      dest='releaseTopDir', default="not-set",
+                      dest='releaseDir', default=releaseDirDefault,
                       help='Top-level release dir')
 
     (options, args) = parser.parse_args()
@@ -101,8 +104,7 @@ def main():
         cmd += " --tag " + options.tag
     elif (options.releaseDate != "latest"):
         cmd += " --releaseDate " + options.releaseDate
-    if (options.releaseDir != "not-set"):
-        cmd += " --releaseDir " + options.releaseDir
+    cmd += " --releaseDir " + options.releaseDir
     cmd += " --force"
     cmd += " --static"
     shellCmd(cmd)
@@ -116,15 +118,14 @@ def main():
     ################################################################
     # create a binary release by building the src release
 
-    os.chdir("lrose-cidd-????????.src")
+    shellCmd("cd /tmp/lrose-cidd-????????.src")
     cmd = "create_bin_release.py"
     if (options.debug):
         cmd += " --debug"
     if (options.verbose):
         cmd += " --verbose"
     cmd += " --prefix /tmp/cidd-build"
-    if (options.releaseDir != "not-set"):
-        cmd += " --releaseDir " + options.releaseDir
+    cmd += " --releaseDir " + options.releaseDir
     cmd += " --force"
     cmd += " --buildNetcdf"
     shellCmd(cmd)
