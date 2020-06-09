@@ -79,11 +79,18 @@ def main():
     now = time.gmtime()
     nowTime = datetime(now.tm_year, now.tm_mon, now.tm_mday,
                        now.tm_hour, now.tm_min, now.tm_sec)
-    dateStr = nowTime.strftime("%Y%m%d")
-
+    nowDateStr = nowTime.strftime("%Y%m%d")
+    versionStr = "lrose-cidd-" + nowDateStr
+    
+    if (options.tag != "master"):
+        versionStr = options.tag
+    elif (options.releaseDate != "latest"):
+        versionStr = "lrose-cidd-" + options.releaseDate
+    
     if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  package: lrose-cidd", file=sys.stderr)
+        print("  version: ", versionStr, file=sys.stderr)
         if (options.tag != "master"):
             print("  tag: ", options.tag, file=sys.stderr)
         else:
@@ -113,12 +120,12 @@ def main():
     # untar the source in /tmp
 
     os.chdir("/tmp")
-    shellCmd("tar xvfz " + options.releaseDir + "/lrose-cidd/lrose-cidd-????????.src.tgz")
+    shellCmd("tar xvfz " + options.releaseDir + "/lrose-cidd/" + versionStr + ".src.tgz")
 
     ################################################################
     # create a binary release by building the src release
 
-    shellCmd("cd /tmp/lrose-cidd-????????.src")
+    os.chdir("/tmp/" + versionStr + ".src")
     cmd = "create_bin_release.py"
     if (options.debug):
         cmd += " --debug"
