@@ -120,7 +120,7 @@ def main():
     # untar the source in /tmp
 
     os.chdir("/tmp")
-    shellCmd("tar xvfz " + options.releaseDir + "/lrose-cidd/" + versionStr + ".src.tgz")
+    shellCmd("tar xvfz " + options.releaseDir + "/lrose-cidd/" + versionStr + ".src.tgz > /tmp/lrose-cidd.untar.log")
 
     ################################################################
     # create a binary release by building the src release
