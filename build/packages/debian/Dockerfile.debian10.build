@@ -18,7 +18,7 @@ RUN \
     --buildDir /tmp/lrose_build \
     --logDir /tmp/lrose_build/logs \
     --buildNetcdf \
-    --fractl --samurai
+    --fractl --samurai --vortrac
 
 # clean up
 

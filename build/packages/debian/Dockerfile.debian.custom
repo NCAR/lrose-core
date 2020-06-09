@@ -31,16 +31,16 @@ RUN \
 
 # install packages for running CIDD
 
-RUN \
-    /usr/bin/dpkg --add-architecture i386 && \
-    apt-get -y update && \
-    apt-get install -y \
-    libx11-dev:i386 \
-    libxext-dev:i386 \
-    libfftw3-dev:i386 \
-    libexpat-dev:i386 \
-    libpng-dev:i386 \
-    libfl-dev:i386 \
-    libbz2-dev:i386 \
-    libzip-dev:i386
+#RUN \
+#    /usr/bin/dpkg --add-architecture i386 && \
+#    apt-get -y update && \
+#    apt-get install -y \
+#    libx11-dev:i386 \
+#    libxext-dev:i386 \
+#    libfftw3-dev:i386 \
+#    libexpat-dev:i386 \
+#    libpng-dev:i386 \
+#    libfl-dev:i386 \
+#    libbz2-dev:i386 \
+#    libzip-dev:i386
 

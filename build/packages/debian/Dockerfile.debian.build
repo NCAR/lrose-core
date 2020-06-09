@@ -25,17 +25,3 @@ RUN \
 RUN \
     /bin/rm -rf /tmp/lrose_build
 
-# build CIDD
-
-#RUN \
-#    /scripts/checkout_and_build_auto.py \
-#    --package lrose-cidd \
-#    --releaseDate ${RELEASE_DATE} \
-#    --prefix /usr/local/cidd \
-#    --buildDir /tmp/cidd_build \
-#    --logDir /tmp/cidd_build.logs  \
-#    --static \
-#    --buildNetcdf \
-#    --noScripts \
-#    --installLroseRuntimeLibs
-

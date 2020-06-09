@@ -19,6 +19,5 @@ RUN \
     --logDir /tmp/build_logs \
     --geolib --fractl --samurai --vortrac
 
-#RUN \
-#    /bin/rm -rf /tmp/lrose_build \
-#    /bin/rm -rf /tmp/cidd_build
+RUN \
+    /bin/rm -rf /tmp/lrose_build

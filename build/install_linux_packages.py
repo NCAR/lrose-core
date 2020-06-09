@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Install dependencies for LROSE
+# Install linux package dependencies for LROSE
 #
 #===========================================================================
 
@@ -45,7 +45,7 @@ def main():
                       action="store_true",
                       help='Set verbose debugging on')
     parser.add_option('--cidd32',
-                      dest='cidd', default=False,
+                      dest='cidd32', default=False,
                       action="store_true",
                       help='Install 32-bit dependencies for CIDD apps')
     parser.add_option('--osFile',
@@ -75,6 +75,7 @@ def main():
     print("Running", thisScriptName, file=sys.stderr)
     print(" ", dateTimeStr, file=sys.stderr)
     print("  OS file: ", options.osFile, file=sys.stderr)
+    print("  cidd32: ", options.cidd32, file=sys.stderr)
     print("  Installing dependencies for LROSE", file=sys.stderr)
     print("  OS type: ", osType, file=sys.stderr)
     print("  OS version: ", osVersion, file=sys.stderr)
@@ -134,15 +135,15 @@ def installPackagesCentos6():
                  "rpm-devel rpmdevtools ")
 
     # install required 32-bit packages for CIDD
-    
-    shellCmd("yum install -y " +
+
+    if (options.cidd32):
+        shellCmd("yum install -y " +
                  "xrdb Xvfb gnuplot " +
                  "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
-                 "libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 " +
+                 "libtiff-devel.i686 libpng-devel.i686 " +
                  "libstdc++-devel.i686 libgcc.i686 " +
                  "expat-devel.i686 flex-devel.i686 " +
                  "fftw-devel.i686 zlib-devel.i686 bzip2-devel.i686 " +
-                 "ImageMagick-devel ImageMagick-c++-devel " +
                  "xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi " +
                  "xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi " +
                  "xorg-x11-fonts-misc")
@@ -191,14 +192,14 @@ def installPackagesCentos7():
 
     # install required 32-bit packages for CIDD
     
-    shellCmd("yum install -y " +
+    if (options.cidd32):
+        shellCmd("yum install -y " +
                  "xrdb Xvfb gnuplot " +
                  "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
-                 "libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 " +
+                 "libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686" +
                  "libstdc++-devel.i686 libgcc.i686 " +
                  "expat-devel.i686 flex-devel.i686 " +
                  "fftw-devel.i686 zlib-devel.i686 bzip2-devel.i686 " +
-                 "ImageMagick-devel ImageMagick-c++-devel " +
                  "xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi " +
                  "xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi " +
                  "xorg-x11-fonts-misc")
@@ -240,18 +241,19 @@ def installPackagesCentos8():
 
     # install required 32-bit packages for CIDD
     
-    shellCmd("dnf install -y --allowerasing " +
-             "xrdb " +
-             "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
-             "libcurl-devel.i686 " +
-             "libtiff-devel.i686 libpng-devel.i686 " +
-             "libstdc++-devel.i686 libtiff-devel.i686 " +
-             "zlib-devel.i686 expat-devel.i686 flex-devel.i686 " +
-             "fftw-devel.i686 bzip2-devel.i686 " +
-             "gnuplot ImageMagick-devel ImageMagick-c++-devel " +
-             "xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi " +
-             "xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi " +
-             "xorg-x11-fonts-misc")
+    if (options.cidd32):
+        shellCmd("dnf install -y --allowerasing " +
+                 "xrdb " +
+                 "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
+                 "libcurl-devel.i686 " +
+                 "libtiff-devel.i686 libpng-devel.i686 " +
+                 "libstdc++-devel.i686 libtiff-devel.i686 " +
+                 "zlib-devel.i686 expat-devel.i686 flex-devel.i686 " +
+                 "fftw-devel.i686 bzip2-devel.i686 " +
+                 "gnuplot ImageMagick-devel ImageMagick-c++-devel " +
+                 "xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi " +
+                 "xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi " +
+                 "xorg-x11-fonts-misc")
 
     # create link for qtmake
 
@@ -282,7 +284,8 @@ def installPackagesFedora():
 
     # install required 32-bit packages for CIDD
     
-    shellCmd("yum install -y " +
+    if (options.cidd32):
+        shellCmd("yum install -y " +
                  "xrdb Xvfb gnuplot " +
                  "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
                  "libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 " +
@@ -327,17 +330,18 @@ def installPackagesDebian():
 
     # install packages for running CIDD
 
-    shellCmd("/usr/bin/dpkg --add-architecture i386")
-    shellCmd("apt-get -y update")
-    shellCmd("apt-get install -y " +
-             "libx11-dev:i386 " +
-             "libxext-dev:i386 " +
-             "libfftw3-dev:i386 " +
-             "libexpat-dev:i386 " +
-             "libpng-dev:i386 " +
-             "libfl-dev:i386 " +
-             "libbz2-dev:i386 " +
-             "libzip-dev:i386")
+    if (options.cidd32):
+        shellCmd("/usr/bin/dpkg --add-architecture i386")
+        shellCmd("apt-get -y update")
+        shellCmd("apt-get install -y " +
+                 "libx11-dev:i386 " +
+                 "libxext-dev:i386 " +
+                 "libfftw3-dev:i386 " +
+                 "libexpat-dev:i386 " +
+                 "libpng-dev:i386 " +
+                 "libfl-dev:i386 " +
+                 "libbz2-dev:i386 " +
+                 "libzip-dev:i386")
 
 ########################################################################
 # install packages for suse
@@ -364,15 +368,16 @@ def installPackagesSuse():
 
     # install packages for CIDD
 
-    shellCmd("zypper install -y " +
-             "xrdb " +
-             "glibc-devel-32bit libX11-devel-32bit libXext-devel-32bit " +
-             "libtiff-devel-32bit libpng-devel-32bit libcurl-devel-32bit " +
-             "libstdc++-devel-32bit libtiff-devel-32bit " +
-             "zlib-devel-32bit libexpat-devel-32bit flex-32bit " +
-             "libfftw3-3-32bit libbz2-devel-32bit " +
-             "gnuplot ImageMagick-devel-32bit " +
-             "xorg-x11 xorg-x11-devel xorg-x11-fonts xorg-x11-fonts-core")
+    if (options.cidd32):
+        shellCmd("zypper install -y " +
+                 "xrdb " +
+                 "glibc-devel-32bit libX11-devel-32bit libXext-devel-32bit " +
+                 "libtiff-devel-32bit libpng-devel-32bit libcurl-devel-32bit " +
+                 "libstdc++-devel-32bit libtiff-devel-32bit " +
+                 "zlib-devel-32bit libexpat-devel-32bit flex-32bit " +
+                 "libfftw3-3-32bit libbz2-devel-32bit " +
+                 "gnuplot ImageMagick-devel-32bit " +
+                 "xorg-x11 xorg-x11-devel xorg-x11-fonts xorg-x11-fonts-core")
 
     # create link for qtmake
 
