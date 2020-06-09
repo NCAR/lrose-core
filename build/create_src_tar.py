@@ -357,10 +357,6 @@ def createTarFile():
     os.chdir(coreDir)
     os.makedirs(tarDir)
 
-    # copy some scripts into tar directory
-
-    #shellCmd("rsync -av build/build_src_release.py " + tarDir)
-
     # move lrose contents into tar dir
 
     for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt" ]:
