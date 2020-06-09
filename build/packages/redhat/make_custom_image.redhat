@@ -64,49 +64,48 @@ fi
 
 cd ~/git/lrose-core/build/packages/redhat
 
-# set the docker file name
+# compute Dockerfile path
+
+mkdir -p /tmp/docker
+DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
+echo "  DockerfileName is: " $DockerfileName
+
+#########################################################
+# create Dockerfile
+
+echo "  Creating DockerfilePath: " $DockerfilePath
+
+# add get image
+
+echo "####################################################" > $DockerfilePath
+echo "FROM ${os_type}:${os_version}" >> $DockerfilePath
+echo "#" >> $DockerfilePath
+
+# add install python
 
 if [ "$os_type" = fedora ]
 then
-    # fedora
-    DockerfileName=Dockerfile.fedora.custom
+    echo "RUN yum install -y python" >> $DockerfilePath
 else
     # various version of centos
     if [ "$os_version" = 6 ] ; then
-        DockerfileName=Dockerfile.centos6.custom
+        echo "RUN yum install -y python" >> $DockerfilePath
     elif [ "$os_version" = 7 ] ; then
-        DockerfileName=Dockerfile.centos7.custom
+        echo "RUN yum install -y python" >> $DockerfilePath
     else
-        DockerfileName=Dockerfile.centos8.custom
+        echo "RUN dnf install -y epel-release; dnf install -y 'dnf-command(config-manager)'; dnf config-manager --set-enabled PowerTools; dnf install -y python2 python3; alternatives --set python /usr/bin/python3" >> $DockerfilePath
     fi
 fi
 
-# compute Dockerfile path
+# add install packages by calling python script
 
-DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
-echo "  DockerfileName is: " $DockerfileName
-echo "  Creating DockerfilePath: " $DockerfilePath
-mkdir -p /tmp/docker
-echo "####################################################" > $DockerfilePath
+echo "RUN /scripts/install_linux_packages.py" >> $DockerfilePath
 
-# for fedora, create Dockerfile preamble with the FROM command
-
-if [ "$os_type" = fedora ]
-then
-    echo "FROM ${os_type}:${os_version}" >> $DockerfilePath
-    echo "#" >> $DockerfilePath
-fi
-
-# append the body of the Dockerfile
-
-cat $DockerfileName >> $DockerfilePath
-
-# create the custom image
+# using the Dockerfile, create the custom image
 
 cd /tmp/docker
 
 docker build \
-    --build-arg OS_TYPE=${os_type} \
-    --build-arg OS_VERSION=${os_version} \
+    -v ${HOME}/git/lrose-core/build:/scripts \
     --tag custom/${os_type}:${os_version} \
     --file ${DockerfilePath} .

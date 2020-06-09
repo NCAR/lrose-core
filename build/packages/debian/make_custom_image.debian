@@ -76,18 +76,22 @@ echo "####################################################" > ${DockerfilePath}
 echo "FROM ${os_type}:${os_version}" >> ${DockerfilePath}
 echo "#" >> ${DockerfilePath}
 
+# add install python
+
+echo "RUN apt-get update; apt-get install -y python" >> $DockerfilePath
+
+# add install packages by calling python script
+
+echo "RUN /scripts/install_linux_packages.py" >> $DockerfilePath
+
 # append the body of the Dockerfile
+# cat Dockerfile.debian.custom >> ${DockerfilePath}
 
-cat Dockerfile.debian.custom >> ${DockerfilePath}
-
-# create the custom image
+# using the Dockerfile, create the custom image
 
 cd /tmp/docker
 
 docker build \
+    -v ${HOME}/git/lrose-core/build:/scripts \
     --tag custom/${os_type}:${os_version} \
     --file ${DockerfilePath} .
-
-
-
-

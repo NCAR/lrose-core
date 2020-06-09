@@ -173,6 +173,7 @@ def installPackagesCentos7():
     shellCmd("yum install -y epel-release")
 
     # install main packages
+    # break this up into pieces so it does not crash inside docker
 
     shellCmd("yum install -y " +
              "tcsh wget git " +
@@ -181,7 +182,8 @@ def installPackagesCentos7():
              "gcc gcc-c++ gcc-gfortran glibc-devel " +
              "libX11-devel libXext-devel " +
              "libpng-devel libtiff-devel zlib-devel libzip-devel " +
-             "GeographicLib-devel eigen3-devel armadillo-devel " +
+             "GeographicLib-devel eigen3-devel armadillo-devel ")
+    shellCmd("yum install -y " +
              "expat-devel libcurl-devel openmpi-devel " +
              "flex-devel fftw3-devel " +
              "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
@@ -215,23 +217,29 @@ def installPackagesCentos8():
 
     # install epel
 
-    shellCmd("dnf install -y epel-release")
+    shellCmd("dnf install -y epel-release python2 python3")
     shellCmd("dnf install -y 'dnf-command(config-manager)'")
     shellCmd("dnf config-manager --set-enabled PowerTools")
+    shellCmd("alternatives --set python /usr/bin/python3")
 
     # install main packages
+    # break this up into pieces so it does not crash inside docker
 
     shellCmd("dnf install -y --allowerasing " +
              "tcsh wget git " +
              "emacs rsync python2 python3 mlocate " +
              "python2-devel platform-python-devel " +
              "m4 make cmake libtool autoconf automake " +
-             "gcc gcc-c++ gcc-gfortran glibc-devel " +
+             "gcc gcc-c++ gcc-gfortran glibc-devel")
+
+    shellCmd("dnf install -y --allowerasing " +
              "libX11-devel libXext-devel libcurl-devel " +
              "libpng-devel libtiff-devel zlib-devel libzip-devel " +
              "eigen3-devel armadillo-devel " +
              "expat-devel libcurl-devel openmpi-devel " +
-             "flex-devel fftw3-devel " +
+             "flex-devel fftw3-devel ")
+
+    shellCmd("dnf install -y --allowerasing " +
              "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
              "hdf5-devel netcdf-devel " +
              "GeographicLib-devel " +
@@ -247,7 +255,8 @@ def installPackagesCentos8():
                  "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
                  "libcurl-devel.i686 " +
                  "libtiff-devel.i686 libpng-devel.i686 " +
-                 "libstdc++-devel.i686 libtiff-devel.i686 " +
+                 "libstdc++-devel.i686 libtiff-devel.i686 ")
+        shellCmd("dnf install -y --allowerasing " +
                  "zlib-devel.i686 expat-devel.i686 flex-devel.i686 " +
                  "fftw-devel.i686 bzip2-devel.i686 " +
                  "gnuplot ImageMagick-devel ImageMagick-c++-devel " +
@@ -265,6 +274,7 @@ def installPackagesCentos8():
 def installPackagesFedora():
 
     # install main packages
+    # break this up into pieces so it does not crash inside docker
 
     shellCmd("yum install -y " +
              "tcsh wget git " +
@@ -273,7 +283,8 @@ def installPackagesFedora():
              "gcc gcc-c++ gcc-gfortran glibc-devel " +
              "libX11-devel libXext-devel " +
              "libpng-devel libtiff-devel zlib-devel libzip-devel " +
-             "GeographicLib-devel eigen3-devel armadillo-devel " +
+             "GeographicLib-devel eigen3-devel armadillo-devel ")
+    shellCmd("yum install -y " +
              "expat-devel libcurl-devel openmpi-devel " +
              "flex-devel fftw3-devel " +
              "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
@@ -357,7 +368,8 @@ def installPackagesSuse():
              "libX11-devel libXext-devel " +
              "libpng-devel libtiff-devel zlib-devel " +
              "libexpat-devel libcurl-devel " +
-             "flex fftw3-devel " +
+             "flex fftw3-devel ")
+    shellCmd("zypper install -y tcsh wget git " +
              "libbz2-devel libzip-devel " +
              "libqt5-qtbase-devel libqt5-qtdeclarative-devel " +
              "eigen3-devel " +

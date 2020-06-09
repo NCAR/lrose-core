@@ -1,7 +1,7 @@
 #! /bin/bash
 
 ###########################################################
-# build custom docker image for suse, with required packages
+# build custom docker image for redhat, with required packages
 
 #--------------------------------------------------------------------
 # usage function
@@ -15,16 +15,16 @@ function usage() {
     echo "  -h   :  help"
     echo "  -d   :  turn debugging on"
     echo "  -t ? :  set os_type"
-    echo "          e.g. opensuse"
+    echo "          e.g. centos, fedora"
     echo "  -v ? :  set os_version"
-    echo "          e.g. latest, leap, tumbleweed"
+    echo "          e.g. 7 for centos 7, 29 for fedora 29"
     echo
 }
 
 scriptName=$(basename $0)
 
-os_type=opensuse
-os_version=latest
+os_type=centos
+os_version=7
 debug=true
 
 # Parse command line options.
@@ -62,37 +62,51 @@ fi
 
 # go to scripts dir
 
-cd ~/git/lrose-core/build/packages/suse
+cd ~/git/lrose-core/build/packages/redhat
+
+# set the docker file name
+
+if [ "$os_type" = fedora ]
+then
+    # fedora
+    DockerfileName=Dockerfile.fedora.custom
+else
+    # various version of centos
+    if [ "$os_version" = 6 ] ; then
+        DockerfileName=Dockerfile.centos6.custom
+    elif [ "$os_version" = 7 ] ; then
+        DockerfileName=Dockerfile.centos7.custom
+    else
+        DockerfileName=Dockerfile.centos8.custom
+    fi
+fi
 
 # compute Dockerfile path
 
 DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
-echo "  Dockerfile path: " $DockerfilePath
-
-# create Dockerfile preamble with the FROM command
-
+echo "  DockerfileName is: " $DockerfileName
+echo "  Creating DockerfilePath: " $DockerfilePath
 mkdir -p /tmp/docker
-echo "####################################################" > ${DockerfilePath}
-echo "FROM ${os_type}:${os_version}" >> ${DockerfilePath}
-echo "#" >> ${DockerfilePath}
+echo "####################################################" > $DockerfilePath
 
-# add install python
+# for fedora, create Dockerfile preamble with the FROM command
 
-echo "RUN zypper install -y python" >> $DockerfilePath
-
-# add install packages by calling python script
-
-echo "RUN /scripts/install_linux_packages.py" >> $DockerfilePath
+if [ "$os_type" = fedora ]
+then
+    echo "FROM ${os_type}:${os_version}" >> $DockerfilePath
+    echo "#" >> $DockerfilePath
+fi
 
 # append the body of the Dockerfile
-# cat Dockerfile.suse.custom >> ${DockerfilePath}
 
-# using the Dockerfile, create the custom image
+cat $DockerfileName >> $DockerfilePath
+
+# create the custom image
 
 cd /tmp/docker
 
 docker build \
-    -v ${HOME}/git/lrose-core/build:/scripts \
+    --build-arg OS_TYPE=${os_type} \
+    --build-arg OS_VERSION=${os_version} \
     --tag custom/${os_type}:${os_version} \
     --file ${DockerfilePath} .
-
