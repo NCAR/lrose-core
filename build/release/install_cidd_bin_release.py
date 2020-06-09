@@ -7,6 +7,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -74,25 +75,25 @@ def main():
 
     # let users know what we are doing
 
-    print >>sys.stderr, "****************************************************"
-    print >>sys.stderr, "  Running " + thisScriptName
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  Installing " + package + " binary release"
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  NCAR, Boulder, CO, USA"
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  " + dateTimeStr
-    print >>sys.stderr, ""
-    print >>sys.stderr, "****************************************************"
-    print >>sys.stderr, "  dateStr: ", dateStr
-    print >>sys.stderr, "  timeStr: ", timeStr
-    print >>sys.stderr, "  runDir: ", runDir
-    print >>sys.stderr, "  installBinDir: ", installBinDir
-    print >>sys.stderr, "  platform: ", platform
-    print >>sys.stderr, "  package: ", package
-    print >>sys.stderr, "  version: ", version
-    print >>sys.stderr, "  srcRelease: ", srcRelease
-    print >>sys.stderr, "****************************************************"
+    print("****************************************************", file=sys.stderr)
+    print("  Running " + thisScriptName, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  Installing " + package + " binary release", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  NCAR, Boulder, CO, USA", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  " + dateTimeStr, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("****************************************************", file=sys.stderr)
+    print("  dateStr: ", dateStr, file=sys.stderr)
+    print("  timeStr: ", timeStr, file=sys.stderr)
+    print("  runDir: ", runDir, file=sys.stderr)
+    print("  installBinDir: ", installBinDir, file=sys.stderr)
+    print("  platform: ", platform, file=sys.stderr)
+    print("  package: ", package, file=sys.stderr)
+    print("  version: ", version, file=sys.stderr)
+    print("  srcRelease: ", srcRelease, file=sys.stderr)
+    print("****************************************************", file=sys.stderr)
 
     # create the install dir
 
@@ -104,24 +105,24 @@ def main():
     os.chdir(runDir)
     if (os.path.isdir("bin")):
         os.chdir("bin")
-        shellCmd("rsync -av * " + installBinDir)
+        shellCmd("cp -r -p * " + installBinDir)
 
     os.chdir(runDir)
     if (os.path.isdir("scripts")):
         os.chdir("scripts")
-        shellCmd("rsync -av convert_image.csh " + installBinDir)
-        shellCmd("rsync -av convert_image_print.csh " + installBinDir)
-        shellCmd("rsync -av make_anim.csh " + installBinDir)
-        shellCmd("rsync -av make_anim.sh " + installBinDir)
-        shellCmd("rsync -av prepare_for_cidd " + installBinDir)
-        shellCmd("rsync -av set_font_path " + installBinDir)
+        shellCmd("cp -p convert_image.csh " + installBinDir)
+        shellCmd("cp -p convert_image_print.csh " + installBinDir)
+        shellCmd("cp -p make_anim.csh " + installBinDir)
+        shellCmd("cp -p make_anim.sh " + installBinDir)
+        shellCmd("cp -p prepare_for_cidd " + installBinDir)
+        shellCmd("cp -p set_font_path " + installBinDir)
 
     #--------------------------------------------------------------------
     # done
     
     print("  **************************************************")
     print("  *** Done installing CIDD binary release ***")
-    print("  *** installed in dir: " + installBinDir + " ***")
+    print(("  *** installed in dir: " + installBinDir + " ***"))
     print("  **************************************************")
 
     sys.exit(0)
@@ -143,7 +144,7 @@ def readReleaseInfoFile():
     
     releaseInfoPath = "ReleaseInfo.txt"
     if (options.verbose):
-        print >>sys.stderr, "==>> reading info file: ", releaseInfoPath
+        print("==>> reading info file: ", releaseInfoPath, file=sys.stderr)
         
     info = open(releaseInfoPath, 'r')
 
@@ -158,16 +159,16 @@ def readReleaseInfoFile():
     # decode lines
 
     if (len(lines) < 1):
-        print >>sys.stderr, "ERROR reading info file: ", releaseInfoPath
-        print >>sys.stderr, "  No contents"
+        print("ERROR reading info file: ", releaseInfoPath, file=sys.stderr)
+        print("  No contents", file=sys.stderr)
         sys.exit(1)
 
     for line in lines:
         line = line.strip()
         toks = line.split(":")
         if (options.verbose):
-            print >>sys.stderr, "  line: ", line
-            print >>sys.stderr, "  toks: ", toks
+            print("  line: ", line, file=sys.stderr)
+            print("  toks: ", toks, file=sys.stderr)
         if (len(toks) == 2):
             if (toks[0] == "package"):
                 package = toks[1]
@@ -177,7 +178,7 @@ def readReleaseInfoFile():
                 srcRelease = toks[1]
         
     if (options.verbose):
-        print >>sys.stderr, "==>> done reading info file: ", releaseInfoPath
+        print("==>> done reading info file: ", releaseInfoPath, file=sys.stderr)
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
@@ -185,22 +186,22 @@ def readReleaseInfoFile():
 def shellCmd(cmd):
 
     if (options.debug):
-        print >>sys.stderr, "running cmd:", cmd, " ....."
+        print("running cmd:", cmd, " .....", file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print >>sys.stderr, "Child exited with code: ", retcode
+            print("Child exited with code: ", retcode, file=sys.stderr)
             sys.exit(1)
         else:
             if (options.verbose):
-                print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
-        print >>sys.stderr, "Execution failed:", e
+                print("Child returned code: ", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
         sys.exit(1)
 
     if (options.debug):
-        print >>sys.stderr, ".... done"
+        print(".... done", file=sys.stderr)
     
 ########################################################################
 # Run - entry point

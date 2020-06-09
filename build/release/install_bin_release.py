@@ -7,6 +7,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -27,18 +28,9 @@ def main():
     thisScriptName = os.path.basename(__file__)
 
     global options
-    global runDir
-    global installDir
-    global dateStr
-    global timeStr
-    global debugStr
-    global releaseName
-
     global package
     global version
     global srcRelease
-
-    global ostype
 
     # parse the command line
 
@@ -64,12 +56,6 @@ def main():
     if (options.verbose):
         options.debug = True
         
-    debugStr = " "
-    if (options.verbose):
-        debugStr = " --verbose "
-    elif (options.debug):
-        debugStr = " --debug "
-
     installDir = options.prefix
 
     # runtime
@@ -86,32 +72,27 @@ def main():
 
     readReleaseInfoFile()
 
-    # get the OS type - x86_64, i686, macosx_64
-    
-    getOsType()
-
     # let users know what we are doing
 
-    print >>sys.stderr, "****************************************************"
-    print >>sys.stderr, "  Running " + thisScriptName
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  Installing " + package + " binary release"
-    print >>sys.stderr, "  OS type: " + ostype
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  NCAR, Boulder, CO, USA"
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  " + dateTimeStr
-    print >>sys.stderr, ""
-    print >>sys.stderr, "****************************************************"
-    print >>sys.stderr, "  dateStr: ", dateStr
-    print >>sys.stderr, "  timeStr: ", timeStr
-    print >>sys.stderr, "  runDir: ", runDir
-    print >>sys.stderr, "  installDir: ", installDir
-    print >>sys.stderr, "  platform: ", platform
-    print >>sys.stderr, "  package: ", package
-    print >>sys.stderr, "  version: ", version
-    print >>sys.stderr, "  srcRelease: ", srcRelease
-    print >>sys.stderr, "****************************************************"
+    print("****************************************************", file=sys.stderr)
+    print("  Running " + thisScriptName, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  Installing " + package + " binary release", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  NCAR, Boulder, CO, USA", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  " + dateTimeStr, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("****************************************************", file=sys.stderr)
+    print("  dateStr: ", dateStr, file=sys.stderr)
+    print("  timeStr: ", timeStr, file=sys.stderr)
+    print("  runDir: ", runDir, file=sys.stderr)
+    print("  installDir: ", installDir, file=sys.stderr)
+    print("  platform: ", platform, file=sys.stderr)
+    print("  package: ", package, file=sys.stderr)
+    print("  version: ", version, file=sys.stderr)
+    print("  srcRelease: ", srcRelease, file=sys.stderr)
+    print("****************************************************", file=sys.stderr)
 
     # create the install dir
 
@@ -121,23 +102,23 @@ def main():
     # do the install
     
     if (os.path.isdir("bin")):
-        shellCmd("rsync -av bin " + installDir)
+        shellCmd("cp -r -p bin " + installDir)
 
     if (os.path.isdir("lib")):
-        shellCmd("rsync -av lib " + installDir)
+        shellCmd("cp -r -p lib " + installDir)
 
     if (os.path.isdir("include")):
-        shellCmd("rsync -av include " + installDir)
+        shellCmd("cp -r -p include " + installDir)
 
     if (os.path.isdir("share")):
-        shellCmd("rsync -av share " + installDir)
+        shellCmd("cp -r -p share " + installDir)
 
     #--------------------------------------------------------------------
     # done
     
     print("  **************************************************")
     print("  *** Done installing binary release ***")
-    print("  *** installed in dir: " + installDir + " ***")
+    print(("  *** installed in dir: " + installDir + " ***"))
     print("  **************************************************")
 
     sys.exit(0)
@@ -159,7 +140,7 @@ def readReleaseInfoFile():
     
     releaseInfoPath = "ReleaseInfo.txt"
     if (options.verbose):
-        print >>sys.stderr, "==>> reading info file: ", releaseInfoPath
+        print("==>> reading info file: ", releaseInfoPath, file=sys.stderr)
         
     info = open(releaseInfoPath, 'r')
 
@@ -174,16 +155,16 @@ def readReleaseInfoFile():
     # decode lines
 
     if (len(lines) < 1):
-        print >>sys.stderr, "ERROR reading info file: ", releaseInfoPath
-        print >>sys.stderr, "  No contents"
+        print("ERROR reading info file: ", releaseInfoPath, file=sys.stderr)
+        print("  No contents", file=sys.stderr)
         sys.exit(1)
 
     for line in lines:
         line = line.strip()
         toks = line.split(":")
         if (options.verbose):
-            print >>sys.stderr, "  line: ", line
-            print >>sys.stderr, "  toks: ", toks
+            print("  line: ", line, file=sys.stderr)
+            print("  toks: ", toks, file=sys.stderr)
         if (len(toks) == 2):
             if (toks[0] == "package"):
                 package = toks[1]
@@ -193,63 +174,30 @@ def readReleaseInfoFile():
                 srcRelease = toks[1]
         
     if (options.verbose):
-        print >>sys.stderr, "==>> done reading info file: ", releaseInfoPath
+        print("==>> done reading info file: ", releaseInfoPath, file=sys.stderr)
 
-########################################################################
-# get the OS type
-
-def getOsType():
-
-    global ostype
-
-    if (platform == "darwin"):
-        ostype = "mac_osx"
-        return
-
-    ostype = "x86_64"
-    tmpFile = os.path.join("/tmp", "ostype." + timeStr + ".txt")
-
-    shellCmd("uname -a > " + tmpFile)
-    f = open(tmpFile, 'r')
-    lines = f.readlines()
-    f.close()
-
-    if (len(lines) < 1):
-        print >>sys.stderr, "ERROR getting OS type"
-        print >>sys.stderr, "  'uname -a' call did not succeed"
-        sys.exit(1)
-
-    for line in lines:
-        line = line.strip()
-        if (options.verbose):
-            print >>sys.stderr, "  line: ", line
-        if (line.find("x86_64") > 0):
-            ostype = "x86_64"
-        elif (line.find("i686") > 0):
-            ostype = "i686"
-            
 ########################################################################
 # Run a command in a shell, wait for it to complete
 
 def shellCmd(cmd):
 
     if (options.debug):
-        print >>sys.stderr, "running cmd:", cmd, " ....."
+        print("running cmd:", cmd, " .....", file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print >>sys.stderr, "Child exited with code: ", retcode
+            print("Child exited with code: ", retcode, file=sys.stderr)
             sys.exit(1)
         else:
             if (options.verbose):
-                print >>sys.stderr, "Child returned code: ", retcode
-    except OSError, e:
-        print >>sys.stderr, "Execution failed:", e
+                print("Child returned code: ", retcode, file=sys.stderr)
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
         sys.exit(1)
 
     if (options.debug):
-        print >>sys.stderr, ".... done"
+        print(".... done", file=sys.stderr)
     
 ########################################################################
 # Run - entry point
