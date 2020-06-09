@@ -66,4 +66,6 @@ apt-get install -y ${debPath}
 
 # check that RadxPrint runs
 
+export LD_LIBRARY_PATH=/usr/local/lrose/lib
+
 /usr/local/lrose/bin/RadxPrint -h
