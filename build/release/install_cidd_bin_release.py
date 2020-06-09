@@ -104,15 +104,7 @@ def main():
     os.chdir(runDir)
     if (os.path.isdir("bin")):
         os.chdir("bin")
-        shellCmd("rsync -av CIDD " + installBinDir)
-        shellCmd("rsync -av SpectraPlot " + installBinDir)
-        shellCmd("rsync -av SpectraScope " + installBinDir)
-        shellCmd("rsync -av SoundingChart " + installBinDir)
-        shellCmd("rsync -av StationStripChart " + installBinDir)
-        shellCmd("rsync -av metar_strip " + installBinDir)
-        shellCmd("rsync -av cscale_edit " + installBinDir)
-        shellCmd("rsync -av view_colormap " + installBinDir)
-        shellCmd("rsync -av lrose-cidd_runtime_libs " + installBinDir)
+        shellCmd("rsync -av * " + installBinDir)
 
     os.chdir(runDir)
     if (os.path.isdir("scripts")):

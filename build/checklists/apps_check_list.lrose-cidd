@@ -16,18 +16,14 @@ DrawFmq2Polygon
 DrawFmqPolygonStats
 EdrSelect
 EventMan
-fix_map
 get_url
 GridPointSelect
 initDrawQueue
 inspectRawFmq
 jvizMaps2ciddMaps
-MapCircles
-MapGrid
 MetarSelect
 metar_strip
 notify_cidd
-OverlayCreate
 pos_report
 RemoteUI2Fmq
 Shape2Map
@@ -37,5 +33,4 @@ ShapeGridPt2Mdv
 SoundingChart
 SoundingText
 StationStripChart
-toneDownColorscale
 view_colormap

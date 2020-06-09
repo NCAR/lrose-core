@@ -24,18 +24,14 @@ SUB_DIRS = \
 	DrawFmqPolygonStats \
 	EdrSelect \
 	EventMan \
-	fix_map \
 	get_url \
 	GridPointSelect \
 	initDrawQueue \
 	inspectRawFmq \
 	jvizMaps2ciddMaps \
-	MapCircles \
-	MapGrid \
 	MetarSelect \
 	metar_strip \
 	notify_cidd \
-	OverlayCreate \
 	pos_report \
 	RemoteUI2Fmq \
 	Shape2Map \
@@ -45,19 +41,7 @@ SUB_DIRS = \
 	SoundingChart \
 	SoundingText \
 	StationStripChart \
-	toneDownColorscale \
 	view_colormap
-
-# Obsolete
-#	ccm_server \
-#	gint_server \
-#	skewt_util \
-#	cedric_server \
-#	old_cidd \
-#	ciddArchiveDriver \
-#	cindex_test \
-#	cronusPointSelect \
-# 
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 

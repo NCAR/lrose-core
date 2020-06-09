@@ -413,3 +413,9 @@ verify_grid
 verify_tracks
 wsi_ingest
 wsim2mdv
+fix_map
+MapCircles
+MapGrid
+OverlayCreate
+toneDownColorScale
+

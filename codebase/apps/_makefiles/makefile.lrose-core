@@ -27,6 +27,7 @@ SUB_DIRS = \
 	radar \
 	refractt \
         Radx \
+        cidd \
         spol \
         xpol
 
