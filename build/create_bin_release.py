@@ -118,6 +118,8 @@ def main():
     # read in release info
 
     readReleaseInfoFile()
+    if (package == "lrose-cidd"):
+        options.buildNetcdf = True
 
     # get the OS type - x86_64, i686, macosx_64
     
@@ -258,16 +260,16 @@ def main():
     logPath = prepareLogFile("no-logging");
     os.chdir(runDir)
     print(("============= Checking libs for " + package + " ============="))
-    shellCmd("./build/scripts/checkLibs.py " + \
-             "--listPath ./build/checklists/libs_check_list." + package + " " + \
-             "--libDir " + buildDir + "/lib " + \
-             "--label " + package + " --maxAge 3600")
+    shellCmd("./build/scripts/checkLibs.py" + \
+             " --prefix " + options.prefix + \
+             " --package " + package + \
+             " --maxAge 3600")
     print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
-    shellCmd("./build/scripts/checkApps.py " + \
-             "--listPath ./build/checklists/apps_check_list." + package + " " + \
-             "--appDir " + buildDir + "/bin " + \
-             "--label " + package + " --maxAge 3600")
+    shellCmd("./build/scripts/checkApps.py" + \
+             " --prefix " + options.prefix + \
+             " --package " + package + \
+             " --maxAge 3600")
     print("====================================================")
     
     #--------------------------------------------------------------------
