@@ -78,7 +78,7 @@ def main():
     parser.add_option('--static',
                       dest='static', default=False,
                       action="store_true",
-                      help='produce distribution for static linking, default is dynamic')
+                      help='produce distribution for static linking, default is dynamic. Always on for lrose-cidd')
 
     (options, args) = parser.parse_args()
     
