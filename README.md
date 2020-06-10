@@ -33,6 +33,7 @@ To download this repository from GitHub, run:
 | [OSX - homebrew build and install](./docs/download/homebrew_install.mac_osx.md) |
 | [OSX - install HawkEye from DMG file](./docs/download/hawkeye_install_from_dmg.md) |
 | [homebrew notes](./docs/download/homebrew_notes.md) |
+| [CIDD binary install](./docs/download/CIDD_binary_download_and_install.linux.md) |
 | [Cyclone release](https://github.com/nsf-lrose/lrose-cyclone) |
 
 ### BUILDS
