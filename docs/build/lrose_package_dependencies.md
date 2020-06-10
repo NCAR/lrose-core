@@ -1,16 +1,65 @@
 # LROSE package dependencies
 
-LROSE depends on a large number of LINUX packages.
+LROSE depends on a number of LINUX packages.
 
-The following are the commands for installing those packages.
+## Auto-installing packages using python script
 
-## RedHat-based systems
+You can install the required packages using a python script provided by the lrose-core.
+This script detects the OS version from the ```/etc/os-release``` file.
+It then installs the packages appropriate for the OS version.
 
-These apply to:
+Check out lrose-core:
 
-  * RedHat 6 and 7
-  * CentOS 6 and 7 (based on RedHat)
-  * Fedora (based on RedHat)
+```
+  git clone https://github.com/ncar/lrose-core
+```
+
+Then run:
+
+```
+  lrose-core/build/install_linux_packages.py
+```
+
+## Manually install packages for CENTOS-6, RHEL-6
+
+This requires upgrading the compiler toolchain.
+
+```
+  yum install -y epel-release
+
+  yum install -y tcsh wget git tkcvs \
+    emacs rsync python \
+    m4 make cmake libtool autoconf automake \
+    gcc gcc-c++ gcc-gfortran glibc-devel \
+    libX11-devel libXext-devel \
+    libpng-devel libtiff-devel zlib-devel \
+    expat-devel libcurl-devel \
+    flex-devel fftw3-devel \
+    bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
+    hdf5-devel netcdf-devel \
+    xorg-x11-xauth xorg-x11-apps \
+    rpm-build redhat-rpm-config \
+    rpm-devel rpmdevtools
+
+  # create link for qtmake
+
+  cd /usr/bin; \
+  ln -s qmake-qt5 qmake;
+
+  # install updated gcc and g++ toolchain
+
+    wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo; \
+    yum install -y devtoolset-2-gcc devtoolset-2-binutils; \
+    yum install -y devtoolset-2-gcc-c++ devtoolset-2-gcc-gfortran
+
+  # copy the updated compilers into /usr
+  # so that they become the system default
+
+  cd /opt/rh/devtoolset-2/root; \
+  rsync -av usr /
+```
+
+## Manually install packages for CENTOS-7, RHEL-7
 
 ```
   yum install -y epel-release
@@ -18,8 +67,8 @@ These apply to:
   yum install -y \
     tcsh wget git \
     tkcvs emacs rsync python mlocate \
-    m4 make cmake libtool autoconf automake \
-    gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
+    m4 make cmake cmake3 libtool autoconf automake \
+    gcc gcc-c++ gcc-gfortran glibc-devel \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
     GeographicLib-devel eigen3-devel armadillo-devel \
@@ -30,9 +79,15 @@ These apply to:
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
     rpm-devel rpmdevtools
+
+  # create link for qtmake
+
+  cd /usr/bin;
+  ln -s qmake-qt5 qmake;
+
 ```
 
-## CENTOS 8 and RHEL 8
+## Manually install packages for CENTOS 8 and RHEL 8
 
 ```
   dnf install -y epel-release ; \
@@ -54,50 +109,94 @@ These apply to:
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
-    rpm-devel rpmdevtools ; \
+    rpm-devel rpmdevtools
   alternatives --set python /usr/bin/python3
+
+  # create link for qtmake
+
+  cd /usr/bin; \
+  ln -s qmake-qt5 qmake;
 ```
 
-The following are missing from the CENTOS 8 install:
+## Manually install packages FEDORA
 
 ```
-    tkcvs
-    GeographicLib-devel
+  yum install -y epel-release
+
+  yum install -y \
+    tcsh wget git \
+    tkcvs emacs rsync python mlocate \
+    m4 make cmake libtool autoconf automake \
+    gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
+    libX11-devel libXext-devel \
+    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    GeographicLib-devel eigen3-devel armadillo-devel \
+    expat-devel libcurl-devel openmpi-devel \
+    flex-devel fftw3-devel \
+    bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
+    hdf5-devel netcdf-devel \
+    xorg-x11-xauth xorg-x11-apps \
+    rpm-build redhat-rpm-config \
+    rpm-devel rpmdevtools
+
+  # create link for qtmake
+
+  cd /usr/bin; \
+  ln -s qmake-qt5 qmake;
 ```
 
-## SUSE-based systems
-
-Suse uses the same package lists as RedHat.
-
-Use ```zypper``` instead of ```yum```, with the same package list as above.
-
-## Debian-based systems
-
-These apply to:
-
-  * Debian
-  * Ubuntu (based on Debian)
+## Manually install packages on Debian and Ubuntu
 
 ```
-sudo apt-get update 
-
-sudo apt-get install -y \
-    git gcc g++ gfortran cmake rsync mlocate \
-    automake make libtool pkg-config python \
+  apt-get update && \
+  apt-get install -y \
+    tcsh git gcc g++ gfortran rsync chrpath \
+    automake make cmake mlocate libtool pkg-config python \
     libcurl3-dev curl \
     libfl-dev libbz2-dev libx11-dev libpng-dev \
     libfftw3-dev libexpat1-dev \
     qtbase5-dev qtdeclarative5-dev \
     libgeographic-dev libeigen3-dev libzip-dev \
-    libarmadillo-dev libopenmpi.dev \
-    libnetcdf-dev netcdf-bin libhdf5-dev hdf5-tools
+    libarmadillo-dev libopenmpi-dev \
+    libnetcdf-dev libhdf5-dev hdf5-tools \
+    libcurl4-openssl-dev
 
-# create link for qmake
+  # create link for qmake
 
-cd /usr/bin
-sudo /bin/rm -f qmake qmake-qt5
-sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake
-sudo ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
+  cd /usr/bin; \
+  /bin/rm -f qmake qmake-qt5; \
+  ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; \
+  ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
+```
+
+## Manually install packages on SUSE-based
+
+Suse uses the same package lists as RedHat.
+
+Use ```zypper``` instead of ```yum```, with the same package list as above.
+
+```
+  zypper install -y \
+    tcsh wget git \
+    tkdiff emacs rsync python docker \
+    m4 make cmake libtool autoconf automake \
+    gcc gcc-c++ gcc-fortran glibc-devel \
+    libX11-devel libXext-devel \
+    libpng-devel libtiff-devel zlib-devel \
+    libexpat-devel libcurl-devel \
+    flex fftw3-devel \
+    libbz2-devel libzip-devel \
+    libqt5-qtbase-devel libqt5-qtdeclarative-devel \
+    eigen3-devel \
+    hdf5-devel netcdf-devel \
+    armadillo-devel openmpi-devel \
+    xorg-x11-xauth \
+    rpm-build rpm-devel rpmdevtools
+
+  # create link for qtmake
+
+  cd /usr/bin; \
+  ln -s qmake-qt5 qmake;
 ```
 
 # CIDD build - 32-bit packages required
