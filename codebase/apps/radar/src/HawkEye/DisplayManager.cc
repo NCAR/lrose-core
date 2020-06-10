@@ -127,10 +127,10 @@ DisplayManager::~DisplayManager()
 void DisplayManager::_createStatusPanel()
 {
  
-  Qt::Alignment alignLeft(Qt::AlignLeft);
-  Qt::Alignment alignRight(Qt::AlignRight);
+  // Qt::Alignment alignLeft(Qt::AlignLeft);
+  // Qt::Alignment alignRight(Qt::AlignRight);
   Qt::Alignment alignCenter(Qt::AlignCenter);
-  Qt::Alignment alignTop(Qt::AlignTop);
+  // Qt::Alignment alignTop(Qt::AlignTop);
 
   // status panel - rows of label value pairs
   
@@ -370,7 +370,7 @@ void DisplayManager::_createFieldPanel()
 {
   
   Qt::Alignment alignCenter(Qt::AlignCenter);
-  Qt::Alignment alignRight(Qt::AlignRight);
+  // Qt::Alignment alignRight(Qt::AlignRight);
   
   int fsize = _params.label_font_size;
   int fsize2 = _params.label_font_size + 2;
@@ -583,7 +583,7 @@ void DisplayManager::_createClickReportDialog()
   _clickReportDialog->setWindowTitle("Field values");
 
   Qt::Alignment alignCenter(Qt::AlignCenter);
-  Qt::Alignment alignRight(Qt::AlignRight);
+  // Qt::Alignment alignRight(Qt::AlignRight);
   
   _clickReportDialogLayout = new QGridLayout(_clickReportDialog);
   _clickReportDialogLayout->setVerticalSpacing(5);
@@ -697,7 +697,7 @@ QLabel *DisplayManager::_createStatusVal(const string &leftLabel,
 
   QLabel *right = new QLabel(_statusPanel);
   right->setText(rightLabel.c_str());
-  Qt::Alignment alignCenter(Qt::AlignCenter);
+  // Qt::Alignment alignCenter(Qt::AlignCenter);
   _statusLayout->addWidget(right, row, 1, alignRight);
 
   if (fontSize > 0) {

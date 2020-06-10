@@ -2944,7 +2944,7 @@ void BscanManager::_saveImageToFile(bool interactive)
 
   // create image
   
-  QPixmap pixmap = QPixmap::grabWidget(_bscan);
+  QPixmap pixmap = _bscan->grab();
   QImage image = pixmap.toImage();
 
   // compute output dir

@@ -289,7 +289,7 @@ void PolarWidget::gridRingsColor(const QColor &color)
 
 QImage* PolarWidget::getImage()
 {
-  QPixmap pixmap = QPixmap::grabWidget(this);
+  QPixmap pixmap = grab();
   QImage* image = new QImage(pixmap.toImage());
   return image;
 }
@@ -301,7 +301,7 @@ QImage* PolarWidget::getImage()
 
 QPixmap* PolarWidget::getPixmap()
 {
-  QPixmap* pixmap = new QPixmap(QPixmap::grabWidget(this));
+  QPixmap* pixmap = new QPixmap(grab());
   return pixmap;
 }
 

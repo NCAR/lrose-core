@@ -3032,9 +3032,9 @@ void PolarManager::_saveImageToFile(bool interactive)
 	  // create image
   QPixmap pixmap;
   if (_rhiMode)
-    pixmap = QPixmap::grabWidget(_rhi);
+    pixmap = _rhi->grab();
   else
-    pixmap = QPixmap::grabWidget(_ppi);
+    pixmap = _ppi->grab();
   QImage image = pixmap.toImage();
 
   string outputDir;
@@ -3128,7 +3128,7 @@ void PolarManager::createBoundaryEditorDialog()
 	_boundaryEditorDialog->setWindowTitle("Boundary Editor");
 
 	Qt::Alignment alignCenter(Qt::AlignCenter);
-	Qt::Alignment alignRight(Qt::AlignRight);
+	// Qt::Alignment alignRight(Qt::AlignRight);
 
 	_boundaryEditorDialogLayout = new QGridLayout(_boundaryEditorDialog);
 	_boundaryEditorDialogLayout->setVerticalSpacing(4);

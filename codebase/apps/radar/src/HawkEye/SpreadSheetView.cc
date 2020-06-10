@@ -441,19 +441,19 @@ void SpreadSheetView::updateColor(QTableWidgetItem *item)
     QPixmap pix(16, 16);
     QColor col;
     if (item)
-        col = item->backgroundColor();
+        col = item->background().color();
     if (!col.isValid())
         col = palette().base().color();
 
     QPainter pt(&pix);
     pt.fillRect(0, 0, 16, 16, col);
 
-    QColor lighter = col.light();
+    QColor lighter = col.lighter();
     pt.setPen(lighter);
     QPoint lightFrame[] = { QPoint(0, 15), QPoint(0, 0), QPoint(15, 0) };
     pt.drawPolyline(lightFrame, 3);
 
-    pt.setPen(col.dark());
+    pt.setPen(col.darker());
     QPoint darkFrame[] = { QPoint(1, 15), QPoint(15, 15), QPoint(15, 1) };
     pt.drawPolyline(darkFrame, 3);
 
@@ -752,7 +752,7 @@ void SpreadSheetView::setSelectionToValue(QString value)
 void SpreadSheetView::selectColor()
 {
     QTableWidgetItem *item = table->currentItem();
-    QColor col = item ? item->backgroundColor() : table->palette().base().color();
+    QColor col = item ? item->background().color() : table->palette().base().color();
     col = QColorDialog::getColor(col, this);
     if (!col.isValid())
         return;
@@ -763,7 +763,7 @@ void SpreadSheetView::selectColor()
 
     foreach (QTableWidgetItem *i, selected) {
         if (i)
-            i->setBackgroundColor(col);
+            i->setBackground(col);
     }
 
     updateColor(table->currentItem());

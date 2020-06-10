@@ -502,7 +502,7 @@ void BscanWidget::setBackgroundColor(const QColor &color)
 QImage* BscanWidget::getImage()
 {
 
-  QPixmap pixmap = QPixmap::grabWidget(this);
+  QPixmap pixmap = grab();
   QImage* image = new QImage(pixmap.toImage());
   return image;
 
@@ -516,7 +516,7 @@ QImage* BscanWidget::getImage()
 QPixmap* BscanWidget::getPixmap()
 {
 
-  QPixmap* pixmap = new QPixmap(QPixmap::grabWidget(this));
+  QPixmap* pixmap = new QPixmap(grab());
   return pixmap;
 
 }

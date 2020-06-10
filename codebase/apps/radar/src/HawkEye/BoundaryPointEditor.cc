@@ -210,7 +210,7 @@ void BoundaryPointEditor::eraseLastPoint()
 // (relevant with the Polygon Tool)
 int BoundaryPointEditor::getNearestPointIndex(float x, float y, vector<Point> &pts)
 {
-	int nearestPointIndex;
+	int nearestPointIndex = 0;
 	float nearestDistance = 99999;
 
 	for (int i=0; i < (int) pts.size(); i++)
