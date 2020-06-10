@@ -2,6 +2,8 @@
 
 LROSE depends on a number of LINUX packages.
 
+**NOTE:** the following procedures require **root** or **sudo** privileges.
+
 ## Auto-installing packages using python script
 
 You can install the required packages using a python script provided by the lrose-core.
