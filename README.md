@@ -24,6 +24,12 @@ To download this repository from GitHub, run:
   git clone https://github.com/NCAR/lrose-core
 ```
 
+### RELEASES
+
+The latest release can be found at:
+
+* [lrose-core releases](https://github.com/NCAR/lrose-core/releases)
+
 ### DOWNLOADS
 
 | Download and install |
