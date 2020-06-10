@@ -31,10 +31,9 @@ You may also need to run:
   xcode-select --install
 ```
 
-### Installing stand-alone XCode command line tools
+### Installing XCode command line tools
 
-Alternatively, you can install the stand-alone XCode command line tools by downloading
-"Command Line Tools" from:
+Install the stand-alone XCode command line tools by downloading "Command Line Tools" from:
 
 ```
   http://developer.apple.com/downloads
@@ -59,13 +58,13 @@ Run the following ruby script:
 You need to download the brew formula from the lrose repository.
 This formula is used to perform the homebrew build.
 
-For example, download lrose-core.rb from:
+Download ```lrose-core.rb``` from:
 
 ```
   https://github.com/NCAR/lrose-core/releases 
 ```
 
-Choose from the appropriate distribution.
+Choose the latest version.
 
 <a name="install"/>
 
