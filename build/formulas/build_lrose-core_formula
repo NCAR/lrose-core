@@ -30,7 +30,7 @@ class LroseCore < Formula
   depends_on 'cmake'
   depends_on 'eigen'
   depends_on 'geographiclib'
-  depends_on 'armadillo'
+  # depends_on 'armadillo'
   depends_on 'rsync'
   depends_on :x11
 
