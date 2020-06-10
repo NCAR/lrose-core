@@ -7,9 +7,7 @@ We compile CIDD and package it up into a binary tar file, from which it can be i
 
 You can find the tar file under the latest releases page on github:
 
-```
 * [lrose-core releases](https://github.com/NCAR/lrose-core/releases)
-```
 
 Here is an example name from the 2020/06/09 release:
 
@@ -57,6 +55,8 @@ The best way to do that is to run a python script from lrose-core.
   cd lrose-core/build
   install_linux_packages.py --cidd32
 ```
+
+```install_linux_packages.py``` will determine the operating system version from the ```/etc/os-release``` file. It will then install the required packages for that version of the OS.
 
 ## Running CIDD
 
