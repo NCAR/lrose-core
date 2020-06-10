@@ -86,7 +86,6 @@ This requires upgrading the compiler toolchain.
 
   cd /usr/bin;
   ln -s qmake-qt5 qmake;
-
 ```
 
 ## Manually install packages for CENTOS 8 and RHEL 8
