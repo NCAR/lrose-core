@@ -21,33 +21,49 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+/********************************************************
+* Approximation of a discrete real function F(x) by     *
+* least squares                                         *
+* ----------------------------------------------------- *
+* Ref.: "Méthodes de calcul numérique, Tome 2 by Claude *
+*        Nowakowski, PSI Edition, 1984" [BIBLI 04].     *
+* ----------------------------------------------------- *
+* C++ version by J-P Moreau, Paris.                     *
+* (www.jpmoreau.fr)                                     *
+********************************************************/
 /////////////////////////////////////////////////////////////
-// PolyFit.hh
+// ForsytheFit.hh
 //
-// Polynomial fit to (x, y) data set
+// Regression fit to (x, y) data set using Forsythe polynomials
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Sept 2018
+// June 2020
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef PolyFit_hh
-#define PolyFit_hh
+#ifndef ForsytheFit_hh
+#define ForsytheFit_hh
+using namespace std;
 
-#include <rapmath/Distribution.hh>
+#include <string>
+#include <vector>
+#include <rapmath/stats.h>
+#include <cmath>
+#include <cstdio>
+using namespace std;
 
-class PolyFit {
+class ForsytheFit {
   
 public:
   
   // constructor
 
-  PolyFit();
+  ForsytheFit();
   
   // destructor
   
-  virtual ~PolyFit();
+  virtual ~ForsytheFit();
 
   // set polynomial order
 
@@ -100,37 +116,28 @@ private:
 
   size_t _order;        // polynomial order
   size_t _orderPlus1;   // polynomial order plus 1
+  size_t _orderPlus2;   // polynomial order plus 2
 
   vector<double> _coeffs; // coefficients
   
   vector<double> _xObs, _yObs; // observations
-  size_t _nObs;
+  size_t _nObs; // number of obs
+  size_t _nObsPlus1; // number of obs plus 1
 
   double *_yEst; // regression estimate of y
 
-  double **_vv;   // Vandermonde matrix
-  double **_vvT;  // vv transpose
-  double **_vvA;  // vvT * vv
-  double **_vvB;  // vvT * vv - check
-  double **_uu;   // from SVD of vvA: [uu, ss, wwT] = SVD(vvA)
-  double **_uuT;  // uu transpose
-  double *_ssVec; // from SVD of vvA - diagonal elements
-  double **_ss;   // from SVD of vvA - diagonal matrix
-  double **_ssInv; // from SVD of vvA - diagonal matrix
-  double **_ww;   // from SVD of vvA
-  double **_wwT;  // ww transpose
-  
-  double *_pp;   // regression coefficients - polynomial fit
-  double **_cc;  // ww * diag * uuT * vvT
-  double **_multa; // temporary matrix for intermediate results
-  double **_multb; // temporary matrix for intermediate results
+  double *_AA; // regression coefficients - polynomial fit
+  double *_BB;
+  double **_CC;
+  double *_Xc;
+  double *_Yx;
 
   mutable double _stdErrEst;
   
   // private methods
 
-  void _doFit();
-  
+  double _intPower(double xx, int kk);
+
   void _init();
 
   void _allocDataArrays();
@@ -141,9 +148,6 @@ private:
 
   void _freeVec(double* &vec);
   void _freeMatrix(double** &array);
-
-  void _computeCc();
-  void _computeVandermonde();
 
   void _matrixMult(double **aa,
                    double **bb,

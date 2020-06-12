@@ -24,7 +24,7 @@
 ///////////////////////////////////////////////////////////////
 // PolyFit.cc
 //
-// Fit a polynomial to a data set
+// Polynomial fit to (x, y) data set
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //

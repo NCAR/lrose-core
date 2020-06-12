@@ -28,6 +28,7 @@ HDRS = ../include/rapmath/umath.h \
        ../include/rapmath/usvd.h
 
 CPPC_SRCS = \
+	ForsytheFit.cc \
 	PolyFit.cc \
 	usort_stl.cc \
 	uCurveFit.cc \
