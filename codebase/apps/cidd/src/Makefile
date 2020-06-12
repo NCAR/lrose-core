@@ -8,54 +8,11 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 TARGETS =  $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-         AsciiSelect \
-	 CIDD \
-         Cidd_snap \
-	 DrawFmq2Bdry \
-	 DrawFmq2Polygon \
-         EdrSelect \
-         EventMan \
          fix_map \
-         GridPointSelect \
 	 MapCircles \
 	 MapGrid \
-         MetarSelect \
-         notify_cidd \
-         pos_report \
 	 OverlayCreate \
-	 RemoteUI2Fmq \
-         skewt_util \
-         SoundingChart \
-         SoundingChart_modified \
-         SoundingText \
-         StationStripChart \
-         toneDownColorScale \
-	 cscale_edit \
-         get_url \
-	 view_colormap
+         toneDownColorScale
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
-
-# ---------------------------------------------------------
-# Special cases
-
-install_include:
-install_lib:
-install_profile_lib:
-install_debug_lib:
-
-install_doc:
-	$(CP) ../doc/*.doc $(LROSE_DOC_DIR)
-
-install: install_bin
-
-clean_lib:
-clean_all: clean clean_lib clean_bin clean_insure
-
-
-
-
-
-
-
 
