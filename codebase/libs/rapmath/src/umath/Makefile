@@ -65,12 +65,12 @@ test: utest_p
 utest_p:
 	$(MAKE) DBUG_OPT_FLAGS="$(DEBUG_FLAG)" utest
 
-utest: uTest.o
-	$(CPPC) $(DBUG_OPT_FLAGS) -I../include/rapmath uTest.o \
-	$(LDFLAGS) -o uTest -lrapmath
+utest: uMathTest.o
+	$(CPPC) $(DBUG_OPT_FLAGS) -I../include/rapmath uMathTest.o \
+	$(LDFLAGS) -o uMathTest -lrapmath
 
 clean_test:
-	$(RM) uTest uTest.o
+	$(RM) uMathTest uMathTest.o
 
 #
 # local targets

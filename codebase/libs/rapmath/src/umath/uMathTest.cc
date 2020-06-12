@@ -52,7 +52,9 @@ int main(int argc, char **argv)
 
   testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
 
+  cerr << "1111111111111111111111" << endl;
   testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
+  cerr << "2222222222222222222222" << endl;
 
   testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.2);
 
@@ -167,6 +169,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
 
   cerr << "====================================" << endl;
   cerr << endl;
+  cerr << "99999999999999999999999999999" << endl;
 
 }
 
