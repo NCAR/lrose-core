@@ -67,7 +67,7 @@ utest_p:
 
 utest: uMathTest.o
 	$(CPPC) $(DBUG_OPT_FLAGS) -I../include/rapmath uMathTest.o \
-	$(LDFLAGS) -o uMathTest -lrapmath
+	$(LDFLAGS) -o uMathTest -lrapmath -ltoolsa
 
 clean_test:
 	$(RM) uMathTest uMathTest.o

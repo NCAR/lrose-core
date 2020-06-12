@@ -265,22 +265,22 @@ int ForsytheFit::performFit()
     _AA[i] = (_BB[i] - s) / _CC[i][i];
   } // i
 
-  printf("\n Polynomial approximation of degree %d (%ld points)\n", m, _nObs);
-  printf(" Coefficients of polynomial:\n");
-  for (int i = 1; i <= m1; i++) {
-    printf("  A(%d) = %15.9f\n", i-1, _AA[i]);
-  }
-  printf("\n Approximated function:\n");
-  printf("        X           Y\n");
-  for (size_t i = 0; i < _nObs; i++) {
-    double xx = _xObs[i];
-    double p = 0;
-    for (int k = 1; k <= m1; k++) {
-      p = p * xx + _AA[m1+1-k];
-    }
-    printf(" %11.6f %11.6f\n", xx, p);
-  }
-  printf("\n\n");
+  // printf("\n Polynomial approximation of degree %d (%ld points)\n", m, _nObs);
+  // printf(" Coefficients of polynomial:\n");
+  // for (int i = 1; i <= m1; i++) {
+  //   printf("  A(%d) = %15.9f\n", i-1, _AA[i]);
+  // }
+  // printf("\n Approximated function:\n");
+  // printf("        X           Y\n");
+  // for (size_t i = 0; i < _nObs; i++) {
+  //   double xx = _xObs[i];
+  //   double p = 0;
+  //   for (int k = 1; k <= m1; k++) {
+  //     p = p * xx + _AA[m1+1-k];
+  //   }
+  //   printf(" %11.6f %11.6f\n", xx, p);
+  // }
+  // printf("\n\n");
 
   // save the coefficients
   

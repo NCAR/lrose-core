@@ -22,6 +22,8 @@
 #include <iostream>
 #include <rapmath/umath.h>
 #include <rapmath/stats.h>
+#include <rapmath/PolyFit.hh>
+#include <rapmath/ForsytheFit.hh>
 using namespace std;
 
 static void testExponentialFit(double a0, double a1, double a2,
@@ -52,12 +54,6 @@ int main(int argc, char **argv)
 
   testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
 
-  cerr << "1111111111111111111111" << endl;
-  testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
-  cerr << "2222222222222222222222" << endl;
-
-  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.2);
-
   testLinearFit(0.33333, 150, 0.0, 5.0);
 
   testLinearFit(4.25, 9.99, 0.0, 2.0);
@@ -65,6 +61,10 @@ int main(int argc, char **argv)
   testLinearFit(-2.50, -8.88, 0.0, 0.1);
 
   testNewtRaph();
+
+  testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
+
+  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.2);
 
   return 0;
 
@@ -161,15 +161,48 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   uPolyFit(100, xx, yy, aaa, 4, &stdErr, &rSquared);
 
   cerr << "---------------------------------" << endl;
-  
+  cerr << "====>> output from uPolyFit() <<====" << endl;
   cerr << "Output aaa[0]: " << aaa[0] << endl;
   cerr << "Output aaa[1]: " << aaa[1] << endl;
   cerr << "Output aaa[2]: " << aaa[2] << endl;
   cerr << "Output aaa[3]: " << aaa[3] << endl;
 
+  cerr << "---------------------------------" << endl;
+
+  PolyFit poly;
+  for (int ii = 0; ii < 100; ii++) {
+    poly.addValue(xx[ii], yy[ii]);
+  }
+  poly.setOrder(4);
+  poly.performFit();
+
+  vector<double> coeffs = poly.getCoeffs();
+
+  cerr << "---------------------------------" << endl;
+  cerr << "====>> output from PolyFit() <<====" << endl;
+  cerr << "Output coeffs[0]: " << coeffs[0] << endl;
+  cerr << "Output coeffs[1]: " << coeffs[1] << endl;
+  cerr << "Output coeffs[2]: " << coeffs[2] << endl;
+  cerr << "Output coeffs[3]: " << coeffs[3] << endl;
+
+  ForsytheFit forsythe;
+  for (int ii = 0; ii < 100; ii++) {
+    forsythe.addValue(xx[ii], yy[ii]);
+  }
+  forsythe.setOrder(4);
+  forsythe.performFit();
+
+  vector<double> fcoeffs = forsythe.getCoeffs();
+
+  cerr << "---------------------------------" << endl;
+  cerr << "====>> output from ForsytheFit() <<====" << endl;
+  cerr << "Output fcoeffs[0]: " << fcoeffs[0] << endl;
+  cerr << "Output fcoeffs[1]: " << fcoeffs[1] << endl;
+  cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
+  cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
+
   cerr << "====================================" << endl;
   cerr << endl;
-  cerr << "99999999999999999999999999999" << endl;
 
 }
 
