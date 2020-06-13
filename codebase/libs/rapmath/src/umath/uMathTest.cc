@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 
   testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
 
-  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.2);
+  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
 
   return 0;
 
@@ -173,7 +173,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   for (int ii = 0; ii < 100; ii++) {
     poly.addValue(xx[ii], yy[ii]);
   }
-  poly.setOrder(4);
+  poly.setOrder(3);
   poly.performFit();
 
   vector<double> coeffs = poly.getCoeffs();
@@ -189,7 +189,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   for (int ii = 0; ii < 100; ii++) {
     forsythe.addValue(xx[ii], yy[ii]);
   }
-  forsythe.setOrder(4);
+  forsythe.setOrder(3);
   forsythe.performFit();
 
   vector<double> fcoeffs = forsythe.getCoeffs();

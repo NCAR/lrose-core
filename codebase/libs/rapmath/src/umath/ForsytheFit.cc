@@ -88,8 +88,6 @@ void ForsytheFit::clear()
 void ForsytheFit::setOrder(size_t order) 
 {
   _order = order;
-  _orderPlus1 = order + 1;
-  _orderPlus2 = order + 2;
   _allocPolyArrays();
 }
 
@@ -195,14 +193,19 @@ int ForsytheFit::performFit()
   
 {
 
-  if (_nObs < _orderPlus1) {
-    return -1;
-  }
-  
   // allocate arrays
   
   _allocDataArrays();
 
+  // check conditions
+
+  if (_nObs < 2 * (_order + 2)) {
+    cerr << "ERROR - ForsytheFit::performFit()" << endl;
+    cerr << "  Not enough observations to  fit order: " << _order << endl;
+    cerr << "  Min n obs: " << 2 * (_order + 2) << endl;
+    return -1;
+  }
+  
   // do the fit
 
   int m = _order;
@@ -217,18 +220,15 @@ int ForsytheFit::performFit()
   }
 
   double yc = 0.0;
-  for (size_t i = 1; i < _nObs; i++) {
+  for (size_t i = 0; i < _nObs; i++) {
     yc += _yObs[i];
   }
   
   for (int k = 1; k <= m; k++) {
-
     _Yx[k]=0.0;
-
-    for (size_t i = 1; i < _nObs; i++) {
+    for (size_t i = 0; i < _nObs; i++) {
       _Yx[k] += _yObs[i] * _intPower(_xObs[i], k);
     } // i
-
   } // k
     
   for (int i = 1; i <= m1; i++) {
@@ -285,7 +285,7 @@ int ForsytheFit::performFit()
   // save the coefficients
   
   _coeffs.clear();
-  for (size_t ii = 0; ii < _orderPlus1; ii++) {
+  for (size_t ii = 0; ii < _order + 1; ii++) {
     _coeffs.push_back(_AA[ii+1]);
   }
   
@@ -318,7 +318,9 @@ void ForsytheFit::_allocDataArrays()
 {
   
   _freeDataArrays();
-  _yEst = (double *) umalloc(_nObs * sizeof(double));
+  _yEst = (double *) ucalloc(_nObs, sizeof(double));
+  _Xc = (double *) ucalloc(_nObs + 3, sizeof(double));
+  _Yx = (double *) ucalloc(_nObs + 3, sizeof(double));
   
 }
 
@@ -328,12 +330,9 @@ void ForsytheFit::_allocPolyArrays()
   
   _freePolyArrays();
   
-  _CC = (double **) umalloc2(_orderPlus2, _orderPlus2, sizeof(double));
-
-  _AA = (double *) umalloc(_orderPlus2 * sizeof(double));
-  _BB = (double *) umalloc(_orderPlus2 * sizeof(double));
-  _Xc = (double *) umalloc(_orderPlus2 * sizeof(double));
-  _Yx = (double *) umalloc(_orderPlus2 * sizeof(double));
+  _AA = (double *) ucalloc(_order + 3, sizeof(double));
+  _BB = (double *) ucalloc(_order + 3, sizeof(double));
+  _CC = (double **) ucalloc2(_order + 3, _order + 3, sizeof(double));
 
 }
 
@@ -345,6 +344,8 @@ void ForsytheFit::_freeDataArrays()
 {
   
   _freeVec(_yEst);
+  _freeVec(_Xc);
+  _freeVec(_Yx);
   
 }
 
@@ -354,9 +355,6 @@ void ForsytheFit::_freePolyArrays()
   
   _freeVec(_AA);
   _freeVec(_BB);
-  _freeVec(_Xc);
-  _freeVec(_Yx);
-
   _freeMatrix(_CC);
 
 }

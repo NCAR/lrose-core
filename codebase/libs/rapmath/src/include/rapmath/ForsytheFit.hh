@@ -115,8 +115,6 @@ protected:
 private:
 
   size_t _order;        // polynomial order
-  size_t _orderPlus1;   // polynomial order plus 1
-  size_t _orderPlus2;   // polynomial order plus 2
 
   vector<double> _coeffs; // coefficients
   
