@@ -116,11 +116,10 @@ private:
 
   size_t _order;        // polynomial order
 
-  vector<double> _coeffs; // coefficients
+  vector<double> _coeffs; // polynomial coefficients
   
   vector<double> _xObs, _yObs; // observations
   size_t _nObs; // number of obs
-  size_t _nObsPlus1; // number of obs plus 1
 
   double *_yEst; // regression estimate of y
 

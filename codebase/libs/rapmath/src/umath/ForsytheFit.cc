@@ -100,7 +100,6 @@ void ForsytheFit::addValue(double xx, double yy)
   _xObs.push_back(xx);
   _yObs.push_back(yy);
   _nObs = _xObs.size();
-  _nObsPlus1 = _nObs + 1;
 
 }
 
