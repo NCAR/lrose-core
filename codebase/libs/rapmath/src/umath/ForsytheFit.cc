@@ -170,6 +170,18 @@ vector<double> ForsytheFit::getYEst() const
   return yyEst;
 }
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int ls_poly_(int *order, double *ee, int *nn, int *fitOrder,
+                    double *xx, double *yy, double *coeffs, double *sdev);  
+
+#ifdef __cplusplus
+}
+#endif
+
 ////////////////////////////////////////////////////
 // perform a fit
 
@@ -193,7 +205,19 @@ int ForsytheFit::performFit()
   int fitOrder;
   double sdev;
 
-  _doFit(_order, 0, _nObs, fitOrder, _xObs, _yObs, _coeffs, sdev);  
+  // _doFit(_order, 0, _nObs, fitOrder, _xObs, _yObs, _coeffs, sdev);
+
+  for (size_t ii = 0; ii < _nObs; ii++) {
+    cerr << "XXXXXXXXX ii, x, y: " << ii << ", " << _xObs[ii] << ", " << _yObs[ii] << endl;
+  }
+
+  int order = _order;
+  double ee = 0.0001;
+  int nn = _nObs;
+  ls_poly_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
+
+  cerr << "xxxxx fitOrder: " << fitOrder << endl;
+  cerr << "xxxxx sdev: " << sdev << endl;
 
   return 0;
 
@@ -358,6 +382,7 @@ int ForsytheFit::_doFit(int mm, double ee, int nn, int &ll,
     int jj = 0;
     while (jj < iorder) {
       ll = iorder - jj;
+      cerr << "jjjjjjjj iorder, jj, ll: " << iorder << ", " << jj << ", " << ll << endl;
       double b2 = _bb[ll];
       d1 = 0.0;
       if (ll > 1) {
@@ -365,7 +390,7 @@ int ForsytheFit::_doFit(int mm, double ee, int nn, int &ll,
       }
       d1 = d1 - a2 * _bb[ll] - f2 * _aa[ll];
       _bb[ll] = d1 / f1;
-      cerr << "yyyyyyy ll, d1, f1, _bb[ll]: " << ll << ", " << d1 << ", " << d1 << ", " << _bb[ll] << endl;
+      cerr << "yyyyyyy ll, d1, f1, b2, _bb[ll]: " << ll << ", " << d1 << ", " << f1 << ", " << b2 << ", " << _bb[ll] << endl;
       _aa[ll] = b2;
       ++jj;
     }

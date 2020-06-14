@@ -20,6 +20,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
+FFLAGS = -ffree-form
 
 TARGET_FILE = ../librapmath.a
 
@@ -50,6 +51,8 @@ SRCS = \
 	usvd.c \
 	uv_2_dir_speed.c
 
+F_SRCS = ForsytheFortran.f
+
 #
 # general targets
 #
@@ -67,7 +70,7 @@ utest_p:
 
 utest: uMathTest.o
 	$(CPPC) $(DBUG_OPT_FLAGS) -I../include/rapmath uMathTest.o \
-	$(LDFLAGS) -o uMathTest -lrapmath -ltoolsa
+	$(LDFLAGS) -o uMathTest -lrapmath -ltoolsa -lgfortran
 
 clean_test:
 	$(RM) uMathTest uMathTest.o

@@ -62,9 +62,11 @@ int main(int argc, char **argv)
 
   // testNewtRaph();
 
-  testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
+  // testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
 
-  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
+  // testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
+
+  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.0);
 
   return 0;
 
