@@ -313,3 +313,113 @@ L50:
 } /* ls_poly__ */
 
 /* Main program alias */ int demo_ls_poly__ () { MAIN__ (); return 0; }
+#ifdef JUNK
+
+////////////////////////////////////////////////////
+// perform a fit
+
+int ForsytheFit::performFit()
+  
+{
+
+  // allocate arrays
+  
+  _allocDataArrays();
+
+  // check conditions
+
+  if (_nObs < 2 * (_order + 2)) {
+    cerr << "ERROR - ForsytheFit::performFit()" << endl;
+    cerr << "  Not enough observations to  fit order: " << _order << endl;
+    cerr << "  Min n obs: " << 2 * (_order + 2) << endl;
+    return -1;
+  }
+  
+  // do the fit
+
+  int m = _order;
+  int m1 = _order + 1;
+  int m2 = _order + 2;
+
+  for (int k = 1; k <= m2; k++) {
+    _Xc[k] = 0.0;
+    for (size_t i = 0; i < _nObs; i++) {
+      _Xc[k] += _intPower(_xObs[i], k);
+    }
+  }
+
+  double yc = 0.0;
+  for (size_t i = 0; i < _nObs; i++) {
+    yc += _yObs[i];
+  }
+  
+  for (int k = 1; k <= m; k++) {
+    _Yx[k]=0.0;
+    for (size_t i = 0; i < _nObs; i++) {
+      _Yx[k] += _yObs[i] * _intPower(_xObs[i], k);
+    } // i
+  } // k
+    
+  for (int i = 1; i <= m1; i++) {
+    for (int j = 1; j <= m1; j++) {
+      int ij = i + j - 2;
+      if (i == 1 && j == 1) {
+        _CC[1][1]= _nObs;
+      } else {
+        _CC[i][j] = _Xc[ij];
+      }
+    } // j
+  } // i
+
+  _BB[1] = yc;
+  for (int i = 2; i <= m1; i++) {
+    _BB[i] = _Yx[i-1];
+  } // i
+    
+  for (int k = 1; k <= m; k++) {
+    for (int i = k+1; i <= m1; i++) {
+      _BB[i] -= _CC[i][k]/_CC[k][k]*_BB[k];
+      for (int j = k+1; j <= m1; j++) {
+        _CC[i][j] -= _CC[i][k] / _CC[k][k] * _CC[k][j];
+      }
+    }
+  } // k
+
+  _AA[m1] = _BB[m1] / _CC[m1][m1];
+  for (int i = m; i > 0; i--)  {
+    double s = 0.0;
+    for (int k= i+1; k <= m1; k++) {
+      s = s + _CC[i][k] * _AA[k];
+    }
+    _AA[i] = (_BB[i] - s) / _CC[i][i];
+  } // i
+
+  // printf("\n Polynomial approximation of degree %d (%ld points)\n", m, _nObs);
+  // printf(" Coefficients of polynomial:\n");
+  // for (int i = 1; i <= m1; i++) {
+  //   printf("  A(%d) = %15.9f\n", i-1, _AA[i]);
+  // }
+  // printf("\n Approximated function:\n");
+  // printf("        X           Y\n");
+  // for (size_t i = 0; i < _nObs; i++) {
+  //   double xx = _xObs[i];
+  //   double p = 0;
+  //   for (int k = 1; k <= m1; k++) {
+  //     p = p * xx + _AA[m1+1-k];
+  //   }
+  //   printf(" %11.6f %11.6f\n", xx, p);
+  // }
+  // printf("\n\n");
+
+  // save the coefficients
+  
+  _coeffs.clear();
+  for (size_t ii = 0; ii < _order + 1; ii++) {
+    _coeffs.push_back(_AA[ii+1]);
+  }
+  
+  return 0;
+
+}
+
+#endif

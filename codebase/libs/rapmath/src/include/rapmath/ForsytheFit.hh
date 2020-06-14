@@ -120,55 +120,26 @@ private:
   vector<double> _xObs, _yObs; // observations
   size_t _nObs; // number of obs
 
-  double *_yEst; // regression estimate of y
+  vector<double> _yEst; // regression estimate of y, size _nObs
 
-  double *_AA; // regression coefficients - polynomial fit
-  double *_BB;
-  double **_CC;
-  double *_Xc;
-  double *_Yx;
+  // arrays for the fitting procedure
+
+  vector<double> _aa, _bb, _ff, _c2; // size _order + 1
+  vector<double> _cc, _ee, _vv; // size _nObs
 
   // private methods
-
-  double _intPower(double xx, int kk);
 
   void _init();
 
   void _allocDataArrays();
   void _allocPolyArrays();
 
-  void _freeDataArrays();
-  void _freePolyArrays();
-
-  void _freeVec(double* &vec);
-  void _freeMatrix(double** &array);
-
   int _doFit(int mm, double ee, int nn, int &ll,
-             double *xx, double *yy,
-             double *coeffs, double &dd);
+             vector<double> &xx, vector<double> &yy,
+             vector<double> &coeffs, double &sdev);
 
-  void _matrixMult(double **aa,
-                   double **bb,
-                   size_t nRowsAa,
-                   size_t nColsAa,
-                   size_t nColsBb,
-                   double **xx) const;
-
-  void _matrixVectorMult(double **aa,
-                         double *bb,
-                         size_t nRowsAa,
-                         size_t nColsAa,
-                         double *xx) const;
-
-  void _matrixPrint(string name,
-                    double **aa,
-                    size_t nRowsAa,
-                    size_t nColsAa,
-                    FILE *out) const;
-  
   void _vectorPrint(string name,
-                    double *aa,
-                    size_t sizeAa,
+                    vector<double> aa,
                     FILE *out) const;
 
 };
