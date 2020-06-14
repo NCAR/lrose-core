@@ -44,7 +44,6 @@
 
 #ifndef ForsytheFit_hh
 #define ForsytheFit_hh
-using namespace std;
 
 #include <string>
 #include <vector>
@@ -129,8 +128,6 @@ private:
   double *_Xc;
   double *_Yx;
 
-  mutable double _stdErrEst;
-  
   // private methods
 
   double _intPower(double xx, int kk);
@@ -145,6 +142,10 @@ private:
 
   void _freeVec(double* &vec);
   void _freeMatrix(double** &array);
+
+  int _doFit(int mm, double ee, int nn, int &ll,
+             double *xx, double *yy,
+             double *coeffs, double &dd);
 
   void _matrixMult(double **aa,
                    double **bb,

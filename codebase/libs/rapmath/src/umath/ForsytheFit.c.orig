@@ -10,7 +10,7 @@
 		http://www.netlib.org/f2c/libf2c.zip
 */
 
-#include "f2c.h"
+#ifdef JUNK
 
 /* Table of constant values */
 
@@ -127,6 +127,8 @@ static integer c__5 = 5;
     return 0;
 } /* MAIN__ */
 
+#endif
+
 /* ***************************************************************** */
 /* *         LEAST SQUARES POLYNOMIAL FITTING PROCEDURE            * */
 /* * ------------------------------------------------------------- * */
@@ -145,9 +147,9 @@ static integer c__5 = 5;
 /* *     by more than e between successive fits.                   * */
 /* * The order of the fit then obtained is l.                      * */
 /* ***************************************************************** */
-/* Subroutine */ int ls_poly__(integer *m, doublereal *e1, integer *n, 
-	integer *l, doublereal *x, doublereal *y, doublereal *c__, doublereal 
-	*dd)
+int ForsytheFit::_doFit(integer *m, doublereal *e1, integer *n, 
+                        integer *l, doublereal *x, doublereal *y, doublereal *c__, doublereal 
+                        *dd)
 {
     /* System generated locals */
     integer i__1;

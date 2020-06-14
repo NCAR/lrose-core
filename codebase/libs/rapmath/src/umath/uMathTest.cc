@@ -48,19 +48,19 @@ int main(int argc, char **argv)
   //////////////////////
   // Checking uCurveFit
 
-  testExponentialFit(0.1, 5.0, -5.0, 0.0, 0.1);
+  // testExponentialFit(0.1, 5.0, -5.0, 0.0, 0.1);
 
-  testExponentialFit(1.0, 0.3, -0.3, 0.0, 0.1);
+  // testExponentialFit(1.0, 0.3, -0.3, 0.0, 0.1);
 
-  testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
+  // testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
 
-  testLinearFit(0.33333, 150, 0.0, 5.0);
+  // testLinearFit(0.33333, 150, 0.0, 5.0);
 
-  testLinearFit(4.25, 9.99, 0.0, 2.0);
+  // testLinearFit(4.25, 9.99, 0.0, 2.0);
 
-  testLinearFit(-2.50, -8.88, 0.0, 0.1);
+  // testLinearFit(-2.50, -8.88, 0.0, 0.1);
 
-  testNewtRaph();
+  // testNewtRaph();
 
   testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
 
