@@ -6,7 +6,7 @@
       parameter(SIZE1=26)                                                                                   
                                                                                                      
       integer i,l,m,n                                                                                      
-      real*8  dd,e1                                                                                     
+      real*8  sdev,e1                                                                                     
                                                                                                      
       real*8 c(SIZE1),x(SIZE),y(SIZE)                                                                     
                                                                                                      
@@ -29,7 +29,7 @@
       end do                                                                                             
       print *,' '                                                                                        
                                                                                                      
-      call LS_POLY(m,e1,n,l,x,y,c,dd)                                                                    
+      call LS_POLY(m,e1,n,l,x,y,c,sdev)                                                                    
                                                                                                      
       print *,'Coefficients are:'                                                                        
       print *,' '                                                                                        
@@ -37,7 +37,7 @@
         write(*,60)  i, c(i)                                                                             
       end do                                                                                             
                                                                                                      
-      write(*,70)  dd                                                                                    
+      write(*,70)  sdev                                                                                    
       stop=4                                                                                                     
 50    format('  ',i2,'   X  Y = ')                                                                      
 60    format('  ',i2,'   ',f9.6)                                                                        
@@ -63,7 +63,7 @@
 !*     by more than e between successive fits.                   *                                   
 !* The order of the fit then obtained is l.                      *                                   
 !*****************************************************************                                   
-      Subroutine LS_POLY(m,e1,n,l,x,y,c,dd)
+      Subroutine LS_POLY(m,e1,n,l,x,y,c,sdev)
 
       integer SIZE, SIZE1
       parameter (SIZE = 25)
@@ -73,66 +73,48 @@ c     Labels: 10,15,20,30,50
       real*8 x(SIZE),y(SIZE),v(SIZE),a(SIZE),b(SIZE)                                                     
 
       real*8 c(SIZE1),d(SIZE),c2(SIZE),e(SIZE),f(SIZE)                                                  
-      integer i,l,l2,m,n,n1                                                                              
-      real*8 a1,a2,b1,b2,c1,dd,d1,e1,f1,f2,v1,v2,w                                                       
-      n1 = m + 1
+      integer i,l,l2,m,n,mm1                                                                              
+      real*8 a1,a2,b1,b2,c1,sdev,d1,e1,f1,f2,v1,v2,w                                                       
+      mm1 = m + 1
       l = 0
       v1 = 1d7
+
 c     Initialize the arrays                                                                            
-      do i=1, n1                                                                                         
-        a(i) = 0.d0
+      do i=1, mm1                                                                                               a(i) = 0.d0
         b(i) = 0.d0
         f(i) = 0.d0                                                            
       end do                                                                                             
-      do i=1, n                                                                                          
-        v(i) = 0.d0
+      do i=1, n                                                                                                 v(i) = 0.d0
         d(i) = 0.d0                                                                         
       end do                                                                                             
       d1 = dsqrt(dfloat(n))
       w = d1                                                                    
-      do i=1, n                                                                                          
-        e(i) = 1.d0 / w                                                                                  
-      end do                                                                                             
+      do i=1, n                                                                                                 e(i) = 1.d0 / w                                                                                       end do                                                                                             
       f1 = d1
       a1 = 0.d0                                                                                 
-      do i=1, n                                                                                          
-        a1 = a1 + x(i) * e(i) * e(i)                                                                     
-      end do
+      do i=1, n                                                                                                 a1 = a1 + x(i) * e(i) * e(i)                                                                          end do
       c1 = 0.d0                                                                                          
-      do i=1, n                                                                                          
-        c1 = c1 + y(i) * e(i)                                                                            
-      end do                                                                                             
+      do i=1, n                                                                                                 c1 = c1 + y(i) * e(i)                                                                                 end do                                                                                             
       b(1) = 1.d0 / f1
       f(1) = b(1) * c1                                                                 
-      do i=1, n                                                                                          
-        v(i) = v(i) + e(i) * c1                                                                          
-      end do                                                                                             
+      do i=1, n                                                                                                 v(i) = v(i) + e(i) * c1                                                                               end do                                                                                             
       m = 1                                                                                              
 c     Save latest results
 
 10    do i=1, l                                                                                         
-        c2(i) = c(i)                                                                                     
-      end do                                                                                             
+        c2(i) = c(i)                                                                                          end do
 
       l2 = l
       v2 = v1
       f2 = f1
       a2 = a1
       f1 = 0.d0
-      do i=1, n                                                                                          
-        b1 = e(i)                                                                                        
-        e(i) = (x(i) - a2) * e(i) - f2 * d(i)                                                            
-        d(i) = b1                                                                                        
-        f1 = f1 + e(i) * e(i)                                                                            
-      end do                                                                                             
+
+      do i=1, n                                                                                                 b1 = e(i)                                                                                               e(i) = (x(i) - a2) * e(i) - f2 * d(i)                                                                   d(i) = b1                                                                                               f1 = f1 + e(i) * e(i)                                                                                 end do                                                                                             
       f1 = dsqrt(f1)                                                                                     
-      do i=1, n                                                                                          
-        e(i) = e(i) / f1                                                                                 
-      end do                                                                                             
+      do i=1, n                                                                                                 e(i) = e(i) / f1                                                                                      end do                                                                                             
       a1 = 0.d0                                                                                          
-      do i=1, n                                                                                          
-        c1 = c1 + e(i) * y(i)                                                                            
-      end do                                                                                             
+      do i=1, n                                                                                                 c1 = c1 + e(i) * y(i)                                                                                 end do                                                                                             
       m = m + 1
       i = 0                                                                                   
 15    l = m - i
@@ -144,17 +126,10 @@ c     Save latest results
       a(l) = b2
       i = i + 1                                                               
       if (i.ne.m) goto 15                                                                                
-      do i=1, n                                                                                          
-        v(i) = v(i) + e(i) * c1                                                                          
-      end do                                                                                             
-      do i=1, n1                                                                                         
-        f(i) = f(i) + b(i) * c1                                                                          
-        c(i) = f(i)                                                                                      
-      end do                                                                                             
+      do i=1, n                                                                                                 v(i) = v(i) + e(i) * c1                                                                               end do                                                                                             
+      do i=1, mm1                                                                                               f(i) = f(i) + b(i) * c1                                                                                 c(i) = f(i)                                                                                           end do                                                                                             
       vv = 0.d0                                                                                          
-      do i=1, n                                                                                          
-        vv = vv + (v(i) - y(i)) * (v(i) - y(i))                                                          
-      end do                                                                                             
+      do i=1, n                                                                                                 vv = vv + (v(i) - y(i)) * (v(i) - y(i))                                                               end do                                                                                             
 c     Note the division is by the number of degrees of freedom                                          
       vv = dsqrt(vv / dfloat(n - l - 1))
       l = m                                                          
@@ -164,7 +139,7 @@ c     Test for minimal improvement
 c     if error is larger, quit                                                                          
       if (e1 * vv > e1 * v1) goto 50                                                                     
       v1 = vv                                                                                            
-20    if (m.eq.n1) goto 30                                                                              
+20    if (m.eq.mm1) goto 30                                                                              
       goto 10                                                                                            
 c     Shift the c[i] down, so c(0) is the constant term                                                   
 30    do i=1, l                                                                                         
@@ -173,7 +148,7 @@ c     Shift the c[i] down, so c(0) is the constant term
       c(l) = 0.d0                                                                                        
 c     l is the order of the polynomial fitted                                                          
       l = l - 1
-      dd = vv                                                                                 
+      sdev = vv                                                                                 
       return                                                                                             
 c     Aborted sequence, recover last values                                                              
 50    l = l2

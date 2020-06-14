@@ -115,17 +115,17 @@ private:
 
   size_t _order;        // polynomial order
 
-  vector<double> _coeffs; // polynomial coefficients
+  vector<double> _coeffs; // polynomial coefficients (0-based)
   
   vector<double> _xObs, _yObs; // observations
   size_t _nObs; // number of obs
-
+  
   vector<double> _yEst; // regression estimate of y, size _nObs
 
   // arrays for the fitting procedure
 
-  vector<double> _aa, _bb, _ff, _c2; // size _order + 1
-  vector<double> _cc, _ee, _vv; // size _nObs
+  vector<double> _aa, _bb, _ff, _cc, _c2; // size _order + 2 (1-based)
+  vector<double> _dd, _ee, _vv; // size _nObs (0-based)
 
   // private methods
 
