@@ -258,11 +258,6 @@ int ForsytheFit::_doFit(int mm, double ee, int nn, int &ll,
                         vector<double> &coeffs, double &sdev)
 {
 
-  // arrays
-  
-  double _aa[1024], _bb[1024], _cc[1024], _ee[1024], _ff[1024];
-  double _vv[1024], _c2[1024];
-  
   // Function Body
 
   int mm1 = mm + 1;
