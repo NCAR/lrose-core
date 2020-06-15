@@ -363,9 +363,7 @@ WsiNidsIngest
 WxHazards2Symprod
 ZdrCalSimHv
 ascii2mdv
-ascii_to_xgraph
 bearing2latlon
-cart_convert
 combine_ltg_radar
 ctrec
 extractStationLocationList
@@ -389,7 +387,6 @@ procmap
 procmap_register
 procmap_unregister
 resolve_host
-rtiming
 sndgIngest
 spdb_merge
 storms_to_ascii
@@ -403,9 +400,7 @@ test_procmap
 test_tserver
 titan_print
 tops_filter
-track_grid_stats
 track_print
-tracks_to_ascii
 tstorm_refl_fcst
 update_mdv_times
 verify_day
