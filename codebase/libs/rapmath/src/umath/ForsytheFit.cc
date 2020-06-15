@@ -178,6 +178,9 @@ extern "C" {
 extern int ls_poly_(int *order, double *ee, int *nn, int *fitOrder,
                     double *xx, double *yy, double *coeffs, double *sdev);  
 
+extern int ls_poly2_(int *order, double *ee, int *nn, int *fitOrder,
+                     double *xx, double *yy, double *coeffs, double *sdev);  
+
 #ifdef __cplusplus
 }
 #endif
@@ -214,7 +217,7 @@ int ForsytheFit::performFit()
   int order = _order;
   double ee = 0.0001;
   int nn = _nObs;
-  ls_poly_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
+  ls_poly2_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
 
   cerr << "xxxxx fitOrder: " << fitOrder << endl;
   cerr << "xxxxx sdev: " << sdev << endl;
