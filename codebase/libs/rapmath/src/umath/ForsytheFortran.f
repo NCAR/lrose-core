@@ -206,7 +206,7 @@
 !     * The order of the fit then obtained is l.                      *
 !*****************************************************************
 
-      Subroutine LS_POLY2(m,e1,n,l,x,y,c,dd,v)
+      Subroutine LS_POLY2(m,e1,n,l,x,y,c,dd)
 
       integer SIZE
       parameter(SIZE=1025,ipoly=39)
@@ -226,11 +226,14 @@
 !     Initialize the arrays
 
       do i=1, n1
-         a(i) = 0.d0; b(i) = 0.d0; f(i) = 0.d0
+         a(i) = 0.d0
+         b(i) = 0.d0
+         f(i) = 0.d0
       end do
 
       do i=1, n
-         v(i) = 0.d0; d(i) = 0.d0
+         v(i) = 0.d0
+         d(i) = 0.d0
       end do
 
       d1 = dsqrt(dfloat(n)); w = d1;
@@ -239,7 +242,8 @@
          e(i) = 1.d0 / w
       end do
 
-      f1 = d1; a1 = 0.d0
+      f1 = d1
+      a1 = 0.d0
 
       do i=1, n
          a1 = a1 + x(i) * e(i) * e(i)
@@ -264,7 +268,11 @@
          c2(i) = c(i)
       end do
 
-      l2 = l; v2 = v1; f2 = f1; a2 = a1; f1 = 0.d0
+      l2 = l
+      v2 = v1
+      f2 = f1
+      a2 = a1
+      f1 = 0.d0
 
       do i=1, n
          b1 = e(i)
@@ -298,7 +306,9 @@
 
       d1 = d1 - a2 * b(l) - f2 * a(l)
 
-      b(l) = d1 / f1; a(l) = b2; i = i + 1
+      b(l) = d1 / f1
+      a(l) = b2
+      i = i + 1
 
       if (i.ne.m) goto 15
 
@@ -319,7 +329,8 @@
 
 !Note the division is by the number of degrees of freedom
 
-      vv = dsqrt(vv / dfloat(n - l - 1)); l = m
+      vv = dsqrt(vv / dfloat(n - l - 1))
+      l = m
 
       if (e1.eq.0.d0) goto 20
 
@@ -347,7 +358,8 @@
 
 ! l is the order of the polynomial fitted
 
-      l = l - 1; dd = vv
+      l = l - 1
+      dd = vv
 
 !C     return m to original input order
 
@@ -358,7 +370,8 @@
 
 !     Aborted sequence, recover last values
 
- 50   l = l2; vv = v2
+ 50   l = l2
+      vv = v2
       
       do i=1, l
          c(i) = c2(i)
