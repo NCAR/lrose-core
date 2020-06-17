@@ -56,6 +56,11 @@ SUB_DIRS = \
 	WrfVIL2Mdv \
 	WsiNidsIngest \
 	file_repeat_day \
+	hiResNids2Mdv \
+	hiResNidsEchoTop2Mdv \
+	hiResNidsStormPrecip2Mdv \
+	hiResNidsVil2Mdv \
+	lowResNids2Mdv \
 	madis2Spdb \
 	nexrad2dsr \
 	noaaportLtg2Spdb \

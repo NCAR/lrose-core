@@ -275,6 +275,11 @@ codebase/apps/ingest/src/radar2Dsr/radar2Dsr
 codebase/apps/ingest/src/sndgIngest/sndgIngest
 codebase/apps/ingest/src/superResNexradII2Dsr/superResNexradII2Dsr
 codebase/apps/ingest/src/superResNexradLdmUnzip/superResNexradLdmUnzip
+codebase/apps/ingest/src/hiResNids2Mdv/hiResNids2Mdv
+codebase/apps/ingest/src/hiResNidsEchoTop2Mdv/hiResNidsEchoTop2Mdv
+codebase/apps/ingest/src/hiResNidsStormPrecip2Mdv/hiResNidsStormPrecip2Mdv
+codebase/apps/ingest/src/hiResNidsVil2Mdv/hiResNidsVil2Mdv
+codebase/apps/ingest/src/lowResNids2Mdv/lowResNids2Mdv
 codebase/apps/interp/src/SurfInterp/SurfInterp
 codebase/apps/interp/src/surf_interp/surf_interp
 

@@ -413,4 +413,9 @@ MapCircles
 MapGrid
 OverlayCreate
 toneDownColorScale
+hiResNids2Mdv
+hiResNidsEchoTop2Mdv
+hiResNidsStormPrecip2Mdv
+hiResNidsVil2Mdv
+lowResNids2Mdv
 
