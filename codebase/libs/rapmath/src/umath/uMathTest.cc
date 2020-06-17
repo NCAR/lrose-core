@@ -206,6 +206,20 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   cerr << "====================================" << endl;
   cerr << endl;
 
+  forsythe.performFit2();
+
+  fcoeffs = forsythe.getCoeffs();
+
+  cerr << "222222222222222222222222222222222222222" << endl;
+  cerr << "====>> output from ForsytheFit2() <<====" << endl;
+  cerr << "Output fcoeffs[0]: " << fcoeffs[0] << endl;
+  cerr << "Output fcoeffs[1]: " << fcoeffs[1] << endl;
+  cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
+  cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
+
+  cerr << "222222222222222222222222222222222222222" << endl;
+  cerr << endl;
+
 }
 
 

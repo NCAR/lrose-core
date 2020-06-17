@@ -210,9 +210,9 @@ int ForsytheFit::performFit()
 
   // _doFit(_order, 0, _nObs, fitOrder, _xObs, _yObs, _coeffs, sdev);
 
-  for (size_t ii = 0; ii < _nObs; ii++) {
-    cerr << "XXXXXXXXX ii, x, y: " << ii << ", " << _xObs[ii] << ", " << _yObs[ii] << endl;
-  }
+  // for (size_t ii = 0; ii < _nObs; ii++) {
+  //   cerr << "XXXXXXXXX ii, x, y: " << ii << ", " << _xObs[ii] << ", " << _yObs[ii] << endl;
+  // }
 
   int order = _order;
   double ee = 0.0001;
@@ -221,6 +221,47 @@ int ForsytheFit::performFit()
 
   cerr << "xxxxx fitOrder: " << fitOrder << endl;
   cerr << "xxxxx sdev: " << sdev << endl;
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////
+// perform a fit
+
+int ForsytheFit::performFit2()
+  
+{
+
+  // allocate arrays
+  
+  _allocDataArrays();
+
+  // check conditions
+
+  if (_nObs < _order + 2) {
+    cerr << "ERROR - ForsytheFit::performFit()" << endl;
+    cerr << "  Not enough observations to  fit order: " << _order << endl;
+    cerr << "  Min n obs: " << _order << endl;
+    return -1;
+  }
+
+  int fitOrder;
+  double sdev;
+
+  _doFit(_order, 0, _nObs, fitOrder, _xObs, _yObs, _coeffs, sdev);
+
+  // for (size_t ii = 0; ii < _nObs; ii++) {
+  //   cerr << "XXXXXXXXX ii, x, y: " << ii << ", " << _xObs[ii] << ", " << _yObs[ii] << endl;
+  // }
+
+  // int order = _order;
+  // double ee = 0.0001;
+  // int nn = _nObs;
+  // ls_poly2_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
+
+  cerr << "yyyyyy fitOrder: " << fitOrder << endl;
+  cerr << "yyyyyy sdev: " << sdev << endl;
 
   return 0;
 

@@ -85,6 +85,7 @@ public:
   // values must have been set
   
   virtual int performFit();
+  virtual int performFit2();
   
   // get order
   

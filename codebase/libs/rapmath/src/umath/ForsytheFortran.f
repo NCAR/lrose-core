@@ -218,6 +218,14 @@
       integer i,l,l2,m,n,n1
       real*8 a1,a2,b1,b2,c1,dd,d1,e1,f1,f2,v1,v2,w
       
+      write(6, *) "ffffffffff m: ", m
+      write(6, *) "ffffffffff SIZE, ipoly: ", SIZE, ipoly
+      write(6, *) "ffffffffff e1, x[1], y[1]: ", e1, x(1), y(1)
+
+!c     do i=1, n
+!c       write(6, *) "ffffffffff ii, x[ii], y[ii]: ", i, x(i), y(i)
+!c     end do
+
 !c     print *,'IN LS_POLY******** ORDER ',m
 
       n1 = m + 1; l=0
@@ -264,9 +272,14 @@
 
 !     Save latest results
 
+      write(6, *) "XXXXXXXXXXXXX d1, f1, a1: ", d1, f1, a1
+      write(6, *) "XXXXXXXXXXXXX c1, b[1]: ", c1, b(1)
+
  10   do i=1, l
          c2(i) = c(i)
       end do
+
+      write(6, *) "mmmmmmmmmmmm m: ", m
 
       l2 = l
       v2 = v1
@@ -283,6 +296,8 @@
 
       f1 = dsqrt(f1)
 
+      write(6, *) "ffffffffffff a1, a2, f1, f2: ", a1,a2,f1,f2
+
       do i=1, n
          e(i) = e(i) / f1
       end do
@@ -297,7 +312,8 @@
       do i=1, n
          c1 = c1 + e(i) * y(i)
       end do
-
+      write(6, *) "cccccccccccccccccc c1: ", c1
+      
       m = m + 1; i = 0
 
  15   l = m - i; b2 = b(l); d1 = 0.d0
