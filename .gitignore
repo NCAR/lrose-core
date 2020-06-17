@@ -107,7 +107,7 @@ codebase/libs/makefile
 
 # apps
 
-libs/rapmath/src/umath/uMathTest
+codebase/libs/rapmath/src/umath/uMathTest
 
 codebase/apps/awc/src/LtgSpdb2Mdv/LtgSpdb2Mdv
 codebase/apps/awc/src/combine_ltg_radar/combine_ltg_radar

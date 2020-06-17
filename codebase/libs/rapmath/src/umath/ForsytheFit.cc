@@ -246,10 +246,9 @@ int ForsytheFit::performFit2()
     return -1;
   }
 
-  int fitOrder;
   double sdev;
 
-  _doFit(_order, 0, _nObs, fitOrder, _xObs, _yObs, _coeffs, sdev);
+  _doFit(_order, _nObs, _xObs, _yObs, _coeffs, sdev);
 
   // for (size_t ii = 0; ii < _nObs; ii++) {
   //   cerr << "XXXXXXXXX ii, x, y: " << ii << ", " << _xObs[ii] << ", " << _yObs[ii] << endl;
@@ -260,7 +259,6 @@ int ForsytheFit::performFit2()
   // int nn = _nObs;
   // ls_poly2_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
 
-  cerr << "yyyyyy fitOrder: " << fitOrder << endl;
   cerr << "yyyyyy sdev: " << sdev << endl;
 
   return 0;
@@ -300,7 +298,7 @@ void ForsytheFit::_allocPolyArrays()
   _c2.resize(_order + 2);
   _ff.resize(_order + 2);
 
-  _coeffs.resize(_order + 1);
+  _coeffs.resize(_order + 2);
 
 }
 
@@ -323,7 +321,7 @@ void ForsytheFit::_allocPolyArrays()
 // The order of the fit then obtained is ll.                      
 ///////////////////////////////////////////////////////////////////////
 
-int ForsytheFit::_doFit(int mm, double ee, int nn, int &ll,
+int ForsytheFit::_doFit(int mm, int nn,
                         vector<double> &xx, vector<double> &yy,
                         vector<double> &coeffs, double &sdev)
 {
@@ -338,27 +336,23 @@ int ForsytheFit::_doFit(int mm, double ee, int nn, int &ll,
   // the order arrays (aa, bb, ff, c2) are 1-based
 
   int mm1 = mm + 1;
+  int ll;
 
-  // Initialize the arrays
+  // Initialize the order arrays - 1-based
 
   for (int ii = 1; ii <= mm1; ++ii) {
-    _aa[ii - 1] = 0.0;
-    _bb[ii - 1] = 0.0;
-    _cc[ii - 1] = 0.0;
-    _ff[ii - 1] = 0.0;
-  }
-
-  for (int ii = 0; ii < nn; ++ii) {
-    _vv[ii] = 0.0;
-    _dd[ii] = 0.0;
+    _aa[ii] = 0.0;
+    _bb[ii] = 0.0;
+    _cc[ii] = 0.0;
+    _ff[ii] = 0.0;
   }
 
   double d1 = sqrt((double) nn);
-
+  
   for (int ii = 0; ii < nn; ++ii) {
     _ee[ii] = 1.0 / d1;
   }
-
+  
   double f1 = d1;
   double a1 = 0.0;
   for (int ii = 0; ii < nn; ++ii) {
@@ -370,8 +364,16 @@ int ForsytheFit::_doFit(int mm, double ee, int nn, int &ll,
     c1 += (yy[ii] * _ee[ii]);
   }
 
-  _bb[0] = 1.0 / f1;
-  _ff[0] = _bb[0] * c1;
+  _bb[1] = 1.0 / f1;
+  _ff[1] = _bb[1] * c1;
+
+  // Initialize the sample arrays - 0-based
+
+  for (int ii = 0; ii < nn; ++ii) {
+    _vv[ii] = 0.0;
+    _dd[ii] = 0.0;
+  }
+  
   for (int ii = 0; ii < nn; ++ii) {
     _vv[ii] += (_ee[ii] * c1);
   }
@@ -386,7 +388,7 @@ int ForsytheFit::_doFit(int mm, double ee, int nn, int &ll,
   // double sdev1 = 1.0e7;
   int iorder = 1;
   while (iorder < mm1) {
-
+    
     cerr << "iiiiiiiiiiiiiii  iorder: " << iorder << endl;
 
     // Save latest results
@@ -416,6 +418,11 @@ int ForsytheFit::_doFit(int mm, double ee, int nn, int &ll,
       _ee[ii] /= f1;
     }
     a1 = 0.0;
+    for (int ii = 0; ii < nn; ++ii) {
+      a1 += (xx[ii] * _ee[ii] * _ee[ii]);
+    }
+
+    c1 = 0.0;
     for (int ii = 0; ii < nn; ++ii) {
       c1 += _ee[ii] * yy[ii];
     }
@@ -449,31 +456,17 @@ int ForsytheFit::_doFit(int mm, double ee, int nn, int &ll,
       _cc[ii] = _ff[ii];
     }
 
+    // compute sdev
+    
     double vv = 0.0;
     for (int ii = 0; ii < nn; ++ii) {
       vv += (_vv[ii] - yy[ii]) * (_vv[ii] - yy[ii]);
     }
-
     // Note the division is by the number of degrees of freedom
-    sdev = sqrt(vv / (double) (nn - ll - 1));
+    sdev = sqrt(vv / (double) (nn - iorder - 1));
 
     ll = iorder;
-
-#ifdef JUNK    
-    if (ee != 0.0) {
-      // Test for minimal improvement
-      if ((fabs(sdev1 - sdev) / sdev < ee) || (ee * sdev > ee * sdev1)) {
-        ll = ll2;
-        sdev = sdev2;
-        for (int ii = 1; ii <= ll; ++ii) {
-          _cc[ii] = _c2[ii];
-        }
-        break;
-      }
-      sdev1 = sdev;
-    }
-#endif
-
+    
   } // while (iorder < mm1)
 
   // Load coeffs arrays - this is 0 based instead of 1 based

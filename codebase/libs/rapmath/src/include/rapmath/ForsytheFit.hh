@@ -135,9 +135,9 @@ private:
   void _allocDataArrays();
   void _allocPolyArrays();
 
-  int _doFit(int mm, double ee, int nn, int &ll,
-             vector<double> &xx, vector<double> &yy,
-             vector<double> &coeffs, double &sdev);
+  int _doFit(int order, int nObs,
+             vector<double> &xxObs, vector<double> &yyObs,
+             vector<double> &coeffsPoly, double &sdevFit);
 
   void _vectorPrint(string name,
                     vector<double> aa,
