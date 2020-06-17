@@ -18,6 +18,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
+#include <ctime>
+#include <sys/time.h>
 #include <string>
 #include <iostream>
 #include <rapmath/umath.h>
@@ -25,6 +27,8 @@
 #include <rapmath/PolyFit.hh>
 #include <rapmath/ForsytheFit.hh>
 using namespace std;
+
+static void _printRunTime(const string& str);
 
 static void testExponentialFit(double a0, double a1, double a2,
                                double noiseMean, double noiseSdev);
@@ -128,7 +132,11 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
                                  double noiseMean, double noiseSdev)
 
 {
-  
+
+  _printRunTime("start polynomial order 3");
+
+  // create polynomial data
+
   double aaa[4];
   aaa[0] = a0;
   aaa[1] = a1;
@@ -139,29 +147,27 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   double yy[100];
   
   for (int ii = 0; ii < 100; ii++) {
-    
     double noise = STATS_normal_gen(noiseMean, noiseSdev);
-    
     double val = ii;
     xx[ii] = val;
     yy[ii] = aaa[0] + aaa[1] * val + aaa[2] * val * val +
       aaa[3] * val * val * val + noise;
-
   }
 
   cerr << "====================================" << endl;
-  cerr << "Poly fit" << endl;
-
+  cerr << "Polynomial details" << endl;
   cerr << "Input aaa[0]: " << aaa[0] << endl;
   cerr << "Input aaa[1]: " << aaa[1] << endl;
   cerr << "Input aaa[2]: " << aaa[2] << endl;
   cerr << "Input aaa[3]: " << aaa[3] << endl;
   cerr << "Noise mean: " << noiseMean << endl;
   cerr << "Noise sdev: " << noiseSdev << endl;
+  cerr << "====================================" << endl;
+
+  // try uPolyFit
   
   double stdErr, rSquared;
   uPolyFit(100, xx, yy, aaa, 4, &stdErr, &rSquared);
-
   cerr << "---------------------------------" << endl;
   cerr << "====>> output from uPolyFit() <<====" << endl;
   cerr << "Output aaa[0]: " << aaa[0] << endl;
@@ -171,13 +177,17 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
 
   cerr << "---------------------------------" << endl;
 
+  _printRunTime("end of uPolyFit");
+
+
+  // try PolyFit
+
   PolyFit poly;
   for (int ii = 0; ii < 100; ii++) {
     poly.addValue(xx[ii], yy[ii]);
   }
   poly.setOrder(3);
   poly.performFit();
-
   vector<double> coeffs = poly.getCoeffs();
 
   cerr << "---------------------------------" << endl;
@@ -187,13 +197,16 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   cerr << "Output coeffs[2]: " << coeffs[2] << endl;
   cerr << "Output coeffs[3]: " << coeffs[3] << endl;
 
+  _printRunTime("end of uPolyFit");
+
+  // try Forsythe fit
+  
   ForsytheFit forsythe;
   for (int ii = 0; ii < 100; ii++) {
     forsythe.addValue(xx[ii], yy[ii]);
   }
   forsythe.setOrder(3);
   forsythe.performFit();
-
   vector<double> fcoeffs = forsythe.getCoeffs();
 
   cerr << "---------------------------------" << endl;
@@ -202,22 +215,139 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   cerr << "Output fcoeffs[1]: " << fcoeffs[1] << endl;
   cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
   cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
+  _printRunTime("end of ForsytheFit");
 
   cerr << "====================================" << endl;
   cerr << endl;
 
-  forsythe.performFit2();
+  // try ForsytheFit FORTRAN
 
+  forsythe.performFitFortran();
   fcoeffs = forsythe.getCoeffs();
-
-  cerr << "222222222222222222222222222222222222222" << endl;
-  cerr << "====>> output from ForsytheFit2() <<====" << endl;
+  
+  cerr << "====>> output from ForsytheFitFortran() <<====" << endl;
   cerr << "Output fcoeffs[0]: " << fcoeffs[0] << endl;
   cerr << "Output fcoeffs[1]: " << fcoeffs[1] << endl;
   cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
   cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
+  _printRunTime("end of ForsytheFitFortran");
 
-  cerr << "222222222222222222222222222222222222222" << endl;
+  cerr << endl;
+
+}
+
+
+/////////////////////////////////////////////////////////
+// test polynomial fit order 3
+
+static void testPolynomial(int order, int nObs,
+                           double a0, double a1, double a2, double a3,
+                           double noiseMean, double noiseSdev)
+
+{
+
+  _printRunTime("start polynomial order");
+
+  // create polynomial data
+
+  double *aaa = new double[order + 1];
+  for (int ii = 0; ii < order + 1; ii += 4) {
+    int jj = ii % 4;
+    double aaa[4];
+  aaa[0] = a0;
+  aaa[1] = a1;
+  aaa[2] = a2;
+  aaa[3] = a3;
+
+  double xx[100];
+  double yy[100];
+  
+  for (int ii = 0; ii < 100; ii++) {
+    double noise = STATS_normal_gen(noiseMean, noiseSdev);
+    double val = ii;
+    xx[ii] = val;
+    yy[ii] = aaa[0] + aaa[1] * val + aaa[2] * val * val +
+      aaa[3] * val * val * val + noise;
+  }
+
+  cerr << "====================================" << endl;
+  cerr << "Polynomial details" << endl;
+  cerr << "Input aaa[0]: " << aaa[0] << endl;
+  cerr << "Input aaa[1]: " << aaa[1] << endl;
+  cerr << "Input aaa[2]: " << aaa[2] << endl;
+  cerr << "Input aaa[3]: " << aaa[3] << endl;
+  cerr << "Noise mean: " << noiseMean << endl;
+  cerr << "Noise sdev: " << noiseSdev << endl;
+  cerr << "====================================" << endl;
+
+  // try uPolyFit
+  
+  double stdErr, rSquared;
+  uPolyFit(100, xx, yy, aaa, 4, &stdErr, &rSquared);
+  cerr << "---------------------------------" << endl;
+  cerr << "====>> output from uPolyFit() <<====" << endl;
+  cerr << "Output aaa[0]: " << aaa[0] << endl;
+  cerr << "Output aaa[1]: " << aaa[1] << endl;
+  cerr << "Output aaa[2]: " << aaa[2] << endl;
+  cerr << "Output aaa[3]: " << aaa[3] << endl;
+
+  cerr << "---------------------------------" << endl;
+
+  _printRunTime("end of uPolyFit");
+
+
+  // try PolyFit
+
+  PolyFit poly;
+  for (int ii = 0; ii < 100; ii++) {
+    poly.addValue(xx[ii], yy[ii]);
+  }
+  poly.setOrder(3);
+  poly.performFit();
+  vector<double> coeffs = poly.getCoeffs();
+
+  cerr << "---------------------------------" << endl;
+  cerr << "====>> output from PolyFit() <<====" << endl;
+  cerr << "Output coeffs[0]: " << coeffs[0] << endl;
+  cerr << "Output coeffs[1]: " << coeffs[1] << endl;
+  cerr << "Output coeffs[2]: " << coeffs[2] << endl;
+  cerr << "Output coeffs[3]: " << coeffs[3] << endl;
+
+  _printRunTime("end of uPolyFit");
+
+  // try Forsythe fit
+  
+  ForsytheFit forsythe;
+  for (int ii = 0; ii < 100; ii++) {
+    forsythe.addValue(xx[ii], yy[ii]);
+  }
+  forsythe.setOrder(3);
+  forsythe.performFit();
+  vector<double> fcoeffs = forsythe.getCoeffs();
+
+  cerr << "---------------------------------" << endl;
+  cerr << "====>> output from ForsytheFit() <<====" << endl;
+  cerr << "Output fcoeffs[0]: " << fcoeffs[0] << endl;
+  cerr << "Output fcoeffs[1]: " << fcoeffs[1] << endl;
+  cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
+  cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
+  _printRunTime("end of ForsytheFit");
+
+  cerr << "====================================" << endl;
+  cerr << endl;
+
+  // try ForsytheFit FORTRAN
+
+  forsythe.performFitFortran();
+  fcoeffs = forsythe.getCoeffs();
+  
+  cerr << "====>> output from ForsytheFitFortran() <<====" << endl;
+  cerr << "Output fcoeffs[0]: " << fcoeffs[0] << endl;
+  cerr << "Output fcoeffs[1]: " << fcoeffs[1] << endl;
+  cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
+  cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
+  _printRunTime("end of ForsytheFitFortran");
+
   cerr << endl;
 
 }
@@ -314,5 +444,25 @@ static void cubic(double x, double *val, double *deriv)
   *val = (pow(x, 3.0) + 3 * pow(x, 2.0) - 6.0 * x - 8.0) / 4.0;
   *deriv = (3.0 * x * x + 6.0 * x - 6.0) / 4.0;
 
+}
+
+// Print the elapsed run time since the previous call, in seconds.
+
+static struct timeval _timeA;
+static bool _firstTime = true;
+
+static void _printRunTime(const string& str)
+{
+  if (_firstTime) {
+    gettimeofday(&_timeA, NULL);
+    _firstTime = false;
+  }
+  struct timeval tvb;
+  gettimeofday(&tvb, NULL);
+  double deltaSec = tvb.tv_sec - _timeA.tv_sec
+    + 1.e-6 * (tvb.tv_usec - _timeA.tv_usec);
+  cerr << "TIMING, task: " << str << ", secs used: " << deltaSec << endl;
+  _timeA.tv_sec = tvb.tv_sec;
+  _timeA.tv_usec = tvb.tv_usec;
 }
 

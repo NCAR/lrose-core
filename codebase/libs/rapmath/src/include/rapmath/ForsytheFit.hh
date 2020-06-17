@@ -85,7 +85,7 @@ public:
   // values must have been set
   
   virtual int performFit();
-  virtual int performFit2();
+  virtual int performFitFortran();
   
   // get order
   
@@ -135,13 +135,7 @@ private:
   void _allocDataArrays();
   void _allocPolyArrays();
 
-  int _doFit(int order, int nObs,
-             vector<double> &xxObs, vector<double> &yyObs,
-             vector<double> &coeffsPoly, double &sdevFit);
-
-  void _vectorPrint(string name,
-                    vector<double> aa,
-                    FILE *out) const;
+  int _doFit();
 
 };
 

@@ -70,8 +70,7 @@ utest_p:
 
 utest: uMathTest.o
 	$(CPPC) $(DBUG_OPT_FLAGS) -I../include/rapmath uMathTest.o \
-	-L/usr/local/Cellar/gcc/9.3.0_1/lib/gcc/9 \
-	$(LDFLAGS) -o uMathTest -lrapmath -ltoolsa -lgfortran
+	$(LDFLAGS) -o uMathTest -lrapmath -ltoolsa
 
 clean_test:
 	$(RM) uMathTest uMathTest.o

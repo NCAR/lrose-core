@@ -205,31 +205,16 @@ int ForsytheFit::performFit()
     return -1;
   }
 
-  int fitOrder;
-  double sdev;
-
-  // _doFit(_order, 0, _nObs, fitOrder, _xObs, _yObs, _coeffs, sdev);
-
-  // for (size_t ii = 0; ii < _nObs; ii++) {
-  //   cerr << "XXXXXXXXX ii, x, y: " << ii << ", " << _xObs[ii] << ", " << _yObs[ii] << endl;
-  // }
-
-  int order = _order;
-  double ee = 0.0001;
-  int nn = _nObs;
-  ls_poly2_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
-
-  cerr << "xxxxx fitOrder: " << fitOrder << endl;
-  cerr << "xxxxx sdev: " << sdev << endl;
+  _doFit();
 
   return 0;
 
 }
 
 ////////////////////////////////////////////////////
-// perform a fit
+// perform a fit using Fortran routine
 
-int ForsytheFit::performFit2()
+int ForsytheFit::performFitFortran()
   
 {
 
@@ -239,28 +224,21 @@ int ForsytheFit::performFit2()
 
   // check conditions
 
-  if (_nObs < _order + 2) {
-    cerr << "ERROR - ForsytheFit::performFit()" << endl;
+  if (_nObs < _order) {
+    cerr << "ERROR - ForsytheFit::performFitFortran()" << endl;
     cerr << "  Not enough observations to  fit order: " << _order << endl;
     cerr << "  Min n obs: " << _order << endl;
     return -1;
   }
 
+  int fitOrder;
   double sdev;
+  int order = _order;
+  double ee = 0.0;
+  int nn = _nObs;
 
-  _doFit(_order, _nObs, _xObs, _yObs, _coeffs, sdev);
-
-  // for (size_t ii = 0; ii < _nObs; ii++) {
-  //   cerr << "XXXXXXXXX ii, x, y: " << ii << ", " << _xObs[ii] << ", " << _yObs[ii] << endl;
-  // }
-
-  // int order = _order;
-  // double ee = 0.0001;
-  // int nn = _nObs;
-  // ls_poly2_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
-
-  cerr << "yyyyyy sdev: " << sdev << endl;
-
+  ls_poly_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
+  
   return 0;
 
 }
@@ -321,47 +299,39 @@ void ForsytheFit::_allocPolyArrays()
 // The order of the fit then obtained is ll.                      
 ///////////////////////////////////////////////////////////////////////
 
-int ForsytheFit::_doFit(int mm, int nn,
-                        vector<double> &xx, vector<double> &yy,
-                        vector<double> &coeffs, double &sdev)
+int ForsytheFit::_doFit()
 {
 
-  cerr << "1111111111111111111111111111111111111111111111111111111" << endl;
-  cerr << "1111111111111111111111111111111111111111111111111111111" << endl;
-
-  // Function Body
-
   // NOTE on array indices
-  // the obs arrays (xx, yy) and associated arrays (vv, cc, ee) are 0-based.
+  // the obs arrays (_xObs, yy) and associated arrays (vv, cc, ee) are 0-based.
   // the order arrays (aa, bb, ff, c2) are 1-based
 
-  int mm1 = mm + 1;
-  int ll;
-
+  size_t mm1 = _order + 1;
+  
   // Initialize the order arrays - 1-based
 
-  for (int ii = 1; ii <= mm1; ++ii) {
+  for (size_t ii = 1; ii <= mm1; ++ii) {
     _aa[ii] = 0.0;
     _bb[ii] = 0.0;
     _cc[ii] = 0.0;
     _ff[ii] = 0.0;
   }
 
-  double d1 = sqrt((double) nn);
+  double d1 = sqrt((double) _nObs);
   
-  for (int ii = 0; ii < nn; ++ii) {
+  for (size_t ii = 0; ii < _nObs; ++ii) {
     _ee[ii] = 1.0 / d1;
   }
   
   double f1 = d1;
   double a1 = 0.0;
-  for (int ii = 0; ii < nn; ++ii) {
-    a1 += (xx[ii] * _ee[ii] * _ee[ii]);
+  for (size_t ii = 0; ii < _nObs; ++ii) {
+    a1 += (_xObs[ii] * _ee[ii] * _ee[ii]);
   }
 
   double c1 = 0.0;
-  for (int ii = 0; ii < nn; ++ii) {
-    c1 += (yy[ii] * _ee[ii]);
+  for (size_t ii = 0; ii < _nObs; ++ii) {
+    c1 += (_yObs[ii] * _ee[ii]);
   }
 
   _bb[1] = 1.0 / f1;
@@ -369,71 +339,58 @@ int ForsytheFit::_doFit(int mm, int nn,
 
   // Initialize the sample arrays - 0-based
 
-  for (int ii = 0; ii < nn; ++ii) {
+  for (size_t ii = 0; ii < _nObs; ++ii) {
     _vv[ii] = 0.0;
     _dd[ii] = 0.0;
   }
   
-  for (int ii = 0; ii < nn; ++ii) {
+  for (size_t ii = 0; ii < _nObs; ++ii) {
     _vv[ii] += (_ee[ii] * c1);
   }
 
-  cerr << "xxxxxxxx d1, f1, a1: " << d1 << ", " << f1 << ", " << a1 << endl;
-  cerr << "xxxxxxxx c1, _bb[0]: " << c1 << ", " << _bb[0] << endl;
-
-
   // Main loop, increasing the order as we go
 
-  ll = 0;
-  // double sdev1 = 1.0e7;
-  int iorder = 1;
+  size_t ll = 0;
+  size_t iorder = 1;
   while (iorder < mm1) {
     
-    cerr << "iiiiiiiiiiiiiii  iorder: " << iorder << endl;
-
     // Save latest results
 
-    for (int ii = 1; ii <= ll; ++ii) {
+    for (size_t ii = 1; ii <= ll; ++ii) {
       _c2[ii] = _cc[ii];
     }
 
-    // int ll2 = ll;
-    // double sdev2 = sdev1;
     double f2 = f1;
     double a2 = a1;
 
     f1 = 0.0;
-    for (int ii = 0; ii < nn; ++ii) {
+    for (size_t ii = 0; ii < _nObs; ++ii) {
       double b1 = _ee[ii];
-      _ee[ii] = (xx[ii] - a2) * _ee[ii] - f2 * _dd[ii];
+      _ee[ii] = (_xObs[ii] - a2) * _ee[ii] - f2 * _dd[ii];
       _dd[ii] = b1;
       f1 += _ee[ii] * _ee[ii];
     }
 
     f1 = sqrt(f1);
 
-    cerr << "ffffffffffff a1, a2, f1, f2: " << a1 << ", " << a2 << ", " << f1 << ", " << f2 << endl;
-
-    for (int ii = 0; ii < nn; ++ii) {
+    for (size_t ii = 0; ii < _nObs; ++ii) {
       _ee[ii] /= f1;
     }
     a1 = 0.0;
-    for (int ii = 0; ii < nn; ++ii) {
-      a1 += (xx[ii] * _ee[ii] * _ee[ii]);
+    for (size_t ii = 0; ii < _nObs; ++ii) {
+      a1 += (_xObs[ii] * _ee[ii] * _ee[ii]);
     }
 
     c1 = 0.0;
-    for (int ii = 0; ii < nn; ++ii) {
-      c1 += _ee[ii] * yy[ii];
+    for (size_t ii = 0; ii < _nObs; ++ii) {
+      c1 += _ee[ii] * _yObs[ii];
     }
-    cerr << "ccccccccccccccccccc  c1: " << c1 << endl;
 
     iorder++;
 
-    int jj = 0;
+    size_t jj = 0;
     while (jj < iorder) {
       ll = iorder - jj;
-      cerr << "jjjjjjjj iorder, jj, ll: " << iorder << ", " << jj << ", " << ll << endl;
       double b2 = _bb[ll];
       d1 = 0.0;
       if (ll > 1) {
@@ -441,70 +398,31 @@ int ForsytheFit::_doFit(int mm, int nn,
       }
       d1 = d1 - a2 * _bb[ll] - f2 * _aa[ll];
       _bb[ll] = d1 / f1;
-      cerr << "yyyyyyy ll, d1, f1, b2, _bb[ll]: " << ll << ", " << d1 << ", " << f1 << ", " << b2 << ", " << _bb[ll] << endl;
       _aa[ll] = b2;
       ++jj;
     }
 
-    for (int ii = 0; ii < nn; ++ii) {
+    for (size_t ii = 0; ii < _nObs; ++ii) {
       _vv[ii] += _ee[ii] * c1;
     }
-    for (int ii = 1; ii <= mm1; ++ii) {
+    for (size_t ii = 1; ii <= mm1; ++ii) {
       _ff[ii] += _bb[ii] * c1;
-      cerr << "2222222222 ii, c1, ff[ii]: " << ii << ", " << c1<< ", " << _ff[ii] << endl;
-      cerr << "3333333333 bb[ii]: " << _bb[ii] << endl;
       _cc[ii] = _ff[ii];
     }
-
-    // compute sdev
-    
-    double vv = 0.0;
-    for (int ii = 0; ii < nn; ++ii) {
-      vv += (_vv[ii] - yy[ii]) * (_vv[ii] - yy[ii]);
-    }
-    // Note the division is by the number of degrees of freedom
-    sdev = sqrt(vv / (double) (nn - iorder - 1));
 
     ll = iorder;
     
   } // while (iorder < mm1)
 
-  // Load coeffs arrays - this is 0 based instead of 1 based
+  // Load _coeffs arrays - this is 0 based instead of 1 based
   // so shift down by 1
 
-  for (int ii = 1; ii <= ll; ++ii) {
-    cerr << "1111111111 cc[" << ii << "]: " << _cc[ii] << endl;
+  for (size_t ii = 1; ii <= _order; ++ii) {
+    _coeffs[ii - 1] = _cc[ii];
   }
-  for (int ii = 1; ii <= ll; ++ii) {
-    coeffs[ii - 1] = _cc[ii];
-  }
-  coeffs[ll] = 0.0;
-
-  // ll is the order of the polynomial fitted
-  --(ll);
-
-  cerr << "111111111111 ll: " << ll << endl;
+  _coeffs[_order] = 0.0;
 
   return 0;
 
 }
 
-//////////////////////////////////////////////  
-// print vector
-//
-
-void ForsytheFit::_vectorPrint(string name,
-                               vector<double> aa,
-                               FILE *out) const
-  
-{
-  
-  fprintf(out, "=========== %10s ===========\n", name.c_str());
-  for (size_t ii = 0; ii < aa.size(); ii++) {
-    fprintf(out, " %8.2g", aa[ii]);
-  }
-  fprintf(out, "\n");
-  fprintf(out, "==================================\n");
-
-}
-  
