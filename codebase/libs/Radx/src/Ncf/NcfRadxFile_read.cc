@@ -791,6 +791,7 @@ int NcfRadxFile::_readGlobalAttributes()
         iret = -1;
       }
     }
+    delete att;
   }
 
   // check for instrument name
@@ -805,6 +806,7 @@ int NcfRadxFile::_readGlobalAttributes()
     if (_instrumentName.size() < 1) {
       _instrumentName = "unknown";
     }
+    delete att;
   }
 
   // Loop through the global attributes, use the ones which make sense
