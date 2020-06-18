@@ -33,6 +33,10 @@ static void _printRunTime(const string& str);
 static void testExponentialFit(double a0, double a1, double a2,
                                double noiseMean, double noiseSdev);
 
+static void testPolynomial(int order, int nObs,
+                           vector<double> coeff,
+                           double noiseMean, double noiseSdev);
+  
 static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
                                  double noiseMean, double noiseSdev);
 
@@ -70,7 +74,15 @@ int main(int argc, char **argv)
 
   // testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
 
-  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.0);
+  vector<double> coeffs;
+  coeffs.push_back(10.0);
+  coeffs.push_back(2.0);
+  coeffs.push_back(-1.5);
+  coeffs.push_back(0.2);
+  coeffs.push_back(0.55);
+  coeffs.push_back(1.05);
+  coeffs.push_back(0.75);
+  testPolynomial(10, 500, coeffs, 0.0, 0.1);
 
   return 0;
 
@@ -238,99 +250,103 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
 
 
 /////////////////////////////////////////////////////////
-// test polynomial fit order 3
+// test polynomial fit of specified order
+// actual coeffs are derived from the vector passed in
 
 static void testPolynomial(int order, int nObs,
-                           double a0, double a1, double a2, double a3,
+                           vector<double> coeff,
                            double noiseMean, double noiseSdev)
-
+  
 {
-
+  
   _printRunTime("start polynomial order");
+
+  // if too few coeff are passed in, derived the remainder
+  // from the original list
+
+  int nCoeffIn = coeff.size();
+  int nExtra = order + 1 - nCoeffIn;
+  if (nCoeffIn > 0) {
+    for (int ii = 0; ii < nExtra; ii++) {
+      int jj = ii % nCoeffIn;
+      double cc = coeff[jj] / (ii + 3.0);
+      coeff.push_back(cc);
+    } // ii
+  }
 
   // create polynomial data
 
-  double *aaa = new double[order + 1];
-  for (int ii = 0; ii < order + 1; ii += 4) {
-    int jj = ii % 4;
-    double aaa[4];
-  aaa[0] = a0;
-  aaa[1] = a1;
-  aaa[2] = a2;
-  aaa[3] = a3;
-
-  double xx[100];
-  double yy[100];
-  
-  for (int ii = 0; ii < 100; ii++) {
+  double deltax = 5.0 / nObs;
+  double startx = 0.0 - nObs * deltax;
+  vector<double> xx, yy;
+  for (int ii = 0; ii < nObs; ii++) {
     double noise = STATS_normal_gen(noiseMean, noiseSdev);
-    double val = ii;
-    xx[ii] = val;
-    yy[ii] = aaa[0] + aaa[1] * val + aaa[2] * val * val +
-      aaa[3] * val * val * val + noise;
+    double xval = startx + ii * deltax;
+    xx.push_back(xval);
+    double yval = coeff[0];
+    for (int mm = 1; mm <= order; mm++) {
+      yval += coeff[mm] * pow(xval, (double) mm);
+    }
+    yval += noise;
+    yy.push_back(yval);
   }
 
   cerr << "====================================" << endl;
   cerr << "Polynomial details" << endl;
-  cerr << "Input aaa[0]: " << aaa[0] << endl;
-  cerr << "Input aaa[1]: " << aaa[1] << endl;
-  cerr << "Input aaa[2]: " << aaa[2] << endl;
-  cerr << "Input aaa[3]: " << aaa[3] << endl;
-  cerr << "Noise mean: " << noiseMean << endl;
-  cerr << "Noise sdev: " << noiseSdev << endl;
+  for (int mm = 0; mm <= order; mm++) {
+    cerr << "  coeff[" << mm << "]: " << coeff[mm] << endl;
+  }
+  cerr << "  Noise mean: " << noiseMean << endl;
+  cerr << "  Noise sdev: " << noiseSdev << endl;
   cerr << "====================================" << endl;
 
   // try uPolyFit
   
   double stdErr, rSquared;
-  uPolyFit(100, xx, yy, aaa, 4, &stdErr, &rSquared);
+  vector<double> aaa;
+  aaa.resize(order + 1);
+  for (int jj = 0; jj < 100; jj++) {
+    uPolyFit(nObs, xx.data(), yy.data(), aaa.data(), order, &stdErr, &rSquared);
+  }
   cerr << "---------------------------------" << endl;
   cerr << "====>> output from uPolyFit() <<====" << endl;
-  cerr << "Output aaa[0]: " << aaa[0] << endl;
-  cerr << "Output aaa[1]: " << aaa[1] << endl;
-  cerr << "Output aaa[2]: " << aaa[2] << endl;
-  cerr << "Output aaa[3]: " << aaa[3] << endl;
-
-  cerr << "---------------------------------" << endl;
-
+  for (int mm = 0; mm <= order; mm++) {
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << endl;
+  }
   _printRunTime("end of uPolyFit");
-
+  cerr << "---------------------------------" << endl;
 
   // try PolyFit
 
   PolyFit poly;
-  for (int ii = 0; ii < 100; ii++) {
-    poly.addValue(xx[ii], yy[ii]);
+  poly.setValues(xx, yy);
+  poly.setOrder(order);
+  for (int jj = 0; jj < 100; jj++) {
+    poly.performFit();
   }
-  poly.setOrder(3);
-  poly.performFit();
-  vector<double> coeffs = poly.getCoeffs();
+  aaa = poly.getCoeffs();
 
   cerr << "---------------------------------" << endl;
   cerr << "====>> output from PolyFit() <<====" << endl;
-  cerr << "Output coeffs[0]: " << coeffs[0] << endl;
-  cerr << "Output coeffs[1]: " << coeffs[1] << endl;
-  cerr << "Output coeffs[2]: " << coeffs[2] << endl;
-  cerr << "Output coeffs[3]: " << coeffs[3] << endl;
-
+  for (int mm = 0; mm <= order; mm++) {
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << endl;
+  }
   _printRunTime("end of uPolyFit");
 
   // try Forsythe fit
   
   ForsytheFit forsythe;
-  for (int ii = 0; ii < 100; ii++) {
-    forsythe.addValue(xx[ii], yy[ii]);
+  forsythe.setValues(xx, yy);
+  forsythe.setOrder(order);
+  for (int jj = 0; jj < 100; jj++) {
+    forsythe.performFit();
   }
-  forsythe.setOrder(3);
-  forsythe.performFit();
-  vector<double> fcoeffs = forsythe.getCoeffs();
-
+  aaa = forsythe.getCoeffs();
   cerr << "---------------------------------" << endl;
   cerr << "====>> output from ForsytheFit() <<====" << endl;
-  cerr << "Output fcoeffs[0]: " << fcoeffs[0] << endl;
-  cerr << "Output fcoeffs[1]: " << fcoeffs[1] << endl;
-  cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
-  cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
+  for (int mm = 0; mm <= order; mm++) {
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << endl;
+  }
   _printRunTime("end of ForsytheFit");
 
   cerr << "====================================" << endl;
@@ -338,14 +354,14 @@ static void testPolynomial(int order, int nObs,
 
   // try ForsytheFit FORTRAN
 
-  forsythe.performFitFortran();
-  fcoeffs = forsythe.getCoeffs();
-  
+  for (int jj = 0; jj < 100; jj++) {
+    forsythe.performFitFortran();
+  }
+  aaa = forsythe.getCoeffs();
   cerr << "====>> output from ForsytheFitFortran() <<====" << endl;
-  cerr << "Output fcoeffs[0]: " << fcoeffs[0] << endl;
-  cerr << "Output fcoeffs[1]: " << fcoeffs[1] << endl;
-  cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
-  cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
+  for (int mm = 0; mm <= order; mm++) {
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << endl;
+  }
   _printRunTime("end of ForsytheFitFortran");
 
   cerr << endl;

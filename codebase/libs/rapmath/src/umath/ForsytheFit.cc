@@ -417,10 +417,10 @@ int ForsytheFit::_doFit()
   // Load _coeffs arrays - this is 0 based instead of 1 based
   // so shift down by 1
 
-  for (size_t ii = 1; ii <= _order; ++ii) {
+  for (size_t ii = 1; ii <= mm1; ++ii) {
     _coeffs[ii - 1] = _cc[ii];
   }
-  _coeffs[_order] = 0.0;
+  _coeffs[mm1] = 0.0;
 
   return 0;
 

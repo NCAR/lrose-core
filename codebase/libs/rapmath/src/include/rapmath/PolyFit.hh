@@ -81,7 +81,7 @@ public:
   
   // get coefficients after fit
   
-  const vector<double> &getCoeffs() const { return _coeffs; }
+  const vector<double> getCoeffs() const { return _coeffs; }
   
   // get single y value, given the x value
 
