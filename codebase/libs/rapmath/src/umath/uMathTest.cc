@@ -82,7 +82,7 @@ int main(int argc, char **argv)
   coeffs.push_back(0.55);
   coeffs.push_back(1.05);
   coeffs.push_back(0.75);
-  testPolynomial(10, 500, coeffs, 0.0, 0.1);
+  testPolynomial(20, 500, coeffs, 0.0, 1.5);
 
   return 0;
 
@@ -259,9 +259,9 @@ static void testPolynomial(int order, int nObs,
   
 {
   
-  _printRunTime("start polynomial order");
+  _printRunTime("start testPolynomial");
 
-  // if too few coeff are passed in, derived the remainder
+  // if too few coeffs are passed in, derived the remainder
   // from the original list
 
   int nCoeffIn = coeff.size();
@@ -277,7 +277,7 @@ static void testPolynomial(int order, int nObs,
   // create polynomial data
 
   double deltax = 5.0 / nObs;
-  double startx = 0.0 - nObs * deltax;
+  double startx = 0.0 - (nObs / 2) * deltax;
   vector<double> xx, yy;
   for (int ii = 0; ii < nObs; ii++) {
     double noise = STATS_normal_gen(noiseMean, noiseSdev);
@@ -291,6 +291,7 @@ static void testPolynomial(int order, int nObs,
     yy.push_back(yval);
   }
 
+  int nPasses = 1000;
   cerr << "====================================" << endl;
   cerr << "Polynomial details" << endl;
   for (int mm = 0; mm <= order; mm++) {
@@ -298,21 +299,24 @@ static void testPolynomial(int order, int nObs,
   }
   cerr << "  Noise mean: " << noiseMean << endl;
   cerr << "  Noise sdev: " << noiseSdev << endl;
+  cerr << "  nPasses: " << nPasses << endl;
   cerr << "====================================" << endl;
 
   // try uPolyFit
-  
+
   double stdErr, rSquared;
   vector<double> aaa;
   aaa.resize(order + 1);
-  for (int jj = 0; jj < 100; jj++) {
+  for (int jj = 0; jj < nPasses; jj++) {
     uPolyFit(nObs, xx.data(), yy.data(), aaa.data(), order, &stdErr, &rSquared);
   }
   cerr << "---------------------------------" << endl;
   cerr << "====>> output from uPolyFit() <<====" << endl;
   for (int mm = 0; mm <= order; mm++) {
-    cerr << "  aaa[" << mm << "]: " << aaa[mm] << endl;
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << " (" << coeff[mm] << ")" << endl;
   }
+  cerr << "stdErr: " << stdErr << endl;
+  cerr << "rSquared: " << rSquared << endl;
   _printRunTime("end of uPolyFit");
   cerr << "---------------------------------" << endl;
 
@@ -321,7 +325,7 @@ static void testPolynomial(int order, int nObs,
   PolyFit poly;
   poly.setValues(xx, yy);
   poly.setOrder(order);
-  for (int jj = 0; jj < 100; jj++) {
+  for (int jj = 0; jj < nPasses; jj++) {
     poly.performFit();
   }
   aaa = poly.getCoeffs();
@@ -329,24 +333,27 @@ static void testPolynomial(int order, int nObs,
   cerr << "---------------------------------" << endl;
   cerr << "====>> output from PolyFit() <<====" << endl;
   for (int mm = 0; mm <= order; mm++) {
-    cerr << "  aaa[" << mm << "]: " << aaa[mm] << endl;
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << " (" << coeff[mm] << ")" << endl;
   }
-  _printRunTime("end of uPolyFit");
+  _printRunTime("end of PolyFit");
 
   // try Forsythe fit
   
   ForsytheFit forsythe;
   forsythe.setValues(xx, yy);
   forsythe.setOrder(order);
-  for (int jj = 0; jj < 100; jj++) {
+  for (int jj = 0; jj < nPasses; jj++) {
     forsythe.performFit();
   }
   aaa = forsythe.getCoeffs();
+  stdErr = forsythe.computeStdErrEst(rSquared);
   cerr << "---------------------------------" << endl;
   cerr << "====>> output from ForsytheFit() <<====" << endl;
   for (int mm = 0; mm <= order; mm++) {
-    cerr << "  aaa[" << mm << "]: " << aaa[mm] << endl;
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << " (" << coeff[mm] << ")" << endl;
   }
+  cerr << "stdErr: " << stdErr << endl;
+  cerr << "rSquared: " << rSquared << endl;
   _printRunTime("end of ForsytheFit");
 
   cerr << "====================================" << endl;
@@ -354,13 +361,13 @@ static void testPolynomial(int order, int nObs,
 
   // try ForsytheFit FORTRAN
 
-  for (int jj = 0; jj < 100; jj++) {
+  for (int jj = 0; jj < nPasses; jj++) {
     forsythe.performFitFortran();
   }
   aaa = forsythe.getCoeffs();
   cerr << "====>> output from ForsytheFitFortran() <<====" << endl;
   for (int mm = 0; mm <= order; mm++) {
-    cerr << "  aaa[" << mm << "]: " << aaa[mm] << endl;
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << " (" << coeff[mm] << ")" << endl;
   }
   _printRunTime("end of ForsytheFitFortran");
 

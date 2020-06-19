@@ -21,15 +21,19 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/********************************************************
- * Approximation of a discrete real function F(x) by     *
- * least squares                                         *
- * ----------------------------------------------------- *
- * Ref.: "Méthodes de calcul numérique, Tome 2 by Claude *
- *        Nowakowski, PSI Edition, 1984" [BIBLI 04].     *
- * ----------------------------------------------------- *
- * C++ version by J-P Moreau, Paris.                     *
- * (www.jpmoreau.fr)                                     *
+/********************************************************************
+ * Approximation of a discrete real function F(x) by least squares
+ * ---------------------------------------------------------------
+ * Refs:
+ *
+ * (a) Generation and use of orthogonal polynomials for data-fitting
+ *     with a digital computer.
+ *     George E. Forsythe.
+ *     J.Soc.Indust.Appl.Math, Vol 5, No 2, June 1957.
+ *
+ * (b) Basic Scientific Subroutines, Vol II.
+ *     Fred Ruckdeschel. McGraw Hill, 1981.
+ *
  ********************************************************/
 ///////////////////////////////////////////////////////////////
 // ForsytheFit.cc
@@ -43,12 +47,10 @@
 ///////////////////////////////////////////////////////////////
 
 #include <rapmath/ForsytheFit.hh>
+#include <rapmath/stats.h>
 #include <toolsa/mem.h>
-#include <rapmath/usvd.h>
 #include <iostream>
 using namespace std;
-
-// #define DEBUG_PRINT
 
 ////////////////////////////////////////////////////
 // constructor
@@ -67,7 +69,7 @@ ForsytheFit::ForsytheFit()
 ForsytheFit::~ForsytheFit()
   
 {
-  // clear();
+  clear();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -170,6 +172,42 @@ vector<double> ForsytheFit::getYEst() const
   return yyEst;
 }
 
+////////////////////////////////////////////////////
+// compute standard error of estimate for the fit
+
+double ForsytheFit::computeStdErrEst(double &rSquared)
+{
+
+  // compute mean
+
+  double sumy = 0.0;
+  for (size_t ii = 0; ii < _nObs; ii++) {
+    sumy += _yObs[ii];
+  }
+  double meany = sumy / _nObs;
+
+  // compute sum of residuals
+  
+  double sum_dy_squared = 0.0;
+  double sum_of_residuals = 0.0;
+  for (size_t ii = 0; ii < _nObs; ii++) {
+    double xx = _xObs[ii];
+    double yy = _yObs[ii];
+    double dy = yy - meany;
+    double yyEst = getYEst(xx);
+    double error = yyEst - yy;
+    sum_of_residuals += error * error;
+    sum_dy_squared += dy * dy;
+  }
+
+  // compute standard error of estimate and r-squared
+    
+  double stdErrEst = sqrt(sum_of_residuals / (_nObs - 3.0));
+  rSquared = (sum_dy_squared - sum_of_residuals) / sum_dy_squared;
+  return stdErrEst;
+
+}
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -204,6 +242,8 @@ int ForsytheFit::performFit()
     cerr << "  Min n obs: " << _order << endl;
     return -1;
   }
+
+  // perform the fit
 
   _doFit();
 
@@ -281,31 +321,17 @@ void ForsytheFit::_allocPolyArrays()
 }
 
 ///////////////////////////////////////////////////////////////////////
-//         LEAST SQUARES POLYNOMIAL FITTING PROCEDURE            
-// ------------------------------------------------------------- 
-// This program least squares fits a polynomial to input data.   
-// forsythe orthogonal polynomials are used in the fitting.      
-// The number of data points is nn.                               
-// The data is input to the subroutine in xx[i], yy[i] pairs.      
-// The coefficients are returned in coeffs[i],                        
-// the smoothed data is returned in vv[i],                        
-// the order of the fit is specified by m.                       
-// The standard deviation of the fit is returned in sdev.
-// There are two options available by use of the parameter ee:    
-//  1. if ee = 0, the fit is to order mm,                          
-//  2. if ee > 0, the order of fit increases towards mm, but will  
-//     stop if the relative standard deviation does not decrease 
-//     by more than e between successive fits.                   
-// The order of the fit then obtained is ll.                      
+// Fit a polynomial to the observations, using
+// forsythe orthogonal polynomials.
 ///////////////////////////////////////////////////////////////////////
 
 int ForsytheFit::_doFit()
 {
-
+  
   // NOTE on array indices
   // the obs arrays (_xObs, yy) and associated arrays (vv, cc, ee) are 0-based.
   // the order arrays (aa, bb, ff, c2) are 1-based
-
+  
   size_t mm1 = _order + 1;
   
   // Initialize the order arrays - 1-based

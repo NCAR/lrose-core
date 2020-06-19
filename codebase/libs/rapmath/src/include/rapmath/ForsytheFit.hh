@@ -111,6 +111,10 @@ public:
 
   vector<double> getYEst() const;
 
+  // compute standard error of estimate for the fit
+  
+  double computeStdErrEst(double &rSquared);
+
 protected:
 private:
 
