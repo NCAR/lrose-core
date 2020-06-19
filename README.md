@@ -78,6 +78,16 @@ Use the following if you need to set up an environment suitable for code develop
 | [codebase/apps](./codebase/apps) | application source code |
 | [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
 
+### DOI
+
+The DOI for lrose-core is:
+
+* [https://doi.org/10.5065/60hz-ry38[(https://doi.org/10.5065/60hz-ry38)]
+
+The DOI entry information is stored at:
+
+* [https://search.datacite.org/works/10.5065/60hz-ry38](https://search.datacite.org/works/10.5065/60hz-ry38)
+
 ### DOCUMENTATION
 
 | Name           | Description   |
