@@ -85,7 +85,10 @@ public:
   // values must have been set
   
   virtual int performFit();
+
+#ifdef WITH_FORTRAN
   virtual int performFitFortran();
+#endif
   
   // get order
   

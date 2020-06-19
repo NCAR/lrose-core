@@ -56,23 +56,23 @@ int main(int argc, char **argv)
   //////////////////////
   // Checking uCurveFit
 
-  // testExponentialFit(0.1, 5.0, -5.0, 0.0, 0.1);
+  testExponentialFit(0.1, 5.0, -5.0, 0.0, 0.1);
 
-  // testExponentialFit(1.0, 0.3, -0.3, 0.0, 0.1);
+  testExponentialFit(1.0, 0.3, -0.3, 0.0, 0.1);
 
-  // testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
+  testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
 
-  // testLinearFit(0.33333, 150, 0.0, 5.0);
+  testLinearFit(0.33333, 150, 0.0, 5.0);
 
-  // testLinearFit(4.25, 9.99, 0.0, 2.0);
+  testLinearFit(4.25, 9.99, 0.0, 2.0);
 
-  // testLinearFit(-2.50, -8.88, 0.0, 0.1);
+  testLinearFit(-2.50, -8.88, 0.0, 0.1);
 
-  // testNewtRaph();
+  testNewtRaph();
 
-  // testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
+  testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
 
-  // testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
+  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
 
   vector<double> coeffs;
   coeffs.push_back(10.0);
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
   coeffs.push_back(0.55);
   coeffs.push_back(1.05);
   coeffs.push_back(0.75);
-  testPolynomial(20, 500, coeffs, 0.0, 1.5);
+  testPolynomial(10, 500, coeffs, 0.0, 1.5);
 
   return 0;
 
@@ -186,7 +186,8 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   cerr << "Output aaa[1]: " << aaa[1] << endl;
   cerr << "Output aaa[2]: " << aaa[2] << endl;
   cerr << "Output aaa[3]: " << aaa[3] << endl;
-
+  cerr << "stdErr: " << stdErr << endl;
+  cerr << "rSquared: " << rSquared << endl;
   cerr << "---------------------------------" << endl;
 
   _printRunTime("end of uPolyFit");
@@ -208,8 +209,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   cerr << "Output coeffs[1]: " << coeffs[1] << endl;
   cerr << "Output coeffs[2]: " << coeffs[2] << endl;
   cerr << "Output coeffs[3]: " << coeffs[3] << endl;
-
-  _printRunTime("end of uPolyFit");
+  _printRunTime("end of PolyFit");
 
   // try Forsythe fit
   
@@ -219,6 +219,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   }
   forsythe.setOrder(3);
   forsythe.performFit();
+  stdErr = forsythe.computeStdErrEst(rSquared);
   vector<double> fcoeffs = forsythe.getCoeffs();
 
   cerr << "---------------------------------" << endl;
@@ -227,10 +228,14 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   cerr << "Output fcoeffs[1]: " << fcoeffs[1] << endl;
   cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
   cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
+  cerr << "stdErr: " << stdErr << endl;
+  cerr << "rSquared: " << rSquared << endl;
   _printRunTime("end of ForsytheFit");
 
   cerr << "====================================" << endl;
   cerr << endl;
+
+#ifdef WITH_FORTRAN
 
   // try ForsytheFit FORTRAN
 
@@ -243,6 +248,8 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   cerr << "Output fcoeffs[2]: " << fcoeffs[2] << endl;
   cerr << "Output fcoeffs[3]: " << fcoeffs[3] << endl;
   _printRunTime("end of ForsytheFitFortran");
+
+#endif
 
   cerr << endl;
 
@@ -359,6 +366,8 @@ static void testPolynomial(int order, int nObs,
   cerr << "====================================" << endl;
   cerr << endl;
 
+#ifdef WITH_FORTRAN
+
   // try ForsytheFit FORTRAN
 
   for (int jj = 0; jj < nPasses; jj++) {
@@ -372,6 +381,7 @@ static void testPolynomial(int order, int nObs,
   _printRunTime("end of ForsytheFitFortran");
 
   cerr << endl;
+#endif
 
 }
 

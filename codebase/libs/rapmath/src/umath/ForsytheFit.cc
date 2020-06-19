@@ -209,20 +209,6 @@ double ForsytheFit::computeStdErrEst(double &rSquared)
 }
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern int ls_poly_(int *order, double *ee, int *nn, int *fitOrder,
-                    double *xx, double *yy, double *coeffs, double *sdev);  
-
-extern int ls_poly2_(int *order, double *ee, int *nn, int *fitOrder,
-                     double *xx, double *yy, double *coeffs, double *sdev);  
-
-#ifdef __cplusplus
-}
-#endif
-
 ////////////////////////////////////////////////////
 // perform a fit
 
@@ -247,38 +233,6 @@ int ForsytheFit::performFit()
 
   _doFit();
 
-  return 0;
-
-}
-
-////////////////////////////////////////////////////
-// perform a fit using Fortran routine
-
-int ForsytheFit::performFitFortran()
-  
-{
-
-  // allocate arrays
-  
-  _allocDataArrays();
-
-  // check conditions
-
-  if (_nObs < _order) {
-    cerr << "ERROR - ForsytheFit::performFitFortran()" << endl;
-    cerr << "  Not enough observations to  fit order: " << _order << endl;
-    cerr << "  Min n obs: " << _order << endl;
-    return -1;
-  }
-
-  int fitOrder;
-  double sdev;
-  int order = _order;
-  double ee = 0.0;
-  int nn = _nObs;
-
-  ls_poly_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
-  
   return 0;
 
 }
@@ -452,3 +406,52 @@ int ForsytheFit::_doFit()
 
 }
 
+#ifdef WITH_FORTRAN
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int ls_poly_(int *order, double *ee, int *nn, int *fitOrder,
+                    double *xx, double *yy, double *coeffs, double *sdev);  
+
+extern int ls_poly2_(int *order, double *ee, int *nn, int *fitOrder,
+                     double *xx, double *yy, double *coeffs, double *sdev);  
+
+#ifdef __cplusplus
+}
+#endif
+
+////////////////////////////////////////////////////
+// perform a fit using Fortran routine
+
+int ForsytheFit::performFitFortran()
+  
+{
+
+  // allocate arrays
+  
+  _allocDataArrays();
+
+  // check conditions
+
+  if (_nObs < _order) {
+    cerr << "ERROR - ForsytheFit::performFitFortran()" << endl;
+    cerr << "  Not enough observations to  fit order: " << _order << endl;
+    cerr << "  Min n obs: " << _order << endl;
+    return -1;
+  }
+
+  int fitOrder;
+  double sdev;
+  int order = _order;
+  double ee = 0.0;
+  int nn = _nObs;
+
+  ls_poly_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
+  
+  return 0;
+
+}
+
+#endif

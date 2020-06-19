@@ -51,7 +51,7 @@ SRCS = \
 	usvd.c \
 	uv_2_dir_speed.c
 
-F_SRCS = ForsytheFortran.f
+# F_SRCS = ForsytheFortran.f
 
 #
 # general targets
