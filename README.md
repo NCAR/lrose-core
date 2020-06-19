@@ -82,7 +82,7 @@ Use the following if you need to set up an environment suitable for code develop
 
 The DOI for lrose-core is:
 
-* [https://doi.org/10.5065/60hz-ry38[(https://doi.org/10.5065/60hz-ry38)]
+* [https://doi.org/10.5065/60hz-ry38](https://doi.org/10.5065/60hz-ry38)]
 
 The DOI entry information is stored at:
 
