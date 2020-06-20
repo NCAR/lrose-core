@@ -130,11 +130,11 @@ $(INSTALL_BIN_PATH): all
 			$(MKDIR) $(LROSE_INSTALL_DIR)/bin; fi ; \
 		if $(TEST) -f $(INSTALL_BIN_PATH) ;\
 		then \
-		 	$(MV) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+		 	$(MV) $(INSTALL_BIN_PATH) $(INSTALL_BIN_PATH).bak ;\
 			$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH) ;\
-			$(RM) $(LROSE_INSTALL_DIR)/bin/$(TARGET_FILE).bak ;\
+			$(RM) $(INSTALL_BIN_PATH).bak ;\
 		else \
-			$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH); \
+			$(CP) $(TARGET_FILE) $(INSTALL_BIN_PATH) ;\
 		fi \
 	fi
 	if $(TEST) "$(DO_SRC_README)" = "" ; then :; else \
