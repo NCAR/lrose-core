@@ -126,7 +126,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-path") || !strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "path = %s;", argv[++i]);
+	sprintf(tmp_str, "path = \"%s\";", argv[++i]);
 	TDRP_add_override(&override, tmp_str);
       } else {
 	OK = false;
