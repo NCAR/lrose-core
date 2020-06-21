@@ -672,8 +672,6 @@ int Mdvx::_loadVsectInfoFromChunks()
 
   int iret = 0;
 
-  cerr << "1111111111 _read32BitHeaders: " << _read32BitHeaders << endl;
-
   for (int ii = 0; ii < (int) _chunks.size(); ii++) {
 
     const MdvxChunk &chunk = *_chunks[ii];

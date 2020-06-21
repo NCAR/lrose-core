@@ -547,7 +547,7 @@ public:
   // check parts for consistency - 32-bit or 64-bit?
   // sets _use32BitHeaders appropriately
   
-  void checkParts() const;
+  void check64BitHeaders() const;
 
   // get the label for a part id
 

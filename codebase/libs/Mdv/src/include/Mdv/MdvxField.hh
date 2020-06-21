@@ -650,21 +650,37 @@ public:
   //                  if false, all values will be printed.
   //
   // print_file_headers: if true and the file headers exist, print them.
+  //
+  // n_lines_data: number of data lines to print. If -1, print all.
   
   void print(ostream &out,
-	     bool print_native = true,
-	     bool print_labels = true,
-	     bool pack_duplicates = true,
-	     bool print_file_headers = false) const;
-  
+             bool print_native = true,
+             bool print_labels = true,
+             bool pack_duplicates = true,
+             bool print_file_headers = false,
+             int n_lines_data = -1) const;
+
   // Print the volume data part of MdvxField object.
-  // See print() for options.
+  //
+  // print_native: if true, type is preserved.
+  //               if false, printed as floats.
+  //
+  // print_labels: if true, a label will be printed for each plane.
+  //
+  // pack_duplicates: if true, duplicates will be printed once with a 
+  //                           repeat count.
+  //                  if false, all values will be printed.
+  //
+  // printCanonical: print in full resolution
+  //
+  // n_lines_data: number of data lines to print. If -1, print all.
   
   void printVoldata(ostream &out,
-		    bool print_native = true,
-		    bool print_labels = true,
-		    bool pack_duplicates = true,
-            bool printCanonical = false) const;
+                    bool print_native = true,
+                    bool print_labels = true,
+                    bool pack_duplicates = true,
+                    bool printCanonical = false,
+                    int n_lines_data = -1) const;
      
   // Print time-height data
   
@@ -925,7 +941,8 @@ protected:
   void _print_voldata_verbose(ostream &out, bool print_labels);
   
   void _print_voldata_packed(ostream &out, bool print_labels,
-			     bool printCanonical = false);
+			     bool printCanonical = false,
+                             int n_lines_print = -1);
   
   void _print_time_height(ostream &out,
 			  const vector<time_t> &times);

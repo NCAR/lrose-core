@@ -89,7 +89,7 @@ int DsMdvxMsg::disassemble(const void *in_msg, const ssize_t msg_len,
   // check we are not mixing 32-bit and 64-bit header parts
   // this also sets _use32BitHeaders
 
-  checkParts();
+  check64BitHeaders();
 
   // error message?
   
@@ -270,6 +270,9 @@ int DsMdvxMsg::_disassembleReadAllHdrs(DsMdvx &mdvx)
   }
 
   mdvx.clearRead();
+  if (_use32BitHeaders) {
+    mdvx.setRead32BitHeaders(true);
+  }
 
   // get format
   
@@ -348,7 +351,10 @@ int DsMdvxMsg::_disassembleReadVolume(DsMdvx &mdvx)
   }
 
   mdvx.clearRead();
-  
+  if (_use32BitHeaders) {
+    mdvx.setRead32BitHeaders(true);
+  }
+
   // get format
   
   _getReadFormat(mdvx);
@@ -468,6 +474,9 @@ int DsMdvxMsg::_disassembleReadVsection(DsMdvx &mdvx)
   }
 
   mdvx.clearRead();
+  if (_use32BitHeaders) {
+    mdvx.setRead32BitHeaders(true);
+  }
 
   // get format
   
@@ -764,6 +773,9 @@ int DsMdvxMsg::_disassembleCompileTimeHeight(DsMdvx &mdvx)
   }
   
   mdvx.clearRead();
+  if (_use32BitHeaders) {
+    mdvx.setRead32BitHeaders(true);
+  }
   mdvx.clearTimeListMode();
 
   // get format

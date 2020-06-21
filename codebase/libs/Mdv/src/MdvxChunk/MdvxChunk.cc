@@ -132,8 +132,8 @@ void MdvxChunk::clear()
 //
 // If chunk id is recognized by Mdvx, the chunk will be byte-swapped by
 // the library, and should not be swapped prior to calling this routine.
-// If the chunk id is not recognized by Mdvx, not automatic swapping
-// will occur.
+// If the chunk id is not recognized by Mdvx, automatic swapping
+// will not occur.
 
 void MdvxChunk::setData(const void *chunkData, int64_t size)
 {

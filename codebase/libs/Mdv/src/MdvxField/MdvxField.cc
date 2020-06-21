@@ -183,48 +183,48 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
     _volBuf.prepare(_fhdr.volume_size);
     if (init_with_missing) {
       switch (_fhdr.encoding_type) {
-      case Mdvx::ENCODING_INT8:
-	{
-	  ui08 missing = (ui08) _fhdr.missing_data_value;
-	  memset(_volBuf.getPtr(), missing, _fhdr.volume_size);
-	}
-	break;
-      case Mdvx::ENCODING_INT16:
-	{
-	  int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
-	  if (npts <= (int64_t) (_fhdr.volume_size / sizeof(ui16))) {
-	    ui16 missing = (ui16) _fhdr.missing_data_value;
-	    ui16 *val = (ui16 *) _volBuf.getPtr();
-	    for (int64_t i = 0; i < npts; i++, val++) {
-	      *val = missing;
-	    }
-	  }
-	}
-	break;
-      case Mdvx::ENCODING_FLOAT32:
-	{
-	  int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
-	  if (npts <= (int64_t) (_fhdr.volume_size / sizeof(fl32))) {
-	    fl32 missing = (fl32) _fhdr.missing_data_value;
-	    fl32 *val = (fl32 *) _volBuf.getPtr();
-	    for (int64_t i = 0; i < npts; i++, val++) {
-	      *val = missing;
-	    }
-	  }
-	}
-	break;
-      case Mdvx::ENCODING_RGBA32:
-	{
-	  int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
-	  if (npts <= (int64_t) (_fhdr.volume_size / sizeof(ui32))) {
-	    ui32 missing = (ui32) _fhdr.missing_data_value;
-	    ui32 *val = (ui32 *) _volBuf.getPtr();
-	    for (int64_t i = 0; i < npts; i++, val++) {
-	      *val = missing;
-	    }
-	  }
-	}
-	break;
+        case Mdvx::ENCODING_INT8:
+          {
+            ui08 missing = (ui08) _fhdr.missing_data_value;
+            memset(_volBuf.getPtr(), missing, _fhdr.volume_size);
+          }
+          break;
+        case Mdvx::ENCODING_INT16:
+          {
+            int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
+            if (npts <= (int64_t) (_fhdr.volume_size / sizeof(ui16))) {
+              ui16 missing = (ui16) _fhdr.missing_data_value;
+              ui16 *val = (ui16 *) _volBuf.getPtr();
+              for (int64_t i = 0; i < npts; i++, val++) {
+                *val = missing;
+              }
+            }
+          }
+          break;
+        case Mdvx::ENCODING_FLOAT32:
+          {
+            int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
+            if (npts <= (int64_t) (_fhdr.volume_size / sizeof(fl32))) {
+              fl32 missing = (fl32) _fhdr.missing_data_value;
+              fl32 *val = (fl32 *) _volBuf.getPtr();
+              for (int64_t i = 0; i < npts; i++, val++) {
+                *val = missing;
+              }
+            }
+          }
+          break;
+        case Mdvx::ENCODING_RGBA32:
+          {
+            int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
+            if (npts <= (int64_t) (_fhdr.volume_size / sizeof(ui32))) {
+              ui32 missing = (ui32) _fhdr.missing_data_value;
+              ui32 *val = (ui32 *) _volBuf.getPtr();
+              for (int64_t i = 0; i < npts; i++, val++) {
+                *val = missing;
+              }
+            }
+          }
+          break;
       }
     } // if (init_with_missing)
 
@@ -487,7 +487,7 @@ void MdvxField::setVolData(const void *vol_data,
 			   int64_t volume_size,
 			   Mdvx::encoding_type_t encoding_type,
 			   Mdvx::scaling_type_t scaling_type
-			     /* = Mdvx::SCALING_ROUNDED */,
+                           /* = Mdvx::SCALING_ROUNDED */,
 			   double scale /* = 1.0*/,
 			   double bias /* = 0.0*/ )
 
@@ -527,7 +527,7 @@ void MdvxField::setVolData(const void *vol_data,
 			   int nz, int ny, int nx,
 			   Mdvx::encoding_type_t encoding_type,
 			   Mdvx::scaling_type_t scaling_type
-			     /* = Mdvx::SCALING_ROUNDED */,
+                           /* = Mdvx::SCALING_ROUNDED */,
 			   double scale /* = 1.0*/,
 			   double bias /* = 0.0*/ )
 
@@ -569,27 +569,27 @@ void MdvxField::clearVolData()
   
   switch (_fhdr.encoding_type)
   {
-  case Mdvx::ENCODING_INT8 :
-    _clearVolDataInt8();
-    break;
+    case Mdvx::ENCODING_INT8 :
+      _clearVolDataInt8();
+      break;
     
-  case Mdvx::ENCODING_INT16 :
-    _clearVolDataInt16();
-    break;
+    case Mdvx::ENCODING_INT16 :
+      _clearVolDataInt16();
+      break;
     
-  case Mdvx::ENCODING_FLOAT32 :
-    _clearVolDataFloat32();
-    break;
+    case Mdvx::ENCODING_FLOAT32 :
+      _clearVolDataFloat32();
+      break;
     
-  case Mdvx::ENCODING_RGBA32 :
-    _clearVolDataRgba32();
-    break;
+    case Mdvx::ENCODING_RGBA32 :
+      _clearVolDataRgba32();
+      break;
     
-  case Mdvx::ENCODING_ASIS :
-    cerr << "WARNING - MdvxField::clearVolData" << endl;
-    cerr << "   Encoding set to ENCODING_ASIS" << endl;
-    cerr << "   Data not changed" << endl;
-    return;
+    case Mdvx::ENCODING_ASIS :
+      cerr << "WARNING - MdvxField::clearVolData" << endl;
+      cerr << "   Encoding set to ENCODING_ASIS" << endl;
+      cerr << "   Data not changed" << endl;
+      return;
   } /* endswitch - _fhdr.encoding_type */
   
   return;
@@ -734,11 +734,11 @@ bool MdvxField::isCompressed(const Mdvx::field_header_t &fhdr)
 // to reflect the changes.
 
 int MdvxField::convertType
-(Mdvx::encoding_type_t output_encoding /* = Mdvx::ENCODING_FLOAT32*/,
- Mdvx::compression_type_t output_compression /* = Mdvx::COMPRESSION_NONE*/,
- Mdvx::scaling_type_t output_scaling /* = Mdvx::SCALING_DYNAMIC*/,
- double output_scale /* = 1.0*/,
- double output_bias /* = 0.0*/ )
+  (Mdvx::encoding_type_t output_encoding /* = Mdvx::ENCODING_FLOAT32*/,
+   Mdvx::compression_type_t output_compression /* = Mdvx::COMPRESSION_NONE*/,
+   Mdvx::scaling_type_t output_scaling /* = Mdvx::SCALING_DYNAMIC*/,
+   double output_scale /* = 1.0*/,
+   double output_bias /* = 0.0*/ )
      
 {
   
@@ -788,7 +788,7 @@ int MdvxField::convertType
     _errStr += "ERROR - MdvxField::convertType()\n";
     sprintf(errstr, "  Output compression type %d not supported\n",
 	    output_compression);
-   _errStr += errstr;
+    _errStr += errstr;
     return -1;
   }
 
@@ -808,7 +808,7 @@ int MdvxField::convertType
     _fhdr.bias = 0.0;
   }
 
- // for ASIS encoding, set output_encoding accordingly
+  // for ASIS encoding, set output_encoding accordingly
   
   if (output_encoding == Mdvx::ENCODING_ASIS) {
     output_encoding =
@@ -934,8 +934,8 @@ int MdvxField::convertType
 // Returns 0 on success, -1 on failure.
 //
 int MdvxField::convertRounded
-(Mdvx::encoding_type_t output_encoding,
- Mdvx::compression_type_t output_compression /* = Mdvx::COMPRESSION_NONE*/ )
+  (Mdvx::encoding_type_t output_encoding,
+   Mdvx::compression_type_t output_compression /* = Mdvx::COMPRESSION_NONE*/ )
   
 {
   
@@ -958,8 +958,8 @@ int MdvxField::convertRounded
 // Returns 0 on success, -1 on failure.
 //
 int MdvxField::convertIntegral
-(Mdvx::encoding_type_t output_encoding,
- Mdvx::compression_type_t output_compression /* = Mdvx::COMPRESSION_NONE*/ )
+  (Mdvx::encoding_type_t output_encoding,
+   Mdvx::compression_type_t output_compression /* = Mdvx::COMPRESSION_NONE*/ )
   
 {
   
@@ -982,8 +982,8 @@ int MdvxField::convertIntegral
 // Returns 0 on success, -1 on failure.
 //
 int MdvxField::convertDynamic
-(Mdvx::encoding_type_t output_encoding,
- Mdvx::compression_type_t output_compression /* = Mdvx::COMPRESSION_NONE*/ )
+  (Mdvx::encoding_type_t output_encoding,
+   Mdvx::compression_type_t output_compression /* = Mdvx::COMPRESSION_NONE*/ )
   
 {
   
@@ -1358,85 +1358,85 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
 
   switch (_fhdr.encoding_type) {
     
-  case Mdvx::ENCODING_INT8: {
-    int64_t nbytes_comp = npoints_plane * sizeof(ui08);
-    ui08 *comp = (ui08 *) workBuf.prepare(nbytes_comp);
-    if (comp == NULL) {
-      fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
-      fprintf(stderr, "  Error allocating memory\n");
-      return -1;
+    case Mdvx::ENCODING_INT8: {
+      int64_t nbytes_comp = npoints_plane * sizeof(ui08);
+      ui08 *comp = (ui08 *) workBuf.prepare(nbytes_comp);
+      if (comp == NULL) {
+        fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
+        fprintf(stderr, "  Error allocating memory\n");
+        return -1;
+      }
+      for (int64_t i = 0; i < npoints_plane; ++i)
+        comp[i] = (ui08) _fhdr.missing_data_value;
+      for (int j = lowerPlaneNum; j <= upperPlaneNum; j++) {
+        ui08 *c = comp;
+        ui08 *v = (ui08 *) _volBuf.getPtr() + j * npoints_plane;
+        for (int64_t i = 0; i < npoints_plane; i++, c++, v++) {
+          ui08 val = *v;
+          if (val == _fhdr.missing_data_value || val == _fhdr.bad_data_value)
+            continue;
+          if (*c == _fhdr.missing_data_value || *c == _fhdr.bad_data_value ||
+              val > *c) {
+            *c = val;
+          }
+        } // i */
+      } // j */
+      break;
     }
-    for (int64_t i = 0; i < npoints_plane; ++i)
-      comp[i] = (ui08) _fhdr.missing_data_value;
-    for (int j = lowerPlaneNum; j <= upperPlaneNum; j++) {
-      ui08 *c = comp;
-      ui08 *v = (ui08 *) _volBuf.getPtr() + j * npoints_plane;
-      for (int64_t i = 0; i < npoints_plane; i++, c++, v++) {
-	ui08 val = *v;
-	if (val == _fhdr.missing_data_value || val == _fhdr.bad_data_value)
-	  continue;
-	if (*c == _fhdr.missing_data_value || *c == _fhdr.bad_data_value ||
-	    val > *c) {
-	  *c = val;
-	}
-      } // i */
-    } // j */
-    break;
-  }
 
-  case Mdvx::ENCODING_INT16: {
-    int64_t nbytes_comp = npoints_plane * sizeof(ui16);
-    ui16 *comp = (ui16 *) workBuf.prepare(nbytes_comp);
-    if (comp == NULL) {
-      fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
-      fprintf(stderr, "  Error allocating memory\n");
-      return -1;
+    case Mdvx::ENCODING_INT16: {
+      int64_t nbytes_comp = npoints_plane * sizeof(ui16);
+      ui16 *comp = (ui16 *) workBuf.prepare(nbytes_comp);
+      if (comp == NULL) {
+        fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
+        fprintf(stderr, "  Error allocating memory\n");
+        return -1;
+      }
+      for (int64_t i = 0; i < npoints_plane; ++i)
+        comp[i] = (ui16) _fhdr.missing_data_value;
+      for (int j = lowerPlaneNum; j <= upperPlaneNum; j++) {
+        ui16 *v = (ui16 *) _volBuf.getPtr() + j * npoints_plane;
+        ui16 *c = comp;
+        for (int64_t i = 0; i < npoints_plane; i++, c++, v++) {
+          ui16 val = *v;
+          if (val == _fhdr.missing_data_value || val == _fhdr.bad_data_value)
+            continue;
+          if (*c == _fhdr.missing_data_value || *c == _fhdr.bad_data_value ||
+              val > *c) {
+            *c = val;
+          }
+        } // i */
+      } // j */
+      break;
     }
-    for (int64_t i = 0; i < npoints_plane; ++i)
-      comp[i] = (ui16) _fhdr.missing_data_value;
-    for (int j = lowerPlaneNum; j <= upperPlaneNum; j++) {
-      ui16 *v = (ui16 *) _volBuf.getPtr() + j * npoints_plane;
-      ui16 *c = comp;
-      for (int64_t i = 0; i < npoints_plane; i++, c++, v++) {
-	ui16 val = *v;
-	if (val == _fhdr.missing_data_value || val == _fhdr.bad_data_value)
-	  continue;
-	if (*c == _fhdr.missing_data_value || *c == _fhdr.bad_data_value ||
-	    val > *c) {
-	  *c = val;
-	}
-      } // i */
-    } // j */
-    break;
-  }
 
-  case Mdvx::ENCODING_FLOAT32: {
-    int64_t nbytes_comp = npoints_plane * sizeof(fl32);
-    fl32 *comp = (fl32 *) workBuf.prepare(nbytes_comp);
-    if (comp == NULL) {
-      fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
-      fprintf(stderr, "  Error allocating memory\n");
-      return -1;
+    case Mdvx::ENCODING_FLOAT32: {
+      int64_t nbytes_comp = npoints_plane * sizeof(fl32);
+      fl32 *comp = (fl32 *) workBuf.prepare(nbytes_comp);
+      if (comp == NULL) {
+        fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
+        fprintf(stderr, "  Error allocating memory\n");
+        return -1;
+      }
+      fl32 *c = comp;
+      for (int64_t i = 0; i < npoints_plane; i++, c++) {
+        *c = _fhdr.missing_data_value;
+      }
+      for (int j = lowerPlaneNum; j <= upperPlaneNum; j++) {
+        fl32 *v = (fl32 *) _volBuf.getPtr() + j * npoints_plane;
+        c = comp;
+        for (int64_t i = 0; i < npoints_plane; i++, c++, v++) {
+          fl32 val = *v;
+          if (val == _fhdr.missing_data_value || val == _fhdr.bad_data_value)
+            continue;
+          if (*c == _fhdr.missing_data_value || *c == _fhdr.bad_data_value ||
+              val > *c) {
+            *c = val;
+          }
+        } // i */
+      } // j */
+      break;
     }
-    fl32 *c = comp;
-    for (int64_t i = 0; i < npoints_plane; i++, c++) {
-      *c = _fhdr.missing_data_value;
-    }
-    for (int j = lowerPlaneNum; j <= upperPlaneNum; j++) {
-      fl32 *v = (fl32 *) _volBuf.getPtr() + j * npoints_plane;
-      c = comp;
-      for (int64_t i = 0; i < npoints_plane; i++, c++, v++) {
-	fl32 val = *v;
-	if (val == _fhdr.missing_data_value || val == _fhdr.bad_data_value)
-	  continue;
-	if (*c == _fhdr.missing_data_value || *c == _fhdr.bad_data_value ||
-	    val > *c) {
-	  *c = val;
-	}
-      } // i */
-    } // j */
-    break;
-  }
 
   } // switch */
 
@@ -2979,49 +2979,49 @@ int MdvxField::remap(MdvxRemapLut &lut,
   workBuf.prepare(nBytesTargetVol);
 
   if ( workBuf.getPtr() == NULL) {
-       _errStr += "ERROR - MdvxField::remap\n";
-       return -1;
+    _errStr += "ERROR - MdvxField::remap\n";
+    return -1;
   }
 
   // zero out the work buffer
 
   switch (_fhdr.encoding_type) {
     
-  case Mdvx::ENCODING_INT8: {
-    ui08 missing = (ui08) _fhdr.missing_data_value;
-    ui08 *vval = (ui08 *) workBuf.getPtr();
-    for (int64_t i = 0;  i < nPointsTargetVol; i++, vval++) {
-      *vval = missing;
+    case Mdvx::ENCODING_INT8: {
+      ui08 missing = (ui08) _fhdr.missing_data_value;
+      ui08 *vval = (ui08 *) workBuf.getPtr();
+      for (int64_t i = 0;  i < nPointsTargetVol; i++, vval++) {
+        *vval = missing;
+      }
+      break;
     }
-    break;
-  }
 
-  case Mdvx::ENCODING_INT16: {
-    ui16 missing = (ui16) _fhdr.missing_data_value;
-    ui16 *vval = (ui16 *) workBuf.getPtr();
-    for (int64_t i = 0;  i < nPointsTargetVol; i++, vval++) {
-      *vval = missing;
+    case Mdvx::ENCODING_INT16: {
+      ui16 missing = (ui16) _fhdr.missing_data_value;
+      ui16 *vval = (ui16 *) workBuf.getPtr();
+      for (int64_t i = 0;  i < nPointsTargetVol; i++, vval++) {
+        *vval = missing;
+      }
+      break;
     }
-    break;
-  }
 
-  case Mdvx::ENCODING_FLOAT32: {
-    fl32 missing = (fl32) _fhdr.missing_data_value;
-    fl32 *vval = (fl32 *) workBuf.getPtr();
-    for (int64_t i = 0;  i < nPointsTargetVol; i++, vval++) {
-      *vval = missing;
+    case Mdvx::ENCODING_FLOAT32: {
+      fl32 missing = (fl32) _fhdr.missing_data_value;
+      fl32 *vval = (fl32 *) workBuf.getPtr();
+      for (int64_t i = 0;  i < nPointsTargetVol; i++, vval++) {
+        *vval = missing;
+      }
+      break;
     }
-    break;
-  }
 
-  case Mdvx::ENCODING_RGBA32: {
-    ui32 missing = (ui32) _fhdr.missing_data_value;
-    ui32 *vval = (ui32 *) workBuf.getPtr();
-    for (int64_t i = 0;  i < nPointsTargetVol; i++, vval++) {
-      *vval = missing;
+    case Mdvx::ENCODING_RGBA32: {
+      ui32 missing = (ui32) _fhdr.missing_data_value;
+      ui32 *vval = (ui32 *) workBuf.getPtr();
+      for (int64_t i = 0;  i < nPointsTargetVol; i++, vval++) {
+        *vval = missing;
+      }
+      break;
     }
-    break;
-  }
 
   } // switch (_fhdr.encoding_type)
 
@@ -3329,18 +3329,18 @@ void MdvxField::buffer_from_BE(void *buf, int64_t buflen,
      
 {
   switch (encoding_type) {
-  case Mdvx::ENCODING_INT8:
-    // no need to swap byte data
-    return;
-    break;
-  case Mdvx::ENCODING_INT16:
-    BE_to_array_16(buf, buflen);
-    break;
-  case Mdvx::ENCODING_FLOAT32:
-    BE_to_array_32(buf, buflen);
-    break;
-  case Mdvx::ENCODING_RGBA32:
-    break;
+    case Mdvx::ENCODING_INT8:
+      // no need to swap byte data
+      return;
+      break;
+    case Mdvx::ENCODING_INT16:
+      BE_to_array_16(buf, buflen);
+      break;
+    case Mdvx::ENCODING_FLOAT32:
+      BE_to_array_32(buf, buflen);
+      break;
+    case Mdvx::ENCODING_RGBA32:
+      break;
   }
 }
 
@@ -3352,18 +3352,18 @@ void MdvxField::buffer_to_BE(void *buf, int64_t buflen,
   
 {
   switch (encoding_type) {
-  case Mdvx::ENCODING_INT8:
-    // no need to swap byte data
-    return;
-    break;
-  case Mdvx::ENCODING_INT16:
-    BE_from_array_16(buf, buflen);
-    break;
-  case Mdvx::ENCODING_FLOAT32:
-    BE_from_array_32(buf, buflen);
-    break;
-  case Mdvx::ENCODING_RGBA32:
-    break;
+    case Mdvx::ENCODING_INT8:
+      // no need to swap byte data
+      return;
+      break;
+    case Mdvx::ENCODING_INT16:
+      BE_from_array_16(buf, buflen);
+      break;
+    case Mdvx::ENCODING_FLOAT32:
+      BE_from_array_32(buf, buflen);
+      break;
+    case Mdvx::ENCODING_RGBA32:
+      break;
   }
 }
 
@@ -3434,17 +3434,20 @@ void MdvxField::printHeaders(ostream &out,
 //                  if false, all values will be printed.
 //
 // print_file_headers: if true and the file headers exist, print them.
+//
+// n_lines_data: number of data lines to print. If -1, print all.
 
 void MdvxField::print(ostream &out,
-		      bool print_native /* = true*/,
-		      bool print_labels /* = true*/,
-		      bool pack_duplicates /* = true*/,
-		      bool print_file_headers /* = false*/ ) const
+		      bool print_native /* = true */,
+		      bool print_labels /* = true */,
+		      bool pack_duplicates /* = true */,
+		      bool print_file_headers /* = false */,
+		      int n_lines_data /* = -1 */ ) const
   
 {
   
   printHeaders(out, print_file_headers);
-  printVoldata(out, print_native, print_labels, pack_duplicates);
+  printVoldata(out, print_native, print_labels, pack_duplicates, false, n_lines_data);
 
 }
 
@@ -3460,12 +3463,17 @@ void MdvxField::print(ostream &out,
 // pack_duplicates: if true, duplicates will be printed once with a 
 //                           repeat count.
 //                  if false, all values will be printed.
+//
+// printCanonical: print in full resolution
+//
+// n_lines_data: number of data lines to print. If -1, print all.
 
 void MdvxField::printVoldata(ostream &out,
-			     bool print_native /* = true*/,
-			     bool print_labels /* = true*/,
-			     bool pack_duplicates /* = true*/,
-                             bool printCanonical /* = false*/ ) const
+			     bool print_native /* = true */,
+			     bool print_labels /* = true */,
+			     bool pack_duplicates /* = true */,
+                             bool printCanonical /* = false */,
+                             int n_lines_data /* = -1 */ ) const
      
 {
 
@@ -3486,7 +3494,7 @@ void MdvxField::printVoldata(ostream &out,
   }
 
   if (pack_duplicates) {
-    copy._print_voldata_packed(out, print_labels, printCanonical);
+    copy._print_voldata_packed(out, print_labels, printCanonical, n_lines_data);
   } else {
     copy._print_voldata_verbose(out, print_labels);
   }
@@ -4267,8 +4275,9 @@ void MdvxField::constrainVertical(const Mdvx &mdvx)
   }
 
   // Sanity check on _fhdr.nz value insures no out-of-bounds array access
-  if (_fhdr.nz < 1)
-     _fhdr.nz = 1;
+  if (_fhdr.nz < 1) {
+    _fhdr.nz = 1;
+  }
 
   if (minPlane < 0) {
     minPlane = 0;
@@ -4336,7 +4345,7 @@ void MdvxField::constrainVertical(const Mdvx &mdvx)
     
     MemBuf outBuf;
     int64_t outOffset = (_fhdr.nx * _fhdr.ny *
-		     _fhdr.data_element_nbytes * minPlane);
+                         _fhdr.data_element_nbytes * minPlane);
     int64_t outSize = _fhdr.nx * _fhdr.ny * outNz * _fhdr.data_element_nbytes;
     void *outData = ((ui08 *) _volBuf.getPtr() + outOffset);
     outBuf.add(outData, outSize);
@@ -4784,14 +4793,14 @@ int MdvxField::_constrain_radar_horiz(const Mdvx &mdvx)
   }
 
 #ifdef DEBUG_PRINT
-    cerr << "constrain_radar_horiz: minX: " << minX << endl;
-    cerr << "constrain_radar_horiz: maxX: " << maxX << endl;
-    cerr << "constrain_radar_horiz: minY: " << minY << endl;
-    cerr << "constrain_radar_horiz: maxY: " << maxY << endl;
-    cerr << "constrain_radar_horiz: ny: " << _fhdr.ny << endl;
-    cerr << "constrain_radar_horiz: grid_miny: " << _fhdr.grid_miny << endl;
-    cerr << "constrain_radar_horiz: nx: " << _fhdr.nx << endl;
-    cerr << "constrain_radar_horiz: grid_minx: " << _fhdr.grid_minx << endl;
+  cerr << "constrain_radar_horiz: minX: " << minX << endl;
+  cerr << "constrain_radar_horiz: maxX: " << maxX << endl;
+  cerr << "constrain_radar_horiz: minY: " << minY << endl;
+  cerr << "constrain_radar_horiz: maxY: " << maxY << endl;
+  cerr << "constrain_radar_horiz: ny: " << _fhdr.ny << endl;
+  cerr << "constrain_radar_horiz: grid_miny: " << _fhdr.grid_miny << endl;
+  cerr << "constrain_radar_horiz: nx: " << _fhdr.nx << endl;
+  cerr << "constrain_radar_horiz: grid_minx: " << _fhdr.grid_minx << endl;
 #endif
 
   // compute max range and azimith limits
@@ -4938,8 +4947,8 @@ int MdvxField::_constrain_radar_horiz(const Mdvx &mdvx)
   }
   
 #ifdef DEBUG_PRINT
-    cerr << "constrain_radar_horiz: minAz: " << minAz << endl;
-    cerr << "constrain_radar_horiz: maxAz: " << maxAz << endl;
+  cerr << "constrain_radar_horiz: minAz: " << minAz << endl;
+  cerr << "constrain_radar_horiz: maxAz: " << maxAz << endl;
 #endif
 
   // compute indexes for azimuth limits
@@ -5251,8 +5260,8 @@ int MdvxField::_decimate_rgba(int64_t max_nxy)
   MemBuf targetBuf;
   targetBuf.prepare(nBytesTargetVol);
   if ( targetBuf.getPtr() == NULL){
-     _errStr += "ERROR - MdvxField::decimate\n";
-     return -1;
+    _errStr += "ERROR - MdvxField::decimate\n";
+    return -1;
   }
  
  
@@ -5269,54 +5278,54 @@ int MdvxField::_decimate_rgba(int64_t max_nxy)
     for (int outy = 0; outy < outNy;  outy++) {
       // loop through x output columns
       for (int outx = 0; outx < outNx; outx++ ) {
-         // compute the starting source Row for the averaging.
-         y_loc = outy * y_ratio;
-         if(y_loc >= _fhdr.ny)  y_loc = _fhdr.ny - 1;
+        // compute the starting source Row for the averaging.
+        y_loc = outy * y_ratio;
+        if(y_loc >= _fhdr.ny)  y_loc = _fhdr.ny - 1;
 
-         // compute the starting source Column for the averaging.
-         x_loc = outx * x_ratio;
-         if(x_loc >= _fhdr.nx) x_loc = _fhdr.nx -1;
+        // compute the starting source Column for the averaging.
+        x_loc = outx * x_ratio;
+        if(x_loc >= _fhdr.nx) x_loc = _fhdr.nx -1;
          
-         // Compute the Value for the output Pixel
-         r_sum = 0;
-         g_sum = 0;
-         b_sum = 0;
-         a_sum = 0;
-         count = 0;
-         // Loop through y_pix_count rows in input
-         for(int iny = 0; iny < y_pix_count; iny++) {
-           ui32 *source = sourcePlane + (y_loc * _fhdr.nx) + x_loc;
-           // Sum x_pix_count columns from each row
-           for(int inx = 0 ; inx < x_pix_count; inx++) {
-              r_sum += (*source >> 24) & 0xFF;
-              g_sum += (*source >> 16) & 0xFF;
-              b_sum += (*source >> 8) & 0xFF;
-              a_sum += *source & 0xFF;
-              source++;  // move to the next input pixel
-              count++;   // keep track of how many pixels are in the sums
-           } // input data column loop
-           y_loc++;
-           if(y_loc >= _fhdr.ny ) y_loc = _fhdr.ny - 1;
-         } // input data row loop
+        // Compute the Value for the output Pixel
+        r_sum = 0;
+        g_sum = 0;
+        b_sum = 0;
+        a_sum = 0;
+        count = 0;
+        // Loop through y_pix_count rows in input
+        for(int iny = 0; iny < y_pix_count; iny++) {
+          ui32 *source = sourcePlane + (y_loc * _fhdr.nx) + x_loc;
+          // Sum x_pix_count columns from each row
+          for(int inx = 0 ; inx < x_pix_count; inx++) {
+            r_sum += (*source >> 24) & 0xFF;
+            g_sum += (*source >> 16) & 0xFF;
+            b_sum += (*source >> 8) & 0xFF;
+            a_sum += *source & 0xFF;
+            source++;  // move to the next input pixel
+            count++;   // keep track of how many pixels are in the sums
+          } // input data column loop
+          y_loc++;
+          if(y_loc >= _fhdr.ny ) y_loc = _fhdr.ny - 1;
+        } // input data row loop
 
-         if ( count != 0) {
-           r_val =  (double) r_sum / count;
-           g_val =  (double) g_sum / count;
-           b_val =  (double) b_sum / count;
-           a_val =  (double) a_sum / count;
+        if ( count != 0) {
+          r_val =  (double) r_sum / count;
+          g_val =  (double) g_sum / count;
+          b_val =  (double) b_sum / count;
+          a_val =  (double) a_sum / count;
 
-           *target = (r_val << 24) + (g_val << 16) + (b_val << 8) + a_val;
-         }
-         else {
-            *target = 0;
-         }
+          *target = (r_val << 24) + (g_val << 16) + (b_val << 8) + a_val;
+        }
+        else {
+          *target = 0;
+        }
 
-         target++; // move to the next output pixel
+        target++; // move to the next output pixel
       } 
     } 
 
   } // iz
- // set the field header appropriately
+  // set the field header appropriately
   
   _fhdr.volume_size = nBytesTargetVol;
   _fhdr.nx = outNx;
@@ -6511,105 +6520,105 @@ void MdvxField::_print_voldata_verbose(ostream &out,
   
   switch (_fhdr.encoding_type) {
 
-  case Mdvx::ENCODING_INT8: {
-    ui08 *val = (ui08 *) _volBuf.getPtr();
-    ui08 missing = (ui08) _fhdr.missing_data_value;
-    ui08 bad = (ui08) _fhdr.bad_data_value;
-    for (int iz = 0; iz < _fhdr.nz; iz++) {
-      if (print_labels) {
-	out << "INT8 data for plane " << iz << ":" << endl << endl;
-      }
-      for (int64_t i = 0; i < npoints_plane; i++, val++) {
-	ui08 this_val = *val;
-	if (this_val == bad) {
-	  out << "BAD ";
-	} else if (this_val == missing) {
-	  out << "MISS ";
-	} else {
-	  sprintf(outstr, "%3d ", *val);
-	  out << outstr;
-	}
-      }
-      out << endl << endl;
-    } // iz 
-    break;
-  }
+    case Mdvx::ENCODING_INT8: {
+      ui08 *val = (ui08 *) _volBuf.getPtr();
+      ui08 missing = (ui08) _fhdr.missing_data_value;
+      ui08 bad = (ui08) _fhdr.bad_data_value;
+      for (int iz = 0; iz < _fhdr.nz; iz++) {
+        if (print_labels) {
+          out << "INT8 data for plane " << iz << ":" << endl << endl;
+        }
+        for (int64_t i = 0; i < npoints_plane; i++, val++) {
+          ui08 this_val = *val;
+          if (this_val == bad) {
+            out << "BAD ";
+          } else if (this_val == missing) {
+            out << "MISS ";
+          } else {
+            sprintf(outstr, "%3d ", *val);
+            out << outstr;
+          }
+        }
+        out << endl << endl;
+      } // iz 
+      break;
+    }
 
-  case Mdvx::ENCODING_INT16: {
-    ui16 *val = (ui16 *) _volBuf.getPtr();
-    ui16 missing = (ui16) _fhdr.missing_data_value;
-    ui16 bad = (ui16) _fhdr.bad_data_value;
-    for (int iz = 0; iz < _fhdr.nz; iz++) {
-      if (print_labels) {
-	out << "INT16 data for plane " << iz << ":" << endl << endl;
-      }
-      for (int64_t i = 0; i < npoints_plane; i++, val++) {
-	ui16 this_val = *val;
-	if (this_val == bad) {
-	  out << "BAD ";
-	} else if (this_val == missing) {
-	  out << "MISS ";
-	} else {
-	  sprintf(outstr, "%5d ", *val);
-	  out << outstr;
-	}
-      }
-      out << endl << endl;
-    } // iz
-    break;
-  }
+    case Mdvx::ENCODING_INT16: {
+      ui16 *val = (ui16 *) _volBuf.getPtr();
+      ui16 missing = (ui16) _fhdr.missing_data_value;
+      ui16 bad = (ui16) _fhdr.bad_data_value;
+      for (int iz = 0; iz < _fhdr.nz; iz++) {
+        if (print_labels) {
+          out << "INT16 data for plane " << iz << ":" << endl << endl;
+        }
+        for (int64_t i = 0; i < npoints_plane; i++, val++) {
+          ui16 this_val = *val;
+          if (this_val == bad) {
+            out << "BAD ";
+          } else if (this_val == missing) {
+            out << "MISS ";
+          } else {
+            sprintf(outstr, "%5d ", *val);
+            out << outstr;
+          }
+        }
+        out << endl << endl;
+      } // iz
+      break;
+    }
 
-  case Mdvx::ENCODING_FLOAT32: {
-    fl32 *val = (fl32 *) _volBuf.getPtr();
-    fl32 missing = _fhdr.missing_data_value;
-    fl32 bad = _fhdr.bad_data_value;
-    for (int iz = 0; iz < _fhdr.nz; iz++) {
-      if (print_labels) {
-	out << "FLOAT32 data for plane " << iz << ":" << endl << endl;
-      }
-      for (int64_t i = 0; i < npoints_plane; i++, val++) {
-	fl32 this_val = *val;
-	if (this_val == bad) {
-	  out << "BAD ";
-	} else if (this_val == missing) {
-	  out << "MISS ";
-	} else {
-	  if (fabs(*val) > 0.01) {
-	    sprintf(outstr, "%.3f ", *val);
-	  } else {
-	    sprintf(outstr, "%.3e ", *val);
-	  }
-	  out << outstr;
-	}
-      }
-      out << endl << endl;
-    } // iz
-    break;
-  }
+    case Mdvx::ENCODING_FLOAT32: {
+      fl32 *val = (fl32 *) _volBuf.getPtr();
+      fl32 missing = _fhdr.missing_data_value;
+      fl32 bad = _fhdr.bad_data_value;
+      for (int iz = 0; iz < _fhdr.nz; iz++) {
+        if (print_labels) {
+          out << "FLOAT32 data for plane " << iz << ":" << endl << endl;
+        }
+        for (int64_t i = 0; i < npoints_plane; i++, val++) {
+          fl32 this_val = *val;
+          if (this_val == bad) {
+            out << "BAD ";
+          } else if (this_val == missing) {
+            out << "MISS ";
+          } else {
+            if (fabs(*val) > 0.01) {
+              sprintf(outstr, "%.3f ", *val);
+            } else {
+              sprintf(outstr, "%.3e ", *val);
+            }
+            out << outstr;
+          }
+        }
+        out << endl << endl;
+      } // iz
+      break;
+    }
   
-  case Mdvx::ENCODING_RGBA32: {
-    ui32 *val = (ui32 *) _volBuf.getPtr();
-    ui32 missing = (ui32) _fhdr.missing_data_value;
-    ui32 bad = (ui32) _fhdr.bad_data_value;
-    for (int iz = 0; iz < _fhdr.nz; iz++) {
-      if (print_labels) {
-	out << "RGBA32 data for plane " << iz << ":" << endl << endl;
-      }
-      for (int64_t i = 0; i < npoints_plane; i++, val++) {
-	ui32 this_val = *val;
-	if (this_val == bad) {
-	  out << "BAD ";
-	} else if (this_val == missing) {
-	  out << "MISS ";
-	} else {
-	  sprintf(outstr, "%5x ", *val);
-	  out << outstr;
-	}
-      }
-      out << endl << endl;
-    } // iz
-    break;
-  }
+    case Mdvx::ENCODING_RGBA32: {
+      ui32 *val = (ui32 *) _volBuf.getPtr();
+      ui32 missing = (ui32) _fhdr.missing_data_value;
+      ui32 bad = (ui32) _fhdr.bad_data_value;
+      for (int iz = 0; iz < _fhdr.nz; iz++) {
+        if (print_labels) {
+          out << "RGBA32 data for plane " << iz << ":" << endl << endl;
+        }
+        for (int64_t i = 0; i < npoints_plane; i++, val++) {
+          ui32 this_val = *val;
+          if (this_val == bad) {
+            out << "BAD ";
+          } else if (this_val == missing) {
+            out << "MISS ";
+          } else {
+            sprintf(outstr, "%5x ", *val);
+            out << outstr;
+          }
+        }
+        out << endl << endl;
+      } // iz
+      break;
+    }
   
   } // switch
 
@@ -6620,203 +6629,241 @@ void MdvxField::_print_voldata_verbose(ostream &out,
 
 void MdvxField::_print_voldata_packed(ostream &out,
 				      bool print_labels,
-                                      bool printCanonical)
+                                      bool printCanonical,
+                                      int n_lines_print)
 
 {     
 
   int64_t npoints_plane = _fhdr.nx * _fhdr.ny;
+  int nlines = 0;
 
   switch (_fhdr.encoding_type) {
     
-  case Mdvx::ENCODING_INT8: {
-    ui08 *val = (ui08 *) _volBuf.getPtr();
-    ui08 missing = (ui08) _fhdr.missing_data_value;
-    ui08 bad = (ui08) _fhdr.bad_data_value;
+    case Mdvx::ENCODING_INT8: {
+      ui08 *val = (ui08 *) _volBuf.getPtr();
+      ui08 missing = (ui08) _fhdr.missing_data_value;
+      ui08 bad = (ui08) _fhdr.bad_data_value;
     
-    for (int iz = 0; iz < _fhdr.nz; iz++) {
-      if (printCanonical) {
-        out << "fullfield: encoding: INT8";
-        out << "  field: " << _fhdr.field_name;
-        out << "  plane: " << iz;
+      for (int iz = 0; iz < _fhdr.nz; iz++) {
+        if (printCanonical) {
+          out << "fullfield: encoding: INT8";
+          out << "  field: " << _fhdr.field_name;
+          out << "  plane: " << iz;
+          out << endl;
+        }
+        if (print_labels) {
+          out << endl;
+          out << "npoints_plane: " << npoints_plane << endl;
+          out << "INT8 data for plane " << iz << ":" << endl << endl;
+        }
+        int64_t printed = 0;
+        int64_t count = 1;
+        ui08 prev_val = *val;
+        val++;
+        for (int64_t i = 1; i < npoints_plane; i++, val++) {
+          ui08 this_val = *val;
+          if (this_val != prev_val) {
+            if (printCanonical) out << "fulldata: ";
+            _print_int8_packed(out, count, prev_val, bad, missing,
+                               printCanonical);
+            if (printCanonical) {
+              out << endl;
+              nlines++;
+            }
+            printed++;
+            if (printed > 8) {
+              if (!printCanonical) {
+                out << endl;
+                nlines++;
+              }
+              printed = 0;
+            }
+            prev_val = this_val;
+            count = 1;
+          } else {
+            count++;
+          }
+          if (n_lines_print > 0 && nlines >= n_lines_print) {
+            break;
+          }
+        } // i
+        if (printCanonical) out << "fulldata: ";
+        _print_int8_packed(out, count, prev_val, bad, missing, printCanonical);
         out << endl;
-      }
-      if (print_labels) {
-	out << endl;
-	out << "npoints_plane: " << npoints_plane << endl;
-	out << "INT8 data for plane " << iz << ":" << endl << endl;
-      }
-      int64_t printed = 0;
-      int64_t count = 1;
-      ui08 prev_val = *val;
-      val++;
-      for (int64_t i = 1; i < npoints_plane; i++, val++) {
-	ui08 this_val = *val;
-	if (this_val != prev_val) {
-          if (printCanonical) out << "fulldata: ";
-          _print_int8_packed(out, count, prev_val, bad, missing,
-            printCanonical);
-          if (printCanonical) out << endl;
-	  printed++;
-	  if (printed > 8) {
-	    if (! printCanonical) out << endl;
-	    printed = 0;
-	  }
-	  prev_val = this_val;
-	  count = 1;
-	} else {
-	  count++;
-	}
-      } // i
-      if (printCanonical) out << "fulldata: ";
-      _print_int8_packed(out, count, prev_val, bad, missing, printCanonical);
-      out << endl;
-    } // iz
+      } // iz
 
-    break;
-  }
+      break;
+    }
 
-  case Mdvx::ENCODING_INT16: {
-    ui16 *val = (ui16 *) _volBuf.getPtr();
-    ui16 missing = (ui16) _fhdr.missing_data_value;
-    ui16 bad = (ui16) _fhdr.bad_data_value;
+    case Mdvx::ENCODING_INT16: {
+      ui16 *val = (ui16 *) _volBuf.getPtr();
+      ui16 missing = (ui16) _fhdr.missing_data_value;
+      ui16 bad = (ui16) _fhdr.bad_data_value;
     
-    for (int iz = 0; iz < _fhdr.nz; iz++) {
-      if (printCanonical) {
-        out << "fullfield: encoding: INT16";
-        out << "  field: " << _fhdr.field_name;
-        out << "  plane: " << iz;
-        out << endl;
-      }
-      if (print_labels) {
-	out << endl;
-	out << "npoints_plane: " << npoints_plane << endl;
-	out << "INT16 data for plane " << iz << ":" << endl << endl;
-      }
-      int printed = 0;
-      int64_t count = 1;
-      ui16 prev_val = *val;
-      val++;
-      for (int64_t i = 1; i < npoints_plane; i++, val++) {
-	ui16 this_val = *val;
-	if (this_val != prev_val) {
-          if (printCanonical) out << "fulldata: ";
-	  _print_int16_packed(out, count, prev_val, bad, missing,
-            printCanonical);
-          if (printCanonical) out << endl;
-	  printed++;
-	  if (printed > 7) {
-	    if (! printCanonical) out << endl;
-	    printed = 0;
-	  }
-	  prev_val = this_val;
-	  count = 1;
-	} else {
-	  count++;
-	}
-      } // i
-      if (printCanonical) out << "fulldata: ";
-      _print_int16_packed(out, count, prev_val, bad, missing, printCanonical);
-      out << endl << endl;
-    } // iz
+      for (int iz = 0; iz < _fhdr.nz; iz++) {
+        if (printCanonical) {
+          out << "fullfield: encoding: INT16";
+          out << "  field: " << _fhdr.field_name;
+          out << "  plane: " << iz;
+          out << endl;
+        }
+        if (print_labels) {
+          out << endl;
+          out << "npoints_plane: " << npoints_plane << endl;
+          out << "INT16 data for plane " << iz << ":" << endl << endl;
+        }
+        int printed = 0;
+        int64_t count = 1;
+        ui16 prev_val = *val;
+        val++;
+        for (int64_t i = 1; i < npoints_plane; i++, val++) {
+          ui16 this_val = *val;
+          if (this_val != prev_val) {
+            if (printCanonical) out << "fulldata: ";
+            _print_int16_packed(out, count, prev_val, bad, missing,
+                                printCanonical);
+            if (printCanonical) {
+              out << endl;
+              nlines++;
+            }
+            printed++;
+            if (printed > 7) {
+              if (!printCanonical) {
+                out << endl;
+                nlines++;
+              }
+              printed = 0;
+            }
+            prev_val = this_val;
+            count = 1;
+          } else {
+            count++;
+          }
+          if (n_lines_print > 0 && nlines >= n_lines_print) {
+            break;
+          }
+        } // i
+        if (printCanonical) out << "fulldata: ";
+        _print_int16_packed(out, count, prev_val, bad, missing, printCanonical);
+        out << endl << endl;
+      } // iz
 
-    break;
-  }
+      break;
+    }
     
-  case Mdvx::ENCODING_FLOAT32: {
+    case Mdvx::ENCODING_FLOAT32: {
     
-    fl32 *val = (fl32 *) _volBuf.getPtr();
-    fl32 missing = _fhdr.missing_data_value;
-    fl32 bad = _fhdr.bad_data_value;
+      fl32 *val = (fl32 *) _volBuf.getPtr();
+      fl32 missing = _fhdr.missing_data_value;
+      fl32 bad = _fhdr.bad_data_value;
     
-    for (int iz = 0; iz < _fhdr.nz; iz++) {
-      if (printCanonical) {
-        out << "fullfield: encoding: FLOAT32";
-        out << "  field: " << _fhdr.field_name;
-        out << "  plane: " << iz;
-        out << endl;
-      }
+      for (int iz = 0; iz < _fhdr.nz; iz++) {
+        if (printCanonical) {
+          out << "fullfield: encoding: FLOAT32";
+          out << "  field: " << _fhdr.field_name;
+          out << "  plane: " << iz;
+          out << endl;
+        }
 
-      if (print_labels) {
-	out << endl;
-	out << "npoints_plane: " << npoints_plane << endl;
-	out << "FLOAT32 data for plane " << iz << ":" << endl << endl;
-      }
-      int printed = 0;
-      int64_t count = 1;
-      fl32 prev_val = *val;
-      val++;
-      for (int64_t i = 1; i < npoints_plane; i++, val++) {
-	fl32 this_val = *val;
-	if (this_val != prev_val) {
-          if (printCanonical) out << "fulldata: ";
-	  _print_float32_packed(out, count, prev_val, bad, missing,
-            printCanonical);
-          if (printCanonical) out << endl;
-	  printed++;
-	  if (printed > 6) {
-	    if (! printCanonical) out << endl;
-	    printed = 0;
-	  }
-	  prev_val = this_val;
-	  count = 1;
-	} else {
-	  count++;
-	}
-      } // i
-      if (printCanonical) out << "fulldata: ";
-      _print_float32_packed(out, count, prev_val, bad, missing,
-        printCanonical);
-      out << endl << endl;
-    } // iz
+        if (print_labels) {
+          out << endl;
+          out << "npoints_plane: " << npoints_plane << endl;
+          out << "FLOAT32 data for plane " << iz << ":" << endl << endl;
+        }
+        int printed = 0;
+        int64_t count = 1;
+        fl32 prev_val = *val;
+        val++;
+        for (int64_t i = 1; i < npoints_plane; i++, val++) {
+          fl32 this_val = *val;
+          if (this_val != prev_val) {
+            if (printCanonical) out << "fulldata: ";
+            _print_float32_packed(out, count, prev_val, bad, missing,
+                                  printCanonical);
+            if (printCanonical) {
+              out << endl;
+              nlines++;
+            }
+            printed++;
+            if (printed > 6) {
+              if (!printCanonical) {
+                out << endl;
+                nlines++;
+              }
+              printed = 0;
+            }
+            prev_val = this_val;
+            count = 1;
+          } else {
+            count++;
+          }
+          if (n_lines_print > 0 && nlines >= n_lines_print) {
+            break;
+          }
+        } // i
+        if (printCanonical) out << "fulldata: ";
+        _print_float32_packed(out, count, prev_val, bad, missing,
+                              printCanonical);
+        out << endl << endl;
+      } // iz
     
-    break;
-  }
+      break;
+    }
     
-  case Mdvx::ENCODING_RGBA32: {
+    case Mdvx::ENCODING_RGBA32: {
     
-    ui32 *val = (ui32 *) _volBuf.getPtr();
-    ui32 missing = (ui32) _fhdr.missing_data_value;
-    ui32 bad = (ui32) _fhdr.bad_data_value;
+      ui32 *val = (ui32 *) _volBuf.getPtr();
+      ui32 missing = (ui32) _fhdr.missing_data_value;
+      ui32 bad = (ui32) _fhdr.bad_data_value;
     
-    for (int iz = 0; iz < _fhdr.nz; iz++) {
-      if (printCanonical) {
-        out << "fullfield: encoding: RGBA32";
-        out << "  field: " << _fhdr.field_name;
-        out << "  plane: " << iz;
-        out << endl;
-      }
-      if (print_labels) {
-	out << "RGBA data for plane " << iz << ":" << endl << endl;
-      }
-      int printed = 0;
-      int64_t count = 1;
-      ui32 prev_val = *val;
-      val++;
-      for (int64_t i = 1; i < npoints_plane; i++, val++) {
-	ui32 this_val = *val;
-	if (this_val != prev_val) {
-          if (printCanonical) out << "fulldata: ";
-	  _print_rgba32_packed(out, count, prev_val, bad, missing,
-            printCanonical);
-          if (printCanonical) out << endl;
-	  printed++;
-	  if (printed > 6) {
-	    if (! printCanonical) out << endl;
-	    printed = 0;
-	  }
-	  prev_val = this_val;
-	  count = 1;
-	} else {
-	  count++;
-	}
-      } // i
-      if (printCanonical) out << "fulldata: ";
-      _print_rgba32_packed(out, count, prev_val, bad, missing, printCanonical);
-      out << endl << endl;
-    } // iz
+      for (int iz = 0; iz < _fhdr.nz; iz++) {
+        if (printCanonical) {
+          out << "fullfield: encoding: RGBA32";
+          out << "  field: " << _fhdr.field_name;
+          out << "  plane: " << iz;
+          out << endl;
+        }
+        if (print_labels) {
+          out << "RGBA data for plane " << iz << ":" << endl << endl;
+        }
+        int printed = 0;
+        int64_t count = 1;
+        ui32 prev_val = *val;
+        val++;
+        for (int64_t i = 1; i < npoints_plane; i++, val++) {
+          ui32 this_val = *val;
+          if (this_val != prev_val) {
+            if (printCanonical) out << "fulldata: ";
+            _print_rgba32_packed(out, count, prev_val, bad, missing,
+                                 printCanonical);
+            if (printCanonical) {
+              out << endl;
+              nlines++;
+            }
+            printed++;
+            if (printed > 6) {
+              if (!printCanonical) {
+                out << endl;
+                nlines++;
+              }
+              printed = 0;
+            }
+            prev_val = this_val;
+            count = 1;
+          } else {
+            count++;
+          }
+          if (n_lines_print > 0 && nlines >= n_lines_print) {
+            break;
+          }
+        } // i
+        if (printCanonical) out << "fulldata: ";
+        _print_rgba32_packed(out, count, prev_val, bad, missing, printCanonical);
+        out << endl << endl;
+      } // iz
     
-    break;
-  }
+      break;
+    }
     
   } // switch
 
@@ -6973,38 +7020,38 @@ void MdvxField::_print_time_height(ostream &out,
 
       switch (_fhdr.encoding_type) {
 
-      case Mdvx::ENCODING_INT8: {
-	ui08 val = ((ui08 *) _volBuf.getPtr())[index];
-	ui08 missing = (ui08) _fhdr.missing_data_value;
-	if (val == missing) {
-	  out << setw(10) << "****";
-	} else {
-	  out << setw(10) << setprecision(4) << val;
-	}
-	break;
-      } // INT8
+        case Mdvx::ENCODING_INT8: {
+          ui08 val = ((ui08 *) _volBuf.getPtr())[index];
+          ui08 missing = (ui08) _fhdr.missing_data_value;
+          if (val == missing) {
+            out << setw(10) << "****";
+          } else {
+            out << setw(10) << setprecision(4) << val;
+          }
+          break;
+        } // INT8
 
-      case Mdvx::ENCODING_INT16: {
-	ui16 val = ((ui16 *) _volBuf.getPtr())[index];
-	ui16 missing = (ui16) _fhdr.missing_data_value;
-	if (val == missing) {
-	  out << setw(10) << "****";
-	} else {
-	  out << setw(10) << setprecision(4) << val;
-	}
-	break;
-      } // INT16
+        case Mdvx::ENCODING_INT16: {
+          ui16 val = ((ui16 *) _volBuf.getPtr())[index];
+          ui16 missing = (ui16) _fhdr.missing_data_value;
+          if (val == missing) {
+            out << setw(10) << "****";
+          } else {
+            out << setw(10) << setprecision(4) << val;
+          }
+          break;
+        } // INT16
       
-      case Mdvx::ENCODING_FLOAT32: {
-	fl32 val = ((fl32 *) _volBuf.getPtr())[index];
-	fl32 missing = (fl32) _fhdr.missing_data_value;
-	if (val == missing) {
-	  out << setw(10) << "****";
-	} else {
-	  out << setw(10) << setprecision(4) << val;
-	}
-	break;
-      } // FLOAT32
+        case Mdvx::ENCODING_FLOAT32: {
+          fl32 val = ((fl32 *) _volBuf.getPtr())[index];
+          fl32 missing = (fl32) _fhdr.missing_data_value;
+          if (val == missing) {
+            out << setw(10) << "****";
+          } else {
+            out << setw(10) << setprecision(4) << val;
+          }
+          break;
+        } // FLOAT32
 
       } // switch
 
@@ -7057,230 +7104,230 @@ void MdvxField::_plane_fill_missing(int encoding_type,
 
   switch (encoding_type) {
     
-  case Mdvx::ENCODING_INT8: {
+    case Mdvx::ENCODING_INT8: {
 
-    ui08 missing = (ui08) missing_data_value;
-    ui08 *a = (ui08 *) array;
+      ui08 missing = (ui08) missing_data_value;
+      ui08 *a = (ui08 *) array;
 
-    // check that less than 75 % is missing
+      // check that less than 75 % is missing
 
-    int64_t count = 0;
-    for (int64_t i = 0; i < nx * ny; i++) {
-      if (a[i] == missing) {
-	count++;
+      int64_t count = 0;
+      for (int64_t i = 0; i < nx * ny; i++) {
+        if (a[i] == missing) {
+          count++;
+        }
       }
-    }
-    if ((double) count / (double) (nx * ny) > 0.75) {
-      return;
-    }
+      if ((double) count / (double) (nx * ny) > 0.75) {
+        return;
+      }
     
-    // create pointer array for efficiency
+      // create pointer array for efficiency
     
-    ui08 **aa = new ui08 *[ny];
-    for (int iy = 0; iy < ny; iy++) {
-      aa[iy] = a + iy * nx;
-    }
-
-    // loop through, copying adjacent values to replace missing ones
-
-    int nloop = 0;
-    int maxloops = count;
-    bool done = false;
-    while (!done) {
-      done = true;
+      ui08 **aa = new ui08 *[ny];
       for (int iy = 0; iy < ny; iy++) {
-	for (int ix = 0; ix < nx; ix++) {
-	  if (aa[iy][ix] == missing) {
-	    if (iy < (ny - 1) && aa[iy + 1][ix] != missing) {
-	      aa[iy][ix] = aa[iy + 1][ix];
-	      iy++; // prevents filling in from one side only
-	      if (iy >= ny - 1) {
-		break;
-	      }
-	      done = false;
-	    } else if (ix < (nx - 1) && aa[iy][ix + 1] != missing) {
-	      aa[iy][ix] = aa[iy][ix + 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    } else if (iy > 0 && aa[iy - 1][ix] != missing) {
-	      aa[iy][ix] = aa[iy - 1][ix];
-	      iy++; // prevents filling in from one side only
-	      if (iy >= ny - 1) {
-		break;
-	      }
-	      done = false;
-	    } else if (ix > 0 && aa[iy][ix - 1] != missing) {
-	      aa[iy][ix] = aa[iy][ix - 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    }
-	  } // if (aa[iy][ix] == missing
-	} // ix
-      } // iy
-      nloop++;
-      if (nloop > maxloops) {
-        delete [] aa;
-	return;
+        aa[iy] = a + iy * nx;
       }
-    } // while (!done)
 
-    delete[] aa;
+      // loop through, copying adjacent values to replace missing ones
 
-    break;
+      int nloop = 0;
+      int maxloops = count;
+      bool done = false;
+      while (!done) {
+        done = true;
+        for (int iy = 0; iy < ny; iy++) {
+          for (int ix = 0; ix < nx; ix++) {
+            if (aa[iy][ix] == missing) {
+              if (iy < (ny - 1) && aa[iy + 1][ix] != missing) {
+                aa[iy][ix] = aa[iy + 1][ix];
+                iy++; // prevents filling in from one side only
+                if (iy >= ny - 1) {
+                  break;
+                }
+                done = false;
+              } else if (ix < (nx - 1) && aa[iy][ix + 1] != missing) {
+                aa[iy][ix] = aa[iy][ix + 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              } else if (iy > 0 && aa[iy - 1][ix] != missing) {
+                aa[iy][ix] = aa[iy - 1][ix];
+                iy++; // prevents filling in from one side only
+                if (iy >= ny - 1) {
+                  break;
+                }
+                done = false;
+              } else if (ix > 0 && aa[iy][ix - 1] != missing) {
+                aa[iy][ix] = aa[iy][ix - 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              }
+            } // if (aa[iy][ix] == missing
+          } // ix
+        } // iy
+        nloop++;
+        if (nloop > maxloops) {
+          delete [] aa;
+          return;
+        }
+      } // while (!done)
 
-  } // case Mdvx::ENCODING_INT8
+      delete[] aa;
 
-  case Mdvx::ENCODING_INT16: {
+      break;
+
+    } // case Mdvx::ENCODING_INT8
+
+    case Mdvx::ENCODING_INT16: {
 
 
-    ui16 missing = (ui16) missing_data_value;
-    ui16 *a = (ui16 *) array;
+      ui16 missing = (ui16) missing_data_value;
+      ui16 *a = (ui16 *) array;
 
-    // check that less than 75 % is missing
+      // check that less than 75 % is missing
 
-    int64_t count = 0;
-    for (int64_t i = 0; i < nx * ny; i++) {
-      if (a[i] == missing) {
-	count++;
+      int64_t count = 0;
+      for (int64_t i = 0; i < nx * ny; i++) {
+        if (a[i] == missing) {
+          count++;
+        }
       }
-    }
-    if ((double) count / (double) (nx * ny) > 0.75) {
-      return;
-    }
+      if ((double) count / (double) (nx * ny) > 0.75) {
+        return;
+      }
     
-    // create pointer array for efficiency
+      // create pointer array for efficiency
     
-    ui16 **aa = new ui16 *[ny];
-    for (int iy = 0; iy < ny; iy++) {
-      aa[iy] = a + iy * nx;
-    }
-
-    // loop through, copying adjacent values to replace missing ones
-
-    int nloop = 0;
-    int maxloops = count;
-    bool done = false;
-    while (!done) {
-      done = true;
+      ui16 **aa = new ui16 *[ny];
       for (int iy = 0; iy < ny; iy++) {
-	for (int ix = 0; ix < nx; ix++) {
-	  if (aa[iy][ix] == missing) {
-	    if (iy < (ny - 1) && aa[iy + 1][ix] != missing) {
-	      aa[iy][ix] = aa[iy + 1][ix];
-	      iy++; // prevents filling in from one side only
-	      if (iy >= ny - 1) {
-		break;
-	      }
-	      done = false;
-	    } else if (ix < (nx - 1) && aa[iy][ix + 1] != missing) {
-	      aa[iy][ix] = aa[iy][ix + 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    } else if (iy > 0 && aa[iy - 1][ix] != missing) {
-	      aa[iy][ix] = aa[iy - 1][ix];
-	      iy++; // prevents filling in from one side only
-	      if (iy >= ny - 1) {
-		break;
-	      }
-	      done = false;
-	    } else if (ix > 0 && aa[iy][ix - 1] != missing) {
-	      aa[iy][ix] = aa[iy][ix - 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    }
-	  } // if (aa[iy][ix] == missing
-	} // ix
-      } // iy
-      nloop++;
-      if (nloop > maxloops) {
-        delete [] aa;
-	return;
+        aa[iy] = a + iy * nx;
       }
-    } // while (!done)
 
-    delete[] aa;
+      // loop through, copying adjacent values to replace missing ones
 
-    break;
+      int nloop = 0;
+      int maxloops = count;
+      bool done = false;
+      while (!done) {
+        done = true;
+        for (int iy = 0; iy < ny; iy++) {
+          for (int ix = 0; ix < nx; ix++) {
+            if (aa[iy][ix] == missing) {
+              if (iy < (ny - 1) && aa[iy + 1][ix] != missing) {
+                aa[iy][ix] = aa[iy + 1][ix];
+                iy++; // prevents filling in from one side only
+                if (iy >= ny - 1) {
+                  break;
+                }
+                done = false;
+              } else if (ix < (nx - 1) && aa[iy][ix + 1] != missing) {
+                aa[iy][ix] = aa[iy][ix + 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              } else if (iy > 0 && aa[iy - 1][ix] != missing) {
+                aa[iy][ix] = aa[iy - 1][ix];
+                iy++; // prevents filling in from one side only
+                if (iy >= ny - 1) {
+                  break;
+                }
+                done = false;
+              } else if (ix > 0 && aa[iy][ix - 1] != missing) {
+                aa[iy][ix] = aa[iy][ix - 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              }
+            } // if (aa[iy][ix] == missing
+          } // ix
+        } // iy
+        nloop++;
+        if (nloop > maxloops) {
+          delete [] aa;
+          return;
+        }
+      } // while (!done)
 
-  } // case Mdvx::ENCODING_INT16
+      delete[] aa;
 
-  case Mdvx::ENCODING_FLOAT32: {
+      break;
 
-    fl32 missing = (fl32) missing_data_value;
-    fl32 *a = (fl32 *) array;
+    } // case Mdvx::ENCODING_INT16
 
-    // check that less than 75 % is missing
+    case Mdvx::ENCODING_FLOAT32: {
 
-    int64_t count = 0;
-    for (int64_t i = 0; i < nx * ny; i++) {
-      if (a[i] == missing) {
-	count++;
+      fl32 missing = (fl32) missing_data_value;
+      fl32 *a = (fl32 *) array;
+
+      // check that less than 75 % is missing
+
+      int64_t count = 0;
+      for (int64_t i = 0; i < nx * ny; i++) {
+        if (a[i] == missing) {
+          count++;
+        }
       }
-    }
 
-    if ((double) count / (double) (nx * ny) > 0.75) {
-      return;
-    }
+      if ((double) count / (double) (nx * ny) > 0.75) {
+        return;
+      }
     
-    // create pointer array for efficiency
+      // create pointer array for efficiency
     
-    fl32 **aa = new fl32 *[ny];
-    for (int iy = 0; iy < ny; iy++) {
-      aa[iy] = a + iy * nx;
-    }
-
-    // loop through, copying adjacent values to replace missing ones
-
-    int nloop = 0;
-    int maxloops = count;
-    bool done = false;
-    while (!done) {
-      done = true;
+      fl32 **aa = new fl32 *[ny];
       for (int iy = 0; iy < ny; iy++) {
-	for (int ix = 0; ix < nx; ix++) {
-	  if (aa[iy][ix] == missing) {
-	    if (iy < (ny - 1) && aa[iy + 1][ix] != missing) {
-	      aa[iy][ix] = aa[iy + 1][ix];
-	      iy++; // prevents filling in from one side only
-	      if (iy >= ny - 1) {
-		break;
-	      }
-	      done = false;
-	    } else if (ix < (nx - 1) && aa[iy][ix + 1] != missing) {
-	      aa[iy][ix] = aa[iy][ix + 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    } else if (iy > 0 && aa[iy - 1][ix] != missing) {
-	      aa[iy][ix] = aa[iy - 1][ix];
-	      iy++; // prevents filling in from one side only
-	      if (iy >= ny - 1) {
-		break;
-	      }
-	      done = false;
-	    } else if (ix > 0 && aa[iy][ix - 1] != missing) {
-	      aa[iy][ix] = aa[iy][ix - 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    }
-	  } // if (aa[iy][ix] == missing
-	} // ix
-      } // iy
-      nloop++;
-      if (nloop > maxloops) {
-        delete [] aa;
-	return;
+        aa[iy] = a + iy * nx;
       }
-    } // while (!done)
 
-    delete[] aa;
+      // loop through, copying adjacent values to replace missing ones
 
-    break;
+      int nloop = 0;
+      int maxloops = count;
+      bool done = false;
+      while (!done) {
+        done = true;
+        for (int iy = 0; iy < ny; iy++) {
+          for (int ix = 0; ix < nx; ix++) {
+            if (aa[iy][ix] == missing) {
+              if (iy < (ny - 1) && aa[iy + 1][ix] != missing) {
+                aa[iy][ix] = aa[iy + 1][ix];
+                iy++; // prevents filling in from one side only
+                if (iy >= ny - 1) {
+                  break;
+                }
+                done = false;
+              } else if (ix < (nx - 1) && aa[iy][ix + 1] != missing) {
+                aa[iy][ix] = aa[iy][ix + 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              } else if (iy > 0 && aa[iy - 1][ix] != missing) {
+                aa[iy][ix] = aa[iy - 1][ix];
+                iy++; // prevents filling in from one side only
+                if (iy >= ny - 1) {
+                  break;
+                }
+                done = false;
+              } else if (ix > 0 && aa[iy][ix - 1] != missing) {
+                aa[iy][ix] = aa[iy][ix - 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              }
+            } // if (aa[iy][ix] == missing
+          } // ix
+        } // iy
+        nloop++;
+        if (nloop > maxloops) {
+          delete [] aa;
+          return;
+        }
+      } // while (!done)
 
-  } // case Mdvx::ENCODING_FLOAT32
+      delete[] aa;
 
-  case Mdvx::ENCODING_RGBA32: {
-    // no-op
-  }
+      break;
+
+    } // case Mdvx::ENCODING_FLOAT32
+
+    case Mdvx::ENCODING_RGBA32: {
+      // no-op
+    }
 
   } // switch
 
@@ -7299,239 +7346,239 @@ void MdvxField::_vsection_fill_missing(int encoding_type,
 
   switch (encoding_type) {
     
-  case Mdvx::ENCODING_INT8: {
+    case Mdvx::ENCODING_INT8: {
 
-    ui08 missing = (ui08) missing_data_value;
-    ui08 *a = (ui08 *) array;
+      ui08 missing = (ui08) missing_data_value;
+      ui08 *a = (ui08 *) array;
 
-    // check that less than 75 % is missing
+      // check that less than 75 % is missing
 
-    int64_t count = 0;
-    for (int64_t i = 0; i < nx * nz; i++) {
-      if (a[i] == missing) {
-	count++;
-      }
-    }
-    if ((double) count / (double) (nx * nz) > 0.75) {
-      return;
-    }
-    
-    // create pointer array for efficiency
-    
-    ui08 **aa = new ui08 *[nz];
-    for (int iz = 0; iz < nz; iz++) {
-      aa[iz] = a + iz * nx;
-    }
-
-    // check each X value to see if all data is missing at that point
-
-    vector<bool> allMissing;
-    for (int ix = 0; ix < nx; ix++) {
-      bool all_missing = true;
-      for (int iz = 0; iz < nz; iz++) {
-        if (aa[iz][ix] != missing) {
-          all_missing = false;
-          break;
+      int64_t count = 0;
+      for (int64_t i = 0; i < nx * nz; i++) {
+        if (a[i] == missing) {
+          count++;
         }
       }
-      allMissing.push_back(all_missing);
-    }
-          
-    // loop through, copying adjacent values to replace missing ones
-
-    int nloop = 0;
-    int maxloops = count;
-    bool done = false;
-    while (!done) {
-      done = true;
+      if ((double) count / (double) (nx * nz) > 0.75) {
+        return;
+      }
+    
+      // create pointer array for efficiency
+    
+      ui08 **aa = new ui08 *[nz];
       for (int iz = 0; iz < nz; iz++) {
-	for (int ix = 0; ix < nx; ix++) {
-          if (allMissing[ix]) {
-            continue;
+        aa[iz] = a + iz * nx;
+      }
+
+      // check each X value to see if all data is missing at that point
+
+      vector<bool> allMissing;
+      for (int ix = 0; ix < nx; ix++) {
+        bool all_missing = true;
+        for (int iz = 0; iz < nz; iz++) {
+          if (aa[iz][ix] != missing) {
+            all_missing = false;
+            break;
           }
-	  if (aa[iz][ix] == missing) {
-	    if (ix < (nx - 1) && aa[iz][ix + 1] != missing) {
-	      aa[iz][ix] = aa[iz][ix + 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    } else if (ix > 0 && aa[iz][ix - 1] != missing) {
-	      aa[iz][ix] = aa[iz][ix - 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    }
-	  } // if (aa[iz][ix] == missing
-	} // ix
-      } // iz
-      nloop++;
-      if (nloop > maxloops) {
-        delete [] aa;
-	return;
+        }
+        allMissing.push_back(all_missing);
       }
-    } // while (!done)
+          
+      // loop through, copying adjacent values to replace missing ones
 
-    delete[] aa;
+      int nloop = 0;
+      int maxloops = count;
+      bool done = false;
+      while (!done) {
+        done = true;
+        for (int iz = 0; iz < nz; iz++) {
+          for (int ix = 0; ix < nx; ix++) {
+            if (allMissing[ix]) {
+              continue;
+            }
+            if (aa[iz][ix] == missing) {
+              if (ix < (nx - 1) && aa[iz][ix + 1] != missing) {
+                aa[iz][ix] = aa[iz][ix + 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              } else if (ix > 0 && aa[iz][ix - 1] != missing) {
+                aa[iz][ix] = aa[iz][ix - 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              }
+            } // if (aa[iz][ix] == missing
+          } // ix
+        } // iz
+        nloop++;
+        if (nloop > maxloops) {
+          delete [] aa;
+          return;
+        }
+      } // while (!done)
 
-    break;
+      delete[] aa;
 
-  } // case Mdvx::ENCODING_INT8
+      break;
 
-  case Mdvx::ENCODING_INT16: {
+    } // case Mdvx::ENCODING_INT8
+
+    case Mdvx::ENCODING_INT16: {
 
 
-    ui16 missing = (ui16) missing_data_value;
-    ui16 *a = (ui16 *) array;
+      ui16 missing = (ui16) missing_data_value;
+      ui16 *a = (ui16 *) array;
 
-    // check that less than 75 % is missing
+      // check that less than 75 % is missing
 
-    int64_t count = 0;
-    for (int64_t i = 0; i < nx * nz; i++) {
-      if (a[i] == missing) {
-	count++;
-      }
-    }
-    if ((double) count / (double) (nx * nz) > 0.75) {
-      return;
-    }
-    
-    // create pointer array for efficiency
-    
-    ui16 **aa = new ui16 *[nz];
-    for (int iz = 0; iz < nz; iz++) {
-      aa[iz] = a + iz * nx;
-    }
-
-    // check each X value to see if all data is missing at that point
-
-    vector<bool> allMissing;
-    for (int ix = 0; ix < nx; ix++) {
-      bool all_missing = true;
-      for (int iz = 0; iz < nz; iz++) {
-        if (aa[iz][ix] != missing) {
-          all_missing = false;
-          break;
+      int64_t count = 0;
+      for (int64_t i = 0; i < nx * nz; i++) {
+        if (a[i] == missing) {
+          count++;
         }
       }
-      allMissing.push_back(all_missing);
-    }
-          
-    // loop through, copying adjacent values to replace missing ones
-
-    int nloop = 0;
-    int maxloops = count;
-    bool done = false;
-    while (!done) {
-      done = true;
+      if ((double) count / (double) (nx * nz) > 0.75) {
+        return;
+      }
+    
+      // create pointer array for efficiency
+    
+      ui16 **aa = new ui16 *[nz];
       for (int iz = 0; iz < nz; iz++) {
-	for (int ix = 0; ix < nx; ix++) {
-          if (allMissing[ix]) {
-            continue;
+        aa[iz] = a + iz * nx;
+      }
+
+      // check each X value to see if all data is missing at that point
+
+      vector<bool> allMissing;
+      for (int ix = 0; ix < nx; ix++) {
+        bool all_missing = true;
+        for (int iz = 0; iz < nz; iz++) {
+          if (aa[iz][ix] != missing) {
+            all_missing = false;
+            break;
           }
-	  if (aa[iz][ix] == missing) {
-	    if (ix < (nx - 1) && aa[iz][ix + 1] != missing) {
-	      aa[iz][ix] = aa[iz][ix + 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    } else if (ix > 0 && aa[iz][ix - 1] != missing) {
-	      aa[iz][ix] = aa[iz][ix - 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    }
-	  } // if (aa[iz][ix] == missing
-	} // ix
-      } // iz
-      nloop++;
-      if (nloop > maxloops) {
-        delete [] aa;
-	return;
+        }
+        allMissing.push_back(all_missing);
       }
-    } // while (!done)
+          
+      // loop through, copying adjacent values to replace missing ones
 
-    delete[] aa;
+      int nloop = 0;
+      int maxloops = count;
+      bool done = false;
+      while (!done) {
+        done = true;
+        for (int iz = 0; iz < nz; iz++) {
+          for (int ix = 0; ix < nx; ix++) {
+            if (allMissing[ix]) {
+              continue;
+            }
+            if (aa[iz][ix] == missing) {
+              if (ix < (nx - 1) && aa[iz][ix + 1] != missing) {
+                aa[iz][ix] = aa[iz][ix + 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              } else if (ix > 0 && aa[iz][ix - 1] != missing) {
+                aa[iz][ix] = aa[iz][ix - 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              }
+            } // if (aa[iz][ix] == missing
+          } // ix
+        } // iz
+        nloop++;
+        if (nloop > maxloops) {
+          delete [] aa;
+          return;
+        }
+      } // while (!done)
 
-    break;
+      delete[] aa;
 
-  } // case Mdvx::ENCODING_INT16
+      break;
 
-  case Mdvx::ENCODING_FLOAT32: {
+    } // case Mdvx::ENCODING_INT16
 
-    fl32 missing = (fl32) missing_data_value;
-    fl32 *a = (fl32 *) array;
+    case Mdvx::ENCODING_FLOAT32: {
 
-    // check that less than 75 % is missing
+      fl32 missing = (fl32) missing_data_value;
+      fl32 *a = (fl32 *) array;
 
-    int count = 0;
-    for (int i = 0; i < nx * nz; i++) {
-      if (a[i] == missing) {
-	count++;
-      }
-    }
+      // check that less than 75 % is missing
 
-    if ((double) count / (double) (nx * nz) > 0.75) {
-      return;
-    }
-    
-    // create pointer array for efficiency
-    
-    fl32 **aa = new fl32 *[nz];
-    for (int iz = 0; iz < nz; iz++) {
-      aa[iz] = a + iz * nx;
-    }
-
-    // check each X value to see if all data is missing at that point
-
-    vector<bool> allMissing;
-    for (int ix = 0; ix < nx; ix++) {
-      bool all_missing = true;
-      for (int iz = 0; iz < nz; iz++) {
-        if (aa[iz][ix] != missing) {
-          all_missing = false;
-          break;
+      int count = 0;
+      for (int i = 0; i < nx * nz; i++) {
+        if (a[i] == missing) {
+          count++;
         }
       }
-      allMissing.push_back(all_missing);
-    }
-          
-    // loop through, copying adjacent values to replace missing ones
 
-    int nloop = 0;
-    int maxloops = count;
-    bool done = false;
-    while (!done) {
-      done = true;
-      for (int iz = 0; iz < nz; iz++) {
-	for (int ix = 0; ix < nx; ix++) {
-          if (allMissing[ix]) {
-            continue;
-          }
-	  if (aa[iz][ix] == missing) {
-	    if (ix < (nx - 1) && aa[iz][ix + 1] != missing) {
-	      aa[iz][ix] = aa[iz][ix + 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    } else if (ix > 0 && aa[iz][ix - 1] != missing) {
-	      aa[iz][ix] = aa[iz][ix - 1];
-	      ix++; // prevents filling in from one side only
-	      done = false;
-	    }
-	  } // if (aa[iz][ix] == missing
-	} // ix
-      } // iz
-      nloop++;
-      if (nloop > maxloops) {
-        delete [] aa;
-	return;
+      if ((double) count / (double) (nx * nz) > 0.75) {
+        return;
       }
-    } // while (!done)
+    
+      // create pointer array for efficiency
+    
+      fl32 **aa = new fl32 *[nz];
+      for (int iz = 0; iz < nz; iz++) {
+        aa[iz] = a + iz * nx;
+      }
 
-    delete[] aa;
+      // check each X value to see if all data is missing at that point
 
-    break;
+      vector<bool> allMissing;
+      for (int ix = 0; ix < nx; ix++) {
+        bool all_missing = true;
+        for (int iz = 0; iz < nz; iz++) {
+          if (aa[iz][ix] != missing) {
+            all_missing = false;
+            break;
+          }
+        }
+        allMissing.push_back(all_missing);
+      }
+          
+      // loop through, copying adjacent values to replace missing ones
 
-  } // case Mdvx::ENCODING_FLOAT32
+      int nloop = 0;
+      int maxloops = count;
+      bool done = false;
+      while (!done) {
+        done = true;
+        for (int iz = 0; iz < nz; iz++) {
+          for (int ix = 0; ix < nx; ix++) {
+            if (allMissing[ix]) {
+              continue;
+            }
+            if (aa[iz][ix] == missing) {
+              if (ix < (nx - 1) && aa[iz][ix + 1] != missing) {
+                aa[iz][ix] = aa[iz][ix + 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              } else if (ix > 0 && aa[iz][ix - 1] != missing) {
+                aa[iz][ix] = aa[iz][ix - 1];
+                ix++; // prevents filling in from one side only
+                done = false;
+              }
+            } // if (aa[iz][ix] == missing
+          } // ix
+        } // iz
+        nloop++;
+        if (nloop > maxloops) {
+          delete [] aa;
+          return;
+        }
+      } // while (!done)
 
-  case Mdvx::ENCODING_RGBA32: {
-    // no-op
-  }
+      delete[] aa;
+
+      break;
+
+    } // case Mdvx::ENCODING_FLOAT32
+
+    case Mdvx::ENCODING_RGBA32: {
+      // no-op
+    }
 
   } // switch
 
