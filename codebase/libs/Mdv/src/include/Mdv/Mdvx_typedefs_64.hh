@@ -356,8 +356,9 @@ typedef struct {
  
   si32 proj_type;              // Projection Type (e.g. PROJ_LATLON)
   
-  si32 encoding_type;          // Type of data encoding (e.g.
-                               //   INT8, FLOAT32)
+  si32 encoding_type;          // Type of data encoding:
+                               //   ENCODING_INT8, ENCODING_INT16,
+                               //   ENCODING_FLOAT32, ENCODING_RGBA32
 
   si64 data_element_nbytes;    // Size of each data element
                                //   (in bytes)

@@ -106,6 +106,9 @@ MdvxField::MdvxField(const MdvxField &rhs)
 //
 //  In addition, for INT8 and INT16, set:
 //    scale, bias
+//
+// All constructors leave internal fields uncompressed,
+// and set write-pending compression appropriately.
 
 MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
 		     const Mdvx::vlevel_header_t &v_hdr,
@@ -169,66 +172,87 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
 
   if (vol_data != NULL) {
 
-    // Check for NaN, infinity values.
-    _check_finite(vol_data);
+    // add the data
 
     _volBuf.add(vol_data, _fhdr.volume_size);
-
-    if (compute_min_and_max) {
-      computeMinAndMax(true);
-    }
 
   } else {
 
     _volBuf.prepare(_fhdr.volume_size);
     if (init_with_missing) {
       switch (_fhdr.encoding_type) {
-        case Mdvx::ENCODING_INT8:
-          {
-            ui08 missing = (ui08) _fhdr.missing_data_value;
-            memset(_volBuf.getPtr(), missing, _fhdr.volume_size);
-          }
+        case Mdvx::ENCODING_INT8: {
+          ui08 missing = (ui08) _fhdr.missing_data_value;
+          memset(_volBuf.getPtr(), missing, _fhdr.volume_size);
+          _fhdr.data_element_nbytes = 1;
           break;
-        case Mdvx::ENCODING_INT16:
-          {
-            int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
-            if (npts <= (int64_t) (_fhdr.volume_size / sizeof(ui16))) {
-              ui16 missing = (ui16) _fhdr.missing_data_value;
-              ui16 *val = (ui16 *) _volBuf.getPtr();
-              for (int64_t i = 0; i < npts; i++, val++) {
-                *val = missing;
-              }
+        }
+        case Mdvx::ENCODING_INT16: {
+          int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
+          if (npts <= (int64_t) (_fhdr.volume_size / sizeof(ui16))) {
+            ui16 missing = (ui16) _fhdr.missing_data_value;
+            ui16 *val = (ui16 *) _volBuf.getPtr();
+            for (int64_t i = 0; i < npts; i++, val++) {
+              *val = missing;
             }
           }
+          _fhdr.data_element_nbytes = 2;
           break;
-        case Mdvx::ENCODING_FLOAT32:
-          {
-            int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
-            if (npts <= (int64_t) (_fhdr.volume_size / sizeof(fl32))) {
-              fl32 missing = (fl32) _fhdr.missing_data_value;
-              fl32 *val = (fl32 *) _volBuf.getPtr();
-              for (int64_t i = 0; i < npts; i++, val++) {
-                *val = missing;
-              }
+        }
+        case Mdvx::ENCODING_FLOAT32: {
+          int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
+          if (npts <= (int64_t) (_fhdr.volume_size / sizeof(fl32))) {
+            fl32 missing = (fl32) _fhdr.missing_data_value;
+            fl32 *val = (fl32 *) _volBuf.getPtr();
+            for (int64_t i = 0; i < npts; i++, val++) {
+              *val = missing;
             }
           }
+          _fhdr.data_element_nbytes = 4;
           break;
-        case Mdvx::ENCODING_RGBA32:
-          {
-            int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
-            if (npts <= (int64_t) (_fhdr.volume_size / sizeof(ui32))) {
-              ui32 missing = (ui32) _fhdr.missing_data_value;
-              ui32 *val = (ui32 *) _volBuf.getPtr();
-              for (int64_t i = 0; i < npts; i++, val++) {
-                *val = missing;
-              }
+        }
+        case Mdvx::ENCODING_RGBA32: {
+          int64_t npts = _fhdr.nx * _fhdr.ny * _fhdr.nz;
+          if (npts <= (int64_t) (_fhdr.volume_size / sizeof(ui32))) {
+            ui32 missing = (ui32) _fhdr.missing_data_value;
+            ui32 *val = (ui32 *) _volBuf.getPtr();
+            for (int64_t i = 0; i < npts; i++, val++) {
+              *val = missing;
             }
           }
+          _fhdr.data_element_nbytes = 4;
           break;
+        }
       }
+
+      _fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+      _fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+      _fhdr.scaling_type = Mdvx::SCALING_NONE;
+      _fhdr.volume_size =
+        _fhdr.data_element_nbytes * _fhdr.nx * _fhdr.ny * _fhdr.nz;
+
     } // if (init_with_missing)
 
   } // if (vol_data != NULL)
+  
+  // uncompress if needed
+  // compression is deferred until write
+
+  int compression_type = _fhdr.compression_type;
+  if (compression_type != Mdvx::COMPRESSION_NONE) {
+    decompress();
+    requestCompression(compression_type);
+  }
+  
+  // Check for NaN, infinity values.
+  
+  _check_finite(getVol());
+
+  // compute min and max
+
+  if (compute_min_and_max) {
+    computeMinAndMax(true);
+  }
 
 }
 
@@ -236,10 +260,15 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
 // Constructor for a handle for a single plane, given a handle which
 // has the entire data volume.
 // The data for the plane is copied from the volume.
+//
+// All constructors leave internal fields uncompressed,
+// and set write-pending compression appropriately.
 
 MdvxField::MdvxField(const MdvxField &rhs, int plane_num)
   
 {
+
+  // copy headers
 
   _fhdr = rhs._fhdr;
   _vhdr = rhs._vhdr;
@@ -256,100 +285,83 @@ MdvxField::MdvxField(const MdvxField &rhs, int plane_num)
     _vhdrFile = NULL;
   }
 
-  if (_fhdr.proj_type != Mdvx::PROJ_VSECTION) {
+  // copy the data
 
-    // not vert section
+  _volBuf = rhs._volBuf;
 
-    _fhdr.nz = 1;
-    
-    MEM_zero(_vhdr);
-    _vhdr.level[0] = rhs._vhdr.level[plane_num];
-    
-    _fhdr.grid_minz =
-      rhs._fhdr.grid_minz + plane_num * rhs._fhdr.grid_dz;
+  // uncompress as appropriate
   
-    void *rhs_vol = rhs._volBuf.getPtr();
-
-    if (_fhdr.compression_type == Mdvx::COMPRESSION_NONE) {
-      
-      // not compressed
-      
-      int64_t plane_len = 
-	_fhdr.nx * _fhdr.ny * _fhdr.data_element_nbytes;
-      int64_t in_plane_offset = plane_len * plane_num;
-      void *plane_ptr = (ui08 *) rhs_vol + in_plane_offset;
-      _volBuf.add(plane_ptr, plane_len);
-      
-    } else if (_fhdr.compression_type == Mdvx::COMPRESSION_GZIP_VOL) {
-      
-      // gzip compressed as a complete volume
-      // first decompress
-      
-      decompress();
-
-      // get the plane needed
-      
-      int64_t plane_len = 
-	_fhdr.nx * _fhdr.ny * _fhdr.data_element_nbytes;
-      int64_t in_plane_offset = plane_len * plane_num;
-      void *plane_ptr = (ui08 *) rhs_vol + in_plane_offset;
-      _volBuf.add(plane_ptr, plane_len);
-      
-      // set compression
-
-      requestCompression(Mdvx::COMPRESSION_GZIP_VOL);
-      
+  int compression_type = _fhdr.compression_type;
+  size_t nBytesIn = 
+    _fhdr.nx * _fhdr.ny * _fhdr.nz  * _fhdr.data_element_nbytes;
+  if (decompress()) {
+    // data decompression error
+    if (nBytesIn == _volBuf.getLen()) {
+      cerr << "WARNING - MdvxField single-plane copy constructor" << endl;
+      cerr << "  Decompression error" << endl;
+      cerr << "  Field name: " << _fhdr.field_name << endl;
+      cerr << "  Size matched uncompressed size" << endl;
+      cerr << "  Assuming not compressed" << endl;
+      _fhdr.compression_type = Mdvx::COMPRESSION_NONE;
     } else {
-      
-      // compressed
-      
-      int in_nz = rhs._fhdr.nz;
-      ui32 be_plane_offset = ((ui32 *) rhs_vol)[plane_num];
-      ui32 be_plane_len = ((ui32 *) rhs_vol)[in_nz + plane_num];
-      ui32 in_plane_offset = BE_to_ui32(be_plane_offset);
-      ui32 plane_len = BE_to_ui32(be_plane_len);
-      
-      ui32 be_out_plane_offset = BE_from_ui32(0);
-      
-      _volBuf.add(&be_out_plane_offset, sizeof(ui32));
-      _volBuf.add(&be_plane_len, sizeof(ui32));
-      void *plane_ptr =
-	(ui08 *) rhs_vol + 2 * in_nz * sizeof(ui32) + in_plane_offset;
-      _volBuf.add(plane_ptr, plane_len);
-      
+      cerr << "WARNING - MdvxField single-plane copy constructor" << endl;
+      cerr << "  Decompression error" << endl;
+      cerr << "  Field name: " << _fhdr.field_name << endl;
+      _fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+      _fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+      _fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+      _fhdr.scaling_type = Mdvx::SCALING_NONE;
+      _fhdr.volume_size = 0;
+      _fhdr.data_element_nbytes = 0;
+      _fhdr.nx = 0;
+      _fhdr.ny = 0;
+      _fhdr.nz = 0;
+      _volBuf.clear();
+    }
+    return;
+  }
+
+  if (_fhdr.proj_type == Mdvx::PROJ_VSECTION) {
+    
+    // vert section data
+
+    if (_fhdr.ny > 1) {
+      // copy the plane
+      MemBuf tmpBuf;
+      int64_t nbytesPlane = _fhdr.nx * _fhdr.nz * _fhdr.data_element_nbytes;
+      int64_t planeOffset =  plane_num * nbytesPlane;
+      void *planePtr = (ui08 *) _volBuf.getPtr() + planeOffset;
+      tmpBuf.add(planePtr, nbytesPlane);
+      _volBuf = tmpBuf;
+      _fhdr.ny = 1;
     }
 
   } else {
 
-    // vert section
-
-    _volBuf = rhs._volBuf;
-
-    if (_fhdr.ny == 1) {
-      return;
-    }
+    // horiz data
     
-    // uncompress as required
-    
-    int compression_type = _fhdr.compression_type;
-    if (decompress()) {
-      return;
+    if (_fhdr.nz > 1) {
+      // copy the plane
+      MemBuf tmpBuf;
+      int64_t nbytesPlane = _fhdr.nx * _fhdr.ny * _fhdr.data_element_nbytes;
+      int64_t planeOffset =  plane_num * nbytesPlane;
+      void *planePtr = (ui08 *) _volBuf.getPtr() + planeOffset;
+      tmpBuf.add(planePtr, nbytesPlane);
+      _volBuf = tmpBuf;
+      _fhdr.nz = 1;
     }
-
-    // copy the plane
-
-    MemBuf tmpBuf;
-    int64_t nbytes = _fhdr.nx * _fhdr.nz;
-    tmpBuf.add((char *) _volBuf.getPtr() + plane_num * nbytes, nbytes);
-    _volBuf = tmpBuf;
-    _fhdr.ny = 1;
-
-    // set compress as required
-
-    requestCompression(compression_type);
     
   }
 
+  // set deferred compression
+
+  if (compression_type == Mdvx::COMPRESSION_NONE) {
+    requestCompression(Mdvx::COMPRESSION_NONE);
+  } else {
+    // we only use GZIP for compression now
+    requestCompression(Mdvx::COMPRESSION_GZIP);
+  }
+  
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -357,7 +369,7 @@ MdvxField::MdvxField(const MdvxField &rhs, int plane_num)
 // Constucts object for single plane from field header and data parts.
 //
 // If the plane data pointer is not NULL, space is allocated for it
-// and the data is copied in.
+// and the data is copied in. Data should not be compressed.
 //
 // If the plane data pointer is NULL, space is allocated for data based
 // on the volume_size in the field header.
@@ -382,18 +394,23 @@ MdvxField::MdvxField(int plane_num,
   _fhdr = f_hdr;
   MEM_zero(_vhdr);
   _vhdr.level[0] = v_hdr.level[plane_num];
+  _vhdr.type[0] = v_hdr.type[plane_num];
 
   _fhdr.nz = 1;
   _fhdr.grid_minz = f_hdr.grid_minz + plane_num * f_hdr.grid_dz;
+  _fhdr.volume_size = plane_size * _fhdr.data_element_nbytes;
 
   _fhdrFile = NULL;
   _vhdrFile = NULL;
 
-  if (plane_data != NULL) {
-    _volBuf.add(plane_data, plane_size);
-  } else {
+  if (plane_data == NULL) {
     _volBuf.prepare(plane_size);
+    _fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  } else {
+    _volBuf.add(plane_data, plane_size);
   }
+    
+  requestCompression(Mdvx::COMPRESSION_NONE);
 
 }
 
@@ -519,8 +536,8 @@ void MdvxField::setVolData(const void *vol_data,
   _fhdr.max_value = 0.0;
 
   // Check for NaN, infinity values.
-  _check_finite(vol_data);
-
+  _check_finite(getVol());
+  
 }
 
 void MdvxField::setVolData(const void *vol_data,
