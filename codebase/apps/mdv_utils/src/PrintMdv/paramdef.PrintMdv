@@ -521,6 +521,12 @@ paramdef boolean {
   p_help = "If set, the chunks are printed when no other flags are set, otherwise the volume might not be loaded and chunks won't be seen";
 } print_chunks;
 
+paramdef int {
+  p_default = -1;
+  p_descr = "Option to limit field data to specified number of lines.";
+  p_help = "If > 0, only the first n lines of each field will be printed.";
+} print_nlines_data;
+
 commentdef {
   p_header = "SAVING THE DATA TO AN MDV FILE";
 }

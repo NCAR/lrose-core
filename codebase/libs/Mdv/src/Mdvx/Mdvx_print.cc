@@ -1437,7 +1437,8 @@ void Mdvx::printVol(ostream &out,
                     bool printData /* = false*/,
                     bool transformToLinear /* = false*/,
                     bool printNative /* = false*/,
-                    bool printCanonical /* = false*/)
+                    bool printCanonical /* = false*/,
+                    int printNlinesData /* = -1 */)
 {
 
   out << endl;
@@ -1491,7 +1492,8 @@ void Mdvx::printVol(ostream &out,
 	  cerr << field->getErrStr() << endl;
 	}
       }
-      field->printVoldata(out, printNative, true, true, printCanonical);
+      field->printVoldata(out, printNative, true, true,
+                          printCanonical, printNlinesData);
     }
   }
 

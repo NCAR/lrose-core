@@ -1562,6 +1562,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'print_nlines_data'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("print_nlines_data");
+    tt->descr = tdrpStrDup("Option to limit field data to specified number of lines.");
+    tt->help = tdrpStrDup("If > 0, only the first n lines of each field will be printed.");
+    tt->val_offset = (char *) &print_nlines_data - &_start_;
+    tt->single_val.i = -1;
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));

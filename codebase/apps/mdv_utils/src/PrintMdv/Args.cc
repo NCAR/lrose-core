@@ -237,6 +237,15 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 
+    } else if (!strcmp(argv[i], "-nlines_data")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "print_nlines_data = %s;", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+      
     } else if (!strcmp(argv[i], "-margin")) {
       
       if (i < argc - 1) {
@@ -701,6 +710,8 @@ void Args::_usage(ostream &out)
       << "  [ -mode ? ] get mode for volume and vsection, not time_list\n"
       << "     Options: latest, closest, first_before, first_after,\n"
       << "              best_forecast, specified_forecast\n"
+      << "\n"
+      << "  [ -nlines_data ? ] only print out first nlines of data fields\n"
       << "\n"
       << "  [ -path ? ] set file path, see also -f\n"
       << "\n"

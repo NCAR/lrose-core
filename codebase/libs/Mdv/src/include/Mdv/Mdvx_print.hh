@@ -106,7 +106,8 @@ static void printVol(ostream &out,
                      bool printData = false,
                      bool transformToLinear = false,
                      bool printNative = false,
-                     bool printCanonical = false);
+                     bool printCanonical = false,
+                     int printNlinesData = -1);
 
 // print volume summary
 
