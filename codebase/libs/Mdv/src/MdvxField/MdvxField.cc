@@ -584,20 +584,20 @@ void MdvxField::clearVolData()
     return;
   }
   
-  switch (_fhdr.encoding_type)
-  {
+  switch (_fhdr.encoding_type) {
+
     case Mdvx::ENCODING_INT8 :
       _clearVolDataInt8();
       break;
-    
+      
     case Mdvx::ENCODING_INT16 :
       _clearVolDataInt16();
       break;
-    
+      
     case Mdvx::ENCODING_FLOAT32 :
       _clearVolDataFloat32();
       break;
-    
+      
     case Mdvx::ENCODING_RGBA32 :
       _clearVolDataRgba32();
       break;
@@ -607,6 +607,7 @@ void MdvxField::clearVolData()
       cerr << "   Encoding set to ENCODING_ASIS" << endl;
       cerr << "   Data not changed" << endl;
       return;
+
   } /* endswitch - _fhdr.encoding_type */
   
   return;
@@ -1048,8 +1049,9 @@ int MdvxField::transform2Log()
 
   // save current state
 
-  Mdvx::encoding_type_t encoding = (Mdvx::encoding_type_t) _fhdr.encoding_type;
-  Mdvx::compression_type_t compression =
+  Mdvx::encoding_type_t encoding_type =
+    (Mdvx::encoding_type_t) _fhdr.encoding_type;
+  Mdvx::compression_type_t compression_type =
     (Mdvx::compression_type_t) _fhdr.compression_type;
 
   // transform to float uncompressed
@@ -1107,7 +1109,7 @@ int MdvxField::transform2Log()
 
   // convert to original state
   
-  if (convertType(encoding, compression)) {
+  if (convertType(encoding_type, compression_type)) {
     _errStr += "ERROR - MdvxField::transform2Log\n";
     _errStr += "  Cannnot convert to original encoding and compression.\n";
     return -1;
@@ -1149,8 +1151,9 @@ int MdvxField::transform2Linear()
 
   // save current state
 
-  Mdvx::encoding_type_t encoding = (Mdvx::encoding_type_t) _fhdr.encoding_type;
-  Mdvx::compression_type_t compression =
+  Mdvx::encoding_type_t encoding_type =
+    (Mdvx::encoding_type_t) _fhdr.encoding_type;
+  Mdvx::compression_type_t compression_type =
     (Mdvx::compression_type_t) _fhdr.compression_type;
 
   // transform to float uncompressed
@@ -1182,7 +1185,7 @@ int MdvxField::transform2Linear()
 
   // convert to original state
   
-  if (convertType(encoding, compression)) {
+  if (convertType(encoding_type, compression_type)) {
     _errStr += "ERROR - MdvxField::transform2Linear\n";
     _errStr += "  Cannnot convert to original encoding and compression.\n";
     return -1;
@@ -1219,10 +1222,11 @@ int MdvxField::negate(bool convert_to_linear /* = false*/ )
 
   // save current state
 
-  Mdvx::encoding_type_t encoding = (Mdvx::encoding_type_t) _fhdr.encoding_type;
-  Mdvx::compression_type_t compression =
+  Mdvx::encoding_type_t encoding_type =
+    (Mdvx::encoding_type_t) _fhdr.encoding_type;
+  Mdvx::compression_type_t compression_type =
     (Mdvx::compression_type_t) _fhdr.compression_type;
-
+  
   bool convertToLinear = false;
   if (_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG &&
       convert_to_linear) {
@@ -1264,7 +1268,7 @@ int MdvxField::negate(bool convert_to_linear /* = false*/ )
 
   // convert to original state
   
-  if (convertType(encoding, compression)) {
+  if (convertType(encoding_type, compression_type)) {
     _errStr += "ERROR - MdvxField::transform2Linear\n";
     _errStr += "  Cannnot convert to original encoding and compression.\n";
     return -1;
