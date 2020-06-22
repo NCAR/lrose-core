@@ -79,6 +79,7 @@ void ForsytheFit::clear()
 {
   _xObs.clear();
   _yObs.clear();
+  _yEst.clear();
   _nObs = 0;
 }
 
@@ -147,29 +148,19 @@ double ForsytheFit::getYEst(double xx)
 }
 
 ////////////////////////////////////////////////////
-// get single y value, given the index
+// get full vector of estimated Y value
 
-double ForsytheFit::getYEst(size_t index)
+const vector<double> &ForsytheFit::getYEstVector()
 {
-  if (index > _nObs - 1) {
-    cerr << "ERROR - ForsytheFit::getYEst()" << endl;
-    cerr << "  Index out of range: " << index << endl;
-    cerr << "  Max index: " << _nObs - 1 << endl;
-    return NAN;
+  if (_yEst.size() == _nObs) {
+    // already computed
+    return _yEst;
   }
-  return _yEst[index];
-}
-
-////////////////////////////////////////////////////
-// get vector of estimated y values
-
-vector<double> ForsytheFit::getYEst() const
-{
-  vector<double> yyEst;
+  _yEst.clear();
   for (size_t ii = 0; ii < _nObs; ii++) {
-    yyEst.push_back(_yEst[ii]);
+    _yEst.push_back(getYEst(_xObs[ii]));
   }
-  return yyEst;
+  return _yEst;
 }
 
 ////////////////////////////////////////////////////
@@ -253,10 +244,10 @@ void ForsytheFit::_allocDataArrays()
 
 {
   
-  _yEst.resize(_nObs);
   _dd.resize(_nObs);
   _ee.resize(_nObs);
   _vv.resize(_nObs);
+  _yEst.clear();
   
 }
 
@@ -270,7 +261,7 @@ void ForsytheFit::_allocPolyArrays()
   _c2.resize(_order + 2);
   _ff.resize(_order + 2);
 
-  _coeffs.resize(_order + 2);
+  _coeffs.resize(_order + 1);
 
 }
 
@@ -448,7 +439,9 @@ int ForsytheFit::performFitFortran()
   double ee = 0.0;
   int nn = _nObs;
 
-  ls_poly_(&order, &ee, &nn, &fitOrder, _xObs.data(), _yObs.data(), _coeffs.data(), &sdev);  
+  ls_poly_(&order, &ee, &nn, &fitOrder, 
+           _xObs.data(), _yObs.data(),
+           _coeffs.data(), &sdev);  
   
   return 0;
 

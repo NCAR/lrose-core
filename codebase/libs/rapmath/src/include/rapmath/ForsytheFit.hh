@@ -106,13 +106,9 @@ public:
 
   double getYEst(double xx);
 
-  // get single y value, given the index
-
-  double getYEst(size_t index);
-
-  // get vector of estimated y values
-
-  vector<double> getYEst() const;
+  // get the full vector of estimated Y values
+  
+  const vector<double> &getYEstVector();
 
   // compute standard error of estimate for the fit
   
