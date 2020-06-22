@@ -56,23 +56,23 @@ int main(int argc, char **argv)
   //////////////////////
   // Checking uCurveFit
 
-  // testExponentialFit(0.1, 5.0, -5.0, 0.0, 0.1);
+  testExponentialFit(0.1, 5.0, -5.0, 0.0, 0.1);
 
-  // testExponentialFit(1.0, 0.3, -0.3, 0.0, 0.1);
+  testExponentialFit(1.0, 0.3, -0.3, 0.0, 0.1);
 
-  // testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
+  testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
 
-  // testLinearFit(0.33333, 150, 0.0, 5.0);
+  testLinearFit(0.33333, 150, 0.0, 5.0);
 
-  // testLinearFit(4.25, 9.99, 0.0, 2.0);
+  testLinearFit(4.25, 9.99, 0.0, 2.0);
 
-  // testLinearFit(-2.50, -8.88, 0.0, 0.1);
+  testLinearFit(-2.50, -8.88, 0.0, 0.1);
 
-  // testNewtRaph();
+  testNewtRaph();
 
-  // testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
+  testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
 
-  // testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
+  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
 
   vector<double> coeffs;
   coeffs.push_back(10.0);
@@ -155,15 +155,16 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   aaa[2] = a2;
   aaa[3] = a3;
 
-  double xx[100];
-  double yy[100];
+  vector<double> xx;
+  vector<double> yy;
   
   for (int ii = 0; ii < 100; ii++) {
     double noise = STATS_normal_gen(noiseMean, noiseSdev);
-    double val = ii;
-    xx[ii] = val;
-    yy[ii] = aaa[0] + aaa[1] * val + aaa[2] * val * val +
-      aaa[3] * val * val * val + noise;
+    double xval = ii;
+    xx.push_back(xval);
+    double yval = (aaa[0] + aaa[1] * xval + aaa[2] * xval * xval +
+                   aaa[3] * xval * xval * xval + noise);
+    yy.push_back(yval);
   }
 
   cerr << "====================================" << endl;
@@ -179,7 +180,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   // try uPolyFit
   
   double stdErr, rSquared;
-  uPolyFit(100, xx, yy, aaa, 4, &stdErr, &rSquared);
+  uPolyFit(xx.size(), xx.data(), yy.data(), aaa, 4, &stdErr, &rSquared);
   cerr << "---------------------------------" << endl;
   cerr << "====>> output from uPolyFit() <<====" << endl;
   cerr << "Output aaa[0]: " << aaa[0] << endl;
@@ -196,9 +197,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   // try PolyFit
 
   PolyFit poly;
-  for (int ii = 0; ii < 100; ii++) {
-    poly.addValue(xx[ii], yy[ii]);
-  }
+  poly.setValues(xx, yy);
   poly.setOrder(3);
   poly.performFit();
   vector<double> coeffs = poly.getCoeffs();
@@ -214,11 +213,8 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   // try Forsythe fit
   
   ForsytheFit forsythe;
-  for (int ii = 0; ii < 100; ii++) {
-    forsythe.addValue(xx[ii], yy[ii]);
-  }
   forsythe.setOrder(3);
-  forsythe.performFit();
+  forsythe.performFit(xx, yy);
   stdErr = forsythe.computeStdErrEst(rSquared);
   vector<double> fcoeffs = forsythe.getCoeffs();
 
@@ -298,7 +294,7 @@ static void testPolynomial(int order, int nObs,
     yy.push_back(yval);
   }
 
-  int nPasses = 10;
+  int nPasses = 100;
   cerr << "====================================" << endl;
   cerr << "Polynomial details" << endl;
   for (int mm = 0; mm <= order; mm++) {
@@ -347,10 +343,9 @@ static void testPolynomial(int order, int nObs,
   // try Forsythe fit
   
   ForsytheFit forsythe;
-  forsythe.setValues(xx, yy);
   forsythe.setOrder(order);
   for (int jj = 0; jj < nPasses; jj++) {
-    forsythe.performFit();
+    forsythe.performFit(xx, yy);
   }
   aaa = forsythe.getCoeffs();
   stdErr = forsythe.computeStdErrEst(rSquared);
@@ -362,6 +357,26 @@ static void testPolynomial(int order, int nObs,
   cerr << "stdErr: " << stdErr << endl;
   cerr << "rSquared: " << rSquared << endl;
   _printRunTime("end of ForsytheFit");
+
+  // try Forsythe fit again, setting X first then fitting Y
+  // this is more efficient if X does not change
+  
+  ForsytheFit forsythe2;
+  forsythe2.setOrder(order);
+  forsythe2.prepareForFit(xx);
+  for (int jj = 0; jj < nPasses; jj++) {
+    forsythe2.performFit(yy);
+  }
+  aaa = forsythe2.getCoeffs();
+  stdErr = forsythe2.computeStdErrEst(rSquared);
+  cerr << "---------------------------------" << endl;
+  cerr << "====>> output from ForsytheFit2() <<====" << endl;
+  for (int mm = 0; mm <= order; mm++) {
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << " (" << coeff[mm] << ")" << endl;
+  }
+  cerr << "stdErr: " << stdErr << endl;
+  cerr << "rSquared: " << rSquared << endl;
+  _printRunTime("end of ForsytheFit2");
 
   cerr << "====================================" << endl;
   cerr << endl;

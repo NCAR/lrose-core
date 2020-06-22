@@ -72,24 +72,18 @@ public:
 
   void clear();
 
-  // add a data value
-  
-  void addValue(double xx, double yy);
-
-  // set the data values
-  
-  void setValues(const vector<double> &xVals,
-                 const vector<double> &yVals);
-
   // perform a fit
   // values must have been set
   
-  virtual int performFit();
+  int performFit(const vector<double> &xVals,
+                 const vector<double> &yVals);
 
-#ifdef WITH_FORTRAN
-  virtual int performFitFortran();
-#endif
+  // Prepare for a fit, specifying the X values.
+  // This is done for efficiency, if the X values do not change.
   
+  void prepareForFit(const vector<double> &xObs);
+  int performFit(const vector<double> &yObs);
+
   // get order
   
   int getOrder() const { return _order; }
@@ -114,6 +108,10 @@ public:
   
   double computeStdErrEst(double &rSquared);
 
+#ifdef WITH_FORTRAN
+  virtual int performFitFortran();
+#endif
+  
 protected:
 private:
 
@@ -130,15 +128,12 @@ private:
 
   vector<double> _aa, _bb, _ff, _cc; // size _order + 2 (1-based)
   vector<double> _dd, _ee; // size _nObs (0-based)
+  vector<vector<double> > _bbSave, _eeSave; // if prepareForFit is used
 
   // private methods
 
-  void _init();
-
   void _allocDataArrays();
   void _allocPolyArrays();
-
-  int _doFit();
 
 };
 
