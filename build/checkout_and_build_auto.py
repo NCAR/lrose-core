@@ -978,7 +978,14 @@ def buildVortrac():
 
     cmd = "make -j 4"
     shellCmd(cmd)
+    
+    if (sys.platform == "darwin"):
+        cmd = "rsync ../Resources/*.xml vortrac.app/Contents/Resources"
+        shellCmd(cmd)
 
+    cmd = "rsync ../Resources " + prefix
+    shellCmd(cmd)
+    
     # do the install
 
     cmd = "rsync ./vortrac " + binDir
