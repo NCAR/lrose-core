@@ -670,7 +670,7 @@ public:
   
   void applyClutterFilter(int nSamples,
                           const RadarFft &fft,
-                          const RegressionFilter &regr,
+                          RegressionFilter &regr,
                           const double *window, // active window
                           const RadarComplex_t *iqOrig, // non-windowed
                           const RadarComplex_t *iqWindowed, // windowed
@@ -733,7 +733,7 @@ public:
   
   void applyRegressionFilter(int nSamples,
                              const RadarFft &fft,
-                             const RegressionFilter &regr,
+                             RegressionFilter &regr,
                              const double *window,
                              const RadarComplex_t *iqOrig, // non-windowed
                              double calibratedNoise,
@@ -821,7 +821,7 @@ public:
   
   void applyRegrFilterStagPrt(int nSamples,
                               const RadarFft &fftHalf,
-                              const RegressionFilter &regr,
+                              RegressionFilter &regr,
                               const RadarComplex_t *iqOrig,
                               double calibratedNoise,
                               bool interpAcrossNotch,
@@ -863,7 +863,7 @@ public:
   void applyRegrFilterStagPrt(int nSamples,
                               int nExpanded,
                               const RadarFft &fftExp,
-                              const RegressionFilter &regr,
+                              RegressionFilter &regr,
                               const RadarComplex_t *iqOrig,
                               double calibratedNoise,
                               bool interpAcrossNotch,

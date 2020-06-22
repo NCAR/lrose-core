@@ -64,10 +64,6 @@ public:
   
   virtual ~ForsytheFit();
 
-  // set polynomial order
-
-  void setOrder(size_t order);
-
   // clear the data values
 
   void clear();
@@ -75,13 +71,14 @@ public:
   // perform a fit
   // values must have been set
   
-  int performFit(const vector<double> &xVals,
+  int performFit(size_t order,
+                 const vector<double> &xVals,
                  const vector<double> &yVals);
 
   // Prepare for a fit, specifying the X values.
   // This is done for efficiency, if the X values do not change.
   
-  void prepareForFit(const vector<double> &xObs);
+  void prepareForFit(size_t order, const vector<double> &xObs);
   int performFit(const vector<double> &yObs);
 
   // get order
@@ -97,7 +94,7 @@ public:
   const vector<double> getCoeffs() const { return _coeffs; }
   
   // get single y value, given the x value
-
+  
   double getYEst(double xx);
 
   // get the full vector of estimated Y values
@@ -115,6 +112,8 @@ public:
 protected:
 private:
 
+  bool _prepActive;
+
   size_t _order;        // polynomial order
 
   vector<double> _coeffs; // polynomial coefficients (0-based)
@@ -129,6 +128,8 @@ private:
   vector<double> _aa, _bb, _ff, _cc; // size _order + 2 (1-based)
   vector<double> _dd, _ee; // size _nObs (0-based)
   vector<vector<double> > _bbSave, _eeSave; // if prepareForFit is used
+
+  vector<vector<double> > _xPowers; // polynomial powers of x [_nObs][_order+1]
 
   // private methods
 

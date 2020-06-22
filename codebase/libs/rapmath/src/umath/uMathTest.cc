@@ -213,8 +213,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   // try Forsythe fit
   
   ForsytheFit forsythe;
-  forsythe.setOrder(3);
-  forsythe.performFit(xx, yy);
+  forsythe.performFit(3, xx, yy);
   stdErr = forsythe.computeStdErrEst(rSquared);
   vector<double> fcoeffs = forsythe.getCoeffs();
 
@@ -343,9 +342,8 @@ static void testPolynomial(int order, int nObs,
   // try Forsythe fit
   
   ForsytheFit forsythe;
-  forsythe.setOrder(order);
   for (int jj = 0; jj < nPasses; jj++) {
-    forsythe.performFit(xx, yy);
+    forsythe.performFit(order, xx, yy);
   }
   aaa = forsythe.getCoeffs();
   stdErr = forsythe.computeStdErrEst(rSquared);
@@ -362,8 +360,7 @@ static void testPolynomial(int order, int nObs,
   // this is more efficient if X does not change
   
   ForsytheFit forsythe2;
-  forsythe2.setOrder(order);
-  forsythe2.prepareForFit(xx);
+  forsythe2.prepareForFit(order, xx);
   for (int jj = 0; jj < nPasses; jj++) {
     forsythe2.performFit(yy);
   }

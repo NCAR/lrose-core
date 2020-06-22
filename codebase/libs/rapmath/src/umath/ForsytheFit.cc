@@ -64,7 +64,6 @@ ForsytheFit::ForsytheFit()
         
 {
   clear();
-  setOrder(3);
 }
 
 ////////////////////////////////////////////////////
@@ -81,29 +80,28 @@ ForsytheFit::~ForsytheFit()
   
 void ForsytheFit::clear()
 {
+  _order = 0;
   _xObs.clear();
   _yObs.clear();
   _yEst.clear();
   _nObs = 0;
-}
-
-//////////////////////////////////////////////////////////////////
-// set polynomial order
-
-void ForsytheFit::setOrder(size_t order) 
-{
-  _order = order;
-  _allocPolyArrays();
+  _prepActive = false;
 }
 
 ////////////////////////////////////////////////////
 // perform a fit
 
-int ForsytheFit::performFit(const vector<double> &xVals,
+int ForsytheFit::performFit(size_t order,
+                            const vector<double> &xVals,
                             const vector<double> &yVals)
   
 {
 
+  _order = order;
+  _allocPolyArrays();
+  _prepActive = false;
+  _xPowers.clear();
+  
   _xObs = xVals;
   _yObs = yVals;
   _nObs = _xObs.size();
@@ -228,19 +226,38 @@ int ForsytheFit::performFit(const vector<double> &xVals,
 // This is done for efficiency, if the X values do not change.
 //
 
-void ForsytheFit::prepareForFit(const vector<double> &xVals)
+void ForsytheFit::prepareForFit(size_t order,
+                                const vector<double> &xVals)
 {
+  
+  _order = order;
+  _allocPolyArrays();
+  _prepActive = true;
 
   // save the X obs
-
+  
   _xObs = xVals;
   _nObs = _xObs.size();
-
+  
   // allocate arrays
   
   _allocDataArrays();
 
+  // set up xPowers
+
+  _xPowers.clear();
+  for (size_t ii = 0; ii < _nObs; ii++) {
+    double xx = _xObs[ii];
+    vector<double> powers;
+    for (size_t jj = 0; jj <= _order; jj++) {
+      double power = pow(xx, (double) jj);
+      powers.push_back(power);
+    } // jj
+    _xPowers.push_back(powers);
+  } // ii
   
+  // compute vectors for later use
+
   size_t order1 = _order + 1;
   
   // Initialize the order arrays - 1-based
@@ -394,8 +411,10 @@ double ForsytheFit::getYEst(double xx)
     return 0.0;
   }
   double yy = _coeffs[0];
+  double fac = xx;
   for (size_t ii = 1; ii < _coeffs.size(); ii++) {
-    yy += _coeffs[ii] * pow(xx, (double) ii);
+    yy += _coeffs[ii] * fac;
+    fac *= xx;
   }
   return yy;
 }
@@ -404,14 +423,20 @@ double ForsytheFit::getYEst(double xx)
 // get full vector of estimated Y value
 
 const vector<double> &ForsytheFit::getYEstVector()
-{
-  if (_yEst.size() == _nObs) {
-    // already computed
-    return _yEst;
-  }
+{ 
   _yEst.clear();
-  for (size_t ii = 0; ii < _nObs; ii++) {
-    _yEst.push_back(getYEst(_xObs[ii]));
+  if (!_prepActive) {
+    for (size_t ii = 0; ii < _nObs; ii++) {
+      _yEst.push_back(getYEst(_xObs[ii]));
+    }
+  } else {
+    for (size_t ii = 0; ii < _nObs; ii++) {
+      double yEst = 0.0;
+      for (size_t jj = 0; jj <= _order; jj++) {
+        yEst += _coeffs[jj] * _xPowers[ii][jj];
+      } // jj
+      _yEst.push_back(yEst);
+    } // ii
   }
   return _yEst;
 }
@@ -473,9 +498,8 @@ void ForsytheFit::_allocPolyArrays()
   _bb.resize(_order + 2);
   _cc.resize(_order + 2);
   _ff.resize(_order + 2);
-
   _coeffs.resize(_order + 1);
-
+  
 }
 
 #ifdef WITH_FORTRAN

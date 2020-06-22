@@ -44,6 +44,7 @@
 #define RegressionFilter_HH
 
 #include <radar/RadarComplex.hh>
+#include <rapmath/ForsytheFit.hh>
 #include <cstdio>
 using namespace std;
 
@@ -109,12 +110,12 @@ public:
   // Note: call setup first
   
   void apply(const RadarComplex_t *rawIq,
-             RadarComplex_t *filteredIq) const;
+             RadarComplex_t *filteredIq);
 
   // apply regression using forsythe polynomials
 
   void applyForsythe(const RadarComplex_t *rawIq,
-                     RadarComplex_t *filteredIq) const;
+                     RadarComplex_t *filteredIq);
   
   // Perform polynomial fit from observed data
   //
@@ -202,6 +203,10 @@ private:
   mutable double _stdErrEst;
   
   RadarComplex_t *_polyfitIq;
+
+  // for orthogonal polynomials
+
+  ForsytheFit _forsythe;
 
   // methods
 
