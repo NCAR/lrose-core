@@ -246,7 +246,6 @@ void ForsytheFit::_allocDataArrays()
   
   _dd.resize(_nObs);
   _ee.resize(_nObs);
-  _vv.resize(_nObs);
   _yEst.clear();
   
 }
@@ -273,7 +272,7 @@ int ForsytheFit::_doFit()
 {
   
   // NOTE on array indices
-  // the obs arrays (_xObs, yy) and associated arrays (vv, cc, ee) are 0-based.
+  // the obs arrays (_xObs, _yObs) and associated arrays (dd, ee) are 0-based.
   // the order arrays (aa, bb, ff, c2) are 1-based
   
   size_t order1 = _order + 1;
@@ -308,12 +307,7 @@ int ForsytheFit::_doFit()
   // Initialize the sample arrays - 0-based
 
   for (size_t ii = 0; ii < _nObs; ++ii) {
-    _vv[ii] = 0.0;
     _dd[ii] = 0.0;
-  }
-  
-  for (size_t ii = 0; ii < _nObs; ++ii) {
-    _vv[ii] += (_ee[ii] * c1);
   }
 
   // Main loop, increasing the order as we go
@@ -323,16 +317,15 @@ int ForsytheFit::_doFit()
     
     double f1Prev = f1;
     double a1Prev = a1;
-
-    f1 = 0.0;
+    
+    double f1Sq = 0.0;
     for (size_t ii = 0; ii < _nObs; ++ii) {
-      double b1 = _ee[ii];
-      _ee[ii] = (_xObs[ii] - a1Prev) * _ee[ii] - f1Prev * _dd[ii];
-      _dd[ii] = b1;
-      f1 += _ee[ii] * _ee[ii];
+      double ddPrev = _dd[ii];
+      _dd[ii] = _ee[ii];
+      _ee[ii] = (_xObs[ii] - a1Prev) * _ee[ii] - f1Prev * ddPrev;
+      f1Sq += _ee[ii] * _ee[ii];
     }
-
-    f1 = sqrt(f1);
+    f1 = sqrt(f1Sq);
 
     for (size_t ii = 0; ii < _nObs; ++ii) {
       _ee[ii] /= f1;
@@ -359,9 +352,6 @@ int ForsytheFit::_doFit()
       _aa[ll] = bbSave;
     } // jj
 
-    for (size_t ii = 0; ii < _nObs; ++ii) {
-      _vv[ii] += _ee[ii] * c1;
-    }
     for (size_t ii = 1; ii <= order1; ++ii) {
       _ff[ii] += _bb[ii] * c1;
       _cc[ii] = _ff[ii];
