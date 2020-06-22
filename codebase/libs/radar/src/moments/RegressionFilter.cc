@@ -46,6 +46,7 @@
 #include <toolsa/TaArray.hh>
 #include <radar/RegressionFilter.hh>
 #include <rapmath/usvd.h>
+#include <rapmath/ForsytheFit.hh>
 using namespace std;
 
 // Constructor
@@ -297,6 +298,7 @@ void RegressionFilter::setupStaggered(int nSamples,
 
 /////////////////////////////////////////////////////
 // Perform regression filtering on I,Q data
+// using precompute Vandermonde and CC matrices
 //
 // Inputs:
 //   rawIq: raw I,Q data
@@ -362,6 +364,102 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
     _polyfitIq[ii].im = _yyEst[ii];
   }
   
+}
+
+/////////////////////////////////////////////////////
+// Perform regression filtering on I,Q data
+// using Forsythe polynomials
+//
+// Inputs:
+//   rawIq: raw I,Q data
+//
+// Outputs:
+//   filteredIq: filtered I,Q data
+//
+// Side effect:
+//   polyfitIq is computed
+//
+// Note: assumes setup() has been successfully completed.
+
+void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
+                                     RadarComplex_t *filteredIq) const
+  
+{
+
+  if (_nSamples == 0) {
+    cerr << "ERROR - RegressionFilter::apply" << endl;
+    cerr << "  Number of samples has not been set" << endl;
+    cerr << "  Call setup() before apply()" << endl;
+    return;
+  }
+
+  // copy IQ data
+
+  TaArray<double> rawI_, rawQ_;
+  double *rawI = rawI_.alloc(_nSamples);
+  double *rawQ = rawQ_.alloc(_nSamples);
+
+  for (int ii = 0; ii < _nSamples; ii++) {
+    rawI[ii] = rawIq[ii].re;
+    rawQ[ii] = rawIq[ii].im;
+  }
+
+  // set up X vector from -0.5 to +0.5
+
+  double xDelta = 1.0 / _nSamples;
+  double xMin = -0.5;
+  vector<double> xVec;
+  for (int ii = 0; ii < _nSamples; ii++) {
+    double xx = xMin + ii * xDelta;
+    xVec.push_back(xx);
+  }
+
+  // poly fit to I
+
+  ForsytheFit forsythe;
+  forsythe.setOrder(_nPoly);
+  for (int ii = 0; ii < _nSamples; ii++) {
+    forsythe.addValue(xVec[ii], rawI[ii]);
+  }
+  forsythe.performFit();
+
+  // compute the estimated I polynomial values
+  
+  vector<double> iSmoothed = forsythe.getYEstVector();
+  for (size_t ii = 0; ii < (size_t) _nSamples; ii++) {
+    _yyEst[ii] = iSmoothed[ii];
+  }
+
+  // load residuals into filtered Iq
+  
+  for (int ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].re = rawI[ii] - _yyEst[ii];
+    _polyfitIq[ii].re = _yyEst[ii];
+  }
+  
+  // poly fit to Q
+
+  forsythe.clear();
+  forsythe.setOrder(_nPoly);
+  for (int ii = 0; ii < _nSamples; ii++) {
+    forsythe.addValue(xVec[ii], rawQ[ii]);
+  }
+  forsythe.performFit();
+  
+  // compute the estimated Q polynomial values
+  
+  vector<double> qSmoothed = forsythe.getYEstVector();
+  for (size_t ii = 0; ii < (size_t) _nSamples; ii++) {
+    _yyEst[ii] = qSmoothed[ii];
+  }
+
+  // load residuals into filtered Iq
+  
+  for (int ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].im = rawQ[ii] - _yyEst[ii];
+    _polyfitIq[ii].im = _yyEst[ii];
+  }
+
 }
 
 /////////////////////////////////////////////////////

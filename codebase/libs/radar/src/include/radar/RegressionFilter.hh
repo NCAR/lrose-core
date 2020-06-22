@@ -110,6 +110,11 @@ public:
   
   void apply(const RadarComplex_t *rawIq,
              RadarComplex_t *filteredIq) const;
+
+  // apply regression using forsythe polynomials
+
+  void applyForsythe(const RadarComplex_t *rawIq,
+                     RadarComplex_t *filteredIq) const;
   
   // Perform polynomial fit from observed data
   //
