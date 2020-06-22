@@ -258,7 +258,6 @@ void ForsytheFit::_allocPolyArrays()
   _aa.resize(_order + 2);
   _bb.resize(_order + 2);
   _cc.resize(_order + 2);
-  _c2.resize(_order + 2);
   _ff.resize(_order + 2);
 
   _coeffs.resize(_order + 1);
@@ -277,24 +276,24 @@ int ForsytheFit::_doFit()
   // the obs arrays (_xObs, yy) and associated arrays (vv, cc, ee) are 0-based.
   // the order arrays (aa, bb, ff, c2) are 1-based
   
-  size_t mm1 = _order + 1;
+  size_t order1 = _order + 1;
   
   // Initialize the order arrays - 1-based
 
-  for (size_t ii = 1; ii <= mm1; ++ii) {
+  for (size_t ii = 1; ii <= order1; ++ii) {
     _aa[ii] = 0.0;
     _bb[ii] = 0.0;
     _cc[ii] = 0.0;
     _ff[ii] = 0.0;
   }
-
-  double d1 = sqrt((double) _nObs);
+  
+  double rootN = sqrt((double) _nObs);
+  _bb[1] = 1.0 / rootN;
   
   for (size_t ii = 0; ii < _nObs; ++ii) {
-    _ee[ii] = 1.0 / d1;
+    _ee[ii] = 1.0 / rootN;
   }
   
-  double f1 = d1;
   double a1 = 0.0;
   for (size_t ii = 0; ii < _nObs; ++ii) {
     a1 += (_xObs[ii] * _ee[ii] * _ee[ii]);
@@ -304,8 +303,6 @@ int ForsytheFit::_doFit()
   for (size_t ii = 0; ii < _nObs; ++ii) {
     c1 += (_yObs[ii] * _ee[ii]);
   }
-
-  _bb[1] = 1.0 / f1;
   _ff[1] = _bb[1] * c1;
 
   // Initialize the sample arrays - 0-based
@@ -321,23 +318,16 @@ int ForsytheFit::_doFit()
 
   // Main loop, increasing the order as we go
 
-  size_t ll = 0;
-  size_t iorder = 1;
-  while (iorder < mm1) {
+  double f1 = rootN;
+  for (size_t iorder = 2; iorder <= order1; iorder++) {
     
-    // Save latest results
-
-    for (size_t ii = 1; ii <= ll; ++ii) {
-      _c2[ii] = _cc[ii];
-    }
-
-    double f2 = f1;
-    double a2 = a1;
+    double f1Prev = f1;
+    double a1Prev = a1;
 
     f1 = 0.0;
     for (size_t ii = 0; ii < _nObs; ++ii) {
       double b1 = _ee[ii];
-      _ee[ii] = (_xObs[ii] - a2) * _ee[ii] - f2 * _dd[ii];
+      _ee[ii] = (_xObs[ii] - a1Prev) * _ee[ii] - f1Prev * _dd[ii];
       _dd[ii] = b1;
       f1 += _ee[ii] * _ee[ii];
     }
@@ -357,41 +347,34 @@ int ForsytheFit::_doFit()
       c1 += _ee[ii] * _yObs[ii];
     }
 
-    iorder++;
-
-    size_t jj = 0;
-    while (jj < iorder) {
-      ll = iorder - jj;
-      double b2 = _bb[ll];
-      d1 = 0.0;
+    for (size_t jj = 0; jj < iorder; jj++) {
+      size_t ll = iorder - jj;
+      double bbSave = _bb[ll];
+      double bbNew = 0.0;
       if (ll > 1) {
-        d1 = _bb[ll - 1];
+        bbNew = _bb[ll - 1];
       }
-      d1 = d1 - a2 * _bb[ll] - f2 * _aa[ll];
-      _bb[ll] = d1 / f1;
-      _aa[ll] = b2;
-      ++jj;
-    }
+      bbNew = bbNew - a1Prev * _bb[ll] - f1Prev * _aa[ll];
+      _bb[ll] = bbNew / f1;
+      _aa[ll] = bbSave;
+    } // jj
 
     for (size_t ii = 0; ii < _nObs; ++ii) {
       _vv[ii] += _ee[ii] * c1;
     }
-    for (size_t ii = 1; ii <= mm1; ++ii) {
+    for (size_t ii = 1; ii <= order1; ++ii) {
       _ff[ii] += _bb[ii] * c1;
       _cc[ii] = _ff[ii];
     }
 
-    ll = iorder;
-    
-  } // while (iorder < mm1)
+  } // iorder
 
   // Load _coeffs arrays - this is 0 based instead of 1 based
   // so shift down by 1
 
-  for (size_t ii = 1; ii <= mm1; ++ii) {
+  for (size_t ii = 1; ii <= order1; ++ii) {
     _coeffs[ii - 1] = _cc[ii];
   }
-  _coeffs[mm1] = 0.0;
 
   return 0;
 

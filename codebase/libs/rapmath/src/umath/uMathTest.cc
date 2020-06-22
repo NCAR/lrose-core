@@ -56,23 +56,23 @@ int main(int argc, char **argv)
   //////////////////////
   // Checking uCurveFit
 
-  testExponentialFit(0.1, 5.0, -5.0, 0.0, 0.1);
+  // testExponentialFit(0.1, 5.0, -5.0, 0.0, 0.1);
 
-  testExponentialFit(1.0, 0.3, -0.3, 0.0, 0.1);
+  // testExponentialFit(1.0, 0.3, -0.3, 0.0, 0.1);
 
-  testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
+  // testExponentialFit(0.0, 0.25, -0.25, 0.0, 0.02);
 
-  testLinearFit(0.33333, 150, 0.0, 5.0);
+  // testLinearFit(0.33333, 150, 0.0, 5.0);
 
-  testLinearFit(4.25, 9.99, 0.0, 2.0);
+  // testLinearFit(4.25, 9.99, 0.0, 2.0);
 
-  testLinearFit(-2.50, -8.88, 0.0, 0.1);
+  // testLinearFit(-2.50, -8.88, 0.0, 0.1);
 
-  testNewtRaph();
+  // testNewtRaph();
 
-  testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
+  // testPolynomialOrder3(13.0, 5.0, 0.25, -1.25, 0.0, 0.2);
 
-  testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
+  // testPolynomialOrder3(10.0, 2.0, -1.5, 1.20, 0.0, 0.5);
 
   vector<double> coeffs;
   coeffs.push_back(10.0);
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
   coeffs.push_back(0.55);
   coeffs.push_back(1.05);
   coeffs.push_back(0.75);
-  testPolynomial(10, 500, coeffs, 0.0, 1.5);
+  testPolynomial(10, 500, coeffs, 0.0, 0.2);
 
   return 0;
 
@@ -298,7 +298,7 @@ static void testPolynomial(int order, int nObs,
     yy.push_back(yval);
   }
 
-  int nPasses = 1000;
+  int nPasses = 10;
   cerr << "====================================" << endl;
   cerr << "Polynomial details" << endl;
   for (int mm = 0; mm <= order; mm++) {

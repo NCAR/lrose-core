@@ -128,7 +128,7 @@ private:
 
   // arrays for the fitting procedure
 
-  vector<double> _aa, _bb, _ff, _cc, _c2; // size _order + 2 (1-based)
+  vector<double> _aa, _bb, _ff, _cc; // size _order + 2 (1-based)
   vector<double> _dd, _ee, _vv; // size _nObs (0-based)
 
   // private methods
