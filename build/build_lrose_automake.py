@@ -262,7 +262,7 @@ def createQtMocFiles(appDir):
     if (platform == "darwin"):
         shellCmd("/usr/local/opt/qt/bin/qmake -o Makefile.qmake");
     else:
-        shellCmd("qmake-qt5 -o Makefile.qmake");
+        shellCmd("qmake -o Makefile.qmake");
     shellCmd("make -f Makefile.qmake mocables");
 
 ########################################################################
