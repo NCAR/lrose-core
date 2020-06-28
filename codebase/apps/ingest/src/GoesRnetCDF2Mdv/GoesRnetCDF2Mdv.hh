@@ -127,6 +127,7 @@ class GoesRnetCDF2Mdv
 
   typedef enum {
     PRODUCT_LEVEL1B_RADIANCES,
+    PRODUCT_CLOUD_AND_MOISTURE_IMAGERY,
     PRODUCT_AEROSOL_DETECTION,
     PRODUCT_AEROSOL_OPTICAL_DEPTH,
     PRODUCT_CLOUD_TOP_PHASE,
@@ -141,7 +142,8 @@ class GoesRnetCDF2Mdv
     PRODUCT_CLOUD_OPTICAL_DEPTH,
     PRODUCT_CLOUD_PARTICLE_SIZE,
     PRODUCT_DERIVED_MOTION_WINDS,
-    PRODUCT_GLOBAL_LIGHTNING
+    PRODUCT_GLOBAL_LIGHTNING,
+    PRODUCT_TYPE_UNKNOWN
   } product_type_t;
    
   typedef enum {
@@ -296,6 +298,7 @@ class GoesRnetCDF2Mdv
 
   // Level-1 Variables
   static const char* RADIANCE;
+  static const char* CMI;
   static const char* YAW_FLIP_FLAG;
   static const char* BAND_ID;
   static const char* BAND_WAVELENGTH;
@@ -643,6 +646,7 @@ class GoesRnetCDF2Mdv
   
   // strings to identify product type
   static const char* TITLE_LEVEL1B_RADIANCES;
+  static const char* TITLE_CLOUD_AND_MOISTURE_IMAGERY;
   static const char* TITLE_AEROSOL_DETECTION;
   static const char* TITLE_AEROSOL_OPTICAL_DEPTH;
   static const char* TITLE_CLOUD_TOP_PHASE;
@@ -766,13 +770,21 @@ class GoesRnetCDF2Mdv
   std::vector< float > _outData;
   std::vector< float > _outQC;
   std::vector< float > _radiance;
+  std::vector< float > _cmi;
   std::vector< std::int8_t > _dataQuality;
   std::map< int, std::string > _qualityFlags;
+
   float _ncRadMissingVal;
-  int8_t _ncDQFMissingVal;
+  float _ncCmiMissingVal;
+  int8_t _ncDqfMissingVal;
   bool _yawFlipFlag;
   int _bandID;
   float _bandWavelength;
+  
+  string _dqfName, _dqfLongName, _dqfStandardName, _dqfUnits;
+  string _outName, _outLongName, _outStandardName, _outUnits;
+  string _radName, _radLongName, _radStandardName, _radUnits;
+  string _cmiName, _cmiLongName, _cmiStandardName, _cmiUnits;
 
   std::time_t _beginTime;
   std::time_t _midpointTime;
@@ -932,6 +944,15 @@ class GoesRnetCDF2Mdv
   // These methods will be part of GOES-R reader library
   void _readVariables();
   void _readGlobalAttributes();
+  void _readOptionalGlobalAttr(const string &name, string &dest);
+  int _readRequiredGlobalAttr(const string &name, string &dest);
+  int _getVarAtt(const NcxxVar &var, const string &attName, NcxxVarAtt &att);
+  string _getAsStr(NcxxVarAtt &att);
+  int _getAsInt(NcxxVarAtt &att);
+  vector<int>_getAsInts(NcxxVarAtt &att);
+  float _getAsFloat(NcxxVarAtt &att);
+  double _getAsDouble(NcxxVarAtt &att);
+  void _printGlobalAttributes(ostream &out);
   void _readDimensions();
   void _readZenithAngleDims();
   void _readCoordinateVars();
@@ -939,7 +960,10 @@ class GoesRnetCDF2Mdv
   void _readProjectionVars();
   void _readRadianceConstantsVars();
   void _readQualityControlVars();
-  void _readRadianceVars();
+  void _readFieldVars();
+  void _readCMI();
+  void _readRadiance();
+  void _readDataQualFlag();
   void _setProductType(const std::string &product_type);
   void _setScanType(const std::string &scan_id);
 

@@ -50,6 +50,7 @@
 #include <toolsa/procmap.h>
 #include <toolsa/str.h>
 #include <toolsa/umisc.h>
+#include <toolsa/TaStr.hh>
 
 #include "GoesRnetCDF2Mdv.hh"
 #include "Params.hh"
@@ -213,15 +214,16 @@ void GoesRnetCDF2Mdv::run()
 
     PMU_auto_register("In main loop");
 
-    cerr << INFO_STR << methodName << endl;
-    cerr << "    Begin waiting for new file" << endl;
+    if (_params->debug) {
+      cerr << INFO_STR << methodName << endl;
+      cerr << "    Begin waiting for new file" << endl;
+    }
     
     if (_dataTrigger->next(triggerInfo) != 0) {
       cerr << ERROR_STR << methodName << endl;
       cerr << "    Error getting next trigger time" << endl;      
       continue;
     }
-
   
     string filePath = triggerInfo.getFilePath();
 
@@ -256,6 +258,7 @@ void GoesRnetCDF2Mdv::run()
  */
 void GoesRnetCDF2Mdv::_addData(float *out_data, float *qc_data, float *rad_data)
 {
+
   Mdvx::coord_t coords =  _outputDomain.getCoord();
 
   float min_val = 999999999.0;
@@ -301,33 +304,35 @@ void GoesRnetCDF2Mdv::_addData(float *out_data, float *qc_data, float *rad_data)
 	qc_data[outDataIndex] = _dataQuality[satIndex];
       }
       
-     
-      if(_dataQuality[satIndex] == 0 || !_params->check_quality_field) {
+      if (_productType == PRODUCT_CLOUD_AND_MOISTURE_IMAGERY) {
 
-	if(rad_data != NULL) {
-	  rad_data[outDataIndex] = _radiance[satIndex];
-	}
- 
-	if(_bandID < EMISSIVE_BAND_START) {
-	  // reflective bands 1 - 6
+        out_data[outDataIndex] = _cmi[satIndex];
 
-	  if((_radiance[satIndex] < 0.0) &&
-             (_params->debug == Params::DEBUG_VERBOSE)) {
-	    cerr << "radiance < 0" << endl;
-	  }
-	  
-	  out_data[outDataIndex] = 
-            _radianceToAlbedo(_radiance[satIndex], lat, lon);
-          
-	}
-	else {
-	  // emissive bands 7 - 16
-          out_data[outDataIndex] = _radianceToBrightTemp(_radiance[satIndex]);
-	}
-	max_val = fmax(out_data[outDataIndex], max_val);
-	min_val = fmin(out_data[outDataIndex], min_val);
+      } else {
+
+        // radiance
+
+        if(_dataQuality[satIndex] == 0 || !_params->check_quality_field) {
+          if(rad_data != NULL) {
+            rad_data[outDataIndex] = _radiance[satIndex];
+          }
+          if(_bandID < EMISSIVE_BAND_START) {
+            // reflective bands 1 - 6
+            if((_radiance[satIndex] < 0.0) &&
+               (_params->debug == Params::DEBUG_VERBOSE)) {
+              cerr << "radiance < 0" << endl;
+            }
+            out_data[outDataIndex] = _radianceToAlbedo(_radiance[satIndex], lat, lon);
+          } else {
+            // emissive bands 7 - 16
+            out_data[outDataIndex] = _radianceToBrightTemp(_radiance[satIndex]);
+          }
+        }
 
       } // if(_dataQuality[satIndex] == 0)
+
+      max_val = fmax(out_data[outDataIndex], max_val);
+      min_val = fmin(out_data[outDataIndex], min_val);
 
     } /* endfor - x_index */
 
@@ -409,13 +414,13 @@ MdvxField *GoesRnetCDF2Mdv::_createField(const string &field_name,
   field_hdr.bias = 0.0;
   field_hdr.bad_data_value =  MISSING_DATA_VALUE;
   field_hdr.missing_data_value =  MISSING_DATA_VALUE;
+
   STRcopy(field_hdr.field_name_long, long_field_name.c_str(), MDV_LONG_FIELD_LEN);
   STRcopy(field_hdr.field_name, field_name.c_str(), MDV_SHORT_FIELD_LEN);
   STRcopy(field_hdr.units, units.c_str(), MDV_UNITS_LEN);
   _outputDomain.syncToFieldHdr(field_hdr);
 
   // Create the vlevel header
-  
 
   Mdvx::vlevel_header_t vlevel_hdr;
   memset(&vlevel_hdr, 0, sizeof(vlevel_hdr));
@@ -667,65 +672,67 @@ bool GoesRnetCDF2Mdv::_processData()
   static const string methodName = "GoesRnetCDF2Mdv::_processData()";
   
   PMU_auto_register("Processing data");
-  cerr << INFO_STR << methodName << endl;
-  cerr << "    Processing data" << endl;
+  if (_params->debug) {
+    cerr << INFO_STR << methodName << endl;
+    cerr << "    Processing data" << endl;
+  }
   
   // Create the output file
   DsMdvx mdvx;
   _updateMasterHeader(mdvx);
     
   // Create the output field and add it to the file
-
-  MdvxField *outDataField;
-  if ((outDataField = _createField(_params->out_data_prep.short_name,
-				   _params->out_data_prep.long_name,
-				   _params->out_data_prep.units)) == 0) {
-    return false;
+  // the output field data array is empty at this stage
+  
+  MdvxField *outDataField = NULL;
+  if (_productType == PRODUCT_CLOUD_AND_MOISTURE_IMAGERY) {
+    if ((outDataField = _createField(_cmiName, _cmiLongName, _cmiUnits)) == 0) {
+      return false;
+    }
+  } else {
+    if ((outDataField = _createField(_outName, _outLongName, _outUnits)) == 0) {
+      return false;
+    }
   }
-
   float *outData = (float*)outDataField->getVol();
 
   // the processing of the QC is controlled in the parameter file
   float *qcData = NULL;  
   MdvxField *outQcField = NULL;
   if (_params->include_qc_field == true) {
-    
-    if ((outQcField = _createField(_params->qc_data_prep.short_name,
-				   _params->qc_data_prep.long_name,
-				   _params->qc_data_prep.units)) == 0) {
+    if ((outQcField = _createField(_dqfName, _dqfLongName, _dqfUnits)) == 0) {
       return false;
-      
     }
-
+    // the qcData field data array is empty at this stage
     qcData = (float*)outQcField->getVol();
-
   }
 
   // create a field for the radiance values if requested
   float *radData = NULL;
   MdvxField *radField = NULL;
-  if (_params->include_rad_field) {
-
-    if ((radField = _createField(_params->rad_data_prep.short_name,
-				   _params->rad_data_prep.long_name,
-				   _params->rad_data_prep.units)) == 0) {
+  if ((_params->include_rad_field == true) &&
+      (_productType != PRODUCT_CLOUD_AND_MOISTURE_IMAGERY)) {
+    if ((radField = _createField(_radName, _radLongName, _radUnits)) == 0) {
       return false;
-      
     }
-
+    // the radData field data array is empty at this stage
     radData = (float*)radField->getVol();
-
   }
+
+  // fill out the data arrays as appropriate
+  // and add to the MDV output object
 
   _addData(outData, qcData, radData);
     
   // Convert the units in the field, if requested
 
-  if (_params->convert_units)
+  if (_params->convert_units &&
+      _productType != PRODUCT_CLOUD_AND_MOISTURE_IMAGERY) {
     _convertUnits(outDataField);
+  }
   
-   // Add the field to the output file
-
+  // Add the field to the output file
+  
   if(outDataField->convertType(static_cast<Mdvx::encoding_type_t>(_params->out_data_prep.encoding_type),
 			       static_cast<Mdvx::compression_type_t>(_params->out_data_prep.compression_type),
 			       static_cast<Mdvx::scaling_type_t>(_params->out_data_prep.scaling_type),
@@ -736,9 +743,7 @@ bool GoesRnetCDF2Mdv::_processData()
   }
   mdvx.addField(outDataField);
 
-  
   if (_params->include_qc_field == true) {
-
     if(outQcField->convertType(static_cast<Mdvx::encoding_type_t>(_params->qc_data_prep.encoding_type),
 			       static_cast<Mdvx::compression_type_t>(_params->qc_data_prep.compression_type),
 			       static_cast<Mdvx::scaling_type_t>(_params->qc_data_prep.scaling_type),
@@ -750,13 +755,13 @@ bool GoesRnetCDF2Mdv::_processData()
     mdvx.addField(outQcField);
   }
     
-  if (_params->include_rad_field == true) {
-
+  if ((_params->include_rad_field == true) &&
+      (_productType != PRODUCT_CLOUD_AND_MOISTURE_IMAGERY)) {
     if(radField->convertType(static_cast<Mdvx::encoding_type_t>(_params->rad_data_prep.encoding_type),
-			       static_cast<Mdvx::compression_type_t>(_params->rad_data_prep.compression_type),
-			       static_cast<Mdvx::scaling_type_t>(_params->rad_data_prep.scaling_type),
-			       _params->rad_data_prep.scale, 
-			       _params->rad_data_prep.bias) != 0) {
+                             static_cast<Mdvx::compression_type_t>(_params->rad_data_prep.compression_type),
+                             static_cast<Mdvx::scaling_type_t>(_params->rad_data_prep.scaling_type),
+                             _params->rad_data_prep.scale, 
+                             _params->rad_data_prep.bias) != 0) {
       cerr << WARN_STR << methodName << endl;
       cerr << "  convertType failed. message: " << radField->getErrStr() << endl;
     }    
@@ -770,9 +775,11 @@ bool GoesRnetCDF2Mdv::_processData()
     mdvx.getField(0)->printHeaders(cerr);
   }
     
+  if (_params->debug) {
     cerr << INFO_STR << methodName << endl;
     cerr << "    Writing output to: " << _params->output_url << " for time "
 	 << DateTime::str(mdvx.getMasterHeader().time_centroid) << endl;
+  }
     
   if (mdvx.writeToDir(_params->output_url) != 0)
     {
@@ -800,8 +807,11 @@ bool GoesRnetCDF2Mdv::_readFile(const std::string& file_path)
   static const string methodName = "GoesRnetCDF2Mdv::_readFile()";
   
   PMU_auto_register("Reading file");
-  cerr << INFO_STR << methodName << endl;
-  cerr << "    Reading file." << endl;
+
+  if (_params->debug) {
+    cerr << INFO_STR << methodName << endl;
+    cerr << "    Reading file." << endl;
+  }
 
   // clear out and reset things before reading another file
 
@@ -810,19 +820,26 @@ bool GoesRnetCDF2Mdv::_readFile(const std::string& file_path)
    // open file and read contents
 
   try {
-    string msg = INFO_STR + methodName + "--   Reading from " + file_path;
-    cerr << msg << endl;
+    
+    if (_params->debug) {
+      string msg = INFO_STR + methodName + "--   Reading from " + file_path;
+      cerr << msg << endl;
+    }
 
     _file.open(file_path, NcxxFile::read);
 
     _readGlobalAttributes();
+
     _readDimensions();
+
     _readVariables();
 
   } catch (NcxxException& e) {
+
     _file.close();
     cerr << _getErrStr();
     return false;
+
   }
    
   // successfully read the file
@@ -848,48 +865,72 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
 {
   static const string methodName = "GoesRnetCDF2Mdv::_readGlobalAttributes()";
 
-  try {
-    _file.readGlobAttr(NC_PROPERTIES, _globalAtts.ncProperties);
-    _file.readGlobAttr(NAMING_AUTHORITY, _globalAtts.namingAuthority);
-    _file.readGlobAttr(CONVENTIONS, _globalAtts.conventions);
-    _file.readGlobAttr(METADATA_CONVENTIONS, _globalAtts.metadataConventions);
-    _file.readGlobAttr(STANDARD_NAME_VOCABULARY, _globalAtts.standardNameVocabulary);
-    _file.readGlobAttr(INSTITUTION, _globalAtts.institution);
-    _file.readGlobAttr(PROJECT, _globalAtts.project);
-    _file.readGlobAttr(PRODUCTION_SITE, _globalAtts.productionSite);
-    _file.readGlobAttr(PRODUCTION_ENVIRONMENT, _globalAtts.productionEnvironment);
-    _file.readGlobAttr(SPATIAL_RESOLUTION, _globalAtts.spatialResolution);
-    _file.readGlobAttr(ORBITAL_SLOT, _globalAtts.orbitalSlot);
-    _file.readGlobAttr(PLATFORM_ID, _globalAtts.platformID);
-    _file.readGlobAttr(INSTRUMENT_TYPE, _globalAtts.instrumentType);
-    _file.readGlobAttr(INSTRUMENT_ID, _globalAtts.instrumentID);
-    _file.readGlobAttr(SUMMARY, _globalAtts.summary);
-    _file.readGlobAttr(KEYWORDS, _globalAtts.keywords);
-    _file.readGlobAttr(KEYWORDS_VOCABULARY, _globalAtts.keywordsVocabulary);
-    _file.readGlobAttr(ISO_SERIES_METADATA_ID, _globalAtts.isoSeriesMetadataID);
-    _file.readGlobAttr(LICENSE, _globalAtts.license);
-    _file.readGlobAttr(PROCESSING_LEVEL, _globalAtts.processingLevel);
-    // TODO : test that _globalAtts.cdmDataType is a Image
-    _file.readGlobAttr(CDM_DATA_TYPE, _globalAtts.cdmDataType);
-    _file.readGlobAttr(DATASET_NAME, _globalAtts.datasetName);
-    _file.readGlobAttr(PRODUCTION_DATA_SOURCE, _globalAtts.productionDataSource);
-    _file.readGlobAttr(TIMELINE_ID, _globalAtts.timelineID);
-    _file.readGlobAttr(DATE_CREATED, _globalAtts.dateCreated);
-    _file.readGlobAttr(TIME_COVERAGE_START, _globalAtts.timeCoverageStart);
-    _file.readGlobAttr(TIME_COVERAGE_END, _globalAtts.timeCoverageEnd);
-    _file.readGlobAttr(CREATED_BY, _globalAtts.createdBy);
-  } catch (NcxxException& e) {
-    string errStr = e.what();
-    size_t ePos = errStr.find("ERROR");
-    while (ePos != string::npos){
-      errStr.replace(ePos,std::string("ERROR").length(), "WARNING");
-      ePos = errStr.find("ERROR");
-    }
-    cerr << errStr << endl;
-    cerr << WARN_STR  << methodName << endl;
-    cerr << "  didn't find global attribute, " << errStr << endl;
+  if (_params->debug) {
+    cerr << "Reading in non-essential global properties" << endl;
   }
 
+  _readOptionalGlobalAttr(NC_PROPERTIES, _globalAtts.ncProperties);
+  _readOptionalGlobalAttr(NAMING_AUTHORITY, _globalAtts.namingAuthority);
+  _readOptionalGlobalAttr(CONVENTIONS, _globalAtts.conventions);
+  _readOptionalGlobalAttr(METADATA_CONVENTIONS, _globalAtts.metadataConventions);
+  _readOptionalGlobalAttr(STANDARD_NAME_VOCABULARY, _globalAtts.standardNameVocabulary);
+  _readOptionalGlobalAttr(INSTITUTION, _globalAtts.institution);
+  _readOptionalGlobalAttr(PROJECT, _globalAtts.project);
+  _readOptionalGlobalAttr(PRODUCTION_SITE, _globalAtts.productionSite);
+  _readOptionalGlobalAttr(PRODUCTION_ENVIRONMENT, _globalAtts.productionEnvironment);
+  _readOptionalGlobalAttr(SPATIAL_RESOLUTION, _globalAtts.spatialResolution);
+  _readOptionalGlobalAttr(ORBITAL_SLOT, _globalAtts.orbitalSlot);
+  _readOptionalGlobalAttr(PLATFORM_ID, _globalAtts.platformID);
+  _readOptionalGlobalAttr(INSTRUMENT_TYPE, _globalAtts.instrumentType);
+  _readOptionalGlobalAttr(INSTRUMENT_ID, _globalAtts.instrumentID);
+  _readOptionalGlobalAttr(SUMMARY, _globalAtts.summary);
+  _readOptionalGlobalAttr(KEYWORDS, _globalAtts.keywords);
+  _readOptionalGlobalAttr(KEYWORDS_VOCABULARY, _globalAtts.keywordsVocabulary);
+  _readOptionalGlobalAttr(ISO_SERIES_METADATA_ID, _globalAtts.isoSeriesMetadataID);
+  _readOptionalGlobalAttr(LICENSE, _globalAtts.license);
+  _readOptionalGlobalAttr(PROCESSING_LEVEL, _globalAtts.processingLevel);
+  _readOptionalGlobalAttr(DATASET_NAME, _globalAtts.datasetName);
+  _readOptionalGlobalAttr(PRODUCTION_DATA_SOURCE, _globalAtts.productionDataSource);
+  _readOptionalGlobalAttr(TIMELINE_ID, _globalAtts.timelineID);
+  _readOptionalGlobalAttr(DATE_CREATED, _globalAtts.dateCreated);
+  _readOptionalGlobalAttr(TIME_COVERAGE_START, _globalAtts.timeCoverageStart);
+  _readOptionalGlobalAttr(TIME_COVERAGE_END, _globalAtts.timeCoverageEnd);
+  _readOptionalGlobalAttr(CREATED_BY, _globalAtts.createdBy);
+
+  if (_params->debug) {
+    _printGlobalAttributes(cerr);
+  }
+
+  // read in CDM data type
+  // check that the value is 'Image'
+
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading in " << CDM_DATA_TYPE << endl;
+  }
+  try {
+    _file.readGlobAttr(CDM_DATA_TYPE, _globalAtts.cdmDataType);
+  } catch (NcxxException e) {
+    NcxxErrStr err;
+    ostringstream  info;
+    info << ERROR_STR << methodName << endl;
+    info << "  didn't find " << CDM_DATA_TYPE << " in global attributes" << endl;
+    err.addErrStr(info.str());
+    err.addErrStr("  exception: ", e.what());
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  }
+  if (_globalAtts.cdmDataType != "Image") {
+    NcxxErrStr err;
+    ostringstream info;
+    info << ERROR_STR << methodName << endl;
+    info << "  " << CDM_DATA_TYPE << " must be 'Image'" << endl;
+    info << "  value found is: " << _globalAtts.cdmDataType << endl;
+    err.addErrStr(info.str());
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  }
+
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading in " << SCENE_ID << endl;
+  }
   try {
     _file.readGlobAttr(SCENE_ID, _globalAtts.sceneID);
   } catch (NcxxException e) {
@@ -902,6 +943,9 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading in " << TITLE << endl;
+  }
   try {
     _file.readGlobAttr(TITLE, _globalAtts.title);
   } catch (NcxxException e) {
@@ -914,6 +958,9 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Setting scan id to sceneID: " << _globalAtts.sceneID << endl;
+  }
   try {
     _setScanType(_globalAtts.sceneID); 
   } catch (NcxxException e) {
@@ -925,6 +972,9 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Setting productType to title: " << _globalAtts.title << endl;
+  }
   try {
     _setProductType(_globalAtts.title);
   } catch (NcxxException e) {
@@ -935,9 +985,190 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
     err.addErrStr("  exception: ", e.what());
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
+}
+
+///////////////////////////////////////////////////////
+// read an optional global attribute, store in dest
+// print warning on failure
+
+void GoesRnetCDF2Mdv::_readOptionalGlobalAttr(const string &name, string &dest)
+{
+
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading optional global attr: " << name << endl;
+  }
+
+  try {
+    _file.readGlobAttr(name, dest);
+  } catch (NcxxException& e) {
+    if (_params->debug) {
+      cerr << "WARNING - cannot find optional global attr: " << name << endl;
+    }
+  }
 
 }
 
+///////////////////////////////////////////////////////
+// read a requried global attribute, store in dest
+// returns 0 on success, -1 on failure
+
+int GoesRnetCDF2Mdv::_readRequiredGlobalAttr(const string &name, string &dest)
+{
+  
+  static const string methodName = "GoesRnetCDF2Mdv::_readRequiredGlobalAttr()";
+  
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading in required global attr: " << name << endl;
+  }
+  
+  try {
+    _file.readGlobAttr(name, dest);
+  } catch (NcxxException e) {
+    NcxxErrStr err;
+    ostringstream info;
+    info << ERROR_STR << methodName << endl;
+    info << "  didn't find " << name << " in global attributes" << endl;
+    err.addErrStr(info.str());
+    err.addErrStr("  exception: ", e.what());
+    cerr << err.getErrStr() << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////
+// get a variable attribute, given the name
+// returns 0 on success, -1 on failure
+
+int GoesRnetCDF2Mdv::_getVarAtt(const NcxxVar &var, const string &attName, 
+                                NcxxVarAtt &att)
+{
+  try {
+    att = var.getAtt(attName);
+  } catch (NcxxException& e) {
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////////////////
+// get string value of an attribute
+// returns empty string on failure
+
+string GoesRnetCDF2Mdv::_getAsStr(NcxxVarAtt &att)
+{
+  string val;
+  try {
+    att.getValues(val);
+  } catch (NcxxException& e) {
+    val.clear();
+  }
+  return val;
+}
+
+///////////////////////////////////////////////////////
+// get int value of an attribute
+// returns -9999 on failure
+
+int GoesRnetCDF2Mdv::_getAsInt(NcxxVarAtt &att)
+{
+  int val;
+  try {
+    att.getValues(&val);
+  } catch (NcxxException& e) {
+    val = -9999;
+  }
+  return val;
+}
+
+///////////////////////////////////////////////////////
+// get int values of an attribute
+// returns -9999 on failure
+
+vector<int> GoesRnetCDF2Mdv::_getAsInts(NcxxVarAtt &att)
+{
+  vector<int> vals;
+  try {
+    att.getValues(vals);
+  } catch (NcxxException& e) {
+    vals.clear();
+  }
+  return vals;
+}
+
+///////////////////////////////////////////////////////
+// get float value of an attribute
+// returns -9999.0 on failure
+
+float GoesRnetCDF2Mdv::_getAsFloat(NcxxVarAtt &att)
+{
+  float val;
+  try {
+    att.getValues(&val);
+  } catch (NcxxException& e) {
+    val = -9999.0;
+  }
+  return val;
+}
+
+///////////////////////////////////////////////////////
+// get doublea value of an attribute
+// returns -9999.0 on failure
+
+double GoesRnetCDF2Mdv::_getAsDouble(NcxxVarAtt &att)
+{
+  double val;
+  try {
+    att.getValues(&val);
+  } catch (NcxxException& e) {
+    val = -9999.0;
+  }
+  return val;
+}
+
+/*********************************************************************
+ * print the global attributes
+ */
+
+void GoesRnetCDF2Mdv::_printGlobalAttributes(ostream &out)
+{
+
+  out << "============= Global Attributes ================" << endl;
+  out << "  ncProperties: " << _globalAtts.ncProperties << endl;
+  out << "  namingAuthority: " << _globalAtts.namingAuthority << endl;
+  out << "  conventions: " << _globalAtts.conventions << endl;
+  out << "  metadataConventions: " << _globalAtts.metadataConventions << endl;
+  out << "  standardNameVocabulary: " << _globalAtts.standardNameVocabulary << endl;
+  out << "  institution: " << _globalAtts.institution << endl;
+  out << "  project: " << _globalAtts.project << endl;
+  out << "  productionSite: " << _globalAtts.productionSite << endl;
+  out << "  productionEnvironment: " << _globalAtts.productionEnvironment << endl;
+  out << "  spatialResolution: " << _globalAtts.spatialResolution << endl;
+  out << "  orbitalSlot: " << _globalAtts.orbitalSlot << endl;
+  out << "  platformID: " << _globalAtts.platformID << endl;
+  out << "  instrumentType: " << _globalAtts.instrumentType << endl;
+  out << "  sceneID: " << _globalAtts.sceneID << endl;
+  out << "  instrumentID: " << _globalAtts.instrumentID << endl;
+  out << "  datasetName: " << _globalAtts.datasetName << endl;
+  out << "  isoSeriesMetadataID: " << _globalAtts.isoSeriesMetadataID << endl;
+  out << "  title: " << _globalAtts.title << endl;
+  out << "  summary: " << _globalAtts.summary << endl;
+  out << "  keywords: " << _globalAtts.keywords << endl;
+  out << "  keywordsVocabulary: " << _globalAtts.keywordsVocabulary << endl;
+  out << "  license: " << _globalAtts.license << endl;
+  out << "  processingLevel: " << _globalAtts.processingLevel << endl;
+  out << "  dateCreated: " << _globalAtts.dateCreated << endl;
+  out << "  cdmDataType: " << _globalAtts.cdmDataType << endl;
+  out << "  timelineID: " << _globalAtts.timelineID << endl;
+  out << "  timeCoverageStart: " << _globalAtts.timeCoverageStart << endl;
+  out << "  timeCoverageEnd: " << _globalAtts.timeCoverageEnd << endl;
+  out << "  createdBy: " << _globalAtts.createdBy << endl;
+  out << "  productionDataSource: " << _globalAtts.productionDataSource << endl;
+  out << "================================================" << endl;
+
+}
 
 /*********************************************************************
  * _readDimensions()
@@ -952,6 +1183,8 @@ void GoesRnetCDF2Mdv::_readDimensions()
 
     switch(_productType) {
     case PRODUCT_LEVEL1B_RADIANCES:
+    case PRODUCT_CLOUD_AND_MOISTURE_IMAGERY:
+    case PRODUCT_TYPE_UNKNOWN:
       {
 	try {   
 	  NcxxDim dim = _file.getDim(BAND_DIM);
@@ -977,14 +1210,14 @@ void GoesRnetCDF2Mdv::_readDimensions()
 
 	break;
       }
-    case PRODUCT_AEROSOL_DETECTION:
-    case PRODUCT_CLOUD_TOP_PHASE:
-    case PRODUCT_CLOUD_TOP_HEIGHT:
-    case PRODUCT_CLOUD_TOP_TEMPERATURE:
-    case PRODUCT_CLOUD_TOP_PRESSURE:
-    case PRODUCT_LAND_SURFACE_TEMPERATURE:
-    case PRODUCT_CLOUD_OPTICAL_DEPTH:
-    case PRODUCT_CLOUD_PARTICLE_SIZE:
+      case PRODUCT_AEROSOL_DETECTION:
+      case PRODUCT_CLOUD_TOP_PHASE:
+      case PRODUCT_CLOUD_TOP_HEIGHT:
+      case PRODUCT_CLOUD_TOP_TEMPERATURE:
+      case PRODUCT_CLOUD_TOP_PRESSURE:
+      case PRODUCT_LAND_SURFACE_TEMPERATURE:
+      case PRODUCT_CLOUD_OPTICAL_DEPTH:
+      case PRODUCT_CLOUD_PARTICLE_SIZE:   
       {
 	_readZenithAngleDims(); // allow the 8 types above to fall through to this point
 	break;
@@ -1247,7 +1480,7 @@ void GoesRnetCDF2Mdv::_readVariables()
     _readProjectionVars();
     _readRadianceConstantsVars();
     _readQualityControlVars();
-    _readRadianceVars();
+    _readFieldVars();
   }
   catch (NcxxException e) {
     NcxxErrStr err;
@@ -1623,7 +1856,9 @@ void GoesRnetCDF2Mdv::_readRadianceConstantsVars()
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
   varK.getVal(&_kappa0);
-  cout <<  "kappa0 is " << _kappa0 << endl;
+  if (_params->debug) {
+    cerr <<  "kappa0 is " << _kappa0 << endl;
+  }
 
   NcxxVar varF1 = _file.getVar(PLANCK_FK1);
   if(varF1.isNull() == true) {
@@ -1681,95 +1916,59 @@ void GoesRnetCDF2Mdv::_readQualityControlVars()
 
   NcxxVar varVp = _file.getVar(VALID_PIXEL_COUNT);
   if(varVp.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " <<  VALID_PIXEL_COUNT << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    _validPixelCount = 0;
+  } else {
+    varVp.getVal(&_validPixelCount);
   }
-  varVp.getVal(&_validPixelCount);
 
   NcxxVar varMp = _file.getVar(MISSING_PIXEL_COUNT);
   if(varMp.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " << MISSING_PIXEL_COUNT  << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    _missingPixelCount = 0;
+  } else {
+    varMp.getVal(&_missingPixelCount);
   }
-  varMp.getVal(&_missingPixelCount);
 
   NcxxVar varSp = _file.getVar(SATURATED_PIXEL_COUNT);
   if(varSp.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " <<  SATURATED_PIXEL_COUNT << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    _saturatedPixelCount = 0;
+  } else {
+    varSp.getVal(&_saturatedPixelCount);
   }
-  varSp.getVal(&_saturatedPixelCount);
 
   NcxxVar varUp = _file.getVar(UNDERSATURATED_PIXEL_COUNT);
   if(varUp.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " <<  UNDERSATURATED_PIXEL_COUNT << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    _undersaturatedPixelCount = 0;
+  } else {
+    varUp.getVal(&_undersaturatedPixelCount);
   }
-  varUp.getVal(&_undersaturatedPixelCount);
 
   NcxxVar varMr = _file.getVar(MIN_RADIANCE_VALUE_OF_VALID_PIXELS);
   if(varMr.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " <<
-      MIN_RADIANCE_VALUE_OF_VALID_PIXELS << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    _minRadValueValidPixels = -9999.0;
+  } else {
+    varMr.getVal(&_minRadValueValidPixels);
   }
-  varMr.getVal(&_minRadValueValidPixels);
 
   NcxxVar varXr = _file.getVar(MAX_RADIANCE_VALUE_OF_VALID_PIXELS);
   if(varXr.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " <<
-      MAX_RADIANCE_VALUE_OF_VALID_PIXELS << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    _maxRadValueValidPixels = -9999.0;
+  } else {
+    varXr.getVal(&_maxRadValueValidPixels);
   }
-  varXr.getVal(&_maxRadValueValidPixels);
 
   NcxxVar varMm = _file.getVar(MEAN_RADIANCE_VALUE_OF_VALID_PIXELS);
   if(varMm.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " <<
-      MEAN_RADIANCE_VALUE_OF_VALID_PIXELS  << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    _meanRadValueValidPixels = -9999.0;
+  } else {
+    varMm.getVal(&_meanRadValueValidPixels);
   }
-  varMm.getVal(&_meanRadValueValidPixels);
 
   NcxxVar varSr = _file.getVar(STD_DEV_RADIANCE_VALUE_OF_VALID_PIXELS);
   if(varSr.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " <<
-      STD_DEV_RADIANCE_VALUE_OF_VALID_PIXELS << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    _stdDevRadValueValidPixels = -9999.0;
+  } else {
+    varSr.getVal(&_stdDevRadValueValidPixels);
   }
-  varSr.getVal(&_stdDevRadValueValidPixels);
 
   NcxxVar varP = _file.getVar(PERCENT_UNCORRECTABLE_L0_ERRORS);
   if(varP.isNull() == true) {
@@ -1806,18 +2005,10 @@ void GoesRnetCDF2Mdv::_readQualityControlVars()
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
   // pull out attributes from this variable
-  std::map< std::string, NcxxVarAtt > attsD;
-  attsD = varD.getAtts();
-  try{
-    attsD[INPUT_ABI_L0_DATA].getValues(_inputAbiL0Data);
-  }
-  catch (NcxxException& e) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "   exception: " << e.what() << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  _inputAbiL0Data.clear();
+  NcxxVarAtt attD;
+  if (_getVarAtt(varD, INPUT_ABI_L0_DATA, attD) == 0) {
+    _inputAbiL0Data = _getAsStr(attD);
   }
 
   NcxxVar varPv = _file.getVar(PROCESSING_PARM_VERSION_CONTAINER);
@@ -1836,12 +2027,7 @@ void GoesRnetCDF2Mdv::_readQualityControlVars()
     attsPv[L1B_PROCESSING_PARM_VERSION].getValues(_l1bProcessingParamVersion);
   }
   catch (NcxxException& e) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "   exception: " << e.what() << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    _l1bProcessingParamVersion.clear();
   }
 
   NcxxVar varV = _file.getVar(ALGORITHM_PRODUCT_VERSION_CONTAINER);
@@ -1870,78 +2056,77 @@ void GoesRnetCDF2Mdv::_readQualityControlVars()
   }
 
   NcxxDim dim = _file.getDim(NUM_STAR_LOOKS);
-  if(dim.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << " dimension is missing, name: " << NUM_STAR_LOOKS << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
-  }
-  size_t numStarLooks = dim.getSize();
+  if(!dim.isNull()) {
 
-  NcxxVar slVar = _file.getVar(T_STAR_LOOK);
-  if(slVar.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " << T_STAR_LOOK << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
-  }
-
-  // TODO -- T_STAR_LOOK contained missing values in test file. Need to put
-  // missing value check
-  double *dvals = new double[numStarLooks];
-  slVar.getVal(dvals);
-  time_t theTime;
-  for(size_t i = 0; i < numStarLooks; i++) {
-    if(dvals[i] > 0.0) {
-      theTime = J2000_EPOCH_START + static_cast< time_t >(round(dvals[i]));
+    size_t numStarLooks = dim.getSize();
+    
+    NcxxVar slVar = _file.getVar(T_STAR_LOOK);
+    if(slVar.isNull() == true) {
+      NcxxErrStr err;
+      stringstream  info;
+      info << ERROR_STR << methodName << endl;
+      info << "  cannot find variable, name: " << T_STAR_LOOK << endl;
+      err.addErrStr(info.str());
+      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
     }
-    else {
-      theTime = 0;
-    }    
-    _timeStarLook.push_back(theTime);
-  }
-  delete [] dvals;
+    
+    // TODO -- T_STAR_LOOK contained missing values in test file. Need to put
+    // missing value check
+    double *dvals = new double[numStarLooks];
+    slVar.getVal(dvals);
+    time_t theTime;
+    for(size_t i = 0; i < numStarLooks; i++) {
+      if(dvals[i] > 0.0) {
+        theTime = J2000_EPOCH_START + static_cast< time_t >(round(dvals[i]));
+      }
+      else {
+        theTime = 0;
+      }    
+      _timeStarLook.push_back(theTime);
+    }
+    delete [] dvals;
+    
+    NcxxVar bwVar = _file.getVar(BAND_WAVELENGTH_STAR_LOOK);
+    if(bwVar.isNull() == true) {
+      NcxxErrStr err;
+      stringstream  info;
+      info << ERROR_STR << methodName << endl;
+      info << "  cannot find variable, name: " << BAND_WAVELENGTH_STAR_LOOK << endl;
+      err.addErrStr(info.str());
+      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    }
+    
+    _bandWavelengthStarLook.assign(numStarLooks, 0.0);
+    bwVar.getVal(_bandWavelengthStarLook.data());
+    
 
-  NcxxVar bwVar = _file.getVar(BAND_WAVELENGTH_STAR_LOOK);
-  if(bwVar.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " << BAND_WAVELENGTH_STAR_LOOK << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
-  }
+    NcxxVar siVar = _file.getVar(STAR_ID);
+    if(siVar.isNull() == true) {
+      NcxxErrStr err;
+      stringstream  info;
+      info << ERROR_STR << methodName << endl;
+      info << "  cannot find variable, name: " << STAR_ID << endl;
+      err.addErrStr(info.str());
+      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    }
 
-  _bandWavelengthStarLook.assign(numStarLooks, 0.0);
-  bwVar.getVal(_bandWavelengthStarLook.data());
+    _starID.assign(numStarLooks, 0);
+    siVar.getVal(_starID.data());
 
-
-  NcxxVar siVar = _file.getVar(STAR_ID);
-  if(siVar.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " << STAR_ID << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
-  }
-
-  _starID.assign(numStarLooks, 0);
-  siVar.getVal(_starID.data());
+  } // NUM_STAR_LOOKS
   
 }
   
 /*********************************************************************
- * _readVars()
+ * _readFieldVars()
  */
 
-void GoesRnetCDF2Mdv::_readRadianceVars()
+void GoesRnetCDF2Mdv::_readFieldVars()
 {
-  static const string methodName = "GoesRnetCDF2Mdv::_readRadianceVars()";
+
+  static const string methodName = "GoesRnetCDF2Mdv::_readFieldVars()";
+
+  // band ID
 
   NcxxVar varB = _file.getVar(BAND_ID);
   if(varB.isNull() == true) {
@@ -1954,6 +2139,8 @@ void GoesRnetCDF2Mdv::_readRadianceVars()
   }
   varB.getVal(&_bandID);
 
+  // band wavelength
+
   NcxxVar varW = _file.getVar(BAND_WAVELENGTH);
   if(varW.isNull() == true) {
     NcxxErrStr err;
@@ -1965,6 +2152,37 @@ void GoesRnetCDF2Mdv::_readRadianceVars()
   }
   varW.getVal(&_bandWavelength);
 
+  if (_productType == PRODUCT_LEVEL1B_RADIANCES) {
+    _readRadiance();
+    _readDataQualFlag();
+  } else if (_productType == PRODUCT_CLOUD_AND_MOISTURE_IMAGERY) {
+    _readCMI();
+    _readDataQualFlag();
+  }
+
+  // yaw flip flag
+
+  NcxxVar varY = _file.getVar(YAW_FLIP_FLAG);
+  if(!varY.isNull()) {
+    uint8_t val;
+    varY.getVal(&val);
+    _yawFlipFlag = static_cast< bool >(val);
+  } else {
+    _yawFlipFlag = false;
+  }
+
+}
+
+/*********************************************************************
+ * _readRadiance()
+ */
+
+void GoesRnetCDF2Mdv::_readRadiance()
+{
+  static const string methodName = "GoesRnetCDF2Mdv::_readRadiance()";
+
+  // get the variable
+
   NcxxVar varR = _file.getVar(RADIANCE);
   if(varR.isNull() == true) {
     NcxxErrStr err;
@@ -1974,22 +2192,68 @@ void GoesRnetCDF2Mdv::_readRadianceVars()
     err.addErrStr(info.str());
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
-  std::map< std::string, NcxxVarAtt > radAtts;
-  radAtts = varR.getAtts();
-  float scaleFactor;
-  float offset;
-  try{
-    radAtts[SCALE_FACTOR].getValues(&scaleFactor);
-    radAtts[ADD_OFFSET].getValues(&offset);
-    radAtts[FILL_VALUE].getValues(&_ncRadMissingVal);
+
+  // retrieve the attributes
+
+  NcxxVarAtt attR;
+  float scaleFactor = 1.0;
+  if (_getVarAtt(varR, SCALE_FACTOR, attR) == 0) {
+    scaleFactor = _getAsFloat(attR);
   }
-  catch (NcxxException& e) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "   exception: " << e.what() << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  float offset = 0.0;
+  if (_getVarAtt(varR, ADD_OFFSET, attR) == 0) {
+    offset = _getAsFloat(attR);
+  }
+  _ncRadMissingVal = -9990.0;
+  if (_getVarAtt(varR, FILL_VALUE, attR) == 0) {
+    _ncRadMissingVal = _getAsFloat(attR);
+  }
+  _radLongName.clear();
+  if (_getVarAtt(varR, LONG_NAME, attR) == 0) {
+    _radLongName = _getAsStr(attR);
+  }
+  _radStandardName.clear();
+  if (_getVarAtt(varR, STANDARD_NAME, attR) == 0) {
+    _radStandardName = _getAsStr(attR);
+  }
+  _radUnits.clear();
+  if (_getVarAtt(varR, UNITS, attR) == 0) {
+    _radUnits = _getAsStr(attR);
+  }
+
+  if(_bandID < EMISSIVE_BAND_START) {
+    _outName = "Albedo";
+    _outLongName = "Albedo";
+    _outStandardName = "Albedo";
+    _outUnits = "%";
+  } else {
+    _outName = "Temp";
+    _outLongName = "BrightnessTemp";
+    _outStandardName = "BrightnessTemp";
+    _outUnits = "K";
+  }
+
+  // optionally override names / units
+
+  _radName = RADIANCE;
+  if (strlen(_params->rad_data_prep.short_name) > 0) {
+    _radName = _params->rad_data_prep.short_name;
+  }
+  if (strlen(_params->rad_data_prep.long_name) > 0) {
+    _radLongName = _params->rad_data_prep.long_name;
+  }
+  if (strlen(_params->rad_data_prep.units) > 0) {
+    _radUnits = _params->rad_data_prep.units;
+  }
+
+  if (strlen(_params->out_data_prep.short_name) > 0) {
+    _outName = _params->out_data_prep.short_name;
+  }
+  if (strlen(_params->out_data_prep.long_name) > 0) {
+    _outLongName = _params->out_data_prep.long_name;
+  }
+  if (strlen(_params->out_data_prep.units) > 0) {
+    _outUnits = _params->out_data_prep.units;
   }
 
   size_t nPts = _numX*_numY;
@@ -2005,15 +2269,12 @@ void GoesRnetCDF2Mdv::_readRadianceVars()
 
   for (size_t i = 0; i < nPts; i++) {
     if (svals[i] != _ncRadMissingVal) {
-
       _radiance[i] = static_cast<float>(svals[i])*scaleFactor + offset;
-
       // somehow small negative radiances values can be computed
       // for svals that are less than offset/scaleFactor. 
       if(_radiance[i] < 0.0) {
 	_radiance[i] = 0.0;
       }
-
 #ifdef DEBUG_PRINT
       if(_radiance[i] < 0.0) {
       	cerr << "radiance < 0" << endl;
@@ -2032,7 +2293,6 @@ void GoesRnetCDF2Mdv::_readRadianceVars()
         }
       }
 #endif
-
     } else {
 #ifdef DEBUG_PRINT
       cerr << "got a missing value here" << endl;
@@ -2041,9 +2301,103 @@ void GoesRnetCDF2Mdv::_readRadianceVars()
   }
   delete [] svals;
 
+}
+
+/*********************************************************************
+ * _readCMI() - Cloud and Moisture Imagery
+ */
+
+void GoesRnetCDF2Mdv::_readCMI()
+{
+
+  static const string methodName = "GoesRnetCDF2Mdv::_readCMI()";
+  
+  // get the variable
+
+  NcxxVar varCmi = _file.getVar(CMI);
+  if(varCmi.isNull() == true) {
+    NcxxErrStr err;
+    stringstream  info;
+    info << ERROR_STR << methodName << endl;
+    info << "  cannot find variable, name: " << CMI << endl;
+    err.addErrStr(info.str());
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  }
+
+  // retrieve the attributes
+
+  NcxxVarAtt attCmi;
+  float scaleFactor = 1.0;
+  if (_getVarAtt(varCmi, SCALE_FACTOR, attCmi) == 0) {
+    scaleFactor = _getAsFloat(attCmi);
+  }
+  float offset = 0.0;
+  if (_getVarAtt(varCmi, ADD_OFFSET, attCmi) == 0) {
+    offset = _getAsFloat(attCmi);
+  }
+  _ncCmiMissingVal = -9990.0;
+  if (_getVarAtt(varCmi, FILL_VALUE, attCmi) == 0) {
+    _ncCmiMissingVal = _getAsFloat(attCmi);
+  }
+  _cmiLongName.clear();
+  if (_getVarAtt(varCmi, LONG_NAME, attCmi) == 0) {
+    _cmiLongName = _getAsStr(attCmi);
+  }
+  _cmiStandardName.clear();
+  if (_getVarAtt(varCmi, STANDARD_NAME, attCmi) == 0) {
+    _cmiStandardName = _getAsStr(attCmi);
+  }
+  _cmiUnits.clear();
+  if (_getVarAtt(varCmi, UNITS, attCmi) == 0) {
+    _cmiUnits = _getAsStr(attCmi);
+  }
+
+  // optionally override names / units
+
+  _cmiName = CMI;
+  if (strlen(_params->out_data_prep.short_name) > 0) {
+    _cmiName = _params->out_data_prep.short_name;
+  }
+  if (strlen(_params->out_data_prep.long_name) > 0) {
+    _cmiLongName = _params->out_data_prep.long_name;
+  }
+  if (strlen(_params->out_data_prep.units) > 0) {
+    _cmiUnits = _params->out_data_prep.units;
+  }
+
+  size_t nPts = _numX*_numY;
+  short *svals = new short[nPts];
+  varCmi.getVal(svals);
+
+  if(_params->init_zero == true) {
+    _cmi.assign(nPts, 0.0);
+  }
+  else {
+    _cmi.assign(nPts, MISSING_DATA_VALUE);
+  }
+  
+  for (size_t i = 0; i < nPts; i++) {
+    if (svals[i] != _ncCmiMissingVal) {
+      _cmi[i] = static_cast<float>(svals[i])*scaleFactor + offset;
+    }
+  }
+  delete [] svals;
+
+}
+
+/*********************************************************************
+ * _readDataQualFlag()
+ */
+
+void GoesRnetCDF2Mdv::_readDataQualFlag()
+{
+
+  static const string methodName = "GoesRnetCDF2Mdv::_readDataQualFlag()";
  
-  NcxxVar varQ  = _file.getVar(DATA_QUALITY_FLAG);
-  if(varQ.isNull() == true) {
+  // get the variable
+
+  NcxxVar varDqf  = _file.getVar(DATA_QUALITY_FLAG);
+  if(varDqf.isNull() == true) {
     NcxxErrStr err;
     stringstream  info;
     info << ERROR_STR << methodName << endl;
@@ -2052,63 +2406,70 @@ void GoesRnetCDF2Mdv::_readRadianceVars()
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
-  _dataQuality.assign(nPts, 0);
-  varQ.getVal(_dataQuality.data());
+  // retrieve the attributes
 
-  // pull out the quality values and meanings from attributes
-  std::map< std::string, NcxxVarAtt > dqAtts;
-  dqAtts = varQ.getAtts();
+  NcxxVarAtt attDqf;
+  _ncDqfMissingVal = -127;
+  if (_getVarAtt(varDqf, FILL_VALUE, attDqf) == 0) {
+    _ncDqfMissingVal = _getAsInt(attDqf);
+  }
+  _dqfLongName.clear();
+  if (_getVarAtt(varDqf, LONG_NAME, attDqf) == 0) {
+    _dqfLongName = _getAsStr(attDqf);
+  }
+  _dqfStandardName.clear();
+  if (_getVarAtt(varDqf, STANDARD_NAME, attDqf) == 0) {
+    _dqfStandardName = _getAsStr(attDqf);
+  }
+  _dqfUnits.clear();
+  if (_getVarAtt(varDqf, UNITS, attDqf) == 0) {
+    _dqfUnits = _getAsStr(attDqf);
+  }
+
+  // override atts from params file as applicable
+
+  if (strlen(_params->qc_data_prep.short_name) > 0) {
+    _dqfName = _params->qc_data_prep.short_name;
+  }
+  if (strlen(_params->qc_data_prep.long_name) > 0) {
+    _dqfLongName = _params->qc_data_prep.long_name;
+  }
+  if (strlen(_params->qc_data_prep.units) > 0) {
+    _dqfUnits = _params->qc_data_prep.units;
+  }
+
+  // get flag meanings string
+
+  string dqfFlagMeaningsStr;
+  if (_getVarAtt(varDqf, FLAG_MEANINGS, attDqf) == 0) {
+    dqfFlagMeaningsStr = _getAsStr(attDqf);
+  }
+
+  // split the dqfLabels based on white space
+  vector< string > dqfLabels;
+  TaStr::tokenize(dqfFlagMeaningsStr, " ", dqfLabels);
   
-  try {
-    
-    string dqLabelStr;
-    vector< uint8_t > dqVals;
-    vector< string > dqLabels;
-
-    dqAtts[FILL_VALUE].getValues(&_ncDQFMissingVal);
-    dqAtts[FLAG_MEANINGS].getValues(dqLabelStr);
-    
-    // split the dqLabels based on white space
-    string flag;
-    size_t end = 0;
-    size_t start = 0;
-    char sep = ' ';
-    size_t len = dqLabelStr.size();
-    while((end = dqLabelStr.find(sep, start)) != string::npos) {
-      dqLabels.push_back(dqLabelStr.substr(start, end - start));
-      start = end + 1;
-    }
-    dqLabels.push_back(dqLabelStr.substr(start, len - start));
-    int numVals;
-    dqAtts[NUMBER_OF_QF_VALUES].getValues(&numVals);
-    dqVals.assign(numVals, 0);
-    dqAtts[FLAG_VALUES].getValues(dqVals.data());
-    assert(dqLabels.size() == dqVals.size());
-    for(int i = 0; i < numVals; i++) {
-      _qualityFlags[static_cast<int>(dqVals[i])] = dqLabels[i];
-    }
-  }
-  catch (NcxxException& e) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    cerr << "   exception: " << e.what() << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  // get flag values
+  
+  vector<int> dqfVals;
+  if (_getVarAtt(varDqf, FLAG_VALUES, attDqf) == 0) {
+    dqfVals = _getAsInts(attDqf);
   }
 
-  NcxxVar varY = _file.getVar(YAW_FLIP_FLAG);
-  if(varY.isNull() == true) {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  cannot find variable, name: " << YAW_FLIP_FLAG  << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  // create quality flags map
+  
+  if (dqfLabels.size() == dqfVals.size()) {
+    _qualityFlags.clear();
+    for(size_t ii = 0; ii < dqfVals.size(); ii++) {
+      _qualityFlags[dqfVals[ii]] = dqfLabels[ii];
+    }
   }
-  uint8_t val;
-  varY.getVal(&val);
-  _yawFlipFlag = static_cast< bool >(val);
+
+  // set data quality array
+  
+  size_t nPts = _numX*_numY;
+  _dataQuality.assign(nPts, 0);
+  varDqf.getVal(_dataQuality.data());
 
 }
 
@@ -2122,6 +2483,9 @@ void GoesRnetCDF2Mdv::_setProductType(const string &title)
 
   if(title == TITLE_LEVEL1B_RADIANCES) {
     _productType = PRODUCT_LEVEL1B_RADIANCES;
+  }
+  else if (title == TITLE_CLOUD_AND_MOISTURE_IMAGERY) {
+    _productType = PRODUCT_CLOUD_AND_MOISTURE_IMAGERY;
   }
   else if (title == TITLE_AEROSOL_DETECTION) {
     _productType = PRODUCT_AEROSOL_DETECTION;
@@ -2179,18 +2543,14 @@ void GoesRnetCDF2Mdv::_setProductType(const string &title)
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
   else {
-    NcxxErrStr err;
-    stringstream  info;
-    info << ERROR_STR << methodName << endl;
-    info << "  Unknown product type" << endl;
-    err.addErrStr(info.str());
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    cerr << "WARNING - product type unknown: " << title << endl;
+    _productType = PRODUCT_TYPE_UNKNOWN;
   }
   
 }
 
 /*********************************************************************
- * _setProductType()
+ * _setScanType()
  */
 
 void GoesRnetCDF2Mdv::_setScanType(const string &scan_id)
@@ -2226,7 +2586,7 @@ bool GoesRnetCDF2Mdv::_latLon2XY(double lat, double lon,
 				 int& x_idx,  int& y_idx)
 {
   static const string methodName = "GoesRnetCDF2Mdv::_latLon2XY()";
-  // 0.0174533
+
   double c_lat = atan(_invRadiusRatio2*tan(lat*DEG_TO_RAD));
   double cos_clat = cos(c_lat);
 
@@ -2455,6 +2815,7 @@ const char* GoesRnetCDF2Mdv::PERCENT_UNCORRECTABLE_L0_ERRORS =
 
 // Level-1 Variables
 const char* GoesRnetCDF2Mdv::RADIANCE = "Rad";
+const char* GoesRnetCDF2Mdv::CMI = "CMI";
 const char* GoesRnetCDF2Mdv::YAW_FLIP_FLAG = "yaw_flip_flag";
 const char* GoesRnetCDF2Mdv::BAND_ID = "band_id";
 const char* GoesRnetCDF2Mdv::BAND_WAVELENGTH = "band_wavelength";
@@ -2909,6 +3270,7 @@ const char* GoesRnetCDF2Mdv::PRODUCT_VERSION = "product_version";
 
 // Title strings that are used to set the product type
 const char* GoesRnetCDF2Mdv::TITLE_LEVEL1B_RADIANCES = "ABI L1b Radiances";
+const char* GoesRnetCDF2Mdv::TITLE_CLOUD_AND_MOISTURE_IMAGERY = "ABI L2 Cloud and Moisture Imagery";
 const char* GoesRnetCDF2Mdv::TITLE_AEROSOL_DETECTION = "ABI L2 Aerosol Detection";
 const char* GoesRnetCDF2Mdv::TITLE_AEROSOL_OPTICAL_DEPTH = "ABI L2 Aerosol Optical Depth";
 const char* GoesRnetCDF2Mdv::TITLE_CLOUD_TOP_PHASE = "ABI L2 Cloud Top Phase";

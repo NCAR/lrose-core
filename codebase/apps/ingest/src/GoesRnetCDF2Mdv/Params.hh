@@ -512,13 +512,13 @@ public:
 
   data_out_t out_data_prep;
 
-  tdrp_bool_t include_qc_field;
-
-  data_out_t qc_data_prep;
-
   tdrp_bool_t include_rad_field;
 
   data_out_t rad_data_prep;
+
+  tdrp_bool_t include_qc_field;
+
+  data_out_t qc_data_prep;
 
   char _end_; // end of data region
               // needed for zeroing out data

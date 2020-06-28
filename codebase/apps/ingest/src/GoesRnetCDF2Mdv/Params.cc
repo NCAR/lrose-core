@@ -1120,7 +1120,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("out_data_prep");
     tt->descr = tdrpStrDup("Data prep for the output data.");
-    tt->help = tdrpStrDup("This is only relevant when converting from float32 to int8 or int16 or if force_scale_change is set.");
+    tt->help = tdrpStrDup("Optionally override the name, long_name and units in the file. If the strings here are empty, no override occurs. Also optionally set the output encoding, compression and scaling. The default output encoding is FLOAT32.");
     tt->val_offset = (char *) &out_data_prep - &_start_;
     tt->struct_def.name = tdrpStrDup("data_out_t");
     tt->struct_def.nfields = 8;
@@ -1219,137 +1219,9 @@
     tt->n_struct_vals = 8;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("data");
-      tt->struct_vals[1].s = tdrpStrDup("long_data");
-      tt->struct_vals[2].s = tdrpStrDup("units");
-      tt->struct_vals[3].e = ENCODING_ASIS;
-      tt->struct_vals[4].e = COMPRESSION_ASIS;
-      tt->struct_vals[5].e = SCALING_ASIS;
-      tt->struct_vals[6].f = 1;
-      tt->struct_vals[7].f = 0;
-    tt++;
-    
-    // Parameter 'include_qc_field'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("include_qc_field");
-    tt->descr = tdrpStrDup("Flag to include the QC field in the MDV output.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &include_qc_field - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'qc_data_prep'
-    // ctype is '_data_out_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("qc_data_prep");
-    tt->descr = tdrpStrDup("Data prep for the QC data.");
-    tt->help = tdrpStrDup("This is only relevant when converting from float32 to int8 or int16 or if force_scale_change is set.");
-    tt->val_offset = (char *) &qc_data_prep - &_start_;
-    tt->struct_def.name = tdrpStrDup("data_out_t");
-    tt->struct_def.nfields = 8;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("short_name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &qc_data_prep.short_name - (char *) &qc_data_prep;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("long_name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &qc_data_prep.long_name - (char *) &qc_data_prep;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("units");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &qc_data_prep.units - (char *) &qc_data_prep;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("encoding_type_t");
-      tt->struct_def.fields[3].fname = tdrpStrDup("encoding_type");
-      tt->struct_def.fields[3].ptype = ENUM_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &qc_data_prep.encoding_type - (char *) &qc_data_prep;
-        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("encoding_type_t");
-        tt->struct_def.fields[3].enum_def.nfields = 4;
-        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("ENCODING_ASIS");
-        tt->struct_def.fields[3].enum_def.fields[0].val = ENCODING_ASIS;
-        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT8");
-        tt->struct_def.fields[3].enum_def.fields[1].val = ENCODING_INT8;
-        tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
-        tt->struct_def.fields[3].enum_def.fields[2].val = ENCODING_INT16;
-        tt->struct_def.fields[3].enum_def.fields[3].name = tdrpStrDup("ENCODING_FLOAT32");
-        tt->struct_def.fields[3].enum_def.fields[3].val = ENCODING_FLOAT32;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("compression_type_t");
-      tt->struct_def.fields[4].fname = tdrpStrDup("compression_type");
-      tt->struct_def.fields[4].ptype = ENUM_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &qc_data_prep.compression_type - (char *) &qc_data_prep;
-        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("compression_type_t");
-        tt->struct_def.fields[4].enum_def.nfields = 9;
-        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("COMPRESSION_ASIS");
-        tt->struct_def.fields[4].enum_def.fields[0].val = COMPRESSION_ASIS;
-        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("COMPRESSION_NONE");
-        tt->struct_def.fields[4].enum_def.fields[1].val = COMPRESSION_NONE;
-        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("COMPRESSION_RLE");
-        tt->struct_def.fields[4].enum_def.fields[2].val = COMPRESSION_RLE;
-        tt->struct_def.fields[4].enum_def.fields[3].name = tdrpStrDup("COMPRESSION_LZO");
-        tt->struct_def.fields[4].enum_def.fields[3].val = COMPRESSION_LZO;
-        tt->struct_def.fields[4].enum_def.fields[4].name = tdrpStrDup("COMPRESSION_ZLIB");
-        tt->struct_def.fields[4].enum_def.fields[4].val = COMPRESSION_ZLIB;
-        tt->struct_def.fields[4].enum_def.fields[5].name = tdrpStrDup("COMPRESSION_BZIP");
-        tt->struct_def.fields[4].enum_def.fields[5].val = COMPRESSION_BZIP;
-        tt->struct_def.fields[4].enum_def.fields[6].name = tdrpStrDup("COMPRESSION_GZIP");
-        tt->struct_def.fields[4].enum_def.fields[6].val = COMPRESSION_GZIP;
-        tt->struct_def.fields[4].enum_def.fields[7].name = tdrpStrDup("COMPRESSION_GZIP_VOL");
-        tt->struct_def.fields[4].enum_def.fields[7].val = COMPRESSION_GZIP_VOL;
-        tt->struct_def.fields[4].enum_def.fields[8].name = tdrpStrDup("COMPRESSION_TYPES_N");
-        tt->struct_def.fields[4].enum_def.fields[8].val = COMPRESSION_TYPES_N;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("scaling_type_t");
-      tt->struct_def.fields[5].fname = tdrpStrDup("scaling_type");
-      tt->struct_def.fields[5].ptype = ENUM_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &qc_data_prep.scaling_type - (char *) &qc_data_prep;
-        tt->struct_def.fields[5].enum_def.name = tdrpStrDup("scaling_type_t");
-        tt->struct_def.fields[5].enum_def.nfields = 6;
-        tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("SCALING_ASIS");
-        tt->struct_def.fields[5].enum_def.fields[0].val = SCALING_ASIS;
-        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("SCALING_NONE");
-        tt->struct_def.fields[5].enum_def.fields[1].val = SCALING_NONE;
-        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("SCALING_ROUNDED");
-        tt->struct_def.fields[5].enum_def.fields[2].val = SCALING_ROUNDED;
-        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("SCALING_INTEGRAL");
-        tt->struct_def.fields[5].enum_def.fields[3].val = SCALING_INTEGRAL;
-        tt->struct_def.fields[5].enum_def.fields[4].name = tdrpStrDup("SCALING_DYNAMIC");
-        tt->struct_def.fields[5].enum_def.fields[4].val = SCALING_DYNAMIC;
-        tt->struct_def.fields[5].enum_def.fields[5].name = tdrpStrDup("SCALING_SPECIFIED");
-        tt->struct_def.fields[5].enum_def.fields[5].val = SCALING_SPECIFIED;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("float");
-      tt->struct_def.fields[6].fname = tdrpStrDup("scale");
-      tt->struct_def.fields[6].ptype = FLOAT_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
-        (char *) &qc_data_prep.scale - (char *) &qc_data_prep;
-      tt->struct_def.fields[7].ftype = tdrpStrDup("float");
-      tt->struct_def.fields[7].fname = tdrpStrDup("bias");
-      tt->struct_def.fields[7].ptype = FLOAT_TYPE;
-      tt->struct_def.fields[7].rel_offset = 
-        (char *) &qc_data_prep.bias - (char *) &qc_data_prep;
-    tt->n_struct_vals = 8;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("QC");
-      tt->struct_vals[1].s = tdrpStrDup("long_QC");
-      tt->struct_vals[2].s = tdrpStrDup("units");
+      tt->struct_vals[0].s = tdrpStrDup("");
+      tt->struct_vals[1].s = tdrpStrDup("");
+      tt->struct_vals[2].s = tdrpStrDup("");
       tt->struct_vals[3].e = ENCODING_ASIS;
       tt->struct_vals[4].e = COMPRESSION_ASIS;
       tt->struct_vals[5].e = SCALING_ASIS;
@@ -1376,7 +1248,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("rad_data_prep");
     tt->descr = tdrpStrDup("Data prep for the radiance data.");
-    tt->help = tdrpStrDup("This is only relevant when converting from float32 to int8 or int16 or if force_scale_change is set.");
+    tt->help = tdrpStrDup("Optionally override the name, long_name and units in the file. If the strings here are empty, no override occurs. Also optionally set the output encoding, compression and scaling. The default output encoding is FLOAT32.");
     tt->val_offset = (char *) &rad_data_prep - &_start_;
     tt->struct_def.name = tdrpStrDup("data_out_t");
     tt->struct_def.nfields = 8;
@@ -1475,9 +1347,137 @@
     tt->n_struct_vals = 8;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("radiance");
-      tt->struct_vals[1].s = tdrpStrDup("long_radinace");
-      tt->struct_vals[2].s = tdrpStrDup("units");
+      tt->struct_vals[0].s = tdrpStrDup("");
+      tt->struct_vals[1].s = tdrpStrDup("");
+      tt->struct_vals[2].s = tdrpStrDup("");
+      tt->struct_vals[3].e = ENCODING_ASIS;
+      tt->struct_vals[4].e = COMPRESSION_ASIS;
+      tt->struct_vals[5].e = SCALING_ASIS;
+      tt->struct_vals[6].f = 1;
+      tt->struct_vals[7].f = 0;
+    tt++;
+    
+    // Parameter 'include_qc_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_qc_field");
+    tt->descr = tdrpStrDup("Flag to include the QC field in the MDV output.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &include_qc_field - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'qc_data_prep'
+    // ctype is '_data_out_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("qc_data_prep");
+    tt->descr = tdrpStrDup("Data prep for the QC data.");
+    tt->help = tdrpStrDup("Optionally override the name, long_name and units in the file. If the strings here are empty, no override occurs. Also optionally set the output encoding, compression and scaling. The default output encoding is FLOAT32.");
+    tt->val_offset = (char *) &qc_data_prep - &_start_;
+    tt->struct_def.name = tdrpStrDup("data_out_t");
+    tt->struct_def.nfields = 8;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("short_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &qc_data_prep.short_name - (char *) &qc_data_prep;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("long_name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &qc_data_prep.long_name - (char *) &qc_data_prep;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("units");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &qc_data_prep.units - (char *) &qc_data_prep;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("encoding_type_t");
+      tt->struct_def.fields[3].fname = tdrpStrDup("encoding_type");
+      tt->struct_def.fields[3].ptype = ENUM_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &qc_data_prep.encoding_type - (char *) &qc_data_prep;
+        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("encoding_type_t");
+        tt->struct_def.fields[3].enum_def.nfields = 4;
+        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("ENCODING_ASIS");
+        tt->struct_def.fields[3].enum_def.fields[0].val = ENCODING_ASIS;
+        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT8");
+        tt->struct_def.fields[3].enum_def.fields[1].val = ENCODING_INT8;
+        tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
+        tt->struct_def.fields[3].enum_def.fields[2].val = ENCODING_INT16;
+        tt->struct_def.fields[3].enum_def.fields[3].name = tdrpStrDup("ENCODING_FLOAT32");
+        tt->struct_def.fields[3].enum_def.fields[3].val = ENCODING_FLOAT32;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("compression_type_t");
+      tt->struct_def.fields[4].fname = tdrpStrDup("compression_type");
+      tt->struct_def.fields[4].ptype = ENUM_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &qc_data_prep.compression_type - (char *) &qc_data_prep;
+        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("compression_type_t");
+        tt->struct_def.fields[4].enum_def.nfields = 9;
+        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("COMPRESSION_ASIS");
+        tt->struct_def.fields[4].enum_def.fields[0].val = COMPRESSION_ASIS;
+        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("COMPRESSION_NONE");
+        tt->struct_def.fields[4].enum_def.fields[1].val = COMPRESSION_NONE;
+        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("COMPRESSION_RLE");
+        tt->struct_def.fields[4].enum_def.fields[2].val = COMPRESSION_RLE;
+        tt->struct_def.fields[4].enum_def.fields[3].name = tdrpStrDup("COMPRESSION_LZO");
+        tt->struct_def.fields[4].enum_def.fields[3].val = COMPRESSION_LZO;
+        tt->struct_def.fields[4].enum_def.fields[4].name = tdrpStrDup("COMPRESSION_ZLIB");
+        tt->struct_def.fields[4].enum_def.fields[4].val = COMPRESSION_ZLIB;
+        tt->struct_def.fields[4].enum_def.fields[5].name = tdrpStrDup("COMPRESSION_BZIP");
+        tt->struct_def.fields[4].enum_def.fields[5].val = COMPRESSION_BZIP;
+        tt->struct_def.fields[4].enum_def.fields[6].name = tdrpStrDup("COMPRESSION_GZIP");
+        tt->struct_def.fields[4].enum_def.fields[6].val = COMPRESSION_GZIP;
+        tt->struct_def.fields[4].enum_def.fields[7].name = tdrpStrDup("COMPRESSION_GZIP_VOL");
+        tt->struct_def.fields[4].enum_def.fields[7].val = COMPRESSION_GZIP_VOL;
+        tt->struct_def.fields[4].enum_def.fields[8].name = tdrpStrDup("COMPRESSION_TYPES_N");
+        tt->struct_def.fields[4].enum_def.fields[8].val = COMPRESSION_TYPES_N;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("scaling_type_t");
+      tt->struct_def.fields[5].fname = tdrpStrDup("scaling_type");
+      tt->struct_def.fields[5].ptype = ENUM_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &qc_data_prep.scaling_type - (char *) &qc_data_prep;
+        tt->struct_def.fields[5].enum_def.name = tdrpStrDup("scaling_type_t");
+        tt->struct_def.fields[5].enum_def.nfields = 6;
+        tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("SCALING_ASIS");
+        tt->struct_def.fields[5].enum_def.fields[0].val = SCALING_ASIS;
+        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("SCALING_NONE");
+        tt->struct_def.fields[5].enum_def.fields[1].val = SCALING_NONE;
+        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("SCALING_ROUNDED");
+        tt->struct_def.fields[5].enum_def.fields[2].val = SCALING_ROUNDED;
+        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("SCALING_INTEGRAL");
+        tt->struct_def.fields[5].enum_def.fields[3].val = SCALING_INTEGRAL;
+        tt->struct_def.fields[5].enum_def.fields[4].name = tdrpStrDup("SCALING_DYNAMIC");
+        tt->struct_def.fields[5].enum_def.fields[4].val = SCALING_DYNAMIC;
+        tt->struct_def.fields[5].enum_def.fields[5].name = tdrpStrDup("SCALING_SPECIFIED");
+        tt->struct_def.fields[5].enum_def.fields[5].val = SCALING_SPECIFIED;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("float");
+      tt->struct_def.fields[6].fname = tdrpStrDup("scale");
+      tt->struct_def.fields[6].ptype = FLOAT_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &qc_data_prep.scale - (char *) &qc_data_prep;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("float");
+      tt->struct_def.fields[7].fname = tdrpStrDup("bias");
+      tt->struct_def.fields[7].ptype = FLOAT_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
+        (char *) &qc_data_prep.bias - (char *) &qc_data_prep;
+    tt->n_struct_vals = 8;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("");
+      tt->struct_vals[1].s = tdrpStrDup("");
+      tt->struct_vals[2].s = tdrpStrDup("");
       tt->struct_vals[3].e = ENCODING_ASIS;
       tt->struct_vals[4].e = COMPRESSION_ASIS;
       tt->struct_vals[5].e = SCALING_ASIS;

@@ -425,7 +425,6 @@ typedef enum {
   SCALING_SPECIFIED =  4
 } scaling_type_t;
 
-
 typedef struct {
  string short_name;
  string long_name;
@@ -440,25 +439,9 @@ typedef struct {
 paramdef struct data_out_t
 {
   p_descr = "Data prep for the output data.";
-  p_help = "This is only relevant when converting from float32 to int8 or "
-           "int16 or if force_scale_change is set.";
-  p_default = { "data", "long_data", "units", ENCODING_ASIS, COMPRESSION_ASIS, SCALING_ASIS, 1.0, 0.0 };
+  p_help = "Optionally override the name, long_name and units in the file. If the strings here are empty, no override occurs. Also optionally set the output encoding, compression and scaling. The default output encoding is FLOAT32.";
+  p_default = { "", "", "", ENCODING_ASIS, COMPRESSION_ASIS, SCALING_ASIS, 1.0, 0.0 };
 } out_data_prep;
-
-paramdef boolean
-{
-  p_descr = "Flag to include the QC field in the MDV output.";
-  p_help = "";
-  p_defualt = false;
-} include_qc_field;
-
-paramdef struct data_out_t
-{
-  p_descr = "Data prep for the QC data.";
-  p_help = "This is only relevant when converting from float32 to int8 or "
-           "int16 or if force_scale_change is set.";
-  p_default = { "QC", "long_QC", "units", ENCODING_ASIS, COMPRESSION_ASIS, SCALING_ASIS, 1.0, 0.0 };
-} qc_data_prep;
 
 paramdef boolean
 {
@@ -470,9 +453,22 @@ paramdef boolean
 paramdef struct data_out_t
 {
   p_descr = "Data prep for the radiance data.";
-  p_help = "This is only relevant when converting from float32 to int8 or "
-           "int16 or if force_scale_change is set.";
-  p_default = { "radiance", "long_radinace", "units", ENCODING_ASIS, COMPRESSION_ASIS, SCALING_ASIS, 1.0, 0.0 };
+  p_help = "Optionally override the name, long_name and units in the file. If the strings here are empty, no override occurs. Also optionally set the output encoding, compression and scaling. The default output encoding is FLOAT32.";
+  p_default = { "", "", "", ENCODING_ASIS, COMPRESSION_ASIS, SCALING_ASIS, 1.0, 0.0 };
 } rad_data_prep;
+
+paramdef boolean
+{
+  p_descr = "Flag to include the QC field in the MDV output.";
+  p_help = "";
+  p_defualt = false;
+} include_qc_field;
+
+paramdef struct data_out_t
+{
+  p_descr = "Data prep for the QC data.";
+  p_help = "Optionally override the name, long_name and units in the file. If the strings here are empty, no override occurs. Also optionally set the output encoding, compression and scaling. The default output encoding is FLOAT32.";
+  p_default = { "", "", "", ENCODING_ASIS, COMPRESSION_ASIS, SCALING_ASIS, 1.0, 0.0 };
+} qc_data_prep;
 
 
