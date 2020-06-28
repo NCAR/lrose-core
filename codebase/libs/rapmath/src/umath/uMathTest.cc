@@ -82,7 +82,7 @@ int main(int argc, char **argv)
   coeffs.push_back(0.55);
   coeffs.push_back(1.05);
   coeffs.push_back(0.75);
-  testPolynomial(10, 500, coeffs, 0.0, 1.5);
+  testPolynomial(10, 500, coeffs, 0.0, 0.2);
 
   return 0;
 
@@ -155,15 +155,16 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   aaa[2] = a2;
   aaa[3] = a3;
 
-  double xx[100];
-  double yy[100];
+  vector<double> xx;
+  vector<double> yy;
   
   for (int ii = 0; ii < 100; ii++) {
     double noise = STATS_normal_gen(noiseMean, noiseSdev);
-    double val = ii;
-    xx[ii] = val;
-    yy[ii] = aaa[0] + aaa[1] * val + aaa[2] * val * val +
-      aaa[3] * val * val * val + noise;
+    double xval = ii;
+    xx.push_back(xval);
+    double yval = (aaa[0] + aaa[1] * xval + aaa[2] * xval * xval +
+                   aaa[3] * xval * xval * xval + noise);
+    yy.push_back(yval);
   }
 
   cerr << "====================================" << endl;
@@ -179,7 +180,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   // try uPolyFit
   
   double stdErr, rSquared;
-  uPolyFit(100, xx, yy, aaa, 4, &stdErr, &rSquared);
+  uPolyFit(xx.size(), xx.data(), yy.data(), aaa, 4, &stdErr, &rSquared);
   cerr << "---------------------------------" << endl;
   cerr << "====>> output from uPolyFit() <<====" << endl;
   cerr << "Output aaa[0]: " << aaa[0] << endl;
@@ -196,9 +197,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   // try PolyFit
 
   PolyFit poly;
-  for (int ii = 0; ii < 100; ii++) {
-    poly.addValue(xx[ii], yy[ii]);
-  }
+  poly.setValues(xx, yy);
   poly.setOrder(3);
   poly.performFit();
   vector<double> coeffs = poly.getCoeffs();
@@ -214,11 +213,7 @@ static void testPolynomialOrder3(double a0, double a1, double a2, double a3,
   // try Forsythe fit
   
   ForsytheFit forsythe;
-  for (int ii = 0; ii < 100; ii++) {
-    forsythe.addValue(xx[ii], yy[ii]);
-  }
-  forsythe.setOrder(3);
-  forsythe.performFit();
+  forsythe.performFit(3, xx, yy);
   stdErr = forsythe.computeStdErrEst(rSquared);
   vector<double> fcoeffs = forsythe.getCoeffs();
 
@@ -298,7 +293,7 @@ static void testPolynomial(int order, int nObs,
     yy.push_back(yval);
   }
 
-  int nPasses = 1000;
+  int nPasses = 100;
   cerr << "====================================" << endl;
   cerr << "Polynomial details" << endl;
   for (int mm = 0; mm <= order; mm++) {
@@ -347,10 +342,8 @@ static void testPolynomial(int order, int nObs,
   // try Forsythe fit
   
   ForsytheFit forsythe;
-  forsythe.setValues(xx, yy);
-  forsythe.setOrder(order);
   for (int jj = 0; jj < nPasses; jj++) {
-    forsythe.performFit();
+    forsythe.performFit(order, xx, yy);
   }
   aaa = forsythe.getCoeffs();
   stdErr = forsythe.computeStdErrEst(rSquared);
@@ -362,6 +355,25 @@ static void testPolynomial(int order, int nObs,
   cerr << "stdErr: " << stdErr << endl;
   cerr << "rSquared: " << rSquared << endl;
   _printRunTime("end of ForsytheFit");
+
+  // try Forsythe fit again, setting X first then fitting Y
+  // this is more efficient if X does not change
+  
+  ForsytheFit forsythe2;
+  forsythe2.prepareForFit(order, xx);
+  for (int jj = 0; jj < nPasses; jj++) {
+    forsythe2.performFit(yy);
+  }
+  aaa = forsythe2.getCoeffs();
+  stdErr = forsythe2.computeStdErrEst(rSquared);
+  cerr << "---------------------------------" << endl;
+  cerr << "====>> output from ForsytheFit2() <<====" << endl;
+  for (int mm = 0; mm <= order; mm++) {
+    cerr << "  aaa[" << mm << "]: " << aaa[mm] << " (" << coeff[mm] << ")" << endl;
+  }
+  cerr << "stdErr: " << stdErr << endl;
+  cerr << "rSquared: " << rSquared << endl;
+  _printRunTime("end of ForsytheFit2");
 
   cerr << "====================================" << endl;
   cerr << endl;

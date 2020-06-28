@@ -65,7 +65,7 @@ DsMdvxMsg::~DsMdvxMsg()
 // check parts for consistency - 32-bit or 64-bit?
 // returns 0 on success, -1 on failure
 
-void DsMdvxMsg::checkParts() const
+void DsMdvxMsg::check64BitHeaders() const
 {
   _use32BitHeaders = true;
   if (_has64BitParts()) {

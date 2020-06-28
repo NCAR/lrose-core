@@ -1865,6 +1865,11 @@ void Ncf2MdvTrans::_setMasterHeaderCfRadial(const string &path,
 
 {
   
+  _mhdr.record_len1 = sizeof(_mhdr) - (2 * sizeof(si32));
+  _mhdr.record_len2 = sizeof(_mhdr) - (2 * sizeof(si32));
+  _mhdr.struct_id = Mdvx::MASTER_HEAD_MAGIC_COOKIE_64;
+  _mhdr.revision_number = Mdvx::REVISION_NUMBER;
+
   _mhdr.index_number = vol.getVolumeNumber(); 
   _mhdr.time_gen = 0;
   _mhdr.time_begin = vol.getStartTimeSecs(); 
@@ -1929,6 +1934,9 @@ void Ncf2MdvTrans::_addFieldCfRadial(const RadxVol &vol,
   
   Mdvx::field_header_t fhdr;
   MEM_zero(fhdr);
+  fhdr.record_len1 = sizeof(Mdvx::field_header_t) - (2 * sizeof(si32));
+  fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE_64;
+  fhdr.record_len2 = fhdr.record_len1;
     
   fhdr.nx = radxField.getMaxNGates();
   fhdr.ny = _nAngles;
@@ -1996,6 +2004,10 @@ void Ncf2MdvTrans::_addFieldCfRadial(const RadxVol &vol,
 
   Mdvx::vlevel_header_t vhdr;
   MEM_zero(vhdr);
+  vhdr.record_len1 = sizeof(Mdvx::vlevel_header_t) - (2 * sizeof(si32));
+  vhdr.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE_64;
+  vhdr.record_len2 = vhdr.record_len1;
+
   for (int isweep = 0; isweep < (int) vol.getSweeps().size(); isweep++) {
     const RadxSweep &sweep = *vol.getSweeps()[isweep];
     double fixedAngle = sweep.getFixedAngleDeg();

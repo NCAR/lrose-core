@@ -959,7 +959,8 @@ void PrintMdv::_doPrintVol(const DsMdvx *mdvx) const
                    _params.print_data,
                    _params.read_transform_to_linear,
                    _params.print_native,
-                   _params.print_canonical);
+                   _params.print_canonical,
+                   _params.print_nlines_data);
 
   } else {
 

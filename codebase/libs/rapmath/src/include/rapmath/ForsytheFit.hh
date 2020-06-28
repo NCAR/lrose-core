@@ -64,32 +64,23 @@ public:
   
   virtual ~ForsytheFit();
 
-  // set polynomial order
-
-  void setOrder(size_t order);
-
   // clear the data values
 
   void clear();
 
-  // add a data value
-  
-  void addValue(double xx, double yy);
-
-  // set the data values
-  
-  void setValues(const vector<double> &xVals,
-                 const vector<double> &yVals);
-
   // perform a fit
   // values must have been set
   
-  virtual int performFit();
+  int performFit(size_t order,
+                 const vector<double> &xVals,
+                 const vector<double> &yVals);
 
-#ifdef WITH_FORTRAN
-  virtual int performFitFortran();
-#endif
+  // Prepare for a fit, specifying the X values.
+  // This is done for efficiency, if the X values do not change.
   
+  void prepareForFit(size_t order, const vector<double> &xObs);
+  int performFit(const vector<double> &yObs);
+
   // get order
   
   int getOrder() const { return _order; }
@@ -103,23 +94,25 @@ public:
   const vector<double> getCoeffs() const { return _coeffs; }
   
   // get single y value, given the x value
-
+  
   double getYEst(double xx);
 
-  // get single y value, given the index
-
-  double getYEst(size_t index);
-
-  // get vector of estimated y values
-
-  vector<double> getYEst() const;
+  // get the full vector of estimated Y values
+  
+  const vector<double> &getYEstVector();
 
   // compute standard error of estimate for the fit
   
   double computeStdErrEst(double &rSquared);
 
+#ifdef WITH_FORTRAN
+  virtual int performFitFortran();
+#endif
+  
 protected:
 private:
+
+  bool _prepActive;
 
   size_t _order;        // polynomial order
 
@@ -132,17 +125,16 @@ private:
 
   // arrays for the fitting procedure
 
-  vector<double> _aa, _bb, _ff, _cc, _c2; // size _order + 2 (1-based)
-  vector<double> _dd, _ee, _vv; // size _nObs (0-based)
+  vector<double> _aa, _bb, _ff, _cc; // size _order + 2 (1-based)
+  vector<double> _dd, _ee; // size _nObs (0-based)
+  vector<vector<double> > _bbSave, _eeSave; // if prepareForFit is used
+
+  vector<vector<double> > _xPowers; // polynomial powers of x [_nObs][_order+1]
 
   // private methods
 
-  void _init();
-
   void _allocDataArrays();
   void _allocPolyArrays();
-
-  int _doFit();
 
 };
 

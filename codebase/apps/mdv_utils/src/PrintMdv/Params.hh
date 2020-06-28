@@ -588,6 +588,8 @@ public:
 
   tdrp_bool_t print_chunks;
 
+  int print_nlines_data;
+
   tdrp_bool_t save_to_file;
 
   tdrp_bool_t no_print;
@@ -607,7 +609,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[75];
+  mutable TDRPtable _table[76];
 
   const char *_className;
 

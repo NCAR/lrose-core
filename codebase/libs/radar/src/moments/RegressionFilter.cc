@@ -228,7 +228,17 @@ void RegressionFilter::setup(int nSamples,
   // compute CC matrix for later use
 
   _computeCc();
-  
+
+  // prepare Forsythe
+
+  vector<double> xVals;
+  for (int ii = 0; ii < _nSamples; ii++) {
+    xVals.push_back(_xx[ii]);
+  }
+  _forsythe.prepareForFit(_nPoly, xVals);
+
+  // done
+
   _setupDone = true;
 
 }
@@ -291,12 +301,23 @@ void RegressionFilter::setupStaggered(int nSamples,
 
   _computeCc();
   
+  // prepare Forsythe
+
+  vector<double> xVals;
+  for (int ii = 0; ii < _nSamples; ii++) {
+    xVals.push_back(_xx[ii]);
+  }
+  _forsythe.prepareForFit(_nPoly, xVals);
+
+  // done
+
   _setupDone = true;
 
 }
 
 /////////////////////////////////////////////////////
 // Perform regression filtering on I,Q data
+// using precompute Vandermonde and CC matrices
 //
 // Inputs:
 //   rawIq: raw I,Q data
@@ -310,7 +331,7 @@ void RegressionFilter::setupStaggered(int nSamples,
 // Note: assumes setup() has been successfully completed.
 
 void RegressionFilter::apply(const RadarComplex_t *rawIq,
-                             RadarComplex_t *filteredIq) const
+                             RadarComplex_t *filteredIq)
 
 {
 
@@ -346,6 +367,17 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
     filteredIq[ii].re = rawI[ii] - _yyEst[ii];
     _polyfitIq[ii].re = _yyEst[ii];
   }
+
+  // {
+  //   cerr << "111111111111111111111111111111111" << endl;
+  //   for (int ii = 0; ii < _nPoly1; ii++) {
+  //     cerr << "  ii, coeff: " << ii << ", " << _pp[ii] << endl;
+  //   }
+  //   for (int ii = 0; ii < 10; ii++) {
+  //     cerr << "  ii, yEst: " << ii << ", " << _yyEst[ii] << endl;
+  //   }
+  //   cerr << "111111111111111111111111111111111" << endl;
+  // }
   
   // poly fit to Q
 
@@ -361,6 +393,104 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
     filteredIq[ii].im = rawQ[ii] - _yyEst[ii];
     _polyfitIq[ii].im = _yyEst[ii];
   }
+
+  // {
+  //   cerr << "3333333333333333333333333333333333" << endl;
+  //   for (int ii = 0; ii < _nPoly1; ii++) {
+  //     cerr << "  ii, coeff: " << ii << ", " << _pp[ii] << endl;
+  //   }
+  //   for (int ii = 0; ii < 10; ii++) {
+  //     cerr << "  ii, yEst: " << ii << ", " << _yyEst[ii] << endl;
+  //   }
+  //   cerr << "3333333333333333333333333333333333" << endl;
+  // }
+  
+}
+
+/////////////////////////////////////////////////////
+// Perform regression filtering on I,Q data
+// using Forsythe polynomials
+//
+// Inputs:
+//   rawIq: raw I,Q data
+//
+// Outputs:
+//   filteredIq: filtered I,Q data
+//
+// Side effect:
+//   polyfitIq is computed
+//
+// Note: assumes setup() has been successfully completed.
+
+void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
+                                     RadarComplex_t *filteredIq)
+  
+{
+
+  if (_nSamples == 0) {
+    cerr << "ERROR - RegressionFilter::apply" << endl;
+    cerr << "  Number of samples has not been set" << endl;
+    cerr << "  Call setup() before apply()" << endl;
+    return;
+  }
+
+  // copy IQ data
+
+  vector<double> rawI, rawQ;
+  for (int ii = 0; ii < _nSamples; ii++) {
+    rawI.push_back(rawIq[ii].re);
+    rawQ.push_back(rawIq[ii].im);
+  }
+
+  // poly fit to I
+
+  _forsythe.performFit(rawI);
+
+  // compute the estimated I polynomial values
+  // load residuals into filtered Iq
+  
+  vector<double> iSmoothed = _forsythe.getYEstVector();
+  for (int ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].re = rawI[ii] - iSmoothed[ii];
+    _polyfitIq[ii].re = iSmoothed[ii];
+  }
+  
+  // {
+  //   cerr << "2222222222222222222222222222222" << endl;
+  //   vector<double> coeffs = _forsythe.getCoeffs();
+  //   for (int ii = 0; ii < _nPoly1; ii++) {
+  //     cerr << "  ii, coeff: " << ii << ", " << coeffs[ii] << endl;
+  //   }
+  //   for (int ii = 0; ii < 10; ii++) {
+  //     cerr << "  ii, yEst: " << ii << ", " << iSmoothed[ii] << endl;
+  //   }
+  //   cerr << "222222222222222222222222222222222" << endl;
+  // }
+  
+  // poly fit to Q
+
+  _forsythe.performFit(rawQ);
+  
+  // compute the estimated Q polynomial values
+  // load residuals into filtered Iq
+  
+  vector<double> qSmoothed = _forsythe.getYEstVector();
+  for (int ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].im = rawQ[ii] - qSmoothed[ii];
+    _polyfitIq[ii].im = qSmoothed[ii];
+  }
+
+  // {
+  //   cerr << "44444444444444444444444444" << endl;
+  //   vector<double> coeffs = _forsythe.getCoeffs();
+  //   for (int ii = 0; ii < _nPoly1; ii++) {
+  //     cerr << "  ii, coeff: " << ii << ", " << coeffs[ii] << endl;
+  //   }
+  //   for (int ii = 0; ii < 10; ii++) {
+  //     cerr << "  ii, yEst: " << ii << ", " << qSmoothed[ii] << endl;
+  //   }
+  //   cerr << "44444444444444444444444444444" << endl;
+  // }
   
 }
 

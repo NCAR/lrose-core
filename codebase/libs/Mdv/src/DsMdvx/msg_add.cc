@@ -137,8 +137,10 @@ int DsMdvxMsg::_addReadSearch(const DsMdvx &mdvx)
 
   // 64-bit
 
-  BE_from_array_64(&fsearch, sizeof(fsearch));
-  addPart(MDVP_FILE_SEARCH_PART_64, sizeof(fsearch), &fsearch);
+  if (!_use32BitHeaders) {
+    BE_from_array_64(&fsearch, sizeof(fsearch));
+    addPart(MDVP_FILE_SEARCH_PART_64, sizeof(fsearch), &fsearch);
+  }
 
   // optional part to constrain forecast lead times
 
@@ -503,8 +505,10 @@ void DsMdvxMsg::_addReadRemap(const Mdvx::coord_t &coords)
 
   // 64-bit
 
-  BE_from_array_64(&remap, sizeof(remap));
-  addPart(MDVP_READ_REMAP_PART_64, sizeof(remap), &remap);
+  if (!_use32BitHeaders) {
+    BE_from_array_64(&remap, sizeof(remap));
+    addPart(MDVP_READ_REMAP_PART_64, sizeof(remap), &remap);
+  }
 
 }
 
@@ -555,12 +559,14 @@ void DsMdvxMsg::_addReadVsectWayPts(const vector<Mdvx::vsect_waypt_t> &wayPts)
 
   // add 64-bit version
 
-  MemBuf buf64;
-  Mdvx::assembleVsectWayPtsBuf64(wayPts, buf64);
-  if (_debug) {
-    Mdvx::printVsectWayPtsBuf64(buf64, cerr);
+  if (!_use32BitHeaders) {
+    MemBuf buf64;
+    Mdvx::assembleVsectWayPtsBuf64(wayPts, buf64);
+    if (_debug) {
+      Mdvx::printVsectWayPtsBuf64(buf64, cerr);
+    }
+    addPart(MDVP_READ_VSECT_WAYPTS_PART_64, buf64.getLen(), buf64.getPtr());
   }
-  addPart(MDVP_READ_VSECT_WAYPTS_PART_64, buf64.getLen(), buf64.getPtr());
 
 }
 
@@ -763,8 +769,10 @@ void DsMdvxMsg::_addTimeListOptions(Mdvx::time_list_mode_t mode,
 
   // 64-bit
 
-  BE_from_array_64(&options, sizeof(options));
-  addPart(MDVP_TIME_LIST_OPTIONS_PART_64, sizeof(options), &options);
+  if (!_use32BitHeaders) {
+    BE_from_array_64(&options, sizeof(options));
+    addPart(MDVP_TIME_LIST_OPTIONS_PART_64, sizeof(options), &options);
+  }
 
 }
 
@@ -937,11 +945,8 @@ void DsMdvxMsg::_addFieldData(const MdvxField& field)
     buf.add(field.getVol(), field.getVolLen());
   }
   
-  // compress as requested
-  
-  field.compressIfRequested();
-  
   // swap if data is not compressed
+
   if (!field.isCompressed()) {
     MdvxField::buffer_to_BE(buf.getPtr(), buf.getLen(),
 			    field.getFieldHeader().encoding_type);
@@ -966,10 +971,6 @@ void DsMdvxMsg::_addFieldData64(const MdvxField& field)
     buf.add(field.getVol(), field.getVolLen());
   }
   
-  // compress as requested
-  
-  field.compressIfRequested64();
-
   // swap if data is not compressed
   if (!field.isCompressed()) {
     MdvxField::buffer_to_BE(buf.getPtr(), buf.getLen(),

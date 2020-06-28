@@ -4185,7 +4185,7 @@ void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
 
 void RadarMoments::applyClutterFilter(int nSamples,
                                       const RadarFft &fft,
-                                      const RegressionFilter &regr,
+                                      RegressionFilter &regr,
                                       const double *window, // window in use
                                       const RadarComplex_t *iqOrig, // non-windowed
                                       const RadarComplex_t *iqWindowed, // windowed
@@ -4483,7 +4483,7 @@ void RadarMoments::applyNotchFilter(int nSamples,
 void RadarMoments::applyRegressionFilter
   (int nSamples,
    const RadarFft &fft,
-   const RegressionFilter &regr,
+   RegressionFilter &regr,
    const double *window,
    const RadarComplex_t *iqOrig, // non-windowed
    double calibratedNoise,
@@ -4502,7 +4502,7 @@ void RadarMoments::applyRegressionFilter
   
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.apply(iqOrig, iqRegr);
+  regr.applyForsythe(iqOrig, iqRegr);
 
   // adjust for residual etc, interpolating as needed
 
@@ -4758,7 +4758,7 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
 
 void RadarMoments::applyRegrFilterStagPrt(int nSamples,
                                           const RadarFft &fftHalf,
-                                          const RegressionFilter &regr,
+                                          RegressionFilter &regr,
                                           const RadarComplex_t *iqOrig,
                                           double calibratedNoise,
                                           bool interpAcrossNotch,
@@ -4774,7 +4774,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.apply(iqOrig, iqRegr);
+  regr.applyForsythe(iqOrig, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -4984,7 +4984,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 void RadarMoments::applyRegrFilterStagPrt(int nSamples,
                                           int nExpanded,
                                           const RadarFft &fftExp,
-                                          const RegressionFilter &regr,
+                                          RegressionFilter &regr,
                                           const RadarComplex_t *iqOrig,
                                           double calibratedNoise,
                                           bool interpAcrossNotch,
@@ -5000,7 +5000,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.apply(iqOrig, iqRegr);
+  regr.applyForsythe(iqOrig, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
