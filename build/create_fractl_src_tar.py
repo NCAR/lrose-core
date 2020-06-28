@@ -2,9 +2,11 @@
 
 #===========================================================================
 #
-# Create an LROSE source tar file suitable for building
+# Create a FRACTL source tar file suitable for building
+# The resulting file will be suitable for use with brew
+# on mac OSX.
 #
-# This checks out a version of lrose from git, run autoconf,
+# This checks out a version of fractl from git,
 # and creates a tar file containing the distribution.
 #
 #===========================================================================
@@ -31,8 +33,7 @@ def main():
     global options
     global releaseDir
     global tmpDir
-    global coreDir
-    global codebaseDir
+    global fractlDir
     global versionStr
     global debugStr
     global argsStr
@@ -44,7 +45,7 @@ def main():
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
-    releaseDirDefault = os.path.join(homeDir, 'tarReleases')
+    releaseDirDefault = os.path.join(homeDir, 'releases')
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=True,
@@ -59,9 +60,9 @@ def main():
                       action="store_true",
                       help='Configure for MAC OSX')
     parser.add_option('--package',
-                      dest='package', default='lrose-core',
+                      dest='package', default='lrose-fractl',
                       help='Package name. Options are: ' + \
-                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-cidd')
+                      'lrose-fractl (default)')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
@@ -72,20 +73,12 @@ def main():
                       dest='force', default=False,
                       action="store_true",
                       help='force, do not request user to check it is OK to proceed')
-    parser.add_option('--static',
-                      dest='static', default=False,
-                      action="store_true",
-                      help='produce distribution for static linking, default is dynamic')
 
     (options, args) = parser.parse_args()
     
     if (options.verbose):
         options.debug = True
 
-    # for CIDD, set to static linkage
-    if (options.package == "lrose-cidd"):
-        options.static = True
-        
     debugStr = " "
     if (options.verbose):
         debugStr = " --verbose "
@@ -109,8 +102,7 @@ def main():
     if (options.osx):
         releaseDir = os.path.join(releaseDir, "osx")
     tmpDir = os.path.join(releaseDir, "tmp")
-    coreDir = os.path.join(tmpDir, "lrose-core")
-    codebaseDir = os.path.join(coreDir, "codebase")
+    fractlDir = os.path.join(tmpDir, "lrose-fractl")
 
     # compute release name and dir name
 
@@ -118,7 +110,7 @@ def main():
     if (options.osx):
         releaseName = options.package + "-" + versionStr + ".mac_osx"
     tarName = releaseName + ".tgz"
-    tarDir = os.path.join(coreDir, releaseName)
+    tarDir = os.path.join(fractlDir, releaseName)
 
     if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
@@ -128,7 +120,6 @@ def main():
         print("  releaseDir: ", releaseDir, file=sys.stderr)
         print("  tmpDir: ", tmpDir, file=sys.stderr)
         print("  force: ", options.force, file=sys.stderr)
-        print("  static: ", options.static, file=sys.stderr)
         print("  versionStr: ", versionStr, file=sys.stderr)
         print("  releaseName: ", releaseName, file=sys.stderr)
         print("  tarName: ", tarName, file=sys.stderr)
@@ -145,36 +136,9 @@ def main():
 
     gitCheckout()
 
-    # install the distribution-specific makefiles
-
-    os.chdir(codebaseDir)
-    cmd = "../build/scripts/installPackageMakefiles.py --package " + options.package
-    if (options.osx):
-        cmd = cmd + " --osx "
-    shellCmd(cmd)
-
-    # trim libs and apps to those required by distribution makefiles
-
-    if (options.package != "lrose-core"):
-        trimToMakefiles("libs")
-        trimToMakefiles("apps")
-
-    # set up autoconf
-
-    setupAutoconf()
-
     # create the release information file
     
     createReleaseInfoFile()
-
-    # run qmake for QT apps to create moc_ files
-
-    hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
-    createQtMocFiles(hawkEyeDir)
-
-    # prune any empty directories
-
-    prune(codebaseDir)
 
     # create the tar file
 
@@ -188,7 +152,7 @@ def main():
     # move the tar file up into release dir
 
     os.chdir(releaseDir)
-    os.rename(os.path.join(coreDir, tarName),
+    os.rename(os.path.join(fractlDir, tarName),
               os.path.join(releaseDir, tarName))
               
     # delete the tmp dir
@@ -270,59 +234,7 @@ def gitCheckout():
 
     os.chdir(tmpDir)
     shellCmd("git clone --branch " + options.tag + 
-             " https://github.com/NCAR/lrose-core")
-
-########################################################################
-# set up autoconf for configure etc
-
-def setupAutoconf():
-
-    os.chdir(codebaseDir)
-
-    # create files for configure
-
-    shutil.copy("../build/autoconf/Makefile.top", "Makefile")
-
-    if (options.static):
-
-        if (options.package == "lrose-cidd"):
-             shutil.copy("../build/autoconf/configure.base.cidd",
-                         "./configure.base")
-        else:
-             shutil.copy("../build/autoconf/configure.base",
-                         "./configure.base")
-
-        shellCmd("../build/autoconf/createConfigure.am.py --dir ." +
-                 " --baseName configure.base" +
-                 " --pkg " + options.package + argsStr)
-    else:
-
-        if (options.package == "lrose-cidd"):
-            shutil.copy("../build/autoconf/configure.base.shared.cidd",
-                        "./configure.base.shared")
-        elif (options.osx):
-            shutil.copy("../build/autoconf/configure.base.shared.osx",
-                        "./configure.base.shared")
-        else:
-            shutil.copy("../build/autoconf/configure.base.shared",
-                        "./configure.base.shared")
-
-        shellCmd("../build/autoconf/createConfigure.am.py --dir ." +
-                 " --baseName configure.base.shared --shared" +
-                 " --pkg " + options.package + argsStr)
-
-########################################################################
-# Run qmake for QT apps such as HawkEye to create _moc files
-
-def createQtMocFiles(appDir):
-    
-    if (os.path.isdir(appDir) == False):
-        return
-    
-    os.chdir(appDir)
-    shellCmd("rm -f moc*");
-    shellCmd("qmake -o Makefile.qmake");
-    shellCmd("make -f Makefile.qmake mocables");
+             " https://github.com/mmbell/fractl")
 
 ########################################################################
 # write release information file
@@ -330,11 +242,11 @@ def createQtMocFiles(appDir):
 def createReleaseInfoFile():
 
     # go to core dir
-    os.chdir(coreDir)
+    os.chdir(fractlDir)
 
     # open info file
 
-    releaseInfoPath = os.path.join(coreDir, "ReleaseInfo.txt")
+    releaseInfoPath = os.path.join(fractlDir, "ReleaseInfo.txt")
     info = open(releaseInfoPath, 'w')
 
     # write release info
@@ -354,7 +266,7 @@ def createTarFile():
 
     # go to core dir, make tar dir
 
-    os.chdir(coreDir)
+    os.chdir(fractlDir)
     os.makedirs(tarDir)
 
     # move lrose contents into tar dir
@@ -372,7 +284,7 @@ def createTarFile():
 
     # create the tar file
 
-    os.chdir(coreDir)
+    os.chdir(fractlDir)
     shellCmd("tar cvfzh " + tarName + " " + releaseName)
     
 ########################################################################
@@ -382,7 +294,7 @@ def createBrewFormula():
 
     # go to core dir
 
-    os.chdir(coreDir)
+    os.chdir(fractlDir)
 
     tarUrl = "https://github.com/NCAR/lrose-core/releases/download/" + \
              options.package + "-" + versionStr + "/" + tarName
@@ -406,7 +318,7 @@ def createBrewFormula():
 
     # move it up into the release dir
 
-    os.rename(os.path.join(coreDir, formulaName),
+    os.rename(os.path.join(fractlDir, formulaName),
               os.path.join(releaseDir, formulaName))
 
 ########################################################################
