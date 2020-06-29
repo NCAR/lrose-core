@@ -9,81 +9,48 @@ template = """
 require 'formula'
 
 class LroseCore < Formula
-  homepage 'https://github.com/NCAR/lrose-core'
+  homepage 'https://github.com/mmbell/fractl'
 
   url '{0}'
   version '{1}'
   sha256 '{2}'
 
-  depends_on 'hdf5' => 'enable-cxx'
-  depends_on 'netcdf' => 'enable-cxx-compat'
-  depends_on 'udunits'
-  depends_on 'fftw'
-  depends_on 'flex'
-  depends_on 'jpeg'
-  depends_on 'libpng'
+  #depends_on 'hdf5' => 'enable-cxx'
+  #depends_on 'netcdf' => 'enable-cxx-compat'
+  #depends_on 'udunits'
+  #depends_on 'fftw'
+  #depends_on 'flex'
+  #depends_on 'jpeg'
+  #depends_on 'libpng'
   depends_on 'libzip'
-  depends_on 'libomp'
-  depends_on 'qt'
-  depends_on 'szip'
-  depends_on 'pkg-config'
+  #depends_on 'libomp'
+  #depends_on 'qt'
+  #depends_on 'szip'
+  #depends_on 'pkg-config'
   depends_on 'cmake'
   depends_on 'eigen'
   depends_on 'geographiclib'
   # depends_on 'armadillo'
   depends_on 'rsync'
-  depends_on :x11
+  #depends_on :x11
 
   def install
 
-    ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
-    Dir.chdir("codebase")
-    system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
-    system "make install"
-    Dir.chdir("..")
-    system "rsync", "-av", "share", "#{{prefix}}"
-
     # Build/install fractl
-    Dir.chdir("fractl")
+    # Dir.chdir("fractl")
     ENV['LROSE_ROOT_DIR'] = prefix
     system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
     system "make install"
-    Dir.chdir("..")
-
-    # Build/install samurai
-    Dir.chdir("samurai")
-    ENV['LROSE_ROOT_DIR'] = prefix
-    system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
-    system "make install", "VERBOSE=1"
-    bin.install 'build/release/bin/samurai'
-    lib.install 'build/release/lib/libsamurai.a'
-    lib.install 'build/release/lib/libsamurai.dylib'
-    include.install 'src/samurai.h'
     Dir.chdir("..")
 
   end
 
   def test
-    system "#{{bin}}/RadxPrint", "-h"
+    system "#{{bin}}/fractl", "-h"
   end
 
 end
 """
-
-if "check_output" not in dir( subprocess ): # duck punch it in!
-    def f(*popenargs, **kwargs):
-        if 'stdout' in kwargs:
-            raise ValueError('stdout argument not allowed, it will be overridden.')
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            raise CalledProcessError(retcode, cmd)
-        return output
-    subprocess.check_output = f
 
 def build_lrose_formula(tar_url, tar_name, formula_name):
     """ build a Homebrew forumula file for lrose-core """	

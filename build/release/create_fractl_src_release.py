@@ -349,6 +349,74 @@ def createTarFile():
     os.rename(tarName, os.path.join(releaseDir, tarName))
     
 ########################################################################
+# template for brew formula
+
+template = """
+require 'formula'
+
+class LroseCore < Formula
+  homepage 'https://github.com/mmbell/fractl'
+
+  url '{0}'
+  version '{1}'
+  sha256 '{2}'
+
+  #depends_on 'hdf5' => 'enable-cxx'
+  #depends_on 'netcdf' => 'enable-cxx-compat'
+  #depends_on 'udunits'
+  #depends_on 'fftw'
+  #depends_on 'flex'
+  #depends_on 'jpeg'
+  #depends_on 'libpng'
+  depends_on 'libzip'
+  #depends_on 'libomp'
+  #depends_on 'qt'
+  #depends_on 'szip'
+  #depends_on 'pkg-config'
+  depends_on 'cmake'
+  depends_on 'eigen'
+  depends_on 'geographiclib'
+  # depends_on 'armadillo'
+  depends_on 'rsync'
+  #depends_on :x11
+
+  def install
+
+    # Build/install fractl
+    # Dir.chdir("fractl")
+    ENV['LROSE_ROOT_DIR'] = prefix
+    system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
+    system "make install"
+    Dir.chdir("..")
+
+  end
+
+  def test
+    system "#{{bin}}/fractl", "-h"
+  end
+
+end
+"""
+
+########################################################################
+# create the brew formula for OSX builds
+
+def buildFractlFormula(tar_url, tar_name, formula_name):
+
+    os.chdir(releaseDir)
+
+    """ build a Homebrew forumula file for lrose-core """	
+    dash = tar_name.find('-')
+    period = tar_name.find('.', dash)
+    version = tar_name[dash+1:period]
+    checksum = subprocess.check_output(("sha256sum", tar_name))
+    checksum = checksum.split()[0]
+    formula = template.format(tar_url, version, checksum)
+    outf = open(formula_name, 'w')
+    outf.write(formula)
+    outf.close()
+
+########################################################################
 # create the brew formula for OSX builds
 
 def createBrewFormula():
@@ -356,26 +424,28 @@ def createBrewFormula():
     tarUrl = "https://github.com/NCAR/lrose-core/releases/download/" + \
              corePackage + "-" + coreVersionStr + "/" + tarName
     formulaName = package + ".rb"
+
+    buildFractlFormula(tarUrl, tarName, formulaName)
     
     # compute path for script to create formula
     
-    scriptName = "build_" + package + "_formula"
-    scriptDir = os.path.join(buildDir, "formulas")
-    scriptPath = os.path.join(scriptDir, scriptName)
+    #scriptName = "build_" + package + "_formula"
+    #scriptDir = os.path.join(buildDir, "formulas")
+    #scriptPath = os.path.join(scriptDir, scriptName)
 
     # check if script exists
     
-    os.chdir(releaseDir)
-    if (os.path.isfile(scriptPath) == False):
-        print("WARNING - ", thisScriptName, file=logFp)
-        print("  No script: ", scriptPath, file=logFp)
-        print("  Will not build brew formula for package", file=logFp)
-        return
+    #os.chdir(releaseDir)
+    #if (os.path.isfile(scriptPath) == False):
+    #    print("WARNING - ", thisScriptName, file=logFp)
+    #    print("  No script: ", scriptPath, file=logFp)
+    #    print("  Will not build brew formula for package", file=logFp)
+    #    return
 
     # create the brew formula file
 
-    shellCmd(scriptPath + " " + tarUrl + " " +
-             tarName + " " + formulaName)
+    #shellCmd(scriptPath + " " + tarUrl + " " +
+    #         tarName + " " + formulaName)
 
 ########################################################################
 # prepare log file
