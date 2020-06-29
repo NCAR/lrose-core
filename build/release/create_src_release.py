@@ -25,7 +25,12 @@ def main():
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
-    global options
+    global homeDir
+    homeDir = os.environ['HOME']
+
+    global releaseInfoName
+    releaseInfoName = "ReleaseInfo.txt"
+    
     global releaseDir
     global tmpDir
     global coreDir
@@ -39,10 +44,11 @@ def main():
     global logPath
     global logFp
 
+    global options
+
     # parse the command line
 
     usage = "usage: %prog [options]"
-    homeDir = os.environ['HOME']
     releaseDirDefault = os.path.join(homeDir, 'releases')
     logDirDefault = '/tmp/create_src_release/logs'
     parser = OptionParser(usage)
@@ -291,7 +297,8 @@ def createTmpDir():
 
     # make it clean
 
-    os.makedirs(tmpDir)
+    if (os.path.isdir(tmpDir) == False):
+        os.makedirs(tmpDir)
 
 ########################################################################
 # check out repos from git
@@ -365,12 +372,14 @@ def createQtMocFiles(appDir):
 
 def createReleaseInfoFile():
 
+    global releaseInfoName
+
     # go to core dir
     os.chdir(coreDir)
 
     # open info file
 
-    releaseInfoPath = os.path.join(coreDir, "ReleaseInfo.txt")
+    releaseInfoPath = os.path.join(coreDir, releaseInfoName)
     info = open(releaseInfoPath, 'w')
 
     # write release info
@@ -383,6 +392,11 @@ def createReleaseInfoFile():
 
     info.close()
 
+    # copy it up into the release dir
+
+    shellCmd("rsync -av " + releaseInfoName + " " + releaseDir)
+
+
 ########################################################################
 # create the tar file
 
@@ -391,7 +405,8 @@ def createTarFile():
     # go to core dir, make tar dir
 
     os.chdir(coreDir)
-    os.makedirs(tarDir)
+    if (os.path.isdir(tarDir) == False):
+        os.makedirs(tarDir)
 
     # copy some scripts into tar directory
 
@@ -400,7 +415,7 @@ def createTarFile():
 
     # move lrose contents into tar dir
 
-    for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt" ]:
+    for fileName in [ "LICENSE.txt", "README.md", releaseInfoName ]:
         os.rename(fileName, os.path.join(tarDir, fileName))
         
     for dirName in [ "build", "codebase", "docs", "release_notes" ]:
@@ -413,13 +428,15 @@ def createTarFile():
 
     netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
     netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
-    os.makedirs(netcdfSubDir)
+    if (os.path.isdir(netcdfSubDir) == False):
+        os.makedirs(netcdfSubDir)
 
     # Copy the color-scales dir from lrose-displays into tar dir (under share)
     
     displaysDir = os.path.join(tmpDir, "lrose-displays/color_scales")
     displaysSubDir = os.path.join(tarDir, "share/")
-    os.makedirs(displaysSubDir)
+    if (os.path.isdir(displaysSubDir) == False):
+        os.makedirs(displaysSubDir)
     shellCmd("rsync -av " + displaysDir + " " + displaysSubDir)
 
     # copy scripts for netcdf build
