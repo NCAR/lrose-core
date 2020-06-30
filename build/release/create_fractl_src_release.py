@@ -256,11 +256,11 @@ def createReleaseInfoFile():
     global releaseInfoName
 
     # go to core dir
-    os.chdir(coreDir)
+    os.chdir(releaseDir)
 
     # open info file
 
-    releaseInfoPath = os.path.join(coreDir, releaseInfoName)
+    releaseInfoPath = os.path.join(releaseDir, releaseInfoName)
     info = open(releaseInfoPath, 'w')
 
     # write release info
@@ -354,7 +354,7 @@ def createTarFile():
 template = """
 require 'formula'
 
-class LroseCore < Formula
+class LroseFractl < Formula
   homepage 'https://github.com/mmbell/fractl'
 
   url '{0}'
@@ -379,6 +379,7 @@ class LroseCore < Formula
   # depends_on 'armadillo'
   depends_on 'rsync'
   #depends_on :x11
+  depends_on 'lrose-core'
 
   def install
 
