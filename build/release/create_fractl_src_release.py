@@ -351,7 +351,8 @@ def createTarFile():
 ########################################################################
 # template for brew formula
 
-template = """
+formulaBody = """
+
 require 'formula'
 
 class LroseFractl < Formula
@@ -398,7 +399,7 @@ def buildFractlFormula(tar_url, tar_name, formula_name):
     version = tar_name[dash+1:period]
     result = str(subprocess.check_output(("sha256sum", tar_name), text=True))
     checksum = result.split()[0]
-    formula = template.format(tar_url, version, checksum)
+    formula = formulaBody.format(tar_url, version, checksum)
     outf = open(formula_name, 'w')
     outf.write(formula)
     outf.close()
@@ -414,26 +415,6 @@ def createBrewFormula():
 
     buildFractlFormula(tarUrl, tarName, formulaName)
     
-    # compute path for script to create formula
-    
-    #scriptName = "build_" + package + "_formula"
-    #scriptDir = os.path.join(buildDir, "formulas")
-    #scriptPath = os.path.join(scriptDir, scriptName)
-
-    # check if script exists
-    
-    #os.chdir(releaseDir)
-    #if (os.path.isfile(scriptPath) == False):
-    #    print("WARNING - ", thisScriptName, file=logFp)
-    #    print("  No script: ", scriptPath, file=logFp)
-    #    print("  Will not build brew formula for package", file=logFp)
-    #    return
-
-    # create the brew formula file
-
-    #shellCmd(scriptPath + " " + tarUrl + " " +
-    #         tarName + " " + formulaName)
-
 ########################################################################
 # prepare log file
 
