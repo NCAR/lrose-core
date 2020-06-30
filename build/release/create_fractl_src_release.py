@@ -355,40 +355,26 @@ template = """
 require 'formula'
 
 class LroseFractl < Formula
+
   homepage 'https://github.com/mmbell/fractl'
 
   url '{0}'
   version '{1}'
   sha256 '{2}'
 
-  #depends_on 'hdf5' => 'enable-cxx'
-  #depends_on 'netcdf' => 'enable-cxx-compat'
-  #depends_on 'udunits'
-  #depends_on 'fftw'
-  #depends_on 'flex'
-  #depends_on 'jpeg'
-  #depends_on 'libpng'
   depends_on 'libzip'
-  #depends_on 'libomp'
-  #depends_on 'qt'
-  #depends_on 'szip'
-  #depends_on 'pkg-config'
   depends_on 'cmake'
   depends_on 'eigen'
   depends_on 'geographiclib'
-  # depends_on 'armadillo'
   depends_on 'rsync'
-  #depends_on :x11
   depends_on 'lrose-core'
 
   def install
 
     # Build/install fractl
-    # Dir.chdir("fractl")
     ENV['LROSE_ROOT_DIR'] = prefix
     system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
     system "make install"
-    Dir.chdir("..")
 
   end
 
@@ -410,8 +396,8 @@ def buildFractlFormula(tar_url, tar_name, formula_name):
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]
-    checksum = subprocess.check_output(("sha256sum", tar_name))
-    checksum = checksum.split()[0]
+    result = str(subprocess.check_output(("sha256sum", tar_name), text=True))
+    checksum = result.split()[0]
     formula = template.format(tar_url, version, checksum)
     outf = open(formula_name, 'w')
     outf.write(formula)
