@@ -49,19 +49,18 @@ while getopts hdp:r: OPT; do
     esac
 done
 
-./redhat/do_lrose_build.redhat -t centos -v 6  -p ${lrose_pkg} -r ${release_date}
-./redhat/do_lrose_build.redhat -t centos -v 7  -p ${lrose_pkg} -r ${release_date}
-./redhat/do_lrose_build.redhat -t centos -v 8  -p ${lrose_pkg} -r ${release_date}
+#./redhat/do_lrose_build.redhat -t centos -v 6  -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.centos6 &
+#./redhat/do_lrose_build.redhat -t centos -v 7  -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.centos7 &
+#./redhat/do_lrose_build.redhat -t centos -v 8  -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.centos8 &
 
-./redhat/do_lrose_build.redhat -t fedora -v 29 -p ${lrose_pkg} -r ${release_date}
-./redhat/do_lrose_build.redhat -t fedora -v 30 -p ${lrose_pkg} -r ${release_date}
-./redhat/do_lrose_build.redhat -t fedora -v 31 -p ${lrose_pkg} -r ${release_date}
+#./redhat/do_lrose_build.redhat -t fedora -v 29 -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.fedora29 &
+#./redhat/do_lrose_build.redhat -t fedora -v 30 -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.fedora30 &
+#./redhat/do_lrose_build.redhat -t fedora -v 31 -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.fedora31 &
 
-./debian/do_lrose_build.debian -t debian -v 9      -p ${lrose_pkg} -r ${release_date}
-./debian/do_lrose_build.debian -t debian -v 10      -p ${lrose_pkg} -r ${release_date}
+#./debian/do_lrose_build.debian -t debian -v 9 -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.debian9 &
+#./debian/do_lrose_build.debian -t debian -v 10 -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.debian10 &
 
-./debian/do_lrose_build.debian -t ubuntu -v 16.04  -p ${lrose_pkg} -r ${release_date}
-./debian/do_lrose_build.debian -t ubuntu -v 18.04  -p ${lrose_pkg} -r ${release_date}
-
-./suse/do_lrose_build.suse -t opensuse -v leap -p ${lrose_pkg} -r ${release_date}
-./suse/do_lrose_build.suse -t opensuse -v latest -p ${lrose_pkg} -r ${release_date}
+./debian/do_lrose_build.debian -t ubuntu -v 16.04  -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.ubuntu16.04 &
+./debian/do_lrose_build.debian -t ubuntu -v 18.04  -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.ubuntu18.04 &
+./suse/do_lrose_build.suse -t opensuse -v leap -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.suse.leap &
+./suse/do_lrose_build.suse -t opensuse -v latest -p ${lrose_pkg} -r ${release_date} >& /tmp/do_lrose_build.suse.latest &
