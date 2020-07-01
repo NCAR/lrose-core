@@ -110,7 +110,8 @@ def main():
     if (options.tag != "master"):
         cmd += " --tag " + options.tag
     elif (options.releaseDate != "latest"):
-        cmd += " --releaseDate " + options.releaseDate
+        tag = "lrose-core-" + options.releaseDate
+        cmd += " --tag " + tag
     cmd += " --releaseDir " + options.releaseDir
     cmd += " --force"
     cmd += " --static"
