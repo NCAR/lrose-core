@@ -27,6 +27,13 @@ Env::import();
 
 use Sys::Hostname;
 use Time::Local;
+
+use Env qw(HOME);
+use Env qw(LROSE_INSTALL_DIR);
+use lib "$HOME/lrose/lib/perl5/";
+use lib "$LROSE_INSTALL_DIR/lib/perl5/";
+use lib "/usr/local/lrose/lib/perl5/";
+
 use Env qw(RAP_LIB_DIR);
 use lib "$RAP_LIB_DIR/perl5/";
 

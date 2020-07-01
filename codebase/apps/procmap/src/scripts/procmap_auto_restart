@@ -98,6 +98,15 @@ use FileHandle;
 #
 # RAP procmap module
 #
+
+use Env qw(HOME);
+use Env qw(LROSE_INSTALL_DIR);
+use lib "$HOME/lrose/lib/perl5/";
+use lib "$LROSE_INSTALL_DIR/lib/perl5/";
+use lib "/usr/local/lrose/lib/perl5/";
+
+use Env qw(PROJ_DIR);
+
 use Env qw(RAP_INST_LIB_DIR);
 use Env qw(RAP_SHARED_LIB_DIR);
 use Env qw(RAP_LIB_DIR);
