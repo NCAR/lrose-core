@@ -104,6 +104,8 @@ void RegressionFilter::_init()
   _staggeredM = 0;
   _staggeredN = 0;
 
+  _orderFromCSR = false;
+
   _xx = NULL;
   _yyEst = NULL;
 
@@ -196,7 +198,8 @@ RegressionFilter &RegressionFilter::_copy(const RegressionFilter &rhs)
 // SVD of vvA.
 
 void RegressionFilter::setup(int nSamples,
-                             int nPoly /* = 5*/)
+                             int nPoly /* = 5*/,
+                             bool orderFromCSR /* = false */)
 
 {
 
@@ -211,6 +214,8 @@ void RegressionFilter::setup(int nSamples,
   _isStaggered = false;
   _staggeredM = 0;
   _staggeredN = 0;
+
+  _orderFromCSR = orderFromCSR;
 
   // allocate arrays
 
@@ -236,6 +241,14 @@ void RegressionFilter::setup(int nSamples,
     xVals.push_back(_xx[ii]);
   }
   _forsythe.prepareForFit(_nPoly, xVals);
+  _forsythe3.prepareForFit(3, xVals);
+  if (_orderFromCSR) {
+    _forsythe4.prepareForFit(4, xVals);
+    _forsythe5.prepareForFit(5, xVals);
+    _forsythe6.prepareForFit(6, xVals);
+    _forsythe7.prepareForFit(7, xVals);
+    _forsythe9.prepareForFit(9, xVals);
+  }
 
   // done
 
@@ -259,7 +272,8 @@ void RegressionFilter::setup(int nSamples,
 void RegressionFilter::setupStaggered(int nSamples,
                                       int staggeredM,
                                       int staggeredN,
-                                      int nPoly /* = 5*/)
+                                      int nPoly /* = 5*/,
+                                      bool orderFromCSR /* = false */)
 
 {
 
@@ -268,7 +282,8 @@ void RegressionFilter::setupStaggered(int nSamples,
       _nSamples == nSamples &&
       _nPoly == nPoly &&
       _staggeredM == staggeredM &&
-      _staggeredN == staggeredN) {
+      _staggeredN == staggeredN &&
+      _orderFromCSR == orderFromCSR) {
     return;
   }
 
@@ -278,6 +293,7 @@ void RegressionFilter::setupStaggered(int nSamples,
   _nPoly1 = _nPoly + 1;
   _staggeredM = staggeredM;
   _staggeredN = staggeredN;
+  _orderFromCSR = orderFromCSR;
 
   // allocate arrays
 
@@ -308,6 +324,14 @@ void RegressionFilter::setupStaggered(int nSamples,
     xVals.push_back(_xx[ii]);
   }
   _forsythe.prepareForFit(_nPoly, xVals);
+  _forsythe3.prepareForFit(3, xVals);
+  if (_orderFromCSR) {
+    _forsythe4.prepareForFit(4, xVals);
+    _forsythe5.prepareForFit(5, xVals);
+    _forsythe6.prepareForFit(6, xVals);
+    _forsythe7.prepareForFit(7, xVals);
+    _forsythe9.prepareForFit(9, xVals);
+  }
 
   // done
 
@@ -368,17 +392,6 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
     _polyfitIq[ii].re = _yyEst[ii];
   }
 
-  // {
-  //   cerr << "111111111111111111111111111111111" << endl;
-  //   for (int ii = 0; ii < _nPoly1; ii++) {
-  //     cerr << "  ii, coeff: " << ii << ", " << _pp[ii] << endl;
-  //   }
-  //   for (int ii = 0; ii < 10; ii++) {
-  //     cerr << "  ii, yEst: " << ii << ", " << _yyEst[ii] << endl;
-  //   }
-  //   cerr << "111111111111111111111111111111111" << endl;
-  // }
-  
   // poly fit to Q
 
   polyFit(rawQ);
@@ -394,17 +407,6 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
     _polyfitIq[ii].im = _yyEst[ii];
   }
 
-  // {
-  //   cerr << "3333333333333333333333333333333333" << endl;
-  //   for (int ii = 0; ii < _nPoly1; ii++) {
-  //     cerr << "  ii, coeff: " << ii << ", " << _pp[ii] << endl;
-  //   }
-  //   for (int ii = 0; ii < 10; ii++) {
-  //     cerr << "  ii, yEst: " << ii << ", " << _yyEst[ii] << endl;
-  //   }
-  //   cerr << "3333333333333333333333333333333333" << endl;
-  // }
-  
 }
 
 /////////////////////////////////////////////////////
@@ -413,6 +415,7 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 //
 // Inputs:
 //   rawIq: raw I,Q data
+//   csrRegr3Db: clutter-to-signal-ratio from 3rd order fit
 //
 // Outputs:
 //   filteredIq: filtered I,Q data
@@ -423,12 +426,13 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 // Note: assumes setup() has been successfully completed.
 
 void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
+                                     double csrRegr3Db,
                                      RadarComplex_t *filteredIq)
   
 {
 
   if (_nSamples == 0) {
-    cerr << "ERROR - RegressionFilter::apply" << endl;
+    cerr << "ERROR - RegressionFilter::applyForsythe" << endl;
     cerr << "  Number of samples has not been set" << endl;
     cerr << "  Call setup() before apply()" << endl;
     return;
@@ -440,6 +444,23 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
   for (int ii = 0; ii < _nSamples; ii++) {
     rawI.push_back(rawIq[ii].re);
     rawQ.push_back(rawIq[ii].im);
+  }
+
+  // choose which order to apply
+
+  ForsytheFit &forsythe = _forsythe;
+  if (_orderFromCSR) {
+    if (csrRegr3Db > 75.0) {
+      forsythe = _forsythe9;
+    } else if (csrRegr3Db > 65.0) {
+      forsythe = _forsythe7;
+    } else if (csrRegr3Db > 50.0) {
+      forsythe = _forsythe6;
+    } else if (csrRegr3Db > 35.0) {
+      forsythe = _forsythe5;
+    } else {
+      forsythe = _forsythe4;
+    }
   }
 
   // poly fit to I
@@ -455,18 +476,6 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
     _polyfitIq[ii].re = iSmoothed[ii];
   }
   
-  // {
-  //   cerr << "2222222222222222222222222222222" << endl;
-  //   vector<double> coeffs = _forsythe.getCoeffs();
-  //   for (int ii = 0; ii < _nPoly1; ii++) {
-  //     cerr << "  ii, coeff: " << ii << ", " << coeffs[ii] << endl;
-  //   }
-  //   for (int ii = 0; ii < 10; ii++) {
-  //     cerr << "  ii, yEst: " << ii << ", " << iSmoothed[ii] << endl;
-  //   }
-  //   cerr << "222222222222222222222222222222222" << endl;
-  // }
-  
   // poly fit to Q
 
   _forsythe.performFit(rawQ);
@@ -480,18 +489,69 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
     _polyfitIq[ii].im = qSmoothed[ii];
   }
 
-  // {
-  //   cerr << "44444444444444444444444444" << endl;
-  //   vector<double> coeffs = _forsythe.getCoeffs();
-  //   for (int ii = 0; ii < _nPoly1; ii++) {
-  //     cerr << "  ii, coeff: " << ii << ", " << coeffs[ii] << endl;
-  //   }
-  //   for (int ii = 0; ii < 10; ii++) {
-  //     cerr << "  ii, yEst: " << ii << ", " << qSmoothed[ii] << endl;
-  //   }
-  //   cerr << "44444444444444444444444444444" << endl;
-  // }
+}
+
+/////////////////////////////////////////////////////
+// Perform 3rd-order regression filtering on I,Q data
+// using Forsythe polynomials
+//
+// Inputs:
+//   rawIq: raw I,Q data
+//
+// Outputs:
+//   filteredIq: filtered I,Q data
+//
+// Side effect:
+//   polyfitIq is computed
+//
+// Note: assumes setup() has been successfully completed.
+
+void RegressionFilter::applyForsythe3(const RadarComplex_t *rawIq,
+                                      RadarComplex_t *filteredIq)
   
+{
+  
+  if (_nSamples == 0) {
+    cerr << "ERROR - RegressionFilter::applyForsythe3" << endl;
+    cerr << "  Number of samples has not been set" << endl;
+    cerr << "  Call setup() before apply()" << endl;
+    return;
+  }
+
+  // copy IQ data
+
+  vector<double> rawI, rawQ;
+  for (int ii = 0; ii < _nSamples; ii++) {
+    rawI.push_back(rawIq[ii].re);
+    rawQ.push_back(rawIq[ii].im);
+  }
+
+  // poly fit to I
+
+  _forsythe3.performFit(rawI);
+  
+  // compute the estimated I polynomial values
+  // load residuals into filtered Iq
+  
+  vector<double> iSmoothed = _forsythe3.getYEstVector();
+  for (int ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].re = rawI[ii] - iSmoothed[ii];
+    _polyfitIq[ii].re = iSmoothed[ii];
+  }
+  
+  // poly fit to Q
+
+  _forsythe3.performFit(rawQ);
+  
+  // compute the estimated Q polynomial values
+  // load residuals into filtered Iq
+  
+  vector<double> qSmoothed = _forsythe3.getYEstVector();
+  for (int ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].im = rawQ[ii] - qSmoothed[ii];
+    _polyfitIq[ii].im = qSmoothed[ii];
+  }
+
 }
 
 /////////////////////////////////////////////////////

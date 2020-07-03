@@ -76,8 +76,10 @@ public:
   //
   // nSamples: number of samples in IQ time series
   // nPoly: order of polynomial for regression
+  // orderFromCSR: determine order from CSR
 
-  void setup(int nSamples, int nPoly = 5);
+  void setup(int nSamples, int nPoly = 5,
+             bool orderFromCSR = false);
 
   // set up regression parameters - staggered PRT
   //
@@ -85,6 +87,7 @@ public:
   // staggeredM, staggeredN - stagger ratio = M/N
   //   time series starts with short PRT
   // nPoly: order of polynomial for regression
+  // orderFromCSR: determine order from CSR
   //
   // If successful, _setupDone will be set to true.
   // If not successful, _setupDone will be set to false.
@@ -94,7 +97,8 @@ public:
   void setupStaggered(int nSamples,
                       int staggeredM,
                       int staggeredN,
-                      int nPoly /* = 5*/);
+                      int nPoly = 5,
+                      bool orderFromCSR = false);
 
   // Apply regression filtering on I,Q data
   //
@@ -112,10 +116,30 @@ public:
   void apply(const RadarComplex_t *rawIq,
              RadarComplex_t *filteredIq);
 
-  // apply regression using forsythe polynomials
+  // Perform regression filtering on I,Q data
+  // using Forsythe polynomials
+  //
+  // Inputs:
+  //   rawIq: raw I,Q data
+  //   csrRegr3Db: clutter-to-signal-ratio from 3rd order fit
+  //
+  // Outputs:
+  //   filteredIq: filtered I,Q data
+  //
+  // Side effect:
+  //   polyfitIq is computed
+  //
+  // Note: assumes setup() has been successfully completed.
 
   void applyForsythe(const RadarComplex_t *rawIq,
+                     double csrRegr3Db,
                      RadarComplex_t *filteredIq);
+  
+  // Perform 3rd-order regression filtering on I,Q data
+  // using Forsythe polynomials
+
+  void applyForsythe3(const RadarComplex_t *rawIq,
+                      RadarComplex_t *filteredIq);
   
   // Perform polynomial fit from observed data
   //
@@ -145,6 +169,7 @@ public:
 
   inline int getNPoly() const { return _nPoly; }
   inline int getNPoly1() const { return _nPoly1; }
+  inline int getOrderFromCSR() const { return _orderFromCSR; }
   inline bool getSetupDone() const { return _setupDone; }
   inline double* getX() const { return _xx; }
   inline double** getVv() const { return _vv; }
@@ -174,9 +199,11 @@ private:
   int _nPoly;    // polynomial order
   int _nPoly1;   // polynomial order plus 1
 
-  bool _isStaggered;
+  bool _isStaggered; // staggered-PRT version
   int _staggeredM;
   int _staggeredN;
+
+  bool _orderFromCSR; // determine the order from the clutter to signal ratio
 
   bool _setupDone;
 
@@ -207,6 +234,12 @@ private:
   // for orthogonal polynomials
 
   ForsytheFit _forsythe;
+  ForsytheFit _forsythe3;
+  ForsytheFit _forsythe4;
+  ForsytheFit _forsythe5;
+  ForsytheFit _forsythe6;
+  ForsytheFit _forsythe7;
+  ForsytheFit _forsythe9;
 
   // methods
 

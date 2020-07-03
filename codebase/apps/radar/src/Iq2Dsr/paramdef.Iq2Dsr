@@ -996,6 +996,12 @@ paramdef int {
 } regression_filter_polynomial_order;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Option to determine the polynomial order from the Clutter-to-Signal-Ratio (CSR).";
+  p_help = "If TRUE, we compute the CSR from the 3 central spectral points. Then, using a lookup-table based on CSR, we determine the appropriate order of the polynomial fit.";
+} regression_filter_determine_order_from_CSR;
+
+paramdef boolean {
   p_default  = true;
   p_descr = "For the regression filter, option to interpolate power across the notch.";
   p_help = "If true, the spectral power in the notch created by the filter will be interpolated using values to each side of the notch.";

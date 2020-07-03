@@ -1236,6 +1236,11 @@ public:
   double getNyquistPrtShort() const { return _nyquistPrtShort; }
   double getNyquistPrtLong() const { return _nyquistPrtLong; }
 
+  // get clutter-to-signal ratio, in dB,
+  // from 3rd order regression filter
+
+  double getCsrRegr3Db() const { return _csrRegr3Db; }
+
   // De-trend a time series in preparation
   // for windowing and FFT.
   //
@@ -1405,6 +1410,10 @@ private:
   int _LL;
   int _PP_[32];
   int *_PP;
+
+  // clutter-to-signal ratio from 3rd order regression filter
+
+  double _csrRegr3Db;
 
   // change the velocity sign - negation - for those cases
   // in which the phase sense is negative

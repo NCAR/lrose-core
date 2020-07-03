@@ -164,6 +164,8 @@ void RadarMoments::_init()
   MEM_zero(_PP_);
   _PP = _PP_;
   
+  _csrRegr3Db = -120.0;
+
   _velSign = 1.0;
   _velSignStaggered = 1.0;
   _phidpSign = 1.0;
@@ -4479,6 +4481,9 @@ void RadarMoments::applyNotchFilter(int nSamples,
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
 //    specRatio: if non-NULL, contains ratio of filtered to unfiltered spectrum
+//
+//  After calling this routine, you can call getCsrRegr3Db() to get
+//  the clutter-to-signal-ratio from a 3rd-order regression filter
 
 void RadarMoments::applyRegressionFilter
   (int nSamples,
@@ -4497,13 +4502,30 @@ void RadarMoments::applyRegressionFilter
   
 {
 
+  // compute clutter to signal ratio
+  // (a) apply a 3rd order regression filter
+  
+  TaArray<RadarComplex_t> iqRegr3_;
+  RadarComplex_t *iqRegr3 = iqRegr3_.alloc(nSamples);
+  regr.applyForsythe3(iqOrig, iqRegr3);
+
+  // (b) compute ratio
+
+  double rawPower = RadarComplex::meanPower(iqOrig, nSamples);
+  double signal3Power = RadarComplex::meanPower(iqRegr3, nSamples);
+  double clut3Power = rawPower - signal3Power;
+  if (clut3Power < 0) {
+    clut3Power = 1.0e-12;
+  }
+  double csrRegr3 = clut3Power / signal3Power;
+  _csrRegr3Db = 10.0 * log10(csrRegr3);
   
   // apply regression filter
   
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, iqRegr);
-
+  regr.applyForsythe(iqOrig, _csrRegr3Db, iqRegr);
+  
   // adjust for residual etc, interpolating as needed
 
   _adjustRegressionFilter(nSamples, fft, window,
@@ -4511,10 +4533,9 @@ void RadarMoments::applyRegressionFilter
                           calibratedNoise, interpAcrossNotch,
                           iqFiltered, filterRatio, spectralNoise,
                           spectralSnr, specRatio);
-  
+
   // memcpy(iqFiltered, iqRegr, nSamples * sizeof(RadarComplex_t));
 
-  double rawPower = RadarComplex::meanPower(iqOrig, nSamples);
   double filteredPower = RadarComplex::meanPower(iqFiltered, nSamples);
   filterRatio = rawPower / filteredPower;
 
@@ -4774,7 +4795,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, iqRegr);
+  regr.applyForsythe(iqOrig, -120.0, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5000,7 +5021,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, iqRegr);
+  regr.applyForsythe(iqOrig, -120.0, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);

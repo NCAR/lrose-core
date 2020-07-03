@@ -2484,6 +2484,18 @@
     tt->single_val.i = 5;
     tt++;
     
+    // Parameter 'regression_filter_determine_order_from_CSR'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("regression_filter_determine_order_from_CSR");
+    tt->descr = tdrpStrDup("Option to determine the polynomial order from the Clutter-to-Signal-Ratio (CSR).");
+    tt->help = tdrpStrDup("If TRUE, we compute the CSR from the 3 central spectral points. Then, using a lookup-table based on CSR, we determine the appropriate order of the polynomial fit.");
+    tt->val_offset = (char *) &regression_filter_determine_order_from_CSR - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'regression_filter_interp_across_notch'
     // ctype is 'tdrp_bool_t'
     
