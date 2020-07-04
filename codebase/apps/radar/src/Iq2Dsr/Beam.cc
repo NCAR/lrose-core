@@ -1963,6 +1963,7 @@ void Beam::_filterSpH()
 
     // testing csr from 3-order regression filter
 
+    fields.test4 = _regr->getPolyOrderInUse();
     fields.test5 = _mom->getCsrRegr3Db();
     
     // compute filtered moments for this gate
@@ -2039,6 +2040,7 @@ void Beam::_filterSpV()
     
     // testing csr from 3-order regression filter
 
+    fields.test4 = _regr->getPolyOrderInUse();
     fields.test5 = _mom->getCsrRegr3Db();
     
     // compute filtered moments for this gate
@@ -2353,8 +2355,9 @@ void Beam::_filterDpAltHvCoCross()
     
     // testing csr from 3-order regression filter
 
+    fields.test4 = _regrHalf->getPolyOrderInUse();
     fields.test5 = _mom->getCsrRegr3Db();
-    
+
     // apply the filter ratio to other channels
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
@@ -2530,6 +2533,7 @@ void Beam::_filterDpAltHvCoOnly()
     
     // testing csr from 3-order regression filter
 
+    fields.test4 = _regrHalf->getPolyOrderInUse();
     fields.test5 = _mom->getCsrRegr3Db();
     
     // apply the filter ratio to other channels
@@ -2626,6 +2630,7 @@ void Beam::_filterDpSimHvFixedPrt()
     
     // testing csr from 3-order regression filter
 
+    fields.test4 = _regr->getPolyOrderInUse();
     fields.test5 = _mom->getCsrRegr3Db();
     
     // apply the filter ratio to other channel
@@ -2791,6 +2796,7 @@ void Beam::_filterDpHOnlyFixedPrt()
     
     // testing csr from 3-order regression filter
 
+    fields.test4 = _regr->getPolyOrderInUse();
     fields.test5 = _mom->getCsrRegr3Db();
     
     // apply the filter ratio to other channel
@@ -2955,6 +2961,7 @@ void Beam::_filterDpVOnlyFixedPrt()
     
     // testing csr from 3-order regression filter
 
+    fields.test4 = _regr->getPolyOrderInUse();
     fields.test5 = _mom->getCsrRegr3Db();
     
     // apply the filter ratio to other channel
