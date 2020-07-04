@@ -75,19 +75,19 @@ public:
   // polynomial to use
   //
   // nSamples: number of samples in IQ time series
-  // nPoly: order of polynomial for regression
-  // orderFromCSR: determine order from CSR
+  // polyOrder: order of polynomial for regression
+  // orderAuto: determine polynomial order from CSR
 
-  void setup(int nSamples, int nPoly = 5,
-             bool orderFromCSR = false);
+  void setup(int nSamples, int polyOrder = 5,
+             bool orderAuto = false);
 
   // set up regression parameters - staggered PRT
   //
   // nSamples: number of samples in IQ time series
   // staggeredM, staggeredN - stagger ratio = M/N
   //   time series starts with short PRT
-  // nPoly: order of polynomial for regression
-  // orderFromCSR: determine order from CSR
+  // polyOrder: order of polynomial for regression
+  // orderAuto: determine polynomial order from CSR
   //
   // If successful, _setupDone will be set to true.
   // If not successful, _setupDone will be set to false.
@@ -97,8 +97,8 @@ public:
   void setupStaggered(int nSamples,
                       int staggeredM,
                       int staggeredN,
-                      int nPoly = 5,
-                      bool orderFromCSR = false);
+                      int polyOrder = 5,
+                      bool orderAuto = false);
 
   // Apply regression filtering on I,Q data
   //
@@ -167,9 +167,10 @@ public:
     }
   }
 
-  inline int getNPoly() const { return _nPoly; }
-  inline int getNPoly1() const { return _nPoly1; }
-  inline int getOrderFromCSR() const { return _orderFromCSR; }
+  inline int getNPoly() const { return _polyOrder; }
+  inline int getNPoly1() const { return _polyOrder1; }
+  inline bool getOrderAuto() const { return _orderAuto; }
+  inline int getPolyOrderInUse() const { return _polyOrderInUse; }
   inline bool getSetupDone() const { return _setupDone; }
   inline double* getX() const { return _xx; }
   inline double** getVv() const { return _vv; }
@@ -196,14 +197,15 @@ private:
   // data
 
   int _nSamples;
-  int _nPoly;    // polynomial order
-  int _nPoly1;   // polynomial order plus 1
+  int _polyOrder;    // polynomial order
+  int _polyOrder1;   // polynomial order plus 1
 
   bool _isStaggered; // staggered-PRT version
   int _staggeredM;
   int _staggeredN;
 
-  bool _orderFromCSR; // determine the order from the clutter to signal ratio
+  bool _orderAuto;     // determine the order from the clutter to signal ratio
+  int _polyOrderInUse; // polynomial order used in auto selection
 
   bool _setupDone;
 
