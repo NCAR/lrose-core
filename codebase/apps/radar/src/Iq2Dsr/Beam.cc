@@ -533,9 +533,10 @@ void Beam::_prepareForComputeMoments()
     _fields = new MomentsFields[_nGatesOut];
     _fieldsF = new MomentsFields[_nGatesOut];
     
-    _mom = new RadarMoments(_nGatesOut,
-                            _params.debug >= Params::DEBUG_NORM,
-                            _params.debug >= Params::DEBUG_VERBOSE);
+    _mom = new RadarMoments(_nGatesOut);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      _mom->setDebug(true);
+    }
 
     _nGatesOutAlloc = _nGatesOut;
 
@@ -1926,7 +1927,7 @@ void Beam::_filterSpH()
 
     // check if we have clutter at this gate
     
-    if (!gate->fields.cmd_flag) {
+    if (!gate->fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -2003,7 +2004,7 @@ void Beam::_filterSpV()
 
     // check if we have clutter at this gate
     
-    if (!gate->fields.cmd_flag) {
+    if (!gate->fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -2097,7 +2098,7 @@ void Beam::_filterRegrSpStagPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -2165,7 +2166,7 @@ void Beam::_filterAdapSpStagPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -2226,7 +2227,7 @@ void Beam::_filterSpSz864()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
     
@@ -2301,7 +2302,7 @@ void Beam::_filterDpAltHvCoCross()
     
     // check if CMD identified clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
 
       // should we apply the RHOHV improvement test?
 
@@ -2493,7 +2494,7 @@ void Beam::_filterDpAltHvCoOnly()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -2590,7 +2591,7 @@ void Beam::_filterDpSimHvFixedPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -2679,7 +2680,7 @@ void Beam::_filterDpSimHvStagPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -2756,7 +2757,7 @@ void Beam::_filterDpHOnlyFixedPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -2841,7 +2842,7 @@ void Beam::_filterDpHOnlyStagPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -2921,7 +2922,7 @@ void Beam::_filterDpVOnlyFixedPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       
@@ -3007,7 +3008,7 @@ void Beam::_filterDpVOnlyStagPrt()
     
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag) {
+    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
       continue;
     }
       

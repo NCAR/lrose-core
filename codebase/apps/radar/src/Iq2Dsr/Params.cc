@@ -2436,6 +2436,18 @@
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
     
+    // Parameter 'use_cmd_to_control_clutter_filter'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_cmd_to_control_clutter_filter");
+    tt->descr = tdrpStrDup("Option to use CMD to control the application of the filter.");
+    tt->help = tdrpStrDup("If true, we use the parameter 'cmd_threshold_for_clutter' to determine whether to apply the filter at a gate.");
+    tt->val_offset = (char *) &use_cmd_to_control_clutter_filter - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'apply_residue_correction_in_adaptive_filter'
     // ctype is 'tdrp_bool_t'
     

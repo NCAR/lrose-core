@@ -974,6 +974,12 @@ commentdef {
 
 paramdef boolean {
   p_default = true;
+  p_descr = "Option to use CMD to control the application of the filter.";
+  p_help = "If true, we use the parameter 'cmd_threshold_for_clutter' to determine whether to apply the filter at a gate.";
+} use_cmd_to_control_clutter_filter;
+
+paramdef boolean {
+  p_default = true;
   p_descr = "Option to apply residue correction to adaptive filter.";
   p_help = "At some gates, the spectral noise floor may be high. If this correction is applied, the spectral noise floor will be reduced to the measured noise value.";
 } apply_residue_correction_in_adaptive_filter;
