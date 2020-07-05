@@ -125,10 +125,8 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
 
   // locate the weather and clutter
   
-  double weatherPeak, clutterPeak;
+  double weatherPeak, clutterPeak, clutNoise;
   int notchWidth;
-
-  double clutNoise;
   locateWxAndClutter(rawPowerSpec,
                      nSamples,
                      maxClutterVel,
@@ -168,6 +166,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
   int clutterUpperBound = clutterPos + maxSearchWidth;
 
   // iterate 3 times, refining the correcting further each time
+  // by fitting a Gaussian to the spectrum
 
   TaArray<double> gaussian_;
   double *gaussian = gaussian_.alloc(nSamples);

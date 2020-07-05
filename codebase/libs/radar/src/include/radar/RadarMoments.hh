@@ -1592,6 +1592,19 @@ private:
                                        int staggeredN,
                                        double *regrSpec);
 
+  void _regressionGaussianInterp(int nSamples,
+                                 const RadarFft &fft,
+                                 const double *window,
+                                 const RadarComplex_t *iqUnfiltered,
+                                 const RadarComplex_t *iqRegr,
+                                 double calibratedNoise,
+                                 bool interpAcrossNotch,
+                                 RadarComplex_t *iqFiltered,
+                                 double &filterRatio,
+                                 double &spectralNoise,
+                                 double &spectralSnr,
+                                 double *specRatio);
+
   void _adjustRegressionFilter(int nSamples,
                                const RadarFft &fft,
                                const double *window,

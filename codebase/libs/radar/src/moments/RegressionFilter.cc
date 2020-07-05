@@ -105,7 +105,7 @@ void RegressionFilter::_init()
   _staggeredN = 0;
 
   _orderAuto = false;
-  _polyOrderInUse = 3;
+  _polyOrderInUse = _polyOrder;
 
   _xx = NULL;
   _yyEst = NULL;
@@ -216,6 +216,7 @@ void RegressionFilter::setup(int nSamples,
   _staggeredM = 0;
   _staggeredN = 0;
 
+  _polyOrderInUse = _polyOrder;
   _orderAuto = orderAuto;
 
   // allocate arrays
@@ -294,6 +295,7 @@ void RegressionFilter::setupStaggered(int nSamples,
   _polyOrder1 = _polyOrder + 1;
   _staggeredM = staggeredM;
   _staggeredN = staggeredN;
+  _polyOrderInUse = _polyOrder;
   _orderAuto = orderAuto;
 
   // allocate arrays
