@@ -2436,18 +2436,6 @@
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
     
-    // Parameter 'use_cmd_to_control_clutter_filter'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_cmd_to_control_clutter_filter");
-    tt->descr = tdrpStrDup("Option to use CMD to control the application of the filter.");
-    tt->help = tdrpStrDup("If true, we use the parameter 'cmd_threshold_for_clutter' to determine whether to apply the filter at a gate.");
-    tt->val_offset = (char *) &use_cmd_to_control_clutter_filter - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'apply_residue_correction_in_adaptive_filter'
     // ctype is 'tdrp_bool_t'
     
@@ -2506,6 +2494,30 @@
     tt->help = tdrpStrDup("If TRUE, we compute the CSR from the 3 central spectral points. Then, using a lookup-table based on CSR, we determine the appropriate order of the polynomial fit.");
     tt->val_offset = (char *) &regression_filter_determine_order_from_CSR - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'regression_filter_notch_edge_power_ratio_threshold_db'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("regression_filter_notch_edge_power_ratio_threshold_db");
+    tt->descr = tdrpStrDup("Power ratio threshold to determine the edge of the filtered notch (dB).");
+    tt->help = tdrpStrDup("After the initial application of the regression filter, a notch is formed around 0. In order to determine the width of this notch, we compute the ratio of the filtered power to the original unfiltered power. This is the threshold used to determine where the edge of the notch occurs.");
+    tt->val_offset = (char *) &regression_filter_notch_edge_power_ratio_threshold_db - &_start_;
+    tt->single_val.d = -45;
+    tt++;
+    
+    // Parameter 'regression_filter_min_csr_db'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("regression_filter_min_csr_db");
+    tt->descr = tdrpStrDup("Min valid CSR - Clutter-to-Signal-Ratio - for applying the filter (dB).");
+    tt->help = tdrpStrDup("As a first step, we compute the CSR using a 3rd order regression fit. If the CSR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.");
+    tt->val_offset = (char *) &regression_filter_min_csr_db - &_start_;
+    tt->single_val.d = -5;
     tt++;
     
     // Parameter 'regression_filter_interp_across_notch'

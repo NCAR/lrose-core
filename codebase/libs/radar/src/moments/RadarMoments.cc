@@ -143,8 +143,12 @@ void RadarMoments::_init()
   _computeCpaUsingAlt = false;
 
   _clutterFilterType = CLUTTER_FILTER_ADAPTIVE;
+  _regrNotchEdgePwrRatioThresholdDb = -45;
+  _regrMinCsrDb = -5;
   _regrInterpAcrossNotch = true;
   _notchWidthMps = 3.0;
+  _regr3CsrDb = 0.0;
+  _regrInterpRatioDb = 0.0;
 
   _wavelengthMeters = 10.0;
   _prt = 0.001;
@@ -164,7 +168,7 @@ void RadarMoments::_init()
   MEM_zero(_PP_);
   _PP = _PP_;
   
-  _csrRegr3Db = -120.0;
+  _regr3CsrDb = -120.0;
 
   _velSign = 1.0;
   _velSignStaggered = 1.0;
@@ -4486,7 +4490,7 @@ void RadarMoments::applyRegressionFilter
    const RadarFft &fft,
    RegressionFilter &regr,
    const double *window,
-   const RadarComplex_t *iqOrig, // non-windowed
+   const RadarComplex_t *iqUnfiltered, // non-windowed
    double calibratedNoise,
    bool interpAcrossNotch,
    RadarComplex_t *iqFiltered,
@@ -4500,45 +4504,38 @@ void RadarMoments::applyRegressionFilter
 
   // apply a 3rd order regression filter
   
-  TaArray<RadarComplex_t> iqRegr3_;
-  RadarComplex_t *iqRegr3 = iqRegr3_.alloc(nSamples);
-  regr.applyForsythe3(iqOrig, iqRegr3);
+  vector<RadarComplex_t> iqRegr3;
+  iqRegr3.resize(nSamples);
+  regr.applyForsythe3(iqUnfiltered, iqRegr3.data());
 
   // compute clutter to signal ratio
 
-  double rawPower = RadarComplex::meanPower(iqOrig, nSamples);
-  double signal3Power = RadarComplex::meanPower(iqRegr3, nSamples);
+  double rawPower = RadarComplex::meanPower(iqUnfiltered, nSamples);
+  double signal3Power = RadarComplex::meanPower(iqRegr3.data(), nSamples);
   double clut3Power = rawPower - signal3Power;
   if (clut3Power < 0) {
     clut3Power = 1.0e-12;
   }
   double csrRegr3 = clut3Power / signal3Power;
-  _csrRegr3Db = 10.0 * log10(csrRegr3);
-  
-  // apply regression filter, passing in CSR
-  
-  TaArray<RadarComplex_t> iqRegr_;
-  RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, _csrRegr3Db, iqRegr);
-  
-  // fill in the regression notch using Gaussian fit to remaining weather
+  _regr3CsrDb = 10.0 * log10(csrRegr3);
 
-  _regressionGaussianInterp(nSamples, fft, window,
-                            iqOrig, iqRegr,
-                            calibratedNoise, interpAcrossNotch,
-                            iqFiltered, filterRatio, spectralNoise,
-                            spectralSnr, specRatio);
+  if (_regr3CsrDb < _regrMinCsrDb) {
+
+    memcpy(iqFiltered, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
+
+  } else {
   
-  // _adjustRegressionFilter(nSamples, fft, window,
-  //                         iqOrig, iqRegr,
-  //                         calibratedNoise, interpAcrossNotch,
-  //                         iqFiltered, filterRatio, spectralNoise,
-  //                         spectralSnr, specRatio);
-
-  // memcpy(iqFiltered, iqRegr, nSamples * sizeof(RadarComplex_t));
-
-  double filteredPower = RadarComplex::meanPower(iqFiltered, nSamples);
-  filterRatio = rawPower / filteredPower;
+    // fill in the regression notch using Gaussian fit to remaining weather
+    
+    _runRegressionFilter(nSamples, fft, regr, window,
+                         iqUnfiltered, calibratedNoise, interpAcrossNotch,
+                         iqFiltered,
+                         filterRatio, spectralNoise,
+                         spectralSnr, specRatio);
+    
+  }
+  
+  // save filtered data to iqNotched
 
   if (iqNotched != NULL) {
     memcpy(iqNotched, iqFiltered, nSamples * sizeof(RadarComplex_t));
@@ -5113,12 +5110,12 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 // For regression filter, interpolate across the notch using
 // a Gaussian fit to the remaining weather signal
 
-void RadarMoments::_regressionGaussianInterp
+void RadarMoments::_runRegressionFilter
   (int nSamples,
    const RadarFft &fft,
+   RegressionFilter &regr,
    const double *window, // window to use
    const RadarComplex_t *iqUnfiltered, // non-windowed
-   const RadarComplex_t *iqRegr, // regr-filtered
    double calibratedNoise,
    bool interpAcrossNotch,
    RadarComplex_t *iqFiltered,
@@ -5147,97 +5144,153 @@ void RadarMoments::_regressionGaussianInterp
   unfiltSpec.resize(nSamples);
   RadarComplex::loadPower(unfiltSpecC.data(), unfiltSpec.data(), nSamples);
 
-  // apply the window to the regression-filtered times series
-
-  vector<RadarComplex_t> regrWindowed;
-  regrWindowed.resize(nSamples);
-  applyWindow(iqRegr, window, regrWindowed.data(), nSamples);
-  
-  // take the forward fft to compute the complex spectrum of regr-filtered series
-  
-  vector<RadarComplex_t> regrSpecC;
-  regrSpecC.resize(nSamples);
-  fft.fwd(regrWindowed.data(), regrSpecC.data());
-  
-  // compute the real regr-filtered spectrum
+  // allocate space for regression power spectrum
   
   vector<double> regrSpec;
   regrSpec.resize(nSamples);
-  RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamples);
 
-  // interpolate across the notch
+  if (_regr3CsrDb < _regrMinCsrDb) {
 
-  if (interpAcrossNotch) {
-
-    // compute the filter ratio at each spectral point
+    // don't use a regression filter
     
-    vector<double> filtRatioDb;
-    filtRatioDb.resize(nSamples);
+    memcpy(iqFiltered, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
+    regrSpec = unfiltSpec;
+    _regrInterpRatioDb = -9999.0;
+
+  } else {
+    
+    // apply regression filter, passing in CSR
+    
+    vector<RadarComplex_t> iqRegr;
+    iqRegr.resize(nSamples);
+    regr.applyForsythe(iqUnfiltered, _regr3CsrDb, iqRegr.data());
+    
+    // apply the window to the regression-filtered times series
+    
+    vector<RadarComplex_t> regrWindowed;
+    regrWindowed.resize(nSamples);
+    applyWindow(iqRegr.data(), window, regrWindowed.data(), nSamples);
+  
+    // take the forward fft to compute the complex spectrum of regr-filtered series
+    
+    vector<RadarComplex_t> regrSpecC;
+    regrSpecC.resize(nSamples);
+    fft.fwd(regrWindowed.data(), regrSpecC.data());
+    
+    // compute the real regr-filtered spectrum
+    
+    RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamples);
+    
+    // interpolate across the notch
+
+    double powerBeforeInterp = RadarComplex::meanPower(regrSpec.data(), nSamples);
+    
+    if (interpAcrossNotch) {
+      
+      // compute the filter ratio at each spectral point
+      
+      vector<double> filtRatioDb;
+      filtRatioDb.resize(nSamples);
+      for (int ii = 0; ii < nSamples; ii++) {
+        double filtRatio = regrSpec[ii] / unfiltSpec[ii];
+        filtRatioDb[ii] = 10.0 * log10(filtRatio);
+      }
+      
+      // We compute the notch width by comparing the filtered spectrum
+      // with the original unfiltered spectrum. The 'notch' was created
+      // through the application of the regression filter.
+      // We actually compute Half width of notch, using a filtRatioDb threshold test,
+      // and widen this by 1 spectral point, and an upper limit of nSamples/4.
+      
+      int notchHalfWidth = 0;
+      for (int ii = 0; ii < nSamples / 2; ii++) {
+        int jj = (nSamples - ii) % nSamples;
+        if (filtRatioDb[ii] > _regrNotchEdgePwrRatioThresholdDb ||
+            filtRatioDb[jj] > _regrNotchEdgePwrRatioThresholdDb) {
+          notchHalfWidth = ii; // widen by 1 spectral point
+          break;
+        }
+      }
+      if (notchHalfWidth > nSamples / 4) {
+        notchHalfWidth = nSamples / 4;
+      }
+      
+      // compute bounds of filtered part of the spectrum
+      
+      int notchLowerBound = -notchHalfWidth;
+      int notchUpperBound = notchHalfWidth;
+      int nUnfiltered = nSamples - notchHalfWidth * 2 - 1;
+      double *startNonNotch = regrSpec.data() + notchHalfWidth + 1;
+      
+      // compute the noise in the filtered spectrum, but not the notch
+      
+      double regrNoise =
+        ClutFilter::estimateSpectralNoise(startNonNotch, nUnfiltered);
+    
+      // find the location of the max power in the filtered spectrum,
+      // presumably the weather position
+      
+      int weatherPos = 0;
+      double maxRegrPower = regrSpec[0];
+      for (int ii = 1; ii < nSamples; ii++) {
+        if (regrSpec[ii] > maxRegrPower) {
+          weatherPos = ii;
+          maxRegrPower = regrSpec[ii];
+        }
+      }
+      
+      // interpolate across the filtered notch
+      // iterate 3 times, refining the correcting further each time
+      // by fitting a Gaussian to the spectrum
+      
+      vector<double> gaussian;
+      gaussian.resize(nSamples);
+      for (int iter = 0; iter < 3; iter++) {
+        // fit gaussian to notched spectrum
+        ClutFilter::fitGaussian(regrSpec.data(), nSamples,
+                                weatherPos, regrNoise,
+                                gaussian.data());
+        for (int ii = notchLowerBound; ii <= notchUpperBound; ii++) {
+          int jj = (ii + nSamples) % nSamples;
+          regrSpec[jj] = gaussian[jj];
+        }
+      } // iter
+      
+    } // if (interpAcrossNotch)
+    
+    double powerAfterInterp = RadarComplex::meanPower(regrSpec.data(), nSamples);
+    _regrInterpRatioDb = 10.0 * log10(powerAfterInterp / powerBeforeInterp);
+
+    // adjust the input spectrum by the filter ratio
+    // constrain ratios to be 1 or less
+    
     for (int ii = 0; ii < nSamples; ii++) {
-      double filtRatio = regrSpec[ii] / unfiltSpec[ii];
-      filtRatioDb[ii] = 10.0 * log10(filtRatio);
-    }
-    
-    // We compute the notch width by comparing the filtered spectrum
-    // with the original unfiltered spectrum. The 'notch' was created
-    // through the application of the regression filter.
-    // We actually compute Half width of notch, using a filtRatioDb threshold of -45 dB,
-    // and widen this by 1 spectral point, and an upper limit of nSamples/4.
-    
-    int notchHalfWidth = 0;
-    for (int ii = 0; ii < nSamples / 2; ii++) {
-      int jj = (nSamples - ii) % nSamples;
-      if (filtRatioDb[ii] > -45 || filtRatioDb[jj] > -45) {
-        notchHalfWidth = ii; // widen by 1 spectral point
-        break;
+      double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
+      if (magRatio > 1.0) {
+        magRatio = 1.0;
       }
-    }
-    if (notchHalfWidth > nSamples / 4) {
-      notchHalfWidth = nSamples / 4;
-    }
-    
-    // compute bounds of filtered part of the spectrum
-    
-    int notchLowerBound = -notchHalfWidth;
-    int notchUpperBound = notchHalfWidth;
-    int nUnfiltered = nSamples - notchHalfWidth * 2 - 1;
-    double *startNonNotch = regrSpec.data() + notchHalfWidth + 1;
-    
-    // compute the noise in the filtered spectrum, but not the notch
-    
-    double regrNoise = ClutFilter::estimateSpectralNoise(startNonNotch, nUnfiltered);
-    // double regrNoiseDb = 10.0 * log10(regrNoise);
-    
-    // find the location of the max power in the filtered spectrum,
-    // presumably the weather position
-    
-    int weatherPos = 0;
-    double maxRegrPower = regrSpec[0];
-    for (int ii = 1; ii < nSamples; ii++) {
-      if (regrSpec[ii] > maxRegrPower) {
-        weatherPos = ii;
-        maxRegrPower = regrSpec[ii];
+      unfiltSpecC[ii].re *= magRatio;
+      unfiltSpecC[ii].im *= magRatio;
+      if (specRatio != NULL) {
+        specRatio[ii] = magRatio;
       }
     }
     
-    // interpolate across the filtered notch
-    // iterate 3 times, refining the correcting further each time
-    // by fitting a Gaussian to the spectrum
+    // invert the fft
     
-    vector<double> gaussian;
-    gaussian.resize(nSamples);
-    for (int iter = 0; iter < 3; iter++) {
-      // fit gaussian to notched spectrum
-      ClutFilter::fitGaussian(regrSpec.data(), nSamples,
-                              weatherPos, regrNoise,
-                              gaussian.data());
-      for (int ii = notchLowerBound; ii <= notchUpperBound; ii++) {
-        int jj = (ii + nSamples) % nSamples;
-        regrSpec[jj] = gaussian[jj];
-      }
-    } // iter
+    fft.inv(unfiltSpecC.data(), regrWindowed.data());
     
-  } // if (interpAcrossNotch)
+    // invert the window
+    
+    invertWindow(regrWindowed.data(), window, iqFiltered, nSamples);
+
+  } // if (_regr3CsrDb < _regrMinCsrDb) {
+  
+  // compute powers and filter ratio
+  
+  double rawPower = RadarComplex::meanPower(iqUnfiltered, nSamples);
+  double filteredPower = RadarComplex::meanPower(iqFiltered, nSamples);
+  filterRatio = rawPower / filteredPower;
 
   // compute spectral noise value
   
@@ -5248,29 +5301,6 @@ void RadarMoments::_regressionGaussianInterp
   // compute SNR based on the spectral noise
 
   spectralSnr = spectralNoise / calibratedNoise;
-
-  // adjust the input spectrum by the filter ratio
-  // constrain ratios to be 1 or less
-  
-  for (int ii = 0; ii < nSamples; ii++) {
-    double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
-    if (magRatio > 1.0) {
-      magRatio = 1.0;
-    }
-    unfiltSpecC[ii].re *= magRatio;
-    unfiltSpecC[ii].im *= magRatio;
-    if (specRatio != NULL) {
-      specRatio[ii] = magRatio;
-    }
-  }
-
-  // invert the fft
-  
-  fft.inv(unfiltSpecC.data(), regrWindowed.data());
-
-  // invert the window
-  
-  invertWindow(regrWindowed.data(), window, iqFiltered, nSamples);
 
 }
 

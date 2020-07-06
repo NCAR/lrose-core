@@ -1927,7 +1927,7 @@ void Beam::_filterSpH()
 
     // check if we have clutter at this gate
     
-    if (!gate->fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!gate->fields.cmd_flag) {
       continue;
     }
       
@@ -1964,8 +1964,9 @@ void Beam::_filterSpH()
 
     // testing csr from 3-order regression filter
 
+    fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getCsrRegr3Db();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // compute filtered moments for this gate
     
@@ -2004,7 +2005,7 @@ void Beam::_filterSpV()
 
     // check if we have clutter at this gate
     
-    if (!gate->fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!gate->fields.cmd_flag) {
       continue;
     }
       
@@ -2041,8 +2042,9 @@ void Beam::_filterSpV()
     
     // testing csr from 3-order regression filter
 
+    fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getCsrRegr3Db();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // compute filtered moments for this gate
     
@@ -2098,7 +2100,7 @@ void Beam::_filterRegrSpStagPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
       
@@ -2166,7 +2168,7 @@ void Beam::_filterAdapSpStagPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
       
@@ -2227,7 +2229,7 @@ void Beam::_filterSpSz864()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
     
@@ -2297,12 +2299,12 @@ void Beam::_filterDpAltHvCoCross()
 
     if (_params.apply_rhohv_test_after_cmd) {
       fields.test2 = 0;
-      fields.test3 = 0;
+      // fields.test3 = 0;
     }
     
     // check if CMD identified clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
 
       // should we apply the RHOHV improvement test?
 
@@ -2356,8 +2358,9 @@ void Beam::_filterDpAltHvCoCross()
     
     // testing csr from 3-order regression filter
 
+    fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regrHalf->getPolyOrderInUse();
-    fields.test5 = _mom->getCsrRegr3Db();
+    fields.test5 = _mom->getRegr3CsrDb();
 
     // apply the filter ratio to other channels
     
@@ -2415,7 +2418,7 @@ void Beam::_filterDpAltHvCoCross()
 
     fieldsF.test = fieldsN.zdr;
     fieldsF.test2 = fieldsN.phidp;
-    fieldsF.test3 = fieldsN.rhohv;
+    // fieldsF.test3 = fieldsN.rhohv;
     
     // compute clutter power
     
@@ -2437,7 +2440,7 @@ void Beam::_filterDpAltHvCoCross()
         // check if RHOHV improvement indicates clutter
         if (rhohvImprov >= _params.rhohv_improvement_factor_threshold) {
           // yes, so use filtered data for dual pol fields
-          fields.test3 = 1;
+          // fields.test3 = 1;
           MomentsFields filt = fieldsF;
           fieldsF = fields;
           fieldsF.zdrm = filt.zdrm;
@@ -2494,7 +2497,7 @@ void Beam::_filterDpAltHvCoOnly()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
       
@@ -2534,8 +2537,9 @@ void Beam::_filterDpAltHvCoOnly()
     
     // testing csr from 3-order regression filter
 
+    fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regrHalf->getPolyOrderInUse();
-    fields.test5 = _mom->getCsrRegr3Db();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // apply the filter ratio to other channels
     
@@ -2591,7 +2595,7 @@ void Beam::_filterDpSimHvFixedPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
       
@@ -2631,8 +2635,9 @@ void Beam::_filterDpSimHvFixedPrt()
     
     // testing csr from 3-order regression filter
 
+    fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getCsrRegr3Db();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // apply the filter ratio to other channel
     
@@ -2680,7 +2685,7 @@ void Beam::_filterDpSimHvStagPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
       
@@ -2757,7 +2762,7 @@ void Beam::_filterDpHOnlyFixedPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
       
@@ -2797,8 +2802,9 @@ void Beam::_filterDpHOnlyFixedPrt()
     
     // testing csr from 3-order regression filter
 
+    fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getCsrRegr3Db();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // apply the filter ratio to other channel
     
@@ -2842,7 +2848,7 @@ void Beam::_filterDpHOnlyStagPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
       
@@ -2922,7 +2928,7 @@ void Beam::_filterDpVOnlyFixedPrt()
       
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
       
@@ -2962,8 +2968,9 @@ void Beam::_filterDpVOnlyFixedPrt()
     
     // testing csr from 3-order regression filter
 
+    fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getCsrRegr3Db();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // apply the filter ratio to other channel
     
@@ -3008,7 +3015,7 @@ void Beam::_filterDpVOnlyStagPrt()
     
     // check if we have clutter at this gate
     
-    if (!fields.cmd_flag && _params.use_cmd_to_control_clutter_filter) {
+    if (!fields.cmd_flag) {
       continue;
     }
       
@@ -3225,7 +3232,9 @@ void Beam::_initMomentsObject()
   
   if (_params.use_polynomial_regression_clutter_filter) {
     _mom->setUseRegressionFilter
-      (_params.regression_filter_interp_across_notch);
+      (_params.regression_filter_interp_across_notch,
+       _params.regression_filter_notch_edge_power_ratio_threshold_db,
+       _params.regression_filter_min_csr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
     _mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }
@@ -5526,7 +5535,7 @@ void Beam::_performClutterFiltering()
   for (int igate = 0; igate < _nGates; igate++) {
     _gateData[igate]->fields.test = _gateData[igate]->fields.zdr;
     _gateData[igate]->fields.test2 = _gateData[igate]->fields.phidp;
-    _gateData[igate]->fields.test3 = _gateData[igate]->fields.rhohv;
+    // _gateData[igate]->fields.test3 = _gateData[igate]->fields.rhohv;
     _gateData[igate]->fieldsF = _gateData[igate]->fields;
   }
   

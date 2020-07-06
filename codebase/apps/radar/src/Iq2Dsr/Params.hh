@@ -939,8 +939,6 @@ public:
 
   double atmos_atten_db_per_km;
 
-  tdrp_bool_t use_cmd_to_control_clutter_filter;
-
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
   double min_snr_db_for_residue_correction;
@@ -950,6 +948,10 @@ public:
   int regression_filter_polynomial_order;
 
   tdrp_bool_t regression_filter_determine_order_from_CSR;
+
+  double regression_filter_notch_edge_power_ratio_threshold_db;
+
+  double regression_filter_min_csr_db;
 
   tdrp_bool_t regression_filter_interp_across_notch;
 
@@ -1238,7 +1240,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[272];
+  mutable TDRPtable _table[273];
 
   const char *_className;
 
