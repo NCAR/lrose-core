@@ -4516,8 +4516,13 @@ void RadarMoments::applyRegressionFilter
   if (clut3Power < 0) {
     clut3Power = 1.0e-12;
   }
-  double csrRegr3 = clut3Power / signal3Power;
+  // double csrRegr3 = clut3Power / signal3Power;
+  double csrRegr3 = clut3Power / calibratedNoise;
   _regr3CsrDb = 10.0 * log10(csrRegr3);
+
+  // cerr << "EEEEEEEE clut3Power, signal3Power, calibratedNoise, _regr3CsrDb: "
+  //      << clut3Power << ", " << signal3Power << ", "
+  //      << calibratedNoise << ", " << _regr3CsrDb << endl;
 
   if (_regr3CsrDb < _regrMinCsrDb) {
 
