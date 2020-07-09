@@ -947,6 +947,12 @@ public:
 
   int regression_filter_polynomial_order;
 
+  tdrp_bool_t regression_filter_determine_order_from_CSR;
+
+  double regression_filter_notch_edge_power_ratio_threshold_db;
+
+  double regression_filter_min_csr_db;
+
   tdrp_bool_t regression_filter_interp_across_notch;
 
   tdrp_bool_t use_simple_notch_clutter_filter;
@@ -1234,7 +1240,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[270];
+  mutable TDRPtable _table[273];
 
   const char *_className;
 

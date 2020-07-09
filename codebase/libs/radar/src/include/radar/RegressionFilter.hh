@@ -75,16 +75,19 @@ public:
   // polynomial to use
   //
   // nSamples: number of samples in IQ time series
-  // nPoly: order of polynomial for regression
+  // polyOrder: order of polynomial for regression
+  // orderAuto: determine polynomial order from CSR
 
-  void setup(int nSamples, int nPoly = 5);
+  void setup(int nSamples, int polyOrder = 5,
+             bool orderAuto = false);
 
   // set up regression parameters - staggered PRT
   //
   // nSamples: number of samples in IQ time series
   // staggeredM, staggeredN - stagger ratio = M/N
   //   time series starts with short PRT
-  // nPoly: order of polynomial for regression
+  // polyOrder: order of polynomial for regression
+  // orderAuto: determine polynomial order from CSR
   //
   // If successful, _setupDone will be set to true.
   // If not successful, _setupDone will be set to false.
@@ -94,7 +97,8 @@ public:
   void setupStaggered(int nSamples,
                       int staggeredM,
                       int staggeredN,
-                      int nPoly /* = 5*/);
+                      int polyOrder = 5,
+                      bool orderAuto = false);
 
   // Apply regression filtering on I,Q data
   //
@@ -112,10 +116,30 @@ public:
   void apply(const RadarComplex_t *rawIq,
              RadarComplex_t *filteredIq);
 
-  // apply regression using forsythe polynomials
+  // Perform regression filtering on I,Q data
+  // using Forsythe polynomials
+  //
+  // Inputs:
+  //   rawIq: raw I,Q data
+  //   csrRegr3Db: clutter-to-signal-ratio from 3rd order fit
+  //
+  // Outputs:
+  //   filteredIq: filtered I,Q data
+  //
+  // Side effect:
+  //   polyfitIq is computed
+  //
+  // Note: assumes setup() has been successfully completed.
 
   void applyForsythe(const RadarComplex_t *rawIq,
+                     double csrRegr3Db,
                      RadarComplex_t *filteredIq);
+  
+  // Perform 3rd-order regression filtering on I,Q data
+  // using Forsythe polynomials
+
+  void applyForsythe3(const RadarComplex_t *rawIq,
+                      RadarComplex_t *filteredIq);
   
   // Perform polynomial fit from observed data
   //
@@ -143,8 +167,10 @@ public:
     }
   }
 
-  inline int getNPoly() const { return _nPoly; }
-  inline int getNPoly1() const { return _nPoly1; }
+  inline int getNPoly() const { return _polyOrder; }
+  inline int getNPoly1() const { return _polyOrder1; }
+  inline bool getOrderAuto() const { return _orderAuto; }
+  inline int getPolyOrderInUse() const { return _polyOrderInUse; }
   inline bool getSetupDone() const { return _setupDone; }
   inline double* getX() const { return _xx; }
   inline double** getVv() const { return _vv; }
@@ -171,12 +197,15 @@ private:
   // data
 
   int _nSamples;
-  int _nPoly;    // polynomial order
-  int _nPoly1;   // polynomial order plus 1
+  int _polyOrder;    // polynomial order
+  int _polyOrder1;   // polynomial order plus 1
 
-  bool _isStaggered;
+  bool _isStaggered; // staggered-PRT version
   int _staggeredM;
   int _staggeredN;
+
+  bool _orderAuto;     // determine the order from the clutter to signal ratio
+  int _polyOrderInUse; // polynomial order used in auto selection
 
   bool _setupDone;
 
@@ -207,6 +236,12 @@ private:
   // for orthogonal polynomials
 
   ForsytheFit _forsythe;
+  ForsytheFit _forsythe3;
+  ForsytheFit _forsythe4;
+  ForsytheFit _forsythe5;
+  ForsytheFit _forsythe6;
+  ForsytheFit _forsythe7;
+  ForsytheFit _forsythe9;
 
   // methods
 

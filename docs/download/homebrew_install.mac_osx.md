@@ -41,6 +41,12 @@ Install the stand-alone XCode command line tools by downloading "Command Line To
 
 You will need to register for a free Apple id, no credit card is required.
 
+### Reboot after XCode install
+
+You should reboot after installing or upgrading XCode.
+
+The reboot will perform some steps to complete the XCode install.
+
 ### Install homebrew
 
 The default location for homebrew is /usr/local. So you need write permission

@@ -495,9 +495,10 @@ void Beam::_prepareForComputeMoments()
   
   if (_params.use_polynomial_regression_clutter_filter) {
     int order = _params.regression_filter_polynomial_order;
-    _regr->setup(_nSamples, order);
-    _regrHalf->setup(_nSamplesHalf, order);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order);
+    bool orderFromCSR = _params.regression_filter_determine_order_from_CSR;
+    _regr->setup(_nSamples, order, orderFromCSR);
+    _regrHalf->setup(_nSamplesHalf, order, orderFromCSR);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order, orderFromCSR);
   }
 
   pthread_mutex_unlock(&_fftMutex);
@@ -532,9 +533,10 @@ void Beam::_prepareForComputeMoments()
     _fields = new MomentsFields[_nGatesOut];
     _fieldsF = new MomentsFields[_nGatesOut];
     
-    _mom = new RadarMoments(_nGatesOut,
-                            _params.debug >= Params::DEBUG_NORM,
-                            _params.debug >= Params::DEBUG_VERBOSE);
+    _mom = new RadarMoments(_nGatesOut);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      _mom->setDebug(true);
+    }
 
     _nGatesOutAlloc = _nGatesOut;
 
@@ -1959,6 +1961,12 @@ void Beam::_filterSpH()
     }
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
+
+    // testing csr from 3-order regression filter
+
+    fields.test3 = _mom->getRegrInterpRatioDb();
+    fields.test4 = _regr->getPolyOrderInUse();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // compute filtered moments for this gate
     
@@ -2031,6 +2039,12 @@ void Beam::_filterSpV()
     }
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
+    
+    // testing csr from 3-order regression filter
+
+    fields.test3 = _mom->getRegrInterpRatioDb();
+    fields.test4 = _regr->getPolyOrderInUse();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // compute filtered moments for this gate
     
@@ -2285,7 +2299,7 @@ void Beam::_filterDpAltHvCoCross()
 
     if (_params.apply_rhohv_test_after_cmd) {
       fields.test2 = 0;
-      fields.test3 = 0;
+      // fields.test3 = 0;
     }
     
     // check if CMD identified clutter at this gate
@@ -2342,6 +2356,12 @@ void Beam::_filterDpAltHvCoCross()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
+    // testing csr from 3-order regression filter
+
+    fields.test3 = _mom->getRegrInterpRatioDb();
+    fields.test4 = _regrHalf->getPolyOrderInUse();
+    fields.test5 = _mom->getRegr3CsrDb();
+
     // apply the filter ratio to other channels
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
@@ -2398,7 +2418,7 @@ void Beam::_filterDpAltHvCoCross()
 
     fieldsF.test = fieldsN.zdr;
     fieldsF.test2 = fieldsN.phidp;
-    fieldsF.test3 = fieldsN.rhohv;
+    // fieldsF.test3 = fieldsN.rhohv;
     
     // compute clutter power
     
@@ -2420,7 +2440,7 @@ void Beam::_filterDpAltHvCoCross()
         // check if RHOHV improvement indicates clutter
         if (rhohvImprov >= _params.rhohv_improvement_factor_threshold) {
           // yes, so use filtered data for dual pol fields
-          fields.test3 = 1;
+          // fields.test3 = 1;
           MomentsFields filt = fieldsF;
           fieldsF = fields;
           fieldsF.zdrm = filt.zdrm;
@@ -2515,6 +2535,12 @@ void Beam::_filterDpAltHvCoOnly()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
+    // testing csr from 3-order regression filter
+
+    fields.test3 = _mom->getRegrInterpRatioDb();
+    fields.test4 = _regrHalf->getPolyOrderInUse();
+    fields.test5 = _mom->getRegr3CsrDb();
+    
     // apply the filter ratio to other channels
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
@@ -2606,6 +2632,12 @@ void Beam::_filterDpSimHvFixedPrt()
     }
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
+    
+    // testing csr from 3-order regression filter
+
+    fields.test3 = _mom->getRegrInterpRatioDb();
+    fields.test4 = _regr->getPolyOrderInUse();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // apply the filter ratio to other channel
     
@@ -2768,6 +2800,12 @@ void Beam::_filterDpHOnlyFixedPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
+    // testing csr from 3-order regression filter
+
+    fields.test3 = _mom->getRegrInterpRatioDb();
+    fields.test4 = _regr->getPolyOrderInUse();
+    fields.test5 = _mom->getRegr3CsrDb();
+    
     // apply the filter ratio to other channel
     
     _mom->applyFilterRatio(_nSamples, *_fft,
@@ -2927,6 +2965,12 @@ void Beam::_filterDpVOnlyFixedPrt()
     }
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
+    
+    // testing csr from 3-order regression filter
+
+    fields.test3 = _mom->getRegrInterpRatioDb();
+    fields.test4 = _regr->getPolyOrderInUse();
+    fields.test5 = _mom->getRegr3CsrDb();
     
     // apply the filter ratio to other channel
     
@@ -3188,7 +3232,9 @@ void Beam::_initMomentsObject()
   
   if (_params.use_polynomial_regression_clutter_filter) {
     _mom->setUseRegressionFilter
-      (_params.regression_filter_interp_across_notch);
+      (_params.regression_filter_interp_across_notch,
+       _params.regression_filter_notch_edge_power_ratio_threshold_db,
+       _params.regression_filter_min_csr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
     _mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }
@@ -5489,7 +5535,7 @@ void Beam::_performClutterFiltering()
   for (int igate = 0; igate < _nGates; igate++) {
     _gateData[igate]->fields.test = _gateData[igate]->fields.zdr;
     _gateData[igate]->fields.test2 = _gateData[igate]->fields.phidp;
-    _gateData[igate]->fields.test3 = _gateData[igate]->fields.rhohv;
+    // _gateData[igate]->fields.test3 = _gateData[igate]->fields.rhohv;
     _gateData[igate]->fieldsF = _gateData[igate]->fields;
   }
   

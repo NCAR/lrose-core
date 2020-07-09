@@ -25,7 +25,12 @@ def main():
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
-    global options
+    global homeDir
+    homeDir = os.environ['HOME']
+
+    global releaseInfoName
+    releaseInfoName = "ReleaseInfo.txt"
+    
     global releaseDir
     global tmpDir
     global coreDir
@@ -39,10 +44,11 @@ def main():
     global logPath
     global logFp
 
+    global options
+
     # parse the command line
 
     usage = "usage: %prog [options]"
-    homeDir = os.environ['HOME']
     releaseDirDefault = os.path.join(homeDir, 'releases')
     logDirDefault = '/tmp/create_src_release/logs'
     parser = OptionParser(usage)
@@ -291,7 +297,8 @@ def createTmpDir():
 
     # make it clean
 
-    os.makedirs(tmpDir)
+    if (os.path.isdir(tmpDir) == False):
+        os.makedirs(tmpDir)
 
 ########################################################################
 # check out repos from git
@@ -303,10 +310,11 @@ def gitCheckout():
              " https://github.com/NCAR/lrose-core")
     shellCmd("git clone https://github.com/NCAR/lrose-netcdf")
     shellCmd("git clone https://github.com/NCAR/lrose-displays")
-    os.chdir(os.path.join(tmpDir, "lrose-core"))
-    shellCmd("git clone https://github.com/mmbell/fractl")
-    shellCmd("git clone https://github.com/mmbell/vortrac")
-    shellCmd("git clone https://github.com/mmbell/samurai")
+
+    # os.chdir(os.path.join(tmpDir, "lrose-core"))
+    # shellCmd("git clone https://github.com/mmbell/fractl")
+    # shellCmd("git clone https://github.com/mmbell/vortrac")
+    # shellCmd("git clone https://github.com/mmbell/samurai")
 
 ########################################################################
 # set up autoconf for configure etc
@@ -365,12 +373,14 @@ def createQtMocFiles(appDir):
 
 def createReleaseInfoFile():
 
+    global releaseInfoName
+
     # go to core dir
     os.chdir(coreDir)
 
     # open info file
 
-    releaseInfoPath = os.path.join(coreDir, "ReleaseInfo.txt")
+    releaseInfoPath = os.path.join(coreDir, releaseInfoName)
     info = open(releaseInfoPath, 'w')
 
     # write release info
@@ -383,6 +393,11 @@ def createReleaseInfoFile():
 
     info.close()
 
+    # copy it up into the release dir
+
+    shellCmd("rsync -av " + releaseInfoName + " " + releaseDir)
+
+
 ########################################################################
 # create the tar file
 
@@ -391,7 +406,8 @@ def createTarFile():
     # go to core dir, make tar dir
 
     os.chdir(coreDir)
-    os.makedirs(tarDir)
+    if (os.path.isdir(tarDir) == False):
+        os.makedirs(tarDir)
 
     # copy some scripts into tar directory
 
@@ -400,26 +416,28 @@ def createTarFile():
 
     # move lrose contents into tar dir
 
-    for fileName in [ "LICENSE.txt", "README.md", "ReleaseInfo.txt" ]:
+    for fileName in [ "LICENSE.txt", "README.md", releaseInfoName ]:
         os.rename(fileName, os.path.join(tarDir, fileName))
         
     for dirName in [ "build", "codebase", "docs", "release_notes" ]:
         os.rename(dirName, os.path.join(tarDir, dirName))
 
-    for dirName in [ "fractl", "vortrac", "samurai" ]:
-        os.rename(dirName, os.path.join(tarDir, dirName))
+    #for dirName in [ "fractl", "vortrac", "samurai" ]:
+    #    os.rename(dirName, os.path.join(tarDir, dirName))
 
     # move netcdf support into tar dir
 
     netcdfDir = os.path.join(tmpDir, "lrose-netcdf")
     netcdfSubDir = os.path.join(tarDir, "lrose-netcdf")
-    os.makedirs(netcdfSubDir)
+    if (os.path.isdir(netcdfSubDir) == False):
+        os.makedirs(netcdfSubDir)
 
     # Copy the color-scales dir from lrose-displays into tar dir (under share)
     
     displaysDir = os.path.join(tmpDir, "lrose-displays/color_scales")
     displaysSubDir = os.path.join(tarDir, "share/")
-    os.makedirs(displaysSubDir)
+    if (os.path.isdir(displaysSubDir) == False):
+        os.makedirs(displaysSubDir)
     shellCmd("rsync -av " + displaysDir + " " + displaysSubDir)
 
     # copy scripts for netcdf build
@@ -448,6 +466,72 @@ def createTarFile():
     shellCmd("tar cvfzh " + tarName + " " + releaseName)
     
 ########################################################################
+# template for brew formula
+
+formulaBody = """
+
+require 'formula'
+
+class LroseCore < Formula
+
+  homepage 'https://github.com/NCAR/lrose-core'
+
+  url '{0}'
+  version '{1}'
+  sha256 '{2}'
+
+  depends_on 'hdf5' => 'enable-cxx'
+  depends_on 'netcdf' => 'enable-cxx-compat'
+  depends_on 'udunits'
+  depends_on 'fftw'
+  depends_on 'flex'
+  depends_on 'jpeg'
+  depends_on 'libpng'
+  depends_on 'libzip'
+  depends_on 'qt'
+  depends_on 'szip'
+  depends_on 'pkg-config'
+  depends_on 'cmake'
+  depends_on 'rsync'
+  depends_on :x11
+
+  def install
+
+    ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
+    Dir.chdir("codebase")
+    system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
+    system "make install"
+    Dir.chdir("..")
+    system "rsync", "-av", "share", "#{{prefix}}"
+
+  end
+
+  def test
+    system "#{{bin}}/RadxPrint", "-h"
+  end
+
+end
+"""
+
+########################################################################
+# create the brew formula for OSX builds
+
+def buildLroseCoreFormula(tar_url, tar_name, formula_name):
+
+    # os.chdir(coreDir)
+
+    """ build a Homebrew forumula file for lrose-core """	
+    dash = tar_name.find('-')
+    period = tar_name.find('.', dash)
+    version = tar_name[dash+1:period]
+    result = str(subprocess.check_output(("sha256sum", tar_name), text=True))
+    checksum = result.split()[0]
+    formula = formulaBody.format(tar_url, version, checksum)
+    outf = open(formula_name, 'w')
+    outf.write(formula)
+    outf.close()
+
+########################################################################
 # create the brew formula for OSX builds
 
 def createBrewFormula():
@@ -459,23 +543,9 @@ def createBrewFormula():
     tarUrl = "https://github.com/NCAR/lrose-core/releases/download/" + \
              options.package + "-" + versionStr + "/" + tarName
     formulaName = options.package + ".rb"
-    scriptName = "formulas/build_" + options.package + "_formula"
-    buildDirPath = os.path.join(tarDir, "build")
-    scriptPath = os.path.join(buildDirPath, scriptName)
 
-    # check if script exists
-
-    if (os.path.isfile(scriptPath) == False):
-        print("WARNING - ", thisScriptName, file=logFp)
-        print("  No script: ", scriptPath, file=logFp)
-        print("  Will not build brew formula for package", file=logFp)
-        return
-
-    # create the brew formula file
-
-    shellCmd(scriptPath + " " + tarUrl + " " +
-             tarName + " " + formulaName)
-
+    buildLroseCoreFormula(tarUrl, tarName, formulaName)
+    
     # move it up into the release dir
 
     os.rename(os.path.join(coreDir, formulaName),

@@ -513,13 +513,15 @@ int Dsr2Radx::_processRay(RadxRay *ray)
     if ((_nRaysRead > 0) && (_nRaysRead % nPrintFreq == 0) &&
         (int) _vol.getNRays() != _nCheckPrint) {
       _nCheckPrint = (int) _vol.getNRays();
-      cerr << "  nRays, sweep, vol, latest time, el, az: "
-           << _nRaysRead << ", "
-           << ray->getSweepNumber() << ", "
-           << ray->getVolumeNumber() << ", "
-           << utimstr(ray->getTimeSecs()) << ", "
-           << ray->getElevationDeg() << ", "
-           << ray->getAzimuthDeg() << endl;
+      fprintf(stderr,
+              "  nRays, sweep, vol, latest time, el, az: "
+              "%4d,%3d,%5d,%20s,%7.2f,%7.2f\n",
+              _nRaysRead,
+              ray->getSweepNumber(),
+              ray->getVolumeNumber(),
+              utimstr(ray->getTimeSecs()),
+              ray->getElevationDeg(),
+              ray->getAzimuthDeg());
     }
   }
     

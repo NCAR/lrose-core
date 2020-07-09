@@ -97,12 +97,15 @@ void RegressionFilter::_init()
   _setupDone = false;
 
   _nSamples = 0;
-  _nPoly = 5;
-  _nPoly1 = _nPoly + 1;
+  _polyOrder = 5;
+  _polyOrder1 = _polyOrder + 1;
 
   _isStaggered = false;
   _staggeredM = 0;
   _staggeredN = 0;
+
+  _orderAuto = false;
+  _polyOrderInUse = _polyOrder;
 
   _xx = NULL;
   _yyEst = NULL;
@@ -145,8 +148,8 @@ RegressionFilter &RegressionFilter::_copy(const RegressionFilter &rhs)
   // copy simple members
 
   _nSamples = rhs._nSamples;
-  _nPoly = rhs._nPoly;
-  _nPoly1 = rhs._nPoly1;
+  _polyOrder = rhs._polyOrder;
+  _polyOrder1 = rhs._polyOrder1;
   _isStaggered = rhs._isStaggered;
   _staggeredM = rhs._staggeredM;
   _staggeredN = rhs._staggeredN;
@@ -161,24 +164,24 @@ RegressionFilter &RegressionFilter::_copy(const RegressionFilter &rhs)
 
   memcpy(_xx, rhs._xx, _nSamples * sizeof(double));
   memcpy(_yyEst, rhs._yyEst, _nSamples * sizeof(double));
-  memcpy(_ssVec, rhs._ssVec, _nPoly1 * sizeof(double));
-  memcpy(_pp, rhs._pp, _nPoly1 * sizeof(double));
+  memcpy(_ssVec, rhs._ssVec, _polyOrder1 * sizeof(double));
+  memcpy(_pp, rhs._pp, _polyOrder1 * sizeof(double));
   memcpy(_polyfitIq, rhs._polyfitIq, _nSamples * sizeof(RadarComplex_t));
 
-  memcpy(*_vv, *rhs._vv, _nSamples * _nPoly1 * sizeof(double));
-  memcpy(*_vvT, *rhs._vvT, _nPoly1 * _nSamples * sizeof(double));
-  memcpy(*_cc, *rhs._cc, _nPoly1 * _nSamples * sizeof(double));
+  memcpy(*_vv, *rhs._vv, _nSamples * _polyOrder1 * sizeof(double));
+  memcpy(*_vvT, *rhs._vvT, _polyOrder1 * _nSamples * sizeof(double));
+  memcpy(*_cc, *rhs._cc, _polyOrder1 * _nSamples * sizeof(double));
 
-  memcpy(*_vvA, *rhs._vvA, _nPoly1 * _nPoly1 * sizeof(double));
-  memcpy(*_vvB, *rhs._vvB, _nPoly1 * _nPoly1 * sizeof(double));
-  memcpy(*_uu, *rhs._uu, _nPoly1 * _nPoly1 * sizeof(double));
-  memcpy(*_uuT, *rhs._uuT, _nPoly1 * _nPoly1 * sizeof(double));
-  memcpy(*_ss, *rhs._ss, _nPoly1 * _nPoly1 * sizeof(double));
-  memcpy(*_ssInv, *rhs._ssInv, _nPoly1 * _nPoly1 * sizeof(double));
-  memcpy(*_ww, *rhs._ww, _nPoly1 * _nPoly1 * sizeof(double));
-  memcpy(*_wwT, *rhs._wwT, _nPoly1 * _nPoly1 * sizeof(double));
-  memcpy(*_multa, *rhs._multa, _nPoly1 * _nPoly1 * sizeof(double));
-  memcpy(*_multb, *rhs._multb, _nPoly1 * _nPoly1 * sizeof(double));
+  memcpy(*_vvA, *rhs._vvA, _polyOrder1 * _polyOrder1 * sizeof(double));
+  memcpy(*_vvB, *rhs._vvB, _polyOrder1 * _polyOrder1 * sizeof(double));
+  memcpy(*_uu, *rhs._uu, _polyOrder1 * _polyOrder1 * sizeof(double));
+  memcpy(*_uuT, *rhs._uuT, _polyOrder1 * _polyOrder1 * sizeof(double));
+  memcpy(*_ss, *rhs._ss, _polyOrder1 * _polyOrder1 * sizeof(double));
+  memcpy(*_ssInv, *rhs._ssInv, _polyOrder1 * _polyOrder1 * sizeof(double));
+  memcpy(*_ww, *rhs._ww, _polyOrder1 * _polyOrder1 * sizeof(double));
+  memcpy(*_wwT, *rhs._wwT, _polyOrder1 * _polyOrder1 * sizeof(double));
+  memcpy(*_multa, *rhs._multa, _polyOrder1 * _polyOrder1 * sizeof(double));
+  memcpy(*_multb, *rhs._multb, _polyOrder1 * _polyOrder1 * sizeof(double));
 
   return *this;
 
@@ -188,7 +191,7 @@ RegressionFilter &RegressionFilter::_copy(const RegressionFilter &rhs)
 // set up regression parameters - fixed PRT
 //
 // nSamples: number of samples in IQ time series
-// nPoly: order of polynomial for regression
+// polyOrder: order of polynomial for regression
 //
 // If successful, _setupDone will be set to true.
 // If not successful, _setupDone will be set to false.
@@ -196,21 +199,25 @@ RegressionFilter &RegressionFilter::_copy(const RegressionFilter &rhs)
 // SVD of vvA.
 
 void RegressionFilter::setup(int nSamples,
-                             int nPoly /* = 5*/)
+                             int polyOrder /* = 5*/,
+                             bool orderAuto /* = false */)
 
 {
 
-  if (_setupDone && _nSamples == nSamples && _nPoly == nPoly) {
+  if (_setupDone && _nSamples == nSamples && _polyOrder == polyOrder) {
     return;
   }
 
   _nSamples = nSamples;
-  _nPoly = nPoly;
-  _nPoly1 = _nPoly + 1;
+  _polyOrder = polyOrder;
+  _polyOrder1 = _polyOrder + 1;
 
   _isStaggered = false;
   _staggeredM = 0;
   _staggeredN = 0;
+
+  _polyOrderInUse = _polyOrder;
+  _orderAuto = orderAuto;
 
   // allocate arrays
 
@@ -235,7 +242,15 @@ void RegressionFilter::setup(int nSamples,
   for (int ii = 0; ii < _nSamples; ii++) {
     xVals.push_back(_xx[ii]);
   }
-  _forsythe.prepareForFit(_nPoly, xVals);
+  _forsythe.prepareForFit(_polyOrder, xVals);
+  _forsythe3.prepareForFit(3, xVals);
+  if (_orderAuto) {
+    _forsythe4.prepareForFit(4, xVals);
+    _forsythe5.prepareForFit(5, xVals);
+    _forsythe6.prepareForFit(6, xVals);
+    _forsythe7.prepareForFit(7, xVals);
+    _forsythe9.prepareForFit(9, xVals);
+  }
 
   // done
 
@@ -249,7 +264,7 @@ void RegressionFilter::setup(int nSamples,
 // nSamples: number of samples in IQ time series
 // staggeredM, staggeredN - stagger ratio = M/N
 //   time series starts with short PRT
-// nPoly: order of polynomial for regression
+// polyOrder: order of polynomial for regression
 //
 // If successful, _setupDone will be set to true.
 // If not successful, _setupDone will be set to false.
@@ -259,25 +274,29 @@ void RegressionFilter::setup(int nSamples,
 void RegressionFilter::setupStaggered(int nSamples,
                                       int staggeredM,
                                       int staggeredN,
-                                      int nPoly /* = 5*/)
+                                      int polyOrder /* = 5*/,
+                                      bool orderAuto /* = false */)
 
 {
 
   if (_setupDone &&
       _isStaggered &&
       _nSamples == nSamples &&
-      _nPoly == nPoly &&
+      _polyOrder == polyOrder &&
       _staggeredM == staggeredM &&
-      _staggeredN == staggeredN) {
+      _staggeredN == staggeredN &&
+      _orderAuto == orderAuto) {
     return;
   }
 
   _isStaggered = true;
   _nSamples = nSamples;
-  _nPoly = nPoly;
-  _nPoly1 = _nPoly + 1;
+  _polyOrder = polyOrder;
+  _polyOrder1 = _polyOrder + 1;
   _staggeredM = staggeredM;
   _staggeredN = staggeredN;
+  _polyOrderInUse = _polyOrder;
+  _orderAuto = orderAuto;
 
   // allocate arrays
 
@@ -307,7 +326,15 @@ void RegressionFilter::setupStaggered(int nSamples,
   for (int ii = 0; ii < _nSamples; ii++) {
     xVals.push_back(_xx[ii]);
   }
-  _forsythe.prepareForFit(_nPoly, xVals);
+  _forsythe.prepareForFit(_polyOrder, xVals);
+  _forsythe3.prepareForFit(3, xVals);
+  if (_orderAuto) {
+    _forsythe4.prepareForFit(4, xVals);
+    _forsythe5.prepareForFit(5, xVals);
+    _forsythe6.prepareForFit(6, xVals);
+    _forsythe7.prepareForFit(7, xVals);
+    _forsythe9.prepareForFit(9, xVals);
+  }
 
   // done
 
@@ -359,7 +386,7 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 
   // compute the estimated I polynomial values
   
-  _matrixVectorMult(_vv, _pp, _nSamples, _nPoly1, _yyEst);
+  _matrixVectorMult(_vv, _pp, _nSamples, _polyOrder1, _yyEst);
 
   // load residuals into filtered Iq
   
@@ -368,24 +395,13 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
     _polyfitIq[ii].re = _yyEst[ii];
   }
 
-  // {
-  //   cerr << "111111111111111111111111111111111" << endl;
-  //   for (int ii = 0; ii < _nPoly1; ii++) {
-  //     cerr << "  ii, coeff: " << ii << ", " << _pp[ii] << endl;
-  //   }
-  //   for (int ii = 0; ii < 10; ii++) {
-  //     cerr << "  ii, yEst: " << ii << ", " << _yyEst[ii] << endl;
-  //   }
-  //   cerr << "111111111111111111111111111111111" << endl;
-  // }
-  
   // poly fit to Q
 
   polyFit(rawQ);
 
   // compute the estimated Q polynomial values
   
-  _matrixVectorMult(_vv, _pp, _nSamples, _nPoly1, _yyEst);
+  _matrixVectorMult(_vv, _pp, _nSamples, _polyOrder1, _yyEst);
 
   // load residuals into filtered Iq
 
@@ -394,21 +410,97 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
     _polyfitIq[ii].im = _yyEst[ii];
   }
 
-  // {
-  //   cerr << "3333333333333333333333333333333333" << endl;
-  //   for (int ii = 0; ii < _nPoly1; ii++) {
-  //     cerr << "  ii, coeff: " << ii << ", " << _pp[ii] << endl;
-  //   }
-  //   for (int ii = 0; ii < 10; ii++) {
-  //     cerr << "  ii, yEst: " << ii << ", " << _yyEst[ii] << endl;
-  //   }
-  //   cerr << "3333333333333333333333333333333333" << endl;
-  // }
-  
 }
 
 /////////////////////////////////////////////////////
 // Perform regression filtering on I,Q data
+// using Forsythe polynomials
+//
+// Inputs:
+//   rawIq: raw I,Q data
+//   csrRegr3Db: clutter-to-signal-ratio from 3rd order fit
+//
+// Outputs:
+//   filteredIq: filtered I,Q data
+//
+// Side effect:
+//   polyfitIq is computed
+//
+// Note: assumes setup() has been successfully completed.
+
+void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
+                                     double csrRegr3Db,
+                                     RadarComplex_t *filteredIq)
+  
+{
+
+  if (_nSamples == 0) {
+    cerr << "ERROR - RegressionFilter::applyForsythe" << endl;
+    cerr << "  Number of samples has not been set" << endl;
+    cerr << "  Call setup() before apply()" << endl;
+    return;
+  }
+
+  // copy IQ data
+
+  vector<double> rawI, rawQ;
+  for (int ii = 0; ii < _nSamples; ii++) {
+    rawI.push_back(rawIq[ii].re);
+    rawQ.push_back(rawIq[ii].im);
+  }
+
+  // choose which order to apply
+
+  ForsytheFit &forsythe = _forsythe;
+  if (_orderAuto) {
+    if (csrRegr3Db > 75.0) {
+      forsythe = _forsythe9;
+      _polyOrderInUse = 9;
+    } else if (csrRegr3Db > 65.0) {
+      forsythe = _forsythe7;
+      _polyOrderInUse = 7;
+    } else if (csrRegr3Db > 50.0) {
+      forsythe = _forsythe6;
+      _polyOrderInUse = 6;
+    } else if (csrRegr3Db > 35.0) {
+      forsythe = _forsythe5;
+      _polyOrderInUse = 5;
+    } else {
+      forsythe = _forsythe4;
+      _polyOrderInUse = 4;
+    }
+  }
+
+  // poly fit to I
+
+  forsythe.performFit(rawI);
+
+  // compute the estimated I polynomial values
+  // load residuals into filtered Iq
+  
+  vector<double> iSmoothed = forsythe.getYEstVector();
+  for (int ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].re = rawI[ii] - iSmoothed[ii];
+    _polyfitIq[ii].re = iSmoothed[ii];
+  }
+  
+  // poly fit to Q
+
+  forsythe.performFit(rawQ);
+  
+  // compute the estimated Q polynomial values
+  // load residuals into filtered Iq
+  
+  vector<double> qSmoothed = forsythe.getYEstVector();
+  for (int ii = 0; ii < _nSamples; ii++) {
+    filteredIq[ii].im = rawQ[ii] - qSmoothed[ii];
+    _polyfitIq[ii].im = qSmoothed[ii];
+  }
+
+}
+
+/////////////////////////////////////////////////////
+// Perform 3rd-order regression filtering on I,Q data
 // using Forsythe polynomials
 //
 // Inputs:
@@ -422,13 +514,13 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 //
 // Note: assumes setup() has been successfully completed.
 
-void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
-                                     RadarComplex_t *filteredIq)
+void RegressionFilter::applyForsythe3(const RadarComplex_t *rawIq,
+                                      RadarComplex_t *filteredIq)
   
 {
-
+  
   if (_nSamples == 0) {
-    cerr << "ERROR - RegressionFilter::apply" << endl;
+    cerr << "ERROR - RegressionFilter::applyForsythe3" << endl;
     cerr << "  Number of samples has not been set" << endl;
     cerr << "  Call setup() before apply()" << endl;
     return;
@@ -444,54 +536,30 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
 
   // poly fit to I
 
-  _forsythe.performFit(rawI);
-
+  _forsythe3.performFit(rawI);
+  
   // compute the estimated I polynomial values
   // load residuals into filtered Iq
   
-  vector<double> iSmoothed = _forsythe.getYEstVector();
+  vector<double> iSmoothed = _forsythe3.getYEstVector();
   for (int ii = 0; ii < _nSamples; ii++) {
     filteredIq[ii].re = rawI[ii] - iSmoothed[ii];
     _polyfitIq[ii].re = iSmoothed[ii];
   }
   
-  // {
-  //   cerr << "2222222222222222222222222222222" << endl;
-  //   vector<double> coeffs = _forsythe.getCoeffs();
-  //   for (int ii = 0; ii < _nPoly1; ii++) {
-  //     cerr << "  ii, coeff: " << ii << ", " << coeffs[ii] << endl;
-  //   }
-  //   for (int ii = 0; ii < 10; ii++) {
-  //     cerr << "  ii, yEst: " << ii << ", " << iSmoothed[ii] << endl;
-  //   }
-  //   cerr << "222222222222222222222222222222222" << endl;
-  // }
-  
   // poly fit to Q
 
-  _forsythe.performFit(rawQ);
+  _forsythe3.performFit(rawQ);
   
   // compute the estimated Q polynomial values
   // load residuals into filtered Iq
   
-  vector<double> qSmoothed = _forsythe.getYEstVector();
+  vector<double> qSmoothed = _forsythe3.getYEstVector();
   for (int ii = 0; ii < _nSamples; ii++) {
     filteredIq[ii].im = rawQ[ii] - qSmoothed[ii];
     _polyfitIq[ii].im = qSmoothed[ii];
   }
 
-  // {
-  //   cerr << "44444444444444444444444444" << endl;
-  //   vector<double> coeffs = _forsythe.getCoeffs();
-  //   for (int ii = 0; ii < _nPoly1; ii++) {
-  //     cerr << "  ii, coeff: " << ii << ", " << coeffs[ii] << endl;
-  //   }
-  //   for (int ii = 0; ii < 10; ii++) {
-  //     cerr << "  ii, yEst: " << ii << ", " << qSmoothed[ii] << endl;
-  //   }
-  //   cerr << "44444444444444444444444444444" << endl;
-  // }
-  
 }
 
 /////////////////////////////////////////////////////
@@ -514,7 +582,7 @@ void RegressionFilter::polyFit(const double *yy) const
     return;
   }
 
-  for (int ii = 0; ii < _nPoly1; ii++) {
+  for (int ii = 0; ii < _polyOrder1; ii++) {
     double sum = 0;
     for (int jj = 0; jj < _nSamples; jj++) {
       sum += _cc[ii][jj] * yy[jj];
@@ -524,7 +592,7 @@ void RegressionFilter::polyFit(const double *yy) const
 
   // compute the standard error of estimates of y
   
-  _matrixVectorMult(_vv, _pp, _nSamples, _nPoly1, _yyEst);
+  _matrixVectorMult(_vv, _pp, _nSamples, _polyOrder1, _yyEst);
 
   double sumSq = 0.0;
   for (int ii = 0; ii < _nSamples; ii++) {
@@ -534,7 +602,7 @@ void RegressionFilter::polyFit(const double *yy) const
   _stdErrEst = sqrt(sumSq / (double) _nSamples);
 
 #ifdef DEBUG_PRINT
-  for (int ii = 0; ii < _nPoly1; ii++) {
+  for (int ii = 0; ii < _polyOrder1; ii++) {
     cerr << "ii, pp: " << ii << ", " << _pp[ii][0] << endl;
   }
   for (int ii = 0; ii < _nSamples; ii++) {
@@ -558,25 +626,25 @@ void RegressionFilter::_alloc()
   _xx = (double *) umalloc(_nSamples * sizeof(double));
   _yyEst = (double *) umalloc(_nSamples * sizeof(double));
 
-  _vv = (double **) umalloc2(_nSamples, _nPoly1, sizeof(double));
-  _vvT = (double **) umalloc2(_nPoly1, _nSamples, sizeof(double));
-  _vvA = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
-  _vvB = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
+  _vv = (double **) umalloc2(_nSamples, _polyOrder1, sizeof(double));
+  _vvT = (double **) umalloc2(_polyOrder1, _nSamples, sizeof(double));
+  _vvA = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
+  _vvB = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
 
-  _uu = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
-  _uuT = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
+  _uu = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
+  _uuT = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
 
-  _ss = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
-  _ssInv = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
-  _ssVec = (double *) umalloc(_nPoly1 * sizeof(double));
+  _ss = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
+  _ssInv = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
+  _ssVec = (double *) umalloc(_polyOrder1 * sizeof(double));
 
-  _ww = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
-  _wwT = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
+  _ww = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
+  _wwT = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
 
-  _pp = (double *) umalloc(_nPoly1 * sizeof(double));
-  _cc = (double **) umalloc2(_nPoly1, _nSamples, sizeof(double));
-  _multa = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
-  _multb = (double **) umalloc2(_nPoly1, _nPoly1, sizeof(double));
+  _pp = (double *) umalloc(_polyOrder1 * sizeof(double));
+  _cc = (double **) umalloc2(_polyOrder1, _nSamples, sizeof(double));
+  _multa = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
+  _multb = (double **) umalloc2(_polyOrder1, _polyOrder1, sizeof(double));
 
   _polyfitIq = (RadarComplex_t *) umalloc(_nSamples * sizeof(RadarComplex_t));
   
@@ -649,7 +717,7 @@ void RegressionFilter::_computeCc()
   
   // compute SVD of vvA
   
-  int iret = usvd(_vvA, _nPoly1, _nPoly1, _uu, _ww, _ssVec);
+  int iret = usvd(_vvA, _polyOrder1, _polyOrder1, _uu, _ww, _ssVec);
   if (iret) {
     cerr << "ERROR - RegressionFilter::_computeCc()" << endl;
     cerr << "  SVD returns error: " << iret << endl;
@@ -659,8 +727,8 @@ void RegressionFilter::_computeCc()
 
   // fill out diagonal matrix and its inverse
   
-  for (int ii = 0; ii < _nPoly1; ii++) {
-    for (int jj = 0; jj < _nPoly1; jj++) {
+  for (int ii = 0; ii < _polyOrder1; ii++) {
+    for (int jj = 0; jj < _polyOrder1; jj++) {
       if (ii == jj) {
         _ss[ii][jj] = _ssVec[ii];
         _ssInv[ii][jj] = 1.0 / _ssVec[ii];
@@ -673,8 +741,8 @@ void RegressionFilter::_computeCc()
 
   // compute transpose of _uu and _ww
 
-  for (int ii = 0; ii < _nPoly1; ii++) {
-    for (int jj = 0; jj < _nPoly1; jj++) {
+  for (int ii = 0; ii < _polyOrder1; ii++) {
+    for (int jj = 0; jj < _polyOrder1; jj++) {
       _uuT[ii][jj] = _uu[jj][ii];
       _wwT[ii][jj] = _ww[jj][ii];
     }
@@ -682,25 +750,25 @@ void RegressionFilter::_computeCc()
 
   // check
 
-  _matrixMult(_uu, _ss, _nPoly1, _nPoly1, _nPoly1, _multa);
-  _matrixMult(_multa, _wwT, _nPoly1, _nPoly1, _nPoly1, _vvB);
+  _matrixMult(_uu, _ss, _polyOrder1, _polyOrder1, _polyOrder1, _multa);
+  _matrixMult(_multa, _wwT, _polyOrder1, _polyOrder1, _polyOrder1, _vvB);
 
   // compute cc
   
-  _matrixMult(_ww, _ssInv, _nPoly1, _nPoly1, _nPoly1, _multa);
-  _matrixMult(_multa, _uuT, _nPoly1, _nPoly1, _nPoly1, _multb);
-  _matrixMult(_multb, _vvT, _nPoly1, _nPoly1, _nSamples, _cc);
+  _matrixMult(_ww, _ssInv, _polyOrder1, _polyOrder1, _polyOrder1, _multa);
+  _matrixMult(_multa, _uuT, _polyOrder1, _polyOrder1, _polyOrder1, _multb);
+  _matrixMult(_multb, _vvT, _polyOrder1, _polyOrder1, _nSamples, _cc);
 
   // #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
-  _matrixPrint("_vvB", _vvB, _nPoly1, _nPoly1, stderr);
-  _matrixPrint("_uu", _uu, _nPoly1, _nPoly1, stderr);
-  _matrixPrint("_uuT", _uuT, _nPoly1, _nPoly1, stderr);
-  _matrixPrint("_ww", _ww, _nPoly1, _nPoly1, stderr);
-  _matrixPrint("_wwT", _wwT, _nPoly1, _nPoly1, stderr);
-  _matrixPrint("_ss", _ss, _nPoly1, _nPoly1, stderr);
-  _matrixPrint("_ssInv", _ssInv, _nPoly1, _nPoly1, stderr);
-  _matrixPrint("_cc", _cc, _nPoly1, _nSamples, stderr);
+  _matrixPrint("_vvB", _vvB, _polyOrder1, _polyOrder1, stderr);
+  _matrixPrint("_uu", _uu, _polyOrder1, _polyOrder1, stderr);
+  _matrixPrint("_uuT", _uuT, _polyOrder1, _polyOrder1, stderr);
+  _matrixPrint("_ww", _ww, _polyOrder1, _polyOrder1, stderr);
+  _matrixPrint("_wwT", _wwT, _polyOrder1, _polyOrder1, stderr);
+  _matrixPrint("_ss", _ss, _polyOrder1, _polyOrder1, stderr);
+  _matrixPrint("_ssInv", _ssInv, _polyOrder1, _polyOrder1, stderr);
+  _matrixPrint("_cc", _cc, _polyOrder1, _nSamples, stderr);
 #endif
   
 }
@@ -716,7 +784,7 @@ void RegressionFilter::_computeVandermonde()
 
   for (int ii = 0; ii < _nSamples; ii++) {
     double xx = _xx[ii];
-    for (int jj = 0; jj < _nPoly1; jj++) {
+    for (int jj = 0; jj < _polyOrder1; jj++) {
       double vv = pow(xx, (double) jj);
       _vv[ii][jj] = vv;
       _vvT[jj][ii] = vv;
@@ -725,14 +793,14 @@ void RegressionFilter::_computeVandermonde()
 
   // compute vvA = vvT * vv
 
-  _matrixMult(_vvT, _vv, _nPoly1, _nSamples, _nPoly1, _vvA);
+  _matrixMult(_vvT, _vv, _polyOrder1, _nSamples, _polyOrder1, _vvA);
 
   // debug print
 
 #ifdef DEBUG_PRINT
-  _matrixPrint("_vv", _vv, _nSamples, _nPoly1, stderr);
-  _matrixPrint("_vvT", _vvT, _nPoly1, _nSamples, stderr);
-  _matrixPrint("_vvA", _vvA, _nPoly1, _nPoly1, stderr);
+  _matrixPrint("_vv", _vv, _nSamples, _polyOrder1, stderr);
+  _matrixPrint("_vvT", _vvT, _polyOrder1, _nSamples, stderr);
+  _matrixPrint("_vvA", _vvA, _polyOrder1, _polyOrder1, stderr);
 #endif
 
 }

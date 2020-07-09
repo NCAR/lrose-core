@@ -996,6 +996,24 @@ paramdef int {
 } regression_filter_polynomial_order;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Option to determine the polynomial order from the Clutter-to-Signal-Ratio (CSR).";
+  p_help = "If TRUE, we compute the CSR from the 3 central spectral points. Then, using a lookup-table based on CSR, we determine the appropriate order of the polynomial fit.";
+} regression_filter_determine_order_from_CSR;
+
+paramdef double {
+  p_default  = -45;
+  p_descr = "Power ratio threshold to determine the edge of the filtered notch (dB).";
+  p_help = "After the initial application of the regression filter, a notch is formed around 0. In order to determine the width of this notch, we compute the ratio of the filtered power to the original unfiltered power. This is the threshold used to determine where the edge of the notch occurs.";
+} regression_filter_notch_edge_power_ratio_threshold_db;
+
+paramdef double {
+  p_default  = -5;
+  p_descr = "Min valid CSR - Clutter-to-Signal-Ratio - for applying the filter (dB).";
+  p_help = "As a first step, we compute the CSR using a 3rd order regression fit. If the CSR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.";
+} regression_filter_min_csr_db;
+
+paramdef boolean {
   p_default  = true;
   p_descr = "For the regression filter, option to interpolate power across the notch.";
   p_help = "If true, the spectral power in the notch created by the filter will be interpolated using values to each side of the notch.";

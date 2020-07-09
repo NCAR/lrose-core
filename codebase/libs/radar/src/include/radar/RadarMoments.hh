@@ -220,9 +220,13 @@ public:
 
   // use polynomial regression filter
 
-  void setUseRegressionFilter(bool interpAcrossNotch) {
+  void setUseRegressionFilter(bool interpAcrossNotch,
+                              double notchEdgePwrRatioThresholdDb,
+                              double minCsrDb) {
     _clutterFilterType = CLUTTER_FILTER_REGRESSION;
     _regrInterpAcrossNotch = interpAcrossNotch;
+    _regrNotchEdgePwrRatioThresholdDb = notchEdgePwrRatioThresholdDb;
+    _regrMinCsrDb = minCsrDb;
   }
   
   // use notch filter
@@ -1236,6 +1240,12 @@ public:
   double getNyquistPrtShort() const { return _nyquistPrtShort; }
   double getNyquistPrtLong() const { return _nyquistPrtLong; }
 
+  // get clutter-to-signal ratio, in dB,
+  // from 3rd order regression filter
+
+  double getRegr3CsrDb() const { return _regr3CsrDb; }
+  double getRegrInterpRatioDb() const { return _regrInterpRatioDb; }
+  
   // De-trend a time series in preparation
   // for windowing and FFT.
   //
@@ -1376,8 +1386,30 @@ private:
   int _weatherPos;
   int _clutterPos;
 
-  bool _regrInterpAcrossNotch; // interpolate across the notch - regression filter
-  double _notchWidthMps;       // notch width in meters per sec - notch filter
+  ////////////////////
+  // regression filter
+
+  double _regrNotchEdgePwrRatioThresholdDb; /* regression filter - 
+                                             * power ratio for finding the 
+                                             * end of the initial notch */
+
+  double _regrMinCsrDb; /* regression filter - 
+                         * minimum CSR - clutter-to-signal-ratio -
+                         * for applying the filter */
+  
+  bool _regrInterpAcrossNotch; /* regression filter - 
+                                * interpolate across the notch */
+
+  
+
+  double _regr3CsrDb; /* regression filter - clutter-to-signal ratio
+                       * from 3rd order fit */
+
+  double _regrInterpRatioDb; /* regression filter - power ratio from
+                              * interpolating across the notch */
+
+  double _notchWidthMps; /* notch filter -
+                          * notch width in meters per sec */
 
   // SNR thresholds for ZDR and LDR
   
@@ -1582,6 +1614,19 @@ private:
                                        int staggeredM,
                                        int staggeredN,
                                        double *regrSpec);
+
+  void _runRegressionFilter(int nSamples,
+                            const RadarFft &fft,
+                            RegressionFilter &regr,
+                            const double *window,
+                            const RadarComplex_t *iqUnfiltered,
+                            double calibratedNoise,
+                            bool interpAcrossNotch,
+                            RadarComplex_t *iqFiltered,
+                            double &filterRatio,
+                            double &spectralNoise,
+                            double &spectralSnr,
+                            double *specRatio);
 
   void _adjustRegressionFilter(int nSamples,
                                const RadarFft &fft,

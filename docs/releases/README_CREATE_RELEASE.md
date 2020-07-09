@@ -1,6 +1,6 @@
-## CREATING an LROSE release
+# CREATING an LROSE release
 
-### Available packages
+## Available packages
 
 LROSE has the following package options:
 
@@ -22,7 +22,7 @@ LROSE has the following package options:
 
 `cidd` is a special package, that must be built using 32-bit emulation, because the applications are based on the `xview` library that has no 64-bit port. This package includes the CIDD display, and other applications that depend on `xview`.
 
-### Creating a source release
+## Creating a source release
 
 By default a source release will be saved in:
 
@@ -70,7 +70,7 @@ The release will be saved as:
 
 where `package` is the package name, and `package.rb` is the OSX brew recipe file.
 
-### Creating a binary release
+## Creating a binary release
 
 You create a binary release from a source release.
 
@@ -138,6 +138,48 @@ For a Mac OSX 64-bit build the name will be:
   releaseDir/package-yyyymmdd.bin.mac_osx.tgz
 ```
 
+## Steps in creating a full release
 
+### Tag lrose-core
+
+In github:
+
+```
+  https://github.com/ncar/lrose-core
+```
+
+create a tag for lrose-core - e.g. ```lrose-core-20200701```
+
+### Create source releases:
+
+```
+  cd lrose-core/build/release
+  ./create_src_release.py --debug --tag lrose-core-20200701
+  ./create_src_release.py --debug --tag lrose-core-20200701 --osx
+  ./create_src_release.py --debug --tag lrose-core-20200701 --package lrose-cidd
+  ./create_cidd_bin_release.py --releaseDate 20200701
+```
+
+### Create binary releases:
+
+```
+  cd lrose-core/build/release
+  ./create_cidd_bin_release.py --releaseDate 20200701
+  cd /tmp
+  tar xvfz ~/releases/lrose-core/lrose-core-20200701.src.tgz
+  cd lrose-core-20200701.src/
+  ./create_bin_release.py
+```
+
+### Upload the tar files to the release page on GitHub
+
+```
+  ~/releases/lrose-core/lrose-core-20200701.src.tgz
+  ~/releases/lrose-core/lrose-core-20200701.bin.x86_64.tgz
+  ~/releases/lrose-core/osx/lrose-core-20200701.src.mac_osx.tgz
+  ~/releases/lrose-core/osx/lrose-core.rb
+  ~/releases/lrose-cidd/lrose-cidd-20200701.src.tgz
+  ~/releases/lrose-cidd/lrose-cidd-20200701.bin.x86_64.tgz
+```
 
 
