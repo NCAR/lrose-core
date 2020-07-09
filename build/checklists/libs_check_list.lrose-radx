@@ -3,7 +3,6 @@
 ####################################
 libFmq.a
 libMdv.a
-#libNcfMdv.a
 libRadx.a
 libSpdb.a
 libdataport.a

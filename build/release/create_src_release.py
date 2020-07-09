@@ -67,7 +67,7 @@ def main():
     parser.add_option('--package',
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
-                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-cidd')
+                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
@@ -96,9 +96,10 @@ def main():
     if (options.package != "lrose-core" and
         options.package != "lrose-blaze" and
         options.package != "lrose-cyclone" and
+        options.package != "lrose-radx" and
         options.package != "lrose-cidd") :
         print("ERROR: invalid package name: %s:" % options.package, file=sys.stderr)
-        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-cidd",
+        print("  options: lrose-core, lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd",
               file=sys.stderr)
         sys.exit(1)
 

@@ -87,7 +87,7 @@ def main():
     parser.add_option('--package',
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
-                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-cidd, samurai')
+                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd, samurai')
     parser.add_option('--releaseDate',
                       dest='releaseDate', default='latest',
                       help='Date from which to compute tag for git clone. Applies if --tag is not used.')
@@ -164,6 +164,7 @@ def main():
     if (options.package != "lrose-core" and
         options.package != "lrose-blaze" and
         options.package != "lrose-cyclone" and
+        options.package != "lrose-radx" and
         options.package != "lrose-cidd" and
         options.package != "samurai") :
         print("ERROR: invalid package name: %s:" % options.package, file=sys.stderr)
