@@ -38,7 +38,8 @@ def main():
                       help='Configure for MAC OSX')
     parser.add_option('--package',
                       dest='package', default="lrose-core",
-                      help='Name of distribution for which we are building')
+                      help='Package name. Options are: ' + \
+                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd')
 
     (options, args) = parser.parse_args()
 
