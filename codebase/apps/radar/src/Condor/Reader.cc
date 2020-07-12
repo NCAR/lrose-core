@@ -489,11 +489,10 @@ void IwrfReader::run()
 
   IwrfMomReader *reader;
 
-  if (_params.input_mode == Params::IWRF_FMQ_INPUT ||
-      _params.input_mode == Params::DSR_FMQ_INPUT) {
+  if (_params.input_mode == Params::FMQ_INPUT) {
     reader = new IwrfMomReaderFmq(_params.input_fmq_url,
                                   _params.seek_to_start_of_fmq);
-  } else if (_params.input_mode == Params::IWRF_TCP_INPUT) {
+  } else if (_params.input_mode == Params::TCP_INPUT) {
     reader = new IwrfMomReaderTcp(_params.input_tcp_host,
                                   _params.input_tcp_port);
   } else {
@@ -501,7 +500,7 @@ void IwrfReader::run()
     cerr << "  incorrect input_mode: " << _params.input_mode << endl;
     assert(false);
   }
-
+  
   // get data
 
   int count = 0;

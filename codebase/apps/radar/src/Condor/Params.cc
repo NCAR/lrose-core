@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Condor is the engineering display for the HAWK moments data");
+    tt->comment_hdr = tdrpStrDup("Condor is the engineering display for the APAR moments data");
     tt->comment_text = tdrpStrDup("This is a C++ application using the QT GUI toolkit.");
     tt++;
     
@@ -648,21 +648,19 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
     tt->descr = tdrpStrDup("Method for reading the input data");
-    tt->help = tdrpStrDup("\tIWRF_FMQ_INPUT: read IWRF moments from an FMQ.\n\tIWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.\n\tDSR_FMQ_INPUT: deprecated.");
+    tt->help = tdrpStrDup("\tFMQ_INPUT: read moments from an FMQ.\n\tTCP_INPUT: read a moments stream from a TCP socket.\n\tSIMULATED_INPUT: internally-generated test pattern data.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 4;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("IWRF_FMQ_INPUT");
-      tt->enum_def.fields[0].val = IWRF_FMQ_INPUT;
-      tt->enum_def.fields[1].name = tdrpStrDup("IWRF_TCP_INPUT");
-      tt->enum_def.fields[1].val = IWRF_TCP_INPUT;
+      tt->enum_def.fields[0].name = tdrpStrDup("FMQ_INPUT");
+      tt->enum_def.fields[0].val = FMQ_INPUT;
+      tt->enum_def.fields[1].name = tdrpStrDup("TCP_INPUT");
+      tt->enum_def.fields[1].val = TCP_INPUT;
       tt->enum_def.fields[2].name = tdrpStrDup("SIMULATED_INPUT");
       tt->enum_def.fields[2].val = SIMULATED_INPUT;
-      tt->enum_def.fields[3].name = tdrpStrDup("DSR_FMQ_INPUT");
-      tt->enum_def.fields[3].val = DSR_FMQ_INPUT;
-    tt->single_val.e = IWRF_FMQ_INPUT;
+    tt->single_val.e = FMQ_INPUT;
     tt++;
     
     // Parameter 'input_fmq_url'
@@ -671,7 +669,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_fmq_url");
-    tt->descr = tdrpStrDup("DSR_FMQ_INPUT or IWRF_FMQ_INPUT mode: input URL for moments data from an FMQ");
+    tt->descr = tdrpStrDup("FMQ_INPUT mode: input URL for moments data from an FMQ");
     tt->help = tdrpStrDup("Full url is of the form fmqp:://hostname:port:path. Path does not in lude the file extension.");
     tt->val_offset = (char *) &input_fmq_url - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/fmq/test");
@@ -695,7 +693,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_tcp_host");
-    tt->descr = tdrpStrDup("IWRF_TCP_INPUT: name of host running IWRF moments server.");
+    tt->descr = tdrpStrDup("TCP_INPUT: name of host running IWRF moments server.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &input_tcp_host - &_start_;
     tt->single_val.s = tdrpStrDup("localhost");
@@ -707,7 +705,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("input_tcp_port");
-    tt->descr = tdrpStrDup("IWRF_TCP_INPUT: port for IWRF moments server.");
+    tt->descr = tdrpStrDup("TCP_INPUT: port for IWRF moments server.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &input_tcp_port - &_start_;
     tt->single_val.i = 11000;
