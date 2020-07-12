@@ -247,9 +247,8 @@ int Condor::_setupReader()
   
   switch (_params.input_mode) {
     
-    case Params::DSR_FMQ_INPUT:
-    case Params::IWRF_FMQ_INPUT:
-    case Params::IWRF_TCP_INPUT: {
+    case Params::FMQ_INPUT:
+    case Params::TCP_INPUT: {
       IwrfReader *iwrfReader = new IwrfReader(_params);
       _reader = iwrfReader;
       break;
