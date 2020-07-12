@@ -1254,10 +1254,10 @@ void SpectraMgr::_about()
 void SpectraMgr::_createStatusPanel()
 {
  
-  Qt::Alignment alignLeft(Qt::AlignLeft);
-  Qt::Alignment alignRight(Qt::AlignRight);
+  // Qt::Alignment alignLeft(Qt::AlignLeft);
+  // Qt::Alignment alignRight(Qt::AlignRight);
   Qt::Alignment alignCenter(Qt::AlignCenter);
-  Qt::Alignment alignTop(Qt::AlignTop);
+  // Qt::Alignment alignTop(Qt::AlignTop);
 
   // status panel - rows of label value pairs
   
@@ -1472,7 +1472,7 @@ QLabel *SpectraMgr::_createStatusVal(const string &leftLabel,
 
   QLabel *right = new QLabel(_statusPanel);
   right->setText(rightLabel.c_str());
-  Qt::Alignment alignCenter(Qt::AlignCenter);
+  // Qt::Alignment alignCenter(Qt::AlignCenter);
   _statusLayout->addWidget(right, row, 1, alignRight);
 
   if (fontSize > 0) {

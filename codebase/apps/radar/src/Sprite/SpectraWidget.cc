@@ -353,7 +353,7 @@ void SpectraWidget::setBackgroundColor(const QColor &color)
 QImage* SpectraWidget::getImage()
 {
 
-  QPixmap pixmap = QPixmap::grabWidget(this);
+  QPixmap pixmap = grab();
   QImage* image = new QImage(pixmap.toImage());
   return image;
 
@@ -367,7 +367,7 @@ QImage* SpectraWidget::getImage()
 QPixmap* SpectraWidget::getPixmap()
 {
 
-  QPixmap* pixmap = new QPixmap(QPixmap::grabWidget(this));
+  QPixmap* pixmap = new QPixmap(grab());
   return pixmap;
 
 }

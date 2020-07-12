@@ -269,6 +269,15 @@ public:
   static bool isArgValid(const char *arg);
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  static int isArgValidN(const char *arg);
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -634,6 +643,12 @@ public:
 
   int regression_filter_polynomial_order;
 
+  tdrp_bool_t regression_filter_determine_order_from_CSR;
+
+  double regression_filter_notch_edge_power_ratio_threshold_db;
+
+  double regression_filter_min_csr_db;
+
   tdrp_bool_t regression_filter_interp_across_notch;
 
   tdrp_bool_t use_simple_notch_clutter_filter;
@@ -727,7 +742,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[153];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 

@@ -2500,10 +2500,17 @@ void Beam::_initMomentsObject()
      _params.min_snr_db_for_residue_correction);
   
   _mom->setUseAdaptiveFilter();
-  
+
   if (_params.use_polynomial_regression_clutter_filter) {
+    int order = _params.regression_filter_polynomial_order;
+    bool orderFromCSR = _params.regression_filter_determine_order_from_CSR;
+    _regr->setup(_nSamples, order, orderFromCSR);
+    _regrHalf->setup(_nSamplesHalf, order, orderFromCSR);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order, orderFromCSR);
     _mom->setUseRegressionFilter
-      (_params.regression_filter_interp_across_notch);
+      (_params.regression_filter_interp_across_notch,
+       _params.regression_filter_notch_edge_power_ratio_threshold_db,
+       _params.regression_filter_min_csr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
     _mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }

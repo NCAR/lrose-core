@@ -38,6 +38,7 @@
 #include <iostream>
 #include <cstdio>
 #include <QtCore/QLineF>
+#include <QtGui/QPainterPath>
 
 #include <toolsa/toolsa_macros.h>
 #include "WorldPlot.hh"

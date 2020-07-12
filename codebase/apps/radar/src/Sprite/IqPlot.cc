@@ -208,8 +208,8 @@ void IqPlot::plotBeam(QPainter &painter,
   double yMin = _zoomWorld.getYMinWorld();
   for (int ii = 1; ii < nSamples; ii++) {
     int jj = (ii + nSamples / 2) % nSamples;
-    double valPrev = powerDbm[ii-1];
-    double val = powerDbm[ii];
+    double valPrev = powerDbm[jj-1];
+    double val = powerDbm[jj];
     _zoomWorld.fillTrap(painter, brush,
                         ii-1, yMin,
                         ii, yMin,
