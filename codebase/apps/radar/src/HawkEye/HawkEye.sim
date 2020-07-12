@@ -1,12 +1,12 @@
 /**********************************************************************
- * TDRP params for ./HawkEye
+ * TDRP params for HawkEye
  **********************************************************************/
 
 //======================================================================
 //
 // HawkEye is the engineering display for the HAWK moments data.
 //
-// This is a C++ application using the QT4 GUI toolkit.
+// This is a C++ application using the QT GUI toolkit.
 //
 //======================================================================
  
@@ -32,6 +32,19 @@
 //
 
 debug = DEBUG_OFF;
+
+///////////// check_ray_alloc /////////////////////////
+//
+// Print out checks on ray memory allocation.
+//
+// If TRUE, the app will keep track of the number of rays allocated and 
+//   freed, and print out that information every 100 rays.
+//
+//
+// Type: boolean
+//
+
+check_ray_alloc = FALSE;
 
 ///////////// register_with_procmap ///////////////////
 //
@@ -72,8 +85,6 @@ instance = "sim";
 // 	IWRF_FMQ_INPUT: read IWRF moments from an FMQ.
 // 	IWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.
 // 	SIMULATED_INPUT: internally-generated test pattern data.
-// 	SIMULATED_RHI_INPUT: internally-generated test pattern data for 
-//   RHIs.
 // 	DSR_FMQ_INPUT: deprecated.
 //
 //
@@ -82,12 +93,10 @@ instance = "sim";
 //     IWRF_FMQ_INPUT
 //     IWRF_TCP_INPUT
 //     SIMULATED_INPUT
-//     SIMULATED_RHI_INPUT
 //     DSR_FMQ_INPUT
 //
 
-// input_mode = SIMULATED_INPUT;
-input_mode = SIMULATED_RHI_INPUT;
+input_mode = SIMULATED_INPUT;
 
 ///////////// input_fmq_url ///////////////////////////
 //
@@ -175,7 +184,7 @@ begin_in_archive_mode = FALSE;
 //
 // Start time for archive mode.
 //
-// If this is set to 1 Jan 1970, the app will initialize at 'now'.
+// In archive mode, data retrieval starts at this time.
 //
 //
 // Type: string
@@ -183,41 +192,17 @@ begin_in_archive_mode = FALSE;
 
 archive_start_time = "2015 06 26 00 30 00";
 
-///////////// archive_end_time ////////////////////////
+///////////// archive_time_span_secs //////////////////
 //
-// End time for archive mode.
+// Time span in ARCHIVE mode (secs).
 //
-// Only applicable for image generation.
-//
-//
-// Type: string
-//
-
-archive_end_time = "2015 06 26 01 00 00";
-
-///////////// archive_scan_interval_secs //////////////
-//
-// Time between scans in archive mode (secs).
-//
-// Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.
+// Archive end time = archive_start_time + archive_time_span.
 //
 //
-// Type: int
+// Type: double
 //
 
-archive_scan_interval_secs = 600;
-
-///////////// archive_n_scans /////////////////////////
-//
-// Number of scans in archive mode.
-//
-// Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.
-//
-//
-// Type: int
-//
-
-archive_n_scans = 12;
+archive_time_span_secs = 3600;
 
 ///////////// archive_data_url ////////////////////////
 //
@@ -230,19 +215,6 @@ archive_n_scans = 12;
 //
 
 archive_data_url = "$(HOME)/data/spol_data/sur";
-
-///////////// archive_retrieval_interval_secs /////////
-//
-// Time interval to search in archive mode (secs).
-//
-// We search for data within this margin, on either side of the required 
-//   time.
-//
-//
-// Type: int
-//
-
-archive_retrieval_interval_secs = 600;
 
 //======================================================================
 //
@@ -332,6 +304,13 @@ show_status_in_gui = {
 ///////////// color_scale_dir /////////////////////////
 //
 // Directory for color scales.
+//
+// You can set this in 2 ways:
+//
+// (a) Set to the absolute path
+//
+// (b)Set as a path relative to the location of the application binary 
+//   executable.
 //
 //
 // Type: string
@@ -723,6 +702,32 @@ ppi_azimuth_lines_on_at_startup = TRUE;
 
 ppi_main_legend_pos = LEGEND_TOP_LEFT;
 
+///////////// ppi_override_rendering_beam_width ///////
+//
+// Option to override the azimuth beam width for rendering.
+//
+// Normally HawkEye determines the azimuth rendering beam width 
+//   automatically. You can override this and specifcally set the azimuth 
+//   beam width for rendering.
+//
+//
+// Type: boolean
+//
+
+ppi_override_rendering_beam_width = FALSE;
+
+///////////// ppi_rendering_beam_width ////////////////
+//
+// Rendering beam width, if override is active.
+//
+// See 'ppi_override_rendering_beam_width'.
+//
+//
+// Type: double
+//
+
+ppi_rendering_beam_width = 1;
+
 //======================================================================
 //
 // RHI MODE DISPLAY.
@@ -945,6 +950,44 @@ rhi_elevation_lines_on_at_startup = FALSE;
 
 rhi_main_legend_pos = LEGEND_TOP_LEFT;
 
+///////////// rhi_beam_queue_size /////////////////////
+//
+// Size of the queue for RHI beams.
+//
+// After the queue reaches this size, older beams are discarded.
+//
+//
+// Type: int
+//
+
+rhi_beam_queue_size = 360;
+
+///////////// rhi_override_rendering_beam_width ///////
+//
+// Option to override the azimuth beam width for rendering.
+//
+// Normally HawkEye determines the azimuth rendering beam width 
+//   automatically. You can override this and specifcally set the azimuth 
+//   beam width for rendering.
+//
+//
+// Type: boolean
+//
+
+rhi_override_rendering_beam_width = FALSE;
+
+///////////// rhi_rendering_beam_width ////////////////
+//
+// Rendering beam width, if override is active.
+//
+// See 'rhi_override_rendering_beam_width'.
+//
+//
+// Type: double
+//
+
+rhi_rendering_beam_width = 1;
+
 //======================================================================
 //
 // BSCAN TIME LIMITS.
@@ -1138,6 +1181,84 @@ bscan_range_in_feet = FALSE;
 //
 
 bscan_range_axis_mode = RANGE_AXIS_ALTITUDE;
+
+//======================================================================
+//
+// BSCAN ANGLE LIMITS.
+//
+//======================================================================
+ 
+///////////// bscan_specify_elevation_limits //////////
+//
+// Specify the min and max elevation angle.
+//
+// If true, only beams within the specified limits will be plotted.
+//
+//
+// Type: boolean
+//
+
+bscan_specify_elevation_limits = FALSE;
+
+///////////// bscan_min_elevation_deg /////////////////
+//
+// Min elevation angle to be plotted (deg).
+//
+// Used if 'bscan_specify_elevation_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_min_elevation_deg = 89;
+
+///////////// bscan_max_elevation_deg /////////////////
+//
+// Max elevation angle to be plotted (deg).
+//
+// Used if 'bscan_specify_elevation_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_max_elevation_deg = 91;
+
+///////////// bscan_specify_azimuth_limits ////////////
+//
+// Specify the min and max azimuth angle.
+//
+// If true, only beams within the specified limits will be plotted.
+//
+//
+// Type: boolean
+//
+
+bscan_specify_azimuth_limits = FALSE;
+
+///////////// bscan_min_azimuth_deg ///////////////////
+//
+// Min azimuth angle to be plotted (deg).
+//
+// Used if 'bscan_specify_azimuth_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_min_azimuth_deg = 89;
+
+///////////// bscan_max_azimuth_deg ///////////////////
+//
+// Max azimuth angle to be plotted (deg).
+//
+// Used if 'bscan_specify_azimuth_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_max_azimuth_deg = 91;
 
 //======================================================================
 //
@@ -1746,6 +1867,74 @@ images_schedule_interval_secs = 60;
 
 images_schedule_delay_secs = 10;
 
+///////////// images_archive_start_time ///////////////
+//
+// Start time for image generation in archive mode.
+//
+// Image generation starts with a seach at this time, and the proceeds 
+//   at increments of images_schedule_interval_secs.
+//
+//
+// Type: string
+//
+
+images_archive_start_time = "1970 01 01 00 00 00";
+
+///////////// images_archive_end_time /////////////////
+//
+// End time for image generation in archive mode.
+//
+// Image generation is terminated when the search time exceeds this end 
+//   time.
+//
+//
+// Type: string
+//
+
+images_archive_end_time = "1970 01 01 00 00 00";
+
+///////////// images_scan_interval_secs ///////////////
+//
+// Time between scans in archive mode (secs).
+//
+// Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.
+//
+//
+// Type: int
+//
+
+images_scan_interval_secs = 300;
+
+///////////// images_set_sweep_index_list /////////////
+//
+// Option to specify the sweep indexes for the image generation.
+//
+// If TRUE, only the specified sweeps will be processed.
+//
+//
+// Type: boolean
+//
+
+images_set_sweep_index_list = FALSE;
+
+///////////// images_sweep_index_list /////////////////
+//
+// List of valid sweep indexes for image generation.
+//
+// See 'images_set_sweep_index_list'. Images will only be generated for 
+//   the specified sweep indexes.
+//
+//
+// Type: int
+// 1D array - variable length.
+//
+
+images_sweep_index_list = {
+ 0,
+ 1,
+ 2
+};
+
 //======================================================================
 //
 // SIMULATION MODE.
@@ -1781,7 +1970,7 @@ sim_n_gates = 1000;
 // Type: double
 //
 
-sim_start_range_km = -0.3;
+sim_start_range_km = 0.075;
 
 ///////////// sim_gate_spacing_km /////////////////////
 //
@@ -1791,5 +1980,5 @@ sim_start_range_km = -0.3;
 // Type: double
 //
 
-sim_gate_spacing_km = 0.02;
+sim_gate_spacing_km = 0.150;
 
