@@ -54,6 +54,11 @@ int main(int argc, char **argv)
 
   try {
     
+    // Set the app so that the menus appear in each main window,
+    // rather than in the Mac top bar
+
+    QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
+
     app = new QApplication(argc, argv);
     app->setWindowIcon(QIcon("://Sprite.icns"));
     Sprite *Prog;
