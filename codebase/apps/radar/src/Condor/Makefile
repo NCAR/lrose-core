@@ -25,7 +25,7 @@
 #
 # Makefile for Condor program
 #
-# Mike Dixon, RAP, NCAR
+# Mike Dixon, EOL, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
 #
 # May 2006

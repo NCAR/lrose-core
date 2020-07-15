@@ -24,7 +24,7 @@
 /////////////////////////////////////////////////////////////
 // Readers.cc
 //
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // May 2010

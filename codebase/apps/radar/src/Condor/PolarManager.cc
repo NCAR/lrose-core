@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 // Oct 2014
 //
 ///////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ PolarManager* PolarManager::m_pInstance = NULL;
 
 PolarManager* PolarManager::Instance()
 {
-   return m_pInstance;
+  return m_pInstance;
 }
 
 // Constructor
@@ -117,7 +117,7 @@ PolarManager::PolarManager(const Params &params,
         DisplayManager(params, reader, fields, haveFilteredFields),
         _sweepManager(params), _rhiWindowDisplayed(false)
 {
-	m_pInstance = this;
+  m_pInstance = this;
 
   // initialize
 
@@ -524,8 +524,8 @@ void PolarManager::_setupWindows()
 
   // sweep panel
 
-   _createSweepPanel();
-   mainLayout->addWidget(_sweepPanel);
+  _createSweepPanel();
+  mainLayout->addWidget(_sweepPanel);
 
   // time panel
 
@@ -557,7 +557,7 @@ void PolarManager::_setupWindows()
   if (_archiveMode) {
     _showTimeControl();
   }
-   _setSweepPanelVisibility();
+  _setSweepPanelVisibility();
 
 }
 
@@ -1027,18 +1027,18 @@ int PolarManager::loadArchiveFileList()
     return -1;
 
     /*
-    if (_archiveFileList.size() > 0) {
+      if (_archiveFileList.size() > 0) {
       cerr << "Trying previously opened file ..." << endl;
       // try to read from previous Open file chooser
       try {
-        _getArchiveData();
+      _getArchiveData();
       } catch (FileIException ex) {
-        cerr << "   failed. " << endl;
-        return -1;
-      }
-    } else {
+      cerr << "   failed. " << endl;
       return -1;
-    }
+      }
+      } else {
+      return -1;
+      }
     */
   }
 
@@ -1180,7 +1180,7 @@ int PolarManager::_getArchiveData()
     cerr << "----------------------------------------------------" << endl;
   }
   
-   _platform = _vol.getPlatform();
+  _platform = _vol.getPlatform();
    
   return 0;
 
@@ -1204,9 +1204,9 @@ void PolarManager::_applyDataEdits()
 }
 
 /*
-RadxVol PolarManager::getDataVolume() {
+  RadxVol PolarManager::getDataVolume() {
   return _vol;
-}
+  }
 */
 /////////////////////////////
 // plot data in archive mode
@@ -1334,7 +1334,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
           data[igate] = val;
         
 	  //=======
-	    //data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values
+          //data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values
           if (!haveColorMap) {
             // keep track of min and max data values
 	    // just display something.  The color scale can be edited as needed, later.
@@ -1359,7 +1359,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
       // fill the remainder with missing 
       //for (int igate = nGates; igate < _nGates; igate++) {
       //  data.push_back(-9999);
-	//>>>>>>> forVivek
+      //>>>>>>> forVivek
       //}
 
       if (!haveColorMap) {                              
@@ -1583,7 +1583,7 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
       LOG(DEBUG) << "Case 1a:";
       LOG(DEBUG) << " i = " << i;
       LOG(DEBUG) << "clearing from start_index=" << start_index <<
-	  " to loc_end_index=" << loc_end_index;
+        " to loc_end_index=" << loc_end_index;
       
       for (int j = start_index; j <= loc_end_index; ++j) {
 
@@ -1596,7 +1596,7 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
       // beam
       LOG(DEBUG) << "Case 1b:";
       LOG(DEBUG) << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
-	  " to start_index=" << start_index;
+        " to start_index=" << start_index;
       
       for (int j = loc_start_index; j < start_index; ++j)
 	_rayLoc[j].endIndex = start_index - 1;
@@ -1609,7 +1609,7 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
       LOG(DEBUG) << "Case 2:";
       LOG(DEBUG) << " i = " << i;
       LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
-	  " to loc_end_index=" << loc_end_index;
+        " to loc_end_index=" << loc_end_index;
       
       for (int j = loc_start_index; j <= loc_end_index; ++j) {
         _rayLoc[j].clear();
@@ -1620,10 +1620,10 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
       // The overlap area covers the beginning of the current beam.  Reduce the
       // current beam down to just cover the area after the overlap area.
 
-	LOG(DEBUG) << "Case 3a:";
-	LOG(DEBUG) << " i = " << i;
-	LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
-	  " to end_index=" << end_index;
+      LOG(DEBUG) << "Case 3a:";
+      LOG(DEBUG) << " i = " << i;
+      LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
+        " to end_index=" << end_index;
 
       for (int j = loc_start_index; j <= end_index; ++j) {
 	_rayLoc[j].ray = NULL;
@@ -1635,7 +1635,7 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
 
       LOG(DEBUG) << "Case 3b:";
       LOG(DEBUG) << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
-	  " to loc_end_index=" << loc_end_index;
+        " to loc_end_index=" << loc_end_index;
       
       for (int j = end_index + 1; j <= loc_end_index; ++j) {
 	_rayLoc[j].startIndex = end_index + 1;
@@ -1648,7 +1648,7 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
       LOG(DEBUG) << "Case 4:";
       LOG(DEBUG) << " i = " << i;
       LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
-	  " to loc_end_index=" << loc_end_index;
+        " to loc_end_index=" << loc_end_index;
       
       for (int j = loc_start_index; j <= loc_end_index; ++j) {
         _rayLoc[j].clear();
@@ -1747,17 +1747,24 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   refreshBoundaries();
 }
 
+//////////////////////////////////////////////////////////////////
 // PolarManager::colorMapRedefineReceived(string, ColorMap)
 // TODO: need to add the background changed, etc. 
-void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
-					    QColor gridColor,
-					    QColor emphasisColor,
-					    QColor annotationColor,
-					    QColor backgroundColor) {
+
+void PolarManager::colorMapRedefineReceived
+  (string fieldName,
+   ColorMap newColorMap,
+   QColor gridColor,
+   QColor emphasisColor,
+   QColor annotationColor,
+   QColor backgroundColor) 
+
+{
 
   LOG(DEBUG) << "enter";
-  // connect the new color map with the field                                                       
-  // find the fieldName in the list of FieldDisplays                                                
+  // connect the new color map with the field
+  // find the fieldName in the list of FieldDisplays
+
   bool found = false;
   vector<DisplayField *>::iterator it;
   int fieldId = -1;
@@ -1777,10 +1784,10 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
   if (!found) {
     LOG(ERROR) << fieldName;
     LOG(ERROR) << "ERROR - field not found; no color map change";
-    // TODO: present error message box                                                              
+    // TODO: present error message box
   } else {
-    // look up the fieldId from the fieldName                                                       
-    // change the field variable                                                                    
+    // look up the fieldId from the fieldName
+    // change the field variable
     _ppi->backgroundColor(backgroundColor);
     _ppi->gridRingsColor(gridColor);
     _changeField(fieldId, false);
@@ -1788,15 +1795,12 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
   LOG(DEBUG) << "exit";
 }
 
-void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
-
+void PolarManager::setVolume() 
+{ // const RadxVol &radarDataVolume) {
+  
   LOG(DEBUG) << "enter";
-
   _applyDataEdits(); // radarDataVolume);
-
   LOG(DEBUG) << "exit";
-
-
 
 }
 
@@ -1932,22 +1936,23 @@ void PolarManager::_locationClicked(double xkm, double ykm,
 
   vector<RadxField *> rflds = ray->getFields();
   for (size_t ifield = 0; ifield < rflds.size(); ifield++) {
+
     const RadxField *field = rflds[ifield];
-  
-    //for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-    //const RadxField *field = ray->getField(ifield);
     const string fieldName = field->getName();
     if (fieldName.size() == 0) {
       continue;
     }
+
     Radx::fl32 *data = (Radx::fl32 *) field->getData();
     double val = data[gate];
     const string fieldUnits = field->getUnits();
+
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Field name, selected name: "
 	   << fieldName << ", "
 	   << _selectedName << endl;
     }
+
     if (fieldName == _selectedName) {
       char text[128];
       if (fabs(val) < 10000) {
@@ -1957,12 +1962,14 @@ void PolarManager::_locationClicked(double xkm, double ykm,
       }
       _valueLabel->setText(text);
     }
+
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Field name, units, val: "
 	   << field->getName() << ", "
 	   << field->getUnits() << ", "
 	   << val << endl;
     }
+
     for (size_t ii = 0; ii < _fields.size(); ii++) {
       if (_fields[ii]->getName() == fieldName) {
 	_fields[ii]->setSelectValue(val);
@@ -2062,11 +2069,11 @@ void PolarManager::_createTimeControl()
   _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
   _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
   QDate endDate(_archiveEndTime.getYear(), 
-                 _archiveEndTime.getMonth(),
-                 _archiveEndTime.getDay());
+                _archiveEndTime.getMonth(),
+                _archiveEndTime.getDay());
   QTime endTime(_archiveEndTime.getHour(),
-                 _archiveEndTime.getMin(),
-                 _archiveEndTime.getSec());
+                _archiveEndTime.getMin(),
+                _archiveEndTime.getSec());
   QDateTime endDateTime(endDate, endTime);
   _archiveEndTimeEdit->setDateTime(endDateTime);
   connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
@@ -2190,22 +2197,26 @@ void PolarManager::_placeTimeControl()
 }
 
 // BoundaryEditor circle (radius) slider has changed value
+
 void PolarManager::_circleRadiusSliderValueChanged(int value)
 {
-	if (BoundaryPointEditor::Instance()->setCircleRadius(value))  //returns true if existing circle was resized with this new radius
-		_ppi->update();
+  if (BoundaryPointEditor::Instance()->setCircleRadius(value)) {
+    //returns true if existing circle was resized with this new radius
+    _ppi->update();
+  }
 }
 
 // BoundaryEditor brush (size) slider has changed value
 void PolarManager::_brushRadiusSliderValueChanged(int value)
 {
-	BoundaryPointEditor::Instance()->setBrushRadius(value);
+  BoundaryPointEditor::Instance()->setBrushRadius(value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // print time slider actions for debugging
 
 void PolarManager::_timeSliderActionTriggered(int action) {
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     switch (action) {
       case QAbstractSlider::SliderNoAction:
@@ -2289,13 +2300,19 @@ void PolarManager::_timeSliderPressed()
   }
 }
 
-// sets the directory (_boundaryDir) into which boundary files will be read/written for current radar file (_openFilePath)
+////////////////////////////////////////////////////////////////////
+// sets the directory (_boundaryDir) into which boundary files
+// will be read/written for current radar file (_openFilePath)
+
 void PolarManager::setBoundaryDir()
 {
-	if (!_openFilePath.empty())
-		_boundaryDir = BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath(BoundaryPointEditor::Instance()->getRootBoundaryDir(), _openFilePath);
-	else
-		_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
+  if (!_openFilePath.empty()) {
+    _boundaryDir =
+      BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath
+      (BoundaryPointEditor::Instance()->getRootBoundaryDir(), _openFilePath);
+  } else {
+    _boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
+  }
 }
 
 ////////////////////////////////////////////////////
@@ -2305,124 +2322,137 @@ void PolarManager::setBoundaryDir()
 
 void PolarManager::_openFile()
 {
-  // seed with files for the day currently in view, generate like this: *yyyymmdd*
+
+  // seed with files for the day currently in view
+  // generate like this: *yyyymmdd*
+  
   string pattern = _archiveStartTime.getDateStrPlain();
   QString finalPattern = "Cfradial (*.nc);; All Files (*.*);; All files (*";
   finalPattern.append(pattern.c_str());
   finalPattern.append("*)");
-
-  QString inputPath = QDir::currentPath();
+  
   // get the path of the current file, if available
+  
+  QString inputPath = QDir::currentPath();
   if (_archiveFileList.size() > 0) {
     QDir temp(_archiveFileList[0].c_str());
     inputPath = temp.absolutePath();
   }
+  
+  // since we are opening a new radar file
+  // close any boundaries currently being displayed
+  
+  BoundaryPointEditor::Instance()->clear();
+  if (_boundaryEditorDialog) {
+    clearBoundaryEditorClick();
+    _boundaryEditorDialog->setVisible(false);
+  }
+  
+  if (_ppi) {
+    _ppi->showOpeningFileMsg(true);
+  }
 
-  //since we are opening a new radar file, close any boundaries currently being displayed
-	BoundaryPointEditor::Instance()->clear();
-	if (_boundaryEditorDialog)
-	{
-		clearBoundaryEditorClick();
-		_boundaryEditorDialog->setVisible(false);
-	}
-
-	if (_ppi)
-  	_ppi->showOpeningFileMsg(true);
-
-  QString filePath =  QFileDialog::getOpenFileName(
-          this,
-          "Open Document",
-          inputPath, finalPattern);  //QDir::currentPath(),
+  QString filePath =
+    QFileDialog::getOpenFileName(this,
+                                 "Open Document",
+                                 inputPath, finalPattern);
+  //QDir::currentPath(),
   //"All files (*.*)");
 
-  QTimer::singleShot(10, [=]()   //wait 10ms so the QFileDialog has time to close before proceeding...
-  {
-    if( !filePath.isNull() )
-    {
-      QByteArray qb = filePath.toUtf8();
-      const char *openFilePath = qb.constData();
-      _openFilePath = openFilePath;
+  // wait 10ms so the QFileDialog has time to close before proceeding...
 
-      cout << "_openFilePath=" << _openFilePath << endl;
+  QTimer::singleShot(10, [=]() {
+      
+      if( !filePath.isNull()) {
+        QByteArray qb = filePath.toUtf8();
+        const char *openFilePath = qb.constData();
+        _openFilePath = openFilePath;
+        
+        cout << "_openFilePath=" << _openFilePath << endl;
+        
+        // use _openFilePath to determine the new directory
+        // into which boundaries will be read/written
+        setBoundaryDir();
 
-      //use _openFilePath to determine the new directory into which boundaries will be read/written
-      setBoundaryDir();
-
-      // trying this ... to get the data from the file selected
-      _setArchiveRetrievalPending();
-      vector<string> list;
-      list.push_back(openFilePath);
-      setArchiveFileList(list, false);
-
-
-      try {
-        _getArchiveData();
-      } catch (FileIException ex) {
-        _ppi->showOpeningFileMsg(false);
-        this->setCursor(Qt::ArrowCursor);
-        // _timeControl->setCursor(Qt::ArrowCursor);
-        return;
-      }
-    }
-
-    // now update the time controller window
-    QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
-    _setArchiveStartTimeFromGui(epoch);
-    QDateTime now = QDateTime::currentDateTime();
-    _setArchiveEndTimeFromGui(now);
-
-    _archiveStartTime = _guiStartTime;
-    _archiveEndTime = _guiEndTime;
-    QFileInfo fileInfo(filePath);
-    string absolutePath = fileInfo.absolutePath().toStdString();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "changing to path " << absolutePath << endl;
-    }
-  //  loadArchiveFileList(dir.absolutePath());
-
-    RadxTimeList timeList;
-    timeList.setDir(absolutePath);
-    timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
-    if (timeList.compile()) {
-      cerr << "ERROR - PolarManager::openFile()" << endl;
-      cerr << "  " << timeList.getErrStr() << endl;
-    }
-
-    vector<string> pathList = timeList.getPathList();
-    if (pathList.size() <= 0) {
-      cerr << "ERROR - PolarManager::openFile()" << endl;
-      cerr << "  pathList is empty" << endl;
-      cerr << "  " << timeList.getErrStr() << endl;
-    } else {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "pathList is NOT empty" << endl;
-        for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-         cerr << *i << endl;
+        // trying this ... to get the data from the file selected
+        _setArchiveRetrievalPending();
+        vector<string> list;
+        list.push_back(openFilePath);
+        setArchiveFileList(list, false);
+        
+        
+        try {
+          _getArchiveData();
+        } catch (FileIException ex) {
+          _ppi->showOpeningFileMsg(false);
+          this->setCursor(Qt::ArrowCursor);
+          // _timeControl->setCursor(Qt::ArrowCursor);
+          return;
         }
-        cerr << endl;
-      }
+      } // if( !filePath.isNull())
 
-      setArchiveFileList(pathList, false);
-
-      // now fetch the first time and last time from the directory
-      // and set these values in the time controller display
-
-      RadxTime firstTime;
-      RadxTime lastTime;
-      timeList.getFirstAndLastTime(firstTime, lastTime);
+      // now update the time controller window
+      QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
+      _setArchiveStartTimeFromGui(epoch);
+      QDateTime now = QDateTime::currentDateTime();
+      _setArchiveEndTimeFromGui(now);
+      
+      _archiveStartTime = _guiStartTime;
+      _archiveEndTime = _guiEndTime;
+      QFileInfo fileInfo(filePath);
+      string absolutePath = fileInfo.absolutePath().toStdString();
       if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "first time " << firstTime << endl;
-        cerr << "last time " << lastTime << endl;
+        cerr << "changing to path " << absolutePath << endl;
       }
-      // convert RadxTime to QDateTime
-      _archiveStartTime = firstTime;
-      _archiveEndTime = lastTime;
-      _setGuiFromArchiveStartTime();
-      _setGuiFromArchiveEndTime();
 
-      _ppi->showOpeningFileMsg(false);
-    } // end else pathList is not empty
-  });
+      //  loadArchiveFileList(dir.absolutePath());
+      
+      RadxTimeList timeList;
+      timeList.setDir(absolutePath);
+      timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
+      if (timeList.compile()) {
+        cerr << "ERROR - PolarManager::openFile()" << endl;
+        cerr << "  " << timeList.getErrStr() << endl;
+      }
+      
+      vector<string> pathList = timeList.getPathList();
+      if (pathList.size() <= 0) {
+        cerr << "ERROR - PolarManager::openFile()" << endl;
+        cerr << "  pathList is empty" << endl;
+        cerr << "  " << timeList.getErrStr() << endl;
+      } else {
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "pathList is NOT empty" << endl;
+          for(vector<string>::const_iterator i = pathList.begin();
+              i != pathList.end(); ++i) {
+            cerr << *i << endl;
+          }
+          cerr << endl;
+        }
+        
+        setArchiveFileList(pathList, false);
+        
+        // now fetch the first time and last time from the directory
+        // and set these values in the time controller display
+
+        RadxTime firstTime;
+        RadxTime lastTime;
+        timeList.getFirstAndLastTime(firstTime, lastTime);
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "first time " << firstTime << endl;
+          cerr << "last time " << lastTime << endl;
+        }
+        // convert RadxTime to QDateTime
+        _archiveStartTime = firstTime;
+        _archiveEndTime = lastTime;
+        _setGuiFromArchiveStartTime();
+        _setGuiFromArchiveEndTime();
+        
+        _ppi->showOpeningFileMsg(false);
+      } // end else pathList is not empty
+
+    }); // QTimer::singleShot(10, [=]() {
+  
 }
 
 
@@ -2927,99 +2957,103 @@ void PolarManager::_createImageFiles()
 
 }
 
-string PolarManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
+string PolarManager::_getOutputPath(bool interactive,
+                                    string &outputDir,
+                                    string fileExt)
 {
-	  // set times from plots
-	  if (_rhiMode) {
-	    _plotStartTime = _rhi->getPlotStartTime();
-	    _plotEndTime = _rhi->getPlotEndTime();
-	  } else {
-	    _plotStartTime = _ppi->getPlotStartTime();
-	    _plotEndTime = _ppi->getPlotEndTime();
-	  }
+  // set times from plots
+  if (_rhiMode) {
+    _plotStartTime = _rhi->getPlotStartTime();
+    _plotEndTime = _rhi->getPlotEndTime();
+  } else {
+    _plotStartTime = _ppi->getPlotStartTime();
+    _plotEndTime = _ppi->getPlotEndTime();
+  }
 
-	  // compute output dir
-		outputDir = _params.images_output_dir;
-		char dayStr[1024];
-		if (_params.images_write_to_day_dir)
-		{
-			sprintf(dayStr, "%.4d%.2d%.2d", _plotStartTime.getYear(), _plotStartTime.getMonth(), _plotStartTime.getDay());
-			outputDir += PATH_DELIM;
-			outputDir += dayStr;
-		}
+  // compute output dir
+  outputDir = _params.images_output_dir;
+  char dayStr[1024];
+  if (_params.images_write_to_day_dir) {
+    sprintf(dayStr, "%.4d%.2d%.2d",
+            _plotStartTime.getYear(),
+            _plotStartTime.getMonth(),
+            _plotStartTime.getDay());
+    outputDir += PATH_DELIM;
+    outputDir += dayStr;
+  }
 
-	  // make sure output dir exists
+  // make sure output dir exists
 
-	  if (ta_makedir_recurse(outputDir.c_str())) {
-	    string errmsg("Cannot create output dir: " + outputDir);
-	    cerr << "ERROR - PolarManager::_saveImageToFile()" << endl;
-	    cerr << "  " << errmsg << endl;
-	    if (interactive) {
-	        QMessageBox::critical(this, "Error", errmsg.c_str());
-	    }
-	    return(NULL);
-	  }
+  if (ta_makedir_recurse(outputDir.c_str())) {
+    string errmsg("Cannot create output dir: " + outputDir);
+    cerr << "ERROR - PolarManager::_saveImageToFile()" << endl;
+    cerr << "  " << errmsg << endl;
+    if (interactive) {
+      QMessageBox::critical(this, "Error", errmsg.c_str());
+    }
+    return(NULL);
+  }
 
-	  // compute file name
+  // compute file name
 
-	  string fileName;
+  string fileName;
 
-	  // category
+  // category
 
-	  if (strlen(_params.images_file_name_category) > 0) {
-	    fileName += _params.images_file_name_category;
-	  }
+  if (strlen(_params.images_file_name_category) > 0) {
+    fileName += _params.images_file_name_category;
+  }
 
-	  // platform
+  // platform
 
-	  if (strlen(_params.images_file_name_platform) > 0) {
-	    fileName += _params.images_file_name_delimiter;
-	    fileName += _params.images_file_name_platform;
-	  }
+  if (strlen(_params.images_file_name_platform) > 0) {
+    fileName += _params.images_file_name_delimiter;
+    fileName += _params.images_file_name_platform;
+  }
 
-	  // time
+  // time
 
-	  if (_params.images_include_time_part_in_file_name) {
-	    fileName += _params.images_file_name_delimiter;
-	    char timeStr[1024];
-	    if (_params.images_include_seconds_in_time_part) {
-	      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
-	              _plotStartTime.getYear(),
-	              _plotStartTime.getMonth(),
-	              _plotStartTime.getDay(),
-	              _plotStartTime.getHour(),
-	              _plotStartTime.getMin(),
-	              _plotStartTime.getSec());
-	    } else {
-	      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d",
-	              _plotStartTime.getYear(),
-	              _plotStartTime.getMonth(),
-	              _plotStartTime.getDay(),
-	              _plotStartTime.getHour(),
-	              _plotStartTime.getMin());
-	    }
-	    fileName += timeStr;
-	  }
+  if (_params.images_include_time_part_in_file_name) {
+    fileName += _params.images_file_name_delimiter;
+    char timeStr[1024];
+    if (_params.images_include_seconds_in_time_part) {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
+              _plotStartTime.getYear(),
+              _plotStartTime.getMonth(),
+              _plotStartTime.getDay(),
+              _plotStartTime.getHour(),
+              _plotStartTime.getMin(),
+              _plotStartTime.getSec());
+    } else {
+      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d",
+              _plotStartTime.getYear(),
+              _plotStartTime.getMonth(),
+              _plotStartTime.getDay(),
+              _plotStartTime.getHour(),
+              _plotStartTime.getMin());
+    }
+    fileName += timeStr;
+  }
 
-	  // field label
+  // field label
 
-	  if (_params.images_include_field_label_in_file_name) {
-	    fileName += _params.images_file_name_delimiter;
-	    fileName += getSelectedFieldLabel();
-	  }
+  if (_params.images_include_field_label_in_file_name) {
+    fileName += _params.images_file_name_delimiter;
+    fileName += getSelectedFieldLabel();
+  }
 
-	  // extension
+  // extension
 
-	  fileName += ".";
-	  fileName += fileExt;
+  fileName += ".";
+  fileName += fileExt;
 
-	  // compute output path
+  // compute output path
 
-	  string outputPath(outputDir);
-	  outputPath += PATH_DELIM;
-	  outputPath += fileName;
+  string outputPath(outputDir);
+  outputPath += PATH_DELIM;
+  outputPath += fileName;
 
-	  return(outputPath);
+  return(outputPath);
 }
 
 /////////////////////////////////////////////////////
@@ -3029,31 +3063,37 @@ string PolarManager::_getOutputPath(bool interactive, string &outputDir, string 
 
 void PolarManager::_saveImageToFile(bool interactive)
 {
-	  // create image
+
+  // create image
+
   QPixmap pixmap;
-  if (_rhiMode)
+  if (_rhiMode) {
     pixmap = _rhi->grab();
-  else
+  } else {
     pixmap = _ppi->grab();
+  }
   QImage image = pixmap.toImage();
 
   string outputDir;
-  string outputPath = _getOutputPath(interactive, outputDir, _params.images_file_name_extension);
+  string outputPath = _getOutputPath(interactive,
+                                     outputDir,
+                                     _params.images_file_name_extension);
 
   // write the file
+
   if (!image.save(outputPath.c_str())) {
     string errmsg("Cannot save image to file: " + outputPath);
     cerr << "ERROR - PolarManager::_saveImageToFile()" << endl;
     cerr << "  " << errmsg << endl;
     if (interactive) {
-        QMessageBox::critical(this, "Error", errmsg.c_str());
+      QMessageBox::critical(this, "Error", errmsg.c_str());
     }
     return;
   }
 
   if (interactive) {
-      string infoMsg("Saved image to file " + outputPath);
-      QMessageBox::information(this, "Image Saved", infoMsg.c_str());
+    string infoMsg("Saved image to file " + outputPath);
+    QMessageBox::information(this, "Image Saved", infoMsg.c_str());
   }
 
   if (_params.debug) {
@@ -3088,12 +3128,9 @@ void PolarManager::_saveImageToFile(bool interactive)
 
 }
 
-
-
 void PolarManager::ShowContextMenu(const QPoint &pos) {
   _ppi->ShowContextMenu(pos, &_vol);
 }
-
 
 /////////////////////////////////////////////////////
 // howto help
@@ -3120,45 +3157,54 @@ void PolarManager::_howto()
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
+//////////////////////////////////////////////////////////////////
 // Creates the boundary editor dialog and associated event slots
 void PolarManager::createBoundaryEditorDialog()
+
 {
-	_boundaryEditorDialog = new QDialog(this);
-	_boundaryEditorDialog->setMaximumHeight(368);
-	_boundaryEditorDialog->setWindowTitle("Boundary Editor");
+  _boundaryEditorDialog = new QDialog(this);
+  _boundaryEditorDialog->setMaximumHeight(368);
+  _boundaryEditorDialog->setWindowTitle("Boundary Editor");
 
-	Qt::Alignment alignCenter(Qt::AlignCenter);
-	// Qt::Alignment alignRight(Qt::AlignRight);
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  // Qt::Alignment alignRight(Qt::AlignRight);
 
-	_boundaryEditorDialogLayout = new QGridLayout(_boundaryEditorDialog);
-	_boundaryEditorDialogLayout->setVerticalSpacing(4);
+  _boundaryEditorDialogLayout = new QGridLayout(_boundaryEditorDialog);
+  _boundaryEditorDialogLayout->setVerticalSpacing(4);
 
-	int row = 0;
-	_boundaryEditorInfoLabel = new QLabel("Boundary Editor allows you to select\nan area of your radar image", _boundaryEditorDialog);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorInfoLabel, row, 0, 1, 2, alignCenter);
+  int row = 0;
+  _boundaryEditorInfoLabel = new QLabel
+    ("Boundary Editor allows you to select\nan area of your radar image",
+     _boundaryEditorDialog);
+  _boundaryEditorDialogLayout->addWidget
+    (_boundaryEditorInfoLabel, row, 0, 1, 2, alignCenter);
 
-	_boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
+  _boundaryEditorDialogLayout->addWidget
+    (new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
 
-	QLabel *toolsCaption = new QLabel("Editor Tools:", _boundaryEditorDialog);
-	_boundaryEditorDialogLayout->addWidget(toolsCaption, ++row, 0, 1, 2, alignCenter);
+  QLabel *toolsCaption = new QLabel("Editor Tools:", _boundaryEditorDialog);
+  _boundaryEditorDialogLayout->addWidget
+    (toolsCaption, ++row, 0, 1, 2, alignCenter);
 
-	_boundaryEditorPolygonBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorPolygonBtn->setMaximumWidth(130);
-	_boundaryEditorPolygonBtn->setText(" Polygon");
-	_boundaryEditorPolygonBtn->setIcon(QIcon("images/polygon.png"));
-	_boundaryEditorPolygonBtn->setCheckable(TRUE);
-	_boundaryEditorPolygonBtn->setFocusPolicy(Qt::NoFocus);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorPolygonBtn, ++row, 0);
-  connect(_boundaryEditorPolygonBtn, SIGNAL(clicked()), this, SLOT(polygonBtnBoundaryEditorClick()));
+  _boundaryEditorPolygonBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorPolygonBtn->setMaximumWidth(130);
+  _boundaryEditorPolygonBtn->setText(" Polygon");
+  _boundaryEditorPolygonBtn->setIcon(QIcon("images/polygon.png"));
+  _boundaryEditorPolygonBtn->setCheckable(TRUE);
+  _boundaryEditorPolygonBtn->setFocusPolicy(Qt::NoFocus);
+  _boundaryEditorDialogLayout->addWidget(_boundaryEditorPolygonBtn, ++row, 0);
+  connect(_boundaryEditorPolygonBtn, SIGNAL(clicked()),
+          this, SLOT(polygonBtnBoundaryEditorClick()));
 
-	_boundaryEditorCircleBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorCircleBtn->setMaximumWidth(130);
-	_boundaryEditorCircleBtn->setText(" Circle  ");
-	_boundaryEditorCircleBtn->setIcon(QIcon("images/circle.png"));
-	_boundaryEditorCircleBtn->setCheckable(TRUE);
-	_boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
-  connect(_boundaryEditorCircleBtn, SIGNAL(clicked()), this, SLOT(circleBtnBoundaryEditorClick()));
+  _boundaryEditorCircleBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorCircleBtn->setMaximumWidth(130);
+  _boundaryEditorCircleBtn->setText(" Circle  ");
+  _boundaryEditorCircleBtn->setIcon(QIcon("images/circle.png"));
+  _boundaryEditorCircleBtn->setCheckable(TRUE);
+  _boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
+  _boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
+  connect(_boundaryEditorCircleBtn, SIGNAL(clicked()),
+          this, SLOT(circleBtnBoundaryEditorClick()));
 
   _circleRadiusSlider = new QSlider(Qt::Horizontal);
   _circleRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -3172,16 +3218,18 @@ void PolarManager::createBoundaryEditorDialog()
   _circleRadiusSlider->setMinimum(8);
   _circleRadiusSlider->setMaximum(200);
   _boundaryEditorDialogLayout->addWidget(_circleRadiusSlider, row, 1);
-  connect(_circleRadiusSlider, SIGNAL(valueChanged(int)), this, SLOT(_circleRadiusSliderValueChanged(int)));
+  connect(_circleRadiusSlider, SIGNAL(valueChanged(int)),
+          this, SLOT(_circleRadiusSliderValueChanged(int)));
 
-	_boundaryEditorBrushBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorBrushBtn->setMaximumWidth(130);
-	_boundaryEditorBrushBtn->setText(" Brush ");
-	_boundaryEditorBrushBtn->setIcon(QIcon("images/brush.png"));
-	_boundaryEditorBrushBtn->setCheckable(TRUE);
-	_boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
-  connect(_boundaryEditorBrushBtn, SIGNAL(clicked()), this, SLOT(brushBtnBoundaryEditorClick()));
+  _boundaryEditorBrushBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorBrushBtn->setMaximumWidth(130);
+  _boundaryEditorBrushBtn->setText(" Brush ");
+  _boundaryEditorBrushBtn->setIcon(QIcon("images/brush.png"));
+  _boundaryEditorBrushBtn->setCheckable(TRUE);
+  _boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
+  _boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
+  connect(_boundaryEditorBrushBtn, SIGNAL(clicked()),
+          this, SLOT(brushBtnBoundaryEditorClick()));
 
   _brushRadiusSlider = new QSlider(Qt::Horizontal);
   _brushRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -3195,177 +3243,182 @@ void PolarManager::createBoundaryEditorDialog()
   _brushRadiusSlider->setMinimum(12);
   _brushRadiusSlider->setMaximum(75);
   _boundaryEditorDialogLayout->addWidget(_brushRadiusSlider, row, 1);
-  connect(_brushRadiusSlider, SIGNAL(valueChanged(int)), this, SLOT(_brushRadiusSliderValueChanged(int)));
+
+  connect(_brushRadiusSlider, SIGNAL(valueChanged(int)),
+          this, SLOT(_brushRadiusSliderValueChanged(int)));
 
   _boundaryEditorBrushBtn->setChecked(TRUE);
-	_boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
+  _boundaryEditorDialogLayout->addWidget
+    (new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
 
-	_boundaryEditorList = new QListWidget(_boundaryEditorDialog);
-	QListWidgetItem *newItem5 = new QListWidgetItem;
-	newItem5->setText("Boundary5 <none>");
-	_boundaryEditorList->insertItem(0, newItem5);
-	QListWidgetItem *newItem4 = new QListWidgetItem;
-	newItem4->setText("Boundary4 <none>");
-	_boundaryEditorList->insertItem(0, newItem4);
-	QListWidgetItem *newItem3 = new QListWidgetItem;
-	newItem3->setText("Boundary3 <none>");
-	_boundaryEditorList->insertItem(0, newItem3);
-	QListWidgetItem *newItem2 = new QListWidgetItem;
-	newItem2->setText("Boundary2 <none>");
-	_boundaryEditorList->insertItem(0, newItem2);
-	QListWidgetItem *newItem1 = new QListWidgetItem;
-	newItem1->setText("Boundary1");
-	_boundaryEditorList->insertItem(0, newItem1);
-	_boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
-  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onBoundaryEditorListItemClicked(QListWidgetItem*)));
+  _boundaryEditorList = new QListWidget(_boundaryEditorDialog);
+  QListWidgetItem *newItem5 = new QListWidgetItem;
+  newItem5->setText("Boundary5 <none>");
+  _boundaryEditorList->insertItem(0, newItem5);
+  QListWidgetItem *newItem4 = new QListWidgetItem;
+  newItem4->setText("Boundary4 <none>");
+  _boundaryEditorList->insertItem(0, newItem4);
+  QListWidgetItem *newItem3 = new QListWidgetItem;
+  newItem3->setText("Boundary3 <none>");
+  _boundaryEditorList->insertItem(0, newItem3);
+  QListWidgetItem *newItem2 = new QListWidgetItem;
+  newItem2->setText("Boundary2 <none>");
+  _boundaryEditorList->insertItem(0, newItem2);
+  QListWidgetItem *newItem1 = new QListWidgetItem;
+  newItem1->setText("Boundary1");
+  _boundaryEditorList->insertItem(0, newItem1);
+  _boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
+  
+  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)),
+          this, SLOT(onBoundaryEditorListItemClicked(QListWidgetItem*)));
 
-	// horizontal layout contains the "Clear", "Help", and "Save" buttons
-	QHBoxLayout *hLayout = new QHBoxLayout;
-	_boundaryEditorDialogLayout->addLayout(hLayout, ++row, 0, 1, 2);
+  // horizontal layout contains the "Clear", "Help", and "Save" buttons
+  QHBoxLayout *hLayout = new QHBoxLayout;
+  _boundaryEditorDialogLayout->addLayout(hLayout, ++row, 0, 1, 2);
 
-	_boundaryEditorClearBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorClearBtn->setText("Clear");
-	hLayout->addWidget(_boundaryEditorClearBtn);
+  _boundaryEditorClearBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorClearBtn->setText("Clear");
+  hLayout->addWidget(_boundaryEditorClearBtn);
   connect(_boundaryEditorClearBtn, SIGNAL(clicked()), this, SLOT(clearBoundaryEditorClick()));
 
-	_boundaryEditorHelpBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorHelpBtn->setText("Help");
-	hLayout->addWidget(_boundaryEditorHelpBtn);
+  _boundaryEditorHelpBtn = new QPushButton(_boundaryEditorDialog);
+  _boundaryEditorHelpBtn->setText("Help");
+  hLayout->addWidget(_boundaryEditorHelpBtn);
   connect(_boundaryEditorHelpBtn, SIGNAL(clicked()), this, SLOT(helpBoundaryEditorClick()));
 
   _boundaryEditorSaveBtn = new QPushButton(_boundaryEditorDialog);
-	_boundaryEditorSaveBtn->setText("Save");
-	hLayout->addWidget(_boundaryEditorSaveBtn);
+  _boundaryEditorSaveBtn->setText("Save");
+  hLayout->addWidget(_boundaryEditorSaveBtn);
   connect(_boundaryEditorSaveBtn, SIGNAL(clicked()), this, SLOT(saveBoundaryEditorClick()));
 }
 
-// Select the given tool and set the hint text, while also un-selecting the other tools
+//////////////////////////////////////////////////
+// Select the given tool and set the hint text,
+// while also un-selecting the other tools
 void PolarManager::selectBoundaryTool(BoundaryToolType tool)
 {
-	_boundaryEditorPolygonBtn->setChecked(false);
-	_boundaryEditorCircleBtn->setChecked(false);
-	_boundaryEditorBrushBtn->setChecked(false);
+  _boundaryEditorPolygonBtn->setChecked(false);
+  _boundaryEditorCircleBtn->setChecked(false);
+  _boundaryEditorBrushBtn->setChecked(false);
 
-	if (tool == BoundaryToolType::polygon)
-	{
-		_boundaryEditorPolygonBtn->setChecked(true);
-		_boundaryEditorInfoLabel->setText("Polygon: click points over desired area to\ndraw a polygon. Click near the first point\nto close it. Once closed, hold the Shift\nkey to insert/delete points.");
-	}
-	else if (tool == BoundaryToolType::circle)
-	{
-		_boundaryEditorCircleBtn->setChecked(true);
-		_boundaryEditorInfoLabel->setText("Circle: click on the main window to\ncreate your circle. You can then adjust\nthe radius slider to rescale it to the\ndesired size.");
-	}
-	else
-	{
-		_boundaryEditorBrushBtn->setChecked(true);
-		_boundaryEditorInfoLabel->setText("Brush: adjust slider to set brush size.\nClick/drag the mouse to 'paint' boundary.\nClick inside your shape and drag outwards\nto enlarge a desired region.");
-	}
+  if (tool == BoundaryToolType::polygon) {
+    _boundaryEditorPolygonBtn->setChecked(true);
+    _boundaryEditorInfoLabel->setText("Polygon: click points over desired area to\ndraw a polygon. Click near the first point\nto close it. Once closed, hold the Shift\nkey to insert/delete points.");
+  } else if (tool == BoundaryToolType::circle) {
+    _boundaryEditorCircleBtn->setChecked(true);
+    _boundaryEditorInfoLabel->setText("Circle: click on the main window to\ncreate your circle. You can then adjust\nthe radius slider to rescale it to the\ndesired size.");
+  } else {
+    _boundaryEditorBrushBtn->setChecked(true);
+    _boundaryEditorInfoLabel->setText("Brush: adjust slider to set brush size.\nClick/drag the mouse to 'paint' boundary.\nClick inside your shape and drag outwards\nto enlarge a desired region.");
+  }
 }
 
 // User clicked on the polygonBtn
 void PolarManager::polygonBtnBoundaryEditorClick()
 {
-	selectBoundaryTool(BoundaryToolType::polygon);
-	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::polygon);
-	_ppi->update();
+  selectBoundaryTool(BoundaryToolType::polygon);
+  BoundaryPointEditor::Instance()->setTool(BoundaryToolType::polygon);
+  _ppi->update();
 }
 
 // User clicked on the circleBtn
 void PolarManager::circleBtnBoundaryEditorClick()
 {
-	selectBoundaryTool(BoundaryToolType::circle);
-	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::circle);
-	_ppi->update();
+  selectBoundaryTool(BoundaryToolType::circle);
+  BoundaryPointEditor::Instance()->setTool(BoundaryToolType::circle);
+  _ppi->update();
 }
 
 // User clicked on the brushBtn
 void PolarManager::brushBtnBoundaryEditorClick()
 {
-	selectBoundaryTool(BoundaryToolType::brush);
-	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::brush);
-	_ppi->update();
+  selectBoundaryTool(BoundaryToolType::brush);
+  BoundaryPointEditor::Instance()->setTool(BoundaryToolType::brush);
+  _ppi->update();
 }
 
-// returns the file path for the boundary file, given the currently selected field and sweep
-// boundaryFileName will be one of 5 values: "Boundary1", "Boundary2"..."Boundary5"
+////////////////////////////////////////////////////////////////////
+// returns the file path for the boundary file, given the
+// currently selected field and sweep
+// boundaryFileName will be one of 5 values:
+//  "Boundary1", "Boundary2"..."Boundary5"
+
 string PolarManager::getBoundaryFilePath(string boundaryFileName)
 {
-	return(BoundaryPointEditor::Instance()->getBoundaryFilePath(_boundaryDir, _fieldNum, _sweepManager.getGuiIndex(), boundaryFileName));
-//	return(_boundaryDir + PATH_DELIM + "field" + to_string(_fieldNum) + "-sweep" + to_string(_sweepManager.getGuiIndex()) + "-" + boundaryFileName);
+  return(BoundaryPointEditor::Instance()->getBoundaryFilePath
+         (_boundaryDir, 
+          _fieldNum,
+          _sweepManager.getGuiIndex(),
+          boundaryFileName));
 }
 
-// user clicked on one of the 5 boundaries in the boundary editor list, so load that boundary
+///////////////////////////////////////////////////////////////
+// user clicked on one of the 5 boundaries in the boundary
+// editor list, so load that boundary
+
 void PolarManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
 {
-	string fileName = item->text().toUtf8().constData();
-	bool found = (fileName.find("<none>") != string::npos);
-	if (!found)
-	{
-		if (_boundaryDir.empty())
-			_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
-		BoundaryPointEditor::Instance()->load(getBoundaryFilePath(fileName));
 
-		if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::circle)
-		{
-			_circleRadiusSlider->setValue(BoundaryPointEditor::Instance()->getCircleRadius());
-			selectBoundaryTool(BoundaryToolType::circle);
-		}
-		else if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::brush)
-		{
-			_brushRadiusSlider->setValue(BoundaryPointEditor::Instance()->getBrushRadius());
-			selectBoundaryTool(BoundaryToolType::brush);
-		}
-		else
-		{
-			selectBoundaryTool(BoundaryToolType::polygon);
-		}
+  string fileName = item->text().toUtf8().constData();
+  bool found = (fileName.find("<none>") != string::npos);
+  if (!found) {
+    if (_boundaryDir.empty()) {
+      _boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
+    }
+    BoundaryPointEditor::Instance()->load(getBoundaryFilePath(fileName));
 
-		_ppi->update();   //forces repaint which clears existing polygon
-	}
+    if (BoundaryPointEditor::Instance()->getCurrentTool() == 
+        BoundaryToolType::circle) {
+      _circleRadiusSlider->setValue(BoundaryPointEditor::Instance()->getCircleRadius());
+      selectBoundaryTool(BoundaryToolType::circle);
+    } else if (BoundaryPointEditor::Instance()->getCurrentTool() == 
+               BoundaryToolType::brush) {
+      _brushRadiusSlider->setValue
+        (BoundaryPointEditor::Instance()->getBrushRadius());
+      selectBoundaryTool(BoundaryToolType::brush);
+    } else {
+      selectBoundaryTool(BoundaryToolType::polygon);
+    }
+    _ppi->update();   //forces repaint which clears existing polygon
+  }
 }
 
 // user clicked the boundary editor Clear button
 void PolarManager::clearBoundaryEditorClick()
 {
-	BoundaryPointEditor::Instance()->clear();
-	_ppi->update();   //forces repaint which clears existing polygon
+  BoundaryPointEditor::Instance()->clear();
+  _ppi->update();   //forces repaint which clears existing polygon
 }
 
 void PolarManager::helpBoundaryEditorClick()
 {
-	QDesktopServices::openUrl(QUrl("https://vimeo.com/369963107"));
+  QDesktopServices::openUrl(QUrl("https://vimeo.com/369963107"));
 }
 
 // user clicked the boundary editor Save button
 void PolarManager::saveBoundaryEditorClick()
 {
-	cout << "PolarManager, _saveBoundaryEditorClick" << endl;
-
-	if (_boundaryDir.empty())
-		_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
-	ta_makedir_recurse(_boundaryDir.c_str());
-
-	string fileName = "Boundary" + to_string(_boundaryEditorList->currentRow()+1);
-	_boundaryEditorList->currentItem()->setText(fileName.c_str());
-
-	BoundaryPointEditor::Instance()->save(getBoundaryFilePath(fileName));
+  cout << "PolarManager, _saveBoundaryEditorClick" << endl;
+  if (_boundaryDir.empty()) {
+    _boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
+  }
+  ta_makedir_recurse(_boundaryDir.c_str());
+  
+  string fileName = "Boundary" + to_string(_boundaryEditorList->currentRow()+1);
+  _boundaryEditorList->currentItem()->setText(fileName.c_str());
+  
+  BoundaryPointEditor::Instance()->save(getBoundaryFilePath(fileName));
 }
 
 // user clicked on the main menu item "Boundary Editor", so toggle it visible or invisible
 void PolarManager::showBoundaryEditor()
 {
-  if (_boundaryEditorDialog)
-  {
-    if (_boundaryEditorDialog->isVisible())
-    {
-    	clearBoundaryEditorClick();
-    	_boundaryEditorDialog->setVisible(false);
-    }
-    else
-    {
-      if (_boundaryEditorDialog->x() == 0 && _boundaryEditorDialog->y() == 0)
-      {
+  if (_boundaryEditorDialog) {
+    if (_boundaryEditorDialog->isVisible()) {
+      clearBoundaryEditorClick();
+      _boundaryEditorDialog->setVisible(false);
+    }  else {
+      if (_boundaryEditorDialog->x() == 0 && _boundaryEditorDialog->y() == 0) {
         QPoint pos;
         pos.setX(x() + width() + 5);
         pos.setY(y());
@@ -3373,7 +3426,6 @@ void PolarManager::showBoundaryEditor()
       }
       _boundaryEditorDialog->setVisible(true);
       _boundaryEditorDialog->raise();
-
       refreshBoundaries();
     }
   }
@@ -3383,27 +3435,27 @@ void PolarManager::showBoundaryEditor()
 void PolarManager::refreshBoundaries()
 {
   BoundaryPointEditor::Instance()->clear();
-	setBoundaryDir();
+  setBoundaryDir();
 
   //rename any items that have corresponding file on disk
-  for (int i=1; i <= 5; i++)
-  {
-		string outputDir;
-		string fileName = "Boundary" + to_string(i);
-		string path = getBoundaryFilePath(fileName);
-
-		ifstream infile(path);
-		if (infile.good())
-			_boundaryEditorList->item(i-1)->setText(fileName.c_str());
-		else
-		{
-			string blankCaption = fileName + " <none>";
-			_boundaryEditorList->item(i-1)->setText(blankCaption.c_str());  //e.g "Boundary2 <none>", "Boundary3 <none>", ...
-		}
+  for (int i=1; i <= 5; i++) {
+    string outputDir;
+    string fileName = "Boundary" + to_string(i);
+    string path = getBoundaryFilePath(fileName);
+    
+    ifstream infile(path);
+    if (infile.good()) {
+      _boundaryEditorList->item(i-1)->setText(fileName.c_str());
+    } else {
+      string blankCaption = fileName + " <none>";
+      _boundaryEditorList->item(i-1)->setText(blankCaption.c_str());  //e.g "Boundary2 <none>", "Boundary3 <none>", ...
+    }
   }
 
-	_boundaryEditorList->setCurrentRow(0);
+  _boundaryEditorList->setCurrentRow(0);
 
-  if (_boundaryEditorDialog->isVisible())
-		onBoundaryEditorListItemClicked(_boundaryEditorList->currentItem());
+  if (_boundaryEditorDialog->isVisible()) {
+    onBoundaryEditorListItemClicked(_boundaryEditorList->currentItem());
+  }
+
 }

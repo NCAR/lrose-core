@@ -26,13 +26,13 @@
 //
 // Condor display
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // July 2010
 //
 ///////////////////////////////////////////////////////////////
 //
-// Condor is the engineering display for the Hawk radar system
+// Condor is the engineering display for APAR
 //
 ///////////////////////////////////////////////////////////////
 

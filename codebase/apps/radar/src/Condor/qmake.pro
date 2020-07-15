@@ -126,7 +126,7 @@ INCLUDEPATH += $(HOME)/rap/include
 LIBS += -L$(HOME)/lrose/lib
 LIBS += -L/usr/local/lib
 LIBS += -L/usr/local/lrose/lib
-LIBS += -L$(RAP_LIB_DIR)
+LIBS += -L$(LROSE_INSTALL_DIR)/lib
 
 lroseDir = $$(LROSE_INSTALL_DIR)
 !isEmpty(lroseDir) {

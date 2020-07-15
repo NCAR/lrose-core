@@ -24,7 +24,7 @@
 //////////////////////////////////////////////////////////////////////////
 // AllocCheck.hh: helper objects for moments computations
 //
-// RAP, NCAR, Boulder CO
+// EOL, NCAR, Boulder CO
 //
 // April 2010
 //
