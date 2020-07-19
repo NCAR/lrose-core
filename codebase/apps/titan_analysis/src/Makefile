@@ -17,16 +17,11 @@ SUB_DIRS = \
 	TrackProps \
 	Tracks2Ascii \
 	VerifyTracks \
-	ascii_to_xgraph \
-	cart_convert \
 	grid_forecast \
-	rtiming \
 	storms_to_ascii \
 	storms_to_tifs \
 	test_tserver \
-	track_grid_stats \
 	track_print \
-	tracks_to_ascii \
 	verify_day \
 	verify_grid \
 	verify_tracks
