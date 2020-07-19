@@ -19,8 +19,9 @@ MODULE_NAME = grib
 LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
-	degrib \
-	fortran
+	degrib
+
+#	fortran
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 
