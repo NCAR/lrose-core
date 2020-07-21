@@ -90,6 +90,21 @@ CPPC_SRCS = \
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 
 #
+# testing
+#
+
+test: test_RadxGeoref
+
+test_RadxGeoref: TEST_RadxGeoref.o
+	$(CPPC) $(DBUG_OPT_FLAGS) TEST_RadxGeoref.o \
+	$(LDFLAGS) -o test_RadxGeoref -lRadx -lm
+
+clean_test:
+	$(RM) test_RadxGeoref TEST_RadxGeoref.o
+	$(RM) *errlog
+
+
+#
 # local targets
 #
 

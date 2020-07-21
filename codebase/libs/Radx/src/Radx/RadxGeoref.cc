@@ -529,7 +529,13 @@ void RadxGeoref::computeRotTiltYPrime(double pitch, double roll, double hdg,
                                       double el, double az,
                                       double &rot, double &tilt)
 {
-  
+
+  if (el == -90.0) {
+    el = -90.0 + 1.0e-12;
+  } else if (el == 90) {
+    el = 90.0 - 1.0e-12;
+  }
+
   // precompute sin/cos
   
   double sinPitch = sin(Radx::toRadians(pitch));
