@@ -588,6 +588,11 @@ public:
 
   static void sincos(double radians, double &sinVal, double &cosVal);
 
+  /// convert degrees to radians, and vice versa
+
+  static double toRadians(double deg) { return deg * 0.017453292519943295; }
+  static double toDegrees(double rad) { return rad * 57.29577951308232; }
+
   /// condition az angle, to between 0 and 360
 
   static double conditionAz(double az);

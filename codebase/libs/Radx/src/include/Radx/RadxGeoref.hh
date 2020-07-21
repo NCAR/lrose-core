@@ -138,6 +138,23 @@ public:
 
   //@}
 
+                                                   
+  // compute (elevation, azimuth) from attitude, rotation, tilt
+  // For a Y-prime radar e.g. HCR
+  // angles are passed in/out in degrees
+
+  static void computeAzElYPrime(double pitch, double roll, double hdg,
+                                double rot, double tilt,
+                                double &el, double &az);
+
+  // compute (rotation, tilt) from attitude, elevation, azimuth
+  // For a Y-prime radar e.g. HCR
+  // angles are passed in/out in degrees
+
+  static void computeRotTiltYPrime(double pitch, double roll, double hdg,
+                                   double el, double az,
+                                   double &rot, double &tilt);
+            
   /// set all elements to 0
 
   void setToZero();

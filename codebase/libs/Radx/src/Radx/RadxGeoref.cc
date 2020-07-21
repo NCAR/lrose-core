@@ -38,6 +38,7 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxXml.hh>
 #include <Radx/ByteOrder.hh>
+#include <cmath>
 using namespace std;
 
 /////////////////////////////////////////////////////////
@@ -457,3 +458,126 @@ void RadxGeoref::_swapMetaNumbers(msgMetaNumbers_t &meta)
 {
   ByteOrder::swap64(&meta, sizeof(msgMetaNumbers_t));
 }
+
+///////////////////////////////////////////////////////////////////
+// compute (elevation, azimuth) from attitude, rotation, tilt
+// For a Y-prime radar e.g. HCR
+// angles are passed in/out in degrees
+
+void RadxGeoref::computeAzElYPrime(double pitch, double roll, double hdg, 
+                                   double rot, double tilt,
+                                   double &el, double &az)
+{
+
+  // precompute sin/cos
+  
+  double sinPitch = sin(Radx::toRadians(pitch));
+  double cosPitch = cos(Radx::toRadians(pitch));
+    
+  double sinRoll = sin(Radx::toRadians(roll));
+  double cosRoll = cos(Radx::toRadians(roll));
+    
+  double sinHdg = sin(Radx::toRadians(hdg));
+  double cosHdg = cos(Radx::toRadians(hdg));
+
+  double sinRot = sin(Radx::toRadians(rot));
+  double cosRot = cos(Radx::toRadians(rot));
+    
+  double sinTilt = sin(Radx::toRadians(tilt));
+  double cosTilt = cos(Radx::toRadians(tilt));
+
+  // compute unit vector relative to aircraft
+  
+  double x_a = sinRot * cosTilt;
+  double y_a = sinTilt;
+  double z_a = cosRot * cosTilt;
+
+  // compute matrix elements after multiplication
+  // for 3 axis transformation
+  
+  double mf11 = cosHdg * cosRoll + sinHdg * sinPitch * sinRoll;
+  double mf12 = sinHdg * cosPitch;
+  double mf13 = cosHdg * sinRoll - sinHdg * sinPitch * cosRoll;
+
+  double mf21 = -sinHdg * cosRoll + cosHdg * sinPitch * sinRoll;
+  double mf22 = cosHdg * cosPitch;
+  double mf23 = -sinHdg * sinRoll - cosHdg * sinPitch * cosRoll;
+
+  double mf31 = -cosPitch * sinRoll;
+  double mf32 = sinPitch;
+  double mf33 = cosPitch * cosRoll;
+
+  // Compute unit vector in earth coords
+  
+  double xx = mf11 * x_a + mf12 * y_a + mf13 * z_a;
+  double yy = mf21 * x_a + mf22 * y_a + mf23 * z_a;
+  double zz = mf31 * x_a + mf32 * y_a + mf33 * z_a;
+
+  // compute az and el
+  
+  az = Radx::toDegrees(atan2(xx, yy));
+  el = Radx::toDegrees(asin(zz));
+
+}
+
+///////////////////////////////////////////////////////////////////
+// compute (rotation, tilt) from attitude, elevation, azimuth
+// For a Y-prime radar e.g. HCR
+// angles are passed in/out in degrees
+
+void RadxGeoref::computeRotTiltYPrime(double pitch, double roll, double hdg, 
+                                      double el, double az,
+                                      double &rot, double &tilt)
+{
+  
+  // precompute sin/cos
+  
+  double sinPitch = sin(Radx::toRadians(pitch));
+  double cosPitch = cos(Radx::toRadians(pitch));
+    
+  double sinRoll = sin(Radx::toRadians(roll));
+  double cosRoll = cos(Radx::toRadians(roll));
+
+  double sinHdg = sin(Radx::toRadians(hdg));
+  double cosHdg = cos(Radx::toRadians(hdg));
+
+  double sinEl = sin(Radx::toRadians(el));
+  double cosEl = cos(Radx::toRadians(el));
+    
+  double sinAz = sin(Radx::toRadians(az));
+  double cosAz = cos(Radx::toRadians(az));
+
+  // compute unit vector relative to aircraft
+
+  double xx = sinAz * cosEl;
+  double yy = cosAz * cosEl;
+  double zz = sinEl;
+
+  // compute matrix elements after multiplication
+  // for 3 axis transformation
+  
+  double mr11 = cosRoll * cosHdg + sinRoll * sinPitch * sinHdg;
+  double mr12 = -cosRoll * sinHdg + sinRoll * sinPitch * cosHdg;
+  double mr13 = -sinRoll * cosPitch;
+
+  double mr21 = cosPitch * sinHdg;
+  double mr22 = cosPitch * cosHdg;
+  double mr23 = sinPitch;
+
+  double mr31 = sinRoll * cosHdg - cosRoll * sinPitch * sinHdg;
+  double mr32 = -sinRoll * sinHdg - cosRoll * sinPitch * cosHdg;
+  double mr33 = cosRoll * cosPitch;
+
+  // Compute unit vector in earth coords
+
+  double x_a = mr11 * xx + mr12 * yy + mr13 * zz;
+  double y_a = mr21 * xx + mr22 * yy + mr23 * zz;
+  double z_a = mr31 * xx + mr32 * yy + mr33 * zz;
+
+  // compute rot and tilt
+
+  tilt = Radx::toDegrees(asin(y_a));
+  rot = Radx::toDegrees(atan2(x_a, z_a));
+
+}
+
