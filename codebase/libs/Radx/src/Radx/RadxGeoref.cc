@@ -514,9 +514,21 @@ void RadxGeoref::computeAzElYPrime(double pitch, double roll, double hdg,
   double zz = mf31 * x_a + mf32 * y_a + mf33 * z_a;
 
   // compute az and el
-  
-  az = Radx::toDegrees(atan2(xx, yy));
+
   el = Radx::toDegrees(asin(zz));
+  az = Radx::toDegrees(atan2(xx, yy));
+
+  // if el is NAN then it is either +90 or -90
+
+  if (std::isnan(el)) {
+    if (zz > 0) {
+      el = 90.0;
+      az = 0.0;
+    } else if (zz < 0) {
+      el = -90.0;
+      az = 0.0;
+    }
+  }
 
 }
 
@@ -529,12 +541,6 @@ void RadxGeoref::computeRotTiltYPrime(double pitch, double roll, double hdg,
                                       double el, double az,
                                       double &rot, double &tilt)
 {
-
-  if (el == -90.0) {
-    el = -90.0 + 1.0e-12;
-  } else if (el == 90) {
-    el = 90.0 - 1.0e-12;
-  }
 
   // precompute sin/cos
   
@@ -584,6 +590,16 @@ void RadxGeoref::computeRotTiltYPrime(double pitch, double roll, double hdg,
 
   tilt = Radx::toDegrees(asin(y_a));
   rot = Radx::toDegrees(atan2(x_a, z_a));
+
+  if (std::isnan(tilt)) {
+    if (y_a > 0) {
+      tilt = 90.0;
+      rot = 0.0;
+    } else if (y_a < 0) {
+      tilt = -90.0;
+      rot = 0.0;
+    }
+  }
 
 }
 

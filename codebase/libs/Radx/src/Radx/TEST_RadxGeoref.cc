@@ -63,9 +63,6 @@ int main(int argc, char *argv[])
 
   // Compute the angles, and write them out
 
-  fprintf(stderr, "# %8s %8s %8s %8s %8s %8s %8s %8s\n",
-          "pitch", "roll", "el", "az", "rot", "tilt", "el2", "az2");
-
   double pitchMin = -2.0;
   double pitchMax = 4.1;
   double pitchDelta = 1.0;
@@ -75,31 +72,47 @@ int main(int argc, char *argv[])
   double rollDelta = 10.0;
 
   double hdg = 45.0;
-  double el = 90.1;
   double az = hdg + 90;
+  // double el = 90.0;
 
   int iret = 0;
-  
-  for (double pitch = pitchMin; pitch < pitchMax; pitch += pitchDelta) {
-    
-    for (double roll = rollMin; roll < rollMax; roll += rollDelta) {
-      
-      double rot, tilt;
-      RadxGeoref::computeRotTiltYPrime(pitch, roll, hdg, el, az, rot, tilt);
-      double el2, az2;
-      RadxGeoref::computeAzElYPrime(pitch, roll, hdg, rot, tilt, el2, az2);
-      
-      fprintf(stderr, "  %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f\n",
-              pitch, roll, el, az, rot, tilt, el2, az2);
 
-      if (fabs(el - el2) > 1.0e-6 || fabs(az - az2) > 1.0e-6) {
-        iret = -1;
-      }
-      
-    } // roll
+  for (double el = -90.0; el < 90.1; el += 10.0) {
 
-  } // pitch
+   fprintf(stderr, "# %8s %8s %8s %8s %8s %8s %8s %8s\n",
+           "pitch", "roll", "el", "az", "rot", "tilt", "el2", "az2");
+   
+   for (double pitch = pitchMin; pitch < pitchMax; pitch += pitchDelta) {
+     
+     for (double roll = rollMin; roll < rollMax; roll += rollDelta) {
+       
+       double rot, tilt;
+       RadxGeoref::computeRotTiltYPrime(pitch, roll, hdg, el, az, rot, tilt);
+       double el2, az2;
+       RadxGeoref::computeAzElYPrime(pitch, roll, hdg, rot, tilt, el2, az2);
+       
+       fprintf(stderr, "  %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f",
+               pitch, roll, el, az, rot, tilt, el2, az2);
+       
+       if (fabs(el - el2) > 1.0e-5) {
+         fprintf(stderr, "*");
+         fprintf(stderr, "%.6f,%.6f,%.6f", el - el2, el, el2);
+         iret = -1;
+       }
+       if (fabs(el-el2) > 1.0e-5 && fabs(az - az2) > 1.0e-5) {
+         fprintf(stderr, "&");
+         fprintf(stderr, "%.6f,%.6f,%.6f,%.6f", el2, az - az2, az, az2);
+         iret = -1;
+       }
+       
+       fprintf(stderr, "\n");
+       
+     } // roll
+     
+   } // pitch
 
+  } // el
+   
   if (iret == 0) {
     fprintf(stderr, "SUCCESS - TEST_RadxGeoref passed\n");
   } else {
