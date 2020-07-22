@@ -95,7 +95,7 @@ namespace rainfields
 
     static constexpr const char* name = nullptr;
     static constexpr int count = 0;
-    static constexpr const char* strings[] = { };
+    static constexpr const char* strings[] = { "" };
   };
 
   namespace detail
