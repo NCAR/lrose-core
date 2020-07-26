@@ -1707,7 +1707,8 @@ void BscanManager::_handleRay(const RadxRay *ray)
       fabs(_rayMaxRangeKm - maxRange) > 0.001) {
     _rayMinRangeKm = minRange;
     _rayMaxRangeKm = maxRange;
-    if (_bscan->getRangeAxisMode() != Params::RANGE_AXIS_ALTITUDE && !_specifyRangeLimits) {
+    if (_bscan->getRangeAxisMode() != Params::RANGE_AXIS_ALTITUDE &&
+        !_specifyRangeLimits) {
       _minPlotRangeKm = _rayMinRangeKm;
       _maxPlotRangeKm = _rayMaxRangeKm;
       _configureAxes();
@@ -1717,10 +1718,6 @@ void BscanManager::_handleRay(const RadxRay *ray)
   // get time
 
   RadxTime rayTime = ray->getRadxTime();
-
-  // add to ray vector
-  
-  _rays.push_back(ray);
 
   // in realtime mode, set up initial plot time window
 

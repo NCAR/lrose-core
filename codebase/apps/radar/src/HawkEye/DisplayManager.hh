@@ -141,7 +141,6 @@ protected:
   // reading data in
   
   Reader *_reader;
-  vector<const RadxRay *> _rays;
   bool _initialRay;
   
   // instrument platform details 
