@@ -40,7 +40,6 @@
 #include "RhiWidget.hh"
 #include "RhiWindow.hh"
 #include "Params.hh"
-#include "Reader.hh"
 #include "AllocCheck.hh"
 #include "BoundaryPointEditor.hh"
 
@@ -111,10 +110,9 @@ PolarManager* PolarManager::Instance()
 // Constructor
 
 PolarManager::PolarManager(const Params &params,
-                           Reader *reader,
                            const vector<DisplayField *> &fields,
                            bool haveFilteredFields) :
-        DisplayManager(params, reader, fields, haveFilteredFields),
+        DisplayManager(params, fields, haveFilteredFields),
         _sweepManager(params), _rhiWindowDisplayed(false)
 {
   m_pInstance = this;
@@ -899,13 +897,13 @@ void PolarManager::_handleRealtimeData(QTimerEvent * event)
 
     // get all available beams
 
-    while (true) {
+    while (_rayQueue.size() > 0) {
 
       // get the next ray from the reader queue
       // responsibility for this ray memory passes to
       // this (the master) thread
 
-      RadxRay *ray = _reader->getNextRay(_platform);
+      RadxRay *ray = getNextRay();
       if (ray == NULL) {
         break; // no pending rays
       }
@@ -1330,11 +1328,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
         if (fabs(val - missingVal) < 0.0001) {
           data[igate] = -9999.0;
         } else {
-	  //<<<<<<< HEAD
           data[igate] = val;
-        
-	  //=======
-          //data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values
           if (!haveColorMap) {
             // keep track of min and max data values
 	    // just display something.  The color scale can be edited as needed, later.

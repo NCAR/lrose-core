@@ -42,6 +42,7 @@
 #include "ColorMap.hh"
 #include "Params.hh"
 #include "Reader.hh"
+#include "AllocCheck.hh"
 
 #include <string>
 #include <cmath>
@@ -77,6 +78,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/TaThread.hh>
 #include <Radx/RadxFile.hh>
 
 using namespace std;
@@ -85,12 +87,10 @@ bool DisplayManager::_firstTimerEvent = true;
 // Constructor
 
 DisplayManager::DisplayManager(const Params &params,
-                               Reader *reader,
                                const vector<DisplayField *> &fields,
                                bool haveFilteredFields) :
         QMainWindow(NULL),
         _params(params),
-        _reader(reader),
         _initialRay(true),
         _fields(fields),
         _haveFilteredFields(haveFilteredFields)
@@ -110,6 +110,8 @@ DisplayManager::DisplayManager(const Params &params,
   _altRateMps = 0.0;
 
   _altitudeInFeet = false;
+
+  _maxQueueSize = _params.beam_queue_size;
 
 }
 
@@ -1267,3 +1269,66 @@ void DisplayManager::_about()
 
   QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
 }
+
+///////////////////////////////////////////////////////
+// add a ray to the queue
+
+void DisplayManager::addRay(RadxRay *ray, const RadxPlatform &platform)
+{
+  
+  TaThread::LockForScope locker;
+  
+  // store platform
+
+  _platform = platform;
+
+  // keep the queue below max size
+  
+  if (_rayQueue.size() >= _maxQueueSize) {
+    // pop the oldest ray
+    RadxRay *oldest = _rayQueue.back();
+    deleteRay(oldest);
+    _rayQueue.pop_back();
+  }
+
+  // add the ray to the queue
+
+  ray->addClient();
+  _rayQueue.push_front(ray);
+  AllocCheck::inst().addAlloc();
+
+}
+
+///////////////////////////////////////////////////////
+// get next ray
+// return NULL if no ray is available
+
+RadxRay *DisplayManager::getNextRay()
+
+{
+  
+  TaThread::LockForScope locker;
+
+  if (_rayQueue.size() == 0) {
+    return NULL;
+  }
+
+  RadxRay *ray = _rayQueue.back();
+  _rayQueue.pop_back();
+  
+  return ray;
+
+}
+
+///////////////////////////////////////////////////////
+// delete a ray if no clients left
+
+void DisplayManager::deleteRay(RadxRay *ray)
+
+{
+  if (ray->removeClient() == 0) {
+    delete ray;
+    AllocCheck::inst().addFree();
+  }
+}
+

@@ -75,7 +75,6 @@ class DisplayField;
 class PpiWidget;
 class RhiWidget;
 class RhiWindow;
-class Reader;
 class RadxPlatform;
 class TimeScaleWidget;
 
@@ -93,7 +92,6 @@ public:
   // constructor
   
   PolarManager(const Params &params,
-               Reader *reader,
                const vector<DisplayField *> &fields,
                bool haveFilteredFields);
   

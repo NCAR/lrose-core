@@ -27,16 +27,18 @@
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2010
+// July 2020
 //
 ///////////////////////////////////////////////////////////////
 //
-// Classes for reading in Beam data in thread
+// Classes for reading in Radx rays in realtime
+// or simulated realtime
 //
 ///////////////////////////////////////////////////////////////
 
 #include "Reader.hh"
 #include "AllocCheck.hh"
+#include "DisplayManager.hh"
 #include <cmath>
 #include <iostream>
 #include <toolsa/uusleep.h>
@@ -59,6 +61,15 @@ Reader::~Reader()
 {
 }
 
+///////////////////////////////////////////////////////
+// add a manager to which the rays will be delivered
+
+void Reader::addManager(DisplayManager *manager)
+
+{
+  _managers.push_back(manager);
+}
+  
 ///////////////////////////////////////////////////////
 // get next ray
 // return NULL if no ray is available
@@ -89,23 +100,21 @@ void Reader::_addRay(RadxRay *ray)
 
 {
 
-  TaThread::LockForScope locker;
-
-  // keep the queue below max size
+  // add a client to the ray so it is not prematurely deleted
   
-  if ((int) _rayQueue.size() >= _maxQueueSize) {
-    // pop the oldest ray
-    RadxRay *ray = _rayQueue.back();
-    delete ray;
-    AllocCheck::inst().addFree();
-    _rayQueue.pop_back();
+  ray->addClient();
+  
+  // add ray to each display manager
+
+  for (size_t ii = 0; ii < _managers.size(); ii++) {
+    _managers[ii]->addRay(ray, _platform);
   }
 
-  _rayQueue.push_front(ray);
-  AllocCheck::inst().addAlloc();
+  // remove the client from the ray and delete if needed
+
+  RadxRay::deleteIfUnused(ray);
 
 }
-
 
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -487,7 +496,7 @@ void IwrfReader::run()
 
   // instatiate reader object
 
-  IwrfMomReader *reader;
+  IwrfMomReader *reader = NULL;
 
   if (_params.input_mode == Params::FMQ_INPUT) {
     reader = new IwrfMomReaderFmq(_params.input_fmq_url,
@@ -509,7 +518,7 @@ void IwrfReader::run()
     // get new ray
 
     try {
-
+      
       RadxRay *ray = reader->readNextRay();
 
       if (ray == NULL) {

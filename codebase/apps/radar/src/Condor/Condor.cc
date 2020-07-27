@@ -196,9 +196,10 @@ int Condor::Run(QApplication &app)
   _reader->signalRunToStart();
   
   if (_params.display_mode == Params::POLAR_DISPLAY) {
+    
+    _polarManager = new PolarManager(_params, _displayFields, _haveFilteredFields);
 
-    _polarManager = new PolarManager(_params, _reader,
-                                     _displayFields, _haveFilteredFields);
+    _reader->addManager(_polarManager);
 
     if (_args.inputFileList.size() > 0) {
       _polarManager->setArchiveFileList(_args.inputFileList);
@@ -228,8 +229,10 @@ int Condor::Run(QApplication &app)
 
   } else if (_params.display_mode == Params::BSCAN_DISPLAY) {
 
-    _bscanManager = new BscanManager(_params, _reader, 
-                                     _displayFields, _haveFilteredFields);
+    _bscanManager = new BscanManager(_params, _displayFields, _haveFilteredFields);
+
+    _reader->addManager(_bscanManager);
+
     return _bscanManager->run(app);
 
   }

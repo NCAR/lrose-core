@@ -41,7 +41,6 @@
 #include "BscanWidget.hh"
 #include "ColorMap.hh"
 #include "Params.hh"
-#include "Reader.hh"
 #include "AllocCheck.hh"
 #include "SoloDefaultColorWrapper.hh"
 #include <radar/RadarComplex.hh>
@@ -87,10 +86,9 @@ using namespace std;
 // Constructor
 
 BscanManager::BscanManager(const Params &params,
-                           Reader *reader,
                            const vector<DisplayField *> &fields,
                            bool haveFilteredFields) :
-        DisplayManager(params, reader, fields, haveFilteredFields),
+        DisplayManager(params, fields, haveFilteredFields),
         _plotStart(true)
         
 {
@@ -1362,7 +1360,7 @@ void BscanManager::_handleRealtimeData()
     // responsibility for this ray memory passes to
     // this (the master) thread
     
-    RadxRay *ray = _reader->getNextRay(_platform);
+    RadxRay *ray = getNextRay();
     if (ray == NULL) {
       return; // no pending rays
     }
@@ -1382,8 +1380,7 @@ void BscanManager::_handleRealtimeData()
       if (_params.debug >= Params::DEBUG_EXTRA) {
         cerr << "  Discarding ray, not enough elapsed time" << endl;
       }
-      delete ray;
-      AllocCheck::inst().addFree();
+      deleteRay(ray);
       continue;
     } else if (timeSincePrev < 0) {
       // gone back in time, so reset times
@@ -1397,7 +1394,7 @@ void BscanManager::_handleRealtimeData()
       double elev = ray->getElevationDeg();
       if (elev < _params.bscan_min_elevation_deg ||
           elev > _params.bscan_max_elevation_deg) {
-        delete ray;
+        deleteRay(ray);
         continue;
       }
     }
@@ -1406,7 +1403,7 @@ void BscanManager::_handleRealtimeData()
       double elev = ray->getAzimuthDeg();
       if (elev < _params.bscan_min_azimuth_deg ||
           elev > _params.bscan_max_azimuth_deg) {
-        delete ray;
+        deleteRay(ray);
         continue;
       }
     }
@@ -1458,7 +1455,8 @@ void BscanManager::_handleRealtimeDataForImages()
     // responsibility for this ray memory passes to
     // this (the master) thread
     
-    RadxRay *ray = _reader->getNextRay(_platform);
+    // RadxRay *ray = _reader->getNextRay(_platform);
+    RadxRay *ray = NULL;
     if (ray == NULL) {
       return; // no pending rays
     }
@@ -1484,8 +1482,7 @@ void BscanManager::_handleRealtimeDataForImages()
     
     // delete the ray
     
-    delete ray;
-    AllocCheck::inst().addFree();
+    deleteRay(ray);
     
   } // while (true)
 
@@ -1707,7 +1704,8 @@ void BscanManager::_handleRay(const RadxRay *ray)
       fabs(_rayMaxRangeKm - maxRange) > 0.001) {
     _rayMinRangeKm = minRange;
     _rayMaxRangeKm = maxRange;
-    if (_bscan->getRangeAxisMode() != Params::RANGE_AXIS_ALTITUDE && !_specifyRangeLimits) {
+    if (_bscan->getRangeAxisMode() != Params::RANGE_AXIS_ALTITUDE && 
+        !_specifyRangeLimits) {
       _minPlotRangeKm = _rayMinRangeKm;
       _maxPlotRangeKm = _rayMaxRangeKm;
       _configureAxes();
@@ -1717,10 +1715,6 @@ void BscanManager::_handleRay(const RadxRay *ray)
   // get time
 
   RadxTime rayTime = ray->getRadxTime();
-
-  // add to ray vector
-  
-  _rays.push_back(ray);
 
   // in realtime mode, set up initial plot time window
 

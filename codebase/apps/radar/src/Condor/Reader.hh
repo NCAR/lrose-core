@@ -27,11 +27,12 @@
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2010
+// July 2020
 //
 ///////////////////////////////////////////////////////////////
 //
-// Classes for reading in Ray data in thread
+// Classes for reading in Radx rays in realtime
+// or simulated realtime
 //
 ///////////////////////////////////////////////////////////////
 
@@ -44,6 +45,7 @@
 #include <Radx/RadxRay.hh>
 #include <radar/IwrfMomReader.hh>
 #include "Params.hh"
+class DisplayManager;
 using namespace std;
 
 ////////////////////////////
@@ -57,6 +59,10 @@ public:
   Reader(const Params &params);
   virtual ~Reader();
 
+  // add a diplay manager to which the rays will be delivered
+  
+  void addManager(DisplayManager *manager);
+  
   // get next ray
   // return NULL if no ray is available
   // also fills in platform object
@@ -71,12 +77,11 @@ protected:
   
   // data members
 
-  // QMutex _mutex;
   const Params &_params;
-  
   RadxPlatform _platform;
   deque<RadxRay *> _rayQueue;
   int _maxQueueSize;
+  vector<DisplayManager *> _managers;
 
 private:
 

@@ -41,10 +41,8 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 
-#include "Args.hh"
-#include "Params.hh"
-#include "ColorMap.hh"
 #include <QMainWindow>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxTime.hh>
@@ -53,6 +51,10 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxGeoref.hh>
+
+#include "Args.hh"
+#include "Params.hh"
+#include "ColorMap.hh"
 #include "SweepManager.hh"
 
 class QApplication;
@@ -81,7 +83,6 @@ public:
   // constructor
   
   DisplayManager(const Params &params,
-                 Reader *reader,
                  const vector<DisplayField *> &fields,
                  bool haveFilteredFields);
   
@@ -112,6 +113,18 @@ public:
   
   virtual void enableZoomButton() const = 0;
 
+  // add an input ray to the queue
+
+  void addRay(RadxRay *ray, const RadxPlatform &platform);
+
+  // get next ray
+  // return NULL if no ray is available
+  
+  RadxRay *getNextRay();
+
+  // delete a ray if no clients left
+  
+  void deleteRay(RadxRay *ray);
 
 public slots:
 
@@ -138,11 +151,11 @@ protected:
   
   const Params &_params;
   
-  // reading data in
+  // reading ray data in
   
-  Reader *_reader;
-  vector<const RadxRay *> _rays;
   bool _initialRay;
+  deque<RadxRay *> _rayQueue;
+  size_t _maxQueueSize;
   
   // instrument platform details 
 
