@@ -452,7 +452,7 @@ void PolarManager::_moveUpDown()
 
 void PolarManager::_setTitleBar(const string &radarName)
 {
-  string windowTitle = "HAWK_EYE -- " + radarName;
+  string windowTitle = "CONDOR -- " + radarName;
   setWindowTitle(tr(windowTitle.c_str()));
 }
   
@@ -925,6 +925,8 @@ void PolarManager::_handleRealtimeData(QTimerEvent * event)
           Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
         _handleRay(_platform, ray);
       }
+
+      deleteRay(ray);
     
     } // while
 
@@ -3132,8 +3134,8 @@ void PolarManager::ShowContextMenu(const QPoint &pos) {
 void PolarManager::_howto()
 {
   string text;
-  text += "HOWTO HINTS FOR HAWK-EYE in POLAR mode\n";
-  text += "======================================\n";
+  text += "HOWTO HINTS FOR CONDOR in POLAR mode\n";
+  text += "====================================\n";
   text += "\n";
   text += "To go forward  in time, click in data window, hit Right Arrow\n";
   text += "To go backward in time, click in data window, hit Left  Arrow\n";

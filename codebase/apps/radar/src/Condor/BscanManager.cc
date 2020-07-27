@@ -178,7 +178,7 @@ int BscanManager::run(QApplication &app)
 
 void BscanManager::_setTitleBar(const string &radarName)
 {
-  string windowTitle = "HAWK_EYE BSCAN -- " + radarName;
+  string windowTitle = "CONDOR BSCAN -- " + radarName;
   setWindowTitle(tr(windowTitle.c_str()));
 }
 
@@ -1435,6 +1435,7 @@ void BscanManager::_handleRealtimeData()
     // draw the beam
     
     _handleRay(ray);
+    deleteRay(ray);
     
   } // while (true)
 
@@ -1455,8 +1456,7 @@ void BscanManager::_handleRealtimeDataForImages()
     // responsibility for this ray memory passes to
     // this (the master) thread
     
-    // RadxRay *ray = _reader->getNextRay(_platform);
-    RadxRay *ray = NULL;
+    RadxRay *ray = getNextRay();
     if (ray == NULL) {
       return; // no pending rays
     }
@@ -3219,8 +3219,8 @@ void BscanManager::_createImageFiles()
 void BscanManager::_howto()
 {
   string text;
-  text += "HOWTO HINTS FOR HAWK-EYE in BSCAN mode\n";
-  text += "======================================\n";
+  text += "HOWTO HINTS FOR CONDOR in BSCAN mode\n";
+  text += "====================================\n";
   text += "\n";
   text += "To go forward  in time, click in data window, hit Right Arrow\n";
   text += "To go backward in time, click in data window, hit Left  Arrow\n";

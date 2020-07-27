@@ -1222,8 +1222,8 @@ void DisplayManager::_showClick()
 void DisplayManager::_howto()
 {
   string text;
-  text += "HOWTO HINTS FOR HAWK-EYE\n";
-  text += "========================\n";
+  text += "HOWTO HINTS FOR CONDOR\n";
+  text += "======================\n";
   text += "\n";
   text += "Use NUMBER keys to display RAW fields\n";
   text += "Use ALT-NUMBER keys to display FILTERED fields\n";
