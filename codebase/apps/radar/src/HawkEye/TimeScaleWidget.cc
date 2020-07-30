@@ -145,7 +145,6 @@ void TimeScaleWidget::configureAxes()
 
 void TimeScaleWidget::refresh()
 {
-  cerr << "wwwwwwwwwwwwwwwwwwwwwww" << endl;
   _refresh();
 }
 
@@ -155,14 +154,11 @@ void TimeScaleWidget::_refresh()
     configureAxes();
     _timesPending = false;
   }
-  cerr << "1111111111111113333333333" << endl;
   QPainter painter(this);
   QPaintDevice *device = painter.device();
   if (device == 0) {
-    cerr << "uuuuuuuuuuuuuuuuuuuuuuuu - painter device not active" << endl;
     return;
   }
-  cerr << "xxxxxxxxxxxxxxxxxxxxxxx" << endl;
   _drawOverlays(painter);
 }
 
