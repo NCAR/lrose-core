@@ -670,7 +670,7 @@ void PolarManager::_createActions()
   // show azimuth lines
 
   _azLinesAct = new QAction(tr("Az Lines"), this);
-  _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
+  _azLinesAct->setStatusTip(tr("Turn az lines on/off"));
   _azLinesAct->setCheckable(true);
   _azLinesAct->setChecked(_params.ppi_azimuth_lines_on_at_startup);
   connect(_azLinesAct, SIGNAL(triggered(bool)),

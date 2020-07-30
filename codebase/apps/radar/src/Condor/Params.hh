@@ -81,6 +81,12 @@ public:
   } input_mode_t;
 
   typedef enum {
+    PPI_PLOT = 0,
+    RHI_PLOT = 1,
+    BSCAN_PLOT = 2
+  } plot_type_t;
+
+  typedef enum {
     POLAR_DISPLAY = 0,
     BSCAN_DISPLAY = 1
   } display_mode_t;
@@ -494,6 +500,13 @@ public:
 
   double max_range_km;
 
+  int plots_n_rows;
+
+  int plots_n_columns;
+
+  plot_type_t *_plot_types;
+  int plot_types_n;
+
   display_mode_t display_mode;
 
   tdrp_bool_t override_radar_name;
@@ -744,7 +757,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[167];
+  mutable TDRPtable _table[171];
 
   const char *_className;
 

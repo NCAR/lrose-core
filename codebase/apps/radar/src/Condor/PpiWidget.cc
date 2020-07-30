@@ -390,19 +390,29 @@ void PpiWidget::configureRange(double max_range)
 
   if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
 
-    _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
-                   -_maxRangeKm, 0.0,
-                   _maxRangeKm, _maxRangeKm,
-                   axisTickLen, nTicksIdeal, textMargin);
-    
+    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setLeftMargin(leftMargin);
+    _fullWorld.setRightMargin(rightMargin);
+    _fullWorld.setTopMargin(topMargin);
+    _fullWorld.setBottomMargin(bottomMargin);
+    _fullWorld.setColorScaleWidth(colorScaleWidth);
+    _fullWorld.setWorldLimits(-_maxRangeKm, 0.0, _maxRangeKm, _maxRangeKm);
+    _fullWorld.setXAxisTickLen(axisTickLen);
+    _fullWorld.setXNTicksIdeal(nTicksIdeal);
+    _fullWorld.setAxisTextMargin(textMargin);
+
   } else {
     
-    _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
-                   -_maxRangeKm, -_maxRangeKm,
-                   _maxRangeKm, _maxRangeKm,
-                   axisTickLen, nTicksIdeal, textMargin);
+    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setLeftMargin(leftMargin);
+    _fullWorld.setRightMargin(rightMargin);
+    _fullWorld.setTopMargin(topMargin);
+    _fullWorld.setBottomMargin(bottomMargin);
+    _fullWorld.setColorScaleWidth(colorScaleWidth);
+    _fullWorld.setWorldLimits(-_maxRangeKm, -_maxRangeKm, _maxRangeKm, _maxRangeKm);
+    _fullWorld.setXAxisTickLen(axisTickLen);
+    _fullWorld.setXNTicksIdeal(nTicksIdeal);
+    _fullWorld.setAxisTextMargin(textMargin);
 
   }
   
@@ -512,7 +522,7 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
     _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
 
     _setTransform(_zoomWorld.getTransform());
 
@@ -693,6 +703,21 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     double maxRingRange = ringRange;
     while (ringRange <= _maxRangeKm) {
 
+      cerr << "1111111 ringRange: " << ringRange << endl;
+      cerr << "1111111 maxRangeKm: " << _maxRangeKm << endl;
+      cerr << "1111111 minX, minY, maxX, maxY: "
+           << ringRange << ", " << -_maxRangeKm << ", "
+           << ringRange << ", " << _maxRangeKm << endl;
+      cerr << "1111111 minX, minY, maxX, maxY: "
+           << -ringRange << ", " << -_maxRangeKm << ", "
+           << -ringRange << ", " << _maxRangeKm << endl;
+      cerr << "1111111 minX, minY, maxX, maxY: "
+           << -_maxRangeKm << ", " << ringRange << ", "
+           << _maxRangeKm << ", " << ringRange << endl;
+      cerr << "1111111 minX, minY, maxX, maxY: "
+           << -_maxRangeKm << ", " << -ringRange << ", "
+           << _maxRangeKm << ", " << -ringRange << endl;
+
       _zoomWorld.drawLine(painter, ringRange, -_maxRangeKm, ringRange, _maxRangeKm);
       _zoomWorld.drawLine(painter, -ringRange, -_maxRangeKm, -ringRange, _maxRangeKm);
       _zoomWorld.drawLine(painter, -_maxRangeKm, ringRange, _maxRangeKm, ringRange);
@@ -703,14 +728,16 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     }
     painter.restore();
 
-    _zoomWorld.setSpecifyTicks(true, -maxRingRange, _ringSpacing);
+    _zoomWorld.specifyXTicks(-maxRingRange, _ringSpacing);
+    _zoomWorld.specifyYTicks(-maxRingRange, _ringSpacing);
 
-    _zoomWorld.drawAxisLeft(painter, "km", true, true, true);
-    _zoomWorld.drawAxisRight(painter, "km", true, true, true);
-    _zoomWorld.drawAxisTop(painter, "km", true, true, true);
-    _zoomWorld.drawAxisBottom(painter, "km", true, true, true);
+    _zoomWorld.drawAxisLeft(painter, "km", true, true, true, false);
+    _zoomWorld.drawAxisRight(painter, "km", true, true, true, false);
+    _zoomWorld.drawAxisTop(painter, "km", true, true, true, false);
+    _zoomWorld.drawAxisBottom(painter, "km", true, true, true, false);
     
-    _zoomWorld.setSpecifyTicks(false);
+    _zoomWorld.unspecifyXTicks();
+    _zoomWorld.unspecifyYTicks();
 
   }
   

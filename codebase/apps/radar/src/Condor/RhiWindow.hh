@@ -220,10 +220,10 @@ protected:
   QAction *_ringsAct;
 
   /**
-   * @brief Action for turning azimuth lines on and off.
+   * @brief Action for turning elevation lines on and off.
    */
 
-  QAction *_azLinesAct;
+  QAction *_elLinesAct;
 
   /**
    * @brief Action for turning grid lines on and off.

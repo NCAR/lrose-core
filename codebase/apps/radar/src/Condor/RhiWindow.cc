@@ -164,11 +164,11 @@ void RhiWindow::_createActions(RhiWidget *rhi)
   connect(_gridsAct, SIGNAL(triggered(bool)),
 	  rhi, SLOT(setGrids(bool)));
 
-  _azLinesAct = new QAction(tr("Az Lines"), this);
-  _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
-  _azLinesAct->setCheckable(true);
-  _azLinesAct->setChecked(_params.rhi_elevation_lines_on_at_startup);
-  connect(_azLinesAct, SIGNAL(triggered(bool)),
+  _elLinesAct = new QAction(tr("El Lines"), this);
+  _elLinesAct->setStatusTip(tr("Turn elevation lines on/off"));
+  _elLinesAct->setCheckable(true);
+  _elLinesAct->setChecked(_params.rhi_elevation_lines_on_at_startup);
+  connect(_elLinesAct, SIGNAL(triggered(bool)),
 	  rhi, SLOT(setAngleLines(bool)));
 
   _unzoomAct = new QAction(tr("Unzoom"), this);
@@ -204,7 +204,7 @@ void RhiWindow::_createMenus()
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
   _overlaysMenu->addAction(_ringsAct);
   _overlaysMenu->addAction(_gridsAct);
-  _overlaysMenu->addAction(_azLinesAct);
+  _overlaysMenu->addAction(_elLinesAct);
   _overlaysMenu->addSeparator();
 
   menuBar()->addAction(_unzoomAct);

@@ -125,16 +125,17 @@ void TimeScaleWidget::configureAxes()
   int leftMargin = 40;
   int rightMargin = 40;
   
-  _world.set(width(), height(),
-             leftMargin, rightMargin,
-             topMargin, bottomMargin,
-             0.0,
-             _startTime.asDouble(), 0.0,
-             _endTime.asDouble(), 1.0,
-             _params.bscan_axis_tick_len,
-             _params.bscan_n_ticks_ideal,
-             _params.bscan_text_margin);
-
+  _world.setWindowGeom(width(), height(), 0, 0);
+  _world.setLeftMargin(leftMargin);
+  _world.setRightMargin(rightMargin);
+  _world.setTopMargin(topMargin);
+  _world.setBottomMargin(bottomMargin);
+  _world.setColorScaleWidth(0.0);
+  _world.setWorldLimits(_startTime.asDouble(), 0.0, _endTime.asDouble(), 1.0);
+  _world.setXAxisTickLen(_params.bscan_axis_tick_len);
+  _world.setXNTicksIdeal(_params.bscan_n_ticks_ideal);
+  _world.setAxisTextMargin(_params.bscan_text_margin);
+    
   _transform = _world.getTransform();
 
 }
@@ -145,7 +146,6 @@ void TimeScaleWidget::configureAxes()
 
 void TimeScaleWidget::refresh()
 {
-  cerr << "wwwwwwwwwwwwwwwwwwwwwww" << endl;
   _refresh();
 }
 
@@ -155,14 +155,11 @@ void TimeScaleWidget::_refresh()
     configureAxes();
     _timesPending = false;
   }
-  cerr << "1111111111111113333333333" << endl;
   QPainter painter(this);
   QPaintDevice *device = painter.device();
   if (device == 0) {
-    cerr << "uuuuuuuuuuuuuuuuuuuuuuuu - painter device not active" << endl;
     return;
   }
-  cerr << "xxxxxxxxxxxxxxxxxxxxxxx" << endl;
   _drawOverlays(painter);
 }
 

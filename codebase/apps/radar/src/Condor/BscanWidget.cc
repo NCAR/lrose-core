@@ -156,7 +156,7 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
 
   _rangeAxisMode = range_axis_mode;
   _minRange = min_range;
-  _maxRangeKm = max_range;
+  _maxRange = max_range;
   _minAltitude = min_altitude;
   _maxAltitude = max_altitude;
   _timeSpanSecs = time_span_secs;
@@ -170,47 +170,44 @@ void BscanWidget::configureAxes(Params::range_axis_mode_t range_axis_mode,
   }
 
   if (range_axis_mode == Params::RANGE_AXIS_UP) {
-    _fullWorld.set(width(), height(),
-                   _params.bscan_left_margin,
-                   _params.bscan_right_margin,
-                   _params.bscan_top_margin,
-                   bottomMargin,
-                   _colorScaleWidth,
-                   0.0,
-                   _minRange,
-                   _timeSpanSecs,
-                   _maxRangeKm,
-                   _params.bscan_axis_tick_len,
-                   _params.bscan_n_ticks_ideal,
-                   _params.bscan_text_margin);
+
+    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setLeftMargin(_params.bscan_left_margin);
+    _fullWorld.setRightMargin(_params.bscan_right_margin);
+    _fullWorld.setTopMargin(_params.bscan_top_margin);
+    _fullWorld.setBottomMargin(bottomMargin);
+    _fullWorld.setColorScaleWidth(_colorScaleWidth);
+    _fullWorld.setWorldLimits(0.0, _minRange, _timeSpanSecs, _maxRange);
+    _fullWorld.setXAxisTickLen(_params.bscan_axis_tick_len);
+    _fullWorld.setXNTicksIdeal(_params.bscan_n_ticks_ideal);
+    _fullWorld.setAxisTextMargin(_params.bscan_text_margin);
+
   } else if (range_axis_mode == Params::RANGE_AXIS_DOWN) {
-    _fullWorld.set(width(), height(),
-                   _params.bscan_left_margin,
-                   _params.bscan_right_margin,
-                   _params.bscan_top_margin,
-                   bottomMargin,
-                   _colorScaleWidth,
-                   0.0,
-                   _maxRangeKm,
-                   _timeSpanSecs,
-                   _minRange,
-                   _params.bscan_axis_tick_len,
-                   _params.bscan_n_ticks_ideal,
-                   _params.bscan_text_margin);
+
+    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setLeftMargin(_params.bscan_left_margin);
+    _fullWorld.setRightMargin(_params.bscan_right_margin);
+    _fullWorld.setTopMargin(_params.bscan_top_margin);
+    _fullWorld.setBottomMargin(bottomMargin);
+    _fullWorld.setColorScaleWidth(_colorScaleWidth);
+    _fullWorld.setWorldLimits(0.0, _maxRange, _timeSpanSecs, _minRange);
+    _fullWorld.setXAxisTickLen(_params.bscan_axis_tick_len);
+    _fullWorld.setXNTicksIdeal(_params.bscan_n_ticks_ideal);
+    _fullWorld.setAxisTextMargin(_params.bscan_text_margin);
+
   } else {
-    _fullWorld.set(width(), height(),
-                   _params.bscan_left_margin,
-                   _params.bscan_right_margin,
-                   _params.bscan_top_margin,
-                   bottomMargin,
-                   _colorScaleWidth,
-                   0.0,
-                   _minAltitude,
-                   _timeSpanSecs,
-                   _maxAltitude,
-                   _params.bscan_axis_tick_len,
-                   _params.bscan_n_ticks_ideal,
-                   _params.bscan_text_margin);
+
+    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setLeftMargin(_params.bscan_left_margin);
+    _fullWorld.setRightMargin(_params.bscan_right_margin);
+    _fullWorld.setTopMargin(_params.bscan_top_margin);
+    _fullWorld.setBottomMargin(bottomMargin);
+    _fullWorld.setColorScaleWidth(_colorScaleWidth);
+    _fullWorld.setWorldLimits(0.0, _minAltitude, _timeSpanSecs, _maxAltitude);
+    _fullWorld.setXAxisTickLen(_params.bscan_axis_tick_len);
+    _fullWorld.setXNTicksIdeal(_params.bscan_n_ticks_ideal);
+    _fullWorld.setAxisTextMargin(_params.bscan_text_margin);
+
   }
   
   _zoomWorld = _fullWorld;
@@ -627,7 +624,8 @@ void BscanWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
-    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY,
+                              _worldReleaseX, _worldReleaseY);
     _setTransform(_zoomWorld.getTransform());
 
     // enable unzoom button

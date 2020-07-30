@@ -202,17 +202,31 @@ void RhiWidget::configureRange(double max_range)
   int textMargin = _params.rhi_text_margin;
 
   if (_params.rhi_display_180_degrees) {
-    _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
-                   -_maxRangeKm, 0.0,
-                   _maxRangeKm, _maxHeightKm,
-                   axisTickLen, nTicksIdeal, textMargin);
+
+    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setLeftMargin(leftMargin);
+    _fullWorld.setRightMargin(rightMargin);
+    _fullWorld.setTopMargin(topMargin);
+    _fullWorld.setBottomMargin(bottomMargin);
+    _fullWorld.setColorScaleWidth(colorScaleWidth);
+    _fullWorld.setWorldLimits(-_maxRangeKm, 0.0, _maxRangeKm, _maxHeightKm);
+    _fullWorld.setXAxisTickLen(axisTickLen);
+    _fullWorld.setXNTicksIdeal(nTicksIdeal);
+    _fullWorld.setAxisTextMargin(textMargin);
+
   } else {
-    _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
-                   0.0, 0.0,
-                   _maxRangeKm, _maxHeightKm,
-                   axisTickLen, nTicksIdeal, textMargin);
+
+    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setLeftMargin(leftMargin);
+    _fullWorld.setRightMargin(rightMargin);
+    _fullWorld.setTopMargin(topMargin);
+    _fullWorld.setBottomMargin(bottomMargin);
+    _fullWorld.setColorScaleWidth(colorScaleWidth);
+    _fullWorld.setWorldLimits(0.0, 0.0, _maxRangeKm, _maxHeightKm);
+    _fullWorld.setXAxisTickLen(axisTickLen);
+    _fullWorld.setXNTicksIdeal(nTicksIdeal);
+    _fullWorld.setAxisTextMargin(textMargin);
+
   }
 
   _zoomWorld = _fullWorld;
@@ -279,7 +293,7 @@ void RhiWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
     _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
 
     _setTransform(_zoomWorld.getTransform());
 
@@ -408,16 +422,16 @@ void RhiWidget::_drawOverlays(QPainter &painter)
   font.setPointSizeF(_params.rhi_label_font_size);
   painter.setFont(font);
   
-  _zoomWorld.setSpecifyTicks(true, xMin, _xGridSpacing);
-  _zoomWorld.drawAxisTop(painter, "km", true, true, true);
-  _zoomWorld.drawAxisBottom(painter, "km", true, true, true);
+  _zoomWorld.specifyXTicks(xMin, _xGridSpacing);
+  _zoomWorld.drawAxisTop(painter, "km", true, true, true, false);
+  _zoomWorld.drawAxisBottom(painter, "km", true, true, true, false);
+  _zoomWorld.unspecifyXTicks();
   
-  _zoomWorld.setSpecifyTicks(true, yMin, _yGridSpacing);
-  _zoomWorld.drawAxisLeft(painter, "km", true, true, true);
-  _zoomWorld.drawAxisRight(painter, "km", true, true, true);
+  _zoomWorld.specifyYTicks(yMin, _yGridSpacing);
+  _zoomWorld.drawAxisLeft(painter, "km", true, true, true, false);
+  _zoomWorld.drawAxisRight(painter, "km", true, true, true, false);
+  _zoomWorld.unspecifyYTicks();
     
-  _zoomWorld.setSpecifyTicks(false);
-
   // Draw the grid
   
   if (_xGridSpacing > 0.0 && _gridsEnabled)  {

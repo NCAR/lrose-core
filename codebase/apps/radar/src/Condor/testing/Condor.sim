@@ -44,7 +44,7 @@ debug = DEBUG_OFF;
 // Type: boolean
 //
 
-check_ray_alloc = TRUE;
+check_ray_alloc = FALSE;
 
 ///////////// register_with_procmap ///////////////////
 //
@@ -476,7 +476,7 @@ max_range_km = 225;
 //     BSCAN_DISPLAY
 //
 
-display_mode = BSCAN_DISPLAY;
+display_mode = POLAR_DISPLAY;
 
 //======================================================================
 //

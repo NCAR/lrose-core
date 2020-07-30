@@ -322,6 +322,34 @@ paramdef double {
 } max_range_km;
 
 commentdef {
+  p_header = "PLOT LAYOUT";
+}
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of rows of plots.";
+  p_help = "The plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.";
+} plots_n_rows;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of columns of plots.";
+  p_help = "The plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.";
+} plots_n_columns;
+
+typedef enum {
+  PPI_PLOT,
+  RHI_PLOT,
+  BSCAN_PLOT
+} plot_type_t;
+
+paramdef enum plot_type_t {
+  p_default = { PPI_PLOT, RHI_PLOT, RHI_PLOT, BSCAN_PLOT };
+  p_descr = "Array of types of plots for each sub panel.";
+  p_help = "The array size must match n_rows times n_columns.";
+} plot_types[];
+
+commentdef {
   p_header = "DISPLAY TYPE";
 }
 

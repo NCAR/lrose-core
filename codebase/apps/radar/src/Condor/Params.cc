@@ -1149,6 +1149,71 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("PLOT LAYOUT");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'plots_n_rows'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("plots_n_rows");
+    tt->descr = tdrpStrDup("Number of rows of plots.");
+    tt->help = tdrpStrDup("The plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.");
+    tt->val_offset = (char *) &plots_n_rows - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'plots_n_columns'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("plots_n_columns");
+    tt->descr = tdrpStrDup("Number of columns of plots.");
+    tt->help = tdrpStrDup("The plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.");
+    tt->val_offset = (char *) &plots_n_columns - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'plot_types'
+    // ctype is '_plot_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("plot_types");
+    tt->descr = tdrpStrDup("Array of types of plots for each sub panel.");
+    tt->help = tdrpStrDup("The array size must match n_rows times n_columns.");
+    tt->array_offset = (char *) &_plot_types - &_start_;
+    tt->array_n_offset = (char *) &plot_types_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(plot_type_t);
+    tt->array_n = 4;
+    tt->enum_def.name = tdrpStrDup("plot_type_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PPI_PLOT");
+      tt->enum_def.fields[0].val = PPI_PLOT;
+      tt->enum_def.fields[1].name = tdrpStrDup("RHI_PLOT");
+      tt->enum_def.fields[1].val = RHI_PLOT;
+      tt->enum_def.fields[2].name = tdrpStrDup("BSCAN_PLOT");
+      tt->enum_def.fields[2].val = BSCAN_PLOT;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].e = PPI_PLOT;
+      tt->array_vals[1].e = RHI_PLOT;
+      tt->array_vals[2].e = RHI_PLOT;
+      tt->array_vals[3].e = BSCAN_PLOT;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DISPLAY TYPE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1173,11 +1238,11 @@
     tt->single_val.e = POLAR_DISPLAY;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("NAMES AND LABELS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1242,11 +1307,11 @@
     tt->single_val.s = tdrpStrDup("MARSHALL");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("WINDOW DIMENSIONS AND PLOTTING DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1371,11 +1436,11 @@
     tt->single_val.i = 11;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("PPI MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1496,11 +1561,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("RHI MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1793,11 +1858,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("BSCAN TIME LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1842,11 +1907,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("BSCAN REALTIME CONTROLS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1887,11 +1952,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("BSCAN RANGE AND ALTITUDE LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2002,11 +2067,11 @@
     tt->single_val.e = RANGE_AXIS_ALTITUDE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("BSCAN ANGLE LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2083,11 +2148,11 @@
     tt->single_val.d = 91;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("BSCAN CENSOR DATA BELOW SURFACE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2152,11 +2217,11 @@
     tt->single_val.d = 5;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("BSCAN MARGINS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2245,11 +2310,11 @@
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("BSCAN TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2374,11 +2439,11 @@
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("DISTANCE SCALE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2407,11 +2472,11 @@
     tt->single_val.i = 50;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("BSCAN LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2488,11 +2553,11 @@
     tt->single_val.e = LEGEND_TOP_RIGHT;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("BSCAN DWELL CONTROLS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2547,11 +2612,11 @@
     tt->single_val.e = DWELL_STATS_MIDDLE;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("SAVING IMAGES TO FILE");
     tt->comment_text = tdrpStrDup("In creating files for the field catalog, the file name is of the form:\n\n\tcategory.platform.YYYYMMDDHHmm.product_name.ext\n\nThe following parameters control the output directory, and the construction of the file name");
     tt++;
@@ -2676,11 +2741,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("OPTION TO CREATE IMAGES AUTOMATICALLY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2812,11 +2877,11 @@
       tt->array_vals[2].i = 2;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("SIMULATION MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -362,7 +362,7 @@ class DLL_EXPORT BscanWidget : public QWidget
    */
 
   double _minRange;
-  double _maxRangeKm;
+  double _maxRange;
   double _minAltitude;
   double _maxAltitude;
   bool _altitudeInFeet;
