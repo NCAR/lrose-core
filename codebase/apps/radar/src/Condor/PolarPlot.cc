@@ -78,10 +78,25 @@ PolarPlot::PolarPlot(QWidget* parent,
         _scaledLabel(ScaledLabel::DistanceEng)
         
 {
+
   _isZoomed = false;
   _ringsEnabled = false;
   _gridsEnabled = false;
   _angleLinesEnabled = false;
+
+  // mode
+
+  _archiveMode = _params.begin_in_archive_mode;
+
+  // create the field renderers
+  
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    FieldRenderer *fieldRenderer =
+      new FieldRenderer(_params, ii, *_fields[ii]);
+    fieldRenderer->createImage(100, 100);
+    _fieldRenderers.push_back(fieldRenderer);
+  }
+
 }
 
 /*************************************************************************
@@ -90,6 +105,13 @@ PolarPlot::PolarPlot(QWidget* parent,
 
 PolarPlot::~PolarPlot()
 {
+
+  // Delete all of the field renderers
+
+  for (size_t i = 0; i < _fieldRenderers.size(); ++i) {
+    delete _fieldRenderers[i];
+  }
+  _fieldRenderers.clear();
 
 }
 
@@ -125,6 +147,15 @@ void PolarPlot::unzoom()
   _zoomWorld = _fullWorld;
   _isZoomed = false;
 
+}
+
+/*************************************************************************
+ * set archive mode
+ */
+
+void PolarPlot::setArchiveMode(bool archive_mode)
+{
+  _archiveMode = archive_mode;
 }
 
 /*************************************************************************
@@ -302,6 +333,39 @@ void PolarPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
 }
 
 /*************************************************************************
+ * setRings()
+ */
+
+void PolarPlot::setRings(const bool enabled)
+{
+  _ringsEnabled = enabled;
+  _parent->update();
+}
+
+
+/*************************************************************************
+ * setGrids()
+ */
+
+void PolarPlot::setGrids(const bool enabled)
+{
+  _gridsEnabled = enabled;
+  _parent->update();
+}
+
+
+/*************************************************************************
+ * setAngleLines()
+ */
+
+void PolarPlot::setAngleLines(const bool enabled)
+{
+  _angleLinesEnabled = enabled;
+  _parent->update();
+}
+
+
+/*************************************************************************
  * turn on archive-style rendering - all fields
  */
 
@@ -352,6 +416,20 @@ void PolarPlot::setGridRingsColor(const QColor &color)
   _gridRingsColor = color;
   _parent->update();
   // LOG(DEBUG) << "exit";
+}
+
+
+/*************************************************************************
+ * displayImage()
+ */
+
+void PolarPlot::displayImage(const size_t field_num)
+{
+  // If we weren't rendering the current field, do nothing
+  if (field_num != _selectedField) {
+    return;
+  }
+  _parent->update();
 }
 
 

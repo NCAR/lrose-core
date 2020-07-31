@@ -121,6 +121,10 @@ public:
   void zoom(int x1, int y1, int x2, int y2);
   void unzoom();
 
+  // set archive mode
+
+  void setArchiveMode(bool archive_mode);
+
   // plot a beam
   
   void plotBeam(QPainter &painter,
@@ -129,9 +133,9 @@ public:
 
   // set overlays
 
-  void setRings(const bool enabled) { _ringsEnabled = enabled; }
-  void setGrids(const bool enabled) { _gridsEnabled = enabled; }
-  void setAngleLines(const bool enabled) { _angleLinesEnabled = enabled; }
+  void setRings(const bool enabled);
+  void setGrids(const bool enabled);
+  void setAngleLines(const bool enabled);
 
   // set max range
 
@@ -153,6 +157,10 @@ public:
 
   void setGridRingsColor(const QColor &color);
   
+  // displayImage for given field
+
+  void displayImage(const size_t field_num);
+
   // get the world plot objects
   
   WorldPlot &getFullWorld() { return _fullWorld; }
