@@ -74,6 +74,7 @@ HDRS = \
 	Params.hh \
 	PpiBeam.hh \
 	PolarManager.hh \
+	PolarPlot.hh \
 	PolarWidget.hh \
 	PpiWidget.hh \
 	Reader.hh \
@@ -109,6 +110,7 @@ NORM_SRCS = \
 	CondorLogger.cc \
 	Main.cc \
 	PaletteManager.cc \
+	PolarPlot.cc \
 	PpiBeam.cc \
 	Reader.cc \
 	RhiBeam.cc \

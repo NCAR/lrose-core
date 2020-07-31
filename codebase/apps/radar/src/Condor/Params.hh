@@ -507,6 +507,8 @@ public:
   plot_type_t *_plot_types;
   int plot_types_n;
 
+  char* axes_label_color;
+
   display_mode_t display_mode;
 
   tdrp_bool_t override_radar_name;
@@ -757,7 +759,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[171];
+  mutable TDRPtable _table[172];
 
   const char *_className;
 

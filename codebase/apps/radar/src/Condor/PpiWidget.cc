@@ -167,41 +167,6 @@ void PpiWidget::selectVar(const size_t index)
 
 
 /*************************************************************************
- * updateVars()
- 
-
-// TODO: maybe just update the beam that changed?
-void PpiWidget::updateVars()
-{
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> PpiWidget::updateVars()" <<  endl;
-  }
-
-  // TODO: see, it would be nice to render only the beam ???
-  // If this field isn't being rendered in the background, render all of
-  // the beams for it
-
-  // TODO: clear the Var first?
-
-  // for each field in beam
-
-  if (!_fieldRenderers[index]->isBackgroundRendered()) {
-    std::vector< PpiBeam* >::iterator beam;
-    for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-      (*beam)->setBeingRendered(index, true);
-      _fieldRenderers[index]->addBeam(*beam);
-    }
-  }
-  _performRendering();
-
-  // Update the display
-
-  update();
-}
-*/
-
-/*************************************************************************
  * clearVar()
  */
 
@@ -718,10 +683,10 @@ void PpiWidget::_drawOverlays(QPainter &painter)
            << -_maxRangeKm << ", " << -ringRange << ", "
            << _maxRangeKm << ", " << -ringRange << endl;
 
-      _zoomWorld.drawLine(painter, ringRange, -_maxRangeKm, ringRange, _maxRangeKm);
-      _zoomWorld.drawLine(painter, -ringRange, -_maxRangeKm, -ringRange, _maxRangeKm);
-      _zoomWorld.drawLine(painter, -_maxRangeKm, ringRange, _maxRangeKm, ringRange);
-      _zoomWorld.drawLine(painter, -_maxRangeKm, -ringRange, _maxRangeKm, -ringRange);
+      _zoomWorld.drawLine(painter, ringRange-50, -_maxRangeKm-50, ringRange-50, _maxRangeKm-50);
+      _zoomWorld.drawLine(painter, -ringRange-50, -_maxRangeKm-50, -ringRange-50, _maxRangeKm-50);
+      _zoomWorld.drawLine(painter, -_maxRangeKm-50, ringRange-50, _maxRangeKm-50, ringRange-50);
+      _zoomWorld.drawLine(painter, -_maxRangeKm-50, -ringRange-50, _maxRangeKm-50, -ringRange-50);
       
       maxRingRange = ringRange;
       ringRange += _ringSpacing;

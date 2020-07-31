@@ -349,6 +349,11 @@ paramdef enum plot_type_t {
   p_help = "The array size must match n_rows times n_columns.";
 } plot_types[];
 
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of axes labels.";
+} axes_label_color;
+
 commentdef {
   p_header = "DISPLAY TYPE";
 }

@@ -269,7 +269,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   void setGrids(const bool enabled);
 
   /**
-   * @brief Set azimuth lines visibility.
+   * @brief Set azimuth/elevation lines visibility.
    *
    * @param[in] enabled    True to show them, false otherwise.
    */
@@ -378,7 +378,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
 
   /**
-   * @brief This will create labels wiith nicely scaled values and
+   * @brief This will create labels with nicely scaled values and
    *        approriate units.
    */
 

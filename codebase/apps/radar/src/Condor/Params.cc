@@ -1209,6 +1209,18 @@
       tt->array_vals[3].e = BSCAN_PLOT;
     tt++;
     
+    // Parameter 'axes_label_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("axes_label_color");
+    tt->descr = tdrpStrDup("Color of axes labels.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &axes_label_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
