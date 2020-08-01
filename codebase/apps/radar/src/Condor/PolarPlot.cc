@@ -62,13 +62,15 @@ const double PolarPlot::SIN_30 = sin(30.0 * DEG_TO_RAD);
 const double PolarPlot::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 
-PolarPlot::PolarPlot(QWidget* parent,
+PolarPlot::PolarPlot(PolarWidget *parent,
+                     const PolarManager &manager,
                      const Params &params,
                      int id,
                      const RadxPlatform &platform,
                      const vector<DisplayField *> &fields,
                      bool haveFilteredFields) :
         _parent(parent),
+        _manager(manager),
         _params(params),
         _id(id),
         _platform(platform),
@@ -412,10 +414,8 @@ void PolarPlot::setBackgroundColor(const QColor &color)
 
 void PolarPlot::setGridRingsColor(const QColor &color)
 {
-  // LOG(DEBUG) << "enter " << color.name().toStdString();
   _gridRingsColor = color;
   _parent->update();
-  // LOG(DEBUG) << "exit";
 }
 
 
@@ -510,3 +510,14 @@ void PolarPlot::_refreshImages()
 
 }
 
+////////////////////
+// set the transform
+
+void PolarPlot::_setTransform(const QTransform &transform)
+{
+  float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
+  BoundaryPointEditor::Instance()->setWorldScale(worldScale);
+  _fullTransform = transform;
+  _zoomTransform = transform;
+}
+  

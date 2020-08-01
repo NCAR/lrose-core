@@ -88,6 +88,7 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   // mode
 
+  _isArchiveMode = false; // ??
   _archiveMode = _params.begin_in_archive_mode;
 
   // Set up the background color
@@ -135,6 +136,10 @@ PolarWidget::PolarWidget(QWidget* parent,
   _zoomCornerX = 0;
   _zoomCornerY = 0;
   
+  _openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
+  _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
+  _openingFileInfoLabel->setVisible(false);
+
 }
 
 
@@ -426,6 +431,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 
   QPointF clickPos(e->pos());
   
+
   _mouseReleaseX = clickPos.x();
   _mouseReleaseY = clickPos.y();
 
@@ -492,10 +498,33 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   }
 }
 
+// Used to notify BoundaryPointEditor if the user has zoomed in/out or is pressing the Shift key
+// Todo: investigate implementing a listener pattern instead
+void PolarWidget::timerEvent(QTimerEvent *event)
+{
+	bool doUpdate = false;
+	bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
+	if (isBoundaryEditorVisible)
+	{
+		double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
+		doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);   //user may have zoomed in or out, so update the polygon point boxes so they are the right size on screen
+	}
+  bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
+  bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+  if ((isBoundaryEditorVisible && !isBoundaryFinished) || (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown))
+    this->setCursor(Qt::CrossCursor);
+  else
+    this->setCursor(Qt::ArrowCursor);
+
+  if (doUpdate)  //only update if something has changed
+  	update();
+}
+
+
 /**************   testing ******/
 void PolarWidget::smartBrush(int xPixel, int yPixel) {
   //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
-  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
+  //int yp = _ppi->_zoomWorld.get>IyPixel(ykm);
 
   QImage qImage;
   qImage.load("/h/eol/brenda/octopus.jpg");
@@ -703,11 +732,11 @@ void PolarWidget::contextMenuView()
   //  notImplemented();                                                                                                   
 }
 
-void PolarWidget::contextMenuEditor()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
+// void PolarWidget::contextMenuEditor()
+// {
+//   informationMessage();
+//   //  notImplemented();                                                                                                   
+// }
 
 
 void PolarWidget::contextMenuExamine()         
@@ -724,13 +753,690 @@ void PolarWidget::contextMenuDataWidget()
 }
 
 
-void PolarWidget::ExamineEdit(const RadxRay *closestRay) 
+// void PolarWidget::ExamineEdit(const RadxRay *closestRay) 
+// {
+//   notImplemented();
+// }
+
+// void PolarWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol) 
+// {  
+//   notImplemented();
+// }
+
+void PolarWidget::showOpeningFileMsg(bool isVisible)
 {
-  notImplemented();
+  _openingFileInfoLabel->setGeometry(width()/2 - 120, height()/2 -15, 200, 30);
+  _openingFileInfoLabel->setVisible(isVisible);
+  _parent->update();
 }
 
-void PolarWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol) 
-{  
-  notImplemented();
+/*************************************************************************
+ * configureRange()
+ */
+
+void PolarWidget::configureRange(double max_range)
+{
+
+  // Save the specified values
+
+  _maxRangeKm = max_range;
+
+  // Set the ring spacing.  This is dependent on the value of _maxRange.
+
+  _setGridSpacing();
+  
+  // set world view
+
+  int leftMargin = 0;
+  int rightMargin = 0;
+  int topMargin = 0;
+  int bottomMargin = 0;
+  int colorScaleWidth = _params.color_scale_width;
+  int axisTickLen = 7;
+  int nTicksIdeal = 7;
+  int textMargin = 5;
+
+  if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
+
+    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setLeftMargin(leftMargin);
+    _fullWorld.setRightMargin(rightMargin);
+    _fullWorld.setTopMargin(topMargin);
+    _fullWorld.setBottomMargin(bottomMargin);
+    _fullWorld.setColorScaleWidth(colorScaleWidth);
+    _fullWorld.setWorldLimits(-_maxRangeKm, 0.0, _maxRangeKm, _maxRangeKm);
+    _fullWorld.setXAxisTickLen(axisTickLen);
+    _fullWorld.setXNTicksIdeal(nTicksIdeal);
+    _fullWorld.setAxisTextMargin(textMargin);
+
+  } else {
+    
+    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setLeftMargin(leftMargin);
+    _fullWorld.setRightMargin(rightMargin);
+    _fullWorld.setTopMargin(topMargin);
+    _fullWorld.setBottomMargin(bottomMargin);
+    _fullWorld.setColorScaleWidth(colorScaleWidth);
+    _fullWorld.setWorldLimits(-_maxRangeKm, -_maxRangeKm, _maxRangeKm, _maxRangeKm);
+    _fullWorld.setXAxisTickLen(axisTickLen);
+    _fullWorld.setXNTicksIdeal(nTicksIdeal);
+    _fullWorld.setAxisTextMargin(textMargin);
+
+  }
+  
+  _zoomWorld = _fullWorld;
+  _isZoomed = false;
+  _setTransform(_zoomWorld.getTransform());
+  _setGridSpacing();
+
+  // Initialize the images used for double-buffering.  For some reason,
+  // the window size is incorrect at this point, but that will be corrected
+  // by the system with a call to resize().
+
+  _refreshImages();
+  
 }
 
+/*************************************************************************
+ * _refreshImages()
+ */
+
+void PolarWidget::_refreshImages()
+{
+
+  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+    
+    FieldRenderer *field = _fieldRenderers[ifield];
+    
+    // If needed, create new image for this field
+    
+    if (size() != field->getImage()->size()) {
+      field->createImage(width(), height());
+    }
+
+    // clear image
+
+    field->getImage()->fill(_backgroundBrush.color().rgb());
+    
+    // set up rendering details
+
+    field->setTransform(_zoomTransform);
+    
+    // Add pointers to the beams to be rendered
+    
+    if (ifield == _selectedField || field->isBackgroundRendered()) {
+
+      // std::vector< PpiBeam* >::iterator beam;
+      // for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
+      //   (*beam)->setBeingRendered(ifield, true);
+      //   field->addBeam(*beam);
+      // }
+      
+    }
+    
+  } // ifield
+  
+  // do the rendering
+
+  _performRendering();
+
+  update();
+}
+
+/*************************************************************************
+ * _drawOverlays()
+ */
+
+void PolarWidget::_drawOverlays(QPainter &painter)
+{
+
+  // Don't try to draw rings if we haven't been configured yet or if the
+  // rings or grids aren't enabled.
+  
+  if (!_ringsEnabled && !_gridsEnabled && !_angleLinesEnabled) {
+    return;
+  }
+
+  // save painter state
+
+  painter.save();
+
+  // store font
+  
+  QFont origFont = painter.font();
+  
+  // Draw rings
+
+  if (_ringSpacing > 0.0 && _ringsEnabled) {
+
+    // Set up the painter
+    
+    painter.save();
+    painter.setTransform(_zoomTransform);
+    painter.setPen(_gridRingsColor);
+  
+    // set narrow line width
+    QPen pen = painter.pen();
+    pen.setWidth(0);
+    painter.setPen(pen);
+
+    double ringRange = _ringSpacing;
+    while (ringRange <= _maxRangeKm) {
+      QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
+      painter.drawEllipse(rect);
+      ringRange += _ringSpacing;
+    }
+    painter.restore();
+
+    // Draw the labels
+    
+    QFont font = painter.font();
+    font.setPointSizeF(_params.range_ring_label_font_size);
+    painter.setFont(font);
+    // painter.setWindow(0, 0, width(), height());
+    
+    ringRange = _ringSpacing;
+    while (ringRange <= _maxRangeKm) {
+      double labelPos = ringRange * SIN_45;
+      const string &labelStr = _scaledLabel.scale(ringRange);
+      _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
+      _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
+      _zoomWorld.drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
+      _zoomWorld.drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
+      ringRange += _ringSpacing;
+    }
+
+  } /* endif - draw rings */
+  
+  // Draw the grid
+
+  if (_ringSpacing > 0.0 && _gridsEnabled)  {
+
+    // Set up the painter
+    
+    painter.save();
+    painter.setTransform(_zoomTransform);
+    painter.setPen(_gridRingsColor);
+  
+    double ringRange = _ringSpacing;
+    double maxRingRange = ringRange;
+    while (ringRange <= _maxRangeKm) {
+
+      cerr << "1111111 ringRange: " << ringRange << endl;
+      cerr << "1111111 maxRangeKm: " << _maxRangeKm << endl;
+      cerr << "1111111 minX, minY, maxX, maxY: "
+           << ringRange << ", " << -_maxRangeKm << ", "
+           << ringRange << ", " << _maxRangeKm << endl;
+      cerr << "1111111 minX, minY, maxX, maxY: "
+           << -ringRange << ", " << -_maxRangeKm << ", "
+           << -ringRange << ", " << _maxRangeKm << endl;
+      cerr << "1111111 minX, minY, maxX, maxY: "
+           << -_maxRangeKm << ", " << ringRange << ", "
+           << _maxRangeKm << ", " << ringRange << endl;
+      cerr << "1111111 minX, minY, maxX, maxY: "
+           << -_maxRangeKm << ", " << -ringRange << ", "
+           << _maxRangeKm << ", " << -ringRange << endl;
+
+      _zoomWorld.drawLine(painter, ringRange-50, -_maxRangeKm-50, ringRange-50, _maxRangeKm-50);
+      _zoomWorld.drawLine(painter, -ringRange-50, -_maxRangeKm-50, -ringRange-50, _maxRangeKm-50);
+      _zoomWorld.drawLine(painter, -_maxRangeKm-50, ringRange-50, _maxRangeKm-50, ringRange-50);
+      _zoomWorld.drawLine(painter, -_maxRangeKm-50, -ringRange-50, _maxRangeKm-50, -ringRange-50);
+      
+      maxRingRange = ringRange;
+      ringRange += _ringSpacing;
+    }
+    painter.restore();
+
+    _zoomWorld.specifyXTicks(-maxRingRange, _ringSpacing);
+    _zoomWorld.specifyYTicks(-maxRingRange, _ringSpacing);
+
+    _zoomWorld.drawAxisLeft(painter, "km", true, true, true, false);
+    _zoomWorld.drawAxisRight(painter, "km", true, true, true, false);
+    _zoomWorld.drawAxisTop(painter, "km", true, true, true, false);
+    _zoomWorld.drawAxisBottom(painter, "km", true, true, true, false);
+    
+    _zoomWorld.unspecifyXTicks();
+    _zoomWorld.unspecifyYTicks();
+
+  }
+  
+  // Draw the azimuth lines
+
+  if (_angleLinesEnabled) {
+
+    // Set up the painter
+    
+    painter.save();
+    painter.setPen(_gridRingsColor);
+  
+    // Draw the lines along the X and Y axes
+
+    _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
+    _zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
+
+    // Draw the lines along the 30 degree lines
+
+    double end_pos1 = SIN_30 * _maxRangeKm;
+    double end_pos2 = COS_30 * _maxRangeKm;
+    
+    _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
+    _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
+    _zoomWorld.drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
+    _zoomWorld.drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
+
+    painter.restore();
+
+  }
+  
+  // click point cross hairs
+  
+  if (_pointClicked) {
+
+    int startX = _mouseReleaseX - _params.click_cross_size / 2;
+    int endX = _mouseReleaseX + _params.click_cross_size / 2;
+    int startY = _mouseReleaseY - _params.click_cross_size / 2;
+    int endY = _mouseReleaseY + _params.click_cross_size / 2;
+
+    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
+    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
+
+    /****** testing ******
+    // do smart brush ...
+  QImage qImage;
+  qImage = *(_fieldRenderers[_selectedField]->getImage());
+  // qImage.load("/h/eol/brenda/octopus.jpg");
+  // get the Image from somewhere ...   
+  // qImage.invertPixels();
+  qImage.convertToFormat(QImage::Format_RGB32);
+
+  // get the color of the selected pixel
+  QRgb colorToMatch = qImage.pixel(_mouseReleaseX, _mouseReleaseY);
+  // walk to all adjacent pixels of the same color and make them white
+
+  vector<QPoint> pixelsToConsider;
+  vector<QPoint> neighbors = {QPoint(-1, 1), QPoint(0, 1), QPoint(1, 1),
+                              QPoint(-1, 0),               QPoint(1, 0),
+                              QPoint(-1,-1), QPoint(0,-1), QPoint(1,-1)};
+
+  pixelsToConsider.push_back(QPoint(_mouseReleaseX, _mouseReleaseY));
+  while (!pixelsToConsider.empty()) {
+    QPoint currentPix = pixelsToConsider.back();
+    pixelsToConsider.pop_back();
+    if (qImage.pixel(currentPix) ==  colorToMatch) {
+      // set currentPix to white
+      qImage.setPixelColor(currentPix, QColor("white"));
+      // cout << "setting pixel " << currentPix.x() << ", " << currentPix.y() << " to white" << endl;
+      // add the eight adjacent neighbors
+      for (vector<QPoint>::iterator noffset = neighbors.begin(); 
+           noffset != neighbors.end(); ++noffset) {
+        QPoint neighbor;
+        neighbor = currentPix + *noffset; // QPoint(-1,1);
+        if (qImage.valid(neighbor)) {
+          pixelsToConsider.push_back(neighbor);
+        }
+      } // end for neighbors iterator
+    }
+  }
+
+  pixelsToConsider.clear();
+  QPainter painter(this);
+  painter.drawImage(0, 0, qImage);
+    ****** end testing *****/
+
+  }
+
+  // reset painter state
+  
+  painter.restore();
+
+  // draw the color scale
+
+  const DisplayField &field = _manager.getSelectedField();
+  _zoomWorld.drawColorScale(field.getColorMap(), painter,
+                            _params.label_font_size);
+
+  if (_archiveMode) {
+
+    // add legends with time, field name and elevation angle
+
+    vector<string> legends;
+    char text[1024];
+
+    // time legend
+
+    sprintf(text, "Start time: %s", _plotStartTime.asString(0).c_str());
+    legends.push_back(text);
+    
+    // radar and site name legend
+
+    string radarName(_platform.getInstrumentName());
+    if (_params.override_radar_name) {
+      radarName = _params.radar_name;
+    }
+    string siteName(_platform.getInstrumentName());
+    if (_params.override_site_name) {
+      siteName = _params.site_name;
+    }
+    string radarSiteLabel = radarName;
+    if (siteName.size() > 0 && siteName != radarName) {
+      radarSiteLabel += "/";
+      radarSiteLabel += siteName;
+    }
+    legends.push_back(radarSiteLabel);
+
+    // field name legend
+
+    string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
+    sprintf(text, "Field: %s", fieldName.c_str());
+    legends.push_back(text);
+
+    // elevation legend
+
+    // sprintf(text, "Elevation(deg): %.2f", _meanElev);
+    // legends.push_back(text);
+
+    // nrays legend
+
+    // sprintf(text, "NRays: %g", _nRays);
+    // legends.push_back(text);
+    
+    painter.save();
+    painter.setPen(Qt::yellow);
+    painter.setBrush(Qt::black);
+    painter.setBackgroundMode(Qt::OpaqueMode);
+
+    switch (_params.ppi_main_legend_pos) {
+      case Params::LEGEND_TOP_LEFT:
+        _zoomWorld.drawLegendsTopLeft(painter, legends);
+        break;
+      case Params::LEGEND_TOP_RIGHT:
+        _zoomWorld.drawLegendsTopRight(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_LEFT:
+        _zoomWorld.drawLegendsBottomLeft(painter, legends);
+        break;
+      case Params::LEGEND_BOTTOM_RIGHT:
+        _zoomWorld.drawLegendsBottomRight(painter, legends);
+        break;
+      default: {}
+    }
+
+    // painter.setBrush(Qt::white);
+    // painter.setBackgroundMode(Qt::TransparentMode);
+    painter.restore();
+
+  } // if (_archiveMode) {
+
+}
+
+/*************************************************************************
+ * _setGridSpacing()
+ */
+
+void PolarWidget::_setGridSpacing()
+{
+
+  double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
+  double yRange = _zoomWorld.getYMaxWorld() - _zoomWorld.getYMinWorld();
+  double diagonal = sqrt(xRange * xRange + yRange * yRange);
+
+  if (diagonal <= 1.0) {
+    _ringSpacing = 0.05;
+  } else if (diagonal <= 2.0) {
+    _ringSpacing = 0.1;
+  } else if (diagonal <= 5.0) {
+    _ringSpacing = 0.2;
+  } else if (diagonal <= 10.0) {
+    _ringSpacing = 0.5;
+  } else if (diagonal <= 20.0) {
+    _ringSpacing = 1.0;
+  } else if (diagonal <= 50.0) {
+    _ringSpacing = 2.0;
+  } else if (diagonal <= 100.0) {
+    _ringSpacing = 5.0;
+  } else if (diagonal <= 200.0) {
+    _ringSpacing = 10.0;
+  } else if (diagonal <= 300.0) {
+    _ringSpacing = 20.0;
+  } else if (diagonal <= 400.0) {
+    _ringSpacing = 25.0;
+  } else if (diagonal <= 500.0) {
+    _ringSpacing = 50.0;
+  } else {
+    _ringSpacing = 50.0;
+  }
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// get ray closest to click point
+
+const RadxRay *PolarWidget::_getClosestRay(double x_km, double y_km)
+
+{
+
+  double clickAz = atan2(y_km, x_km) * RAD_TO_DEG;
+  double radarDisplayAz = 90.0 - clickAz;
+  if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
+  LOG(DEBUG) << "clickAz = " << clickAz << " from x_km, y_km = " 
+                          << x_km << "," << y_km; 
+  LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from x_km, y_km = "
+             << x_km << y_km;
+
+  // double minDiff = 1.0e99;
+  const RadxRay *closestRay = NULL;
+  // for (size_t ii = 0; ii < _ppiBeams.size(); ii++) {
+  //   const RadxRay *ray = _ppiBeams[ii]->getRay();
+  //   double rayAz = ray->getAzimuthDeg();
+  //   double diff = fabs(radarDisplayAz - rayAz);
+  //   if (diff > 180.0) {
+  //     diff = fabs(diff - 360.0);
+  //   }
+  //   if (diff < minDiff) {
+  //     closestRay = ray;
+  //     minDiff = diff;
+  //   }
+  // }
+
+  if (closestRay != NULL)
+    LOG(DEBUG) << "closestRay has azimuth " << closestRay->getAzimuthDeg();
+  else
+    LOG(DEBUG) << "Error: No ray found";
+  return closestRay;
+
+}
+
+void PolarWidget::ExamineEdit(const RadxRay *closestRay) 
+
+{
+  
+
+  // get an version of the ray that we can edit
+  // we'll need the az, and sweep number to get a list from
+  // the volume
+
+  // NOTE - this will need to be done in  the plot object
+
+  RadxRay *closestRayToEdit = NULL;
+
+#ifdef NOTNOW
+  vector<RadxRay *> rays = _vol->getRays();
+  // find that ray
+  bool foundIt = false;
+  RadxRay *closestRayToEdit = NULL;
+  vector<RadxRay *>::iterator r;
+  r=rays.begin();
+  int idx = 0;
+  while(r<rays.end()) {
+    RadxRay *rayr = *r;
+    if (closestRay->getAzimuthDeg() == rayr->getAzimuthDeg()) {
+      if (closestRay->getElevationDeg() == rayr->getElevationDeg()) {
+        foundIt = true;
+        closestRayToEdit = *r;
+        LOG(DEBUG) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
+        closestRay->print(cout); 
+      }
+    }
+    r += 1;
+    idx += 1;
+  }  
+  if (!foundIt || closestRayToEdit == NULL)
+    throw "couldn't find closest ray";
+#endif
+
+  
+  //RadxRay *closestRayCopy = new RadxRay(*closestRay);
+
+  // create the view
+  SpreadSheetView *sheetView;
+  sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
+
+  // create the model
+
+  // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
+  RadxVol *_vol = NULL; // NEED get from plot
+  SpreadSheetModel *model = new SpreadSheetModel(closestRayToEdit, _vol);
+  //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
+  
+  // create the controller
+  SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
+
+  // finish the other connections ..
+  //sheetView->addController(sheetController);
+  // model->setController(sheetController);
+
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+                                                                         
+  connect(sheetControl, SIGNAL(volumeChanged()),
+  	  &_manager, SLOT(setVolume()));
+  
+  sheetView->init();
+  sheetView->show();
+  sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
+  
+}
+
+void PolarWidget::contextMenuEditor()
+{
+  LOG(DEBUG) << "enter";
+
+  // get click location in world coords
+  // by using the location stored in class variables
+  double x_km = _worldPressX;
+  double y_km = _worldPressY;
+
+  // get ray closest to click point
+  const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+  // TODO: make sure the point is in the valid area
+  if (closestRay == NULL) {
+    // report error
+    QMessageBox::information(this, QString::fromStdString(""), QString::fromStdString("No ray found at location clicked"));
+    // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
+  } else {
+    ExamineEdit(closestRay);
+  }
+  LOG(DEBUG) << "exit";
+}
+
+/* TODO add to PolarWidget class
+   void PolarWidget::errorMessage(string title, string message) {
+   QMessageBox::information(this, QString::fromStdString(title), QString::fromStdString(message));
+   }
+*/
+
+void PolarWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)
+{
+
+  // RadxVol _vol = NULL; // need to sort out with plots
+  // _vol = vol;
+
+  QMenu contextMenu("Context menu", this);
+  
+  QAction action1("Cancel", this);
+  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
+  contextMenu.addAction(&action1);
+
+  QAction action3("Parameters + Colors", this);
+  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
+  contextMenu.addAction(&action3);
+
+  QAction action4("View", this);
+  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
+  contextMenu.addAction(&action4);
+
+  QAction action5("Editor", this);
+  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
+  contextMenu.addAction(&action5);
+  
+  QAction action6("Examine", this);
+  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
+  contextMenu.addAction(&action6);
+
+  /*
+    QAction action7("Data Widget", this);
+    connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
+    contextMenu.addAction(&action7);
+  */
+
+  contextMenu.exec(this->mapToGlobal(pos));
+}
+
+#ifdef NOTNOW  
+
+void PolarWidget::contextMenuParameterColors()
+
+{
+
+  LOG(DEBUG) << "enter";
+
+  //DisplayField selectedField;                                                                             
+
+  // const DisplayField &field = _manager.getSelectedField();
+  // const ColorMap &colorMapForSelectedField = field.getColorMap();
+  ParameterColorView *parameterColorView = new ParameterColorView(this);
+  vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
+  DisplayField selectedField = _manager.getSelectedField();
+  string emphasis_color = "white";
+  string annotation_color = "white";
+  DisplayFieldModel *displayFieldModel = 
+    new DisplayFieldModel(displayFields, selectedField.getName(),
+			  _params.grid_and_range_ring_color,
+			  emphasis_color,
+u			  annotation_color,
+			  _params.background_color);
+  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+                                                                         
+  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
+  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
+  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
+  //  PolarManager::colorMapRedefineReceived(string, ColorMap)
+  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
+  //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
+
+  /* TODO: combine with replot
+     connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
+     this, SLOT(backgroundColor(QColor)));
+  */
+
+  fieldColorController->startUp(); 
+
+  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
+  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
+  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
+  // TODO: move this call to the controller?                                                                
+  // parameterColorView.exec();
+
+  //  if(parameterColorController.Changes()) {
+  // TODO: what are changes?  new displayField(s)?                                                        
+  //}
+ 
+  LOG(DEBUG) << "exit ";
+
+}
+
+#endif
+  

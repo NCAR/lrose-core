@@ -21,21 +21,19 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef PpiWidget_HH
-#define PpiWidget_HH
+
+#ifndef PpiPlot_HH
+#define PpiPlot_HH
 
 #include "Radx/RadxVol.hh"
-#include "PolarWidget.hh"
+#include "PolarPlot.hh"
+class PpiWidget;
 
-class QLabel;
-
-// Widget representing a PPI scan.  Beams are added to the scan as they
+// Plot for a PPI scan.  Beams are added to the scan as they
 // are received.
 
-class DLL_EXPORT PpiWidget : public PolarWidget
+class DLL_EXPORT PpiPlot : public PolarPlot
 {
-  // must include this if you use Qt signals/slots
-  Q_OBJECT
 
  public:
 
@@ -50,18 +48,19 @@ class DLL_EXPORT PpiWidget : public PolarWidget
    * @param[in] params   TDRP parameters.
    */
 
-  PpiWidget(QWidget* parent,
-            const PolarManager &manager,
-            const Params &params,
-            const RadxPlatform &platform,
-            const vector<DisplayField *> &fields,
-            bool haveFilteredFields);
+  PpiPlot(PolarWidget *parent,
+          const PolarManager &manager,
+          const Params &params,
+          int id,
+          const RadxPlatform &platform,
+          const vector<DisplayField *> &fields,
+          bool haveFilteredFields);
 
   /**
    * @brief Destructor.
    */
-
-  virtual ~PpiWidget();
+  
+  virtual ~PpiPlot();
 
   /**
    * @brief Configure for range.
@@ -90,7 +89,6 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   // are we in archive mode? and if so are we at the start of a sweep?
 
-  void setArchiveMode(bool state) { _isArchiveMode = state; }
   void setStartOfSweep(bool state) { _isStartOfSweep = state; }
 
   // get the number of beams stored in widget
@@ -123,23 +121,11 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   void ShowContextMenu(const QPoint &pos, RadxVol *vol);
   void ExamineEdit(const RadxRay *closestRay);
 
-  QLabel *_openingFileInfoLabel;
-
-  //////////////
-  // Qt slots //
-  //////////////
-
- public slots:
-
   /**
    * @brief Clear the data in the view.
    */
-
+  
   void clear();
-
-  void contextMenuEditor();
-  void contextMenuParameterColors();
-  //  void changeToDisplayField(string fieldName); // , ColorMap newColorMap);
 
  protected:
 
@@ -161,10 +147,10 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   double _nRays;
 
   // override mouse release event
-  virtual void mouseReleaseEvent(QMouseEvent* event);
+  // virtual void mouseReleaseEvent(QMouseEvent* event);
 
-  // used to detect shift key pressed for boundary editor (switches cursor)
-  virtual void timerEvent(QTimerEvent * event);
+  // // used to detect shift key pressed for boundary editor (switches cursor)
+  // virtual void timerEvent(QTimerEvent * event);
 
 
   // get ray closest to click point

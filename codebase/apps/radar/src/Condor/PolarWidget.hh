@@ -102,9 +102,6 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   /**
    * @brief Constructor.
-   *
-   * @param[in] parent         Parent widget.
-   * @param[in] params         TDRP parameters.
    */
 
   PolarWidget(QWidget* parent, 
@@ -123,8 +120,13 @@ class DLL_EXPORT PolarWidget : public QWidget
   /**
    * @brief Configure the PolarWidget for range.
    */
+  
+  void configureRange(double max_range);
 
-  virtual void configureRange(double max_range) = 0;
+  // get plot times
+
+  const RadxTime &getPlotStartTime() { return _plotStartTime; }
+  const RadxTime &getPlotEndTime() { return _plotEndTime; }
 
   /**********************************************
    * turn on archive-style rendering - all fields
@@ -210,6 +212,10 @@ class DLL_EXPORT PolarWidget : public QWidget
     return _aspectRatio;
   }
 
+  // was the mouse clicked in the data area?
+
+  bool getPointClicked() const { return _pointClicked; }
+
   ////////////////
   // Qt signals //
   ////////////////
@@ -276,7 +282,6 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   void setAngleLines(const bool enabled);
 
-
  protected:
 
   /////////////////////////
@@ -339,7 +344,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   
   // overide refresh images
 
-  virtual void _refreshImages() = 0;
+  void _refreshImages();
 
   /**
    * @brief The index of the field selected for display.
@@ -459,7 +464,13 @@ class DLL_EXPORT PolarWidget : public QWidget
   bool _isZoomed;
   QTransform _zoomTransform;
   WorldPlot _zoomWorld;
-  
+
+  QLabel *_openingFileInfoLabel;
+
+  bool _isArchiveMode;
+
+  RadxTime _plotStartTime;
+  RadxTime _plotEndTime;
 
   ///////////////////////
   // Protected methods //
@@ -472,7 +483,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] painter    Painter to use for rendering.
    */
 
-  virtual void _drawOverlays(QPainter &painter) = 0;
+  void _drawOverlays(QPainter &painter);
 
   /**
    * @brief Determine a ring spacing which will give even distances, and
@@ -481,7 +492,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @return Returns the ring spacing in kilometers.
    */
 
-  virtual void _setGridSpacing() = 0;
+  void _setGridSpacing();
 
   /**
    * @brief Initialize the full window transform to use for the widget.
@@ -521,6 +532,9 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   virtual void mouseReleaseEvent(QMouseEvent* event);
 
+  // used to detect shift key pressed for boundary editor (switches cursor)
+  virtual void timerEvent(QTimerEvent * event);
+
   /**
    * @brief The method that is called when a repaint event is triggered.
    *
@@ -550,7 +564,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   // get ray closest to click point
 
-  virtual const RadxRay *_getClosestRay(double x_km, double y_km) = 0;
+  const RadxRay *_getClosestRay(double x_km, double y_km);
 
  public:
 
@@ -561,6 +575,8 @@ class DLL_EXPORT PolarWidget : public QWidget
   virtual void ExamineEdit(const RadxRay *closestRay);
   void notImplemented();
   virtual void informationMessage();
+
+  void showOpeningFileMsg(bool isVisible);
 
  public slots:
 

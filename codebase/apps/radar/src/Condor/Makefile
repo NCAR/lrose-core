@@ -76,6 +76,7 @@ HDRS = \
 	PolarManager.hh \
 	PolarPlot.hh \
 	PolarWidget.hh \
+	PpiPlot.hh \
 	PpiWidget.hh \
 	Reader.hh \
 	RhiBeam.hh \
@@ -112,6 +113,7 @@ NORM_SRCS = \
 	PaletteManager.cc \
 	PolarPlot.cc \
 	PpiBeam.cc \
+	PpiPlot.cc \
 	Reader.cc \
 	RhiBeam.cc \
 	ScaledLabel.cc \

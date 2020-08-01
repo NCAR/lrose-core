@@ -3455,3 +3455,4 @@ void PolarManager::refreshBoundaries()
   }
 
 }
+

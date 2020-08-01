@@ -51,9 +51,12 @@
 #include "FieldRenderer.hh"
 #include "WorldPlot.hh"
 #include "DisplayField.hh"
+#include "PpiBeam.hh"
 
 class Beam;
 class MomentsFields;
+class PolarManager;
+class PolarWidget;
 
 /// AScope plotting
 
@@ -70,7 +73,8 @@ public:
    * Constructor.
    */
   
-  PolarPlot(QWidget *parent,
+  PolarPlot(PolarWidget *parent,
+            const PolarManager &manager,
             const Params &params,
             int id,
             const RadxPlatform &platform,
@@ -190,7 +194,8 @@ protected:
   static const double SIN_30;
   static const double COS_30;
 
-  QWidget *_parent;
+  PolarWidget *_parent;
+  const PolarManager &_manager;
   const Params &_params;
   int _id;
 
@@ -230,6 +235,7 @@ protected:
 
   double _aspectRatio;
   double _maxRangeKm;
+  int _colorScaleWidth;
 
   // painting
 
@@ -270,6 +276,8 @@ protected:
   // get ray closest to click point
   
   virtual const RadxRay *_getClosestRay(double x_km, double y_km) = 0;
+
+  void _setTransform(const QTransform &transform);
 
 };
 

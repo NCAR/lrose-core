@@ -21,6 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
+#include "PpiPlot.hh"
 #include "PpiWidget.hh"
 #include "PolarManager.hh"
 #include "SpreadSheetView.hh"
@@ -29,6 +31,7 @@
 #include "FieldColorController.hh"
 #include "DisplayFieldModel.hh"
 #include "BoundaryPointEditor.hh"
+#include "SpreadSheetView.hh"
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/LogStream.hh>
@@ -44,14 +47,15 @@ using namespace std;
 
 
 
-PpiWidget::PpiWidget(QWidget* parent,
-                     const PolarManager &manager,
-                     const Params &params,
-                     const RadxPlatform &platform,
-                     const vector<DisplayField *> &fields,
-                     bool haveFilteredFields) :
-        PolarWidget(parent, manager, params, platform,
-                    fields, haveFilteredFields)
+PpiPlot::PpiPlot(PolarWidget* parent,
+                 const PolarManager &manager,
+                 const Params &params,
+                 int id,
+                 const RadxPlatform &platform,
+                 const vector<DisplayField *> &fields,
+                 bool haveFilteredFields) :
+        PolarPlot(parent, manager, params, id,
+                  platform, fields, haveFilteredFields)
         
 {
 
@@ -75,22 +79,13 @@ PpiWidget::PpiWidget(QWidget* parent,
   _sumElev = 0.0;
   _nRays = 0.0;
 
-	_openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
-	_openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
-	_openingFileInfoLabel->setVisible(false);
-
-	//fires every 50ms. used for boundary editor to
-	// (1) detect shift key down (changes cursor)
-	// (2) get notified if user zooms in or out so the boundary can be rescaled
-	// Todo: investigate implementing a listener pattern instead
-  startTimer(50);
 }
 
 /*************************************************************************
  * Destructor
  */
 
-PpiWidget::~PpiWidget()
+PpiPlot::~PpiPlot()
 {
 
   // delete all of the dynamically created beams
@@ -106,7 +101,7 @@ PpiWidget::~PpiWidget()
  * clear()
  */
 
-void PpiWidget::clear()
+void PpiPlot::clear()
 {
   // Clear out the beam array
   
@@ -118,14 +113,14 @@ void PpiWidget::clear()
   // Now rerender the images
   
   _refreshImages();
-  showOpeningFileMsg(false);
+  _parent->showOpeningFileMsg(false);
 }
 
 /*************************************************************************
  * selectVar()
  */
 
-void PpiWidget::selectVar(const size_t index)
+void PpiPlot::selectVar(const size_t index)
 {
 
   // If the field index isn't actually changing, we don't need to do anything
@@ -135,7 +130,7 @@ void PpiWidget::selectVar(const size_t index)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> PpiWidget::selectVar() for field index: " 
+    cerr << "=========>> PpiPlot::selectVar() for field index: " 
          << index << endl;
   }
 
@@ -162,7 +157,7 @@ void PpiWidget::selectVar(const size_t index)
 
   // Update the display
 
-  update();
+  _parent->update();
 }
 
 
@@ -170,7 +165,7 @@ void PpiWidget::selectVar(const size_t index)
  * clearVar()
  */
 
-void PpiWidget::clearVar(const size_t index)
+void PpiPlot::clearVar(const size_t index)
 {
 
   if (index >= _fields.size()) {
@@ -186,7 +181,7 @@ void PpiWidget::clearVar(const size_t index)
   }
   
   if (index == _selectedField) {
-    update();
+    _parent->update();
   }
 
 }
@@ -196,11 +191,11 @@ void PpiWidget::clearVar(const size_t index)
  * addBeam()
  */
 
-void PpiWidget::addBeam(const RadxRay *ray,
-                        const float start_angle,
-                        const float stop_angle,
-                        const std::vector< std::vector< double > > &beam_data,
-                        const std::vector< DisplayField* > &fields)
+void PpiPlot::addBeam(const RadxRay *ray,
+                      const float start_angle,
+                      const float stop_angle,
+                      const std::vector< std::vector< double > > &beam_data,
+                      const std::vector< DisplayField* > &fields)
 {
 
   LOG(DEBUG) << "enter";
@@ -331,7 +326,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
  * configureRange()
  */
 
-void PpiWidget::configureRange(double max_range)
+void PpiPlot::configureRange(double max_range)
 {
 
   // Save the specified values
@@ -355,7 +350,7 @@ void PpiWidget::configureRange(double max_range)
 
   if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
 
-    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setWindowGeom(_parent->width(), _parent->height(), 0, 0);
     _fullWorld.setLeftMargin(leftMargin);
     _fullWorld.setRightMargin(rightMargin);
     _fullWorld.setTopMargin(topMargin);
@@ -368,7 +363,7 @@ void PpiWidget::configureRange(double max_range)
 
   } else {
     
-    _fullWorld.setWindowGeom(width(), height(), 0, 0);
+    _fullWorld.setWindowGeom(_parent->width(), _parent->height(), 0, 0);
     _fullWorld.setLeftMargin(leftMargin);
     _fullWorld.setRightMargin(rightMargin);
     _fullWorld.setTopMargin(topMargin);
@@ -396,124 +391,125 @@ void PpiWidget::configureRange(double max_range)
 
 // Used to notify BoundaryPointEditor if the user has zoomed in/out or is pressing the Shift key
 // Todo: investigate implementing a listener pattern instead
-void PpiWidget::timerEvent(QTimerEvent *event)
-{
-	bool doUpdate = false;
-	bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
-	if (isBoundaryEditorVisible)
-	{
-		double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
-		doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);   //user may have zoomed in or out, so update the polygon point boxes so they are the right size on screen
-	}
-  bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
-  bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
-  if ((isBoundaryEditorVisible && !isBoundaryFinished) || (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown))
-    this->setCursor(Qt::CrossCursor);
-  else
-    this->setCursor(Qt::ArrowCursor);
+// void PpiPlot::timerEvent(QTimerEvent *event)
+// {
+//   bool doUpdate = false;
+//   bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
+//   if (isBoundaryEditorVisible)
+//   {
+//     double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
+//     doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);   //user may have zoomed in or out, so update the polygon point boxes so they are the right size on screen
+//   }
+//   bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
+//   bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+//   if ((isBoundaryEditorVisible && !isBoundaryFinished) || (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown))
+//     this->setCursor(Qt::CrossCursor);
+//   else
+//     this->setCursor(Qt::ArrowCursor);
 
-  if (doUpdate)  //only update if something has changed
-  	update();
-}
+//   if (doUpdate)  //only update if something has changed
+//     _parent->update();
+// }
 
 
 /*************************************************************************
  * mouseReleaseEvent()
  */
-void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
-{
+// void PpiPlot::mouseReleaseEvent(QMouseEvent *e)
+// {
 
-  _pointClicked = false;
+//   _pointClicked = false;
 
-  QRect rgeom = _rubberBand->geometry();
+//   QRect rgeom = _rubberBand->geometry();
 
-  // If the mouse hasn't moved much, assume we are clicking rather than
-  // zooming
+//   // If the mouse hasn't moved much, assume we are clicking rather than
+//   // zooming
 
-  QPointF clickPos(e->pos());
+//   QPointF clickPos(e->pos());
   
-  _mouseReleaseX = clickPos.x();
-  _mouseReleaseY = clickPos.y();
+//   _mouseReleaseX = clickPos.x();
+//   _mouseReleaseY = clickPos.y();
 
-  // get click location in world coords
+//   // get click location in world coords
 
-  if (rgeom.width() <= 20)
-  {
+//   if (rgeom.width() <= 20)
+//   {
 
-		// Emit a signal to indicate that the click location has changed
-    _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-    _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+//     // Emit a signal to indicate that the click location has changed
+//     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+//     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
 
-    // If boundary editor active, then interpret boundary mouse release event
-    if (_manager._boundaryEditorDialog->isVisible())
-    {
-    	if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::polygon)
-    	{
-				if (!BoundaryPointEditor::Instance()->isAClosedPolygon())
-					BoundaryPointEditor::Instance()->addPoint(_worldReleaseX, _worldReleaseY);
-				else  //polygon finished, user may want to insert/delete a point
-					BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
-    	}
-    	else if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::circle)
-    	{
-				if (BoundaryPointEditor::Instance()->isAClosedPolygon())
-					BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
-				else
-					BoundaryPointEditor::Instance()->makeCircle(_worldReleaseX, _worldReleaseY, BoundaryPointEditor::Instance()->getCircleRadius());
-    	}
-    }
+//     // If boundary editor active, then interpret boundary mouse release event
+//     if (_manager._boundaryEditorDialog->isVisible())
+//     {
+//       if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::polygon)
+//       {
+//         if (!BoundaryPointEditor::Instance()->isAClosedPolygon())
+//           BoundaryPointEditor::Instance()->addPoint(_worldReleaseX, _worldReleaseY);
+//         else  //polygon finished, user may want to insert/delete a point
+//           BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
+//       }
+//       else if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::circle)
+//       {
+//         if (BoundaryPointEditor::Instance()->isAClosedPolygon())
+//           BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
+//         else
+//           BoundaryPointEditor::Instance()->makeCircle(_worldReleaseX, _worldReleaseY, BoundaryPointEditor::Instance()->getCircleRadius());
+//       }
+//     }
 
-    double x_km = _worldReleaseX;
-    double y_km = _worldReleaseY;
-    _pointClicked = true;
+//     double x_km = _worldReleaseX;
+//     double y_km = _worldReleaseY;
+//     _pointClicked = true;
 
-    // get ray closest to click point
+//     // get ray closest to click point
 
-    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+//     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
 
-    // emit signal
+//     // emit signal
 
-    emit locationClicked(x_km, y_km, closestRay);
+//     emit locationClicked(x_km, y_km, closestRay);
   
-  }
-  else
-  {
+//   }
+//   else
+//   {
 
-    // mouse moved more than 20 pixels, so a zoom occurred
+//     // mouse moved more than 20 pixels, so a zoom occurred
     
-    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+//     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+//     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
-    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+//     _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+//     _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+//     _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
 
-    _setTransform(_zoomWorld.getTransform());
+//     _setTransform(_zoomWorld.getTransform());
 
-    _setGridSpacing();
+//     _setGridSpacing();
 
-    // enable unzoom button
+//     // enable unzoom button
     
-    _manager.enableZoomButton();
+//     _manager.enableZoomButton();
     
-    // Update the window in the renderers
+//     // Update the window in the renderers
     
-    _refreshImages();
+//     _refreshImages();
 
-  }
+//   }
     
-  // hide the rubber band
+//   // hide the rubber band
 
-  _rubberBand->hide();
-  update();
+//   _rubberBand->hide();
+//   _parent->update();
 
-}
+// }
+
 
 ////////////////////////////////////////////////////////////////////////////
 // get ray closest to click point
 
-const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
+const RadxRay *PpiPlot::_getClosestRay(double x_km, double y_km)
 
 {
 
@@ -521,7 +517,7 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
   double radarDisplayAz = 90.0 - clickAz;
   if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
   LOG(DEBUG) << "clickAz = " << clickAz << " from x_km, y_km = " 
-                          << x_km << "," << y_km; 
+             << x_km << "," << y_km; 
   LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from x_km, y_km = "
              << x_km << y_km;
 
@@ -552,7 +548,7 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
  * _setGridSpacing()
  */
 
-void PpiWidget::_setGridSpacing()
+void PpiPlot::_setGridSpacing()
 {
 
   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
@@ -592,7 +588,7 @@ void PpiWidget::_setGridSpacing()
  * _drawOverlays()
  */
 
-void PpiWidget::_drawOverlays(QPainter &painter)
+void PpiPlot::_drawOverlays(QPainter &painter)
 {
 
   // Don't try to draw rings if we haven't been configured yet or if the
@@ -735,58 +731,58 @@ void PpiWidget::_drawOverlays(QPainter &painter)
   
   // click point cross hairs
   
-  if (_pointClicked) {
+  if (_parent->getPointClicked()) {
 
-    int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    int endY = _mouseReleaseY + _params.click_cross_size / 2;
+    // int startX = _mouseReleaseX - _params.click_cross_size / 2;
+    // int endX = _mouseReleaseX + _params.click_cross_size / 2;
+    // int startY = _mouseReleaseY - _params.click_cross_size / 2;
+    // int endY = _mouseReleaseY + _params.click_cross_size / 2;
 
-    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
-    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
+    // painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
+    // painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
 
     /****** testing ******
-    // do smart brush ...
-  QImage qImage;
-  qImage = *(_fieldRenderers[_selectedField]->getImage());
-  // qImage.load("/h/eol/brenda/octopus.jpg");
-  // get the Image from somewhere ...   
-  // qImage.invertPixels();
-  qImage.convertToFormat(QImage::Format_RGB32);
+     // do smart brush ...
+     QImage qImage;
+     qImage = *(_fieldRenderers[_selectedField]->getImage());
+     // qImage.load("/h/eol/brenda/octopus.jpg");
+     // get the Image from somewhere ...   
+     // qImage.invertPixels();
+     qImage.convertToFormat(QImage::Format_RGB32);
 
-  // get the color of the selected pixel
-  QRgb colorToMatch = qImage.pixel(_mouseReleaseX, _mouseReleaseY);
-  // walk to all adjacent pixels of the same color and make them white
+     // get the color of the selected pixel
+     QRgb colorToMatch = qImage.pixel(_mouseReleaseX, _mouseReleaseY);
+     // walk to all adjacent pixels of the same color and make them white
 
-  vector<QPoint> pixelsToConsider;
-  vector<QPoint> neighbors = {QPoint(-1, 1), QPoint(0, 1), QPoint(1, 1),
-                              QPoint(-1, 0),               QPoint(1, 0),
-                              QPoint(-1,-1), QPoint(0,-1), QPoint(1,-1)};
+     vector<QPoint> pixelsToConsider;
+     vector<QPoint> neighbors = {QPoint(-1, 1), QPoint(0, 1), QPoint(1, 1),
+     QPoint(-1, 0),               QPoint(1, 0),
+     QPoint(-1,-1), QPoint(0,-1), QPoint(1,-1)};
 
-  pixelsToConsider.push_back(QPoint(_mouseReleaseX, _mouseReleaseY));
-  while (!pixelsToConsider.empty()) {
-    QPoint currentPix = pixelsToConsider.back();
-    pixelsToConsider.pop_back();
-    if (qImage.pixel(currentPix) ==  colorToMatch) {
-      // set currentPix to white
-      qImage.setPixelColor(currentPix, QColor("white"));
-      // cout << "setting pixel " << currentPix.x() << ", " << currentPix.y() << " to white" << endl;
-      // add the eight adjacent neighbors
-      for (vector<QPoint>::iterator noffset = neighbors.begin(); 
-           noffset != neighbors.end(); ++noffset) {
-        QPoint neighbor;
-        neighbor = currentPix + *noffset; // QPoint(-1,1);
-        if (qImage.valid(neighbor)) {
-          pixelsToConsider.push_back(neighbor);
-        }
-      } // end for neighbors iterator
-    }
-  }
+     pixelsToConsider.push_back(QPoint(_mouseReleaseX, _mouseReleaseY));
+     while (!pixelsToConsider.empty()) {
+     QPoint currentPix = pixelsToConsider.back();
+     pixelsToConsider.pop_back();
+     if (qImage.pixel(currentPix) ==  colorToMatch) {
+     // set currentPix to white
+     qImage.setPixelColor(currentPix, QColor("white"));
+     // cout << "setting pixel " << currentPix.x() << ", " << currentPix.y() << " to white" << endl;
+     // add the eight adjacent neighbors
+     for (vector<QPoint>::iterator noffset = neighbors.begin(); 
+     noffset != neighbors.end(); ++noffset) {
+     QPoint neighbor;
+     neighbor = currentPix + *noffset; // QPoint(-1,1);
+     if (qImage.valid(neighbor)) {
+     pixelsToConsider.push_back(neighbor);
+     }
+     } // end for neighbors iterator
+     }
+     }
 
-  pixelsToConsider.clear();
-  QPainter painter(this);
-  painter.drawImage(0, 0, qImage);
-    ****** end testing *****/
+     pixelsToConsider.clear();
+     QPainter painter(this);
+     painter.drawImage(0, 0, qImage);
+     ****** end testing *****/
 
   }
 
@@ -893,9 +889,9 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
 // draw text in world coords
 
-void PpiWidget::_drawScreenText(QPainter &painter, const string &text,
-                                int text_x, int text_y,
-                                int flags)
+void PpiPlot::_drawScreenText(QPainter &painter, const string &text,
+                              int text_x, int text_y,
+                              int flags)
   
 {
 
@@ -916,7 +912,7 @@ void PpiWidget::_drawScreenText(QPainter &painter, const string &text,
  * numBeams()
  */
 
-size_t PpiWidget::getNumBeams() const
+size_t PpiPlot::getNumBeams() const
 {
   return _ppiBeams.size();
 }
@@ -925,8 +921,8 @@ size_t PpiWidget::getNumBeams() const
  * _beamIndex()
  */
 
-int PpiWidget::_beamIndex(const double start_angle,
-                          const double stop_angle)
+int PpiPlot::_beamIndex(const double start_angle,
+                        const double stop_angle)
 {
 
   // Find where the center angle of the beam will fall within the beam array
@@ -950,14 +946,14 @@ int PpiWidget::_beamIndex(const double start_angle,
  * _cullBeams()
  */
 
-void PpiWidget::_cullBeams(const PpiBeam *beamAB)
+void PpiPlot::_cullBeams(const PpiBeam *beamAB)
 {
   // This routine examines the collection of beams, and removes those that are 
   // completely occluded by other beams. The algorithm gives precedence to the 
   // most recent beams; i.e. beams at the end of the _ppiBeams vector.
   //
   // Remember that there won't be any beams that cross angles through zero; 
-  // otherwise the beam culling logic would be a real pain, and PpiWidget has
+  // otherwise the beam culling logic would be a real pain, and PpiPlot has
   // already split incoming beams into two, if it received a beam of this type.
   //
   // The logic is as follows. First of all, just consider the start and stop angle 
@@ -1147,9 +1143,10 @@ void PpiWidget::_cullBeams(const PpiBeam *beamAB)
  * _refreshImages()
  */
 
-void PpiWidget::_refreshImages()
+void PpiPlot::_refreshImages()
 {
 
+#ifdef NOTNOW
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     
     FieldRenderer *field = _fieldRenderers[ifield];
@@ -1157,7 +1154,7 @@ void PpiWidget::_refreshImages()
     // If needed, create new image for this field
     
     if (size() != field->getImage()->size()) {
-      field->createImage(width(), height());
+      field->createImage(_parent->width(), _parent->height());
     }
 
     // clear image
@@ -1186,228 +1183,9 @@ void PpiWidget::_refreshImages()
 
   _performRendering();
 
-  update();
+  _parent->update();
+
+#endif
+
 }
 
-void PpiWidget::contextMenuParameterColors()
-{
-  
-  LOG(DEBUG) << "enter";
-
-  //DisplayField selectedField;                                                                             
-
-  // const DisplayField &field = _manager.getSelectedField();
-  // const ColorMap &colorMapForSelectedField = field.getColorMap();
-  ParameterColorView *parameterColorView = new ParameterColorView(this);
-  vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
-  DisplayField selectedField = _manager.getSelectedField();
-  string emphasis_color = "white";
-  string annotation_color = "white";
-  DisplayFieldModel *displayFieldModel = 
-    new DisplayFieldModel(displayFields, selectedField.getName(),
-			  _params.grid_and_range_ring_color,
-			  emphasis_color,
-			  annotation_color,
-			  _params.background_color);
-  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display
-                                                                         
-  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
-  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
-  //  PolarManager::colorMapRedefineReceived(string, ColorMap)
-  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
-  //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
-
-  /* TODO: combine with replot
-  connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
-  	  this, SLOT(backgroundColor(QColor)));
-  */
-
-  fieldColorController->startUp(); 
-
-  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
-  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
-  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
-  // TODO: move this call to the controller?                                                                
-	  // parameterColorView.exec();
-
-  //  if(parameterColorController.Changes()) {
-    // TODO: what are changes?  new displayField(s)?                                                        
-  //}
- 
-  LOG(DEBUG) << "exit ";
-  
-}
-
-/*
-void PpiWidget::sillyReceived() {
-  LOG(DEBUG) << "enter";
-  LOG(DEBUG) << "exit";
-}
-*/
-/*
-void PpiWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMap) {
-{
-  LOG(DEBUG) << "enter";
-  // connect the new color map with the field                                                                    
-  // find the fieldName in the list of FieldDisplays                                                             
-  
-  bool found = false;
-  vector<DisplayField *>::iterator it;
-  int fieldId = 0;
-
-  it = _fields.begin();
-  while ( it != _fields.end() && !found ) {
-    DisplayField *field = *it;
-
-    string name = field->getName();
-    if (name.compare(fieldName) == 0) {
-      found = true;
-      field->replaceColorMap(newColorMap);
-    }
-    fieldId++;
-    it++;
-  }
-  if (!found) {
-    LOG(ERROR) << fieldName;
-    LOG(ERROR) << "ERROR - field not found; no color map change";
-    // TODO: present error message box                                                                           
-  } else {
-    // look up the fieldId from the fieldName                                                                    
-    // change the field variable                                                                                 
-    _changeField(fieldId, true);
-  }
-  
-  LOG(DEBUG) << "exit";
-}
-*/
-
-
- 
-void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
-  
-
-  // get an version of the ray that we can edit
-  // we'll need the az, and sweep number to get a list from
-  // the volume
-
-  vector<RadxRay *> rays = _vol->getRays();
-  // find that ray
-  bool foundIt = false;
-  RadxRay *closestRayToEdit = NULL;
-  vector<RadxRay *>::iterator r;
-  r=rays.begin();
-  int idx = 0;
-  while(r<rays.end()) {
-    RadxRay *rayr = *r;
-    if (closestRay->getAzimuthDeg() == rayr->getAzimuthDeg()) {
-      if (closestRay->getElevationDeg() == rayr->getElevationDeg()) {
-        foundIt = true;
-        closestRayToEdit = *r;
-        LOG(DEBUG) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
-        closestRay->print(cout); 
-      }
-    }
-    r += 1;
-    idx += 1;
-  }  
-  if (!foundIt || closestRayToEdit == NULL)
-    throw "couldn't find closest ray";
-
-  
-  //RadxRay *closestRayCopy = new RadxRay(*closestRay);
-
-  // create the view
-  SpreadSheetView *sheetView;
-  sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
-
-  // create the model
-
-  // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
-  SpreadSheetModel *model = new SpreadSheetModel(closestRayToEdit, _vol);
-  //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
-  
-  // create the controller
-  SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
-
-  // finish the other connections ..
-  //sheetView->addController(sheetController);
-  // model->setController(sheetController);
-
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display
-                                                                         
-  connect(sheetControl, SIGNAL(volumeChanged()),
-  	  &_manager, SLOT(setVolume()));
-  
-  sheetView->init();
-  sheetView->show();
-  sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
-  
-}
-
-void PpiWidget::contextMenuEditor()
-{
-  LOG(DEBUG) << "enter";
-
-  // get click location in world coords
-  // by using the location stored in class variables
-  double x_km = _worldPressX;
-  double y_km = _worldPressY;
-
-  // get ray closest to click point
-  const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-  // TODO: make sure the point is in the valid area
-  if (closestRay == NULL) {
-    // report error
-    QMessageBox::information(this, QString::fromStdString(""), QString::fromStdString("No ray found at location clicked"));
-    // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
-  } else {
-    ExamineEdit(closestRay);
-  }
-  LOG(DEBUG) << "exit";
-}
-
-/* TODO add to PolarWidget class
-void PolarWidget::errorMessage(string title, string message) {
-  QMessageBox::information(this, QString::fromStdString(title), QString::fromStdString(message));
-}
-*/
-
-void PpiWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)
-{
-
-  _vol = vol;
-
-  QMenu contextMenu("Context menu", this);
-  
-  QAction action1("Cancel", this);
-  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
-  contextMenu.addAction(&action1);
-
-  QAction action3("Parameters + Colors", this);
-  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
-  contextMenu.addAction(&action3);
-
-  QAction action4("View", this);
-  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
-  contextMenu.addAction(&action4);
-
-  QAction action5("Editor", this);
-  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
-  contextMenu.addAction(&action5);
-  
-  QAction action6("Examine", this);
-  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
-  contextMenu.addAction(&action6);
-
-  /*
-  QAction action7("Data Widget", this);
-  connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
-  contextMenu.addAction(&action7);
-  */
-
-  contextMenu.exec(this->mapToGlobal(pos));
-}
