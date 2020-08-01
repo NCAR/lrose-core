@@ -36,6 +36,7 @@
 
 #include "PolarManager.hh"
 #include "DisplayField.hh"
+#include "PolarWidget.hh"
 #include "PpiWidget.hh"
 #include "RhiWidget.hh"
 #include "RhiWindow.hh"
@@ -136,6 +137,9 @@ PolarManager::PolarManager(const Params &params,
   _archiveMode = false;
   _archiveRetrievalPending = false;
   
+  _polarFrame = NULL;
+  _polar = NULL;
+
   _ppiFrame = NULL;
   _ppi = NULL;
 
@@ -245,7 +249,7 @@ void PolarManager::timerEvent(QTimerEvent *event)
 
   if (_firstTimerEvent) {
 
-    _ppi->resize(_ppiFrame->width(), _ppiFrame->height());
+    _polar->resize(_polarFrame->width(), _polarFrame->height());
     
     // Set the size of the second column to the size of the largest
     // label.  This should keep the column from wiggling as the values change.
@@ -320,7 +324,7 @@ void PolarManager::resizeEvent(QResizeEvent *event)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent: " << event << endl;
   }
-  emit frameResized(_ppiFrame->width(), _ppiFrame->height());
+  emit frameResized(_polarFrame->width(), _polarFrame->height());
 }
 
 ////////////////////////////////////////////////////////////////
@@ -397,8 +401,8 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
-    _ppi->setStartOfSweep(true);
-    _rhi->setStartOfSweep(true);
+    // _ppi->setStartOfSweep(true);
+    // _rhi->setStartOfSweep(true);
     _goBack1();
 
   } else if (key == Qt::Key_Right) {
@@ -406,8 +410,8 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
-    _ppi->setStartOfSweep(true);
-    _rhi->setStartOfSweep(true);
+    // _ppi->setStartOfSweep(true);
+    // _rhi->setStartOfSweep(true);
     _goFwd1();
     
   } else if (key == Qt::Key_Up) {
@@ -417,8 +421,8 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       if (_params.debug) {
         cerr << "Clicked up arrow, go up a sweep" << endl;
       }
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
+      // _ppi->setStartOfSweep(true);
+      // _rhi->setStartOfSweep(true);
       _changeSweepRadioButton(-1);
 
     }
@@ -430,8 +434,8 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
       if (_params.debug) {
         cerr << "Clicked down arrow, go down a sweep" << endl;
       }
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
+      // _ppi->setStartOfSweep(true);
+      // _rhi->setStartOfSweep(true);
       _changeSweepRadioButton(+1);
 
     }
@@ -471,40 +475,52 @@ void PolarManager::_setupWindows()
   mainLayout->setContentsMargins(3,3,3,3);
   setCentralWidget(_main);
 
+  // polar window
+
+  _polarFrame = new QFrame(_main);
+  _polarFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  _polar = new PolarWidget(_polarFrame, *this, _params, _platform, _fields, _haveFilteredFields);
+
+  connect(this, SIGNAL(frameResized(const int, const int)),
+	  _polar, SLOT(resize(const int, const int)));
+
   // ppi window
 
-  _ppiFrame = new QFrame(_main);
-  _ppiFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  // _ppiFrame = new QFrame(_main);
+  // _ppiFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   // configure the PPI
 
-  _ppi = new PpiWidget(_ppiFrame, *this, _params, _platform, _fields, _haveFilteredFields);
+  // _ppi = new PpiWidget(_ppiFrame, *this, _params, _platform, _fields, _haveFilteredFields);
 
-  connect(this, SIGNAL(frameResized(const int, const int)),
-	  _ppi, SLOT(resize(const int, const int)));
+  // connect(this, SIGNAL(frameResized(const int, const int)),
+  //         _ppi, SLOT(resize(const int, const int)));
   
   // Create the RHI window
 
-  _rhiWindow = new RhiWindow(this, _params, _platform,
-                             _fields, _haveFilteredFields);
-  _rhiWindow->setRadarName(_params.radar_name);
+  // _rhiWindow = new RhiWindow(this, _params, _platform,
+  //                            _fields, _haveFilteredFields);
+  // _rhiWindow->setRadarName(_params.radar_name);
 
   // set pointer to the rhiWidget
 
-  _rhi = _rhiWindow->getWidget();
+  // _rhi = _rhiWindow->getWidget();
   
   // connect slots for location
 
-  connect(_ppi, SIGNAL(locationClicked(double, double, const RadxRay*)),
+  connect(_polar, SIGNAL(locationClicked(double, double, const RadxRay*)),
           this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
-  connect(_rhi, SIGNAL(locationClicked(double, double, const RadxRay*)),
-          this, SLOT(_rhiLocationClicked(double, double, const RadxRay*)));
+
+  // connect(_ppi, SIGNAL(locationClicked(double, double, const RadxRay*)),
+  //         this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
+  // connect(_rhi, SIGNAL(locationClicked(double, double, const RadxRay*)),
+  //         this, SLOT(_rhiLocationClicked(double, double, const RadxRay*)));
 
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
   // customContextMenuRequested(e->pos());
-  connect(_ppi, SIGNAL(customContextMenuRequested(const QPoint &)),
-	  this, SLOT(ShowContextMenu(const QPoint &)));
+  // connect(_ppi, SIGNAL(customContextMenuRequested(const QPoint &)),
+  //         this, SLOT(ShowContextMenu(const QPoint &)));
 
   // create status panel
 
@@ -518,7 +534,8 @@ void PolarManager::_setupWindows()
 
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_fieldPanel);
-  mainLayout->addWidget(_ppiFrame);
+  mainLayout->addWidget(_polarFrame);
+  // mainLayout->addWidget(_ppiFrame);
 
   // sweep panel
 
@@ -628,8 +645,8 @@ void PolarManager::_createActions()
   // clear display
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
-  connect(_clearAct, SIGNAL(triggered()), _ppi, SLOT(clear()));
-  connect(_clearAct, SIGNAL(triggered()), _rhi, SLOT(clear()));
+  // connect(_clearAct, SIGNAL(triggered()), _ppi, SLOT(clear()));
+  // connect(_clearAct, SIGNAL(triggered()), _rhi, SLOT(clear()));
 
   // exit app
   _exitAct = new QAction(tr("E&xit"), this);
@@ -655,8 +672,8 @@ void PolarManager::_createActions()
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
   _ringsAct->setChecked(_params.ppi_range_rings_on_at_startup);
-  connect(_ringsAct, SIGNAL(triggered(bool)),
-	  _ppi, SLOT(setRings(bool)));
+  // connect(_ringsAct, SIGNAL(triggered(bool)),
+  //         _ppi, SLOT(setRings(bool)));
 
   // show grids
 
@@ -664,8 +681,8 @@ void PolarManager::_createActions()
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
   _gridsAct->setChecked(_params.ppi_grids_on_at_startup);
-  connect(_gridsAct, SIGNAL(triggered(bool)),
-	  _ppi, SLOT(setGrids(bool)));
+  // connect(_gridsAct, SIGNAL(triggered(bool)),
+  //         _ppi, SLOT(setGrids(bool)));
 
   // show azimuth lines
 
@@ -673,14 +690,14 @@ void PolarManager::_createActions()
   _azLinesAct->setStatusTip(tr("Turn az lines on/off"));
   _azLinesAct->setCheckable(true);
   _azLinesAct->setChecked(_params.ppi_azimuth_lines_on_at_startup);
-  connect(_azLinesAct, SIGNAL(triggered(bool)),
-	  _ppi, SLOT(setAngleLines(bool)));
+  // connect(_azLinesAct, SIGNAL(triggered(bool)),
+  //         _ppi, SLOT(setAngleLines(bool)));
 
   // show RHI window
 
   _showRhiAct = new QAction(tr("Show RHI Window"), this);
   _showRhiAct->setStatusTip(tr("Show the RHI Window"));
-  connect(_showRhiAct, SIGNAL(triggered()), _rhiWindow, SLOT(show()));
+  // connect(_showRhiAct, SIGNAL(triggered()), _rhiWindow, SLOT(show()));
 
   // howto and about
   
@@ -842,8 +859,8 @@ void PolarManager::_changeSweep(bool value) {
         cerr << "  moving to sweep index " << sweepIndex << endl;
       }
       _sweepManager.setGuiIndex(sweepIndex);
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
+      // _ppi->setStartOfSweep(true);
+      // _rhi->setStartOfSweep(true);
       _moveUpDown();
 
       refreshBoundaries();
@@ -884,8 +901,8 @@ void PolarManager::_handleRealtimeData(QTimerEvent * event)
 
 {
 
-  _ppi->setArchiveMode(false);
-  _rhi->setArchiveMode(false);
+  // _ppi->setArchiveMode(false);
+  // _rhi->setArchiveMode(false);
 
   // do nothing if freeze is on
 
@@ -1059,11 +1076,11 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
     cerr << "handling archive data ..." << endl;
   }
 
-  _ppi->setArchiveMode(true);
-  _ppi->setStartOfSweep(true);
+  // _ppi->setArchiveMode(true);
+  // _ppi->setStartOfSweep(true);
 
-  _rhi->setArchiveMode(true);
-  _rhi->setStartOfSweep(true);
+  // _rhi->setArchiveMode(true);
+  // _rhi->setStartOfSweep(true);
 
   // set cursor to wait cursor
 
@@ -1293,8 +1310,8 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   
   if ((maxRange - _maxRangeKm) > 0.001) {
     _maxRangeKm = maxRange;
-    _ppi->configureRange(_maxRangeKm);
-    _rhi->configureRange(_maxRangeKm);
+    // _ppi->configureRange(_maxRangeKm);
+    // _rhi->configureRange(_maxRangeKm);
   }
 
   // create 2D field data vector
@@ -1379,17 +1396,17 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     // the RHI window.  After this, opening and closing the window will be
     // left to the user.
 
-    if (!_rhiWindowDisplayed) {
-      _rhiWindow->show();
-      _rhiWindow->resize();
-      _rhiWindowDisplayed = true;
-    }
+    // if (!_rhiWindowDisplayed) {
+    //   _rhiWindow->show();
+    //   _rhiWindow->resize();
+    //   _rhiWindowDisplayed = true;
+    // }
 
     // Add the beam to the display
 
-    _rhi->addBeam(ray, fieldData, _fields);
-    _rhiWindow->setAzimuth(ray->getAzimuthDeg());
-    _rhiWindow->setElevation(ray->getElevationDeg());
+    // _rhi->addBeam(ray, fieldData, _fields);
+    // _rhiWindow->setAzimuth(ray->getAzimuthDeg());
+    // _rhiWindow->setElevation(ray->getElevationDeg());
     
   } else {
 
@@ -1408,7 +1425,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     // Add the beam to the display
     
-    _ppi->addBeam(ray, _startAz, _endAz, fieldData, _fields);
+    // _ppi->addBeam(ray, _startAz, _endAz, fieldData, _fields);
 
   }
   
@@ -1682,7 +1699,7 @@ void PolarManager::_freeze()
 
 void PolarManager::_unzoom()
 {
-  _ppi->unzoomView();
+  // _ppi->unzoomView();
   _unzoomAct->setEnabled(false);
 }
 
@@ -1720,8 +1737,8 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   _prevFieldNum = _fieldNum;
   _fieldNum = fieldId;
   
-  _ppi->selectVar(_fieldNum);
-  _rhi->selectVar(_fieldNum);
+  // _ppi->selectVar(_fieldNum);
+  // _rhi->selectVar(_fieldNum);
 
   // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
 
@@ -1784,8 +1801,8 @@ void PolarManager::colorMapRedefineReceived
   } else {
     // look up the fieldId from the fieldName
     // change the field variable
-    _ppi->backgroundColor(backgroundColor);
-    _ppi->gridRingsColor(gridColor);
+    // _ppi->backgroundColor(backgroundColor);
+    // _ppi->gridRingsColor(gridColor);
     _changeField(fieldId, false);
   }
   LOG(DEBUG) << "exit";
@@ -2198,7 +2215,7 @@ void PolarManager::_circleRadiusSliderValueChanged(int value)
 {
   if (BoundaryPointEditor::Instance()->setCircleRadius(value)) {
     //returns true if existing circle was resized with this new radius
-    _ppi->update();
+    // _ppi->update();
   }
 }
 
@@ -2380,7 +2397,7 @@ void PolarManager::_openFile()
         try {
           _getArchiveData();
         } catch (FileIException ex) {
-          _ppi->showOpeningFileMsg(false);
+          // _ppi->showOpeningFileMsg(false);
           this->setCursor(Qt::ArrowCursor);
           // _timeControl->setCursor(Qt::ArrowCursor);
           return;
@@ -2444,7 +2461,7 @@ void PolarManager::_openFile()
         _setGuiFromArchiveStartTime();
         _setGuiFromArchiveEndTime();
         
-        _ppi->showOpeningFileMsg(false);
+        // _ppi->showOpeningFileMsg(false);
       } // end else pathList is not empty
 
     }); // QTimer::singleShot(10, [=]() {
@@ -2748,6 +2765,9 @@ void PolarManager::_activateRealtimeRendering()
   _nGates = 1000;
   _maxRangeKm = _params.max_range_km;
   _clear();
+  if (_polar) {
+    _polar->activateRealtimeRendering();
+  }
   if (_ppi) {
     _ppi->activateRealtimeRendering();
   }
@@ -2905,18 +2925,18 @@ void PolarManager::_createImageFiles()
 
   // plot the data
 
-  _ppi->setStartOfSweep(true);
-  _rhi->setStartOfSweep(true);
+  // _ppi->setStartOfSweep(true);
+  // _rhi->setStartOfSweep(true);
   _plotArchiveData();
 
   // set times from plots
 
   if (_rhiMode) {
-    _plotStartTime = _rhi->getPlotStartTime();
-    _plotEndTime = _rhi->getPlotEndTime();
+    // _plotStartTime = _rhi->getPlotStartTime();
+    // _plotEndTime = _rhi->getPlotEndTime();
   } else {
-    _plotStartTime = _ppi->getPlotStartTime();
-    _plotEndTime = _ppi->getPlotEndTime();
+    // _plotStartTime = _ppi->getPlotStartTime();
+    // _plotEndTime = _ppi->getPlotEndTime();
   }
 
   // save current field
@@ -2959,11 +2979,11 @@ string PolarManager::_getOutputPath(bool interactive,
 {
   // set times from plots
   if (_rhiMode) {
-    _plotStartTime = _rhi->getPlotStartTime();
-    _plotEndTime = _rhi->getPlotEndTime();
+    // _plotStartTime = _rhi->getPlotStartTime();
+    // _plotEndTime = _rhi->getPlotEndTime();
   } else {
-    _plotStartTime = _ppi->getPlotStartTime();
-    _plotEndTime = _ppi->getPlotEndTime();
+    // _plotStartTime = _ppi->getPlotStartTime();
+    // _plotEndTime = _ppi->getPlotEndTime();
   }
 
   // compute output dir
@@ -3063,11 +3083,11 @@ void PolarManager::_saveImageToFile(bool interactive)
   // create image
 
   QPixmap pixmap;
-  if (_rhiMode) {
-    pixmap = _rhi->grab();
-  } else {
-    pixmap = _ppi->grab();
-  }
+  // if (_rhiMode) {
+  //   pixmap = _rhi->grab();
+  // } else {
+  //   pixmap = _ppi->grab();
+  // }
   QImage image = pixmap.toImage();
 
   string outputDir;
@@ -3125,7 +3145,7 @@ void PolarManager::_saveImageToFile(bool interactive)
 }
 
 void PolarManager::ShowContextMenu(const QPoint &pos) {
-  _ppi->ShowContextMenu(pos, &_vol);
+  // _ppi->ShowContextMenu(pos, &_vol);
 }
 
 /////////////////////////////////////////////////////
@@ -3314,7 +3334,7 @@ void PolarManager::polygonBtnBoundaryEditorClick()
 {
   selectBoundaryTool(BoundaryToolType::polygon);
   BoundaryPointEditor::Instance()->setTool(BoundaryToolType::polygon);
-  _ppi->update();
+  // _ppi->update();
 }
 
 // User clicked on the circleBtn
@@ -3322,7 +3342,7 @@ void PolarManager::circleBtnBoundaryEditorClick()
 {
   selectBoundaryTool(BoundaryToolType::circle);
   BoundaryPointEditor::Instance()->setTool(BoundaryToolType::circle);
-  _ppi->update();
+  // _ppi->update();
 }
 
 // User clicked on the brushBtn
@@ -3330,7 +3350,7 @@ void PolarManager::brushBtnBoundaryEditorClick()
 {
   selectBoundaryTool(BoundaryToolType::brush);
   BoundaryPointEditor::Instance()->setTool(BoundaryToolType::brush);
-  _ppi->update();
+  // _ppi->update();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -3375,7 +3395,7 @@ void PolarManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
     } else {
       selectBoundaryTool(BoundaryToolType::polygon);
     }
-    _ppi->update();   //forces repaint which clears existing polygon
+    // _ppi->update();   //forces repaint which clears existing polygon
   }
 }
 
@@ -3383,7 +3403,7 @@ void PolarManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
 void PolarManager::clearBoundaryEditorClick()
 {
   BoundaryPointEditor::Instance()->clear();
-  _ppi->update();   //forces repaint which clears existing polygon
+  // _ppi->update();   //forces repaint which clears existing polygon
 }
 
 void PolarManager::helpBoundaryEditorClick()

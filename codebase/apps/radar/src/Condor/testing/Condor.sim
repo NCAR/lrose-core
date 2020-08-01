@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for Condor
+ * TDRP params for ./Condor
  **********************************************************************/
 
 //======================================================================
@@ -458,6 +458,70 @@ max_range_km = 225;
 
 //======================================================================
 //
+// PLOT LAYOUT.
+//
+//======================================================================
+ 
+///////////// plots_n_rows ////////////////////////////
+//
+// Number of rows of plots.
+//
+// The plots are made up of a matrix of plots, n_rows by n_colums. This 
+//   is the starting value for the number of rows.
+//
+//
+// Type: int
+//
+
+plots_n_rows = 2;
+
+///////////// plots_n_columns /////////////////////////
+//
+// Number of columns of plots.
+//
+// The plots are made up of a matrix of plots, n_rows by n_colums. This 
+//   is the starting value for the number of columns.
+//
+//
+// Type: int
+//
+
+plots_n_columns = 2;
+
+///////////// plot_types //////////////////////////////
+//
+// Array of types of plots for each sub panel.
+//
+// The array size must match n_rows times n_columns.
+//
+//
+// Type: enum
+// Options:
+//     PPI_PLOT
+//     RHI_PLOT
+//     BSCAN_PLOT
+// 1D array - variable length.
+//
+
+plot_types = {
+ PPI_PLOT,
+ RHI_PLOT,
+ RHI_PLOT,
+ BSCAN_PLOT
+};
+
+///////////// axes_label_color ////////////////////////
+//
+// Color of axes labels.
+//
+//
+// Type: string
+//
+
+axes_label_color = "white";
+
+//======================================================================
+//
 // DISPLAY TYPE.
 //
 //======================================================================
@@ -589,6 +653,78 @@ main_window_start_y = 0;
 //
 
 color_scale_width = 40;
+
+///////////// main_window_title_margin ////////////////
+//
+// Height of top title margin, main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_title_margin = 24;
+
+///////////// main_title_font_size ////////////////////
+//
+// Font size of main title (pixels).
+//
+//
+// Type: int
+//
+
+main_title_font_size = 10;
+
+///////////// main_title_color ////////////////////////
+//
+// Text color for main title.
+//
+//
+// Type: string
+//
+
+main_title_color = "white";
+
+///////////// main_label_font_size ////////////////////
+//
+// Basic font size for labels (pixels).
+//
+// Some of the labels are scaled relative to this size.
+//
+//
+// Type: int
+//
+
+main_label_font_size = 10;
+
+///////////// main_background_color ///////////////////
+//
+// Color of main display background.
+//
+//
+// Type: string
+//
+
+main_background_color = "black";
+
+///////////// main_window_panel_divider_line_width ////
+//
+// Width for lines dividing up the main window into panels.
+//
+//
+// Type: int
+//
+
+main_window_panel_divider_line_width = 1;
+
+///////////// main_window_panel_divider_color /////////
+//
+// Color for lines dividing up the main window into panels.
+//
+//
+// Type: string
+//
+
+main_window_panel_divider_color = "yellow";
 
 ///////////// label_font_size /////////////////////////
 //

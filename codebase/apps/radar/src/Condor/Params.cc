@@ -1388,6 +1388,90 @@
     tt->single_val.i = 40;
     tt++;
     
+    // Parameter 'main_window_title_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_window_title_margin");
+    tt->descr = tdrpStrDup("Height of top title margin, main window (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_title_margin - &_start_;
+    tt->single_val.i = 24;
+    tt++;
+    
+    // Parameter 'main_title_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_title_font_size");
+    tt->descr = tdrpStrDup("Font size of main title (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_title_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'main_title_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("main_title_color");
+    tt->descr = tdrpStrDup("Text color for main title.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_title_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'main_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_label_font_size");
+    tt->descr = tdrpStrDup("Basic font size for labels (pixels).");
+    tt->help = tdrpStrDup("Some of the labels are scaled relative to this size.");
+    tt->val_offset = (char *) &main_label_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'main_background_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("main_background_color");
+    tt->descr = tdrpStrDup("Color of main display background.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_background_color - &_start_;
+    tt->single_val.s = tdrpStrDup("black");
+    tt++;
+    
+    // Parameter 'main_window_panel_divider_line_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_window_panel_divider_line_width");
+    tt->descr = tdrpStrDup("Width for lines dividing up the main window into panels.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_panel_divider_line_width - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'main_window_panel_divider_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("main_window_panel_divider_color");
+    tt->descr = tdrpStrDup("Color for lines dividing up the main window into panels.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_panel_divider_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
     // Parameter 'label_font_size'
     // ctype is 'int'
     

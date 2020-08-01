@@ -91,6 +91,25 @@ PolarWidget::PolarWidget(QWidget* parent,
   _isArchiveMode = false; // ??
   _archiveMode = _params.begin_in_archive_mode;
 
+  _titleMargin = _params.main_window_title_margin;
+
+  _nRows = _params.plots_n_rows;
+  _nCols = _params.plots_n_columns;
+  _nPlots = _nRows * _nCols;
+  
+  _plotsGrossHeight = height() - _titleMargin;
+  _plotsGrossWidth = width();
+  _plotWidth = _plotsGrossWidth / _nCols;
+  _plotHeight = _plotsGrossHeight / _nRows;
+
+  _ppiPlotsConfigured = false;
+  _rhiPlotsConfigured = false;
+
+  _xGridEnabled = false;
+  _yGridEnabled = false;
+
+  _currentBeam = NULL;
+
   // Set up the background color
 
   QPalette new_palette = palette();
@@ -545,13 +564,15 @@ void PolarWidget::smartBrush(int xPixel, int yPixel) {
 
 void PolarWidget::paintEvent(QPaintEvent *event)
 {
+
   QPainter painter(this);
 
-  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
+  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
-  _drawOverlays(painter);
+  // _drawOverlays(painter);
+  _drawDividers(painter);
 
-  BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
+  // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
 }
 
 
@@ -884,6 +905,80 @@ void PolarWidget::_refreshImages()
 }
 
 /*************************************************************************
+ * Draw the dividing lines between plots, title etc.
+ */
+
+void PolarWidget::_drawDividers(QPainter &painter)
+{
+
+  cerr << "111111111111111111111" << endl;
+
+  // draw panel dividing lines
+
+  painter.save();
+  QPen dividerPen(_params.main_window_panel_divider_color);
+  dividerPen.setWidth(_params.main_window_panel_divider_line_width);
+  painter.setPen(dividerPen);
+
+  // borders
+
+  {
+    QLineF upperBorder(0, 0, width()-1, 0);
+    painter.drawLine(upperBorder);
+    QLineF lowerBorder(0, height()-1, width()-1, height()-1);
+    painter.drawLine(lowerBorder);
+    QLineF leftBorder(0, 0, 0, height()-1);
+    painter.drawLine(leftBorder);
+    QLineF rightBorder(width()-1, 0, width()-1, height()-1);
+    painter.drawLine(rightBorder);
+  }
+    
+  // line below title
+  {
+    QLineF topLine(0, _titleMargin, width(), _titleMargin);
+    painter.drawLine(topLine);
+  }
+
+  // plot panel lower boundaries
+  
+  for (int irow = 1; irow < _nRows; irow++) {
+    QLineF lowerBoundary(0, _titleMargin + irow * _plotHeight,
+                         width(), _titleMargin + irow * _plotHeight);
+    painter.drawLine(lowerBoundary);
+  }
+  
+  // plot panel right boundaries
+  
+  for (int icol = 1; icol < _nCols; icol++) {
+    QLineF rightBoundary(icol * _plotWidth, _titleMargin,
+                         icol * _plotWidth, height());
+    painter.drawLine(rightBoundary);
+  }
+  painter.restore();
+  
+  // click point cross hairs
+  
+  if (_pointClicked) {
+    
+    painter.save();
+
+    int startX = _mouseReleaseX - _params.click_cross_size / 2;
+    int endX = _mouseReleaseX + _params.click_cross_size / 2;
+    int startY = _mouseReleaseY - _params.click_cross_size / 2;
+    int endY = _mouseReleaseY + _params.click_cross_size / 2;
+
+    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
+    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
+
+    painter.restore();
+
+  }
+
+  cerr << "222222222222222222222" << endl;
+
+}
+
+/*************************************************************************
  * _drawOverlays()
  */
 
@@ -1166,6 +1261,62 @@ void PolarWidget::_drawOverlays(QPainter &painter)
     painter.restore();
 
   } // if (_archiveMode) {
+
+}
+
+/////////////////////////////////////////////////////////////	
+// Title
+    
+void PolarWidget::_drawMainTitle(QPainter &painter) 
+
+{
+
+  painter.save();
+
+  // set the font and color
+  
+  QFont font = painter.font();
+  font.setPointSizeF(_params.main_title_font_size);
+  painter.setFont(font);
+  painter.setPen(_params.main_title_color);
+
+  string title("CONDOR POLAR PLOTS");
+
+#ifdef NOTNOW
+  if (_currentBeam) {
+    string rname(_currentBeam->getInfo().get_radar_name());
+    if (_params.override_radar_name) rname = _params.radar_name;
+    title.append(":");
+    title.append(rname);
+    char dateStr[1024];
+    DateTime beamTime(_currentBeam->getTimeSecs());
+    snprintf(dateStr, 1024, "%.4d/%.2d/%.2d",
+             beamTime.getYear(), beamTime.getMonth(), beamTime.getDay());
+    title.append(" ");
+    title.append(dateStr);
+    char timeStr[1024];
+    int nanoSecs = _currentBeam->getNanoSecs();
+    snprintf(timeStr, 1024, "%.2d:%.2d:%.2d.%.3d",
+             beamTime.getHour(), beamTime.getMin(), beamTime.getSec(),
+             (nanoSecs / 1000000));
+    title.append("-");
+    title.append(timeStr);
+  }
+#endif
+
+  // get bounding rectangle
+  
+  QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
+  
+  qreal xx = (qreal) ((width() / 2.0) - (tRect.width() / 2.0));
+  qreal yy = (qreal) (_titleMargin - tRect.height()) / 2.0;
+  QRectF bRect(xx, yy, tRect.width() + 6, tRect.height() + 6);
+                      
+  // draw the text
+  
+  painter.drawText(bRect, Qt::AlignTop, title.c_str());
+
+  painter.restore();
 
 }
 

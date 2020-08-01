@@ -72,6 +72,7 @@ class QDateTimeEdit;
 class QFileDialog;
 
 class DisplayField;
+class PolarWidget;
 class PpiWidget;
 class RhiWidget;
 class RhiWindow;
@@ -175,6 +176,9 @@ private:
   vector<QRadioButton *> *_sweepRButtons;
 
   // windows
+
+  QFrame *_polarFrame;
+  PolarWidget *_polar;
 
   QFrame *_ppiFrame;
   PpiWidget *_ppi;

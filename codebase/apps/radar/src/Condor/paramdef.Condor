@@ -432,6 +432,42 @@ paramdef int {
 } color_scale_width;
 
 paramdef int {
+  p_default = 24;
+  p_descr = "Height of top title margin, main window (pixels).";
+} main_window_title_margin;
+
+paramdef int {1
+  p_default = 10;
+  p_descr = "Font size of main title (pixels).";
+} main_title_font_size;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Text color for main title.";
+} main_title_color;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Basic font size for labels (pixels).";
+  p_help = "Some of the labels are scaled relative to this size.";
+} main_label_font_size;
+
+paramdef string {
+  p_default = "black";
+  p_descr = "Color of main display background.";
+} main_background_color;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Width for lines dividing up the main window into panels.";
+} main_window_panel_divider_line_width;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color for lines dividing up the main window into panels.";
+} main_window_panel_divider_color;
+
+paramdef int {
   p_default = 12;
   p_descr = "Basic font size for labels (pixels).";
   p_help = "Some of the labels are scaled relative to this size.";

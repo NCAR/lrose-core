@@ -60,6 +60,8 @@
 #include "DisplayField.hh"
 
 class PolarManager;
+class PpiPlot;
+class RhiPlot;
 
 /// Base class for widgets displaying PPI or RHI scans.
 ///
@@ -310,6 +312,10 @@ class DLL_EXPORT PolarWidget : public QWidget
   static const double COS_30;
   
 
+  // beam data
+
+  Beam *_currentBeam;
+
   ///////////////////////
   // Protected members //
   ///////////////////////
@@ -330,6 +336,37 @@ class DLL_EXPORT PolarWidget : public QWidget
   // instrument platform details 
 
   const RadxPlatform &_platform;
+  
+  // plot panel layouts
+
+  int _titleMargin;
+  int _nRows;
+  int _nCols;
+  int _nPlots;
+
+  int _plotsGrossHeight;
+  int _plotsGrossWidth;
+  int _plotHeight;
+  int _plotWidth;
+  
+  // ppis
+  
+  vector<PpiPlot *> _ppis;
+  bool _ppiPlotsConfigured;
+  
+  // rhis
+  
+  vector<RhiPlot *> _rhiPlots;
+  bool _rhiPlotsConfigured;
+  
+  // Grid overlays
+  
+  bool _xGridEnabled;
+  bool _yGridEnabled;
+
+  // currently selected range
+
+  double _selectedRangeKm;
   
   // data fields
 
@@ -484,6 +521,8 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   void _drawOverlays(QPainter &painter);
+  void _drawDividers(QPainter &painter);
+  void _drawMainTitle(QPainter &painter);
 
   /**
    * @brief Determine a ring spacing which will give even distances, and
