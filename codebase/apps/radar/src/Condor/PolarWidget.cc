@@ -644,7 +644,7 @@ void PolarWidget::doResize(int ww, int hh)
   int totalWidth = _plotsGrossWidth + _colorScaleWidth + 1;
   int totalHeight = _plotsGrossHeight + _titleMargin + 1;
 
-  // QWidget::resize(totalWidth, totalHeight);
+  QWidget::resize(totalWidth, totalHeight);
 
   cerr << "RRRRRRRRRRRRRRR plotWidth, plotHeight: " << _plotWidth << ", " << _plotHeight << endl;
   cerr << "RRRRRRRRRRRRRRR plotGrossWidth, plotGrossHeight: " << _plotsGrossWidth << ", " << _plotsGrossHeight << endl;
