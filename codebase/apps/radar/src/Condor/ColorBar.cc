@@ -38,7 +38,7 @@ ColorBar::ColorBar(int width, const ColorMap *cmap,
         QWidget(parent),
         _colorMap(cmap)
 {
-  setMinimumSize(width, 100);
+  setMinimumSize(width, 120);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   update();
   _annotation = true;

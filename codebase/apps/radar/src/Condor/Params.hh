@@ -504,6 +504,8 @@ public:
 
   int plots_n_columns;
 
+  double plot_aspect_ratio;
+
   plot_type_t *_plot_types;
   int plot_types_n;
 
@@ -773,7 +775,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[179];
+  mutable TDRPtable _table[180];
 
   const char *_className;
 

@@ -488,6 +488,16 @@ plots_n_rows = 2;
 
 plots_n_columns = 2;
 
+///////////// plot_aspect_ratio ///////////////////////
+//
+// Aspect ratio (width/height) of plot window.
+//
+//
+// Type: double
+//
+
+plot_aspect_ratio = 1;
+
 ///////////// plot_types //////////////////////////////
 //
 // Array of types of plots for each sub panel.

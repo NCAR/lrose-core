@@ -23,7 +23,6 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
 #include "PpiPlot.hh"
-#include "PpiWidget.hh"
 #include "PolarManager.hh"
 #include "SpreadSheetView.hh"
 #include "SpreadSheetController.hh"

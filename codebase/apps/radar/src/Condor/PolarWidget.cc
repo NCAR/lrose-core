@@ -92,13 +92,15 @@ PolarWidget::PolarWidget(QWidget* parent,
   _archiveMode = _params.begin_in_archive_mode;
 
   _titleMargin = _params.main_window_title_margin;
+  _aspectRatio = _params.plot_aspect_ratio;
+  _colorScaleWidth = _params.color_scale_width;
 
   _nRows = _params.plots_n_rows;
   _nCols = _params.plots_n_columns;
   _nPlots = _nRows * _nCols;
   
-  _plotsGrossHeight = height() - _titleMargin;
-  _plotsGrossWidth = width();
+  _plotsGrossHeight = height() - _titleMargin - 1;
+  _plotsGrossWidth = width() - _colorScaleWidth - 1;
   _plotWidth = _plotsGrossWidth / _nCols;
   _plotHeight = _plotsGrossHeight / _nRows;
 
@@ -130,7 +132,7 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   // Allow the size_t type to be passed to slots
 
-  qRegisterMetaType<size_t>("size_t");
+  // qRegisterMetaType<size_t>("size_t");
 
   // create the field renderers
   
@@ -340,34 +342,23 @@ QPixmap* PolarWidget::getPixmap()
 
 void PolarWidget::mousePressEvent(QMouseEvent *e)
 {
-
-
+  
   if (e->button() == Qt::RightButton) {
-
-    //-------
-
-      QPointF clickPos(e->pos());
-
-      _mousePressX = e->x();
-      _mousePressY = e->y();
-
-      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
-      emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
-
+    QPointF clickPos(e->pos());
+    _mousePressX = e->x();
+    _mousePressY = e->y();
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+    emit customContextMenuRequested(clickPos.toPoint());
   } else {
-
-
-  _rubberBand->setGeometry(QRect(e->pos(), QSize()));
-  _rubberBand->show();
-
-  _mousePressX = e->x();
-  _mousePressY = e->y();
-
-  _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-  _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+    _rubberBand->setGeometry(QRect(e->pos(), QSize()));
+    _rubberBand->show();
+    _mousePressX = e->x();
+    _mousePressY = e->y();
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
   }
+
 }
 
 
@@ -377,20 +368,26 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
 
 void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 {
+
   int worldX = (int)_zoomWorld.getXWorld(e->pos().x());
   int worldY = (int)_zoomWorld.getYWorld(e->pos().y());
+  
+  if (_manager._boundaryEditorDialog->isVisible()) {
 
-  if (_manager._boundaryEditorDialog->isVisible())
-  {
-  	BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
+    BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
+    
+    if (tool == BoundaryToolType::polygon && 
+        BoundaryPointEditor::Instance()->isAClosedPolygon() && 
+        BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY)) {
+      BoundaryPointEditor::Instance()->moveNearestPointTo(worldX, worldY);
+    } else if (tool == BoundaryToolType::brush) {
+      BoundaryPointEditor::Instance()->addToBrushShape(worldX, worldY);
+    }
 
-  	if (tool == BoundaryToolType::polygon && BoundaryPointEditor::Instance()->isAClosedPolygon() && BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY))
-			BoundaryPointEditor::Instance()->moveNearestPointTo(worldX, worldY);
-  	else if (tool == BoundaryToolType::brush)
-  		BoundaryPointEditor::Instance()->addToBrushShape(worldX, worldY);
-		update();
-		return;
-	}
+    update();
+    return;
+
+  }
 
   // Zooming with the mouse
 
@@ -398,10 +395,10 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
   int y = e->y();
   int deltaX = x - _mousePressX;
   int deltaY = y - _mousePressY;
-
+  
   // Make the rubberband aspect ratio match that
   // of the window
-
+  
   double dx = fabs(deltaY * _aspectRatio);
   double dy = fabs(dx / _aspectRatio);
 
@@ -413,15 +410,14 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
   int moveX = (int) floor(dx + 0.5);
   int moveY = (int) floor(dy + 0.5);
   QRect newRect = QRect(_mousePressX, _mousePressY, moveX, moveY);
-
+  
   _zoomCornerX = _mousePressX + moveX;
   _zoomCornerY = _mousePressY + moveY;
-
+  
   newRect = newRect.normalized();
   _rubberBand->setGeometry(newRect);
 
 }
-
 
 /*************************************************************************
  * mouseReleaseEvent()
@@ -429,91 +425,91 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 
 void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 {
-
+  
   _pointClicked = false;
-
+  
   if (e->button() == Qt::RightButton) {
-
-      QPointF clickPos(e->pos());
-
-      _mousePressX = e->x();
-      _mousePressY = e->y();
-
-      emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
-
+    
+    QPointF clickPos(e->pos());
+    
+    _mousePressX = e->x();
+    _mousePressY = e->y();
+    
+    emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
+    
   } else {
-
-  QRect rgeom = _rubberBand->geometry();
-
-  // If the mouse hasn't moved much, assume we are clicking rather than
-  // zooming
-
-  QPointF clickPos(e->pos());
-  
-
-  _mouseReleaseX = clickPos.x();
-  _mouseReleaseY = clickPos.y();
-
-  // get click location in world coords
-
-  if (rgeom.width() <= 20) {
     
-    // Emit a signal to indicate that the click location has changed
+    QRect rgeom = _rubberBand->geometry();
     
-    _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-    _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-
-    double x_km = _worldReleaseX;
-    double y_km = _worldReleaseY;
-    _pointClicked = true;
-
-
-    /***** testing ******
-    // QToolTip::showText(mapToGlobal(QPoint(_mouseReleaseX, _mouseReleaseY)), "louigi")  
-    QToolTip::showText(QPoint(0,0), "louigi");
-
-    smartBrush(_mouseReleaseX, _mouseReleaseY);
-
-    // ***** end testing ****/
-
-    // get ray closest to click point
-
-    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-
-    // emit signal
-
-    emit locationClicked(x_km, y_km, closestRay);
-  
-  } else {
-
-    // mouse moved more than 20 pixels, so a zoom occurred
+    // If the mouse hasn't moved much, assume we are clicking rather than
+    // zooming
     
-    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
-    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
-
-    _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
-
-    _setTransform(_zoomWorld.getTransform());
-
-    _setGridSpacing();
-
-    // enable unzoom button
+    QPointF clickPos(e->pos());
     
-    _manager.enableZoomButton();
+    _mouseReleaseX = clickPos.x();
+    _mouseReleaseY = clickPos.y();
     
-    // Update the window in the renderers
+    // get click location in world coords
     
-    _refreshImages();
+    if (rgeom.width() <= 20) {
+      
+      // Emit a signal to indicate that the click location has changed
+      
+      _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+      _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+      
+      double x_km = _worldReleaseX;
+      double y_km = _worldReleaseY;
+      _pointClicked = true;
+      
+      
+      /***** testing ******
+       // QToolTip::showText(mapToGlobal(QPoint(_mouseReleaseX, _mouseReleaseY)), "louigi")  
+       QToolTip::showText(QPoint(0,0), "louigi");
+       
+       smartBrush(_mouseReleaseX, _mouseReleaseY);
+       
+       // ***** end testing ****/
+      
+      // get ray closest to click point
+      
+      const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+      
+      // emit signal
+      
+      emit locationClicked(x_km, y_km, closestRay);
+      
+    } else {
+      
+      // mouse moved more than 20 pixels, so a zoom occurred
+      
+      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+      
+      _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+      _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+      
+      _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+      
+      _setTransform(_zoomWorld.getTransform());
+      
+      _setGridSpacing();
+      
+      // enable unzoom button
+      
+      _manager.enableZoomButton();
+      
+      // Update the window in the renderers
+      
+      _refreshImages();
+      
+    }
+    
+    // hide the rubber band
+    
+    _rubberBand->hide();
+    update();
 
-  }
-    
-  // hide the rubber band
-
-  _rubberBand->hide();
-  update();
   }
 }
 
@@ -521,22 +517,27 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 // Todo: investigate implementing a listener pattern instead
 void PolarWidget::timerEvent(QTimerEvent *event)
 {
-	bool doUpdate = false;
-	bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
-	if (isBoundaryEditorVisible)
-	{
-		double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
-		doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);   //user may have zoomed in or out, so update the polygon point boxes so they are the right size on screen
-	}
+  bool doUpdate = false;
+  bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
+  if (isBoundaryEditorVisible) {
+    double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
+    doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);   //user may have zoomed in or out, so update the polygon point boxes so they are the right size on screen
+  }
   bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
-  bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
-  if ((isBoundaryEditorVisible && !isBoundaryFinished) || (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown))
+  bool isShiftKeyDown =
+    (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+  if ((isBoundaryEditorVisible && !isBoundaryFinished) ||
+      (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown)) {
     this->setCursor(Qt::CrossCursor);
-  else
+  } else {
     this->setCursor(Qt::ArrowCursor);
+  }
+  
+  if (doUpdate) {  //only update if something has changed
+    cerr << "UUUUUUUUUUUUUUUUUU222222222222222" << endl;
+    update();
+  }
 
-  if (doUpdate)  //only update if something has changed
-  	update();
 }
 
 
@@ -565,6 +566,15 @@ void PolarWidget::smartBrush(int xPixel, int yPixel) {
 void PolarWidget::paintEvent(QPaintEvent *event)
 {
 
+  // compute plot widths
+
+  _plotsGrossWidth = width() - 1 - _colorScaleWidth;
+  _plotsGrossHeight = height() - 1 - _titleMargin;
+  _plotWidth = _plotsGrossWidth / _nCols;
+  _plotHeight = _plotsGrossHeight / _nRows;
+  
+  cerr << "22222222222222222222" << endl;
+
   QPainter painter(this);
 
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
@@ -573,6 +583,9 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   _drawDividers(painter);
 
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
+
+  cerr << "aaaaaaaaaaaaaaaaaaaaa" << endl;
+
 }
 
 
@@ -582,9 +595,11 @@ void PolarWidget::paintEvent(QPaintEvent *event)
 
 void PolarWidget::resizeEvent(QResizeEvent * e)
 {
+  cerr << "333333333333333333" << endl;
   _resetWorld(width(), height());
   _refreshImages();
-  update();
+  cerr << "UUUUUUUUUUUUUUUUUU33333333333333" << endl;
+  // update();
 }
 
 
@@ -592,21 +607,71 @@ void PolarWidget::resizeEvent(QResizeEvent * e)
  * resize()
  */
 
-void PolarWidget::resize(const int width, const int height)
+void PolarWidget::doResize(int ww, int hh)
 {
+  
+  double grossHeight = height() - _titleMargin - 1;
+  double grossWidth = width() - _colorScaleWidth - 1;
+  double grossAspect = grossWidth / grossHeight;
+  double plotWidth = grossWidth / _nCols;
+  double plotHeight = grossHeight / _nRows;
+
+  if (_params.plot_aspect_ratio < 0) {
+
+    // use aspect ratio from window
+    _aspectRatio = grossAspect;
+
+  } else {
+
+    // use specified aspect ratio
+
+    _aspectRatio = _params.plot_aspect_ratio;
+    cerr << "AAAAAAAAAAA grossAspect, _aspectRatio: " << grossAspect << ", " << _aspectRatio << endl;
+    if (_aspectRatio > grossAspect) {
+      // limit height
+      plotHeight = plotWidth / _aspectRatio;
+    } else {
+      // limit width
+      plotWidth = plotHeight * _aspectRatio;
+    }
+    
+  }
+  
+  _plotWidth = (int) (plotWidth + 0.5);
+  _plotHeight = (int) (plotHeight + 0.5);
+  _plotsGrossWidth = _nCols * _plotWidth;
+  _plotsGrossHeight = _nRows * _plotHeight;
+  int totalWidth = _plotsGrossWidth + _colorScaleWidth + 1;
+  int totalHeight = _plotsGrossHeight + _titleMargin + 1;
+
+  // QWidget::resize(totalWidth, totalHeight);
+
+  cerr << "RRRRRRRRRRRRRRR plotWidth, plotHeight: " << _plotWidth << ", " << _plotHeight << endl;
+  cerr << "RRRRRRRRRRRRRRR plotGrossWidth, plotGrossHeight: " << _plotsGrossWidth << ", " << _plotsGrossHeight << endl;
+  cerr << "RRRRRRRRRRRRRRR titleMargin, colorScaleWidth: " << _titleMargin << ", " << _colorScaleWidth << endl;
+  cerr << "RRRRRRRRRRRRRRRR resize ww, hh: " << ww << ", " << hh << endl;
+  cerr << "RRRRRRRRRRRRRRRR resize width, height: " << this->width() << ", " << this->height() << endl;
+  cerr << "RRRRRRRRR _aspectRatio: " << _aspectRatio << endl;
 
   // Set the geometry based on the aspect ratio that we need for this display.
   // The setGeometry() method will fire off the resizeEvent() so we leave the
   // updating of the display to that event.
   
-  int sizeNeeded = (int) ((width - _colorScaleWidth) / _aspectRatio + 0.5);
-  if (height < sizeNeeded) {
-    sizeNeeded = height;
-  }
+  // int sizeNeeded = (int) ((ww - _colorScaleWidth) / _aspectRatio + 0.5);
+  // if (hh < sizeNeeded) {
+  //   sizeNeeded = hh;
+  // }
 
-  setGeometry(0, 0, 
-              (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth,
-              sizeNeeded);
+  // int widthNeeded = (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth;
+
+  // QWidget::resize(700, 500);
+
+  // setGeometry(0, 0, 
+  //             (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth,
+  //             sizeNeeded);
+
+  cerr << "UUUUUUUUUUUUUUUUUU111111111111" << endl;
+  update();
 
 }
 
@@ -666,7 +731,8 @@ void PolarWidget::_performRendering()
     }
   } // ifield
 
-  update();
+  cerr << "UUUUUUUUUUUUUUUUUU555555555555555" << endl;
+  // update();
 
 }
 
@@ -901,6 +967,7 @@ void PolarWidget::_refreshImages()
 
   _performRendering();
 
+  cerr << "UUUUUUUUUUUUUUUUUU66666666666666" << endl;
   update();
 }
 
@@ -911,7 +978,7 @@ void PolarWidget::_refreshImages()
 void PolarWidget::_drawDividers(QPainter &painter)
 {
 
-  cerr << "111111111111111111111" << endl;
+  cerr << "CCCCCCCCCCCCCCCCCCCCCCCCC width, height: " << width() << ", " << height() << endl;
 
   // draw panel dividing lines
 
@@ -939,21 +1006,33 @@ void PolarWidget::_drawDividers(QPainter &painter)
     painter.drawLine(topLine);
   }
 
-  // plot panel lower boundaries
+  // plot panel lower borders
   
   for (int irow = 1; irow < _nRows; irow++) {
-    QLineF lowerBoundary(0, _titleMargin + irow * _plotHeight,
-                         width(), _titleMargin + irow * _plotHeight);
+    double yy = _titleMargin + irow * _plotHeight;
+    QLineF lowerBoundary(0, yy, _plotsGrossWidth, yy);
     painter.drawLine(lowerBoundary);
+    cerr << "***** irow, yy: " << irow << ", " << yy << endl;
   }
   
-  // plot panel right boundaries
+  // plot panel right borders
   
   for (int icol = 1; icol < _nCols; icol++) {
-    QLineF rightBoundary(icol * _plotWidth, _titleMargin,
-                         icol * _plotWidth, height());
+    double xx = icol * _plotWidth;
+    QLineF rightBoundary(xx, _titleMargin, xx, height());
     painter.drawLine(rightBoundary);
+    cerr << "***** icol, xx: " << icol << ", " << xx << endl;
   }
+
+  // color scale left boundary
+  {
+    double xx = _plotsGrossWidth;
+    QLineF boundary(xx, _titleMargin, xx, height());
+    painter.drawLine(boundary);
+  }
+
+
+
   painter.restore();
   
   // click point cross hairs
@@ -974,7 +1053,8 @@ void PolarWidget::_drawDividers(QPainter &painter)
 
   }
 
-  cerr << "222222222222222222222" << endl;
+  cerr << "UUUUUUUUUUUUUUUU7777777777777777" << endl;
+  //   update();
 
 }
 

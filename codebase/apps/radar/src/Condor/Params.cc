@@ -1177,6 +1177,18 @@
     tt->single_val.i = 2;
     tt++;
     
+    // Parameter 'plot_aspect_ratio'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("plot_aspect_ratio");
+    tt->descr = tdrpStrDup("Aspect ratio (width/height) of main plot window.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &plot_aspect_ratio - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // Parameter 'plot_types'
     // ctype is '_plot_type_t'
     

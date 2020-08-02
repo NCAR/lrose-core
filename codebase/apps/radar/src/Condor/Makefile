@@ -77,11 +77,8 @@ HDRS = \
 	PolarPlot.hh \
 	PolarWidget.hh \
 	PpiPlot.hh \
-	PpiWidget.hh \
 	Reader.hh \
 	RhiBeam.hh \
-	RhiWidget.hh \
-	RhiWindow.hh \
 	ScaledLabel.hh \
 	SiiPalette.hh \
 	SoloDefaultColorWrapper.hh \
@@ -139,9 +136,6 @@ MOC_SRCS = \
 	ParameterColorView.cc \
 	PolarManager.cc \
 	PolarWidget.cc \
-	PpiWidget.cc \
-	RhiWidget.cc \
-	RhiWindow.cc \
 	SoloFunctions.cc \
 	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
@@ -156,9 +150,6 @@ MOC_OUTPUT = \
 	moc_FieldRenderer.cpp \
 	moc_PolarManager.cpp \
 	moc_PolarWidget.cpp \
-	moc_PpiWidget.cpp \
-	moc_RhiWidget.cpp \
-	moc_RhiWindow.cpp \
 	moc_TimeScaleWidget.cpp \
 	moc_ParameterColorView.cpp \
 	moc_FieldColorController.cpp \

@@ -180,11 +180,11 @@ private:
   QFrame *_polarFrame;
   PolarWidget *_polar;
 
-  QFrame *_ppiFrame;
-  PpiWidget *_ppi;
+  // QFrame *_ppiFrame;
+  // PpiWidget *_ppi;
 
-  RhiWindow *_rhiWindow;
-  RhiWidget *_rhi;
+  // RhiWindow *_rhiWindow;
+  // RhiWidget *_rhi;
   bool _rhiWindowDisplayed;
   bool _rhiMode;
   

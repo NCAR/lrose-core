@@ -258,7 +258,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    *
    */
 
-  void resize(const int width, const int height);
+  void doResize(int ww, int hh);
 
   /**
    * @brief Set ring visibility.
