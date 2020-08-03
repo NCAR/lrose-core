@@ -487,7 +487,7 @@ void PolarManager::_setupWindows()
   _polar = new PolarWidget(_polarFrame, *this, _params, _platform, _fields, _haveFilteredFields);
 
   connect(this, SIGNAL(frameResized(const int, const int)),
-          _polar, SLOT(doResize(const int, const int)));
+          _polar, SLOT(resize(const int, const int)));
 
   // ppi window
 

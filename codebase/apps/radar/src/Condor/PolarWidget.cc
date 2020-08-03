@@ -604,14 +604,14 @@ void PolarWidget::resizeEvent(QResizeEvent * e)
 
 
 /*************************************************************************
- * resize()
+ * overload resize()
  */
 
-void PolarWidget::doResize(int ww, int hh)
+void PolarWidget::resize(int ww, int hh)
 {
   
-  double grossHeight = height() - _titleMargin - 1;
-  double grossWidth = width() - _colorScaleWidth - 1;
+  double grossHeight = hh - _titleMargin - 1;
+  double grossWidth = ww - _colorScaleWidth - 1;
   double grossAspect = grossWidth / grossHeight;
   double plotWidth = grossWidth / _nCols;
   double plotHeight = grossHeight / _nRows;
@@ -644,7 +644,9 @@ void PolarWidget::doResize(int ww, int hh)
   int totalWidth = _plotsGrossWidth + _colorScaleWidth + 1;
   int totalHeight = _plotsGrossHeight + _titleMargin + 1;
 
-  QWidget::resize(totalWidth, totalHeight);
+  // QWidget::resize(totalWidth, totalHeight);
+
+  setGeometry(0, 0,  totalWidth, totalHeight);
 
   cerr << "RRRRRRRRRRRRRRR plotWidth, plotHeight: " << _plotWidth << ", " << _plotHeight << endl;
   cerr << "RRRRRRRRRRRRRRR plotGrossWidth, plotGrossHeight: " << _plotsGrossWidth << ", " << _plotsGrossHeight << endl;
@@ -666,9 +668,6 @@ void PolarWidget::doResize(int ww, int hh)
 
   // QWidget::resize(700, 500);
 
-  // setGeometry(0, 0, 
-  //             (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth,
-  //             sizeNeeded);
 
   cerr << "UUUUUUUUUUUUUUUUUU111111111111" << endl;
   update();

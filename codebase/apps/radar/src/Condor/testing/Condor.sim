@@ -496,7 +496,7 @@ plots_n_columns = 2;
 // Type: double
 //
 
-plot_aspect_ratio = -1;
+plot_aspect_ratio = 1;
 
 ///////////// plot_types //////////////////////////////
 //

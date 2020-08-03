@@ -254,11 +254,11 @@ class DLL_EXPORT PolarWidget : public QWidget
   void unzoomView();
 
   /**
-   * @brief Resize the window.
+   * @brief Overload - resize the window.
    *
    */
 
-  void doResize(int ww, int hh);
+  virtual void resize(int ww, int hh);
 
   /**
    * @brief Set ring visibility.
