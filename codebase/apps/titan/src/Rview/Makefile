@@ -116,7 +116,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 ProdParams.cc: paramdef.products
 	tdrp_gen -f paramdef.products -c++ -class ProdParams \
-	-module Products -prog $(TARGET_FILE)
+	-module Products -prog $(TARGET_FILE) -add_ncar_copyright
 
 ProdParams.hh: ProdParams.cc
 

@@ -33,7 +33,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-MODULE_TYPE=progcpp
+MODULE_TYPE = progcpp
 
 TARGET_FILE = RefractParams2Tdrp
 
@@ -77,12 +77,12 @@ depend: depend_generic
 RefractParams.cc: paramdef.Refract
 	tdrp_gen Refract -f paramdef.Refract -c++ \
 		-class RefractParams \
-		-prog $(TARGET_FILE)
+		-prog $(TARGET_FILE) -add_ncar_copyright
 
 RefractCalibParams.cc: paramdef.RefractCalib
 	tdrp_gen RefractCalib -f paramdef.RefractCalib -c++ \
 		-class RefractCalibParams \
-		-prog $(TARGET_FILE)
+		-prog $(TARGET_FILE) -add_ncar_copyright
 
 clean_tdrp:
 	$(RM) Params.hh Params.cc \

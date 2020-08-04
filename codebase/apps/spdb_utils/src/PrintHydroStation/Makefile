@@ -45,7 +45,6 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_CFLAGS =
 
 HDRS = \
-       
 
 CPPC_SRCS = \
 	Main.cc 
@@ -53,7 +52,7 @@ CPPC_SRCS = \
 #
 # tdrp macros
 #
- 
+
 ##include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
@@ -65,8 +64,9 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 #
 # tdrp targets
 #
- 
+
 ##include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
+clean_tdrp:
 
 #
 # local targets

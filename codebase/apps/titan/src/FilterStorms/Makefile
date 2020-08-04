@@ -47,8 +47,6 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CFLAGS =
 
-MODULE_TYPE = progcpp
-
 HDRS = \
 	Params.hh \
 	AreaFilter.hh \
@@ -73,20 +71,22 @@ CPPC_SRCS = \
 	Main.cc
 
 #
-# standard targets
+# tdrp macros
+#
+
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
+
+#
+# standard C++ targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
-# tdrp
+# tdrp targets
 #
 
-Params.cc: paramdef.$(TARGET_FILE)
-	tdrp_gen -f paramdef.$(TARGET_FILE) -c++ -prog $(TARGET_FILE)
-
-clean_tdrp:
-	$(RM) Params.hh Params.cc
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets

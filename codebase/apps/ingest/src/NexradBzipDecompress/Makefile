@@ -54,6 +54,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 #
 
 ##nclude $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
+clean_tdrp:
 
 #
 # local targets

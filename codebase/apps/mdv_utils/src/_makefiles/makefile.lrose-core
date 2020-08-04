@@ -91,7 +91,6 @@ SUB_DIRS = \
 	mdv_constant_data \
 	mdv_le2be \
 	mdv_repeat_day \
-	print_mdv \
 	update_mdv_times
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets

@@ -62,6 +62,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 # local targets
 #
 
+clean_tdrp:
+
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 
