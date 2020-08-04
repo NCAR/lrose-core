@@ -134,7 +134,8 @@ public:
 	   const bool use_gen_time,
 	   const int max_valid_age,
 	   const heartbeat_func_t heartbeat_func = NULL,
-	   const int delay_msec = 5000);
+	   const int delay_msec = 5000,
+           const bool latest_only_flag = false);
   
 
   ////////////////////
@@ -171,10 +172,21 @@ protected:
   ///////////////////////
 
   bool _objectInitialized;
+
+  heartbeat_func_t _heartbeatFunc;
+  int _delayMsec;
   
   DsLdataTrigger _ldataTrigger;
   vector< int > _fcstPeriods;
   bool _useGenTime;
+  bool _latestOnlyFlag;
+  
+  ///////////////////////
+  // Protected methods //
+  ///////////////////////
+
+  int _nextAll();
+  int _nextLatestOnly();
   
 };
 
