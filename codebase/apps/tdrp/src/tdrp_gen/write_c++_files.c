@@ -63,7 +63,7 @@ static void write_comments_array_realloc(FILE *out);
 static void write_comments_array2D_realloc(FILE *out);
 static void write_comments_usage(FILE *out);
 static void write_comments_init(FILE *out);
-static void write_copyright(FILE *out);
+static void write_ncar_copyright(FILE *out);
 
 /***********************************************
  * write_hh_file()
@@ -78,7 +78,8 @@ int write_hh_file(const char *class_name,
 		  int n_defs,
                   const char *prog_name,
                   const char *lib_name,
-                  int singleton)
+                  int singleton,
+                  int add_ncar_copyright)
 
 {
 
@@ -102,7 +103,9 @@ int write_hh_file(const char *class_name,
    * copyright
    */
 
-  write_copyright(hfile);
+  if (add_ncar_copyright) {
+    write_ncar_copyright(hfile);
+  }
 
   /*
    * preamble
@@ -504,7 +507,8 @@ int write_cc_file(const char *class_name,
 		  int n_defs,
                   const char *prog_name,
                   const char *lib_name,
-                  int singleton)
+                  int singleton,
+                  int add_ncar_copyright)
   
 {
 
@@ -529,7 +533,9 @@ int write_cc_file(const char *class_name,
    * copyright
    */
 
-  write_copyright(cfile);
+  if (add_ncar_copyright) {
+    write_ncar_copyright(cfile);
+  }
 
   /*
    * preamble
@@ -1940,7 +1946,7 @@ static void write_comments_init(FILE *out)
  * write_copyright()
  */
 
-static void write_copyright(FILE *out)
+static void write_ncar_copyright(FILE *out)
      
 {
 

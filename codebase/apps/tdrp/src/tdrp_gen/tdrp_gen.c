@@ -72,6 +72,7 @@ int main(int argc, char **argv)
   int debug = FALSE;
   int cplusplus = FALSE;
   int singleton = FALSE;
+  int add_ncar_copyright = FALSE;
   int fname_set = FALSE;
   tdrpToken_t *tokens;
   TDRPtable *t_entries;
@@ -104,6 +105,8 @@ int main(int argc, char **argv)
       cplusplus = TRUE;
     } else if (!strcmp(argv[i], "-singleton")) {
       singleton = TRUE;
+    } else if (!strcmp(argv[i], "-add_ncar_copyright")) {
+      add_ncar_copyright = TRUE;
     } else if (!strcmp(argv[i], "-f")) {
       if (i < argc - 1) {
 	paramdef_path = argv[++i];
@@ -239,7 +242,7 @@ int main(int argc, char **argv)
      */
     
     if (write_hh_file(class_name, t_entries, n_defs, 
-                      prog_name, lib_name, singleton)) {
+                      prog_name, lib_name, singleton, add_ncar_copyright)) {
       return (-1);
     }
     
@@ -248,7 +251,7 @@ int main(int argc, char **argv)
      */
     
     if (write_cc_file(class_name, t_entries, n_defs,
-                      prog_name, lib_name, singleton)) {
+                      prog_name, lib_name, singleton, add_ncar_copyright)) {
       return (-1);
     }
 
@@ -314,6 +317,7 @@ static void Usage(FILE *out)
 	  "    moduleName must be first arg if it is specified.\n"
 	  "    If first arg begins with -, moduleName is set\n"
 	  "    to empty string.\n"
+	  "  [-add_ncar_copyright] Add NCAR copyright in C++ mode.\n"
 	  "  [-f paramdef_path] parameter definition file path.\n"
 	  "    This arg is REQUIRED.\n"
 	  "  [-h] gives usage.\n"

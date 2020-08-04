@@ -22,7 +22,7 @@
 $(PARAMS_HH): $(PARAMS_CC)
 
 $(PARAMS_CC): paramdef.$(TARGET_FILE)
-	tdrp_gen -f paramdef.$(TARGET_FILE) -c++ -singleton -prog $(TARGET_FILE)
+	tdrp_gen -f paramdef.$(TARGET_FILE) -c++ -singleton -prog $(TARGET_FILE) -add_ncar_copyright
 
 clean_tdrp:
 	$(RM) $(PARAMS_CC) $(PARAMS_HH)
