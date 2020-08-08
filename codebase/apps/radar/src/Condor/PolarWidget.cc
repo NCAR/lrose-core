@@ -94,6 +94,7 @@ PolarWidget::PolarWidget(QWidget* parent,
   _titleMargin = _params.main_window_title_margin;
   _aspectRatio = _params.plot_aspect_ratio;
   _colorScaleWidth = _params.color_scale_width;
+  _fullWorld.setColorScaleWidth(_colorScaleWidth);
 
   _nRows = _params.plots_n_rows;
   _nCols = _params.plots_n_columns;
@@ -581,6 +582,12 @@ void PolarWidget::paintEvent(QPaintEvent *event)
 
   // _drawOverlays(painter);
   _drawDividers(painter);
+
+  // draw the color scale
+
+  const DisplayField &field = _manager.getSelectedField();
+  _fullWorld.drawColorScale(field.getColorMap(), painter,
+                            _params.label_font_size);
 
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
 
