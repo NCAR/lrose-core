@@ -1764,6 +1764,8 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   }
   _valueLabel->setText(text);
 
+  _polar->update();
+
   refreshBoundaries();
 }
 

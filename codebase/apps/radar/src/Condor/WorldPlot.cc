@@ -1773,9 +1773,10 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
 
-  int pltHt = _plotHeight;
+  int pltHt = _plotHeight - _titleTextMargin;
   int width = _colorScaleWidth;
   int xStart = _widthPixels - width;
+  // int yStart = _titleTextMargin;
   size_t nHts = cmap.size() + 1; // leave some space at top and bottom
   double patchHt = (double)(pltHt) / nHts;
   int iPatchHt = (int) patchHt;
@@ -1791,7 +1792,6 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     painter.setBrush(color);
     double topY = pltHt - (int) (ii + 2) * patchHt + (patchHt / 2) + _topMargin;
     QRectF r(xStart, topY, width, patchHt);
-    cerr << "XXXXXXX xStart, topY, width, patchHt: " << xStart << ", " << topY << ", " << width << ", " << patchHt << endl;
     painter.fillRect(r, color);
     if (ii == 0) {
       scaleYBot = topY + patchHt;
@@ -1916,11 +1916,11 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     QString qunits(units.c_str());
     painter.drawText(ixx, iyy, width, tRect.height() + 4, 
                      Qt::AlignTop | Qt::AlignHCenter, qunits);
-
+    
   }
 
   // restore state
-
+  
   painter.restore();
 
 }

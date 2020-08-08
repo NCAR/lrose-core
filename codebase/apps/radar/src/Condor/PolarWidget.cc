@@ -95,6 +95,8 @@ PolarWidget::PolarWidget(QWidget* parent,
   _aspectRatio = _params.plot_aspect_ratio;
   _colorScaleWidth = _params.color_scale_width;
   _fullWorld.setColorScaleWidth(_colorScaleWidth);
+  _fullWorld.setTitleTextMargin(_titleMargin);
+  _fullWorld.setTopMargin(_titleMargin);
 
   _nRows = _params.plots_n_rows;
   _nCols = _params.plots_n_columns;
