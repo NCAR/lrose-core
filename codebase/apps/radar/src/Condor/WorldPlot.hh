@@ -105,7 +105,6 @@ public:
   inline void setRightMargin(int val) { _rightMargin = val; }
   inline void setTopMargin(int val) { _topMargin = val; }
   inline void setBottomMargin(int val) { _bottomMargin = val; }
-  inline void setTitleTextMargin(int val) { _titleTextMargin = val; }
   inline void setAxisTextMargin(int val) { _axisTextMargin = val; }
   inline void setLegendTextMargin(int val) { _legendTextMargin = val; }
 
@@ -174,7 +173,6 @@ public:
   inline int getRightMargin() const { return _rightMargin; }
   inline int getTopMargin() const { return _topMargin; }
   inline int getBottomMargin() const { return _bottomMargin; }
-  inline int getTitleTextMargin() const { return _titleTextMargin; }
   inline int getAxisTextMargin() const { return _axisTextMargin; }
   inline int getLegendTextMargin() const { return _legendTextMargin; }
 
@@ -438,10 +436,6 @@ public:
 
   void setClippingOff(QPainter &painter);
 
-  // represent as string
-  
-  string asString();
-
   // get axis label given value and delta
     
   string getAxisLabel(double delta, double val);
@@ -451,6 +445,10 @@ public:
   void drawColorScale(const ColorMap &colorMap,
                       QPainter &painter,
                       int unitsFontSize);
+
+  // represent as string
+  
+  string asString();
 
   // print
 
@@ -476,7 +474,6 @@ private:
   int _rightMargin;
   int _topMargin;
   int _bottomMargin;
-  int _titleTextMargin;
   int _axisTextMargin;
   int _legendTextMargin;
 

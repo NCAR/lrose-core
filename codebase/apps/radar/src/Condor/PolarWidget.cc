@@ -90,12 +90,11 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   _isArchiveMode = false; // ??
   _archiveMode = _params.begin_in_archive_mode;
-
+  
   _titleMargin = _params.main_window_title_margin;
   _aspectRatio = _params.plot_aspect_ratio;
   _colorScaleWidth = _params.color_scale_width;
   _fullWorld.setColorScaleWidth(_colorScaleWidth);
-  _fullWorld.setTitleTextMargin(_titleMargin);
   _fullWorld.setTopMargin(_titleMargin);
 
   _nRows = _params.plots_n_rows;
@@ -580,16 +579,16 @@ void PolarWidget::paintEvent(QPaintEvent *event)
 
   QPainter painter(this);
 
-  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-
-  // _drawOverlays(painter);
-  _drawDividers(painter);
+  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
   // draw the color scale
 
   const DisplayField &field = _manager.getSelectedField();
   _fullWorld.drawColorScale(field.getColorMap(), painter,
                             _params.label_font_size);
+
+  // _drawOverlays(painter);
+  _drawDividers(painter);
 
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
 
@@ -995,7 +994,7 @@ void PolarWidget::_drawDividers(QPainter &painter)
   dividerPen.setWidth(_params.main_window_panel_divider_line_width);
   painter.setPen(dividerPen);
 
-  // borders
+  // outside borders
 
   {
     QLineF upperBorder(0, 0, width()-1, 0);
@@ -1009,8 +1008,9 @@ void PolarWidget::_drawDividers(QPainter &painter)
   }
     
   // line below title
+
   {
-    QLineF topLine(0, _titleMargin, width(), _titleMargin);
+    QLineF topLine(0, _titleMargin, width() - _colorScaleWidth, _titleMargin);
     painter.drawLine(topLine);
   }
 
@@ -1033,9 +1033,10 @@ void PolarWidget::_drawDividers(QPainter &painter)
   }
 
   // color scale left boundary
+
   {
-    double xx = _plotsGrossWidth;
-    QLineF boundary(xx, _titleMargin, xx, height());
+    double xx = _plotsGrossWidth + 1;
+    QLineF boundary(xx, 0, xx, height());
     painter.drawLine(boundary);
   }
 
@@ -1062,6 +1063,7 @@ void PolarWidget::_drawDividers(QPainter &painter)
   }
 
   cerr << "UUUUUUUUUUUUUUUU7777777777777777" << endl;
+
   //   update();
 
 }

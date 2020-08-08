@@ -61,7 +61,6 @@ WorldPlot::WorldPlot()
   _rightMargin = 0;
   _topMargin = 0;
   _bottomMargin = 0;
-  _titleTextMargin = 0;
   _axisTextMargin = 0;
   _legendTextMargin = 0;
 
@@ -143,7 +142,6 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _rightMargin = rhs._rightMargin;
   _topMargin = rhs._topMargin;
   _bottomMargin = rhs._bottomMargin;
-  _titleTextMargin = rhs._titleTextMargin;
   _axisTextMargin = rhs._axisTextMargin;
   _legendTextMargin = rhs._legendTextMargin;
 
@@ -665,7 +663,7 @@ void WorldPlot::drawTitleTopCenter(QPainter &painter,
   QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
   
   qreal xx = (qreal) ((_xMinPixel + _xMaxPixel - tRect.width()) / 2.0);
-  qreal yy = (qreal) getYPixCanvas(2 * _titleTextMargin);
+  qreal yy = (qreal) getYPixCanvas(2 * _topMargin);
   
   QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 4);
     
@@ -1668,41 +1666,6 @@ void WorldPlot::setClippingOff(QPainter &painter) {
   painter.setClipping(false);
 }
 
-///////////////////////
-// represent as string
-  
-string WorldPlot::asString() {
-    
-  stringstream sstr;
-
-  sstr << "_widthPixels: " << _widthPixels << "\n"
-       << "_heightPixels: " << _heightPixels << "\n"
-       << "_leftMargin: " << _leftMargin << "\n"
-       << "_rightMargin: " << _rightMargin << "\n"
-       << "_topMargin: " << _topMargin << "\n"
-       << "_bottomMargin: " << _bottomMargin << "\n"
-       << "_xMinWorld: " << _xMinWorld << "\n"
-       << "_xMaxWorld: " << _xMaxWorld << "\n"
-       << "_yMinWorld: " << _yMinWorld << "\n"
-       << "_yMaxWorld: " << _yMaxWorld << "\n"
-       << "_plotWidth: " << _plotWidth << "\n"
-       << "_plotHeight: " << _plotHeight << "\n"
-       << "_xMinPixel: " << _xMinPixel << "\n"
-       << "_xMaxPixel: " << _xMaxPixel << "\n"
-       << "_yMinPixel: " << _yMinPixel << "\n"
-       << "_yMaxPixel: " << _yMaxPixel << "\n"
-       << "_xPixelsPerWorld: " << _xPixelsPerWorld << "\n"
-       << "_yPixelsPerWorld: " << _yPixelsPerWorld << "\n"
-       << "_xMinWindow: " << _xMinWindow << "\n"
-       << "_xMaxWindow: " << _xMaxWindow << "\n"
-       << "_yMinWindow: " << _yMinWindow << "\n"
-       << "_yMaxWindow: " << _yMaxWindow << "\n"
-       << "";
-
-  return sstr.str();
-	
-}
-
 ////////////////////////////////////////////////////
 // get axis label given value and delta
     
@@ -1773,13 +1736,13 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
 
-  int pltHt = _plotHeight - _titleTextMargin;
+  int pltHt = _plotHeight - _topMargin;
   int width = _colorScaleWidth;
   int xStart = _widthPixels - width;
-  // int yStart = _titleTextMargin;
   size_t nHts = cmap.size() + 1; // leave some space at top and bottom
-  double patchHt = (double)(pltHt) / nHts;
+  double patchHt = (double) (pltHt) / (double) nHts;
   int iPatchHt = (int) patchHt;
+  int yStart = _topMargin + iPatchHt;
 
   // fill the swatches with the color
   
@@ -1790,7 +1753,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     const ColorMap::CmapEntry &entry = cmap[ii];
     QColor color(entry.red, entry.green, entry.blue);
     painter.setBrush(color);
-    double topY = pltHt - (int) (ii + 2) * patchHt + (patchHt / 2) + _topMargin;
+    double topY = yStart + pltHt - (int) (ii + 2) * patchHt + (patchHt / 2);
     QRectF r(xStart, topY, width, patchHt);
     painter.fillRect(r, color);
     if (ii == 0) {
@@ -1866,7 +1829,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     // label the color transitions
     // we space the labels vertically by at least 2 * text height
     
-    double yy = pltHt - (patchHt * 1.0) + _topMargin;
+    double yy = yStart + pltHt - (patchHt * 1.0);
     double prevIyy = -1;
     for (size_t ii = 0; ii < cmap.size(); ii++) {
       const ColorMap::CmapEntry &entry = cmap[ii];
@@ -1901,7 +1864,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
   }
 
-  // add Units label
+  // add units label
 
   string units(colorMap.getUnits());
   if (units.size() > 0) {
@@ -1925,6 +1888,41 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
 
 }
 
+///////////////////////
+// represent as string
+  
+string WorldPlot::asString() {
+    
+  stringstream sstr;
+
+  sstr << "_widthPixels: " << _widthPixels << "\n"
+       << "_heightPixels: " << _heightPixels << "\n"
+       << "_leftMargin: " << _leftMargin << "\n"
+       << "_rightMargin: " << _rightMargin << "\n"
+       << "_topMargin: " << _topMargin << "\n"
+       << "_bottomMargin: " << _bottomMargin << "\n"
+       << "_xMinWorld: " << _xMinWorld << "\n"
+       << "_xMaxWorld: " << _xMaxWorld << "\n"
+       << "_yMinWorld: " << _yMinWorld << "\n"
+       << "_yMaxWorld: " << _yMaxWorld << "\n"
+       << "_plotWidth: " << _plotWidth << "\n"
+       << "_plotHeight: " << _plotHeight << "\n"
+       << "_xMinPixel: " << _xMinPixel << "\n"
+       << "_xMaxPixel: " << _xMaxPixel << "\n"
+       << "_yMinPixel: " << _yMinPixel << "\n"
+       << "_yMaxPixel: " << _yMaxPixel << "\n"
+       << "_xPixelsPerWorld: " << _xPixelsPerWorld << "\n"
+       << "_yPixelsPerWorld: " << _yPixelsPerWorld << "\n"
+       << "_xMinWindow: " << _xMinWindow << "\n"
+       << "_xMaxWindow: " << _xMaxWindow << "\n"
+       << "_yMinWindow: " << _yMinWindow << "\n"
+       << "_yMaxWindow: " << _yMaxWindow << "\n"
+       << "";
+
+  return sstr.str();
+	
+}
+
 /////////////////////////////////////////////////////
 // print
 
@@ -1938,32 +1936,10 @@ void WorldPlot::print(ostream &out)
   out << "  _heightPixels      : " << _heightPixels << endl;
   out << "  _xPixOffset        : " << _xPixOffset << endl;
   out << "  _yPixOffset        : " << _yPixOffset << endl;
-  out << "  _xMinWorld         : " << _xMinWorld << endl;
-  out << "  _xMaxWorld         : " << _xMaxWorld << endl;
-  out << "  _yMinWorld         : " << _yMinWorld << endl;
-  out << "  _yMaxWorld         : " << _yMaxWorld << endl;
-  out << "  _plotWidth         : " << _plotWidth << endl;
-  out << "  _plotHeight        : " << _plotHeight << endl;
-  out << "  _xMinPixel         : " << _xMinPixel << endl;
-  out << "  _yMinPixel         : " << _yMinPixel << endl;
-  out << "  _xMaxPixel         : " << _xMaxPixel << endl;
-  out << "  _yMaxPixel         : " << _yMaxPixel << endl;
-  out << "  _xPixelsPerWorld   : " << _xPixelsPerWorld << endl;
-  out << "  _yPixelsPerWorld   : " << _yPixelsPerWorld << endl;
-  out << "  _xMinWindow        : " << _xMinWindow << endl;
-  out << "  _xMaxWindow        : " << _xMaxWindow << endl;
-  out << "  _yMinWindow        : " << _yMinWindow << endl;
-  out << "  _yMaxWindow        : " << _yMaxWindow << endl;
-  out << "  _colorScaleWidth   : " << _colorScaleWidth << endl;
-  out << "  _widthPixels       : " << _widthPixels << endl;
-  out << "  _heightPixels      : " << _heightPixels << endl;
-  out << "  _xPixOffset        : " << _xPixOffset << endl;
-  out << "  _yPixOffset        : " << _yPixOffset << endl;
   out << "  _leftMargin        : " << _leftMargin << endl;
   out << "  _rightMargin       : " << _rightMargin << endl;
   out << "  _topMargin         : " << _topMargin << endl;
   out << "  _bottomMargin      : " << _bottomMargin << endl;
-  out << "  _titleTextMargin   : " << _titleTextMargin << endl;
   out << "  _axisTextMargin    : " << _axisTextMargin << endl;
   out << "  _legendTextMargin  : " << _legendTextMargin << endl;
   out << "  _colorScaleWidth   : " << _colorScaleWidth << endl;
@@ -2004,43 +1980,51 @@ void WorldPlot::print(ostream &out)
   out << "  _yMinWindow        : " << _yMinWindow << endl;
   out << "  _yMaxWindow        : " << _yMaxWindow << endl;
 
-  out << "  _topTicks          : ";
-  for (size_t ii = 0; ii < _topTicks.size(); ii++) {
-    out << _topTicks[ii];
-    if (ii < _topTicks.size() - 1) {
-      out << ", ";
-    } else {
-      out << endl;
+  if (_topTicks.size() > 0) {
+    out << "  _topTicks          : ";
+    for (size_t ii = 0; ii < _topTicks.size(); ii++) {
+      out << _topTicks[ii];
+      if (ii < _topTicks.size() - 1) {
+        out << ", ";
+      } else {
+        out << endl;
+      }
     }
   }
 
-  out << "  _bottomTicks       : ";
-  for (size_t ii = 0; ii < _bottomTicks.size(); ii++) {
-    out << _bottomTicks[ii];
-    if (ii < _bottomTicks.size() - 1) {
-      out << ", ";
-    } else {
-      out << endl;
+  if (_bottomTicks.size() > 0) {
+    out << "  _bottomTicks       : ";
+    for (size_t ii = 0; ii < _bottomTicks.size(); ii++) {
+      out << _bottomTicks[ii];
+      if (ii < _bottomTicks.size() - 1) {
+        out << ", ";
+      } else {
+        out << endl;
+      }
     }
   }
 
-  out << "  _leftTicks         : ";
-  for (size_t ii = 0; ii < _leftTicks.size(); ii++) {
-    out << _leftTicks[ii];
-    if (ii < _leftTicks.size() - 1) {
-      out << ", ";
-    } else {
-      out << endl;
+  if (_leftTicks.size() > 0) {
+    out << "  _leftTicks         : ";
+    for (size_t ii = 0; ii < _leftTicks.size(); ii++) {
+      out << _leftTicks[ii];
+      if (ii < _leftTicks.size() - 1) {
+        out << ", ";
+      } else {
+        out << endl;
+      }
     }
   }
 
-  out << "  _rightTicks        : ";
-  for (size_t ii = 0; ii < _rightTicks.size(); ii++) {
-    out << _rightTicks[ii];
-    if (ii < _rightTicks.size() - 1) {
-      out << ", ";
-    } else {
-      out << endl;
+  if (_rightTicks.size() > 0) {
+    out << "  _rightTicks        : ";
+    for (size_t ii = 0; ii < _rightTicks.size(); ii++) {
+      out << _rightTicks[ii];
+      if (ii < _rightTicks.size() - 1) {
+        out << ", ";
+      } else {
+        out << endl;
+      }
     }
   }
 

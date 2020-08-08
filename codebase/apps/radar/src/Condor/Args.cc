@@ -107,6 +107,9 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "input_mode = SIMULATED_INPUT;");
       TDRP_add_override(&override, tmp_str);
       
+      sprintf(tmp_str, "begin_in_archive_mode = FALSE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-fmq_mode")) {
       
       sprintf(tmp_str, "input_mode = DSR_FMQ_INPUT;");
