@@ -39,11 +39,12 @@
 #include <Radx/RadxPath.hh>
 #include <Ncxx/Nc3xFile.hh>
 #include <Mdv/GenericRadxFile.hh>
-#include <didss/LdataInfo.hh>
+#include <dsserver/DsLdataInfo.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/sincos.h>
 #include <toolsa/TaArray.hh>
+#include <toolsa/Path.hh>
 #include <toolsa/file_io.h>
 #include <rapmath/RapComplex.hh>
 #include <physics/IcaoStdAtmos.hh>
@@ -204,9 +205,6 @@ int RadxEvad::_runArchive()
   RadxTimeList tlist;
   tlist.setDir(_params.input_dir);
   tlist.setModeInterval(_args.startTime, _args.endTime);
-  if (_params.aggregate_sweep_files_on_read) {
-    tlist.setReadAggregateSweeps(true);
-  }
   if (tlist.compile()) {
     cerr << "ERROR - RadxEvad::_runFilelist()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
@@ -321,12 +319,6 @@ int RadxEvad::_processFile(const string &filePath)
   
   _readVol.setNGatesConstant();
   
-  // trip sweeps to 360 deg if requested
-  
-  if (_params.trim_surveillance_sweeps_to_360deg) {
-    _readVol.trimSurveillanceSweepsTo360Deg();
-  }
-
   // convert to floats
 
   _readVol.convertToFl32();
@@ -371,40 +363,11 @@ void RadxEvad::_setupRead(RadxFile &file)
     file.setVerbose(true);
   }
 
-  if (_params.set_fixed_angle_limits) {
-    file.setReadFixedAngleLimits(_params.lower_fixed_angle_limit,
-                                 _params.upper_fixed_angle_limit);
-  }
-
   file.addReadField(_params.VEL_field_name);
   if (_params.censor_using_thresholds) {
     file.addReadField(_params.censor_field_name);
   }
 
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
-  }
-
-  if (_params.remove_long_range_rays) {
-    file.setReadRemoveLongRange(true);
-  }
-
-  if (_params.remove_short_range_rays) {
-    file.setReadRemoveShortRange(true);
-  }
-
-  if (_params.set_max_range) {
-    file.setReadMaxRangeKm(_params.max_range_km);
-  }
-
-  if (_params.remove_rays_with_antenna_transitions &&
-      !_params.trim_surveillance_sweeps_to_360deg) {
-    file.setReadIgnoreTransitions(true);
-    file.setReadTransitionNraysMargin(_params.transition_nrays_margin);
-  }
-  
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
@@ -2428,6 +2391,10 @@ int RadxEvad::_writeNetcdfOutput()
     cerr << "Wrote netcdf file: " << file.getPathInUse() << endl;
   }
 
+  // write latest data info file
+
+  _writeLdataInfo(outPath);
+
   return 0;
 
 }
@@ -2538,3 +2505,30 @@ int RadxEvad::_doubleCompare(const void *i, const void *j)
     return 0;
   }
 }
+
+//////////////////////////////////////
+// Write LdataInfo file
+
+void RadxEvad::_writeLdataInfo(const string &outputPath)
+{
+
+  DsLdataInfo ldata(_params.output_netcdf_dir, _params.debug);
+  
+  ldata.setWriter("RadxEvad");
+  ldata.setDataFileExt("nc");
+  ldata.setDataType("netCDF");
+
+  string fileName;
+  Path::stripDir(_params.output_netcdf_dir, outputPath, fileName);
+  ldata.setRelDataPath(fileName);
+  
+  ldata.setIsFcast(false);
+  ldata.write(_readVol.getStartTimeSecs());
+  
+  if (_params.debug) {
+    cerr << "RadxEvad::_writeLdataInfo(): Data written to "
+         << outputPath << endl;
+  }
+
+}
+

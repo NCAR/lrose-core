@@ -1090,7 +1090,7 @@ void OutputMdv::_writeLdataInfo(const string &outputPath)
 
   DsLdataInfo ldata(_params.output_dir, _params.debug);
 
-  ldata.setWriter("Mdv2NetCDF");
+  ldata.setWriter("Radx2Grid");
   ldata.setDataFileExt("nc");
   ldata.setDataType("netCDF");
 
@@ -1114,7 +1114,7 @@ void OutputMdv::_writeLdataInfo(const string &outputPath)
   }
   
   if (_params.debug) {
-    cerr << "Mdv2NetCDF::_writeLdataInfo(): Data written to "
+    cerr << "OutputMdv::_writeLdataInfo(): Data written to "
          << outputPath << endl;
   }
 

@@ -10,11 +10,11 @@
 
 commentdef {
   p_header = "RadxEvad reads in Doppler data from a polar radar file, computes volumetric VAD (VVP) winds and writes them out to NetCDF.";
-  p_text = "The implementation in Mdv2Vad is based on the paper 'An Improved Version of the Extended Velocity-Azimuth Display Analysis of Single-Doppler Radar Data' by Thomas Metejka and Ramesh C. Srivastava, Journal of Atmospheric and Oceanic Technology, Vol 8, No 4, August 1991. The code is designed to match the terminology in the paper as fas as is posible. Please refer to the paper for a detailed explanation of the method.";
+  p_text = "The implementation is based on the paper 'An Improved Version of the Extended Velocity-Azimuth Display Analysis of Single-Doppler Radar Data' by Thomas Metejka and Ramesh C. Srivastava, Journal of Atmospheric and Oceanic Technology, Vol 8, No 4, August 1991. The code is designed to match the terminology in the paper as fas as is posible. Please refer to the paper for a detailed explanation of the method.";
 }
 
 commentdef {
-  p_header = "Computes enhanced VAD from polar radar data.";
+  p_header = "Computes Enhanced VAD from polar radar data.";
 }
 
 commentdef {
@@ -71,95 +71,8 @@ paramdef int {
 } max_realtime_data_age_secs;
 
 commentdef {
-  p_header = "READ OPTIONS";
+  p_header = "OPTION TO OVERRIDE RADAR LOCATION";
 }
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to aggregate sweep files into a volume on read.";
-  p_help = "If true, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.";
-} aggregate_sweep_files_on_read;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to remove rays taken while the antenna was in transition.";
-  p_help = "If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.";
-} remove_rays_with_antenna_transitions;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Number of transition rays to include as a margin";
-  p_help =  "Sometimes the transition flag is turned on too early in a transition, on not turned off quickly enough after a transition. If you set this to a number greater than 0, that number of rays will be included at each end of the transition, i.e. the transition will effectively be shorter at each end by this number of rays.";
-} transition_nrays_margin;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
-  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
-} trim_surveillance_sweeps_to_360deg;
-
-commentdef {
-  p_header = "OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS";
-  p_text = "Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set fixed angle limits";
-  p_help = "Only use sweeps within the specified fixed angle limits.";
-} set_fixed_angle_limits;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Lower fixed angle limit - degrees.";
-} lower_fixed_angle_limit;
-
-paramdef double {
-  p_default = 90;
-  p_descr = "Upper fixed angle limit - degrees.";
-} upper_fixed_angle_limit;
-
-commentdef {
-  p_header = "OPTIONAL RANGE LIMITS";
-  p_help = "Can be useful for removing a test pulse at max range";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set the max range for any ray.";
-} set_max_range;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Specified maximim range - km.";
-  p_help = "Gates beyond this range are removed.";
-} max_range_km;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to remove long range rays.";
-  p_help = "Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be removed.";
-} remove_long_range_rays;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to remove short range rays.";
-  p_help = "Applies to NEXRAD data. If true, data from the Doppler short-range sweeps will be removed.";
-} remove_short_range_rays;
-
-commentdef {
-  p_header = "OPTION TO OVERRIDE RADAR NAME AND/OR LOCATION";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override the radar name in input data.";
-} override_radar_name;
-
-paramdef string {
-  p_default = "NONE";
-  p_descr = "Specify radar name, to be used to override input data.";
-} radar_name;
 
 paramdef boolean {
   p_default = false;
@@ -356,12 +269,6 @@ paramdef boolean {
   p_descr = "Add the year directory to the output directory.";
   p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
 } append_year_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out _latest_data_info files.";
-  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
-} write_latest_data_info;
 
 commentdef {
   p_header = "SPDB OUTPUT";

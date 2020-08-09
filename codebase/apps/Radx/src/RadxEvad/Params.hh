@@ -384,32 +384,6 @@ public:
 
   int max_realtime_data_age_secs;
 
-  tdrp_bool_t aggregate_sweep_files_on_read;
-
-  tdrp_bool_t remove_rays_with_antenna_transitions;
-
-  int transition_nrays_margin;
-
-  tdrp_bool_t trim_surveillance_sweeps_to_360deg;
-
-  tdrp_bool_t set_fixed_angle_limits;
-
-  double lower_fixed_angle_limit;
-
-  double upper_fixed_angle_limit;
-
-  tdrp_bool_t set_max_range;
-
-  double max_range_km;
-
-  tdrp_bool_t remove_long_range_rays;
-
-  tdrp_bool_t remove_short_range_rays;
-
-  tdrp_bool_t override_radar_name;
-
-  char* radar_name;
-
   tdrp_bool_t override_radar_location;
 
   double radar_latitude_deg;
@@ -470,8 +444,6 @@ public:
 
   tdrp_bool_t append_year_dir_to_output_dir;
 
-  tdrp_bool_t write_latest_data_info;
-
   tdrp_bool_t write_results_to_spdb;
 
   char* output_spdb_url;
@@ -485,7 +457,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[68];
+  mutable TDRPtable _table[51];
 
   const char *_className;
 

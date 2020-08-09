@@ -560,7 +560,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("RadxEvad reads in Doppler data from a polar radar file, computes volumetric VAD (VVP) winds and writes them out to NetCDF.");
-    tt->comment_text = tdrpStrDup("The implementation in Mdv2Vad is based on the paper 'An Improved Version of the Extended Velocity-Azimuth Display Analysis of Single-Doppler Radar Data' by Thomas Metejka and Ramesh C. Srivastava, Journal of Atmospheric and Oceanic Technology, Vol 8, No 4, August 1991. The code is designed to match the terminology in the paper as fas as is posible. Please refer to the paper for a detailed explanation of the method.");
+    tt->comment_text = tdrpStrDup("The implementation is based on the paper 'An Improved Version of the Extended Velocity-Azimuth Display Analysis of Single-Doppler Radar Data' by Thomas Metejka and Ramesh C. Srivastava, Journal of Atmospheric and Oceanic Technology, Vol 8, No 4, August 1991. The code is designed to match the terminology in the paper as fas as is posible. Please refer to the paper for a detailed explanation of the method.");
     tt++;
     
     // Parameter 'Comment 1'
@@ -568,7 +568,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 1");
-    tt->comment_hdr = tdrpStrDup("Computes enhanced VAD from polar radar data.");
+    tt->comment_hdr = tdrpStrDup("Computes Enhanced VAD from polar radar data.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -677,191 +677,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("READ OPTIONS");
+    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR LOCATION");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'aggregate_sweep_files_on_read'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("aggregate_sweep_files_on_read");
-    tt->descr = tdrpStrDup("Option to aggregate sweep files into a volume on read.");
-    tt->help = tdrpStrDup("If true, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.");
-    tt->val_offset = (char *) &aggregate_sweep_files_on_read - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'remove_rays_with_antenna_transitions'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remove_rays_with_antenna_transitions");
-    tt->descr = tdrpStrDup("Option to remove rays taken while the antenna was in transition.");
-    tt->help = tdrpStrDup("If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.");
-    tt->val_offset = (char *) &remove_rays_with_antenna_transitions - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'transition_nrays_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("transition_nrays_margin");
-    tt->descr = tdrpStrDup("Number of transition rays to include as a margin");
-    tt->help = tdrpStrDup("Sometimes the transition flag is turned on too early in a transition, on not turned off quickly enough after a transition. If you set this to a number greater than 0, that number of rays will be included at each end of the transition, i.e. the transition will effectively be shorter at each end by this number of rays.");
-    tt->val_offset = (char *) &transition_nrays_margin - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'trim_surveillance_sweeps_to_360deg'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("trim_surveillance_sweeps_to_360deg");
-    tt->descr = tdrpStrDup("Option to trip surveillance sweeps so that they only cover 360 degrees.");
-    tt->help = tdrpStrDup("Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.");
-    tt->val_offset = (char *) &trim_surveillance_sweeps_to_360deg - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS");
-    tt->comment_text = tdrpStrDup("Fixed angles are elevation in PPI mode and azimuth in RHI mode.");
-    tt++;
-    
-    // Parameter 'set_fixed_angle_limits'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_fixed_angle_limits");
-    tt->descr = tdrpStrDup("Option to set fixed angle limits");
-    tt->help = tdrpStrDup("Only use sweeps within the specified fixed angle limits.");
-    tt->val_offset = (char *) &set_fixed_angle_limits - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'lower_fixed_angle_limit'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lower_fixed_angle_limit");
-    tt->descr = tdrpStrDup("Lower fixed angle limit - degrees.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &lower_fixed_angle_limit - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'upper_fixed_angle_limit'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("upper_fixed_angle_limit");
-    tt->descr = tdrpStrDup("Upper fixed angle limit - degrees.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &upper_fixed_angle_limit - &_start_;
-    tt->single_val.d = 90;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OPTIONAL RANGE LIMITS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'set_max_range'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_max_range");
-    tt->descr = tdrpStrDup("Option to set the max range for any ray.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_max_range - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_range_km");
-    tt->descr = tdrpStrDup("Specified maximim range - km.");
-    tt->help = tdrpStrDup("Gates beyond this range are removed.");
-    tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 9999;
-    tt++;
-    
-    // Parameter 'remove_long_range_rays'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remove_long_range_rays");
-    tt->descr = tdrpStrDup("Option to remove long range rays.");
-    tt->help = tdrpStrDup("Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be removed.");
-    tt->val_offset = (char *) &remove_long_range_rays - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'remove_short_range_rays'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remove_short_range_rays");
-    tt->descr = tdrpStrDup("Option to remove short range rays.");
-    tt->help = tdrpStrDup("Applies to NEXRAD data. If true, data from the Doppler short-range sweeps will be removed.");
-    tt->val_offset = (char *) &remove_short_range_rays - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR NAME AND/OR LOCATION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'override_radar_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_radar_name");
-    tt->descr = tdrpStrDup("Option to override the radar name in input data.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &override_radar_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'radar_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("radar_name");
-    tt->descr = tdrpStrDup("Specify radar name, to be used to override input data.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("NONE");
     tt++;
     
     // Parameter 'override_radar_location'
@@ -912,11 +729,11 @@
     tt->single_val.d = -999;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("INPUT FIELD INFORMATION");
     tt->comment_text = tdrpStrDup("Velocity field - required.");
     tt++;
@@ -933,11 +750,11 @@
     tt->single_val.s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("INPUT DATA CENSORING");
     tt->comment_text = tdrpStrDup("You have the option to censor gates in the input data based on the value in an input field. Normally SNR or NCP is used for this purpose.");
     tt++;
@@ -990,11 +807,11 @@
     tt->single_val.d = 70;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE NYQUIST velocity (m/s)");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1023,11 +840,11 @@
     tt->single_val.d = 25;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("VAD COMPUTATIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1176,11 +993,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("REGULAR HEIGHT LEVELS FOR WIND PROFILE");
     tt->comment_text = tdrpStrDup("Results will be interpolated onto this regular set of levels.");
     tt++;
@@ -1221,11 +1038,11 @@
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("NETCDF OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1278,23 +1095,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'write_latest_data_info'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("SPDB OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

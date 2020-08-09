@@ -327,6 +327,8 @@ private:
   static double _norm(double **a,int n);
   static int _doubleCompare(const void *i, const void *j);
 
+  void _writeLdataInfo(const string &outputPath);
+
 
 };
 
