@@ -106,7 +106,8 @@ This requires upgrading the compiler toolchain.
     eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
-    bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
+    bzip2-devel \
+    qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
@@ -187,7 +188,7 @@ Use ```zypper``` instead of ```yum```, with the same package list as above.
     libexpat-devel libcurl-devel \
     flex fftw3-devel \
     libbz2-devel libzip-devel \
-    libqt5-qtbase-devel libqt5-qtdeclarative-devel \
+    libqt5-qtbase-devel libqt5-qtdeclarative-devel qt5-qtcharts-devel \
     eigen3-devel \
     hdf5-devel netcdf-devel \
     armadillo-devel openmpi-devel \
