@@ -68,7 +68,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 ParamsFuzzyFunction.hh: ParamsFuzzyFunction.cc
 	$(CP) ParamsFuzzyFunction.hh ../include/rapmath
 ParamsFuzzyFunction.cc: paramdef.FuzzyFunction
-	tdrp_gen -f paramdef.FuzzyFunction -c++ -class ParamsFuzzyFunction
+	tdrp_gen -f paramdef.FuzzyFunction -c++ -class ParamsFuzzyFunction -add_ncar_copyright
 	$(CP) ParamsFuzzyFunction.hh ../include/rapmath
 
 depend: depend_generic

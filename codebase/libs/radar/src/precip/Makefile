@@ -36,7 +36,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 #
 
 PrecipRateParams.cc: paramdef.PrecipRate
-	tdrp_gen -f paramdef.PrecipRate -c++ -class PrecipRateParams -lib radar
+	tdrp_gen -f paramdef.PrecipRate -c++ -class PrecipRateParams -lib radar -add_ncar_copyright
 	/bin/mv -f PrecipRateParams.hh ../include/radar
 
 clean_tdrp:

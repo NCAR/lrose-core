@@ -39,7 +39,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 #
 
 KdpFiltParams.cc: paramdef.KdpFilt
-	tdrp_gen -f paramdef.KdpFilt -c++ -class KdpFiltParams -lib radar
+	tdrp_gen -f paramdef.KdpFilt -c++ -class KdpFiltParams -lib radar -add_ncar_copyright
 	/bin/mv -f KdpFiltParams.hh ../include/radar
 
 clean_tdrp:

@@ -97,7 +97,7 @@ This requires upgrading the compiler toolchain.
   dnf install -y python3 ; \
   dnf install -y python2-devel platform-python-devel ; \
   dnf install -y \
-    tcsh wget git \
+    tcsh wget git tk-devel \
     emacs rsync python2 python3 mlocate \
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
@@ -118,6 +118,18 @@ This requires upgrading the compiler toolchain.
 
   cd /usr/bin; \
   ln -s qmake-qt5 qmake;
+```
+
+Also, if you are deoing development, download tkdiff from:
+
+```
+* https://sourceforge.net/projects/tkdiff/
+```
+
+and install in
+
+```
+* ~/lrose/bin
 ```
 
 ## Manually install packages FEDORA

@@ -40,11 +40,11 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 # local targets
 
 AlgorithmParams.cc: paramdef.Algorithm
-	tdrp_gen -f paramdef.Algorithm -c++ -class AlgorithmParams -lib FiltAlgVirtVol
+	tdrp_gen -f paramdef.Algorithm -c++ -class AlgorithmParams -lib FiltAlgVirtVol -add_ncar_copyright
 	/bin/mv -f AlgorithmParams.hh ../include/FiltAlgVirtVol
 
 VirtVolParams.cc: paramdef.VirtVol
-	tdrp_gen -f paramdef.VirtVol -c++ -class VirtVolParams -lib FiltAlgVirtVol
+	tdrp_gen -f paramdef.VirtVol -c++ -class VirtVolParams -lib FiltAlgVirtVol -add_ncar_copyright
 	/bin/mv -f VirtVolParams.hh ../include/FiltAlgVirtVol
 
 /bin/mv clean_tdrp:
@@ -52,26 +52,6 @@ VirtVolParams.cc: paramdef.VirtVol
 	$(RM) VirtVolParams.cc ../include/FiltAlgVirtVol/VirtVolParams.hh
 
 depend: depend_generic
-
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-
-#
-# general targets
-#
-#include $(LROSE_CORE_DIR)/build/make_include/lrose_make_targets
-
-#AlgorithmParams.hh: AlgorithmParams.cc#
-#	$(CP) AlgorithmParams.hh ../include/FiltAlgVirtVol
-#AlgorithmParams.cc: paramdef.Algorithm
-#	tdrp_gen -f paramdef.Algorithm -c++ -class AlgorithmParams
-#	$(CP) AlgorithmParams.hh ../include/FiltAlgVirtVol
-
-
-#VirtVolParams.hh: VirtVolParams.cc
-#	$(CP) VirtVolParams.hh ../include/FiltAlgVirtVol
-#VirtVolParams.cc: paramdef.VirtVol
-#	tdrp_gen -f paramdef.VirtVol -c++ -class VirtVolParams
-#	$(CP) VirtVolParams.hh ../include/FiltAlgVirtVol
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

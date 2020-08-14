@@ -55,7 +55,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 depend: depend_generic
 
 RadxAppParams.cc: paramdef.RadxApp
-	tdrp_gen -f paramdef.RadxApp -c++ -class RadxAppParams -lib radar
+	tdrp_gen -f paramdef.RadxApp -c++ -class RadxAppParams -lib radar -add_ncar_copyright
 	/bin/mv -f RadxAppParams.hh ../include/radar
 
 /bin/mv clean_tdrp:

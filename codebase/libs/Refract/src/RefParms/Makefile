@@ -28,7 +28,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_targets
 RefParams.hh: RefParams.cc
 	$(CP) RefParams.hh ../include/Refract
 RefParams.cc: paramdef.Refract
-	tdrp_gen -f paramdef.Refract -c++ -class RefParams
+	tdrp_gen -f paramdef.Refract -c++ -class RefParams -add_ncar_copyright
 	$(CP) RefParams.hh ../include/Refract
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

@@ -78,7 +78,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 # local targets
 
 FiltAlgParams.cc: paramdef.FiltAlg
-	tdrp_gen -f paramdef.FiltAlg -c++ -class FiltAlgParams -lib FiltAlg
+	tdrp_gen -f paramdef.FiltAlg -c++ -class FiltAlgParams -lib FiltAlg -add_ncar_copyright
 	/bin/mv -f FiltAlgParams.hh ../include/FiltAlg
 
 /bin/mv clean_tdrp:
