@@ -225,15 +225,6 @@ paramdef struct field_t {
     }
     ,
     {
-      label = "REF",
-      raw_name = "REF",
-      filtered_name = "",
-      units = "dBZ",
-      color_map = "dbz.colors",
-      shortcut = "2"
-    }
-    ,
-    {
       label = "VEL",
       raw_name = "VEL",
       filtered_name = "",
@@ -249,15 +240,6 @@ paramdef struct field_t {
       units = "m/s",
       color_map = "width.colors",
       shortcut = "4"
-    }
-    ,
-    {
-      label = "SW",
-      raw_name = "SW",
-      filtered_name = "",
-      units = "m/s",
-      color_map = "width.colors",
-      shortcut = "5"
     }
     ,
     {

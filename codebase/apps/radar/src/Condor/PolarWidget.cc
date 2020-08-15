@@ -112,7 +112,7 @@ PolarWidget::PolarWidget(QWidget* parent,
   _xGridEnabled = false;
   _yGridEnabled = false;
 
-  _currentBeam = NULL;
+  _currentRay = NULL;
 
   // Set up the background color
 
@@ -542,6 +542,23 @@ void PolarWidget::timerEvent(QTimerEvent *event)
 
 }
 
+/*************************************************************************
+ * handleRay()
+ * Handle incomgin ray
+ */
+
+void PolarWidget::handleRay(const RadxRay *ray,
+                            const std::vector< std::vector< double > > &beam_data,
+                            const std::vector< DisplayField* > &fields)
+  
+{
+
+  // QPainter painter(this);
+  _currentRay = ray;
+  update();
+  // _drawMainTitle(painter, _currentRay);
+
+}
 
 /**************   testing ******/
 void PolarWidget::smartBrush(int xPixel, int yPixel) {
@@ -574,11 +591,8 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   _plotsGrossHeight = height() - 1 - _titleMargin;
   _plotWidth = _plotsGrossWidth / _nCols;
   _plotHeight = _plotsGrossHeight / _nRows;
-  
-  cerr << "22222222222222222222" << endl;
 
   QPainter painter(this);
-
   painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
   // draw the color scale
@@ -588,11 +602,10 @@ void PolarWidget::paintEvent(QPaintEvent *event)
                             _params.label_font_size);
 
   // _drawOverlays(painter);
+  _drawMainTitle(painter);
   _drawDividers(painter);
 
   // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
-
-  cerr << "aaaaaaaaaaaaaaaaaaaaa" << endl;
 
 }
 
@@ -607,7 +620,6 @@ void PolarWidget::resizeEvent(QResizeEvent * e)
   _resetWorld(width(), height());
   _refreshImages();
   cerr << "UUUUUUUUUUUUUUUUUU33333333333333" << endl;
-  // update();
 }
 
 
@@ -617,6 +629,8 @@ void PolarWidget::resizeEvent(QResizeEvent * e)
 
 void PolarWidget::resize(int ww, int hh)
 {
+
+  // compute the geometry
   
   double grossHeight = hh - _titleMargin - 1;
   double grossWidth = ww - _colorScaleWidth - 1;
@@ -627,6 +641,7 @@ void PolarWidget::resize(int ww, int hh)
   if (_params.plot_aspect_ratio < 0) {
 
     // use aspect ratio from window
+
     _aspectRatio = grossAspect;
 
   } else {
@@ -634,7 +649,6 @@ void PolarWidget::resize(int ww, int hh)
     // use specified aspect ratio
 
     _aspectRatio = _params.plot_aspect_ratio;
-    cerr << "AAAAAAAAAAA grossAspect, _aspectRatio: " << grossAspect << ", " << _aspectRatio << endl;
     if (_aspectRatio > grossAspect) {
       // limit height
       plotHeight = plotWidth / _aspectRatio;
@@ -652,8 +666,8 @@ void PolarWidget::resize(int ww, int hh)
   int totalWidth = _plotsGrossWidth + _colorScaleWidth + 1;
   int totalHeight = _plotsGrossHeight + _titleMargin + 1;
 
-  // QWidget::resize(totalWidth, totalHeight);
-
+  // resize
+  
   setGeometry(0, 0,  totalWidth, totalHeight);
 
   cerr << "RRRRRRRRRRRRRRR plotWidth, plotHeight: " << _plotWidth << ", " << _plotHeight << endl;
@@ -663,21 +677,8 @@ void PolarWidget::resize(int ww, int hh)
   cerr << "RRRRRRRRRRRRRRRR resize width, height: " << this->width() << ", " << this->height() << endl;
   cerr << "RRRRRRRRR _aspectRatio: " << _aspectRatio << endl;
 
-  // Set the geometry based on the aspect ratio that we need for this display.
-  // The setGeometry() method will fire off the resizeEvent() so we leave the
-  // updating of the display to that event.
+  // repaint
   
-  // int sizeNeeded = (int) ((ww - _colorScaleWidth) / _aspectRatio + 0.5);
-  // if (hh < sizeNeeded) {
-  //   sizeNeeded = hh;
-  // }
-
-  // int widthNeeded = (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth;
-
-  // QWidget::resize(700, 500);
-
-
-  cerr << "UUUUUUUUUUUUUUUUUU111111111111" << endl;
   update();
 
 }
@@ -688,11 +689,15 @@ void PolarWidget::resize(int ww, int hh)
 void PolarWidget::_resetWorld(int width, int height)
 
 {
-
+  
   _fullWorld.resize(width, height);
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
   _setGridSpacing();
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _fullWorld.print(cerr);
+  }
 
 }
 
@@ -737,9 +742,6 @@ void PolarWidget::_performRendering()
       _fieldRenderers[ifield]->waitForRunToComplete();
     }
   } // ifield
-
-  cerr << "UUUUUUUUUUUUUUUUUU555555555555555" << endl;
-  // update();
 
 }
 
@@ -985,8 +987,6 @@ void PolarWidget::_refreshImages()
 void PolarWidget::_drawDividers(QPainter &painter)
 {
 
-  cerr << "CCCCCCCCCCCCCCCCCCCCCCCCC width, height: " << width() << ", " << height() << endl;
-
   // draw panel dividing lines
 
   painter.save();
@@ -1020,7 +1020,6 @@ void PolarWidget::_drawDividers(QPainter &painter)
     double yy = _titleMargin + irow * _plotHeight;
     QLineF lowerBoundary(0, yy, _plotsGrossWidth, yy);
     painter.drawLine(lowerBoundary);
-    cerr << "***** irow, yy: " << irow << ", " << yy << endl;
   }
   
   // plot panel right borders
@@ -1029,7 +1028,6 @@ void PolarWidget::_drawDividers(QPainter &painter)
     double xx = icol * _plotWidth;
     QLineF rightBoundary(xx, _titleMargin, xx, height());
     painter.drawLine(rightBoundary);
-    cerr << "***** icol, xx: " << icol << ", " << xx << endl;
   }
 
   // color scale left boundary
@@ -1039,8 +1037,6 @@ void PolarWidget::_drawDividers(QPainter &painter)
     QLineF boundary(xx, 0, xx, height());
     painter.drawLine(boundary);
   }
-
-
 
   painter.restore();
   
@@ -1061,10 +1057,6 @@ void PolarWidget::_drawDividers(QPainter &painter)
     painter.restore();
 
   }
-
-  cerr << "UUUUUUUUUUUUUUUU7777777777777777" << endl;
-
-  //   update();
 
 }
 
@@ -1372,27 +1364,11 @@ void PolarWidget::_drawMainTitle(QPainter &painter)
 
   string title("CONDOR POLAR PLOTS");
 
-#ifdef NOTNOW
-  if (_currentBeam) {
-    string rname(_currentBeam->getInfo().get_radar_name());
-    if (_params.override_radar_name) rname = _params.radar_name;
-    title.append(":");
-    title.append(rname);
-    char dateStr[1024];
-    DateTime beamTime(_currentBeam->getTimeSecs());
-    snprintf(dateStr, 1024, "%.4d/%.2d/%.2d",
-             beamTime.getYear(), beamTime.getMonth(), beamTime.getDay());
-    title.append(" ");
-    title.append(dateStr);
-    char timeStr[1024];
-    int nanoSecs = _currentBeam->getNanoSecs();
-    snprintf(timeStr, 1024, "%.2d:%.2d:%.2d.%.3d",
-             beamTime.getHour(), beamTime.getMin(), beamTime.getSec(),
-             (nanoSecs / 1000000));
-    title.append("-");
-    title.append(timeStr);
+  if (_currentRay != NULL) {
+    title.append(" : ");
+    RadxTime rayTime = _currentRay->getRadxTime();
+    title.append(rayTime.asString(3));
   }
-#endif
 
   // get bounding rectangle
   

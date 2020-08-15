@@ -149,17 +149,14 @@ class DLL_EXPORT PolarWidget : public QWidget
    *        render the beam for each field in the appropriate pixamp. The
    *        existing wedge for this beam will be discarded.
    *
-   * @param[in] start_angle    The starting angle for the beam.
-   * @param[in] stop_angle     The ending angle for the beam.
    * @param[in] gates          The number of gates (must match beam_data vector
    *                             sizes).
    * @param[in] beam_data      Vectors of data, one for each field.
    */
 
-  // virtual void addBeam(const RadxRay *ray,
-  //                      const float start_angle, const float stop_angle,
-  //       	       const std::vector< std::vector< double > > &beam_data,
-  //       	       const std::vector< DisplayField* > &fields) = 0;
+  void handleRay(const RadxRay *ray,
+                 const std::vector< std::vector< double > > &beam_data,
+                 const std::vector< DisplayField* > &fields);
 
   /**
    * @brief Specify the background color.
@@ -314,7 +311,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   // beam data
 
-  Beam *_currentBeam;
+  const RadxRay *_currentRay;
 
   ///////////////////////
   // Protected members //

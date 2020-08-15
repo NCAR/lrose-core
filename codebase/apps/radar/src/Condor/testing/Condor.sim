@@ -350,15 +350,6 @@ fields = {
   }
   ,
   {
-    label = "REF",
-    raw_name = "REF",
-    filtered_name = "",
-    units = "dBZ",
-    color_map = "dbz.colors",
-    shortcut = "2"
-  }
-  ,
-  {
     label = "VEL",
     raw_name = "VEL",
     filtered_name = "",
@@ -374,19 +365,11 @@ fields = {
     units = "m/s",
     color_map = "width.colors",
     shortcut = "4"
+    
   }
   ,
   {
-    label = "SW",
-    raw_name = "SW",
-    filtered_name = "",
-    units = "m/s",
-    color_map = "width.colors",
-    shortcut = "5"
-  }
-  ,
-  {
-    label = "ZDR",
+   label = "ZDR",
     raw_name = "ZDR",
     filtered_name = "",
     units = "dB",
@@ -622,7 +605,7 @@ site_name = "MARSHALL";
 // Type: int
 //
 
-main_window_width = 1100;
+main_window_width = 1122;
 
 ///////////// main_window_height //////////////////////
 //
@@ -632,7 +615,7 @@ main_window_width = 1100;
 // Type: int
 //
 
-main_window_height = 635;
+main_window_height = 815;
 
 ///////////// main_window_start_x /////////////////////
 //

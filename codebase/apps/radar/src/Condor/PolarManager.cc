@@ -1097,7 +1097,7 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
   // get data
   try {
     _getArchiveData();
-  } catch (FileIException ex) {
+  } catch (const FileIException &ex) {
     this->setCursor(Qt::ArrowCursor);
     _timeControl->setCursor(Qt::ArrowCursor);
     return;
@@ -1311,7 +1311,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 {
 
   // do we need to reconfigure the PPI?
-
+  
   _nGates = ray->getNGates();
   double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
   
@@ -1432,7 +1432,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     // Add the beam to the display
     
-    // _ppi->addBeam(ray, _startAz, _endAz, fieldData, _fields);
+    _polar->handleRay(ray, fieldData, _fields);
 
   }
   
@@ -2405,7 +2405,7 @@ void PolarManager::_openFile()
         
         try {
           _getArchiveData();
-        } catch (FileIException ex) {
+        } catch (const FileIException &ex) {
           // _ppi->showOpeningFileMsg(false);
           this->setCursor(Qt::ArrowCursor);
           // _timeControl->setCursor(Qt::ArrowCursor);
@@ -2518,7 +2518,7 @@ void PolarManager::_saveFile()
     try {
       // LOG(DEBUG) << "writing to file " << name;
       outFile.writeToPath(_vol, name);
-    } catch (FileIException ex) {
+    } catch (const FileIException &ex) {
       this->setCursor(Qt::ArrowCursor);
       return;
     }

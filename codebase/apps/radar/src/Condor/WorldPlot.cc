@@ -302,10 +302,6 @@ void WorldPlot::resize(int width,
   
   _computeTransform();
 
-  cerr << "WWWWWWWWW width, height: " << _widthPixels << ", " << _heightPixels << endl;
-  print(cerr);
-  cerr << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWW" << endl;
-  
 }
 
 ////////////////////////////////////////
