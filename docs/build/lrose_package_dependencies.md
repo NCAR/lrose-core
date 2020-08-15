@@ -40,6 +40,7 @@ This requires upgrading the compiler toolchain.
     bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
+    gnuplot ImageMagick-devel ImageMagick-c++-devel \
     rpm-build redhat-rpm-config \
     rpm-devel rpmdevtools
 
@@ -79,6 +80,7 @@ This requires upgrading the compiler toolchain.
     bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
+    gnuplot ImageMagick-devel ImageMagick-c++-devel \
     rpm-build redhat-rpm-config \
     rpm-devel rpmdevtools
 
@@ -109,6 +111,7 @@ This requires upgrading the compiler toolchain.
     bzip2-devel \
     qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
     hdf5-devel netcdf-devel \
+    gnuplot ImageMagick-devel ImageMagick-c++-devel \
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
     rpm-devel rpmdevtools
