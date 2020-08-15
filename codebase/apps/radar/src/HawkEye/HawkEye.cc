@@ -272,6 +272,8 @@ int HawkEye::_setupReader()
       }
       simReader->setFields(simFields);
 
+      _params.begin_in_archive_mode = pFALSE;
+
     }
 
   } // switch
