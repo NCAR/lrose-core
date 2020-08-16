@@ -1401,6 +1401,8 @@ void PpiPlot::_cullBeams(const PpiBeam *beamAB)
 void PpiPlot::_refreshImages()
 {
 
+  cerr << "XXXXXXXXXXXXXXXXXXXXXX" << endl;
+  
 #ifdef NOTNOW
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     

@@ -440,6 +440,9 @@ void PolarPlot::displayImage(const size_t field_num)
 void PolarPlot::_performRendering()
 {
 
+  // cerr << "22222222222222222 _selectedField: " << _selectedField << endl;
+  // cerr << "22222222222222222 _fieldRenderers.size(): " << _fieldRenderers.size() << endl;
+  
   // start the rendering
   
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
@@ -470,6 +473,8 @@ void PolarPlot::_performRendering()
 void PolarPlot::_refreshImages()
 {
 
+  cerr << "YYYYYYYYYYYYYYYYYYYYYYYY" << endl;
+  
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     
     FieldRenderer *field = _fieldRenderers[ifield];

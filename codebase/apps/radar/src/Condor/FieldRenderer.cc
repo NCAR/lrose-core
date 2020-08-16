@@ -151,6 +151,8 @@ void FieldRenderer::setBackgroundRenderingOn()
 void FieldRenderer::run()
 {
 
+  cerr << "33333333333" << endl;
+  
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Start of rendering for field: " 
          << _field.getLabel() << endl;
@@ -168,6 +170,7 @@ void FieldRenderer::run()
   vector< Beam* >::iterator beam;
   for (beam = _beams.begin(); beam != _beams.end(); ++beam)
   {
+    cerr << "4444444444444444" << endl;
     if (*beam == NULL) {
       continue;
     }

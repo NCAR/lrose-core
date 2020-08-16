@@ -956,6 +956,10 @@ void PolarWidget::configureRange(double max_range)
 void PolarWidget::_refreshImages()
 {
 
+  cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
+
+  // _ppis[0]->refreshImages();
+  
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     
     FieldRenderer *field = _fieldRenderers[ifield];
