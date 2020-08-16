@@ -345,6 +345,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   int _plotsGrossWidth;
   int _plotHeight;
   int _plotWidth;
+  int _plotsTopY;
   
   // ppis
   

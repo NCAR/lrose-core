@@ -61,7 +61,7 @@ PpiPlot::PpiPlot(PolarWidget* parent,
   _aspectRatio = _params.ppi_aspect_ratio;
   _colorScaleWidth = _params.color_scale_width;
 
-  // initialoze world view
+  // initialize world view
 
   configureRange(_params.max_range_km);
 
@@ -77,6 +77,10 @@ PpiPlot::PpiPlot(PolarWidget* parent,
   _meanElev = -9999.0;
   _sumElev = 0.0;
   _nRays = 0.0;
+
+  // set up ray locators
+
+  _rayLoc.resize(RayLoc::RAY_LOC_N);
 
 }
 
@@ -191,13 +195,17 @@ void PpiPlot::clearVar(const size_t index)
  */
 
 void PpiPlot::addBeam(const RadxRay *ray,
-                      const float start_angle,
-                      const float stop_angle,
                       const std::vector< std::vector< double > > &beam_data,
                       const std::vector< DisplayField* > &fields)
 {
 
   LOG(DEBUG) << "enter";
+
+  double az = ray->getAzimuthDeg();
+  _storeRayLoc(ray, az, _platform.getRadarBeamWidthDegH());
+
+  double start_angle = _startAz;
+  double stop_angle = _endAz;
 
   // add a new beam to the display. 
   // The steps are:
@@ -318,6 +326,254 @@ void PpiPlot::addBeam(const RadxRay *ray,
   _performRendering();
 
   LOG(DEBUG) << "exit";
+}
+
+
+///////////////////////////////////////////////////////////
+// store ray location
+
+void PpiPlot::_storeRayLoc(const RadxRay *ray, 
+                           const double az,
+                           const double beam_width)
+{
+
+  LOG(DEBUG) << "az = " << az << " beam_width = " << beam_width;
+
+  // Determine the extent of this ray
+
+  if (_params.ppi_override_rendering_beam_width) {
+    double half_angle = _params.ppi_rendering_beam_width / 2.0;
+    _startAz = az - half_angle - 0.1;
+    _endAz = az + half_angle + 0.1;
+  } else if (ray->getIsIndexed()) {
+    double half_angle = ray->getAngleResDeg() / 2.0;
+    _startAz = az - half_angle - 0.1;
+    _endAz = az + half_angle + 0.1;
+  } else {
+    double beam_width_min = beam_width;
+    if (beam_width_min < 0) 
+      beam_width_min = 10.0;
+
+    double max_half_angle = beam_width_min / 2.0;
+    double prev_offset = max_half_angle;
+    if (_prevAz > 0.0) { // >= 0.0) {
+      double az_diff = az - _prevAz;
+      if (az_diff < 0.0)
+	az_diff += 360.0;
+      double half_az_diff = az_diff / 2.0;
+	
+      if (prev_offset > half_az_diff)
+	prev_offset = half_az_diff;
+    }
+    _startAz = az - prev_offset - 0.1;
+    _endAz = az + max_half_angle + 0.1;
+  }
+    
+  // store
+  // HERE !!! fix up negative values here or in clearRayOverlap??
+  if (_startAz < 0) _startAz += 360.0;
+  if (_endAz < 0) _endAz += 360.0;
+  if (_startAz >= 360) _startAz -= 360.0;
+  if (_endAz >= 360) _endAz -= 360.0;
+    
+  LOG(DEBUG) << " startAz = " << _startAz << " endAz = " << _endAz;
+
+  // compute start and end indices, using modulus to keep with array bounds
+
+  int startIndex = ((int) (_startAz * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
+  int endIndex = ((int) (_endAz * RayLoc::RAY_LOC_RES + 1)) % RayLoc::RAY_LOC_N;
+
+  // Clear out any rays in the locations list that are overlapped by the
+  // new ray
+    
+  if (startIndex > endIndex) {
+
+    // area crosses the 360; 0 boundary; must break into two sections
+
+    // first from start index to 360
+    
+    _clearRayOverlap(startIndex, RayLoc::RAY_LOC_N - 1);
+
+    for (int ii = startIndex; ii < RayLoc::RAY_LOC_N; ii++) { // RayLoc::RAY_LOC_N; ii++) {
+      _rayLoc[ii].ray = ray;
+      _rayLoc[ii].active = true;
+      _rayLoc[ii].startIndex = startIndex;
+      _rayLoc[ii].endIndex = RayLoc::RAY_LOC_N - 1; // RayLoc::RAY_LOC_N;
+    }
+
+    // then from 0 to end index
+    
+    _clearRayOverlap(0, endIndex);
+
+    // Set the locations associated with this ray
+    
+    for (int ii = 0; ii <= endIndex; ii++) {
+      _rayLoc[ii].ray = ray;
+      _rayLoc[ii].active = true;
+      _rayLoc[ii].startIndex = 0;
+      _rayLoc[ii].endIndex = endIndex;
+    }
+
+  } else { // if (startIndex > endIndex) 
+
+    _clearRayOverlap(startIndex, endIndex);
+    
+    // Set the locations associated with this ray
+
+    for (int ii = startIndex; ii <= endIndex; ii++) {
+      _rayLoc[ii].ray = ray;
+      _rayLoc[ii].active = true;
+      _rayLoc[ii].startIndex = startIndex;
+      _rayLoc[ii].endIndex = endIndex;
+    }
+
+  } // if (startIndex > endIndex) 
+
+}
+
+ 
+///////////////////////////////////////////////////////////
+// clear any locations that are overlapped by the given ray
+
+void PpiPlot::_clearRayOverlap(const int start_index, const int end_index)
+{
+
+  LOG(DEBUG) << "enter" << " start_index=" << start_index <<
+    " end_index = " << end_index;
+
+  if ((start_index < 0) || (start_index > RayLoc::RAY_LOC_N)) {
+    cout << "ERROR: _clearRayOverlap start_index out of bounds " << start_index << endl;
+    return;
+  }
+  if ((end_index < 0) || (end_index > RayLoc::RAY_LOC_N)) {
+    cout << "ERROR: _clearRayOverlap end_index out of bounds " << end_index << endl;
+    return;
+  }
+
+  // Loop through the ray locations, clearing out old information
+
+  int i = start_index;
+  
+  while (i <= end_index) {
+
+    RayLoc &loc = _rayLoc[i];
+    
+    // If this location isn't active, we can skip it
+
+    if (!loc.active) {
+      // LOG(DEBUG) << "loc NOT active";
+      ++i;
+      continue;
+    }
+    
+    int loc_start_index = loc.startIndex;
+    int loc_end_index = loc.endIndex;
+
+    if ((loc_start_index < 0) || (loc_start_index > RayLoc::RAY_LOC_N)) {
+      cout << "ERROR: _clearRayOverlap loc_start_index out of bounds " << loc_start_index << endl;
+      ++i;
+      continue;
+    }
+    if ((loc_end_index < 0) || (loc_end_index > RayLoc::RAY_LOC_N)) {
+      cout << "ERROR: _clearRayOverlap loc_end_index out of bounds " << loc_end_index << endl;
+      ++i;
+      continue;
+    }
+
+    if (loc_end_index < i) {
+      cout << " OH NO! We are HERE" << endl;
+      ++i;
+      continue;
+    }
+    // If we get here, this location is active.  We now have 4 possible
+    // situations:
+
+    if (loc.startIndex < start_index && loc.endIndex <= end_index) {
+
+      // The overlap area covers the end of the current beam.  Reduce the
+      // current beam down to just cover the area before the overlap area.
+      LOG(DEBUG) << "Case 1a:";
+      LOG(DEBUG) << " i = " << i;
+      LOG(DEBUG) << "clearing from start_index=" << start_index <<
+	  " to loc_end_index=" << loc_end_index;
+      
+      for (int j = start_index; j <= loc_end_index; ++j) {
+
+	_rayLoc[j].ray = NULL;
+	_rayLoc[j].active = false;
+
+      }
+
+      // Update the end indices for the remaining locations in the current
+      // beam
+      LOG(DEBUG) << "Case 1b:";
+      LOG(DEBUG) << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
+	  " to start_index=" << start_index;
+      
+      for (int j = loc_start_index; j < start_index; ++j)
+	_rayLoc[j].endIndex = start_index - 1;
+
+    } else if (loc.startIndex < start_index && loc.endIndex > end_index) {
+      
+      // The current beam is bigger than the overlap area.  This should never
+      // happen, so go ahead and just clear out the locations for the current
+      // beam.
+      LOG(DEBUG) << "Case 2:";
+      LOG(DEBUG) << " i = " << i;
+      LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
+	  " to loc_end_index=" << loc_end_index;
+      
+      for (int j = loc_start_index; j <= loc_end_index; ++j) {
+        _rayLoc[j].clear();
+      }
+
+    } else if (loc.endIndex > end_index) {
+      
+      // The overlap area covers the beginning of the current beam.  Reduce the
+      // current beam down to just cover the area after the overlap area.
+
+	LOG(DEBUG) << "Case 3a:";
+	LOG(DEBUG) << " i = " << i;
+	LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
+	  " to end_index=" << end_index;
+
+      for (int j = loc_start_index; j <= end_index; ++j) {
+	_rayLoc[j].ray = NULL;
+	_rayLoc[j].active = false;
+      }
+
+      // Update the start indices for the remaining locations in the current
+      // beam
+
+      LOG(DEBUG) << "Case 3b:";
+      LOG(DEBUG) << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
+	  " to loc_end_index=" << loc_end_index;
+      
+      for (int j = end_index + 1; j <= loc_end_index; ++j) {
+	_rayLoc[j].startIndex = end_index + 1;
+      }
+
+    } else {
+      
+      // The current beam is completely covered by the overlap area.  Clear
+      // out all of the locations for the current beam.
+      LOG(DEBUG) << "Case 4:";
+      LOG(DEBUG) << " i = " << i;
+      LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
+	  " to loc_end_index=" << loc_end_index;
+      
+      for (int j = loc_start_index; j <= loc_end_index; ++j) {
+        _rayLoc[j].clear();
+      }
+
+    }
+    
+    i = loc_end_index + 1;
+
+  } /* endwhile - i */
+  
+  LOG(DEBUG) << "exit ";
+  
 }
 
 

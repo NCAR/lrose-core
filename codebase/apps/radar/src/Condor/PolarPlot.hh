@@ -141,10 +141,6 @@ public:
   void setGrids(const bool enabled);
   void setAngleLines(const bool enabled);
 
-  // set max range
-
-  virtual void setMaxRange(double max_range) = 0;
-
   // turn on archive-style rendering - all fields
 
   void activateArchiveRendering();

@@ -27,6 +27,7 @@
 
 #include "Radx/RadxVol.hh"
 #include "PolarPlot.hh"
+#include "RayLoc.hh"
 class PpiWidget;
 
 // Plot for a PPI scan.  Beams are added to the scan as they
@@ -83,7 +84,6 @@ class DLL_EXPORT PpiPlot : public PolarPlot
    */
 
   void addBeam(const RadxRay *ray,
-               const float start_angle, const float stop_angle,
                const std::vector< std::vector< double > > &beam_data,
                const std::vector< DisplayField* > &fields);
 
@@ -129,6 +129,8 @@ class DLL_EXPORT PpiPlot : public PolarPlot
 
  protected:
 
+  RadxVol *_vol;
+  
   // pointers to active beams
 
   std::vector<PpiBeam*> _ppiBeams;
@@ -145,6 +147,17 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   double _meanElev;
   double _sumElev;
   double _nRays;
+
+  // ray locations
+
+  vector<RayLoc> _rayLoc;
+
+  // azimuths for current ray
+
+  double _prevAz;
+  double _prevEl;
+  double _startAz;
+  double _endAz;
 
   // override mouse release event
   // virtual void mouseReleaseEvent(QMouseEvent* event);
@@ -213,7 +226,12 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   inline int _beamIndex(const double start_angle, const double stop_angle);
 
 
-  RadxVol *_vol;
+  void _storeRayLoc(const RadxRay *ray, 
+                    const double az,
+                    const double beam_width);
+
+  void _clearRayOverlap(const int start_index, const int end_index);
+
 };
 
 

@@ -53,6 +53,7 @@
 #include "SpreadSheetView.hh"
 #include "SpreadSheetController.hh"
 #include "BoundaryPointEditor.hh"
+#include "PpiPlot.hh"
 
 using namespace std;
 
@@ -92,6 +93,7 @@ PolarWidget::PolarWidget(QWidget* parent,
   _archiveMode = _params.begin_in_archive_mode;
   
   _titleMargin = _params.main_window_title_margin;
+  _plotsTopY = _titleMargin;
   _aspectRatio = _params.plot_aspect_ratio;
   _colorScaleWidth = _params.color_scale_width;
   _fullWorld.setColorScaleWidth(_colorScaleWidth);
@@ -132,10 +134,6 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
 
-  // Allow the size_t type to be passed to slots
-
-  // qRegisterMetaType<size_t>("size_t");
-
   // create the field renderers
   
   for (size_t ii = 0; ii < _fields.size(); ii++) {
@@ -163,6 +161,14 @@ PolarWidget::PolarWidget(QWidget* parent,
   _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
   _openingFileInfoLabel->setVisible(false);
 
+  // create plots
+
+  PpiPlot *ppi = new PpiPlot(this, _manager, _params,
+                             0, _platform,
+                             fields, haveFilteredFields);
+
+  _ppis.push_back(ppi);
+  
 }
 
 
@@ -548,15 +554,16 @@ void PolarWidget::timerEvent(QTimerEvent *event)
  */
 
 void PolarWidget::handleRay(const RadxRay *ray,
-                            const std::vector< std::vector< double > > &beam_data,
-                            const std::vector< DisplayField* > &fields)
+                            const std::vector<std::vector<double> > &beam_data,
+                            const std::vector<DisplayField*> &fields)
   
 {
 
-  // QPainter painter(this);
   _currentRay = ray;
+  if (_ppis.size() > 0 && _ppis[0] != NULL) {
+    _ppis[0]->addBeam(ray, beam_data, fields);
+  }
   update();
-  // _drawMainTitle(painter, _currentRay);
 
 }
 
@@ -659,6 +666,7 @@ void PolarWidget::resize(int ww, int hh)
     
   }
   
+  _plotsTopY = _titleMargin;
   _plotWidth = (int) (plotWidth + 0.5);
   _plotHeight = (int) (plotHeight + 0.5);
   _plotsGrossWidth = _nCols * _plotWidth;
@@ -677,6 +685,14 @@ void PolarWidget::resize(int ww, int hh)
   cerr << "RRRRRRRRRRRRRRRR resize width, height: " << this->width() << ", " << this->height() << endl;
   cerr << "RRRRRRRRR _aspectRatio: " << _aspectRatio << endl;
 
+  // resize the plots
+
+  if (_ppis.size() > 0 && _ppis[0] != NULL) {
+    _ppis[0]->setWindowGeom(_plotWidth, _plotHeight,
+                            0, _plotsTopY);
+  }
+      
+  
   // repaint
   
   update();
@@ -1010,7 +1026,7 @@ void PolarWidget::_drawDividers(QPainter &painter)
   // line below title
 
   {
-    QLineF topLine(0, _titleMargin, width() - _colorScaleWidth, _titleMargin);
+    QLineF topLine(0, _titleMargin - 1, width() - _colorScaleWidth, _titleMargin - 1);
     painter.drawLine(topLine);
   }
 
@@ -1373,10 +1389,12 @@ void PolarWidget::_drawMainTitle(QPainter &painter)
   // get bounding rectangle
   
   QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
-  
-  qreal xx = (qreal) ((width() / 2.0) - (tRect.width() / 2.0));
-  qreal yy = (qreal) (_titleMargin - tRect.height()) / 2.0;
-  QRectF bRect(xx, yy, tRect.width() + 6, tRect.height() + 6);
+
+  int boxWidth = tRect.width() + 6;
+  int boxHeight = tRect.height() + 6;
+  qreal xx = (qreal) ((width() / 2.0) - (boxWidth / 2.0));
+  qreal yy = (qreal) (((_titleMargin - 1) - boxHeight) / 2.0);
+  QRectF bRect(xx, yy, boxWidth, boxHeight);
                       
   // draw the text
   
