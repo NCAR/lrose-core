@@ -479,7 +479,7 @@ int FmqDeviceShmem::check_exists()
     return -1;
   }
   
-  if (!_ushmCheck(_bufKey, _nbytes[STAT_IDENT])) {
+  if (!_ushmCheck(_bufKey, _nbytes[BUF_IDENT])) {
     return -1;
   }
 
