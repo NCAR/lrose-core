@@ -601,7 +601,9 @@ void PolarWidget::paintEvent(QPaintEvent *event)
 
   QPainter painter(this);
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-  painter.drawImage(0, 0, *(_ppis[0]->getCurrentImage()));
+  QImage *beamImage = _ppis[0]->getCurrentImage();
+  painter.drawImage(0, _titleMargin + 1, *beamImage);
+  cerr << "IIIIIIIIIII width, height: " << beamImage->width() << ", " << beamImage->height() << endl;
 
   // draw the color scale
 

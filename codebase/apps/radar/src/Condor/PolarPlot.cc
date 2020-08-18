@@ -249,9 +249,13 @@ void PolarPlot::plotBeam(QPainter &painter,
 void PolarPlot::setWindowGeom(int width, int height,
                               int xOffset, int yOffset)
 {
+  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+    FieldRenderer *field = _fieldRenderers[ifield];
+    field->createImage(width, height);
+  }
   _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
   _zoomWorld = _fullWorld;
-  cerr << "WWWWWWWWWWWWWWW" << endl;
+  cerr << "WWWWWWWWWWWWWWW width, height: " << width << ", " << height << endl;
 }
 
 /*************************************************************************
@@ -264,7 +268,7 @@ void PolarPlot::setWorldLimits(double xMinWorld,
                                double yMaxWorld)
 {
   _fullWorld.setWorldLimits(xMinWorld, yMinWorld,
-                            xMaxWorld, yMaxWorld);
+                         xMaxWorld, yMaxWorld);
   _zoomWorld = _fullWorld;
 }
 
