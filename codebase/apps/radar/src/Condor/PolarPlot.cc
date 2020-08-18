@@ -251,6 +251,7 @@ void PolarPlot::setWindowGeom(int width, int height,
 {
   _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
   _zoomWorld = _fullWorld;
+  cerr << "WWWWWWWWWWWWWWW" << endl;
 }
 
 /*************************************************************************
@@ -430,6 +431,16 @@ void PolarPlot::displayImage(const size_t field_num)
     return;
   }
   _parent->update();
+}
+
+
+/*************************************************************************
+ * get image for current field
+ */
+
+QImage *PolarPlot::getCurrentImage()
+{
+  return _fieldRenderers[_selectedField]->getImage();
 }
 
 

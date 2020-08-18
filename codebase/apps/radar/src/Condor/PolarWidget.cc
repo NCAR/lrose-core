@@ -560,8 +560,8 @@ void PolarWidget::handleRay(const RadxRay *ray,
 {
 
   _currentRay = ray;
-  if (_ppis.size() > 0 && _ppis[0] != NULL) {
-    _ppis[0]->addBeam(ray, beam_data, fields);
+  for (size_t ii = 0; ii < _ppis.size(); ii++) {
+    _ppis[ii]->addBeam(ray, beam_data, fields);
   }
   update();
 
@@ -600,7 +600,8 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   _plotHeight = _plotsGrossHeight / _nRows;
 
   QPainter painter(this);
-  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
+  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
+  painter.drawImage(0, 0, *(_ppis[0]->getCurrentImage()));
 
   // draw the color scale
 
@@ -687,9 +688,11 @@ void PolarWidget::resize(int ww, int hh)
 
   // resize the plots
 
-  if (_ppis.size() > 0 && _ppis[0] != NULL) {
-    _ppis[0]->setWindowGeom(_plotWidth, _plotHeight,
-                            0, _plotsTopY);
+  for (size_t ii = 0; ii < _ppis.size(); ii++) {
+    // _ppis[ii]->setWindowGeom(_plotWidth, _plotHeight,
+    //                          0, _plotsTopY);
+    _ppis[ii]->setWindowGeom(_plotWidth, _plotHeight,
+                             0, 0);
   }
       
   
@@ -740,6 +743,8 @@ void PolarWidget::_setTransform(const QTransform &transform)
 
 void PolarWidget::_performRendering()
 {
+
+  cerr << "EEEEEEEEEEEEEEEEEEEEE" << endl;
 
   // start the rendering
   

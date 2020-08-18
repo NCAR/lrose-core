@@ -161,6 +161,10 @@ public:
 
   void displayImage(const size_t field_num);
 
+  // get image for current field
+
+  QImage *getCurrentImage();
+
   // get the world plot objects
   
   WorldPlot &getFullWorld() { return _fullWorld; }
@@ -200,7 +204,7 @@ protected:
   QTransform _fullTransform;
   WorldPlot _fullWorld;
 
-  // zoomed world
+  // zoomed world'
 
   bool _isZoomed;
   QTransform _zoomTransform;

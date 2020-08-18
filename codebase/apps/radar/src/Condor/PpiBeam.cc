@@ -112,7 +112,7 @@ void PpiBeam::paint(QImage *image,
                     bool drawInstHt)
 {
 
-  cerr << "55555555555555555" << endl;
+  cerr << ".";
   
   QPainter painter(image);
   
@@ -147,9 +147,9 @@ void PpiBeam::paint(QImage *image,
       painter.setBrush(*prev_brush);
       painter.drawPolygon(polygon);
 
-      cerr << "PPPPPPPPPPPPPPPPPPPP :"
-           << _polygons[igate].pts[1].x << ", "
-           << _polygons[igate].pts[1].y << endl;
+      // cerr << "PPPPPPPPPPPPPPPPPPPP :"
+      //      << _polygons[igate].pts[1].x << ", "
+      //      << _polygons[igate].pts[1].y << endl;
 
       prev_brush = curr_brush;
       polygon[0] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);
