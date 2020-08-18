@@ -1,0 +1,39 @@
+#
+# Host with input data
+#
+setenv RADAR_HOST jerk.rap.ucar.edu
+setenv DBZ_NAME DBZ
+setenv VEL_NAME VEL
+
+setenv RAP_DATA_DIR  /d1/dave/tmp
+
+#
+# Host on which app is run
+#
+setenv COLIDE_HOST  jerk.rap.ucar.edu
+setenv BDRY_HOST    jerk.rap.ucar.edu
+
+#
+# Binary location
+#
+setenv COLIDE_BIN_DIR $PWD/../../ncar/rap/bin
+
+#
+# Path to output data on colide host
+#
+setenv COLIDE_DATA_DIR  $PWD/../data
+
+#
+# Range of times to process and display start time
+#
+setenv TDATE  20180629
+setenv TSTART 20180629170000
+setenv TEND   20180629180000
+setenv DEMO_TIME '17:00 06/29/2018'
+
+#
+# where is CIDD?
+#
+setenv DISPLAY_BIN_DIR /home/dave/cidd/bin
+
+unsetenv MDV_READ_LONG_FIELD_NAMES_ONLY

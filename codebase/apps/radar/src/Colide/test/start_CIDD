@@ -1,0 +1,16 @@
+#!/bin/csh -f
+
+source env
+
+#source host_env.realtime
+setenv INGEST_HOST nws4.rap.ucar.edu
+setenv WSDDM_HOST boreal.rap.ucar.edu
+setenv LTG_HOST cospa25.rap.ucar.edu
+setenv ATEC_LTG_HOST atec-anc1.rap.ucar.edu
+setenv PROJECT front_porch
+setenv PROJECT2 CoSPA
+
+setenv ORIGIN_LAT 39.7914
+setenv ORIGIN_LON -104.5683
+
+$DISPLAY_BIN_DIR/CIDD -p CIDD.params

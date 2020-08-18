@@ -1,0 +1,59 @@
+/**********************************************************************
+ * TDRP params for UrlParams
+ **********************************************************************/
+
+//======================================================================
+//
+// VirtVol URL Parameters.
+//
+// All the data written to a URL, or read from a URL.
+//
+//======================================================================
+ 
+///////////// url /////////////////////////////////////
+//
+// The URL.
+//
+// Type: string
+//
+
+url = "$(DATA_URL)";
+
+///////////// url_type ////////////////////////////////
+//
+// type of url : VOLUME (grids,values),  DATABASE (values), or ASCII 
+//   (values).
+//
+// Type: enum
+// Options:
+//     VOLUME
+//     DATABASE
+//     ASCII
+//
+
+url_type = VOLUME;
+
+///////////// data_type ///////////////////////////////
+//
+// Type of data at the URL, either GRID or VALUE.
+//
+// Type: enum
+// Options:
+//     GRID
+//     VALUE
+//     NOT_SET
+//
+
+data_type = GRID;
+
+///////////// names ///////////////////////////////////
+//
+// Names of data associated with this URL, should match something in the 
+//   filter outputs or inputs.
+//
+// Type: string
+// 1D array - variable length.
+//
+
+names = {"$(VEL_NAME)"};
+

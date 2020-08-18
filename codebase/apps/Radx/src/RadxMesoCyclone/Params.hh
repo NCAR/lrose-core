@@ -65,19 +65,6 @@ class Params {
 
 public:
 
-  // struct typedefs
-
-  typedef struct {
-    double x;
-    double y;
-  } Fuzzy_f;
-
-  typedef struct {
-    double x;
-    double y;
-    double yOffset;
-  } Template_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -387,23 +374,13 @@ public:
   char* *_volume_after_filter;
   int volume_after_filter_n;
 
-  double min_vel_diff;
+  char* output_url_2d;
 
-  double min_percent_large;
+  char* shapes_name;
 
-  double min_percent_good;
+  char* shapes_url;
 
-  Fuzzy_f *_detect_side_fuzzy;
-  int detect_side_fuzzy_n;
-
-  Fuzzy_f *_nyquist_fuzzy;
-  int nyquist_fuzzy_n;
-
-  Fuzzy_f *_radial_fuzzy;
-  int radial_fuzzy_n;
-
-  Template_t *_meso_template;
-  int meso_template_n;
+  int shapes_expire_seconds;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -412,7 +389,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[14];
+  mutable TDRPtable _table[11];
 
   const char *_className;
 

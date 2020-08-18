@@ -63,30 +63,6 @@ class VirtVolParams {
 
 public:
 
-  // enum typedefs
-
-  typedef enum {
-    VIRTUAL_VOLUME = 0,
-    DATABASE = 1,
-    ASCII = 2
-  } Url_t;
-
-  typedef enum {
-    GRID = 0,
-    VALUE = 1,
-    NOT_SET = 2
-  } Data_t;
-
-  // struct typedefs
-
-  typedef struct {
-    char* internal_name;
-    char* external_name;
-    char* url;
-    Url_t url_type;
-    Data_t data_type;
-  } External_data_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -394,11 +370,11 @@ public:
 
   double max_range;
 
-  External_data_t *_virtvol_input;
-  int virtvol_input_n;
+  char* *_input_url;
+  int input_url_n;
 
-  External_data_t *_virtvol_output;
-  int virtvol_output_n;
+  char* *_output_url;
+  int output_url_n;
 
   char _end_; // end of data region
               // needed for zeroing out data

@@ -3,7 +3,8 @@
 #include <euclid/Grid2d.hh>
 #include <toolsa/LogStream.hh>
 
-static bool pcntGt(const std::vector<double> &data, double thresh)
+//------------------------------------------------------------------
+static bool _pcntGt(const std::vector<double> &data, double thresh)
 {
   double nBelow=0.0, nAbove=0.0;
   for (size_t i=0; i<data.size(); ++i)
@@ -20,7 +21,8 @@ static bool pcntGt(const std::vector<double> &data, double thresh)
   return nAbove/(nAbove+nBelow);
 }
 
-static bool pcntLt(const std::vector<double> &data, double thresh)
+//------------------------------------------------------------------
+static bool _pcntLt(const std::vector<double> &data, double thresh)
 {
   double nBelow=0.0, nAbove=0.0;
   for (size_t i=0; i<data.size(); ++i)
@@ -56,7 +58,7 @@ void MesoTemplate::apply(const Grid2d &data, const Sweep &v, Grid2d &out)
 
 //------------------------------------------------------------------
 bool MesoTemplate::_updateOneRay(int i, const Grid2d &data,
-				     bool circular, Grid2d &out)
+				 bool circular, Grid2d &out)
 {
   for (int r=0; r<_t->nGates(); ++r)
   {
@@ -103,13 +105,13 @@ bool MesoTemplate::_updateGate(int i, int r,
   else
   {
     double nd = (double)vdata1.size();
-    if (nd/count1 < _parms.min_percent_good)
+    if (nd/count1 < _minPctGood)
     {
       //LOG(WARNING) << "NOt enough data";
       return true;
    }
     nd = (double)vdata2.size();
-    if (nd/count2 < _parms.min_percent_good)
+    if (nd/count2 < _minPctGood)
     {
       //LOG(WARNING) << "NOt enough data";
       return true;
@@ -172,6 +174,7 @@ bool MesoTemplate::_addLookupToData(int i, int r, int rj, int aj,
   return true;
 }
 
+//------------------------------------------------------------------
 double MesoTemplate::_process(const std::vector<double> &data1,
 			      const std::vector<double> &data2,
 			      double count1, double count2)
@@ -198,23 +201,23 @@ double MesoTemplate::_process(const std::vector<double> &data1,
 
   if (ave1 > 0 && ave2 < 0)
   {
-    if (ave1-ave2 > _parms.min_vel_diff)
+    if (ave1-ave2 > _minDiff)
     {
-      if (pcntGt(data1, ave1/2.0) > _parms.min_percent_large &&
-	  pcntLt(data2, ave2/2.0) > _parms.min_percent_large)
+      if (_pcntGt(data1, ave1/2.0) > _minPctLarge &&
+	  _pcntLt(data2, ave2/2.0) > _minPctLarge)
       {	
-	return _parms._detectSide.apply(ave1-ave2);
+	return _ff->apply(ave1-ave2);
       }
     }
   }
   else if (ave1 < 0 && ave2 > 0)
   {
-    if (ave2-ave1 > _parms.min_vel_diff)
+    if (ave2-ave1 > _minDiff)
     {
-      if (pcntGt(data2, ave2/2.0) > _parms.min_percent_large &&
-	  pcntLt(data1, ave1/2.0) > _parms.min_percent_large)
+      if (_pcntGt(data2, ave2/2.0) > _minPctLarge &&
+	  _pcntLt(data1, ave1/2.0) > _minPctLarge)
       {	
-	return _parms._detectSide.apply(ave2-ave1);
+	return _ff->apply(ave2-ave1);
       }
     }
   }

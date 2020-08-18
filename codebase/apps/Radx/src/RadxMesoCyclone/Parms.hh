@@ -10,7 +10,7 @@
 
 #include "Params.hh"
 #include <FiltAlgVirtVol/FiltAlgParms.hh>
-#include <rapmath/FuzzyF.hh>
+#include <FiltAlgVirtVol/UrlParms.hh>
 #include <tdrp/tdrp.h>
 #include <string>
 
@@ -27,6 +27,7 @@ public:
   /**
    * Constructor that reads a file
    * @param[in] parmFileName  Name of file to read
+   * param[in] expandEnv  True to expand $() things to values
    */
   Parms(const std::string &parmFileName, bool expandEnv=true);
   
@@ -37,32 +38,22 @@ public:
 
   /**
    * Print (tdrp print) the params
+   * @param[in] printMode
    */
   void printParams(tdrp_print_mode_t printMode);
 
+  /**
+   * Print the app help
+   */
   void printHelp(void);
 
-  /**
-   * Print the inputs and outputs to stdout (debugging)
-   */
-  void printInputOutputs(void) const;
 
   #include <FiltAlgVirtVol/AlgorithmParmsVirtualFunctions.hh>
 
   /**
-   * Fuzzy functions for line detection
+   * Params for the 2 dimensional output
    */
-  FuzzyF _detectSide;
-
-  /**
-   * Fuzzy function for nyquist velocity
-   */
-  FuzzyF _nyquistFuzzy;
-
-  /**
-   * Fuzzy function for radial length km
-   */
-  FuzzyF _radialFuzzy;
+  UrlParms _output2dUrl;
 
 protected:
 private:  

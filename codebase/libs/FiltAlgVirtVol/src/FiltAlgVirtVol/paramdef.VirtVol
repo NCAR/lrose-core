@@ -52,36 +52,17 @@ paramdef double
   p_default = -1;
 } max_range;
 
-typedef enum {VIRTUAL_VOLUME, DATABASE, ASCII} Url_t;
-typedef enum {GRID, VALUE, NOT_SET} Data_t;
-typedef struct 
+paramdef string
 {
-  string internal_name;
-  string external_name;
-  string url;
-  Url_t url_type;
-  Data_t data_type;
-} External_data_t;
-
-paramdef struct External_data_t
-{
-  p_descr = "inputs";
-  p_help =
-    "The fields read in externally\n"
-    "internal_name = name used in filtering\n"
-    "external_name = external field name";
-    "url = where the data is\n"
-    "url_type = VIRTUAL_VOLUME (grids, values)\n"
-    "           DATABASE  (values)\n"
-    "           ASCII (values)\n"
-    "data_type = GRID, VALUE";
-   p_default = {};
-} virtvol_input[];    
-
-paramdef struct External_data_t
-{
-  p_descr = "Fields/values to write out";
-  p_help = "";
+  p_descr = "names of param files for input URLS, one per URL";
+  p_help = "The param files are read and parsed.  The names should match filter descriptions";
   p_default = {};
-} virtvol_output[];
+} input_url[];
+
+paramdef string
+{
+  p_descr = "names of param files for output URLS, one per URL";
+  p_help = "The param files are read and parsed.  The names should match filter descriptions";
+  p_default = {};
+} output_url[];
 

@@ -3,9 +3,26 @@
  */
 #include <FiltAlgVirtVol/AlgorithmParms.hh>
 #include <toolsa/LogStream.hh>
+#include <algorithm>
 using std::vector;
 using std::string;
 using std::pair;
+
+//-------------------------------------------------------------------------------
+static void _findAndReplaceAll(std::string & data, const std::string &toSearch,
+			       const std::string &replaceStr)
+ {
+   // Get the first occurrence
+   size_t pos = data.find(toSearch);
+   // Repeat till end is reached
+   while( pos != std::string::npos)
+   {
+     // Replace this occurrence of Sub String
+     data.replace(pos, toSearch.size(), replaceStr);
+     // Get the next occurrence from the current position
+     pos =data.find(toSearch, pos + replaceStr.size());
+   }
+ }
 
 //------------------------------------------------------------------
 AlgorithmParms::AlgorithmParms() : AlgorithmParams(), _ok(false)
@@ -35,25 +52,12 @@ void AlgorithmParms::set(const AlgorithmParams &a)
   *((AlgorithmParams *)this) = a;
 }
 
-//------------------------------------------------------------------
-bool AlgorithmParms::isOutput(const std::string &name) const
+//-----------------------------------------------------------------------
+bool AlgorithmParms::matchesFixedConst(const std::string &s) const
 {
-  for (int i=0; i<output_n; ++i)
+  for (size_t j=0; j<_fixedConstants.size(); ++j)
   {
-    if (_output[i] == name)
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
-//------------------------------------------------------------------
-bool AlgorithmParms::isInput(const std::string &name) const
-{
-  for (int i=0; i<input_n; ++i)
-  {
-    if (_input[i] == name)
+    if (_fixedConstants[j].first == s)
     {
       return true;
     }
@@ -62,15 +66,53 @@ bool AlgorithmParms::isInput(const std::string &name) const
 }
 
 //-----------------------------------------------------------------------
-bool AlgorithmParms::matchesFixedConst(const std::string &s) const
+void  AlgorithmParms::substituteFixedConst(void)
 {
-  for (size_t j=0; j<_fixedConstants.size(); ++j)
+  for (size_t i=0; i<_volumeBeforeFilters.size(); ++i)
   {
-    if (_fixedConstants[j] == s)
-    {
-      return true;
-    }
+    _subsituteFixedConst(_volumeBeforeFilters[i]);
   }
-  return false;
+  for (size_t i=0; i<_sweepFilters.size(); ++i)
+  {
+    _subsituteFixedConst(_sweepFilters[i]);
+  }
+  for (size_t i=0; i<_volumeAfterFilters.size(); ++i)
+  {
+    _subsituteFixedConst(_volumeAfterFilters[i]);
+  }
 }
+
+//-----------------------------------------------------------------------
+bool AlgorithmParms::addFixedConstant(const std::string &item)
+{
+  // remove all whitespace first
+  string loc(item);
+  loc.erase(remove(loc.begin(), loc.end(), ' '), loc.end());
+  loc.erase(remove(loc.begin(), loc.end(), '\t'), loc.end());
+
+  // now look for =
+  std::size_t found = loc.find_first_of("=");
+  if (found == std::string::npos)
+  {
+    LOG(ERROR) << "fixed constant not of format const=value, got " << loc;
+    return false;
+  }
+  string variable = loc.substr(0, found);
+  string value = loc.substr(found+1);
+  _fixedConstants.push_back(pair<string,string>(variable, value));
+  _fixedConstantNames.push_back(variable);
+  LOG(DEBUG) << "Added fixed constant " << variable << " with value " << value;
+  return true;
+}
+
+//-----------------------------------------------------------------------
+void AlgorithmParms::_subsituteFixedConst(std::string &filterStr)
+{
+  for (size_t i=0; i<_fixedConstants.size(); ++i)
+  {
+    _findAndReplaceAll(filterStr, _fixedConstants[i].first,
+		       _fixedConstants[i].second);
+  }
+}
+
 

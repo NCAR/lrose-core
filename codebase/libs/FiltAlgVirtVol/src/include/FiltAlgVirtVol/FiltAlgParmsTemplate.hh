@@ -9,6 +9,7 @@
 # define    FiltAlgParmsTempate_HH
 
 #include <FiltAlgVirtVol/FiltAlgParms.hh>
+#include <FiltAlgVirtVol/UrlParams.hh>
 #include <tdrp/tdrp.h>
 
 /*----------------------------------------------------------------*/
@@ -26,16 +27,23 @@ bool parmAppInit(T &appParams, int argc, char **argv)
 {
   tdrp_print_mode_t printMode;
   int expandEnv;
-  bool pp, po, pr, help;
+  bool pp, po, pr, pu, help;
   string fileName;
   pp = FiltAlgParms::isPrintParams(argc, argv, printMode, expandEnv);
   po = FiltAlgParms::isPrintOperators(argc, argv);
+  pu = FiltAlgParms::isPrintUrlParams(argc, argv);
   help = FiltAlgParms::isHelp(argc, argv);
   pr = FiltAlgParms::isSetParams(argc, argv, fileName);
 
   if (help)
   {
     appParams.printHelp();
+    return false;
+  }
+  if (pu)
+  {
+    UrlParams u;
+    u.print(stdout);//, PRINT_NORM);
     return false;
   }
   if (po)
@@ -55,6 +63,7 @@ bool parmAppInit(T &appParams, int argc, char **argv)
       appParams = T(fileName, true);
     }
     appParams.setFiltersFromParms();
+    appParams.substituteFixedConst();
   }
   
   if (pp)

@@ -3,7 +3,7 @@
 source env
 
 source ./env
-$BIN_DIR/RadxMesoCyclone -params RadxMesoCyclone.params5 -interval $TSTART $TEND
+$BIN_DIR/RadxMesoCyclone -params RadxMesoCyclone.params -interval $TSTART $TEND
 exit 0
 
     

@@ -1,0 +1,48 @@
+/**********************************************************
+ * paramdef.Url
+ *
+ * This file contains the TDRP parameter definitions for data handling of
+ * for virtual volumes for a particular URL
+ * 
+ */
+
+commentdef
+{
+  p_header = "VirtVol URL Parameters";
+  p_text = "All the data written to a URL, or read from a URL";
+};
+
+typedef enum {VOLUME, DATABASE, ASCII} Url_t;
+typedef enum {GRID, VALUE, NOT_SET} Data_t;
+
+paramdef boolean
+{
+  p_descr = "TRUE for netCDF output URL's";
+  p_help = "If true, expect data_type = GRID and url_type = VOLUME";
+  p_default = FALSE;
+} is_netCDF_output;
+
+paramdef string
+{
+  p_descr = "The URL";
+  p_default = "unknown";
+} url;
+
+paramdef enum Url_t
+{
+  p_help = "type of url : VOLUME (grids,values),  DATABASE (values), or ASCII (values)";
+  p_default = VOLUME;
+} url_type;
+
+paramdef enum Data_t
+{
+  p_help = "Type of data at the URL, either GRID or VALUE";
+  p_default = GRID;
+} data_type;
+
+paramdef string
+{
+  p_help = "Names of data associated with this URL, should match something in the filter outputs or inputs";
+  p_default = {};
+} names[];
+

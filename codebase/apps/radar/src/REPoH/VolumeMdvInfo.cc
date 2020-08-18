@@ -6,8 +6,7 @@
 #include "VolumeMdvInfo.hh"
 #include "RepohParams.hh"
 #include "GridFieldsAll.hh"
-#include <FiltAlgVirtVol/NamePair.hh>
-#include <FiltAlgVirtVol/UrlSpec.hh>
+#include <FiltAlgVirtVol/UrlParms.hh>
 #include <Mdv/MdvxField.hh>
 #include <toolsa/LogStream.hh>
 #include <cmath>
@@ -35,20 +34,20 @@ std::vector<double> VolumeMdvInfo::noisePerRange(double noiseAt100Km) const
 }
 
 //------------------------------------------------------------------
-bool VolumeMdvInfo::initialInitializeInput(const time_t &t, const UrlSpec &u,
+bool VolumeMdvInfo::initialInitializeInput(const time_t &t, const UrlParms &u,
 					   const RepohParams &parms)
 {
-  vector<NamePair> fields = u.fieldNames();
+  vector<string> fields = u.getNames();
   if (fields.empty())
   {
     return false;
   }
 
-  LOG(DEBUG) << " creating initial input state using " << u._url
-	     << " field " << fields[0]._external;
+  LOG(DEBUG) << " creating initial input state using " << u.url
+	     << " field " << fields[0];
   DsMdvx mdv;
-  mdv.setReadTime(Mdvx::READ_FIRST_BEFORE, u._url, 0, t);
-  mdv.addReadField(fields[0]._external);
+  mdv.setReadTime(Mdvx::READ_FIRST_BEFORE, u.url, 0, t);
+  mdv.addReadField(fields[0]);
   if (parms.restrict_vertical_levels)
   {
     mdv.setReadVlevelLimits(parms._vertical_level_range[0],
@@ -58,14 +57,13 @@ bool VolumeMdvInfo::initialInitializeInput(const time_t &t, const UrlSpec &u,
   LOG(DEBUG) << "Reading";
   if (mdv.readVolume())
   {
-    LOG(ERROR)<< "reading volume " << u._url;
+    LOG(ERROR)<< "reading volume " << u.url;
     return false;
   }
-  MdvxField *f = mdv.getFieldByName(fields[0]._external);
+  MdvxField *f = mdv.getFieldByName(fields[0]);
   if (f == NULL)
   {
-    LOG(ERROR) << "reading field " << fields[0]._external << " from " <<
-      u._url;
+    LOG(ERROR) << "reading field " << fields[0] << " from " << u.url;
     return  false;
   }
   Mdvx::field_header_t hdr = f->getFieldHeader();
@@ -101,22 +99,21 @@ bool VolumeMdvInfo::initialInitializeInput(const time_t &t, const UrlSpec &u,
   return true;
 }
 
-bool VolumeMdvInfo::initializeInput(const time_t &t, const UrlSpec &u,
+bool VolumeMdvInfo::initializeInput(const time_t &t, const UrlParms &u,
 				    const RepohParams &parms,
 				    GridFieldsAll &data)
 {
-  vector<NamePair> fields = u.fieldNames();
-  vector<NamePair> values = u.valueNames();
+  vector<string> fields = u.getNames();
 
-  LOG(DEBUG) << " creating input for " << u._url;
+  LOG(DEBUG) << " creating input for " << u.url;
   if (!fields.empty())
   {
     DsMdvx mdv;
-    mdv.setReadTime(Mdvx::READ_FIRST_BEFORE, u._url, 0, t);
+    mdv.setReadTime(Mdvx::READ_FIRST_BEFORE, u.url, 0, t);
     for (size_t i=0; i<fields.size(); ++i)
     {
-      LOG(DEBUG) << " data = " << fields[i]._external;
-      mdv.addReadField(fields[i]._external);
+      LOG(DEBUG) << " data = " << fields[i];
+      mdv.addReadField(fields[i]);
     }
     if (parms.restrict_vertical_levels)
     {
@@ -126,18 +123,17 @@ bool VolumeMdvInfo::initializeInput(const time_t &t, const UrlSpec &u,
     LOG(DEBUG) << "Reading";
     if (mdv.readVolume())
     {
-      LOG(ERROR)<< "reading volume " << u._url;
+      LOG(ERROR)<< "reading volume " << u.url;
       return false;
     }
 
     for (size_t i=0; i<fields.size(); ++i)
     {
-      LOG(DEBUG) << "Storing locally " << fields[i]._external;
-      MdvxField *f = mdv.getFieldByName(fields[i]._external);
+      LOG(DEBUG) << "Storing locally " << fields[i];
+      MdvxField *f = mdv.getFieldByName(fields[i]);
       if (f == NULL)
       {
-	LOG(ERROR) << "reading field " << fields[i]._external << " from " <<
-	  u._url;
+	LOG(ERROR) << "reading field " << fields[i] << " from " << u.url;
 	return  false;
       }
       f->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
@@ -149,7 +145,7 @@ bool VolumeMdvInfo::initializeInput(const time_t &t, const UrlSpec &u,
       }
       for (int j=0; j<hdr.nz; ++j)
       {
-	Grid2d g(fields[i]._internal, hdr.nx, hdr.ny, hdr.missing_data_value);
+	Grid2d g(fields[i], hdr.nx, hdr.ny, hdr.missing_data_value);
 	GriddedData gd(g);
 	fl32 *fdata = (fl32 *)f->getVol();
 	int k0 = hdr.nx*hdr.ny*j;
@@ -166,26 +162,15 @@ bool VolumeMdvInfo::initializeInput(const time_t &t, const UrlSpec &u,
     }
   }
 
-  if (!values.empty())
-  {
-    // if (values.size() > 1)
-    // {
-    LOG(ERROR) << "No values have been implemented";
-    return false;
-    // }
-    // SoundingR *s = new SoundingR(values[0]._external, u._url, t);
-    // _soundings.push_back(s);
-  }
   return true;
 }
 
-void VolumeMdvInfo::outputToUrl(const time_t &t, const UrlSpec &u,
+void VolumeMdvInfo::outputToUrl(const time_t &t, const UrlParms &u,
 				const GridFieldsAll &data)
 {
-  vector<NamePair> names = u.fieldNames();
+  vector<string> names = u.getNames();
   // construct each named field
-
-  LOG(DEBUG) << "Writing " << names.size() << " fields to " << u._url;
+  LOG(DEBUG) << "Writing " << names.size() << " fields to " << u.url;
   DsMdvx out;
   
   _masterHdr.time_gen = _masterHdr.time_end = _masterHdr.time_centroid = t;
@@ -195,17 +180,16 @@ void VolumeMdvInfo::outputToUrl(const time_t &t, const UrlSpec &u,
   out.setMasterHeader(_masterHdr);
   for (size_t i=0; i<names.size(); ++i)
   {
-    _outputFieldToUrl(names[i]._internal, names[i]._external, t, data, out);
+    _outputFieldToUrl(names[i], t, data, out);
   }
   out.setWriteLdataInfo();
-  if (out.writeToDir(u._url))
+  if (out.writeToDir(u.url))
   {
     LOG(ERROR) << "Unable to write mdv";
   }
 }
 
-void VolumeMdvInfo::_outputFieldToUrl(const std::string &internalName,
-				      const std::string &externalName,
+void VolumeMdvInfo::_outputFieldToUrl(const std::string &name,
 				      const time_t &t, 
 				      const GridFieldsAll &data,
 				      DsMdvx &out)
@@ -220,19 +204,19 @@ void VolumeMdvInfo::_outputFieldToUrl(const std::string &internalName,
   _fieldHdr.bias = 0.0;
   _fieldHdr.forecast_delta = 0;
   _fieldHdr.forecast_time = t;
-  strncpy(_fieldHdr.field_name_long, externalName.c_str(),
+  strncpy(_fieldHdr.field_name_long, name.c_str(),
 	  MDV_LONG_FIELD_LEN-1);
   _fieldHdr.field_name_long[MDV_LONG_FIELD_LEN-1] = '\0';
-  strncpy(_fieldHdr.field_name, externalName.c_str(), MDV_SHORT_FIELD_LEN-1);
+  strncpy(_fieldHdr.field_name, name.c_str(), MDV_SHORT_FIELD_LEN-1);
   _fieldHdr.field_name[MDV_SHORT_FIELD_LEN-1] = '\0';
   strncpy(_fieldHdr.units, "units", MDV_UNITS_LEN-1);
   _fieldHdr.units[MDV_UNITS_LEN-1] = '\0';
 
   // Try to get some sample data so as to set the missing values
   double missingV;
-  if (!data.sampleMissingValue(internalName, missingV))
+  if (!data.sampleMissingValue(name, missingV))
   {
-    LOG(ERROR) << "Missing data " << internalName;
+    LOG(ERROR) << "Missing data " << name;
     LOG(WARNING) << "Write some code to fill missing";
     return;
   }
@@ -245,7 +229,7 @@ void VolumeMdvInfo::_outputFieldToUrl(const std::string &internalName,
   fl32 *fo = (fl32 *)f->getVol();
 
   // Loop through again and populate the new field
-  data.retrieveVolumeData(internalName, fo);
+  data.retrieveVolumeData(name, fo);
   out.addField(f);
 }
 

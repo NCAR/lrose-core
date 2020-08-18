@@ -15,6 +15,9 @@ class RadxMesoCyclone
 {
 public:
 
+  /**
+   * Constructor empty
+   */
   RadxMesoCyclone(void);
 
   /**

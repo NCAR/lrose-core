@@ -74,6 +74,13 @@ public:
   static bool isPrintOperators(int argc, char **argv);
 
   /**
+   * @return true if command line arguments contain '-print_url_params'
+   * @param[in] argc
+   * @param[in] argv
+   */
+  static bool isPrintUrlParams(int argc, char **argv);
+
+  /**
    * @return true if command line arguments contain -params <filename>
    * @param[in] argc
    * @param[in] argv

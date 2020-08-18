@@ -16,9 +16,6 @@ Repoh::Repoh(void) : _ok(false)
 Repoh::Repoh(const Parms &parms, void cleanExit(int)) : _ok(true),
 							_parms(parms)
 {
-  // _parms = RepohParms(parmFileName);
-  _parms.printInputOutputs();
-
   InterfaceAlgorithm::algInit("Repoh", _parms, cleanExit);
 
   // initiate the algorithm

@@ -176,8 +176,7 @@ bool Sweep::processUserLoopFunction(ProcessingNode &p)
   // }
   else
   {
-    printf("Unknown keyword %s\n", keyword.c_str());
-    return false;
+    return processVirtVolUserLoopFunction(p);
   }
 }
 

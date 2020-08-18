@@ -1,6 +1,6 @@
 /**********************************************************************
- * TDRP params for Params
- **********************************************************************/
+* TDRP params for Params
+**********************************************************************/
 
 //======================================================================
 //
@@ -9,7 +9,7 @@
 // This program does the algorithm.
 //
 //======================================================================
- 
+
 ///////////// fixed_const /////////////////////////////
 //
 // Fixed constant strings that are interpreted by user functions.
@@ -20,6 +20,11 @@
 //
 
 fixed_const = {
+  "NyquistFloor=25.0",
+  "MinRangeKm=2.0",
+  "ShapeComputeModeDiamonds=0",
+  "ShapeComputeModePerimeter=1",
+  "ShapeSizeKm=6"
 };
 
 ///////////// user_data ///////////////////////////////
@@ -32,6 +37,7 @@ fixed_const = {
 //
 
 user_data = {
+"Template0", "Template1", "Template2"
 };
 
 ///////////// volume_before_filter ////////////////////
@@ -44,6 +50,14 @@ user_data = {
 //
 
 volume_before_filter = {
+"Template0 = ParmsTemplate(10, 8, 2)",
+"Template1 = ParmsTemplate(10, 5, 5)",
+"Template2 = ParmsTemplate(5, 2, 4)",
+"MesoFuzzy = ParmsFuzzy(0, 0, 8, 0.25, 15, 0.5, NyquistFloor, 1)",
+"PcntLessThanNyquistFuzzy = ParmsFuzzy(0.0, 1.0, 0.5, 0.8, 0.7, 0.2, 1.0, 0.0)",
+"LargePosNegFuzzy = ParmsFuzzy(0.0, 1.0, 0.1, 0.8, 0.5, 0.5, 1.0, 0.0)",
+"InvertInterestFuzzy0 = ParmsFuzzy(0.0, 1.0, 0.2, 0.8, 0.3, 0.1, 0.4, 0.0)",
+"CTemplate = ParmsCircularTemplate(5, MinRangeKm)"
 };
 
 ///////////// filter //////////////////////////////////
@@ -56,30 +70,41 @@ volume_before_filter = {
 //
 
 filter = {
- "MedDbz = median(DBZ, 10, 10, 0, 80, 5)",
- "FiltDbz = mask(MedDbz, 0, 25)",
- "ExpandDbz = Expand(FiltDbz, 20)",
- "FiltVel = mask_missing_to_missing(VEL, FiltDbz)",
- "Shear1 = AzShear(VEL, 1, 1)",
- "Shear3 = AzShear(VEL, 3, 1)",
- "Shear5 = AzShear(VEL, 5, 1)",
- "Shear10 = AzShear(VEL, 10, 1)",
- "Shear21 = AzShear(VEL, 1, 0)",
- "Shear23 = AzShear(VEL, 3, 0)",
- "Shear25 = AzShear(VEL, 5, 0)",
- "Shear210 = AzShear(VEL, 10, 0)",
- "ShearMax = maximum(Shear1, Shear3, Shear5, Shear10)",
- "Shear2Max = maximum(Shear21, Shear23, Shear25, Shear210)",
- "ShearMedian = median(ShearMax, 4, 4, 0, 30, 3)",
- "Shear2Median = median(Shear2Max, 4, 4, 0, 30, 3)",
- "ShearThresh = mask(ShearMedian, -100, 10)",
- "Shear2Thresh = mask(Shear2Median, -100, 10)",
- "ShearClump = clump(ShearThresh, 10)",
- "Shear2Clump = clump(Shear2Thresh, 10)",
- "Max = max_expand(ShearClump, 2, 2)",
- "Max2 = max_expand(Shear2Clump, 2, 2)",
- "Meso1 = MesoTemplate(FiltVel, 20, 20, 10)",
- "Meso2 = MesoTemplate(FiltVel, 10, 10, 5)"
+"PcntNyquist = PercentOfAbsMax($(VEL_NAME), NyquistFloor)",
+"LessThanNy = PercentLessThan(PcntNyquist, CTemplate, 0.9)",
+"PosNegNy = LargePositiveNegative(PcntNyquist, CTemplate, 0.9)",
+"FLessThanNy = VirtVolFuzzy(LessThanNy, PcntLessThanNyquistFuzzy)",
+"FPosNegNy = VirtVolFuzzy(PosNegNy, LargePosNegFuzzy)",
+"AbsNyq = abs(PcntNyquist)",
+"NyqAve = SmoothPolar(AbsNyq, CTemplate)",
+"NyqCalib = FLessThanNy*FPosNegNy",
+"IsNyquist0 = NyqCalib*NyqAve",
+"IsNyquist = DilatePolar(IsNyquist0, CTemplate)",
+"IsNotNyquist = VirtVolFuzzy(IsNyquist, InvertInterestFuzzy0)",
+
+"Meso100 = MesoTemplate($(VEL_NAME), Template0, 0.6, 10, 0.5, MesoFuzzy)",
+"Meso10 = mask(Meso100, -1, 0)",  // maybe don't need these masks
+"Nyq10 = IsNotNyquist*Meso10",
+"Clump10 = ClumpFilt(Nyq10, 0.2, 0.5)",
+"Final10 = mask(Clump10, 0.0, 0.2)",
+
+"Meso200 = MesoTemplate($(VEL_NAME), Template1, 0.6, 10, 0.5, MesoFuzzy)",
+"Meso20 = mask(Meso200, -1, 0)",  // maybe don't need these masks
+"Nyq20 = IsNotNyquist*Meso20",
+"Clump20 = ClumpFilt(Nyq20, 0.2, 0.5)",
+"Final20 = mask(Clump20, 0.0, 0.2)",
+
+"Meso300 = MesoTemplate($(VEL_NAME), Template2, 0.6, 10, 0.5, MesoFuzzy)",
+"Meso30 = mask(Meso300, -1, 0)",  // maybe don't need these masks
+"Nyq30 = IsNotNyquist*Meso30",
+"Clump30 = ClumpFilt(Nyq30, 0.2, 0.5)",
+"Final30 = mask(Clump30, 0.0, 0.2)",
+"Final = maximum(Final10, Final20, Final30)",
+
+"Shear10 = AzShearPolar($(VEL_NAME), 12, 1)",
+"Shear20 = AzShearPolar($(VEL_NAME), 10, 1)",
+"Shear11 = AzShearPolar($(VEL_NAME), 12, 0)",
+"Shear21 = AzShearPolar($(VEL_NAME), 10, 0)"
 };
 
 ///////////// volume_after_filter /////////////////////
@@ -92,113 +117,48 @@ filter = {
 //
 
 volume_after_filter = {
-  "Vertical =  VerticalConsistency(Max)",
-  "Vertical2 =  VerticalConsistency(Max2)"
+"Vertical =  VerticalConsistency(Final, IsNyquist, CTemplate)",
+"Vclumps = VerticalDataClumpFilt(Vertical, 0.3, 0.4)",
+"shapes = ComputeFixedSizeShapes(Vclumps, ShapeSizeKm)"
+//"shapes = ComputeShapes(Vclumps, ShapeComputeModeDiamonds)"
 };
 
-///////////// min_vel_diff ////////////////////////////
+///////////// output_url_2d ///////////////////////////
 //
-// Minimum diff in velocities between towards and away.
-//
-//
-// Type: double
-//
-
-min_vel_diff = 10;
-
-///////////// min_percent_large ///////////////////////
-//
-// Minimum percentage of away or towards data that have large values.
-//
-// Large means at least half as big as the average.
+// Parameter file with 2d output fields.
 //
 //
-// Type: double
+// Type: string
 //
 
-min_percent_large = 0.5;
+output_url_2d = "UrlOutput2d.parms";
 
-///////////// min_percent_good ////////////////////////
+///////////// shapes_name /////////////////////////////
 //
-// Minimum percentage of data points in the template that are good.
+// Name of the shapes data output.
 //
-//
-// Type: double
-//
-
-min_percent_good = 0.6;
-
-///////////// detect_side_fuzzy ///////////////////////
-//
-// Line detection side fuzzy function.
+// This is a special field, not a volume.
 //
 //
-// Type: struct
-//   typedef struct {
-//      double x;
-//      double y;
-//   }
-//
-// 1D array - variable length.
+// Type: string
 //
 
-detect_side_fuzzy = {
-  {
-    x = 0,
-    y = 0
-  }
-  ,
-  {
-    x = 8,
-    y = 0.25
-  }
-  ,
-  {
-    x = 15,
-    y = 0.5
-  }
-  ,
-  {
-    x = 25,
-    y = 1
-  }
-};
+shapes_name = "shapes";
 
-///////////// meso_template ///////////////////////////
+///////////// shapes_url //////////////////////////////
 //
-// x and y dimensions of the template plus y offset and x offset.
+// URL to output shapes.
 //
 //
-// Type: struct
-//   typedef struct {
-//      double x;
-//      double y;
-//      double yOffset;
-//      double xOffset;
-//   }
-//
-// 1D array - variable length.
+// Type: string
 //
 
-meso_template = {
-  {
-    x = 20,
-    y = 20,
-    yOffset = 10,
-    xOffset = 20
-  }
-  ,
-  {
-    x = 20,
-    y = 20,
-    yOffset = 10,
-    xOffset = -20
-  }
-};
+shapes_url = "spdbp:://localhost::$(ALG_SPDB_PATH)";
+
 
 /**********************************************************************
- * TDRP params for AlgorithmParams
- **********************************************************************/
+* TDRP params for AlgorithmParams
+**********************************************************************/
 
 //======================================================================
 //
@@ -207,7 +167,7 @@ meso_template = {
 // Parameters used to run the Algorithm class.
 //
 //======================================================================
- 
+
 ///////////// instance ////////////////////////////////
 //
 // instance.
@@ -260,63 +220,11 @@ debug_threads = FALSE;
 // Type: int
 //
 
-num_threads = 3;
-
-///////////// input ///////////////////////////////////
-//
-// Inputs to the algorithm.
-//
-// Names of the fields that are inputs to the algorithm.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-input = {
- "VEL",
- "DBZ"
-};
-
-///////////// output //////////////////////////////////
-//
-// Fields/values to export from the algorithm.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-output = {
- "MedDbz",
- "FiltDbz",
- "ExpandDbz",
- "FiltVel",
- "Shear1",
- "Shear3",
- "Shear5",
- "Shear10",
- "ShearMax",
- "ShearMedian",
- "ShearClump",
- "Max",
- "Shear21",
- "Shear23",
- "Shear25",
- "Shear210",
- "Shear2Max",
- "Shear2Median",
- "Shear2Clump",
- "Max2",
- "Vertical",
- "Vertical2",
- "Meso1",
- "Meso2"
-};
+num_threads = 6;
 
 /**********************************************************************
- * TDRP params for VirtVolParams
- **********************************************************************/
+* TDRP params for VirtVolParams
+**********************************************************************/
 
 //======================================================================
 //
@@ -325,7 +233,7 @@ output = {
 // Triggering new data, reading in new data, writing data.
 //
 //======================================================================
- 
+
 ///////////// debug_triggering ////////////////////////
 //
 // triggering debug.
@@ -373,273 +281,64 @@ restrict_vertical_levels = TRUE;
 //
 
 vertical_level_range = {
- 0.3,
- 3
+0.3,
+3
 };
 
-///////////// virtvol_input ///////////////////////////
+///////////// restrict_max_range //////////////////////
 //
-// inputs.
-//
-// The fields read in externally
-// internal_name = name used in filtering
-// external_name = external field name.
+// Set TRUE to restrict maximum range to a parameter, FALSE to use all
+//   the data.
 //
 //
-// Type: struct
-//   typedef struct {
-//      string internal_name;
-//      string external_name;
-//      string url;
-//      Url_t url_type;
-//        Options:
-//          VIRTUAL_VOLUME
-//          DATABASE
-//          ASCII
-//      Data_t data_type;
-//        Options:
-//          GRID
-//          VALUE
-//          NOT_SET
-//   }
+// Type: boolean
 //
+
+restrict_max_range = FALSE;
+
+///////////// max_range ///////////////////////////////
+//
+// If restrict_max_range = TRUE, this is the max range index.
+//
+// Not used when restrict_max_range = FALSE, or if the value is >=0.
+//
+//
+// Type: double
+//
+
+max_range = -1;
+
+///////////// input_url ///////////////////////////////
+//
+// names of param files for input URLS, one per URL.
+//
+// The param files are read and parsed.  The names should match filter
+//   descriptions.
+//
+//
+// Type: string
 // 1D array - variable length.
 //
 
-virtvol_input = {
-  {
-    internal_name = "VEL",
-    external_name = "VEL",
-    url = "$(DATA_URL)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "DBZ",
-    external_name = "DBZ",
-    url = "$(DATA_URL)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
+input_url = {
+  "UrlRadar.parms"
 };
 
-///////////// virtvol_output //////////////////////////
+///////////// output_url //////////////////////////////
 //
-// Fields/values to write out.
+// names of param files for output URLS, one per URL.
+//
+// The param files are read and parsed.  The names should match filter
+//   descriptions.
 //
 //
-// Type: struct
-//   typedef struct {
-//      string internal_name;
-//      string external_name;
-//      string url;
-//      Url_t url_type;
-//        Options:
-//          VIRTUAL_VOLUME
-//          DATABASE
-//          ASCII
-//      Data_t data_type;
-//        Options:
-//          GRID
-//          VALUE
-//          NOT_SET
-//   }
-//
+// Type: string
 // 1D array - variable length.
 //
 
-virtvol_output = {
-  {
-    internal_name = "Shear1",
-    external_name = "Shear1",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "Shear3",
-    external_name = "Shear3",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "Shear5",
-    external_name = "Shear5",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "Shear10",
-    external_name = "Shear10",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "Shear21",
-    external_name = "Shear21",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "Shear23",
-    external_name = "Shear23",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "Shear25",
-    external_name = "Shear25",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "Shear210",
-    external_name = "Shear210",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "FiltVel",
-    external_name = "FiltVel",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "MedDbz",
-    external_name = "MedDbz",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "FiltDbz",
-    external_name = "FiltDbz",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ExpandDbz",
-    external_name = "ExpandDbz",
-    url = "mdvp:://localhost::$(ALG_PATH)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-     internal_name = "ShearMax",
-     external_name = "ShearMax",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-   {
-     internal_name = "ShearMedian",
-     external_name = "ShearMedian",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-   {
-     internal_name = "ShearClump",
-     external_name = "ShearClump",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-   {
-     internal_name = "Max",
-     external_name = "Max",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-   {
-     internal_name = "Shear2Max",
-     external_name = "Shear2Max",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-   {
-     internal_name = "Shear2Median",
-     external_name = "Shear2Median",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-   {
-     internal_name = "Shear2Clump",
-     external_name = "Shear2Clump",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-   {
-     internal_name = "Max2",
-     external_name = "Max2",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-  {
-     internal_name = "Vertical",
-     external_name = "Vertical",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-  {
-     internal_name = "Vertical2",
-     external_name = "Vertical2",
-     url = "mdvp::localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-   {
-     internal_name = "Meso1",
-     external_name = "Meso1",
-     url = "mdvp:://localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
-   ,
-   {
-     internal_name = "Meso2",
-     external_name = "Meso2",
-     url = "mdvp:://localhost::$(ALG_PATH)",
-     url_type = VIRTUAL_VOLUME,
-     data_type = GRID
-   }
+output_url = {
+  "UrlMainOutput.parms",
+  "UrlNyquist.parms",
+  "UrlDebug.parms"
 };
 

@@ -39,7 +39,7 @@ bool Volume::trigger(time_t &t)
   {
     return false;
   }
-  if (!_kernelOutputs.initialize(_parms, _nz))
+  if (!_kernelOutputs.initialize(_parms, nz()))
   {
     return false;
   }
@@ -68,7 +68,7 @@ void Volume::repohOutput(const time_t &t)
   // }
 
   VirtVolVolume::output(t);
-  _kernelOutputs.output(t, _proj);
+  _kernelOutputs.output(t, proj());
 }
 
 //------------------------------------------------------------------
@@ -77,7 +77,7 @@ MathData *Volume::initializeProcessingNode(int index, bool twoD) const
   MathData *ret = NULL;
   if (twoD)
   {
-    Sweep *sweep = new Sweep(*this, index, _vlevel[index]);
+    Sweep *sweep = new Sweep(*this, index, getIthVlevel(index));
     ret = (MathData *)sweep;
   }
   else
@@ -98,7 +98,7 @@ bool Volume::virtVolSynchUserInputs(const std::string &userKey,
 //------------------------------------------------------------------
 MathUserData *Volume::processUserVolumeFunction(const UnaryNode &p)
 {
-  return NULL;
+  return processVirtVolUserVolumeFunction(p);
 }
 
 //------------------------------------------------------------------

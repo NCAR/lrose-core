@@ -1,8 +1,8 @@
 /**
  * @file TemplateLookup1.hh
- * @brief One lookup table giving range and azimuth offsets
+ * @brief One lookup table giving range and azimuth offsets for two sided offset boxes
  * @class TemplateLookup1
- * @brief One lookup table giving range and azimuth offsets
+ * @brief One lookup table giving range and azimuth offsets for two sided offset boxes
  */
 #ifndef TEMPLATE_LOOKUP_1_H
 #define TEMPLATE_LOOKUP_1_H
@@ -17,44 +17,35 @@ public:
    */
   TemplateLookup1(void);
 
-  TemplateLookup1(int xCenterIndex, double x, int ngates,
-		  double startRangeKm, double deltaGateKm,  double deltaAzDeg,
-		  double yOff, double y);
+  /**
+   * Constructor
+   * @param[in] x  Template box size x (km)
+   * @param[in] y  Template box size y (km)
+   * @param[in] yOff  Offset from centerpoint to box y (km)
+   * @param[in] xCenterIndex  center point index x (gate)
+   * @param[in] ngates  Number of gates total
+   * @param[in] startRangeKm  km to first gate
+   * @param[in] deltaGateKm km between gates
+   * @param[in] deltaAzDeg  degrees between azimuths
+   */
+  TemplateLookup1(double x, double y, double yOff,
+		  int xCenterIndex, int ngates,
+		  double startRangeKm, double deltaGateKm,  double deltaAzDeg);
+
 
   /**
    * @destructor
    */
   inline virtual ~TemplateLookup1 (void) {}
 
-  // /**
-  //  * @return number of points in lookup
-  //  */
-  // inline int num(void) const {return (int)_offsets1.size();}
-
-  // /**
-  //  * @return gate index of i'th point in lookup
-  //  */
-  // inline int ithIndex1R(const int i) const {return _offsets1[i].first;}
-
-  // /**
-  //  * @return azimuth offset index of i'th point in lookup
-  //  */
-  // inline int ithIndex1A(const int i) const {return _offsets1[i].second;}
-
-  // /**
-  //  * @return gate index of i'th point in lookup
-  //  */
-  // inline int ithIndex2R(const int i) const {return _offsets2[i].first;}
-
-  // /**
-  //  * @return azimuth offset index of i'th point in lookup
-  //  */
-  // inline int ithIndex2A(const int i) const {return _offsets2[i].second;}
-
   /**
-   * Debug
+   * Debug print
    */
   void print(void) const;
+
+  /**
+   * @return debug print string
+   */
   std::string sprint(void) const;
   
   /**
@@ -69,21 +60,25 @@ public:
 
   /**
    * @return gate index of i'th point in lookup
+   * @param[in] i
    */
   inline int ithIndex1R(const int i) const {return _offsets1[i].first;}
 
   /**
    * @return azimuth offset index of i'th point in lookup
+   * @param[in] i
    */
   inline int ithIndex1A(const int i) const {return _offsets1[i].second;}
 
   /**
    * @return gate index of i'th point in lookup
+   * @param[in] i
    */
   inline int ithIndex2R(const int i) const {return _offsets2[i].first;}
 
   /**
    * @return azimuth offset index of i'th point in lookup
+   * @param[in] i
    */
   inline int ithIndex2A(const int i) const {return _offsets2[i].second;}
 
@@ -91,15 +86,15 @@ public:
 protected:
 private:
 
-  // int _centerIndexRNear;  /**< Center point gate index */
-  // int _centerIndexRFar;  /**< Center point gate index */
-  // int _centerIndexA;  /**< Center point azimuth index (always 0) */
+  /**
+   * The offsets, first = gate index, second = azimuth offset index, positive angles
+   */
+  std::vector<std::pair<int,int> >  _offsets1;
 
   /**
-   * The offsets, first = gate index, second = azimuth offset index
+   * The offsets, first = gate index, second = azimuth offset index, negative angles
    */
-  std::vector<std::pair<int,int> >  _offsets1;  // positive angles
-  std::vector<std::pair<int,int> >  _offsets2;  // negative angles
+  std::vector<std::pair<int,int> >  _offsets2;
 
 
   void _addToOffsets(int r, int ngates, double startRangeKm,

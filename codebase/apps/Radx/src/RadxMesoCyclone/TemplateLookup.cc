@@ -22,8 +22,8 @@ TemplateLookup::TemplateLookup(double x, double y, double yOff,
   _centerIndexA = 0;
 
   // we construct two options for xOff, one each way
-  _points = TemplateLookup1(_centerIndex, x, ngates,
-			     startRangeKm, deltaGateKm, deltaAzDeg, yOff, y);
+  _points = TemplateLookup1(x, y, yOff, _centerIndex, ngates,
+			    startRangeKm, deltaGateKm, deltaAzDeg);
 }
 
 //------------------------------------------------------------------

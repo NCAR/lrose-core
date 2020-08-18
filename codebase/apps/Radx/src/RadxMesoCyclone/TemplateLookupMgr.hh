@@ -43,6 +43,7 @@ public:
 
   /**
    * @return reference to indexed indivdual lookup
+   * @param[in] i
    */
   inline const TemplateLookup & operator[](const std::size_t i) const
   {
@@ -59,6 +60,12 @@ public:
    */
   void printLookups(void) const;
 
+  /**
+   * @return true if the inputs are the same as the template local values
+   * @param[in] x  Box length x (km)
+   * @param[in] y  Box length y (km)
+   * @param[in] yoffset  Offset to the boxes in y
+   */
   inline bool match(double x, double y, double yoffset) const
   {
     return x == _x && y == _y && yoffset == _yoff;
@@ -67,9 +74,9 @@ public:
 protected:
 private:
 
-  double _x;
-  double _y;
-  double _yoff;
+  double _x;             /**< Km box size x */
+  double _y;             /**< Km box size y */
+  double _yoff;          /**< Offset to box km (y) */
 
   int _ngates;            /**< Number of gates */
   double _startRangeKm;   /**< Range to starting gate */
@@ -81,10 +88,6 @@ private:
    */
   std::vector<TemplateLookup> _state;
 
-  // void _setState(const Volume &vol, int zIndex, int &ngates,
-   		 // double &da, bool first);
-  // double _deltaAngleDegrees(const RadxVol &vol, const RadxSweep &s,
-  // 			    int &ngates) const;
 };
 
 #endif

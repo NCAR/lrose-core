@@ -20,7 +20,6 @@ RadxMesoCyclone::RadxMesoCyclone(const Parms &parms, void cleanExit(int)) :
 {
   Sweep s;
   Volume v;
-  _parms.printInputOutputs();
 
   InterfaceAlgorithm::algInit("RadxMesoCyclone", _parms, cleanExit);
 

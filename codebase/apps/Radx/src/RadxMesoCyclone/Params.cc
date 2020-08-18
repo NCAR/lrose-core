@@ -560,7 +560,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("RadxMesoCyclone");
-    tt->comment_text = tdrpStrDup("This program does the algorithm");
+    tt->comment_text = tdrpStrDup("This program identifies mesocyclones in radar data\noption -print_operators will show all the filtering options");
     tt++;
     
     // Parameter 'fixed_const'
@@ -655,177 +655,52 @@
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
     tt++;
     
-    // Parameter 'min_vel_diff'
-    // ctype is 'double'
+    // Parameter 'output_url_2d'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_vel_diff");
-    tt->descr = tdrpStrDup("Minimum diff in velocities between towards and away");
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_url_2d");
+    tt->descr = tdrpStrDup("Parameter file with 2d output fields");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &min_vel_diff - &_start_;
-    tt->single_val.d = 10;
+    tt->val_offset = (char *) &output_url_2d - &_start_;
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'min_percent_large'
-    // ctype is 'double'
+    // Parameter 'shapes_name'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_percent_large");
-    tt->descr = tdrpStrDup("Minimum percentage of away or towards data that have large values");
-    tt->help = tdrpStrDup("Large means at least half as big as the average");
-    tt->val_offset = (char *) &min_percent_large - &_start_;
-    tt->single_val.d = 0.5;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("shapes_name");
+    tt->descr = tdrpStrDup("Name of the shapes data output");
+    tt->help = tdrpStrDup("This is a special field, not a volume");
+    tt->val_offset = (char *) &shapes_name - &_start_;
+    tt->single_val.s = tdrpStrDup("shapes");
     tt++;
     
-    // Parameter 'min_percent_good'
-    // ctype is 'double'
+    // Parameter 'shapes_url'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_percent_good");
-    tt->descr = tdrpStrDup("Minimum percentage of data points in the template that are good");
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("shapes_url");
+    tt->descr = tdrpStrDup("URL to output shapes");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &min_percent_good - &_start_;
-    tt->single_val.d = 0.6;
+    tt->val_offset = (char *) &shapes_url - &_start_;
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'detect_side_fuzzy'
-    // ctype is '_Fuzzy_f'
+    // Parameter 'shapes_expire_seconds'
+    // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("detect_side_fuzzy");
-    tt->descr = tdrpStrDup("detection side fuzzy function");
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("shapes_expire_seconds");
+    tt->descr = tdrpStrDup("Shape expiration seconds");
     tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_detect_side_fuzzy - &_start_;
-    tt->array_n_offset = (char *) &detect_side_fuzzy_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(Fuzzy_f);
-    tt->array_n = 0;
-    tt->struct_def.name = tdrpStrDup("Fuzzy_f");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("x");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_detect_side_fuzzy->x - (char *) _detect_side_fuzzy;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("y");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_detect_side_fuzzy->y - (char *) _detect_side_fuzzy;
-    tt->n_struct_vals = 0;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'nyquist_fuzzy'
-    // ctype is '_Fuzzy_f'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("nyquist_fuzzy");
-    tt->descr = tdrpStrDup("meso template near nyquist fuzzy function");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_nyquist_fuzzy - &_start_;
-    tt->array_n_offset = (char *) &nyquist_fuzzy_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(Fuzzy_f);
-    tt->array_n = 0;
-    tt->struct_def.name = tdrpStrDup("Fuzzy_f");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("x");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_nyquist_fuzzy->x - (char *) _nyquist_fuzzy;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("y");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_nyquist_fuzzy->y - (char *) _nyquist_fuzzy;
-    tt->n_struct_vals = 0;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'radial_fuzzy'
-    // ctype is '_Fuzzy_f'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("radial_fuzzy");
-    tt->descr = tdrpStrDup("radial length fuzzy function");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_radial_fuzzy - &_start_;
-    tt->array_n_offset = (char *) &radial_fuzzy_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(Fuzzy_f);
-    tt->array_n = 0;
-    tt->struct_def.name = tdrpStrDup("Fuzzy_f");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("x");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_radial_fuzzy->x - (char *) _radial_fuzzy;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("y");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_radial_fuzzy->y - (char *) _radial_fuzzy;
-    tt->n_struct_vals = 0;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'meso_template'
-    // ctype is '_Template_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("meso_template");
-    tt->descr = tdrpStrDup("x and y dimensions of the template plus y offset");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_meso_template - &_start_;
-    tt->array_n_offset = (char *) &meso_template_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(Template_t);
-    tt->array_n = 0;
-    tt->struct_def.name = tdrpStrDup("Template_t");
-    tt->struct_def.nfields = 3;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("x");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_meso_template->x - (char *) _meso_template;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("y");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_meso_template->y - (char *) _meso_template;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("yOffset");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_meso_template->yOffset - (char *) _meso_template;
-    tt->n_struct_vals = 0;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+    tt->val_offset = (char *) &shapes_expire_seconds - &_start_;
+    tt->single_val.i = 60;
     tt++;
     
     // trailing entry has param_name set to NULL

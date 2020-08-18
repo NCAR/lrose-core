@@ -1,0 +1,70 @@
+/**********************************************************************
+ * TDRP params for UrlParams
+ **********************************************************************/
+
+//======================================================================
+//
+// VirtVol URL Parameters.
+//
+// All the data written to a URL, or read from a URL.
+//
+//======================================================================
+ 
+ 
+///////////// is_netCDF_output ////////////////////////
+//
+// TRUE for netCDF output URL's.
+// If true, expect data_type = GRID and url_type = VOLUME.
+//
+// Type: boolean
+//
+
+is_netCDF_output = TRUE;
+
+///////////// url /////////////////////////////////////
+//
+// The URL.
+//
+// Type: string
+//
+
+url = "mdvp:://localhost::$(ALG_PATH)/nyquist";
+
+///////////// url_type ////////////////////////////////
+//
+// type of url : VOLUME (grids,values),  DATABASE (values), or ASCII 
+//   (values).
+//
+// Type: enum
+// Options:
+//     VOLUME
+//     DATABASE
+//     ASCII
+//
+
+url_type = VOLUME;
+
+///////////// data_type ///////////////////////////////
+//
+// Type of data at the URL, either GRID or VALUE.
+//
+// Type: enum
+// Options:
+//     GRID
+//     VALUE
+//     NOT_SET
+//
+
+data_type = GRID;
+
+///////////// names ///////////////////////////////////
+//
+// Names of data associated with this URL, should match something in the 
+//   filter outputs or inputs.
+//
+// Type: string
+// 1D array - variable length.
+//
+
+names = {"PcntNyquist", "LessThanNy", "FLessThanNy", "PosNegNy", "FPosNegNy", "NyqAve", "IsNyquist0", "IsNyquist", "IsNotNyquist"};
+

@@ -45,6 +45,13 @@ public:
   virtual ~VirtVolSweep(void);
 
   /**
+   * @return the function definitions for those functions supported by VirtVolSweep
+   * 
+   * Each such function is supported within any derived class
+   */
+  static std::vector<FunctionDef> virtVolUserUnaryOperators(void);
+
+  /**
    * @return true if it is a full 360 degree sweep
    */
   bool isCircular(void) const;
@@ -80,6 +87,17 @@ public:
   #define FILTALG_BASE
   #include <rapmath/MathDataVirtualMethods.hh>
   #undef FILTALG_BASE
+
+  /**
+   * Process using information from the input processing nod.
+   *
+   * It is expected that the function specified will be one of those supported within
+   * VirtVolSweep (see the static private strings)
+   *
+   * @param[in] p   The node with keyword, and args
+   * @return true for success, false for failure
+   */ 
+  bool processVirtVolUserLoopFunction(ProcessingNode &p);
 
   /**
    * @return reference to the data vector
@@ -148,6 +166,23 @@ protected:
   bool _loadMultiFields(std::vector<ProcessingNode *> &args,
 			std::vector<const GriddedData *> &fields) const;
 private:
+  static const std::string _percentLessThanStr; /**< Function keyword */
+  static const std::string _largePositiveNegativeStr; /**< Function keyword */
+  static const std::string _smoothPolarStr; /**< Function keyword */
+  static const std::string _dilatePolarStr; /**< Function keyword */
+  static const std::string _percentOfAbsMaxStr; /**< Function keyword */
+  static const std::string _azimuthalPolarShearStr; /**< Function keyword */
+  static const std::string _clumpFiltStr; /**< Function keyword */
+  static const std::string _virtVolFuzzyStr; /**< virtual volume fuzzy function keyword */
+
+  bool _processPercentLessThan(std::vector<ProcessingNode *> &args);
+  bool _processLargePositiveNegative(std::vector<ProcessingNode *> &args);
+  bool _processSmoothPolar(std::vector<ProcessingNode *> &args);
+  bool _processDilatePolar(std::vector<ProcessingNode *> &args);
+  bool _processPercentOfAbsMax(std::vector<ProcessingNode *> &args);
+  bool _processAzimuthalPolarShear(std::vector<ProcessingNode *> &args);
+  bool _processClumpFilt(std::vector<ProcessingNode *> &args);
+  bool _processFuzzy(std::vector<ProcessingNode *> &args);
 };
 
 #endif

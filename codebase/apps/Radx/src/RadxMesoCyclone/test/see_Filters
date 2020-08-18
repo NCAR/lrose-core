@@ -1,0 +1,5 @@
+#! /bin/csh -f
+
+source ./env
+$BIN_DIR/RadiaFilt -print_operators
+exit 0    

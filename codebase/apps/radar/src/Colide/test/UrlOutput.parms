@@ -1,0 +1,103 @@
+/**********************************************************************
+ * TDRP params for UrlParams
+ **********************************************************************/
+
+//======================================================================
+//
+// VirtVol URL Parameters.
+//
+// All the data written to a URL, or read from a URL.
+//
+//======================================================================
+ 
+///////////// is_netCDF_output ////////////////////////
+//
+// TRUE for netCDF output URL's.
+// If true, expect data_type = GRID and url_type = VOLUME.
+//
+// Type: boolean
+//
+
+is_netCDF_output = FALSE;
+
+///////////// url /////////////////////////////////////
+//
+// The URL.
+//
+// Type: string
+//
+
+url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)";
+
+///////////// url_type ////////////////////////////////
+//
+// type of url : VOLUME (grids,values),  DATABASE (values), or ASCII 
+//   (values).
+//
+// Type: enum
+// Options:
+//     VOLUME
+//     DATABASE
+//     ASCII
+//
+
+url_type = VOLUME;
+
+///////////// data_type ///////////////////////////////
+//
+// Type of data at the URL, either GRID or VALUE.
+//
+// Type: enum
+// Options:
+//     GRID
+//     VALUE
+//     NOT_SET
+//
+
+data_type = GRID;
+
+///////////// names ///////////////////////////////////
+//
+// Names of data associated with this URL, should match something in the 
+//   filter outputs or inputs.
+//
+// Type: string
+// 1D array - variable length.
+//
+
+names = {
+  "line_det",
+  "line_dir",
+  "shear_det",
+  "shear_dir",
+  "line_ellip",
+  "line_ellip_conf",
+  "line_ellip_orient",
+  "line_ellip_orient2",
+  "shear_ellip",
+  "shear_ellip_conf",
+  "shear_ellip_orient",
+  "shear_ellip_orient2",
+  "ellip_comb",
+  "ellip_orient_comb",
+  "raw_comb",
+  "enhanced0",
+  "enhanced1",
+  "enhanced0_orient",
+  "enhanced1_orient",
+  "enhanced_out",
+  "ellip_orient",
+  "ellip",
+   "ellip_conf",
+  "dilate",
+  "line_hotspot",
+  "line_full",
+  "shear_hotspot",
+  "shear_full",
+  "line_reg",
+  "shear_reg",
+  "reg",
+  "ellip_orient_expand",
+  "ellipD",
+  "expandEof"
+};

@@ -2,13 +2,15 @@
  * paramdef.RadxMesoCyclone
  *
  * This file contains the TDRP parameter definitions for RadxMesoCyclone
+ *
  * 
  */
 
 commentdef
 {
   p_header = "RadxMesoCyclone";
-  p_text = "This program does the algorithm";
+  p_text = "This program identifies mesocyclones in radar data\n"
+           "option -print_operators will show all the filtering options";
 };
 
 paramdef string
@@ -44,61 +46,27 @@ paramdef string
   p_default = {};
 } volume_after_filter[];  
 
-typedef struct
+paramdef string
 {
-  double x;
-  double y;
-} Fuzzy_f;
+  p_descr = "Parameter file with 2d output fields";
+  p_default = "";
+} output_url_2d;
 
-typedef struct
+paramdef string
 {
-  double x;
-  double y;
-  double yOffset;
-} Template_t;
+  p_descr = "Name of the shapes data output";
+  p_help = "This is a special field, not a volume";
+  p_default = "shapes";
+} shapes_name;
 
-
-paramdef double
+paramdef string
 {
-  p_descr = "Minimum diff in velocities between towards and away";
-  p_default = 10.0;
-} min_vel_diff;
+  p_descr = "URL to output shapes";
+  p_default = "";
+} shapes_url;
 
-paramdef double
+paramdef int
 {
-  p_descr = "Minimum percentage of away or towards data that have large values";
-  p_help = "Large means at least half as big as the average";
-  p_default = 0.5;
-} min_percent_large;
-
-paramdef double
-{
-  p_descr = "Minimum percentage of data points in the template that are good";
-  p_default = 0.6;
-} min_percent_good;
-
-
-paramdef struct Fuzzy_f
-{
-  p_descr = "detection side fuzzy function";
-  p_default = {};
-} detect_side_fuzzy[];
-
-paramdef struct Fuzzy_f
-{
-  p_descr = "meso template near nyquist fuzzy function";
-  p_default = {};
-} nyquist_fuzzy[];
-
-
-paramdef struct Fuzzy_f
-{
-  p_descr = "radial length fuzzy function";
-  p_default = {};
-} radial_fuzzy[];
-
-paramdef struct Template_t
-{
-  p_descr = "x and y dimensions of the template plus y offset";
-  p_default = {};
-} meso_template[];
+  p_descr = "Shape expiration seconds";
+  p_default = 60;
+} shapes_expire_seconds;

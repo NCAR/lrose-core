@@ -5,7 +5,11 @@
 //------------------------------------------------------------------
 #include "Volume.hh"
 #include "Sweep.hh"
+#include "TemplateLookupMgr.hh"
 #include <FiltAlgVirtVol/GridUserData.hh>
+#include <FiltAlgVirtVol/PolarCircularTemplate.hh>
+#include <FiltAlgVirtVol/ShapePolygons.hh>
+#include <euclid/GridAlgs.hh>
 #include <rapmath/UnaryNode.hh>
 #include <rapmath/FunctionDef.hh>
 #include <toolsa/LogMsgStreamInit.hh>
@@ -15,7 +19,6 @@
 #include <toolsa/port.h>
 #include <cstdlib>
 
-const std::string Volume::_verticalConsistencyStr = "VerticalConsistency";
 const std::string Volume::_parmsTemplateStr = "ParmsTemplate";
   
 //------------------------------------------------------------------
@@ -27,6 +30,8 @@ Volume::Volume(void) :  VirtVolVolume()
 Volume::Volume(const Parms &parms, int argc, char **argv):
   VirtVolVolume(&parms, argc, argv),  _parms(parms)
 {
+  _shapesUrl = _parms.shapes_url;
+  _shapesName = _parms.shapes_name;
 }
 
 //------------------------------------------------------------------
@@ -38,8 +43,9 @@ Volume::~Volume(void)
 std::vector<FunctionDef> Volume::userUnaryOperators(void) const
 {
   std::vector<FunctionDef> ret;
-  ret.push_back(FunctionDef(_verticalConsistencyStr, "M", "field", ""));
-  ret.push_back(FunctionDef(_parmsTemplateStr, "M", "x, y, offset", ""));
+  ret.push_back(FunctionDef(_parmsTemplateStr, "M", "x, y, offset",
+			    "At each point Two boxes of dimension x by y km centered offset\n"
+			    " km on either side of the point (in y)"));
   return ret;
 }
 
@@ -50,24 +56,16 @@ bool Volume::trigger(time_t &t)
   {
     return false;
   }
-  _templates.clear();
-  for (int i=0; i<_parms.meso_template_n; ++i)
-  {
-    TemplateLookupMgr t(_parms._meso_template[i].x, _parms._meso_template[i].y,
-			_parms._meso_template[i].yOffset,
-			*this);
-    _templates.push_back(t);
-  }
-
   return true;
 }
 
+//---------------------------------------------------------------------
 MathData *Volume::initializeProcessingNode(int index, bool twoD) const
 {
   MathData *ret = NULL;
   if (twoD)
   {
-    Sweep *sweep = new Sweep(*this, index, _vlevel[index]);
+    Sweep *sweep = new Sweep(*this, index, getIthVlevel(index));
     ret = (MathData *)sweep;
   }
   else
@@ -77,34 +75,13 @@ MathData *Volume::initializeProcessingNode(int index, bool twoD) const
   return ret;
 }
 
+//------------------------------------------------------------------------
 bool Volume::virtVolSynchUserInputs(const std::string &userKey,
 				    const std::vector<std::string> &names)
 {
-  if (userKey == _verticalConsistencyStr)
+  if (userKey == _parmsTemplateStr)
   {
-    // expect one arg
-    if (names.size() != 1)
-    {
-      LOG(ERROR) << "Expect one arg for " << _verticalConsistencyStr;
-      return false;
-    }
-    else
-    {
-      return true;
-    }
-  }
-  else if (userKey == _parmsTemplateStr)
-  {
-    // // expect 3 args
-    // if (names.size() != 3)
-    // {
-    //   LOG(ERROR) << "Expect 3 args for " << _parmsTemplateStr;
-    //   return false;
-    // }
-    // else
-    // {
-      return true;
-    // }
+    return true;
   }
   else
   {
@@ -113,6 +90,7 @@ bool Volume::virtVolSynchUserInputs(const std::string &userKey,
   }
 }
 
+//------------------------------------------------------------------------
 MathUserData *Volume::processUserVolumeFunction(const UnaryNode &p)
 {
     // pull out the keyword
@@ -123,17 +101,7 @@ MathUserData *Volume::processUserVolumeFunction(const UnaryNode &p)
   }
   vector<string> args = p.getUnaryNodeArgStrings();
   
-  if (keyword == _verticalConsistencyStr)
-  {
-    // expect one string argument which is either Prt or NSamples
-    if (args.size() != 1)
-    {
-      LOG(ERROR) << "Wrong number of args want one got " << args.size();
-      return NULL;
-    }
-    return _computeVerticalConsistency(args[0]);
-  }
-  else if (keyword == _parmsTemplateStr)
+  if (keyword == _parmsTemplateStr)
   {
     // expect 3 double arguments
     if (args.size() != 3)
@@ -145,95 +113,40 @@ MathUserData *Volume::processUserVolumeFunction(const UnaryNode &p)
   }
   else
   {
-    LOG(ERROR) << "Keyword is invalid " << keyword;
-    return NULL;
+    return processVirtVolUserVolumeFunction(p);
   }
 }
 
+//------------------------------------------------------------------------
 void Volume::addNew(int zIndex, const MathData *s)
 {
   const VirtVolSweep *smdv = (const VirtVolSweep *)s;
   addNewSweep(zIndex, *smdv);
 }
 
+//------------------------------------------------------------------------
+void Volume::mesoOutput(const time_t &t)
+{
+  VirtVolVolume::output(t);
+  VirtVolVolume::specialOutput2d(t, _parms._output2dUrl);
+
+  MathUserData *u = _special->matchingDataPtr(_shapesName);
+  if (u != NULL)
+  {
+    ShapePolygons *shapes = (ShapePolygons *)u;
+    shapes->output(t, _parms.shapes_expire_seconds, _shapesUrl);
+  }
+  else
+  {
+    LOG(ERROR) << "No match found for " << _shapesName;
+  }
+}
+
+//------------------------------------------------------------------------
 bool Volume::storeMathUserData(const std::string &name, MathUserData *v)
 {
   return storeMathUserDataVirtVol(name, v);
 }
-
-#ifdef NEEDTOFIXTHIS
-  // expect this is the vertical consistency data, it is all we have
-  // WEAK!
-  // make a copy of the field and rename
-  GridUserData *u = (GridUserData *)v;
-  GriddedData g(*u);
-  g.setName(name);
-  // replicate it as a 3d field and store.
-  for (int i=0; i<VirtVolVolume::nz(); ++i)
-  {
-    VirtVolVolume::addNewGrid(i, g);
-  }
-  
-  // store this because we have to, but it is a throwaway.
-  // again, bad design
-  return storeMathUserDataVirtVol(name, v);
-#endif
-
-//------------------------------------------------------------------
-MathUserData *Volume::
-_computeVerticalConsistency(const std::string &fieldName)
-{
-  std::vector<GriddedData> f = getField3d(fieldName);
-  if (f.empty())
-  {
-    LOG(ERROR) << "No data";
-    return NULL;
-  }
-
-  Grid2d vc(f[0]);
-  vc.setAllMissing();
-  // this will be an interest image with mapping from 0 (not consistent)
-  // to 1 (completely consistent)
-
-  for (int i=0; i<vc.getNdata(); ++i)
-  {
-    double ngood=0, nbad=0, min=0, max=0;
-    bool first = true;
-    for (size_t j=0; j<f.size(); ++j)
-    {
-      double v;
-      if (f[j].getValue(i, v))
-      {
-	if (first)
-	{
-	  first = false;
-	  min = max = v;
-	}
-	else
-	{
-	  if (v < min) min = v;
-	  if (v > max) max = v;
-	}
-	++ngood;
-      }
-      else
-      {
-	++nbad;
-      }
-    }
-    // come up with a score based on results
-    if (ngood > 0)
-    {
-      double v = ngood/(ngood+nbad);
-      // later do something with max and min
-      vc.setValue(i, v);
-    }
-  }
-  // take this and create a new output field, same name for now
-  GridUserData *g = new GridUserData(vc, fieldName);
-  return (MathUserData *)g;
-}
-
 
 //------------------------------------------------------------------
 MathUserData *Volume::
@@ -260,3 +173,4 @@ _computeParmsTemplate(const std::string &xstr, const std::string &ystr,
   TemplateLookupMgr *t = new TemplateLookupMgr(x, y, yoff, *this);
   return (MathUserData *)t;
 }
+

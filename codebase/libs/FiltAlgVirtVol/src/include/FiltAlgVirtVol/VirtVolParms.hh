@@ -9,7 +9,7 @@
 #define VIRT_VOL_PARMS_H
 
 #include <FiltAlgVirtVol/VirtVolParams.hh>
-#include <FiltAlgVirtVol/UrlSpec.hh>
+#include <FiltAlgVirtVol/UrlParms.hh>
 #include <tdrp/tdrp.h>
 #include <vector>
 #include <string>
@@ -52,6 +52,7 @@ public:
     _init();
   }
 
+
   /**
    * TDRP print base values
    * @param[in] mode
@@ -68,51 +69,20 @@ public:
   bool checkConsistency(const Algorithm &A) const;
 
   /**
-   * Look through the inputs for a matching external name,
-   * and convert to the associated internal name
-   *
-   * @param[in] externalName
-   * @param[out] internalName  
-   *
-   * @return true if name was filled in, false if no externalName found
-   */
-  bool inputExternal2InternalName(const std::string externalName,
-  				  std::string &internalName) const;
-
-  /**
-   * Look through the outputs for a matching internal name,
-   * and convert to the associated external name
-   *
-   * @param[in] internalName
-   * @param[out] externalName  The external (output) name
-   *
-   * @return true if name was filled in, false if no internalName found
-   */
-  bool outputInternal2ExternalName(const std::string internalName,
-  				   std::string &externalName) const;
-
-  /**
    * @return string URL to match a particular output field, empty
    * string for no match
-   * @param[in] internalFieldName  Name to try and match
+   * @param[in] fieldName  Name to try and match
    */
-  std::string matchingOutputUrl(const std::string &internalFieldName) const;
+  std::string matchingOutputUrl(const std::string &fieldName) const;
 
   /**
-   * @return a string for a particular URL type 
-   * @param[in] t  The URL type
+   * @return true if the field is an output field in some url
+   * @param[in] fieldName
    */
-  static std::string sprintUrl(VirtVolParams::Url_t t);
+  bool hasOutputField(const std::string &fieldName) const;
 
-  /**
-   * @return a string for a particular data type
-   * @param[in] t  The data type
-   */
-  static std::string sprintData(VirtVolParams::Data_t t);
-
-
-  std::vector<UrlSpec> _virtvol_inputs;     /**< Inputs to the app */
-  std::vector<UrlSpec> _virtvol_outputs;    /**< Outputs from the app */
+  std::vector<UrlParms> _inputUrl;  /**< Input URL specifications */
+  std::vector<UrlParms> _outputUrl; /**< Output URL specifications */
 
 protected:
 private:
@@ -120,8 +90,8 @@ private:
   bool _ok;      /**< True if object well formed */
 
   bool _init(void);
-  bool _isInput(const std::string &internalName) const;
-  bool _isOutput(const std::string &internalName) const;
+  bool _isInput(const std::string &name) const;
+  bool _isOutput(const std::string &name) const;
 
 };
 

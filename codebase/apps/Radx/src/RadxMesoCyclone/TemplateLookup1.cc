@@ -1,15 +1,16 @@
 #include "TemplateLookup1.hh"
 #include <cmath>
 
+//------------------------------------------------------------------
 TemplateLookup1::TemplateLookup1(void)
 {
 }
 
-TemplateLookup1::TemplateLookup1(int xCenterIndex, double x,  int ngates,
+//------------------------------------------------------------------
+TemplateLookup1::TemplateLookup1(double x, double y, double yOff,
+				 int xCenterIndex, int ngates,
 				 double startRangeKm, double deltaGateKm,
-				 double deltaAzDeg,
-				 double yOff,
-				 double y)
+				 double deltaAzDeg)
 {   
   // min and max radius will be on the 0
   int minRindex = xCenterIndex - (int)(x/2.0/deltaGateKm);
@@ -34,12 +35,13 @@ TemplateLookup1::TemplateLookup1(int xCenterIndex, double x,  int ngates,
   }
 }
 
-
+//------------------------------------------------------------------
 void TemplateLookup1::print(void) const
 {
   printf("%d,%d points\n", (int)(_offsets1.size()), (int)(_offsets2.size()));
 }
 
+//------------------------------------------------------------------
 std::string TemplateLookup1::sprint(void) const
 {
   char buf[1000];
@@ -49,7 +51,7 @@ std::string TemplateLookup1::sprint(void) const
   return s;
 }
 
-
+//------------------------------------------------------------------
 void TemplateLookup1::_addToOffsets(int r, int ngates, double startRangeKm,
 				    double deltaGateKm, double deltaAzDeg,
 				    double yOff, double y, bool negative,

@@ -91,23 +91,37 @@ field_list = {
 
 RADAR_DBZ        DBZ        $(DATA_URL)&$(DBZ_NAME)     dbz.colors   dBZ -5 80 5 radial 1 0
 RADAR_VEL        VEl        $(DATA_URL)&$(VEL_NAME)     vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEAR01     SHEAR1      mdvp:://localhost::$(ALG_PATH)&Shear1     vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEAR02     SHEAR2      mdvp:://localhost::$(ALG_PATH)&Shear2     vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEAR04     SHEAR4      mdvp:://localhost::$(ALG_PATH)&Shear4     vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEAR06     SHEAR6      mdvp:://localhost::$(ALG_PATH)&Shear6     vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEAR08     SHEAR8      mdvp:://localhost::$(ALG_PATH)&Shear8     vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEAR10     SHEAR10     mdvp:://localhost::$(ALG_PATH)&Shear10     vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEAR15     SHEAR15     mdvp:://localhost::$(ALG_PATH)&Shear15     vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEARMAX    SHEARMAX    mdvp:://localhost::$(ALG_PATH)&ShearMax   vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEARMED    SHEARMED    mdvp:://localhost::$(ALG_PATH)&ShearMedian   vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_SHEARCLUMP  SHEARCLUMP  mdvp:://localhost::$(ALG_PATH)&ShearClump   vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_MAX         MAX         mdvp:://localhost::$(ALG_PATH)&Max   vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_VERTICAL    VERTICAL    mdvp:://localhost::$(ALG_PATH)&Vertical   interest.colors   dBZ -5 80 5 radial 1 0
-RADAR_FILTDBZ    FILTDBZ    mdvp:://localhost::$(ALG_PATH)&FiltDbz   dbz.colors   dBZ -5 80 5 radial 1 0
-RADAR_EXPANDDBZ    EXPANDDBZ   mdvp:://localhost::$(ALG_PATH)&ExpandDbz   dbz.colors   dBZ -5 80 5 radial 1 0
-RADAR_FILTVEL    FILTVEL    mdvp:://localhost::$(ALG_PATH)&FiltVel   vel.colors   dBZ -5 80 5 radial 1 0
-RADAR_MESO1       MESO1     mdvp:://localhost::$(ALG_PATH)&Meso1 interest.colors dBZ -5 80 5 radial 1 0
-RADAR_MESO2       MESO2     mdvp:://localhost::$(ALG_PATH)&Meso2 interest.colors dBZ -5 80 5 radial 1 0
+
+RADAR_PCNT_NYQ           PCNT_NYQ       $(RAP_DATA_DIR)/$(ALG_PATH)/nyquist&PcntNyquist       interest2.colors dBZ -5 80 5 radial 1 0
+RADAR_LESS_THAN_NY       LESS_THAN_NY   $(RAP_DATA_DIR)/$(ALG_PATH)/nyquist&LessThanNy        interest.colors dBZ -5 80 5 radial 1 0
+RADAR_FUZZY_LESS_THAN_NY FLESS_THAN_NY  $(RAP_DATA_DIR)/$(ALG_PATH)/nyquist&FLessThanNy       interest.colors dBZ -5 80 5 radial 1 0
+RADAR_POS_NEG_NY         POS_NEG_NY     $(RAP_DATA_DIR)/$(ALG_PATH)/nyquist&PosNegNy          interest.colors dBZ -5 80 5 radial 1 0
+RADAR_FUZZY_POS_NEG_NY   FPOS_NEG_NY    $(RAP_DATA_DIR)/$(ALG_PATH)/nyquist&FPosNegNy         interest.colors dBZ -5 80 5 radial 1 0
+RADAR_NYQAVE             NYQAVE         $(RAP_DATA_DIR)/$(ALG_PATH)/nyquist&NyqAve            interest.colors dBZ -5 80 5 radial 1 0
+RADAR_IS_NYQ0            IS_NYQ0        $(RAP_DATA_DIR)/$(ALG_PATH)/nyquist&IsNyquist0        interest.colors dBZ -5 80 5 radial 1 0
+RADAR_IS_NYQUIST         IS_NYQUIST     $(RAP_DATA_DIR)/$(ALG_PATH)/nyquist&IsNyquist         interest.colors dBZ -5 80 5 radial 1 0
+RADAR_IS_NOT_NYQUIST     IS_NOT_NYQUIST $(RAP_DATA_DIR)/$(ALG_PATH)/nyquist&IsNotNyquist      interest.colors dBZ -5 80 5 radial 1 0
+
+RADAR_MESO1              MESO1          $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Meso10            interest.colors dBZ -5 80 5 radial 1 0
+RADAR_MESO2              MESO2          $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Meso20            interest.colors dBZ -5 80 5 radial 1 0
+RADAR_MESO3              MESO3          $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Meso30            interest.colors dBZ -5 80 5 radial 1 0
+RADAR_NYQ1               NYQ1           $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Nyq10             interest.colors dBZ -5 80 5 radial 1 0
+RADAR_NYQ2               NYQ2           $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Nyq20             interest.colors dBZ -5 80 5 radial 1 0
+RADAR_NYQ3               NYQ3           $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Nyq30             interest.colors dBZ -5 80 5 radial 1 0
+RADAR_Clump1             Clump1         $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Clump10           interest.colors dBZ -5 80 5 radial 1 0
+RADAR_Clump2             Clump2         $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Clump20           interest.colors dBZ -5 80 5 radial 1 0
+RADAR_Clump3             Clump3         $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Clump30           interest.colors dBZ -5 80 5 radial 1 0
+RADAR_Final1             Final1         $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Final10           interest.colors dBZ -5 80 5 radial 1 0
+RADAR_Final2             Final2         $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Final20           interest.colors dBZ -5 80 5 radial 1 0
+RADAR_Final3             Final3         $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Final30           interest.colors dBZ -5 80 5 radial 1 0
+RADAR_FinalFinal         FinalFinal     $(RAP_DATA_DIR)/$(ALG_PATH)/main&Final             interest.colors dBZ -5 80 5 radial 1 0
+RADAR_Vertical           Verticall      $(RAP_DATA_DIR)/$(ALG_PATH)/vertical&Vertical interest.colors dBZ -5 80 5 radial 1 0
+RADAR_Vclumps            Vclumps        $(RAP_DATA_DIR)/$(ALG_PATH)/vertical&Vclumps  interest.colors dBZ -5 80 5 radial 1 0
+
+RADAR_SHEAR10    SHEAR10    $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Shear10   vel_shear.colors   dBZ -5 80 5 radial 1 0
+RADAR_SHEAR11    SHEAR11    $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Shear11   vel_shear.colors   dBZ -5 80 5 radial 1 0
+RADAR_SHEAR20    SHEAR20    $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Shear20   vel_shear.colors   dBZ -5 80 5 radial 1 0
+RADAR_SHEAR21    SHEAR21    $(RAP_DATA_DIR)/$(ALG_PATH)/debug&Shear21   vel_shear.colors   dBZ -5 80 5 radial 1 0
 
 ======== ========  mdvp::static//localhost:0:mdv/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 ======== ========  mdvp::static//localhost:0:mdv/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
@@ -1224,118 +1238,14 @@ short_requests = TRUE;
 //         Note: scale_constant set in MAIN_PARAM section.      
 
 prod_info = {
-   {
-    menu_label = "RHI-ticks",
-    url = "spdbp:Rhi2Symprod:ticks//tesla.eol.ucar.edu:0:spdb/rhi/sband",
-    data_type = 0,
-    render_type = RENDER_ALL_VALID,
-    on_by_default = FALSE,
-    minutes_allow_before = 20,
-    minutes_allow_after = 10,
-    text_off_threshold = 0.4,
-    request_data_on_zoom = FALSE,
-    request_data_on_vert_change = FALSE
-  }
-  , 
   {
-    menu_label = "RHI-label",
-    url = "spdbp:Rhi2Symprod:label//tesla.eol.ucar.edu:0:spdb/rhi/sband",
-    data_type = 0,
-    render_type = RENDER_ALL_VALID,
-    on_by_default = FALSE,
-    minutes_allow_before = 20,
-    minutes_allow_after = 10,
-    text_off_threshold = 0.4,
-    request_data_on_zoom = FALSE,
-    request_data_on_vert_change = FALSE
-  }
-  ,
-  {
-    menu_label = "METARS-simple",
-    url = "spdbp:Metar2Symprod:simple//tesla.eol.ucar.edu:0:spdb/metar",
-    data_type = 0,
-    render_type = RENDER_LATEST_IN_FRAME,
-    on_by_default = FALSE,
-    minutes_allow_before = 90.0,
-    minutes_allow_after = 0.0,
-    text_off_threshold = 0.0,
-    request_data_on_zoom = FALSE,
-    request_data_on_vert_change = FALSE
-  }
-  ,
-  {
-    menu_label = "METARS-full",
-    url = "spdbp:Metar2Symprod:labels//tesla.eol.ucar.edu:0:spdb/metar",
-    data_type = 0,
-    render_type = RENDER_LATEST_IN_FRAME,
-    on_by_default = FALSE,
-    minutes_allow_before = 90.0,
-    minutes_allow_after = 0.0,
-    text_off_threshold = 0.0,
-    request_data_on_zoom = FALSE,
-    request_data_on_vert_change = FALSE
-  }
-  ,
-  {
-    menu_label = "SHIP-OBS",
-    url = "spdbp:Metar2Symprod:simple//tesla.eol.ucar.edu:0:spdb/ship_obs",
-    data_type = 0,
-    render_type = RENDER_LATEST_IN_FRAME,
-    on_by_default = FALSE,
-    minutes_allow_before = 120.0,
-    minutes_allow_after = 30.0,
-    text_off_threshold = 0.0001,
-    request_data_on_zoom = FALSE,
-    request_data_on_vert_change = FALSE
-  }
-  ,
-  {
-    menu_label = "SYN-OBS",
-    url = "spdbp:Metar2Symprod:simple//tesla.eol.ucar.edu:0:spdb/synop_obs",
-    data_type = 0,
-    render_type = RENDER_LATEST_IN_FRAME,
-    on_by_default = FALSE,
-    minutes_allow_before = 240.0,
-    minutes_allow_after = 6.0,
-    text_off_threshold = 0.0,
-    request_data_on_zoom = FALSE,
-    request_data_on_vert_change = FALSE
-  }
-  ,
-  {
-    menu_label = "WWLLN-1hour" ,
-    url = "spdbp:Ltg2Symprod:wwlln//tesla.eol.ucar.edu:0:spdb/wwlln",
+    menu_label = "MesoKDGX",
+    url = "spdbp:GenPoly2Symprod:default//localhost:0:$(RAP_DATA_DIR)/$(ALG_SPDB_PATH)",
     data_type = 0,
     render_type = RENDER_ALL_BEFORE_DATA_TIME,
     on_by_default = FALSE,
-    minutes_allow_before = 60.0,
-    minutes_allow_after = 0.0,
-    text_off_threshold = 0.0,
-    FALSE,
-    FALSE
-  }
-  ,
-  {
-    menu_label = "WWLLN-3hour" ,
-    url = "spdbp:Ltg2Symprod:wwlln//tesla.eol.ucar.edu:0:spdb/wwlln",
-    data_type = 0,
-    render_type = RENDER_ALL_BEFORE_DATA_TIME,
-    on_by_default = FALSE,
-    minutes_allow_before = 180.0,
-    minutes_allow_after = 0.0,
-    text_off_threshold = 0.0,
-    FALSE,
-    FALSE
-  }
-  ,
-  {
-    menu_label = "WWLLN-6hour" ,
-    url = "spdbp:Ltg2Symprod:wwlln//tesla.eol.ucar.edu:0:spdb/wwlln",
-    data_type = 0,
-    render_type = RENDER_ALL_BEFORE_DATA_TIME,
-    on_by_default = FALSE,
-    minutes_allow_before = 360.0,
-    minutes_allow_after = 0.0,
+    minutes_allow_before = 0.0,
+    minutes_allow_after = 4.0,
     text_off_threshold = 0.0,
     FALSE,
     FALSE

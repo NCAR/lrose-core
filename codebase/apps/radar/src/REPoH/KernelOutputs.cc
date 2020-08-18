@@ -66,11 +66,11 @@ KernelOutput *KernelOutputs::refToKernelOutput(const std::string &name,
 bool KernelOutputs::_setupKernelOutput(const RepohParams::Kernel_output_t &p,
 				       const VirtVolParms &vparms, int nz)
 {
-  for (size_t j=0; j<vparms._virtvol_outputs.size(); ++j)
+  for (size_t j=0; j<vparms._outputUrl.size(); ++j)
   {
-    if (vparms._virtvol_outputs[j].internalNameMatch(p.name))
+    if (vparms._outputUrl[j].nameMatch(p.name))
     {
-      if (vparms._virtvol_outputs[j]._type != VirtVolParams::DATABASE)
+      if (vparms._outputUrl[j].url_type != UrlParams::DATABASE)
       {
 	LOG(ERROR) << "Inconsistent use of kernel output data";
 	return false;
@@ -78,7 +78,7 @@ bool KernelOutputs::_setupKernelOutput(const RepohParams::Kernel_output_t &p,
       _kernelOutput.push_back(new
 			      KernelOutput(p.name, nz,
 					   p.filtered, p.outside,
-					   vparms._virtvol_outputs[j]._url));
+					   vparms._outputUrl[j].url));
       return true;
     }
   }

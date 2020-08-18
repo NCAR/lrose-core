@@ -373,12 +373,6 @@ public:
 
   int num_threads;
 
-  char* *_input;
-  int input_n;
-
-  char* *_output;
-  int output_n;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -386,7 +380,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[8];
+  mutable TDRPtable _table[6];
 
   const char *_className;
 

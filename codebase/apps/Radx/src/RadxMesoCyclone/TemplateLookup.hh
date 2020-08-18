@@ -53,21 +53,25 @@ public:
 
   /**
    * @return gate index of i'th point in lookup
+   * @param[in] i
    */
   inline int ithIndex1R(const int i) const {return _points.ithIndex1R(i);}
 
   /**
    * @return azimuth offset index of i'th point in lookup
+   * @param[in] i
    */
   inline int ithIndex1A(const int i) const {return _points.ithIndex1A(i);}
 
   /**
    * @return gate index of i'th point in lookup
+   * @param[in] i
    */
   inline int ithIndex2R(const int i) const {return _points.ithIndex2R(i);}
 
   /**
    * @return azimuth offset index of i'th point in lookup
+   * @param[in] i
    */
   inline int ithIndex2A(const int i) const {return _points.ithIndex2A(i);}
 

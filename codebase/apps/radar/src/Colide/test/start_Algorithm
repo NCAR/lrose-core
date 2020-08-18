@@ -1,0 +1,17 @@
+#!/bin/csh
+#
+
+source env
+
+set APPLICATION = Colide
+setenv INSTANCE KFTG
+setenv RADAR KFTG
+setenv COLIDE Colide
+unsetenv MDV_READ_LONG_FIELD_NAMES_ONLY
+
+
+$COLIDE_BIN_DIR/$APPLICATION -instance $INSTANCE -params Colide.alg -interval $TSTART $TEND
+exit 0
+    
+    
+

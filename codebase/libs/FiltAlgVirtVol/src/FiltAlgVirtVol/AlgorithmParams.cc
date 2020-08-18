@@ -619,42 +619,6 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'input'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input");
-    tt->descr = tdrpStrDup("Inputs to the algorithm");
-    tt->help = tdrpStrDup("Names of the fields that are inputs to the algorithm");
-    tt->array_offset = (char *) &_input - &_start_;
-    tt->array_n_offset = (char *) &input_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'output'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output");
-    tt->descr = tdrpStrDup("Fields/values to export from the algorithm");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_output - &_start_;
-    tt->array_n_offset = (char *) &output_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

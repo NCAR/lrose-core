@@ -6,8 +6,9 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
+LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_INC_DIR = ../include
-MY_CPPCHECKFLAGS = -E AlgorithmParams.cc -E VirtVolParams.cc -E ../include/FiltAlgVirtVol/AlgorithmParams.hh -E ../include/FiltAlgVirtVol/VirtVolParams.hh  -E AlgorithmParams.hh -E VirtVolParams.hh  -AllowPrivateNoDoxygen
+MY_CPPCHECKFLAGS = -E AlgorithmParams.cc -E VirtVolParams.cc -E UrlParams.cc -E ../include/FiltAlgVirtVol/AlgorithmParams.hh -E ../include/FiltAlgVirtVol/VirtVolParams.hh  -E ../include/FiltAlgVirtVol/UrlParams.hh  -E AlgorithmParams.hh -E VirtVolParams.hh  -E UrlParams.hh -AllowPrivateNoDoxygen
 
 LOC_CPPC_CFLAGS = -I$(LOC_INC_DIR) -Wall 
 LOC_CFLAGS = $(LOC_CPPC_CFLAGS)
@@ -24,12 +25,21 @@ CPPC_SRCS = \
 	GriddedData.cc \
 	GridUserData.cc \
 	InterfaceAlgorithm.cc \
-	UrlSpec.cc \
+	LookupOffsets.cc \
+	PolarCircularFilter.cc \
+	PolarCircularTemplate.cc \
+	ShapePolygons.cc \
+	UrlParams.cc \
+	UrlParms.cc \
+	VertData2d.cc \
+	VirtVolMdv.cc \
 	VirtVolParams.cc \
 	VirtVolParms.cc \
 	VirtVolSweep.cc \
 	VirtVolVolume.cc \
 	VolumeInfo.cc
+
+#	UrlSpec.cc \
 
 #
 # general targets
@@ -46,6 +56,12 @@ AlgorithmParams.cc: paramdef.Algorithm
 VirtVolParams.cc: paramdef.VirtVol
 	tdrp_gen -f paramdef.VirtVol -c++ -class VirtVolParams -lib FiltAlgVirtVol -add_ncar_copyright
 	/bin/mv -f VirtVolParams.hh ../include/FiltAlgVirtVol
+
+UrlParams.hh: UrlParams.cc
+	$(CP) UrlParams.hh ../include/FiltAlgVirtVol
+UrlParams.cc: paramdef.Url
+	tdrp_gen -f paramdef.Url -c++ -class UrlParams
+	$(CP) UrlParams.hh ../include/FiltAlgVirtVol
 
 /bin/mv clean_tdrp:
 	$(RM) AlgorithmParams.cc ../include/FiltAlgVirtVol/AlgorithmParams.hh

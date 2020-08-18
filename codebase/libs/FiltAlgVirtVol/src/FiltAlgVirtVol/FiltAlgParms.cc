@@ -29,13 +29,6 @@ FiltAlgParms::FiltAlgParms(const std::string &fileName, bool expandEnv) :
   {
     envs = 0;
   }
-  if (a.load(fileName.c_str(), x, envs, false) == 1)
-  {
-    LOG(ERROR) << "LOading algorithm params from " << fileName;
-    _ok = false;
-  }
-  AlgorithmParms::set(a);
-  
   VirtVolParams v;
   if (v.load(fileName.c_str(), x, envs, false) == 1)
   {
@@ -43,6 +36,13 @@ FiltAlgParms::FiltAlgParms(const std::string &fileName, bool expandEnv) :
     _ok = false;
   }
   VirtVolParms::set(v);
+
+  if (a.load(fileName.c_str(), x, envs, false) == 1)
+  {
+    LOG(ERROR) << "LOading algorithm params from " << fileName;
+    _ok = false;
+  }
+  AlgorithmParms::set(a);
 
   TDRP_warn_if_extra_params(TRUE);
 }
@@ -141,10 +141,25 @@ bool FiltAlgParms::isPrintOperators(int argc, char **argv)
 }
 
 //------------------------------------------------------------------
+bool FiltAlgParms::isPrintUrlParams(int argc, char **argv)
+{
+  for (int i=0; i<argc; ++i)
+  {
+    string s = argv[i];
+    if (s == "-print_url_params")
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+//------------------------------------------------------------------
 void FiltAlgParms::printHelp(void)
 {
   std::cout << "FiltAlgParms options:\n"
 	    << " [-print_operators] Print out all binary and unary operators\n"
+	    << " [-print_url_params] Print out a URL params example\n"
 	    << " [-interval yyyymmddhhmmss yyyymmddhhmmss] Archive mode\n";
   AlgorithmParams::usage(std::cout);
 }

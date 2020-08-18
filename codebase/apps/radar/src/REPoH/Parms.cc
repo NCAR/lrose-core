@@ -68,28 +68,13 @@ void Parms::printParams(tdrp_print_mode_t mode)
 }
 
 //------------------------------------------------------------------
-void Parms::printInputOutputs(void) const
-{
-  printf("INPUTS:\n");
-  for (int i=0; i<input_n; ++i)
-  {
-    printf("\t%s\n", _input[i]);
-  }
-
-  printf("OUTPUTS:\n");
-  for (int i=0; i<output_n; ++i)
-  {
-    printf("\t%s\n", _output[i]);
-  }
-}
-
-//------------------------------------------------------------------
 void Parms::setFiltersFromParms(void) 
 {
   _fixedConstants.clear();
+  _fixedConstantNames.clear();
   for (int i=0; i<fixed_const_n; ++i)
   {
-    _fixedConstants.push_back(_fixed_const[i]);
+    addFixedConstant(_fixed_const[i]);
   }
   
   _userData.clear();

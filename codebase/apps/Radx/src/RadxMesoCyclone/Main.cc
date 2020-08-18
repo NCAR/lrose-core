@@ -40,7 +40,7 @@ int main(int argc, char **argv)
   while (volume.trigger(t))
   {
     alg.run((VolumeData *)(&volume));
-    volume.output(t);
+    volume.mesoOutput(t);
     volume.clear();
   }
 

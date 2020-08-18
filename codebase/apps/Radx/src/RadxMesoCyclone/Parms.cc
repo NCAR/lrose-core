@@ -40,31 +40,13 @@ Parms::Parms(const std::string &parmFileName,  bool expandEnv) :
     LOG(ERROR) << "Loading filtAlg params";
     exit(1);
   }    
-  
-  vector<double> x, y;
-   for (int i=0; i<detect_side_fuzzy_n; ++i)
-   {
-     x.push_back(_detect_side_fuzzy[i].x);
-     y.push_back(_detect_side_fuzzy[i].y);
-   }
-   _detectSide = FuzzyF(x, y);
-   x.clear();
-   y.clear();
-   for (int i=0; i<nyquist_fuzzy_n; ++i)
-   {
-     x.push_back(_nyquist_fuzzy[i].x);
-     y.push_back(_nyquist_fuzzy[i].y);
-   }
-   _nyquistFuzzy = FuzzyF(x,y);
 
-   x.clear();
-   y.clear();
-   for (int i=0; i<radial_fuzzy_n; ++i)
-   {
-     x.push_back(_radial_fuzzy[i].x);
-     y.push_back(_radial_fuzzy[i].y);
-   }
-   _radialFuzzy = FuzzyF(x,y);
+  _output2dUrl = UrlParms(output_url_2d);
+  if (!_output2dUrl.isOk())
+  {
+    LOG(ERROR) << "Loading url parms from " << output_url_2d;
+    exit(1);
+  }
 }
 
 //------------------------------------------------------------------
@@ -76,9 +58,10 @@ Parms::~Parms()
 void Parms::setFiltersFromParms(void) 
 {
   _fixedConstants.clear();
+  _fixedConstantNames.clear();
   for (int i=0; i<fixed_const_n; ++i)
   {
-    _fixedConstants.push_back(_fixed_const[i]);
+    addFixedConstant(_fixed_const[i]);
   }
   
   _userData.clear();
@@ -117,22 +100,6 @@ void Parms::printParams(tdrp_print_mode_t printMode)
 void Parms::printHelp(void)
 {
   FiltAlgParms::printHelp();
-}
-
-//------------------------------------------------------------------
-void Parms::printInputOutputs(void) const
-{
-  printf("INPUTS:\n");
-  for (int i=0; i<input_n; ++i)
-  {
-    printf("\t%s\n", _input[i]);
-  }
-
-  printf("OUTPUTS:\n");
-  for (int i=0; i<output_n; ++i)
-  {
-    printf("\t%s\n", _output[i]);
-  }
 }
 
 //-----------------------------------------------------------------------

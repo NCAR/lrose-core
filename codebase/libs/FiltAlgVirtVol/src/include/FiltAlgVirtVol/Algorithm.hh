@@ -7,6 +7,7 @@
 
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
+#include <FiltAlgVirtVol/FiltAlgParms.hh>
 #include <FiltAlgVirtVol/AlgorithmParms.hh>
 #include <rapmath/MathParser.hh>
 #include <rapmath/MathData.hh>
@@ -27,7 +28,7 @@ public:
    * Constructor
    * @param[in] p  Algorithm parameter settings
    */
-  Algorithm(const AlgorithmParms &p, const MathData &data,
+  Algorithm(const FiltAlgParms &p, const MathData &data,
 	    const VolumeData &vdata);
 
   /**
@@ -86,6 +87,9 @@ public:
    */
   bool isOutput(const std::string &name) const;
 
+  /**
+   * Print debug
+   */
   void printOperators(void) const;
 
   /**

@@ -1,0 +1,634 @@
+/**********************************************************************
+ * TDRP params for /rap/bin/GenPoly2Symprod
+ **********************************************************************/
+
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for procmap registration and auto restarting.
+//
+//
+// Type: string
+//
+
+instance = "";
+
+///////////// no_threads //////////////////////////////
+//
+// Option to prevent server from using a thread per client.
+//
+// For debugging purposes it it sometimes useful to suppress the use of 
+//   threads. Set no_threads to TRUE for this type of debugging.
+//
+//
+// Type: boolean
+//
+
+no_threads = FALSE;
+
+//======================================================================
+//
+// Server details for support from ServerMgr.
+//
+//======================================================================
+ 
+///////////// port ////////////////////////////////////
+//
+// Port number.
+//
+// The server listens on this port for client requests.
+//
+//
+// Type: int
+//
+
+port = 5472;
+
+///////////// qmax ////////////////////////////////////
+//
+// Max quiescent period (secs).
+//
+// If the server does not receive requests for this time period, it will 
+//   die gracefully. If set to -1, the server never exits.
+//
+//
+// Type: int
+//
+
+qmax = -1;
+
+///////////// max_clients /////////////////////////////
+//
+// Maximum number of clients.
+//
+// This is the maximum number of threads the application will produce to 
+//   handle client requests.  If the maximum is reached, new clients will 
+//   receive a SERVICE_DENIED error message and will have to request the 
+//   data again.  If set to -1, no maximum is enforced.
+//
+//
+// Type: int
+//
+
+max_clients = 64;
+
+//======================================================================
+//
+// RENDERING PARAMETERS.
+//
+//======================================================================
+ 
+///////////// polyline_dashed /////////////////////////
+//
+// Polyline dashed flag.
+//
+// If set, the polyline will be rendered using a dashed line rather than 
+//   a solid line.
+//
+//
+// Type: boolean
+//
+
+polyline_dashed = FALSE;
+
+///////////// polyline_color //////////////////////////
+//
+// Polyline color.
+//
+// Name of color suggested for rendering the polylines.
+//
+//
+// Type: string
+//
+
+polyline_color = "white";
+
+///////////// polyline_color_mapped ///////////////////
+//
+// Polyline color mapped.
+//
+// TRUE to map colors using mapping function.
+//
+//
+// Type: boolean
+//
+
+polyline_color_mapped = FALSE;
+
+///////////// polyline_color_mapped_x /////////////////
+//
+// Polyline color mapping.
+//
+// x values (in the 1DVal(0) value).
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+polyline_color_mapped_x = {
+};
+
+///////////// polyline_color_mapped_y /////////////////
+//
+// Polyline color mapping.
+//
+// y values (a color).
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+polyline_color_mapped_y = {
+};
+
+//======================================================================
+//
+// Line styles.
+//
+//======================================================================
+ 
+///////////// suggested_line_type /////////////////////
+//
+// display line type.
+//
+// Line type suggested for using on the display.
+//
+//
+// Type: enum
+// Options:
+//     LINETYPE_SOLID
+//     LINETYPE_DASH
+//     LINETYPE_DOT_DASH
+//
+
+suggested_line_type = LINETYPE_SOLID;
+
+///////////// suggested_line_width ////////////////////
+//
+// display line width.
+//
+// Line width suggested for using on the display.
+//
+//
+// Type: long
+//
+
+suggested_line_width = 2;
+
+///////////// suggested_arrow_line_width //////////////
+//
+// display arrow line width.
+//
+// Line width suggested for using on the arrow display.
+//
+//
+// Type: long
+//
+
+suggested_arrow_line_width = 2;
+
+///////////// suggested_capstyle //////////////////////
+//
+// display capstyle.
+//
+// Capstyle suggested for using on the display.
+//
+//
+// Type: enum
+// Options:
+//     CAPSTYLE_BUTT
+//     CAPSTYLE_NOT_LAST
+//     CAPSTYLE_PROJECTING
+//     CAPSTYLE_ROUND
+//
+
+suggested_capstyle = CAPSTYLE_BUTT;
+
+///////////// suggested_joinstyle /////////////////////
+//
+// display joinstyle.
+//
+// Joinstyle suggested for using on the display.
+//
+//
+// Type: enum
+// Options:
+//     JOINSTYLE_BEVEL
+//     JOINSTYLE_MITER
+//     JOINSTYLE_ROUND
+//
+
+suggested_joinstyle = JOINSTYLE_BEVEL;
+
+//======================================================================
+//
+// Field values.
+//
+//======================================================================
+ 
+///////////// display_fields //////////////////////////
+//
+// Value fields to display with each polygon.
+//
+// 	field_name - The name of the field in the GenPoly database. This 
+//   name must match the name in the database exactly. If the field isn't 
+//   found, nothing is displayed.
+// 	format_string - The printf format string to use when displaying the 
+//   field.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string field_name;
+//      string format_string;
+//      boolean display_units;
+//      string text_color;
+//      string background_color;
+//      int x_offset;
+//      int y_offset;
+//      string font_name;
+//      int font_size;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+// 1D array - variable length.
+//
+
+display_fields = {
+};
+
+///////////// show_field_names ////////////////////////
+//
+// Option to make field names part of the displayed fields.
+//
+// Default is not to do this, but it does help differentiate between the 
+//   fields.
+//
+//
+// Type: boolean
+//
+
+show_field_names = FALSE;
+
+///////////// display_time ////////////////////////////
+//
+// Value fields to display with each polygon.
+//
+// 	displayGenTime - option to display issue time.
+// 	  Requires that a leadTime in seconds be saved
+// 	  as a field in the GenPoly.
+// 	displayValidTime - option to display valid time.
+// 	displayExpireTime - option to display expire time.
+// 	text_color - Color to use for the text.
+// 	background_color - Color to use for the background.
+// 	x_offset - X offset, in pixels, of the location to display the text. 
+//   The text is displayed at this offset from the polygon centroid.
+// 	y_offset - Y offset, in pixels, of the location to display the text. 
+//   The text is displayed at this offset from the polygon centroid.
+// 	font_name - Name of the font to use for the text.
+// 	font_size - Size of the font to use for the text.
+// 	vert_align - Vertical alignment to use for the text.
+// 	horiz_align - Horizontal alignment to use for the text.
+//
+//
+// Type: struct
+//   typedef struct {
+//      boolean displayGenTime;
+//      boolean displayValidTime;
+//      boolean displayExpireTime;
+//      string text_color;
+//      string background_color;
+//      int x_offset;
+//      int y_offset;
+//      string font_name;
+//      int font_size;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+display_time = {
+    displayGenTime = FALSE,
+    displayValidTime = FALSE,
+    displayExpireTime = FALSE,
+    text_color = "red",
+    background_color = "",
+    x_offset = 0,
+    y_offset = 0,
+    font_name = "fixed",
+    font_size = 12,
+    vert_align = VERT_ALIGN_CENTER,
+    horiz_align = HORIZ_ALIGN_LEFT
+};
+
+//======================================================================
+//
+// Vectors.
+//
+//======================================================================
+ 
+///////////// plot_vectors ////////////////////////////
+//
+// Plot vector flag.
+//
+// If set, the forecast vector associated with each polygon will be 
+//   plotted.
+//
+//
+// Type: boolean
+//
+
+plot_vectors = FALSE;
+
+///////////// forecast_lead_time //////////////////////
+//
+// Forecast lead time (secs).
+//
+// Lead time for forecast vectors.
+//
+//
+// Type: long
+//
+
+forecast_lead_time = 1800;
+
+///////////// vector_field_names //////////////////////
+//
+// The field names in the GenPoly SPDB database that give the vector 
+//   information.
+//
+// 	use_speed_dir_fields - Flag indicating which type of fields have the 
+//   vector information. If true, the speed_field_name and dir_field_name 
+//   parameters are used for getting the vector information.
+// If false, the u_field_name and v_field_name parameters are used.
+// 	speed_field_name - The name of the field that contains the speed 
+//   value. The speed value is assumed to be in km/hr.
+// 	dir_field_name - The name of the field that contains the direction 
+//   value. The direction is assumed to be in degN.
+// 	u_field_name - The name of the field that contains the U value. The 
+//   U value is assumed to be in m/s.
+// 	v_field_name - The name of the field that contains the V value. The 
+//   V value is assumed to be in m/s.
+//
+//
+// Type: struct
+//   typedef struct {
+//      boolean use_speed_dir_fields;
+//      string speed_field_name;
+//      string dir_field_name;
+//      string u_field_name;
+//      string v_field_name;
+//   }
+//
+//
+
+vector_field_names = {
+    use_speed_dir_fields = TRUE,
+    speed_field_name = "speed",
+    dir_field_name = "dir",
+    u_field_name = "U",
+    v_field_name = "V"
+};
+
+///////////// vector_color ////////////////////////////
+//
+// Motion vector color.
+//
+// Name of color suggested for rendering the motion vector.
+//
+//
+// Type: string
+//
+
+vector_color = "yellow";
+
+///////////// arrow_head_len //////////////////////////
+//
+// Length of arrow head (km).
+//
+// Minimum val: 0
+//
+// Type: double
+//
+
+arrow_head_len = 2;
+
+///////////// arrow_head_half_angle ///////////////////
+//
+// Half angle of arrow head (deg).
+//
+// Minimum val: 0
+// Maximum val: 90
+//
+// Type: double
+//
+
+arrow_head_half_angle = 20;
+
+///////////// fixed_length_arrows /////////////////////
+//
+// Fixed length arrows flag.
+//
+// If flag set, direction arrows are of fixed length. If not set, arrows 
+//   are scaled to length for time forecast_lead_time.
+//
+//
+// Type: boolean
+//
+
+fixed_length_arrows = FALSE;
+
+///////////// arrow_shaft_length //////////////////////
+//
+// Shaft length arrow head (km).
+//
+// This is used if fixed_length_arrows is TRUE.
+//
+// Minimum val: 0
+//
+// Type: double
+//
+
+arrow_shaft_length = 20;
+
+///////////// plot_genpoly_id /////////////////////////
+//
+// Option to plot ID at centroid of polyline.
+//
+// Default is not to do this.
+//
+//
+// Type: boolean
+//
+
+plot_genpoly_id = FALSE;
+
+///////////// id_format_string ////////////////////////
+//
+// C-style format string to use in plotting ID.
+//
+// Relevant only if plot_genpoly_id is TRUE.
+//
+//
+// Type: string
+//
+
+id_format_string = "ID : %d";
+
+///////////// id_label ////////////////////////////////
+//
+// Details for id label. Relevant only if plot_genpoly_id is TRUE.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string background_color;
+//      string font_name;
+//      int font_size;
+//      int x_offset;
+//      int y_offset;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+id_label = {
+    background_color = "",
+    font_name = "fixed",
+    font_size = 10,
+    x_offset = 0,
+    y_offset = 0,
+    vert_align = VERT_ALIGN_CENTER,
+    horiz_align = HORIZ_ALIGN_CENTER
+};
+
+///////////// plot_text ///////////////////////////////
+//
+// Plot text.
+//
+// If set, the text content of the GenPoly will be plotted at the 
+//   centroid of the polygon.
+//
+//
+// Type: boolean
+//
+
+plot_text = FALSE;
+
+///////////// text_info ///////////////////////////////
+//
+// Text formatting, for when plot_text=TRUE.
+//
+// 	text_color - Color to use for the text.
+// 	background_color - Color to use for the background.
+// 	x_offset - X offset, in pixels, of the location to display the text. 
+//   The text is displayed at this offset from the polygon centroid.
+// 	y_offset - Y offset, in pixels, of the location to display the text. 
+//   The text is displayed at this offset from the polygon centroid.
+// 	font_name - Name of the font to use for the text.
+// 	font_size - Size of the font to use for the text.
+// 	vert_align - Vertical alignment to use for the text.
+// 	horiz_align - Horizontal alignment to use for the text.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string text_color;
+//      string background_color;
+//      int x_offset;
+//      int y_offset;
+//      string font_name;
+//      int font_size;
+//      vert_align_t vert_align;
+//        Options:
+//          VERT_ALIGN_TOP
+//          VERT_ALIGN_CENTER
+//          VERT_ALIGN_BOTTOM
+//      horiz_align_t horiz_align;
+//        Options:
+//          HORIZ_ALIGN_LEFT
+//          HORIZ_ALIGN_CENTER
+//          HORIZ_ALIGN_RIGHT
+//   }
+//
+//
+
+text_info = {
+    text_color = "black",
+    background_color = "white",
+    x_offset = 0,
+    y_offset = 0,
+    font_name = "fixed",
+    font_size = 2,
+    vert_align = VERT_ALIGN_CENTER,
+    horiz_align = HORIZ_ALIGN_CENTER
+};
+
+///////////// render_met_mode /////////////////////////
+//
+// Option to do rendering for MODE/MET gen polys.
+//
+//
+// Type: boolean
+//
+
+render_met_mode = FALSE;
+

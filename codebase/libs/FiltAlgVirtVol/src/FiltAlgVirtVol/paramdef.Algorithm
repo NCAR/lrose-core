@@ -42,18 +42,3 @@ paramdef int
   p_default = 3;
 } num_threads;
 
-paramdef string
-{
-  p_descr = "Inputs to the algorithm";
-  p_help = "Names of the fields that are inputs to the algorithm";
-  p_default = {};
-} input[];
-
-paramdef string 
-{
-  p_descr = "Fields/values to export from the algorithm";
-  p_help = "";
-  p_default = {};
-} output[];
-
-

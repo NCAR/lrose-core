@@ -9,7 +9,6 @@
 #define VOLUME_HH
 
 #include "Parms.hh"
-#include "TemplateLookupMgr.hh"
 #include <FiltAlgVirtVol/VirtVolVolume.hh>
 #include <ctime>
 #include <vector>
@@ -21,10 +20,16 @@ class Volume : public VirtVolVolume
   friend class Sweep;
 public:
 
+  /**
+   * Constructor. Empty
+   */
   Volume(void);
 
   /**
    * Constructor
+   * @param[in] parms  App params
+   * @param[in] argc  Command args
+   * @param[in] argv  Command args
    */
   Volume(const Parms &parms, int argc, char **argv);
 
@@ -49,19 +54,36 @@ public:
    */
   bool trigger(time_t &t);
 
+  /**
+   * Output including 2d fields and products
+   * @param[in] t  Time
+   */
+  void mesoOutput(const time_t &t);
   
 protected:
 private:
 
-  static const std::string _verticalConsistencyStr;
+  /**
+   * String for a special function
+   */
   static const std::string _parmsTemplateStr;
 
+  /**
+   * Params for the app
+   */
   Parms _parms;
 
-  std::vector<TemplateLookupMgr> _templates;
+  /**
+   * The special URL for shapes
+   */
+  std::string _shapesUrl;
 
-  MathUserData *_computeVerticalConsistency(const std::string &fieldName);
-  MathUserData *_computeParmsTemplate(const std::string &xstr,
+  /**
+   * THe name of the shape special data
+   */
+  std::string _shapesName;
+
+ MathUserData *_computeParmsTemplate(const std::string &xstr,
 				      const std::string &ystr,
 				      const std::string &yoffsetStr);
 

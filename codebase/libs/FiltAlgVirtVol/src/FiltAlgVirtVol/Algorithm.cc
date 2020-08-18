@@ -3,6 +3,8 @@
  */
 
 #include <FiltAlgVirtVol/Algorithm.hh>
+#include <FiltAlgVirtVol/VirtVolVolume.hh>
+#include <FiltAlgVirtVol/VirtVolSweep.hh>
 #include <rapmath/VolumeData.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaThreadSimple.hh>
@@ -27,11 +29,28 @@ Algorithm::Algorithm(const MathData &data, const VolumeData &vdata)
   _ok = false;
 
   std::vector<FunctionDef> userUops = data.userUnaryOperators();
+  LOG(DEBUG) << "Adding " << userUops.size() << " data unary operators";
   for (size_t i=0; i<userUops.size(); ++i)
   {
     _p.addUserUnaryOperator(userUops[i]);
   }
+
+  userUops = VirtVolSweep::virtVolUserUnaryOperators();
+  LOG(DEBUG) << "Adding " << userUops.size() << " virtual sweep unary operators";
+  for (size_t i=0; i<userUops.size(); ++i)
+  {
+    _p.addUserUnaryOperator(userUops[i]);
+  }
+
+  userUops = VirtVolVolume::virtVolUserUnaryOperators();
+  LOG(DEBUG) << "Adding " << userUops.size() << " virtual volume unary operators";
+  for (size_t i=0; i<userUops.size(); ++i)
+  {
+    _p.addUserUnaryOperator(userUops[i]);
+  }
+
   userUops = vdata.userUnaryOperators();
+  LOG(DEBUG) << "Adding " << userUops.size() << " volume unary operators";
   for (size_t i=0; i<userUops.size(); ++i)
   {
     _p.addUserUnaryOperator(userUops[i]);
@@ -39,17 +58,34 @@ Algorithm::Algorithm(const MathData &data, const VolumeData &vdata)
 }
 
 //------------------------------------------------------------------
-Algorithm::Algorithm(const AlgorithmParms &p, const MathData &data,
+Algorithm::Algorithm(const FiltAlgParms &p, const MathData &data,
 		     const VolumeData &vdata)
 {
   _ok = true;
 
   std::vector<FunctionDef> userUops = data.userUnaryOperators();
+  LOG(DEBUG) << "Adding " << userUops.size() << " data unary operators";
   for (size_t i=0; i<userUops.size(); ++i)
   {
     _p.addUserUnaryOperator(userUops[i]);
   }
+
+  userUops = VirtVolSweep::virtVolUserUnaryOperators();
+  LOG(DEBUG) << "Adding " << userUops.size() << " virtual sweep unary operators";
+  for (size_t i=0; i<userUops.size(); ++i)
+  {
+    _p.addUserUnaryOperator(userUops[i]);
+  }
+
+  userUops = VirtVolVolume::virtVolUserUnaryOperators();
+  LOG(DEBUG) << "Adding " << userUops.size() << " virtual volume unary operators";
+  for (size_t i=0; i<userUops.size(); ++i)
+  {
+    _p.addUserUnaryOperator(userUops[i]);
+  }
+
   userUops = vdata.userUnaryOperators();
+  LOG(DEBUG) << "Adding " << userUops.size() << " volume unary operators";
   for (size_t i=0; i<userUops.size(); ++i)
   {
     _p.addUserUnaryOperator(userUops[i]);
@@ -58,19 +94,19 @@ Algorithm::Algorithm(const AlgorithmParms &p, const MathData &data,
   for (size_t i=0; i<p._volumeBeforeFilters.size(); ++i)
   {
     _p.parse(p._volumeBeforeFilters[i], MathParser::VOLUME_BEFORE,
-	     p._fixedConstants, p._userData);
+	     p._fixedConstantNames, p._userData);
   }
 
   for (size_t i=0; i<p._sweepFilters.size(); ++i)
   {
-    _p.parse(p._sweepFilters[i], MathParser::LOOP2D_TO_2D, p._fixedConstants,
+    _p.parse(p._sweepFilters[i], MathParser::LOOP2D_TO_2D, p._fixedConstantNames,
 	     p._userData);
   }
 
   for (size_t i=0; i<p._volumeAfterFilters.size(); ++i)
   {
     _p.parse(p._volumeAfterFilters[i], MathParser::VOLUME_AFTER,
-	     p._fixedConstants, p._userData);
+	     p._fixedConstantNames, p._userData);
   }
 
   _inputs = _p.identifyInputs();
@@ -89,44 +125,10 @@ Algorithm::Algorithm(const AlgorithmParms &p, const MathData &data,
   
   _outputs = _p.identifyOutputs();
   
-  // check for internal consistency, completeness, and uniqueness
-  vector<string> names;
+  // make sure inputs are 1 to 1 and onto params, and outputs are
+  // a superset of params
+  _ok = p.checkConsistency(*this);
 
-  for (size_t i=0; i<_inputs.size(); ++i)
-  {
-    string name = _inputs[i];
-    if (find(names.begin(), names.end(), name) == names.end())
-    {
-      names.push_back(name);
-    }
-  }
-
-  vector<string> o;
-  for (int i=0; i<_p.numLoop2DFilters(); ++i)
-  {
-    string s = _p.loopFilter2dRef(i)._output;
-    if (!s.empty())
-    {
-      if (find(o.begin(), o.end(), s) == o.end())
-      {
-	o.push_back(s);
-      }
-    }
-  }
-
-  // see if there are outputs that are not in the list of names, 
-  // filter down outputs to those that are actually output
-  // note that an input can also be an output. Just lift the outputs
-
-  for (int i=0; i<p.output_n; ++i)
-  {
-    string name = p._output[i];
-    if (find(_outputs.begin(), _outputs.end(), name) == _outputs.end())
-    {
-      LOG(ERROR) << "Named output " << name << " is not a filter output";
-      _ok = false;
-    }
-  }
   if (!_ok)
   {
     return;

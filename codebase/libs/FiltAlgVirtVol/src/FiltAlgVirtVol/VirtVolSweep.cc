@@ -5,6 +5,8 @@
 //------------------------------------------------------------------
 #include <FiltAlgVirtVol/VirtVolSweep.hh>
 #include <FiltAlgVirtVol/VirtVolVolume.hh>
+#include <FiltAlgVirtVol/PolarCircularFilter.hh>
+#include <FiltAlgVirtVol/VirtVolFuzzy.hh>
 #include <euclid/GridAlgs.hh>
 #include <euclid/Grid2dClump.hh>
 #include <rapmath/MathParser.hh>
@@ -20,6 +22,73 @@
 #include <cmath>
 #include <algorithm>
 
+const std::string VirtVolSweep::_percentLessThanStr = "PercentLessThan";
+const std::string VirtVolSweep::_largePositiveNegativeStr = "LargePositiveNegative";
+const std::string VirtVolSweep::_smoothPolarStr = "SmoothPolar";
+const std::string VirtVolSweep::_dilatePolarStr = "DilatePolar";
+const std::string VirtVolSweep::_azimuthalPolarShearStr = "AzShearPolar";
+const std::string VirtVolSweep::_percentOfAbsMaxStr = "PercentOfAbsMax";
+const std::string VirtVolSweep::_clumpFiltStr = "ClumpFilt";
+const std::string VirtVolSweep::_virtVolFuzzyStr = "VirtVolFuzzy";
+
+//------------------------------------------------------------------
+static bool _adjust(int ny, bool circular, int &a)
+{
+  if (a >= (int)(1.5*ny) || a < (int)(-1.5*ny))
+  {
+    return false;
+  }
+  
+  if (a >= ny)
+  {
+    if (circular)
+    {
+      a = a - ny;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  if (a < 0)
+  {
+    if (circular)
+    {
+      a = a + ny;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+//------------------------------------------------------------------
+static bool _adjust(int ny, bool circular, int &aplus, int &aminus)
+{
+  if (!_adjust(ny, circular, aplus))
+  {
+    return false;
+  }
+  if (!_adjust(ny, circular, aminus))
+  {
+    return false;
+  }
+  return true;
+}
+
+//------------------------------------------------------------------
+static void _azShear(const Grid2d &input, int r, int a, int aplus,
+		     int aminus, Grid2d &g)
+{
+  double vplus, vminus;
+  if (input.getValue(r, aplus, vplus) &&
+      input.getValue(r, aminus, vminus))
+  {
+    g.setValue(r, a, vplus - vminus);
+  }
+}
 //------------------------------------------------------------------
 VirtVolSweep::VirtVolSweep(void) : _grid2d(NULL)
 {
@@ -30,7 +99,7 @@ VirtVolSweep::VirtVolSweep(const VirtVolVolume &volume,
 			   int index, double vlevel)
 {
   _time = volume._time;
-  _proj = volume._proj;
+  _proj = volume.proj();
   _clockwise = volume.clockwise();
   _vlevel = vlevel;
   _vlevelIndex = index;
@@ -42,6 +111,34 @@ VirtVolSweep::VirtVolSweep(const VirtVolVolume &volume,
 //------------------------------------------------------------------
 VirtVolSweep::~VirtVolSweep(void)
 {
+}
+
+//------------------------------------------------------------------
+std::vector<FunctionDef> VirtVolSweep::virtVolUserUnaryOperators(void)
+{
+  std::vector<FunctionDef> ret;
+  ret.push_back(FunctionDef(_percentLessThanStr, "P", "data, template, min",
+			    "at each point output the percent of data < min within the circular template"));
+  ret.push_back(FunctionDef(_largePositiveNegativeStr, "P", "data, template, minvalue",
+			    "at each point output = (np-nn)/(np+nn) where np = number of points > minvalue\n"
+			    "and nn = number of points < -minvalue, within the circular template"));
+  ret.push_back(FunctionDef(_smoothPolarStr, "M", "data,template",
+			    "at each point output = average of data values within circular template"));
+  ret.push_back(FunctionDef(_dilatePolarStr, "M", "data,template",
+			    "at each point output = max of data values within circular template"));
+  ret.push_back(FunctionDef(_percentOfAbsMaxStr, "M", "data, floorMax",
+			    "let max = maximum absvalue of all data, or floorMax if max < floorMax.\n"
+			    "  output = data/max, ranging from -1 to 1"));
+  ret.push_back(FunctionDef(_azimuthalPolarShearStr, "M", "data, widthKm, clockwise",
+			    " output at point = difference in value at the points widthKm azimuthally away from the point\n"
+			    " If clockwise=1 take diff in clockwise direction, otherwise counterclockwise"));
+  ret.push_back(FunctionDef(_clumpFiltStr, "M", "shapes, minv, minpctaboveminv",
+			    "Build clumps then within each clump count percent above minv,\n"
+			    "removing clumps where that pecent is less than minpctaboveminv.\n"
+			    "For kept clumps data is a passthrough value"));
+  ret.push_back(FunctionDef(_virtVolFuzzyStr, "M", "data, fuzzyParms",
+			    "Apply the fuzzy function specified by fuzzyParms to the data"));
+  return ret;
 }
 
 //------------------------------------------------------------------
@@ -156,9 +253,57 @@ MathUserData *VirtVolSweep::userDataPtr(const std::string &name)
 
 //------------------------------------------------------------------
 bool VirtVolSweep::storeMathUserData(const std::string &name,
-					    MathUserData *v)
+				     MathUserData *v)
 {
   return _special.store(name, v);
+}
+
+//------------------------------------------------------------------
+bool VirtVolSweep::processVirtVolUserLoopFunction(ProcessingNode &p)
+{
+  string keyword;
+  if (!p.isUserUnaryOp(keyword))
+  {
+    return false;
+  }
+
+  if (keyword == _percentLessThanStr)
+  {
+    return _processPercentLessThan(*(p.unaryOpArgs()));
+  }
+  else if (keyword == _largePositiveNegativeStr)
+  {
+    return _processLargePositiveNegative(*(p.unaryOpArgs()));
+  }
+  else if (keyword == _smoothPolarStr)
+  {
+    return _processSmoothPolar(*(p.unaryOpArgs()));
+  }
+  else if (keyword == _dilatePolarStr)
+  {
+    return _processDilatePolar(*(p.unaryOpArgs()));
+  }
+  else if (keyword == _azimuthalPolarShearStr)
+  {
+    return _processAzimuthalPolarShear(*(p.unaryOpArgs()));
+  }
+  else if (keyword == _percentOfAbsMaxStr)
+  {
+    return _processPercentOfAbsMax(*(p.unaryOpArgs()));
+  }
+  else if (keyword == _clumpFiltStr)
+  {
+    return _processClumpFilt(*(p.unaryOpArgs()));
+  }
+  else if (keyword == _virtVolFuzzyStr)
+  {
+    return _processFuzzy(*(p.unaryOpArgs()));
+  }
+  else
+  {
+    printf("Unknown keyword %s\n", keyword.c_str());
+    return false;
+   }
 }
 
 //------------------------------------------------------------------
@@ -484,9 +629,12 @@ VirtVolSweep::clump(MathLoopData *out,
   for (size_t i=0; i<clumps.size(); ++i)
   {
     clump::Region_citer_t c;
-    for (c=clumps[i].begin(); c!=clumps[i].end(); ++c)
+    if ((int)(clumps[i].size()) > npt)
     {
-      g.setValue(c->first, c->second, gd->getValue(c->first, c->second));
+      for (c=clumps[i].begin(); c!=clumps[i].end(); ++c)
+      {
+	g.setValue(c->first, c->second, gd->getValue(c->first, c->second));
+      }
     }
   }
   _outputSweep->dataCopy(g);
@@ -680,7 +828,7 @@ const GriddedData *VirtVolSweep::_matchConst(const std::string &n) const
   return NULL;
 }      
 
-
+//------------------------------------------------------------------
 bool VirtVolSweep::_loadGridValueValue(std::vector<ProcessingNode *> &args,
 				       const GriddedData **field, double &nx,
 				       double &ny) const
@@ -718,6 +866,7 @@ bool VirtVolSweep::_loadGridValueValue(std::vector<ProcessingNode *> &args,
   return true;
 }
 
+//------------------------------------------------------------------
 bool VirtVolSweep::
 _loadGridandPairs(std::vector<ProcessingNode *> &args,
 		  const GriddedData **field,
@@ -763,6 +912,7 @@ _loadGridandPairs(std::vector<ProcessingNode *> &args,
   return true;
 }
 
+//------------------------------------------------------------------
 bool VirtVolSweep::
 _loadValueAndMultiFields(std::vector<ProcessingNode *> &args,
 			 double &value,
@@ -802,6 +952,7 @@ _loadValueAndMultiFields(std::vector<ProcessingNode *> &args,
   return true;
 }
 
+//------------------------------------------------------------------
 bool VirtVolSweep::
 _loadMultiFields(std::vector<ProcessingNode *> &args,
 		 std::vector<const GriddedData *> &fields) const
@@ -831,3 +982,357 @@ _loadMultiFields(std::vector<ProcessingNode *> &args,
   }
   return true;
 }
+
+//------------------------------------------------------------------
+bool VirtVolSweep::_processSmoothPolar(std::vector<ProcessingNode *> &args)
+{
+  const MathLoopData *data;
+  MathUserData *udata;
+
+  if (!loadDataAndUserData(args, &data, &udata))
+  {
+    LOG(ERROR) << "Wrong interface";
+    return false;
+  }
+
+  const PolarCircularTemplate *pt = (const PolarCircularTemplate *)udata;
+
+
+  const GriddedData *input = (const GriddedData *)data;
+  Grid2d g(*input);
+  g.changeMissingAndData(-99);
+  //g.setAllMissing();
+
+  PolarCircularFilter::smooth(g, *pt);
+  _outputSweep->dataCopy(g);
+  return true;
+}
+
+//------------------------------------------------------------------
+bool VirtVolSweep::_processDilatePolar(std::vector<ProcessingNode *> &args)
+{
+  const MathLoopData *data;
+  MathUserData *udata;
+
+  if (!loadDataAndUserData(args, &data, &udata))
+  {
+    LOG(ERROR) << "Wrong interface";
+    return false;
+  }
+
+  const PolarCircularTemplate *pt = (const PolarCircularTemplate *)udata;
+
+
+  const GriddedData *input = (const GriddedData *)data;
+  Grid2d g(*input);
+  g.changeMissingAndData(-99);
+  //g.setAllMissing();
+
+
+  PolarCircularFilter::dilate(g, *pt);
+  _outputSweep->dataCopy(g);
+  return true;
+}
+
+//------------------------------------------------------------------
+bool VirtVolSweep::_processPercentLessThan(std::vector<ProcessingNode *> &args)
+{
+  const MathLoopData *data;
+  MathUserData *udata;
+  double min;
+
+  if (!loadDataAndUserDataAndValue(args, &data, &udata, min))
+  {
+    LOG(ERROR) << "Wrong interface";
+    return false;
+  }
+
+  const PolarCircularTemplate *pt = (const PolarCircularTemplate *)udata;
+  const GriddedData *input = (const GriddedData *)data;
+  Grid2d g(*input);
+  g.changeMissingAndData(-99);
+  //g.setAllMissing();
+
+  PolarCircularFilter::percentLessThan(g, *pt, min);
+  _outputSweep->dataCopy(g);
+  return true;
+    
+}
+
+//------------------------------------------------------------------
+bool VirtVolSweep::_processLargePositiveNegative(std::vector<ProcessingNode *> &args)
+{
+  const MathLoopData *data;
+  MathUserData *udata;
+  double minValue;
+
+  if (!loadDataAndUserDataAndValue(args, &data, &udata, minValue))
+  {
+    LOG(ERROR) << "Wrong interface";
+    return false;
+  }
+
+  const PolarCircularTemplate *pt = (const PolarCircularTemplate *)udata;
+
+  const GriddedData *input = (const GriddedData *)data;
+  Grid2d g(*input);
+  g.changeMissingAndData(-99);
+
+  PolarCircularFilter::largePosNeg(g, *pt, minValue);
+  _outputSweep->dataCopy(g);
+  return true;
+    
+}
+
+//--------------------------------------------------------------------
+bool VirtVolSweep::_processPercentOfAbsMax(std::vector<ProcessingNode *> &args)
+{
+  const MathLoopData *data;
+  double floorMax;
+  
+  int n = (int)args.size();
+  if (n != 2)
+  {
+    LOG(ERROR) << "Need 2 args";
+    return false;
+  }
+
+  if (!loadDataValue(args, &data, floorMax))
+  {
+    LOG(ERROR) << "Wrong interface";
+    return false;
+  }
+  
+  const GriddedData *input = (const GriddedData *)data;
+  // loop through data to get max abs value, which we might use as nyquist
+  double max;
+  bool first;
+  
+  for (int i=0; i<input->getNdata(); ++i)
+  {
+    double v;
+    if (input->getValue(i, v))
+    {
+      double fv = fabs(v);
+      if (first)
+      {
+	first = false;
+	max = fv;
+      }
+      else
+      {
+	if (fv > max)
+	{
+	  max = fv;
+	}
+      }
+    }
+  }
+  if (first)
+  {
+    max = floorMax;
+  }
+  else
+  {
+    if (max < floorMax)
+    {
+      max = floorMax;
+    }
+  }
+
+  Grid2d g(*input);
+  g.changeMissing(-99);
+  g.setAllMissing();
+
+  for (int i=0; i<input->getNdata(); ++i)
+  {
+    double v;
+    if (input->getValue(i, v))
+    {
+      // should go from -1 to 1
+      g.setValue(i, v/max);
+    }
+  }
+  _outputSweep->dataCopy(g);
+  return true;
+}
+
+//--------------------------------------------------------------------
+bool VirtVolSweep::_processAzimuthalPolarShear(std::vector<ProcessingNode *> &args)
+{
+  const MathLoopData *data;
+  double widthKm, dclockwise;
+  if (!loadDataValueValue(args, &data, widthKm, dclockwise))
+  {
+    LOG(ERROR) << "No data";
+    return false;
+  }
+  bool clockwise = (dclockwise == 1.0);
+
+  bool circular = isCircular();
+  const GriddedData *input = (const GriddedData *)data;
+
+  Grid2d g(*input);
+  g.changeMissing(-99);
+  g.setAllMissing();
+
+  Mdvx::coord_t c = _proj.getCoord();
+  double x0Km = c.minx;
+  double deltaPlus, deltaMinus;
+  double dxKm = _proj.xGrid2km(1.0);  // km
+  double dyDegrees = _proj.yGrid2km(1.0);  /// actualy degrees
+  double dyRadians = dyDegrees*3.14159/180.0;
+  
+  if (clockwise)
+  {
+    if (VirtVolSweep::clockwise())
+    {
+      // want larger azimuth to be positive, smaller to be negative
+      deltaMinus = widthKm/2;
+      deltaPlus = -widthKm/2;
+    }
+    else 
+    {
+      // want larger azimuth to be negative, smaller to be positive
+      deltaMinus = -widthKm/2;
+      deltaPlus = widthKm/2;
+    }
+  }
+  else
+  {
+    if (VirtVolSweep::clockwise())
+    {
+      // want larger azimuth to be negative, smaller to be positive
+      deltaMinus = -widthKm/2;
+      deltaPlus = widthKm/2;
+    }
+    else 
+    {
+      // want larger azimuth to be negative, smaller to be positive
+      deltaMinus = widthKm/2;
+      deltaPlus = -widthKm/2;
+    }
+  }
+  
+  // do the shear thing
+  for (int r=0; r<g.getNx(); ++r)
+  {
+    double R = x0Km + r*dxKm;
+    // want arc length to be deltaPlus/deltaMinus in km
+    int kplus = (int)deltaPlus/(R*dyRadians);
+    int kminus = (int)deltaMinus/(R*dyRadians);
+    for (int a=0; a<g.getNy(); ++a)
+    {
+      if (kplus == kminus)
+      {
+	// skip this point
+	LOG(DEBUG_VERBOSE) << " skip radius " << R;
+	g.setMissing(r, a);
+      }
+      else
+      {
+	int aplus = a + kplus;
+	int aminus = a + kminus;
+	if (_adjust(g.getNy(), circular, aplus, aminus))
+	{
+	  _azShear(*input, r, a, aplus, aminus, g);
+	}
+      }
+    }
+  }  
+
+  _outputSweep->dataCopy(g);
+  return true;
+    
+}
+
+//--------------------------------------------------------------------
+bool VirtVolSweep::_processClumpFilt(std::vector<ProcessingNode *> &args)
+{
+  const MathLoopData *data;
+  double minv, minpct;
+
+  if (!loadDataValueValue(args, &data, minv, minpct))
+  {
+    LOG(ERROR) << "bad interface";
+    return false;
+  }
+  const GriddedData *input = (const GriddedData *)data;
+  Grid2d g(*input);
+  g.changeMissing(-99);
+  g.setAllMissing();
+
+  Grid2dClump c(*input);
+  std::vector<clump::Region_t> clumps = c.buildRegions();
+  for (size_t i=0; i<clumps.size(); ++i)
+  {
+    clump::Region_citer_t c;
+    double count = 0;
+    double good = 0;
+    for (c=clumps[i].begin(); c!=clumps[i].end(); ++c)
+    {
+      double v;
+      if (input->getValue(c->first, c->second, v))
+      {
+	count ++;
+	if (v >= minv)
+	{
+	  ++good;
+	}
+      }
+    }
+    if (count == 0)
+    {
+      // don't even save this clump
+    }
+    else
+    {
+      double pct = good/count;
+      if (pct >= minpct)
+      {
+	// keep this clump
+	for (c=clumps[i].begin(); c!=clumps[i].end(); ++c)
+	{
+	  double v;
+	  if (input->getValue(c->first, c->second, v))
+	  {
+	    g.setValue(c->first, c->second, v);
+	  }
+	}
+      }
+    }	  
+  }
+  
+  _outputSweep->dataCopy(g);
+  return true;
+}
+
+//------------------------------------------------------------------
+bool VirtVolSweep::_processFuzzy(std::vector<ProcessingNode *> &args)
+{
+  const MathLoopData *data;
+  MathUserData *udata;
+
+  if (!loadDataAndUserData(args, &data, &udata))
+  {
+    LOG(ERROR) << "Wrong interface";
+    return false;
+  }
+
+  const VirtVolFuzzy *f = (const VirtVolFuzzy *)udata;
+  const GriddedData *input = (const GriddedData *)data;
+  Grid2d g(*input);
+  g.changeMissingAndData(-99);
+  for (int i=0; i<g.getNdata(); ++i)
+  {
+    double v;
+    if (input->getValue(i, v))
+    {
+      g.setValue(i, f->apply(v));
+    }
+  }
+  _outputSweep->dataCopy(g);
+  return true;
+    
+}
+

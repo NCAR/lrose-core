@@ -70,11 +70,11 @@ bool AsciiOutputs::_setupAsciiOutput(const RepohParams::Ascii_output_t &p,
 				     const VirtVolParms &vparms,
 				     const time_t &t)
 {
-  for (size_t j=0; j<vparms._virtvol_outputs.size(); ++j)
+  for (size_t j=0; j<vparms._outputUrl.size(); ++j)
   {
-    if (vparms._virtvol_outputs[j].internalNameMatch(p.name))
+    if (vparms._outputUrl[j].nameMatch(p.name))
     {
-      if (vparms._virtvol_outputs[j]._type != VirtVolParams::ASCII)
+      if (vparms._outputUrl[j].url_type != UrlParams::ASCII)
       {
 	LOG(ERROR) << "Inconsistent use of kernel ascii output data";
 	return false;

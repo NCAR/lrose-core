@@ -2,10 +2,9 @@
 #
 
 source env
-setenv DBZ_NAME    "DBZ"
-setenv VEL_NAME    "VEL"
-setenv LATITUDE   39.7730
-setenv LONGITUDE  -104.5481
     
+mkdir -p $RAP_DATA_DIR/$ALG_SPDB_PATH
+cp _GenPoly2Symprod.default $RAP_DATA_DIR/$ALG_SPDB_PATH
+
 $DISPLAY_BIN_DIR/CIDD -p CIDD.params
 

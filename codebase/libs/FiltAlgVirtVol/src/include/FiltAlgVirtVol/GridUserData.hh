@@ -8,17 +8,6 @@
 #ifndef GRID_USER_DATA_HH
 #define GRID_USER_DATA_HH
 
-// #include <FiltAlgVirtVol/FiltAlgParms.hh>
-// #include <FiltAlgVirtVol/GriddedData.hh>
-// #include <rapmath/SpecialUserData.hh>
-// #include <rapmath/MathData.hh>
-// #include <Mdv/MdvxProj.hh>
-// #include <Mdv/MdvxRadar.hh>
-// #include <vector>
-
-// class VolumeMdv;
-// class Algorithm;
-
 #include <euclid/Grid2d.hh>
 #include <rapmath/MathUserData.hh>
 

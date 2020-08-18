@@ -14,8 +14,8 @@
 #include <Mdv/Mdvx.hh>
 #include <vector>
 
+class UrlParms;
 class RepohParams;
-class UrlSpec;
 class GridFieldsAll;
 
 //------------------------------------------------------------------
@@ -46,14 +46,14 @@ public:
     
   std::vector<double> noisePerRange(double noiseAt100Km) const;
 
-  bool initialInitializeInput(const time_t &t, const UrlSpec &u,
+  bool initialInitializeInput(const time_t &t, const UrlParms &u,
 			      const RepohParams &parms);
 
   
-  bool initializeInput(const time_t &t, const UrlSpec &u,
+  bool initializeInput(const time_t &t, const UrlParms &u,
 		       const RepohParams &parms, GridFieldsAll &data);
 
-  void outputToUrl(const time_t &t, const UrlSpec &u,
+  void outputToUrl(const time_t &t, const UrlParms &u,
 		   const GridFieldsAll &data);
 
 
@@ -72,8 +72,7 @@ private:
   std::vector<double> _vlevel;
   int _nz, _nx, _ny;
 
-  void _outputFieldToUrl(const std::string &internalName,
-			 const std::string &externalName,
+  void _outputFieldToUrl(const std::string &name,
 			 const time_t &t,
 			 const GridFieldsAll &data,
 			 DsMdvx &out);

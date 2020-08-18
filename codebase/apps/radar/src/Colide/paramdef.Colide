@@ -1,0 +1,165 @@
+/**********************************************************
+ * paramdef.Colide
+ *
+ * This file contains the TDRP parameter definitions for Colide
+ * 
+ */
+
+commentdef
+{
+  p_header = "Colide";
+  p_text = "This program does the COlide algorithm";
+};
+
+paramdef string
+{
+  p_descr = "Fixed constant strings that are interpreted by user functions";
+  p_default = {};
+} fixed_const[];
+
+paramdef string
+{
+  p_descr = "Non gridded data names";
+  p_default = {};
+} user_data[];
+
+paramdef string
+{
+  p_descr = "Volume Filters to apply before the sweep filters";
+  p_default = {};
+} volume_before_filter[];  
+
+paramdef string
+{
+  p_descr = "Filters (sweep) to apply";
+  p_default = {
+    "line_dir = LineDir(DBZ, 12, 5, 30)",
+    "line_det = LineDet(DBZ, line_dir, 12, 5, 30)",
+    "shear_dir = ShearDir(VEL, line_det, 12, 5, 30)",
+    "shear_det = ShearDet(VEL, shear_dir, line_det, 12, 5, 30)",
+    "raw_comb = maximum(line_det, shear_det)",
+    "line_ellip_orient = EllipOrient(line_det, 12, 2, 30)",
+    "line_ellip_orient2 = median(line_ellip_orient, 5, 5, 0, 180, 5)",
+    "line_ellip = Ellip(line_det, line_ellip_orient, 12, 2, 30)",
+    "line_ellip_conf = EllipConf(line_det, line_ellip_orient, 12, 2, 30)",
+    "shear_ellip_orient = EllipOrient(shear_det, 12, 2, 30)",
+    "shear_ellip_orient2 = median(shear_ellip_orient, 5, 5, 0, 180, 5)",
+    "shear_ellip = Ellip(shear_det, shear_ellip_orient, 12, 2, 30)",
+    "shear_ellip_conf = EllipConf(shear_det, shear_ellip_orient, 12, 2, 30)",
+    "ellip_comb = weighted_average(0, line_ellip, 0.25, shear_ellip, 0.75)",
+    "ellip_comb_dilate = max_expand(ellip_comb, 1, 1)",
+    "ellip_orient_comb = weighted_angle_average(0, line_ellip_orient, 0.5, shear_ellip_orient, 0.5)",
+    "enhanced0 = Enhance(raw_comb, 20, 16, 18, 30)",
+    "enhanced0_orient = EnhanceDir(raw_comb, 20, 16, 18, 30)",
+    "enhanced1 = Enhance(raw_comb, 25, 14, 18, 30)",
+    "enhanced1_orient = EnhanceDir(raw_comb, 25, 14, 18, 30)",
+    "enhanced_out = weighted_average(0, enhanced0, 0.5, raw_comb, 0.5)",
+    "ellip_orient = EllipOrient(enhanced0, 12, 2, 30)",
+    "ellip = Ellip(enhanced0, ellip_orient, 12, 2, 30)",
+    "ellip_conf = EllipConf(enhanced0, ellip_orient, 12, 2, 30)",
+    "dilate = max_expand(ellip, 2, 2)",
+    "line_hotspot = 0",
+    "line_medium = 0",
+    "line_full = 0",
+    "if (line_ellip >= 0.55) then line_hotspot = 1",
+    "if (line_ellip >= 0.45) then line_medium = 1",
+    "if (line_ellip >= 0.40) then line_full = 1",
+    "shear_hotspot = 0",
+    "shear_medium = 0",
+    "shear_full = 0",
+    "if (shear_ellip >= 0.5) then shear_hotspot = 1",
+    "if (shear_ellip >= 0.4) then shear_medium = 1",
+    "if (shear_ellip >= 0.35) then shear_full = 1",
+    "hot = 0",
+    "medium = 0",
+    "full = 0",
+    "if (ellip_comb_dilate >= 0.55) then hot = 1",
+    "if (ellip_comb_dilate >= 0.42) then medium = 1",
+    "if (ellip_comb_dilate >= 0.38) then full = 1",
+    "line_reg = Region(line_hotspot,line_medium,line_full,10,20,0,80,20)",
+    "shear_reg=Region(shear_hotspot,shear_medium,shear_full,10,20,0,80,20)",
+    "reg=Region(hot,medium,full,10,20,0,80,20)",
+    "eocm = median(ellip_orient_comb, 5, 5, 0, 180, 10)",
+    "omask = mask_missing_to_missing(eocm, reg)",
+    "ellip_orient_expand = expand_angles_laterally(omask, 15)",
+    "regComb = RegComb(15, 30, 5, reg, eocm)",
+    "ecf = ellip_comb",
+    "if (ecf < 0.4) then ecf = missing",
+    "ellipD = max_expand(ecf, 5, 5)",
+    "ellipHist = History(ellipD, 300, 0.9, 600, 0.7, 1000, 0.5, 2000, 0.2)",
+    "ellipMaxAgeHist = MaxAgeMinutes(ellipD)",
+    "eof = enhanced_out",
+    "if (eof < 0.3) then eof = missing",
+    "expandEof = max_expand(eof, 5, 5)",
+    "enhHist = History(expandEof, 300, 0.9, 600, 0.7, 1000, 0.5, 2000, 0.2)",
+    "enhMaxAgeHist = MaxAgeMinutes(expandEof)"
+  };
+} filter[];  
+
+
+paramdef string
+{
+  p_descr = "Volume Filters to apply after the sweep filters";
+  p_default = {};
+} volume_after_filter[];  
+
+
+typedef struct
+{
+  double x;
+  double y;
+} Fuzzy_f;
+
+paramdef struct Fuzzy_f
+{
+  p_descr = "Line detection side fuzzy function";
+  p_default = {{0.75, -1}, {5.25, 1} };
+} line_detect_side_fuzzy[];
+
+paramdef struct Fuzzy_f
+{
+  p_descr = "Line detection center fuzzy function";
+  p_default = {
+    {-10, 0},
+    {  6, 1},
+    { 15, 1},
+    { 30, 0}
+  };
+} line_detect_center_fuzzy[];
+
+paramdef struct Fuzzy_f
+{
+  p_descr = "Line detection std fuzzy function";
+  p_default = { {2, 1.25}, {70, 0} };
+} line_detect_std_fuzzy[];
+
+paramdef struct Fuzzy_f
+{
+  p_descr = "Shear detection side fuzzy function";
+  p_default = {{-2.5, -2}, {-2, -1}, {3.5, 1}};
+} shear_detect_side_fuzzy[];
+
+paramdef struct Fuzzy_f
+{
+  p_descr = "Elliptical filter confidence fuzzy function";
+  p_default = {{0, 1}, {0.5, 0.9}, {1, 0.1}};
+} ellip_conf_fuzzy[];
+
+paramdef struct Fuzzy_f
+{
+  p_descr = "Enhance filter fuzzy function";
+  p_default = {{0.15, 0}, {0.5, 1}};
+} enhance_fuzzy[];
+
+typedef struct
+{
+  string fieldName;
+  int maxSecondsBack;
+} Old_data_t;
+
+paramdef struct Old_data_t
+{
+  p_descr = "Fields for which we want to get and use older data";
+  p_help = "BOOST";
+  p_default = {{"ellipD", 3600}, {"expandEof", 3600}};
+} old_data[];

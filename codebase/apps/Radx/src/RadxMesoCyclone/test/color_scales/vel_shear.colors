@@ -1,0 +1,31 @@
+# NAME vel.colors
+
+# fhage 	6/9/1993 12:19:36
+
+-36 	-31 	blue
+-31 	-28 	royal blue
+-28	-25 	deep sky blue
+-25	-22	medium spring green
+-22 	-19 	forest green
+-19 	-16 	DeepPink1
+-16 	-13 	maroon
+-13 	-11	dark orchid
+-11      -9     gray16  
+-9      -7      gray21   
+-7 	-5 	gray25
+-5 	-3 	gray28
+-3 	-1 	gray30
+-1       1      gray31
+1        3      gray34
+3 	 5 	gray37
+5        7      gray41
+7        9      gray44
+9 	11 	salmon1
+11 	13 	tomato
+13 	16 	brown1
+16 	19 	red
+19 	22 	firebrick
+22 	25	gray
+25 	28	tan2
+28 	31 	gold1
+31	36 	yellow

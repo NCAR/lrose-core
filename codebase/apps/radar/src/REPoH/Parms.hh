@@ -40,11 +40,6 @@ public:
   void printParams(tdrp_print_mode_t mode);
 
   void printHelp(void);
-  
-  /**
-   * Print the inputs and outputs to stdout (debugging)
-   */
-  void printInputOutputs(void) const;
 
   #include <FiltAlgVirtVol/AlgorithmParmsVirtualFunctions.hh>
 

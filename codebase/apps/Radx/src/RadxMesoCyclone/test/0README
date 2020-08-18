@@ -1,0 +1,33 @@
+To run the algorithm on <host> from here:
+
+1. cp env_<host> env
+2. edit env to change things like input and output data locations, time range, etc.
+3. put your data in the right place, the location in 'env' by default is:
+      $DATA_URL
+   this should be data with the fields specified by the environment variable values for:
+      $DBZ_NAME
+      $VEL_NAME
+      
+4. If you forget what certain filters do:
+      see_Filters
+   to see what each one does
+
+5. edit the RadxMesoCyclone param file to your liking
+    to turn on and off different output fields, comment out one or more of the lines in output_url
+    to change to/from netCDF output, edit UrlOutputs* files and change is_netCDF_output
+    change algorithm steps however you want, but make sure to synchronize things with the UrlOutputs* param files regarding names
+    and also make sure to edit CIDD.params as well to view any new outputs
+
+6. Run the app:     
+      start_Algorithm
+
+7. Display results:
+   (Note you need to be logged in with X forwarding)
+       start_CIDD
+
+8. IMPORTANT:
+   If you make a change and want it to 'stick' you must put it into revision control. 
+
+
+
+

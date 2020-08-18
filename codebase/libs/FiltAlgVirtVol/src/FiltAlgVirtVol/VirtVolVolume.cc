@@ -5,9 +5,18 @@
 //------------------------------------------------------------------
 #include <FiltAlgVirtVol/VirtVolVolume.hh>
 #include <FiltAlgVirtVol/VirtVolSweep.hh>
+#include <FiltAlgVirtVol/PolarCircularTemplate.hh>
+#include <FiltAlgVirtVol/PolarCircularFilter.hh>
+#include <FiltAlgVirtVol/VertData2d.hh>
+#include <FiltAlgVirtVol/VirtVolFuzzy.hh>
+#include <FiltAlgVirtVol/ShapePolygons.hh>
 #include <rapmath/UnaryNode.hh>
-#include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxField.hh>
+#include <rapmath/FunctionDef.hh>
+// #include <Mdv/DsMdvx.hh>
+// #include <Mdv/Mdvx.hh>
+// #include <Mdv/MdvxField.hh>
+// #include <Mdv/MdvxChunk.hh>
+// #include <Mdv/Mdv2NcfTrans.hh>
 #include <dsdata/DsUrlTrigger.hh>
 
 #include <dsdata/DsTimeListTrigger.hh>
@@ -16,10 +25,19 @@
 #include <toolsa/LogMsgStreamInit.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/Path.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/port.h>
 #include <cstdlib>
 
+const std::string VirtVolVolume::_parmsFuzzyStr = "ParmsFuzzy";
+const std::string VirtVolVolume::_parmsCircularTemplateStr = "ParmsCircularTemplate";
+const std::string VirtVolVolume::_verticalConsistencyStr = "VerticalConsistency";
+const std::string VirtVolVolume::_verticalClumpFiltStr = "VerticalDataClumpFilt";
+const std::string VirtVolVolume::_shapeFiltStr = "ComputeShapes";
+const std::string VirtVolVolume::_shapeFixedFiltStr = "ComputeFixedSizeShapes";
+
+					      
 //------------------------------------------------------------------
 VirtVolVolume::VirtVolVolume(void) :
   _archiveChecked(false), _isArchiveMode(false), _debug(false), _T(NULL),
@@ -95,6 +113,28 @@ VirtVolVolume::~VirtVolVolume(void)
 }
 
 //------------------------------------------------------------------
+std::vector<FunctionDef> VirtVolVolume::virtVolUserUnaryOperators(void)
+{
+  std::vector<FunctionDef> ret;
+  ret.push_back(FunctionDef(_parmsFuzzyStr, "P", "x0, y0, x1, y1, ...",
+			    "pairs of points making up a fuzzy function"));
+  ret.push_back(FunctionDef(_parmsCircularTemplateStr, "M", "r, minr",
+			    "This should be a volume_before filter, r=radius Km of the template, minr = min radius Km to create a template"));
+  ret.push_back(FunctionDef(_verticalConsistencyStr, "M", "data, isNyquist, template",
+			    "This should be a volume_after filter, template is a circular template.  Data is maximized using this template at each point, then this filter looks at values at each heights and counts heights with data vs. without to get percent with data, then multiplies by average to get final output\n"
+			    "Currently nyquist inpt is not used"));
+  ret.push_back(FunctionDef(_verticalClumpFiltStr, "M", "data, threshold, minpct",
+			    "Take 2d vertical consistency, clump, and keep only clumps with minpct of the points >= threshold"));
+  ret.push_back(FunctionDef(_shapeFiltStr, "M", "data, mode",
+			    "Take 2d data, clump, and generate polygons around each clump, which are returned as special data\n"
+			    "mode=0 means diamonds the size of the region, model=1 means shapes that hug the clumps"));
+  ret.push_back(FunctionDef(_shapeFixedFiltStr, "M", "data, sizeKm",
+			    "Take 2d data, clump, and generate polygons around each clump, which are returned as special data\n"
+			    "The shapes are fixed size diamonds of sizeKm on  side"));
+  return ret;
+}
+
+//------------------------------------------------------------------
 bool VirtVolVolume::triggerVirtVol(time_t &t)
 {
   if (_T == NULL)
@@ -127,9 +167,9 @@ bool VirtVolVolume::triggerVirtVol(time_t &t)
 
   // try to initialize state using any of the inputs
   bool didInit = false;
-  for (size_t i=0; i<_parms->_virtvol_inputs.size(); ++i)
+  for (size_t i=0; i<_parms->_inputUrl.size(); ++i)
   {
-    if (_initialInitializeInput(_time, _parms->_virtvol_inputs[i]))
+    if (_initialInitializeInput(_time, _parms->_inputUrl[i]))
     {
       didInit = true;
       break;
@@ -142,9 +182,9 @@ bool VirtVolVolume::triggerVirtVol(time_t &t)
   }
 
   // now load in volume data for each url
-  for (size_t i=0; i<_parms->_virtvol_inputs.size(); ++i)
+  for (size_t i=0; i<_parms->_inputUrl.size(); ++i)
   {
-    if (!_initializeInput(_time, _parms->_virtvol_inputs[i]))
+    if (!_initializeInput(_time, _parms->_inputUrl[i]))
     {
       return false;
     }
@@ -201,8 +241,7 @@ void VirtVolVolume::addNewSweep(int zIndex, const VirtVolSweep &s)
   for (size_t i=0; i<newD.size(); ++i)
   {
     string name = newD[i].getName();
-    string ename;
-    if (_parms->outputInternal2ExternalName(name, ename))
+    if (_parms->hasOutputField(name))
     {
       bool exists = false;
       for (size_t j=0; j<_data[zIndex]._grid2d.size(); ++j)
@@ -227,7 +266,7 @@ void VirtVolVolume::addNewGrid(int zIndex, const GriddedData &g)
 {
   string name = g.getName();
   string ename;
-  if (_parms->outputInternal2ExternalName(name, ename))
+  if (_parms->hasOutputField(name))
   {
     bool exists = false;
     for (size_t j=0; j<_data[zIndex]._grid2d.size(); ++j)
@@ -252,6 +291,72 @@ void VirtVolVolume::addNewGrid(int zIndex, const GriddedData &g)
 }
 
 //------------------------------------------------------------------
+MathUserData *VirtVolVolume::processVirtVolUserVolumeFunction(const UnaryNode &p)
+{
+    // pull out the keyword
+  string keyword;
+  if (!p.getUserUnaryKeyword(keyword))
+  {
+    return NULL;
+  }
+  vector<string> args = p.getUnaryNodeArgStrings();
+  if (keyword == _parmsFuzzyStr)
+  {
+    return _computeFuzzyFunction(args);
+  }
+  else if (keyword == _parmsCircularTemplateStr)
+  {
+    // expect 2 double arguments
+    if (args.size() != 2)
+    {
+      LOG(ERROR) << "Wrong number of args want 2 got " << args.size();
+      return NULL;
+    }
+    return _computeParmsCircularTemplate(args[0], args[1]);
+  }
+  else if (keyword == _verticalConsistencyStr)
+  {
+    if (args.size() != 3)
+    {
+      LOG(ERROR) << "Wrong number of args want 3 got " << args.size();
+      return NULL;
+    }
+    return _computeVerticalConsistency(args[0], args[1], args[2]);
+  }
+  else if (keyword == _verticalClumpFiltStr)
+  {
+    if (args.size() != 3)
+    {
+      LOG(ERROR) << "Wrong number of args want 3 got " << args.size();
+      return NULL;
+    }
+    return _computeVerticalClumpFilt(args[0], args[1], args[2]);
+  }
+  else if (keyword == _shapeFiltStr)
+  {
+    if (args.size() != 2)
+    {
+      LOG(ERROR) << "Wrong number of args want 1 got " << args.size();
+      return NULL;
+    }
+    return _computeShapes(args[0], args[1]);
+  }
+  else if (keyword == _shapeFixedFiltStr)
+  {
+    if (args.size() != 2)
+    {
+      LOG(ERROR) << "Wrong number of args want 1 got " << args.size();
+      return NULL;
+    }
+    return _computeFixedShapes(args[0], args[1]);
+  }
+  else
+  {
+    return NULL;
+  }
+}
+
+//------------------------------------------------------------------
 bool VirtVolVolume::storeMathUserDataVirtVol(const std::string &name,
 					     MathUserData *v)
 {
@@ -267,12 +372,48 @@ bool VirtVolVolume::storeMathUserDataVirtVol(const std::string &name,
 }
 
 //------------------------------------------------------------------
+void VirtVolVolume::specialOutput2d(const time_t &t,
+				    const UrlParms &u)
+{
+  if (u.url_type != UrlParams::VOLUME)
+  {
+    LOG(DEBUG) << "output of non-volume data assumed done by app - "
+	       << u.url;
+    return;
+  }
+  if (u.data_type != UrlParams::GRID)
+  {
+    LOG(DEBUG) << "output of non-gridded data assumed done by app - "
+	       << u.url;
+    return;
+  }
+
+  vector<string> names = u.getNames();
+  vector<Grid2d> grids;
+  for (size_t i=0; i<names.size(); ++i)
+  {
+    std::string name = names[i];
+    MathUserData *u = _special->matchingDataPtr(name);
+    if (u != NULL)
+    {
+      // this is the VertData..probably should check somehow.
+      VertData2d *v = (VertData2d *)u;
+      Grid2d g(v->constGridRef());
+      g.setName(names[i]);
+      grids.push_back(g);
+    }
+  }	
+
+  _mdv.output2d(t, grids, u);
+}
+
+//------------------------------------------------------------------
 void VirtVolVolume::output(const time_t &t)
 {
   // for each output url
-  for (size_t i=0; i<_parms->_virtvol_outputs.size(); ++i)
+  for (size_t i=0; i<_parms->_outputUrl.size(); ++i)
   {
-    _outputToUrl(t, _parms->_virtvol_outputs[i]);
+    _outputToUrl(t, _parms->_outputUrl[i]);
   }
 }
 
@@ -295,267 +436,461 @@ bool VirtVolVolume::
 synchUserDefinedInputs(const std::string &userKey,
 		       const std::vector<std::string> &names)
 {
-  return virtVolSynchUserInputs(userKey, names);
+  if (userKey == _parmsFuzzyStr)
+  {
+    return true; // there are actually no args
+  }
+  if (userKey == _parmsCircularTemplateStr)
+  {
+    return true; // there are actually no args
+  }
+  else if (userKey == _verticalConsistencyStr)
+  {
+    if (names.size() != 3)
+    {
+      LOG(ERROR) << "Expect 3 inputs got " << names.size();
+      return false;
+    }
+    return true;
+  }
+  else if (userKey == _verticalClumpFiltStr)
+  {
+    // no args. What is happening here?  Need to debug.
+    return true;
+  }
+  else if (userKey == _shapeFiltStr)
+  {
+    return true;
+  }
+  else if (userKey == _shapeFixedFiltStr)
+  {
+    return true;
+  }
+  else
+  {
+    return virtVolSynchUserInputs(userKey, names);
+  }
+
 }
 
 //------------------------------------------------------------------
 int VirtVolVolume::getNGates(void) const
 {
-  Mdvx::coord_t coord = _proj.getCoord();
-  return coord.nx;
+  return _mdv.getNGates();
 }  
 
 //------------------------------------------------------------------
 double VirtVolVolume::getDeltaGateKm(void) const
 {
-  Mdvx::coord_t coord = _proj.getCoord();
-  return coord.dx;
+  return _mdv.getDeltaGateKm();
 }
 
 //------------------------------------------------------------------
 double VirtVolVolume::getDeltaAzDeg(void) const
 {
-  Mdvx::coord_t coord = _proj.getCoord();
-  return coord.dy;
+  return _mdv.getDeltaAzDeg();
 }
 
 //------------------------------------------------------------------
 double VirtVolVolume::getStartRangeKm(void) const
 {
-  Mdvx::coord_t coord = _proj.getCoord();
-  return coord.minx;
+  return _mdv.getStartRangeKm();
 }
 
 //------------------------------------------------------------------
 int VirtVolVolume::nz(void) const
 {
-  return _nz;
+  return _mdv.nz();
 }
 
 //------------------------------------------------------------------
 bool
-VirtVolVolume::_initialInitializeInput(const time_t &t, const UrlSpec &u)
+VirtVolVolume::_initialInitializeInput(const time_t &t, const UrlParms &u)
 {
-  vector<NamePair> fields = u.fieldNames();
+  if (u.url_type != UrlParams::VOLUME)
+  {
+    return false;
+  }
+  vector<string> fields = u.getNames();
   if (fields.empty())
   {
     return false;
   }
 
-  LOG(DEBUG) << " creating initial input state using " << u._url;
-  DsMdvx mdv;
-  mdv.setReadTime(Mdvx::READ_CLOSEST, u._url, 0, t);
-  mdv.addReadField(fields[0]._external);
-  if (_parms->restrict_vertical_levels)
+  if (_mdv.initialize(t, u, fields[0], _parms))
   {
-    mdv.setReadVlevelLimits(_parms->_vertical_level_range[0],
-			    _parms->_vertical_level_range[1]);
+    _data.clear();
+    for (int i=0; i<_mdv.nz(); ++i)
+    {
+      _data.push_back(GridFields(i));
+    }
+    return true;
   }
-
-  LOG(DEBUG) << "Reading";
-  if (mdv.readVolume())
-  {
-    LOG(ERROR)<< "reading volume " << u._url;
-    LOG(ERROR) << mdv.getErrStr();
-    return false;
-  }
-  MdvxField *f = mdv.getFieldByName(fields[0]._external);
-  if (f == NULL)
-  {
-    LOG(ERROR) << "reading field " << fields[0]._external << " from " <<
-      u._url;
-    return  false;
-  }
-  _masterHdr = mdv.getMasterHeader();
-  Mdvx::field_header_t hdr = f->getFieldHeader();
-  _nz = hdr.nz;
-  _ny = hdr.ny;
-  _nx = hdr.nx;
-  if (_parms->restrict_max_range)
-  {
-    _nx = _parms->max_range;
-    _fieldHdr = hdr;
-    _fieldHdr.nx = _parms->max_range;
-    _fieldHdr.volume_size = _fieldHdr.nx *  _fieldHdr.ny * 
-      _fieldHdr.nz * _fieldHdr.data_element_nbytes;
-    _proj = MdvxProj(_masterHdr, _fieldHdr);
-  }
-  else
-  {
-    _proj = MdvxProj(_masterHdr, hdr);
-    _fieldHdr = hdr;
-  }
-  _data.clear();
-  for (int i=0; i<_nz; ++i)
-  {
-    _data.push_back(GridFields(i));
-  }
-  _vlevelHdr = f->getVlevelHeader();
-
-  Mdvx::coord_t coord = _proj.getCoord();
-  _positiveDy = coord.dy > 0.0;
-  MdvxRadar mdvRadar;
-  if (mdvRadar.loadFromMdvx(mdv) && mdvRadar.radarParamsAvail())
-  {
-    _hasWavelength = true;
-    _hasAltitude = true;
-    DsRadarParams &rparams = mdvRadar.getRadarParams();
-    _wavelength = rparams.wavelength;
-    _altitude = rparams.altitude;
-  }
-  else
-  {
-    _hasWavelength = false;
-    _hasAltitude = true;
-    _altitude = _masterHdr.sensor_alt;
-  }
-
-  _vlevel.clear();
-  for (int i=0; i<_nz; ++i)
-  {
-    _vlevel.push_back(_vlevelHdr.level[i]);
-  }
-  return true;
+  return false;
 }
 
 //------------------------------------------------------------------
-bool VirtVolVolume::_initializeInput(const time_t &t, const UrlSpec &u)
+bool VirtVolVolume::_initializeInput(const time_t &t, const UrlParms &u)
 {
-  vector<NamePair> fields = u.fieldNames();
+  if (u.url_type != UrlParams::VOLUME)
+  {
+    LOG(DEBUG) << "Initializion of " << u.url << " not needed";
+    return true;
+  }
+    
+  vector<string> fields = u.getNames();
   if (!fields.empty())
   {
-    LOG(DEBUG) << " creating input for " << u._url;
-    DsMdvx mdv;
-    mdv.setReadTime(Mdvx::READ_FIRST_BEFORE, u._url, 0, t);
-    for (size_t i=0; i<fields.size(); ++i)
+    if (!_mdv.readAllFields(t, u.url, fields, _parms))
     {
-      LOG(DEBUG) << " data = " << fields[i]._external;
-      mdv.addReadField(fields[i]._external);
-    }
-    if (_parms->restrict_vertical_levels)
-    {
-      mdv.setReadVlevelLimits(_parms->_vertical_level_range[0],
-			      _parms->_vertical_level_range[1]);
-    }
-    LOG(DEBUG) << "Reading";
-    if (mdv.readVolume())
-    {
-      LOG(ERROR)<< "reading volume " << u._url;
       return false;
     }
 
+
     for (size_t i=0; i<fields.size(); ++i)
     {
-      LOG(DEBUG) << "Storing locally " << fields[i]._external;
-      MdvxField *f = mdv.getFieldByName(fields[i]._external);
-      if (f == NULL)
+      if (!_initializeInputField(fields[i], u.url))
       {
-	LOG(ERROR) << "reading field " << fields[i]._external << " from " <<
-	  u._url;
-	return  false;
-      }
-      f->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
-      Mdvx::field_header_t hdr = f->getFieldHeader();
-      if (_nz != hdr.nz || _ny != hdr.ny)
-      {
-	LOG(ERROR) << "Unequal dimensions in z or y";
 	return false;
-      }
-      if (!_parms->restrict_max_range)
-      {
-	if (_nx != hdr.nx)
-	{
-	  LOG(ERROR) << "Unequal dimensions in x";
-	  return false;
-	}
-      }
-
-      for (int j=0; j<hdr.nz; ++j)
-      {
-	Grid2d g(fields[i]._internal, _nx, hdr.ny, hdr.missing_data_value);
-	GriddedData gd(g);
-	fl32 *data = (fl32 *)f->getVol();
-	// use input data x dimension always,
-	// and downsample
-	int k0 = hdr.nx*hdr.ny*j;  
-	for (int iy=0; iy<hdr.ny ; ++iy)
-	{
-	  for (int ix=0; ix<_nx; ++ix)
-	  {
-	    int k = iy*hdr.nx + ix;
-	    if (data[k0+k] != hdr.bad_data_value &&
-	      data[k0+k] != hdr.missing_data_value)
-	    {
-	      gd.setValue(ix, iy, static_cast<double>(data[k0+k]));
-	    }
-	  }
-	}
-	_data[j]._grid2d.push_back(gd);
       }
     }
   }
   return true;
 }
 
-//------------------------------------------------------------------
-void VirtVolVolume::_outputToUrl(const time_t &t, const UrlSpec &u)
+//-----------------------------------------------------------------
+bool VirtVolVolume::_initializeInputField(const std::string &field,
+					  const std::string &url)
 {
-  vector<NamePair> names = u.fieldNames();
-
-  if (!names.empty())
+  LOG(DEBUG) << "Storing locally " << field;
+  vector<GriddedData> gd = _mdv.initializeInputField(field, url, _parms);
+  if (gd.empty())
   {
-    //construct each named field
-
-    DsMdvx out;
-  
-    _masterHdr.time_gen = _masterHdr.time_end = _masterHdr.time_centroid = t;
-    _masterHdr.time_expire = t;
-    _masterHdr.forecast_time = t;
-    _masterHdr.forecast_delta = 0;
-    out.setMasterHeader(_masterHdr);
-    for (size_t i=0; i<names.size(); ++i)
-    {
-      _outputFieldToUrl(names[i]._internal, names[i]._external, t, out);
-    }
-    out.setWriteLdataInfo();
-    if (out.writeToDir(u._url))
-    {
-      LOG(ERROR) << "Unable to write mdv";
-    }
-    else
-    {
-      LOG(DEBUG) << "Wrote data to " << u._url;
-    }
+    return false;
   }
 
-  names = u.valueNames();
+  for (size_t j=0; j<gd.size(); ++j)
+  {
+    _data[j]._grid2d.push_back(gd[j]);
+  }
+  return true;
+}
+
+//------------------------------------------------------------------
+void VirtVolVolume::_outputToUrl(const time_t &t, const UrlParms &u)
+{
+  if (u.url_type != UrlParams::VOLUME)
+  {
+    LOG(DEBUG) << "output of non-volume data assumed done by app - "
+	       << u.url;
+    return;
+  }
+
+  vector<string> names = u.getNames();
+  if (names.empty())
+  {
+    LOG(WARNING) << "Nothing to write to url " << u.url;
+    return;
+  }
+  _mdv.initializeOutput(t, 3);
+
   for (size_t i=0; i<names.size(); ++i)
   {
+    double missing;
+    if (!_missingValueForField(names[i], missing))
+    {
+      return;
+    }
+
+    vector<Grid2d> data3d = _getData3d(names[i]);
+    if (data3d.empty())
+    {
+      return;
+    }
+    _mdv.addOutputField(t, names[i], data3d, missing);
+      
+    // for (size_t i=0; i<names.size(); ++i)
+    // {
+    //   _outputFieldToUrl(names[i], t, out);
+    // }
+  }
+  _mdv.write(u);
+}
+
+// //------------------------------------------------------------------
+// void VirtVolVolume::_outputFieldToUrl(const std::string &name,
+// 				      const time_t &t, DsMdvx &out)
+
+//   Mdvx::field_header_t fieldHdr = _tweakedFieldHdr(3, _nx, _ny, _nz, t, 
+// 						   name,  missing);
+//   // finally, add the field
+//   MdvxField *f = new MdvxField(fieldHdr, _vlevelHdr, (void *)0,true,false);
+//   fl32 *fo = (fl32 *)f->getVol();
+
+//   // Loop through again and populate the new field
+//   for ( size_t z=0; z<_data.size(); ++z)
+//   {
+//     for (size_t f=0; f<_data[z]._grid2d.size(); ++f)
+//     {
+//       if (_data[z]._grid2d[f].getName() == name)
+//       {
+// 	for (int i=0; i<_nx*_ny; ++i)
+// 	{
+// 	  fo[i+z*_nx*_ny] = _data[z]._grid2d[f].getValue(i);
+// 	}
+// 	break;
+//       }
+//     }
+//   }
+//   f->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
+//   out.addField(f);
+// }
+
+//------------------------------------------------------------------
+MathUserData *VirtVolVolume::
+_computeParmsCircularTemplate(const std::string &rstr,
+			      const std::string &minrstr)
+{
+  double r, minr;
+  if (sscanf(rstr.c_str(), "%lf", &r) != 1)
+  {
+    LOG(ERROR) << "Cannot scan " << rstr << " as a double";
+    return NULL;
+  }
+  if (sscanf(minrstr.c_str(), "%lf", &minr) != 1)
+  {
+    LOG(ERROR) << "Cannot scan " << minrstr << " as a double";
+    return NULL;
+  }
+
+  PolarCircularTemplate *t = new PolarCircularTemplate(r, proj(), minr);
+  return (MathUserData *)t;
+}
+
+//------------------------------------------------------------------
+MathUserData *VirtVolVolume::
+_computeFuzzyFunction(const std::vector<std::string> &args)
+{
+  int nargs = (int)args.size();
+  if (nargs % 2 != 0)
+  {
+    LOG(ERROR) << "Need an even number or args";
+    return NULL;
+  }
+  std::vector<pair<double,double> > xy;
+  for (size_t i=0; i<args.size(); i+=2)
+  {
+    double x, y;
+    if (sscanf(args[i].c_str(), "%lf", &x) != 1)
+    {
+      LOG(ERROR) << "Cannot scan " << args[i] << " as a double";
+      return NULL;
+    }
+    if (sscanf(args[i+1].c_str(), "%lf", &y) != 1)
+    {
+      LOG(ERROR) << "Cannot scan " << args[i+1] << " as a double";
+      return NULL;
+    }
+    xy.push_back(pair<double,double>(x, y));
+  }
+
+  VirtVolFuzzy *v = new VirtVolFuzzy(xy);
+  if (v->ok())
+  {
+    return (MathUserData *)v;
+  }
+  else
+  {
+    delete v;
+    return NULL;
   }
 }
 
 //------------------------------------------------------------------
-void VirtVolVolume::_outputFieldToUrl(const std::string &internalName,
-				      const std::string &externalName,
-				      const time_t &t, DsMdvx &out)
+MathUserData *VirtVolVolume::
+_computeVerticalConsistency(const std::string &dataName,
+			    const std::string &isNyquistName,
+			    const std::string &templateName)
 {
-  _fieldHdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  _fieldHdr.data_element_nbytes = 4;
-  _fieldHdr.volume_size = _nx*_ny*_nz*_fieldHdr.data_element_nbytes;
-  _fieldHdr.compression_type = Mdvx::COMPRESSION_NONE; // done later
-  _fieldHdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
-  _fieldHdr.scaling_type = Mdvx::SCALING_DYNAMIC;
-  _fieldHdr.scale = 1.0;
-  _fieldHdr.bias = 0.0;
-  _fieldHdr.forecast_delta = 0;
-  _fieldHdr.forecast_time = t;
-  strncpy(_fieldHdr.field_name_long, externalName.c_str(),
-	  MDV_LONG_FIELD_LEN-1);
-  _fieldHdr.field_name_long[MDV_LONG_FIELD_LEN-1] = '\0';
-  strncpy(_fieldHdr.field_name, externalName.c_str(), MDV_SHORT_FIELD_LEN-1);
-  _fieldHdr.field_name[MDV_SHORT_FIELD_LEN-1] = '\0';
-  strncpy(_fieldHdr.units, "units", MDV_UNITS_LEN-1);
-  _fieldHdr.units[MDV_UNITS_LEN-1] = '\0';
+  std::vector<GriddedData> data = getField3d(dataName);
+  if (data.empty())
+  {
+    LOG(ERROR) << "No data " << dataName;
+    return NULL;
+  }
+
+  std::vector<GriddedData> isNyquist = getField3d(isNyquistName);
+  if (isNyquist.empty())
+  {
+    LOG(ERROR) << "No data " << isNyquistName;
+    return NULL;
+  }
+
+  MathUserData *udata = _special->matchingDataPtr(templateName);
+  if (udata == NULL)
+  {
+    LOG(ERROR) << "No user data " << templateName;
+    return NULL;
+  }
+  else
+  {
+    const PolarCircularTemplate *pt = (const PolarCircularTemplate *)udata;
+    return _consistency(data, isNyquist, *pt);
+  }
+}
+
+//------------------------------------------------------------------
+MathUserData *VirtVolVolume::
+_computeVerticalClumpFilt(const std::string &dataName,
+			  const std::string &threshName,
+			  const std::string &pctName)
+{
+  MathUserData *udata = _special->matchingDataPtr(dataName);
+  if (udata == NULL)
+  {
+    LOG(ERROR) << "No data " << dataName;
+    return NULL;
+  }
+  VertData2d *vdata = (VertData2d *)udata;
+  double thresh, pct;
+  if (sscanf(threshName.c_str(), "%lf", &thresh) != 1)
+  {
+    LOG(ERROR) << "Scanning " << threshName << " as double";
+    return NULL;
+  }
+  if (sscanf(pctName.c_str(), "%lf", &pct) != 1)
+  {
+    LOG(ERROR) << "Scanning " << pctName << " as double";
+    return NULL;
+  }
+
+  VertData2d *clumped = vdata->clump(thresh, pct);
+  return (MathUserData *)clumped;
+}
+
+//------------------------------------------------------------------
+MathUserData *VirtVolVolume::_computeShapes(const std::string &dataName,
+					    const std::string &modeName)
+{
+  MathUserData *udata = _special->matchingDataPtr(dataName);
+  if (udata == NULL)
+  {
+    LOG(ERROR) << "No data " << dataName;
+    return NULL;
+  }
+  int mode;
+  if (sscanf(modeName.c_str(), "%d", &mode) != 1)
+  {
+    LOG(ERROR) << "scanning " << modeName << " as an int";
+    return NULL;
+  }
+  VertData2d *vdata = (VertData2d *)udata;
+  int expireSeconds = 100;
+  bool isDiamond;
+  if (mode == 0)
+  {
+    isDiamond = true;
+  }
+  else if (mode == 1)
+  {
+    isDiamond = false;
+  }
+  else
+  {
+    LOG(ERROR) << "Mode must be 0 or 1";
+    return NULL;
+  }
+  
+  ShapePolygons *s = new ShapePolygons(_time, expireSeconds, proj(),
+				       vdata->constGridRef(), isDiamond);
+  return (MathUserData *)s;
+}
+
+//------------------------------------------------------------------
+MathUserData *VirtVolVolume::_computeFixedShapes(const std::string &dataName,
+						 const std::string &sizeName)
+{
+  MathUserData *udata = _special->matchingDataPtr(dataName);
+  if (udata == NULL)
+  {
+    LOG(ERROR) << "No data " << dataName;
+    return NULL;
+  }
+  double sizeKm;
+  if (sscanf(sizeName.c_str(), "%lf", &sizeKm) != 1)
+  {
+    LOG(ERROR) << "scanning " << sizeName << " as an int";
+    return NULL;
+  }
+  VertData2d *vdata = (VertData2d *)udata;
+  int expireSeconds = 100;
+  
+  ShapePolygons *s = new ShapePolygons(_time, expireSeconds, proj(),
+				       sizeKm, vdata->constGridRef());
+  return (MathUserData *)s;
+}
+
+//------------------------------------------------------------------
+MathUserData *VirtVolVolume::_consistency(const std::vector<GriddedData> &data,
+					  const std::vector<GriddedData> &isNyquist,
+					  const PolarCircularTemplate &pt)
+{
+  Grid2d out(data[0]);
+  out.setAllMissing();
+
+  vector<Grid2d> dilated;
+
+  // pull out every grid and expand it
+  for (size_t i=0; i<data.size(); ++i)
+  {
+    Grid2d a(data[i]);
+
+    PolarCircularFilter::dilate(a, pt);
+    dilated.push_back(a);
+  }
+  for (int i=0; i<out.getNdata(); ++i)
+  {
+    double ngood = 0, nbad = 0, min = 0, max = 0;
+    bool first = true;
+    for (size_t j=0; j< dilated.size(); ++j)
+    {
+      double v;
+      if (dilated[j].getValue(i, v))
+      {
+	if (first)
+	{
+	  first = false;
+	  min = max = v;
+	}
+	else
+	{
+	  if (v < min) min = v;
+	  if (v > max) max = v;
+	}
+	++ngood;
+      }
+      else
+      {
+	++nbad;
+      }
+    }
+    if (ngood > 0)
+    {
+      // simple score
+      double v = ngood/(ngood+nbad);
+      v = v*(max+min)/2.0;
+      // later use min and max, and do something fancier
+      out.setValue(i, v);
+    }
+  }
+  
+  VertData2d *ret = new VertData2d(out, 0.0);
+  return (MathUserData *)ret;
+}
+
+//------------------------------------------------------------------
+ bool VirtVolVolume::_missingValueForField(const std::string &name, double &missingValue) const
+ {
 
   // Try to get some sample data so as to set the missing values
   bool got = false;
@@ -563,11 +898,10 @@ void VirtVolVolume::_outputFieldToUrl(const std::string &internalName,
   {
     for (size_t f=0; f<_data[z]._grid2d.size(); ++f)
     {
-      if (_data[z]._grid2d[f].getName() == internalName)
+      if (_data[z]._grid2d[f].getName() == name)
       {
 	got = true;
-	_fieldHdr.bad_data_value = _data[z]._grid2d[f].getMissing();
-	_fieldHdr.missing_data_value = _fieldHdr.bad_data_value;
+	missingValue = _data[z]._grid2d[f].getMissing();
 	break;
       }
     }
@@ -578,30 +912,40 @@ void VirtVolVolume::_outputFieldToUrl(const std::string &internalName,
   }
   if (!got)
   {
-    LOG(ERROR) << "Missing data " << internalName;
+    LOG(ERROR) << "Missing data " << name;
     LOG(WARNING) << "Write some code to fill missing";
-    return;
+    return false;
   }
+  else
+  {
+    return true;
+  }
+ }
 
-  // finally, add the field
-  MdvxField *f = new MdvxField(_fieldHdr, _vlevelHdr, (void *)0,true,false);
-  fl32 *fo = (fl32 *)f->getVol();
 
+//------------------------------------------------------------------
+ std::vector<Grid2d> VirtVolVolume::_getData3d(const std::string &name) const
+{
+  vector<Grid2d> ret;
+  
   // Loop through again and populate the new field
   for ( size_t z=0; z<_data.size(); ++z)
   {
+    bool ok = false;
     for (size_t f=0; f<_data[z]._grid2d.size(); ++f)
     {
-      if (_data[z]._grid2d[f].getName() == internalName)
+      if (_data[z]._grid2d[f].getName() == name)
       {
-	for (int i=0; i<_nx*_ny; ++i)
-	{
-	  fo[i+z*_nx*_ny] = _data[z]._grid2d[f].getValue(i);
-	}
+	ret.push_back(_data[z]._grid2d[f]);
+	ok = true;
 	break;
       }
     }
+    if (!ok)
+    {
+      ret.clear();
+      LOG(ERROR) << "Didn't find name at all heights " << name;
+    }
   }
-  f->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
-  out.addField(f);
+  return ret;
 }

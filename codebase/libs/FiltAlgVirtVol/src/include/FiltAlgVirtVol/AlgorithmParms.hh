@@ -56,55 +56,57 @@ public:
   void printParams(tdrp_print_mode_t mode = PRINT_LONG);
 
   /**
-   * @return true if the input string is one of the strings in the
-   *         base output[] array
-   *
-   * @param[in] name  String to match
-   */
-  bool isOutput(const std::string &name) const;
-
-  /**
-   * @return true if the input string is one of the strings in the
-   *         base input[] array
-   *
-   * @param[in] name  String to match
-   */
-  bool isInput(const std::string &name) const;
-
-  /**
    * @return true if input string is configured as a fixed constant
    * @param[in] s  
    */
   bool matchesFixedConst(const std::string &s) const;
+
+  /**
+   * Substitute fixed constants for values in al the filtering strings
+   */
+  void substituteFixedConst(void);
+  
+  /**
+   * Add a fixed constant to the state, assumed of form conststring=valuestring
+   * @param[in] item
+   * @return true for success false for failure
+   */
+  bool addFixedConstant(const std::string &item);
 
   #define ALGORITHM_PARMS_BASE
   #include <FiltAlgVirtVol/AlgorithmParmsVirtualFunctions.hh>
   #undef ALGORITHM_PARMS_BASE
 
   /**
-   * app parameters, fixed constants, set by virtual method
+   * app parameters, fixed constants, set by virtual method setFiltersFromParms
+   * subsituted into the filters
    */
-  std::vector<std::string> _fixedConstants;
+  std::vector<std::pair<std::string, std::string> > _fixedConstants;
 
   /**
-   * app parameters, user data strings, set by virtual method
+   * The fixed constant strings
+   */
+  std::vector<std::string> _fixedConstantNames;
+
+  /**
+   * app parameters, user data strings, set by virtual method setFiltersFromParms
    */
   std::vector<std::string> _userData;
 
   /**
    * app parameters, strings for filters over entire volume done before
-   * the sweep filters, set by virtual method
+   * the sweep filters, set by virtual method setFiltersFromParms
    */
   std::vector<std::string> _volumeBeforeFilters;
 
   /**
-   * app parameters, sweep filter strings, set by virtual method
+   * app parameters, sweep filter strings, set by virtual method setFiltersFromParms
    */
   std::vector<std::string> _sweepFilters;
 
   /**
    * app parameters, strings for filters over entire volume done after 
-   * the sweep filters, set by virtual method
+   * the sweep filters, set by virtual method setFiltersFromParms
    */
   std::vector<std::string> _volumeAfterFilters;
 
@@ -113,6 +115,7 @@ private:
 
   bool _ok;      /**< True if object well formed */
 
+  void _subsituteFixedConst(std::string &filterStr);
 
 };
 
