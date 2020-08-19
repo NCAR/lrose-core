@@ -127,6 +127,13 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   
   void clear();
 
+  /**
+   * @brief Refresh the images.  Note that this is an expensive method and
+   *        should only be called where needed.
+   */
+
+  virtual void refreshImages();
+
  protected:
 
   RadxVol *_vol;
@@ -193,13 +200,6 @@ class DLL_EXPORT PpiPlot : public PolarPlot
                        int text_x, int text_y,
                        int flags);
     
-  /**
-   * @brief Refresh the images.  Note that this is an expensive method and
-   *        should only be called where needed.
-   */
-
-  virtual void _refreshImages();
-
   /**
    * @brief For dynamically allocated beams, cull the beam list, removing
    *        beams that are hidden by the given new beam.

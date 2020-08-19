@@ -115,7 +115,7 @@ void PpiPlot::clear()
   
   // Now rerender the images
   
-  _refreshImages();
+  refreshImages();
   _parent->showOpeningFileMsg(false);
 }
 
@@ -598,14 +598,14 @@ void PpiPlot::configureRange(double max_range)
   int rightMargin = 0;
   int topMargin = 0;
   int bottomMargin = 0;
-  int colorScaleWidth = _params.color_scale_width;
+  int colorScaleWidth = 0;
   int axisTickLen = 7;
   int nTicksIdeal = 7;
   int textMargin = 5;
 
   if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
 
-    _fullWorld.setWindowGeom(_parent->width(), _parent->height(), 0, 0);
+    // _fullWorld.setWindowGeom(_parent->width(), _parent->height(), 0, 0);
     _fullWorld.setLeftMargin(leftMargin);
     _fullWorld.setRightMargin(rightMargin);
     _fullWorld.setTopMargin(topMargin);
@@ -618,7 +618,10 @@ void PpiPlot::configureRange(double max_range)
 
   } else {
     
-    _fullWorld.setWindowGeom(_parent->width(), _parent->height(), 0, 0);
+    cerr << "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP _maxRangeKm: " << _maxRangeKm << endl;
+
+    // _fullWorld.setWindowGeom(_parent->width(), _parent->height(), 0, 0);
+    // _fullWorld.setWindowGeom(400, 400, 0, 0);
     _fullWorld.setLeftMargin(leftMargin);
     _fullWorld.setRightMargin(rightMargin);
     _fullWorld.setTopMargin(topMargin);
@@ -633,14 +636,14 @@ void PpiPlot::configureRange(double max_range)
   
   _zoomWorld = _fullWorld;
   _isZoomed = false;
-  _setTransform(_zoomWorld.getTransform());
+  setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
 
   // Initialize the images used for double-buffering.  For some reason,
   // the window size is incorrect at this point, but that will be corrected
   // by the system with a call to resize().
 
-  _refreshImages();
+  refreshImages();
   
 }
 
@@ -749,7 +752,7 @@ void PpiPlot::configureRange(double max_range)
     
 //     // Update the window in the renderers
     
-//     _refreshImages();
+//     refreshImages();
 
 //   }
     
@@ -1395,23 +1398,29 @@ void PpiPlot::_cullBeams(const PpiBeam *beamAB)
 }
 
 /*************************************************************************
- * _refreshImages()
+ * refreshImages()
  */
 
-void PpiPlot::_refreshImages()
+void PpiPlot::refreshImages()
 {
 
-  cerr << "XXXXXXXXXXXXXXXXXXXXXX" << endl;
+  cerr << "XXXXXXXXXXXXXXXXXXXXXX width, height: "
+       << _fullWorld.getWidthPixels() << ", " 
+       << _fullWorld.getHeightPixels() << endl;
   
-#ifdef NOTNOW
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     
     FieldRenderer *field = _fieldRenderers[ifield];
     
     // If needed, create new image for this field
-    
-    if (size() != field->getImage()->size()) {
-      field->createImage(_parent->width(), _parent->height());
+
+    QSize imageSize = field->getImage()->size();
+    if (imageSize.width() != _fullWorld.getWidthPixels() ||
+        imageSize.height() != _fullWorld.getHeightPixels()) {
+      field->createImage(_fullWorld.getWidthPixels(), _fullWorld.getHeightPixels());
+      cerr << "XXXXXXXXXXXXXXXXXXXXXX width, height: "
+           << _fullWorld.getWidthPixels() << ", " 
+           << _fullWorld.getHeightPixels() << endl;
     }
 
     // clear image
@@ -1442,7 +1451,6 @@ void PpiPlot::_refreshImages()
 
   _parent->update();
 
-#endif
 
 }
 

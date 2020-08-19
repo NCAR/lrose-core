@@ -183,7 +183,15 @@ public:
   bool getRingsEnabled() const { return _ringsEnabled; }
   bool getGridsEnabled() const { return _gridsEnabled; }
   bool getAngleLinesEnabled() const { return _angleLinesEnabled; }
-  
+
+  // set the transform between world and image coords
+
+  void setTransform(const QTransform &transform);
+
+  // overide refresh images
+
+  virtual void refreshImages() = 0;
+
 protected:
 
   ///////////////////////
@@ -269,15 +277,9 @@ protected:
   
   void _performRendering();
   
-  // overide refresh images
-
-  virtual void _refreshImages() = 0;
-
   // get ray closest to click point
   
   virtual const RadxRay *_getClosestRay(double x_km, double y_km) = 0;
-
-  void _setTransform(const QTransform &transform);
 
 };
 

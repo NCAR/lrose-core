@@ -255,7 +255,10 @@ void PolarPlot::setWindowGeom(int width, int height,
   }
   _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
   _zoomWorld = _fullWorld;
+  _fullTransform = _fullWorld.getTransform();
+  _zoomTransform = _zoomWorld.getTransform();
   cerr << "WWWWWWWWWWWWWWW width, height: " << width << ", " << height << endl;
+  refreshImages();
 }
 
 /*************************************************************************
@@ -409,7 +412,7 @@ void PolarPlot::setBackgroundColor(const QColor &color)
   QPalette new_palette = _parent->palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   _parent->setPalette(new_palette);
-  _refreshImages();
+  refreshImages();
 }
 
 
@@ -476,65 +479,16 @@ void PolarPlot::_performRendering()
     }
   } // ifield
 
-  _parent->update();
-
-}
-
-/*************************************************************************
- * _refreshImages()
- * NOTE - belongs in PpiPlot
- */
-
-void PolarPlot::_refreshImages()
-{
-
-  cerr << "YYYYYYYYYYYYYYYYYYYYYYYY" << endl;
-  
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    
-    FieldRenderer *field = _fieldRenderers[ifield];
-    
-    // If needed, create new image for this field
-    
-    if (_parent->size() != field->getImage()->size()) {
-      field->createImage(_parent->width(), _parent->height());
-    }
-
-    // clear image
-
-    field->getImage()->fill(_backgroundBrush.color().rgb());
-    
-    // set up rendering details
-
-    field->setTransform(_zoomTransform);
-    
-    // Add pointers to the beams to be rendered
-    
-    if (ifield == _selectedField || field->isBackgroundRendered()) {
-
-      std::vector< PpiBeam* >::iterator beam;
-      // for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-      //   (*beam)->setBeingRendered(ifield, true);
-      //   field->addBeam(*beam);
-      // }
-      
-    }
-    
-  } // ifield
-  
-  // do the rendering
-
-  _performRendering();
-
-  _parent->update();
+  // _parent->update();
 
 }
 
 ////////////////////
 // set the transform
 
-void PolarPlot::_setTransform(const QTransform &transform)
+void PolarPlot::setTransform(const QTransform &transform)
 {
+  cerr << "TTTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
   float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
   BoundaryPointEditor::Instance()->setWorldScale(worldScale);
   _fullTransform = transform;

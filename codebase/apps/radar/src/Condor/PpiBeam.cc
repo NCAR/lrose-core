@@ -130,7 +130,8 @@ void PpiBeam::paint(QImage *image,
   
   const QBrush *prev_brush = _brushes[field][0];
   const QBrush *curr_brush = 0;
-  
+
+  // int count = 0;
   for (size_t igate = 0; igate < _nGates; ++igate) {
 
     if (!_polygons[igate].doPaint) {
@@ -146,10 +147,16 @@ void PpiBeam::paint(QImage *image,
 
       painter.setBrush(*prev_brush);
       painter.drawPolygon(polygon);
-
-      // cerr << "PPPPPPPPPPPPPPPPPPPP :"
-      //      << _polygons[igate].pts[1].x << ", "
-      //      << _polygons[igate].pts[1].y << endl;
+      
+      // if (count == 0) {
+      //   cerr << "PPPPPPPPPPPPPPPPPPPP igate, az, el, x, y:"
+      //        << igate << ", "
+      //        << _ray->getAzimuthDeg() << ", "
+      //        << _ray->getElevationDeg() << ", "
+      //        << _polygons[igate].pts[1].x << ", "
+      //        << _polygons[igate].pts[1].y << endl;
+      //   count++;
+      // }
 
       prev_brush = curr_brush;
       polygon[0] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);

@@ -603,7 +603,6 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
   QImage *beamImage = _ppis[0]->getCurrentImage();
   painter.drawImage(0, _titleMargin + 1, *beamImage);
-  cerr << "IIIIIIIIIII width, height: " << beamImage->width() << ", " << beamImage->height() << endl;
 
   // draw the color scale
 
@@ -732,8 +731,9 @@ void PolarWidget::_resetWorld(int width, int height)
 
 void PolarWidget::_setTransform(const QTransform &transform)
 {
-	float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
- 	BoundaryPointEditor::Instance()->setWorldScale(worldScale);
+
+  float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
+  BoundaryPointEditor::Instance()->setWorldScale(worldScale);
 
   _fullTransform = transform;
   _zoomTransform = transform;
@@ -963,48 +963,52 @@ void PolarWidget::configureRange(double max_range)
 void PolarWidget::_refreshImages()
 {
 
-  cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
+  for (size_t ii = 0; ii < _ppis.size(); ii++) {
+    _ppis[ii]->refreshImages();
+  }
 
-  // _ppis[0]->refreshImages();
+  // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
+
+  // // _ppis[0]->refreshImages();
   
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     
-    FieldRenderer *field = _fieldRenderers[ifield];
+  //   FieldRenderer *field = _fieldRenderers[ifield];
     
-    // If needed, create new image for this field
+  //   // If needed, create new image for this field
     
-    if (size() != field->getImage()->size()) {
-      field->createImage(width(), height());
-    }
+  //   if (size() != field->getImage()->size()) {
+  //     field->createImage(width(), height());
+  //   }
 
-    // clear image
+  //   // clear image
 
-    field->getImage()->fill(_backgroundBrush.color().rgb());
+  //   field->getImage()->fill(_backgroundBrush.color().rgb());
     
-    // set up rendering details
+  //   // set up rendering details
 
-    field->setTransform(_zoomTransform);
+  //   field->setTransform(_zoomTransform);
     
-    // Add pointers to the beams to be rendered
+  //   // Add pointers to the beams to be rendered
     
-    if (ifield == _selectedField || field->isBackgroundRendered()) {
+  //   if (ifield == _selectedField || field->isBackgroundRendered()) {
 
-      // std::vector< PpiBeam* >::iterator beam;
-      // for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-      //   (*beam)->setBeingRendered(ifield, true);
-      //   field->addBeam(*beam);
-      // }
+  //     // std::vector< PpiBeam* >::iterator beam;
+  //     // for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
+  //     //   (*beam)->setBeingRendered(ifield, true);
+  //     //   field->addBeam(*beam);
+  //     // }
       
-    }
+  //   }
     
-  } // ifield
+  // } // ifield
   
-  // do the rendering
+  // // do the rendering
 
-  _performRendering();
+  // _performRendering();
 
-  cerr << "UUUUUUUUUUUUUUUUUU66666666666666" << endl;
-  update();
+  // cerr << "UUUUUUUUUUUUUUUUUU66666666666666" << endl;
+  // update();
 }
 
 /*************************************************************************
