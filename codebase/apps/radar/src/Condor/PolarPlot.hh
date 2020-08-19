@@ -129,12 +129,6 @@ public:
 
   void setArchiveMode(bool archive_mode);
 
-  // plot a beam
-  
-  void plotBeam(QPainter &painter,
-                Beam *beam,
-                double selectedRangeKm);
-
   // set overlays
 
   void setRings(const bool enabled);
@@ -251,10 +245,13 @@ protected:
   QColor _gridRingsColor;
   ScaledLabel _scaledLabel;
 
+  // Image used for background rendering of this field
+
+  QImage *_image;
+  
   // archive mode
 
   bool _archiveMode;
-
   ///////////////////////
   // Protected methods //
   ///////////////////////
@@ -267,12 +264,16 @@ protected:
 
   // draw the overlays
   
-  void _drawOverlays(QPainter &painter, double selectedRangeKm);
+  virtual void _drawOverlays(QPainter &painter) = 0;
   
   // reset the world coords
   
   void _resetWorld(int width, int height);
   
+  // create the image
+  
+  void _createImage(int width, int height);
+
   // rendering
   
   void _performRendering();

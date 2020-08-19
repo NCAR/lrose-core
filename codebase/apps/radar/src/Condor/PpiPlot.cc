@@ -878,6 +878,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     QPen pen = painter.pen();
     pen.setWidth(0);
     painter.setPen(pen);
+    painter.setPen(_gridRingsColor);
 
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
@@ -892,6 +893,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     QFont font = painter.font();
     font.setPointSizeF(_params.range_ring_label_font_size);
     painter.setFont(font);
+    painter.setPen(_gridRingsColor);
     // painter.setWindow(0, 0, width(), height());
     
     ringRange = _ringSpacing;

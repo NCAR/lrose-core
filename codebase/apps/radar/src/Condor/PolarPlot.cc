@@ -91,13 +91,19 @@ PolarPlot::PolarPlot(PolarWidget *parent,
   _archiveMode = _params.begin_in_archive_mode;
 
   // create the field renderers
-  
+
+  _image = NULL;
+  _createImage(100, 100);
+
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     FieldRenderer *fieldRenderer =
       new FieldRenderer(_params, ii, *_fields[ii]);
     fieldRenderer->createImage(100, 100);
     _fieldRenderers.push_back(fieldRenderer);
   }
+
+  setBackgroundColor(QColor(_params.background_color));
+  setGridRingsColor(QColor(_params.grid_and_range_ring_color));
 
 }
 
@@ -107,6 +113,8 @@ PolarPlot::PolarPlot(PolarWidget *parent,
 
 PolarPlot::~PolarPlot()
 {
+
+  delete _image;
 
   // Delete all of the field renderers
 
@@ -160,86 +168,14 @@ void PolarPlot::setArchiveMode(bool archive_mode)
   _archiveMode = archive_mode;
 }
 
-/*************************************************************************
- * plot a beam
- */
+/////////////////////////////////////
+// create image into which we render
 
-void PolarPlot::plotBeam(QPainter &painter,
-                         Beam *beam,
-                         double selectedRangeKm)
-  
+void PolarPlot::_createImage(int width, int height)
+
 {
-
-#ifdef JUNK
-  if (beam == NULL) {
-    cerr << "WARNING - PolarPlot::plotBeam() - got NULL beam, ignoring"
-         << endl;
-    return;
-  }
-  
-  if(_params.debug) {
-    cerr << "======== Ascope - plotting beam data ================" << endl;
-    DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
-    cerr << "  Beam time: " << beamTime.asString(3) << endl;
-    cerr << "  Max range: " << beam->getMaxRange() << endl;
-  }
-
-  const MomentsFields* fields = beam->getOutFields();
-  int nGates = beam->getNGates();
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
-
-  // first use filled polygons (trapezia)
-  
-  double xMin = _zoomWorld.getXMinWorld();
-  QBrush brush(_params.ascope_fill_color);
-  brush.setStyle(Qt::SolidPattern);
-  
-  for (int ii = 1; ii < nGates; ii++) {
-    double rangePrev = startRange + gateSpacing * (ii-1);
-    double range = startRange + gateSpacing * (ii);
-    double valPrev = getFieldVal(_momentType, fields[ii-1]);
-    double val = getFieldVal(_momentType, fields[ii]);
-    if (val > -9990 && valPrev > -9990) {
-      _zoomWorld.fillTrap(painter, brush,
-                          xMin, rangePrev,
-                          valPrev, rangePrev,
-                          val, range,
-                          xMin, range);
-    }
-  }
-
-  // draw the reflectivity field vs range - as line
-
-  painter.save();
-  painter.setPen(_params.ascope_line_color);
-  QVector<QPointF> pts;
-  for (int ii = 0; ii < nGates; ii++) {
-    double range = startRange + gateSpacing * ii;
-    double val = getFieldVal(_momentType, fields[ii]);
-    if (val > -9990) {
-      QPointF pt(val, range);
-      pts.push_back(pt);
-    }
-  }
-  _zoomWorld.drawLines(painter, pts);
-  painter.restore();
-
-  // draw the overlays
-
-  _drawOverlays(painter, selectedRangeKm);
-
-  // draw the title
-
-  painter.save();
-  painter.setPen(_params.ascope_title_color);
-  string title("Ascope:");
-  title.append(getName(_momentType));
-  _zoomWorld.drawTitleTopCenter(painter, title);
-  painter.restore();
-
-#endif
-
+  delete _image;
+  _image = new QImage(width, height, QImage::Format_RGB32);
 }
 
 /*************************************************************************
@@ -249,6 +185,7 @@ void PolarPlot::plotBeam(QPainter &painter,
 void PolarPlot::setWindowGeom(int width, int height,
                               int xOffset, int yOffset)
 {
+  _createImage(width, height);
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     FieldRenderer *field = _fieldRenderers[ifield];
     field->createImage(width, height);
@@ -310,37 +247,37 @@ void PolarPlot::setZoomLimitsY(int yMin,
  * Draw the overlays, axes, legends etc
  */
 
-void PolarPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
-{
+// void PolarPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
+// {
 
-  // save painter state
+//   // save painter state
   
-  painter.save();
+//   painter.save();
   
-  // store font
+//   // store font
   
-  QFont origFont = painter.font();
+//   QFont origFont = painter.font();
   
-  painter.setPen(_params.axes_label_color);
+//   painter.setPen(_params.axes_label_color);
 
-  // _zoomWorld.drawAxisBottom(painter, getUnits(_momentType),
-  //                           true, true, true, _xGridLinesOn);
+//   // _zoomWorld.drawAxisBottom(painter, getUnits(_momentType),
+//   //                           true, true, true, _xGridLinesOn);
 
-  // _zoomWorld.drawAxisLeft(painter, "km", 
-  //                         true, true, true, _yGridLinesOn);
+//   // _zoomWorld.drawAxisLeft(painter, "km", 
+//   //                         true, true, true, _yGridLinesOn);
 
-  // _zoomWorld.drawYAxisLabelLeft(painter, "Range");
+//   // _zoomWorld.drawYAxisLabelLeft(painter, "Range");
 
-  // selected range line
+//   // selected range line
   
-  // painter.setPen(_params.ascope_selected_range_color);
-  _zoomWorld.drawLine(painter,
-                      _zoomWorld.getXMinWorld(), selectedRangeKm,
-                      _zoomWorld.getXMaxWorld(), selectedRangeKm);
+//   // painter.setPen(_params.ascope_selected_range_color);
+//   _zoomWorld.drawLine(painter,
+//                       _zoomWorld.getXMinWorld(), selectedRangeKm,
+//                       _zoomWorld.getXMaxWorld(), selectedRangeKm);
 
-  painter.restore();
+//   painter.restore();
 
-}
+// }
 
 /*************************************************************************
  * setRings()
@@ -412,7 +349,7 @@ void PolarPlot::setBackgroundColor(const QColor &color)
   QPalette new_palette = _parent->palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   _parent->setPalette(new_palette);
-  refreshImages();
+  // refreshImages();
 }
 
 
@@ -447,7 +384,10 @@ void PolarPlot::displayImage(const size_t field_num)
 
 QImage *PolarPlot::getCurrentImage()
 {
-  return _fieldRenderers[_selectedField]->getImage();
+  _image = _fieldRenderers[_selectedField]->getImage();
+  QPainter painter(_image);
+  _drawOverlays(painter);
+  return _image;
 }
 
 

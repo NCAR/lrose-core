@@ -1410,6 +1410,10 @@ void PolarWidget::_drawMainTitle(QPainter &painter)
   qreal xx = (qreal) ((width() / 2.0) - (boxWidth / 2.0));
   qreal yy = (qreal) (((_titleMargin - 1) - boxHeight) / 2.0);
   QRectF bRect(xx, yy, boxWidth, boxHeight);
+
+  //   // clear image
+
+  painter.fillRect(bRect, _backgroundBrush.color().rgb());
                       
   // draw the text
   
