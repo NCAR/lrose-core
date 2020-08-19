@@ -191,6 +191,13 @@ For the **samurai** distribtion, run the following:
   ./build/scripts/installPackageMakefiles.py --package samurai
 ```
 
+For the **lrose-radx** distribtion, run the following:
+
+```
+  cd $LROSE_CORE_DIR
+  ./build/scripts/installPackageMakefiles.py --package lrose-radx
+```
+
 To re-install the **lrose-core** standard package Makefiles, perform the following:
 
 ```
