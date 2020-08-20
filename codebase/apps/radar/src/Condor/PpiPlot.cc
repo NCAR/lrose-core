@@ -128,7 +128,7 @@ void PpiPlot::selectVar(const size_t index)
 
   // If the field index isn't actually changing, we don't need to do anything
   
-  if (_selectedField == index) {
+  if (_fieldNum == index) {
     return;
   }
   
@@ -151,12 +151,12 @@ void PpiPlot::selectVar(const size_t index)
 
   // Do any needed housekeeping when the field selection is changed
 
-  _fieldRenderers[_selectedField]->unselectField();
+  _fieldRenderers[_fieldNum]->unselectField();
   _fieldRenderers[index]->selectField();
   
   // Change the selected field index
 
-  _selectedField = index;
+  _fieldNum = index;
 
   // Update the display
 
@@ -183,7 +183,7 @@ void PpiPlot::clearVar(const size_t index)
     (*beam)->resetFieldBrush(index, &_backgroundBrush);
   }
   
-  if (index == _selectedField) {
+  if (index == _fieldNum) {
     _parent->update();
   }
 
@@ -311,7 +311,7 @@ void PpiPlot::addBeam(const RadxRay *ray,
     // Add the new beams to the render lists for each of the fields
     
     for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-      if (field == _selectedField ||
+      if (field == _fieldNum ||
           _fieldRenderers[field]->isBackgroundRendered()) {
         _fieldRenderers[field]->addBeam(beam);
       } else {
@@ -1004,7 +1004,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     /****** testing ******
      // do smart brush ...
      QImage qImage;
-     qImage = *(_fieldRenderers[_selectedField]->getImage());
+     qImage = *(_fieldRenderers[_fieldNum]->getImage());
      // qImage.load("/h/eol/brenda/octopus.jpg");
      // get the Image from somewhere ...   
      // qImage.invertPixels();
@@ -1087,7 +1087,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
 
     // field name legend
 
-    string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
+    string fieldName = _fieldRenderers[_fieldNum]->getField().getLabel();
     sprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
 
@@ -1435,7 +1435,7 @@ void PpiPlot::refreshImages()
     
     // Add pointers to the beams to be rendered
     
-    if (ifield == _selectedField || field->isBackgroundRendered()) {
+    if (ifield == _fieldNum || field->isBackgroundRendered()) {
 
       std::vector< PpiBeam* >::iterator beam;
       for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {

@@ -75,7 +75,7 @@ PolarWidget::PolarWidget(QWidget* parent,
         _platform(platform),
         _fields(fields),
         _haveFilteredFields(haveFilteredFields),
-        _selectedField(0),
+        _fieldNum(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridRingsColor(_params.grid_and_range_ring_color),
         _ringsEnabled(false),
@@ -163,11 +163,17 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   // create plots
 
-  PpiPlot *ppi = new PpiPlot(this, _manager, _params,
-                             0, _platform,
-                             fields, haveFilteredFields);
+  PpiPlot *ppi0 = new PpiPlot(this, _manager, _params,
+                              0, _platform,
+                              fields, haveFilteredFields);
+  
+  _ppis.push_back(ppi0);
+  
+  PpiPlot *ppi1 = new PpiPlot(this, _manager, _params,
+                              0, _platform,
+                              fields, haveFilteredFields);
 
-  _ppis.push_back(ppi);
+  _ppis.push_back(ppi1);
   
 }
 
@@ -188,6 +194,17 @@ PolarWidget::~PolarWidget()
 
 }
 
+
+// set current field
+
+void PolarWidget::setFieldNum(int fieldNum)
+
+{
+  _fieldNum = fieldNum;
+  for (size_t ii = 0; ii < _ppis.size(); ii++) {
+    _ppis[ii]->setFieldNum(_fieldNum);
+  }
+}
 
 /*************************************************************************
  * configure the axes
@@ -269,7 +286,7 @@ void PolarWidget::activateRealtimeRendering()
 {
   
   for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-    if (ii != _selectedField) {
+    if (ii != _fieldNum) {
       _fieldRenderers[ii]->activateBackgroundRendering();
     }
   }
@@ -283,7 +300,7 @@ void PolarWidget::activateRealtimeRendering()
 void PolarWidget::displayImage(const size_t field_num)
 {
   // If we weren't rendering the current field, do nothing
-  if (field_num != _selectedField) {
+  if (field_num != _fieldNum) {
     return;
   }
   update();
@@ -600,9 +617,13 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   _plotHeight = _plotsGrossHeight / _nRows;
 
   QPainter painter(this);
-  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-  QImage *beamImage = _ppis[0]->getCurrentImage();
-  painter.drawImage(0, _titleMargin + 1, *beamImage);
+  // painter.drawImage(0, 0, *(_fieldRenderers[_fieldNum]->getImage()));
+
+  QImage *beamImage0 = _ppis[0]->getCurrentImage();
+  painter.drawImage(0, _titleMargin + 1, *beamImage0);
+
+  QImage *beamImage1 = _ppis[1]->getCurrentImage();
+  painter.drawImage(_plotWidth, _titleMargin + 1, *beamImage1);
 
   // draw the color scale
 
@@ -751,7 +772,7 @@ void PolarWidget::_performRendering()
   // start the rendering
   
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    if (ifield == _selectedField ||
+    if (ifield == _fieldNum ||
 	_fieldRenderers[ifield]->isBackgroundRendered()) {
       _fieldRenderers[ifield]->signalRunToStart();
     }
@@ -760,7 +781,7 @@ void PolarWidget::_performRendering()
   // wait for rendering to complete
   
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    if (ifield == _selectedField ||
+    if (ifield == _fieldNum ||
 	_fieldRenderers[ifield]->isBackgroundRendered()) {
       _fieldRenderers[ifield]->waitForRunToComplete();
     }
@@ -991,7 +1012,7 @@ void PolarWidget::_refreshImages()
     
   //   // Add pointers to the beams to be rendered
     
-  //   if (ifield == _selectedField || field->isBackgroundRendered()) {
+  //   if (ifield == _fieldNum || field->isBackgroundRendered()) {
 
   //     // std::vector< PpiBeam* >::iterator beam;
   //     // for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
@@ -1251,7 +1272,7 @@ void PolarWidget::_drawOverlays(QPainter &painter)
     /****** testing ******
     // do smart brush ...
   QImage qImage;
-  qImage = *(_fieldRenderers[_selectedField]->getImage());
+  qImage = *(_fieldRenderers[_fieldNum]->getImage());
   // qImage.load("/h/eol/brenda/octopus.jpg");
   // get the Image from somewhere ...   
   // qImage.invertPixels();
@@ -1334,7 +1355,7 @@ void PolarWidget::_drawOverlays(QPainter &painter)
 
     // field name legend
 
-    string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
+    string fieldName = _fieldRenderers[_fieldNum]->getField().getLabel();
     sprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
 

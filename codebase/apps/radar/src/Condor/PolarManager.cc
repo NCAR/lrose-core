@@ -1723,6 +1723,7 @@ void PolarManager::_refresh()
 void PolarManager::_changeField(int fieldId, bool guiMode)
 
 {
+
   _selectedField = _fields[fieldId];
   
   if (_params.debug) {
@@ -1743,6 +1744,8 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
 
   _prevFieldNum = _fieldNum;
   _fieldNum = fieldId;
+
+ _polar->setFieldNum(_fieldNum);
   
   // _ppi->selectVar(_fieldNum);
   // _rhi->selectVar(_fieldNum);

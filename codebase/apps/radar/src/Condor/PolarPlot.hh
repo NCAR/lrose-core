@@ -125,6 +125,12 @@ public:
   void zoom(int x1, int y1, int x2, int y2);
   void unzoom();
 
+  // set current field
+
+  void setFieldNum(int fieldNum) {
+    _fieldNum = fieldNum;
+  }
+
   // set archive mode
 
   void setArchiveMode(bool archive_mode);
@@ -220,7 +226,7 @@ protected:
   
   const vector<DisplayField *> &_fields;
   bool _haveFilteredFields;
-  size_t _selectedField;
+  size_t _fieldNum;
 
   // The renderer for each field.
 

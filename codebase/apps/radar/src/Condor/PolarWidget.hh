@@ -119,6 +119,10 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   virtual ~PolarWidget();
 
+  // set current field
+
+  void setFieldNum(int fieldNum);
+
   /**
    * @brief Configure the PolarWidget for range.
    */
@@ -385,7 +389,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @brief The index of the field selected for display.
    */
 
-  size_t _selectedField;
+  size_t _fieldNum;
 
   /**
    * @brief The brush for the background.

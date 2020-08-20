@@ -76,7 +76,7 @@ PolarPlot::PolarPlot(PolarWidget *parent,
         _platform(platform),
         _fields(fields),
         _haveFilteredFields(haveFilteredFields),
-        _selectedField(0),
+        _fieldNum(0),
         _scaledLabel(ScaledLabel::DistanceEng)
         
 {
@@ -332,7 +332,7 @@ void PolarPlot::activateRealtimeRendering()
 {
   
   for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-    if (ii != _selectedField) {
+    if (ii != _fieldNum) {
       _fieldRenderers[ii]->activateBackgroundRendering();
     }
   }
@@ -371,7 +371,7 @@ void PolarPlot::setGridRingsColor(const QColor &color)
 void PolarPlot::displayImage(const size_t field_num)
 {
   // If we weren't rendering the current field, do nothing
-  if (field_num != _selectedField) {
+  if (field_num != _fieldNum) {
     return;
   }
   _parent->update();
@@ -384,7 +384,7 @@ void PolarPlot::displayImage(const size_t field_num)
 
 QImage *PolarPlot::getCurrentImage()
 {
-  _image = _fieldRenderers[_selectedField]->getImage();
+  _image = _fieldRenderers[_fieldNum]->getImage();
   QPainter painter(_image);
   _drawOverlays(painter);
   return _image;
@@ -398,13 +398,10 @@ QImage *PolarPlot::getCurrentImage()
 void PolarPlot::_performRendering()
 {
 
-  // cerr << "22222222222222222 _selectedField: " << _selectedField << endl;
-  // cerr << "22222222222222222 _fieldRenderers.size(): " << _fieldRenderers.size() << endl;
-  
   // start the rendering
   
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    if (ifield == _selectedField ||
+    if (ifield == _fieldNum ||
 	_fieldRenderers[ifield]->isBackgroundRendered()) {
       _fieldRenderers[ifield]->signalRunToStart();
     }
@@ -413,7 +410,7 @@ void PolarPlot::_performRendering()
   // wait for rendering to complete
   
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    if (ifield == _selectedField ||
+    if (ifield == _fieldNum ||
 	_fieldRenderers[ifield]->isBackgroundRendered()) {
       _fieldRenderers[ifield]->waitForRunToComplete();
     }
