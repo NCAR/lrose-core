@@ -144,6 +144,7 @@ public:
   inline void setTickValuesFontSize(int val) { _tickValuesFontSize = val; }
   inline void setLegendFontSize(int val) { _legendFontSize = val; }
 
+  inline void setBackgroundColor(const string &val) { _backgroundColor = val; }
   inline void setTitleColor(const string &val) { _titleColor = val; }
   inline void setAxisLineColor(const string &val) { _axisLineColor = val; }
   inline void setAxisTextColor(const string &val) { _axisTextColor = val; }
@@ -505,6 +506,7 @@ private:
   int _tickValuesFontSize;
   int _legendFontSize;
 
+  string _backgroundColor;
   string _titleColor;
   string _axisLineColor;
   string _axisTextColor;

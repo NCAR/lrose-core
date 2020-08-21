@@ -98,6 +98,7 @@ PolarWidget::PolarWidget(QWidget* parent,
   _colorScaleWidth = _params.color_scale_width;
   _fullWorld.setColorScaleWidth(_colorScaleWidth);
   _fullWorld.setTopMargin(_titleMargin);
+  _fullWorld.setBackgroundColor(_params.background_color);
 
   _nRows = _params.plots_n_rows;
   _nCols = _params.plots_n_columns;
@@ -1432,7 +1433,7 @@ void PolarWidget::_drawMainTitle(QPainter &painter)
   qreal yy = (qreal) (((_titleMargin - 1) - boxHeight) / 2.0);
   QRectF bRect(xx, yy, boxWidth, boxHeight);
 
-  //   // clear image
+  // clear rectangle
 
   painter.fillRect(bRect, _backgroundBrush.color().rgb());
                       
