@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Condor
+ * TDRP params for Condor
  **********************************************************************/
 
 //======================================================================
@@ -365,11 +365,10 @@ fields = {
     units = "m/s",
     color_map = "width.colors",
     shortcut = "4"
-    
   }
   ,
   {
-   label = "ZDR",
+    label = "ZDR",
     raw_name = "ZDR",
     filtered_name = "",
     units = "dB",
@@ -425,40 +424,11 @@ use_field_label_in_title = FALSE;
 
 //======================================================================
 //
-// INITIAL MAX RANGE.
+// POLAR PLOT LAYOUT.
 //
 //======================================================================
  
-///////////// max_range_km ////////////////////////////
-//
-// Max range for the display (km).
-//
-//
-// Type: double
-//
-
-max_range_km = 150;
-
-//======================================================================
-//
-// PLOT LAYOUT.
-//
-//======================================================================
- 
-///////////// plots_n_rows ////////////////////////////
-//
-// Number of rows of plots.
-//
-// The plots are made up of a matrix of plots, n_rows by n_colums. This 
-//   is the starting value for the number of rows.
-//
-//
-// Type: int
-//
-
-plots_n_rows = 2;
-
-///////////// plots_n_columns /////////////////////////
+///////////// polar_plots_n_columns ///////////////////
 //
 // Number of columns of plots.
 //
@@ -469,38 +439,107 @@ plots_n_rows = 2;
 // Type: int
 //
 
-plots_n_columns = 2;
+polar_plots_n_columns = 2;
 
-///////////// plot_aspect_ratio ///////////////////////
+///////////// polar_plot_aspect_ratio /////////////////
 //
-// Aspect ratio (width/height) of plot window.
+// Aspect ratio (width/height) of main plot window.
 //
 //
 // Type: double
 //
 
-plot_aspect_ratio = 1;
+polar_plot_aspect_ratio = 1;
 
-///////////// plot_types //////////////////////////////
+///////////// polar_plots /////////////////////////////
 //
-// Array of types of plots for each sub panel.
+// Fields to be displayed.
 //
-// The array size must match n_rows times n_columns.
+// label: appears on the GUI. raw_name: unfiltered field name. 
+//   filtered_name: field with clutter filter applied. units: units string 
+//   for color scale. color_map: name of color map in color_scale_dir. 
+//   shortcut: keyboard character for shortcut. Specified key will select 
+//   raw field. Use ALT-key to get filtered field. .
 //
 //
-// Type: enum
-// Options:
-//     PPI_PLOT
-//     RHI_PLOT
-//     BSCAN_PLOT
+// Type: struct
+//   typedef struct {
+//      plot_type_t plot_type;
+//        Options:
+//          PPI_PLOT
+//          RHI_PLOT
+//          BSCAN_PLOT
+//      string label;
+//      double min_az;
+//      double max_az;
+//      double min_el;
+//      double max_el;
+//      double max_range_km;
+//   }
+//
 // 1D array - variable length.
 //
 
-plot_types = {
- PPI_PLOT,
- RHI_PLOT,
- RHI_PLOT,
- BSCAN_PLOT
+polar_plots = {
+  {
+    plot_type = PPI_PLOT,
+    label = "PPI-1",
+    min_az = -45,
+    max_az = 45,
+    min_el = -45,
+    max_el = 45,
+    max_range_km = 225
+  }
+  ,
+  {
+    plot_type = PPI_PLOT,
+    label = "PPI-2",
+    min_az = -45,
+    max_az = 45,
+    min_el = -45,
+    max_el = 45,
+    max_range_km = 225
+  }
+  ,
+  {
+    plot_type = RHI_PLOT,
+    label = "RHI-fore",
+    min_az = -7.5,
+    max_az = -2.5,
+    min_el = -25,
+    max_el = 25,
+    max_range_km = 225
+  }
+  ,
+  {
+    plot_type = RHI_PLOT,
+    label = "RHI-aft",
+    min_az = 22.5,
+    max_az = 27.5,
+    min_el = -25,
+    max_el = 25,
+    max_range_km = 225
+  }
+  ,
+  {
+    plot_type = RHI_PLOT,
+    label = "RHI-dualpol",
+    min_az = -2.5,
+    max_az = 2.5,
+    min_el = -25,
+    max_el = 25,
+    max_range_km = 225
+  }
+  ,
+  {
+    plot_type = PPI_PLOT,
+    label = "PPI",
+    min_az = -45,
+    max_az = 45,
+    min_el = -45,
+    max_el = 45,
+    max_range_km = 225
+  }
 };
 
 ///////////// axes_label_color ////////////////////////

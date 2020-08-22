@@ -50,10 +50,18 @@ PpiPlot::PpiPlot(PolarWidget* parent,
                  const PolarManager &manager,
                  const Params &params,
                  int id,
+                 Params::plot_type_t plotType,
+                 string label,
+                 double minAz,
+                 double maxAz,
+                 double minEl,
+                 double maxEl,
+                 double maxRangeKm,
                  const RadxPlatform &platform,
                  const vector<DisplayField *> &fields,
                  bool haveFilteredFields) :
-        PolarPlot(parent, manager, params, id,
+        PolarPlot(parent, manager, params, id, plotType, label,
+                  minAz, maxAz, minEl, maxEl, maxRangeKm,
                   platform, fields, haveFilteredFields)
         
 {
@@ -63,7 +71,7 @@ PpiPlot::PpiPlot(PolarWidget* parent,
 
   // initialize world view
 
-  configureRange(_params.max_range_km);
+  configureRange(_maxRangeKm);
 
   setGrids(_params.ppi_grids_on_at_startup);
   setRings(_params.ppi_range_rings_on_at_startup);

@@ -77,6 +77,13 @@ public:
             const PolarManager &manager,
             const Params &params,
             int id,
+            Params::plot_type_t plotType,
+            string label,
+            double minAz,
+            double maxAz,
+            double minEl,
+            double maxEl,
+            double maxRangeKm,
             const RadxPlatform &platform,
             const vector<DisplayField *> &fields,
             bool haveFilteredFields);
@@ -161,10 +168,24 @@ public:
 
   void displayImage(const size_t field_num);
 
-  // get image for current field
+  // geometry
+  
+  void setMaxRangeKm(double val) { _maxRangeKm = val; }
+
+  // image for current field
 
   QImage *getCurrentImage();
 
+  void setImageWidth(int val) { _imageWidth = val; }
+  void setImageHeight(int val) { _imageHeight = val; }
+  void setImageOffsetX(int val) { _imageOffsetX = val; }
+  void setImageOffsetY(int val) { _imageOffsetY = val; }
+  
+  int getImageWidth() const { return _imageWidth; }
+  int getImageHeight() const { return _imageHeight; }
+  int getImageOffsetX() const { return _imageOffsetX; }
+    int getImageOffsetY() const { return _imageOffsetY; }
+  
   // get the world plot objects
   
   WorldPlot &getFullWorld() { return _fullWorld; }
@@ -207,6 +228,16 @@ protected:
   const Params &_params;
   int _id;
 
+  // plot type etc
+  
+  Params::plot_type_t _plotType;
+  string _label;
+  double _minAz;
+  double _maxAz;
+  double _minEl;
+  double _maxEl;
+  double _maxRangeKm;
+
   // unzoomed world
 
   QTransform _fullTransform;
@@ -239,25 +270,30 @@ protected:
   bool _angleLinesEnabled;
   double _ringSpacing;
 
-  // geometry
-
-  double _aspectRatio;
-  double _maxRangeKm;
-  int _colorScaleWidth;
-
   // painting
 
   QBrush _backgroundBrush;
   QColor _gridRingsColor;
   ScaledLabel _scaledLabel;
 
-  // Image used for background rendering of this field
-
-  QImage *_image;
-  
   // archive mode
 
   bool _archiveMode;
+
+  // Image used for background rendering of this field
+
+  QImage *_image;
+
+  int _imageWidth;
+  int _imageHeight;
+  int _imageOffsetX;
+  int _imageOffsetY;
+
+  // geometry
+
+  double _aspectRatio;
+  int _colorScaleWidth;
+
   ///////////////////////
   // Protected methods //
   ///////////////////////

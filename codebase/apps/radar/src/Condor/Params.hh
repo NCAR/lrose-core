@@ -165,6 +165,16 @@ public:
     char* shortcut;
   } field_t;
 
+  typedef struct {
+    plot_type_t plot_type;
+    char* label;
+    double min_az;
+    double max_az;
+    double min_el;
+    double max_el;
+    double max_range_km;
+  } polar_plot_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -498,16 +508,12 @@ public:
 
   tdrp_bool_t use_field_label_in_title;
 
-  double max_range_km;
+  int polar_plots_n_columns;
 
-  int plots_n_rows;
+  double polar_plot_aspect_ratio;
 
-  int plots_n_columns;
-
-  double plot_aspect_ratio;
-
-  plot_type_t *_plot_types;
-  int plot_types_n;
+  polar_plot_t *_polar_plots;
+  int polar_plots_n;
 
   char* axes_label_color;
 
@@ -775,7 +781,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[180];
+  mutable TDRPtable _table[177];
 
   const char *_className;
 

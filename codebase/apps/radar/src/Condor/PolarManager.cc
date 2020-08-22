@@ -129,7 +129,11 @@ PolarManager::PolarManager(const Params &params,
   _rhiMode = false;
 
   _nGates = 1000;
-  _maxRangeKm = _params.max_range_km;
+  if (_params.polar_plots_n > 0) {
+    _maxRangeKm = _params._polar_plots[0].max_range_km;
+  } else {
+    _maxRangeKm = 100.0;
+  }
   
   _archiveMode = false;
   _archiveRetrievalPending = false;
@@ -2775,7 +2779,11 @@ void PolarManager::_setRealtime(bool enabled)
 void PolarManager::_activateRealtimeRendering()
 {
   _nGates = 1000;
-  _maxRangeKm = _params.max_range_km;
+  if (_params.polar_plots_n > 0) {
+    _maxRangeKm = _params._polar_plots[0].max_range_km;
+  } else {
+    _maxRangeKm = 100.0;
+  }
   _clear();
   if (_polar) {
     _polar->activateRealtimeRendering();

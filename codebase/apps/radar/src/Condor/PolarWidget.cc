@@ -94,16 +94,21 @@ PolarWidget::PolarWidget(QWidget* parent,
   
   _titleMargin = _params.main_window_title_margin;
   _plotsTopY = _titleMargin;
-  _aspectRatio = _params.plot_aspect_ratio;
+  _aspectRatio = _params.polar_plot_aspect_ratio;
   _colorScaleWidth = _params.color_scale_width;
   _fullWorld.setColorScaleWidth(_colorScaleWidth);
   _fullWorld.setTopMargin(_titleMargin);
   _fullWorld.setBackgroundColor(_params.background_color);
 
-  _nRows = _params.plots_n_rows;
-  _nCols = _params.plots_n_columns;
-  _nPlots = _nRows * _nCols;
-  
+  _nPlots = _params.polar_plots_n;
+  if (_nPlots < _params.polar_plots_n_columns) {
+    _nCols = _params.polar_plots_n;
+    _nRows = 1;
+  } else {
+    _nCols = _params.polar_plots_n_columns;
+    _nRows = (_nPlots - 1) / _nCols + 1;
+  }
+
   _plotsGrossHeight = height() - _titleMargin - 1;
   _plotsGrossWidth = width() - _colorScaleWidth - 1;
   _plotWidth = _plotsGrossWidth / _nCols;
@@ -159,23 +164,37 @@ PolarWidget::PolarWidget(QWidget* parent,
   _zoomCornerY = 0;
   
   _openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
-  _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
+  _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; "
+                                       "color : yellow; "
+                                       "qproperty-alignment: AlignCenter; }");
   _openingFileInfoLabel->setVisible(false);
 
   // create plots
 
-  PpiPlot *ppi0 = new PpiPlot(this, _manager, _params,
-                              0, _platform,
-                              fields, haveFilteredFields);
-  
-  _ppis.push_back(ppi0);
-  
-  PpiPlot *ppi1 = new PpiPlot(this, _manager, _params,
-                              0, _platform,
-                              fields, haveFilteredFields);
+  for (int iplot = 0; iplot < _params.polar_plots_n; iplot++) {
 
-  _ppis.push_back(ppi1);
-  
+    const Params::polar_plot_t &plotParams = _params._polar_plots[iplot];
+
+    if (plotParams.plot_type == Params::PPI_PLOT) {
+      
+      PpiPlot *ppi = new PpiPlot(this, _manager, _params, iplot,
+                                 plotParams.plot_type,
+                                 plotParams.label,
+                                 plotParams.min_az,
+                                 plotParams.max_az,
+                                 plotParams.min_el,
+                                 plotParams.max_el,
+                                 plotParams.max_range_km,
+                                 _platform,
+                                 fields,
+                                 haveFilteredFields);
+
+      _ppis.push_back(ppi);
+      
+    }
+    
+  } // iplot
+    
 }
 
 
@@ -669,7 +688,7 @@ void PolarWidget::resize(int ww, int hh)
   double plotWidth = grossWidth / _nCols;
   double plotHeight = grossHeight / _nRows;
 
-  if (_params.plot_aspect_ratio < 0) {
+  if (_params.polar_plot_aspect_ratio < 0) {
 
     // use aspect ratio from window
 
@@ -679,7 +698,7 @@ void PolarWidget::resize(int ww, int hh)
 
     // use specified aspect ratio
 
-    _aspectRatio = _params.plot_aspect_ratio;
+    _aspectRatio = _params.polar_plot_aspect_ratio;
     if (_aspectRatio > grossAspect) {
       // limit height
       plotHeight = plotWidth / _aspectRatio;

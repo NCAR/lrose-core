@@ -1116,97 +1116,128 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("INITIAL MAX RANGE");
+    tt->comment_hdr = tdrpStrDup("POLAR PLOT LAYOUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_range_km");
-    tt->descr = tdrpStrDup("Max range for the display (km).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 225;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("PLOT LAYOUT");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'plots_n_rows'
+    // Parameter 'polar_plots_n_columns'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("plots_n_rows");
-    tt->descr = tdrpStrDup("Number of rows of plots.");
-    tt->help = tdrpStrDup("The plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.");
-    tt->val_offset = (char *) &plots_n_rows - &_start_;
-    tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'plots_n_columns'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("plots_n_columns");
+    tt->param_name = tdrpStrDup("polar_plots_n_columns");
     tt->descr = tdrpStrDup("Number of columns of plots.");
     tt->help = tdrpStrDup("The plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.");
-    tt->val_offset = (char *) &plots_n_columns - &_start_;
+    tt->val_offset = (char *) &polar_plots_n_columns - &_start_;
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'plot_aspect_ratio'
+    // Parameter 'polar_plot_aspect_ratio'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("plot_aspect_ratio");
+    tt->param_name = tdrpStrDup("polar_plot_aspect_ratio");
     tt->descr = tdrpStrDup("Aspect ratio (width/height) of main plot window.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &plot_aspect_ratio - &_start_;
+    tt->val_offset = (char *) &polar_plot_aspect_ratio - &_start_;
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'plot_types'
-    // ctype is '_plot_type_t'
+    // Parameter 'polar_plots'
+    // ctype is '_polar_plot_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("plot_types");
-    tt->descr = tdrpStrDup("Array of types of plots for each sub panel.");
-    tt->help = tdrpStrDup("The array size must match n_rows times n_columns.");
-    tt->array_offset = (char *) &_plot_types - &_start_;
-    tt->array_n_offset = (char *) &plot_types_n - &_start_;
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("polar_plots");
+    tt->descr = tdrpStrDup("Fields to be displayed.");
+    tt->help = tdrpStrDup("label: appears on the GUI. raw_name: unfiltered field name. filtered_name: field with clutter filter applied. units: units string for color scale. color_map: name of color map in color_scale_dir. shortcut: keyboard character for shortcut. Specified key will select raw field. Use ALT-key to get filtered field. ");
+    tt->array_offset = (char *) &_polar_plots - &_start_;
+    tt->array_n_offset = (char *) &polar_plots_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(plot_type_t);
+    tt->array_elem_size = sizeof(polar_plot_t);
     tt->array_n = 4;
-    tt->enum_def.name = tdrpStrDup("plot_type_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PPI_PLOT");
-      tt->enum_def.fields[0].val = PPI_PLOT;
-      tt->enum_def.fields[1].name = tdrpStrDup("RHI_PLOT");
-      tt->enum_def.fields[1].val = RHI_PLOT;
-      tt->enum_def.fields[2].name = tdrpStrDup("BSCAN_PLOT");
-      tt->enum_def.fields[2].val = BSCAN_PLOT;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].e = PPI_PLOT;
-      tt->array_vals[1].e = RHI_PLOT;
-      tt->array_vals[2].e = RHI_PLOT;
-      tt->array_vals[3].e = BSCAN_PLOT;
+    tt->struct_def.name = tdrpStrDup("polar_plot_t");
+    tt->struct_def.nfields = 7;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("plot_type_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("plot_type");
+      tt->struct_def.fields[0].ptype = ENUM_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_polar_plots->plot_type - (char *) _polar_plots;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("plot_type_t");
+        tt->struct_def.fields[0].enum_def.nfields = 3;
+        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("PPI_PLOT");
+        tt->struct_def.fields[0].enum_def.fields[0].val = PPI_PLOT;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("RHI_PLOT");
+        tt->struct_def.fields[0].enum_def.fields[1].val = RHI_PLOT;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("BSCAN_PLOT");
+        tt->struct_def.fields[0].enum_def.fields[2].val = BSCAN_PLOT;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("label");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_polar_plots->label - (char *) _polar_plots;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("min_az");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_polar_plots->min_az - (char *) _polar_plots;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("max_az");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_polar_plots->max_az - (char *) _polar_plots;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("min_el");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_polar_plots->min_el - (char *) _polar_plots;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("max_el");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_polar_plots->max_el - (char *) _polar_plots;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[6].fname = tdrpStrDup("max_range_km");
+      tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_polar_plots->max_range_km - (char *) _polar_plots;
+    tt->n_struct_vals = 28;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].e = RHI_PLOT;
+      tt->struct_vals[1].s = tdrpStrDup("RHI-fore");
+      tt->struct_vals[2].d = -7.5;
+      tt->struct_vals[3].d = -2.5;
+      tt->struct_vals[4].d = -25;
+      tt->struct_vals[5].d = 25;
+      tt->struct_vals[6].d = 225;
+      tt->struct_vals[7].e = RHI_PLOT;
+      tt->struct_vals[8].s = tdrpStrDup("RHI-aft");
+      tt->struct_vals[9].d = 22.5;
+      tt->struct_vals[10].d = 27.5;
+      tt->struct_vals[11].d = -25;
+      tt->struct_vals[12].d = 25;
+      tt->struct_vals[13].d = 225;
+      tt->struct_vals[14].e = RHI_PLOT;
+      tt->struct_vals[15].s = tdrpStrDup("RHI-dualpol");
+      tt->struct_vals[16].d = -2.5;
+      tt->struct_vals[17].d = 2.5;
+      tt->struct_vals[18].d = -25;
+      tt->struct_vals[19].d = 25;
+      tt->struct_vals[20].d = 225;
+      tt->struct_vals[21].e = PPI_PLOT;
+      tt->struct_vals[22].s = tdrpStrDup("PPI");
+      tt->struct_vals[23].d = -45;
+      tt->struct_vals[24].d = 45;
+      tt->struct_vals[25].d = -45;
+      tt->struct_vals[26].d = 45;
+      tt->struct_vals[27].d = 225;
     tt++;
     
     // Parameter 'axes_label_color'
@@ -1221,11 +1252,11 @@
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("DISPLAY TYPE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1250,11 +1281,11 @@
     tt->single_val.e = POLAR_DISPLAY;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("NAMES AND LABELS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1319,11 +1350,11 @@
     tt->single_val.s = tdrpStrDup("MARSHALL");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("WINDOW DIMENSIONS AND PLOTTING DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1532,11 +1563,11 @@
     tt->single_val.i = 11;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("PPI MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1657,11 +1688,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("RHI MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1954,11 +1985,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("BSCAN TIME LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2003,11 +2034,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("BSCAN REALTIME CONTROLS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2048,11 +2079,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("BSCAN RANGE AND ALTITUDE LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2163,11 +2194,11 @@
     tt->single_val.e = RANGE_AXIS_ALTITUDE;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("BSCAN ANGLE LIMITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2244,11 +2275,11 @@
     tt->single_val.d = 91;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("BSCAN CENSOR DATA BELOW SURFACE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2313,11 +2344,11 @@
     tt->single_val.d = 5;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("BSCAN MARGINS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2406,11 +2437,11 @@
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("BSCAN TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2535,11 +2566,11 @@
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("DISTANCE SCALE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2568,11 +2599,11 @@
     tt->single_val.i = 50;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("BSCAN LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2649,11 +2680,11 @@
     tt->single_val.e = LEGEND_TOP_RIGHT;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("BSCAN DWELL CONTROLS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2708,11 +2739,11 @@
     tt->single_val.e = DWELL_STATS_MIDDLE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("SAVING IMAGES TO FILE");
     tt->comment_text = tdrpStrDup("In creating files for the field catalog, the file name is of the form:\n\n\tcategory.platform.YYYYMMDDHHmm.product_name.ext\n\nThe following parameters control the output directory, and the construction of the file name");
     tt++;
@@ -2837,11 +2868,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("OPTION TO CREATE IMAGES AUTOMATICALLY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2973,11 +3004,11 @@
       tt->array_vals[2].i = 2;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("SIMULATION MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;

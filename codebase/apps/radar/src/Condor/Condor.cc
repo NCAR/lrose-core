@@ -111,15 +111,12 @@ Condor::Condor(int argc, char **argv) :
 
   // check params
 
-  if (_params.plot_types_n != _params.plots_n_rows * _params.plots_n_columns) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "  Mismatch in number of panels in plot window" << endl;
-    cerr << "    n_rows: " << _params.plots_n_rows << endl;
-    cerr << "    n_columns: " << _params.plots_n_columns << endl;
-    cerr << "  Number of plot_types: " 
-         << _params.plot_types_n << endl;
-    cerr << "  This must equal n_rows * n_columns" << endl;
-    OK = false;
+  if (_params.polar_plots_n < _params.polar_plots_n_columns) {
+    _nPolarCols = _params.polar_plots_n;
+    _nPolarRows = 1;
+  } else {
+    _nPolarCols = _params.polar_plots_n_columns;
+    _nPolarRows = (_params.polar_plots_n - 1) / _nPolarCols + 1;
   }
 
   // check for any filtered fields

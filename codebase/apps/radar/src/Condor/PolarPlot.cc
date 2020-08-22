@@ -66,6 +66,13 @@ PolarPlot::PolarPlot(PolarWidget *parent,
                      const PolarManager &manager,
                      const Params &params,
                      int id,
+                     Params::plot_type_t plotType,
+                     string label,
+                     double minAz,
+                     double maxAz,
+                     double minEl,
+                     double maxEl,
+                     double maxRangeKm,
                      const RadxPlatform &platform,
                      const vector<DisplayField *> &fields,
                      bool haveFilteredFields) :
@@ -73,6 +80,13 @@ PolarPlot::PolarPlot(PolarWidget *parent,
         _manager(manager),
         _params(params),
         _id(id),
+        _plotType(plotType),
+        _label(label),
+        _minAz(minAz),
+        _maxAz(maxAz),
+        _minEl(minEl),
+        _maxEl(maxEl),
+        _maxRangeKm(maxRangeKm),
         _platform(platform),
         _fields(fields),
         _haveFilteredFields(haveFilteredFields),
@@ -92,9 +106,6 @@ PolarPlot::PolarPlot(PolarWidget *parent,
 
   // create the field renderers
 
-  _image = NULL;
-  _createImage(100, 100);
-
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     FieldRenderer *fieldRenderer =
       new FieldRenderer(_params, ii, *_fields[ii]);
@@ -102,8 +113,20 @@ PolarPlot::PolarPlot(PolarWidget *parent,
     _fieldRenderers.push_back(fieldRenderer);
   }
 
+  // colors
+  
   setBackgroundColor(QColor(_params.background_color));
   setGridRingsColor(QColor(_params.grid_and_range_ring_color));
+
+  // image
+  
+  setImageWidth(100);
+  setImageHeight(100);
+  setImageOffsetX(0);
+  setImageOffsetY(0);
+
+  _image = NULL;
+  _createImage(_imageWidth, _imageHeight);
 
 }
 

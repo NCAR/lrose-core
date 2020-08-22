@@ -53,6 +53,13 @@ class DLL_EXPORT PpiPlot : public PolarPlot
           const PolarManager &manager,
           const Params &params,
           int id,
+          Params::plot_type_t plotType,
+          string label,
+          double minAz,
+          double maxAz,
+          double minEl,
+          double maxEl,
+          double maxRangeKm,
           const RadxPlatform &platform,
           const vector<DisplayField *> &fields,
           bool haveFilteredFields);

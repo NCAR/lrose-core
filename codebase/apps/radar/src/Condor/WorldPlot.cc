@@ -1739,7 +1739,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   double patchHt = (double) (pltHt) / (double) nHts;
   int iPatchHt = (int) patchHt;
   // int yStart = _topMargin + iPatchHt;
-  int yStart = _topMargin;
+  int yStart = _topMargin + iPatchHt / 2;
 
   // clear rectangle
 

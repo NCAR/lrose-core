@@ -55,45 +55,49 @@ class BscanManager;
 class Condor {
   
 public:
-
+  
   // constructor
-
+  
   Condor (int argc, char **argv);
-
+  
   // destructor
   
   ~Condor();
-
+  
   // run 
-
+  
   int Run(QApplication &app);
-
+  
   // data members
-
+  
   bool OK;
-
+  
 protected:
 private:
-
+  
   // basic
-
+  
   string _progName;
   Params _params;
   Args _args;
-
+  
   // reading data in
-
+  
   Reader *_reader;
-
+   
   // data fields
-
+  
   vector<DisplayField *> _displayFields;
   bool _haveFilteredFields;
-
+  
   // managing the rendering objects
 
   PolarManager *_polarManager;
   BscanManager *_bscanManager;
+
+  // plot geometry
+
+  int _nPolarCols, _nPolarRows;
   
   // methods
 
