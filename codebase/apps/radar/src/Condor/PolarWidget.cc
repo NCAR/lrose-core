@@ -115,6 +115,10 @@ PolarWidget::PolarWidget(QWidget* parent,
   _colorScaleImage = NULL;
   _colorScaleWorld.setWindowGeom(200, 200, 0, 0);
   _colorScaleWorld.setColorScaleWidth(_colorScaleWidth);
+  _colorScaleWorld.setLeftMargin(5);
+  _colorScaleWorld.setRightMargin(5);
+  _colorScaleWorld.setTopMargin(10);
+  _colorScaleWorld.setBottomMargin(10);
 
   _plotsSumHeight = height() - _titleHeight - 1;
   _plotsSumWidth = width() - _colorScaleWidth - 1;
@@ -624,7 +628,7 @@ void PolarWidget::smartBrush(int xPixel, int yPixel) {
   //qImage->invertPixels();
   QPainter painter(this);
   painter.drawImage(0, 0, qImage);
-  _drawOverlays(painter);
+  // _drawOverlays(painter);
 
 }
 
@@ -648,20 +652,16 @@ void PolarWidget::paintEvent(QPaintEvent *event)
                       *image);
   } // ii
   
-  // copy in color scale image
+  // draw color scale and copy in image
 
+  _drawColorScale();
   painter.drawImage(_colorScaleOffsetX, _colorScaleOffsetY,
                     *_colorScaleImage);
-
-  // copy in title image
-
+  
+  // draw title and copy in title image
+  
   _drawMainTitle();
   painter.drawImage(_titleOffsetX, _titleOffsetY, *_titleImage);
-  
-  const DisplayField &field = _manager.getSelectedField();
-  QPainter colorScalePainter(_colorScaleImage);
-  _colorScaleWorld.drawColorScale(field.getColorMap(), colorScalePainter,
-                                  _params.label_font_size);
 
   // draw the dividers
   
@@ -1083,52 +1083,63 @@ void PolarWidget::_drawDividers(QPainter &painter)
 
   painter.save();
   QPen dividerPen(_params.main_window_panel_divider_color);
-  dividerPen.setWidth(_params.main_window_panel_divider_line_width);
+  dividerPen.setWidth(1);
+  // dividerPen.setWidth(_params.main_window_panel_divider_line_width);
   painter.setPen(dividerPen);
 
-  // outside borders
-
-  {
-    QLineF upperBorder(0, 0, width()-1, 0);
-    painter.drawLine(upperBorder);
-    QLineF lowerBorder(0, height()-1, width()-1, height()-1);
-    painter.drawLine(lowerBorder);
-    QLineF leftBorder(0, 0, 0, height()-1);
-    painter.drawLine(leftBorder);
-    QLineF rightBorder(width()-1, 0, width()-1, height()-1);
-    painter.drawLine(rightBorder);
-  }
+  for (int jj = 0; jj < _dividerWidth; jj++) {
     
-  // line below title
+    // outside borders
+    
+    QLineF upperBorder(0, jj, width()-1, jj);
+    painter.drawLine(upperBorder);
+    QLineF lowerBorder(0, height()-1-jj, width()-1, height()-1-jj);
+    painter.drawLine(lowerBorder);
+    QLineF leftBorder(jj, 0, jj, height()-1);
+    painter.drawLine(leftBorder);
+    QLineF rightBorder(width()-1-jj, 0, width()-1-jj, height()-1);
+    painter.drawLine(rightBorder);
+    
+    // color scale left boundary
 
-  {
-    QLineF topLine(0, _titleHeight - 1, width() - _colorScaleWidth, _titleHeight - 1);
-    painter.drawLine(topLine);
-  }
-
-  // plot panel lower borders
-  
-  for (int irow = 1; irow < _nRows; irow++) {
-    double yy = _titleHeight + irow * _plotHeight;
-    QLineF lowerBoundary(0, yy, _plotsSumWidth, yy);
-    painter.drawLine(lowerBoundary);
-  }
-  
-  // plot panel right borders
-  
-  for (int icol = 1; icol < _nCols; icol++) {
-    double xx = icol * _plotWidth;
-    QLineF rightBoundary(xx, _titleHeight, xx, height());
-    painter.drawLine(rightBoundary);
-  }
-
-  // color scale left boundary
-
-  {
-    double xx = _plotsSumWidth + 1;
-    QLineF boundary(xx, 0, xx, height());
-    painter.drawLine(boundary);
-  }
+    {
+      double xx = _dividerWidth + _titleWidth + jj;
+      QLineF leftBoundary(xx, 0, xx, height());
+      painter.drawLine(leftBoundary);
+    }
+    
+    // plot panel top borders
+    
+    for (int irow = 0; irow < _nRows; irow++) {
+      int plotNum0 = irow * _nCols;
+      int plotImageOffsetY = _plots[plotNum0]->getImageOffsetY();
+      int len = _nCols * (_dividerWidth + _plotWidth);
+      double yy = plotImageOffsetY-1-jj;
+      QLineF topBoundary(0, yy, len + _dividerWidth - 1, yy);
+      painter.drawLine(topBoundary);
+    }
+    
+    // plot panel left borders
+    
+    for (int icol = 0; icol < _nCols; icol++) {
+      int plotImageOffsetX = _plots[icol]->getImageOffsetX();
+      int plotImageOffsetY = _plots[icol]->getImageOffsetY();
+      int len = _nRows * (_dividerWidth + _plotHeight);
+      double xx = plotImageOffsetX-1-jj;
+      double yy = plotImageOffsetY;
+      QLineF leftBoundary(xx, yy, xx, yy + len);
+      painter.drawLine(leftBoundary);
+    }
+    
+    // // plot panel right borders
+    
+    // for (int icol = 1; icol < _nCols; icol++) {
+    //   double xx = icol * _plotWidth;
+    //   QLineF rightBoundary(xx, _titleHeight, xx, height());
+    //   painter.drawLine(rightBoundary);
+    // }
+    
+  } // jj
 
   painter.restore();
   
@@ -1151,6 +1162,8 @@ void PolarWidget::_drawDividers(QPainter &painter)
   }
 
 }
+
+#ifdef JUNK
 
 /*************************************************************************
  * _drawOverlays()
@@ -1439,6 +1452,8 @@ void PolarWidget::_drawOverlays(QPainter &painter)
 
 }
 
+#endif
+
 /////////////////////////////////////////////////////////////	
 // Title
     
@@ -1446,6 +1461,12 @@ void PolarWidget::_drawMainTitle()
 
 {
 
+  // clear title image
+
+  _titleImage->fill(_backgroundBrush.color().rgb());
+
+  // get painter
+  
   QPainter painter(_titleImage);
   painter.save();
 
@@ -1459,7 +1480,7 @@ void PolarWidget::_drawMainTitle()
   string title("CONDOR POLAR PLOTS");
 
   if (_currentRay != NULL) {
-    title.append(" : ");
+    title.append(" - ");
     RadxTime rayTime = _currentRay->getRadxTime();
     title.append(rayTime.asString(3));
   }
@@ -1468,21 +1489,44 @@ void PolarWidget::_drawMainTitle()
   
   QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
 
-  int boxWidth = tRect.width() + 6;
+  int boxWidth = tRect.width() + 10;
   int boxHeight = tRect.height() + 6;
   qreal xx = (qreal) ((_titleWidth - boxWidth) / 2.0);
   qreal yy = (qreal) ((_titleHeight - boxHeight) / 2.0);
   QRectF bRect(xx, yy, boxWidth, boxHeight);
 
-  // clear rectangle
-
-  _titleImage->fill(_backgroundBrush.color().rgb());
-                      
   // draw the text
   
   painter.drawText(bRect, Qt::AlignTop, title.c_str());
 
   painter.restore();
+
+}
+
+/////////////////////////////////////////////////////////////	
+// color scale
+    
+void PolarWidget::_drawColorScale()
+
+{
+
+  // clear color scale image
+  
+  _colorScaleImage->fill(_backgroundBrush.color().rgb());
+
+  // get painter
+
+  QPainter painter(_colorScaleImage);
+
+  // get current field
+  
+  const DisplayField &field = _manager.getSelectedField();
+
+  // draw color scale
+
+  _colorScaleWorld.drawColorScale(field.getColorMap(),
+                                  painter,
+                                  _params.label_font_size);
 
 }
 

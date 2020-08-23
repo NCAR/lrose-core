@@ -1080,7 +1080,7 @@
       tt->struct_vals[30].s = tdrpStrDup("RHOHV");
       tt->struct_vals[31].s = tdrpStrDup("RHOHV");
       tt->struct_vals[32].s = tdrpStrDup("");
-      tt->struct_vals[33].s = tdrpStrDup("unitless");
+      tt->struct_vals[33].s = tdrpStrDup("");
       tt->struct_vals[34].s = tdrpStrDup("rhohv.colors");
       tt->struct_vals[35].s = tdrpStrDup("8");
     tt++;

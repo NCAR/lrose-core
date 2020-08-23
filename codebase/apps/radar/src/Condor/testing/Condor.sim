@@ -389,7 +389,7 @@ fields = {
     label = "RHOHV",
     raw_name = "RHOHV",
     filtered_name = "",
-    units = "unitless",
+    units = "",
     color_map = "rhohv.colors",
     shortcut = "8"
   }
@@ -488,7 +488,7 @@ polar_plots = {
     max_az = 45,
     min_el = -45,
     max_el = 45,
-    max_range_km = 225
+    max_range_km = 100
   }
   ,
   {
@@ -498,28 +498,48 @@ polar_plots = {
     max_az = 45,
     min_el = -45,
     max_el = 45,
-    max_range_km = 225
+    max_range_km = 150
   }
   ,
   {
-    plot_type = RHI_PLOT,
-    label = "RHI-fore",
-    min_az = -7.5,
-    max_az = -2.5,
-    min_el = -25,
-    max_el = 25,
-    max_range_km = 225
+    plot_type = PPI_PLOT,
+    label = "PPI-1",
+    min_az = -45,
+    max_az = 45,
+    min_el = -45,
+    max_el = 45,
+    max_range_km = 200
   }
   ,
   {
-    plot_type = RHI_PLOT,
-    label = "RHI-aft",
-    min_az = 22.5,
-    max_az = 27.5,
-    min_el = -25,
-    max_el = 25,
-    max_range_km = 225
+    plot_type = PPI_PLOT,
+    label = "PPI-2",
+    min_az = -45,
+    max_az = 45,
+    min_el = -45,
+    max_el = 45,
+    max_range_km = 250
   }
+  // ,
+  // {
+  //   plot_type = RHI_PLOT,
+  //   label = "RHI-fore",
+  //   min_az = -7.5,
+  //   max_az = -2.5,
+  //   min_el = -25,
+  //   max_el = 25,
+  //   max_range_km = 225
+  // }
+  // ,
+  // {
+  //   plot_type = RHI_PLOT,
+  //   label = "RHI-aft",
+  //   min_az = 22.5,
+  //   max_az = 27.5,
+  //   min_el = -25,
+  //   max_el = 25,
+  //   max_range_km = 225
+  // }
   // ,
   // {
   //   plot_type = RHI_PLOT,

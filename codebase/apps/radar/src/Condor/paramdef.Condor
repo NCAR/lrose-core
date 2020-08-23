@@ -271,7 +271,7 @@ paramdef struct field_t {
       label = "RHOHV",
       raw_name = "RHOHV",
       filtered_name = "",
-      units = "unitless",
+      units = "",
       color_map = "rhohv.colors",
       shortcut = "8"
     }

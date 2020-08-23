@@ -530,9 +530,9 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] painter    Painter to use for rendering.
    */
 
-  void _drawOverlays(QPainter &painter);
   void _drawDividers(QPainter &painter);
   void _drawMainTitle();
+  void _drawColorScale();
 
   /**
    * @brief Determine a ring spacing which will give even distances, and
