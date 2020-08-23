@@ -520,26 +520,26 @@ polar_plots = {
     max_el = 25,
     max_range_km = 225
   }
-  ,
-  {
-    plot_type = RHI_PLOT,
-    label = "RHI-dualpol",
-    min_az = -2.5,
-    max_az = 2.5,
-    min_el = -25,
-    max_el = 25,
-    max_range_km = 225
-  }
-  ,
-  {
-    plot_type = PPI_PLOT,
-    label = "PPI",
-    min_az = -45,
-    max_az = 45,
-    min_el = -45,
-    max_el = 45,
-    max_range_km = 225
-  }
+  // ,
+  // {
+  //   plot_type = RHI_PLOT,
+  //   label = "RHI-dualpol",
+  //   min_az = -2.5,
+  //   max_az = 2.5,
+  //   min_el = -25,
+  //   max_el = 25,
+  //   max_range_km = 225
+  // }
+  // ,
+  // {
+  //   plot_type = PPI_PLOT,
+  //   label = "PPI",
+  //   min_az = -45,
+  //   max_az = 45,
+  //   min_el = -45,
+  //   max_el = 45,
+  //   max_range_km = 225
+  // }
 };
 
 ///////////// axes_label_color ////////////////////////

@@ -60,6 +60,7 @@
 #include "DisplayField.hh"
 
 class PolarManager;
+class PolarPlot;
 class PpiPlot;
 class RhiPlot;
 
@@ -340,17 +341,31 @@ class DLL_EXPORT PolarWidget : public QWidget
   
   // plot panel layouts
 
-  int _titleMargin;
+  int _dividerLineWidth;
   int _nRows;
   int _nCols;
   int _nPlots;
 
-  int _plotsGrossHeight;
-  int _plotsGrossWidth;
+  int _titleHeight;
+  int _titleWidth;
+  int _titleOffsetX;
+  int _titleOffsetY;
+  QImage *_titleImage;
+  
+  int _colorScaleHeight;
+  int _colorScaleWidth;
+  int _colorScaleOffsetX;
+  int _colorScaleOffsetY;
+  QImage *_colorScaleImage;
+
+  int _plotsSumHeight;
+  int _plotsSumWidth;
   int _plotHeight;
   int _plotWidth;
   int _plotsTopY;
-  
+
+  double _aspectRatio;
+
   // ppis
   
   vector<PpiPlot *> _ppis;
@@ -360,7 +375,11 @@ class DLL_EXPORT PolarWidget : public QWidget
   
   vector<RhiPlot *> _rhiPlots;
   bool _rhiPlotsConfigured;
-  
+
+  // all plots
+
+  vector<PolarPlot *> _plots;
+
   // Grid overlays
   
   bool _xGridEnabled;
@@ -474,18 +493,6 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   double _ringSpacing;
-  
-  /**
-   * @brief The aspect ratio of the display area.
-   */
-
-  double _aspectRatio;
-  
-  /**
-   * @brief The width of the color scale
-   */
-
-  int _colorScaleWidth;
   
   /**
    * @brief The full window rendering dimensions.  These are different for

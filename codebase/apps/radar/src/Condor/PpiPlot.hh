@@ -89,10 +89,10 @@ class DLL_EXPORT PpiPlot : public PolarPlot
    *                             sizes).
    * @param[in] beam_data      Vectors of data, one for each field.
    */
-
-  void addBeam(const RadxRay *ray,
-               const std::vector< std::vector< double > > &beam_data,
-               const std::vector< DisplayField* > &fields);
+  
+  virtual void addBeam(const RadxRay *ray,
+                       const std::vector< std::vector< double > > &beam_data,
+                       const std::vector< DisplayField* > &fields);
 
   // are we in archive mode? and if so are we at the start of a sweep?
 

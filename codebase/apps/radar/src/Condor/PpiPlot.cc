@@ -86,6 +86,8 @@ PpiPlot::PpiPlot(PolarWidget* parent,
   _sumElev = 0.0;
   _nRays = 0.0;
 
+  _prevAz = -9999;
+
   // set up ray locators
 
   _rayLoc.resize(RayLoc::RAY_LOC_N);

@@ -112,7 +112,7 @@ void PpiBeam::paint(QImage *image,
                     bool drawInstHt)
 {
 
-  cerr << ".";
+  // cerr << ".";
   
   QPainter painter(image);
   

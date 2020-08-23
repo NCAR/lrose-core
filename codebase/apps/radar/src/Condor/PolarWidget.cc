@@ -91,13 +91,15 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   _isArchiveMode = false; // ??
   _archiveMode = _params.begin_in_archive_mode;
-  
-  _titleMargin = _params.main_window_title_margin;
-  _plotsTopY = _titleMargin;
-  _aspectRatio = _params.polar_plot_aspect_ratio;
+
+  _dividerLineWidth = _params.main_window_panel_divider_line_width;
+
+  _titleHeight = _params.main_window_title_margin;
   _colorScaleWidth = _params.color_scale_width;
+  _plotsTopY = _titleHeight;
+  _aspectRatio = _params.polar_plot_aspect_ratio;
   _fullWorld.setColorScaleWidth(_colorScaleWidth);
-  _fullWorld.setTopMargin(_titleMargin);
+  _fullWorld.setTopMargin(_titleHeight);
   _fullWorld.setBackgroundColor(_params.background_color);
 
   _nPlots = _params.polar_plots_n;
@@ -109,10 +111,13 @@ PolarWidget::PolarWidget(QWidget* parent,
     _nRows = (_nPlots - 1) / _nCols + 1;
   }
 
-  _plotsGrossHeight = height() - _titleMargin - 1;
-  _plotsGrossWidth = width() - _colorScaleWidth - 1;
-  _plotWidth = _plotsGrossWidth / _nCols;
-  _plotHeight = _plotsGrossHeight / _nRows;
+  _titleImage = NULL;
+  _colorScaleImage = NULL;
+  
+  _plotsSumHeight = height() - _titleHeight - 1;
+  _plotsSumWidth = width() - _colorScaleWidth - 1;
+  _plotWidth = _plotsSumWidth / _nCols;
+  _plotHeight = _plotsSumHeight / _nRows;
 
   _ppiPlotsConfigured = false;
   _rhiPlotsConfigured = false;
@@ -190,6 +195,7 @@ PolarWidget::PolarWidget(QWidget* parent,
                                  haveFilteredFields);
 
       _ppis.push_back(ppi);
+      _plots.push_back(ppi);
       
     }
     
@@ -221,8 +227,8 @@ void PolarWidget::setFieldNum(int fieldNum)
 
 {
   _fieldNum = fieldNum;
-  for (size_t ii = 0; ii < _ppis.size(); ii++) {
-    _ppis[ii]->setFieldNum(_fieldNum);
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->setFieldNum(_fieldNum);
   }
 }
 
@@ -597,8 +603,8 @@ void PolarWidget::handleRay(const RadxRay *ray,
 {
 
   _currentRay = ray;
-  for (size_t ii = 0; ii < _ppis.size(); ii++) {
-    _ppis[ii]->addBeam(ray, beam_data, fields);
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->addBeam(ray, beam_data, fields);
   }
   update();
 
@@ -631,19 +637,19 @@ void PolarWidget::paintEvent(QPaintEvent *event)
 
   // compute plot widths
 
-  _plotsGrossWidth = width() - 1 - _colorScaleWidth;
-  _plotsGrossHeight = height() - 1 - _titleMargin;
-  _plotWidth = _plotsGrossWidth / _nCols;
-  _plotHeight = _plotsGrossHeight / _nRows;
+  _plotsSumWidth = width() - 1 - _colorScaleWidth;
+  _plotsSumHeight = height() - 1 - _titleHeight;
+  _plotWidth = _plotsSumWidth / _nCols;
+  _plotHeight = _plotsSumHeight / _nRows;
 
   QPainter painter(this);
   // painter.drawImage(0, 0, *(_fieldRenderers[_fieldNum]->getImage()));
 
-  QImage *beamImage0 = _ppis[0]->getCurrentImage();
-  painter.drawImage(0, _titleMargin + 1, *beamImage0);
+  QImage *beamImage0 = _plots[0]->getCurrentImage();
+  painter.drawImage(0, _titleHeight + 1, *beamImage0);
 
-  QImage *beamImage1 = _ppis[1]->getCurrentImage();
-  painter.drawImage(_plotWidth, _titleMargin + 1, *beamImage1);
+  QImage *beamImage1 = _plots[1]->getCurrentImage();
+  painter.drawImage(_plotWidth, _titleHeight + 1, *beamImage1);
 
   // draw the color scale
 
@@ -680,60 +686,55 @@ void PolarWidget::resizeEvent(QResizeEvent * e)
 void PolarWidget::resize(int ww, int hh)
 {
 
-  // compute the geometry
+  // compute the plot geometry
   
-  double grossHeight = hh - _titleMargin - 1;
-  double grossWidth = ww - _colorScaleWidth - 1;
-  double grossAspect = grossWidth / grossHeight;
-  double plotWidth = grossWidth / _nCols;
-  double plotHeight = grossHeight / _nRows;
+  double plotsSumWidth = ww - _colorScaleWidth - (2 * _nCols) * _dividerLineWidth;
+  double plotsSumHeight = hh - _titleHeight - (2 + _nRows) * _dividerLineWidth;
+  double plotsSumAspect = plotsSumWidth / plotsSumHeight;
+  double plotWidth = plotsSumWidth / _nCols;
+  double plotHeight = plotsSumHeight / _nRows;
 
   if (_params.polar_plot_aspect_ratio < 0) {
-
     // use aspect ratio from window
-
-    _aspectRatio = grossAspect;
-
+    _aspectRatio = plotsSumAspect;
   } else {
-
     // use specified aspect ratio
-
     _aspectRatio = _params.polar_plot_aspect_ratio;
-    if (_aspectRatio > grossAspect) {
+    if (_aspectRatio > plotsSumAspect) {
       // limit height
       plotHeight = plotWidth / _aspectRatio;
     } else {
       // limit width
       plotWidth = plotHeight * _aspectRatio;
     }
-    
   }
   
-  _plotsTopY = _titleMargin;
+  _plotsTopY = _titleHeight;
   _plotWidth = (int) (plotWidth + 0.5);
   _plotHeight = (int) (plotHeight + 0.5);
-  _plotsGrossWidth = _nCols * _plotWidth;
-  _plotsGrossHeight = _nRows * _plotHeight;
-  int totalWidth = _plotsGrossWidth + _colorScaleWidth + 1;
-  int totalHeight = _plotsGrossHeight + _titleMargin + 1;
+  _plotsSumWidth = _nCols * _plotWidth;
+  _plotsSumHeight = _nRows * _plotHeight;
+  int totalWidth = _plotsSumWidth + _colorScaleWidth + (2 * _nCols) * _dividerLineWidth;
+  int totalHeight = _plotsSumHeight + _titleHeight + (2 + _nRows) * _dividerLineWidth;
 
   // resize
   
   setGeometry(0, 0,  totalWidth, totalHeight);
 
   cerr << "RRRRRRRRRRRRRRR plotWidth, plotHeight: " << _plotWidth << ", " << _plotHeight << endl;
-  cerr << "RRRRRRRRRRRRRRR plotGrossWidth, plotGrossHeight: " << _plotsGrossWidth << ", " << _plotsGrossHeight << endl;
-  cerr << "RRRRRRRRRRRRRRR titleMargin, colorScaleWidth: " << _titleMargin << ", " << _colorScaleWidth << endl;
+  cerr << "RRRRRRRRRRRRRRR plotSumWidth, plotSumHeight: " << _plotsSumWidth << ", " << _plotsSumHeight << endl;
+  cerr << "RRRRRRRRRRRRRRR titleMargin, colorScaleWidth: " << _titleHeight << ", " << _colorScaleWidth << endl;
   cerr << "RRRRRRRRRRRRRRRR resize ww, hh: " << ww << ", " << hh << endl;
   cerr << "RRRRRRRRRRRRRRRR resize width, height: " << this->width() << ", " << this->height() << endl;
   cerr << "RRRRRRRRR _aspectRatio: " << _aspectRatio << endl;
 
   // resize the plots
 
-  for (size_t ii = 0; ii < _ppis.size(); ii++) {
-    // _ppis[ii]->setWindowGeom(_plotWidth, _plotHeight,
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    cerr << "UUUUUUUUUUUUUUUUU ii, size: " << ii << ", " << _plots.size() << endl;
+    // _plots[ii]->setWindowGeom(_plotWidth, _plotHeight,
     //                          0, _plotsTopY);
-    _ppis[ii]->setWindowGeom(_plotWidth, _plotHeight,
+    _plots[ii]->setWindowGeom(_plotWidth, _plotHeight,
                              0, 0);
   }
       
@@ -1004,13 +1005,13 @@ void PolarWidget::configureRange(double max_range)
 void PolarWidget::_refreshImages()
 {
 
-  for (size_t ii = 0; ii < _ppis.size(); ii++) {
-    _ppis[ii]->refreshImages();
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->refreshImages();
   }
 
   // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
 
-  // // _ppis[0]->refreshImages();
+  // // _plots[0]->refreshImages();
   
   // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     
@@ -1082,15 +1083,15 @@ void PolarWidget::_drawDividers(QPainter &painter)
   // line below title
 
   {
-    QLineF topLine(0, _titleMargin - 1, width() - _colorScaleWidth, _titleMargin - 1);
+    QLineF topLine(0, _titleHeight - 1, width() - _colorScaleWidth, _titleHeight - 1);
     painter.drawLine(topLine);
   }
 
   // plot panel lower borders
   
   for (int irow = 1; irow < _nRows; irow++) {
-    double yy = _titleMargin + irow * _plotHeight;
-    QLineF lowerBoundary(0, yy, _plotsGrossWidth, yy);
+    double yy = _titleHeight + irow * _plotHeight;
+    QLineF lowerBoundary(0, yy, _plotsSumWidth, yy);
     painter.drawLine(lowerBoundary);
   }
   
@@ -1098,14 +1099,14 @@ void PolarWidget::_drawDividers(QPainter &painter)
   
   for (int icol = 1; icol < _nCols; icol++) {
     double xx = icol * _plotWidth;
-    QLineF rightBoundary(xx, _titleMargin, xx, height());
+    QLineF rightBoundary(xx, _titleHeight, xx, height());
     painter.drawLine(rightBoundary);
   }
 
   // color scale left boundary
 
   {
-    double xx = _plotsGrossWidth + 1;
+    double xx = _plotsSumWidth + 1;
     QLineF boundary(xx, 0, xx, height());
     painter.drawLine(boundary);
   }
@@ -1449,7 +1450,7 @@ void PolarWidget::_drawMainTitle(QPainter &painter)
   int boxWidth = tRect.width() + 6;
   int boxHeight = tRect.height() + 6;
   qreal xx = (qreal) ((width() / 2.0) - (boxWidth / 2.0));
-  qreal yy = (qreal) (((_titleMargin - 1) - boxHeight) / 2.0);
+  qreal yy = (qreal) (((_titleHeight - 1) - boxHeight) / 2.0);
   QRectF bRect(xx, yy, boxWidth, boxHeight);
 
   // clear rectangle

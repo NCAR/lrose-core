@@ -209,6 +209,12 @@ public:
 
   void setTransform(const QTransform &transform);
 
+  // add a beam
+  
+  virtual void addBeam(const RadxRay *ray,
+                       const std::vector< std::vector< double > > &beam_data,
+                       const std::vector< DisplayField* > &fields) = 0;
+
   // overide refresh images
 
   virtual void refreshImages() = 0;

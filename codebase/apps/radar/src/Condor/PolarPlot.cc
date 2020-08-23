@@ -109,7 +109,7 @@ PolarPlot::PolarPlot(PolarWidget *parent,
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     FieldRenderer *fieldRenderer =
       new FieldRenderer(_params, ii, *_fields[ii]);
-    fieldRenderer->createImage(100, 100);
+    fieldRenderer->createImage(200, 200);
     _fieldRenderers.push_back(fieldRenderer);
   }
 
@@ -120,8 +120,8 @@ PolarPlot::PolarPlot(PolarWidget *parent,
 
   // image
   
-  setImageWidth(100);
-  setImageHeight(100);
+  setImageWidth(200);
+  setImageHeight(200);
   setImageOffsetX(0);
   setImageOffsetY(0);
 
@@ -208,17 +208,25 @@ void PolarPlot::_createImage(int width, int height)
 void PolarPlot::setWindowGeom(int width, int height,
                               int xOffset, int yOffset)
 {
+
+  cerr << "JJJJJJJJJJJJJJJJJJ width, height: " << width << ", " << height << endl;
   _createImage(width, height);
+  cerr << "KKKKKKKKKKKKKKKKKK width, height: " << width << ", " << height << endl;
+
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     FieldRenderer *field = _fieldRenderers[ifield];
+    cerr << "LLLLLLLLLLLLLLLLLL ifield: " << ifield << endl;
     field->createImage(width, height);
   }
+
   _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
   _zoomWorld = _fullWorld;
   _fullTransform = _fullWorld.getTransform();
   _zoomTransform = _zoomWorld.getTransform();
+
   cerr << "WWWWWWWWWWWWWWW width, height: " << width << ", " << height << endl;
   refreshImages();
+
 }
 
 /*************************************************************************

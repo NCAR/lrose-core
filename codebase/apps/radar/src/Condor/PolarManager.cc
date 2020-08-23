@@ -487,6 +487,7 @@ void PolarManager::_setupWindows()
   // polar window
 
   _polarFrame = new QFrame(_main);
+  _polarFrame->resize(200, 200);
   _polarFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   _polar = new PolarWidget(_polarFrame, *this, _params, _platform, _fields, _haveFilteredFields);
 
