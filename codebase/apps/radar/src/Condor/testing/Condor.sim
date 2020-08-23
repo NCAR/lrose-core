@@ -746,7 +746,7 @@ main_background_color = "black";
 // Type: int
 //
 
-main_window_panel_divider_line_width = 1;
+main_window_panel_divider_line_width = 3;
 
 ///////////// main_window_panel_divider_color /////////
 //

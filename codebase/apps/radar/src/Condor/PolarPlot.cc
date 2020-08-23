@@ -206,8 +206,13 @@ void PolarPlot::_createImage(int width, int height)
  */
 
 void PolarPlot::setWindowGeom(int width, int height,
-                              int xOffset, int yOffset)
+                              int offsetX, int offsetY)
 {
+
+  setImageWidth(width);
+  setImageHeight(height);
+  setImageOffsetX(offsetX);
+  setImageOffsetY(offsetY);
 
   cerr << "JJJJJJJJJJJJJJJJJJ width, height: " << width << ", " << height << endl;
   _createImage(width, height);
@@ -219,7 +224,7 @@ void PolarPlot::setWindowGeom(int width, int height,
     field->createImage(width, height);
   }
 
-  _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
+  _fullWorld.setWindowGeom(width, height, 0, 0);
   _zoomWorld = _fullWorld;
   _fullTransform = _fullWorld.getTransform();
   _zoomTransform = _zoomWorld.getTransform();
@@ -415,7 +420,7 @@ void PolarPlot::displayImage(const size_t field_num)
 
 QImage *PolarPlot::getCurrentImage()
 {
-  _image = _fieldRenderers[_fieldNum]->getImage();
+  *_image = *_fieldRenderers[_fieldNum]->getImage();
   QPainter painter(_image);
   _drawOverlays(painter);
   return _image;

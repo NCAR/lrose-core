@@ -92,7 +92,7 @@ PolarWidget::PolarWidget(QWidget* parent,
   _isArchiveMode = false; // ??
   _archiveMode = _params.begin_in_archive_mode;
 
-  _dividerLineWidth = _params.main_window_panel_divider_line_width;
+  _dividerWidth = _params.main_window_panel_divider_line_width;
 
   _titleHeight = _params.main_window_title_margin;
   _colorScaleWidth = _params.color_scale_width;
@@ -113,7 +113,9 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   _titleImage = NULL;
   _colorScaleImage = NULL;
-  
+  _colorScaleWorld.setWindowGeom(200, 200, 0, 0);
+  _colorScaleWorld.setColorScaleWidth(_colorScaleWidth);
+
   _plotsSumHeight = height() - _titleHeight - 1;
   _plotsSumWidth = width() - _colorScaleWidth - 1;
   _plotWidth = _plotsSumWidth / _nCols;
@@ -176,7 +178,7 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   // create plots
 
-  for (int iplot = 0; iplot < _params.polar_plots_n; iplot++) {
+  for (int iplot = 0; iplot < _nPlots; iplot++) {
 
     const Params::polar_plot_t &plotParams = _params._polar_plots[iplot];
 
@@ -635,34 +637,36 @@ void PolarWidget::smartBrush(int xPixel, int yPixel) {
 void PolarWidget::paintEvent(QPaintEvent *event)
 {
 
-  // compute plot widths
-
-  _plotsSumWidth = width() - 1 - _colorScaleWidth;
-  _plotsSumHeight = height() - 1 - _titleHeight;
-  _plotWidth = _plotsSumWidth / _nCols;
-  _plotHeight = _plotsSumHeight / _nRows;
-
   QPainter painter(this);
-  // painter.drawImage(0, 0, *(_fieldRenderers[_fieldNum]->getImage()));
+  
+  // copy in plot images
+  
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    QImage *image = _plots[ii]->getCurrentImage();
+    painter.drawImage(_plots[ii]->getImageOffsetX(),
+                      _plots[ii]->getImageOffsetY(),
+                      *image);
+  } // ii
+  
+  // copy in color scale image
 
-  QImage *beamImage0 = _plots[0]->getCurrentImage();
-  painter.drawImage(0, _titleHeight + 1, *beamImage0);
+  painter.drawImage(_colorScaleOffsetX, _colorScaleOffsetY,
+                    *_colorScaleImage);
 
-  QImage *beamImage1 = _plots[1]->getCurrentImage();
-  painter.drawImage(_plotWidth, _titleHeight + 1, *beamImage1);
+  // copy in title image
 
-  // draw the color scale
-
+  _drawMainTitle();
+  painter.drawImage(_titleOffsetX, _titleOffsetY, *_titleImage);
+  
   const DisplayField &field = _manager.getSelectedField();
-  _fullWorld.drawColorScale(field.getColorMap(), painter,
-                            _params.label_font_size);
+  QPainter colorScalePainter(_colorScaleImage);
+  _colorScaleWorld.drawColorScale(field.getColorMap(), colorScalePainter,
+                                  _params.label_font_size);
 
-  // _drawOverlays(painter);
-  _drawMainTitle(painter);
+  // draw the dividers
+  
   _drawDividers(painter);
-
-  // BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
-
+  
 }
 
 
@@ -686,10 +690,10 @@ void PolarWidget::resizeEvent(QResizeEvent * e)
 void PolarWidget::resize(int ww, int hh)
 {
 
-  // compute the plot geometry
+  // compute the plot geometry, size etc
   
-  double plotsSumWidth = ww - _colorScaleWidth - (2 * _nCols) * _dividerLineWidth;
-  double plotsSumHeight = hh - _titleHeight - (2 + _nRows) * _dividerLineWidth;
+  double plotsSumWidth = ww - _colorScaleWidth - (2 * _nCols) * _dividerWidth;
+  double plotsSumHeight = hh - _titleHeight - (2 + _nRows) * _dividerWidth;
   double plotsSumAspect = plotsSumWidth / plotsSumHeight;
   double plotWidth = plotsSumWidth / _nCols;
   double plotHeight = plotsSumHeight / _nRows;
@@ -714,9 +718,35 @@ void PolarWidget::resize(int ww, int hh)
   _plotHeight = (int) (plotHeight + 0.5);
   _plotsSumWidth = _nCols * _plotWidth;
   _plotsSumHeight = _nRows * _plotHeight;
-  int totalWidth = _plotsSumWidth + _colorScaleWidth + (2 * _nCols) * _dividerLineWidth;
-  int totalHeight = _plotsSumHeight + _titleHeight + (2 + _nRows) * _dividerLineWidth;
+  int totalWidth = _plotsSumWidth + _colorScaleWidth + (2 + _nCols) * _dividerWidth;
+  int totalHeight = _plotsSumHeight + _titleHeight + (2 + _nRows) * _dividerWidth;
 
+  // compute image sizes and locations
+
+  _titleOffsetX = _dividerWidth;
+  _titleOffsetY = _dividerWidth;
+  _titleHeight = _params.main_window_title_margin;
+  _titleWidth = _plotsSumWidth + (_nCols - 1) * _dividerWidth;
+  delete(_titleImage);
+  _titleImage = new QImage(_titleWidth, _titleHeight, QImage::Format_RGB32);
+  
+  _colorScaleOffsetX = _titleWidth + 2 * _dividerWidth;
+  _colorScaleOffsetY = _dividerWidth;
+  _colorScaleWidth = _params.color_scale_width;
+  _colorScaleHeight = _titleHeight + _plotsSumHeight + _nRows * _dividerWidth;
+  delete(_colorScaleImage);
+  _colorScaleImage = new QImage(_colorScaleWidth, _colorScaleHeight, QImage::Format_RGB32);
+  _colorScaleWorld.setWindowGeom(_colorScaleWidth, _colorScaleHeight, 0, 0);
+
+  for (size_t iplot = 0; iplot < _plots.size(); iplot++) {
+    PolarPlot *plot = _plots[iplot];
+    int colNum = iplot % _nCols;
+    int rowNum = iplot / _nCols;
+    int offsetX = _dividerWidth + colNum * (_plotWidth + _dividerWidth);
+    int offsetY = 2 * _dividerWidth + _titleHeight + rowNum * (_plotHeight + _dividerWidth);
+    plot->setWindowGeom(_plotWidth, _plotHeight, offsetX, offsetY);
+  } // iplot
+    
   // resize
   
   setGeometry(0, 0,  totalWidth, totalHeight);
@@ -728,17 +758,6 @@ void PolarWidget::resize(int ww, int hh)
   cerr << "RRRRRRRRRRRRRRRR resize width, height: " << this->width() << ", " << this->height() << endl;
   cerr << "RRRRRRRRR _aspectRatio: " << _aspectRatio << endl;
 
-  // resize the plots
-
-  for (size_t ii = 0; ii < _plots.size(); ii++) {
-    cerr << "UUUUUUUUUUUUUUUUU ii, size: " << ii << ", " << _plots.size() << endl;
-    // _plots[ii]->setWindowGeom(_plotWidth, _plotHeight,
-    //                          0, _plotsTopY);
-    _plots[ii]->setWindowGeom(_plotWidth, _plotHeight,
-                             0, 0);
-  }
-      
-  
   // repaint
   
   update();
@@ -1342,8 +1361,9 @@ void PolarWidget::_drawOverlays(QPainter &painter)
   // draw the color scale
 
   const DisplayField &field = _manager.getSelectedField();
-  _zoomWorld.drawColorScale(field.getColorMap(), painter,
-                            _params.label_font_size);
+  QPainter colorScalePainter(_colorScaleImage);
+  _colorScaleWorld.drawColorScale(field.getColorMap(), colorScalePainter,
+                                  _params.label_font_size);
 
   if (_archiveMode) {
 
@@ -1422,10 +1442,11 @@ void PolarWidget::_drawOverlays(QPainter &painter)
 /////////////////////////////////////////////////////////////	
 // Title
     
-void PolarWidget::_drawMainTitle(QPainter &painter) 
+void PolarWidget::_drawMainTitle() 
 
 {
 
+  QPainter painter(_titleImage);
   painter.save();
 
   // set the font and color
@@ -1434,7 +1455,7 @@ void PolarWidget::_drawMainTitle(QPainter &painter)
   font.setPointSizeF(_params.main_title_font_size);
   painter.setFont(font);
   painter.setPen(_params.main_title_color);
-
+  
   string title("CONDOR POLAR PLOTS");
 
   if (_currentRay != NULL) {
@@ -1449,13 +1470,13 @@ void PolarWidget::_drawMainTitle(QPainter &painter)
 
   int boxWidth = tRect.width() + 6;
   int boxHeight = tRect.height() + 6;
-  qreal xx = (qreal) ((width() / 2.0) - (boxWidth / 2.0));
-  qreal yy = (qreal) (((_titleHeight - 1) - boxHeight) / 2.0);
+  qreal xx = (qreal) ((_titleWidth - boxWidth) / 2.0);
+  qreal yy = (qreal) ((_titleHeight - boxHeight) / 2.0);
   QRectF bRect(xx, yy, boxWidth, boxHeight);
 
   // clear rectangle
 
-  painter.fillRect(bRect, _backgroundBrush.color().rgb());
+  _titleImage->fill(_backgroundBrush.color().rgb());
                       
   // draw the text
   

@@ -174,8 +174,6 @@ public:
 
   // image for current field
 
-  QImage *getCurrentImage();
-
   void setImageWidth(int val) { _imageWidth = val; }
   void setImageHeight(int val) { _imageHeight = val; }
   void setImageOffsetX(int val) { _imageOffsetX = val; }
@@ -184,7 +182,10 @@ public:
   int getImageWidth() const { return _imageWidth; }
   int getImageHeight() const { return _imageHeight; }
   int getImageOffsetX() const { return _imageOffsetX; }
-    int getImageOffsetY() const { return _imageOffsetY; }
+  int getImageOffsetY() const { return _imageOffsetY; }
+
+  
+  QImage *getCurrentImage();
   
   // get the world plot objects
   

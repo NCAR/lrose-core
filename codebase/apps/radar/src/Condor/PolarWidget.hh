@@ -341,7 +341,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   
   // plot panel layouts
 
-  int _dividerLineWidth;
+  int _dividerWidth;
   int _nRows;
   int _nCols;
   int _nPlots;
@@ -357,6 +357,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   int _colorScaleOffsetX;
   int _colorScaleOffsetY;
   QImage *_colorScaleImage;
+  WorldPlot _colorScaleWorld;
 
   int _plotsSumHeight;
   int _plotsSumWidth;
@@ -531,7 +532,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   void _drawOverlays(QPainter &painter);
   void _drawDividers(QPainter &painter);
-  void _drawMainTitle(QPainter &painter);
+  void _drawMainTitle();
 
   /**
    * @brief Determine a ring spacing which will give even distances, and
