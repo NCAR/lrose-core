@@ -933,25 +933,14 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     double maxRingRange = ringRange;
     while (ringRange <= _maxRangeKm) {
 
-      cerr << "1111111 ringRange: " << ringRange << endl;
-      cerr << "1111111 maxRangeKm: " << _maxRangeKm << endl;
-      cerr << "1111111 minX, minY, maxX, maxY: "
-           << ringRange << ", " << -_maxRangeKm << ", "
-           << ringRange << ", " << _maxRangeKm << endl;
-      cerr << "1111111 minX, minY, maxX, maxY: "
-           << -ringRange << ", " << -_maxRangeKm << ", "
-           << -ringRange << ", " << _maxRangeKm << endl;
-      cerr << "1111111 minX, minY, maxX, maxY: "
-           << -_maxRangeKm << ", " << ringRange << ", "
-           << _maxRangeKm << ", " << ringRange << endl;
-      cerr << "1111111 minX, minY, maxX, maxY: "
-           << -_maxRangeKm << ", " << -ringRange << ", "
-           << _maxRangeKm << ", " << -ringRange << endl;
-
-      _zoomWorld.drawLine(painter, ringRange-50, -_maxRangeKm-50, ringRange-50, _maxRangeKm-50);
-      _zoomWorld.drawLine(painter, -ringRange-50, -_maxRangeKm-50, -ringRange-50, _maxRangeKm-50);
-      _zoomWorld.drawLine(painter, -_maxRangeKm-50, ringRange-50, _maxRangeKm-50, ringRange-50);
-      _zoomWorld.drawLine(painter, -_maxRangeKm-50, -ringRange-50, _maxRangeKm-50, -ringRange-50);
+      _zoomWorld.drawLine(painter, ringRange-50, -_maxRangeKm-50,
+                          ringRange-50, _maxRangeKm-50);
+      _zoomWorld.drawLine(painter, -ringRange-50, -_maxRangeKm-50,
+                          -ringRange-50, _maxRangeKm-50);
+      _zoomWorld.drawLine(painter, -_maxRangeKm-50, ringRange-50,
+                          _maxRangeKm-50, ringRange-50);
+      _zoomWorld.drawLine(painter, -_maxRangeKm-50, -ringRange-50,
+                          _maxRangeKm-50, -ringRange-50);
       
       maxRingRange = ringRange;
       ringRange += _ringSpacing;
@@ -1056,15 +1045,32 @@ void PpiPlot::_drawOverlays(QPainter &painter)
 
   }
 
+  // add label
+  
+  if (_label.size() > 0) {
+
+    QFont ufont(painter.font());
+    ufont.setPointSizeF(_params.main_label_font_size);
+    painter.setFont(ufont);
+    
+    QRect tRect(painter.fontMetrics().tightBoundingRect(_label.c_str()));
+    int iyy = 5;
+    int ixx = 5;
+    QString qlabel(_label.c_str());
+    painter.drawText(ixx, iyy, tRect.width() + 4, tRect.height() + 4, 
+                     Qt::AlignTop | Qt::AlignHCenter, qlabel);
+    
+  }
+
   // reset painter state
   
   painter.restore();
 
   // draw the color scale
 
-  const DisplayField &field = _manager.getSelectedField();
-  _zoomWorld.drawColorScale(field.getColorMap(), painter,
-                            _params.label_font_size);
+  // const DisplayField &field = _manager.getSelectedField();
+  // _zoomWorld.drawColorScale(field.getColorMap(), painter,
+  //                           _params.label_font_size);
 
   if (_archiveMode) {
 
@@ -1131,7 +1137,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
         break;
       default: {}
     }
-
+    
     // painter.setBrush(Qt::white);
     // painter.setBackgroundMode(Qt::TransparentMode);
     painter.restore();

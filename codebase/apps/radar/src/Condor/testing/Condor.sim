@@ -746,7 +746,7 @@ main_title_color = "white";
 // Type: int
 //
 
-main_label_font_size = 8;
+main_label_font_size = 12;
 
 ///////////// main_background_color ///////////////////
 //

@@ -1738,11 +1738,10 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   size_t nHts = cmap.size() + 1; // leave some space at top and bottom
   double patchHt = (double) (pltHt) / (double) nHts;
   int iPatchHt = (int) patchHt;
-  // int yStart = _topMargin + iPatchHt;
   int yStart = _topMargin + iPatchHt / 2;
 
   // clear rectangle
-
+  
   QRectF cRect((qreal) xStart, (qreal) 0, _colorScaleWidth, _plotHeight);
   QColor backColor(_backgroundColor.c_str());
   painter.fillRect(cRect, backColor);
