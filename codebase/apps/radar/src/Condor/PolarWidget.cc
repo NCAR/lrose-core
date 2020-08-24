@@ -329,14 +329,14 @@ void PolarWidget::activateRealtimeRendering()
  * displayImage()
  */
 
-void PolarWidget::displayImage(const size_t field_num)
-{
-  // If we weren't rendering the current field, do nothing
-  if (field_num != _fieldNum) {
-    return;
-  }
-  update();
-}
+// void PolarWidget::displayImage(const size_t field_num)
+// {
+//   // If we weren't rendering the current field, do nothing
+//   if (field_num != _fieldNum) {
+//     return;
+//   }
+//   update();
+// }
 
 
 /*************************************************************************

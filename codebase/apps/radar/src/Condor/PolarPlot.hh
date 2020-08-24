@@ -166,7 +166,7 @@ public:
   
   // displayImage for given field
 
-  void displayImage(const size_t field_num);
+  // void displayImage(const size_t field_num);
 
   // geometry
   

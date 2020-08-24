@@ -241,7 +241,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    *                         is used to check if this was the selected field.
    */
 
-  void displayImage(const size_t field_num);
+  // void displayImage(const size_t field_num);
 
   /**
    * set archive mode

@@ -399,14 +399,14 @@ void PolarPlot::setGridRingsColor(const QColor &color)
  * displayImage()
  */
 
-void PolarPlot::displayImage(const size_t field_num)
-{
-  // If we weren't rendering the current field, do nothing
-  if (field_num != _fieldNum) {
-    return;
-  }
-  _parent->update();
-}
+// void PolarPlot::displayImage(const size_t field_num)
+// {
+//   // If we weren't rendering the current field, do nothing
+//   if (field_num != _fieldNum) {
+//     return;
+//   }
+//   _parent->update();
+// }
 
 
 /*************************************************************************
