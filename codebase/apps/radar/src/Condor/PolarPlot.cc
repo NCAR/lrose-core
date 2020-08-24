@@ -103,7 +103,7 @@ PolarPlot::PolarPlot(PolarWidget *parent,
   // mode
 
   _archiveMode = _params.begin_in_archive_mode;
-
+  
   // create the field renderers
 
   for (size_t ii = 0; ii < _fields.size(); ii++) {
@@ -214,13 +214,10 @@ void PolarPlot::setWindowGeom(int width, int height,
   setImageOffsetX(offsetX);
   setImageOffsetY(offsetY);
 
-  cerr << "JJJJJJJJJJJJJJJJJJ width, height: " << width << ", " << height << endl;
   _createImage(width, height);
-  cerr << "KKKKKKKKKKKKKKKKKK width, height: " << width << ", " << height << endl;
 
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     FieldRenderer *field = _fieldRenderers[ifield];
-    cerr << "LLLLLLLLLLLLLLLLLL ifield: " << ifield << endl;
     field->createImage(width, height);
   }
 
@@ -229,8 +226,7 @@ void PolarPlot::setWindowGeom(int width, int height,
   _fullTransform = _fullWorld.getTransform();
   _zoomTransform = _zoomWorld.getTransform();
 
-  cerr << "WWWWWWWWWWWWWWW width, height: " << width << ", " << height << endl;
-  refreshImages();
+  refreshFieldImages();
 
 }
 
@@ -385,7 +381,6 @@ void PolarPlot::setBackgroundColor(const QColor &color)
   QPalette new_palette = _parent->palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   _parent->setPalette(new_palette);
-  // refreshImages();
 }
 
 
@@ -434,7 +429,7 @@ QImage *PolarPlot::getCurrentImage()
 void PolarPlot::_performRendering()
 {
 
-  // start the rendering
+  // start the rendering threads
   
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     if (ifield == _fieldNum ||
@@ -443,7 +438,7 @@ void PolarPlot::_performRendering()
     }
   } // ifield
 
-  // wait for rendering to complete
+  // wait for rendering threads to complete
   
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     if (ifield == _fieldNum ||
@@ -452,8 +447,6 @@ void PolarPlot::_performRendering()
     }
   } // ifield
 
-  // _parent->update();
-
 }
 
 ////////////////////
@@ -461,7 +454,6 @@ void PolarPlot::_performRendering()
 
 void PolarPlot::setTransform(const QTransform &transform)
 {
-  cerr << "TTTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
   float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
   BoundaryPointEditor::Instance()->setWorldScale(worldScale);
   _fullTransform = transform;

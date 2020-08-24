@@ -125,7 +125,7 @@ void PpiPlot::clear()
   
   // Now rerender the images
   
-  refreshImages();
+  refreshFieldImages();
   _parent->showOpeningFileMsg(false);
 }
 
@@ -212,6 +212,29 @@ void PpiPlot::addBeam(const RadxRay *ray,
   LOG(DEBUG) << "enter";
 
   double az = ray->getAzimuthDeg();
+  double el = ray->getElevationDeg();
+
+  // check that we should process this beam
+
+  if (el < _minEl || el > _maxEl) {
+    return;
+  }
+  if (_minAz < 0) {
+    double azTest = az;
+    if (azTest > _maxAz) {
+      azTest -= 360.0;
+    }
+    if (azTest < _minAz || azTest > _maxAz) {
+      return;
+    }
+  } else {
+    if (az < _minAz || az > _maxAz) {
+      return;
+    }
+  }
+
+  // store the ray location
+
   _storeRayLoc(ray, az, _platform.getRadarBeamWidthDegH());
 
   double start_angle = _startAz;
@@ -615,7 +638,6 @@ void PpiPlot::configureRange(double max_range)
 
   if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
 
-    // _fullWorld.setWindowGeom(_parent->width(), _parent->height(), 0, 0);
     _fullWorld.setLeftMargin(leftMargin);
     _fullWorld.setRightMargin(rightMargin);
     _fullWorld.setTopMargin(topMargin);
@@ -628,10 +650,6 @@ void PpiPlot::configureRange(double max_range)
 
   } else {
     
-    cerr << "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP _maxRangeKm: " << _maxRangeKm << endl;
-
-    // _fullWorld.setWindowGeom(_parent->width(), _parent->height(), 0, 0);
-    // _fullWorld.setWindowGeom(400, 400, 0, 0);
     _fullWorld.setLeftMargin(leftMargin);
     _fullWorld.setRightMargin(rightMargin);
     _fullWorld.setTopMargin(topMargin);
@@ -653,126 +671,9 @@ void PpiPlot::configureRange(double max_range)
   // the window size is incorrect at this point, but that will be corrected
   // by the system with a call to resize().
 
-  refreshImages();
+  refreshFieldImages();
   
 }
-
-// Used to notify BoundaryPointEditor if the user has zoomed in/out or is pressing the Shift key
-// Todo: investigate implementing a listener pattern instead
-// void PpiPlot::timerEvent(QTimerEvent *event)
-// {
-//   bool doUpdate = false;
-//   bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
-//   if (isBoundaryEditorVisible)
-//   {
-//     double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
-//     doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);   //user may have zoomed in or out, so update the polygon point boxes so they are the right size on screen
-//   }
-//   bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
-//   bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
-//   if ((isBoundaryEditorVisible && !isBoundaryFinished) || (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown))
-//     this->setCursor(Qt::CrossCursor);
-//   else
-//     this->setCursor(Qt::ArrowCursor);
-
-//   if (doUpdate)  //only update if something has changed
-//     _parent->update();
-// }
-
-
-/*************************************************************************
- * mouseReleaseEvent()
- */
-// void PpiPlot::mouseReleaseEvent(QMouseEvent *e)
-// {
-
-//   _pointClicked = false;
-
-//   QRect rgeom = _rubberBand->geometry();
-
-//   // If the mouse hasn't moved much, assume we are clicking rather than
-//   // zooming
-
-//   QPointF clickPos(e->pos());
-  
-//   _mouseReleaseX = clickPos.x();
-//   _mouseReleaseY = clickPos.y();
-
-//   // get click location in world coords
-
-//   if (rgeom.width() <= 20)
-//   {
-
-//     // Emit a signal to indicate that the click location has changed
-//     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-//     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-
-//     // If boundary editor active, then interpret boundary mouse release event
-//     if (_manager._boundaryEditorDialog->isVisible())
-//     {
-//       if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::polygon)
-//       {
-//         if (!BoundaryPointEditor::Instance()->isAClosedPolygon())
-//           BoundaryPointEditor::Instance()->addPoint(_worldReleaseX, _worldReleaseY);
-//         else  //polygon finished, user may want to insert/delete a point
-//           BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
-//       }
-//       else if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::circle)
-//       {
-//         if (BoundaryPointEditor::Instance()->isAClosedPolygon())
-//           BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
-//         else
-//           BoundaryPointEditor::Instance()->makeCircle(_worldReleaseX, _worldReleaseY, BoundaryPointEditor::Instance()->getCircleRadius());
-//       }
-//     }
-
-//     double x_km = _worldReleaseX;
-//     double y_km = _worldReleaseY;
-//     _pointClicked = true;
-
-//     // get ray closest to click point
-
-//     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-
-//     // emit signal
-
-//     emit locationClicked(x_km, y_km, closestRay);
-  
-//   }
-//   else
-//   {
-
-//     // mouse moved more than 20 pixels, so a zoom occurred
-    
-//     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-//     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
-//     _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-//     _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
-
-//     _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
-
-//     _setTransform(_zoomWorld.getTransform());
-
-//     _setGridSpacing();
-
-//     // enable unzoom button
-    
-//     _manager.enableZoomButton();
-    
-//     // Update the window in the renderers
-    
-//     refreshImages();
-
-//   }
-    
-//   // hide the rubber band
-
-//   _rubberBand->hide();
-//   _parent->update();
-
-// }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // get ray closest to click point
@@ -1416,16 +1317,12 @@ void PpiPlot::_cullBeams(const PpiBeam *beamAB)
 }
 
 /*************************************************************************
- * refreshImages()
+ * refreshFieldImages()
  */
 
-void PpiPlot::refreshImages()
+void PpiPlot::refreshFieldImages()
 {
 
-  cerr << "XXXXXXXXXXXXXXXXXXXXXX width, height: "
-       << _fullWorld.getWidthPixels() << ", " 
-       << _fullWorld.getHeightPixels() << endl;
-  
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     
     FieldRenderer *field = _fieldRenderers[ifield];
@@ -1436,9 +1333,6 @@ void PpiPlot::refreshImages()
     if (imageSize.width() != _fullWorld.getWidthPixels() ||
         imageSize.height() != _fullWorld.getHeightPixels()) {
       field->createImage(_fullWorld.getWidthPixels(), _fullWorld.getHeightPixels());
-      cerr << "XXXXXXXXXXXXXXXXXXXXXX width, height: "
-           << _fullWorld.getWidthPixels() << ", " 
-           << _fullWorld.getHeightPixels() << endl;
     }
 
     // clear image
@@ -1467,8 +1361,9 @@ void PpiPlot::refreshImages()
 
   _performRendering();
 
+  // update main plot
+  
   _parent->update();
-
 
 }
 

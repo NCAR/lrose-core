@@ -135,11 +135,12 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   void clear();
 
   /**
-   * @brief Refresh the images.  Note that this is an expensive method and
+   * @brief Refresh the images for each field.
+   *        Note that this is an expensive method and
    *        should only be called where needed.
    */
 
-  virtual void refreshImages();
+  virtual void refreshFieldImages();
 
  protected:
 

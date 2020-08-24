@@ -1025,7 +1025,7 @@ void PolarWidget::_refreshImages()
 {
 
   for (size_t ii = 0; ii < _plots.size(); ii++) {
-    _plots[ii]->refreshImages();
+    _plots[ii]->refreshFieldImages();
   }
 
   // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;

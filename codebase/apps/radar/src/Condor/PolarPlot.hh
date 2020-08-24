@@ -216,9 +216,9 @@ public:
                        const std::vector< std::vector< double > > &beam_data,
                        const std::vector< DisplayField* > &fields) = 0;
 
-  // overide refresh images
+  // overide refresh field images
 
-  virtual void refreshImages() = 0;
+  virtual void refreshFieldImages() = 0;
 
 protected:
 

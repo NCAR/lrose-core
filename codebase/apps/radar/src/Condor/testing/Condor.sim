@@ -494,8 +494,8 @@ polar_plots = {
   {
     plot_type = PPI_PLOT,
     label = "PPI-2",
-    min_az = -45,
-    max_az = 45,
+    min_az = 45,
+    max_az = 135,
     min_el = -45,
     max_el = 45,
     max_range_km = 150
@@ -504,8 +504,8 @@ polar_plots = {
   {
     plot_type = PPI_PLOT,
     label = "PPI-1",
-    min_az = -45,
-    max_az = 45,
+    min_az = 135,
+    max_az = 225,
     min_el = -45,
     max_el = 45,
     max_range_km = 200
@@ -514,8 +514,8 @@ polar_plots = {
   {
     plot_type = PPI_PLOT,
     label = "PPI-2",
-    min_az = -45,
-    max_az = 45,
+    min_az = 225,
+    max_az = 315,
     min_el = -45,
     max_el = 45,
     max_range_km = 250
