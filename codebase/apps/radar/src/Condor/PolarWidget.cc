@@ -261,7 +261,7 @@ void PolarWidget::unzoomView()
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
-  _refreshImages();
+  _refreshFieldImages();
 }
 
 
@@ -349,7 +349,7 @@ void PolarWidget::backgroundColor(const QColor &color)
   QPalette new_palette = palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
-  _refreshImages();
+  _refreshFieldImages();
 }
 
 
@@ -558,7 +558,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
       
       // Update the window in the renderers
       
-      _refreshImages();
+      _refreshFieldImages();
       
     }
     
@@ -591,7 +591,6 @@ void PolarWidget::timerEvent(QTimerEvent *event)
   }
   
   if (doUpdate) {  //only update if something has changed
-    cerr << "UUUUUUUUUUUUUUUUUU222222222222222" << endl;
     update();
   }
 
@@ -676,10 +675,8 @@ void PolarWidget::paintEvent(QPaintEvent *event)
 
 void PolarWidget::resizeEvent(QResizeEvent * e)
 {
-  cerr << "333333333333333333" << endl;
   _resetWorld(width(), height());
-  _refreshImages();
-  cerr << "UUUUUUUUUUUUUUUUUU33333333333333" << endl;
+  _refreshFieldImages();
 }
 
 
@@ -751,13 +748,6 @@ void PolarWidget::resize(int ww, int hh)
   
   setGeometry(0, 0,  totalWidth, totalHeight);
 
-  cerr << "RRRRRRRRRRRRRRR plotWidth, plotHeight: " << _plotWidth << ", " << _plotHeight << endl;
-  cerr << "RRRRRRRRRRRRRRR plotSumWidth, plotSumHeight: " << _plotsSumWidth << ", " << _plotsSumHeight << endl;
-  cerr << "RRRRRRRRRRRRRRR titleMargin, colorScaleWidth: " << _titleHeight << ", " << _colorScaleWidth << endl;
-  cerr << "RRRRRRRRRRRRRRRR resize ww, hh: " << ww << ", " << hh << endl;
-  cerr << "RRRRRRRRRRRRRRRR resize width, height: " << this->width() << ", " << this->height() << endl;
-  cerr << "RRRRRRRRR _aspectRatio: " << _aspectRatio << endl;
-
   // repaint
   
   update();
@@ -800,35 +790,6 @@ void PolarWidget::_setTransform(const QTransform &transform)
   _zoomTransform = transform;
 }
   
-/*************************************************************************
- * perform the rendering
- */
-
-void PolarWidget::_performRendering()
-{
-
-  cerr << "EEEEEEEEEEEEEEEEEEEEE" << endl;
-
-  // start the rendering
-  
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    if (ifield == _fieldNum ||
-	_fieldRenderers[ifield]->isBackgroundRendered()) {
-      _fieldRenderers[ifield]->signalRunToStart();
-    }
-  } // ifield
-
-  // wait for rendering to complete
-  
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    if (ifield == _fieldNum ||
-	_fieldRenderers[ifield]->isBackgroundRendered()) {
-      _fieldRenderers[ifield]->waitForRunToComplete();
-    }
-  } // ifield
-
-}
-
 void PolarWidget::informationMessage()
 {
   // QMessageBox::StandardButton reply;
@@ -1013,7 +974,7 @@ void PolarWidget::configureRange(double max_range)
   // the window size is incorrect at this point, but that will be corrected
   // by the system with a call to resize().
 
-  _refreshImages();
+  _refreshFieldImages();
   
 }
 
@@ -1021,55 +982,13 @@ void PolarWidget::configureRange(double max_range)
  * _refreshImages()
  */
 
-void PolarWidget::_refreshImages()
+void PolarWidget::_refreshFieldImages()
 {
 
   for (size_t ii = 0; ii < _plots.size(); ii++) {
     _plots[ii]->refreshFieldImages();
   }
 
-  // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
-
-  // // _plots[0]->refreshImages();
-  
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    
-  //   FieldRenderer *field = _fieldRenderers[ifield];
-    
-  //   // If needed, create new image for this field
-    
-  //   if (size() != field->getImage()->size()) {
-  //     field->createImage(width(), height());
-  //   }
-
-  //   // clear image
-
-  //   field->getImage()->fill(_backgroundBrush.color().rgb());
-    
-  //   // set up rendering details
-
-  //   field->setTransform(_zoomTransform);
-    
-  //   // Add pointers to the beams to be rendered
-    
-  //   if (ifield == _fieldNum || field->isBackgroundRendered()) {
-
-  //     // std::vector< PpiBeam* >::iterator beam;
-  //     // for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-  //     //   (*beam)->setBeingRendered(ifield, true);
-  //     //   field->addBeam(*beam);
-  //     // }
-      
-  //   }
-    
-  // } // ifield
-  
-  // // do the rendering
-
-  // _performRendering();
-
-  // cerr << "UUUUUUUUUUUUUUUUUU66666666666666" << endl;
-  // update();
 }
 
 /*************************************************************************
@@ -1162,297 +1081,6 @@ void PolarWidget::_drawDividers(QPainter &painter)
   }
 
 }
-
-#ifdef JUNK
-
-/*************************************************************************
- * _drawOverlays()
- */
-
-void PolarWidget::_drawOverlays(QPainter &painter)
-{
-
-  // Don't try to draw rings if we haven't been configured yet or if the
-  // rings or grids aren't enabled.
-  
-  if (!_ringsEnabled && !_gridsEnabled && !_angleLinesEnabled) {
-    return;
-  }
-
-  // save painter state
-
-  painter.save();
-
-  // store font
-  
-  QFont origFont = painter.font();
-  
-  // Draw rings
-
-  if (_ringSpacing > 0.0 && _ringsEnabled) {
-
-    // Set up the painter
-    
-    painter.save();
-    painter.setTransform(_zoomTransform);
-    painter.setPen(_gridRingsColor);
-  
-    // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(0);
-    painter.setPen(pen);
-
-    double ringRange = _ringSpacing;
-    while (ringRange <= _maxRangeKm) {
-      QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
-      painter.drawEllipse(rect);
-      ringRange += _ringSpacing;
-    }
-    painter.restore();
-
-    // Draw the labels
-    
-    QFont font = painter.font();
-    font.setPointSizeF(_params.range_ring_label_font_size);
-    painter.setFont(font);
-    // painter.setWindow(0, 0, width(), height());
-    
-    ringRange = _ringSpacing;
-    while (ringRange <= _maxRangeKm) {
-      double labelPos = ringRange * SIN_45;
-      const string &labelStr = _scaledLabel.scale(ringRange);
-      _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
-      ringRange += _ringSpacing;
-    }
-
-  } /* endif - draw rings */
-  
-  // Draw the grid
-
-  if (_ringSpacing > 0.0 && _gridsEnabled)  {
-
-    // Set up the painter
-    
-    painter.save();
-    painter.setTransform(_zoomTransform);
-    painter.setPen(_gridRingsColor);
-  
-    double ringRange = _ringSpacing;
-    double maxRingRange = ringRange;
-    while (ringRange <= _maxRangeKm) {
-
-      cerr << "1111111 ringRange: " << ringRange << endl;
-      cerr << "1111111 maxRangeKm: " << _maxRangeKm << endl;
-      cerr << "1111111 minX, minY, maxX, maxY: "
-           << ringRange << ", " << -_maxRangeKm << ", "
-           << ringRange << ", " << _maxRangeKm << endl;
-      cerr << "1111111 minX, minY, maxX, maxY: "
-           << -ringRange << ", " << -_maxRangeKm << ", "
-           << -ringRange << ", " << _maxRangeKm << endl;
-      cerr << "1111111 minX, minY, maxX, maxY: "
-           << -_maxRangeKm << ", " << ringRange << ", "
-           << _maxRangeKm << ", " << ringRange << endl;
-      cerr << "1111111 minX, minY, maxX, maxY: "
-           << -_maxRangeKm << ", " << -ringRange << ", "
-           << _maxRangeKm << ", " << -ringRange << endl;
-
-      _zoomWorld.drawLine(painter, ringRange-50, -_maxRangeKm-50, ringRange-50, _maxRangeKm-50);
-      _zoomWorld.drawLine(painter, -ringRange-50, -_maxRangeKm-50, -ringRange-50, _maxRangeKm-50);
-      _zoomWorld.drawLine(painter, -_maxRangeKm-50, ringRange-50, _maxRangeKm-50, ringRange-50);
-      _zoomWorld.drawLine(painter, -_maxRangeKm-50, -ringRange-50, _maxRangeKm-50, -ringRange-50);
-      
-      maxRingRange = ringRange;
-      ringRange += _ringSpacing;
-    }
-    painter.restore();
-
-    _zoomWorld.specifyXTicks(-maxRingRange, _ringSpacing);
-    _zoomWorld.specifyYTicks(-maxRingRange, _ringSpacing);
-
-    _zoomWorld.drawAxisLeft(painter, "km", true, true, true, false);
-    _zoomWorld.drawAxisRight(painter, "km", true, true, true, false);
-    _zoomWorld.drawAxisTop(painter, "km", true, true, true, false);
-    _zoomWorld.drawAxisBottom(painter, "km", true, true, true, false);
-    
-    _zoomWorld.unspecifyXTicks();
-    _zoomWorld.unspecifyYTicks();
-
-  }
-  
-  // Draw the azimuth lines
-
-  if (_angleLinesEnabled) {
-
-    // Set up the painter
-    
-    painter.save();
-    painter.setPen(_gridRingsColor);
-  
-    // Draw the lines along the X and Y axes
-
-    _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
-    _zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
-
-    // Draw the lines along the 30 degree lines
-
-    double end_pos1 = SIN_30 * _maxRangeKm;
-    double end_pos2 = COS_30 * _maxRangeKm;
-    
-    _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
-    _zoomWorld.drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
-
-    painter.restore();
-
-  }
-  
-  // click point cross hairs
-  
-  if (_pointClicked) {
-
-    int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    int endY = _mouseReleaseY + _params.click_cross_size / 2;
-
-    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
-    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
-
-    /****** testing ******
-    // do smart brush ...
-  QImage qImage;
-  qImage = *(_fieldRenderers[_fieldNum]->getImage());
-  // qImage.load("/h/eol/brenda/octopus.jpg");
-  // get the Image from somewhere ...   
-  // qImage.invertPixels();
-  qImage.convertToFormat(QImage::Format_RGB32);
-
-  // get the color of the selected pixel
-  QRgb colorToMatch = qImage.pixel(_mouseReleaseX, _mouseReleaseY);
-  // walk to all adjacent pixels of the same color and make them white
-
-  vector<QPoint> pixelsToConsider;
-  vector<QPoint> neighbors = {QPoint(-1, 1), QPoint(0, 1), QPoint(1, 1),
-                              QPoint(-1, 0),               QPoint(1, 0),
-                              QPoint(-1,-1), QPoint(0,-1), QPoint(1,-1)};
-
-  pixelsToConsider.push_back(QPoint(_mouseReleaseX, _mouseReleaseY));
-  while (!pixelsToConsider.empty()) {
-    QPoint currentPix = pixelsToConsider.back();
-    pixelsToConsider.pop_back();
-    if (qImage.pixel(currentPix) ==  colorToMatch) {
-      // set currentPix to white
-      qImage.setPixelColor(currentPix, QColor("white"));
-      // cout << "setting pixel " << currentPix.x() << ", " << currentPix.y() << " to white" << endl;
-      // add the eight adjacent neighbors
-      for (vector<QPoint>::iterator noffset = neighbors.begin(); 
-           noffset != neighbors.end(); ++noffset) {
-        QPoint neighbor;
-        neighbor = currentPix + *noffset; // QPoint(-1,1);
-        if (qImage.valid(neighbor)) {
-          pixelsToConsider.push_back(neighbor);
-        }
-      } // end for neighbors iterator
-    }
-  }
-
-  pixelsToConsider.clear();
-  QPainter painter(this);
-  painter.drawImage(0, 0, qImage);
-    ****** end testing *****/
-
-  }
-
-  // reset painter state
-  
-  painter.restore();
-
-  // draw the color scale
-
-  const DisplayField &field = _manager.getSelectedField();
-  QPainter colorScalePainter(_colorScaleImage);
-  _colorScaleWorld.drawColorScale(field.getColorMap(), colorScalePainter,
-                                  _params.label_font_size);
-
-  if (_archiveMode) {
-
-    // add legends with time, field name and elevation angle
-
-    vector<string> legends;
-    char text[1024];
-
-    // time legend
-
-    sprintf(text, "Start time: %s", _plotStartTime.asString(0).c_str());
-    legends.push_back(text);
-    
-    // radar and site name legend
-
-    string radarName(_platform.getInstrumentName());
-    if (_params.override_radar_name) {
-      radarName = _params.radar_name;
-    }
-    string siteName(_platform.getInstrumentName());
-    if (_params.override_site_name) {
-      siteName = _params.site_name;
-    }
-    string radarSiteLabel = radarName;
-    if (siteName.size() > 0 && siteName != radarName) {
-      radarSiteLabel += "/";
-      radarSiteLabel += siteName;
-    }
-    legends.push_back(radarSiteLabel);
-
-    // field name legend
-
-    string fieldName = _fieldRenderers[_fieldNum]->getField().getLabel();
-    sprintf(text, "Field: %s", fieldName.c_str());
-    legends.push_back(text);
-
-    // elevation legend
-
-    // sprintf(text, "Elevation(deg): %.2f", _meanElev);
-    // legends.push_back(text);
-
-    // nrays legend
-
-    // sprintf(text, "NRays: %g", _nRays);
-    // legends.push_back(text);
-    
-    painter.save();
-    painter.setPen(Qt::yellow);
-    painter.setBrush(Qt::black);
-    painter.setBackgroundMode(Qt::OpaqueMode);
-
-    switch (_params.ppi_main_legend_pos) {
-      case Params::LEGEND_TOP_LEFT:
-        _zoomWorld.drawLegendsTopLeft(painter, legends);
-        break;
-      case Params::LEGEND_TOP_RIGHT:
-        _zoomWorld.drawLegendsTopRight(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_LEFT:
-        _zoomWorld.drawLegendsBottomLeft(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_RIGHT:
-        _zoomWorld.drawLegendsBottomRight(painter, legends);
-        break;
-      default: {}
-    }
-
-    // painter.setBrush(Qt::white);
-    // painter.setBackgroundMode(Qt::TransparentMode);
-    painter.restore();
-
-  } // if (_archiveMode) {
-
-}
-
-#endif
 
 /////////////////////////////////////////////////////////////	
 // Title

@@ -401,9 +401,9 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   vector<FieldRenderer*> _fieldRenderers;
   
-  // overide refresh images
+  // refresh field images
 
-  void _refreshImages();
+  void _refreshFieldImages();
 
   /**
    * @brief The index of the field selected for display.
@@ -606,10 +606,6 @@ class DLL_EXPORT PolarWidget : public QWidget
   // reset the world coords
 
   void _resetWorld(int width, int height);
-
-  // rendering
-
-  void _performRendering();
 
   // get ray closest to click point
 

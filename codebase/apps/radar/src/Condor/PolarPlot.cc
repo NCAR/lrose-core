@@ -113,6 +113,8 @@ PolarPlot::PolarPlot(PolarWidget *parent,
     _fieldRenderers.push_back(fieldRenderer);
   }
 
+  activateArchiveRendering();
+
   // colors
   
   setBackgroundColor(QColor(_params.background_color));
@@ -433,7 +435,7 @@ void PolarPlot::_performRendering()
   
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     if (ifield == _fieldNum ||
-	_fieldRenderers[ifield]->isBackgroundRendered()) {
+        _fieldRenderers[ifield]->isBackgroundRendered()) {
       _fieldRenderers[ifield]->signalRunToStart();
     }
   } // ifield
@@ -442,7 +444,7 @@ void PolarPlot::_performRendering()
   
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     if (ifield == _fieldNum ||
-	_fieldRenderers[ifield]->isBackgroundRendered()) {
+        _fieldRenderers[ifield]->isBackgroundRendered()) {
       _fieldRenderers[ifield]->waitForRunToComplete();
     }
   } // ifield
