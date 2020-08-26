@@ -58,7 +58,7 @@ public:
 
   // constructor specifying dimensions of array
 
-  TaArray2D(int sizeMajor, int sizeMinor);
+  TaArray2D(size_t sizeMajor, size_t sizeMinor);
 
   // destructor
 
@@ -74,7 +74,7 @@ public:
 
   // Alloc array
 
-  T **alloc(int sizeMajor, int sizeMinor);
+  T **alloc(size_t sizeMajor, size_t sizeMinor);
 
   // free array
 
@@ -82,9 +82,9 @@ public:
 
   // get size
 
-  int sizeMajor() const { return _sizeMajor; }
-  int sizeMinor() const { return _sizeMinor; }
-  int size1D() const { return _size1D; }
+  size_t sizeMajor() const { return _sizeMajor; }
+  size_t sizeMinor() const { return _sizeMinor; }
+  size_t size1D() const { return _size1D; }
 
   // get pointer to data
 
@@ -95,12 +95,12 @@ private:
 
   T **_dat2D;
   T *_dat1D;
-  int _sizeMajor;
-  int _sizeMinor;
-  int _size1D;
+  size_t _sizeMajor;
+  size_t _sizeMinor;
+  size_t _size1D;
   
   TaArray2D &_copy(const TaArray2D &rhs);
-  void _alloc(int sizeMajor, int sizeMinor);
+  void _alloc(size_t sizeMajor, size_t sizeMinor);
   void _init();
 
 };
@@ -118,7 +118,7 @@ template <class T>
 // constructor specifying array dimension
 
 template <class T>
-  TaArray2D<T>::TaArray2D(int sizeMajor, int sizeMinor)
+  TaArray2D<T>::TaArray2D(size_t sizeMajor, size_t sizeMinor)
 {
   _init();
   _alloc(sizeMajor, sizeMinor);
@@ -153,14 +153,14 @@ template <class T>
 // allocation
 
 template <class T>
-  T **TaArray2D<T>::alloc(int sizeMajor, int sizeMinor)
+  T **TaArray2D<T>::alloc(size_t sizeMajor, size_t sizeMinor)
 {
   _alloc(sizeMajor, sizeMinor);
   return _dat2D;
 }
 
 template <class T>
-  void TaArray2D<T>::_alloc(int sizeMajor, int sizeMinor)
+  void TaArray2D<T>::_alloc(size_t sizeMajor, size_t sizeMinor)
 {
   if (sizeMajor == _sizeMajor &&
       sizeMinor == _sizeMinor) {

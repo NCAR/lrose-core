@@ -40,6 +40,7 @@
 #ifndef FilterUtils_HH
 #define FilterUtils_HH
 
+#include <vector>
 using namespace std;
 
 ////////////////////////

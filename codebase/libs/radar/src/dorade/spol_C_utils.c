@@ -1434,6 +1434,7 @@ char *solo_modify_list_entry(which, entry, len, entry_num)
   struct solo_list_mgmt *which;
   char *entry;
   int len;
+  int entry_num;
 {
     char *a, *c, *str_terminate();
 
