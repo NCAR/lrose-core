@@ -60,8 +60,8 @@ VirtVolParams.cc: paramdef.VirtVol
 UrlParams.hh: UrlParams.cc
 	$(CP) UrlParams.hh ../include/FiltAlgVirtVol
 UrlParams.cc: paramdef.Url
-	tdrp_gen -f paramdef.Url -c++ -class UrlParams
-	$(CP) UrlParams.hh ../include/FiltAlgVirtVol
+	tdrp_gen -f paramdef.Url -c++ -class UrlParams -lib FiltAlgVirtVol -add_ncar_copyright
+	/bin/mv -f UrlParams.hh ../include/FiltAlgVirtVol
 
 /bin/mv clean_tdrp:
 	$(RM) AlgorithmParams.cc ../include/FiltAlgVirtVol/AlgorithmParams.hh

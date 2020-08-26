@@ -87,7 +87,7 @@ void ShapePolygons::_createDiamonds(const time_t &t, int expireSeconds,
   for (size_t i=0; i<clumps.size(); ++i)
   {
     clump::Region_citer_t c;
-    int xmin, ymin, xmax, ymax;
+    int xmin = 999999, ymin = 999999, xmax = -999999, ymax = -999999;
     for (c=clumps[i].begin(); c!=clumps[i].end(); ++c)
     {
       if (c == clumps[i].begin())

@@ -1105,7 +1105,7 @@ bool VirtVolSweep::_processPercentOfAbsMax(std::vector<ProcessingNode *> &args)
   
   const GriddedData *input = (const GriddedData *)data;
   // loop through data to get max abs value, which we might use as nyquist
-  double max;
+  double max = -1.0e99;
   bool first;
   
   for (int i=0; i<input->getNdata(); ++i)
