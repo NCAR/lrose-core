@@ -327,7 +327,6 @@ void PolarManager::timerEvent(QTimerEvent *event)
 
 void PolarManager::resizeEvent(QResizeEvent *event)
 {
-  cerr << "44444444444444444444444" << endl;
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent: " << event << endl;
   }
@@ -565,9 +564,7 @@ void PolarManager::_setupWindows()
 
   _setTitleBar(_params.radar_name);
   setMinimumSize(400, 300);
-  cerr << "SSSSSSSSSSSSSSSSSSSSSSSSS" << endl;
   resize(_params.main_window_width, _params.main_window_height);
-  cerr << "TTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
   
   // set location on screen
 
