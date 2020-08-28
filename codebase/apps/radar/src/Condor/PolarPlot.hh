@@ -114,20 +114,7 @@ public:
                       double xMaxWorld,
                       double yMaxWorld);
 
-  // set the zoom limits, using pixel space
-  
-  void setZoomLimits(int xMin,
-                     int yMin,
-                     int xMax,
-                     int yMax);
-  
-  void setZoomLimitsX(int xMin,
-                      int xMax);
-
-  void setZoomLimitsY(int yMin,
-                      int yMax);
-
-  // zooming
+  // zooming - pixel space
 
   void zoom(int x1, int y1, int x2, int y2);
   void unzoom();
@@ -163,11 +150,11 @@ public:
   // set the color for the grid / rings
 
   void setGridRingsColor(const QColor &color);
+
+  // id
+
+  int getId() const { return _id; }
   
-  // displayImage for given field
-
-  // void displayImage(const size_t field_num);
-
   // geometry
   
   void setMaxRangeKm(double val) { _maxRangeKm = val; }
@@ -184,7 +171,6 @@ public:
   int getImageOffsetX() const { return _imageOffsetX; }
   int getImageOffsetY() const { return _imageOffsetY; }
 
-  
   QImage *getCurrentImage();
   
   // get the world plot objects

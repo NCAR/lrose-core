@@ -257,11 +257,15 @@ void PolarWidget::setArchiveMode(bool archive_mode)
 
 void PolarWidget::unzoomView()
 {
+  cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUU" << endl;
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
   _refreshFieldImages();
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->unzoom();
+  }
 }
 
 
@@ -545,6 +549,27 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
       
       _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
       _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+
+      cerr << "22222222222222 _mousePressX: " << _mousePressX << endl;
+      cerr << "22222222222222 _mousePressY: " << _mousePressY << endl;
+      cerr << "22222222222222 _mouseReleaseX: " << _mouseReleaseX << endl;
+      cerr << "22222222222222 _mouseReleaseY: " << _mouseReleaseY << endl;
+
+      int plotIdStart = getPlotIdClicked(_mousePressX, _mousePressY);
+      int plotIdEnd = getPlotIdClicked(_mouseReleaseX, _mouseReleaseY);
+
+      cerr << "22222222222222 plotIdStart: " << plotIdStart << endl;
+      cerr << "22222222222222 plotIdEnd: " << plotIdEnd << endl;
+      
+      if (plotIdStart == plotIdEnd && plotIdStart >= 0) {
+        cerr << "22222222222222 DO ZOOM, id: " << plotIdStart << endl;
+        PolarPlot *plot = _plots[plotIdStart];
+        _plots[plotIdStart]->zoom(_mousePressX - plot->getImageOffsetX(),
+                                  _mousePressY - plot->getImageOffsetY(),
+                                  _mouseReleaseX - plot->getImageOffsetX(),
+                                  _mouseReleaseY - plot->getImageOffsetY());
+
+      }
       
       _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
       
@@ -568,6 +593,26 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     update();
 
   }
+}
+
+/*************************************************************************
+ * get plot id for a given click location
+ *
+ * returns plot id on success, -1 on error
+ */
+
+int PolarWidget::getPlotIdClicked(int ix, int iy) const
+{
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    const PolarPlot *plot = _plots[ii];
+    if ((ix >= plot->getImageOffsetX()) &&
+        (ix <= plot->getImageOffsetX() + plot->getImageWidth() - 1)  &&
+        (iy >= plot->getImageOffsetY()) &&
+        (iy <= plot->getImageOffsetY() + plot->getImageHeight() - 1)) {
+      return plot->getId();
+    }
+  }
+  return -1;
 }
 
 // Used to notify BoundaryPointEditor if the user has zoomed in/out or is pressing the Shift key

@@ -220,6 +220,11 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   bool getPointClicked() const { return _pointClicked; }
 
+  // get plot id for a given click location
+  // returns plot id on success, -1 on error
+
+  int getPlotIdClicked(int ix, int iy) const;
+
   ////////////////
   // Qt signals //
   ////////////////

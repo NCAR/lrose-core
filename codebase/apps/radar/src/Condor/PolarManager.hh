@@ -178,7 +178,7 @@ private:
   // windows
 
   QFrame *_polarFrame;
-  PolarWidget *_polar;
+  PolarWidget *_plotWidget;
 
   // QFrame *_ppiFrame;
   // PpiWidget *_ppi;

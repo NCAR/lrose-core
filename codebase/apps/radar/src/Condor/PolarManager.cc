@@ -139,7 +139,7 @@ PolarManager::PolarManager(const Params &params,
   _archiveRetrievalPending = false;
   
   _polarFrame = NULL;
-  _polar = NULL;
+  _plotWidget = NULL;
 
   // _ppiFrame = NULL;
   // _ppi = NULL;
@@ -194,8 +194,8 @@ PolarManager::~PolarManager()
 
 {
 
-  if (_polar) {
-    delete _polar;
+  if (_plotWidget) {
+    delete _plotWidget;
   }
 
   // if (_ppi) {
@@ -254,7 +254,7 @@ void PolarManager::timerEvent(QTimerEvent *event)
 
   if (_firstTimerEvent) {
 
-    _polar->resize(_polarFrame->width(), _polarFrame->height());
+    _plotWidget->resize(_polarFrame->width(), _polarFrame->height());
     // _ppi->resize(_ppiFrame->width(), _ppiFrame->height());
     
     // Set the size of the second column to the size of the largest
@@ -488,10 +488,10 @@ void PolarManager::_setupWindows()
   _polarFrame = new QFrame(_main);
   _polarFrame->resize(200, 200);
   _polarFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  _polar = new PolarWidget(_polarFrame, *this, _params, _platform, _fields, _haveFilteredFields);
+  _plotWidget = new PolarWidget(_polarFrame, *this, _params, _platform, _fields, _haveFilteredFields);
 
   connect(this, SIGNAL(frameResized(const int, const int)),
-          _polar, SLOT(resize(const int, const int)));
+          _plotWidget, SLOT(resize(const int, const int)));
 
   // ppi window
 
@@ -517,7 +517,7 @@ void PolarManager::_setupWindows()
   
   // connect slots for location
 
-  connect(_polar, SIGNAL(locationClicked(double, double, const RadxRay*)),
+  connect(_plotWidget, SIGNAL(locationClicked(double, double, const RadxRay*)),
           this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
 
   // connect(_ppi, SIGNAL(locationClicked(double, double, const RadxRay*)),
@@ -583,7 +583,7 @@ void PolarManager::_setupWindows()
   }
   _setSweepPanelVisibility();
 
-  _polar->show();
+  _plotWidget->show();
 
 }
 
@@ -1434,7 +1434,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     // Add the beam to the display
     
-    _polar->handleRay(ray, fieldData, _fields);
+    _plotWidget->handleRay(ray, fieldData, _fields);
 
   }
   
@@ -1708,7 +1708,7 @@ void PolarManager::_freeze()
 
 void PolarManager::_unzoom()
 {
-  // _ppi->unzoomView();
+  _plotWidget->unzoomView();
   _unzoomAct->setEnabled(false);
 }
 
@@ -1747,7 +1747,7 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   _prevFieldNum = _fieldNum;
   _fieldNum = fieldId;
 
- _polar->setFieldNum(_fieldNum);
+ _plotWidget->setFieldNum(_fieldNum);
   
   // _ppi->selectVar(_fieldNum);
   // _rhi->selectVar(_fieldNum);
@@ -1769,7 +1769,7 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   }
   _valueLabel->setText(text);
 
-  _polar->update();
+  _plotWidget->update();
 
   refreshBoundaries();
 }
@@ -2375,8 +2375,8 @@ void PolarManager::_openFile()
     _boundaryEditorDialog->setVisible(false);
   }
   
-  if (_polar) {
-    _polar->showOpeningFileMsg(true);
+  if (_plotWidget) {
+    _plotWidget->showOpeningFileMsg(true);
   }
 
   QString filePath =
@@ -2743,8 +2743,8 @@ void PolarManager::_setArchiveMode(bool state)
   _archiveMode = state;
   _setSweepPanelVisibility();
 
-  if (_polar) {
-    _polar->setArchiveMode(state);
+  if (_plotWidget) {
+    _plotWidget->setArchiveMode(state);
   }
   // if (_rhi) {
   //   _rhi->setArchiveMode(state);
@@ -2783,8 +2783,8 @@ void PolarManager::_activateRealtimeRendering()
     _maxRangeKm = 100.0;
   }
   _clear();
-  if (_polar) {
-    _polar->activateRealtimeRendering();
+  if (_plotWidget) {
+    _plotWidget->activateRealtimeRendering();
   }
   // if (_ppi) {
   //   _ppi->activateRealtimeRendering();
@@ -2800,8 +2800,8 @@ void PolarManager::_activateRealtimeRendering()
 void PolarManager::_activateArchiveRendering()
 {
   _clear();
-  if (_polar) {
-    _polar->activateArchiveRendering();
+  if (_plotWidget) {
+    _plotWidget->activateArchiveRendering();
   }
   // if (_rhi) {
   //   _rhi->activateArchiveRendering();

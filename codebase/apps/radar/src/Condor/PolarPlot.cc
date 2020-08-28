@@ -247,33 +247,6 @@ void PolarPlot::setWorldLimits(double xMinWorld,
 }
 
 /*************************************************************************
- * set the zoom limits, from pixel space
- */
-
-void PolarPlot::setZoomLimits(int xMin,
-                              int yMin,
-                              int xMax,
-                              int yMax)
-{
-  _zoomWorld.setZoomLimits(xMin, yMin, xMax, yMax);
-  _isZoomed = true;
-}
-
-void PolarPlot::setZoomLimitsX(int xMin,
-                               int xMax)
-{
-  _zoomWorld.setZoomLimitsX(xMin, xMax);
-  _isZoomed = true;
-}
-
-void PolarPlot::setZoomLimitsY(int yMin,
-                               int yMax)
-{
-  _zoomWorld.setZoomLimitsY(yMin, yMax);
-  _isZoomed = true;
-}
-
-/*************************************************************************
  * Protected methods
  *************************************************************************/
 
@@ -395,20 +368,6 @@ void PolarPlot::setGridRingsColor(const QColor &color)
   _gridRingsColor = color;
   _parent->update();
 }
-
-
-/*************************************************************************
- * displayImage()
- */
-
-// void PolarPlot::displayImage(const size_t field_num)
-// {
-//   // If we weren't rendering the current field, do nothing
-//   if (field_num != _fieldNum) {
-//     return;
-//   }
-//   _parent->update();
-// }
 
 
 /*************************************************************************
