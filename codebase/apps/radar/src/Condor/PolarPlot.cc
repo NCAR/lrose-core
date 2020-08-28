@@ -168,6 +168,7 @@ void PolarPlot::zoom(int x1, int y1, int x2, int y2)
 {
 
   _zoomWorld.setZoomLimits(x1, y1, x2, y2);
+  _zoomTransform = _zoomWorld.getTransform();
   _isZoomed = true;
 
 }
@@ -180,6 +181,7 @@ void PolarPlot::unzoom()
 {
 
   _zoomWorld = _fullWorld;
+  _zoomTransform = _zoomWorld.getTransform();
   _isZoomed = false;
 
 }
