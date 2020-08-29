@@ -35,9 +35,10 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = CedricPrint
 
-LOC_INCLUDES = -I../include
+LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_CFLAGS =
-LOC_LDFLAGS = -L..
+
 LOC_LIBS = \
           -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver \
           -lRadx -lNcxx -lrapformats -ldidss -leuclid -lrapmath \
