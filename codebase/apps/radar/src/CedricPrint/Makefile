@@ -37,7 +37,6 @@ TARGET_FILE = CedricPrint
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
-LOC_CFLAGS =
 
 LOC_LIBS = \
           -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver \

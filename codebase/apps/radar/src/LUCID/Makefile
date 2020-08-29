@@ -37,15 +37,15 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 TARGET_FILE = LUCID
 
 # need to add $(NETCDF4_INCS) 
-LOC_INCLUDES = $(QT_INCLUDES) $(HDRS) -I/usr/local/Cellar/qt/5.13.0/lib/QtCharts.framework/Headers
+LOC_INCLUDES = $(QT_INCLUDES) $(HDRS) -I/usr/local/Cellar/qt/5.13.0/lib/QtCharts.framework/Headers $(NETCDF4_INCS)
 
 
 # need to add -lRadx -lNcxx -ltoolsa -ldataport  $(NETCDF4_LIBS)
-LOC_LIBS = $(QT_LIBS) \
+LOC_LIBS = $(QT_LIBS) $(NETCDF4_LIBS) \
 	-ltdrp -lfftw3 -lbz2 -lz -lpthread -lm 
 
 # need to add $(NETCDF4_LDFLAGS)
-LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS)  -F/usr/local/Cellar/qt/5.13.0/lib -framework QtCharts
+LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS)  -F/usr/local/Cellar/qt/5.13.0/lib -framework QtCharts $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 

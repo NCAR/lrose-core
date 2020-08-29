@@ -36,9 +36,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = AparTsSim
 
-LOC_INCLUDES =
-LOC_CFLAGS =
-LOC_LDFLAGS =
+LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_LIBS = \
           -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \

@@ -35,7 +35,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = HcrTempRxGain
 
-LOC_INCLUDES =
+LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_LIBS = \
           -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
@@ -43,10 +44,6 @@ LOC_LIBS = \
           -lphysics -ltoolsa -ldataport -ltdrp \
           $(NETCDF4_LIBS) \
           -lfftw3 -lbz2 -lz -lpthread
-
-LOC_LDFLAGS =
-
-LOC_CFLAGS =
 
 HDRS = \
 	Params.hh \

@@ -47,8 +47,6 @@ LOC_LIBS = \
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
-LOC_CPPC_CFLAGS =
-
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \

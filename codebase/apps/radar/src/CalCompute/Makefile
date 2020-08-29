@@ -46,9 +46,6 @@ LOC_LIBS = \
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
-LOC_CPPC_CFLAGS =
-
-
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \

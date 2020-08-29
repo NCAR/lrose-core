@@ -37,8 +37,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 TARGET_FILE = HsrlSim
 
 LOC_INCLUDES = $(NETCDF4_INCS)
-LOC_CFLAGS =
-LOC_LDFLAGS =
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+
 LOC_LIBS = \
           -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
           -lRadx -lNcxx -lrapformats -leuclid -lrapmath \

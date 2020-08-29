@@ -36,9 +36,6 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = RadarCal
 
-LOC_INCLUDES =
-LOC_CPPC_CFLAGS =
-LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltoolsa -lpthread -ldataport -ltdrp -lbz2 \
 	-lz

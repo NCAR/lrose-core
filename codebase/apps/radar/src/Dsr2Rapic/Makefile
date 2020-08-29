@@ -36,8 +36,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = Dsr2Rapic
 
-LOC_INCLUDES = -IrapicDataServer/include -IrapicDataServer/include/ct_include.6.7 -DSTDCPPHEADERS -DUSE_DEFRAG_FN_ORIDE \
-	$(NETCDF4_INCS)
+LOC_INCLUDES = -IrapicDataServer/include -IrapicDataServer/include/ct_include.6.7 -DSTDCPPHEADERS -DUSE_DEFRAG_FN_ORIDE $(NETCDF4_INCS)
 
 LOC_LIBS = -lFmq -lMdv -lRadx -leuclid \
 	-ldsserver -lrapformats -ldidss -ltoolsa \

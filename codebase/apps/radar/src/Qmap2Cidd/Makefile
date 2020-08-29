@@ -35,9 +35,9 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = Qmap2Cidd
 
-LOC_INCLUDES = -I../include
-LOC_CFLAGS =
-LOC_LDFLAGS = -L..
+LOC_INCLUDES =
+LOC_LDFLAGS =
+
 LOC_LIBS = \
 	-ltoolsa -lpthread -ldataport -ltdrp -lbz2 -lz
 
