@@ -36,7 +36,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = ChillCal2Xml
 
-LOC_INCLUDES =
+LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
