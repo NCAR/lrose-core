@@ -284,9 +284,11 @@ void PolarWidget::clear()
  * setRings()
  */
 
-void PolarWidget::setRings(const bool enabled)
+void PolarWidget::setRings(bool enabled)
 {
-  _ringsEnabled = enabled;
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->setRings(enabled);
+  }
   update();
 }
 
@@ -297,7 +299,9 @@ void PolarWidget::setRings(const bool enabled)
 
 void PolarWidget::setGrids(const bool enabled)
 {
-  _gridsEnabled = enabled;
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->setGrids(enabled);
+  }
   update();
 }
 
@@ -308,7 +312,9 @@ void PolarWidget::setGrids(const bool enabled)
 
 void PolarWidget::setAngleLines(const bool enabled)
 {
-  _angleLinesEnabled = enabled;
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->setAngleLines(enabled);
+  }
   update();
 }
 

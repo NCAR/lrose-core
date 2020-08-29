@@ -683,8 +683,8 @@ void PolarManager::_createActions()
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
   _ringsAct->setChecked(_params.ppi_range_rings_on_at_startup);
-  // connect(_ringsAct, SIGNAL(triggered(bool)),
-  //         _ppi, SLOT(setRings(bool)));
+  connect(_ringsAct, SIGNAL(triggered(bool)),
+          _plotWidget, SLOT(setRings(bool)));
 
   // show grids
 
@@ -692,8 +692,8 @@ void PolarManager::_createActions()
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
   _gridsAct->setChecked(_params.ppi_grids_on_at_startup);
-  // connect(_gridsAct, SIGNAL(triggered(bool)),
-  //         _ppi, SLOT(setGrids(bool)));
+  connect(_gridsAct, SIGNAL(triggered(bool)),
+          _plotWidget, SLOT(setGrids(bool)));
 
   // show azimuth lines
 
@@ -701,8 +701,8 @@ void PolarManager::_createActions()
   _azLinesAct->setStatusTip(tr("Turn az lines on/off"));
   _azLinesAct->setCheckable(true);
   _azLinesAct->setChecked(_params.ppi_azimuth_lines_on_at_startup);
-  // connect(_azLinesAct, SIGNAL(triggered(bool)),
-  //         _ppi, SLOT(setAngleLines(bool)));
+  connect(_azLinesAct, SIGNAL(triggered(bool)),
+          _plotWidget, SLOT(setAngleLines(bool)));
 
   // show RHI window
 

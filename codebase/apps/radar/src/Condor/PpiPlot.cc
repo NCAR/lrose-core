@@ -751,7 +751,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     return;
   }
 
-  // save painter state
+  // save painter state, set transform
 
   painter.save();
 
@@ -762,27 +762,29 @@ void PpiPlot::_drawOverlays(QPainter &painter)
   // Draw rings
 
   if (_ringSpacing > 0.0 && _ringsEnabled) {
-
-    // Set up the painter
+    
+    // Set up the painter for rings
+    
+    painter.setPen(_gridRingsColor);
+    
+    // set narrow line width
+    QPen pen = painter.pen();
+    pen.setWidth(1);
+    painter.setPen(pen);
+    painter.setPen(_gridRingsColor);
     
     painter.save();
     painter.setTransform(_zoomWorld.getTransform());
-    painter.setPen(_gridRingsColor);
-  
-    // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(0);
-    painter.setPen(pen);
-    painter.setPen(_gridRingsColor);
-
+    pen.setWidth(1);
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
+      // _zoomWorld.drawArc(painter, 0.0, 0.0, ringRange, ringRange, 0.0, 360.0);
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
       painter.drawEllipse(rect);
       ringRange += _ringSpacing;
     }
     painter.restore();
-
+  
     // Draw the labels
     
     QFont font = painter.font();
@@ -807,30 +809,23 @@ void PpiPlot::_drawOverlays(QPainter &painter)
   // Draw the grid
 
   if (_ringSpacing > 0.0 && _gridsEnabled)  {
-
+    
     // Set up the painter
     
-    painter.save();
-    painter.setTransform(_zoomWorld.getTransform());
     painter.setPen(_gridRingsColor);
   
     double ringRange = _ringSpacing;
     double maxRingRange = ringRange;
     while (ringRange <= _maxRangeKm) {
-
-      _zoomWorld.drawLine(painter, ringRange-50, -_maxRangeKm-50,
-                          ringRange-50, _maxRangeKm-50);
-      _zoomWorld.drawLine(painter, -ringRange-50, -_maxRangeKm-50,
-                          -ringRange-50, _maxRangeKm-50);
-      _zoomWorld.drawLine(painter, -_maxRangeKm-50, ringRange-50,
-                          _maxRangeKm-50, ringRange-50);
-      _zoomWorld.drawLine(painter, -_maxRangeKm-50, -ringRange-50,
-                          _maxRangeKm-50, -ringRange-50);
+      
+      _zoomWorld.drawLine(painter, ringRange, -_maxRangeKm, ringRange, _maxRangeKm);
+      _zoomWorld.drawLine(painter, -ringRange, -_maxRangeKm, -ringRange, _maxRangeKm);
+      _zoomWorld.drawLine(painter, -_maxRangeKm, ringRange, _maxRangeKm, ringRange);
+      _zoomWorld.drawLine(painter, -_maxRangeKm, -ringRange, _maxRangeKm, -ringRange);
       
       maxRingRange = ringRange;
       ringRange += _ringSpacing;
     }
-    painter.restore();
 
     _zoomWorld.specifyXTicks(-maxRingRange, _ringSpacing);
     _zoomWorld.specifyYTicks(-maxRingRange, _ringSpacing);
@@ -842,7 +837,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     
     _zoomWorld.unspecifyXTicks();
     _zoomWorld.unspecifyYTicks();
-
+    
   }
   
   // Draw the azimuth lines
@@ -851,14 +846,13 @@ void PpiPlot::_drawOverlays(QPainter &painter)
 
     // Set up the painter
     
-    painter.save();
     painter.setPen(_gridRingsColor);
-  
+    
     // Draw the lines along the X and Y axes
 
     _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
     _zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
-
+    
     // Draw the lines along the 30 degree lines
 
     double end_pos1 = SIN_30 * _maxRangeKm;
@@ -869,14 +863,12 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     _zoomWorld.drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
     _zoomWorld.drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
 
-    painter.restore();
-
   }
   
   // click point cross hairs
   
   if (_parent->getPointClicked()) {
-
+    
     // int startX = _mouseReleaseX - _params.click_cross_size / 2;
     // int endX = _mouseReleaseX + _params.click_cross_size / 2;
     // int startY = _mouseReleaseY - _params.click_cross_size / 2;
@@ -933,7 +925,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
   // add label
   
   if (_label.size() > 0) {
-
+    
     QFont ufont(painter.font());
     ufont.setPointSizeF(_params.main_label_font_size);
     painter.setFont(ufont);
@@ -1316,7 +1308,8 @@ void PpiPlot::refreshFieldImages()
     QSize imageSize = field->getImage()->size();
     if (imageSize.width() != _fullWorld.getWidthPixels() ||
         imageSize.height() != _fullWorld.getHeightPixels()) {
-      field->createImage(_fullWorld.getWidthPixels(), _fullWorld.getHeightPixels());
+      field->createImage(_fullWorld.getWidthPixels(),
+                         _fullWorld.getHeightPixels());
     }
 
     // clear image

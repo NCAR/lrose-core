@@ -277,7 +277,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] enabled    True to show them, false otherwise.
    */
 
-  void setRings(const bool enabled);
+  void setRings(bool enabled);
 
   /**
    * @brief Set grids visibility.
@@ -285,7 +285,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] enabled   True to show them, false otherwise.
    */
 
-  void setGrids(const bool enabled);
+  void setGrids(bool enabled);
 
   /**
    * @brief Set azimuth/elevation lines visibility.
@@ -293,7 +293,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @param[in] enabled    True to show them, false otherwise.
    */
 
-  void setAngleLines(const bool enabled);
+  void setAngleLines(bool enabled);
 
  protected:
 

@@ -503,7 +503,7 @@ polar_plots = {
   ,
   {
     plot_type = PPI_PLOT,
-    label = "PPI-1",
+    label = "PPI-3",
     min_az = 135,
     max_az = 225,
     min_el = -45,
@@ -513,7 +513,7 @@ polar_plots = {
   ,
   {
     plot_type = PPI_PLOT,
-    label = "PPI-2",
+    label = "PPI-4",
     min_az = 225,
     max_az = 315,
     min_el = -45,

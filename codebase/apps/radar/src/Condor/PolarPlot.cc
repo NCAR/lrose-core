@@ -285,10 +285,9 @@ void PolarPlot::setWorldLimits(double xMinWorld,
  * setRings()
  */
 
-void PolarPlot::setRings(const bool enabled)
+void PolarPlot::setRings(bool enabled)
 {
   _ringsEnabled = enabled;
-  _parent->update();
 }
 
 
@@ -296,10 +295,9 @@ void PolarPlot::setRings(const bool enabled)
  * setGrids()
  */
 
-void PolarPlot::setGrids(const bool enabled)
+void PolarPlot::setGrids(bool enabled)
 {
   _gridsEnabled = enabled;
-  _parent->update();
 }
 
 
@@ -307,10 +305,9 @@ void PolarPlot::setGrids(const bool enabled)
  * setAngleLines()
  */
 
-void PolarPlot::setAngleLines(const bool enabled)
+void PolarPlot::setAngleLines(bool enabled)
 {
   _angleLinesEnabled = enabled;
-  _parent->update();
 }
 
 

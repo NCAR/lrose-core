@@ -125,9 +125,9 @@ public:
 
   // set overlays
 
-  void setRings(const bool enabled);
-  void setGrids(const bool enabled);
-  void setAngleLines(const bool enabled);
+  void setRings(bool enabled);
+  void setGrids(bool enabled);
+  void setAngleLines(bool enabled);
 
   // turn on archive-style rendering - all fields
 
