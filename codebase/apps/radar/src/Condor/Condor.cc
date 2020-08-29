@@ -353,7 +353,9 @@ int Condor::_setupDisplayFields()
     ColorMap map;
     map.setName(pfld.label);
     map.setUnits(pfld.units);
-    // TODO: the logic here is a little weird ... the label and units have been set, but are we throwing them away?
+
+    // TODO: the logic here is a little weird ...
+    // the label and units have been set, but are we throwing them away?
 
     bool noColorMap = false;
 
@@ -372,9 +374,11 @@ int Condor::_setupDisplayFields()
           map = colorMap;
           // HERE: What is missing from the ColorMap object??? 
         } catch (std::out_of_range &ex) {
-          cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
+          cerr << "WARNING - did not find default color map for field" << endl;
+          cerr << "          using rainbow colors" << endl;
 	  // Just set the colormap to a generic color map
-	  // use range to indicate it needs update; update when we have access to the actual data values
+	  // use range to indicate it needs update
+          // update when we have access to the actual data values
           map = ColorMap(0.0, 1.0);
 	  noColorMap = true; 
           // return -1
@@ -396,7 +400,9 @@ int Condor::_setupDisplayFields()
     if (strlen(pfld.filtered_name) > 0) {
       string filtLabel = string(pfld.label) + "-filt";
       DisplayField *filt =
-        new DisplayField(filtLabel, pfld.filtered_name, pfld.units, pfld.shortcut, 
+        new DisplayField(filtLabel,
+                         pfld.filtered_name,
+                         pfld.units, pfld.shortcut, 
                          map, ifield, true);
       _displayFields.push_back(filt);
     }

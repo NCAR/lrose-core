@@ -540,22 +540,22 @@ commentdef {
   p_header = "PPI MODE DISPLAY";
 }
 
-typedef enum
-  {
-   PPI_FULL,
-   PPI_AIRBORNE
-  } ppi_display_type_t;
+// typedef enum
+//   {
+//    PPI_FULL,
+//    PPI_AIRBORNE
+//   } ppi_display_type_t;
 
-paramdef enum ppi_display_type_t
-  {
-   p_descr = "Type of display to use for the PPI window.";
-   p_help = "\tPPI_FULL - Display the full 360 degrees of the PPI. "
-   "This is the default.\n"
-   "\tPPI_AIRBORN - Use the airborn radar PPI display. "
-   "This display shows just the 180 degrees of radar pointing forward "
-   "from the nose of the plane.\n";
-   p_default = PPI_FULL;
-  } ppi_display_type;
+// paramdef enum ppi_display_type_t
+//   {
+//    p_descr = "Type of display to use for the PPI window.";
+//    p_help = "\tPPI_FULL - Display the full 360 degrees of the PPI. "
+//    "This is the default.\n"
+//    "\tPPI_AIRBORN - Use the airborn radar PPI display. "
+//    "This display shows just the 180 degrees of radar pointing forward "
+//    "from the nose of the plane.\n";
+//    p_default = PPI_FULL;
+//   } ppi_display_type;
 
 paramdef double {
   p_default = 1.0;

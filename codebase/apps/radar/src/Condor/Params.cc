@@ -1572,26 +1572,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'ppi_display_type'
-    // ctype is '_ppi_display_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("ppi_display_type");
-    tt->descr = tdrpStrDup("Type of display to use for the PPI window.");
-    tt->help = tdrpStrDup("\tPPI_FULL - Display the full 360 degrees of the PPI. This is the default.\n\tPPI_AIRBORN - Use the airborn radar PPI display. This display shows just the 180 degrees of radar pointing forward from the nose of the plane.\n");
-    tt->val_offset = (char *) &ppi_display_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("ppi_display_type_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PPI_FULL");
-      tt->enum_def.fields[0].val = PPI_FULL;
-      tt->enum_def.fields[1].name = tdrpStrDup("PPI_AIRBORNE");
-      tt->enum_def.fields[1].val = PPI_AIRBORNE;
-    tt->single_val.e = PPI_FULL;
-    tt++;
-    
     // Parameter 'ppi_aspect_ratio'
     // ctype is 'double'
     

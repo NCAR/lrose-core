@@ -838,25 +838,6 @@ click_cross_size = 11;
 //
 //======================================================================
  
-///////////// ppi_display_type ////////////////////////
-//
-// Type of display to use for the PPI window.
-//
-// 	PPI_FULL - Display the full 360 degrees of the PPI. This is the 
-//   default.
-// 	PPI_AIRBORN - Use the airborn radar PPI display. This display shows 
-//   just the 180 degrees of radar pointing forward from the nose of the 
-//   plane.
-//
-//
-// Type: enum
-// Options:
-//     PPI_FULL
-//     PPI_AIRBORNE
-//
-
-ppi_display_type = PPI_FULL;
-
 ///////////// ppi_aspect_ratio ////////////////////////
 //
 // Aspect ratio (width/height) of PPI window.

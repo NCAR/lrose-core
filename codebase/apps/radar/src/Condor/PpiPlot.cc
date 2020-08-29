@@ -610,7 +610,7 @@ void PpiPlot::_clearRayOverlap(const int start_index, const int end_index)
 }
 
 
-/*************************************************************************
+/**************************************`***********************************
  * configureRange()
  */
 
@@ -636,35 +636,19 @@ void PpiPlot::configureRange(double max_range)
   int nTicksIdeal = 7;
   int textMargin = 5;
 
-  if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
-
-    _fullWorld.setLeftMargin(leftMargin);
-    _fullWorld.setRightMargin(rightMargin);
-    _fullWorld.setTopMargin(topMargin);
-    _fullWorld.setBottomMargin(bottomMargin);
-    _fullWorld.setColorScaleWidth(colorScaleWidth);
-    _fullWorld.setWorldLimits(-_maxRangeKm, 0.0, _maxRangeKm, _maxRangeKm);
-    _fullWorld.setXAxisTickLen(axisTickLen);
-    _fullWorld.setXNTicksIdeal(nTicksIdeal);
-    _fullWorld.setAxisTextMargin(textMargin);
-
-  } else {
-    
-    _fullWorld.setLeftMargin(leftMargin);
-    _fullWorld.setRightMargin(rightMargin);
-    _fullWorld.setTopMargin(topMargin);
-    _fullWorld.setBottomMargin(bottomMargin);
-    _fullWorld.setColorScaleWidth(colorScaleWidth);
-    _fullWorld.setWorldLimits(-_maxRangeKm, -_maxRangeKm, _maxRangeKm, _maxRangeKm);
-    _fullWorld.setXAxisTickLen(axisTickLen);
-    _fullWorld.setXNTicksIdeal(nTicksIdeal);
-    _fullWorld.setAxisTextMargin(textMargin);
-
-  }
+  _fullWorld.setLeftMargin(leftMargin);
+  _fullWorld.setRightMargin(rightMargin);
+  _fullWorld.setTopMargin(topMargin);
+  _fullWorld.setBottomMargin(bottomMargin);
+  _fullWorld.setColorScaleWidth(colorScaleWidth);
+  _fullWorld.setWorldLimits(-_maxRangeKm, -_maxRangeKm, _maxRangeKm, _maxRangeKm);
+  _fullWorld.setXAxisTickLen(axisTickLen);
+  _fullWorld.setXNTicksIdeal(nTicksIdeal);
+  _fullWorld.setAxisTextMargin(textMargin);
   
   _zoomWorld = _fullWorld;
   _isZoomed = false;
-  setTransform(_zoomWorld.getTransform());
+  setTransform00(_zoomWorld.getTransform());
   _setGridSpacing();
 
   // Initialize the images used for double-buffering.  For some reason,
@@ -782,7 +766,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     // Set up the painter
     
     painter.save();
-    painter.setTransform(_zoomTransform);
+    painter.setTransform(_zoomWorld.getTransform());
     painter.setPen(_gridRingsColor);
   
     // set narrow line width
@@ -827,7 +811,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     // Set up the painter
     
     painter.save();
-    painter.setTransform(_zoomTransform);
+    painter.setTransform(_zoomWorld.getTransform());
     painter.setPen(_gridRingsColor);
   
     double ringRange = _ringSpacing;
@@ -1341,18 +1325,16 @@ void PpiPlot::refreshFieldImages()
     
     // set up rendering details
 
-    field->setTransform(_zoomTransform);
+    field->setTransform(_zoomWorld.getTransform());
     
     // Add pointers to the beams to be rendered
     
     if (ifield == _fieldNum || field->isBackgroundRendered()) {
-
       std::vector< PpiBeam* >::iterator beam;
       for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
 	(*beam)->setBeingRendered(ifield, true);
 	field->addBeam(*beam);
       }
-      
     }
     
   } // ifield

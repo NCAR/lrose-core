@@ -204,7 +204,7 @@ public:
   inline double getYMaxWindow() const { return _yMaxWindow; }
 
   QRect getWorldWindow() const;
-  QTransform getTransform() const { return _transform; }
+  const QTransform &getTransform() const { return _transform; }
   
   inline double getXPixel(double xWorld) const {
     return (xWorld - _xMinWorld) * _xPixelsPerWorld + _xMinPixel;
@@ -527,8 +527,8 @@ private:
   // pixel coords of data area
   
   int _xMinPixel;
-  int _yMinPixel;
   int _xMaxPixel;
+  int _yMinPixel;
   int _yMaxPixel;
 
   // scale in pixels per world coords

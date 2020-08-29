@@ -656,7 +656,7 @@ void PolarManager::_createActions()
   // clear display
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
-  // connect(_clearAct, SIGNAL(triggered()), _ppi, SLOT(clear()));
+  connect(_clearAct, SIGNAL(triggered()), _plotWidget, SLOT(clear()));
   // connect(_clearAct, SIGNAL(triggered()), _rhi, SLOT(clear()));
 
   // exit app

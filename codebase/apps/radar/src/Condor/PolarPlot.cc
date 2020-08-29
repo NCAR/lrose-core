@@ -152,15 +152,6 @@ PolarPlot::~PolarPlot()
 
 
 /*************************************************************************
- * clear()
- */
-
-void PolarPlot::clear()
-{
-
-}
-
-/*************************************************************************
  * perform zoom
  */
 
@@ -168,8 +159,8 @@ void PolarPlot::zoom(int x1, int y1, int x2, int y2)
 {
 
   _zoomWorld.setZoomLimits(x1, y1, x2, y2);
-  _zoomTransform = _zoomWorld.getTransform();
   _isZoomed = true;
+  refreshFieldImages();
 
 }
 
@@ -180,10 +171,12 @@ void PolarPlot::zoom(int x1, int y1, int x2, int y2)
 void PolarPlot::unzoom()
 {
 
-  _zoomWorld = _fullWorld;
-  _zoomTransform = _zoomWorld.getTransform();
-  _isZoomed = false;
-
+  if (_isZoomed) {
+    _zoomWorld = _fullWorld;
+    _isZoomed = false;
+    refreshFieldImages();
+  }
+  
 }
 
 /*************************************************************************
@@ -227,8 +220,8 @@ void PolarPlot::setWindowGeom(int width, int height,
 
   _fullWorld.setWindowGeom(width, height, 0, 0);
   _zoomWorld = _fullWorld;
-  _fullTransform = _fullWorld.getTransform();
-  _zoomTransform = _zoomWorld.getTransform();
+  // _fullTransform = _fullWorld.getTransform();
+  // _zoomTransform = _zoomWorld.getTransform();
 
   refreshFieldImages();
 
@@ -384,6 +377,16 @@ QImage *PolarPlot::getCurrentImage()
   return _image;
 }
 
+/*************************************************************************
+ * clear field images
+ */
+
+void PolarPlot::clearFieldImages()
+{
+  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+    _fieldRenderers[ifield]->clearImage();
+  } // ifield
+}
 
 /*************************************************************************
  * perform the rendering
@@ -391,6 +394,12 @@ QImage *PolarPlot::getCurrentImage()
 
 void PolarPlot::_performRendering()
 {
+
+  // set the transform
+  
+  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+    _fieldRenderers[ifield]->setTransform(_zoomWorld.getTransform());
+  } // ifield
 
   // start the rendering threads
   
@@ -415,11 +424,10 @@ void PolarPlot::_performRendering()
 ////////////////////
 // set the transform
 
-void PolarPlot::setTransform(const QTransform &transform)
+void PolarPlot::setTransform00(const QTransform &transform)
 {
   float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
   BoundaryPointEditor::Instance()->setWorldScale(worldScale);
-  _fullTransform = transform;
-  _zoomTransform = transform;
+  // _fullTransform = transform;
+  // _zoomTransform = transform;
 }
-  

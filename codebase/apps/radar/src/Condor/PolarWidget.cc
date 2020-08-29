@@ -257,7 +257,6 @@ void PolarWidget::setArchiveMode(bool archive_mode)
 
 void PolarWidget::unzoomView()
 {
-  cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUU" << endl;
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
@@ -265,6 +264,18 @@ void PolarWidget::unzoomView()
   _refreshFieldImages();
   for (size_t ii = 0; ii < _plots.size(); ii++) {
     _plots[ii]->unzoom();
+  }
+}
+
+
+/*************************************************************************
+ * clear the data and images of the plots
+ */
+
+void PolarWidget::clear()
+{
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->clear();
   }
 }
 
@@ -452,10 +463,10 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 
   // Zooming with the mouse
 
-  int x = e->x();
-  int y = e->y();
-  int deltaX = x - _mousePressX;
-  int deltaY = y - _mousePressY;
+  int ix = e->x();
+  int iy = e->y();
+  int deltaX = ix - _mousePressX;
+  int deltaY = iy - _mousePressY;
   
   // Make the rubberband aspect ratio match that
   // of the window
@@ -467,7 +478,7 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 
   dx *= fabs(deltaX)/deltaX;
   dy *= fabs(deltaY)/deltaY;
-
+  
   int moveX = (int) floor(dx + 0.5);
   int moveY = (int) floor(dy + 0.5);
   QRect newRect = QRect(_mousePressX, _mousePressY, moveX, moveY);
@@ -550,32 +561,27 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
       _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
       _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-      cerr << "22222222222222 _mousePressX: " << _mousePressX << endl;
-      cerr << "22222222222222 _mousePressY: " << _mousePressY << endl;
-      cerr << "22222222222222 _mouseReleaseX: " << _mouseReleaseX << endl;
-      cerr << "22222222222222 _mouseReleaseY: " << _mouseReleaseY << endl;
-
       int plotIdStart = getPlotIdClicked(_mousePressX, _mousePressY);
       int plotIdEnd = getPlotIdClicked(_mouseReleaseX, _mouseReleaseY);
 
-      cerr << "22222222222222 plotIdStart: " << plotIdStart << endl;
-      cerr << "22222222222222 plotIdEnd: " << plotIdEnd << endl;
-      
       if (plotIdStart == plotIdEnd && plotIdStart >= 0) {
-        cerr << "22222222222222 DO ZOOM, id: " << plotIdStart << endl;
+        
         PolarPlot *plot = _plots[plotIdStart];
-        _plots[plotIdStart]->zoom(_mousePressX - plot->getImageOffsetX(),
-                                  _mousePressY - plot->getImageOffsetY(),
-                                  _mouseReleaseX - plot->getImageOffsetX(),
-                                  _mouseReleaseY - plot->getImageOffsetY());
+
+        int xx1 = _mousePressX - plot->getImageOffsetX();
+        int yy1 = _mousePressY - plot->getImageOffsetY();
+        int xx2 = _zoomCornerX - plot->getImageOffsetX();
+        int yy2 = _zoomCornerY - plot->getImageOffsetY();
+
+        _plots[plotIdStart]->zoom(xx1, yy1, xx2, yy2);
 
       }
       
-      _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+      // _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
       
-      _setTransform(_zoomWorld.getTransform());
+      // _setTransform(_zoomWorld.getTransform());
       
-      _setGridSpacing();
+      // _setGridSpacing();
       
       // enable unzoom button
       
@@ -583,7 +589,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
       
       // Update the window in the renderers
       
-      _refreshFieldImages();
+      // _refreshFieldImages();
       
     }
     
@@ -982,33 +988,16 @@ void PolarWidget::configureRange(double max_range)
   int nTicksIdeal = 7;
   int textMargin = 5;
 
-  if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
-
-    _fullWorld.setWindowGeom(width(), height(), 0, 0);
-    _fullWorld.setLeftMargin(leftMargin);
-    _fullWorld.setRightMargin(rightMargin);
-    _fullWorld.setTopMargin(topMargin);
-    _fullWorld.setBottomMargin(bottomMargin);
-    _fullWorld.setColorScaleWidth(colorScaleWidth);
-    _fullWorld.setWorldLimits(-_maxRangeKm, 0.0, _maxRangeKm, _maxRangeKm);
-    _fullWorld.setXAxisTickLen(axisTickLen);
-    _fullWorld.setXNTicksIdeal(nTicksIdeal);
-    _fullWorld.setAxisTextMargin(textMargin);
-
-  } else {
-    
-    _fullWorld.setWindowGeom(width(), height(), 0, 0);
-    _fullWorld.setLeftMargin(leftMargin);
-    _fullWorld.setRightMargin(rightMargin);
-    _fullWorld.setTopMargin(topMargin);
-    _fullWorld.setBottomMargin(bottomMargin);
-    _fullWorld.setColorScaleWidth(colorScaleWidth);
-    _fullWorld.setWorldLimits(-_maxRangeKm, -_maxRangeKm, _maxRangeKm, _maxRangeKm);
-    _fullWorld.setXAxisTickLen(axisTickLen);
-    _fullWorld.setXNTicksIdeal(nTicksIdeal);
-    _fullWorld.setAxisTextMargin(textMargin);
-
-  }
+  _fullWorld.setWindowGeom(width(), height(), 0, 0);
+  _fullWorld.setLeftMargin(leftMargin);
+  _fullWorld.setRightMargin(rightMargin);
+  _fullWorld.setTopMargin(topMargin);
+  _fullWorld.setBottomMargin(bottomMargin);
+  _fullWorld.setColorScaleWidth(colorScaleWidth);
+  _fullWorld.setWorldLimits(-_maxRangeKm, -_maxRangeKm, _maxRangeKm, _maxRangeKm);
+  _fullWorld.setXAxisTickLen(axisTickLen);
+  _fullWorld.setXNTicksIdeal(nTicksIdeal);
+  _fullWorld.setAxisTextMargin(textMargin);
   
   _zoomWorld = _fullWorld;
   _isZoomed = false;

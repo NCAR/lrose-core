@@ -132,7 +132,7 @@ class DLL_EXPORT PpiPlot : public PolarPlot
    * @brief Clear the data in the view.
    */
   
-  void clear();
+  virtual void clear();
 
   /**
    * @brief Refresh the images for each field.

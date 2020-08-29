@@ -260,7 +260,11 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   void unzoomView();
 
-  /**
+  // clear the data and images of the plots
+
+  void clear();
+
+   /**
    * @brief Overload - resize the window.
    *
    */

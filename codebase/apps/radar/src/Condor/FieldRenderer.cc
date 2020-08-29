@@ -21,9 +21,9 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
 #include "FieldRenderer.hh"
 using namespace std;
-
 
 /*************************************************************************
  * Constructor
@@ -73,24 +73,30 @@ void FieldRenderer::createImage(int width, int height)
   _image = new QImage(width, height, QImage::Format_RGB32);
 }
 
+/////////////////////////////////////
+// clear the image
+
+void FieldRenderer::clearImage()
+
+{
+  QBrush backgroundBrush(QColor(_params.background_color));
+  _image->fill(backgroundBrush.color().rgb());
+}
+
 //////////////////////////////////////////////////
 // Add to the beams to be rendered.
 
 void FieldRenderer::addBeam(Beam *beam)
 {
-
   TaThread::LockForScope locker;
-
   _beams.push_back(beam);
   beam->addClient();
-
 }
 
 ////////////////////////////////////////////////////////////////////
 // Perform the housekeeping needed when this field is newly selected.
 
 void FieldRenderer::selectField() 
-
 {
   activateBackgroundRendering();
 }
@@ -165,9 +171,8 @@ void FieldRenderer::run()
   
   TaThread::LockForScope locker;
 
-  vector< Beam* >::iterator beam;
-  for (beam = _beams.begin(); beam != _beams.end(); ++beam)
-  {
+  vector<Beam*>::iterator beam;
+  for (beam = _beams.begin(); beam != _beams.end(); ++beam) {
     if (*beam == NULL) {
       continue;
     }
@@ -180,10 +185,10 @@ void FieldRenderer::run()
     (*beam)->setBeingRendered(_fieldIndex, false);
   }
   
-  for (beam = _beams.begin(); beam != _beams.end(); ++beam)
-  {
+  for (beam = _beams.begin(); beam != _beams.end(); ++beam) {
     Beam::deleteIfUnused(*beam);
   }
+
   _beams.clear();
   
 }

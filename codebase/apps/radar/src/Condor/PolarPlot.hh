@@ -94,12 +94,6 @@ public:
 
   virtual ~PolarPlot();
 
-  /**
-   * Clear the plot
-   */
-  
-  void clear();
-
   // set the window geometry
   
   void setWindowGeom(int width,
@@ -194,7 +188,7 @@ public:
 
   // set the transform between world and image coords
 
-  void setTransform(const QTransform &transform);
+  void setTransform00(const QTransform &transform);
 
   // add a beam
   
@@ -202,7 +196,15 @@ public:
                        const std::vector< std::vector< double > > &beam_data,
                        const std::vector< DisplayField* > &fields) = 0;
 
-  // overide refresh field images
+  // Clear the field images
+  
+  void clearFieldImages();
+
+  // Clear the plot
+  
+  virtual void clear() = 0;
+
+  // refresh field images
 
   virtual void refreshFieldImages() = 0;
 
@@ -233,13 +235,13 @@ protected:
 
   // unzoomed world
 
-  QTransform _fullTransform;
+  // QTransform _fullTransform;
   WorldPlot _fullWorld;
 
   // zoomed world'
 
   bool _isZoomed;
-  QTransform _zoomTransform;
+  // QTransform _zoomTransform;
   WorldPlot _zoomWorld;
 
   // instrument platform details 

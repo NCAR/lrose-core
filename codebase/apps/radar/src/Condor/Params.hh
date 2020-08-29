@@ -92,11 +92,6 @@ public:
   } display_mode_t;
 
   typedef enum {
-    PPI_FULL = 0,
-    PPI_AIRBORNE = 1
-  } ppi_display_type_t;
-
-  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
@@ -563,8 +558,6 @@ public:
 
   int click_cross_size;
 
-  ppi_display_type_t ppi_display_type;
-
   double ppi_aspect_ratio;
 
   tdrp_bool_t ppi_grids_on_at_startup;
@@ -781,7 +774,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[177];
+  mutable TDRPtable _table[176];
 
   const char *_className;
 

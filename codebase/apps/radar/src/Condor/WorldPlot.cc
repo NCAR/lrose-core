@@ -166,6 +166,8 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _axisLabelFontSize = rhs._axisLabelFontSize;
   _tickValuesFontSize = rhs._tickValuesFontSize;
   _legendFontSize = rhs._legendFontSize;
+
+  _backgroundColor = rhs._backgroundColor;
   _titleColor = rhs._titleColor;
   _axisLineColor = rhs._axisLineColor;
   _axisTextColor = rhs._axisTextColor;

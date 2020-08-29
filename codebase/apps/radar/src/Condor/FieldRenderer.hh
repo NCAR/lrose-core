@@ -81,6 +81,7 @@ public:
   // setting state
   
   void createImage(int width, int height);
+  void clearImage();
   void setTransform(const QTransform &transform) { _transform = transform; }
 
   // setting state - bscan only
