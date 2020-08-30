@@ -48,7 +48,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "DisplayManager.hh"
-#include "RayLoc.hh"
+// #include "RayLoc.hh"
 #include "ContextEditingView.hh"
 #include "BoundaryPointEditor.hh"
 #include <QMainWindow>
@@ -161,7 +161,7 @@ private:
 
   // ray locations
 
-  vector<RayLoc> _rayLoc;
+  // vector<RayLoc> _rayLoc;
 
   // input data
   
@@ -190,10 +190,10 @@ private:
   
   // azimuths for current ray
 
-  double _prevAz;
-  double _prevEl;
-  double _startAz;
-  double _endAz;
+  // double _prevAz;
+  // double _prevEl;
+  // double _startAz;
+  // double _endAz;
 
   // times for rays
 
@@ -321,9 +321,9 @@ private:
 
   // ray handling for display
 
-  void _storeRayLoc(const RadxRay *ray, const double az,
-		    const double beam_width);
-  void _clearRayOverlap(const int start_index, const int end_index);
+  // void _storeRayLoc(const RadxRay *ray, const double az,
+  //       	    const double beam_width);
+  // void _clearRayOverlap(const int start_index, const int end_index);
 
   // modes
 

@@ -208,6 +208,11 @@ public:
 
   virtual void refreshFieldImages() = 0;
 
+  // get ray closest to click point
+  
+  virtual const RadxRay *getClosestRay(int imageX, int imageY,
+                                       double &xKm, double &yKm) = 0;
+  
 protected:
 
   ///////////////////////
@@ -315,10 +320,6 @@ protected:
   
   void _performRendering();
   
-  // get ray closest to click point
-  
-  virtual const RadxRay *_getClosestRay(double x_km, double y_km) = 0;
-
 };
 
 #endif

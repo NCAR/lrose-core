@@ -662,33 +662,44 @@ void PpiPlot::configureRange(double max_range)
 ////////////////////////////////////////////////////////////////////////////
 // get ray closest to click point
 
-const RadxRay *PpiPlot::_getClosestRay(double x_km, double y_km)
-
+const RadxRay *PpiPlot::getClosestRay(int imageX, int imageY,
+                                      double &xKm, double &yKm)
+  
 {
-
-  double clickAz = atan2(y_km, x_km) * RAD_TO_DEG;
+  
+  xKm = _zoomWorld.getXWorld(imageX);
+  yKm = _zoomWorld.getYWorld(imageY);
+  
+  double clickAz = atan2(yKm, xKm) * RAD_TO_DEG;
   double radarDisplayAz = 90.0 - clickAz;
   if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
-  LOG(DEBUG) << "clickAz = " << clickAz << " from x_km, y_km = " 
-             << x_km << "," << y_km; 
-  LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from x_km, y_km = "
-             << x_km << y_km;
+  LOG(DEBUG) << "clickAz = " << clickAz << " from xKm, yKm = " 
+             << xKm << "," << yKm; 
+  LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from xKm, yKm = "
+             << xKm << yKm;
 
-  double minDiff = 1.0e99;
+  double minAzErr = 1.0e99;
   const RadxRay *closestRay = NULL;
   for (size_t ii = 0; ii < _ppiBeams.size(); ii++) {
     const RadxRay *ray = _ppiBeams[ii]->getRay();
     double rayAz = ray->getAzimuthDeg();
-    double diff = fabs(radarDisplayAz - rayAz);
-    if (diff > 180.0) {
-      diff = fabs(diff - 360.0);
+    double azErr = fabs(radarDisplayAz - rayAz);
+    if (azErr > 180.0) {
+      azErr = fabs(azErr - 360.0);
     }
-    if (diff < minDiff) {
-      closestRay = ray;
-      minDiff = diff;
+    if (azErr < minAzErr) {
+      if (azErr < 5) {
+        closestRay = ray;
+      }
+      minAzErr = azErr;
     }
   }
 
+  if (closestRay) {
+    cerr << "XXXXXXXX closestRay has azimuth, minAzErr " << closestRay->getAzimuthDeg() << ", " << minAzErr << endl;
+    closestRay->print(cerr);
+  }
+  
   if (closestRay != NULL)
     LOG(DEBUG) << "closestRay has azimuth " << closestRay->getAzimuthDeg();
   else

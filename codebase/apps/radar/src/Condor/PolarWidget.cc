@@ -536,26 +536,25 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
       _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
       _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
       
-      double x_km = _worldReleaseX;
-      double y_km = _worldReleaseY;
       _pointClicked = true;
-      
-      
-      /***** testing ******
-       // QToolTip::showText(mapToGlobal(QPoint(_mouseReleaseX, _mouseReleaseY)), "louigi")  
-       QToolTip::showText(QPoint(0,0), "louigi");
-       
-       smartBrush(_mouseReleaseX, _mouseReleaseY);
-       
-       // ***** end testing ****/
-      
-      // get ray closest to click point
-      
-      const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-      
-      // emit signal
-      
-      emit locationClicked(x_km, y_km, closestRay);
+
+      int plotId = getPlotIdClicked(_mouseReleaseX, _mouseReleaseY);
+      if (plotId >= 0) {
+
+        PolarPlot *plot = _plots[plotId];
+        int ixx = _mousePressX - plot->getImageOffsetX();
+        int iyy = _mousePressY - plot->getImageOffsetY();
+        
+        // get ray closest to click point
+        
+        double xKm, yKm;
+        const RadxRay *closestRay = plot->getClosestRay(ixx, iyy, xKm, yKm);
+        
+        // emit signal
+        
+        emit ppiLocationClicked(xKm, yKm, closestRay);
+
+      }
       
     } else {
       

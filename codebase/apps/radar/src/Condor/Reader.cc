@@ -130,14 +130,14 @@ SimReader::SimReader(const Params &params) :
   _altitude = 1.6;
 
   TaThread::LockForScope locker;
-  _platform.setInstrumentName("SPOL");
-  _platform.setSiteName("Marshall");
+  _platform.setInstrumentName("APAR");
+  _platform.setSiteName("C130");
   _platform.setLatitudeDeg(_latitude);
   _platform.setLongitudeDeg(_longitude);
   _platform.setAltitudeKm(_altitude);
-  _platform.addWavelengthM(0.10);
-  _platform.setRadarBeamWidthDegH(1.0);
-  _platform.setRadarBeamWidthDegV(1.0);
+  _platform.addWavelengthM(0.05);
+  _platform.setRadarBeamWidthDegH(2.0);
+  _platform.setRadarBeamWidthDegV(2.0);
 
 }
 

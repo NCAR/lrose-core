@@ -231,7 +231,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
  signals:
 
-  void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+  void ppiLocationClicked(double xkm, double ykm, const RadxRay *closestRay);
 
   //////////////
   // Qt slots //

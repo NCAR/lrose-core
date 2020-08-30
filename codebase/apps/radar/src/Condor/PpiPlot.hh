@@ -142,6 +142,10 @@ class DLL_EXPORT PpiPlot : public PolarPlot
 
   virtual void refreshFieldImages();
 
+  // get ray closest to click point
+  virtual const RadxRay *getClosestRay(int imageX, int imageY,
+                                       double &xKm, double &yKm);
+
  protected:
 
   RadxVol *_vol;
@@ -180,9 +184,6 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   // // used to detect shift key pressed for boundary editor (switches cursor)
   // virtual void timerEvent(QTimerEvent * event);
 
-
-  // get ray closest to click point
-  virtual const RadxRay *_getClosestRay(double x_km, double y_km);
 
   /**
    * @brief Render the rings and grid. The current value of _ringsGridColor
