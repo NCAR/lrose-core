@@ -167,7 +167,10 @@ public:
     double max_az;
     double min_el;
     double max_el;
-    double max_range_km;
+    double min_x_km;
+    double max_x_km;
+    double min_y_km;
+    double max_y_km;
   } polar_plot_t;
 
   ///////////////////////////
@@ -492,6 +495,8 @@ public:
 
   char* archive_data_url;
 
+  double max_range_km;
+
   show_status_t show_status_in_gui;
 
   char* color_scale_dir;
@@ -774,7 +779,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[176];
+  mutable TDRPtable _table[178];
 
   const char *_className;
 

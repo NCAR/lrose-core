@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for Condor
+ * TDRP params for ./Condor
  **********************************************************************/
 
 //======================================================================
@@ -212,6 +212,22 @@ archive_time_span_secs = 3600;
 //
 
 archive_data_url = ".";
+
+//======================================================================
+//
+// MAX RANGE OF DATA TO BE DISPLAYED.
+//
+//======================================================================
+ 
+///////////// max_range_km ////////////////////////////
+//
+// Max range for the display (km).
+//
+//
+// Type: double
+//
+
+max_range_km = 150;
 
 //======================================================================
 //
@@ -449,7 +465,7 @@ polar_plots_n_columns = 2;
 // Type: double
 //
 
-polar_plot_aspect_ratio = 1;
+polar_plot_aspect_ratio = 1.0;
 
 ///////////// polar_plots /////////////////////////////
 //
@@ -474,7 +490,10 @@ polar_plot_aspect_ratio = 1;
 //      double max_az;
 //      double min_el;
 //      double max_el;
-//      double max_range_km;
+//      double min_x_km;
+//      double max_x_km;
+//      double min_y_km;
+//      double max_y_km;
 //   }
 //
 // 1D array - variable length.
@@ -488,17 +507,23 @@ polar_plots = {
     max_az = 45,
     min_el = -45,
     max_el = 45,
-    max_range_km = 100
+    min_x_km = -120,
+    max_x_km = 120,
+    min_y_km = 0,
+    max_y_km = 150
   }
   ,
   {
     plot_type = PPI_PLOT,
     label = "PPI-2",
-    min_az = 45,
-    max_az = 135,
+    min_az = 10,
+    max_az = 80,
     min_el = -45,
     max_el = 45,
-    max_range_km = 150
+    min_x_km = 0,
+    max_x_km = 150,
+    min_y_km = 0,
+    max_y_km = 150
   }
   ,
   {
@@ -508,7 +533,10 @@ polar_plots = {
     max_az = 225,
     min_el = -45,
     max_el = 45,
-    max_range_km = 200
+    min_x_km = -120,
+    max_x_km = 120,
+    min_y_km = -240,
+    max_y_km = 0
   }
   ,
   {
@@ -518,48 +546,11 @@ polar_plots = {
     max_az = 315,
     min_el = -45,
     max_el = 45,
-    max_range_km = 250
+    min_x_km = -240,
+    max_x_km = 0,
+    min_y_km = -120,
+    max_y_km = 120
   }
-  // ,
-  // {
-  //   plot_type = RHI_PLOT,
-  //   label = "RHI-fore",
-  //   min_az = -7.5,
-  //   max_az = -2.5,
-  //   min_el = -25,
-  //   max_el = 25,
-  //   max_range_km = 225
-  // }
-  // ,
-  // {
-  //   plot_type = RHI_PLOT,
-  //   label = "RHI-aft",
-  //   min_az = 22.5,
-  //   max_az = 27.5,
-  //   min_el = -25,
-  //   max_el = 25,
-  //   max_range_km = 225
-  // }
-  // ,
-  // {
-  //   plot_type = RHI_PLOT,
-  //   label = "RHI-dualpol",
-  //   min_az = -2.5,
-  //   max_az = 2.5,
-  //   min_el = -25,
-  //   max_el = 25,
-  //   max_range_km = 225
-  // }
-  // ,
-  // {
-  //   plot_type = PPI_PLOT,
-  //   label = "PPI",
-  //   min_az = -45,
-  //   max_az = 45,
-  //   min_el = -45,
-  //   max_el = 45,
-  //   max_range_km = 225
-  // }
 };
 
 ///////////// axes_label_color ////////////////////////

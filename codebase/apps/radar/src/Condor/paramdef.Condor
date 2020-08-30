@@ -125,6 +125,15 @@ paramdef string {
 } archive_data_url;
 
 commentdef {
+  p_header = "MAX RANGE OF DATA TO BE DISPLAYED";
+}
+
+paramdef double {
+  p_default = 225.0;
+  p_descr = "Max range for the display (km).";
+} max_range_km;
+
+commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
 }
 
@@ -332,7 +341,10 @@ typedef struct {
   double max_az;
   double min_el;
   double max_el;
-  double max_range_km;
+  double min_x_km;
+  double max_x_km;
+  double min_y_km;
+  double max_y_km;
   
 } polar_plot_t;
 
@@ -347,7 +359,10 @@ paramdef struct polar_plot_t
       max_az = -2.5,
       min_el = -25.0,
       max_el = 25.0,
-      max_range_km = 225.0
+      min_x_km = 0.0,
+      max_x_km = 225.0,
+      min_y_km = -90,
+      max_y_km = 90
      }
      ,
      {
@@ -357,7 +372,10 @@ paramdef struct polar_plot_t
       max_az = 27.5,
       min_el = -25.0,
       max_el = 25.0,
-      max_range_km = 225.0
+      min_x_km = 0.0,
+      max_x_km = 225.0,
+      min_y_km = -90,
+      max_y_km = 90
      }
      ,
      {
@@ -367,7 +385,10 @@ paramdef struct polar_plot_t
       max_az = 2.5,
       min_el = -25.0,
       max_el = 25.0,
-      max_range_km = 225.0
+      min_x_km = 0.0,
+      max_x_km = 225.0,
+      min_y_km = -90,
+      max_y_km = 90
      }
      ,
      {
@@ -377,7 +398,10 @@ paramdef struct polar_plot_t
       max_az = 45.0,
       min_el = -45.0,
       max_el = 45.0,
-      max_range_km = 225.0
+      min_x_km = -150.0,
+      max_x_km = 150.0,
+      min_y_km = 0,
+      max_y_km = 300
      }
     };
   p_descr = "Fields to be displayed.";

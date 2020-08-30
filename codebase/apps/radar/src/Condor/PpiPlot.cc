@@ -56,12 +56,16 @@ PpiPlot::PpiPlot(PolarWidget* parent,
                  double maxAz,
                  double minEl,
                  double maxEl,
-                 double maxRangeKm,
+                 double minXKm,
+                 double maxXKm,
+                 double minYKm,
+                 double maxYKm,
                  const RadxPlatform &platform,
                  const vector<DisplayField *> &fields,
                  bool haveFilteredFields) :
         PolarPlot(parent, manager, params, id, plotType, label,
-                  minAz, maxAz, minEl, maxEl, maxRangeKm,
+                  minAz, maxAz, minEl, maxEl,
+                  minXKm, maxXKm, minYKm, maxYKm,
                   platform, fields, haveFilteredFields)
         
 {
@@ -71,12 +75,17 @@ PpiPlot::PpiPlot(PolarWidget* parent,
 
   // initialize world view
 
-  configureRange(_maxRangeKm);
+  _maxRangeKm = _params.max_range_km;
+  _initWorld();
 
+  // set up overlays
+  
   setGrids(_params.ppi_grids_on_at_startup);
   setRings(_params.ppi_range_rings_on_at_startup);
   setAngleLines(_params.ppi_azimuth_lines_on_at_startup);
 
+  // archive mode
+  
   _isArchiveMode = false;
   _isStartOfSweep = true;
 
@@ -611,15 +620,11 @@ void PpiPlot::_clearRayOverlap(const int start_index, const int end_index)
 
 
 /**************************************`***********************************
- * configureRange()
+ * initialize world coords
  */
 
-void PpiPlot::configureRange(double max_range)
+void PpiPlot::_initWorld()
 {
-
-  // Save the specified values
-
-  _maxRangeKm = max_range;
 
   // Set the ring spacing.  This is dependent on the value of _maxRange.
 
@@ -635,13 +640,13 @@ void PpiPlot::configureRange(double max_range)
   int axisTickLen = 7;
   int nTicksIdeal = 7;
   int textMargin = 5;
-
+  
   _fullWorld.setLeftMargin(leftMargin);
   _fullWorld.setRightMargin(rightMargin);
   _fullWorld.setTopMargin(topMargin);
   _fullWorld.setBottomMargin(bottomMargin);
   _fullWorld.setColorScaleWidth(colorScaleWidth);
-  _fullWorld.setWorldLimits(-_maxRangeKm, -_maxRangeKm, _maxRangeKm, _maxRangeKm);
+  _fullWorld.setWorldLimits(_minXKm, _minYKm, _maxXKm, _maxYKm);
   _fullWorld.setXAxisTickLen(axisTickLen);
   _fullWorld.setXNTicksIdeal(nTicksIdeal);
   _fullWorld.setAxisTextMargin(textMargin);

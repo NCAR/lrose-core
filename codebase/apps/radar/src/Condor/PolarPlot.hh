@@ -83,7 +83,10 @@ public:
             double maxAz,
             double minEl,
             double maxEl,
-            double maxRangeKm,
+            double minXKm,
+            double maxXKm,
+            double minYKm,
+            double maxYKm,
             const RadxPlatform &platform,
             const vector<DisplayField *> &fields,
             bool haveFilteredFields);
@@ -149,10 +152,6 @@ public:
 
   int getId() const { return _id; }
   
-  // geometry
-  
-  void setMaxRangeKm(double val) { _maxRangeKm = val; }
-
   // image for current field
 
   void setImageWidth(int val) { _imageWidth = val; }
@@ -228,7 +227,7 @@ protected:
   const Params &_params;
   int _id;
 
-  // plot type etc
+  // plot type and geometry
   
   Params::plot_type_t _plotType;
   string _label;
@@ -236,8 +235,12 @@ protected:
   double _maxAz;
   double _minEl;
   double _maxEl;
+  double _minXKm;
+  double _maxXKm;
+  double _minYKm;
+  double _maxYKm;
   double _maxRangeKm;
-
+  
   // unzoomed world
 
   // QTransform _fullTransform;

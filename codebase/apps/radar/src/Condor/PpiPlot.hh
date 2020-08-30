@@ -59,7 +59,10 @@ class DLL_EXPORT PpiPlot : public PolarPlot
           double maxAz,
           double minEl,
           double maxEl,
-          double maxRangeKm,
+          double minXKm,
+          double maxXKm,
+          double minYKm,
+          double maxYKm,
           const RadxPlatform &platform,
           const vector<DisplayField *> &fields,
           bool haveFilteredFields);
@@ -69,12 +72,6 @@ class DLL_EXPORT PpiPlot : public PolarPlot
    */
   
   virtual ~PpiPlot();
-
-  /**
-   * @brief Configure for range.
-   */
-
-  virtual void configureRange(double max_range);
 
   /**
    * @brief Add a new beam to the display. Data for all fields and all
@@ -184,6 +181,9 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   // // used to detect shift key pressed for boundary editor (switches cursor)
   // virtual void timerEvent(QTimerEvent * event);
 
+  // initialize world coords
+
+  void _initWorld();
 
   /**
    * @brief Render the rings and grid. The current value of _ringsGridColor
