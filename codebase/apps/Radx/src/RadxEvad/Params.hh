@@ -444,6 +444,8 @@ public:
 
   tdrp_bool_t append_year_dir_to_output_dir;
 
+  tdrp_bool_t write_data_from_all_levels;
+
   tdrp_bool_t write_results_to_spdb;
 
   char* output_spdb_url;
@@ -457,7 +459,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[51];
+  mutable TDRPtable _table[52];
 
   const char *_className;
 

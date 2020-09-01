@@ -1095,6 +1095,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'write_data_from_all_levels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_data_from_all_levels");
+    tt->descr = tdrpStrDup("Option to include all levels in the output.");
+    tt->help = tdrpStrDup("Write out data at all levels. The default is to only write data up to the last level at which a valid result is obtained.");
+    tt->val_offset = (char *) &write_data_from_all_levels - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));

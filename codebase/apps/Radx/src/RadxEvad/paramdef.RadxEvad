@@ -270,6 +270,12 @@ paramdef boolean {
   p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
 } append_year_dir_to_output_dir;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include all levels in the output.";
+  p_help = "Write out data at all levels. The default is to only write data up to the last level at which a valid result is obtained.";
+} write_data_from_all_levels;
+
 commentdef {
   p_header = "SPDB OUTPUT";
 }

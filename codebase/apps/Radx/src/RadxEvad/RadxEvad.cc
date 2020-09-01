@@ -2181,8 +2181,8 @@ int RadxEvad::_writeNetcdfOutput()
           _radarName.c_str());
   
   char outPath[BUFSIZ];
-  sprintf(outPath, "%s%s%s",
-          outDir.c_str(), PATH_DELIM,  fileName);
+  snprintf(outPath, BUFSIZ, "%s%s%s",
+           outDir.c_str(), PATH_DELIM,  fileName);
 
   // open file for writing
 
@@ -2204,6 +2204,10 @@ int RadxEvad::_writeNetcdfOutput()
   // add dimensions
   
   int nZ = _getNValidLevels();
+  if (_params.write_data_from_all_levels) {
+    nZ = _profileNLevels;
+  }
+
   Nc3Dim *zDim;
   if (file.addDim(zDim, "z", nZ)) {
     cerr << "ERROR - RadxEvad::_writeNetcdfOutput" << endl;
@@ -2429,22 +2433,24 @@ int RadxEvad::_writeSpdbOutput()
   vector<double> ww;
   vector<double> div;
 
-  for (int iz = 0; iz < _profileNLevels; iz++) {
+  int nZ = _getNValidLevels();
+  if (_params.write_data_from_all_levels) {
+    nZ = _profileNLevels;
+  }
+  if (nZ == 0) {
+    nZ = 1;
+  }
+  
+  for (int iz = 0; iz < nZ; iz++) {
     const ProfilePt &pt = _profile.interp[iz];
-    if (iz == 0 ||
-        pt.uu != missingVal ||
-        pt.vv != missingVal ||
-        pt.ww != missingVal ||
-        pt.div != missingVal) {
-      ht.push_back(pt.ht);
-      uu.push_back(pt.uu);
-      vv.push_back(pt.vv);
-      ww.push_back(pt.ww);
-      if (pt.div == missingVal) {
-        div.push_back(pt.div);
-      } else {
-        div.push_back(pt.div * 1.0e5);
-      }
+    ht.push_back(pt.ht);
+    uu.push_back(pt.uu);
+    vv.push_back(pt.vv);
+    ww.push_back(pt.ww);
+    if (pt.div == missingVal) {
+      div.push_back(pt.div);
+    } else {
+      div.push_back(pt.div * 1.0e5);
     }
   }
   
