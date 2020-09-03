@@ -76,7 +76,7 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   /**
    * @brief Add a new beam to the display. Data for all fields and all
    *        gates are provided, as well as color maps for all fields.
-   *        addBeam() will map the field values to  the correct color, and
+   *        addRay() will map the field values to  the correct color, and
    *        render the beam for each field in the appropriate pixamp. The
    *        existing wedge for this beam will be discarded.
    *
@@ -87,10 +87,10 @@ class DLL_EXPORT PpiPlot : public PolarPlot
    * @param[in] beam_data      Vectors of data, one for each field.
    */
   
-  virtual void addBeam(const RadxRay *ray,
-                       const std::vector< std::vector< double > > &beam_data,
-                       const std::vector< DisplayField* > &fields);
-
+  virtual void addRay(const RadxRay *ray,
+                      const std::vector< std::vector< double > > &beam_data,
+                      const std::vector< DisplayField* > &fields);
+  
   // are we in archive mode? and if so are we at the start of a sweep?
 
   void setStartOfSweep(bool state) { _isStartOfSweep = state; }

@@ -210,10 +210,10 @@ void PpiPlot::clearVar(const size_t index)
 
 
 /*************************************************************************
- * addBeam()
+ * addRay()
  */
 
-void PpiPlot::addBeam(const RadxRay *ray,
+void PpiPlot::addRay(const RadxRay *ray,
                       const std::vector< std::vector< double > > &beam_data,
                       const std::vector< DisplayField* > &fields)
 {

@@ -240,15 +240,6 @@ class DLL_EXPORT PolarWidget : public QWidget
  public slots:
 
   /**
-   * @brief Slot called when a beam has finished rendering.
-   *
-   * @params[in] field_num   The index of the field that was rendered.  This
-   *                         is used to check if this was the selected field.
-   */
-
-  // void displayImage(const size_t field_num);
-
-  /**
    * set archive mode
    */
   
@@ -607,8 +598,6 @@ class DLL_EXPORT PolarWidget : public QWidget
    *
    * @brief event   The resize event.
    */
-
-  void smartBrush(int xPixel, int yPixel);
 
   virtual void resizeEvent(QResizeEvent * event);
 

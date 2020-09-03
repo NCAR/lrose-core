@@ -159,10 +159,6 @@ private:
   int _nGates;
   double _maxRangeKm;
 
-  // ray locations
-
-  // vector<RayLoc> _rayLoc;
-
   // input data
   
   RadxTime _readerRayTime;
@@ -180,21 +176,9 @@ private:
   QFrame *_polarFrame;
   PolarWidget *_plotWidget;
 
-  // QFrame *_ppiFrame;
-  // PpiWidget *_ppi;
-
-  // RhiWindow *_rhiWindow;
-  // RhiWidget *_rhi;
   bool _rhiWindowDisplayed;
   bool _rhiMode;
   
-  // azimuths for current ray
-
-  // double _prevAz;
-  // double _prevEl;
-  // double _startAz;
-  // double _endAz;
-
   // times for rays
 
   RadxTime _plotStartTime;
@@ -312,18 +296,11 @@ private:
   int _getArchiveData();
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);
-  //  int _applyDataEdits(RadxVol _editedVol);  // & or * ??
   void _applyDataEdits(); // const RadxVol &editedVol);
 
   // draw beam
 
   void _handleRay(RadxPlatform &platform, RadxRay *ray);
-
-  // ray handling for display
-
-  // void _storeRayLoc(const RadxRay *ray, const double az,
-  //       	    const double beam_width);
-  // void _clearRayOverlap(const int start_index, const int end_index);
 
   // modes
 

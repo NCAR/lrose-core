@@ -191,9 +191,9 @@ public:
 
   // add a beam
   
-  virtual void addBeam(const RadxRay *ray,
-                       const std::vector< std::vector< double > > &beam_data,
-                       const std::vector< DisplayField* > &fields) = 0;
+  virtual void addRay(const RadxRay *ray,
+                      const std::vector< std::vector< double > > &beam_data,
+                      const std::vector< DisplayField* > &fields) = 0;
 
   // Clear the field images
   

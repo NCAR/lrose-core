@@ -122,10 +122,6 @@ PolarManager::PolarManager(const Params &params,
 
   // setWindowIcon(QIcon("CondorPolarIcon.icns"));
   
-  // _prevAz = -9999.0;
-  // _prevEl = -9999.0;
-  // _startAz = -9999.0;
-  // _endAz = -9999.0;
   _rhiMode = false;
 
   _nGates = 1000;
@@ -136,12 +132,6 @@ PolarManager::PolarManager(const Params &params,
   
   _polarFrame = NULL;
   _plotWidget = NULL;
-
-  // _ppiFrame = NULL;
-  // _ppi = NULL;
-
-  // _rhiWindow = NULL;
-  // _rhi = NULL;
 
   _sweepVBoxLayout = NULL;
   _sweepPanel = NULL;
@@ -170,10 +160,6 @@ PolarManager::PolarManager(const Params &params,
   _imagesArchiveEndTime.set(_params.images_archive_end_time);
   _imagesScanIntervalSecs = _params.images_scan_interval_secs;
 
-  // set up ray locators
-
-  // _rayLoc.resize(RayLoc::RAY_LOC_N);
-
   // set up windows
 
   _setupWindows();
@@ -193,14 +179,6 @@ PolarManager::~PolarManager()
   if (_plotWidget) {
     delete _plotWidget;
   }
-
-  // if (_ppi) {
-  //   delete _ppi;
-  // }
-
-  // if (_rhi) {
-  //   delete _rhi;
-  // }
 
 }
 
@@ -327,7 +305,6 @@ void PolarManager::resizeEvent(QResizeEvent *event)
     cerr << "resizeEvent: " << event << endl;
   }
   emit frameResized(_polarFrame->width(), _polarFrame->height());
-  // emit frameResized(_ppiFrame->width(), _polarFrame->height());
 }
 
 ////////////////////////////////////////////////////////////////
@@ -489,43 +466,14 @@ void PolarManager::_setupWindows()
   connect(this, SIGNAL(frameResized(const int, const int)),
           _plotWidget, SLOT(resize(const int, const int)));
 
-  // ppi window
-
-  // _ppiFrame = new QFrame(_main);
-  // _ppiFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-  // configure the PPI
-
-  // _ppi = new PpiWidget(_ppiFrame, *this, _params, _platform, _fields, _haveFilteredFields);
-
-  // connect(this, SIGNAL(frameResized(const int, const int)),
-  //         _ppi, SLOT(resize(const int, const int)));
-  
-  // Create the RHI window
-
-  // _rhiWindow = new RhiWindow(this, _params, _platform,
-  //                            _fields, _haveFilteredFields);
-  // _rhiWindow->setRadarName(_params.radar_name);
-
-  // set pointer to the rhiWidget
-
-  // _rhi = _rhiWindow->getWidget();
-  
   // connect slots for location
   
   connect(_plotWidget, SIGNAL(ppiLocationClicked(double, double, const RadxRay*)),
           this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
   
-  // connect(_ppi, SIGNAL(locationClicked(double, double, const RadxRay*)),
-  //         this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
-  // connect(_rhi, SIGNAL(locationClicked(double, double, const RadxRay*)),
-  //         this, SLOT(_rhiLocationClicked(double, double, const RadxRay*)));
-
   // add a right-click context menu to the image
+
   setContextMenuPolicy(Qt::CustomContextMenu);
-  // customContextMenuRequested(e->pos());
-  // connect(_ppi, SIGNAL(customContextMenuRequested(const QPoint &)),
-  //         this, SLOT(ShowContextMenu(const QPoint &)));
 
   // create status panel
 
@@ -540,7 +488,6 @@ void PolarManager::_setupWindows()
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_fieldPanel);
   mainLayout->addWidget(_polarFrame);
-  // mainLayout->addWidget(_ppiFrame);
 
   // sweep panel
 
@@ -1048,20 +995,6 @@ int PolarManager::loadArchiveFileList()
     _urlOK = false;
     return -1;
 
-    /*
-      if (_archiveFileList.size() > 0) {
-      cerr << "Trying previously opened file ..." << endl;
-      // try to read from previous Open file chooser
-      try {
-      _getArchiveData();
-      } catch (FileIException ex) {
-      cerr << "   failed. " << endl;
-      return -1;
-      }
-      } else {
-      return -1;
-      }
-    */
   }
 
   setArchiveFileList(timeList.getPathList(), false);
@@ -1225,11 +1158,6 @@ void PolarManager::_applyDataEdits()
   _plotArchiveData();
 }
 
-/*
-  RadxVol PolarManager::getDataVolume() {
-  return _vol;
-  }
-*/
 /////////////////////////////
 // plot data in archive mode
 
@@ -1374,11 +1302,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
           }
         } // end else not missing value
       } // end for each gate
-      // fill the remainder with missing 
-      //for (int igate = nGates; igate < _nGates; igate++) {
-      //  data.push_back(-9999);
-      //>>>>>>> forVivek
-      //}
 
       if (!haveColorMap) {                              
         _fields[ifield]->setColorMapRange(min, max);
@@ -1397,290 +1320,15 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     _rhiMode = true;
 
-    // If this is the first RHI beam we've encountered, automatically open
-    // the RHI window.  After this, opening and closing the window will be
-    // left to the user.
-
-    // if (!_rhiWindowDisplayed) {
-    //   _rhiWindow->show();
-    //   _rhiWindow->resize();
-    //   _rhiWindowDisplayed = true;
-    // }
-
-    // Add the beam to the display
-
-    // _rhi->addBeam(ray, fieldData, _fields);
-    // _rhiWindow->setAzimuth(ray->getAzimuthDeg());
-    // _rhiWindow->setElevation(ray->getElevationDeg());
-    
   } else {
 
     _rhiMode = false;
 
-    // Store the ray location using the azimuth angle and the PPI location
-    // table
-
-    // double az = ray->getAzimuthDeg();
-    // _storeRayLoc(ray, az, platform.getRadarBeamWidthDegH());
-
-    // Save the angle information for the next iteration
-
-    // _prevAz = az;
-    // _prevEl = -9999.0;
-
-    // Add the beam to the display
-    
     _plotWidget->handleRay(ray, fieldData, _fields);
 
   }
   
 }
-
-///////////////////////////////////////////////////////////
-// store ray location
-
-// void PolarManager::_storeRayLoc(const RadxRay *ray, 
-//                                 const double az,
-//                                 const double beam_width)
-// {
-//   // LOG(DEBUG) << "az = " << az << " beam_width = " << beam_width;
-
-//   // Determine the extent of this ray
-
-//   if (_params.ppi_override_rendering_beam_width) {
-//     double half_angle = _params.ppi_rendering_beam_width / 2.0;
-//     _startAz = az - half_angle - 0.1;
-//     _endAz = az + half_angle + 0.1;
-//   } else if (ray->getIsIndexed()) {
-//     double half_angle = ray->getAngleResDeg() / 2.0;
-//     _startAz = az - half_angle - 0.1;
-//     _endAz = az + half_angle + 0.1;
-//   } else {
-//     double beam_width_min = beam_width;
-//     if (beam_width_min < 0) 
-//       beam_width_min = 10.0;
-
-//     double max_half_angle = beam_width_min / 2.0;
-//     double prev_offset = max_half_angle;
-//     if (_prevAz > 0.0) { // >= 0.0) {
-//       double az_diff = az - _prevAz;
-//       if (az_diff < 0.0)
-// 	az_diff += 360.0;
-//       double half_az_diff = az_diff / 2.0;
-	
-//       if (prev_offset > half_az_diff)
-// 	prev_offset = half_az_diff;
-//     }
-//     _startAz = az - prev_offset - 0.1;
-//     _endAz = az + max_half_angle + 0.1;
-//   }
-    
-//   // store
-//   // HERE !!! fix up negative values here or in clearRayOverlap??
-//   if (_startAz < 0) _startAz += 360.0;
-//   if (_endAz < 0) _endAz += 360.0;
-//   if (_startAz >= 360) _startAz -= 360.0;
-//   if (_endAz >= 360) _endAz -= 360.0;
-    
-//   // LOG(DEBUG) << " startAz = " << _startAz << " endAz = " << _endAz;
-
-//   // compute start and end indices, using modulus to keep with array bounds
-
-//   int startIndex = ((int) (_startAz * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
-//   int endIndex = ((int) (_endAz * RayLoc::RAY_LOC_RES + 1)) % RayLoc::RAY_LOC_N;
-
-//   // Clear out any rays in the locations list that are overlapped by the
-//   // new ray
-    
-//   if (startIndex > endIndex) {
-
-//     // area crosses the 360; 0 boundary; must break into two sections
-
-//     // first from start index to 360
-    
-//     _clearRayOverlap(startIndex, RayLoc::RAY_LOC_N - 1);
-
-//     for (int ii = startIndex; ii < RayLoc::RAY_LOC_N; ii++) { // RayLoc::RAY_LOC_N; ii++) {
-//       _rayLoc[ii].ray = ray;
-//       _rayLoc[ii].active = true;
-//       _rayLoc[ii].startIndex = startIndex;
-//       _rayLoc[ii].endIndex = RayLoc::RAY_LOC_N - 1; // RayLoc::RAY_LOC_N;
-//     }
-
-//     // then from 0 to end index
-    
-//     _clearRayOverlap(0, endIndex);
-
-//     // Set the locations associated with this ray
-    
-//     for (int ii = 0; ii <= endIndex; ii++) {
-//       _rayLoc[ii].ray = ray;
-//       _rayLoc[ii].active = true;
-//       _rayLoc[ii].startIndex = 0;
-//       _rayLoc[ii].endIndex = endIndex;
-//     }
-
-//   } else { // if (startIndex > endIndex) 
-
-//     _clearRayOverlap(startIndex, endIndex);
-    
-//     // Set the locations associated with this ray
-
-//     for (int ii = startIndex; ii <= endIndex; ii++) {
-//       _rayLoc[ii].ray = ray;
-//       _rayLoc[ii].active = true;
-//       _rayLoc[ii].startIndex = startIndex;
-//       _rayLoc[ii].endIndex = endIndex;
-//     }
-
-//   } // if (startIndex > endIndex) 
-
-// }
-
- 
-///////////////////////////////////////////////////////////
-// clear any locations that are overlapped by the given ray
-
-// void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
-// {
-
-//   // LOG(DEBUG) << "enter" << " start_index=" << start_index <<
-//   // " end_index = " << end_index;
-
-//   if ((start_index < 0) || (start_index > RayLoc::RAY_LOC_N)) {
-//     cout << "ERROR: _clearRayOverlap start_index out of bounds " << start_index << endl;
-//     return;
-//   }
-//   if ((end_index < 0) || (end_index > RayLoc::RAY_LOC_N)) {
-//     cout << "ERROR: _clearRayOverlap end_index out of bounds " << end_index << endl;
-//     return;
-//   }
-
-//   // Loop through the ray locations, clearing out old information
-
-//   int i = start_index;
-  
-//   while (i <= end_index) {
-
-//     RayLoc &loc = _rayLoc[i];
-    
-//     // If this location isn't active, we can skip it
-
-//     if (!loc.active) {
-//       // // LOG(DEBUG) << "loc NOT active";
-//       ++i;
-//       continue;
-//     }
-    
-//     int loc_start_index = loc.startIndex;
-//     int loc_end_index = loc.endIndex;
-
-//     if ((loc_start_index < 0) || (loc_start_index > RayLoc::RAY_LOC_N)) {
-//       cout << "ERROR: _clearRayOverlap loc_start_index out of bounds " << loc_start_index << endl;
-//       ++i;
-//       continue;
-//     }
-//     if ((loc_end_index < 0) || (loc_end_index > RayLoc::RAY_LOC_N)) {
-//       cout << "ERROR: _clearRayOverlap loc_end_index out of bounds " << loc_end_index << endl;
-//       ++i;
-//       continue;
-//     }
-
-//     if (loc_end_index < i) {
-//       cout << " OH NO! We are HERE" << endl;
-//       ++i;
-//       continue;
-//     }
-//     // If we get here, this location is active.  We now have 4 possible
-//     // situations:
-
-//     if (loc.startIndex < start_index && loc.endIndex <= end_index) {
-
-//       // The overlap area covers the end of the current beam.  Reduce the
-//       // current beam down to just cover the area before the overlap area.
-//       // LOG(DEBUG) << "Case 1a:";
-//       // LOG(DEBUG) << " i = " << i;
-//       // LOG(DEBUG) << "clearing from start_index=" << start_index <<
-//       // " to loc_end_index=" << loc_end_index;
-      
-//       for (int j = start_index; j <= loc_end_index; ++j) {
-
-// 	_rayLoc[j].ray = NULL;
-// 	_rayLoc[j].active = false;
-
-//       }
-
-//       // Update the end indices for the remaining locations in the current
-//       // beam
-//       // LOG(DEBUG) << "Case 1b:";
-//       // LOG(DEBUG) << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
-//       // " to start_index=" << start_index;
-      
-//       for (int j = loc_start_index; j < start_index; ++j)
-// 	_rayLoc[j].endIndex = start_index - 1;
-
-//     } else if (loc.startIndex < start_index && loc.endIndex > end_index) {
-      
-//       // The current beam is bigger than the overlap area.  This should never
-//       // happen, so go ahead and just clear out the locations for the current
-//       // beam.
-//       // LOG(DEBUG) << "Case 2:";
-//       // LOG(DEBUG) << " i = " << i;
-//       // LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
-//       // " to loc_end_index=" << loc_end_index;
-      
-//       for (int j = loc_start_index; j <= loc_end_index; ++j) {
-//         _rayLoc[j].clear();
-//       }
-
-//     } else if (loc.endIndex > end_index) {
-      
-//       // The overlap area covers the beginning of the current beam.  Reduce the
-//       // current beam down to just cover the area after the overlap area.
-
-//       // LOG(DEBUG) << "Case 3a:";
-//       // LOG(DEBUG) << " i = " << i;
-//       // LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
-//       // " to end_index=" << end_index;
-
-//       for (int j = loc_start_index; j <= end_index; ++j) {
-// 	_rayLoc[j].ray = NULL;
-// 	_rayLoc[j].active = false;
-//       }
-
-//       // Update the start indices for the remaining locations in the current
-//       // beam
-
-//       // LOG(DEBUG) << "Case 3b:";
-//       // LOG(DEBUG) << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
-//       // " to loc_end_index=" << loc_end_index;
-      
-//       for (int j = end_index + 1; j <= loc_end_index; ++j) {
-// 	_rayLoc[j].startIndex = end_index + 1;
-//       }
-
-//     } else {
-      
-//       // The current beam is completely covered by the overlap area.  Clear
-//       // out all of the locations for the current beam.
-//       // LOG(DEBUG) << "Case 4:";
-//       // LOG(DEBUG) << " i = " << i;
-//       // LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
-//       // " to loc_end_index=" << loc_end_index;
-      
-//       for (int j = loc_start_index; j <= loc_end_index; ++j) {
-//         _rayLoc[j].clear();
-//       }
-
-//     }
-    
-//     i = loc_end_index + 1;
-
-//   } /* endwhile - i */
-  
-//   // LOG(DEBUG) << "exit ";
-  
-// }
 
 ////////////////////////////////////////////
 // freeze / unfreeze
@@ -1747,8 +1395,6 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   
   // _ppi->selectVar(_fieldNum);
   // _rhi->selectVar(_fieldNum);
-
-  // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
 
   _selectedName = _selectedField->getName();
   _selectedLabel = _selectedField->getLabel();
@@ -1849,20 +1495,11 @@ void PolarManager::_ppiLocationClicked(double xKm, double yKm,
     cerr << "    azDeg = " << azDeg << endl;
   }
   
-  // int rayIndex = ((int) (azDeg * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
-  // if (_params.debug) {
-  //   cerr << "    rayIndex = " << rayIndex << endl;
-  // }
-  // const RadxRay *ray = _rayLoc[rayIndex].ray;
-  
   if (closestRay == NULL) {
     // no ray data yet
     if (_params.debug) {
       cerr << "    No ray data yet, xKm, yKm, az: "
            << xKm << ", " << yKm << ", " << azDeg << endl;
-      // cerr << "      active = " << _rayLoc[rayIndex].active << endl;
-      // cerr << "      startIndex = " << _rayLoc[rayIndex].startIndex << endl;
-      // cerr << "      endIndex = " << _rayLoc[rayIndex].endIndex << endl;
     }
     return;
   }
@@ -1915,20 +1552,6 @@ void PolarManager::_locationClicked(double xKm, double yKm,
       ray->print(cerr);
     }
   }
-
-  //**** testing ****
-  //  QToolTip::showText(this->mapToGlobal(QPoint(xKm, yKm)), "cindy");
-  //QToolTip::showText(mapToGlobal(QPoint(xKm, yKm)), "cindy");
-  //QToolTip::showText(mapToGlobal(QPoint(xKm, yKm)), "louise");
-  //QToolTip::showText(QPoint(xKm, yKm), "jay");
-  //int xp = _ppi->_zoomWorld.getIxPixel(xKm);
-  //int yp = _ppi->_zoomWorld.getIyPixel(yKm);
-  //QToolTip::showText(_ppi->mapToGlobal(QPoint(xp, yp)), "louigi");
-
-  //_ppi->smartBrush(xKm, yKm);
-  //qImage->convertToFormat(QImage::Format_RGB32);
-  //qImage->invertPixels()
-  // ****** end testing *****
 
   DateTime rayTime(ray->getTimeSecs());
   char text[256];
@@ -2066,7 +1689,6 @@ void PolarManager::_createTimeControl()
   
   // active time
 
-  // _selectedTimeLabel = new QLabel("yyyy/MM/dd hh:mm:ss", _timePanel);
   _selectedTimeLabel = new QPushButton(_timePanel);
   _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
   QPalette pal = _selectedTimeLabel->palette();
@@ -2380,9 +2002,6 @@ void PolarManager::_openFile()
     QFileDialog::getOpenFileName(this,
                                  "Open Document",
                                  inputPath, finalPattern);
-  //QDir::currentPath(),
-  //"All files (*.*)");
-
   // wait 10ms so the QFileDialog has time to close before proceeding...
 
   QTimer::singleShot(10, [=]() {
@@ -2743,9 +2362,6 @@ void PolarManager::_setArchiveMode(bool state)
   if (_plotWidget) {
     _plotWidget->setArchiveMode(state);
   }
-  // if (_rhi) {
-  //   _rhi->setArchiveMode(state);
-  // }
 }
 
 ////////////////////////////////////////////////////////
@@ -2779,12 +2395,6 @@ void PolarManager::_activateRealtimeRendering()
   if (_plotWidget) {
     _plotWidget->activateRealtimeRendering();
   }
-  // if (_ppi) {
-  //   _ppi->activateRealtimeRendering();
-  // }
-  // if (_rhi) {
-  //   _rhi->activateRealtimeRendering();
-  // }
 }
 
 /////////////////////////////////////
@@ -2796,9 +2406,6 @@ void PolarManager::_activateArchiveRendering()
   if (_plotWidget) {
     _plotWidget->activateArchiveRendering();
   }
-  // if (_rhi) {
-  //   _rhi->activateArchiveRendering();
-  // }
 }
 
 /////////////////////////////////////////////////////

@@ -328,8 +328,8 @@ void PolarWidget::setAngleLines(const bool enabled)
 
 void PolarWidget::activateArchiveRendering()
 {
-  for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-    _fieldRenderers[ii]->setBackgroundRenderingOn();
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->activateArchiveRendering();
   }
 }
 
@@ -340,28 +340,10 @@ void PolarWidget::activateArchiveRendering()
 
 void PolarWidget::activateRealtimeRendering()
 {
-  
-  for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-    if (ii != _fieldNum) {
-      _fieldRenderers[ii]->activateBackgroundRendering();
-    }
+  for (size_t ii = 0; ii < _plots.size(); ii++) {
+    _plots[ii]->activateRealtimeRendering();
   }
-
 }
-
-/*************************************************************************
- * displayImage()
- */
-
-// void PolarWidget::displayImage(const size_t field_num)
-// {
-//   // If we weren't rendering the current field, do nothing
-//   if (field_num != _fieldNum) {
-//     return;
-//   }
-//   update();
-// }
-
 
 /*************************************************************************
  * backgroundColor()
@@ -585,25 +567,16 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 
       }
       
-      // _zoomWorld.setWorldLimits(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
-      
-      // _setTransform(_zoomWorld.getTransform());
-      
-      // _setGridSpacing();
-      
-      // enable unzoom button
-      
       _manager.enableZoomButton();
-      
-      // Update the window in the renderers
-      
-      // _refreshFieldImages();
       
     }
     
     // hide the rubber band
     
     _rubberBand->hide();
+
+    // paint
+    
     update();
 
   }
@@ -631,6 +604,7 @@ int PolarWidget::getPlotIdClicked(int ix, int iy) const
 
 // Used to notify BoundaryPointEditor if the user has zoomed in/out or is pressing the Shift key
 // Todo: investigate implementing a listener pattern instead
+
 void PolarWidget::timerEvent(QTimerEvent *event)
 {
   bool doUpdate = false;
@@ -667,30 +641,15 @@ void PolarWidget::handleRay(const RadxRay *ray,
 {
 
   _currentRay = ray;
+
+  // add beam to each plot
+  
   for (size_t ii = 0; ii < _plots.size(); ii++) {
-    _plots[ii]->addBeam(ray, beam_data, fields);
+    _plots[ii]->addRay(ray, beam_data, fields);
   }
   update();
 
 }
-
-/**************   testing ******/
-void PolarWidget::smartBrush(int xPixel, int yPixel) {
-  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
-  //int yp = _ppi->_zoomWorld.get>IyPixel(ykm);
-
-  QImage qImage;
-  qImage.load("/h/eol/brenda/octopus.jpg");
-  // get the Image from somewhere ...   
-  //qImage->convertToFormat(QImage::Format_RGB32);
-  //qImage->invertPixels();
-  QPainter painter(this);
-  painter.drawImage(0, 0, qImage);
-  // _drawOverlays(painter);
-
-}
-
-
 
 /*************************************************************************
  * paintEvent()
