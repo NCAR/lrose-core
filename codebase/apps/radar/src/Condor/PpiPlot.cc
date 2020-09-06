@@ -383,33 +383,9 @@ void PpiPlot::_storeRayLoc(const RadxRay *ray,
 
   // Determine the extent of this ray
 
-  if (_params.ppi_override_rendering_beam_width) {
-    double half_angle = _params.ppi_rendering_beam_width / 2.0;
-    _startAz = az - half_angle - 0.1;
-    _endAz = az + half_angle + 0.1;
-  } else if (ray->getIsIndexed()) {
-    double half_angle = ray->getAngleResDeg() / 2.0;
-    _startAz = az - half_angle - 0.1;
-    _endAz = az + half_angle + 0.1;
-  } else {
-    double beam_width_min = beam_width;
-    if (beam_width_min < 0) 
-      beam_width_min = 10.0;
-
-    double max_half_angle = beam_width_min / 2.0;
-    double prev_offset = max_half_angle;
-    if (_prevAz > 0.0) { // >= 0.0) {
-      double az_diff = az - _prevAz;
-      if (az_diff < 0.0)
-	az_diff += 360.0;
-      double half_az_diff = az_diff / 2.0;
-	
-      if (prev_offset > half_az_diff)
-	prev_offset = half_az_diff;
-    }
-    _startAz = az - prev_offset - 0.1;
-    _endAz = az + max_half_angle + 0.1;
-  }
+  double half_angle = _params.ppi_rendering_beam_width / 2.0;
+  _startAz = az - half_angle - 0.1;
+  _endAz = az + half_angle + 0.1;
     
   // store
   // HERE !!! fix up negative values here or in clearRayOverlap??

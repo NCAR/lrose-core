@@ -1148,7 +1148,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("polar_plots_n_columns");
     tt->descr = tdrpStrDup("Number of columns of plots.");
-    tt->help = tdrpStrDup("The plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.");
+    tt->help = tdrpStrDup("The plots are made up of a matrix of plots, n_rows by n_colums. This is the value for the number of columns. The number of rows is computed from the number of plots and the number of columns.");
     tt->val_offset = (char *) &polar_plots_n_columns - &_start_;
     tt->single_val.i = 2;
     tt++;
@@ -1359,7 +1359,7 @@
     tt->descr = tdrpStrDup("Radar name if overridden.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("SPOL");
+    tt->single_val.s = tdrpStrDup("APAR");
     tt++;
     
     // Parameter 'display_site_name'
@@ -1395,7 +1395,7 @@
     tt->descr = tdrpStrDup("Site name if overridden.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &site_name - &_start_;
-    tt->single_val.s = tdrpStrDup("MARSHALL");
+    tt->single_val.s = tdrpStrDup("C130");
     tt++;
     
     // Parameter 'Comment 10'
@@ -1692,18 +1692,6 @@
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'ppi_override_rendering_beam_width'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ppi_override_rendering_beam_width");
-    tt->descr = tdrpStrDup("Option to override the azimuth beam width for rendering.");
-    tt->help = tdrpStrDup("Normally Condor determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.");
-    tt->val_offset = (char *) &ppi_override_rendering_beam_width - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'ppi_rendering_beam_width'
     // ctype is 'double'
     
@@ -1987,18 +1975,6 @@
     tt->help = tdrpStrDup("After the queue reaches this size, older beams are discarded.");
     tt->val_offset = (char *) &rhi_beam_queue_size - &_start_;
     tt->single_val.i = 360;
-    tt++;
-    
-    // Parameter 'rhi_override_rendering_beam_width'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_override_rendering_beam_width");
-    tt->descr = tdrpStrDup("Option to override the azimuth beam width for rendering.");
-    tt->help = tdrpStrDup("Normally Condor determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.");
-    tt->val_offset = (char *) &rhi_override_rendering_beam_width - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'rhi_rendering_beam_width'

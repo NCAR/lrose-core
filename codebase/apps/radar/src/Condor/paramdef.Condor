@@ -317,7 +317,7 @@ commentdef {
 paramdef int {
   p_default = 2;
   p_descr = "Number of columns of plots.";
-  p_help = "The plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.";
+  p_help = "The plots are made up of a matrix of plots, n_rows by n_colums. This is the value for the number of columns. The number of rows is computed from the number of plots and the number of columns.";
 } polar_plots_n_columns;
 
 paramdef double {
@@ -449,7 +449,7 @@ paramdef boolean {
 } override_radar_name;
 
 paramdef string {
-  p_default = "SPOL";
+  p_default = "APAR";
   p_descr = "Radar name if overridden.";
 } radar_name;
 
@@ -464,7 +464,7 @@ paramdef boolean {
 } override_site_name;
 
 paramdef string {
-  p_default = "MARSHALL";
+  p_default = "C130";
   p_descr = "Site name if overridden.";
 } site_name;
 
@@ -564,23 +564,6 @@ commentdef {
   p_header = "PPI MODE DISPLAY";
 }
 
-// typedef enum
-//   {
-//    PPI_FULL,
-//    PPI_AIRBORNE
-//   } ppi_display_type_t;
-
-// paramdef enum ppi_display_type_t
-//   {
-//    p_descr = "Type of display to use for the PPI window.";
-//    p_help = "\tPPI_FULL - Display the full 360 degrees of the PPI. "
-//    "This is the default.\n"
-//    "\tPPI_AIRBORN - Use the airborn radar PPI display. "
-//    "This display shows just the 180 degrees of radar pointing forward "
-//    "from the nose of the plane.\n";
-//    p_default = PPI_FULL;
-//   } ppi_display_type;
-
 paramdef double {
   p_default = 1.0;
   p_descr = "Aspect ratio (width/height) of PPI window.";
@@ -616,12 +599,6 @@ paramdef enum legend_pos_t
    p_descr = "Position of main legend in the PPI plot window";
    p_help = "This include time, field name and elevation angle.";
   } ppi_main_legend_pos;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the azimuth beam width for rendering.";
-  p_help = "Normally Condor determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} ppi_override_rendering_beam_width;
 
 paramdef double {
   p_default = 1.0;
@@ -748,12 +725,6 @@ paramdef int {
   p_descr = "Size of the queue for RHI beams.";
   p_help = "After the queue reaches this size, older beams are discarded.";
 } rhi_beam_queue_size;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the azimuth beam width for rendering.";
-  p_help = "Normally Condor determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} rhi_override_rendering_beam_width;
 
 paramdef double {
   p_default = 1.0;

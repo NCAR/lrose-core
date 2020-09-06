@@ -44,7 +44,7 @@ debug = DEBUG_OFF;
 // Type: boolean
 //
 
-check_ray_alloc = FALSE;
+check_ray_alloc = TRUE;
 
 ///////////// register_with_procmap ///////////////////
 //
@@ -449,7 +449,8 @@ use_field_label_in_title = FALSE;
 // Number of columns of plots.
 //
 // The plots are made up of a matrix of plots, n_rows by n_colums. This 
-//   is the starting value for the number of columns.
+//   is the value for the number of columns. The number of rows is 
+//   computed from the number of plots and the number of columns.
 //
 //
 // Type: int
@@ -465,7 +466,7 @@ polar_plots_n_columns = 2;
 // Type: double
 //
 
-polar_plot_aspect_ratio = 1.0;
+polar_plot_aspect_ratio = 1;
 
 ///////////// polar_plots /////////////////////////////
 //
@@ -886,20 +887,6 @@ ppi_azimuth_lines_on_at_startup = TRUE;
 
 ppi_main_legend_pos = LEGEND_TOP_LEFT;
 
-///////////// ppi_override_rendering_beam_width ///////
-//
-// Option to override the azimuth beam width for rendering.
-//
-// Normally Condor determines the azimuth rendering beam width 
-//   automatically. You can override this and specifcally set the azimuth 
-//   beam width for rendering.
-//
-//
-// Type: boolean
-//
-
-ppi_override_rendering_beam_width = FALSE;
-
 ///////////// ppi_rendering_beam_width ////////////////
 //
 // Rendering beam width, if override is active.
@@ -910,7 +897,7 @@ ppi_override_rendering_beam_width = FALSE;
 // Type: double
 //
 
-ppi_rendering_beam_width = 1;
+ppi_rendering_beam_width = 1.0;
 
 //======================================================================
 //
@@ -1145,20 +1132,6 @@ rhi_main_legend_pos = LEGEND_TOP_LEFT;
 //
 
 rhi_beam_queue_size = 360;
-
-///////////// rhi_override_rendering_beam_width ///////
-//
-// Option to override the azimuth beam width for rendering.
-//
-// Normally Condor determines the azimuth rendering beam width 
-//   automatically. You can override this and specifcally set the azimuth 
-//   beam width for rendering.
-//
-//
-// Type: boolean
-//
-
-rhi_override_rendering_beam_width = FALSE;
 
 ///////////// rhi_rendering_beam_width ////////////////
 //

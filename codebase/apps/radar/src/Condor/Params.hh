@@ -573,8 +573,6 @@ public:
 
   legend_pos_t ppi_main_legend_pos;
 
-  tdrp_bool_t ppi_override_rendering_beam_width;
-
   double ppi_rendering_beam_width;
 
   int rhi_window_width;
@@ -618,8 +616,6 @@ public:
   legend_pos_t rhi_main_legend_pos;
 
   int rhi_beam_queue_size;
-
-  tdrp_bool_t rhi_override_rendering_beam_width;
 
   double rhi_rendering_beam_width;
 
@@ -779,7 +775,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[178];
+  mutable TDRPtable _table[176];
 
   const char *_className;
 

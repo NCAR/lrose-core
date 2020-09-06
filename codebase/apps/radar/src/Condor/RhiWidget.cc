@@ -699,14 +699,13 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
 
   int i = startIndex;
   
-  while (i <= endIndex)
-  {
+  while (i <= endIndex) {
+
     RayLoc &loc = _rayLoc[i];
     
     // If this location isn't active, we can skip it
-
-    if (!loc.active)
-    {
+    
+    if (!loc.active) {
       ++i;
       continue;
     }
@@ -717,13 +716,12 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
     // If we get here, this location is active.  We now have 4 possible
     // situations:
 
-    if (loc.startIndex < startIndex && loc.endIndex <= endIndex)
-    {
+    if (loc.startIndex < startIndex && loc.endIndex <= endIndex) {
+
       // The overlap area covers the end of the current beam.  Reduce the
       // current beam down to just cover the area before the overlap area.
-
-      for (int j = startIndex; j <= locEndIndex; ++j)
-      {
+      
+      for (int j = startIndex; j <= locEndIndex; ++j) {
 	_rayLoc[j].ray = NULL;
 	_rayLoc[j].active = false;
       }
@@ -731,27 +729,26 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
       // Update the end indices for the remaining locations in the current
       // beam
 
-      for (int j = locStartIndex; j < startIndex; ++j)
+      for (int j = locStartIndex; j < startIndex; ++j) {
 	_rayLoc[j].endIndex = startIndex - 1;
-    }
-    else if (loc.startIndex < startIndex && loc.endIndex > endIndex)
-    {
+      }
+      
+    } else if (loc.startIndex < startIndex && loc.endIndex > endIndex) {
+      
       // The current beam is bigger than the overlap area.  This should never
       // happen, so go ahead and just clear out the locations for the current
       // beam.
 
-      for (int j = locStartIndex; j <= locEndIndex; ++j)
-      {
+      for (int j = locStartIndex; j <= locEndIndex; ++j) {
         _rayLoc[j].clear();
       }
-    }
-    else if (loc.endIndex > endIndex)
-    {
+
+    } else if (loc.endIndex > endIndex) {
+
       // The overlap area covers the beginning of the current beam.  Reduce the
       // current beam down to just cover the area after the overlap area.
-
-      for (int j = locStartIndex; j <= endIndex; ++j)
-      {
+      
+      for (int j = locStartIndex; j <= endIndex; ++j) {
 	_rayLoc[j].ray = NULL;
 	_rayLoc[j].active = false;
       }
@@ -759,21 +756,23 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
       // Update the start indices for the remaining locations in the current
       // beam
 
-      for (int j = endIndex + 1; j <= locEndIndex; ++j)
+      for (int j = endIndex + 1; j <= locEndIndex; ++j) {
 	_rayLoc[j].startIndex = endIndex + 1;
-    }
-    else
-    {
+      }
+      
+    } else {
+
       // The current beam is completely covered by the overlap area.  Clear
       // out all of the locations for the current beam.
-
-      for (int j = locStartIndex; j <= locEndIndex; ++j)
-      {
+      
+      for (int j = locStartIndex; j <= locEndIndex; ++j) {
         _rayLoc[j].clear();
       }
+
     }
     
     i = locEndIndex + 1;
+    
   } /* endwhile - i */
   
 }
