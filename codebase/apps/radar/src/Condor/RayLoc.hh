@@ -36,28 +36,35 @@
 #define RayLoc_HH
 
 class RadxRay;
+class Beam;
 
 class RayLoc {
 
 public:
 
   int startIndex;
+  int midIndex;
   int endIndex;
   bool active;
   const RadxRay *ray;
-
+  Beam *beam;
+  
   RayLoc() {
     startIndex = -1;
+    midIndex = -1;
     endIndex = -1;
     active = false;
     ray = NULL;
+    beam = NULL;
   }
 
   void clear() {
-    ray = NULL;
     startIndex = -1;
+    midIndex = -1;
     endIndex = -1;
     active = false;
+    ray = NULL;
+    beam = NULL;
   }
 
   // ray locator

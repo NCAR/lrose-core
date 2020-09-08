@@ -27,7 +27,6 @@
 
 #include "Radx/RadxVol.hh"
 #include "PolarPlot.hh"
-#include "RayLoc.hh"
 class PpiWidget;
 
 // Plot for a PPI scan.  Beams are added to the scan as they
@@ -92,13 +91,13 @@ class DLL_EXPORT PpiPlot : public PolarPlot
                       const std::vector< DisplayField* > &fields);
   
   // are we in archive mode? and if so are we at the start of a sweep?
-
+  
   void setStartOfSweep(bool state) { _isStartOfSweep = state; }
 
   // get the number of beams stored in widget
 
   size_t getNumBeams() const;
-
+  
   /**
    * @brief Select the field to display.
    *
@@ -114,11 +113,11 @@ class DLL_EXPORT PpiPlot : public PolarPlot
    *
    * @notes This method is not currently called anywhere.
    */
-
+  
   void clearVar(const size_t index);
-
+  
   // get plot times
-
+  
   const RadxTime &getPlotStartTime() { return _plotStartTime; }
   const RadxTime &getPlotEndTime() { return _plotEndTime; }
 
@@ -140,16 +139,11 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   virtual void refreshFieldImages();
 
   // get ray closest to click point
+
   virtual const RadxRay *getClosestRay(int imageX, int imageY,
                                        double &xKm, double &yKm);
-
- protected:
-
-  RadxVol *_vol;
   
-  // pointers to active beams
-
-  std::vector<PpiBeam*> _ppiBeams;
+ protected:
 
   // are we in archive mode? and if so are we at the start of a sweep?
 
@@ -163,23 +157,6 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   double _meanElev;
   double _sumElev;
   double _nRays;
-
-  // ray locations
-
-  vector<RayLoc> _rayLoc;
-
-  // azimuths for current ray
-
-  double _prevAz;
-  double _prevEl;
-  double _startAz;
-  double _endAz;
-
-  // override mouse release event
-  // virtual void mouseReleaseEvent(QMouseEvent* event);
-
-  // // used to detect shift key pressed for boundary editor (switches cursor)
-  // virtual void timerEvent(QTimerEvent * event);
 
   // initialize world coords
 
@@ -209,37 +186,60 @@ class DLL_EXPORT PpiPlot : public PolarPlot
                        int text_x, int text_y,
                        int flags);
     
-  /**
-   * @brief For dynamically allocated beams, cull the beam list, removing
-   *        beams that are hidden by the given new beam.
-   *
-   * @params[in] beamAB     The new beam being added to the list.  Note that
-   *                        this beam must not already be added to the list
-   *                        when this method is called or it will be immediately
-   *                        removed again.
-   */
-
-  void _cullBeams(const PpiBeam *beamAB);
+ private:
   
-  /**
-   * @brief Find the index in the _ppiBeams array of the beam that corresponds
-   *        to this angle. The beam angles must sweep in a counter clockwise,
-   *         i.e. cartessian, direction.
-   *
-   * @param[in] start_angle    Beginning angle of the beam.
-   * @param[in] stop_angle     Ending angle of the beam.
-   *
-   * @return Returns the index for the given beam.
-   */
+  // ray locations
+  // we use a locator with data every 1/10th degree
+  // around the 360 degree circle
+  
+  static const int RAY_LOC_RES = 10;
+  static const int RAY_LOC_N = 3600;
+  
+  class RayLoc {
+    
+  public:
 
-  inline int _beamIndex(const double start_angle, const double stop_angle);
+    // constructor
+    
+    RayLoc(int index);
 
+    // set the ray and beam data
 
-  void _storeRayLoc(const RadxRay *ray, 
-                    const double az,
-                    const double beam_width);
+    void setData(double az, const RadxRay *ray, PpiBeam *beam);
 
-  void _clearRayOverlap(const int start_index, const int end_index);
+    // clear the ray and beam data
+    
+    void clearData();
+
+    // get methods
+    
+    int getIndex() const { return _index; }
+    double getMidAz() const { return _midAz; }
+    double getTrueAz() const { return _trueAz; }
+    bool getActive() const { return _active; }
+    const RadxRay *getRay() const { return _ray; }
+    PpiBeam *getBeam() const { return _beam; }
+
+  private:
+    
+    // members
+    
+    int _index;
+    double _midAz;
+    double _trueAz;
+    bool _active;
+    const RadxRay *_ray;
+    PpiBeam *_beam;
+    
+  };
+  
+  vector<RayLoc *> _rayLoc;
+  int _rayLocWidthHalf;
+
+  int _getRayLocIndex(double az);
+  void _storeRayLoc(double az,
+                    const RadxRay *ray,
+                    PpiBeam *beam);
 
 };
 

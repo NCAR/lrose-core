@@ -95,11 +95,17 @@ PpiPlot::PpiPlot(PolarWidget* parent,
   _sumElev = 0.0;
   _nRays = 0.0;
 
-  _prevAz = -9999;
+  // _prevAz = -9999;
 
-  // set up ray locators
-
-  _rayLoc.resize(RayLoc::RAY_LOC_N);
+  // set up ray locator array
+  
+  _rayLocWidthHalf =
+    (int) (_params.ppi_rendering_beam_width * RAY_LOC_RES + 0.5);
+  
+  for (int ii = 0; ii < RAY_LOC_N; ii++) {
+    RayLoc *loc = new RayLoc(ii);
+    _rayLoc.push_back(loc);
+  }
 
 }
 
@@ -110,13 +116,13 @@ PpiPlot::PpiPlot(PolarWidget* parent,
 PpiPlot::~PpiPlot()
 {
 
-  // delete all of the dynamically created beams
+  // clear ray locator
   
-  for (size_t i = 0; i < _ppiBeams.size(); ++i) {
-    Beam::deleteIfUnused(_ppiBeams[i]);
+  for (size_t ii = 0; ii < _rayLoc.size(); ii++) {
+    delete _rayLoc[ii];
   }
-  _ppiBeams.clear();
-
+  _rayLoc.clear();
+  
 }
 
 /*************************************************************************
@@ -125,12 +131,17 @@ PpiPlot::~PpiPlot()
 
 void PpiPlot::clear()
 {
+
+  for (int ii = 0; ii < RAY_LOC_N; ii++) {
+    _rayLoc[ii]->clearData();
+  }
+  
   // Clear out the beam array
   
-  for (size_t i = 0; i < _ppiBeams.size(); i++) {
-    Beam::deleteIfUnused(_ppiBeams[i]);
-  }
-  _ppiBeams.clear();
+  // for (size_t i = 0; i < _ppiBeams.size(); i++) {
+  //   Beam::deleteIfUnused(_ppiBeams[i]);
+  // }
+  // _ppiBeams.clear();
   
   // Now rerender the images
   
@@ -142,40 +153,42 @@ void PpiPlot::clear()
  * selectVar()
  */
 
-void PpiPlot::selectVar(const size_t index)
+void PpiPlot::selectVar(const size_t fieldNum)
 {
-
+  
   // If the field index isn't actually changing, we don't need to do anything
   
-  if (_fieldNum == index) {
+  if (_fieldNum == fieldNum) {
     return;
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> PpiPlot::selectVar() for field index: " 
-         << index << endl;
+    cerr << "=========>> PpiPlot::selectVar() for fieldNum: " 
+         << fieldNum << endl;
   }
 
   // If this field isn't being rendered in the background, render all of
   // the beams for it
 
-  if (!_fieldRenderers[index]->isBackgroundRendered()) {
-    std::vector< PpiBeam* >::iterator beam;
-    for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-      (*beam)->setBeingRendered(index, true);
-      _fieldRenderers[index]->addBeam(*beam);
-    }
+  if (!_fieldRenderers[fieldNum]->isBackgroundRendered()) {
+    for (size_t ii = 0; ii < _rayLoc.size(); ii++) {
+      if (_rayLoc[ii]->getActive()) {
+        PpiBeam *beam = _rayLoc[ii]->getBeam();
+        beam->setBeingRendered(fieldNum, true);
+        _fieldRenderers[fieldNum]->addBeam(beam);
+      }
+    } // ii
   }
   _performRendering();
 
   // Do any needed housekeeping when the field selection is changed
 
   _fieldRenderers[_fieldNum]->unselectField();
-  _fieldRenderers[index]->selectField();
+  _fieldRenderers[fieldNum]->selectField();
   
-  // Change the selected field index
+  // Change the selected field fieldNum
 
-  _fieldNum = index;
+  _fieldNum = fieldNum;
 
   // Update the display
 
@@ -197,10 +210,12 @@ void PpiPlot::clearVar(const size_t index)
   // Set the brush for every beam/gate for this field to use the background
   // color
 
-  std::vector< PpiBeam* >::iterator beam;
-  for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-    (*beam)->resetFieldBrush(index, &_backgroundBrush);
-  }
+  for (size_t ii = 0; ii < _rayLoc.size(); ii++) {
+    if (_rayLoc[ii]->getActive()) {
+      PpiBeam *beam = _rayLoc[ii]->getBeam();
+      beam->resetFieldBrush(index, &_backgroundBrush);
+    }
+  } // ii
   
   if (index == _fieldNum) {
     _parent->update();
@@ -214,8 +229,9 @@ void PpiPlot::clearVar(const size_t index)
  */
 
 void PpiPlot::addRay(const RadxRay *ray,
-                      const std::vector< std::vector< double > > &beam_data,
-                      const std::vector< DisplayField* > &fields)
+                     const std::vector< std::vector< double > > &beam_data,
+                     const std::vector< DisplayField* > &fields)
+
 {
 
   LOG(DEBUG) << "enter";
@@ -242,355 +258,40 @@ void PpiPlot::addRay(const RadxRay *ray,
     }
   }
 
-  // store the ray location
+  // Determine the extent of this ray
 
-  _storeRayLoc(ray, az, _platform.getRadarBeamWidthDegH());
+  double halfAngle = _params.ppi_rendering_beam_width / 2.0;
+  double startAz = az - halfAngle;
+  double endAz = az + halfAngle;
+  
+  // create beam
 
-  double start_angle = _startAz;
-  double stop_angle = _endAz;
+  PpiBeam *beam = new PpiBeam(_params, ray, _fields.size(), 
+                              startAz, endAz);
 
-  // add a new beam to the display. 
-  // The steps are:
-  // 1. preallocate mode: find the beam to be drawn, or dynamic mode:
-  //    create the beam(s) to be drawn.
-  // 2. fill the colors for all variables in the beams to be drawn
-  // 3. make the display list for the selected variables in the beams
-  //    to be drawn.
-  // 4. call the new display list(s)
+  // store the ray and beam data
+  
+  _storeRayLoc(az, ray, beam);
 
-  std::vector< PpiBeam* > newBeams;
-
-  // The start and stop angle MUST specify a clockwise fill for the sector.
-  // Thus if start_angle > stop_angle, we know that we have crossed the 0
-  // boundary, and must break it up into 2 beams.
-
-  // Create the new beam(s), to keep track of the display information.
-  // Beam start and stop angles are adjusted here so that they always 
-  // increase clockwise. Likewise, if a beam crosses the 0 degree boundary,
-  // it is split into two beams, each of them again obeying the clockwise
-  // rule. Prescribing these rules makes the beam culling logic a lot simpler.
-
-  // Normalize the start and stop angles.  I'm not convinced that this works
-  // for negative angles, but leave it for now.
-
-  double n_start_angle = start_angle - ((int)(start_angle/360.0))*360.0;
-  double n_stop_angle = stop_angle - ((int)(stop_angle/360.0))*360.0;
-
-  if (n_start_angle <= n_stop_angle) {
-
-    // This beam does not cross the 0 degree angle.  Just add the beam to
-    // the beam list.
-
-    PpiBeam* b = new PpiBeam(_params, ray, _fields.size(), 
-                             n_start_angle, n_stop_angle);
-    b->addClient();
-    _cullBeams(b);
-    _ppiBeams.push_back(b);
-    newBeams.push_back(b);
-
-  } else {
-
-    // The beam crosses the 0 degree angle.  First add the portion of the
-    // beam to the left of the 0 degree point.
-
-    PpiBeam* b1 = new PpiBeam(_params, ray, _fields.size(), n_start_angle, 360.0);
-    b1->addClient();
-    _cullBeams(b1);
-    _ppiBeams.push_back(b1);
-    newBeams.push_back(b1);
-
-    // Now add the portion of the beam to the right of the 0 degree point.
-
-    PpiBeam* b2 = new PpiBeam(_params, ray, _fields.size(), 0.0, n_stop_angle);
-    b2->addClient();
-    _cullBeams(b2);
-    _ppiBeams.push_back(b2);
-    newBeams.push_back(b2);
-
-  }
-
-  // compute angles and times in archive mode
-
-  if (newBeams.size() > 0) {
-    
-    if (_isArchiveMode) {
-
-      if (_isStartOfSweep) {
-        _plotStartTime = ray->getRadxTime();
-        _meanElev = -9999.0;
-        _sumElev = 0.0;
-        _nRays = 0.0;
-        _isStartOfSweep = false;
-      }
-      _plotEndTime = ray->getRadxTime();
-      _sumElev += ray->getElevationDeg();
-      _nRays++;
-      _meanElev = _sumElev / _nRays;
-      LOG(DEBUG) << "isArchiveMode _nRays = " << _nRays;    
-    } // if (_isArchiveMode) 
-    
-  } // if (newBeams.size() > 0) 
-
-
-  if (_params.debug >= Params::DEBUG_VERBOSE &&
-      _ppiBeams.size() % 10 == 0) {
-    cerr << "==>> _ppiBeams.size(): " << _ppiBeams.size() << endl;
-  }
-  LOG(DEBUG) << "number of new Beams " << newBeams.size();
-
-  // newBeams has pointers to all of the newly added beams.  Render the
-  // beam data.
-
-  for (size_t ii = 0; ii < newBeams.size(); ii++) {
-
-    PpiBeam *beam = newBeams[ii];
-    
-    // Set up the brushes for all of the fields in this beam.  This can be
-    // done independently of a Painter object.
-    
-    beam->fillColors(beam_data, fields, &_backgroundBrush);
-
-    // Add the new beams to the render lists for each of the fields
-    
-    for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-      if (field == _fieldNum ||
-          _fieldRenderers[field]->isBackgroundRendered()) {
-        _fieldRenderers[field]->addBeam(beam);
-      } else {
-        beam->setBeingRendered(field, false);
-      }
+  // Set up the brushes for all of the fields in this beam.  This can be
+  // done independently of a Painter object.
+  
+  beam->fillColors(beam_data, fields, &_backgroundBrush);
+  
+  // Add the new beams to the render lists for each of the fields
+  
+  for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
+    if (field == _fieldNum ||
+        _fieldRenderers[field]->isBackgroundRendered()) {
+      _fieldRenderers[field]->addBeam(beam);
+    } else {
+      beam->setBeingRendered(field, false);
     }
+  }
     
-  } /* endfor - beam */
-
   // Start the threads to render the new beams
 
   _performRendering();
-
-  LOG(DEBUG) << "exit";
-}
-
-
-///////////////////////////////////////////////////////////
-// store ray location
-
-void PpiPlot::_storeRayLoc(const RadxRay *ray, 
-                           const double az,
-                           const double beam_width)
-{
-
-  LOG(DEBUG) << "az = " << az << " beam_width = " << beam_width;
-
-  // Determine the extent of this ray
-
-  double half_angle = _params.ppi_rendering_beam_width / 2.0;
-  _startAz = az - half_angle - 0.1;
-  _endAz = az + half_angle + 0.1;
-    
-  // store
-  // HERE !!! fix up negative values here or in clearRayOverlap??
-  if (_startAz < 0) _startAz += 360.0;
-  if (_endAz < 0) _endAz += 360.0;
-  if (_startAz >= 360) _startAz -= 360.0;
-  if (_endAz >= 360) _endAz -= 360.0;
-    
-  LOG(DEBUG) << " startAz = " << _startAz << " endAz = " << _endAz;
-
-  // compute start and end indices, using modulus to keep with array bounds
-
-  int startIndex = ((int) (_startAz * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
-  int endIndex = ((int) (_endAz * RayLoc::RAY_LOC_RES + 1)) % RayLoc::RAY_LOC_N;
-
-  // Clear out any rays in the locations list that are overlapped by the
-  // new ray
-    
-  if (startIndex > endIndex) {
-
-    // area crosses the 360; 0 boundary; must break into two sections
-
-    // first from start index to 360
-    
-    _clearRayOverlap(startIndex, RayLoc::RAY_LOC_N - 1);
-
-    for (int ii = startIndex; ii < RayLoc::RAY_LOC_N; ii++) { // RayLoc::RAY_LOC_N; ii++) {
-      _rayLoc[ii].ray = ray;
-      _rayLoc[ii].active = true;
-      _rayLoc[ii].startIndex = startIndex;
-      _rayLoc[ii].endIndex = RayLoc::RAY_LOC_N - 1; // RayLoc::RAY_LOC_N;
-    }
-
-    // then from 0 to end index
-    
-    _clearRayOverlap(0, endIndex);
-
-    // Set the locations associated with this ray
-    
-    for (int ii = 0; ii <= endIndex; ii++) {
-      _rayLoc[ii].ray = ray;
-      _rayLoc[ii].active = true;
-      _rayLoc[ii].startIndex = 0;
-      _rayLoc[ii].endIndex = endIndex;
-    }
-
-  } else { // if (startIndex > endIndex) 
-
-    _clearRayOverlap(startIndex, endIndex);
-    
-    // Set the locations associated with this ray
-
-    for (int ii = startIndex; ii <= endIndex; ii++) {
-      _rayLoc[ii].ray = ray;
-      _rayLoc[ii].active = true;
-      _rayLoc[ii].startIndex = startIndex;
-      _rayLoc[ii].endIndex = endIndex;
-    }
-
-  } // if (startIndex > endIndex) 
-
-}
-
- 
-///////////////////////////////////////////////////////////
-// clear any locations that are overlapped by the given ray
-
-void PpiPlot::_clearRayOverlap(const int start_index, const int end_index)
-{
-
-  LOG(DEBUG) << "enter" << " start_index=" << start_index <<
-    " end_index = " << end_index;
-
-  if ((start_index < 0) || (start_index > RayLoc::RAY_LOC_N)) {
-    cout << "ERROR: _clearRayOverlap start_index out of bounds " << start_index << endl;
-    return;
-  }
-  if ((end_index < 0) || (end_index > RayLoc::RAY_LOC_N)) {
-    cout << "ERROR: _clearRayOverlap end_index out of bounds " << end_index << endl;
-    return;
-  }
-
-  // Loop through the ray locations, clearing out old information
-
-  int i = start_index;
-  
-  while (i <= end_index) {
-
-    RayLoc &loc = _rayLoc[i];
-    
-    // If this location isn't active, we can skip it
-
-    if (!loc.active) {
-      // LOG(DEBUG) << "loc NOT active";
-      ++i;
-      continue;
-    }
-    
-    int loc_start_index = loc.startIndex;
-    int loc_end_index = loc.endIndex;
-
-    if ((loc_start_index < 0) || (loc_start_index > RayLoc::RAY_LOC_N)) {
-      cout << "ERROR: _clearRayOverlap loc_start_index out of bounds " << loc_start_index << endl;
-      ++i;
-      continue;
-    }
-    if ((loc_end_index < 0) || (loc_end_index > RayLoc::RAY_LOC_N)) {
-      cout << "ERROR: _clearRayOverlap loc_end_index out of bounds " << loc_end_index << endl;
-      ++i;
-      continue;
-    }
-
-    if (loc_end_index < i) {
-      cout << " OH NO! We are HERE" << endl;
-      ++i;
-      continue;
-    }
-    // If we get here, this location is active.  We now have 4 possible
-    // situations:
-
-    if (loc.startIndex < start_index && loc.endIndex <= end_index) {
-
-      // The overlap area covers the end of the current beam.  Reduce the
-      // current beam down to just cover the area before the overlap area.
-      LOG(DEBUG) << "Case 1a:";
-      LOG(DEBUG) << " i = " << i;
-      LOG(DEBUG) << "clearing from start_index=" << start_index <<
-	  " to loc_end_index=" << loc_end_index;
-      
-      for (int j = start_index; j <= loc_end_index; ++j) {
-
-	_rayLoc[j].ray = NULL;
-	_rayLoc[j].active = false;
-
-      }
-
-      // Update the end indices for the remaining locations in the current
-      // beam
-      LOG(DEBUG) << "Case 1b:";
-      LOG(DEBUG) << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
-	  " to start_index=" << start_index;
-      
-      for (int j = loc_start_index; j < start_index; ++j)
-	_rayLoc[j].endIndex = start_index - 1;
-
-    } else if (loc.startIndex < start_index && loc.endIndex > end_index) {
-      
-      // The current beam is bigger than the overlap area.  This should never
-      // happen, so go ahead and just clear out the locations for the current
-      // beam.
-      LOG(DEBUG) << "Case 2:";
-      LOG(DEBUG) << " i = " << i;
-      LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
-	  " to loc_end_index=" << loc_end_index;
-      
-      for (int j = loc_start_index; j <= loc_end_index; ++j) {
-        _rayLoc[j].clear();
-      }
-
-    } else if (loc.endIndex > end_index) {
-      
-      // The overlap area covers the beginning of the current beam.  Reduce the
-      // current beam down to just cover the area after the overlap area.
-
-	LOG(DEBUG) << "Case 3a:";
-	LOG(DEBUG) << " i = " << i;
-	LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
-	  " to end_index=" << end_index;
-
-      for (int j = loc_start_index; j <= end_index; ++j) {
-	_rayLoc[j].ray = NULL;
-	_rayLoc[j].active = false;
-      }
-
-      // Update the start indices for the remaining locations in the current
-      // beam
-
-      LOG(DEBUG) << "Case 3b:";
-      LOG(DEBUG) << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
-	  " to loc_end_index=" << loc_end_index;
-      
-      for (int j = end_index + 1; j <= loc_end_index; ++j) {
-	_rayLoc[j].startIndex = end_index + 1;
-      }
-
-    } else {
-      
-      // The current beam is completely covered by the overlap area.  Clear
-      // out all of the locations for the current beam.
-      LOG(DEBUG) << "Case 4:";
-      LOG(DEBUG) << " i = " << i;
-      LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
-	  " to loc_end_index=" << loc_end_index;
-      
-      for (int j = loc_start_index; j <= loc_end_index; ++j) {
-        _rayLoc[j].clear();
-      }
-
-    }
-    
-    i = loc_end_index + 1;
-
-  } /* endwhile - i */
-  
-  LOG(DEBUG) << "exit ";
   
 }
 
@@ -647,9 +348,13 @@ const RadxRay *PpiPlot::getClosestRay(int imageX, int imageY,
                                       double &xKm, double &yKm)
   
 {
+
+  // compute location in world coords
   
   xKm = _zoomWorld.getXWorld(imageX);
   yKm = _zoomWorld.getYWorld(imageY);
+
+  // compute the azimuth relative to the display
   
   double clickAz = atan2(yKm, xKm) * RAD_TO_DEG;
   double radarDisplayAz = 90.0 - clickAz;
@@ -659,33 +364,23 @@ const RadxRay *PpiPlot::getClosestRay(int imageX, int imageY,
   LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from xKm, yKm = "
              << xKm << yKm;
 
-  double minAzErr = 1.0e99;
-  const RadxRay *closestRay = NULL;
-  for (size_t ii = 0; ii < _ppiBeams.size(); ii++) {
-    const RadxRay *ray = _ppiBeams[ii]->getRay();
-    double rayAz = ray->getAzimuthDeg();
-    double azErr = fabs(radarDisplayAz - rayAz);
-    if (azErr > 180.0) {
-      azErr = fabs(azErr - 360.0);
+  // search for the closest ray to this az
+  
+  int rayLocIndex = _getRayLocIndex(radarDisplayAz);
+  for (int ii = 0; ii <= _rayLocWidthHalf * 2; ii++) {
+    int jj1 = (rayLocIndex - ii + RAY_LOC_N) % RAY_LOC_N;
+    if (_rayLoc[jj1]->getActive()) {
+      return _rayLoc[jj1]->getRay();
     }
-    if (azErr < minAzErr) {
-      if (azErr < 5) {
-        closestRay = ray;
-      }
-      minAzErr = azErr;
+    int jj2 = (rayLocIndex + ii + RAY_LOC_N) % RAY_LOC_N;
+    if (_rayLoc[jj2]->getActive()) {
+      return _rayLoc[jj2]->getRay();
     }
   }
 
-  if (closestRay) {
-    cerr << "XXXXXXXX closestRay has azimuth, minAzErr " << closestRay->getAzimuthDeg() << ", " << minAzErr << endl;
-    closestRay->print(cerr);
-  }
-  
-  if (closestRay != NULL)
-    LOG(DEBUG) << "closestRay has azimuth " << closestRay->getAzimuthDeg();
-  else
-    LOG(DEBUG) << "Error: No ray found";
-  return closestRay;
+  // no active ray close by
+
+  return NULL;
 
 }
 
@@ -857,63 +552,6 @@ void PpiPlot::_drawOverlays(QPainter &painter)
 
   }
   
-  // click point cross hairs
-  
-  if (_parent->getPointClicked()) {
-    
-    // int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    // int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    // int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    // int endY = _mouseReleaseY + _params.click_cross_size / 2;
-
-    // painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
-    // painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
-
-    /****** testing ******
-     // do smart brush ...
-     QImage qImage;
-     qImage = *(_fieldRenderers[_fieldNum]->getImage());
-     // qImage.load("/h/eol/brenda/octopus.jpg");
-     // get the Image from somewhere ...   
-     // qImage.invertPixels();
-     qImage.convertToFormat(QImage::Format_RGB32);
-
-     // get the color of the selected pixel
-     QRgb colorToMatch = qImage.pixel(_mouseReleaseX, _mouseReleaseY);
-     // walk to all adjacent pixels of the same color and make them white
-
-     vector<QPoint> pixelsToConsider;
-     vector<QPoint> neighbors = {QPoint(-1, 1), QPoint(0, 1), QPoint(1, 1),
-     QPoint(-1, 0),               QPoint(1, 0),
-     QPoint(-1,-1), QPoint(0,-1), QPoint(1,-1)};
-
-     pixelsToConsider.push_back(QPoint(_mouseReleaseX, _mouseReleaseY));
-     while (!pixelsToConsider.empty()) {
-     QPoint currentPix = pixelsToConsider.back();
-     pixelsToConsider.pop_back();
-     if (qImage.pixel(currentPix) ==  colorToMatch) {
-     // set currentPix to white
-     qImage.setPixelColor(currentPix, QColor("white"));
-     // cout << "setting pixel " << currentPix.x() << ", " << currentPix.y() << " to white" << endl;
-     // add the eight adjacent neighbors
-     for (vector<QPoint>::iterator noffset = neighbors.begin(); 
-     noffset != neighbors.end(); ++noffset) {
-     QPoint neighbor;
-     neighbor = currentPix + *noffset; // QPoint(-1,1);
-     if (qImage.valid(neighbor)) {
-     pixelsToConsider.push_back(neighbor);
-     }
-     } // end for neighbors iterator
-     }
-     }
-
-     pixelsToConsider.clear();
-     QPainter painter(this);
-     painter.drawImage(0, 0, qImage);
-     ****** end testing *****/
-
-  }
-
   // add label
   
   if (_label.size() > 0) {
@@ -934,12 +572,6 @@ void PpiPlot::_drawOverlays(QPainter &painter)
   // reset painter state
   
   painter.restore();
-
-  // draw the color scale
-
-  // const DisplayField &field = _manager.getSelectedField();
-  // _zoomWorld.drawColorScale(field.getColorMap(), painter,
-  //                           _params.label_font_size);
 
   if (_archiveMode) {
 
@@ -1007,8 +639,6 @@ void PpiPlot::_drawOverlays(QPainter &painter)
       default: {}
     }
     
-    // painter.setBrush(Qt::white);
-    // painter.setBackgroundMode(Qt::TransparentMode);
     painter.restore();
 
   } // if (_archiveMode) {
@@ -1059,229 +689,13 @@ void PpiPlot::_drawScreenText(QPainter &painter, const string &text,
 
 size_t PpiPlot::getNumBeams() const
 {
-  return _ppiBeams.size();
-}
-
-/*************************************************************************
- * _beamIndex()
- */
-
-int PpiPlot::_beamIndex(const double start_angle,
-                        const double stop_angle)
-{
-
-  // Find where the center angle of the beam will fall within the beam array
-  
-  int ii = (int)
-    (_ppiBeams.size()*(start_angle + (stop_angle-start_angle)/2)/360.0);
-
-  // Take care of the cases at the ends of the beam list
-  
-  if (ii < 0)
-    ii = 0;
-  if (ii > (int)_ppiBeams.size() - 1)
-    ii = _ppiBeams.size() - 1;
-
-  return ii;
-
-}
-
-
-/*************************************************************************
- * _cullBeams()
- */
-
-void PpiPlot::_cullBeams(const PpiBeam *beamAB)
-{
-  // This routine examines the collection of beams, and removes those that are 
-  // completely occluded by other beams. The algorithm gives precedence to the 
-  // most recent beams; i.e. beams at the end of the _ppiBeams vector.
-  //
-  // Remember that there won't be any beams that cross angles through zero; 
-  // otherwise the beam culling logic would be a real pain, and PpiPlot has
-  // already split incoming beams into two, if it received a beam of this type.
-  //
-  // The logic is as follows. First of all, just consider the start and stop angle 
-  // of a beam to be a linear region. We can diagram the angle interval of beam(AB) as:
-  //         a---------b
-  // 
-  // The culling logic will compare all other beams (XY) to AB, looking for an overlap.
-  // An example overlap might be:
-  //         a---------b
-  //    x---------y
-  // 
-  // If an overlap on beam XY is detected, the occluded region is recorded
-  //   as the interval (CD):        
-  //         a---------b
-  //    x---------y
-  //         c----d
-  // 
-  // The culling algorithm starts with the last beam in the list, and compares it with all
-  // preceeding beams, setting their overlap regions appropriately.
-  // Then the next to the last beam is compared with all preceeding beams.
-  // Previously found occluded regions will be expanded as they are detected.
-  // 
-  // Once the occluded region spans the entire beam, then the beam is known 
-  // to be hidden, and it doesn't need to be tested any more, nor is it it used as a 
-  // test on other beams.
-  //
-  // After the list has been completly processed in this manner, the completely occluded 
-  // beams are removed.
-  // .
-  // Note now that if the list is rendered from beginning to end, the more recent beams will
-  // overwrite the portions of previous beams that they share.
-  //
-
-  // NOTE - This algorithm doesn't handle beams that are occluded in different
-  // subsections.  For example, the following would be handled as a hidden
-  // beam even though the middle of the beam is still visible:
-  //         a---------b    c--------d
-  //              x-------------y
-
-  // Do nothing if we don't have any beams in the list
-
-  if (_ppiBeams.size() < 1)
-    return;
-
-  // Look through all of the beams in the list and record any place where
-  // this beam occludes any other beam.
-
-  bool need_to_cull = false;
-  
-  // Save the angle information for easier processing.
-  
-  double a = beamAB->startAngle;
-  double b = beamAB->stopAngle;
-
-  // Look at all of the beams in the list to see if any are occluded by this
-  // new beam
-
-  for (size_t j = 0; j < _ppiBeams.size(); ++j)
-  {
-    // Pull the beam from the list for ease of coding
-
-    PpiBeam *beamXY = _ppiBeams[j];
-
-    // If this beam has alread been marked hidden, we don't need to 
-    // look at it.
-
-    if (beamXY->hidden)
-      continue;
-      
-    // Again, save the angles for easier coding
-
-    double x = beamXY->startAngle;
-    double y = beamXY->stopAngle;
-
-    if (b <= x || a >= y)
-    {
-      //  handles these cases:
-      //  a-----b                a-----b
-      //           x-----------y
-      //  
-      // they don't overlap at all so do nothing
+  size_t count = 0;
+  for (size_t ii = 0; ii < _rayLoc.size(); ii++) {
+    if (_rayLoc[ii]->getActive()) {
+      count++;
     }
-    else if (a <= x && b >= y)
-    {
-      //     a------------------b
-      //        x-----------y
-      // completely covered
-
-      beamXY->hidden = true;
-      need_to_cull = true;
-    }
-    else if (a <= x && b <= y)
-    {
-      //   a-----------b
-      //        x-----------y
-      //
-      // We know that b > x because otherwise this would have been handled
-      // in the first case above.
-
-      // If the right part of this beam is already occluded, we can just
-      // mark the beam as hidden at this point.  Otherwise, we update the
-      // c and d values.
-
-      if (beamXY->rightEnd == y)
-      {
-	beamXY->hidden = true;
-	need_to_cull = true;
-      }
-      else
-      {
-	beamXY->leftEnd = x;
-	if (beamXY->rightEnd < b)
-	  beamXY->rightEnd = b;
-      }
-    }
-    else if (a >= x && b >= y)
-    {
-      //       a-----------b
-      //   x-----------y
-      //
-      // We know that a < y because otherwise this would have been handled
-      // in the first case above.
-      
-      // If the left part of this beam is already occluded, we can just
-      // mark the beam as hidden at this point.  Otherwise, we update the
-      // c and d values.
-
-      if (beamXY->leftEnd == x)
-      {
-	beamXY->hidden = true;
-	need_to_cull = true;
-      }
-      else
-      {
-	beamXY->rightEnd = y;
-	if (a < beamXY->leftEnd)
-	  beamXY->leftEnd = a;
-      }
-    }
-    else
-    {
-      // all that is left is this pathological case:
-      //     a-------b
-      //   x-----------y
-      //
-      // We need to extend c and d, if the are inside of a and b.  We know
-      // that a != x and b != y because otherwise this would have been
-      // handled in the third case above.
-
-      if (beamXY->leftEnd > a)
-	beamXY->leftEnd = a;
-      if (beamXY->rightEnd < b)
-	beamXY->rightEnd = b;
-	      
-    } /* endif */
-  } /* endfor - j */
-
-  // Now actually cull the list
-
-  if (need_to_cull)
-  {
-    // Note that i has to be an int rather than a size_t since we are going
-    // backwards through the list and will end when i < 0.
-
-    for (int i = _ppiBeams.size()-1; i >= 0; i--)
-    {
-      // Delete beams who are hidden but aren't currently being rendered.
-      // We can get the case where we have hidden beams that are being
-      // rendered when we do something (like resizing) that causes us to 
-      // have to rerender all of the current beams.  During the rerendering,
-      // new beams continue to come in and will obscure some of the beams
-      // that are still in the rendering queue.  These beams will be deleted
-      // during a later pass through this loop.
-
-      if (_ppiBeams[i]->hidden && !_ppiBeams[i]->isBeingRendered())
-      {
-        Beam::deleteIfUnused(_ppiBeams[i]);
-	_ppiBeams.erase(_ppiBeams.begin()+i);
-      }
-    }
-
-  } /* endif - need_to_cull */
-  
+  }
+  return count;
 }
 
 /*************************************************************************
@@ -1309,17 +723,19 @@ void PpiPlot::refreshFieldImages()
     field->getImage()->fill(_backgroundBrush.color().rgb());
     
     // set up rendering details
-
+    
     field->setTransform(_zoomWorld.getTransform());
     
     // Add pointers to the beams to be rendered
     
     if (ifield == _fieldNum || field->isBackgroundRendered()) {
-      std::vector< PpiBeam* >::iterator beam;
-      for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
-	(*beam)->setBeingRendered(ifield, true);
-	field->addBeam(*beam);
-      }
+      for (size_t ii = 0; ii < _rayLoc.size(); ii++) {
+        if (_rayLoc[ii]->getActive()) {
+          PpiBeam *beam = _rayLoc[ii]->getBeam();
+          beam->setBeingRendered(ifield, true);
+          field->addBeam(beam);
+        }
+      } // ii
     }
     
   } // ifield
@@ -1331,6 +747,85 @@ void PpiPlot::refreshFieldImages()
   // update main plot
   
   _parent->update();
+
+}
+
+/*************************************************************************
+ * RayLoc inner class
+ */
+
+// constructor
+
+PpiPlot::RayLoc::RayLoc(int index)
+{
+  _index = index;
+  _midAz = (double) index / (double) RAY_LOC_RES;
+  _trueAz = _midAz;
+  _active = false;
+  _ray = NULL;
+  _beam = NULL;
+}
+
+// set the data
+
+void PpiPlot::RayLoc::setData(double az,
+                              const RadxRay *ray,
+                              PpiBeam *beam)
+{
+  clearData();
+  _trueAz = az;
+  _ray = ray;
+  _ray->addClient();
+  _beam = beam;
+  _beam->addClient();
+  _active = true;
+}
+
+// clear ray and beam data
+
+void PpiPlot::RayLoc::clearData()
+{
+  if (_ray) {
+    RadxRay::deleteIfUnused(_ray);
+    _ray = NULL;
+  }
+  if (_beam) {
+    Beam::deleteIfUnused(_beam);
+    _beam = NULL;
+  }
+  _active = false;
+}
+
+// compute the ray loc index from the azimuth
+
+int PpiPlot::_getRayLocIndex(double az)
+{
+  double iaz = (int) floor(az * RAY_LOC_RES + 0.5);
+  if (iaz < 0) {
+    iaz += RAY_LOC_N;
+  }
+  return iaz;
+}
+
+// store the ray at the appropriate location
+
+void PpiPlot::_storeRayLoc(double az,
+                           const RadxRay *ray,
+                           PpiBeam *beam)
+{
+
+  int index = _getRayLocIndex(az);
+
+  // clear any existing data in ray width
+
+  for (int ii = -_rayLocWidthHalf; ii <= _rayLocWidthHalf; ii++) {
+    int jj = (ii + RAY_LOC_N) % RAY_LOC_N;
+    _rayLoc[jj]->clearData();
+  }
+
+  // store this ray
+  
+  _rayLoc[index]->setData(az, ray, beam);
 
 }
 
