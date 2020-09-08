@@ -83,7 +83,7 @@ Beam::Beam(const string &progName,
   _targetEl = 0;
   _targetAz = 0;
 
-  _scanMode = static_cast<int>(apar_ts_scan_mode_t::NOT_SET);
+  _scanMode = static_cast<int>(apar_ts_scan_mode_t::PPI);
   _sweepNum = 0;
   _volNum = 0;
   _endOfSweepFlag = false;
@@ -531,7 +531,7 @@ int Beam::getScanMode() const
     scanMode = _opsInfo.getScanMode();
   }
 
-  if (scanMode < 0) {
+  if (scanMode <= 0) {
     scanMode = DS_RADAR_SURVEILLANCE_MODE;
   }
 
