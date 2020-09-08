@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-#include "PpiPlot.hh"
+#include "RhiPlot.hh"
 #include "PolarManager.hh"
 #include "SpreadSheetView.hh"
 #include "SpreadSheetController.hh"
@@ -44,9 +44,7 @@
 
 using namespace std;
 
-
-
-PpiPlot::PpiPlot(PolarWidget* parent,
+RhiPlot::RhiPlot(PolarWidget* parent,
                  const PolarManager &manager,
                  const Params &params,
                  int id,
@@ -70,7 +68,7 @@ PpiPlot::PpiPlot(PolarWidget* parent,
         
 {
 
-  // initialize world view
+   // initialize world view
 
   _maxRangeKm = _params.max_range_km;
   _initWorld();
@@ -109,7 +107,7 @@ PpiPlot::PpiPlot(PolarWidget* parent,
  * Destructor
  */
 
-PpiPlot::~PpiPlot()
+RhiPlot::~RhiPlot()
 {
 
   // clear ray locator
@@ -125,7 +123,7 @@ PpiPlot::~PpiPlot()
  * clear()
  */
 
-void PpiPlot::clear()
+void RhiPlot::clear()
 {
 
   for (int ii = 0; ii < RAY_LOC_N; ii++) {
@@ -149,7 +147,7 @@ void PpiPlot::clear()
  * selectVar()
  */
 
-void PpiPlot::selectVar(const size_t fieldNum)
+void RhiPlot::selectVar(const size_t fieldNum)
 {
   
   // If the field index isn't actually changing, we don't need to do anything
@@ -159,7 +157,7 @@ void PpiPlot::selectVar(const size_t fieldNum)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> PpiPlot::selectVar() for fieldNum: " 
+    cerr << "=========>> RhiPlot::selectVar() for fieldNum: " 
          << fieldNum << endl;
   }
 
@@ -169,7 +167,7 @@ void PpiPlot::selectVar(const size_t fieldNum)
   if (!_fieldRenderers[fieldNum]->isBackgroundRendered()) {
     for (size_t ii = 0; ii < _rayLoc.size(); ii++) {
       if (_rayLoc[ii]->getActive()) {
-        PpiBeam *beam = _rayLoc[ii]->getBeam();
+        RhiBeam *beam = _rayLoc[ii]->getBeam();
         beam->setBeingRendered(fieldNum, true);
         _fieldRenderers[fieldNum]->addBeam(beam);
       }
@@ -196,7 +194,7 @@ void PpiPlot::selectVar(const size_t fieldNum)
  * clearVar()
  */
 
-void PpiPlot::clearVar(const size_t index)
+void RhiPlot::clearVar(const size_t index)
 {
 
   if (index >= _fields.size()) {
@@ -208,7 +206,7 @@ void PpiPlot::clearVar(const size_t index)
 
   for (size_t ii = 0; ii < _rayLoc.size(); ii++) {
     if (_rayLoc[ii]->getActive()) {
-      PpiBeam *beam = _rayLoc[ii]->getBeam();
+      RhiBeam *beam = _rayLoc[ii]->getBeam();
       beam->resetFieldBrush(index, &_backgroundBrush);
     }
   } // ii
@@ -224,7 +222,7 @@ void PpiPlot::clearVar(const size_t index)
  * addRay()
  */
 
-void PpiPlot::addRay(const RadxRay *ray,
+void RhiPlot::addRay(const RadxRay *ray,
                      const std::vector< std::vector< double > > &beam_data,
                      const std::vector< DisplayField* > &fields)
 
@@ -262,8 +260,9 @@ void PpiPlot::addRay(const RadxRay *ray,
   
   // create beam
 
-  PpiBeam *beam = new PpiBeam(_params, ray, _fields.size(), 
-                              startAz, endAz);
+  double instHtKm = 0.0;
+  RhiBeam *beam = new RhiBeam(_params, ray, instHtKm,
+                              _fields.size(), startAz, endAz);
 
   // store the ray and beam data
   
@@ -296,7 +295,7 @@ void PpiPlot::addRay(const RadxRay *ray,
  * initialize world coords
  */
 
-void PpiPlot::_initWorld()
+void RhiPlot::_initWorld()
 {
 
   // Set the ring spacing.  This is dependent on the value of _maxRange.
@@ -340,7 +339,7 @@ void PpiPlot::_initWorld()
 ////////////////////////////////////////////////////////////////////////////
 // get ray closest to click point
 
-const RadxRay *PpiPlot::getClosestRay(int imageX, int imageY,
+const RadxRay *RhiPlot::getClosestRay(int imageX, int imageY,
                                       double &xKm, double &yKm)
   
 {
@@ -384,7 +383,7 @@ const RadxRay *PpiPlot::getClosestRay(int imageX, int imageY,
  * _setGridSpacing()
  */
 
-void PpiPlot::_setGridSpacing()
+void RhiPlot::_setGridSpacing()
 {
 
   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
@@ -424,7 +423,7 @@ void PpiPlot::_setGridSpacing()
  * _drawOverlays()
  */
 
-void PpiPlot::_drawOverlays(QPainter &painter)
+void RhiPlot::_drawOverlays(QPainter &painter)
 {
 
   // Don't try to draw rings if we haven't been configured yet or if the
@@ -660,7 +659,7 @@ void PpiPlot::_drawOverlays(QPainter &painter)
 
 // draw text in world coords
 
-void PpiPlot::_drawScreenText(QPainter &painter, const string &text,
+void RhiPlot::_drawScreenText(QPainter &painter, const string &text,
                               int text_x, int text_y,
                               int flags)
   
@@ -683,7 +682,7 @@ void PpiPlot::_drawScreenText(QPainter &painter, const string &text,
  * numBeams()
  */
 
-size_t PpiPlot::getNumBeams() const
+size_t RhiPlot::getNumBeams() const
 {
   size_t count = 0;
   for (size_t ii = 0; ii < _rayLoc.size(); ii++) {
@@ -698,7 +697,7 @@ size_t PpiPlot::getNumBeams() const
  * refreshFieldImages()
  */
 
-void PpiPlot::refreshFieldImages()
+void RhiPlot::refreshFieldImages()
 {
 
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
@@ -727,7 +726,7 @@ void PpiPlot::refreshFieldImages()
     if (ifield == _fieldNum || field->isBackgroundRendered()) {
       for (size_t ii = 0; ii < _rayLoc.size(); ii++) {
         if (_rayLoc[ii]->getActive()) {
-          PpiBeam *beam = _rayLoc[ii]->getBeam();
+          RhiBeam *beam = _rayLoc[ii]->getBeam();
           beam->setBeingRendered(ifield, true);
           field->addBeam(beam);
         }
@@ -752,7 +751,7 @@ void PpiPlot::refreshFieldImages()
 
 // constructor
 
-PpiPlot::RayLoc::RayLoc(int index)
+RhiPlot::RayLoc::RayLoc(int index)
 {
   _index = index;
   _midAz = (double) index / (double) RAY_LOC_RES;
@@ -764,9 +763,9 @@ PpiPlot::RayLoc::RayLoc(int index)
 
 // set the data
 
-void PpiPlot::RayLoc::setData(double az,
+void RhiPlot::RayLoc::setData(double az,
                               const RadxRay *ray,
-                              PpiBeam *beam)
+                              RhiBeam *beam)
 {
   clearData();
   _trueAz = az;
@@ -779,7 +778,7 @@ void PpiPlot::RayLoc::setData(double az,
 
 // clear ray and beam data
 
-void PpiPlot::RayLoc::clearData()
+void RhiPlot::RayLoc::clearData()
 {
   if (_ray) {
     RadxRay::deleteIfUnused(_ray);
@@ -794,7 +793,7 @@ void PpiPlot::RayLoc::clearData()
 
 // compute the ray loc index from the azimuth
 
-int PpiPlot::_getRayLocIndex(double az)
+int RhiPlot::_getRayLocIndex(double az)
 {
   double iaz = (int) floor(az * RAY_LOC_RES + 0.5);
   if (iaz < 0) {
@@ -805,9 +804,9 @@ int PpiPlot::_getRayLocIndex(double az)
 
 // store the ray at the appropriate location
 
-void PpiPlot::_storeRayLoc(double az,
+void RhiPlot::_storeRayLoc(double az,
                            const RadxRay *ray,
-                           PpiBeam *beam)
+                           RhiBeam *beam)
 {
 
   int index = _getRayLocIndex(az);

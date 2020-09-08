@@ -22,17 +22,17 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-#ifndef PpiPlot_HH
-#define PpiPlot_HH
+#ifndef RhiPlot_HH
+#define RhiPlot_HH
 
 #include "Radx/RadxVol.hh"
 #include "PolarPlot.hh"
-#include "PpiBeam.hh"
+#include "RhiBeam.hh"
 
-// Plot for a PPI scan.  Beams are added to the scan as they
+// Plot for a RHI scan.  Beams are added to the scan as they
 // are received.
 
-class DLL_EXPORT PpiPlot : public PolarPlot
+class DLL_EXPORT RhiPlot : public PolarPlot
 {
 
  public:
@@ -42,8 +42,8 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   ////////////////////
 
   // constructor
-
-  PpiPlot(PolarWidget *parent,
+  
+  RhiPlot(PolarWidget *parent,
           const PolarManager &manager,
           const Params &params,
           int id,
@@ -63,7 +63,7 @@ class DLL_EXPORT PpiPlot : public PolarPlot
 
   // Destructor
   
-  virtual ~PpiPlot();
+  virtual ~RhiPlot();
 
   // Add a new ray to the display. Data for all fields and all
   //        gates are provided, as well as color maps for all fields.
@@ -152,7 +152,7 @@ class DLL_EXPORT PpiPlot : public PolarPlot
 
     // set the ray and beam data
 
-    void setData(double az, const RadxRay *ray, PpiBeam *beam);
+    void setData(double az, const RadxRay *ray, RhiBeam *beam);
 
     // clear the ray and beam data
     
@@ -165,7 +165,7 @@ class DLL_EXPORT PpiPlot : public PolarPlot
     double getTrueAz() const { return _trueAz; }
     bool getActive() const { return _active; }
     const RadxRay *getRay() const { return _ray; }
-    PpiBeam *getBeam() const { return _beam; }
+    RhiBeam *getBeam() const { return _beam; }
 
   private:
     
@@ -176,7 +176,7 @@ class DLL_EXPORT PpiPlot : public PolarPlot
     double _trueAz;
     bool _active;
     const RadxRay *_ray;
-    PpiBeam *_beam;
+    RhiBeam *_beam;
     
   };
   
@@ -186,7 +186,7 @@ class DLL_EXPORT PpiPlot : public PolarPlot
   int _getRayLocIndex(double az);
   void _storeRayLoc(double az,
                     const RadxRay *ray,
-                    PpiBeam *beam);
+                    RhiBeam *beam);
 
 };
 

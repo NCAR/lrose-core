@@ -51,7 +51,6 @@
 #include "FieldRenderer.hh"
 #include "WorldPlot.hh"
 #include "DisplayField.hh"
-#include "PpiBeam.hh"
 
 class Beam;
 class MomentsFields;
@@ -291,11 +290,6 @@ protected:
   int _imageHeight;
   int _imageOffsetX;
   int _imageOffsetY;
-
-  // geometry
-
-  double _aspectRatio;
-  int _colorScaleWidth;
 
   ///////////////////////
   // Protected methods //

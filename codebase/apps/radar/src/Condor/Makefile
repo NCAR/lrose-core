@@ -79,6 +79,7 @@ HDRS = \
 	PpiPlot.hh \
 	Reader.hh \
 	RhiBeam.hh \
+	RhiPlot.hh \
 	ScaledLabel.hh \
 	SiiPalette.hh \
 	SoloDefaultColorWrapper.hh \
@@ -113,6 +114,7 @@ NORM_SRCS = \
 	PpiPlot.cc \
 	Reader.cc \
 	RhiBeam.cc \
+	RhiPlot.cc \
 	ScaledLabel.cc \
 	SiiPalette.cc \
 	SoloDefaultColorWrapper.cc \

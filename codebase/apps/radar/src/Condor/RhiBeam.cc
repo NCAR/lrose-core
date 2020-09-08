@@ -90,14 +90,23 @@ RhiBeam::RhiBeam(const Params &params,
     } else {
       _polygons[jj].doPaint = true;
     }
+
     _polygons[jj].pts[0].x = innerRange * cos1;
-    _polygons[jj].pts[0].y = _beamHt.computeHtKm(startAngle, innerRange);
+    _polygons[jj].pts[0].y = innerRange * sin1;
+    // _polygons[jj].pts[0].y = _beamHt.computeHtKm(startAngle, innerRange);
+
     _polygons[jj].pts[1].x = innerRange * cos2;
-    _polygons[jj].pts[1].y = _beamHt.computeHtKm(stopAngle, innerRange);
+    _polygons[jj].pts[1].y = innerRange * sin2;
+    // _polygons[jj].pts[1].y = _beamHt.computeHtKm(stopAngle, innerRange);
+
     _polygons[jj].pts[2].x = outerRange * cos2;
-    _polygons[jj].pts[2].y = _beamHt.computeHtKm(stopAngle, outerRange);
+    _polygons[jj].pts[2].y = outerRange * sin2;
+    // _polygons[jj].pts[2].y = _beamHt.computeHtKm(stopAngle, outerRange);
+
     _polygons[jj].pts[3].x = outerRange * cos1;
-    _polygons[jj].pts[3].y = _beamHt.computeHtKm(startAngle, outerRange);
+    _polygons[jj].pts[3].y = outerRange * sin1;
+    // _polygons[jj].pts[3].y = _beamHt.computeHtKm(startAngle, outerRange);
+
   }
 
 }
