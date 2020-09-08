@@ -121,11 +121,8 @@ private:
   double _longitude;
   double _altitude;
 
-  void _runSimPpi();
-  void _runSimVert();
-  void _simulatePpiBeam(double elev, double az, int volNum, int sweepNum);
-  void _simulateRhiBeam(double elev, double az, int volNum, int sweepNum);
-  void _simulateVertBeam(double elev, double az, int volNum, int sweepNum);
+  void _simulateBeam(double elev, double az, int volNum, int sweepNum, 
+                     Radx::SweepMode_t sweepMode);
 
 };
 

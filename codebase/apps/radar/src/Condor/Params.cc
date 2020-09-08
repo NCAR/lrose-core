@@ -1171,8 +1171,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("polar_plots");
-    tt->descr = tdrpStrDup("Fields to be displayed.");
-    tt->help = tdrpStrDup("label: appears on the GUI. raw_name: unfiltered field name. filtered_name: field with clutter filter applied. units: units string for color scale. color_map: name of color map in color_scale_dir. shortcut: keyboard character for shortcut. Specified key will select raw field. Use ALT-key to get filtered field. ");
+    tt->descr = tdrpStrDup("Types of plot to be displayed.");
+    tt->help = tdrpStrDup("label: appears on the plot upper left. min_az, max_az: For PPIs, range of azimuths. For RHIs, should bracket desired az. min_el, max_el: For RHIs, range of elevations. For PPIs, should bracket desired el. min_x_km, max_x_km: limits of plot in X. min_y_km, max_y_km: limits of plot in Y.");
     tt->array_offset = (char *) &_polar_plots - &_start_;
     tt->array_n_offset = (char *) &polar_plots_n - &_start_;
     tt->is_array = TRUE;
@@ -3063,6 +3063,120 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &sim_gate_spacing_km - &_start_;
     tt->single_val.d = 0.15;
+    tt++;
+    
+    // Parameter 'sim_scans'
+    // ctype is '_sim_scan_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("sim_scans");
+    tt->descr = tdrpStrDup("Scans to be simulated.");
+    tt->help = tdrpStrDup("For RHIs, the min_az and max_az should be the same. For PPIs, the min_el and max_el should be the same. The stride is the number of beams in an APAR dwell.");
+    tt->array_offset = (char *) &_sim_scans - &_start_;
+    tt->array_n_offset = (char *) &sim_scans_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(sim_scan_t);
+    tt->array_n = 4;
+    tt->struct_def.name = tdrpStrDup("sim_scan_t");
+    tt->struct_def.nfields = 9;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("sim_type_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("sim_type");
+      tt->struct_def.fields[0].ptype = ENUM_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_sim_scans->sim_type - (char *) _sim_scans;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("sim_type_t");
+        tt->struct_def.fields[0].enum_def.nfields = 3;
+        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("PPI_SIM");
+        tt->struct_def.fields[0].enum_def.fields[0].val = PPI_SIM;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("RHI_SIM");
+        tt->struct_def.fields[0].enum_def.fields[1].val = RHI_SIM;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("BSCAN_SIM");
+        tt->struct_def.fields[0].enum_def.fields[2].val = BSCAN_SIM;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("label");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_sim_scans->label - (char *) _sim_scans;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("min_az");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_sim_scans->min_az - (char *) _sim_scans;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("max_az");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_sim_scans->max_az - (char *) _sim_scans;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("delta_az");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_sim_scans->delta_az - (char *) _sim_scans;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("min_el");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_sim_scans->min_el - (char *) _sim_scans;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[6].fname = tdrpStrDup("max_el");
+      tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_sim_scans->max_el - (char *) _sim_scans;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[7].fname = tdrpStrDup("delta_el");
+      tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
+        (char *) &_sim_scans->delta_el - (char *) _sim_scans;
+      tt->struct_def.fields[8].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[8].fname = tdrpStrDup("stride");
+      tt->struct_def.fields[8].ptype = INT_TYPE;
+      tt->struct_def.fields[8].rel_offset = 
+        (char *) &_sim_scans->stride - (char *) _sim_scans;
+    tt->n_struct_vals = 36;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].e = RHI_SIM;
+      tt->struct_vals[1].s = tdrpStrDup("RHI-fore");
+      tt->struct_vals[2].d = -5;
+      tt->struct_vals[3].d = -5;
+      tt->struct_vals[4].d = 1;
+      tt->struct_vals[5].d = -25;
+      tt->struct_vals[6].d = 25;
+      tt->struct_vals[7].d = 1;
+      tt->struct_vals[8].i = 6;
+      tt->struct_vals[9].e = RHI_SIM;
+      tt->struct_vals[10].s = tdrpStrDup("RHI-aft");
+      tt->struct_vals[11].d = -25;
+      tt->struct_vals[12].d = -25;
+      tt->struct_vals[13].d = 1;
+      tt->struct_vals[14].d = -25;
+      tt->struct_vals[15].d = 25;
+      tt->struct_vals[16].d = 1;
+      tt->struct_vals[17].i = 6;
+      tt->struct_vals[18].e = RHI_SIM;
+      tt->struct_vals[19].s = tdrpStrDup("RHI-dualpol");
+      tt->struct_vals[20].d = 0;
+      tt->struct_vals[21].d = 0;
+      tt->struct_vals[22].d = 1;
+      tt->struct_vals[23].d = -25;
+      tt->struct_vals[24].d = 25;
+      tt->struct_vals[25].d = 1;
+      tt->struct_vals[26].i = 6;
+      tt->struct_vals[27].e = PPI_SIM;
+      tt->struct_vals[28].s = tdrpStrDup("PPI-sur");
+      tt->struct_vals[29].d = -45;
+      tt->struct_vals[30].d = 45;
+      tt->struct_vals[31].d = 1;
+      tt->struct_vals[32].d = 0;
+      tt->struct_vals[33].d = 0;
+      tt->struct_vals[34].d = 1;
+      tt->struct_vals[35].i = 6;
     tt++;
     
     // trailing entry has param_name set to NULL

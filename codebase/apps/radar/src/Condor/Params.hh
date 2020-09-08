@@ -118,6 +118,12 @@ public:
     CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
   } images_creation_mode_t;
 
+  typedef enum {
+    PPI_SIM = 0,
+    RHI_SIM = 1,
+    BSCAN_SIM = 2
+  } sim_type_t;
+
   // struct typedefs
 
   typedef struct {
@@ -172,6 +178,18 @@ public:
     double min_y_km;
     double max_y_km;
   } polar_plot_t;
+
+  typedef struct {
+    sim_type_t sim_type;
+    char* label;
+    double min_az;
+    double max_az;
+    double delta_az;
+    double min_el;
+    double max_el;
+    double delta_el;
+    int stride;
+  } sim_scan_t;
 
   ///////////////////////////
   // Member functions
@@ -768,6 +786,9 @@ public:
 
   double sim_gate_spacing_km;
 
+  sim_scan_t *_sim_scans;
+  int sim_scans_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -775,7 +796,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[176];
+  mutable TDRPtable _table[177];
 
   const char *_className;
 

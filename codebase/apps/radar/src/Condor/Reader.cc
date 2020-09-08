@@ -147,130 +147,89 @@ void SimReader::run()
 
 {
 
-  if (_params.display_mode == Params::POLAR_DISPLAY) {
-    _runSimPpi();
-  } else {
-    _runSimVert();
-  }
-
-}
-
-// simulate in ppi mode
-
-void SimReader::_runSimPpi()
-  
-{
+  int sweepNum = 0;
+  int volNum = 0;
 
   while (true) {
-
-    // PPI
-
-    double az = 0.0;
-    double elev = 1.0;
-    int sweepNum = 0;
-    int volNum = 0;
     
-    while (true) {
-      _simulatePpiBeam(elev, az, volNum, sweepNum);
-      umsleep(_params.sim_sleep_msecs);
-      az += 1.0;
-      if (az > 359.5) {
-        az = 0.0;
-        sweepNum++;
-        elev += 2.0;
-      }
-      if (elev > 20) {
-        volNum++;
-        break;
-      }
-    } // while
+    for (int iscan = 0; iscan < _params.sim_scans_n; iscan++) {
+      
+      const Params::sim_scan_t &scan = _params._sim_scans[iscan];
 
-    // RHI
+      if (scan.sim_type == Params::RHI_SIM) {
+        
+        Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_RHI;
+        
+        for (double az = scan.min_az;
+             az <= scan.max_az;
+             az += scan.delta_az) {
+          for (int istride = 0; istride < scan.stride; istride++) {
+            for (double el = scan.min_el + istride * scan.delta_el;
+                 el <= scan.max_el;
+                 el += istride * scan.delta_el) {
+              _simulateBeam(el, az, volNum, sweepNum, sweepMode);
+              umsleep(_params.sim_sleep_msecs);
+            } // el
+          } // istride
+        } // az
 
-    az = 0.0;
-    elev = 1.0;
-    sweepNum = 0;
-    double maxElev = 89.5;
-    if (_params.rhi_display_180_degrees) {
-      maxElev = 179.5;
-    }
+      } else if (scan.sim_type == Params::PPI_SIM) {
 
-    double increment = 1.0;
-    while (true) {
-      _simulateRhiBeam(elev, az, volNum, sweepNum);
-      umsleep(_params.sim_sleep_msecs);
-      elev += increment;
-      if (elev > maxElev) {
-        increment = -1.0;
-        az += 30.0;
-      } else if (elev < 0.5) {
-        increment = 1.0;
-        az += 13.0;
-      }
-      if (az > 359.5) {
-        volNum++;
-        break;
-      }
-    } // while
+        Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+        
+        for (double el = scan.min_el;
+             el <= scan.max_el;
+             el += scan.delta_el) {
+          for (int istride = 0; istride < scan.stride; istride++) {
+            for (double az = scan.min_az + istride * scan.delta_az;
+                 az <= scan.max_az;
+                 az += scan.stride * scan.delta_az) {
+              _simulateBeam(el, az, volNum, sweepNum, sweepMode);
+              umsleep(_params.sim_sleep_msecs);
+            } // az
+          } // istride
+        } // el
+        
+      } // if (scan.sim_type == Params::RHI_SIM)
+
+      sweepNum++;
+      
+    } // iscan
+
+    volNum++;
 
   } // while
 
 }
 
-// simulate in vert point mode
+// simulate a beam
 
-void SimReader::_runSimVert()
-
-{
-  
-  double az = 0.0;
-  double elev = 89.0;
-  int sweepNum = 0;
-  int volNum = 0;
-  
-  while (true) {
-
-    _simulateVertBeam(elev, az, volNum, sweepNum);
-    
-    umsleep(_params.sim_sleep_msecs);
-    
-    az += 1.0;
-    if (az > 359.5) {
-      az = 0.0;
-      sweepNum++;
-      elev += 0.1;
-      if (elev > 90) {
-        elev = 89.0;
-        sweepNum = 0;
-        volNum++;
-      }
-    }
-
-  }
-
-}
-
-// simulate a ppi beam
-
-void SimReader::_simulatePpiBeam(double elev, double az,
-                                 int volNum, int sweepNum)
+void SimReader::_simulateBeam(double elev, double az,
+                              int volNum, int sweepNum,
+                              Radx::SweepMode_t sweepMode)
   
 {
 
   RadxRay *ray = new RadxRay;
   ray->setVolumeNumber(volNum);
   ray->setSweepNumber(sweepNum);
-  ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+  ray->setSweepMode(sweepMode);
   ray->setPolarizationMode(Radx::POL_MODE_HV_ALT);
   ray->setPrtMode(Radx::PRT_MODE_FIXED);
 
   struct timeval tv;
   gettimeofday(&tv, NULL);
   ray->setTime(tv.tv_sec, tv.tv_usec * 1000);
+  double dsecs = ray->getTimeDouble();
+  double frac = fmod(dsecs, 30.0) / 30.0;
 
   ray->setAzimuthDeg(az);
   ray->setElevationDeg(elev);
-  ray->setFixedAngleDeg(elev);
+  if (sweepMode == Radx::SWEEP_MODE_RHI) {
+    ray->setFixedAngleDeg(az);
+  } else {
+    ray->setFixedAngleDeg(elev);
+  }
   ray->setIsIndexed(true);
   ray->setIsIndexed(false);
   ray->setAngleResDeg(1.0);
@@ -297,168 +256,12 @@ void SimReader::_simulatePpiBeam(double elev, double az,
     Radx::fl32 *data = new Radx::fl32[nGates];
 
     double dataRange = (field.maxVal - field.minVal) / 2.0;
-    double dataMin = field.minVal + (dataRange / 20.0) * elev;
+    double dataMin = field.minVal + dataRange * frac;
     double dataDelta = dataRange / nGates;
 
     for (int igate = 0; igate < nGates; igate++) {
       // data[igate] = dataMin + igate * dataDelta + ifield * 2.0 + az * 0.01;
       data[igate] = dataMin + igate * dataDelta + ifield * 2.0;
-    }
-
-    ray->addField(field.name, field.units, nGates,
-                  missing, data, true);
-
-    delete[] data;
-
-  } // ifield
-
-  // add ray to queue
-
-  _addRay(ray);
-
-}
-
-/////////////////////////
-// simulate an RHI beam
-
-void SimReader::_simulateRhiBeam(double elev, double az,
-                                 int volNum, int sweepNum)
-  
-{
-
-  RadxRay *ray = new RadxRay;
-  ray->setVolumeNumber(volNum);
-  ray->setSweepNumber(sweepNum);
-  ray->setSweepMode(Radx::SWEEP_MODE_RHI);
-  ray->setPolarizationMode(Radx::POL_MODE_HV_ALT);
-  ray->setPrtMode(Radx::PRT_MODE_FIXED);
-
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  ray->setTime(tv.tv_sec, tv.tv_usec * 1000);
-
-  ray->setAzimuthDeg(az);
-  ray->setElevationDeg(elev);
-  ray->setFixedAngleDeg(az);
-  ray->setIsIndexed(true);
-  ray->setAngleResDeg(1.0);
-  ray->setNSamples(128);
-  ray->setPulseWidthUsec(1.0);
-  ray->setPrtSec(0.001);
-  ray->setNyquistMps(25.0);
-  ray->setUnambigRangeKm(150.0);
-  ray->setMeasXmitPowerDbmH(84.0);
-  ray->setMeasXmitPowerDbmV(84.1);
-
-  int nGates = _params.sim_n_gates;
-  double startRange = _params.sim_start_range_km;
-  double gateSpacing = _params.sim_gate_spacing_km;
-
-  ray->setNGates(nGates);
-  ray->setRangeGeom(startRange, gateSpacing);
-
-  Radx::fl32 missing = -9999.0;
-
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-    
-    const Field &field = _fields[ifield];
-    Radx::fl32 *data = new Radx::fl32[nGates];
-
-    double dataRange = (field.maxVal - field.minVal) / 2.0;
-    double dataMin = field.minVal + (dataRange / 720.0) * az;
-    double dataDelta = dataRange / nGates;
-
-    for (int igate = 0; igate < nGates; igate++) {
-      data[igate] = dataMin + igate * dataDelta + ifield * 2.0;
-    }
-
-    ray->addField(field.name, field.units, nGates,
-                  missing, data, true);
-
-    delete[] data;
-
-  } // ifield
-
-  // add ray to queue
-
-  _addRay(ray);
-
-}
-
-// simulate a vert pointing beam
-
-void SimReader::_simulateVertBeam(double elev, double az,
-                                  int volNum, int sweepNum)
-  
-{
-
-  RadxRay *ray = new RadxRay;
-  ray->setVolumeNumber(volNum);
-  ray->setSweepNumber(sweepNum);
-  ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-  ray->setPolarizationMode(Radx::POL_MODE_HV_ALT);
-  ray->setPrtMode(Radx::PRT_MODE_FIXED);
-
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  ray->setTime(tv.tv_sec, tv.tv_usec * 1000);
-
-  ray->setAzimuthDeg(az);
-  ray->setElevationDeg(elev);
-  ray->setFixedAngleDeg(elev);
-  ray->setIsIndexed(true);
-  ray->setIsIndexed(false);
-  ray->setNSamples(128);
-  ray->setPulseWidthUsec(1.0);
-  ray->setPrtSec(0.001);
-  ray->setNyquistMps(25.0);
-  ray->setUnambigRangeKm(150.0);
-  ray->setMeasXmitPowerDbmH(84.0);
-  ray->setMeasXmitPowerDbmV(84.1);
-
-  double modSecs = (tv.tv_sec % 60) + tv.tv_usec / 1.0e6;
-  _altitude = sin((modSecs / 60.0) * 2.0 * M_PI) * 10.0 + 12.0;
-  _latitude += 0.001;
-  if (_latitude > 90) {
-    _latitude = 0.0;
-  }
-  _longitude += 0.001;
-  if (_longitude > 180) {
-    _longitude = 0.0;
-  }
-  
-  if (_altitude > 10.0) {
-    ray->setElevationDeg(-elev);
-  }
-
-  RadxGeoref georef;
-  georef.setTimeSecs(ray->getTimeSecs());
-  georef.setNanoSecs(ray->getNanoSecs());
-  georef.setLongitude(_longitude);
-  georef.setLatitude(_latitude);
-  georef.setAltitudeKmMsl(_altitude);
-  ray->setGeoref(georef);
-  
-  int nGates = _params.sim_n_gates;
-  double startRange = _params.sim_start_range_km;
-  double gateSpacing = _params.sim_gate_spacing_km;
-
-  ray->setNGates(nGates);
-  ray->setRangeGeom(startRange, gateSpacing);
-
-  Radx::fl32 missing = -9999.0;
-
-  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-    
-    const Field &field = _fields[ifield];
-    Radx::fl32 *data = new Radx::fl32[nGates];
-
-    double dataRange = (field.maxVal - field.minVal) / 2.0;
-    double dataMin = field.minVal + (dataRange / 200.0) * elev;
-    double dataDelta = dataRange / nGates;
-
-    for (int igate = 0; igate < nGates; igate++) {
-      data[igate] = dataMin + igate * dataDelta + ifield * 2.0 + az * 0.01;
     }
 
     ray->addField(field.name, field.units, nGates,

@@ -470,13 +470,13 @@ polar_plot_aspect_ratio = 1;
 
 ///////////// polar_plots /////////////////////////////
 //
-// Fields to be displayed.
+// Types of plot to be displayed.
 //
-// label: appears on the GUI. raw_name: unfiltered field name. 
-//   filtered_name: field with clutter filter applied. units: units string 
-//   for color scale. color_map: name of color map in color_scale_dir. 
-//   shortcut: keyboard character for shortcut. Specified key will select 
-//   raw field. Use ALT-key to get filtered field. .
+// label: appears on the plot upper left. min_az, max_az: For PPIs, 
+//   range of azimuths. For RHIs, should bracket desired az. min_el, 
+//   max_el: For RHIs, range of elevations. For PPIs, should bracket 
+//   desired el. min_x_km, max_x_km: limits of plot in X. min_y_km, 
+//   max_y_km: limits of plot in Y.
 //
 //
 // Type: struct
@@ -897,7 +897,7 @@ ppi_main_legend_pos = LEGEND_TOP_LEFT;
 // Type: double
 //
 
-ppi_rendering_beam_width = 1.0;
+ppi_rendering_beam_width = 1;
 
 //======================================================================
 //
@@ -2138,4 +2138,83 @@ sim_start_range_km = 0.075;
 //
 
 sim_gate_spacing_km = 0.15;
+
+///////////// sim_scans ///////////////////////////////
+//
+// Scans to be simulated.
+//
+// For RHIs, the min_az and max_az should be the same. For PPIs, the 
+//   min_el and max_el should be the same. The stride is the number of 
+//   beams in an APAR dwell.
+//
+//
+// Type: struct
+//   typedef struct {
+//      sim_type_t sim_type;
+//        Options:
+//          PPI_SIM
+//          RHI_SIM
+//          BSCAN_SIM
+//      string label;
+//      double min_az;
+//      double max_az;
+//      double delta_az;
+//      double min_el;
+//      double max_el;
+//      double delta_el;
+//      int stride;
+//   }
+//
+// 1D array - variable length.
+//
+
+sim_scans = {
+  // {
+  //   sim_type = RHI_SIM,
+  //   label = "RHI-fore",
+  //   min_az = -5,
+  //   max_az = -5,
+  //   delta_az = 1,
+  //   min_el = -25,
+  //   max_el = 25,
+  //   delta_el = 1,
+  //   stride = 6
+  // }
+  // ,
+  // {
+  //   sim_type = RHI_SIM,
+  //   label = "RHI-aft",
+  //   min_az = -25,
+  //   max_az = -25,
+  //   delta_az = 1,
+  //   min_el = -25,
+  //   max_el = 25,
+  //   delta_el = 1,
+  //   stride = 6
+  // }
+  // ,
+  // {
+  //   sim_type = RHI_SIM,
+  //   label = "RHI-dualpol",
+  //   min_az = 0,
+  //   max_az = 0,
+  //   delta_az = 1,
+  //   min_el = -25,
+  //   max_el = 25,
+  //   delta_el = 1,
+  //   stride = 6
+  // }
+  // ,
+  {
+    sim_type = PPI_SIM,
+    label = "PPI-sur",
+    min_az = -45,
+    max_az = 45,
+    delta_az = 1,
+    min_el = 0,
+    max_el = 0,
+    delta_el = 1,
+    stride = 6
+  }
+};
 

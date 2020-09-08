@@ -148,16 +148,6 @@ void PpiBeam::paint(QImage *image,
       painter.setBrush(*prev_brush);
       painter.drawPolygon(polygon);
       
-      // if (count == 0) {
-      //   cerr << "PPPPPPPPPPPPPPPPPPPP igate, az, el, x, y:"
-      //        << igate << ", "
-      //        << _ray->getAzimuthDeg() << ", "
-      //        << _ray->getElevationDeg() << ", "
-      //        << _polygons[igate].pts[1].x << ", "
-      //        << _polygons[igate].pts[1].y << endl;
-      //   count++;
-      // }
-
       prev_brush = curr_brush;
       polygon[0] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);
       polygon[1] = QPointF(_polygons[igate].pts[1].x, _polygons[igate].pts[1].y);
