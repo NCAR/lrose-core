@@ -441,22 +441,19 @@ void PpiPlot::_drawOverlays(QPainter &painter)
 
   if (_ringSpacing > 0.0 && _ringsEnabled) {
     
-    // Set up the painter for rings
-    
-    painter.setPen(_gridRingsColor);
-    
-    // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(1);
-    painter.setPen(pen);
-    painter.setPen(_gridRingsColor);
-    
     painter.save();
+
+    // set narrow line width
+    
     painter.setTransform(_zoomWorld.getTransform());
-    pen.setWidth(1);
+    painter.setPen(_gridRingsColor);
+
+    QPen pen = painter.pen();
+    pen.setWidth(0);
+    painter.setPen(pen);
+    
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
-      // _zoomWorld.drawArc(painter, 0.0, 0.0, ringRange, ringRange, 0.0, 360.0);
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
       painter.drawEllipse(rect);
       ringRange += _ringSpacing;
