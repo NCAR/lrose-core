@@ -500,57 +500,59 @@ polar_plot_aspect_ratio = 1;
 // 1D array - variable length.
 //
 
-polar_plots = {
+polar_plots =
   {
+   {
+    plot_type = RHI_PLOT,
+    label = "RHI-fore",
+    min_az = -7.5,
+    max_az = -2.5,
+    min_el = -25.0,
+    max_el = 25.0,
+    min_x_km = 0.0,
+    max_x_km = 225.0,
+    min_y_km = -90,
+    max_y_km = 90
+   }
+   ,
+   {
+    plot_type = RHI_PLOT,
+    label = "RHI-aft",
+    min_az = 22.5,
+    max_az = 27.5,
+    min_el = -25.0,
+    max_el = 25.0,
+    min_x_km = 0.0,
+    max_x_km = 225.0,
+    min_y_km = -90,
+    max_y_km = 90
+   }
+   ,
+   {
+    plot_type = RHI_PLOT,
+    label = "RHI-dualpol",
+    min_az = -2.5,
+    max_az = 2.5,
+    min_el = -25.0,
+    max_el = 25.0,
+    min_x_km = 0.0,
+    max_x_km = 225.0,
+    min_y_km = -90,
+    max_y_km = 90
+   }
+   ,
+   {
     plot_type = PPI_PLOT,
-    label = "PPI-1",
-    min_az = -45,
-    max_az = 45,
-    min_el = -45,
-    max_el = 45,
-    min_x_km = -120,
-    max_x_km = 120,
+    label = "PPI",
+    min_az = -45.0,
+    max_az = 45.0,
+    min_el = -45.0,
+    max_el = 45.0,
+    min_x_km = -150.0,
+    max_x_km = 150.0,
     min_y_km = 0,
-    max_y_km = 150
-  }
-  ,
-  {
-    plot_type = PPI_PLOT,
-    label = "PPI-2",
-    min_az = 10,
-    max_az = 80,
-    min_el = -45,
-    max_el = 45,
-    min_x_km = 0,
-    max_x_km = 150,
-    min_y_km = 0,
-    max_y_km = 150
-  }
-  ,
-  {
-    plot_type = PPI_PLOT,
-    label = "PPI-3",
-    min_az = 135,
-    max_az = 225,
-    min_el = -45,
-    max_el = 45,
-    min_x_km = -120,
-    max_x_km = 120,
-    min_y_km = -240,
-    max_y_km = 0
-  }
-  ,
-  {
-    plot_type = PPI_PLOT,
-    label = "PPI-4",
-    min_az = 225,
-    max_az = 315,
-    min_el = -45,
-    max_el = 45,
-    min_x_km = -240,
-    max_x_km = 0,
-    min_y_km = -120,
-    max_y_km = 120
+    max_y_km = 300
+   }
   }
 };
 
@@ -2107,7 +2109,7 @@ images_sweep_index_list = {
 // Type: int
 //
 
-sim_sleep_msecs = 10;
+sim_sleep_msecs = 100;
 
 ///////////// sim_n_gates /////////////////////////////
 //
@@ -2169,47 +2171,47 @@ sim_gate_spacing_km = 0.15;
 //
 
 sim_scans = {
-  // {
-  //   sim_type = RHI_SIM,
-  //   label = "RHI-fore",
-  //   min_az = -5,
-  //   max_az = -5,
-  //   delta_az = 1,
-  //   min_el = -25,
-  //   max_el = 25,
-  //   delta_el = 1,
-  //   stride = 6
-  // }
-  // ,
-  // {
-  //   sim_type = RHI_SIM,
-  //   label = "RHI-aft",
-  //   min_az = -25,
-  //   max_az = -25,
-  //   delta_az = 1,
-  //   min_el = -25,
-  //   max_el = 25,
-  //   delta_el = 1,
-  //   stride = 6
-  // }
-  // ,
-  // {
-  //   sim_type = RHI_SIM,
-  //   label = "RHI-dualpol",
-  //   min_az = 0,
-  //   max_az = 0,
-  //   delta_az = 1,
-  //   min_el = -25,
-  //   max_el = 25,
-  //   delta_el = 1,
-  //   stride = 6
-  // }
-  // ,
+  {
+    sim_type = RHI_SIM,
+    label = "RHI-fore",
+    min_az = -5,
+    max_az = -5,
+    delta_az = 1,
+    min_el = -25,
+    max_el = 25,
+    delta_el = 1,
+    stride = 6
+  }
+  ,
+  {
+    sim_type = RHI_SIM,
+    label = "RHI-aft",
+    min_az = -25,
+    max_az = -25,
+    delta_az = 1,
+    min_el = -25,
+    max_el = 25,
+    delta_el = 1,
+    stride = 6
+  }
+  ,
+  {
+    sim_type = RHI_SIM,
+    label = "RHI-dualpol",
+    min_az = 0,
+    max_az = 0,
+    delta_az = 1,
+    min_el = -25,
+    max_el = 25,
+    delta_el = 1,
+    stride = 6
+  }
+  ,
   {
     sim_type = PPI_SIM,
     label = "PPI-sur",
     min_az = -45,
-    max_az = 45,
+    max_az = 345,
     delta_az = 1,
     min_el = 0,
     max_el = 0,

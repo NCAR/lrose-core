@@ -21,6 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
 #include <assert.h>
 #include <cmath>
 #include <unistd.h>
@@ -54,6 +55,7 @@
 #include "SpreadSheetController.hh"
 #include "BoundaryPointEditor.hh"
 #include "PpiPlot.hh"
+#include "RhiPlot.hh"
 
 using namespace std;
 
@@ -205,6 +207,26 @@ PolarWidget::PolarWidget(QWidget* parent,
 
       _ppis.push_back(ppi);
       _plots.push_back(ppi);
+      
+    } else if (plotParams.plot_type == Params::RHI_PLOT) {
+      
+      RhiPlot *rhi = new RhiPlot(this, _manager, _params, iplot,
+                                 plotParams.plot_type,
+                                 plotParams.label,
+                                 plotParams.min_az,
+                                 plotParams.max_az,
+                                 plotParams.min_el,
+                                 plotParams.max_el,
+                                 plotParams.min_x_km,
+                                 plotParams.max_x_km,
+                                 plotParams.min_y_km,
+                                 plotParams.max_y_km,
+                                 _platform,
+                                 fields,
+                                 haveFilteredFields);
+
+      _rhis.push_back(rhi);
+      _plots.push_back(rhi);
       
     }
     

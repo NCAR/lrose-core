@@ -374,7 +374,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   
   // rhis
   
-  vector<RhiPlot *> _rhiPlots;
+  vector<RhiPlot *> _rhis;
   bool _rhiPlotsConfigured;
 
   // all plots

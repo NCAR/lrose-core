@@ -166,7 +166,7 @@ void SimReader::run()
           for (int istride = 0; istride < scan.stride; istride++) {
             for (double el = scan.min_el + istride * scan.delta_el;
                  el <= scan.max_el;
-                 el += istride * scan.delta_el) {
+                 el += scan.stride * scan.delta_el) {
               _simulateBeam(el, az, volNum, sweepNum, sweepMode);
               umsleep(_params.sim_sleep_msecs);
             } // el
@@ -210,6 +210,15 @@ void SimReader::_simulateBeam(double elev, double az,
   
 {
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Sim beam: elev, az, volNum, sweepNum, sweepMode: "
+         << elev << ", "
+         << az << ", "
+         << volNum << ", "
+         << sweepNum << ", "
+         << Radx::sweepModeToStr(sweepMode) << endl;
+  }
+  
   RadxRay *ray = new RadxRay;
   ray->setVolumeNumber(volNum);
   ray->setSweepNumber(sweepNum);
