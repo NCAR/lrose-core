@@ -466,7 +466,7 @@ polar_plots_n_columns = 2;
 // Type: double
 //
 
-polar_plot_aspect_ratio = 1;
+polar_plot_aspect_ratio = 1.3;
 
 ///////////// polar_plots /////////////////////////////
 //
@@ -509,10 +509,10 @@ polar_plots =
     max_az = -2.5,
     min_el = -25.0,
     max_el = 25.0,
-    min_x_km = 0.0,
-    max_x_km = 225.0,
-    min_y_km = -90,
-    max_y_km = 90
+    min_x_km = -9.0,
+    max_x_km = 160.0,
+    min_y_km = -65,
+    max_y_km = 65
    }
    ,
    {
@@ -522,10 +522,10 @@ polar_plots =
     max_az = 27.5,
     min_el = -25.0,
     max_el = 25.0,
-    min_x_km = 0.0,
-    max_x_km = 225.0,
-    min_y_km = -90,
-    max_y_km = 90
+    min_x_km = -9.0,
+    max_x_km = 160.0,
+    min_y_km = -65,
+    max_y_km = 65
    }
    ,
    {
@@ -535,10 +535,10 @@ polar_plots =
     max_az = 2.5,
     min_el = -25.0,
     max_el = 25.0,
-    min_x_km = 0.0,
-    max_x_km = 225.0,
-    min_y_km = -90,
-    max_y_km = 90
+    min_x_km = -9.0,
+    max_x_km = 160.0,
+    min_y_km = -65,
+    max_y_km = 65
    }
    ,
    {
@@ -548,10 +548,10 @@ polar_plots =
     max_az = 45.0,
     min_el = -45.0,
     max_el = 45.0,
-    min_x_km = -150.0,
-    max_x_km = 150.0,
-    min_y_km = 0,
-    max_y_km = 300
+    min_x_km = -110,
+    max_x_km = 110,
+    min_y_km = -10,
+    max_y_km = 159.23
    }
   }
 };
@@ -658,7 +658,7 @@ site_name = "MARSHALL";
 // Type: int
 //
 
-main_window_width = 1122;
+main_window_width = 1425;
 
 ///////////// main_window_height //////////////////////
 //
@@ -668,7 +668,7 @@ main_window_width = 1122;
 // Type: int
 //
 
-main_window_height = 815;
+main_window_height = 875;
 
 ///////////// main_window_start_x /////////////////////
 //
