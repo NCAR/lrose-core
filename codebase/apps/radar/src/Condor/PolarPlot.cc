@@ -77,8 +77,7 @@ PolarPlot::PolarPlot(PolarWidget *parent,
                      double minYKm,
                      double maxYKm,
                      const RadxPlatform &platform,
-                     const vector<DisplayField *> &fields,
-                     bool haveFilteredFields) :
+                     const vector<DisplayField *> &fields) :
         _parent(parent),
         _manager(manager),
         _params(params),
@@ -95,7 +94,6 @@ PolarPlot::PolarPlot(PolarWidget *parent,
         _maxYKm(maxYKm),
         _platform(platform),
         _fields(fields),
-        _haveFilteredFields(haveFilteredFields),
         _fieldNum(0),
         _scaledLabel(ScaledLabel::DistanceEng)
         
@@ -250,42 +248,6 @@ void PolarPlot::setWorldLimits(double xMinWorld,
 /*************************************************************************
  * Protected methods
  *************************************************************************/
-
-/*************************************************************************
- * Draw the overlays, axes, legends etc
- */
-
-// void PolarPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
-// {
-
-//   // save painter state
-  
-//   painter.save();
-  
-//   // store font
-  
-//   QFont origFont = painter.font();
-  
-//   painter.setPen(_params.axes_label_color);
-
-//   // _zoomWorld.drawAxisBottom(painter, getUnits(_momentType),
-//   //                           true, true, true, _xGridLinesOn);
-
-//   // _zoomWorld.drawAxisLeft(painter, "km", 
-//   //                         true, true, true, _yGridLinesOn);
-
-//   // _zoomWorld.drawYAxisLabelLeft(painter, "Range");
-
-//   // selected range line
-  
-//   // painter.setPen(_params.ascope_selected_range_color);
-//   _zoomWorld.drawLine(painter,
-//                       _zoomWorld.getXMinWorld(), selectedRangeKm,
-//                       _zoomWorld.getXMaxWorld(), selectedRangeKm);
-
-//   painter.restore();
-
-// }
 
 /*************************************************************************
  * setRings()

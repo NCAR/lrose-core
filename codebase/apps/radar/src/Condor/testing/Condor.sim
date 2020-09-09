@@ -329,14 +329,14 @@ show_status_in_gui = {
 // Type: string
 //
 
-color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
+color_scale_dir = "./testing/color_scales";
 
 ///////////// fields //////////////////////////////////
 //
 // Fields to be displayed.
 //
-// label: appears on the GUI. raw_name: unfiltered field name. 
-//   filtered_name: field with clutter filter applied. units: units string 
+// label: appears on the GUI. field_name: field name. 
+//   units: units string 
 //   for color scale. color_map: name of color map in color_scale_dir. 
 //   shortcut: keyboard character for shortcut. Specified key will select 
 //   raw field. Use ALT-key to get filtered field. .
@@ -345,8 +345,7 @@ color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 // Type: struct
 //   typedef struct {
 //      string label;
-//      string raw_name;
-//      string filtered_name;
+//      string field_name;
 //      string units;
 //      string color_map;
 //      string shortcut;
@@ -358,8 +357,7 @@ color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 fields = {
   {
     label = "DBZ",
-    raw_name = "DBZ",
-    filtered_name = "",
+    field_name = "DBZ",
     units = "dBZ",
     color_map = "dbz.colors",
     shortcut = "1"
@@ -367,8 +365,7 @@ fields = {
   ,
   {
     label = "VEL",
-    raw_name = "VEL",
-    filtered_name = "",
+    field_name = "VEL",
     units = "m/s",
     color_map = "vel.colors",
     shortcut = "3"
@@ -376,8 +373,7 @@ fields = {
   ,
   {
     label = "WIDTH",
-    raw_name = "WIDTH",
-    filtered_name = "",
+    field_name = "WIDTH",
     units = "m/s",
     color_map = "width.colors",
     shortcut = "4"
@@ -385,8 +381,7 @@ fields = {
   ,
   {
     label = "ZDR",
-    raw_name = "ZDR",
-    filtered_name = "",
+    field_name = "ZDR",
     units = "dB",
     color_map = "zdr.colors",
     shortcut = "6"
@@ -394,8 +389,7 @@ fields = {
   ,
   {
     label = "PHIDP",
-    raw_name = "PHIDP",
-    filtered_name = "",
+    field_name = "PHIDP",
     units = "deg",
     color_map = "phidp.colors",
     shortcut = "7"
@@ -403,8 +397,7 @@ fields = {
   ,
   {
     label = "RHOHV",
-    raw_name = "RHOHV",
-    filtered_name = "",
+    field_name = "RHOHV",
     units = "",
     color_map = "rhohv.colors",
     shortcut = "8"

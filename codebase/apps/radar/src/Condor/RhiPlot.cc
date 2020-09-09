@@ -59,12 +59,11 @@ RhiPlot::RhiPlot(PolarWidget* parent,
                  double minYKm,
                  double maxYKm,
                  const RadxPlatform &platform,
-                 const vector<DisplayField *> &fields,
-                 bool haveFilteredFields) :
+                 const vector<DisplayField *> &fields) :
         PolarPlot(parent, manager, params, id, plotType, label,
                   minAz, maxAz, minEl, maxEl,
                   minXKm, maxXKm, minYKm, maxYKm,
-                  platform, fields, haveFilteredFields)
+                  platform, fields)
         
 {
 
@@ -354,16 +353,12 @@ const RadxRay *RhiPlot::getClosestRay(int imageX, int imageY,
   // compute the azimuth relative to the display
   
   double clickEl = atan2(yKm, xKm) * RAD_TO_DEG;
-  double radarDisplayEl = 90.0 - clickEl;
-  if (radarDisplayEl < 0.0) radarDisplayEl += 360.0;
   LOG(DEBUG) << "clickEl = " << clickEl << " from xKm, yKm = " 
              << xKm << "," << yKm; 
-  LOG(DEBUG) << "radarDisplayEl = " << radarDisplayEl << " from xKm, yKm = "
-             << xKm << yKm;
-
+  
   // search for the closest ray to this el
   
-  int rayLocIndex = _getRayLocIndex(radarDisplayEl);
+  int rayLocIndex = _getRayLocIndex(clickEl);
   for (int ii = 0; ii <= _rayLocWidthHalf * 2; ii++) {
     int jj1 = (rayLocIndex - ii + RAY_LOC_N) % RAY_LOC_N;
     if (_rayLoc[jj1]->getActive()) {

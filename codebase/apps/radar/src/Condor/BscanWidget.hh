@@ -99,8 +99,7 @@ class DLL_EXPORT BscanWidget : public QWidget
   BscanWidget(QWidget* parent,
               const BscanManager &manager,
               const Params &params,
-              const vector<DisplayField *> &fields,
-              bool haveFilteredFields);
+              const vector<DisplayField *> &fields);
   
   /**
    * @brief Destructor.
@@ -312,7 +311,6 @@ class DLL_EXPORT BscanWidget : public QWidget
   // data fields
 
   const vector<DisplayField *> &_fields;
-  bool _haveFilteredFields;
 
   /**
    * @brief Pointers to all of the active beams are saved here.

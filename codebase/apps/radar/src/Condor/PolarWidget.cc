@@ -68,15 +68,13 @@ PolarWidget::PolarWidget(QWidget* parent,
                          const PolarManager &manager,
                          const Params &params,
                          const RadxPlatform &platform,
-                         const vector<DisplayField *> &fields,
-                         bool haveFilteredFields) :
+                         const vector<DisplayField *> &fields) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
         _params(params),
         _platform(platform),
         _fields(fields),
-        _haveFilteredFields(haveFilteredFields),
         _fieldNum(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridRingsColor(_params.grid_and_range_ring_color),
@@ -202,8 +200,7 @@ PolarWidget::PolarWidget(QWidget* parent,
                                  plotParams.min_y_km,
                                  plotParams.max_y_km,
                                  _platform,
-                                 fields,
-                                 haveFilteredFields);
+                                 fields);
 
       _ppis.push_back(ppi);
       _plots.push_back(ppi);
@@ -222,8 +219,7 @@ PolarWidget::PolarWidget(QWidget* parent,
                                  plotParams.min_y_km,
                                  plotParams.max_y_km,
                                  _platform,
-                                 fields,
-                                 haveFilteredFields);
+                                 fields);
 
       _rhis.push_back(rhi);
       _plots.push_back(rhi);
@@ -559,7 +555,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
         
         // emit signal
         
-        emit ppiLocationClicked(xKm, yKm, closestRay);
+        emit polarLocationClicked(xKm, yKm, closestRay, plot->getLabel());
 
       }
       

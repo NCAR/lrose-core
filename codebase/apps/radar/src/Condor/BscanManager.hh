@@ -67,8 +67,7 @@ public:
   // constructor
 
   BscanManager(const Params &params,
-               const vector<DisplayField *> &fields,
-               bool haveFilteredFields);
+               const vector<DisplayField *> &fields);
   
   // destructor
   

@@ -61,12 +61,11 @@ PpiPlot::PpiPlot(PolarWidget* parent,
                  double minYKm,
                  double maxYKm,
                  const RadxPlatform &platform,
-                 const vector<DisplayField *> &fields,
-                 bool haveFilteredFields) :
+                 const vector<DisplayField *> &fields) :
         PolarPlot(parent, manager, params, id, plotType, label,
                   minAz, maxAz, minEl, maxEl,
                   minXKm, maxXKm, minYKm, maxYKm,
-                  platform, fields, haveFilteredFields)
+                  platform, fields)
         
 {
 
@@ -129,13 +128,6 @@ void PpiPlot::clear()
   for (int ii = 0; ii < RAY_LOC_N; ii++) {
     _rayLoc[ii]->clearData();
   }
-  
-  // Clear out the beam array
-  
-  // for (size_t i = 0; i < _ppiBeams.size(); i++) {
-  //   Beam::deleteIfUnused(_ppiBeams[i]);
-  // }
-  // _ppiBeams.clear();
   
   // Now rerender the images
   

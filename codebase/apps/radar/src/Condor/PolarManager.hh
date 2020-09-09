@@ -48,7 +48,6 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "DisplayManager.hh"
-// #include "RayLoc.hh"
 #include "ContextEditingView.hh"
 #include "BoundaryPointEditor.hh"
 #include <QMainWindow>
@@ -93,8 +92,7 @@ public:
   // constructor
   
   PolarManager(const Params &params,
-               const vector<DisplayField *> &fields,
-               bool haveFilteredFields);
+               const vector<DisplayField *> &fields);
   
   // destructor
   
@@ -346,12 +344,9 @@ private slots:
 
   // local
 
-  void _ppiLocationClicked(double xkm, double ykm,
-                           const RadxRay *closestRay);
-  void _rhiLocationClicked(double xkm, double ykm,
-                           const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
-                        const RadxRay *ray);
+                        const RadxRay *ray,
+                        string plotLabel);
 
   // modes
   

@@ -159,8 +159,7 @@ public:
 
   typedef struct {
     char* label;
-    char* raw_name;
-    char* filtered_name;
+    char* field_name;
     char* units;
     char* color_map;
     char* shortcut;

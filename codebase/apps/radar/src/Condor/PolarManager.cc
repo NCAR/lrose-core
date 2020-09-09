@@ -108,9 +108,8 @@ PolarManager* PolarManager::Instance()
 // Constructor
 
 PolarManager::PolarManager(const Params &params,
-                           const vector<DisplayField *> &fields,
-                           bool haveFilteredFields) :
-        DisplayManager(params, fields, haveFilteredFields),
+                           const vector<DisplayField *> &fields) :
+        DisplayManager(params, fields),
         _sweepManager(params), _rhiWindowDisplayed(false)
 {
   m_pInstance = this;
@@ -313,7 +312,6 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
   // get key pressed
 
-  Qt::KeyboardModifiers mods = e->modifiers();
   char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
 
@@ -350,17 +348,9 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     
     bool correctField = false;
     if (shortcut == keychar) {
-      if (mods & Qt::AltModifier) {
-        if (field->getIsFilt()) {
-          correctField = true;
-        }
-      } else {
-        if (!field->getIsFilt()) {
-          correctField = true;
-        }
-      }
+      correctField = true;
     }
-
+    
     if (correctField) {
       if (_params.debug) {
 	cerr << "Short-cut key pressed: " << shortcut << endl;
@@ -461,15 +451,17 @@ void PolarManager::_setupWindows()
   _polarFrame = new QFrame(_main);
   _polarFrame->resize(200, 200);
   _polarFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  _plotWidget = new PolarWidget(_polarFrame, *this, _params, _platform, _fields, _haveFilteredFields);
+  _plotWidget = new PolarWidget(_polarFrame, *this, _params,
+                                _platform, _fields);
 
   connect(this, SIGNAL(frameResized(const int, const int)),
           _plotWidget, SLOT(resize(const int, const int)));
 
   // connect slots for location
   
-  connect(_plotWidget, SIGNAL(ppiLocationClicked(double, double, const RadxRay*)),
-          this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
+  connect(_plotWidget,
+          SIGNAL(polarLocationClicked(double, double, const RadxRay*, string)),
+          this, SLOT(_locationClicked(double, double, const RadxRay*, string)));
   
   // add a right-click context menu to the image
 
@@ -1469,61 +1461,19 @@ void PolarManager::setVolume()
 
 }
 
-///////////////////////////////////////////////////
-// respond to a change in click location on the PPI
-
-void PolarManager::_ppiLocationClicked(double xKm, double yKm, 
-                                       const RadxRay *closestRay)
-
-{
-  
-  // find the relevant ray
-  // ignore closest ray sent in
-  
-  double azDeg = 0.0;
-  if (xKm != 0 || yKm != 0) {
-    azDeg = atan2(xKm, yKm) * RAD_TO_DEG;
-    if (azDeg < 0) {
-      azDeg += 360.0;
-    }
-  }
-  if (_params.debug) {
-    cerr << "    azDeg = " << azDeg << endl;
-  }
-  
-  if (closestRay == NULL) {
-    // no ray data yet
-    if (_params.debug) {
-      cerr << "    No ray data yet, xKm, yKm, az: "
-           << xKm << ", " << yKm << ", " << azDeg << endl;
-    }
-    return;
-  }
-
-  _locationClicked(xKm, yKm, closestRay);
-
-}
-
-///////////////////////////////////////////////////
-// respond to a change in click location on the RHI
-
-void PolarManager::_rhiLocationClicked(double xKm, double yKm, 
-                                       const RadxRay *closestRay)
-  
-{
-
-  _locationClicked(xKm, yKm, closestRay);
-
-}
-
 ////////////////////////////////////////////////////////////////////////
 // respond to a change in click location on one of the windows
 
 void PolarManager::_locationClicked(double xKm, double yKm,
-                                    const RadxRay *ray)
+                                    const RadxRay *ray,
+                                    string plotLabel)
   
 {
 
+  if (ray == NULL) {
+    return;
+  }
+  
   if (_params.debug) {
     cerr << "*** Entering PolarManager::_locationClicked()" << endl;
   }
@@ -1548,6 +1498,8 @@ void PolarManager::_locationClicked(double xKm, double yKm,
       ray->print(cerr);
     }
   }
+
+  _plotClicked->setText(plotLabel.c_str());
 
   DateTime rayTime(ray->getTimeSecs());
   char text[256];

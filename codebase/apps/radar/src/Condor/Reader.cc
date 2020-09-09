@@ -269,8 +269,7 @@ void SimReader::_simulateBeam(double elev, double az,
     double dataDelta = dataRange / nGates;
 
     for (int igate = 0; igate < nGates; igate++) {
-      // data[igate] = dataMin + igate * dataDelta + ifield * 2.0 + az * 0.01;
-      data[igate] = dataMin + igate * dataDelta + ifield * 2.0;
+      data[igate] = dataMin + igate * dataDelta;
     }
 
     ray->addField(field.name, field.units, nGates,

@@ -86,9 +86,8 @@ using namespace std;
 // Constructor
 
 BscanManager::BscanManager(const Params &params,
-                           const vector<DisplayField *> &fields,
-                           bool haveFilteredFields) :
-        DisplayManager(params, fields, haveFilteredFields),
+                           const vector<DisplayField *> &fields) :
+        DisplayManager(params, fields),
         _plotStart(true)
         
 {
@@ -200,8 +199,7 @@ void BscanManager::_setupWindows()
 
   // configure the BSCAN
 
-  _bscan = new BscanWidget(_bscanFrame, *this, _params,
-                           _fields, _haveFilteredFields);
+  _bscan = new BscanWidget(_bscanFrame, *this, _params, _fields);
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _bscan, SLOT(resize(const int, const int)));
   
@@ -1246,7 +1244,6 @@ void BscanManager::keyPressEvent(QKeyEvent * e)
   
   // get key pressed
 
-  Qt::KeyboardModifiers mods = e->modifiers();
   char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
   
@@ -1283,17 +1280,9 @@ void BscanManager::keyPressEvent(QKeyEvent * e)
     
     bool correctField = false;
     if (shortcut == keychar) {
-      if (mods & Qt::AltModifier) {
-        if (field->getIsFilt()) {
-          correctField = true;
-        }
-      } else {
-        if (!field->getIsFilt()) {
-          correctField = true;
-        }
-      }
+      correctField = true;
     }
-
+    
     if (correctField) {
       if (_params.debug) {
 	cerr << "Short-cut key pressed: " << shortcut << endl;
@@ -3230,8 +3219,7 @@ void BscanManager::_howto()
   text += "  Hit '.' to toggle between the two latest fields\n";
   text += "\n";
   text += "Hot-keys for fields:\n";
-  text += "  Use NUMBER or LETTER keys to display RAW fields\n";
-  text += "  Use ALT-NUMBER and ALT-LETTER keys to display FILTERED fields\n";
+  text += "  Use NUMBER or LETTER keys to display selected fields\n";
   text += "\n";
   text += "To see field data at a point:\n";
   text += "  Click in main window\n";
