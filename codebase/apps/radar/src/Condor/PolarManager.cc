@@ -1313,21 +1313,17 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
   // Store the ray location (which also sets _startAz and _endAz), then
   // draw beam on the PPI or RHI, as appropriate
-
+  
   if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
       ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI ||
       ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-
     _rhiMode = true;
-
   } else {
-
     _rhiMode = false;
-
-    _plotWidget->handleRay(ray, fieldData, _fields);
-
   }
   
+  _plotWidget->handleRay(ray, fieldData, _fields);
+
 }
 
 ////////////////////////////////////////////

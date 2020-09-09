@@ -175,7 +175,7 @@ void SimReader::run()
 
       } else if (scan.sim_type == Params::PPI_SIM) {
 
-        Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+        Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_SECTOR;
         
         for (double el = scan.min_el;
              el <= scan.max_el;

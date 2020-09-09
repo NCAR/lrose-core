@@ -91,8 +91,6 @@ PpiPlot::PpiPlot(PolarWidget* parent,
   _sumElev = 0.0;
   _nRays = 0.0;
 
-  // _prevAz = -9999;
-
   // set up ray locator array
   
   _rayLocWidthHalf =
@@ -229,9 +227,14 @@ void PpiPlot::addRay(const RadxRay *ray,
                      const std::vector< DisplayField* > &fields)
 
 {
-
+  
   LOG(DEBUG) << "enter";
 
+  if (ray->getSweepMode() != Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE &&
+      ray->getSweepMode() != Radx::SWEEP_MODE_SECTOR) {
+    return;
+  }
+      
   double az = ray->getAzimuthDeg();
   double el = ray->getElevationDeg();
 
@@ -796,7 +799,7 @@ void PpiPlot::RayLoc::clearData()
 
 int PpiPlot::_getRayLocIndex(double az)
 {
-  double iaz = (int) floor(az * RAY_LOC_RES + 0.5);
+  int iaz = (int) floor(az * RAY_LOC_RES + 0.5);
   if (iaz < 0) {
     iaz += RAY_LOC_N;
   }

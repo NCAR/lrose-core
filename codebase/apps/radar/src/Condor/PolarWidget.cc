@@ -231,7 +231,7 @@ PolarWidget::PolarWidget(QWidget* parent,
     }
     
   } // iplot
-    
+
 }
 
 

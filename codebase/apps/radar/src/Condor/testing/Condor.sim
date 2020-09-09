@@ -2109,7 +2109,7 @@ images_sweep_index_list = {
 // Type: int
 //
 
-sim_sleep_msecs = 100;
+sim_sleep_msecs = 20;
 
 ///////////// sim_n_gates /////////////////////////////
 //
@@ -2186,8 +2186,8 @@ sim_scans = {
   {
     sim_type = RHI_SIM,
     label = "RHI-aft",
-    min_az = -25,
-    max_az = -25,
+    min_az = 25,
+    max_az = 25,
     delta_az = 1,
     min_el = -25,
     max_el = 25,
@@ -2211,7 +2211,7 @@ sim_scans = {
     sim_type = PPI_SIM,
     label = "PPI-sur",
     min_az = -45,
-    max_az = 345,
+    max_az = 45,
     delta_az = 1,
     min_el = 0,
     max_el = 0,
