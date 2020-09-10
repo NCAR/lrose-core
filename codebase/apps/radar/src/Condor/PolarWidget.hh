@@ -111,8 +111,7 @@ class DLL_EXPORT PolarWidget : public QWidget
               const PolarManager &manager,
               const Params &params,
               const RadxPlatform &platform,
-              const vector<DisplayField *> &fields,
-              bool haveFilteredFields);
+              const vector<DisplayField *> &fields);
   
   /**
    * @brief Destructor.
@@ -231,7 +230,9 @@ class DLL_EXPORT PolarWidget : public QWidget
 
  signals:
 
-  void ppiLocationClicked(double xkm, double ykm, const RadxRay *closestRay);
+  void polarLocationClicked(double xkm, double ykm,
+                            const RadxRay *closestRay,
+                            string plotLabel);
 
   //////////////
   // Qt slots //
@@ -374,7 +375,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   
   // rhis
   
-  vector<RhiPlot *> _rhiPlots;
+  vector<RhiPlot *> _rhis;
   bool _rhiPlotsConfigured;
 
   // all plots
@@ -393,7 +394,6 @@ class DLL_EXPORT PolarWidget : public QWidget
   // data fields
 
   const vector<DisplayField *> &_fields;
-  bool _haveFilteredFields;
 
   /**
    * @brief The renderer for each field.

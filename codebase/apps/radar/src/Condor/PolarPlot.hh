@@ -87,8 +87,7 @@ public:
             double minYKm,
             double maxYKm,
             const RadxPlatform &platform,
-            const vector<DisplayField *> &fields,
-            bool haveFilteredFields);
+            const vector<DisplayField *> &fields);
   
   /**
    * @brief Destructor.
@@ -150,6 +149,7 @@ public:
   // id
 
   int getId() const { return _id; }
+  string getLabel() const { return _label; }
   
   // image for current field
 
@@ -258,7 +258,6 @@ protected:
   // data fields
   
   const vector<DisplayField *> &_fields;
-  bool _haveFilteredFields;
   size_t _fieldNum;
 
   // The renderer for each field.

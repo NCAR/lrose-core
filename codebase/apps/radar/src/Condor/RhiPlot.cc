@@ -59,12 +59,11 @@ RhiPlot::RhiPlot(PolarWidget* parent,
                  double minYKm,
                  double maxYKm,
                  const RadxPlatform &platform,
-                 const vector<DisplayField *> &fields,
-                 bool haveFilteredFields) :
+                 const vector<DisplayField *> &fields) :
         PolarPlot(parent, manager, params, id, plotType, label,
                   minAz, maxAz, minEl, maxEl,
                   minXKm, maxXKm, minYKm, maxYKm,
-                  platform, fields, haveFilteredFields)
+                  platform, fields)
         
 {
 
@@ -89,12 +88,10 @@ RhiPlot::RhiPlot(PolarWidget* parent,
   _sumElev = 0.0;
   _nRays = 0.0;
 
-  // _prevAz = -9999;
-
   // set up ray locator array
   
   _rayLocWidthHalf =
-    (int) (_params.ppi_rendering_beam_width * RAY_LOC_RES + 0.5);
+    (int) (_params.rhi_rendering_beam_width * RAY_LOC_RES + 0.5);
   
   for (int ii = 0; ii < RAY_LOC_N; ii++) {
     RayLoc *loc = new RayLoc(ii);
@@ -229,6 +226,10 @@ void RhiPlot::addRay(const RadxRay *ray,
 {
 
   LOG(DEBUG) << "enter";
+  
+  if (ray->getSweepMode() != Radx::SWEEP_MODE_RHI) {
+    return;
+  }
 
   double az = ray->getAzimuthDeg();
   double el = ray->getElevationDeg();
@@ -255,18 +256,18 @@ void RhiPlot::addRay(const RadxRay *ray,
   // Determine the extent of this ray
 
   double halfAngle = _params.ppi_rendering_beam_width / 2.0;
-  double startAz = az - halfAngle;
-  double endAz = az + halfAngle;
+  double startEl = el - halfAngle;
+  double endEl = el + halfAngle;
   
   // create beam
 
   double instHtKm = 0.0;
   RhiBeam *beam = new RhiBeam(_params, ray, instHtKm,
-                              _fields.size(), startAz, endAz);
+                              _fields.size(), startEl, endEl);
 
   // store the ray and beam data
   
-  _storeRayLoc(az, ray, beam);
+  _storeRayLoc(el, ray, beam);
 
   // Set up the brushes for all of the fields in this beam.  This can be
   // done independently of a Painter object.
@@ -351,17 +352,13 @@ const RadxRay *RhiPlot::getClosestRay(int imageX, int imageY,
 
   // compute the azimuth relative to the display
   
-  double clickAz = atan2(yKm, xKm) * RAD_TO_DEG;
-  double radarDisplayAz = 90.0 - clickAz;
-  if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
-  LOG(DEBUG) << "clickAz = " << clickAz << " from xKm, yKm = " 
+  double clickEl = atan2(yKm, xKm) * RAD_TO_DEG;
+  LOG(DEBUG) << "clickEl = " << clickEl << " from xKm, yKm = " 
              << xKm << "," << yKm; 
-  LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from xKm, yKm = "
-             << xKm << yKm;
-
-  // search for the closest ray to this az
   
-  int rayLocIndex = _getRayLocIndex(radarDisplayAz);
+  // search for the closest ray to this el
+  
+  int rayLocIndex = _getRayLocIndex(clickEl);
   for (int ii = 0; ii <= _rayLocWidthHalf * 2; ii++) {
     int jj1 = (rayLocIndex - ii + RAY_LOC_N) % RAY_LOC_N;
     if (_rayLoc[jj1]->getActive()) {
@@ -445,22 +442,19 @@ void RhiPlot::_drawOverlays(QPainter &painter)
 
   if (_ringSpacing > 0.0 && _ringsEnabled) {
     
-    // Set up the painter for rings
-    
-    painter.setPen(_gridRingsColor);
-    
-    // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(1);
-    painter.setPen(pen);
-    painter.setPen(_gridRingsColor);
-    
     painter.save();
+
+    // set narrow line width
+    
     painter.setTransform(_zoomWorld.getTransform());
-    pen.setWidth(1);
+    painter.setPen(_gridRingsColor);
+
+    QPen pen = painter.pen();
+    pen.setWidth(0);
+    painter.setPen(pen);
+    
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
-      // _zoomWorld.drawArc(painter, 0.0, 0.0, ringRange, ringRange, 0.0, 360.0);
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
       painter.drawEllipse(rect);
       ringRange += _ringSpacing;
@@ -551,9 +545,15 @@ void RhiPlot::_drawOverlays(QPainter &painter)
   
   if (_label.size() > 0) {
     
+    painter.save();
+
     QFont ufont(painter.font());
     ufont.setPointSizeF(_params.main_label_font_size);
     painter.setFont(ufont);
+    
+    painter.setPen(QColor(_params.plot_label_color));
+    painter.setBackground(QColor(_params.background_color));
+    painter.setBackgroundMode(Qt::OpaqueMode);
     
     QRect tRect(painter.fontMetrics().tightBoundingRect(_label.c_str()));
     int iyy = 5;
@@ -562,6 +562,8 @@ void RhiPlot::_drawOverlays(QPainter &painter)
     painter.drawText(ixx, iyy, tRect.width() + 4, tRect.height() + 4, 
                      Qt::AlignTop | Qt::AlignHCenter, qlabel);
     
+    painter.restore();
+
   }
 
   // reset painter state
@@ -754,8 +756,8 @@ void RhiPlot::refreshFieldImages()
 RhiPlot::RayLoc::RayLoc(int index)
 {
   _index = index;
-  _midAz = (double) index / (double) RAY_LOC_RES;
-  _trueAz = _midAz;
+  _midEl = (double) (index - RAY_LOC_NHALF) / (double) RAY_LOC_RES;
+  _trueEl = _midEl;
   _active = false;
   _ray = NULL;
   _beam = NULL;
@@ -763,12 +765,12 @@ RhiPlot::RayLoc::RayLoc(int index)
 
 // set the data
 
-void RhiPlot::RayLoc::setData(double az,
+void RhiPlot::RayLoc::setData(double el,
                               const RadxRay *ray,
                               RhiBeam *beam)
 {
   clearData();
-  _trueAz = az;
+  _trueEl = el;
   _ray = ray;
   _ray->addClient();
   _beam = beam;
@@ -791,25 +793,23 @@ void RhiPlot::RayLoc::clearData()
   _active = false;
 }
 
-// compute the ray loc index from the azimuth
+// compute the ray loc index from the elevation
 
-int RhiPlot::_getRayLocIndex(double az)
+int RhiPlot::_getRayLocIndex(double el)
 {
-  double iaz = (int) floor(az * RAY_LOC_RES + 0.5);
-  if (iaz < 0) {
-    iaz += RAY_LOC_N;
-  }
-  return iaz;
+  int iel = (int) floor(el * RAY_LOC_RES + 0.5) + RAY_LOC_NHALF;
+  iel = (iel + RAY_LOC_N) % RAY_LOC_N;
+  return iel;
 }
 
 // store the ray at the appropriate location
 
-void RhiPlot::_storeRayLoc(double az,
+void RhiPlot::_storeRayLoc(double el,
                            const RadxRay *ray,
                            RhiBeam *beam)
 {
 
-  int index = _getRayLocIndex(az);
+  int index = _getRayLocIndex(el);
 
   // clear any existing data in ray width
 
@@ -820,7 +820,7 @@ void RhiPlot::_storeRayLoc(double az,
 
   // store this ray
   
-  _rayLoc[index]->setData(az, ray, beam);
+  _rayLoc[index]->setData(el, ray, beam);
 
 }
 

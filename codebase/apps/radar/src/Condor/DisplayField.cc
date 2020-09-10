@@ -41,15 +41,13 @@ DisplayField::DisplayField(const string &label,
                            const string &units,
                            const string &shortcut,
                            const ColorMap &colorMap,
-                           int buttonRow,
-                           bool isFilt) :
+                           int buttonRow) :
         _label(label),
         _name(name),
         _units(units),
         _shortcut(shortcut),
         _colorMap(colorMap),
         _buttonRow(buttonRow),
-        _isFilt(isFilt),
         _selectValue(0),
         _dialog(NULL)
 {
@@ -109,7 +107,6 @@ void DisplayField::print(ostream &out)
   out << "  shortcut: " << _shortcut << endl;
   out << "  colorMap: " << _colorMap.getName() << endl;
   out << "  buttonRow: " << _buttonRow << endl;
-  out << "  isFilt: " << _isFilt << endl;
   out << "  selectValue: " << _selectValue << endl;
   out << "===============================" << endl;
 
@@ -128,8 +125,9 @@ void DisplayField::setColorMapRange(double min, double max)
   sd.FindNiceMinMax(min, max, nSteps, &niceMin, &niceMax);
   _colorMap.setRange(niceMin, niceMax);
 
-  cerr << "INFO - changing color map range: min, max, nSteps = " << min << "," << max << "," << nSteps << 
-    " => nice min, max = " << niceMin << "," << niceMax << endl;
+  // cerr << "INFO - changing color map range: min, max, nSteps = " << min << "," << max << "," << nSteps << 
+  //   " => nice min, max = " << niceMin << "," << niceMax << endl;
+
 }
 
 void DisplayField::replaceColorMap(ColorMap newColorMap)

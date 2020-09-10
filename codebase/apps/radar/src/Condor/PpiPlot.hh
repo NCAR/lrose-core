@@ -58,8 +58,7 @@ class DLL_EXPORT PpiPlot : public PolarPlot
           double minYKm,
           double maxYKm,
           const RadxPlatform &platform,
-          const vector<DisplayField *> &fields,
-          bool haveFilteredFields);
+          const vector<DisplayField *> &fields);
 
   // Destructor
   

@@ -166,7 +166,7 @@ void SimReader::run()
           for (int istride = 0; istride < scan.stride; istride++) {
             for (double el = scan.min_el + istride * scan.delta_el;
                  el <= scan.max_el;
-                 el += istride * scan.delta_el) {
+                 el += scan.stride * scan.delta_el) {
               _simulateBeam(el, az, volNum, sweepNum, sweepMode);
               umsleep(_params.sim_sleep_msecs);
             } // el
@@ -175,7 +175,7 @@ void SimReader::run()
 
       } else if (scan.sim_type == Params::PPI_SIM) {
 
-        Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+        Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_SECTOR;
         
         for (double el = scan.min_el;
              el <= scan.max_el;
@@ -210,6 +210,15 @@ void SimReader::_simulateBeam(double elev, double az,
   
 {
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Sim beam: elev, az, volNum, sweepNum, sweepMode: "
+         << elev << ", "
+         << az << ", "
+         << volNum << ", "
+         << sweepNum << ", "
+         << Radx::sweepModeToStr(sweepMode) << endl;
+  }
+  
   RadxRay *ray = new RadxRay;
   ray->setVolumeNumber(volNum);
   ray->setSweepNumber(sweepNum);
@@ -221,7 +230,8 @@ void SimReader::_simulateBeam(double elev, double az,
   gettimeofday(&tv, NULL);
   ray->setTime(tv.tv_sec, tv.tv_usec * 1000);
   double dsecs = ray->getTimeDouble();
-  double frac = fmod(dsecs, 30.0) / 30.0;
+  double sleepMsecs = _params.sim_sleep_msecs;
+  double frac = fmod(dsecs, sleepMsecs) / sleepMsecs;
 
   ray->setAzimuthDeg(az);
   ray->setElevationDeg(elev);
@@ -260,8 +270,7 @@ void SimReader::_simulateBeam(double elev, double az,
     double dataDelta = dataRange / nGates;
 
     for (int igate = 0; igate < nGates; igate++) {
-      // data[igate] = dataMin + igate * dataDelta + ifield * 2.0 + az * 0.01;
-      data[igate] = dataMin + igate * dataDelta + ifield * 2.0;
+      data[igate] = dataMin + igate * dataDelta;
     }
 
     ray->addField(field.name, field.units, nGates,

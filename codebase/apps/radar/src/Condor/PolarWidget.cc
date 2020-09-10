@@ -21,6 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
 #include <assert.h>
 #include <cmath>
 #include <unistd.h>
@@ -54,6 +55,7 @@
 #include "SpreadSheetController.hh"
 #include "BoundaryPointEditor.hh"
 #include "PpiPlot.hh"
+#include "RhiPlot.hh"
 
 using namespace std;
 
@@ -66,15 +68,13 @@ PolarWidget::PolarWidget(QWidget* parent,
                          const PolarManager &manager,
                          const Params &params,
                          const RadxPlatform &platform,
-                         const vector<DisplayField *> &fields,
-                         bool haveFilteredFields) :
+                         const vector<DisplayField *> &fields) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
         _params(params),
         _platform(platform),
         _fields(fields),
-        _haveFilteredFields(haveFilteredFields),
         _fieldNum(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridRingsColor(_params.grid_and_range_ring_color),
@@ -200,16 +200,34 @@ PolarWidget::PolarWidget(QWidget* parent,
                                  plotParams.min_y_km,
                                  plotParams.max_y_km,
                                  _platform,
-                                 fields,
-                                 haveFilteredFields);
+                                 fields);
 
       _ppis.push_back(ppi);
       _plots.push_back(ppi);
       
+    } else if (plotParams.plot_type == Params::RHI_PLOT) {
+      
+      RhiPlot *rhi = new RhiPlot(this, _manager, _params, iplot,
+                                 plotParams.plot_type,
+                                 plotParams.label,
+                                 plotParams.min_az,
+                                 plotParams.max_az,
+                                 plotParams.min_el,
+                                 plotParams.max_el,
+                                 plotParams.min_x_km,
+                                 plotParams.max_x_km,
+                                 plotParams.min_y_km,
+                                 plotParams.max_y_km,
+                                 _platform,
+                                 fields);
+
+      _rhis.push_back(rhi);
+      _plots.push_back(rhi);
+      
     }
     
   } // iplot
-    
+
 }
 
 
@@ -537,7 +555,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
         
         // emit signal
         
-        emit ppiLocationClicked(xKm, yKm, closestRay);
+        emit polarLocationClicked(xKm, yKm, closestRay, plot->getLabel());
 
       }
       

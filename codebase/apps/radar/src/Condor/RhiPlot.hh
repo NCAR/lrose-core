@@ -58,8 +58,7 @@ class DLL_EXPORT RhiPlot : public PolarPlot
           double minYKm,
           double maxYKm,
           const RadxPlatform &platform,
-          const vector<DisplayField *> &fields,
-          bool haveFilteredFields);
+          const vector<DisplayField *> &fields);
 
   // Destructor
   
@@ -141,6 +140,7 @@ class DLL_EXPORT RhiPlot : public PolarPlot
   
   static const int RAY_LOC_RES = 10;
   static const int RAY_LOC_N = 3600;
+  static const int RAY_LOC_NHALF = 1800;
   
   class RayLoc {
     
@@ -152,7 +152,7 @@ class DLL_EXPORT RhiPlot : public PolarPlot
 
     // set the ray and beam data
 
-    void setData(double az, const RadxRay *ray, RhiBeam *beam);
+    void setData(double el, const RadxRay *ray, RhiBeam *beam);
 
     // clear the ray and beam data
     
@@ -161,8 +161,8 @@ class DLL_EXPORT RhiPlot : public PolarPlot
     // get methods
     
     int getIndex() const { return _index; }
-    double getMidAz() const { return _midAz; }
-    double getTrueAz() const { return _trueAz; }
+    double getMidEl() const { return _midEl; }
+    double getTrueEl() const { return _trueEl; }
     bool getActive() const { return _active; }
     const RadxRay *getRay() const { return _ray; }
     RhiBeam *getBeam() const { return _beam; }
@@ -172,8 +172,8 @@ class DLL_EXPORT RhiPlot : public PolarPlot
     // members
     
     int _index;
-    double _midAz;
-    double _trueAz;
+    double _midEl;
+    double _trueEl;
     bool _active;
     const RadxRay *_ray;
     RhiBeam *_beam;
@@ -183,8 +183,8 @@ class DLL_EXPORT RhiPlot : public PolarPlot
   vector<RayLoc *> _rayLoc;
   int _rayLocWidthHalf;
 
-  int _getRayLocIndex(double az);
-  void _storeRayLoc(double az,
+  int _getRayLocIndex(double el);
+  void _storeRayLoc(double el,
                     const RadxRay *ray,
                     RhiBeam *beam);
 

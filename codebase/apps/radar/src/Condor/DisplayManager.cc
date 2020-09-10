@@ -87,13 +87,11 @@ bool DisplayManager::_firstTimerEvent = true;
 // Constructor
 
 DisplayManager::DisplayManager(const Params &params,
-                               const vector<DisplayField *> &fields,
-                               bool haveFilteredFields) :
+                               const vector<DisplayField *> &fields) :
         QMainWindow(NULL),
         _params(params),
         _initialRay(true),
-        _fields(fields),
-        _haveFilteredFields(haveFilteredFields)
+        _fields(fields)
         
 {
 
@@ -386,9 +384,6 @@ void DisplayManager::_createFieldPanel()
 
   int row = 0;
   int nCols = 3;
-  if (_haveFilteredFields) {
-    nCols = 4;
-  }
 
   _selectedField = _fields[0];
   _selectedLabel = _fields[0]->getLabel();
@@ -423,56 +418,35 @@ void DisplayManager::_createFieldPanel()
   QLabel *keyHeader = new QLabel("HotKey", _fieldPanel);
   keyHeader->setFont(font);
   _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
-  if (_haveFilteredFields) {
-    QLabel *rawHeader = new QLabel("Raw", _fieldPanel);
-    rawHeader->setFont(font);
-    _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
-    QLabel *filtHeader = new QLabel("Filt", _fieldPanel);
-    filtHeader->setFont(font);
-    _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
-  }
   row++;
 
   // add fields, one row at a time
-  // a row can have 1 or 2 buttons, depending on whether the
-  // filtered field is present
 
   for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
 
     // get raw field - always present
     
-    const DisplayField *rawField = _fields[ifield];
-    int buttonRow = rawField->getButtonRow();
+    const DisplayField *field = _fields[ifield];
     
-    // get filt field - may not be present
-    
-    const DisplayField *filtField = NULL;
-    if (ifield < _fields.size() - 1) {
-      if (_fields[ifield+1]->getButtonRow() == buttonRow &&
-          _fields[ifield+1]->getIsFilt()) {
-        filtField = _fields[ifield+1];
-      }
-    }
-
     QLabel *label = new QLabel(_fieldPanel);
     label->setFont(font);
-    label->setText(rawField->getLabel().c_str());
+    label->setText(field->getLabel().c_str());
     QLabel *key = new QLabel(_fieldPanel);
     key->setFont(font);
-    if (rawField->getShortcut().size() > 0) {
+    if (field->getShortcut().size() > 0) {
       char text[4];
-      text[0] = rawField->getShortcut()[0];
+      text[0] = field->getShortcut()[0];
       text[1] = '\0';
       key->setText(text);
       char text2[128];
-      sprintf(text2, "Hit %s for %s, ALT-%s for filtered",
-	      text, rawField->getName().c_str(), text);
+      sprintf(text2, "Hit %s for field %s",
+	      text, field->getName().c_str());
       label->setToolTip(text2);
       key->setToolTip(text2);
     }
 
     QRadioButton *rawButton = new QRadioButton(_fieldPanel);
-    rawButton->setToolTip(rawField->getName().c_str());
+    rawButton->setToolTip(field->getName().c_str());
     if (ifield == 0) {
       rawButton->click();
     }
@@ -484,20 +458,6 @@ void DisplayManager::_createFieldPanel()
     connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
 
     _fieldButtons.push_back(rawButton);
-    if (filtField != NULL) {
-      QRadioButton *filtButton = new QRadioButton(_fieldPanel);
-      filtButton->setToolTip(filtField->getName().c_str());
-      _fieldsLayout->addWidget(filtButton, row, 3, alignCenter);
-      _fieldGroup->addButton(filtButton, ifield + 1);
-      _fieldButtons.push_back(filtButton);
-      // connect slot for field change
-      connect(filtButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
-    }
-
-    if (filtField != NULL) {
-      ifield++;
-    }
-
     row++;
   }
 
@@ -597,6 +557,8 @@ void DisplayManager::_createClickReportDialog()
 
   // _clickReportDialogLayout->addWidget(left, row, 0, alignRight);
 
+  _plotClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
+                              "Plot", "---------", row++);
   _dateClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
                               "Date", "9999/99/99", row++);
   _timeClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
@@ -618,50 +580,25 @@ void DisplayManager::_createClickReportDialog()
 
   QLabel *nameHeader = new QLabel("Name", _clickReportDialog);
   _clickReportDialogLayout->addWidget(nameHeader, row, 0, alignCenter);
-  QLabel *rawHeader = new QLabel("Raw", _clickReportDialog);
+  QLabel *rawHeader = new QLabel("Value", _clickReportDialog);
   _clickReportDialogLayout->addWidget(rawHeader, row, 1, alignCenter);
-  if (_haveFilteredFields) {
-    QLabel *filtHeader = new QLabel("Filt", _clickReportDialog);
-    _clickReportDialogLayout->addWidget(filtHeader, row, 2, alignCenter);
-  }
   row++;
 
   // add fields, one row at a time
-  // a row can have 1 or 2 buttons, depending on whether the
-  // filtered field is present
 
   for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
 
     // get raw field - always present
     
-    DisplayField *rawField = _fields[ifield];
-    int buttonRow = rawField->getButtonRow();
+    DisplayField *field = _fields[ifield];
     
-    // get filt field - may not be present
-    
-    DisplayField *filtField = NULL;
-    if (ifield < _fields.size() - 1) {
-      if (_fields[ifield+1]->getButtonRow() == buttonRow &&
-          _fields[ifield+1]->getIsFilt()) {
-        filtField = _fields[ifield+1];
-      }
-    }
-
     QLabel *label = new QLabel(_clickReportDialog);
-    label->setText(rawField->getLabel().c_str());
+    label->setText(field->getLabel().c_str());
     _clickReportDialogLayout->addWidget(label, row, 0, alignCenter);
     
-    rawField->createDialog(_clickReportDialog, "-------------");
-    _clickReportDialogLayout->addWidget(rawField->getDialog(), row, 1, alignCenter);
-
-    if (filtField) {
-      filtField->createDialog(_clickReportDialog, "-------------");
-      _clickReportDialogLayout->addWidget(filtField->getDialog(), row, 2, alignCenter);
-    }
-      
-    if (filtField != NULL) {
-      ifield++;
-    }
+    field->createDialog(_clickReportDialog, "-------------");
+    _clickReportDialogLayout->addWidget(field->getDialog(),
+                                        row, 1, alignCenter);
 
     row++;
   }

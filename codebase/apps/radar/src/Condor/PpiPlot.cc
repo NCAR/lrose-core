@@ -61,12 +61,11 @@ PpiPlot::PpiPlot(PolarWidget* parent,
                  double minYKm,
                  double maxYKm,
                  const RadxPlatform &platform,
-                 const vector<DisplayField *> &fields,
-                 bool haveFilteredFields) :
+                 const vector<DisplayField *> &fields) :
         PolarPlot(parent, manager, params, id, plotType, label,
                   minAz, maxAz, minEl, maxEl,
                   minXKm, maxXKm, minYKm, maxYKm,
-                  platform, fields, haveFilteredFields)
+                  platform, fields)
         
 {
 
@@ -90,8 +89,6 @@ PpiPlot::PpiPlot(PolarWidget* parent,
   _meanElev = -9999.0;
   _sumElev = 0.0;
   _nRays = 0.0;
-
-  // _prevAz = -9999;
 
   // set up ray locator array
   
@@ -131,13 +128,6 @@ void PpiPlot::clear()
   for (int ii = 0; ii < RAY_LOC_N; ii++) {
     _rayLoc[ii]->clearData();
   }
-  
-  // Clear out the beam array
-  
-  // for (size_t i = 0; i < _ppiBeams.size(); i++) {
-  //   Beam::deleteIfUnused(_ppiBeams[i]);
-  // }
-  // _ppiBeams.clear();
   
   // Now rerender the images
   
@@ -229,9 +219,14 @@ void PpiPlot::addRay(const RadxRay *ray,
                      const std::vector< DisplayField* > &fields)
 
 {
-
+  
   LOG(DEBUG) << "enter";
 
+  if (ray->getSweepMode() != Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE &&
+      ray->getSweepMode() != Radx::SWEEP_MODE_SECTOR) {
+    return;
+  }
+      
   double az = ray->getAzimuthDeg();
   double el = ray->getElevationDeg();
 
@@ -446,22 +441,19 @@ void PpiPlot::_drawOverlays(QPainter &painter)
 
   if (_ringSpacing > 0.0 && _ringsEnabled) {
     
-    // Set up the painter for rings
-    
-    painter.setPen(_gridRingsColor);
-    
-    // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(1);
-    painter.setPen(pen);
-    painter.setPen(_gridRingsColor);
-    
     painter.save();
+
+    // set narrow line width
+    
     painter.setTransform(_zoomWorld.getTransform());
-    pen.setWidth(1);
+    painter.setPen(_gridRingsColor);
+
+    QPen pen = painter.pen();
+    pen.setWidth(0);
+    painter.setPen(pen);
+    
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
-      // _zoomWorld.drawArc(painter, 0.0, 0.0, ringRange, ringRange, 0.0, 360.0);
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
       painter.drawEllipse(rect);
       ringRange += _ringSpacing;
@@ -551,10 +543,16 @@ void PpiPlot::_drawOverlays(QPainter &painter)
   // add label
   
   if (_label.size() > 0) {
-    
+
+    painter.save();
+
     QFont ufont(painter.font());
     ufont.setPointSizeF(_params.main_label_font_size);
     painter.setFont(ufont);
+
+    painter.setPen(QColor(_params.plot_label_color));
+    painter.setBackground(QColor(_params.background_color));
+    painter.setBackgroundMode(Qt::OpaqueMode);
     
     QRect tRect(painter.fontMetrics().tightBoundingRect(_label.c_str()));
     int iyy = 5;
@@ -562,6 +560,8 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     QString qlabel(_label.c_str());
     painter.drawText(ixx, iyy, tRect.width() + 4, tRect.height() + 4, 
                      Qt::AlignTop | Qt::AlignHCenter, qlabel);
+
+    painter.restore();
     
   }
 
@@ -796,7 +796,7 @@ void PpiPlot::RayLoc::clearData()
 
 int PpiPlot::_getRayLocIndex(double az)
 {
-  double iaz = (int) floor(az * RAY_LOC_RES + 0.5);
+  int iaz = (int) floor(az * RAY_LOC_RES + 0.5);
   if (iaz < 0) {
     iaz += RAY_LOC_N;
   }

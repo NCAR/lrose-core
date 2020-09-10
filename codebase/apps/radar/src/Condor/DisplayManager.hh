@@ -83,8 +83,7 @@ public:
   // constructor
   
   DisplayManager(const Params &params,
-                 const vector<DisplayField *> &fields,
-                 bool haveFilteredFields);
+                 const vector<DisplayField *> &fields);
   
   // destructor
   
@@ -170,7 +169,6 @@ protected:
   // data fields
 
   vector<DisplayField *> _fields;
-  bool _haveFilteredFields;
 
   // windows
 
@@ -265,6 +263,7 @@ protected:
   // click location report dialog
   QDialog *_clickReportDialog;
   QGridLayout *_clickReportDialogLayout;
+  QLabel *_plotClicked;
   QLabel *_dateClicked;
   QLabel *_timeClicked;
   QLabel *_elevClicked;

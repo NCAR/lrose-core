@@ -1,0 +1,28 @@
+# NAME zdr.colors
+
+-3	-2	dodgerblue3
+-2	-1	royalblue3
+-1	-0.8	blue
+-0.8    -0.6    mediumblue
+-0.6    -0.4    navyblue
+-0.4    -0.2    midnightblue
+-0.2    0.0     dimgray
+0.0     0.2     slategray
+0.2     0.4     seagreen
+0.4     0.6     forestgreen
+0.6     0.8     olivedrab
+0.8     1.0     yellowgreen
+1.0	1.5	Gold3
+1.5 	2  	gold
+2	2.5	yellow
+2.5	3 	orange
+3 	4 	coral
+4       5       tomato
+5       6       firebrick1
+6 	8	OrangeRed
+8 	10 	Red
+10 	12 	DeepPink
+12	14	Maroon1
+14      16      HotPink
+16	18	Pink
+

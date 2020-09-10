@@ -44,14 +44,12 @@ using namespace std;
 BscanWidget::BscanWidget(QWidget* parent,
                          const BscanManager &manager,
                          const Params &params,
-                         const vector<DisplayField *> &fields,
-                         bool haveFilteredFields) :
+                         const vector<DisplayField *> &fields) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
         _params(params),
         _fields(fields),
-        _haveFilteredFields(haveFilteredFields),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _scaledLabel(ScaledLabel::DistanceEng),

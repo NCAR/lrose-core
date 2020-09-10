@@ -218,8 +218,7 @@ paramdef string {
 typedef struct {
 
   string label;
-  string raw_name;
-  string filtered_name;
+  string field_name;
   string units;
   string color_map;
   string shortcut;
@@ -229,8 +228,7 @@ paramdef struct field_t {
   p_default = {
     {
       label = "DBZ",
-      raw_name = "DBZ",
-      filtered_name = "",
+      field_name = "DBZ",
       units = "dBZ",
       color_map = "dbz.colors",
       shortcut = "1"
@@ -238,8 +236,7 @@ paramdef struct field_t {
     ,
     {
       label = "VEL",
-      raw_name = "VEL",
-      filtered_name = "",
+      field_name = "VEL",
       units = "m/s",
       color_map = "vel.colors",
       shortcut = "3"
@@ -247,8 +244,7 @@ paramdef struct field_t {
     ,
     {
       label = "WIDTH",
-      raw_name = "WIDTH",
-      filtered_name = "",
+      field_name = "WIDTH",
       units = "m/s",
       color_map = "width.colors",
       shortcut = "4"
@@ -256,8 +252,7 @@ paramdef struct field_t {
     ,
     {
       label = "ZDR",
-      raw_name = "ZDR",
-      filtered_name = "",
+      field_name = "ZDR",
       units = "dB",
       color_map = "zdr.colors",
       shortcut = "6"
@@ -265,8 +260,7 @@ paramdef struct field_t {
     ,
     {
       label = "PHIDP",
-      raw_name = "PHIDP",
-      filtered_name = "",
+      field_name = "PHIDP",
       units = "deg",
       color_map = "phidp.colors",
       shortcut = "7"
@@ -274,8 +268,7 @@ paramdef struct field_t {
     ,
     {
       label = "RHOHV",
-      raw_name = "RHOHV",
-      filtered_name = "",
+      field_name = "RHOHV",
       units = "",
       color_map = "rhohv.colors",
       shortcut = "8"
@@ -283,13 +276,11 @@ paramdef struct field_t {
   };
   p_descr = "Fields to be displayed.";
   p_help = "label: appears on the GUI. "
-           "raw_name: unfiltered field name. "
-           "filtered_name: field with clutter filter applied. "
+           "field_name:field name. "
            "units: units string for color scale. "
            "color_map: name of color map in color_scale_dir. "
            "shortcut: keyboard character for shortcut. "
            "Specified key will select raw field. "
-           "Use ALT-key to get filtered field. ";
 } fields[];
 
 paramdef double {
@@ -303,7 +294,7 @@ paramdef double {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to use field label in the display title.";
-  p_help = "If TRUE, the label will be used in the title. If FALSE, the raw_name or filtered name will be used.";
+  p_help = "If TRUE, the label will be used in the title. If FALSE, the field_name will be used.";
 } use_field_label_in_title;
 
 commentdef {
@@ -531,6 +522,11 @@ paramdef string {
   p_default = "black";
   p_descr = "Color of main display background.";
 } background_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of plot labels.";
+} plot_label_color;
 
 paramdef string {
   p_default = "white";

@@ -119,15 +119,6 @@ Condor::Condor(int argc, char **argv) :
     _nPolarRows = (_params.polar_plots_n - 1) / _nPolarCols + 1;
   }
 
-  // check for any filtered fields
-
-  _haveFilteredFields = false;
-  for (int ifield = 0; ifield < _params.fields_n; ifield++) {
-    if (strlen(_params._fields[ifield].filtered_name) > 0) {
-      _haveFilteredFields = true;
-    }
-  }
-
   // set params on alloc checker
 
   AllocCheck::inst().setParams(&_params);
@@ -207,7 +198,7 @@ int Condor::Run(QApplication &app)
   
   if (_params.display_mode == Params::POLAR_DISPLAY) {
     
-    _polarManager = new PolarManager(_params, _displayFields, _haveFilteredFields);
+    _polarManager = new PolarManager(_params, _displayFields);
 
     _reader->addManager(_polarManager);
 
@@ -239,7 +230,7 @@ int Condor::Run(QApplication &app)
 
   } else if (_params.display_mode == Params::BSCAN_DISPLAY) {
 
-    _bscanManager = new BscanManager(_params, _displayFields, _haveFilteredFields);
+    _bscanManager = new BscanManager(_params, _displayFields);
 
     _reader->addManager(_bscanManager);
 
@@ -336,11 +327,11 @@ int Condor::_setupDisplayFields()
       continue;
     }
     
-    // check we have a raw field name
+    // check we have a field name
     
-    if (strlen(pfld.raw_name) == 0) {
+    if (strlen(pfld.field_name) == 0) {
       cerr << "WARNING - Condor::_setupDisplayFields()" << endl;
-      cerr << "  Empty raw field name, ifield: " << ifield << endl;
+      cerr << "  Empty field name, ifield: " << ifield << endl;
       cerr << "  Ignoring" << endl;
       continue;
     }
@@ -385,27 +376,15 @@ int Condor::_setupDisplayFields()
         }
     }
 
-    // unfiltered field
-
+    // fields
+    
     DisplayField *field =
-      new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
-                       pfld.shortcut, map, ifield, false);
+      new DisplayField(pfld.label, pfld.field_name, pfld.units, 
+                       pfld.shortcut, map, ifield);
     if (noColorMap)
       field->setNoColorMap();
-
+    
     _displayFields.push_back(field);
-
-    // filtered field
-
-    if (strlen(pfld.filtered_name) > 0) {
-      string filtLabel = string(pfld.label) + "-filt";
-      DisplayField *filt =
-        new DisplayField(filtLabel,
-                         pfld.filtered_name,
-                         pfld.units, pfld.shortcut, 
-                         map, ifield, true);
-      _displayFields.push_back(filt);
-    }
 
   } // ifield
 

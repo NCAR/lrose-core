@@ -50,8 +50,7 @@ public:
                const string &units,
                const string &shortcut,
                const ColorMap &colorMap,
-               int buttonRow,
-               bool isFilt);
+               int buttonRow);
 
   ~DisplayField();
 
@@ -62,7 +61,6 @@ public:
   const ColorMap &getColorMap() const { return _colorMap; }
 
   int getButtonRow() const { return _buttonRow; }
-  bool getIsFilt() const { return _isFilt; }
   bool haveColorMap() const { return _haveColorMap; }
   void setNoColorMap() { _haveColorMap = false; }
   void changeColorMap() { _haveColorMap = true; }
@@ -90,7 +88,6 @@ private:
   ColorMap _colorMap;
 
   int _buttonRow;
-  bool _isFilt;
   bool _haveColorMap;
   double _selectValue;
   QLabel *_dialog;
