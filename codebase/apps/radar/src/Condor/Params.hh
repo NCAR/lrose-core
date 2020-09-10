@@ -574,6 +574,8 @@ public:
 
   char* background_color;
 
+  char* plot_label_color;
+
   char* grid_and_range_ring_color;
 
   int range_ring_label_font_size;
@@ -795,7 +797,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[177];
+  mutable TDRPtable _table[178];
 
   const char *_className;
 

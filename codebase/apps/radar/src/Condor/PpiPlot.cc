@@ -543,10 +543,16 @@ void PpiPlot::_drawOverlays(QPainter &painter)
   // add label
   
   if (_label.size() > 0) {
-    
+
+    painter.save();
+
     QFont ufont(painter.font());
     ufont.setPointSizeF(_params.main_label_font_size);
     painter.setFont(ufont);
+
+    painter.setPen(QColor(_params.plot_label_color));
+    painter.setBackground(QColor(_params.background_color));
+    painter.setBackgroundMode(Qt::OpaqueMode);
     
     QRect tRect(painter.fontMetrics().tightBoundingRect(_label.c_str()));
     int iyy = 5;
@@ -554,6 +560,8 @@ void PpiPlot::_drawOverlays(QPainter &painter)
     QString qlabel(_label.c_str());
     painter.drawText(ixx, iyy, tRect.width() + 4, tRect.height() + 4, 
                      Qt::AlignTop | Qt::AlignHCenter, qlabel);
+
+    painter.restore();
     
   }
 

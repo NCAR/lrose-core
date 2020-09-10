@@ -524,6 +524,11 @@ paramdef string {
 } background_color;
 
 paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of plot labels.";
+} plot_label_color;
+
+paramdef string {
   p_default = "white";
   p_descr = "Color of grids and range rings.";
 } grid_and_range_ring_color;
