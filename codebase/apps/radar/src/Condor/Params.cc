@@ -1024,7 +1024,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("fields");
     tt->descr = tdrpStrDup("Fields to be displayed.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("label: appears on the GUI. field_name:field name. units: units string for color scale. color_map: name of color map in color_scale_dir. shortcut: keyboard character for shortcut. Specified key will select raw field. ");
     tt->array_offset = (char *) &_fields - &_start_;
     tt->array_n_offset = (char *) &fields_n - &_start_;
     tt->is_array = TRUE;

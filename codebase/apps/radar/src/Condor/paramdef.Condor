@@ -280,7 +280,7 @@ paramdef struct field_t {
            "units: units string for color scale. "
            "color_map: name of color map in color_scale_dir. "
            "shortcut: keyboard character for shortcut. "
-           "Specified key will select raw field. "
+           "Specified key will select raw field. ";
 } fields[];
 
 paramdef double {
