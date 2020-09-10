@@ -2102,7 +2102,7 @@ images_sweep_index_list = {
 // Type: int
 //
 
-sim_sleep_msecs = 20;
+sim_sleep_msecs = 50;
 
 ///////////// sim_n_gates /////////////////////////////
 //

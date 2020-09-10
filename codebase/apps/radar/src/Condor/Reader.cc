@@ -230,7 +230,8 @@ void SimReader::_simulateBeam(double elev, double az,
   gettimeofday(&tv, NULL);
   ray->setTime(tv.tv_sec, tv.tv_usec * 1000);
   double dsecs = ray->getTimeDouble();
-  double frac = fmod(dsecs, 30.0) / 30.0;
+  double sleepMsecs = _params.sim_sleep_msecs;
+  double frac = fmod(dsecs, sleepMsecs) / sleepMsecs;
 
   ray->setAzimuthDeg(az);
   ray->setElevationDeg(elev);
