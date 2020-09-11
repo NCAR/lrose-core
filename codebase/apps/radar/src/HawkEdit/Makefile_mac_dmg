@@ -1,0 +1,92 @@
+#
+# run after general make
+#
+# make -f Makefile_mac_dmg HawkEyeEdit_Elle
+#
+# build Mac OSX application
+#
+hawkeye_app:
+# copy the system libraries to the .app tree structure
+# 	mkdir -p HawkEye.app/Contents/Frameworks
+	#cp /usr/lib/libexpat.1.dylib HawkEye.app/Contents/Frameworks/.
+	#cp /usr/lib/libbz2.1.0.dylib HawkEye.app/Contents/Frameworks/.
+	#cp /usr/lib/libz.1.dylib HawkEye.app/Contents/Frameworks/.
+	#cp /usr/lib/libSystem.B.dylib HawkEye.app/Contents/Frameworks/.
+	mkdir -p HawkEye.app/Contents/MacOS/../share
+	cp -r ~/git/lrose-displays/color_scales HawkEye.app/Contents/MacOS/../share/.
+# make the dmg  
+	/usr/local/opt/qt/bin/macdeployqt HawkEye.app -always-overwrite -codesign="${CERT_NAME}"
+# now build the folder for the dmg installer
+	mkdir -p /tmp/deploy/HawkEye_bkg
+	cp ~/Desktop/arrow.pdf /tmp/deploy/HawkEye_bkg/.background
+	ln -s /Applications    /tmp/deploy/HawkEye_bkg/Applications
+	rsync -r HawkEye.app   /tmp/deploy/HawkEye_bkg/.
+	hdiutil create -volname HawkEyeEdit_Elle_installer -srcfolder /tmp/deploy/HawkEye/HawkEye_bkg -ov -format UDZO HawkEyeEdit_Elle_installer.dmg
+
+
+	# ln -s /Applications HawkEye_staging/Applications
+# rsync -r HawkEye.app HawkEye_staging/.
+# 	hdiutil create -volname HawkEye_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Cyclone.dmg
+
+
+#---------
+TARGET=HawkEyeEdit_Elle
+QT_BIN=/usr/local/opt/qt/bin
+STAGING=/tmp/staging
+USR_LIB=/usr/local/lib
+
+vars:
+	@echo "QT_BIN = " ${QT_BIN}
+	@echo "STAGING = " ${STAGING}
+
+HawkEyeEdit_Elle:
+	# pulled from circleci.yml
+	echo "building HawkEyeEdit_Elle.dmg"
+	# make clean
+	# ${QT_BIN}/qmake -o Makefile.qmake
+	# echo " ...  make from_qmake"
+	# make -f Makefile.qmake
+	# echo " ... after qmake"
+	mkdir -p ${STAGING}
+	cp -r ${TARGET}.app ${STAGING}
+	echo " ... after mkdir"
+	#
+	# add the frameworks
+	#
+	mkdir -p ${STAGING}/${TARGET}.app/Contents/Frameworks
+	#cp -r HawkEye.app/Contents/Frameworks/*framework ${STAGING}/${TARGET}.app/Contents/Frameworks
+	#
+	# add the dependent libs
+	#
+	#cp    ${USR_LIB}/libhdf5_cpp.103.dylib ${STAGING}/${TARGET}.app/Contents/Frameworks
+	#cp    ${USR_LIB}/libudunits2.dylib     ${STAGING}/${TARGET}.app/Contents/Frameworks
+	#cp    ${USR_LIB}/libnetcdf.15.dylib    ${STAGING}/${TARGET}.app/Contents/Frameworks
+	#cp    ${USR_LIB}/libhdf5_hl.100.dylib  ${STAGING}/${TARGET}.app/Contents/Frameworks
+	#cp    ${USR_LIB}/libhdf5.103.dylib     ${STAGING}/${TARGET}.app/Contents/Frameworks
+	#cp    ${USR_LIB}/libnetcdf_c++.4.dylib ${STAGING}/${TARGET}.app/Contents/Frameworks
+	#cp    ${USR_LIB}/libsz.2.dylib         ${STAGING}/${TARGET}.app/Contents/Frameworks
+	#
+	# copy the color scales
+	#
+	mkdir -p ${STAGING}/${TARGET}.app/Contents/MacOS/../share
+	cp -r ~/git/lrose-displays/color_scales ${STAGING}/${TARGET}.app/Contents/MacOS/../share/.
+	#
+	echo " ... before calling macdeployqt"
+	# macdeployqt HawkEye.app -dmg -always-overwrite
+	cd ${STAGING}; ${QT_BIN}/macdeployqt ${TARGET}.app -no-plugins -dmg -always-overwrite -codesign="${CERT_NAME}"
+	#
+	# creating folder and arrow
+	#
+	cp ~/Desktop/arrow.pdf ${STAGING}/.background
+	ln -s /Applications    ${STAGING}/Applications
+	#
+	echo " .. before calling hdiutil"
+	# hdiutil create -volname ${TARGET} -srcfolder ${STAGING} -ov -format UDZO ${TARGET}.dmg
+	#
+	# hdiutil create -volname HawkEye-Elle_Installer -srcfolder /private/tmp/workarea/$SOURCE_DIR/apps/radar/src/HawkEye/HawkEye-Elle.app -ov -format UDZO HawkEye-Elle.dmg
+	#
+	echo " ... after dmg build"
+	echo " ... done  building HawkEye"
+
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

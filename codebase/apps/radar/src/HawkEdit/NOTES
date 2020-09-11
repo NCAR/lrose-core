@@ -1,0 +1,153 @@
+eol-albireo:LUCID brenda$ git stash
+Saved working directory and index state WIP on BoundaryEditorIntegrate: 9dade4053 HawkEye + Solo: changes when upgrading to Catalina MacOS 10.15, XCode ?latest?  and Qt5.15
+
+-----	
+
+
+modified:   ../../../Makefile
+eol-albireo:HawkEye brenda$ git diff ../../../Makefile
+diff --git a/codebase/apps/Makefile b/codebase/apps/Makefile
+index 9605ba8a4..28c913de4 100644
+--- a/codebase/apps/Makefile
++++ b/codebase/apps/Makefile
+@@ -10,25 +10,29 @@ TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
+ SUB_DIRS = \
+        tdrp \
+        procmap \
+-       titan \
+-       titan_analysis \
+-       trec \
+-       didss \
+-       ingest \
+-       dsserver \
+-       mdv_utils \
+-        mm5 \
+-        physics \
+-        satApps \
+-       spdb_utils \
+-       filters \
+-        awc \
+-       hydro \
+-       interp \
+        radar \
+-       refractt \
+-        Radx \
+-        spol \
+-        xpol
++       Radx 
++
++
++       #titan \
++       #titan_analysis \
++       #trec \
++       #didss \
++       #ingest \
++       #dsserver \
++       #mdv_utils \
++        #mm5 \
++        #physics \
++        #satApps \
++       #spdb_utils \
++       #filters \
++        #awc \
++       #hydro \
++       #interp \
++       #radar \
++       #refractt \
++        #Radx \
++        #spol \
++        #xpol
+ 
+ include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+--------
+
+	modified:   Makefile
+	modified:   WorldPlot.hh
+	modified:   qmake.pro
+	modified:   qrc_resources.cpp
+
+-------
+	modified:   ../../../../libs/Makefile
+
+eol-albireo:HawkEye brenda$ git diff ../../../../libs/Makefile
+diff --git a/codebase/libs/Makefile b/codebase/libs/Makefile
+index 282037d4c..2603c9125 100644
+--- a/codebase/libs/Makefile
++++ b/codebase/libs/Makefile
+@@ -17,7 +17,6 @@ SUB_DIRS = \
+        Solo \
+        Spdb \
+        advect \
+-       cidd \
+        contour \
+        dataport \
+        didss \
+@@ -35,11 +34,9 @@ SUB_DIRS = \
+        radar \
+        rapformats \
+        rapmath \
+-       rapplot \
+        shapelib \
+        tdrp \
+        titan \
+-       toolsa \
+-       trmm_rsl
++       toolsa 
+ 
+ include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+
+---------
+
+	modified:   ../../../../make_include/rap_make.OSX_LROSE
+
+----
+
+eol-albireo:HawkEye brenda$ git diff ../../../../make_include/rap_make.OSX_LROSE
+diff --git a/codebase/make_include/rap_make.OSX_LROSE b/codebase/make_include/rap_make.OSX_LROSE
+index 6650595d8..b97baee4b 100644
+--- a/codebase/make_include/rap_make.OSX_LROSE
++++ b/codebase/make_include/rap_make.OSX_LROSE
+@@ -61,8 +61,8 @@ SYS_LD_LIBRARY_PATH =
+ CC = gcc
+ SYS_CFLAGS = $(GCC_WARNINGS) -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_CFLAGS)
+ PROFILE_FLAG = -pg
+-DEBUG_FLAG = -g -O2
+-OPT_FLAG = -O2
++DEBUG_FLAG = -g
++OPT_FLAG = -g
+ 
+ #
+ # cc
+
+-------
+
+eol-albireo:LUCID brenda$ git diff ../../../../libs/Makefile
+diff --git a/codebase/libs/Makefile b/codebase/libs/Makefile
+index 282037d4c..2603c9125 100644
+--- a/codebase/libs/Makefile
++++ b/codebase/libs/Makefile
+@@ -17,7 +17,6 @@ SUB_DIRS = \
+        Solo \
+        Spdb \
+        advect \
+-       cidd \
+        contour \
+        dataport \
+        didss \
+@@ -35,11 +34,9 @@ SUB_DIRS = \
+        radar \
+        rapformats \
+        rapmath \
+-       rapplot \
+        shapelib \
+        tdrp \
+        titan \
+-       toolsa \
+-       trmm_rsl
++       toolsa 
+ 
+ include $(RAP_MAKE_INC_DIR)/rap_make_recursive_dir_targets
+
+--------
+
+
