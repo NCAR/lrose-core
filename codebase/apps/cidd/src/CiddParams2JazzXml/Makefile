@@ -39,7 +39,7 @@ TARGET_FILE = CiddParams2JazzXml
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -ldidss -lrapformats \
+LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss -lrapformats \
 	-leuclid -ltoolsa -lpthread -lrapmath -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 

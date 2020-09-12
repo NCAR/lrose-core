@@ -41,7 +41,7 @@ LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
 	-ltoolsa -ltdrp -ldataport -lshapelib \
-	-lbz2 -lz
+	-lbz2 -lz -lpthread
 
 HDRS = \
 	$(PARAMS_HH) \
