@@ -80,6 +80,24 @@ public:
     READ_FROM_UDP = 2
   } run_mode_t;
 
+  typedef enum {
+    PPI_SIM = 0,
+    RHI_SIM = 1
+  } sim_type_t;
+
+  // struct typedefs
+
+  typedef struct {
+    sim_type_t sim_type;
+    char* label;
+    double min_az;
+    double max_az;
+    double delta_az;
+    double min_el;
+    double max_el;
+    double delta_el;
+  } sim_scan_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -380,14 +398,6 @@ public:
 
   char* instance;
 
-  int n_samples_per_visit;
-
-  int n_visits_per_beam;
-
-  int n_beams_per_dwell;
-
-  tdrp_bool_t add_cross_pol_sample_at_end_of_visit;
-
   run_mode_t run_mode;
 
   char* output_dir;
@@ -422,6 +432,19 @@ public:
 
   int data_mapper_report_interval;
 
+  int n_samples_per_visit;
+
+  int n_visits_per_beam;
+
+  int n_beams_per_dwell;
+
+  tdrp_bool_t add_cross_pol_sample_at_end_of_visit;
+
+  tdrp_bool_t specify_scan_strategy;
+
+  sim_scan_t *_sim_scans;
+  int sim_scans_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -429,7 +452,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[32];
+  mutable TDRPtable _table[35];
 
   const char *_className;
 

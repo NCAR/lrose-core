@@ -96,6 +96,12 @@ WriteToUdp::WriteToUdp(const string &progName,
   _nBytesForRate = 0;
   _realtimeDeltaSecs = 0;
 
+  // compute the scan strategy
+  
+  _simVolNum = 0;
+  _simBeamNum = 0;
+  _computeScanStrategy();
+
   // compute packet header length
   // by creating a dummy header and
   // getting the length of the resulting buffer
@@ -325,21 +331,41 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
   double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
   
   vector<double> beamAz, beamEl;
+  vector<int> sweepNum, volNum;
+  vector<Radx::SweepMode_t> sweepMode;
+  
   for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
 
-    double az = AparTsSim::conditionAngle360(startAz + 
-                                             (ii + 0.5) * deltaAzPerBeam);
-    double el = AparTsSim::conditionAngle180(startEl + 
-                                             (ii + 0.5) * deltaElPerBeam);
+    if (!_params.specify_scan_strategy) {
 
-    // for APAR, az ranges from -60 to +60
-    // and el from -90 to +90
-    // so we adjust accordingly
+      double az = AparTsSim::conditionAngle360(startAz + 
+                                               (ii + 0.5) * deltaAzPerBeam);
+      double el = AparTsSim::conditionAngle180(startEl + 
+                                               (ii + 0.5) * deltaElPerBeam);
+      
+      // for APAR, az ranges from -60 to +60
+      // and el from -90 to +90
+      // so we adjust accordingly
+      
+      beamAz.push_back((az / 3.0) - 60.0);
+      beamEl.push_back(el / 1.5);
 
-    beamAz.push_back((az / 3.0) - 60.0);
-    beamEl.push_back(el / 1.5);
+    } else {
 
-  }
+      if (_simBeamNum >= _simEl.size()) {
+        _simBeamNum = 0;
+        _simVolNum++;
+      }
+
+      beamAz.push_back(_simAz[_simBeamNum]);
+      beamEl.push_back(_simEl[_simBeamNum]);
+      sweepNum.push_back(_simSweepNum[_simBeamNum]);
+      volNum.push_back(_simVolNum);
+      sweepMode.push_back(_simSweepMode[_simBeamNum]);
+
+    } // if (_params.specify_scan_strategy) 
+
+  } // ii
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "-----------------------------------------------" << endl;
@@ -373,7 +399,8 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
           _realtimeDeltaSecs = now - iwrfPulse->getTime();
           si64 newTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
           if (_params.debug) {
-            cerr << "====>> recomputing pulse time offset, newTime: " << RadxTime::strm(newTime) << endl;
+            cerr << "====>> recomputing pulse time offset, newTime: "
+                 << RadxTime::strm(newTime) << endl;
           }
         }
         
@@ -384,11 +411,6 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         ui32 beamNumInDwell = ibeam;
         ui32 visitNumInBeam = ivisit;
 
-        // for APAR, az ranges from -60 to +60
-        // and el from -90 to +90
-        
-        // double az = beamAz[ibeam] / 3.0 - 60.0;
-        // double el = beamEl[ibeam] / 1.5;
         double az = beamAz[ibeam];
         double el = beamEl[ibeam];
         double azRad = az * DEG_TO_RAD;
@@ -458,6 +480,64 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
   } // ivisit
 
   return 0;
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// compute simulated scan strategy
+
+void WriteToUdp::_computeScanStrategy()
+
+{
+
+  int beamsPerDwell = _params.n_beams_per_dwell;
+  int sweepNum = 0;
+  
+  for (int iscan = 0; iscan < _params.sim_scans_n; iscan++) {
+    
+    const Params::sim_scan_t &scan = _params._sim_scans[iscan];
+    
+    if (scan.sim_type == Params::RHI_SIM) {
+      
+      Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_RHI;
+      
+      for (double az = scan.min_az;
+           az <= scan.max_az;
+           az += scan.delta_az) {
+        for (int istride = 0; istride < beamsPerDwell; istride++) {
+          for (double el = scan.min_el + istride * scan.delta_el;
+               el <= scan.max_el; el += beamsPerDwell * scan.delta_el) {
+            _simEl.push_back(el);
+            _simAz.push_back(az);
+            _simSweepNum.push_back(sweepNum);
+            _simSweepMode.push_back(sweepMode);
+          } // el
+        } // istride
+      } // az
+
+    } else if (scan.sim_type == Params::PPI_SIM) {
+
+      Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_SECTOR;
+      
+      for (double el = scan.min_el;
+           el <= scan.max_el;
+           el += scan.delta_el) {
+        for (int istride = 0; istride < beamsPerDwell; istride++) {
+          for (double az = scan.min_az + istride * scan.delta_az;
+               az <= scan.max_az; az += beamsPerDwell * scan.delta_az) {
+            _simEl.push_back(el);
+            _simAz.push_back(az);
+            _simSweepNum.push_back(sweepNum);
+            _simSweepMode.push_back(sweepMode);
+          } // az
+        } // istride
+      } // el
+      
+    } // if (scan.sim_type == Params::RHI_SIM)
+    
+    sweepNum++;
+    
+  } // iscan
 
 }
 

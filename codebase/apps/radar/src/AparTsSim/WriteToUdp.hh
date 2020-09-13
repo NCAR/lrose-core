@@ -44,6 +44,7 @@
 #include <vector>
 #include <deque>
 #include <cstdio>
+#include <Radx/Radx.hh>
 #include <Radx/RadxTime.hh>
 
 #include "Args.hh"
@@ -111,7 +112,16 @@ private:
   
   RadxTime _rateStartTime;
   double _nBytesForRate;
+
+  // simulated scan strategy
   
+  int _simVolNum;
+  size_t _simBeamNum;
+  vector<double> _simEl;
+  vector<double> _simAz;
+  vector<int> _simSweepNum;
+  vector<Radx::SweepMode_t> _simSweepMode;
+
   // functions
 
   int _convertToUdp(const string &inputPath);
@@ -150,7 +160,9 @@ private:
   int _openOutputUdp();
   int _writeBufToUdp(const MemBuf &buf);
   void _sleepForDataRate();
-  
+
+  void _computeScanStrategy();
+
 };
 
 #endif

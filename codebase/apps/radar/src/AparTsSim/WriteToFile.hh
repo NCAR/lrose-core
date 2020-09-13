@@ -51,6 +51,7 @@
 #include <radar/IwrfTsReader.hh>
 #include <radar/apar_ts_data.h>
 #include <radar/AparTsInfo.hh>
+#include <Radx/Radx.hh>
 
 using namespace std;
 
@@ -102,6 +103,15 @@ private:
   apar_ts_processing_t _aparTsProcessing;
   apar_ts_calibration_t _aparCalibration;
 
+  // simulated scan strategy
+  
+  int _simVolNum;
+  size_t _simBeamNum;
+  vector<double> _simEl;
+  vector<double> _simAz;
+  vector<int> _simSweepNum;
+  vector<Radx::SweepMode_t> _simSweepMode;
+
   // functions
 
   int _convertFile(const string &inputPath);
@@ -111,6 +121,8 @@ private:
   void _closeOutputFile();
   
   void _convertMeta2Apar(const IwrfTsInfo &info);
+
+  void _computeScanStrategy();
 
 };
 

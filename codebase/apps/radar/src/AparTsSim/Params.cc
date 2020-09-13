@@ -625,63 +625,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("SPECIFY APAR TIME-SERIES DETAILS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'n_samples_per_visit'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_samples_per_visit");
-    tt->descr = tdrpStrDup("Number of samples taken each time we revisit the beam location.");
-    tt->help = tdrpStrDup("We take this number of samples for an az/el, then move to sampling for other locations, before coming back to visit this beam again.");
-    tt->val_offset = (char *) &n_samples_per_visit - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'n_visits_per_beam'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_visits_per_beam");
-    tt->descr = tdrpStrDup("Number of visits for each beam.");
-    tt->help = tdrpStrDup("During a dwell, we come back to a specific beam location this number of times.");
-    tt->val_offset = (char *) &n_visits_per_beam - &_start_;
-    tt->single_val.i = 6;
-    tt++;
-    
-    // Parameter 'n_beams_per_dwell'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_beams_per_dwell");
-    tt->descr = tdrpStrDup("Number of beams sampled in a dwell.");
-    tt->help = tdrpStrDup("During a dwell, we create this number of beams. Then repeat for the next dwell.");
-    tt->val_offset = (char *) &n_beams_per_dwell - &_start_;
-    tt->single_val.i = 4;
-    tt++;
-    
-    // Parameter 'add_cross_pol_sample_at_end_of_visit'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("add_cross_pol_sample_at_end_of_visit");
-    tt->descr = tdrpStrDup("Add 1 cross-pol sample at end of visit.");
-    tt->help = tdrpStrDup("APAR can receive in co-polar or cross-polar mode. This option allows us to test the cross-polar mode, by including a cross-polar sample at the end of each visit. This option effectively increases n_samples_per_visit by 1.");
-    tt->val_offset = (char *) &add_cross_pol_sample_at_end_of_visit - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 3'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("RUN MODES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -708,11 +651,11 @@
     tt->single_val.e = WRITE_TO_FILE;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("WRITE FILES MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -729,11 +672,11 @@
     tt->single_val.s = tdrpStrDup("./output");
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("WRITE UDP MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -846,11 +789,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("READ UDP MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -925,6 +868,187 @@
     tt->help = tdrpStrDup("If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.");
     tt->val_offset = (char *) &data_mapper_report_interval - &_start_;
     tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("DWELL DETAILS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'n_samples_per_visit'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_samples_per_visit");
+    tt->descr = tdrpStrDup("Number of samples taken each time we revisit the beam location.");
+    tt->help = tdrpStrDup("We take this number of samples for an az/el, then move to sampling for other locations, before coming back to visit this beam again.");
+    tt->val_offset = (char *) &n_samples_per_visit - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'n_visits_per_beam'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_visits_per_beam");
+    tt->descr = tdrpStrDup("Number of visits for each beam.");
+    tt->help = tdrpStrDup("During a dwell, we come back to a specific beam location this number of times.");
+    tt->val_offset = (char *) &n_visits_per_beam - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'n_beams_per_dwell'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_beams_per_dwell");
+    tt->descr = tdrpStrDup("Number of beams sampled in a dwell.");
+    tt->help = tdrpStrDup("During a dwell, we create this number of beams. Then repeat for the next dwell.");
+    tt->val_offset = (char *) &n_beams_per_dwell - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'add_cross_pol_sample_at_end_of_visit'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_cross_pol_sample_at_end_of_visit");
+    tt->descr = tdrpStrDup("Add 1 cross-pol sample at end of visit.");
+    tt->help = tdrpStrDup("APAR can receive in co-polar or cross-polar mode. This option allows us to test the cross-polar mode, by including a cross-polar sample at the end of each visit. This option effectively increases n_samples_per_visit by 1.");
+    tt->val_offset = (char *) &add_cross_pol_sample_at_end_of_visit - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("SCAN STRATEGY");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'specify_scan_strategy'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_scan_strategy");
+    tt->descr = tdrpStrDup("Specify the scan strategy instead of using the angles in the input files.");
+    tt->help = tdrpStrDup("This is an option to specify a realistic APAR scan strategy.");
+    tt->val_offset = (char *) &specify_scan_strategy - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'sim_scans'
+    // ctype is '_sim_scan_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("sim_scans");
+    tt->descr = tdrpStrDup("Scans to be simulated.");
+    tt->help = tdrpStrDup("For RHIs, the min_az and max_az should be the same. For PPIs, the min_el and max_el should be the same. ");
+    tt->array_offset = (char *) &_sim_scans - &_start_;
+    tt->array_n_offset = (char *) &sim_scans_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(sim_scan_t);
+    tt->array_n = 4;
+    tt->struct_def.name = tdrpStrDup("sim_scan_t");
+    tt->struct_def.nfields = 8;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("sim_type_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("sim_type");
+      tt->struct_def.fields[0].ptype = ENUM_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_sim_scans->sim_type - (char *) _sim_scans;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("sim_type_t");
+        tt->struct_def.fields[0].enum_def.nfields = 2;
+        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("PPI_SIM");
+        tt->struct_def.fields[0].enum_def.fields[0].val = PPI_SIM;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("RHI_SIM");
+        tt->struct_def.fields[0].enum_def.fields[1].val = RHI_SIM;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("label");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_sim_scans->label - (char *) _sim_scans;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("min_az");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_sim_scans->min_az - (char *) _sim_scans;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("max_az");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_sim_scans->max_az - (char *) _sim_scans;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("delta_az");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_sim_scans->delta_az - (char *) _sim_scans;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("min_el");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_sim_scans->min_el - (char *) _sim_scans;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[6].fname = tdrpStrDup("max_el");
+      tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_sim_scans->max_el - (char *) _sim_scans;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[7].fname = tdrpStrDup("delta_el");
+      tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
+        (char *) &_sim_scans->delta_el - (char *) _sim_scans;
+    tt->n_struct_vals = 32;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].e = RHI_SIM;
+      tt->struct_vals[1].s = tdrpStrDup("RHI-fore");
+      tt->struct_vals[2].d = -5;
+      tt->struct_vals[3].d = -5;
+      tt->struct_vals[4].d = 1;
+      tt->struct_vals[5].d = -25;
+      tt->struct_vals[6].d = 25;
+      tt->struct_vals[7].d = 1;
+      tt->struct_vals[8].e = RHI_SIM;
+      tt->struct_vals[9].s = tdrpStrDup("RHI-aft");
+      tt->struct_vals[10].d = -25;
+      tt->struct_vals[11].d = -25;
+      tt->struct_vals[12].d = 1;
+      tt->struct_vals[13].d = -25;
+      tt->struct_vals[14].d = 25;
+      tt->struct_vals[15].d = 1;
+      tt->struct_vals[16].e = RHI_SIM;
+      tt->struct_vals[17].s = tdrpStrDup("RHI-dualpol");
+      tt->struct_vals[18].d = 0;
+      tt->struct_vals[19].d = 0;
+      tt->struct_vals[20].d = 1;
+      tt->struct_vals[21].d = -25;
+      tt->struct_vals[22].d = 25;
+      tt->struct_vals[23].d = 1;
+      tt->struct_vals[24].e = PPI_SIM;
+      tt->struct_vals[25].s = tdrpStrDup("PPI-sur");
+      tt->struct_vals[26].d = -45;
+      tt->struct_vals[27].d = 45;
+      tt->struct_vals[28].d = 1;
+      tt->struct_vals[29].d = 0;
+      tt->struct_vals[30].d = 0;
+      tt->struct_vals[31].d = 1;
     tt++;
     
     // trailing entry has param_name set to NULL

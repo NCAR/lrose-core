@@ -78,6 +78,12 @@ WriteToFile::WriteToFile(const string &progName,
   }
   _aparTsInfo = new AparTsInfo(_aparTsDebug);
 
+  // compute the scan strategy
+  
+  _simVolNum = 0;
+  _simBeamNum = 0;
+  _computeScanStrategy();
+
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Running WriteToFile - extra verbose debug mode" << endl;
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -281,9 +287,26 @@ int WriteToFile::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
   double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
 
   vector<double> beamAz, beamEl;
+  vector<int> sweepNum, volNum;
+  vector<Radx::SweepMode_t> sweepMode;
+
   for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
-    beamAz.push_back(AparTsSim::conditionAngle360(startAz + (ii + 0.5) * deltaAzPerBeam));
-    beamEl.push_back(AparTsSim::conditionAngle180(startEl + (ii + 0.5) * deltaElPerBeam));
+    if (_params.specify_scan_strategy) {
+      if (_simBeamNum >= _simEl.size()) {
+        _simBeamNum = 0;
+        _simVolNum++;
+      }
+      beamAz.push_back(_simAz[_simBeamNum]);
+      beamEl.push_back(_simEl[_simBeamNum]);
+      sweepNum.push_back(_simSweepNum[_simBeamNum]);
+      volNum.push_back(_simVolNum);
+      sweepMode.push_back(_simSweepMode[_simBeamNum]);
+    } else {
+      beamAz.push_back(AparTsSim::conditionAngle360
+                       (startAz + (ii + 0.5) * deltaAzPerBeam));
+      beamEl.push_back(AparTsSim::conditionAngle180
+                       (startEl + (ii + 0.5) * deltaElPerBeam));
+    } // if (_params.specify_scan_strategy)
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -319,6 +342,17 @@ int WriteToFile::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         aparHdr.visit_num_in_beam = ivisit;
         aparHdr.chan_is_copol[0] = 1;
         aparHdr.pulse_seq_num = _pulseSeqNum;
+
+        if (_params.specify_scan_strategy) {
+          aparHdr.volume_num = volNum[ibeam];
+          aparHdr.sweep_num = sweepNum[ibeam];
+          if (sweepMode[ibeam] == Radx::SWEEP_MODE_RHI) {
+            aparHdr.scan_mode = (int) apar_ts_scan_mode_t::RHI;
+          } else {
+            aparHdr.scan_mode = (int) apar_ts_scan_mode_t::PPI;
+          }
+        }
+
         _pulseSeqNum++;
 
         // create co-polar pulse, set header
@@ -493,3 +527,60 @@ void WriteToFile::_convertMeta2Apar(const IwrfTsInfo &info)
   }
 }
 
+////////////////////////////////////////////////////////////////////////
+// compute simulated scan strategy
+
+void WriteToFile::_computeScanStrategy()
+
+{
+
+  int beamsPerDwell = _params.n_beams_per_dwell;
+  int sweepNum = 0;
+  
+  for (int iscan = 0; iscan < _params.sim_scans_n; iscan++) {
+    
+    const Params::sim_scan_t &scan = _params._sim_scans[iscan];
+    
+    if (scan.sim_type == Params::RHI_SIM) {
+      
+      Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_RHI;
+      
+      for (double az = scan.min_az;
+           az <= scan.max_az;
+           az += scan.delta_az) {
+        for (int istride = 0; istride < beamsPerDwell; istride++) {
+          for (double el = scan.min_el + istride * scan.delta_el;
+               el <= scan.max_el; el += beamsPerDwell * scan.delta_el) {
+            _simEl.push_back(el);
+            _simAz.push_back(az);
+            _simSweepNum.push_back(sweepNum);
+            _simSweepMode.push_back(sweepMode);
+          } // el
+        } // istride
+      } // az
+
+    } else if (scan.sim_type == Params::PPI_SIM) {
+
+      Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_SECTOR;
+      
+      for (double el = scan.min_el;
+           el <= scan.max_el;
+           el += scan.delta_el) {
+        for (int istride = 0; istride < beamsPerDwell; istride++) {
+          for (double az = scan.min_az + istride * scan.delta_az;
+               az <= scan.max_az; az += beamsPerDwell * scan.delta_az) {
+            _simEl.push_back(el);
+            _simAz.push_back(az);
+            _simSweepNum.push_back(sweepNum);
+            _simSweepMode.push_back(sweepMode);
+          } // az
+        } // istride
+      } // el
+      
+    } // if (scan.sim_type == Params::RHI_SIM)
+    
+    sweepNum++;
+    
+  } // iscan
+
+}
