@@ -74,9 +74,9 @@ RhiPlot::RhiPlot(PolarWidget* parent,
 
   // set up overlays
   
-  setGrids(_params.ppi_grids_on_at_startup);
-  setRings(_params.ppi_range_rings_on_at_startup);
-  setAngleLines(_params.ppi_azimuth_lines_on_at_startup);
+  setGrids(_params.polar_grids_on_at_startup);
+  setRings(_params.polar_range_rings_on_at_startup);
+  setAngleLines(_params.polar_angle_lines_on_at_startup);
 
   // archive mode
   
@@ -255,7 +255,7 @@ void RhiPlot::addRay(const RadxRay *ray,
 
   // Determine the extent of this ray
 
-  double halfAngle = _params.ppi_rendering_beam_width / 2.0;
+  double halfAngle = _params.rhi_rendering_beam_width / 2.0;
   double startEl = el - halfAngle;
   double endEl = el + halfAngle;
   
@@ -620,7 +620,7 @@ void RhiPlot::_drawOverlays(QPainter &painter)
     painter.setBrush(Qt::black);
     painter.setBackgroundMode(Qt::OpaqueMode);
 
-    switch (_params.ppi_main_legend_pos) {
+    switch (_params.rhi_main_legend_pos) {
       case Params::LEGEND_TOP_LEFT:
         _zoomWorld.drawLegendsTopLeft(painter, legends);
         break;

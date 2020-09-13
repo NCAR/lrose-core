@@ -149,8 +149,6 @@ typedef struct {
   boolean nyquist;
   boolean max_range;
   boolean unambiguous_range;
-  boolean measured_power_h;
-  boolean measured_power_v;
   boolean scan_name;
   boolean scan_mode;
   boolean polarization_mode;
@@ -183,8 +181,6 @@ paramdef struct show_status_t {
     nyquist = true,
     max_range = true,
     unambiguous_range = true,
-    measured_power_h = false,
-    measured_power_v = false,
     scan_name = false,
     scan_mode = true,
     polarization_mode = true,
@@ -500,7 +496,7 @@ paramdef int {
 paramdef string {
   p_default = "black";
   p_descr = "Color of main display background.";
-} main_background_color;
+} background_color;
 
 paramdef int {
   p_default = 1;
@@ -517,11 +513,6 @@ paramdef int {
   p_descr = "Basic font size for labels (pixels).";
   p_help = "Some of the labels are scaled relative to this size.";
 } label_font_size;
-
-paramdef string {
-  p_default = "black";
-  p_descr = "Color of main display background.";
-} background_color;
 
 paramdef string {
   p_default = "yellow";
@@ -544,30 +535,24 @@ paramdef int {
   p_help = "Size of cross drawn at click point, to select data.";
 } click_cross_size;
 
-commentdef {
-  p_header = "PPI MODE DISPLAY";
-}
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set POLAR range rings overlay on at startup.";
+} polar_range_rings_on_at_startup;
 
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Aspect ratio (width/height) of PPI window.";
-  p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
-} ppi_aspect_ratio;
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set POLAR angle lines overlay on at startup.";
+} polar_angle_lines_on_at_startup;
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Set PPI grids overlay on at startup.";
-} ppi_grids_on_at_startup;
+  p_descr = "Set POLAR grids overlay on at startup.";
+} polar_grids_on_at_startup;
 
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set PPI range rings overlay on at startup.";
-} ppi_range_rings_on_at_startup;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set PPI azimuth lines overlay on at startup.";
-} ppi_azimuth_lines_on_at_startup;
+commentdef {
+  p_header = "PPI MODE DISPLAY";
+}
 
 typedef enum {
   LEGEND_TOP_LEFT,
@@ -592,120 +577,11 @@ commentdef {
   p_header = "RHI MODE DISPLAY";
 }
 
-paramdef int {
-  p_default = 500;
-  p_descr = "Startup width of RHI window (pixels).";
-} rhi_window_width;
-
-paramdef int {
-  p_default = 500;
-  p_descr = "Startup height of RHI window (pixels).";
-} rhi_window_height;
-
-paramdef int {
-  p_default = 1100;
-  p_descr = "Startup X for RHI window (pixels).";
-} rhi_window_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup Y for RHI window (pixels).";
-} rhi_window_start_y;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of top margin in RHI mode (pixels).";
-  p_help = "Titles go in the top margin.";
-} rhi_top_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of bottom margin in RHI mode (pixels).";
-  p_help = "Time scale goes in the bottom margin.";
-} rhi_bottom_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of left margin in RHI mode (pixels).";
-  p_help = "Height scale goes in the left margin.";
-} rhi_left_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of right margin in RHI mode (pixels).";
-  p_help = "Height scale goes in the right margin.";
-} rhi_right_margin;
-
-paramdef int {
-  p_default = 8;
-  p_descr = "Font size for labels on range rings (pixels).";
-} rhi_label_font_size;
-
-paramdef int {
-  p_default = 7;
-  p_descr = "Length of ticks on axes (pixels).";
-} rhi_axis_tick_len;
-
-paramdef int {
-  p_default = 7;
-  p_descr = "Ideal number of ticks on axes.";
-} rhi_n_ticks_ideal;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Margin around some text (pixels).";
-} rhi_text_margin;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Flag indicating to display full 180 degrees in RHI window. "
-            "If set to false, the RHI window will just display 90 degrees "
-            "of the RHI.";
-} rhi_display_180_degrees;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Aspect ratio (width/height) of RHI window.";
-  p_descr = "Set to -1 to allow aspect ratio to vary as the RHI window is resized.";
-} rhi_aspect_ratio;
-
-paramdef double {
-  p_default = 25.0;
-  p_descr = "Max height of data in RHI window (km).";
-  p_descr = "This can be adjusted interactively.";
-} rhi_max_height_km;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of color scale for RHI window (pixels).";
-} rhi_color_scale_width;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set RHI grids overlay on at startup.";
-} rhi_grids_on_at_startup;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Set RHI range rings overlay on at startup.";
-} rhi_range_rings_on_at_startup;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Set RHI elevation lines overlay on at startup.";
-} rhi_elevation_lines_on_at_startup;
-
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
   p_descr = "Position of main legend in the RHI plot window";
   p_help = "This include time, field name and elevation angle.";
 } rhi_main_legend_pos;
-
-paramdef int {
-  p_default = 360;
-  p_descr = "Size of the queue for RHI beams.";
-  p_help = "After the queue reaches this size, older beams are discarded.";
-} rhi_beam_queue_size;
 
 paramdef double {
   p_default = 1.0;
@@ -810,7 +686,7 @@ typedef enum {
 } range_axis_mode_t;
 
 paramdef enum range_axis_mode_t {
-  p_default = RANGE_AXIS_ALTITUDE;
+  p_default = RANGE_AXIS_UP;
   p_descr = "Options for plotting range in the vertical scale.";
   p_help = "RANGE_AXIS_UP - instrument is at the bottom, range plotted positively upwards. RANGE_AXIS_DOWN: instrument is at the top, range plotted downwards. RANGE_AXIS_ALTITUDE: vertical scale represents the altitude of the gates in earth coordinates.";
 } bscan_range_axis_mode;

@@ -820,7 +820,7 @@
     tt->help = tdrpStrDup("These items are shown in the left panel in the GUI. Setting an item to false will hide it in the GUI.");
     tt->val_offset = (char *) &show_status_in_gui - &_start_;
     tt->struct_def.name = tdrpStrDup("show_status_t");
-    tt->struct_def.nfields = 28;
+    tt->struct_def.nfields = 26;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("boolean");
@@ -894,76 +894,66 @@
       tt->struct_def.fields[13].rel_offset = 
         (char *) &show_status_in_gui.unambiguous_range - (char *) &show_status_in_gui;
       tt->struct_def.fields[14].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[14].fname = tdrpStrDup("measured_power_h");
+      tt->struct_def.fields[14].fname = tdrpStrDup("scan_name");
       tt->struct_def.fields[14].ptype = BOOL_TYPE;
       tt->struct_def.fields[14].rel_offset = 
-        (char *) &show_status_in_gui.measured_power_h - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.scan_name - (char *) &show_status_in_gui;
       tt->struct_def.fields[15].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[15].fname = tdrpStrDup("measured_power_v");
+      tt->struct_def.fields[15].fname = tdrpStrDup("scan_mode");
       tt->struct_def.fields[15].ptype = BOOL_TYPE;
       tt->struct_def.fields[15].rel_offset = 
-        (char *) &show_status_in_gui.measured_power_v - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.scan_mode - (char *) &show_status_in_gui;
       tt->struct_def.fields[16].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[16].fname = tdrpStrDup("scan_name");
+      tt->struct_def.fields[16].fname = tdrpStrDup("polarization_mode");
       tt->struct_def.fields[16].ptype = BOOL_TYPE;
       tt->struct_def.fields[16].rel_offset = 
-        (char *) &show_status_in_gui.scan_name - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.polarization_mode - (char *) &show_status_in_gui;
       tt->struct_def.fields[17].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[17].fname = tdrpStrDup("scan_mode");
+      tt->struct_def.fields[17].fname = tdrpStrDup("latitude");
       tt->struct_def.fields[17].ptype = BOOL_TYPE;
       tt->struct_def.fields[17].rel_offset = 
-        (char *) &show_status_in_gui.scan_mode - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.latitude - (char *) &show_status_in_gui;
       tt->struct_def.fields[18].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[18].fname = tdrpStrDup("polarization_mode");
+      tt->struct_def.fields[18].fname = tdrpStrDup("longitude");
       tt->struct_def.fields[18].ptype = BOOL_TYPE;
       tt->struct_def.fields[18].rel_offset = 
-        (char *) &show_status_in_gui.polarization_mode - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.longitude - (char *) &show_status_in_gui;
       tt->struct_def.fields[19].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[19].fname = tdrpStrDup("latitude");
+      tt->struct_def.fields[19].fname = tdrpStrDup("altitude");
       tt->struct_def.fields[19].ptype = BOOL_TYPE;
       tt->struct_def.fields[19].rel_offset = 
-        (char *) &show_status_in_gui.latitude - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.altitude - (char *) &show_status_in_gui;
       tt->struct_def.fields[20].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[20].fname = tdrpStrDup("longitude");
+      tt->struct_def.fields[20].fname = tdrpStrDup("altitude_rate");
       tt->struct_def.fields[20].ptype = BOOL_TYPE;
       tt->struct_def.fields[20].rel_offset = 
-        (char *) &show_status_in_gui.longitude - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.altitude_rate - (char *) &show_status_in_gui;
       tt->struct_def.fields[21].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[21].fname = tdrpStrDup("altitude");
+      tt->struct_def.fields[21].fname = tdrpStrDup("sun_elevation");
       tt->struct_def.fields[21].ptype = BOOL_TYPE;
       tt->struct_def.fields[21].rel_offset = 
-        (char *) &show_status_in_gui.altitude - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.sun_elevation - (char *) &show_status_in_gui;
       tt->struct_def.fields[22].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[22].fname = tdrpStrDup("altitude_rate");
+      tt->struct_def.fields[22].fname = tdrpStrDup("sun_azimuth");
       tt->struct_def.fields[22].ptype = BOOL_TYPE;
       tt->struct_def.fields[22].rel_offset = 
-        (char *) &show_status_in_gui.altitude_rate - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.sun_azimuth - (char *) &show_status_in_gui;
       tt->struct_def.fields[23].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[23].fname = tdrpStrDup("sun_elevation");
+      tt->struct_def.fields[23].fname = tdrpStrDup("speed");
       tt->struct_def.fields[23].ptype = BOOL_TYPE;
       tt->struct_def.fields[23].rel_offset = 
-        (char *) &show_status_in_gui.sun_elevation - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.speed - (char *) &show_status_in_gui;
       tt->struct_def.fields[24].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[24].fname = tdrpStrDup("sun_azimuth");
+      tt->struct_def.fields[24].fname = tdrpStrDup("heading");
       tt->struct_def.fields[24].ptype = BOOL_TYPE;
       tt->struct_def.fields[24].rel_offset = 
-        (char *) &show_status_in_gui.sun_azimuth - (char *) &show_status_in_gui;
+        (char *) &show_status_in_gui.heading - (char *) &show_status_in_gui;
       tt->struct_def.fields[25].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[25].fname = tdrpStrDup("speed");
+      tt->struct_def.fields[25].fname = tdrpStrDup("track");
       tt->struct_def.fields[25].ptype = BOOL_TYPE;
       tt->struct_def.fields[25].rel_offset = 
-        (char *) &show_status_in_gui.speed - (char *) &show_status_in_gui;
-      tt->struct_def.fields[26].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[26].fname = tdrpStrDup("heading");
-      tt->struct_def.fields[26].ptype = BOOL_TYPE;
-      tt->struct_def.fields[26].rel_offset = 
-        (char *) &show_status_in_gui.heading - (char *) &show_status_in_gui;
-      tt->struct_def.fields[27].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[27].fname = tdrpStrDup("track");
-      tt->struct_def.fields[27].ptype = BOOL_TYPE;
-      tt->struct_def.fields[27].rel_offset = 
         (char *) &show_status_in_gui.track - (char *) &show_status_in_gui;
-    tt->n_struct_vals = 28;
+    tt->n_struct_vals = 26;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].b = pTRUE;
@@ -981,19 +971,17 @@
       tt->struct_vals[12].b = pTRUE;
       tt->struct_vals[13].b = pTRUE;
       tt->struct_vals[14].b = pFALSE;
-      tt->struct_vals[15].b = pFALSE;
-      tt->struct_vals[16].b = pFALSE;
+      tt->struct_vals[15].b = pTRUE;
+      tt->struct_vals[16].b = pTRUE;
       tt->struct_vals[17].b = pTRUE;
       tt->struct_vals[18].b = pTRUE;
       tt->struct_vals[19].b = pTRUE;
-      tt->struct_vals[20].b = pTRUE;
+      tt->struct_vals[20].b = pFALSE;
       tt->struct_vals[21].b = pTRUE;
-      tt->struct_vals[22].b = pFALSE;
-      tt->struct_vals[23].b = pTRUE;
-      tt->struct_vals[24].b = pTRUE;
+      tt->struct_vals[22].b = pTRUE;
+      tt->struct_vals[23].b = pFALSE;
+      tt->struct_vals[24].b = pFALSE;
       tt->struct_vals[25].b = pFALSE;
-      tt->struct_vals[26].b = pFALSE;
-      tt->struct_vals[27].b = pFALSE;
     tt++;
     
     // Parameter 'Comment 6'
@@ -1504,15 +1492,15 @@
     tt->single_val.i = 10;
     tt++;
     
-    // Parameter 'main_background_color'
+    // Parameter 'background_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("main_background_color");
+    tt->param_name = tdrpStrDup("background_color");
     tt->descr = tdrpStrDup("Color of main display background.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &main_background_color - &_start_;
+    tt->val_offset = (char *) &background_color - &_start_;
     tt->single_val.s = tdrpStrDup("black");
     tt++;
     
@@ -1550,18 +1538,6 @@
     tt->help = tdrpStrDup("Some of the labels are scaled relative to this size.");
     tt->val_offset = (char *) &label_font_size - &_start_;
     tt->single_val.i = 12;
-    tt++;
-    
-    // Parameter 'background_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("background_color");
-    tt->descr = tdrpStrDup("Color of main display background.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &background_color - &_start_;
-    tt->single_val.s = tdrpStrDup("black");
     tt++;
     
     // Parameter 'plot_label_color'
@@ -1612,6 +1588,42 @@
     tt->single_val.i = 11;
     tt++;
     
+    // Parameter 'polar_range_rings_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("polar_range_rings_on_at_startup");
+    tt->descr = tdrpStrDup("Set POLAR range rings overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &polar_range_rings_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'polar_angle_lines_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("polar_angle_lines_on_at_startup");
+    tt->descr = tdrpStrDup("Set POLAR angle lines overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &polar_angle_lines_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'polar_grids_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("polar_grids_on_at_startup");
+    tt->descr = tdrpStrDup("Set POLAR grids overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &polar_grids_on_at_startup - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1619,54 +1631,6 @@
     tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("PPI MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'ppi_aspect_ratio'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ppi_aspect_ratio");
-    tt->descr = tdrpStrDup("Aspect ratio (width/height) of PPI window.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ppi_aspect_ratio - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'ppi_grids_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ppi_grids_on_at_startup");
-    tt->descr = tdrpStrDup("Set PPI grids overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ppi_grids_on_at_startup - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'ppi_range_rings_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ppi_range_rings_on_at_startup");
-    tt->descr = tdrpStrDup("Set PPI range rings overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ppi_range_rings_on_at_startup - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'ppi_azimuth_lines_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ppi_azimuth_lines_on_at_startup");
-    tt->descr = tdrpStrDup("Set PPI azimuth lines overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ppi_azimuth_lines_on_at_startup - &_start_;
-    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'ppi_main_legend_pos'
@@ -1714,234 +1678,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'rhi_window_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_window_width");
-    tt->descr = tdrpStrDup("Startup width of RHI window (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_window_width - &_start_;
-    tt->single_val.i = 500;
-    tt++;
-    
-    // Parameter 'rhi_window_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_window_height");
-    tt->descr = tdrpStrDup("Startup height of RHI window (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_window_height - &_start_;
-    tt->single_val.i = 500;
-    tt++;
-    
-    // Parameter 'rhi_window_start_x'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_window_start_x");
-    tt->descr = tdrpStrDup("Startup X for RHI window (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_window_start_x - &_start_;
-    tt->single_val.i = 1100;
-    tt++;
-    
-    // Parameter 'rhi_window_start_y'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_window_start_y");
-    tt->descr = tdrpStrDup("Startup Y for RHI window (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_window_start_y - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'rhi_top_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_top_margin");
-    tt->descr = tdrpStrDup("Height of top margin in RHI mode (pixels).");
-    tt->help = tdrpStrDup("Titles go in the top margin.");
-    tt->val_offset = (char *) &rhi_top_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'rhi_bottom_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_bottom_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin in RHI mode (pixels).");
-    tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
-    tt->val_offset = (char *) &rhi_bottom_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'rhi_left_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_left_margin");
-    tt->descr = tdrpStrDup("Width of left margin in RHI mode (pixels).");
-    tt->help = tdrpStrDup("Height scale goes in the left margin.");
-    tt->val_offset = (char *) &rhi_left_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'rhi_right_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_right_margin");
-    tt->descr = tdrpStrDup("Width of right margin in RHI mode (pixels).");
-    tt->help = tdrpStrDup("Height scale goes in the right margin.");
-    tt->val_offset = (char *) &rhi_right_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'rhi_label_font_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_label_font_size");
-    tt->descr = tdrpStrDup("Font size for labels on range rings (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_label_font_size - &_start_;
-    tt->single_val.i = 8;
-    tt++;
-    
-    // Parameter 'rhi_axis_tick_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_axis_tick_len");
-    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_axis_tick_len - &_start_;
-    tt->single_val.i = 7;
-    tt++;
-    
-    // Parameter 'rhi_n_ticks_ideal'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_n_ticks_ideal");
-    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_n_ticks_ideal - &_start_;
-    tt->single_val.i = 7;
-    tt++;
-    
-    // Parameter 'rhi_text_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_text_margin");
-    tt->descr = tdrpStrDup("Margin around some text (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_text_margin - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'rhi_display_180_degrees'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_display_180_degrees");
-    tt->descr = tdrpStrDup("Flag indicating to display full 180 degrees in RHI window. If set to false, the RHI window will just display 90 degrees of the RHI.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_display_180_degrees - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'rhi_aspect_ratio'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rhi_aspect_ratio");
-    tt->descr = tdrpStrDup("Aspect ratio (width/height) of RHI window.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_aspect_ratio - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'rhi_max_height_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rhi_max_height_km");
-    tt->descr = tdrpStrDup("Max height of data in RHI window (km).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_max_height_km - &_start_;
-    tt->single_val.d = 25;
-    tt++;
-    
-    // Parameter 'rhi_color_scale_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_color_scale_width");
-    tt->descr = tdrpStrDup("Width of color scale for RHI window (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_color_scale_width - &_start_;
-    tt->single_val.i = 40;
-    tt++;
-    
-    // Parameter 'rhi_grids_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_grids_on_at_startup");
-    tt->descr = tdrpStrDup("Set RHI grids overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_grids_on_at_startup - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'rhi_range_rings_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_range_rings_on_at_startup");
-    tt->descr = tdrpStrDup("Set RHI range rings overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_range_rings_on_at_startup - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'rhi_elevation_lines_on_at_startup'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_elevation_lines_on_at_startup");
-    tt->descr = tdrpStrDup("Set RHI elevation lines overlay on at startup.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_elevation_lines_on_at_startup - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'rhi_main_legend_pos'
     // ctype is '_legend_pos_t'
     
@@ -1964,18 +1700,6 @@
       tt->enum_def.fields[3].name = tdrpStrDup("LEGEND_BOTTOM_RIGHT");
       tt->enum_def.fields[3].val = LEGEND_BOTTOM_RIGHT;
     tt->single_val.e = LEGEND_TOP_LEFT;
-    tt++;
-    
-    // Parameter 'rhi_beam_queue_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_beam_queue_size");
-    tt->descr = tdrpStrDup("Size of the queue for RHI beams.");
-    tt->help = tdrpStrDup("After the queue reaches this size, older beams are discarded.");
-    tt->val_offset = (char *) &rhi_beam_queue_size - &_start_;
-    tt->single_val.i = 360;
     tt++;
     
     // Parameter 'rhi_rendering_beam_width'
@@ -2196,7 +1920,7 @@
       tt->enum_def.fields[1].val = RANGE_AXIS_DOWN;
       tt->enum_def.fields[2].name = tdrpStrDup("RANGE_AXIS_ALTITUDE");
       tt->enum_def.fields[2].val = RANGE_AXIS_ALTITUDE;
-    tt->single_val.e = RANGE_AXIS_ALTITUDE;
+    tt->single_val.e = RANGE_AXIS_UP;
     tt++;
     
     // Parameter 'Comment 16'

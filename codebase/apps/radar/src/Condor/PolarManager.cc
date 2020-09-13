@@ -617,7 +617,7 @@ void PolarManager::_createActions()
   _ringsAct = new QAction(tr("Range Rings"), this);
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
-  _ringsAct->setChecked(_params.ppi_range_rings_on_at_startup);
+  _ringsAct->setChecked(_params.polar_range_rings_on_at_startup);
   connect(_ringsAct, SIGNAL(triggered(bool)),
           _plotWidget, SLOT(setRings(bool)));
 
@@ -626,7 +626,7 @@ void PolarManager::_createActions()
   _gridsAct = new QAction(tr("Grids"), this);
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
-  _gridsAct->setChecked(_params.ppi_grids_on_at_startup);
+  _gridsAct->setChecked(_params.polar_grids_on_at_startup);
   connect(_gridsAct, SIGNAL(triggered(bool)),
           _plotWidget, SLOT(setGrids(bool)));
 
@@ -635,7 +635,7 @@ void PolarManager::_createActions()
   _azLinesAct = new QAction(tr("Az Lines"), this);
   _azLinesAct->setStatusTip(tr("Turn az lines on/off"));
   _azLinesAct->setCheckable(true);
-  _azLinesAct->setChecked(_params.ppi_azimuth_lines_on_at_startup);
+  _azLinesAct->setChecked(_params.polar_angle_lines_on_at_startup);
   connect(_azLinesAct, SIGNAL(triggered(bool)),
           _plotWidget, SLOT(setAngleLines(bool)));
 
