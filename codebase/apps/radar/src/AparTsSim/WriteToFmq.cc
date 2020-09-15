@@ -674,7 +674,8 @@ int WriteToFmq::_writeToOutputFmq(bool force)
     _outputMsg.clearParts();
     return -1;
   }
-
+  _nBytesForRate += len;
+   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  Wrote msg, nparts, len, path: "
          << nParts << ", " << len << ", "
@@ -682,6 +683,10 @@ int WriteToFmq::_writeToOutputFmq(bool force)
   }
 
   _outputMsg.clearParts();
+
+  if (_nBytesForRate > 1000000) {
+    _sleepForDataRate();
+  }
 
   return 0;
 
