@@ -800,18 +800,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'fmq_n_gates'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("fmq_n_gates");
-    tt->descr = tdrpStrDup("Number of gates for FMQ simulation mode.");
-    tt->help = tdrpStrDup("If the input files contain fewer gates than this, the input gates will be sampled multiple times to create the output data.");
-    tt->val_offset = (char *) &fmq_n_gates - &_start_;
-    tt->single_val.i = 2500;
-    tt++;
-    
     // Parameter 'fmq_gate_spacing_m'
     // ctype is 'double'
     
@@ -822,30 +810,6 @@
     tt->help = tdrpStrDup("Overrides the gate spacing in the IWRF data.");
     tt->val_offset = (char *) &fmq_gate_spacing_m - &_start_;
     tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'fmq_n_channels'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("fmq_n_channels");
-    tt->descr = tdrpStrDup("Number of channels for FMQ simulation mode.");
-    tt->help = tdrpStrDup("If this is 1, then that represents the signals from the entire array combined into a single channel.If this is more than 1, each channel represents a single row from the array, which will be combined using beam forming on the FPGA.");
-    tt->val_offset = (char *) &fmq_n_channels - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'fmq_iq_scale_for_si16'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("fmq_iq_scale_for_si16");
-    tt->descr = tdrpStrDup("Scale factor for converting floats to si16 in IQ data stream.");
-    tt->help = tdrpStrDup("This scales the IQ data so that sqrt(I*I + Q*Q) is in Watts.");
-    tt->val_offset = (char *) &fmq_iq_scale_for_si16 - &_start_;
-    tt->single_val.d = 0.0001;
     tt++;
     
     // Parameter 'fmq_sim_data_rate'
@@ -860,15 +824,15 @@
     tt->single_val.d = 20;
     tt++;
     
-    // Parameter 'set_fmq_time_to_now'
+    // Parameter 'fmq_set_times_to_now'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_fmq_time_to_now");
+    tt->param_name = tdrpStrDup("fmq_set_times_to_now");
     tt->descr = tdrpStrDup("Set the pulse times to real-time.");
     tt->help = tdrpStrDup("Overwrite the times in the pulse headers with real-time values.");
-    tt->val_offset = (char *) &set_fmq_time_to_now - &_start_;
+    tt->val_offset = (char *) &fmq_set_times_to_now - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

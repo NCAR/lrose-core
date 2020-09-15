@@ -283,7 +283,7 @@ int WriteToFmq::_convertToFmq(const string &inputPath)
 }
 
 ////////////////////////////////////////////
-// process pulses in a dwell for UDP output
+// process pulses in a dwell for FMQ output
 
 int WriteToFmq::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
   
@@ -364,7 +364,7 @@ int WriteToFmq::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
 
         // change to realtime if appropriate
 
-        if (_params.set_udp_time_to_now && _realtimeDeltaSecs == 0) {
+        if (_params.fmq_set_times_to_now && _realtimeDeltaSecs == 0) {
           time_t now = time(NULL);
           _realtimeDeltaSecs = now - iwrfPulse->getTime();
           si64 newTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
@@ -482,7 +482,7 @@ void WriteToFmq::_sleepForDataRate()
   // compute time for data sent since last check
 
   double targetDuration =
-    _nBytesForRate / (_params.udp_sim_data_rate * 1.0e6);
+    _nBytesForRate / (_params.fmq_sim_data_rate * 1.0e6);
   double sleepSecs = targetDuration - elapsedSecs;
 
   if (sleepSecs <= 0) {
@@ -516,8 +516,8 @@ int WriteToFmq::_initMetaData(const IwrfTsInfo &tsInfo)
   _convertMeta2Apar(tsInfo);
   _aparTsInfo->setRadarInfo(_aparRadarInfo);
   _aparTsInfo->setScanSegment(_aparScanSegment);
-  _aparTsProcessing.start_range_m = _params.udp_gate_spacing_m / 2.0;
-  _aparTsProcessing.gate_spacing_m = _params.udp_gate_spacing_m;
+  _aparTsProcessing.start_range_m = _params.fmq_gate_spacing_m / 2.0;
+  _aparTsProcessing.gate_spacing_m = _params.fmq_gate_spacing_m;
   _aparTsInfo->setTsProcessing(_aparTsProcessing);
   if (tsInfo.isCalibrationActive()) {
     _aparTsInfo->setCalibration(_aparCalibration);

@@ -421,17 +421,11 @@ public:
 
   tdrp_bool_t set_udp_time_to_now;
 
-  int fmq_n_gates;
-
   double fmq_gate_spacing_m;
-
-  int fmq_n_channels;
-
-  double fmq_iq_scale_for_si16;
 
   double fmq_sim_data_rate;
 
-  tdrp_bool_t set_fmq_time_to_now;
+  tdrp_bool_t fmq_set_times_to_now;
 
   char* output_fmq_path;
 
@@ -465,7 +459,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[39];
 
   const char *_className;
 
