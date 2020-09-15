@@ -83,6 +83,7 @@ SimScanStrategy::angle_t SimScanStrategy::getNextAngle() const
 
   angle_t angle = _angles[_angleIndex];
   angle.volNum = _simVolNum;
+  _angleIndex++;
   return angle;
 
 }
