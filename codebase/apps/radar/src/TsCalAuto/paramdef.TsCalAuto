@@ -122,7 +122,7 @@ paramdef boolean {
 } siggen_specify_power_sequence;
 
 paramdef double {
-  p_default = 38.62;
+  p_default = -38.62;
   p_descr = "Start value for siggen power sequence (dBm)";
   p_help = "The actual power is the sum of this value, with the delta power in the sequence.";
 } siggen_sequence_start_power;
