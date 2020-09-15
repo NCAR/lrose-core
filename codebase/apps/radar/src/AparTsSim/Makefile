@@ -52,6 +52,7 @@ HDRS = \
 	AparTsSim.hh \
 	ReadFromUdp.hh \
 	WriteToFile.hh \
+	WriteToFmq.hh \
 	WriteToUdp.hh
 
 CPPC_SRCS = \
@@ -61,6 +62,7 @@ CPPC_SRCS = \
 	AparTsSim.cc \
 	ReadFromUdp.cc \
 	WriteToFile.cc \
+	WriteToFmq.cc \
 	WriteToUdp.cc
 
 #

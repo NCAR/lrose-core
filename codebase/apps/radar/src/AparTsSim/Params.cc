@@ -636,18 +636,20 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("run_mode");
     tt->descr = tdrpStrDup("Control write or read processing.");
-    tt->help = tdrpStrDup("WRITE_TO_FILE: generates time series files in APAR format.\n\nWRITE_TO_UDP: writes out simulated data to the DREX FPGA, via UDP.\n\nREAD_FROM_UDP: for testing read UDP data stream generated in the WRITE_UDP mode. The reader creates an APAR time series data stream, and writes it out to an FMQ.");
+    tt->help = tdrpStrDup("WRITE_TO_FILE: generates time series files in APAR format.\n\nWRITE_TO_UDP: writes out simulated data to the DREX FPGA, via UDP.\n\nWRITE_TO_FMQ: writes out simulated data to a time series FMQ.\n\nREAD_FROM_UDP: for testing read UDP data stream generated in the WRITE_UDP mode. The reader creates an APAR time series data stream, and writes it out to an FMQ.");
     tt->val_offset = (char *) &run_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("run_mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("WRITE_TO_FILE");
-      tt->enum_def.fields[0].val = WRITE_TO_FILE;
-      tt->enum_def.fields[1].name = tdrpStrDup("WRITE_TO_UDP");
-      tt->enum_def.fields[1].val = WRITE_TO_UDP;
-      tt->enum_def.fields[2].name = tdrpStrDup("READ_FROM_UDP");
-      tt->enum_def.fields[2].val = READ_FROM_UDP;
+      tt->enum_def.fields[0].name = tdrpStrDup("READ_FROM_UDP");
+      tt->enum_def.fields[0].val = READ_FROM_UDP;
+      tt->enum_def.fields[1].name = tdrpStrDup("WRITE_TO_FILE");
+      tt->enum_def.fields[1].val = WRITE_TO_FILE;
+      tt->enum_def.fields[2].name = tdrpStrDup("WRITE_TO_UDP");
+      tt->enum_def.fields[2].val = WRITE_TO_UDP;
+      tt->enum_def.fields[3].name = tdrpStrDup("WRITE_TO_FMQ");
+      tt->enum_def.fields[3].val = WRITE_TO_FMQ;
     tt->single_val.e = WRITE_TO_FILE;
     tt++;
     
@@ -794,8 +796,89 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("READ UDP MODE");
+    tt->comment_hdr = tdrpStrDup("WRITE FMQ MODE");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'fmq_n_gates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("fmq_n_gates");
+    tt->descr = tdrpStrDup("Number of gates for FMQ simulation mode.");
+    tt->help = tdrpStrDup("If the input files contain fewer gates than this, the input gates will be sampled multiple times to create the output data.");
+    tt->val_offset = (char *) &fmq_n_gates - &_start_;
+    tt->single_val.i = 2500;
+    tt++;
+    
+    // Parameter 'fmq_gate_spacing_m'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("fmq_gate_spacing_m");
+    tt->descr = tdrpStrDup("Gate spacing of simulated data (m).");
+    tt->help = tdrpStrDup("Overrides the gate spacing in the IWRF data.");
+    tt->val_offset = (char *) &fmq_gate_spacing_m - &_start_;
+    tt->single_val.d = 30;
+    tt++;
+    
+    // Parameter 'fmq_n_channels'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("fmq_n_channels");
+    tt->descr = tdrpStrDup("Number of channels for FMQ simulation mode.");
+    tt->help = tdrpStrDup("If this is 1, then that represents the signals from the entire array combined into a single channel.If this is more than 1, each channel represents a single row from the array, which will be combined using beam forming on the FPGA.");
+    tt->val_offset = (char *) &fmq_n_channels - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'fmq_iq_scale_for_si16'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("fmq_iq_scale_for_si16");
+    tt->descr = tdrpStrDup("Scale factor for converting floats to si16 in IQ data stream.");
+    tt->help = tdrpStrDup("This scales the IQ data so that sqrt(I*I + Q*Q) is in Watts.");
+    tt->val_offset = (char *) &fmq_iq_scale_for_si16 - &_start_;
+    tt->single_val.d = 0.0001;
+    tt++;
+    
+    // Parameter 'fmq_sim_data_rate'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("fmq_sim_data_rate");
+    tt->descr = tdrpStrDup("Target simulation data rate (MBytes/sec).");
+    tt->help = tdrpStrDup("We use periodic sleeps to achieve the target data rate.");
+    tt->val_offset = (char *) &fmq_sim_data_rate - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
+    // Parameter 'set_fmq_time_to_now'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_fmq_time_to_now");
+    tt->descr = tdrpStrDup("Set the pulse times to real-time.");
+    tt->help = tdrpStrDup("Overwrite the times in the pulse headers with real-time values.");
+    tt->val_offset = (char *) &set_fmq_time_to_now - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("FMQ DETAILS");
+    tt->comment_text = tdrpStrDup("Applies to WRITE_TO_FMQ and READ_FROM_UDP modes");
     tt++;
     
     // Parameter 'output_fmq_path'
@@ -870,11 +953,11 @@
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("DWELL DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -927,11 +1010,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("SCAN STRATEGY");
     tt->comment_text = tdrpStrDup("");
     tt++;

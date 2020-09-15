@@ -43,13 +43,13 @@ commentdef {
 };
 
 typedef enum {
-  WRITE_TO_FILE, WRITE_TO_UDP, READ_FROM_UDP
+  READ_FROM_UDP, WRITE_TO_FILE, WRITE_TO_UDP, WRITE_TO_FMQ
 } run_mode_t;
 
 paramdef enum run_mode_t {
   p_default = WRITE_TO_FILE;
   p_descr = "Control write or read processing.";
-  p_help = "WRITE_TO_FILE: generates time series files in APAR format.\n\nWRITE_TO_UDP: writes out simulated data to the DREX FPGA, via UDP.\n\nREAD_FROM_UDP: for testing read UDP data stream generated in the WRITE_UDP mode. The reader creates an APAR time series data stream, and writes it out to an FMQ.";
+  p_help = "WRITE_TO_FILE: generates time series files in APAR format.\n\nWRITE_TO_UDP: writes out simulated data to the DREX FPGA, via UDP.\n\nWRITE_TO_FMQ: writes out simulated data to a time series FMQ.\n\nREAD_FROM_UDP: for testing read UDP data stream generated in the WRITE_UDP mode. The reader creates an APAR time series data stream, and writes it out to an FMQ.";
 } run_mode;
 
 commentdef {
@@ -121,7 +121,49 @@ paramdef boolean {
 } set_udp_time_to_now;
 
 commentdef {
-  p_header = "READ UDP MODE";
+  p_header = "WRITE FMQ MODE";
+  p_test = "Writes simulated data to time series FMQ.";
+};
+
+paramdef int {
+  p_default = 2500;
+  p_descr = "Number of gates for FMQ simulation mode.";
+  p_help = "If the input files contain fewer gates than this, the input gates will be sampled multiple times to create the output data.";
+} fmq_n_gates;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Gate spacing of simulated data (m).";
+  p_help = "Overrides the gate spacing in the IWRF data.";
+} fmq_gate_spacing_m;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of channels for FMQ simulation mode.";
+  p_help = "If this is 1, then that represents the signals from the entire array combined into a single channel.If this is more than 1, each channel represents a single row from the array, which will be combined using beam forming on the FPGA.";
+} fmq_n_channels;
+
+paramdef double {
+  p_default = 1.0e-4;
+  p_descr = "Scale factor for converting floats to si16 in IQ data stream.";
+  p_help = "This scales the IQ data so that sqrt(I*I + Q*Q) is in Watts.";
+} fmq_iq_scale_for_si16;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Target simulation data rate (MBytes/sec).";
+  p_help = "We use periodic sleeps to achieve the target data rate.";
+} fmq_sim_data_rate;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the pulse times to real-time.";
+  p_help = "Overwrite the times in the pulse headers with real-time values.";
+} set_fmq_time_to_now;
+
+commentdef {
+  p_header = "FMQ DETAILS";
+  p_text = "Applies to WRITE_TO_FMQ and READ_FROM_UDP modes";
 };
 
 paramdef string {

@@ -75,9 +75,10 @@ public:
   } debug_t;
 
   typedef enum {
-    WRITE_TO_FILE = 0,
-    WRITE_TO_UDP = 1,
-    READ_FROM_UDP = 2
+    READ_FROM_UDP = 0,
+    WRITE_TO_FILE = 1,
+    WRITE_TO_UDP = 2,
+    WRITE_TO_FMQ = 3
   } run_mode_t;
 
   typedef enum {
@@ -420,6 +421,18 @@ public:
 
   tdrp_bool_t set_udp_time_to_now;
 
+  int fmq_n_gates;
+
+  double fmq_gate_spacing_m;
+
+  int fmq_n_channels;
+
+  double fmq_iq_scale_for_si16;
+
+  double fmq_sim_data_rate;
+
+  tdrp_bool_t set_fmq_time_to_now;
+
   char* output_fmq_path;
 
   int output_fmq_size;
@@ -452,7 +465,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[35];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 
