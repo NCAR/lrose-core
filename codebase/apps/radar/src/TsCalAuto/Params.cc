@@ -806,16 +806,28 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'siggen_power_sequence'
+    // Parameter 'siggen_sequence_start_power'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("siggen_power_sequence");
+    tt->param_name = tdrpStrDup("siggen_sequence_start_power");
+    tt->descr = tdrpStrDup("Start value for siggen power sequence (dBm)");
+    tt->help = tdrpStrDup("The actual power is the sum of this value, with the delta power in the sequence.");
+    tt->val_offset = (char *) &siggen_sequence_start_power - &_start_;
+    tt->single_val.d = 38.62;
+    tt++;
+    
+    // Parameter 'siggen_delta_power_sequence'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("siggen_delta_power_sequence");
     tt->descr = tdrpStrDup("Min power for siggen signal (dBm)");
     tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_siggen_power_sequence - &_start_;
-    tt->array_n_offset = (char *) &siggen_power_sequence_n - &_start_;
+    tt->array_offset = (char *) &_siggen_delta_power_sequence - &_start_;
+    tt->array_n_offset = (char *) &siggen_delta_power_sequence_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(double);
@@ -831,24 +843,24 @@
       tt->array_vals[6].d = -30;
       tt->array_vals[7].d = -35;
       tt->array_vals[8].d = -40;
-      tt->array_vals[9].d = -45;
-      tt->array_vals[10].d = -50;
-      tt->array_vals[11].d = -55;
-      tt->array_vals[12].d = -60;
-      tt->array_vals[13].d = -65;
-      tt->array_vals[14].d = -70;
-      tt->array_vals[15].d = -75;
-      tt->array_vals[16].d = -80;
-      tt->array_vals[17].d = -85;
-      tt->array_vals[18].d = -90;
-      tt->array_vals[19].d = -95;
-      tt->array_vals[20].d = -100;
-      tt->array_vals[21].d = -105;
-      tt->array_vals[22].d = -110;
-      tt->array_vals[23].d = -115;
-      tt->array_vals[24].d = -120;
-      tt->array_vals[25].d = -125;
-      tt->array_vals[26].d = -130;
+      tt->array_vals[9].d = -46.35;
+      tt->array_vals[10].d = -51.35;
+      tt->array_vals[11].d = -56.35;
+      tt->array_vals[12].d = -61.35;
+      tt->array_vals[13].d = -66.35;
+      tt->array_vals[14].d = -71.35;
+      tt->array_vals[15].d = -76.35;
+      tt->array_vals[16].d = -81.35;
+      tt->array_vals[17].d = -86.35;
+      tt->array_vals[18].d = -91.35;
+      tt->array_vals[19].d = -96.35;
+      tt->array_vals[20].d = -101.35;
+      tt->array_vals[21].d = -106.35;
+      tt->array_vals[22].d = -111.35;
+      tt->array_vals[23].d = -116.35;
+      tt->array_vals[24].d = -121.35;
+      tt->array_vals[25].d = -126.35;
+      tt->array_vals[26].d = -131.35;
     tt++;
     
     // Parameter 'set_sig_freq'
