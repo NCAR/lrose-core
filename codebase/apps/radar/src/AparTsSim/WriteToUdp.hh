@@ -51,6 +51,7 @@
 #include "Params.hh"
 
 class IwrfTsPulse;
+class SimScanStrategy;
 using namespace std;
 
 ////////////////////////
@@ -61,7 +62,7 @@ class WriteToUdp {
 public:
 
   // constructor
-
+  
   WriteToUdp(const string &progName,
              const Params &params,
              vector<string> &inputFileList);
@@ -114,14 +115,9 @@ private:
   double _nBytesForRate;
 
   // simulated scan strategy
-  
-  int _simVolNum;
-  size_t _simBeamNum;
-  vector<double> _simEl;
-  vector<double> _simAz;
-  vector<int> _simSweepNum;
-  vector<Radx::SweepMode_t> _simSweepMode;
 
+  SimScanStrategy *_strategy;
+  
   // functions
 
   int _convertToUdp(const string &inputPath);
@@ -160,8 +156,6 @@ private:
   int _openOutputUdp();
   int _writeBufToUdp(const MemBuf &buf);
   void _sleepForDataRate();
-
-  void _computeScanStrategy();
 
 };
 

@@ -79,7 +79,6 @@ ReadFromUdp::ReadFromUdp(const string &progName,
   
 {
 
-  _sampleSeqNum = 0;
   _pulseSeqNum = 0;
   _dwellSeqNum = 0;
   _udpFd = -1;

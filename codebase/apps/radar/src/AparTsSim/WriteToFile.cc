@@ -52,6 +52,7 @@
 
 #include "WriteToFile.hh"
 #include "AparTsSim.hh"
+#include "SimScanStrategy.hh"
 
 using namespace std;
 
@@ -78,12 +79,6 @@ WriteToFile::WriteToFile(const string &progName,
   }
   _aparTsInfo = new AparTsInfo(_aparTsDebug);
 
-  // compute the scan strategy
-  
-  _simVolNum = 0;
-  _simBeamNum = 0;
-  _computeScanStrategy();
-
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Running WriteToFile - extra verbose debug mode" << endl;
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -92,6 +87,10 @@ WriteToFile::WriteToFile(const string &progName,
     cerr << "Running WriteToFile - debug mode" << endl;
   }
 
+  // compute the scan strategy
+
+  _strategy = new SimScanStrategy(_params);
+  
 }
 
 // destructor
@@ -99,6 +98,8 @@ WriteToFile::WriteToFile(const string &progName,
 WriteToFile::~WriteToFile()
   
 {
+
+  delete _strategy;
   
   // delete pulses to free memory
   
@@ -292,15 +293,12 @@ int WriteToFile::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
 
   for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
     if (_params.specify_scan_strategy) {
-      if (_simBeamNum >= _simEl.size()) {
-        _simBeamNum = 0;
-        _simVolNum++;
-      }
-      beamAz.push_back(_simAz[_simBeamNum]);
-      beamEl.push_back(_simEl[_simBeamNum]);
-      sweepNum.push_back(_simSweepNum[_simBeamNum]);
-      volNum.push_back(_simVolNum);
-      sweepMode.push_back(_simSweepMode[_simBeamNum]);
+      SimScanStrategy::angle_t angle = _strategy->getNextAngle();
+      beamAz.push_back(angle.az);
+      beamEl.push_back(angle.el);
+      sweepNum.push_back(angle.sweepNum);
+      volNum.push_back(angle.volNum);
+      sweepMode.push_back(angle.sweepMode);
     } else {
       beamAz.push_back(AparTsSim::conditionAngle360
                        (startAz + (ii + 0.5) * deltaAzPerBeam));
@@ -527,60 +525,3 @@ void WriteToFile::_convertMeta2Apar(const IwrfTsInfo &info)
   }
 }
 
-////////////////////////////////////////////////////////////////////////
-// compute simulated scan strategy
-
-void WriteToFile::_computeScanStrategy()
-
-{
-
-  int beamsPerDwell = _params.n_beams_per_dwell;
-  int sweepNum = 0;
-  
-  for (int iscan = 0; iscan < _params.sim_scans_n; iscan++) {
-    
-    const Params::sim_scan_t &scan = _params._sim_scans[iscan];
-    
-    if (scan.sim_type == Params::RHI_SIM) {
-      
-      Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_RHI;
-      
-      for (double az = scan.min_az;
-           az <= scan.max_az;
-           az += scan.delta_az) {
-        for (int istride = 0; istride < beamsPerDwell; istride++) {
-          for (double el = scan.min_el + istride * scan.delta_el;
-               el <= scan.max_el; el += beamsPerDwell * scan.delta_el) {
-            _simEl.push_back(el);
-            _simAz.push_back(az);
-            _simSweepNum.push_back(sweepNum);
-            _simSweepMode.push_back(sweepMode);
-          } // el
-        } // istride
-      } // az
-
-    } else if (scan.sim_type == Params::PPI_SIM) {
-
-      Radx::SweepMode_t sweepMode = Radx::SWEEP_MODE_SECTOR;
-      
-      for (double el = scan.min_el;
-           el <= scan.max_el;
-           el += scan.delta_el) {
-        for (int istride = 0; istride < beamsPerDwell; istride++) {
-          for (double az = scan.min_az + istride * scan.delta_az;
-               az <= scan.max_az; az += beamsPerDwell * scan.delta_az) {
-            _simEl.push_back(el);
-            _simAz.push_back(az);
-            _simSweepNum.push_back(sweepNum);
-            _simSweepMode.push_back(sweepMode);
-          } // az
-        } // istride
-      } // el
-      
-    } // if (scan.sim_type == Params::RHI_SIM)
-    
-    sweepNum++;
-    
-  } // iscan
-
-}

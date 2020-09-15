@@ -243,11 +243,11 @@ paramdef boolean {
 typedef enum {
   PPI_SIM,
   RHI_SIM
-} sim_type_t;
+} sweep_type_t;
 
 typedef struct {
   
-  sim_type_t sim_type;
+  sweep_type_t sweep_type;
   string label;
   double min_az;
   double max_az;
@@ -256,12 +256,12 @@ typedef struct {
   double max_el;
   double delta_el;
   
-} sim_scan_t;
+} sim_sweep_t;
 
-paramdef struct sim_scan_t {
+paramdef struct sim_sweep_t {
   p_default = {
     {
-      sim_type = RHI_SIM,
+      sweep_type = RHI_SIM,
       label = "RHI-fore",
       min_az = -5.0,
       max_az = -5.0,
@@ -272,7 +272,7 @@ paramdef struct sim_scan_t {
     }
     ,
     {
-      sim_type = RHI_SIM,
+      sweep_type = RHI_SIM,
       label = "RHI-aft",
       min_az = -25.0,
       max_az = -25.0,
@@ -283,7 +283,7 @@ paramdef struct sim_scan_t {
     }
     ,
     {
-      sim_type = RHI_SIM,
+      sweep_type = RHI_SIM,
       label = "RHI-dualpol",
       min_az = 0.0,
       max_az = 0.0,
@@ -294,7 +294,7 @@ paramdef struct sim_scan_t {
     }
     ,
     {
-      sim_type = PPI_SIM,
+     sweep_type = PPI_SIM,
       label = "PPI-sur",
       min_az = -45,
       max_az = 45,
@@ -304,8 +304,8 @@ paramdef struct sim_scan_t {
       delta_el = 1.0
     }
   };
-  p_descr = "Scans to be simulated.";
+  p_descr = "Sweeps to be simulated.";
   p_help = "For RHIs, the min_az and max_az should be the same. "
     "For PPIs, the min_el and max_el should be the same. ";
-} sim_scans[];
+} sim_sweeps[];
 

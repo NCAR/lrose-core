@@ -32,7 +32,7 @@
 ///////////////////////////////////////////////////////////////
 //
 // Resample IWRF time series data,
-// convert to APAR time series format,
+// convert to APAR format,
 // and write out to FMQ
 //
 ////////////////////////////////////////////////////////////////
@@ -52,10 +52,12 @@
 #include <radar/IwrfTsReader.hh>
 #include <radar/apar_ts_data.h>
 #include <radar/AparTsInfo.hh>
+#include <radar/AparTsPulse.hh>
 
 #include "Args.hh"
 #include "Params.hh"
 
+class SimScanStrategy;
 using namespace std;
 
 ////////////////////////
@@ -91,7 +93,6 @@ private:
 
   ui64 _dwellSeqNum;
   ui64 _pulseSeqNum;
-  ui64 _sampleSeqNum; // for UDP only
   vector<IwrfTsPulse *> _dwellPulses;
   si64 _realtimeDeltaSecs;
 
@@ -101,18 +102,9 @@ private:
   double _nBytesForRate;
 
   // simulated scan strategy
+
+  SimScanStrategy *_strategy;
   
-  int _simVolNum;
-  size_t _simBeamNum;
-  vector<double> _simEl;
-  vector<double> _simAz;
-  vector<int> _simSweepNum;
-  vector<Radx::SweepMode_t> _simSweepMode;
-
-  // pulse IQ
-
-  // vector<si16> _iqApar;
-
   // APAR-style metadata
 
   AparTsInfo *_aparTsInfo;
@@ -137,7 +129,6 @@ private:
   int _convertToFmq(const string &inputPath);
   int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
 
-  void _computeScanStrategy();
   void _sleepForDataRate();
 
   int _initMetaData(const IwrfTsInfo &tsInfo);

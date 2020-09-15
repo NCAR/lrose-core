@@ -84,12 +84,12 @@ public:
   typedef enum {
     PPI_SIM = 0,
     RHI_SIM = 1
-  } sim_type_t;
+  } sweep_type_t;
 
   // struct typedefs
 
   typedef struct {
-    sim_type_t sim_type;
+    sweep_type_t sweep_type;
     char* label;
     double min_az;
     double max_az;
@@ -97,7 +97,7 @@ public:
     double min_el;
     double max_el;
     double delta_el;
-  } sim_scan_t;
+  } sim_sweep_t;
 
   ///////////////////////////
   // Member functions
@@ -455,8 +455,8 @@ public:
 
   tdrp_bool_t specify_scan_strategy;
 
-  sim_scan_t *_sim_scans;
-  int sim_scans_n;
+  sim_sweep_t *_sim_sweeps;
+  int sim_sweeps_n;
 
   char _end_; // end of data region
               // needed for zeroing out data

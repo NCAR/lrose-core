@@ -94,7 +94,6 @@ private:
 
   ui64 _dwellSeqNum;
   ui64 _pulseSeqNum;
-  ui64 _sampleSeqNum; // for UDP only
   vector<IwrfTsPulse *> _dwellPulses;
   
   ui16 _messageType;

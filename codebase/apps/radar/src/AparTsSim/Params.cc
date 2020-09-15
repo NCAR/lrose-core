@@ -1031,30 +1031,30 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'sim_scans'
-    // ctype is '_sim_scan_t'
+    // Parameter 'sim_sweeps'
+    // ctype is '_sim_sweep_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("sim_scans");
-    tt->descr = tdrpStrDup("Scans to be simulated.");
+    tt->param_name = tdrpStrDup("sim_sweeps");
+    tt->descr = tdrpStrDup("Sweeps to be simulated.");
     tt->help = tdrpStrDup("For RHIs, the min_az and max_az should be the same. For PPIs, the min_el and max_el should be the same. ");
-    tt->array_offset = (char *) &_sim_scans - &_start_;
-    tt->array_n_offset = (char *) &sim_scans_n - &_start_;
+    tt->array_offset = (char *) &_sim_sweeps - &_start_;
+    tt->array_n_offset = (char *) &sim_sweeps_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(sim_scan_t);
+    tt->array_elem_size = sizeof(sim_sweep_t);
     tt->array_n = 4;
-    tt->struct_def.name = tdrpStrDup("sim_scan_t");
+    tt->struct_def.name = tdrpStrDup("sim_sweep_t");
     tt->struct_def.nfields = 8;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("sim_type_t");
-      tt->struct_def.fields[0].fname = tdrpStrDup("sim_type");
+      tt->struct_def.fields[0].ftype = tdrpStrDup("sweep_type_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("sweep_type");
       tt->struct_def.fields[0].ptype = ENUM_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_sim_scans->sim_type - (char *) _sim_scans;
-        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("sim_type_t");
+        (char *) &_sim_sweeps->sweep_type - (char *) _sim_sweeps;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("sweep_type_t");
         tt->struct_def.fields[0].enum_def.nfields = 2;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
@@ -1066,37 +1066,37 @@
       tt->struct_def.fields[1].fname = tdrpStrDup("label");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_sim_scans->label - (char *) _sim_scans;
+        (char *) &_sim_sweeps->label - (char *) _sim_sweeps;
       tt->struct_def.fields[2].ftype = tdrpStrDup("double");
       tt->struct_def.fields[2].fname = tdrpStrDup("min_az");
       tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_sim_scans->min_az - (char *) _sim_scans;
+        (char *) &_sim_sweeps->min_az - (char *) _sim_sweeps;
       tt->struct_def.fields[3].ftype = tdrpStrDup("double");
       tt->struct_def.fields[3].fname = tdrpStrDup("max_az");
       tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_sim_scans->max_az - (char *) _sim_scans;
+        (char *) &_sim_sweeps->max_az - (char *) _sim_sweeps;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
       tt->struct_def.fields[4].fname = tdrpStrDup("delta_az");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_sim_scans->delta_az - (char *) _sim_scans;
+        (char *) &_sim_sweeps->delta_az - (char *) _sim_sweeps;
       tt->struct_def.fields[5].ftype = tdrpStrDup("double");
       tt->struct_def.fields[5].fname = tdrpStrDup("min_el");
       tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &_sim_scans->min_el - (char *) _sim_scans;
+        (char *) &_sim_sweeps->min_el - (char *) _sim_sweeps;
       tt->struct_def.fields[6].ftype = tdrpStrDup("double");
       tt->struct_def.fields[6].fname = tdrpStrDup("max_el");
       tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[6].rel_offset = 
-        (char *) &_sim_scans->max_el - (char *) _sim_scans;
+        (char *) &_sim_sweeps->max_el - (char *) _sim_sweeps;
       tt->struct_def.fields[7].ftype = tdrpStrDup("double");
       tt->struct_def.fields[7].fname = tdrpStrDup("delta_el");
       tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[7].rel_offset = 
-        (char *) &_sim_scans->delta_el - (char *) _sim_scans;
+        (char *) &_sim_sweeps->delta_el - (char *) _sim_sweeps;
     tt->n_struct_vals = 32;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
