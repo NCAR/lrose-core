@@ -122,9 +122,15 @@ paramdef boolean {
 } siggen_specify_power_sequence;
 
 paramdef double {
-  p_default = { 0, -5, -10, -15,-20, -25, -30, -35, -40, -45, -50, -55, -60, -65, -70, -75, -80, -85, -90, -95, -100, -105, -110, -115, -120, -125, -130 };
+  p_default = -38.62;
+  p_descr = "Start value for siggen power sequence (dBm)";
+  p_help = "The actual power is the sum of this value, with the delta power in the sequence.";
+} siggen_sequence_start_power;
+
+paramdef double {
+  p_default = { 0, -5, -10, -15, -20, -25, -30, -35, -40, -46.35, -51.35, -56.35, -61.35, -66.35, -71.35, -76.35, -81.35, -86.35, -91.35, -96.35, -101.35, -106.35, -111.35, -116.35, -121.35, -126.35, -131.35 };
   p_descr = "Min power for siggen signal (dBm)";
-} siggen_power_sequence[];
+} siggen_delta_power_sequence[];
 
 paramdef boolean {
   p_default = TRUE;
