@@ -976,6 +976,8 @@ string apar_ts_scan_mode_to_str(apar_ts_scan_mode_t scan_mode)
 {
   
   switch (scan_mode) {
+    case apar_ts_scan_mode_t::CALIBRATION:
+        return "CALIBRATION";
     case apar_ts_scan_mode_t::PPI:
         return "PPI";
     case apar_ts_scan_mode_t::RHI:
@@ -1006,6 +1008,8 @@ string apar_ts_scan_mode_to_short_str(apar_ts_scan_mode_t scan_mode)
 
 {
   switch (scan_mode) {
+    case apar_ts_scan_mode_t::CALIBRATION:
+        return "CAL";
     case apar_ts_scan_mode_t::PPI:
         return "PPI";
     case apar_ts_scan_mode_t::RHI:
