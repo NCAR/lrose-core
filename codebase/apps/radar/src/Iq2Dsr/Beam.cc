@@ -5695,7 +5695,7 @@ void Beam::_fixAltClutVelocity()
     // OK - set the vel to the H-only vel
 
     for (int jj = startGate; jj <= endGate; jj++) {
-      _gateData[jj]->flds.vel = _gateData[jj]->flds.vel_h_only;
+      _gateData[jj]->flds.vel = _gateData[jj]->flds.vel_hv;
     }
     
   } // ii
@@ -5780,7 +5780,7 @@ void Beam::_fixAltClutVelocityFiltered()
     // OK - set the vel to the H-only vel
 
     for (int jj = startGate; jj <= endGate; jj++) {
-      _gateData[jj]->fldsF.vel = _gateData[jj]->fldsF.vel_h_only;
+      _gateData[jj]->fldsF.vel = _gateData[jj]->fldsF.vel_hv;
     }
     
   } // ii
