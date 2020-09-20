@@ -1244,9 +1244,9 @@ void Cmd::_applySpeckleFilter(int nGates)
 // run speckle filter for a given length and threshold
 //
 // minRunLen: length of run being tested for
-// cmdThreshold: if a run is less than or equal to the min length,
-//               apply the more stringent CMD threshold to modify
-//               the flag field
+// minRunLen: if a run is less than or equal to the min length,
+//            apply the more stringent CMD threshold to modify
+//            the flag field
 
 void Cmd::_runSpeckleFilter(int nGates,
                             int minRunLen,
