@@ -1,6 +1,10 @@
 #! /bin/csh
 
-sudo singularity build -F custom.sif custom.def
+mkdir /tmp/singularity
 
-sudo singularity build -F checkout_and_build.sif checkout_and_build.def
+cd ~/git/lrose-core/build/singularity
+
+sudo singularity build -F /tmp/singularity/custom.centos:8.sif custom.centos:8.def
+
+sudo singularity build -F /tmp/singularity/lrose_build.sif lrose_build.def
 

@@ -1,5 +1,5 @@
 BootStrap: localimage
-From: custom.sif
+From: /tmp/singularity/custom.centos:8.sif
 
 %post
   mkdir git
@@ -12,9 +12,8 @@ From: custom.sif
     --releaseDate latest \
     --prefix /usr/local/lrose \
     --buildDir /tmp/singularity/lrose_build \
-    --logDir /tmp/singularity/build_logs
-    
-#    --fractl --samurai --vortrac
+    --logDir /tmp/singularity/build_logs \
+    --fractl --samurai --vortrac
 
 %environment
   export LC_ALL=C
