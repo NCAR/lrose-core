@@ -310,6 +310,8 @@ def main():
         logPath = prepareLogFile("create-qt-moc-files");
         hawkEyeDir = os.path.join(codebaseDir, "apps/radar/src/HawkEye")
         createQtMocFiles(hawkEyeDir)
+        condorDir = os.path.join(codebaseDir, "apps/radar/src/Condor")
+        createQtMocFiles(condorDir)
 
     # prune any empty directories
 
