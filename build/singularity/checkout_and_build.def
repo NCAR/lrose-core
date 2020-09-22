@@ -1,0 +1,27 @@
+BootStrap: localimage
+From: custom.sif
+
+%post
+  mkdir git
+  cd git
+  git clone https://github.com/ncar/lrose-core
+  /bin/rm -rf /tmp/lrose_build /tmp/build_logs
+  cd lrose-core/build
+  ./checkout_and_build_auto.py \
+    --package lrose-core \
+    --releaseDate latest \
+    --prefix /usr/local/lrose \
+    --buildDir /tmp/lrose_build \
+    --logDir /tmp/build_logs
+    
+#    --fractl --samurai --vortrac
+
+%environment
+  export LC_ALL=C
+  export PATH=/usr/games:$PATH
+
+%runscript
+  csh
+
+%labels
+  Mike Dixon

@@ -1,0 +1,6 @@
+#! /bin/csh
+
+sudo singularity build -F custom.sif custom.def
+
+sudo singularity build -F checkout_and_build.sif checkout_and_build.def
+
