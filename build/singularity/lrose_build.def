@@ -16,8 +16,8 @@ From: /tmp/singularity/custom.centos:8.sif
     --fractl --samurai --vortrac
 
 %environment
-  export LC_ALL=C
-  export PATH=/usr/games:$PATH
+  export LANG=C
+  export PATH=/usr/local/lrose/bin:$PATH
 
 %runscript
   csh

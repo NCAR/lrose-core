@@ -13,10 +13,9 @@ From: centos:8
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
-    eigen3-devel armadillo-devel \
+    eigen3-devel armadillo-devel bzip2-devel \
     expat-devel libcurl-devel openmpi-devel \
-    flex-devel fftw3-devel \
-    bzip2-devel \
+    flex-devel fftw3-devel GeographicLib-devel \
     qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
     hdf5-devel netcdf-devel \
     gnuplot ImageMagick-devel ImageMagick-c++-devel \
@@ -27,8 +26,8 @@ From: centos:8
   cd /usr/bin; \
   ln -s qmake-qt5 qmake
 %environment
-  export LC_ALL=C
-  export PATH=/usr/games:$PATH
+  export LANG=C
+  export PATH=/usr/local/lrose/bin:$PATH
 %runscript
   csh
 %labels
