@@ -27,7 +27,7 @@
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2006
+// Sept 2020
 //
 ///////////////////////////////////////////////////////////////
 //
@@ -47,9 +47,9 @@
 #include "Params.hh"
 #include <toolsa/Socket.hh>
 #include <toolsa/MemBuf.hh>
-#include <radar/IwrfTsInfo.hh>
-#include <radar/IwrfTsPulse.hh>
-#include <radar/IwrfTsReader.hh>
+#include <radar/AparTsInfo.hh>
+#include <radar/AparTsPulse.hh>
+#include <radar/AparTsReader.hh>
 #include <Fmq/Fmq.hh>
 
 using namespace std;
@@ -85,46 +85,20 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  IwrfTsReader *_pulseReader;
+  AparTsReader *_pulseReader;
   time_t _startTime;
   time_t _exitTime;
 
   // current scan mode
 
-  iwrf_scan_mode_t _currentScanMode;
-
-  // // previous values - to check for changes
-
-  iwrf_scan_segment_t _scanPrev;
-  // iwrf_ts_processing_t _procPrev;
-  // bool _transPrev;
-
+  apar_ts_scan_mode_t _currentScanMode;
+  apar_ts_scan_segment_t _scanPrev;
+  
   // sector information to determine if we need a new file
   
   bool _needNewFile;
   int _nPulsesFile; // number of pulses in current file
-  // double _sectorWidth; // width of sector (file)
-  // int _currentSector; // which sector are we in?
 
-  // pointing mode
-
-  // typedef enum {
-  //   MODE_NORMAL,
-  //   MODE_VERT_POINT,
-  //   MODE_SUN_SCAN,
-  //   MODE_FLAG_FILE,
-  //   MODE_STATIONARY
-  // } pointing_mode_t;
-  
-  // pointing_mode_t _currentPointingMode;
-  // bool _isStationary;
-  
-  // double _timeEnterVertPoint;
-  // double _timeEnterSunScan;
-
-  // SunPosn _sunPosn;
-  // time_t _timePrintSunPosn;
-  
   // output file
 
   FILE *_out;
@@ -137,16 +111,13 @@ private:
   
   si64 _nPulses;
   si64 _prevSeqNum;
-  // double _prevAz;
 
   // functions
   
-  int _checkNeedNewFile(const IwrfTsPulse &pulse);
-  int _handlePulse(IwrfTsPulse &pulse);
-  // pointing_mode_t _getPointingMode(time_t ptime, double el, double az);
-  int _openNewFile(const IwrfTsPulse &pulse);
+  int _checkNeedNewFile(const AparTsPulse &pulse);
+  int _handlePulse(AparTsPulse &pulse);
+  int _openNewFile(const AparTsPulse &pulse);
   int _closeFile();
-  // bool _moving(time_t ptime, double el, double az);
   
 };
 

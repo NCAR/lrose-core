@@ -26,7 +26,7 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2006
+// Sept 2020
 //
 ///////////////////////////////////////////////////////////////
 //
@@ -61,11 +61,8 @@ AparTsArchive::AparTsArchive(int argc, char **argv)
 
   isOK = true;
   MEM_zero(_scanPrev);
-  // MEM_zero(_procPrev);
-  // _transPrev = false;
   _nPulses = 0;
   _prevSeqNum = 0;
-  // _prevAz = -999;
   
   // set programe name
   
@@ -93,11 +90,11 @@ AparTsArchive::AparTsArchive(int argc, char **argv)
   
   // create the reader from FMQ
   
-  IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
+  AparTsDebug_t aparDebug = AparTsDebug_t::OFF;
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    iwrfDebug = IWRF_DEBUG_NORM;
+    aparDebug = AparTsDebug_t::NORM;
   } 
-  _pulseReader = new IwrfTsReaderFmq(_params.fmq_name, iwrfDebug);
+  _pulseReader = new AparTsReaderFmq(_params.fmq_name, aparDebug);
   
   // init process mapper registration
   
@@ -161,11 +158,11 @@ int AparTsArchive::Run ()
     
     // read next pulse
     
-    IwrfTsPulse *pulse = _pulseReader->getNextPulse();
+    AparTsPulse *pulse = _pulseReader->getNextPulse();
     if (pulse == NULL) {
       return 0;
     }
-    _currentScanMode = (iwrf_scan_mode_t) pulse->get_scan_mode();
+    _currentScanMode = (apar_ts_scan_mode_t) pulse->getScanMode();
 
     // check if we need a new file? If so open file
     
@@ -197,15 +194,14 @@ int AparTsArchive::Run ()
 //
 // Returns 0 to continue, -1 to exit
 
-int AparTsArchive::_checkNeedNewFile(const IwrfTsPulse &pulse)
+int AparTsArchive::_checkNeedNewFile(const AparTsPulse &pulse)
 
 {
 
   bool needNewFile = false;
 
-  const IwrfTsInfo &info = pulse.getTsInfo();
-  const iwrf_scan_segment_t &scan = info.getScanSegment();
-  // const iwrf_ts_processing_t &proc = info.getTsProcessing();
+  const AparTsInfo &info = pulse.getTsInfo();
+  const apar_ts_scan_segment_t &scan = info.getScanSegment();
 
   if (scan.scan_mode != _scanPrev.scan_mode ||
       scan.volume_num != _scanPrev.volume_num ||
@@ -213,7 +209,7 @@ int AparTsArchive::_checkNeedNewFile(const IwrfTsPulse &pulse)
     if (_params.debug) {
       cerr << "==>> New scan info" << endl;
       if (_params.debug >= Params::DEBUG_EXTRA) {
-	iwrf_scan_segment_print(stderr, scan);
+	apar_ts_scan_segment_print(stderr, scan);
       }
     }
     needNewFile = true;
@@ -261,24 +257,24 @@ int AparTsArchive::_checkNeedNewFile(const IwrfTsPulse &pulse)
 /////////////////////////////
 // handle a pulse
 
-int AparTsArchive::_handlePulse(IwrfTsPulse &pulse)
+int AparTsArchive::_handlePulse(AparTsPulse &pulse)
 
 {
 
   // write ops info to file, if info has changed since last write
   
-  const IwrfTsInfo &info = pulse.getTsInfo();
+  const AparTsInfo &info = pulse.getTsInfo();
 
   info.writeMetaQueueToFile(_out, true);
 
   // reformat pulse as needed
 
   if (_params.output_packing == Params::PACKING_FL32) {
-    pulse.convertToPacked(IWRF_IQ_ENCODING_FL32);
+    pulse.convertToPacked(apar_ts_iq_encoding_t::FL32);
   } else if (_params.output_packing == Params::PACKING_SCALED_SI16) {
-    pulse.convertToPacked(IWRF_IQ_ENCODING_SCALED_SI16);
+    pulse.convertToPacked(apar_ts_iq_encoding_t::SCALED_SI16);
   } else if (_params.output_packing == Params::PACKING_DBM_PHASE_SI16) {
-    pulse.convertToPacked(IWRF_IQ_ENCODING_DBM_PHASE_SI16);
+    pulse.convertToPacked(apar_ts_iq_encoding_t::DBM_PHASE_SI16);
   }
 
   // write pulse to file
@@ -287,8 +283,8 @@ int AparTsArchive::_handlePulse(IwrfTsPulse &pulse)
 
   _nPulses++;
   si64 seqNum = pulse.getSeqNum();
-  double thisEl = pulse.getEl();
-  double thisAz = pulse.getAz();
+  double thisEl = pulse.getElevation();
+  double thisAz = pulse.getAzimuth();
   
   if (_prevSeqNum > 0 && seqNum > (_prevSeqNum + 1)) {
     cerr << "WARNING - missing sequence numbers, prev: " << _prevSeqNum
@@ -311,7 +307,7 @@ int AparTsArchive::_handlePulse(IwrfTsPulse &pulse)
 /////////////////////////////////
 // open a new file
 
-int AparTsArchive::_openNewFile(const IwrfTsPulse &pulse)
+int AparTsArchive::_openNewFile(const AparTsPulse &pulse)
 
 {
 
@@ -335,20 +331,19 @@ int AparTsArchive::_openNewFile(const IwrfTsPulse &pulse)
 
   // compute antenna pos strings
   
-  iwrf_scan_mode_t scanMode = pulse.getScanMode();
+  apar_ts_scan_mode_t scanMode = pulse.getScanMode();
 
   char fixedAngleStr[64];
   char movingAngleStr[64];
   
-  if (scanMode == IWRF_SCAN_MODE_RHI ||
-      scanMode == IWRF_SCAN_MODE_MANRHI) {
-    double el = pulse.getEl();
+  if (scanMode == apar_ts_scan_mode_t::RHI) {
+    double el = pulse.getElevation();
     if (el < 0) {
       el += 360;
     }
-    double az = pulse.getAz();
+    double az = pulse.getAzimuth();
     if (_params.use_fixed_angle_for_file_name) {
-      az = pulse.getFixedAz();
+      az = pulse.getFixedAngle();
       if (az < -9990) {
         az = 999; // missing
       }
@@ -356,13 +351,13 @@ int AparTsArchive::_openNewFile(const IwrfTsPulse &pulse)
     sprintf(fixedAngleStr, "_%.3d", (int) (az * 10.0 + 0.5));
     sprintf(movingAngleStr, "_%.3d", (int) (el + 0.5));
   } else {
-    double az = pulse.getAz();
+    double az = pulse.getAzimuth();
     if (az < 0) {
       az += 360;
     }
-    double el = pulse.getEl();
+    double el = pulse.getElevation();
     if (_params.use_fixed_angle_for_file_name) {
-      el = pulse.getFixedEl();
+      el = pulse.getFixedAngle();
       if (el < -9990) {
         el = 99.9; // missing
       }
@@ -376,47 +371,15 @@ int AparTsArchive::_openNewFile(const IwrfTsPulse &pulse)
   string scanModeStr;
   if (_params.add_scan_mode_to_file_name) {
     switch (scanMode) {
-    case IWRF_SCAN_MODE_SECTOR:
-      scanModeStr = ".sec";
-      break;
-    case IWRF_SCAN_MODE_COPLANE:
-      scanModeStr = ".coplane";
-      break;
-    case IWRF_SCAN_MODE_RHI:
-      scanModeStr = ".rhi";
-      break;
-    case IWRF_SCAN_MODE_VERTICAL_POINTING:
-      scanModeStr = ".vert";
-      break;
-    case IWRF_SCAN_MODE_IDLE:
-      scanModeStr = ".idle";
-      break;
-    case IWRF_SCAN_MODE_AZ_SUR_360:
-      scanModeStr = ".sur";
-      break;
-    case IWRF_SCAN_MODE_EL_SUR_360:
-      scanModeStr = ".elsur";
-      break;
-    case IWRF_SCAN_MODE_SUNSCAN:
-      scanModeStr = ".sun";
-      break;
-    case IWRF_SCAN_MODE_POINTING:
-      scanModeStr = ".point";
-      break;
-    case IWRF_SCAN_MODE_MANPPI:
-      scanModeStr = ".manppi";
-      break;
-    case IWRF_SCAN_MODE_MANRHI:
-      scanModeStr = ".manrhi";
-      break;
-    default: {}
+      case apar_ts_scan_mode_t::RHI:
+        scanModeStr = ".rhi";
+        break;
+      case apar_ts_scan_mode_t::PPI:
+      default:
+        scanModeStr = ".ppi";
     }
   }
 
-  if (pulse.antennaTransition()) {
-    scanModeStr += "_trans";
-  }
-    
   // make the output dir
 
   char subdir[1024];
@@ -439,7 +402,7 @@ int AparTsArchive::_openNewFile(const IwrfTsPulse &pulse)
   // compute output path
 
   string format;
-  format = ".iwrf_ts";
+  format = ".apar_ts";
 
   string packing;
   if (_params.output_packing == Params::PACKING_FL32) {
@@ -511,7 +474,7 @@ int AparTsArchive::_closeFile()
     ldata.setLatestTime(_outputTime);
     ldata.setRelDataPath(_relPath);
     ldata.setWriter("AparTsArchive");
-    ldata.setDataType("iwrf_ts");
+    ldata.setDataType("apar_ts");
     if (ldata.write(_outputTime)) {
       cerr << "ERROR - cannot write LdataInfo" << endl;
       cerr << " outputDir: " << _outputDir << endl;
