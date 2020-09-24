@@ -137,43 +137,43 @@ private:
   double _el;
   double _az;
   double _prt;
-  double _phaseDiff;
+  // double _phaseDiff;
 
   // meta data arrays
 
   vector<int> _nGatesRay;
 
-  vector<double> _timeArrayHc, _dtimeArrayHc;
-  vector<float> _elArrayHc, _azArrayHc, _fixedAngleArrayHc;
-  vector<float> _prtArrayHc;
-  vector<float> _pulseWidthArrayHc;
-  vector<float> _modCodeArrayHc;
-  // vector<int> _transitionFlagArrayHc;
-  // vector<float> _burstMagArrayHc;
-  // vector<float> _burstArgArrayHc;
+  vector<double> _timeArray, _dtimeArray;
+  vector<float> _elArray, _azArray, _fixedAngleArray;
+  vector<float> _prtArray;
+  vector<float> _pulseWidthArray;
+  // vector<float> _modCodeArray;
+  // vector<int> _transitionFlagArray;
+  // vector<float> _burstMagArray;
+  // vector<float> _burstArgArray;
 
-  vector<double> _timeArrayVc, _dtimeArrayVc;
-  vector<float> _elArrayVc, _azArrayVc, _fixedAngleArrayVc;
-  vector<float> _prtArrayVc;
-  vector<float> _pulseWidthArrayVc;
-  vector<float> _modCodeArrayVc;
+  // vector<double> _timeArrayVc, _dtimeArrayVc;
+  // vector<float> _elArrayVc, _azArrayVc, _fixedAngleArrayVc;
+  // vector<float> _prtArrayVc;
+  // vector<float> _pulseWidthArrayVc;
+  // vector<float> _modCodeArrayVc;
   // vector<int> _transitionFlagArrayVc;
   // vector<float> _burstMagArrayVc;
   // vector<float> _burstArgArrayVc;
 
   // IQ data
 
-  int _nPulsesHc;
-  int _nPulsesVc;
-  int _nPulsesHx;
-  int _nPulsesVx;
+  int _nPulses;
+  // int _nPulsesVc;
+  // int _nPulsesHx;
+  // int _nPulsesVx;
   
   MemBuf _iBuf0, _qBuf0;
-  MemBuf _iBuf1, _qBuf1;
-  MemBuf _iBufHc, _qBufHc;
-  MemBuf _iBufVc, _qBufVc;
-  MemBuf _iBufHx, _qBufHx;
-  MemBuf _iBufVx, _qBufVx;
+  // MemBuf _iBuf1, _qBuf1;
+  MemBuf _iBuf, _qBuf;
+  // MemBuf _iBufVc, _qBufVc;
+  // MemBuf _iBufHx, _qBufHx;
+  // MemBuf _iBufVx, _qBufVx;
 
   // output file
 
@@ -189,8 +189,6 @@ private:
   bool _checkReadyToWrite(const AparTsPulse &pulse);
   int _handlePulse(AparTsPulse &pulse);
   int _savePulseData(AparTsPulse &pulse);
-  int _savePulseDataAltH(AparTsPulse &pulse);
-  int _savePulseDataAltV(AparTsPulse &pulse);
   void _reset();
 
   int _writeFile();

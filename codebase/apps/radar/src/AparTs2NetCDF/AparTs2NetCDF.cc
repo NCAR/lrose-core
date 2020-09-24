@@ -202,20 +202,6 @@ int AparTs2NetCDF::Run ()
     }
   }
 
-  // check for alternating mode by inspecting the HV flag
-
-  if (_params.debug) {
-    cerr << "==>> checking for alternating mode" << endl;
-  }
-  // _checkAltMode();
-  // if (_params.debug) {
-  //   if (_alternatingMode) {
-  //     cerr << "==>> alternating mode" << endl;
-  //   } else {
-  //     cerr << "==>> NOT alternating mode" << endl;
-  //   }
-  // }
-
   if (_params.debug) {
     cerr << "==>> reading in data to convert" << endl;
   }
@@ -249,7 +235,7 @@ int AparTs2NetCDF::Run ()
       }
     }
 
-    if (_elArrayHc.size() < 1) {
+    if (_elArray.size() < 1) {
       readyToWrite = false;
     }
     
@@ -466,7 +452,7 @@ int AparTs2NetCDF::_handlePulse(AparTsPulse &pulse)
   _prt = pulse.getPrtNext();
   _el = pulse.getElevation();
   _az = pulse.getAzimuth();
-  _phaseDiff = pulse.getPhaseDiff0();
+  // _phaseDiff = pulse.getPhaseDiff0();
 
   _startRangeM = pulse.getStartRangeM();
   _gateSpacingM = pulse.getGateSpacingM();
@@ -500,13 +486,13 @@ int AparTs2NetCDF::_handlePulse(AparTsPulse &pulse)
   if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     _iBuf0.prepare(_nGatesMax * sizeof(float));
     _qBuf0.prepare(_nGatesMax * sizeof(float));
-    _iBuf1.prepare(_nGatesMax * sizeof(float));
-    _qBuf1.prepare(_nGatesMax * sizeof(float));
+    // _iBuf1.prepare(_nGatesMax * sizeof(float));
+    // _qBuf1.prepare(_nGatesMax * sizeof(float));
   } else {
     _iBuf0.prepare(_nGates * sizeof(float));
     _qBuf0.prepare(_nGates * sizeof(float));
-    _iBuf1.prepare(_nGates * sizeof(float));
-    _qBuf1.prepare(_nGates * sizeof(float));
+    // _iBuf1.prepare(_nGates * sizeof(float));
+    // _qBuf1.prepare(_nGates * sizeof(float));
   }
 
   // load up data
@@ -519,7 +505,7 @@ int AparTs2NetCDF::_handlePulse(AparTsPulse &pulse)
     //     if (_savePulseDataAltH(pulse)) {
     //       return -1;
     //     }
-    //   } else if (_elArrayHc.size() > 0) {
+    //   } else if (_elArray.size() > 0) {
     //     // wait to make sure we start on H pulse
     //     if (_savePulseDataAltV(pulse)) {
     //       return -1;
@@ -594,20 +580,20 @@ int AparTs2NetCDF::_savePulseData(AparTsPulse &pulse)
 
   _nGatesRay.push_back(_nGates);
 
-  _timeArrayHc.push_back(_pulseTime);
-  _dtimeArrayHc.push_back((_pulseTimeSecs - _startTime) 
+  _timeArray.push_back(_pulseTime);
+  _dtimeArray.push_back((_pulseTimeSecs - _startTime) 
                           + pulse.getNanoSecs() * 1.0e-9);
-  _prtArrayHc.push_back(_prt);
-  _pulseWidthArrayHc.push_back(pulse.getPulseWidthUs());
-  _elArrayHc.push_back(_el);
-  _azArrayHc.push_back(_az);
-  _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
-  _modCodeArrayHc.push_back(_phaseDiff);
-  // _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+  _prtArray.push_back(_prt);
+  _pulseWidthArray.push_back(pulse.getPulseWidthUs());
+  _elArray.push_back(_el);
+  _azArray.push_back(_az);
+  _fixedAngleArray.push_back(pulse.getFixedAngle());
+  // _modCodeArray.push_back(_phaseDiff);
+  // _transitionFlagArray.push_back(pulse.antennaTransition());
 
-  // _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  // _burstMagArray.push_back(pulse.get_burst_mag(0));
   // _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
-  // _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+  // _burstArgArray.push_back(pulse.get_burst_arg(0));
   // _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
 
   const fl32 *chan0 = pulse.getIq0();
@@ -633,9 +619,9 @@ int AparTs2NetCDF::_savePulseData(AparTsPulse &pulse)
   }
 
   // if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
-    _nPulsesHc++;
-    _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-    _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+    _nPulses++;
+    _iBuf.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBuf.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
   // } else {
   //   _nPulsesVc++;
   //   _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
@@ -645,193 +631,6 @@ int AparTs2NetCDF::_savePulseData(AparTsPulse &pulse)
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Using pulse, time, _prt, _el, _az, _nGates: "
-         << _pulseTime << " "
-         << _prt << " "
-         << _el << " "
-         << _az << " "
-         << _nGates << endl;
-  }
-
-  return 0;
-
-}
-    
-//////////////////////////////////////
-// save pulse data in alternating mode
-// transmit H
-
-int AparTs2NetCDF::_savePulseDataAltH(AparTsPulse &pulse)
-
-{
-
-  _nGatesRay.push_back(_nGates);
-
-  _timeArrayHc.push_back(_pulseTime);
-  _dtimeArrayHc.push_back((_pulseTimeSecs - _startTime) 
-                          + pulse.getNanoSecs() * 1.0e-9);
-  _prtArrayHc.push_back(_prt);
-  _pulseWidthArrayHc.push_back(pulse.getPulseWidthUs());
-  _elArrayHc.push_back(_el);
-  _azArrayHc.push_back(_az);
-  _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
-  _modCodeArrayHc.push_back(_phaseDiff);
-  // _transitionFlagArrayHc.push_back(pulse.antennaTransition());
-
-  // _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
-  // _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
-  // _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
-  // _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
-  
-  const fl32 *chan0 = pulse.getIq0();
-  float *ivals0 = (float *) _iBuf0.getPtr();
-  float *qvals0 = (float *) _qBuf0.getPtr();
-  
-  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
-    *ivals0 = *chan0;
-    chan0++;
-    *qvals0 = *chan0;
-    chan0++;
-  } // igate
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
-      *ivals0 = -9999.0;
-      *qvals0 = -9999.0;
-    } // igate
-  }
-
-  const fl32 *chan1 = pulse.getIq1();
-  float *ivals1 = (float *) _iBuf1.getPtr();
-  float *qvals1 = (float *) _qBuf1.getPtr();
-  
-  for (int igate = 0; igate < _nGates; igate++, ivals1++, qvals1++) {
-    *ivals1 = *chan1;
-    chan1++;
-    *qvals1 = *chan1;
-    chan1++;
-  } // igate
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals1++, qvals1++) {
-      *ivals1 = -9999.0;
-      *qvals1 = -9999.0;
-    } // igate
-  }
-  
-  _nPulsesHc++;
-  _nPulsesVx++;
-
-  int nGatesStore = _nGates;
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    nGatesStore = _nGatesMax;
-  }
-
-  // if (_params.chan0_is_h_or_copolar) {
-    _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-    _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-    _iBufVx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-    _qBufVx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-  // } else {
-  //   _iBufHc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-  //   _qBufHc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-  //   _iBufVx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-  //   _qBufVx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-  // }
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Using H pulse, time, _prt, _el, _az, _nGates: "
-         << _pulseTime << " "
-         << _prt << " "
-         << _el << " "
-         << _az << " "
-         << _nGates << endl;
-  }
-
-  return 0;
-
-}
-    
-//////////////////////////////////////
-// save pulse data in alternating mode
-// transmit V
-
-int AparTs2NetCDF::_savePulseDataAltV(AparTsPulse &pulse)
-  
-{
-  
-  _nGatesRay.push_back(_nGates);
-
-  _timeArrayVc.push_back(_pulseTime);
-  _dtimeArrayVc.push_back((_pulseTimeSecs - _startTime) 
-                          + pulse.getNanoSecs() * 1.0e-9);
-  _prtArrayVc.push_back(_prt);
-  _pulseWidthArrayVc.push_back(pulse.getPulseWidthUs());
-  _elArrayVc.push_back(_el);
-  _azArrayVc.push_back(_az);
-  _fixedAngleArrayVc.push_back(pulse.getFixedAngle());
-  _modCodeArrayVc.push_back(_phaseDiff);
-  // _transitionFlagArrayVc.push_back(pulse.antennaTransition());
-
-  // _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
-  // _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
-  
-  const fl32 *chan0 = pulse.getIq0();
-  float *ivals0 = (float *) _iBuf0.getPtr();
-  float *qvals0 = (float *) _qBuf0.getPtr();
-  
-  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
-    *ivals0 = *chan0;
-    chan0++;
-    *qvals0 = *chan0;
-    chan0++;
-  } // igate
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
-      *ivals0 = -9999.0;
-      *qvals0 = -9999.0;
-    } // igate
-  }
-
-  const fl32 *chan1 = pulse.getIq1();
-  float *ivals1 = (float *) _iBuf1.getPtr();
-  float *qvals1 = (float *) _qBuf1.getPtr();
-  
-  for (int igate = 0; igate < _nGates; igate++, ivals1++, qvals1++) {
-    *ivals1 = *chan1;
-    chan1++;
-    *qvals1 = *chan1;
-    chan1++;
-  } // igate
-
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals1++, qvals1++) {
-      *ivals1 = -9999.0;
-      *qvals1 = -9999.0;
-    } // igate
-  }
-  
-  _nPulsesVc++;
-  _nPulsesHx++;
-
-  int nGatesStore = _nGates;
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    nGatesStore = _nGatesMax;
-  }
-
-  // switching co-polar receiver
-  // if (_params.chan0_is_h_or_copolar) {
-    _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-    _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-    _iBufHx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-    _qBufHx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-  // } else {
-  //   // channels in reverse order
-  //   _iBufVc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-  //   _qBufVc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-  //   _iBufHx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-  //   _qBufHx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-  // }
-
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Using V pulse, time, _prt, _el, _az, _nGates: "
          << _pulseTime << " "
          << _prt << " "
          << _el << " "
@@ -860,43 +659,43 @@ void AparTs2NetCDF::_reset()
 
   // _alternatingMode = false;
 
-  _nPulsesHc = 0;
-  _nPulsesVc = 0;
-  _nPulsesHx = 0;
-  _nPulsesVx = 0;
+  _nPulses = 0;
+  // _nPulsesVc = 0;
+  // _nPulsesHx = 0;
+  // _nPulsesVx = 0;
 
-  _iBufHc.reset();
-  _qBufHc.reset();
-  _iBufVc.reset();
-  _qBufVc.reset();
-  _iBufHx.reset();
-  _qBufHx.reset();
-  _iBufVx.reset();
-  _qBufVx.reset();
+  _iBuf.reset();
+  _qBuf.reset();
+  // _iBufVc.reset();
+  // _qBufVc.reset();
+  // _iBufHx.reset();
+  // _qBufHx.reset();
+  // _iBufVx.reset();
+  // _qBufVx.reset();
 
   _nGatesRay.clear();
 
-  _timeArrayHc.clear();
-  _dtimeArrayHc.clear();
+  _timeArray.clear();
+  _dtimeArray.clear();
 
-  _elArrayHc.clear();
-  _azArrayHc.clear();
-  _fixedAngleArrayHc.clear();
-  _prtArrayHc.clear();
-  _pulseWidthArrayHc.clear();
-  _modCodeArrayHc.clear();
-  // _transitionFlagArrayHc.clear();
-  // _burstMagArrayHc.clear();
-  // _burstArgArrayHc.clear();
+  _elArray.clear();
+  _azArray.clear();
+  _fixedAngleArray.clear();
+  _prtArray.clear();
+  _pulseWidthArray.clear();
+  // _modCodeArray.clear();
+  // _transitionFlagArray.clear();
+  // _burstMagArray.clear();
+  // _burstArgArray.clear();
 
-  _timeArrayVc.clear();
-  _dtimeArrayVc.clear();
-  _elArrayVc.clear();
-  _azArrayVc.clear();
-  _fixedAngleArrayVc.clear();
-  _prtArrayVc.clear();
-  _pulseWidthArrayVc.clear();
-  _modCodeArrayVc.clear();
+  // _timeArrayVc.clear();
+  // _dtimeArrayVc.clear();
+  // _elArrayVc.clear();
+  // _azArrayVc.clear();
+  // _fixedAngleArrayVc.clear();
+  // _prtArrayVc.clear();
+  // _pulseWidthArrayVc.clear();
+  // _modCodeArrayVc.clear();
   // _transitionFlagArrayVc.clear();
   // _burstMagArrayVc.clear();
   // _burstArgArrayVc.clear();
@@ -920,10 +719,10 @@ int AparTs2NetCDF::_writeFile()
 
   // compute number of times active
   
-  _nTimes = _elArrayHc.size();
-  if (_elArrayVc.size() > 0) {
-    if (_elArrayVc.size() < _nTimes) {
-      _nTimes = _elArrayVc.size();
+  _nTimes = _elArray.size();
+  if (_elArray.size() > 0) {
+    if (_elArray.size() < _nTimes) {
+      _nTimes = _elArray.size();
     }
   }
 
@@ -1030,37 +829,37 @@ int AparTs2NetCDF::_writeFileTmp()
 
   // }
 
-  if (_nPulsesHc > 0) {
-    if (_writeIqVars(file, timeDim, gatesDim, "IHc", "QHc",
-                     (float *) _iBufHc.getPtr(),
-                     (float *) _qBufHc.getPtr())) {
+  if (_nPulses > 0) {
+    if (_writeIqVars(file, timeDim, gatesDim, "I", "Q",
+                     (float *) _iBuf.getPtr(),
+                     (float *) _qBuf.getPtr())) {
       return -1;
     }
   }
 
-  if (_nPulsesVc > 0) {
-    if (_writeIqVars(file, timeDim, gatesDim, "IVc", "QVc",
-                     (float *) _iBufVc.getPtr(),
-                     (float *) _qBufVc.getPtr())) {
-      return -1;
-    }
-  }
+  // if (_nPulsesVc > 0) {
+  //   if (_writeIqVars(file, timeDim, gatesDim, "IVc", "QVc",
+  //                    (float *) _iBufVc.getPtr(),
+  //                    (float *) _qBufVc.getPtr())) {
+  //     return -1;
+  //   }
+  // }
 
-  if (_nPulsesHx > 0) {
-    if (_writeIqVars(file, timeDim, gatesDim, "IHx", "QHx",
-                     (float *) _iBufHx.getPtr(),
-                     (float *) _qBufHx.getPtr())) {
-      return -1;
-    }
-  }
+  // if (_nPulsesHx > 0) {
+  //   if (_writeIqVars(file, timeDim, gatesDim, "IHx", "QHx",
+  //                    (float *) _iBufHx.getPtr(),
+  //                    (float *) _qBufHx.getPtr())) {
+  //     return -1;
+  //   }
+  // }
 
-  if (_nPulsesVx > 0) {
-    if (_writeIqVars(file, timeDim, gatesDim, "IVx", "QVx",
-                     (float *) _iBufVx.getPtr(),
-                     (float *) _qBufVx.getPtr())) {
-      return -1;
-    }
-  }
+  // if (_nPulsesVx > 0) {
+  //   if (_writeIqVars(file, timeDim, gatesDim, "IVx", "QVx",
+  //                    (float *) _iBufVx.getPtr(),
+  //                    (float *) _qBufVx.getPtr())) {
+  //     return -1;
+  //   }
+  // }
 
   return iret;
 
@@ -1415,20 +1214,20 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
           stime.getYear(), stime.getMonth(), stime.getDay(),
           stime.getHour(), stime.getMin(), stime.getSec());
   
-  NcxxVar timeVarHc;
-  if (_addVar(file, timeVarHc, ncxxDouble, timeDim,
+  NcxxVar timeVar;
+  if (_addVar(file, timeVar, ncxxDouble, timeDim,
               "time_offset", "time_offset_from_base_time", timeUnitsStr)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     cerr << "  Cannot create time var" << endl;
     return -1;
   }
-  timeVarHc.addScalarAttr("_FillValue", -9999.0);
+  timeVar.addScalarAttr("_FillValue", -9999.0);
   TaArray<double> times_;
   double *times = times_.alloc(_nTimes);
   for (size_t jj = 0; jj < _nTimes; jj++) {
-    times[jj] = _dtimeArrayHc[jj];
+    times[jj] = _dtimeArray[jj];
   }
-  timeVarHc.putVal(times);
+  timeVar.putVal(times);
 
   // ngates per ray
 
@@ -1445,7 +1244,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
 
   if (_writeVar(file, timeDim,
                 "elevation", "elevation_angle", "degrees",
-                _elArrayHc)) {
+                _elArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
@@ -1454,7 +1253,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   if (_writeVar(file, timeDim,
                 "azimuth", "azimuth_angle", "degrees",
-                _azArrayHc)) {
+                _azArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
@@ -1463,25 +1262,25 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   if (_writeVar(file, timeDim,
                 "fixed_angle", "fixed_scan_angle", "degrees",
-                _fixedAngleArrayHc)) {
+                _fixedAngleArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   // modulation code variable
 
-  if (_writeVar(file, timeDim,
-                "mod_code", "modulation_code", "degrees",
-                _modCodeArrayHc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "mod_code", "modulation_code", "degrees",
+  //               _modCodeArray)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   // PRT variable
   
   if (_writeVar(file, timeDim,
                 "prt", "pulse_repetition_time", "seconds",
-                _prtArrayHc)) {
+                _prtArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
@@ -1490,7 +1289,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   if (_writeVar(file, timeDim,
                 "pulse_width", "pulse_width", "micro_seconds",
-                _pulseWidthArrayHc)) {
+                _pulseWidthArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
@@ -1499,7 +1298,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   // if (_writeVar(file, timeDim,
   //               "antenna_transition", "antenna_is_in_transition", "",
-  //               _transitionFlagArrayHc)) {
+  //               _transitionFlagArray)) {
   //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
   //   return -1;
   // }
@@ -1508,7 +1307,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   // if (_writeVar(file, timeDim,
   //               "burst_mag_hc", "", "",
-  //               _burstMagArrayHc)) {
+  //               _burstMagArray)) {
   //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
   //   return -1;
   // }
@@ -1522,7 +1321,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   // if (_writeVar(file, timeDim,
   //               "burst_arg_hc", "", "",
-  //               _burstArgArrayHc)) {
+  //               _burstArgArray)) {
   //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
   //   return -1;
   // }
@@ -1557,135 +1356,135 @@ int AparTs2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
   
   // h copolar times
 
-  NcxxVar timeVarHc;
-  if (_addVar(file, timeVarHc, ncxxDouble, timeDim,
+  NcxxVar timeVar;
+  if (_addVar(file, timeVar, ncxxDouble, timeDim,
               "time_offset_hc", "time_offset_from_base_time_hc", 
               timeUnitsStr)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     cerr << "  Cannot create time_offset_hc var" << endl;
     return -1;
   }
-  timeVarHc.addScalarAttr("_FillValue", -9999.0);
-  TaArray<double> timesHc_;
-  double *timesHc = timesHc_.alloc(_nTimes);
+  timeVar.addScalarAttr("_FillValue", -9999.0);
+  TaArray<double> times_;
+  double *times = times_.alloc(_nTimes);
   for (size_t jj = 0; jj < _nTimes; jj++) {
-    timesHc[jj] = _dtimeArrayHc[jj];
+    times[jj] = _dtimeArray[jj];
   }
-  timeVarHc.putVal(timesHc);
+  timeVar.putVal(times);
 
   // v copolar times
   
-  NcxxVar timeVarVc;
-  if (_addVar(file, timeVarVc, ncxxDouble, timeDim,
-              "time_offset_vc", "time_offset_from_base_time_vc", 
-              timeUnitsStr)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    cerr << "  Cannot create time_offset_vc var" << endl;
-    return -1;
-  }
-  timeVarVc.addScalarAttr("_FillValue", -9999.0);
-  TaArray<double> timesVc_;
-  double *timesVc = timesVc_.alloc(_nTimes);
-  for (size_t jj = 0; jj < _nTimes; jj++) {
-    timesVc[jj] = _dtimeArrayVc[jj];
-  }
-  timeVarVc.putVal(timesVc);
+  // NcxxVar timeVarVc;
+  // if (_addVar(file, timeVarVc, ncxxDouble, timeDim,
+  //             "time_offset_vc", "time_offset_from_base_time_vc", 
+  //             timeUnitsStr)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   cerr << "  Cannot create time_offset_vc var" << endl;
+  //   return -1;
+  // }
+  // timeVarVc.addScalarAttr("_FillValue", -9999.0);
+  // TaArray<double> timesVc_;
+  // double *timesVc = timesVc_.alloc(_nTimes);
+  // for (size_t jj = 0; jj < _nTimes; jj++) {
+  //   timesVc[jj] = _dtimeArrayVc[jj];
+  // }
+  // timeVarVc.putVal(timesVc);
 
   // Elevation variable
 
   if (_writeVar(file, timeDim,
-                "elevation_hc", "elevation_angle_h_copolar", "degrees",
-                _elArrayHc)) {
+                "elevation", "elevation_angle", "degrees",
+                _elArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, timeDim,
-                "elevation_vc", "elevation_angle_v_copolar", "degrees",
-                _elArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "elevation_vc", "elevation_angle_v_copolar", "degrees",
+  //               _elArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   // Azimuth variable
   
   if (_writeVar(file, timeDim,
-                "azimuth_hc", "azimuth_angle_h_copolar", "degrees",
-                _azArrayHc)) {
+                "azimuth", "azimuth_angle", "degrees",
+                _azArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, timeDim,
-                "azimuth_vc", "azimuth_angle_v_copolar", "degrees",
-                _azArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "azimuth_vc", "azimuth_angle_v_copolar", "degrees",
+  //               _azArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   // Fixed angle variable
   
   if (_writeVar(file, timeDim,
-                "fixed_angle_hc", "fixed_scan_angle_h_copolar", "degrees",
-                _fixedAngleArrayHc)) {
+                "fixed_angle", "fixed_scan_angle", "degrees",
+                _fixedAngleArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, timeDim,
-                "fixed_angle_vc", "fixed_scan_angle_v_copolar", "degrees",
-                _fixedAngleArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "fixed_angle_vc", "fixed_scan_angle_v_copolar", "degrees",
+  //               _fixedAngleArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   // modulation code variable
 
-  if (_writeVar(file, timeDim,
-                "mod_code_hc", "modulation_code_h_copolar", "degrees",
-                _modCodeArrayHc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  if (_writeVar(file, timeDim,
-                "mod_code_vc", "modulation_code_v_copolar", "degrees",
-                _modCodeArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "mod_code_hc", "modulation_code_h_copolar", "degrees",
+  //               _modCodeArray)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
+  // if (_writeVar(file, timeDim,
+  //               "mod_code_vc", "modulation_code_v_copolar", "degrees",
+  //               _modCodeArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   // PRT variable
   
   if (_writeVar(file, timeDim,
                 "prt_hc", "pulse_repetition_time_h_copolar", "seconds",
-                _prtArrayHc)) {
+                _prtArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, timeDim,
-                "prt_vc", "pulse_repetition_time_v_copolar", "seconds",
-                _prtArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "prt_vc", "pulse_repetition_time_v_copolar", "seconds",
+  //               _prtArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   // Pulse width variable
   
   if (_writeVar(file, timeDim,
                 "pulse_width_hc", "pulse_width_h_copolar", "micro_seconds",
-                _pulseWidthArrayHc)) {
+                _pulseWidthArray)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
-  if (_writeVar(file, timeDim,
-                "pulse_width_vc", "pulse_width_v_copolar", "micro_seconds",
-                _pulseWidthArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "pulse_width_vc", "pulse_width_v_copolar", "micro_seconds",
+  //               _pulseWidthArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   // Antenna transition variable
   
   // if (_writeVar(file, timeDim,
   //               "antenna_transition_hc", "antenna_is_in_transition_h_copolar", "",
-  //               _transitionFlagArrayHc)) {
+  //               _transitionFlagArray)) {
   //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
   //   return -1;
   // }
@@ -1701,7 +1500,7 @@ int AparTs2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
   
   // if (_writeVar(file, timeDim,
   //               "burst_mag_hc", "", "",
-  //               _burstMagArrayHc)) {
+  //               _burstMagArray)) {
   //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
   //   return -1;
   // }
@@ -1715,7 +1514,7 @@ int AparTs2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
   
   // if (_writeVar(file, timeDim,
   //               "burst_arg_hc", "", "",
-  //               _burstArgArrayHc)) {
+  //               _burstArgArray)) {
   //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
   //   return -1;
   // }
