@@ -698,6 +698,26 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'output_trigger'
+    // ctype is '_output_trigger_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("output_trigger");
+    tt->descr = tdrpStrDup("Decision in when to trigger writing a file.");
+    tt->help = tdrpStrDup("END_OF_SWEEP: write a file when the sweep number changes. END_OF_VOLUME: write a file when the sweep number resets to 0.");
+    tt->val_offset = (char *) &output_trigger - &_start_;
+    tt->enum_def.name = tdrpStrDup("output_trigger_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("END_OF_SWEEP");
+      tt->enum_def.fields[0].val = END_OF_SWEEP;
+      tt->enum_def.fields[1].name = tdrpStrDup("END_OF_VOLUME");
+      tt->enum_def.fields[1].val = END_OF_VOLUME;
+    tt->single_val.e = END_OF_VOLUME;
+    tt++;
+    
     // Parameter 'output_packing'
     // ctype is '_output_packing_t'
     

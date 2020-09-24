@@ -60,9 +60,10 @@ AparTsArchive::AparTsArchive(int argc, char **argv)
 {
 
   isOK = true;
-  MEM_zero(_scanPrev);
+  // MEM_zero(_scanPrev);
   _nPulses = 0;
-  _prevSeqNum = 0;
+  _prevPulseSeqNum = 0;
+  _prevPulseSweepNum = -1;
   
   // set programe name
   
@@ -201,20 +202,39 @@ int AparTsArchive::_checkNeedNewFile(const AparTsPulse &pulse)
   bool needNewFile = false;
 
   const AparTsInfo &info = pulse.getTsInfo();
-  const apar_ts_scan_segment_t &scan = info.getScanSegment();
 
-  if (scan.scan_mode != _scanPrev.scan_mode ||
-      scan.volume_num != _scanPrev.volume_num ||
-      scan.sweep_num != _scanPrev.sweep_num) {
-    if (_params.debug) {
-      cerr << "==>> New scan info" << endl;
-      if (_params.debug >= Params::DEBUG_EXTRA) {
-	apar_ts_scan_segment_print(stderr, scan);
-      }
-    }
-    needNewFile = true;
-    _scanPrev = scan;
+  si32 pulseSweepNum = pulse.getSweepNum();
+  // initialize
+  if (_prevPulseSweepNum == -1) {
+    _prevPulseSweepNum = pulseSweepNum;
   }
+
+  if (_params.output_trigger == Params::END_OF_VOLUME) {
+    // look for sweep number reset to 0
+    if (pulseSweepNum == 0 && _prevPulseSweepNum != 0) {
+      needNewFile = true;
+    }
+  } else {
+    // look for sweep number change
+    if (pulseSweepNum != _prevPulseSweepNum) {
+      needNewFile = true;
+    }
+  }
+  _prevPulseSweepNum = pulseSweepNum;
+
+  // const apar_ts_scan_segment_t &scan = info.getScanSegment();
+  // if (scan.scan_mode != _scanPrev.scan_mode ||
+  //     scan.volume_num != _scanPrev.volume_num ||
+  //     scan.sweep_num != _scanPrev.sweep_num) {
+  //   if (_params.debug) {
+  //     cerr << "==>> New scan info" << endl;
+  //     if (_params.debug >= Params::DEBUG_EXTRA) {
+  //       apar_ts_scan_segment_print(stderr, scan);
+  //     }
+  //   }
+  //   needNewFile = true;
+  //   _scanPrev = scan;
+  // }
   
   // do we have too many pulses in the file?
   
@@ -286,8 +306,8 @@ int AparTsArchive::_handlePulse(AparTsPulse &pulse)
   double thisEl = pulse.getElevation();
   double thisAz = pulse.getAzimuth();
   
-  if (_prevSeqNum > 0 && seqNum > (_prevSeqNum + 1)) {
-    cerr << "WARNING - missing sequence numbers, prev: " << _prevSeqNum
+  if (_prevPulseSeqNum > 0 && seqNum > (_prevPulseSeqNum + 1)) {
+    cerr << "WARNING - missing sequence numbers, prev: " << _prevPulseSeqNum
          << ", latest: " << seqNum << endl;
   }
 
@@ -298,7 +318,7 @@ int AparTsArchive::_handlePulse(AparTsPulse &pulse)
     }
   } // debug
 
-  _prevSeqNum = seqNum;
+  _prevPulseSeqNum = seqNum;
 
   return 0;
 

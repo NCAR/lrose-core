@@ -75,6 +75,11 @@ public:
   } debug_t;
 
   typedef enum {
+    END_OF_SWEEP = 0,
+    END_OF_VOLUME = 1
+  } output_trigger_t;
+
+  typedef enum {
     PACKING_ASIS = 0,
     PACKING_FL32 = 1,
     PACKING_SCALED_SI16 = 2,
@@ -391,6 +396,8 @@ public:
 
   tdrp_bool_t add_scan_mode_to_file_name;
 
+  output_trigger_t output_trigger;
+
   output_packing_t output_packing;
 
   tdrp_bool_t one_file_only;
@@ -406,7 +413,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[17];
+  mutable TDRPtable _table[18];
 
   const char *_className;
 

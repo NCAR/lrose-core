@@ -76,6 +76,17 @@ commentdef {
 };
 
 typedef enum {
+  END_OF_SWEEP,
+  END_OF_VOLUME
+} output_trigger_t;
+
+paramdef enum output_trigger_t {
+  p_default = END_OF_VOLUME;
+  p_descr = "Decision in when to trigger writing a file.";
+  p_help = "END_OF_SWEEP: write a file when the sweep number changes. END_OF_VOLUME: write a file when the sweep number resets to 0.";
+} output_trigger;
+
+typedef enum {
   PACKING_ASIS,
   PACKING_FL32,
   PACKING_SCALED_SI16,

@@ -92,7 +92,7 @@ private:
   // current scan mode
 
   apar_ts_scan_mode_t _currentScanMode;
-  apar_ts_scan_segment_t _scanPrev;
+  // apar_ts_scan_segment_t _scanPrev;
   
   // sector information to determine if we need a new file
   
@@ -110,7 +110,8 @@ private:
   // debug print loop count
   
   si64 _nPulses;
-  si64 _prevSeqNum;
+  si64 _prevPulseSeqNum;
+  si32 _prevPulseSweepNum;
 
   // functions
   
