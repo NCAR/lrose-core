@@ -1,0 +1,181 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for AparTs2NetCDF
+//
+//  Mike Dixon, RAP, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  Jan 2011
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "AparTs2NetCDF reads radar time series files in IWRF ir TsArchive format, and writes files in netCDF format.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+  
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Register with procmap.";
+} reg_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT, TS_TCP_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILE_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Name of host for TCP server. For TS_TCP_INPUT only.";
+} tcp_server_host;
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "Port for TCP server. For TS_TCP_INPUT only.";
+} tcp_server_port;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "RVP8 TsArchive data is in legacy 11-bit mantissa packing.";
+  p_descr = "If set, the legacy unpacking will be used.";
+} rvp8_legacy_unpacking;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remove pulses for which the antenna transition flag is set.";
+  p_help = "If true, transition pulses will not be stored in the file.";
+} filter_antenna_transitions;
+
+commentdef {
+  p_header = "OVERRIDE CALIBRATION";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, read in calibration from xml file.";
+} override_radar_cal;
+
+paramdef string {
+  p_default = "/tmp/radar_cal.xml";
+  p_descr = "Path of radar calibration file.";
+  p_help = "See 'override_radar_calib.";
+} radar_cal_xml_file_path;
+
+commentdef {
+  p_header = "CHANNEL details for dual channel receivers";
+  p_header = "Normally H-copolar data is in channel 0";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Dual pol channel location.";
+  p_help = "For dual pol data there are 2 channels: 0 and 1.\n\tWe have the following cases:\n\t\tFixed receiver: if this param is true, channel 0 holds H data, and channel 1 holds V data, and vice-versa.\n\t\tSwitching receiver: if this param is true, then channel 0 holds co-polar data, and channel 1 holds cross-polar data, and vice-versa.";
+} chan0_is_h_or_copolar;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_default = "/tmp/nc";
+  p_descr = "Path of output directory.";
+  p_help = "Files are saved to this directory.";
+} output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, use the same file name for output.";
+  p_help = "An '.nc' extension will be appended to the file name.";
+} preserve_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, save one output file for every input file.";
+  p_help = "Only applies to TS_FILE_INPUT mode, in which the input files are specified on the command line. This option overrides save_scans_in_sectors and max_pulses_per_file.";
+} save_one_file_per_input_file;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, save to output file when processing details change.";
+  p_help = "Only applies to TS_FILE_INPUT mode, in which the input files are specified on the command line. Write an output file if the scan or processing details change.";
+} save_file_when_processing_details_change;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to save scans out in sectors to limit the file size.";
+  p_help = "If false, each fixed angle will be in a single file. If true, the angular change will be limited per file. See max_sector_size.";
+} save_scans_in_sectors;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Maximum sector size per output file (degrees).";
+  p_help = "Once this maximum is exceeded, the current file will be closed and a new one started.";
+} max_sector_size;
+
+paramdef int {
+  p_default = 250000;
+  p_descr = "Maximum number of pulses per output file.";
+  p_help = "Once this maximum is exceeded, the current file will be closed and a new one started.";
+} max_pulses_per_file;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the number of gates in pulses to be saved.";
+  p_help = "If false, the number of gates will be checked to make sure it is constant. If true, only pulses with the specified number of gates will be saved.";
+} specify_n_gates_save;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Number of gates in pulses to be saved.";
+  p_help = "Pulses with a different number of gates will be ignored.";
+} n_gates_save;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to pad all rays out to the maximum number of gates in the file.";
+  p_help = "If true, we read through the file to determine the maximum number of gates in the file. Then, if the number of gates varies from ray to ray, the shorter rays are padded out to the maximum number of gates found. Also, the number of gates per ray is stored out as a netCDF variable nGatesRay. This option is not compatible with 'specify_n_gates_save'.";
+} pad_n_gates_to_max;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, write one file only and then quit.";
+} one_file_only;
+

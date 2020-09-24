@@ -414,6 +414,7 @@ codebase/apps/radar/src/AparTsArchive/AparTsArchive
 codebase/apps/radar/src/AparTsPrint/AparTsPrint
 codebase/apps/radar/src/AparTsSim/AparTsSim
 codebase/apps/radar/src/AparTs2Moments/AparTs2Moments
+codebase/apps/radar/src/AparTs2NetCDF/AparTs2NetCDF
 codebase/apps/radar/src/AcGeorefCompare/AcGeorefCompare
 codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
 codebase/apps/radar/src/AltCpCompute/AltCpCompute
