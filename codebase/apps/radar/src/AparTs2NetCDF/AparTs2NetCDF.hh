@@ -46,9 +46,9 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include <radar/IwrfTsInfo.hh>
-#include <radar/IwrfTsPulse.hh>
-#include <radar/IwrfTsReader.hh>
+#include <radar/AparTsInfo.hh>
+#include <radar/AparTsPulse.hh>
+#include <radar/AparTsReader.hh>
 #include <rapformats/DsRadarCalib.hh>
 #include <toolsa/Socket.hh>
 #include <toolsa/MemBuf.hh>
@@ -87,7 +87,7 @@ private:
   char *_paramsPath;
   Params _params;
   
-  IwrfTsReader *_pulseReader;
+  AparTsReader *_pulseReader;
   
   // calib for override
 
@@ -96,24 +96,22 @@ private:
   // debug print loop count
   
   si64 _nPulsesRead;
+  int _nPulsesFile; // number of pulses in current file
   si64 _prevSeqNum;
   double _prevAz;
 
   // previous values - to check for changes
 
+  int _prevPulseSweepNum;
   int _nGatesPrev, _nGatesPrev2;
-  int _nChannelsPrev;
-  iwrf_radar_info_t _radarPrev;
-  iwrf_scan_segment_t _scanPrev;
-  iwrf_ts_processing_t _procPrev;
-  iwrf_calibration_t _calibPrev;
+  apar_ts_radar_info_t _radarPrev;
+  apar_ts_scan_segment_t _scanPrev;
+  // apar_ts_processing_t _procPrev;
+  apar_ts_calibration_t _calibPrev;
 
-  // sector information to determine if we need a new file
+  // do we need a new file
   
   bool _needNewFile;
-  int _nPulsesFile; // number of pulses in current file
-  double _sectorWidth; // width of sector (file)
-  int _currentSector; // which sector are we in?
 
   // ray metadata
 
@@ -124,12 +122,14 @@ private:
   int _nGatesSave;
   int _nGatesMax;
 
-  bool _alternatingMode;
+  double _startRangeM;
+  double _gateSpacingM;
+
+  // bool _alternatingMode;
 
   double _startAz;
   double _startEl;
-  iwrf_scan_mode_t _scanMode;
-  iwrf_xmit_rcv_mode _xmitRcvMode;
+  apar_ts_scan_mode_t _scanMode;
 
   time_t _pulseTimeSecs;
   double _pulseTime;
@@ -148,18 +148,18 @@ private:
   vector<float> _prtArrayHc;
   vector<float> _pulseWidthArrayHc;
   vector<float> _modCodeArrayHc;
-  vector<int> _transitionFlagArrayHc;
-  vector<float> _burstMagArrayHc;
-  vector<float> _burstArgArrayHc;
+  // vector<int> _transitionFlagArrayHc;
+  // vector<float> _burstMagArrayHc;
+  // vector<float> _burstArgArrayHc;
 
   vector<double> _timeArrayVc, _dtimeArrayVc;
   vector<float> _elArrayVc, _azArrayVc, _fixedAngleArrayVc;
   vector<float> _prtArrayVc;
   vector<float> _pulseWidthArrayVc;
   vector<float> _modCodeArrayVc;
-  vector<int> _transitionFlagArrayVc;
-  vector<float> _burstMagArrayVc;
-  vector<float> _burstArgArrayVc;
+  // vector<int> _transitionFlagArrayVc;
+  // vector<float> _burstMagArrayVc;
+  // vector<float> _burstArgArrayVc;
 
   // IQ data
 
@@ -184,14 +184,13 @@ private:
   // functions
   
   void _setNGatesMax();
-  void _checkAltMode();
 
-  bool _checkInfoChanged(const IwrfTsPulse &pulse);
-  bool _checkReadyToWrite(const IwrfTsPulse &pulse);
-  int _handlePulse(IwrfTsPulse &pulse);
-  int _savePulseData(IwrfTsPulse &pulse);
-  int _savePulseDataAltH(IwrfTsPulse &pulse);
-  int _savePulseDataAltV(IwrfTsPulse &pulse);
+  bool _checkInfoChanged(const AparTsPulse &pulse);
+  bool _checkReadyToWrite(const AparTsPulse &pulse);
+  int _handlePulse(AparTsPulse &pulse);
+  int _savePulseData(AparTsPulse &pulse);
+  int _savePulseDataAltH(AparTsPulse &pulse);
+  int _savePulseDataAltV(AparTsPulse &pulse);
   void _reset();
 
   int _writeFile();

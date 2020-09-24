@@ -61,7 +61,7 @@ AparTsArchive::AparTsArchive(int argc, char **argv)
 
   isOK = true;
   // MEM_zero(_scanPrev);
-  _nPulses = 0;
+  _nPulsesProcessed = 0;
   _prevPulseSeqNum = 0;
   _prevPulseSweepNum = -1;
   
@@ -163,7 +163,7 @@ int AparTsArchive::Run ()
     if (pulse == NULL) {
       return 0;
     }
-    _currentScanMode = (apar_ts_scan_mode_t) pulse->getScanMode();
+    // _currentScanMode = (apar_ts_scan_mode_t) pulse->getScanMode();
 
     // check if we need a new file? If so open file
     
@@ -301,7 +301,7 @@ int AparTsArchive::_handlePulse(AparTsPulse &pulse)
   
   pulse.writeToFile(_out);
 
-  _nPulses++;
+  _nPulsesProcessed++;
   si64 seqNum = pulse.getSeqNum();
   double thisEl = pulse.getElevation();
   double thisAz = pulse.getAzimuth();
@@ -312,9 +312,9 @@ int AparTsArchive::_handlePulse(AparTsPulse &pulse)
   }
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    if ((_nPulses % 1000) == 0) {
+    if ((_nPulsesProcessed % 1000) == 0) {
       cerr << "El, az, npulses received: "
-           << thisEl << " " << thisAz << " " << _nPulses << endl; 
+           << thisEl << " " << thisAz << " " << _nPulsesProcessed << endl; 
     }
   } // debug
 

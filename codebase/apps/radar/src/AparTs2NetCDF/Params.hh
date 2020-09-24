@@ -80,6 +80,17 @@ public:
     TS_TCP_INPUT = 2
   } input_mode_t;
 
+  typedef enum {
+    END_OF_INPUT_FILE = 0,
+    END_OF_SWEEP = 1,
+    END_OF_VOLUME = 2
+  } output_trigger_t;
+
+  typedef enum {
+    SPECIFY_NGATES_SAVE = 0,
+    PAD_NGATES_TO_MAX = 1
+  } determine_ngates_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -390,35 +401,21 @@ public:
 
   int tcp_server_port;
 
-  tdrp_bool_t rvp8_legacy_unpacking;
-
-  tdrp_bool_t filter_antenna_transitions;
-
   tdrp_bool_t override_radar_cal;
 
   char* radar_cal_xml_file_path;
 
-  tdrp_bool_t chan0_is_h_or_copolar;
+  output_trigger_t output_trigger;
+
+  int max_pulses_per_file;
+
+  determine_ngates_t determine_ngates;
+
+  int n_gates_save;
 
   char* output_dir;
 
   tdrp_bool_t preserve_file_name;
-
-  tdrp_bool_t save_one_file_per_input_file;
-
-  tdrp_bool_t save_file_when_processing_details_change;
-
-  tdrp_bool_t save_scans_in_sectors;
-
-  int max_sector_size;
-
-  int max_pulses_per_file;
-
-  tdrp_bool_t specify_n_gates_save;
-
-  int n_gates_save;
-
-  tdrp_bool_t pad_n_gates_to_max;
 
   tdrp_bool_t one_file_only;
 
@@ -429,7 +426,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 

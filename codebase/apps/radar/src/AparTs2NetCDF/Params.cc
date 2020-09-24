@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("AparTs2NetCDF reads radar time series files in IWRF ir TsArchive format, and writes files in netCDF format.");
+    tt->comment_hdr = tdrpStrDup("AparTs2NetCDF reads radar time series data in APAR format, and writes files in netCDF format.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -699,30 +699,6 @@
     tt->single_val.i = 12000;
     tt++;
     
-    // Parameter 'rvp8_legacy_unpacking'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rvp8_legacy_unpacking");
-    tt->descr = tdrpStrDup("RVP8 TsArchive data is in legacy 11-bit mantissa packing.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rvp8_legacy_unpacking - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'filter_antenna_transitions'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("filter_antenna_transitions");
-    tt->descr = tdrpStrDup("Option to remove pulses for which the antenna transition flag is set.");
-    tt->help = tdrpStrDup("If true, transition pulses will not be stored in the file.");
-    tt->val_offset = (char *) &filter_antenna_transitions - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -761,20 +737,42 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("CHANNEL details for dual channel receivers");
+    tt->comment_hdr = tdrpStrDup("TRIGGERING WRITING OF OUTPUT FILE");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'chan0_is_h_or_copolar'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'output_trigger'
+    // ctype is '_output_trigger_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("chan0_is_h_or_copolar");
-    tt->descr = tdrpStrDup("Dual pol channel location.");
-    tt->help = tdrpStrDup("For dual pol data there are 2 channels: 0 and 1.\n\tWe have the following cases:\n\t\tFixed receiver: if this param is true, channel 0 holds H data, and channel 1 holds V data, and vice-versa.\n\t\tSwitching receiver: if this param is true, then channel 0 holds co-polar data, and channel 1 holds cross-polar data, and vice-versa.");
-    tt->val_offset = (char *) &chan0_is_h_or_copolar - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("output_trigger");
+    tt->descr = tdrpStrDup("Decision in when to trigger writing a file.");
+    tt->help = tdrpStrDup("END_OF_INPUT_FILE: write one output file for each input file. END_OF_SWEEP: write a file when the sweep number changes. END_OF_VOLUME: write a file when the sweep number resets to 0.");
+    tt->val_offset = (char *) &output_trigger - &_start_;
+    tt->enum_def.name = tdrpStrDup("output_trigger_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("END_OF_INPUT_FILE");
+      tt->enum_def.fields[0].val = END_OF_INPUT_FILE;
+      tt->enum_def.fields[1].name = tdrpStrDup("END_OF_SWEEP");
+      tt->enum_def.fields[1].val = END_OF_SWEEP;
+      tt->enum_def.fields[2].name = tdrpStrDup("END_OF_VOLUME");
+      tt->enum_def.fields[2].val = END_OF_VOLUME;
+    tt->single_val.e = END_OF_INPUT_FILE;
+    tt++;
+    
+    // Parameter 'max_pulses_per_file'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("max_pulses_per_file");
+    tt->descr = tdrpStrDup("Maximum number of pulses per output file.");
+    tt->help = tdrpStrDup("Once this maximum is exceeded, the current file will be closed and a new one started.");
+    tt->val_offset = (char *) &max_pulses_per_file - &_start_;
+    tt->single_val.i = 250000;
     tt++;
     
     // Parameter 'Comment 5'
@@ -782,6 +780,47 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("NUMBER OF GATES");
+    tt->comment_text = tdrpStrDup("Number of gates in output file must be constant, since we use rectangular arrays in the NetCDF file.");
+    tt++;
+    
+    // Parameter 'determine_ngates'
+    // ctype is '_determine_ngates_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("determine_ngates");
+    tt->descr = tdrpStrDup("Determine number of gates to write.");
+    tt->help = tdrpStrDup("The number of gates in output file must be constant, since we use rectangular arrays in the NetCDF file.");
+    tt->val_offset = (char *) &determine_ngates - &_start_;
+    tt->enum_def.name = tdrpStrDup("determine_ngates_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SPECIFY_NGATES_SAVE");
+      tt->enum_def.fields[0].val = SPECIFY_NGATES_SAVE;
+      tt->enum_def.fields[1].name = tdrpStrDup("PAD_NGATES_TO_MAX");
+      tt->enum_def.fields[1].val = PAD_NGATES_TO_MAX;
+    tt->single_val.e = PAD_NGATES_TO_MAX;
+    tt++;
+    
+    // Parameter 'n_gates_save'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_gates_save");
+    tt->descr = tdrpStrDup("Number of gates in pulses to be saved.");
+    tt->help = tdrpStrDup("Applies to SPECIFY_NGATES_SAVE.");
+    tt->val_offset = (char *) &n_gates_save - &_start_;
+    tt->single_val.i = 1000;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -805,104 +844,8 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("preserve_file_name");
     tt->descr = tdrpStrDup("If true, use the same file name for output.");
-    tt->help = tdrpStrDup("An '.nc' extension will be appended to the file name.");
+    tt->help = tdrpStrDup("Applies only to TS_FILE_INPUT. An '.nc' extension will be appended to the file name.");
     tt->val_offset = (char *) &preserve_file_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'save_one_file_per_input_file'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("save_one_file_per_input_file");
-    tt->descr = tdrpStrDup("If true, save one output file for every input file.");
-    tt->help = tdrpStrDup("Only applies to TS_FILE_INPUT mode, in which the input files are specified on the command line. This option overrides save_scans_in_sectors and max_pulses_per_file.");
-    tt->val_offset = (char *) &save_one_file_per_input_file - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'save_file_when_processing_details_change'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("save_file_when_processing_details_change");
-    tt->descr = tdrpStrDup("If true, save to output file when processing details change.");
-    tt->help = tdrpStrDup("Only applies to TS_FILE_INPUT mode, in which the input files are specified on the command line. Write an output file if the scan or processing details change.");
-    tt->val_offset = (char *) &save_file_when_processing_details_change - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'save_scans_in_sectors'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("save_scans_in_sectors");
-    tt->descr = tdrpStrDup("Option to save scans out in sectors to limit the file size.");
-    tt->help = tdrpStrDup("If false, each fixed angle will be in a single file. If true, the angular change will be limited per file. See max_sector_size.");
-    tt->val_offset = (char *) &save_scans_in_sectors - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'max_sector_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_sector_size");
-    tt->descr = tdrpStrDup("Maximum sector size per output file (degrees).");
-    tt->help = tdrpStrDup("Once this maximum is exceeded, the current file will be closed and a new one started.");
-    tt->val_offset = (char *) &max_sector_size - &_start_;
-    tt->single_val.i = 360;
-    tt++;
-    
-    // Parameter 'max_pulses_per_file'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_pulses_per_file");
-    tt->descr = tdrpStrDup("Maximum number of pulses per output file.");
-    tt->help = tdrpStrDup("Once this maximum is exceeded, the current file will be closed and a new one started.");
-    tt->val_offset = (char *) &max_pulses_per_file - &_start_;
-    tt->single_val.i = 250000;
-    tt++;
-    
-    // Parameter 'specify_n_gates_save'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_n_gates_save");
-    tt->descr = tdrpStrDup("Option to specify the number of gates in pulses to be saved.");
-    tt->help = tdrpStrDup("If false, the number of gates will be checked to make sure it is constant. If true, only pulses with the specified number of gates will be saved.");
-    tt->val_offset = (char *) &specify_n_gates_save - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'n_gates_save'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_gates_save");
-    tt->descr = tdrpStrDup("Number of gates in pulses to be saved.");
-    tt->help = tdrpStrDup("Pulses with a different number of gates will be ignored.");
-    tt->val_offset = (char *) &n_gates_save - &_start_;
-    tt->single_val.i = 1000;
-    tt++;
-    
-    // Parameter 'pad_n_gates_to_max'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("pad_n_gates_to_max");
-    tt->descr = tdrpStrDup("Option to pad all rays out to the maximum number of gates in the file.");
-    tt->help = tdrpStrDup("If true, we read through the file to determine the maximum number of gates in the file. Then, if the number of gates varies from ray to ray, the shorter rays are padded out to the maximum number of gates found. Also, the number of gates per ray is stored out as a netCDF variable nGatesRay. This option is not compatible with 'specify_n_gates_save'.");
-    tt->val_offset = (char *) &pad_n_gates_to_max - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

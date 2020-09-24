@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// IwrfAparTs2NetCDF.cc
+// AparAparTs2NetCDF.cc
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -66,7 +66,8 @@ AparTs2NetCDF::AparTs2NetCDF(int argc, char **argv)
   _nPulsesRead = 0;
   _nGatesPrev = -1;
   _nGatesPrev2 = -1;
-  _nChannelsPrev = -1;
+  // _nChannelsPrev = -1;
+
   MEM_zero(_radarPrev);
 
   MEM_zero(_scanPrev);
@@ -74,12 +75,16 @@ AparTs2NetCDF::AparTs2NetCDF(int argc, char **argv)
   _scanPrev.volume_num = -1;
   _scanPrev.sweep_num = -1;
 
-  MEM_zero(_procPrev);
-  _procPrev.xmit_rcv_mode = -1;
-  _procPrev.xmit_phase_mode = -1;
-  _procPrev.prf_mode = -1;
+  // MEM_zero(_procPrev);
+  // _procPrev.prf_mode = -1;
 
   MEM_zero(_calibPrev);
+
+  _nPulsesFile = 0;
+  _prevPulseSweepNum = -1;
+
+  _startRangeM = 0.0;
+  _gateSpacingM = 1.0;
 
   // set programe name
   
@@ -105,63 +110,28 @@ AparTs2NetCDF::AparTs2NetCDF(int argc, char **argv)
     return;
   }
 
-  // check params
-  
-  if (_params.specify_n_gates_save && _params.pad_n_gates_to_max) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "  Problem with parameters or command line" << endl;
-    cerr << "  You have specified both of:" << endl;
-    cerr << "    specify_n_gates_save" << endl;
-    cerr << "  and" << endl;
-    cerr << "    pad_n_gates_to_max" << endl;
-    cerr << "  These are not mutually compatible." << endl;
-    cerr << "  Choose only one of these options." << endl;
-    isOK = false;
-    return;
-  }
-  
   // create the pulse reader
   
-  IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
+  AparTsDebug_t aparDebug = AparTsDebug_t::OFF;
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    iwrfDebug = IWRF_DEBUG_VERBOSE;
+    aparDebug = AparTsDebug_t::VERBOSE;
   } else if (_params.debug >= Params::DEBUG_NORM) {
-    iwrfDebug = IWRF_DEBUG_NORM;
+    aparDebug = AparTsDebug_t::NORM;
   } 
     
   if (_params.input_mode == Params::TS_FMQ_INPUT) {
-    _pulseReader = new IwrfTsReaderFmq(_params.input_fmq_name,
-				       iwrfDebug,
+    _pulseReader = new AparTsReaderFmq(_params.input_fmq_name,
+				       aparDebug,
 				       !_params.seek_to_end_of_input);
   } else if (_params.input_mode == Params::TS_TCP_INPUT) {
-    _pulseReader = new IwrfTsReaderTcp(_params.tcp_server_host,
+    _pulseReader = new AparTsReaderTcp(_params.tcp_server_host,
                                        _params.tcp_server_port,
-				       iwrfDebug);
+				       aparDebug);
   } else {
-    _pulseReader = new IwrfTsReaderFile(_args.inputFileList, iwrfDebug);
-  }
-  if (_params.rvp8_legacy_unpacking) {
-    _pulseReader->setSigmetLegacyUnpacking(true);
+    _pulseReader = new AparTsReaderFile(_args.inputFileList, aparDebug);
   }
 
   _reset();
-
-  // compute sector size etc for files
-  
-  _nPulsesFile = 0;
-
-  int numSectors = (int) (359.9 / _params.max_sector_size) + 1;
-  if (numSectors < 2) {
-    numSectors = 2;
-  }
-  _sectorWidth = 360.0 / numSectors;
-  _currentSector = -1;
-
-  if (_params.debug && _params.save_scans_in_sectors) {
-    cerr << "TsSmartSave: numSectors, sectorWidth: "
-         << numSectors << ", "
-         << _sectorWidth << endl;
-  }
 
   // init process mapper registration
   
@@ -221,7 +191,7 @@ int AparTs2NetCDF::Run ()
   // set up ngates ray vector if needed
   // also compute maxNGates
 
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     if (_params.debug) {
       cerr << "==>> checking for n gates max" << endl;
     }
@@ -237,14 +207,14 @@ int AparTs2NetCDF::Run ()
   if (_params.debug) {
     cerr << "==>> checking for alternating mode" << endl;
   }
-  _checkAltMode();
-  if (_params.debug) {
-    if (_alternatingMode) {
-      cerr << "==>> alternating mode" << endl;
-    } else {
-      cerr << "==>> NOT alternating mode" << endl;
-    }
-  }
+  // _checkAltMode();
+  // if (_params.debug) {
+  //   if (_alternatingMode) {
+  //     cerr << "==>> alternating mode" << endl;
+  //   } else {
+  //     cerr << "==>> NOT alternating mode" << endl;
+  //   }
+  // }
 
   if (_params.debug) {
     cerr << "==>> reading in data to convert" << endl;
@@ -255,7 +225,7 @@ int AparTs2NetCDF::Run ()
     // read next pulse
     
     bool readyToWrite = false;
-    IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
+    AparTsPulse *pulse = _pulseReader->getNextPulse(true);
     if (pulse == NULL) {
       readyToWrite = true;
     }
@@ -265,13 +235,6 @@ int AparTs2NetCDF::Run ()
       if (_params.debug) {
         cerr << "INFO - end of file found" << endl;
       }
-    }
-
-    if (_params.filter_antenna_transitions &&
-        pulse != NULL &&
-        pulse->get_antenna_transition()) {
-      delete pulse;
-      continue;
     }
 
     // check if we need a new file? If so open file
@@ -333,18 +296,12 @@ void AparTs2NetCDF::_setNGatesMax()
     
     // read next pulse
     
-    IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
+    AparTsPulse *pulse = _pulseReader->getNextPulse(true);
     if (pulse == NULL) {
       _pulseReader->reset();
       return;
     }
     
-    if (_params.filter_antenna_transitions &&
-        pulse->get_antenna_transition()) {
-      delete pulse;
-      continue;
-    }
-
     // record nGates for this ray
 
     int nGates = pulse->getNGates();
@@ -358,91 +315,24 @@ void AparTs2NetCDF::_setNGatesMax()
   
 }
 
-////////////////////////////////////////
-// check for alternating mode
-
-void AparTs2NetCDF::_checkAltMode()
-  
-{
-
-  // initialize
-
-  int count = 0;
-  int prevHvFlag = 0;
-  _alternatingMode = false;
-
-  // read a few pulses from start of queue
-
-  while (true) {
-    
-    if (_pulseReader->endOfFile()) {
-      // end of data
-      _pulseReader->reset();
-      return;
-    }
-    
-    // read next pulse
-    
-    IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
-    if (pulse == NULL) {
-      // end of data
-      _pulseReader->reset();
-      return;
-    }
-    int hvFlag = pulse->getHdr().hv_flag;
-    delete pulse;
-
-    // initialize isHoriz flag
-
-    if (count == 0) {
-      prevHvFlag = hvFlag;
-      count++;
-      continue;
-    }
-    
-    if (count > 2 && (prevHvFlag == hvFlag)) {
-      // not alternating
-      _alternatingMode = false;
-      _pulseReader->reset();
-      return;
-    }
-    
-    if (count > 4) {
-      // alternating
-      _alternatingMode = true;
-      _pulseReader->reset();
-      return;
-    }
-
-    prevHvFlag = hvFlag;
-    count++;
-
-  } // while
-
-  _alternatingMode = false;
-  _pulseReader->reset();
-  return;
-
-}
-
 /////////////////////////////////////////
 // Check if ops info has changed
 // Returns true if changed, false if not
 
-bool AparTs2NetCDF::_checkInfoChanged(const IwrfTsPulse &pulse)
+bool AparTs2NetCDF::_checkInfoChanged(const AparTsPulse &pulse)
 
 {
   
-  const IwrfTsInfo &info = pulse.getTsInfo();
-  const iwrf_radar_info_t &radar = info.getRadarInfo();
-  const iwrf_scan_segment_t &scan = info.getScanSegment();
-  const iwrf_ts_processing_t &proc = info.getTsProcessing();
-  const iwrf_calibration_t &calib = info.getCalibration();
+  const AparTsInfo &info = pulse.getTsInfo();
+  const apar_ts_radar_info_t &radar = info.getRadarInfo();
+  const apar_ts_scan_segment_t &scan = info.getScanSegment();
+  // const apar_ts_processing_t &proc = info.getTsProcessing();
+  const apar_ts_calibration_t &calib = info.getCalibration();
 
   bool changed = false;
 
   if (pulse.getNGates() != _nGatesPrev) {
-    if (!_params.pad_n_gates_to_max) {
+    if (_params.determine_ngates != Params::PAD_NGATES_TO_MAX) {
       if (pulse.getNGates() == _nGatesPrev2) {
         cerr << "WARNING - ngates changed, prev, now: "
              << _nGatesPrev << ", " << pulse.getNGates() << endl;
@@ -455,12 +345,7 @@ bool AparTs2NetCDF::_checkInfoChanged(const IwrfTsPulse &pulse)
     _nGatesPrev = pulse.getNGates();
   }
 
-  if (pulse.getNChannels() != _nChannelsPrev) {
-    _nChannelsPrev = pulse.getNChannels();
-    changed = true;
-  }
-
-  if (iwrf_compare(radar, _radarPrev)) {
+  if (apar_ts_compare(radar, _radarPrev)) {
     _radarPrev = radar;
     changed = true;
   }
@@ -471,28 +356,28 @@ bool AparTs2NetCDF::_checkInfoChanged(const IwrfTsPulse &pulse)
     if (_params.debug) {
       cerr << "==>> New scan info" << endl;
       if (_params.debug >= Params::DEBUG_VERBOSE) {
-	iwrf_scan_segment_print(stderr, scan);
+	apar_ts_scan_segment_print(stderr, scan);
       }
     }
     _scanPrev = scan;
     changed = true;
   }
   
-  if (proc.xmit_rcv_mode != _procPrev.xmit_rcv_mode ||
-      proc.xmit_phase_mode != _procPrev.xmit_phase_mode ||
-      proc.prf_mode != _procPrev.prf_mode) {
-    if (_params.debug) {
-      cerr << "==>> New ts processing" << endl;
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-	iwrf_ts_processing_print(stderr, proc);
-      }
-    }
-    _procPrev = proc;
-    changed = true;
-  }
+  // if (proc.xmit_rcv_mode != _procPrev.xmit_rcv_mode ||
+  //     proc.xmit_phase_mode != _procPrev.xmit_phase_mode ||
+  //     proc.prf_mode != _procPrev.prf_mode) {
+  //   if (_params.debug) {
+  //     cerr << "==>> New ts processing" << endl;
+  //     if (_params.debug >= Params::DEBUG_VERBOSE) {
+  //       apar_ts_processing_print(stderr, proc);
+  //     }
+  //   }
+  //   _procPrev = proc;
+  //   changed = true;
+  // }
 
   
-  if (iwrf_compare(calib, _calibPrev)) {
+  if (apar_ts_compare(calib, _calibPrev)) {
     changed = true;
     _calibPrev = calib;
   }
@@ -506,11 +391,9 @@ bool AparTs2NetCDF::_checkInfoChanged(const IwrfTsPulse &pulse)
 //
 // Returns 0 to continue, -1 to exit
 
-bool AparTs2NetCDF::_checkReadyToWrite(const IwrfTsPulse &pulse)
+bool AparTs2NetCDF::_checkReadyToWrite(const AparTsPulse &pulse)
 
 {
-
-  bool infoChanged = _checkInfoChanged(pulse);
 
   _nPulsesFile++;
   if (_nPulsesFile < 2) {
@@ -520,42 +403,39 @@ bool AparTs2NetCDF::_checkReadyToWrite(const IwrfTsPulse &pulse)
   // base decision on end-of-file?
   
   if (_params.input_mode == Params::TS_FILE_INPUT &&
-      _params.save_one_file_per_input_file) {
+      _params.output_trigger == Params::END_OF_INPUT_FILE) {
     if (_pulseReader->endOfFile()) {
       return true;
     } else {
       return false;
     }
   }
-  
-  // check for change in scan or proc params
 
-  if (_params.input_mode == Params::TS_FILE_INPUT &&
-      _params.save_file_when_processing_details_change) {
-    if (infoChanged) {
-      return true;
-    } else {
-      return false;
-    }
+  // end of sweep or volume
+
+  int pulseSweepNum = pulse.getSweepNum();
+  // initialize
+  if (_prevPulseSweepNum == -1) {
+    _prevPulseSweepNum = pulseSweepNum;
   }
   
-  // compute sector in surveillance mode
-
-  if (_params.save_scans_in_sectors) {
-    if (pulse.getScanMode() == IWRF_SCAN_MODE_AZ_SUR_360 ||
-        pulse.getScanMode() == IWRF_SCAN_MODE_SECTOR ||
-        pulse.getScanMode() == IWRF_SCAN_MODE_COPLANE ||
-        pulse.getScanMode() == IWRF_SCAN_MODE_SECTOR ||
-        pulse.getScanMode() == IWRF_SCAN_MODE_MANPPI ||
-        pulse.getScanMode() == IWRF_SCAN_MODE_NOT_SET) {
-      int sector = (int) (pulse.getAz() / _sectorWidth);
-      if (sector != _currentSector && !_params.one_file_only) {
-        _currentSector = sector;
-        return true;
-      }
+  bool readyToWrite = false;
+  if (_params.output_trigger == Params::END_OF_VOLUME) {
+    // look for sweep number reset to 0
+    if (pulseSweepNum == 0 && _prevPulseSweepNum != 0) {
+      readyToWrite = true;
+    }
+  } else {
+    // look for sweep number change
+    if (pulseSweepNum != _prevPulseSweepNum) {
+      readyToWrite = true;
     }
   }
-  
+  _prevPulseSweepNum = pulseSweepNum;
+  if (readyToWrite) {
+    return true;
+  }
+
   // do we have too many pulses in the file?
   
   if (_nPulsesFile > _params.max_pulses_per_file) {
@@ -569,7 +449,7 @@ bool AparTs2NetCDF::_checkReadyToWrite(const IwrfTsPulse &pulse)
 /////////////////////////////
 // handle a pulse
 
-int AparTs2NetCDF::_handlePulse(IwrfTsPulse &pulse)
+int AparTs2NetCDF::_handlePulse(AparTsPulse &pulse)
 
 {
 
@@ -583,10 +463,14 @@ int AparTs2NetCDF::_handlePulse(IwrfTsPulse &pulse)
   _nGates = pulse.getNGates();
   _pulseTimeSecs = pulse.getTime();
   _pulseTime = pulse.getFTime();
-  _prt = pulse.get_prt_next();
-  _el = pulse.getEl();
-  _az = pulse.getAz();
+  _prt = pulse.getPrtNext();
+  _el = pulse.getElevation();
+  _az = pulse.getAzimuth();
   _phaseDiff = pulse.getPhaseDiff0();
+
+  _startRangeM = pulse.getStartRangeM();
+  _gateSpacingM = pulse.getGateSpacingM();
+
 
   // set start time etc
 
@@ -594,15 +478,13 @@ int AparTs2NetCDF::_handlePulse(IwrfTsPulse &pulse)
     _startTime = _pulseTimeSecs;
     _startEl = _el;
     _startAz = _az;
-    _scanMode = pulse.getScanMode();
-    _xmitRcvMode = (iwrf_xmit_rcv_mode)
-      _pulseReader->getOpsInfo().get_proc_xmit_rcv_mode();
+    // _scanMode = pulse.getScanMode();
   }
 
   // set number of gates to be saved out
   
   if (_nGatesSave < 0) {
-    if (_params.specify_n_gates_save) {
+    if (_params.determine_ngates == Params::SPECIFY_NGATES_SAVE) {
       _nGatesSave = _params.n_gates_save;
     } else {
       _nGatesSave = _nGates;
@@ -615,7 +497,7 @@ int AparTs2NetCDF::_handlePulse(IwrfTsPulse &pulse)
 
   // allocate tmp storage
 
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     _iBuf0.prepare(_nGatesMax * sizeof(float));
     _qBuf0.prepare(_nGatesMax * sizeof(float));
     _iBuf1.prepare(_nGatesMax * sizeof(float));
@@ -629,24 +511,25 @@ int AparTs2NetCDF::_handlePulse(IwrfTsPulse &pulse)
 
   // load up data
   
-  if ((_nGates == _nGatesSave) || _params.pad_n_gates_to_max) {
+  if ((_nGates == _nGatesSave) ||
+      (_params.determine_ngates == Params::PAD_NGATES_TO_MAX)) {
 
-    if (_alternatingMode) {
-      if (pulse.isHoriz()) {
-        if (_savePulseDataAltH(pulse)) {
-          return -1;
-        }
-      } else if (_elArrayHc.size() > 0) {
-        // wait to make sure we start on H pulse
-        if (_savePulseDataAltV(pulse)) {
-          return -1;
-        }
-      }
-    } else {
+    // if (_alternatingMode) {
+    //   if (pulse.isHoriz()) {
+    //     if (_savePulseDataAltH(pulse)) {
+    //       return -1;
+    //     }
+    //   } else if (_elArrayHc.size() > 0) {
+    //     // wait to make sure we start on H pulse
+    //     if (_savePulseDataAltV(pulse)) {
+    //       return -1;
+    //     }
+    //   }
+    // } else {
       if (_savePulseData(pulse)) {
         return -1;
       }
-    }
+    // }
     
   } else {
     
@@ -662,8 +545,8 @@ int AparTs2NetCDF::_handlePulse(IwrfTsPulse &pulse)
   }
   
   si64 seqNum = pulse.getSeqNum();
-  double thisEl = pulse.getEl();
-  double thisAz = pulse.getAz();
+  double thisEl = pulse.getElevation();
+  double thisAz = pulse.getAzimuth();
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
     if ((_nPulsesRead % 1000) == 0) {
@@ -705,7 +588,7 @@ int AparTs2NetCDF::_handlePulse(IwrfTsPulse &pulse)
 /////////////////////////////
 // save pulse data
 
-int AparTs2NetCDF::_savePulseData(IwrfTsPulse &pulse)
+int AparTs2NetCDF::_savePulseData(AparTsPulse &pulse)
 
 {
 
@@ -720,12 +603,12 @@ int AparTs2NetCDF::_savePulseData(IwrfTsPulse &pulse)
   _azArrayHc.push_back(_az);
   _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
   _modCodeArrayHc.push_back(_phaseDiff);
-  _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+  // _transitionFlagArrayHc.push_back(pulse.antennaTransition());
 
-  _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
-  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
-  _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
-  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+  // _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  // _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  // _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+  // _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
 
   const fl32 *chan0 = pulse.getIq0();
   float *ivals0 = (float *) _iBuf0.getPtr();
@@ -737,7 +620,7 @@ int AparTs2NetCDF::_savePulseData(IwrfTsPulse &pulse)
     *qvals0 = *chan0;
     chan0++;
   } // igate
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
       *ivals0 = -9999.0;
       *qvals0 = -9999.0;
@@ -745,44 +628,20 @@ int AparTs2NetCDF::_savePulseData(IwrfTsPulse &pulse)
   }
 
   int nGatesStore = _nGates;
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     nGatesStore = _nGatesMax;
   }
 
-  if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
+  // if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
     _nPulsesHc++;
     _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
     _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-  } else {
-    _nPulsesVc++;
-    _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-    _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-  }
+  // } else {
+  //   _nPulsesVc++;
+  //   _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+  //   _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  // }
   
-  if (pulse.getIq1() != NULL) {
-    
-    const fl32 *chan1 = pulse.getIq1();
-    float *ivals1 = (float *) _iBuf1.getPtr();
-    float *qvals1 = (float *) _qBuf1.getPtr();
-    
-    for (int igate = 0; igate < nGatesStore; igate++, ivals1++, qvals1++) {
-      *ivals1 = *chan1;
-      chan1++;
-      *qvals1 = *chan1;
-      chan1++;
-    } // igate
-
-    if (_params.chan0_is_h_or_copolar) {
-      _nPulsesVc++;
-      _iBufVc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-      _qBufVc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-    } else {
-      _nPulsesHc++;
-      _iBufHc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-      _qBufHc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-    }
-
-  } // if (chan1 != NULL)
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Using pulse, time, _prt, _el, _az, _nGates: "
@@ -801,7 +660,7 @@ int AparTs2NetCDF::_savePulseData(IwrfTsPulse &pulse)
 // save pulse data in alternating mode
 // transmit H
 
-int AparTs2NetCDF::_savePulseDataAltH(IwrfTsPulse &pulse)
+int AparTs2NetCDF::_savePulseDataAltH(AparTsPulse &pulse)
 
 {
 
@@ -816,12 +675,12 @@ int AparTs2NetCDF::_savePulseDataAltH(IwrfTsPulse &pulse)
   _azArrayHc.push_back(_az);
   _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
   _modCodeArrayHc.push_back(_phaseDiff);
-  _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+  // _transitionFlagArrayHc.push_back(pulse.antennaTransition());
 
-  _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
-  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
-  _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
-  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+  // _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  // _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  // _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+  // _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
   
   const fl32 *chan0 = pulse.getIq0();
   float *ivals0 = (float *) _iBuf0.getPtr();
@@ -833,7 +692,7 @@ int AparTs2NetCDF::_savePulseDataAltH(IwrfTsPulse &pulse)
     *qvals0 = *chan0;
     chan0++;
   } // igate
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
       *ivals0 = -9999.0;
       *qvals0 = -9999.0;
@@ -850,7 +709,7 @@ int AparTs2NetCDF::_savePulseDataAltH(IwrfTsPulse &pulse)
     *qvals1 = *chan1;
     chan1++;
   } // igate
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     for (int igate = _nGates; igate < _nGatesMax; igate++, ivals1++, qvals1++) {
       *ivals1 = -9999.0;
       *qvals1 = -9999.0;
@@ -861,21 +720,21 @@ int AparTs2NetCDF::_savePulseDataAltH(IwrfTsPulse &pulse)
   _nPulsesVx++;
 
   int nGatesStore = _nGates;
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     nGatesStore = _nGatesMax;
   }
 
-  if (_params.chan0_is_h_or_copolar) {
+  // if (_params.chan0_is_h_or_copolar) {
     _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
     _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
     _iBufVx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
     _qBufVx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-  } else {
-    _iBufHc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-    _qBufHc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-    _iBufVx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-    _qBufVx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-  }
+  // } else {
+  //   _iBufHc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+  //   _qBufHc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+  //   _iBufVx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+  //   _qBufVx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  // }
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Using H pulse, time, _prt, _el, _az, _nGates: "
@@ -894,7 +753,7 @@ int AparTs2NetCDF::_savePulseDataAltH(IwrfTsPulse &pulse)
 // save pulse data in alternating mode
 // transmit V
 
-int AparTs2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
+int AparTs2NetCDF::_savePulseDataAltV(AparTsPulse &pulse)
   
 {
   
@@ -909,10 +768,10 @@ int AparTs2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
   _azArrayVc.push_back(_az);
   _fixedAngleArrayVc.push_back(pulse.getFixedAngle());
   _modCodeArrayVc.push_back(_phaseDiff);
-  _transitionFlagArrayVc.push_back(pulse.antennaTransition());
+  // _transitionFlagArrayVc.push_back(pulse.antennaTransition());
 
-  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
-  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+  // _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  // _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
   
   const fl32 *chan0 = pulse.getIq0();
   float *ivals0 = (float *) _iBuf0.getPtr();
@@ -924,7 +783,7 @@ int AparTs2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
     *qvals0 = *chan0;
     chan0++;
   } // igate
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
       *ivals0 = -9999.0;
       *qvals0 = -9999.0;
@@ -942,7 +801,7 @@ int AparTs2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
     chan1++;
   } // igate
 
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     for (int igate = _nGates; igate < _nGatesMax; igate++, ivals1++, qvals1++) {
       *ivals1 = -9999.0;
       *qvals1 = -9999.0;
@@ -953,39 +812,23 @@ int AparTs2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
   _nPulsesHx++;
 
   int nGatesStore = _nGates;
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     nGatesStore = _nGatesMax;
   }
 
-  if (_xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
-    // fixed receiver
-    if (_params.chan0_is_h_or_copolar) {
-      _iBufHx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-      _qBufHx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-      _iBufVc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-      _qBufVc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-    } else {
-      // channels in reverse order
-      _iBufHx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-      _qBufHx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-      _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-      _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-    }
-  } else {
-    // switching co-polar receiver
-    if (_params.chan0_is_h_or_copolar) {
-      _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-      _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-      _iBufHx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-      _qBufHx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-    } else {
-      // channels in reverse order
-      _iBufVc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
-      _qBufVc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
-      _iBufHx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-      _qBufHx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-    }
-  }
+  // switching co-polar receiver
+  // if (_params.chan0_is_h_or_copolar) {
+    _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+    _iBufHx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+    _qBufHx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+  // } else {
+  //   // channels in reverse order
+  //   _iBufVc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+  //   _qBufVc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+  //   _iBufHx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+  //   _qBufHx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  // }
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Using V pulse, time, _prt, _el, _az, _nGates: "
@@ -1015,7 +858,7 @@ void AparTs2NetCDF::_reset()
   _nGates = 0;
   _nGatesSave = -1;
 
-  _alternatingMode = false;
+  // _alternatingMode = false;
 
   _nPulsesHc = 0;
   _nPulsesVc = 0;
@@ -1042,9 +885,9 @@ void AparTs2NetCDF::_reset()
   _prtArrayHc.clear();
   _pulseWidthArrayHc.clear();
   _modCodeArrayHc.clear();
-  _transitionFlagArrayHc.clear();
-  _burstMagArrayHc.clear();
-  _burstArgArrayHc.clear();
+  // _transitionFlagArrayHc.clear();
+  // _burstMagArrayHc.clear();
+  // _burstArgArrayHc.clear();
 
   _timeArrayVc.clear();
   _dtimeArrayVc.clear();
@@ -1054,9 +897,9 @@ void AparTs2NetCDF::_reset()
   _prtArrayVc.clear();
   _pulseWidthArrayVc.clear();
   _modCodeArrayVc.clear();
-  _transitionFlagArrayVc.clear();
-  _burstMagArrayVc.clear();
-  _burstArgArrayVc.clear();
+  // _transitionFlagArrayVc.clear();
+  // _burstMagArrayVc.clear();
+  // _burstArgArrayVc.clear();
 
 }
 
@@ -1125,7 +968,7 @@ int AparTs2NetCDF::_writeFile()
 
 ////////////////////////////////////////
 // write out the netDCF file to tmp name
-// in iwrf format
+// in apar format
 // Returns 0 on success, -1 on failure
 
 int AparTs2NetCDF::_writeFileTmp()
@@ -1169,23 +1012,23 @@ int AparTs2NetCDF::_writeFileTmp()
     return -1;
   }
 
-  if (_alternatingMode) {
+  // if (_alternatingMode) {
     
-    // alternating mode
+  //   // alternating mode
     
-    if (_writeTimeDimVarsAlt(file, timeDim)) {
-      cerr << "ERROR - AparTs2NetCDF::_writeFileTmp" << endl;
-      return -1;
-    }
+  //   if (_writeTimeDimVarsAlt(file, timeDim)) {
+  //     cerr << "ERROR - AparTs2NetCDF::_writeFileTmp" << endl;
+  //     return -1;
+  //   }
 
-  } else {
+  // } else {
     
     if (_writeTimeDimVars(file, timeDim)) {
       cerr << "ERROR - AparTs2NetCDF::_writeFileTmp" << endl;
       return -1;
     }
 
-  }
+  // }
 
   if (_nPulsesHc > 0) {
     if (_writeIqVars(file, timeDim, gatesDim, "IHc", "QHc",
@@ -1238,7 +1081,7 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   char desc[1024];
   sprintf(desc,
 	  "Radar time series reformatted by AparTs2NetCDF\n"
-	  "  This is the IWRF format\n"
+	  "  This is the APAR format\n"
 	  "  Starting Sample =%d, Ending Sample =%d, "
 	  "  Start Gate= %d, End Gate = %d\n"
 	  "  Azimuth = %.2f, Elevation = %.2f\n",
@@ -1249,13 +1092,13 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   file.addGlobAttr("FirstGate", startGate);
   file.addGlobAttr("LastGate", endGate);
 
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     file.addGlobAttr("n_gates_padded_to_max", _nGatesMax);
   }
 
   // radar info
 
-  iwrf_radar_info_t radarInfo(_radarPrev);
+  apar_ts_radar_info_t radarInfo(_radarPrev);
   file.addGlobAttr("radar_latitude_deg", radarInfo.latitude_deg);
   file.addGlobAttr("radar_longitude_deg", radarInfo.longitude_deg);
   file.addGlobAttr("radar_altitude_m", radarInfo.altitude_m);
@@ -1270,75 +1113,73 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   
   // scan info
 
-  iwrf_scan_segment_t scanSeg(_scanPrev);
+  // apar_ts_scan_segment_t scanSeg(_scanPrev);
 
-  file.addGlobAttr("scan_scan_mode", 
-                   iwrf_scan_mode_to_str(scanSeg.scan_mode).c_str());
-  file.addGlobAttr("scan_follow_mode", 
-                   iwrf_follow_mode_to_str(scanSeg.follow_mode).c_str());
-  file.addGlobAttr("scan_volume_num", scanSeg.volume_num);
-  file.addGlobAttr("scan_sweep_num", scanSeg.sweep_num);
-  file.addGlobAttr("scan_time_limit", scanSeg.time_limit);
-  file.addGlobAttr("scan_az_manual", scanSeg.az_manual);
-  file.addGlobAttr("scan_el_manual", scanSeg.el_manual);
-  file.addGlobAttr("scan_az_start", scanSeg.az_start);
-  file.addGlobAttr("scan_el_start", scanSeg.el_start);
-  file.addGlobAttr("scan_scan_rate", scanSeg.scan_rate);
-  file.addGlobAttr("scan_left_limit", scanSeg.left_limit);
-  file.addGlobAttr("scan_right_limit", scanSeg.right_limit);
-  file.addGlobAttr("scan_up_limit", scanSeg.up_limit);
-  file.addGlobAttr("scan_down_limit", scanSeg.down_limit);
-  file.addGlobAttr("scan_step", scanSeg.step);
-  file.addGlobAttr("scan_current_fixed_angle", scanSeg.current_fixed_angle);
-  file.addGlobAttr("scan_init_direction_cw", scanSeg.init_direction_cw);
-  file.addGlobAttr("scan_init_direction_up", scanSeg.init_direction_up);
-  file.addGlobAttr("scan_n_sweeps", scanSeg.n_sweeps);
-  file.addGlobAttr("scan_sun_scan_sector_width_az", 
-                   scanSeg.sun_scan_sector_width_az);
-  file.addGlobAttr("scan_sun_scan_sector_width_el", 
-                   scanSeg.sun_scan_sector_width_el);
-  file.addGlobAttr("scan_segment_name", scanSeg.segment_name);
-  file.addGlobAttr("scan_project_name", scanSeg.project_name);
+  // file.addGlobAttr("scan_scan_mode", 
+  //                  apar_ts_scan_mode_to_str(scanSeg.scan_mode).c_str());
+  // file.addGlobAttr("scan_volume_num", scanSeg.volume_num);
+  // file.addGlobAttr("scan_sweep_num", scanSeg.sweep_num);
+  // file.addGlobAttr("scan_time_limit", scanSeg.time_limit);
+  // file.addGlobAttr("scan_az_manual", scanSeg.az_manual);
+  // file.addGlobAttr("scan_el_manual", scanSeg.el_manual);
+  // file.addGlobAttr("scan_az_start", scanSeg.az_start);
+  // file.addGlobAttr("scan_el_start", scanSeg.el_start);
+  // file.addGlobAttr("scan_scan_rate", scanSeg.scan_rate);
+  // file.addGlobAttr("scan_left_limit", scanSeg.left_limit);
+  // file.addGlobAttr("scan_right_limit", scanSeg.right_limit);
+  // file.addGlobAttr("scan_up_limit", scanSeg.up_limit);
+  // file.addGlobAttr("scan_down_limit", scanSeg.down_limit);
+  // file.addGlobAttr("scan_step", scanSeg.step);
+  // file.addGlobAttr("scan_current_fixed_angle", scanSeg.current_fixed_angle);
+  // file.addGlobAttr("scan_init_direction_cw", scanSeg.init_direction_cw);
+  // file.addGlobAttr("scan_init_direction_up", scanSeg.init_direction_up);
+  // file.addGlobAttr("scan_n_sweeps", scanSeg.n_sweeps);
+  // file.addGlobAttr("scan_sun_scan_sector_width_az", 
+  //                  scanSeg.sun_scan_sector_width_az);
+  // file.addGlobAttr("scan_sun_scan_sector_width_el", 
+  //                  scanSeg.sun_scan_sector_width_el);
+  // file.addGlobAttr("scan_segment_name", scanSeg.segment_name);
+  // file.addGlobAttr("scan_project_name", scanSeg.project_name);
 
   // processor info
 
-  iwrf_ts_processing_t proc(_procPrev);
+  // apar_ts_processing_t proc(_procPrev);
 
-  file.addGlobAttr("proc_xmit_rcv_mode",
-                   iwrf_xmit_rcv_mode_to_str(proc.xmit_rcv_mode).c_str());
-  file.addGlobAttr("proc_xmit_phase_mode",
-                   iwrf_xmit_phase_mode_to_str(proc.xmit_phase_mode).c_str());
-  file.addGlobAttr("proc_prf_mode", 
-                   iwrf_prf_mode_to_str(proc.prf_mode).c_str());
-  file.addGlobAttr("proc_pulse_type", 
-                   iwrf_pulse_type_to_str(proc.pulse_type).c_str());
-  file.addGlobAttr("proc_prt_usec", proc.prt_usec);
-  file.addGlobAttr("proc_prt2_usec", proc.prt2_usec);
-  file.addGlobAttr("proc_cal_type", 
-                   iwrf_cal_type_to_str(proc.cal_type).c_str());
-  file.addGlobAttr("proc_burst_range_offset_m", proc.burst_range_offset_m);
-  file.addGlobAttr("proc_pulse_width_us", proc.pulse_width_us);
-  file.addGlobAttr("proc_start_range_m", proc.start_range_m);
-  file.addGlobAttr("proc_gate_spacing_m", proc.gate_spacing_m);
-  file.addGlobAttr("proc_integration_cycle_pulses",
-                   proc.integration_cycle_pulses);
-  file.addGlobAttr("proc_clutter_filter_number", proc.clutter_filter_number);
-  file.addGlobAttr("proc_range_gate_averaging", proc.range_gate_averaging);
-  file.addGlobAttr("proc_max_gate", proc.max_gate);
-  file.addGlobAttr("proc_test_power_dbm", proc.test_power_dbm);
-  file.addGlobAttr("proc_test_pulse_range_km", proc.test_pulse_range_km);
-  file.addGlobAttr("proc_test_pulse_length_usec", proc.test_pulse_length_usec);
-  file.addGlobAttr("proc_pol_mode", proc.pol_mode);
-  file.addGlobAttr("proc_xmit_flag[0]", proc.xmit_flag[0]);
-  file.addGlobAttr("proc_xmit_flag[1]", proc.xmit_flag[1]);
-  file.addGlobAttr("proc_beams_are_indexed", proc.beams_are_indexed);
-  file.addGlobAttr("proc_specify_dwell_width", proc.specify_dwell_width);
-  file.addGlobAttr("proc_indexed_beam_width_deg", proc.indexed_beam_width_deg);
-  file.addGlobAttr("proc_indexed_beam_spacing_deg",
-                   proc.indexed_beam_spacing_deg);
-  file.addGlobAttr("proc_num_prts", proc.num_prts);
-  file.addGlobAttr("proc_prt3_usec", proc.prt3_usec);
-  file.addGlobAttr("proc_prt4_usec", proc.prt4_usec);
+  // file.addGlobAttr("proc_xmit_rcv_mode",
+  //                  apar_ts_xmit_rcv_mode_to_str(proc.xmit_rcv_mode).c_str());
+  // file.addGlobAttr("proc_xmit_phase_mode",
+  //                  apar_xmit_phase_mode_to_str(proc.xmit_phase_mode).c_str());
+  // file.addGlobAttr("proc_prf_mode", 
+  //                  apar_prf_mode_to_str(proc.prf_mode).c_str());
+  // file.addGlobAttr("proc_pulse_type", 
+  //                  apar_pulse_type_to_str(proc.pulse_type).c_str());
+  // file.addGlobAttr("proc_prt_usec", proc.prt_usec);
+  // file.addGlobAttr("proc_prt2_usec", proc.prt2_usec);
+  // file.addGlobAttr("proc_cal_type", 
+  //                  apar_cal_type_to_str(proc.cal_type).c_str());
+  // file.addGlobAttr("proc_burst_range_offset_m", proc.burst_range_offset_m);
+  // file.addGlobAttr("proc_pulse_width_us", proc.pulse_width_us);
+  // file.addGlobAttr("proc_start_range_m", proc.start_range_m);
+  // file.addGlobAttr("proc_gate_spacing_m", proc.gate_spacing_m);
+  // file.addGlobAttr("proc_integration_cycle_pulses",
+  //                  proc.integration_cycle_pulses);
+  // file.addGlobAttr("proc_clutter_filter_number", proc.clutter_filter_number);
+  // file.addGlobAttr("proc_range_gate_averaging", proc.range_gate_averaging);
+  // file.addGlobAttr("proc_max_gate", proc.max_gate);
+  // file.addGlobAttr("proc_test_power_dbm", proc.test_power_dbm);
+  // file.addGlobAttr("proc_test_pulse_range_km", proc.test_pulse_range_km);
+  // file.addGlobAttr("proc_test_pulse_length_usec", proc.test_pulse_length_usec);
+  // file.addGlobAttr("proc_pol_mode", proc.pol_mode);
+  // file.addGlobAttr("proc_xmit_flag[0]", proc.xmit_flag[0]);
+  // file.addGlobAttr("proc_xmit_flag[1]", proc.xmit_flag[1]);
+  // file.addGlobAttr("proc_beams_are_indexed", proc.beams_are_indexed);
+  // file.addGlobAttr("proc_specify_dwell_width", proc.specify_dwell_width);
+  // file.addGlobAttr("proc_indexed_beam_width_deg", proc.indexed_beam_width_deg);
+  // file.addGlobAttr("proc_indexed_beam_spacing_deg",
+  //                  proc.indexed_beam_spacing_deg);
+  // file.addGlobAttr("proc_num_prts", proc.num_prts);
+  // file.addGlobAttr("proc_prt3_usec", proc.prt3_usec);
+  // file.addGlobAttr("proc_prt4_usec", proc.prt4_usec);
 
   // calibration
 
@@ -1404,7 +1245,7 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
 
   } else {
 
-    iwrf_calibration_t cal(_calibPrev);
+    apar_ts_calibration_t cal(_calibPrev);
     file.addGlobAttr("cal_wavelength_cm", cal.wavelength_cm);
     file.addGlobAttr("cal_beamwidth_deg_h", cal.beamwidth_deg_h);
     file.addGlobAttr("cal_beamwidth_deg_v", cal.beamwidth_deg_v);
@@ -1558,7 +1399,7 @@ int AparTs2NetCDF::_writeBaseTimeVars(NcxxFile &file)
 
 ////////////////////////////////////////
 // write out time variables
-// in iwrf format
+// in apar format
 // Returns 0 on success, -1 on failure
 
 int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
@@ -1591,7 +1432,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
 
   // ngates per ray
 
-  if (_params.pad_n_gates_to_max) {
+  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
     if (_writeVar(file, timeDim,
                   "n_gates_ray", "number_of_valid_gates_in_ray", "",
                   _nGatesRay)) {
@@ -1656,42 +1497,42 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   // Antenna transition variable
   
-  if (_writeVar(file, timeDim,
-                "antenna_transition", "antenna_is_in_transition", "",
-                _transitionFlagArrayHc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "antenna_transition", "antenna_is_in_transition", "",
+  //               _transitionFlagArrayHc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   // write burst data
   
-  if (_writeVar(file, timeDim,
-                "burst_mag_hc", "", "",
-                _burstMagArrayHc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "burst_mag_hc", "", "",
+  //               _burstMagArrayHc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
-  if (_writeVar(file, timeDim,
-                "burst_mag_vc", "", "",
-                _burstMagArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "burst_mag_vc", "", "",
+  //               _burstMagArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
-  if (_writeVar(file, timeDim,
-                "burst_arg_hc", "", "",
-                _burstArgArrayHc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "burst_arg_hc", "", "",
+  //               _burstArgArrayHc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
-  if (_writeVar(file, timeDim,
-                "burst_arg_vc", "", "",
-                _burstArgArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "burst_arg_vc", "", "",
+  //               _burstArgArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   return 0;
 
@@ -1842,49 +1683,49 @@ int AparTs2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
   
   // Antenna transition variable
   
-  if (_writeVar(file, timeDim,
-                "antenna_transition_hc", "antenna_is_in_transition_h_copolar", "",
-                _transitionFlagArrayHc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "antenna_transition_hc", "antenna_is_in_transition_h_copolar", "",
+  //               _transitionFlagArrayHc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
 
-  if (_writeVar(file, timeDim,
-                "antenna_transition_vc", "antenna_is_in_transition_v_copolar", "",
-                _transitionFlagArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "antenna_transition_vc", "antenna_is_in_transition_v_copolar", "",
+  //               _transitionFlagArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   // write burst data
   
-  if (_writeVar(file, timeDim,
-                "burst_mag_hc", "", "",
-                _burstMagArrayHc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "burst_mag_hc", "", "",
+  //               _burstMagArrayHc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
-  if (_writeVar(file, timeDim,
-                "burst_mag_vc", "", "",
-                _burstMagArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "burst_mag_vc", "", "",
+  //               _burstMagArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
-  if (_writeVar(file, timeDim,
-                "burst_arg_hc", "", "",
-                _burstArgArrayHc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "burst_arg_hc", "", "",
+  //               _burstArgArrayHc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
-  if (_writeVar(file, timeDim,
-                "burst_arg_vc", "", "",
-                _burstArgArrayVc)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
+  // if (_writeVar(file, timeDim,
+  //               "burst_arg_vc", "", "",
+  //               _burstArgArrayVc)) {
+  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+  //   return -1;
+  // }
   
   return 0;
 
@@ -1909,9 +1750,8 @@ int AparTs2NetCDF::_writeRangeVar(NcxxFile &file,
 
   TaArray<float> range_;
   float *range = range_.alloc(_nGates);
-  double thisRange = _procPrev.start_range_m;
-  double gateSpacing = _procPrev.gate_spacing_m;
-  for (int ii = 0; ii < _nGates; ii++, thisRange += gateSpacing) {
+  double thisRange = _startRangeM;
+  for (int ii = 0; ii < _nGates; ii++, thisRange += _gateSpacingM) {
     range[ii] = thisRange;
   }
   rangeVar.putVal(range);
@@ -1939,40 +1779,28 @@ int AparTs2NetCDF::_computeOutputFilePaths()
   
   string scanModeStr;
   switch (_scanMode) {
-    case IWRF_SCAN_MODE_SECTOR:
-      scanModeStr = ".sec";
-      break;
-    case IWRF_SCAN_MODE_COPLANE:
+    case apar_ts_scan_mode_t::COPLANE:
       scanModeStr = ".coplane";
       break;
-    case IWRF_SCAN_MODE_RHI:
+    case apar_ts_scan_mode_t::RHI:
       scanModeStr = ".rhi";
       break;
-    case IWRF_SCAN_MODE_VERTICAL_POINTING:
+    case apar_ts_scan_mode_t::VPOINT:
       scanModeStr = ".vert";
       break;
-    case IWRF_SCAN_MODE_IDLE:
+    case apar_ts_scan_mode_t::IDLE:
       scanModeStr = ".idle";
       break;
-    case IWRF_SCAN_MODE_AZ_SUR_360:
-      scanModeStr = ".sur";
-      break;
-    case IWRF_SCAN_MODE_EL_SUR_360:
-      scanModeStr = ".elsur";
-      break;
-    case IWRF_SCAN_MODE_SUNSCAN:
+    case apar_ts_scan_mode_t::SUNSCAN:
       scanModeStr = ".sun";
       break;
-    case IWRF_SCAN_MODE_POINTING:
+    case apar_ts_scan_mode_t::POINTING:
       scanModeStr = ".point";
       break;
-    case IWRF_SCAN_MODE_MANPPI:
-      scanModeStr = ".manppi";
+    case apar_ts_scan_mode_t::PPI:
+    default:
+      scanModeStr = ".ppi";
       break;
-    case IWRF_SCAN_MODE_MANRHI:
-      scanModeStr = ".manrhi";
-      break;
-    default: {}
   }
     
   // make the output dir
