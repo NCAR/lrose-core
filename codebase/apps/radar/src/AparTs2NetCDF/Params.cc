@@ -780,47 +780,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("NUMBER OF GATES");
-    tt->comment_text = tdrpStrDup("Number of gates in output file must be constant, since we use rectangular arrays in the NetCDF file.");
-    tt++;
-    
-    // Parameter 'determine_ngates'
-    // ctype is '_determine_ngates_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("determine_ngates");
-    tt->descr = tdrpStrDup("Determine number of gates to write.");
-    tt->help = tdrpStrDup("The number of gates in output file must be constant, since we use rectangular arrays in the NetCDF file.");
-    tt->val_offset = (char *) &determine_ngates - &_start_;
-    tt->enum_def.name = tdrpStrDup("determine_ngates_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("SPECIFY_NGATES_SAVE");
-      tt->enum_def.fields[0].val = SPECIFY_NGATES_SAVE;
-      tt->enum_def.fields[1].name = tdrpStrDup("PAD_NGATES_TO_MAX");
-      tt->enum_def.fields[1].val = PAD_NGATES_TO_MAX;
-    tt->single_val.e = PAD_NGATES_TO_MAX;
-    tt++;
-    
-    // Parameter 'n_gates_save'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_gates_save");
-    tt->descr = tdrpStrDup("Number of gates in pulses to be saved.");
-    tt->help = tdrpStrDup("Applies to SPECIFY_NGATES_SAVE.");
-    tt->val_offset = (char *) &n_gates_save - &_start_;
-    tt->single_val.i = 1000;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

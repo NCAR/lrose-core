@@ -40,6 +40,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 #include <cstdio>
 #include <Ncxx/Ncxx.hh>
 #include <Ncxx/NcxxFile.hh>
@@ -86,8 +87,11 @@ private:
   Args _args;
   char *_paramsPath;
   Params _params;
+
+  // read in pulses
   
   AparTsReader *_pulseReader;
+  deque<AparTsPulse *> _pulses;
   
   // calib for override
 
@@ -96,34 +100,34 @@ private:
   // debug print loop count
   
   si64 _nPulsesRead;
-  int _nPulsesFile; // number of pulses in current file
-  si64 _prevSeqNum;
-  double _prevAz;
+  // int _nPulsesFile; // number of pulses in current file
+  // si64 _prevSeqNum;
+  // double _prevAz;
 
   // previous values - to check for changes
 
   int _prevPulseSweepNum;
-  int _nGatesPrev, _nGatesPrev2;
-  apar_ts_radar_info_t _radarPrev;
-  apar_ts_scan_segment_t _scanPrev;
+  // int _nGatesPrev, _nGatesPrev2;
+  // apar_ts_radar_info_t _radarPrev;
+  // apar_ts_scan_segment_t _scanPrev;
   // apar_ts_processing_t _procPrev;
-  apar_ts_calibration_t _calibPrev;
+  // apar_ts_calibration_t _calibPrev;
 
   // do we need a new file
   
-  bool _needNewFile;
+  // bool _needNewFile;
 
-  // ray metadata
+  // geometry
+  
+  int _nGatesMax;
+  double _startRangeM;
+  double _gateSpacingM;
 
   size_t _nTimes;
   time_t _startTime;
 
   int _nGates;
   int _nGatesSave;
-  int _nGatesMax;
-
-  double _startRangeM;
-  double _gateSpacingM;
 
   // bool _alternatingMode;
 
@@ -163,14 +167,16 @@ private:
 
   // IQ data
 
-  int _nPulses;
+  MemBuf _II, _QQ;
+  MemBuf _pulseII, _pulseQQ;
+
+  // int _nPulses;
   // int _nPulsesVc;
   // int _nPulsesHx;
   // int _nPulsesVx;
   
-  MemBuf _iBuf0, _qBuf0;
+  // MemBuf _iBuf0, _qBuf0;
   // MemBuf _iBuf1, _qBuf1;
-  MemBuf _iBuf, _qBuf;
   // MemBuf _iBufVc, _qBufVc;
   // MemBuf _iBufHx, _qBufHx;
   // MemBuf _iBufVx, _qBufVx;
@@ -183,19 +189,19 @@ private:
 
   // functions
   
-  void _setNGatesMax();
+  bool _checkReadyToWrite(const AparTsPulse *pulse, bool &useThisPulse);
 
-  bool _checkInfoChanged(const AparTsPulse &pulse);
-  bool _checkReadyToWrite(const AparTsPulse &pulse);
-  int _handlePulse(AparTsPulse &pulse);
-  int _savePulseData(AparTsPulse &pulse);
-  void _reset();
+  void _computeNGatesMax();
+  void _checkForMissingPulses();
+  void _prepareToWrite();
+  
+  void _clearPulseQueue();
+  // void _reset();
 
   int _writeFile();
   int _writeFileTmp();
   int _computeOutputFilePaths();
-
-
+  
   void _addGlobAtt(NcxxFile &out);
   
   int _writeBaseTimeVars(NcxxFile &file);

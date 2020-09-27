@@ -64,24 +64,10 @@ AparTs2NetCDF::AparTs2NetCDF(int argc, char **argv)
   isOK = true;
   _pulseReader = NULL;
   _nPulsesRead = 0;
-  _nGatesPrev = -1;
-  _nGatesPrev2 = -1;
-  // _nChannelsPrev = -1;
-
-  MEM_zero(_radarPrev);
-
-  MEM_zero(_scanPrev);
-  _scanPrev.scan_mode = -1;
-  _scanPrev.volume_num = -1;
-  _scanPrev.sweep_num = -1;
-
-  // MEM_zero(_procPrev);
-  // _procPrev.prf_mode = -1;
-
-  MEM_zero(_calibPrev);
-
-  _nPulsesFile = 0;
-  _prevPulseSweepNum = -1;
+  // _nGatesPrev = -1;
+  // _nGatesPrev2 = -1;
+  // _nPulsesFile = 0;
+  // _prevPulseSweepNum = -1;
 
   _startRangeM = 0.0;
   _gateSpacingM = 1.0;
@@ -110,6 +96,14 @@ AparTs2NetCDF::AparTs2NetCDF(int argc, char **argv)
     return;
   }
 
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "Running " << _progName << " - extra verbose debug mode" << endl;
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Running " << _progName << " - verbose debug mode" << endl;
+  } else if (_params.debug) {
+    cerr << "Running " << _progName << " - debug mode" << endl;
+  }
+
   // create the pulse reader
   
   AparTsDebug_t aparDebug = AparTsDebug_t::OFF;
@@ -131,7 +125,25 @@ AparTs2NetCDF::AparTs2NetCDF(int argc, char **argv)
     _pulseReader = new AparTsReaderFile(_args.inputFileList, aparDebug);
   }
 
-  _reset();
+  // initialize
+  
+  // _reset();
+  
+  // override cal if appropriate
+
+  if (_params.override_radar_cal) {
+    string errStr;
+    if (_calOverride.readFromXmlFile
+        (_params.radar_cal_xml_file_path, errStr)) {
+      cerr << "ERROR - AparTs2NetCDF::Run" << endl;
+      cerr << "  Overriding radar cal" << endl;
+      cerr << "  Cannot read in cal file: " 
+           << _params.radar_cal_xml_file_path << endl;
+      cerr << errStr << endl;
+      isOK = false;
+      return;
+    }
+  }
 
   // init process mapper registration
   
@@ -149,6 +161,8 @@ AparTs2NetCDF::~AparTs2NetCDF()
 
 {
 
+  _clearPulseQueue();
+  
   if (_pulseReader) {
     delete _pulseReader;
   }
@@ -163,268 +177,133 @@ AparTs2NetCDF::~AparTs2NetCDF()
 int AparTs2NetCDF::Run ()
 {
 
-  PMU_auto_register("Run");
-  
-  // override cal if appropriate
-
-  if (_params.override_radar_cal) {
-    string errStr;
-    if (_calOverride.readFromXmlFile
-        (_params.radar_cal_xml_file_path, errStr)) {
-      cerr << "ERROR - AparTs2NetCDF::Run" << endl;
-      cerr << "  Overriding radar cal" << endl;
-      cerr << "  Cannot read in cal file: " 
-           << _params.radar_cal_xml_file_path << endl;
-      cerr << errStr << endl;
-      return -1;
-    }
-  }
-
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Running TsSmartSave - extra verbose debug mode" << endl;
-  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Running TsSmartSave - verbose debug mode" << endl;
-  } else if (_params.debug) {
-    cerr << "Running TsSmartSave - debug mode" << endl;
-  }
-
-  // set up ngates ray vector if needed
-  // also compute maxNGates
-
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    if (_params.debug) {
-      cerr << "==>> checking for n gates max" << endl;
-    }
-    _setNGatesMax();
-    if (_params.debug) {
-      cerr << "DEBUG - padding ngates out to max" << endl;
-      cerr << "  nGatesMax: " << _nGatesMax << endl;
-    }
-  }
-
   if (_params.debug) {
-    cerr << "==>> reading in data to convert" << endl;
+    cerr << "==>> reading in pulses" << endl;
   }
-
+  
   while (true) {
     
+    PMU_auto_register("Reading pulse");
+    
     // read next pulse
-    
-    bool readyToWrite = false;
+
     AparTsPulse *pulse = _pulseReader->getNextPulse(true);
-    if (pulse == NULL) {
-      readyToWrite = true;
-    }
 
-    if (_pulseReader->endOfFile()) {
-      readyToWrite = true;
+    // convert to floats
+    
+    if (pulse != NULL) {
+      _nPulsesRead++;
       if (_params.debug) {
-        cerr << "INFO - end of file found" << endl;
+        if ((_nPulsesRead % 1000) == 0) {
+          cerr << "El, az, npulses received: "
+               << pulse->getElevation() << ", "
+               << pulse->getAzimuth() << ", "
+               << _nPulsesRead << endl; 
+        }
       }
     }
 
-    // check if we need a new file? If so open file
-    
-    if (pulse) {
-      if (_checkReadyToWrite(*pulse)) {
-        readyToWrite = true;
-      }
-    } else {
-      if (_pulseReader->endOfFile()) {
-        readyToWrite = true;
-      }
-    }
+    // check we are ready to write the data to file
 
-    if (_elArray.size() < 1) {
-      readyToWrite = false;
-    }
+    bool useThisPulse;
+    bool readyToWrite = _checkReadyToWrite(pulse, useThisPulse);
     
+    // add to queue if we are to use this pulse now
+
     if (readyToWrite) {
+
+      if (useThisPulse) {
+        // add pulse to queue before write
+        _pulses.push_back(pulse);
+      }
+
+      // prepare to write
+      _prepareToWrite();
+
+      // write the file
       if (_writeFile()) {
         return -1;
       }
-    }
-    
-    // handle the pulse
-    
-    if (pulse && _handlePulse(*pulse)) {
-      return -1;
-    }
-    
-    // delete pulse to clean up
 
-    if (pulse) {
-      delete pulse;
+      // clear the queue
+      _clearPulseQueue();
+
+      // add previous pulse if not already used
+
+      if (!useThisPulse) {
+        // add pulse to queue after write
+        _pulses.push_back(pulse);
+      }
+
     } else {
-      return 0;
-    }
-  
+
+      // add pulse to queue for later write
+      
+      if (pulse != NULL) {
+        _pulses.push_back(pulse);
+      }
+
+    } // if (readyToWrite)
+
   } // while
-  
+    
   return 0;
   
 }
 
-//////////////////////////////////////////////////
-// set the max number of gates
-
-void AparTs2NetCDF::_setNGatesMax()
-{
-
-  _nGatesMax = 0;
-
-  while (true) {
-    
-    if (_pulseReader->endOfFile()) {
-      _pulseReader->reset();
-      return;
-    }
-    
-    // read next pulse
-    
-    AparTsPulse *pulse = _pulseReader->getNextPulse(true);
-    if (pulse == NULL) {
-      _pulseReader->reset();
-      return;
-    }
-    
-    // record nGates for this ray
-
-    int nGates = pulse->getNGates();
-    delete pulse;
-    
-    if (nGates > _nGatesMax) {
-      _nGatesMax = nGates;
-    }
-
-  } // while
-  
-}
-
-/////////////////////////////////////////
-// Check if ops info has changed
-// Returns true if changed, false if not
-
-bool AparTs2NetCDF::_checkInfoChanged(const AparTsPulse &pulse)
-
-{
-  
-  const AparTsInfo &info = pulse.getTsInfo();
-  const apar_ts_radar_info_t &radar = info.getRadarInfo();
-  const apar_ts_scan_segment_t &scan = info.getScanSegment();
-  // const apar_ts_processing_t &proc = info.getTsProcessing();
-  const apar_ts_calibration_t &calib = info.getCalibration();
-
-  bool changed = false;
-
-  if (pulse.getNGates() != _nGatesPrev) {
-    if (_params.determine_ngates != Params::PAD_NGATES_TO_MAX) {
-      if (pulse.getNGates() == _nGatesPrev2) {
-        cerr << "WARNING - ngates changed, prev, now: "
-             << _nGatesPrev << ", " << pulse.getNGates() << endl;
-        cerr << "May be staggered mode, consider setting -pad_n_gates_to_max" 
-             << endl;
-      }
-      changed = true;
-    }
-    _nGatesPrev2 = _nGatesPrev;
-    _nGatesPrev = pulse.getNGates();
-  }
-
-  if (apar_ts_compare(radar, _radarPrev)) {
-    _radarPrev = radar;
-    changed = true;
-  }
-
-  if (scan.scan_mode != _scanPrev.scan_mode ||
-      scan.volume_num != _scanPrev.volume_num ||
-      scan.sweep_num != _scanPrev.sweep_num) {
-    if (_params.debug) {
-      cerr << "==>> New scan info" << endl;
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-	apar_ts_scan_segment_print(stderr, scan);
-      }
-    }
-    _scanPrev = scan;
-    changed = true;
-  }
-  
-  // if (proc.xmit_rcv_mode != _procPrev.xmit_rcv_mode ||
-  //     proc.xmit_phase_mode != _procPrev.xmit_phase_mode ||
-  //     proc.prf_mode != _procPrev.prf_mode) {
-  //   if (_params.debug) {
-  //     cerr << "==>> New ts processing" << endl;
-  //     if (_params.debug >= Params::DEBUG_VERBOSE) {
-  //       apar_ts_processing_print(stderr, proc);
-  //     }
-  //   }
-  //   _procPrev = proc;
-  //   changed = true;
-  // }
-
-  
-  if (apar_ts_compare(calib, _calibPrev)) {
-    changed = true;
-    _calibPrev = calib;
-  }
-
-  return changed;
-
-}
-  
 ///////////////////////////////////////////
 // Check if we are ready to write the file
 //
 // Returns 0 to continue, -1 to exit
 
-bool AparTs2NetCDF::_checkReadyToWrite(const AparTsPulse &pulse)
+bool AparTs2NetCDF::_checkReadyToWrite(const AparTsPulse *pulse,
+                                       bool &useThisPulse)
 
 {
 
-  _nPulsesFile++;
-  if (_nPulsesFile < 2) {
-    return false;
+  useThisPulse = false;
+  
+  // if null pulse, we are at end of data
+  
+  if (pulse == NULL) {
+    return true;
   }
-
+  
   // base decision on end-of-file?
   
   if (_params.input_mode == Params::TS_FILE_INPUT &&
       _params.output_trigger == Params::END_OF_INPUT_FILE) {
     if (_pulseReader->endOfFile()) {
+      useThisPulse = true;
       return true;
-    } else {
-      return false;
     }
   }
 
   // end of sweep or volume
-
-  int pulseSweepNum = pulse.getSweepNum();
+  
+  int pulseSweepNum = pulse->getSweepNum();
   // initialize
   if (_prevPulseSweepNum == -1) {
     _prevPulseSweepNum = pulseSweepNum;
   }
   
-  bool readyToWrite = false;
   if (_params.output_trigger == Params::END_OF_VOLUME) {
     // look for sweep number reset to 0
     if (pulseSweepNum == 0 && _prevPulseSweepNum != 0) {
-      readyToWrite = true;
+      _prevPulseSweepNum = pulseSweepNum;
+      return true;
     }
   } else {
     // look for sweep number change
     if (pulseSweepNum != _prevPulseSweepNum) {
-      readyToWrite = true;
+      _prevPulseSweepNum = pulseSweepNum;
+      return true;
     }
   }
-  _prevPulseSweepNum = pulseSweepNum;
-  if (readyToWrite) {
-    return true;
-  }
-
+  
   // do we have too many pulses in the file?
   
-  if (_nPulsesFile > _params.max_pulses_per_file) {
+  if ((int) _pulses.size() > _params.max_pulses_per_file) {
     return true;
   }
 
@@ -432,275 +311,207 @@ bool AparTs2NetCDF::_checkReadyToWrite(const AparTsPulse &pulse)
 
 }
 
-/////////////////////////////
-// handle a pulse
+//////////////////////////////////////////////////
+// prepare for writing the file
 
-int AparTs2NetCDF::_handlePulse(AparTsPulse &pulse)
-
+void AparTs2NetCDF::_prepareToWrite()
 {
 
-  // convert to floats
-  
-  _nPulsesRead++;
-  pulse.convertToFL32();
-
-  // set pulse properties
-
-  _nGates = pulse.getNGates();
-  _pulseTimeSecs = pulse.getTime();
-  _pulseTime = pulse.getFTime();
-  _prt = pulse.getPrtNext();
-  _el = pulse.getElevation();
-  _az = pulse.getAzimuth();
-  // _phaseDiff = pulse.getPhaseDiff0();
-
-  _startRangeM = pulse.getStartRangeM();
-  _gateSpacingM = pulse.getGateSpacingM();
-
-
-  // set start time etc
-
-  if (_startTime == 0) {
-    _startTime = _pulseTimeSecs;
-    _startEl = _el;
-    _startAz = _az;
-    // _scanMode = pulse.getScanMode();
-  }
-
-  // set number of gates to be saved out
-  
-  if (_nGatesSave < 0) {
-    if (_params.determine_ngates == Params::SPECIFY_NGATES_SAVE) {
-      _nGatesSave = _params.n_gates_save;
-    } else {
-      _nGatesSave = _nGates;
-    }
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "--> DEBUG: only saving pulses with nGates: "
-           << _nGatesSave << endl;
-    }
-  }
-
-  // allocate tmp storage
-
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    _iBuf0.prepare(_nGatesMax * sizeof(float));
-    _qBuf0.prepare(_nGatesMax * sizeof(float));
-    // _iBuf1.prepare(_nGatesMax * sizeof(float));
-    // _qBuf1.prepare(_nGatesMax * sizeof(float));
-  } else {
-    _iBuf0.prepare(_nGates * sizeof(float));
-    _qBuf0.prepare(_nGates * sizeof(float));
-    // _iBuf1.prepare(_nGates * sizeof(float));
-    // _qBuf1.prepare(_nGates * sizeof(float));
-  }
-
-  // load up data
-  
-  if ((_nGates == _nGatesSave) ||
-      (_params.determine_ngates == Params::PAD_NGATES_TO_MAX)) {
-
-    // if (_alternatingMode) {
-    //   if (pulse.isHoriz()) {
-    //     if (_savePulseDataAltH(pulse)) {
-    //       return -1;
-    //     }
-    //   } else if (_elArray.size() > 0) {
-    //     // wait to make sure we start on H pulse
-    //     if (_savePulseDataAltV(pulse)) {
-    //       return -1;
-    //     }
-    //   }
-    // } else {
-      if (_savePulseData(pulse)) {
-        return -1;
-      }
-    // }
-    
-  } else {
-    
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "Skipping pulse, time, _prt, _el, _az, _nGates: "
-           << _pulseTime << " "
-           << _prt << " "
-           << _el << " "
-           << _az << " "
-           << _nGates << endl;
-    }
-    
-  }
-  
-  si64 seqNum = pulse.getSeqNum();
-  double thisEl = pulse.getElevation();
-  double thisAz = pulse.getAzimuth();
-  
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    if ((_nPulsesRead % 1000) == 0) {
-      cerr << "El, az, npulses received: "
-           << thisEl << " " << thisAz << " " << _nPulsesRead << endl; 
-    }
-    if (_prevSeqNum > 0 && seqNum != (_prevSeqNum + 1)) {
-      cerr << "Missing sequence numbers, prev: " << _prevSeqNum
-           << ", this: " << seqNum << endl;
-    }
-    if (_prevAz > -900) {
-      double deltaAz = fabs(thisAz - _prevAz);
-      if (deltaAz >= 180) {
-        deltaAz -= 360.0;
-      }
-      fprintf(stderr,
-              "Azimuth, prevAz, thisAz, deltaAz, prevNum, thisNum: "
-              "%10.3f %10.3f %10.3f %10d %10d\n",
-              _prevAz, thisAz, deltaAz, (int) _prevSeqNum, (int) seqNum);
-      if (fabs(deltaAz) > 0.1) {
-        cerr << "************************************************" << endl;
-        fprintf(stderr,
-                "Missing azimuth, prevAz, thisAz, deltaAz, prevNum, thisNum: "
-                "%10.3f %10.3f %10.3f %10d %10d\n",
-                _prevAz, thisAz, deltaAz, (int) _prevSeqNum, (int) seqNum);
-        cerr << "************************************************" << endl;
-      }
-    }
-
-  } // debug
-
-  _prevSeqNum = seqNum;
-  _prevAz = thisAz;
-
-  return 0;
-
-}
-
-/////////////////////////////
-// save pulse data
-
-int AparTs2NetCDF::_savePulseData(AparTsPulse &pulse)
-
-{
-
-  _nGatesRay.push_back(_nGates);
-
-  _timeArray.push_back(_pulseTime);
-  _dtimeArray.push_back((_pulseTimeSecs - _startTime) 
-                          + pulse.getNanoSecs() * 1.0e-9);
-  _prtArray.push_back(_prt);
-  _pulseWidthArray.push_back(pulse.getPulseWidthUs());
-  _elArray.push_back(_el);
-  _azArray.push_back(_az);
-  _fixedAngleArray.push_back(pulse.getFixedAngle());
-  // _modCodeArray.push_back(_phaseDiff);
-  // _transitionFlagArray.push_back(pulse.antennaTransition());
-
-  // _burstMagArray.push_back(pulse.get_burst_mag(0));
-  // _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
-  // _burstArgArray.push_back(pulse.get_burst_arg(0));
-  // _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
-
-  const fl32 *chan0 = pulse.getIq0();
-  float *ivals0 = (float *) _iBuf0.getPtr();
-  float *qvals0 = (float *) _qBuf0.getPtr();
-  
-  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
-    *ivals0 = *chan0;
-    chan0++;
-    *qvals0 = *chan0;
-    chan0++;
-  } // igate
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
-      *ivals0 = -9999.0;
-      *qvals0 = -9999.0;
-    } // igate
+    _checkForMissingPulses();
   }
 
-  int nGatesStore = _nGates;
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    nGatesStore = _nGatesMax;
-  }
-
-  // if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
-    _nPulses++;
-    _iBuf.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-    _qBuf.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-  // } else {
-  //   _nPulsesVc++;
-  //   _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
-  //   _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
-  // }
+  // initialize
   
+  _computeNGatesMax();
+
+  _pulseII.prepare(_nGatesMax * sizeof(float));
+  _pulseQQ.prepare(_nGatesMax * sizeof(float));
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Using pulse, time, _prt, _el, _az, _nGates: "
-         << _pulseTime << " "
-         << _prt << " "
-         << _el << " "
-         << _az << " "
-         << _nGates << endl;
-  }
-
-  return 0;
-
-}
-    
-////////////////////////////////////////
-// reset data variables
-
-void AparTs2NetCDF::_reset()
-
-{
-
-  _startTime = 0;
-  _startAz = 0;
-  _startEl = 0;
-
-  _nPulsesFile = 0;
-  _nGates = 0;
-  _nGatesSave = -1;
-
-  // _alternatingMode = false;
-
-  _nPulses = 0;
-  // _nPulsesVc = 0;
-  // _nPulsesHx = 0;
-  // _nPulsesVx = 0;
-
-  _iBuf.reset();
-  _qBuf.reset();
-  // _iBufVc.reset();
-  // _qBufVc.reset();
-  // _iBufHx.reset();
-  // _qBufHx.reset();
-  // _iBufVx.reset();
-  // _qBufVx.reset();
+  _II.free();
+  _QQ.free();
 
   _nGatesRay.clear();
-
   _timeArray.clear();
   _dtimeArray.clear();
-
   _elArray.clear();
   _azArray.clear();
   _fixedAngleArray.clear();
   _prtArray.clear();
   _pulseWidthArray.clear();
-  // _modCodeArray.clear();
-  // _transitionFlagArray.clear();
-  // _burstMagArray.clear();
-  // _burstArgArray.clear();
 
-  // _timeArrayVc.clear();
-  // _dtimeArrayVc.clear();
-  // _elArrayVc.clear();
-  // _azArrayVc.clear();
-  // _fixedAngleArrayVc.clear();
-  // _prtArrayVc.clear();
-  // _pulseWidthArrayVc.clear();
-  // _modCodeArrayVc.clear();
-  // _transitionFlagArrayVc.clear();
-  // _burstMagArrayVc.clear();
-  // _burstArgArrayVc.clear();
+  // loop through the pulses
+  
+  for (size_t ii = 0; ii < _pulses.size(); ii++) {
+    
+    AparTsPulse *pulse = _pulses[ii];
+    pulse->convertToFL32();
+    double el = pulse->getElevation();
+    double az = pulse->getAzimuth();
+    
+    if (ii == 0) {
+      _startTime = pulse->getTime();
+      _startEl = el;
+      _startAz = az;
+      _startRangeM = pulse->getStartRangeM();
+      _gateSpacingM = pulse->getGateSpacingM();
+    }
+    
+    // set pulse properties
+    
+    int nGates = pulse->getNGates();
+    double pulseTime = pulse->getFTime();
+    float prt = pulse->getPrtNext();
+    
+    _nGatesRay.push_back(nGates);
+    _timeArray.push_back(pulseTime);
+    _dtimeArray.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse->getNanoSecs() * 1.0e-9);
+    _elArray.push_back(el);
+    _azArray.push_back(az);
+    _fixedAngleArray.push_back(pulse->getFixedAngle());
+    _prtArray.push_back(prt);
+    _pulseWidthArray.push_back(pulse->getPulseWidthUs());
+
+    const fl32 *chan0 = pulse->getIq0();
+    float *ivals0 = (float *) _pulseII.getPtr();
+    float *qvals0 = (float *) _pulseQQ.getPtr();
+    
+    for (int igate = 0; igate < nGates; igate++, ivals0++, qvals0++) {
+      *ivals0 = *chan0;
+      chan0++;
+      *qvals0 = *chan0;
+      chan0++;
+    } // igate
+    for (int igate = nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
+    
+    _II.add(_pulseII.getPtr(), _nGatesMax * sizeof(float));
+    _QQ.add(_pulseQQ.getPtr(), _nGatesMax * sizeof(float));
+
+  }  // ii
+  
+}
+
+//////////////////////////////////////////////////
+// compute the max number of gates
+
+void AparTs2NetCDF::_computeNGatesMax()
+{
+  
+  _nGatesMax = 0;
+  for (size_t ii = 0; ii < _pulses.size(); ii++) {
+    int nGates = _pulses[ii]->getNGates();
+    if (nGates > _nGatesMax) {
+      _nGatesMax = nGates;
+    }
+  }  // ii
+  
+}
+
+//////////////////////////////////////////////////
+// check for missing pulses
+
+void AparTs2NetCDF::_checkForMissingPulses()
+{
+  
+  
+  si64 prevSeqNum = _pulses[0]->getSeqNum();
+  
+  for (size_t ii = 1; ii < _pulses.size(); ii++) {
+
+    AparTsPulse *pulse = _pulses[ii];
+    si64 seqNum = pulse->getSeqNum();
+    double el = pulse->getElevation();
+    double az = pulse->getAzimuth();
+    
+    if (prevSeqNum > 0 && seqNum != (prevSeqNum + 1)) {
+      cerr << "Missing sequence numbers, el, az, prev, this: "
+           << el << ", "
+           << az << ", "
+           << prevSeqNum << ", "
+           << seqNum << endl;
+    }
+
+  } // ii
 
 }
+
+////////////////////////////////////////
+// clear the pulse queue
+
+void AparTs2NetCDF::_clearPulseQueue()
+
+{
+  for (size_t ii = 0; ii < _pulses.size(); ii++) {
+    delete _pulses[ii];
+  }
+  _pulses.clear();
+}
+
+////////////////////////////////////////
+// reset data variables
+
+// void AparTs2NetCDF::_reset()
+
+// {
+
+//   _startTime = 0;
+//   _startAz = 0;
+//   _startEl = 0;
+
+//   _nPulsesFile = 0;
+//   _nGates = 0;
+//   _nGatesSave = -1;
+
+//   // _alternatingMode = false;
+
+//   _nPulses = 0;
+//   // _nPulsesVc = 0;
+//   // _nPulsesHx = 0;
+//   // _nPulsesVx = 0;
+
+//   _iBuf.reset();
+//   _qBuf.reset();
+//   // _iBufVc.reset();
+//   // _qBufVc.reset();
+//   // _iBufHx.reset();
+//   // _qBufHx.reset();
+//   // _iBufVx.reset();
+//   // _qBufVx.reset();
+
+//   _nGatesRay.clear();
+
+//   _timeArray.clear();
+//   _dtimeArray.clear();
+
+//   _elArray.clear();
+//   _azArray.clear();
+//   _fixedAngleArray.clear();
+//   _prtArray.clear();
+//   _pulseWidthArray.clear();
+//   // _modCodeArray.clear();
+//   // _transitionFlagArray.clear();
+//   // _burstMagArray.clear();
+//   // _burstArgArray.clear();
+
+//   // _timeArrayVc.clear();
+//   // _dtimeArrayVc.clear();
+//   // _elArrayVc.clear();
+//   // _azArrayVc.clear();
+//   // _fixedAngleArrayVc.clear();
+//   // _prtArrayVc.clear();
+//   // _pulseWidthArrayVc.clear();
+//   // _modCodeArrayVc.clear();
+//   // _transitionFlagArrayVc.clear();
+//   // _burstMagArrayVc.clear();
+//   // _burstArgArrayVc.clear();
+
+//   _clearPulseQueue();
+  
+// }
 
 ////////////////////////////////////////
 // write out the netDCF file
@@ -711,23 +522,28 @@ int AparTs2NetCDF::_writeFile()
   
 {
 
-  // compute output and tmp paths
+  // compute number of times active
+  
+  _nTimes = _pulses.size();
+  if (_nTimes < 1) {
+    if (_params.debug) {
+      cerr << "  INFO - no pulses" << endl;
+    }
+    return 0;
+  }
 
+  // compute max number of gates
+
+  _computeNGatesMax();
+
+  // compute output and tmp paths
+  
   if (_computeOutputFilePaths()) {
     return -1;
   }
 
-  // compute number of times active
-  
-  _nTimes = _elArray.size();
-  if (_elArray.size() > 0) {
-    if (_elArray.size() < _nTimes) {
-      _nTimes = _elArray.size();
-    }
-  }
-
   // write out tmp file
-
+  
   if (_writeFileTmp()) {
     cerr << "ERROR - AparTs2NetCDF::_writeFile" << endl;
     cerr << "  Cannot write netCDF tmp file: " << _tmpPath << endl;
@@ -759,7 +575,7 @@ int AparTs2NetCDF::_writeFile()
 
   // reset data variables
 
-  _reset();
+  // _reset();
 
   return 0;
 
@@ -811,55 +627,18 @@ int AparTs2NetCDF::_writeFileTmp()
     return -1;
   }
 
-  // if (_alternatingMode) {
-    
-  //   // alternating mode
-    
-  //   if (_writeTimeDimVarsAlt(file, timeDim)) {
-  //     cerr << "ERROR - AparTs2NetCDF::_writeFileTmp" << endl;
-  //     return -1;
-  //   }
+  if (_writeTimeDimVars(file, timeDim)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeFileTmp" << endl;
+    return -1;
+  }
 
-  // } else {
-    
-    if (_writeTimeDimVars(file, timeDim)) {
-      cerr << "ERROR - AparTs2NetCDF::_writeFileTmp" << endl;
-      return -1;
-    }
-
-  // }
-
-  if (_nPulses > 0) {
+  if (_pulses.size() > 0) {
     if (_writeIqVars(file, timeDim, gatesDim, "I", "Q",
-                     (float *) _iBuf.getPtr(),
-                     (float *) _qBuf.getPtr())) {
+                     (float *) _II.getPtr(),
+                     (float *) _QQ.getPtr())) {
       return -1;
     }
   }
-
-  // if (_nPulsesVc > 0) {
-  //   if (_writeIqVars(file, timeDim, gatesDim, "IVc", "QVc",
-  //                    (float *) _iBufVc.getPtr(),
-  //                    (float *) _qBufVc.getPtr())) {
-  //     return -1;
-  //   }
-  // }
-
-  // if (_nPulsesHx > 0) {
-  //   if (_writeIqVars(file, timeDim, gatesDim, "IHx", "QHx",
-  //                    (float *) _iBufHx.getPtr(),
-  //                    (float *) _qBufHx.getPtr())) {
-  //     return -1;
-  //   }
-  // }
-
-  // if (_nPulsesVx > 0) {
-  //   if (_writeIqVars(file, timeDim, gatesDim, "IVx", "QVx",
-  //                    (float *) _iBufVx.getPtr(),
-  //                    (float *) _qBufVx.getPtr())) {
-  //     return -1;
-  //   }
-  // }
 
   return iret;
 
@@ -890,14 +669,14 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   file.addGlobAttr("Description", desc);
   file.addGlobAttr("FirstGate", startGate);
   file.addGlobAttr("LastGate", endGate);
-
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    file.addGlobAttr("n_gates_padded_to_max", _nGatesMax);
-  }
+  
+  file.addGlobAttr("n_gates_padded_to_max", _nGatesMax);
 
   // radar info
-
-  apar_ts_radar_info_t radarInfo(_radarPrev);
+  
+  const AparTsInfo &info = _pulses[0]->getTsInfo();
+  const apar_ts_radar_info_t &radarInfo = info.getRadarInfo();
+  
   file.addGlobAttr("radar_latitude_deg", radarInfo.latitude_deg);
   file.addGlobAttr("radar_longitude_deg", radarInfo.longitude_deg);
   file.addGlobAttr("radar_altitude_m", radarInfo.altitude_m);
@@ -912,73 +691,28 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   
   // scan info
 
-  // apar_ts_scan_segment_t scanSeg(_scanPrev);
-
-  // file.addGlobAttr("scan_scan_mode", 
-  //                  apar_ts_scan_mode_to_str(scanSeg.scan_mode).c_str());
-  // file.addGlobAttr("scan_volume_num", scanSeg.volume_num);
-  // file.addGlobAttr("scan_sweep_num", scanSeg.sweep_num);
-  // file.addGlobAttr("scan_time_limit", scanSeg.time_limit);
-  // file.addGlobAttr("scan_az_manual", scanSeg.az_manual);
-  // file.addGlobAttr("scan_el_manual", scanSeg.el_manual);
-  // file.addGlobAttr("scan_az_start", scanSeg.az_start);
-  // file.addGlobAttr("scan_el_start", scanSeg.el_start);
-  // file.addGlobAttr("scan_scan_rate", scanSeg.scan_rate);
-  // file.addGlobAttr("scan_left_limit", scanSeg.left_limit);
-  // file.addGlobAttr("scan_right_limit", scanSeg.right_limit);
-  // file.addGlobAttr("scan_up_limit", scanSeg.up_limit);
-  // file.addGlobAttr("scan_down_limit", scanSeg.down_limit);
-  // file.addGlobAttr("scan_step", scanSeg.step);
-  // file.addGlobAttr("scan_current_fixed_angle", scanSeg.current_fixed_angle);
-  // file.addGlobAttr("scan_init_direction_cw", scanSeg.init_direction_cw);
-  // file.addGlobAttr("scan_init_direction_up", scanSeg.init_direction_up);
-  // file.addGlobAttr("scan_n_sweeps", scanSeg.n_sweeps);
-  // file.addGlobAttr("scan_sun_scan_sector_width_az", 
-  //                  scanSeg.sun_scan_sector_width_az);
-  // file.addGlobAttr("scan_sun_scan_sector_width_el", 
-  //                  scanSeg.sun_scan_sector_width_el);
-  // file.addGlobAttr("scan_segment_name", scanSeg.segment_name);
-  // file.addGlobAttr("scan_project_name", scanSeg.project_name);
-
-  // processor info
-
-  // apar_ts_processing_t proc(_procPrev);
-
-  // file.addGlobAttr("proc_xmit_rcv_mode",
-  //                  apar_ts_xmit_rcv_mode_to_str(proc.xmit_rcv_mode).c_str());
-  // file.addGlobAttr("proc_xmit_phase_mode",
-  //                  apar_xmit_phase_mode_to_str(proc.xmit_phase_mode).c_str());
-  // file.addGlobAttr("proc_prf_mode", 
-  //                  apar_prf_mode_to_str(proc.prf_mode).c_str());
-  // file.addGlobAttr("proc_pulse_type", 
-  //                  apar_pulse_type_to_str(proc.pulse_type).c_str());
-  // file.addGlobAttr("proc_prt_usec", proc.prt_usec);
-  // file.addGlobAttr("proc_prt2_usec", proc.prt2_usec);
-  // file.addGlobAttr("proc_cal_type", 
-  //                  apar_cal_type_to_str(proc.cal_type).c_str());
-  // file.addGlobAttr("proc_burst_range_offset_m", proc.burst_range_offset_m);
-  // file.addGlobAttr("proc_pulse_width_us", proc.pulse_width_us);
-  // file.addGlobAttr("proc_start_range_m", proc.start_range_m);
-  // file.addGlobAttr("proc_gate_spacing_m", proc.gate_spacing_m);
-  // file.addGlobAttr("proc_integration_cycle_pulses",
-  //                  proc.integration_cycle_pulses);
-  // file.addGlobAttr("proc_clutter_filter_number", proc.clutter_filter_number);
-  // file.addGlobAttr("proc_range_gate_averaging", proc.range_gate_averaging);
-  // file.addGlobAttr("proc_max_gate", proc.max_gate);
-  // file.addGlobAttr("proc_test_power_dbm", proc.test_power_dbm);
-  // file.addGlobAttr("proc_test_pulse_range_km", proc.test_pulse_range_km);
-  // file.addGlobAttr("proc_test_pulse_length_usec", proc.test_pulse_length_usec);
-  // file.addGlobAttr("proc_pol_mode", proc.pol_mode);
-  // file.addGlobAttr("proc_xmit_flag[0]", proc.xmit_flag[0]);
-  // file.addGlobAttr("proc_xmit_flag[1]", proc.xmit_flag[1]);
-  // file.addGlobAttr("proc_beams_are_indexed", proc.beams_are_indexed);
-  // file.addGlobAttr("proc_specify_dwell_width", proc.specify_dwell_width);
-  // file.addGlobAttr("proc_indexed_beam_width_deg", proc.indexed_beam_width_deg);
-  // file.addGlobAttr("proc_indexed_beam_spacing_deg",
-  //                  proc.indexed_beam_spacing_deg);
-  // file.addGlobAttr("proc_num_prts", proc.num_prts);
-  // file.addGlobAttr("proc_prt3_usec", proc.prt3_usec);
-  // file.addGlobAttr("proc_prt4_usec", proc.prt4_usec);
+  const apar_ts_scan_segment_t &scanSeg = info.getScanSegment();
+  
+  file.addGlobAttr("scan_scan_mode", 
+                   apar_ts_scan_mode_to_str(scanSeg.scan_mode).c_str());
+  file.addGlobAttr("scan_volume_num", scanSeg.volume_num);
+  file.addGlobAttr("scan_sweep_num", scanSeg.sweep_num);
+  file.addGlobAttr("scan_az_start", scanSeg.az_start);
+  file.addGlobAttr("scan_el_start", scanSeg.el_start);
+  file.addGlobAttr("scan_scan_rate", scanSeg.scan_rate);
+  file.addGlobAttr("scan_left_limit", scanSeg.left_limit);
+  file.addGlobAttr("scan_right_limit", scanSeg.right_limit);
+  file.addGlobAttr("scan_up_limit", scanSeg.up_limit);
+  file.addGlobAttr("scan_down_limit", scanSeg.down_limit);
+  file.addGlobAttr("scan_step", scanSeg.step);
+  file.addGlobAttr("scan_current_fixed_angle", scanSeg.current_fixed_angle);
+  file.addGlobAttr("scan_n_sweeps", scanSeg.n_sweeps);
+  file.addGlobAttr("scan_sun_scan_sector_width_az", 
+                   scanSeg.sun_scan_sector_width_az);
+  file.addGlobAttr("scan_sun_scan_sector_width_el", 
+                   scanSeg.sun_scan_sector_width_el);
+  file.addGlobAttr("scan_segment_name", scanSeg.segment_name);
+  file.addGlobAttr("scan_project_name", scanSeg.project_name);
 
   // calibration
 
@@ -1044,7 +778,7 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
 
   } else {
 
-    apar_ts_calibration_t cal(_calibPrev);
+    const apar_ts_calibration_t &cal = info.getCalibration();
     file.addGlobAttr("cal_wavelength_cm", cal.wavelength_cm);
     file.addGlobAttr("cal_beamwidth_deg_h", cal.beamwidth_deg_h);
     file.addGlobAttr("cal_beamwidth_deg_v", cal.beamwidth_deg_v);
@@ -1231,13 +965,11 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
 
   // ngates per ray
 
-  if (_params.determine_ngates == Params::PAD_NGATES_TO_MAX) {
-    if (_writeVar(file, timeDim,
-                  "n_gates_ray", "number_of_valid_gates_in_ray", "",
-                  _nGatesRay)) {
-      cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-      return -1;
-    }
+  if (_writeVar(file, timeDim,
+                "n_gates_ray", "number_of_valid_gates_in_ray", "",
+                _nGatesRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
   }
   
   // Elevation variable

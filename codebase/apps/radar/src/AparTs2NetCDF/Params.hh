@@ -86,11 +86,6 @@ public:
     END_OF_VOLUME = 2
   } output_trigger_t;
 
-  typedef enum {
-    SPECIFY_NGATES_SAVE = 0,
-    PAD_NGATES_TO_MAX = 1
-  } determine_ngates_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -409,10 +404,6 @@ public:
 
   int max_pulses_per_file;
 
-  determine_ngates_t determine_ngates;
-
-  int n_gates_save;
-
   char* output_dir;
 
   tdrp_bool_t preserve_file_name;
@@ -426,7 +417,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[25];
+  mutable TDRPtable _table[22];
 
   const char *_className;
 

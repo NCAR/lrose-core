@@ -110,28 +110,6 @@ paramdef int {
 } max_pulses_per_file;
 
 commentdef {
-  p_header = "NUMBER OF GATES";
-  p_text = "Number of gates in output file must be constant, since we use rectangular arrays in the NetCDF file.";
-};
-
-typedef enum {
-  SPECIFY_NGATES_SAVE,
-  PAD_NGATES_TO_MAX
-} determine_ngates_t;
-
-paramdef enum determine_ngates_t {
-  p_default = PAD_NGATES_TO_MAX;
-  p_descr = "Determine number of gates to write.";
-  p_help = "The number of gates in output file must be constant, since we use rectangular arrays in the NetCDF file.";
-} determine_ngates;
-
-paramdef int {
-  p_default = 1000;
-  p_descr = "Number of gates in pulses to be saved.";
-  p_help = "Applies to SPECIFY_NGATES_SAVE.";
-} n_gates_save;
-
-commentdef {
   p_header = "DATA OUTPUT";
 };
 
