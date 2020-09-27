@@ -434,20 +434,20 @@ int AparTsArchive::_openNewFile(const AparTsPulse &pulse)
   }
 
   char name[1024];
-  sprintf(name, "%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d%s%s%s%s%s",
+  snprintf(name, 1024, "%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d%s%s%s%s%s",
           ttime.year, ttime.month, ttime.day,
           ttime.hour, ttime.min, ttime.sec, milliSecs,
 	  fixedAngleStr, movingAngleStr, scanModeStr.c_str(),
           packing.c_str(), format.c_str());
   _outputName = name;
 
-  char relPath[1024];
-  sprintf(relPath, "%.4d%.2d%.2d/%s",
-          ttime.year, ttime.month, ttime.day, name);
+  char relPath[2048];
+  snprintf(relPath, 2048, "%.4d%.2d%.2d/%s",
+           ttime.year, ttime.month, ttime.day, name);
   _relPath = relPath;
 
-  char path[1024];
-  sprintf(path, "%s/%s", _outputDir.c_str(), relPath);
+  char path[4096];
+  snprintf(path, 4096, "%s/%s", _outputDir.c_str(), relPath);
   
   // open file
 
