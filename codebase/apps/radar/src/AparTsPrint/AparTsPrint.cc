@@ -627,11 +627,12 @@ int AparTsPrint::_runCalMode()
   // compute output file name
 
   DateTime now(time(NULL));
-  char fileName[1024];
-  sprintf(fileName, "tscal_%.4d%.2d%.2d_%.2d%.2d%2d_%s.txt",
-	  now.getYear(), now.getMonth(), now.getDay(),
-	  now.getHour(), now.getMin(), now.getSec(),
-	  calName);
+  char fileName[2048];
+  snprintf(fileName, 2048,
+           "tscal_%.4d%.2d%.2d_%.2d%.2d%2d_%s.txt",
+           now.getYear(), now.getMonth(), now.getDay(),
+           now.getHour(), now.getMin(), now.getSec(),
+           calName);
 
   // open file
 

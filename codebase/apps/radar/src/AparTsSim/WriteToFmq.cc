@@ -98,7 +98,7 @@ WriteToFmq::WriteToFmq(const string &progName,
   _rateStartTime.set(RadxTime::NEVER);
   _nBytesForRate = 0;
   _realtimeDeltaSecs = 0;
-  _nPulsesOut = 0;
+  _metaCount = 0;
 
   // compute the scan strategy
 
@@ -363,7 +363,7 @@ int WriteToFmq::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         IwrfTsPulse *iwrfPulse = dwellPulses[pulseNumInDwell];
 
         // change to realtime if appropriate
-
+        
         if (_params.fmq_set_times_to_now && _realtimeDeltaSecs == 0) {
           time_t now = time(NULL);
           _realtimeDeltaSecs = now - iwrfPulse->getTime();
@@ -381,64 +381,133 @@ int WriteToFmq::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         double el = beamEl[ibeam];
 
         // add metadata to outgoing message
-        
-        if (_nPulsesOut % _params.n_pulses_per_info == 0) {
-          _addMetaDataToMsg();
-        }
-        
-        // create the outgoing pulse
-        
-        AparTsPulse pulse(*_aparTsInfo, _aparTsDebug);
-        pulse.setTime(secondsTime, nanoSecs);
 
-        pulse.setBeamNumInDwell(ibeam);
-        pulse.setVisitNumInBeam(ivisit);
-        pulse.setPulseSeqNum(_pulseSeqNum);
-        pulse.setDwellSeqNum(_dwellSeqNum);
+        if (_metaCount >= _params.n_pulses_per_info) {
+          _addMetaDataToMsg();
+          _metaCount = 0;
+        }
+        _metaCount++;
+        
+        // create the outgoing co-polar pulse
+        
+        AparTsPulse copolPulse(*_aparTsInfo, _aparTsDebug);
+        copolPulse.setTime(secondsTime, nanoSecs);
+        
+        copolPulse.setBeamNumInDwell(ibeam);
+        copolPulse.setVisitNumInBeam(ivisit);
+        copolPulse.setPulseSeqNum(_pulseSeqNum);
+        copolPulse.setDwellSeqNum(_dwellSeqNum);
         
         if (sweepMode[ibeam] == Radx::SWEEP_MODE_RHI) {
-          pulse.setScanMode((int) apar_ts_scan_mode_t::RHI);
-          pulse.setFixedAngle(az);
+          copolPulse.setScanMode((int) apar_ts_scan_mode_t::RHI);
+          copolPulse.setFixedAngle(az);
         } else {
-          pulse.setScanMode((int) apar_ts_scan_mode_t::PPI);
-          pulse.setFixedAngle(el);
+          copolPulse.setScanMode((int) apar_ts_scan_mode_t::PPI);
+          copolPulse.setFixedAngle(el);
         }
-        pulse.setSweepNum(sweepNum[ibeam]);
-        pulse.setVolumeNum(volNum[ibeam]);
-        pulse.setElevation(el);
-        pulse.setAzimuth(az);
-        pulse.setPrt(iwrfPulse->getPrt());
-        pulse.setPrtNext(iwrfPulse->get_prt_next());
-        pulse.setPulseWidthUs(iwrfPulse->getPulseWidthUs());
-        pulse.setNGates(iwrfPulse->getNGates());
-        pulse.setNChannels(iwrfPulse->getNChannels());
-        pulse.setIqEncoding((int) apar_ts_iq_encoding_t::FL32);
-        pulse.setHvFlag(iwrfPulse->isHoriz());
-        pulse.setPhaseCohered(iwrfPulse->get_phase_cohered());
-        pulse.setStatus(iwrfPulse->get_status());
-        pulse.setNData(iwrfPulse->get_n_data());
-        pulse.setScale(1.0);
-        pulse.setOffset(0.0);
-        pulse.setStartRangeM(iwrfPulse->get_start_range_m());
-        pulse.setGateGSpacineM(iwrfPulse->get_gate_spacing_m());
-        
-        // pulse.setStartOfSweep(false);
-        // pulse.setStartOfVolume(false);
-        // pulse.setEndOfSweep(false);
-        // pulse.setEndOfVolume(false);
+
+        copolPulse.setSweepNum(sweepNum[ibeam]);
+        copolPulse.setVolumeNum(volNum[ibeam]);
+        copolPulse.setElevation(el);
+        copolPulse.setAzimuth(az);
+        copolPulse.setPrt(iwrfPulse->getPrt());
+        copolPulse.setPrtNext(iwrfPulse->get_prt_next());
+        copolPulse.setPulseWidthUs(iwrfPulse->getPulseWidthUs());
+        copolPulse.setNGates(iwrfPulse->getNGates());
+        copolPulse.setNChannels(1);
+        copolPulse.setIqEncoding((int) apar_ts_iq_encoding_t::FL32);
+        copolPulse.setHvFlag(iwrfPulse->isHoriz());
+        copolPulse.setChanIsCopol(0, true);
+        copolPulse.setPhaseCohered(iwrfPulse->get_phase_cohered());
+        copolPulse.setStatus(iwrfPulse->get_status());
+        copolPulse.setNData(iwrfPulse->get_n_data());
+        copolPulse.setScale(1.0);
+        copolPulse.setOffset(0.0);
+        copolPulse.setStartRangeM(iwrfPulse->get_start_range_m());
+        copolPulse.setGateGSpacineM(iwrfPulse->get_gate_spacing_m());
 
         _pulseSeqNum++;
 
-        pulse.setIqFloats(iwrfPulse->getNGates(), iwrfPulse->getNChannels(), 
-                          (fl32*) iwrfPulse->getPackedData());
+        // add the co-pol IQ channel data as floats
+
+        {
+          MemBuf iqBuf;
+          fl32 **iqChans = iwrfPulse->getIqArray();
+          iqBuf.add(iqChans[0], iwrfPulse->getNGates() * 2 * sizeof(fl32));
+          copolPulse.setIqFloats(iwrfPulse->getNGates(), 1,
+                                 (const fl32 *) iqBuf.getPtr());
+        }
         
         // add the pulse to the outgoing message
         
-        MemBuf pulseBuf;
-        pulse.assemble(pulseBuf);
+        MemBuf copolBuf;
+        copolPulse.assemble(copolBuf);
         _outputMsg.addPart(APAR_TS_PULSE_HEADER_ID,
-                           pulseBuf.getLen(),
-                           pulseBuf.getPtr());
+                           copolBuf.getLen(),
+                           copolBuf.getPtr());
+        
+        // optionally add a cross-pol pulse
+        
+        if (_params.add_cross_pol_sample_at_end_of_visit &&
+            ipulse == _params.n_samples_per_visit - 1) {
+
+          AparTsPulse xpolPulse(*_aparTsInfo, _aparTsDebug);
+          xpolPulse.setTime(secondsTime, nanoSecs);
+          
+          xpolPulse.setBeamNumInDwell(ibeam);
+          xpolPulse.setVisitNumInBeam(ivisit);
+          xpolPulse.setPulseSeqNum(_pulseSeqNum);
+          xpolPulse.setDwellSeqNum(_dwellSeqNum);
+          
+          if (sweepMode[ibeam] == Radx::SWEEP_MODE_RHI) {
+            xpolPulse.setScanMode((int) apar_ts_scan_mode_t::RHI);
+            xpolPulse.setFixedAngle(az);
+          } else {
+            xpolPulse.setScanMode((int) apar_ts_scan_mode_t::PPI);
+            xpolPulse.setFixedAngle(el);
+          }
+          
+          xpolPulse.setSweepNum(sweepNum[ibeam]);
+          xpolPulse.setVolumeNum(volNum[ibeam]);
+          xpolPulse.setElevation(el);
+          xpolPulse.setAzimuth(az);
+          xpolPulse.setPrt(iwrfPulse->getPrt());
+          xpolPulse.setPrtNext(iwrfPulse->get_prt_next());
+          xpolPulse.setPulseWidthUs(iwrfPulse->getPulseWidthUs());
+          xpolPulse.setNGates(iwrfPulse->getNGates());
+          xpolPulse.setNChannels(1);
+          xpolPulse.setIqEncoding((int) apar_ts_iq_encoding_t::FL32);
+          xpolPulse.setHvFlag(iwrfPulse->isHoriz());
+          xpolPulse.setChanIsCopol(0, false);
+          xpolPulse.setPhaseCohered(iwrfPulse->get_phase_cohered());
+          xpolPulse.setStatus(iwrfPulse->get_status());
+          xpolPulse.setNData(iwrfPulse->get_n_data());
+          xpolPulse.setScale(1.0);
+          xpolPulse.setOffset(0.0);
+          xpolPulse.setStartRangeM(iwrfPulse->get_start_range_m());
+          xpolPulse.setGateGSpacineM(iwrfPulse->get_gate_spacing_m());
+        
+          _pulseSeqNum++;
+
+          // add the co-pol IQ channel data as floats
+
+          {
+            MemBuf iqBuf;
+            fl32 **iqChans = iwrfPulse->getIqArray();
+            iqBuf.add(iqChans[1], iwrfPulse->getNGates() * 2 * sizeof(fl32));
+            xpolPulse.setIqFloats(iwrfPulse->getNGates(), 1,
+                                  (const fl32 *) iqBuf.getPtr());
+          }
+        
+          // add the pulse to the outgoing message
+          
+          MemBuf xpolBuf;
+          xpolPulse.assemble(xpolBuf);
+          _outputMsg.addPart(APAR_TS_PULSE_HEADER_ID,
+                             xpolBuf.getLen(),
+                             xpolBuf.getPtr());
+
+        } // if (_params.add_cross_pol_sample_at_end_of_visit ...
         
         // write to the queue if ready
         
@@ -447,14 +516,6 @@ int WriteToFmq::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
           iret = -1;
         }
         
-        // clear the buffer
-        
-        // Apar.clear();
-        
-        // increment
-        
-        _nPulsesOut++;
-  
       } // ipulse
     } // ibeam
   } // ivisit

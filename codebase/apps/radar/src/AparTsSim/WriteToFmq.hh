@@ -115,7 +115,7 @@ private:
   apar_ts_calibration_t _aparCalibration;
   int _volNum;
   int _sweepNum;
-  si64 _nPulsesOut;
+  si64 _metaCount;
 
   // output message and FMQ
   // we conbine a number of packets into a message before
