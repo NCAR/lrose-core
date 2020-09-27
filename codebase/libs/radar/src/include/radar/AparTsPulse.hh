@@ -350,6 +350,9 @@ public:
   inline void setNChannels(si32 x) { _hdr.n_channels = x; }
   inline void setIqEncoding(si32 x) { _hdr.iq_encoding = x; }
   inline void setHvFlag(si32 x) { _hdr.hv_flag = x; }
+  inline void setChanIsCopol(int chanNum, bool val) {
+    _hdr.chan_is_copol[chanNum] = val;
+  }
   inline void setPhaseCohered(si32 x) { _hdr.phase_cohered = x; }
   inline void setStatus(si32 x) { _hdr.status = x; }
   inline void setNData(si32 x) { _hdr.n_data = x; }
