@@ -100,22 +100,10 @@ private:
   // debug print loop count
   
   si64 _nPulsesRead;
-  // int _nPulsesFile; // number of pulses in current file
-  // si64 _prevSeqNum;
-  // double _prevAz;
 
   // previous values - to check for changes
 
   int _prevPulseSweepNum;
-  // int _nGatesPrev, _nGatesPrev2;
-  // apar_ts_radar_info_t _radarPrev;
-  // apar_ts_scan_segment_t _scanPrev;
-  // apar_ts_processing_t _procPrev;
-  // apar_ts_calibration_t _calibPrev;
-
-  // do we need a new file
-  
-  // bool _needNewFile;
 
   // geometry
   
@@ -141,7 +129,6 @@ private:
   double _el;
   double _az;
   double _prt;
-  // double _phaseDiff;
 
   // meta data arrays
 
@@ -151,35 +138,11 @@ private:
   vector<float> _elArray, _azArray, _fixedAngleArray;
   vector<float> _prtArray;
   vector<float> _pulseWidthArray;
-  // vector<float> _modCodeArray;
-  // vector<int> _transitionFlagArray;
-  // vector<float> _burstMagArray;
-  // vector<float> _burstArgArray;
-
-  // vector<double> _timeArrayVc, _dtimeArrayVc;
-  // vector<float> _elArrayVc, _azArrayVc, _fixedAngleArrayVc;
-  // vector<float> _prtArrayVc;
-  // vector<float> _pulseWidthArrayVc;
-  // vector<float> _modCodeArrayVc;
-  // vector<int> _transitionFlagArrayVc;
-  // vector<float> _burstMagArrayVc;
-  // vector<float> _burstArgArrayVc;
 
   // IQ data
 
   MemBuf _II, _QQ;
   MemBuf _pulseII, _pulseQQ;
-
-  // int _nPulses;
-  // int _nPulsesVc;
-  // int _nPulsesHx;
-  // int _nPulsesVx;
-  
-  // MemBuf _iBuf0, _qBuf0;
-  // MemBuf _iBuf1, _qBuf1;
-  // MemBuf _iBufVc, _qBufVc;
-  // MemBuf _iBufHx, _qBufHx;
-  // MemBuf _iBufVx, _qBufVx;
 
   // output file
 
@@ -190,13 +153,10 @@ private:
   // functions
   
   bool _checkReadyToWrite(const AparTsPulse *pulse, bool &useThisPulse);
-
+  void _prepareToWrite();
   void _computeNGatesMax();
   void _checkForMissingPulses();
-  void _prepareToWrite();
-  
   void _clearPulseQueue();
-  // void _reset();
 
   int _writeFile();
   int _writeFileTmp();
@@ -206,7 +166,6 @@ private:
   
   int _writeBaseTimeVars(NcxxFile &file);
   int _writeTimeDimVars(NcxxFile &file, NcxxDim &timeDim);
-  int _writeTimeDimVarsAlt(NcxxFile &file, NcxxDim &timeDim);
   int _writeRangeVar(NcxxFile &file, NcxxDim &rangeDim);
     
   int _addAttr(NcxxVar &var,

@@ -125,10 +125,6 @@ AparTs2NetCDF::AparTs2NetCDF(int argc, char **argv)
     _pulseReader = new AparTsReaderFile(_args.inputFileList, aparDebug);
   }
 
-  // initialize
-  
-  // _reset();
-  
   // override cal if appropriate
 
   if (_params.override_radar_cal) {
@@ -217,19 +213,23 @@ int AparTs2NetCDF::Run ()
         _pulses.push_back(pulse);
       }
 
-      // prepare to write
-      _prepareToWrite();
+      if (_pulses.size() > 0) {
+        
+        // prepare to write
+        _prepareToWrite();
+        
+        // write the file
+        if (_writeFile()) {
+          return -1;
+        }
 
-      // write the file
-      if (_writeFile()) {
-        return -1;
       }
-
+        
       // clear the queue
       _clearPulseQueue();
-
+      
       // add previous pulse if not already used
-
+      
       if (!useThisPulse) {
         // add pulse to queue after write
         _pulses.push_back(pulse);
@@ -452,68 +452,6 @@ void AparTs2NetCDF::_clearPulseQueue()
 }
 
 ////////////////////////////////////////
-// reset data variables
-
-// void AparTs2NetCDF::_reset()
-
-// {
-
-//   _startTime = 0;
-//   _startAz = 0;
-//   _startEl = 0;
-
-//   _nPulsesFile = 0;
-//   _nGates = 0;
-//   _nGatesSave = -1;
-
-//   // _alternatingMode = false;
-
-//   _nPulses = 0;
-//   // _nPulsesVc = 0;
-//   // _nPulsesHx = 0;
-//   // _nPulsesVx = 0;
-
-//   _iBuf.reset();
-//   _qBuf.reset();
-//   // _iBufVc.reset();
-//   // _qBufVc.reset();
-//   // _iBufHx.reset();
-//   // _qBufHx.reset();
-//   // _iBufVx.reset();
-//   // _qBufVx.reset();
-
-//   _nGatesRay.clear();
-
-//   _timeArray.clear();
-//   _dtimeArray.clear();
-
-//   _elArray.clear();
-//   _azArray.clear();
-//   _fixedAngleArray.clear();
-//   _prtArray.clear();
-//   _pulseWidthArray.clear();
-//   // _modCodeArray.clear();
-//   // _transitionFlagArray.clear();
-//   // _burstMagArray.clear();
-//   // _burstArgArray.clear();
-
-//   // _timeArrayVc.clear();
-//   // _dtimeArrayVc.clear();
-//   // _elArrayVc.clear();
-//   // _azArrayVc.clear();
-//   // _fixedAngleArrayVc.clear();
-//   // _prtArrayVc.clear();
-//   // _pulseWidthArrayVc.clear();
-//   // _modCodeArrayVc.clear();
-//   // _transitionFlagArrayVc.clear();
-//   // _burstMagArrayVc.clear();
-//   // _burstArgArrayVc.clear();
-
-//   _clearPulseQueue();
-  
-// }
-
-////////////////////////////////////////
 // write out the netDCF file
 //
 // Returns 0 on success, -1 on failure
@@ -521,20 +459,6 @@ void AparTs2NetCDF::_clearPulseQueue()
 int AparTs2NetCDF::_writeFile()
   
 {
-
-  // compute number of times active
-  
-  _nTimes = _pulses.size();
-  if (_nTimes < 1) {
-    if (_params.debug) {
-      cerr << "  INFO - no pulses" << endl;
-    }
-    return 0;
-  }
-
-  // compute max number of gates
-
-  _computeNGatesMax();
 
   // compute output and tmp paths
   
@@ -691,28 +615,28 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   
   // scan info
 
-  const apar_ts_scan_segment_t &scanSeg = info.getScanSegment();
+  // const apar_ts_scan_segment_t &scanSeg = info.getScanSegment();
   
-  file.addGlobAttr("scan_scan_mode", 
-                   apar_ts_scan_mode_to_str(scanSeg.scan_mode).c_str());
-  file.addGlobAttr("scan_volume_num", scanSeg.volume_num);
-  file.addGlobAttr("scan_sweep_num", scanSeg.sweep_num);
-  file.addGlobAttr("scan_az_start", scanSeg.az_start);
-  file.addGlobAttr("scan_el_start", scanSeg.el_start);
-  file.addGlobAttr("scan_scan_rate", scanSeg.scan_rate);
-  file.addGlobAttr("scan_left_limit", scanSeg.left_limit);
-  file.addGlobAttr("scan_right_limit", scanSeg.right_limit);
-  file.addGlobAttr("scan_up_limit", scanSeg.up_limit);
-  file.addGlobAttr("scan_down_limit", scanSeg.down_limit);
-  file.addGlobAttr("scan_step", scanSeg.step);
-  file.addGlobAttr("scan_current_fixed_angle", scanSeg.current_fixed_angle);
-  file.addGlobAttr("scan_n_sweeps", scanSeg.n_sweeps);
-  file.addGlobAttr("scan_sun_scan_sector_width_az", 
-                   scanSeg.sun_scan_sector_width_az);
-  file.addGlobAttr("scan_sun_scan_sector_width_el", 
-                   scanSeg.sun_scan_sector_width_el);
-  file.addGlobAttr("scan_segment_name", scanSeg.segment_name);
-  file.addGlobAttr("scan_project_name", scanSeg.project_name);
+  // file.addGlobAttr("scan_scan_mode", 
+  //                  apar_ts_scan_mode_to_str(scanSeg.scan_mode).c_str());
+  // file.addGlobAttr("scan_volume_num", scanSeg.volume_num);
+  // file.addGlobAttr("scan_sweep_num", scanSeg.sweep_num);
+  // file.addGlobAttr("scan_az_start", scanSeg.az_start);
+  // file.addGlobAttr("scan_el_start", scanSeg.el_start);
+  // file.addGlobAttr("scan_scan_rate", scanSeg.scan_rate);
+  // file.addGlobAttr("scan_left_limit", scanSeg.left_limit);
+  // file.addGlobAttr("scan_right_limit", scanSeg.right_limit);
+  // file.addGlobAttr("scan_up_limit", scanSeg.up_limit);
+  // file.addGlobAttr("scan_down_limit", scanSeg.down_limit);
+  // file.addGlobAttr("scan_step", scanSeg.step);
+  // file.addGlobAttr("scan_current_fixed_angle", scanSeg.current_fixed_angle);
+  // file.addGlobAttr("scan_n_sweeps", scanSeg.n_sweeps);
+  // file.addGlobAttr("scan_sun_scan_sector_width_az", 
+  //                  scanSeg.sun_scan_sector_width_az);
+  // file.addGlobAttr("scan_sun_scan_sector_width_el", 
+  //                  scanSeg.sun_scan_sector_width_el);
+  // file.addGlobAttr("scan_segment_name", scanSeg.segment_name);
+  // file.addGlobAttr("scan_project_name", scanSeg.project_name);
 
   // calibration
 
@@ -999,15 +923,6 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
     return -1;
   }
   
-  // modulation code variable
-
-  // if (_writeVar(file, timeDim,
-  //               "mod_code", "modulation_code", "degrees",
-  //               _modCodeArray)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
   // PRT variable
   
   if (_writeVar(file, timeDim,
@@ -1031,199 +946,6 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   // if (_writeVar(file, timeDim,
   //               "antenna_transition", "antenna_is_in_transition", "",
   //               _transitionFlagArray)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // write burst data
-  
-  // if (_writeVar(file, timeDim,
-  //               "burst_mag_hc", "", "",
-  //               _burstMagArray)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // if (_writeVar(file, timeDim,
-  //               "burst_mag_vc", "", "",
-  //               _burstMagArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // if (_writeVar(file, timeDim,
-  //               "burst_arg_hc", "", "",
-  //               _burstArgArray)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // if (_writeVar(file, timeDim,
-  //               "burst_arg_vc", "", "",
-  //               _burstArgArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  return 0;
-
-}
-
-////////////////////////////////////////////////////////
-// write out time variables in alternating dual pol mode
-// Returns 0 on success, -1 on failure
-
-int AparTs2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
-                                        NcxxDim &timeDim)
-  
-{
-
-  // Time variable - secs since start of file
-
-  char timeUnitsStr[256];
-  DateTime stime(_startTime);
-  sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
-          stime.getYear(), stime.getMonth(), stime.getDay(),
-          stime.getHour(), stime.getMin(), stime.getSec());
-  
-  // h copolar times
-
-  NcxxVar timeVar;
-  if (_addVar(file, timeVar, ncxxDouble, timeDim,
-              "time_offset_hc", "time_offset_from_base_time_hc", 
-              timeUnitsStr)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    cerr << "  Cannot create time_offset_hc var" << endl;
-    return -1;
-  }
-  timeVar.addScalarAttr("_FillValue", -9999.0);
-  TaArray<double> times_;
-  double *times = times_.alloc(_nTimes);
-  for (size_t jj = 0; jj < _nTimes; jj++) {
-    times[jj] = _dtimeArray[jj];
-  }
-  timeVar.putVal(times);
-
-  // v copolar times
-  
-  // NcxxVar timeVarVc;
-  // if (_addVar(file, timeVarVc, ncxxDouble, timeDim,
-  //             "time_offset_vc", "time_offset_from_base_time_vc", 
-  //             timeUnitsStr)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   cerr << "  Cannot create time_offset_vc var" << endl;
-  //   return -1;
-  // }
-  // timeVarVc.addScalarAttr("_FillValue", -9999.0);
-  // TaArray<double> timesVc_;
-  // double *timesVc = timesVc_.alloc(_nTimes);
-  // for (size_t jj = 0; jj < _nTimes; jj++) {
-  //   timesVc[jj] = _dtimeArrayVc[jj];
-  // }
-  // timeVarVc.putVal(timesVc);
-
-  // Elevation variable
-
-  if (_writeVar(file, timeDim,
-                "elevation", "elevation_angle", "degrees",
-                _elArray)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  // if (_writeVar(file, timeDim,
-  //               "elevation_vc", "elevation_angle_v_copolar", "degrees",
-  //               _elArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // Azimuth variable
-  
-  if (_writeVar(file, timeDim,
-                "azimuth", "azimuth_angle", "degrees",
-                _azArray)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  // if (_writeVar(file, timeDim,
-  //               "azimuth_vc", "azimuth_angle_v_copolar", "degrees",
-  //               _azArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // Fixed angle variable
-  
-  if (_writeVar(file, timeDim,
-                "fixed_angle", "fixed_scan_angle", "degrees",
-                _fixedAngleArray)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  // if (_writeVar(file, timeDim,
-  //               "fixed_angle_vc", "fixed_scan_angle_v_copolar", "degrees",
-  //               _fixedAngleArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // modulation code variable
-
-  // if (_writeVar(file, timeDim,
-  //               "mod_code_hc", "modulation_code_h_copolar", "degrees",
-  //               _modCodeArray)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  // if (_writeVar(file, timeDim,
-  //               "mod_code_vc", "modulation_code_v_copolar", "degrees",
-  //               _modCodeArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // PRT variable
-  
-  if (_writeVar(file, timeDim,
-                "prt_hc", "pulse_repetition_time_h_copolar", "seconds",
-                _prtArray)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  // if (_writeVar(file, timeDim,
-  //               "prt_vc", "pulse_repetition_time_v_copolar", "seconds",
-  //               _prtArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // Pulse width variable
-  
-  if (_writeVar(file, timeDim,
-                "pulse_width_hc", "pulse_width_h_copolar", "micro_seconds",
-                _pulseWidthArray)) {
-    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-    return -1;
-  }
-  // if (_writeVar(file, timeDim,
-  //               "pulse_width_vc", "pulse_width_v_copolar", "micro_seconds",
-  //               _pulseWidthArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-  
-  // Antenna transition variable
-  
-  // if (_writeVar(file, timeDim,
-  //               "antenna_transition_hc", "antenna_is_in_transition_h_copolar", "",
-  //               _transitionFlagArray)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
-
-  // if (_writeVar(file, timeDim,
-  //               "antenna_transition_vc", "antenna_is_in_transition_v_copolar", "",
-  //               _transitionFlagArrayVc)) {
   //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
   //   return -1;
   // }
