@@ -121,7 +121,7 @@ private:
 
   double _startAz;
   double _startEl;
-  apar_ts_scan_mode_t _scanMode;
+  apar_ts_scan_mode_t _startScanMode;
 
   time_t _pulseTimeSecs;
   double _pulseTime;
@@ -134,10 +134,22 @@ private:
 
   vector<int> _nGatesRay;
 
-  vector<double> _timeArray, _dtimeArray;
-  vector<float> _elArray, _azArray, _fixedAngleArray;
-  vector<float> _prtArray;
-  vector<float> _pulseWidthArray;
+  vector<double> _timeRay, _dtimeRay;
+  vector<float> _elRay, _azRay, _fixedAngleRay;
+  vector<float> _prtRay;
+  vector<float> _pulseWidthRay;
+
+  vector<int64_t> _pulseSeqNumRay;
+  vector<int64_t> _dwellSeqNumRay;
+
+  vector<int> _beamNumInDwellRay;
+  vector<int> _visitNumInBeamRay;
+  vector<int> _scanModeRay;
+  vector<int> _sweepNumRay;
+  vector<int> _volNumRay;
+  
+  vector<int> _hvFlagRay;
+  vector<int> _chanIsCopolRay;
 
   // IQ data
 
@@ -217,6 +229,13 @@ private:
                 const string &standardName,
                 const string &units,
                 const vector<int> vals);
+  
+  int _writeVar(NcxxFile &file,
+                NcxxDim &timeDim,
+                const string &name,
+                const string &standardName,
+                const string &units,
+                const vector<int64_t> vals);
   
   int _writeIqVars(NcxxFile &file,
                    NcxxDim &timeDim,

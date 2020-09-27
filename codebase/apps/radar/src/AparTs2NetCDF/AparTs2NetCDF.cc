@@ -64,11 +64,7 @@ AparTs2NetCDF::AparTs2NetCDF(int argc, char **argv)
   isOK = true;
   _pulseReader = NULL;
   _nPulsesRead = 0;
-  // _nGatesPrev = -1;
-  // _nGatesPrev2 = -1;
-  // _nPulsesFile = 0;
-  // _prevPulseSweepNum = -1;
-
+  
   _startRangeM = 0.0;
   _gateSpacingM = 1.0;
 
@@ -332,13 +328,23 @@ void AparTs2NetCDF::_prepareToWrite()
   _QQ.free();
 
   _nGatesRay.clear();
-  _timeArray.clear();
-  _dtimeArray.clear();
-  _elArray.clear();
-  _azArray.clear();
-  _fixedAngleArray.clear();
-  _prtArray.clear();
-  _pulseWidthArray.clear();
+  _timeRay.clear();
+  _dtimeRay.clear();
+  _elRay.clear();
+  _azRay.clear();
+  _fixedAngleRay.clear();
+  _prtRay.clear();
+  _pulseWidthRay.clear();
+
+  _pulseSeqNumRay.clear();
+  _dwellSeqNumRay.clear();
+  _beamNumInDwellRay.clear();
+  _visitNumInBeamRay.clear();
+  _scanModeRay.clear();
+  _sweepNumRay.clear();
+  _volNumRay.clear();
+  _hvFlagRay.clear();
+  _chanIsCopolRay.clear();
 
   // loop through the pulses
   
@@ -355,6 +361,7 @@ void AparTs2NetCDF::_prepareToWrite()
       _startAz = az;
       _startRangeM = pulse->getStartRangeM();
       _gateSpacingM = pulse->getGateSpacingM();
+      _startScanMode = pulse->getScanMode();
     }
     
     // set pulse properties
@@ -364,14 +371,25 @@ void AparTs2NetCDF::_prepareToWrite()
     float prt = pulse->getPrtNext();
     
     _nGatesRay.push_back(nGates);
-    _timeArray.push_back(pulseTime);
-    _dtimeArray.push_back((_pulseTimeSecs - _startTime) 
+    _timeRay.push_back(pulseTime);
+    _dtimeRay.push_back((_pulseTimeSecs - _startTime) 
                           + pulse->getNanoSecs() * 1.0e-9);
-    _elArray.push_back(el);
-    _azArray.push_back(az);
-    _fixedAngleArray.push_back(pulse->getFixedAngle());
-    _prtArray.push_back(prt);
-    _pulseWidthArray.push_back(pulse->getPulseWidthUs());
+    _elRay.push_back(el);
+    _azRay.push_back(az);
+    _fixedAngleRay.push_back(pulse->getFixedAngle());
+    _prtRay.push_back(prt);
+    _pulseWidthRay.push_back(pulse->getPulseWidthUs());
+
+    _pulseSeqNumRay.push_back(pulse->getPulseSeqNum());
+    _dwellSeqNumRay.push_back(pulse->getDwellSeqNum());
+
+    _beamNumInDwellRay.push_back(pulse->getBeamNumInDwell());
+    _visitNumInBeamRay.push_back(pulse->getVisitNumInBeam());
+    _scanModeRay.push_back((int) pulse->getScanMode());
+    _sweepNumRay.push_back(pulse->getSweepNum());
+    _volNumRay.push_back(pulse->getVolumeNum());
+    _hvFlagRay.push_back(pulse->getHvFlag());
+    _chanIsCopolRay.push_back(pulse->getChanIsCopol(0));
 
     const fl32 *chan0 = pulse->getIq0();
     float *ivals0 = (float *) _pulseII.getPtr();
@@ -883,7 +901,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   TaArray<double> times_;
   double *times = times_.alloc(_nTimes);
   for (size_t jj = 0; jj < _nTimes; jj++) {
-    times[jj] = _dtimeArray[jj];
+    times[jj] = _dtimeRay[jj];
   }
   timeVar.putVal(times);
 
@@ -900,7 +918,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
 
   if (_writeVar(file, timeDim,
                 "elevation", "elevation_angle", "degrees",
-                _elArray)) {
+                _elRay)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
@@ -909,7 +927,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   if (_writeVar(file, timeDim,
                 "azimuth", "azimuth_angle", "degrees",
-                _azArray)) {
+                _azRay)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
@@ -918,7 +936,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   if (_writeVar(file, timeDim,
                 "fixed_angle", "fixed_scan_angle", "degrees",
-                _fixedAngleArray)) {
+                _fixedAngleRay)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
@@ -927,7 +945,7 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   if (_writeVar(file, timeDim,
                 "prt", "pulse_repetition_time", "seconds",
-                _prtArray)) {
+                _prtRay)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
@@ -936,49 +954,73 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   
   if (_writeVar(file, timeDim,
                 "pulse_width", "pulse_width", "micro_seconds",
-                _pulseWidthArray)) {
+                _pulseWidthRay)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
-  // Antenna transition variable
+  // Pulse sequence number
   
-  // if (_writeVar(file, timeDim,
-  //               "antenna_transition", "antenna_is_in_transition", "",
-  //               _transitionFlagArray)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
+  if (_writeVar(file, timeDim,
+                "pulse_seq_num", "pulse_seq_num", "",
+                _pulseSeqNumRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
   
-  // write burst data
+  // Dwell sequence number
   
-  // if (_writeVar(file, timeDim,
-  //               "burst_mag_hc", "", "",
-  //               _burstMagArray)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
+  if (_writeVar(file, timeDim,
+                "dwell_seq_num", "dwell_seq_num", "",
+                _dwellSeqNumRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
   
-  // if (_writeVar(file, timeDim,
-  //               "burst_mag_vc", "", "",
-  //               _burstMagArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
+  // scan mode
   
-  // if (_writeVar(file, timeDim,
-  //               "burst_arg_hc", "", "",
-  //               _burstArgArray)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
+  if (_writeVar(file, timeDim,
+                "scan_mode", "scan_mode", "",
+                _scanModeRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
   
-  // if (_writeVar(file, timeDim,
-  //               "burst_arg_vc", "", "",
-  //               _burstArgArrayVc)) {
-  //   cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
-  //   return -1;
-  // }
+  // sweep number
+  
+  if (_writeVar(file, timeDim,
+                "sweep_num", "sweep_num", "",
+                _sweepNumRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
+  
+  // volume number
+  
+  if (_writeVar(file, timeDim,
+                "volume_num", "volume_num", "",
+                _volNumRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
+  
+  // hv flag
+  
+  if (_writeVar(file, timeDim,
+                "hv_flag", "hv_flag", "",
+                _hvFlagRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
+  
+  // copol flag
+  
+  if (_writeVar(file, timeDim,
+                "chan_is_copol", "chan_is_copol", "",
+                _chanIsCopolRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
   
   return 0;
 
@@ -1031,7 +1073,7 @@ int AparTs2NetCDF::_computeOutputFilePaths()
   sprintf(azAngleStr, "_%.2f", _startAz);
   
   string scanModeStr;
-  switch (_scanMode) {
+  switch (_startScanMode) {
     case apar_ts_scan_mode_t::COPLANE:
       scanModeStr = ".coplane";
       break;
@@ -1313,6 +1355,39 @@ int AparTs2NetCDF::_writeVar(NcxxFile &file,
   if (_addVar(file, var, ncxxInt, timeDim,
               name, standardName, units)) {
     cerr << "ERROR - AparTs2NetCDF::_addIntVar" << endl;
+    cerr << "  Cannot create var, name: " << name << endl;
+    return -1;
+  }
+  var.addScalarAttr("_FillValue", -9999);
+  for (size_t jj = 0; jj < timeDim.getSize(); jj++) {
+    ints[jj] = vals[jj];
+  }
+  var.putVal(ints);
+  
+  return 0;
+
+}
+
+////////////////////////////////////////
+// add and write int64 var
+// Returns 0 on success, -1 on failure
+
+int AparTs2NetCDF::_writeVar(NcxxFile &file,
+                             NcxxDim &timeDim,
+                             const string &name,
+                             const string &standardName,
+                             const string &units,
+                             const vector<int64_t> vals)
+  
+{
+  
+  TaArray<int64_t> ints_;
+  int64_t *ints = ints_.alloc(timeDim.getSize());
+  
+  NcxxVar var;
+  if (_addVar(file, var, ncxxInt64, timeDim,
+              name, standardName, units)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeVar" << endl;
     cerr << "  Cannot create var, name: " << name << endl;
     return -1;
   }
