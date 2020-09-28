@@ -881,6 +881,18 @@
     tt->single_val.i = 1000;
     tt++;
     
+    // Parameter 'output_fmq_write_blocking'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_fmq_write_blocking");
+    tt->descr = tdrpStrDup("Option to block on write.");
+    tt->help = tdrpStrDup("If set to true, the write will block until the reader catches up. NOTE: this only works for a single reader.");
+    tt->val_offset = (char *) &output_fmq_write_blocking - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'n_pulses_per_message'
     // ctype is 'int'
     

@@ -94,10 +94,11 @@ SimScanStrategy::angle_t SimScanStrategy::getNextAngle() const
 void SimScanStrategy::_init()
 
 {
-  
+
   _angles.clear();
   _simVolNum = 0;
   _angleIndex = 0;
+  _angles.clear();
   
   for (int isweep = 0; isweep < _params.sim_sweeps_n; isweep++) {
     
@@ -105,59 +106,106 @@ void SimScanStrategy::_init()
     
     if (sweep.sweep_type == Params::RHI_SIM) {
       
+      int nAngles = (int) ((sweep.max_el - sweep.min_el) / sweep.delta_el) + 1;
+      int stride = ((nAngles - 1) / _params.n_beams_per_dwell) + 1;
+      
       for (double az = sweep.min_az;
            az <= sweep.max_az;
            az += sweep.delta_az) {
+        
+        for (int idwell = 0; idwell < stride; idwell++) {
 
-        for (int istride = 0; istride < _params.n_beams_per_dwell; istride++) {
+          bool startOfDwell = true;
+          
+          for (int ivisit = 0; ivisit < _params.n_visits_per_beam; ivisit++) {
+            
+            int beamNumInDwell = 0;
+            
+            for (double el = sweep.min_el + idwell * sweep.delta_el;
+                 el <= sweep.max_el;
+                 el += stride * sweep.delta_el, beamNumInDwell++) {
+              
+              angle_t angle;
+              angle.el = el;
+              angle.az = az;
+              angle.sweepNum = isweep;
+              angle.volNum = 0;
+              angle.startOfDwell = startOfDwell;
+              angle.beamNumInDwell = beamNumInDwell;
+              angle.visitNumInBeam = ivisit;
+              angle.sweepMode = Radx::SWEEP_MODE_RHI;
+              _angles.push_back(angle);
 
-          for (double el = sweep.min_el + istride * sweep.delta_el;
-               el <= sweep.max_el;
-               el += _params.n_beams_per_dwell * sweep.delta_el) {
+              startOfDwell = false;
 
-            angle_t angle;
-            angle.el = el;
-            angle.az = az;
-            angle.sweepNum = isweep;
-            angle.volNum = 0;
-            angle.sweepMode = Radx::SWEEP_MODE_RHI;
-            _angles.push_back(angle);
+            } // el
 
-          } // el
-
-        } // istride
-
+          } // ivisit
+          
+        } // idwell
+        
       } // az
 
     } else if (sweep.sweep_type == Params::PPI_SIM) {
 
+      int nAngles = (int) ((sweep.max_az - sweep.min_az) / sweep.delta_az) + 1;
+      int stride = ((nAngles - 1) / _params.n_beams_per_dwell) + 1;
+      
       for (double el = sweep.min_el;
            el <= sweep.max_el;
            el += sweep.delta_el) {
+        
+        for (int idwell = 0; idwell < stride; idwell++) {
 
-        for (int istride = 0; istride < _params.n_beams_per_dwell; istride++) {
+          bool startOfDwell = true;
           
-          for (double az = sweep.min_az + istride * sweep.delta_az;
-               az <= sweep.max_az;
-               az += _params.n_beams_per_dwell * sweep.delta_az) {
+          for (int ivisit = 0; ivisit < _params.n_visits_per_beam; ivisit++) {
 
-            angle_t angle;
-            angle.el = el;
-            angle.az = az;
-            angle.sweepNum = isweep;
-            angle.volNum = 0;
-            angle.sweepMode = Radx::SWEEP_MODE_SECTOR;
-            _angles.push_back(angle);
+            int beamNumInDwell = 0;
+            
+            for (double az = sweep.min_az + idwell * sweep.delta_az;
+                 az <= sweep.max_az;
+                 az += stride * sweep.delta_az, beamNumInDwell++) {
+              
+              angle_t angle;
+              angle.el = el;
+              angle.az = az;
+              angle.sweepNum = isweep;
+              angle.volNum = 0;
+              angle.startOfDwell = startOfDwell;
+              angle.beamNumInDwell = beamNumInDwell;
+              angle.visitNumInBeam = ivisit;
+              angle.sweepMode = Radx::SWEEP_MODE_SECTOR;
+              _angles.push_back(angle);
 
-          } // az
+            } // az
 
-        } // istride
+          } // ivisit
+
+        } // idwell
 
       } // el
       
     } // if (sweep.sweep_type == Params::RHI_SIM)
     
   } // isweep
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "================= Simulation angles ====================" << endl;
+    for (size_t ii = 0; ii < _angles.size(); ii++) {
+      cerr << "-----------------------------------" << endl;
+      angle_t angle = _angles[ii];
+      cerr << "  index: " << ii << endl;
+      cerr << "  el: " << angle.el << endl;
+      cerr << "  az: " << angle.az << endl;
+      cerr << "  sweepNum: " << angle.sweepNum << endl;
+      cerr << "  volNum: " << angle.volNum << endl;
+      cerr << "  startOfDwell: " << (angle.startOfDwell?"Y":"N") << endl;
+      cerr << "  beamNumInDwell: " << angle.beamNumInDwell << endl;
+      cerr << "  visitNumInBeam: " << angle.visitNumInBeam << endl;
+      cerr << "  sweepMode: " << Radx::sweepModeToStr(angle.sweepMode) << endl;
+    }
+  }
 
 }
 

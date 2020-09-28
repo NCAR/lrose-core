@@ -89,15 +89,6 @@ private:
   time_t _startTime;
   time_t _exitTime;
 
-  // current scan mode
-
-  // apar_ts_scan_mode_t _currentScanMode;
-  // apar_ts_scan_segment_t _scanPrev;
-  
-  // sector information to determine if we need a new file
-  
-  bool _needNewFile;
-  int _nPulsesFile; // number of pulses in current file
 
   // output file
 
@@ -106,12 +97,13 @@ private:
   string _outputDir;
   string _outputName;
   string _relPath;
+  int _nPulsesFile; // number of pulses in current file
 
   // debug print loop count
   
   si64 _nPulsesProcessed;
   si64 _prevPulseSeqNum;
-  si32 _prevPulseSweepNum;
+  si32 _prevSweepNum;
 
   // functions
   

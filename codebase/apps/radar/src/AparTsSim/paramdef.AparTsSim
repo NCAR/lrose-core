@@ -166,6 +166,12 @@ paramdef int {
   p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
 } output_fmq_nslots;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write.";
+  p_help = "If set to true, the write will block until the reader catches up. NOTE: this only works for a single reader.";
+} output_fmq_write_blocking;
+
 paramdef int {
   p_default = "200";
   p_descr = "Number of pulses per output message.";

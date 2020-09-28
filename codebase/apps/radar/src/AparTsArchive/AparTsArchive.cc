@@ -63,7 +63,7 @@ AparTsArchive::AparTsArchive(int argc, char **argv)
   // MEM_zero(_scanPrev);
   _nPulsesProcessed = 0;
   _prevPulseSeqNum = 0;
-  _prevPulseSweepNum = -1;
+  _prevSweepNum = -1;
   
   // set programe name
   
@@ -108,7 +108,6 @@ AparTsArchive::AparTsArchive(int argc, char **argv)
   // compute sector size etc for files
 
   _out = NULL;
-  _needNewFile = true;
   _nPulsesFile = 0;
 
   // run period and exit time
@@ -202,40 +201,26 @@ int AparTsArchive::_checkNeedNewFile(const AparTsPulse &pulse)
   bool needNewFile = false;
 
   const AparTsInfo &info = pulse.getTsInfo();
-
-  si32 pulseSweepNum = pulse.getSweepNum();
+  
+  si32 sweepNum = pulse.getSweepNum();
   // initialize
-  if (_prevPulseSweepNum == -1) {
-    _prevPulseSweepNum = pulseSweepNum;
+  if (_prevSweepNum == -1) {
+    _prevSweepNum = sweepNum;
   }
 
   if (_params.output_trigger == Params::END_OF_VOLUME) {
     // look for sweep number reset to 0
-    if (pulseSweepNum == 0 && _prevPulseSweepNum != 0) {
+    if (sweepNum == 0 && _prevSweepNum != 0) {
       needNewFile = true;
     }
   } else {
     // look for sweep number change
-    if (pulseSweepNum != _prevPulseSweepNum) {
+    if (sweepNum != _prevSweepNum) {
       needNewFile = true;
     }
   }
-  _prevPulseSweepNum = pulseSweepNum;
+  _prevSweepNum = sweepNum;
 
-  // const apar_ts_scan_segment_t &scan = info.getScanSegment();
-  // if (scan.scan_mode != _scanPrev.scan_mode ||
-  //     scan.volume_num != _scanPrev.volume_num ||
-  //     scan.sweep_num != _scanPrev.sweep_num) {
-  //   if (_params.debug) {
-  //     cerr << "==>> New scan info" << endl;
-  //     if (_params.debug >= Params::DEBUG_EXTRA) {
-  //       apar_ts_scan_segment_print(stderr, scan);
-  //     }
-  //   }
-  //   needNewFile = true;
-  //   _scanPrev = scan;
-  // }
-  
   // do we have too many pulses in the file?
   
   _nPulsesFile++;
@@ -254,7 +239,6 @@ int AparTsArchive::_checkNeedNewFile(const AparTsPulse &pulse)
       return -1;
     }
 
-    _nPulsesFile = 0;
     
     if (_openNewFile(pulse) == 0) {
 
@@ -460,9 +444,9 @@ int AparTsArchive::_openNewFile(const AparTsPulse &pulse)
   }
 
   if (_params.debug) {
-    cerr << "Opened new file: " << _relPath << endl;
+    cerr << "====>> Opened new file: " << _relPath << endl;
   }
-
+  
   return 0;
 
 }
@@ -484,8 +468,10 @@ int AparTsArchive::_closeFile()
     _out = NULL;
 
     if (_params.debug) {
-      cerr << "Done with file: " << _relPath << endl;
+      cerr << "====>>  Done with file: " << _relPath << endl;
+      cerr << "           nPulsesFile: " << _nPulsesFile << endl;
     }
+    _nPulsesFile = 0;
 
     // write latest data info file
     

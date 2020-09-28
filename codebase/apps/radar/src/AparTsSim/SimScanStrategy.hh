@@ -61,6 +61,9 @@ public:
     double az;
     int sweepNum;
     int volNum;
+    bool startOfDwell;
+    int beamNumInDwell;
+    int visitNumInBeam;
     Radx::SweepMode_t sweepMode;
   } angle_t;
 
@@ -71,6 +74,10 @@ public:
   // destructor
   
   ~SimScanStrategy();
+
+  // reset to start of strategy
+
+  void resetToStart() const { _angleIndex = 0; }
   
   // get the next entry
 

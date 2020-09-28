@@ -433,6 +433,8 @@ public:
 
   int output_fmq_nslots;
 
+  tdrp_bool_t output_fmq_write_blocking;
+
   int n_pulses_per_message;
 
   int n_pulses_per_info;
@@ -459,7 +461,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[39];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

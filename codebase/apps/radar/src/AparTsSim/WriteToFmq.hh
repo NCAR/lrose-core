@@ -56,8 +56,8 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "SimScanStrategy.hh"
 
-class SimScanStrategy;
 using namespace std;
 
 ////////////////////////
@@ -127,7 +127,8 @@ private:
   // functions
 
   int _convertToFmq(const string &inputPath);
-  int _processDwell(vector<IwrfTsPulse *> &dwellPulses);
+  int _processPulse(int pulseIndex, IwrfTsPulse *iwrfPulse,
+                    SimScanStrategy::angle_t &angle);
 
   void _sleepForDataRate();
 

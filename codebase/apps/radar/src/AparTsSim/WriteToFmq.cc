@@ -58,7 +58,6 @@
 
 #include "WriteToFmq.hh"
 #include "AparTsSim.hh"
-#include "SimScanStrategy.hh"
 
 using namespace std;
 
@@ -99,6 +98,8 @@ WriteToFmq::WriteToFmq(const string &progName,
   _nBytesForRate = 0;
   _realtimeDeltaSecs = 0;
   _metaCount = 0;
+  _volNum = 0;
+  _sweepNum = 0;
 
   // compute the scan strategy
 
@@ -196,6 +197,16 @@ int WriteToFmq::_convertToFmq(const string &inputPath)
   
   {
     IwrfTsPulse *iwrfPulse = reader.getNextPulse();
+    // change to realtime if appropriate
+    if (_params.fmq_set_times_to_now && _realtimeDeltaSecs == 0) {
+      time_t now = time(NULL);
+      _realtimeDeltaSecs = now - iwrfPulse->getTime();
+      si64 newTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
+      if (_params.debug) {
+        cerr << "====>> recomputing pulse time offset, newTime: "
+             << RadxTime::strm(newTime) << endl;
+      }
+    }
     bool haveMetadata = false;
     while (iwrfPulse != NULL) {
       if (tsInfo.isRadarInfoActive() &&
@@ -227,300 +238,202 @@ int WriteToFmq::_convertToFmq(const string &inputPath)
   // reset reader queue to start
 
   reader.reset();
+
+  // reset scan strategy to start
   
-  // compute number of pulses per dwell
-
-  size_t nPulsesPerDwell = 
-    _params.n_samples_per_visit *
-    _params.n_visits_per_beam *
-    _params.n_beams_per_dwell;
-
-  if (_params.debug) {
-    cerr << "  ==>> nPulsesPerDwell: " << nPulsesPerDwell << endl;
-  }
-
-  // read in all pulses
-
-  IwrfTsPulse *iwrfPulse = reader.getNextPulse();
-  while (iwrfPulse != NULL) {
-    
-    PMU_auto_register("reading pulse");
+  _strategy->resetToStart();
   
-    // convert pulse data to si16 counts
-    
-    iwrfPulse->convertToFL32();
-    
-    // add pulse to dwell
-    
-    _dwellPulses.push_back(iwrfPulse);
-    
-    // if we have a full dwell, process the pulses in it
+  // loop through all pulses in file
 
-    if (_dwellPulses.size() == nPulsesPerDwell) {
+  while (true) {
 
-      // process dwell
-      
-      _processDwell(_dwellPulses);
+    // get a new sim angle
+    
+    SimScanStrategy::angle_t angle = _strategy->getNextAngle();
+    if (angle.startOfDwell) {
       _dwellSeqNum++;
-
-      // delete pulses to free memory
-      
-      for (size_t ii = 0; ii < _dwellPulses.size(); ii++) {
-        delete _dwellPulses[ii];
-      }
-      _dwellPulses.clear();
-
     }
+    if (angle.sweepNum < _sweepNum) {
+      // end of volume
+      _volNum++;
+    }
+    _sweepNum = angle.sweepNum;
+
+    // loop through pulses for visiting this angle
+
+    for (int ipulse = 0; ipulse < _params.n_samples_per_visit; ipulse++) {
+    
+      PMU_auto_register("reading pulse");
+      IwrfTsPulse *iwrfPulse = reader.getNextPulse();
+      if (iwrfPulse == NULL) {
+        return 0;
+      }
       
-    // read next one
+      // convert pulse data to floats
+    
+      iwrfPulse->convertToFL32();
 
-    iwrfPulse = reader.getNextPulse();
+      // process this pulse
 
-  } // while
+      _processPulse(ipulse, iwrfPulse, angle);
 
-  return 0;
-  
+    } // ipulse
+
+  } // while (true)
+
+  // should not reach here
+
+  return -1;
+
 }
-
+    
 ////////////////////////////////////////////
-// process pulses in a dwell for FMQ output
+// process pulse
 
-int WriteToFmq::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
+int WriteToFmq::_processPulse(int pulseIndex, IwrfTsPulse *iwrfPulse,
+                              SimScanStrategy::angle_t &angle)
   
 {
-
-  int iret = 0;
-
-  // compute the angles for the beams in the dwell
-
-  double startAz = dwellPulses.front()->getAz();
-  double endAz = dwellPulses.back()->getAz();
-  double azRange = AparTsSim::conditionAngle360(endAz - startAz);
-  double deltaAzPerBeam = azRange / _params.n_beams_per_dwell;
-
-  double startEl = dwellPulses.front()->getEl();
-  double endEl = dwellPulses.back()->getEl();
-  double elRange = AparTsSim::conditionAngle360(endEl - startEl);
-  double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
   
-  vector<double> beamAz, beamEl;
-  vector<int> sweepNum, volNum;
-  vector<Radx::SweepMode_t> sweepMode;
+  si64 secondsTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
+  ui32 nanoSecs = iwrfPulse->getNanoSecs();
   
-  for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
-
-    if (!_params.specify_scan_strategy) {
-
-      double az = AparTsSim::conditionAngle360(startAz + 
-                                               (ii + 0.5) * deltaAzPerBeam);
-      double el = AparTsSim::conditionAngle180(startEl + 
-                                               (ii + 0.5) * deltaElPerBeam);
-      
-      // for APAR, az ranges from -60 to +60
-      // and el from -90 to +90
-      // so we adjust accordingly
-      
-      beamAz.push_back((az / 3.0) - 60.0);
-      beamEl.push_back(el / 1.5);
-
-    } else {
-
-      SimScanStrategy::angle_t angle = _strategy->getNextAngle();
-      
-      beamAz.push_back(angle.az);
-      beamEl.push_back(angle.el);
-      sweepNum.push_back(angle.sweepNum);
-      volNum.push_back(angle.volNum);
-      sweepMode.push_back(angle.sweepMode);
-
-    } // if (_params.specify_scan_strategy) 
-
-  } // ii
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "-----------------------------------------------" << endl;
-    cerr << "startAz, endAz, deltaAzPerBeam: "
-         << startAz << ", " << endAz << ", " << deltaAzPerBeam << endl;
-    cerr << "startEl, endEl, deltaElPerBeam: "
-         << startEl << ", " << endEl << ", " << deltaElPerBeam << endl;
-    for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
-      cerr << "  ii, az, el: "
-           << ii << ", " << beamAz[ii] << ", " << beamEl[ii] << endl;
-    }
-    cerr << "-----------------------------------------------" << endl;
+  // add metadata to outgoing message
+  
+  if (_metaCount % _params.n_pulses_per_info == 0) {
+    _addMetaDataToMsg();
   }
-
-  // loop through all of the pulses
-
-  int pulseNumInDwell = 0;
-  for (int ivisit = 0; ivisit < _params.n_visits_per_beam; ivisit++) {
-    for (int ibeam = 0; ibeam < _params.n_beams_per_dwell; ibeam++) {
-      for (int ipulse = 0; ipulse < _params.n_samples_per_visit; 
-           ipulse++, pulseNumInDwell++) {
+  _metaCount++;
         
-        // set the metadata
+  // create the outgoing co-polar pulse
+  
+  AparTsPulse copolPulse(*_aparTsInfo, _aparTsDebug);
+  copolPulse.setTime(secondsTime, nanoSecs);
         
-        IwrfTsPulse *iwrfPulse = dwellPulses[pulseNumInDwell];
-
-        // change to realtime if appropriate
-        
-        if (_params.fmq_set_times_to_now && _realtimeDeltaSecs == 0) {
-          time_t now = time(NULL);
-          _realtimeDeltaSecs = now - iwrfPulse->getTime();
-          si64 newTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
-          if (_params.debug) {
-            cerr << "====>> recomputing pulse time offset, newTime: "
-                 << RadxTime::strm(newTime) << endl;
-          }
-        }
-        
-        si64 secondsTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
-        ui32 nanoSecs = iwrfPulse->getNanoSecs();
-        
-        double az = beamAz[ibeam];
-        double el = beamEl[ibeam];
-
-        // add metadata to outgoing message
-
-        if (_metaCount >= _params.n_pulses_per_info) {
-          _addMetaDataToMsg();
-          _metaCount = 0;
-        }
-        _metaCount++;
-        
-        // create the outgoing co-polar pulse
-        
-        AparTsPulse copolPulse(*_aparTsInfo, _aparTsDebug);
-        copolPulse.setTime(secondsTime, nanoSecs);
-        
-        copolPulse.setBeamNumInDwell(ibeam);
-        copolPulse.setVisitNumInBeam(ivisit);
-        copolPulse.setPulseSeqNum(_pulseSeqNum);
-        copolPulse.setDwellSeqNum(_dwellSeqNum);
-        
-        if (sweepMode[ibeam] == Radx::SWEEP_MODE_RHI) {
-          copolPulse.setScanMode((int) apar_ts_scan_mode_t::RHI);
-          copolPulse.setFixedAngle(az);
-        } else {
-          copolPulse.setScanMode((int) apar_ts_scan_mode_t::PPI);
-          copolPulse.setFixedAngle(el);
-        }
-
-        copolPulse.setSweepNum(sweepNum[ibeam]);
-        copolPulse.setVolumeNum(volNum[ibeam]);
-        copolPulse.setElevation(el);
-        copolPulse.setAzimuth(az);
-        copolPulse.setPrt(iwrfPulse->getPrt());
-        copolPulse.setPrtNext(iwrfPulse->get_prt_next());
-        copolPulse.setPulseWidthUs(iwrfPulse->getPulseWidthUs());
-        copolPulse.setNGates(iwrfPulse->getNGates());
-        copolPulse.setNChannels(1);
-        copolPulse.setIqEncoding((int) apar_ts_iq_encoding_t::FL32);
-        copolPulse.setHvFlag(iwrfPulse->isHoriz());
-        copolPulse.setChanIsCopol(0, true);
-        copolPulse.setPhaseCohered(iwrfPulse->get_phase_cohered());
-        copolPulse.setStatus(iwrfPulse->get_status());
-        copolPulse.setNData(iwrfPulse->get_n_data());
-        copolPulse.setScale(1.0);
-        copolPulse.setOffset(0.0);
-        copolPulse.setStartRangeM(iwrfPulse->get_start_range_m());
-        copolPulse.setGateGSpacineM(iwrfPulse->get_gate_spacing_m());
-
-        _pulseSeqNum++;
-
-        // add the co-pol IQ channel data as floats
-
-        {
-          MemBuf iqBuf;
-          fl32 **iqChans = iwrfPulse->getIqArray();
-          iqBuf.add(iqChans[0], iwrfPulse->getNGates() * 2 * sizeof(fl32));
-          copolPulse.setIqFloats(iwrfPulse->getNGates(), 1,
-                                 (const fl32 *) iqBuf.getPtr());
-        }
-        
-        // add the pulse to the outgoing message
-        
-        MemBuf copolBuf;
-        copolPulse.assemble(copolBuf);
-        _outputMsg.addPart(APAR_TS_PULSE_HEADER_ID,
-                           copolBuf.getLen(),
-                           copolBuf.getPtr());
-        
-        // optionally add a cross-pol pulse
-        
-        if (_params.add_cross_pol_sample_at_end_of_visit &&
-            ipulse == _params.n_samples_per_visit - 1) {
-
-          AparTsPulse xpolPulse(*_aparTsInfo, _aparTsDebug);
-          xpolPulse.setTime(secondsTime, nanoSecs);
-          
-          xpolPulse.setBeamNumInDwell(ibeam);
-          xpolPulse.setVisitNumInBeam(ivisit);
-          xpolPulse.setPulseSeqNum(_pulseSeqNum);
-          xpolPulse.setDwellSeqNum(_dwellSeqNum);
-          
-          if (sweepMode[ibeam] == Radx::SWEEP_MODE_RHI) {
-            xpolPulse.setScanMode((int) apar_ts_scan_mode_t::RHI);
-            xpolPulse.setFixedAngle(az);
-          } else {
-            xpolPulse.setScanMode((int) apar_ts_scan_mode_t::PPI);
-            xpolPulse.setFixedAngle(el);
-          }
-          
-          xpolPulse.setSweepNum(sweepNum[ibeam]);
-          xpolPulse.setVolumeNum(volNum[ibeam]);
-          xpolPulse.setElevation(el);
-          xpolPulse.setAzimuth(az);
-          xpolPulse.setPrt(iwrfPulse->getPrt());
-          xpolPulse.setPrtNext(iwrfPulse->get_prt_next());
-          xpolPulse.setPulseWidthUs(iwrfPulse->getPulseWidthUs());
-          xpolPulse.setNGates(iwrfPulse->getNGates());
-          xpolPulse.setNChannels(1);
-          xpolPulse.setIqEncoding((int) apar_ts_iq_encoding_t::FL32);
-          xpolPulse.setHvFlag(iwrfPulse->isHoriz());
-          xpolPulse.setChanIsCopol(0, false);
-          xpolPulse.setPhaseCohered(iwrfPulse->get_phase_cohered());
-          xpolPulse.setStatus(iwrfPulse->get_status());
-          xpolPulse.setNData(iwrfPulse->get_n_data());
-          xpolPulse.setScale(1.0);
-          xpolPulse.setOffset(0.0);
-          xpolPulse.setStartRangeM(iwrfPulse->get_start_range_m());
-          xpolPulse.setGateGSpacineM(iwrfPulse->get_gate_spacing_m());
-        
-          _pulseSeqNum++;
-
-          // add the co-pol IQ channel data as floats
-
-          {
-            MemBuf iqBuf;
-            fl32 **iqChans = iwrfPulse->getIqArray();
-            iqBuf.add(iqChans[1], iwrfPulse->getNGates() * 2 * sizeof(fl32));
-            xpolPulse.setIqFloats(iwrfPulse->getNGates(), 1,
-                                  (const fl32 *) iqBuf.getPtr());
-          }
-        
-          // add the pulse to the outgoing message
-          
-          MemBuf xpolBuf;
-          xpolPulse.assemble(xpolBuf);
-          _outputMsg.addPart(APAR_TS_PULSE_HEADER_ID,
-                             xpolBuf.getLen(),
-                             xpolBuf.getPtr());
-
-        } // if (_params.add_cross_pol_sample_at_end_of_visit ...
-        
-        // write to the queue if ready
-        
-        if (_writeToOutputFmq(false)) {
-          cerr << "ERROR - WriteToFmq::_writePulseToFmq" << endl;
-          iret = -1;
-        }
-        
-      } // ipulse
-    } // ibeam
-  } // ivisit
-
-  return iret;
+  copolPulse.setBeamNumInDwell(angle.beamNumInDwell);
+  copolPulse.setVisitNumInBeam(angle.visitNumInBeam);
+  copolPulse.setPulseSeqNum(_pulseSeqNum);
+  copolPulse.setDwellSeqNum(_dwellSeqNum);
+  
+  if (angle.sweepMode == Radx::SWEEP_MODE_RHI) {
+    copolPulse.setScanMode((int) apar_ts_scan_mode_t::RHI);
+    copolPulse.setFixedAngle(angle.az);
+  } else {
+    copolPulse.setScanMode((int) apar_ts_scan_mode_t::PPI);
+    copolPulse.setFixedAngle(angle.el);
+  }
+  
+  copolPulse.setSweepNum(_sweepNum);
+  copolPulse.setVolumeNum(_volNum);
+  copolPulse.setElevation(angle.el);
+  copolPulse.setAzimuth(angle.az);
+  copolPulse.setPrt(iwrfPulse->getPrt());
+  copolPulse.setPrtNext(iwrfPulse->get_prt_next());
+  copolPulse.setPulseWidthUs(iwrfPulse->getPulseWidthUs());
+  copolPulse.setNGates(iwrfPulse->getNGates());
+  copolPulse.setNChannels(1);
+  copolPulse.setIqEncoding((int) apar_ts_iq_encoding_t::FL32);
+  copolPulse.setHvFlag(iwrfPulse->isHoriz());
+  copolPulse.setChanIsCopol(0, true);
+  copolPulse.setPhaseCohered(iwrfPulse->get_phase_cohered());
+  copolPulse.setStatus(iwrfPulse->get_status());
+  copolPulse.setNData(iwrfPulse->get_n_data());
+  copolPulse.setScale(1.0);
+  copolPulse.setOffset(0.0);
+  copolPulse.setStartRangeM(iwrfPulse->get_start_range_m());
+  copolPulse.setGateGSpacineM(iwrfPulse->get_gate_spacing_m());
+  
+  _pulseSeqNum++;
+  
+  // add the co-pol IQ channel data as floats
+  
+  {
+    MemBuf iqBuf;
+    fl32 **iqChans = iwrfPulse->getIqArray();
+    iqBuf.add(iqChans[0], iwrfPulse->getNGates() * 2 * sizeof(fl32));
+    copolPulse.setIqFloats(iwrfPulse->getNGates(), 1,
+                           (const fl32 *) iqBuf.getPtr());
+  }
+  
+  // add the pulse to the outgoing message
+  
+  MemBuf copolBuf;
+  copolPulse.assemble(copolBuf);
+  _outputMsg.addPart(APAR_TS_PULSE_HEADER_ID,
+                     copolBuf.getLen(),
+                     copolBuf.getPtr());
+  
+  // optionally add a cross-pol pulse
+  
+  if (_params.add_cross_pol_sample_at_end_of_visit &&
+      pulseIndex == _params.n_samples_per_visit - 1) {
+    
+    AparTsPulse xpolPulse(*_aparTsInfo, _aparTsDebug);
+    xpolPulse.setTime(secondsTime, nanoSecs);
+    
+    xpolPulse.setBeamNumInDwell(angle.beamNumInDwell);
+    xpolPulse.setVisitNumInBeam(angle.visitNumInBeam);
+    xpolPulse.setPulseSeqNum(_pulseSeqNum);
+    xpolPulse.setDwellSeqNum(_dwellSeqNum);
+    
+    if (angle.sweepMode == Radx::SWEEP_MODE_RHI) {
+      xpolPulse.setScanMode((int) apar_ts_scan_mode_t::RHI);
+      xpolPulse.setFixedAngle(angle.az);
+    } else {
+      xpolPulse.setScanMode((int) apar_ts_scan_mode_t::PPI);
+      xpolPulse.setFixedAngle(angle.el);
+    }
+    
+    xpolPulse.setSweepNum(_sweepNum);
+    xpolPulse.setVolumeNum(_volNum);
+    xpolPulse.setElevation(angle.el);
+    xpolPulse.setAzimuth(angle.az);
+    xpolPulse.setPrt(iwrfPulse->getPrt());
+    xpolPulse.setPrtNext(iwrfPulse->get_prt_next());
+    xpolPulse.setPulseWidthUs(iwrfPulse->getPulseWidthUs());
+    xpolPulse.setNGates(iwrfPulse->getNGates());
+    xpolPulse.setNChannels(1);
+    xpolPulse.setIqEncoding((int) apar_ts_iq_encoding_t::FL32);
+    xpolPulse.setHvFlag(iwrfPulse->isHoriz());
+    xpolPulse.setChanIsCopol(0, false);
+    xpolPulse.setPhaseCohered(iwrfPulse->get_phase_cohered());
+    xpolPulse.setStatus(iwrfPulse->get_status());
+    xpolPulse.setNData(iwrfPulse->get_n_data());
+    xpolPulse.setScale(1.0);
+    xpolPulse.setOffset(0.0);
+    xpolPulse.setStartRangeM(iwrfPulse->get_start_range_m());
+    xpolPulse.setGateGSpacineM(iwrfPulse->get_gate_spacing_m());
+    
+    _pulseSeqNum++;
+    
+    // add the co-pol IQ channel data as floats
+    
+    {
+      MemBuf iqBuf;
+      fl32 **iqChans = iwrfPulse->getIqArray();
+      iqBuf.add(iqChans[1], iwrfPulse->getNGates() * 2 * sizeof(fl32));
+      xpolPulse.setIqFloats(iwrfPulse->getNGates(), 1,
+                            (const fl32 *) iqBuf.getPtr());
+    }
+    
+    // add the pulse to the outgoing message
+    
+    MemBuf xpolBuf;
+    xpolPulse.assemble(xpolBuf);
+    _outputMsg.addPart(APAR_TS_PULSE_HEADER_ID,
+                       xpolBuf.getLen(),
+                       xpolBuf.getPtr());
+    
+  } // if (_params.add_cross_pol_sample_at_end_of_visit ...
+  
+  // write to the queue if ready
+  
+  if (_writeToOutputFmq(false)) {
+    cerr << "ERROR - WriteToFmq::_writePulseToFmq" << endl;
+    return -1;
+  }
+  
+  return 0;
 
 }
 
@@ -657,6 +570,9 @@ int WriteToFmq::_openOutputFmq()
   _outputFmq.setSingleWriter();
   if (_params.data_mapper_report_interval > 0) {
     _outputFmq.setRegisterWithDmap(true, _params.data_mapper_report_interval);
+  }
+  if (_params.output_fmq_write_blocking) {
+    _outputFmq.setBlockingWrite();
   }
 
   // initialize message
