@@ -270,12 +270,16 @@ int WriteToFmq::_convertToFmq(const string &inputPath)
       }
       
       // convert pulse data to floats
-    
+      
       iwrfPulse->convertToFL32();
 
       // process this pulse
 
       _processPulse(ipulse, iwrfPulse, angle);
+
+      // clean up
+
+      delete iwrfPulse;
 
     } // ipulse
 
