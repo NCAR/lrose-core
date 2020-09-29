@@ -23,9 +23,8 @@ From: centos:8
     qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
     hdf5-devel netcdf-devel \
     gnuplot ImageMagick-devel ImageMagick-c++-devel \
-    xorg-x11-xauth xorg-x11-apps \
-    rpm-build redhat-rpm-config \
-    rpm-devel rpmdevtools
+    xorg-x11-xauth xorg-x11-apps xorg-x11-server-Xvfb \
+    rpm-build redhat-rpm-config rpm-devel rpmdevtools
   alternatives --set python /usr/bin/python3
   cd /usr/bin; \
   ln -s qmake-qt5 qmake
