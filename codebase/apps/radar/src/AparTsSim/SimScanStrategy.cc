@@ -178,6 +178,8 @@ void SimScanStrategy::_init()
               angle.sweepMode = Radx::SWEEP_MODE_SECTOR;
               _angles.push_back(angle);
 
+              startOfDwell = false;
+
             } // az
 
           } // ivisit
