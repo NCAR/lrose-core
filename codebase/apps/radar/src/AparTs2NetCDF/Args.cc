@@ -99,16 +99,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "seek_to_end_of_input = FALSE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-rvp8_legacy")) {
-
-      sprintf(tmp_str, "rvp8_legacy_unpacking = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-second")) {
-      
-      sprintf(tmp_str, "save_second_geometry = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
     } else if (!strcmp(argv[i], "-one_file_only")) {
       
       sprintf(tmp_str, "one_file_only = TRUE;");
@@ -144,35 +134,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
 
-    } else if (!strcmp(argv[i], "-sectors")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "max_sector_size = %s;", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "save_scans_in_sectors = TRUE;");
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "save_one_file_per_input_file = FALSE;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-
-    } else if (!strcmp(argv[i], "-n_gates_save")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "n_gates_save = %s;", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "specify_n_gates_save = TRUE;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-
-    } else if (!strcmp(argv[i], "-pad_n_gates_to_max")) {
-      
-      sprintf(tmp_str, "pad_n_gates_to_max = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
     } else if (!strcmp(argv[i], "-max_pulses")) {
       
       if (i < argc - 1) {
@@ -274,10 +235,6 @@ void Args::_usage(string &prog_name, ostream &out)
      << "         Not compatible with n_gates_save\n"
       << "       [ -preserve_fname ] use the same file name on output\n"
       << "         A '.nc' extension will be appended to the file name\n"
-      << "       [ -rvp8_legacy ] RVP8 data is in legacy packing\n"
-      << "       [ -second ] save data from second geom found.\n"
-      << "         By default, first geom is saved.\n"
-      << "       [ -sectors ? ] save files in sectors of given width (deg)\n"
       << "       [ -tcp_host ? ] specify host for tcp server\n"
       << "         Sets input_mode to TS_TCP_INPUT.\n"
       << "       [ -tcp_port ? ] specify port for tcp server\n"
