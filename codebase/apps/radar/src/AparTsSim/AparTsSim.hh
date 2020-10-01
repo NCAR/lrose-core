@@ -118,6 +118,7 @@ private:
 
   int _runWriteToFile();
   int _runWriteToUdp();
+  int _runWriteToFmq();
   int _runReadFromUdp();
 
 };

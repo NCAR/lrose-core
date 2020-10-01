@@ -260,18 +260,6 @@ void DisplayManager::_createStatusPanel()
     _unambigRangeVal = NULL;
   }
 
-  if (_params.show_status_in_gui.measured_power_h) {
-    _powerHVal = _createStatusVal("Power H", "-9999", row++, fsize);
-  } else {
-    _powerHVal = NULL;
-  }
-
-  if (_params.show_status_in_gui.measured_power_v) {
-    _powerVVal = _createStatusVal("Power V", "-9999", row++, fsize);
-  } else {
-    _powerVVal = NULL;
-  }
-
   if (_params.show_status_in_gui.scan_name) {
     _scanNameVal = _createStatusVal("Scan name", "unknown", row++, fsize);
   } else {
@@ -899,20 +887,6 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
     }
   }
   
-  if (_powerHVal) {
-    if (ray->getMeasXmitPowerDbmH() > -9990) {
-      _setText(text, "%.1f", ray->getMeasXmitPowerDbmH());
-      _powerHVal->setText(text);
-    }
-  }
-   
-  if (_powerVVal) {
-    if (ray->getMeasXmitPowerDbmV() > -9990) {
-      _setText(text, "%.1f", ray->getMeasXmitPowerDbmV());
-      _powerVVal->setText(text);
-    }
-  }
-
   if (_scanNameVal) {
     string scanName = ray->getScanName();
     size_t len = scanName.size();

@@ -1,0 +1,14 @@
+Notes on commands used for sif manipulation
+===========================================
+
+singularity --version
+singularity key list
+singularity remote login
+singularity key search BD40466986135906B046E6F016F9BFA5E454BC25
+singularity key remove BD40466986135906B046E6F016F9BFA5E454BC25
+singularity key push CE7299134AFCD78919A7EDDAD6B54597A38092DD
+singularity sign lrose_build.sif
+singularity sif list lrose_build.sif
+singularity sif del 4
+singularity verify lrose_build.sif
+singularity push ./lrose_build.sif library://mike-dixon/lrose-gateway/lrose_build:latest

@@ -661,7 +661,7 @@ void WorldPlot::drawTitleTopCenter(QPainter &painter,
   QRect tRect(painter.fontMetrics().tightBoundingRect(title.c_str()));
   
   qreal xx = (qreal) ((_xMinPixel + _xMaxPixel - tRect.width()) / 2.0);
-  qreal yy = (qreal) getYPixCanvas(2 * _topMargin);
+  qreal yy = (qreal) getYPixCanvas(_topMargin / 2.0);
   
   QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 4);
     

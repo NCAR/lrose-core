@@ -75,10 +75,29 @@ public:
   } debug_t;
 
   typedef enum {
-    WRITE_TO_FILE = 0,
-    WRITE_TO_UDP = 1,
-    READ_FROM_UDP = 2
+    READ_FROM_UDP = 0,
+    WRITE_TO_FILE = 1,
+    WRITE_TO_UDP = 2,
+    WRITE_TO_FMQ = 3
   } run_mode_t;
+
+  typedef enum {
+    PPI_SIM = 0,
+    RHI_SIM = 1
+  } sweep_type_t;
+
+  // struct typedefs
+
+  typedef struct {
+    sweep_type_t sweep_type;
+    char* label;
+    double min_az;
+    double max_az;
+    double delta_az;
+    double min_el;
+    double max_el;
+    double delta_el;
+  } sim_sweep_t;
 
   ///////////////////////////
   // Member functions
@@ -380,14 +399,6 @@ public:
 
   char* instance;
 
-  int n_samples_per_visit;
-
-  int n_visits_per_beam;
-
-  int n_beams_per_dwell;
-
-  tdrp_bool_t add_cross_pol_sample_at_end_of_visit;
-
   run_mode_t run_mode;
 
   char* output_dir;
@@ -410,17 +421,38 @@ public:
 
   tdrp_bool_t set_udp_time_to_now;
 
+  double fmq_gate_spacing_m;
+
+  double fmq_sim_data_rate;
+
+  tdrp_bool_t fmq_set_times_to_now;
+
   char* output_fmq_path;
 
   int output_fmq_size;
 
   int output_fmq_nslots;
 
+  tdrp_bool_t output_fmq_write_blocking;
+
   int n_pulses_per_message;
 
   int n_pulses_per_info;
 
   int data_mapper_report_interval;
+
+  int n_samples_per_visit;
+
+  int n_visits_per_beam;
+
+  int n_beams_per_dwell;
+
+  tdrp_bool_t add_cross_pol_sample_at_end_of_visit;
+
+  tdrp_bool_t specify_scan_strategy;
+
+  sim_sweep_t *_sim_sweeps;
+  int sim_sweeps_n;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -429,7 +461,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[32];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

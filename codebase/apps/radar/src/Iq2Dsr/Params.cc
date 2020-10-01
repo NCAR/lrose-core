@@ -2562,7 +2562,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("use_h_only_for_alt_mode_clutter_vel");
-    tt->descr = tdrpStrDup("Option to use H only pulses for computing clutter velocity in alternation dual pol mode.");
+    tt->descr = tdrpStrDup("Option to use H only pulses for computing clutter velocity in alternating dual pol mode.");
     tt->help = tdrpStrDup("If false, the normal phidp-based method is used everywhere in alternating dual pol mode. If true, the H-only pulses are used to compute velocity where CMD flags a gate as clutter.");
     tt->val_offset = (char *) &use_h_only_for_alt_mode_clutter_vel - &_start_;
     tt->single_val.b = pFALSE;

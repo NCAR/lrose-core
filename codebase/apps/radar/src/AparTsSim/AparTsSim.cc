@@ -46,6 +46,7 @@
 #include "AparTsSim.hh"
 #include "WriteToFile.hh"
 #include "WriteToUdp.hh"
+#include "WriteToFmq.hh"
 #include "ReadFromUdp.hh"
 
 using namespace std;
@@ -128,6 +129,8 @@ int AparTsSim::Run ()
     return _runWriteToFile();
   } else if (_params.run_mode == Params::WRITE_TO_UDP) {
     return _runWriteToUdp();
+  } else if (_params.run_mode == Params::WRITE_TO_FMQ) {
+    return _runWriteToFmq();
   } else {
     return _runReadFromUdp();
   }
@@ -163,6 +166,22 @@ int AparTsSim::_runWriteToUdp()
                         _args.inputFileList);
 
   return writeToUdp.Run();
+
+}
+
+//////////////////////////////////////////////////
+// Run in write to FMQ mode
+
+int AparTsSim::_runWriteToFmq()
+{
+  
+  PMU_auto_register("_runWriteToFmq");
+ 
+  WriteToFmq writeToFmq(_progName,
+                        _params,
+                        _args.inputFileList);
+
+  return writeToFmq.Run();
 
 }
 

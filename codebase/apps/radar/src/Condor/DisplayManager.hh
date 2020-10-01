@@ -214,8 +214,6 @@ protected:
   QLabel *_nyquistVal;
   QLabel *_maxRangeVal;
   QLabel *_unambigRangeVal;
-  QLabel *_powerHVal;
-  QLabel *_powerVVal;
 
   QLabel *_scanNameVal;
   QLabel *_sweepModeVal;

@@ -141,8 +141,6 @@ public:
     tdrp_bool_t nyquist;
     tdrp_bool_t max_range;
     tdrp_bool_t unambiguous_range;
-    tdrp_bool_t measured_power_h;
-    tdrp_bool_t measured_power_v;
     tdrp_bool_t scan_name;
     tdrp_bool_t scan_mode;
     tdrp_bool_t polarization_mode;
@@ -564,15 +562,13 @@ public:
 
   int main_label_font_size;
 
-  char* main_background_color;
+  char* background_color;
 
   int main_window_panel_divider_line_width;
 
   char* main_window_panel_divider_color;
 
   int label_font_size;
-
-  char* background_color;
 
   char* plot_label_color;
 
@@ -582,59 +578,17 @@ public:
 
   int click_cross_size;
 
-  double ppi_aspect_ratio;
+  tdrp_bool_t polar_range_rings_on_at_startup;
 
-  tdrp_bool_t ppi_grids_on_at_startup;
+  tdrp_bool_t polar_angle_lines_on_at_startup;
 
-  tdrp_bool_t ppi_range_rings_on_at_startup;
-
-  tdrp_bool_t ppi_azimuth_lines_on_at_startup;
+  tdrp_bool_t polar_grids_on_at_startup;
 
   legend_pos_t ppi_main_legend_pos;
 
   double ppi_rendering_beam_width;
 
-  int rhi_window_width;
-
-  int rhi_window_height;
-
-  int rhi_window_start_x;
-
-  int rhi_window_start_y;
-
-  int rhi_top_margin;
-
-  int rhi_bottom_margin;
-
-  int rhi_left_margin;
-
-  int rhi_right_margin;
-
-  int rhi_label_font_size;
-
-  int rhi_axis_tick_len;
-
-  int rhi_n_ticks_ideal;
-
-  int rhi_text_margin;
-
-  tdrp_bool_t rhi_display_180_degrees;
-
-  double rhi_aspect_ratio;
-
-  double rhi_max_height_km;
-
-  int rhi_color_scale_width;
-
-  tdrp_bool_t rhi_grids_on_at_startup;
-
-  tdrp_bool_t rhi_range_rings_on_at_startup;
-
-  tdrp_bool_t rhi_elevation_lines_on_at_startup;
-
   legend_pos_t rhi_main_legend_pos;
-
-  int rhi_beam_queue_size;
 
   double rhi_rendering_beam_width;
 
@@ -797,7 +751,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[178];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 

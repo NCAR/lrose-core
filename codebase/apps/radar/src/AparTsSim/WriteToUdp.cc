@@ -61,6 +61,7 @@
 
 #include "WriteToUdp.hh"
 #include "AparTsSim.hh"
+#include "SimScanStrategy.hh"
 
 using namespace std;
 
@@ -96,6 +97,10 @@ WriteToUdp::WriteToUdp(const string &progName,
   _nBytesForRate = 0;
   _realtimeDeltaSecs = 0;
 
+  // compute the scan strategy
+
+  _strategy = new SimScanStrategy(_params);
+  
   // compute packet header length
   // by creating a dummy header and
   // getting the length of the resulting buffer
@@ -134,6 +139,8 @@ WriteToUdp::WriteToUdp(const string &progName,
 WriteToUdp::~WriteToUdp()
   
 {
+
+  delete _strategy;
   
   // delete pulses to free memory
   
@@ -325,21 +332,38 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
   double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
   
   vector<double> beamAz, beamEl;
+  vector<int> sweepNum, volNum;
+  vector<Radx::SweepMode_t> sweepMode;
+  
   for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
 
-    double az = AparTsSim::conditionAngle360(startAz + 
-                                             (ii + 0.5) * deltaAzPerBeam);
-    double el = AparTsSim::conditionAngle180(startEl + 
-                                             (ii + 0.5) * deltaElPerBeam);
+    if (!_params.specify_scan_strategy) {
 
-    // for APAR, az ranges from -60 to +60
-    // and el from -90 to +90
-    // so we adjust accordingly
+      double az = AparTsSim::conditionAngle360(startAz + 
+                                               (ii + 0.5) * deltaAzPerBeam);
+      double el = AparTsSim::conditionAngle180(startEl + 
+                                               (ii + 0.5) * deltaElPerBeam);
+      
+      // for APAR, az ranges from -60 to +60
+      // and el from -90 to +90
+      // so we adjust accordingly
+      
+      beamAz.push_back((az / 3.0) - 60.0);
+      beamEl.push_back(el / 1.5);
 
-    beamAz.push_back((az / 3.0) - 60.0);
-    beamEl.push_back(el / 1.5);
+    } else {
 
-  }
+      SimScanStrategy::angle_t angle = _strategy->getNextAngle();
+      
+      beamAz.push_back(angle.az);
+      beamEl.push_back(angle.el);
+      sweepNum.push_back(angle.sweepNum);
+      volNum.push_back(angle.volNum);
+      sweepMode.push_back(angle.sweepMode);
+
+    } // if (_params.specify_scan_strategy) 
+
+  } // ii
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "-----------------------------------------------" << endl;
@@ -373,7 +397,8 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
           _realtimeDeltaSecs = now - iwrfPulse->getTime();
           si64 newTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
           if (_params.debug) {
-            cerr << "====>> recomputing pulse time offset, newTime: " << RadxTime::strm(newTime) << endl;
+            cerr << "====>> recomputing pulse time offset, newTime: "
+                 << RadxTime::strm(newTime) << endl;
           }
         }
         
@@ -384,11 +409,6 @@ int WriteToUdp::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         ui32 beamNumInDwell = ibeam;
         ui32 visitNumInBeam = ivisit;
 
-        // for APAR, az ranges from -60 to +60
-        // and el from -90 to +90
-        
-        // double az = beamAz[ibeam] / 3.0 - 60.0;
-        // double el = beamEl[ibeam] / 1.5;
         double az = beamAz[ibeam];
         double el = beamEl[ibeam];
         double azRad = az * DEG_TO_RAD;

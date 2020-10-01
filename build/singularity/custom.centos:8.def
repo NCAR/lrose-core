@@ -1,0 +1,34 @@
+BootStrap: library
+From: centos:8
+%post
+  dnf install -y epel-release ; \
+  dnf install -y 'dnf-command(config-manager)' ; \
+  dnf config-manager --set-enabled PowerTools ; \
+  dnf install -y python3 ; \
+  dnf install -y python2-devel platform-python-devel ; \
+  dnf install -y \
+    tcsh wget git tk-devel \
+    emacs rsync python2 python3 mlocate \
+    m4 make cmake libtool autoconf automake \
+    gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
+    libX11-devel libXext-devel \
+    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    eigen3-devel armadillo-devel bzip2-devel \
+    expat-devel libcurl-devel openmpi-devel \
+    flex-devel fftw3-devel GeographicLib-devel \
+    qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
+    hdf5-devel netcdf-devel \
+    gnuplot ImageMagick-devel ImageMagick-c++-devel \
+    xorg-x11-xauth xorg-x11-apps \
+    rpm-build redhat-rpm-config \
+    rpm-devel rpmdevtools
+  alternatives --set python /usr/bin/python3
+  cd /usr/bin; \
+  ln -s qmake-qt5 qmake
+%environment
+  export LANG=C
+  export PATH=/usr/local/lrose/bin:$PATH
+%runscript
+  csh
+%labels
+  Mike Dixon

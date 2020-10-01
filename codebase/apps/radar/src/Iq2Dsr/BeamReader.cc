@@ -85,7 +85,7 @@ BeamReader::BeamReader(const string &prog_name,
   _prevAzInterp = -9999.0;
   _prevElInterp = -9999.0;
 
-  memset(&_burstPhases, 0, sizeof(_burstPhases));
+  // memset(&_burstPhases, 0, sizeof(_burstPhases));
 
   _beamCount = 0;
   _midIndex = 0;

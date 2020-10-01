@@ -39,45 +39,17 @@ paramdef string {
 } instance;
 
 commentdef {
-  p_header = "SPECIFY APAR TIME-SERIES DETAILS";
-};
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Number of samples taken each time we revisit the beam location.";
-  p_help = "We take this number of samples for an az/el, then move to sampling for other locations, before coming back to visit this beam again.";
-} n_samples_per_visit;
-
-paramdef int {
-  p_default = 6;
-  p_descr = "Number of visits for each beam.";
-  p_help = "During a dwell, we come back to a specific beam location this number of times.";
-} n_visits_per_beam;
-
-paramdef int {
-  p_default = 4;
-  p_descr = "Number of beams sampled in a dwell.";
-  p_help = "During a dwell, we create this number of beams. Then repeat for the next dwell.";
-} n_beams_per_dwell;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Add 1 cross-pol sample at end of visit.";
-  p_help = "APAR can receive in co-polar or cross-polar mode. This option allows us to test the cross-polar mode, by including a cross-polar sample at the end of each visit. This option effectively increases n_samples_per_visit by 1.";
-} add_cross_pol_sample_at_end_of_visit;
-
-commentdef {
   p_header = "RUN MODES";
 };
 
 typedef enum {
-  WRITE_TO_FILE, WRITE_TO_UDP, READ_FROM_UDP
+  READ_FROM_UDP, WRITE_TO_FILE, WRITE_TO_UDP, WRITE_TO_FMQ
 } run_mode_t;
 
 paramdef enum run_mode_t {
   p_default = WRITE_TO_FILE;
   p_descr = "Control write or read processing.";
-  p_help = "WRITE_TO_FILE: generates time series files in APAR format.\n\nWRITE_TO_UDP: writes out simulated data to the DREX FPGA, via UDP.\n\nREAD_FROM_UDP: for testing read UDP data stream generated in the WRITE_UDP mode. The reader creates an APAR time series data stream, and writes it out to an FMQ.";
+  p_help = "WRITE_TO_FILE: generates time series files in APAR format.\n\nWRITE_TO_UDP: writes out simulated data to the DREX FPGA, via UDP.\n\nWRITE_TO_FMQ: writes out simulated data to a time series FMQ.\n\nREAD_FROM_UDP: for testing read UDP data stream generated in the WRITE_UDP mode. The reader creates an APAR time series data stream, and writes it out to an FMQ.";
 } run_mode;
 
 commentdef {
@@ -149,7 +121,31 @@ paramdef boolean {
 } set_udp_time_to_now;
 
 commentdef {
-  p_header = "READ UDP MODE";
+  p_header = "WRITE FMQ MODE";
+  p_test = "Writes simulated data to time series FMQ.";
+};
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Gate spacing of simulated data (m).";
+  p_help = "Overrides the gate spacing in the IWRF data.";
+} fmq_gate_spacing_m;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Target simulation data rate (MBytes/sec).";
+  p_help = "We use periodic sleeps to achieve the target data rate.";
+} fmq_sim_data_rate;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the pulse times to real-time.";
+  p_help = "Overwrite the times in the pulse headers with real-time values.";
+} fmq_set_times_to_now;
+
+commentdef {
+  p_header = "FMQ DETAILS";
+  p_text = "Applies to WRITE_TO_FMQ and READ_FROM_UDP modes";
 };
 
 paramdef string {
@@ -170,6 +166,12 @@ paramdef int {
   p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
 } output_fmq_nslots;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write.";
+  p_help = "If set to true, the write will block until the reader catches up. NOTE: this only works for a single reader.";
+} output_fmq_write_blocking;
+
 paramdef int {
   p_default = "200";
   p_descr = "Number of pulses per output message.";
@@ -187,4 +189,111 @@ paramdef int {
   p_descr = "Number of seconds between reports to DataMapper.";
   p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
 } data_mapper_report_interval;
+
+commentdef {
+  p_header = "DWELL DETAILS";
+};
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of samples taken each time we revisit the beam location.";
+  p_help = "We take this number of samples for an az/el, then move to sampling for other locations, before coming back to visit this beam again.";
+} n_samples_per_visit;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Number of visits for each beam.";
+  p_help = "During a dwell, we come back to a specific beam location this number of times.";
+} n_visits_per_beam;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Number of beams sampled in a dwell.";
+  p_help = "During a dwell, we create this number of beams. Then repeat for the next dwell.";
+} n_beams_per_dwell;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add 1 cross-pol sample at end of visit.";
+  p_help = "APAR can receive in co-polar or cross-polar mode. This option allows us to test the cross-polar mode, by including a cross-polar sample at the end of each visit. This option effectively increases n_samples_per_visit by 1.";
+} add_cross_pol_sample_at_end_of_visit;
+
+commentdef {
+  p_header = "SCAN STRATEGY";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Specify the scan strategy instead of using the angles in the input files.";
+  p_help = "This is an option to specify a realistic APAR scan strategy.";
+} specify_scan_strategy;
+
+typedef enum {
+  PPI_SIM,
+  RHI_SIM
+} sweep_type_t;
+
+typedef struct {
+  
+  sweep_type_t sweep_type;
+  string label;
+  double min_az;
+  double max_az;
+  double delta_az;
+  double min_el;
+  double max_el;
+  double delta_el;
+  
+} sim_sweep_t;
+
+paramdef struct sim_sweep_t {
+  p_default = {
+    {
+      sweep_type = RHI_SIM,
+      label = "RHI-fore",
+      min_az = -5.0,
+      max_az = -5.0,
+      delta_az = 1.0,
+      min_el = -25.0,
+      max_el = 25.0,
+      delta_el = 1.0
+    }
+    ,
+    {
+      sweep_type = RHI_SIM,
+      label = "RHI-aft",
+      min_az = -25.0,
+      max_az = -25.0,
+      delta_az = 1.0,
+      min_el = -25.0,
+      max_el = 25.0,
+      delta_el = 1.0
+    }
+    ,
+    {
+      sweep_type = RHI_SIM,
+      label = "RHI-dualpol",
+      min_az = 0.0,
+      max_az = 0.0,
+      delta_az = 1.0,
+      min_el = -25.0,
+      max_el = 25.0,
+      delta_el = 1.0
+    }
+    ,
+    {
+     sweep_type = PPI_SIM,
+      label = "PPI-sur",
+      min_az = -45,
+      max_az = 45,
+      delta_az = 1.0,
+      min_el = 0.0,
+      max_el = 0.0,
+      delta_el = 1.0
+    }
+  };
+  p_descr = "Sweeps to be simulated.";
+  p_help = "For RHIs, the min_az and max_az should be the same. "
+    "For PPIs, the min_el and max_el should be the same. ";
+} sim_sweeps[];
 

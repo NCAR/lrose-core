@@ -217,8 +217,9 @@ int TsCalAuto::_runFmqMode()
     
     // use specified power sequence
 
-    for (int jj = 0; jj < _params.siggen_power_sequence_n; jj++) {
-      powerDbm = _params._siggen_power_sequence[jj];
+    for (int jj = 0; jj < _params.siggen_delta_power_sequence_n; jj++) {
+      powerDbm = (_params.siggen_sequence_start_power +
+                  _params._siggen_delta_power_sequence[jj]);
       _setSiggenPower(powerDbm);
       umsleep(500);
 

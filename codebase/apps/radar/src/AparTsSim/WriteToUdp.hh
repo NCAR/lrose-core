@@ -44,12 +44,14 @@
 #include <vector>
 #include <deque>
 #include <cstdio>
+#include <Radx/Radx.hh>
 #include <Radx/RadxTime.hh>
 
 #include "Args.hh"
 #include "Params.hh"
 
 class IwrfTsPulse;
+class SimScanStrategy;
 using namespace std;
 
 ////////////////////////
@@ -60,7 +62,7 @@ class WriteToUdp {
 public:
 
   // constructor
-
+  
   WriteToUdp(const string &progName,
              const Params &params,
              vector<string> &inputFileList);
@@ -111,6 +113,10 @@ private:
   
   RadxTime _rateStartTime;
   double _nBytesForRate;
+
+  // simulated scan strategy
+
+  SimScanStrategy *_strategy;
   
   // functions
 
@@ -150,7 +156,7 @@ private:
   int _openOutputUdp();
   int _writeBufToUdp(const MemBuf &buf);
   void _sleepForDataRate();
-  
+
 };
 
 #endif

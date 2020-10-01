@@ -51,7 +51,9 @@ HDRS = \
 	Args.hh \
 	AparTsSim.hh \
 	ReadFromUdp.hh \
+	SimScanStrategy.hh \
 	WriteToFile.hh \
+	WriteToFmq.hh \
 	WriteToUdp.hh
 
 CPPC_SRCS = \
@@ -60,7 +62,9 @@ CPPC_SRCS = \
 	Main.cc \
 	AparTsSim.cc \
 	ReadFromUdp.cc \
+	SimScanStrategy.cc \
 	WriteToFile.cc \
+	WriteToFmq.cc \
 	WriteToUdp.cc
 
 #

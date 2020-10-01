@@ -76,9 +76,9 @@ PpiPlot::PpiPlot(PolarWidget* parent,
 
   // set up overlays
   
-  setGrids(_params.ppi_grids_on_at_startup);
-  setRings(_params.ppi_range_rings_on_at_startup);
-  setAngleLines(_params.ppi_azimuth_lines_on_at_startup);
+  setGrids(_params.polar_grids_on_at_startup);
+  setRings(_params.polar_range_rings_on_at_startup);
+  setAngleLines(_params.polar_angle_lines_on_at_startup);
 
   // archive mode
   

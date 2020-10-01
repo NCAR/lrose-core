@@ -52,6 +52,7 @@
 
 #include "WriteToFile.hh"
 #include "AparTsSim.hh"
+#include "SimScanStrategy.hh"
 
 using namespace std;
 
@@ -86,6 +87,10 @@ WriteToFile::WriteToFile(const string &progName,
     cerr << "Running WriteToFile - debug mode" << endl;
   }
 
+  // compute the scan strategy
+
+  _strategy = new SimScanStrategy(_params);
+  
 }
 
 // destructor
@@ -93,6 +98,8 @@ WriteToFile::WriteToFile(const string &progName,
 WriteToFile::~WriteToFile()
   
 {
+
+  delete _strategy;
   
   // delete pulses to free memory
   
@@ -281,9 +288,23 @@ int WriteToFile::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
   double deltaElPerBeam = elRange / _params.n_beams_per_dwell;
 
   vector<double> beamAz, beamEl;
+  vector<int> sweepNum, volNum;
+  vector<Radx::SweepMode_t> sweepMode;
+
   for (int ii = 0; ii < _params.n_beams_per_dwell; ii++) {
-    beamAz.push_back(AparTsSim::conditionAngle360(startAz + (ii + 0.5) * deltaAzPerBeam));
-    beamEl.push_back(AparTsSim::conditionAngle180(startEl + (ii + 0.5) * deltaElPerBeam));
+    if (_params.specify_scan_strategy) {
+      SimScanStrategy::angle_t angle = _strategy->getNextAngle();
+      beamAz.push_back(angle.az);
+      beamEl.push_back(angle.el);
+      sweepNum.push_back(angle.sweepNum);
+      volNum.push_back(angle.volNum);
+      sweepMode.push_back(angle.sweepMode);
+    } else {
+      beamAz.push_back(AparTsSim::conditionAngle360
+                       (startAz + (ii + 0.5) * deltaAzPerBeam));
+      beamEl.push_back(AparTsSim::conditionAngle180
+                       (startEl + (ii + 0.5) * deltaElPerBeam));
+    } // if (_params.specify_scan_strategy)
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -319,6 +340,17 @@ int WriteToFile::_processDwell(vector<IwrfTsPulse *> &dwellPulses)
         aparHdr.visit_num_in_beam = ivisit;
         aparHdr.chan_is_copol[0] = 1;
         aparHdr.pulse_seq_num = _pulseSeqNum;
+
+        if (_params.specify_scan_strategy) {
+          aparHdr.volume_num = volNum[ibeam];
+          aparHdr.sweep_num = sweepNum[ibeam];
+          if (sweepMode[ibeam] == Radx::SWEEP_MODE_RHI) {
+            aparHdr.scan_mode = (int) apar_ts_scan_mode_t::RHI;
+          } else {
+            aparHdr.scan_mode = (int) apar_ts_scan_mode_t::PPI;
+          }
+        }
+
         _pulseSeqNum++;
 
         // create co-polar pulse, set header

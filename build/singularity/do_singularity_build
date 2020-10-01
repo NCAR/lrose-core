@@ -1,0 +1,10 @@
+#! /bin/csh
+
+mkdir /tmp/singularity
+
+cd ~/git/lrose-core/build/singularity
+
+sudo singularity build -F /tmp/singularity/custom.centos:8.sif custom.centos:8.def
+
+sudo singularity build -F /tmp/singularity/lrose_build.sif lrose_build.def
+

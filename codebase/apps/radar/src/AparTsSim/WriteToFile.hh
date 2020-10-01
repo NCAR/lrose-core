@@ -51,7 +51,9 @@
 #include <radar/IwrfTsReader.hh>
 #include <radar/apar_ts_data.h>
 #include <radar/AparTsInfo.hh>
+#include <Radx/Radx.hh>
 
+class SimScanStrategy;
 using namespace std;
 
 ////////////////////////
@@ -102,6 +104,10 @@ private:
   apar_ts_processing_t _aparTsProcessing;
   apar_ts_calibration_t _aparCalibration;
 
+  // simulated scan strategy
+
+  SimScanStrategy *_strategy;
+  
   // functions
 
   int _convertFile(const string &inputPath);

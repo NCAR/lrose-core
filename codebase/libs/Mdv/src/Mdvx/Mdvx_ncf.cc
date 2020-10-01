@@ -1104,8 +1104,9 @@ int Mdvx::_readAllHeadersRadx(const string &path)
   // read in first field with data
 
   RadxVol vol0;
-  if (vol.getFields().size() > 0) {
-    RadxField *rfld = vol.getField(0);
+  const vector<RadxField *> fields = vol.getFields();
+  if (fields.size() > 0) {
+    const RadxField *rfld = fields[0];
     string firstFieldName = rfld->getName();
     RadxFile inFile0;
     inFile0.addReadField(firstFieldName);

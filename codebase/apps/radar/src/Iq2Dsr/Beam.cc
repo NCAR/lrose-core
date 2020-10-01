@@ -2455,7 +2455,7 @@ void Beam::_filterDpAltHvCoCross()
       } // if (!fields.cmd_flag)
 
     } // if (_params.apply_rhohv_test_after_cmd)
-    
+
   } // igate
   
   // compute the alternating velocity
@@ -5528,6 +5528,7 @@ void Beam::_performClutterFiltering()
 
   _cmd->setRangeGeometry(_startRangeKm, _gateSpacingKm);
   _cmd->compute(_nGates, _dualPol);
+
   _fixAltClutVelocity();
 
   // copy the unfiltered fields to the filtered fields
@@ -5542,6 +5543,7 @@ void Beam::_performClutterFiltering()
   // filter clutter from moments
   
   _filterMoments();
+  _fixAltClutVelocityFiltered();
 
 }
 
@@ -5596,6 +5598,7 @@ void Beam::_performClutterFilteringSz()
   // perform filtering
   
   _performClutterFiltering();
+  _fixAltClutVelocityFiltered();
 
 }
 
@@ -5608,12 +5611,18 @@ void Beam::_performClutterFilteringSz()
 // on the H and V time series independently.
 //
 // So, we use this alternative form of velocity for gates at
-// which CMD identifies clutter
+// which this occurs
+//
+// We search for runs of gates with vel close to the nyquist
+// and bracketed by vel close to 0
+// and we set the vel at those gates to that computed for H-only data
 
 void Beam::_fixAltClutVelocity()
 
 {
 
+  // check for conditions
+  
   if (!_params.use_h_only_for_alt_mode_clutter_vel) {
     return;
   }
@@ -5623,21 +5632,159 @@ void Beam::_fixAltClutVelocity()
     return;
   }
 
-  double quarterNyquist = _nyquist / 4.0;
-
-  for (int ii = 0; ii < _nGates; ii++) {
-
-    MomentsFields &fld = _gateData[ii]->flds;
-    if (fld.cmd_flag == 1) {
-      double vel_h_only = fld.vel_h_only;
-      if (vel_h_only != MomentsFields::missingDouble &&
-	  fabs(vel_h_only) < quarterNyquist) {
-        fld.vel = vel_h_only;
+  // find runs of gates close to the nyquist
+  
+  double closeToZero = _nyquist * 0.05;
+  double closeToNyquist = _nyquist * 0.95;
+  
+  vector<int> startGates, endGates;
+  int startGate = 1;
+  bool inRun = false;
+  
+  for (int ii = 1; ii < _nGates - 1; ii++) {
+    
+    if (inRun) {
+      if (fabs(_gateData[ii]->flds.vel) < closeToNyquist) {
+        // end of run
+        if (ii - startGate < 4) {
+          startGates.push_back(startGate);
+          endGates.push_back(ii-1);
+        }
+        inRun = false;
       }
+    } else {
+      if (fabs(_gateData[ii]->flds.vel) >= closeToNyquist) {
+        // start of run
+        startGate = ii;
+        inRun = true;
+      }
+    } // if (inRun)
+
+  } // ii
+
+  // loop through the runs
+
+  for (size_t ii = 0; ii < startGates.size(); ii++) {
+
+    // check gates before and after
+    // these need to be close to 0
+
+    int startGate = startGates[ii];
+    int endGate = endGates[ii];
+
+    double velPrev = fabs(_gateData[startGate-1]->flds.vel);
+    double velNext = fabs(_gateData[endGate+1]->flds.vel);
+    
+    if (velPrev > closeToZero || velNext > closeToZero) {
+      continue;
+    }
+    
+    // check that the diffs at each end of the run are
+    // close to the nyquist
+
+    double velStart = fabs(_gateData[startGate]->flds.vel);
+    double velEnd = fabs(_gateData[endGate]->flds.vel);
+    
+    double diffPrev = fabs(velStart - velPrev);
+    double diffNext = fabs(velEnd - velNext);
+
+    if (diffPrev < closeToNyquist && diffNext < closeToNyquist) {
+      continue;
+    }
+
+    // OK - set the vel to the H-only vel
+
+    for (int jj = startGate; jj <= endGate; jj++) {
+      _gateData[jj]->flds.vel = _gateData[jj]->flds.vel_hv;
     }
     
   } // ii
+  
+}
 
+void Beam::_fixAltClutVelocityFiltered()
+
+{
+
+  // check for conditions
+  
+  if (!_params.use_h_only_for_alt_mode_clutter_vel) {
+    return;
+  }
+
+  if (_xmitRcvMode != IWRF_ALT_HV_CO_ONLY &&
+      _xmitRcvMode != IWRF_ALT_HV_CO_CROSS) {
+    return;
+  }
+
+  // find runs of gates close to the nyquist
+  
+  double closeToZero = _nyquist * 0.05;
+  double closeToNyquist = _nyquist * 0.95;
+  
+  vector<int> startGates, endGates;
+  int startGate = 1;
+  bool inRun = false;
+  
+  for (int ii = 1; ii < _nGates - 1; ii++) {
+    
+    if (inRun) {
+      if (fabs(_gateData[ii]->fldsF.vel) < closeToNyquist) {
+        // end of run
+        if (ii - startGate < 4) {
+          startGates.push_back(startGate);
+          endGates.push_back(ii-1);
+        }
+        inRun = false;
+      }
+    } else {
+      if (fabs(_gateData[ii]->fldsF.vel) >= closeToNyquist) {
+        // start of run
+        startGate = ii;
+        inRun = true;
+      }
+    } // if (inRun)
+
+  } // ii
+
+  // loop through the runs
+
+  for (size_t ii = 0; ii < startGates.size(); ii++) {
+
+    // check gates before and after
+    // these need to be close to 0
+
+    int startGate = startGates[ii];
+    int endGate = endGates[ii];
+
+    double velPrev = fabs(_gateData[startGate-1]->fldsF.vel);
+    double velNext = fabs(_gateData[endGate+1]->fldsF.vel);
+    
+    if (velPrev > closeToZero || velNext > closeToZero) {
+      continue;
+    }
+    
+    // check that the diffs at each end of the run are
+    // close to the nyquist
+
+    double velStart = fabs(_gateData[startGate]->fldsF.vel);
+    double velEnd = fabs(_gateData[endGate]->fldsF.vel);
+    
+    double diffPrev = fabs(velStart - velPrev);
+    double diffNext = fabs(velEnd - velNext);
+
+    if (diffPrev < closeToNyquist && diffNext < closeToNyquist) {
+      continue;
+    }
+
+    // OK - set the vel to the H-only vel
+
+    for (int jj = startGate; jj <= endGate; jj++) {
+      _gateData[jj]->fldsF.vel = _gateData[jj]->fldsF.vel_hv;
+    }
+    
+  } // ii
+  
 }
 
 //////////////////////////////////////////////////////////////

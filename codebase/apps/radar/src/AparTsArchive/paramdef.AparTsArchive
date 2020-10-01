@@ -1,0 +1,118 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions AparTsArchive
+//
+// EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Sept 2020
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "AparTsArchive reads apar time-series data from a file message queue (FMQ). It saves the time series data out in files.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with the process mapper.";
+  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
+} register_with_procmap;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to exit after a specified time period.";
+  p_help = "If true, the application will exit after 'run_period_secs' has elapsed.";
+} exit_after_specified_period;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Run period (secs).";
+  p_help = "If exit_after_specified_period is true, the application will exit after this number of seconds.";
+} run_period_secs;
+
+commentdef {
+  p_header = "DATA INPUT - from file message queue (FMQ)";
+};
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For FMQ input_mode only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} fmq_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use the fixed angle (el or az) to compute the file name.";
+  p_help = "If false, the actual measured angle will be used.";
+} use_fixed_angle_for_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add a string indicating the scan mode to the file name.";
+} add_scan_mode_to_file_name;
+
+commentdef {
+  p_header = "OUTPUT FILE DETAILS";
+};
+
+typedef enum {
+  END_OF_SWEEP,
+  END_OF_VOLUME
+} output_trigger_t;
+
+paramdef enum output_trigger_t {
+  p_default = END_OF_VOLUME;
+  p_descr = "Decision in when to trigger writing a file.";
+  p_help = "END_OF_SWEEP: write a file when the sweep number changes. END_OF_VOLUME: write a file when the sweep number resets to 0.";
+} output_trigger;
+
+typedef enum {
+  PACKING_ASIS,
+  PACKING_FL32,
+  PACKING_SCALED_SI16,
+  PACKING_DBM_PHASE_SI16
+} output_packing_t;
+
+paramdef enum output_packing_t {
+  p_default = PACKING_ASIS;
+  p_descr = "Packing of the IQ data in the output files";
+  p_help = "ASIS: as it was read. FL32: 32-bit floating point. SCALED_SI16: scaled signed 16-bit integers. DBM_PHASE_SI16: signed 16-bit integers representing power in dBM and phase in deg. SIGMET_SI16: Sigmet 16-bit floating point packing as in the RVP8.";
+} output_packing;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, write one file only and then quit.";
+} one_file_only;
+
+paramdef int {
+  p_default = 50000;
+  p_descr = "Maximum number of pulses per output file.";
+  p_help = "Once this maximum is exceeded, the current file will be closed and a new one started.";
+} max_pulses_per_file;
+
+paramdef string {
+  p_default = "./tsarchive/save";
+  p_descr = "Normal mode output directory path.";
+  p_help = "Files are written to this directory, unless a special condition applies, in which case an alternative directory may be used. See VERTICALLY-POINTING and SUN-SCAN sections below.";
+} output_dir;
+

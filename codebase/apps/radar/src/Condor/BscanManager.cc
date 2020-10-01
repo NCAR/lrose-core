@@ -1984,6 +1984,8 @@ void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray
     }
   }
   
+  _plotClicked->setText("BSCAN");
+
   DateTime rayTime(ray->getTimeSecs());
   char text[256];
   sprintf(text, "%.4d/%.2d/%.2d",

@@ -497,6 +497,7 @@ private:
   void _performClutterFiltering();
   void _performClutterFilteringSz();
   void _fixAltClutVelocity();
+  void _fixAltClutVelocityFiltered();
   
   double _computeClutPower(const MomentsFields &unfiltered,
                            const MomentsFields &filtered);

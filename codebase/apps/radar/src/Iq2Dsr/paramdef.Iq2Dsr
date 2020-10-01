@@ -1033,7 +1033,7 @@ paramdef double {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to use H only pulses for computing clutter velocity in alternation dual pol mode.";
+  p_descr = "Option to use H only pulses for computing clutter velocity in alternating dual pol mode.";
   p_help = "If false, the normal phidp-based method is used everywhere in alternating dual pol mode. If true, the H-only pulses are used to compute velocity where CMD flags a gate as clutter.";
 } use_h_only_for_alt_mode_clutter_vel;
 

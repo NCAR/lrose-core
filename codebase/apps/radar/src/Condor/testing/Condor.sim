@@ -259,8 +259,6 @@ max_range_km = 150;
 //      boolean nyquist;
 //      boolean max_range;
 //      boolean unambiguous_range;
-//      boolean measured_power_h;
-//      boolean measured_power_v;
 //      boolean scan_name;
 //      boolean scan_mode;
 //      boolean polarization_mode;
@@ -292,8 +290,6 @@ show_status_in_gui = {
     nyquist = TRUE,
     max_range = TRUE,
     unambiguous_range = TRUE,
-    measured_power_h = FALSE,
-    measured_power_v = FALSE,
     scan_name = FALSE,
     scan_mode = TRUE,
     polarization_mode = TRUE,
@@ -335,11 +331,10 @@ color_scale_dir = "./testing/color_scales";
 //
 // Fields to be displayed.
 //
-// label: appears on the GUI. field_name: field name. 
-//   units: units string 
+// label: appears on the GUI. field_name:field name. units: units string 
 //   for color scale. color_map: name of color map in color_scale_dir. 
 //   shortcut: keyboard character for shortcut. Specified key will select 
-//   raw field. Use ALT-key to get filtered field. .
+//   raw field. .
 //
 //
 // Type: struct
@@ -422,8 +417,8 @@ background_render_mins = 2;
 //
 // Option to use field label in the display title.
 //
-// If TRUE, the label will be used in the title. If FALSE, the raw_name 
-//   or filtered name will be used.
+// If TRUE, the label will be used in the title. If FALSE, the 
+//   field_name will be used.
 //
 //
 // Type: boolean
@@ -493,59 +488,57 @@ polar_plot_aspect_ratio = 1.3;
 // 1D array - variable length.
 //
 
-polar_plots =
+polar_plots = {
   {
-   {
     plot_type = RHI_PLOT,
     label = "RHI-fore",
     min_az = -7.5,
     max_az = -2.5,
-    min_el = -25.0,
-    max_el = 25.0,
-    min_x_km = -9.0,
-    max_x_km = 160.0,
+    min_el = -25,
+    max_el = 25,
+    min_x_km = -9,
+    max_x_km = 160,
     min_y_km = -65,
     max_y_km = 65
-   }
-   ,
-   {
+  }
+  ,
+  {
     plot_type = RHI_PLOT,
     label = "RHI-aft",
     min_az = 22.5,
     max_az = 27.5,
-    min_el = -25.0,
-    max_el = 25.0,
-    min_x_km = -9.0,
-    max_x_km = 160.0,
+    min_el = -25,
+    max_el = 25,
+    min_x_km = -9,
+    max_x_km = 160,
     min_y_km = -65,
     max_y_km = 65
-   }
-   ,
-   {
+  }
+  ,
+  {
     plot_type = RHI_PLOT,
     label = "RHI-dualpol",
     min_az = -2.5,
     max_az = 2.5,
-    min_el = -25.0,
-    max_el = 25.0,
-    min_x_km = -9.0,
-    max_x_km = 160.0,
+    min_el = -25,
+    max_el = 25,
+    min_x_km = -9,
+    max_x_km = 160,
     min_y_km = -65,
     max_y_km = 65
-   }
-   ,
-   {
+  }
+  ,
+  {
     plot_type = PPI_PLOT,
     label = "PPI",
-    min_az = -45.0,
-    max_az = 45.0,
-    min_el = -45.0,
-    max_el = 45.0,
+    min_az = -45,
+    max_az = 45,
+    min_el = -45,
+    max_el = 45,
     min_x_km = -110,
     max_x_km = 110,
     min_y_km = -10,
     max_y_km = 159.23
-   }
   }
 };
 
@@ -605,7 +598,7 @@ override_radar_name = FALSE;
 // Type: string
 //
 
-radar_name = "SPOL";
+radar_name = "APAR";
 
 ///////////// display_site_name ///////////////////////
 //
@@ -735,7 +728,7 @@ main_title_color = "white";
 
 main_label_font_size = 12;
 
-///////////// main_background_color ///////////////////
+///////////// background_color ////////////////////////
 //
 // Color of main display background.
 //
@@ -743,7 +736,7 @@ main_label_font_size = 12;
 // Type: string
 //
 
-main_background_color = "black";
+background_color = "black";
 
 ///////////// main_window_panel_divider_line_width ////
 //
@@ -777,15 +770,15 @@ main_window_panel_divider_color = "yellow";
 
 label_font_size = 12;
 
-///////////// background_color ////////////////////////
+///////////// plot_label_color ////////////////////////
 //
-// Color of main display background.
+// Color of plot labels.
 //
 //
 // Type: string
 //
 
-background_color = "black";
+plot_label_color = "yellow";
 
 ///////////// grid_and_range_ring_color ///////////////
 //
@@ -819,52 +812,42 @@ range_ring_label_font_size = 8;
 
 click_cross_size = 11;
 
+///////////// polar_range_rings_on_at_startup /////////
+//
+// Set POLAR range rings overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+polar_range_rings_on_at_startup = TRUE;
+
+///////////// polar_angle_lines_on_at_startup /////////
+//
+// Set POLAR angle lines overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+polar_angle_lines_on_at_startup = TRUE;
+
+///////////// polar_grids_on_at_startup ///////////////
+//
+// Set POLAR grids overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+polar_grids_on_at_startup = FALSE;
+
 //======================================================================
 //
 // PPI MODE DISPLAY.
 //
 //======================================================================
  
-///////////// ppi_aspect_ratio ////////////////////////
-//
-// Aspect ratio (width/height) of PPI window.
-//
-//
-// Type: double
-//
-
-ppi_aspect_ratio = 1;
-
-///////////// ppi_grids_on_at_startup /////////////////
-//
-// Set PPI grids overlay on at startup.
-//
-//
-// Type: boolean
-//
-
-ppi_grids_on_at_startup = FALSE;
-
-///////////// ppi_range_rings_on_at_startup ///////////
-//
-// Set PPI range rings overlay on at startup.
-//
-//
-// Type: boolean
-//
-
-ppi_range_rings_on_at_startup = TRUE;
-
-///////////// ppi_azimuth_lines_on_at_startup /////////
-//
-// Set PPI azimuth lines overlay on at startup.
-//
-//
-// Type: boolean
-//
-
-ppi_azimuth_lines_on_at_startup = TRUE;
-
 ///////////// ppi_main_legend_pos /////////////////////
 //
 // Position of main legend in the PPI plot window.
@@ -900,205 +883,6 @@ ppi_rendering_beam_width = 1;
 //
 //======================================================================
  
-///////////// rhi_window_width ////////////////////////
-//
-// Startup width of RHI window (pixels).
-//
-//
-// Type: int
-//
-
-rhi_window_width = 500;
-
-///////////// rhi_window_height ///////////////////////
-//
-// Startup height of RHI window (pixels).
-//
-//
-// Type: int
-//
-
-rhi_window_height = 500;
-
-///////////// rhi_window_start_x //////////////////////
-//
-// Startup X for RHI window (pixels).
-//
-//
-// Type: int
-//
-
-rhi_window_start_x = 1100;
-
-///////////// rhi_window_start_y //////////////////////
-//
-// Startup Y for RHI window (pixels).
-//
-//
-// Type: int
-//
-
-rhi_window_start_y = 0;
-
-///////////// rhi_top_margin //////////////////////////
-//
-// Height of top margin in RHI mode (pixels).
-//
-// Titles go in the top margin.
-//
-//
-// Type: int
-//
-
-rhi_top_margin = 20;
-
-///////////// rhi_bottom_margin ///////////////////////
-//
-// Height of bottom margin in RHI mode (pixels).
-//
-// Time scale goes in the bottom margin.
-//
-//
-// Type: int
-//
-
-rhi_bottom_margin = 20;
-
-///////////// rhi_left_margin /////////////////////////
-//
-// Width of left margin in RHI mode (pixels).
-//
-// Height scale goes in the left margin.
-//
-//
-// Type: int
-//
-
-rhi_left_margin = 20;
-
-///////////// rhi_right_margin ////////////////////////
-//
-// Width of right margin in RHI mode (pixels).
-//
-// Height scale goes in the right margin.
-//
-//
-// Type: int
-//
-
-rhi_right_margin = 20;
-
-///////////// rhi_label_font_size /////////////////////
-//
-// Font size for labels on range rings (pixels).
-//
-//
-// Type: int
-//
-
-rhi_label_font_size = 8;
-
-///////////// rhi_axis_tick_len ///////////////////////
-//
-// Length of ticks on axes (pixels).
-//
-//
-// Type: int
-//
-
-rhi_axis_tick_len = 7;
-
-///////////// rhi_n_ticks_ideal ///////////////////////
-//
-// Ideal number of ticks on axes.
-//
-//
-// Type: int
-//
-
-rhi_n_ticks_ideal = 7;
-
-///////////// rhi_text_margin /////////////////////////
-//
-// Margin around some text (pixels).
-//
-//
-// Type: int
-//
-
-rhi_text_margin = 5;
-
-///////////// rhi_display_180_degrees /////////////////
-//
-// Flag indicating to display full 180 degrees in RHI window. If set to 
-//   false, the RHI window will just display 90 degrees of the RHI.
-//
-//
-// Type: boolean
-//
-
-rhi_display_180_degrees = FALSE;
-
-///////////// rhi_aspect_ratio ////////////////////////
-//
-// Aspect ratio (width/height) of RHI window.
-//
-//
-// Type: double
-//
-
-rhi_aspect_ratio = 1;
-
-///////////// rhi_max_height_km ///////////////////////
-//
-// Max height of data in RHI window (km).
-//
-//
-// Type: double
-//
-
-rhi_max_height_km = 25;
-
-///////////// rhi_color_scale_width ///////////////////
-//
-// Width of color scale for RHI window (pixels).
-//
-//
-// Type: int
-//
-
-rhi_color_scale_width = 40;
-
-///////////// rhi_grids_on_at_startup /////////////////
-//
-// Set RHI grids overlay on at startup.
-//
-//
-// Type: boolean
-//
-
-rhi_grids_on_at_startup = TRUE;
-
-///////////// rhi_range_rings_on_at_startup ///////////
-//
-// Set RHI range rings overlay on at startup.
-//
-//
-// Type: boolean
-//
-
-rhi_range_rings_on_at_startup = TRUE;
-
-///////////// rhi_elevation_lines_on_at_startup ///////
-//
-// Set RHI elevation lines overlay on at startup.
-//
-//
-// Type: boolean
-//
-
-rhi_elevation_lines_on_at_startup = FALSE;
-
 ///////////// rhi_main_legend_pos /////////////////////
 //
 // Position of main legend in the RHI plot window.
@@ -1115,18 +899,6 @@ rhi_elevation_lines_on_at_startup = FALSE;
 //
 
 rhi_main_legend_pos = LEGEND_TOP_LEFT;
-
-///////////// rhi_beam_queue_size /////////////////////
-//
-// Size of the queue for RHI beams.
-//
-// After the queue reaches this size, older beams are discarded.
-//
-//
-// Type: int
-//
-
-rhi_beam_queue_size = 360;
 
 ///////////// rhi_rendering_beam_width ////////////////
 //
@@ -1273,7 +1045,7 @@ bscan_min_range_km = 0;
 // Type: double
 //
 
-bscan_max_range_km = 25;
+bscan_max_range_km = 150;
 
 ///////////// bscan_min_altitude_km ///////////////////
 //
@@ -1332,7 +1104,7 @@ bscan_range_in_feet = FALSE;
 //     RANGE_AXIS_ALTITUDE
 //
 
-bscan_range_axis_mode = RANGE_AXIS_ALTITUDE;
+bscan_range_axis_mode = RANGE_AXIS_UP;
 
 //======================================================================
 //
@@ -1875,7 +1647,7 @@ images_file_name_category = "radar";
 // Type: string
 //
 
-images_file_name_platform = "NSF_NCAR_GV_HCR";
+images_file_name_platform = "NSF_NCAR_C130_APAR";
 
 ///////////// images_file_name_extension //////////////
 //

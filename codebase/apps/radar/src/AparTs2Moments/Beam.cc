@@ -407,6 +407,9 @@ int Beam::_getVolNum()
     volNums.push_back(_pulses[ii]->getVolumeNum());
   }
   sort(volNums.begin(), volNums.end());
+  if ((int) volNums.size() < _nSamplesHalf + 1) {
+    return 0;
+  }
   if (volNums[_nSamplesHalf] < 0) {
     return 0;
   }
