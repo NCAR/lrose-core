@@ -70,6 +70,8 @@ void BoundaryPointMap::se_delete_bnd_pt(BoundaryPointManagement *bpm,
   }
 }
 
+// add a BoundaryPointManagement block to the double linked list
+// kept by OneBoundary
 void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob, 
                                       bool time_series) {
 
@@ -164,6 +166,8 @@ void BoundaryPointMap::xse_add_bnd_pt(long x, long y, OneBoundary *ob,
     ob->min_x = ob->max_x = x;
     ob->min_y = ob->max_y = y;
   }
+  //cout << "xse_add_bnd_pt finished  ... " << endl;
+  //ob->print();
 }
 
 /* c------------------------------------------------------------------------ */
@@ -488,6 +492,8 @@ void BoundaryPointMap::se_radar_inside_bnd(OneBoundary *ob)
   int ii, nBoundaryPoints = ob->num_points-1, nn, inside_count=0;
 
 
+  // TODO: ignoring the boundary header for now 
+  if (0) {
   if(ob->bh->force_inside_outside) {
     if(ob->bh->force_inside_outside == BND_FIX_RADAR_INSIDE) {
       ob->radar_inside_boundary = true;
@@ -496,6 +502,8 @@ void BoundaryPointMap::se_radar_inside_bnd(OneBoundary *ob)
       ob->radar_inside_boundary = false;
     }
   }
+  }
+  // 
 
   bpm = ob->top_bpm;
   x = abs(bpm->_x);
@@ -837,6 +845,44 @@ void BoundaryPointMap::dd_latlon_relative(PointInSpace *p0, PointInSpace *p1)
     p1->z = (float)zz;
 }
 
+
+/*
+// out params:
+//    q_x, q_y, q_zz
+//
+void BoundaryPointMap::dd_latlon_relative(double p0_tilt,
+					  double p0_latitude,
+					  double p0_longitude,
+					  double p0_altitude,
+					  double p1_x,
+					  double p1_y,
+					  double p1_z,
+					  double p1_latitude,
+					  double p1_longitude,
+					  double p1_altitude,
+					  float *q_x,
+					  float *q_y,
+					  float *q_z)
+{
+  // routine to calculate (x,y,z) for p1 so as to line up                                                   
+  // with (0,0,0) for p0                                                                                    
+  //
+  //double del_lat;
+ //del_lon,
+ //double lat=RADIANS(p1->latitude);
+    double xx, yy, zz, R_earth;
+
+    R_earth = dd_earthr(p1_latitude);
+    // TODO: note! the p0 lat, long, altitude are changed?
+    loop_ll2xy_v3( &p0_latitude, &p0_longitude, &p0_altitude
+                   , &xx, &yy, &zz
+                   , p1_latitude, p1_longitude, p1_altitude
+                   , R_earth, 1 );
+    q_x = (float)xx;
+    q_y = (float)yy;
+    q_z = (float)zz;
+}
+*/
 
 /* c------------------------------------------------------------------------ */
 
@@ -1399,6 +1445,74 @@ int BoundaryPointMap::xse_num_segments(OneBoundary *ob)
   nx = ob->num_intxns;
 
   if(ob->radar_inside_boundary) {
+    if (nx == 0) { // if(!nx) {
+      // the end of the ray is inside the boundary 
+      ob->num_segments = 1;
+      ob->r0 = 0;
+      ob->r1 = 1.e9;
+      cout << "xse_num_segments: return point 1" << endl;
+      return(1);
+    }
+    ob->r0 = 0;
+    ob->r1 = ob->first_intxn->rx;
+    ob->next_segment = ob->first_intxn->next_intxn;
+
+    if(nx & 1) {            // no funny stuff
+      ob->num_segments = (nx+1)/2;
+    }
+    else {
+      //                                                       
+      // even number of intersections                                                
+      // assume the boundary is past the end of the ray                              
+      //
+      ob->num_segments = nx/2 +1;
+    }
+      cout << "xse_num_segments: return point 2" << endl;
+
+    return(ob->num_segments);
+  }
+  // radar is outside the boundary                                                       
+   
+  if(!nx) {
+    ob->num_segments = 0;
+      cout << "xse_num_segments: return point 3" << endl;
+
+    return(ob->num_segments);
+  }
+  ob->r0 = ob->first_intxn->rx;
+
+  if(nx & 1) {                // the boundary is past the end of the ray 
+    if(nx == 1) {
+      ob->num_segments = 1;
+      ob->r1 = 1.e9;
+      cout << "xse_num_segments: return point 4" << endl;
+
+      return(1);
+    }
+    ob->num_segments = (nx+1)/2;
+  }
+  else {
+    ob->num_segments = nx/2;
+  }
+  ob->r1 = ob->first_intxn->next_intxn->rx;
+  ob->next_segment = ob->first_intxn->next_intxn->next_intxn;
+      cout << "xse_num_segments: return point 5" << endl;
+
+  return(ob->num_segments);
+}
+
+/*
+int BoundaryPointMap::xse_num_segments_original(OneBoundary *ob)
+{
+  // calculate the number of segments and set up                                         
+  // the first segment                                                                   
+  //
+  //int ii, nn,
+  int  nx; // , mark;
+
+  nx = ob->num_intxns;
+
+  if(ob->radar_inside_boundary) {
     if(!nx) {
       // the end of the ray is inside the boundary 
       ob->num_segments = 1;
@@ -1446,7 +1560,7 @@ int BoundaryPointMap::xse_num_segments(OneBoundary *ob)
 
   return(ob->num_segments);
 }
-
+*/
 /* c------------------------------------------------------------------------ */
 
 void BoundaryPointMap::se_shift_bnd( // ob, boundary_radar, current_radar, scan_mode, current_tilt)
@@ -1501,10 +1615,9 @@ void BoundaryPointMap::se_shift_bnd( // ob, boundary_radar, current_radar, scan_
   }
 }
 
-
-
 /* c------------------------------------------------------------------------ */
 
+/*
 // returns boundary mask
 // NOTE: This is a Frankenstein method ... it has been pieced together
 //       from different sections of the original Soloii code. 
@@ -1546,23 +1659,24 @@ short *BoundaryPointMap::get_boundary_mask(
                       tilt_angle);
 
         //--------
-        /*  NOTE: this should be filled by the calling function
-        radar->latitude = dd_latitude(dgi);
-        radar->longitude = dd_longitude(dgi);
-        radar->altitude = dd_altitude(dgi);
-        radar->earth_radius = dd_earthr(radar->latitude);
-        radar->tilt = dd_tilt_angle(dgi);
-        radar->tilt = dgi->dds->swib->fixed_angle;
+        //  NOTE: this should be filled by the calling function
+        //radar->latitude = dd_latitude(dgi);
+        //radar->longitude = dd_longitude(dgi);
+        //radar->altitude = dd_altitude(dgi);
+        //radar->earth_radius = dd_earthr(radar->latitude);
+        //radar->tilt = dd_tilt_angle(dgi);
+        //radar->tilt = dgi->dds->swib->fixed_angle;
        
-        dd_latlon_relative(boundary_origin, radar_origin);
-        */
+        //dd_latlon_relative(boundary_origin, radar_origin);
+        // end NOTE:
+        //
 
-        /*                                                                             
-         * radar->x is now the x coordinate of the boundary origin                     
-         * relative to the radar                                                       
-         * check to see if the boundary origin and the radar origin                    
-         * are within 100m of each other                                               
-         */
+        //                                                                             
+         // radar->x is now the x coordinate of the boundary origin                     
+         // relative to the radar                                                       
+         // check to see if the boundary origin and the radar origin                    
+         // are within 100m of each other                                               
+         ///
         bool not_aligned = (SQ(radar_origin->x) + SQ(radar_origin->y)) > .1;
         bool airborne = radar_scan_mode == RHI ||
               !(radar_type == GROUND ||
@@ -1592,13 +1706,120 @@ short *BoundaryPointMap::get_boundary_mask(
       int g1 = dd_cell_num(nGates, gateSize, distanceToCellNInMeters, r1);
       int g2 = dd_cell_num(nGates, gateSize, distanceToCellNInMeters, r2) +1;
 
+      for(; g1 < g2; g1++) { // set boundary flags 
+        *(bnd + g1) = bflag;
+      }
+    } // end segments loop //
+
+  } // end boundary for loop //
+  return bnd;
+}
+*/
+
+
+/* c------------------------------------------------------------------------ */
+
+// pass in allocated boundary mask array
+// NOTE: This is a Frankenstein method ... it has been pieced together
+//       from different sections of the original Soloii code. 
+//
+void BoundaryPointMap::get_boundary_mask(
+        OneBoundary *boundaryList,
+        // bool new_sweep,  // assume new_sweep
+        //        bool operate_outside_bnd,
+        //bool shift_bnd,  // always shift
+        PointInSpace *radar_origin,
+        PointInSpace *boundary_origin,
+        int nGates,
+        float gateSize,
+        float distanceToCellNInMeters,
+        float azimuth,    // TODO: are azimuth & rotation_angle the same thing? YES
+        int radar_scan_mode,
+        int radar_type,
+        float tilt_angle, 
+        float rotation_angle,
+	bool *boundary_mask) {
+
+  OneBoundary *ob;
+  //rota = d = dd_rotation_angle(dgi);
+  bool bflag;
+
+  //  short *bnd = new short[nGates];
+  bool *bnd = boundary_mask;
+
+  int nn = nGates;
+  bflag = true;
+  memset(bnd, 0, nn * sizeof(bool));
+  // for each boundary, add to the mask; the mask is the intersection
+  // of all boundaries?
+  //
+  for(ob = boundaryList; ob ; ob = ob->next) {
+    if(ob->num_points < 3)
+      continue;
+
+    // print the boundary for debug 
+    ob->print();
+        // shift the boundary's points to be relative to current radar represented by "usi"
+        se_shift_bnd(ob, boundary_origin, radar_origin,
+                     radar_scan_mode,
+                      tilt_angle);
+
+        //--------
+        /*  NOTE: this should be filled by the calling function
+        radar->latitude = dd_latitude(dgi);
+        radar->longitude = dd_longitude(dgi);
+        radar->altitude = dd_altitude(dgi);
+        radar->earth_radius = dd_earthr(radar->latitude);
+        radar->tilt = dd_tilt_angle(dgi);
+        radar->tilt = dgi->dds->swib->fixed_angle;
+       
+        dd_latlon_relative(boundary_origin, radar_origin);
+        */
+
+        /*                                                                             
+         * radar->x is now the x coordinate of the boundary origin                     
+         * relative to the radar                                                       
+         * check to see if the boundary origin and the radar origin                    
+         * are within 100m of each other                                               
+         */
+        bool not_aligned = (SQ(radar_origin->x) + SQ(radar_origin->y)) > .1;
+        bool airborne = radar_scan_mode == RHI ||
+              !(radar_type == GROUND ||
+                radar_type == SHIP);
+
+            //---------------
+
+	//if(not_aligned && !airborne) {
+        // see if radar is inside this boundary
+        se_radar_inside_bnd(ob);
+        // there must be some side effects of this. What are they?
+        // sets ob->radar_inside_boundary = T/F 
+	//}
+      // TODO: must set ob->radar_inside_boundary <==== HERE
+      double range = distanceToCellNInMeters + nGates*gateSize;
+    xse_find_intxns(azimuth, range, ob);
+    xse_num_segments(ob);
+    
+    cout << "azimuth=" << azimuth << " r0 = " << ob->r0 << " r1 = " << ob->r1 << endl;
+    double range1;
+    double range2;
+
+    for(int ii=0; ii < ob->num_segments; ii++) {
+      se_nab_segment(ii, &range1, &range2, ob);
+      if(range2 <= 0)
+        continue;
+      double r1 = range1; 
+      double r2 = range2;
+      int g1 = dd_cell_num(nGates, gateSize, distanceToCellNInMeters, r1);
+      int g2 = dd_cell_num(nGates, gateSize, distanceToCellNInMeters, r2) +1;
+
       for(; g1 < g2; g1++) { /* set boundary flags */
         *(bnd + g1) = bflag;
       }
     } /* end segments loop */
 
   } /* end boundary for loop */
-  return bnd;
+
 }
 
 /*

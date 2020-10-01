@@ -11,6 +11,8 @@ OneBoundary::OneBoundary() {
   last = NULL;
   top_bpm = NULL;
   first_intxn = NULL;
+  next_segment = NULL;
+  bh = NULL;
 }
 
 // OneBoundary::OneBoundary(int *xpoints, int *ypoints, int npoints) {}

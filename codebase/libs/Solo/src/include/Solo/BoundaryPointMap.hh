@@ -1,7 +1,35 @@
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// ** Copyright UCAR (c) 1990 - 2016                                         
+// ** University Corporation for Atmospheric Research (UCAR)                 
+// ** National Center for Atmospheric Research (NCAR)                        
+// ** Boulder, Colorado, USA                                                 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from UCAR.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of UCAR nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+#ifndef BOUNDARYPOINTMAP_H
+#define BOUNDARYPOINTMAP_H
 
 #include "Solo/BoundaryPointManagement.hh"
 #include "Solo/OneBoundary.hh"
 
+
+// BoundaryPointMap is just an interface to the Solo boundary
+// functions.  Remember, it holds no state!
 
 class BoundaryPointMap {
 
@@ -49,6 +77,22 @@ public:
 
   void dd_latlon_relative(PointInSpace *p0, PointInSpace *p1);
 
+  /*
+  void dd_latlon_relative(double p0_tilt,
+			  double p0_latitude,
+			  double p0_longitude,
+			  double p0_altitude,
+			  double p1_x,
+			  double p1_y,
+			  double p1_z,
+			  double p1_latitude,
+			  double p1_longitude,
+			  double p1_altitude,
+			  float *q_x,
+			  float *q_y,
+			  float *q_z);
+  */
+
   void se_nab_segment(int num, double *r0, double *r1, 
                       OneBoundary *ob);
 
@@ -63,7 +107,7 @@ public:
           PointInSpace *current_radar,
           int scan_mode,
           double current_tilt);
-
+  /*
   short *get_boundary_mask(
           OneBoundary *boundaryList,
           PointInSpace *radar_origin,
@@ -76,6 +120,26 @@ public:
           int radar_type,
           float tilt_angle,
           float rotation_angle);
+  */
+void get_boundary_mask(
+        OneBoundary *boundaryList,
+        // bool new_sweep,  // assume new_sweep
+        //        bool operate_outside_bnd,
+        //bool shift_bnd,  // always shift
+        PointInSpace *radar_origin,
+        PointInSpace *boundary_origin,
+        int nGates,
+        float gateSize,
+        float distanceToCellNInMeters,
+        float azimuth,    // TODO: are azimuth & rotation_angle the same thing? YES
+        int radar_scan_mode,
+        int radar_type,
+        float tilt_angle, 
+        float rotation_angle,
+	bool *boundary_mask);
+
+
+
   /*
 
   short *get_boundary_mask_time_series(
@@ -93,3 +157,5 @@ public:
   //  int se_perform_cmds (struct ui_cmd_mgmt *the_ucm, int num_cmds);
 
 };
+
+#endif
