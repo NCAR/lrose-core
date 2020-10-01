@@ -327,6 +327,7 @@ void AparTs2NetCDF::_prepareToWrite()
   // initialize
   
   _computeNGatesMax();
+  _nTimes = _pulses.size();
 
   _pulseII.prepare(_nGatesMax * sizeof(float));
   _pulseQQ.prepare(_nGatesMax * sizeof(float));
@@ -555,8 +556,9 @@ int AparTs2NetCDF::_writeFileTmp()
   
   //////////////////
   // add dimensions
-  
-  NcxxDim gatesDim = file.addDim("gates", _nGates);
+
+  cerr << "000000000 _nGates, _nTimes: " << _nGatesMax << ", " << _nTimes << endl;
+  NcxxDim gatesDim = file.addDim("gates", _nGatesMax);
   NcxxDim timeDim = file.addDim("time", _nTimes);
 
   /////////////////////////////////
@@ -578,6 +580,7 @@ int AparTs2NetCDF::_writeFileTmp()
   }
 
   if (_pulses.size() > 0) {
+    cerr << "99999999 _pulses.size(): " << _pulses.size() << endl;
     if (_writeIqVars(file, timeDim, gatesDim, "I", "Q",
                      (float *) _II.getPtr(),
                      (float *) _QQ.getPtr())) {
@@ -599,7 +602,7 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   int startingSample = 0;
   int endingSample = startingSample + _nTimes - 1;
   int startGate = 0;
-  int endGate = startGate + _nGates - 1;
+  int endGate = startGate + _nGatesMax - 1;
   
   char desc[1024];
   sprintf(desc,
@@ -615,8 +618,6 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   file.addGlobAttr("FirstGate", startGate);
   file.addGlobAttr("LastGate", endGate);
   
-  file.addGlobAttr("n_gates_padded_to_max", _nGatesMax);
-
   // radar info
   
   const AparTsInfo &info = _pulses[0]->getTsInfo();
@@ -1047,9 +1048,9 @@ int AparTs2NetCDF::_writeRangeVar(NcxxFile &file,
   }
 
   TaArray<float> range_;
-  float *range = range_.alloc(_nGates);
+  float *range = range_.alloc(_nGatesMax);
   double thisRange = _startRangeM;
-  for (int ii = 0; ii < _nGates; ii++, thisRange += _gateSpacingM) {
+  for (int ii = 0; ii < _nGatesMax; ii++, thisRange += _gateSpacingM) {
     range[ii] = thisRange;
   }
   rangeVar.putVal(range);
@@ -1418,6 +1419,8 @@ int AparTs2NetCDF::_writeIqVars(NcxxFile &file,
   
 {
 
+  cerr << "aaaaaaaaa timeDim, gatesDim: " << timeDim.getSize() << ", " << gatesDim.getSize() << endl;
+  
   // I variable
   
   NcxxVar iVar = file.addVar(iName,

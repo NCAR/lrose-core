@@ -114,9 +114,6 @@ private:
   size_t _nTimes;
   time_t _startTime;
 
-  int _nGates;
-  int _nGatesSave;
-
   // bool _alternatingMode;
 
   double _startAz;
