@@ -220,9 +220,14 @@ int AparTs2NetCDF::Run ()
         }
 
       }
-        
+
       // clear the queue
+
       _clearPulseQueue();
+      
+      if (pulse == NULL) {
+        return 0;
+      }
       
       // add previous pulse if not already used
       
@@ -242,8 +247,10 @@ int AparTs2NetCDF::Run ()
     } // if (readyToWrite)
 
   } // while
-    
-  return 0;
+
+  // should not get here
+  
+  return -1;
   
 }
 
@@ -514,10 +521,6 @@ int AparTs2NetCDF::_writeFile()
   }
 
   cerr << "  Wrote file: " << _outputPath << endl;
-
-  // reset data variables
-
-  // _reset();
 
   return 0;
 
@@ -1391,7 +1394,7 @@ int AparTs2NetCDF::_writeVar(NcxxFile &file,
     cerr << "  Cannot create var, name: " << name << endl;
     return -1;
   }
-  var.addScalarAttr("_FillValue", -9999);
+  var.addScalarAttr("_FillValue", (int64_t) -9999);
   for (size_t jj = 0; jj < timeDim.getSize(); jj++) {
     ints[jj] = vals[jj];
   }
