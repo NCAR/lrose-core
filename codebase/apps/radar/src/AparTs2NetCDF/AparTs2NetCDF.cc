@@ -204,10 +204,10 @@ int AparTs2NetCDF::Run ()
 
     if (readyToWrite) {
 
-      if (useThisPulse) {
-        // add pulse to queue before write
-        _pulses.push_back(pulse);
-      }
+      // if (useThisPulse) {
+      //   // add pulse to queue before write
+      //   _pulses.push_back(pulse);
+      // }
 
       if (_pulses.size() > 0) {
         
