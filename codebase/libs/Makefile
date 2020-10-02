@@ -14,6 +14,7 @@ SUB_DIRS = \
         Ncxx \
 	Radx \
         Refract \
+	Solo \
 	Spdb \
 	advect \
 	cidd \
