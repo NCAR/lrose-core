@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
+#include <cstring>
 #include <string>
 
 // extern "C" is needed for python access to library
