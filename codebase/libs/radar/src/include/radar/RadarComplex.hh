@@ -59,6 +59,10 @@ public:
     re = re_;
     im = im_;
   }
+  // clear method
+  void clear() {
+    set(0.0, 0.0);
+  }
   // data
   double re;
   double im;
