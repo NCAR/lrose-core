@@ -277,13 +277,10 @@ AparTsPulse*
 
   _endOfFile = false;
 
-  if (_in != NULL && feof(_in)) {
-    _endOfFile = true;
-  }
-
   if (_in == NULL || feof(_in)) {
     if (_openNextFile()) {
       delete pulse;
+      _endOfFile = true;
       return NULL;
     }
   }
@@ -293,10 +290,6 @@ AparTsPulse*
   while (_in != NULL) {
 
     int iret = _readPulse(*pulse);
-
-    if (feof(_in)) {
-      _endOfFile = true;
-    }
 
     if (iret == 0) {
       // success
@@ -322,15 +315,18 @@ AparTsPulse*
       cerr << "  Cannot read in pulse headers and data" << endl;
       cerr << "  File: " << _inputPath << endl;
     }
+
+    // set end of file flag
     
+    _endOfFile = true;
+
     // try new file
     if (_openNextFile()) {
       // no good
       delete pulse;
       return NULL;
     }
-    _endOfFile = true;
-
+    
   } // while
 
   // should not get here
