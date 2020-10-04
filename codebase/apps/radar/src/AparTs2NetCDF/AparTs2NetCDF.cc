@@ -362,6 +362,7 @@ void AparTs2NetCDF::_prepareToWrite()
       _startTime = pulse->getTime();
       _startEl = el;
       _startAz = az;
+      _startFixedAngle = pulse->getFixedAngle();
       _startRangeM = pulse->getStartRangeM();
       _gateSpacingM = pulse->getGateSpacingM();
       _startScanMode = pulse->getScanMode();
@@ -1069,6 +1070,9 @@ int AparTs2NetCDF::_computeOutputFilePaths()
   char azAngleStr[64];
   sprintf(azAngleStr, "_%.2f", _startAz);
   
+  char fixedAngleStr[64];
+  sprintf(fixedAngleStr, "_%.2f", _startFixedAngle);
+  
   string scanModeStr;
   switch (_startScanMode) {
     case apar_ts_scan_mode_t::COPLANE:
@@ -1111,17 +1115,24 @@ int AparTs2NetCDF::_computeOutputFilePaths()
   
   // compute output path
 
-  char relPath[1024];
+  char relPath[BUFSIZ];
 
   if (_params.input_mode == Params::TS_FILE_INPUT &&
       _params.preserve_file_name) {
     Path path(_pulseReader->getPrevPathInUse());
-    sprintf(relPath, "%s.nc", path.getFile().c_str());
+    snprintf(relPath, BUFSIZ, "%s.nc", path.getFile().c_str());
   } else {
-    sprintf(relPath, "%.4d%.2d%.2d_%.2d%.2d%.2d%s%s%s.nc",
-            stime.getYear(), stime.getMonth(), stime.getDay(),
-            stime.getHour(), stime.getMin(), stime.getSec(),
-            elevAngleStr, azAngleStr, scanModeStr.c_str());
+    if (_params.output_trigger == Params::END_OF_SWEEP) {
+      snprintf(relPath, BUFSIZ, "%.4d%.2d%.2d_%.2d%.2d%.2d%s%s.nc",
+               stime.getYear(), stime.getMonth(), stime.getDay(),
+               stime.getHour(), stime.getMin(), stime.getSec(),
+               fixedAngleStr, scanModeStr.c_str());
+    } else {
+      snprintf(relPath, BUFSIZ, "%.4d%.2d%.2d_%.2d%.2d%.2d%s%s%s.nc",
+               stime.getYear(), stime.getMonth(), stime.getDay(),
+               stime.getHour(), stime.getMin(), stime.getSec(),
+               elevAngleStr, azAngleStr, scanModeStr.c_str());
+    }
   }
 
   _outputName = relPath;

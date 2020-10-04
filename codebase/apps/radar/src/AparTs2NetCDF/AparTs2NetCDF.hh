@@ -118,6 +118,7 @@ private:
 
   double _startAz;
   double _startEl;
+  double _startFixedAngle;
   apar_ts_scan_mode_t _startScanMode;
 
   time_t _pulseTimeSecs;
