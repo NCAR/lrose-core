@@ -161,7 +161,7 @@ private:
 
   // functions
   
-  bool _checkReadyToWrite(const AparTsPulse *pulse, bool &useThisPulse);
+  bool _checkReadyToWrite(const AparTsPulse *pulse, bool &endOfFile);
   void _prepareToWrite();
   void _computeNGatesMax();
   void _checkForMissingPulses();

@@ -197,17 +197,12 @@ int AparTs2NetCDF::Run ()
 
     // check we are ready to write the data to file
 
-    bool useThisPulse;
-    bool readyToWrite = _checkReadyToWrite(pulse, useThisPulse);
+    bool endOfFile = false;
+    bool readyToWrite = _checkReadyToWrite(pulse, endOfFile);
     
     // add to queue if we are to use this pulse now
 
     if (readyToWrite) {
-
-      // if (useThisPulse) {
-      //   // add pulse to queue before write
-      //   _pulses.push_back(pulse);
-      // }
 
       if (_pulses.size() > 0) {
         
@@ -229,9 +224,9 @@ int AparTs2NetCDF::Run ()
         return 0;
       }
       
-      // add previous pulse if not already used
+      // add previous pulse in end of file condition
       
-      if (!useThisPulse) {
+      if (!endOfFile) {
         // add pulse to queue after write
         _pulses.push_back(pulse);
       }
@@ -260,11 +255,11 @@ int AparTs2NetCDF::Run ()
 // Returns 0 to continue, -1 to exit
 
 bool AparTs2NetCDF::_checkReadyToWrite(const AparTsPulse *pulse,
-                                       bool &useThisPulse)
+                                       bool &endOfFile)
 
 {
 
-  useThisPulse = false;
+  endOfFile = false;
   
   // if null pulse, we are at end of data
   
@@ -277,7 +272,7 @@ bool AparTs2NetCDF::_checkReadyToWrite(const AparTsPulse *pulse,
   if (_params.input_mode == Params::TS_FILE_INPUT &&
       _params.output_trigger == Params::END_OF_INPUT_FILE) {
     if (_pulseReader->endOfFile()) {
-      useThisPulse = true;
+      endOfFile = true;
       return true;
     }
   }
@@ -557,7 +552,6 @@ int AparTs2NetCDF::_writeFileTmp()
   //////////////////
   // add dimensions
 
-  cerr << "000000000 _nGates, _nTimes: " << _nGatesMax << ", " << _nTimes << endl;
   NcxxDim gatesDim = file.addDim("gates", _nGatesMax);
   NcxxDim timeDim = file.addDim("time", _nTimes);
 
@@ -580,7 +574,6 @@ int AparTs2NetCDF::_writeFileTmp()
   }
 
   if (_pulses.size() > 0) {
-    cerr << "99999999 _pulses.size(): " << _pulses.size() << endl;
     if (_writeIqVars(file, timeDim, gatesDim, "I", "Q",
                      (float *) _II.getPtr(),
                      (float *) _QQ.getPtr())) {
@@ -1419,8 +1412,6 @@ int AparTs2NetCDF::_writeIqVars(NcxxFile &file,
   
 {
 
-  cerr << "aaaaaaaaa timeDim, gatesDim: " << timeDim.getSize() << ", " << gatesDim.getSize() << endl;
-  
   // I variable
   
   NcxxVar iVar = file.addVar(iName,
