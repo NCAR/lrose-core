@@ -203,12 +203,27 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
   if (_debug) {
     cerr << "adding field: " << fieldName << endl;
   }
-
+  
+  // check that field name does not conflict
+  
+  string testName(fieldName);
+  for (int ii = 1; ii < 100; ii++) {
+    Nc3Var *testVar = ncFile->get_var(testName.c_str());
+    if (testVar == NULL) {
+      // var does not yet exist, so name can be used
+      fieldName = testName;
+      break;
+    }
+    char numStr[128];
+    snprintf(numStr, 128, "_%.2d", ii);
+    testName = fieldName + numStr;
+  }
+  
   _ncVar =
     ncFile->add_var(fieldName.c_str(), _ncType, timeDim,
                     _vlevelInfo->getNcZdim(), _gridInfo->getNcYdim(),
                     _gridInfo->getNcXdim());
-
+  
   if (_ncVar == NULL) {
     errStr += "WARNING - NcfFieldData::addToNc\n";
     errStr += "  Cannot add variable to Nc file object\n";
@@ -310,7 +325,9 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
 
     char auxVarNames[1024];
     
-    if (_outputLatlonArrays) {
+    if (_outputLatlonArrays &&
+        _gridInfo->getNcLonVar() != NULL &&
+        _gridInfo->getNcLatVar() != NULL) {
       sprintf(auxVarNames, "%s %s",
               _gridInfo->getNcLonVar()->name(),
               _gridInfo->getNcLatVar()->name());

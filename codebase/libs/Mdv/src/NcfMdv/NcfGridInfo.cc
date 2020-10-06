@@ -461,7 +461,7 @@ int NcfGridInfo::addProjVar(int gridNum, Nc3File *ncFile, string &errStr)
 // add nc coordinate variables for this grid
 
 int NcfGridInfo::addCoordVars(int gridNum, bool outputLatlonArrays,
-                           Nc3File *ncFile, string &errStr)
+                              Nc3File *ncFile, string &errStr)
 
 {
   
@@ -511,7 +511,6 @@ int NcfGridInfo::addCoordVars(int gridNum, bool outputLatlonArrays,
     if (_outputLatlonArrays) {
       
       char latVarName[32],  lonVarName[32];
-      
       sprintf(latVarName, "lat%d", gridNum);
       sprintf(lonVarName, "lon%d", gridNum);
       
@@ -549,7 +548,7 @@ int NcfGridInfo::addCoordVars(int gridNum, bool outputLatlonArrays,
 // add nc vert section coordinate variables for this grid
 
 int NcfGridInfo::addVsectCoordVars(int gridNum,
-                                Nc3File *ncFile, string &errStr)
+                                   Nc3File *ncFile, string &errStr)
 
 {
   

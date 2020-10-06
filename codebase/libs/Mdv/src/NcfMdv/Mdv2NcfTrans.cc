@@ -498,7 +498,7 @@ int Mdv2NcfTrans::_parseMdv()
     if (_debug && compress) {
       cerr << "Mdv2NcfTrans::_parseMdv: compress is true, field: " << i << endl;
     }
-      
+
     NcfFieldData *fieldData = new NcfFieldData(_debug, field, gridInfo, vlevelInfo,
                                                mdvFieldName, ncfFieldName,
                                                ncfStandardName, ncfLongName,
@@ -831,7 +831,23 @@ int Mdv2NcfTrans::_addCoordinateVariables()
 
   for (size_t i = 0; i < _gridInfo.size(); i++) {	
 
-    if (_gridInfo[i]->addCoordVars(i, _outputLatlonArrays,
+    // check if lat/lon vars already in data
+    bool outputLatLonForThisGrid = _outputLatlonArrays;
+    if (outputLatLonForThisGrid) {
+      char latVarName[32], lonVarName[32];
+      sprintf(latVarName, "lat%ld", i);
+      sprintf(lonVarName, "lon%ld", i);
+      for (size_t jj = 0; jj < _fieldData.size(); jj++) {
+        string fieldName = _fieldData[jj]->getName();
+        if (fieldName.compare(latVarName) == 0 ||
+            fieldName.compare(lonVarName) == 0) {
+          outputLatLonForThisGrid = false;
+          break;
+        }
+      } // jj
+    } // outputLatLonForThisGrid
+
+    if (_gridInfo[i]->addCoordVars(i, outputLatLonForThisGrid,
                                    _ncFile, _errStr)) {
       TaStr::AddStr(_errStr, "Mdv2NcfTrans::_addCoordinateVariables");
       TaStr::AddStr(_errStr, "  Cannot add coordinate vars");
@@ -1014,14 +1030,19 @@ int Mdv2NcfTrans::_addFieldDataVariables()
     cerr << "Mdv2NcfTrans::addFieldVariables()" << endl;
   }
 
+  int nFieldsAdded = 0;
   for (size_t i = 0; i < _fieldData.size(); i++) {
     if (_fieldData[i]->addToNc(_ncFile, _timeDim,
-                               _mdv->_ncfOutputMdvAttr, _errStr)) {
-      return -1;
+                               _mdv->_ncfOutputMdvAttr, _errStr) == 0) {
+      nFieldsAdded++;
     }
   }
 
-  return 0;
+  if (nFieldsAdded == 0) {
+    return -1;
+  } else {
+    return 0;
+  }
 
 }
 
