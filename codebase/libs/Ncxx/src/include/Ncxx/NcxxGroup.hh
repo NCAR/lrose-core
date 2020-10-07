@@ -804,6 +804,21 @@ public:
                  bool isMetadata = false);
 
   ///////////////////////////////////////
+  // Add 3-D array var
+  // Throws NcxxException on failure
+  // Side effect: var is set
+     
+  NcxxVar addVar(const string &name,
+                 const string &standardName,
+                 const string &longName,
+                 NcxxType ncType,
+                 NcxxDim &dim0,
+                 NcxxDim &dim1,
+                 NcxxDim &dim2,
+                 const string &units = "",
+                 bool isMetadata = false);
+
+  ///////////////////////////////////////
   // Add var in multiple-dimensions
   // Throws NcxxException on failure
   // Side effect: var is set

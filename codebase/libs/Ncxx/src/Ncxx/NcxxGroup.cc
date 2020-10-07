@@ -1989,6 +1989,32 @@ NcxxVar NcxxGroup::addVar(const string &name,
 }
 
 ///////////////////////////////////////
+// Add 3-D array var
+// Throws NcxxException on failure
+// Side effect: var is set
+
+NcxxVar NcxxGroup::addVar(const string &name,
+                          const string &standardName,
+                          const string &longName,
+                          NcxxType ncType,
+                          NcxxDim &dim0,
+                          NcxxDim &dim1,
+                          NcxxDim &dim2,
+                          const string &units /* = "" */,
+                          bool isMetadata /* = false */)
+{
+  
+  vector<NcxxDim> dims;
+  dims.push_back(dim0);
+  dims.push_back(dim1);
+  dims.push_back(dim2);
+
+  return addVar(name, standardName, longName,
+                ncType, dims, units, isMetadata);
+  
+}
+
+///////////////////////////////////////
 // Add var in multiple-dimensions
 // Throws NcxxException on failure
 // Side effect: var is set
