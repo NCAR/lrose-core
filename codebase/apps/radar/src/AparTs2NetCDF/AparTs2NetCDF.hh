@@ -238,6 +238,7 @@ private:
   int _writeIqVars(NcxxFile &file,
                    NcxxDim &timeDim,
                    NcxxDim &rangeDim,
+                   NcxxDim &rowsElementsDim,
                    const string &iName,
                    const string &qName,
                    const float *ivals,

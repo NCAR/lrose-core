@@ -555,6 +555,7 @@ int AparTs2NetCDF::_writeFileTmp()
 
   NcxxDim gatesDim = file.addDim("gates", _nGatesMax);
   NcxxDim timeDim = file.addDim("time", _nTimes);
+  NcxxDim rowsElementsDim = file.addDim("rowselements", 1);
 
   /////////////////////////////////
   // add vars and their attributes
@@ -575,7 +576,8 @@ int AparTs2NetCDF::_writeFileTmp()
   }
 
   if (_pulses.size() > 0) {
-    if (_writeIqVars(file, timeDim, gatesDim, "I", "Q",
+    if (_writeIqVars(file, timeDim, gatesDim, rowsElementsDim,
+                     "I", "Q",
                      (float *) _II.getPtr(),
                      (float *) _QQ.getPtr())) {
       return -1;
@@ -653,6 +655,14 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   //                  scanSeg.sun_scan_sector_width_el);
   // file.addGlobAttr("scan_segment_name", scanSeg.segment_name);
   // file.addGlobAttr("scan_project_name", scanSeg.project_name);
+
+  // processing info
+  
+  const apar_ts_processing_t &procInfo = info.getTsProcessing();
+  
+  file.addGlobAttr("proc_pulse_width_us", info.getProcPulseWidthUs());
+  file.addGlobAttr("proc_start_range_m", info.getProcStartRangeM());
+  file.addGlobAttr("proc_gate_spacing_m", info.getProcGateSpacingM());
 
   // calibration
 
@@ -1416,6 +1426,7 @@ int AparTs2NetCDF::_writeVar(NcxxFile &file,
 int AparTs2NetCDF::_writeIqVars(NcxxFile &file,
                                 NcxxDim &timeDim,
                                 NcxxDim &gatesDim,
+                                NcxxDim &rowsElementsDim,
                                 const string &iName,
                                 const string &qName,
                                 const float *ivals,
@@ -1431,6 +1442,7 @@ int AparTs2NetCDF::_writeIqVars(NcxxFile &file,
                              ncxxFloat,
                              timeDim,
                              gatesDim,
+                             rowsElementsDim,
                              "scaled A/D counts");
   iVar.addScalarAttr("_FillValue", (float) -9999.0);
   iVar.putVal(ivals);
@@ -1443,6 +1455,7 @@ int AparTs2NetCDF::_writeIqVars(NcxxFile &file,
                              ncxxFloat,
                              timeDim,
                              gatesDim,
+                             rowsElementsDim,
                              "scaled A/D counts");
   qVar.addScalarAttr("_FillValue", (float) -9999.0);
   qVar.putVal(qvals);
