@@ -278,6 +278,18 @@
   }
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  int Params::isArgValidN(const char *arg)
+  {
+    return (tdrpIsArgValidN(arg));
+  }
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -803,7 +815,7 @@
     tt->descr = tdrpStrDup("Start value for siggen power sequence (dBm)");
     tt->help = tdrpStrDup("The actual power is the sum of this value, with the delta power in the sequence.");
     tt->val_offset = (char *) &siggen_sequence_start_power - &_start_;
-    tt->single_val.d = 38.62;
+    tt->single_val.d = -38.62;
     tt++;
     
     // Parameter 'siggen_delta_power_sequence'
