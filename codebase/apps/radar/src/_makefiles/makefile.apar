@@ -9,7 +9,9 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 SUB_DIRS = \
 	AcGeoref2Spdb \
 	AcGeorefCompare \
+	AparTsArchive \
 	AparTs2Moments \
+	AparTs2NetCDF \
 	AparTsPrint \
 	AparTsSim \
 	CalCompute \

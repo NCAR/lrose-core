@@ -121,9 +121,6 @@ private:
   double _startFixedAngle;
   apar_ts_scan_mode_t _startScanMode;
 
-  time_t _pulseTimeSecs;
-  double _pulseTime;
-
   double _el;
   double _az;
   double _prt;

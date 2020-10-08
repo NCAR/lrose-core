@@ -371,13 +371,14 @@ void AparTs2NetCDF::_prepareToWrite()
     // set pulse properties
     
     int nGates = pulse->getNGates();
+    time_t pulseTimeSecs = pulse->getTime();
     double pulseTime = pulse->getFTime();
     float prt = pulse->getPrtNext();
     
     _nGatesRay.push_back(nGates);
     _timeRay.push_back(pulseTime);
-    _dtimeRay.push_back((_pulseTimeSecs - _startTime) 
-                          + pulse->getNanoSecs() * 1.0e-9);
+    double deltaTime = pulseTimeSecs - _startTime + pulse->getNanoSecs() * 1.0e-9;
+    _dtimeRay.push_back(deltaTime);
     _elRay.push_back(el);
     _azRay.push_back(az);
     _fixedAngleRay.push_back(pulse->getFixedAngle());
@@ -657,8 +658,6 @@ void AparTs2NetCDF::_addGlobAtt(NcxxFile &file)
   // file.addGlobAttr("scan_project_name", scanSeg.project_name);
 
   // processing info
-  
-  const apar_ts_processing_t &procInfo = info.getTsProcessing();
   
   file.addGlobAttr("proc_pulse_width_us", info.getProcPulseWidthUs());
   file.addGlobAttr("proc_start_range_m", info.getProcStartRangeM());
@@ -981,6 +980,24 @@ int AparTs2NetCDF::_writeTimeDimVars(NcxxFile &file,
   if (_writeVar(file, timeDim,
                 "dwell_seq_num", "dwell_seq_num", "",
                 _dwellSeqNumRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
+  
+  // beam num in dwell
+  
+  if (_writeVar(file, timeDim,
+                "beam_num_in_dwell", "beam_num_in_dwell", "",
+                _beamNumInDwellRay)) {
+    cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
+  
+  // visit num in beam
+  
+  if (_writeVar(file, timeDim,
+                "visit_num_in_beam", "visit_num_in_beam", "",
+                _visitNumInBeamRay)) {
     cerr << "ERROR - AparTs2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
