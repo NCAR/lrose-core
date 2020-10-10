@@ -31,6 +31,7 @@
 /////////////////////////////////////////////////////////////
 
 #include <toolsa/file_io.h>
+#include <toolsa/Path.hh>
 #include <cctype>
 #include <unistd.h>
 
@@ -39,12 +40,12 @@
 // requires some fiddling here.
 //
 #if defined(__linux) || defined(LINUX_ALPHA)
- #include <sys/vfs.h>
+#include <sys/vfs.h>
 #elif defined(__APPLE__)
- #include <sys/mount.h>
+#include <sys/mount.h>
 #else
- #include <sys/types.h>
- #include <sys/statvfs.h>
+#include <sys/types.h>
+#include <sys/statvfs.h>
 #endif
 
 #include <didss/DataFileNames.hh>
@@ -167,8 +168,8 @@ void DataFileNames::GetFileFacts(const string FileName,
 				 const string CompressedExt,
 				 const string MatchExt, const string FilePattern)
 {
-    GetFileFacts(FileName.c_str(), CompressedExt.c_str(), MatchExt.c_str(),
-                 FilePattern.c_str());
+  GetFileFacts(FileName.c_str(), CompressedExt.c_str(), MatchExt.c_str(),
+               FilePattern.c_str());
 }
 
 void DataFileNames::GetFileFacts(const char *FileName,
@@ -281,35 +282,35 @@ void DataFileNames::GetFileFacts(const char *FileName,
 	
     // See if it is a Soft Link 
     if (ta_lstat(FileName,&FileStat)!=0){
-        Exists=false;
-        return;
-	} else {  // ta_lstat valid return.
+      Exists=false;
+      return;
+    } else {  // ta_lstat valid return.
       if (S_ISLNK(FileStat.st_mode)) {
-		  char  buf[MAX_PATH_LEN];
-		  int len;
-		  IsSoftLinkDir = true;
+        char  buf[MAX_PATH_LEN];
+        int len;
+        IsSoftLinkDir = true;
 
-		  if((len = readlink(FileName,buf,MAX_PATH_LEN)) > 0) {
-			  if((strncmp(buf,"./",2) == 0) ||
-				 (strncmp(buf,"../",3) == 0 )) {
-				 IsPathRelative = true;
-			  } else {
-				 IsPathRelative = false;
-			  }
-		  } else {
-            Exists=false;
-            return;
-		  }
-	  } else { // is not a Soft Linked Dir
-		  IsSoftLinkDir = false;
-		  IsPathRelative = false;
-	  }
-	}
+        if((len = readlink(FileName,buf,MAX_PATH_LEN)) > 0) {
+          if((strncmp(buf,"./",2) == 0) ||
+             (strncmp(buf,"../",3) == 0 )) {
+            IsPathRelative = true;
+          } else {
+            IsPathRelative = false;
+          }
+        } else {
+          Exists=false;
+          return;
+        }
+      } else { // is not a Soft Linked Dir
+        IsSoftLinkDir = false;
+        IsPathRelative = false;
+      }
+    }
 
   } else { // Is not a Dir
     Directory=false;
-	IsSoftLinkDir = false;
-	IsPathRelative = false;
+    IsSoftLinkDir = false;
+    IsPathRelative = false;
   }
 }
 
@@ -340,9 +341,9 @@ void DataFileNames::GetFileFacts(const char *FileName,
 // On success, sets file_time.
 
 int DataFileNames::getDataTime(const string& file_path,
-             time_t &data_time,
-             bool &date_only,
-             bool gen_time)
+                               time_t &data_time,
+                               bool &date_only,
+                               bool gen_time)
 {
 
   data_time = 0;
@@ -355,6 +356,25 @@ int DataFileNames::getDataTime(const string& file_path,
 
   char fcopy[MAX_PATH_LEN];
   STRcopy(fcopy, file_path.c_str(), MAX_PATH_LEN);
+
+  // first search for yyyymmdd?hhmmss in the file name
+  // this is the most common case
+
+  Path fpath(file_path);
+  string fname = fpath.getFile();
+  for (size_t ii = 0; ii < fname.size() - 15; ii++) {
+    const char *ptr = fname.c_str() + ii;
+    char cc;
+    if (sscanf(ptr, "%4d%2d%2d%1c%2d%2d%2d",
+	       &ftime.year, &ftime.month, &ftime.day, &cc,
+	       &ftime.hour, &ftime.min, &ftime.sec) == 7) {
+      if (!isdigit(cc)) {
+	uconvert_to_utime(&ftime);
+	data_time = ftime.unix_time;
+	return 0;
+      }
+    }
+  } // ii
 
   // find the last 3 path delimiters in the path
 
@@ -406,9 +426,9 @@ int DataFileNames::getDataTime(const string& file_path,
 	if (sscanf(start3, "f_%8d", &lead_time) == 1) {
 	  uconvert_to_utime(&ftime);
           if (gen_time)
-             data_time = ftime.unix_time;
+            data_time = ftime.unix_time;
           else
-	     data_time = ftime.unix_time + lead_time;
+            data_time = ftime.unix_time + lead_time;
 	  return 0;
 	}
       }
@@ -682,10 +702,10 @@ int DataFileNames::getDataTime(const string& file_path,
 // On success, sets file_time.
 
 int DataFileNames::getDataTime(const string& file_path,
-             const string &file_pattern,
-             time_t &data_time,
-             bool &date_only,
-             bool gen_time)
+                               const string &file_pattern,
+                               time_t &data_time,
+                               bool &date_only,
+                               bool gen_time)
 {
   // store the file time here
   date_time_t ftime;
