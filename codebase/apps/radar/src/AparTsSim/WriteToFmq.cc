@@ -49,7 +49,6 @@
 
 #include <dataport/bigend.h>
 #include <dataport/swap.h>
-#include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
 #include <toolsa/file_io.h>
 #include <toolsa/toolsa_macros.h>
@@ -96,7 +95,7 @@ WriteToFmq::WriteToFmq(const string &progName,
   _dwellSeqNum = 0;
   _rateStartTime.set(RadxTime::NEVER);
   _nBytesForRate = 0;
-  _realtimeDeltaSecs = 0;
+  _prt = 0.001;
   _metaCount = 0;
   _volNum = 0;
   _sweepNum = 0;
@@ -115,13 +114,6 @@ WriteToFmq::~WriteToFmq()
   
   delete _strategy;
   
-  // delete pulses to free memory
-  
-  for (size_t ii = 0; ii < _dwellPulses.size(); ii++) {
-    delete _dwellPulses[ii];
-  }
-  _dwellPulses.clear();
-
 }
 
 //////////////////////////////////////////////////
@@ -148,11 +140,6 @@ int WriteToFmq::Run ()
       cerr << "N input files: " << _inputFileList.size() << endl;
     }
     
-    // initialize time delta for realtime correction
-    // this is redone every time we go through the file list
-
-    _realtimeDeltaSecs = 0;
-
     // loop through files
 
     for (size_t ii = 0; ii < _inputFileList.size(); ii++) {
@@ -197,16 +184,6 @@ int WriteToFmq::_convertToFmq(const string &inputPath)
   
   {
     IwrfTsPulse *iwrfPulse = reader.getNextPulse();
-    // change to realtime if appropriate
-    if (_params.fmq_set_times_to_now && _realtimeDeltaSecs == 0) {
-      time_t now = time(NULL);
-      _realtimeDeltaSecs = now - iwrfPulse->getTime();
-      si64 newTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
-      if (_params.debug) {
-        cerr << "====>> recomputing pulse time offset, newTime: "
-             << RadxTime::strm(newTime) << endl;
-      }
-    }
     bool haveMetadata = false;
     while (iwrfPulse != NULL) {
       if (tsInfo.isRadarInfoActive() &&
@@ -242,6 +219,22 @@ int WriteToFmq::_convertToFmq(const string &inputPath)
   // reset scan strategy to start
   
   _strategy->resetToStart();
+
+  // read one initial pulse, set start time
+  
+  IwrfTsPulse *startPulse = reader.getNextPulse();
+  if (startPulse == NULL) {
+    return 0;
+  }
+  RadxTime startTime(startPulse->getTime() + startPulse->getNanoSecs() / 1.0e9);
+  if (_params.fmq_set_times_to_now) {
+    time_t now = time(NULL);
+    _pulseTime.set(now, startPulse->getNanoSecs() / 1.0e9);
+  } else {
+    _pulseTime = startTime;
+  }
+  _prevTime = startTime;
+  delete startPulse;
   
   // loop through all pulses in file
 
@@ -273,6 +266,12 @@ int WriteToFmq::_convertToFmq(const string &inputPath)
       
       iwrfPulse->convertToFL32();
 
+      // compute prt
+      
+      RadxTime thisTime(iwrfPulse->getTime(), iwrfPulse->getNanoSecs() / 1.0e9);
+      _prt = thisTime - _prevTime;
+      _prevTime = thisTime;
+
       // process this pulse
 
       _processPulse(ipulse, iwrfPulse, angle);
@@ -299,9 +298,6 @@ int WriteToFmq::_processPulse(int pulseIndex, IwrfTsPulse *iwrfPulse,
   
 {
   
-  si64 secondsTime = iwrfPulse->getTime() + _realtimeDeltaSecs;
-  ui32 nanoSecs = iwrfPulse->getNanoSecs();
-  
   // add metadata to outgoing message
   
   if (_metaCount % _params.n_pulses_per_info == 0) {
@@ -312,7 +308,9 @@ int WriteToFmq::_processPulse(int pulseIndex, IwrfTsPulse *iwrfPulse,
   // create the outgoing co-polar pulse
   
   AparTsPulse copolPulse(*_aparTsInfo, _aparTsDebug);
-  copolPulse.setTime(secondsTime, nanoSecs);
+  _pulseTime += _prt;
+  int nanoSecs = (int) (_pulseTime.getSubSec() * 1.0e9 + 0.5);
+  copolPulse.setTime(_pulseTime.utime(), nanoSecs);
         
   copolPulse.setBeamNumInDwell(angle.beamNumInDwell);
   copolPulse.setVisitNumInBeam(angle.visitNumInBeam);
@@ -373,8 +371,10 @@ int WriteToFmq::_processPulse(int pulseIndex, IwrfTsPulse *iwrfPulse,
       pulseIndex == _params.n_samples_per_visit - 1) {
     
     AparTsPulse xpolPulse(*_aparTsInfo, _aparTsDebug);
-    xpolPulse.setTime(secondsTime, nanoSecs);
-    
+    _pulseTime += _prt;
+    nanoSecs = (int) (_pulseTime.getSubSec() * 1.0e9 + 0.5);
+    xpolPulse.setTime(_pulseTime.utime(), nanoSecs);
+
     xpolPulse.setBeamNumInDwell(angle.beamNumInDwell);
     xpolPulse.setVisitNumInBeam(angle.visitNumInBeam);
     xpolPulse.setPulseSeqNum(_pulseSeqNum);
