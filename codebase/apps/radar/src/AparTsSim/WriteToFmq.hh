@@ -53,6 +53,7 @@
 #include <radar/apar_ts_data.h>
 #include <radar/AparTsInfo.hh>
 #include <radar/AparTsPulse.hh>
+#include <Radx/RadxTime.hh>
 
 #include "Args.hh"
 #include "Params.hh"
@@ -93,8 +94,9 @@ private:
 
   ui64 _dwellSeqNum;
   ui64 _pulseSeqNum;
-  vector<IwrfTsPulse *> _dwellPulses;
-  si64 _realtimeDeltaSecs;
+  RadxTime _prevTime;
+  RadxTime _pulseTime;
+  double _prt;
 
   // data rate
   
