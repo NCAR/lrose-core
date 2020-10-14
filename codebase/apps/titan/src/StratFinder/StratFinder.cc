@@ -183,6 +183,11 @@ int StratFinder::Run()
     // set grid in ConvStrat object
 
     MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
+    if (dbzField == NULL) {
+      cerr << "ERROR - StratFinder::Run()" << endl;
+      cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
+      return -1;
+    }
     const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
     const Mdvx::vlevel_header_t &vhdr = dbzField->getVlevelHeader();
     bool isLatLon = (fhdr.proj_type == Mdvx::PROJ_LATLON);
