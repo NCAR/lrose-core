@@ -419,6 +419,11 @@ public:
   int id( void ) const;               // rarely needed, C interface id
   Nc3Bool sync( void );
     
+  int get_compression_parameters(bool& shuffleFilterEnabled,
+                                 bool& deflateFilterEnabled,
+                                 int& deflateLevel) const;
+  
+
 private:
   int dim_to_index(Nc3Dim* rdim);
   int the_id;

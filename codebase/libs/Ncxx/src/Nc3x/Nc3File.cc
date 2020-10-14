@@ -2433,6 +2433,34 @@ void Nc3Var::init_cur( void )
     the_cur[i] = 0; cur_rec[i] = 0; }
 }
 
+///////////////////////////////////////////////////////////////////
+// Get compression parameters
+// returns 0 on success, -1 on failure
+
+int Nc3Var::get_compression_parameters(bool& shuffleFilterEnabled,
+                                       bool& deflateFilterEnabled,
+                                       int& deflateLevel) const
+  
+{
+
+  int fileId = the_file->id();
+  int varId = the_id;
+  int shuffle, control, level;
+
+  if (nc_inq_var_deflate(fileId, varId, &shuffle, &control, &level) == NC_NOERR) {
+    shuffleFilterEnabled = static_cast<bool> (shuffle);
+    deflateFilterEnabled = static_cast<bool> (control);
+    deflateLevel = level;
+    return 0;
+  } else {
+    shuffleFilterEnabled = 0;
+    deflateFilterEnabled = 0;
+    deflateLevel = 0;
+    return -1;
+  }
+
+}
+
 Nc3Att::Nc3Att(Nc3File* nc, const Nc3Var* var, Nc3Token name)
         : Nc3TypedComponent(nc), the_variable(var)
 {
