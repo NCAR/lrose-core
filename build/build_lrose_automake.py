@@ -158,12 +158,12 @@ def main():
         mocDirs = ["apps/radar/src/HawkEye",
                    "apps/radar/src/HawkEdit",
                    "apps/radar/src/Condor"]
-        for dir in mocDirs:
-            createQtMocFiles(dir)
     elif (options.package.find("lrose") >= 0):
         mocDirs = ["apps/radar/src/HawkEye"]
-        for dir in mocDirs:
-            createQtMocFiles(dir)
+
+    for dir in mocDirs:
+        mocPath = os.path.join(codebaseDir, dir)
+        createQtMocFiles(mocPath)
 
     # set the environment
 
