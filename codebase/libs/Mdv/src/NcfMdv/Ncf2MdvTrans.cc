@@ -75,6 +75,7 @@ Ncf2MdvTrans::Ncf2MdvTrans()
   _debug = false;
   _ncFile = NULL;
   _ncErr = NULL;
+  _readData = true;
   _forecast_reference_time_found = false;
   _timesInspected = false;
   _expectedNumTimes = -1;
@@ -895,6 +896,7 @@ int Ncf2MdvTrans::_matchTimeInfoToData()
 int Ncf2MdvTrans::_addDataFields()
 
 {
+
   time_t t0 = time(0);
 
   _validTimes.clear();
@@ -903,9 +905,7 @@ int Ncf2MdvTrans::_addDataFields()
 
   int fieldNum = 0;
   for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
-    
-    if (_addOneField(_ncFile->get_var(ivar), fieldNum))
-    {
+    if (_addOneField(_ncFile->get_var(ivar), fieldNum)) {
       return -1;
     }
   }
@@ -919,8 +919,10 @@ int Ncf2MdvTrans::_addDataFields()
   // (a) convert to vert section as needed
   // (b) compress appropriately
   
-  if (_finalizeFields()) {
-    return -1;
+  if (_readData) {
+    if (_finalizeFields()) {
+      return -1;
+    }
   }
 
   time_t t1 = time(0);
@@ -945,7 +947,6 @@ int Ncf2MdvTrans::_addOneField(Nc3Var *dataVar, int &fieldNum)
 
   TimeDim *tdim = _findTimeDim(dataVar);
 
-
   // go for it.
 
   if (_debug) {
@@ -959,33 +960,25 @@ int Ncf2MdvTrans::_addOneField(Nc3Var *dataVar, int &fieldNum)
   int numTimes = (int) tdim->times.size();
 	
   if (_timesInspected && _timeIndex >= 0) {
-
     // do just the current index
-
     if (numTimes == _expectedNumTimes) {
-
       if (_addOneTimeDataField(_timeIndex, tdim, dataVar, arrayDim)) {
 	return -1;
       }
       // a bit of a hack to adjust forecast delta here, but needed.
       if (_validTimes.size() == 1) {
 	_mhdr.forecast_delta = *_validTimes.begin() - _mhdr.time_gen;
-      }
-      else {
+      } else {
 	cerr << "ERROR expected 1 valid time got " << _validTimes.size() <<endl;
 	return -1;
       }
-    }	 
-    else {
+    } else {
       cerr << "ERROR mismatch in number of times for " << dataVar->name() <<
 	" dataNtimes" << numTimes << " expected " << 
 	_expectedNumTimes << endl;
       return -1;
     }
-  }
-  else
-  {
-
+  } else {
     // Create data for for each and every time.
     for (int itime = 0 ; itime < numTimes; itime++) {
       if (_addOneTimeDataField(itime, tdim, dataVar, arrayDim)) {
@@ -993,7 +986,9 @@ int Ncf2MdvTrans::_addOneField(Nc3Var *dataVar, int &fieldNum)
       }
     }
   }
+
   return 0;
+
 }
 
 
@@ -1317,7 +1312,7 @@ int Ncf2MdvTrans::_addOneTimeDataField(int itime, TimeDim *tdim,
     forecastDelta = 0;
     forecastTime = 0;
   }
-        
+
   Ncf2MdvField *field = new Ncf2MdvField(_debug,
 					 validTime,
 					 itime,
@@ -1328,7 +1323,8 @@ int Ncf2MdvTrans::_addOneTimeDataField(int itime, TimeDim *tdim,
 					 tdim->dim, tdim->var,
 					 arrayDim.zDim, arrayDim.zVar,
 					 arrayDim.yDim, arrayDim.yVar,
-					 arrayDim.xDim, arrayDim.xVar);
+					 arrayDim.xDim, arrayDim.xVar,
+                                         _readData);
         
   MdvxField *mdvxField = field->createMdvxField();
 
@@ -1434,7 +1430,7 @@ int Ncf2MdvTrans::_finalizeFields()
   }
 
   // not a vsection, just apply read contraints, compression etc
-  
+
   MdvxRemapLut remapLut;
   for (int ifield = 0; ifield < (int) _mdv->getNFields(); ifield++) {
     MdvxField *fld = _mdv->getField(ifield);

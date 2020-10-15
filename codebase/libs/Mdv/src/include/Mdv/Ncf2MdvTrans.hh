@@ -101,6 +101,9 @@ public:
     _timeIndex = index;
   }
 
+  // set flag on whether to read in data or not
+
+  void setReadData(bool val) { _readData = val; }
 
   // read NetCDF CF file, populating Mdvx object
   // returns 0 on success, -1 on failure
@@ -163,12 +166,13 @@ protected:
   // there may be multiple time dimensions in the file
   // each field could have a different time dimension and values, but that is
   // somewhat pathological
+
   class TimeDim {
   public:
-    string name;           // field name
-    Nc3Dim *dim;            // pointer to dimension
-    Nc3Var *var;            // pointer to the variable
-    vector<time_t> times;  // the time values in the time dimension
+    string name;          // field name
+    Nc3Dim *dim;          // pointer to dimension
+    Nc3Var *var;          // pointer to the variable
+    vector<time_t> times; // the time values in the time dimension
 
     TimeDim() {
       dim = NULL;
@@ -184,6 +188,10 @@ protected:
   // set of valid times in data set
 
   set<time_t> _validTimes;
+
+  // flag to indicate actually read in the data
+
+  bool _readData;
 
   // flag to indicate that a forecast reference time was found
 

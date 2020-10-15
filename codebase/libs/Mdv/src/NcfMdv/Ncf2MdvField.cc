@@ -53,19 +53,22 @@ Ncf2MdvField::Ncf2MdvField(bool debug,
                            time_t forecastTime,
                            int forecastDelta,
                            Nc3File *ncFile, Nc3Error *ncErr,
-                           Nc3Var *dataVar,
+                           Nc3Var *var4Data,
                            Nc3Dim *tDim, Nc3Var *tVar,
                            Nc3Dim *zDim, Nc3Var *zVar,
                            Nc3Dim *yDim, Nc3Var *yVar,
-                           Nc3Dim *xDim, Nc3Var *xVar) :
-        _debug(debug),
-        _ncFile(ncFile), _ncErr(ncErr),
-        _dataVar(dataVar),
-        _tDim(tDim), _tVar(tVar),
-        _zDim(zDim), _zVar(zVar),
-        _yDim(yDim), _yVar(yVar),
-        _xDim(xDim), _xVar(xVar)
-
+                           Nc3Dim *xDim, Nc3Var *xVar,
+                           bool readData /* = true */) :
+  _debug(debug),
+  _ncFile(ncFile),
+  _ncErr(ncErr),
+  _var4Data(var4Data),
+  _readData(readData),
+  _tDim(tDim), _tVar(tVar),
+  _zDim(zDim), _zVar(zVar),
+  _yDim(yDim), _yVar(yVar),
+  _xDim(xDim), _xVar(xVar)
+  
 {
 
   MEM_zero(_fhdr);
@@ -79,7 +82,8 @@ Ncf2MdvField::Ncf2MdvField(bool debug,
   _fhdr.forecast_time = forecastTime;
   _fhdr.forecast_delta = forecastDelta;
 
-  _dataType = _dataVar->type();
+  _dataType = _var4Data->type();
+  _data = NULL;
   
 }
 
@@ -109,7 +113,7 @@ MdvxField *Ncf2MdvField::createMdvxField()
 {
 
   if (_debug) {
-    cerr << "Adding data field: " << _dataVar->name() << endl;
+    cerr << "Adding data field: " << _var4Data->name() << endl;
     cerr << "             time: " << DateTime::strm(_validTime) << endl;
   }
   
@@ -122,14 +126,14 @@ MdvxField *Ncf2MdvField::createMdvxField()
   if (_setProjType()) {
     TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::createMdvxField");
     TaStr::AddStr(_errStr, "  Cannot find projection type, field:",
-                  _dataVar->name());
+                  _var4Data->name());
     return NULL;
   }
 
   if (_setProjInfo()) {
     TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::createMdvxField");
     TaStr::AddStr(_errStr, "  Cannot load projection info, field:",
-                  _dataVar->name());
+                  _var4Data->name());
     return NULL;
   }
   _proj.syncToFieldHdr(_fhdr);
@@ -140,7 +144,7 @@ MdvxField *Ncf2MdvField::createMdvxField()
   if (_setGridDimensions()) {
     TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::createMdvxField");
     TaStr::AddStr(_errStr, "  Cannot set grid, field: ",
-                  _dataVar->name());
+                  _var4Data->name());
     return NULL;
   }
 
@@ -149,7 +153,7 @@ MdvxField *Ncf2MdvField::createMdvxField()
   if (_setGridData()) {
     TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::createMdvxField");
     TaStr::AddStr(_errStr, "  Cannot set data, field: ",
-                  _dataVar->name());
+                  _var4Data->name());
     return NULL;
   }
 
@@ -158,11 +162,28 @@ MdvxField *Ncf2MdvField::createMdvxField()
 
   _setMdvSpecific();
 
-  // create MdvxField object
-  
-  MdvxField *fld = new MdvxField(_fhdr, _vhdr, _data);
+  // check compression
 
-  return fld;
+  bool shuffle = false, compressed = false;
+  int compressLevel = 0;
+  if (_var4Data->get_compression_parameters(shuffle, 
+                                           compressed,
+                                           compressLevel) == 0) {
+    if (compressed) {
+      _fhdr.compression_type = Mdvx::COMPRESSION_GZIP;
+      _fhdr.user_data_si32[0] = compressLevel;
+    }
+  }
+
+  // create MdvxField object
+
+  if (_readData) {
+    MdvxField *fld = new MdvxField(_fhdr, _vhdr, _data);
+    return fld;
+  } else {
+    MdvxField *fld = new MdvxField(_fhdr, _vhdr);
+    return fld;
+  }
 
 }
 
@@ -174,7 +195,7 @@ void Ncf2MdvField::clearErrStr()
   _errStr.clear();
   TaStr::AddStr(_errStr, "=====>>> Ncf2MdvField <<<=====");
   TaStr::AddStr(_errStr, "Time for error: ", DateTime::str());
-  TaStr::AddStr(_errStr, "  Field name:", _dataVar->name());
+  TaStr::AddStr(_errStr, "  Field name:", _var4Data->name());
 }
 
 /////////////////////////////////////////
@@ -191,7 +212,7 @@ int Ncf2MdvField::_setProjType()
 
   // find the grid mapping variable name
   
-  Nc3Att *gridMapAtt = _dataVar->get_att(NcfMdv::grid_mapping);
+  Nc3Att *gridMapAtt = _var4Data->get_att(NcfMdv::grid_mapping);
   if (gridMapAtt != NULL) {
     
     string projVarName = _asString(gridMapAtt);
@@ -616,7 +637,7 @@ void Ncf2MdvField::_setNamesAndUnits()
   
 {
 
-  string name = _dataVar->name();
+  string name = _var4Data->name();
   STRncopy(_fhdr.field_name, name.c_str(), MDV_SHORT_FIELD_LEN);
 
    //
@@ -627,14 +648,14 @@ void Ncf2MdvField::_setNamesAndUnits()
       STRncopy(_fhdr.field_name_long, name.c_str(), MDV_LONG_FIELD_LEN); 
    } else {
       // long name is set to netcdf long name attribute
-      Nc3Att* longNameAtt = _dataVar->get_att(NcfMdv::long_name);
+      Nc3Att* longNameAtt = _var4Data->get_att(NcfMdv::long_name);
       if (longNameAtt != NULL) {
          STRncopy(_fhdr.field_name_long, _asString(longNameAtt).c_str(), MDV_LONG_FIELD_LEN);
         delete longNameAtt;
      }
    }
 
-  Nc3Att* unitsAtt = _dataVar->get_att(NcfMdv::units);
+  Nc3Att* unitsAtt = _var4Data->get_att(NcfMdv::units);
   if (unitsAtt != NULL) {
     STRncopy(_fhdr.units, _asString(unitsAtt).c_str(), MDV_UNITS_LEN);
     delete unitsAtt;
@@ -898,7 +919,7 @@ void Ncf2MdvField::_setZAxis()
 int Ncf2MdvField::_setGridData()
   
 {
-  
+
   // compute data size, allocate array
 
   size_t nPtsVol = _fhdr.nx * _fhdr.ny * _fhdr.nz;
@@ -908,21 +929,21 @@ int Ncf2MdvField::_setGridData()
     tDimSize = _tDim->size();
   }
   
-  // compute number of points contained in _dataVar
+  // compute number of points contained in _var4Data
 
   size_t nPtsTotal =  _fhdr.nx * _fhdr.ny * _fhdr.nz * tDimSize;
 
   // get scale and offset
 
   double scale = 1.0;
-  Nc3Att *scaleAtt = _dataVar->get_att(NcfMdv::scale_factor); 
+  Nc3Att *scaleAtt = _var4Data->get_att(NcfMdv::scale_factor); 
   if (scaleAtt != NULL) {
     scale = scaleAtt->as_double(0);
     delete scaleAtt;
   }
 
   double offset = 0.0;
-  Nc3Att *offsetAtt = _dataVar->get_att(NcfMdv::add_offset); 
+  Nc3Att *offsetAtt = _var4Data->get_att(NcfMdv::add_offset); 
   if (offsetAtt != NULL) {
     offset = offsetAtt->as_double(0);
     delete offsetAtt;
@@ -947,7 +968,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasFillValue = false;
       ncbyte fillValue = -128;
-      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _var4Data->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_ncbyte(0);
         delete fillAtt;
@@ -956,7 +977,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasValidMin = false;
       ncbyte validMin = -128;
-      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _var4Data->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_ncbyte(0);
         delete minAtt;
@@ -965,7 +986,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       ncbyte validMax = 127;
-      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _var4Data->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_ncbyte(0);
         delete maxAtt;
@@ -993,58 +1014,71 @@ int Ncf2MdvField::_setGridData()
       _fhdr.bias = offset - 128.0 * scale;
       _fhdr.scaling_type = Mdvx::SCALING_SPECIFIED;
 
-      TaArray<ncbyte> inData_;
-      ncbyte *inData = inData_.alloc(nPtsTotal);
-      Nc3Bool iret = 0;
+      if (_readData) {
 
-      size_t ndims = _dataVar->num_dims();
-      if (ndims == 2) {
-        iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
-      } else if (ndims == 3) {
-        if (_tVar != NULL) {
-          iret = _dataVar->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
-        } else if (_zVar != NULL) {
-          iret = _dataVar->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-        } else {
-          TaStr::AddStr(_errStr, "ERROR - ndims 3 but tVar and zVar are NULL");
+        TaArray<ncbyte> inData_;
+        ncbyte *inData = inData_.alloc(nPtsTotal);
+        for (size_t kk = 0; kk < nPtsTotal; kk++) {
+          inData[kk] = _fhdr.missing_data_value;
         }
-      } else if (ndims == 4) {
-        if (_tVar != NULL && _zVar != NULL) {
-          iret = _dataVar->get(inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-          if (_tVar == NULL) {
-            TaStr::AddStr(_errStr, "ERROR - ndims 4 but tVar is NULL");
+
+        Nc3Bool iret = 0;
+        size_t ndims = _var4Data->num_dims();
+        if (ndims == 2) {
+          iret = _var4Data->get(inData, _fhdr.ny, _fhdr.nx);
+        } else if (ndims == 3) {
+          if (_tVar != NULL) {
+            iret = _var4Data->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
+          } else if (_zVar != NULL) {
+            iret = _var4Data->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
           } else {
-            TaStr::AddStr(_errStr, "ERROR - ndims 4 but zVar is NULL");
+            TaStr::AddStr(_errStr, "ERROR - ndims 3 but tVar and zVar are NULL");
+          }
+        } else if (ndims == 4) {
+          if (_tVar != NULL && _zVar != NULL) {
+            iret = _var4Data->get(inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
+            if (_tVar == NULL) {
+              TaStr::AddStr(_errStr, "ERROR - ndims 4 but tVar is NULL");
+            } else {
+              TaStr::AddStr(_errStr, "ERROR - ndims 4 but zVar is NULL");
+            }
           }
         }
-      }
-
-      if (iret == 0) {
-        // try just (y,x)
-        iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
-      }
-
-      if (iret == 0) {
-        TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
-        TaStr::AddStr(_errStr, "  Reading byte data, field: ", _fhdr.field_name);
-        TaStr::AddStr(_errStr, _ncErr->get_errmsg());
-        return -1;
-      }
-
-      inData = inData + _timeIndex * nPtsVol;
-
-      for (size_t ii = 0; ii < nPtsVol; ii++) {
-        if ((hasFillValue && inData[ii] == fillValue) ||
-            (hasValidMin && inData[ii] < validMin) ||
-            (hasValidMax && inData[ii] > validMax)) {
-          _data[ii] = (ui08) _fhdr.missing_data_value;
-        } else {
-          int val = inData[ii];
-          _data[ii] = (ui08) (val + 128);
+        if (iret == 0) {
+          // try just (y,x)
+          iret = _var4Data->get(inData, _fhdr.ny, _fhdr.nx);
         }
-      }
+        if (iret == 0) {
+          TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
+          TaStr::AddStr(_errStr, "  Reading byte data, field: ", _fhdr.field_name);
+          TaStr::AddStr(_errStr, _ncErr->get_errmsg());
+          return -1;
+        }
+
+        inData = inData + _timeIndex * nPtsVol;
+        
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          if ((hasFillValue && inData[ii] == fillValue) ||
+              (hasValidMin && inData[ii] < validMin) ||
+              (hasValidMax && inData[ii] > validMax)) {
+            _data[ii] = _fhdr.missing_data_value;
+          } else {
+            int val = inData[ii];
+            _data[ii] = (ui08) (val + 128);
+          }
+        }
+
+      } else {
+
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          _data[ii] = _fhdr.missing_data_value;
+        }
+
+      } // if (_readData)
+
       break;
-    }
+
+    } // case nc3Char: case nc3Byte:
 
     case nc3Short: {
 
@@ -1060,7 +1094,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasFillValue = false;
       short fillValue = -32768;
-      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _var4Data->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_short(0);
         delete fillAtt;
@@ -1069,7 +1103,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMin = false;
       short validMin = -32768;
-      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _var4Data->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_short(0);
         delete minAtt;
@@ -1078,7 +1112,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       short validMax = 32767;
-      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _var4Data->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_short(0);
         delete maxAtt;
@@ -1106,56 +1140,69 @@ int Ncf2MdvField::_setGridData()
       _fhdr.bias = offset - 32768.0 * scale;
       _fhdr.scaling_type = Mdvx::SCALING_SPECIFIED;
 
-      TaArray<short> inData_;
-      short *inData = inData_.alloc(nPtsTotal);
-      Nc3Bool iret = 0;
-    
-      size_t ndims = _dataVar->num_dims();
-      if (ndims == 2) {
-        iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
-      } else if (ndims == 3) {
-        if (_tVar != NULL) {
-          iret = _dataVar->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
-        } else if (_zVar != NULL) {
-          iret = _dataVar->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-        } else {
-          TaStr::AddStr(_errStr, "ERROR - ndims 3 but tVar and zVar are NULL");
-        }
-      } else if (ndims == 4) {
-        if (_tVar != NULL && _zVar != NULL) {
-          iret = _dataVar->get(inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-          if (_tVar == NULL) {
-            TaStr::AddStr(_errStr, "ERROR - ndims 4 but tVar is NULL");
+      if (_readData) {
+
+        TaArray<short> inData_;
+        short *inData = inData_.alloc(nPtsTotal);
+        Nc3Bool iret = 0;
+        
+        size_t ndims = _var4Data->num_dims();
+        if (ndims == 2) {
+          iret = _var4Data->get(inData, _fhdr.ny, _fhdr.nx);
+        } else if (ndims == 3) {
+          if (_tVar != NULL) {
+            iret = _var4Data->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
+          } else if (_zVar != NULL) {
+            iret = _var4Data->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
           } else {
-            TaStr::AddStr(_errStr, "ERROR - ndims 4 but zVar is NULL");
+            TaStr::AddStr(_errStr, "ERROR - ndims 3 but tVar and zVar are NULL");
+          }
+        } else if (ndims == 4) {
+          if (_tVar != NULL && _zVar != NULL) {
+            iret = _var4Data->get(inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
+            if (_tVar == NULL) {
+              TaStr::AddStr(_errStr, "ERROR - ndims 4 but tVar is NULL");
+            } else {
+              TaStr::AddStr(_errStr, "ERROR - ndims 4 but zVar is NULL");
+            }
           }
         }
-      }
-
-      if (iret == 0) {
-        TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
-        TaStr::AddStr(_errStr, "  Reading short data, field: ", _fhdr.field_name);
-        TaStr::AddStr(_errStr, _ncErr->get_errmsg());
-        return -1;
-      }
-
-      // Advance to desired time step or grid in the inData array
-
-      inData = inData + _timeIndex * nPtsVol;
-
-      ui16 *ui16Data = (ui16 *) _data;
-      for (size_t ii = 0; ii < nPtsVol; ii++) {
-        if ((hasFillValue && inData[ii] == fillValue) ||
-            (hasValidMin && inData[ii] < validMin) ||
-            (hasValidMax && inData[ii] > validMax)) {
-          ui16Data[ii] = (ui16) _fhdr.missing_data_value;
-        } else {
-          int val = inData[ii];
-          ui16Data[ii] = (ui16) (val + 32768);
+        
+        if (iret == 0) {
+          TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
+          TaStr::AddStr(_errStr, "  Reading short data, field: ", _fhdr.field_name);
+          TaStr::AddStr(_errStr, _ncErr->get_errmsg());
+          return -1;
         }
-      }
+        
+        // Advance to desired time step or grid in the inData array
+        
+        inData = inData + _timeIndex * nPtsVol;
+        
+        ui16 *ui16Data = (ui16 *) _data;
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          if ((hasFillValue && inData[ii] == fillValue) ||
+              (hasValidMin && inData[ii] < validMin) ||
+              (hasValidMax && inData[ii] > validMax)) {
+            ui16Data[ii] = (ui16) _fhdr.missing_data_value;
+          } else {
+            int val = inData[ii];
+            ui16Data[ii] = (ui16) (val + 32768);
+          }
+        }
+        
+      } else {
+        
+        ui16 *ui16Data = (ui16 *) _data;
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          ui16Data[ii] = _fhdr.missing_data_value;
+        }
+
+      } // if (_readData)
+
       break;
-    }
+
+    } // case nc3Short:
 
     case nc3Int: {
 
@@ -1168,7 +1215,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasFillValue = false;
       int fillValue = 0;
-      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _var4Data->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_int(0);
         delete fillAtt;
@@ -1177,7 +1224,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasValidMin = false;
       int validMin = -2147483648;
-      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _var4Data->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_int(0);
         delete minAtt;
@@ -1186,7 +1233,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       int validMax = 2147483647;
-      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _var4Data->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_int(0);
         delete maxAtt;
@@ -1211,55 +1258,68 @@ int Ncf2MdvField::_setGridData()
       _fhdr.missing_data_value = fillValue * scale + offset;
       _fhdr.bad_data_value = _fhdr.missing_data_value;
       
-      TaArray<int> inData_;
-      int *inData = inData_.alloc(nPtsTotal);
-      Nc3Bool iret = 0;
+      if (_readData) {
 
-      size_t ndims = _dataVar->num_dims();
-      if (ndims == 2) {
-        iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
-      } else if (ndims == 3) {
-        if (_tVar != NULL) {
-          iret = _dataVar->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
-        } else if (_zVar != NULL) {
-          iret = _dataVar->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-        } else {
-          TaStr::AddStr(_errStr, "ERROR - ndims 3 but tVar and zVar are NULL");
-        }
-      } else if (ndims == 4) {
-        if (_tVar != NULL && _zVar != NULL) {
-          iret = _dataVar->get(inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-          if (_tVar == NULL) {
-            TaStr::AddStr(_errStr, "ERROR - ndims 4 but tVar is NULL");
+        TaArray<int> inData_;
+        int *inData = inData_.alloc(nPtsTotal);
+        Nc3Bool iret = 0;
+        
+        size_t ndims = _var4Data->num_dims();
+        if (ndims == 2) {
+          iret = _var4Data->get(inData, _fhdr.ny, _fhdr.nx);
+        } else if (ndims == 3) {
+          if (_tVar != NULL) {
+            iret = _var4Data->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
+          } else if (_zVar != NULL) {
+            iret = _var4Data->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
           } else {
-            TaStr::AddStr(_errStr, "ERROR - ndims 4 but zVar is NULL");
+            TaStr::AddStr(_errStr, "ERROR - ndims 3 but tVar and zVar are NULL");
+          }
+        } else if (ndims == 4) {
+          if (_tVar != NULL && _zVar != NULL) {
+            iret = _var4Data->get(inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
+            if (_tVar == NULL) {
+              TaStr::AddStr(_errStr, "ERROR - ndims 4 but tVar is NULL");
+            } else {
+              TaStr::AddStr(_errStr, "ERROR - ndims 4 but zVar is NULL");
+            }
           }
         }
-      }
-
-      if (iret == 0) {
-        TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
-        TaStr::AddStr(_errStr, "  Reading int data, field: ", _fhdr.field_name);
-        TaStr::AddStr(_errStr, _ncErr->get_errmsg());
-        return -1;
-      }
-
-      // Advance to desired time step or grid in the inData array
-
-      inData = inData + _timeIndex * nPtsVol;
-
-      fl32 *fl32Data = (fl32 *) _data;
-      for (size_t ii = 0; ii < nPtsVol; ii++) {
-        if ((hasFillValue && inData[ii] == fillValue) ||
-            (hasValidMin && inData[ii] < validMin) ||
-            (hasValidMax && inData[ii] > validMax)) {
-          fl32Data[ii] = _fhdr.missing_data_value;
-        } else {
-          fl32Data[ii] = inData[ii] * scale + offset;
+        
+        if (iret == 0) {
+          TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
+          TaStr::AddStr(_errStr, "  Reading int data, field: ", _fhdr.field_name);
+          TaStr::AddStr(_errStr, _ncErr->get_errmsg());
+          return -1;
         }
-      }
+        
+        // Advance to desired time step or grid in the inData array
+        
+        inData = inData + _timeIndex * nPtsVol;
+        
+        fl32 *fl32Data = (fl32 *) _data;
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          if ((hasFillValue && inData[ii] == fillValue) ||
+              (hasValidMin && inData[ii] < validMin) ||
+              (hasValidMax && inData[ii] > validMax)) {
+            fl32Data[ii] = _fhdr.missing_data_value;
+          } else {
+            fl32Data[ii] = inData[ii] * scale + offset;
+          }
+        }
+
+      } else {
+        
+        fl32 *fl32Data = (fl32 *) _data;
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          fl32Data[ii] = _fhdr.missing_data_value;
+        }
+
+      } // if (_readData)
+      
       break;
-    }
+      
+    } // case nc3Int:
 
     case nc3Float: {
 
@@ -1272,7 +1332,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasFillValue = false;
       float fillValue = -9.0e33;
-      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _var4Data->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_float(0);
         delete fillAtt;
@@ -1281,7 +1341,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMin = false;
       float validMin = -9.0e33;
-      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _var4Data->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_float(0);
         delete minAtt;
@@ -1290,7 +1350,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       float validMax = 9.0e33;
-      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _var4Data->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_float(0);
         delete maxAtt;
@@ -1314,55 +1374,69 @@ int Ncf2MdvField::_setGridData()
       
       _fhdr.missing_data_value = fillValue * scale + offset;
       _fhdr.bad_data_value = _fhdr.missing_data_value;
-      TaArray<float> inData_;
-      float *inData = inData_.alloc(nPtsTotal);
-      Nc3Bool iret = 0;
 
-      size_t ndims = _dataVar->num_dims();
-      if (ndims == 2) {
-        iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
-      } else if (ndims == 3) {
-        if (_tVar != NULL) {
-          iret = _dataVar->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
-        } else if (_zVar != NULL) {
-          iret = _dataVar->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-        } else {
-          TaStr::AddStr(_errStr, "ERROR - ndims 3 but tVar and zVar are NULL");
-        }
-      } else if (ndims == 4) {
-        if (_tVar != NULL && _zVar != NULL) {
-          iret = _dataVar->get(inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-          if (_tVar == NULL) {
-            TaStr::AddStr(_errStr, "ERROR - ndims 4 but tVar is NULL");
+      if (_readData) {
+
+        TaArray<float> inData_;
+        float *inData = inData_.alloc(nPtsTotal);
+        Nc3Bool iret = 0;
+        
+        size_t ndims = _var4Data->num_dims();
+        if (ndims == 2) {
+          iret = _var4Data->get(inData, _fhdr.ny, _fhdr.nx);
+        } else if (ndims == 3) {
+          if (_tVar != NULL) {
+            iret = _var4Data->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
+          } else if (_zVar != NULL) {
+            iret = _var4Data->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
           } else {
-            TaStr::AddStr(_errStr, "ERROR - ndims 4 but zVar is NULL");
+            TaStr::AddStr(_errStr, "ERROR - ndims 3 but tVar and zVar are NULL");
+          }
+        } else if (ndims == 4) {
+          if (_tVar != NULL && _zVar != NULL) {
+            iret = _var4Data->get(inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
+            if (_tVar == NULL) {
+              TaStr::AddStr(_errStr, "ERROR - ndims 4 but tVar is NULL");
+            } else {
+              TaStr::AddStr(_errStr, "ERROR - ndims 4 but zVar is NULL");
+            }
           }
         }
-      }
-
-      if (iret == 0) {
-        TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
-        TaStr::AddStr(_errStr, "  Reading float data, field: ", _fhdr.field_name);
-        TaStr::AddStr(_errStr, _ncErr->get_errmsg());
-        return -1;
-      }
-      
-      // Advance to desired time step or grid in the inData array
-      
-      inData = inData + _timeIndex * nPtsVol;
-      
-      fl32 *fl32Data = (fl32 *) _data;
-      for (size_t ii = 0; ii < nPtsVol; ii++) {
-        if ((hasFillValue && inData[ii] == fillValue) ||
-            (hasValidMin && inData[ii] < validMin) ||
-            (hasValidMax && inData[ii] > validMax)) {
-          fl32Data[ii] = _fhdr.missing_data_value;
-        } else {
-          fl32Data[ii] = inData[ii] * scale + offset;
+        
+        if (iret == 0) {
+          TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
+          TaStr::AddStr(_errStr, "  Reading float data, field: ", _fhdr.field_name);
+          TaStr::AddStr(_errStr, _ncErr->get_errmsg());
+          return -1;
         }
-      }
+        
+        // Advance to desired time step or grid in the inData array
+        
+        inData = inData + _timeIndex * nPtsVol;
+        
+        fl32 *fl32Data = (fl32 *) _data;
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          if ((hasFillValue && inData[ii] == fillValue) ||
+              (hasValidMin && inData[ii] < validMin) ||
+              (hasValidMax && inData[ii] > validMax)) {
+            fl32Data[ii] = _fhdr.missing_data_value;
+          } else {
+            fl32Data[ii] = inData[ii] * scale + offset;
+          }
+        }
+
+      } else {
+        
+        fl32 *fl32Data = (fl32 *) _data;
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          fl32Data[ii] = _fhdr.missing_data_value;
+        }
+
+      } // if (_readData)
+
       break;
-    }
+
+    } // case nc3Float
 
     case nc3Double: {
 
@@ -1375,7 +1449,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasFillValue = false;
       double fillValue = 0;
-      Nc3Att *fillAtt = _dataVar->get_att(NcfMdv::FillValue); 
+      Nc3Att *fillAtt = _var4Data->get_att(NcfMdv::FillValue); 
       if (fillAtt != NULL) {
         fillValue = fillAtt->as_double(0);
         delete fillAtt;
@@ -1384,7 +1458,7 @@ int Ncf2MdvField::_setGridData()
       
       bool hasValidMin = false;
       double validMin = -9.0e33;
-      Nc3Att *minAtt = _dataVar->get_att(NcfMdv::valid_min); 
+      Nc3Att *minAtt = _var4Data->get_att(NcfMdv::valid_min); 
       if (minAtt != NULL) {
         validMin = minAtt->as_double(0);
         delete minAtt;
@@ -1393,7 +1467,7 @@ int Ncf2MdvField::_setGridData()
 
       bool hasValidMax = false;
       double validMax = 9.0e33;
-      Nc3Att *maxAtt = _dataVar->get_att(NcfMdv::valid_max); 
+      Nc3Att *maxAtt = _var4Data->get_att(NcfMdv::valid_max); 
       if (maxAtt != NULL) {
         validMax = maxAtt->as_double(0);
         delete maxAtt;
@@ -1417,43 +1491,57 @@ int Ncf2MdvField::_setGridData()
 
       _fhdr.missing_data_value = fillValue * scale + offset;
       _fhdr.bad_data_value = _fhdr.missing_data_value;
-      TaArray<double> inData_;
-      double *inData = inData_.alloc(nPtsTotal);
-      Nc3Bool iret = 0;
 
-      if (_tVar != NULL && _zVar != NULL) {
-        iret = _dataVar->get( inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-      } else if (_tVar != NULL) {
-        iret = _dataVar->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
-      } else if (_zVar != NULL) {
-        iret = _dataVar->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
-      } else {
-        iret = _dataVar->get(inData, _fhdr.ny, _fhdr.nx);
-      }
-
-      if (iret == 0) {
-        TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
-        TaStr::AddStr(_errStr, "  Reading double data, field: ", _fhdr.field_name);
-        TaStr::AddStr(_errStr, _ncErr->get_errmsg());
-        return -1;
-      }
-
-      // Advance to desired time step or grid in the inData array
-      
-      inData = inData + _timeIndex * nPtsVol;
-
-      fl32 *fl32Data = (fl32 *) _data;
-      for (size_t ii = 0; ii < nPtsVol; ii++) {
-        if ((hasFillValue && inData[ii] == fillValue) ||
-            (hasValidMin && inData[ii] < validMin) ||
-            (hasValidMax && inData[ii] > validMax)) {
-          fl32Data[ii] = _fhdr.missing_data_value;
+      if (_readData) {
+        
+        TaArray<double> inData_;
+        double *inData = inData_.alloc(nPtsTotal);
+        Nc3Bool iret = 0;
+        
+        if (_tVar != NULL && _zVar != NULL) {
+          iret = _var4Data->get( inData, tDimSize, _fhdr.nz, _fhdr.ny, _fhdr.nx);
+        } else if (_tVar != NULL) {
+          iret = _var4Data->get(inData, tDimSize, _fhdr.ny, _fhdr.nx);
+        } else if (_zVar != NULL) {
+          iret = _var4Data->get(inData, _fhdr.nz, _fhdr.ny, _fhdr.nx);
         } else {
-          fl32Data[ii] = inData[ii] * scale + offset;
+          iret = _var4Data->get(inData, _fhdr.ny, _fhdr.nx);
         }
-      }
+        
+        if (iret == 0) {
+          TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
+          TaStr::AddStr(_errStr, "  Reading double data, field: ", _fhdr.field_name);
+          TaStr::AddStr(_errStr, _ncErr->get_errmsg());
+          return -1;
+        }
+        
+        // Advance to desired time step or grid in the inData array
+        
+        inData = inData + _timeIndex * nPtsVol;
+        
+        fl32 *fl32Data = (fl32 *) _data;
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          if ((hasFillValue && inData[ii] == fillValue) ||
+              (hasValidMin && inData[ii] < validMin) ||
+              (hasValidMax && inData[ii] > validMax)) {
+            fl32Data[ii] = _fhdr.missing_data_value;
+          } else {
+            fl32Data[ii] = inData[ii] * scale + offset;
+          }
+        }
+        
+      } else {
+        
+        fl32 *fl32Data = (fl32 *) _data;
+        for (size_t ii = 0; ii < nPtsVol; ii++) {
+          fl32Data[ii] = _fhdr.missing_data_value;
+        }
+        
+      } // if (_readData)
+
       break;
-    }
+
+    } // case nc3Double
 
     default: {
       TaStr::AddStr(_errStr, "ERROR - Ncf2MdvField::_setGridData");
@@ -1483,9 +1571,9 @@ int Ncf2MdvField::_setMdvSpecific()
   
 {
 
-  for (int i = 0; i < _dataVar->num_atts(); i++) {
+  for (int i = 0; i < _var4Data->num_atts(); i++) {
     
-    Nc3Att* att = _dataVar->get_att(i);
+    Nc3Att* att = _var4Data->get_att(i);
       
     if (att == NULL) {
       continue;

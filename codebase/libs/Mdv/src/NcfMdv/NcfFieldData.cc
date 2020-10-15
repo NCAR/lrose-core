@@ -543,6 +543,35 @@ int NcfFieldData::_setCompression(Nc3File *ncFile,
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// Get compression parameters
+// returns 0 on success, -1 on failure
+
+int NcfFieldData::getCompressionParameters(Nc3File *ncFile,
+                                           bool& shuffleFilterEnabled,
+                                           bool& deflateFilterEnabled,
+                                           int& deflateLevel) const
+  
+{
+
+  int fileId = ncFile->id();
+  int varId = _ncVar->id();
+  int shuffle, control, level;
+
+  if (nc_inq_var_deflate(fileId, varId, &shuffle, &control, &level) == NC_NOERR) {
+    shuffleFilterEnabled = static_cast<bool> (shuffle);
+    deflateFilterEnabled = static_cast<bool> (control);
+    deflateLevel = level;
+    return 0;
+  } else {
+    shuffleFilterEnabled = 0;
+    deflateFilterEnabled = 0;
+    deflateLevel = 0;
+    return -1;
+  }
+
+}
+
+///////////////////////////////////////////////////////////////////////////
 // Set chunking
 // We want to be able to read in a single vertical plan efficiently
 // So we want to chunk a plane at a time.

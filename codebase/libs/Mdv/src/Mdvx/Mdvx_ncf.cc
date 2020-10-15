@@ -968,6 +968,7 @@ int Mdvx::_readAllHeadersNcf(const string &path)
 
   Ncf2MdvTrans trans;
   trans.setDebug(_debug);
+  trans.setReadData(false);
   Mdvx mdvx;
   if (trans.readCf(path, mdvx)) {
     _errStr += "ERROR - Mdvx::_readNcf\n";

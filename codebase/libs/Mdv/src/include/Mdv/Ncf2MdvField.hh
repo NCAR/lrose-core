@@ -61,11 +61,12 @@ public:
                time_t forecastTime,
                int forecastDelta,
                Nc3File *ncFile, Nc3Error *ncErr,
-               Nc3Var *dataVar,
+               Nc3Var *var4Data,
                Nc3Dim *tDim, Nc3Var *tVar,
                Nc3Dim *zDim, Nc3Var *zVar,
                Nc3Dim *yDim, Nc3Var *yVar,
-               Nc3Dim *xDim, Nc3Var *xVar);
+               Nc3Dim *xDim, Nc3Var *xVar,
+               bool readData = true);
   
   // destructor
 
@@ -107,10 +108,11 @@ protected:
 
   // main data variable and type
   
-  Nc3Var *_dataVar;
+  Nc3Var *_var4Data;
   Nc3Type _dataType;
   TaArray<ui08> _data_;
   ui08 *_data;
+  bool _readData;
 
   // dimensions and coordinate variables
 
@@ -119,7 +121,7 @@ protected:
 
   Nc3Dim *_zDim;
   Nc3Var *_zVar;
-
+  
   Nc3Dim *_yDim;
   Nc3Var *_yVar;
 
