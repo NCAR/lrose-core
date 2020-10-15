@@ -105,7 +105,7 @@ This requires upgrading the compiler toolchain.
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
-    eigen3-devel armadillo-devel \
+    GeographicLib-devel eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
     bzip2-devel \

@@ -440,6 +440,11 @@ codebase/apps/radar/src/HawkEye/Makefile.qmake
 codebase/apps/radar/src/HawkEye/moc_*cpp
 codebase/apps/radar/src/HawkEye/moc_predefs.h
 
+codebase/apps/radar/src/HawkEdit/HawkEdit
+codebase/apps/radar/src/HawkEdit/Makefile.qmake
+codebase/apps/radar/src/HawkEdit/moc_*cpp
+codebase/apps/radar/src/HawkEdit/moc_predefs.h
+
 codebase/apps/radar/src/Condor/Condor
 codebase/apps/radar/src/Condor/Makefile.qmake
 codebase/apps/radar/src/Condor/moc_*cpp
