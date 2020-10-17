@@ -11,7 +11,7 @@ You need to perform the build on a machine with the correct OS version.
 3. [build core](#build-core)
 4. [build CIDD](#build-cidd)
 5. [install into /opt/local](#install)
-6. [make symbolic link(#make-link)
+6. [make symbolic link](#make-link)
 
 <a name="prepare"/>
 
@@ -35,7 +35,9 @@ Create a working directory, clone lrose-core
 
 <a name="build-core"/>
 
-## 3. Build LROSE core plus CSU apps, install in ```/tmp/lrose-core```.
+## 3. Build LROSE core plus CSU apps.
+
+Temporary install in ```/tmp/lrose-core```.
 
 ```
   cd ~/git/lrose-core/build
@@ -46,7 +48,9 @@ NOTE - the ```--cmake3``` is only needed for Centos 7, not for Centos 8.
 
 <a name="build-cidd"/>
 
-## 4. Build CIDD, install in ```/tmp/lrose-cidd```.
+## 4. Build CIDD
+
+Temporary install in ```/tmp/lrose-cidd```.
 
 ```
   cd ~/git/lrose-core/build
