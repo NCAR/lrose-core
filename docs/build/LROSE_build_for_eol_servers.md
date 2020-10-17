@@ -1,5 +1,11 @@
 # Building LROSE for deployment on EOL servers
 
+The LROSE binaries are installed in the ```/opt/local/lrose/bin``` crossmount on the EOL servers.
+
+The is an ```/opt/local``` for each version of the OS.
+
+You need to perform the build on a machine with the correct OS version.
+
 1. [prepare](#prepare)
 2. [download](#download)
 3. [build core](#build-core)
