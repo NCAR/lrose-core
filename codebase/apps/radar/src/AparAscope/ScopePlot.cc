@@ -48,7 +48,7 @@ ScopePlot::ScopePlot(QWidget *parent):
         _plotType(IANDQ),
         _scaleMin(0.0),
         _scaleMax(0.0),
-  _paused(false)
+        _paused(false)
 {
   setupUi(this);
 
