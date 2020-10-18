@@ -77,7 +77,7 @@ clean_moc:
 	$(RM) moc_*.cc moc_*.cpp Makefile.qmake
 
 clean_qmake:
-	$(RM) Makefile.qmake .qmake.stash
+	$(RM) Makefile.qmake .qmake.stash moc_predefs.h
 
 clean_all: clean clean_bin clean_moc clean_qmake
 
