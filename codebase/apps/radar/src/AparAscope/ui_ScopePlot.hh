@@ -10,12 +10,12 @@
 #define UI_SCOPEPLOT_H
 
 #include <QtCore/QVariant>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QHeaderView>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWidget>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWidget>
 #include <qwt/qwt_plot.h>
 
 QT_BEGIN_NAMESPACE
