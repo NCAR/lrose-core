@@ -124,7 +124,7 @@ NORM_SRCS = \
 	WorldPlot.cc 
 
 MOC_SRCS = \
-	BscanManager.cc \
+	AScope.cc \
 	BscanWidget.cc \
 	ClickableLabel.cc \
 	ColorBar.cc \
@@ -144,7 +144,7 @@ MOC_SRCS = \
 	TimeScaleWidget.cc
 
 MOC_OUTPUT = \
-	moc_BscanManager.cpp \
+	moc_AScope.cpp \
 	moc_BscanWidget.cpp \
 	moc_DisplayManager.cpp \
 	moc_FieldRenderer.cpp \

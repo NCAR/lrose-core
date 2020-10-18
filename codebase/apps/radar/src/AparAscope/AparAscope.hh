@@ -28,11 +28,11 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2010
+// Oct 2020
 //
 ///////////////////////////////////////////////////////////////
 //
-// AparAscope is the engineering display for the Hawk radar system
+// AparAscope is the time series ascope for APAR
 //
 ///////////////////////////////////////////////////////////////
 
@@ -44,13 +44,8 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include <euclid/SunPosn.hh>
 
 class QApplication;
-class DisplayField;
-class Reader;
-class PolarManager;
-class BscanManager;
 
 class AparAscope {
   
@@ -81,29 +76,6 @@ private:
   Params _params;
   Args _args;
   
-  // reading data in
-  
-  Reader *_reader;
-   
-  // data fields
-  
-  vector<DisplayField *> _displayFields;
-  
-  // managing the rendering objects
-
-  PolarManager *_polarManager;
-  BscanManager *_bscanManager;
-
-  // plot geometry
-
-  int _nPolarCols, _nPolarRows;
-  
-  // methods
-
-  int _setupDisplayFields();
-  int _setupReader();
-  string _getArchiveUrl(const string &filePath);
-
 };
 
 #endif

@@ -115,7 +115,7 @@ commentdef {
 paramdef string {
   p_default = "AparAscope";
   p_descr = "Title for plot window.";
-} display_title;
+} main_window_title;
 
 paramdef double {
   p_default = 50.0;

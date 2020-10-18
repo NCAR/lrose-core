@@ -21,75 +21,79 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
-//
-// main for AparAscope, copied from AScope and TcpScope
-//
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Oct 2020
-//
-///////////////////////////////////////////////////////////////
+#include "Knob.h"
+#include <qlabel.h>
+#include <qwt/qwt_knob.h>
 
-#include "AparAscope.hh"
-#include <QApplication>
-#include <toolsa/uusleep.h>
-#include <toolsa/LogStream.hh>
-#include <QIcon>
-
-// file scope
-
-static void tidy_and_exit (int sig);
-static AparAscope *Prog;
-static QApplication *app;
-
-// main
-
-int main(int argc, char **argv)
-
+Knob::Knob( QWidget* parent):
+QWidget(parent)
 {
-
-  // create program object
-
-  try {
-
-    // menu bar - don't use native bar for mac
-    // keep menu with the window
-    
-    QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
-    
-    app = new QApplication(argc, argv);
-    //app->setWindowIcon(QIcon(":/radar.AparAscope.png"));
-    // cerr << "After setting Window Icon\n" << endl;
-
-    AparAscope *Prog;
-    Prog = new AparAscope(argc, argv);
-    if (!Prog->OK) {
-      return(-1);
-    }
-    
-    // run it
-    
-    int iret = Prog->Run(*app);
-    
-    // clean up
-    
-    tidy_and_exit(iret);
-    return (iret);
-    
-  } catch (std::bad_alloc &a) {
-    cerr << ">>>>> bad alloc: " << a.what() << endl;
-  }
-
+	setupUi(this);
+	connect(_knob, SIGNAL(valueChanged(double)), this, SLOT(valueChangedSlot(double)));
 }
 
-// tidy up on exit
-
-static void tidy_and_exit (int sig)
-
+/*
+ *  Destroys the object and frees any allocated resources
+ */
+Knob::~Knob()
 {
-  app->exit();
-  delete(Prog);
-  umsleep(1000);
-  exit(sig);
+    // no need to delete child widgets, Qt does it all for us
+}
+
+void
+Knob::setTitle(std::string title)
+{
+   _label->setText(title.c_str());
+}
+
+void
+Knob::setRange(double min, double max)
+{
+#if (QWT_VERSION < 0x060100)
+   _knob->setRange(min, max);
+#else
+   _knob->setScale(min, max);
+#endif
+}
+
+void
+Knob::setValue(double val)
+{
+	_knob->setValue(val);
+}
+
+void
+Knob::valueChangedSlot(double v)
+{
+   emit valueChanged(v);
+}
+
+void 
+Knob::setScaleMaxMajor(int ticks)
+{
+	_knob->setScaleMaxMajor(ticks);
+}
+
+void 
+Knob::setScaleMaxMinor(int ticks)
+{
+	_knob->setScaleMaxMinor(ticks);
+}
+
+void 
+Knob::getRange(double& min, double& max)
+{
+#if (QWT_VERSION < 0x060100)
+	min = _knob->minValue();
+	max = _knob->maxValue();
+#else
+	min = _knob->lowerBound();
+	max = _knob->upperBound();
+#endif
+}
+
+double
+Knob::value()
+{
+	return _knob->value();
 }

@@ -21,75 +21,48 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
-//
-// main for AparAscope, copied from AScope and TcpScope
-//
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Oct 2020
-//
-///////////////////////////////////////////////////////////////
+#ifndef KNOB_H
+#define KNOB_H
 
-#include "AparAscope.hh"
-#include <QApplication>
-#include <toolsa/uusleep.h>
-#include <toolsa/LogStream.hh>
-#include <QIcon>
+#include "ui_Knob.h"
+#include <qdialog.h>
+#include <string>
 
-// file scope
+#ifndef DLL_EXPORT
+#ifdef WIN32
+#ifdef QT_PLUGIN
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT __declspec(dllimport)
+#endif
+#else
+#define DLL_EXPORT
+#endif
+#endif
 
-static void tidy_and_exit (int sig);
-static AparAscope *Prog;
-static QApplication *app;
-
-// main
-
-int main(int argc, char **argv)
-
+///
+class DLL_EXPORT Knob: public QWidget, private Ui::Knob
 {
+    Q_OBJECT
 
-  // create program object
+public:
+    Knob( QWidget* parent = 0);
+    ~Knob();
 
-  try {
+    void setTitle(std::string title);
+    void setRange(double min, double max);
+    void getRange(double& min, double& max);
+	void setValue(double val);
+	void setScaleMaxMajor(int ticks);
+	void setScaleMaxMinor(int ticks);
+	double value();
 
-    // menu bar - don't use native bar for mac
-    // keep menu with the window
-    
-    QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
-    
-    app = new QApplication(argc, argv);
-    //app->setWindowIcon(QIcon(":/radar.AparAscope.png"));
-    // cerr << "After setting Window Icon\n" << endl;
+public slots:
+   void valueChangedSlot(double);
 
-    AparAscope *Prog;
-    Prog = new AparAscope(argc, argv);
-    if (!Prog->OK) {
-      return(-1);
-    }
-    
-    // run it
-    
-    int iret = Prog->Run(*app);
-    
-    // clean up
-    
-    tidy_and_exit(iret);
-    return (iret);
-    
-  } catch (std::bad_alloc &a) {
-    cerr << ">>>>> bad alloc: " << a.what() << endl;
-  }
+signals:
+   void valueChanged(double);
 
-}
+};
 
-// tidy up on exit
-
-static void tidy_and_exit (int sig)
-
-{
-  app->exit();
-  delete(Prog);
-  umsleep(1000);
-  exit(sig);
-}
+#endif // KNOB_H

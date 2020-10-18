@@ -28,29 +28,16 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2010
+// Oct 2020
 //
 ///////////////////////////////////////////////////////////////
 //
-// AparAscope is the engineering display for APAR
+// AparAscope is the time series ascope for APAR
 //
 ///////////////////////////////////////////////////////////////
 
 #include "AparAscope.hh"
-#include "PolarManager.hh"
-#include "BscanManager.hh"
-#include "DisplayField.hh"
-#include "ColorMap.hh"
 #include "Params.hh"
-#include "Reader.hh"
-#include "AllocCheck.hh"
-#include "SoloDefaultColorWrapper.hh"
-#include <toolsa/Path.hh>
-#include <toolsa/LogStream.hh>
-//#include <toolsa/Log.hh>
-//#include <toolsa/MsgLog.hh>
-#include "AparAscopeLogger.hh"
-
 #include <string>
 #include <iostream>
 #include <QApplication>
@@ -65,20 +52,10 @@ AparAscope::AparAscope(int argc, char **argv) :
 {
 
   OK = true;
-  _polarManager = NULL;
-  _bscanManager = NULL;
-  _reader = NULL;
-
+  
   // set programe name
-
+  
   _progName = strdup("AparAscope");
-
-  AparAscopeLogger logger("AparAscope");
-  logger.setDayMode();
-  logger.setOutputDir("/tmp/Applications/AparAscope/Logs");
-  logger.openFile();
-  logger.postLine("AparAscope starting");
-  logger.closeFile();
 
   // get command line args
   
@@ -101,59 +78,10 @@ AparAscope::AparAscope(int argc, char **argv) :
     return;
   }
 
-  if (_params.fields_n < 1) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "  0 fields specified" << endl;
-    cerr << "  At least 1 field is required" << endl;
-    OK = false;
-    return;
-  }
-
-  // check params
-
-  if (_params.polar_plots_n < _params.polar_plots_n_columns) {
-    _nPolarCols = _params.polar_plots_n;
-    _nPolarRows = 1;
-  } else {
-    _nPolarCols = _params.polar_plots_n_columns;
-    _nPolarRows = (_params.polar_plots_n - 1) / _nPolarCols + 1;
-  }
-
-  // set params on alloc checker
-
-  AllocCheck::inst().setParams(&_params);
-
-  if (_params.debug) {
-    LOG_STREAM_INIT(true, false, true, true);
-  } else {
-    LOG_STREAM_INIT(false, false, false, false);
-    LOG_STREAM_TO_CERR();
-  }
-
-  // print color scales if debugging
-  if (_params.debug) {
-    SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-    sd.PrintColorScales();
-  } 
-
-  // set up display fields
-
-  if (_setupDisplayFields()) {
-    OK = false;
-    return;
-  }
-
-  // create reader
-
-  if (_setupReader()) {
-    OK = false;
-    return;
-  }
-
   // init process mapper registration
-
+  
   if (_params.register_with_procmap) {
-    PMU_auto_init((char *) _progName.c_str(),
+    PMU_auto_init(_progName.c_str(),
                   _params.instance,
                   PROCMAP_REGISTER_INTERVAL);
   }
@@ -166,24 +94,6 @@ AparAscope::~AparAscope()
 
 {
 
-  if (_polarManager) {
-    delete _polarManager;
-  }
-
-  if (_bscanManager) {
-    delete _bscanManager;
-  }
-
-  if (_reader) {
-    delete _reader;
-  }
-
-  for (size_t ii = 0; ii < _displayFields.size(); ii++) {
-    delete _displayFields[ii];
-  }
-  _displayFields.clear();
-  // logger.closeFile();
-
 }
 
 //////////////////////////////////////////////////
@@ -191,6 +101,29 @@ AparAscope::~AparAscope()
 
 int AparAscope::Run(QApplication &app)
 {
+
+  // create the scope
+  
+  AScope scope(_params.refresh_hz, _params.save_dir);
+  scope.setWindowTitle(QString(_params.main_window_title));
+  scope.show();
+
+  // create the data source reader
+  
+  AScopeReader reader(_serverHost, _serverPort, _serverFmq,
+                      _simulMode, scope, _radarId, _burstChan, _debugLevel);
+  
+  // connect the reader to the scope to receive new time series data
+  
+  scope.connect(&reader, SIGNAL(newItem(AScope::TimeSeries)),
+                &scope, SLOT(newTSItemSlot(AScope::TimeSeries)));
+  
+  // connect the scope to the reader to return used time series data
+
+  scope.connect(&scope, SIGNAL(returnTSItem(AScope::TimeSeries)),
+                &reader, SLOT(returnItemSlot(AScope::TimeSeries)));
+
+  return app.exec();
 
   // start the reader thread
 

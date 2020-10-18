@@ -136,7 +136,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-title")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "display_title = \"%s\";", argv[++i]);
+        sprintf(tmp_str, "main_window_title = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
