@@ -775,15 +775,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'display_title'
+    // Parameter 'main_window_title'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("display_title");
+    tt->param_name = tdrpStrDup("main_window_title");
     tt->descr = tdrpStrDup("Title for plot window.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &display_title - &_start_;
+    tt->val_offset = (char *) &main_window_title - &_start_;
     tt->single_val.s = tdrpStrDup("AparAscope");
     tt++;
     

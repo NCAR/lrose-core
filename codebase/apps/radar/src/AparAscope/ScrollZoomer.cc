@@ -21,13 +21,19 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
+#ifndef QT_STATIC_CONST
+#define QT_STATIC_CONST static const
+#endif
+
 #include <qevent.h>
 #include <qwt/qwt_plot_canvas.h>
 #include <qwt/qwt_plot_layout.h>
 #include <qwt/qwt_scale_engine.h>
 #include <qwt/qwt_scale_widget.h>
-#include "ScrollBar.h"
-#include "ScrollZoomer.h"
+
+#include "ScrollBar.hh"
+#include "ScrollZoomer.hh"
 
 class ScrollData
 {

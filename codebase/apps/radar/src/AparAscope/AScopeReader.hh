@@ -36,7 +36,8 @@
 #include <radar/IwrfTsBurst.hh>
 #include <radar/IwrfTsReader.hh>
 
-#include "AScope.h"
+#include "AScope.hh"
+#include "Params.hh"
 
 /// A Time series reader for the AScope. It reads IWRF data and translates
 /// DDS samples to AScope::TimeSeries.
@@ -54,14 +55,9 @@ public:
   /// @param host The server host
   /// @param port The server port
   /// @param fmqPath - set in FMQ mode
-    AScopeReader(const std::string &host, int port,
-                 const std::string &fmqPath,
-                 bool simulMode,
-                 AScope &scope, 
-                 int radarId,
-                 int burstChan,
-                 int debugLevel);
-
+  AScopeReader(const Params &params,
+               AScope &scope);
+  
   /// Destructor
   virtual ~AScopeReader();
   
@@ -89,9 +85,10 @@ protected:
 
 private:
 
+  const Params &_params;
+
   int _radarId;
   int _burstChan;
-  int _debugLevel;
 
   std::string _serverHost;
   int _serverPort;

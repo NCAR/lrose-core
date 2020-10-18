@@ -21,13 +21,12 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#include "ScopePlot.h"
+#include "ScopePlot.hh"
 #include <QPainter>
 #include <QPixmap>
 
 #include <iostream>
 #include <stdlib.h>
-#include "ScopePlot.h"
 #include <qpen.h>
 
 #include <qwt/qwt_math.h>

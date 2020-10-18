@@ -28,8 +28,8 @@
 #include <QtGui/QToolButton>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
-#include "Knob.h"
-#include "ScopePlot.h"
+#include "Knob.hh"
+#include "ScopePlot.hh"
 
 QT_BEGIN_NAMESPACE
 

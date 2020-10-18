@@ -24,15 +24,17 @@
 #ifndef SCOPEPLOT_H_
 #define SCOPEPLOT_H_ 1
 
+#ifndef QT_STATIC_CONST
 #define QT_STATIC_CONST static const
+#endif
 
 #include <qwt/qwt.h>
 #include <qwt/qwt_plot_curve.h>
 #include <qwt/qwt_plot_grid.h>
 #include <qwt/qwt_plot.h>
 #include <qwt/qwt_scale_engine.h>
-#include "ui_ScopePlot.h"
-#include "ScrollZoomer.h"
+#include "ui_ScopePlot.hh"
+#include "ScrollZoomer.hh"
 
 #include <vector>
 

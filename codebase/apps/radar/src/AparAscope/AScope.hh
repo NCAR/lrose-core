@@ -51,14 +51,14 @@
 
 // Components from the QtToolbox
 
-#include "ScopePlot.h"
-#include "Knob.h"
+#include "ScopePlot.hh"
+#include "Knob.hh"
 
 // The designer generated header file.
-#include "ui_AScope.h"
+#include "ui_AScope.hh"
 
 // PlotInfo knows the characteristics of a plot
-#include "PlotInfo.h"
+#include "PlotInfo.hh"
 
 #include "Params.hh"
 

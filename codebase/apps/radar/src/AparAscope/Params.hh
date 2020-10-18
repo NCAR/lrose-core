@@ -399,7 +399,7 @@ public:
 
   int main_window_start_y;
 
-  char* display_title;
+  char* main_window_title;
 
   double refresh_hz;
 

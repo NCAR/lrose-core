@@ -21,48 +21,56 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef KNOB_H
-#define KNOB_H
+#ifndef _SCROLLBAR_H
+#define _SCROLLBAR_H 1
 
-#include "ui_Knob.h"
-#include <qdialog.h>
-#include <string>
+#include <qscrollbar.h>
 
-#ifndef DLL_EXPORT
-#ifdef WIN32
-#ifdef QT_PLUGIN
-#define DLL_EXPORT __declspec(dllexport)
-#else
-#define DLL_EXPORT __declspec(dllimport)
-#endif
-#else
-#define DLL_EXPORT
-#endif
-#endif
-
-///
-class DLL_EXPORT Knob: public QWidget, private Ui::Knob
+class ScrollBar: public QScrollBar
 {
     Q_OBJECT
 
 public:
-    Knob( QWidget* parent = 0);
-    ~Knob();
+    ScrollBar(QWidget *parent = NULL);
+    ScrollBar(Qt::Orientation, QWidget *parent = NULL);
+    ScrollBar(double minBase, double maxBase,       
+        Qt::Orientation o, QWidget *parent = NULL);
 
-    void setTitle(std::string title);
-    void setRange(double min, double max);
-    void getRange(double& min, double& max);
-	void setValue(double val);
-	void setScaleMaxMajor(int ticks);
-	void setScaleMaxMinor(int ticks);
-	double value();
+    void setInverted(bool);
+    bool isInverted() const;
 
-public slots:
-   void valueChangedSlot(double);
+    double minBaseValue() const;
+    double maxBaseValue() const;
+
+    double minSliderValue() const;
+    double maxSliderValue() const;
+
+    int extent() const;
 
 signals:
-   void valueChanged(double);
+    void sliderMoved(Qt::Orientation, double, double);
+    void valueChanged(Qt::Orientation, double, double);
 
+public slots:
+    virtual void setBase(double min, double max);
+    virtual void moveSlider(double min, double max);
+
+protected:
+    void sliderRange(int value, double &min, double &max) const;
+    int mapToTick(double) const;
+    double mapFromTick(int) const;
+
+private slots:
+    void catchValueChanged(int value);
+    void catchSliderMoved(int value);
+
+private:
+    void init();
+
+    bool d_inverted;
+    double d_minBase;
+    double d_maxBase;
+    int d_baseTicks;
 };
 
-#endif // KNOB_H
+#endif

@@ -21,7 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#include "AScopeReader.h"
+
+#include "AScopeReader.hh"
 #include <cerrno>
 #include <radar/iwrf_functions.hh>
 #include <toolsa/uusleep.h>
@@ -29,25 +30,21 @@ using namespace std;
 
 // Note that the timer interval for QtTSReader is 0
 
-AScopeReader::AScopeReader(const string &host,
-                           int port,
-                           const string &fmqPath,
-                           bool simulMode,
-                           AScope &scope,
-                           int radarId,
-                           int burstChan,
-                           int debugLevel):
-        _radarId(radarId),
-        _burstChan(burstChan),
-        _debugLevel(debugLevel),
-        _serverHost(host),
-        _serverPort(port),
-        _serverFmq(fmqPath),
-        _simulMode(simulMode),
-        _scope(scope),
-        _pulseCount(0),
-        _tsSeqNum(0)
+AScopeReader::AScopeReader(const Params &params,
+                           AScope &scope):
+        _params(params),
+        _scope(scope)
+        
 {
+  
+  _radarId = _params.radar_id;
+  _burstChan = _params.burst_chan;
+  _serverHost = _params.input_tcp_host;
+  _serverPort = _params.input_tcp_port;
+  _serverFmq = _params.input_fmq_url;
+  _simulMode = _params.simultaneous_mode;
+  _pulseCount = 0;
+  _tsSeqNum = 0;
   
   // this are required in order to send structured data types
   // via a qt signal
@@ -93,7 +90,7 @@ void AScopeReader::timerEvent(QTimerEvent *event)
 
   if (event->timerId() == _dataTimerId) {
 
-    if (_debugLevel > 0) {
+    if (_params.debug) {
       cerr << "Servicing socket timer event" << endl;
     }
 
@@ -415,7 +412,7 @@ int AScopeReader::_loadTs(int nGates,
   size_t *seq0 = new size_t;
   *seq0 = _tsSeqNum;
   ts.handle = seq0;
-  if (_debugLevel > 1) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Creating ts data, seq num: " << _tsSeqNum << endl;
   }
   _tsSeqNum++;
@@ -475,7 +472,7 @@ int AScopeReader::_loadBurst(const IwrfTsBurst &burst,
   size_t *seq0 = new size_t;
   *seq0 = _tsSeqNum;
   ts.handle = seq0;
-  if (_debugLevel > 1) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Creating burst data, seq num: " << _tsSeqNum << endl;
   }
   _tsSeqNum++;
@@ -483,7 +480,7 @@ int AScopeReader::_loadBurst(const IwrfTsBurst &burst,
   // load IQ data
 
   fl32 *iq = new fl32[copy.getNSamples() * 2];
-  if (_debugLevel > 2) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     copy.printHeader(stderr);
     copy.printData(stderr);
   }
@@ -502,7 +499,7 @@ void AScopeReader::returnItemSlot(AScope::TimeSeries ts)
 {
 
   size_t *seqNum = (size_t *) ts.handle;
-  if (_debugLevel > 1) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "--->> Freeing ts data, seq num: " << *seqNum << endl;
   }
   delete seqNum;

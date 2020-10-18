@@ -1,4 +1,4 @@
-`// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 // ** Copyright UCAR (c) 1990 - 2016                                         
 // ** University Corporation for Atmospheric Research (UCAR)                 
 // ** National Center for Atmospheric Research (NCAR)                        
@@ -37,7 +37,10 @@
 ///////////////////////////////////////////////////////////////
 
 #include "AparAscope.hh"
+#include "AScope.hh"
+#include "AScopeReader.hh"
 #include "Params.hh"
+#include <toolsa/pmu.h>
 #include <string>
 #include <iostream>
 #include <QApplication>
@@ -104,14 +107,13 @@ int AparAscope::Run(QApplication &app)
 
   // create the scope
   
-  AScope scope(_params.refresh_hz, _params.save_dir);
+  AScope scope(_params);
   scope.setWindowTitle(QString(_params.main_window_title));
   scope.show();
-
+  
   // create the data source reader
   
-  AScopeReader reader(_serverHost, _serverPort, _serverFmq,
-                      _simulMode, scope, _radarId, _burstChan, _debugLevel);
+  AScopeReader reader(_params, scope);
   
   // connect the reader to the scope to receive new time series data
   
@@ -124,252 +126,6 @@ int AparAscope::Run(QApplication &app)
                 &reader, SLOT(returnItemSlot(AScope::TimeSeries)));
 
   return app.exec();
-
-  // start the reader thread
-
-  _reader->signalRunToStart();
-  
-  if (_params.display_mode == Params::POLAR_DISPLAY) {
-    
-    _polarManager = new PolarManager(_params, _displayFields);
-
-    _reader->addManager(_polarManager);
-
-    if (_args.inputFileList.size() > 0) {
-      _polarManager->setArchiveFileList(_args.inputFileList);
-      // override archive data url from input file
-      string url = _getArchiveUrl(_args.inputFileList[0]);
-      TDRP_str_replace(&_params.archive_data_url, url.c_str());
-    } else if (_params.begin_in_archive_mode) {
-      if (_polarManager->loadArchiveFileList()) {
-        
-        string errMsg = "WARNING\n";
-        errMsg.append("<p>AparAscope cannot find archive data files. </p>");
-        errMsg.append("<p> Choose a file to open or change the time limits. </p>");
-        //errMsg.append(" in startup location. </p>");
-        //errMsg.append(_params.archive_data_url);
-        //errMsg.append(")</p>");
-        //errMsg.append("<p> Click OK to continue to use AparAscope.</p>");
-        QErrorMessage errorDialog;
-        errorDialog.setMinimumSize(400, 250);
-        errorDialog.showMessage(errMsg.c_str());
-        errorDialog.exec();
-
-        // return -1;
-      }
-    }
-
-    return _polarManager->run(app);
-
-  } else if (_params.display_mode == Params::BSCAN_DISPLAY) {
-
-    _bscanManager = new BscanManager(_params, _displayFields);
-
-    _reader->addManager(_bscanManager);
-
-    return _bscanManager->run(app);
-
-  }
-  
-  return -1;
-
-}
-
-//////////////////////////////////////////////////
-// set up reader thread
-// returns 0 on success, -1 on failure
-  
-int AparAscope::_setupReader()
-{
-  
-  switch (_params.input_mode) {
-    
-    case Params::FMQ_INPUT:
-    case Params::TCP_INPUT: {
-      IwrfReader *iwrfReader = new IwrfReader(_params);
-      _reader = iwrfReader;
-      break;
-    }
-      
-    case Params::SIMULATED_INPUT:
-    default: {
-      
-      SimReader *simReader = new SimReader(_params);
-      _reader = simReader;
-      
-      vector<SimReader::Field> simFields;
-      for (size_t ii = 0; ii < _displayFields.size(); ii++) {
-        SimReader::Field simField;
-        simField.name = _displayFields[ii]->getName();
-        simField.units = _displayFields[ii]->getUnits();
-        simField.minVal = _displayFields[ii]->getColorMap().rangeMin();
-        simField.maxVal = _displayFields[ii]->getColorMap().rangeMax();
-        simFields.push_back(simField);
-      }
-      simReader->setFields(simFields);
-
-    }
-
-  } // switch
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////////
-// set up field objects, with their color maps
-// use same map for raw and unfiltered fields
-// returns 0 on success, -1 on failure
-  
-int AparAscope::_setupDisplayFields()
-{
-
-  // check for color map location
-  
-  string colorMapDir = _params.color_scale_dir;
-  Path mapDir(_params.color_scale_dir);
-  if (!mapDir.dirExists()) {
-    colorMapDir = Path::getPathRelToExec(_params.color_scale_dir);
-    mapDir.setPath(colorMapDir);
-    if (!mapDir.dirExists()) {
-      cerr << "ERROR - AparAscope" << endl;
-      cerr << "  Cannot find color scale directory" << endl;
-      cerr << "  Primary is: " << _params.color_scale_dir << endl;
-      cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
-      return -1;
-    }
-    if (_params.debug) {
-      cerr << "NOTE - using color scales relative to executable location" << endl;
-      cerr << "  Exec path: " << Path::getExecPath() << endl;
-      cerr << "  Color scale dir:: " << colorMapDir << endl;
-    }
-  }
-
-  // we interleave unfiltered fields and filtered fields
-
-  for (int ifield = 0; ifield < _params.fields_n; ifield++) {
-
-    const Params::field_t &pfld = _params._fields[ifield];
-
-    // check we have a valid label
-    
-    if (strlen(pfld.label) == 0) {
-      cerr << "WARNING - AparAscope::_setupDisplayFields()" << endl;
-      cerr << "  Empty field label, ifield: " << ifield << endl;
-      cerr << "  Ignoring" << endl;
-      continue;
-    }
-    
-    // check we have a field name
-    
-    if (strlen(pfld.field_name) == 0) {
-      cerr << "WARNING - AparAscope::_setupDisplayFields()" << endl;
-      cerr << "  Empty field name, ifield: " << ifield << endl;
-      cerr << "  Ignoring" << endl;
-      continue;
-    }
-
-    // create color map
-    
-    string colorMapPath = colorMapDir;
-    colorMapPath += PATH_DELIM;
-    colorMapPath += pfld.color_map;
-    ColorMap map;
-    map.setName(pfld.label);
-    map.setUnits(pfld.units);
-
-    // TODO: the logic here is a little weird ...
-    // the label and units have been set, but are we throwing them away?
-
-    bool noColorMap = false;
-
-    if (map.readMap(colorMapPath)) {
-        cerr << "WARNING - AparAscope::_setupDisplayFields()" << endl;
-        cerr << "  Cannot read in color map file: " << colorMapPath << endl;
-        cerr << "  Looking for default color map for field " << pfld.label << endl; 
-
-        try {
-          // check here for smart color scale; look up by field name/label and
-          // see if the name is a usual parameter for a known color map
-          SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-          ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
-          cerr << "  found default color map for " <<  pfld.label  << endl;
-          // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
-          map = colorMap;
-          // HERE: What is missing from the ColorMap object??? 
-        } catch (std::out_of_range &ex) {
-          cerr << "WARNING - did not find default color map for field" << endl;
-          cerr << "          using rainbow colors" << endl;
-	  // Just set the colormap to a generic color map
-	  // use range to indicate it needs update
-          // update when we have access to the actual data values
-          map = ColorMap(0.0, 1.0);
-	  noColorMap = true; 
-          // return -1
-        }
-    }
-
-    // fields
-    
-    DisplayField *field =
-      new DisplayField(pfld.label, pfld.field_name, pfld.units, 
-                       pfld.shortcut, map, ifield);
-    if (noColorMap)
-      field->setNoColorMap();
-    
-    _displayFields.push_back(field);
-
-  } // ifield
-
-  if (_displayFields.size() < 1) {
-    cerr << "ERROR - AparAscope::_setupDisplayFields()" << endl;
-    cerr << "  No fields found" << endl;
-    return -1;
-  }
-
-  return 0;
-
-}
-
-
-///////////////////////////////////////////////////
-// get the archive url
-
-string AparAscope::_getArchiveUrl(const string &filePath)
-  
-{
-
-  // find first digit in path - if no digits, return now
-  
-  const char *start = NULL;
-  for (size_t ii = 0; ii < filePath.size(); ii++) {
-    if (isdigit(filePath[ii])) {
-      start = filePath.c_str() + ii;
-      break;
-    }
-  }
-  if (!start) {
-    return "";
-  }
-
-  const char *end = start + strlen(start);
-
-  // get day dir
-  
-  int year, month, day;
-  while (start < end - 6) {
-    if (sscanf(start, "%4d%2d%2d/", &year, &month, &day) == 3) {
-      int urlLen = start - filePath.c_str() - 1;
-      string url(filePath.substr(0, urlLen));
-      if (_params.debug) {
-        cerr << "===>> Setting archive url to: " << url << endl;
-      }
-      return url;
-    }
-    start++;
-  }
-
-  return "";
 
 }
 
