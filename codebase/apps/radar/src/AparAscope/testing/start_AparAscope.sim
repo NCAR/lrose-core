@@ -1,6 +1,7 @@
 #!/bin/csh
 
-./AparAscope -fmq /tmp/fmq/iwrf_shmem_20200 -debug
+./AparAscope -fmq /tmp/fmq/iwrf_shmem_20200
+
 
 
 
