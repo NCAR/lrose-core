@@ -225,6 +225,15 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
+    } else if (!strcmp(argv[i], "-gate_num")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "start_gate_num = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } // if
     
   } // i
@@ -247,6 +256,7 @@ void Args::_usage(ostream &out)
       << "       [ -burst_chan ? ] set burst channel, 0 to 3\n"
       << "       [ -debug, -d ] print debug messages\n"
       << "       [ -fmq ?] set FMQ mode, and input fmq URL\n"
+      << "       [ -gate_num ? ] starting gate number for plot\n"
       << "       [ -height ? ] height of main window\n"
       << "       [ -instance ?] set instance for procmap\n"
       << "       [ -radar_id ? ] set radar ID, defaults to 0, i.e. all radars\n"

@@ -409,6 +409,8 @@ public:
 
   char* save_dir;
 
+  int start_gate_num;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -416,7 +418,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 

@@ -236,7 +236,7 @@ public slots:
 
   /// A different tab has been selected. Change the plot type to the
   /// currently selected button on that tab.
-  void tabChangeSlot(QWidget* w);
+  void tabChangeSlot(int index);
 
   /// The gain knob value has changed.
   virtual void gainChangeSlot(double);
@@ -264,7 +264,8 @@ public slots:
 
   /// Select the gate
   /// @param index The index from the combo box of the selected gate.
-  void gateChoiceSlot(int index);
+  void setGateNumber();
+  void setGateNumber(int val);
 
   /// Select the block size
   /// @param size The block size. It must be a power of two.
@@ -293,9 +294,9 @@ protected:
   /// @param size The fft length.
   void initFFT(int size);
 
-  /// Initialize the gate selection 
+  /// Set the number of gates
   /// @param gates The number of gates.
-  void initGates(int gates);
+  void setNGates(int gates);
 
   /// Initialize the channel selection
   /// @param channels The number of channels.
@@ -334,7 +335,7 @@ protected:
   /// Initialize the combo box choices and FFTs.
   /// @param channels The number of channels,
   /// @param gates The number of gates
-  void initCombos(int channels, int gates);
+  void initCombos(int channels);
 
   /// Adjust the _graphRange and _graphOffset values.
   /// @param min Desired scale minimum
@@ -467,7 +468,7 @@ protected:
   int _channel;
 
   /// The selected gate, zero based.
-  int _gateChoice;
+  int _gateNum;
 
   /// Set false to cause initialization of blocksize and 
   /// gate choices when the first data is received.
@@ -499,7 +500,7 @@ protected:
   unsigned int _nextIQ;
 
   /// The number of gates. Initially zero, it is diagnosed from the data stream
-  int _gates;
+  int _nGates;
 
   /// set true when we want to start capturing the next incoming data
   bool _capture;

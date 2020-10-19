@@ -835,6 +835,18 @@
     tt->single_val.s = tdrpStrDup("/tmp/AparAscope/images");
     tt++;
     
+    // Parameter 'start_gate_num'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("start_gate_num");
+    tt->descr = tdrpStrDup("Starting gate number.");
+    tt->help = tdrpStrDup("This is the gate number in use when the display starts.");
+    tt->val_offset = (char *) &start_gate_num - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

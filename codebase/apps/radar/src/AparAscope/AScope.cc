@@ -53,6 +53,7 @@
 #include <QDateTime>
 #include <QFileDialog>
 #include <QProgressBar>
+#include <QErrorMessage>
 #include <string>
 #include <algorithm>
 #include <unistd.h>
@@ -74,11 +75,11 @@ AScope::AScope(const Params &params, QWidget* parent) :
         _paused(false),
         _zeroMoment(0.0),
         _channel(0),
-        _gateChoice(0),
+        _gateNum(0),
         _combosInitialized(false),
         _alongBeam(false),
         _nextIQ(0),
-        _gates(0),
+        _nGates(0),
         _capture(true),
         _sampleRateHz(10.0e6) {
   
@@ -112,7 +113,7 @@ AScope::AScope(const Params &params, QWidget* parent) :
   connect(_saveImage,       SIGNAL(released()),           this, SLOT(saveImageSlot()));
   connect(_pauseButton,     SIGNAL(toggled(bool)),        this, SLOT(pauseSlot(bool)));
   connect(_windowButton,    SIGNAL(toggled(bool)),        this, SLOT(windowSlot(bool)));
-  connect(_gateNumber,      SIGNAL(valueChanged(int)),    this, SLOT(gateChoiceSlot(int)));
+  connect(_gateNumEditor,      SIGNAL(returnPressed()),      this, SLOT(setGateNumber()));
   connect(_alongBeamCheck,  SIGNAL(toggled(bool)),        this, SLOT(alongBeamSlot(bool)));
   connect(_blockSizeCombo,  SIGNAL(activated(int)),       this, SLOT(blockSizeSlot(int)));
   connect(_chanButtonGroup, SIGNAL(buttonReleased(int)),  this, SLOT(channelSlot(int)));
@@ -128,6 +129,7 @@ AScope::AScope(const Params &params, QWidget* parent) :
   // initialize the book keeping for the plots.
   // This also sets up the radio buttons
   // in the plot type tab widget
+
   initPlots();
   
   _gainKnob->setRange(-7, 7);
@@ -175,26 +177,14 @@ AScope::~AScope() {
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::initCombos(int channels, int gates) 
+void AScope::initCombos(int channels) 
 {
   
   // initialize the fft numerics
   initBlockSizes();
 
-  // initialize the number of gates.
-  initGates(gates);
-
   // initialize the channels
   initChans(channels);
-}
-
-//////////////////////////////////////////////////////////////////////
-void AScope::initGates(int gates) 
-{
-  // populate the gate selection spin box
-  // _gateNumber->setMinimum(0);
-  // _gateNumber->setMaximum(gates-1);
-  _gateNumber->setMaxCount(gates-1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -465,7 +455,7 @@ void AScope::plotTypeSlot(int plotType)
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::tabChangeSlot(QWidget* w) 
+void AScope::tabChangeSlot(int index) 
 {
   // find out the index of the current page
   int pageNum = _typeTab->currentIndex();
@@ -540,8 +530,8 @@ void AScope::initPlots()
   pGroup = addTSTypeTab("I & Q", _pulsePlots);
   _tabButtonGroups.push_back(pGroup);
 
-  connect(_typeTab, SIGNAL(currentChanged(QWidget *)),
-          this, SLOT(tabChangeSlot(QWidget*)));
+  connect(_typeTab, SIGNAL(currentChanged(int)),
+          this, SLOT(tabChangeSlot(int)));
 
 }
 
@@ -724,33 +714,39 @@ void AScope::adjustGainOffset(double min,
 void AScope::newTSItemSlot(AScope::TimeSeries pItem) 
 {
 
+  if (!_combosInitialized) {
+    // initialize
+    int nGates = pItem.gates;
+    int startGateNum = _params.start_gate_num;
+    if (startGateNum >= nGates) {
+      startGateNum = nGates - 1;
+    }
+    setNGates(nGates);
+    setGateNumber(startGateNum);
+    initCombos(4);
+    _combosInitialized = true;
+  }
+
   int chanId = pItem.chanId;
   int tsLength = pItem.IQbeams.size();
-  _gates = pItem.gates;
+  setNGates(pItem.gates);
   _sampleRateHz = pItem.sampleRateHz;
-
-  if (!_combosInitialized) {
-    // initialize the combo selectors
-    initCombos(4, _gates);
-    _combosInitialized = true;
-
-  }
 
   if (chanId == _channel && !_paused && _capture) {
     // extract the time series from the DDS sample
     if (_alongBeam) {
-      _I.resize(_gates);
-      _Q.resize(_gates);
+      _I.resize(_nGates);
+      _Q.resize(_nGates);
       _nextIQ = 0;
-      for (int i = 0; i < _gates; i++)  {
+      for (int i = 0; i < _nGates; i++)  {
         _I[_nextIQ] = pItem.i(0, _nextIQ);
         _Q[_nextIQ] = pItem.q(0, _nextIQ);
         _nextIQ++;
       }
     } else {
       for (int t = 0; t < tsLength; t++) {
-        _I[_nextIQ] = pItem.i(t, _gateChoice);
-        _Q[_nextIQ] = pItem.q(t, _gateChoice);
+        _I[_nextIQ] = pItem.i(t, _gateNum);
+        _Q[_nextIQ] = pItem.q(t, _gateNum);
         _nextIQ++;
         if (_nextIQ == _I.size()) {
           break;
@@ -797,9 +793,52 @@ void AScope::channelSlot(int c)
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::gateChoiceSlot(int index) 
+void AScope::setNGates(int nGates)
 {
-  _gateChoice = index;
+  if (nGates != _nGates) {
+    char text[1024];
+    snprintf(text, 1024, "NumGates: %d", nGates);
+    _nGatesLabel->setText(text);
+    _nGates = nGates;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+void AScope::setGateNumber(int val) 
+{
+  char text[1024];
+  if (val > _nGates - 1) {
+    QErrorMessage errMsg(_gateNumEditor);
+    snprintf(text, 1024, "Gate number too high: %d", val);
+    errMsg.setModal(true);
+    errMsg.showMessage(text);
+    errMsg.exec();
+    snprintf(text, 1024, "%d", _gateNum);
+    _gateNumEditor->setText(text);
+    return;
+  }
+  _gateNum = val;
+  snprintf(text, 1024, "%d", _gateNum);
+  _gateNumEditor->setText(text);
+}
+
+//////////////////////////////////////////////////////////////////////
+void AScope::setGateNumber() 
+{
+  int val;
+  if (sscanf(_gateNumEditor->text().toLocal8Bit().data(), "%d", &val) != 1) {
+    QErrorMessage errMsg(_gateNumEditor);
+    char text[1024];
+    snprintf(text, 1024, "Bad entry for gate number: %s",
+             _gateNumEditor->text().toLocal8Bit().data());
+    errMsg.setModal(true);
+    errMsg.showMessage(text);
+    errMsg.exec();
+    snprintf(text, 1024, "%d", _gateNum);
+    _gateNumEditor->setText(text);
+    return;
+  }
+  setGateNumber(val);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -874,14 +913,14 @@ void AScope::alongBeamSlot(bool flag)
   // to the number of gates. Otherwise, set them to the
   // blocksize.
   if (_alongBeam) {
-    _I.resize(_gates);
-    _Q.resize(_gates);
+    _I.resize(_nGates);
+    _Q.resize(_nGates);
     _nextIQ = 0;
-    _gateNumber->setEnabled(false);
+    _gateNumEditor->setEnabled(false);
   } else {
     _I.resize(_blockSize);
     _Q.resize(_blockSize);
-    _gateNumber->setEnabled(true);
+    _gateNumEditor->setEnabled(true);
   }
   _nextIQ = 0;
 }

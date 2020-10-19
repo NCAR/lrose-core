@@ -140,3 +140,9 @@ paramdef string {
   p_descr = "Dir for saving images.";
 } save_dir;
 
+paramdef int {
+  p_default = 0;
+  p_descr = "Starting gate number.";
+  p_help = "This is the gate number in use when the display starts.";
+} start_gate_num;
+
