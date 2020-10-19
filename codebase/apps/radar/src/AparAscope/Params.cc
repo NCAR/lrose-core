@@ -697,18 +697,6 @@
     tt->single_val.i = 11000;
     tt++;
     
-    // Parameter 'simultaneous_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("simultaneous_mode");
-    tt->descr = tdrpStrDup("Radar is operating in simultaneous mode.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &simultaneous_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -808,18 +796,6 @@
     tt->descr = tdrpStrDup("Radar Identifier.");
     tt->help = tdrpStrDup("Set radarId if data contains multiple IDs, 0 uses all data.");
     tt->val_offset = (char *) &radar_id - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'burst_chan'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("burst_chan");
-    tt->descr = tdrpStrDup("Set burst channel.");
-    tt->help = tdrpStrDup("Set burst channel (0 to 3) in alternating mode.");
-    tt->val_offset = (char *) &burst_chan - &_start_;
     tt->single_val.i = 0;
     tt++;
     

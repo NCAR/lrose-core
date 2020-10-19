@@ -389,8 +389,6 @@ public:
 
   int input_tcp_port;
 
-  tdrp_bool_t simultaneous_mode;
-
   int main_window_width;
 
   int main_window_height;
@@ -405,8 +403,6 @@ public:
 
   int radar_id;
 
-  int burst_chan;
-
   char* save_dir;
 
   int start_gate_num;
@@ -418,7 +414,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[25];
+  mutable TDRPtable _table[23];
 
   const char *_className;
 

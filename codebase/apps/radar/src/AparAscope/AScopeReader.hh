@@ -28,18 +28,18 @@
 #include <QMetaType>
 
 #include <string>
+#include <deque>
 #include <toolsa/Socket.hh>
 #include <toolsa/MemBuf.hh>
-#include <radar/iwrf_data.h>
-#include <radar/IwrfTsInfo.hh>
-#include <radar/IwrfTsPulse.hh>
-#include <radar/IwrfTsBurst.hh>
-#include <radar/IwrfTsReader.hh>
+#include <radar/apar_ts_data.h>
+#include <radar/AparTsInfo.hh>
+#include <radar/AparTsPulse.hh>
+#include <radar/AparTsReader.hh>
 
 #include "AScope.hh"
 #include "Params.hh"
 
-/// A Time series reader for the AScope. It reads IWRF data and translates
+/// A Time series reader for the AScope. It reads APAR data and translates
 /// DDS samples to AScope::TimeSeries.
 
 Q_DECLARE_METATYPE(AScope::TimeSeries)
@@ -86,42 +86,31 @@ protected:
 private:
 
   const Params &_params;
-
-  int _radarId;
-  int _burstChan;
-
+  AScope &_scope;
+  
   std::string _serverHost;
   int _serverPort;
   std::string _serverFmq;
-  bool _simulMode;
 
-  AScope &_scope;
-  
   // read in data
 
-  IwrfTsReader *_pulseReader;
+  AparTsReader *_pulseReader;
   bool _haveChan1;
   int _dataTimerId;
-
+  int _radarId;
+  
   // pulse stats
 
-  int _nSamples;
+  size_t _nSamples;
   int _pulseCount;
   
   // info and pulses
 
-  vector<IwrfTsPulse *> _pulses; // SIM mode, or when H/V flag is 1
-  vector<IwrfTsPulse *> _pulsesV; // when H/V flag is 0
-
-  // xmit mode
-
-  typedef enum {
-    CHANNEL_MODE_HV_SIM,
-    CHANNEL_MODE_V_ONLY,
-    CHANNEL_MODE_ALTERNATING
-  } channelMode_t;
-  channelMode_t _channelMode;
-
+  deque<AparTsPulse *> _pulsesHCo;
+  deque<AparTsPulse *> _pulsesVCo;
+  deque<AparTsPulse *> _pulsesHx;
+  deque<AparTsPulse *> _pulsesVx;
+  
   // sequence number for time series to ascope
 
   size_t _tsSeqNum;
@@ -129,17 +118,12 @@ private:
   // methods
   
   int _readData();
-  IwrfTsPulse *_getNextPulse();
+  AparTsPulse *_getNextPulse();
+  void _trimPulseQueues();
   void _sendDataToAScope();
-  int _loadTs(int nGates,
-              int channelIn,
-              const vector<IwrfTsPulse *> &pulses,
+  int _loadTs(const deque<AparTsPulse *> &pulses,
               int channelOut,
               AScope::FloatTimeSeries &ts);
-  int _loadBurst(const IwrfTsBurst &burst,
-                 int channelOut,
-                 AScope::FloatTimeSeries &ts);
-
 };
 
 

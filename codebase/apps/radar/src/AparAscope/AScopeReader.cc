@@ -24,7 +24,7 @@
 
 #include "AScopeReader.hh"
 #include <cerrno>
-#include <radar/iwrf_functions.hh>
+#include <radar/apar_ts_functions.hh>
 #include <toolsa/uusleep.h>
 using namespace std;
 
@@ -38,11 +38,9 @@ AScopeReader::AScopeReader(const Params &params,
 {
   
   _radarId = _params.radar_id;
-  _burstChan = _params.burst_chan;
   _serverHost = _params.input_tcp_host;
   _serverPort = _params.input_tcp_port;
   _serverFmq = _params.input_fmq_url;
-  _simulMode = _params.simultaneous_mode;
   _pulseCount = 0;
   _tsSeqNum = 0;
   
@@ -53,16 +51,12 @@ AScopeReader::AScopeReader(const Params &params,
   // start timer for checking socket every 50 msecs
   _dataTimerId = startTimer(50);
 
-  // pulse mode
-
-  _channelMode = CHANNEL_MODE_HV_SIM;
-
   // pulse reader
-
+  
   if (_serverFmq.size() > 0) {
-    _pulseReader = new IwrfTsReaderFmq(_serverFmq.c_str());
+    _pulseReader = new AparTsReaderFmq(_serverFmq.c_str());
   } else {
-    _pulseReader = new IwrfTsReaderTcp(_serverHost.c_str(), _serverPort);
+    _pulseReader = new AparTsReaderTcp(_serverHost.c_str(), _serverPort);
   }
   if (_radarId != 0) {
     _pulseReader->setRadarId(_radarId);
@@ -75,6 +69,28 @@ AScopeReader::AScopeReader(const Params &params,
 AScopeReader::~AScopeReader()
 
 {
+
+  // free up the pulses
+  
+  for (size_t ii = 0; ii < _pulsesHCo.size(); ii++) {
+    delete _pulsesHCo[ii];
+  }
+  _pulsesHCo.clear();
+
+  for (size_t ii = 0; ii < _pulsesVCo.size(); ii++) {
+    delete _pulsesVCo[ii];
+  }
+  _pulsesVCo.clear();
+
+  for (size_t ii = 0; ii < _pulsesHx.size(); ii++) {
+    delete _pulsesHx[ii];
+  }
+  _pulsesHx.clear();
+
+  for (size_t ii = 0; ii < _pulsesVx.size(); ii++) {
+    delete _pulsesVx[ii];
+  }
+  _pulsesVx.clear();
 
   if (_pulseReader) {
     delete _pulseReader;
@@ -115,13 +131,14 @@ int AScopeReader::_readData()
   // read data until nSamples pulses have been gathered
   
   _nSamples = _scope.getBlockSize();
+  _trimPulseQueues();
   
   MemBuf buf;
   while (true) {
     
     // read in a pulse
     
-    IwrfTsPulse *pulse = _getNextPulse();
+    AparTsPulse *pulse = _getNextPulse();
     if (pulse == NULL) {
       // No data yet; return to event loop
       return -1;
@@ -132,56 +149,41 @@ int AScopeReader::_readData()
       continue;
     }
 
-    if (pulse->getIq1() == NULL) {
-      
-      // single pol mode
-      
-      _pulses.push_back(pulse);
-      _channelMode = CHANNEL_MODE_HV_SIM;
-      
-    } else {
-      
-      // add to vector based on H/V flag
-      
-      if (_simulMode) {
-        _pulses.push_back(pulse);
+    if (pulse->getHvFlag()) {
+      // Horizontal
+      if (pulse->getChanIsCopol(0)) {
+        _pulsesHCo.push_back(pulse);
       } else {
-        int hvFlag = pulse->get_hv_flag();
-        if (hvFlag) {
-          _pulses.push_back(pulse);
-        } else {
-          _pulsesV.push_back(pulse);
-        }
+        _pulsesHx.push_back(pulse);
       }
-
+    } else {
+      // Vertical
+      if (pulse->getChanIsCopol(0)) {
+        _pulsesVCo.push_back(pulse);
+      } else {
+        _pulsesVx.push_back(pulse);
+      }
     }
 
-    // check we have enough data
+    // check we have enough data in the active channel
     
-    if ((int) _pulses.size() >= _nSamples) {
-      
-      if (_pulsesV.size() == 0) {
-        // H data only
-        _channelMode = CHANNEL_MODE_HV_SIM;
-        return 0;
-      } else if ((int) _pulsesV.size() >= _nSamples) {
-        // Equal number H and V implies alternating data
-        _channelMode = CHANNEL_MODE_ALTERNATING;
+    int chanInUse = _scope.getChannel();
+    if (chanInUse == 1) {
+      if (_pulsesVCo.size() >= _nSamples) {
         return 0;
       }
-
-    } else if ((int) _pulsesV.size() >= _nSamples) {
-      
-      if (_pulses.size() == 0) {
-        // V data only
-        _channelMode = CHANNEL_MODE_V_ONLY;
-        return 0;
-      } else if ((int) _pulses.size() >= _nSamples) {
-        // Equal number H and V implies alternating data
-        _channelMode = CHANNEL_MODE_ALTERNATING;
+    } else if (chanInUse == 2) {
+      if (_pulsesHx.size() >= _nSamples) {
         return 0;
       }
-
+    } else if (chanInUse == 3) {
+      if (_pulsesVx.size() >= _nSamples) {
+        return 0;
+      }
+    } else {
+      if (_pulsesHCo.size() >= _nSamples) {
+        return 0;
+      }
     }
 
   } // while 
@@ -195,11 +197,11 @@ int AScopeReader::_readData()
 //
 // returns NULL on failure
 
-IwrfTsPulse *AScopeReader::_getNextPulse()
+AparTsPulse *AScopeReader::_getNextPulse()
 
 {
   
-  IwrfTsPulse *pulse = NULL;
+  AparTsPulse *pulse = NULL;
   
   while (pulse == NULL) {
     pulse = _pulseReader->getNextPulse(true);
@@ -229,171 +231,76 @@ IwrfTsPulse *AScopeReader::_getNextPulse()
 }
 
 ///////////////////////////////////////////////////////
+// trim the pulse queues
+
+void AScopeReader::_trimPulseQueues()
+
+{
+
+  if (_pulsesHCo.size() > _nSamples - 1) {
+    AparTsPulse *pulse = _pulsesHCo.front();
+    delete pulse;
+    _pulsesHCo.pop_front();
+  }
+
+  if (_pulsesVCo.size() > _nSamples - 1) {
+    AparTsPulse *pulse = _pulsesVCo.front();
+    delete pulse;
+    _pulsesVCo.pop_front();
+  }
+
+  if (_pulsesHx.size() > _nSamples - 1) {
+    AparTsPulse *pulse = _pulsesHx.front();
+    delete pulse;
+    _pulsesHx.pop_front();
+  }
+
+  if (_pulsesVx.size() > _nSamples - 1) {
+    AparTsPulse *pulse = _pulsesVx.front();
+    delete pulse;
+    _pulsesVx.pop_front();
+  }
+
+}
+
+///////////////////////////////////////////////////////
 // send data to the AScope
 
 void AScopeReader::_sendDataToAScope()
 
 {
 
-  // compute max gates and channels
+  // check we have enough data in the active channel
   
-  int nGates = 0;
-  int nChannels = 0;
-  
-  for (size_t ii = 0; ii < _pulses.size(); ii++) {
-    const IwrfTsPulse *pulse = _pulses[ii];
-    int nGatesPulse = pulse->getNGates();
-    if (nGatesPulse > nGates) {
-      nGates = nGatesPulse;
+  int chanInUse = _scope.getChannel();
+  if (chanInUse == 1) {
+    AScope::FloatTimeSeries tsChan;
+    if (_loadTs(_pulsesVCo, chanInUse, tsChan) == 0) {
+      emit newItem(tsChan);
     }
-    int nChannelsPulse = pulse->getNChannels();
-    if (nChannelsPulse > nChannels) {
-      nChannels = nChannelsPulse;
+  } else if (chanInUse == 2) {
+    AScope::FloatTimeSeries tsChan;
+    if (_loadTs(_pulsesHx, chanInUse, tsChan) == 0) {
+      emit newItem(tsChan);
     }
-  } // ii
-  
-  for (size_t ii = 0; ii < _pulsesV.size(); ii++) {
-    const IwrfTsPulse *pulse = _pulsesV[ii];
-    int nGatesPulse = pulse->getNGates();
-    if (nGatesPulse > nGates) {
-      nGates = nGatesPulse;
+  } else if (chanInUse == 3) {
+    AScope::FloatTimeSeries tsChan;
+    if (_loadTs(_pulsesVx, chanInUse, tsChan) == 0) {
+      emit newItem(tsChan);
     }
-    int nChannelsPulse = pulse->getNChannels();
-    if (nChannelsPulse > nChannels) {
-      nChannels = nChannelsPulse;
-    }
-  } // ii
-
-  if (_channelMode == CHANNEL_MODE_HV_SIM) {
-
-    // load H chan 0, send to scope
-
-    AScope::FloatTimeSeries tsChan0;
-    if (_loadTs(nGates, 0, _pulses, 0, tsChan0) == 0) {
-      emit newItem(tsChan0);
-    }
-
-    // load H chan 1, send to scope
-
-    AScope::FloatTimeSeries tsChan1;
-    if (_loadTs(nGates, 1, _pulses, 1, tsChan1) == 0) {
-      emit newItem(tsChan1);
-    }
-
-    // load burst, send to scope as chan 2
-
-    AScope::FloatTimeSeries tsChan2;
-    if (_loadBurst(_pulseReader->getBurst(), 2, tsChan2) == 0) {
-      emit newItem(tsChan2);
-    }
-
-  } else if (_channelMode == CHANNEL_MODE_V_ONLY) {
-
-    // load V chan 0, send to scope
-    
-    AScope::FloatTimeSeries tsChan0;
-    if (_loadTs(nGates, 0, _pulsesV, 0, tsChan0) == 0) {
-      emit newItem(tsChan0);
-    }
-
-    // load V chan 1, send to scope
-
-    AScope::FloatTimeSeries tsChan1;
-    if (_loadTs(nGates, 1, _pulsesV, 1, tsChan1) == 0) {
-      emit newItem(tsChan1);
-    }
-    
-    // load V burst, send to scope as chan 3
-    
-    AScope::FloatTimeSeries tsChan3;
-    if (_loadBurst(_pulseReader->getBurst(), 3, tsChan3) == 0) {
-      emit newItem(tsChan3);
-    }
-
   } else {
-
-    // alternating mode, 4 channels
-    // if burst chan is set (>= 0) use specified channel instead of
-    // the default channels
-
-    // load H chan 0, (h-co), into channel 0
-
-    if (_burstChan == 0) {
-      AScope::FloatTimeSeries tsChan0;
-      if (_loadBurst(_pulseReader->getBurst(), 0, tsChan0) == 0) {
-        emit newItem(tsChan0);
-      }
-    } else {
-      AScope::FloatTimeSeries tsChan0;
-      if (_loadTs(nGates, 0, _pulses, 0, tsChan0) == 0) {
-        emit newItem(tsChan0);
-      }
+    AScope::FloatTimeSeries tsChan;
+    if (_loadTs(_pulsesHCo, chanInUse, tsChan) == 0) {
+      emit newItem(tsChan);
     }
-
-    // load H chan 1, (v-cross), into channel 3
-    
-    if (_burstChan == 3) {
-      AScope::FloatTimeSeries tsChan3;
-      if (_loadBurst(_pulseReader->getBurst(), 3, tsChan3) == 0) {
-        emit newItem(tsChan3);
-      }
-    } else {
-      AScope::FloatTimeSeries tsChan3;
-      if (_loadTs(nGates, 1, _pulses, 3, tsChan3) == 0) {
-        emit newItem(tsChan3);
-      }
-    }
-
-    // load V chan 0, (v-co) into channel 1
-    
-    if (_burstChan == 1) {
-      AScope::FloatTimeSeries tsChan1;
-      if (_loadBurst(_pulseReader->getBurst(), 1, tsChan1) == 0) {
-        emit newItem(tsChan1);
-      }
-    } else {
-      AScope::FloatTimeSeries tsChan1;
-      if (_loadTs(nGates, 0, _pulsesV, 1, tsChan1) == 0) {
-        emit newItem(tsChan1);
-      }
-    }
-
-    // load V chan 1, (h_cross) into channel 2
-
-    if (_burstChan == 2) {
-      AScope::FloatTimeSeries tsChan2;
-      if (_loadBurst(_pulseReader->getBurst(), 2, tsChan2) == 0) {
-        emit newItem(tsChan2);
-      }
-    } else {
-      AScope::FloatTimeSeries tsChan2;
-      if (_loadTs(nGates, 1, _pulsesV, 2, tsChan2) == 0) {
-        emit newItem(tsChan2);
-      }
-    }
-    
   }
-
-  // free up the pulses
-  
-  for (size_t ii = 0; ii < _pulses.size(); ii++) {
-    delete _pulses[ii];
-  }
-  _pulses.clear();
-
-  for (size_t ii = 0; ii < _pulsesV.size(); ii++) {
-    delete _pulsesV[ii];
-  }
-  _pulsesV.clear();
 
 }
 
 ///////////////////////////////////////////////
 // load up time series object
 
-int AScopeReader::_loadTs(int nGates,
-                          int channelIn,
-                          const vector<IwrfTsPulse *> &pulses,
+int AScopeReader::_loadTs(const deque<AparTsPulse *> &pulses,
                           int channelOut,
                           AScope::FloatTimeSeries &ts)
   
@@ -401,14 +308,25 @@ int AScopeReader::_loadTs(int nGates,
 
   if (pulses.size() < 2) return -1;
 
+  // set max number of gates
+  
+  size_t maxNGates = 0;
+  for (size_t ii = 0; ii < pulses.size(); ii++) {
+    const AparTsPulse* pulse = pulses[ii];
+    size_t nGatesPulse = pulse->getNGates();
+    if (nGatesPulse > maxNGates) {
+      maxNGates = nGatesPulse;
+    }
+  }
+  
   // set header
 
-  ts.gates = nGates;
+  ts.gates = maxNGates;
   ts.chanId = channelOut;
-  ts.sampleRateHz = 1.0 / pulses[0]->get_prt();
+  ts.sampleRateHz = 1.0 / pulses[0]->getPrt();
   
   // set sequence number
-
+  
   size_t *seq0 = new size_t;
   *seq0 = _tsSeqNum;
   ts.handle = seq0;
@@ -416,24 +334,20 @@ int AScopeReader::_loadTs(int nGates,
     cerr << "Creating ts data, seq num: " << _tsSeqNum << endl;
   }
   _tsSeqNum++;
-  
+
   // load IQ data
 
   for (size_t ii = 0; ii < pulses.size(); ii++) {
     
-    const IwrfTsPulse* pulse = pulses[ii];
+    const AparTsPulse* pulse = pulses[ii];
     int nGatesPulse = pulse->getNGates();
     
-    fl32 *iq = new fl32[nGates * 2];
-    memset(iq, 0, nGates * 2 * sizeof(fl32));
-    if (channelIn == 0) {
-      if (pulse->getIq0()) {
-        memcpy(iq, pulse->getIq0(), nGatesPulse * 2 * sizeof(fl32));
-      }
-    } else if (channelIn == 1) {
-      if (pulse->getIq1()) {
-        memcpy(iq, pulse->getIq1(), nGatesPulse * 2 * sizeof(fl32));
-      }
+    fl32 *iq = new fl32[maxNGates * 2];
+    memset(iq, 0, maxNGates * 2 * sizeof(fl32));
+    if (pulse->getIq0()) {
+      memcpy(iq, pulse->getIq0(), nGatesPulse * 2 * sizeof(fl32));
+    } else if (pulse->getIq1()) {
+      memcpy(iq, pulse->getIq1(), nGatesPulse * 2 * sizeof(fl32));
     }
     ts.IQbeams.push_back(iq);
     
@@ -441,54 +355,6 @@ int AScopeReader::_loadTs(int nGates,
 
   return 0;
   
-}
-    
-///////////////////////////////////////////////
-// load up burst data
-
-int AScopeReader::_loadBurst(const IwrfTsBurst &burst,
-                             int channelOut,
-                             AScope::FloatTimeSeries &ts)
-
-{
-  
-  if (burst.getNSamples() < 2) return -1;
-
-  IwrfTsBurst copy(burst);
-  copy.convertToFL32();
-  if (copy.getIq() == NULL) {
-    cerr << "WARNING - burst has null data" << endl;
-    return -1;
-  }
-
-  // set header
-
-  ts.gates = copy.getNSamples();
-  ts.chanId = channelOut;
-  ts.sampleRateHz = copy.getSamplingFreqHz();
-  
-  // set sequence number
-
-  size_t *seq0 = new size_t;
-  *seq0 = _tsSeqNum;
-  ts.handle = seq0;
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Creating burst data, seq num: " << _tsSeqNum << endl;
-  }
-  _tsSeqNum++;
-  
-  // load IQ data
-
-  fl32 *iq = new fl32[copy.getNSamples() * 2];
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    copy.printHeader(stderr);
-    copy.printData(stderr);
-  }
-  memcpy(iq, copy.getIq(), copy.getNSamples() * 2 * sizeof(fl32));
-  ts.IQbeams.push_back(iq);
-
-  return 0;
-
 }
     
 //////////////////////////////////////////////////////////////////////////////

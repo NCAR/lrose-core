@@ -79,11 +79,6 @@ paramdef int {
   p_descr = "TCP_INPUT: port for IWRF moments server.";
 } input_tcp_port;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Radar is operating in simultaneous mode.";
-} simultaneous_mode;
-
 commentdef {
   p_header = "WINDOW DIMENSIONS";
 }
@@ -128,12 +123,6 @@ paramdef int {
   p_descr = "Radar Identifier.";
   p_help = "Set radarId if data contains multiple IDs, 0 uses all data.";
 } radar_id;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Set burst channel.";
-  p_help = "Set burst channel (0 to 3) in alternating mode.";
-} burst_chan;
 
 paramdef string {
   p_default = "/tmp/AparAscope/images";

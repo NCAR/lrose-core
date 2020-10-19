@@ -197,8 +197,20 @@ void AScope::initChans(int channels)
   _chanBox->setLayout(vbox);
 
   for (int c = 0; c < channels; c++) {
+
     // create the button and add to the layout
-    QString l = QString("Chan %1").arg(c);
+
+    QString l;
+    if (c == 1) {
+      l = QString("VCo").arg(c);
+    } else if (c == 2) {
+      l = QString("Hx").arg(c);
+    } else if (c == 3) {
+      l = QString("Vx").arg(c);
+    } else {
+      l = QString("HCo").arg(c);
+    }
+      
     QRadioButton* r = new QRadioButton(l);
     vbox->addWidget(r);
     // add it to the button group, with the channel

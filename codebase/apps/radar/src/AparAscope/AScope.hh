@@ -279,6 +279,9 @@ public slots:
 
   /// Get the current block size
   unsigned int getBlockSize() const { return _blockSize; }
+  
+  /// Get the current channel
+  int getChannel() const { return _channel; }
 
 protected:
 
