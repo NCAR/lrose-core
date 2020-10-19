@@ -1,0 +1,11 @@
+#!/bin/csh
+
+running "TsFile2Fmq -instance sim"
+
+if ($status == 1) then
+    TsFile2Fmq -instance sim -sim \
+    -f ~/projDir/data/sim/iwrf/20190313_120452.686_005_118.sur.iwrf_ts \
+        -fmq /tmp/fmq/iwrf_shmem_20200 -debug |& \
+            LogFilter -d $ERRORS_LOG_DIR -p TsFile2Fmq -i sim >& /dev/null &
+endif
+

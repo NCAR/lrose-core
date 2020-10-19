@@ -1,0 +1,3 @@
+#!/bin/csh
+
+snuff "TsFile2Fmq -instance sim"

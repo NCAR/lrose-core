@@ -1,16 +1,16 @@
 /*********************************************************
  * parameter definitions for TsAscope
  *
- * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
  *
- * Dec 2011
+ * August 2020
  */
 
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "TsAscope reads IWRF time series data, and displays it on an AScope";
-  p_text = "This is a C++ application using the QT4 GUI toolkit.";
+  p_header = "TsAscope is the ascope display for time series data in APAR format.";
+  p_text = "";
 }
 
 commentdef {
@@ -18,7 +18,10 @@ commentdef {
 }
 
 typedef enum {
-  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+  DEBUG_OFF,
+  DEBUG_NORM,
+  DEBUG_VERBOSE,
+  DEBUG_EXTRA
 } debug_t;
 
 paramdef enum debug_t {
@@ -27,95 +30,119 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to register this process with the process mapper (procmap).";
+  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
+} register_with_procmap;
+
 paramdef string {
   p_default = "test";
   p_descr = "Process instance";
   p_help = "Used for registration with procmap.";
 } instance;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to register with the process mapper.";
-  p_help = "If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)";
-} register_with_procmap;
-
 commentdef {
-  p_header = "DATA INPUT";
-};
+  p_header = "REALTIME DATA INPUT";
+}
 
 typedef enum {
-  TS_FILE_INPUT, TS_FMQ_INPUT, TS_TCP_INPUT
+  FMQ_INPUT, 
+  TCP_INPUT
 } input_mode_t;
 
 paramdef enum input_mode_t {
-  p_default = TS_FILE_INPUT;
-  p_descr = "Input mode - files or time series API.";
-  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+  p_default = FMQ_INPUT;
+  p_descr = "Method for reading the input data";
+  p_help = "\tFMQ_INPUT: read moments from an FMQ.\n\tTCP_INPUT: read a moments stream from a TCP socket.";
 } input_mode;
 
 paramdef string {
-  p_default = "/tmp/fmq/ts";
-  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
-  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
-} input_fmq_name;
+  p_default = "/tmp/fmq/test";
+  p_descr = "FMQ_INPUT mode: input URL for moments data from an FMQ";
+  p_help = "Full url is of the form fmqp:://hostname:port:path. Path does not in lude the file extension.";
+} input_fmq_url;
 
 paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Option to seek to the end of the input FMQ.";
-  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
-} seek_to_end_of_fmq;
+  p_default = FALSE;
+  p_descr = "Option to seek to the start of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the start of the fmq and read the entire contents at startup. If FALSE, it will read only new data as it arrives.";
+} seek_to_start_of_fmq;
 
 paramdef string {
   p_default = "localhost";
-  p_descr = "Name of host for TCP server. For TS_TCP_INPUT only.";
-} tcp_server_host;
+  p_descr = "TCP_INPUT: name of host running IWRF moments server.";
+} input_tcp_host;
 
 paramdef int {
-  p_default = 12000;
-  p_descr = "Port for TCP server. For TS_TCP_INPUT only.";
-} tcp_server_port;
+  p_default = 11000;
+  p_descr = "TCP_INPUT: port for IWRF moments server.";
+} input_tcp_port;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Radar is operating in simultaneous mode.";
+} simultaneous_mode;
+
+commentdef {
+  p_header = "WINDOW DIMENSIONS";
+}
+
+paramdef int {
+  p_default = 1100;
+  p_descr = "Startup width of main window (pixels).";
+} main_window_width;
+
+paramdef int {
+  p_default = 635;
+  p_descr = "Startup height of main window (pixels).";
+} main_window_height;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup X for main window (pixels).";
+} main_window_start_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup Y for main window (pixels).";
+} main_window_start_y;
 
 commentdef {
   p_header = "DISPLAY DETAILS";
 }
 
+paramdef string {
+  p_default = "TsAscope";
+  p_descr = "Title for plot window.";
+} main_window_title;
+
 paramdef double {
-  p_default = 50;
-  p_descr = "The scope refresh rate in Hz.";
-} refresh_rate_hz;
+  p_default = 50.0;
+  p_descr = "Set the display refresh rate (Hz).";
+  p_help = "The display will update at this rate.";
+} refresh_hz;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Radar Identifier.";
+  p_help = "Set radarId if data contains multiple IDs, 0 uses all data.";
+} radar_id;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Set burst channel.";
+  p_help = "Set burst channel (0 to 3) in alternating mode.";
+} burst_chan;
 
 paramdef string {
-  p_default = "/tmp/TsAscope";
-  p_descr = "Directory for saving images.";
-} image_save_dir;
+  p_default = "/tmp/TsAscope/images";
+  p_descr = "Dir for saving images.";
+} save_dir;
 
-paramdef string {
-  p_default = "SPOL S-band";
-  p_descr = "Title for scope window.";
-} scope_title;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override radar name in the data.";
-} override_radar_name;
-
-paramdef string {
-  p_default = "SPOL";
-  p_descr = "Radar name if overridden.";
-} radar_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to display the site name in the left panel.";
-} display_site_name;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override site name in the data.";
-} override_site_name;
-
-paramdef string {
-  p_default = "MARSHALL";
-  p_descr = "Site name if overridden.";
-} site_name;
+paramdef int {
+  p_default = 0;
+  p_descr = "Starting gate number.";
+  p_help = "This is the gate number in use when the display starts.";
+} start_gate_num;
 

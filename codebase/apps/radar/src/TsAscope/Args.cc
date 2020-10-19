@@ -22,61 +22,64 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////////
-// Args.cc
+// Args.cc : command line args
 //
-// Command line args
-//
-// Mike Dixon, RAP, NCAR,
+// Mike Dixon, EOL, NCAR,
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Dec 2011
 //
 //////////////////////////////////////////////////////////
 
 #include "Args.hh"
 #include "Params.hh"
 #include <cstring>
-#include <toolsa/umisc.h>
+#include <cstdlib>
 using namespace std;
 
-// constructor
+// Constructor
 
-Args::Args()
+Args::Args (const string &prog_name)
 
 {
-  TDRP_init_override(&override);
+  _progName = prog_name;
 }
 
-// destructor
 
-Args::~Args()
+// Destructor
+
+Args::~Args ()
 
 {
   TDRP_free_override(&override);
 }
 
-// parse
+// Parse command line
+// Returns 0 on success, -1 on failure
 
-int Args::parse(int argc, char **argv, string &prog_name)
+int Args::parse (const int argc, const char **argv)
 
 {
 
+  char tmp_str[BUFSIZ];
+
+  // intialize
+
   int iret = 0;
-  char tmp_str[256];
+  TDRP_init_override(&override);
 
   // loop through args
   
   for (int i =  1; i < argc; i++) {
-    
+
     if (!strcmp(argv[i], "--") ||
 	!strcmp(argv[i], "-h") ||
 	!strcmp(argv[i], "-help") ||
 	!strcmp(argv[i], "-man")) {
       
-      _usage(prog_name, cout);
+      _usage(cout);
       exit (0);
       
-    } else if (!strcmp(argv[i], "-debug")) {
+    } else if (!strcmp(argv[i], "-debug") ||
+               !strcmp(argv[i], "-d")) {
       
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
@@ -93,60 +96,13 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-instance")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "instance = %s;", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "register_with_procmap = true;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
-    } else if (!strcmp(argv[i], "-title")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "scope_title = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
-    } else if (!strcmp(argv[i], "-refresh")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "refresh_rate_hz = %s;", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-
-    } else if (!strcmp(argv[i], "-image_dir")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "image_save_dir = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-
     } else if (!strcmp(argv[i], "-fmq")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "input_fmq_name = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "input_mode = TS_FMQ_INPUT;");
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-
-    } else if (!strcmp(argv[i], "-fmq_start")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "seek_to_end_of_fmq = FALSE;");
-	TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "input_fmq_url = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "input_mode = FMQ_INPUT;");
+        TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
       }
@@ -154,79 +110,167 @@ int Args::parse(int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-tcp_host")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "tcp_server_host = \"%s\";", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "input_mode = TS_TCP_INPUT;");
-	TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "input_tcp_host = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "input_mode = TCP_INPUT;");
+        TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
       }
-
     } else if (!strcmp(argv[i], "-tcp_port")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "tcp_server_port = %s;", argv[++i]);
-	TDRP_add_override(&override, tmp_str);
-	sprintf(tmp_str, "input_mode = TS_TCP_INPUT;");
-	TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "input_tcp_port = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "input_mode = TCP_INPUT;");
+        TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
       }
 
-    } else if (!strcmp(argv[i], "-f")) {
+    } else if (!strcmp(argv[i], "-simultaneous")) {
+      
+      sprintf(tmp_str, "simultaneous_mode = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-title")) {
       
       if (i < argc - 1) {
-	// load up file list vector. Break at next arg which
-	// start with -
-	for (int j = i + 1; j < argc; j++) {
-	  if (argv[j][0] == '-') {
-	    break;
-	  } else {
-	    inputFileList.push_back(argv[j]);
-	  }
-	}
+        sprintf(tmp_str, "main_window_title = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
       }
-
-      if (inputFileList.size() < 1) {
-        cerr << "ERROR - with -f you must specify files to be read" << endl;
-        iret = -1;
+      
+    } else if (!strcmp(argv[i], "-refresh")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "refresh_hz = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
       } else {
-	sprintf(tmp_str, "input_mode = TS_FILE_INPUT;");
-	TDRP_add_override(&override, tmp_str);
+	iret = -1;
       }
-
+      
+    } else if (!strcmp(argv[i], "-radar_id")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "radar_id = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-burst_chan")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "burst_chan = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-instance")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "instance = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "register_with_procmap = TRUE;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-save_dir")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "save_dir = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-start_x")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "main_window_start_x = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-start_y")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "main_window_start_y = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-width")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "main_window_width = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-height")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "main_window_height = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[i], "-gate_num")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "start_gate_num = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } // if
     
   } // i
 
   if (iret) {
-    _usage(prog_name, cerr);
+    _usage(cerr);
   }
 
   return (iret);
     
 }
 
-void Args::_usage(string &prog_name, ostream &out)
+void Args::_usage(ostream &out)
+
 {
 
-  out << "Usage: " << prog_name << " [options as below]\n"
+  out << "Usage: " << _progName << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
-      << "       [ -f files ] specify input time series file list.\n"
-      << "         Read files instead of FMQ.\n"
-      << "       [ -fmq ? ] name of input fmq.\n"
-      << "       [ -fmq_start ] go to start of fmq.\n"
-      << "       [ -instance ?] instance for registering with procmap\n"
-      << "       [ -title ?] set scope title\n"
-      << "       [ -start ] read from start of FMQ\n"
-      << "       [ -tcp_host ? ] specify host for tcp server\n"
-      << "       [ -tcp_port ? ] specify port for tcp server\n"
+      << "       [ -burst_chan ? ] set burst channel, 0 to 3\n"
+      << "       [ -debug, -d ] print debug messages\n"
+      << "       [ -fmq ?] set FMQ mode, and input fmq URL\n"
+      << "       [ -gate_num ? ] starting gate number for plot\n"
+      << "       [ -height ? ] height of main window\n"
+      << "       [ -instance ?] set instance for procmap\n"
+      << "       [ -radar_id ? ] set radar ID, defaults to 0, i.e. all radars\n"
+      << "       [ -refresh ?] set display refresh rate (Hz)\n"
+      << "       [ -save_dir ? ] directory for saving images\n"
+      << "       [ -simultaneous ] data is simultaneous mode\n"
+      << "       [ -start_x ? ] start x location of main window\n"
+      << "       [ -start_y ? ] start y location of main window\n"
+      << "       [ -tcp_host ?] set TCP server host\n"
+      << "       [ -tcp_port ?] set TCP server port\n"
+      << "       [ -title ? ] set main window title\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
+      << "       [ -width ? ] width of main window\n"
       << endl;
 
   Params::usage(out);

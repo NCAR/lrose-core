@@ -21,65 +21,54 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// PlotInfo.hh
-//
-// Copied from Charlie Martin's Profiler Scope classes
-// NCAR, Boulder, CO, USA
-//
-// Dec 2011
-//
-///////////////////////////////////////////////////////////////
-
-#ifndef PLOTINFO_HH
-#define PLOTINFO_HH
+#ifndef PLOTINFOINC_
+#define PLOTINFOINC_
 
 #include <string>
 
 class PlotInfo {
 public:
-  PlotInfo();
-  PlotInfo(int id, int displayType, std::string shortName, std::string longName,
-           double gainMin, double gainMax, double gainCurrent, 
-           double offsetMin, double offsetMax, double offsetCurrent);
-  virtual ~PlotInfo();
-  
-  int getId();
-  int getDisplayType();
-  
-  void setGain(double min, double max, double current);
-  void setOffset(double min, double Max, double current);
-  
-  double getGainMin();
-  double getGainMax();
-  double getGainCurrent();
-  
-  double getOffsetMin();
-  double getOffsetMax();
-  double getOffsetCurrent();
-  
-  std::string getShortName();
-  std::string getLongName();
-  
-  /// Set the autoscale flag
-  /// @param flag True if autscale requested.
-  void autoscale(bool flag);
-  
-  /// @return True if an autoscale is needed.
-  bool autoscale();
-  
-protected:
-  int _id;
-  int _displayType;
-  std::string _shortName;
-  std::string _longName;
-  double _gainMin;
-  double _gainMax;
-  double _gainCurrent;
-  double _offsetMin;
-  double _offsetMax;
-  double _offsetCurrent;
-  bool _autoscale;
+	PlotInfo();
+	PlotInfo(int id, int displayType, std::string shortName, std::string longName,
+		double gainMin, double gainMax, double gainCurrent, 
+		double offsetMin, double offsetMax, double offsetCurrent);
+	virtual ~PlotInfo();
 
+	int getId();
+	int getDisplayType();
+
+	void setGain(double min, double max, double current);
+	void setOffset(double min, double Max, double current);
+
+	double getGainMin();
+	double getGainMax();
+	double getGainCurrent();
+
+	double getOffsetMin();
+	double getOffsetMax();
+	double getOffsetCurrent();
+
+	std::string getShortName();
+	std::string getLongName();
+	
+	/// Set the autoscale flag
+	/// @param flag True if autscale requested.
+	void autoscale(bool flag);
+	
+	/// @return True if an autoscale is needed.
+	bool autoscale();
+
+protected:
+	int _id;
+	int _displayType;
+	std::string _shortName;
+	std::string _longName;
+	double _gainMin;
+	double _gainMax;
+	double _gainCurrent;
+	double _offsetMin;
+	double _offsetMax;
+	double _offsetCurrent;
+    bool _autoscale;
 };
 #endif

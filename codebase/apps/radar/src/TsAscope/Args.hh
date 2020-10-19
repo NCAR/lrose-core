@@ -24,19 +24,20 @@
 /////////////////////////////////////////////////////////////
 // Args.hh: Command line object
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Oct 2007
+// July 2006
 //
 /////////////////////////////////////////////////////////////
 
 #ifndef ARGS_H
 #define ARGS_H
 
+#include <tdrp/tdrp.h>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <tdrp/tdrp.h>
 using namespace std;
 
 class Args {
@@ -45,28 +46,28 @@ public:
 
   // constructor
 
-  Args();
+  Args (const string &prog_name);
 
   // destructor
 
-  ~Args();
+  ~Args ();
 
-  // parse
+  // parse command line
+  // Returns 0 on success, -1 on failure
 
-  int parse(int argc, char **argv, string &prog_name);
+  int parse (const int argc, const char **argv);
 
   // public data
 
   tdrp_override_t override;
-  vector<string> inputFileList;
 
 protected:
   
 private:
 
-  void _usage(string &prog_name, ostream &out);
+  string _progName;
+  void _usage(ostream &out);
   
 };
 
 #endif
-

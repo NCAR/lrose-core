@@ -21,62 +21,56 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// TsAscope.h
-//
-// TsAscope object
-//
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Oct 2020
-//
-///////////////////////////////////////////////////////////////
-//
-// TsAscope is the time series ascope for APAR
-//
-///////////////////////////////////////////////////////////////
+#ifndef _SCROLLBAR_H
+#define _SCROLLBAR_H 1
 
-#ifndef TsAscope_HH
-#define TsAscope_HH
+#include <qscrollbar.h>
 
-#include <string>
-#include <vector>
+class ScrollBar: public QScrollBar
+{
+  Q_OBJECT
 
-#include "Args.hh"
-#include "Params.hh"
-
-class QApplication;
-
-class TsAscope {
-  
 public:
-  
-  // constructor
-  
-  TsAscope (int argc, char **argv);
-  
-  // destructor
-  
-  ~TsAscope();
-  
-  // run 
-  
-  int Run(QApplication &app);
-  
-  // data members
-  
-  bool OK;
-  
+  ScrollBar(QWidget *parent = NULL);
+  ScrollBar(Qt::Orientation, QWidget *parent = NULL);
+  ScrollBar(double minBase, double maxBase,       
+            Qt::Orientation o, QWidget *parent = NULL);
+
+  void setInverted(bool);
+  bool isInverted() const;
+
+  double minBaseValue() const;
+  double maxBaseValue() const;
+
+  double minSliderValue() const;
+  double maxSliderValue() const;
+
+  int extent() const;
+
+signals:
+  void sliderMoved(Qt::Orientation, double, double);
+  void valueChanged(Qt::Orientation, double, double);
+
+public slots:
+  virtual void setBase(double min, double max);
+  virtual void moveSlider(double min, double max);
+
 protected:
+  void sliderRange(int value, double &min, double &max) const;
+  int mapToTick(double) const;
+  double mapFromTick(int) const;
+
+private slots:
+  void catchValueChanged(int value);
+  void catchSliderMoved(int value);
+
 private:
-  
-  // basic
-  
-  string _progName;
-  Params _params;
-  Args _args;
-  
+  void init();
+
+  bool d_inverted;
+  double d_minBase;
+  double d_maxBase;
+  int d_baseTicks;
 };
 
 #endif
-

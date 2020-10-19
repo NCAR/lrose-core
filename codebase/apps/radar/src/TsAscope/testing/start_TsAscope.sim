@@ -1,0 +1,7 @@
+#!/bin/csh
+
+TsAscope -fmq /tmp/fmq/iwrf_shmem_20200
+
+
+
+

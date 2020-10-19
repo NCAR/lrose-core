@@ -1,0 +1,10 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+  <file>images/ok_check.png</file>
+  <file>images/cancel_x.png</file>
+  <file>images/apply.png</file>
+  <file>images/polygon.png</file>
+  <file>images/brush.png</file>
+  <file>images/circle.png</file>
+</qresource>
+</RCC>

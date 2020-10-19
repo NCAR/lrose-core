@@ -25,10 +25,10 @@
 #
 # Makefile for TsAscope program
 #
-# Mike Dixon, RAP, NCAR
+# Mike Dixon, EOL, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
 #
-# Dec 2011
+# Oct 2020
 #
 ###########################################################################
 
@@ -36,41 +36,56 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = TsAscope
 
-LOC_INCLUDES = $(QT4_INCLUDES) $(NETCDF4_INCS)
-
-LOC_CPPC_CFLAGS =
-
-LOC_LDFLAGS = $(QT4_LDFLAGS) $(NETCDF4_LDFLAGS)
+LOC_INCLUDES = $(QT_INCLUDES)
 
 LOC_LIBS = \
-          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
-          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
-          -lphysics -ltoolsa -ldataport -ltdrp \
-          $(NETCDF4_LIBS) \
-          -lfftw3 -lbz2 -lz -lpthread
+	-lradar -lFmq -ldsserver -ldidss \
+	-lRadx -lNcxx -lrapformats \
+	-ltoolsa -ldataport -ltdrp \
+	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
+	-lqwt-qt5 -lfftw3 -lbz2 -lz -lpthread
+
+LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS)
+
+LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 
 HDRS = \
 	$(PARAMS_HH) \
-	Args.hh \
-	Ascope.hh \
-	AscopeReader.hh \
+	AScope.hh \
+	AScopeReader.hh \
 	TsAscope.hh \
-	Params.hh \
-	PlotInfo.hh
+	Args.hh \
+	Knob.hh \
+	PlotInfo.hh \
+	ScopePlot.hh \
+	ScrollBar.hh \
+	ScrollZoomer.hh \
+	ui_AScope.hh \
+	ui_Knob.hh \
+	ui_ScopePlot.hh
 
 NORM_SRCS = \
 	$(PARAMS_CC) \
+	TsAscope.cc \
 	Args.cc \
-	Ascope.cc \
-	AscopeReader.cc \
 	Main.cc \
 	PlotInfo.cc
 
 MOC_SRCS = \
-	TsAscope.cc
+	AScope.cc \
+	AScopeReader.cc \
+	Knob.cc \
+	ScopePlot.cc \
+	ScrollBar.cc \
+	ScrollZoomer.cc
 
 MOC_OUTPUT = \
-	moc_TsAscope.cpp
+	moc_AScope.cpp \
+	moc_AScopeReader.cpp \
+	moc_Knob.cpp \
+	moc_ScopePlot.cpp \
+	moc_ScrollBar.cpp \
+	moc_ScrollZoomer.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)
@@ -98,5 +113,4 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
 

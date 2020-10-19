@@ -21,62 +21,84 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// TsAscope.h
-//
-// TsAscope object
-//
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Oct 2020
-//
-///////////////////////////////////////////////////////////////
-//
-// TsAscope is the time series ascope for APAR
-//
-///////////////////////////////////////////////////////////////
+#ifndef _SCROLLZOOMER_H
+#define _SCROLLZOOMER_H
 
-#ifndef TsAscope_HH
-#define TsAscope_HH
+#include <qglobal.h>
+#if QT_VERSION < 0x040000
+#include <qscrollview.h>
+#endif
+#include <qwt/qwt_plot_zoomer.h>
 
-#include <string>
-#include <vector>
+class ScrollData;
+class ScrollBar;
 
-#include "Args.hh"
-#include "Params.hh"
-
-class QApplication;
-
-class TsAscope {
-  
+class ScrollZoomer: public QwtPlotZoomer
+{
+  Q_OBJECT
 public:
+  enum ScrollBarPosition
+    {
+      AttachedToScale,
+      OppositeToScale
+    };
   
-  // constructor
+#if (QWT_VERSION < 0x060100)
+  ScrollZoomer(QwtPlotCanvas *);
+#else
+  ScrollZoomer(QWidget *);
+#endif
+  virtual ~ScrollZoomer();
   
-  TsAscope (int argc, char **argv);
+  ScrollBar *horizontalScrollBar() const;
+  ScrollBar *verticalScrollBar() const;
   
-  // destructor
+#if QT_VERSION < 0x040000
+  void setHScrollBarMode(QScrollView::ScrollBarMode);
+  void setVScrollBarMode(QScrollView::ScrollBarMode);
   
-  ~TsAscope();
+  QScrollView::ScrollBarMode vScrollBarMode () const;
+  QScrollView::ScrollBarMode hScrollBarMode () const;
+#else
+  void setHScrollBarMode(Qt::ScrollBarPolicy);
+  void setVScrollBarMode(Qt::ScrollBarPolicy);
   
-  // run 
+  Qt::ScrollBarPolicy vScrollBarMode () const;
+  Qt::ScrollBarPolicy hScrollBarMode () const;
+#endif
   
-  int Run(QApplication &app);
+  void setHScrollBarPosition(ScrollBarPosition);
+  void setVScrollBarPosition(ScrollBarPosition);
   
-  // data members
+  ScrollBarPosition hScrollBarPosition() const;
+  ScrollBarPosition vScrollBarPosition() const;
   
-  bool OK;
+  QWidget* cornerWidget() const;
+  virtual void setCornerWidget(QWidget *); 
+  
+  virtual bool eventFilter(QObject *, QEvent *);
+  
+  virtual void rescale();
   
 protected:
+  virtual ScrollBar *scrollBar(Qt::Orientation);
+  virtual void updateScrollBars();
+  virtual void layoutScrollBars(const QRect &);
+                                              
+private slots:
+  void scrollBarMoved(Qt::Orientation o, double min, double max);
+
 private:
+  bool needScrollBar(Qt::Orientation) const;
+  int oppositeAxis(int) const;
   
-  // basic
+  QWidget *d_cornerWidget;
   
-  string _progName;
-  Params _params;
-  Args _args;
+  ScrollData *d_hScrollData;
+  ScrollData *d_vScrollData;
   
+  bool d_inZoom;
+
 };
-
+            
 #endif
-

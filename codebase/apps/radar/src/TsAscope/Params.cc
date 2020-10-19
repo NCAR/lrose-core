@@ -1,26 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -50,8 +50,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "Params.hh"
 #include <cstring>
 
@@ -280,6 +278,18 @@ using namespace std;
   }
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  int Params::isArgValidN(const char *arg)
+  {
+    return (tdrpIsArgValidN(arg));
+  }
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -470,9 +480,9 @@ using namespace std;
   void Params::usage(ostream &out)
   {
     out << "TDRP args: [options as below]\n"
-        << "   [ -params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -params/--params path ] specify params file path\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -549,8 +559,8 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("TsAscope reads IWRF time series data, and displays it on an AScope");
-    tt->comment_text = tdrpStrDup("This is a C++ application using the QT4 GUI toolkit.");
+    tt->comment_hdr = tdrpStrDup("TsAscope is the ascope display for time series data in APAR format.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 1'
@@ -586,6 +596,18 @@ using namespace std;
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
+    // Parameter 'register_with_procmap'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("register_with_procmap");
+    tt->descr = tdrpStrDup("Option to register this process with the process mapper (procmap).");
+    tt->help = tdrpStrDup("If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.");
+    tt->val_offset = (char *) &register_with_procmap - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'instance'
     // ctype is 'char*'
     
@@ -598,24 +620,12 @@ using namespace std;
     tt->single_val.s = tdrpStrDup("test");
     tt++;
     
-    // Parameter 'register_with_procmap'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("register_with_procmap");
-    tt->descr = tdrpStrDup("Option to register with the process mapper.");
-    tt->help = tdrpStrDup("If true, this application will try to register with procmap once per minute. (If unable to do so, no error occurs.)");
-    tt->val_offset = (char *) &register_with_procmap - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("DATA INPUT");
+    tt->comment_hdr = tdrpStrDup("REALTIME DATA INPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -625,68 +635,78 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
-    tt->descr = tdrpStrDup("Input mode - files or time series API.");
-    tt->help = tdrpStrDup("If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.");
+    tt->descr = tdrpStrDup("Method for reading the input data");
+    tt->help = tdrpStrDup("\tFMQ_INPUT: read moments from an FMQ.\n\tTCP_INPUT: read a moments stream from a TCP socket.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("TS_FILE_INPUT");
-      tt->enum_def.fields[0].val = TS_FILE_INPUT;
-      tt->enum_def.fields[1].name = tdrpStrDup("TS_FMQ_INPUT");
-      tt->enum_def.fields[1].val = TS_FMQ_INPUT;
-      tt->enum_def.fields[2].name = tdrpStrDup("TS_TCP_INPUT");
-      tt->enum_def.fields[2].val = TS_TCP_INPUT;
-    tt->single_val.e = TS_FILE_INPUT;
+      tt->enum_def.fields[0].name = tdrpStrDup("FMQ_INPUT");
+      tt->enum_def.fields[0].val = FMQ_INPUT;
+      tt->enum_def.fields[1].name = tdrpStrDup("TCP_INPUT");
+      tt->enum_def.fields[1].val = TCP_INPUT;
+    tt->single_val.e = FMQ_INPUT;
     tt++;
     
-    // Parameter 'input_fmq_name'
+    // Parameter 'input_fmq_url'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_fmq_name");
-    tt->descr = tdrpStrDup("FMQ name. For TS_FMQ_INPUT only.");
-    tt->help = tdrpStrDup("Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.");
-    tt->val_offset = (char *) &input_fmq_name - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/fmq/ts");
+    tt->param_name = tdrpStrDup("input_fmq_url");
+    tt->descr = tdrpStrDup("FMQ_INPUT mode: input URL for moments data from an FMQ");
+    tt->help = tdrpStrDup("Full url is of the form fmqp:://hostname:port:path. Path does not in lude the file extension.");
+    tt->val_offset = (char *) &input_fmq_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/fmq/test");
     tt++;
     
-    // Parameter 'seek_to_end_of_input'
+    // Parameter 'seek_to_start_of_fmq'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("seek_to_end_of_input");
-    tt->descr = tdrpStrDup("Option to seek to the end of the input FMQ.");
-    tt->help = tdrpStrDup("If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.");
-    tt->val_offset = (char *) &seek_to_end_of_input - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->param_name = tdrpStrDup("seek_to_start_of_fmq");
+    tt->descr = tdrpStrDup("Option to seek to the start of the input FMQ.");
+    tt->help = tdrpStrDup("If TRUE, the program will seek to the start of the fmq and read the entire contents at startup. If FALSE, it will read only new data as it arrives.");
+    tt->val_offset = (char *) &seek_to_start_of_fmq - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'tcp_server_host'
+    // Parameter 'input_tcp_host'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("tcp_server_host");
-    tt->descr = tdrpStrDup("Name of host for TCP server. For TS_TCP_INPUT only.");
+    tt->param_name = tdrpStrDup("input_tcp_host");
+    tt->descr = tdrpStrDup("TCP_INPUT: name of host running IWRF moments server.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &tcp_server_host - &_start_;
+    tt->val_offset = (char *) &input_tcp_host - &_start_;
     tt->single_val.s = tdrpStrDup("localhost");
     tt++;
     
-    // Parameter 'tcp_server_port'
+    // Parameter 'input_tcp_port'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("tcp_server_port");
-    tt->descr = tdrpStrDup("Port for TCP server. For TS_TCP_INPUT only.");
+    tt->param_name = tdrpStrDup("input_tcp_port");
+    tt->descr = tdrpStrDup("TCP_INPUT: port for IWRF moments server.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &tcp_server_port - &_start_;
-    tt->single_val.i = 12000;
+    tt->val_offset = (char *) &input_tcp_port - &_start_;
+    tt->single_val.i = 11000;
+    tt++;
+    
+    // Parameter 'simultaneous_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("simultaneous_mode");
+    tt->descr = tdrpStrDup("Radar is operating in simultaneous mode.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &simultaneous_mode - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 3'
@@ -694,104 +714,137 @@ using namespace std;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("WINDOW DIMENSIONS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'main_window_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_window_width");
+    tt->descr = tdrpStrDup("Startup width of main window (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_width - &_start_;
+    tt->single_val.i = 1100;
+    tt++;
+    
+    // Parameter 'main_window_height'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_window_height");
+    tt->descr = tdrpStrDup("Startup height of main window (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_height - &_start_;
+    tt->single_val.i = 635;
+    tt++;
+    
+    // Parameter 'main_window_start_x'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_window_start_x");
+    tt->descr = tdrpStrDup("Startup X for main window (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_start_x - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'main_window_start_y'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("main_window_start_y");
+    tt->descr = tdrpStrDup("Startup Y for main window (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_start_y - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("DISPLAY DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'refresh_rate_hz'
+    // Parameter 'main_window_title'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("main_window_title");
+    tt->descr = tdrpStrDup("Title for plot window.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &main_window_title - &_start_;
+    tt->single_val.s = tdrpStrDup("TsAscope");
+    tt++;
+    
+    // Parameter 'refresh_hz'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("refresh_rate_hz");
-    tt->descr = tdrpStrDup("The scope refresh rate in Hz.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &refresh_rate_hz - &_start_;
+    tt->param_name = tdrpStrDup("refresh_hz");
+    tt->descr = tdrpStrDup("Set the display refresh rate (Hz).");
+    tt->help = tdrpStrDup("The display will update at this rate.");
+    tt->val_offset = (char *) &refresh_hz - &_start_;
     tt->single_val.d = 50;
     tt++;
     
-    // Parameter 'image_save_dir'
+    // Parameter 'radar_id'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("radar_id");
+    tt->descr = tdrpStrDup("Radar Identifier.");
+    tt->help = tdrpStrDup("Set radarId if data contains multiple IDs, 0 uses all data.");
+    tt->val_offset = (char *) &radar_id - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'burst_chan'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("burst_chan");
+    tt->descr = tdrpStrDup("Set burst channel.");
+    tt->help = tdrpStrDup("Set burst channel (0 to 3) in alternating mode.");
+    tt->val_offset = (char *) &burst_chan - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'save_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("image_save_dir");
-    tt->descr = tdrpStrDup("Directory for saving images.");
+    tt->param_name = tdrpStrDup("save_dir");
+    tt->descr = tdrpStrDup("Dir for saving images.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &image_save_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/TsAscope");
+    tt->val_offset = (char *) &save_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/TsAscope/images");
     tt++;
     
-    // Parameter 'scope_title'
-    // ctype is 'char*'
+    // Parameter 'start_gate_num'
+    // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("scope_title");
-    tt->descr = tdrpStrDup("Title for scope window.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &scope_title - &_start_;
-    tt->single_val.s = tdrpStrDup("SPOL S-band");
-    tt++;
-    
-    // Parameter 'override_radar_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_radar_name");
-    tt->descr = tdrpStrDup("Option to override radar name in the data.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &override_radar_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'radar_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("radar_name");
-    tt->descr = tdrpStrDup("Radar name if overridden.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("SPOL");
-    tt++;
-    
-    // Parameter 'display_site_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("display_site_name");
-    tt->descr = tdrpStrDup("Option to display the site name in the left panel.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &display_site_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'override_site_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_site_name");
-    tt->descr = tdrpStrDup("Option to override site name in the data.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &override_site_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'site_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("site_name");
-    tt->descr = tdrpStrDup("Site name if overridden.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &site_name - &_start_;
-    tt->single_val.s = tdrpStrDup("MARSHALL");
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("start_gate_num");
+    tt->descr = tdrpStrDup("Starting gate number.");
+    tt->help = tdrpStrDup("This is the gate number in use when the display starts.");
+    tt->val_offset = (char *) &start_gate_num - &_start_;
+    tt->single_val.i = 0;
     tt++;
     
     // trailing entry has param_name set to NULL

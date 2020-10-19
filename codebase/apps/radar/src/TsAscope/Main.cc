@@ -23,21 +23,25 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// main for TsAscope
+// main for TsAscope, copied from AScope and TcpScope
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2011
+// Oct 2020
 //
 ///////////////////////////////////////////////////////////////
 
 #include "TsAscope.hh"
 #include <QApplication>
+#include <toolsa/uusleep.h>
+#include <toolsa/LogStream.hh>
+#include <QIcon>
 
 // file scope
 
 static void tidy_and_exit (int sig);
 static TsAscope *Prog;
+static QApplication *app;
 
 // main
 
@@ -47,22 +51,36 @@ int main(int argc, char **argv)
 
   // create program object
 
-  QApplication app(argc, argv);
-  TsAscope *Prog;
-  Prog = new TsAscope(argc, argv, NULL);
-  if (!Prog->OK) {
-    return(-1);
+  try {
+
+    // menu bar - don't use native bar for mac
+    // keep menu with the window
+    
+    QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
+    
+    app = new QApplication(argc, argv);
+    //app->setWindowIcon(QIcon(":/radar.TsAscope.png"));
+    // cerr << "After setting Window Icon\n" << endl;
+
+    TsAscope *Prog;
+    Prog = new TsAscope(argc, argv);
+    if (!Prog->OK) {
+      return(-1);
+    }
+    
+    // run it
+    
+    int iret = Prog->Run(*app);
+    
+    // clean up
+    
+    tidy_and_exit(iret);
+    return (iret);
+    
+  } catch (std::bad_alloc &a) {
+    cerr << ">>>>> bad alloc: " << a.what() << endl;
   }
 
-  // run it
-
-  int iret = Prog->Run(app);
-
-  // clean up
-
-  tidy_and_exit(iret);
-  return (iret);
-  
 }
 
 // tidy up on exit
@@ -70,6 +88,8 @@ int main(int argc, char **argv)
 static void tidy_and_exit (int sig)
 
 {
+  app->exit();
   delete(Prog);
+  umsleep(1000);
   exit(sig);
 }
