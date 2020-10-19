@@ -411,6 +411,10 @@ codebase/apps/procmap/src/procmap_unregister/procmap_unregister
 codebase/apps/procmap/src/test_procmap/test_procmap
 
 codebase/apps/radar/src/AparAscope/AparAscope
+codebase/apps/radar/src/AparAscope/Makefile.qmake
+codebase/apps/radar/src/AparAscope/moc_*cpp
+codebase/apps/radar/src/AparAscope/moc_predefs.h
+
 codebase/apps/radar/src/AparTsArchive/AparTsArchive
 codebase/apps/radar/src/AparTsPrint/AparTsPrint
 codebase/apps/radar/src/AparTsSim/AparTsSim
@@ -492,7 +496,12 @@ codebase/apps/radar/src/SunCal/SunCal
 codebase/apps/radar/src/SunCal/testing/sunscan_ael_code
 codebase/apps/radar/src/SunCpCompute/SunCpCompute
 codebase/apps/radar/src/SweepInfo2Spdb/SweepInfo2Spdb
+
 codebase/apps/radar/src/TsAscope/TsAscope
+codebase/apps/radar/src/TsAscope/Makefile.qmake
+codebase/apps/radar/src/TsAscope/moc_*cpp
+codebase/apps/radar/src/TsAscope/moc_predefs.h
+
 codebase/apps/radar/src/Ts2NetCDF/Ts2NetCDF
 codebase/apps/radar/src/TsCalAuto/TsCalAuto
 codebase/apps/radar/src/TsConvert/TsConvert
