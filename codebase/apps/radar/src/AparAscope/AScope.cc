@@ -241,7 +241,7 @@ void AScope::initBlockSizes()
 
   // initialize items that depend on the block size selection
   // (fftw and hamming coefficients)
-  _blockSizeCombo->setCurrentIndex(5);
+  _blockSizeCombo->setCurrentIndex(3);
   blockSizeSlot(5);
 
 }
