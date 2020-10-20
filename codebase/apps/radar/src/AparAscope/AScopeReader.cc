@@ -300,7 +300,7 @@ void AScopeReader::_sendDataToAScope()
 ///////////////////////////////////////////////
 // load up time series object
 
-int AScopeReader::_loadTs(const deque<AparTsPulse *> &pulses,
+int AScopeReader::_loadTs(deque<AparTsPulse *> &pulses,
                           int channelOut,
                           AScope::FloatTimeSeries &ts)
   
@@ -352,6 +352,13 @@ int AScopeReader::_loadTs(const deque<AparTsPulse *> &pulses,
     ts.IQbeams.push_back(iq);
     
   } // ii
+
+  // clean up
+
+  for (size_t ii = 0; ii < pulses.size(); ii++) {
+    delete pulses[ii];
+  } // ii
+  pulses.clear();
 
   return 0;
   

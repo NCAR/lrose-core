@@ -121,7 +121,7 @@ private:
   AparTsPulse *_getNextPulse();
   void _trimPulseQueues();
   void _sendDataToAScope();
-  int _loadTs(const deque<AparTsPulse *> &pulses,
+  int _loadTs(deque<AparTsPulse *> &pulses,
               int channelOut,
               AScope::FloatTimeSeries &ts);
 };

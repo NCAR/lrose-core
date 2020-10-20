@@ -148,7 +148,7 @@ int WriteToFmq::Run ()
       }
     }
 
-    umsleep(1000);
+    umsleep(20);
 
   } // while
   
