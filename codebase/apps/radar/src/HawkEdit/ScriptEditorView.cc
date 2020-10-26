@@ -257,12 +257,22 @@ float  ScriptEditorView::myPow()
 
 
 void ScriptEditorView::openScriptFile() {
-  //QString fileNameQ = QFileDialog::getOpenFileName(this,
-  //  tr("Open Script from File"), ".", tr("Script Files (*.*)"));
-  //string fileName = fileNameQ.toStdString();
-  //LOG(DEBUG) << "fileName is " << fileName;
+  QString fileNameQ = QFileDialog::getOpenFileName(this,
+    tr("Open Script from File"), ".", tr("Script Files (*.*)"));
+  string fileName = fileNameQ.toStdString();
+  LOG(DEBUG) << "script file name is " << fileName;
 
-  //QString fileContent("Script Content Here");
+  QString fileContent("Script Content Here");
+  QFile file(fileNameQ); 
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QMessageBox::warning(this, "title", "Cannot open file");
+  } else {
+    QTextStream in(&file);
+    fileContent = in.readAll(); //  >> fileContent; // forEachRayScript.toUtf8();
+    // out.close();
+  }
+
+  this->formulaInputForEachRay->setText(fileContent);
 
 /*
   auto fileContentReady = [](const QString &fileName, const QByteArray &fileContent) {
@@ -273,6 +283,7 @@ void ScriptEditorView::openScriptFile() {
     }
   };
 */
+  /* for Qt 5.13
   // takes zero arguments and returns nothing
   std::function<void(const QString &, const QByteArray &)> fileContentReady;
   fileContentReady = [this](const QString &fileName, const QByteArray &fileContent ) {
@@ -284,7 +295,7 @@ void ScriptEditorView::openScriptFile() {
     }
   };
   QFileDialog::getOpenFileContent("Images (*.png *.xpm *.jpg)",  fileContentReady);
-
+  */
   // formulaInputForEachRay->setText(fileContent);
 
 }
