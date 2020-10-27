@@ -29,6 +29,9 @@ Q_DECLARE_METATYPE(QVector<double>)
 
 // Qt::WindowMinMaxButtonsHint
 
+// Create a Dialog for the spreadsheet settings
+// Create a separate window that contains the spreadsheet 
+
   SpreadSheetView::SpreadSheetView(QWidget *parent, float rayAzimuth)
   : QMainWindow(parent)
 {
@@ -46,6 +49,7 @@ Q_DECLARE_METATYPE(QVector<double>)
   rows = 200;
 
   //_volumeData = vol;
+
     addToolBar(toolBar = new QToolBar());
     formulaInput = new TextEdit(this);
     //QSize sizeHint = formulaInput->viewportSizeHint();
@@ -57,8 +61,150 @@ Q_DECLARE_METATYPE(QVector<double>)
     //cellLabel->setMaximumSize(50, 10);
     //cellLabel->setMinimumSize(80, 10);
 
+    // Add a layout
+    //QGridLayout layout;
+    //addLayout
+    // Add the input field widgets to the layout
+
     toolBar->addWidget(cellLabel);
     toolBar->addWidget(formulaInput);
+
+
+    QDockWidget *dock = new QDockWidget(tr("Spreadsheet Configuration"), this);
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+
+    QGroupBox *echoGroup = new QGroupBox(tr(""));
+
+    QLabel *echoLabel = new QLabel(tr("Fields"));
+    fieldListWidget = new QListWidget();
+    fieldListWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    //fieldListWidget->addItem("DBZ");
+    //QComboBox *echoComboBox = new QComboBox;
+    //echoComboBox->addItem(tr("Normal"));
+    //echoComboBox->addItem(tr("Password"));
+    //echoComboBox->addItem(tr("PasswordEchoOnEdit"));
+    //echoComboBox->addItem(tr("No Echo"));
+
+    //QLineEdit *echoLineEdit = new QLineEdit;
+    //echoLineEdit->setPlaceholderText("Placeholder Text");
+    //echoLineEdit->setFocus();
+
+    QGridLayout *echoLayout = new QGridLayout;
+    echoLayout->addWidget(echoLabel, 0, 0);
+    echoLayout->addWidget(fieldListWidget, 0, 1);
+    //echoLayout->addWidget(echoLineEdit, 1, 0, 1, 2);
+
+    QLabel *formatLabel = new QLabel(tr("Format"));
+    QLineEdit *formatLineEdit = new QLineEdit;
+    formatLineEdit->setPlaceholderText("6.1f");
+    echoLayout->addWidget(formatLabel, 1, 0);
+    echoLayout->addWidget(formatLineEdit, 1, 1);
+
+    QLineEdit *changesLineEdit = new QLineEdit;
+    changesLineEdit->setPlaceholderText("0");
+    echoLayout->addWidget(new QLabel(tr("Changes")), 2, 0);
+    echoLayout->addWidget(changesLineEdit, 2, 1);
+
+    QLineEdit *rangeLineEdit = new QLineEdit;
+    rangeLineEdit->setPlaceholderText("0.15");
+    echoLayout->addWidget(new QLabel(tr("Range")), 3, 0);
+    echoLayout->addWidget(rangeLineEdit, 3, 1);
+
+    QLineEdit *nyqVelLineEdit = new QLineEdit;
+    nyqVelLineEdit->setPlaceholderText("0");
+    echoLayout->addWidget(new QLabel(tr("Nyq Vel")), 4, 0);
+    echoLayout->addWidget(nyqVelLineEdit, 4, 1);
+    echoLayout->addWidget(new QLabel(tr("0 implies the default Nyq Vel")), 4, 2);
+
+    //QFileDialog *logDirDialog = new QFileDialog; 
+    echoLayout->addWidget(new QLabel(tr("Log Dir")), 5, 0);
+    //echoLayout->addWidget(logDirDialog, 5, 1);
+
+    rayLineEdit = new QLineEdit;
+    QString azString = QString::number(rayAzimuth);
+    //rayLineEdit->setPlaceholderText(azString);
+
+    //rayLineEdit->setValidator(new QDoubleValidator(0.0,
+    //        360.0, 2, rayLineEdit));
+    //rayLineEdit->insert(azString);
+    echoLayout->addWidget(new QLabel(tr("Ray")), 1, 2);
+    echoLayout->addWidget(rayLineEdit, 1, 3);
+
+    QLineEdit *raysLineEdit = new QLineEdit;
+    raysLineEdit->setPlaceholderText("5");
+    echoLayout->addWidget(new QLabel(tr("Rays")), 2, 2);
+    echoLayout->addWidget(raysLineEdit, 2, 3);
+
+    QLineEdit *cellLineEdit = new QLineEdit;
+    cellLineEdit->setPlaceholderText("0");
+    echoLayout->addWidget(new QLabel(tr("Cell")), 3, 2);
+    echoLayout->addWidget(cellLineEdit, 3, 3);
+
+    QPushButton *clearEditsButton = new QPushButton("Clear Edits", this);
+    echoLayout->addWidget(clearEditsButton, 6, 0);
+
+    QPushButton *undoButton = new QPushButton("Undo", this);
+    undoButton->setDisabled(true); 
+    echoLayout->addWidget(undoButton, 6, 1);
+
+    applyEditsButton = new QPushButton("Apply Edits", this);
+    echoLayout->addWidget(applyEditsButton, 6, 2);
+    connect(applyEditsButton, SIGNAL (released()), this, SLOT (applyEdits())); 
+
+    QPushButton *refreshButton = new QPushButton("Refresh", this);
+    refreshButton->setDisabled(true);
+    echoLayout->addWidget(refreshButton, 6, 3);
+
+    echoGroup->setLayout(echoLayout);
+
+    //QGridLayout *layout = new QGridLayout;
+    //layout->addWidget(echoGroup, 1, 1);
+
+    //HERE  ... not sure of the next two lines ... 
+    //QDialog *myList = new QDialog(dock);
+    dock->setWidget(echoGroup);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+/*
+
+    QListWidget *customerList = new QListWidget(dock);
+    customerList->addItems(QStringList()
+            << "John Doe, Harmony Enterprises, 12 Lakeside, Ambleton"
+            << "Jane Doe, Memorabilia, 23 Watersedge, Beaton"
+            << "Tammy Shea, Tiblanka, 38 Sea Views, Carlton"
+            << "Tim Sheen, Caraba Gifts, 48 Ocean Way, Deal"
+            << "Sol Harvey, Chicos Coffee, 53 New Springs, Eccleston"
+            << "Sally Hobart, Tiroli Tea, 67 Long River, Fedula");
+    dock->setWidget(customerList);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+*/
+    //viewMenu->addAction(dock->toggleViewAction());
+
+    // -----
+/*
+    toolBar->addWidget(new QLabel("Fields"));
+
+
+    toolBar->addWidget(new QLabel("Format"));   
+    TextEdit *formatInput = new TextEdit(this);
+    //formatInput->L
+    toolBar->addWidget(formatInput);
+
+    TextEdit *rangeInput = new TextEdit(this);
+    toolBar->addWidget(rangeInput);
+
+    TextEdit *nyqVelInput = new TextEdit(this);
+    toolBar->addWidget(nyqVelInput);
+
+    
+    TextEdit *rayInput = new TextEdit(this);
+    toolBar->addWidget(rayInput);
+
+    TextEdit *raysInput = new TextEdit(this);
+    toolBar->addWidget(raysInput);
+
+    TextEdit *cellInput = new TextEdit(this);
+    toolBar->addWidget(cellInput);
+    */
 
     int actionFontSize = 14;
 
@@ -141,14 +287,14 @@ Q_DECLARE_METATYPE(QVector<double>)
 
     createActions();
     LOG(DEBUG) << "Action created\n";
-    updateColor(0);
-    LOG(DEBUG) << "update Color\n";
+    //updateColor(0);
+    //LOG(DEBUG) << "update Color\n";
     setupMenuBar();
     LOG(DEBUG) << "setupMenuBar\n";
     //setupContentsBlank();
     //cout << "setupContentsBlank\n";
-    setupContextMenu();
-    cout << "setupContextMenu\n";
+    //setupContextMenu();
+    //cout << "setupContextMenu\n";
     setCentralWidget(table);
     cout << "setCentralWidgets\n";
 
@@ -166,13 +312,15 @@ Q_DECLARE_METATYPE(QVector<double>)
     connect(table, &QTableWidget::itemChanged,
             this, &SpreadSheetView::updateTextEdit);
 
+    // setTheWindowTitle(rayAzimuth);
+    newAzimuth(rayAzimuth);
+}
 
+void SpreadSheetView::setTheWindowTitle(float rayAzimuth) {
     QString title("Spreadsheet Editor for Ray ");
     title.append(QString::number(rayAzimuth, 'f', 2));
     title.append(" degrees");
     setWindowTitle(title);
-
-    //setupSoloFunctions();
 }
 
 // use when a new file is opened ...
@@ -312,24 +460,41 @@ void SpreadSheetView::init()
 
 void SpreadSheetView::createActions()
 {
-    cell_sumAction = new QAction(tr("+ Sum"), this);
-    connect(cell_sumAction, &QAction::triggered, this, &SpreadSheetView::actionSum);
+    cell_deleteAction = new QAction(tr("Delete"), this);
+    connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
 
-    cell_addAction = new QAction(tr("&+ Fold"), this);
-    cell_addAction->setShortcut(Qt::CTRL | Qt::Key_Plus);
-    connect(cell_addAction, &QAction::triggered, this, &SpreadSheetView::actionAdd);
+    cell_negFoldAction = new QAction(tr("&- Fold"), this);
+    //cell_addAction->setShortcut(Qt::CTRL | Qt::Key_Plus);
+    connect(cell_negFoldAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
 
-    cell_subAction = new QAction(tr("&Delete Ray"), this);
-    cell_subAction->setShortcut(Qt::CTRL | Qt::Key_Minus);
-    connect(cell_subAction, &QAction::triggered, this, &SpreadSheetView::actionSubtract);
+    cell_plusFoldAction = new QAction(tr("&+ Fold"), this);
+    //cell_addAction->setShortcut(Qt::CTRL | Qt::Key_Plus);
+    connect(cell_plusFoldAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
 
-    cell_mulAction = new QAction(tr("&- Fold Ray"), this);
-    cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
-    connect(cell_mulAction, &QAction::triggered, this, &SpreadSheetView::actionMultiply);
+    cell_deleteRayAction = new QAction(tr("&Delete Ray"), this);
+    //cell_subAction->setShortcut(Qt::CTRL | Qt::Key_Minus);
+    connect(cell_deleteRayAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
 
-    cell_divAction = new QAction(tr("&+ Fold Ray"), this);
-    cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
-    connect(cell_divAction, &QAction::triggered, this, &SpreadSheetView::actionDivide);
+    cell_negFoldRayAction = new QAction(tr("&- Fold Ray"), this);
+    //cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
+    connect(cell_negFoldRayAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+
+    cell_plusFoldRayAction = new QAction(tr("&+ Fold Ray"), this);
+    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    connect(cell_plusFoldRayAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+
+    cell_negFoldRayGreaterAction = new QAction(tr("&- Fold Ray >"), this);
+    //cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
+    connect(cell_negFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+
+    cell_plusFoldRayGreaterAction = new QAction(tr("&+ Fold Ray >"), this);
+    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    connect(cell_plusFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+
+    cell_zapGndSpdAction = new QAction(tr("Zap Gnd Spd"), this);
+    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    connect(cell_zapGndSpdAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+
     /* TODO:
     cell_MinusFoldRayAction = new QAction(tr("&- Fold Ray"), this);
     //cell_MinusFoldRayAction->setShortcut(Qt::CTRL | Qt::Key_division);
@@ -358,12 +523,12 @@ void SpreadSheetView::createActions()
     //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
     connect(display_editHistAction, &QAction::triggered, this, &SpreadSheetView::actionDisplayEditHist);
      
-    fontAction = new QAction(tr("Font ..."), this);
-    fontAction->setShortcut(Qt::CTRL | Qt::Key_F);
-    connect(fontAction, &QAction::triggered, this, &SpreadSheetView::selectFont);
+    //fontAction = new QAction(tr("Font ..."), this);
+    //fontAction->setShortcut(Qt::CTRL | Qt::Key_F);
+    //connect(fontAction, &QAction::triggered, this, &SpreadSheetView::selectFont);
     
-    colorAction = new QAction(QPixmap(16, 16), tr("Background &Color..."), this);
-    connect(colorAction, &QAction::triggered, this, &SpreadSheetView::selectColor);
+    //colorAction = new QAction(QPixmap(16, 16), tr("Background &Color..."), this);
+    //connect(colorAction, &QAction::triggered, this, &SpreadSheetView::selectColor);
     
 
     clearAction = new QAction(tr("Delete"), this);
@@ -373,13 +538,13 @@ void SpreadSheetView::createActions()
     aboutSpreadSheet = new QAction(tr("About Spreadsheet"), this);
     connect(aboutSpreadSheet, &QAction::triggered, this, &SpreadSheetView::showAbout);
 
-    exitAction = new QAction(tr("E&xit"), this);
+    exitAction = new QAction(tr("Cell,Ray Labels"), this);
     connect(exitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
 
-    openAction = new QAction(tr("&Open"), this);
+    openAction = new QAction(tr("&Az,Rng Labels"), this);
     connect(openAction, &QAction::triggered, this, &SpreadSheetView::open);
 
-    printAction = new QAction(tr("&Print"), this);
+    printAction = new QAction(tr("&Logging Active"), this);
     connect(printAction, &QAction::triggered, this, &SpreadSheetView::print);
 
     firstSeparator = new QAction(this);
@@ -391,12 +556,7 @@ void SpreadSheetView::createActions()
 
 void SpreadSheetView::setupMenuBar()
 {
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(openAction);
-    fileMenu->addAction(printAction);
-    fileMenu->addAction(exitAction);
 
-    
     QMenu *displayMenu = menuBar()->addMenu(tr("&Display"));
     displayMenu->addAction(display_cellValuesAction);
     displayMenu->addAction(display_rayInfoAction);
@@ -405,27 +565,41 @@ void SpreadSheetView::setupMenuBar()
     
 
     QMenu *cellMenu = menuBar()->addMenu(tr("&Edit"));
-    cellMenu->addAction(cell_addAction);
-    cellMenu->addAction(cell_subAction);
-    cellMenu->addAction(cell_mulAction);
-    cellMenu->addAction(cell_divAction);
-    cellMenu->addAction(cell_sumAction);
-    cellMenu->addSeparator();
-    cellMenu->addAction(colorAction);
-    cellMenu->addAction(fontAction);
+    cellMenu->addAction(cell_deleteAction);
+    cellMenu->addAction(cell_negFoldAction);
+    cellMenu->addAction(cell_plusFoldAction);
+    cellMenu->addAction(cell_deleteRayAction);
+    cellMenu->addAction(cell_negFoldRayAction);
+    cellMenu->addAction(cell_plusFoldRayAction);
+    cellMenu->addAction(cell_negFoldRayGreaterAction);
+    cellMenu->addAction(cell_plusFoldRayGreaterAction);
+    cellMenu->addAction(cell_zapGndSpdAction);
+    //cellMenu->addSeparator();
+    //cellMenu->addAction(colorAction);
+    //cellMenu->addAction(fontAction);
     //cellMenu->addAction(clearEditsAction);
     //cellMenu->addAction(undoAction);
     //cellMenu->addAction(applyEditsAction);  // TODO: what does apply edits do?
     //cellMenu->addAction(refreshAction);
 
 
-    // QMenu *optionsMenu = menuBar()->addMenu(tr("&Options"));
-    // QMenu *replotMenu = menuBar()->addMenu(tr("&Replot"));
-
     menuBar()->addSeparator();
+
+    QMenu *OptionsMenu = menuBar()->addMenu(tr("&Options"));
+    OptionsMenu->addAction(openAction);
+    OptionsMenu->addAction(printAction);
+    OptionsMenu->addAction(exitAction);
+
+    QMenu *ReplotMenu = menuBar()->addMenu(tr("&Replot"));
+    //OptionsMenu->addAction(openAction);
+    //OptionsMenu->addAction(printAction);
+    //OptionsMenu->addAction(exitAction);
 
     QMenu *aboutMenu = menuBar()->addMenu(tr("&Help"));
     aboutMenu->addAction(aboutSpreadSheet);
+
+    QMenu *cancelMenu = menuBar()->addMenu(tr("&Cancel"));
+
 }
 
 void SpreadSheetView::updateStatus(QTableWidgetItem *item)
@@ -929,6 +1103,7 @@ bool SpreadSheetView::runInputDialog(const QString &title,
     return false;
 }
 
+/*
 void SpreadSheetView::actionSum()
 {
     int row_first = 0;
@@ -989,6 +1164,7 @@ void SpreadSheetView::actionDivide()
   }    
 
 }
+*/
 
 void SpreadSheetView::notImplementedMessage() {
       QMessageBox::information(this, "Not Implemented", "Not Implemented");
@@ -1029,21 +1205,6 @@ void SpreadSheetView::actionMath_helper(const QString &title, const QString &op)
     }
 }
 
-void SpreadSheetView::actionAdd()
-{
-    actionMath_helper(tr("Addition"), "+");
-}
-
-void SpreadSheetView::actionSubtract()
-{
-    actionMath_helper(tr("Subtraction"), "-");
-}
-
-void SpreadSheetView::actionMultiply()
-{
-    actionMath_helper(tr("Multiplication"), "*");
-}
-
 void SpreadSheetView::clear()
 {
     foreach (QTableWidgetItem *i, table->selectedItems())
@@ -1052,7 +1213,18 @@ void SpreadSheetView::clear()
 
 void SpreadSheetView::setupContextMenu()
 {
-    addAction(cell_addAction);
+    addAction(cell_deleteAction);
+    addAction(cell_negFoldAction);
+    addAction(cell_plusFoldAction);
+    addAction(cell_deleteRayAction);
+    addAction(cell_negFoldRayAction);
+    addAction(cell_plusFoldRayAction);
+    addAction(cell_negFoldRayGreaterAction);
+    addAction(cell_plusFoldRayGreaterAction);
+    addAction(cell_zapGndSpdAction);
+
+    /*
+    addAction(cell_deleteAction);
     addAction(cell_subAction);
     addAction(cell_mulAction);
     addAction(cell_divAction);
@@ -1062,7 +1234,10 @@ void SpreadSheetView::setupContextMenu()
     addAction(fontAction);
     addAction(secondSeparator);
     addAction(clearAction);
+    */
+
     setContextMenuPolicy(Qt::ActionsContextMenu);
+
 }
 
 
@@ -1108,15 +1283,70 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int useless, int c) {
 
 }
 
-// request filled by Controller in response to needFieldNames signal
-void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
+void SpreadSheetView::applyEdits() {
+  // get a new azimuth if needed
+  QString rayAz = rayLineEdit->text();
+  LOG(DEBUG) << "ray az entered " << rayAz.toStdString();
+  bool ok;
+  float currentRayAzimuth = rayAz.toFloat(&ok);
+
+  if (ok) {
+    // signal the controller to update the model
+    changeAzEl(currentRayAzimuth, _currentElevation);  
+  } else {
+    criticalMessage("ray azimuth must be between 0.0 and 360.0");
+  }
+}
+
+void SpreadSheetView::changeAzEl(float azimuth, float elevation) {
+  if ((azimuth < 0) || (azimuth > 360)) {
+    criticalMessage("ray azimuth must be between 0.0 and 360.0");
+    return;
+  }
+
+  // signal the controller to update the model
+  try {
+    signalRayAzimuthChange(azimuth, elevation);
+
+    // model updated; request new data for display
+    const QList<QListWidgetItem *> selectedFields = fieldListWidget->selectedItems();
+    vector<string> selectedNames;
+    QList<QListWidgetItem *>::const_iterator item;
+    for (item = selectedFields.constBegin(); item != selectedFields.constEnd(); ++item) {
+      QListWidgetItem *i = *item;
+      QString theText = i->text();
+      selectedNames.push_back(theText.toStdString());
+    }
+    fieldNamesSelected(selectedNames);
+    newAzimuth(azimuth);
+    newElevation(elevation);
+  } catch (const string &ex) {
+    criticalMessage(ex);
+  }
+}
+
+void SpreadSheetView::newElevation(float elevation) {
+    _currentElevation = elevation;
+}
+
+void SpreadSheetView::newAzimuth(float azimuth) {
+    QString n;
+    n.setNum(azimuth);
+    rayLineEdit->clear();
+    rayLineEdit->insert(n);
+
+    setTheWindowTitle(azimuth);
+}
+
+// display the fields selected and their data
+void SpreadSheetView::fieldNamesSelected(vector<string> fieldNames) {
 
   int useless = 0;
 
   // fill everything that needs the fieldNames ...
 
     table->setColumnCount(fieldNames.size());
-    LOG(DEBUG) << "In SpreadSheetView::fieldNamesProvided, there are " << fieldNames.size() << " field namess";
+    LOG(DEBUG) << "there are " << fieldNames.size() << " field namess";
 
     int c = 0;
     vector<string>::iterator it; 
@@ -1132,8 +1362,8 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
     // test: adding some missing code
     // TODO: magic number 20 = number of rows
     //table->setItemPrototype(table->item(20 - 1, c - 1));
-    table->setItemPrototype(table->item(20 - 1, c - 1));
-    table->setItemDelegate(new SpreadSheetDelegate());
+    //table->setItemPrototype(table->item(20 - 1, c - 1));
+    //table->setItemDelegate(new SpreadSheetDelegate());
     // end test: adding some missing code
 
     // This section of code makes every data field in volume a variable
@@ -1169,9 +1399,9 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
     
     //if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG)) { // causes a segmentation fault
     // print the context ...                                                                                                   
-      LOG(DEBUG) << "current QJSEngine context ... after fieldNamesProvided";
+     // LOG(DEBUG) << "current QJSEngine context ... after fieldNamesProvided";
 
-      printQJSEngineContext();
+     // printQJSEngineContext();
       /*
     std::map<QString, QString> currentVariableContext;
     QJSValue theGlobalObject = engine.globalObject();
@@ -1193,6 +1423,29 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
     
 
 }
+
+// request filled by Controller in response to needFieldNames signal
+// fill the list of fields to choose
+void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
+
+//  fieldListWidget->addItems(new QStringList(fieldNames));
+/*
+  // fill everything that needs the fieldNames ...
+
+    table->setColumnCount(fieldNames.size());
+    LOG(DEBUG) << " there are " << fieldNames.size() << " field namess";
+*/
+    int c = 0;
+    vector<string>::iterator it; 
+    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
+      QString the_name(QString::fromStdString(*it));
+      LOG(DEBUG) << *it;
+      fieldListWidget->addItem(the_name); // , new QTableWidgetItem(the_name));
+    }
+
+    LOG(DEBUG) << "exit";
+}
+
 
 void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
 

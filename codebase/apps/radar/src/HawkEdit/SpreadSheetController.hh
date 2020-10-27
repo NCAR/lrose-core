@@ -27,6 +27,8 @@ public:
   SpreadSheetController(SpreadSheetView *view);
   SpreadSheetController(SpreadSheetView *view, SpreadSheetModel *model);
 
+
+
   vector<string> getFieldNames();
   vector<float> *getData(string fieldName);
   void setData(string fieldName, vector<float> *data);
@@ -43,7 +45,8 @@ public slots:
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
   void getVolumeChanges();
-
+  void switchRay(float azimuth, float elevation);
+  
 private:
 
   SpreadSheetModel *_currentModel;

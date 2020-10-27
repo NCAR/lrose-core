@@ -19,11 +19,12 @@ public:
 
   // return lists of data
   vector<float> *getData(string fieldName);
-  vector<float> getSampleData();
   vector<string> getFields();
   //  RadxVol getVolume(); 
 
   void setData(string fieldName, vector<float> *data);
+  void findClosestRay(float azimuth, float elevation);
+
   RadxVol *_vol;
   RadxRay *_closestRay;
 

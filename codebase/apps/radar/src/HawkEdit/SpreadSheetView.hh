@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <QAction>
 #include <QLabel>
+#include <QListWidget>
 #include <QTextEdit>
 #include <QToolBar>
 #include <QTableWidgetItem>
@@ -61,12 +62,6 @@ public slots:
     void print();
     QString open();
 
-    void actionSum();
-    void actionSubtract();
-    void actionAdd();
-    void actionMultiply();
-    void actionDivide();
-
   void actionDisplayCellValues();
   void actionDisplayRayInfo();
   void actionDisplayMetadata();
@@ -77,10 +72,16 @@ public slots:
 
   //  void setupSoloFunctions(SoloFunctions *soloFunctions);
 
+  void fieldNamesSelected(vector<string> fieldNames);
   void fieldNamesProvided(vector<string> fieldNames);
   void fieldDataSent(vector<float> *data, int useless, int c);
 
   void applyChanges();
+  void applyEdits();
+  void changeAzEl(float azimuth, float elevation);
+  void newElevation(float elevation);
+  void newAzimuth(float azimuth);
+  void setTheWindowTitle(float rayAzimuth);
 
   void printQJSEngineContext();
 
@@ -89,6 +90,7 @@ signals:
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
   void applyVolumeEdits();
+  void signalRayAzimuthChange(float rayAzimuth, float elevation);
 
 protected:
     void setupContextMenu();
@@ -115,16 +117,23 @@ private:
 
   //SpreadSheetController *_controller;
     vector<std::string> _fieldNames;
+    //float _currentAzimuth;
+    float _currentElevation;
 
     QToolBar *toolBar;
     QAction *colorAction;
     QAction *fontAction;
     QAction *firstSeparator;
-    QAction *cell_sumAction;
-    QAction *cell_addAction;
-    QAction *cell_subAction;
-    QAction *cell_mulAction;
-    QAction *cell_divAction;
+    QAction *cell_deleteAction;
+    QAction *cell_negFoldAction;
+    QAction *cell_plusFoldAction;
+    QAction *cell_deleteRayAction;
+    QAction *cell_negFoldRayAction;
+    QAction *cell_plusFoldRayAction;
+    QAction *cell_negFoldRayGreaterAction;
+    QAction *cell_plusFoldRayGreaterAction;
+    QAction *cell_zapGndSpdAction;
+
     QAction *secondSeparator;
     QAction *clearAction;
     QAction *aboutSpreadSheet;
@@ -136,6 +145,9 @@ private:
   QAction *display_metadataAction;
   QAction *display_editHistAction;
 
+  QPushButton *applyEditsButton;
+  QLineEdit *rayLineEdit;
+
     QAction *printAction;
 
     QLabel *cellLabel;
@@ -143,6 +155,8 @@ private:
     TextEdit *formulaInput;
     //QTextEdit *formulaInput;
   // SpreadSheetDelegate *formulaInput;
+
+    QListWidget *fieldListWidget;
 
   QJSEngine engine;
 

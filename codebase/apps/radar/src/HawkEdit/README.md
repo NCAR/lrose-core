@@ -2,6 +2,9 @@ build from instructions for manual build
 
 export PKG_CONFIG_PATH="/usr/local/opt/qt/lib/pkgconfig"
 
+$ ~/lrose/bin/HawkEdit -f ~/test_area/hawkeye/data/20170408/cfrad.20170408_001452.962_to_20170408_002320.954_KARX_Surveillance_SUR.nc
+
+
 ---
 cp  HawkEyeEdit_Elle.app/Contents/MacOS/HawkEyeEdit_Elle  ~/lrose/bin
 

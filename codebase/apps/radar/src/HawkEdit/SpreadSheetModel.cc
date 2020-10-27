@@ -157,18 +157,45 @@ void SpreadSheetModel::setData(string fieldName, vector<float> *data)
     outfile << "_vol = " << _vol << endl;
 }
 
+// find the closest ray in the volume and set the internal variable _closestRay
+void SpreadSheetModel::findClosestRay(float azimuth, float elevation) {
+  LOG(DEBUG) << "enter azimuth = " << azimuth;
 
-// return a list of data values
-vector<float> SpreadSheetModel::getSampleData()
-{
+  vector<RadxRay *> rays = _vol->getRays();
+  // find that ray
+  bool foundIt = false;
+  double minDiff = 1.0e99;
+  double delta = 0.01;
+  RadxRay *closestRayToEdit = NULL;
+  vector<RadxRay *>::iterator r;
+  r=rays.begin();
+  int idx = 0;
+  while(r<rays.end()) {
+    RadxRay *rayr = *r;
+    double diff = fabs(azimuth - rayr->getAzimuthDeg());
+    if (diff > 180.0) {
+      diff = fabs(diff - 360.0);
+    }
+    if (diff < minDiff) {
+      if (abs(elevation - rayr->getElevationDeg()) <= delta) {
+        foundIt = true;
+        closestRayToEdit = *r;
+        minDiff = diff;
+      }
+    }
+    r += 1;
+    idx += 1;
+  }  
+  if (!foundIt || closestRayToEdit == NULL) {
+    throw "could not find closest ray";
+    // errorMessage("ExamineEdit Error", "couldn't find closest ray");
+  }
 
-  vector<float> data;
-  data.push_back(1.0);
-  data.push_back(3.0);
-  data.push_back(5.0);
-  data.push_back(10.0);
-  return data;
+  LOG(DEBUG) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
+  closestRayToEdit->print(cout); 
+  _closestRay = closestRayToEdit;
 }
+
 
 
 

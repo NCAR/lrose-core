@@ -65,6 +65,8 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
   connect(_currentView, SIGNAL(applyVolumeEdits()), 
 	  this, SLOT(getVolumeChanges()));
 
+  connect(_currentView, SIGNAL(signalRayAzimuthChange(float, float)), this, SLOT(switchRay(float, float)));
+
     // connect controller slots to model signals 
 
     // connect model signals to controller slots 
@@ -83,7 +85,14 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
   */
 }
 
-
+void SpreadSheetController::switchRay(float azimuth, float elevation) {
+  LOG(DEBUG) << "enter";
+  _currentModel->findClosestRay(azimuth, elevation);
+  LOG(DEBUG) << "switching to ray " << azimuth;
+  _currentView->newElevation(elevation);
+  _currentView->newAzimuth(azimuth);
+  LOG(DEBUG) << "exit";
+}
 
 vector<string>  SpreadSheetController::getFieldNames()
 {

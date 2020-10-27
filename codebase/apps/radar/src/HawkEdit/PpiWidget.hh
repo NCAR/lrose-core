@@ -26,6 +26,8 @@
 
 #include "Radx/RadxVol.hh"
 #include "PolarWidget.hh"
+#include "SpreadSheetController.hh"
+#include "SpreadSheetView.hh"
 
 // Widget representing a PPI scan.  Beams are added to the scan as they
 // are received.
@@ -162,6 +164,9 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   void ShowContextMenu(const QPoint &pos, RadxVol *vol);
   void ExamineEdit(double azimuth, double elevation, size_t fieldIndex); // const RadxRay *closestRay);
   void EditRunScript();
+
+  SpreadSheetController *spreadSheetControl;
+  SpreadSheetView *sheetView;
 
   //////////////
   // Qt slots //

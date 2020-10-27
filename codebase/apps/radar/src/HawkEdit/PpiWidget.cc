@@ -80,6 +80,10 @@ PpiWidget::PpiWidget(QWidget* parent,
   _nRays = 0.0;
 
   startTimer(50);  //used for boundary editor to detect shift key down (changes cursor)
+
+  spreadSheetControl = NULL;
+  sheetView = NULL;
+
 }
 
 /*************************************************************************
@@ -99,6 +103,8 @@ PpiWidget::~PpiWidget()
   _ppiBeams.clear();
   LOG(DEBUG) << "exit";
   //  delete _ppiBeamController;
+
+  // TODO: free SpreadSheetControl & sheetView
 }
 
 /*************************************************************************
@@ -1846,31 +1852,35 @@ void PpiWidget::ExamineEdit(double azimuth, double elevation, size_t fieldIndex)
 
 
   // create the view
-  SpreadSheetView *sheetView;
-  sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
+  //SpreadSheetView *sheetView;
+  if (sheetView == NULL) {
+    sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
+    sheetView->newElevation(elevation);
+    // create the model
 
-  // create the model
+    // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
+    SpreadSheetModel *model = new SpreadSheetModel(closestRayToEdit, _vol);
+    //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
+    
+    // create the controller
+    spreadSheetControl = new SpreadSheetController(sheetView, model);
 
-  // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
-  SpreadSheetModel *model = new SpreadSheetModel(closestRayToEdit, _vol);
-  //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
-  
-  // create the controller
-  SpreadSheetController *sheetControl = new SpreadSheetController(sheetView, model);
+    // finish the other connections ..
+    //sheetView->addController(sheetController);
+    // model->setController(sheetController);
 
-  // finish the other connections ..
-  //sheetView->addController(sheetController);
-  // model->setController(sheetController);
-
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display
-                                                                         
-  connect(sheetControl, SIGNAL(volumeChanged()),
-  	  &_manager, SLOT(setVolume()));
-  
-  sheetView->init();
-  sheetView->show();
-  // sheetView->layout()->setSizeConstraint(QLayout::SetFixedSize);
+    // connect some signals and slots in order to retrieve information
+    // and send changes back to display
+                                                                           
+    connect(spreadSheetControl, SIGNAL(volumeChanged()),
+    	  &_manager, SLOT(setVolume()));
+    
+    sheetView->init();
+    sheetView->show();
+  } else {
+    //spreadSheetControl->switchRay(closestRayToEdit->getAzimuthDeg(), elevation);
+    sheetView->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);
+  }
   
 }
 
