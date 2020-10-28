@@ -206,7 +206,7 @@ void AlternatingVelocity::computeVelAlt(int nGates,
   for (int igate = 0; igate < _nGates; igate++) {
     MomentsFields &mfields = _mfields[igate];
     CompFields &cfield = _compFields[igate];
-    mfields.vel_alt = mfields.vel;
+    // mfields.vel_alt = mfields.vel;
     mfields.vel = cfield.velAlt;
     mfields.vel_alt_fold_interval = cfield.foldInterval;
     mfields.vel_alt_fold_confidence = cfield.foldConfidence;
