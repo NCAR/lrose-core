@@ -355,23 +355,23 @@ void Moments::computeByFft(const Complex_t *IQ,
 
   // apply window
 
-  Complex_t windowedIq[_nSamples];
+  Complex_t *windowedIq = new Complex_t[_nSamples];
   if (windowType == WINDOW_HANNING) {
     applyHanningWindow(IQ, windowedIq);
   } else if (windowType == WINDOW_BLACKMAN) {
     applyBlackmanWindow(IQ, windowedIq);
   } else {
-    memcpy(windowedIq, IQ, sizeof(windowedIq));
+    memcpy(windowedIq, IQ, _nSamples * sizeof(Complex_t));
   }
 
   // compute fft
   
-  Complex_t spectrum[_nSamples];
+  Complex_t *spectrum = new Complex_t[_nSamples];
   _fft->fwd(windowedIq, spectrum);
-
+  
   // compute vel and width
 
-  double specMag[_nSamples];
+  double *specMag = new double[_nSamples];
   _loadMag(spectrum, specMag);
   double vv, ww, measuredNoise;
   _velWidthFromFft(specMag, prtSecs, vv, ww, measuredNoise);
@@ -390,6 +390,12 @@ void Moments::computeByFft(const Complex_t *IQ,
     cerr << "    width: " << width << endl;
     cerr << "    noise: " << noise << endl;
   }
+
+  // free up
+  
+  delete[] windowedIq;
+  delete[] spectrum;
+  delete[] specMag;
 
 }
 
@@ -696,7 +702,7 @@ void Moments::_velWidthFromFft(const double *magnitude,
 
   // center power array on the max value
 
-  double powerCentered[_nSamples];
+  double *powerCentered = new double[_nSamples];
   int kOffset = kCent - kMax;
   for (int ii = 0; ii < _nSamples; ii++) {
     int jj = (ii + kOffset) % _nSamples;
@@ -805,6 +811,10 @@ void Moments::_velWidthFromFft(const double *magnitude,
     cerr << "    meanK: " << meanK << endl;
     cerr << "    sdevK: " << sdevK << endl;
   }
+
+  // free up
+
+  delete[] powerCentered;
 
 }
 
