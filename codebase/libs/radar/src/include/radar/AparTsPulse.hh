@@ -257,13 +257,6 @@ public:
   inline si32 getNChannels() const { return _hdr.n_channels; }
   inline si32 getIqEncoding() const { return _hdr.iq_encoding; }
   inline si32 getHvFlag() const { return _hdr.hv_flag; }
-  inline si32 getChanIsCopol(int chan = 0) const {
-    if (chan < 4) {
-      return _hdr.chan_is_copol[chan];
-    } else {
-      return _hdr.chan_is_copol[0];
-    }
-  }
   inline si32 getPhaseCohered() const { return _hdr.phase_cohered; }
   inline si32 getStatus() const { return _hdr.status; }
   inline si32 getNData() const { return _hdr.n_data; }
@@ -291,11 +284,11 @@ public:
     return (_hdr.event_flags & APAR_TS_END_OF_VOLUME);
   }
 
-  inline bool getChanIsCopol(int ii) const {
-    if (ii >= 0 && ii < APAR_TS_MAX_CHAN) {
-      return _hdr.chan_is_copol[ii];
+  inline bool getChanIsCopol(int chan = 0) const {
+    if (chan >= 0 && chan < APAR_TS_MAX_CHAN) {
+      return _hdr.chan_is_copol[chan];
     } else {
-      return -1;
+      return _hdr.chan_is_copol[0];
     }
   }
 

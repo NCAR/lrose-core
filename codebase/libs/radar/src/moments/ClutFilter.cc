@@ -879,7 +879,7 @@ double ClutFilter::computeSpectralNoise(const double *powerSpec,
 {
 
   // divide the spectrum into sections, of at least 8 points
-  // must have minimum of 8 points
+  // must have minimum of 8 sections
 
   int nSections = nSamples / 8;
   if (nSections < 8) {
