@@ -66,10 +66,7 @@ public:
 
   inline void setApp(Iq2Dsr *val) { _app = val; }
   inline Iq2Dsr *getApp() const { return _app; }
-
-  inline void setBeam(Beam *val) { _beam = val; }
-  inline Beam *getBeam() const { return _beam; }
-
+  
   // return code
   
   inline void setReturnCode(int val) { _returnCode = val; }
@@ -135,7 +132,6 @@ protected:
   // application context
 
   Iq2Dsr *_app;
-  Beam *_beam;
 
   // return code
   
@@ -199,9 +195,19 @@ public:
   int regrStagM, regrStagN;
   RegressionFilter regrStag;
 
+  // beam for computations
+  
+  inline void setBeam(Beam *val) { _beam = val; }
+  inline Beam *getBeam() const { return _beam; }
+
+  inline void setBeamReadyForWrite(bool val) { _beamReadyForWrite = val; }
+  inline bool getBeamReadyForWrite() const { return _beamReadyForWrite; }
+
 private:
 
   static pthread_mutex_t _fftMutex;
+  Beam *_beam;
+  bool _beamReadyForWrite;
 
 };
 
