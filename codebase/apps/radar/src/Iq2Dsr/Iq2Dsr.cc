@@ -257,65 +257,12 @@ Iq2Dsr::~Iq2Dsr()
     cerr << "Entering Iq2Dsr destructor" << endl;
   }
 
-}
+  // unregister process
 
-void Iq2Dsr::_cleanUp()
+  PMU_auto_unregister();
 
-{
-
-  if (_params.debug) {
-    cerr << "Entering _cleanUp" << endl;
-  }
-
-  // umsleep(2000);
-  _writeRemainingBeamsOnExit();
-
-  // set write thread to exit
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    pthread_mutex_lock(&_debugPrintMutex);
-    cerr << "==>> waiting for write thread to exit" << endl;
-    pthread_mutex_unlock(&_debugPrintMutex);
-  }
-
-  // wait for write thread to exit
+  // free memory
   
-  if (_writeThread) {
-    _writeThread->signalWorkToStart();
-  }
-
-  for (size_t ii = 0; ii < _threadPool.size(); ii++) {
-    _threadPool[ii]->setExitFlag(true);
-    _threadPool[ii]->signalWorkToStart();
-  }
-
-  // wait for write thread to exit
-
-  if (_writeThread) {
-    _writeThread->waitForWorkToComplete();
-  }
-
-  if (_writeThread) {
-    // write thread will process all beams waiting in the
-    // compute queue, and then exit
-    _writeThread->setExitFlag(true);
-  }
-  
-  // end time
-
-  struct timeval tval;
-  gettimeofday(&tval, NULL);
-  _endTimeSecs = tval.tv_sec + tval.tv_usec / 1.0e6;
-
-  if (_params.debug) {
-    double duration = _endTimeSecs - _startTimeSecs;
-    double gatesPerSec = _nGatesComputed / duration;
-    cerr << "Run stats:" << endl;
-    cerr << "  Duration: " << duration << endl;
-    cerr << "  N Gates: " << _nGatesComputed << endl;
-    cerr << "  Gates per second: " << gatesPerSec << endl;
-  }
-
   if (_beamReader) {
     delete _beamReader;
   }
@@ -333,16 +280,56 @@ void Iq2Dsr::_cleanUp()
     delete _calib;
   }
   
-  // for (size_t ii = 0; ii < _beamRecyclePool.size(); ii++) {
-  //   delete _beamRecyclePool[ii];
-  // }
+  for (size_t ii = 0; ii < _beamRecyclePool.size(); ii++) {
+    delete _beamRecyclePool[ii];
+  }
 
-  // pthread_mutex_destroy(&_beamRecyclePoolMutex);
-  // pthread_mutex_destroy(&_debugPrintMutex);
+  pthread_mutex_destroy(&_beamRecyclePoolMutex);
+  pthread_mutex_destroy(&_debugPrintMutex);
 
-  // unregister process
+  if (_params.debug) {
+    cerr << "Exiting Iq2Dsr destructor" << endl;
+  }
 
-  PMU_auto_unregister();
+}
+
+void Iq2Dsr::_cleanUp()
+
+{
+
+  if (_params.debug) {
+    cerr << "Entering _cleanUp" << endl;
+  }
+
+  _writeRemainingBeamsOnExit();
+
+  // set threads to exit
+
+  if (_writeThread) {
+    // write thread will process all beams waiting in the
+    // compute queue, and then exit
+    _writeThread->setExitFlag(true);
+  }
+  
+  for (size_t ii = 0; ii < _threadPool.size(); ii++) {
+    _threadPool[ii]->setExitFlag(true);
+    _threadPool[ii]->signalWorkToStart();
+  }
+
+  // end time
+
+  struct timeval tval;
+  gettimeofday(&tval, NULL);
+  _endTimeSecs = tval.tv_sec + tval.tv_usec / 1.0e6;
+
+  if (_params.debug) {
+    double duration = _endTimeSecs - _startTimeSecs;
+    double gatesPerSec = _nGatesComputed / duration;
+    cerr << "Run stats:" << endl;
+    cerr << "  Duration: " << duration << endl;
+    cerr << "  N Gates: " << _nGatesComputed << endl;
+    cerr << "  Gates per second: " << gatesPerSec << endl;
+  }
 
   if (_params.debug) {
     cerr << "Exiting _cleanUp" << endl;

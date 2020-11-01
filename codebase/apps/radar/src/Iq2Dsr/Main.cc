@@ -92,7 +92,7 @@ static void tidy_and_exit (int sig)
 
 {
 
-  // delete _prog;
+  delete _prog;
   exit(sig);
 
 }
