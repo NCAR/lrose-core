@@ -62,6 +62,7 @@ IwrfMomReader::IwrfMomReader()
   _endOfFile = false;
   _latestRay = NULL;
   _savedRay = NULL;
+  _useSavedRay = false;
   _rayReady = false;
   _debug = IWRF_DEBUG_OFF;
 }
@@ -141,7 +142,16 @@ RadxRay *IwrfMomReader::readNextRay()
     while (!_rayReady) {
       
       if (_getNextMsg()) {
-        return NULL;
+        if (_useSavedRay) {
+          // no rays immediately available, make use of saved
+          // ray if it is available
+          userRay = _savedRay;
+          _savedRay = NULL;
+          _latestRay = NULL;
+          return userRay;
+        } else {
+          return NULL;
+        }
       }
       
       // try disassembling as a DsRadarMsg
@@ -983,12 +993,30 @@ int IwrfMomReaderFmq::_getNextMsg()
       return -1;
     }
   } else {
-    if (_fmq.readMsgBlocking()) {
-      cerr << "ERROR - IwrfMomReaderFmq::_getNextMsg" << endl;
-      cerr << _fmq.getErrStr() << endl;
-      _fmq.closeMsgQueue();
-      _fmqIsOpen = false;
-      return -1;
+    if (_savedRay == NULL) {
+      // read blocking, need to wait for data
+      if (_fmq.readMsgBlocking()) {
+        cerr << "ERROR - IwrfMomReaderFmq::_getNextMsg" << endl;
+        cerr << _fmq.getErrStr() << endl;
+        _fmq.closeMsgQueue();
+        _fmqIsOpen = false;
+        return -1;
+      }
+    } else {
+      // read non-blocking with 0.5 sec timeout
+      bool gotOne = false;
+      if (_fmq.readMsg(&gotOne, -1, 500)) {
+        cerr << "ERROR - IwrfMomReaderFmq::_getNextMsg" << endl;
+        cerr << _fmq.getErrStr() << endl;
+        _fmq.closeMsgQueue();
+        _fmqIsOpen = false;
+        return -1;
+      }
+      if (!gotOne) {
+        // no immediate data available, so used saved ray
+        _useSavedRay = true;
+        return -1;
+      }
     }
   }
 
