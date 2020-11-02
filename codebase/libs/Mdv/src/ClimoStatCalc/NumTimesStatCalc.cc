@@ -146,8 +146,7 @@ MdvxField *NumTimesStatCalc::_createField(const MdvxField &data_field,
   
   MdvxField *num_times_field = new MdvxField(field_hdr,
 					     data_field.getVlevelHeader(),
-					     (void *)0,
-					     true);
+					     NULL, true);
   if (num_times_field == 0)
   {
     cerr << "ERROR: " << method_name << endl;

@@ -103,7 +103,8 @@ public:
   // If the data pointer is not NULL, space is allocated for it and the
   // data is copied in.
   //
-  // If the data pointer is NULL, space is allocated for data based on
+  // If the data pointer is NULL, and alloc_mem is true,
+  // memory in the volBuf member is allocated for data based on
   // the volume_size in the field header. In this case,
   // if init_with_missing is true, the array will be filled with
   // the missing_data_value in the header.
@@ -121,7 +122,8 @@ public:
 	    const Mdvx::vlevel_header_t &v_hdr,
 	    const void *vol_data = NULL,
 	    bool init_with_missing = false,
-	    bool compute_min_and_max = true);
+	    bool compute_min_and_max = true,
+	    bool alloc_mem = true);
   
   // Constructor for a handle for a single plane, given a handle which
   // has the entire data volume.
@@ -760,7 +762,6 @@ public:
   // Sets all of the data values to missing.
 
   void clearVolData();
-  
 
   // compute the the min and max in a data volume
   // Note: this is automatically done in convert(), so if you call convert()
@@ -868,11 +869,22 @@ protected:
   void _float32_to_int16(double output_scale,
 			 double output_bias);
 
+  // is volbuf valid in size?
+
+  inline bool _volbufSizeValid() const {
+    if ((ssize_t) _volBuf.getLen() < _fhdr.volume_size) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   // compression
 
   int _compressGzipVol() const;
   int _decompressGzipVol() const;
   int _decompress64() const;
+
   // constraining the domain in the horizontal and vertical dimensions
 
   int _constrain_radar_horiz(const Mdvx &mdvx);

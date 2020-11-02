@@ -147,8 +147,7 @@ MdvxField *PercentObsStatCalc::_createField(const MdvxField &data_field,
   
   MdvxField *percent_field = new MdvxField(field_hdr,
 					   data_field.getVlevelHeader(),
-					   (void *)0,
-					   true);
+					   NULL, true);
   if (percent_field == 0)
   {
     cerr << "ERROR: " << method_name << endl;

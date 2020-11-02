@@ -114,10 +114,11 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
 		     const Mdvx::vlevel_header_t &v_hdr,
 		     const void *vol_data /* = NULL*/,
 		     bool init_with_missing /* = false*/,
-		     bool compute_min_and_max /* = true*/ )
+		     bool compute_min_and_max /* = true*/,
+                     bool alloc_mem /* = true*/ )
   
 {
-  
+
   _fhdr = f_hdr;
   _vhdr = v_hdr;
   _fhdrFile = NULL;
@@ -178,8 +179,11 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
 
   } else {
 
-    _volBuf.prepare(_fhdr.volume_size);
-    if (init_with_missing) {
+    if (alloc_mem) {
+      _volBuf.prepare(_fhdr.volume_size);
+    }
+
+    if (alloc_mem && init_with_missing) {
       switch (_fhdr.encoding_type) {
         case Mdvx::ENCODING_INT8: {
           ui08 missing = (ui08) _fhdr.missing_data_value;
@@ -234,24 +238,28 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
     } // if (init_with_missing)
 
   } // if (vol_data != NULL)
-  
-  // uncompress if needed
-  // compression is deferred until write
 
-  int compression_type = _fhdr.compression_type;
-  if (compression_type != Mdvx::COMPRESSION_NONE) {
-    decompress();
-    requestCompression(compression_type);
-  }
-  
-  // Check for NaN, infinity values.
-  
-  _check_finite(getVol());
+  if (_volbufSizeValid()) {
+    
+    // uncompress if needed
+    // compression is deferred until write
+    
+    int compression_type = _fhdr.compression_type;
+    if (compression_type != Mdvx::COMPRESSION_NONE) {
+      decompress();
+      requestCompression(compression_type);
+    }
+    
+    // Check for NaN, infinity values.
+    
+    _check_finite(getVol());
+    
+    // compute min and max
+    
+    if (compute_min_and_max) {
+      computeMinAndMax(true);
+    }
 
-  // compute min and max
-
-  if (compute_min_and_max) {
-    computeMinAndMax(true);
   }
 
 }
@@ -577,10 +585,15 @@ void MdvxField::setVolData(const void *vol_data,
 
 void MdvxField::clearVolData()
 {
-  if (_fhdr.compression_type != Mdvx::COMPRESSION_NONE)
-  {
+
+  if (_fhdr.compression_type != Mdvx::COMPRESSION_NONE) {
     cerr << "WARNING - MdvxField::clearVolData" << endl;
     cerr << "   Data is compressed, cannot clear" << endl;
+    return;
+  }
+
+  if (!_volbufSizeValid()) {
+    // no op
     return;
   }
   
@@ -819,6 +832,12 @@ int MdvxField::convertType
     return -1;
   }
   
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::convertType()\n";
+    _errStr += "  volBuf not allocated\n";
+    return -1;
+  }
+  
   // for floats ensure the scale and bias are neutral
 
   if (_fhdr.encoding_type == Mdvx::ENCODING_FLOAT32) {
@@ -1041,6 +1060,12 @@ int MdvxField::transform2Log()
     return 0;
   }
 
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::transform2Log()\n";
+    _errStr += "  volBuf not allocated\n";
+    return -1;
+  }
+  
   if (_fhdr.transform_type != Mdvx::DATA_TRANSFORM_NONE) {
     _errStr += "ERROR - MdvxField::transform2Log\n";
     _errStr += "  Data must be linear before calling this routine.\n";
@@ -1143,6 +1168,12 @@ int MdvxField::transform2Linear()
     return 0;
   }
 
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::transform2Linear()\n";
+    _errStr += "  volBuf not allocated\n";
+    return -1;
+  }
+  
   if (_fhdr.transform_type != Mdvx::DATA_TRANSFORM_LOG) {
     _errStr += "ERROR - MdvxField::transform2Linear\n";
     _errStr += "  Data must be log before calling this routine.\n";
@@ -1215,6 +1246,11 @@ int MdvxField::negate(bool convert_to_linear /* = false*/ )
 
   clearErrStr();
 
+  if (!_volbufSizeValid()) {
+    // no-op
+    return 0;
+  }
+  
   if (_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
     // no-op
     return 0;
@@ -1289,6 +1325,11 @@ int MdvxField::convert2Composite(double lower_vlevel,
 
 {
   
+  if (!_volbufSizeValid()) {
+    // no-op
+    return 0;
+  }
+  
   if (_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
     // no-op
     return 0;
@@ -1320,6 +1361,11 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
 
   clearErrStr();
 
+  if (!_volbufSizeValid()) {
+    // no-op
+    return 0;
+  }
+  
   if (_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
     // no-op
     return 0;
@@ -1513,6 +1559,12 @@ void MdvxField::convertVlevelType(Mdvx::vlevel_type_t req_vlevel_type)
   
   bool failure = false;
 
+  if (!_volbufSizeValid()) {
+    cerr << "ERROR: MdvxField::convertVlevelType" << endl;
+    cerr << "  volBuf not allocted" << endl;
+    failure = true;
+  }
+
   if (req_vlevel_type != Mdvx::VERT_TYPE_Z &&
       req_vlevel_type != Mdvx::VERT_TYPE_PRESSURE &&
       req_vlevel_type != Mdvx::VERT_FLIGHT_LEVEL) {
@@ -1589,6 +1641,13 @@ int MdvxField::convert2Vsection(const Mdvx::master_header_t &mhdr,
 {
 
   clearErrStr();
+
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::convert2Vsection\n";
+    _errStr += "  volBuf not allocted\n";
+    return -1;
+  }
+
   if (waypts.size() < 1) {
     _errStr += "ERROR - MdvxField::convert2Vsection\n";
     _errStr += "  0 waypoints specified\n";
@@ -1739,6 +1798,12 @@ int MdvxField::convert2SingleRhi(const Mdvx::master_header_t &mhdr,
   
   clearErrStr();
 
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::convert2SingleRhi\n";
+    _errStr += "  volBuf not allocated";
+    return -1;
+  }
+
   // convert to float and uncompress as required
   
   Mdvx::encoding_type_t encoding_type =
@@ -1801,6 +1866,12 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   
   clearErrStr();
   
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::convertRhi2Vsect\n";
+    _errStr += "  volBuf not allocated";
+    return -1;
+  }
+
   // convert to float and uncompress as required
   
   Mdvx::encoding_type_t encoding_type =
@@ -2182,6 +2253,12 @@ void MdvxField::_vsectionElev2Ht(const Mdvx::master_header_t &mhdr,
 
 {
 
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::vsectionElev2Ht\n";
+    _errStr += "  volBuf not allocated";
+    return;
+  }
+  
   const vector<Mdvx::vsect_samplept_t> &samplePts = lut.getSamplePts();
   int64_t nSamplePoints = samplePts.size();
   
@@ -2970,6 +3047,12 @@ int MdvxField::remap(MdvxRemapLut &lut,
   
 {
 
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::remap\n";
+    _errStr += "  volBuf not allocated";
+    return -1;
+  }
+  
   // uncompress as required
   
   int compression_type = _fhdr.compression_type;
@@ -3111,6 +3194,12 @@ int MdvxField::decimate(int64_t max_nxy)
   
 {
 
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::decimate\n";
+    _errStr += "  volBuf not allocated";
+    return -1;
+  }
+  
   // for polar data, use special method
 
   if (_fhdr.proj_type == Mdvx::PROJ_POLAR_RADAR) {
@@ -3349,6 +3438,7 @@ void MdvxField::buffer_from_BE(void *buf, int64_t buflen,
 			       int encoding_type)
      
 {
+
   switch (encoding_type) {
     case Mdvx::ENCODING_INT8:
       // no need to swap byte data
@@ -3372,6 +3462,7 @@ void MdvxField::buffer_to_BE(void *buf, int64_t buflen,
 			     int encoding_type)
   
 {
+
   switch (encoding_type) {
     case Mdvx::ENCODING_INT8:
       // no need to swap byte data
@@ -3498,6 +3589,12 @@ void MdvxField::printVoldata(ostream &out,
      
 {
 
+  if (!_volbufSizeValid()) {
+    out << "ERROR - MdvxField::printVoldata" << endl;
+    out << "  volBuf not allocated" << endl;
+    return;
+  }
+  
   // make local copy of object
 
   MdvxField copy(*this);
@@ -3531,6 +3628,12 @@ void MdvxField::printTimeHeightData(ostream &out,
 				    bool print_native /* = true*/)
   
 {
+  
+  if (!_volbufSizeValid()) {
+    out << "ERROR - MdvxField::printTimeHeightData" << endl;
+    out << "  volBuf not allocated" << endl;
+    return;
+  }
   
   // make local copy of object
 
@@ -3619,6 +3722,11 @@ void MdvxField::setPlanePtrs() const
 
 {
 
+  if (!_volbufSizeValid()) {
+    // no op
+    return;
+  }
+  
   int nz = _fhdr.nz;
 
   _planeData.erase(_planeData.begin(), _planeData.end());
@@ -4277,6 +4385,10 @@ void MdvxField::constrainVertical(const Mdvx &mdvx)
 
 {
 
+  if (!_volbufSizeValid()) {
+    return;
+  }
+  
   int minPlane, maxPlane;
   
   if (mdvx._readPlaneNumLimitsSet) {
@@ -4399,6 +4511,11 @@ void MdvxField::_check_lon_domain(double read_min_lon,
 
 {
 
+  if (!_volbufSizeValid()) {
+    // no-op
+    return;
+  }
+  
   double dLon = _fhdr.grid_dx;
   double dataMinLon = _fhdr.grid_minx;
   double dataMaxLon = dataMinLon + dLon * (_fhdr.nx - 1);
@@ -4565,6 +4682,11 @@ void MdvxField::_check_lon_domain(double read_min_lon,
 void MdvxField::constrainHorizontal(const Mdvx &mdvx)
 
 {
+  
+  if (!_volbufSizeValid()) {
+    // no-op
+    return;
+  }
   
   // find the index limits for the bounding box. Each corner must
   // be tested because the projection may cause the sides to be
@@ -5408,6 +5530,12 @@ int MdvxField::compress(int compression_type) const
 
 {
 
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::compress.\n";
+    _errStr +=  "  volBuf not allocated.\n";
+    return -1;
+  }
+  
   // check if we are already properly compressed
   // now use gzip for all compression
 
@@ -5527,6 +5655,12 @@ int MdvxField::compress64(int compression_type) const
 
 {
 
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::compress64.\n";
+    _errStr +=  "  volBuf not allocated.\n";
+    return -1;
+  }
+  
   // check if we are already properly compressed
   // now use gzip for all compression
 
@@ -5694,6 +5828,12 @@ int MdvxField::decompress() const
 
 {
 
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::decompress.\n";
+    _errStr +=  "  volBuf not allocated.\n";
+    return -1;
+  }
+  
   if (!isCompressed()) {
     return 0;
   }
@@ -6011,6 +6151,12 @@ void MdvxField::_set_data_element_nbytes()
 int MdvxField::computeMinAndMax(bool force /* = false*/ )
 
 {
+  
+  if (!_volbufSizeValid()) {
+    _errStr += "ERROR - MdvxField::computeMinAndMax()\n";
+    _errStr +=  "  volBuf not allocated.\n";
+    return -1;
+  }
   
   if (_fhdr.min_value != 0.0 || _fhdr.max_value != 0.0) {
     if (_fhdr.min_value_orig_vol == 0 && _fhdr.max_value_orig_vol == 0) {
@@ -7807,6 +7953,11 @@ void MdvxField::remapVlevels(int nz, double minz, double dz)
 
 {
 
+  if (!_volbufSizeValid()) {
+    // no op
+    return;
+  }
+  
   // don't remap if less than 2 levels
   
   if (_fhdr.nz < 2) {

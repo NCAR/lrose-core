@@ -181,7 +181,8 @@ MdvxField *Ncf2MdvField::createMdvxField()
     MdvxField *fld = new MdvxField(_fhdr, _vhdr, _data);
     return fld;
   } else {
-    MdvxField *fld = new MdvxField(_fhdr, _vhdr);
+    MdvxField *fld = new MdvxField(_fhdr, _vhdr, NULL,
+                                   false, false, false);
     return fld;
   }
 
