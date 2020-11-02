@@ -42,6 +42,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/file_io.h>
 #include <toolsa/Path.hh>
+#include <toolsa/TaArray.hh>
 #include <toolsa/os_config.h>
 #include <cstdio>
 #include <cstring>
@@ -267,11 +268,13 @@ int PpiFile::write()
 
   // compute path names
 
-  char tmpPath[MAX_PATH_LEN];
-  sprintf(tmpPath, "%s%s%s", _params.tmp_dir, PATH_DELIM, outputName);
+  char tmpPath[MAX_PATH_LEN * 2];
+  snprintf(tmpPath, MAX_PATH_LEN * 2, "%s%s%s",
+           _params.tmp_dir, PATH_DELIM, outputName);
 
-  char outputPath[MAX_PATH_LEN];
-  sprintf(outputPath, "%s%s%s", _params.output_dir, PATH_DELIM, outputName);
+  char outputPath[MAX_PATH_LEN * 2];
+  snprintf(outputPath, MAX_PATH_LEN * 2,
+           "%s%s%s", _params.output_dir, PATH_DELIM, outputName);
 
   // create the tmp file
 
@@ -406,7 +409,8 @@ int PpiFile::_createTmp(const char *tmp_path,
     
     Nc3Var *varIn = _ncfIn.get_var(ivar);
     int nDims = varIn->num_dims();
-    const Nc3Dim *dims[nDims];
+    TaArray<const Nc3Dim *> dims_;
+    const Nc3Dim **dims = dims_.alloc(nDims);
     for (int ii = 0; ii < nDims; ii++) {
       dims[ii] = out.get_dim(varIn->get_dim(ii)->id());
     }
@@ -461,8 +465,10 @@ int PpiFile::_createTmp(const char *tmp_path,
     Nc3Var *varIn = _ncfIn.get_var(ivar);
     Nc3Var *var = out.get_var(ivar);
     int nDims = var->num_dims();
-    const Nc3Dim *dims[nDims];
-    long dimSizes[nDims];
+    TaArray<const Nc3Dim *> dims_;
+    const Nc3Dim **dims = dims_.alloc(nDims);
+    TaArray<long> dimSizes_;
+    long *dimSizes = dimSizes_.alloc(nDims);
     for (int ii = 0; ii < nDims; ii++) {
       dims[ii] = var->get_dim(ii);
       dimSizes[ii] = dims[ii]->size();
@@ -513,7 +519,8 @@ int PpiFile::_createTmp(const char *tmp_path,
 	}
       } else if (!strcmp(var->name(), "time_offset")) {
 	long size = n_beams;
-	double offset[n_beams];
+	TaArray<double> offset_;
+	double *offset = offset_.alloc(n_beams);
 	double startOffset = _timeOffsetData[_startBeam];
 	for (int i = 0; i < n_beams; i++) {
 	  offset[i] = _timeOffsetData[_startBeam + i] - startOffset;

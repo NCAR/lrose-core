@@ -33,6 +33,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/TaArray.hh>
 #include "Server.hh"
 using namespace std;
 
@@ -223,7 +224,8 @@ int Server::convertToSymprod(const void *params,
   } else {
     nstrikes = spdb_len / sizeof(LTG_strike_t);
   }
-  LTG_extended_t strikes[nstrikes];
+  TaArray<LTG_extended_t> strikes_;
+  LTG_extended_t *strikes = strikes_.alloc(nstrikes);
   
   // load up strike data array
   

@@ -38,6 +38,7 @@
 #include <Spdb/Spdb.hh>
 #include <toolsa/udatetime.h>
 #include <toolsa/str.h>
+#include <toolsa/TaArray.hh>
 using namespace std;
 
 // constructor
@@ -201,9 +202,10 @@ int Args::parse(int argc, char **argv, const string &prog_name)
 	char *last=strrchr(argv[i], '\"');
 	if (first != NULL && last != NULL) {
 	  int len = last - first - 1;
-	  char tmp[len + 1];
-	  memset(tmp, 0, sizeof(tmp));
-	  memcpy(tmp, first+1, len);
+	  TaArray<char> tmp_;
+	  char *tmp = tmp_.alloc(len + 1);
+	  memset(tmp, 0, len + 1);
+          memcpy(tmp, first+1, len);
 	  dataType2 = Spdb::hash4CharsToInt32(tmp);
 	} else {
 	  if (sscanf(argv[i], "%d", &dataType2) != 1) {
@@ -316,8 +318,9 @@ void Args::_setDataTypes(const string &dataTypeStr)
       const char *last=strrchr(thisDataType.c_str(), '\"');
       if (first != NULL && last != NULL) {
 	int len = last - first - 1;
-	char tmp[len + 1];
-	memset(tmp, 0, sizeof(tmp));
+        TaArray<char> tmp_;
+        char *tmp = tmp_.alloc(len + 1);
+        memset(tmp, 0, len + 1);
 	memcpy(tmp, first+1, len);
 	dataType = Spdb::hash4CharsToInt32(tmp);
       } else {

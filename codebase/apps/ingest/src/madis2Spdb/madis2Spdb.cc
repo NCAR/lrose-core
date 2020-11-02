@@ -38,6 +38,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/str.h>
 #include <toolsa/umisc.h>
+#include <toolsa/TaArray.hh>
 
 #include "Params.hh"
 #include "madis2Spdb.hh"
@@ -460,12 +461,14 @@ bool madis2Spdb::processFile(char *fileName){
   if (!(haveStnTypes)) maxStaTypeLen = strlen("UNKNOWN");
 
 
-  char PrevType[maxStaTypeLen+1];
+  TaArray<char> PrevType_;
+  char *PrevType = PrevType_.alloc(maxStaTypeLen+1);
   PrevType[0] = '\0';
 
   for(unsigned int i=0; i < recNum; i++)
   {
-    char ID[maxStaIdLen+1];
+    TaArray<char> ID_;
+    char *ID = ID_.alloc(maxStaIdLen+1);
     if (!_readString(netID, i, maxStaIdLen, "stationId", ID, _params->debug)){
       if (!_readString(netID, i, maxStaIdLen, "stationName", ID)){
 	cerr << "Failed to read station ID/name" << endl;
@@ -475,7 +478,8 @@ bool madis2Spdb::processFile(char *fileName){
     
     int dataType = _Hash(ID);
 
-    char Type[maxStaTypeLen+1];
+    TaArray<char> Type_;
+    char *Type = Type_.alloc(maxStaTypeLen+1);
     
     if (!(haveStnTypes)){
       sprintf(Type,"UNKOWN");

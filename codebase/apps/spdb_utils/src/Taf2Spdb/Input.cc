@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <toolsa/file_io.h>
+#include <toolsa/TaArray.hh>
 using namespace std;
 
 //////////////////////
@@ -96,8 +97,8 @@ void Input::close()
 
 void Input::_fgets_save(char *buffer)
 {
-  strncpy(_saved, buffer, MaxLine);
-};
+  strncpy(_saved, buffer, MaxLine-1);
+}
 
 ////////////////////////////////////////
 // gets either from file or saved buffer
@@ -153,7 +154,8 @@ int Input::readNext(string &tafStr)
     // tokenize the line
     
     vector<string> toks;
-    char lineCopy[strlen(line) + 1];
+    TaArray<char> lineCopy_;
+    char *lineCopy = lineCopy_.alloc(strlen(line) + 1);
     strcpy(lineCopy, line);
     char *tok = strtok(lineCopy, " ");
     while (tok) {

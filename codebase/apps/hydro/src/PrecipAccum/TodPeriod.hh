@@ -82,7 +82,7 @@ private:
   const string &_progName;
   const Params &_params;
   int _nPeriods;
-  int _periodNum;;
+  int _periodNum;
   period_times_t *_periods;
   zrpf_handle_t _zrHandle;
 

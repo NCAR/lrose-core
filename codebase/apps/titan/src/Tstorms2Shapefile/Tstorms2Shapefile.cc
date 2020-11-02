@@ -40,6 +40,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/str.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/TaArray.hh>
 #include <didss/RapDataDir.hh>
 #include <Mdv/MdvxProj.hh>
 #include <ctime>
@@ -672,11 +673,12 @@ int
   double poly_delta_az, theta, range, dx, dy;
 
   struct tm *tempo;
-  char datetime_iso[]="2015-01-01T00:00:00Z";
   tempo = gmtime(&valid_time);
      
   leadTimeMin=int(leadTimeHr*60);
-  sprintf(datetime_iso," %04d-%02d-%02dT%02d:%02dZ",tempo->tm_year+1900, tempo->tm_mon+1,
+  char datetime_iso[1024];
+  snprintf(datetime_iso, 1024, " %04d-%02d-%02dT%02d:%02dZ",
+           tempo->tm_year+1900, tempo->tm_mon+1,
           tempo->tm_mday,tempo->tm_hour, tempo->tm_min);  
  
   if ( leadTimeHr == 0.0 ) {
@@ -784,10 +786,11 @@ int
   dx = grid.dx;
   dy = grid.dy;
 
-  double rayX[sparams.n_poly_sides];
-  double rayY[sparams.n_poly_sides];
-  double polygonX[sparams.n_poly_sides + 1];
-  double polygonY[sparams.n_poly_sides + 1];
+  TaArray<double> rayX_, rayY_, polygonX_, polygonY_;
+  double *rayX = rayX_.alloc(sparams.n_poly_sides);
+  double *rayY = rayY_.alloc(sparams.n_poly_sides);
+  double *polygonX = polygonX_.alloc(sparams.n_poly_sides + 1);
+  double *polygonY = polygonY_.alloc(sparams.n_poly_sides + 1);
 
   for( int iray=0; iray < sparams.n_poly_sides; iray++ ) {
     range = gprops.proj_area_polygon[iray] * plot_storm_scale;

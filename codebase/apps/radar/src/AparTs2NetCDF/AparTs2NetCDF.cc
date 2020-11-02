@@ -1102,8 +1102,8 @@ int AparTs2NetCDF::_computeOutputFilePaths()
   
   string scanModeStr;
   switch (_startScanMode) {
-    case apar_ts_scan_mode_t::COPLANE:
-      scanModeStr = ".coplane";
+    case apar_ts_scan_mode_t::CALIBRATION:
+      scanModeStr = ".cal";
       break;
     case apar_ts_scan_mode_t::RHI:
       scanModeStr = ".rhi";

@@ -95,8 +95,8 @@ void Input::close()
 
 void Input::_fgets_save(char *buffer)
 {
-  strncpy(_saved, buffer, MaxLine);
-};
+  strncpy(_saved, buffer, MaxLine-1);
+}
 
 ////////////////////////////////////////
 // gets either from file or saved buffer

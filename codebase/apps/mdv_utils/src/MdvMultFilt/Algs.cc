@@ -22,6 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include <toolsa/copyright.h>
+#include <toolsa/TaArray.hh>
 #include <cstdlib>
 #include <cstring>
 
@@ -388,7 +389,9 @@ fl32 Algs::_GetMedian(fl32 *Buffer, int num)
   // Pick off the non-missing data into another array.
   // Return missing as the median if no data found.
   //
-  fl32 GoodBuf[num];
+
+  TaArray<fl32> GoodBuf_;
+  fl32 *GoodBuf = GoodBuf_.alloc(num);
 
   int nGood = 0;
   for(int l=0; l < num; l++)

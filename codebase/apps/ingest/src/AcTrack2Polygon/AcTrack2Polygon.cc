@@ -22,6 +22,8 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include "AcTrack2Polygon.hh"
+#include <toolsa/TaArray.hh>
+#include <toolsa/TaArray2D.hh>
 using namespace std;
 
 //
@@ -365,16 +367,18 @@ int AcTrack2Polygon::_createConvexHull(time_t dataTime)
   //
   // Declare and create arguments for libeuclid convex hull routines
   //
-  double *pointPtr[numPoints +1];
 
-  double points[numPoints][2];
+  TaArray<double *> pointPtr_;
+  double **pointPtr = pointPtr_.alloc(numPoints + 1);
+  
+  TaArray2D<double> points_;
+  double **points = points_.alloc(numPoints, 2);
 
-  for ( int i = 0; i < numPoints; i++ )
-    {
-      points[i][0] = (double)_acPosVec[i]->lon;
-      points[i][1] =(double) _acPosVec[i]->lat;
-      pointPtr[i] = points[i];
-    }
+  for (int i = 0; i < numPoints; i++) {
+    points[i][0] = (double)_acPosVec[i]->lon;
+    points[i][1] =(double) _acPosVec[i]->lat;
+    pointPtr[i] = points[i];
+  }
 
   int numPtsInHull = EG_ch2d(pointPtr, numPoints); 
 
@@ -439,8 +443,8 @@ int AcTrack2Polygon::_expandTrack( )
     }
 
   int numVertices = genPoly.getNumVertices();
-
-  GenPoly::vertex_t vertices[numVertices];
+  TaArray<GenPoly::vertex_t> vertices_;
+  GenPoly::vertex_t *vertices = vertices_.alloc(numVertices);
 
   //
   //  Get the vertices and find the centroid of the unexpanded polygon

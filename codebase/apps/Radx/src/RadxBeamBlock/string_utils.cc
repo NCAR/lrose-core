@@ -92,20 +92,20 @@ auto rainfields::from_string<bool>(const char* str) -> bool
     return ret; \
   }
 
-IMPL_FROMSTRING_I(char, strtol);
-IMPL_FROMSTRING_I(signed char, strtol);
-IMPL_FROMSTRING_I(unsigned char, strtoul);
-IMPL_FROMSTRING_I(short, strtol);
-IMPL_FROMSTRING_I(unsigned short, strtoul);
-IMPL_FROMSTRING_I(int, strtol);
-IMPL_FROMSTRING_I(unsigned int, strtoul);
-IMPL_FROMSTRING_I(long, strtol);
-IMPL_FROMSTRING_I(unsigned long, strtoul);
-IMPL_FROMSTRING_I(long long, strtoll);
-IMPL_FROMSTRING_I(unsigned long long, strtoull);
-IMPL_FROMSTRING_F(float, strtod);
-IMPL_FROMSTRING_F(double, strtod);
-IMPL_FROMSTRING_F(long double, strtold);
+IMPL_FROMSTRING_I(char, strtol)
+IMPL_FROMSTRING_I(signed char, strtol)
+IMPL_FROMSTRING_I(unsigned char, strtoul)
+IMPL_FROMSTRING_I(short, strtol)
+IMPL_FROMSTRING_I(unsigned short, strtoul)
+IMPL_FROMSTRING_I(int, strtol)
+IMPL_FROMSTRING_I(unsigned int, strtoul)
+IMPL_FROMSTRING_I(long, strtol)
+IMPL_FROMSTRING_I(unsigned long, strtoul)
+IMPL_FROMSTRING_I(long long, strtoll)
+IMPL_FROMSTRING_I(unsigned long long, strtoull)
+IMPL_FROMSTRING_F(float, strtod)
+IMPL_FROMSTRING_F(double, strtod)
+IMPL_FROMSTRING_F(long double, strtold)
 
 auto rainfields::to_string(bool val) -> std::string
 {
@@ -122,20 +122,20 @@ auto rainfields::to_string(bool val) -> std::string
     return std::string(buf, buf + len); \
   }
 
-IMPL_TOSTRING_1(char, 4 * sizeof(char), "%hhd");
-IMPL_TOSTRING_1(signed char, 4 * sizeof(signed char), "%hhd");
-IMPL_TOSTRING_1(unsigned char, 4 * sizeof(unsigned char), "%hhu");
-IMPL_TOSTRING_1(short, 4 * sizeof(short), "%hd");
-IMPL_TOSTRING_1(unsigned short, 4 * sizeof(unsigned short), "%hu");
-IMPL_TOSTRING_1(int, 4 * sizeof(int), "%d");
-IMPL_TOSTRING_1(unsigned int, 4 * sizeof(unsigned int), "%u");
-IMPL_TOSTRING_1(long, 4 * sizeof(long), "%ld");
-IMPL_TOSTRING_1(unsigned long, 4 * sizeof(unsigned long), "%lu");
-IMPL_TOSTRING_1(long long, 4 * sizeof(long long), "%lld");
-IMPL_TOSTRING_1(unsigned long long, 4 * sizeof(unsigned long long), "%llu");
-IMPL_TOSTRING_1(float, std::numeric_limits<float>::max_exponent10 + 20, "%f");
-IMPL_TOSTRING_1(double, std::numeric_limits<double>::max_exponent10 + 20, "%f");
-IMPL_TOSTRING_1(long double, std::numeric_limits<long double>::max_exponent10 + 20, "%Lf");
+IMPL_TOSTRING_1(char, 4 * sizeof(char), "%hhd")
+IMPL_TOSTRING_1(signed char, 4 * sizeof(signed char), "%hhd")
+IMPL_TOSTRING_1(unsigned char, 4 * sizeof(unsigned char), "%hhu")
+IMPL_TOSTRING_1(short, 4 * sizeof(short), "%hd")
+IMPL_TOSTRING_1(unsigned short, 4 * sizeof(unsigned short), "%hu")
+IMPL_TOSTRING_1(int, 4 * sizeof(int), "%d")
+IMPL_TOSTRING_1(unsigned int, 4 * sizeof(unsigned int), "%u")
+IMPL_TOSTRING_1(long, 4 * sizeof(long), "%ld")
+IMPL_TOSTRING_1(unsigned long, 4 * sizeof(unsigned long), "%lu")
+IMPL_TOSTRING_1(long long, 4 * sizeof(long long), "%lld")
+IMPL_TOSTRING_1(unsigned long long, 4 * sizeof(unsigned long long), "%llu")
+IMPL_TOSTRING_1(float, std::numeric_limits<float>::max_exponent10 + 20, "%f")
+IMPL_TOSTRING_1(double, std::numeric_limits<double>::max_exponent10 + 20, "%f")
+IMPL_TOSTRING_1(long double, std::numeric_limits<long double>::max_exponent10 + 20, "%Lf")
 
 auto rainfields::to_string(bool val, std::string& out) -> void
 {
@@ -155,20 +155,20 @@ auto rainfields::to_string(bool val, std::string& out) -> void
     out.assign(buf, len); \
   }
 
-IMPL_TOSTRING_2(char, 4 * sizeof(char), "%hhd");
-IMPL_TOSTRING_2(signed char, 4 * sizeof(char), "%hhd");
-IMPL_TOSTRING_2(unsigned char, 4 * sizeof(unsigned char), "%hhu");
-IMPL_TOSTRING_2(short, 4 * sizeof(short), "%hd");
-IMPL_TOSTRING_2(unsigned short, 4 * sizeof(unsigned short), "%hu");
-IMPL_TOSTRING_2(int, 4 * sizeof(int), "%d");
-IMPL_TOSTRING_2(unsigned int, 4 * sizeof(unsigned int), "%u");
-IMPL_TOSTRING_2(long, 4 * sizeof(long), "%ld");
-IMPL_TOSTRING_2(unsigned long, 4 * sizeof(unsigned long), "%lu");
-IMPL_TOSTRING_2(long long, 4 * sizeof(long long), "%lld");
-IMPL_TOSTRING_2(unsigned long long, 4 * sizeof(unsigned long long), "%llu");
-IMPL_TOSTRING_2(float, std::numeric_limits<float>::max_exponent10 + 20, "%f");
-IMPL_TOSTRING_2(double, std::numeric_limits<double>::max_exponent10 + 20, "%f");
-IMPL_TOSTRING_2(long double, std::numeric_limits<long double>::max_exponent10 + 20, "%Lf");
+IMPL_TOSTRING_2(char, 4 * sizeof(char), "%hhd")
+IMPL_TOSTRING_2(signed char, 4 * sizeof(char), "%hhd")
+IMPL_TOSTRING_2(unsigned char, 4 * sizeof(unsigned char), "%hhu")
+IMPL_TOSTRING_2(short, 4 * sizeof(short), "%hd")
+IMPL_TOSTRING_2(unsigned short, 4 * sizeof(unsigned short), "%hu")
+IMPL_TOSTRING_2(int, 4 * sizeof(int), "%d")
+IMPL_TOSTRING_2(unsigned int, 4 * sizeof(unsigned int), "%u")
+IMPL_TOSTRING_2(long, 4 * sizeof(long), "%ld")
+IMPL_TOSTRING_2(unsigned long, 4 * sizeof(unsigned long), "%lu")
+IMPL_TOSTRING_2(long long, 4 * sizeof(long long), "%lld")
+IMPL_TOSTRING_2(unsigned long long, 4 * sizeof(unsigned long long), "%llu")
+IMPL_TOSTRING_2(float, std::numeric_limits<float>::max_exponent10 + 20, "%f")
+IMPL_TOSTRING_2(double, std::numeric_limits<double>::max_exponent10 + 20, "%f")
+IMPL_TOSTRING_2(long double, std::numeric_limits<long double>::max_exponent10 + 20, "%Lf")
 
 auto rainfields::operator<<(std::ostream& os, const indent& in) -> std::ostream&
 {

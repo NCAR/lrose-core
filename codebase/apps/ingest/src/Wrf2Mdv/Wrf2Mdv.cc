@@ -34,6 +34,7 @@
 
 #include <Mdv/MdvxField.hh>
 #include <toolsa/Path.hh>
+#include <toolsa/TaArray.hh>
 #include <toolsa/pjg.h>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
@@ -249,11 +250,12 @@ bool Wrf2Mdv::_checkParams()
   
 bool Wrf2Mdv::_initVertInterp()
 {
+  TaArray<double> levels_;
+  double *levels = levels_.alloc(_params.flight_levels_n);
   switch (_params.output_levels)
   {
   case Params::FLIGHT_LEVELS:
   {
-    double levels[_params.flight_levels_n];
     for (int i = 0; i < _params.flight_levels_n; i++)
       levels[i] = _params._flight_levels[i];
 
@@ -266,7 +268,6 @@ bool Wrf2Mdv::_initVertInterp()
 
   case Params::PRESSURE_LEVELS:
   {
-    double levels[_params.pressure_levels_n];
     for (int i = 0; i < _params.pressure_levels_n; i++)
       levels[i] = _params._pressure_levels[i];
 
@@ -279,7 +280,6 @@ bool Wrf2Mdv::_initVertInterp()
 
   case Params::HEIGHT_LEVELS:
   {
-    double levels[_params.height_levels_n];
     for (int i = 0; i < _params.height_levels_n; i++)
       levels[i] = _params._height_levels[i] * 1000.0;
 

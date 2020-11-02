@@ -313,7 +313,8 @@ void TsSim::_createTimeSeries(double power,
   double C1 = power / Ts;
   double C2 = 1.0 / (sqrt(2.0 * M_PI) * fvsigma);
 
-  RadarComplex_t spec[nSamples];
+  TaArray<RadarComplex_t> spec_;
+  RadarComplex_t *spec = spec_.alloc(nSamples);
 
   for (int k = 0; k < nSamples; k++) {
     spec[k].re = 0.0;
@@ -692,7 +693,8 @@ void TsSim::_createTimeSeries2(double power,
   double C1 = power / Ts;
   double C2 = 1.0 / (sqrt(2.0 * M_PI) * fvsigma);
 
-  RadarComplex_t spec[nSamples];
+  TaArray<RadarComplex_t> spec_;
+  RadarComplex_t *spec = spec_.alloc(nSamples);
 
   for (int k = 0; k < nSamples; k++) {
     spec[k].re = 0.0;

@@ -918,7 +918,8 @@ void DataSet::_printFile(Nc3File &ncf)
   
   // dimensions
 
-  Nc3Dim *dims[ncf.num_dims()];
+  TaArray<Nc3Dim *> dims_;
+  Nc3Dim **dims = dims_.alloc(ncf.num_dims());
   for (int idim = 0; idim < ncf.num_dims(); idim++) {
     dims[idim] = ncf.get_dim(idim);
 
@@ -946,7 +947,8 @@ void DataSet::_printFile(Nc3File &ncf)
 
   // loop through variables
 
-  Nc3Var *vars[ncf.num_vars()];
+  TaArray<Nc3Var *> vars_;
+  Nc3Var **vars = vars_.alloc(ncf.num_vars());
   for (int ivar = 0; ivar < ncf.num_vars(); ivar++) {
 
     vars[ivar] = ncf.get_var(ivar);
@@ -955,7 +957,8 @@ void DataSet::_printFile(Nc3File &ncf)
     cout << "  Name: " << vars[ivar]->name() << endl;
     cout << "  Is valid: " << vars[ivar]->is_valid() << endl;
     cout << "  N dims: " << vars[ivar]->num_dims();
-    Nc3Dim *vdims[vars[ivar]->num_dims()];
+    TaArray<Nc3Dim *> vdims_;
+    Nc3Dim **vdims = vdims_.alloc(vars[ivar]->num_dims());
     if (vars[ivar]->num_dims() > 0) {
       cout << ": (";
       for (int ii = 0; ii < vars[ivar]->num_dims(); ii++) {
@@ -1017,8 +1020,9 @@ void DataSet::_printAtt(Nc3Att *att)
   
   case nc3Char: {
     cout << "CHAR: ";
-    char vals[att->num_vals() + 1];
-    MEM_zero(vals);
+    TaArray<char> vals_;
+    char *vals = vals_.alloc(att->num_vals() + 1);
+    memset(vals, 0, att->num_vals() + 1);
     memcpy(vals, values->base(), att->num_vals());
     cout << vals;
   }
@@ -1104,8 +1108,9 @@ void DataSet::_printVarVals(Nc3Var *var)
   
   case nc3Char: {
     cout << "(char)";
-    char str[nprint + 1];
-    MEM_zero(str);
+    TaArray<char> str_;
+    char *str = str_.alloc(nprint + 1);
+    memset(str, 0, nprint + 1);
     memcpy(str, values->base(), nprint);
     cout << " " << str;
   }

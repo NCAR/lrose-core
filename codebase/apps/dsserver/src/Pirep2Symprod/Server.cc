@@ -34,6 +34,7 @@
 
 #include <cstdio>  
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/TaArray.hh>
 #include "Server.hh"
 #include "Params.hh"
 using namespace std;
@@ -177,8 +178,9 @@ int Server::convertToSymprod(const void *params,
     }
 
     // decode chunk
-    char xml[spdb_len];
-    memcpy(&xml,spdb_data,spdb_len);
+    TaArray<char> xml_;
+    char *xml = xml_.alloc(spdb_len);
+    memcpy(xml,spdb_data,spdb_len);
     const string s(xml);
     pirep->setXml(s);
     pirep->fromXml();

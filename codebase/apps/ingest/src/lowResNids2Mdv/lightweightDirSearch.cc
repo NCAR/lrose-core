@@ -210,11 +210,5 @@ void lightweightDirSearch::_procDir(char *dirName){
 
   return;
 
-};
-
-
-
-
-
-
+}
 

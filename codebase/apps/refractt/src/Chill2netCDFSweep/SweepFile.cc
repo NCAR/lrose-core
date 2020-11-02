@@ -50,6 +50,7 @@
 
 #include <toolsa/os_config.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/TaArray.hh>
 #include <toolsa/file_io.h>
 #include <toolsa/str.h>
 
@@ -360,7 +361,8 @@ bool SweepFile::_writeTmp(const double *time_offset,
 
   Nc3Var *fields = out.add_var("fields", nc3Char, fieldsDim, short_stringDim);
   {
-    char fnames[_nFields * SHORT_STRING_LEN];
+    TaArray<char> fnames_;
+    char *fnames = fnames_.alloc(_nFields * SHORT_STRING_LEN);
     memset(fnames, 0, _nFields * SHORT_STRING_LEN);
     STRncopy(fnames + 0 * SHORT_STRING_LEN, "h_avg_i", SHORT_STRING_LEN);
     STRncopy(fnames + 1 * SHORT_STRING_LEN, "h_avg_q", SHORT_STRING_LEN);
@@ -715,14 +717,15 @@ bool SweepFile::_writeTmp(const double *time_offset,
   clip_range->add_att("missing_value", -32768.f);
   clip_range->add_att("_FillValue", -32768.f);
   {
-    float cr[_nAz];
+    TaArray<float> cr_;
+    float *cr = cr_.alloc(_nAz);
     float crange = (_startRange + _gateSpacing * (_nGates - 1)) * 1000.0;
     for (int jj = 0; jj < _nAz; jj++)
       cr[jj] = crange;
     long edge = _nAz;
     clip_range->put(cr, &edge);
   }
-
+  
   // fields
   
   _putField(out, "h_avg_i", "h_avg_i", "none",

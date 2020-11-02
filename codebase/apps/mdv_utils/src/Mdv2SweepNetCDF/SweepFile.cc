@@ -41,6 +41,7 @@
 #include <toolsa/str.h>
 #include <toolsa/file_io.h>
 #include <toolsa/Path.hh>
+#include <toolsa/TaArray.hh>
 #include <toolsa/os_config.h>
 #include <cstdio>
 #include <string.h>
@@ -296,8 +297,9 @@ int SweepFile::_writeTmp()
 
   Nc3Var *fields = out.add_var("fields", nc3Char, fieldsDim, short_stringDim);
   {
-    char fnames[_nFields * SHORT_STRING_LEN];
-    MEM_zero(fnames);
+    TaArray<char> fnames_;
+    char *fnames = fnames_.alloc(_nFields * SHORT_STRING_LEN);
+    memset(fnames, 0, _nFields * SHORT_STRING_LEN);
     for (int i = 0; i < _nFields; i++) {
       MdvxField *fld = _mdvx.getField(i);
       const Mdvx::field_header_t &fhdr = fld->getFieldHeader();
@@ -594,7 +596,8 @@ int SweepFile::_writeTmp()
   time_offset->add_att("_missing", 0.0);
   time_offset->add_att("_FillValue", 0.0);
   {
-    double tdata[_nAz];
+    TaArray<double> tdata_;
+    double *tdata = tdata_.alloc(_nAz);
     double dTime = (double) _sweepDuration / _nAz;
     for (int jj = 0; jj < _nAz; jj++) {
       tdata[jj] = (jj + 1) * dTime;
@@ -618,7 +621,8 @@ int SweepFile::_writeTmp()
     Azimuth->add_att("valid_range", 2, validRange);
   }
   {
-    float az[_nAz];
+    TaArray<float> az_;
+    float *az = az_.alloc(_nAz);
     for (int jj = 0; jj < _nAz; jj++) {
       az[jj] = jj;
     }
@@ -641,7 +645,8 @@ int SweepFile::_writeTmp()
     Elevation->add_att("valid_range", 2, validRange);
   }
   {
-    float el[_nAz];
+    TaArray<float> el_;
+    float *el = el_.alloc(_nAz);
     for (int jj = 0; jj < _nAz; jj++) {
       el[jj] = _elev;
     }
@@ -658,7 +663,8 @@ int SweepFile::_writeTmp()
   clip_range->add_att("missing_value", -9999.f);
   clip_range->add_att("_FillValue", -9999.f);
   {
-    float cr[_nAz];
+    TaArray<float> cr_;
+    float *cr = cr_.alloc(_nAz);
     float crange = (_radarParams.startRange +
 		    _radarParams.gateSpacing * (_nGates - 1)) * 1000.0;
     for (int jj = 0; jj < _nAz; jj++) {

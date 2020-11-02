@@ -36,6 +36,7 @@
 #include "Rview.hh"
 #include <titan/TitanPartialTrack.hh>
 #include <toolsa/TaArray.hh>
+#include <toolsa/toolsa_macros.h>
 using namespace std;
 
 #define START_AZIMUTH 0.0
@@ -44,7 +45,6 @@ using namespace std;
 #define ARROW_HEAD_ANGLE 15.0
 #define ARROW_HEAD_KM_FRACTION 0.010
 #define ARROW_HEAD_KM 1.0
-#define DEG_TO_RAD 0.01745329251994372
 
 /*
  * file scope prototypes

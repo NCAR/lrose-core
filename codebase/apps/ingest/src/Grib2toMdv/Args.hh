@@ -92,7 +92,7 @@ class Args
   bool _printSummary;
   bool _printVarList;
   bool _printSections;
-  char **_fileList;;
+  char **_fileList;
   
  private:
   

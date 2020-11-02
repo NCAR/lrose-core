@@ -44,6 +44,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/str.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/TaArray.hh>
 #include <rapformats/metar_decode.h>
 
 
@@ -288,7 +289,8 @@ int PrintSpdbMetar::_doDataType(si32 dataType, bool &headerPrinted)
 	// table format with remarks
 	// copy chunk data to str, remove line feeds
 
-	char str[chunks[jj].len + 1];
+	TaArray<char> str_;
+	char *str = str_.alloc(chunks[jj].len + 1);
 	strncpy(str, (char *) chunk_data, chunk_len);
 	str[chunk_len] = '\0';
 	for (int i = 0; i < chunk_len; i++) {
@@ -307,7 +309,8 @@ int PrintSpdbMetar::_doDataType(si32 dataType, bool &headerPrinted)
 	}
 	
 	// decode the metar
-	char tmp[chunk_len + 1];
+	TaArray<char> tmp_;
+	char *tmp = tmp_.alloc(chunk_len + 1);
 	strcpy(tmp, str);
 	Decoded_METAR dcdMetar;
 

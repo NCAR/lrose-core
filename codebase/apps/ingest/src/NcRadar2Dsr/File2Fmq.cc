@@ -42,6 +42,7 @@
 #include <toolsa/uusleep.h>
 #include <toolsa/mem.h>
 #include <toolsa/os_config.h>
+#include <toolsa/TaArray.hh>
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
@@ -152,8 +153,9 @@ void File2Fmq::_findFields()
 {
 
   // set flag array so we know if a field has been found
-  
-  bool fieldFound[_params.output_fields_n];
+
+  TaArray<bool> fieldFound_;
+  bool *fieldFound = fieldFound_.alloc(_params.output_fields_n);
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
     fieldFound[ifield] = false;
   }
@@ -451,8 +453,10 @@ int File2Fmq::writeBeams(int vol_num,
   DsRadarBeam &beam = msg.getRadarBeam();
   int nfields = _fields.size();
   int ndata = _maxCells * nfields;
-  ui08 data[ndata];
   int iret = 0;
+
+  TaArray<ui08> data_;
+  ui08 *data = data_.alloc(ndata);
   
   // loop through the beams
   
@@ -478,7 +482,7 @@ int File2Fmq::writeBeams(int vol_num,
     
     // data
 
-    MEM_zero(data);
+    memset(data, 0, ndata);
     for (int ifield = 0; ifield < nfields; ifield++) {
 
       Field *fld = _fields[ifield];
