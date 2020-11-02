@@ -9,6 +9,7 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 SUB_DIRS = \
 	AcGeoref2Spdb \
 	AcGeorefCompare \
+	AparAscope \
 	AparTsArchive \
 	AparTs2Moments \
 	AparTs2NetCDF \

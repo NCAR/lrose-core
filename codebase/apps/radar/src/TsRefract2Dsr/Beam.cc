@@ -229,7 +229,7 @@ int Beam::_computeMomentsSinglePol()
 
   // get unpacked pulses
   
-  const fl32* iqData[_nSamples];
+  const fl32 **iqData = new const fl32*[_nSamples];
   for (int ii = 0; ii < _nSamples; ii++) {
     iqData[ii] = _pulses[ii]->getIq();
   }
@@ -261,7 +261,8 @@ int Beam::_computeMomentsSinglePol()
 
   _momentsMgr->computeAiqNiq(_nGatesPulse, _nSamples,
                              _iq, _aiq, _niq, _meanI, _meanQ);
-  
+
+  delete[] iqData;
   return 0;
 
 }
@@ -277,7 +278,7 @@ int Beam::_computeMomentsAlternating()
 
   // get unpacked pulses
   
-  const fl32* iqData[_nSamples];
+  const fl32 **iqData = new const fl32*[_nSamples];
   for (int ii = 0; ii < _nSamples; ii++) {
     iqData[ii] = _pulses[ii]->getIq();
   }
@@ -336,7 +337,8 @@ int Beam::_computeMomentsAlternating()
   
   _momentsMgr->computeAiqNiq(_nGatesPulse, nDual, _iqv,
                              _aiqVpol, _niqVpol, _meanIVpol, _meanQVpol);
-  
+
+  delete[] iqData;
   return 0;
 
 }

@@ -192,11 +192,10 @@ enum class apar_ts_pol_mode_t {
  ************************************************************************/
 
 enum class apar_ts_scan_mode_t {
-
-  NOT_SET = -1,                                
-  CALIBRATION = 0,
+                                
+  NOT_SET = 0,
   PPI = 1, /**< PPI sector */
-  COPLANE = 2, /**< co-plane dual doppler mode */
+  CALIBRATION = 2,
   RHI = 3, /**< RHI vertical slice */
   VPOINT = 4, /**< vertical pointing for calibration */
   IDLE = 7, /**< between scans */

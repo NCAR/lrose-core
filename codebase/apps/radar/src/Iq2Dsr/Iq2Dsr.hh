@@ -194,6 +194,7 @@ private:
 
   // private functions
 
+  void _cleanUp();
   int _runSingleThreaded();
   int _runMultiThreaded();
   
@@ -209,7 +210,11 @@ private:
 
   int _writeParamsAndCalib(const Beam *beam);
 
-  // sweep and vol info
+  // write any remaining beams on exit
+  
+  int _writeRemainingBeamsOnExit();
+
+// sweep and vol info
 
   void _handleSweepAndVolChange(const Beam *beam);
   void _putEndOfVol(time_t latestTime);

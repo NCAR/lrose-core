@@ -505,10 +505,10 @@ int Dsr2Radx::_processRay(RadxRay *ray)
   
   if (_params.debug) {
     int nPrintFreq = 90;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      nPrintFreq = 10;
-    } else if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       nPrintFreq = 1;
+    } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+      nPrintFreq = 10;
     }
     if ((_nRaysRead > 0) && (_nRaysRead % nPrintFreq == 0) &&
         (int) _vol.getNRays() != _nCheckPrint) {

@@ -486,7 +486,7 @@ Beam *BeamReader::getNextBeam()
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     fprintf(stderr, 
-            "==>> New beam, el, start, end, rate, az, start, end, az, nSamp, nEff: "
+            "==>> New beam, el: mid, start, end, rate, az: mid, start, end, rate, nSamp, nEff: "
             "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %6.2f %6.2f %4d %4d\n",
             _el, startEl, endEl, _beamElRate,
             _az, startAz, endAz, _beamAzRate,

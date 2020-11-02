@@ -64,7 +64,6 @@ Thread::Thread()
   _exitFlag = false;
 
   _app = NULL;
-  _beam = NULL;
   _returnCode = 0;
 
 }
@@ -204,6 +203,9 @@ ComputeThread::ComputeThread()
   nSamplesRegrStag = 0;
   regrStagM = 0;
   regrStagN = 0;
+
+  _beam = NULL;
+  _beamReadyForWrite = false;
 
 }
 

@@ -185,6 +185,7 @@ protected:
   RadxRay *_savedRay;  // save 1 ray, so we can dermine the event flags
                        // by comparing with next ray read in
   bool _rayReady;
+  bool _useSavedRay;
   
   vector<RadxEvent> _events; // events for ray passed to user
   vector<RadxEvent> _savedEvents; // events for saved ray
