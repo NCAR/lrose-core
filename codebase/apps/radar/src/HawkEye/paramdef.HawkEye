@@ -314,8 +314,14 @@ paramdef boolean {
 } use_field_label_in_title;
 
 commentdef {
-  p_header = "INITIAL MAX RANGE";
+  p_header = "SET MAX RANGE";
 }
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the max range to be used for plotting.";
+  p_help = "If FALSE, the max range of the data will be used. If TRUE, max_range_km will override the max range in the data.";
+} set_max_range;
 
 paramdef double {
   p_default = 225.0;

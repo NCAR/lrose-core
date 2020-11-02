@@ -1289,12 +1289,14 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   // do we need to reconfigure the PPI?
 
   _nGates = ray->getNGates();
+
   double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
-  
-  if ((maxRange - _maxRangeKm) > 0.001) {
-    _maxRangeKm = maxRange;
-    _ppi->configureRange(_maxRangeKm);
-    _rhi->configureRange(_maxRangeKm);
+  if (!_params.set_max_range) {
+    if ((maxRange - _maxRangeKm) > 0.001) {
+      _maxRangeKm = maxRange;
+      _ppi->configureRange(_maxRangeKm);
+      _rhi->configureRange(_maxRangeKm);
+    }
   }
 
   // create 2D field data vector

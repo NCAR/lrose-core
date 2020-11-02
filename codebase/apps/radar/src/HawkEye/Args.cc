@@ -133,6 +133,17 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
+    } else if (!strcmp(argv[i], "-max_range")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "max_range_km = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "set_max_range = TRUE;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
     } else if (!strcmp(argv[i], "-instance")) {
       
       if (i < argc - 1) {
@@ -318,6 +329,7 @@ void Args::_usage(ostream &out)
       << "       [ -images_start_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set start time for image generation mode\n"
       << "       [ -instance ?] set instance for procmap\n"
+      << "       [ -max_range ?] set max range in km\n"
       << "       [ -polar ] run in POLAR (PPI/RHI) mode\n"
       << "       [ -realtime] start in realtime mode\n"
       << "       [ -sim_mode] SIMULATED_INPUT mode\n"
