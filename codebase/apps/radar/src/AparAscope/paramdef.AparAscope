@@ -84,12 +84,12 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 1100;
+  p_default = 930;
   p_descr = "Startup width of main window (pixels).";
 } main_window_width;
 
 paramdef int {
-  p_default = 635;
+  p_default = 618;
   p_descr = "Startup height of main window (pixels).";
 } main_window_height;
 

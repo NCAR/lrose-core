@@ -117,12 +117,13 @@ Q_OBJECT
 
   /// Time series plot types.Exactly one of these type
   /// plots will be created.
-  enum TS_PLOT_TYPES {
-    TS_AMPLITUDE_PLOT,  ///<  time series amplitude plot
-    TS_IANDQ_PLOT,      ///<  time series I and Q plot
-    TS_IVSQ_PLOT,       ///<  time series I versus Q plot
-    TS_SPECTRUM_PLOT    ///<  time series power spectrum plot
-  };
+  enum TS_PLOT_TYPES
+    {
+     TS_SPECTRUM_PLOT,    ///<  time series power spectrum plot
+     TS_AMPLITUDE_PLOT,  ///<  time series amplitude plot
+     TS_IANDQ_PLOT,      ///<  time series I and Q plot
+     TS_IVSQ_PLOT       ///<  time series I versus Q plot
+    };
   
 public:
 
@@ -192,10 +193,8 @@ public:
   };
 
   /// Constructor
-  /// params and parent are passed in
 
-  AScope(const Params &params,
-         QWidget* parent = 0);
+  AScope(const Params &params);
 
   /// Destructor
   virtual ~AScope();

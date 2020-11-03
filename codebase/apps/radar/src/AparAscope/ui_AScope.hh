@@ -50,14 +50,14 @@ public:
   QVBoxLayout *verticalLayout;
   QGroupBox *groupBox_2;
   QFormLayout *formLayout;
-  QLabel *label;
+  QLabel *gateNumLabel;
   QLineEdit *_gateNumEditor;
   QLabel *_nGatesLabel;
-  QLabel *label_2;
+  QLabel *blocksizeLabel;
   QComboBox *_blockSizeCombo;
   QCheckBox *_alongBeamCheck;
   QHBoxLayout *hboxLayout2;
-  QLabel *label_3;
+  QLabel *powerLabel;
   QLabel *_powerDB;
   QVBoxLayout *vboxLayout;
   QCheckBox *_windowButton;
@@ -161,13 +161,13 @@ public:
     groupBox_2->setSizePolicy(sizePolicy3);
     formLayout = new QFormLayout(groupBox_2);
     formLayout->setObjectName(QString::fromUtf8("formLayout"));
-    label = new QLabel(groupBox_2);
-    label->setObjectName(QString::fromUtf8("label"));
-    sizePolicy2.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
-    label->setSizePolicy(sizePolicy2);
-    label->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+    gateNumLabel = new QLabel(groupBox_2);
+    gateNumLabel->setObjectName(QString::fromUtf8("gateNumLabel"));
+    sizePolicy2.setHeightForWidth(gateNumLabel->sizePolicy().hasHeightForWidth());
+    gateNumLabel->setSizePolicy(sizePolicy2);
+    gateNumLabel->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
 
-    formLayout->setWidget(0, QFormLayout::LabelRole, label);
+    formLayout->setWidget(0, QFormLayout::LabelRole, gateNumLabel);
 
     _gateNumEditor = new QLineEdit(groupBox_2);
     _gateNumEditor->setObjectName(QString::fromUtf8("_gateNumEditor"));
@@ -179,13 +179,13 @@ public:
 
     formLayout->setWidget(0, QFormLayout::FieldRole, _gateNumEditor);
 
-    label_2 = new QLabel(groupBox_2);
-    label_2->setObjectName(QString::fromUtf8("label_2"));
-    sizePolicy2.setHeightForWidth(label_2->sizePolicy().hasHeightForWidth());
-    label_2->setSizePolicy(sizePolicy2);
-    label_2->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+    blocksizeLabel = new QLabel(groupBox_2);
+    blocksizeLabel->setObjectName(QString::fromUtf8("blocksizeLabel"));
+    sizePolicy2.setHeightForWidth(blocksizeLabel->sizePolicy().hasHeightForWidth());
+    blocksizeLabel->setSizePolicy(sizePolicy2);
+    blocksizeLabel->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
 
-    formLayout->setWidget(1, QFormLayout::LabelRole, label_2);
+    formLayout->setWidget(1, QFormLayout::LabelRole, blocksizeLabel);
 
     _blockSizeCombo = new QComboBox(groupBox_2);
     _blockSizeCombo->setObjectName(QString::fromUtf8("_blockSizeCombo"));
@@ -212,13 +212,13 @@ public:
 #endif
     hboxLayout2->setContentsMargins(0, 0, 0, 0);
     hboxLayout2->setObjectName(QString::fromUtf8("hboxLayout2"));
-    label_3 = new QLabel(AScope);
-    label_3->setObjectName(QString::fromUtf8("label_3"));
-    sizePolicy1.setHeightForWidth(label_3->sizePolicy().hasHeightForWidth());
-    label_3->setSizePolicy(sizePolicy1);
-    label_3->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+    powerLabel = new QLabel(AScope);
+    powerLabel->setObjectName(QString::fromUtf8("powerLabel"));
+    sizePolicy1.setHeightForWidth(powerLabel->sizePolicy().hasHeightForWidth());
+    powerLabel->setSizePolicy(sizePolicy1);
+    powerLabel->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
 
-    hboxLayout2->addWidget(label_3);
+    hboxLayout2->addWidget(powerLabel);
 
     _powerDB = new QLabel(AScope);
     _powerDB->setObjectName(QString::fromUtf8("_powerDB"));
@@ -392,16 +392,16 @@ public:
 #endif // QT_NO_TOOLTIP
     _typeTab->setTabText(_typeTab->indexOf(Channels), QApplication::translate("AScope", "Chan", 0));
     groupBox_2->setTitle(QApplication::translate("AScope", "Display Mode", 0));
-    label->setText(QApplication::translate("AScope", "Gate Number", 0));
+    gateNumLabel->setText(QApplication::translate("AScope", "Gate Number", 0));
 #ifndef QT_NO_TOOLTIP
     _gateNumEditor->setToolTip(QApplication::translate("AScope", "Select the gate for the one gate display.", 0));
 #endif // QT_NO_TOOLTIP
-    label_2->setText(QApplication::translate("AScope", "Block size", 0));
+    blocksizeLabel->setText(QApplication::translate("AScope", "Block size", 0));
 #ifndef QT_NO_TOOLTIP
     _blockSizeCombo->setToolTip(QApplication::translate("AScope", "Set the number of samples for one gate mode.", 0));
 #endif // QT_NO_TOOLTIP
     _alongBeamCheck->setText(QApplication::translate("AScope", "Along Beam", 0));
-    label_3->setText(QApplication::translate("AScope", "Power (DB)", 0));
+    powerLabel->setText(QApplication::translate("AScope", "Power (DB)", 0));
     _powerDB->setText(QApplication::translate("AScope", "0", 0));
 #ifndef QT_NO_TOOLTIP
     _windowButton->setToolTip(QApplication::translate("AScope", "Enable time series windowing for the power spectrum.", 0));

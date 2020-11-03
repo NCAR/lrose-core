@@ -715,7 +715,7 @@
     tt->descr = tdrpStrDup("Startup width of main window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_width - &_start_;
-    tt->single_val.i = 1100;
+    tt->single_val.i = 930;
     tt++;
     
     // Parameter 'main_window_height'
@@ -727,7 +727,7 @@
     tt->descr = tdrpStrDup("Startup height of main window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_height - &_start_;
-    tt->single_val.i = 635;
+    tt->single_val.i = 618;
     tt++;
     
     // Parameter 'main_window_start_x'

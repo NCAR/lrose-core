@@ -66,8 +66,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-AScope::AScope(const Params &params, QWidget* parent) :
-        QWidget(parent),
+AScope::AScope(const Params &params) :
         _params(params),
         _IQplot(true),
         _fftwData(0),
@@ -84,8 +83,17 @@ AScope::AScope(const Params &params, QWidget* parent) :
         _sampleRateHz(10.0e6) {
   
   // Set up our form
+
   setupUi(this);
-  
+
+  // set size and pos
+
+  resize(_params.main_window_width, _params.main_window_height);
+  QPoint pos;
+  pos.setX(_params.main_window_start_x);
+  pos.setY(_params.main_window_start_y);
+  move(pos);
+
   // Let's be reasonable with the refresh rate.
   _refreshRateHz = _params.refresh_hz;
   if (_refreshRateHz < 1.0) {
@@ -106,17 +114,17 @@ AScope::AScope(const Params &params, QWidget* parent) :
   _chanButtonGroup = new QButtonGroup;
   
   // connect the controls
-  connect(_autoScale,       SIGNAL(released()),           this, SLOT(autoScaleSlot()));
-  connect(_gainKnob,        SIGNAL(valueChanged(double)), this, SLOT(gainChangeSlot(double)));
-  connect(_up,              SIGNAL(released()),           this, SLOT(upSlot()));
-  connect(_dn,              SIGNAL(released()),           this, SLOT(dnSlot()));
-  connect(_saveImage,       SIGNAL(released()),           this, SLOT(saveImageSlot()));
-  connect(_pauseButton,     SIGNAL(toggled(bool)),        this, SLOT(pauseSlot(bool)));
-  connect(_windowButton,    SIGNAL(toggled(bool)),        this, SLOT(windowSlot(bool)));
-  connect(_gateNumEditor,      SIGNAL(returnPressed()),      this, SLOT(setGateNumber()));
-  connect(_alongBeamCheck,  SIGNAL(toggled(bool)),        this, SLOT(alongBeamSlot(bool)));
-  connect(_blockSizeCombo,  SIGNAL(activated(int)),       this, SLOT(blockSizeSlot(int)));
-  connect(_chanButtonGroup, SIGNAL(buttonReleased(int)),  this, SLOT(channelSlot(int)));
+  connect(_autoScale, SIGNAL(released()), this, SLOT(autoScaleSlot()));
+  connect(_gainKnob, SIGNAL(valueChanged(double)), this, SLOT(gainChangeSlot(double)));
+  connect(_up, SIGNAL(released()), this, SLOT(upSlot()));
+  connect(_dn, SIGNAL(released()), this, SLOT(dnSlot()));
+  connect(_saveImage, SIGNAL(released()), this, SLOT(saveImageSlot()));
+  connect(_pauseButton, SIGNAL(toggled(bool)), this, SLOT(pauseSlot(bool)));
+  connect(_windowButton, SIGNAL(toggled(bool)), this, SLOT(windowSlot(bool)));
+  connect(_gateNumEditor, SIGNAL(returnPressed()), this, SLOT(setGateNumber()));
+  connect(_alongBeamCheck, SIGNAL(toggled(bool)), this, SLOT(alongBeamSlot(bool)));
+  connect(_blockSizeCombo, SIGNAL(activated(int)), this, SLOT(blockSizeSlot(int)));
+  connect(_chanButtonGroup,SIGNAL(buttonReleased(int)), this, SLOT(channelSlot(int)));
   
   connect(_xGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableXgrid(bool)));
   connect(_yGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableYgrid(bool)));
@@ -156,9 +164,8 @@ AScope::AScope(const Params &params, QWidget* parent) :
   _redPalette = _greenPalette;
   _redPalette.setColor(this->backgroundRole(), QColor("red"));
 
-  // The initial plot type will be I and Q timeseries
-  plotTypeSlot(TS_IANDQ_PLOT);
-
+  // The initial plot type will be a spectrum
+  plotTypeSlot(TS_SPECTRUM_PLOT);
 
   // start the statistics timer
   int interval = (int)(1000/_refreshRateHz);
@@ -452,10 +459,12 @@ double AScope::powerSpectrum(
 ////////////////////////////////////////////////////////////////////
 void AScope::plotTypeSlot(int plotType) 
 {
-
+  
+  _tsPlotType = (TS_PLOT_TYPES) plotType;
+  
   // find out the index of the current page
   int pageNum = _typeTab->currentIndex();
-
+  
   // get the radio button id of the currently selected button
   // on that page.
   int ptype = _tabButtonGroups[pageNum]->checkedId();
@@ -984,5 +993,7 @@ QFrame* AScope::userFrame()
 {
   return _userFrame;
 }
+
+
 
 
