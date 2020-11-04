@@ -436,6 +436,18 @@ void BscanWidget::addBeam(const RadxRay *ray,
                           const std::vector< DisplayField* > &fields)
 {
 
+  // check if time went backwards, and if so clear the beam vector
+
+  if (_beams.size() > 0) {
+    const Beam *prevBeam = _beams[_beams.size() - 1];
+    const RadxRay *prevRay = prevBeam->getRay();
+    RadxTime prevTime = prevRay->getRadxTime();
+    RadxTime thisTime = ray->getRadxTime();
+    if (thisTime < prevTime) {
+      clear();
+    }
+  }
+  
   // Create the new beam, to keep track of the display information.
   // Beam start and stop angles are adjusted here so that they always 
   // increase clockwise. Likewise, if a beam crosses the 0 degree boundary,
