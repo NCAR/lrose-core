@@ -248,7 +248,7 @@ void AScope::initBlockSizes()
   // initialize items that depend on the block size selection
   // (fftw and hamming coefficients)
   _blockSizeCombo->setCurrentIndex(3);
-  blockSizeSlot(5);
+  blockSizeSlot(3);
 
 }
 
@@ -868,7 +868,7 @@ void AScope::blockSizeSlot(int index)
   unsigned int size = _blockSizeChoices[index];
 
   // Reconfigure fftw if the size has changed
-  if (size != _blockSize) {
+  if (size != _blockSize || _fftwData == NULL) {
     initFFT(size);
     // save the size
     _blockSize = size;

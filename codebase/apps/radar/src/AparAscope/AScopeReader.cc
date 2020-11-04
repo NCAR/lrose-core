@@ -131,11 +131,12 @@ int AScopeReader::_readData()
   // read data until nSamples pulses have been gathered
   
   _nSamples = _scope.getBlockSize();
-  _trimPulseQueues();
   
   MemBuf buf;
   while (true) {
     
+    _trimPulseQueues();
+
     // read in a pulse
     
     AparTsPulse *pulse = _getNextPulse();
@@ -146,6 +147,7 @@ int AScopeReader::_readData()
     _pulseCount++;
     if (pulse->getIq0() == NULL) {
       cerr << "WARNING - pulse has NULL data" << endl;
+      delete pulse;
       continue;
     }
 
@@ -237,25 +239,25 @@ void AScopeReader::_trimPulseQueues()
 
 {
 
-  if (_pulsesHCo.size() > _nSamples - 1) {
+  while (_pulsesHCo.size() > _nSamples - 1) {
     AparTsPulse *pulse = _pulsesHCo.front();
     delete pulse;
     _pulsesHCo.pop_front();
   }
 
-  if (_pulsesVCo.size() > _nSamples - 1) {
+  while (_pulsesVCo.size() > _nSamples - 1) {
     AparTsPulse *pulse = _pulsesVCo.front();
     delete pulse;
     _pulsesVCo.pop_front();
   }
 
-  if (_pulsesHx.size() > _nSamples - 1) {
+  while (_pulsesHx.size() > _nSamples - 1) {
     AparTsPulse *pulse = _pulsesHx.front();
     delete pulse;
     _pulsesHx.pop_front();
   }
 
-  if (_pulsesVx.size() > _nSamples - 1) {
+  while (_pulsesVx.size() > _nSamples - 1) {
     AparTsPulse *pulse = _pulsesVx.front();
     delete pulse;
     _pulsesVx.pop_front();
