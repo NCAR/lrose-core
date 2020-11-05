@@ -668,3 +668,25 @@ void ConvStrat::ComputeTexture::run()
   
 }
 
+////////////////////////////////////////////////////////////////////
+// Compute the radius of convective influence from the background
+// reflectivity.
+// Given definite convection at a point (see above),
+// we set all points within the computed radius to be convective.
+
+double ConvStrat::getConvRadiusKm(double backgroundDbz) 
+{
+  if (!_computeConvRadius) {
+    return _convRadiusKm;
+  }
+  if (backgroundDbz < _dbzForMinRadius) {
+    return _minConvRadiusKm;
+  }
+  if (backgroundDbz > _dbzForMaxRadius) {
+    return _maxConvRadiusKm;
+  }
+  double radius = _minConvRadiusKm +
+    (backgroundDbz - _dbzForMinRadius) * _radiusSlope;
+  return radius;
+}
+

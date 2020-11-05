@@ -132,7 +132,18 @@ public:
     _dbzForMinRadius = dbzForMinRadius;
     _dbzForMaxRadius = dbzForMaxRadius;
     _backgroundDbzRadiusKm = backgroundDbzRadiusKm;
+    _deltaRadius = _maxConvRadiusKm - _minConvRadiusKm;
+    _deltaBackgroundDbz = _dbzForMaxRadius -_dbzForMinRadius;
+    _radiusSlope = _deltaRadius / _deltaBackgroundDbz;
   }
+
+  ////////////////////////////////////////////////////////////////////
+  // Compute the radius of convective influence from the background
+  // reflectivity.
+  // Given definite convection at a point (see above),
+  // we set all points within the computed radius to be convective.
+  
+  double getConvRadiusKm(double backgroundDbz);
 
   ////////////////////////////////////////////////////////////////////
   // Radius for texture analysis (km).  We determine the reflectivity
@@ -264,6 +275,9 @@ private:
   double _dbzForMinRadius;  // background dbz for min radius
   double _dbzForMaxRadius;  // background dbz for max radius
   double _backgroundDbzRadiusKm;  // radius for computing background dbz
+  double _deltaRadius;
+  double _deltaBackgroundDbz;
+  double _radiusSlope;
 
   vector<ssize_t> _textureKernelOffsets;
   vector<ssize_t> _convKernelOffsets;
