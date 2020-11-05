@@ -59,10 +59,17 @@ ConvStrat::ConvStrat()
   _maxValidHtKm = 30.0;
   _minValidDbz = 10.0;
   _dbzForDefiniteConvection = 53;
-  _convectiveRadiusKm = 5.0;
   _textureRadiusKm = 5.0;
   _minValidFractionForTexture = 0.33; 
   _minTextureForConvection = 15.0; 
+
+  _convRadiusKm = 5.0;
+  _computeConvRadius = true;
+  _minConvRadiusKm = 1.0;
+  _maxConvRadiusKm = 5.0;
+  _dbzForMinRadius = 22.5;
+  _dbzForMaxRadius = 42.5;
+  _backgroundDbzRadiusKm = 11.0;
 
   _nx = _ny = 0;
   _dx = _dy = 0.0;
@@ -493,8 +500,8 @@ void ConvStrat::_computeKernels()
 
   _convKernelOffsets.clear();
 
-  _nyConv = (int) floor(_convectiveRadiusKm / _dy + 0.5);
-  _nxConv = (int) floor(_convectiveRadiusKm / _dx + 0.5);
+  _nyConv = (int) floor(_convRadiusKm / _dy + 0.5);
+  _nxConv = (int) floor(_convRadiusKm / _dx + 0.5);
 
   if (_verbose) {
     cerr << "Convective kernel size:" << endl;
@@ -507,7 +514,7 @@ void ConvStrat::_computeKernels()
     for (int jdx = -_nxConv; jdx <= _nxConv; jdx++) {
       double xx = jdx * _dx;
       double radius = sqrt(yy * yy + xx * xx);
-      if (radius <= _convectiveRadiusKm) {
+      if (radius <= _convRadiusKm) {
         ssize_t offset = jdx + jdy * _nx;
         _convKernelOffsets.push_back(offset);
       }
@@ -529,7 +536,7 @@ void ConvStrat::_printSettings(ostream &out)
   out << "  _maxValidHtKm: " << _maxValidHtKm << endl;
   out << "  _minValidDbz: " << _minValidDbz << endl;
   out << "  _dbzForDefiniteConvection: " << _dbzForDefiniteConvection << endl;
-  out << "  _convectiveRadiusKm: " << _convectiveRadiusKm << endl;
+  out << "  _convRadiusKm: " << _convRadiusKm << endl;
   out << "  _textureRadiusKm: " << _textureRadiusKm << endl;
   out << "  _minValidFractionForTexture: " << _minValidFractionForTexture << endl;
   out << "  _minTextureForConvection: " << _minTextureForConvection << endl;

@@ -99,11 +99,40 @@ public:
   }
 
   ////////////////////////////////////////////////////////////////////
-  // Radius of convective influence (km).  Given definite convection
-  // at a point (see above), we set all points within this radius to
-  // be convective.
+  // Specify the radius of convective influence (km).
+  // Given definite convection at a point (see above),
+  // we set all points within this radius to be convective.
 
-  void setConvectiveRadiusKm(double val) { _convectiveRadiusKm = val; }
+  void setConvectiveRadiusKm(double val) {
+    _computeConvRadius = false; // do not compute it, use this value
+    _convRadiusKm = val; // specified radius
+  }
+  
+  ////////////////////////////////////////////////////////////////////
+  // Compute the radius of convective influence from the background
+  // reflectivity.
+  // Given definite convection at a point (see above),
+  // we set all points within the computed radius to be convective.
+  //
+  //
+  // minConvRadiusKm = min convective radius if computed
+  // maxConvRadiusKm = max convective radius if computed
+  // dbzForMinRadius = background dbz for min radius
+  // dbzForMaxRadius = background dbz for max radius
+  // backgroundDbzRadiusKm = kernel radius for computing background dbz
+
+  void setComputeConvRadius(double minConvRadiusKm,
+                            double maxConvRadiusKm,
+                            double dbzForMinRadius,
+                            double dbzForMaxRadius,
+                            double backgroundDbzRadiusKm) {
+    _computeConvRadius = true;
+    _minConvRadiusKm = minConvRadiusKm;
+    _maxConvRadiusKm = maxConvRadiusKm;
+    _dbzForMinRadius = dbzForMinRadius;
+    _dbzForMaxRadius = dbzForMaxRadius;
+    _backgroundDbzRadiusKm = backgroundDbzRadiusKm;
+  }
 
   ////////////////////////////////////////////////////////////////////
   // Radius for texture analysis (km).  We determine the reflectivity
@@ -224,10 +253,17 @@ private:
   double _maxValidHtKm;
   double _minValidDbz;
   double _dbzForDefiniteConvection;
-  double _convectiveRadiusKm;
   double _textureRadiusKm;
   double _minValidFractionForTexture;
   double _minTextureForConvection;
+
+  bool _computeConvRadius;  // compute radius from background dbz
+  double _convRadiusKm;     // use if _computeConvRadius is false
+  double _minConvRadiusKm;  // min convective radius if computed
+  double _maxConvRadiusKm;  // max convective radius if computed
+  double _dbzForMinRadius;  // background dbz for min radius
+  double _dbzForMaxRadius;  // background dbz for max radius
+  double _backgroundDbzRadiusKm;  // radius for computing background dbz
 
   vector<ssize_t> _textureKernelOffsets;
   vector<ssize_t> _convKernelOffsets;
