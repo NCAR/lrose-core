@@ -547,7 +547,7 @@ map_ptrs( char * buf, int size, int * bytes_used )
 		    }
 		}
 	    }
-	    strncpy( this->celv->cell_spacing_des, "CELV", 4 );
+	    memcpy( this->celv->cell_spacing_des, "CELV", 4 );
 	    this->celv->cell_des_len =
 		this->celv->number_cells * sizeof( float ) + 12;
 	    gotta_celv = YES;
@@ -605,7 +605,7 @@ map_ptrs( char * buf, int size, int * bytes_used )
 	    if( tcc < MAX_COMMENTS ) {
 		if( !this->comms[tcc] ) {
 		    commx = this->comms[tcc] = new comment_d;
-		    strncpy( commx->comment_des, "COMM", 4 );
+		    memcpy( commx->comment_des, "COMM", 4 );
 		    commx->comment_des_length = sizeof( *comm );
 		}
 		else

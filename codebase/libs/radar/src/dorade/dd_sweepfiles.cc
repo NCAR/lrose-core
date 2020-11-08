@@ -52,12 +52,12 @@ parameter_info( const char * name, PARAMETER * parm )
 {
     int id;
 
-    strncpy(parm->parameter_name, "          ", 8);
+    memcpy(parm->parameter_name, "          ", 8);
     int nn = (strlen(name) < 8) ? strlen(name) : 8;
     strncpy( parm->parameter_name, name, nn );
 
     parm->binary_format = DD_16_BITS;
-    strncpy(parm->threshold_field, "         ", 8);
+    memcpy(parm->threshold_field, "         ", 8);
     parm->threshold_value = EMPTY_FLAG;      
     parm->parameter_scale = 100.;      
     parm->parameter_bias = 0.;       
@@ -567,7 +567,7 @@ dd_sweepfile( int min_rays) {
     free_at = local_buf;
 
     sswb = new super_SWIB;
-    strncpy((char *)sswb, "SSWB", 4);
+    memcpy(sswb, "SSWB", 4);
     sswb->sizeof_struct = sizeof(*sswb);
     sswb->sizeof_file = 0;
     sswb->version_num = 1;
@@ -588,12 +588,12 @@ dd_sweepfile( int min_rays) {
     tmp_parm = new PARAMETER;
 
     csfd = new CELLSPACINGFP;
-    strncpy( csfd->cell_spacing_des, "CSFD", 4 );
+    memcpy( csfd->cell_spacing_des, "CSFD", 4 );
     csfd->cell_spacing_des_len = sizeof(*csfd);
 
 
     null_des = new generic_descriptor;
-    strncpy((char *)null_des->name_struct, "NULL", 4);
+    memcpy(null_des->name_struct, "NULL", 4);
     null_des->sizeof_struct = sizeof(*null_des);
 
     compressed_data = free_at;
@@ -649,7 +649,7 @@ begin_sweepfile(dd_mapper * ddmpr, const char * directory,  const char * qualifi
 
     ddm = ddmpr;
     swp_count_out++;
-    char full_path_name[256];
+    char full_path_name[2048];
     int ii, nn;
 
     int vm = (version_num >= 0) ? version_num * 1000 + ddm->millisecond()
@@ -717,9 +717,9 @@ begin_sweepfile(dd_mapper * ddmpr, const char * directory,  const char * qualifi
     //    sfile = new std::ofstream(full_path_name, std::ios::in | std::ios::out);
     sfile = new std::ofstream (full_path_name);
     if(sfile->fail()) {
-	char message[256];
-	sprintf(message, "Unable to open sweepfile name\n%s:\t%s\n"
-		, full_path_name, strerror(errno));
+	char message[4096];
+	snprintf(message, 4096, "Unable to open sweepfile name\n%s:\t%s\n"
+                 , full_path_name, strerror(errno));
 	dd_Testify(message);
 	delete sfile;
 	sfile = 0;
@@ -884,10 +884,10 @@ end_sweepfile( int kill_it )	// may be passed a kill flag
 
     // move the file to its permanent name
     
-    strcpy(permanent_name, dir_name);
-    strcat(permanent_name, filename);
-    strcat(permanent_name, ascii_fixed_angle);
-    strcat(permanent_name, the_qualifier);
+    strncpy(permanent_name, dir_name, 128);
+    strncat(permanent_name, filename, 128);
+    strncat(permanent_name, ascii_fixed_angle, 32);
+    strncat(permanent_name, the_qualifier, 128);
 
 # ifdef obsolete
     strcpy(shell_command, "mv ");
@@ -1033,7 +1033,7 @@ enlarge_rotang_table()
     }
     else {			// initializing
 	rktb = (rot_ang_table *)aa;
-	strncpy(rktb->name_struct, "RKTB", 4);
+	memcpy(rktb->name_struct, "RKTB", 4);
 	rktb->ndx_que_size = angle_ndx_size;
 	rktb->angle2ndx = (float)angle_ndx_size/360.;
 	rktb->angle_table_offset = mm;
@@ -1450,7 +1450,7 @@ dd_mem_sweepfile( int max_file_size, int min_rays ) {
     free_at = local_buf + 2 * 1024;
 
     sswb = new super_SWIB;
-    strncpy((char *)sswb, "SSWB", 4);
+    memcpy(sswb, "SSWB", 4);
     sswb->sizeof_struct = sizeof(*sswb);
     sswb->sizeof_file = 0;
     sswb->version_num = 1;
@@ -1464,7 +1464,7 @@ dd_mem_sweepfile( int max_file_size, int min_rays ) {
     swib = new SWEEPINFO;
 
     null_des = new generic_descriptor;
-    strncpy((char *)null_des->name_struct, "NULL", 4);
+    memcpy(null_des->name_struct, "NULL", 4);
     null_des->sizeof_struct = sizeof(*null_des);
 
 
@@ -1757,7 +1757,7 @@ enlarge_rotang_table() {
     }
     else {			// initializing
 	rktb = (rot_ang_table *)aa;
-	strncpy(rktb->name_struct, "RKTB", 4);
+	memcpy(rktb->name_struct, "RKTB", 4);
 	rktb->ndx_que_size = angle_ndx_size;
 	rktb->angle2ndx = (float)angle_ndx_size/360.;
 	rktb->angle_table_offset = mm;
