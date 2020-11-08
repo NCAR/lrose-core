@@ -5611,7 +5611,8 @@ void RadarMoments::expandStagIq(int nSamples,
   // pulses to make a pseudo-constant-prt series
   
   int kk = 0;
-  memset(iqExpanded, 0, nExpanded * sizeof(RadarComplex_t));
+  RadarComplex::clear(iqExpanded, nExpanded);
+  // memset(iqExpanded, 0, nExpanded * sizeof(RadarComplex_t));
   for (int ii = 0; ii < nSamples; ii++) {
     iqExpanded[kk] = iq[ii];
     if (ii % 2 == 0) {

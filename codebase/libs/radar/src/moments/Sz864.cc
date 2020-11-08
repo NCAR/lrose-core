@@ -566,13 +566,11 @@ void Sz864::_initDeconMatrix(int notchWidth,
   _subCode(notchedCode21, _modCode21, cohered21);
   
   // compute cohered spectra
-  
+
   TaArray<RadarComplex_t> coheredSpec12_;
   RadarComplex_t *coheredSpec12 = coheredSpec12_.alloc(_nSamples);
-  memset(coheredSpec12, 0, _nSamples * sizeof(RadarComplex_t));
   TaArray<RadarComplex_t> coheredSpec21_;
   RadarComplex_t *coheredSpec21 = coheredSpec21_.alloc(_nSamples);
-  memset(coheredSpec21, 0, _nSamples * sizeof(RadarComplex_t));
   fft.fwd(cohered12, coheredSpec12);
   fft.fwd(cohered21, coheredSpec21);
   
@@ -1210,9 +1208,12 @@ void Sz864::_applyNotch(int startIndex,
   if (iStart >= 0 && iEnd < _nSamples) {
 
     // notch does not wrap, copy array then zero out the notch
+
+    RadarComplex::copy(notched, in, _nSamples);
+    RadarComplex::clear(notched + iStart, notchWidth);
     
-    memcpy(notched, in, _nSamples * sizeof(RadarComplex_t));
-    memset(notched + iStart, 0, notchWidth * sizeof(RadarComplex_t));
+    // memcpy(notched, in, _nSamples * sizeof(RadarComplex_t));
+    // memset(notched + iStart, 0, notchWidth * sizeof(RadarComplex_t));
     
     if (_debug) {
       cerr << "--> notch does not wrap, do memcpy" << endl;
@@ -1232,10 +1233,13 @@ void Sz864::_applyNotch(int startIndex,
       // copyStart = _nSamples - (iEnd + 1);
       copyStart = iEnd - _nSamples + 1;
     }
-    
-    memset(notched, 0, _nSamples * sizeof(RadarComplex_t));
-    memcpy(notched + copyStart, in + copyStart,
-	   powerWidth * sizeof(RadarComplex_t));
+
+    RadarComplex::clear(notched, _nSamples);
+    RadarComplex::copy(notched + copyStart, in + copyStart, powerWidth);
+
+    // memset(notched, 0, _nSamples * sizeof(RadarComplex_t));
+    // memcpy(notched + copyStart, in + copyStart,
+    //        powerWidth * sizeof(RadarComplex_t));
 
     if (_debug) {
       cerr << "--> notch does wrap" << endl;

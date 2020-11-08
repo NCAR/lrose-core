@@ -465,6 +465,31 @@ void RadarComplex::loadMag(const RadarComplex_t *in, double *mag, int len)
 
 }
 
+/////////////////////////////////////////////
+// clear an array of RadarComplex_t
+
+void RadarComplex::clear(RadarComplex_t *cc,
+                         size_t nn)
+  
+{
+  for (size_t ii = 0; ii < nn; ii++) {
+    cc[ii].clear();
+  }
+}
+
+/////////////////////////////////////////////
+// copy an array of RadarComplex_t
+
+void RadarComplex::copy(RadarComplex_t *dest,
+                        const RadarComplex_t *src,
+                        size_t nn)
+  
+{
+  for (size_t ii = 0; ii < nn; ii++) {
+    dest[ii] = src[ii];
+  }
+}
+
 ///////////////////////////////
 // print IQ time series
 //

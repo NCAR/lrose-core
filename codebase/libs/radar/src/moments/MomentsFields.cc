@@ -234,18 +234,18 @@ void MomentsFields::init()
   lag0_vc = missingDouble;
   lag0_vx = missingDouble;
 
-  memset(&lag0_vchx, 0, sizeof(RadarComplex_t));
-  memset(&lag0_hcvx, 0, sizeof(RadarComplex_t));
-  memset(&lag1_hc, 0, sizeof(RadarComplex_t));
-  memset(&lag1_vc, 0, sizeof(RadarComplex_t));
-  memset(&lag1_hcvc, 0, sizeof(RadarComplex_t));
-  memset(&lag1_vchc, 0, sizeof(RadarComplex_t));
-  memset(&lag1_vxhx, 0, sizeof(RadarComplex_t));
-  memset(&lag2_hc, 0, sizeof(RadarComplex_t));
-  memset(&lag2_vc, 0, sizeof(RadarComplex_t));
-  memset(&lag3_hc, 0, sizeof(RadarComplex_t));
-  memset(&lag3_vc, 0, sizeof(RadarComplex_t));
-  memset(&rvvhh0, 0, sizeof(RadarComplex_t));
+  lag0_vchx.clear();
+  lag0_hcvx.clear();
+  lag1_hc.clear();
+  lag1_vc.clear();
+  lag1_hcvc.clear();
+  lag1_vchc.clear();
+  lag1_vxhx.clear();
+  lag2_hc.clear();
+  lag2_vc.clear();
+  lag3_hc.clear();
+  lag3_vc.clear();
+  rvvhh0.clear();
 
   // covariances staggered
 
@@ -254,18 +254,18 @@ void MomentsFields::init()
   lag0_hc_long = missingDouble;
   lag0_vc_long = missingDouble;
 
-  memset(&lag1_hc_long, 0, sizeof(RadarComplex_t));
-  memset(&lag1_vc_long, 0, sizeof(RadarComplex_t));
-  memset(&lag1_hc_short, 0, sizeof(RadarComplex_t));
-  memset(&lag1_vc_short, 0, sizeof(RadarComplex_t));
+  lag1_hc_long.clear();
+  lag1_vc_long.clear();
+  lag1_hc_short.clear();
+  lag1_vc_short.clear();
 
-  memset(&lag1_hc_short_to_long, 0, sizeof(RadarComplex_t));
-  memset(&lag1_vc_short_to_long, 0, sizeof(RadarComplex_t));
-  memset(&lag1_hc_long_to_short, 0, sizeof(RadarComplex_t));
-  memset(&lag1_vc_long_to_short, 0, sizeof(RadarComplex_t));
+  lag1_hc_short_to_long.clear();
+  lag1_vc_short_to_long.clear();
+  lag1_hc_long_to_short.clear();
+  lag1_vc_long_to_short.clear();
 
-  memset(&rvvhh0_long, 0, sizeof(RadarComplex_t));
-  memset(&rvvhh0_short, 0, sizeof(RadarComplex_t));
+  rvvhh0_long.clear();
+  rvvhh0_short.clear();
 
   // covariances as log power and phase
 
@@ -355,7 +355,7 @@ void MomentsFields::init()
   dbm_for_noise = missingDouble;
   dbm_sdev = missingDouble;
   ncp_mean = missingDouble;
-  memset(&phase_for_noise, 0, sizeof(RadarComplex_t));
+  phase_for_noise.clear();
   accum_phase_change = 0.0;
   phase_change_error = 0.0;
   

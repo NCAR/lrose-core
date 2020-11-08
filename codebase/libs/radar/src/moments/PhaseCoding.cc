@@ -692,8 +692,11 @@ void PhaseCoding::_applyNotch(int startIndex,
 
     // notch does not wrap, copy array then zero out the notch
     
-    memcpy(notched, in, _nSamples * sizeof(RadarComplex_t));
-    memset(notched + iStart, 0, notchWidth * sizeof(RadarComplex_t));
+    RadarComplex::copy(notched, in, _nSamples);
+    RadarComplex::clear(notched + iStart, notchWidth);
+      
+    // memcpy(notched, in, _nSamples * sizeof(RadarComplex_t));
+    // memset(notched + iStart, 0, notchWidth * sizeof(RadarComplex_t));
     
     if (_debug) {
       cerr << "--> notch does not wrap, do memcpy" << endl;
@@ -713,10 +716,13 @@ void PhaseCoding::_applyNotch(int startIndex,
       // copyStart = _nSamples - (iEnd + 1);
       copyStart = iEnd - _nSamples + 1;
     }
+
+    RadarComplex::clear(notched, _nSamples);
+    RadarComplex::copy(notched + copyStart, in + copyStart, powerWidth);
     
-    memset(notched, 0, _nSamples * sizeof(RadarComplex_t));
-    memcpy(notched + copyStart, in + copyStart,
-	   powerWidth * sizeof(RadarComplex_t));
+    // memset(notched, 0, _nSamples * sizeof(RadarComplex_t));
+    // memcpy(notched + copyStart, in + copyStart,
+    //        powerWidth * sizeof(RadarComplex_t));
 
     if (_debug) {
       cerr << "--> notch does wrap" << endl;

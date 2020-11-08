@@ -201,6 +201,17 @@ public:
   
   static void loadMag(const RadarComplex_t *in, double *mag, int len);
 
+  // clear an array
+  
+  static void clear(RadarComplex_t *cc,
+                    size_t nn);
+
+  // copy an array of RadarComplex_t
+  
+  static void copy(RadarComplex_t *dest,
+                   const RadarComplex_t *src,
+                   size_t nn);
+  
   // print IQ time series
   // 3 columns are printed: n, i, q
   // An optional header is printed, labelling the columns

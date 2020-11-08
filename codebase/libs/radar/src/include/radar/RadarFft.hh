@@ -87,7 +87,26 @@ public:
   
   void unshift(RadarComplex_t *spectrum) const;
   
-  // get references to sin and cos arrays
+  // copy between RadarComplex_t and fftw_complex
+  
+  static void copy(fftw_complex *dest,
+                   const RadarComplex_t *src,
+                   size_t nn);
+  
+  static void copy(RadarComplex_t *dest,
+                   const fftw_complex *src,
+                   size_t nn);
+  
+  static void copy(RadarComplex_t *dest,
+                   const RadarComplex_t *src,
+                   size_t nn);
+
+  static void copy(fftw_complex *dest,
+                   const fftw_complex *src,
+                   size_t nn);
+  
+
+// get references to sin and cos arrays
   // will be loaded as required
 
   const vector<vector<double> > &getCosArray() const;

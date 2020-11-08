@@ -213,10 +213,14 @@ void RadarFft::shift(RadarComplex_t *spectrum) const
 
   int nRight = _n / 2;
   int nLeft = _n - nRight;
+
+  RadarFft::copy(_tmp, spectrum, nLeft);
+  RadarFft::copy(spectrum, spectrum + nLeft, nRight);
+  RadarFft::copy(spectrum + nRight, _tmp, nLeft);
   
-  memcpy(_tmp, spectrum, nLeft * sizeof(RadarComplex_t));
-  memcpy(spectrum, spectrum + nLeft, nRight * sizeof(RadarComplex_t));
-  memcpy(spectrum + nRight, _tmp, nLeft * sizeof(RadarComplex_t));
+  // memcpy(_tmp, spectrum, nLeft * sizeof(RadarComplex_t));
+  // memcpy(spectrum, spectrum + nLeft, nRight * sizeof(RadarComplex_t));
+  // memcpy(spectrum + nRight, _tmp, nLeft * sizeof(RadarComplex_t));
 
 }
 
@@ -234,9 +238,13 @@ void RadarFft::unshift(RadarComplex_t *spectrum) const
   int nRight = _n / 2;
   int nLeft = _n - nRight;
   
-  memcpy(_tmp, spectrum, nRight * sizeof(RadarComplex_t));
-  memcpy(spectrum, spectrum + nRight, nLeft * sizeof(RadarComplex_t));
-  memcpy(spectrum + nLeft, _tmp, nRight * sizeof(RadarComplex_t));
+  RadarFft::copy(_tmp, spectrum, nRight);
+  RadarFft::copy(spectrum, spectrum + nRight, nLeft);
+  RadarFft::copy(spectrum + nLeft, _tmp, nRight);
+  
+  // memcpy(_tmp, spectrum, nRight * sizeof(RadarComplex_t));
+  // memcpy(spectrum, spectrum + nRight, nLeft * sizeof(RadarComplex_t));
+  // memcpy(spectrum + nLeft, _tmp, nRight * sizeof(RadarComplex_t));
 
 }
 
@@ -292,5 +300,51 @@ const vector<vector<double> > &RadarFft::getSinArray() const
   
   return _sinArray;
 
+}
+
+/////////////////////////////////////////////
+// copy between RadarComplex_t and fftw_complex
+
+void RadarFft::copy(fftw_complex *dest,
+                    const RadarComplex_t *src,
+                    size_t nn)
+  
+{
+  for (size_t ii = 0; ii < nn; ii++) {
+    dest[ii][0] = src[ii].re;
+    dest[ii][1] = src[ii].im;
+  }
+}
+
+void RadarFft::copy(RadarComplex_t *dest,
+                    const fftw_complex *src,
+                    size_t nn)
+  
+{
+  for (size_t ii = 0; ii < nn; ii++) {
+    dest[ii].re = src[ii][0];
+    dest[ii].im = src[ii][1];
+  }
+}
+
+void RadarFft::copy(RadarComplex_t *dest,
+                    const RadarComplex_t *src,
+                    size_t nn)
+  
+{
+  for (size_t ii = 0; ii < nn; ii++) {
+    dest[ii] = src[ii];
+  }
+}
+
+void RadarFft::copy(fftw_complex *dest,
+                    const fftw_complex *src,
+                    size_t nn)
+  
+{
+  for (size_t ii = 0; ii < nn; ii++) {
+    dest[ii][0] = src[ii][0];
+    dest[ii][1] = src[ii][1];
+  }
 }
 
