@@ -217,7 +217,7 @@ private:
     char 	      dir_name[128];
     char 	      filename[128];
     char 	      tmp_filename[128];
-    char              permanent_name[256];
+    char              permanent_name[1024];
     char              the_qualifier[128];
     char              ascii_fixed_angle[32];
     generic_descriptor * null_des;
