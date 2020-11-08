@@ -166,7 +166,7 @@ int Egm2008::_readNetcdf(const string &path)
     xDim = file.getDim("x0");
     nX = xDim.getSize();
 
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
 
     cerr << "ERROR - Egm2008::_readNetcdf" << endl;
     cerr << "  Cannot read dimensions: " << path << endl;

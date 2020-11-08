@@ -148,12 +148,12 @@ double BeamHeight::computeHtKm(double elDeg, double slantRangeKm) const
   // find location in cache
 
   int iel = (int) ((elDeg - _htCacheStartElevDeg) / _htCacheDeltaElevDeg + 0.5);
-  if (iel < 0 || iel >= _htCache_.sizeMajor()) {
+  if (iel < 0 || iel >= (int) _htCache_.sizeMajor()) {
     // outside valid range of cache, compute on the fly
     return _computeHtKm(elDeg, slantRangeKm);
   }
   int irng = (int) ((elDeg - _htCacheStartElevDeg) / _htCacheDeltaElevDeg + 0.5);
-  if (irng < 0 || irng >= _htCache_.sizeMinor()) {
+  if (irng < 0 || irng >= (int) _htCache_.sizeMinor()) {
     // outside valid range of cache, compute on the fly
     return _computeHtKm(elDeg, slantRangeKm);
   }
