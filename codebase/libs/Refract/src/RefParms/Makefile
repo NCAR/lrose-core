@@ -6,15 +6,15 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-LOC_INC_DIR = ../include
-MY_CPPCHECKFLAGS = -E RefParams.hh -E RefParams.cc -E ../include/Refract/RefParams.hh
+LOC_INCLUDES = -I../include
+LOC_CFLAGS =
+TARGET_FILE = ../libRefract.a
 
-LOC_CPPC_CFLAGS = -I$(LOC_INC_DIR) -Wall 
-LOC_CFLAGS = $(LOC_CPPC_CFLAGS)
+#
+# file lists
+#
 
-MODULE_TYPE=library
-TARGET_FILE= ../libRefract.a
-HDRS = 
+HDRS =
 
 CPPC_SRCS = \
 	RefParams.cc \
@@ -23,14 +23,23 @@ CPPC_SRCS = \
 #
 # general targets
 #
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_targets
 
-RefParams.hh: RefParams.cc
-	$(CP) RefParams.hh ../include/Refract
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
+
+#
+# local targets
+#
+
 RefParams.cc: paramdef.Refract
-	tdrp_gen -f paramdef.Refract -c++ -class RefParams -add_ncar_copyright
-	$(CP) RefParams.hh ../include/Refract
+	tdrp_gen -f paramdef.Ref -c++ -class RefParams -lib Refract -add_ncar_copyright
+	/bin/mv -f RefParams.hh ../include/Refract
+
+clean_tdrp:
+	$(RM) RefParams.cc ../include/Refract/RefParams.hh
+
+depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
