@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// ConvStrat.cc
+// ConvStratFinder.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,7 +30,7 @@
 //
 ////////////////////////////////////////////////////////////////////
 //
-// ConvStrat partitions stratiform and convective regions in a
+// ConvStratFinder partitions stratiform and convective regions in a
 // Cartesian radar volume
 //
 /////////////////////////////////////////////////////////////////////
@@ -41,14 +41,14 @@
 #include <cstring>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
-#include <radar/ConvStrat.hh>
+#include <radar/ConvStratFinder.hh>
 using namespace std;
 
-const fl32 ConvStrat::_missing = -9999.0;
+const fl32 ConvStratFinder::_missing = -9999.0;
 
 // Constructor
 
-ConvStrat::ConvStrat()
+ConvStratFinder::ConvStratFinder()
 
 {
 
@@ -81,7 +81,7 @@ ConvStrat::ConvStrat()
 
 // destructor
 
-ConvStrat::~ConvStrat()
+ConvStratFinder::~ConvStratFinder()
 
 {
   freeArrays();
@@ -90,12 +90,12 @@ ConvStrat::~ConvStrat()
 //////////////////////////////////////////////////
 // Compute the partition
 
-int ConvStrat::computePartition(const fl32 *dbz, 
-                                fl32 dbzMissingVal)
+int ConvStratFinder::computePartition(const fl32 *dbz, 
+                                      fl32 dbzMissingVal)
 {
   
   int iret = 0;
-  PMU_auto_register("ConvStrat::partition()");
+  PMU_auto_register("ConvStratFinder::partition()");
 
   // allocate the arrays
 
@@ -163,7 +163,7 @@ int ConvStrat::computePartition(const fl32 *dbz,
 /////////////////////////////////////////////////////////
 // allocate the arrays
 
-void ConvStrat::_allocArrays()
+void ConvStratFinder::_allocArrays()
   
 {
 
@@ -187,7 +187,7 @@ void ConvStrat::_allocArrays()
 /////////////////////////////////////////////////////////
 // free the arrays
 
-void ConvStrat::freeArrays()
+void ConvStratFinder::freeArrays()
   
 {
 
@@ -211,11 +211,11 @@ void ConvStrat::freeArrays()
 /////////////////////////////////////////////////////////
 // compute the column maximum
 
-void ConvStrat::_computeColMax()
+void ConvStratFinder::_computeColMax()
   
 {
 
-  PMU_auto_register("ConvStrat::_computeColMax()");
+  PMU_auto_register("ConvStratFinder::_computeColMax()");
 
   // get date pointers
 
@@ -275,11 +275,11 @@ void ConvStrat::_computeColMax()
 /////////////////////////////////////////////////////////
 // compute the spatial texture
 
-void ConvStrat::_computeTexture()
+void ConvStratFinder::_computeTexture()
   
 {
 
-  PMU_auto_register("ConvStrat::_computeTexture()");
+  PMU_auto_register("ConvStratFinder::_computeTexture()");
 
   // array pointers
 
@@ -376,11 +376,11 @@ void ConvStrat::_computeTexture()
 /////////////////////////////////////////////////////////
 // set the convective/stratiform partition
 
-void ConvStrat::_setPartition()
+void ConvStratFinder::_setPartition()
   
 {
 
-  PMU_auto_register("ConvStrat::_setPartition()");
+  PMU_auto_register("ConvStratFinder::_setPartition()");
 
   // get date pointers
   
@@ -465,11 +465,11 @@ void ConvStrat::_setPartition()
 //////////////////////////////////////
 // compute the kernels for this grid
 
-void ConvStrat::_computeKernels()
+void ConvStratFinder::_computeKernels()
 
 {
 
-  PMU_auto_register("ConvStrat::_computeKernels()");
+  PMU_auto_register("ConvStratFinder::_computeKernels()");
     
   // texture kernel
 
@@ -526,11 +526,11 @@ void ConvStrat::_computeKernels()
 //////////////////////////////////////
 // print parameter settings
 
-void ConvStrat::_printSettings(ostream &out)
+void ConvStratFinder::_printSettings(ostream &out)
 
 {
 
-  out << "========== ConvStrat settings ============" << endl;
+  out << "========== ConvStratFinder settings ============" << endl;
 
   out << "  _minValidHtKm: " << _minValidHtKm << endl;
   out << "  _maxValidHtKm: " << _maxValidHtKm << endl;
@@ -578,7 +578,7 @@ void ConvStrat::_printSettings(ostream &out)
 
 // Constructor
 
-ConvStrat::ComputeTexture::ComputeTexture(int iz) :
+ConvStratFinder::ComputeTexture::ComputeTexture(int iz) :
         TaThread(),
         _iz(iz)
 {
@@ -593,14 +593,14 @@ ConvStrat::ComputeTexture::ComputeTexture(int iz) :
 }  
 
 
-ConvStrat::ComputeTexture::~ComputeTexture() 
+ConvStratFinder::ComputeTexture::~ComputeTexture() 
 {
 }
 
 // override run method
 // compute texture at each point in plane
 
-void ConvStrat::ComputeTexture::run()
+void ConvStratFinder::ComputeTexture::run()
 {
 
   // check for validity
@@ -674,7 +674,7 @@ void ConvStrat::ComputeTexture::run()
 // Given definite convection at a point (see above),
 // we set all points within the computed radius to be convective.
 
-double ConvStrat::getConvRadiusKm(double backgroundDbz) 
+double ConvStratFinder::getConvRadiusKm(double backgroundDbz) 
 {
   if (!_computeConvRadius) {
     return _convRadiusKm;

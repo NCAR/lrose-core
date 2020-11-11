@@ -20,10 +20,10 @@ TARGET_FILE = ../libradar.a
 #
 
 HDRS = \
-	../include/radar/ConvStrat.hh
+	../include/radar/ConvStratFinder.hh
 
 CPPC_SRCS = \
-	ConvStrat.cc
+	ConvStratFinder.cc
 
 #
 # general targets

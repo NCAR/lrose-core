@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ConvStrat.hh
+// ConvStratFinder.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,13 +30,13 @@
 //
 ////////////////////////////////////////////////////////////////////
 //
-// ConvStrat partitions stratiform and convective regions in a
+// ConvStratFinder partitions stratiform and convective regions in a
 // Cartesian radar volume
 //
 /////////////////////////////////////////////////////////////////////
 
-#ifndef ConvStrat_HH
-#define ConvStrat_HH
+#ifndef ConvStratFinder_HH
+#define ConvStratFinder_HH
 
 #include <string>
 #include <vector>
@@ -48,7 +48,7 @@ using namespace std;
 ////////////////////////
 // This class
 
-class ConvStrat {
+class ConvStratFinder {
   
 public:
 
@@ -61,11 +61,11 @@ public:
   
   // constructor
   
-  ConvStrat();
+  ConvStratFinder();
   
   // destructor
   
-  ~ConvStrat();
+  ~ConvStratFinder();
 
   // set algorithm parameters
 
