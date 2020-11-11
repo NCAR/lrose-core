@@ -1037,6 +1037,12 @@ paramdef boolean {
   p_help = "If false, the normal phidp-based method is used everywhere in alternating dual pol mode. If true, the H-only pulses are used to compute velocity where CMD flags a gate as clutter.";
 } use_h_only_for_alt_mode_clutter_vel;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out debug fields for alternating mode velocity.";
+  p_help = "If true the following fields are written out: test2=meanConfidence, test3=minVelRun, test4=maxVelRun, test5=unfolded, vel=velAlt, vel_alt_fold_interval, vel_alt_fold_confidence, vel_diff, vel_unfold_interval.";
+} write_alt_mode_vel_debug_fields;
+
 commentdef {
   p_header = "COMPUTING KDP USING ADAPTIVE FILTER METHOD";
   p_text = "Parameters for computing KDP.";
@@ -1918,6 +1924,11 @@ typedef enum {
   CLUT_2_WX_RATIO,
   SPECTRAL_NOISE,
   SPECTRAL_SNR,
+
+  // NOISE
+  
+  NOISE_FLAG,
+  SIGNAL_FLAG,
 
   // REFRACT
 

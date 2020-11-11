@@ -852,7 +852,14 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.spectral_noise - start);
     case Params::SPECTRAL_SNR:
       return (&_flds.spectral_snr - start);
+
+      // NOISE
       
+    case Params::NOISE_FLAG:
+      return (&_flds.noise_flag - start);
+    case Params::SIGNAL_FLAG:
+      return (&_flds.signal_flag - start);
+
       // REFRACT
 
     case Params::AIQ_HC:

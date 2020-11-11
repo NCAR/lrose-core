@@ -246,6 +246,10 @@ void Beam::init(const MomentsMgr &mmgr,
     cerr << "  Cannot initialize noise object" << endl;
   }
 
+  if (_params.write_alt_mode_vel_debug_fields) {
+    _altVel.setLoadTestFields(true);
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////
