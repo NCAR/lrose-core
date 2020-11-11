@@ -1,12 +1,12 @@
 /**********************************************************************
- * TDRP params for StratFinder
+ * TDRP params for ConvStrat
  **********************************************************************/
 
 //======================================================================
 //
-// Program name: StratFinder.
+// Program name: ConvStrat.
 //
-// StratFinder finds stratiform/convective regions within a Cartesian 
+// ConvStrat finds stratiform/convective regions within a Cartesian 
 //   radar volume.
 //
 //======================================================================

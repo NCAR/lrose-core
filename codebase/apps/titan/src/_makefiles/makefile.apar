@@ -13,7 +13,6 @@ SUB_DIRS = \
 	PrintTitanFiles \
 	PrintTitanServer \
 	Rview \
-        StratFinder \
 	TimeHist \
 	Titan \
 	TitanSelect \

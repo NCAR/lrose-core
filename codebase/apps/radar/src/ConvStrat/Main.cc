@@ -21,8 +21,9 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// StratFinder.hh
+////////////////////////////////////////////////////////////////////
+//
+// main for ConvStrat
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,62 +31,86 @@
 //
 ////////////////////////////////////////////////////////////////////
 //
-// StratFinder finds stratiform regions in a Cartesian radar volume
+// ConvStrat finds stratiform regions in a Cartesian radar volume
 //
 /////////////////////////////////////////////////////////////////////
 
-#ifndef StratFinder_H
-#define StratFinder_H
-
-#include <string>
-#include <Mdv/DsMdvxInput.hh>
-#include <toolsa/TaArray.hh>
-#include <radar/ConvStratFinder.hh>
-#include "Args.hh"
-#include "Params.hh"
+#include "ConvStrat.hh"
+#include <toolsa/str.h>
+#include <toolsa/port.h>
+#include <signal.h>
+#include <new>
 using namespace std;
 
-////////////////////////
-// This class
+// file scope
 
-class StratFinder {
+static void tidy_and_exit (int sig);
+static void out_of_store();
+static ConvStrat *_prog;
+static int _argc;
+static char **_argv;
+
+// main
+
+int main(int argc, char **argv)
+
+{
+
+  _argc = argc;
+  _argv = argv;
+
+  // create program object
+
+  _prog = new ConvStrat(argc, argv);
+  if (!_prog->isOK) {
+    return(-1);
+  }
+
+  // set signal handling
   
-public:
+  PORTsignal(SIGINT, tidy_and_exit);
+  PORTsignal(SIGHUP, tidy_and_exit);
+  PORTsignal(SIGTERM, tidy_and_exit);
+  PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
 
-  // constructor
+  // set new() memory failure handler function
 
-  StratFinder (int argc, char **argv);
+  set_new_handler(out_of_store);
 
-  // destructor
+  // run it
+
+  int iret = _prog->Run();
+
+  // clean up
+
+  tidy_and_exit(iret);
+  return (iret);
   
-  ~StratFinder();
+}
 
-  // run 
+///////////////////
+// tidy up on exit
 
-  int Run();
+static void tidy_and_exit (int sig)
 
-  // data members
+{
 
-  bool isOK;
+  delete(_prog);
+  exit(sig);
 
-protected:
-  
-private:
+}
+////////////////////////////////////
+// out_of_store()
+//
+// Handle out-of-memory conditions
+//
 
-  static const fl32 _missing;
+static void out_of_store()
 
-  string _progName;
-  char *_paramsPath;
-  Args _args;
-  Params _params;
-  DsMdvxInput _input;
-  DsMdvx _inMdvx, _outMdvx;
-  ConvStratFinder _convStrat;
+{
 
-  int _doRead();
-  void _addFields();
-  int _doWrite();
+  fprintf(stderr, "FATAL ERROR - program ConvStrat\n");
+  fprintf(stderr, "  Operator new failed - out of store\n");
+  exit(-1);
 
-};
-
-#endif
+}

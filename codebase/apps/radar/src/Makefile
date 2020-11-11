@@ -20,6 +20,7 @@ SUB_DIRS = \
 	ChillTsTcp2Fmq \
 	CmdVerify \
 	Condor \
+	ConvStrat \
 	Cov2Mom \
 	DowSendFreq \
 	DsrGrabber \

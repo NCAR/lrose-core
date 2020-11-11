@@ -23,6 +23,7 @@ BomAws2Spdb
 BomSounding2Spdb
 CalCompute
 CalcHumidity
+ConvStrat
 Cov2Mom
 CreateStationList
 CsuSounding2Spdb
@@ -215,7 +216,6 @@ SpdbQuery
 SpdbXml2Table
 SpectraPrint
 StaggeredLimits
-StratFinder
 SunCal
 SunCal2Symprod
 SunCpCompute

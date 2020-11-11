@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// StratFinder.cc
+// ConvStrat.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,7 +30,7 @@
 //
 ////////////////////////////////////////////////////////////////////
 //
-// StratFinder finds stratiform/convective regions in a Cartesian
+// ConvStrat finds stratiform/convective regions in a Cartesian
 // radar volume
 //
 /////////////////////////////////////////////////////////////////////
@@ -42,14 +42,14 @@
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxChunk.hh>
-#include "StratFinder.hh"
+#include "ConvStrat.hh"
 using namespace std;
 
-const fl32 StratFinder::_missing = -9999.0;
+const fl32 ConvStrat::_missing = -9999.0;
 
 // Constructor
 
-StratFinder::StratFinder(int argc, char **argv)
+ConvStrat::ConvStrat(int argc, char **argv)
 
 {
 
@@ -57,7 +57,7 @@ StratFinder::StratFinder(int argc, char **argv)
 
   // set programe name
 
-  _progName = "StratFinder";
+  _progName = "ConvStrat";
   ucopyright((char *) _progName.c_str());
 
   // get command line args
@@ -141,7 +141,7 @@ StratFinder::StratFinder(int argc, char **argv)
 
 // destructor
 
-StratFinder::~StratFinder()
+ConvStrat::~ConvStrat()
 
 {
 
@@ -154,7 +154,7 @@ StratFinder::~StratFinder()
 //////////////////////////////////////////////////
 // Run
 
-int StratFinder::Run()
+int ConvStrat::Run()
 {
   
   int iret = 0;
@@ -174,7 +174,7 @@ int StratFinder::Run()
 
     PMU_auto_register("Before read");
     if (_doRead()) {
-      cerr << "ERROR - StratFinder::Run()" << endl;
+      cerr << "ERROR - ConvStrat::Run()" << endl;
       umsleep(1000);
       iret = -1;
       continue;
@@ -184,7 +184,7 @@ int StratFinder::Run()
 
     MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
     if (dbzField == NULL) {
-      cerr << "ERROR - StratFinder::Run()" << endl;
+      cerr << "ERROR - ConvStrat::Run()" << endl;
       cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
       return -1;
     }
@@ -210,7 +210,7 @@ int StratFinder::Run()
     const fl32 *dbz = (const fl32*) dbzField->getVol();
     fl32 missingDbz = fhdr.missing_data_value;
     if (_convStrat.computePartition(dbz, missingDbz)) {
-      cerr << "ERROR - StratFinder::Run()" << endl;
+      cerr << "ERROR - ConvStrat::Run()" << endl;
       umsleep(1000);
       iret = -1;
       continue;
@@ -219,7 +219,7 @@ int StratFinder::Run()
     // write out
     
     if (_doWrite()) {
-      cerr << "ERROR - StratFinder::Run()" << endl;
+      cerr << "ERROR - ConvStrat::Run()" << endl;
       umsleep(1000);
       iret = -1;
       continue;
@@ -242,7 +242,7 @@ int StratFinder::Run()
 //
 // Returns 0 on success, -1 on failure.
 
-int StratFinder::_doRead()
+int ConvStrat::_doRead()
   
 {
   
@@ -263,7 +263,7 @@ int StratFinder::_doRead()
   PMU_auto_register("Before read");
   
   if (_input.readVolumeNext(_inMdvx)) {
-    cerr << "ERROR - StratFinder::_doRead" << endl;
+    cerr << "ERROR - ConvStrat::_doRead" << endl;
     cerr << "  Cannot read in data." << endl;
     cerr << _input.getErrStr() << endl;
     return -1;
@@ -280,7 +280,7 @@ int StratFinder::_doRead()
 /////////////////////////////////////////////////////////
 // add fields to the output object
 
-void StratFinder::_addFields()
+void ConvStrat::_addFields()
   
 {
 
@@ -463,7 +463,7 @@ void StratFinder::_addFields()
 //
 // Returns 0 on success, -1 on failure.
 
-int StratFinder::_doWrite()
+int ConvStrat::_doWrite()
   
 {
   
@@ -496,7 +496,7 @@ int StratFinder::_doWrite()
   
   PMU_auto_register("Before write");
   if(_outMdvx.writeToDir(_params.output_url)) {
-    cerr << "ERROR - StratFinder::Run" << endl;
+    cerr << "ERROR - ConvStrat::Run" << endl;
     cerr << "  Cannot write data set." << endl;
     cerr << _outMdvx.getErrStr() << endl;
     return -1;

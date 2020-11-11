@@ -423,6 +423,7 @@ codebase/apps/radar/src/AparTs2NetCDF/AparTs2NetCDF
 codebase/apps/radar/src/AcGeorefCompare/AcGeorefCompare
 codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
 codebase/apps/radar/src/AltCpCompute/AltCpCompute
+codebase/apps/radar/src/ConvStrat/ConvStrat
 codebase/apps/radar/src/CP2Udp2Fmq/CP2Udp2Fmq
 codebase/apps/radar/src/CalCompute/CalCompute
 codebase/apps/radar/src/CartSim/CartSim
@@ -595,7 +596,6 @@ codebase/apps/titan/src/StormInitLocDump/StormInitLocDump
 codebase/apps/titan/src/StormInitLocation/StormInitLocation
 codebase/apps/titan/src/Storms2Xml/Storms2Xml
 codebase/apps/titan/src/Storms2Xml2/Storms2Xml2
-codebase/apps/titan/src/StratFinder/StratFinder
 codebase/apps/titan/src/TimeHist/TimeHist
 codebase/apps/titan/src/Titan/Titan
 codebase/apps/titan/src/TitanLite/TitanLite

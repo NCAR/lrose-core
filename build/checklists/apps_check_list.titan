@@ -34,6 +34,7 @@ ClutterCompute
 ClutterRemove
 ClutterTableGenerate
 CmdVerify
+ConvStrat
 Cov2Mom
 CreateStationList
 CsuSounding2Spdb
@@ -276,7 +277,6 @@ StormInitLocation
 StormModel
 Storms2Xml
 Storms2Xml2
-StratFinder
 SunCal
 SunCal2Symprod
 SunCpCompute

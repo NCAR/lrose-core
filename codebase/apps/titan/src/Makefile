@@ -18,7 +18,6 @@ SUB_DIRS = \
 	PrintTitanServer \
 	RdasSim \
 	Rview \
-        StratFinder \
 	StormInit2Field \
 	StormInitBdry \
 	StormInitClimatology \
