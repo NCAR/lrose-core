@@ -40,7 +40,7 @@
 #include <string>
 #include <Mdv/DsMdvxInput.hh>
 #include <toolsa/TaArray.hh>
-#include <radar/ConvStrat.hh>
+#include <radar/ConvStratFinder.hh>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;
@@ -80,7 +80,7 @@ private:
   Params _params;
   DsMdvxInput _input;
   DsMdvx _inMdvx, _outMdvx;
-  ConvStrat _convStrat;
+  ConvStratFinder _convStrat;
 
   int _doRead();
   void _addFields();

@@ -116,7 +116,7 @@ StratFinder::StratFinder(int argc, char **argv)
     }
   }
 
-  // set up ConvStrat object
+  // set up ConvStratFinder object
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _convStrat.setVerbose(true);
@@ -180,7 +180,7 @@ int StratFinder::Run()
       continue;
     }
 
-    // set grid in ConvStrat object
+    // set grid in ConvStratFinder object
 
     MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
     if (dbzField == NULL) {
@@ -358,8 +358,8 @@ void StratFinder::_addFields()
   fhdr.volume_size = volSize08;
   fhdr.encoding_type = Mdvx::ENCODING_INT8;
   fhdr.data_element_nbytes = 1;
-  fhdr.missing_data_value = ConvStrat::CATEGORY_MISSING;
-  fhdr.bad_data_value = ConvStrat::CATEGORY_MISSING;
+  fhdr.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
+  fhdr.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
   
   // convective flag from max dbz
   
