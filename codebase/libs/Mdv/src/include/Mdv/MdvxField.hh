@@ -871,13 +871,7 @@ protected:
 
   // is volbuf valid in size?
 
-  inline bool _volbufSizeValid() const {
-    if ((ssize_t) _volBuf.getLen() < _fhdr.volume_size) {
-      return false;
-    } else {
-      return true;
-    }
-  }
+  bool _volbufSizeValid() const;
 
   // compression
 

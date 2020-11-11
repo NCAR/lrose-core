@@ -162,23 +162,18 @@ MdvxField *Ncf2MdvField::createMdvxField()
 
   _setMdvSpecific();
 
-  // check compression
-
-  bool shuffle = false, compressed = false;
-  int compressLevel = 0;
-  if (_var4Data->get_compression_parameters(shuffle, 
-                                           compressed,
-                                           compressLevel) == 0) {
-    if (compressed) {
-      _fhdr.compression_type = Mdvx::COMPRESSION_GZIP;
-      _fhdr.user_data_si32[0] = compressLevel;
-    }
-  }
-
   // create MdvxField object
 
   if (_readData) {
     MdvxField *fld = new MdvxField(_fhdr, _vhdr, _data);
+    // request compression if appropriate
+    bool shuffle = false, compressed = false;
+    int compressLevel = 0;
+    if (_var4Data->get_compression_parameters(shuffle, 
+                                              compressed,
+                                              compressLevel) == 0) {
+      fld->requestCompression(Mdvx::COMPRESSION_GZIP);
+    }
     return fld;
   } else {
     MdvxField *fld = new MdvxField(_fhdr, _vhdr, NULL,

@@ -2094,7 +2094,7 @@ void Ncf2MdvTrans::_addFieldCfRadial(const RadxVol &vol,
 
   delete[] mdvData;
 
-  // convert mdv field based on byte width, compress
+  // convert mdv field based on byte width, request compression
 
   if (origByteWidth == 1) {
     mdvxField->convertType(Mdvx::ENCODING_INT8, Mdvx::COMPRESSION_GZIP);
