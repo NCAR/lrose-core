@@ -39,7 +39,7 @@
 #include "Interp.hh"
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
-#include <radar/ConvStrat.hh>
+#include <radar/ConvStratFinder.hh>
 class DsMdvx;
 class Orient;
 
@@ -177,7 +177,7 @@ private:
 
   // convective / stratiform split
 
-  ConvStrat _convStrat;
+  ConvStratFinder _convStrat;
   bool _gotConvStrat;
 
   // private methods

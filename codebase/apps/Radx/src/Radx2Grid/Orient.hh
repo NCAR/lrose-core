@@ -40,7 +40,7 @@
 
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
-#include <radar/ConvStrat.hh>
+#include <radar/ConvStratFinder.hh>
 #include "Interp.hh"
 #include "Params.hh"
 

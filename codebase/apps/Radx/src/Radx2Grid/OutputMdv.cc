@@ -382,7 +382,7 @@ void OutputMdv::addConvStratBool(const RadxVol &vol,
 ////////////////////////////////////////
 // add convective stratiform fields
 
-void OutputMdv::addConvStratFields(const ConvStrat &convStrat,
+void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
                                    const RadxVol &vol,
                                    MdvxProj &proj,
                                    const vector<double> &vlevels)
@@ -408,7 +408,7 @@ void OutputMdv::addConvStratFields(const ConvStrat &convStrat,
     addConvStratBool(vol, proj,
                      "ConvStrat",
                      "1 = stratiform, 2 = convective",
-                     ConvStrat::CATEGORY_MISSING,
+                     ConvStratFinder::CATEGORY_MISSING,
                      convStrat.getPartition());
   }
 
@@ -437,13 +437,13 @@ void OutputMdv::addConvStratFields(const ConvStrat &convStrat,
     addConvStratBool(vol, proj,
                      "ConvFromColMax",
                      "convective_flag_from_column_max_dbz",
-                     ConvStrat::CATEGORY_MISSING,
+                     ConvStratFinder::CATEGORY_MISSING,
                      convStrat.getConvFromColMax());
     
     addConvStratBool(vol, proj,
                      "ConvFromTexture",
                      "convective_flag_from_mean_dbz_texture",
-                     ConvStrat::CATEGORY_MISSING,
+                     ConvStratFinder::CATEGORY_MISSING,
                      convStrat.getConvFromTexture());
 
     addField(vol, proj, vlevel2D,
@@ -1058,19 +1058,19 @@ string OutputMdv::_computeCfNetcdfPath()
     
     string v_yyyymmdd = validTime.getDateStrPlain();
     string v_hhmmss = validTime.getTimeStrPlain();
-    char filename[1024];
+    char filename[256];
     
-    sprintf(filename, "%s%s_%s%s.nc",
-            _params.netcdf_file_prefix,
-            v_yyyymmdd.c_str(), v_hhmmss.c_str(),
-            _params.netcdf_file_suffix);
+    snprintf(filename, 256, "%s%s_%s%s.nc",
+             _params.netcdf_file_prefix,
+             v_yyyymmdd.c_str(), v_hhmmss.c_str(),
+             _params.netcdf_file_suffix);
     
     if (isForecast) { 
       string g_hhmmss = genTime.getTimeStrPlain();
-      sprintf(outputPath, "%s/g_%s/%s",
-              _outputDir.c_str(), g_hhmmss.c_str(), filename);
+      snprintf(outputPath, 1024, "%s/g_%s/%s",
+               _outputDir.c_str(), g_hhmmss.c_str(), filename);
     } else {
-      sprintf(outputPath, "%s/%s", _outputDir.c_str(), filename);
+      snprintf(outputPath, 1024, "%s/%s", _outputDir.c_str(), filename);
     }
     
   }

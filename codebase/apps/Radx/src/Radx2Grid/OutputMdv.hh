@@ -42,7 +42,7 @@
 #include <Radx/RadxRcalib.hh>
 #include <rapformats/DsRadarParams.hh>
 #include <rapformats/DsRadarCalib.hh>
-#include <radar/ConvStrat.hh>
+#include <radar/ConvStratFinder.hh>
 #include "Params.hh"
 using namespace std;
 
@@ -84,7 +84,7 @@ public:
                         ui08 missingVal,
                         const ui08 *data);
   
-  void addConvStratFields(const ConvStrat &convStrat,
+  void addConvStratFields(const ConvStratFinder &convStrat,
                           const RadxVol &vol,
                           MdvxProj &proj,
                           const vector<double> &vlevels);

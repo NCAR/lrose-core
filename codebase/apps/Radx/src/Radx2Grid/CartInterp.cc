@@ -112,7 +112,7 @@ CartInterp::CartInterp(const string &progName,
 
   _createThreads();
 
-  // set up ConvStrat object
+  // set up ConvStratFinder object
 
   if (_params.identify_convective_stratiform_split) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -2683,7 +2683,7 @@ void CartInterp::_addMatrixField(DsMdvx &mdvx,
 int CartInterp::_convStratCompute()
 {
 
-  // set the grid in the ConvStrat object
+  // set the grid in the ConvStratFinder object
 
   bool isLatLon = (_params.grid_projection == Params::PROJ_LATLON);
   _convStrat.setGrid(_gridNx, _gridNy,
@@ -2692,7 +2692,7 @@ int CartInterp::_convStratCompute()
                      _gridZLevels,
                      isLatLon);
 
-  // get the dbz field for ConvStrat
+  // get the dbz field for ConvStratFinder
 
   string dbzName(_params.conv_strat_dbz_field_name);
   fl32 *dbzVals = NULL;
