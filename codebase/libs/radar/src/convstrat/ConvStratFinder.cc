@@ -69,7 +69,7 @@ ConvStratFinder::ConvStratFinder()
   _maxConvRadiusKm = 5.0;
   _dbzForMinRadius = 22.5;
   _dbzForMaxRadius = 42.5;
-  _backgroundDbzRadiusKm = 11.0;
+  _backgroundRadiusKm = 11.0;
 
   _nx = _ny = 0;
   _dx = _dy = 0.0;
@@ -147,7 +147,11 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
   // compute column maxima
   
   _computeColMax();
+
+  // compute the background dbz
   
+  void _computeBackgroundDbz();
+
   // compute spatial texture
   
   _computeTexture();
@@ -179,6 +183,7 @@ void ConvStratFinder::_allocArrays()
   _meanTexture.alloc(_nxy);
   _fractionActive.alloc(_nxy);
   _colMaxDbz.alloc(_nxy);
+  _backgroundDbz.alloc(_nxy);
   _convFromColMax.alloc(_nxy);
   _convFromTexture.alloc(_nxy);
 
@@ -203,6 +208,7 @@ void ConvStratFinder::freeArrays()
   _meanTexture.free();
   _fractionActive.free();
   _colMaxDbz.free();
+  _backgroundDbz.free();
   _convFromColMax.free();
   _convFromTexture.free();
 
@@ -217,7 +223,7 @@ void ConvStratFinder::_computeColMax()
 
   PMU_auto_register("ConvStratFinder::_computeColMax()");
 
-  // get date pointers
+  // get data pointers
 
   fl32 *colMaxDbz = _colMaxDbz.buf();
   
@@ -382,7 +388,7 @@ void ConvStratFinder::_setPartition()
 
   PMU_auto_register("ConvStratFinder::_setPartition()");
 
-  // get date pointers
+  // get data pointers
   
   const fl32 *colMaxDbz = _colMaxDbz.buf();
   const fl32 *texture = _meanTexture.buf();
@@ -480,7 +486,7 @@ void ConvStratFinder::_computeKernels()
   
   if (_verbose) {
     cerr << "Texture kernel size:" << endl;
-    cerr << "  idy: " << _nyTexture << endl;
+    cerr << "  ny: " << _nyTexture << endl;
     cerr << "  nx: " << _nxTexture << endl;
   }
   
@@ -496,6 +502,31 @@ void ConvStratFinder::_computeKernels()
     }
   }
 
+  // background kernel
+
+  _backgroundKernelOffsets.clear();
+  
+  _nyBackground = (int) floor(_backgroundRadiusKm / _dy + 0.5);
+  _nxBackground = (int) floor(_backgroundRadiusKm / _dx + 0.5);
+  
+  if (_verbose) {
+    cerr << "Background kernel size:" << endl;
+    cerr << "  ny: " << _nyBackground << endl;
+    cerr << "  nx: " << _nxBackground << endl;
+  }
+  
+  for (int jdy = -_nyBackground; jdy <= _nyBackground; jdy++) {
+    double yy = jdy * _dy;
+    for (int jdx = -_nxBackground; jdx <= _nxBackground; jdx++) {
+      double xx = jdx * _dx;
+      double radius = sqrt(yy * yy + xx * xx);
+      if (radius <= _backgroundRadiusKm) {
+        ssize_t offset = jdx + jdy * _nx;
+        _backgroundKernelOffsets.push_back(offset);
+      }
+    }
+  }
+
   // convective kernel
 
   _convKernelOffsets.clear();
@@ -505,7 +536,7 @@ void ConvStratFinder::_computeKernels()
 
   if (_verbose) {
     cerr << "Convective kernel size:" << endl;
-    cerr << "  idy: " << _nyConv << endl;
+    cerr << "  ny: " << _nyConv << endl;
     cerr << "  nx: " << _nxConv << endl;
   }
   
@@ -562,6 +593,8 @@ void ConvStratFinder::_printSettings(ostream &out)
 
   out << "  _nxTexture: " << _nxTexture << endl;
   out << "  _nyTexture: " << _nyTexture << endl;
+  out << "  _nxBackground: " << _nxBackground << endl;
+  out << "  _nyBackground: " << _nyBackground << endl;
   out << "  _nxConv: " << _nxConv << endl;
   out << "  _nyConv: " << _nyConv << endl;
 
@@ -679,6 +712,9 @@ double ConvStratFinder::getConvRadiusKm(double backgroundDbz)
   if (!_computeConvRadius) {
     return _convRadiusKm;
   }
+  if (backgroundDbz == _missing) {
+    return _minConvRadiusKm;
+  }
   if (backgroundDbz < _dbzForMinRadius) {
     return _minConvRadiusKm;
   }
@@ -688,5 +724,56 @@ double ConvStratFinder::getConvRadiusKm(double backgroundDbz)
   double radius = _minConvRadiusKm +
     (backgroundDbz - _dbzForMinRadius) * _radiusSlope;
   return radius;
+}
+
+/////////////////////////////////////////////
+// Compute the background dbz
+// at each point in the col max dbz
+
+void ConvStratFinder::_computeBackgroundDbz()
+{
+
+  // get data pointers
+
+  fl32 *colMaxDbz = _colMaxDbz.buf();
+  fl32 *backgroundDbz = _backgroundDbz.buf();
+  
+  // initialize
+
+  for (int ii = 0; ii < _nxy; ii++) {
+    backgroundDbz[ii] = _missing;
+  }
+
+  // background is mean dbz in a circle around a point
+  
+  for (int iy = _nyBackground; iy < _ny - _nyBackground; iy++) {
+    
+    int icenter = _nxBackground + iy * _nx;
+    
+    for (int ix = _nxBackground; ix < _nx - _nxBackground; ix++, icenter++) {
+      
+      double nn = 0.0;
+      double sum = 0.0;
+      
+      for (size_t ii = 0; ii < _backgroundKernelOffsets.size(); ii++) {
+        int kk = icenter + _backgroundKernelOffsets[ii];
+        double dbz = colMaxDbz[kk];
+        if (dbz != _missing) {
+          sum += dbz;
+        }
+        nn++;
+      } // ii
+      
+      if (nn >= 0) {
+        double mean = sum / nn;
+        backgroundDbz[icenter] = mean;
+      } else {
+        backgroundDbz[icenter] = 0.0;
+      }
+      
+    } // ix
+    
+  } // iy
+
 }
 

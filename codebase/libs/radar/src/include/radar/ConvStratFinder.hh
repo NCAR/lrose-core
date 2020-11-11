@@ -119,19 +119,19 @@ public:
   // maxConvRadiusKm = max convective radius if computed
   // dbzForMinRadius = background dbz for min radius
   // dbzForMaxRadius = background dbz for max radius
-  // backgroundDbzRadiusKm = kernel radius for computing background dbz
+  // backgroundRadiusKm = kernel radius for computing background dbz
 
   void setComputeConvRadius(double minConvRadiusKm,
                             double maxConvRadiusKm,
                             double dbzForMinRadius,
                             double dbzForMaxRadius,
-                            double backgroundDbzRadiusKm) {
+                            double backgroundRadiusKm) {
     _computeConvRadius = true;
     _minConvRadiusKm = minConvRadiusKm;
     _maxConvRadiusKm = maxConvRadiusKm;
     _dbzForMinRadius = dbzForMinRadius;
     _dbzForMaxRadius = dbzForMaxRadius;
-    _backgroundDbzRadiusKm = backgroundDbzRadiusKm;
+    _backgroundRadiusKm = backgroundRadiusKm;
     _deltaRadius = _maxConvRadiusKm - _minConvRadiusKm;
     _deltaBackgroundDbz = _dbzForMaxRadius -_dbzForMinRadius;
     _radiusSlope = _deltaRadius / _deltaBackgroundDbz;
@@ -226,6 +226,7 @@ public:
   const fl32 *getMeanTexture() const { return _meanTexture.buf(); }
   const fl32 *getFractionActive() const { return _fractionActive.buf(); }
   const fl32 *getColMaxDbz() const { return _colMaxDbz.buf(); }
+  const fl32 *getBackgroundDbz() const { return _backgroundDbz.buf(); }
   const ui08 *getConvFromColMax() const { return _convFromColMax.buf(); }
   const ui08 *getConvFromTexture() const { return _convFromTexture.buf(); }
 
@@ -274,12 +275,13 @@ private:
   double _maxConvRadiusKm;  // max convective radius if computed
   double _dbzForMinRadius;  // background dbz for min radius
   double _dbzForMaxRadius;  // background dbz for max radius
-  double _backgroundDbzRadiusKm;  // radius for computing background dbz
   double _deltaRadius;
   double _deltaBackgroundDbz;
   double _radiusSlope;
-
+  double _backgroundRadiusKm;  // radius for computing background dbz
+  
   vector<ssize_t> _textureKernelOffsets;
+  vector<ssize_t> _backgroundKernelOffsets;
   vector<ssize_t> _convKernelOffsets;
 
   int _nx, _ny;
@@ -292,6 +294,7 @@ private:
   int _minIz, _maxIz;
 
   int _nxTexture, _nyTexture;
+  int _nxBackground, _nyBackground;
   int _nxConv, _nyConv;
 
   TaArray<ui08> _partition;
@@ -305,6 +308,7 @@ private:
   TaArray<fl32> _meanTexture;
   TaArray<fl32> _fractionActive;
   TaArray<fl32> _colMaxDbz;
+  TaArray<fl32> _backgroundDbz;
   TaArray<ui08> _convFromColMax;
   TaArray<ui08> _convFromTexture;
 
@@ -314,7 +318,8 @@ private:
   void _computeTexture();
   void _computeKernels();
   void _printSettings(ostream &out);
-
+  void _computeBackgroundDbz();
+  
   // inner class for starting timers in a separate thread
 
   class ComputeTexture : public TaThread
