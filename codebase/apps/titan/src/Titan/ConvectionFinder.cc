@@ -57,7 +57,7 @@ ConvectionFinder::ConvectionFinder(const string &progName,
         
 {
 
-  // set up ConvStrat object
+  // set up ConvStratFinder object
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     _convStrat.setVerbose(true);
@@ -98,7 +98,7 @@ int ConvectionFinder::run(const DsMdvx &inMdvx,
   
   PMU_auto_register("ConvectionFinder::run");
   
-  // set grid in ConvStrat object
+  // set grid in ConvStratFinder object
   
   const Mdvx::field_header_t &fhdr = dbzField.getFieldHeader();
   const Mdvx::vlevel_header_t &vhdr = dbzField.getVlevelHeader();
@@ -215,8 +215,8 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   fhdr.volume_size = volSize08;
   fhdr.encoding_type = Mdvx::ENCODING_INT8;
   fhdr.data_element_nbytes = 1;
-  fhdr.missing_data_value = ConvStrat::CATEGORY_MISSING;
-  fhdr.bad_data_value = ConvStrat::CATEGORY_MISSING;
+  fhdr.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
+  fhdr.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
   
   // convective flag from max dbz
   

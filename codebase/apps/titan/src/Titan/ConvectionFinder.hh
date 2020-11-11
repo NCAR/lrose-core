@@ -40,7 +40,7 @@
 #include <string>
 #include <Mdv/DsMdvx.hh>
 #include <toolsa/TaArray.hh>
-#include <radar/ConvStrat.hh>
+#include <radar/ConvStratFinder.hh>
 #include "Params.hh"
 using namespace std;
 
@@ -65,7 +65,7 @@ public:
 
   // get partition object
 
-  const ConvStrat &getConvStrat() const { return _convStrat; }
+  const ConvStratFinder &getConvStrat() const { return _convStrat; }
 
 protected:
   
@@ -75,7 +75,7 @@ private:
   
   string _progName;
   Params _params;
-  ConvStrat _convStrat;
+  ConvStratFinder _convStrat;
   
   void _addFields(const MdvxField &dbzField, DsMdvx &outMdvx);
   int _doWrite(const DsMdvx &inMdvx, const MdvxField &dbzField);

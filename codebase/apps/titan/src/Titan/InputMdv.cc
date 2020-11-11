@@ -375,7 +375,7 @@ void InputMdv::_removeStratiform()
     const ui08 *partition = _convFinder.getConvStrat().getPartition();
     for (int iy = 0; iy < fhdr.ny; iy++) {
       for (int ix = 0; ix < fhdr.nx; ix++, dbz++, partition++) {
-        if (*partition != ConvStrat::CATEGORY_CONVECTIVE) {
+        if (*partition != ConvStratFinder::CATEGORY_CONVECTIVE) {
           *dbz = dbzMiss;
         }
       } // ix
