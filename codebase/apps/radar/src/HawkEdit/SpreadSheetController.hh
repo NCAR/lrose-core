@@ -30,7 +30,8 @@ public:
 
 
   vector<string> getFieldNames();
-  vector<float> *getData(string fieldName);
+  vector<float> *getData(string fieldName, int offsetFromClosest);
+  float getAzimuthForRay(int offsetFromClosest);
   void setData(string fieldName, vector<float> *data);
 
   void open(string fileName);
@@ -44,6 +45,7 @@ signals:
 public slots:
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
+  void needAzimuthForRay(int offsetFromClosest);
   void getVolumeChanges();
   void switchRay(float azimuth, float elevation);
   

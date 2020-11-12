@@ -48,6 +48,9 @@ Q_DECLARE_METATYPE(QVector<double>)
   cols = 3; // (int) fieldNames.size();
   rows = 200;
 
+  _nFieldsToDisplay = 1;
+  _nRays = 3;
+
   //_volumeData = vol;
 
     addToolBar(toolBar = new QToolBar());
@@ -301,8 +304,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     statusBar();
     connect(table, &QTableWidget::currentItemChanged,
             this, &SpreadSheetView::updateStatus);
-    connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateColor);
+    //connect(table, &QTableWidget::currentItemChanged,
+    //        this, &SpreadSheetView::updateColor);
     connect(table, &QTableWidget::currentItemChanged,
             this, &SpreadSheetView::updateTextEdit);
     connect(table, &QTableWidget::itemChanged,
@@ -323,139 +326,12 @@ void SpreadSheetView::setTheWindowTitle(float rayAzimuth) {
     setWindowTitle(title);
 }
 
-// use when a new file is opened ...
-/*
-SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
-        : QMainWindow(parent)
-{
-  int rows;
-  int cols;
-
-  //_controller = new SpreadSheetController(this);
-  //_controller->open(fileName);
-  vector<std::string> fieldNames = _controller->getFieldNames();
-  //cols = displayInfo.getNumFields();
-  // vector<std::string> fieldNames = vol.getUniqueFieldNameList();
-  cols = (int) fieldNames.size();
-  rows = 20;
-
-  //_volumeData = vol;
-    addToolBar(toolBar = new QToolBar());
-    //formulaInput = new TextEdit(this); // parent);
-    //SpreadSheetDelegate *formulaEditor = new SpreadSheetDelegate(this); // new QTextEdit();
-    //formulaInput = formulaEditor->createEditor(this, ); // new QTextEdit();
-
-    cellLabel = new QLabel(toolBar);
-    cellLabel->setMinimumSize(80, 0);
-
-    toolBar->addWidget(cellLabel);
-    //toolBar->addWidget(formulaInput);
-
-    table = new QTableWidget(rows, cols, this);
-    table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
-    // set the column headers to the data fields
-    
-    
-    int c = 0;
-    vector<std::string>::iterator it; 
-    for(it = fieldNames.begin(); it != fieldNames.end(); it++, c++) {
-      QString the_name(QString::fromStdString(*it));
-      //cerr << *it << endl;
-      table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
-    }
-    
-    table->setItemPrototype(table->item(rows - 1, cols - 1));
-    table->setItemDelegate(new SpreadSheetDelegate());
-
-    createActions();
-    cout << "Action created\n";
-    updateColor(0);
-    cout << "update Color\n";
-    setupMenuBar();
-    cout << "setupMenuBar\n";
-    setupContents();
-    cout << "setupContents\n";
-    setupContextMenu();
-    cout << "setupContextMenu\n";
-    setCentralWidget(table);
-    cout << "setCentralWidgets\n";
-
-    statusBar();
-    connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateStatus);
-    connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateColor);
-    connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateTextEdit);
-    connect(table, &QTableWidget::itemChanged,
-            this, &SpreadSheetView::updateStatus);
-    // connect(formulaInput, &QTextEdit::returnPressed, this, &SpreadSheetView::returnPressed);
-    connect(table, &QTableWidget::itemChanged,
-            this, &SpreadSheetView::updateTextEdit);
-
-    setWindowTitle(tr("Spreadsheet"));
-
-    //setupSoloFunctions();
-}
-*/
-
-
-
 void SpreadSheetView::init()
 {
   LOG(DEBUG) << "emitting signal to get field names";
   //  emit a signal to the controller to get the data for display
   emit needFieldNames();
   
-  /*  int rows;
-  int cols;
-
-  cols = 5; 
-  rows = 20;
-
-    addToolBar(toolBar = new QToolBar());
-
-    cellLabel = new QLabel(toolBar);
-    cellLabel->setMinimumSize(80, 0);
-
-    toolBar->addWidget(cellLabel);
-
-    table = new QTableWidget(rows, cols, this);
-    table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
-    // set the column headers to the data fields
-
-    table->setItemPrototype(table->item(rows - 1, cols - 1));
-    table->setItemDelegate(new SpreadSheetDelegate());
-
-    createActions();
-    cout << "Actions created\n";
-    updateColor(0);
-    cout << "update Color\n";
-    setupMenuBar();
-    cout << "setupMenuBar\n";
-    setupContents();
-    cout << "setupContents\n";
-    setupContextMenu();
-    cout << "setupContextMenu\n";
-    setCentralWidget(table);
-    cout << "setCentralWidgets\n";
-
-    statusBar();
-    connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateStatus);
-    connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateColor);
-    connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateTextEdit);
-    connect(table, &QTableWidget::itemChanged,
-            this, &SpreadSheetView::updateStatus);
-    // connect(formulaInput, &QTextEdit::returnPressed, this, &SpreadSheetView::returnPressed);
-    connect(table, &QTableWidget::itemChanged,
-            this, &SpreadSheetView::updateTextEdit);
-
-    setWindowTitle(tr("Spreadsheet"));
-  */
-    //setupSoloFunctions();
 }
 
 void SpreadSheetView::createActions()
@@ -575,13 +451,6 @@ void SpreadSheetView::setupMenuBar()
     cellMenu->addAction(cell_plusFoldRayGreaterAction);
     cellMenu->addAction(cell_zapGndSpdAction);
     //cellMenu->addSeparator();
-    //cellMenu->addAction(colorAction);
-    //cellMenu->addAction(fontAction);
-    //cellMenu->addAction(clearEditsAction);
-    //cellMenu->addAction(undoAction);
-    //cellMenu->addAction(applyEditsAction);  // TODO: what does apply edits do?
-    //cellMenu->addAction(refreshAction);
-
 
     menuBar()->addSeparator();
 
@@ -665,26 +534,6 @@ float  SpreadSheetView::myPow()
 {
   return(999.9);
 }
-
-/* SoloFunctions object comes in with data model already attached
-void SpreadSheetView::setupSoloFunctions(SoloFunctions *soloFunctions) {
-
-  LOG(DEBUG) << "defining REMOVE_AIRCRAFT_MOTION function";
-  //  emit radarVolumeDataRequest();  make the request for the data inside the SoloFunctions object
-
-  //    QJSValue myExt = engine.newQObject(new SoloFunctions(_controller));
-  QJSValue myExt = engine.newQObject(soloFunctions); // new SoloFunctions());
-    engine.globalObject().setProperty("cat", myExt.property("cat"));
-    engine.globalObject().setProperty("sqrt", myExt.property("sqrt"));
-    engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
-    engine.globalObject().setProperty("add", myExt.property("add"));
-
-    // print the context ...
-    printQJSEngineContext();
-
-  
-}
-*/
 
 void SpreadSheetView::applyChanges()
 {
@@ -906,89 +755,6 @@ void SpreadSheetView::setSelectionToValue(QString value)
     //updateColor(table->currentItem());
 }
 
-
-void SpreadSheetView::selectColor()
-{
-    QTableWidgetItem *item = table->currentItem();
-    QColor col = item ? item->backgroundColor() : table->palette().base().color();
-    col = QColorDialog::getColor(col, this);
-    if (!col.isValid())
-        return;
-
-    QList<QTableWidgetItem*> selected = table->selectedItems();
-    if (selected.count() == 0)
-        return;
-
-    foreach (QTableWidgetItem *i, selected) {
-        if (i)
-            i->setBackgroundColor(col);
-    }
-
-    updateColor(table->currentItem());
-}
-
-
-void SpreadSheetView::selectFont()
-{
-    QList<QTableWidgetItem*> selected = table->selectedItems();
-    if (selected.count() == 0)
-        return;
-
-    bool ok = false;
-    QFont fnt = QFontDialog::getFont(&ok, font(), this);
-
-    if (!ok)
-        return;
-    foreach (QTableWidgetItem *i, selected) {
-        if (i)
-            i->setFont(fnt);
-    }
-}
-/*
-bool SpreadSheetView::runFunctionDialog(const QString &title,
-                                 const QString &c1Text,
-                                 const QString &c2Text,
-                                 const QString &opText,
-                                 const QString &outText,
-                                 QString *cell1, QString *cell2, QString *outCell)
-{
-    QStringList rows, cols;
-    for (int c = 0; c < table->columnCount(); ++c)
-        cols << QChar('A' + c);
-    for (int r = 0; r < table->rowCount(); ++r)
-        rows << QString::number(1 + r);
-
-    QDialog functionDialog(this);
-    //functionDialog.setWindowTitle(title);
-
-    TextEdit textEditArea();
-
-    QPushButton cancelButton(tr("Cancel"), &functionDialog);
-    connect(&cancelButton, &QAbstractButton::clicked, &functionDialog, &QDialog::reject);
-
-    QPushButton okButton(tr("OK"), &functionDialog);
-    okButton.setDefault(true);
-    connect(&okButton, &QAbstractButton::clicked, &functionDialog, &QDialog::accept);
-
-    QHBoxLayout *buttonsLayout = new QHBoxLayout;
-    buttonsLayout->addStretch(1);
-    buttonsLayout->addWidget(&okButton);
-    buttonsLayout->addSpacing(10);
-    buttonsLayout->addWidget(&cancelButton);
-
-    QHBoxLayout *dialogLayout = new QHBoxLayout(&functionDialog);
-    dialogLayout->addWidget(&textEditArea);
-    dialogLayout->addStretch(1);
-    dialogLayout->addItem(buttonsLayout);
-
-    if (addDialog.exec()) {
-        QString formula = textEditArea.getText();
-        return true;
-    }
-
-    return false;
-}
-*/
 
 bool SpreadSheetView::runInputDialog(const QString &title,
                                  const QString &c1Text,
@@ -1250,7 +1016,7 @@ void SpreadSheetView::setupContents()
 }
 
 // request filled by Controller in response to needFieldData 
-void SpreadSheetView::fieldDataSent(vector<float> *data, int useless, int c) {
+void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, int c) {
   size_t nPoints = data->size();
   LOG(DEBUG) << "number of data values = " << nPoints;
 
@@ -1258,29 +1024,53 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int useless, int c) {
       char formattedData[250];
 
       // TODO: get the globalObject for this field and set the values
-
+      int nthClosest = offsetFromClosest + (_nRays/2);
+      cout << "nthClosest = " << nthClosest << endl;
+      int c2 = nthClosest * _nFieldsToDisplay + c;
+      cout << "c2 = " << c2 << endl;
       //------
       QTableWidgetItem *headerItem = table->horizontalHeaderItem(c);
       QString fieldName = headerItem->text();
+      cout << "fieldName = " << fieldName.toStdString() << endl;
       QJSValue fieldArray = engine.newArray(nPoints);
       QString vectorName = fieldName;
 
       table->setRowCount(nPoints);
       vector<float> dataVector = *data;
       float *dp = &dataVector[0];
-      for (int r=0; r<nPoints; r++) {
+      int startingRow = 1; // leave room for the azimuth header
+      for (int r=startingRow; r<startingRow + nPoints; r++) {
       // 752019 for (std::size_t r=0; r<data.size(); r++) {
         //    sprintf(formattedData, format, data[0]);
         sprintf(formattedData, "%g", *dp); // data->at(r));
-        LOG(DEBUG) << "setting " << r << "," << c << "= " << formattedData; 
-        table->setItem(r, c, new SpreadSheetItem(formattedData));
+        LOG(DEBUG) << "setting " << r << "," << c2 << "= " << formattedData; 
+        table->setItem(r, c2, new SpreadSheetItem(formattedData));
         fieldArray.setProperty(r, *dp); // data.at(r));
         dp++;
       }
-      LOG(DEBUG) << "adding vector form " << vectorName.toStdString();
-      engine.globalObject().setProperty(vectorName, fieldArray);
-      LOG(DEBUG) << "end adding vector form " << vectorName.toStdString();
+      //LOG(DEBUG) << "adding vector form " << vectorName.toStdString();
+      //engine.globalObject().setProperty(vectorName, fieldArray);
+      //LOG(DEBUG) << "end adding vector form " << vectorName.toStdString();
 
+}
+
+void SpreadSheetView::azimuthForRaySent(float azimuth, int offsetFromClosestRay) {
+      string format = "%g";
+      char formattedData[250];
+
+      sprintf(formattedData, "%g", azimuth); 
+
+      int nthClosest = offsetFromClosestRay + (_nRays/2);
+      cout << "nthClosest = " << nthClosest << endl;
+      int c2 = nthClosest * _nFieldsToDisplay;
+      cout << "c2 = " << c2 << endl;
+      //------
+      //QTableWidgetItem *headerItem = table->horizontalHeaderItem(c);
+      int r = 0;
+      int rowSpan = 1;
+      int columnSpan = _nFieldsToDisplay;
+      table->setSpan(r, c2, rowSpan, columnSpan);
+      table->setItem(r, c2, new SpreadSheetItem(formattedData));
 }
 
 void SpreadSheetView::applyEdits() {
@@ -1341,24 +1131,32 @@ void SpreadSheetView::newAzimuth(float azimuth) {
 // display the fields selected and their data
 void SpreadSheetView::fieldNamesSelected(vector<string> fieldNames) {
 
-  int useless = 0;
+  int useless = 0; // this becomes iterator over nRays
+  table->clearContents();
 
   // fill everything that needs the fieldNames ...
-
-    table->setColumnCount(fieldNames.size());
+    _nFieldsToDisplay = fieldNames.size();
+    int somethingHideous = 10;
+    table->setColumnCount(_nFieldsToDisplay * _nRays + somethingHideous);
     LOG(DEBUG) << "there are " << fieldNames.size() << " field namess";
+    // rayIdx goes from 0 to nRays; map to -nRays/2 ... 0 ... nRays/2
+    for (int rayIdx= - _nRays/2; rayIdx <= _nRays/2; rayIdx++) {
+        int c = 0;
+        emit needAzimuthForRay(rayIdx);
 
-    int c = 0;
-    vector<string>::iterator it; 
-    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
-      QString the_name(QString::fromStdString(*it));
-      LOG(DEBUG) << *it;
-      table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
-      // TODO: what about setHorizontalHeaderLabels(const QStringList &labels) instead? would it be faster?
-      emit needDataForField(*it, useless, c);
-      c += 1;
+        vector<string>::iterator it; 
+        for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
+          QString the_name(QString::fromStdString(*it));
+          LOG(DEBUG) << *it;
+          for (int i=0; i<_nRays; i++) {
+            table->setHorizontalHeaderItem(c + (i*_nFieldsToDisplay), 
+                new QTableWidgetItem(the_name));
+            // TODO: what about setHorizontalHeaderLabels(const QStringList &labels) instead? would it be faster?
+          }
+          emit needDataForField(*it, rayIdx, c);
+          c += 1;
+        }
     }
-
     // test: adding some missing code
     // TODO: magic number 20 = number of rows
     //table->setItemPrototype(table->item(20 - 1, c - 1));

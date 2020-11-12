@@ -45,18 +45,41 @@ vector<string> SpreadSheetModel::getFields()
   return fieldNames;
 }
 
+// return the azimuth of the ray offset from the closest ray
+float SpreadSheetModel::getAzimuthForRay(int offsetFromClosest)
+{
+  float azimuth = 0.0;
+  if (offsetFromClosest == 0) {
+    azimuth = _closestRay->getAzimuthDeg();
+  } else {
+    vector<RadxRay *> rays = _vol->getRays();
+    size_t idx = (_closestRayIdx + offsetFromClosest) % rays.size();
+    RadxRay *ray = rays.at(idx);
+    azimuth = ray->getAzimuthDeg(); 
+  }
+  return azimuth;
+}
+
 // return a list of data values for the given
 // field name
 // vector<double>
-vector<float> *SpreadSheetModel::getData(string fieldName)
+vector<float> *SpreadSheetModel::getData(string fieldName, int offsetFromClosest)
 {
 
   // vector <double> *dataVector = NULL;
   const RadxField *field;
-  //  field = _vol.getFieldFromRay(fieldName);  // <--- Why is this returning NULL
-  // because the type is 
-  // from debugger:  *((vol.getFieldFromRay("VEL"))->getDataSi16()+1)
-  field = _closestRay->getField(fieldName);
+
+  if (offsetFromClosest == 0) {
+    //  field = _vol.getFieldFromRay(fieldName);  // <--- Why is this returning NULL
+    // because the type is 
+    // from debugger:  *((vol.getFieldFromRay("VEL"))->getDataSi16()+1)
+    field = _closestRay->getField(fieldName);
+  } else {
+    vector<RadxRay *> rays = _vol->getRays();
+    size_t idx = (_closestRayIdx + offsetFromClosest) % rays.size();
+    RadxRay *ray = rays.at(idx);
+    field = ray->getField(fieldName); 
+  }
 
   if (field == NULL) {
     throw std::invalid_argument("no RadxField found "); //  <<  endl;
@@ -80,6 +103,7 @@ vector<float> *SpreadSheetModel::getData(string fieldName)
   return dataVector;
 
 }
+
 
 /*
 RadxVol SpreadSheetModel::getVolume() {
@@ -195,8 +219,6 @@ void SpreadSheetModel::findClosestRay(float azimuth, float elevation) {
   closestRayToEdit->print(cout); 
   _closestRay = closestRayToEdit;
 }
-
-
 
 
 /*

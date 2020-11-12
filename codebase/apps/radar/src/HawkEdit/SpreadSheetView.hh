@@ -54,8 +54,6 @@ public slots:
     void returnPressed();
     void acceptFormulaInput();
     void cancelFormulaInput();
-    void selectColor();
-    void selectFont();
     void clear();
     void showAbout();
 
@@ -75,6 +73,7 @@ public slots:
   void fieldNamesSelected(vector<string> fieldNames);
   void fieldNamesProvided(vector<string> fieldNames);
   void fieldDataSent(vector<float> *data, int useless, int c);
+  void azimuthForRaySent(float azimuth, int offsetFromClosestRay);
 
   void applyChanges();
   void applyEdits();
@@ -89,6 +88,7 @@ signals:
 
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
+  void needAzimuthForRay(int offsetFromClosestRay);
   void applyVolumeEdits();
   void signalRayAzimuthChange(float rayAzimuth, float elevation);
 
@@ -119,6 +119,11 @@ private:
     vector<std::string> _fieldNames;
     //float _currentAzimuth;
     float _currentElevation;
+
+    int _nFieldsToDisplay;
+    int _nRays;
+    string data_format = "%g";
+
 
     QToolBar *toolBar;
     QAction *colorAction;

@@ -62,6 +62,8 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
   connect(_currentView, SIGNAL(needFieldNames()), this, SLOT(needFieldNames()));
   connect(_currentView, SIGNAL(needDataForField(string, int, int)), 
 	  this, SLOT(needDataForField(string, int, int)));
+  connect(_currentView, SIGNAL(needAzimuthForRay(int)), 
+    this, SLOT(needAzimuthForRay(int)));
   connect(_currentView, SIGNAL(applyVolumeEdits()), 
 	  this, SLOT(getVolumeChanges()));
 
@@ -101,7 +103,7 @@ vector<string>  SpreadSheetController::getFieldNames()
   return names;
 }
 
-vector<float> *SpreadSheetController::getData(string fieldName)
+vector<float> *SpreadSheetController::getData(string fieldName, int offsetFromClosest)
 {
 
   LOG(DEBUG) << "getting values for " << fieldName;
@@ -110,11 +112,24 @@ vector<float> *SpreadSheetController::getData(string fieldName)
   //return _currentModel->getData(fieldName);
   
   //  vector<float> SpreadSheetModel::getData(string fieldName)
-  vector<float> *data = _currentModel->getData(fieldName);
+  vector<float> *data = _currentModel->getData(fieldName, offsetFromClosest);
 
   LOG(DEBUG) << " found " << data->size() << " data values ";
 
   return data;
+ 
+}
+
+float SpreadSheetController::getAzimuthForRay(int offsetFromClosest)
+{
+
+  LOG(DEBUG) << "getting azimuth for ray: offset from closest =" << offsetFromClosest;
+
+  float azimuth = _currentModel->getAzimuthForRay(offsetFromClosest);
+
+  LOG(DEBUG) << " found: azimuth=" << azimuth;
+
+  return azimuth;
  
 }
 
@@ -129,11 +144,16 @@ void  SpreadSheetController::needFieldNames() {
   _currentView->fieldNamesProvided(getFieldNames());
 }
 
-void  SpreadSheetController::needDataForField(string fieldName, int r, int c) {
+void  SpreadSheetController::needDataForField(string fieldName, int offsetFromClosest, int c) {
 
-  _currentView->fieldDataSent(getData(fieldName), r, c);
+  int useless = 0;
+  _currentView->fieldDataSent(getData(fieldName, offsetFromClosest), offsetFromClosest, c);
 }
 
+void  SpreadSheetController::needAzimuthForRay(int offsetFromClosest) {
+
+  _currentView->azimuthForRaySent(getAzimuthForRay(offsetFromClosest), offsetFromClosest);
+}
 
 void SpreadSheetController::getVolumeChanges() {
 

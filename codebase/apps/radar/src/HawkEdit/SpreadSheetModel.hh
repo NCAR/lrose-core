@@ -18,8 +18,9 @@ public:
   //void initData(string fileName);
 
   // return lists of data
-  vector<float> *getData(string fieldName);
+  vector<float> *getData(string fieldName, int offsetFromClosest);
   vector<string> getFields();
+  float getAzimuthForRay(int offsetFromClosest);
   //  RadxVol getVolume(); 
 
   void setData(string fieldName, vector<float> *data);
@@ -27,6 +28,7 @@ public:
 
   RadxVol *_vol;
   RadxRay *_closestRay;
+  size_t _closestRayIdx;
 
   /*
   void _setupVolRead(RadxFile *file);
