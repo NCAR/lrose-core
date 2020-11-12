@@ -69,7 +69,11 @@ ConvectionFinder::ConvectionFinder(const string &progName,
   _convStrat.setMinValidDbz(_params.convection_finder_min_valid_dbz);
   _convStrat.setDbzForDefiniteConvection
     (_params.dbz_threshold_for_definite_convection);
-  _convStrat.setConvectiveRadiusKm(_params.convective_radius_km);
+  _convStrat.setComputeConvRadius(_params.conv_radius_function.min_dbz,
+                                  _params.conv_radius_function.max_dbz,
+                                  _params.conv_radius_function.min_radius_km,
+                                  _params.conv_radius_function.max_radius_km,
+                                  _params.convection_finder_background_dbz_radius_km);
   _convStrat.setTextureRadiusKm(_params.convection_finder_texture_radius_km);
   _convStrat.setMinValidFractionForTexture
     (_params.convection_finder_min_valid_fraction_for_texture);
@@ -209,6 +213,34 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   maxField->setUnits("dBZ");
   outMdvx.addField(maxField);
   
+  // background dbz
+  
+  Mdvx::field_header_t backgrFhdr = fhdr;
+  MdvxField *backgrField = new MdvxField(backgrFhdr, vhdr);
+  backgrField->setVolData(_convStrat.getBackgroundDbz(),
+                          volSize32,
+                          Mdvx::ENCODING_FLOAT32);
+  backgrField->convertType(Mdvx::ENCODING_FLOAT32,
+                           Mdvx::COMPRESSION_GZIP);
+  backgrField->setFieldName("BackgroundDbz");
+  backgrField->setFieldNameLong("Background_mean_dbz");
+  backgrField->setUnits("dBZ");
+  outMdvx.addField(backgrField);
+  
+  // convective radius
+  
+  Mdvx::field_header_t convRadFhdr = fhdr;
+  MdvxField *convRadField = new MdvxField(convRadFhdr, vhdr);
+  convRadField->setVolData(_convStrat.getConvRadiusKm(),
+                           volSize32,
+                           Mdvx::ENCODING_FLOAT32);
+  convRadField->convertType(Mdvx::ENCODING_FLOAT32,
+                            Mdvx::COMPRESSION_GZIP);
+  convRadField->setFieldName("ConvRadius");
+  convRadField->setFieldNameLong("Convective-radius");
+  convRadField->setUnits("km");
+  outMdvx.addField(convRadField);
+  
   // the following fields are unsigned bytes
 
   int volSize08 = fhdr.nx * fhdr.ny * sizeof(ui08);
@@ -217,35 +249,6 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   fhdr.data_element_nbytes = 1;
   fhdr.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
   fhdr.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
-  
-  // convective flag from max dbz
-  
-  Mdvx::field_header_t convFromMaxFhdr = fhdr;
-  MdvxField *convFromMaxField = new MdvxField(convFromMaxFhdr, vhdr);
-  convFromMaxField->setVolData(_convStrat.getConvFromColMax(),
-                               volSize08,
-                               Mdvx::ENCODING_INT8);
-  convFromMaxField->convertType(Mdvx::ENCODING_INT8,
-                                Mdvx::COMPRESSION_GZIP);
-  convFromMaxField->setFieldName("ConvFromColMax");
-  convFromMaxField->setFieldNameLong("Flag for convection from column max dbz");
-  convFromMaxField->setUnits("");
-  outMdvx.addField(convFromMaxField);
-
-  // convective flag from texture
-  
-  Mdvx::field_header_t convFromTextureFhdr = fhdr;
-  MdvxField *convFromTextureField = new MdvxField(convFromTextureFhdr, vhdr);
-  convFromTextureField->setVolData(_convStrat.getConvFromTexture(),
-                                   volSize08,
-                                   Mdvx::ENCODING_INT8);
-  convFromTextureField->convertType(Mdvx::ENCODING_INT8,
-                              Mdvx::COMPRESSION_GZIP);
-  convFromTextureField->setFieldName("ConvFromTexture");
-  convFromTextureField->setFieldNameLong
-    ("Flag for convection from texture field");
-  convFromTextureField->setUnits("");
-  outMdvx.addField(convFromTextureField);
   
   // partition
   

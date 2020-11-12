@@ -63,8 +63,6 @@ ConvStratFinder::ConvStratFinder()
   _minValidFractionForTexture = 0.33; 
   _minTextureForConvection = 15.0; 
 
-  _convRadiusKm = 5.0;
-  _computeConvRadius = true;
   _minConvRadiusKm = 1.0;
   _maxConvRadiusKm = 5.0;
   _dbzForMinRadius = 22.5;
@@ -127,7 +125,7 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
 
   // set dbz field to missing if below the min threshold
   
-  fl32 *volDbz = _volDbz.buf();
+  fl32 *volDbz = _volDbz.dat();
   for (int ii = 0; ii < _nxyz; ii++) {
     if (dbz[ii] == dbzMissingVal || dbz[ii] < _minValidDbz) {
       volDbz[ii] = _missing;
@@ -150,7 +148,7 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
 
   // compute the background dbz
   
-  void _computeBackgroundDbz();
+  _computeBackgroundDbz();
 
   // compute spatial texture
   
@@ -184,8 +182,7 @@ void ConvStratFinder::_allocArrays()
   _fractionActive.alloc(_nxy);
   _colMaxDbz.alloc(_nxy);
   _backgroundDbz.alloc(_nxy);
-  _convFromColMax.alloc(_nxy);
-  _convFromTexture.alloc(_nxy);
+  _convRadiusKm.alloc(_nxy);
 
 }
 
@@ -209,8 +206,7 @@ void ConvStratFinder::freeArrays()
   _fractionActive.free();
   _colMaxDbz.free();
   _backgroundDbz.free();
-  _convFromColMax.free();
-  _convFromTexture.free();
+  _convRadiusKm.free();
 
 }
 
@@ -225,7 +221,7 @@ void ConvStratFinder::_computeColMax()
 
   // get data pointers
 
-  fl32 *colMaxDbz = _colMaxDbz.buf();
+  fl32 *colMaxDbz = _colMaxDbz.dat();
   
   // initialize
 
@@ -233,7 +229,7 @@ void ConvStratFinder::_computeColMax()
     colMaxDbz[ii] = _missing;
   }
 
-  fl32 *dbz = _volDbz.buf();
+  fl32 *dbz = _volDbz.dat();
   
   for (int iz = _minIz; iz <= _maxIz; iz++) {
     for (int iy = 0; iy < _ny; iy++) {
@@ -258,7 +254,7 @@ void ConvStratFinder::_computeColMax()
   // compute fraction covered array for texture kernel
   // we use the column maximum dbz to find points with coverage
 
-  fl32 *fractionTexture = _fractionActive.buf();
+  fl32 *fractionTexture = _fractionActive.dat();
   memset(fractionTexture, 0, _nxy * sizeof(fl32));
   for (int iy = _nyTexture; iy < _ny - _nyTexture; iy++) {
     for (int ix = _nxTexture; ix < _nx - _nxTexture; ix++) {
@@ -289,11 +285,11 @@ void ConvStratFinder::_computeTexture()
 
   // array pointers
 
-  fl32 *volTexture = _volTexture.buf();
-  fl32 *sumTexture = _sumTexture.buf();
-  fl32 *nTexture = _nTexture.buf();
-  fl32 *meanTexture = _meanTexture.buf();
-  fl32 *fractionTexture = _fractionActive.buf();
+  fl32 *volTexture = _volTexture.dat();
+  fl32 *sumTexture = _sumTexture.dat();
+  fl32 *nTexture = _nTexture.dat();
+  fl32 *meanTexture = _meanTexture.dat();
+  fl32 *fractionTexture = _fractionActive.dat();
 
   // initialize
   
@@ -309,7 +305,7 @@ void ConvStratFinder::_computeTexture()
   
   // set up threads for computing texture at each level
 
-  const fl32 *dbz = _volDbz.buf();
+  const fl32 *dbz = _volDbz.dat();
   vector<ComputeTexture *> threads;
   for (int iz = _minIz; iz <= _maxIz; iz++) {
     size_t zoffset = iz * _nxy;
@@ -390,60 +386,46 @@ void ConvStratFinder::_setPartition()
 
   // get data pointers
   
-  const fl32 *colMaxDbz = _colMaxDbz.buf();
-  const fl32 *texture = _meanTexture.buf();
-  ui08 *convFromColMax = _convFromColMax.buf();
-  ui08 *convFromTexture = _convFromTexture.buf();
-  ui08 *partition = _partition.buf();
+  const fl32 *colMaxDbz = _colMaxDbz.dat();
+  const fl32 *texture = _meanTexture.dat();
+  ui08 *partition = _partition.dat();
   
   // initialize
 
-  memset(convFromColMax, 0, _nxy * sizeof(ui08));
-  memset(convFromTexture, 0, _nxy * sizeof(ui08));
   memset(partition, 0, _nxy * sizeof(ui08));
   
   // load up convective flag at points surrounding the
   // central grid point
-        
-  for (int iy = _nyConv; iy < _ny - _nyConv; iy++) {
-    for (int ix = _nxConv; ix < _nx - _nxConv; ix++) {
-      
-      int ii = ix + iy * _nx;
 
-      // set convective flag
+  for (int iy = 0; iy < _ny; iy++) {
+    for (int ix = 0; ix < _nx; ix++) {
+      // set convective partition
+      int index = ix + iy * _nx;
+      if (colMaxDbz[index] >= _dbzForDefiniteConvection ||
+          texture[index] >= _minTextureForConvection) {
+        _setPartitionExpanded(ix, iy, index);
+      }
+    } // ix
+  } // iy
 
-      if (colMaxDbz[ii] >= _dbzForDefiniteConvection) {
-        for (size_t kk = 0; kk < _convKernelOffsets.size(); kk++) {
-          int jj = ii + _convKernelOffsets[kk];
-          convFromColMax[jj] = CATEGORY_CONVECTIVE;
-          partition[jj] = CATEGORY_CONVECTIVE;
+  // set stratiform partition
+  
+  for (int iy = 0; iy < _ny; iy++) {
+    for (int ix = 0; ix < _nx; ix++) {
+      int index = ix + iy * _nx;
+      if (colMaxDbz[index] != _missing) {
+        if (partition[index] == CATEGORY_MISSING) {
+          partition[index] = CATEGORY_STRATIFORM;
         }
       }
-
-      if (texture[ii] >= _minTextureForConvection) {
-        for (size_t kk = 0; kk < _convKernelOffsets.size(); kk++) {
-          int jj = ii + _convKernelOffsets[kk];
-          convFromTexture[jj] = CATEGORY_CONVECTIVE;
-          partition[jj] = CATEGORY_CONVECTIVE;
-        }
-      }
-
-      // set stratiform flag
-
-      if (colMaxDbz[ii] != _missing) {
-        if (partition[ii] == CATEGORY_MISSING) {
-          partition[ii] = CATEGORY_STRATIFORM;
-        }
-      }
-
     } // ix
   } // iy
 
   // load up the partitioned dbz arrays
 
-  const fl32 *dbz = _volDbz.buf();
-  fl32 *convDbz = _convDbz.buf();
-  fl32 *stratDbz = _stratDbz.buf();
+  const fl32 *dbz = _volDbz.dat();
+  fl32 *convDbz = _convDbz.dat();
+  fl32 *stratDbz = _stratDbz.dat();
 
   for (int ii = 0; ii < _nxyz; ii++) {
     convDbz[ii] = _missing;
@@ -527,30 +509,42 @@ void ConvStratFinder::_computeKernels()
     }
   }
 
-  // convective kernel
+}
 
-  _convKernelOffsets.clear();
+////////////////////////////////////////////////////////////
+// set partition, expanding convection by computed radius
 
-  _nyConv = (int) floor(_convRadiusKm / _dy + 0.5);
-  _nxConv = (int) floor(_convRadiusKm / _dx + 0.5);
-
-  if (_verbose) {
-    cerr << "Convective kernel size:" << endl;
-    cerr << "  ny: " << _nyConv << endl;
-    cerr << "  nx: " << _nxConv << endl;
-  }
+void ConvStratFinder::_setPartitionExpanded(int ix, int iy, int index)
   
-  for (int jdy = -_nyConv; jdy <= _nyConv; jdy++) {
-    double yy = jdy * _dy;
-    for (int jdx = -_nxConv; jdx <= _nxConv; jdx++) {
-      double xx = jdx * _dx;
-      double radius = sqrt(yy * yy + xx * xx);
-      if (radius <= _convRadiusKm) {
-        ssize_t offset = jdx + jdy * _nx;
-        _convKernelOffsets.push_back(offset);
-      }
-    }
-  }
+{
+
+  // get the convetive radius for this point
+  
+  double backgroundDbz = _backgroundDbz.dat()[index];
+  double radius = _computeConvRadiusKm(backgroundDbz);
+  _convRadiusKm.dat()[index] = radius;
+  double radSq = radius * radius;
+  int ny = (int) floor(radius / _dy + 0.5);
+  int nx = (int) floor(radius / _dx + 0.5);
+
+  ui08 *partition = _partition.dat();
+
+  for (int jy = -ny; jy <= ny; jy++) {
+    double yy = jy * _dy;
+    for (int jx = -nx; jx <= nx; jx++) {
+      double xx = jx * _dx;
+      double rSq = yy * yy + xx * xx;
+      if (rSq <= radSq) {
+        int ky = iy + jy;
+        int kx = ix + jx;
+        if (ky >= 0 && ky < _ny - 1 &&
+            kx >= 0 && kx < _nx - 1) {
+          int kk = kx + ky * _nx;
+          partition[kk] = CATEGORY_CONVECTIVE;
+        } // if (ky >= 0 ...
+      } // if (rSq <= radSq)
+    } // jx
+  } // jy
 
 }
 
@@ -567,7 +561,6 @@ void ConvStratFinder::_printSettings(ostream &out)
   out << "  _maxValidHtKm: " << _maxValidHtKm << endl;
   out << "  _minValidDbz: " << _minValidDbz << endl;
   out << "  _dbzForDefiniteConvection: " << _dbzForDefiniteConvection << endl;
-  out << "  _convRadiusKm: " << _convRadiusKm << endl;
   out << "  _textureRadiusKm: " << _textureRadiusKm << endl;
   out << "  _minValidFractionForTexture: " << _minValidFractionForTexture << endl;
   out << "  _minTextureForConvection: " << _minTextureForConvection << endl;
@@ -595,10 +588,79 @@ void ConvStratFinder::_printSettings(ostream &out)
   out << "  _nyTexture: " << _nyTexture << endl;
   out << "  _nxBackground: " << _nxBackground << endl;
   out << "  _nyBackground: " << _nyBackground << endl;
-  out << "  _nxConv: " << _nxConv << endl;
-  out << "  _nyConv: " << _nyConv << endl;
 
+}
 
+////////////////////////////////////////////////////////////////////
+// Compute the radius of convective influence from the background
+// reflectivity.
+// Given definite convection at a point (see above),
+// we set all points within the computed radius to be convective.
+
+double ConvStratFinder::_computeConvRadiusKm(double backgroundDbz) 
+{
+  if (backgroundDbz == _missing) {
+    return _minConvRadiusKm;
+  }
+  if (backgroundDbz < _dbzForMinRadius) {
+    return _minConvRadiusKm;
+  }
+  if (backgroundDbz > _dbzForMaxRadius) {
+    return _maxConvRadiusKm;
+  }
+  double radius = _minConvRadiusKm +
+    (backgroundDbz - _dbzForMinRadius) * _radiusSlope;
+  return radius;
+}
+
+/////////////////////////////////////////////
+// Compute the background dbz
+// at each point in the col max dbz
+
+void ConvStratFinder::_computeBackgroundDbz()
+{
+
+  // get data pointers
+
+  fl32 *colMaxDbz = _colMaxDbz.dat();
+  fl32 *backgroundDbz = _backgroundDbz.dat();
+  
+  // initialize
+
+  for (int ii = 0; ii < _nxy; ii++) {
+    backgroundDbz[ii] = _missing;
+  }
+
+  // background is mean dbz in a circle around a point
+  
+  for (int iy = _nyBackground; iy < _ny - _nyBackground; iy++) {
+    
+    int icenter = _nxBackground + iy * _nx;
+    
+    for (int ix = _nxBackground; ix < _nx - _nxBackground; ix++, icenter++) {
+      
+      double nn = 0.0;
+      double sum = 0.0;
+      
+      for (size_t ii = 0; ii < _backgroundKernelOffsets.size(); ii++) {
+        int kk = icenter + _backgroundKernelOffsets[ii];
+        double dbz = colMaxDbz[kk];
+        if (dbz != _missing) {
+          sum += dbz;
+        }
+        nn++;
+      } // ii
+      
+      if (nn >= 0) {
+        double mean = sum / nn;
+        backgroundDbz[icenter] = mean;
+      } else {
+        backgroundDbz[icenter] = 0.0;
+      }
+      
+    } // ix
+    
+  } // iy
 
 }
 
@@ -699,81 +761,5 @@ void ConvStratFinder::ComputeTexture::run()
     
   } // iy
   
-}
-
-////////////////////////////////////////////////////////////////////
-// Compute the radius of convective influence from the background
-// reflectivity.
-// Given definite convection at a point (see above),
-// we set all points within the computed radius to be convective.
-
-double ConvStratFinder::getConvRadiusKm(double backgroundDbz) 
-{
-  if (!_computeConvRadius) {
-    return _convRadiusKm;
-  }
-  if (backgroundDbz == _missing) {
-    return _minConvRadiusKm;
-  }
-  if (backgroundDbz < _dbzForMinRadius) {
-    return _minConvRadiusKm;
-  }
-  if (backgroundDbz > _dbzForMaxRadius) {
-    return _maxConvRadiusKm;
-  }
-  double radius = _minConvRadiusKm +
-    (backgroundDbz - _dbzForMinRadius) * _radiusSlope;
-  return radius;
-}
-
-/////////////////////////////////////////////
-// Compute the background dbz
-// at each point in the col max dbz
-
-void ConvStratFinder::_computeBackgroundDbz()
-{
-
-  // get data pointers
-
-  fl32 *colMaxDbz = _colMaxDbz.buf();
-  fl32 *backgroundDbz = _backgroundDbz.buf();
-  
-  // initialize
-
-  for (int ii = 0; ii < _nxy; ii++) {
-    backgroundDbz[ii] = _missing;
-  }
-
-  // background is mean dbz in a circle around a point
-  
-  for (int iy = _nyBackground; iy < _ny - _nyBackground; iy++) {
-    
-    int icenter = _nxBackground + iy * _nx;
-    
-    for (int ix = _nxBackground; ix < _nx - _nxBackground; ix++, icenter++) {
-      
-      double nn = 0.0;
-      double sum = 0.0;
-      
-      for (size_t ii = 0; ii < _backgroundKernelOffsets.size(); ii++) {
-        int kk = icenter + _backgroundKernelOffsets[ii];
-        double dbz = colMaxDbz[kk];
-        if (dbz != _missing) {
-          sum += dbz;
-        }
-        nn++;
-      } // ii
-      
-      if (nn >= 0) {
-        double mean = sum / nn;
-        backgroundDbz[icenter] = mean;
-      } else {
-        backgroundDbz[icenter] = 0.0;
-      }
-      
-    } // ix
-    
-  } // iy
-
 }
 

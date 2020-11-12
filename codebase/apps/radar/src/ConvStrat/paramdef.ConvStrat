@@ -5,6 +5,7 @@
 // P.O.Box 3000, Boulder, CO, USA, 80307-3000
 //
 // June 2014
+//////////////////////////////////////////////////////////////////////
 
 commentdef {
   p_header = "Program name: ConvStrat";
@@ -84,11 +85,33 @@ paramdef double {
   p_help = "If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.";
 } dbz_threshold_for_definite_convection;
 
+commentdef {
+  p_header = "COMPUTING THE CONVECTIVE RADIUS";
+  p_text = "The convective radius is the distance by which identified convection will be expanded around the convective point. A linear function is used to compute the radius from the background reflectivity";
+}
+
 paramdef double {
-  p_default = 5.0;
-  p_descr = "Radius of convective influence (km).";
-  p_help = "Given definite convection at a point (see above), we set all points within this radius to be convective.";
-} convective_radius_km;
+  p_default = 11.0;
+  p_descr = "Radius for computing background reflectivity (km).";
+  p_help = "The background dbz at a point is the mean within this specified radius of the point.";
+} background_dbz_radius_km;
+
+typedef struct {
+  double min_dbz;
+  double max_dbz;
+  double min_radius_km;
+  double max_radius_km;
+} conv_radius_function_t;
+
+paramdef struct conv_radius_function_t {
+  p_default = { min_dbz = 22.5,
+                max_dbz = 42.5,
+                min_radius_km = 1.0,
+                max_radius_km = 5.0
+  };
+  p_descr = "End points of the linear function to compute the radius from the background reflectivity.";
+  p_help = "The radius function varies linearly between the min and max dbz. For dbz below the min, the min radius applies. For dbz above the max, the max radius applies.";
+} conv_radius_function;
 
 commentdef {
   p_header = "COMPUTING REFLECTIVITY TEXTURE";

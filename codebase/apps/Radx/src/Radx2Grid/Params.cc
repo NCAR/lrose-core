@@ -3015,6 +3015,60 @@
     tt->single_val.d = 53;
     tt++;
     
+    // Parameter 'conv_strat_background_dbz_radius_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_background_dbz_radius_km");
+    tt->descr = tdrpStrDup("Radius for computing background reflectivity (km).");
+    tt->help = tdrpStrDup("The background dbz at a point is the mean within this specified radius of the point.");
+    tt->val_offset = (char *) &conv_strat_background_dbz_radius_km - &_start_;
+    tt->single_val.d = 11;
+    tt++;
+    
+    // Parameter 'conv_radius_function'
+    // ctype is '_conv_radius_function_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("conv_radius_function");
+    tt->descr = tdrpStrDup("End points of the linear function to compute the radius from the background reflectivity.");
+    tt->help = tdrpStrDup("The radius function varies linearly between the min and max dbz. For dbz below the min, the min radius applies. For dbz above the max, the max radius applies.");
+    tt->val_offset = (char *) &conv_radius_function - &_start_;
+    tt->struct_def.name = tdrpStrDup("conv_radius_function_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("min_dbz");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &conv_radius_function.min_dbz - (char *) &conv_radius_function;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("max_dbz");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &conv_radius_function.max_dbz - (char *) &conv_radius_function;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("min_radius_km");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &conv_radius_function.min_radius_km - (char *) &conv_radius_function;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("max_radius_km");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &conv_radius_function.max_radius_km - (char *) &conv_radius_function;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 22.5;
+      tt->struct_vals[1].d = 42.5;
+      tt->struct_vals[2].d = 1;
+      tt->struct_vals[3].d = 5;
+    tt++;
+    
     // Parameter 'conv_strat_convective_radius_km'
     // ctype is 'double'
     

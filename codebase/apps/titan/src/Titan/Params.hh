@@ -130,6 +130,13 @@ public:
   } dual_threshold_t;
 
   typedef struct {
+    double min_dbz;
+    double max_dbz;
+    double min_radius_km;
+    double max_radius_km;
+  } conv_radius_function_t;
+
+  typedef struct {
     double coeff;
     double expon;
   } zr_t;
@@ -526,6 +533,10 @@ public:
 
   double dbz_threshold_for_definite_convection;
 
+  double convection_finder_background_dbz_radius_km;
+
+  conv_radius_function_t conv_radius_function;
+
   double convective_radius_km;
 
   double convection_finder_texture_radius_km;
@@ -691,7 +702,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[149];
+  mutable TDRPtable _table[151];
 
   const char *_className;
 

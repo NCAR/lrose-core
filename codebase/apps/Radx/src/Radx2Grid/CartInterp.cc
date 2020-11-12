@@ -125,7 +125,11 @@ CartInterp::CartInterp(const string &progName,
     _convStrat.setMinValidDbz(_params.conv_strat_min_valid_dbz);
     _convStrat.setDbzForDefiniteConvection
       (_params.conv_strat_dbz_threshold_for_definite_convection);
-    _convStrat.setConvectiveRadiusKm(_params.conv_strat_convective_radius_km);
+    _convStrat.setComputeConvRadius(_params.conv_radius_function.min_dbz,
+                                    _params.conv_radius_function.max_dbz,
+                                    _params.conv_radius_function.min_radius_km,
+                                    _params.conv_radius_function.max_radius_km,
+                                    _params.conv_strat_background_dbz_radius_km);
     _convStrat.setTextureRadiusKm(_params.conv_strat_texture_radius_km);
     _convStrat.setMinValidFractionForTexture
       (_params.conv_strat_min_valid_fraction_for_texture);

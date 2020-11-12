@@ -119,20 +119,24 @@ ConvStrat::ConvStrat(int argc, char **argv)
   // set up ConvStratFinder object
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _convStrat.setVerbose(true);
+    _finder.setVerbose(true);
   } else if (_params.debug) {
-    _convStrat.setDebug(true);
+    _finder.setDebug(true);
   }
-  _convStrat.setMinValidHtKm(_params.min_valid_height);
-  _convStrat.setMaxValidHtKm(_params.max_valid_height);
-  _convStrat.setMinValidDbz(_params.min_valid_dbz);
-  _convStrat.setDbzForDefiniteConvection
+  _finder.setMinValidHtKm(_params.min_valid_height);
+  _finder.setMaxValidHtKm(_params.max_valid_height);
+  _finder.setMinValidDbz(_params.min_valid_dbz);
+  _finder.setDbzForDefiniteConvection
     (_params.dbz_threshold_for_definite_convection);
-  _convStrat.setConvectiveRadiusKm(_params.convective_radius_km);
-  _convStrat.setTextureRadiusKm(_params.texture_radius_km);
-  _convStrat.setMinValidFractionForTexture
+  _finder.setComputeConvRadius(_params.conv_radius_function.min_dbz,
+                               _params.conv_radius_function.max_dbz,
+                               _params.conv_radius_function.min_radius_km,
+                               _params.conv_radius_function.max_radius_km,
+                               _params.background_dbz_radius_km);
+  _finder.setTextureRadiusKm(_params.texture_radius_km);
+  _finder.setMinValidFractionForTexture
     (_params.min_valid_fraction_for_texture);
-  _convStrat.setMinTextureForConvection
+  _finder.setMinTextureForConvection
     (_params.min_texture_for_convection);
 
   return;
@@ -196,20 +200,20 @@ int ConvStrat::Run()
       zLevels.push_back(vhdr.level[iz]);
     }
     
-    _convStrat.setGrid(fhdr.nx,
-                       fhdr.ny,
-                       fhdr.grid_dx, 
-                       fhdr.grid_dy, 
-                       fhdr.grid_minx, 
-                       fhdr.grid_miny,
-                       zLevels,
-                       isLatLon);
+    _finder.setGrid(fhdr.nx,
+                    fhdr.ny,
+                    fhdr.grid_dx, 
+                    fhdr.grid_dy, 
+                    fhdr.grid_minx, 
+                    fhdr.grid_miny,
+                    zLevels,
+                    isLatLon);
 
     // compute the convective/stratiform partition
 
     const fl32 *dbz = (const fl32*) dbzField->getVol();
     fl32 missingDbz = fhdr.missing_data_value;
-    if (_convStrat.computePartition(dbz, missingDbz)) {
+    if (_finder.computePartition(dbz, missingDbz)) {
       cerr << "ERROR - ConvStrat::Run()" << endl;
       umsleep(1000);
       iret = -1;
@@ -229,7 +233,7 @@ int ConvStrat::Run()
     
     _inMdvx.clear();
     _outMdvx.clear();
-    _convStrat.freeArrays();
+    _finder.freeArrays();
     
   } // while
   
@@ -292,8 +296,8 @@ void ConvStrat::_addFields()
   Mdvx::field_header_t fhdr = dbzField->getFieldHeader();
   fhdr.nz = 1;
   fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  int volSize32 = fhdr.nx * fhdr.ny * sizeof(fl32);
-  fhdr.volume_size = volSize32;
+  size_t planeSize32 = fhdr.nx * fhdr.ny * sizeof(fl32);
+  fhdr.volume_size = planeSize32;
   fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr.data_element_nbytes = 4;
   fhdr.missing_data_value = _missing;
@@ -312,8 +316,8 @@ void ConvStrat::_addFields()
     
     Mdvx::field_header_t fractionFhdr = fhdr;
     MdvxField *fractionField = new MdvxField(fractionFhdr, vhdr);
-    fractionField->setVolData(_convStrat.getFractionActive(),
-                              volSize32,
+    fractionField->setVolData(_finder.getFractionActive(),
+                              planeSize32,
                               Mdvx::ENCODING_FLOAT32);
     fractionField->convertType(Mdvx::ENCODING_FLOAT32,
                                Mdvx::COMPRESSION_GZIP);
@@ -326,8 +330,8 @@ void ConvStrat::_addFields()
     
     Mdvx::field_header_t textureFhdr = fhdr;
     MdvxField *textureField = new MdvxField(textureFhdr, vhdr);
-    textureField->setVolData(_convStrat.getMeanTexture(), 
-                             volSize32,
+    textureField->setVolData(_finder.getMeanTexture(), 
+                             planeSize32,
                              Mdvx::ENCODING_FLOAT32);
     textureField->convertType(Mdvx::ENCODING_FLOAT32,
                               Mdvx::COMPRESSION_GZIP);
@@ -340,8 +344,8 @@ void ConvStrat::_addFields()
     
     Mdvx::field_header_t maxFhdr = fhdr;
     MdvxField *maxField = new MdvxField(maxFhdr, vhdr);
-    maxField->setVolData(_convStrat.getColMaxDbz(),
-                         volSize32,
+    maxField->setVolData(_finder.getColMaxDbz(),
+                         planeSize32,
                          Mdvx::ENCODING_FLOAT32);
     maxField->convertType(Mdvx::ENCODING_FLOAT32,
                           Mdvx::COMPRESSION_GZIP);
@@ -349,6 +353,34 @@ void ConvStrat::_addFields()
     maxField->setFieldNameLong("Column max dbz");
     maxField->setUnits("dBZ");
     _outMdvx.addField(maxField);
+
+    // background dbz
+    
+    Mdvx::field_header_t backgrFhdr = fhdr;
+    MdvxField *backgrField = new MdvxField(backgrFhdr, vhdr);
+    backgrField->setVolData(_finder.getBackgroundDbz(),
+                            planeSize32,
+                            Mdvx::ENCODING_FLOAT32);
+    backgrField->convertType(Mdvx::ENCODING_FLOAT32,
+                             Mdvx::COMPRESSION_GZIP);
+    backgrField->setFieldName("DbzBackground");
+    backgrField->setFieldNameLong("Background dbz");
+    backgrField->setUnits("dBZ");
+    _outMdvx.addField(backgrField);
+
+    // convective radius in km
+    
+    Mdvx::field_header_t convRadFhdr = fhdr;
+    MdvxField *convRadField = new MdvxField(convRadFhdr, vhdr);
+    convRadField->setVolData(_finder.getConvRadiusKm(),
+                             planeSize32,
+                             Mdvx::ENCODING_FLOAT32);
+    convRadField->convertType(Mdvx::ENCODING_FLOAT32,
+                              Mdvx::COMPRESSION_GZIP);
+    convRadField->setFieldName("ConvRadius");
+    convRadField->setFieldNameLong("ConvectiveRadius");
+    convRadField->setUnits("km");
+    _outMdvx.addField(convRadField);
 
   }
   
@@ -365,32 +397,32 @@ void ConvStrat::_addFields()
   
   if (_params.write_debug_fields) {
 
-    Mdvx::field_header_t convFromMaxFhdr = fhdr;
-    MdvxField *convFromMaxField = new MdvxField(convFromMaxFhdr, vhdr);
-    convFromMaxField->setVolData(_convStrat.getConvFromColMax(),
-                                 volSize08,
-                                 Mdvx::ENCODING_INT8);
-    convFromMaxField->convertType(Mdvx::ENCODING_INT8,
-                                  Mdvx::COMPRESSION_GZIP);
-    convFromMaxField->setFieldName("ConvFromColMax");
-    convFromMaxField->setFieldNameLong("Flag for convection from column max dbz");
-    convFromMaxField->setUnits("");
-    _outMdvx.addField(convFromMaxField);
+    // Mdvx::field_header_t convFromMaxFhdr = fhdr;
+    // MdvxField *convFromMaxField = new MdvxField(convFromMaxFhdr, vhdr);
+    // convFromMaxField->setVolData(_finder.getConvFromColMax(),
+    //                              volSize08,
+    //                              Mdvx::ENCODING_INT8);
+    // convFromMaxField->convertType(Mdvx::ENCODING_INT8,
+    //                               Mdvx::COMPRESSION_GZIP);
+    // convFromMaxField->setFieldName("ConvFromColMax");
+    // convFromMaxField->setFieldNameLong("Flag for convection from column max dbz");
+    // convFromMaxField->setUnits("");
+    // _outMdvx.addField(convFromMaxField);
     
     // convective flag from texture
     
-    Mdvx::field_header_t convFromTextureFhdr = fhdr;
-    MdvxField *convFromTextureField = new MdvxField(convFromTextureFhdr, vhdr);
-    convFromTextureField->setVolData(_convStrat.getConvFromTexture(),
-                                     volSize08,
-                                     Mdvx::ENCODING_INT8);
-    convFromTextureField->convertType(Mdvx::ENCODING_INT8,
-                                      Mdvx::COMPRESSION_GZIP);
-    convFromTextureField->setFieldName("ConvFromTexture");
-    convFromTextureField->setFieldNameLong
-      ("Flag for convection from texture field");
-    convFromTextureField->setUnits("");
-    _outMdvx.addField(convFromTextureField);
+    // Mdvx::field_header_t convFromTextureFhdr = fhdr;
+    // MdvxField *convFromTextureField = new MdvxField(convFromTextureFhdr, vhdr);
+    // convFromTextureField->setVolData(_finder.getConvFromTexture(),
+    //                                  volSize08,
+    //                                  Mdvx::ENCODING_INT8);
+    // convFromTextureField->convertType(Mdvx::ENCODING_INT8,
+    //                                   Mdvx::COMPRESSION_GZIP);
+    // convFromTextureField->setFieldName("ConvFromTexture");
+    // convFromTextureField->setFieldNameLong
+    //   ("Flag for convection from texture field");
+    // convFromTextureField->setUnits("");
+    // _outMdvx.addField(convFromTextureField);
 
   }
   
@@ -400,7 +432,7 @@ void ConvStrat::_addFields()
 
     Mdvx::field_header_t partitionFhdr = fhdr;
     MdvxField *partitionField = new MdvxField(partitionFhdr, vhdr);
-    partitionField->setVolData(_convStrat.getPartition(),
+    partitionField->setVolData(_finder.getPartition(),
                                volSize08,
                                Mdvx::ENCODING_INT8);
     partitionField->convertType(Mdvx::ENCODING_INT8,
@@ -422,7 +454,7 @@ void ConvStrat::_addFields()
   if (_params.write_convective_dbz) {
 
     MdvxField *convDbzField = new MdvxField(fhdr3d, vhdr3d);
-    convDbzField->setVolData(_convStrat.getConvectiveDbz(),
+    convDbzField->setVolData(_finder.getConvectiveDbz(),
                              fhdr3d.volume_size,
                              Mdvx::ENCODING_FLOAT32);
     if (_params.convert_convective_dbz_to_column_max) {
@@ -440,7 +472,7 @@ void ConvStrat::_addFields()
   if (_params.write_stratiform_dbz) {
 
     MdvxField *stratDbzField = new MdvxField(fhdr3d, vhdr3d);
-    stratDbzField->setVolData(_convStrat.getStratiformDbz(),
+    stratDbzField->setVolData(_finder.getStratiformDbz(),
                               fhdr3d.volume_size,
                               Mdvx::ENCODING_FLOAT32);
     if (_params.convert_stratiform_dbz_to_column_max) {

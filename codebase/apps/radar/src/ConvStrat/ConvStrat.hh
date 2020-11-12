@@ -80,7 +80,7 @@ private:
   Params _params;
   DsMdvxInput _input;
   DsMdvx _inMdvx, _outMdvx;
-  ConvStratFinder _convStrat;
+  ConvStratFinder _finder;
 
   int _doRead();
   void _addFields();

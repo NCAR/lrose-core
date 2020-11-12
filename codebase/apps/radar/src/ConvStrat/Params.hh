@@ -80,6 +80,15 @@ public:
     FILELIST = 2
   } mode_t;
 
+  // struct typedefs
+
+  typedef struct {
+    double min_dbz;
+    double max_dbz;
+    double min_radius_km;
+    double max_radius_km;
+  } conv_radius_function_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -392,7 +401,9 @@ public:
 
   double dbz_threshold_for_definite_convection;
 
-  double convective_radius_km;
+  double background_dbz_radius_km;
+
+  conv_radius_function_t conv_radius_function;
 
   double texture_radius_km;
 
@@ -427,7 +438,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[30];
+  mutable TDRPtable _table[32];
 
   const char *_className;
 

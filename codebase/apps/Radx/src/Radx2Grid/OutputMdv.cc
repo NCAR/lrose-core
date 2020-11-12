@@ -434,18 +434,6 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
 
   if (_params.conv_strat_write_debug_fields) {
 
-    addConvStratBool(vol, proj,
-                     "ConvFromColMax",
-                     "convective_flag_from_column_max_dbz",
-                     ConvStratFinder::CATEGORY_MISSING,
-                     convStrat.getConvFromColMax());
-    
-    addConvStratBool(vol, proj,
-                     "ConvFromTexture",
-                     "convective_flag_from_mean_dbz_texture",
-                     ConvStratFinder::CATEGORY_MISSING,
-                     convStrat.getConvFromTexture());
-
     addField(vol, proj, vlevel2D,
              "DbzColMax",
              "dbz_column_maximum",
@@ -453,6 +441,22 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              Radx::FL32, 1.0, 0.0,
              convStrat.getMissingVal(),
              convStrat.getColMaxDbz());
+    
+    addField(vol, proj, vlevel2D,
+             "DbzBackground",
+             "dbz_background_mean",
+             "dBZ",
+             Radx::FL32, 1.0, 0.0,
+             convStrat.getMissingVal(),
+             convStrat.getBackgroundDbz());
+    
+    addField(vol, proj, vlevel2D,
+             "ConvRadius",
+             "convective_radius",
+             "km",
+             Radx::FL32, 1.0, 0.0,
+             convStrat.getMissingVal(),
+             convStrat.getConvRadiusKm());
     
     addField(vol, proj, vlevel2D,
              "FractionActive",

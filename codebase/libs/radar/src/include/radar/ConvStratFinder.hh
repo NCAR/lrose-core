@@ -99,16 +99,6 @@ public:
   }
 
   ////////////////////////////////////////////////////////////////////
-  // Specify the radius of convective influence (km).
-  // Given definite convection at a point (see above),
-  // we set all points within this radius to be convective.
-
-  void setConvectiveRadiusKm(double val) {
-    _computeConvRadius = false; // do not compute it, use this value
-    _convRadiusKm = val; // specified radius
-  }
-  
-  ////////////////////////////////////////////////////////////////////
   // Compute the radius of convective influence from the background
   // reflectivity.
   // Given definite convection at a point (see above),
@@ -121,12 +111,11 @@ public:
   // dbzForMaxRadius = background dbz for max radius
   // backgroundRadiusKm = kernel radius for computing background dbz
 
-  void setComputeConvRadius(double minConvRadiusKm,
-                            double maxConvRadiusKm,
-                            double dbzForMinRadius,
+  void setComputeConvRadius(double dbzForMinRadius,
                             double dbzForMaxRadius,
+                            double minConvRadiusKm,
+                            double maxConvRadiusKm,
                             double backgroundRadiusKm) {
-    _computeConvRadius = true;
     _minConvRadiusKm = minConvRadiusKm;
     _maxConvRadiusKm = maxConvRadiusKm;
     _dbzForMinRadius = dbzForMinRadius;
@@ -136,14 +125,6 @@ public:
     _deltaBackgroundDbz = _dbzForMaxRadius -_dbzForMinRadius;
     _radiusSlope = _deltaRadius / _deltaBackgroundDbz;
   }
-
-  ////////////////////////////////////////////////////////////////////
-  // Compute the radius of convective influence from the background
-  // reflectivity.
-  // Given definite convection at a point (see above),
-  // we set all points within the computed radius to be convective.
-  
-  double getConvRadiusKm(double backgroundDbz);
 
   ////////////////////////////////////////////////////////////////////
   // Radius for texture analysis (km).  We determine the reflectivity
@@ -216,19 +197,18 @@ public:
   // get the resulting partition
   // will be set to the relevant category
 
-  const ui08 *getPartition() const { return _partition.buf(); }
-  const fl32 *getConvectiveDbz() const { return _convDbz.buf(); }
-  const fl32 *getStratiformDbz() const { return _stratDbz.buf(); }
+  const ui08 *getPartition() const { return _partition.dat(); }
+  const fl32 *getConvectiveDbz() const { return _convDbz.dat(); }
+  const fl32 *getStratiformDbz() const { return _stratDbz.dat(); }
 
   ////////////////////////////////////////////////////////////////////
   // get intermediate fields for debugging
 
-  const fl32 *getMeanTexture() const { return _meanTexture.buf(); }
-  const fl32 *getFractionActive() const { return _fractionActive.buf(); }
-  const fl32 *getColMaxDbz() const { return _colMaxDbz.buf(); }
-  const fl32 *getBackgroundDbz() const { return _backgroundDbz.buf(); }
-  const ui08 *getConvFromColMax() const { return _convFromColMax.buf(); }
-  const ui08 *getConvFromTexture() const { return _convFromTexture.buf(); }
+  const fl32 *getMeanTexture() const { return _meanTexture.dat(); }
+  const fl32 *getFractionActive() const { return _fractionActive.dat(); }
+  const fl32 *getColMaxDbz() const { return _colMaxDbz.dat(); }
+  const fl32 *getBackgroundDbz() const { return _backgroundDbz.dat(); }
+  const fl32 *getConvRadiusKm() const { return _convRadiusKm.dat(); }
 
   // get missing value for float arrays
 
@@ -269,8 +249,6 @@ private:
   double _minValidFractionForTexture;
   double _minTextureForConvection;
 
-  bool _computeConvRadius;  // compute radius from background dbz
-  double _convRadiusKm;     // use if _computeConvRadius is false
   double _minConvRadiusKm;  // min convective radius if computed
   double _maxConvRadiusKm;  // max convective radius if computed
   double _dbzForMinRadius;  // background dbz for min radius
@@ -282,7 +260,6 @@ private:
   
   vector<ssize_t> _textureKernelOffsets;
   vector<ssize_t> _backgroundKernelOffsets;
-  vector<ssize_t> _convKernelOffsets;
 
   int _nx, _ny;
   double _minx, _miny;
@@ -292,10 +269,9 @@ private:
 
   int _nxy, _nxyz;
   int _minIz, _maxIz;
-
+  
   int _nxTexture, _nyTexture;
   int _nxBackground, _nyBackground;
-  int _nxConv, _nyConv;
 
   TaArray<ui08> _partition;
   TaArray<fl32> _convDbz;
@@ -309,15 +285,16 @@ private:
   TaArray<fl32> _fractionActive;
   TaArray<fl32> _colMaxDbz;
   TaArray<fl32> _backgroundDbz;
-  TaArray<ui08> _convFromColMax;
-  TaArray<ui08> _convFromTexture;
+  TaArray<fl32> _convRadiusKm;
 
   void _allocArrays();
   void _computeColMax();
   void _setPartition();
+  void _setPartitionExpanded(int ix, int iy, int index);
   void _computeTexture();
   void _computeKernels();
   void _printSettings(ostream &out);
+  double _computeConvRadiusKm(double backgroundDbz);
   void _computeBackgroundDbz();
   
   // inner class for starting timers in a separate thread

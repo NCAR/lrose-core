@@ -190,6 +190,13 @@ public:
   } censoring_field_t;
 
   typedef struct {
+    double min_dbz;
+    double max_dbz;
+    double min_radius_km;
+    double max_radius_km;
+  } conv_radius_function_t;
+
+  typedef struct {
     char* input_name;
     double min_value;
     double max_value;
@@ -778,6 +785,10 @@ public:
 
   double conv_strat_dbz_threshold_for_definite_convection;
 
+  double conv_strat_background_dbz_radius_km;
+
+  conv_radius_function_t conv_radius_function;
+
   double conv_strat_convective_radius_km;
 
   double conv_strat_texture_radius_km;
@@ -840,7 +851,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[210];
+  mutable TDRPtable _table[212];
 
   const char *_className;
 
