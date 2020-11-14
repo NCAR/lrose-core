@@ -293,29 +293,29 @@ void ConvStrat::_addFields()
   // initial fields are float32
 
   MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
-  Mdvx::field_header_t fhdr = dbzField->getFieldHeader();
-  fhdr.nz = 1;
-  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  size_t planeSize32 = fhdr.nx * fhdr.ny * sizeof(fl32);
-  fhdr.volume_size = planeSize32;
-  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  fhdr.data_element_nbytes = 4;
-  fhdr.missing_data_value = _missing;
-  fhdr.bad_data_value = _missing;
-  fhdr.scale = 1.0;
-  fhdr.bias = 0.0;
+  Mdvx::field_header_t fhdr2d = dbzField->getFieldHeader();
+  fhdr2d.nz = 1;
+  fhdr2d.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  size_t planeSize32 = fhdr2d.nx * fhdr2d.ny * sizeof(fl32);
+  fhdr2d.volume_size = planeSize32;
+  fhdr2d.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr2d.data_element_nbytes = 4;
+  fhdr2d.missing_data_value = _missing;
+  fhdr2d.bad_data_value = _missing;
+  fhdr2d.scale = 1.0;
+  fhdr2d.bias = 0.0;
   
-  Mdvx::vlevel_header_t vhdr;
-  MEM_zero(vhdr);
-  vhdr.level[0] = 0;
-  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  Mdvx::vlevel_header_t vhdr2d;
+  MEM_zero(vhdr2d);
+  vhdr2d.level[0] = 0;
+  vhdr2d.type[0] = Mdvx::VERT_TYPE_SURFACE;
 
   if (_params.write_debug_fields) {
 
     // load up fraction of texture kernel covered
     
-    Mdvx::field_header_t fractionFhdr = fhdr;
-    MdvxField *fractionField = new MdvxField(fractionFhdr, vhdr);
+    Mdvx::field_header_t fractionFhdr = fhdr2d;
+    MdvxField *fractionField = new MdvxField(fractionFhdr, vhdr2d);
     fractionField->setVolData(_finder.getFractionActive(),
                               planeSize32,
                               Mdvx::ENCODING_FLOAT32);
@@ -326,24 +326,38 @@ void ConvStrat::_addFields()
     fractionField->setUnits("");
     _outMdvx.addField(fractionField);
     
-    // load up mean texture field, add to output object
+    // add mean texture field
     
-    Mdvx::field_header_t textureFhdr = fhdr;
-    MdvxField *textureField = new MdvxField(textureFhdr, vhdr);
-    textureField->setVolData(_finder.getMeanTexture(), 
+    Mdvx::field_header_t meanTextFhdr = fhdr2d;
+    MdvxField *meanTextField = new MdvxField(meanTextFhdr, vhdr2d);
+    meanTextField->setVolData(_finder.getMeanTexture(), 
                              planeSize32,
                              Mdvx::ENCODING_FLOAT32);
-    textureField->convertType(Mdvx::ENCODING_FLOAT32,
+    meanTextField->convertType(Mdvx::ENCODING_FLOAT32,
                               Mdvx::COMPRESSION_GZIP);
-    textureField->setFieldName("DbzTextureMean");
-    textureField->setFieldNameLong("Mean texture of dbz");
-    textureField->setUnits("dBZ");
-    _outMdvx.addField(textureField);
+    meanTextField->setFieldName("DbzTextureMean");
+    meanTextField->setFieldNameLong("Mean texture of dbz");
+    meanTextField->setUnits("dBZ");
+    _outMdvx.addField(meanTextField);
+    
+    // add max texture field
+    
+    Mdvx::field_header_t maxTextFhdr = fhdr2d;
+    MdvxField *maxTextField = new MdvxField(maxTextFhdr, vhdr2d);
+    maxTextField->setVolData(_finder.getMaxTexture(), 
+                             planeSize32,
+                             Mdvx::ENCODING_FLOAT32);
+    maxTextField->convertType(Mdvx::ENCODING_FLOAT32,
+                              Mdvx::COMPRESSION_GZIP);
+    maxTextField->setFieldName("DbzTextureMax");
+    maxTextField->setFieldNameLong("Max texture of dbz");
+    maxTextField->setUnits("dBZ");
+    _outMdvx.addField(maxTextField);
     
     // max dbz
     
-    Mdvx::field_header_t maxFhdr = fhdr;
-    MdvxField *maxField = new MdvxField(maxFhdr, vhdr);
+    Mdvx::field_header_t maxFhdr = fhdr2d;
+    MdvxField *maxField = new MdvxField(maxFhdr, vhdr2d);
     maxField->setVolData(_finder.getColMaxDbz(),
                          planeSize32,
                          Mdvx::ENCODING_FLOAT32);
@@ -356,8 +370,8 @@ void ConvStrat::_addFields()
 
     // background dbz
     
-    Mdvx::field_header_t backgrFhdr = fhdr;
-    MdvxField *backgrField = new MdvxField(backgrFhdr, vhdr);
+    Mdvx::field_header_t backgrFhdr = fhdr2d;
+    MdvxField *backgrField = new MdvxField(backgrFhdr, vhdr2d);
     backgrField->setVolData(_finder.getBackgroundDbz(),
                             planeSize32,
                             Mdvx::ENCODING_FLOAT32);
@@ -370,8 +384,8 @@ void ConvStrat::_addFields()
 
     // convective radius in km
     
-    Mdvx::field_header_t convRadFhdr = fhdr;
-    MdvxField *convRadField = new MdvxField(convRadFhdr, vhdr);
+    Mdvx::field_header_t convRadFhdr = fhdr2d;
+    MdvxField *convRadField = new MdvxField(convRadFhdr, vhdr2d);
     convRadField->setVolData(_finder.getConvRadiusKm(),
                              planeSize32,
                              Mdvx::ENCODING_FLOAT32);
@@ -386,52 +400,19 @@ void ConvStrat::_addFields()
   
   // the following fields are unsigned bytes
   
-  int volSize08 = fhdr.nx * fhdr.ny * sizeof(ui08);
-  fhdr.volume_size = volSize08;
-  fhdr.encoding_type = Mdvx::ENCODING_INT8;
-  fhdr.data_element_nbytes = 1;
-  fhdr.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
-  fhdr.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
-  
-  // convective flag from max dbz
-  
-  if (_params.write_debug_fields) {
-
-    // Mdvx::field_header_t convFromMaxFhdr = fhdr;
-    // MdvxField *convFromMaxField = new MdvxField(convFromMaxFhdr, vhdr);
-    // convFromMaxField->setVolData(_finder.getConvFromColMax(),
-    //                              volSize08,
-    //                              Mdvx::ENCODING_INT8);
-    // convFromMaxField->convertType(Mdvx::ENCODING_INT8,
-    //                               Mdvx::COMPRESSION_GZIP);
-    // convFromMaxField->setFieldName("ConvFromColMax");
-    // convFromMaxField->setFieldNameLong("Flag for convection from column max dbz");
-    // convFromMaxField->setUnits("");
-    // _outMdvx.addField(convFromMaxField);
-    
-    // convective flag from texture
-    
-    // Mdvx::field_header_t convFromTextureFhdr = fhdr;
-    // MdvxField *convFromTextureField = new MdvxField(convFromTextureFhdr, vhdr);
-    // convFromTextureField->setVolData(_finder.getConvFromTexture(),
-    //                                  volSize08,
-    //                                  Mdvx::ENCODING_INT8);
-    // convFromTextureField->convertType(Mdvx::ENCODING_INT8,
-    //                                   Mdvx::COMPRESSION_GZIP);
-    // convFromTextureField->setFieldName("ConvFromTexture");
-    // convFromTextureField->setFieldNameLong
-    //   ("Flag for convection from texture field");
-    // convFromTextureField->setUnits("");
-    // _outMdvx.addField(convFromTextureField);
-
-  }
+  int volSize08 = fhdr2d.nx * fhdr2d.ny * sizeof(ui08);
+  fhdr2d.volume_size = volSize08;
+  fhdr2d.encoding_type = Mdvx::ENCODING_INT8;
+  fhdr2d.data_element_nbytes = 1;
+  fhdr2d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
+  fhdr2d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
   
   // partition field
   
   if (_params.write_partition_field) {
 
-    Mdvx::field_header_t partitionFhdr = fhdr;
-    MdvxField *partitionField = new MdvxField(partitionFhdr, vhdr);
+    Mdvx::field_header_t partitionFhdr = fhdr2d;
+    MdvxField *partitionField = new MdvxField(partitionFhdr, vhdr2d);
     partitionField->setVolData(_finder.getPartition(),
                                volSize08,
                                Mdvx::ENCODING_INT8);
@@ -487,6 +468,22 @@ void ConvStrat::_addFields()
 
   }
   
+  if (_params.write_debug_fields) {
+    
+    // texture for full volume
+    
+    MdvxField *volTextureField = new MdvxField(fhdr3d, vhdr3d);
+    volTextureField->setVolData(_finder.getVolTexture(),
+                                fhdr3d.volume_size,
+                                Mdvx::ENCODING_FLOAT32);
+    volTextureField->convertType(Mdvx::ENCODING_INT16,
+                                 Mdvx::COMPRESSION_GZIP);
+    volTextureField->setFieldName("DbzTexture3D");
+    volTextureField->setFieldNameLong("ReflectivityTexture3D");
+    volTextureField->setUnits("dBZ");
+    _outMdvx.addField(volTextureField);
+
+  }
   
 }
 

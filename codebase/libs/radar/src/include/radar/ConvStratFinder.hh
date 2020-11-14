@@ -204,7 +204,9 @@ public:
   ////////////////////////////////////////////////////////////////////
   // get intermediate fields for debugging
 
+  const fl32 *getVolTexture() const { return _volTexture.dat(); }
   const fl32 *getMeanTexture() const { return _meanTexture.dat(); }
+  const fl32 *getMaxTexture() const { return _maxTexture.dat(); }
   const fl32 *getFractionActive() const { return _fractionActive.dat(); }
   const fl32 *getColMaxDbz() const { return _colMaxDbz.dat(); }
   const fl32 *getBackgroundDbz() const { return _backgroundDbz.dat(); }
@@ -282,6 +284,7 @@ private:
   TaArray<fl32> _sumTexture;
   TaArray<fl32> _nTexture;
   TaArray<fl32> _meanTexture;
+  TaArray<fl32> _maxTexture;
   TaArray<fl32> _fractionActive;
   TaArray<fl32> _colMaxDbz;
   TaArray<fl32> _backgroundDbz;

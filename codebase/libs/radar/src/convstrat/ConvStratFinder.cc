@@ -179,6 +179,7 @@ void ConvStratFinder::_allocArrays()
   _sumTexture.alloc(_nxy);
   _nTexture.alloc(_nxy);
   _meanTexture.alloc(_nxy);
+  _maxTexture.alloc(_nxy);
   _fractionActive.alloc(_nxy);
   _colMaxDbz.alloc(_nxy);
   _backgroundDbz.alloc(_nxy);
@@ -203,6 +204,7 @@ void ConvStratFinder::freeArrays()
   _sumTexture.free();
   _nTexture.free();
   _meanTexture.free();
+  _maxTexture.free();
   _fractionActive.free();
   _colMaxDbz.free();
   _backgroundDbz.free();
@@ -289,6 +291,7 @@ void ConvStratFinder::_computeTexture()
   fl32 *sumTexture = _sumTexture.dat();
   fl32 *nTexture = _nTexture.dat();
   fl32 *meanTexture = _meanTexture.dat();
+  fl32 *maxTexture = _maxTexture.dat();
   fl32 *fractionTexture = _fractionActive.dat();
 
   // initialize
@@ -298,6 +301,7 @@ void ConvStratFinder::_computeTexture()
   
   for (int ii = 0; ii < _nxy; ii++) {
     meanTexture[ii] = _missing;
+    maxTexture[ii] = -1.0e99;
   }
   for (int ii = 0; ii < _nxyz; ii++) {
     volTexture[ii] = _missing;
@@ -356,17 +360,20 @@ void ConvStratFinder::_computeTexture()
         if (texture != _missing) {
           sumTexture[jcenter] += texture;
           nTexture[jcenter]++;
+          if (texture > maxTexture[jcenter]) {
+            maxTexture[jcenter] = texture;
+          }
         }
       } // iz
 
     } // ix
   } // iy
         
-  // compute mean texture
+  // compute mean texture and max texture
   
   int nLevelsUsed = _maxIz - _minIz + 1;
   int minLevels = (int) (nLevelsUsed * _minValidFractionForTexture + 0.5);
-
+  
   for (int ii = 0; ii < _nxy; ii++) {
     if (nTexture[ii] >= minLevels && sumTexture[ii] > 0) {
       meanTexture[ii] = sumTexture[ii] / nTexture[ii];
