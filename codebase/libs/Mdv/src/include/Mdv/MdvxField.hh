@@ -125,8 +125,8 @@ public:
 	    bool compute_min_and_max = true,
 	    bool alloc_mem = true);
   
-  // Constructor for a handle for a single plane, given a handle which
-  // has the entire data volume.
+  // Constructor for a single plane, given an object
+  // with the entire data volume.
   // The data for the plane is copied from the volume.
   
   MdvxField(const MdvxField &rhs, int plane_num);
@@ -732,6 +732,11 @@ public:
 
   // setting string parts of the header
 
+  void setFieldName(const string &name);
+  void setFieldNameLong(const string &nameLong);
+  void setUnits(const string &units);
+  void setTransform(const string &transform);
+
   void setFieldName(const char *name);
   void setFieldNameLong(const char *nameLong);
   void setUnits(const char *units);
@@ -755,6 +760,56 @@ public:
                   Mdvx::scaling_type_t scaling_type = Mdvx::SCALING_ROUNDED,
                   double scale = 1.0,
                   double bias = 0.0);
+
+  // Set object state from field header and data parts.
+  //
+  // If the data pointer is not NULL, space is allocated for it and the
+  // data is copied in.
+  //
+  // If the data pointer is NULL, and alloc_mem is true,
+  // memory in the volBuf member is allocated for data based on
+  // the volume_size in the field header. In this case,
+  // if init_with_missing is true, the array will be filled with
+  // the missing_data_value in the header.
+  //
+  // NOTE: for this to work, the following items in the 
+  //       header must be set:
+  //
+  //    nx, ny, nz, volume_size, data_element_nbytes,
+  //    bad_data_value, missing_data_value
+  //
+  //  In addition, for INT8 and INT16, set:
+  //    scale, bias
+  
+  void setHdrsAndVolData(const Mdvx::field_header_t &f_hdr,
+                         const Mdvx::vlevel_header_t &v_hdr,
+                         const void *vol_data = NULL,
+                         bool init_with_missing = false,
+                         bool compute_min_and_max = true,
+                         bool alloc_mem = true);
+  
+  // Set object state for single plane from field header and data parts.
+  //
+  // If the plane data pointer is not NULL, space is allocated for it and the
+  // data is copied in.
+  //
+  // If the plane data pointer is NULL, space is allocated for data based on
+  // the volume_size in the field header.
+  //
+  // NOTE: for this to work, the following items in the 
+  //       header must be set:
+  //
+  //    nx, ny, nz, volume_size, data_element_nbytes,
+  //    bad_data_value, missing_data_value
+  //
+  //  In addition, for INT8 and INT16, set:
+  //    scale, bias
+  
+  void setHdrsAndPlaneData(int plane_num,
+                           int64_t plane_size,
+                           const Mdvx::field_header_t &f_hdr,
+                           const Mdvx::vlevel_header_t &v_hdr,
+                           const void *plane_data = NULL);
 
   // clearing the volume data
   //

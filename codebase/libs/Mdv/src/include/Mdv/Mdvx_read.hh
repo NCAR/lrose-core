@@ -63,10 +63,10 @@ virtual void clearRead();
 //                            within search_margin
 
 virtual void setReadTime(const read_search_mode_t mode,
-                               const string &read_dir,
-                               const int search_margin = 0,
-                               const time_t search_time = 0,
-                               const int forecast_lead_time = 0);
+                         const string &read_dir,
+                         const int search_margin = 0,
+                         const time_t search_time = 0,
+                         const int forecast_lead_time = 0);
 
 virtual void clearReadTime();
 
@@ -87,8 +87,8 @@ virtual void clearReadTime();
 // in both the valid and gen time list.
 
 void setConstrainFcastLeadTimes(int min_lead_time,
-				      int max_lead_time,
-				      bool request_by_gen_time = false);
+                                int max_lead_time,
+                                bool request_by_gen_time = false);
 
 void clearConstrainFcastLeadTimes();
   
@@ -126,9 +126,9 @@ void setReadNoChunks();
 // set or clear horizontal limits
 
 void setReadHorizLimits(const double min_lat,
-                              const double min_lon,
-                              const double max_lat,
-                              const double max_lon);
+                        const double min_lon,
+                        const double max_lat,
+                        const double max_lon);
 
 void clearReadHorizLimits();
 
@@ -138,12 +138,12 @@ void clearReadHorizLimits();
 // vlevel limits - min and max vlevel values in floating point
 
 void setReadVlevelLimits(const double min_vlevel,
-                               const double max_vlevel);
+                         const double max_vlevel);
 
 // plane num limits - min and max plane nums as integers
 
 void setReadPlaneNumLimits(const int min_plane_num,
-                                 const int max_plane_num);
+                           const int max_plane_num);
 
 void clearReadVertLimits();
 
@@ -172,8 +172,8 @@ void setReadCompressionType(const compression_type_t compression_type);
 void clearReadCompressionType();
 
 void setReadScalingType(const scaling_type_t scaling_type,
-                              const double scale = 1.0,
-                              const double bias = 0.0);
+                        const double scale = 1.0,
+                        const double bias = 0.0);
 void clearReadScalingType();
 
 /////////////////////////////////////////////
