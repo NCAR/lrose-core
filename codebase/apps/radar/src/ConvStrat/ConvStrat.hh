@@ -39,6 +39,9 @@
 
 #include <string>
 #include <Mdv/DsMdvxInput.hh>
+#include <Mdv/MdvxField.hh>
+#include <Mdv/DsMdvx.hh>
+#include <Mdv/MdvxChunk.hh>
 #include <toolsa/TaArray.hh>
 #include <radar/ConvStratFinder.hh>
 #include "Args.hh"
@@ -80,10 +83,22 @@ private:
   Params _params;
   DsMdvxInput _input;
   DsMdvx _inMdvx, _outMdvx;
+  DsMdvx _tempMdvx;
   ConvStratFinder _finder;
+
+  MdvxField *_tempField;
+  MdvxField _fzHtField;
+  MdvxField _divHtField;
 
   int _doRead();
   void _addFields();
+  int _readTempProfile(time_t dbzTime,
+                       const MdvxField *dbzField);
+  void _computeHts(double tempC,
+                   MdvxField &htField,
+                   const string &fieldName,
+                   const string &longName,
+                   const string &units);
   int _doWrite();
 
 };

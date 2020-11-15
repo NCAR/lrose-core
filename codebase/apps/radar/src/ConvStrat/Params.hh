@@ -80,6 +80,11 @@ public:
     FILELIST = 2
   } mode_t;
 
+  typedef enum {
+    VERT_LEVELS_BY_TEMP = 0,
+    VERT_LEVELS_BY_HT = 1
+  } vert_levels_type_t;
+
   // struct typedefs
 
   typedef struct {
@@ -393,6 +398,22 @@ public:
 
   char* dbz_field_name;
 
+  vert_levels_type_t vert_levels_type;
+
+  char* temp_profile_url;
+
+  char* temp_profile_field_name;
+
+  int temp_profile_search_margin;
+
+  double freezing_level_ht;
+
+  double freezing_level_temp;
+
+  double divergence_level_ht;
+
+  double divergence_level_temp;
+
   double min_valid_height;
 
   double max_valid_height;
@@ -438,7 +459,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[32];
+  mutable TDRPtable _table[41];
 
   const char *_className;
 

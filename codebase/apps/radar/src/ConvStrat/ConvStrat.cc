@@ -39,9 +39,6 @@
 #include <dataport/bigend.h>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
-#include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxField.hh>
-#include <Mdv/MdvxChunk.hh>
 #include "ConvStrat.hh"
 using namespace std;
 
@@ -208,6 +205,17 @@ int ConvStrat::Run()
                     fhdr.grid_miny,
                     zLevels,
                     isLatLon);
+
+    // optionally read in temperature profile
+
+    if (_params.vert_levels_type == Params::VERT_LEVELS_BY_TEMP) {
+      if (_readTempProfile(_inMdvx.getValidTime(), dbzField)) {
+        cerr << "WARNING - ConvStrat::Run()" << endl;
+        cerr << "  Cannot read in temperature profile, url: "
+             << _params.temp_profile_url << endl;
+        cerr << "  Not using temp profile" << endl;
+      }
+    }
 
     // compute the convective/stratiform partition
 
@@ -483,7 +491,167 @@ void ConvStrat::_addFields()
     volTextureField->setUnits("dBZ");
     _outMdvx.addField(volTextureField);
 
+    // freezing level field
+
+    _outMdvx.addField(new MdvxField(_fzHtField));
+    _outMdvx.addField(new MdvxField(_divHtField));
+    _outMdvx.addField(new MdvxField(*_tempField));
+
   }
+  
+}
+
+/////////////////////////////////////////////////////////
+// read in temp profile
+//
+// Returns 0 on success, -1 on failure.
+
+int ConvStrat::_readTempProfile(time_t dbzTime,
+                                const MdvxField *dbzField)
+
+{
+
+  _tempMdvx.clearRead();
+  _tempMdvx.setReadTime(Mdvx::READ_CLOSEST,
+                       _params.temp_profile_url,
+                       _params.temp_profile_search_margin,
+                       dbzTime);
+  _tempMdvx.addReadField(_params.temp_profile_field_name);
+
+  if (_tempMdvx.readVolume()) {
+    cerr << "ERROR - ConvStrat::_readTempProfile" << endl;
+    cerr << "  Cannot read temperature profile" << endl;
+    cerr << _tempMdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  _tempField = _tempMdvx.getField(_params.temp_profile_field_name);
+  if (_tempField == NULL) {
+    cerr << "ERROR - ConvStrat::_readTempProfile" << endl;
+    cerr << "  Cannot find field in temp file: "
+         << _params.temp_profile_field_name << endl;
+    cerr << "  URL: " << _params.temp_profile_url << endl;
+    cerr << "  Time: " << DateTime::strm(_tempMdvx.getValidTime()) << endl;
+    return -1;
+  }
+  
+  // fill the temperature level arrays
+  
+  _computeHts(_params.freezing_level_temp, _fzHtField,
+              "FzHt", "height_of_freezing_level", "km");
+  _computeHts(_params.divergence_level_temp, _divHtField,
+              "DivHt", "height_of_divergence_level", "km");
+
+  // remap from model to radar grid coords
+  // use of the lookup table makes this more efficient
+  
+  MdvxProj proj(dbzField->getFieldHeader());
+  MdvxRemapLut lut;
+  if (_fzHtField.remap(lut, proj)) {
+    cerr << "ERROR - ConvStrat::_readTempProfile" << endl;
+    cerr << "  Cannot convert model temp grid to radar grid" << endl;
+    cerr << "  URL: " << _params.temp_profile_url << endl;
+    cerr << "  Time: " << DateTime::strm(_tempMdvx.getValidTime()) << endl;
+    return -1;
+  }
+  if (_divHtField.remap(lut, proj)) {
+    cerr << "ERROR - ConvStrat::_readTempProfile" << endl;
+    cerr << "  Cannot convert model temp grid to radar grid" << endl;
+    cerr << "  URL: " << _params.temp_profile_url << endl;
+    cerr << "  Time: " << DateTime::strm(_tempMdvx.getValidTime()) << endl;
+    return -1;
+  }
+                       
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// fill temperature level ht array
+
+void ConvStrat::_computeHts(double tempC,
+                            MdvxField &htField,
+                            const string &fieldName,
+                            const string &longName,
+                            const string &units)
+
+{
+
+  // set up the height field
+
+  htField.clearVolData();
+
+  Mdvx::field_header_t fhdr = _tempField->getFieldHeader();
+  fhdr.nz = 1;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  size_t planeSize32 = fhdr.nx * fhdr.ny * sizeof(fl32);
+  fhdr.volume_size = planeSize32;
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = 4;
+  fhdr.missing_data_value = _missing;
+  fhdr.bad_data_value = _missing;
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.level[0] = 0;
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  
+  htField.setHdrsAndVolData(fhdr, vhdr, NULL,
+                            true, false, true);
+
+  htField.setFieldName(fieldName);
+  htField.setFieldNameLong(longName);
+  htField.setUnits(units);
+  
+  // get hts array pointer
+  
+  fl32 *hts = (fl32 *) htField.getVol();
+
+  // get temp array
+
+  fl32 *temp = (fl32 *) _tempField->getVol();
+  const Mdvx::field_header_t tempFhdr = _tempField->getFieldHeader();
+  
+  // get Z profile for temperatures
+  
+  const Mdvx::vlevel_header_t tempVhdr = _tempField->getVlevelHeader();
+  vector<double> zProfile;
+  for (si64 iz = 0; iz < tempFhdr.nz; iz++) {
+    zProfile.push_back(tempVhdr.level[iz]);
+  } // iz
+  
+  // loop through the (x, y) plane
+  
+  si64 planeIndex = 0;
+  size_t nxy = fhdr.nx * fhdr.ny;
+  for (si64 iy = 0; iy < tempFhdr.ny; iy++) {
+    for (si64 ix = 0; ix < tempFhdr.nx; ix++, planeIndex++) {
+
+      // interpolate to find the height for tempC
+
+      double interpHt = tempVhdr.level[0]; // if temp level is below grid
+      si64 index = planeIndex;
+      double tempBelow = temp[index];
+      index += nxy;
+      for (si64 iz = 1; iz < tempFhdr.nz; iz++, index += nxy) {
+        double tempAbove = temp[index];
+        if ((tempC <= tempBelow && tempC >= tempAbove) ||
+            (tempC >= tempBelow && tempC <= tempAbove)) {
+          double deltaTemp = tempAbove - tempBelow;
+          double deltaHt = zProfile[iz] - zProfile[iz-1];
+          interpHt = zProfile[iz] + ((tempC - tempBelow) / deltaTemp) * deltaHt;
+          hts[planeIndex] = interpHt;
+          break;
+        }
+        tempBelow = tempAbove;
+        // check if temp level is above grid
+        if (iz == tempFhdr.nz - 1) {
+          hts[planeIndex] = tempVhdr.level[tempFhdr.nz-1];
+        }
+      } // iz
+
+    } // ix
+  } // iy
   
 }
 

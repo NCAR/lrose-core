@@ -668,6 +668,119 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("SPECIFYING VERTICAL LEVELS - TEMPERAURE or HEIGHT?");
+    tt->comment_text = tdrpStrDup("We need to specify the vertical separation between shallow, mid-level and high clouds. We use the freezing level to separate warm clouds and cold clouds. And we use the divergence level to separate the mid-level clouds from high-level clouds such as anvil. These vertical limits can be specified as heights MSL (in km), or as temperatures. If temperatures are used, we read in the temperature profile from a model.");
+    tt++;
+    
+    // Parameter 'vert_levels_type'
+    // ctype is '_vert_levels_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("vert_levels_type");
+    tt->descr = tdrpStrDup("How we specify the vertical levels.");
+    tt->help = tdrpStrDup("If temperatures are used, we need to read in the temperature profile from a model.");
+    tt->val_offset = (char *) &vert_levels_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("vert_levels_type_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("VERT_LEVELS_BY_TEMP");
+      tt->enum_def.fields[0].val = VERT_LEVELS_BY_TEMP;
+      tt->enum_def.fields[1].name = tdrpStrDup("VERT_LEVELS_BY_HT");
+      tt->enum_def.fields[1].val = VERT_LEVELS_BY_HT;
+    tt->single_val.e = VERT_LEVELS_BY_HT;
+    tt++;
+    
+    // Parameter 'temp_profile_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("temp_profile_url");
+    tt->descr = tdrpStrDup("URL for temperature profile data, in MDV/Netcdf-CF format.");
+    tt->help = tdrpStrDup("We read in the model data that is closest in time to the reflectivity data.");
+    tt->val_offset = (char *) &temp_profile_url - &_start_;
+    tt->single_val.s = tdrpStrDup("mdv/model");
+    tt++;
+    
+    // Parameter 'temp_profile_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("temp_profile_field_name");
+    tt->descr = tdrpStrDup("Name of temperature field in the model data. This should be in degrees C.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &temp_profile_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("Temp");
+    tt++;
+    
+    // Parameter 'temp_profile_search_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("temp_profile_search_margin");
+    tt->descr = tdrpStrDup("Search margin for finding the temp profile data (secs).");
+    tt->help = tdrpStrDup("The temp profile must be within this number of seconds of the dbz data.");
+    tt->val_offset = (char *) &temp_profile_search_margin - &_start_;
+    tt->single_val.i = 21600;
+    tt++;
+    
+    // Parameter 'freezing_level_ht'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("freezing_level_ht");
+    tt->descr = tdrpStrDup("Freezing level height (km).");
+    tt->help = tdrpStrDup("Used if vert_levels_type = VERT_LEVELS_BY_HT.");
+    tt->val_offset = (char *) &freezing_level_ht - &_start_;
+    tt->single_val.d = 4.5;
+    tt++;
+    
+    // Parameter 'freezing_level_temp'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("freezing_level_temp");
+    tt->descr = tdrpStrDup("Freezing level temperature (degC).");
+    tt->help = tdrpStrDup("Used if vert_levels_type = VERT_LEVELS_BY_TEMP.");
+    tt->val_offset = (char *) &freezing_level_temp - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'divergence_level_ht'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("divergence_level_ht");
+    tt->descr = tdrpStrDup("Divergence level height (km).");
+    tt->help = tdrpStrDup("Convective divergence occurs above this height, forming anvils. Used if vert_levels_type = VERT_LEVELS_BY_HT.");
+    tt->val_offset = (char *) &divergence_level_ht - &_start_;
+    tt->single_val.d = 8;
+    tt++;
+    
+    // Parameter 'divergence_level_temp'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("divergence_level_temp");
+    tt->descr = tdrpStrDup("Divergence level temperature (degC).");
+    tt->help = tdrpStrDup("Convective divergence occurs above this height, forming anvils. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.");
+    tt->val_offset = (char *) &divergence_level_temp - &_start_;
+    tt->single_val.d = -12;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -720,11 +833,11 @@
     tt->single_val.d = 53;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("COMPUTING THE CONVECTIVE RADIUS");
     tt->comment_text = tdrpStrDup("The convective radius is the distance by which identified convection will be expanded around the convective point. A linear function is used to compute the radius from the background reflectivity");
     tt++;
@@ -783,11 +896,11 @@
       tt->struct_vals[3].d = 5;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("COMPUTING REFLECTIVITY TEXTURE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -828,11 +941,11 @@
     tt->single_val.d = 15;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
