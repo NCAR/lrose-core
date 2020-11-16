@@ -259,6 +259,7 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
     
     // Check for NaN, infinity values.
     
+    cerr << "aaaaaaaaaaaaaaaaaaaaa" << endl;
     _check_finite(getVol());
     
     // compute min and max
@@ -560,6 +561,7 @@ void MdvxField::setVolData(const void *vol_data,
   _fhdr.max_value = 0.0;
 
   // Check for NaN, infinity values.
+  cerr << "bbbbbbbbbbbbbbbbbbbb" << endl;
   _check_finite(getVol());
   
 }
@@ -760,6 +762,7 @@ void MdvxField::setHdrsAndVolData(const Mdvx::field_header_t &f_hdr,
     
     // Check for NaN, infinity values.
     
+  cerr << "cccccccccccccccccccccccc" << endl;
     _check_finite(getVol());
     
     // compute min and max
@@ -1196,6 +1199,7 @@ int MdvxField::convertType
 
   } else if (_fhdr.encoding_type == Mdvx::ENCODING_FLOAT32) {
 
+  cerr << "dddddddddddddddddddddd" << endl;
     _check_finite(getVol());
       
     if (output_encoding == Mdvx::ENCODING_INT8) {
@@ -3923,6 +3927,29 @@ void MdvxField::setTransform(const char *transform)
   STRncopy(_fhdr.transform, transform, MDV_TRANSFORM_LEN );
 }
 
+void MdvxField::setFieldName(const string &name,
+                             Mdvx::field_header_t &fhdr)
+{
+  STRncopy(fhdr.field_name, name.c_str(), MDV_SHORT_FIELD_LEN );
+}
+
+void MdvxField::setFieldNameLong(const string &nameLong,
+                                 Mdvx::field_header_t &fhdr)
+{
+  STRncopy(fhdr.field_name_long, nameLong.c_str(), MDV_LONG_FIELD_LEN );
+}
+
+void MdvxField::setUnits(const string &units, Mdvx::field_header_t &fhdr)
+{
+  STRncopy(fhdr.units, units.c_str(), MDV_UNITS_LEN );
+}
+
+void MdvxField::setTransform(const string &transform,
+                             Mdvx::field_header_t &fhdr)
+{
+  STRncopy(fhdr.transform, transform.c_str(), MDV_TRANSFORM_LEN );
+}
+
 ///////////////////////
 // protected functions
 
@@ -6402,6 +6429,7 @@ int MdvxField::computeMinAndMax(bool force /* = false*/ )
 
   // check we do not have nans or inf
 
+  cerr << "eeeeeeeeeeeeeeeeeeeeee" << endl;
   _check_finite(getVol());
 
   // decompress data if necessary
@@ -8358,6 +8386,8 @@ double MdvxField::_round_dz(double dz)
 void MdvxField::_check_finite(const void *vol_data)
 
 {
+
+  cerr << "ffffffffffffffffffffffffffffff" << endl;
   
   // For uncompressed FLOAT_32 data, check for NaN's - if any
   // are found, print a message to that effect and replace the values
