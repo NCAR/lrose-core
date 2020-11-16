@@ -412,7 +412,7 @@ fix_map
 MapCircles
 MapGrid
 OverlayCreate
-toneDownColorScale
+toneDownColorscale
 hiResNids2Mdv
 hiResNidsEchoTop2Mdv
 hiResNidsStormPrecip2Mdv
