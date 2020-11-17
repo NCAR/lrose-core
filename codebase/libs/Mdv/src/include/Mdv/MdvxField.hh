@@ -742,7 +742,15 @@ public:
   void setUnits(const char *units);
   void setTransform(const char *transform);
 
-  // setting the volume data
+  static void setFieldName(const string &name,
+                           Mdvx::field_header_t &fhdr);
+  static void setFieldNameLong(const string &nameLong,
+                               Mdvx::field_header_t &fhdr);
+  static void setUnits(const string &units,
+                       Mdvx::field_header_t &fhdr);
+  static void setTransform(const string &transform, Mdvx::field_header_t &fhdr);
+
+// setting the volume data
   //
   // The data must be uncompressed.
   // Scaling type, scale and bias only apply to INT8 and INT16 encoding.

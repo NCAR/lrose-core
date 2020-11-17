@@ -208,6 +208,12 @@ int ConvStrat::Run()
 
     // optionally read in temperature profile
 
+    _finder.setLevelHtValues(_params.freezing_level_ht,
+                             _params.divergence_level_ht);
+    
+    // optionally read in temperature profile from a model
+    // and set the freezing and divergence level ht grids
+
     if (_params.vert_levels_type == Params::VERT_LEVELS_BY_TEMP) {
       if (_readTempProfile(_inMdvx.getValidTime(), dbzField)) {
         cerr << "WARNING - ConvStrat::Run()" << endl;
@@ -215,6 +221,10 @@ int ConvStrat::Run()
              << _params.temp_profile_url << endl;
         cerr << "  Not using temp profile" << endl;
       }
+      _finder.setLevelHtGrids((fl32 *) _fzHtField.getVol(),
+                              (fl32 *) _divHtField.getVol(),
+                              fhdr.nx * fhdr.ny);
+                              
     }
 
     // compute the convective/stratiform partition
@@ -322,88 +332,125 @@ void ConvStrat::_addFields()
 
     // load up fraction of texture kernel covered
     
-    Mdvx::field_header_t fractionFhdr = fhdr2d;
-    MdvxField *fractionField = new MdvxField(fractionFhdr, vhdr2d);
-    fractionField->setVolData(_finder.getFractionActive(),
-                              planeSize32,
-                              Mdvx::ENCODING_FLOAT32);
-    fractionField->convertType(Mdvx::ENCODING_FLOAT32,
-                               Mdvx::COMPRESSION_GZIP);
-    fractionField->setFieldName("FractionActive");
-    fractionField->setFieldNameLong("Fraction of texture kernel active");
-    fractionField->setUnits("");
-    _outMdvx.addField(fractionField);
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getFractionActive(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "FractionActive",
+                                 "Fraction of texture kernel active",
+                                 ""));
+                      
+    // add mean texture fields
     
-    // add mean texture field
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getMeanTexture(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "DbzTextureMean",
+                                 "Mean texture of dbz",
+                                 "dBZ"));
     
-    Mdvx::field_header_t meanTextFhdr = fhdr2d;
-    MdvxField *meanTextField = new MdvxField(meanTextFhdr, vhdr2d);
-    meanTextField->setVolData(_finder.getMeanTexture(), 
-                             planeSize32,
-                             Mdvx::ENCODING_FLOAT32);
-    meanTextField->convertType(Mdvx::ENCODING_FLOAT32,
-                              Mdvx::COMPRESSION_GZIP);
-    meanTextField->setFieldName("DbzTextureMean");
-    meanTextField->setFieldNameLong("Mean texture of dbz");
-    meanTextField->setUnits("dBZ");
-    _outMdvx.addField(meanTextField);
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getMeanTextureLow(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "DbzTextureLow",
+                                 "Mean texture of dbz - low",
+                                 "dBZ"));
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getMeanTextureMid(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "DbzTextureMid",
+                                 "Mean texture of dbz - mid",
+                                 "dBZ"));
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getMeanTextureHigh(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "DbzTextureHigh",
+                                 "Mean texture of dbz - high",
+                                 "dBZ"));
     
     // add max texture field
     
-    Mdvx::field_header_t maxTextFhdr = fhdr2d;
-    MdvxField *maxTextField = new MdvxField(maxTextFhdr, vhdr2d);
-    maxTextField->setVolData(_finder.getMaxTexture(), 
-                             planeSize32,
-                             Mdvx::ENCODING_FLOAT32);
-    maxTextField->convertType(Mdvx::ENCODING_FLOAT32,
-                              Mdvx::COMPRESSION_GZIP);
-    maxTextField->setFieldName("DbzTextureMax");
-    maxTextField->setFieldNameLong("Max texture of dbz");
-    maxTextField->setUnits("dBZ");
-    _outMdvx.addField(maxTextField);
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getMaxTexture(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "DbzTextureMax",
+                                 "Max texture of dbz",
+                                 "dBZ"));
     
     // max dbz
     
-    Mdvx::field_header_t maxFhdr = fhdr2d;
-    MdvxField *maxField = new MdvxField(maxFhdr, vhdr2d);
-    maxField->setVolData(_finder.getColMaxDbz(),
-                         planeSize32,
-                         Mdvx::ENCODING_FLOAT32);
-    maxField->convertType(Mdvx::ENCODING_FLOAT32,
-                          Mdvx::COMPRESSION_GZIP);
-    maxField->setFieldName("DbzColMax");
-    maxField->setFieldNameLong("Column max dbz");
-    maxField->setUnits("dBZ");
-    _outMdvx.addField(maxField);
-
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getColMaxDbz(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "DbzColMax",
+                                 "Max dbz in column",
+                                 "dBZ"));
+    
     // background dbz
     
-    Mdvx::field_header_t backgrFhdr = fhdr2d;
-    MdvxField *backgrField = new MdvxField(backgrFhdr, vhdr2d);
-    backgrField->setVolData(_finder.getBackgroundDbz(),
-                            planeSize32,
-                            Mdvx::ENCODING_FLOAT32);
-    backgrField->convertType(Mdvx::ENCODING_FLOAT32,
-                             Mdvx::COMPRESSION_GZIP);
-    backgrField->setFieldName("DbzBackground");
-    backgrField->setFieldNameLong("Background dbz");
-    backgrField->setUnits("dBZ");
-    _outMdvx.addField(backgrField);
-
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getBackgroundDbz(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "DbzBackground",
+                                 "Background dbz",
+                                 "dBZ"));
+    
     // convective radius in km
     
-    Mdvx::field_header_t convRadFhdr = fhdr2d;
-    MdvxField *convRadField = new MdvxField(convRadFhdr, vhdr2d);
-    convRadField->setVolData(_finder.getConvRadiusKm(),
-                             planeSize32,
-                             Mdvx::ENCODING_FLOAT32);
-    convRadField->convertType(Mdvx::ENCODING_FLOAT32,
-                              Mdvx::COMPRESSION_GZIP);
-    convRadField->setFieldName("ConvRadius");
-    convRadField->setFieldNameLong("ConvectiveRadius");
-    convRadField->setUnits("km");
-    _outMdvx.addField(convRadField);
-
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getConvRadiusKm(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "ConvRadius",
+                                 "ConvectiveRadius",
+                                 "km"));
+    
+    // convective base, top and depth
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getConvBaseKm(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "ConvBase",
+                                 "ConvectiveBase",
+                                 "km"));
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getConvTopKm(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "ConvTop",
+                                 "ConvectiveTop",
+                                 "km"));
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getConvDepthKm(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "ConvDepth",
+                                 "ConvectiveDepth",
+                                 "km"));
+    
+    // stratiform base, top and depth
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getStratBaseKm(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "StratBase",
+                                 "StratiformBase",
+                                 "km"));
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getStratTopKm(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "StratTop",
+                                 "StratiformTop",
+                                 "km"));
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getStratDepthKm(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "StratDepth",
+                                 "StratiformDepth",
+                                 "km"));
+    
   }
   
   // the following fields are unsigned bytes
@@ -418,18 +465,34 @@ void ConvStrat::_addFields()
   // partition field
   
   if (_params.write_partition_field) {
-
-    Mdvx::field_header_t partitionFhdr = fhdr2d;
-    MdvxField *partitionField = new MdvxField(partitionFhdr, vhdr2d);
-    partitionField->setVolData(_finder.getPartition(),
-                               volSize08,
-                               Mdvx::ENCODING_INT8);
-    partitionField->convertType(Mdvx::ENCODING_INT8,
-                                Mdvx::COMPRESSION_GZIP);
-    partitionField->setFieldName(_params.partition_field_name);
-    partitionField->setFieldNameLong("1 = stratiform, 2 = convective");
-    partitionField->setUnits("");
-    _outMdvx.addField(partitionField);
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getPartition(),
+                                 Mdvx::ENCODING_INT8,
+                                 _params.partition_field_name,
+                                 "1 = stratiform, 2 = convective",
+                                 ""));
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getPartitionLow(),
+                                 Mdvx::ENCODING_INT8,
+                                 "PartitionLow",
+                                 "1 = stratiform, 2 = convective",
+                                 ""));
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getPartitionMid(),
+                                 Mdvx::ENCODING_INT8,
+                                 "PartitionMid",
+                                 "1 = stratiform, 2 = convective",
+                                 ""));
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getPartitionHigh(),
+                                 Mdvx::ENCODING_INT8,
+                                 "PartitionHigh",
+                                 "1 = stratiform, 2 = convective",
+                                 ""));
     
   }
   
@@ -441,57 +504,51 @@ void ConvStrat::_addFields()
   fhdr3d.bad_data_value = _missing;
 
   if (_params.write_convective_dbz) {
-
-    MdvxField *convDbzField = new MdvxField(fhdr3d, vhdr3d);
-    convDbzField->setVolData(_finder.getConvectiveDbz(),
-                             fhdr3d.volume_size,
-                             Mdvx::ENCODING_FLOAT32);
+    MdvxField *convDbz = _makeField(fhdr3d, vhdr3d,
+                                    _finder.getConvectiveDbz(),
+                                    Mdvx::ENCODING_INT16,
+                                    _params.convective_dbz_field_name,
+                                    "Convective reflectivity",
+                                    "dBZ");
     if (_params.convert_convective_dbz_to_column_max) {
-      convDbzField->convert2Composite();
+      convDbz->convert2Composite();
     }
-    convDbzField->convertType(Mdvx::ENCODING_INT16,
-                              Mdvx::COMPRESSION_GZIP);
-    convDbzField->setFieldName(_params.convective_dbz_field_name);
-    convDbzField->setFieldNameLong("Convective reflectivity");
-    convDbzField->setUnits("dBZ");
-    _outMdvx.addField(convDbzField);
-
+    _outMdvx.addField(convDbz);
   }
   
   if (_params.write_stratiform_dbz) {
-
-    MdvxField *stratDbzField = new MdvxField(fhdr3d, vhdr3d);
-    stratDbzField->setVolData(_finder.getStratiformDbz(),
-                              fhdr3d.volume_size,
-                              Mdvx::ENCODING_FLOAT32);
+    MdvxField *stratDbz = _makeField(fhdr3d, vhdr3d,
+                                     _finder.getStratiformDbz(),
+                                     Mdvx::ENCODING_INT16,
+                                     _params.stratiform_dbz_field_name,
+                                     "Stratiform reflectivity",
+                                     "dBZ");
     if (_params.convert_stratiform_dbz_to_column_max) {
-      stratDbzField->convert2Composite();
+      stratDbz->convert2Composite();
     }
-    stratDbzField->convertType(Mdvx::ENCODING_FLOAT32,
-                               Mdvx::COMPRESSION_GZIP);
-    stratDbzField->setFieldName(_params.stratiform_dbz_field_name);
-    stratDbzField->setFieldNameLong("Stratiform reflectivity");
-    stratDbzField->setUnits("dBZ");
-    _outMdvx.addField(stratDbzField);
-
+    _outMdvx.addField(stratDbz);
   }
   
   if (_params.write_debug_fields) {
     
     // texture for full volume
     
-    MdvxField *volTextureField = new MdvxField(fhdr3d, vhdr3d);
-    volTextureField->setVolData(_finder.getVolTexture(),
-                                fhdr3d.volume_size,
-                                Mdvx::ENCODING_FLOAT32);
-    volTextureField->convertType(Mdvx::ENCODING_INT16,
-                                 Mdvx::COMPRESSION_GZIP);
-    volTextureField->setFieldName("DbzTexture3D");
-    volTextureField->setFieldNameLong("ReflectivityTexture3D");
-    volTextureField->setUnits("dBZ");
-    _outMdvx.addField(volTextureField);
+    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
+                                 _finder.getVolTexture(),
+                                 Mdvx::ENCODING_INT16,
+                                 "DbzTexture3D",
+                                 "ReflectivityTexture3D",
+                                 "dBZ"));
+    // echo the input field
+    
+    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
+                                 _finder.getVolDbz(),
+                                 Mdvx::ENCODING_INT16,
+                                 "Dbz3D",
+                                 "Reflectivity3D",
+                                 "dBZ"));
 
-    // freezing level field
+    // freezing level, divergence level ht, temp field
 
     _outMdvx.addField(new MdvxField(_fzHtField));
     _outMdvx.addField(new MdvxField(_divHtField));
@@ -706,4 +763,60 @@ int ConvStrat::_doWrite()
   return 0;
 
 }
+
+/////////////////////////////////////////////////////////
+// create a float field
+
+MdvxField *ConvStrat::_makeField(Mdvx::field_header_t &fhdrTemplate,
+                                 Mdvx::vlevel_header_t &vhdr,
+                                 const fl32 *data,
+                                 Mdvx::encoding_type_t outputEncoding,
+                                 string fieldName,
+                                 string longName,
+                                 string units)
+                                 
+{
+
+  Mdvx::field_header_t fhdr = fhdrTemplate;
+  MdvxField::setFieldName(fieldName, fhdr);
+  MdvxField::setFieldNameLong(longName, fhdr);
+  MdvxField::setUnits(units, fhdr);
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  newField->setVolData(data, volSize, Mdvx::ENCODING_FLOAT32);
+  newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
+
+  return newField;
+
+}
+
+/////////////////////////////////////////////////////////
+// create a byte field
+
+MdvxField *ConvStrat::_makeField(Mdvx::field_header_t &fhdrTemplate,
+                                 Mdvx::vlevel_header_t &vhdr,
+                                 const ui08 *data,
+                                 Mdvx::encoding_type_t outputEncoding,
+                                 string fieldName,
+                                 string longName,
+                                 string units)
+                                 
+{
   
+  Mdvx::field_header_t fhdr = fhdrTemplate;
+  MdvxField::setFieldName(fieldName, fhdr);
+  MdvxField::setFieldNameLong(longName, fhdr);
+  MdvxField::setUnits(units, fhdr);
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(ui08);
+  newField->setVolData(data, volSize, Mdvx::ENCODING_INT8);
+  newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
+  
+  return newField;
+
+}
+

@@ -35,6 +35,7 @@
 //
 /////////////////////////////////////////////////////////////////////
 
+#include <cassert>
 #include <cmath>
 #include <algorithm>
 #include <iostream>
@@ -44,7 +45,8 @@
 #include <radar/ConvStratFinder.hh>
 using namespace std;
 
-const fl32 ConvStratFinder::_missing = -9999.0;
+const fl32 ConvStratFinder::_missingFl32 = -9999.0;
+const ui08 ConvStratFinder::_missingUi08 = ConvStratFinder::CATEGORY_MISSING;
 
 // Constructor
 
@@ -74,6 +76,11 @@ ConvStratFinder::ConvStratFinder()
   _minx = _miny = 0;
   _nxy = _nxyz = 0;
   _projIsLatLon = false;
+  _gridSet = false;
+
+  _specifyLevelsByHtValues = true;
+  _fzLevelHtKm = 4.0;
+  _divLevelHtKm = 8.0;
 
 }
 
@@ -85,6 +92,62 @@ ConvStratFinder::~ConvStratFinder()
   freeArrays();
 }
 
+////////////////////////////////////////////////////////////////////
+// Set grid details
+
+void ConvStratFinder::setGrid(size_t nx, size_t ny, 
+                              double dx, double dy,
+                              double minx, double miny,
+                              const vector<double> &zKm,
+                              bool projIsLatLon /* = false */)
+{
+
+  _nx = nx;
+  _ny = ny;
+  _dx = dx;
+  _dy = dy;
+  _minx = minx;
+  _miny = miny;
+  _zKm = zKm;
+  _nxy = _nx * _ny;
+  _nxyz = _nxy * _zKm.size();
+  _projIsLatLon = projIsLatLon;
+  _specifyLevelsByHtValues = false;
+  _gridSet = true;
+
+  // allocate the arrays and set to missing
+
+  _allocArrays();
+  _initToMissing();
+  
+}
+
+////////////////////////////////////////////////////////////////////
+// Set the freezing level and divergence level as km MSL values
+
+void ConvStratFinder::setLevelHtValues(double fzLevelHtKm,
+                                       double divLevelHtKm)
+
+{
+  _specifyLevelsByHtValues = true;
+  _fzLevelHtKm = fzLevelHtKm;
+  _divLevelHtKm = divLevelHtKm;
+}
+
+////////////////////////////////////////////////////////////////////
+// Set the freezing level and divergence level as grids
+// These must be on the same grid as the radar DBZ data
+
+void ConvStratFinder::setLevelHtGrids(const fl32 *fzHtKm,
+                                      const fl32 *divHtKm,
+                                      size_t nptsPlane)
+{
+  assert(_gridSet);
+  assert(nptsPlane == _nxy);
+  memcpy(_fzHtKm.dat(), fzHtKm, _nxy * sizeof(fl32));
+  memcpy(_divHtKm.dat(), divHtKm, _nxy * sizeof(fl32));
+}
+
 //////////////////////////////////////////////////
 // Compute the partition
 
@@ -92,13 +155,11 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
                                       fl32 dbzMissingVal)
 {
   
+  assert(_gridSet);
+
   int iret = 0;
   PMU_auto_register("ConvStratFinder::partition()");
 
-  // allocate the arrays
-
-  _allocArrays();
-  
   // set geometry in km
   
   if (_projIsLatLon) {
@@ -126,9 +187,9 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
   // set dbz field to missing if below the min threshold
   
   fl32 *volDbz = _volDbz.dat();
-  for (int ii = 0; ii < _nxyz; ii++) {
+  for (size_t ii = 0; ii < _nxyz; ii++) {
     if (dbz[ii] == dbzMissingVal || dbz[ii] < _minValidDbz) {
-      volDbz[ii] = _missing;
+      volDbz[ii] = _missingFl32;
     } else {
       volDbz[ii] = dbz[ii];
     }
@@ -145,7 +206,7 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
   // compute column maxima
   
   _computeColMax();
-
+  
   // compute the background dbz
   
   _computeBackgroundDbz();
@@ -153,10 +214,15 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
   // compute spatial texture
   
   _computeTexture();
+
+  // compute the properties from the vertical profiles of texture
+
+  _computeProps();
   
-  // set the convective/stratiform partition
+  // finalize the convective/stratiform partitions,
+  // expanding as required
   
-  _setPartition();
+  _finalizePartition();
 
   return iret;
 
@@ -169,22 +235,103 @@ void ConvStratFinder::_allocArrays()
   
 {
 
+  _volDbz.alloc(_nxyz);
+  _fzHtKm.alloc(_nxy);
+  _divHtKm.alloc(_nxy);
+
   _partition.alloc(_nxy);
+  _partitionLow.alloc(_nxy);
+  _partitionMid.alloc(_nxy);
+  _partitionHigh.alloc(_nxy);
+  
   _convDbz.alloc(_nxyz);
   _stratDbz.alloc(_nxyz);
 
-  _volDbz.alloc(_nxyz);
   _volTexture.alloc(_nxyz);
+  // _sumTexture.alloc(_nxy);
+  // _nTexture.alloc(_nxy);
 
-  _sumTexture.alloc(_nxy);
-  _nTexture.alloc(_nxy);
   _meanTexture.alloc(_nxy);
+  _meanTextureLow.alloc(_nxy);
+  _meanTextureMid.alloc(_nxy);
+  _meanTextureHigh.alloc(_nxy);
   _maxTexture.alloc(_nxy);
+  
   _fractionActive.alloc(_nxy);
   _colMaxDbz.alloc(_nxy);
   _backgroundDbz.alloc(_nxy);
   _convRadiusKm.alloc(_nxy);
 
+  _convBaseKm.alloc(_nxy);
+  _convTopKm.alloc(_nxy);
+  _convDepthKm.alloc(_nxy);
+  
+  _stratBaseKm.alloc(_nxy);
+  _stratTopKm.alloc(_nxy);
+  _stratDepthKm.alloc(_nxy);
+  
+}
+
+/////////////////////////////////////////////////////////
+// init arrays to missing
+
+void ConvStratFinder::_initToMissing()
+  
+{
+
+  _initToMissing(_volDbz, _missingFl32);
+  _initToMissing(_fzHtKm, _missingFl32);
+  _initToMissing(_divHtKm, _missingFl32);
+
+  _initToMissing(_partition, _missingUi08);
+  _initToMissing(_partitionLow, _missingUi08);
+  _initToMissing(_partitionMid, _missingUi08);
+  _initToMissing(_partitionHigh, _missingUi08);
+  
+  _initToMissing(_convDbz, _missingFl32);
+  _initToMissing(_stratDbz, _missingFl32);
+
+  _initToMissing(_volTexture, _missingFl32);
+  // _initToMissing(_sumTexture, _missingFl32);
+  // _initToMissing(_nTexture, _missingFl32);
+
+  _initToMissing(_meanTexture, _missingFl32);
+  _initToMissing(_meanTextureLow, _missingFl32);
+  _initToMissing(_meanTextureMid, _missingFl32);
+  _initToMissing(_meanTextureHigh, _missingFl32);
+  _initToMissing(_maxTexture, _missingFl32);
+  
+  _initToMissing(_fractionActive, _missingFl32);
+  _initToMissing(_colMaxDbz, _missingFl32);
+  _initToMissing(_backgroundDbz, _missingFl32);
+  _initToMissing(_convRadiusKm, _missingFl32);
+
+  _initToMissing(_convBaseKm, _missingFl32);
+  _initToMissing(_convTopKm, _missingFl32);
+  _initToMissing(_convDepthKm, _missingFl32);
+  
+  _initToMissing(_stratBaseKm, _missingFl32);
+  _initToMissing(_stratTopKm, _missingFl32);
+  _initToMissing(_stratDepthKm, _missingFl32);
+  
+}
+
+void ConvStratFinder::_initToMissing(TaArray<fl32> &array,
+                                     fl32 missingVal)
+{
+  fl32 *data = array.dat();
+  for (size_t ii = 0; ii < array.size(); ii++) {
+    data[ii] = missingVal;
+  }
+}
+
+void ConvStratFinder::_initToMissing(TaArray<ui08> &array,
+                                     ui08 missingVal)
+{
+  ui08 *data = array.dat();
+  for (size_t ii = 0; ii < array.size(); ii++) {
+    data[ii] = missingVal;
+  }
 }
 
 /////////////////////////////////////////////////////////
@@ -194,22 +341,41 @@ void ConvStratFinder::freeArrays()
   
 {
 
+  _volDbz.free();
+  _fzHtKm.free();
+  _divHtKm.free();
+
   _partition.free();
+  _partitionLow.free();
+  _partitionMid.free();
+  _partitionHigh.free();
+  
   _convDbz.free();
   _stratDbz.free();
 
-  _volDbz.free();
   _volTexture.free();
+  // _sumTexture.free();
+  // _nTexture.free();
 
-  _sumTexture.free();
-  _nTexture.free();
   _meanTexture.free();
+  _meanTextureLow.free();
+  _meanTextureMid.free();
+  _meanTextureHigh.free();
   _maxTexture.free();
+  
   _fractionActive.free();
   _colMaxDbz.free();
   _backgroundDbz.free();
   _convRadiusKm.free();
 
+  _convBaseKm.free();
+  _convTopKm.free();
+  _convDepthKm.free();
+  
+  _stratBaseKm.free();
+  _stratTopKm.free();
+  _stratDepthKm.free();
+  
 }
 
 /////////////////////////////////////////////////////////
@@ -227,21 +393,21 @@ void ConvStratFinder::_computeColMax()
   
   // initialize
 
-  for (int ii = 0; ii < _nxy; ii++) {
-    colMaxDbz[ii] = _missing;
+  for (size_t ii = 0; ii < _nxy; ii++) {
+    colMaxDbz[ii] = _missingFl32;
   }
 
   fl32 *dbz = _volDbz.dat();
   
-  for (int iz = _minIz; iz <= _maxIz; iz++) {
-    for (int iy = 0; iy < _ny; iy++) {
-      for (int ix = 0; ix < _nx; ix++) {
+  for (size_t iz = _minIz; iz <= _maxIz; iz++) {
+    for (size_t iy = 0; iy < _ny; iy++) {
+      for (size_t ix = 0; ix < _nx; ix++) {
         
-        int ii = ix + iy * _nx + iz * _nxy;
-        int jj = ix + iy * _nx;
+        size_t ii = ix + iy * _nx + iz * _nxy;
+        size_t jj = ix + iy * _nx;
         fl32 dbzVal = dbz[ii];
         
-        if (dbzVal == _missing) {
+        if (dbzVal == _missingFl32) {
           continue;
         }
 
@@ -258,12 +424,12 @@ void ConvStratFinder::_computeColMax()
 
   fl32 *fractionTexture = _fractionActive.dat();
   memset(fractionTexture, 0, _nxy * sizeof(fl32));
-  for (int iy = _nyTexture; iy < _ny - _nyTexture; iy++) {
-    for (int ix = _nxTexture; ix < _nx - _nxTexture; ix++) {
-      int jcenter = ix + iy * _nx;
+  for (int iy = _nyTexture; iy < (int) _ny - _nyTexture; iy++) {
+    for (int ix = _nxTexture; ix < (int) _nx - _nxTexture; ix++) {
+      size_t jcenter = ix + iy * _nx;
       double count = 0;
       for (size_t ii = 0; ii < _textureKernelOffsets.size(); ii++) {
-        int jj = jcenter + _textureKernelOffsets[ii];
+        size_t jj = jcenter + _textureKernelOffsets[ii];
         double val = colMaxDbz[jj];
         if (val >= _minValidDbz) {
           count++;
@@ -288,36 +454,36 @@ void ConvStratFinder::_computeTexture()
   // array pointers
 
   fl32 *volTexture = _volTexture.dat();
-  fl32 *sumTexture = _sumTexture.dat();
-  fl32 *nTexture = _nTexture.dat();
-  fl32 *meanTexture = _meanTexture.dat();
-  fl32 *maxTexture = _maxTexture.dat();
+  // fl32 *sumTexture = _sumTexture.dat();
+  // fl32 *nTexture = _nTexture.dat();
+  // fl32 *meanTexture = _meanTexture.dat();
+  // fl32 *maxTexture = _maxTexture.dat();
   fl32 *fractionTexture = _fractionActive.dat();
 
   // initialize
   
-  memset(nTexture, 0, _nxy * sizeof(fl32));
-  memset(sumTexture, 0, _nxy * sizeof(fl32));
+  // memset(nTexture, 0, _nxy * sizeof(fl32));
+  // memset(sumTexture, 0, _nxy * sizeof(fl32));
   
-  for (int ii = 0; ii < _nxy; ii++) {
-    meanTexture[ii] = _missing;
-    maxTexture[ii] = -1.0e99;
-  }
-  for (int ii = 0; ii < _nxyz; ii++) {
-    volTexture[ii] = _missing;
+  // for (size_t ii = 0; ii < _nxy; ii++) {
+  //   meanTexture[ii] = _missingFl32;
+  //   maxTexture[ii] = -1.0e99;
+  // }
+  for (size_t ii = 0; ii < _nxyz; ii++) {
+    volTexture[ii] = _missingFl32;
   }
   
   // set up threads for computing texture at each level
 
   const fl32 *dbz = _volDbz.dat();
   vector<ComputeTexture *> threads;
-  for (int iz = _minIz; iz <= _maxIz; iz++) {
+  for (size_t iz = _minIz; iz <= _maxIz; iz++) {
     size_t zoffset = iz * _nxy;
     ComputeTexture *thread = new ComputeTexture(iz);
     thread->setGridSize(_nx, _ny);
     thread->setKernelSize(_nxTexture, _nyTexture);
     thread->setMinValidFraction(_minValidFractionForTexture);
-    thread->setDbz(dbz + zoffset, _missing);
+    thread->setDbz(dbz + zoffset, _missingFl32);
     thread->setFractionCovered(fractionTexture);
     thread->setKernelOffsets(_textureKernelOffsets);
     thread->setTextureArray(volTexture + zoffset);
@@ -343,84 +509,294 @@ void ConvStratFinder::_computeTexture()
   }
   threads.clear();
 
-  // compute mean texture at each point
+  // compute texture in the vertical column at each point
+  
+  // size_t jcenter = 0;
+  // for (size_t iy = 0; iy < _ny; iy++) {
+  //   for (size_t ix = 0; ix < _nx; ix++, jcenter++) {
+  //     if (fractionTexture[jcenter] < _minValidFractionForTexture) {
+  //       continue;
+  //     }
+  //     size_t zcenter = jcenter + _minIz * _nxy;
+  //     for (size_t iz = _minIz; iz <= _maxIz; iz++, zcenter += _nxy) {
+  //       fl32 texture = volTexture[zcenter];
+  //       if (texture != _missingFl32) {
+  //         sumTexture[jcenter] += texture;
+  //         nTexture[jcenter]++;
+  //         if (texture > maxTexture[jcenter]) {
+  //           maxTexture[jcenter] = texture;
+  //         }
+  //       }
+  //     } // iz
 
-  int jcenter = 0;
-  for (int iy = 0; iy < _ny; iy++) {
-    for (int ix = 0; ix < _nx; ix++, jcenter++) {
-
-      if (fractionTexture[jcenter] < _minValidFractionForTexture) {
-        continue;
-      }
-
-      int zcenter = jcenter + _minIz * _nxy;
-      
-      for (int iz = _minIz; iz <= _maxIz; iz++, zcenter += _nxy) {
-        fl32 texture = volTexture[zcenter];
-        if (texture != _missing) {
-          sumTexture[jcenter] += texture;
-          nTexture[jcenter]++;
-          if (texture > maxTexture[jcenter]) {
-            maxTexture[jcenter] = texture;
-          }
-        }
-      } // iz
-
-    } // ix
-  } // iy
+  //   } // ix
+  // } // iy
         
-  // compute mean texture and max texture
+  // compute mean texture and max texture over full depth
   
-  int nLevelsUsed = _maxIz - _minIz + 1;
-  int minLevels = (int) (nLevelsUsed * _minValidFractionForTexture + 0.5);
+  // size_t nLevelsUsed = _maxIz - _minIz + 1;
+  // int minLevels = (int) (nLevelsUsed * _minValidFractionForTexture + 0.5);
   
-  for (int ii = 0; ii < _nxy; ii++) {
-    if (nTexture[ii] >= minLevels && sumTexture[ii] > 0) {
-      meanTexture[ii] = sumTexture[ii] / nTexture[ii];
-    }
-  }
+  // for (size_t ii = 0; ii < _nxy; ii++) {
+  //   if (nTexture[ii] >= minLevels && sumTexture[ii] > 0) {
+  //     meanTexture[ii] = sumTexture[ii] / nTexture[ii];
+  //   }
+  // }
 
 }
 
 /////////////////////////////////////////////////////////
-// set the convective/stratiform partition
+// set properties from the vertical profile of texture
 
-void ConvStratFinder::_setPartition()
+void ConvStratFinder::_computeProps()
   
 {
 
-  PMU_auto_register("ConvStratFinder::_setPartition()");
+  PMU_auto_register("ConvStratFinder::_setPropsFromTextureProfile()");
+
+  // array pointers
+
+  fl32 *volTexture = _volTexture.dat();
+  // fl32 *sumTexture = _sumTexture.dat();
+  // fl32 *nTexture = _nTexture.dat();
+
+  // fl32 *meanTexture = _meanTexture.dat();
+  // fl32 *meanTextureHigh = _meanTextureHigh.dat();
+  // fl32 *meanTextureMid = _meanTextureMid.dat();
+  // fl32 *meanTextureLow = _meanTextureLow.dat();
+  // fl32 *maxTexture = _maxTexture.dat();
+
+  fl32 *fractionTexture = _fractionActive.dat();
+
+  // initialize
+  
+  // memset(nTexture, 0, _nxy * sizeof(fl32));
+  // memset(sumTexture, 0, _nxy * sizeof(fl32));
+  
+  // for (size_t ii = 0; ii < _nxy; ii++) {
+  //   meanTexture[ii] = _missingFl32;
+  //   maxTexture[ii] = -1.0e99;
+  // }
+  // for (size_t ii = 0; ii < _nxyz; ii++) {
+  //   volTexture[ii] = _missingFl32;
+  // }
+  
+  // loop through the x/y arrays
+  
+  size_t jcenter = 0;
+  for (size_t iy = 0; iy < _ny; iy++) {
+    for (size_t ix = 0; ix < _nx; ix++, jcenter++) {
+      
+      if (fractionTexture[jcenter] < _minValidFractionForTexture) {
+        continue;
+      }
+      size_t zcenter = jcenter + _minIz * _nxy;
+      
+      // create a vert profile of texture
+      
+      vector<fl32> vtext;
+      for (size_t iz = _minIz; iz <= _maxIz; iz++, zcenter += _nxy) {
+        fl32 texture = volTexture[zcenter];
+        vtext.push_back(texture);
+      } // iz
+
+      // compute the props for this point
+
+      _computeProps(jcenter, vtext);
+
+    } // ix
+  } // iy
+        
+  // compute mean texture and max texture over full depth
+  
+  // size_t nLevelsUsed = _maxIz - _minIz + 1;
+  // int minLevels = (int) (nLevelsUsed * _minValidFractionForTexture + 0.5);
+  
+  // for (size_t ii = 0; ii < _nxy; ii++) {
+  //   if (nTexture[ii] >= minLevels && sumTexture[ii] > 0) {
+  //     meanTexture[ii] = sumTexture[ii] / nTexture[ii];
+  //   }
+  // }
+
+}
+
+/////////////////////////////////////////////////////////////
+// compute the props for a vert profile at a specified point
+// The index gives the location of the point in (x, y)
+
+void ConvStratFinder::_computeProps(size_t index,
+                                    vector<fl32> &textureProfile)
+  
+{
+
+  double fzHt = _fzLevelHtKm;
+  double divHt = _divLevelHtKm;
+  
+  if (!_specifyLevelsByHtValues) {
+    fzHt = _fzHtKm.dat()[index];
+    divHt = _divHtKm.dat()[index];
+  }
+  
+  // compute mean texture for full column, plus the
+  // low, mid and high parts of the column
+  // compute max textful for full column
+  // set partition values
+
+  double nFull = 0.0, nLow = 0.0, nMid = 0.0, nHigh = 0.0;
+  double sumFull = 0.0, sumLow = 0.0, sumMid = 0.0, sumHigh = 0.0;
+  fl32 maxFull = _missingFl32;
+  
+  for (size_t ii = 0; ii < textureProfile.size(); ii++) {
+    double ht = _zKm[ii];
+    fl32 texture = textureProfile[ii];
+    if (texture == _missingFl32) {
+      continue;
+    }
+    if (texture > maxFull) {
+      maxFull = texture;
+    }
+    nFull++;
+    sumFull += texture;
+    if (ht <= fzHt) {
+      nLow++;
+      sumLow += texture;
+    } else if (ht <= divHt) {
+      nMid++;
+      sumMid += texture;
+    } else {
+      nHigh++;
+      sumHigh += texture;
+    }
+  } // ii
+
+  if (nFull > 0) {
+    double meanFull = sumFull / nFull;
+    _meanTexture.dat()[index] = meanFull;
+    if (meanFull >= _minTextureForConvection) {
+      _partition.dat()[index] = CATEGORY_CONVECTIVE;
+    } else {
+      _partition.dat()[index] = CATEGORY_STRATIFORM;
+    }
+  }
+  if (nLow > 0) {
+    double meanLow = sumLow / nLow;
+    _meanTextureLow.dat()[index] = meanLow;
+    if (meanLow >= _minTextureForConvection) {
+      _partitionLow.dat()[index] = CATEGORY_CONVECTIVE;
+    } else {
+      _partitionLow.dat()[index] = CATEGORY_STRATIFORM;
+    }
+  }
+  if (nMid > 0) {
+    double meanMid = sumMid / nMid;
+    _meanTextureMid.dat()[index] = meanMid;
+    if (meanMid >= _minTextureForConvection) {
+      _partitionMid.dat()[index] = CATEGORY_CONVECTIVE;
+    } else {
+      _partitionMid.dat()[index] = CATEGORY_STRATIFORM;
+    }
+  }
+  if (nHigh > 0) {
+    double meanHigh = sumHigh / nHigh;
+    _meanTextureHigh.dat()[index] = meanHigh;
+    if (meanHigh >= _minTextureForConvection) {
+      _partitionHigh.dat()[index] = CATEGORY_CONVECTIVE;
+    } else {
+      _partitionHigh.dat()[index] = CATEGORY_STRATIFORM;
+    }
+  }
+  _maxTexture.dat()[index] = maxFull;
+  
+  // set the top and base for convection
+
+  double convBase = _missingFl32;
+  double convTop = _missingFl32;
+  double stratBase = _missingFl32;
+  double stratTop = _missingFl32;
+  
+  for (size_t ii = 0; ii < textureProfile.size(); ii++) {
+    double ht = _zKm[ii];
+    fl32 texture = textureProfile[ii];
+    if (texture == _missingFl32) {
+      continue;
+    }
+    if (texture >= _minTextureForConvection) {
+      if (convBase == _missingFl32) {
+        convBase = ht;
+      }
+      convTop = ht;
+    } else {
+      if (stratBase == _missingFl32) {
+        stratBase = ht;
+      }
+      stratTop = ht;
+    }
+  } // ii
+
+  if (convBase != _missingFl32 && convTop != _missingFl32) {
+    _convBaseKm.dat()[index] = convBase;
+    _convTopKm.dat()[index] = convTop;
+    _convDepthKm.dat()[index] = convTop - convBase;
+  }
+  
+  if (stratBase != _missingFl32 && stratTop != _missingFl32) {
+    _stratBaseKm.dat()[index] = stratBase;
+    _stratTopKm.dat()[index] = stratTop;
+    _stratDepthKm.dat()[index] = stratTop - stratBase;
+  }
+  
+}
+
+/////////////////////////////////////////////////////////
+// finalize the convective/stratiform partition
+
+void ConvStratFinder::_finalizePartition()
+  
+{
+  
+  PMU_auto_register("ConvStratFinder::_finalizePartition()");
 
   // get data pointers
   
-  const fl32 *colMaxDbz = _colMaxDbz.dat();
-  const fl32 *texture = _meanTexture.dat();
   ui08 *partition = _partition.dat();
+  ui08 *partLow = _partitionLow.dat();
+  ui08 *partMid = _partitionMid.dat();
+  ui08 *partHigh = _partitionHigh.dat();
   
-  // initialize
-
-  memset(partition, 0, _nxy * sizeof(ui08));
+  // expand the convective area around the points
+  // that have been identified
   
-  // load up convective flag at points surrounding the
-  // central grid point
+  size_t index = 0;
+  for (size_t iy = 0; iy < _ny; iy++) {
+    for (size_t ix = 0; ix < _nx; ix++, index++) {
 
-  for (int iy = 0; iy < _ny; iy++) {
-    for (int ix = 0; ix < _nx; ix++) {
-      // set convective partition
-      int index = ix + iy * _nx;
-      if (colMaxDbz[index] >= _dbzForDefiniteConvection ||
-          texture[index] >= _minTextureForConvection) {
-        _setPartitionExpanded(ix, iy, index);
+      if (partition[index] == CATEGORY_CONVECTIVE) {
+        _setPartitionExpanded(partition, ix, iy, index);
       }
+
+      if (partLow[index] == CATEGORY_CONVECTIVE) {
+        _setPartitionExpanded(partLow, ix, iy, index);
+      }
+
+      if (partMid[index] == CATEGORY_CONVECTIVE) {
+        _setPartitionExpanded(partMid, ix, iy, index);
+      }
+
+      if (partHigh[index] == CATEGORY_CONVECTIVE) {
+        _setPartitionExpanded(partHigh, ix, iy, index);
+      }
+      
     } // ix
   } // iy
 
+#ifdef JUNK
+  
   // set stratiform partition
   
-  for (int iy = 0; iy < _ny; iy++) {
-    for (int ix = 0; ix < _nx; ix++) {
-      int index = ix + iy * _nx;
-      if (colMaxDbz[index] != _missing) {
+  for (size_t iy = 0; iy < _ny; iy++) {
+    for (size_t ix = 0; ix < _nx; ix++) {
+      size_t index = ix + iy * _nx;
+      if (colMaxDbz[index] != _missingFl32) {
         if (partition[index] == CATEGORY_MISSING) {
           partition[index] = CATEGORY_STRATIFORM;
         }
@@ -428,32 +804,72 @@ void ConvStratFinder::_setPartition()
     } // ix
   } // iy
 
+#endif
+  
   // load up the partitioned dbz arrays
 
   const fl32 *dbz = _volDbz.dat();
   fl32 *convDbz = _convDbz.dat();
   fl32 *stratDbz = _stratDbz.dat();
 
-  for (int ii = 0; ii < _nxyz; ii++) {
-    convDbz[ii] = _missing;
-    stratDbz[ii] = _missing;
+  for (size_t ii = 0; ii < _nxyz; ii++) {
+    convDbz[ii] = _missingFl32;
+    stratDbz[ii] = _missingFl32;
   }
 
-  for (int iy = 0, ii = 0; iy < _ny; iy++) {
-    for (int ix = 0; ix < _nx; ix++, ii++) {
+  for (size_t iy = 0, ii = 0; iy < _ny; iy++) {
+    for (size_t ix = 0; ix < _nx; ix++, ii++) {
       if (partition[ii] == CATEGORY_CONVECTIVE) {
-        int jj = ii;
-        for (int iz = 0; iz < (int) _zKm.size(); iz++, jj += _nxy) {
+        size_t jj = ii;
+        for (size_t iz = 0; iz < (size_t) _zKm.size(); iz++, jj += _nxy) {
           convDbz[jj] = dbz[jj];
         } // iz
       } else if (partition[ii] == CATEGORY_STRATIFORM) {
-        int jj = ii;
-        for (int iz = 0; iz < (int) _zKm.size(); iz++, jj += _nxy) {
+        size_t jj = ii;
+        for (size_t iz = 0; iz < (size_t) _zKm.size(); iz++, jj += _nxy) {
           stratDbz[jj] = dbz[jj];
         } // iz
       }
     } // ix
   } // iy
+
+}
+
+////////////////////////////////////////////////////////////
+// set partition, expanding convection by computed radius
+
+void ConvStratFinder::_setPartitionExpanded(ui08 *partition,
+                                            size_t ix,
+                                            size_t iy,
+                                            size_t index)
+  
+{
+  
+  // get the convetive radius for this point
+  
+  double backgroundDbz = _backgroundDbz.dat()[index];
+  double radius = _computeConvRadiusKm(backgroundDbz);
+  _convRadiusKm.dat()[index] = radius;
+  double radSq = radius * radius;
+  size_t ny = (size_t) floor(radius / _dy + 0.5);
+  size_t nx = (size_t) floor(radius / _dx + 0.5);
+
+  for (size_t jy = -ny; jy <= ny; jy++) {
+    double yy = jy * _dy;
+    for (size_t jx = -nx; jx <= nx; jx++) {
+      double xx = jx * _dx;
+      double rSq = yy * yy + xx * xx;
+      if (rSq <= radSq) {
+        size_t ky = iy + jy;
+        size_t kx = ix + jx;
+        if (ky >= 0 && ky < _ny - 1 &&
+            kx >= 0 && kx < _nx - 1) {
+          size_t kk = kx + ky * _nx;
+          partition[kk] = CATEGORY_CONVECTIVE;
+        } // if (ky >= 0 ...
+      } // if (rSq <= radSq)
+    } // jx
+  } // jy
 
 }
 
@@ -470,13 +886,15 @@ void ConvStratFinder::_computeKernels()
 
   _textureKernelOffsets.clear();
 
-  _nyTexture = (int) floor(_textureRadiusKm / _dy + 0.5);
-  _nxTexture = (int) floor(_textureRadiusKm / _dx + 0.5);
+  _nyTexture = (size_t) floor(_textureRadiusKm / _dy + 0.5);
+  _nxTexture = (size_t) floor(_textureRadiusKm / _dx + 0.5);
   
   if (_verbose) {
     cerr << "Texture kernel size:" << endl;
     cerr << "  ny: " << _nyTexture << endl;
     cerr << "  nx: " << _nxTexture << endl;
+    cerr << "  _dy: " << _dy << endl;
+    cerr << "  _dx: " << _dx << endl;
   }
   
   for (int jdy = -_nyTexture; jdy <= _nyTexture; jdy++) {
@@ -495,8 +913,8 @@ void ConvStratFinder::_computeKernels()
 
   _backgroundKernelOffsets.clear();
   
-  _nyBackground = (int) floor(_backgroundRadiusKm / _dy + 0.5);
-  _nxBackground = (int) floor(_backgroundRadiusKm / _dx + 0.5);
+  _nyBackground = (size_t) floor(_backgroundRadiusKm / _dy + 0.5);
+  _nxBackground = (size_t) floor(_backgroundRadiusKm / _dx + 0.5);
   
   if (_verbose) {
     cerr << "Background kernel size:" << endl;
@@ -515,43 +933,6 @@ void ConvStratFinder::_computeKernels()
       }
     }
   }
-
-}
-
-////////////////////////////////////////////////////////////
-// set partition, expanding convection by computed radius
-
-void ConvStratFinder::_setPartitionExpanded(int ix, int iy, int index)
-  
-{
-
-  // get the convetive radius for this point
-  
-  double backgroundDbz = _backgroundDbz.dat()[index];
-  double radius = _computeConvRadiusKm(backgroundDbz);
-  _convRadiusKm.dat()[index] = radius;
-  double radSq = radius * radius;
-  int ny = (int) floor(radius / _dy + 0.5);
-  int nx = (int) floor(radius / _dx + 0.5);
-
-  ui08 *partition = _partition.dat();
-
-  for (int jy = -ny; jy <= ny; jy++) {
-    double yy = jy * _dy;
-    for (int jx = -nx; jx <= nx; jx++) {
-      double xx = jx * _dx;
-      double rSq = yy * yy + xx * xx;
-      if (rSq <= radSq) {
-        int ky = iy + jy;
-        int kx = ix + jx;
-        if (ky >= 0 && ky < _ny - 1 &&
-            kx >= 0 && kx < _nx - 1) {
-          int kk = kx + ky * _nx;
-          partition[kk] = CATEGORY_CONVECTIVE;
-        } // if (ky >= 0 ...
-      } // if (rSq <= radSq)
-    } // jx
-  } // jy
 
 }
 
@@ -606,7 +987,7 @@ void ConvStratFinder::_printSettings(ostream &out)
 
 double ConvStratFinder::_computeConvRadiusKm(double backgroundDbz) 
 {
-  if (backgroundDbz == _missing) {
+  if (backgroundDbz == _missingFl32) {
     return _minConvRadiusKm;
   }
   if (backgroundDbz < _dbzForMinRadius) {
@@ -634,25 +1015,25 @@ void ConvStratFinder::_computeBackgroundDbz()
   
   // initialize
 
-  for (int ii = 0; ii < _nxy; ii++) {
-    backgroundDbz[ii] = _missing;
+  for (size_t ii = 0; ii < _nxy; ii++) {
+    backgroundDbz[ii] = _missingFl32;
   }
 
   // background is mean dbz in a circle around a point
   
-  for (int iy = _nyBackground; iy < _ny - _nyBackground; iy++) {
+  for (size_t iy = _nyBackground; iy < _ny - _nyBackground; iy++) {
     
-    int icenter = _nxBackground + iy * _nx;
+    size_t icenter = _nxBackground + iy * _nx;
     
-    for (int ix = _nxBackground; ix < _nx - _nxBackground; ix++, icenter++) {
+    for (size_t ix = _nxBackground; ix < _nx - _nxBackground; ix++, icenter++) {
       
       double nn = 0.0;
       double sum = 0.0;
       
       for (size_t ii = 0; ii < _backgroundKernelOffsets.size(); ii++) {
-        int kk = icenter + _backgroundKernelOffsets[ii];
+        size_t kk = icenter + _backgroundKernelOffsets[ii];
         double dbz = colMaxDbz[kk];
-        if (dbz != _missing) {
+        if (dbz != _missingFl32) {
           sum += dbz;
         }
         nn++;
@@ -680,12 +1061,12 @@ void ConvStratFinder::_computeBackgroundDbz()
 
 // Constructor
 
-ConvStratFinder::ComputeTexture::ComputeTexture(int iz) :
+ConvStratFinder::ComputeTexture::ComputeTexture(size_t iz) :
         TaThread(),
         _iz(iz)
 {
   char name[128];
-  sprintf(name, "ComputeTexture-level-%d", _iz);
+  sprintf(name, "ComputeTexture-level-%ld", _iz);
   setThreadName(name);
   _dbz = NULL;
   _fractionCovered = NULL;
@@ -717,20 +1098,20 @@ void ConvStratFinder::ComputeTexture::run()
   
   // initialize texture to missing
 
-  for (int ii = 0; ii < _nx * _ny; ii++) {
+  for (size_t ii = 0; ii < _nx * _ny; ii++) {
     _texture[ii] = _missingVal;
   }
 
   // compute texture at each point in the plane
 
-  int minPtsForTexture = 
-    (int) (_minValidFraction * _kernelOffsets.size() + 0.5);
-  
-  for (int iy = _nyTexture; iy < _ny - _nyTexture; iy++) {
+  size_t minPtsForTexture = 
+    (size_t) (_minValidFraction * _kernelOffsets.size() + 0.5);
+
+  for (int iy = _nyTexture; iy < (int) _ny - _nyTexture; iy++) {
     
     int icenter = _nxTexture + iy * _nx;
     
-    for (int ix = _nxTexture; ix < _nx - _nxTexture; ix++, icenter++) {
+    for (int ix = _nxTexture; ix < (int) _nx - _nxTexture; ix++, icenter++) {
       
       if (_fractionCovered[icenter] < _minValidFraction) {
         continue;
@@ -745,7 +1126,7 @@ void ConvStratFinder::ComputeTexture::run()
       double sumSq = 0.0;
       
       for (size_t ii = 0; ii < _kernelOffsets.size(); ii++) {
-        int kk = icenter + _kernelOffsets[ii];
+        size_t kk = icenter + _kernelOffsets[ii];
         double val = _dbz[kk];
         if (val != _missingVal) {
           double dbzSq = val * val;

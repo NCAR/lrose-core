@@ -158,28 +158,30 @@ public:
   ////////////////////////////////////////////////////////////////////
   // Set grid details
 
-  void setGrid(int nx, int ny, 
+  void setGrid(size_t nx, size_t ny,
                double dx, double dy,
                double minx, double miny,
                const vector<double> &zKm,
-               bool projIsLatLon = false)
-  {
-    _nx = nx;
-    _ny = ny;
-    _dx = dx;
-    _dy = dy;
-    _minx = minx;
-    _miny = miny;
-    _zKm = zKm;
-    _nxy = _nx * _ny;
-    _nxyz = _nxy * _zKm.size();
-    _projIsLatLon = projIsLatLon;
-  }
+               bool projIsLatLon = false);
+  
+  ////////////////////////////////////////////////////////////////////
+  // Set the freezing level and divergence level in km MSL
+  
+  void setLevelHtValues(double fzLevelHtKm,
+                        double divLevelHtKm);
 
+  // Set the freezing level and divergence level as grids
+  // These must be on the same grid as the radar DBZ data
+  
+  void setLevelHtGrids(const fl32 *fzHtKm,
+                       const fl32 *divHtKm,
+                       size_t nptsPlane);
+  
   ////////////////////////////////////////////////////////////////////
   // Set debugging to on or verbose
 
   void setDebug(bool state) { _debug = state; }
+
   void setVerbose(bool state) {
     _verbose = state;
     if (state) {
@@ -192,12 +194,22 @@ public:
   // Returns 0 on success, -1 on failure
 
   int computePartition(const fl32 *dbz, fl32 dbzMissingVal);
+
+  // get the input fields
+  
+  const fl32 *getVolDbz() const { return _volDbz.dat(); }
+  const fl32 *getFzHtKm() const { return _fzHtKm.dat(); }
+  const fl32 *getDivHtKm() const { return _divHtKm.dat(); }
   
   ////////////////////////////////////////////////////////////////////
   // get the resulting partition
   // will be set to the relevant category
 
   const ui08 *getPartition() const { return _partition.dat(); }
+  const ui08 *getPartitionLow() const { return _partitionLow.dat(); }
+  const ui08 *getPartitionMid() const { return _partitionMid.dat(); }
+  const ui08 *getPartitionHigh() const { return _partitionHigh.dat(); }
+
   const fl32 *getConvectiveDbz() const { return _convDbz.dat(); }
   const fl32 *getStratiformDbz() const { return _stratDbz.dat(); }
 
@@ -206,20 +218,32 @@ public:
 
   const fl32 *getVolTexture() const { return _volTexture.dat(); }
   const fl32 *getMeanTexture() const { return _meanTexture.dat(); }
+  const fl32 *getMeanTextureLow() const { return _meanTextureLow.dat(); }
+  const fl32 *getMeanTextureMid() const { return _meanTextureMid.dat(); }
+  const fl32 *getMeanTextureHigh() const { return _meanTextureHigh.dat(); }
   const fl32 *getMaxTexture() const { return _maxTexture.dat(); }
   const fl32 *getFractionActive() const { return _fractionActive.dat(); }
   const fl32 *getColMaxDbz() const { return _colMaxDbz.dat(); }
   const fl32 *getBackgroundDbz() const { return _backgroundDbz.dat(); }
   const fl32 *getConvRadiusKm() const { return _convRadiusKm.dat(); }
 
+  const fl32 *getConvBaseKm() const { return _convBaseKm.dat(); }
+  const fl32 *getConvTopKm() const { return _convTopKm.dat(); }
+  const fl32 *getConvDepthKm() const { return _convDepthKm.dat(); }
+
+  const fl32 *getStratBaseKm() const { return _stratBaseKm.dat(); }
+  const fl32 *getStratTopKm() const { return _stratTopKm.dat(); }
+  const fl32 *getStratDepthKm() const { return _stratDepthKm.dat(); }
+
   // get missing value for float arrays
 
-  fl32 getMissingVal() const { return _missing; }
+  ui08 getMissingUi08() const { return _missingUi08; }
+  fl32 getMissingFl32() const { return _missingFl32; }
 
   // get grid details
 
-  int getGridNx() const { return _nx; }
-  int getGridNy() const { return _ny; }
+  size_t getGridNx() const { return _nx; }
+  size_t getGridNy() const { return _ny; }
 
   double getGridMinx() const { return _minx; }
   double getGridMiny() const { return _miny; }
@@ -238,10 +262,13 @@ protected:
   
 private:
 
-  static const fl32 _missing;
-
-  bool _debug;   /**< Print debug messages */
-  bool _verbose; /**< Print verbose debug messages */
+  // private data
+  
+  static const fl32 _missingFl32;
+  static const ui08 _missingUi08;
+  
+  bool _debug; // Print debug messages
+  bool _verbose; // Print verbose debug messages
 
   double _minValidHtKm;
   double _maxValidHtKm;
@@ -251,50 +278,93 @@ private:
   double _minValidFractionForTexture;
   double _minTextureForConvection;
 
-  double _minConvRadiusKm;  // min convective radius if computed
-  double _maxConvRadiusKm;  // max convective radius if computed
-  double _dbzForMinRadius;  // background dbz for min radius
-  double _dbzForMaxRadius;  // background dbz for max radius
+  double _minConvRadiusKm; // min convective radius if computed
+  double _maxConvRadiusKm; // max convective radius if computed
+  double _dbzForMinRadius; // background dbz for min radius
+  double _dbzForMaxRadius; // background dbz for max radius
   double _deltaRadius;
   double _deltaBackgroundDbz;
   double _radiusSlope;
-  double _backgroundRadiusKm;  // radius for computing background dbz
-  
+  double _backgroundRadiusKm; // radius for computing background dbz
+
   vector<ssize_t> _textureKernelOffsets;
   vector<ssize_t> _backgroundKernelOffsets;
 
-  int _nx, _ny;
+  // grid details
+
+  bool _gridSet;
+  
+  size_t _nx, _ny;
   double _minx, _miny;
   double _dx, _dy;
   vector<double> _zKm;
   bool _projIsLatLon;
 
-  int _nxy, _nxyz;
-  int _minIz, _maxIz;
+  size_t _nxy, _nxyz;
+  size_t _minIz, _maxIz;
   
   int _nxTexture, _nyTexture;
   int _nxBackground, _nyBackground;
 
+  // specify freezing level, and divergence level, by ht MSL
+  // if this is false, grids for fz and div level must be passed in
+  
+  bool _specifyLevelsByHtValues;
+  double _fzLevelHtKm;
+  double _divLevelHtKm;
+  
+  // inputs
+  
+  TaArray<fl32> _volDbz;
+  TaArray<fl32> _fzHtKm;  // grid for ht of freezing level
+  TaArray<fl32> _divHtKm; // grid for ht of divergence level
+  
+  // primary outputs
+  
   TaArray<ui08> _partition;
+  TaArray<ui08> _partitionLow;
+  TaArray<ui08> _partitionMid;
+  TaArray<ui08> _partitionHigh;
+
   TaArray<fl32> _convDbz;
   TaArray<fl32> _stratDbz;
-
-  TaArray<fl32> _volDbz;
+  
+  // intermediate fields
+  
   TaArray<fl32> _volTexture;
-  TaArray<fl32> _sumTexture;
-  TaArray<fl32> _nTexture;
+  // TaArray<fl32> _sumTexture;
+  // TaArray<fl32> _nTexture;
   TaArray<fl32> _meanTexture;
+  TaArray<fl32> _meanTextureLow;
+  TaArray<fl32> _meanTextureMid;
+  TaArray<fl32> _meanTextureHigh;
   TaArray<fl32> _maxTexture;
   TaArray<fl32> _fractionActive;
   TaArray<fl32> _colMaxDbz;
   TaArray<fl32> _backgroundDbz;
   TaArray<fl32> _convRadiusKm;
 
+  TaArray<fl32> _convBaseKm;
+  TaArray<fl32> _convTopKm;
+  TaArray<fl32> _convDepthKm;
+
+  TaArray<fl32> _stratBaseKm;
+  TaArray<fl32> _stratTopKm;
+  TaArray<fl32> _stratDepthKm;
+
+  // methods
+  
   void _allocArrays();
+  void _initToMissing();
+  void _initToMissing(TaArray<fl32> &array, fl32 missingVal);
+  void _initToMissing(TaArray<ui08> &array, ui08 missingVal);
   void _computeColMax();
-  void _setPartition();
-  void _setPartitionExpanded(int ix, int iy, int index);
+  void _finalizePartition();
+  void _setPartitionExpanded(ui08 *partition,
+                             size_t ix, size_t iy, size_t index);
   void _computeTexture();
+  void _computeProps();
+  void _computeProps(size_t index, vector<fl32> &textureProfile);
   void _computeKernels();
   void _printSettings(ostream &out);
   double _computeConvRadiusKm(double backgroundDbz);
@@ -309,7 +379,7 @@ private:
     
     // constructor saves _sd3c pointer
     
-    ComputeTexture(int iz);
+    ComputeTexture(size_t iz);
     
     // destructor
     
@@ -317,13 +387,13 @@ private:
     
     // set parameters
     
-    void setGridSize(int nx, int ny)
+    void setGridSize(size_t nx, size_t ny)
     {
       _nx = nx;
       _ny = ny;
     }
     
-    void setKernelSize(int nx, int ny)
+    void setKernelSize(size_t nx, size_t ny)
     {
       _nxTexture = nx;
       _nyTexture = ny;
@@ -361,8 +431,8 @@ private:
     
   private:
     
-    int _iz;
-    int _nx, _ny;
+    size_t _iz;
+    size_t _nx, _ny;
     int _nxTexture, _nyTexture;
     double _minValidFraction;
     fl32 _missingVal;

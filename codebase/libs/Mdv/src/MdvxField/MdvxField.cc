@@ -3923,6 +3923,29 @@ void MdvxField::setTransform(const char *transform)
   STRncopy(_fhdr.transform, transform, MDV_TRANSFORM_LEN );
 }
 
+void MdvxField::setFieldName(const string &name,
+                             Mdvx::field_header_t &fhdr)
+{
+  STRncopy(fhdr.field_name, name.c_str(), MDV_SHORT_FIELD_LEN );
+}
+
+void MdvxField::setFieldNameLong(const string &nameLong,
+                                 Mdvx::field_header_t &fhdr)
+{
+  STRncopy(fhdr.field_name_long, nameLong.c_str(), MDV_LONG_FIELD_LEN );
+}
+
+void MdvxField::setUnits(const string &units, Mdvx::field_header_t &fhdr)
+{
+  STRncopy(fhdr.units, units.c_str(), MDV_UNITS_LEN );
+}
+
+void MdvxField::setTransform(const string &transform,
+                             Mdvx::field_header_t &fhdr)
+{
+  STRncopy(fhdr.transform, transform.c_str(), MDV_TRANSFORM_LEN );
+}
+
 ///////////////////////
 // protected functions
 
@@ -8358,7 +8381,7 @@ double MdvxField::_round_dz(double dz)
 void MdvxField::_check_finite(const void *vol_data)
 
 {
-  
+
   // For uncompressed FLOAT_32 data, check for NaN's - if any
   // are found, print a message to that effect and replace the values
   // with the bad_data_value.
@@ -8384,7 +8407,6 @@ void MdvxField::_check_finite(const void *vol_data)
     if (!isfinite(*floatData)) {
       numNans++;
       *floatData = bad;
-      // cerr << "+";
     }
     
   }
