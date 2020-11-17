@@ -936,9 +936,21 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("min_texture_for_convection");
     tt->descr = tdrpStrDup("Minimum texture for convection at a point.");
-    tt->help = tdrpStrDup("If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.");
+    tt->help = tdrpStrDup("If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using a computed radius that depends on the strength of the background reflectivity.");
     tt->val_offset = (char *) &min_texture_for_convection - &_start_;
     tt->single_val.d = 15;
+    tt++;
+    
+    // Parameter 'max_texture_for_stratiform'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_texture_for_stratiform");
+    tt->descr = tdrpStrDup("Maximum texture for stratiform at a point.");
+    tt->help = tdrpStrDup("If the texture at a point is less than this value, we set the stratiform flag at this point.");
+    tt->val_offset = (char *) &max_texture_for_stratiform - &_start_;
+    tt->single_val.d = 11;
     tt++;
     
     // Parameter 'Comment 7'

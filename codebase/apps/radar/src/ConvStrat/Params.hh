@@ -432,6 +432,8 @@ public:
 
   double min_texture_for_convection;
 
+  double max_texture_for_stratiform;
+
   char* output_url;
 
   tdrp_bool_t write_partition_field;
@@ -459,7 +461,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[41];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 

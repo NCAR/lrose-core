@@ -56,6 +56,7 @@ public:
     CATEGORY_MISSING = 0,
     CATEGORY_STRATIFORM = 1,
     CATEGORY_CONVECTIVE = 2,
+    CATEGORY_MIXED = 3,
     CATEGORY_UNKNOWN
   } category_t;
   
@@ -156,6 +157,16 @@ public:
   }
 
   ////////////////////////////////////////////////////////////////////
+  // Minimum texture for convection at a point.  If the texture at a
+  // point exceeds this value, we set the convective flag at this
+  // point. We then expand the convective influence around the point
+  // using convetive_radius_km.
+
+  void setMaxTextureForStratiform(double val) {
+    _maxTextureForStratiform = val; 
+  }
+
+  ////////////////////////////////////////////////////////////////////
   // Set grid details
 
   void setGrid(size_t nx, size_t ny,
@@ -229,11 +240,9 @@ public:
 
   const fl32 *getConvBaseKm() const { return _convBaseKm.dat(); }
   const fl32 *getConvTopKm() const { return _convTopKm.dat(); }
-  const fl32 *getConvDepthKm() const { return _convDepthKm.dat(); }
 
   const fl32 *getStratBaseKm() const { return _stratBaseKm.dat(); }
   const fl32 *getStratTopKm() const { return _stratTopKm.dat(); }
-  const fl32 *getStratDepthKm() const { return _stratDepthKm.dat(); }
 
   // get missing value for float arrays
 
@@ -277,6 +286,7 @@ private:
   double _textureRadiusKm;
   double _minValidFractionForTexture;
   double _minTextureForConvection;
+  double _maxTextureForStratiform;
 
   double _minConvRadiusKm; // min convective radius if computed
   double _maxConvRadiusKm; // max convective radius if computed
@@ -332,8 +342,6 @@ private:
   // intermediate fields
   
   TaArray<fl32> _volTexture;
-  // TaArray<fl32> _sumTexture;
-  // TaArray<fl32> _nTexture;
   TaArray<fl32> _meanTexture;
   TaArray<fl32> _meanTextureLow;
   TaArray<fl32> _meanTextureMid;
@@ -346,11 +354,8 @@ private:
 
   TaArray<fl32> _convBaseKm;
   TaArray<fl32> _convTopKm;
-  TaArray<fl32> _convDepthKm;
-
   TaArray<fl32> _stratBaseKm;
   TaArray<fl32> _stratTopKm;
-  TaArray<fl32> _stratDepthKm;
 
   // methods
   
@@ -360,8 +365,8 @@ private:
   void _initToMissing(TaArray<ui08> &array, ui08 missingVal);
   void _computeColMax();
   void _finalizePartition();
-  void _setPartitionExpanded(ui08 *partition,
-                             size_t ix, size_t iy, size_t index);
+  void _expandConvection(ui08 *partition,
+                         size_t ix, size_t iy, size_t index);
   void _computeTexture();
   void _computeProps();
   void _computeProps(size_t index, vector<fl32> &textureProfile);

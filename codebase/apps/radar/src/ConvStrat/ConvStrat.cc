@@ -133,9 +133,9 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setTextureRadiusKm(_params.texture_radius_km);
   _finder.setMinValidFractionForTexture
     (_params.min_valid_fraction_for_texture);
-  _finder.setMinTextureForConvection
-    (_params.min_texture_for_convection);
-
+  _finder.setMinTextureForConvection(_params.min_texture_for_convection);
+  _finder.setMaxTextureForStratiform(_params.max_texture_for_stratiform);
+  
   return;
 
 }
@@ -405,7 +405,7 @@ void ConvStrat::_addFields()
                                  "ConvectiveRadius",
                                  "km"));
     
-    // convective base, top and depth
+    // convective base, top
     
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getConvBaseKm(),
@@ -421,14 +421,7 @@ void ConvStrat::_addFields()
                                  "ConvectiveTop",
                                  "km"));
     
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getConvDepthKm(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "ConvDepth",
-                                 "ConvectiveDepth",
-                                 "km"));
-    
-    // stratiform base, top and depth
+    // stratiform base, top
     
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getStratBaseKm(),
@@ -442,13 +435,6 @@ void ConvStrat::_addFields()
                                  Mdvx::ENCODING_FLOAT32,
                                  "StratTop",
                                  "StratiformTop",
-                                 "km"));
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getStratDepthKm(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "StratDepth",
-                                 "StratiformDepth",
                                  "km"));
     
   }

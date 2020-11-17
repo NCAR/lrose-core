@@ -189,8 +189,14 @@ paramdef double {
 paramdef double {
   p_default = 15.0;
   p_descr = "Minimum texture for convection at a point.";
-  p_help = "If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.";
+  p_help = "If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using a computed radius that depends on the strength of the background reflectivity.";
 } min_texture_for_convection;
+
+paramdef double {
+  p_default = 11.0;
+  p_descr = "Maximum texture for stratiform at a point.";
+  p_help = "If the texture at a point is less than this value, we set the stratiform flag at this point.";
+} max_texture_for_stratiform;
 
 commentdef {
   p_header = "DATA OUTPUT";
