@@ -424,8 +424,8 @@ void ConvStratFinder::_computeColMax()
 
   fl32 *fractionTexture = _fractionActive.dat();
   memset(fractionTexture, 0, _nxy * sizeof(fl32));
-  for (size_t iy = _nyTexture; iy < _ny - _nyTexture; iy++) {
-    for (size_t ix = _nxTexture; ix < _nx - _nxTexture; ix++) {
+  for (int iy = _nyTexture; iy < (int) _ny - _nyTexture; iy++) {
+    for (int ix = _nxTexture; ix < (int) _nx - _nxTexture; ix++) {
       size_t jcenter = ix + iy * _nx;
       double count = 0;
       for (size_t ii = 0; ii < _textureKernelOffsets.size(); ii++) {
@@ -893,11 +893,13 @@ void ConvStratFinder::_computeKernels()
     cerr << "Texture kernel size:" << endl;
     cerr << "  ny: " << _nyTexture << endl;
     cerr << "  nx: " << _nxTexture << endl;
+    cerr << "  _dy: " << _dy << endl;
+    cerr << "  _dx: " << _dx << endl;
   }
   
-  for (size_t jdy = -_nyTexture; jdy <= _nyTexture; jdy++) {
+  for (int jdy = -_nyTexture; jdy <= _nyTexture; jdy++) {
     double yy = jdy * _dy;
-    for (size_t jdx = -_nxTexture; jdx <= _nxTexture; jdx++) {
+    for (int jdx = -_nxTexture; jdx <= _nxTexture; jdx++) {
       double xx = jdx * _dx;
       double radius = sqrt(yy * yy + xx * xx);
       if (radius <= _textureRadiusKm) {
@@ -920,9 +922,9 @@ void ConvStratFinder::_computeKernels()
     cerr << "  nx: " << _nxBackground << endl;
   }
   
-  for (size_t jdy = -_nyBackground; jdy <= _nyBackground; jdy++) {
+  for (int jdy = -_nyBackground; jdy <= _nyBackground; jdy++) {
     double yy = jdy * _dy;
-    for (size_t jdx = -_nxBackground; jdx <= _nxBackground; jdx++) {
+    for (int jdx = -_nxBackground; jdx <= _nxBackground; jdx++) {
       double xx = jdx * _dx;
       double radius = sqrt(yy * yy + xx * xx);
       if (radius <= _backgroundRadiusKm) {
@@ -1104,12 +1106,12 @@ void ConvStratFinder::ComputeTexture::run()
 
   size_t minPtsForTexture = 
     (size_t) (_minValidFraction * _kernelOffsets.size() + 0.5);
-  
-  for (size_t iy = _nyTexture; iy < _ny - _nyTexture; iy++) {
+
+  for (int iy = _nyTexture; iy < (int) _ny - _nyTexture; iy++) {
     
-    size_t icenter = _nxTexture + iy * _nx;
+    int icenter = _nxTexture + iy * _nx;
     
-    for (size_t ix = _nxTexture; ix < _nx - _nxTexture; ix++, icenter++) {
+    for (int ix = _nxTexture; ix < (int) _nx - _nxTexture; ix++, icenter++) {
       
       if (_fractionCovered[icenter] < _minValidFraction) {
         continue;

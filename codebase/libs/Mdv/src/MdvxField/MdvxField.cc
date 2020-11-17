@@ -259,7 +259,6 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
     
     // Check for NaN, infinity values.
     
-    cerr << "aaaaaaaaaaaaaaaaaaaaa" << endl;
     _check_finite(getVol());
     
     // compute min and max
@@ -561,7 +560,6 @@ void MdvxField::setVolData(const void *vol_data,
   _fhdr.max_value = 0.0;
 
   // Check for NaN, infinity values.
-  cerr << "bbbbbbbbbbbbbbbbbbbb" << endl;
   _check_finite(getVol());
   
 }
@@ -762,7 +760,6 @@ void MdvxField::setHdrsAndVolData(const Mdvx::field_header_t &f_hdr,
     
     // Check for NaN, infinity values.
     
-  cerr << "cccccccccccccccccccccccc" << endl;
     _check_finite(getVol());
     
     // compute min and max
@@ -1199,7 +1196,6 @@ int MdvxField::convertType
 
   } else if (_fhdr.encoding_type == Mdvx::ENCODING_FLOAT32) {
 
-  cerr << "dddddddddddddddddddddd" << endl;
     _check_finite(getVol());
       
     if (output_encoding == Mdvx::ENCODING_INT8) {
@@ -6429,7 +6425,6 @@ int MdvxField::computeMinAndMax(bool force /* = false*/ )
 
   // check we do not have nans or inf
 
-  cerr << "eeeeeeeeeeeeeeeeeeeeee" << endl;
   _check_finite(getVol());
 
   // decompress data if necessary
@@ -8387,8 +8382,6 @@ void MdvxField::_check_finite(const void *vol_data)
 
 {
 
-  cerr << "ffffffffffffffffffffffffffffff" << endl;
-  
   // For uncompressed FLOAT_32 data, check for NaN's - if any
   // are found, print a message to that effect and replace the values
   // with the bad_data_value.
@@ -8414,7 +8407,6 @@ void MdvxField::_check_finite(const void *vol_data)
     if (!isfinite(*floatData)) {
       numNans++;
       *floatData = bad;
-      // cerr << "+";
     }
     
   }

@@ -303,8 +303,8 @@ private:
   size_t _nxy, _nxyz;
   size_t _minIz, _maxIz;
   
-  size_t _nxTexture, _nyTexture;
-  size_t _nxBackground, _nyBackground;
+  int _nxTexture, _nyTexture;
+  int _nxBackground, _nyBackground;
 
   // specify freezing level, and divergence level, by ht MSL
   // if this is false, grids for fz and div level must be passed in
@@ -433,7 +433,7 @@ private:
     
     size_t _iz;
     size_t _nx, _ny;
-    size_t _nxTexture, _nyTexture;
+    int _nxTexture, _nyTexture;
     double _minValidFraction;
     fl32 _missingVal;
     const fl32 *_dbz;
