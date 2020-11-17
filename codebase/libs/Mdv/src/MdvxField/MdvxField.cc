@@ -259,7 +259,7 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
     
     // Check for NaN, infinity values.
     
-    _check_finite(getVol());
+    _check_finite(_volBuf.getPtr());
     
     // compute min and max
     
@@ -560,7 +560,7 @@ void MdvxField::setVolData(const void *vol_data,
   _fhdr.max_value = 0.0;
 
   // Check for NaN, infinity values.
-  _check_finite(getVol());
+  _check_finite(_volBuf.getPtr());
   
 }
 
@@ -760,7 +760,7 @@ void MdvxField::setHdrsAndVolData(const Mdvx::field_header_t &f_hdr,
     
     // Check for NaN, infinity values.
     
-    _check_finite(getVol());
+    _check_finite(_volBuf.getPtr());
     
     // compute min and max
     
@@ -863,10 +863,12 @@ void MdvxField::clearVolData()
       break;
     
     case Mdvx::ENCODING_ASIS :
-      cerr << "WARNING - MdvxField::clearVolData" << endl;
-      cerr << "   Encoding set to ENCODING_ASIS" << endl;
-      cerr << "   Data not changed" << endl;
-      return;
+      void *data = _volBuf.getPtr();
+      memset(data, 0, _fhdr.volume_size);
+      // cerr << "WARNING - MdvxField::clearVolData" << endl;
+      // cerr << "   Encoding set to ENCODING_ASIS" << endl;
+      // cerr << "   Data not changed" << endl;
+      break;
 
   } /* endswitch - _fhdr.encoding_type */
   
@@ -882,7 +884,7 @@ void MdvxField::clearVolData()
 
 void MdvxField::_clearVolDataInt8()
 {
-  ui08 *data = (ui08 *)getVol();
+  ui08 *data = (ui08 *)_volBuf.getPtr();
   int64_t num_values = _fhdr.volume_size / _fhdr.data_element_nbytes;
   
   for (int64_t i = 0; i < num_values; ++i)
@@ -898,7 +900,7 @@ void MdvxField::_clearVolDataInt8()
 
 void MdvxField::_clearVolDataInt16()
 {
-  ui16 *data = (ui16 *)getVol();
+  ui16 *data = (ui16 *)_volBuf.getPtr();
   int64_t num_values = _fhdr.volume_size / _fhdr.data_element_nbytes;
   
   for (int64_t i = 0; i < num_values; ++i)
@@ -914,7 +916,7 @@ void MdvxField::_clearVolDataInt16()
 
 void MdvxField::_clearVolDataFloat32()
 {
-  fl32 *data = (fl32 *)getVol();
+  fl32 *data = (fl32 *)_volBuf.getPtr();
   int64_t num_values = _fhdr.volume_size / _fhdr.data_element_nbytes;
   
   for (int64_t i = 0; i < num_values; ++i)
@@ -930,7 +932,7 @@ void MdvxField::_clearVolDataFloat32()
 
 void MdvxField::_clearVolDataRgba32()
 {
-  ui32 *data = (ui32 *)getVol();
+  ui32 *data = (ui32 *)_volBuf.getPtr();
   int64_t num_values = _fhdr.volume_size / _fhdr.data_element_nbytes;
   
   for (int64_t i = 0; i < num_values; ++i)
@@ -1196,7 +1198,7 @@ int MdvxField::convertType
 
   } else if (_fhdr.encoding_type == Mdvx::ENCODING_FLOAT32) {
 
-    _check_finite(getVol());
+    _check_finite(_volBuf.getPtr());
       
     if (output_encoding == Mdvx::ENCODING_INT8) {
       
@@ -6425,7 +6427,7 @@ int MdvxField::computeMinAndMax(bool force /* = false*/ )
 
   // check we do not have nans or inf
 
-  _check_finite(getVol());
+  _check_finite(_volBuf.getPtr());
 
   // decompress data if necessary
 
