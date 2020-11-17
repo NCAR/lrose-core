@@ -1038,6 +1038,9 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
     _radarLat = _platform.getLatitudeDeg();
     _radarLon = _platform.getLongitudeDeg();
     _radarAltKm = _platform.getAltitudeKm();
+    if (_radarAltKm < -1.0) {
+      _radarAltKm = 0.0;
+    }
     _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm * 1000.0);
   }
 
@@ -1127,7 +1130,11 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
     }
     
     if (_altitudeInFeet) {
-      _setText(text, "%.3f", _platform.getAltitudeKm() / 0.3048);
+      if (_platform.getAltitudeKm() > -1.0) {
+        _setText(text, "%.3f", _platform.getAltitudeKm() / 0.3048);
+      } else {
+        snprintf(text, 1024, "%s", "missing");
+      }
     } else {
       _setText(text, "%.3f", _platform.getAltitudeKm());
     }
@@ -1184,6 +1191,9 @@ double DisplayManager::_getInstHtKm(const RadxRay *ray)
 
 {
   double instHtKm = _platform.getAltitudeKm();
+  if (instHtKm < -1.0) {
+    instHtKm = 0.0;
+  }
   if (ray->getGeoreference() != NULL) {
     instHtKm = ray->getGeoreference()->getAltitudeKmMsl();
   }

@@ -115,9 +115,13 @@ void RhiWidget::addBeam(const RadxRay *ray,
   _storeRayLoc(ray);
 
   // Add the beam to the beam list
-  
-  RhiBeam* beam = new RhiBeam(_params, ray,
-                              _manager.getPlatform().getAltitudeKm(),
+
+  double instHtKm = _manager.getPlatform().getAltitudeKm();
+  if (instHtKm < -1.0) {
+    instHtKm = 0.0;
+  }
+
+  RhiBeam* beam = new RhiBeam(_params, ray, instHtKm,
                               _fields.size(), _startElev, _endElev);
   beam->addClient();
 
@@ -309,7 +313,9 @@ const RadxRay *RhiWidget::_getClosestRay(double xx, double yy)
 
 {
 
-  _beamHt.setInstrumentHtKm(_platform.getAltitudeKm());
+  if (_platform.getAltitudeKm() > -1.0) {
+    _beamHt.setInstrumentHtKm(_platform.getAltitudeKm());
+  }
   double clickEl = _beamHt.computeElevationDeg(yy, xx);
   
   double minDiff = 1.0e99;
@@ -656,8 +662,12 @@ void RhiWidget::_computeAngleLimits(const RadxRay *ray)
 void RhiWidget::_storeRayLoc(const RadxRay *ray)
 {
 
-  int startIndex = (int) (_startElev * RayLoc::RAY_LOC_RES);
-  int endIndex = (int) (_endElev * RayLoc::RAY_LOC_RES + 1);
+  // compute start and end indices for _rayLoc
+  // RHIs elevation range from -180 to 180
+  // so add 180 to put the index in 0 to 3599 range
+
+  int startIndex = (int) ((_startElev + 180.0) * RayLoc::RAY_LOC_RES);
+  int endIndex = (int) ((_endElev + 180.0) * RayLoc::RAY_LOC_RES + 1);
 
   // Clear out any rays in the locations list that are overlapped by the
   // new ray

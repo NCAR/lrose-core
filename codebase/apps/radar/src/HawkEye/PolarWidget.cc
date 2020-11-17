@@ -74,15 +74,15 @@ PolarWidget::PolarWidget(QWidget* parent,
         _platform(platform),
         _fields(fields),
         _haveFilteredFields(haveFilteredFields),
-        _selectedField(0),
-        _backgroundBrush(QColor(_params.background_color)),
-        _gridRingsColor(_params.grid_and_range_ring_color),
-        _ringsEnabled(false),
-        _gridsEnabled(false),
-        _angleLinesEnabled(false),
-        _scaledLabel(ScaledLabel::DistanceEng),
-        _rubberBand(0),
-        _ringSpacing(10.0)
+  _selectedField(0),
+  _backgroundBrush(QColor(_params.background_color)),
+  _gridRingsColor(_params.grid_and_range_ring_color),
+  _ringsEnabled(false),
+  _gridsEnabled(false),
+  _angleLinesEnabled(false),
+  _scaledLabel(ScaledLabel::DistanceEng),
+  _rubberBand(0),
+  _ringSpacing(10.0)
 
 {
 
@@ -322,27 +322,27 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
 
     //-------
 
-      QPointF clickPos(e->pos());
+    QPointF clickPos(e->pos());
 
-      _mousePressX = e->x();
-      _mousePressY = e->y();
+    _mousePressX = e->x();
+    _mousePressY = e->y();
 
-      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
-      emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
+    emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
 
   } else {
 
 
-  _rubberBand->setGeometry(QRect(e->pos(), QSize()));
-  _rubberBand->show();
+    _rubberBand->setGeometry(QRect(e->pos(), QSize()));
+    _rubberBand->show();
 
-  _mousePressX = e->x();
-  _mousePressY = e->y();
+    _mousePressX = e->x();
+    _mousePressY = e->y();
 
-  _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-  _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
   }
 }
 
@@ -356,17 +356,20 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
   int worldX = (int)_zoomWorld.getXWorld(e->pos().x());
   int worldY = (int)_zoomWorld.getYWorld(e->pos().y());
 
-  if (_manager._boundaryEditorDialog->isVisible())
-  {
-  	BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
+  if (_manager._boundaryEditorDialog->isVisible()) {
 
-  	if (tool == BoundaryToolType::polygon && BoundaryPointEditor::Instance()->isAClosedPolygon() && BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY))
-			BoundaryPointEditor::Instance()->moveNearestPointTo(worldX, worldY);
-  	else if (tool == BoundaryToolType::brush)
-  		BoundaryPointEditor::Instance()->addToBrushShape(worldX, worldY);
-		update();
-		return;
-	}
+    BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
+    
+    if (tool == BoundaryToolType::polygon && 
+        BoundaryPointEditor::Instance()->isAClosedPolygon() && 
+        BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY)) {
+      BoundaryPointEditor::Instance()->moveNearestPointTo(worldX, worldY);
+    } else if (tool == BoundaryToolType::brush) {
+      BoundaryPointEditor::Instance()->addToBrushShape(worldX, worldY);
+    }
+    update();
+    return;
+  }
 
   // Zooming with the mouse
 
@@ -410,90 +413,84 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 
   if (e->button() == Qt::RightButton) {
 
-      QPointF clickPos(e->pos());
+    QPointF clickPos(e->pos());
 
-      _mousePressX = e->x();
-      _mousePressY = e->y();
+    _mousePressX = e->x();
+    _mousePressY = e->y();
 
-      emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
+    emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
 
   } else {
+    
+    QRect rgeom = _rubberBand->geometry();
 
-  QRect rgeom = _rubberBand->geometry();
+    // If the mouse hasn't moved much, assume we are clicking rather than
+    // zooming
 
-  // If the mouse hasn't moved much, assume we are clicking rather than
-  // zooming
-
-  QPointF clickPos(e->pos());
+    QPointF clickPos(e->pos());
   
-  _mouseReleaseX = clickPos.x();
-  _mouseReleaseY = clickPos.y();
+    _mouseReleaseX = clickPos.x();
+    _mouseReleaseY = clickPos.y();
 
-  // get click location in world coords
+    // get click location in world coords
 
-  if (rgeom.width() <= 20) {
+    if (rgeom.width() <= 20) {
     
-    // Emit a signal to indicate that the click location has changed
+      // Emit a signal to indicate that the click location has changed
     
-    _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-    _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+      _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+      _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
 
-    double x_km = _worldReleaseX;
-    double y_km = _worldReleaseY;
-    _pointClicked = true;
+      double x_km = _worldReleaseX;
+      double y_km = _worldReleaseY;
+      _pointClicked = true;
 
+      // get ray closest to click point
 
-    /***** testing ******
-    // QToolTip::showText(mapToGlobal(QPoint(_mouseReleaseX, _mouseReleaseY)), "louigi")  
-    QToolTip::showText(QPoint(0,0), "louigi");
+      const RadxRay *closestRay = _getClosestRay(x_km, y_km);
 
-    smartBrush(_mouseReleaseX, _mouseReleaseY);
+      // emit signal
 
-    // ***** end testing ****/
-
-    // get ray closest to click point
-
-    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-
-    // emit signal
-
-    emit locationClicked(x_km, y_km, closestRay);
+      emit locationClicked(x_km, y_km, closestRay);
   
-  } else {
-
-    // mouse moved more than 20 pixels, so a zoom occurred
+    } else {
+      
+      // mouse moved more than 20 pixels, so a zoom occurred
     
-    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
-    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+      _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+      _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
 
-    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+      _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
 
-    _setTransform(_zoomWorld.getTransform());
+      _setTransform(_zoomWorld.getTransform());
 
-    _setGridSpacing();
+      _setGridSpacing();
 
-    // enable unzoom button
+      // enable unzoom button
     
-    _manager.enableZoomButton();
+      _manager.enableZoomButton();
     
-    // Update the window in the renderers
+      // Update the window in the renderers
     
-    _refreshImages();
+      _refreshImages();
 
-  }
+    }
     
-  // hide the rubber band
+    // hide the rubber band
 
-  _rubberBand->hide();
-  update();
+    _rubberBand->hide();
+    update();
   }
 }
 
 /**************   testing ******/
-void PolarWidget::smartBrush(int xPixel, int yPixel) {
+
+void PolarWidget::smartBrush(int xPixel, int yPixel) 
+{
+
   //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
   //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
 
@@ -508,21 +505,22 @@ void PolarWidget::smartBrush(int xPixel, int yPixel) {
 
 }
 
-
-
 /*************************************************************************
  * paintEvent()
  */
 
 void PolarWidget::paintEvent(QPaintEvent *event)
 {
+
   QPainter painter(this);
 
   painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
   _drawOverlays(painter);
 
-  BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
+  //if there are no points, this does nothing
+  BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);
+
 }
 
 
@@ -584,8 +582,8 @@ void PolarWidget::_resetWorld(int width, int height)
 
 void PolarWidget::_setTransform(const QTransform &transform)
 {
-	float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
- 	BoundaryPointEditor::Instance()->setWorldScale(worldScale);
+  float worldScale = _zoomWorld.getXMaxWindow() - _zoomWorld.getXMinWindow();
+  BoundaryPointEditor::Instance()->setWorldScale(worldScale);
 
   _fullTransform = transform;
   _zoomTransform = transform;
@@ -622,6 +620,7 @@ void PolarWidget::_performRendering()
 
 void PolarWidget::informationMessage()
 {
+  
   // QMessageBox::StandardButton reply;
   // QLabel *informationLabel;
 
@@ -657,41 +656,40 @@ void PolarWidget::notImplemented()
 
 void PolarWidget::contextMenuCancel()
 {
-  //  informationMessage();
-
-  //notImplemented();                                                                                                     
+  // informationMessage();
+  // notImplemented();                                                                                                     
 }
 
 void PolarWidget::contextMenuParameterColors()
 {
   /*
-  LOG(DEBUG) << "enter";
+    LOG(DEBUG) << "enter";
 
-  //DisplayField selectedField;
+    //DisplayField selectedField;
 
-  const DisplayField &field = _manager.getSelectedField();
-  const ColorMap &colorMapForSelectedField = field.getColorMap();
-  ParameterColorView *parameterColorView = new ParameterColorView(this);
-  vector<DisplayField> displayFields = _manager.getDisplayFields();
-  DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields);
-  FieldColorController fieldColorController(parameterColorView, displayFieldModel);
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display 
-  connect(&parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-  connect(&parameterColorView, SIGNAL(changesToDisplay()), &_manager, SLOT(changesToDisplayFields()));
+    const DisplayField &field = _manager.getSelectedField();
+    const ColorMap &colorMapForSelectedField = field.getColorMap();
+    ParameterColorView *parameterColorView = new ParameterColorView(this);
+    vector<DisplayField> displayFields = _manager.getDisplayFields();
+    DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields);
+    FieldColorController fieldColorController(parameterColorView, displayFieldModel);
+    // connect some signals and slots in order to retrieve information
+    // and send changes back to display 
+    connect(&parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
+    connect(&parameterColorView, SIGNAL(changesToDisplay()), &_manager, SLOT(changesToDisplayFields()));
 
-  // TODO: move this call to the controller?
-  parameterColorView.exec();
+    // TODO: move this call to the controller?
+    parameterColorView.exec();
 
-  if(parameterColorController.Changes()) {
+    if(parameterColorController.Changes()) {
     // TODO: what are changes?  new displayField(s)?
-  }
+    }
   
-  // TODO: where to delete the ParameterColor objects & disconnect the signals and slots??
-  delete parameterColorView;
-  delete parameterColorModel;
+    // TODO: where to delete the ParameterColor objects & disconnect the signals and slots??
+    delete parameterColorView;
+    delete parameterColorModel;
 
-  LOG(DEBUG) << "exit ";
+    LOG(DEBUG) << "exit ";
   */
   informationMessage();
    

@@ -171,11 +171,12 @@ void FieldRenderer::run()
     if (*beam == NULL) {
       continue;
     }
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "Rendering beam field:" 
-           << _field.getLabel() << endl;
-      (*beam)->print(cerr);
-    }
+    // The following print can be problematic for threading
+    // if (_params.debug >= Params::DEBUG_EXTRA) {
+    //   cerr << "Rendering beam field:" 
+    //        << _field.getLabel() << endl;
+    //   (*beam)->print(cerr);
+    // }
     (*beam)->paint(_image, _transform, _fieldIndex, _useHeight, _drawInstHt);
     (*beam)->setBeingRendered(_fieldIndex, false);
   }

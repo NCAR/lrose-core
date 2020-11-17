@@ -911,10 +911,11 @@ void PolarManager::_handleRealtimeData(QTimerEvent * event)
       }
 
       if (_params.debug >= Params::DEBUG_EXTRA) {
-        cerr << "  Got a ray, time, el, az: "
+        cerr << "  Got a ray, time, el, az, nGates: "
              << DateTime::strm(ray->getTimeSecs()) << ", "
              << ray->getElevationDeg() << ", "
-             << ray->getAzimuthDeg() << endl;
+             << ray->getAzimuthDeg() << ", "
+             << ray->getNGates() << endl;
       }
 
       // update the status panel
@@ -1232,7 +1233,7 @@ void PolarManager::_plotArchiveData()
     cerr << "  No rays found" << endl;
     return;
   }
-  
+
   const vector<RadxSweep *> &sweeps = _vol.getSweeps();
   if (sweeps.size() < 1) {
     cerr << "ERROR - _plotArchiveData" << endl;
@@ -1286,6 +1287,10 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   
 {
 
+  if (ray->getNGates() < 1) {
+    return;
+  }
+
   // do we need to reconfigure the PPI?
 
   _nGates = ray->getNGates();
@@ -1332,11 +1337,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
         if (fabs(val - missingVal) < 0.0001) {
           data[igate] = -9999.0;
         } else {
-	  //<<<<<<< HEAD
           data[igate] = val;
-        
-	  //=======
-	    //data.push_back(*fdata);  // ==> We know the data value here; determine min and max of values
           if (!haveColorMap) {
             // keep track of min and max data values
 	    // just display something.  The color scale can be edited as needed, later.
@@ -1358,12 +1359,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
           }
         } // end else not missing value
       } // end for each gate
-      // fill the remainder with missing 
-      //for (int igate = nGates; igate < _nGates; igate++) {
-      //  data.push_back(-9999);
-	//>>>>>>> forVivek
-      //}
-
+      
       if (!haveColorMap) {                              
         _fields[ifield]->setColorMapRange(min, max);
         _fields[ifield]->changeColorMap(); // just change bounds on existing map
@@ -1413,7 +1409,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     _prevEl = -9999.0;
 
     // Add the beam to the display
-    
+
     _ppi->addBeam(ray, _startAz, _endAz, fieldData, _fields);
 
   }

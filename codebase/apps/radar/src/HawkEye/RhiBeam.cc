@@ -74,7 +74,7 @@ RhiBeam::RhiBeam(const Params &params,
   
   // Now calculate the vertex values to be used for all fields.  We negate
   // the y values because the display coordinate system has y increasing down.
-  
+
   _polygons.resize(_nGates);
 
   double startRangeKm = _ray->getStartRangeKm();
@@ -166,6 +166,7 @@ void RhiBeam::paint(QImage *image,
   
     painter.setBrush(*curr_brush);
     painter.drawPolygon(polygon);
+
   }
 
 }
