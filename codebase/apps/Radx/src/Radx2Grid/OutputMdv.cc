@@ -390,8 +390,8 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
 {
 
   Mdvx::coord_t projCoord = proj.getCoord();
-  if (convStrat.getGridNx() != projCoord.nx ||
-      convStrat.getGridNy() != projCoord.ny) {
+  if ((int) convStrat.getGridNx() != projCoord.nx ||
+      (int) convStrat.getGridNy() != projCoord.ny) {
     cerr << "ERROR - OutputMdv::addConvStratFields" << endl;
     cerr << "  ConvStrat grid size does not match Proj grid size" << endl;
     cerr << "  ConvStrat nx, ny: " 
@@ -418,7 +418,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              "mean_of_dbz_texture_over_height",
              "dBZ",
              Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingVal(),
+             convStrat.getMissingFl32(),
              convStrat.getMeanTexture());
   }
   
@@ -428,7 +428,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              "dbz_in_convection",
              "dBZ",
              Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingVal(),
+             convStrat.getMissingFl32(),
              convStrat.getConvectiveDbz());
   }
 
@@ -439,7 +439,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              "dbz_column_maximum",
              "dBZ",
              Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingVal(),
+             convStrat.getMissingFl32(),
              convStrat.getColMaxDbz());
     
     addField(vol, proj, vlevel2D,
@@ -447,7 +447,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              "dbz_background_mean",
              "dBZ",
              Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingVal(),
+             convStrat.getMissingFl32(),
              convStrat.getBackgroundDbz());
     
     addField(vol, proj, vlevel2D,
@@ -455,7 +455,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              "convective_radius",
              "km",
              Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingVal(),
+             convStrat.getMissingFl32(),
              convStrat.getConvRadiusKm());
     
     addField(vol, proj, vlevel2D,
@@ -463,7 +463,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              "fraction_of_texture_kernel_with_active_dbz",
              "",
              Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingVal(),
+             convStrat.getMissingFl32(),
              convStrat.getFractionActive());
 
 
