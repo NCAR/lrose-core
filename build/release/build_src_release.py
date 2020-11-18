@@ -44,7 +44,7 @@ def main():
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
-    prefixDefault = '/usr/local/lrose'
+    prefixDefault = os.path.join(homeDir, 'lrose')
 
     parser = OptionParser(usage)
     parser.add_option('--debug',
