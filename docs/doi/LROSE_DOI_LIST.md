@@ -9,7 +9,7 @@ The following are DOIs for various components of the LROSE system.
 | lrose-cedric  | [https://doi.org/10.5065/cnth-sa86](https://doi.org/10.5065/cnth-sa86) |
 | lrose-soloii  | [https://doi.org/10.5065/apfn-y595](https://doi.org/10.5065/apfn-y595) |
 | lrose-solo3   | [https://doi.org/10.5065/sv4e-7z49](https://doi.org/10.5065/sv4e-7z49) |
-| CfRadial 1.4  | [https://doi.org/10.5065/k0md-1642](https://doi.org/10.5065/k0md-1642) |
-| CfRadial 2.0  | [https://doi.org/10.5065/fy2k-x587](https://doi.org/10.5065/fy2k-x587) |
+| CfRadial 1.x  | [https://doi.org/10.5065/k0md-1642](https://doi.org/10.5065/k0md-1642) |
+| CfRadial 2.x  | [https://doi.org/10.5065/fy2k-x587](https://doi.org/10.5065/fy2k-x587) |
 
 
