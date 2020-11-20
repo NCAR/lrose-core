@@ -7,6 +7,7 @@
 #include "SpreadSheetUtils.hh"
 #include "SpreadSheetController.hh"
 #include "SpreadSheetDelegate.hh"
+//#include "CustomTableHeader.hh"
 
 #include <vector>
 
@@ -52,7 +53,7 @@ public slots:
     void updateColor(QTableWidgetItem *item);
     void updateTextEdit(QTableWidgetItem *item);
     void returnPressed();
-    void acceptFormulaInput();
+    //void acceptFormulaInput();
     void cancelFormulaInput();
     void clear();
     void showAbout();
@@ -73,7 +74,10 @@ public slots:
   void fieldNamesSelected(vector<string> fieldNames);
   void fieldNamesProvided(vector<string> fieldNames);
   void fieldDataSent(vector<float> *data, int useless, int c);
-  void azimuthForRaySent(float azimuth, int offsetFromClosestRay);
+  void azimuthForRaySent(float azimuth, int offsetFromClosestRay,
+    int fieldIdx, string fieldName);
+  void setHeader(int baseColumn, int fieldIdx, float azimuth,
+    string fieldName);
 
   void applyChanges();
   void applyEdits();
@@ -88,7 +92,7 @@ signals:
 
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
-  void needAzimuthForRay(int offsetFromClosestRay);
+  void needAzimuthForRay(int offsetFromClosestRay, int fieldIdx, string fieldName);
   void applyVolumeEdits();
   void signalRayAzimuthChange(float rayAzimuth, float elevation);
 
@@ -97,7 +101,7 @@ protected:
     void setupContents();
     void setupMenuBar();
     void createActions();
-    void addVariableToSpreadSheet(QString name, QJSValue value);
+    //void addVariableToSpreadSheet(QString name, QJSValue value);
 
 
 
@@ -152,11 +156,14 @@ private:
 
   QPushButton *applyEditsButton;
   QLineEdit *rayLineEdit;
+  QLineEdit *raysLineEdit;
 
     QAction *printAction;
 
     QLabel *cellLabel;
     QTableWidget *table;
+    //CustomTableHeader *h;
+
     TextEdit *formulaInput;
     //QTextEdit *formulaInput;
   // SpreadSheetDelegate *formulaInput;

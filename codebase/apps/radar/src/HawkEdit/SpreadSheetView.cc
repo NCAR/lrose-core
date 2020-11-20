@@ -15,6 +15,7 @@
 #include "SpreadSheetItem.hh"
 //#include "SoloFunctions.hh"
 #include "DataField.hh"
+#include "CustomTableHeader.hh"
 
 
 using namespace std;
@@ -49,7 +50,7 @@ Q_DECLARE_METATYPE(QVector<double>)
   rows = 200;
 
   _nFieldsToDisplay = 1;
-  _nRays = 3;
+  _nRays = 1;
 
   //_volumeData = vol;
 
@@ -133,8 +134,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     echoLayout->addWidget(new QLabel(tr("Ray")), 1, 2);
     echoLayout->addWidget(rayLineEdit, 1, 3);
 
-    QLineEdit *raysLineEdit = new QLineEdit;
-    raysLineEdit->setPlaceholderText("5");
+    raysLineEdit = new QLineEdit;
+    raysLineEdit->setPlaceholderText(QString::number(_nRays));
     echoLayout->addWidget(new QLabel(tr("Rays")), 2, 2);
     echoLayout->addWidget(raysLineEdit, 2, 3);
 
@@ -238,7 +239,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     //okFont.setBold(true);
     //okFont.setPointSize(actionFontSize);
     //okAct->setFont(okFont);
-    connect(okAct, &QAction::triggered, this, &SpreadSheetView::acceptFormulaInput);
+    //connect(okAct, &QAction::triggered, this, &SpreadSheetView::acceptFormulaInput);
     toolBar->addAction(okAct);
 
     QAction *applyAct = new QAction(tr("&Apply"), this);
@@ -273,11 +274,15 @@ Q_DECLARE_METATYPE(QVector<double>)
     // ============
     table = new QTableWidget(rows, cols, this);
     QHeaderView* header = table->horizontalHeader();
+    //-----  custom header ... 
+    // QTableWidget *tw = new QTableWidget(5, 5);
+    //CustomTableHeader *h = new CustomTableHeader(table->horizontalHeader());
+    //CustomTableHeader *h = new CustomTableHeader(header);
+    //----
+
     header->setSectionResizeMode(QHeaderView::Interactive);
     // table->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
     // set the column headers to the data fields
-    
-    
    
     for (int c=0; c<cols; c++) {
       QString the_name(" ");
@@ -541,7 +546,7 @@ void SpreadSheetView::applyChanges()
   // QJSEngine to the model (via the controller?)
   emit applyVolumeEdits();
 }
-
+/*
 void SpreadSheetView::acceptFormulaInput()
 {
     QString text = formulaInput->getText();
@@ -609,6 +614,7 @@ void SpreadSheetView::acceptFormulaInput()
 	    addVariableToSpreadSheet(it2.name(), it2.value());
 	  }
 	}
+    */
 	// ======
         /*
 	int row = table->currentRow();
@@ -622,6 +628,7 @@ void SpreadSheetView::acceptFormulaInput()
 	  item->setData(Qt::EditRole, result.toString()); // text);
         }
         */
+/*
 	table->viewport()->update();
       }
     } catch (const std::exception& ex) {
@@ -633,6 +640,7 @@ void SpreadSheetView::acceptFormulaInput()
     }
 
 }
+*/
 
 void SpreadSheetView::cancelFormulaInput()
 {
@@ -1043,7 +1051,7 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, 
       // 752019 for (std::size_t r=0; r<data.size(); r++) {
         //    sprintf(formattedData, format, data[0]);
         sprintf(formattedData, "%g", *dp); // data->at(r));
-        LOG(DEBUG) << "setting " << r << "," << c2 << "= " << formattedData; 
+        // LOG(DEBUG) << "setting " << r << "," << c2 << "= " << formattedData; 
         table->setItem(r, c2, new SpreadSheetItem(formattedData));
         fieldArray.setProperty(r, *dp); // data.at(r));
         dp++;
@@ -1054,30 +1062,57 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, 
 
 }
 
-void SpreadSheetView::azimuthForRaySent(float azimuth, int offsetFromClosestRay) {
-      string format = "%g";
-      char formattedData[250];
+// baseColumn is the first column of the fields for this ray
+//  az 0    az 1     az 2
+// VEL RF  VEL RF   VEL RF
+//         ^  base Column
+// 
+void SpreadSheetView::setHeader(int baseColumn, int fieldIdx, float azimuth,
+    string fieldName) {
 
-      sprintf(formattedData, "%g", azimuth); 
+    char formattedData[250];
+    sprintf(formattedData, "%6.2f\n%s", azimuth, fieldName.c_str()); 
+    cout << "formatted header ..." << endl; 
+    cout << formattedData << endl;
+
+    int column = baseColumn + fieldIdx;
+    table->setHorizontalHeaderItem(column, new QTableWidgetItem(formattedData));
+}
+
+// TODO: does this become setHeader?
+void SpreadSheetView::azimuthForRaySent(float azimuth, int offsetFromClosestRay,
+    int fieldIdx, string fieldName) {
+
+      cout << "--------" << endl;
 
       int nthClosest = offsetFromClosestRay + (_nRays/2);
       cout << "nthClosest = " << nthClosest << endl;
-      int c2 = nthClosest * _nFieldsToDisplay;
-      cout << "c2 = " << c2 << endl;
-      //------
-      //QTableWidgetItem *headerItem = table->horizontalHeaderItem(c);
-      int r = 0;
-      int rowSpan = 1;
-      int columnSpan = _nFieldsToDisplay;
-      table->setSpan(r, c2, rowSpan, columnSpan);
-      table->setItem(r, c2, new SpreadSheetItem(formattedData));
+      int baseColumn = nthClosest * _nFieldsToDisplay;
+      cout << "baseColumn = " << baseColumn << endl;
+
+      setHeader(baseColumn, fieldIdx, azimuth, fieldName);
+      //table->setHorizontalHeaderItem(5, new QTableWidgetItem("ha ha"));
+
+      cout << "++++++++++" << endl;
 }
 
 void SpreadSheetView::applyEdits() {
+  bool ok;
+
+  QString nRaysToDisplay = raysLineEdit->text();
+  int newNRays = nRaysToDisplay.toInt(&ok);
+
+  if (ok) {
+    _nRays = newNRays;
+    // TODO: what to do when the number of rays to display changes?
+  } else {
+    criticalMessage("number of rays to display must be between 0 to 10 rays");
+  }
+
   // get a new azimuth if needed
   QString rayAz = rayLineEdit->text();
   LOG(DEBUG) << "ray az entered " << rayAz.toStdString();
-  bool ok;
+
   float currentRayAzimuth = rayAz.toFloat(&ok);
 
   if (ok) {
@@ -1128,11 +1163,13 @@ void SpreadSheetView::newAzimuth(float azimuth) {
     setTheWindowTitle(azimuth);
 }
 
+
+
 // display the fields selected and their data
 void SpreadSheetView::fieldNamesSelected(vector<string> fieldNames) {
 
   int useless = 0; // this becomes iterator over nRays
-  table->clearContents();
+  table->clear(); // clearContents(); 
 
   // fill everything that needs the fieldNames ...
     _nFieldsToDisplay = fieldNames.size();
@@ -1141,20 +1178,24 @@ void SpreadSheetView::fieldNamesSelected(vector<string> fieldNames) {
     LOG(DEBUG) << "there are " << fieldNames.size() << " field namess";
     // rayIdx goes from 0 to nRays; map to -nRays/2 ... 0 ... nRays/2
     for (int rayIdx= - _nRays/2; rayIdx <= _nRays/2; rayIdx++) {
-        int c = 0;
-        emit needAzimuthForRay(rayIdx);
+        int fieldIdx = 0;
 
         vector<string>::iterator it; 
         for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
           QString the_name(QString::fromStdString(*it));
           LOG(DEBUG) << *it;
           for (int i=0; i<_nRays; i++) {
-            table->setHorizontalHeaderItem(c + (i*_nFieldsToDisplay), 
-                new QTableWidgetItem(the_name));
+            // this ultimately calls setHeader; we need to send the info needed for setHeader
+            emit needAzimuthForRay(rayIdx, fieldIdx, *it);
+            // needAzimuthForRay(int offsetFromClosest, 
+
+            //table->setHorizontalHeaderItem(c + (i*_nFieldsToDisplay), 
+             //   new QTableWidgetItem(the_name));
             // TODO: what about setHorizontalHeaderLabels(const QStringList &labels) instead? would it be faster?
           }
-          emit needDataForField(*it, rayIdx, c);
-          c += 1;
+          emit needDataForField(*it, rayIdx, fieldIdx);
+          //emit needAzimuthForRay(rayIdx);     
+          fieldIdx += 1;
         }
     }
     // test: adding some missing code
@@ -1244,7 +1285,7 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
     LOG(DEBUG) << "exit";
 }
 
-
+/*
 void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
 
   LOG(DEBUG) << "adding variable to spreadsheet " << name.toStdString();
@@ -1269,7 +1310,7 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
   if (value.isArray()) {
     //qDebug() << "variable isArray " << name << endl;
     LOG(DEBUG) << "variable isArray " << name.toStdString();
-
+*/
     /*
   for(it = value.begin(); it != value.end(); it++) {
     QString the_name(QString::fromStdString(*it));
@@ -1285,6 +1326,7 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
     }
     c += 1;
     } */
+/*
   }
   if (value.isBool()) {
     //qDebug() << "variable isBool " << name << endl;
@@ -1367,6 +1409,7 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
   }
 
 }
+*/
 
 void SpreadSheetView::criticalMessage(std::string message)
 {

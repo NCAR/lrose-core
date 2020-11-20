@@ -45,7 +45,7 @@ signals:
 public slots:
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
-  void needAzimuthForRay(int offsetFromClosest);
+  void needAzimuthForRay(int offsetFromClosest, int fieldIdx, string fieldName);
   void getVolumeChanges();
   void switchRay(float azimuth, float elevation);
   

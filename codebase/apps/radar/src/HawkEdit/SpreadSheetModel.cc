@@ -54,6 +54,8 @@ float SpreadSheetModel::getAzimuthForRay(int offsetFromClosest)
   } else {
     vector<RadxRay *> rays = _vol->getRays();
     size_t idx = (_closestRayIdx + offsetFromClosest) % rays.size();
+    cout << "closestRayIdx=" << _closestRayIdx << " offsetFromClosest=" << offsetFromClosest 
+      << " idx=" << idx << endl;
     RadxRay *ray = rays.at(idx);
     azimuth = ray->getAzimuthDeg(); 
   }
@@ -218,6 +220,7 @@ void SpreadSheetModel::findClosestRay(float azimuth, float elevation) {
   LOG(DEBUG) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
   closestRayToEdit->print(cout); 
   _closestRay = closestRayToEdit;
+  _closestRayIdx = idx;
 }
 
 
