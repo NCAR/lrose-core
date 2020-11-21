@@ -191,7 +191,8 @@ void SpreadSheetModel::findClosestRay(float azimuth, float elevation) {
   // find that ray
   bool foundIt = false;
   double minDiff = 1.0e99;
-  double delta = 0.01;
+  int minIdx = 0;
+  double delta = 0.1;  // TODO set this to the min diff between elevations/sweeps
   RadxRay *closestRayToEdit = NULL;
   vector<RadxRay *>::iterator r;
   r=rays.begin();
@@ -207,6 +208,7 @@ void SpreadSheetModel::findClosestRay(float azimuth, float elevation) {
         foundIt = true;
         closestRayToEdit = *r;
         minDiff = diff;
+        minIdx = idx;
       }
     }
     r += 1;
@@ -217,10 +219,10 @@ void SpreadSheetModel::findClosestRay(float azimuth, float elevation) {
     // errorMessage("ExamineEdit Error", "couldn't find closest ray");
   }
 
-  LOG(DEBUG) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
+  LOG(DEBUG) << "Found closest ray: index = " << minIdx << " min diff = " << minDiff; // " pointer = " << closestRayToEdit;
   closestRayToEdit->print(cout); 
   _closestRay = closestRayToEdit;
-  _closestRayIdx = idx;
+  _closestRayIdx = minIdx;
 }
 
 
