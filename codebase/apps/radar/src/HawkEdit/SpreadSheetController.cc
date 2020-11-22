@@ -62,8 +62,8 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
   connect(_currentView, SIGNAL(needFieldNames()), this, SLOT(needFieldNames()));
   connect(_currentView, SIGNAL(needDataForField(string, int, int)), 
 	  this, SLOT(needDataForField(string, int, int)));
-  connect(_currentView, SIGNAL(needAzimuthForRay(int)), 
-    this, SLOT(needAzimuthForRay(int)));
+  connect(_currentView, SIGNAL(needAzimuthForRay(int, int, string)), 
+    this, SLOT(needAzimuthForRay(int, int, string)));
   connect(_currentView, SIGNAL(applyVolumeEdits()), 
 	  this, SLOT(getVolumeChanges()));
 
@@ -150,9 +150,12 @@ void  SpreadSheetController::needDataForField(string fieldName, int offsetFromCl
   _currentView->fieldDataSent(getData(fieldName, offsetFromClosest), offsetFromClosest, c);
 }
 
-void  SpreadSheetController::needAzimuthForRay(int offsetFromClosest) {
+void  SpreadSheetController::needAzimuthForRay(int offsetFromClosest, 
+  int fieldIdx, string fieldName) {
 
-  _currentView->azimuthForRaySent(getAzimuthForRay(offsetFromClosest), offsetFromClosest);
+//azimuthForRaySent(float azimuth, int offsetFromClosestRay, int fieldIdx, string fieldName)
+  _currentView->azimuthForRaySent(getAzimuthForRay(offsetFromClosest), offsetFromClosest,
+    fieldIdx, fieldName);
 }
 
 void SpreadSheetController::getVolumeChanges() {

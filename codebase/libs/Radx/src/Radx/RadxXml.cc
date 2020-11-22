@@ -1137,7 +1137,10 @@ void RadxXml::attrDecode(const string &attrStr,
 
     int nameLen = nameEnd - nameStart;
     if (nameLen < 1) {
-      return;
+      // 0-length name
+      size_t spacePos = attrStr.find('=', nameEnd);
+      nameStart = spacePos;
+      continue;
     }
     string name = attrStr.substr(nameStart, nameLen);
 
@@ -1159,10 +1162,10 @@ void RadxXml::attrDecode(const string &attrStr,
     // set value
 
     int valueLen = endQuotePos - startQuotePos - 1;
-    if (valueLen < 1) {
-      return;
+    string val = "";
+    if (valueLen > 0) {
+      val = attrStr.substr(startQuotePos + 1, valueLen);
     }
-    string val = attrStr.substr(startQuotePos + 1, valueLen);
 
     // add attribute
 
