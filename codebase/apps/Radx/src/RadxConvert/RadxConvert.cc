@@ -102,7 +102,8 @@ RadxConvert::RadxConvert(int argc, char **argv)
 
   if (_params.apply_variable_transforms) {
     for (int ii = 0; ii < _params.variable_transform_fields_n; ii++) {
-      const Params::variable_transform_field_t &tf = _params._variable_transform_fields[ii];
+      const Params::variable_transform_field_t &tf =
+        _params._variable_transform_fields[ii];
       VarTransform *trans = new VarTransform(tf.input_field_name,
                                              tf.control,
                                              tf.xml_tag,
