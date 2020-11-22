@@ -681,14 +681,7 @@ int NexradRadxFile::readFromPath(const string &path,
     ordered.push_back("ZDR");
     ordered.push_back("PHI");
     ordered.push_back("RHO");
-    ordered.push_back("REF-s0");
-    ordered.push_back("REF-s1");
-    ordered.push_back("REF-s2");
-    ordered.push_back("REF-s3");
-    ordered.push_back("REF-s4");
-    ordered.push_back("REF-s5");
-    ordered.push_back("REF-s6");
-    ordered.push_back("REF-s7");
+    ordered.push_back("PURPLE_HAZE");
   }
   _readVol->reorderFieldsByName(ordered);
 
@@ -1525,6 +1518,7 @@ void NexradRadxFile::_handleFieldType31(RadxRay *ray,
   string units;
   string standard_name;
   string long_name;
+  bool isVel = false;
   if (fieldName == "REF") {
     units = "dBZ";
     standard_name = "equivalent_reflectivity_factor";
@@ -1533,6 +1527,7 @@ void NexradRadxFile::_handleFieldType31(RadxRay *ray,
     units = "m/s";
     standard_name = "radial_velocity_of_scatterers_away_from_instrument";
     long_name = "radial_velocity";
+    isVel = true;
   } else if (fieldName == "SW") {
     units = "m/s";
     standard_name = "doppler_spectrum_width";
@@ -1590,6 +1585,7 @@ void NexradRadxFile::_handleFieldType31(RadxRay *ray,
   int nGatesOut = nGatesIn;
   vector<Radx::si08> sdata08;
   vector<Radx::si16> sdata16;
+  RadxField *purpleHaze = NULL;
   if (byteWidth == 2) {
     vector<Radx::ui16> udata16;
     Radx::ui16 *bdata = (Radx::ui16 *) (msgStart + dataOffset);
@@ -1607,6 +1603,10 @@ void NexradRadxFile::_handleFieldType31(RadxRay *ray,
     }
     _loadSignedData(udata08, sdata08, doGateInterp);
     nGatesOut = sdata08.size();
+    if (isVel) {
+      // purple haze indicated gates with censored vel
+      purpleHaze = _createPurpleHaze(udata08, startRangeKm, gateSpacingKm);
+    }
   }
 
   double scaleNexrad = fieldHdr.scale;
@@ -1621,7 +1621,7 @@ void NexradRadxFile::_handleFieldType31(RadxRay *ray,
 
     double scaleRadx = 1.0 / scaleNexrad;
     double offsetRadx = (128.0 - offsetNexrad) / scaleNexrad;
-
+    
     field->setTypeSi08(Radx::missingSi08, scaleRadx, offsetRadx);
     field->addDataSi08(nGatesOut, sdata08.data());
 
@@ -1645,6 +1645,9 @@ void NexradRadxFile::_handleFieldType31(RadxRay *ray,
 
   ray->setRangeGeom(startRangeKm, gateSpacingKm);
   ray->addField(field);
+  if (purpleHaze != NULL) {
+    ray->addField(purpleHaze);
+  }
 
   if (_verbose) {
     double maxRange = startRangeKm + nGatesOut * gateSpacingKm;
@@ -3949,3 +3952,33 @@ void NexradRadxFile::_interp1kmGates(int nGates,
 
 }
 
+////////////////////////////////////////////////
+// create purple haze field
+// this indicates gates with censored velocity
+
+RadxField *NexradRadxFile::_createPurpleHaze(const vector<Radx::ui08> &udata08,
+                                             double startRangeKm,
+                                             double gateSpacingKm)
+
+{
+
+  RadxField *purp = new RadxField("PURPLE_HAZE", "");
+  purp->setLongName("vel_censored_flag_aka_purple_haze");
+  purp->setStandardName("vel_censored_flag");
+  purp->setComment("1 = censored");
+  purp->setRangeGeom(startRangeKm, gateSpacingKm);
+  purp->setTypeSi08(-127, 1, 0);
+  
+  vector<Radx::si08> haze;
+  for (size_t ii = 0; ii < udata08.size(); ii++) {
+    if (udata08[ii] == 1) {
+      haze.push_back(1);
+    } else {
+      haze.push_back(-127);
+    }
+  }
+  purp->addDataSi08(udata08.size(), haze.data());
+
+  return purp;
+  
+}

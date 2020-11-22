@@ -431,6 +431,10 @@ protected:
   void _interp1kmGates(int nGates,
                        Radx::si16 *idata);
 
+  RadxField *_createPurpleHaze(const vector<Radx::ui08> &udata08,
+                               double startRangeKm,
+                               double gateSpacingKm);
+
 private:
 
 };
