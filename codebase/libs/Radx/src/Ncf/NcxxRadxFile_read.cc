@@ -752,7 +752,7 @@ int NcxxRadxFile::_readDimensions()
 
     _sweepDim = _file.getDim(SWEEP);
 
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
 
     _addErrStr("ERROR - NcxxRadxFile::readDimensions");
     _addErrStr("  exception: ", e.what());
@@ -764,7 +764,7 @@ int NcxxRadxFile::_readDimensions()
 
   try {
     _calDim = _file.getDim(R_CALIB);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _calDim.setNull();
   }
 
@@ -1124,21 +1124,21 @@ int NcxxRadxFile::_readScalarVariables()
       string pstring;
       _instrumentTypeVar = _file.readCharStringVar(INSTRUMENT_TYPE, pstring);
       _instrumentType = Radx::instrumentTypeFromStr(pstring);
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
     }
 
     try {
       string pstring;
       _platformTypeVar = _file.readCharStringVar(PLATFORM_TYPE, pstring);
       _platformType = Radx::platformTypeFromStr(pstring);
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
     }
 
     try {
       string pstring;
       _primaryAxisVar = _file.readCharStringVar(PRIMARY_AXIS, pstring);
       _primaryAxis = Radx::primaryAxisFromStr(pstring);
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
     }
     
     if (!_file.getVar(STATUS_XML).isNull()) {
@@ -1146,7 +1146,7 @@ int NcxxRadxFile::_readScalarVariables()
         string pstring;
         _statusXmlVar = _file.readCharStringVar(STATUS_XML, pstring);
         _statusXml = pstring;
-      } catch (NcxxException e) {
+      } catch (NcxxException &e) {
       }
     }
 
@@ -1186,7 +1186,7 @@ int NcxxRadxFile::_readScalarVariables()
       
     }
 
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _addErrStr("ERROR - NcxxRadxFile::_readScalarVariables");
     _addErrStr("  exception: ", e.what());
     return -1;
@@ -1261,7 +1261,7 @@ int NcxxRadxFile::_readCorrectionVariables()
     _tiltCorrVar = _file.readDoubleVar(TILT_CORRECTION, val, 0);
     _cfactors.setTiltCorr(val);
 
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
   }
 
   return 0;

@@ -392,21 +392,21 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   
   try {
     _addGlobalAttributes();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     cerr << _errStr << endl;
     return _closeOnError("_addGlobalAttributes");
   }
 
   try {
     _addRootDimensions();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     cerr << _errStr << endl;
     return _closeOnError("_addRootDimensions");
   }
 
   try {
     _addRootScalarVariables();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     cerr << _errStr << endl;
     return _closeOnError("_addRootScalarVariables");
   }
@@ -414,14 +414,14 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
     try {
       _addRadarParameters();
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
       cerr << _errStr << endl;
       return _closeOnError("_addRadarParameters");
     }
   } else {
     try {
       _addLidarParameters();
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
       cerr << _errStr << endl;
       return _closeOnError("_addLidarParameters");
     }
@@ -429,7 +429,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
 
   try {
     _addRadarCalibration();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     cerr << _errStr << endl;
     return _closeOnError("_addRadarCalibration");
   }
@@ -437,7 +437,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
   if (_correctionsActive) {
     try {
       _addGeorefCorrections();
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
       cerr << _errStr << endl;
       return _closeOnError("_addGeorefCorrections");
     }
@@ -445,14 +445,14 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
 
   try {
     _addLocation();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     cerr << _errStr << endl;
     return _closeOnError("_addLocation");
   }
 
   try {
     _addProjection();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     cerr << _errStr << endl;
     return _closeOnError("_addProjection");
   }
@@ -461,7 +461,7 @@ int Cf2RadxFile::writeToPath(const RadxVol &vol,
 
   try {
     _addSweeps();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     cerr << _errStr << endl;
     return _closeOnError("_addSweeps");
   }

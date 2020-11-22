@@ -1700,7 +1700,7 @@ int LeoCf2RadxFile::_readPath(const string &path, size_t pathNum)
   /*
   try {
     _readSweepsMetaAsInFile();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _addErrStr("ERROR - LeoCf2RadxFile::_readPath()");
     _addErrStr("  path: ", path);
     _addErrStr("  exception: ", e.what());
@@ -1718,7 +1718,7 @@ int LeoCf2RadxFile::_readPath(const string &path, size_t pathNum)
   if (_readTimesOnly) {
     try {
       _readTimes();
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
       return -1;
     }
     return 0;
@@ -1732,7 +1732,7 @@ int LeoCf2RadxFile::_readPath(const string &path, size_t pathNum)
     
     try {
       _readGlobalAttributes();
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
       _addErrStr("ERROR - LeoCf2RadxFile::_readPath()");
       _addErrStr("  reading global attributes, path: ", path);
       _addErrStr("  exception: ", e.what());
@@ -1743,7 +1743,7 @@ int LeoCf2RadxFile::_readPath(const string &path, size_t pathNum)
     
     try {
       _readRootScalarVariables();
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
       _addErrStr("ERROR - LeoCf2RadxFile::_readPath()");
       _addErrStr("  reading scalar variables, path: ", path);
       _addErrStr("  exception: ", e.what());
@@ -1780,7 +1780,7 @@ int LeoCf2RadxFile::_readPath(const string &path, size_t pathNum)
   
   try {
     _readTimes();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     return -1;
   }
 
@@ -1788,7 +1788,7 @@ int LeoCf2RadxFile::_readPath(const string &path, size_t pathNum)
   
   try {
     _readSweeps();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _addErrStr("ERROR - LeoCf2RadxFile::_readPath()");
     _addErrStr("  reading sweeps and their fields, path: ", path);
     _addErrStr("  exception: ", e.what());
@@ -2150,7 +2150,7 @@ int LeoCf2RadxFile::_appendSweepInfo(const string &path)
 
   try {
     _readSweepsMetaAsInFile();
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _addErrStr("ERROR - LeoCf2RadxFile::_appendSweepInfo");
     _addErrStr("  path: ", path);
     _addErrStr(e.what());
@@ -2196,7 +2196,7 @@ void LeoCf2RadxFile::_readRootDimensions()
   _sweepDim.setNull();
   try {
     _sweepDim = _file.getDim(SWEEP);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     NcxxErrStr err;
     err.addErrStr("ERROR - LeoCf2RadxFile::readRootDimensions");
     err.addErrStr("  Cannot find sweep dimension");
@@ -2530,7 +2530,7 @@ void LeoCf2RadxFile::_readSweepsMetaAsInFile()
   {
     try {
       _read1DVar(_file, _sweepDim, SWEEP_GROUP_NAME, _sweepGroupNames);
-    } catch (NcxxException e) {
+    } catch (NcxxException &e) {
       NcxxErrStr err;
       err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepsMetaAsInFile");
       err.addErrStr("  Cannot read var, name", SWEEP_GROUP_NAME);
@@ -2611,7 +2611,7 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
       sweep->setFixedAngleDeg(val);
       _fixedAngleFound = true;
     }
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
   }
   
   // target scan rate
@@ -2785,7 +2785,7 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
   bool required = true;
   try {
     _file.readIntVar(VOLUME_NUMBER, _volumeNumber, Radx::missingMetaInt, !required);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _volumeNumber = 0;
   }
 
@@ -2793,7 +2793,7 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
     string pstring;
     _file.readScalarStringVar(INSTRUMENT_TYPE, pstring);
     _instrumentType = Radx::instrumentTypeFromStr(pstring);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
   }
 
@@ -2801,7 +2801,7 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
     string pstring;
     _file.readScalarStringVar(PLATFORM_TYPE, pstring);
     _platformType = Radx::platformTypeFromStr(pstring);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _platformType = Radx::PLATFORM_TYPE_FIXED;
   }
   
@@ -2809,7 +2809,7 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
     string pstring;
     _file.readScalarStringVar(PRIMARY_AXIS, pstring);
     _primaryAxis = Radx::primaryAxisFromStr(pstring);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _primaryAxis = Radx::PRIMARY_AXIS_Z;
   }
   
@@ -2817,7 +2817,7 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
     string pstring;
     _file.readScalarStringVar(STATUS_XML, pstring);
     _statusXml = pstring;
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     _statusXml.clear();
   }
   
@@ -2978,7 +2978,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _file.readDoubleVar(LATITUDE, _latitude, Radx::missingFl64);
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      _latitude = 0.0;
      cerr << "WARNING - LeoCf2RadxFile::_readLocation" << endl;
      cerr << "  No latitude variable" << endl;
@@ -2989,7 +2989,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _file.readDoubleVar(LONGITUDE, _longitude, Radx::missingFl64);
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      _longitude = 0.0;
      cerr << "WARNING - LeoCf2RadxFile::_readLocation" << endl;
      cerr << "  No longitude variable" << endl;
@@ -3000,7 +3000,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _file.readDoubleVar(ALTITUDE, _altitudeM, Radx::missingFl64);
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      _altitudeM = 0.0;
      cerr << "WARNING - LeoCf2RadxFile::_readLocation" << endl;
      cerr << "  No altitude variable" << endl;
@@ -3011,7 +3011,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _file.readDoubleVar(ALTITUDE_AGL, _altitudeAglM, Radx::missingFl64);
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      _altitudeAglM = 0.0;
    }
 
@@ -3078,7 +3078,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      time_t ctime;
      _readCalTime(group, dim, CALIBRATION_TIME, index, ctime);
      cal.setCalibTime(ctime);
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      NcxxErrStr err;
      err.addErrStr("ERROR - LeoCf2RadxFile::_readRcal");
      err.addErrStr("  Cannot read cal time");
@@ -3093,7 +3093,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      if (width > 0) {
        cal.setPulseWidthUsec(width * 1.0e6);
      }
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      NcxxErrStr err;
      err.addErrStr("ERROR - LeoCf2RadxFile::_readRcal");
      err.addErrStr("  Cannot read pulse width");
@@ -3108,7 +3108,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      if (gain > -9000) {
        cal.setReceiverGainDbHc(gain);
      }
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      NcxxErrStr err;
      err.addErrStr("ERROR - LeoCf2RadxFile::_readRcal");
      err.addErrStr("  Cannot read receiver gain");
@@ -3252,7 +3252,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      _readCalVar(group, dim, RECEIVER_SLOPE_VX, index, val);
      cal.setReceiverSlopeDbVx(val);
 
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
    }
 
  }
@@ -3422,7 +3422,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      if (_timeDimSweep.isNull()) {
        throw NcxxException("cannot read time for sweep", __FILE__, __LINE__);
      }
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      err.addErrStr("  ERROR - no time dimension");
      err.addErrStr("  exception: ", e.what());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
@@ -3441,7 +3441,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
        if (_rangeDimSweep.isNull())
 	 cout << "cannot read gate_index for sweep" << endl;
      }
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      err.addErrStr("  ERROR - no gate_index dimension");
      err.addErrStr("  exception: ", e.what());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
@@ -3452,7 +3452,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    _sweepTimes.clear();
    try {
      _readSweepTimes(_sweepGroup, _sweepTimes);
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      err.addErrStr("  ERROR reading times array");
      err.addErrStr("  exception: ", e.what());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
@@ -3467,7 +3467,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
      } else { // rhi or ppi mode
        _readSweepRange(_sweepGroup, _rangeDimSweep, _sweepRangeKm);
      }
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      err.addErrStr("  ERROR reading range table");
      err.addErrStr("  exception: ", e.what());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
@@ -3477,7 +3477,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _readRayVariables();
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      err.addErrStr("  ERROR reading ray variables");
      err.addErrStr("  exception: ", e.what());
      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
@@ -3487,7 +3487,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _readGeorefVariables();
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
    }
 
    if (_readMetadataOnly) {
