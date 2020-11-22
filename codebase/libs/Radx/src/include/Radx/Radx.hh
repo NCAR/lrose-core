@@ -574,6 +574,12 @@ public:
   
   static string makeString(const char *text, int len);
   
+  // Smart copy of string into specified location.
+  // Generally used to set headers with fixed-length strings.
+  // If strlen is equal to or exceeds destlen, omit trailing null.
+  
+  static void copyString(char *dest, const string &src, size_t destLen);
+
   /// Safely print char text.
   /// Ensure null termination.
   
