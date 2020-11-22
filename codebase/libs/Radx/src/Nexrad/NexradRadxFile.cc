@@ -640,9 +640,7 @@ int NexradRadxFile::readFromPath(const string &path,
     _computeFixedAngles();
   }
 
-  // copy DBZ from long range to short range sweeps for split cuts
-
-  // _copyDbzFromLongRangeSweeps();
+  // combine fields from sweeps as appropriate
 
   if (_readPreserveSweeps) {
 
@@ -3055,7 +3053,7 @@ int NexradRadxFile::_writeMsg31(const RadxVol &writeVol,
   NexradData::message_31_vol_t vol;
   memset(&vol, 0, sizeof(vol));
   char blockText[32];
-  strncpy(blockText, "RVOL", 4);
+  memcpy(blockText, "RVOL", 4);
   memcpy(&vol, blockText, 4);
   vol.block_size = sizeof(vol);
   vol.ver_major = 1;
@@ -3099,7 +3097,7 @@ int NexradRadxFile::_writeMsg31(const RadxVol &writeVol,
 
   NexradData::message_31_elev_t elev;
   memset(&elev, 0, sizeof(elev));
-  strncpy(blockText, "RELV", 4);
+  memcpy(blockText, "RELV", 4);
   memcpy(&elev, blockText, 4);
   elev.block_size = sizeof(elev);
   elev.dbz0 = dbz0;
@@ -3112,7 +3110,7 @@ int NexradRadxFile::_writeMsg31(const RadxVol &writeVol,
 
   NexradData::message_31_radial_t radial;
   memset(&radial, 0, sizeof(radial));
-  strncpy(blockText, "RRAD", 4);
+  memcpy(blockText, "RRAD", 4);
   memcpy(&radial, blockText, 4);
   radial.block_size = sizeof(radial);
 
