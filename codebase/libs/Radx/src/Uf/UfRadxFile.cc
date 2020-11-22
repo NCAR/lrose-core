@@ -1773,8 +1773,8 @@ int UfRadxFile::_loadWriteRecordFromRay(const RadxVol &vol, int rayNumber)
 
   // Copy radarName and siteName
 
-  strncpy(_manHdr.radar_name, vol.getInstrumentName().c_str(), 8);
-  strncpy(_manHdr.site_name, vol.getSiteName().c_str(), 8);
+  Radx::copyString(_manHdr.radar_name, vol.getInstrumentName(), 8);
+  Radx::copyString(_manHdr.site_name, vol.getSiteName(), 8);
 
   // record latitude:
   // check for location override,
@@ -1902,7 +1902,7 @@ int UfRadxFile::_loadWriteRecordFromRay(const RadxVol &vol, int rayNumber)
   
   // Facility
 
-  strncpy(_manHdr.gen_facility, vol.getSource().c_str(), 8);
+  Radx::copyString(_manHdr.gen_facility, vol.getSource(), 8);
 
   // missing data value
 
@@ -1910,8 +1910,8 @@ int UfRadxFile::_loadWriteRecordFromRay(const RadxVol &vol, int rayNumber)
   
   // Fill optional header
   
-  strncpy(_optHdr.project_name, vol.getTitle().c_str(), 8);
-  strncpy(_optHdr.tape_name, vol.getReferences().c_str(), 8);
+  Radx::copyString(_optHdr.project_name, vol.getTitle(), 8);
+  Radx::copyString(_optHdr.tape_name, vol.getReferences(), 8);
   RadxTime volStartTime(vol.getStartTimeSecs());
   _optHdr.baseline_azimuth = -99 * 64;
   _optHdr.baseline_elevation = -99 * 64;

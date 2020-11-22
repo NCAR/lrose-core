@@ -312,17 +312,17 @@ int NsslMrdRadxFile::writeToPath(const RadxVol &vol,
     hdr.range_delay = (int) (ray->getStartRangeKm() * 1000.0 + 0.5);
 
     if (storm_name.size() > 0) {
-      strncpy(hdr.storm_name, storm_name.c_str(), 12);
+      Radx::copyString(hdr.storm_name, storm_name, 12);
     }
 
     if (flight_number.size() > 0) {
-      strncpy(hdr.flight_number, flight_number.c_str(), 8);
+      Radx::copyString(hdr.flight_number, flight_number, 8);
     } else {
-      strncpy(hdr.flight_number, vol.getInstrumentName().c_str(), 8);
+      Radx::copyString(hdr.flight_number, vol.getInstrumentName(), 8);
     }
 
     if (aircraft_id.size() > 0) {
-      strncpy(hdr.aircraft_id, aircraft_id.c_str(), 2);
+      Radx::copyString(hdr.aircraft_id, aircraft_id, 2);
     } else {
       if (vol.getInstrumentName().find("42") != string::npos) {
         memcpy(hdr.aircraft_id, "42", 2);
@@ -1622,4 +1622,3 @@ string NsslMrdRadxFile::_getInstrumentNameFromPath(const string path)
   }
 
 }
-  
