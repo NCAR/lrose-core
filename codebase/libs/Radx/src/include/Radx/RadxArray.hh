@@ -60,7 +60,7 @@ public:
 
   // constructor specifying number of elements in array
 
-  RadxArray(int nelem);
+  RadxArray(size_t nelem);
 
   // destructor
 
@@ -76,7 +76,7 @@ public:
 
   // Alloc array
 
-  T *alloc(int nelem);
+  T *alloc(size_t nelem);
 
   // free array
 
@@ -84,7 +84,7 @@ public:
 
   // get size
 
-  int size() const { return _nelem; }
+  size_t size() const { return _nelem; }
 
   // get pointer to buffer
 
@@ -94,7 +94,7 @@ public:
 private:
 
   T *_buf;
-  int _nelem;
+  size_t _nelem;
   
   RadxArray &_copy(const RadxArray &rhs);
 
@@ -114,7 +114,7 @@ RadxArray<T>::RadxArray()
 // constructor specifying array size
 
 template <class T>
-RadxArray<T>::RadxArray(int nelem)
+RadxArray<T>::RadxArray(size_t nelem)
 {
   _buf = new T[nelem];
   _nelem = nelem;
@@ -149,7 +149,7 @@ RadxArray<T>& RadxArray<T>::operator=(const RadxArray<T> &rhs) {
 // allocation
 
 template <class T>
-T *RadxArray<T>::alloc(int nelem)
+T *RadxArray<T>::alloc(size_t nelem)
 {
   if (nelem == _nelem) {
     return _buf;
@@ -206,7 +206,7 @@ public:
 
   // constructor specifying dimensions of array
 
-  RadxArray2D(int sizeMajor, int sizeMinor);
+  RadxArray2D(size_t sizeMajor, size_t sizeMinor);
 
   // destructor
 
@@ -222,7 +222,7 @@ public:
 
   // Alloc array
 
-  T **alloc(int sizeMajor, int sizeMinor);
+  T **alloc(size_t sizeMajor, size_t sizeMinor);
 
   // free array
 
@@ -230,9 +230,9 @@ public:
 
   // get size
 
-  int sizeMajor() const { return _sizeMajor; }
-  int sizeMinor() const { return _sizeMinor; }
-  int size1D() const { return _size1D; }
+  size_t sizeMajor() const { return _sizeMajor; }
+  size_t sizeMinor() const { return _sizeMinor; }
+  size_t size1D() const { return _size1D; }
 
   // get pointer to data
 
@@ -243,12 +243,12 @@ private:
 
   T **_dat2D;
   T *_dat1D;
-  int _sizeMajor;
-  int _sizeMinor;
-  int _size1D;
+  size_t _sizeMajor;
+  size_t _sizeMinor;
+  size_t _size1D;
   
   RadxArray2D &_copy(const RadxArray2D &rhs);
-  void _alloc(int sizeMajor, int sizeMinor);
+  void _alloc(size_t sizeMajor, size_t sizeMinor);
 
 };
 
@@ -269,7 +269,7 @@ template <class T>
 // constructor specifying array dimension
 
 template <class T>
-  RadxArray2D<T>::RadxArray2D(int sizeMajor, int sizeMinor)
+  RadxArray2D<T>::RadxArray2D(size_t sizeMajor, size_t sizeMinor)
 {
   _alloc(sizeMajor, sizeMinor);
 }
@@ -302,14 +302,14 @@ template <class T>
 // allocation
 
 template <class T>
-  T **RadxArray2D<T>::alloc(int sizeMajor, int sizeMinor)
+  T **RadxArray2D<T>::alloc(size_t sizeMajor, size_t sizeMinor)
 {
   _alloc(sizeMajor, sizeMinor);
   return _dat2D;
 }
 
 template <class T>
-  void RadxArray2D<T>::_alloc(int sizeMajor, int sizeMinor)
+  void RadxArray2D<T>::_alloc(size_t sizeMajor, size_t sizeMinor)
 {
   if (sizeMajor == _sizeMajor &&
       sizeMinor == _sizeMinor) {
