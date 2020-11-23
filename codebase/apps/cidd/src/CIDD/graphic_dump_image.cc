@@ -591,6 +591,8 @@ static void dump_png(Drawable xid, Window w, const char *dir, const char *fname,
   if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
     fclose(outfile);
+    cerr << "ERROR - graphic_dump_image::dump_png" << endl;
+    cerr << "  setjmp() failed" << endl;
     return;
   }
 
