@@ -440,10 +440,11 @@ void umax_wt_bip(long **cost, long sizeS, long sizeT,
 
     clear_set(unscanp, unscan_setp, &num_unscan);
 
-    if (delta == delta1)
+    if (delta == delta1) {
       finish = 1;
+    }
 
-      goto stage; 
+    goto stage; 
 
   } /* if (delta <= delta1) */
 

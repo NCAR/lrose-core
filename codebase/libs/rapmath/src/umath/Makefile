@@ -30,6 +30,7 @@ HDRS = ../include/rapmath/umath.h \
 
 CPPC_SRCS = \
 	ForsytheFit.cc \
+	PlaneFit.cc \
 	PolyFit.cc \
 	usort_stl.cc \
 	uCurveFit.cc \
@@ -46,7 +47,7 @@ SRCS = \
 	upoint_in_ellipse.c \
 	upoint_in_polygon.c \
 	usign.c \
-        usort.c \
+	usort.c \
 	ustat.c \
 	usvd.c \
 	uv_2_dir_speed.c
