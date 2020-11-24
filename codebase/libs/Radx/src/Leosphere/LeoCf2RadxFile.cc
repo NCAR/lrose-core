@@ -2539,6 +2539,50 @@ void LeoCf2RadxFile::_readSweepsMetaAsInFile()
     }
   }
 
+// HERE ...
+  if (_sweepGroupNames.size() > 0) {
+    NcxxGroup group = _file.getGroup(_sweepGroupNames[0]);
+    if (group.isNull()) {
+      NcxxErrStr err;
+      err.addErrStr("ERROR - LeoCf2RadxFile::_readSweepsMetaAsInFile");
+      err.addErrStr("  Cannot read sweep group, name", _sweepGroupNames[0]);
+      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+    }
+    int natts = group.getAttCount();
+    const multimap<string, NcxxGroupAtt> &atts = group.getAtts();
+
+    for (multimap<string, NcxxGroupAtt>::const_iterator iter = atts.begin();
+        iter != atts.end(); iter++) {
+
+     NcxxGroupAtt att = iter->second;
+     if (att.isNull()) {
+       continue;
+     }
+     string name = att.getName();
+     string value;
+     att.getValues(value);
+     //if (name.find("scan_file_name") != string::npos) {
+       //if (value.find("RHI") != string::npos)
+       //  _sweepMode = value; //(Radx::SWEEP_MODE_RHI);  
+       //else if (value.find("PPI") != string::npos)    
+       // _readVol->setPredomSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);  
+       //else if (value.find("DBS") != string::npos)    
+       // _readVol->setPredomSweepMode(Radx::SWEEP_MODE_DOPPLER_BEAM_SWINGING);  
+       //else
+        //_readVol->setPredomSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE); 
+     //} else 
+     if (name.find("scan_id") != string::npos) {
+       _scanName = value;
+     } else if (name.find("res_file_name") != string::npos) {
+       _rangeResolution = value;
+     }
+
+
+     if (_debug)
+       cout << "attribute " << name << ": " << value << endl;
+    }
+  }
+
   // read each sweep group, accumulating sweeps as in file
 
   size_t startRayIndex = 0;
@@ -2644,9 +2688,19 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
         err.addErrInt("  Bad dimCount, should be 0, found: ", len);
         throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
       }
-      char *val;
-      var.getVal(&val);
-      sweep->setSweepMode(Radx::sweepModeFromStr(val));
+      char *sweepModeVal;
+      var.getVal(&sweepModeVal);
+      string val(sweepModeVal);
+      if (val.find("ppi") != string::npos) 
+        _sweepMode = Radx::SWEEP_MODE_SECTOR;
+      else if (val.find("rhi") != string::npos)
+        _sweepMode = Radx::SWEEP_MODE_RHI; 
+      else if (val.find("dbs") != string::npos)
+        _sweepMode = Radx::SWEEP_MODE_DOPPLER_BEAM_SWINGING;
+      else 
+        _sweepMode = Radx::SWEEP_MODE_NOT_SET;
+            //_sweepMode = Radx::sweepModeFromStr(val);
+      sweep->setSweepMode(_sweepMode);
     }
   }
 
@@ -2999,7 +3053,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    // altitude
 
    try {
-     _file.readDoubleVar(ALTITUDE, _altitudeM, Radx::missingFl64);
+     _file.readDoubleVar(ALTITUDE, _altitudeM, 0.0); // Radx::missingFl64);
    } catch (NcxxException e) {
      _altitudeM = 0.0;
      cerr << "WARNING - LeoCf2RadxFile::_readLocation" << endl;
@@ -4061,7 +4115,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
        }
      }
      if (_rayAntennaTransitions.size() > iray) {
-       ray->setAntennaTransition(_rayAntennaTransitions[iray]);
+       ray->setAntennaTransition(false); // _rayAntennaTransitions[iray]);
      }
      if (_georefsActive && _rayGeorefsApplied.size() > iray) {
        ray->setGeorefApplied(_rayGeorefsApplied[iray]);
@@ -5380,17 +5434,19 @@ void LeoCf2RadxFile::_loadReadVolume()
   _readVol->setSiteName(_siteName);
   _readVol->setScanName(_scanName);
   _readVol->setScanId(_scanId);
+  _readVol->setRangeResolution(_rangeResolution);
   _readVol->setInstrumentName(_instrumentName);
 
   _readVol->setStartTime(_raysVol[0]->getTimeSecs(),
                           _raysVol[0]->getNanoSecs());
-  int nRays = _raysVol.size();
+  size_t nRays = _raysVol.size();
   _readVol->setEndTime(_raysVol[nRays-1]->getTimeSecs(),
                        _raysVol[nRays-1]->getNanoSecs());
 
 
   _readVol->setLatitudeDeg(_latitude);
   _readVol->setLongitudeDeg(_longitude);
+  if (_altitudeM < 0.0) _altitudeM = 0.0;
   _readVol->setAltitudeKm(_altitudeM / 1000.0);
   _readVol->setSensorHtAglM(_altitudeAglM);
 
@@ -5401,12 +5457,16 @@ void LeoCf2RadxFile::_loadReadVolume()
   }
 
   for (size_t ii = 0; ii < _raysVol.size(); ii++) {
-    _readVol->addRay(_raysVol[ii]);
+    _readVol->addRay(_raysVol[ii]); 
   }
+
+
 
   for (size_t ii = 0; ii < _rCals.size(); ii++) {
     _readVol->addCalib(_rCals[ii]);
   }
+
+
 
   if (_readSetMaxRange) {
     _readVol->setMaxRangeKm(_readMaxRangeKm);
@@ -5664,3 +5724,14 @@ NcxxVar LeoCf2RadxFile::_read1DVar(NcxxGroup &group,
 
 }
 
+string LeoCf2RadxFile::_computeWritePath(const RadxVol &vol,
+                           const RadxTime &startTime,
+                           int startMillisecs,
+                           const RadxTime &endTime,
+                           int endMillisecs,
+                           const RadxTime &fileTime,
+                           int fileMillisecs,
+                           const string &dir) {
+     cout << "oh, yah, you are here" << endl;
+     return "something wonderful";
+}

@@ -1259,6 +1259,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'override_altitude_only'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_altitude_only");
+    tt->descr = tdrpStrDup("Option to override the radar altitude ONLY.");
+    tt->help = tdrpStrDup("If true, the altitude in this file will be used. If not, the altitude in the time series data will be used.");
+    tt->val_offset = (char *) &override_altitude_only - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'radar_latitude_deg'
     // ctype is 'double'
     
@@ -2674,6 +2686,30 @@
     tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.");
     tt->val_offset = (char *) &include_scan_type_in_file_name - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'include_scan_name_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_scan_name_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan name in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.");
+    tt->val_offset = (char *) &include_scan_name_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'include_range_resolution_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_range_resolution_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the range resolution in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the range resolution (50m) will be included in the file name.");
+    tt->val_offset = (char *) &include_range_resolution_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'include_vol_num_in_file_name'

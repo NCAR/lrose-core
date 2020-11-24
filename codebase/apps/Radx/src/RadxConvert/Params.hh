@@ -601,6 +601,8 @@ public:
 
   tdrp_bool_t override_radar_location;
 
+  tdrp_bool_t override_altitude_only;
+
   double radar_latitude_deg;
 
   double radar_longitude_deg;
@@ -749,6 +751,10 @@ public:
 
   tdrp_bool_t include_scan_type_in_file_name;
 
+  tdrp_bool_t include_scan_name_in_file_name;
+
+  tdrp_bool_t include_range_resolution_in_file_name;
+
   tdrp_bool_t include_vol_num_in_file_name;
 
   tdrp_bool_t use_hyphen_in_file_name_datetime_part;
@@ -806,7 +812,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[176];
+  mutable TDRPtable _table[179];
 
   const char *_className;
 

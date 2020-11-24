@@ -357,6 +357,12 @@ paramdef boolean {
   p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
 } override_radar_location;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar altitude ONLY.";
+  p_help = "If true, the altitude in this file will be used. If not, the altitude in the time series data will be used.";
+} override_altitude_only;
+
 paramdef double {
   p_default = -999;
   p_descr = "Radar latitude (deg).";
@@ -1058,6 +1064,18 @@ paramdef boolean {
   p_descr = "Option to include the scan type in the file name.";
   p_help = "Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.";
 } include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan name in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.";
+} include_scan_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the range resolution in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the range resolution (50m) will be included in the file name.";
+} include_range_resolution_in_file_name;
 
 paramdef boolean {
   p_default = false;

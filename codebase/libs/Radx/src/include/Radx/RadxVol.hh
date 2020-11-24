@@ -252,6 +252,10 @@ public:
 
   inline void setScanId(int val) { _scanId = val; }
 
+  /// Set the range resolution, if available.
+
+  inline void setRangeResolution(const string &val) { _rangeResolution = val; }
+
   /// Set the volume number.
   /// This increments with every volume, and may wrap.
 
@@ -424,6 +428,12 @@ public:
   void overrideLocation(double latitudeDeg,
                         double longitudeDeg,
                         double altitudeKm);
+
+  /// override the radar altitude ONLY
+  /// this also sets the altitude in any georeference objects
+  /// attached to the rays
+
+  void overrideAltitude(double altitudeKm);
 
   /// set the radar location from the start ray,
   // if georefs are active
@@ -1271,6 +1281,10 @@ public:
 
   inline int getScanId() const { return _scanId; }
 
+  /// Get range resolution.
+
+  inline const string getRangeResolution() const { return _rangeResolution; }
+
   /// Get volume number.
 
   inline int getVolumeNumber() const { return _volNum; }
@@ -1837,6 +1851,7 @@ private:
 
   string _scanName;
   int _scanId; // VCP
+  string _rangeResolution;
 
   // predominant sweep mode for volume, by checking angles
   // surveillance, sector or rhi

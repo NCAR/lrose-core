@@ -5997,6 +5997,26 @@ void RadxVol::overrideLocation(double latitudeDeg,
 }
 
 ////////////////////////////////////////////////
+/// override the radar altitude ONLY
+/// this also sets the altitude in any georeference objects
+/// attached to the rays
+
+void RadxVol::overrideAltitude(double altitudeKm)
+
+{
+  
+  setAltitudeKm(altitudeKm);
+  
+  for (size_t ii = 0; ii < _rays.size(); ii++) {
+    RadxGeoref *georef = _rays[ii]->getGeoreference();
+    if (georef) {
+      georef->setAltitudeKmMsl(altitudeKm);
+    }
+  }
+
+}
+
+////////////////////////////////////////////////
 /// set the radar location from the start ray
 /// provided georefs are active
 

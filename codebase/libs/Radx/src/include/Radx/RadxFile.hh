@@ -331,6 +331,20 @@ public:
     _writeScanTypeInFileName = val; 
   }
 
+  /// Add scan Id  to output file name
+  /// Default is false
+  
+  void setWriteScanIdInFileName(bool val) {
+    _writeScanIdInFileName = val; 
+  }
+
+  /// Add range resolution  to output file name
+  /// Default is false
+  
+  void setWriteRangeResolutionInFileName(bool val) {
+    _writeRangeResolutionInFileName = val; 
+  }
+
   /// Add volume number to output file name
   /// Default is false
   
@@ -921,6 +935,8 @@ protected:
   bool _writeSiteNameInFileName; ///< include site name in file name
   bool _writeSubsecsInFileName; ///< include subseconds in file name
   bool _writeScanTypeInFileName; ///< include scan type in file name
+  bool _writeScanIdInFileName; ///< include scan Id in file name
+  bool _writeRangeResolutionInFileName; ///< include range resoluition in file name
   bool _writeVolNumInFileName; ///< include volume number in file name
   bool _writeHyphenInDateTime; ///< use a hyphen instead of underscore in datetime part of file names
   bool _writeIndividualSweeps; ///< write individual sweeps, if applicable
