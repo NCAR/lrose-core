@@ -87,7 +87,8 @@ public:
   double getCoeffA() const { return _aa; }
   double getCoeffB() const { return _bb; }
   double getCoeffC() const { return _cc; }
-
+  size_t getNPoints() const { return _xVals.size(); }
+  
 protected:
 private:
 
