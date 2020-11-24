@@ -3783,10 +3783,12 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
   }
 
   string scanName;
-  if (vol.getScanName().size() > 0) {
-    if (strcasestr(vol.getScanName().c_str(), "default") == NULL) {
-      scanName += "_";
-      scanName += vol.getScanName();
+  if (_writeScanIdInFileName) {
+    if (vol.getScanName().size() > 0) {
+      if (strcasestr(vol.getScanName().c_str(), "default") == NULL) {
+        scanName += "_";
+        scanName += vol.getScanName();
+      }
     }
   }
 
@@ -3796,6 +3798,14 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
     sprintf(volNumStr, "_v%d", volNum);
   } else {
     volNumStr[0] = '\0'; // NULL str
+  }
+
+  string rangeResolution = "";
+  if (_writeRangeResolutionInFileName) {
+    if (vol.getRangeResolution().size() > 0) {
+      rangeResolution.append("_");
+      rangeResolution.append(vol.getRangeResolution());
+    }
   }
 
   string prefix = "cfrad.";
@@ -3841,7 +3851,9 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
             endTime.getHour(), endTime.getMin(), endTime.getSec(),
             endSubsecsStr,
             instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanType.c_str(), suffix.c_str());
+            scanName.c_str(), scanType.c_str(),  
+            rangeResolution.c_str(),
+            suffix.c_str());
 
   } else {
     

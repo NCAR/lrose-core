@@ -626,6 +626,12 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
                          _params.radar_altitude_meters / 1000.0);
   }
     
+  // override radar altitude if requested
+  
+  if (_params.override_altitude_only) {
+    vol.overrideAltitude(_params.radar_altitude_meters / 1000.0);
+  }
+
   // override radar name and site name if requested
   
   if (_params.override_instrument_name) {
@@ -1187,6 +1193,8 @@ void RadxConvert::_setupWrite(RadxFile &file)
   file.setWriteSiteNameInFileName(_params.include_site_name_in_file_name);
   file.setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
   file.setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
+  file.setWriteScanIdInFileName(_params.include_scan_name_in_file_name); // include_scan_id_in_file_name);
+  file.setWriteRangeResolutionInFileName(_params.include_range_resolution_in_file_name);
   file.setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
   file.setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
 

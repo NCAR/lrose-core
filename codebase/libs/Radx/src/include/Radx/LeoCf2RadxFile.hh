@@ -406,6 +406,11 @@ private:
   //string _siteName;
   string _scanName;
   int _scanId;
+
+  string _rangeResolution;
+
+  Radx::SweepMode_t _sweepMode;
+
   //string _instrumentName;
 
   vector<double> _rayTimes;
