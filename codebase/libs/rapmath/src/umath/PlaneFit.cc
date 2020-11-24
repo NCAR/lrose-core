@@ -152,7 +152,7 @@ int PlaneFit::performFit()
   double meanx = sumx / dnpts;
   double meany = sumy / dnpts;
   double meanz = sumz / dnpts;
-  
+
   // Calc full 3x3 covariance matrix, excluding symmetries:
   
   double xx = 0.0; double xy = 0.0; double xz = 0.0;
@@ -170,47 +170,10 @@ int PlaneFit::performFit()
     zz += dz * dz;
   }
 
-  // compute the determinants
-  
-  double det_x = yy * zz - yz * yz;
-  double det_y = xx * zz - xz * xz;
-  double det_z = xx * yy - xy * xy;
-
-  double det_max = det_x;
-  if (det_max < det_y) {
-    det_max = det_y;
-  }
-  if (det_max < det_z) {
-    det_max = det_z;
-  }
-  if (det_max <= 0.0) {
-    return -1; // The points don't span a plane
-  }
-  
-  _aa = yz * xy - xz * yy;
-  _bb = xy * xz - xx * yz;
+  _aa = (xx * xz - xy * yz) / (xx * yy - xy * xy);
+  _bb = (xx * yz - xy * xz) / (xx * yy - xy * xy);
   _cc = meanz;
 
   return 0;
   
-#ifdef NOTNOW
-
-  // Pick path with best conditioning:
-
-  if (det_max == det_x) {
-    x = det_x;
-    y = xz * yz - xy * zz;
-    z = xy * yz - xz * yy;
-  } else if (det_max == det_y) {
-    x = xz * yz - xy * zz;
-    y = det_y;
-    z = xy * xz - yz * xx;
-  } else {
-    x = xy * yz - xz * yy;
-    y = xy * xz - yz * xx;
-    z = det_z;
-  }
-
-#endif
-    
 }

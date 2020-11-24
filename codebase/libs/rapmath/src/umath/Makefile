@@ -67,14 +67,16 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 test: utest_p
 
 utest_p:
-	$(MAKE) DBUG_OPT_FLAGS="$(DEBUG_FLAG)" utest
+	$(MAKE) DBUG_OPT_FLAGS="$(DEBUG_FLAG)" utest testPlaneFit
 
-utest: uMathTest.o
+utest: uMathTest.o TestPlaneFit.o
 	$(CPPC) $(DBUG_OPT_FLAGS) -I../include/rapmath uMathTest.o \
 	$(LDFLAGS) -o uMathTest -lrapmath -ltoolsa
+	$(CPPC) $(DBUG_OPT_FLAGS) -I../include/rapmath TestPlaneFit.o \
+	$(LDFLAGS) -o testPlaneFit -lrapmath -ltoolsa
 
 clean_test:
-	$(RM) uMathTest uMathTest.o
+	$(RM) uMathTest uMathTest.o testPlaneFit TestPlaneFit.o
 
 #
 # local targets
