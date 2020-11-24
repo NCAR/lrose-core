@@ -4512,6 +4512,7 @@ void RadxVol::sortSweepsByFixedAngle()
 
   checkForIndexedRays();
   loadSweepInfoFromRays();
+  loadVolumeInfoFromRays();
   
 }
 
@@ -5600,15 +5601,15 @@ void RadxVol::combineSweepsAtSameFixedAngleAndGeom
 {
 
   // ensure fields are owned by rays
-
+  
   loadRaysFromFields();
   
   // make sure sweep info is up to date
-
+  
   loadSweepInfoFromRays();
-
+  
   // find sweeps that should be combined
-
+  
   vector<Combo> combos;
   set<int> sources;
 
@@ -5624,11 +5625,11 @@ void RadxVol::combineSweepsAtSameFixedAngleAndGeom
       RadxRay *ray0 = _rays[sweep0->getStartRayIndex()];
       
       if ((fabs(sweep0->getFixedAngleDeg() -
-                sweep1->getFixedAngleDeg()) < 0.001) &&
+                sweep1->getFixedAngleDeg()) < 0.01) &&
           (fabs(ray0->getStartRangeKm() -
-                ray1->getStartRangeKm()) < 0.001) &&
+                ray1->getStartRangeKm()) < 0.01) &&
           (fabs(ray0->getGateSpacingKm() -
-                ray1->getGateSpacingKm()) < 0.001)) {
+                ray1->getGateSpacingKm()) < 0.01)) {
         
         if (sources.find(jj) == sources.end()) {
           // source sweep not previously used
@@ -5643,7 +5644,7 @@ void RadxVol::combineSweepsAtSameFixedAngleAndGeom
     combos.push_back(combo);
     
   } // ii
-  
+
   // combine the data from the sweeps
 
   for (size_t ii = 0; ii < combos.size(); ii++) {
@@ -5690,14 +5691,17 @@ void RadxVol::combineSweepsAtSameFixedAngleAndGeom
 ////////////////////////////////////////////////////////
 /// Augment fields in a sweep, by copying in fields from
 /// another sweep
+///
+/// We copy from a source sweep to a target sweep
 
-void RadxVol::_augmentSweepFields(size_t targetIndex, size_t sourceIndex)
+void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
+                                  size_t srcSweepIndex)
 {
 
-  RadxSweep *sweepTarget = _sweeps[targetIndex];
-  RadxSweep *sweepSource = _sweeps[sourceIndex];
+  RadxSweep *sweepTarget = _sweeps[targetSweepIndex];
+  RadxSweep *sweepSource = _sweeps[srcSweepIndex];
 
-  _setupAngleSearch(sourceIndex);
+  _setupAngleSearch(srcSweepIndex);
 
   // check sweep mode
 
@@ -5730,35 +5734,27 @@ void RadxVol::_augmentSweepFields(size_t targetIndex, size_t sourceIndex)
       vector<RadxField *> flds = raySource->getFields();
       for (size_t ifield = 0; ifield < flds.size(); ifield++) {
         
-        const RadxField *fldSource = flds[ifield];
+        const RadxField *fld = flds[ifield];
         
-        // make a copy of the field
+        // does this field name already exist in the target?
+        // test by trying to get the field from the target ray
         
-        RadxField *copy = new RadxField(*fldSource);
+        RadxField *fldTarget = rayTarget->getField(fld->getName());
+        if (fldTarget == NULL) {
 
-        // does this field exist in the target?
+          // source field does not exist on the target
+          // so make a copy and add to the target ray
+          
+          RadxField *fldCopy = new RadxField(*fld);
+          rayTarget->addField(fldCopy);
         
-        RadxField *fldTarget = rayTarget->getField(fldSource->getName());
-        
-        if (fldTarget != NULL) {
-          // field already exists on the target, so modify its name
-          // based on the sweep number
-          char newName[128];
-          sprintf(newName, "%s-s%d",
-                  fldTarget->getName().c_str(), (int) targetIndex);
-          fldTarget->setName(newName);
         }
-        
-        // add field to target ray
-        
-        rayTarget->addField(copy);
         
       } // ifield
       
     } // if (raySource != NULL)
 
   } // iray
-
 
 }
 
@@ -6433,7 +6429,7 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::fl32> &array,
   
 {
 
-  if (array.sizeMajor() != (int) rays.size()) {
+  if (array.sizeMajor() != rays.size()) {
     cerr << "ERROR - RadxVol::loadRaysFrom2DField()" << endl;
     cerr << "  Array major dimension does not match nRays" << endl;
     cerr << "  Array major size: " << array.sizeMajor() << endl;
@@ -6449,7 +6445,7 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::fl32> &array,
   for (size_t iray = 0; iray < rays.size(); iray++) {
 
     RadxRay *ray = rays[iray];
-    int nGates = ray->getNGates();
+    size_t nGates = ray->getNGates();
     if (nGates > array.sizeMinor()) {
       nGates = array.sizeMinor();
     }
@@ -6490,7 +6486,7 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
   
 {
 
-  if (array.sizeMajor() != (int) rays.size()) {
+  if (array.sizeMajor() != rays.size()) {
     cerr << "ERROR - RadxVol::loadRaysFrom2DField()" << endl;
     cerr << "  Array major dimension does not match nRays" << endl;
     cerr << "  Array major size: " << array.sizeMajor() << endl;
@@ -6506,7 +6502,7 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
   for (size_t iray = 0; iray < rays.size(); iray++) {
 
     RadxRay *ray = rays[iray];
-    int nGates = ray->getNGates();
+    size_t nGates = ray->getNGates();
     if (nGates > array.sizeMinor()) {
       nGates = array.sizeMinor();
     }

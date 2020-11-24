@@ -787,7 +787,7 @@ int NcxxRadxFile::_addGlobalAttributes()
       } // switch
     } // ii
     
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
 
     _addErrStr("ERROR - NcxxRadxFile::_addGlobalAttributes");
     _addErrStr("  exception: ", e.what());
@@ -861,7 +861,7 @@ int NcxxRadxFile::_addDimensions()
       _frequencyDim = _file.addDim(FREQUENCY, _writeVol->getFrequencyHz().size());
     }
 
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
 
     _addErrStr("ERROR - NcxxRadxFile::_addDimensions");
     _addErrStr("  exception: ", e.what());

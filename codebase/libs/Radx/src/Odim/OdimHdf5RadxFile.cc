@@ -264,7 +264,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     how = new Group(file.openGroup("how"));
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     if (_verbose) {
       cerr << "No 'how' group, not ODIM file" << endl;
     }
@@ -279,7 +279,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     what = new Group(file.openGroup("what"));
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     if (_verbose) {
       cerr << "No 'what' group, not ODIM file" << endl;
     }
@@ -294,7 +294,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     where = new Group(file.openGroup("where"));
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     if (_verbose) {
       cerr << "No 'where' group, not ODIM file" << endl;
     }
@@ -309,7 +309,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     dataset1 = new Group(file.openGroup("dataset1"));
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     if (_verbose) {
       cerr << "No 'dataset1' group, not ODIM file" << endl;
     }
@@ -383,12 +383,12 @@ int OdimHdf5RadxFile::writeToDir(const RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
+    snprintf(yearStr, BUFSIZ, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+    snprintf(dayStr, BUFSIZ, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
             fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
     outDir += dayStr;
   }
@@ -461,7 +461,7 @@ int OdimHdf5RadxFile::writeToPath(const RadxVol &vol,
       return -1;
     }
   }
-  catch (H5::Exception error) {
+  catch (H5::Exception &error) {
     _addErrStr("ERROR - OdimHdf5RadxFile::writeToPath");
     _addErrStr("  Error in _doWrite()");
     _addErrStr(error.getDetailMsg());
@@ -629,7 +629,7 @@ int OdimHdf5RadxFile::printNative(const string &path, ostream &out,
     Group root(file.openGroup("/"));
     _utils.printGroup(root, "/", out, printRays, printData);
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     _addErrStr("ERROR - trying to read ODIM HDF5 file");
     _addErrStr(e.getDetailMsg());
     return -1;
@@ -744,7 +744,7 @@ int OdimHdf5RadxFile::_readFromPath(const string &path,
 
   }
 
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     _addErrStr("ERROR - reading ODIM HDF5 file");
     _addErrStr(e.getDetailMsg());
     return -1;
@@ -788,14 +788,14 @@ int OdimHdf5RadxFile::_getNSweeps(Group &root)
   
   for (size_t ii = 0; ii <= root.getNumObjs(); ii++) {
     
-    char datasetName[128];
-    sprintf(datasetName, "dataset%d", (int) ii);
+    char datasetName[2048];
+    snprintf(datasetName, 2048, "dataset%d", (int) ii);
     
     Group *ds = NULL;
     try {
       ds = new Group(root.openGroup(datasetName));
     }
-    catch (H5::Exception e) {
+    catch (H5::Exception &e) {
       // data set does not exist
       if (ds) delete ds;
       continue;
@@ -834,13 +834,13 @@ int OdimHdf5RadxFile::_getNFields(Group &sweep)
   // look through all objects, counting up the data sets
   
   for (size_t ii = 0; ii <= sweep.getNumObjs(); ii++) {
-    char dataName[128];
-    sprintf(dataName, "data%d", (int) ii);
+    char dataName[2048];
+    snprintf(dataName, 2048, "data%d", (int) ii);
     Group *data = NULL;
     try {
       data = new Group(sweep.openGroup(dataName));
     }
-    catch (H5::Exception e) {
+    catch (H5::Exception &e) {
       // data set does not exist
       if (data) delete data;
       continue;
@@ -850,13 +850,13 @@ int OdimHdf5RadxFile::_getNFields(Group &sweep)
   }
 
   for (size_t ii = 0; ii <= sweep.getNumObjs(); ii++) {
-    char qualityName[128];
-    sprintf(qualityName, "quality%d", (int) ii);
+    char qualityName[2048];
+    snprintf(qualityName, 2048, "quality%d", (int) ii);
     Group *quality = NULL;
     try {
       quality = new Group(sweep.openGroup(qualityName));
     }
-    catch (H5::Exception e) {
+    catch (H5::Exception &e) {
       // quality set does not exist
       if (quality) delete quality;
       continue;
@@ -910,8 +910,8 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
   
   // compute dataset name: dataset1, dataset2 etc ...
 
-  char sweepName[128];
-  sprintf(sweepName, "dataset%d", sweepNumber + 1);
+  char sweepName[2048];
+  snprintf(sweepName, 2048, "dataset%d", sweepNumber + 1);
 
   if (_debug) {
     cerr << "===== reading sweep " << sweepNumber << " "
@@ -927,15 +927,17 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
   
   Group *what = NULL;
   try {
-    char label[128];
-    sprintf(label, "%s what", sweepName);
+    // char label[2048];
+    // snprintf(label, 2048, "%s what", sweepName);
+    string label(sweepName);
+    label += " what";
     what = new Group(sweep.openGroup("what"));
     if (_readSweepWhat(*what, label)) {
       delete what;
       return -1;
     }
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     if (_debug) {
       cerr << "NOTE - no 'what' group for sweep: " << sweepName << endl;
     }
@@ -946,15 +948,17 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
   
   Group *where = NULL;
   try {
-    char label[128];
-    sprintf(label, "%s where", sweepName);
+    // char label[2048];
+    // snprintf(label, 2048, "%s where", sweepName);
+    string label(sweepName);
+    label += " where";
     where = new Group(sweep.openGroup("where"));
     if (_readSweepWhere(*where, label)) {
       delete where;
       return -1;
     }
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     if (_debug) {
       cerr << "NOTE - no 'where' group for sweep: " << sweepName << endl;
     }
@@ -966,13 +970,15 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
   Group *how = NULL;
   try {
     how = new Group(sweep.openGroup("how"));
-    char label[128];
-    sprintf(label, "%s how", sweepName);
+    // char label[2048];
+    // snprintf(label, 2048, "%s how", sweepName);
+    string label(sweepName);
+    label += " how";
     if (_readSweepHow(*how, label)) {
       return -1;
     }
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     if (_verbose) {
       cerr << "NOTE - no 'how' group for sweep: " << sweepName << endl;
     }
@@ -1076,8 +1082,8 @@ void OdimHdf5RadxFile::_setSweepStatusXml(int sweepNum)
   
   // initialize
 
-  char tag[128];
-  sprintf(tag, "SweepStatus_%d", sweepNum);
+  char tag[2048];
+  snprintf(tag, 2048, "SweepStatus_%d", sweepNum);
   _sweepStatusXml += RadxXml::writeStartTag(tag, 1);
 
   _sweepStatusXml += RadxXml::writeInt("a1Gate", 2, _a1Gate);
@@ -2041,8 +2047,8 @@ void OdimHdf5RadxFile::_createRaysForSweep(int sweepNumber)
     int msecs = (int) ((_rayTime[iray] - raySecs) * 1000.0 + 0.5);
 
     if (_verbose) {
-      char rayTimeStr[128];
-      sprintf(rayTimeStr, "%s.%.3d", RadxTime::strm(raySecs).c_str(), msecs);
+      char rayTimeStr[2048];
+      snprintf(rayTimeStr, 2048, "%s.%.3d", RadxTime::strm(raySecs).c_str(), msecs);
       cerr << "ray iray, time, el, az: " << iray << ", "
            << rayTimeStr << ", "
            << _rayEl[iray] << ", "
@@ -2085,8 +2091,8 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
 {
   // compute field name
   
-  char dataGroupName[1024];
-  sprintf(dataGroupName, "%s%d", label, fieldNum + 1);
+  char dataGroupName[2048];
+  snprintf(dataGroupName, 2048, "%s%d", label, fieldNum + 1);
   
   // get data group
   
@@ -2094,7 +2100,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
   try {
     dg = new Group(sweep.openGroup(dataGroupName));
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     _addErrStr("ERROR - OdimHdf5RadxFile::_addFieldToRays");
     _addErrStr("  Cannot open data grop");
     _addErrStr("  Data group name: ", dataGroupName);
@@ -2107,8 +2113,10 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
   
   Group *what = NULL;
   try {
-    char label[128];
-    sprintf(label, "%s what", dataGroupName);
+    string label = dataGroupName;
+    label += " what";
+    // char label[2048];
+    // snprintf(label, 2048, "%s what", dataGroupName);
     what = new Group(dg->openGroup("what"));
     if (_readDataWhat(*what, label)) {
       delete what;
@@ -2116,7 +2124,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
       return -1;
     }
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     if (_debug) {
       cerr << "NOTE - no 'what' group for data field: " << dataGroupName << endl;
     }
@@ -2128,11 +2136,13 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
   Group *how = NULL;
   try {
     how = new Group(dg->openGroup("how"));
-    char label[128];
-    sprintf(label, "%s how", dataGroupName);
+    // char label[2048];
+    // snprintf(label, 2048, "%s how", dataGroupName);
+    string label(dataGroupName);
+    label += " how";
     _readHow(*how, label);
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     if (_verbose) {
       cerr << "NOTE - no 'how' group for data field: " << dataGroupName << endl;
     }
@@ -2161,7 +2171,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
   try {
     ds = new DataSet(dg->openDataSet("data"));
   }
-  catch (H5::Exception e) {
+  catch (H5::Exception &e) {
     _addErrStr("ERROR - OdimHdf5RadxFile::_addFieldToRays");
     _addErrStr("  Cannot open data set for field: ", _fieldName);
     _addErrStr(e.getDetailMsg());
@@ -3385,7 +3395,7 @@ int OdimHdf5RadxFile::_openFileForWriting(const string &writePath)
   }
   
   // catch failure caused by the H5File operations
-  catch(H5::Exception error)
+  catch(H5::Exception &error)
   {
     _addErrStr("ERROR - OdimHdf5RadxFile::_openFileForWriting");
     _addErrStr("  Cannot open file for writing: ", writePath);
@@ -3455,7 +3465,7 @@ string OdimHdf5RadxFile::_computeWritePath(const RadxVol &writeVol,
   int volNum = writeVol.getVolumeNumber();
   char volNumStr[1024];
   if (_writeVolNumInFileName && volNum >= 0) {
-    sprintf(volNumStr, "_v%d", volNum);
+    snprintf(volNumStr, 1024, "_v%d", volNum);
   } else {
     volNumStr[0] = '\0'; // NULL str
   }
@@ -3483,23 +3493,24 @@ string OdimHdf5RadxFile::_computeWritePath(const RadxVol &writeVol,
       endSubsecsStr[0] = '\0';
     }
 
-    sprintf(fileName,
-            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "_to_%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "%s%s%s"
-            "%s.h5",
-            prefix.c_str(),
-            startTime.getYear(), startTime.getMonth(), startTime.getDay(),
-            dateTimeConnector,
-            startTime.getHour(), startTime.getMin(), startTime.getSec(),
-            startSubsecsStr,
-            endTime.getYear(), endTime.getMonth(), endTime.getDay(),
-            dateTimeConnector,
-            endTime.getHour(), endTime.getMin(), endTime.getSec(),
-            endSubsecsStr,
-            instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str());
-
+    snprintf(fileName,
+             BUFSIZ,
+             "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+             "_to_%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+             "%s%s%s"
+             "%s.h5",
+             prefix.c_str(),
+             startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+             dateTimeConnector,
+             startTime.getHour(), startTime.getMin(), startTime.getSec(),
+             startSubsecsStr,
+             endTime.getYear(), endTime.getMonth(), endTime.getDay(),
+             dateTimeConnector,
+             endTime.getHour(), endTime.getMin(), endTime.getSec(),
+             endSubsecsStr,
+             instName.c_str(), siteName.c_str(), volNumStr,
+             scanName.c_str());
+    
   } else {
     
     char fileSubsecsStr[64];
@@ -3509,17 +3520,18 @@ string OdimHdf5RadxFile::_computeWritePath(const RadxVol &writeVol,
       fileSubsecsStr[0] = '\0';
     }
 
-    sprintf(fileName,
-            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "%s%s%s"
-            "%s.h5",
-            prefix.c_str(),
-            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
-            dateTimeConnector,
-            fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
-            fileSubsecsStr,
-            instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str());
+    snprintf(fileName,
+             BUFSIZ,
+             "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+             "%s%s%s"
+             "%s.h5",
+             prefix.c_str(),
+             fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
+             dateTimeConnector,
+             fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
+             fileSubsecsStr,
+             instName.c_str(), siteName.c_str(), volNumStr,
+             scanName.c_str());
 
   }
 
@@ -3594,12 +3606,12 @@ int OdimHdf5RadxFile::_doWrite(const RadxVol &vol,
   }
 
   RadxTime startTime(vol.getStartTimeSecs(), vol.getStartNanoSecs() / 1.0e9);
-  char dateStr[32];
+  char dateStr[64];
   sprintf(dateStr, "%.4d%.2d%.2d",
           startTime.getYear(), startTime.getMonth(), startTime.getDay());
   Hdf5xx::addAttr(what, "date", dateStr);
 
-  char timeStr[32];
+  char timeStr[64];
   sprintf(timeStr, "%.2d%.2d%.2d",
           startTime.getHour(), startTime.getMin(), startTime.getSec());
   Hdf5xx::addAttr(what, "time", timeStr);

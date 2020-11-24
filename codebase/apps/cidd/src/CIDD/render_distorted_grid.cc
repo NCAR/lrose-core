@@ -87,18 +87,24 @@ int render_distorted_grid( Drawable xid, met_record_t *mr, time_t start_time, ti
     XStandardColormap best_map;
     // Images don't get countoured
     if(mr->h_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
-		render_method = POLYGONS;
-
-       if(! XGetStandardColormap(gd.dpy,RootWindow(gd.dpy,0),&best_map,XA_RGB_BEST_MAP)){
-         // try to fix the problem
-         safe_system("xstdcmap -best",gd.simple_command_timeout_secs);
-         if(! XGetStandardColormap(gd.dpy,RootWindow(gd.dpy,0),&best_map,XA_RGB_BEST_MAP)){
-             fprintf(stderr,"Failed XGetStandardColormap!\n");
-             fprintf(stderr,"Can't Render RGB images - Try Running X Server in 24 bit mode\n");
-            fprintf(stderr,"Run 'xstdcmap -best -verbose' to see the problem\n"); 
-            return CIDD_FAILURE;
-          }
+      render_method = POLYGONS;
+      
+      if(! XGetStandardColormap(gd.dpy,RootWindow(gd.dpy,0),&best_map,XA_RGB_BEST_MAP)){
+        // try to fix the problem
+        safe_system("xstdcmap -best",gd.simple_command_timeout_secs);
+        if(! XGetStandardColormap(gd.dpy,RootWindow(gd.dpy,0),&best_map,XA_RGB_BEST_MAP)){
+          fprintf(stderr,"Failed XGetStandardColormap!\n");
+          fprintf(stderr,"Can't Render RGB images - Try Running X Server in 24 bit mode\n");
+          fprintf(stderr,"Run 'xstdcmap -best -verbose' to see the problem\n"); 
+          // assume 24-bit depth, 8-bit colors
+          fprintf(stderr,"Setting base_pixel = 0, red_mult = 65536, green_mult = 256, blue_mult = 1\n"); 
+          best_map.base_pixel = 0;
+          best_map.red_mult = 65536;
+          best_map.green_mult = 256;
+          best_map.blue_mult = 1;
+          // return CIDD_FAILURE;
         }
+      }
     }
 
     if(gd.clip_overlay_fields) render_method = POLYGONS; 

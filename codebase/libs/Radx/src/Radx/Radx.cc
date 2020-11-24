@@ -1019,6 +1019,21 @@ string Radx::makeString(const char *text, int len)
 
 }
 
+///////////////////////////////////////////////////////////////////
+// Smart copy of string into specified location.
+// Generally used to set headers with fixed-length strings.
+// If strlen is equal to or exceeds destlen, omit trailing null.
+
+void Radx::copyString(char *dest, const string &src, size_t destLen)
+  
+{
+  if (src.size() >= destLen) {
+    memcpy(dest, src.c_str(), destLen);
+  } else {
+    strncpy(dest, src.c_str(), destLen);
+  }
+}
+
 //////////////////////////////////////////////
 // replace spaces in a string with underscores
 
