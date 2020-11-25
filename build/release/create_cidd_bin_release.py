@@ -38,7 +38,9 @@ def main():
 
     global thisScriptDir
     thisScriptDir = os.path.dirname(__file__)
-    os.chdir(thisScriptDir)
+    if (len(thisScriptDir) > 0):
+        print("chdir to %s" % thisScriptDir, file=sys.stderr)
+        os.chdir(thisScriptDir)
     thisScriptDir = os.getcwd()
 
     homeDir = os.environ['HOME']
