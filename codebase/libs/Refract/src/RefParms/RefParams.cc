@@ -48,7 +48,7 @@
  * @author Automatically generated
  *
  */
-#include "RefParams.hh"
+#include <Refract/RefParams.hh>
 #include <cstring>
 
   ////////////////////////////////////////////
