@@ -130,15 +130,20 @@ int render_cart_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t 
 
            XStandardColormap best_map;
           if(! XGetStandardColormap(gd.dpy,RootWindow(gd.dpy,0),&best_map,XA_RGB_BEST_MAP)){
-               fprintf(stderr,"Failed XGetStandardColormap\n");
-               fprintf(stderr,"Try running 'xstdcmap -best'\n");
-               // assume 24-bit depth, 8-bit colors
-               fprintf(stderr,"Setting base_pixel = 0, red_mult = 65536, green_mult = 256, blue_mult = 1\n"); 
-               best_map.base_pixel = 0;
-               best_map.red_mult = 65536;
-               best_map.green_mult = 256;
-               best_map.blue_mult = 1;
-               // return CIDD_FAILURE;
+            // fprintf(stderr,"  (Try running 'xstdcmap -best')\n");
+            // assume 24-bit depth, 8-bit colors
+            fprintf(stderr,"WARNING - XGetStandardColormap() failed\n");
+            fprintf(stderr,"  Setting base_pixel = 0\n"); 
+            fprintf(stderr,"  Setting   red_mult = 65536, green_mult = 256, blue_mult = 1\n"); 
+            fprintf(stderr,"  Setting   red_max  = 255,   green_max  = 255, blue_max  = 255\n"); 
+            best_map.base_pixel = 0;
+            best_map.red_mult = 65536;
+            best_map.green_mult = 256;
+            best_map.blue_mult = 1;
+            best_map.red_max = 255;
+            best_map.green_max = 255;
+            best_map.blue_max = 255;
+            // return CIDD_FAILURE;
           }
           uptr =  (ui32 * ) mr->h_data;
 
