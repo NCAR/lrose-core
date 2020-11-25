@@ -39,7 +39,7 @@ TARGET_FILE = ConvStrat
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lradar -lMdv -lRadx -lNcxx -leuclid \
-	-ldsserver -ldidss -lrapformats -ltoolsa \
+	-ldsserver -ldidss -lrapformats -lrapmath -ltoolsa \
 	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
 	-lz -lpthread
 

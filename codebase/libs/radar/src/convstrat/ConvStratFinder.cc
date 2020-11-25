@@ -43,6 +43,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include <radar/ConvStratFinder.hh>
+#include <rapmath/PlaneFit.hh>
 using namespace std;
 
 const fl32 ConvStratFinder::_missingFl32 = -9999.0;
@@ -71,6 +72,7 @@ ConvStratFinder::ConvStratFinder()
   _dbzForMinRadius = 22.5;
   _dbzForMaxRadius = 42.5;
   _backgroundRadiusKm = 11.0;
+  _dbzForEchoTops = 18.0;
 
   _nx = _ny = 0;
   _dx = _dy = 0.0;
@@ -265,6 +267,7 @@ void ConvStratFinder::_allocArrays()
   _convTopKm.alloc(_nxy);
   _stratBaseKm.alloc(_nxy);
   _stratTopKm.alloc(_nxy);
+  _echoTopKm.alloc(_nxy);
   
 }
 
@@ -304,6 +307,7 @@ void ConvStratFinder::_initToMissing()
   _initToMissing(_convTopKm, _missingFl32);
   _initToMissing(_stratBaseKm, _missingFl32);
   _initToMissing(_stratTopKm, _missingFl32);
+  _initToMissing(_echoTopKm, _missingFl32);
   
 }
 
@@ -361,6 +365,7 @@ void ConvStratFinder::freeArrays()
   _convTopKm.free();
   _stratBaseKm.free();
   _stratTopKm.free();
+  _echoTopKm.free();
   
 }
 
@@ -384,13 +389,17 @@ void ConvStratFinder::_computeColMax()
   }
 
   fl32 *dbz = _volDbz.dat();
+  fl32 *topKm = _echoTopKm.dat();
   
   for (size_t iz = _minIz; iz <= _maxIz; iz++) {
+    double htKm = _zKm[iz];
+    size_t jj = 0;
+    size_t ii = iz * _nxy;
     for (size_t iy = 0; iy < _ny; iy++) {
-      for (size_t ix = 0; ix < _nx; ix++) {
+      for (size_t ix = 0; ix < _nx; ix++, jj++, ii++) {
         
-        size_t ii = ix + iy * _nx + iz * _nxy;
-        size_t jj = ix + iy * _nx;
+        // size_t jj = ix + iy * _nx;
+        // size_t ii = jj + iz * _nxy;
         fl32 dbzVal = dbz[ii];
         
         if (dbzVal == _missingFl32) {
@@ -399,6 +408,10 @@ void ConvStratFinder::_computeColMax()
 
         if (dbzVal > colMaxDbz[jj]) {
           colMaxDbz[jj] = dbzVal;
+        }
+        
+        if (dbzVal >= _dbzForEchoTops) {
+          topKm[jj] = htKm;
         }
 
       } // ix
@@ -415,7 +428,7 @@ void ConvStratFinder::_computeColMax()
       size_t jcenter = ix + iy * _nx;
       double count = 0;
       for (size_t ii = 0; ii < _textureKernelOffsets.size(); ii++) {
-        size_t jj = jcenter + _textureKernelOffsets[ii];
+        size_t jj = jcenter + _textureKernelOffsets[ii].offset;
         double val = colMaxDbz[jj];
         if (val >= _minValidDbz) {
           count++;
@@ -451,6 +464,7 @@ void ConvStratFinder::_computeTexture()
   // set up threads for computing texture at each level
 
   const fl32 *dbz = _volDbz.dat();
+  const fl32 *colMaxDbz = _colMaxDbz.dat();
   vector<ComputeTexture *> threads;
   for (size_t iz = _minIz; iz <= _maxIz; iz++) {
     size_t zoffset = iz * _nxy;
@@ -458,7 +472,7 @@ void ConvStratFinder::_computeTexture()
     thread->setGridSize(_nx, _ny);
     thread->setKernelSize(_nxTexture, _nyTexture);
     thread->setMinValidFraction(_minValidFractionForTexture);
-    thread->setDbz(dbz + zoffset, _missingFl32);
+    thread->setDbz(dbz + zoffset, colMaxDbz, _missingFl32);
     thread->setFractionCovered(fractionTexture);
     thread->setKernelOffsets(_textureKernelOffsets);
     thread->setTextureArray(volTexture + zoffset);
@@ -811,15 +825,18 @@ void ConvStratFinder::_computeKernels()
     cerr << "  _dy: " << _dy << endl;
     cerr << "  _dx: " << _dx << endl;
   }
-  
+
+  kernel_t entry;
   for (int jdy = -_nyTexture; jdy <= _nyTexture; jdy++) {
     double yy = jdy * _dy;
     for (int jdx = -_nxTexture; jdx <= _nxTexture; jdx++) {
       double xx = jdx * _dx;
       double radius = sqrt(yy * yy + xx * xx);
       if (radius <= _textureRadiusKm) {
-        ssize_t offset = jdx + jdy * _nx;
-        _textureKernelOffsets.push_back(offset);
+        entry.xx = xx;
+        entry.yy = yy;
+        entry.offset = jdx + jdy * _nx;
+        _textureKernelOffsets.push_back(entry);
       }
     }
   }
@@ -1017,12 +1034,13 @@ void ConvStratFinder::ComputeTexture::run()
   for (size_t ii = 0; ii < _nx * _ny; ii++) {
     _texture[ii] = _missingVal;
   }
-
+  
   // compute texture at each point in the plane
 
   size_t minPtsForTexture = 
     (size_t) (_minValidFraction * _kernelOffsets.size() + 0.5);
-
+  PlaneFit pfit;
+  
   for (int iy = _nyTexture; iy < (int) _ny - _nyTexture; iy++) {
     
     int icenter = _nxTexture + iy * _nx;
@@ -1032,26 +1050,57 @@ void ConvStratFinder::ComputeTexture::run()
       if (_fractionCovered[icenter] < _minValidFraction) {
         continue;
       }
+      if (_dbzColMax[icenter] == _missingVal) {
+        continue;
+      }
+
+      // fit a plane to the reflectivity in a circular kernel around point
       
-      // compute texture in circular kernel around point
-      // first we compute the standard deviation of the square of dbz
-      // then we take the square root of the sdev
-      
-      double nn = 0.0;
-      double sum = 0.0;
-      double sumSq = 0.0;
-      
+      pfit.clear();
+      size_t count = 0;
+      vector<double> dbzVals;
+      vector<double> xx, yy;
       for (size_t ii = 0; ii < _kernelOffsets.size(); ii++) {
-        size_t kk = icenter + _kernelOffsets[ii];
+        const kernel_t &kern = _kernelOffsets[ii];
+        size_t kk = icenter + kern.offset;
         double val = _dbz[kk];
         if (val != _missingVal) {
+          pfit.addPoint(kern.xx, kern.yy, val);
+          dbzVals.push_back(val);
+          xx.push_back(kern.xx);
+          yy.push_back(kern.yy);
+          count++;
+        }
+      } // ii
+
+      // check we have sufficient data around this point
+      
+      if (count >= minPtsForTexture) {
+
+        // fit a plane to the reflectivity
+        if (pfit.performFit() == 0) {
+          // subtract plane fit from dbz values to
+          // remove 2d trends in the data
+          double aa = pfit.getCoeffA();
+          double bb = pfit.getCoeffB();
+          for (size_t ii = 0; ii < dbzVals.size(); ii++) {
+            double delta = aa * xx[ii] + bb * yy[ii];
+            dbzVals[ii] -= delta;
+          }
+        }
+
+        // compute sdev of dbz squared
+        
+        double nn = 0.0;
+        double sum = 0.0;
+        double sumSq = 0.0;
+        for (size_t ii = 0; ii < dbzVals.size(); ii++) {
+          double val = dbzVals[ii];
           double dbzSq = val * val;
           sum += dbzSq;
           sumSq += dbzSq * dbzSq;
           nn++;
-        }
-      } // ii
-      if (nn >= minPtsForTexture) {
+        } // ii
         double mean = sum / nn;
         double var = sumSq / nn - (mean * mean);
         if (var < 0.0) {
@@ -1059,7 +1108,8 @@ void ConvStratFinder::ComputeTexture::run()
         }
         double sdev = sqrt(var);
         _texture[icenter] = sqrt(sdev);
-      }
+
+      } // if (count >= minPtsForTexture)
       
     } // ix
     

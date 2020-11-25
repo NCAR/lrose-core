@@ -59,6 +59,12 @@ public:
     CATEGORY_MIXED = 3,
     CATEGORY_UNKNOWN
   } category_t;
+
+  typedef struct {
+    double xx;
+    double yy;
+    ssize_t offset;
+  } kernel_t;
   
   // constructor
   
@@ -98,7 +104,14 @@ public:
   void setDbzForDefiniteConvection(double val) {
     _dbzForDefiniteConvection = val; 
   }
-
+  
+  ////////////////////////////////////////////////////////////////////
+  // Reflectivity threshold for echo tops (dBZ).
+  // Echo tops are defined as the max ht with reflectivity at or
+  // above this value.
+  
+  void setDbzForEchoTops(double val) { _dbzForEchoTops = val; }
+  
   ////////////////////////////////////////////////////////////////////
   // Compute the radius of convective influence from the background
   // reflectivity.
@@ -244,6 +257,8 @@ public:
   const fl32 *getStratBaseKm() const { return _stratBaseKm.dat(); }
   const fl32 *getStratTopKm() const { return _stratTopKm.dat(); }
 
+  const fl32 *getEchoTopKm() const { return _echoTopKm.dat(); }
+
   // get missing value for float arrays
 
   ui08 getMissingUi08() const { return _missingUi08; }
@@ -296,8 +311,9 @@ private:
   double _deltaBackgroundDbz;
   double _radiusSlope;
   double _backgroundRadiusKm; // radius for computing background dbz
+  double _dbzForEchoTops; // reflectivity for storm tops
 
-  vector<ssize_t> _textureKernelOffsets;
+  vector<kernel_t> _textureKernelOffsets;
   vector<ssize_t> _backgroundKernelOffsets;
 
   // grid details
@@ -356,6 +372,7 @@ private:
   TaArray<fl32> _convTopKm;
   TaArray<fl32> _stratBaseKm;
   TaArray<fl32> _stratTopKm;
+  TaArray<fl32> _echoTopKm;
 
   // methods
   
@@ -409,9 +426,11 @@ private:
       _minValidFraction = val;
     }
     
-    void setDbz(const fl32 *dbz, fl32 missingVal)
+    void setDbz(const fl32 *dbz, const fl32 *dbzColMax,
+                fl32 missingVal)
     {
       _dbz = dbz;
+      _dbzColMax = dbzColMax;
       _missingVal = missingVal;
     }
     
@@ -420,7 +439,7 @@ private:
       _fractionCovered = frac;
     }
     
-    void setKernelOffsets(const vector<ssize_t> &offsets)
+    void setKernelOffsets(const vector<kernel_t> &offsets)
     {
       _kernelOffsets = offsets;
     }
@@ -442,9 +461,10 @@ private:
     double _minValidFraction;
     fl32 _missingVal;
     const fl32 *_dbz;
+    const fl32 *_dbzColMax;
     const fl32 *_fractionCovered;
     fl32 *_texture;
-    vector<ssize_t> _kernelOffsets;
+    vector<kernel_t> _kernelOffsets;
     
   };
 

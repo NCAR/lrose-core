@@ -422,6 +422,8 @@ public:
 
   double dbz_threshold_for_definite_convection;
 
+  double dbz_for_echo_tops;
+
   double background_dbz_radius_km;
 
   conv_radius_function_t conv_radius_function;
@@ -461,7 +463,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[43];
 
   const char *_className;
 

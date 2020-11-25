@@ -125,6 +125,7 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setMinValidDbz(_params.min_valid_dbz);
   _finder.setDbzForDefiniteConvection
     (_params.dbz_threshold_for_definite_convection);
+  _finder.setDbzForEchoTops(_params.dbz_for_echo_tops);
   _finder.setComputeConvRadius(_params.conv_radius_function.min_dbz,
                                _params.conv_radius_function.max_dbz,
                                _params.conv_radius_function.min_radius_km,
@@ -435,6 +436,15 @@ void ConvStrat::_addFields()
                                  Mdvx::ENCODING_FLOAT32,
                                  "StratTop",
                                  "StratiformTop",
+                                 "km"));
+    
+    // echo top
+    
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getEchoTopKm(),
+                                 Mdvx::ENCODING_FLOAT32,
+                                 "EchoTop",
+                                 "EchoTop",
                                  "km"));
     
   }

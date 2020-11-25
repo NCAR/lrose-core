@@ -833,6 +833,18 @@
     tt->single_val.d = 53;
     tt++;
     
+    // Parameter 'dbz_for_echo_tops'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("dbz_for_echo_tops");
+    tt->descr = tdrpStrDup("Reflectivity for determing echo tops.");
+    tt->help = tdrpStrDup("Echo tops are defined as the max ht with reflectivity at or above this value.");
+    tt->val_offset = (char *) &dbz_for_echo_tops - &_start_;
+    tt->single_val.d = 18;
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));

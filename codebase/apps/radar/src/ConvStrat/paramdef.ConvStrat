@@ -142,6 +142,12 @@ paramdef double {
   p_help = "If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.";
 } dbz_threshold_for_definite_convection;
 
+paramdef double {
+  p_default = 18;
+  p_descr = "Reflectivity for determing echo tops.";
+  p_help = "Echo tops are defined as the max ht with reflectivity at or above this value.";
+} dbz_for_echo_tops;
+
 commentdef {
   p_header = "COMPUTING THE CONVECTIVE RADIUS";
   p_text = "The convective radius is the distance by which identified convection will be expanded around the convective point. A linear function is used to compute the radius from the background reflectivity";
