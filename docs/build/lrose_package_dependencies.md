@@ -99,7 +99,7 @@ This requires upgrading the compiler toolchain.
   dnf install -y python3 ; \
   dnf install -y python2-devel platform-python-devel ; \
   dnf install -y \
-    tcsh wget git tk-devel \
+    tcsh wget git tk-devel perl-Env \
     emacs rsync python2 python3 mlocate \
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
