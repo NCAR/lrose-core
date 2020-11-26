@@ -362,6 +362,9 @@ int DataFileNames::getDataTime(const string& file_path,
 
   Path fpath(file_path);
   string fname = fpath.getFile();
+  if (fname.size() < 15) {
+    return -1;
+  }
   for (size_t ii = 0; ii < fname.size() - 15; ii++) {
     const char *ptr = fname.c_str() + ii;
     char cc;
