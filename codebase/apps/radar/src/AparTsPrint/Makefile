@@ -36,14 +36,12 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = AparTsPrint
 
-LOC_INCLUDES = $(NETCDF4_INCS)
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+LOC_INCLUDES =
+LOC_LDFLAGS =
 
 LOC_LIBS = \
-          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
-          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
-          -lphysics -ltoolsa -ldataport -ltdrp \
-          $(NETCDF4_LIBS) \
+          -lradar -lFmq -ldsserver -ldidss \
+          -ltoolsa -ldataport -ltdrp \
           -lfftw3 -lbz2 -lz -lpthread
 
 HDRS = \
