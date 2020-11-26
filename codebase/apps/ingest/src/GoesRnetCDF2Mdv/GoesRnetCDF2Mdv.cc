@@ -781,6 +781,7 @@ bool GoesRnetCDF2Mdv::_processData()
 	 << DateTime::str(mdvx.getMasterHeader().time_centroid) << endl;
   }
     
+  mdvx.setWriteLdataInfo();
   if (mdvx.writeToDir(_params->output_url) != 0)
     {
       cerr << ERROR_STR << methodName << endl;
@@ -909,7 +910,7 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
   }
   try {
     _file.readGlobAttr(CDM_DATA_TYPE, _globalAtts.cdmDataType);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     NcxxErrStr err;
     ostringstream  info;
     info << ERROR_STR << methodName << endl;
@@ -933,7 +934,7 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
   }
   try {
     _file.readGlobAttr(SCENE_ID, _globalAtts.sceneID);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     NcxxErrStr err;
     ostringstream  info;
     info << ERROR_STR << methodName << endl;
@@ -948,7 +949,7 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
   }
   try {
     _file.readGlobAttr(TITLE, _globalAtts.title);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     NcxxErrStr err;
     stringstream  info;
     info << ERROR_STR << methodName << endl;
@@ -963,7 +964,7 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
   }
   try {
     _setScanType(_globalAtts.sceneID); 
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     NcxxErrStr err;
     stringstream  info;
     info << ERROR_STR << methodName << endl;
@@ -977,7 +978,7 @@ void GoesRnetCDF2Mdv::_readGlobalAttributes()
   }
   try {
     _setProductType(_globalAtts.title);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     NcxxErrStr err;
     stringstream  info;
     info << ERROR_STR << methodName << endl;
@@ -1023,7 +1024,7 @@ int GoesRnetCDF2Mdv::_readRequiredGlobalAttr(const string &name, string &dest)
   
   try {
     _file.readGlobAttr(name, dest);
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
     NcxxErrStr err;
     ostringstream info;
     info << ERROR_STR << methodName << endl;
@@ -1199,7 +1200,7 @@ void GoesRnetCDF2Mdv::_readDimensions()
 	  }
 	  _numBands = dim.getSize();    
 	}
-	catch  (NcxxException e) {
+	catch  (NcxxException &e) {
 	  NcxxErrStr err;
 	  stringstream  info;
 	  info << ERROR_STR << methodName << endl;
@@ -1400,7 +1401,7 @@ void GoesRnetCDF2Mdv::_readDimensions()
       }
     }
   }
-  catch  (NcxxException e) {
+  catch  (NcxxException &e) {
     NcxxErrStr err;
     stringstream  info;
     info << ERROR_STR << methodName << endl;
@@ -1443,7 +1444,7 @@ void GoesRnetCDF2Mdv::_readZenithAngleDims()
     _numSZABounds = dim.getSize();
 
   }
-  catch  (NcxxException e) {
+  catch  (NcxxException &e) {
     NcxxErrStr err;
     stringstream  info;
     info << ERROR_STR << methodName << endl;
@@ -1482,7 +1483,7 @@ void GoesRnetCDF2Mdv::_readVariables()
     _readQualityControlVars();
     _readFieldVars();
   }
-  catch (NcxxException e) {
+  catch (NcxxException &e) {
     NcxxErrStr err;
     stringstream  info;
     info << ERROR_STR << methodName << endl;
@@ -1561,7 +1562,7 @@ void GoesRnetCDF2Mdv::_readCoordinateVars()
     yCoordAtts[SCALE_FACTOR].getValues(&scaleFactor);
     yCoordAtts[ADD_OFFSET].getValues(&offset);
   }
-  catch (NcxxException e) {
+  catch (NcxxException &e) {
     NcxxErrStr err;
     stringstream  info;
     info << ERROR_STR << methodName << endl;
