@@ -362,23 +362,22 @@ int DataFileNames::getDataTime(const string& file_path,
 
   Path fpath(file_path);
   string fname = fpath.getFile();
-  if (fname.size() < 15) {
-    return -1;
-  }
-  for (size_t ii = 0; ii < fname.size() - 15; ii++) {
-    const char *ptr = fname.c_str() + ii;
-    char cc;
-    if (sscanf(ptr, "%4d%2d%2d%1c%2d%2d%2d",
-	       &ftime.year, &ftime.month, &ftime.day, &cc,
-	       &ftime.hour, &ftime.min, &ftime.sec) == 7) {
-      if (!isdigit(cc)) {
-	uconvert_to_utime(&ftime);
-	data_time = ftime.unix_time;
-	return 0;
+  if (fname.size() >= 15) {
+    for (size_t ii = 0; ii < fname.size() - 15; ii++) {
+      const char *ptr = fname.c_str() + ii;
+      char cc;
+      if (sscanf(ptr, "%4d%2d%2d%1c%2d%2d%2d",
+                 &ftime.year, &ftime.month, &ftime.day, &cc,
+                 &ftime.hour, &ftime.min, &ftime.sec) == 7) {
+        if (!isdigit(cc)) {
+          uconvert_to_utime(&ftime);
+          data_time = ftime.unix_time;
+          return 0;
+        }
       }
-    }
-  } // ii
-
+    } // ii
+  } // if (fname.size() >= 15)
+    
   // find the last 3 path delimiters in the path
 
   int delim_len = strlen(PATH_DELIM);
