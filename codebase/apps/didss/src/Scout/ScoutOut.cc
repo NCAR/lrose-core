@@ -139,7 +139,7 @@ void ScoutOut::Recurse()
   
   // Set up logging report file, if any
 
-  if (_params.Debug) {
+  if (_params.Debug >= Params::DEBUG_VERBOSE) {
     _logFile = stderr;
   } else if (_params.Report) {
     PMU_auto_register( "Setting up report file" );
@@ -227,7 +227,8 @@ void ScoutOut::Recurse()
       if( strcmp( dataSetName.c_str(), _params._Patterns[i].dataSetName ) == 0 )
       {
         // get specs on the file using a file name pattern
-        Q.GetFileFacts( FileName.c_str(), _params.CompressedExt, "DontCare", _params._Patterns[i].filePattern );
+        Q.GetFileFacts( FileName.c_str(), _params.CompressedExt,
+                        "DontCare", _params._Patterns[i].filePattern );
         patternFound = true;
       }
     }
@@ -242,7 +243,7 @@ void ScoutOut::Recurse()
       continue;
     }
  
-    if (_params.Debug) {
+    if (_params.Debug >= Params::DEBUG_VERBOSE) {
       fprintf(stderr,"\t--> %s\n",FileName.c_str());
     }
     
