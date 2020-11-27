@@ -781,7 +781,8 @@ bool GoesRnetCDF2Mdv::_processData()
 	 << DateTime::str(mdvx.getMasterHeader().time_centroid) << endl;
   }
     
-  if (_params->trigger_mode == Params::REALTIME) {
+  if (_params->trigger_mode == Params::REALTIME ||
+      _params->trigger_mode == Params::LATEST_DATA) {
     mdvx.setWriteLdataInfo();
   }
   if (mdvx.writeToDir(_params->output_url) != 0)
