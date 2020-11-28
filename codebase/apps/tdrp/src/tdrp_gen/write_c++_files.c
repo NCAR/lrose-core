@@ -115,7 +115,7 @@ int write_hh_file(const char *class_name,
    */
 
   fprintf(hfile, "////////////////////////////////////////////\n");
-  fprintf(hfile, "// %s\n", hname);
+  fprintf(hfile, "// %s.hh\n", class_name);
   fprintf(hfile, "//\n");
   fprintf(hfile, "// TDRP header file for '%s' class.\n", class_name);
   fprintf(hfile, "//\n");
@@ -548,8 +548,8 @@ int write_cc_file(const char *class_name,
 
   fprintf(cfile,
 	  "////////////////////////////////////////////\n"
-	  "// %s\n"
-	  "//\n", cname);
+	  "// %s.cc\n"
+	  "//\n", class_name);
 
   fprintf(cfile, "// TDRP C++ code file for class '%s'.\n", class_name);
   fprintf(cfile, "//\n");

@@ -100,7 +100,7 @@ int write_h_file(const char *module,
    */
 
   fprintf(hfile, "/*******************************************\n");
-  fprintf(hfile, " * %s\n", hname);
+  fprintf(hfile, " * %s_tdrp.h\n", module);
   fprintf(hfile, " *\n");
   if (strlen(module) > 0) {
     fprintf(hfile, " * TDRP header file for '%s' module.\n", module);
@@ -424,8 +424,8 @@ int write_c_file(const char *module,
 
   fprintf(cfile,
 	  "/*******************************************\n"
-	  " * %s\n"
-	  " *\n", cname);
+	  " * %s_tdrp.c\n"
+	  " *\n", module);
 
   if (strlen(module) > 0) {
     fprintf(cfile, " * TDRP C code file '%s' module.\n", module);
