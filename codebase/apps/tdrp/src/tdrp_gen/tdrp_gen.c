@@ -63,6 +63,7 @@ int main(int argc, char **argv)
   char *paramdef_path = NULL;
   char *module = "";
   char *class_name = "Params";
+  char *output_dir = ".";
   char *prog_name = NULL;
   char *lib_name = NULL;
   int i;
@@ -72,7 +73,6 @@ int main(int argc, char **argv)
   int debug = FALSE;
   int cplusplus = FALSE;
   int singleton = FALSE;
-  int add_ncar_copyright = FALSE;
   int fname_set = FALSE;
   tdrpToken_t *tokens;
   TDRPtable *t_entries;
@@ -105,8 +105,6 @@ int main(int argc, char **argv)
       cplusplus = TRUE;
     } else if (!strcmp(argv[i], "-singleton")) {
       singleton = TRUE;
-    } else if (!strcmp(argv[i], "-add_ncar_copyright")) {
-      add_ncar_copyright = TRUE;
     } else if (!strcmp(argv[i], "-f")) {
       if (i < argc - 1) {
 	paramdef_path = argv[++i];
@@ -118,6 +116,13 @@ int main(int argc, char **argv)
     } else if (!strcmp(argv[i], "-class")) {
       if (i < argc - 1) {
 	class_name = argv[++i];
+      } else {
+	Usage(stderr);
+	exit(-1);
+      }
+    } else if (!strcmp(argv[i], "-dir")) {
+      if (i < argc - 1) {
+	output_dir = argv[++i];
       } else {
 	Usage(stderr);
 	exit(-1);
@@ -161,6 +166,9 @@ int main(int argc, char **argv)
 	    paramdef_path);
     fprintf(stdout, "  Creating files '%s.hh' and '%s.cc'.\n",
 	    class_name, class_name);
+    if (strcmp(output_dir, ".")) {
+      fprintf(stdout, "  Writing to dir '%s'.\n", output_dir);
+    }
   }
   
   /*
@@ -242,7 +250,7 @@ int main(int argc, char **argv)
      */
     
     if (write_hh_file(class_name, t_entries, n_defs, 
-                      prog_name, lib_name, singleton, add_ncar_copyright)) {
+                      prog_name, lib_name, output_dir, singleton)) {
       return (-1);
     }
     
@@ -251,7 +259,7 @@ int main(int argc, char **argv)
      */
     
     if (write_cc_file(class_name, t_entries, n_defs,
-                      prog_name, lib_name, singleton, add_ncar_copyright)) {
+                      prog_name, lib_name, output_dir, singleton)) {
       return (-1);
     }
 
@@ -261,7 +269,7 @@ int main(int argc, char **argv)
      * write out C mode header file
      */
     
-    if (write_h_file(module, t_entries, n_defs, prog_name, lib_name)) {
+    if (write_h_file(module, t_entries, n_defs, prog_name, lib_name, output_dir)) {
       return (-1);
     }
     
@@ -269,7 +277,7 @@ int main(int argc, char **argv)
      * write out C code file
      */
     
-    if (write_c_file(module, t_entries, n_defs, prog_name, lib_name)) {
+    if (write_c_file(module, t_entries, n_defs, prog_name, lib_name, output_dir)) {
       return (-1);
     }
 
@@ -317,9 +325,10 @@ static void Usage(FILE *out)
 	  "    moduleName must be first arg if it is specified.\n"
 	  "    If first arg begins with -, moduleName is set\n"
 	  "    to empty string.\n"
-	  "  [-add_ncar_copyright] Add NCAR copyright in C++ mode.\n"
 	  "  [-f paramdef_path] parameter definition file path.\n"
 	  "    This arg is REQUIRED.\n"
+	  "  [-dir path] optional dir path to which to write the output.\n"
+	  "    Default is the current directory.\n"
 	  "  [-h] gives usage.\n"
 	  "  [-c++] C++ mode - generates .hh and .cc class files.\n"
 	  "  [-class className] In C++ mode, set the name of the params class.\n"

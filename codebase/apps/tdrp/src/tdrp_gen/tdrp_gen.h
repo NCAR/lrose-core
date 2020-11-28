@@ -159,29 +159,31 @@ extern int write_h_file(const char *module,
                         const TDRPtable *t_entries,
 			int n_defs, 
                         const char *prog_name,
-                        const char *lib_name);
+                        const char *lib_name,
+                        const char *output_dir);
 
 extern int write_c_file(const char *module,
                         const TDRPtable *t_entries,
 			int n_defs, 
                         const char *prog_name,
-                        const char *lib_name);
+                        const char *lib_name,
+                        const char *output_dir);
    
 extern int write_hh_file(const char *module,
                          const TDRPtable *t_entries,
 			 int n_defs,
                          const char *prog_name,
                          const char *lib_name,
-                         int singleton,
-                         int add_ncar_copyright);
-
+                         const char *output_dir,
+                         int singleton);
+   
 extern int write_cc_file(const char *module,
                          const TDRPtable *t_entries,
 			 int n_defs,
                          const char *prog_name,
                          const char *lib_name,
-                         int singleton,
-                         int add_ncar_copyright);
+                         const char *output_dir,
+                         int singleton);
 
 #ifdef __cplusplus
 }
