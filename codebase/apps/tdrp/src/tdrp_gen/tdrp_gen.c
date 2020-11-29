@@ -73,6 +73,7 @@ int main(int argc, char **argv)
   int debug = FALSE;
   int cplusplus = FALSE;
   int singleton = FALSE;
+  int add_ncar_copyright = FALSE;
   int fname_set = FALSE;
   tdrpToken_t *tokens;
   TDRPtable *t_entries;
@@ -105,6 +106,8 @@ int main(int argc, char **argv)
       cplusplus = TRUE;
     } else if (!strcmp(argv[i], "-singleton")) {
       singleton = TRUE;
+    } else if (!strcmp(argv[i], "-add_ncar_copyright")) {
+      add_ncar_copyright = TRUE;
     } else if (!strcmp(argv[i], "-f")) {
       if (i < argc - 1) {
 	paramdef_path = argv[++i];
@@ -250,7 +253,8 @@ int main(int argc, char **argv)
      */
     
     if (write_hh_file(class_name, t_entries, n_defs, 
-                      prog_name, lib_name, output_dir, singleton)) {
+                      prog_name, lib_name, output_dir,
+                      singleton, add_ncar_copyright)) {
       return (-1);
     }
     
@@ -259,7 +263,8 @@ int main(int argc, char **argv)
      */
     
     if (write_cc_file(class_name, t_entries, n_defs,
-                      prog_name, lib_name, output_dir, singleton)) {
+                      prog_name, lib_name, output_dir,
+                      singleton, add_ncar_copyright)) {
       return (-1);
     }
 
@@ -316,8 +321,11 @@ static void Usage(FILE *out)
 
   fprintf(out,
 	  "Usage:\n"
-	  "  tdrp_gen [moduleName] -f paramdef_path [-h] [-c++] [-debug]\n"
-	  "           [-class className] [-prog progName] [-lib libName]\n"
+	  "  tdrp_gen [moduleName] [-h] -f paramdef_path\n"
+	  "           [-c++] [-debug]\n"
+	  "           [-class className] [-dir output_dir]\n"
+	  "           [-prog progName] [-lib libName]\n"
+	  "           [-singleton] [-add_ncar_copyright]\n"
 	  "\n"
 	  "where:\n"
 	  "  [moduleName] in C mode all externals are prepended\n"
@@ -325,19 +333,20 @@ static void Usage(FILE *out)
 	  "    moduleName must be first arg if it is specified.\n"
 	  "    If first arg begins with -, moduleName is set\n"
 	  "    to empty string.\n"
+	  "  [-h] gives usage.\n"
 	  "  [-f paramdef_path] parameter definition file path.\n"
 	  "    This arg is REQUIRED.\n"
-	  "  [-dir path] optional dir path to which to write the output.\n"
-	  "    Default is the current directory.\n"
-	  "  [-h] gives usage.\n"
 	  "  [-c++] C++ mode - generates .hh and .cc class files.\n"
+	  "  [-debug] print debug messages.\n"
 	  "  [-class className] In C++ mode, set the name of the params class.\n"
 	  "    Default is 'Params'.\n"
+	  "  [-dir path] optional dir path to which to write the output.\n"
+	  "    Default is the current directory.\n"
+	  "  [-prog progName] Program name for documenting code files.\n"
 	  "  [-lib libName] Library name if the params reside in a library.\n"
 	  "    This ensures the includes are set correctly.\n"
-	  "  [-prog progName] Program name for documenting code files.\n"
 	  "  [-singleton] Create a singleton object. Only in C++ mode.\n"
-	  "  [-debug] print debug messages.\n"
+	  "  [-add_ncar_copyright] Add NCAR copyright in C++ mode.\n"
 	  );
 
   fprintf(out,

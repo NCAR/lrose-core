@@ -175,7 +175,8 @@ extern int write_hh_file(const char *module,
                          const char *prog_name,
                          const char *lib_name,
                          const char *output_dir,
-                         int singleton);
+                         int singleton,
+                         int add_ncar_copyright);
    
 extern int write_cc_file(const char *module,
                          const TDRPtable *t_entries,
@@ -183,7 +184,8 @@ extern int write_cc_file(const char *module,
                          const char *prog_name,
                          const char *lib_name,
                          const char *output_dir,
-                         int singleton);
+                         int singleton,
+                         int add_ncar_copyright);
 
 #ifdef __cplusplus
 }
