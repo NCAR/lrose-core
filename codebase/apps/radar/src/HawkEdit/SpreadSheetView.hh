@@ -86,6 +86,8 @@ public slots:
   void newAzimuth(float azimuth);
   void setTheWindowTitle(float rayAzimuth);
 
+  void rangeDataSent(size_t nGates, float startingKm, float gateSize);
+
   void printQJSEngineContext();
 
 signals:
@@ -95,6 +97,7 @@ signals:
   void needAzimuthForRay(int offsetFromClosestRay, int fieldIdx, string fieldName);
   void applyVolumeEdits();
   void signalRayAzimuthChange(float rayAzimuth, float elevation);
+  void needRangeData(size_t nPoints);
 
 protected:
     void setupContextMenu();

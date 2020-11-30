@@ -16,6 +16,8 @@ public:
   SpreadSheetModel(RadxRay *closestRay, RadxVol *dataVolume);
   
   //void initData(string fileName);
+  void getRangeGeom(float *startRangeKm, float *gateSpacingKm);
+    // TODO: maybe on construction, map to finest range geometry? then we can call 
 
   // return lists of data
   vector<float> *getData(string fieldName, int offsetFromClosest);

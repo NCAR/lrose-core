@@ -25,6 +25,14 @@ SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay, RadxVol *dataVolume)
   _vol->loadFieldsFromRays();
 }
 
+void SpreadSheetModel::getRangeGeom(float *startRangeKm, float *gateSpacingKm) { 
+  double startRange;
+  double gateSpace;
+    // TODO: maybe on construction, map to finest range geometry? then we can call 
+  _vol->getPredomRayGeom(startRange, gateSpace);
+  *startRangeKm = startRange;
+  *gateSpacingKm = gateSpace;
+}
 
 vector<string> SpreadSheetModel::getFields()
 {

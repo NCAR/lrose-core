@@ -60,6 +60,7 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
   // connect view signals to controller slots
 
   connect(_currentView, SIGNAL(needFieldNames()), this, SLOT(needFieldNames()));
+  connect(_currentView, SIGNAL(needRangeData(size_t)), this, SLOT(needRangeData(size_t)));
   connect(_currentView, SIGNAL(needDataForField(string, int, int)), 
 	  this, SLOT(needDataForField(string, int, int)));
   connect(_currentView, SIGNAL(needAzimuthForRay(int, int, string)), 
@@ -133,6 +134,13 @@ float SpreadSheetController::getAzimuthForRay(int offsetFromClosest)
  
 }
 
+void SpreadSheetController::getRangeData(float *startingRangeKm, float *gateSpacingKm)
+{
+  _currentModel->getRangeGeom(startingRangeKm, gateSpacingKm);
+  cout << " In SpreadSheetController::getRangeGeom, startingRangeKm = " 
+    << *startingRangeKm << ", gateSpacingKm = " << *gateSpacingKm << endl;
+}
+
 void SpreadSheetController::setData(string fieldName, vector<float> *data)
 {
   LOG(DEBUG) << "setting values for " << fieldName;
@@ -156,6 +164,13 @@ void  SpreadSheetController::needAzimuthForRay(int offsetFromClosest,
 //azimuthForRaySent(float azimuth, int offsetFromClosestRay, int fieldIdx, string fieldName)
   _currentView->azimuthForRaySent(getAzimuthForRay(offsetFromClosest), offsetFromClosest,
     fieldIdx, fieldName);
+}
+
+void  SpreadSheetController::needRangeData(size_t nGates) {
+  float startingKm;
+  float gateSpacingKm;
+  getRangeData(&startingKm, &gateSpacingKm);
+  _currentView->rangeDataSent(nGates, startingKm, gateSpacingKm);
 }
 
 void SpreadSheetController::getVolumeChanges() {

@@ -32,6 +32,8 @@ public:
   vector<string> getFieldNames();
   vector<float> *getData(string fieldName, int offsetFromClosest);
   float getAzimuthForRay(int offsetFromClosest);
+  void getRangeData(float *startingRangeKm, float *gateSpacingKm);
+
   void setData(string fieldName, vector<float> *data);
 
   void open(string fileName);
@@ -46,6 +48,7 @@ public slots:
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
   void needAzimuthForRay(int offsetFromClosest, int fieldIdx, string fieldName);
+  void needRangeData(size_t nGates);
   void getVolumeChanges();
   void switchRay(float azimuth, float elevation);
   
