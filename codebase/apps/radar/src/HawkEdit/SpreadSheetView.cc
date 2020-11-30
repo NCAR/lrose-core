@@ -55,13 +55,13 @@ Q_DECLARE_METATYPE(QVector<double>)
   //_volumeData = vol;
 
     addToolBar(toolBar = new QToolBar());
-    formulaInput = new TextEdit(this);
+    //formulaInput = new TextEdit(this);
     //QSize sizeHint = formulaInput->viewportSizeHint();
     // get the font to determine height of one row
-    QFontMetrics m(formulaInput->font());
-    int rowHeight = m.lineSpacing();
-    formulaInput->setFixedHeight(3*rowHeight);
-    cellLabel = new QLabel(toolBar);
+    //QFontMetrics m(formulaInput->font());
+    //int rowHeight = m.lineSpacing();
+    //formulaInput->setFixedHeight(3*rowHeight);
+    //cellLabel = new QLabel(toolBar);
     //cellLabel->setMaximumSize(50, 10);
     //cellLabel->setMinimumSize(80, 10);
 
@@ -70,8 +70,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     //addLayout
     // Add the input field widgets to the layout
 
-    toolBar->addWidget(cellLabel);
-    toolBar->addWidget(formulaInput);
+    //toolBar->addWidget(cellLabel);
+    //toolBar->addWidget(formulaInput);
 
 
     QDockWidget *dock = new QDockWidget(tr("Spreadsheet Configuration"), this);
@@ -82,16 +82,6 @@ Q_DECLARE_METATYPE(QVector<double>)
     QLabel *echoLabel = new QLabel(tr("Fields"));
     fieldListWidget = new QListWidget();
     fieldListWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    //fieldListWidget->addItem("DBZ");
-    //QComboBox *echoComboBox = new QComboBox;
-    //echoComboBox->addItem(tr("Normal"));
-    //echoComboBox->addItem(tr("Password"));
-    //echoComboBox->addItem(tr("PasswordEchoOnEdit"));
-    //echoComboBox->addItem(tr("No Echo"));
-
-    //QLineEdit *echoLineEdit = new QLineEdit;
-    //echoLineEdit->setPlaceholderText("Placeholder Text");
-    //echoLineEdit->setFocus();
 
     QGridLayout *echoLayout = new QGridLayout;
     echoLayout->addWidget(echoLabel, 0, 0);
@@ -222,26 +212,26 @@ Q_DECLARE_METATYPE(QVector<double>)
     //connect(&okButton, &QAbstractButton::clicked, &functionDialog, &QDialog::accept);
     //    addWidget(&cancelButton);
     //addWidget(&okButton);
-    QAction *cancelAct = new QAction(tr("&Cancel"), this);
-    cancelAct->setStatusTip(tr("Cancel changes"));
-    cancelAct->setIcon(QIcon(":/images/cancel_x.png"));
+    //QAction *cancelAct = new QAction(tr("&Cancel"), this);
+    //cancelAct->setStatusTip(tr("Cancel changes"));
+    //cancelAct->setIcon(QIcon(":/images/cancel_x.png"));
     //QFont cancelFont = cancelAct->font();
     //cancelFont.setBold(true);
     //cancelFont.setPointSize(actionFontSize);
     //cancelAct->setFont(cancelFont);
-    connect(cancelAct, &QAction::triggered, this, &SpreadSheetView::cancelFormulaInput);
-    toolBar->addAction(cancelAct);
+    //connect(cancelAct, &QAction::triggered, this, &SpreadSheetView::cancelFormulaInput);
+    //toolBar->addAction(cancelAct);
 
-    QAction *okAct = new QAction(tr("&Ok"), this);
-    okAct->setStatusTip(tr("Accept changes"));
-    okAct->setIcon(QIcon(":/images/ok_check.png"));
+    //QAction *okAct = new QAction(tr("&Ok"), this);
+    //okAct->setStatusTip(tr("Accept changes"));
+    //okAct->setIcon(QIcon(":/images/ok_check.png"));
     //QFont okFont = okAct->font();
     //okFont.setBold(true);
     //okFont.setPointSize(actionFontSize);
     //okAct->setFont(okFont);
     //connect(okAct, &QAction::triggered, this, &SpreadSheetView::acceptFormulaInput);
-    toolBar->addAction(okAct);
-
+    //toolBar->addAction(okAct);
+/*
     QAction *applyAct = new QAction(tr("&Apply"), this);
     applyAct->setStatusTip(tr("Apply changes to display"));
     applyAct->setIcon(QIcon(":/images/apply.png"));
@@ -251,7 +241,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     applyAct->setFont(applyFont);
     connect(applyAct, &QAction::triggered, this, &SpreadSheetView::applyChanges);
     toolBar->addAction(applyAct);
-
+*/
     /*
     toolBar->addAction(okAct);
     toolBar->addAction(applyAct);
@@ -311,14 +301,14 @@ Q_DECLARE_METATYPE(QVector<double>)
             this, &SpreadSheetView::updateStatus);
     //connect(table, &QTableWidget::currentItemChanged,
     //        this, &SpreadSheetView::updateColor);
-    connect(table, &QTableWidget::currentItemChanged,
-            this, &SpreadSheetView::updateTextEdit);
+    //connect(table, &QTableWidget::currentItemChanged,
+    //        this, &SpreadSheetView::updateTextEdit);
     connect(table, &QTableWidget::itemChanged,
             this, &SpreadSheetView::updateStatus);
     //    connect(formulaInput, &QTextEdit::returnPressed, this, &SpreadSheetView::returnPressed);
     // connect(formulaInput, &TextEdit::Pressed, this, &SpreadSheetView::returnPressed);
-    connect(table, &QTableWidget::itemChanged,
-            this, &SpreadSheetView::updateTextEdit);
+    //connect(table, &QTableWidget::itemChanged,
+    //        this, &SpreadSheetView::updateTextEdit);
 
     // setTheWindowTitle(rayAzimuth);
     newAzimuth(rayAzimuth);
@@ -510,6 +500,7 @@ void SpreadSheetView::updateColor(QTableWidgetItem *item)
     colorAction->setIcon(pix);
 }
 
+/*
 void SpreadSheetView::updateTextEdit(QTableWidgetItem *item)
 {
     if (item != table->currentItem())
@@ -519,6 +510,7 @@ void SpreadSheetView::updateTextEdit(QTableWidgetItem *item)
     else
         formulaInput->clear();
 }
+*/
 
 void SpreadSheetView::returnPressed()
 {

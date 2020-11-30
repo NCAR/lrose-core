@@ -51,7 +51,7 @@ public:
 public slots:
     void updateStatus(QTableWidgetItem *item);
     void updateColor(QTableWidgetItem *item);
-    void updateTextEdit(QTableWidgetItem *item);
+    //void updateTextEdit(QTableWidgetItem *item);
     void returnPressed();
     //void acceptFormulaInput();
     void cancelFormulaInput();
