@@ -24,17 +24,18 @@
 /******************************************************************/
 /**
  *
- * /file <apar_ts_data.h>
+ * /file <ips_ts_data.h>
  *
- * Defines for handling apar time series radar data.
+ * Support for Independent Pulse Sampling.
+ * Defines for handling ips time series radar data.
  *
  * Mike Dixon, EOL, NCAR, Boulder, CO
  * July 2019
  *
  *********************************************************************/
 
-#ifndef _APAR_TS_DATA_H_
-#define _APAR_TS_DATA_H_
+#ifndef _IPS_TS_DATA_H_
+#define _IPS_TS_DATA_H_
 
 #ifdef WIN32                       
 #pragma pack(push,4)
@@ -48,7 +49,7 @@ extern "C" {
 /**
  * \mainpage
  *
- * This document describes the time series format for the APAR_TS project.
+ * This document describes the time series format for the IPS_TS project.
  * <br>
  * The format uses the following platform-independent data types:
  * 
@@ -68,52 +69,52 @@ extern "C" {
 #include <dataport/port_types.h>
 #include <math.h>
 
-#define APAR_TS_MAX_CHAN 4  /**< Max number of channels in data */
-#define APAR_TS_MAX_PRT  4  /**< Max number of PRTs to be used */
-#define APAR_TS_MAX_RADAR_NAME 32  /**< Max length of radar name */
-#define APAR_TS_MAX_SITE_NAME  32  /**< Max length of site name */
-#define APAR_TS_MAX_SEGMENT_NAME 32  /**< Max length of scan segment name */
-#define APAR_TS_MAX_PROJECT_NAME 32  /**< Max length of project name */
-#define APAR_TS_MAX_FIXED_ANGLES 520 /**< Length of array of fixed angles */
-#define APAR_TS_MAX_PHASE_SEQ_LEN 1024  /**< Max length of phase coding sequence array */
-#define APAR_TS_VERSION_NAME_LEN 56  /**< Version name length */
+#define IPS_TS_MAX_CHAN 4  /**< Max number of channels in data */
+#define IPS_TS_MAX_PRT  4  /**< Max number of PRTs to be used */
+#define IPS_TS_MAX_RADAR_NAME 32  /**< Max length of radar name */
+#define IPS_TS_MAX_SITE_NAME  32  /**< Max length of site name */
+#define IPS_TS_MAX_SEGMENT_NAME 32  /**< Max length of scan segment name */
+#define IPS_TS_MAX_PROJECT_NAME 32  /**< Max length of project name */
+#define IPS_TS_MAX_FIXED_ANGLES 520 /**< Length of array of fixed angles */
+#define IPS_TS_MAX_PHASE_SEQ_LEN 1024  /**< Max length of phase coding sequence array */
+#define IPS_TS_VERSION_NAME_LEN 56  /**< Version name length */
 
 /* missing value for meta-data
  * used where value is not known */
 
-#define APAR_TS_MISSING_INT -9999 /**< Missing val for integer values */
-#define APAR_TS_MISSING_FLOAT -9999.0F /**< Missing val for float values */ 
-#define APAR_TS_MISSING_DOUBLE -9999.0 /**< Missing val for double values */ 
+#define IPS_TS_MISSING_INT -9999 /**< Missing val for integer values */
+#define IPS_TS_MISSING_FLOAT -9999.0F /**< Missing val for float values */ 
+#define IPS_TS_MISSING_DOUBLE -9999.0 /**< Missing val for double values */ 
 #ifdef NOTNOW
-#define APAR_TS_MISSING_FLOAT NAN /**< Missing val for float values */
+#define IPS_TS_MISSING_FLOAT NAN /**< Missing val for float values */
 #endif
 
 /* packet IDs */
 
-#define APAR_TS_SYNC_ID 0x55550001 /**< ID for sync packet */
-#define APAR_TS_RADAR_INFO_ID 0x55550002 /**< ID for radar_info packet */
-#define APAR_TS_SCAN_SEGMENT_ID 0x55550003 /**< ID for scan segment packet */
-#define APAR_TS_PROCESSING_ID 0x55550004 /**< ID for time-series processing packet */
-#define APAR_TS_CALIBRATION_ID 0x55550005 /**< ID for calibration packet */
-#define APAR_TS_EVENT_NOTICE_ID 0x55550006 /**< ID for event notice packet */
+#define IPS_TS_SYNC_ID 0x55550001 /**< ID for sync packet */
+#define IPS_TS_RADAR_INFO_ID 0x55550002 /**< ID for radar_info packet */
+#define IPS_TS_SCAN_SEGMENT_ID 0x55550003 /**< ID for scan segment packet */
+#define IPS_TS_PROCESSING_ID 0x55550004 /**< ID for time-series processing packet */
+#define IPS_TS_CALIBRATION_ID 0x55550005 /**< ID for calibration packet */
+#define IPS_TS_EVENT_NOTICE_ID 0x55550006 /**< ID for event notice packet */
 
-#define APAR_TS_PULSE_HEADER_ID 0x55550007 /**< ID for pulse header packet */
-#define APAR_TS_VERSION_ID 0x55550008 /**< ID for version packet */
-#define APAR_TS_STATUS_XML_ID 0x55550009 /**< ID for status in XML format */
+#define IPS_TS_PULSE_HEADER_ID 0x55550007 /**< ID for pulse header packet */
+#define IPS_TS_VERSION_ID 0x55550008 /**< ID for version packet */
+#define IPS_TS_STATUS_XML_ID 0x55550009 /**< ID for status in XML format */
   
-#define APAR_TS_PLATFORM_GEOREF_ID 0x5555000a /**< ID for moving platform georeference */
-#define APAR_TS_GEOREF_CORRECTION_ID 0x5555000b /**< ID for moving platform georeference */
+#define IPS_TS_PLATFORM_GEOREF_ID 0x5555000a /**< ID for moving platform georeference */
+#define IPS_TS_GEOREF_CORRECTION_ID 0x5555000b /**< ID for moving platform georeference */
 
-#define APAR_TS_SYNC_VAL_00 0x2a2a2a2a /**< Value for first word in sync packet */
-#define APAR_TS_SYNC_VAL_01 0x7e7e7e7e /**< Value for second word in sync packet */
+#define IPS_TS_SYNC_VAL_00 0x2a2a2a2a /**< Value for first word in sync packet */
+#define IPS_TS_SYNC_VAL_01 0x7e7e7e7e /**< Value for second word in sync packet */
 
 /* event flags */
 
-typedef si32 apar_ts_event_flags_t;
-#define APAR_TS_END_OF_SWEEP (1 << 0)
-#define APAR_TS_END_OF_VOLUME (1 << 1)
-#define APAR_TS_START_OF_SWEEP (1 << 2)
-#define APAR_TS_START_OF_VOLUME (1 << 3)
+typedef si32 ips_ts_event_flags_t;
+#define IPS_TS_END_OF_SWEEP (1 << 0)
+#define IPS_TS_END_OF_VOLUME (1 << 1)
+#define IPS_TS_START_OF_SWEEP (1 << 2)
+#define IPS_TS_START_OF_VOLUME (1 << 3)
 
 /************************************************************************/
 /************************************************************************/
@@ -123,7 +124,7 @@ typedef si32 apar_ts_event_flags_t;
 /************************************************************************/
 /************************************************************************/
 
-enum class AparTsDebug_t {
+enum class IpsTsDebug_t {
   OFF = 0,
   NORM,
   VERBOSE,
@@ -132,13 +133,13 @@ enum class AparTsDebug_t {
 
 /************************************************************************/
 /**
- * \enum apar_ts_prf_mode_t
+ * \enum ips_ts_prf_mode_t
  *
  * PRF mode - fixed or dual-prt.
  *
  ************************************************************************/
 
-enum class apar_ts_prf_mode_t {
+enum class ips_ts_prf_mode_t {
 
   NOT_SET = 0,
   FIXED = 1, /**< fixed pulsing mode */
@@ -152,11 +153,11 @@ enum class apar_ts_prf_mode_t {
 
 /************************************************************************/
 /**
- * \enum apar_ts_pulse_type_t
+ * \enum ips_ts_pulse_type_t
  *
  ************************************************************************/
 
-enum class apar_ts_pulse_shape_t {
+enum class ips_ts_pulse_shape_t {
 
   NOT_SET = 0,
   RECT = 1, /**< rectangular pulse */
@@ -168,11 +169,11 @@ enum class apar_ts_pulse_shape_t {
 
 /************************************************************************/
 /**
- * \enum apar_ts_pol_mode_t - polarization
+ * \enum ips_ts_pol_mode_t - polarization
  *
  ************************************************************************/
 
-enum class apar_ts_pol_mode_t {
+enum class ips_ts_pol_mode_t {
   
   NOT_SET = 0,
   H = 1, /**< H pulse */
@@ -184,14 +185,14 @@ enum class apar_ts_pol_mode_t {
 
 /************************************************************************/
 /**
- * \enum apar_ts_scan_mode_t
+ * \enum ips_ts_scan_mode_t
  *
  * Antenna scanning mode - these are legacy NCAR codes, with the CHILL
  * FIXED, MANPPI and MANRHI appended
  *
  ************************************************************************/
 
-enum class apar_ts_scan_mode_t {
+enum class ips_ts_scan_mode_t {
                                 
   NOT_SET = 0,
   PPI = 1, /**< PPI sector */
@@ -207,13 +208,13 @@ enum class apar_ts_scan_mode_t {
 
 /************************************************************************/
 /**
- * \enum apar_ts_radar_platform_t
+ * \enum ips_ts_radar_platform_t
  *
  * The type of platform on which the radar is mounted.
  *
  ************************************************************************/
 
-enum class apar_ts_radar_platform_t {
+enum class ips_ts_radar_platform_t {
 
   NOT_SET = 0,
   FIXED = 1, /**< Radar is in a fixed location */
@@ -226,13 +227,13 @@ enum class apar_ts_radar_platform_t {
 
 /************************************************************************/
 /**
- * \enum apar_ts_iq_encoding_t
+ * \enum ips_ts_iq_encoding_t
  *
  * How the IQ data is encoded and packed.
  *
  ************************************************************************/
 
-enum class apar_ts_iq_encoding_t {
+enum class ips_ts_iq_encoding_t {
 
   NOT_SET = 0,
 
@@ -264,16 +265,16 @@ enum class apar_ts_iq_encoding_t {
 
 /************************************************************************/
 /**
- * \struct apar_ts_packet_info_
+ * \struct ips_ts_packet_info_
  *
  * Struct included at top of all other structs.
  * packet_id is set to the id relevant to that packet type.
  *
  ************************************************************************/
 
-typedef struct apar_ts_packet_info {
+typedef struct ips_ts_packet_info {
     
-  si32 id; /**< Id for the packet type e.g. APAR_TS_RADAR_INFO_ID */
+  si32 id; /**< Id for the packet type e.g. IPS_TS_RADAR_INFO_ID */
   si32 len_bytes; /**< length of packet structure, in bytes,
 		   ** except for status_xml and pulse_header,
                    ** in which len_bytes
@@ -285,52 +286,52 @@ typedef struct apar_ts_packet_info {
   si32 time_nano_secs; /**< partial secs - nanosecs */
   si32 reserved[7]; /**< future expansion */
 
-} apar_ts_packet_info_t;
+} ips_ts_packet_info_t;
 
 /************************************************************************/
 /**
- * \struct apar_ts_sync
+ * \struct ips_ts_sync
  *
  * Synchronization packet.
  * Sent regularly to resynchronize data stream if needed.
  *
  * The magik[2] array will contain the following:
  *
- *   <br>APAR_TS_SYNC_VAL_00  = 0x2a2a2a2a		ascii: ****
- *   <br>APAR_TS_SYNC_VAL_01  = 0x7e7e7e7e		ascii: ~~~~
+ *   <br>IPS_TS_SYNC_VAL_00  = 0x2a2a2a2a		ascii: ****
+ *   <br>IPS_TS_SYNC_VAL_01  = 0x7e7e7e7e		ascii: ~~~~
  *
  ************************************************************************/
 
-typedef struct apar_ts_sync {
+typedef struct ips_ts_sync {
     
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_SYNC_ID */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_SYNC_ID */
 
   si32 magik[16]; /**< array of sync values */
   
-} apar_ts_sync_t;
+} ips_ts_sync_t;
 
 /************************************************************************/
 /**
- * \struct apar_ts_version
+ * \struct ips_ts_version
  *
  * Version packet.
  *
  ************************************************************************/
 
-typedef struct apar_ts_version {
+typedef struct ips_ts_version {
     
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_VERSION_ID */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_VERSION_ID */
 
   si32 major_version_num;
   si32 minor_version_num;
 
-  char version_name[APAR_TS_VERSION_NAME_LEN];
+  char version_name[IPS_TS_VERSION_NAME_LEN];
   
-} apar_ts_version_t;
+} ips_ts_version_t;
 
 /************************************************************************/
 /**
- * \struct apar_ts_radar_info
+ * \struct ips_ts_radar_info
  *
  * Fixed radar-specific information.
  *
@@ -338,14 +339,14 @@ typedef struct apar_ts_version {
  *
  ************************************************************************/
 
-typedef struct apar_ts_radar_info {
+typedef struct ips_ts_radar_info {
     
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_RADAR_INFO_ID */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_RADAR_INFO_ID */
   
   fl64 latitude_deg;  /**< latitude, in degrees */
   fl64 longitude_deg; /**< longitude, in degrees */
   fl32 altitude_m;    /**< altitude, in meters */
-  si32 platform_type; /**< platform type - \ref apar_ts_radar_platform */
+  si32 platform_type; /**< platform type - \ref ips_ts_radar_platform */
 
   fl32 beamwidth_deg_h; /**< Antenna beamwidth, horizontal, in degrees */
   fl32 beamwidth_deg_v; /**< Antenna beamwidth, vertical, in degrees */
@@ -356,26 +357,26 @@ typedef struct apar_ts_radar_info {
 
   si32 unused[21]; /**< for future expansion */
   
-  char radar_name[APAR_TS_MAX_RADAR_NAME]; /**< UTF-8 encoded radar name */
-  char site_name[APAR_TS_MAX_SITE_NAME];   /**< UTF-8 encoded radar name */
+  char radar_name[IPS_TS_MAX_RADAR_NAME]; /**< UTF-8 encoded radar name */
+  char site_name[IPS_TS_MAX_SITE_NAME];   /**< UTF-8 encoded radar name */
 
-} apar_ts_radar_info_t;
+} ips_ts_radar_info_t;
 
 /************************************************************************/
 /**
- * \struct apar_ts_scan_segment
+ * \struct ips_ts_scan_segment
  *
  * Scanning strategy - scan segment or volume
  *
  ************************************************************************/
 
-typedef struct apar_ts_scan_segment
+typedef struct ips_ts_scan_segment
 
 {
 
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_SCAN_SEGMENT_ID */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_SCAN_SEGMENT_ID */
   
-  si32 scan_mode; /**< The current scan mode - \ref apar_ts_scan_mode */
+  si32 scan_mode; /**< The current scan mode - \ref ips_ts_scan_mode */
   si32 volume_num; /**< Volume number, increments linearly */
   si32 sweep_num; /**< Sweep number within the current volume */
 
@@ -393,7 +394,7 @@ typedef struct apar_ts_scan_segment
                              *   (az in RHI, el in PPI) */
   si32 n_sweeps;  /**< Indicates that a set of discrete angles
                    *   is specified for az or el */
-  fl32 fixed_angles[APAR_TS_MAX_FIXED_ANGLES];
+  fl32 fixed_angles[IPS_TS_MAX_FIXED_ANGLES];
   
   /** Sun Scan sector widths */
 
@@ -402,14 +403,14 @@ typedef struct apar_ts_scan_segment
 
   si32 unused[456]; /**< for future expansion */
   
-  char segment_name[APAR_TS_MAX_SEGMENT_NAME]; /**< Name of this scan segment */
-  char project_name[APAR_TS_MAX_PROJECT_NAME]; /**< Project name */
+  char segment_name[IPS_TS_MAX_SEGMENT_NAME]; /**< Name of this scan segment */
+  char project_name[IPS_TS_MAX_PROJECT_NAME]; /**< Project name */
 
-} apar_ts_scan_segment_t;
+} ips_ts_scan_segment_t;
 
 /************************************************************************/
 /**
- * \struct apar_ts_processing
+ * \struct ips_ts_processing
  *
  * Time-series-specific processing.
  *
@@ -418,18 +419,18 @@ typedef struct apar_ts_scan_segment
  *
  ************************************************************************/
 
-typedef struct apar_ts_processing {
+typedef struct ips_ts_processing {
 
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_PROCESSING_ID */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_PROCESSING_ID */
   
   si32 pol_mode;        /**< current polarization mode - 
-                         *   \ref apar_ts_pol_mode */
+                         *   \ref ips_ts_pol_mode */
 
   si32 prf_mode;        /**< current PRF mode -
-                         *   \ref apar_ts_prf_mode */
+                         *   \ref ips_ts_prf_mode */
 
   si32 pulse_shape;      /**< current pulse type -
-                         *   \ref apar_ts_pulse_shape */
+                         *   \ref ips_ts_pulse_shape */
 
   fl32 pulse_width_us;   /**< pulse width in microsecs */
   
@@ -440,16 +441,16 @@ typedef struct apar_ts_processing {
   fl32 test_pulse_length_us;    /**< Length of test pulse */
   
   si32 num_prts;       /**< number of prt's used
-                        * allowed values 1 through APAR_TS_MAX_PRT */
-  fl32 prt_us[APAR_TS_MAX_PRT]; /**< PRT in microseconds */
+                        * allowed values 1 through IPS_TS_MAX_PRT */
+  fl32 prt_us[IPS_TS_MAX_PRT]; /**< PRT in microseconds */
 
   si32 unused[35];     /**< for future expansion */
   
-} apar_ts_processing_t;
+} ips_ts_processing_t;
 
 /************************************************************************/
 /**
- * \struct apar_ts_status_xml
+ * \struct ips_ts_status_xml
  *
  * Status as ASCII in XML format.
  *
@@ -458,23 +459,23 @@ typedef struct apar_ts_processing {
  * The contents are free-form. Any suitable status information
  * may be included in the XML buffer.
  *
- * packet.len_bytes = sizeof(apar_ts_packet_info_t) + xml_len.
+ * packet.len_bytes = sizeof(ips_ts_packet_info_t) + xml_len.
  *
  ************************************************************************/
 
-typedef struct apar_ts_status_xml {
+typedef struct ips_ts_status_xml {
   
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_STATUS_XML */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_STATUS_XML */
   
   si32 xml_len; /**< Length of XML buffer in bytes
                  * This should include the trailing NULL */
   si32 unused[15]; /**< for future expansion */
 
-} apar_ts_status_xml_t;
+} ips_ts_status_xml_t;
 
 /************************************************************************/
 /**
- * \struct apar_ts_calibration
+ * \struct ips_ts_calibration
  *
  * Calibration information
  *
@@ -487,9 +488,9 @@ typedef struct apar_ts_status_xml {
  *
  ************************************************************************/
 
-typedef struct apar_ts_calibration {
+typedef struct ips_ts_calibration {
   
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_CALIBRATION_ID */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_CALIBRATION_ID */
   
   fl32 wavelength_cm;  /**< radar wavelength in cm */
   fl32 beamwidth_deg_h; /**< Antenna beamwidth, horizontal, in degrees */
@@ -638,21 +639,21 @@ typedef struct apar_ts_calibration {
 
   si32 unused[47]; /**< for future expansion */ 
 
-  char radar_name[APAR_TS_MAX_RADAR_NAME]; /**< name of instrument */
+  char radar_name[IPS_TS_MAX_RADAR_NAME]; /**< name of instrument */
 
-} apar_ts_calibration_t;
+} ips_ts_calibration_t;
 
 /************************************************************************/
 /**
- * \struct apar_ts_event_notice
+ * \struct ips_ts_event_notice
  *
  * Signals events such as end of volume, errors, restart etc.
  *
  ************************************************************************/
 
-typedef struct apar_ts_event_notice {
+typedef struct ips_ts_event_notice {
 
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_EVENT_NOTICE_ID */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_EVENT_NOTICE_ID */
   
   si32 start_of_sweep; /**< TRUE / FALSE */
   si32 end_of_sweep; /**< TRUE / FALSE */
@@ -660,7 +661,7 @@ typedef struct apar_ts_event_notice {
   si32 start_of_volume; /**< TRUE / FALSE */
   si32 end_of_volume; /**< TRUE / FALSE */
   
-  si32 scan_mode; /**< The current scan mode - \ref apar_ts_scan_mode */
+  si32 scan_mode; /**< The current scan mode - \ref ips_ts_scan_mode */
   si32 volume_num; /**< Volume number, increments linearly */
   si32 sweep_num; /**< Sweep number within the current volume */
   
@@ -669,18 +670,18 @@ typedef struct apar_ts_event_notice {
 
   si32 unused[40]; /**< not used - for later expansion */
 
-} apar_ts_event_notice_t;
+} ips_ts_event_notice_t;
 
 /************************************************************************/
 /**
- * \struct apar_ts_pulse_header
+ * \struct ips_ts_pulse_header
  *
  * Pulse header.
  * This header precedes the IQ data.
  *
  * A pulse data packet is made up as follows:
  * 
- *  \li apar_ts_pulse_header
+ *  \li ips_ts_pulse_header
  *  \li iq-data channel 0 (H or co-polar)
  *  \li iq-data channel 1 (V or x-polar) (if available)
  *  \li iq-data channel 2 (if available)
@@ -691,9 +692,9 @@ typedef struct apar_ts_event_notice {
  *
  ************************************************************************/
 
-typedef struct apar_ts_pulse_header {
+typedef struct ips_ts_pulse_header {
   
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_PULSE_HEADER_ID *
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_PULSE_HEADER_ID *
                                  * len_bytes = length of this structure,
                                  * plus following data, in bytes */
   
@@ -703,7 +704,7 @@ typedef struct apar_ts_pulse_header {
   si32 beam_num_in_dwell;  /**< beam sequence number since start of dwell */
   si32 visit_num_in_beam;  /**< visit sequence number since start of beam */
 
-  si32 scan_mode; /**< The current scan mode - \ref apar_ts_scan_mode */
+  si32 scan_mode; /**< The current scan mode - \ref ips_ts_scan_mode */
   si32 volume_num;  /**< scan vol  num - if avail, otherwise set to -1 */ 
   si32 sweep_num;   /**< scan tilt num - if avail, otherwise set to -1 */ 
 
@@ -727,28 +728,28 @@ typedef struct apar_ts_pulse_header {
                        * 1 = TRUE, 0 = FALSE.
 		       * Applies to phase coded operation */
   
-  si32 iq_encoding; /**< APAR_TS_IQ_ENCODING */
+  si32 iq_encoding; /**< IPS_TS_IQ_ENCODING */
   si32 n_channels;  /**< number of channels in the IQ data */
   si32 n_data; /**< number of data values in the IQ array
                 * \code nData = nChannels * nGates * 2 \endcode */
   
-  fl32 scale;   /**< for use with APAR_TS_IQ_ENCODING types
+  fl32 scale;   /**< for use with IPS_TS_IQ_ENCODING types
                  * to convert to/from floats */
-  fl32 offset;  /**< for use with APAR_TS_IQ_ENCODING types
+  fl32 offset;  /**< for use with IPS_TS_IQ_ENCODING types
                  * to convert to/from floats */
 
-  si32 chan_is_copol[APAR_TS_MAX_CHAN]; /**< channel copol flag
+  si32 chan_is_copol[IPS_TS_MAX_CHAN]; /**< channel copol flag
                                          * -1 = not set,
                                          *  1 = copol, 0 = crosspol */
 
   si32 status; /**< general status flag - optional use */
 
   si32 event_flags; /**< flags from end of volume, start of tilt etc.
-                     * See apar_ts_event_flags_t */
+                     * See ips_ts_event_flags_t */
 
   si32 unused[80];
 
-} apar_ts_pulse_header_t;
+} ips_ts_pulse_header_t;
 
 /************************************************************************/
 /**
@@ -758,9 +759,9 @@ typedef struct apar_ts_pulse_header {
  *
  ************************************************************************/
 
-typedef struct apar_ts_platform_georef {
+typedef struct ips_ts_platform_georef {
     
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_PLATFORM_GEOREF_ID */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_PLATFORM_GEOREF_ID */
   
   fl64 longitude;           /**< Antenna longitude (Eastern
                              * Hemisphere is positive, West
@@ -824,7 +825,7 @@ typedef struct apar_ts_platform_georef {
 
   si32 unused[24]; /**< for future expansion */
   
-} apar_ts_platform_georef_t;
+} ips_ts_platform_georef_t;
 
 /************************************************************************/
 /**
@@ -834,9 +835,9 @@ typedef struct apar_ts_platform_georef {
  *
  ************************************************************************/
   
-typedef struct apar_ts_georef_correction {
+typedef struct ips_ts_georef_correction {
     
-  apar_ts_packet_info_t packet; /*< packet_id = APAR_TS_GEOREF_CORRECTION_ID */
+  ips_ts_packet_info_t packet; /*< packet_id = IPS_TS_GEOREF_CORRECTION_ID */
   
   fl32 longitude_corr_deg;    /**< Correction added to radar longitude */
   fl32 latitude_corr_deg;     /**< Correction added to radar latitude */
@@ -869,7 +870,7 @@ typedef struct apar_ts_georef_correction {
   
   si32 unused[32];            /**< for future expansion */
   
-} apar_ts_georef_correction_t;
+} ips_ts_georef_correction_t;
 
 #ifdef __cplusplus
 }

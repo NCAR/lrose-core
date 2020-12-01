@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparNoiseLocator.hh
+// IpsNoiseLocator.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,31 +30,33 @@
 //
 ///////////////////////////////////////////////////////////////
 //
+// Support for Independent Pulse Sampling.
+//
 // Find noise gates in Doppler radar data
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef AparNoiseLocator_H
-#define AparNoiseLocator_H
+#ifndef IpsNoiseLocator_H
+#define IpsNoiseLocator_H
 
 #include <pthread.h>
 #include <vector>
-#include <radar/AparMomFields.hh>
-#include <radar/AparTsCalib.hh>
+#include <radar/IpsMomFields.hh>
+#include <radar/IpsTsCalib.hh>
 #include <radar/InterestMap.hh>
 using namespace std;
 
-class AparNoiseLocator {
+class IpsNoiseLocator {
   
 public:
 
   // constructor
   
-  AparNoiseLocator();
+  IpsNoiseLocator();
 
   // destructor
   
-  ~AparNoiseLocator();
+  ~IpsNoiseLocator();
 
   // set debugging state
 
@@ -116,7 +118,7 @@ public:
   // must be called before locate() or computeNoise()
 
   void setRayProps(int nGates,
-                   const AparTsCalib &calib,
+                   const IpsTsCalib &calib,
                    time_t timeSecs, 
                    double nanoSecs,
                    double elevation, 
@@ -148,7 +150,7 @@ public:
   //   dbm_for_noise
   //   ncp
   
-  void locate(const AparMomFields *mfields);
+  void locate(const IpsMomFields *mfields);
 
   /////////////////////////////////////////////
   // Identify the noise, compute mean noise
@@ -159,20 +161,20 @@ public:
   // The following must be set in mfields prior to calling:
   //   lag0_hc_db
 
-  void computeNoiseSinglePolH(AparMomFields *mfields);
+  void computeNoiseSinglePolH(IpsMomFields *mfields);
 
   // Single pol V channel
   // The following must be set in mfields prior to calling:
   //   lag0_vc_db
 
-  void computeNoiseSinglePolV(AparMomFields *mfields);
+  void computeNoiseSinglePolV(IpsMomFields *mfields);
 
   // Alternating mode dual pol, co-pol receiver only
   // The following must be set in mfields prior to calling:
   //   lag0_hc_db
   //   lag0_vc_db
   
-  void computeNoiseDpAltHvCoOnly(AparMomFields *mfields);
+  void computeNoiseDpAltHvCoOnly(IpsMomFields *mfields);
 
   // Alternating mode dual pol, co/cross receivers
   // The following must be set in mfields prior to calling:
@@ -181,32 +183,32 @@ public:
   //   lag0_hx_db
   //   lag0_vx_db
   
-  void computeNoiseDpAltHvCoCross(AparMomFields *mfields);
+  void computeNoiseDpAltHvCoCross(IpsMomFields *mfields);
 
   // Sim HV mode
   // The following must be set in mfields prior to calling:
   //   lag0_hc_db
   //   lag0_vc_db
   
-  void computeNoiseDpSimHv(AparMomFields *mfields);
+  void computeNoiseDpSimHv(IpsMomFields *mfields);
 
   // Dual pol, H-transmit only
   // The following must be set in mfields prior to calling:
   //   lag0_hc_db
   //   lag0_vx_db
   
-  void computeNoiseDpHOnly(AparMomFields *mfields);
+  void computeNoiseDpHOnly(IpsMomFields *mfields);
 
   // Dual pol, V-transmit only
   // The following must be set in mfields prior to calling:
   //   lag0_vc_db
   //   lag0_hx_db
   
-  void computeNoiseDpVOnly(AparMomFields *mfields);
+  void computeNoiseDpVOnly(IpsMomFields *mfields);
   
   // add the noise fields to a moments array
   
-  void addToMoments(AparMomFields *mfields);
+  void addToMoments(IpsMomFields *mfields);
     
   // get results - after running locate
   // these arrays span the gates from 0 to nGates-1
@@ -255,7 +257,7 @@ private:
   double _nanoSecs;
   double _elevation;
   double _azimuth;
-  AparTsCalib _calib;
+  IpsTsCalib _calib;
 
   // flag to indicate that the noise bias should be set
   // to the same value for all channels
@@ -357,8 +359,8 @@ private:
   // private methods
   
   double _computePhaseChangeError(int startGate, int endGate);
-  void _computeDbmSdev(const AparMomFields *mfields);
-  void _computeNcpMean(const AparMomFields *mfields);
+  void _computeDbmSdev(const IpsMomFields *mfields);
+  void _computeNcpMean(const IpsMomFields *mfields);
   double _computeMean(const vector<double> &vals);
   double _computeMedian(const vector<double> &vals);
   int _getSavedNoiseClosestHc(noise_val_t &closest);

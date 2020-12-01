@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparTsReader
+// IpsTsReader
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -30,9 +30,13 @@
 // Aug 2019
 //
 ///////////////////////////////////////////////////////////////
+//
+// Support for Independent Pulse Sampling.
+//
+///////////////////////////////////////////////////////////////
 
-#ifndef AparTsReader_hh
-#define AparTsReader_hh
+#ifndef IpsTsReader_hh
+#define IpsTsReader_hh
 
 #include <string>
 #include <toolsa/pmu.h>
@@ -42,28 +46,28 @@
 #include <didss/DsInputPath.hh>
 #include <didss/DsMessage.hh>
 #include <didss/DsMsgPart.hh>
-#include <radar/AparTsInfo.hh>
-#include <radar/AparTsPulse.hh>
+#include <radar/IpsTsInfo.hh>
+#include <radar/IpsTsPulse.hh>
 using namespace std;
 
 ////////////////////////
 // Base class
 
-class AparTsReader {
+class IpsTsReader {
   
 public:
 
   // constructor
   
-  AparTsReader(AparTsDebug_t debug = AparTsDebug_t::OFF);
+  IpsTsReader(IpsTsDebug_t debug = IpsTsDebug_t::OFF);
   
   // destructor
   
-  virtual ~AparTsReader();
+  virtual ~IpsTsReader();
 
   // debugging
 
-  void setDebug(AparTsDebug_t debug) { _debug = debug; }
+  void setDebug(IpsTsDebug_t debug) { _debug = debug; }
 
   // Specify the radar id.
   // There is a radar_id associated with each packet.
@@ -110,8 +114,8 @@ public:
   // Returns pointer to pulse object.
   // Returns NULL at end of data, or error.
   
-  virtual AparTsPulse *getNextPulse(bool convertToFloats = false,
-                                    AparTsPulse *pulse = NULL) = 0;
+  virtual IpsTsPulse *getNextPulse(bool convertToFloats = false,
+                                    IpsTsPulse *pulse = NULL) = 0;
 
   // in non-blocking mode, check if read timed out
 
@@ -127,8 +131,8 @@ public:
   
   // get ops info
   
-  const AparTsInfo &getOpsInfo() const { return _opsInfo; }
-  AparTsInfo &getOpsInfo() { return _opsInfo; }
+  const IpsTsInfo &getOpsInfo() const { return _opsInfo; }
+  IpsTsInfo &getOpsInfo() { return _opsInfo; }
 
   // check to see if the ops info has changed since the previous pulse
   
@@ -149,8 +153,8 @@ public:
 
 protected:
   
-  AparTsDebug_t _debug;
-  AparTsInfo _opsInfo;
+  IpsTsDebug_t _debug;
+  IpsTsInfo _opsInfo;
   
   // read controls
 
@@ -183,9 +187,9 @@ protected:
                     * other classes will always have this
                     * set to false */
   
-  void _setEventFlags(AparTsPulse &pulse);
-  void _setPlatformGeoref(AparTsPulse &pulse);
-  void _updatePulse(AparTsPulse &pulse);
+  void _setEventFlags(IpsTsPulse &pulse);
+  void _setPlatformGeoref(IpsTsPulse &pulse);
+  void _updatePulse(IpsTsPulse &pulse);
 
 private:
   
@@ -195,7 +199,7 @@ private:
 // Read pulses from time-series files
 // Derived class.
 
-class AparTsReaderFile : public AparTsReader {
+class IpsTsReaderFile : public IpsTsReader {
   
 public:
 
@@ -207,20 +211,20 @@ public:
   // Blocks on read.
   // Calls heartbeat_func when blocked, if non-null.
   
-  AparTsReaderFile(const char *input_dir,
+  IpsTsReaderFile(const char *input_dir,
                    int max_realtime_age_secs = 3600,
                    DsInput_heartbeat_t heartbeat_func = PMU_auto_register,
                    bool use_ldata_info = true,
-                   AparTsDebug_t debug = AparTsDebug_t::OFF);
+                   IpsTsDebug_t debug = IpsTsDebug_t::OFF);
   
   // ARCHIVE mode - specify list of files to be read
   
-  AparTsReaderFile(const vector<string> &fileList,
-                   AparTsDebug_t debug = AparTsDebug_t::OFF);
+  IpsTsReaderFile(const vector<string> &fileList,
+                   IpsTsDebug_t debug = IpsTsDebug_t::OFF);
  
   // destructor
   
-  virtual ~AparTsReaderFile();
+  virtual ~IpsTsReaderFile();
 
   // Get next pulse.
   // Converts IQ data to floats if requested.
@@ -231,8 +235,8 @@ public:
   // Returns pointer to pulse object.
   // Returns NULL at end of data, or error.
   
-  virtual AparTsPulse *getNextPulse(bool convertToFloats = false,
-                                    AparTsPulse *pulse = NULL);
+  virtual IpsTsPulse *getNextPulse(bool convertToFloats = false,
+                                    IpsTsPulse *pulse = NULL);
 
   // reset the file queue - used for sim mode
 
@@ -267,7 +271,7 @@ private:
   // private functions
   
   int _openNextFile();
-  int _readPulse(AparTsPulse &pulse);
+  int _readPulse(IpsTsPulse &pulse);
   int _resync();
 
 };
@@ -276,19 +280,19 @@ private:
 // Read pulses from time-series FMQ
 // Derived class.
 
-class AparTsReaderFmq : public AparTsReader {
+class IpsTsReaderFmq : public IpsTsReader {
   
 public:
 
   // constructor
   
-  AparTsReaderFmq(const char *input_fmq,
-                   AparTsDebug_t debug = AparTsDebug_t::OFF,
+  IpsTsReaderFmq(const char *input_fmq,
+                   IpsTsDebug_t debug = IpsTsDebug_t::OFF,
                    bool position_fmq_at_start = false);
   
   // destructor
   
-  virtual ~AparTsReaderFmq();
+  virtual ~IpsTsReaderFmq();
 
   // Get next pulse.
   // Converts IQ data to floats if requested.
@@ -299,8 +303,8 @@ public:
   // Returns pointer to pulse object.
   // Returns NULL at end of data, or error.
   
-  virtual AparTsPulse *getNextPulse(bool convertToFloats = false,
-                                    AparTsPulse *pulse = NULL);
+  virtual IpsTsPulse *getNextPulse(bool convertToFloats = false,
+                                    IpsTsPulse *pulse = NULL);
 
   // reset the queue to the beginning
 
@@ -342,19 +346,19 @@ private:
 // Read pulses from time-series TCP server
 // Derived class.
 
-class AparTsReaderTcp : public AparTsReader {
+class IpsTsReaderTcp : public IpsTsReader {
   
 public:
 
   // constructor
   
-  AparTsReaderTcp(const char *server_host,
+  IpsTsReaderTcp(const char *server_host,
                   int server_port,
-                  AparTsDebug_t debug = AparTsDebug_t::OFF);
+                  IpsTsDebug_t debug = IpsTsDebug_t::OFF);
   
   // destructor
   
-  virtual ~AparTsReaderTcp();
+  virtual ~IpsTsReaderTcp();
 
   // Get next pulse.
   // Converts IQ data to floats if requested.
@@ -365,8 +369,8 @@ public:
   // Returns pointer to pulse object.
   // Returns NULL at end of data, or error.
   
-  virtual AparTsPulse *getNextPulse(bool convertToFloats = false,
-                                    AparTsPulse *pulse = NULL);
+  virtual IpsTsPulse *getNextPulse(bool convertToFloats = false,
+                                    IpsTsPulse *pulse = NULL);
 
   // reset the queue to the beginning
   // this is a no-op for TCP, cannot reset

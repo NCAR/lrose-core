@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// AparTsCalib.hh
+// IpsTsCalib.hh
 //
 // Radar calibration support
 //
@@ -33,7 +33,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-// The convention in APAR is that the radar constant is positive.
+// Support for Independent Pulse Sampling.
+//
+// The convention in IPS is that the radar constant is positive.
 // 
 // Computing radar constant:
 //
@@ -59,21 +61,21 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef AparTsCalib_hh
-#define AparTsCalib_hh
+#ifndef IpsTsCalib_hh
+#define IpsTsCalib_hh
 
 #include <string>
-#include <radar/apar_ts_data.h>
+#include <radar/ips_ts_data.h>
 class RadxRcalib;
 class DsRadarCalib;
 using namespace std;
 
-class AparTsCalib
+class IpsTsCalib
 {
 public:
   
-  AparTsCalib();
-  ~AparTsCalib();
+  IpsTsCalib();
+  ~IpsTsCalib();
 
   static double LightSpeedMps;
 
@@ -171,7 +173,7 @@ public:
 
   // set from struct
   
-  void set(const apar_ts_calibration_t &calib);
+  void set(const ips_ts_calibration_t &calib);
 
   // get values
   
@@ -265,15 +267,15 @@ public:
 
   // get struct value, in place
   
-  inline const apar_ts_calibration_t &getStruct() const { return _calib; }
+  inline const ips_ts_calibration_t &getStruct() const { return _calib; }
 
   // get struct value in Big-Endian byte order
   
-  apar_ts_calibration_t getStructAsBE() const;
+  ips_ts_calibration_t getStructAsBE() const;
  
   // encode struct into Big-Endian byte order
 
-  void encode(apar_ts_calibration_t *calib) const;
+  void encode(ips_ts_calibration_t *calib) const;
 
   // convert to XML - load up xml string
   
@@ -293,7 +295,7 @@ public:
 
   // override from struct, if struct member data is not missing
   
-  void overrideFromStruct(const apar_ts_calibration_t &calib);
+  void overrideFromStruct(const ips_ts_calibration_t &calib);
 
   // print
 
@@ -301,9 +303,9 @@ public:
 
 private:
 
-  /* values are stored in apar_ts_calibration_t struct */
+  /* values are stored in ips_ts_calibration_t struct */
 
-  apar_ts_calibration_t _calib;
+  ips_ts_calibration_t _calib;
 
   void _addToXml(const string &tag, double val, string &xml);
 

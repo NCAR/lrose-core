@@ -22,13 +22,15 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AparTsInfo.cc
+// IpsTsInfo.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Aug 2019
 //
 ///////////////////////////////////////////////////////////////
+//
+// Support for Independent Pulse Sampling.
 //
 // Stores current radar ops info
 //
@@ -41,7 +43,7 @@
 #include <toolsa/str.h>
 #include <toolsa/mem.h>
 #include <toolsa/TaArray.hh>
-#include <radar/AparTsInfo.hh>
+#include <radar/IpsTsInfo.hh>
 #include <radar/RadarCalib.hh>
 #include <rapformats/DsRadarCalib.hh>
 using namespace std;
@@ -49,7 +51,7 @@ using namespace std;
 ////////////////////////////////////////////////////
 // Constructor
 
-AparTsInfo::AparTsInfo(AparTsDebug_t debug) :
+IpsTsInfo::IpsTsInfo(IpsTsDebug_t debug) :
         _debug(debug)
 
 {
@@ -60,7 +62,7 @@ AparTsInfo::AparTsInfo(AparTsDebug_t debug) :
 /////////////////////////////
 // Copy constructor
 
-AparTsInfo::AparTsInfo(const AparTsInfo &rhs)
+IpsTsInfo::IpsTsInfo(const IpsTsInfo &rhs)
 
 {
   if (this != &rhs) {
@@ -71,7 +73,7 @@ AparTsInfo::AparTsInfo(const AparTsInfo &rhs)
 //////////////////////////////////////////////////////////////////
 // destructor
 
-AparTsInfo::~AparTsInfo()
+IpsTsInfo::~IpsTsInfo()
 
 {
   _clearMetaQueue();
@@ -80,7 +82,7 @@ AparTsInfo::~AparTsInfo()
 /////////////////////////////
 // copy
 
-AparTsInfo &AparTsInfo::_copy(const AparTsInfo &rhs)
+IpsTsInfo &IpsTsInfo::_copy(const IpsTsInfo &rhs)
 
 {
 
@@ -138,7 +140,7 @@ AparTsInfo &AparTsInfo::_copy(const AparTsInfo &rhs)
 // Assignment
 //
 
-AparTsInfo &AparTsInfo::operator=(const AparTsInfo &rhs)
+IpsTsInfo &IpsTsInfo::operator=(const IpsTsInfo &rhs)
 
 {
   return _copy(rhs);
@@ -147,18 +149,18 @@ AparTsInfo &AparTsInfo::operator=(const AparTsInfo &rhs)
 //////////////////////////////////////////////////////////////////
 // clear all
 
-void AparTsInfo::clear()
+void IpsTsInfo::clear()
 
 {
   
-  apar_ts_radar_info_init(_radar_info);
-  apar_ts_scan_segment_init(_scan_seg);
-  apar_ts_processing_init(_proc);
-  apar_ts_status_xml_init(_status_xml_hdr);
-  apar_ts_calibration_init(_calib);
-  apar_ts_event_notice_init(_enotice);
-  apar_ts_platform_georef_init(_platform_georef0);
-  apar_ts_platform_georef_init(_platform_georef1);
+  ips_ts_radar_info_init(_radar_info);
+  ips_ts_scan_segment_init(_scan_seg);
+  ips_ts_processing_init(_proc);
+  ips_ts_status_xml_init(_status_xml_hdr);
+  ips_ts_calibration_init(_calib);
+  ips_ts_event_notice_init(_enotice);
+  ips_ts_platform_georef_init(_platform_georef0);
+  ips_ts_platform_georef_init(_platform_georef1);
 
   _radar_info_active = false;
   _scan_seg_active = false;
@@ -178,18 +180,18 @@ void AparTsInfo::clear()
 // by checking for the id
 // swaps as required
 
-int AparTsInfo::setFromBuffer(const void *buf, int len)
+int IpsTsInfo::setFromBuffer(const void *buf, int len)
   
 {
 
   // check validity of packet
   
   int packet_id;
-  if (apar_ts_get_packet_id(buf, len, packet_id)) {
-    cerr << "ERROR - AparTsInfo::setFromBuffer" << endl;
+  if (ips_ts_get_packet_id(buf, len, packet_id)) {
+    cerr << "ERROR - IpsTsInfo::setFromBuffer" << endl;
     fprintf(stderr, "  Bad packet, id: 0x%x\n", packet_id);
     cerr << "             len: " << len << endl;
-    cerr << "            type: " << apar_ts_packet_id_to_str(packet_id) << endl;
+    cerr << "            type: " << ips_ts_packet_id_to_str(packet_id) << endl;
     return -1;
   }
 
@@ -197,43 +199,43 @@ int AparTsInfo::setFromBuffer(const void *buf, int len)
 
   char *copy = new char[len + 1];
   memcpy(copy, buf, len);
-  apar_ts_packet_swap(copy, len);
+  ips_ts_packet_swap(copy, len);
 
   switch (packet_id) {
-    case APAR_TS_RADAR_INFO_ID: {
-      setRadarInfo(*(apar_ts_radar_info_t *) copy);
+    case IPS_TS_RADAR_INFO_ID: {
+      setRadarInfo(*(ips_ts_radar_info_t *) copy);
       setRadarInfoActive(true);
     } break;
-    case APAR_TS_SCAN_SEGMENT_ID: {
-      setScanSegment(*(apar_ts_scan_segment_t *) copy);
+    case IPS_TS_SCAN_SEGMENT_ID: {
+      setScanSegment(*(ips_ts_scan_segment_t *) copy);
       setScanSegmentActive(true);
     } break;
-    case APAR_TS_PROCESSING_ID: {
-      setTsProcessing(*(apar_ts_processing_t *) copy);
+    case IPS_TS_PROCESSING_ID: {
+      setTsProcessing(*(ips_ts_processing_t *) copy);
       setTsProcessingActive(true);
     } break;
-    case APAR_TS_STATUS_XML_ID: {
-      setStatusXml(*(apar_ts_status_xml_t *) copy,
-                   copy + sizeof(apar_ts_status_xml_t));
+    case IPS_TS_STATUS_XML_ID: {
+      setStatusXml(*(ips_ts_status_xml_t *) copy,
+                   copy + sizeof(ips_ts_status_xml_t));
       setStatusXmlActive(true);
     } break;
-    case APAR_TS_CALIBRATION_ID: {
-      setCalibration(*(apar_ts_calibration_t *) copy);
+    case IPS_TS_CALIBRATION_ID: {
+      setCalibration(*(ips_ts_calibration_t *) copy);
       setCalibrationActive(true);
     } break;
-    case APAR_TS_EVENT_NOTICE_ID: {
-      setEventNotice(*(apar_ts_event_notice_t *) copy);
+    case IPS_TS_EVENT_NOTICE_ID: {
+      setEventNotice(*(ips_ts_event_notice_t *) copy);
       setEventNoticeActive(true);
     } break;
-    case APAR_TS_PLATFORM_GEOREF_ID: {
-      apar_ts_platform_georef_t georef;
-      memcpy(&georef, copy, sizeof(apar_ts_platform_georef_t));
-      apar_ts_platform_georef_swap(georef);
+    case IPS_TS_PLATFORM_GEOREF_ID: {
+      ips_ts_platform_georef_t georef;
+      memcpy(&georef, copy, sizeof(ips_ts_platform_georef_t));
+      ips_ts_platform_georef_swap(georef);
       setPlatformGeoref(georef);
     } break;
-    case APAR_TS_SYNC_ID:
-    case APAR_TS_PULSE_HEADER_ID:
-    case APAR_TS_GEOREF_CORRECTION_ID:
+    case IPS_TS_SYNC_ID:
+    case IPS_TS_PULSE_HEADER_ID:
+    case IPS_TS_GEOREF_CORRECTION_ID:
       break;
     default: {
       delete[] copy;
@@ -249,22 +251,22 @@ int AparTsInfo::setFromBuffer(const void *buf, int len)
 ///////////////////////////////////////////////////////////
 // override radar name and site name
 
-void AparTsInfo::overrideRadarName(const string &radarName)
+void IpsTsInfo::overrideRadarName(const string &radarName)
 {
-  STRncopy(_radar_info.radar_name, radarName.c_str(), APAR_TS_MAX_RADAR_NAME);
+  STRncopy(_radar_info.radar_name, radarName.c_str(), IPS_TS_MAX_RADAR_NAME);
 }
 
-void AparTsInfo::overrideSiteName(const string &siteName)
+void IpsTsInfo::overrideSiteName(const string &siteName)
 {
-  STRncopy(_radar_info.site_name, siteName.c_str(), APAR_TS_MAX_SITE_NAME);
+  STRncopy(_radar_info.site_name, siteName.c_str(), IPS_TS_MAX_SITE_NAME);
 }
 
 ///////////////////////////////////////////////////////////
 // override radar location
 
-void AparTsInfo::overrideRadarLocation(double altitudeMeters,
-				       double latitudeDeg,
-				       double longitudeDeg)
+void IpsTsInfo::overrideRadarLocation(double altitudeMeters,
+                                      double latitudeDeg,
+                                      double longitudeDeg)
   
 {
   
@@ -277,8 +279,8 @@ void AparTsInfo::overrideRadarLocation(double altitudeMeters,
 ///////////////////////////////////////////////////////////
 // override gate geometry
 
-void AparTsInfo::overrideGateGeometry(double startRangeMeters,
-				      double gateSpacingMeters)
+void IpsTsInfo::overrideGateGeometry(double startRangeMeters,
+                                     double gateSpacingMeters)
   
 {
   
@@ -290,7 +292,7 @@ void AparTsInfo::overrideGateGeometry(double startRangeMeters,
 ///////////////////////////////////////////////////////////
 // override wavelength
 
-void AparTsInfo::overrideWavelength(double wavelengthCm)
+void IpsTsInfo::overrideWavelength(double wavelengthCm)
   
 {
   
@@ -302,22 +304,22 @@ void AparTsInfo::overrideWavelength(double wavelengthCm)
 ///////////////////////////////////////////////////////////
 // is info ready to be used?
  
-bool AparTsInfo::isEssentialInfoReady() const
+bool IpsTsInfo::isEssentialInfoReady() const
 {
 
   if (_radar_info_active && _proc_active) {
     return true;
   }
 
-  if (_debug != AparTsDebug_t::OFF) {
+  if (_debug != IpsTsDebug_t::OFF) {
     if (_debugPrintCount % 2500 == 0) {
       if (!_radar_info_active) {
-        cerr << "INFO - AparTsInfo::isEssentialInfoReady()" << endl;
-        cerr << "  Waiting for APAR_TS_RADAR_INFO packet" << endl;
+        cerr << "INFO - IpsTsInfo::isEssentialInfoReady()" << endl;
+        cerr << "  Waiting for IPS_TS_RADAR_INFO packet" << endl;
       }
       if (!_proc_active) {
-        cerr << "INFO - AparTsInfo::isEssentialInfoReady()" << endl;
-        cerr << "  Waiting for APAR_TS_PROCESSING packet" << endl;
+        cerr << "INFO - IpsTsInfo::isEssentialInfoReady()" << endl;
+        cerr << "  Waiting for IPS_TS_PROCESSING packet" << endl;
       }
     }
     _debugPrintCount++;
@@ -330,19 +332,19 @@ bool AparTsInfo::isEssentialInfoReady() const
 ///////////////////////////////////////////////////////////
 // is this an info packet? Check the id
 
-bool AparTsInfo::isInfo(int id)
+bool IpsTsInfo::isInfo(int id)
   
 {
 
   switch (id) {
-    case APAR_TS_SYNC_ID:
-    case APAR_TS_RADAR_INFO_ID:
-    case APAR_TS_SCAN_SEGMENT_ID:
-    case APAR_TS_PROCESSING_ID:
-    case APAR_TS_STATUS_XML_ID:
-    case APAR_TS_CALIBRATION_ID:
-    case APAR_TS_EVENT_NOTICE_ID:
-    case APAR_TS_PLATFORM_GEOREF_ID:
+    case IPS_TS_SYNC_ID:
+    case IPS_TS_RADAR_INFO_ID:
+    case IPS_TS_SCAN_SEGMENT_ID:
+    case IPS_TS_PROCESSING_ID:
+    case IPS_TS_STATUS_XML_ID:
+    case IPS_TS_CALIBRATION_ID:
+    case IPS_TS_EVENT_NOTICE_ID:
+    case IPS_TS_PLATFORM_GEOREF_ID:
       return true;
   }
   return false;
@@ -352,56 +354,56 @@ bool AparTsInfo::isInfo(int id)
 ////////////////////////////////////////////////////////////
 // set info at the struct level
 
-void AparTsInfo::setRadarInfo(const apar_ts_radar_info_t &info,
-                              bool addToMetaQueue /* = true */) {
+void IpsTsInfo::setRadarInfo(const ips_ts_radar_info_t &info,
+                             bool addToMetaQueue /* = true */) {
   _radar_info = info;
-  _radar_info.packet.id = APAR_TS_RADAR_INFO_ID;
-  _radar_info.packet.len_bytes = sizeof(apar_ts_radar_info_t);
+  _radar_info.packet.id = IPS_TS_RADAR_INFO_ID;
+  _radar_info.packet.len_bytes = sizeof(ips_ts_radar_info_t);
   _radar_info.packet.version_num = 1;
   if (addToMetaQueue) {
-    // _addIdToQueue(APAR_TS_RADAR_INFO_ID);
+    // _addIdToQueue(IPS_TS_RADAR_INFO_ID);
     _addMetaToQueue(sizeof(_radar_info), &_radar_info);
   }
 }
 
-void AparTsInfo::setScanSegment(const apar_ts_scan_segment_t &seg,
-                                bool addToMetaQueue /* = true */) {
+void IpsTsInfo::setScanSegment(const ips_ts_scan_segment_t &seg,
+                               bool addToMetaQueue /* = true */) {
   _scan_seg = seg;
-  _scan_seg.packet.id = APAR_TS_SCAN_SEGMENT_ID;
-  _scan_seg.packet.len_bytes = sizeof(apar_ts_scan_segment_t);
+  _scan_seg.packet.id = IPS_TS_SCAN_SEGMENT_ID;
+  _scan_seg.packet.len_bytes = sizeof(ips_ts_scan_segment_t);
   _scan_seg.packet.version_num = 1;
   if (addToMetaQueue) {
-    // _addIdToQueue(APAR_TS_SCAN_SEGMENT_ID);
+    // _addIdToQueue(IPS_TS_SCAN_SEGMENT_ID);
     _addMetaToQueue(sizeof(_scan_seg), &_scan_seg);
   }
 }
 
-void AparTsInfo::setTsProcessing(const apar_ts_processing_t &proc,
-                                 bool addToMetaQueue /* = true */) {
+void IpsTsInfo::setTsProcessing(const ips_ts_processing_t &proc,
+                                bool addToMetaQueue /* = true */) {
   _proc = proc;
   if (isnan(_proc.start_range_m)) {
     _proc.start_range_m = 0.0;
   }
-  _proc.packet.id = APAR_TS_PROCESSING_ID;
-  _proc.packet.len_bytes = sizeof(apar_ts_processing_t);
+  _proc.packet.id = IPS_TS_PROCESSING_ID;
+  _proc.packet.len_bytes = sizeof(ips_ts_processing_t);
   _proc.packet.version_num = 1;
   if (addToMetaQueue) {
-    // _addIdToQueue(APAR_TS_PROCESSING_ID);
+    // _addIdToQueue(IPS_TS_PROCESSING_ID);
     _addMetaToQueue(sizeof(_proc), &_proc);
   }
 }
 
-void AparTsInfo::setStatusXml(const apar_ts_status_xml_t &hdr,
-                              const string &xmlStr,
-                              bool addToMetaQueue /* = true */) {
+void IpsTsInfo::setStatusXml(const ips_ts_status_xml_t &hdr,
+                             const string &xmlStr,
+                             bool addToMetaQueue /* = true */) {
   _status_xml_hdr = hdr;
   _status_xml_str = xmlStr;
-  _status_xml_hdr.packet.id = APAR_TS_STATUS_XML_ID;
+  _status_xml_hdr.packet.id = IPS_TS_STATUS_XML_ID;
   _status_xml_hdr.packet.len_bytes =
-    sizeof(apar_ts_status_xml_t) + xmlStr.size() + 1;
+    sizeof(ips_ts_status_xml_t) + xmlStr.size() + 1;
   _status_xml_hdr.packet.version_num = 1;
   if (addToMetaQueue) {
-    // _addIdToQueue(APAR_TS_STATUS_XML_ID);
+    // _addIdToQueue(IPS_TS_STATUS_XML_ID);
     MemBuf buf;
     buf.add(&_status_xml_hdr, sizeof(_status_xml_hdr));
     buf.add(xmlStr.c_str(), xmlStr.size() + 1);
@@ -409,26 +411,26 @@ void AparTsInfo::setStatusXml(const apar_ts_status_xml_t &hdr,
   }
 }
 
-void AparTsInfo::setCalibration(const apar_ts_calibration_t &calib,
-                                bool addToMetaQueue /* = true */) {
+void IpsTsInfo::setCalibration(const ips_ts_calibration_t &calib,
+                               bool addToMetaQueue /* = true */) {
   _calib = calib;
-  _calib.packet.id = APAR_TS_CALIBRATION_ID;
-  _calib.packet.len_bytes = sizeof(apar_ts_calibration_t);
+  _calib.packet.id = IPS_TS_CALIBRATION_ID;
+  _calib.packet.len_bytes = sizeof(ips_ts_calibration_t);
   _calib.packet.version_num = 1;
   if (addToMetaQueue) {
-    // _addIdToQueue(APAR_TS_CALIBRATION_ID);
+    // _addIdToQueue(IPS_TS_CALIBRATION_ID);
     _addMetaToQueue(sizeof(_calib), &_calib);
   }
 }
 
-void AparTsInfo::setEventNotice(const apar_ts_event_notice_t &enotice,
-                                bool addToMetaQueue /* = true */) {
+void IpsTsInfo::setEventNotice(const ips_ts_event_notice_t &enotice,
+                               bool addToMetaQueue /* = true */) {
   _enotice = enotice;
-  _enotice.packet.id = APAR_TS_EVENT_NOTICE_ID;
-  _enotice.packet.len_bytes = sizeof(apar_ts_event_notice_t);
+  _enotice.packet.id = IPS_TS_EVENT_NOTICE_ID;
+  _enotice.packet.len_bytes = sizeof(ips_ts_event_notice_t);
   _enotice.packet.version_num = 1;
   if (addToMetaQueue) {
-    // _addIdToQueue(APAR_TS_EVENT_NOTICE_ID);
+    // _addIdToQueue(IPS_TS_EVENT_NOTICE_ID);
     _addMetaToQueue(sizeof(_enotice), &_enotice);
   }
   if (_enotice.start_of_sweep) {
@@ -445,13 +447,13 @@ void AparTsInfo::setEventNotice(const apar_ts_event_notice_t &enotice,
   }
 }
 
-void AparTsInfo::setPlatformGeoref
-  (const apar_ts_platform_georef_t &platform_georef,
+void IpsTsInfo::setPlatformGeoref
+  (const ips_ts_platform_georef_t &platform_georef,
    bool addToMetaQueue /* = true */) {
   if (platform_georef.unit_num == 1) {
     _platform_georef1 = platform_georef;
-    _platform_georef1.packet.id = APAR_TS_PLATFORM_GEOREF_ID;
-    _platform_georef1.packet.len_bytes = sizeof(apar_ts_platform_georef_t);
+    _platform_georef1.packet.id = IPS_TS_PLATFORM_GEOREF_ID;
+    _platform_georef1.packet.len_bytes = sizeof(ips_ts_platform_georef_t);
     _platform_georef1.packet.version_num = 1;
     setPlatformGeoref1Active(true);
     if (addToMetaQueue) {
@@ -459,8 +461,8 @@ void AparTsInfo::setPlatformGeoref
     }
   } else {
     _platform_georef0 = platform_georef;
-    _platform_georef0.packet.id = APAR_TS_PLATFORM_GEOREF_ID;
-    _platform_georef0.packet.len_bytes = sizeof(apar_ts_platform_georef_t);
+    _platform_georef0.packet.id = IPS_TS_PLATFORM_GEOREF_ID;
+    _platform_georef0.packet.len_bytes = sizeof(ips_ts_platform_georef_t);
     _platform_georef0.packet.version_num = 1;
     setPlatformGeorefActive(true);
     if (addToMetaQueue) {
@@ -472,95 +474,95 @@ void AparTsInfo::setPlatformGeoref
 ////////////////////////////////////////////////////////////
 // activate structs
 
-void AparTsInfo::setRadarInfoActive(bool state) {
+void IpsTsInfo::setRadarInfoActive(bool state) {
   _radar_info_active = state;
 }
 
-void AparTsInfo::setScanSegmentActive(bool state) {
+void IpsTsInfo::setScanSegmentActive(bool state) {
   _scan_seg_active = state;
 }
 
-void AparTsInfo::setTsProcessingActive(bool state) {
+void IpsTsInfo::setTsProcessingActive(bool state) {
   _proc_active = state;
 }
 
-void AparTsInfo::setStatusXmlActive(bool state) {
+void IpsTsInfo::setStatusXmlActive(bool state) {
   _status_xml_active = state;
 }
 
-void AparTsInfo::setCalibrationActive(bool state) {
+void IpsTsInfo::setCalibrationActive(bool state) {
   _calib_active = state;
 }
 
-void AparTsInfo::setEventNoticeActive(bool state) {
+void IpsTsInfo::setEventNoticeActive(bool state) {
   _enotice_active = state;
 }
 
-void AparTsInfo::setPlatformGeorefActive(bool state) {
+void IpsTsInfo::setPlatformGeorefActive(bool state) {
   _platform_georef0_active = state;
 }
 
-void AparTsInfo::setPlatformGeoref1Active(bool state) {
+void IpsTsInfo::setPlatformGeoref1Active(bool state) {
   _platform_georef1_active = state;
 }
 
 ////////////////////////////////////////////////////////////
 // set sequence number for each packet type
 
-void AparTsInfo::setRadarInfoPktSeqNum(si64 pkt_seq_num) {
+void IpsTsInfo::setRadarInfoPktSeqNum(si64 pkt_seq_num) {
   _radar_info.packet.seq_num = pkt_seq_num;
 }
 
-void AparTsInfo::setScanSegmentPktSeqNum(si64 pkt_seq_num) {
+void IpsTsInfo::setScanSegmentPktSeqNum(si64 pkt_seq_num) {
   _scan_seg.packet.seq_num = pkt_seq_num;
 }
 
-void AparTsInfo::setTsProcessingPktSeqNum(si64 pkt_seq_num) {
+void IpsTsInfo::setTsProcessingPktSeqNum(si64 pkt_seq_num) {
   _proc.packet.seq_num = pkt_seq_num;
 }
 
-void AparTsInfo::setStatusXmlPktSeqNum(si64 pkt_seq_num) {
+void IpsTsInfo::setStatusXmlPktSeqNum(si64 pkt_seq_num) {
   _status_xml_hdr.packet.seq_num = pkt_seq_num;
 }
 
-void AparTsInfo::setCalibrationPktSeqNum(si64 pkt_seq_num) {
+void IpsTsInfo::setCalibrationPktSeqNum(si64 pkt_seq_num) {
   _calib.packet.seq_num = pkt_seq_num;
 }
 
-void AparTsInfo::setEventNoticePktSeqNum(si64 pkt_seq_num) {
+void IpsTsInfo::setEventNoticePktSeqNum(si64 pkt_seq_num) {
   _enotice.packet.seq_num = pkt_seq_num;
 }
 
-void AparTsInfo::setPlatformGeorefPktSeqNum(si64 pkt_seq_num) {
+void IpsTsInfo::setPlatformGeorefPktSeqNum(si64 pkt_seq_num) {
   _platform_georef0.packet.seq_num = pkt_seq_num;
 }
 
-void AparTsInfo::setPlatformGeoref1PktSeqNum(si64 pkt_seq_num) {
+void IpsTsInfo::setPlatformGeoref1PktSeqNum(si64 pkt_seq_num) {
   _platform_georef1.packet.seq_num = pkt_seq_num;
 }
 
 ////////////////////////////////////////////////////////////
 // set time on all packets
 
-void AparTsInfo::setTime(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_radar_info.packet, secs, nano_secs);
-  apar_ts_set_packet_time(_scan_seg.packet, secs, nano_secs);
-  apar_ts_set_packet_time(_proc.packet, secs, nano_secs);
-  apar_ts_set_packet_time(_status_xml_hdr.packet, secs, nano_secs);
-  apar_ts_set_packet_time(_calib.packet, secs, nano_secs);
-  apar_ts_set_packet_time(_enotice.packet, secs, nano_secs);
+void IpsTsInfo::setTime(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_radar_info.packet, secs, nano_secs);
+  ips_ts_set_packet_time(_scan_seg.packet, secs, nano_secs);
+  ips_ts_set_packet_time(_proc.packet, secs, nano_secs);
+  ips_ts_set_packet_time(_status_xml_hdr.packet, secs, nano_secs);
+  ips_ts_set_packet_time(_calib.packet, secs, nano_secs);
+  ips_ts_set_packet_time(_enotice.packet, secs, nano_secs);
   if (_platform_georef0_active) {
-    apar_ts_set_packet_time(_platform_georef0.packet, secs, nano_secs);
+    ips_ts_set_packet_time(_platform_georef0.packet, secs, nano_secs);
   }
   if (_platform_georef1_active) {
-    apar_ts_set_packet_time(_platform_georef1.packet, secs, nano_secs);
+    ips_ts_set_packet_time(_platform_georef1.packet, secs, nano_secs);
   }
 }
 
 ////////////////////////////////////////////////////////////
 // set time to now on all packets
 
-void AparTsInfo::setTimeToNow() {
+void IpsTsInfo::setTimeToNow() {
   struct timeval time;
   gettimeofday(&time, NULL);
   setTime(time.tv_sec, time.tv_usec * 1000);
@@ -569,112 +571,112 @@ void AparTsInfo::setTimeToNow() {
 ////////////////////////////////////////////////////////////
 // set time for each packet
 
-void AparTsInfo::setRadarInfoTime(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_radar_info.packet, secs, nano_secs);
+void IpsTsInfo::setRadarInfoTime(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_radar_info.packet, secs, nano_secs);
 }
 
-void AparTsInfo::setScanSegmentTime(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_scan_seg.packet, secs, nano_secs);
+void IpsTsInfo::setScanSegmentTime(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_scan_seg.packet, secs, nano_secs);
 }
 
-void AparTsInfo::setTsProcessingTime(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_proc.packet, secs, nano_secs);
+void IpsTsInfo::setTsProcessingTime(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_proc.packet, secs, nano_secs);
 }
 
-void AparTsInfo::setStatusXmlTime(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_status_xml_hdr.packet, secs, nano_secs);
+void IpsTsInfo::setStatusXmlTime(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_status_xml_hdr.packet, secs, nano_secs);
 }
 
-void AparTsInfo::setCalibrationTime(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_calib.packet, secs, nano_secs);
+void IpsTsInfo::setCalibrationTime(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_calib.packet, secs, nano_secs);
 }
 
-void AparTsInfo::setEventNoticeTime(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_enotice.packet, secs, nano_secs);
+void IpsTsInfo::setEventNoticeTime(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_enotice.packet, secs, nano_secs);
 }
 
-void AparTsInfo::setPlatformGeorefTime(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_platform_georef0.packet, secs, nano_secs);
+void IpsTsInfo::setPlatformGeorefTime(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_platform_georef0.packet, secs, nano_secs);
 }
 
-void AparTsInfo::setPlatformGeoref1Time(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_platform_georef1.packet, secs, nano_secs);
+void IpsTsInfo::setPlatformGeoref1Time(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_platform_georef1.packet, secs, nano_secs);
 }
 
 ////////////////////////////////////////////////////////////
 // set time to now for each packet
 
-void AparTsInfo::setRadarInfoTimeToNow() {
-  apar_ts_set_packet_time_to_now(_radar_info.packet);
+void IpsTsInfo::setRadarInfoTimeToNow() {
+  ips_ts_set_packet_time_to_now(_radar_info.packet);
 }
 
-void AparTsInfo::setScanSegmentTimeToNow() {
-  apar_ts_set_packet_time_to_now(_scan_seg.packet);
+void IpsTsInfo::setScanSegmentTimeToNow() {
+  ips_ts_set_packet_time_to_now(_scan_seg.packet);
 }
 
-void AparTsInfo::setTsProcessingTimeToNow() {
-  apar_ts_set_packet_time_to_now(_proc.packet);
+void IpsTsInfo::setTsProcessingTimeToNow() {
+  ips_ts_set_packet_time_to_now(_proc.packet);
 }
 
-void AparTsInfo::setStatusXmlTimeToNow() {
-  apar_ts_set_packet_time_to_now(_status_xml_hdr.packet);
+void IpsTsInfo::setStatusXmlTimeToNow() {
+  ips_ts_set_packet_time_to_now(_status_xml_hdr.packet);
 }
 
-void AparTsInfo::setCalibrationTimeToNow() {
-  apar_ts_set_packet_time_to_now(_calib.packet);
+void IpsTsInfo::setCalibrationTimeToNow() {
+  ips_ts_set_packet_time_to_now(_calib.packet);
 }
 
-void AparTsInfo::setEventNoticeTimeToNow() {
-  apar_ts_set_packet_time_to_now(_enotice.packet);
+void IpsTsInfo::setEventNoticeTimeToNow() {
+  ips_ts_set_packet_time_to_now(_enotice.packet);
 }
 
-void AparTsInfo::setPlatformGeorefTimeToNow() {
-  apar_ts_set_packet_time_to_now(_platform_georef0.packet);
+void IpsTsInfo::setPlatformGeorefTimeToNow() {
+  ips_ts_set_packet_time_to_now(_platform_georef0.packet);
 }
 
-void AparTsInfo::setPlatformGeoref1TimeToNow() {
-  apar_ts_set_packet_time_to_now(_platform_georef1.packet);
+void IpsTsInfo::setPlatformGeoref1TimeToNow() {
+  ips_ts_set_packet_time_to_now(_platform_georef1.packet);
 }
 
 ////////////////////////////////////////////////////////////
 // get time for each packet
 
-double AparTsInfo::getRadarInfoTime() const {
-  return apar_ts_get_packet_time_as_double(_radar_info.packet);
+double IpsTsInfo::getRadarInfoTime() const {
+  return ips_ts_get_packet_time_as_double(_radar_info.packet);
 }
 
-double AparTsInfo::getScanSegmentTime() const {
-  return apar_ts_get_packet_time_as_double(_scan_seg.packet);
+double IpsTsInfo::getScanSegmentTime() const {
+  return ips_ts_get_packet_time_as_double(_scan_seg.packet);
 }
 
-double AparTsInfo::getTsProcessingTime() const {
-  return apar_ts_get_packet_time_as_double(_proc.packet);
+double IpsTsInfo::getTsProcessingTime() const {
+  return ips_ts_get_packet_time_as_double(_proc.packet);
 }
 
-double AparTsInfo::getStatusXmlTime() const {
-  return apar_ts_get_packet_time_as_double(_status_xml_hdr.packet);
+double IpsTsInfo::getStatusXmlTime() const {
+  return ips_ts_get_packet_time_as_double(_status_xml_hdr.packet);
 }
 
-double AparTsInfo::getCalibrationTime() const {
-  return apar_ts_get_packet_time_as_double(_calib.packet);
+double IpsTsInfo::getCalibrationTime() const {
+  return ips_ts_get_packet_time_as_double(_calib.packet);
 }
 
-double AparTsInfo::getEventNoticeTime() const {
-  return apar_ts_get_packet_time_as_double(_enotice.packet);
+double IpsTsInfo::getEventNoticeTime() const {
+  return ips_ts_get_packet_time_as_double(_enotice.packet);
 }
 
-double AparTsInfo::getPlatformGeorefTime() const {
-  return apar_ts_get_packet_time_as_double(_platform_georef0.packet);
+double IpsTsInfo::getPlatformGeorefTime() const {
+  return ips_ts_get_packet_time_as_double(_platform_georef0.packet);
 }
 
-double AparTsInfo::getPlatformGeoref1Time() const {
-  return apar_ts_get_packet_time_as_double(_platform_georef1.packet);
+double IpsTsInfo::getPlatformGeoref1Time() const {
+  return ips_ts_get_packet_time_as_double(_platform_georef1.packet);
 }
 
 ////////////////////////////////////////////////////////////
 // set radar ID on all packet types
 
-void AparTsInfo::setRadarId(int id) {
+void IpsTsInfo::setRadarId(int id) {
 
   _radar_info.packet.radar_id = id;
   _scan_seg.packet.radar_id = id;
@@ -688,47 +690,47 @@ void AparTsInfo::setRadarId(int id) {
 }
 
 ///////////////////////////////////////////////////////////////
-// set AparTsCalib object from _calib
+// set IpsTsCalib object from _calib
 
-void AparTsInfo::setAparTsCalib(AparTsCalib &aparCalib) const
+void IpsTsInfo::setIpsTsCalib(IpsTsCalib &ipsCalib) const
 
 {
   if (_calib_active) {
     // only set it if _calib has been set
-    aparCalib.set(_calib);
+    ipsCalib.set(_calib);
   }
 }
 
 ///////////////////////////////////////////////////////////////
-// set _calib from AparTsCalib object
+// set _calib from IpsTsCalib object
 
-void AparTsInfo::setFromAparTsCalib(const AparTsCalib &aparCalib)
+void IpsTsInfo::setFromIpsTsCalib(const IpsTsCalib &ipsCalib)
 
 {
-  _calib = aparCalib.getStruct();
+  _calib = ipsCalib.getStruct();
 }
 
 ////////////////////////////////////////////////////////////
 // set methods for individual fields
 
-void AparTsInfo::setRadarName(const string &x) {
-  STRncopy(_radar_info.radar_name, x.c_str(), APAR_TS_MAX_RADAR_NAME);
+void IpsTsInfo::setRadarName(const string &x) {
+  STRncopy(_radar_info.radar_name, x.c_str(), IPS_TS_MAX_RADAR_NAME);
 }
 
-void AparTsInfo::setSiteName(const string &x) { 
-  STRncopy(_radar_info.site_name, x.c_str(), APAR_TS_MAX_SITE_NAME);
+void IpsTsInfo::setSiteName(const string &x) { 
+  STRncopy(_radar_info.site_name, x.c_str(), IPS_TS_MAX_SITE_NAME);
 }
 
-void AparTsInfo::setScanSegmentName(const string &x) {
-  STRncopy(_scan_seg.segment_name, x.c_str(), APAR_TS_MAX_SEGMENT_NAME);
+void IpsTsInfo::setScanSegmentName(const string &x) {
+  STRncopy(_scan_seg.segment_name, x.c_str(), IPS_TS_MAX_SEGMENT_NAME);
 }
 
-void AparTsInfo::setScanProjectName(const string &x) {
-  STRncopy(_scan_seg.project_name, x.c_str(), APAR_TS_MAX_PROJECT_NAME);
+void IpsTsInfo::setScanProjectName(const string &x) {
+  STRncopy(_scan_seg.project_name, x.c_str(), IPS_TS_MAX_PROJECT_NAME);
 }
 
-void AparTsInfo::setScanFixedAngle(int i, fl32 x) {
-  if (i < APAR_TS_MAX_FIXED_ANGLES) {
+void IpsTsInfo::setScanFixedAngle(int i, fl32 x) {
+  if (i < IPS_TS_MAX_FIXED_ANGLES) {
     _scan_seg.fixed_angles[i] = x;
   }
 }
@@ -736,24 +738,24 @@ void AparTsInfo::setScanFixedAngle(int i, fl32 x) {
 ////////////////////////////////////////////////////////////
 // get methods for individual fields
 
-string AparTsInfo::getRadarName() const {
-  return apar_ts_safe_str(_radar_info.radar_name, APAR_TS_MAX_RADAR_NAME);
+string IpsTsInfo::getRadarName() const {
+  return ips_ts_safe_str(_radar_info.radar_name, IPS_TS_MAX_RADAR_NAME);
 }
 
-string AparTsInfo::getSiteName() const { 
-  return apar_ts_safe_str(_radar_info.site_name, APAR_TS_MAX_SITE_NAME);
+string IpsTsInfo::getSiteName() const { 
+  return ips_ts_safe_str(_radar_info.site_name, IPS_TS_MAX_SITE_NAME);
 }
 
-string AparTsInfo::getScanSegmentName() const {
-  return apar_ts_safe_str(_scan_seg.segment_name, APAR_TS_MAX_SEGMENT_NAME);
+string IpsTsInfo::getScanSegmentName() const {
+  return ips_ts_safe_str(_scan_seg.segment_name, IPS_TS_MAX_SEGMENT_NAME);
 }
 
-string AparTsInfo::getScanProjectName() const {
-  return apar_ts_safe_str(_scan_seg.project_name, APAR_TS_MAX_PROJECT_NAME);
+string IpsTsInfo::getScanProjectName() const {
+  return ips_ts_safe_str(_scan_seg.project_name, IPS_TS_MAX_PROJECT_NAME);
 }
 
-fl32 AparTsInfo::getScanFixedAngle(int i) const {
-  if (i < APAR_TS_MAX_FIXED_ANGLES) {
+fl32 IpsTsInfo::getScanFixedAngle(int i) const {
+  if (i < IPS_TS_MAX_FIXED_ANGLES) {
     return _scan_seg.fixed_angles[i];
   } else {
     return -1;
@@ -765,63 +767,63 @@ fl32 AparTsInfo::getScanFixedAngle(int i) const {
 
 // print everything
 
-void AparTsInfo::print(FILE *out) const
+void IpsTsInfo::print(FILE *out) const
 {
   
-  fprintf(out, "******************** Start AparTsInfo ***************************\n");
+  fprintf(out, "******************** Start IpsTsInfo ***************************\n");
 
   if (_radar_info_active) {
-    apar_ts_radar_info_print(out, _radar_info);
+    ips_ts_radar_info_print(out, _radar_info);
   }
   if (_scan_seg_active) {
-    apar_ts_scan_segment_print(out, _scan_seg);
+    ips_ts_scan_segment_print(out, _scan_seg);
   }
   if (_proc_active) {
-    apar_ts_processing_print(out, _proc);
+    ips_ts_processing_print(out, _proc);
   }
   if (_status_xml_active) {
-    apar_ts_status_xml_print(out, _status_xml_hdr, _status_xml_str);
+    ips_ts_status_xml_print(out, _status_xml_hdr, _status_xml_str);
   }
   if (_calib_active) {
-    apar_ts_calibration_print(out, _calib);
+    ips_ts_calibration_print(out, _calib);
   }
   if (_enotice_active) {
-    apar_ts_event_notice_print(out, _enotice);
+    ips_ts_event_notice_print(out, _enotice);
   }
   if (_platform_georef0_active) {
-    apar_ts_platform_georef_print(out, _platform_georef0);
+    ips_ts_platform_georef_print(out, _platform_georef0);
   }
   if (_platform_georef1_active) {
-    apar_ts_platform_georef_print(out, _platform_georef1);
+    ips_ts_platform_georef_print(out, _platform_georef1);
   }
 
-  fprintf(out, "********************* End AparTsInfo ****************************\n");
+  fprintf(out, "********************* End IpsTsInfo ****************************\n");
 
 }
 
 // print only what is in the id queue
 // clear the queue if clearQueue is set to true
 
-void AparTsInfo::printMetaQueue(FILE *out, bool clearQueue) const
+void IpsTsInfo::printMetaQueue(FILE *out, bool clearQueue) const
 {
   
   if (_metaQueue.size() == 0) {
     return;
   }
 
-  if (_debug >= AparTsDebug_t::VERBOSE) {
-    cerr << "DEBUG - AparTsInfo::printMetaQueue()" << endl;
+  if (_debug >= IpsTsDebug_t::VERBOSE) {
+    cerr << "DEBUG - IpsTsInfo::printMetaQueue()" << endl;
     cerr << "  _metaQueue.size(): " << _metaQueue.size() << endl;
   }
 
-  fprintf(out, "******************** Start AparTsInfo ***************************\n");
+  fprintf(out, "******************** Start IpsTsInfo ***************************\n");
   
   for (size_t ii = 0; ii < _metaQueue.size(); ii++) {
     MemBuf *buf = _metaQueue[ii];
-    apar_ts_packet_print(out, buf->getPtr(), buf->getLen());
+    ips_ts_packet_print(out, buf->getPtr(), buf->getLen());
   } // ii
 
-  fprintf(out, "********************* End AparTsInfo ****************************\n");
+  fprintf(out, "********************* End IpsTsInfo ****************************\n");
   
   if (clearQueue) {
     _clearMetaQueue();
@@ -830,11 +832,11 @@ void AparTsInfo::printMetaQueue(FILE *out, bool clearQueue) const
 }
 
 ///////////////////////////////////////////////////
-// write a sync packet to file in APAR format
+// write a sync packet to file in IPS format
 //
 // returns 0 on success, -1 on failure
 
-int AparTsInfo::writeSyncToFile(FILE *out) const
+int IpsTsInfo::writeSyncToFile(FILE *out) const
 
 {
   
@@ -842,11 +844,11 @@ int AparTsInfo::writeSyncToFile(FILE *out) const
     return -1;
   }
   
-  apar_ts_sync_t sync;
-  apar_ts_sync_init(sync);
+  ips_ts_sync_t sync;
+  ips_ts_sync_init(sync);
   if (fwrite(&sync, sizeof(sync), 1, out) != 1) {
     int errNum = errno;
-    cerr << "ERROR - AparTsInfo::writeSync2File" << endl;
+    cerr << "ERROR - IpsTsInfo::writeSync2File" << endl;
     cerr << "  Cannot write sync packet" << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -857,7 +859,7 @@ int AparTsInfo::writeSyncToFile(FILE *out) const
 }
 
 ///////////////////////////////////////////////////
-// write meta-data to file in APAR format
+// write meta-data to file in IPS format
 //
 // Writes out any meta-data which has a sequence number
 // later than the previous pulse written.
@@ -865,7 +867,7 @@ int AparTsInfo::writeSyncToFile(FILE *out) const
 //
 // returns 0 on success, -1 on failure
 
-int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
+int IpsTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
 
 {
   
@@ -884,7 +886,7 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
     if (_radar_info_active) {
       if (fwrite(&_radar_info, sizeof(_radar_info), 1, out) != 1) {
 	int errNum = errno;
-	cerr << "ERROR - AparTsInfo::write2File" << endl;
+	cerr << "ERROR - IpsTsInfo::write2File" << endl;
 	cerr << "  Cannot write _radar_info packet" << endl;
 	cerr << "  " << strerror(errNum) << endl;
 	return -1;
@@ -896,7 +898,7 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
   if (_scan_seg_active && _scan_seg.packet.seq_num > prevPulseSeqNum) {
     if (fwrite(&_scan_seg, sizeof(_scan_seg), 1, out) != 1) {
       int errNum = errno;
-      cerr << "ERROR - AparTsInfo::write2File" << endl;
+      cerr << "ERROR - IpsTsInfo::write2File" << endl;
       cerr << "  Cannot write _scan_seg packet" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -906,7 +908,7 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
   if (_proc_active && _proc.packet.seq_num > prevPulseSeqNum) {
     if (fwrite(&_proc, sizeof(_proc), 1, out) != 1) {
       int errNum = errno;
-      cerr << "ERROR - AparTsInfo::write2File" << endl;
+      cerr << "ERROR - IpsTsInfo::write2File" << endl;
       cerr << "  Cannot write _proc packet" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -917,7 +919,7 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
       _status_xml_hdr.packet.seq_num > prevPulseSeqNum) {
     if (fwrite(&_status_xml_hdr, sizeof(_status_xml_hdr), 1, out) != 1) {
       int errNum = errno;
-      cerr << "ERROR - AparTsInfo::write2File" << endl;
+      cerr << "ERROR - IpsTsInfo::write2File" << endl;
       cerr << "  Cannot write _status_xml header" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -925,7 +927,7 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
     if (fwrite(_status_xml_str.c_str(),
                _status_xml_str.size() + 1, 1, out) != 1) {
       int errNum = errno;
-      cerr << "ERROR - AparTsInfo::write2File" << endl;
+      cerr << "ERROR - IpsTsInfo::write2File" << endl;
       cerr << "  Cannot write _status_xml string" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -935,7 +937,7 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
   if (_calib_active && _calib.packet.seq_num > prevPulseSeqNum) {
     if (fwrite(&_calib, sizeof(_calib), 1, out) != 1) {
       int errNum = errno;
-      cerr << "ERROR - AparTsInfo::write2File" << endl;
+      cerr << "ERROR - IpsTsInfo::write2File" << endl;
       cerr << "  Cannot write _calib packet" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -945,7 +947,7 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
   if (_enotice_active && _enotice.packet.seq_num > prevPulseSeqNum) {
     if (fwrite(&_enotice, sizeof(_enotice), 1, out) != 1) {
       int errNum = errno;
-      cerr << "ERROR - AparTsInfo::write2File" << endl;
+      cerr << "ERROR - IpsTsInfo::write2File" << endl;
       cerr << "  Cannot write _enotice packet" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -956,7 +958,7 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
       _platform_georef0.packet.seq_num > prevPulseSeqNum) {
     if (fwrite(&_platform_georef0, sizeof(_platform_georef0), 1, out) != 1) {
       int errNum = errno;
-      cerr << "ERROR - AparTsInfo::write2File" << endl;
+      cerr << "ERROR - IpsTsInfo::write2File" << endl;
       cerr << "  Cannot write _platform_georef0 packet" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -967,7 +969,7 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
       _platform_georef1.packet.seq_num > prevPulseSeqNum) {
     if (fwrite(&_platform_georef1, sizeof(_platform_georef1), 1, out) != 1) {
       int errNum = errno;
-      cerr << "ERROR - AparTsInfo::write2File" << endl;
+      cerr << "ERROR - IpsTsInfo::write2File" << endl;
       cerr << "  Cannot write _platform_georef1 packet" << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -979,14 +981,14 @@ int AparTsInfo::writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const
 }
 
 ///////////////////////////////////////////////////
-// write meta-data to file in APAR format
+// write meta-data to file in IPS format
 //
 // Writes out any meta-data in the queue
 // If clearQueue is true, the queue will be cleared.
 //
 // Returns 0 on success, -1 on failure
 
-int AparTsInfo::writeMetaQueueToFile(FILE *out, bool clearQueue) const
+int IpsTsInfo::writeMetaQueueToFile(FILE *out, bool clearQueue) const
 
 {
   
@@ -1004,8 +1006,8 @@ int AparTsInfo::writeMetaQueueToFile(FILE *out, bool clearQueue) const
     return -1;
   }
 
-  if (_debug >= AparTsDebug_t::VERBOSE) {
-    cerr << "DEBUG - AparTsInfo::writeMetaQueueToFile()" << endl;
+  if (_debug >= IpsTsDebug_t::VERBOSE) {
+    cerr << "DEBUG - IpsTsInfo::writeMetaQueueToFile()" << endl;
     cerr << "  _metaQueue.size(): " << _metaQueue.size() << endl;
   }
 
@@ -1016,10 +1018,10 @@ int AparTsInfo::writeMetaQueueToFile(FILE *out, bool clearQueue) const
     MemBuf *buf = _metaQueue[ii];
     if (fwrite(buf->getPtr(), buf->getLen(), 1, out) != 1) {
       int errNum = errno;
-      cerr << "ERROR - AparTsInfo::write2File" << endl;
+      cerr << "ERROR - IpsTsInfo::write2File" << endl;
       cerr << "  Cannot write metaData packet" << endl;
       cerr << "  " << strerror(errNum) << endl;
-      apar_ts_packet_print(stderr, buf->getPtr(), buf->getLen());
+      ips_ts_packet_print(stderr, buf->getPtr(), buf->getLen());
       iret = -1;
     }
   } // ii
@@ -1033,24 +1035,24 @@ int AparTsInfo::writeMetaQueueToFile(FILE *out, bool clearQueue) const
 }
 
 ///////////////////////////////////////////////////
-// add meta-data to DsMessage in APAR format
+// add meta-data to DsMessage in IPS format
 //
 // Loads up any meta-data in the queue.
 // If clearQueue is true, the queue will be cleared.
 
-void AparTsInfo::addMetaQueueToMsg(DsMessage &msg, bool clearQueue) const
+void IpsTsInfo::addMetaQueueToMsg(DsMessage &msg, bool clearQueue) const
   
 {
 
-  if (_debug >= AparTsDebug_t::VERBOSE) {
-    cerr << "DEBUG - AparTsInfo::addMetaQueueToMsg()" << endl;
+  if (_debug >= IpsTsDebug_t::VERBOSE) {
+    cerr << "DEBUG - IpsTsInfo::addMetaQueueToMsg()" << endl;
     cerr << "  _metaQueue.size(): " << _metaQueue.size() << endl;
   }
 
   for (size_t ii = 0; ii < _metaQueue.size(); ii++) {
     MemBuf *buf = _metaQueue[ii];
     int packetId = 0;
-    if (apar_ts_get_packet_id(buf->getPtr(), buf->getLen(), packetId) == 0) {
+    if (ips_ts_get_packet_id(buf->getPtr(), buf->getLen(), packetId) == 0) {
       msg.addPart(packetId, buf->getLen(), buf->getPtr());
     }
   } // ii
@@ -1065,7 +1067,7 @@ void AparTsInfo::addMetaQueueToMsg(DsMessage &msg, bool clearQueue) const
 // add id to queue
 // deletes previous entries for the same id
 
-// void AparTsInfo::_addIdToQueue(si32 id)
+// void IpsTsInfo::_addIdToQueue(si32 id)
 
 // {
   
@@ -1088,7 +1090,7 @@ void AparTsInfo::addMetaQueueToMsg(DsMessage &msg, bool clearQueue) const
 ///////////////////////////////////////////////////////////////
 // add metadata packet to back of queue
 
-void AparTsInfo::_addMetaToQueue(size_t len, const void *packet)
+void IpsTsInfo::_addMetaToQueue(size_t len, const void *packet)
 
 {
 
@@ -1111,7 +1113,7 @@ void AparTsInfo::_addMetaToQueue(size_t len, const void *packet)
 /////////////////////////////////////////////
 // pop an entry from the metadata queue
 
-MemBuf *AparTsInfo::_popFrontFromMetaQueue()
+MemBuf *IpsTsInfo::_popFrontFromMetaQueue()
   
 {
   MemBuf *front = _metaQueue.front();
@@ -1122,7 +1124,7 @@ MemBuf *AparTsInfo::_popFrontFromMetaQueue()
 /////////////////////////////////////////////
 // clear the metadata queue - public
 
-void AparTsInfo::clearMetadataQueue()
+void IpsTsInfo::clearMetadataQueue()
   
 {
   // _idQueue.clear();
@@ -1132,7 +1134,7 @@ void AparTsInfo::clearMetadataQueue()
 /////////////////////////////////////////////
 // clear the metadata queue - private
 
-void AparTsInfo::_clearMetaQueue() const
+void IpsTsInfo::_clearMetaQueue() const
   
 {
   for (size_t ii = 0; ii < _metaQueue.size(); ii++) {
@@ -1144,7 +1146,7 @@ void AparTsInfo::_clearMetaQueue() const
 /////////////////////////////////////////////
 // clear the event flags
 
-void AparTsInfo::clearEventFlags()
+void IpsTsInfo::clearEventFlags()
   
 {
 

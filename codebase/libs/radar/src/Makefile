@@ -12,7 +12,6 @@ MODULE_NAME = radar
 LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
-	apar \
 	calib \
 	complex \
 	convstrat \
@@ -20,6 +19,7 @@ SUB_DIRS = \
 	filter \
 	geom \
 	hsrl \
+	ips \
 	iwrf \
 	kdp \
 	moments \

@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparGateData.hh
+// IpsGateData.hh
 //
 // Container for memory for IQ gate data.
 //
@@ -33,20 +33,22 @@
 //
 ///////////////////////////////////////////////////////////////
 //
+// Support for Independent Pulse Sampling.
+//
 // Field data and IQ data for a single gate.
 //
 ////////////////////////////////////////////////////////////////
 
-#ifndef AparGateData_hh
-#define AparGateData_hh
+#ifndef IpsGateData_hh
+#define IpsGateData_hh
 
 #include <radar/RadarComplex.hh>
-#include <radar/AparMomFields.hh>
-#include <radar/apar_ts_data.h>
+#include <radar/IpsMomFields.hh>
+#include <radar/ips_ts_data.h>
 #include <toolsa/TaArray.hh>
 using namespace std;
 
-class AparGateData {
+class IpsGateData {
   
 friend class Cmd;
 
@@ -56,11 +58,11 @@ public:
   // Initializes all arrays to NULL.
   // Call allocArrays() before using.
 
-  AparGateData();
+  IpsGateData();
 
   // destructor
 
-  ~AparGateData();
+  ~IpsGateData();
   
   // Allocate all arrays, irrespective of mode.
   // On object allocated in this way can be used for any
@@ -97,14 +99,14 @@ public:
 
   // fields
 
-  AparMomFields fields;
-  AparMomFields secondTrip;
+  IpsMomFields fields;
+  IpsMomFields secondTrip;
 
   // field references
   // can be switched between normal and second trip fields
   // used for computations in SZ mode
 
-  AparMomFields &flds;
+  IpsMomFields &flds;
 
 protected:
 private:

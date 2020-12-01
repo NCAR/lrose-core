@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparMoments.hh
+// IpsMoments.hh
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -31,28 +31,30 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// AparMoments computes moments at a gate
+// Support for Independent Pulse Sampling.
+//
+// IpsMoments computes moments at a gate
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef AparMoments_hh
-#define AparMoments_hh
+#ifndef IpsMoments_hh
+#define IpsMoments_hh
 
 #include <string>
-#include <radar/AparTsInfo.hh>
-#include <radar/AparTsCalib.hh>
-#include <radar/AparMomFields.hh>
+#include <radar/IpsTsInfo.hh>
+#include <radar/IpsTsCalib.hh>
+#include <radar/IpsMomFields.hh>
 #include <radar/RadarComplex.hh>
 #include <radar/RadarFft.hh>
 #include <radar/AtmosAtten.hh>
 #include <rapformats/DsRadarCalib.hh>
-class AparTsPulse;
+class IpsTsPulse;
 using namespace std;
 
 ////////////////////////
 // This class
 
-class AparMoments {
+class IpsMoments {
   
 public:
 
@@ -67,17 +69,17 @@ public:
 
   // default constructor
 
-  AparMoments();
+  IpsMoments();
 
   // constructor with max gates specified
   
-  AparMoments(int max_gates,
+  IpsMoments(int max_gates,
               bool debug = false,
               bool verbose = false);
   
   // destructor
   
-  ~AparMoments();
+  ~IpsMoments();
 
   // set debugging
 
@@ -90,7 +92,7 @@ public:
 
   // initialize based on OpsInfo
   
-  void init(double prt, const AparTsInfo &opsInfo);
+  void init(double prt, const IpsTsInfo &opsInfo);
   
   // initialize based on params passed in
   
@@ -107,7 +109,7 @@ public:
                    int staggeredN,
                    int nGatesPrtShort,
                    int nGatesPrtLong,
-                   const AparTsInfo &opsInfo);
+                   const IpsTsInfo &opsInfo);
   
   // initialize staggered PRT mode based on params passed in
 
@@ -127,7 +129,7 @@ public:
 
   // set calibration data
   
-  void setCalib(const AparTsCalib &calib);
+  void setCalib(const IpsTsCalib &calib);
 
   // set the estimated noise power based on analysis of the data
   // note that noise is power at the DRX, before subtraction of receiver gain
@@ -244,10 +246,10 @@ public:
   // Compute moments, for pulses from a single channel
   // store results in fields object
   
-  void computeMoments(vector<const AparTsPulse *> &pulses,
+  void computeMoments(vector<const IpsTsPulse *> &pulses,
                       RadarComplex_t *iq0,
                       int gateNum,
-                      AparMomFields &fields);
+                      IpsMomFields &fields);
 
   // Clutter phase alignment - single pol
 
@@ -425,17 +427,17 @@ public:
 
   void singlePolHNoisePrep(double lag0_hc,
                            RadarComplex_t lag1_hc,
-                           AparMomFields &fields);
+                           IpsMomFields &fields);
   
   void singlePolVNoisePrep(double lag0_vc,
                            RadarComplex_t lag1_vc,
-                           AparMomFields &fields);
+                           IpsMomFields &fields);
   
   void dpAltHvCoOnlyNoisePrep(double lag0_hc,
                               double lag0_vc,
                               RadarComplex_t lag2_hc,
                               RadarComplex_t lag2_vc,
-                              AparMomFields &fields);
+                              IpsMomFields &fields);
   
   void dpAltHvCoCrossNoisePrep(double lag0_hc,
                                double lag0_hx,
@@ -443,28 +445,28 @@ public:
                                double lag0_vx,
                                RadarComplex_t lag2_hc,
                                RadarComplex_t lag2_vc,
-                               AparMomFields &fields);
+                               IpsMomFields &fields);
   
   void dpSimHvNoisePrep(double lag0_hc,
                         double lag0_vc,
                         RadarComplex_t lag1_hc,
                         RadarComplex_t lag1_vc,
-                        AparMomFields &fields);
+                        IpsMomFields &fields);
   
   void dpHOnlyNoisePrep(double lag0_hc,
                         double lag0_vx,
                         RadarComplex_t lag1_hc,
-                        AparMomFields &fields);
+                        IpsMomFields &fields);
   
   void dpVOnlyNoisePrep(double lag0_vc,
                         double lag0_hx,
                         RadarComplex_t lag1_vc,
-                        AparMomFields &fields);
+                        IpsMomFields &fields);
   
   void singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
                                   RadarComplex_t *iqhcShort,
                                   RadarComplex_t *iqhcLong,
-                                  AparMomFields &fields);
+                                  IpsMomFields &fields);
   
   void dpSimHvStagPrtNoisePrep(RadarComplex_t *iqhc,
                                RadarComplex_t *iqvc,
@@ -472,7 +474,7 @@ public:
                                RadarComplex_t *iqvcShort,
                                RadarComplex_t *iqhcLong,
                                RadarComplex_t *iqvcLong,
-                               AparMomFields &fields);
+                               IpsMomFields &fields);
 
 
 protected:
@@ -709,7 +711,7 @@ private:
   double _adjustDbzForPwrV(double dbz);
   double _adjustZdrForPwr(double zdr);
 
-  void _setFieldMetaData(AparMomFields &fields);
+  void _setFieldMetaData(IpsMomFields &fields);
 
   void _allocRangeCorr();
   void _allocAtmosAttenCorr();

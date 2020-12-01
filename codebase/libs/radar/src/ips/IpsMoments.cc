@@ -22,16 +22,18 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AparMoments.cc
+// IpsMoments.cc
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// August 2007
+// August 2019
 //
 ///////////////////////////////////////////////////////////////
 //
-// AparMoments computes moments at a gate
+// Support for Independent Pulse Sampling.
+//
+// IpsMoments computes moments at a gate
 //
 ///////////////////////////////////////////////////////////////
 
@@ -43,24 +45,24 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
 #include <rapmath/umath.h>
-#include <radar/AparMoments.hh>
-#include <radar/AparTsPulse.hh>
+#include <radar/IpsMoments.hh>
+#include <radar/IpsTsPulse.hh>
 
-const double AparMoments::_missing = AparMomFields::missingDouble;
-const double AparMoments::_phidpPhaseLimitAlt = -70;
-const double AparMoments::_phidpPhaseLimitSim = -160;
-const double AparMoments::_minDetectableSnr = 0.01; // -20 dB
+const double IpsMoments::_missing = IpsMomFields::missingDouble;
+const double IpsMoments::_phidpPhaseLimitAlt = -70;
+const double IpsMoments::_phidpPhaseLimitSim = -160;
+const double IpsMoments::_minDetectableSnr = 0.01; // -20 dB
 
 // coeffs for computing least squares fit for width
 
-const double AparMoments::_c1 = -0.192307692307692;
-const double AparMoments::_c2 = -0.076923076923077;
-const double AparMoments::_c3 = 0.269230769230769;
+const double IpsMoments::_c1 = -0.192307692307692;
+const double IpsMoments::_c2 = -0.076923076923077;
+const double IpsMoments::_c3 = 0.269230769230769;
 
 ////////////////////////////////////////////////////
 // Default constructor
 
-AparMoments::AparMoments() :
+IpsMoments::IpsMoments() :
         _debug(false),
         _verbose(false)
 
@@ -75,9 +77,9 @@ AparMoments::AparMoments() :
 ////////////////////////////////////////////////////
 // Constructor with max gates specified
 
-AparMoments::AparMoments(int max_gates,
-                         bool debug,
-                         bool verbose) :
+IpsMoments::IpsMoments(int max_gates,
+                       bool debug,
+                       bool verbose) :
         _debug(debug),
         _verbose(verbose)
   
@@ -93,7 +95,7 @@ AparMoments::AparMoments(int max_gates,
 //////////////////////////////////////////////////////////////////
 // destructor
 
-AparMoments::~AparMoments()
+IpsMoments::~IpsMoments()
 
 {
 
@@ -110,7 +112,7 @@ AparMoments::~AparMoments()
 ////////////////////////////////////////////////////
 // construct members
 
-void AparMoments::_init()
+void IpsMoments::_init()
   
 {
   
@@ -208,7 +210,7 @@ void AparMoments::_init()
 ////////////////////////////////////////////////////
 // set max number of gates
 
-void AparMoments::setMaxGates(int max_gates)
+void IpsMoments::setMaxGates(int max_gates)
   
 {
   
@@ -230,7 +232,7 @@ void AparMoments::setMaxGates(int max_gates)
 /////////////////////////
 // set number of samples
 
-void AparMoments::setNSamples(int n)
+void IpsMoments::setNSamples(int n)
 
 {
 
@@ -242,7 +244,7 @@ void AparMoments::setNSamples(int n)
 ///////////////////////////////////////////////////////////
 // initialize for covariances
 
-void AparMoments::_initForCovar()
+void IpsMoments::_initForCovar()
 
 {
 
@@ -288,10 +290,10 @@ void AparMoments::_initForCovar()
 // Compute moments, for pulses from a single channel
 // store results in fields object
 
-void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
-                                 RadarComplex_t *iq0,
-                                 int gateNum,
-                                 AparMomFields &fields)
+void IpsMoments::computeMoments(vector<const IpsTsPulse *> &pulses,
+                                RadarComplex_t *iq0,
+                                int gateNum,
+                                IpsMomFields &fields)
   
 {
 
@@ -307,7 +309,7 @@ void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
   // sum up for covariances - lag 0
 
   for (size_t ii = 0; ii < pulses.size(); ii++) {
-    const AparTsPulse *pulse0 = pulses[ii];
+    const IpsTsPulse *pulse0 = pulses[ii];
     bool isCopol = pulse0->getChanIsCopol(0);
     if (isCopol) {
       if (pulse0->isHoriz()) {
@@ -328,8 +330,8 @@ void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
   // sum up for covariances - lag 1
 
   for (size_t ii = 1; ii < pulses.size(); ii++) {
-    const AparTsPulse *pulse0 = pulses[ii-1];
-    const AparTsPulse *pulse1 = pulses[ii];
+    const IpsTsPulse *pulse0 = pulses[ii-1];
+    const IpsTsPulse *pulse1 = pulses[ii];
     if (pulse0->getVisitNumInBeam() != pulse1->getVisitNumInBeam()) {
       // not the same visit, so do not use this pair
       continue;
@@ -349,8 +351,8 @@ void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
   // sum up for covariances - lag 2
 
   for (size_t ii = 2; ii < pulses.size(); ii++) {
-    const AparTsPulse *pulse0 = pulses[ii-2];
-    const AparTsPulse *pulse2 = pulses[ii];
+    const IpsTsPulse *pulse0 = pulses[ii-2];
+    const IpsTsPulse *pulse2 = pulses[ii];
     if (pulse0->getVisitNumInBeam() != pulse2->getVisitNumInBeam()) {
       // not the same visit, so do not use this pair
       continue;
@@ -366,8 +368,8 @@ void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
   // sum up for covariances - lag 3
 
   for (size_t ii = 3; ii < pulses.size(); ii++) {
-    const AparTsPulse *pulse0 = pulses[ii-3];
-    const AparTsPulse *pulse3 = pulses[ii];
+    const IpsTsPulse *pulse0 = pulses[ii-3];
+    const IpsTsPulse *pulse3 = pulses[ii];
     if (pulse0->getVisitNumInBeam() != pulse3->getVisitNumInBeam()) {
       // not the same visit, so do not use this pair
       continue;
@@ -906,7 +908,7 @@ void AparMoments::computeMoments(vector<const AparTsPulse *> &pulses,
 ///////////////////////////////////////////////////////////
 // set field metadata
   
-void AparMoments::_setFieldMetaData(AparMomFields &fields)
+void IpsMoments::_setFieldMetaData(IpsMomFields &fields)
   
 {
   
@@ -920,10 +922,10 @@ void AparMoments::_setFieldMetaData(AparMomFields &fields)
 ///////////////////////////////////////
 // initialize based on params passed in
 
-void AparMoments::init(double prt,
-                       double wavelengthMeters,
-                       double startRangeKm,
-                       double gateSpacingKm)
+void IpsMoments::init(double prt,
+                      double wavelengthMeters,
+                      double startRangeKm,
+                      double gateSpacingKm)
   
 {
 
@@ -940,10 +942,10 @@ void AparMoments::init(double prt,
 }
 
 ///////////////////////////////////////
-// initialize based on AparTsInfo
+// initialize based on IpsTsInfo
 
-void AparMoments::init(double prt,
-                       const AparTsInfo &opsInfo)
+void IpsMoments::init(double prt,
+                      const IpsTsInfo &opsInfo)
   
 {
   
@@ -957,15 +959,15 @@ void AparMoments::init(double prt,
 ///////////////////////////////////////
 // initialize staggered PRT mode
 
-void AparMoments::initStagPrt(double prtShort,
-                              double prtLong,
-                              int staggeredM,
-                              int staggeredN,
-                              int nGatesPrtShort,
-                              int nGatesPrtLong,
-                              double wavelengthMeters,
-                              double startRangeKm,
-                              double gateSpacingKm)
+void IpsMoments::initStagPrt(double prtShort,
+                             double prtLong,
+                             int staggeredM,
+                             int staggeredN,
+                             int nGatesPrtShort,
+                             int nGatesPrtLong,
+                             double wavelengthMeters,
+                             double startRangeKm,
+                             double gateSpacingKm)
   
 {
 
@@ -990,7 +992,7 @@ void AparMoments::initStagPrt(double prtShort,
 
   // #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
-   cerr << "11111 _prtShort: " <<  _prtShort << endl;
+  cerr << "11111 _prtShort: " <<  _prtShort << endl;
   cerr << "11111 _prtLong: " <<  _prtLong << endl;
   cerr << "11111 _nyquistPrtShort: " <<  _nyquistPrtShort << endl;
   cerr << "11111 _nyquistPrtLong: " <<  _nyquistPrtLong << endl;
@@ -1042,13 +1044,13 @@ void AparMoments::initStagPrt(double prtShort,
 // initialize staggered PRT mode
 // bases on OpsInfo
 
-void AparMoments::initStagPrt(double prtShort,
-                              double prtLong,
-                              int staggeredM,
-                              int staggeredN,
-                              int nGatesPrtShort,
-                              int nGatesPrtLong,
-                              const AparTsInfo &opsInfo)
+void IpsMoments::initStagPrt(double prtShort,
+                             double prtLong,
+                             int staggeredM,
+                             int staggeredN,
+                             int nGatesPrtShort,
+                             int nGatesPrtLong,
+                             const IpsTsInfo &opsInfo)
   
 {
   
@@ -1067,7 +1069,7 @@ void AparMoments::initStagPrt(double prtShort,
 /////////////////////////////////////////////////////////////
 // set the calibration
 
-void AparMoments::setCalib(const AparTsCalib &calib)
+void IpsMoments::setCalib(const IpsTsCalib &calib)
   
 {
   
@@ -1126,22 +1128,22 @@ void AparMoments::setCalib(const AparTsCalib &calib)
 // note that noise is power at the DRX,
 // before subtraction of receiver gain
 
-void AparMoments::setNoiseDbmHc(double val)
+void IpsMoments::setNoiseDbmHc(double val)
 {
   _noisePowerHc = pow(10.0, val / 10.0);
 }
 
-void AparMoments::setNoiseDbmVc(double val)
+void IpsMoments::setNoiseDbmVc(double val)
 {
   _noisePowerVc = pow(10.0, val / 10.0);
 }
 
-void AparMoments::setNoiseDbmHx(double val)
+void IpsMoments::setNoiseDbmHx(double val)
 {
   _noisePowerHx = pow(10.0, val / 10.0);
 }
 
-void AparMoments::setNoiseDbmVx(double val)
+void IpsMoments::setNoiseDbmVx(double val)
 {
   _noisePowerVx = pow(10.0, val / 10.0);
 }
@@ -1149,7 +1151,7 @@ void AparMoments::setNoiseDbmVx(double val)
 ///////////////////////////////////////////
 // negate the velocity - change the sign
   
-void AparMoments::setChangeVelocitySign(bool state)
+void IpsMoments::setChangeVelocitySign(bool state)
 {
   if (state) {
     _velSign = -1.0;
@@ -1161,7 +1163,7 @@ void AparMoments::setChangeVelocitySign(bool state)
 ///////////////////////////////////////////
 // negate the phidp - change the sign
   
-void AparMoments::setChangePhidpSign(bool state)
+void IpsMoments::setChangePhidpSign(bool state)
 {
   if (state) {
     _phidpSign = -1.0;
@@ -1175,7 +1177,7 @@ void AparMoments::setChangePhidpSign(bool state)
 // this is used in conjunction with setChangeVelocitySign()
 // so if both are set they cancel out for staggered.
   
-void AparMoments::setChangeVelocitySignStaggered(bool state)
+void IpsMoments::setChangeVelocitySignStaggered(bool state)
 {
   if (state) {
     _velSignStaggered = -1.0;
@@ -1187,12 +1189,12 @@ void AparMoments::setChangeVelocitySignStaggered(bool state)
 ///////////////////////////////////////
 // set the window R values, used for width correction
 
-void AparMoments::setWindowRValues(double windowR1,
-                                   double windowR2,
-                                   double windowR3,
-                                   double windowHalfR1,
-                                   double windowHalfR2,
-                                   double windowHalfR3)
+void IpsMoments::setWindowRValues(double windowR1,
+                                  double windowR2,
+                                  double windowR3,
+                                  double windowHalfR1,
+                                  double windowHalfR2,
+                                  double windowHalfR3)
 
 {
 
@@ -1208,8 +1210,8 @@ void AparMoments::setWindowRValues(double windowR1,
 /////////////////////////////////////////////////
 // compute sdev of magnitudes of a time series
 
-double AparMoments::computeMagSdev(const RadarComplex_t *iq,
-                                   int nSamples)
+double IpsMoments::computeMagSdev(const RadarComplex_t *iq,
+                                  int nSamples)
   
 {
   
@@ -1239,8 +1241,8 @@ double AparMoments::computeMagSdev(const RadarComplex_t *iq,
 ///////////////////////////////////////////////////
 // compute SQRT of ratio of DC power to total power
 
-double AparMoments::computePowerRatio(const RadarComplex_t *iq,
-                                      int nSamples)
+double IpsMoments::computePowerRatio(const RadarComplex_t *iq,
+                                     int nSamples)
   
 {
 
@@ -1267,9 +1269,9 @@ double AparMoments::computePowerRatio(const RadarComplex_t *iq,
 
 }
 
-double AparMoments::computePowerRatio(const RadarComplex_t *iqh,
-                                      const RadarComplex_t *iqv,
-                                      int nSamples)
+double IpsMoments::computePowerRatio(const RadarComplex_t *iqh,
+                                     const RadarComplex_t *iqv,
+                                     int nSamples)
   
 {
   
@@ -1282,7 +1284,7 @@ double AparMoments::computePowerRatio(const RadarComplex_t *iqh,
 ///////////////////////////////////////////////////////////
 // Compute ncp for a given time series
   
-double AparMoments::computeNcp(RadarComplex_t *iq)
+double IpsMoments::computeNcp(RadarComplex_t *iq)
   
 {
   
@@ -1299,7 +1301,7 @@ double AparMoments::computeNcp(RadarComplex_t *iq)
 /////////////////////////////////////
 // initialize rectangular window
 
-void AparMoments::initWindowRect(int nSamples, double *window)
+void IpsMoments::initWindowRect(int nSamples, double *window)
   
 {
   
@@ -1312,7 +1314,7 @@ void AparMoments::initWindowRect(int nSamples, double *window)
 /////////////////////////////////////
 // initialize vonHann window
 
-void AparMoments::initWindowVonhann(int nSamples, double *window)
+void IpsMoments::initWindowVonhann(int nSamples, double *window)
 
 {
 
@@ -1337,7 +1339,7 @@ void AparMoments::initWindowVonhann(int nSamples, double *window)
 /////////////////////////////////////
 // initialize Blackman window
 
-void AparMoments::initWindowBlackman(int nSamples, double *window)
+void IpsMoments::initWindowBlackman(int nSamples, double *window)
 
 {
   
@@ -1365,7 +1367,7 @@ void AparMoments::initWindowBlackman(int nSamples, double *window)
 /////////////////////////////////////
 // initialize Blackman-Nuttall window
 
-void AparMoments::initWindowBlackmanNuttall(int nSamples, double *window)
+void IpsMoments::initWindowBlackmanNuttall(int nSamples, double *window)
 
 {
   
@@ -1401,7 +1403,7 @@ void AparMoments::initWindowBlackmanNuttall(int nSamples, double *window)
 // alpha == 1 implies a VonHann window
 // alpha == 0 implies a rectangular window
 
-void AparMoments::initWindowTukey(double alpha, int nSamples, double *window)
+void IpsMoments::initWindowTukey(double alpha, int nSamples, double *window)
 
 {
 
@@ -1449,7 +1451,7 @@ void AparMoments::initWindowTukey(double alpha, int nSamples, double *window)
 // create rectangular window
 // Allocates memory and returns window
 
-double *AparMoments::createWindowRect(int nSamples)
+double *IpsMoments::createWindowRect(int nSamples)
   
 {
   
@@ -1463,7 +1465,7 @@ double *AparMoments::createWindowRect(int nSamples)
 // create vonHann window
 // Allocates memory and returns window
 
-double *AparMoments::createWindowVonhann(int nSamples)
+double *IpsMoments::createWindowVonhann(int nSamples)
 
 {
 
@@ -1477,7 +1479,7 @@ double *AparMoments::createWindowVonhann(int nSamples)
 // create Blackman window
 // Allocates memory and returns window
 
-double *AparMoments::createWindowBlackman(int nSamples)
+double *IpsMoments::createWindowBlackman(int nSamples)
 
 {
   
@@ -1491,7 +1493,7 @@ double *AparMoments::createWindowBlackman(int nSamples)
 // create Blackman window
 // Allocates memory and returns window
 
-double *AparMoments::createWindowBlackmanNuttall(int nSamples)
+double *IpsMoments::createWindowBlackmanNuttall(int nSamples)
 
 {
   
@@ -1505,7 +1507,7 @@ double *AparMoments::createWindowBlackmanNuttall(int nSamples)
 // create Tukey window
 // Allocates memory and returns window
 
-double *AparMoments::createWindowTukey(double alpha, int nSamples)
+double *IpsMoments::createWindowTukey(double alpha, int nSamples)
 
 {
   
@@ -1518,9 +1520,9 @@ double *AparMoments::createWindowTukey(double alpha, int nSamples)
 ///////////////////////////////////////
 // apply window to IQ samples, in place
 
-void AparMoments::applyWindow(RadarComplex_t *iq,
-                              const double *window,
-                              int nSamples)
+void IpsMoments::applyWindow(RadarComplex_t *iq,
+                             const double *window,
+                             int nSamples)
   
 {
   
@@ -1537,10 +1539,10 @@ void AparMoments::applyWindow(RadarComplex_t *iq,
 ///////////////////////////////////////////
 // apply window to IQ samples, not in place
 
-void AparMoments::applyWindow(const RadarComplex_t *iqOrig,
-                              const double *window,
-                              RadarComplex_t *iqWindowed,
-                              int nSamples)
+void IpsMoments::applyWindow(const RadarComplex_t *iqOrig,
+                             const double *window,
+                             RadarComplex_t *iqWindowed,
+                             int nSamples)
   
 {
   
@@ -1558,10 +1560,10 @@ void AparMoments::applyWindow(const RadarComplex_t *iqOrig,
 ///////////////////////////////////////////////////
 // invert (undo) window to IQ samples, not in place
 
-void AparMoments::invertWindow(const RadarComplex_t *iqWindowed,
-                               const double *window,
-                               RadarComplex_t *iqOrig,
-                               int nSamples)
+void IpsMoments::invertWindow(const RadarComplex_t *iqWindowed,
+                              const double *window,
+                              RadarComplex_t *iqOrig,
+                              int nSamples)
   
 {
   
@@ -1579,9 +1581,9 @@ void AparMoments::invertWindow(const RadarComplex_t *iqWindowed,
 ////////////////////////////////////////////////
 // compute serial correlation value for a window
 
-double AparMoments::computeWindowCorrelation(int lag,
-                                             double *window,
-                                             int nSamples)
+double IpsMoments::computeWindowCorrelation(int lag,
+                                            double *window,
+                                            int nSamples)
   
 {
   
@@ -1602,8 +1604,8 @@ double AparMoments::computeWindowCorrelation(int lag,
 ///////////////////////////////////////
 // compute range correction table
 
-void AparMoments::_computeRangeCorrection(double startRangeKm,
-                                          double gateSpacingKm)
+void IpsMoments::_computeRangeCorrection(double startRangeKm,
+                                         double gateSpacingKm)
 
 {
 
@@ -1634,9 +1636,9 @@ void AparMoments::_computeRangeCorrection(double startRangeKm,
 // load up the 2-way atmospheric attenuation table,
 // given the elevation angle
 
-void AparMoments::loadAtmosAttenCorrection(int nGates,
-                                           double elevationDeg,
-                                           const AtmosAtten &atmosAtten)
+void IpsMoments::loadAtmosAttenCorrection(int nGates,
+                                          double elevationDeg,
+                                          const AtmosAtten &atmosAtten)
 { 
 
   if (nGates > _maxGates) {
@@ -1653,8 +1655,8 @@ void AparMoments::loadAtmosAttenCorrection(int nGates,
 //////////////////////////////////////////////////
 // Clutter phase alignment - single pol
 
-double AparMoments::computeCpa(const RadarComplex_t *iq,
-                               int nSamples)
+double IpsMoments::computeCpa(const RadarComplex_t *iq,
+                              int nSamples)
   
 {
 
@@ -1682,9 +1684,9 @@ double AparMoments::computeCpa(const RadarComplex_t *iq,
     
 // CPA - dual pol mode
 
-double AparMoments::computeCpa(const RadarComplex_t *iqh,
-                               const RadarComplex_t *iqv,
-                               int nSamples)
+double IpsMoments::computeCpa(const RadarComplex_t *iqh,
+                              const RadarComplex_t *iqv,
+                              int nSamples)
   
 {
   double cpa_h = computeCpa(iqh, nSamples);
@@ -1705,8 +1707,8 @@ double AparMoments::computeCpa(const RadarComplex_t *iqh,
 // a short period, and then returns to high values
 // for the rest of the series.
 
-double AparMoments::computeCpaAlt(const RadarComplex_t *iq,
-                                  int nSamples)
+double IpsMoments::computeCpaAlt(const RadarComplex_t *iq,
+                                 int nSamples)
   
 {
 
@@ -1796,9 +1798,9 @@ double AparMoments::computeCpaAlt(const RadarComplex_t *iq,
 /////////////////////////////////////////////////////////////
 // CPA alt - dual pol mode
 
-double AparMoments::computeCpaAlt(const RadarComplex_t *iqh,
-                                  const RadarComplex_t *iqv,
-                                  int nSamples)
+double IpsMoments::computeCpaAlt(const RadarComplex_t *iqh,
+                                 const RadarComplex_t *iqv,
+                                 int nSamples)
   
 {
   double cpa_h = computeCpaAlt(iqh, nSamples);
@@ -1810,9 +1812,9 @@ double AparMoments::computeCpaAlt(const RadarComplex_t *iqh,
 // compute width using R0R1 method
 // from Greg Meymaris
 
-double AparMoments::_computeR0R1Width(double r0,
-                                      double r1,
-                                      double nyquist) const
+double IpsMoments::_computeR0R1Width(double r0,
+                                     double r1,
+                                     double nyquist) const
 { 
   
   double r0r1 = 0;
@@ -1829,9 +1831,9 @@ double AparMoments::_computeR0R1Width(double r0,
 // compute width using R1R2 method
 // from Greg Meymaris
 
-double AparMoments::_computeR1R2Width(double r1,
-                                      double r2,
-                                      double nyquist) const
+double IpsMoments::_computeR1R2Width(double r1,
+                                     double r2,
+                                     double nyquist) const
 { 
   double r1r2 = 0;
   if (r1 > r2) {
@@ -1846,9 +1848,9 @@ double AparMoments::_computeR1R2Width(double r1,
 // compute width using R1R3 method
 // from Greg Meymaris
 
-double AparMoments::_computeR1R3Width(double r1,
-                                      double r3,
-                                      double nyquist) const
+double IpsMoments::_computeR1R3Width(double r1,
+                                     double r3,
+                                     double nyquist) const
 { 
 
   double r1r3 = 0;
@@ -1864,10 +1866,10 @@ double AparMoments::_computeR1R3Width(double r1,
 // compute width using R0R1R2 method
 // from Greg Meymaris
 
-double AparMoments::_computePplsWidth(double r0,
-                                      double r1,
-                                      double r2,
-                                      double nyquist) const
+double IpsMoments::_computePplsWidth(double r0,
+                                     double r1,
+                                     double r2,
+                                     double nyquist) const
 { 
   double r0r1r2 = 0;
   double qq = _c1 * log(r0) + _c2 * log(r1) + _c3 * log(r2);
@@ -1883,11 +1885,11 @@ double AparMoments::_computePplsWidth(double r0,
 // compute width using hybrid method
 // from Greg Meymaris
 
-double AparMoments::_computeHybridWidth(double r0,
-                                        double r1,
-                                        double r2,
-                                        double r3,
-                                        double nyquist) const
+double IpsMoments::_computeHybridWidth(double r0,
+                                       double r1,
+                                       double r2,
+                                       double r3,
+                                       double nyquist) const
   
 {
   
@@ -1966,11 +1968,11 @@ double AparMoments::_computeHybridWidth(double r0,
 // compute width from lags a and b for staggered prt
 // using an rA/rB estimator
 
-double AparMoments::_computeStagWidth(double rA,
-                                      double rB,
-                                      int lagA,
-                                      int lagB,
-                                      double nyquist) const
+double IpsMoments::_computeStagWidth(double rA,
+                                     double rB,
+                                     int lagA,
+                                     int lagB,
+                                     double nyquist) const
 
 {
   
@@ -1990,7 +1992,7 @@ double AparMoments::_computeStagWidth(double rA,
 /////////////////////////////////////////////////////
 // get the calibrated noise power given the channel
 
-double AparMoments::getCalNoisePower(channel_t channel)
+double IpsMoments::getCalNoisePower(channel_t channel)
   
 {
 
@@ -2016,7 +2018,7 @@ double AparMoments::getCalNoisePower(channel_t channel)
 /////////////////////////////////////////////////////
 // get the noise power in use given the channel
 
-double AparMoments::getNoisePower(channel_t channel)
+double IpsMoments::getNoisePower(channel_t channel)
   
 {
 
@@ -2042,7 +2044,7 @@ double AparMoments::getNoisePower(channel_t channel)
 //////////////////////////////////////////
 // get the receiver gain given the channel
 
-double AparMoments::getReceiverGain(channel_t channel)
+double IpsMoments::getReceiverGain(channel_t channel)
   
 {
 
@@ -2068,7 +2070,7 @@ double AparMoments::getReceiverGain(channel_t channel)
 /////////////////////////////////////////////
 // get the base dbz at 1km given the channel
 
-double AparMoments::getBaseDbz1km(channel_t channel)
+double IpsMoments::getBaseDbz1km(channel_t channel)
   
 {
 
@@ -2094,8 +2096,8 @@ double AparMoments::getBaseDbz1km(channel_t channel)
 /////////////////////////////////////////////
 // compute percentile power value in spectrum
 
-double AparMoments::computePowerPercentile(int nSamples, double *powerSpec,
-                                           double percentile)
+double IpsMoments::computePowerPercentile(int nSamples, double *powerSpec,
+                                          double percentile)
 
 {
 
@@ -2135,9 +2137,9 @@ double AparMoments::computePowerPercentile(int nSamples, double *powerSpec,
 // The de-trended time series is computed as the redidual difference
 // between the original values and the computed line.
 
-void AparMoments::detrendTs(const RadarComplex_t *iq,
-                            int nSamples,
-                            RadarComplex_t *iqDeTrended)
+void IpsMoments::detrendTs(const RadarComplex_t *iq,
+                           int nSamples,
+                           RadarComplex_t *iqDeTrended)
   
 {
 
@@ -2173,8 +2175,8 @@ void AparMoments::detrendTs(const RadarComplex_t *iq,
 //
 // Assumes iq has space for 3 values.
 
-void AparMoments::_compute3PtMedian(const RadarComplex_t *iq,
-                                    RadarComplex_t &median)
+void IpsMoments::_compute3PtMedian(const RadarComplex_t *iq,
+                                   RadarComplex_t &median)
   
 {
 
@@ -2197,7 +2199,7 @@ void AparMoments::_compute3PtMedian(const RadarComplex_t *iq,
 ////////////////////////////////////////////////////////////
 // condition SNR - i.e. set a minumum reasonable SNR
 
-double AparMoments::_conditionSnr(double snr)
+double IpsMoments::_conditionSnr(double snr)
   
 {
   
@@ -2216,7 +2218,7 @@ double AparMoments::_conditionSnr(double snr)
 // transmit power exceeds the calibrated power,
 // and vice versa.
 
-double AparMoments::_adjustDbzForPwrH(double dbz)
+double IpsMoments::_adjustDbzForPwrH(double dbz)
   
 {
 
@@ -2241,7 +2243,7 @@ double AparMoments::_adjustDbzForPwrH(double dbz)
 // transmit power exceeds the calibrated power,
 // and vice versa.
 
-double AparMoments::_adjustDbzForPwrV(double dbz)
+double IpsMoments::_adjustDbzForPwrV(double dbz)
   
 {
 
@@ -2266,7 +2268,7 @@ double AparMoments::_adjustDbzForPwrV(double dbz)
 // transmit power exceeds the calibrated power,
 // and vice versa.
 
-double AparMoments::_adjustZdrForPwr(double zdr)
+double IpsMoments::_adjustZdrForPwr(double zdr)
   
 {
 
@@ -2291,9 +2293,9 @@ double AparMoments::_adjustZdrForPwr(double zdr)
 // prepare for noise detection - single polarization
 // hc channel
   
-void AparMoments::singlePolHNoisePrep(double lag0_hc,
-                                      RadarComplex_t lag1_hc,
-                                      AparMomFields &fields)
+void IpsMoments::singlePolHNoisePrep(double lag0_hc,
+                                     RadarComplex_t lag1_hc,
+                                     IpsMomFields &fields)
   
 {
   
@@ -2318,9 +2320,9 @@ void AparMoments::singlePolHNoisePrep(double lag0_hc,
 // prepare for noise detection - single polarization
 // vc channel
   
-void AparMoments::singlePolVNoisePrep(double lag0_vc,
-                                      RadarComplex_t lag1_vc,
-                                      AparMomFields &fields)
+void IpsMoments::singlePolVNoisePrep(double lag0_vc,
+                                     RadarComplex_t lag1_vc,
+                                     IpsMomFields &fields)
   
 {
   
@@ -2345,11 +2347,11 @@ void AparMoments::singlePolVNoisePrep(double lag0_vc,
 // prepare for noise detection - DP_ALT_HV_CO_ONLY
 // Transmit alternating, receive copolar only
 
-void AparMoments::dpAltHvCoOnlyNoisePrep(double lag0_hc,
-                                         double lag0_vc,
-                                         RadarComplex_t lag2_hc,
-                                         RadarComplex_t lag2_vc,
-                                         AparMomFields &fields)
+void IpsMoments::dpAltHvCoOnlyNoisePrep(double lag0_hc,
+                                        double lag0_vc,
+                                        RadarComplex_t lag2_hc,
+                                        RadarComplex_t lag2_vc,
+                                        IpsMomFields &fields)
   
 {
   
@@ -2378,13 +2380,13 @@ void AparMoments::dpAltHvCoOnlyNoisePrep(double lag0_hc,
 // prepare for noise detection - DP_ALT_HV_CO_CROSS
 // Transmit alternating, receive co/cross
 
-void AparMoments::dpAltHvCoCrossNoisePrep(double lag0_hc,
-                                          double lag0_hx,
-                                          double lag0_vc,
-                                          double lag0_vx,
-                                          RadarComplex_t lag2_hc,
-                                          RadarComplex_t lag2_vc,
-                                          AparMomFields &fields)
+void IpsMoments::dpAltHvCoCrossNoisePrep(double lag0_hc,
+                                         double lag0_hx,
+                                         double lag0_vc,
+                                         double lag0_vx,
+                                         RadarComplex_t lag2_hc,
+                                         RadarComplex_t lag2_vc,
+                                         IpsMomFields &fields)
   
 {
   
@@ -2415,11 +2417,11 @@ void AparMoments::dpAltHvCoCrossNoisePrep(double lag0_hc,
 // prepare for noise detection - DP_SIM_HV
 // Dual pol, transmit simultaneous, receive fixed channels
 
-void AparMoments::dpSimHvNoisePrep(double lag0_hc,
-                                   double lag0_vc,
-                                   RadarComplex_t lag1_hc,
-                                   RadarComplex_t lag1_vc,
-                                   AparMomFields &fields)
+void IpsMoments::dpSimHvNoisePrep(double lag0_hc,
+                                  double lag0_vc,
+                                  RadarComplex_t lag1_hc,
+                                  RadarComplex_t lag1_vc,
+                                  IpsMomFields &fields)
   
 {
   
@@ -2453,10 +2455,10 @@ void AparMoments::dpSimHvNoisePrep(double lag0_hc,
 // prepare for noise detection - DP_H_ONLY
 // Dual pol, transmit H, receive co/cross
 
-void AparMoments::dpHOnlyNoisePrep(double lag0_hc,
-                                   double lag0_vx,
-                                   RadarComplex_t lag1_hc,
-                                   AparMomFields &fields)
+void IpsMoments::dpHOnlyNoisePrep(double lag0_hc,
+                                  double lag0_vx,
+                                  RadarComplex_t lag1_hc,
+                                  IpsMomFields &fields)
   
 {
   
@@ -2482,10 +2484,10 @@ void AparMoments::dpHOnlyNoisePrep(double lag0_hc,
 // prepare for noise detection - DP_V_ONLY
 // Dual pol, transmit V, receive co/cross
 
-void AparMoments::dpVOnlyNoisePrep(double lag0_vc,
-                                   double lag0_hx,
-                                   RadarComplex_t lag1_vc,
-                                   AparMomFields &fields)
+void IpsMoments::dpVOnlyNoisePrep(double lag0_vc,
+                                  double lag0_hx,
+                                  RadarComplex_t lag1_vc,
+                                  IpsMomFields &fields)
   
 {
   
@@ -2512,10 +2514,10 @@ void AparMoments::dpVOnlyNoisePrep(double lag0_vc,
 // prepare for noise detection
 // Single polarization Staggered-PRT
 
-void AparMoments::singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
-                                             RadarComplex_t *iqhcShort,
-                                             RadarComplex_t *iqhcLong,
-                                             AparMomFields &fields)
+void IpsMoments::singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
+                                            RadarComplex_t *iqhcShort,
+                                            RadarComplex_t *iqhcLong,
+                                            IpsMomFields &fields)
   
 {
   
@@ -2546,13 +2548,13 @@ void AparMoments::singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
 // Dual pol, transmit simultaneous, receive fixed channels
 // Staggered-PRT
 
-void AparMoments::dpSimHvStagPrtNoisePrep(RadarComplex_t *iqhc,
-                                          RadarComplex_t *iqvc,
-                                          RadarComplex_t *iqhcShort,
-                                          RadarComplex_t *iqvcShort,
-                                          RadarComplex_t *iqhcLong,
-                                          RadarComplex_t *iqvcLong,
-                                          AparMomFields &fields)
+void IpsMoments::dpSimHvStagPrtNoisePrep(RadarComplex_t *iqhc,
+                                         RadarComplex_t *iqvc,
+                                         RadarComplex_t *iqhcShort,
+                                         RadarComplex_t *iqvcShort,
+                                         RadarComplex_t *iqhcLong,
+                                         RadarComplex_t *iqvcLong,
+                                         IpsMomFields &fields)
   
 {
   
@@ -2588,7 +2590,7 @@ void AparMoments::dpSimHvStagPrtNoisePrep(RadarComplex_t *iqhc,
 ///////////////////////////////////////////////////////////
 // allocate range correction table
 
-void AparMoments::_allocRangeCorr()
+void IpsMoments::_allocRangeCorr()
 
 {
 
@@ -2601,7 +2603,7 @@ void AparMoments::_allocRangeCorr()
 ///////////////////////////////////////////////////////////
 // allocate atmos atten corr table
 
-void AparMoments::_allocAtmosAttenCorr()
+void IpsMoments::_allocAtmosAttenCorr()
 
 {
 

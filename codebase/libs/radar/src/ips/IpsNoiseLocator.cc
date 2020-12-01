@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AparNoiseLocator.cc
+// IpsNoiseLocator.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,50 +30,52 @@
 //
 ///////////////////////////////////////////////////////////////
 //
+// Support for Independent Pulse Sampling.
+//
 // Find noise gates in Doppler radar data
 //
 ///////////////////////////////////////////////////////////////
 
-#include <radar/AparNoiseLocator.hh>
+#include <radar/IpsNoiseLocator.hh>
 #include <toolsa/mem.h>
 #include <algorithm>
 using namespace std;
 
 // mutexes
 
-int AparNoiseLocator::_idCount = 0;
-pthread_mutex_t AparNoiseLocator::_prevGridMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t AparNoiseLocator::_computeMethodMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t AparNoiseLocator::_runningMedianMutex = PTHREAD_MUTEX_INITIALIZER;
+int IpsNoiseLocator::_idCount = 0;
+pthread_mutex_t IpsNoiseLocator::_prevGridMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t IpsNoiseLocator::_computeMethodMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t IpsNoiseLocator::_runningMedianMutex = PTHREAD_MUTEX_INITIALIZER;
 
 // method for computing the median noise
 
-AparNoiseLocator::compute_method_t AparNoiseLocator::_computeMethod
-  = AparNoiseLocator::compute_method_t::RAY_BY_RAY;
+IpsNoiseLocator::compute_method_t IpsNoiseLocator::_computeMethod
+  = IpsNoiseLocator::compute_method_t::RAY_BY_RAY;
 
 // grid for storing previous noise values
 
-AparNoiseLocator::noise_val_t **AparNoiseLocator::_historyGrid = NULL;
-const double AparNoiseLocator::_gridResEl = 360.0 / _gridSizeEl;
-const double AparNoiseLocator::_gridResAz = 360.0 / _gridSizeAz;
+IpsNoiseLocator::noise_val_t **IpsNoiseLocator::_historyGrid = NULL;
+const double IpsNoiseLocator::_gridResEl = 360.0 / _gridSizeEl;
+const double IpsNoiseLocator::_gridResAz = 360.0 / _gridSizeAz;
 
 // running median method
 
-int AparNoiseLocator::_nGatesRunningMedian = 2500;
-int AparNoiseLocator::_nGatesRunningCount = 0;
-vector<double> AparNoiseLocator::_runningValsDbmHc;
-vector<double> AparNoiseLocator::_runningValsDbmVc;
-vector<double> AparNoiseLocator::_runningValsDbmHx;
-vector<double> AparNoiseLocator::_runningValsDbmVx;
-double AparNoiseLocator::_runningMedianNoiseDbmHc = -9999;
-double AparNoiseLocator::_runningMedianNoiseDbmVc = -9999;
-double AparNoiseLocator::_runningMedianNoiseDbmHx = -9999;
-double AparNoiseLocator::_runningMedianNoiseDbmVx = -9999;
+int IpsNoiseLocator::_nGatesRunningMedian = 2500;
+int IpsNoiseLocator::_nGatesRunningCount = 0;
+vector<double> IpsNoiseLocator::_runningValsDbmHc;
+vector<double> IpsNoiseLocator::_runningValsDbmVc;
+vector<double> IpsNoiseLocator::_runningValsDbmHx;
+vector<double> IpsNoiseLocator::_runningValsDbmVx;
+double IpsNoiseLocator::_runningMedianNoiseDbmHc = -9999;
+double IpsNoiseLocator::_runningMedianNoiseDbmVc = -9999;
+double IpsNoiseLocator::_runningMedianNoiseDbmHx = -9999;
+double IpsNoiseLocator::_runningMedianNoiseDbmVx = -9999;
 
 // search kernel for finding most appropriate previous
 // noise value
 
-AparNoiseLocator::search_kernel_t AparNoiseLocator::_searchKernel[25] =
+IpsNoiseLocator::search_kernel_t IpsNoiseLocator::_searchKernel[25] =
   {
     {0,0},   {-1,0},  {1,0},   {0,1},   {0,-1},
     {-1,1},  {1,1},   {-1,-1}, {1,-1},  {-2,0},
@@ -85,7 +87,7 @@ AparNoiseLocator::search_kernel_t AparNoiseLocator::_searchKernel[25] =
 ///////////////////////////////////////////////////////////////
 // Constructor
 
-AparNoiseLocator::AparNoiseLocator()
+IpsNoiseLocator::IpsNoiseLocator()
   
 {
 
@@ -126,7 +128,7 @@ AparNoiseLocator::AparNoiseLocator()
 ///////////////////////////////////////////////////////////////
 // destructor
 
-AparNoiseLocator::~AparNoiseLocator()
+IpsNoiseLocator::~IpsNoiseLocator()
   
 {
 
@@ -155,7 +157,7 @@ AparNoiseLocator::~AparNoiseLocator()
 // for the ray-by-ray method, we compute noise for individual
 // rays so the noise varies on a ray-by-ray basis
 
-void AparNoiseLocator::setComputeRayMedian(int minNGatesRayMedian)
+void IpsNoiseLocator::setComputeRayMedian(int minNGatesRayMedian)
 {
   
   pthread_mutex_lock(&_computeMethodMutex);
@@ -170,7 +172,7 @@ void AparNoiseLocator::setComputeRayMedian(int minNGatesRayMedian)
 // the noise which is applied to the rays in sequence
 // so the estimated noise varies slowly from time to time
 
-void AparNoiseLocator::setComputeRunningMedian(int nGatesMedian)
+void IpsNoiseLocator::setComputeRunningMedian(int nGatesMedian)
   
 { 
   
@@ -194,7 +196,7 @@ void AparNoiseLocator::setComputeRunningMedian(int nGatesMedian)
 ///////////////////////////////////////////////////////////////
 // print parameters for debugging
 
-void AparNoiseLocator::printParams(ostream &out)
+void IpsNoiseLocator::printParams(ostream &out)
   
 {
 
@@ -240,12 +242,12 @@ void AparNoiseLocator::printParams(ostream &out)
 // set the ray properties
 // must be called before locate() or computeNoise()
 
-void AparNoiseLocator::setRayProps(int nGates,
-                                   const AparTsCalib &calib,
-                                   time_t timeSecs, 
-                                   double nanoSecs,
-                                   double elevation, 
-                                   double azimuth)
+void IpsNoiseLocator::setRayProps(int nGates,
+                                  const IpsTsCalib &calib,
+                                  time_t timeSecs, 
+                                  double nanoSecs,
+                                  double elevation, 
+                                  double azimuth)
   
 {
 
@@ -271,7 +273,7 @@ void AparNoiseLocator::setRayProps(int nGates,
 ///////////////////////////////////////////////////////////////
 // locate the noise gates
 
-void AparNoiseLocator::locate(const AparMomFields *mfields)
+void IpsNoiseLocator::locate(const IpsMomFields *mfields)
   
 {
 
@@ -427,7 +429,7 @@ void AparNoiseLocator::locate(const AparMomFields *mfields)
 ///////////////////////////////////////////////////////////////
 // compute mean phase error in range, for the specified kernel
 
-double AparNoiseLocator::_computePhaseChangeError(int startGate, int endGate)
+double IpsNoiseLocator::_computePhaseChangeError(int startGate, int endGate)
   
 {
 
@@ -455,7 +457,7 @@ double AparNoiseLocator::_computePhaseChangeError(int startGate, int endGate)
 ///////////////////////////////////////////////////////////////
 // compute for DBM SDEV
 
-void AparNoiseLocator::_computeDbmSdev(const AparMomFields *mfields)
+void IpsNoiseLocator::_computeDbmSdev(const IpsMomFields *mfields)
   
 {
   
@@ -471,7 +473,7 @@ void AparNoiseLocator::_computeDbmSdev(const AparMomFields *mfields)
       
       double dbm = mfields[jgate].dbm_for_noise;
       
-      if (dbm != AparMomFields::missingDouble) {
+      if (dbm != IpsMomFields::missingDouble) {
         sumDbm += dbm;
         sumDbmSq += (dbm * dbm);
         nDbm++;
@@ -497,7 +499,7 @@ void AparNoiseLocator::_computeDbmSdev(const AparMomFields *mfields)
 ///////////////////////////////////////////////////////////////
 // compute NCP mean
 
-void AparNoiseLocator::_computeNcpMean(const AparMomFields *mfields)
+void IpsNoiseLocator::_computeNcpMean(const IpsMomFields *mfields)
   
 {
   
@@ -512,7 +514,7 @@ void AparNoiseLocator::_computeNcpMean(const AparMomFields *mfields)
       
       double ncp = mfields[jgate].ncp;
       
-      if (ncp != AparMomFields::missingDouble) {
+      if (ncp != IpsMomFields::missingDouble) {
         sumNcp += ncp;
         nNcp++;
       }
@@ -535,7 +537,7 @@ void AparNoiseLocator::_computeNcpMean(const AparMomFields *mfields)
 // The following must be set in mfields prior to calling:
 //   lag0_hc_db
 
-void AparNoiseLocator::computeNoiseSinglePolH(AparMomFields *mfields)
+void IpsNoiseLocator::computeNoiseSinglePolH(IpsMomFields *mfields)
   
   
 {
@@ -554,7 +556,7 @@ void AparNoiseLocator::computeNoiseSinglePolH(AparMomFields *mfields)
     
     vector<double> noiseHc;
     for (int igate = 0; igate < _nGates; igate++) {
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         noiseHc.push_back(mfield.lag0_hc_db);
       }
@@ -596,7 +598,7 @@ void AparNoiseLocator::computeNoiseSinglePolH(AparMomFields *mfields)
       
       // add valid gates to the arrays
       
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
         _nGatesRunningCount++;
@@ -628,7 +630,7 @@ void AparNoiseLocator::computeNoiseSinglePolH(AparMomFields *mfields)
   _noiseBiasDbHc = _medianNoiseDbmHc - _calib.getNoiseDbmHc();
 
   for (int igate = 0; igate < _nGates; igate++) {
-    AparMomFields &mfield = mfields[igate];
+    IpsMomFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
   }
   
@@ -637,7 +639,7 @@ void AparNoiseLocator::computeNoiseSinglePolH(AparMomFields *mfields)
 // The following must be set in mfields prior to calling:
 //   lag0_vc_db
 
-void AparNoiseLocator::computeNoiseSinglePolV(AparMomFields *mfields)
+void IpsNoiseLocator::computeNoiseSinglePolV(IpsMomFields *mfields)
   
   
 {
@@ -656,7 +658,7 @@ void AparNoiseLocator::computeNoiseSinglePolV(AparMomFields *mfields)
     
     vector<double> noiseVc;
     for (int igate = 0; igate < _nGates; igate++) {
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         noiseVc.push_back(mfield.lag0_vc_db);
       }
@@ -698,7 +700,7 @@ void AparNoiseLocator::computeNoiseSinglePolV(AparMomFields *mfields)
       
       // add valid gates to the arrays
       
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
         _nGatesRunningCount++;
@@ -730,7 +732,7 @@ void AparNoiseLocator::computeNoiseSinglePolV(AparMomFields *mfields)
   _noiseBiasDbVc = _medianNoiseDbmVc - _calib.getNoiseDbmVc();
 
   for (int igate = 0; igate < _nGates; igate++) {
-    AparMomFields &mfield = mfields[igate];
+    IpsMomFields &mfield = mfields[igate];
     mfield.noise_bias_db_vc = _noiseBiasDbVc;
   }
   
@@ -744,7 +746,7 @@ void AparNoiseLocator::computeNoiseSinglePolV(AparMomFields *mfields)
 //   lag0_hc_db
 //   lag0_vc_db
 
-void AparNoiseLocator::computeNoiseDpAltHvCoOnly(AparMomFields *mfields)
+void IpsNoiseLocator::computeNoiseDpAltHvCoOnly(IpsMomFields *mfields)
   
 {
 
@@ -764,7 +766,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoOnly(AparMomFields *mfields)
     vector<double> noiseHc;
     vector<double> noiseVc;
     for (int igate = 0; igate < _nGates; igate++) {
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         noiseHc.push_back(mfield.lag0_hc_db);
         noiseVc.push_back(mfield.lag0_vc_db);
@@ -810,7 +812,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoOnly(AparMomFields *mfields)
 
       // add valid gates to the arrays
 
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
         _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
@@ -855,7 +857,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoOnly(AparMomFields *mfields)
   // set noise moment for each gate
 
   for (int igate = 0; igate < _nGates; igate++) {
-    AparMomFields &mfield = mfields[igate];
+    IpsMomFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
     mfield.noise_bias_db_vc = _noiseBiasDbVc;
   }
@@ -872,7 +874,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoOnly(AparMomFields *mfields)
 //   lag0_hx_db
 //   lag0_vx_db
   
-void AparNoiseLocator::computeNoiseDpAltHvCoCross(AparMomFields *mfields)
+void IpsNoiseLocator::computeNoiseDpAltHvCoCross(IpsMomFields *mfields)
   
 {
 
@@ -896,7 +898,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoCross(AparMomFields *mfields)
     vector<double> noiseVc;
     vector<double> noiseVx;
     for (int igate = 0; igate < _nGates; igate++) {
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         noiseHc.push_back(mfield.lag0_hc_db);
         noiseHx.push_back(mfield.lag0_hx_db);
@@ -950,7 +952,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoCross(AparMomFields *mfields)
 
       // add valid gates to the arrays
 
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
         _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
@@ -1011,7 +1013,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoCross(AparMomFields *mfields)
   // set noise moment for each gate
 
   for (int igate = 0; igate < _nGates; igate++) {
-    AparMomFields &mfield = mfields[igate];
+    IpsMomFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
     mfield.noise_bias_db_vc = _noiseBiasDbVc;
     mfield.noise_bias_db_hx = _noiseBiasDbHx;
@@ -1028,7 +1030,7 @@ void AparNoiseLocator::computeNoiseDpAltHvCoCross(AparMomFields *mfields)
 //   lag0_hc_db
 //   lag0_vc_db
   
-void AparNoiseLocator::computeNoiseDpSimHv(AparMomFields *mfields)
+void IpsNoiseLocator::computeNoiseDpSimHv(IpsMomFields *mfields)
   
 {
 
@@ -1048,7 +1050,7 @@ void AparNoiseLocator::computeNoiseDpSimHv(AparMomFields *mfields)
     vector<double> noiseHc;
     vector<double> noiseVc;
     for (int igate = 0; igate < _nGates; igate++) {
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         noiseHc.push_back(mfield.lag0_hc_db);
         noiseVc.push_back(mfield.lag0_vc_db);
@@ -1079,7 +1081,7 @@ void AparNoiseLocator::computeNoiseDpSimHv(AparMomFields *mfields)
       if (_getSavedNoiseClosestHc(prev) == 0) {
         // use previously saved data
         _medianNoiseDbmHc = prev.noiseHc;
-      _medianNoiseDbmVc = prev.noiseVc;
+        _medianNoiseDbmVc = prev.noiseVc;
       }
       
     }
@@ -1092,7 +1094,7 @@ void AparNoiseLocator::computeNoiseDpSimHv(AparMomFields *mfields)
 
     for (int igate = 0; igate < _nGates; igate++) {
       // add valid gates to the arrays
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
         _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
@@ -1134,7 +1136,7 @@ void AparNoiseLocator::computeNoiseDpSimHv(AparMomFields *mfields)
   // set noise moment for each gate
 
   for (int igate = 0; igate < _nGates; igate++) {
-    AparMomFields &mfield = mfields[igate];
+    IpsMomFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
     mfield.noise_bias_db_vc = _noiseBiasDbVc;
   }
@@ -1149,7 +1151,7 @@ void AparNoiseLocator::computeNoiseDpSimHv(AparMomFields *mfields)
 //   lag0_hc_db
 //   lag0_vx_db
   
-void AparNoiseLocator::computeNoiseDpHOnly(AparMomFields *mfields)
+void IpsNoiseLocator::computeNoiseDpHOnly(IpsMomFields *mfields)
   
 {
 
@@ -1169,7 +1171,7 @@ void AparNoiseLocator::computeNoiseDpHOnly(AparMomFields *mfields)
     vector<double> noiseHc;
     vector<double> noiseVx;
     for (int igate = 0; igate < _nGates; igate++) {
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         noiseHc.push_back(mfield.lag0_hc_db);
         noiseVx.push_back(mfield.lag0_vx_db);
@@ -1213,7 +1215,7 @@ void AparNoiseLocator::computeNoiseDpHOnly(AparMomFields *mfields)
 
     for (int igate = 0; igate < _nGates; igate++) {
       // add valid gates to the arrays
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         _runningValsDbmHc[_nGatesRunningCount] = mfield.lag0_hc_db;
         _runningValsDbmVx[_nGatesRunningCount] = mfield.lag0_vx_db;
@@ -1256,7 +1258,7 @@ void AparNoiseLocator::computeNoiseDpHOnly(AparMomFields *mfields)
   // set noise moment for each gate
 
   for (int igate = 0; igate < _nGates; igate++) {
-    AparMomFields &mfield = mfields[igate];
+    IpsMomFields &mfield = mfields[igate];
     mfield.noise_bias_db_hc = _noiseBiasDbHc;
     mfield.noise_bias_db_vx = _noiseBiasDbVx;
   }
@@ -1271,7 +1273,7 @@ void AparNoiseLocator::computeNoiseDpHOnly(AparMomFields *mfields)
 //   lag0_vc_db
 //   lag0_hx_db
   
-void AparNoiseLocator::computeNoiseDpVOnly(AparMomFields *mfields)
+void IpsNoiseLocator::computeNoiseDpVOnly(IpsMomFields *mfields)
   
 {
 
@@ -1291,7 +1293,7 @@ void AparNoiseLocator::computeNoiseDpVOnly(AparMomFields *mfields)
     vector<double> noiseHx;
     vector<double> noiseVc;
     for (int igate = 0; igate < _nGates; igate++) {
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         noiseHx.push_back(mfield.lag0_hx_db);
         noiseVc.push_back(mfield.lag0_vc_db);
@@ -1335,7 +1337,7 @@ void AparNoiseLocator::computeNoiseDpVOnly(AparMomFields *mfields)
 
     for (int igate = 0; igate < _nGates; igate++) {
       // add valid gates to the arrays
-      const AparMomFields &mfield = mfields[igate];
+      const IpsMomFields &mfield = mfields[igate];
       if (_noiseFlag[igate]) {
         _runningValsDbmVc[_nGatesRunningCount] = mfield.lag0_vc_db;
         _runningValsDbmHx[_nGatesRunningCount] = mfield.lag0_hx_db;
@@ -1378,7 +1380,7 @@ void AparNoiseLocator::computeNoiseDpVOnly(AparMomFields *mfields)
   // set noise moment for each gate
 
   for (int igate = 0; igate < _nGates; igate++) {
-    AparMomFields &mfield = mfields[igate];
+    IpsMomFields &mfield = mfields[igate];
     mfield.noise_bias_db_hx = _noiseBiasDbHx;
     mfield.noise_bias_db_vc = _noiseBiasDbVc;
   }
@@ -1388,7 +1390,7 @@ void AparNoiseLocator::computeNoiseDpVOnly(AparMomFields *mfields)
 ///////////////////////////////////////////////////////////////
 // Compute mean noise, removing outliers
   
-double AparNoiseLocator::_computeMean(const vector<double> &vals)
+double IpsNoiseLocator::_computeMean(const vector<double> &vals)
   
 {
 
@@ -1443,7 +1445,7 @@ double AparNoiseLocator::_computeMean(const vector<double> &vals)
 ///////////////////////////////////////////////////////////////
 // Compute median noise
   
-double AparNoiseLocator::_computeMedian(const vector<double> &vals)
+double IpsNoiseLocator::_computeMedian(const vector<double> &vals)
 
 {
 
@@ -1468,7 +1470,7 @@ double AparNoiseLocator::_computeMedian(const vector<double> &vals)
 //
 // Returns 0 on success, -1 on failure
   
-int AparNoiseLocator::_getSavedNoiseClosestHc(noise_val_t &closest)
+int IpsNoiseLocator::_getSavedNoiseClosestHc(noise_val_t &closest)
   
 {
 
@@ -1509,7 +1511,7 @@ int AparNoiseLocator::_getSavedNoiseClosestHc(noise_val_t &closest)
 //
 // Returns 0 on success, -1 on failure
   
-int AparNoiseLocator::_getSavedNoiseClosestVc(noise_val_t &closest)
+int IpsNoiseLocator::_getSavedNoiseClosestVc(noise_val_t &closest)
   
 {
 
@@ -1545,7 +1547,7 @@ int AparNoiseLocator::_getSavedNoiseClosestVc(noise_val_t &closest)
 ///////////////////////////////////////////////////////////////
 // Create the default interest maps and weights
 
-void AparNoiseLocator::_createDefaultInterestMaps()
+void IpsNoiseLocator::_createDefaultInterestMaps()
   
 {
 
@@ -1585,7 +1587,7 @@ void AparNoiseLocator::_createDefaultInterestMaps()
 ///////////////////////////////////////////////////////////////
 // interest maps for noise
 
-void AparNoiseLocator::setInterestMapPhaseChangeErrorForNoise
+void IpsNoiseLocator::setInterestMapPhaseChangeErrorForNoise
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
@@ -1602,7 +1604,7 @@ void AparNoiseLocator::setInterestMapPhaseChangeErrorForNoise
 
 }
 
-void AparNoiseLocator::setInterestMapDbmSdevForNoise
+void IpsNoiseLocator::setInterestMapDbmSdevForNoise
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
@@ -1619,7 +1621,7 @@ void AparNoiseLocator::setInterestMapDbmSdevForNoise
 
 }
 
-void AparNoiseLocator::setInterestMapNcpMeanForNoise
+void IpsNoiseLocator::setInterestMapNcpMeanForNoise
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
@@ -1636,7 +1638,7 @@ void AparNoiseLocator::setInterestMapNcpMeanForNoise
 
 }
 
-void AparNoiseLocator::setInterestThresholdForNoise(double val)
+void IpsNoiseLocator::setInterestThresholdForNoise(double val)
   
 {
   _interestThresholdForNoise = val;
@@ -1645,7 +1647,7 @@ void AparNoiseLocator::setInterestThresholdForNoise(double val)
 ///////////////////////////////////////////////////////////////
 // interest maps for signal
 
-void AparNoiseLocator::setInterestMapPhaseChangeErrorForSignal
+void IpsNoiseLocator::setInterestMapPhaseChangeErrorForSignal
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
@@ -1662,7 +1664,7 @@ void AparNoiseLocator::setInterestMapPhaseChangeErrorForSignal
 
 }
 
-void AparNoiseLocator::setInterestMapDbmSdevForSignal
+void IpsNoiseLocator::setInterestMapDbmSdevForSignal
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
@@ -1679,7 +1681,7 @@ void AparNoiseLocator::setInterestMapDbmSdevForSignal
   
 }
 
-void AparNoiseLocator::setInterestThresholdForSignal(double val)
+void IpsNoiseLocator::setInterestThresholdForSignal(double val)
   
 {
   _interestThresholdForSignal = val;
@@ -1688,12 +1690,12 @@ void AparNoiseLocator::setInterestThresholdForSignal(double val)
 //////////////////////////////////////////
 // add the noise fields to a moments array
 
-void AparNoiseLocator::addToMoments(AparMomFields *mfields)
+void IpsNoiseLocator::addToMoments(IpsMomFields *mfields)
   
 {
   
   for (int igate = 0; igate < _nGates; igate++) {
-    AparMomFields &mfield = mfields[igate];
+    IpsMomFields &mfield = mfields[igate];
     mfield.noise_flag = _noiseFlag[igate];
     mfield.signal_flag = _signalFlag[igate];
     mfield.accum_phase_change = _accumPhaseChange[igate];

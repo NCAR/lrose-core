@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparMomFields.hh
+// IpsMomFields.hh
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -30,20 +30,24 @@
 // Aug 2019
 //
 ///////////////////////////////////////////////////////////////
+//
+// Support for Independent Pulse Sampling.
+//
+///////////////////////////////////////////////////////////////
 
-#ifndef AparMomFields_HH
-#define AparMomFields_HH
+#ifndef IpsMomFields_HH
+#define IpsMomFields_HH
 
 #include <radar/RadarComplex.hh>
 
 ////////////////////////
 // This class
 
-class AparMomFields {
+class IpsMomFields {
   
 public:
   
-  AparMomFields();
+  IpsMomFields();
 
   // set values to missing
 

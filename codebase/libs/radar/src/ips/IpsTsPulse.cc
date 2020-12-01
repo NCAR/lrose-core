@@ -22,11 +22,15 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AparTsPulse.cc
+// IpsTsPulse.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Aug 2019
+//
+////////////////////////////////////////////////////////////////
+//
+// Support for Independent Pulse Sampling.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -37,21 +41,21 @@
 #include <toolsa/sincos.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/toolsa_macros.h>
-#include <radar/AparTsPulse.hh>
+#include <radar/IpsTsPulse.hh>
 using namespace std;
 
-const double AparTsPulse::PHASE_MULT = 180.0 / 32767.0;
+const double IpsTsPulse::PHASE_MULT = 180.0 / 32767.0;
 
 // Constructor
 
-AparTsPulse::AparTsPulse(AparTsInfo &info,
-			 AparTsDebug_t debug) :
+IpsTsPulse::IpsTsPulse(IpsTsInfo &info,
+                       IpsTsDebug_t debug) :
         _info(info),
         _debug(debug)
   
 {
 
-  apar_ts_pulse_header_init(_hdr);
+  ips_ts_pulse_header_init(_hdr);
 
   _georefActive = false;
   _georefCorrActive = false;
@@ -64,11 +68,11 @@ AparTsPulse::AparTsPulse(AparTsInfo &info,
 
   _iqData = NULL;
 
-  for (int ii = 0; ii < APAR_TS_MAX_CHAN; ii++) {
+  for (int ii = 0; ii < IPS_TS_MAX_CHAN; ii++) {
     _chanIq[ii]= NULL;
   }
 
-  _packedEncoding = apar_ts_iq_encoding_t::LAST;
+  _packedEncoding = ips_ts_iq_encoding_t::LAST;
   _packedScale = 1.0;
   _packedOffset = 0.0;
   _packed = NULL;
@@ -83,7 +87,7 @@ AparTsPulse::AparTsPulse(AparTsInfo &info,
 /////////////////////////////
 // Copy constructor
 
-AparTsPulse::AparTsPulse(const AparTsPulse &rhs) :
+IpsTsPulse::IpsTsPulse(const IpsTsPulse &rhs) :
 	_info(rhs._info),
         _nClients(0)
 
@@ -97,7 +101,7 @@ AparTsPulse::AparTsPulse(const AparTsPulse &rhs) :
 /////////////////////////////
 // destructor
 
-AparTsPulse::~AparTsPulse()
+IpsTsPulse::~IpsTsPulse()
 
 {
   _clearIq();
@@ -109,7 +113,7 @@ AparTsPulse::~AparTsPulse()
 // Assignment
 //
 
-AparTsPulse &AparTsPulse::operator=(const AparTsPulse &rhs)
+IpsTsPulse &IpsTsPulse::operator=(const IpsTsPulse &rhs)
 
 {
   return _copy(rhs);
@@ -118,14 +122,14 @@ AparTsPulse &AparTsPulse::operator=(const AparTsPulse &rhs)
 //////////////////////////////////////////////////////////////////
 // clear all
 
-void AparTsPulse::clear()
+void IpsTsPulse::clear()
 
 {
   
   _clearIq();
   _clearPacked();
 
-  apar_ts_pulse_header_init(_hdr);
+  ips_ts_pulse_header_init(_hdr);
 
   _georefActive = false;
   _georefCorrActive = false;
@@ -135,11 +139,11 @@ void AparTsPulse::clear()
 ////////////////////////////////////////////////////////////
 // set time
 
-void AparTsPulse::setTime(time_t secs, int nano_secs) {
-  apar_ts_set_packet_time(_hdr.packet, secs, nano_secs);
+void IpsTsPulse::setTime(time_t secs, int nano_secs) {
+  ips_ts_set_packet_time(_hdr.packet, secs, nano_secs);
 }
 
-void AparTsPulse::setTimeToNow() {
+void IpsTsPulse::setTimeToNow() {
   struct timeval time;
   gettimeofday(&time, NULL);
   setTime(time.tv_sec, time.tv_usec * 1000);
@@ -148,17 +152,17 @@ void AparTsPulse::setTimeToNow() {
 ////////////////////////////////////////////////////////////
 // set headers directly
 
-void AparTsPulse::setHeader(const apar_ts_pulse_header_t &hdr) {
+void IpsTsPulse::setHeader(const ips_ts_pulse_header_t &hdr) {
   _hdr = hdr;
-  _hdr.packet.id = APAR_TS_PULSE_HEADER_ID;
-  _hdr.packet.len_bytes = sizeof(apar_ts_pulse_header_t);
+  _hdr.packet.id = IPS_TS_PULSE_HEADER_ID;
+  _hdr.packet.len_bytes = sizeof(ips_ts_pulse_header_t);
   _hdr.packet.version_num = 1;
 }
 
 ////////////////////////////////////////////////////////////
 // set radar ID
 
-void AparTsPulse::setRadarId(int id) {
+void IpsTsPulse::setRadarId(int id) {
 
   _hdr.packet.radar_id = id;
 
@@ -167,7 +171,7 @@ void AparTsPulse::setRadarId(int id) {
 ////////////////////////////////////////////////////////////
 // set sequence number for each header
 
-void AparTsPulse::setPktSeqNum(si64 pkt_seq_num) {
+void IpsTsPulse::setPktSeqNum(si64 pkt_seq_num) {
   _hdr.packet.seq_num = pkt_seq_num;
 }
 
@@ -176,42 +180,42 @@ void AparTsPulse::setPktSeqNum(si64 pkt_seq_num) {
 // optionally convert iq data to floats
 // Returns 0 on success, -1 on failure
 
-int AparTsPulse::setFromBuffer(const void *buf, int len,
-			       bool convertToFloat)
+int IpsTsPulse::setFromBuffer(const void *buf, int len,
+                              bool convertToFloat)
   
 {
 
   // check validity of packet
   
   int packet_id;
-  if (apar_ts_get_packet_id(buf, len, packet_id)) {
-    cerr << "ERROR - AparTsPulse::setFromBuffer" << endl;
+  if (ips_ts_get_packet_id(buf, len, packet_id)) {
+    cerr << "ERROR - IpsTsPulse::setFromBuffer" << endl;
     fprintf(stderr, "  Bad packet, id: 0x%x\n", packet_id);
     cerr << "             len: " << len << endl;
-    cerr << "            type: " << apar_ts_packet_id_to_str(packet_id) << endl;
-   return -1;
+    cerr << "            type: " << ips_ts_packet_id_to_str(packet_id) << endl;
+    return -1;
   }
 
   // swap packet as required, using a copy to preserve const
 
   char *copy = new char[len];
   memcpy(copy, buf, len);
-  apar_ts_packet_swap(copy, len);
+  ips_ts_packet_swap(copy, len);
 
-  if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
-    apar_ts_packet_print(stderr, copy, len);
+  if (_debug >= IpsTsDebug_t::EXTRAVERBOSE) {
+    ips_ts_packet_print(stderr, copy, len);
   }
 
-  if (packet_id != APAR_TS_PULSE_HEADER_ID) {
-    cerr << "ERROR - AparTsPulse::setFromBuffer" << endl;
+  if (packet_id != IPS_TS_PULSE_HEADER_ID) {
+    cerr << "ERROR - IpsTsPulse::setFromBuffer" << endl;
     fprintf(stderr, "  Incorrect packet id: 0x%x\n", packet_id);
     cerr << "                  len: " << len << endl;
-    cerr << "                 type: " << apar_ts_packet_id_to_str(packet_id) << endl;
+    cerr << "                 type: " << ips_ts_packet_id_to_str(packet_id) << endl;
     delete[] copy;
     return -1;
   }
 
-  memcpy(&_hdr, copy, sizeof(apar_ts_pulse_header_t));
+  memcpy(&_hdr, copy, sizeof(ips_ts_pulse_header_t));
 
   // derive
 
@@ -222,8 +226,8 @@ int AparTsPulse::setFromBuffer(const void *buf, int len,
   int nGatesTotal = _hdr.n_gates;
   int nDataMin = _hdr.n_channels * (nGatesTotal) * 2;
   if ((int) _hdr.n_data < nDataMin) {
-    if (_debug >= AparTsDebug_t::VERBOSE) {
-      cerr << "WARNING: AparTsPulse::setFromTsBuffer: ndata set to low" << endl;
+    if (_debug >= IpsTsDebug_t::VERBOSE) {
+      cerr << "WARNING: IpsTsPulse::setFromTsBuffer: ndata set to low" << endl;
       cerr << "  nData in pulse header: " << _hdr.n_data << endl;
       cerr << "  Setting to min required: " << nDataMin << endl;
     }
@@ -236,38 +240,38 @@ int AparTsPulse::setFromBuffer(const void *buf, int len,
   _prf = 1.0 / _hdr.prt;
   
   // load up IQ data
-  apar_ts_iq_encoding_t iqEncoding =
-          static_cast<apar_ts_iq_encoding_t>(_hdr.iq_encoding);
+  ips_ts_iq_encoding_t iqEncoding =
+    static_cast<ips_ts_iq_encoding_t>(_hdr.iq_encoding);
   
   int requiredLen = 
-    (int) sizeof(apar_ts_pulse_header_t) + _hdr.n_data * sizeof(si16);
+    (int) sizeof(ips_ts_pulse_header_t) + _hdr.n_data * sizeof(si16);
 
-  if (iqEncoding == apar_ts_iq_encoding_t::FL32 ||
-      iqEncoding == apar_ts_iq_encoding_t::SCALED_SI32) {
+  if (iqEncoding == ips_ts_iq_encoding_t::FL32 ||
+      iqEncoding == ips_ts_iq_encoding_t::SCALED_SI32) {
     requiredLen =
-      (int) sizeof(apar_ts_pulse_header_t) + _hdr.n_data * sizeof(fl32);
+      (int) sizeof(ips_ts_pulse_header_t) + _hdr.n_data * sizeof(fl32);
   }
   if (len < requiredLen) {
-    cerr << "ERROR - AparTsPulse::setFromTsPulse" << endl;
+    cerr << "ERROR - IpsTsPulse::setFromTsPulse" << endl;
     cerr << "  Buffer passed in too short, len: " << len << endl;
     cerr << "  Must be at least len: " << requiredLen << endl;
-    cerr << "sizeof(apar_ts_pulse_header_t): "
-         << sizeof(apar_ts_pulse_header_t) << endl; 
-    apar_ts_pulse_header_print(stderr, _hdr);
+    cerr << "sizeof(ips_ts_pulse_header_t): "
+         << sizeof(ips_ts_pulse_header_t) << endl; 
+    ips_ts_pulse_header_print(stderr, _hdr);
     delete[] copy;
     return -1;
   }
   
-  if (iqEncoding == apar_ts_iq_encoding_t::FL32) {
+  if (iqEncoding == ips_ts_iq_encoding_t::FL32) {
     
     _clearPacked();
-    fl32 *iq = (fl32 *) (copy + sizeof(apar_ts_pulse_header_t));
+    fl32 *iq = (fl32 *) (copy + sizeof(ips_ts_pulse_header_t));
     _iqData = (fl32 *) _iqBuf.load(iq, _hdr.n_data * sizeof(fl32));
 
-  } else if (iqEncoding == apar_ts_iq_encoding_t::SCALED_SI32) {
+  } else if (iqEncoding == ips_ts_iq_encoding_t::SCALED_SI32) {
     
     _clearPacked();
-    si32 *siq = (si32 *) (copy + sizeof(apar_ts_pulse_header_t));
+    si32 *siq = (si32 *) (copy + sizeof(ips_ts_pulse_header_t));
     _iqData = (fl32 *) _iqBuf.prepare(_hdr.n_data * sizeof(fl32));
     fl32 *iq = _iqData;
     double scale = _hdr.scale;
@@ -279,7 +283,7 @@ int AparTsPulse::setFromBuffer(const void *buf, int len,
   } else {
 
     _clearIq();
-    si16 *packed = (si16 *) (copy + sizeof(apar_ts_pulse_header_t));
+    si16 *packed = (si16 *) (copy + sizeof(ips_ts_pulse_header_t));
     _packed = (si16 *) _packedBuf.load(packed, _hdr.n_data * sizeof(si16));
 
   }
@@ -304,21 +308,21 @@ int AparTsPulse::setFromBuffer(const void *buf, int len,
 ///////////////////////////////////////////////////////////
 // set IQ data as floats
 
-void AparTsPulse::setIqFloats(int nGates,
-			      int nChannels,
-			      const fl32 *iq)
+void IpsTsPulse::setIqFloats(int nGates,
+                             int nChannels,
+                             const fl32 *iq)
   
 {
 
   _hdr.n_gates = nGates;
   _hdr.n_channels = nChannels;
   _hdr.n_data = nChannels * nGates * 2;
-  _hdr.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::FL32);
+  _hdr.iq_encoding = static_cast<si32>(ips_ts_iq_encoding_t::FL32);
   
   _iqData = (fl32 *) _iqBuf.load(iq, _hdr.n_data * sizeof(fl32));
 
   _clearPacked();
-  _packedEncoding = apar_ts_iq_encoding_t::FL32;
+  _packedEncoding = ips_ts_iq_encoding_t::FL32;
   _packedScale = _hdr.scale;
   _packedOffset = _hdr.offset;
 
@@ -329,16 +333,16 @@ void AparTsPulse::setIqFloats(int nGates,
 ///////////////////////////////////////////////////////////
 // set IQ data as floats, converting from ScaledSi32
 
-void AparTsPulse::setIqFromScaledSi32(int nGates,
-                                      int nChannels,
-                                      const si32 *siq)
+void IpsTsPulse::setIqFromScaledSi32(int nGates,
+                                     int nChannels,
+                                     const si32 *siq)
   
 {
 
   _hdr.n_gates = nGates;
   _hdr.n_channels = nChannels;
   _hdr.n_data = nChannels * nGates * 2;
-  _hdr.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::FL32);
+  _hdr.iq_encoding = static_cast<si32>(ips_ts_iq_encoding_t::FL32);
   
   _iqData = (fl32 *) _iqBuf.prepare(_hdr.n_data * sizeof(fl32));
   fl32 *iq = _iqData;
@@ -349,7 +353,7 @@ void AparTsPulse::setIqFromScaledSi32(int nGates,
   }
   
   _clearPacked();
-  _packedEncoding = apar_ts_iq_encoding_t::FL32;
+  _packedEncoding = ips_ts_iq_encoding_t::FL32;
   _packedScale = 1.0;
   _packedOffset = 0.0;
 
@@ -360,11 +364,11 @@ void AparTsPulse::setIqFromScaledSi32(int nGates,
 ///////////////////////////////////////////////////////////
 // set IQ data as packed si16
   
-void AparTsPulse::setIqPacked(int nGates, int nChannels, 
-			      apar_ts_iq_encoding_t encoding,
-			      const si16 *packed,
-			      double scale = 1.0,
-			      double offset = 0.0)
+void IpsTsPulse::setIqPacked(int nGates, int nChannels, 
+                             ips_ts_iq_encoding_t encoding,
+                             const si16 *packed,
+                             double scale = 1.0,
+                             double offset = 0.0)
   
 {
   
@@ -395,7 +399,7 @@ void AparTsPulse::setIqPacked(int nGates, int nChannels,
 // If the incoming data uses a different convention, this call
 // can be used to swap the values
   
-void AparTsPulse::swapPrtValues()
+void IpsTsPulse::swapPrtValues()
 
 {
   double prt = _hdr.prt_next;
@@ -407,11 +411,11 @@ void AparTsPulse::swapPrtValues()
 ///////////////////////////////////////////////////////////
 // convert packed data to float32
 
-void AparTsPulse::convertToFL32()
+void IpsTsPulse::convertToFL32()
   
 {
 
-  if (_packedEncoding == apar_ts_iq_encoding_t::FL32) {
+  if (_packedEncoding == ips_ts_iq_encoding_t::FL32) {
     _setDataPointers();
     _fixZeroPower();
     return;
@@ -419,8 +423,8 @@ void AparTsPulse::convertToFL32()
 
   _iqData = (fl32 *) _iqBuf.prepare(_hdr.n_data * sizeof(fl32));
   
-  apar_ts_iq_encoding_t iqEncoding = static_cast<apar_ts_iq_encoding_t>(_hdr.iq_encoding);
-  if (iqEncoding == apar_ts_iq_encoding_t::SCALED_SI16) {
+  ips_ts_iq_encoding_t iqEncoding = static_cast<ips_ts_iq_encoding_t>(_hdr.iq_encoding);
+  if (iqEncoding == ips_ts_iq_encoding_t::SCALED_SI16) {
     
     // compute from signed scaled values
     
@@ -432,7 +436,7 @@ void AparTsPulse::convertToFL32()
       }
     }
     
-  } else if (iqEncoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
+  } else if (iqEncoding == ips_ts_iq_encoding_t::DBM_PHASE_SI16) {
 
     // compute from power and phase
     
@@ -456,7 +460,7 @@ void AparTsPulse::convertToFL32()
   
   _hdr.scale = 1.0;
   _hdr.offset = 0.0;
-  _hdr.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::FL32);
+  _hdr.iq_encoding = static_cast<si32>(ips_ts_iq_encoding_t::FL32);
   
   _setDataPointers();
 
@@ -465,26 +469,26 @@ void AparTsPulse::convertToFL32()
 ///////////////////////////////////////////////////////////
 // get IQ at a gate
 
-void AparTsPulse::getIq0(int gateNum,
-                         fl32 &ival, fl32 &qval) const
+void IpsTsPulse::getIq0(int gateNum,
+                        fl32 &ival, fl32 &qval) const
 {
   return getIq(0, gateNum, ival, qval);
 }
 
-void AparTsPulse::getIq1(int gateNum,
-                         fl32 &ival, fl32 &qval) const
+void IpsTsPulse::getIq1(int gateNum,
+                        fl32 &ival, fl32 &qval) const
 {
   return getIq(1, gateNum, ival, qval);
 }
 
-void AparTsPulse::getIq2(int gateNum,
-                         fl32 &ival, fl32 &qval) const
+void IpsTsPulse::getIq2(int gateNum,
+                        fl32 &ival, fl32 &qval) const
 {
   return getIq(2, gateNum, ival, qval);
 }
 
-void AparTsPulse::getIq3(int gateNum,
-                         fl32 &ival, fl32 &qval) const
+void IpsTsPulse::getIq3(int gateNum,
+                        fl32 &ival, fl32 &qval) const
 {
   return getIq(3, gateNum, ival, qval);
 }
@@ -493,16 +497,16 @@ void AparTsPulse::getIq3(int gateNum,
 // get IQ at a gate and channel
 
 
-void AparTsPulse::getIq(int chanNum,
-                        int gateNum,
-                        fl32 &ival, fl32 &qval) const
+void IpsTsPulse::getIq(int chanNum,
+                       int gateNum,
+                       fl32 &ival, fl32 &qval) const
   
 {
 
   // initialize to missing
 
-  ival = APAR_TS_MISSING_FLOAT;
-  qval = APAR_TS_MISSING_FLOAT;
+  ival = IPS_TS_MISSING_FLOAT;
+  qval = IPS_TS_MISSING_FLOAT;
 
   // check for valid geometry
 
@@ -520,12 +524,12 @@ void AparTsPulse::getIq(int chanNum,
 
   // floats? return as is
 
-  if (_packedEncoding == apar_ts_iq_encoding_t::FL32) {
+  if (_packedEncoding == ips_ts_iq_encoding_t::FL32) {
 
     ival = _iqData[offset];
     qval = _iqData[offset + 1];
 
-  } else if (_packedEncoding == apar_ts_iq_encoding_t::SCALED_SI16) {
+  } else if (_packedEncoding == ips_ts_iq_encoding_t::SCALED_SI16) {
     
     // unscale
     
@@ -534,7 +538,7 @@ void AparTsPulse::getIq(int chanNum,
     ival = ipacked * _packedScale + _packedOffset;
     qval = qpacked * _packedScale + _packedOffset;
     
-  } else if (_packedEncoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
+  } else if (_packedEncoding == ips_ts_iq_encoding_t::DBM_PHASE_SI16) {
 
     // compute from power and phase
     
@@ -554,7 +558,7 @@ void AparTsPulse::getIq(int chanNum,
 ///////////////////////////////////////////////////////////
 // convert to specified packing
 
-void AparTsPulse::convertToPacked(apar_ts_iq_encoding_t encoding)
+void IpsTsPulse::convertToPacked(ips_ts_iq_encoding_t encoding)
   
 {
   
@@ -566,15 +570,15 @@ void AparTsPulse::convertToPacked(apar_ts_iq_encoding_t encoding)
     return;
   }
   
-  if (encoding == apar_ts_iq_encoding_t::FL32 && _iqData != NULL) {
+  if (encoding == ips_ts_iq_encoding_t::FL32 && _iqData != NULL) {
     // use float data as packed data
     _clearPacked();
     _hdr.scale = 1.0;
     _hdr.offset = 0.0;
-    _hdr.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::FL32);
+    _hdr.iq_encoding = static_cast<si32>(ips_ts_iq_encoding_t::FL32);
     _packedScale = 1.0;
     _packedOffset = 0.0;
-    _packedEncoding = apar_ts_iq_encoding_t::FL32;
+    _packedEncoding = ips_ts_iq_encoding_t::FL32;
     return;
   }
 
@@ -589,7 +593,7 @@ void AparTsPulse::convertToPacked(apar_ts_iq_encoding_t encoding)
   
   // fill packed array
   
-  if (encoding == apar_ts_iq_encoding_t::SCALED_SI16) {
+  if (encoding == ips_ts_iq_encoding_t::SCALED_SI16) {
     
     // compute max absolute val
     
@@ -624,7 +628,7 @@ void AparTsPulse::convertToPacked(apar_ts_iq_encoding_t encoding)
     _packedScale = scale;
     _packedOffset = offset;
     
-  } else if (encoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
+  } else if (encoding == ips_ts_iq_encoding_t::DBM_PHASE_SI16) {
 
     // compute power and phase, save in arrays
     // also compute min and max power in db
@@ -705,12 +709,12 @@ void AparTsPulse::convertToPacked(apar_ts_iq_encoding_t encoding)
 ///////////////////////////////////////////////////////////
 // convert to scaled si16 packing
 
-void AparTsPulse::convertToScaledSi16(double scale,
-                                      double offset)
+void IpsTsPulse::convertToScaledSi16(double scale,
+                                     double offset)
   
 {
   
-  if (_packedEncoding != apar_ts_iq_encoding_t::FL32 || _iqData == NULL) {
+  if (_packedEncoding != ips_ts_iq_encoding_t::FL32 || _iqData == NULL) {
     // make sure we have float 32 data available
     convertToFL32();
   }
@@ -740,7 +744,7 @@ void AparTsPulse::convertToScaledSi16(double scale,
 
   // save values
 
-  _packedEncoding = apar_ts_iq_encoding_t::SCALED_SI16;
+  _packedEncoding = ips_ts_iq_encoding_t::SCALED_SI16;
   _hdr.scale = _packedScale;
   _hdr.offset = _packedOffset;
   _hdr.iq_encoding = static_cast<si32>(_packedEncoding);
@@ -751,12 +755,12 @@ void AparTsPulse::convertToScaledSi16(double scale,
 // set the scale and offset values for scaled si16 packing
 // does not change the data, only the metadata
 
-void AparTsPulse::setScaleAndOffsetForSi16(double scale,
-                                           double offset)
+void IpsTsPulse::setScaleAndOffsetForSi16(double scale,
+                                          double offset)
   
 {
   
-  if (_packedEncoding != apar_ts_iq_encoding_t::SCALED_SI16) {
+  if (_packedEncoding != ips_ts_iq_encoding_t::SCALED_SI16) {
     // do nothing, not si16 encoding
     return;
   }
@@ -773,7 +777,7 @@ void AparTsPulse::setScaleAndOffsetForSi16(double scale,
 // swaps I and Q, because they are stored in the incorrect order
 // in the data arrays
 
-void AparTsPulse::swapIQ()
+void IpsTsPulse::swapIQ()
 {
 
   int nIQ = _hdr.n_data / 2;
@@ -807,7 +811,7 @@ void AparTsPulse::swapIQ()
 ///////////////////////////////////////////////////////////////////
 // invert Q values in the data arrays
 
-void AparTsPulse::invertQ()
+void IpsTsPulse::invertQ()
 {
 
   int nIQ = _hdr.n_data / 2;
@@ -833,7 +837,7 @@ void AparTsPulse::invertQ()
 ////////////////////////////////////////////////////////////
 // copy the pulse width from the ts_proc in the info
 
-void AparTsPulse::copyPulseWidthFromTsProc() {
+void IpsTsPulse::copyPulseWidthFromTsProc() {
   
   if (_info.isTsProcessingActive()) {
     _hdr.pulse_width_us = _info.getProcPulseWidthUs();
@@ -844,19 +848,19 @@ void AparTsPulse::copyPulseWidthFromTsProc() {
 ///////////////////////////////////////////////////////////
 // assemble into a single buffer
 
-void AparTsPulse::assemble(MemBuf &buf) const
+void IpsTsPulse::assemble(MemBuf &buf) const
 {
-  apar_ts_pulse_header_t hdr = _hdr;
+  ips_ts_pulse_header_t hdr = _hdr;
   int nbytesIq = 0;
-  apar_ts_iq_encoding_t iqEncoding = static_cast<apar_ts_iq_encoding_t>(hdr.iq_encoding);
-  if (iqEncoding == apar_ts_iq_encoding_t::FL32) {
+  ips_ts_iq_encoding_t iqEncoding = static_cast<ips_ts_iq_encoding_t>(hdr.iq_encoding);
+  if (iqEncoding == ips_ts_iq_encoding_t::FL32) {
     nbytesIq = hdr.n_data * sizeof(fl32);
   } else {
     nbytesIq = hdr.n_data * sizeof(si16);
   }
-  hdr.packet.len_bytes = sizeof(apar_ts_pulse_header_t) + nbytesIq;
+  hdr.packet.len_bytes = sizeof(ips_ts_pulse_header_t) + nbytesIq;
   buf.add(&hdr, sizeof(hdr));
-  if (iqEncoding == apar_ts_iq_encoding_t::FL32) {
+  if (iqEncoding == ips_ts_iq_encoding_t::FL32) {
     buf.add(_iqData, nbytesIq);
   } else {
     buf.add(_packed, nbytesIq);
@@ -866,7 +870,7 @@ void AparTsPulse::assemble(MemBuf &buf) const
 /////////////////////////////////////////////////////////////////
 // Check to see if horizontally polarized
 
-bool AparTsPulse::isHoriz() const
+bool IpsTsPulse::isHoriz() const
 
 {
 
@@ -890,11 +894,11 @@ bool AparTsPulse::isHoriz() const
 // get packed data
 // returns NULL on error
 
-const void *AparTsPulse::getPackedData() const
+const void *IpsTsPulse::getPackedData() const
 
 {
 
-  if (_hdr.iq_encoding == static_cast<si32>(apar_ts_iq_encoding_t::FL32)) {
+  if (_hdr.iq_encoding == static_cast<si32>(ips_ts_iq_encoding_t::FL32)) {
     return _iqData;
   } else {
     return _packed;
@@ -905,7 +909,7 @@ const void *AparTsPulse::getPackedData() const
 /////////////////////////////
 // get elevation and azimuth
 
-double AparTsPulse::getElevation() const {
+double IpsTsPulse::getElevation() const {
   if (isnan(_hdr.elevation)) {
     return _hdr.elevation;
   }
@@ -917,7 +921,7 @@ double AparTsPulse::getElevation() const {
   return _hdr.elevation;
 }
 
-double AparTsPulse::getAzimuth() const {
+double IpsTsPulse::getAzimuth() const {
   if (isnan(_hdr.azimuth)) {
     return _hdr.azimuth;
   }
@@ -929,7 +933,7 @@ double AparTsPulse::getAzimuth() const {
   return _hdr.azimuth;
 }
 
-double AparTsPulse::getFixedAngle() const {
+double IpsTsPulse::getFixedAngle() const {
   if (isnan(_hdr.fixed_angle)) {
     return _hdr.fixed_angle;
   }
@@ -947,13 +951,13 @@ double AparTsPulse::getFixedAngle() const {
 // Before this method is called, this pulse should be added to
 // the queue.
 
-int AparTsPulse::computePhaseDiffs
-  (const deque<AparTsPulse *> &pulseQueue, int maxTrips) const
+int IpsTsPulse::computePhaseDiffs
+  (const deque<IpsTsPulse *> &pulseQueue, int maxTrips) const
   
 {
   
   if (pulseQueue[0] != this) {
-    cerr << "ERROR - AparTsPulse::computePhaseDiffs()" << endl;
+    cerr << "ERROR - IpsTsPulse::computePhaseDiffs()" << endl;
     cerr << "  You must add this pulse before calling this function" << endl;
     return -1;
   }
@@ -986,13 +990,13 @@ int AparTsPulse::computePhaseDiffs
 
 }
 
-int AparTsPulse::computePhaseDiffs
-  (int qSize, const AparTsPulse **pulseQueue, int maxTrips) const
+int IpsTsPulse::computePhaseDiffs
+  (int qSize, const IpsTsPulse **pulseQueue, int maxTrips) const
   
 {
   
   if (pulseQueue[0] != this) {
-    cerr << "ERROR - AparTsPulse::computePhaseDiffs()" << endl;
+    cerr << "ERROR - IpsTsPulse::computePhaseDiffs()" << endl;
     cerr << "  You must add this pulse before calling this function" << endl;
     return -1;
   }
@@ -1026,31 +1030,31 @@ int AparTsPulse::computePhaseDiffs
 ////////////////////////////////////////////////////////////
 // print headers
 
-void AparTsPulse::printHeader(FILE *out) const
+void IpsTsPulse::printHeader(FILE *out) const
 {
   if (_georefActive) {
     // fprintf(out, "====>>> this georef applies to following pulse <<<====\n");
-    // apar_ts_platform_georef_print(out, _georef);
-    apar_ts_pulse_header_print(out, _hdr, &_georef);
+    // ips_ts_platform_georef_print(out, _georef);
+    ips_ts_pulse_header_print(out, _hdr, &_georef);
   } else {
-    apar_ts_pulse_header_print(out, _hdr);
+    ips_ts_pulse_header_print(out, _hdr);
   }
 }
 
 ////////////////////////////////////////////////////////////
 // print data
 
-void AparTsPulse::printData(FILE *out) const
+void IpsTsPulse::printData(FILE *out) const
 {
   printData(out, 0, _hdr.n_gates - 1);
 }
 
-void AparTsPulse::printData(FILE *out, int startGate, int endGate) const
+void IpsTsPulse::printData(FILE *out, int startGate, int endGate) const
 {
   
   // copy this object for printing
   
-  AparTsPulse pulse(*this);
+  IpsTsPulse pulse(*this);
   pulse.convertToFL32();
   pulse.printHeader(out);
   for (int ichan = 0; ichan < _hdr.n_channels; ichan++) {
@@ -1060,11 +1064,11 @@ void AparTsPulse::printData(FILE *out, int startGate, int endGate) const
 }
 
 ///////////////////////////////////////////////////
-// write to file in APAR format
+// write to file in IPS format
 //
 // returns 0 on success, -1 on failure
 
-int AparTsPulse::writeToFile(FILE *out) const
+int IpsTsPulse::writeToFile(FILE *out) const
 
 {
 
@@ -1076,7 +1080,7 @@ int AparTsPulse::writeToFile(FILE *out) const
   assemble(buf);
   if (fwrite(buf.getPtr(), buf.getLen(), 1, out) != 1) {
     int errNum = errno;
-    cerr << "ERROR - AparTsPulse::write2File" << endl;
+    cerr << "ERROR - IpsTsPulse::write2File" << endl;
     cerr << "  Cannot write pulse" << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -1092,7 +1096,7 @@ int AparTsPulse::writeToFile(FILE *out) const
 // If removeClient() returns 0, the object should be deleted.
 // These functions are protected by a mutex for multi-threaded ops
 
-int AparTsPulse::addClient() const
+int IpsTsPulse::addClient() const
   
 {
   int nClients;
@@ -1103,7 +1107,7 @@ int AparTsPulse::addClient() const
   return nClients;
 }
 
-int AparTsPulse::removeClient() const
+int IpsTsPulse::removeClient() const
 
 {
   int nClients;
@@ -1114,7 +1118,7 @@ int AparTsPulse::removeClient() const
   return nClients;
 }
 
-void AparTsPulse::deleteIfUnused(AparTsPulse *pulse)
+void IpsTsPulse::deleteIfUnused(IpsTsPulse *pulse)
   
 {
   if (pulse->removeClient() == 0) {
@@ -1122,7 +1126,7 @@ void AparTsPulse::deleteIfUnused(AparTsPulse *pulse)
   }
 }
 
-int AparTsPulse::getNClients() const
+int IpsTsPulse::getNClients() const
 
 {
   int nClients;
@@ -1135,7 +1139,7 @@ int AparTsPulse::getNClients() const
 /////////////////////////////
 // copy
 
-AparTsPulse &AparTsPulse::_copy(const AparTsPulse &rhs)
+IpsTsPulse &IpsTsPulse::_copy(const IpsTsPulse &rhs)
 
 {
 
@@ -1177,7 +1181,7 @@ AparTsPulse &AparTsPulse::_copy(const AparTsPulse &rhs)
 ////////////////////////////////////////////////////////////
 // compute az and el angles by applying the georef data
 
-void AparTsPulse::computeElAzFromGeoref()
+void IpsTsPulse::computeElAzFromGeoref()
 
 {
 
@@ -1242,8 +1246,8 @@ void AparTsPulse::computeElAzFromGeoref()
   setElevation(elevationRad * RAD_TO_DEG);
   setAzimuth(azimuthRad * RAD_TO_DEG);
 
-  if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
-    cerr << "========== AparTsPulse::computeElAzFromGeoref() ========" << endl;
+  if (_debug >= IpsTsDebug_t::EXTRAVERBOSE) {
+    cerr << "========== IpsTsPulse::computeElAzFromGeoref() ========" << endl;
     cerr << "  roll: " << _georef.roll_deg << endl;
     cerr << "  pitch: " << _georef.pitch_deg << endl;
     cerr << "  heading: " << _georef.heading_deg << endl;
@@ -1261,7 +1265,7 @@ void AparTsPulse::computeElAzFromGeoref()
 ////////////////////////////////////////////////////////////
 // set start range and gate spacing in header, if needed
 
-void AparTsPulse::_checkRangeMembers() {
+void IpsTsPulse::_checkRangeMembers() {
 
   if (_info.isTsProcessingActive()) {
 
@@ -1282,7 +1286,7 @@ void AparTsPulse::_checkRangeMembers() {
 // for some data sets the burst pulse is
 // in the first 2 gates
 
-void AparTsPulse::_setDataPointers()
+void IpsTsPulse::_setDataPointers()
   
 {
 
@@ -1305,11 +1309,11 @@ void AparTsPulse::_setDataPointers()
 // Check for 0 power.
 // If 0 found, set to small non-zero values.
 
-void AparTsPulse::_fixZeroPower()
+void IpsTsPulse::_fixZeroPower()
   
 {
 
-  if (_packedEncoding != apar_ts_iq_encoding_t::FL32) {
+  if (_packedEncoding != ips_ts_iq_encoding_t::FL32) {
     convertToFL32();
   }
   
@@ -1324,13 +1328,13 @@ void AparTsPulse::_fixZeroPower()
 ////////////////////
 // clean up memory
 
-void AparTsPulse::_clearIq()
+void IpsTsPulse::_clearIq()
 {
   _iqBuf.free();
   _iqData = NULL;
 }
 
-void AparTsPulse::_clearPacked()
+void IpsTsPulse::_clearPacked()
 {
   _packedBuf.free();
   _packed = NULL;
@@ -1339,7 +1343,7 @@ void AparTsPulse::_clearPacked()
 ////////////////////////////////////////////////////////////
 // print data
 
-void AparTsPulse::_doPrintData(FILE *out, int channel, int startGate, int endGate)
+void IpsTsPulse::_doPrintData(FILE *out, int channel, int startGate, int endGate)
 {
 
   // if starting at beginning, include burst gates
@@ -1356,9 +1360,9 @@ void AparTsPulse::_doPrintData(FILE *out, int channel, int startGate, int endGat
   fprintf(out, " %5s %15s %15s %15s %15s",
 	  "gate", "i(volts)", "q(volts)", "power(dBm)", "phase(deg)");
   if (_packed != NULL) {
-    if (_packedEncoding == apar_ts_iq_encoding_t::SCALED_SI16) {
+    if (_packedEncoding == ips_ts_iq_encoding_t::SCALED_SI16) {
       fprintf(out, " %14s %14s", "i(scaled)", "q(scaled)");
-    } else if (_packedEncoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
+    } else if (_packedEncoding == ips_ts_iq_encoding_t::DBM_PHASE_SI16) {
       fprintf(out, " %14s %14s", "power(scaled)", "phase(scaled)");
     }
   }
@@ -1391,9 +1395,9 @@ void AparTsPulse::_doPrintData(FILE *out, int channel, int startGate, int endGat
     if (_packed != NULL) {
       si16 ipacked = packed[ii];
       si16 qpacked = packed[ii + 1];
-      if (_packedEncoding == apar_ts_iq_encoding_t::SCALED_SI16) {
+      if (_packedEncoding == ips_ts_iq_encoding_t::SCALED_SI16) {
 	fprintf(out, " %14d %14d", ipacked, qpacked);
-      } else if (_packedEncoding == apar_ts_iq_encoding_t::DBM_PHASE_SI16) {
+      } else if (_packedEncoding == ips_ts_iq_encoding_t::DBM_PHASE_SI16) {
 	fprintf(out, " %14d %14d", ipacked, qpacked);
       }
     }
@@ -1409,7 +1413,7 @@ void AparTsPulse::_doPrintData(FILE *out, int channel, int startGate, int endGat
 ////////////////////////////////////////////////////////////
 // print float data
 
-void AparTsPulse::_printFl32Data(FILE *out, int channel, int startGate, int endGate)
+void IpsTsPulse::_printFl32Data(FILE *out, int channel, int startGate, int endGate)
 {
 
   // if starting at beginning, include burst gates

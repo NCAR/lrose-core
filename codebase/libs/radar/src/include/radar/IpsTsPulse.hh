@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparTsPulse.hh
+// IpsTsPulse.hh
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -30,9 +30,13 @@
 // Aug 2019
 //
 ///////////////////////////////////////////////////////////////
+//
+// Support for Independent Pulse Sampling.
+//
+///////////////////////////////////////////////////////////////
 
-#ifndef AparTsPulse_hh
-#define AparTsPulse_hh
+#ifndef IpsTsPulse_hh
+#define IpsTsPulse_hh
 
 #include <string>
 #include <vector>
@@ -40,7 +44,7 @@
 #include <pthread.h>
 #include <toolsa/MemBuf.hh>
 #include <dataport/port_types.h>
-#include <radar/AparTsInfo.hh>
+#include <radar/IpsTsInfo.hh>
 #include <radar/RadarComplex.hh>
 class OpsInfo;
 
@@ -49,26 +53,26 @@ using namespace std;
 ////////////////////////
 // This class
 
-class AparTsPulse {
+class IpsTsPulse {
   
 public:
 
   // constructor
 
-  AparTsPulse(AparTsInfo &info,
-	      AparTsDebug_t debug = AparTsDebug_t::OFF);
+  IpsTsPulse(IpsTsInfo &info,
+	      IpsTsDebug_t debug = IpsTsDebug_t::OFF);
 
   // copy constructor
   
-  AparTsPulse(const AparTsPulse &rhs);
+  IpsTsPulse(const IpsTsPulse &rhs);
 
   // destructor
 
-  virtual ~AparTsPulse();
+  virtual ~IpsTsPulse();
 
   // assignment
   
-  AparTsPulse & operator=(const AparTsPulse &rhs);
+  IpsTsPulse & operator=(const IpsTsPulse &rhs);
 
   // clear data
 
@@ -76,13 +80,13 @@ public:
 
   // set the ops info
 
-  void setOpsInfo(AparTsInfo &info) {
+  void setOpsInfo(IpsTsInfo &info) {
     if (&_info != &info) _info = info;
   }
   
   // debugging
 
-  void setDebug(AparTsDebug_t debug) { _debug = debug; }
+  void setDebug(IpsTsDebug_t debug) { _debug = debug; }
   
   // invert HV flag?
   // The HV flag is defined as 1 for H, 0 for V.
@@ -98,12 +102,12 @@ public:
 
   // set the platform georeference for this pulse
 
-  void setPlatformGeoref(const apar_ts_platform_georef_t &georef) {
+  void setPlatformGeoref(const ips_ts_platform_georef_t &georef) {
     _georef = georef;
     _georefActive = true;
   }
 
-  void setGeorefCorr(const apar_ts_georef_correction_t &georefCorr) {
+  void setGeorefCorr(const ips_ts_georef_correction_t &georefCorr) {
     _georefCorr = georefCorr;
     _georefCorrActive = true;
   }
@@ -131,7 +135,7 @@ public:
   // set IQ data packed
   
   void setIqPacked(int nGates, int nChannels, 
-		   apar_ts_iq_encoding_t encoding,
+		   ips_ts_iq_encoding_t encoding,
 		   const si16 *packed,
 		   double scale /* = 1.0 */,
 		   double offset /* = 0.0 */);
@@ -142,7 +146,7 @@ public:
     
   // convert to specified packing
   
-  void convertToPacked(apar_ts_iq_encoding_t encoding);
+  void convertToPacked(ips_ts_iq_encoding_t encoding);
 
   // convert to scaled si16 packing
   
@@ -172,7 +176,7 @@ public:
 
   // set headers directly
 
-  void setHeader(const apar_ts_pulse_header_t &hdr);
+  void setHeader(const ips_ts_pulse_header_t &hdr);
 
   // set radar ID
   
@@ -198,14 +202,14 @@ public:
   // Before this method is called, this pulse should be added to
   // the queue.
   
-  int computePhaseDiffs(const deque<AparTsPulse *> &pulseQueue,
+  int computePhaseDiffs(const deque<IpsTsPulse *> &pulseQueue,
 			int maxTrips) const;
 
   int computePhaseDiffs(int qSize,
-                        const AparTsPulse **pulseQueue,
+                        const IpsTsPulse **pulseQueue,
 			int maxTrips) const;
 
-  // write to file in APAR time series format
+  // write to file in IPS time series format
   // returns 0 on success, -1 on failure
 
   int writeToFile(FILE *out) const;
@@ -218,10 +222,10 @@ public:
 
   // get methods
 
-  inline AparTsInfo &getTsInfo() { return _info; }
-  inline const AparTsInfo &getTsInfo() const { return _info; }
+  inline IpsTsInfo &getTsInfo() { return _info; }
+  inline const IpsTsInfo &getTsInfo() const { return _info; }
 
-  inline const apar_ts_pulse_header_t &getHdr() const { return _hdr; }
+  inline const ips_ts_pulse_header_t &getHdr() const { return _hdr; }
 
   inline int getRadarId() const { return _hdr.packet.radar_id; }
   inline si64 getSeqNum() const { return _hdr.pulse_seq_num; }
@@ -235,8 +239,8 @@ public:
   inline double getPhaseDiff1() const { return _phaseDiff[1]; }
   bool isHoriz() const; // is horizontally polarized
 
-  apar_ts_scan_mode_t getScanMode() const {
-    return static_cast<apar_ts_scan_mode_t>(_hdr.scan_mode);
+  ips_ts_scan_mode_t getScanMode() const {
+    return static_cast<ips_ts_scan_mode_t>(_hdr.scan_mode);
   }
 
   inline si64 getPktSeqNum() const { return _hdr.packet.seq_num; }
@@ -272,20 +276,20 @@ public:
   }
   
   inline bool getStartOfSweep() {
-    return (_hdr.event_flags & APAR_TS_START_OF_SWEEP);
+    return (_hdr.event_flags & IPS_TS_START_OF_SWEEP);
   }
   inline bool getStartOfVolume() {
-    return (_hdr.event_flags & APAR_TS_START_OF_VOLUME);
+    return (_hdr.event_flags & IPS_TS_START_OF_VOLUME);
   }
   inline bool getEndOfSweep() {
-    return (_hdr.event_flags & APAR_TS_END_OF_SWEEP);
+    return (_hdr.event_flags & IPS_TS_END_OF_SWEEP);
   }
   inline bool getEndOfVolume() {
-    return (_hdr.event_flags & APAR_TS_END_OF_VOLUME);
+    return (_hdr.event_flags & IPS_TS_END_OF_VOLUME);
   }
 
   inline bool getChanIsCopol(int chan = 0) const {
-    if (chan >= 0 && chan < APAR_TS_MAX_CHAN) {
+    if (chan >= 0 && chan < IPS_TS_MAX_CHAN) {
       return _hdr.chan_is_copol[chan];
     } else {
       return _hdr.chan_is_copol[0];
@@ -294,12 +298,12 @@ public:
 
   // get the platform georeference for this pulse
 
-  const apar_ts_platform_georef_t &getPlatformGeoref() const {
+  const ips_ts_platform_georef_t &getPlatformGeoref() const {
     return _georef;
   }
   bool getGeorefActive() const { return _georefActive; }
 
-  const apar_ts_georef_correction_t &getGeorefCorrection() const {
+  const ips_ts_georef_correction_t &getGeorefCorrection() const {
     return _georefCorr;
   }
   bool getGeorefCorrActive() const { return _georefCorrActive; }
@@ -314,7 +318,7 @@ public:
   inline fl32 **getIqArray() { return _chanIq; }
 
   // get IQ data at a gate
-  // returns APAR_TS_MISSING_FLOAT if not available at that gate for that channel
+  // returns IPS_TS_MISSING_FLOAT if not available at that gate for that channel
   
   void getIq0(int gateNum, fl32 &ival, fl32 &qval) const;
   void getIq1(int gateNum, fl32 &ival, fl32 &qval) const;
@@ -324,7 +328,7 @@ public:
 
   // get packed data
 
-  apar_ts_iq_encoding_t getPackedEncoding() const { return _packedEncoding; }
+  ips_ts_iq_encoding_t getPackedEncoding() const { return _packedEncoding; }
   double getPackedScale() const { return _packedScale; }
   double getPackedOffset() const { return _packedOffset; }
   const void *getPackedData() const;
@@ -362,16 +366,16 @@ public:
   inline void setGateGSpacineM(fl32 x) { _hdr.gate_spacing_m = x; }
 
   inline void setStartOfSweep() {
-    _hdr.event_flags |= APAR_TS_START_OF_SWEEP;
+    _hdr.event_flags |= IPS_TS_START_OF_SWEEP;
   }
   inline void setStartOfVolume() {
-    _hdr.event_flags |= APAR_TS_START_OF_VOLUME;
+    _hdr.event_flags |= IPS_TS_START_OF_VOLUME;
   }
   inline void setEndOfSweep() {
-    _hdr.event_flags |= APAR_TS_END_OF_SWEEP;
+    _hdr.event_flags |= IPS_TS_END_OF_SWEEP;
   }
   inline void setEndOfVolume() {
-    _hdr.event_flags |= APAR_TS_END_OF_VOLUME;
+    _hdr.event_flags |= IPS_TS_END_OF_VOLUME;
   }
 
   // Memory management.
@@ -380,14 +384,14 @@ public:
   
   int addClient() const; 
   int removeClient() const;
-  static void deleteIfUnused(AparTsPulse *pulse);
+  static void deleteIfUnused(IpsTsPulse *pulse);
   int getNClients() const;
 
 protected:
 
   // copy
   
-  virtual AparTsPulse &_copy(const AparTsPulse &rhs);
+  virtual IpsTsPulse &_copy(const IpsTsPulse &rhs);
   
 private:
 
@@ -397,18 +401,18 @@ private:
 
   // info
 
-  AparTsInfo &_info;
+  IpsTsInfo &_info;
   
   // meta-data information
   
-  apar_ts_pulse_header_t _hdr;
+  ips_ts_pulse_header_t _hdr;
 
   // platform georeference for this pulse
 
-  apar_ts_platform_georef_t _georef;
+  ips_ts_platform_georef_t _georef;
   bool _georefActive;
 
-  apar_ts_georef_correction_t _georefCorr;
+  ips_ts_georef_correction_t _georefCorr;
   bool _georefCorrActive;
 
   // invert HV flag
@@ -417,7 +421,7 @@ private:
 
   // debugging
 
-  AparTsDebug_t _debug;
+  IpsTsDebug_t _debug;
 
   // derived from pulse header
 
@@ -429,12 +433,12 @@ private:
   // floating point IQ data
 
   fl32 *_iqData;  // pointer to float data
-  fl32 *_chanIq[APAR_TS_MAX_CHAN]; // array of channel data pointers
+  fl32 *_chanIq[IPS_TS_MAX_CHAN]; // array of channel data pointers
   MemBuf _iqBuf;  // float data is stored here
 
   // packed 16-bit data
 
-  apar_ts_iq_encoding_t _packedEncoding;
+  ips_ts_iq_encoding_t _packedEncoding;
   double _packedScale, _packedOffset;
   si16 *_packed; // pointer to packed data
   MemBuf _packedBuf; // packed data is stored here

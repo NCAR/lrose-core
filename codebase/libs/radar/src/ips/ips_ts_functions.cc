@@ -22,39 +22,45 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////////
-// apar_ts_functions.cc
+// ips_ts_functions.cc
 //
-// Utility routines for apar_ts_data structs
+// Utility routines for ips_ts_data structs
 //
 // Mike Dixon, RAL, EOL, POBox 3000, Boulder, CO, 80307-3000
 //
 // Aug 2019
+//
+///////////////////////////////////////////////////////////////
+//
+// Support for Independent Pulse Sampling.
+//
+///////////////////////////////////////////////////////////////
 
 #include <dataport/swap.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
-#include <radar/apar_ts_functions.hh>
+#include <radar/ips_ts_functions.hh>
 
 using namespace std;
 
 /////////////////////////////
 // check for a missing values
 
-bool apar_ts_int_is_missing(si32 val)
+bool ips_ts_int_is_missing(si32 val)
 {
-  if (val == APAR_TS_MISSING_INT) {
+  if (val == IPS_TS_MISSING_INT) {
     return true;
   } else {
     return false;
   }
 }
 
-bool apar_ts_float_is_missing(fl32 val)
+bool ips_ts_float_is_missing(fl32 val)
 {
   if (isnan(val)) {
     return true;
-  } else if (fabs(val - APAR_TS_MISSING_FLOAT) < 0.001)  {
+  } else if (fabs(val - IPS_TS_MISSING_FLOAT) < 0.001)  {
     return true;
   } else {
     return false;
@@ -68,7 +74,7 @@ bool apar_ts_float_is_missing(fl32 val)
 //////////////////////////////////////////////////////
 // init packet info struct
 
-void apar_ts_packet_info_init(apar_ts_packet_info_t &val)
+void ips_ts_packet_info_init(ips_ts_packet_info_t &val)
 
 {
 
@@ -79,131 +85,131 @@ void apar_ts_packet_info_init(apar_ts_packet_info_t &val)
 //////////////////////////////////////////////////////
 // init sync struct
 
-void apar_ts_sync_init(apar_ts_sync_t &val)
+void ips_ts_sync_init(ips_ts_sync_t &val)
 
 {
 
   MEM_zero(val);
 
-  val.packet.id = APAR_TS_SYNC_ID;
+  val.packet.id = IPS_TS_SYNC_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
 
-  val.magik[0] = APAR_TS_SYNC_VAL_00;
-  val.magik[1] = APAR_TS_SYNC_VAL_01;
+  val.magik[0] = IPS_TS_SYNC_VAL_00;
+  val.magik[1] = IPS_TS_SYNC_VAL_01;
 
 }
 
 //////////////////////////////////////////////////////
 // init version struct
 
-void apar_ts_version_init(apar_ts_version_t &val)
+void ips_ts_version_init(ips_ts_version_t &val)
 
 {
 
   MEM_zero(val);
 
-  val.packet.id = APAR_TS_VERSION_ID;
+  val.packet.id = IPS_TS_VERSION_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
   
 }
 
 //////////////////////////////////////////////////////
 // init radar_info struct
 
-void apar_ts_radar_info_init(apar_ts_radar_info &val)
+void ips_ts_radar_info_init(ips_ts_radar_info &val)
 
 {
 
   MEM_zero(val);
 
-  val.packet.id = APAR_TS_RADAR_INFO_ID;
+  val.packet.id = IPS_TS_RADAR_INFO_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
 
-  val.latitude_deg = APAR_TS_MISSING_FLOAT;
-  val.longitude_deg = APAR_TS_MISSING_FLOAT;
-  val.altitude_m = APAR_TS_MISSING_FLOAT;
-  val.platform_type = static_cast<si32>(apar_ts_radar_platform_t::NOT_SET);
+  val.latitude_deg = IPS_TS_MISSING_FLOAT;
+  val.longitude_deg = IPS_TS_MISSING_FLOAT;
+  val.altitude_m = IPS_TS_MISSING_FLOAT;
+  val.platform_type = static_cast<si32>(ips_ts_radar_platform_t::NOT_SET);
 
-  val.beamwidth_deg_h = APAR_TS_MISSING_FLOAT;
-  val.beamwidth_deg_v = APAR_TS_MISSING_FLOAT;
-  val.wavelength_cm = APAR_TS_MISSING_FLOAT;
+  val.beamwidth_deg_h = IPS_TS_MISSING_FLOAT;
+  val.beamwidth_deg_v = IPS_TS_MISSING_FLOAT;
+  val.wavelength_cm = IPS_TS_MISSING_FLOAT;
   
-  val.nominal_gain_ant_db_h = APAR_TS_MISSING_FLOAT;
-  val.nominal_gain_ant_db_v = APAR_TS_MISSING_FLOAT;
+  val.nominal_gain_ant_db_h = IPS_TS_MISSING_FLOAT;
+  val.nominal_gain_ant_db_v = IPS_TS_MISSING_FLOAT;
 
 }
 
 //////////////////////////////////////////////////////
 // init scan_segment struct
 
-void apar_ts_scan_segment_init(apar_ts_scan_segment &val)
+void ips_ts_scan_segment_init(ips_ts_scan_segment &val)
 
 {
 
   MEM_zero(val);
 
-  val.packet.id = APAR_TS_SCAN_SEGMENT_ID;
+  val.packet.id = IPS_TS_SCAN_SEGMENT_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
 
-  val.scan_mode = static_cast<si32>(apar_ts_scan_mode_t::NOT_SET);
-  val.volume_num = APAR_TS_MISSING_INT;
-  val.sweep_num = APAR_TS_MISSING_INT;
+  val.scan_mode = static_cast<si32>(ips_ts_scan_mode_t::NOT_SET);
+  val.volume_num = IPS_TS_MISSING_INT;
+  val.sweep_num = IPS_TS_MISSING_INT;
 
-  val.az_start = APAR_TS_MISSING_FLOAT;
-  val.el_start = APAR_TS_MISSING_FLOAT;
-  val.scan_rate = APAR_TS_MISSING_FLOAT;
-  val.left_limit = APAR_TS_MISSING_FLOAT;
-  val.right_limit = APAR_TS_MISSING_FLOAT;
-  val.up_limit = APAR_TS_MISSING_FLOAT;
-  val.down_limit = APAR_TS_MISSING_FLOAT;
-  val.step = APAR_TS_MISSING_FLOAT;
+  val.az_start = IPS_TS_MISSING_FLOAT;
+  val.el_start = IPS_TS_MISSING_FLOAT;
+  val.scan_rate = IPS_TS_MISSING_FLOAT;
+  val.left_limit = IPS_TS_MISSING_FLOAT;
+  val.right_limit = IPS_TS_MISSING_FLOAT;
+  val.up_limit = IPS_TS_MISSING_FLOAT;
+  val.down_limit = IPS_TS_MISSING_FLOAT;
+  val.step = IPS_TS_MISSING_FLOAT;
 
-  val.current_fixed_angle = APAR_TS_MISSING_FLOAT;
+  val.current_fixed_angle = IPS_TS_MISSING_FLOAT;
 
   val.n_sweeps = 0;
   
-  val.sun_scan_sector_width_az = APAR_TS_MISSING_FLOAT;  
-  val.sun_scan_sector_width_el = APAR_TS_MISSING_FLOAT;  
+  val.sun_scan_sector_width_az = IPS_TS_MISSING_FLOAT;  
+  val.sun_scan_sector_width_el = IPS_TS_MISSING_FLOAT;  
 
 }
 
 //////////////////////////////////////////////////////
 // init ts_processing struct
 
-void apar_ts_processing_init(apar_ts_processing_t &val)
+void ips_ts_processing_init(ips_ts_processing_t &val)
 
 {
 
   MEM_zero(val);
 
-  val.packet.id = APAR_TS_PROCESSING_ID;
+  val.packet.id = IPS_TS_PROCESSING_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
 
-  val.pol_mode = static_cast<si32>(apar_ts_pol_mode_t::NOT_SET);
-  val.prf_mode = static_cast<si32>(apar_ts_prf_mode_t::NOT_SET);
-  val.pulse_shape = static_cast<si32>(apar_ts_pulse_shape_t::NOT_SET);
+  val.pol_mode = static_cast<si32>(ips_ts_pol_mode_t::NOT_SET);
+  val.prf_mode = static_cast<si32>(ips_ts_prf_mode_t::NOT_SET);
+  val.pulse_shape = static_cast<si32>(ips_ts_pulse_shape_t::NOT_SET);
 
-  val.pulse_width_us = APAR_TS_MISSING_FLOAT;
+  val.pulse_width_us = IPS_TS_MISSING_FLOAT;
 
-  val.start_range_m = APAR_TS_MISSING_FLOAT;
-  val.gate_spacing_m = APAR_TS_MISSING_FLOAT;
+  val.start_range_m = IPS_TS_MISSING_FLOAT;
+  val.gate_spacing_m = IPS_TS_MISSING_FLOAT;
 
-  val.test_pulse_range_km = APAR_TS_MISSING_FLOAT;
-  val.test_pulse_length_us = APAR_TS_MISSING_FLOAT;
+  val.test_pulse_range_km = IPS_TS_MISSING_FLOAT;
+  val.test_pulse_length_us = IPS_TS_MISSING_FLOAT;
 
   val.num_prts = 1;
-  for (int ii = 0; ii < APAR_TS_MAX_PRT; ii++) {
-    val.prt_us[ii] = APAR_TS_MISSING_FLOAT;
+  for (int ii = 0; ii < IPS_TS_MAX_PRT; ii++) {
+    val.prt_us[ii] = IPS_TS_MISSING_FLOAT;
   }
 
 }
@@ -211,16 +217,16 @@ void apar_ts_processing_init(apar_ts_processing_t &val)
 //////////////////////////////////////////////////////
 // init status_xml struct
 
-void apar_ts_status_xml_init(apar_ts_status_xml_t &val)
+void ips_ts_status_xml_init(ips_ts_status_xml_t &val)
 
 {
 
   MEM_zero(val);
 
-  val.packet.id = APAR_TS_STATUS_XML_ID;
+  val.packet.id = IPS_TS_STATUS_XML_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
   val.xml_len = 0;
 
 }
@@ -228,69 +234,69 @@ void apar_ts_status_xml_init(apar_ts_status_xml_t &val)
 //////////////////////////////////////////////////////
 // init calibration struct
 
-void apar_ts_calibration_init(apar_ts_calibration_t &val)
+void ips_ts_calibration_init(ips_ts_calibration_t &val)
 
 {
 
   MEM_zero(val);
 
-  val.packet.id = APAR_TS_CALIBRATION_ID;
+  val.packet.id = IPS_TS_CALIBRATION_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
 
-  val.wavelength_cm = APAR_TS_MISSING_FLOAT;
-  val.beamwidth_deg_h = APAR_TS_MISSING_FLOAT;
-  val.beamwidth_deg_v = APAR_TS_MISSING_FLOAT;
-  val.gain_ant_db_h = APAR_TS_MISSING_FLOAT;
-  val.gain_ant_db_v = APAR_TS_MISSING_FLOAT;
-  val.pulse_width_us = APAR_TS_MISSING_FLOAT;
-  val.xmit_power_dbm_h = APAR_TS_MISSING_FLOAT;
-  val.xmit_power_dbm_v = APAR_TS_MISSING_FLOAT;
-  val.two_way_waveguide_loss_db_h = APAR_TS_MISSING_FLOAT;
-  val.two_way_waveguide_loss_db_v = APAR_TS_MISSING_FLOAT;
-  val.two_way_radome_loss_db_h = APAR_TS_MISSING_FLOAT;
-  val.two_way_radome_loss_db_v = APAR_TS_MISSING_FLOAT;
-  val.receiver_mismatch_loss_db = APAR_TS_MISSING_FLOAT;
-  val.k_squared_water = APAR_TS_MISSING_FLOAT;
-  val.radar_constant_h = APAR_TS_MISSING_FLOAT;
-  val.radar_constant_v = APAR_TS_MISSING_FLOAT;
-  val.noise_dbm_hc = APAR_TS_MISSING_FLOAT;
-  val.noise_dbm_hx = APAR_TS_MISSING_FLOAT;
-  val.noise_dbm_vc = APAR_TS_MISSING_FLOAT;
-  val.noise_dbm_vx = APAR_TS_MISSING_FLOAT;
-  val.i0_dbm_hc = APAR_TS_MISSING_FLOAT;
-  val.i0_dbm_hx = APAR_TS_MISSING_FLOAT;
-  val.i0_dbm_vc = APAR_TS_MISSING_FLOAT;
-  val.i0_dbm_vx = APAR_TS_MISSING_FLOAT;
-  val.receiver_gain_db_hc = APAR_TS_MISSING_FLOAT;
-  val.receiver_gain_db_hx = APAR_TS_MISSING_FLOAT;
-  val.receiver_gain_db_vc = APAR_TS_MISSING_FLOAT;
-  val.receiver_gain_db_vx = APAR_TS_MISSING_FLOAT;
-  val.receiver_slope_hc = APAR_TS_MISSING_FLOAT;
-  val.receiver_slope_hx = APAR_TS_MISSING_FLOAT;
-  val.receiver_slope_vc = APAR_TS_MISSING_FLOAT;
-  val.receiver_slope_vx = APAR_TS_MISSING_FLOAT;
-  val.dynamic_range_db_hc = APAR_TS_MISSING_FLOAT;
-  val.dynamic_range_db_hx = APAR_TS_MISSING_FLOAT;
-  val.dynamic_range_db_vc = APAR_TS_MISSING_FLOAT;
-  val.dynamic_range_db_vx = APAR_TS_MISSING_FLOAT;
-  val.base_dbz_1km_hc = APAR_TS_MISSING_FLOAT;
-  val.base_dbz_1km_hx = APAR_TS_MISSING_FLOAT;
-  val.base_dbz_1km_vc = APAR_TS_MISSING_FLOAT;
-  val.base_dbz_1km_vx = APAR_TS_MISSING_FLOAT;
-  val.sun_power_dbm_hc = APAR_TS_MISSING_FLOAT;
-  val.sun_power_dbm_hx = APAR_TS_MISSING_FLOAT;
-  val.sun_power_dbm_vc = APAR_TS_MISSING_FLOAT;
-  val.sun_power_dbm_vx = APAR_TS_MISSING_FLOAT;
-  val.noise_source_power_dbm_h = APAR_TS_MISSING_FLOAT;
-  val.noise_source_power_dbm_v = APAR_TS_MISSING_FLOAT;
-  val.power_meas_loss_db_h = APAR_TS_MISSING_FLOAT;
-  val.power_meas_loss_db_v = APAR_TS_MISSING_FLOAT;
-  val.coupler_forward_loss_db_h = APAR_TS_MISSING_FLOAT;
-  val.coupler_forward_loss_db_v = APAR_TS_MISSING_FLOAT;
-  val.test_power_dbm_h = APAR_TS_MISSING_FLOAT;
-  val.test_power_dbm_v = APAR_TS_MISSING_FLOAT;
+  val.wavelength_cm = IPS_TS_MISSING_FLOAT;
+  val.beamwidth_deg_h = IPS_TS_MISSING_FLOAT;
+  val.beamwidth_deg_v = IPS_TS_MISSING_FLOAT;
+  val.gain_ant_db_h = IPS_TS_MISSING_FLOAT;
+  val.gain_ant_db_v = IPS_TS_MISSING_FLOAT;
+  val.pulse_width_us = IPS_TS_MISSING_FLOAT;
+  val.xmit_power_dbm_h = IPS_TS_MISSING_FLOAT;
+  val.xmit_power_dbm_v = IPS_TS_MISSING_FLOAT;
+  val.two_way_waveguide_loss_db_h = IPS_TS_MISSING_FLOAT;
+  val.two_way_waveguide_loss_db_v = IPS_TS_MISSING_FLOAT;
+  val.two_way_radome_loss_db_h = IPS_TS_MISSING_FLOAT;
+  val.two_way_radome_loss_db_v = IPS_TS_MISSING_FLOAT;
+  val.receiver_mismatch_loss_db = IPS_TS_MISSING_FLOAT;
+  val.k_squared_water = IPS_TS_MISSING_FLOAT;
+  val.radar_constant_h = IPS_TS_MISSING_FLOAT;
+  val.radar_constant_v = IPS_TS_MISSING_FLOAT;
+  val.noise_dbm_hc = IPS_TS_MISSING_FLOAT;
+  val.noise_dbm_hx = IPS_TS_MISSING_FLOAT;
+  val.noise_dbm_vc = IPS_TS_MISSING_FLOAT;
+  val.noise_dbm_vx = IPS_TS_MISSING_FLOAT;
+  val.i0_dbm_hc = IPS_TS_MISSING_FLOAT;
+  val.i0_dbm_hx = IPS_TS_MISSING_FLOAT;
+  val.i0_dbm_vc = IPS_TS_MISSING_FLOAT;
+  val.i0_dbm_vx = IPS_TS_MISSING_FLOAT;
+  val.receiver_gain_db_hc = IPS_TS_MISSING_FLOAT;
+  val.receiver_gain_db_hx = IPS_TS_MISSING_FLOAT;
+  val.receiver_gain_db_vc = IPS_TS_MISSING_FLOAT;
+  val.receiver_gain_db_vx = IPS_TS_MISSING_FLOAT;
+  val.receiver_slope_hc = IPS_TS_MISSING_FLOAT;
+  val.receiver_slope_hx = IPS_TS_MISSING_FLOAT;
+  val.receiver_slope_vc = IPS_TS_MISSING_FLOAT;
+  val.receiver_slope_vx = IPS_TS_MISSING_FLOAT;
+  val.dynamic_range_db_hc = IPS_TS_MISSING_FLOAT;
+  val.dynamic_range_db_hx = IPS_TS_MISSING_FLOAT;
+  val.dynamic_range_db_vc = IPS_TS_MISSING_FLOAT;
+  val.dynamic_range_db_vx = IPS_TS_MISSING_FLOAT;
+  val.base_dbz_1km_hc = IPS_TS_MISSING_FLOAT;
+  val.base_dbz_1km_hx = IPS_TS_MISSING_FLOAT;
+  val.base_dbz_1km_vc = IPS_TS_MISSING_FLOAT;
+  val.base_dbz_1km_vx = IPS_TS_MISSING_FLOAT;
+  val.sun_power_dbm_hc = IPS_TS_MISSING_FLOAT;
+  val.sun_power_dbm_hx = IPS_TS_MISSING_FLOAT;
+  val.sun_power_dbm_vc = IPS_TS_MISSING_FLOAT;
+  val.sun_power_dbm_vx = IPS_TS_MISSING_FLOAT;
+  val.noise_source_power_dbm_h = IPS_TS_MISSING_FLOAT;
+  val.noise_source_power_dbm_v = IPS_TS_MISSING_FLOAT;
+  val.power_meas_loss_db_h = IPS_TS_MISSING_FLOAT;
+  val.power_meas_loss_db_v = IPS_TS_MISSING_FLOAT;
+  val.coupler_forward_loss_db_h = IPS_TS_MISSING_FLOAT;
+  val.coupler_forward_loss_db_v = IPS_TS_MISSING_FLOAT;
+  val.test_power_dbm_h = IPS_TS_MISSING_FLOAT;
+  val.test_power_dbm_v = IPS_TS_MISSING_FLOAT;
   val.zdr_correction_db = 0.0;
   val.ldr_correction_db_h = 0.0;
   val.ldr_correction_db_v = 0.0;
@@ -302,16 +308,16 @@ void apar_ts_calibration_init(apar_ts_calibration_t &val)
 //////////////////////////////////////////////////////
 // init event_notice struct
 
-void apar_ts_event_notice_init(apar_ts_event_notice_t &val)
+void ips_ts_event_notice_init(ips_ts_event_notice_t &val)
 
 {
 
   MEM_zero(val);
 
-  val.packet.id = APAR_TS_EVENT_NOTICE_ID;
+  val.packet.id = IPS_TS_EVENT_NOTICE_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
 
   val.start_of_sweep = 0;
   val.end_of_sweep = 0;
@@ -319,27 +325,27 @@ void apar_ts_event_notice_init(apar_ts_event_notice_t &val)
   val.start_of_volume = 0;
   val.end_of_volume = 0;
   
-  val.scan_mode = static_cast<si32>(apar_ts_scan_mode_t::NOT_SET);
-  val.volume_num = APAR_TS_MISSING_INT;
-  val.sweep_num = APAR_TS_MISSING_INT;
+  val.scan_mode = static_cast<si32>(ips_ts_scan_mode_t::NOT_SET);
+  val.volume_num = IPS_TS_MISSING_INT;
+  val.sweep_num = IPS_TS_MISSING_INT;
   
-  val.current_fixed_angle = APAR_TS_MISSING_FLOAT;
+  val.current_fixed_angle = IPS_TS_MISSING_FLOAT;
 
 }
 
 //////////////////////////////////////////////////////
 // init pulse_header struct
 
-void apar_ts_pulse_header_init(apar_ts_pulse_header_t &val)
+void ips_ts_pulse_header_init(ips_ts_pulse_header_t &val)
 
 {
 
   MEM_zero(val);
 
-  val.packet.id = APAR_TS_PULSE_HEADER_ID;
+  val.packet.id = IPS_TS_PULSE_HEADER_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
 
   val.pulse_seq_num = 0;
   val.dwell_seq_num = 0;
@@ -347,34 +353,34 @@ void apar_ts_pulse_header_init(apar_ts_pulse_header_t &val)
   val.beam_num_in_dwell = 0;
   val.visit_num_in_beam = 0;
 
-  val.scan_mode = static_cast<si32>(apar_ts_scan_mode_t::NOT_SET);
-  val.sweep_num = APAR_TS_MISSING_INT;
-  val.volume_num = APAR_TS_MISSING_INT;
+  val.scan_mode = static_cast<si32>(ips_ts_scan_mode_t::NOT_SET);
+  val.sweep_num = IPS_TS_MISSING_INT;
+  val.volume_num = IPS_TS_MISSING_INT;
 
-  val.elevation = APAR_TS_MISSING_FLOAT;
-  val.azimuth = APAR_TS_MISSING_FLOAT;
-  val.fixed_angle = APAR_TS_MISSING_FLOAT;
+  val.elevation = IPS_TS_MISSING_FLOAT;
+  val.azimuth = IPS_TS_MISSING_FLOAT;
+  val.fixed_angle = IPS_TS_MISSING_FLOAT;
   
-  val.prt = APAR_TS_MISSING_FLOAT;
-  val.prt_next = APAR_TS_MISSING_FLOAT;
+  val.prt = IPS_TS_MISSING_FLOAT;
+  val.prt_next = IPS_TS_MISSING_FLOAT;
   
-  val.pulse_width_us = APAR_TS_MISSING_FLOAT;
+  val.pulse_width_us = IPS_TS_MISSING_FLOAT;
 
   val.n_gates = 0;
-  val.start_range_m = APAR_TS_MISSING_FLOAT;
-  val.gate_spacing_m = APAR_TS_MISSING_FLOAT;
+  val.start_range_m = IPS_TS_MISSING_FLOAT;
+  val.gate_spacing_m = IPS_TS_MISSING_FLOAT;
 
-  val.hv_flag = APAR_TS_MISSING_INT;
-  val.phase_cohered = APAR_TS_MISSING_INT;
+  val.hv_flag = IPS_TS_MISSING_INT;
+  val.phase_cohered = IPS_TS_MISSING_INT;
 
-  val.iq_encoding = static_cast<si32>(apar_ts_iq_encoding_t::NOT_SET);
+  val.iq_encoding = static_cast<si32>(ips_ts_iq_encoding_t::NOT_SET);
   val.n_channels = 1;
   val.n_data = 0;
 
   val.scale = 1.0;
   val.offset = 0.0;
 
-  for (int ii = 0; ii < APAR_TS_MAX_CHAN; ii++) {
+  for (int ii = 0; ii < IPS_TS_MAX_CHAN; ii++) {
     val.chan_is_copol[ii] = -1;
   }
 
@@ -386,11 +392,11 @@ void apar_ts_pulse_header_init(apar_ts_pulse_header_t &val)
 //////////////////////////////////////////////////////
 // init platform_georef struct
 
-void apar_ts_platform_georef_init(apar_ts_platform_georef_t &val)
+void ips_ts_platform_georef_init(ips_ts_platform_georef_t &val)
 
 {
   MEM_zero(val);
-  val.packet.id = APAR_TS_PLATFORM_GEOREF_ID;
+  val.packet.id = IPS_TS_PLATFORM_GEOREF_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
 }
@@ -398,41 +404,41 @@ void apar_ts_platform_georef_init(apar_ts_platform_georef_t &val)
 //////////////////////////////////////////////////////
 // init georef_correction struct
 
-void apar_ts_georef_correction_init(apar_ts_georef_correction_t &val)
+void ips_ts_georef_correction_init(ips_ts_georef_correction_t &val)
 
 {
   MEM_zero(val);
-  val.packet.id = APAR_TS_GEOREF_CORRECTION_ID;
+  val.packet.id = IPS_TS_GEOREF_CORRECTION_ID;
   val.packet.len_bytes = sizeof(val);
   val.packet.version_num = 1;
-  apar_ts_set_packet_time_to_now(val.packet);
+  ips_ts_set_packet_time_to_now(val.packet);
 }
 
 ////////////////////////////////////////////////////////////
 // set packet sequence number
 
-void apar_ts_set_packet_seq_num(apar_ts_packet_info_t &packet, si64 seq_num) {
+void ips_ts_set_packet_seq_num(ips_ts_packet_info_t &packet, si64 seq_num) {
   packet.seq_num = seq_num;
 }
 
 ////////////////////////////////////////////////////////////
 // set packet time
 
-void apar_ts_set_packet_time(apar_ts_packet_info_t &packet,
-                             double dtime) {
+void ips_ts_set_packet_time(ips_ts_packet_info_t &packet,
+                            double dtime) {
   time_t secs = (time_t) dtime;
   int nano_secs = (int) ((dtime - secs) * 1.0e9 + 0.5);
   packet.time_secs_utc = secs;
   packet.time_nano_secs = nano_secs;
 }
 
-void apar_ts_set_packet_time(apar_ts_packet_info_t &packet,
-                             time_t secs, int nano_secs) {
+void ips_ts_set_packet_time(ips_ts_packet_info_t &packet,
+                            time_t secs, int nano_secs) {
   packet.time_secs_utc = secs;
   packet.time_nano_secs = nano_secs;
 }
 
-void apar_ts_set_packet_time_to_now(apar_ts_packet_info_t &packet) {
+void ips_ts_set_packet_time_to_now(ips_ts_packet_info_t &packet) {
   struct timeval time;
   gettimeofday(&time, NULL);
   packet.time_secs_utc = time.tv_sec;
@@ -443,7 +449,7 @@ void apar_ts_set_packet_time_to_now(apar_ts_packet_info_t &packet) {
 // check packet id for validity, swapping as required.
 // returns 0 on success, -1 on failure
 
-int apar_ts_check_packet_id(si32 packetId, bool *isSwapped)
+int ips_ts_check_packet_id(si32 packetId, bool *isSwapped)
 
 {
 
@@ -452,15 +458,15 @@ int apar_ts_check_packet_id(si32 packetId, bool *isSwapped)
   }
   
   si32 id = packetId;
-  if (aparIdIsSwapped(id)) {
+  if (ipsIdIsSwapped(id)) {
     SWAP_array_32(&id, sizeof(si32));
     if (isSwapped != NULL) {
       *isSwapped = true;
     }
   }
 
-  if (id >= APAR_TS_SYNC_ID &&
-      id < APAR_TS_SYNC_ID + 1000) {
+  if (id >= IPS_TS_SYNC_ID &&
+      id < IPS_TS_SYNC_ID + 1000) {
     return 0;
   }
 
@@ -473,7 +479,7 @@ int apar_ts_check_packet_id(si32 packetId, bool *isSwapped)
 // also swaps the packet_len argument.
 // returns 0 on success, -1 on failure
 
-int apar_ts_check_packet_id(si32 &packetId, si32 &packetLen, bool *isSwapped)
+int ips_ts_check_packet_id(si32 &packetId, si32 &packetLen, bool *isSwapped)
 
 {
 
@@ -481,7 +487,7 @@ int apar_ts_check_packet_id(si32 &packetId, si32 &packetLen, bool *isSwapped)
     *isSwapped = false;
   }
   
-  if (aparIdIsSwapped(packetId)) {
+  if (ipsIdIsSwapped(packetId)) {
     SWAP_array_32(&packetId, sizeof(si32));
     SWAP_array_32(&packetLen, sizeof(si32));
     if (isSwapped != NULL) {
@@ -489,7 +495,7 @@ int apar_ts_check_packet_id(si32 &packetId, si32 &packetLen, bool *isSwapped)
     }
   }
 
-  return apar_ts_check_packet_id(packetId);
+  return ips_ts_check_packet_id(packetId);
 
 }
 
@@ -499,7 +505,7 @@ int apar_ts_check_packet_id(si32 &packetId, si32 &packetLen, bool *isSwapped)
 // prints error in debug mode
 // returns 0 on success, -1 on failure
 
-int apar_ts_get_packet_id(const void* buf, int len, int &packet_id)
+int ips_ts_get_packet_id(const void* buf, int len, int &packet_id)
 
 {
 
@@ -511,7 +517,7 @@ int apar_ts_get_packet_id(const void* buf, int len, int &packet_id)
   
   si32 id;
   memcpy(&id, buf, sizeof(si32));
-  if (aparIdIsSwapped(id)) {
+  if (ipsIdIsSwapped(id)) {
     SWAP_array_32(&id, sizeof(si32));
   }
 
@@ -520,43 +526,43 @@ int apar_ts_get_packet_id(const void* buf, int len, int &packet_id)
   int iret = 0;
   switch (packet_id) {
 
-    case APAR_TS_SYNC_ID:
-      if (len < (int) sizeof(apar_ts_sync_t)) {
+    case IPS_TS_SYNC_ID:
+      if (len < (int) sizeof(ips_ts_sync_t)) {
 	iret = -1;
       } break;
 
-    case APAR_TS_RADAR_INFO_ID:
-      if (len < (int) sizeof(apar_ts_radar_info_t)) {
+    case IPS_TS_RADAR_INFO_ID:
+      if (len < (int) sizeof(ips_ts_radar_info_t)) {
 	iret = -1;
       } break;
 
-    case APAR_TS_SCAN_SEGMENT_ID:
-      if (len < (int) sizeof(apar_ts_scan_segment_t)) {
+    case IPS_TS_SCAN_SEGMENT_ID:
+      if (len < (int) sizeof(ips_ts_scan_segment_t)) {
 	iret = -1;
       } break;
 
-    case APAR_TS_PROCESSING_ID:
-      if (len < (int) sizeof(apar_ts_processing_t)) {
+    case IPS_TS_PROCESSING_ID:
+      if (len < (int) sizeof(ips_ts_processing_t)) {
 	iret = -1;
       } break;
 
-    case APAR_TS_STATUS_XML_ID:
-      if (len < (int) sizeof(apar_ts_status_xml_t)) {
+    case IPS_TS_STATUS_XML_ID:
+      if (len < (int) sizeof(ips_ts_status_xml_t)) {
 	iret = -1;
       } break;
 
-    case APAR_TS_CALIBRATION_ID:
-      if (len < (int) sizeof(apar_ts_calibration_t)) {
+    case IPS_TS_CALIBRATION_ID:
+      if (len < (int) sizeof(ips_ts_calibration_t)) {
 	iret = -1;
       } break;
 
-    case APAR_TS_EVENT_NOTICE_ID:
-      if (len < (int) sizeof(apar_ts_event_notice_t)) {
+    case IPS_TS_EVENT_NOTICE_ID:
+      if (len < (int) sizeof(ips_ts_event_notice_t)) {
 	iret = -1;
       } break;
 
-    case APAR_TS_PULSE_HEADER_ID:
-      if (len < (int) sizeof(apar_ts_pulse_header_t)) {
+    case IPS_TS_PULSE_HEADER_ID:
+      if (len < (int) sizeof(ips_ts_pulse_header_t)) {
 	iret = -1;
       } break;
 
@@ -571,22 +577,22 @@ int apar_ts_get_packet_id(const void* buf, int len, int &packet_id)
 // Returns true if correct, false if not.
 // A specified radarId of 0 will match all messages.
 
-bool apar_ts_check_radar_id(const void *buf,
-                            int len,
-                            int radarId)
+bool ips_ts_check_radar_id(const void *buf,
+                           int len,
+                           int radarId)
   
 {
   if (radarId == 0) {
     // matches all packets
     return true;
   }
-  if (len < (int) sizeof(apar_ts_packet_info_t)) {
+  if (len < (int) sizeof(ips_ts_packet_info_t)) {
     // too small for a valid packet
     return false;
   }
-  apar_ts_packet_info_t info;
+  ips_ts_packet_info_t info;
   memcpy(&info, buf, sizeof(info));
-  apar_ts_packet_info_swap(info);
+  ips_ts_packet_info_swap(info);
   if (info.radar_id == 0 ||
       info.radar_id == radarId) {
     return true;
@@ -597,7 +603,7 @@ bool apar_ts_check_radar_id(const void *buf,
 //////////////////////////////////////////////////////////////////
 // get packet time as a double
 
-double apar_ts_get_packet_time_as_double(const apar_ts_packet_info_t &packet)
+double ips_ts_get_packet_time_as_double(const ips_ts_packet_info_t &packet)
 
 {
   return (packet.time_secs_utc + packet.time_nano_secs / 1.0e9);
@@ -615,46 +621,46 @@ double apar_ts_get_packet_time_as_double(const apar_ts_packet_info_t &packet)
 // swap depending on packet type
 // returns 0 on success, -1 on failure
 
-int apar_ts_packet_swap(void *buf, int len)
+int ips_ts_packet_swap(void *buf, int len)
 {
 
   int packet_id;
-  if (apar_ts_get_packet_id(buf, len, packet_id)) {
+  if (ips_ts_get_packet_id(buf, len, packet_id)) {
     return -1;
   }
 
   switch (packet_id) {
 
-    case APAR_TS_SYNC_ID:
-      apar_ts_sync_swap(*((apar_ts_sync_t *) buf));
+    case IPS_TS_SYNC_ID:
+      ips_ts_sync_swap(*((ips_ts_sync_t *) buf));
       break;
 
-    case APAR_TS_RADAR_INFO_ID:
-      apar_ts_radar_info_swap(*((apar_ts_radar_info_t *) buf));
+    case IPS_TS_RADAR_INFO_ID:
+      ips_ts_radar_info_swap(*((ips_ts_radar_info_t *) buf));
       break;
 
-    case APAR_TS_SCAN_SEGMENT_ID:
-      apar_ts_scan_segment_swap(*((apar_ts_scan_segment_t *) buf));
+    case IPS_TS_SCAN_SEGMENT_ID:
+      ips_ts_scan_segment_swap(*((ips_ts_scan_segment_t *) buf));
       break;
 
-    case APAR_TS_PROCESSING_ID:
-      apar_ts_processing_swap(*((apar_ts_processing_t *) buf));
+    case IPS_TS_PROCESSING_ID:
+      ips_ts_processing_swap(*((ips_ts_processing_t *) buf));
       break;
 
-    case APAR_TS_STATUS_XML_ID:
-      apar_ts_status_xml_swap(*((apar_ts_status_xml_t *) buf));
+    case IPS_TS_STATUS_XML_ID:
+      ips_ts_status_xml_swap(*((ips_ts_status_xml_t *) buf));
       break;
 
-    case APAR_TS_CALIBRATION_ID:
-      apar_ts_calibration_swap(*((apar_ts_calibration_t *) buf));
+    case IPS_TS_CALIBRATION_ID:
+      ips_ts_calibration_swap(*((ips_ts_calibration_t *) buf));
       break;
 
-    case APAR_TS_EVENT_NOTICE_ID:
-      apar_ts_event_notice_swap(*((apar_ts_event_notice_t *) buf));
+    case IPS_TS_EVENT_NOTICE_ID:
+      ips_ts_event_notice_swap(*((ips_ts_event_notice_t *) buf));
       break;
 
-    case APAR_TS_PULSE_HEADER_ID:
-      apar_ts_pulse_header_swap(*((apar_ts_pulse_header_t *) buf));
+    case IPS_TS_PULSE_HEADER_ID:
+      ips_ts_pulse_header_swap(*((ips_ts_pulse_header_t *) buf));
       break;
 
   }
@@ -667,10 +673,10 @@ int apar_ts_packet_swap(void *buf, int len)
 // swap packet header
 // returns true is swapped, false if already in native
 
-bool apar_ts_packet_info_swap(apar_ts_packet_info_t &packet)
+bool ips_ts_packet_info_swap(ips_ts_packet_info_t &packet)
   
 {
-  if (aparIdIsSwapped(packet.id)) {
+  if (ipsIdIsSwapped(packet.id)) {
     SWAP_array_32(&packet.id, 2 * sizeof(si32));
     SWAP_array_64(&packet.seq_num, sizeof(si64));
     SWAP_array_32(&packet.version_num, 2 * sizeof(si32));
@@ -685,12 +691,12 @@ bool apar_ts_packet_info_swap(apar_ts_packet_info_t &packet)
 // swap version
 // returns true is swapped, false if already in native
 
-bool apar_ts_version_swap(apar_ts_version_t &version)
+bool ips_ts_version_swap(ips_ts_version_t &version)
 
 {
-  bool swap = apar_ts_packet_info_swap(version.packet);
+  bool swap = ips_ts_packet_info_swap(version.packet);
   if (swap) {
-    ui08 *start = (ui08 *) &version + sizeof(apar_ts_packet_info_t);
+    ui08 *start = (ui08 *) &version + sizeof(ips_ts_packet_info_t);
     ui08 *end = (ui08 *) &version.version_name;
     int nbytes = end - start;
     SWAP_array_32(start, nbytes);
@@ -702,24 +708,24 @@ bool apar_ts_version_swap(apar_ts_version_t &version)
 // swap sync
 // returns true is swapped, false if already in native
 
-bool apar_ts_sync_swap(apar_ts_sync_t &sync)
+bool ips_ts_sync_swap(ips_ts_sync_t &sync)
 
 {
   // only swap the header
   // no data to be swapped since all bytes are identical
-  return apar_ts_packet_info_swap(sync.packet);
+  return ips_ts_packet_info_swap(sync.packet);
 }
 
 //////////////////////////////////////////////////////
 // swap radar_info
 // returns true is swapped, false if already in native
 
-bool apar_ts_radar_info_swap(apar_ts_radar_info_t &radar_info)
+bool ips_ts_radar_info_swap(ips_ts_radar_info_t &radar_info)
 
 {
-  bool swap = apar_ts_packet_info_swap(radar_info.packet);
+  bool swap = ips_ts_packet_info_swap(radar_info.packet);
   if (swap) {
-    ui08 *start = (ui08 *) &radar_info + sizeof(apar_ts_packet_info_t);
+    ui08 *start = (ui08 *) &radar_info + sizeof(ips_ts_packet_info_t);
     ui08 *end = (ui08 *) &radar_info.radar_name;
     int nbytes = end - start;
     SWAP_array_32(start, nbytes);
@@ -731,12 +737,12 @@ bool apar_ts_radar_info_swap(apar_ts_radar_info_t &radar_info)
 // swap scan_segment
 // returns true is swapped, false if already in native
 
-bool apar_ts_scan_segment_swap(apar_ts_scan_segment_t &segment)
+bool ips_ts_scan_segment_swap(ips_ts_scan_segment_t &segment)
 
 {
-  bool swap = apar_ts_packet_info_swap(segment.packet);
+  bool swap = ips_ts_packet_info_swap(segment.packet);
   if (swap) {
-    ui08 *start = (ui08 *) &segment + sizeof(apar_ts_packet_info_t);
+    ui08 *start = (ui08 *) &segment + sizeof(ips_ts_packet_info_t);
     ui08 *end = (ui08 *) &segment.segment_name;
     int nbytes = end - start;
     SWAP_array_32(start, nbytes);
@@ -748,13 +754,13 @@ bool apar_ts_scan_segment_swap(apar_ts_scan_segment_t &segment)
 // swap ts_processing
 // returns true is swapped, false if already in native
 
-bool apar_ts_processing_swap(apar_ts_processing_t &processing)
+bool ips_ts_processing_swap(ips_ts_processing_t &processing)
 
 {
-  bool swap = apar_ts_packet_info_swap(processing.packet);
+  bool swap = ips_ts_packet_info_swap(processing.packet);
   if (swap) {
-    ui08 *start = (ui08 *) &processing + sizeof(apar_ts_packet_info_t);
-    int nbytes = sizeof(apar_ts_processing_t) - sizeof(apar_ts_packet_info_t);
+    ui08 *start = (ui08 *) &processing + sizeof(ips_ts_packet_info_t);
+    int nbytes = sizeof(ips_ts_processing_t) - sizeof(ips_ts_packet_info_t);
     SWAP_array_32(start, nbytes);
   }
   return swap;
@@ -764,13 +770,13 @@ bool apar_ts_processing_swap(apar_ts_processing_t &processing)
 // swap status_xml
 // returns true is swapped, false if already in native
 
-bool apar_ts_status_xml_swap(apar_ts_status_xml_t &val)
+bool ips_ts_status_xml_swap(ips_ts_status_xml_t &val)
   
 {
-  bool swap = apar_ts_packet_info_swap(val.packet);
+  bool swap = ips_ts_packet_info_swap(val.packet);
   if (swap) {
-    ui08 *start = (ui08 *) &val + sizeof(apar_ts_packet_info_t);
-    int nbytes = sizeof(apar_ts_status_xml_t) - sizeof(apar_ts_packet_info_t);
+    ui08 *start = (ui08 *) &val + sizeof(ips_ts_packet_info_t);
+    int nbytes = sizeof(ips_ts_status_xml_t) - sizeof(ips_ts_packet_info_t);
     SWAP_array_32(start, nbytes);
   }
   return swap;
@@ -780,14 +786,14 @@ bool apar_ts_status_xml_swap(apar_ts_status_xml_t &val)
 // swap calibration
 // returns true is swapped, false if already in native
 
-bool apar_ts_calibration_swap(apar_ts_calibration_t &calib)
+bool ips_ts_calibration_swap(ips_ts_calibration_t &calib)
 
 {
-  bool swap = apar_ts_packet_info_swap(calib.packet);
+  bool swap = ips_ts_packet_info_swap(calib.packet);
   if (swap) {
-    ui08 *start = (ui08 *) &calib + sizeof(apar_ts_packet_info_t);
-    int nbytes = sizeof(apar_ts_calibration_t)
-      - sizeof(apar_ts_packet_info_t) - APAR_TS_MAX_RADAR_NAME;
+    ui08 *start = (ui08 *) &calib + sizeof(ips_ts_packet_info_t);
+    int nbytes = sizeof(ips_ts_calibration_t)
+      - sizeof(ips_ts_packet_info_t) - IPS_TS_MAX_RADAR_NAME;
     SWAP_array_32(start, nbytes);
   }
   return swap;
@@ -797,13 +803,13 @@ bool apar_ts_calibration_swap(apar_ts_calibration_t &calib)
 // swap event_notice
 // returns true is swapped, false if already in native
 
-bool apar_ts_event_notice_swap(apar_ts_event_notice_t &notice)
+bool ips_ts_event_notice_swap(ips_ts_event_notice_t &notice)
 
 {
-  bool swap = apar_ts_packet_info_swap(notice.packet);
+  bool swap = ips_ts_packet_info_swap(notice.packet);
   if (swap) {
-    ui08 *start = (ui08 *) &notice + sizeof(apar_ts_packet_info_t);
-    int nbytes = sizeof(apar_ts_event_notice_t) - sizeof(apar_ts_packet_info_t);
+    ui08 *start = (ui08 *) &notice + sizeof(ips_ts_packet_info_t);
+    int nbytes = sizeof(ips_ts_event_notice_t) - sizeof(ips_ts_packet_info_t);
     SWAP_array_32(start, nbytes);
   }
   return swap;
@@ -813,15 +819,15 @@ bool apar_ts_event_notice_swap(apar_ts_event_notice_t &notice)
 // swap pulse_header
 // returns true is swapped, false if already in native
 
-bool apar_ts_pulse_header_swap(apar_ts_pulse_header_t &pulse)
+bool ips_ts_pulse_header_swap(ips_ts_pulse_header_t &pulse)
 
 {
-  bool swap = apar_ts_packet_info_swap(pulse.packet);
+  bool swap = ips_ts_packet_info_swap(pulse.packet);
   if (swap) {
     SWAP_array_64(&pulse.pulse_seq_num, 2 * sizeof(si64));
-    int nn = sizeof(apar_ts_packet_info_t) + 2 * sizeof(si64);
+    int nn = sizeof(ips_ts_packet_info_t) + 2 * sizeof(si64);
     ui08 *start32 = (ui08 *) &pulse + nn;
-    int nbytes32 = sizeof(apar_ts_pulse_header_t) - nn;
+    int nbytes32 = sizeof(ips_ts_pulse_header_t) - nn;
     SWAP_array_32(start32, nbytes32);
   }
   return swap;
@@ -831,12 +837,12 @@ bool apar_ts_pulse_header_swap(apar_ts_pulse_header_t &pulse)
 // swap field_index
 // returns true is swapped, false if already in native
 
-bool apar_ts_platform_georef_swap(apar_ts_platform_georef_t &val)
+bool ips_ts_platform_georef_swap(ips_ts_platform_georef_t &val)
   
 {
-  bool swap = apar_ts_packet_info_swap(val.packet);
+  bool swap = ips_ts_packet_info_swap(val.packet);
   if (swap) {
-    ui08 *start = (ui08 *) &val + sizeof(apar_ts_packet_info_t);
+    ui08 *start = (ui08 *) &val + sizeof(ips_ts_packet_info_t);
     SWAP_array_32(start, 20 * sizeof(fl32));
     SWAP_array_64(&val.longitude, 2 * sizeof(fl64));
   }
@@ -847,13 +853,13 @@ bool apar_ts_platform_georef_swap(apar_ts_platform_georef_t &val)
 // swap field_index
 // returns true is swapped, false if already in native
 
-bool apar_ts_georef_correction_swap(apar_ts_georef_correction_t &val)
+bool ips_ts_georef_correction_swap(ips_ts_georef_correction_t &val)
   
 {
-  bool swap = apar_ts_packet_info_swap(val.packet);
+  bool swap = ips_ts_packet_info_swap(val.packet);
   if (swap) {
-    ui08 *start = (ui08 *) &val + sizeof(apar_ts_packet_info_t);
-    int nbytes = sizeof(apar_ts_georef_correction_t) - sizeof(apar_ts_packet_info_t);
+    ui08 *start = (ui08 *) &val + sizeof(ips_ts_packet_info_t);
+    int nbytes = sizeof(ips_ts_georef_correction_t) - sizeof(ips_ts_packet_info_t);
     SWAP_array_32(start, nbytes);
   }
   return swap;
@@ -865,22 +871,22 @@ bool apar_ts_georef_correction_swap(apar_ts_georef_correction_t &val)
 
 // string representation of packet_id 
 
-string apar_ts_packet_id_to_str(int packet_id)
+string ips_ts_packet_id_to_str(int packet_id)
 
 {
 
   switch (packet_id) {
-    case APAR_TS_SYNC_ID: return "APAR_TS_SYNC_ID";
-    case APAR_TS_RADAR_INFO_ID: return "APAR_TS_RADAR_INFO_ID";
-    case APAR_TS_SCAN_SEGMENT_ID: return "APAR_TS_SCAN_SEGMENT_ID";
-    case APAR_TS_PROCESSING_ID: return "APAR_TS_PROCESSING_ID";
-    case APAR_TS_STATUS_XML_ID: return "APAR_TS_STATUS_XML_ID";
-    case APAR_TS_CALIBRATION_ID: return "APAR_TS_CALIBRATION_ID";
-    case APAR_TS_EVENT_NOTICE_ID: return "APAR_TS_EVENT_NOTICE_ID";
-    case APAR_TS_PULSE_HEADER_ID: return "APAR_TS_PULSE_HEADER_ID";
-    case APAR_TS_VERSION_ID: return "APAR_TS_VERSION_ID";
-    case APAR_TS_PLATFORM_GEOREF_ID: return "APAR_TS_PLATFORM_GEOREF_ID";
-    case APAR_TS_GEOREF_CORRECTION_ID: return "APAR_TS_GEOREF_CORRECTION_ID";
+    case IPS_TS_SYNC_ID: return "IPS_TS_SYNC_ID";
+    case IPS_TS_RADAR_INFO_ID: return "IPS_TS_RADAR_INFO_ID";
+    case IPS_TS_SCAN_SEGMENT_ID: return "IPS_TS_SCAN_SEGMENT_ID";
+    case IPS_TS_PROCESSING_ID: return "IPS_TS_PROCESSING_ID";
+    case IPS_TS_STATUS_XML_ID: return "IPS_TS_STATUS_XML_ID";
+    case IPS_TS_CALIBRATION_ID: return "IPS_TS_CALIBRATION_ID";
+    case IPS_TS_EVENT_NOTICE_ID: return "IPS_TS_EVENT_NOTICE_ID";
+    case IPS_TS_PULSE_HEADER_ID: return "IPS_TS_PULSE_HEADER_ID";
+    case IPS_TS_VERSION_ID: return "IPS_TS_VERSION_ID";
+    case IPS_TS_PLATFORM_GEOREF_ID: return "IPS_TS_PLATFORM_GEOREF_ID";
+    case IPS_TS_GEOREF_CORRECTION_ID: return "IPS_TS_GEOREF_CORRECTION_ID";
     default: return "UNKNOWN";
   }
 
@@ -888,205 +894,205 @@ string apar_ts_packet_id_to_str(int packet_id)
 
 // string representation of prf_mode
 
-string apar_ts_prf_mode_to_str(apar_ts_prf_mode_t prf_mode)
+string ips_ts_prf_mode_to_str(ips_ts_prf_mode_t prf_mode)
 
 {
   
   switch (prf_mode) {
-    case apar_ts_prf_mode_t::FIXED:
-        return "FIXED";
-    case apar_ts_prf_mode_t::STAGGERED_2_3:
-        return "STAGGERED_2_3";
-    case apar_ts_prf_mode_t::STAGGERED_3_4:
-        return "STAGGERED_3_4";
-    case apar_ts_prf_mode_t::STAGGERED_4_5:
-        return "STAGGERED_4_5";
-    case apar_ts_prf_mode_t::MULTI_PRT:
-        return "MULTI_PRT";
+    case ips_ts_prf_mode_t::FIXED:
+      return "FIXED";
+    case ips_ts_prf_mode_t::STAGGERED_2_3:
+      return "STAGGERED_2_3";
+    case ips_ts_prf_mode_t::STAGGERED_3_4:
+      return "STAGGERED_3_4";
+    case ips_ts_prf_mode_t::STAGGERED_4_5:
+      return "STAGGERED_4_5";
+    case ips_ts_prf_mode_t::MULTI_PRT:
+      return "MULTI_PRT";
     default:
-        return "UNKNOWN";
+      return "UNKNOWN";
   }
 
 }
 
-string apar_ts_prf_mode_to_str(int prf_mode_int)
+string ips_ts_prf_mode_to_str(int prf_mode_int)
 
 {
-    apar_ts_prf_mode_t prf_mode = static_cast<apar_ts_prf_mode_t>(prf_mode_int);
-    return apar_ts_prf_mode_to_str(prf_mode);
+  ips_ts_prf_mode_t prf_mode = static_cast<ips_ts_prf_mode_t>(prf_mode_int);
+  return ips_ts_prf_mode_to_str(prf_mode);
 }
 
 // string representation of pulse_shape
 
-string apar_ts_pulse_shape_to_str(apar_ts_pulse_shape_t pulse_shape)
+string ips_ts_pulse_shape_to_str(ips_ts_pulse_shape_t pulse_shape)
   
 {
   
   switch (pulse_shape) {
-    case apar_ts_pulse_shape_t::RECT:
-        return "RECT";
-    case apar_ts_pulse_shape_t::GAUSSIAN:
-        return "GAUSSIAN";
-    case apar_ts_pulse_shape_t::CUSTOM:
-        return "CUSTOM";
+    case ips_ts_pulse_shape_t::RECT:
+      return "RECT";
+    case ips_ts_pulse_shape_t::GAUSSIAN:
+      return "GAUSSIAN";
+    case ips_ts_pulse_shape_t::CUSTOM:
+      return "CUSTOM";
     default:
-        return "UNKNOWN";
+      return "UNKNOWN";
   }
 
 }
 
-string apar_ts_pulse_shape_to_str(int pulse_shape_int)
+string ips_ts_pulse_shape_to_str(int pulse_shape_int)
 
 {
-    apar_ts_pulse_shape_t pulse_shape =
-            static_cast<apar_ts_pulse_shape_t>(pulse_shape_int);
-    return apar_ts_pulse_shape_to_str(pulse_shape);
+  ips_ts_pulse_shape_t pulse_shape =
+    static_cast<ips_ts_pulse_shape_t>(pulse_shape_int);
+  return ips_ts_pulse_shape_to_str(pulse_shape);
 }
 
 // string representation of pulse_polarization
 
-string apar_ts_pol_mode_to_str(apar_ts_pol_mode_t pol_mode)
+string ips_ts_pol_mode_to_str(ips_ts_pol_mode_t pol_mode)
 
 {
   
   switch (pol_mode) {
-    case apar_ts_pol_mode_t::H:
-        return "H";
-    case apar_ts_pol_mode_t::V:
-        return "V";
-    case apar_ts_pol_mode_t::MIXED:
-        return "MIXED";
+    case ips_ts_pol_mode_t::H:
+      return "H";
+    case ips_ts_pol_mode_t::V:
+      return "V";
+    case ips_ts_pol_mode_t::MIXED:
+      return "MIXED";
     default:
-        return "UNKNOWN";
+      return "UNKNOWN";
   }
 
 }
 
-string apar_ts_pol_mode_to_str(int pol_mode_int)
+string ips_ts_pol_mode_to_str(int pol_mode_int)
 
 {
-    apar_ts_pol_mode_t pol_mode = static_cast<apar_ts_pol_mode_t>(pol_mode_int);
-    return apar_ts_pol_mode_to_str(pol_mode);
+  ips_ts_pol_mode_t pol_mode = static_cast<ips_ts_pol_mode_t>(pol_mode_int);
+  return ips_ts_pol_mode_to_str(pol_mode);
 }
 
 // string representation of scan_mode
 
-string apar_ts_scan_mode_to_str(apar_ts_scan_mode_t scan_mode)
+string ips_ts_scan_mode_to_str(ips_ts_scan_mode_t scan_mode)
 
 {
   
   switch (scan_mode) {
-    case apar_ts_scan_mode_t::PPI:
-        return "PPI";
-    case apar_ts_scan_mode_t::RHI:
-        return "RHI";
-    case apar_ts_scan_mode_t::CALIBRATION:
-        return "CALIBRATION";
-    case apar_ts_scan_mode_t::VPOINT:
-        return "VPOINT";
-    case apar_ts_scan_mode_t::SUNSCAN:
-        return "SUNSCAN";
-    case apar_ts_scan_mode_t::POINTING:
-        return "POINTING";
-    case apar_ts_scan_mode_t::IDLE:
-        return "IDLE";
+    case ips_ts_scan_mode_t::PPI:
+      return "PPI";
+    case ips_ts_scan_mode_t::RHI:
+      return "RHI";
+    case ips_ts_scan_mode_t::CALIBRATION:
+      return "CALIBRATION";
+    case ips_ts_scan_mode_t::VPOINT:
+      return "VPOINT";
+    case ips_ts_scan_mode_t::SUNSCAN:
+      return "SUNSCAN";
+    case ips_ts_scan_mode_t::POINTING:
+      return "POINTING";
+    case ips_ts_scan_mode_t::IDLE:
+      return "IDLE";
     default: return "UNKNOWN";
   }
 
 }
 
-string apar_ts_scan_mode_to_str(int scan_mode_int)
+string ips_ts_scan_mode_to_str(int scan_mode_int)
 
 {
-    apar_ts_scan_mode_t scan_mode = static_cast<apar_ts_scan_mode_t>(scan_mode_int);
-    return apar_ts_scan_mode_to_str(scan_mode);
+  ips_ts_scan_mode_t scan_mode = static_cast<ips_ts_scan_mode_t>(scan_mode_int);
+  return ips_ts_scan_mode_to_str(scan_mode);
 }
 
-string apar_ts_scan_mode_to_short_str(apar_ts_scan_mode_t scan_mode)
+string ips_ts_scan_mode_to_short_str(ips_ts_scan_mode_t scan_mode)
 
 {
   switch (scan_mode) {
-    case apar_ts_scan_mode_t::PPI:
-        return "PPI";
-    case apar_ts_scan_mode_t::RHI:
-        return "RHI";
-    case apar_ts_scan_mode_t::CALIBRATION:
-        return "CAL";
-    case apar_ts_scan_mode_t::VPOINT:
-        return "VPOINT";
-    case apar_ts_scan_mode_t::SUNSCAN:
-        return "SUN";
-    case apar_ts_scan_mode_t::POINTING:
-        return "POINT";
-    case apar_ts_scan_mode_t::IDLE:
-        return "IDLE";
+    case ips_ts_scan_mode_t::PPI:
+      return "PPI";
+    case ips_ts_scan_mode_t::RHI:
+      return "RHI";
+    case ips_ts_scan_mode_t::CALIBRATION:
+      return "CAL";
+    case ips_ts_scan_mode_t::VPOINT:
+      return "VPOINT";
+    case ips_ts_scan_mode_t::SUNSCAN:
+      return "SUN";
+    case ips_ts_scan_mode_t::POINTING:
+      return "POINT";
+    case ips_ts_scan_mode_t::IDLE:
+      return "IDLE";
     default:
-        return "UNKNOWN";
+      return "UNKNOWN";
   }
 
 }
 
-string apar_ts_scan_mode_to_short_str(int scan_mode_int)
+string ips_ts_scan_mode_to_short_str(int scan_mode_int)
 {
-    apar_ts_scan_mode_t scan_mode = static_cast<apar_ts_scan_mode_t>(scan_mode_int);
-    return apar_ts_scan_mode_to_short_str(scan_mode);
+  ips_ts_scan_mode_t scan_mode = static_cast<ips_ts_scan_mode_t>(scan_mode_int);
+  return ips_ts_scan_mode_to_short_str(scan_mode);
 }
 
 // string representation of radar_platform
 
-string apar_ts_radar_platform_to_str(apar_ts_radar_platform_t radar_platform)
+string ips_ts_radar_platform_to_str(ips_ts_radar_platform_t radar_platform)
 
 {
   
   switch (radar_platform) {
-    case apar_ts_radar_platform_t::FIXED:
-        return "FIXED";
-    case apar_ts_radar_platform_t::VEHICLE:
-        return "VEHICLE";
-    case apar_ts_radar_platform_t::SHIP:
-        return "SHIP";
-    case apar_ts_radar_platform_t::AIRCRAFT:
-        return "AIRCRAFT";
+    case ips_ts_radar_platform_t::FIXED:
+      return "FIXED";
+    case ips_ts_radar_platform_t::VEHICLE:
+      return "VEHICLE";
+    case ips_ts_radar_platform_t::SHIP:
+      return "SHIP";
+    case ips_ts_radar_platform_t::AIRCRAFT:
+      return "AIRCRAFT";
     default:
-        return "UNKNOWN";
+      return "UNKNOWN";
   }
 
 }
 
-string apar_ts_radar_platform_to_str(int radar_platform_int)
+string ips_ts_radar_platform_to_str(int radar_platform_int)
 
 {
-    apar_ts_radar_platform_t radar_platform =
-            static_cast<apar_ts_radar_platform_t>(radar_platform_int);
-    return apar_ts_radar_platform_to_str(radar_platform);
+  ips_ts_radar_platform_t radar_platform =
+    static_cast<ips_ts_radar_platform_t>(radar_platform_int);
+  return ips_ts_radar_platform_to_str(radar_platform);
 }
 
 // string representation of iq_encoding
 
-string apar_ts_iq_encoding_to_str(apar_ts_iq_encoding_t iq_encoding)
+string ips_ts_iq_encoding_to_str(ips_ts_iq_encoding_t iq_encoding)
 
 {
   
   switch (iq_encoding) {
-    case apar_ts_iq_encoding_t::FL32:
-        return "FL32";
-    case apar_ts_iq_encoding_t::SCALED_SI16:
-        return "SCALED_SI16";
-    case apar_ts_iq_encoding_t::DBM_PHASE_SI16:
-        return "DBM_PHASE_SI16";
-    case apar_ts_iq_encoding_t::SCALED_SI32:
-        return "SCALED_SI32";
+    case ips_ts_iq_encoding_t::FL32:
+      return "FL32";
+    case ips_ts_iq_encoding_t::SCALED_SI16:
+      return "SCALED_SI16";
+    case ips_ts_iq_encoding_t::DBM_PHASE_SI16:
+      return "DBM_PHASE_SI16";
+    case ips_ts_iq_encoding_t::SCALED_SI32:
+      return "SCALED_SI32";
     default:
-        return "UNKNOWN";
+      return "UNKNOWN";
   }
 
 }
 
-string apar_ts_iq_encoding_to_str(int iq_encoding_int)
+string ips_ts_iq_encoding_to_str(int iq_encoding_int)
 
 {
-    apar_ts_iq_encoding_t iq_encoding = static_cast<apar_ts_iq_encoding_t>(iq_encoding_int);
-    return apar_ts_iq_encoding_to_str(iq_encoding);
+  ips_ts_iq_encoding_t iq_encoding = static_cast<ips_ts_iq_encoding_t>(iq_encoding_int);
+  return ips_ts_iq_encoding_to_str(iq_encoding);
 }
 
 //////////////////////////////////////////////////////////////////
@@ -1096,55 +1102,55 @@ string apar_ts_iq_encoding_to_str(int iq_encoding_int)
 ////////////////////////////////
 // print depending on packet type
 
-void apar_ts_packet_print(FILE *out, const void *buf, int len)
+void ips_ts_packet_print(FILE *out, const void *buf, int len)
 
 {
   
   int packet_id;
-  if (apar_ts_get_packet_id(buf, len, packet_id)) {
+  if (ips_ts_get_packet_id(buf, len, packet_id)) {
     return;
   }
 
   switch (packet_id) {
 
-    case APAR_TS_SYNC_ID:
-      apar_ts_sync_print(out, *((apar_ts_sync_t *) buf));
+    case IPS_TS_SYNC_ID:
+      ips_ts_sync_print(out, *((ips_ts_sync_t *) buf));
       break;
 
-    case APAR_TS_RADAR_INFO_ID:
-      apar_ts_radar_info_print(out, *((apar_ts_radar_info_t *) buf));
+    case IPS_TS_RADAR_INFO_ID:
+      ips_ts_radar_info_print(out, *((ips_ts_radar_info_t *) buf));
       break;
 
-    case APAR_TS_SCAN_SEGMENT_ID:
-      apar_ts_scan_segment_print(out, *((apar_ts_scan_segment_t *) buf));
+    case IPS_TS_SCAN_SEGMENT_ID:
+      ips_ts_scan_segment_print(out, *((ips_ts_scan_segment_t *) buf));
       break;
 
-    case APAR_TS_PROCESSING_ID:
-      apar_ts_processing_print(out, *((apar_ts_processing_t *) buf));
+    case IPS_TS_PROCESSING_ID:
+      ips_ts_processing_print(out, *((ips_ts_processing_t *) buf));
       break;
 
-    case APAR_TS_STATUS_XML_ID:
-      apar_ts_status_xml_print(out, buf);
+    case IPS_TS_STATUS_XML_ID:
+      ips_ts_status_xml_print(out, buf);
       break;
 
-    case APAR_TS_CALIBRATION_ID:
-      apar_ts_calibration_print(out, *((apar_ts_calibration_t *) buf));
+    case IPS_TS_CALIBRATION_ID:
+      ips_ts_calibration_print(out, *((ips_ts_calibration_t *) buf));
       break;
 
-    case APAR_TS_EVENT_NOTICE_ID:
-      apar_ts_event_notice_print(out, *((apar_ts_event_notice_t *) buf));
+    case IPS_TS_EVENT_NOTICE_ID:
+      ips_ts_event_notice_print(out, *((ips_ts_event_notice_t *) buf));
       break;
 
-    case APAR_TS_PULSE_HEADER_ID:
-      apar_ts_pulse_header_print(out, *((apar_ts_pulse_header_t *) buf));
+    case IPS_TS_PULSE_HEADER_ID:
+      ips_ts_pulse_header_print(out, *((ips_ts_pulse_header_t *) buf));
       break;
 
-    case APAR_TS_PLATFORM_GEOREF_ID:
-      apar_ts_platform_georef_print(out, *((apar_ts_platform_georef_t *) buf));
+    case IPS_TS_PLATFORM_GEOREF_ID:
+      ips_ts_platform_georef_print(out, *((ips_ts_platform_georef_t *) buf));
       break;
       
-    case APAR_TS_GEOREF_CORRECTION_ID:
-      apar_ts_georef_correction_print(out, *((apar_ts_georef_correction_t *) buf));
+    case IPS_TS_GEOREF_CORRECTION_ID:
+      ips_ts_georef_correction_print(out, *((ips_ts_georef_correction_t *) buf));
       break;
       
   }
@@ -1154,13 +1160,13 @@ void apar_ts_packet_print(FILE *out, const void *buf, int len)
 //////////////////////////////////////////////////////
 // print packet header
 
-void apar_ts_packet_info_print(FILE *out,
-                               const apar_ts_packet_info_t &packet)
+void ips_ts_packet_info_print(FILE *out,
+                              const ips_ts_packet_info_t &packet)
 
 {
 
-  apar_ts_packet_info_t copy = packet;
-  apar_ts_packet_info_swap(copy);
+  ips_ts_packet_info_t copy = packet;
+  ips_ts_packet_info_swap(copy);
   fprintf(out, "  id: 0x%x (%d)\n", copy.id, copy.id);
   fprintf(out, "  len_bytes: %d\n", copy.len_bytes);
   fprintf(out, "  seq_num: %lld\n", (long long) copy.seq_num);
@@ -1178,16 +1184,16 @@ void apar_ts_packet_info_print(FILE *out,
 //////////////////////////////////////////////////////
 // print sync packet
 
-void apar_ts_sync_print(FILE *out,
-                        const apar_ts_sync_t &sync)
+void ips_ts_sync_print(FILE *out,
+                       const ips_ts_sync_t &sync)
 
 {
 
-  apar_ts_sync_t copy = sync;
-  apar_ts_sync_swap(copy);
+  ips_ts_sync_t copy = sync;
+  ips_ts_sync_swap(copy);
 
-  fprintf(out, "==================== apar_ts_sync ==================================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  fprintf(out, "==================== ips_ts_sync ==================================\n");
+  ips_ts_packet_info_print(out, copy.packet);
   fprintf(out, "  magik[0]: 0x%x\n", copy.magik[0]);
   fprintf(out, "  magik[1]: 0x%x\n", copy.magik[1]);
   fprintf(out, "=================================================================\n");
@@ -1197,15 +1203,15 @@ void apar_ts_sync_print(FILE *out,
 //////////////////////////////////////////////////////
 // print version packet
 
-void apar_ts_version_print(FILE *out,
-                           const apar_ts_version_t &version)
+void ips_ts_version_print(FILE *out,
+                          const ips_ts_version_t &version)
 
 {
 
-  apar_ts_version_t copy = version;
-  apar_ts_version_swap(copy);
-  fprintf(out, "==================== apar_ts_version ===============================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  ips_ts_version_t copy = version;
+  ips_ts_version_swap(copy);
+  fprintf(out, "==================== ips_ts_version ===============================\n");
+  ips_ts_packet_info_print(out, copy.packet);
   fprintf(out, "  major_version_num: %d\n", copy.major_version_num);
   fprintf(out, "  minor_version_num: %d\n", copy.minor_version_num);
   fprintf(out, "  version_name: %s\n", copy.version_name);
@@ -1216,30 +1222,30 @@ void apar_ts_version_print(FILE *out,
 //////////////////////////////////////////////////////
 // print radar_info
 
-void apar_ts_radar_info_print(FILE *out,
-                              const apar_ts_radar_info_t &info)
+void ips_ts_radar_info_print(FILE *out,
+                             const ips_ts_radar_info_t &info)
 
 {
 
-  apar_ts_radar_info_t copy = info;
-  apar_ts_radar_info_swap(copy);
-  fprintf(out, "==================== apar_ts_radar_info ============================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  ips_ts_radar_info_t copy = info;
+  ips_ts_radar_info_swap(copy);
+  fprintf(out, "==================== ips_ts_radar_info ============================\n");
+  ips_ts_packet_info_print(out, copy.packet);
 
   fprintf(out, "  latitude_deg: %g\n", copy.latitude_deg);
   fprintf(out, "  longitude_deg: %g\n", copy.longitude_deg);
   fprintf(out, "  altitude_m: %g\n", copy.altitude_m);
   fprintf(out, "  platform_type: %s\n",
-	  apar_ts_radar_platform_to_str(copy.platform_type).c_str());
+	  ips_ts_radar_platform_to_str(copy.platform_type).c_str());
   fprintf(out, "  beamwidth_deg_h: %g\n", copy.beamwidth_deg_h);
   fprintf(out, "  beamwidth_deg_v: %g\n", copy.beamwidth_deg_v);
   fprintf(out, "  wavelength_cm: %g\n", copy.wavelength_cm);
   fprintf(out, "  nominal_gain_ant_db_h: %g\n", copy.nominal_gain_ant_db_h);
   fprintf(out, "  nominal_gain_ant_db_v: %g\n", copy.nominal_gain_ant_db_v);
   fprintf(out, "  radar_name: %s\n",
-	  apar_ts_safe_str(copy.radar_name, APAR_TS_MAX_RADAR_NAME).c_str());
+	  ips_ts_safe_str(copy.radar_name, IPS_TS_MAX_RADAR_NAME).c_str());
   fprintf(out, "  site_name: %s\n",
-	  apar_ts_safe_str(copy.site_name, APAR_TS_MAX_SITE_NAME).c_str());
+	  ips_ts_safe_str(copy.site_name, IPS_TS_MAX_SITE_NAME).c_str());
   fprintf(out, "=================================================================\n");
 
 }
@@ -1247,17 +1253,17 @@ void apar_ts_radar_info_print(FILE *out,
 //////////////////////////////////////////////////////
 // print scan_segment
 
-void apar_ts_scan_segment_print(FILE *out,
-                                const apar_ts_scan_segment_t &seg)
+void ips_ts_scan_segment_print(FILE *out,
+                               const ips_ts_scan_segment_t &seg)
 
 {
 
-  apar_ts_scan_segment_t copy = seg;
-  apar_ts_scan_segment_swap(copy);
-  fprintf(out, "==================== apar_ts_scan_segment ==========================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  ips_ts_scan_segment_t copy = seg;
+  ips_ts_scan_segment_swap(copy);
+  fprintf(out, "==================== ips_ts_scan_segment ==========================\n");
+  ips_ts_packet_info_print(out, copy.packet);
 
-  fprintf(out, "  scan_mode: %s\n", apar_ts_scan_mode_to_str(copy.scan_mode).c_str());
+  fprintf(out, "  scan_mode: %s\n", ips_ts_scan_mode_to_str(copy.scan_mode).c_str());
   fprintf(out, "  volume_num: %d\n", copy.volume_num);
   fprintf(out, "  sweep_num: %d\n", copy.sweep_num);
   fprintf(out, "  az_start: %g\n", copy.az_start);
@@ -1273,9 +1279,9 @@ void apar_ts_scan_segment_print(FILE *out,
 
   fprintf(out, "  fixed_angles:");
   int nSweeps = copy.n_sweeps;
-  if (nSweeps > APAR_TS_MAX_FIXED_ANGLES) {
+  if (nSweeps > IPS_TS_MAX_FIXED_ANGLES) {
     fprintf(out, " WARNING - bad number of sweeps: %d\n", nSweeps);
-    nSweeps = APAR_TS_MAX_FIXED_ANGLES;
+    nSweeps = IPS_TS_MAX_FIXED_ANGLES;
   } else {
     for (int ii = 0; ii < nSweeps; ii++) {
       fprintf(out, " %g", copy.fixed_angles[ii]);
@@ -1287,9 +1293,9 @@ void apar_ts_scan_segment_print(FILE *out,
   fprintf(out, "  sun_scan_sector_width_el: %g\n", copy.sun_scan_sector_width_el);
 
   fprintf(out, "  segment_name: %s\n",
-	  apar_ts_safe_str(copy.segment_name, APAR_TS_MAX_SEGMENT_NAME).c_str());
+	  ips_ts_safe_str(copy.segment_name, IPS_TS_MAX_SEGMENT_NAME).c_str());
   fprintf(out, "  project_name: %s\n",
-	  apar_ts_safe_str(copy.project_name, APAR_TS_MAX_PROJECT_NAME).c_str());
+	  ips_ts_safe_str(copy.project_name, IPS_TS_MAX_PROJECT_NAME).c_str());
   
   fprintf(out, "=================================================================\n");
 
@@ -1298,22 +1304,22 @@ void apar_ts_scan_segment_print(FILE *out,
 //////////////////////////////////////////////////////
 // print ts_processing
 
-void apar_ts_processing_print(FILE *out,
-			      const apar_ts_processing_t &proc)
+void ips_ts_processing_print(FILE *out,
+                             const ips_ts_processing_t &proc)
 
 {
 
-  apar_ts_processing_t copy = proc;
-  apar_ts_processing_swap(copy);
-  fprintf(out, "==================== apar_ts_processing =========================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  ips_ts_processing_t copy = proc;
+  ips_ts_processing_swap(copy);
+  fprintf(out, "==================== ips_ts_processing =========================\n");
+  ips_ts_packet_info_print(out, copy.packet);
 
   fprintf(out, "  pol_mode: %s\n",
-          apar_ts_pol_mode_to_str(copy.pol_mode).c_str());
+          ips_ts_pol_mode_to_str(copy.pol_mode).c_str());
   fprintf(out, "  prf_mode: %s\n",
-          apar_ts_prf_mode_to_str(copy.prf_mode).c_str());
+          ips_ts_prf_mode_to_str(copy.prf_mode).c_str());
   fprintf(out, "  pulse_shape: %s\n",
-          apar_ts_pulse_shape_to_str(copy.pulse_shape).c_str());
+          ips_ts_pulse_shape_to_str(copy.pulse_shape).c_str());
   
   fprintf(out, "  pulse_width_us: %g\n", copy.pulse_width_us);
   fprintf(out, "  start_range_m: %g\n", copy.start_range_m);
@@ -1333,16 +1339,16 @@ void apar_ts_processing_print(FILE *out,
 //////////////////////////////////////////////////////
 // print status_xml
 
-void apar_ts_status_xml_print(FILE *out,
-                              const apar_ts_status_xml_t &val,
-                              const string &xmlStr)
+void ips_ts_status_xml_print(FILE *out,
+                             const ips_ts_status_xml_t &val,
+                             const string &xmlStr)
   
 {
   
-  apar_ts_status_xml_t copy = val;
-  apar_ts_status_xml_swap(copy);
-  fprintf(out, "===================== apar_ts_status_xml ===========================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  ips_ts_status_xml_t copy = val;
+  ips_ts_status_xml_swap(copy);
+  fprintf(out, "===================== ips_ts_status_xml ===========================\n");
+  ips_ts_packet_info_print(out, copy.packet);
   fprintf(out, "  xml_len: %d\n", copy.xml_len);
   if (copy.xml_len > (int) sizeof(copy) + 1) {
     fprintf(out, "%s\n", xmlStr.c_str());
@@ -1351,27 +1357,27 @@ void apar_ts_status_xml_print(FILE *out,
   
 }
 
-void apar_ts_status_xml_print(FILE *out, const void *buf)
+void ips_ts_status_xml_print(FILE *out, const void *buf)
 {
-  apar_ts_status_xml_t hdr;
-  memcpy(&hdr, buf, sizeof(apar_ts_status_xml_t));
-  const char *str = (const char *) buf + sizeof(apar_ts_status_xml_t);
+  ips_ts_status_xml_t hdr;
+  memcpy(&hdr, buf, sizeof(ips_ts_status_xml_t));
+  const char *str = (const char *) buf + sizeof(ips_ts_status_xml_t);
   string statusStr(str);
-  apar_ts_status_xml_print(out, hdr, statusStr);
+  ips_ts_status_xml_print(out, hdr, statusStr);
 }
 
 //////////////////////////////////////////////////////
 // print calibration
 
-void apar_ts_calibration_print(FILE *out,
-                               const apar_ts_calibration_t &calib)
+void ips_ts_calibration_print(FILE *out,
+                              const ips_ts_calibration_t &calib)
   
 {
 
-  apar_ts_calibration_t copy = calib;
-  apar_ts_calibration_swap(copy);
-  fprintf(out, "==================== apar_ts_calibration ===========================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  ips_ts_calibration_t copy = calib;
+  ips_ts_calibration_swap(copy);
+  fprintf(out, "==================== ips_ts_calibration ===========================\n");
+  ips_ts_packet_info_print(out, copy.packet);
   
   fprintf(out, "  radar_name: %s\n", copy.radar_name);
   fprintf(out, "  wavelength_cm: %g\n", copy.wavelength_cm);
@@ -1438,21 +1444,21 @@ void apar_ts_calibration_print(FILE *out,
 //////////////////////////////////////////////////////
 // print event_notice
 
-void apar_ts_event_notice_print(FILE *out,
-                                const apar_ts_event_notice_t &note)
+void ips_ts_event_notice_print(FILE *out,
+                               const ips_ts_event_notice_t &note)
 
 {
 
-  apar_ts_event_notice_t copy = note;
-  apar_ts_event_notice_swap(copy);
-  fprintf(out, "==================== apar_ts_event_notice ==========================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  ips_ts_event_notice_t copy = note;
+  ips_ts_event_notice_swap(copy);
+  fprintf(out, "==================== ips_ts_event_notice ==========================\n");
+  ips_ts_packet_info_print(out, copy.packet);
   
   fprintf(out, "  start_of_sweep: %d\n", copy.start_of_sweep);
   fprintf(out, "  end_of_sweep: %d\n", copy.end_of_sweep);
   fprintf(out, "  start_of_volume: %d\n", copy.start_of_volume);
   fprintf(out, "  end_of_volume: %d\n", copy.end_of_volume);
-  fprintf(out, "  scan_mode: %s\n", apar_ts_scan_mode_to_str(copy.scan_mode).c_str());
+  fprintf(out, "  scan_mode: %s\n", ips_ts_scan_mode_to_str(copy.scan_mode).c_str());
   fprintf(out, "  volume_num: %d\n", copy.volume_num);
   fprintf(out, "  sweep_num: %d\n", copy.sweep_num);
   fprintf(out, "  current_fixed_angle: %g\n", copy.current_fixed_angle);
@@ -1463,16 +1469,16 @@ void apar_ts_event_notice_print(FILE *out,
 //////////////////////////////////////////////////////
 // print pulse_header
 
-void apar_ts_pulse_header_print(FILE *out,
-                                const apar_ts_pulse_header_t &pulse,
-                                const apar_ts_platform_georef_t *georef /* = NULL*/)
+void ips_ts_pulse_header_print(FILE *out,
+                               const ips_ts_pulse_header_t &pulse,
+                               const ips_ts_platform_georef_t *georef /* = NULL*/)
 
 {
   
-  apar_ts_pulse_header_t copy = pulse;
-  apar_ts_pulse_header_swap(copy);
-  fprintf(out, "==================== apar_ts_pulse_header ==========================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  ips_ts_pulse_header_t copy = pulse;
+  ips_ts_pulse_header_swap(copy);
+  fprintf(out, "==================== ips_ts_pulse_header ==========================\n");
+  ips_ts_packet_info_print(out, copy.packet);
   
   fprintf(out, "  pulse_seq_num: %lld\n", (long long) copy.pulse_seq_num);
   fprintf(out, "  dwell_seq_num: %lld\n", (long long) copy.dwell_seq_num);
@@ -1480,7 +1486,7 @@ void apar_ts_pulse_header_print(FILE *out,
   fprintf(out, "  beam_num_in_dwell: %d\n", copy.beam_num_in_dwell);
   fprintf(out, "  visit_num_in_beam: %d\n", copy.visit_num_in_beam);
 
-  fprintf(out, "  scan_mode: %s\n", apar_ts_scan_mode_to_str(copy.scan_mode).c_str());
+  fprintf(out, "  scan_mode: %s\n", ips_ts_scan_mode_to_str(copy.scan_mode).c_str());
   fprintf(out, "  volume_num: %d\n", copy.volume_num);
   fprintf(out, "  sweep_num: %d\n", copy.sweep_num);
 
@@ -1500,7 +1506,7 @@ void apar_ts_pulse_header_print(FILE *out,
   fprintf(out, "  phase_cohered: %d\n", copy.phase_cohered);
 
   fprintf(out, "  iq_encoding: %s\n",
-          apar_ts_iq_encoding_to_str(copy.iq_encoding).c_str());  
+          ips_ts_iq_encoding_to_str(copy.iq_encoding).c_str());  
   fprintf(out, "  n_channels: %d\n", copy.n_channels);
   fprintf(out, "  n_data: %d\n", copy.n_data);
   fprintf(out, "  scale: %g\n", copy.scale);
@@ -1512,22 +1518,22 @@ void apar_ts_pulse_header_print(FILE *out,
 
   fprintf(out, "  status: %d\n", copy.status);
   
-  if (copy.event_flags & APAR_TS_END_OF_SWEEP) {
+  if (copy.event_flags & IPS_TS_END_OF_SWEEP) {
     fprintf(out, "  event: end_of_sweep\n");
   }
-  if (copy.event_flags & APAR_TS_START_OF_SWEEP) {
+  if (copy.event_flags & IPS_TS_START_OF_SWEEP) {
     fprintf(out, "  event: start_of_sweep\n");
   }
-  if (copy.event_flags & APAR_TS_END_OF_VOLUME) {
+  if (copy.event_flags & IPS_TS_END_OF_VOLUME) {
     fprintf(out, "  event: end_of_volume\n");
   }
-  if (copy.event_flags & APAR_TS_START_OF_VOLUME) {
+  if (copy.event_flags & IPS_TS_START_OF_VOLUME) {
     fprintf(out, "  event: start_of_volume\n");
   }
 
   if (georef != NULL) {
-    apar_ts_platform_georef_t gcopy = *georef;
-    apar_ts_platform_georef_swap(gcopy);
+    ips_ts_platform_georef_t gcopy = *georef;
+    ips_ts_platform_georef_swap(gcopy);
     fprintf(out, "  Pulse is using georef:\n");
     fprintf(out, "    georef time_secs_utc: %lld\n",
             (long long) gcopy.packet.time_secs_utc);
@@ -1543,15 +1549,15 @@ void apar_ts_pulse_header_print(FILE *out,
 //////////////////////////////////////////////////////
 // print platform_georef
 
-void apar_ts_platform_georef_print(FILE *out,
-                                   const apar_ts_platform_georef &val)
+void ips_ts_platform_georef_print(FILE *out,
+                                  const ips_ts_platform_georef &val)
 
 {
   
-  apar_ts_platform_georef_t copy = val;
-  apar_ts_platform_georef_swap(copy);
-  fprintf(out, "====================== apar_ts_platform_georef =====================\n");
-  apar_ts_packet_info_print(out, copy.packet);
+  ips_ts_platform_georef_t copy = val;
+  ips_ts_platform_georef_swap(copy);
+  fprintf(out, "====================== ips_ts_platform_georef =====================\n");
+  ips_ts_packet_info_print(out, copy.packet);
   fprintf(out, "  longitude: %g\n", copy.longitude);
   fprintf(out, "  latitude: %g\n", copy.latitude);
   fprintf(out, "  unit_num: %d\n", copy.unit_num);
@@ -1581,14 +1587,14 @@ void apar_ts_platform_georef_print(FILE *out,
 //////////////////////////////////////////////////////
 // print georef_correction
 
-void apar_ts_georef_correction_print(FILE *out,
-                                     const apar_ts_georef_correction &val)
+void ips_ts_georef_correction_print(FILE *out,
+                                    const ips_ts_georef_correction &val)
 
 {
 
-  apar_ts_georef_correction_t copy = val;
-  apar_ts_georef_correction_swap(copy);
-  fprintf(out, "==================== apar_ts_georef_correction =====================\n");
+  ips_ts_georef_correction_t copy = val;
+  ips_ts_georef_correction_swap(copy);
+  fprintf(out, "==================== ips_ts_georef_correction =====================\n");
   fprintf(out, "  longitude_corr_deg: %g\n", copy.longitude_corr_deg);
   fprintf(out, "  latitude_corr_deg: %g\n", copy.latitude_corr_deg);
   fprintf(out, "  azimuth_corr_deg: %g\n", copy.azimuth_corr_deg);
@@ -1613,7 +1619,7 @@ void apar_ts_georef_correction_print(FILE *out,
 // Return a string formed safely from a char* array
 // Null-termination of the input string is guaranteed.
 
-string apar_ts_safe_str(const char *str, int maxLen)
+string ips_ts_safe_str(const char *str, int maxLen)
 
 {
 
@@ -1627,7 +1633,7 @@ string apar_ts_safe_str(const char *str, int maxLen)
 
 }
 
-string apar_ts_time_str(const time_t *ptime, si32 *nano_secs)
+string ips_ts_time_str(const time_t *ptime, si32 *nano_secs)
 {
 
   char str1[30]={"                             "};
@@ -1645,7 +1651,7 @@ string apar_ts_time_str(const time_t *ptime, si32 *nano_secs)
 }
 
 ////////////////////////////////////////////////////////
-/// Print format for APAR structs
+/// Print format for IPS structs
 
 static const char *_hform = "%9s %30s %7s %7s\n";
 static const char *_dform = "%9s %30s %7d %7d\n";
@@ -1660,7 +1666,7 @@ static void _print_format_divider(char val, FILE *out)
 }
   
 ////////////////////////////////////////////////////////
-/// Print format of all APAR structs
+/// Print format of all IPS structs
 
 static void _print_format_header(FILE *out)
 {
@@ -1668,69 +1674,69 @@ static void _print_format_header(FILE *out)
   fprintf(out, _hform, "----", "----", "----", "------");
 }
 
-void apar_ts_print_all_formats(FILE *out)
+void ips_ts_print_all_formats(FILE *out)
 {
 
-  fprintf(out, "============= APAR TIME SERIES FORMAT ==================\n");
+  fprintf(out, "============= IPS TIME SERIES FORMAT ==================\n");
 
   {
-    apar_ts_packet_info_t val;
-    apar_ts_packet_info_print_format(out, val);
-  }
-
-  {
-    apar_ts_sync_t val;
-    apar_ts_sync_print_format(out, val);
+    ips_ts_packet_info_t val;
+    ips_ts_packet_info_print_format(out, val);
   }
 
   {
-    apar_ts_version_t val;
-    apar_ts_version_print_format(out, val);
+    ips_ts_sync_t val;
+    ips_ts_sync_print_format(out, val);
   }
 
   {
-    apar_ts_radar_info_t val;
-    apar_ts_radar_info_print_format(out, val);
+    ips_ts_version_t val;
+    ips_ts_version_print_format(out, val);
+  }
+
+  {
+    ips_ts_radar_info_t val;
+    ips_ts_radar_info_print_format(out, val);
   }
   
   {
-    apar_ts_scan_segment_t val;
-    apar_ts_scan_segment_print_format(out, val);
+    ips_ts_scan_segment_t val;
+    ips_ts_scan_segment_print_format(out, val);
   }
   
   {
-    apar_ts_processing_t val;
-    apar_ts_processing_print_format(out, val);
+    ips_ts_processing_t val;
+    ips_ts_processing_print_format(out, val);
   }
   
   {
-    apar_ts_status_xml_t val;
-    apar_ts_status_xml_print_format(out, val);
+    ips_ts_status_xml_t val;
+    ips_ts_status_xml_print_format(out, val);
   }
   
   {
-    apar_ts_calibration_t val;
-    apar_ts_calibration_print_format(out, val);
+    ips_ts_calibration_t val;
+    ips_ts_calibration_print_format(out, val);
   }
   
   {
-    apar_ts_event_notice_t val;
-    apar_ts_event_notice_print_format(out, val);
+    ips_ts_event_notice_t val;
+    ips_ts_event_notice_print_format(out, val);
   }
   
   {
-    apar_ts_pulse_header_t val;
-    apar_ts_pulse_header_print_format(out, val);
+    ips_ts_pulse_header_t val;
+    ips_ts_pulse_header_print_format(out, val);
   }
   
   {
-    apar_ts_platform_georef_t val;
-    apar_ts_platform_georef_print_format(out, val);
+    ips_ts_platform_georef_t val;
+    ips_ts_platform_georef_print_format(out, val);
   }
   
   {
-    apar_ts_georef_correction_t val;
-    apar_ts_georef_correction_print_format(out, val);
+    ips_ts_georef_correction_t val;
+    ips_ts_georef_correction_print_format(out, val);
   }
   
   _print_format_divider('=', out);
@@ -1740,7 +1746,7 @@ void apar_ts_print_all_formats(FILE *out)
 // print basic packet info
 
 void _print_packet_format(FILE *out,
-                          const apar_ts_packet_info_t &pkt)
+                          const ips_ts_packet_info_t &pkt)
 
 {
   
@@ -1760,13 +1766,13 @@ void _print_packet_format(FILE *out,
 
 // print format of packet info
 
-void apar_ts_packet_info_print_format(FILE *out,
-                                      const apar_ts_packet_info_t &val)
+void ips_ts_packet_info_print_format(FILE *out,
+                                     const ips_ts_packet_info_t &val)
 
 {
   
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_packet_info_t'\n");
+  fprintf(out, "  struct: 'ips_ts_packet_info_t'\n");
   fprintf(out, "  included in all packet types\n");
   fprintf(out, "  size: %d\n\n", (int) sizeof(val));
   _print_format_header(out);
@@ -1778,11 +1784,11 @@ void apar_ts_packet_info_print_format(FILE *out,
 
 // print format of sync packet
 
-void apar_ts_sync_print_format(FILE *out, const apar_ts_sync_t &val)
+void ips_ts_sync_print_format(FILE *out, const ips_ts_sync_t &val)
 {
 
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_sync_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), APAR_TS_SYNC_ID);
+  fprintf(out, "  struct: 'ips_ts_sync_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IPS_TS_SYNC_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -1802,14 +1808,14 @@ void apar_ts_sync_print_format(FILE *out, const apar_ts_sync_t &val)
 
 // print format of version packet
 
-void apar_ts_version_print_format(FILE *out,
-                                  const apar_ts_version_t &val)
+void ips_ts_version_print_format(FILE *out,
+                                 const ips_ts_version_t &val)
 
 {
 
   _print_format_divider('-', out);
 
-  fprintf(out, "  struct: 'apar_ts_version_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), APAR_TS_VERSION_ID);
+  fprintf(out, "  struct: 'ips_ts_version_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IPS_TS_VERSION_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -1831,11 +1837,11 @@ void apar_ts_version_print_format(FILE *out,
 
 // print format of radar_info
 
-void apar_ts_radar_info_print_format(FILE *out, const apar_ts_radar_info_t &val)
+void ips_ts_radar_info_print_format(FILE *out, const ips_ts_radar_info_t &val)
 {
 
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_radar_info_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), APAR_TS_RADAR_INFO_ID);
+  fprintf(out, "  struct: 'ips_ts_radar_info_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IPS_TS_RADAR_INFO_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -1869,11 +1875,11 @@ void apar_ts_radar_info_print_format(FILE *out, const apar_ts_radar_info_t &val)
 
 // print format of scan_segment
 
-void apar_ts_scan_segment_print_format(FILE *out, const apar_ts_scan_segment_t &val)
+void ips_ts_scan_segment_print_format(FILE *out, const ips_ts_scan_segment_t &val)
 {
 
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_scan_segment_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), APAR_TS_SCAN_SEGMENT_ID);
+  fprintf(out, "  struct: 'ips_ts_scan_segment_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IPS_TS_SCAN_SEGMENT_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -1920,11 +1926,11 @@ void apar_ts_scan_segment_print_format(FILE *out, const apar_ts_scan_segment_t &
 
 // print format of ts_processing
 
-void apar_ts_processing_print_format(FILE *out, const apar_ts_processing_t &val)
+void ips_ts_processing_print_format(FILE *out, const ips_ts_processing_t &val)
 {
 
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_processing_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), APAR_TS_PROCESSING_ID);
+  fprintf(out, "  struct: 'ips_ts_processing_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IPS_TS_PROCESSING_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -1946,7 +1952,7 @@ void apar_ts_processing_print_format(FILE *out, const apar_ts_processing_t &val)
   fprintf(out, _dform, "si32", "num_prts", sizeof(val.num_prts), (char *) &val.num_prts - id);
 
   char tmpStr[1024];
-  snprintf(tmpStr, 1024, "prt_us[%d]", APAR_TS_MAX_PRT);
+  snprintf(tmpStr, 1024, "prt_us[%d]", IPS_TS_MAX_PRT);
   fprintf(out, _dform, "fl32", tmpStr, sizeof(val.prt_us), (char *) val.prt_us - id);
 
   snprintf(tmpStr, 1024, "unused[%d]", (int) (sizeof(val.unused) / sizeof(fl32)));
@@ -1959,11 +1965,11 @@ void apar_ts_processing_print_format(FILE *out, const apar_ts_processing_t &val)
 
 // print format of status_xml
 
-void apar_ts_status_xml_print_format(FILE *out, const apar_ts_status_xml_t &val)
+void ips_ts_status_xml_print_format(FILE *out, const ips_ts_status_xml_t &val)
 {
 
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_status_xml_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), APAR_TS_STATUS_XML_ID);
+  fprintf(out, "  struct: 'ips_ts_status_xml_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IPS_TS_STATUS_XML_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -1986,11 +1992,11 @@ void apar_ts_status_xml_print_format(FILE *out, const apar_ts_status_xml_t &val)
 
 // print format of calibration
 
-void apar_ts_calibration_print_format(FILE *out, const apar_ts_calibration_t &val)
+void ips_ts_calibration_print_format(FILE *out, const ips_ts_calibration_t &val)
 {
 
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_calibration_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), APAR_TS_CALIBRATION_ID);
+  fprintf(out, "  struct: 'ips_ts_calibration_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IPS_TS_CALIBRATION_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -2091,11 +2097,11 @@ void apar_ts_calibration_print_format(FILE *out, const apar_ts_calibration_t &va
   
 // print format of event_notice
 
-void apar_ts_event_notice_print_format(FILE *out, const apar_ts_event_notice_t &val)
+void ips_ts_event_notice_print_format(FILE *out, const ips_ts_event_notice_t &val)
 {
 
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_event_notice_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), APAR_TS_EVENT_NOTICE_ID);
+  fprintf(out, "  struct: 'ips_ts_event_notice_t'\n  size: %d\n  id: 0x%x\n\n", (int) sizeof(val), IPS_TS_EVENT_NOTICE_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -2126,12 +2132,12 @@ void apar_ts_event_notice_print_format(FILE *out, const apar_ts_event_notice_t &
 
 // print format of pulse_header
 
-void apar_ts_pulse_header_print_format(FILE *out, const apar_ts_pulse_header_t &val)
+void ips_ts_pulse_header_print_format(FILE *out, const ips_ts_pulse_header_t &val)
 {
 
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_pulse_header_t'\n  size: %d\n  id: 0x%x\n\n", 
-          (int) sizeof(val), APAR_TS_PULSE_HEADER_ID);
+  fprintf(out, "  struct: 'ips_ts_pulse_header_t'\n  size: %d\n  id: 0x%x\n\n", 
+          (int) sizeof(val), IPS_TS_PULSE_HEADER_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -2167,7 +2173,7 @@ void apar_ts_pulse_header_print_format(FILE *out, const apar_ts_pulse_header_t &
   fprintf(out, _dform, "fl32", "offset", sizeof(val.offset), (char *) &val.offset - id);
 
   char tmpStr[1024];
-  snprintf(tmpStr, 1024, "chan_is_copol[%d]", APAR_TS_MAX_CHAN);
+  snprintf(tmpStr, 1024, "chan_is_copol[%d]", IPS_TS_MAX_CHAN);
   fprintf(out, _dform, "si32", tmpStr, sizeof(val.chan_is_copol), (char *) val.chan_is_copol - id);
 
   fprintf(out, _dform, "si32", "status", sizeof(val.status), (char *) &val.status - id);
@@ -2182,12 +2188,12 @@ void apar_ts_pulse_header_print_format(FILE *out, const apar_ts_pulse_header_t &
 
 // print format of platform_georef
 
-void apar_ts_platform_georef_print_format(FILE *out, const apar_ts_platform_georef_t &val)
+void ips_ts_platform_georef_print_format(FILE *out, const ips_ts_platform_georef_t &val)
 {
   
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_platform_georef_t'\n  size: %d\n  id: 0x%x\n\n", 
-          (int) sizeof(val), APAR_TS_PLATFORM_GEOREF_ID);
+  fprintf(out, "  struct: 'ips_ts_platform_georef_t'\n  size: %d\n  id: 0x%x\n\n", 
+          (int) sizeof(val), IPS_TS_PLATFORM_GEOREF_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);
@@ -2261,12 +2267,12 @@ void apar_ts_platform_georef_print_format(FILE *out, const apar_ts_platform_geor
 
 // print format of georef_correction
 
-void apar_ts_georef_correction_print_format(FILE *out, const apar_ts_georef_correction_t &val)
+void ips_ts_georef_correction_print_format(FILE *out, const ips_ts_georef_correction_t &val)
 {
   
   _print_format_divider('-', out);
-  fprintf(out, "  struct: 'apar_ts_georef_correction_t'\n  size: %d\n  id: 0x%x\n\n", 
-          (int) sizeof(val), APAR_TS_GEOREF_CORRECTION_ID);
+  fprintf(out, "  struct: 'ips_ts_georef_correction_t'\n  size: %d\n  id: 0x%x\n\n", 
+          (int) sizeof(val), IPS_TS_GEOREF_CORRECTION_ID);
   fprintf(out, "  packet info:\n");
   _print_format_header(out);
   _print_packet_format(out, val.packet);

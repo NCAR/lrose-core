@@ -22,13 +22,15 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparAltModeVel.hh
+// IpsAltModeVel.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Aug 2019
 //
 ///////////////////////////////////////////////////////////////
+//
+// Support for Independent Pulse Sampling.
 //
 // Compute secondary velocity estimate for alternating mode radars,
 // using (a) the alternating mode velocity and (b) the velocity estimated
@@ -40,26 +42,26 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef AparAltModeVel_H
-#define AparAltModeVel_H
+#ifndef IpsAltModeVel_H
+#define IpsAltModeVel_H
 
 #include <string>
 #include <vector>
-#include <radar/AparMomFields.hh>
+#include <radar/IpsMomFields.hh>
 class IwrfCalib;
 using namespace std;
 
-class AparAltModeVel {
+class IpsAltModeVel {
   
 public:
 
   // constructor
   
-  AparAltModeVel ();
+  IpsAltModeVel ();
 
   // destructor
   
-  ~AparAltModeVel();
+  ~IpsAltModeVel();
 
   // compute velAlt
   //
@@ -79,7 +81,7 @@ public:
   //   vel_diff (vel_hv - velAlt)
   
   void computeVelAlt(int nGates,
-                     AparMomFields *mfields,
+                     IpsMomFields *mfields,
                      double nyquist);
 
   // set to load up test fields
@@ -102,7 +104,7 @@ private:
   // moments field data
 
   int _nGates;
-  AparMomFields *_mfields;
+  IpsMomFields *_mfields;
 
   // class for computational fields
 

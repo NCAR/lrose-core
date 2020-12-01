@@ -22,11 +22,15 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AparAltModeVel.cc
+// IpsAltModeVel.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2012
+// Aig 2019
+//
+///////////////////////////////////////////////////////////////
+//
+// Support for Independent Pulse Sampling.
 //
 ///////////////////////////////////////////////////////////////
 //
@@ -40,13 +44,13 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <radar/AparAltModeVel.hh>
-#include <radar/AparTsCalib.hh>
+#include <radar/IpsAltModeVel.hh>
+#include <radar/IpsTsCalib.hh>
 using namespace std;
 
 // Constructor
 
-AparAltModeVel::AparAltModeVel()
+IpsAltModeVel::IpsAltModeVel()
   
 {
   _loadTestFields = false;
@@ -54,7 +58,7 @@ AparAltModeVel::AparAltModeVel()
 
 // destructor
 
-AparAltModeVel::~AparAltModeVel()
+IpsAltModeVel::~IpsAltModeVel()
 
 {
 
@@ -69,9 +73,9 @@ AparAltModeVel::~AparAltModeVel()
 //   vel_hv - velocity from H and V time series
 //   noise_flag - presence of noise
 
-void AparAltModeVel::computeVelAlt(int nGates,
-                                   AparMomFields *mfields,
-                                   double nyquist)
+void IpsAltModeVel::computeVelAlt(int nGates,
+                                  IpsMomFields *mfields,
+                                  double nyquist)
   
 {
   
@@ -111,7 +115,7 @@ void AparAltModeVel::computeVelAlt(int nGates,
   // and velocity from H and V separately, and deduce the folding interval
   
   for (int igate = 0; igate < _nGates; igate++) {
-    const AparMomFields &mfields = _mfields[igate];
+    const IpsMomFields &mfields = _mfields[igate];
     CompFields &cfield = _compFields[igate];
     double velDiff = mfields.vel - mfields.vel_hv;
     cfield.velDiff = velDiff;
@@ -148,7 +152,7 @@ void AparAltModeVel::computeVelAlt(int nGates,
   // set velocity for gates with known interval
 
   for (int igate = 0; igate < _nGates; igate++) {
-    const AparMomFields &mfields = _mfields[igate];
+    const IpsMomFields &mfields = _mfields[igate];
     CompFields &cfield = _compFields[igate];
     if (cfield.unfoldInterval > -9998) {
       double velAlt = mfields.vel_hv + cfield.foldInterval * _nyquist;
@@ -166,7 +170,7 @@ void AparAltModeVel::computeVelAlt(int nGates,
     int startGate = gap.start;
     int endGate = gap.end;
     for (int igate = startGate; igate < endGate; igate++) {
-      const AparMomFields &mfields = _mfields[igate];
+      const IpsMomFields &mfields = _mfields[igate];
       CompFields &cfield = _compFields[igate];
       double velAlt = mfields.vel_hv;
       // constrain between minVel and maxVel
@@ -190,7 +194,7 @@ void AparAltModeVel::computeVelAlt(int nGates,
   // copy computed values over to mfields array
 
   for (int igate = 0; igate < _nGates; igate++) {
-    const AparMomFields &mfields = _mfields[igate];
+    const IpsMomFields &mfields = _mfields[igate];
     CompFields &cfield = _compFields[igate];
     if (mfields.noise_flag) {
       cfield.velAlt = mfields.vel;
@@ -201,7 +205,7 @@ void AparAltModeVel::computeVelAlt(int nGates,
   // and save the original vel as vel_alt
   
   for (int igate = 0; igate < _nGates; igate++) {
-    AparMomFields &mfields = _mfields[igate];
+    IpsMomFields &mfields = _mfields[igate];
     CompFields &cfield = _compFields[igate];
     mfields.vel_alt = mfields.vel;
     mfields.vel = cfield.velAlt;
@@ -223,7 +227,7 @@ void AparAltModeVel::computeVelAlt(int nGates,
 // fix the alternating mode velocity, which oscillates
 // between 0 and the nyquist in clutter
 
-void AparAltModeVel::_fixAltModeVel()
+void IpsAltModeVel::_fixAltModeVel()
 
 {
   
@@ -236,7 +240,7 @@ void AparAltModeVel::_fixAltModeVel()
     if (nyqFrac < 0.05) {
       cfield.velZero = true;
     } else {
-     cfield.velZero = false;
+      cfield.velZero = false;
     }
     if (nyqFrac > 0.95) {
       cfield.velNyquist = true;
@@ -312,7 +316,7 @@ void AparAltModeVel::_fixAltModeVel()
 /////////////////////////////////////////////////////
 // find the gaps which need filling
 
-void AparAltModeVel::_findGapRuns()
+void IpsAltModeVel::_findGapRuns()
 {
   
   _gaps.clear();
@@ -351,7 +355,7 @@ void AparAltModeVel::_findGapRuns()
 // this is done by computing the predominant folding
 // values for the interval
 
-void AparAltModeVel::_computeFoldInterval(GateRun &run)
+void IpsAltModeVel::_computeFoldInterval(GateRun &run)
 {
 
   // include the gate on either side of the run
@@ -374,7 +378,7 @@ void AparAltModeVel::_computeFoldInterval(GateRun &run)
   double nConfidence = 0.0;
   
   for (int igate = startGate; igate <= endGate; igate++){
-    const AparMomFields &mfields = _mfields[igate];
+    const IpsMomFields &mfields = _mfields[igate];
     CompFields &cfield = _compFields[igate];
     double ifold = cfield.foldInterval;
     double confidence = cfield.foldConfidence;
@@ -433,7 +437,7 @@ void AparAltModeVel::_computeFoldInterval(GateRun &run)
 /////////////////////////////////////////////////////
 // Check for bad fold in a run, fix if appropriate
 
-void AparAltModeVel::_correctBadFold(GateRun &run)
+void IpsAltModeVel::_correctBadFold(GateRun &run)
 {
   
   // we only look for the 'intermediate' folds, i.e. those

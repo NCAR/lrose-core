@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AparGateData.cc
+// IpsGateData.cc
 //
 // Container for memory for IQ gate data.
 //
@@ -32,19 +32,21 @@
 //
 ////////////////////////////////////////////////////////////////
 //
+// Support for Independent Pulse Sampling.
+//
 // Field data and IQ data for a single gate.
 //
 ////////////////////////////////////////////////////////////////
 
 #include <iostream>
-#include <radar/AparGateData.hh>
+#include <radar/IpsGateData.hh>
 using namespace std;
 
 // Default constructor.
 // Initializes all arrays to NULL.
 // Call allocArrays() before using.
 
-AparGateData::AparGateData() :
+IpsGateData::IpsGateData() :
         flds(fields)
 
 {
@@ -58,7 +60,7 @@ AparGateData::AparGateData() :
 
 // destructor
 
-AparGateData::~AparGateData()
+IpsGateData::~IpsGateData()
 
 {
   _freeArrays();
@@ -66,7 +68,7 @@ AparGateData::~AparGateData()
 
 // clear the field data
 
-void AparGateData::initFields()
+void IpsGateData::initFields()
 
 {
   fields.init();
@@ -75,7 +77,7 @@ void AparGateData::initFields()
 //////////////////////////////////////
 // init arrays to NULL
 
-void AparGateData::_initArraysToNull()
+void IpsGateData::_initArraysToNull()
 
 {
 
@@ -104,8 +106,8 @@ void AparGateData::_initArraysToNull()
 // On object allocated in this way can be used for any
 // computation in any mode.
 
-void AparGateData::allocArrays(int nSamples, 
-                               bool isStagPrt)
+void IpsGateData::allocArrays(int nSamples, 
+                              bool isStagPrt)
 
 {
 
@@ -166,7 +168,7 @@ void AparGateData::allocArrays(int nSamples,
 ///////////////////////////////////////////////////
 // free up all field arrays
 
-void AparGateData::_freeArrays()
+void IpsGateData::_freeArrays()
 
 {
 

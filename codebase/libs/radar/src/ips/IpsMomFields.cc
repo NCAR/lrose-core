@@ -22,24 +22,28 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparMomFields.cc
+// IpsMomFields.cc
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Sept 2006
+// Aug 2019
+//
+///////////////////////////////////////////////////////////////
+//
+// Support for Independent Pulse Sampling.
 //
 ///////////////////////////////////////////////////////////////
 
-#include <radar/AparMomFields.hh>
+#include <radar/IpsMomFields.hh>
 #include <cmath>
 #include <cstring>
 
-const double AparMomFields::missingDouble = -9999;
+const double IpsMomFields::missingDouble = -9999;
 
 // constructor
 
-AparMomFields::AparMomFields()
+IpsMomFields::IpsMomFields()
 
 {
 
@@ -49,7 +53,7 @@ AparMomFields::AparMomFields()
 
 // Initialize to missing
 
-void AparMomFields::init()
+void IpsMomFields::init()
 
 {
   
@@ -112,7 +116,7 @@ void AparMomFields::init()
   snrvc = missingDouble;
   snrvx = missingDouble;
 
- // uncalibrated power
+  // uncalibrated power
 
   dbm = missingDouble;
   dbmhc = missingDouble;

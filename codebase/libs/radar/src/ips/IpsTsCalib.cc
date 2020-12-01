@@ -33,7 +33,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-// The convention in APAR is that the radar constant is positive.
+// Support for Independent Pulse Sampling.
+//
+// The convention in IPS is that the radar constant is positive.
 // 
 // Computing radar constant:
 //
@@ -67,9 +69,9 @@
 #include <toolsa/TaStr.hh>
 #include <toolsa/file_io.h>
 #include <toolsa/ugetenv.hh>
-#include <radar/AparTsCalib.hh>
+#include <radar/IpsTsCalib.hh>
 #include <radar/RadarCalib.hh>
-#include <radar/apar_ts_functions.hh>
+#include <radar/ips_ts_functions.hh>
 #include <rapformats/DsRadarCalib.hh>
 #include <Radx/RadxRcalib.hh>
 #include <iostream>
@@ -77,20 +79,20 @@
 #include <cerrno>
 using namespace std;
 
-double AparTsCalib::LightSpeedMps = 2.99792458e8;
+double IpsTsCalib::LightSpeedMps = 2.99792458e8;
 
 ///////////////
 // constructor
 
-AparTsCalib::AparTsCalib()
+IpsTsCalib::IpsTsCalib()
 {
-  apar_ts_calibration_init(_calib);
+  ips_ts_calibration_init(_calib);
 }
 
 /////////////
 // destructor
 
-AparTsCalib::~AparTsCalib()
+IpsTsCalib::~IpsTsCalib()
 {
 }
 
@@ -99,18 +101,18 @@ AparTsCalib::~AparTsCalib()
 //
 // Compare with missing val
 
-bool AparTsCalib::isMissing(fl32 val)
+bool IpsTsCalib::isMissing(fl32 val)
 {
-  return apar_ts_float_is_missing(val);
+  return ips_ts_float_is_missing(val);
 }
 
 ////////////////////////////////////////
 // Adjust based on pulse width and power.
 // NOTE - this assumes a positive radar constant.
 
-void AparTsCalib::adjustRadarConst(double pulseWidthUs,
-                                 double xmitPowerDbmH,
-                                 double xmitPowerDbmV)
+void IpsTsCalib::adjustRadarConst(double pulseWidthUs,
+                                  double xmitPowerDbmH,
+                                  double xmitPowerDbmV)
 
 {
 
@@ -196,15 +198,15 @@ void AparTsCalib::adjustRadarConst(double pulseWidthUs,
 /////////////////////
 // set the radar name
 
-void AparTsCalib::setRadarName(const string &name)
+void IpsTsCalib::setRadarName(const string &name)
 {
-  STRncopy(_calib.radar_name, name.c_str(), APAR_TS_MAX_RADAR_NAME);
+  STRncopy(_calib.radar_name, name.c_str(), IPS_TS_MAX_RADAR_NAME);
 }
 
 ///////////////////////////
 // set the calibration time
 
-void AparTsCalib::setCalibTime(time_t calTime)
+void IpsTsCalib::setCalibTime(time_t calTime)
 {
   _calib.packet.time_secs_utc = calTime;
 }
@@ -212,16 +214,16 @@ void AparTsCalib::setCalibTime(time_t calTime)
 //////////////////
 // set from struct
 
-void AparTsCalib::set(const apar_ts_calibration_t &calib)
+void IpsTsCalib::set(const ips_ts_calibration_t &calib)
 {
   _calib = calib;
-  apar_ts_calibration_swap(_calib);
+  ips_ts_calibration_swap(_calib);
 }
 
 ///////////////////////////
 // get the radar name
 
-string AparTsCalib::getRadarName() const
+string IpsTsCalib::getRadarName() const
 {
   return _calib.radar_name;
 }
@@ -229,7 +231,7 @@ string AparTsCalib::getRadarName() const
 ///////////////////////////
 // get the calibration time
 
-time_t AparTsCalib::getCalibTime() const
+time_t IpsTsCalib::getCalibTime() const
 {
   return _calib.packet.time_secs_utc;
 }
@@ -237,11 +239,11 @@ time_t AparTsCalib::getCalibTime() const
 ////////////////////////////////////////////
 // convert to XML - load up xml string
 
-void AparTsCalib::convert2Xml(string &xml)  const
+void IpsTsCalib::convert2Xml(string &xml)  const
 {
 
   xml.clear();
-  xml += TaXml::writeStartTag("AparTsCalib", 0);
+  xml += TaXml::writeStartTag("IpsTsCalib", 0);
 
   // name
 
@@ -321,7 +323,7 @@ void AparTsCalib::convert2Xml(string &xml)  const
   xml += TaXml::writeDouble("testPowerDbmH", 1, _calib.test_power_dbm_h);
   xml += TaXml::writeDouble("testPowerDbmV", 1, _calib.test_power_dbm_v);
 
-  xml += TaXml::writeEndTag("AparTsCalib", 0);
+  xml += TaXml::writeEndTag("IpsTsCalib", 0);
 }
 
 ////////////////////////////////////////////
@@ -330,10 +332,10 @@ void AparTsCalib::convert2Xml(string &xml)  const
 // Returns 0 on success, -1 on failure
 // Sets errStr on failure
 
-int AparTsCalib::setFromXml(const string &xmlBuf, string &errStr)
+int IpsTsCalib::setFromXml(const string &xmlBuf, string &errStr)
 {
 
-  apar_ts_calibration_init(_calib);
+  ips_ts_calibration_init(_calib);
 
   int iret = 0;
   string xbuf = TaXml::removeComments(xmlBuf);
@@ -608,11 +610,11 @@ int AparTsCalib::setFromXml(const string &xmlBuf, string &errStr)
 // Returns 0 on success, -1 on failure
 // Sets errStr on failure
 
-int AparTsCalib::readFromXmlFile(const string &calPath, string &errStr)
+int IpsTsCalib::readFromXmlFile(const string &calPath, string &errStr)
 
 {
 
-  errStr = "ERROR - AparTsCalib::_readFromXmlFile\n";
+  errStr = "ERROR - IpsTsCalib::_readFromXmlFile\n";
 
   // Stat the file to get length
   
@@ -666,7 +668,7 @@ int AparTsCalib::readFromXmlFile(const string &calPath, string &errStr)
 //////////////////////////////////////////////////////////////
 // override from struct, if struct member data is not missing
 
-void AparTsCalib::overrideFromStruct(const apar_ts_calibration_t &calib)
+void IpsTsCalib::overrideFromStruct(const ips_ts_calibration_t &calib)
 {
 
   if (!isMissing(calib.wavelength_cm)) {
@@ -845,17 +847,17 @@ void AparTsCalib::overrideFromStruct(const apar_ts_calibration_t &calib)
 
 // get methods
 
-double AparTsCalib::getWavelengthCm() const
+double IpsTsCalib::getWavelengthCm() const
 {
   return _calib.wavelength_cm;
 }
 
-double AparTsCalib::getWavelengthM() const
+double IpsTsCalib::getWavelengthM() const
 {
   return _calib.wavelength_cm / 100.0;
 }
 
-double AparTsCalib::getFrequencyHz() const
+double IpsTsCalib::getFrequencyHz() const
 {
   double wavelengthM = _calib.wavelength_cm / 100.0;
   double freqHz = LightSpeedMps / wavelengthM;
@@ -863,10 +865,10 @@ double AparTsCalib::getFrequencyHz() const
 }
 
 void
-AparTsCalib::print(ostream &out)  const
+  IpsTsCalib::print(ostream &out)  const
 {
    
-  out << "APAR CALIB" << endl;
+  out << "IPS CALIB" << endl;
   out << "----------" << endl;
    
   DateTime ctime(_calib.packet.time_secs_utc);

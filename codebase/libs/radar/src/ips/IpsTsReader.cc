@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// AparTsReader.cc
+// IpsTsReader.cc
 //
-// AparTsReader object
+// IpsTsReader object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,20 +32,22 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// AparTsReader reads radar time series data
+// Support for Independent Pulse Sampling.
+//
+// IpsTsReader reads radar time series data
 //
 ////////////////////////////////////////////////////////////////
 
 #include <cerrno>
 #include <iostream>
 #include <dataport/swap.h>
-#include <radar/AparTsReader.hh>
+#include <radar/IpsTsReader.hh>
 using namespace std;
 
 ////////////////////////////////////////////////////
 // Base class
 
-AparTsReader::AparTsReader(AparTsDebug_t debug) :
+IpsTsReader::IpsTsReader(IpsTsDebug_t debug) :
         _debug(debug)
   
 {
@@ -66,7 +68,7 @@ AparTsReader::AparTsReader(AparTsDebug_t debug) :
 //////////////////////////////////////////////////////////////////
 // destructor
 
-AparTsReader::~AparTsReader()
+IpsTsReader::~IpsTsReader()
 
 {
 
@@ -75,7 +77,7 @@ AparTsReader::~AparTsReader()
 //////////////////////////////////////////////////////////////////
 // reset - used for sim mode
 
-void AparTsReader::reset()
+void IpsTsReader::reset()
 
 {
   _pulseSeqNumLatestPulse = 0;
@@ -85,7 +87,7 @@ void AparTsReader::reset()
 
 // check to see if the ops info has changed since the previous pulse
 
-bool AparTsReader::isOpsInfoNew() const
+bool IpsTsReader::isOpsInfoNew() const
 
 {
 
@@ -105,7 +107,7 @@ bool AparTsReader::isOpsInfoNew() const
 //////////////////////////////////////////////////////////////////
 // set event flags on the pulse
 
-void AparTsReader::_setEventFlags(AparTsPulse &pulse)
+void IpsTsReader::_setEventFlags(IpsTsPulse &pulse)
 
 {
 
@@ -129,7 +131,7 @@ void AparTsReader::_setEventFlags(AparTsPulse &pulse)
 //////////////////////////////////////////////////////////////////
 // set platform georef on pulse
 
-void AparTsReader::_setPlatformGeoref(AparTsPulse &pulse)
+void IpsTsReader::_setPlatformGeoref(IpsTsPulse &pulse)
 
 {
 
@@ -137,8 +139,8 @@ void AparTsReader::_setPlatformGeoref(AparTsPulse &pulse)
 
   if (_georefUseSecondary &&
       _opsInfo.isPlatformGeoref1Active()) {
-    const apar_ts_platform_georef_t &georef1 = _opsInfo.getPlatformGeoref1();
-    double gtime = apar_ts_get_packet_time_as_double(georef1.packet);
+    const ips_ts_platform_georef_t &georef1 = _opsInfo.getPlatformGeoref1();
+    double gtime = ips_ts_get_packet_time_as_double(georef1.packet);
     double ptime = pulse.getFTime();
     double dtime = fabs(gtime - ptime);
     if (dtime <= _georefTimeMarginSecs) {
@@ -150,8 +152,8 @@ void AparTsReader::_setPlatformGeoref(AparTsPulse &pulse)
   // use primary if active
 
   if (_opsInfo.isPlatformGeorefActive()) {
-    const apar_ts_platform_georef_t &georef = _opsInfo.getPlatformGeoref();
-    double gtime = apar_ts_get_packet_time_as_double(georef.packet);
+    const ips_ts_platform_georef_t &georef = _opsInfo.getPlatformGeoref();
+    double gtime = ips_ts_get_packet_time_as_double(georef.packet);
     double ptime = pulse.getFTime();
     double dtime = fabs(gtime - ptime);
     if (dtime <= _georefTimeMarginSecs) {
@@ -164,7 +166,7 @@ void AparTsReader::_setPlatformGeoref(AparTsPulse &pulse)
 //////////////////////////////////////////////////////////////////
 // update the pulse data and metadata as appropriate
 
-void AparTsReader::_updatePulse(AparTsPulse &pulse)
+void IpsTsReader::_updatePulse(IpsTsPulse &pulse)
 
 {
   
@@ -185,17 +187,17 @@ void AparTsReader::_updatePulse(AparTsPulse &pulse)
 // Blocks on read.
 // Calls heartbeat_func when blocked, if non-null.
 
-AparTsReaderFile::AparTsReaderFile(const char *input_dir,
-				   int max_realtime_age_secs,
-				   DsInput_heartbeat_t heartbeat_func,
-				   bool use_ldata_info,
-				   AparTsDebug_t debug) :
-        AparTsReader(debug)
+IpsTsReaderFile::IpsTsReaderFile(const char *input_dir,
+                                 int max_realtime_age_secs,
+                                 DsInput_heartbeat_t heartbeat_func,
+                                 bool use_ldata_info,
+                                 IpsTsDebug_t debug) :
+        IpsTsReader(debug)
 
 {
   
-  _input = new DsInputPath("AparTsReaderFile",
-                           _debug >= AparTsDebug_t::NORM,
+  _input = new DsInputPath("IpsTsReaderFile",
+                           _debug >= IpsTsDebug_t::NORM,
                            input_dir,
                            max_realtime_age_secs,
                            heartbeat_func,
@@ -207,18 +209,18 @@ AparTsReaderFile::AparTsReaderFile(const char *input_dir,
 
 // ARCHIVE mode - specify list of files to be read
 
-AparTsReaderFile::AparTsReaderFile(const vector<string> &fileList,
-				   AparTsDebug_t debug) :
-        AparTsReader(debug),
+IpsTsReaderFile::IpsTsReaderFile(const vector<string> &fileList,
+                                 IpsTsDebug_t debug) :
+        IpsTsReader(debug),
         _fileList(fileList)
   
 {
   
-  _input = new DsInputPath("AparTsReaderFile", (debug != AparTsDebug_t::OFF),
+  _input = new DsInputPath("IpsTsReaderFile", (debug != IpsTsDebug_t::OFF),
                            _fileList);
   _in = NULL;
-  if (_debug != AparTsDebug_t::OFF) {
-    cerr << "INFO - AparTsReaderFile" << endl;
+  if (_debug != IpsTsDebug_t::OFF) {
+    cerr << "INFO - IpsTsReaderFile" << endl;
     const vector<string> &pathList = _input->getPathList();
     for (size_t ii = 0; ii < pathList.size(); ii++) {
       cerr << "  using file: " << pathList[ii] << endl;
@@ -230,7 +232,7 @@ AparTsReaderFile::AparTsReaderFile(const vector<string> &fileList,
 //////////////////////////////////////////////////////////////////
 // destructor
 
-AparTsReaderFile::~AparTsReaderFile()
+IpsTsReaderFile::~IpsTsReaderFile()
 
 {
 
@@ -259,17 +261,17 @@ AparTsReaderFile::~AparTsReaderFile()
 //   pointer to pulse object.
 //   NULL at end of data, or error.
 
-AparTsPulse*
-  AparTsReaderFile::getNextPulse(bool convertToFloats /* = false */,
-                                 AparTsPulse *inPulse /* = NULL*/)
+IpsTsPulse*
+  IpsTsReaderFile::getNextPulse(bool convertToFloats /* = false */,
+                                IpsTsPulse *inPulse /* = NULL*/)
   
 {
   
   // Create a new pulse object if required
   
-  AparTsPulse *pulse = inPulse;
+  IpsTsPulse *pulse = inPulse;
   if (pulse == NULL) {
-    pulse = new AparTsPulse(_opsInfo, _debug);
+    pulse = new IpsTsPulse(_opsInfo, _debug);
   } else {
     pulse->setOpsInfo(_opsInfo);
     pulse->setDebug(_debug);
@@ -300,7 +302,7 @@ AparTsPulse*
 	pulse->convertToFL32();
       }
       _updatePulse(*pulse);
-      if (_debug >= AparTsDebug_t::VERBOSE) {
+      if (_debug >= IpsTsDebug_t::VERBOSE) {
         pulse->printHeader(stderr);
       }
       _setEventFlags(*pulse);
@@ -310,8 +312,8 @@ AparTsPulse*
     
     // failure with this file
     
-    if ((_debug != AparTsDebug_t::OFF) && !feof(_in)) {
-      cerr << "ERROR - AparTsReader::_processFile" << endl;
+    if ((_debug != IpsTsDebug_t::OFF) && !feof(_in)) {
+      cerr << "ERROR - IpsTsReader::_processFile" << endl;
       cerr << "  Cannot read in pulse headers and data" << endl;
       cerr << "  File: " << _inputPath << endl;
     }
@@ -341,7 +343,7 @@ AparTsPulse*
 //
 // Returns 0 on success, -1 on failure
 
-int AparTsReaderFile::_openNextFile()
+int IpsTsReaderFile::_openNextFile()
 
 {
 
@@ -361,7 +363,7 @@ int AparTsReaderFile::_openNextFile()
   }
   _inputPath = inputPath;
 
-  if (_debug != AparTsDebug_t::OFF) {
+  if (_debug != IpsTsDebug_t::OFF) {
     cerr << "Opening input file: " << _inputPath << endl;
   }
 
@@ -369,7 +371,7 @@ int AparTsReaderFile::_openNextFile()
   
   if ((_in = fopen(_inputPath.c_str(), "r")) == NULL) {
     int errNum = errno;
-    cerr << "ERROR - AparTsReaderFile::_openNextFile" << endl;
+    cerr << "ERROR - IpsTsReaderFile::_openNextFile" << endl;
     cerr << "  Cannot open file: " << _inputPath << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -383,7 +385,7 @@ int AparTsReaderFile::_openNextFile()
 // read next pulse from file
 // returns 0 on success, -1 on error
 
-int AparTsReaderFile::_readPulse(AparTsPulse &pulse)
+int IpsTsReaderFile::_readPulse(IpsTsPulse &pulse)
   
 {
   
@@ -400,17 +402,17 @@ int AparTsReaderFile::_readPulse(AparTsPulse &pulse)
       return -1;
     }
 
-    // is this an APAR TS packet?
+    // is this an IPS TS packet?
     
     si32 packetId = packetTop[0];
     si32 packetLen = packetTop[1];
 
-    if (_debug >= AparTsDebug_t::VERBOSE) {
+    if (_debug >= IpsTsDebug_t::VERBOSE) {
       fprintf(stderr, "Found packet, id, len: 0x%x, %d\n",
               packetId, packetLen);
     }
     
-    if (apar_ts_check_packet_id(packetId, packetLen)) {
+    if (ips_ts_check_packet_id(packetId, packetLen)) {
       if (_resync()) {
 	return -1;
       }
@@ -418,7 +420,7 @@ int AparTsReaderFile::_readPulse(AparTsPulse &pulse)
     }
     
     if (packetLen > 10000000) {
-      cerr << "ERROR - AparTsReaderFile::_readPulse" << endl;
+      cerr << "ERROR - IpsTsReaderFile::_readPulse" << endl;
       cerr << "  Packet too long, len: " << packetLen << endl;
       cerr << "  Packet id: " << packetId << endl;
       return -1;
@@ -434,15 +436,15 @@ int AparTsReaderFile::_readPulse(AparTsPulse &pulse)
       return -1;
     }
 
-    if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
+    if (_debug >= IpsTsDebug_t::EXTRAVERBOSE) {
       cerr << "======================================================" << endl;
-      apar_ts_packet_print(stderr, _pktBuf.getPtr(), _pktBuf.getLen());
+      ips_ts_packet_print(stderr, _pktBuf.getPtr(), _pktBuf.getLen());
       cerr << "======================================================" << endl;
     }
 
     // check radar id
     
-    if (!apar_ts_check_radar_id(_pktBuf.getPtr(), _pktBuf.getLen(), _radarId)) {
+    if (!ips_ts_check_radar_id(_pktBuf.getPtr(), _pktBuf.getLen(), _radarId)) {
       continue;
     }
 
@@ -454,11 +456,11 @@ int AparTsReaderFile::_readPulse(AparTsPulse &pulse)
 	return -1;
       }
 
-      if (_debug >= AparTsDebug_t::VERBOSE) {
+      if (_debug >= IpsTsDebug_t::VERBOSE) {
         _opsInfo.print(stderr);
       }
 
-    } else if (packetId == APAR_TS_PULSE_HEADER_ID) {
+    } else if (packetId == IPS_TS_PULSE_HEADER_ID) {
 
       if (pulse.setFromBuffer(_pktBuf.getPtr(), _pktBuf.getLen(), false)) {
 	return -1;
@@ -482,11 +484,11 @@ int AparTsReaderFile::_readPulse(AparTsPulse &pulse)
 // re-sync the data stream
 // returns 0 on success, -1 on error
 
-int AparTsReaderFile::_resync()
+int IpsTsReaderFile::_resync()
   
 {
 
-  if (_debug != AparTsDebug_t::OFF) {
+  if (_debug != IpsTsDebug_t::OFF) {
     cerr << "Trying to resync ....." << endl;
   }
   
@@ -500,10 +502,10 @@ int AparTsReaderFile::_resync()
       return -1;
     }
 
-    if (check[0] == APAR_TS_SYNC_VAL_00 &&
-	check[1] == APAR_TS_SYNC_VAL_01) {
+    if (check[0] == IPS_TS_SYNC_VAL_00 &&
+	check[1] == IPS_TS_SYNC_VAL_01) {
       // back in sync
-      if (_debug != AparTsDebug_t::OFF) {
+      if (_debug != IpsTsDebug_t::OFF) {
 	cerr << "Found sync packet, back in sync" << endl;
       }
       return 0;
@@ -514,7 +516,7 @@ int AparTsReaderFile::_resync()
 	_opsInfo.isInfo(swapped)) {
       // found start of a packet
       // seek back 8 bytes, so we are back to the top of packet
-      if (_debug != AparTsDebug_t::OFF) {
+      if (_debug != IpsTsDebug_t::OFF) {
 	cerr << "Found top of packet, back in sync" << endl;
       }
       if (fseek(_in, -8L, SEEK_CUR)) {
@@ -538,7 +540,7 @@ int AparTsReaderFile::_resync()
 //////////////////////////////////////////////////////////////////
 // reset - used for sim mode
 
-void AparTsReaderFile::reset()
+void IpsTsReaderFile::reset()
 
 {
   if (_input) {
@@ -548,13 +550,13 @@ void AparTsReaderFile::reset()
     fclose(_in);
     _in = NULL;
   } 
-  AparTsReader::reset();
+  IpsTsReader::reset();
 }
 
 //////////////////////////////////////////////////////////////////
 // seek to end - no op in file mode
 
-void AparTsReaderFile::seekToEnd()
+void IpsTsReaderFile::seekToEnd()
 
 {
 }
@@ -564,10 +566,10 @@ void AparTsReaderFile::seekToEnd()
 // Read pulses from FMQ
 // Derived class
 
-AparTsReaderFmq::AparTsReaderFmq(const char *input_fmq,
-				 AparTsDebug_t debug,
-				 bool position_fmq_at_start) :
-        AparTsReader(debug),
+IpsTsReaderFmq::IpsTsReaderFmq(const char *input_fmq,
+                               IpsTsDebug_t debug,
+                               bool position_fmq_at_start) :
+        IpsTsReader(debug),
         _inputFmq(input_fmq),
         _positionFmqAtStart(position_fmq_at_start)
   
@@ -580,7 +582,7 @@ AparTsReaderFmq::AparTsReaderFmq(const char *input_fmq,
 //////////////////////////////////////////////////////////////////
 // destructor
 
-AparTsReaderFmq::~AparTsReaderFmq()
+IpsTsReaderFmq::~IpsTsReaderFmq()
 
 {
 
@@ -600,17 +602,17 @@ AparTsReaderFmq::~AparTsReaderFmq()
 //   pointer to pulse object.
 //   NULL at end of data, or error.
 
-AparTsPulse*
-  AparTsReaderFmq::getNextPulse(bool convertToFloats /* = false */,
-                                AparTsPulse *inPulse /* = NULL*/)
+IpsTsPulse*
+  IpsTsReaderFmq::getNextPulse(bool convertToFloats /* = false */,
+                               IpsTsPulse *inPulse /* = NULL*/)
   
 {
   
   // Create pulse object as needed
   
-  AparTsPulse *pulse = inPulse;
+  IpsTsPulse *pulse = inPulse;
   if (pulse == NULL) {
-    pulse = new AparTsPulse(_opsInfo, _debug);
+    pulse = new IpsTsPulse(_opsInfo, _debug);
   } else {
     pulse->setOpsInfo(_opsInfo);
     pulse->setDebug(_debug);
@@ -625,13 +627,13 @@ AparTsPulse*
       return NULL;
     }
     
-    if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
-      apar_ts_packet_print(stderr, _part->getBuf(), _part->getLength());
+    if (_debug >= IpsTsDebug_t::EXTRAVERBOSE) {
+      ips_ts_packet_print(stderr, _part->getBuf(), _part->getLength());
     }
 
     // check radar id
 
-    if (!apar_ts_check_radar_id(_part->getBuf(), _part->getLength(), _radarId)) {
+    if (!ips_ts_check_radar_id(_part->getBuf(), _part->getLength(), _radarId)) {
       continue;
     }
 
@@ -654,7 +656,7 @@ AparTsPulse*
     
     // check radar id
     
-    if (!apar_ts_check_radar_id(_part->getBuf(), _part->getLength(), _radarId)) {
+    if (!ips_ts_check_radar_id(_part->getBuf(), _part->getLength(), _radarId)) {
       continue;
     }
 
@@ -666,11 +668,11 @@ AparTsPulse*
       
       _opsInfo.setFromBuffer((void *) _part->getBuf(), _part->getLength());
       
-      if (_debug >= AparTsDebug_t::VERBOSE) {
+      if (_debug >= IpsTsDebug_t::VERBOSE) {
         _opsInfo.print(stderr);
       }
 
-    } else if (partType == APAR_TS_PULSE_HEADER_ID) {
+    } else if (partType == IPS_TS_PULSE_HEADER_ID) {
       
       if (pulse->setFromBuffer((void *) _part->getBuf(),
                                _part->getLength(), convertToFloats) == 0) {
@@ -699,7 +701,7 @@ AparTsPulse*
 //
 // Returns 0 on success, -1 on failure
 
-int AparTsReaderFmq::_getNextPart()
+int IpsTsReaderFmq::_getNextPart()
   
 {
 
@@ -720,19 +722,19 @@ int AparTsReaderFmq::_getNextPart()
     int iret = 0;
     if (_nonBlocking) {
       iret = _fmq.initReadOnly(_inputFmq.c_str(),
-                               "AparTsReader",
-                               _debug >= AparTsDebug_t::NORM,
+                               "IpsTsReader",
+                               _debug >= IpsTsDebug_t::NORM,
                                initPos, 
                                _msecsWait);
     } else {
       iret = _fmq.initReadBlocking(_inputFmq.c_str(),
-                                   "AparTsReader",
-                                   _debug >= AparTsDebug_t::NORM,
+                                   "IpsTsReader",
+                                   _debug >= IpsTsDebug_t::NORM,
                                    initPos);
     }
     
     if (iret) {
-      cerr << "ERROR - AparTsReaderFmq::_getNextPart" << endl;
+      cerr << "ERROR - IpsTsReaderFmq::_getNextPart" << endl;
       cerr << "  Cannot init FMQ for reading" << endl;
       cerr << "  Fmq: " << _inputFmq << endl;
       cerr << _fmq.getErrStr() << endl;
@@ -766,7 +768,7 @@ int AparTsReaderFmq::_getNextPart()
       }
     }
 
-    if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
+    if (_debug >= IpsTsDebug_t::EXTRAVERBOSE) {
       cerr << "--->> Got FMQ message" << endl;
     }
 
@@ -791,10 +793,10 @@ int AparTsReaderFmq::_getNextPart()
 //////////////////////////////////////////////////////////////////
 // handle FMQ read error
 
-void AparTsReaderFmq::_handleReadError()
+void IpsTsReaderFmq::_handleReadError()
   
 {
-  cerr << "ERROR - AparTsReaderFmq::_getNextPart" << endl;
+  cerr << "ERROR - IpsTsReaderFmq::_getNextPart" << endl;
   cerr << "  Cannot read message from FMQ" << endl;
   cerr << "  Fmq: " << _inputFmq << endl;
   cerr << _fmq.getErrStr() << endl;
@@ -805,17 +807,17 @@ void AparTsReaderFmq::_handleReadError()
 //////////////////////////////////////////////////////////////////
 // reset - used for sim mode
 
-void AparTsReaderFmq::reset()
+void IpsTsReaderFmq::reset()
 
 {
   _fmq.seek(Fmq::FMQ_SEEK_START);
-  AparTsReader::reset();
+  IpsTsReader::reset();
 }
 
 //////////////////////////////////////////////////////////////////
 // seek to end
 
-void AparTsReaderFmq::seekToEnd()
+void IpsTsReaderFmq::seekToEnd()
 
 {
   _fmq.seek(Fmq::FMQ_SEEK_END);
@@ -826,10 +828,10 @@ void AparTsReaderFmq::seekToEnd()
 // Read pulses from TCP socket
 // Derived class
 
-AparTsReaderTcp::AparTsReaderTcp(const char *server_host,
-                                 int server_port,
-                                 AparTsDebug_t debug) :
-        AparTsReader(debug),
+IpsTsReaderTcp::IpsTsReaderTcp(const char *server_host,
+                               int server_port,
+                               IpsTsDebug_t debug) :
+        IpsTsReader(debug),
         _serverHost(server_host),
         _serverPort(server_port)
         
@@ -844,7 +846,7 @@ AparTsReaderTcp::AparTsReaderTcp(const char *server_host,
 //////////////////////////////////////////////////////////////////
 // destructor
 
-AparTsReaderTcp::~AparTsReaderTcp()
+IpsTsReaderTcp::~IpsTsReaderTcp()
 
 {
   _sock.close();
@@ -864,17 +866,17 @@ AparTsReaderTcp::~AparTsReaderTcp()
 //   pointer to pulse object.
 //   NULL at end of data, or error.
 
-AparTsPulse*
-  AparTsReaderTcp::getNextPulse(bool convertToFloats /* = false */,
-                                AparTsPulse *inPulse /* = NULL*/)
+IpsTsPulse*
+  IpsTsReaderTcp::getNextPulse(bool convertToFloats /* = false */,
+                               IpsTsPulse *inPulse /* = NULL*/)
   
 {
   
   // Create pulse object as needed
   
-  AparTsPulse *pulse = inPulse;
+  IpsTsPulse *pulse = inPulse;
   if (pulse == NULL) {
-    pulse = new AparTsPulse(_opsInfo, _debug);
+    pulse = new IpsTsPulse(_opsInfo, _debug);
   } else {
     pulse->setOpsInfo(_opsInfo);
     pulse->setDebug(_debug);
@@ -892,13 +894,13 @@ AparTsPulse*
       return NULL;
     }
     
-    if (_debug >= AparTsDebug_t::EXTRAVERBOSE) {
-      apar_ts_packet_print(stderr, buf.getPtr(), buf.getLen());
+    if (_debug >= IpsTsDebug_t::EXTRAVERBOSE) {
+      ips_ts_packet_print(stderr, buf.getPtr(), buf.getLen());
     }
 
     // check radar id
     
-    if (!apar_ts_check_radar_id(buf.getPtr(), buf.getLen(), _radarId)) {
+    if (!ips_ts_check_radar_id(buf.getPtr(), buf.getLen(), _radarId)) {
       continue;
     }
 
@@ -921,7 +923,7 @@ AparTsPulse*
     
     // check radar id
     
-    if (!apar_ts_check_radar_id(buf.getPtr(), buf.getLen(), _radarId)) {
+    if (!ips_ts_check_radar_id(buf.getPtr(), buf.getLen(), _radarId)) {
       continue;
     }
 
@@ -931,7 +933,7 @@ AparTsPulse*
       
       _opsInfo.setFromBuffer(buf.getPtr(), buf.getLen());
       
-    } else if (packetId == APAR_TS_PULSE_HEADER_ID) {
+    } else if (packetId == IPS_TS_PULSE_HEADER_ID) {
       
       if (pulse->setFromBuffer(buf.getPtr(), buf.getLen(),
                                convertToFloats) == 0) {
@@ -959,7 +961,7 @@ AparTsPulse*
 // open the socket to the server
 // Returns 0 on success, -1 on failure
 
-int AparTsReaderTcp::_openSocket()
+int IpsTsReaderTcp::_openSocket()
   
 {
 
@@ -979,11 +981,11 @@ int AparTsReaderTcp::_openSocket()
     }
 
     if (_sock.getErrNum() == Socket::TIMED_OUT) {
-      cerr << "ERROR - AparTsReaderTcp::_openSocket()" << endl;
+      cerr << "ERROR - IpsTsReaderTcp::_openSocket()" << endl;
       cerr << "     host: " << _serverHost << endl;
       cerr << "     port: " << _serverPort << endl;
     } else {
-      cerr << "ERROR - AparTsReaderTcp::_openSocket()" << endl;
+      cerr << "ERROR - IpsTsReaderTcp::_openSocket()" << endl;
       cerr << "  Connecting to server" << endl;
       cerr << "  " << _sock.getErrStr() << endl;
     }
@@ -1000,7 +1002,7 @@ int AparTsReaderTcp::_openSocket()
 // Read in next packet, set id and load buffer.
 // Returns 0 on success, -1 on failure
 
-int AparTsReaderTcp::_readTcpPacket(int &id, int &len, MemBuf &buf)
+int IpsTsReaderTcp::_readTcpPacket(int &id, int &len, MemBuf &buf)
 
 {
 
@@ -1026,14 +1028,14 @@ int AparTsReaderTcp::_readTcpPacket(int &id, int &len, MemBuf &buf)
           _timedOut = true;
           return -1;
         }
-        cerr << "ERROR - AparTsReader::_readTcpPacket" << endl;
+        cerr << "ERROR - IpsTsReader::_readTcpPacket" << endl;
         cerr << "  " << _sock.getErrStr() << endl;
         return -1;
       }
     } else {
       if (_sock.readBufferHb(packetTop, sizeof(packetTop),
                              sizeof(packetTop), PMU_auto_register, -1)) {
-        cerr << "ERROR - AparTsReader::_readTcpPacket" << endl;
+        cerr << "ERROR - IpsTsReader::_readTcpPacket" << endl;
         cerr << "  " << _sock.getErrStr() << endl;
         return -1;
       }
@@ -1043,10 +1045,10 @@ int AparTsReaderTcp::_readTcpPacket(int &id, int &len, MemBuf &buf)
     packetId = packetTop[0];
     packetLen = packetTop[1];
 
-    if (apar_ts_check_packet_id(packetId, packetLen)) {
+    if (ips_ts_check_packet_id(packetId, packetLen)) {
       // read bytes to re-synchronize data stream
       if (_reSync()) {
-        cerr << "ERROR - AparTsReader::_readPacket" << endl;
+        cerr << "ERROR - IpsTsReader::_readPacket" << endl;
         cerr << " Cannot re-sync incoming data stream from socket";
         cerr << endl;
         return -1;
@@ -1073,7 +1075,7 @@ int AparTsReaderTcp::_readTcpPacket(int &id, int &len, MemBuf &buf)
 
   if (_sock.readBufferHb(startPtr, nBytesLeft, 1024, 
                          PMU_auto_register, 10000)) {
-    cerr << "ERROR - AparTsReader::_readTcpPacket" << endl;
+    cerr << "ERROR - IpsTsReader::_readTcpPacket" << endl;
     cerr << "  " << _sock.getErrStr() << endl;
     return -1;
   }
@@ -1086,12 +1088,12 @@ int AparTsReaderTcp::_readTcpPacket(int &id, int &len, MemBuf &buf)
 // re-sync the data stream
 // returns 0 on success, -1 on error
 
-int AparTsReaderTcp::_reSync()
+int IpsTsReaderTcp::_reSync()
   
 {
   int sync_count = 0;
 
-  if (_debug != AparTsDebug_t::OFF) {
+  if (_debug != IpsTsDebug_t::OFF) {
     cerr << "Trying to resync ....." << endl;
   }
   
@@ -1102,25 +1104,25 @@ int AparTsReaderTcp::_reSync()
     // peek at the next 8 bytes
     
     if (_peekAtBuffer(check, sizeof(check))) {
-      cerr << "ERROR - AparTsReader::_reSync" << endl;
+      cerr << "ERROR - IpsTsReader::_reSync" << endl;
       cerr << "  " << _sock.getErrStr() << endl;
       return -1;
     }
 
-    if(check[0] == APAR_TS_RADAR_INFO_ID &&
-       check[1] == sizeof(apar_ts_radar_info_t)) {
-      return 0; // We've found a legitimate APAR packet header
+    if(check[0] == IPS_TS_RADAR_INFO_ID &&
+       check[1] == sizeof(ips_ts_radar_info_t)) {
+      return 0; // We've found a legitimate IPS packet header
     } 
 
     // Search for the sync packet 
-    if (check[0] == APAR_TS_SYNC_VAL_00 && check[1] == APAR_TS_SYNC_VAL_01) {
+    if (check[0] == IPS_TS_SYNC_VAL_00 && check[1] == IPS_TS_SYNC_VAL_01) {
       // These are "sync packet" bytes read the 8 sync bytes and move on
-      if (_debug != AparTsDebug_t::OFF) {
+      if (_debug != IpsTsDebug_t::OFF) {
 	cerr << "Found sync packet, back in sync" << endl;
       }
       if (_sock.readBufferHb(check, sizeof(check), sizeof(check),
-			    PMU_auto_register, 10000)) {
-	cerr << "ERROR - AparTsReader::_reSync" << endl;
+                             PMU_auto_register, 10000)) {
+	cerr << "ERROR - IpsTsReader::_reSync" << endl;
 	cerr << "  " << _sock.getErrStr() << endl;
 	return -1;
       }
@@ -1131,7 +1133,7 @@ int AparTsReaderTcp::_reSync()
 
     char byteVal;
     if (_sock.readBufferHb(&byteVal, 1, 1, PMU_auto_register, 10000)) {
-      cerr << "ERROR - AparTsReader::_reSync" << endl;
+      cerr << "ERROR - IpsTsReader::_reSync" << endl;
       cerr << "  " << _sock.getErrStr() << endl;
       return -1;
     }
@@ -1147,7 +1149,7 @@ int AparTsReaderTcp::_reSync()
 // Peek at buffer from socket
 // Returns 0 on success, -1 on failure
 
-int AparTsReaderTcp::_peekAtBuffer(void *buf, int nbytes)
+int IpsTsReaderTcp::_peekAtBuffer(void *buf, int nbytes)
 
 {
 
@@ -1163,7 +1165,7 @@ int AparTsReaderTcp::_peekAtBuffer(void *buf, int nbytes)
 	count++;
         continue;
       }
-      cerr << "ERROR - AparTsReader::_peekAtBuffer" << endl;
+      cerr << "ERROR - IpsTsReader::_peekAtBuffer" << endl;
       cerr << "  " << _sock.getErrStr() << endl;
       return -1;
     }
@@ -1176,16 +1178,16 @@ int AparTsReaderTcp::_peekAtBuffer(void *buf, int nbytes)
 //////////////////////////////////////////////////////////////////
 // reset - used for sim mode
 
-void AparTsReaderTcp::reset()
+void IpsTsReaderTcp::reset()
 
 {
-  AparTsReader::reset();
+  IpsTsReader::reset();
 }
 
 //////////////////////////////////////////////////////////////////
 // seek to end
 
-void AparTsReaderTcp::seekToEnd()
+void IpsTsReaderTcp::seekToEnd()
 
 {
 }

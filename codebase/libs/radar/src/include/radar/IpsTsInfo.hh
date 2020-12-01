@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// AparTsInfo.hh
+// IpsTsInfo.hh
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -31,44 +31,46 @@
 //
 ///////////////////////////////////////////////////////////////
 //
+// Support for Independent Pulse Sampling.
+//
 // Stores current radar ops info
 //
 ////////////////////////////////////////////////////////////////
 
-#ifndef _AparTsInfo_hh
-#define _AparTsInfo_hh
+#ifndef _IpsTsInfo_hh
+#define _IpsTsInfo_hh
 
 #include <string>
 #include <deque>
 #include <dataport/port_types.h>
 #include <toolsa/MemBuf.hh>
-#include <radar/apar_ts_functions.hh>
-#include <radar/AparTsCalib.hh>
+#include <radar/ips_ts_functions.hh>
+#include <radar/IpsTsCalib.hh>
 #include <didss/DsMessage.hh>
 using namespace std;
 
 ////////////////////////
 // This class
 
-class AparTsInfo {
+class IpsTsInfo {
   
 public:
 
   // constructor
   
-  AparTsInfo(AparTsDebug_t debug = AparTsDebug_t::OFF);
+  IpsTsInfo(IpsTsDebug_t debug = IpsTsDebug_t::OFF);
 
   // copy constructor
   
-  AparTsInfo(const AparTsInfo &rhs);
+  IpsTsInfo(const IpsTsInfo &rhs);
 
   // assignment
   
-  AparTsInfo & operator=(const AparTsInfo &rhs);
+  IpsTsInfo & operator=(const IpsTsInfo &rhs);
 
   // destructor
   
-  virtual ~AparTsInfo();
+  virtual ~IpsTsInfo();
 
   // clear all data
 
@@ -76,7 +78,7 @@ public:
 
   // debugging
   
-  void setDebug(AparTsDebug_t debug) { _debug = debug; }
+  void setDebug(IpsTsDebug_t debug) { _debug = debug; }
 
   // set structs from a generic buffer
   // by checking for the id
@@ -115,12 +117,12 @@ public:
   
   int writeToTsarchiveFile(FILE *out) const;
 
-  // write a sync packet to file in APAR format
+  // write a sync packet to file in IPS format
   // returns 0 on success, -1 on failure
 
   int writeSyncToFile(FILE *out) const;
   
-  // write meta-data to file in APAR format
+  // write meta-data to file in IPS format
   // Writes out any meta-data which has a sequence number
   // later than the previous pulse written.
   // To force a write, set the prevPulseSeqNum to 0.
@@ -128,7 +130,7 @@ public:
 
   int writeMetaToFile(FILE *out, si64 prevPulseSeqNum) const;
 
-  // write meta-data to file in APAR format
+  // write meta-data to file in IPS format
   // Writes out any meta-data for which the id is
   // queued in the _idQueue.
   // If clearQueue is true, the queue will be cleared
@@ -137,7 +139,7 @@ public:
 
   int writeMetaQueueToFile(FILE *out, bool clearQueue) const;
 
-  // write meta-data to DsMessage in APAR format
+  // write meta-data to DsMessage in IPS format
   // Loads up any meta-data for which the id is
   // queued in the _idQueue.
   // If clearQueue is true, the queue will be cleared
@@ -163,20 +165,20 @@ public:
   ////////////////////////////////////////////////////////////
   // set info at the struct level - does not set time
 
-  void setRadarInfo(const apar_ts_radar_info_t &info,
+  void setRadarInfo(const ips_ts_radar_info_t &info,
                     bool addToMetaQueue = true);
-  void setScanSegment(const apar_ts_scan_segment_t &seg,
+  void setScanSegment(const ips_ts_scan_segment_t &seg,
                       bool addToMetaQueue = true);
-  void setTsProcessing(const apar_ts_processing_t &proc,
+  void setTsProcessing(const ips_ts_processing_t &proc,
                        bool addToMetaQueue = true);
-  void setStatusXml(const apar_ts_status_xml_t &hdr,
+  void setStatusXml(const ips_ts_status_xml_t &hdr,
                     const string &xmlStr,
                     bool addToMetaQueue = true);
-  void setCalibration(const apar_ts_calibration_t &calib,
+  void setCalibration(const ips_ts_calibration_t &calib,
                       bool addToMetaQueue = true);
-  void setEventNotice(const apar_ts_event_notice_t &enotice,
+  void setEventNotice(const ips_ts_event_notice_t &enotice,
                       bool addToMetaQueue = true);
-  void setPlatformGeoref(const apar_ts_platform_georef_t &georef,
+  void setPlatformGeoref(const ips_ts_platform_georef_t &georef,
                          bool addToMetaQueue = true);
   
   ////////////////////////////////////////////////////////////
@@ -240,27 +242,27 @@ public:
   void setRadarId(int id);
 
   ////////////////////////////////////////////////////////////
-  // set AparTsCalib object from _calib, and vice versa
+  // set IpsTsCalib object from _calib, and vice versa
   
-  void setAparTsCalib(AparTsCalib &aparCalib) const;
-  void setFromAparTsCalib(const AparTsCalib &aparCalib);
+  void setIpsTsCalib(IpsTsCalib &ipsCalib) const;
+  void setFromIpsTsCalib(const IpsTsCalib &ipsCalib);
 
   ////////////////////////////////////////////////////////////
   // get info at the struct level
 
-  inline const apar_ts_radar_info_t &getRadarInfo() const { return _radar_info; }
-  inline const apar_ts_scan_segment_t &getScanSegment() const { return _scan_seg; }
-  inline const apar_ts_processing_t &getTsProcessing() const { return _proc; }
-  inline const apar_ts_status_xml_t &getStatusXmlHdr() const { 
+  inline const ips_ts_radar_info_t &getRadarInfo() const { return _radar_info; }
+  inline const ips_ts_scan_segment_t &getScanSegment() const { return _scan_seg; }
+  inline const ips_ts_processing_t &getTsProcessing() const { return _proc; }
+  inline const ips_ts_status_xml_t &getStatusXmlHdr() const { 
     return _status_xml_hdr; 
   }
   inline const string &getStatusXmlStr() const { return _status_xml_str; }
-  inline const apar_ts_calibration_t &getCalibration() const { return _calib; }
-  inline const apar_ts_event_notice_t &getEventNotice() const { return _enotice; }
-  inline const apar_ts_platform_georef_t &getPlatformGeoref() const { 
+  inline const ips_ts_calibration_t &getCalibration() const { return _calib; }
+  inline const ips_ts_event_notice_t &getEventNotice() const { return _enotice; }
+  inline const ips_ts_platform_georef_t &getPlatformGeoref() const { 
     return _platform_georef0; 
   }
-  inline const apar_ts_platform_georef_t &getPlatformGeoref1() const { 
+  inline const ips_ts_platform_georef_t &getPlatformGeoref1() const { 
     return _platform_georef1; 
   }
 
@@ -359,13 +361,13 @@ public:
 
   // set time-series processing fields
 
-  inline void setProcPolMode(apar_ts_pol_mode_t x) {
+  inline void setProcPolMode(ips_ts_pol_mode_t x) {
     _proc.pol_mode = (si32) x;
   }
-  inline void setProcPrfMode(apar_ts_prf_mode_t x) {
+  inline void setProcPrfMode(ips_ts_prf_mode_t x) {
     _proc.prf_mode = (si32) x;
   }
-  inline void setProcPulseShape(apar_ts_pulse_shape_t x) {
+  inline void setProcPulseShape(ips_ts_pulse_shape_t x) {
     _proc.pulse_shape = (si32) x; 
   }
 
@@ -492,14 +494,14 @@ public:
 
   // get time-series processing fields
 
-  inline apar_ts_pol_mode_t getProcPolMode() const {
-    return (apar_ts_pol_mode_t) _proc.pol_mode;
+  inline ips_ts_pol_mode_t getProcPolMode() const {
+    return (ips_ts_pol_mode_t) _proc.pol_mode;
   }
-  inline apar_ts_prf_mode_t getProcPrfMode() const {
-    return (apar_ts_prf_mode_t) _proc.prf_mode;
+  inline ips_ts_prf_mode_t getProcPrfMode() const {
+    return (ips_ts_prf_mode_t) _proc.prf_mode;
   }
-  inline apar_ts_pulse_shape_t getProcPulseShape() const {
-    return (apar_ts_pulse_shape_t) _proc.pulse_shape; 
+  inline ips_ts_pulse_shape_t getProcPulseShape() const {
+    return (ips_ts_pulse_shape_t) _proc.pulse_shape; 
   }
 
   inline fl32 getProcPulseWidthUs() const { return _proc.pulse_width_us; }
@@ -599,24 +601,24 @@ protected:
   
   // copy
   
-  virtual AparTsInfo &_copy(const AparTsInfo &rhs);
+  virtual IpsTsInfo &_copy(const IpsTsInfo &rhs);
   
 private:
 
-  AparTsDebug_t _debug;
+  IpsTsDebug_t _debug;
   mutable int _debugPrintCount;
 
   // meta-data information
 
-  apar_ts_radar_info_t _radar_info;
-  apar_ts_scan_segment_t _scan_seg;
-  apar_ts_processing_t _proc;
-  apar_ts_status_xml_t _status_xml_hdr;
+  ips_ts_radar_info_t _radar_info;
+  ips_ts_scan_segment_t _scan_seg;
+  ips_ts_processing_t _proc;
+  ips_ts_status_xml_t _status_xml_hdr;
   string _status_xml_str;
-  apar_ts_calibration_t _calib;
-  apar_ts_event_notice_t _enotice;
-  apar_ts_platform_georef_t _platform_georef0;
-  apar_ts_platform_georef_t _platform_georef1;
+  ips_ts_calibration_t _calib;
+  ips_ts_event_notice_t _enotice;
+  ips_ts_platform_georef_t _platform_georef0;
+  ips_ts_platform_georef_t _platform_georef1;
 
   bool _radar_info_active;
   bool _scan_seg_active;
