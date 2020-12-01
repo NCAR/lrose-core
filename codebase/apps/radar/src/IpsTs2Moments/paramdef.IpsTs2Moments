@@ -1,0 +1,958 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions IpsTs2Moments
+//
+// EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Aug 2019
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "IpsTs2Moments reads raw time-series data, computes the moments and writes the contents into a DsRadar FMQ.";
+  p_text = "Support for Idependent Pulse Sampling.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Interval at which beam data is printed in debug mode.";
+  p_help = "We print out beam details in debug mode - this is the number of beams between each print.";
+} beam_count_for_debug_print;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "THREADING FOR SPEED.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use multiple threads to improve performance.";
+  p_help = "The read, compute and write stages can overlap in time, to improve performance. Also, the compute stage can be split into multiple threads, with each thread working on a discrete number of gates.";
+} use_multiple_threads;
+
+paramdef int {
+  p_default = 8;
+  p_min = 1;
+  p_descr = "The number of compute threads.";
+  p_help = "The moments are computed in a 'pipe-line' a beam at a time. The pipe line contains the number of compute threads specified.";
+} n_compute_threads;
+
+commentdef {
+  p_header = "TIME-SERIES DATA INPUT";
+};
+
+typedef enum {
+  FILELIST, ARCHIVE, REALTIME, SIMULATE, FMQ
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FMQ;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the files between the start and end times specified on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. In SIMULATE mode, the program moves repeatedly through the file list, creating output files with times set to now. This is useful for simulating an operational radar. In FMQ mode, the program opens the input_fmq, and reads time series data from the queue.";
+} mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name for time series data.";
+  p_help = "This is used in FMQ mode only.";
+} input_fmq;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to position the input FMQ at the start of the queue.";
+  p_help = "FMQ mode only. If false, we start reading at the end of the queue. This is the default behavior. If true, we position the read pointer at the start of the queue, and read all data available in the queue before starting to read new data.";
+} position_fmq_at_start;
+
+paramdef string {
+  p_default = "./input";
+  p_descr = "Dir for input data files.";
+  p_help = "This is used in REALTIME and ARCHIVE modes. In FILELIST and SIMULATE modes, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 360;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_valid_age;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Max number of pulses per dwell";
+  p_help = "If the pulse count exceeds this, the current set of pulses is discarded and a new dwell starts.";
+} max_pulses_per_dwell;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to invert the sense of the HV flag in alternating mode.";
+  p_help = "In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.";
+} invert_hv_flag;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to change the sign of the velocity.";
+  p_help = "If true, the sign of the velocity will be changed.";
+} change_velocity_sign;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to change the sign of the velocity in staggered mode.";
+  p_help = "If true, the sign of the velocity will be changed in staggered mode. Both this and the 'change_velocity_sign' parameter above will be applied, so if both are true they will cancel out in staggered mode.";
+} change_velocity_sign_staggered;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Margin for matching platform goeref with pulses (secs).";
+  p_help = "The platform georeference objects, if they are included in the data stream, are asynchronous with the pulse objects. Therefore we need to match a georeference object with a pulse object. If the times of the two objects differ by less than this specified margin, the georeference is attached to the pulse. If the time difference exceeds this margin, no georeference is attached to the pulse.";
+} georef_time_margin_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If true, use the secondary georeference packet.";
+  p_help = "By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.";
+} use_secondary_georeference;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check the radar ID in the time series data stream.";
+  p_help = "If TRUE, we will check that the radar_id in the header packet info is either the specified radar_id, or is 0. This allows us to filter out unwanted data from the time series stream. Mostly this is not applicable. However, in some cases time series data from multiple sources is included in a single stream, in which case we need to filter it accordingly.";
+} check_radar_id;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "radar_id to be used for filtering incoming data.";
+  p_help = "See 'check_radar_id' above.";
+} radar_id;
+
+commentdef {
+  p_header = "RADAR PARAMETERS";
+  p_text = "Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar name.";
+  p_help = "If true, the name in this file will be used. If not, the name in the time series data will be used.";
+} override_radar_name;
+
+paramdef string {
+  p_default = "IPS";
+  p_descr = "Name of the radar.";
+  p_help = "See 'override_radar_name'.";
+} radar_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location in this file will be used. If not, the location in the time series data will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = 40.0;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = -105.0;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude_deg;
+
+paramdef double {
+  p_default = 1700;
+  p_descr = "Radar altitude msl (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the gate geometry.";
+  p_help = "If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.";
+} override_gate_geometry;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Gate spacing (meters).";
+  p_help = "See override_gate_geometry.";
+} gate_spacing_meters;
+
+paramdef double {
+  p_default = 150;
+  p_descr = "Start range (meters).";
+  p_help = "See override_gate_geometry.";
+} start_range_meters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar wavelength.";
+  p_help = "If true, the radar wavelength in this file will be used. If not, the wavelength in the time series data will be used if available.";
+} override_radar_wavelength;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Radar wavelength (cm).";
+  p_help = "See override_radar_wavelength.";
+} radar_wavelength_cm;
+
+commentdef {
+  p_header = "MOMENTS COMPUTATIONS";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute ZDR using SNR instead of power.";
+  p_help = "If true, we compute ZDR as SNRHC/SNRVC. This has the effect of taking into account a difference in noise floor in each channel. The ZDR correction applied must therefore be computed relatrive to SNR, not power.";
+} compute_zdr_using_snr;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to check for missing pulses in the time series.";
+  p_help = "If missing pulses are found, the beam formed by those pulses will be flagged and a message printed.";
+} check_for_missing_pulses;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to correct for system phidp.";
+  p_help = "If true, the H and V correlation phases will be corrected by adding/subtracting the system phidp value as appropriate. This avoids premature wrapping of the phased from which phidp and velocity are computed. If false, this correction will not be applied. To find the system phidp, set this to false and compute phidp for vertically-pointing data.";
+} correct_for_system_phidp;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Length of median filter applied to ZDR field in range (gates).";
+  p_help = "Set to 1 if you do not want a median filter applied.";
+} zdr_median_filter_len;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Length of median filter applied to RHOHV field in range (gates).";
+  p_help = "Set to 1 if you do not want a median filter applied.";
+} rhohv_median_filter_len;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Length of median filter applied to unfolding interval for staggered PRT.";
+  p_help = "If less than 3, no filtering will be performed.";
+} staggered_prt_median_filter_len;
+
+typedef enum {
+  WIDTH_METHOD_R0R1,
+  WIDTH_METHOD_R1R2,
+  WIDTH_METHOD_HYBRID
+} spectrum_width_method_t;
+
+paramdef enum spectrum_width_method_t {
+  p_default = WIDTH_METHOD_R0R1;
+  p_descr = "Method for computing spectrum width.";
+  p_help = "R0R1 is the default. For staggered we use R0Rm in this case. Otherwise we use R1R2 if applicable. For staggered, we use the hybrid if R0R1 is not selected.";
+} spectrum_width_method;
+
+commentdef {
+  p_header = "RADAR CALIBRATION";
+}
+
+paramdef string {
+  p_default = "./startup_cal.xml";
+  p_descr = "File name for calibration to be read at startup. Required.";
+  p_help = "The startup calibration file is required. The startup cal will be overridden if set_cal_by_pulse_width is true, or if use_cal_from_time_series is true.";
+} startup_cal_file;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read different cal file depending on the pulse width in the data.";
+  p_help = "The calibration changes with pulse width. Therefore, if the radar supports variable pulse widths, you need to specify the location of the calibration files for each pulse width.\nYou can also optionally specify that we use different directories for different XMIT_RCV_MODEs. These are the same as those used in moments_params above.";
+} set_cal_by_pulse_width;
+
+typedef enum {
+
+  /// Single polarization H channel
+  SINGLE_POL = 0, 
+  /// Dual pol, alternating transmission, copolar receiver only
+  /// (CP2 SBand)
+  DP_ALT_HV_CO_ONLY = 1, 
+  /// Dual pol, alternating transmission, co-polar and cross-polar
+  ///receivers (SPOL with Mitch Switch and receiver in 
+  /// switching mode, CHILL)
+  DP_ALT_HV_CO_CROSS = 2,
+  /// Dual pol, alternating transmission, fixed H and V receivers (SPOL
+  /// with Mitch Switch and receivers in fixed mode)
+  DP_ALT_HV_FIXED_HV = 3,
+  /// Dual pol, simultaneous transmission, fixed H and V receivers (NEXRAD
+  /// upgrade, SPOL with T and receivers in fixed mode)
+  DP_SIM_HV_FIXED_HV = 4,
+  /// Dual pol, simultaneous transmission, switching H and V receivers
+  /// (SPOL with T and receivers in switching mode)
+  DP_SIM_HV_SWITCHED_HV = 5,
+  /// Dual pol, H transmission, fixed H and V receivers (CP2 X band)
+  DP_H_ONLY_FIXED_HV = 6,
+  /// Dual pol, V transmission, fixed H and V receivers (CP2 X band)
+  DP_V_ONLY_FIXED_HV = 7,
+  /// Single polarization V channel
+  SINGLE_POL_V = 10
+
+} xmit_rcv_mode_t;
+
+typedef struct {
+  double pulse_width_us;
+  string cal_dir;
+  double zdr_correction_db;
+  double system_phidp_deg;
+} pulse_width_cal_t;
+
+paramdef struct pulse_width_cal_t {
+  p_default = {
+    { 0.5, "/tmp/cal_pw_0.5", -9999.0, -9999.0 },
+    { 1.0, "/tmp/cal_pw_1.0", -9999.0, -9999.0 },
+    { 2.0, "/tmp/cal_pw_2.0", -9999.0, -9999.0 }
+  };
+  p_descr = "Specify the directories in which the calibration files for each pulse width will be stored.";
+  p_help = "See 'set_cal_by_pulse_width'. First, the app will determine which of the specified pulse widths best matches the pulse width in the data. The closest available pulse width will be used. The corresponding directory will then be searched. The cal file in that directory which is closest in time to the beam time will be used.\nYou can optionally specify that we check the xmit_rcv_mode and use different cal directories for different modes.\nNOTE - the pulse width is specified in micro-seconds. In addition, (a) if override_cal_zdr_correction is true, and zdr_correction_db != -9999, then the specified zdr_correction_db is applied, and (b) if override_cal_system_phidp is true, and system_phidp_deg != -9999, then the specified system phidp is used.";
+} pulse_width_cals[];
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Frequency at which to check for new cal (secs).";
+  p_help = "The program will scan the calibration directory structure once every period, to check for new calibration files.";
+} cal_recheck_period;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use cal information from time series data.";
+  p_help = "If true, the cal information in the time series data will be used, if available. If false, the cal info in the param file will be used.";
+} use_cal_from_time_series;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the DBZ correction in the calibration data.";
+  p_help = "If true, we will override the DBZ correction in the calibration files. See 'dbz_correction'.";
+} override_cal_dbz_correction;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "DBZ correction to be applied to all calibrations (dB).";
+  p_help = "See 'override_cal_dbz_correction'.";
+} dbz_correction;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the ZDR correction in the calibration data.";
+  p_help = "If true, the parameter 'zdr_correction_db' will override the zdr correction in the calibration data.";
+} override_cal_zdr_correction;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "ZDR correction to be applied to all calibrations (dB).";
+  p_help = "See 'override_cal_zdr_correction'.";
+} zdr_correction_db;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to threshold ZDR using SNR.";
+  p_help = "If true, we will only compute ZDR if the SNR in both the H and V co-polar channels exceeds this value. See 'min_snr_db_for_zdr'.";
+} threshold_zdr_using_snr;
+
+paramdef double {
+  p_default = -7.0;
+  p_descr = "Min SNR for computing ZDR (dB).";
+  p_help = "If the SNR is below this threshold for either the H or V co-polar channels, ZDR will be set to missing. See 'threshold_zdr_using_snr'.";
+} min_snr_db_for_zdr;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the LDR corrections in the calibration data.";
+  p_help = "If true, the parameters 'ldrh_correction_db' and 'ldrv_correction_db' will override the ldr corrections in the calibration data.";
+} override_cal_ldr_corrections;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "LDRH correction to be applied to all calibrations (dB).";
+  p_help = "See 'override_cal_ldr_corrections'.";
+} ldr_correction_db_h;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "LDRV correction to be applied to all calibrations (dB).";
+  p_help = "See 'override_cal_ldr_corrections'.";
+} ldr_correction_db_v;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to threshold LDR using SNR.";
+  p_help = "If true, we will only compute LDR if the SNR in both the co- and cross-polar channels exceeds this value. Since the cross-polar channel is generally the weaker channel, it is the SNR on the cross-polar channel that will be limiting. See 'min_snr_db_for_ldr'.";
+} threshold_ldr_using_snr;
+
+paramdef double {
+  p_default = -7.0;
+  p_descr = "Min SNR for computing LDR (dB).";
+  p_help = "For LDR, the cross polar channel is the weaker return. Therefore effectively this threshold will be applied to the cross channel. If the SNR is below this threshold for either the co- or cross-polar channels, LDR will be set to missing. See 'threshold_ldr_using_snr'.";
+} min_snr_db_for_ldr;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the system PHIDP in the calibration data.";
+  p_help = "If true, the parameter 'system_phidp_deg' will override the system phidp in the calibration data.";
+} override_cal_system_phidp;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "System PHIDP to be applied to all calibrations (deg).";
+  p_help = "See 'override_cal_system_phidp'.";
+} system_phidp_deg;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to change the sign of PHIDP.";
+  p_help = "This should not be necessary - using for testing.";
+} change_phidp_sign;
+
+commentdef {
+  p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to apply precip attenuation correction for DBZ and ZDR.";
+  p_help =
+    "The following extra fields will be computed:\n"
+    "\tDBZ_ATTEN_CORRECTION - correction in dB\n"
+    "\tZDR_ATTEN_CORRECTION - correction in dB\n"
+    "\tDBZ_ATTEN_CORRECTED - DBZHC corrected\n"
+    "\tZDR_ATTEN_CORRECTED - ZDR corrected\n";
+} apply_precip_attenuation_correction;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the coefficients and exponents - see below.";
+  p_help = "If false, the default coefficients will be determined for the radar wavelength.";
+} specify_coefficients_for_attenuation_correction;
+
+paramdef double {
+  p_default = 0.017;
+  p_descr = "Coefficient for computing DBZ attenuation correction.";
+  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
+} dbz_attenuation_coefficient;
+
+paramdef double {
+  p_default = 0.84;
+  p_descr = "Exponent for computing DBZ attenuation correction.";
+  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
+} dbz_attenuation_exponent;
+
+paramdef double {
+  p_default = 0.017;
+  p_descr = "Coefficient for computing ZDR attenuation correction.";
+  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
+} zdr_attenuation_coefficient;
+
+paramdef double {
+  p_default = 0.84;
+  p_descr = "Exponent for computing ZDR attenuation correction.";
+  p_help = "See Bringi and Chandrasekar, Table 7.1, page 494.";
+} zdr_attenuation_exponent;
+
+commentdef {
+  p_header = "ATMOSPHERIC ATTENUATION CORRECTION METHOD";
+}
+
+typedef enum {
+  ATMOS_ATTEN_NONE, 
+  ATMOS_ATTEN_CONSTANT, 
+  ATMOS_ATTEN_CRPL
+} atmos_atten_method_t;
+
+paramdef enum atmos_atten_method_t {
+  p_default = ATMOS_ATTEN_CRPL;
+  p_descr = "Method for computing atmospheric attenuation.";
+  p_help = "This is applied to the DBZ fields only.\n"
+  "\tATMOS_ATTEN_NONE:\n"
+  "\t\tNo correction is applied\n"
+  "\tATMOS_ATTEN_CONSTANT:\n"
+  "\t\tA constant correction in dB/km is applied\n"
+  "\t\tSee atmos_atten_db_per_km\n"
+  "\tATMOS_ATTEN_CRPL:\n"
+  "\t\tUses the method based on the Central Radio Propagation Laboratory\n"
+  "\t\tmeasurements.\n"
+  "\t\tSee Doviak and Zrnic, page 44\n";
+} atmos_atten_method;
+
+paramdef double {
+  p_default = 0.012;
+  p_descr = "Constant atmospheric attenuation (dB/km).";
+  p_help = "DBZ is corrected for this.";
+} atmos_atten_db_per_km;
+
+commentdef {
+  p_header = "COMPUTING KDP USING ADAPTIVE FILTER METHOD";
+  p_text = "Parameters for computing KDP.";
+}
+
+typedef enum {
+  FIR_LEN_125, FIR_LEN_60, FIR_LEN_40, FIR_LEN_30, FIR_LEN_20, FIR_LEN_10
+} fir_filter_len_t;
+  
+paramdef enum fir_filter_len_t {
+  p_default = FIR_LEN_20;
+  p_descr = "Filter length for the FIR filter for PHIDP (gates)";
+  p_help = "When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.";
+} KDP_fir_filter_len;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Sets the number of iterations for the initial FIR filter for unfolded PHIDP.";
+  p_help = "After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
+} KDP_n_filt_iterations_unfolded;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Sets the number of iterations for the final FIR filter for conditioned PHIDP.";
+  p_help = "In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
+} KDP_n_filt_iterations_conditioned;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Perform iterative filtering to locate backscatter phase shift.";
+  p_descr = "This is the Hubbert-Bringi method.";
+} KDP_use_iterative_filtering;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Difference threshold for the iterative filtering method.";
+  p_help = "The FIR filter is applied successively, KDP_n_filt_iterations_conditioned times. After each iteration the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.";
+} KDP_phidp_difference_threshold;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Number of gates over which the phidp mean, sdev and jitter are computed.";
+  p_help = "The mean, sdev and jitter of phidp are computed over a consecutive number of gates in range, centered on the current gate of interest. This parameter is the number of gates over which these statistics are computed.";
+} KDP_ngates_for_stats;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Sets the threshold for the standard deviation of phidp in range.";
+  p_help = "The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_phidp_sdev_max;
+
+paramdef double {
+  p_default = 25.0;
+  p_descr = "Sets the threshold for the jitter of phidp in range.";
+  p_help = "The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_phidp_jitter_max;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Check the SNR.";
+  p_descr = "This test can help identify regions of good PHIDP.";
+} KDP_check_snr;
+
+paramdef double {
+  p_default = -6.0;
+  p_descr = "Sets the threshold for checking SNR (dB).";
+  p_help = "If the SNR drops below this value, KDP will not be computed at this gate.";
+} KDP_snr_threshold;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Check the RHOHV.";
+  p_descr = "This test can help identify regions of good PHIDP.";
+} KDP_check_rhohv;
+
+paramdef double {
+  p_default = 0.95;
+  p_descr = "Sets the threshold for checking RHOHV.";
+  p_help = "If the RHOHV drops below this value, KDP will not be computed at this gate.";
+} KDP_rhohv_threshold;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Check the standard deviation of ZDR in range?";
+  p_descr = "This test can help identify regions of clutter, and hence noisy PHIDP.";
+} KDP_check_zdr_sdev;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Sets the threshold for the standard deviation of zdr in range.";
+  p_help = "The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.";
+} KDP_zdr_sdev_max;
+
+paramdef double {
+  p_default = 0.025;
+  p_descr = "Sets the min valid KDP value.";
+  p_help = "Values less than this are set to 0.";
+} KDP_min_valid_abs_kdp;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print debug messages in KDP computation.";
+} KDP_debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write ray files to debug KDP computation.";
+} KDP_write_ray_files;
+
+paramdef string {
+  p_default = "/tmp/kdp_ray_files";
+  p_descr = "Directory for KDP ray files.";
+} KDP_ray_files_dir;
+
+commentdef {
+  p_header = "OUTPUT TO DSRADAR FMQ";
+};
+
+paramdef string {
+  p_default = "fmqp:://localhost::fmq/lirp";
+  p_descr = "Output URL for DsRadar data via FMQ";
+} output_fmq_url;
+
+paramdef int {
+  p_default = 50000000;
+  p_descr = "Size of output FMQ, in bytes.";
+  p_help = "This is the total size of the output FMQ buffer. Some of this buffer will be used for control bytes (12 bytes per message).";
+} output_fmq_size;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "Number of slots in output FMQ.";
+  p_help = "The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.";
+} output_fmq_nslots;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "FMQ compression option.";
+  p_help = "If TRUE FMQ messages are compressed.";
+} output_fmq_compress;
+
+paramdef int {
+  p_default = 360;
+  p_descr = "Number of beams between sending params and calibration.";
+  p_help = "The params and calibration data is sent when the radar operation changes, as well as once every tilt. However, if none of these triggers a change, the params will be sent regardless when this number of beams have been written.";
+} nbeams_for_params_and_calib;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set up the FMQ as blocking.";
+  p_help = "If TRUE, FMQ will be set up FMQ for blocking operation. If the FMQ becomes full, Test2Dsr will then block until there is space for more data.";
+} write_blocking;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Wait per beam (milli-secs)";
+  p_help = "FILELIST, ARCHIVE and SIMULATE modes only.";
+} beam_wait_msecs;
+
+typedef enum {
+
+  // reflectivity
+
+  DBZ,
+  DBZ_NO_ATMOS_ATTEN,
+  DBZHC,
+  DBZVC,
+  DBZHX,
+  DBZVX,
+
+  // velocity
+
+  VEL,
+  VEL_ALT,
+  VEL_HV,
+  VEL_H_ONLY,
+  VEL_V_ONLY,
+  VEL_ALT_FOLD_INTERVAL,
+  VEL_ALT_FOLD_CONFIDENCE,
+  VEL_CORRECTED,
+  
+  // STAGGERED PRT VEL
+
+  VEL_PRT_SHORT,
+  VEL_PRT_LONG,
+  VEL_DIFF,
+  VEL_UNFOLD_INTERVAL,
+
+  // width
+
+  WIDTH,
+  WIDTH_R0R1,
+  WIDTH_R1R2,
+  WIDTH_R1R3,
+  WIDTH_PPLS,
+  WIDTH_H_ONLY,
+  WIDTH_V_ONLY,
+  WIDTH_PRT_LONG,
+  WIDTH_PRT_SHORT,
+
+  // normalized coherent power
+
+  NCP,
+  NCP_H_ONLY,
+  NCP_V_ONLY,
+  NCP_H_MINUS_V,
+
+  NCP_PRT_LONG,
+  NCP_PRT_SHORT,
+  NCP_TRIP_FLAG,
+
+  // NOISE BIAS
+
+  NOISE_BIAS_DB_HC,
+  NOISE_BIAS_DB_HX,
+  NOISE_BIAS_DB_VC,
+  NOISE_BIAS_DB_VX,
+
+  // SIGNAL-TO-NOISE RATIO
+
+  SNR,
+  SNRHC,
+  SNRHX,
+  SNRVC,
+  SNRVX,
+
+  // UNCALIBRATED POWER
+
+  DBM,
+  DBMHC,
+  DBMHX,
+  DBMVC,
+  DBMVX,
+
+  // NOISE SUBTRACTED POWER
+
+  DBMHC_NS,
+  DBMHX_NS,
+  DBMVC_NS,
+  DBMVX_NS,
+
+  // DUAL POL
+
+  ZDRM, // measured
+  ZDR,  // calibrated
+  ZDR_BIAS,  // ZDR - LDR_DIFF
+
+  LDR,
+  LDRHM,
+  LDRH,
+  LDRVM,
+  LDRV,
+  LDR_DIFF,
+  LDR_MEAN,
+
+  RHOHV,
+  RHOHV_NNC,
+
+  PHIDP0, // uncorrected
+  PHIDP, // corrected for system phidp
+
+  PHIDP_COND, // phidp conditioned for kdp
+  PHIDP_FILT, // phidp filt for kdp
+  PHIDP_SDEV_4KDP, // phidp sdev in range when computing KDP
+  PHIDP_JITTER_4KDP, // phidp jitter in range when computing KDP
+  ZDR_SDEV_4KDP, // sdev of zdr as computed for KDP
+  KDP,
+  PSOB, // phase shift on backscatter
+  KDP_HB, // hubbert-bringi method 
+
+  // co-cross correlation
+
+  RHO_HC_VX,
+  RHO_VC_HX,
+  RHO_VX_HX,
+  RHO_PHIDP,
+
+  // ATTENUATION CORRECTION
+
+  DBZ_ATTEN_CORRECTION,
+  ZDR_ATTEN_CORRECTION,
+  DBZ_ATTEN_CORRECTED,
+  ZDR_ATTEN_CORRECTED,
+
+  // covariances
+
+  LAG0_HC_DB,
+  LAG0_HX_DB,
+  LAG0_VC_DB,
+  LAG0_VX_DB,
+
+  LAG0_HC_SHORT_DB,
+  LAG0_VC_SHORT_DB,
+  LAG0_HC_LONG_DB,
+  LAG0_VC_LONG_DB,
+
+  LAG0_VCHX_DB,
+  LAG0_VCHX_PHASE,
+
+  LAG0_HCVX_DB,
+  LAG0_HCVX_PHASE,
+
+  LAG1_HC_DB,
+  LAG1_HC_PHASE,
+
+  LAG1_VC_DB,
+  LAG1_VC_PHASE,
+
+  LAG1_HCVC_DB,
+  LAG1_HCVC_PHASE,
+
+  LAG1_VCHC_DB,
+  LAG1_VCHC_PHASE,
+
+  LAG1_VXHX_DB,
+  LAG1_VXHX_PHASE,
+
+  LAG1_HC_LONG_DB,
+  LAG1_HC_LONG_PHASE,
+
+  LAG1_VC_LONG_DB,
+  LAG1_VC_LONG_PHASE,
+
+  LAG1_HC_SHORT_DB,
+  LAG1_HC_SHORT_PHASE,
+
+  LAG1_VC_SHORT_DB,
+  LAG1_VC_SHORT_PHASE,
+
+  LAG1_HC_LONG_TO_SHORT_DB,
+  LAG1_HC_LONG_TO_SHORT_PHASE,
+
+  LAG1_VC_LONG_TO_SHORT_DB,
+  LAG1_VC_LONG_TO_SHORT_PHASE,
+
+  LAG1_HC_SHORT_TO_LONG_DB,
+  LAG1_HC_SHORT_TO_LONG_PHASE,
+
+  LAG1_VC_SHORT_TO_LONG_DB,
+  LAG1_VC_SHORT_TO_LONG_PHASE,
+
+  LAG2_HC_DB,
+  LAG2_HC_PHASE,
+
+  LAG2_VC_DB,
+  LAG2_VC_PHASE,
+
+  LAG3_HC_DB,
+  LAG3_HC_PHASE,
+
+  LAG3_VC_DB,
+  LAG3_VC_PHASE,
+
+  RVVHH0_DB,
+  RVVHH0_PHASE,
+
+  RVVHH0_LONG_DB,
+  RVVHH0_LONG_PHASE,
+
+  RVVHH0_SHORT_DB,
+  RVVHH0_SHORT_PHASE,
+
+  SDEV_VV,
+
+  // DEBUG
+
+  PRT,
+  NUM_PULSES,
+  TEST,
+  TEST2,
+  TEST3,
+  TEST4,
+  TEST5
+
+} field_id_t;
+
+typedef struct {
+
+  field_id_t id;
+  string name;
+  string units;
+  double scale;
+  double bias;
+    
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    { NCP, "NCP", "", 0.0001, -0.01 },
+    { SNR, "SNR", "dB", 0.01, -320 },
+    { DBM, "DBM", "dBm", 0.01, -320 },
+    { DBZ, "DBZ", "dBZ", 0.01, -320},
+    { VEL, "VEL", "m/s", 0.01, -320},
+    { WIDTH, "WIDTH", "m/s", 0.001, -0.01},
+    { ZDR, "ZDR", "dB", 0.001, -32},
+    { ZDRM, "ZDRM", "dB", 0.001, -32},
+    { LDRH, "LDRH", "dB", 0.005, -160},
+    { RHOHV, "RHOHV", "", 0.0001, -1},
+    { PHIDP0, "PHIDP0", "deg", 0.06, -200},
+    { PHIDP, "PHIDP", "deg", 0.06, -200},
+    { KDP, "KDP", "deg/km", 0.001, -32},
+    { SNRHC, "SNRHC", "dB", 0.01, -320},
+    { SNRHX, "SNRHX", "dB", 0.01, -320},
+    { SNRVC, "SNRVC", "dB", 0.01, -320},
+    { SNRVX, "SNRVX", "dB", 0.01, -320},
+    { DBMHC, "DBMHC", "dBm", 0.01, -320},
+    { DBMHX, "DBMHX", "dBm", 0.01, -320},
+    { DBMVC, "DBMVC", "dBm", 0.01, -320},
+    { DBMVX, "DBMVX", "dBm", 0.01, -320},
+    { LAG0_HC_DB, "LAG0_HC_DB", "dBm", 0.005, -160},
+    { LAG0_HX_DB, "LAG0_HX_DB", "dBm", 0.005, -160},
+    { LAG0_VC_DB, "LAG0_VC_DB", "dBm", 0.005, -160},
+    { LAG0_VX_DB, "LAG0_VX_DB", "dBm", 0.005, -160},
+    { LAG0_HCVX_DB, "LAG0_HCVX_DB", "dBm", 0.005, -160},
+    { LAG0_HCVX_PHASE, "LAG0_HCVX_PHASE", "deg", 0.006, -190},
+    { LAG0_VCHX_DB, "LAG0_VCHX_DB", "dBm", 0.005, -160},
+    { LAG0_VCHX_PHASE, "LAG0_VCHX_PHASE", "deg", 0.006, -190},
+    { LAG1_HC_DB, "LAG1_HC_DB", "dBm", 0.005, -160},
+    { LAG1_HC_PHASE, "LAG1_HC_PHASE", "deg", 0.006, -190},
+    { LAG1_VC_DB, "LAG1_VC_DB", "dBm", 0.005, -160},
+    { LAG1_VC_PHASE, "LAG1_VC_PHASE", "deg", 0.006, -190},
+    { LAG1_HCVC_DB, "LAG1_HCVC_DB", "dBm", 0.005, -160},
+    { LAG1_HCVC_PHASE, "LAG1_HCVC_PHASE", "deg", 0.006, -190},
+    { LAG1_VCHC_DB, "LAG1_VCHC_DB", "dBm", 0.005, -160},
+    { LAG1_VCHC_PHASE, "LAG1_VCHC_PHASE", "deg", 0.006, -190},
+    { LAG1_VXHX_DB, "LAG1_VXHX_DB", "dBm", 0.005, -160},
+    { LAG1_VXHX_PHASE, "LAG1_VXHX_PHASE", "deg", 0.006, -190},
+    { LAG2_HC_DB, "LAG2_HC_DB", "dBm", 0.005, -160},
+    { LAG2_HC_PHASE, "LAG2_HC_PHASE", "deg", 0.006, -190},
+    { LAG2_VC_DB, "LAG2_VC_DB", "dBm", 0.005, -160},
+    { LAG2_VC_PHASE, "LAG2_VC_PHASE", "deg", 0.006, -190},
+    { LAG3_HC_DB, "LAG3_HC_DB", "dBm", 0.005, -160},
+    { LAG3_HC_PHASE, "LAG3_HC_PHASE", "deg", 0.006, -190},
+    { LAG3_VC_DB, "LAG3_VC_DB", "dBm", 0.005, -160},
+    { LAG3_VC_PHASE, "LAG3_VC_PHASE", "deg", 0.006, -190},
+    { RVVHH0_DB, "RVVHH0_DB", "dBm", 0.005, -160},
+    { RVVHH0_PHASE, "RVVHH0_PHASE", "deg", 0.006, -190},
+    { SDEV_VV, "SDEV_VV", "dBm", 0.01, -320}
+  };
+  p_descr = "Indicate which fields should be written to the Dsr FMQ.";
+  p_help = "Choose the ID from the list. The name and units can be set however the user prefers. The scale and bias are applied to the floating point value to compute the 16-bit output value for the FMQ.";
+} output_fields[];
+
+paramdef int {
+  p_private = TRUE;
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQ is written to. If <= 0, registration will not be performed.";
+} data_mapper_report_interval;
+

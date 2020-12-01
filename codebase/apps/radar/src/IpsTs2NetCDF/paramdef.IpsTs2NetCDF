@@ -1,0 +1,133 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for IpsTs2NetCDF
+//
+//  Mike Dixon, RAP, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  Sept 2020
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "IpsTs2NetCDF reads radar time series data in IPS format, and writes files in netCDF format.";
+  p_text = "Support for Idependent Pulse Sampling.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+  
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Register with procmap.";
+} reg_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT, TS_TCP_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILE_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Name of host for TCP server. For TS_TCP_INPUT only.";
+} tcp_server_host;
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "Port for TCP server. For TS_TCP_INPUT only.";
+} tcp_server_port;
+
+commentdef {
+  p_header = "OVERRIDE CALIBRATION";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, read in calibration from xml file.";
+} override_radar_cal;
+
+paramdef string {
+  p_default = "/tmp/radar_cal.xml";
+  p_descr = "Path of radar calibration file.";
+  p_help = "See 'override_radar_calib.";
+} radar_cal_xml_file_path;
+
+commentdef {
+  p_header = "TRIGGERING WRITING OF OUTPUT FILE";
+};
+
+typedef enum {
+  END_OF_INPUT_FILE,
+  END_OF_SWEEP,
+  END_OF_VOLUME
+} output_trigger_t;
+
+paramdef enum output_trigger_t {
+  p_default = END_OF_INPUT_FILE;
+  p_descr = "Decision in when to trigger writing a file.";
+  p_help = "END_OF_INPUT_FILE: write one output file for each input file. END_OF_SWEEP: write a file when the sweep number changes. END_OF_VOLUME: write a file when the sweep number resets to 0.";
+} output_trigger;
+
+paramdef int {
+  p_default = 250000;
+  p_descr = "Maximum number of pulses per output file.";
+  p_help = "Once this maximum is exceeded, the current file will be closed and a new one started.";
+} max_pulses_per_file;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string {
+  p_default = "/tmp/nc";
+  p_descr = "Path of output directory.";
+  p_help = "Files are saved to this directory.";
+} output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, use the same file name for output.";
+  p_help = "Applies only to TS_FILE_INPUT. An '.nc' extension will be appended to the file name.";
+} preserve_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, write one file only and then quit.";
+} one_file_only;
+

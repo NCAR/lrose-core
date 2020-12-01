@@ -31,6 +31,12 @@ SUB_DIRS = \
 	HcrVelCorrect \
 	Hsrl2Radx \
 	IntfRemove \
+	IpsEye \
+	IpsTsArchive \
+	IpsTs2Moments \
+	IpsTs2NetCDF \
+	IpsTsPrint \
+	IpsTsSim \
 	Iq2Dsr \
 	KinGin2Ncf \
 	Mdv2Vad \

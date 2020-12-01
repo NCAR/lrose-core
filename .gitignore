@@ -410,16 +410,6 @@ codebase/apps/procmap/src/procmap_register/procmap_register
 codebase/apps/procmap/src/procmap_unregister/procmap_unregister
 codebase/apps/procmap/src/test_procmap/test_procmap
 
-codebase/apps/radar/src/AparAscope/AparAscope
-codebase/apps/radar/src/AparAscope/Makefile.qmake
-codebase/apps/radar/src/AparAscope/moc_*cpp
-codebase/apps/radar/src/AparAscope/moc_predefs.h
-
-codebase/apps/radar/src/AparTsArchive/AparTsArchive
-codebase/apps/radar/src/AparTsPrint/AparTsPrint
-codebase/apps/radar/src/AparTsSim/AparTsSim
-codebase/apps/radar/src/AparTs2Moments/AparTs2Moments
-codebase/apps/radar/src/AparTs2NetCDF/AparTs2NetCDF
 codebase/apps/radar/src/AcGeorefCompare/AcGeorefCompare
 codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
 codebase/apps/radar/src/AltCpCompute/AltCpCompute
@@ -451,10 +441,21 @@ codebase/apps/radar/src/HawkEdit/Makefile.qmake
 codebase/apps/radar/src/HawkEdit/moc_*cpp
 codebase/apps/radar/src/HawkEdit/moc_predefs.h
 
-codebase/apps/radar/src/Condor/Condor
-codebase/apps/radar/src/Condor/Makefile.qmake
-codebase/apps/radar/src/Condor/moc_*cpp
-codebase/apps/radar/src/Condor/moc_predefs.h
+codebase/apps/radar/src/IpsAscope/IpsAscope
+codebase/apps/radar/src/IpsAscope/Makefile.qmake
+codebase/apps/radar/src/IpsAscope/moc_*cpp
+codebase/apps/radar/src/IpsAscope/moc_predefs.h
+
+codebase/apps/radar/src/IpsEye/IpsEye
+codebase/apps/radar/src/IpsEye/Makefile.qmake
+codebase/apps/radar/src/IpsEye/moc_*cpp
+codebase/apps/radar/src/IpsEye/moc_predefs.h
+
+codebase/apps/radar/src/IpsTsArchive/IpsTsArchive
+codebase/apps/radar/src/IpsTsPrint/IpsTsPrint
+codebase/apps/radar/src/IpsTsSim/IpsTsSim
+codebase/apps/radar/src/IpsTs2Moments/IpsTs2Moments
+codebase/apps/radar/src/IpsTs2NetCDF/IpsTs2NetCDF
 
 codebase/apps/radar/src/Sprite/Sprite
 codebase/apps/radar/src/Sprite/Makefile.qmake

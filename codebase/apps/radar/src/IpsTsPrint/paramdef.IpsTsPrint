@@ -1,0 +1,410 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for IpsTsPrint
+//
+//  Mike Dixon, EOL, NCAR
+//  P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+//  Aug 2019
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "IpsTsPrint reads radar time series data, and prints it in various ways.";
+  p_text = "Support for Idependent Pulse Sampling.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+  
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Register with procmap.";
+} reg_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+commentdef {
+  p_header = "RUN mode";
+}
+
+typedef enum {
+  PRINT_MODE,
+  ASCOPE_MODE,
+  CAL_MODE,
+  SERVER_MODE,
+  MAX_POWER_MODE,
+  MAX_POWER_SERVER_MODE
+} run_mode_t;
+  
+paramdef enum run_mode_t {
+  p_default = PRINT_MODE;
+  p_descr = "Run mode";
+  p_help = "PRINT_MODE: print power, averaged over a number of gates, data to the screen, a line at a time.\n\nASCOPE_MODE: print data for a range of gates to the screen.\n\nCAL_MODE: average the powers for a number of gates, and write out in a file suitable for calibration.\n\nSERVER_MODE: listen on a port, and when a connection is established read an incoming set of commands in XML, average power over gates, and respond to the client in XML.\n\nMAX_POWER_MODE: compute the max power at any range within the specified gate limits, and print out the max power and range at which it occurs most often.\n\n\n\nMAX_POWER_SERVER_MODE: compute max power stats, write results to socket.";
+} run_mode;
+
+commentdef {
+  p_header = "PRINT DETAILS";
+}
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Labels will be printed at this number of lines.";
+} label_interval;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Just write one data set, then quit.";
+} once_only;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print meta-data headers, but not the pulse headers.";
+} print_meta_headers;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print all meta-data headers and pulse headers.";
+} print_all_headers;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print all pulses as they are read.";
+} print_all_pulses;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print ops info in full whenever it changes changes.";
+} print_info_on_change;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print the PRT for each pulse, along with the difference from the previous pulse.";
+} print_prt_details;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print type of packing used for IQ data.";
+} print_packing;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print HV flag for each pulse, comma-delimited.";
+} print_hv_flag;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print IQ data.";
+  p_help = "Uses the stored packing, unless print_iq_data_as_floats is true, in which case it prints it as floats.";
+} print_iq_data;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print IQ data from burst.";
+} print_burst_iq;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print warning if pulses are missing.";
+  p_help = "Check the sequence numbers for gaps. If a gap is found, a warning is printed.";
+} print_missing_pulses;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print out the data structure format.";
+} print_format;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print radial velocity if available";
+  p_help = "Only applies to MAX_POWER_MODE";
+} print_radial_velocity;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print lat/lon if available";
+  p_help = "Only applies to MAX_POWER_MODE";
+} print_lat_lon;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print altitude if available";
+  p_help = "Only applies to MAX_POWER_MODE";
+} print_altitude;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+typedef enum {
+  TS_FILE_INPUT, TS_FMQ_INPUT, TS_TCP_INPUT
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = TS_FILE_INPUT;
+  p_descr = "Input mode - files or time series API.";
+  p_help = "If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.";
+} input_mode;
+
+paramdef string {
+  p_default = "/tmp/fmq/ts";
+  p_descr = "FMQ name. For TS_FMQ_INPUT only.";
+  p_help = "Path to FMQ files. There are 2 files, one with a .buf extension and one with a .stat extention. This path does not include the extensions.";
+} input_fmq_name;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input;
+
+paramdef string {
+  p_default = "localhost";
+  p_descr = "Name of host for TCP server. For TS_TCP_INPUT only.";
+} tcp_server_host;
+
+paramdef int {
+  p_default = 12000;
+  p_descr = "Port for TCP server. For TS_TCP_INPUT only.";
+} tcp_server_port;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Handle dual channels.";
+  p_help = "Normally, only a single channel is used.";
+} dual_channel;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Radar is in fast-alternating mode.";
+} fast_alternating;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to invert H/V flag in pulse data.";
+  p_help = "Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the data has the opposite sense, set this to true.";
+} invert_hv_flag;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check the radar ID in the time series data stream.";
+  p_help = "If TRUE, we will check that the radar_id in the header packet info is either the specified radar_id, or is 0. This allows us to filter out unwanted data from the time series stream. Mostly this is not applicable. However, in some cases time series data from multiple sources is included in a single stream, in which case we need to filter it accordingly.";
+} check_radar_id;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "radar_id to be used for filtering incoming data.";
+  p_help = "See 'check_radar_id' above.";
+} radar_id;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If true, use the secondary georeference packet.";
+  p_help = "By default, we use the primary georeference packet. And most mobile radars only have one georeference. For those radars that have 2 georef devices, set this to true to use the secondary reference.";
+} use_secondary_georeference;
+
+commentdef {
+  p_header = "SAMPLING";
+};
+
+paramdef int {
+  p_default = 128;
+  p_descr = "Number of pulse samples in a beam.";
+} n_samples;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Start gate for analysis.";
+} start_gate;
+
+paramdef int {
+  p_default = 2048;
+  p_descr = "Number of gates for analysis.";
+} n_gates;
+
+typedef enum {
+  DISTANCE_IN_METERS,
+  DISTANCE_IN_FEET
+} distance_units_t;
+
+paramdef enum distance_units_t {
+  p_default = DISTANCE_IN_METERS;
+  p_descr = "Units for displaying distance.";
+  p_help = "In MAX_POWER mode, the distance to the max power gate for each channel is printed out. This can be either in feet or meters.";
+} distance_units;
+
+commentdef {
+  p_header = "CALIBRATION";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to apply calibration to compute powers.";
+  p_help = "Normally the powers are simply computed as I**2 + Q**2 - i.e. the power at the digitizer. If this param is set to TRUE, then the receiver gain from the calibration file will be subtracted from the powers, to give the powers detected by the LNAs.";
+} apply_calibration;
+
+paramdef string {
+  p_default = "calibration.xml";
+  p_descr = "Path for calibration file - see apply_calibration above.";
+  p_help = "This file will be read in and the gain values applied to compute the powers,m if apply_calibration is TRUE.";
+} cal_xml_file_path;
+
+commentdef {
+  p_header = "TESTING the PACKING";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Changing the packing for testing purposes.";
+} change_packing;
+
+typedef enum {
+  PACKING_FL32,
+  PACKING_SCALED_SI16,
+  PACKING_DBM_PHASE_SI16,
+  PACKING_SIGMET_FL16
+} packing_type_t;
+
+paramdef enum packing_type_t {
+  p_default = PACKING_FL32;
+  p_descr = "Packing of the IQ data for test printing";
+  p_help = "FL32: 32-bit floating point. COUNTS_UI16: scaled unsigned 16-bit integers, as is typical of IQ data directly from an A2D. SCALED_SI16: scaled signed 16-bit integers. DBM_PHASE_SI16: signed 16-bit integers representing power in dBM and phase in deg. SIGMET_SI16: Sigmet 16-bit floating point packing as in the RVP8.";
+} packing_type;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Scaling factor for packed IQ data.";
+  p_help = "This applies to the following packing types: COUNTS_UI16, SCALED_SI16, DBM_PHASE_SI16.\n\nFor COUNTS_UI16: volts = scaled unsigned_int * scale + offset.\n\nFor SCALED_SI16: volts = scaled signed_int * scale + offset.\n\nFor DBM_PHASE_SI16: dbm = scaled signed_int * scale + offset.\n\n";
+} packing_scale;
+  
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Offset for packed IQ data.";
+  p_help = "See test_scale.";
+} packing_offset;
+
+commentdef {
+  p_header = "SERVER MODE";
+  p_text = "In server mode, the application listens for connections from clients. A client, once connected, passed in a set of commands in XML format. IpsTsPrint computes results based on the commands, and returns the result also in XML mode.";
+};
+
+paramdef int {
+  p_default = 13000;
+  p_descr = "Port for listening in server mode.";
+} server_port;
+
+commentdef {
+  p_header = "SERVER MODE XML COMMANDS";
+  p_text = "The following lists the XML commands to be sent to IpsTsPrint in server mode:\n"
+    "  \n"
+    "  <IpsTsPrintCommands>\n"
+    "    <nSamples>1000</nSamples>\n"
+    "    <startGate>50</startGate>\n"
+    "    <nGates>500</nGates>\n"
+    "    <dualChannel>true</dualChannel>\n"
+    "    <fastAlternating>true</fastAlternating>\n"
+    "    <labviewRequest>true</labviewRequest>\n"
+    "  </IpsTsPrintCommands>\n"
+    "  \n"
+    "  nSamples: the number of pulses (samples) to be averaged\n"
+    "  startGate: the starting gate for averaging\n"
+    "  nGates: the number of gates to be averaged\n"
+    "  dualChannel: true if 2 channels, false otherwise\n"
+    "  fastAlternating: true in dual-pol fast alternating mode, false otherwise\n"
+    "  labviewReqyest: true if result to be sent in XML suitable for labview, false otherwise\n"
+    "\n";
+};
+
+commentdef {
+  p_header = "XML RESULT - NORMAL MODE";
+  p_text = "The following is an example of the XML result in normal (non-labview) mode:\n"
+    "  \n"
+    "  <IpsTsPrintResponse>\n"
+    "    <success>true</success>\n"
+    "    <time>2010-05-17T17:00:40</time>\n"
+    "    <msecs>863</msecs>\n"
+    "    <prf>1000</prf>\n"
+    "    <nSamples>1000</nSamples>\n"
+    "    <startGate>50</startGate>\n"
+    "    <nGates>500</nGates>\n"
+    "    <el>0</el>\n"
+    "    <az>360</az>\n"
+    "    <dbm0>-76.8903</dbm0>\n"
+    "    <dbm1>-77.5489</dbm1>\n"
+    "    <dbmHc>-76.9409</dbmHc>\n"
+    "    <dbmHx>-77.6356</dbmHx>\n"
+    "    <dbmVc>-76.8403</dbmVc>\n"
+    "    <dbmVx>-77.4638</dbmVx>\n"
+    "    <corr01H>0.00378701</corr01H>\n"
+    "    <arg01H>-12.0024</arg01H>\n"
+    "    <corr01V>0.0010595</corr01V>\n"
+    "    <arg01V>58.3829</arg01V>\n"
+    "  </IpsTsPrintResponse>\n"
+    "\n";
+};
+
+commentdef {
+  p_header = "XML RESULT - LABVIEW MODE";
+  p_text = "The following is an example of the XML result in normal (non-labview) mode:\n"
+    "  \n"
+    "  <Cluster>\n"
+    "    <Name>RVP8_power</Name>\n"
+    "    <NumElts>10</NumElts>\n"
+    "    <Boolean>\n"
+    "      <Name>success</Name>\n"
+    "      <Val>1</Val>\n"
+    "    </Boolean>\n"
+    "    <DBL>\n"
+    "      <Name>time</Name>\n"
+    "      <Val>3.3569173307e+09</Val>\n"
+    "    </DBL>\n"
+    "    <DBL>\n"
+    "      <Name>el</Name>\n"
+    "      <Val>0</Val>\n"
+    "    </DBL>\n"
+    "    <DBL>\n"
+    "      <Name>az</Name>\n"
+    "      <Val>360</Val>\n"
+    "    </DBL>\n"
+    "    <DBL>\n"
+    "      <Name>dbm0</Name>\n"
+    "      <Val>-76.8911</Val>\n"
+    "    </DBL>\n"
+    "    <DBL>\n"
+    "      <Name>dbm1</Name>\n"
+    "      <Val>-77.5407</Val>\n"
+    "    </DBL>\n"
+    "    <DBL>\n"
+    "      <Name>dbmHc</Name>\n"
+    "      <Val>-76.9401</Val>\n"
+    "    </DBL>\n"
+    "    <DBL>\n"
+    "      <Name>dbmHx</Name>\n"
+    "      <Val>-77.6436</Val>\n"
+    "    </DBL>\n"
+    "    <DBL>\n"
+    "      <Name>dbmVc</Name>\n"
+    "      <Val>-76.8426</Val>\n"
+    "    </DBL>\n"
+    "    <DBL>\n"
+    "      <Name>dbmVx</Name>\n"
+    "      <Val>-77.4402</Val>\n"
+    "    </DBL>\n"
+    "  </Cluster>\n"
+    "\n";
+};
+
