@@ -96,7 +96,7 @@ $(TARGET_FILES):
 	fi
 	$(MV) $@.exe $@
 
-$(TARGET_FILE): $(OBJS) Makefile
+$(TARGET_FILE): $(OBJS)
 	if $(TEST) $(MODULE_TYPE) = program; \
 	then \
 		echo Linking C program ...; \

@@ -36,7 +36,7 @@ target:
 # link target
 #
 
-$(TARGET_FILE): $(OBJS) Makefile
+$(TARGET_FILE): $(OBJS)
 	echo Linking C program ...
 	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LOC_LD_LIBRARY_PATH):$(SYS_LD_LIBRARY_PATH)
 	$(RM) $(TARGET_FILE)
