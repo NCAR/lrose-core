@@ -143,6 +143,55 @@ bool process_copy(string line) {
 	return recognized; 
 }
 
+bool process_assignment(string line) {
+	bool recognized = false;
+	//  [\\s] is blank space
+	const std::regex pieces_regex("([-[:alpha:]]+) is ([-\\.[:digit:]]+)[\\s]*(|degrees|gates)[\\s]*");
+
+	std::smatch pieces_match;
+
+	        if (std::regex_match(line, pieces_match, pieces_regex)) {
+
+	            for (size_t i = 0; i < pieces_match.size(); ++i) {
+	                std::ssub_match sub_match = pieces_match[i];
+	                std::string piece = sub_match.str();
+	                std::cout << "  submatch " << i << ": " << piece << '\n';
+	            }   
+	            string command = pieces_match[1];
+	            format_it(command);
+	            string value = pieces_match[2];
+	            cout << command << " = " << value << endl;
+	            recognized = true;
+	        } else {
+	        	std::cout << "regex_match returned false\n";
+	        }  
+	return recognized; 
+}
+
+bool process_action_no_args(string line) {
+	bool recognized = false;
+		        // from x to y 
+	    const std::regex pieces_regex("(clear-bad-flags)[\\s]");
+
+	    std::smatch pieces_match;
+
+	        if (std::regex_match(line, pieces_match, pieces_regex)) {
+	            //std::cout << line << '\n';
+	            for (size_t i = 0; i < pieces_match.size(); ++i) {
+	                std::ssub_match sub_match = pieces_match[i];
+	                std::string piece = sub_match.str();
+	                std::cout << "  submatch " << i << ": " << piece << '\n';
+	            }   
+	            string command = pieces_match[1];
+	            format_it(command);
+	            cout << command << " ( )" << endl;
+	            recognized = true;
+	        } else {
+	        	std::cout << "regex_match returned false\n";
+	        } 
+	return recognized;
+}
+
 int main()
 {
 
@@ -175,26 +224,28 @@ int main()
     // ----
   
 	        //  
+       if (!recognized) recognized = process_action_no_args(line);
        if (!recognized) recognized = process_copy(line);
        if (!recognized) recognized = process_from_to(line);
        if (!recognized) recognized = process_action_in(line);
        if (!recognized) recognized = process_when_above(line);
        if (!recognized) recognized = process_on_var_below(line);
+       if (!recognized) recognized = process_assignment(line);
        if (!recognized) {
 		   // write the results to an output iterator
 	       //std::regex_replace(std::ostreambuf_iterator<char>(std::cout),
 	        //  
 	        //               line.begin(), line.end(), vowel_re, "*");
-	       std::transform(line.begin(), line.end(), line.begin(), ::toupper);
-	       std::string line1, line2, line3;
-	       line1 = std::regex_replace(line, solo, " = ");
+	       //std::transform(line.begin(), line.end(), line.begin(), ::toupper);
+	       //std::string line1, line2, line3;
+	       //line1 = std::regex_replace(line, solo, " = ");
 
-	       line2 = std::regex_replace(line1, solo2, "(");
-	       std::cout << line2 << std::endl;
+	       //line2 = std::regex_replace(line1, solo2, "(");
+	       //std::cout << line2 << std::endl;
 	       //if (line2.find("(") != std::string::npos) line2.append(")");
 	 
 	       // construct a string holding the results
-	       std::cout << line2 << std::endl;
+	       //std::cout << line2 << std::endl;
        }
        if (!recognized) {
        	  cout << "ERROR not recognized " << line << endl;
