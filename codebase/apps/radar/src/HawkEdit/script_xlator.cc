@@ -12,6 +12,11 @@ void process(string str) {
 	cout << str << endl;
 }
 
+void format_it(string &command) {
+	std::transform(command.begin(), command.end(), command.begin(), ::toupper);
+	replace(command.begin(), command.end(), '-', '_');
+}
+
 bool process_from_to(string line) {
 	bool recognized = false;
 		        // from x to y 
@@ -26,6 +31,7 @@ bool process_from_to(string line) {
 	                std::cout << "  submatch " << i << ": " << piece << '\n';
 	            }   
 	            string command = pieces_match[1];
+	            format_it(command);
 	            string field = pieces_match[2];
 	            string from = pieces_match[3];
 	            string to = pieces_match[4];
@@ -51,6 +57,7 @@ bool process_action_in(string line) {
 	                std::cout << "  submatch " << i << ": " << piece << '\n';
 	            }   
 	            string command = pieces_match[1];
+	            format_it(command);
 	            string field = pieces_match[3];
 	            cout << command << " ( " << field << " )" << endl;
 	            recognized = true;
@@ -63,7 +70,9 @@ bool process_action_in(string line) {
 bool process_when_above(string line) {
 	bool recognized = false;
 		        // from x to y 
-	    const std::regex pieces_regex("(and-bad-flags|set-bad-flags) when ([_[:alnum:]]+) (above|below) ([-\\.[:digit:]]+)[\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
+	    // const std::regex pieces_regex("(and-bad-flags|set-bad-flags|or-bad-flags) when ([_[:alnum:]]+) (above|below) ([-\\.[:digit:]]+)[\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
+
+	    const std::regex pieces_regex("((and|set|or|xor)-bad-flags) when ([_[:alnum:]]+) (above|below) ([-\\.[:digit:]]+)[\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
 	    std::smatch pieces_match;
 
 	        if (std::regex_match(line, pieces_match, pieces_regex)) {
@@ -74,10 +83,12 @@ bool process_when_above(string line) {
 	                std::cout << "  submatch " << i << ": " << piece << '\n';
 	            }   
 	            string command = pieces_match[1];
-	            string field = pieces_match[2];
-	            string above_below = pieces_match[3];
-	            string value = pieces_match[4];
-	            cout << command << " ( " << field << "," << above_below << "," << value << " )" << endl;
+	            format_it(command);
+	            string field = pieces_match[3];
+	            string above_below = pieces_match[4];
+	            format_it(above_below);
+	            string value = pieces_match[5];
+	            cout << command << "_" << above_below << " ( " << field << "," << value << " )" << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -99,6 +110,7 @@ bool process_on_var_below(string line) {
 	                std::cout << "  submatch " << i << ": " << piece << '\n';
 	            }   
 	            string command = pieces_match[1];
+	            format_it(command);
 	            string field1 = pieces_match[2];
 	            string field2 = pieces_match[3];
 	            string value = pieces_match[4];
@@ -108,6 +120,27 @@ bool process_on_var_below(string line) {
 	        	std::cout << "regex_match returned false\n";
 	        } 
 	return recognized;
+}
+
+bool process_copy(string line) {
+	bool recognized = false;
+	    //  [\\s] is blank space
+	    const std::regex pieces_regex("copy[\\s]+([_[:alnum:]]+) to ([_[:alnum:]]+)[\\s]+"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
+	    std::smatch pieces_match;
+	        string mytest = "copy VG to VP1";
+	        if (std::regex_match(line, pieces_match, pieces_regex)) {
+	            //std::cout << line << '\n';
+	            for (size_t i = 0; i < pieces_match.size(); ++i) {
+	                std::ssub_match sub_match = pieces_match[i];
+	                std::string piece = sub_match.str();
+	                std::cout << "  submatch " << i << ": " << piece << '\n';
+	            }   
+	            cout << pieces_match[2] << " = " << pieces_match[1] << endl;
+	            recognized = true;
+	        } else {
+	        	std::cout << "regex_match returned false\n";
+	        }  
+	return recognized; 
 }
 
 int main()
@@ -140,24 +173,9 @@ int main()
 */
 
     // ----
-    //  [\\s] is blank space
-	    const std::regex pieces_regex("copy[\\s]+([_[:alnum:]]+) to ([_[:alnum:]]+)[\\s]+"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
-	    std::smatch pieces_match;
-	        string mytest = "copy VG to VP1";
-	        if (std::regex_match(line, pieces_match, pieces_regex)) {
-	            //std::cout << line << '\n';
-	            for (size_t i = 0; i < pieces_match.size(); ++i) {
-	                std::ssub_match sub_match = pieces_match[i];
-	                std::string piece = sub_match.str();
-	                std::cout << "  submatch " << i << ": " << piece << '\n';
-	            }   
-	            cout << pieces_match[2] << " = " << pieces_match[1] << endl;
-	            recognized = true;
-	        } else {
-	        	std::cout << "regex_match returned false\n";
-	        }     
+  
 	        //  
-
+       if (!recognized) recognized = process_copy(line);
        if (!recognized) recognized = process_from_to(line);
        if (!recognized) recognized = process_action_in(line);
        if (!recognized) recognized = process_when_above(line);
