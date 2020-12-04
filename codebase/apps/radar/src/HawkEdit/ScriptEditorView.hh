@@ -48,6 +48,7 @@ public slots:
     void returnPressed();
     void acceptFormulaInput();
     void cancelFormulaInput();
+    void displayHelp();
   //void clear();
 
   void notImplementedMessage();
@@ -87,6 +88,7 @@ protected:
   void criticalMessage(std::string message);
 
   void openScriptFile();
+  void importScriptFile();
   void saveScriptFile();
 
 private:

@@ -15,6 +15,7 @@
 //#include "ScriptEditorDelegate.hh"
 //#include "ScriptEditorItem.hh"
 #include "SoloFunctionsController.hh"
+#include "SoloScriptTranslator.hh"
 #include "DataField.hh"
 
 
@@ -102,6 +103,14 @@ Q_DECLARE_METATYPE(QVector<double>)
     connect(openFileAct, &QAction::triggered, this, &ScriptEditorView::openScriptFile);
     toolBar->addAction(openFileAct);
 
+    QAction *importFileAct = new QAction(tr("&Import Solo"), this);
+    font = importFileAct->font();
+    font.setPointSize(actionFontSize);
+    importFileAct->setFont(font);
+    importFileAct->setStatusTip(tr("import Solo style script from file"));
+    connect(importFileAct, &QAction::triggered, this, &ScriptEditorView::importScriptFile);
+    toolBar->addAction(importFileAct);
+
     QAction *saveFileAct = new QAction(tr("&Save"), this);
     font = saveFileAct->font();
     font.setPointSize(actionFontSize);
@@ -110,6 +119,13 @@ Q_DECLARE_METATYPE(QVector<double>)
     connect(saveFileAct, &QAction::triggered, this, &ScriptEditorView::saveScriptFile);
     toolBar->addAction(saveFileAct);
 
+    QAction *helpAct = new QAction(tr("&Help"), this);
+    font = helpAct->font();
+    font.setPointSize(actionFontSize);
+    helpAct->setFont(font);
+    helpAct->setStatusTip(tr("list of script commands"));
+    connect(helpAct, &QAction::triggered, this, &ScriptEditorView::displayHelp);
+    toolBar->addAction(helpAct);
 /*
     QAction *applyAct = new QAction(tr("&Apply"), this);
     applyAct->setStatusTip(tr("Apply changes to display"));
@@ -298,6 +314,36 @@ void ScriptEditorView::openScriptFile() {
   */
   // formulaInputForEachRay->setText(fileContent);
 
+}
+
+void ScriptEditorView::importScriptFile() {
+  QString fileNameQ = QFileDialog::getOpenFileName(this,
+    tr("Open Script from File"), ".", tr("Script Files (*)"));
+  string fileName = fileNameQ.toStdString();
+  LOG(DEBUG) << "script file name is " << fileName;
+
+  QString fileContent("Script Content Here");
+  QFile file(fileNameQ); 
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QMessageBox::warning(this, "title", "Cannot open file");
+  } else {
+    QTextStream in(&file);
+    //fileContent = in.readAll(); //  >> fileContent; // forEachRayScript.toUtf8();
+    std::ifstream script_file;
+    script_file.open(fileName, std::ios::in);
+    std::stringstream javascript;
+    SoloScriptTranslator xlator;
+    xlator.translate(script_file, javascript);
+    fileContent = QString::fromStdString(javascript.str());
+    script_file.close();
+  }
+
+  // TODO: run text through translator, then display new version in text box
+  this->formulaInputForEachRay->setText(fileContent);
+}
+
+void ScriptEditorView::displayHelp() {
+  LOG(DEBUG) << "not implemented";
 }
 
 void ScriptEditorView::saveScriptFile() {

@@ -45,6 +45,7 @@ signals:
   void volumeChanged(); // const RadxVol &radarDataVolume);
 
 public slots:
+  void setDataMissing(string fieldName, float missingDataValue);
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
   void needAzimuthForRay(int offsetFromClosest, int fieldIdx, string fieldName);

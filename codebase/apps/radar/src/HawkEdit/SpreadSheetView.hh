@@ -65,6 +65,7 @@ public slots:
   void actionDisplayRayInfo();
   void actionDisplayMetadata();
   void actionDisplayEditHist();
+  void deleteField();
 
   void notImplementedMessage();
 
@@ -82,6 +83,7 @@ public slots:
   void applyChanges();
   void applyEdits();
   void changeAzEl(float azimuth, float elevation);
+  void changeMissingValue(float currentMissingValue);
   void newElevation(float elevation);
   void newAzimuth(float azimuth);
   void setTheWindowTitle(float rayAzimuth);
@@ -98,6 +100,7 @@ signals:
   void applyVolumeEdits();
   void signalRayAzimuthChange(float rayAzimuth, float elevation);
   void needRangeData(size_t nPoints);
+  void setDataMissing(string fieldName, float missingDataValue);
 
 protected:
     void setupContextMenu();
@@ -130,6 +133,7 @@ private:
     int _nFieldsToDisplay;
     int _nRays;
     string data_format = "%g";
+    float _missingDataValue;
 
 
     QToolBar *toolBar;
@@ -160,6 +164,7 @@ private:
   QPushButton *applyEditsButton;
   QLineEdit *rayLineEdit;
   QLineEdit *raysLineEdit;
+  QLineEdit *missingDataValueLineEdit;
 
     QAction *printAction;
 

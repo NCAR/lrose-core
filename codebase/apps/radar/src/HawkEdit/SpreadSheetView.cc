@@ -110,8 +110,13 @@ Q_DECLARE_METATYPE(QVector<double>)
     echoLayout->addWidget(nyqVelLineEdit, 4, 1);
     echoLayout->addWidget(new QLabel(tr("0 implies the default Nyq Vel")), 4, 2);
 
+    missingDataValueLineEdit = new QLineEdit;
+    missingDataValueLineEdit->setText(QString::number(Radx::missingFl32));
+    echoLayout->addWidget(new QLabel(tr("Missing Data")), 5, 0);
+    echoLayout->addWidget(missingDataValueLineEdit, 5, 1);
+
     //QFileDialog *logDirDialog = new QFileDialog; 
-    echoLayout->addWidget(new QLabel(tr("Log Dir")), 5, 0);
+    echoLayout->addWidget(new QLabel(tr("Log Dir")), 6, 0);
     //echoLayout->addWidget(logDirDialog, 5, 1);
 
     rayLineEdit = new QLineEdit;
@@ -125,7 +130,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     echoLayout->addWidget(rayLineEdit, 1, 3);
 
     raysLineEdit = new QLineEdit;
-    raysLineEdit->setPlaceholderText(QString::number(_nRays));
+    raysLineEdit->setText(QString::number(_nRays));
     echoLayout->addWidget(new QLabel(tr("Rays")), 2, 2);
     echoLayout->addWidget(raysLineEdit, 2, 3);
 
@@ -331,8 +336,8 @@ void SpreadSheetView::init()
 
 void SpreadSheetView::createActions()
 {
-    cell_deleteAction = new QAction(tr("Delete"), this);
-    connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+    cell_deleteAction = new QAction(tr("Delete Field"), this);
+    connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::deleteField);
 
     cell_negFoldAction = new QAction(tr("&- Fold"), this);
     //cell_addAction->setShortcut(Qt::CTRL | Qt::Key_Plus);
@@ -928,7 +933,7 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, 
       string format = "%g";
       char formattedData[250];
       char dashes[] = " -- ";
-      float MISSING = Radx::missingFl32;
+      float MISSING = _missingDataValue;
 
       int startingColumn = 0; // leave room for the range/gate values
 
@@ -1015,6 +1020,19 @@ void SpreadSheetView::applyEdits() {
     criticalMessage("number of rays to display must be between 0 to 10 rays");
   }
 
+  // get new missing data value, if needed
+  QString missingDataValue = missingDataValueLineEdit->text();
+  LOG(DEBUG) << "missing data entered " << missingDataValue.toStdString();
+
+  float currentMissingValue = missingDataValue.toFloat(&ok);
+
+  if (ok) {
+    // signal the controller to update the display
+    changeMissingValue(currentMissingValue);  
+  } else {
+    criticalMessage("missing data must be numeric");
+  }
+
   // get a new azimuth if needed
   QString rayAz = rayLineEdit->text();
   LOG(DEBUG) << "ray az entered " << rayAz.toStdString();
@@ -1027,6 +1045,12 @@ void SpreadSheetView::applyEdits() {
   } else {
     criticalMessage("ray azimuth must be between 0.0 and 360.0");
   }
+
+
+}
+
+void SpreadSheetView::changeMissingValue(float currentMissingValue) {
+    _missingDataValue = currentMissingValue;
 }
 
 void SpreadSheetView::changeAzEl(float azimuth, float elevation) {
@@ -1127,6 +1151,15 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
     }
 
     LOG(DEBUG) << "exit";
+}
+
+void SpreadSheetView::deleteField() {
+    int currentColumn = table->currentColumn();
+    QTableWidgetItem *currentHeader = table->horizontalHeaderItem(table->currentColumn());
+    if (currentHeader != NULL) {
+        setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
+    }
+
 }
 
 void SpreadSheetView::criticalMessage(std::string message)

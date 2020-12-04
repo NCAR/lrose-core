@@ -59,6 +59,7 @@ HDRS = \
 	ColorBar.hh \
 	ColorMap.hh \
 	ColorTableManager.hh \
+	CustomTableHeader.hh \
 	DisplayManager.hh \
 	FieldRenderer.hh \
 	FieldRendererController.hh \
@@ -86,6 +87,7 @@ HDRS = \
 	ScriptEditorView.hh \
 	SoloDefaultColorWrapper.hh \
 	SoloFunctionsController.hh \
+	SoloScriptTranslator.hh \
 	SpreadSheetController.hh \
 	SpreadSheetItem.hh \
 	SpreadSheetModel.hh \
@@ -120,6 +122,7 @@ NORM_SRCS = \
 	SiiPalette.cc \
 	SoloDefaultColorWrapper.cc \
 	SoloFunctionsModel.cc \
+	SoloScriptTranslator.cc \
 	SpreadSheetItem.cc \
 	SpreadSheetModel.cc \
 	SpreadSheetUtils.cc \
@@ -141,6 +144,7 @@ MOC_SRCS = \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
+	CustomTableHeader.cc \
 	ScriptEditorView.cc \
 	ScriptEditorController.cc \
 	TextEdit.cc \
@@ -164,6 +168,7 @@ MOC_OUTPUT = \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \
+	moc_CustomTableHeader.cpp \
 	moc_ScriptEditorView.cpp \
 	moc_ScriptEditorController.cpp \
 	moc_TextEdit.cpp \

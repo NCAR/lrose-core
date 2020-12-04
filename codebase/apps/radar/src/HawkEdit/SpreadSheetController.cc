@@ -147,6 +147,9 @@ void SpreadSheetController::setData(string fieldName, vector<float> *data)
   _currentModel->setData(fieldName, data);
 }
 
+void SpreadSheetController::setDataMissing(string fieldName, float missingDataValue) {
+  // _currentModel->setDataMissing(fieldName, missingDataValue);
+}
 
 void  SpreadSheetController::needFieldNames() {
   _currentView->fieldNamesProvided(getFieldNames());
@@ -190,6 +193,7 @@ void SpreadSheetController::getVolumeChanges() {
 void SpreadSheetController::volumeUpdated() {
   emit volumeChanged(); // _currentModel->getVolume());
 }
+
 
 
 void SpreadSheetController::open(string fileName)
