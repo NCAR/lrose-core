@@ -17,7 +17,7 @@ void format_it(string &command) {
 	replace(command.begin(), command.end(), '-', '_');
 }
 
-bool process_from_to(string line) {
+bool process_from_to(string line, std::iostream& javascript) {
 	bool recognized = false;
 		        // from x to y 
 	    const std::regex pieces_regex("(remove-ring) in ([_[:alnum:]]+) from[\\s]+([-\\.[:digit:]]+) to ([-\\.[:digit:]]+) km\\.[\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
@@ -36,6 +36,7 @@ bool process_from_to(string line) {
 	            string from = pieces_match[3];
 	            string to = pieces_match[4];
 	            cout << command << " ( " << field << "," << from << "," << to << " )" << endl;
+	            javascript << command << " ( " << field << "," << from << "," << to << " )" << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -43,7 +44,7 @@ bool process_from_to(string line) {
 	return recognized;
 }
 
-bool process_action_in(string line) {
+bool process_action_in(string line, std::iostream& javascript) {
 	bool recognized = false;
 		        // from x to y 
 	    const std::regex pieces_regex("(remove-only-surface|assert-bad-flags|copy-bad-flags|BB-unfolding) (in|from|of) ([_[:alnum:]]+)[\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
@@ -60,6 +61,7 @@ bool process_action_in(string line) {
 	            format_it(command);
 	            string field = pieces_match[3];
 	            cout << command << " ( " << field << " )" << endl;
+	            javascript << command << " ( " << field << " )" << endl;	            
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -67,7 +69,7 @@ bool process_action_in(string line) {
 	return recognized;
 }
 
-bool process_when_above(string line) {
+bool process_when_above(string line, std::iostream& javascript) {
 	bool recognized = false;
 		        // from x to y 
 	    // const std::regex pieces_regex("(and-bad-flags|set-bad-flags|or-bad-flags) when ([_[:alnum:]]+) (above|below) ([-\\.[:digit:]]+)[\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
@@ -89,6 +91,7 @@ bool process_when_above(string line) {
 	            format_it(above_below);
 	            string value = pieces_match[5];
 	            cout << command << "_" << above_below << " ( " << field << "," << value << " )" << endl;
+	            javascript << command << "_" << above_below << " ( " << field << "," << value << " )" << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -96,7 +99,7 @@ bool process_when_above(string line) {
 	return recognized;
 }
 
-bool process_on_var_below(string line) {
+bool process_on_var_below(string line, std::iostream& javascript) {
 	bool recognized = false;
 		        // from x to y 
 	    const std::regex pieces_regex("(threshold) ([_[:alnum:]]+) on ([_[:alnum:]]+) below ([-\\.[:digit:]]+)[\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
@@ -115,6 +118,7 @@ bool process_on_var_below(string line) {
 	            string field2 = pieces_match[3];
 	            string value = pieces_match[4];
 	            cout << command << " ( " << field1 << "," << field2 << "," << value << " )" << endl;
+	            javascript << command << " ( " << field1 << "," << field2 << "," << value << " )" << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -122,7 +126,7 @@ bool process_on_var_below(string line) {
 	return recognized;
 }
 
-bool process_copy(string line) {
+bool process_copy(string line, std::iostream& javascript) {
 	bool recognized = false;
 	    //  [\\s] is blank space
 	    const std::regex pieces_regex("copy[\\s]+([_[:alnum:]]+) to ([_[:alnum:]]+)[\\s]+"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
@@ -136,6 +140,7 @@ bool process_copy(string line) {
 	                std::cout << "  submatch " << i << ": " << piece << '\n';
 	            }   
 	            cout << pieces_match[2] << " = " << pieces_match[1] << endl;
+	            javascript << pieces_match[2] << " = " << pieces_match[1] << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -143,7 +148,7 @@ bool process_copy(string line) {
 	return recognized; 
 }
 
-bool process_assignment(string line) {
+bool process_assignment(string line, std::iostream& javascript) {
 	bool recognized = false;
 	//  [\\s] is blank space
 	const std::regex pieces_regex("([-[:alpha:]]+) is ([-\\.[:digit:]]+)[\\s]*(|degrees|gates)[\\s]*");
@@ -161,6 +166,7 @@ bool process_assignment(string line) {
 	            format_it(command);
 	            string value = pieces_match[2];
 	            cout << command << " = " << value << endl;
+	            javascript << command << " = " << value << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -168,7 +174,7 @@ bool process_assignment(string line) {
 	return recognized; 
 }
 
-bool process_action_no_args(string line) {
+bool process_action_no_args(string line, std::iostream& javascript) {
 	bool recognized = false;
 		        // from x to y 
 	    const std::regex pieces_regex("(clear-bad-flags)[\\s]");
@@ -185,6 +191,7 @@ bool process_action_no_args(string line) {
 	            string command = pieces_match[1];
 	            format_it(command);
 	            cout << command << " ( )" << endl;
+	            javascript << command << " ( )" << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -192,19 +199,41 @@ bool process_action_no_args(string line) {
 	return recognized;
 }
 
+//void translate(ifstream& solo_script, std::stringstream& javascript)
+void translate(ifstream& solo_script, std::iostream& javascript) {
+   if (solo_script.is_open()) {
+     std::string line;
+     while (getline(solo_script, line)) {
+
+     	std::cout << "|" << line << "| \n";
+     	bool recognized = false;
+
+       if (!recognized) recognized = process_action_no_args(line, javascript);
+       if (!recognized) recognized = process_copy(line, javascript);
+       if (!recognized) recognized = process_from_to(line, javascript);
+       if (!recognized) recognized = process_action_in(line, javascript);
+       if (!recognized) recognized = process_when_above(line, javascript);
+       if (!recognized) recognized = process_on_var_below(line, javascript);
+       if (!recognized) recognized = process_assignment(line, javascript);
+       if (!recognized) {
+       	  cout << "ERROR not recognized " << line << endl;
+       }
+	   std::cout << std::endl;
+	   //javascript << endl;
+     }
+    }
+}
+
 int main()
 {
 
-   std::string text = "Quick brown fox";
-   std::regex vowel_re("a|e|i|o|u");
-   std::regex solo(" IS ");
-   std::regex solo2(" IN "); 
-   std::regex solo_copy("COPY VG TO V1"); // => V1 = VG  
    std::ifstream script_file;
-
    
    script_file.open("/Users/brenda/data/solo_scripts/sed_med_auto", std::ios::in);
+   std::stringstream javascript;
+   translate(script_file, javascript);
 
+   /*
    if (script_file.is_open()) {
      std::string line;
      while (getline(script_file, line)) {
@@ -212,14 +241,6 @@ int main()
      	//line[length-1] = '\0';
      	std::cout << "|" << line << "| \n";
      	bool recognized = false;
- /*
-        // maybe instead of regular expressions, just separate by blank space, then rearrange tokens?
-        stringstream iss(line);
-        string str;
-        while (iss >> str) {
-       	   process(str);
-        }
-*/
 
     // ----
   
@@ -232,38 +253,16 @@ int main()
        if (!recognized) recognized = process_on_var_below(line);
        if (!recognized) recognized = process_assignment(line);
        if (!recognized) {
-		   // write the results to an output iterator
-	       //std::regex_replace(std::ostreambuf_iterator<char>(std::cout),
-	        //  
-	        //               line.begin(), line.end(), vowel_re, "*");
-	       //std::transform(line.begin(), line.end(), line.begin(), ::toupper);
-	       //std::string line1, line2, line3;
-	       //line1 = std::regex_replace(line, solo, " = ");
-
-	       //line2 = std::regex_replace(line1, solo2, "(");
-	       //std::cout << line2 << std::endl;
-	       //if (line2.find("(") != std::string::npos) line2.append(")");
-	 
-	       // construct a string holding the results
-	       //std::cout << line2 << std::endl;
-       }
-       if (!recognized) {
        	  cout << "ERROR not recognized " << line << endl;
        }
-
-
-// -----
-
-	        
 	        std::cout << std::endl;
-
-// -----
-
-
-       //std::cout << '\n' << std::regex_replace(text, vowel_re, "[$&]") << '\n';
-       
      }
+     */
+
      script_file.close();
-   }
+
+     cout << "\n\nHere is the translated script ...\n";
+     cout << javascript.str() << endl;
+   //}
    
 }
