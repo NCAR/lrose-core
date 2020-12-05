@@ -462,6 +462,20 @@ QString SoloFunctionsController::SET_BAD_FLAGS_BETWEEN(QString field, float lowe
   return QString::fromStdString(tempFieldName);
 } 
 
+// return the name of the field in which the result is stored in the RadxVol
+QString SoloFunctionsController::REMOVE_RING(QString field, float lower_threshold,
+                   float upper_threshold, float bad_data,
+                   size_t clip_gate) {
+  // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
+  string tempFieldName = soloFunctionsModel.RemoveRing(field.toStdString(), _data,
+                     _currentRayIdx, _currentSweepIdx,
+                     lower_threshold, upper_threshold,
+                     clip_gate,
+                     bad_data,
+                     field.toStdString());
+  return QString::fromStdString(tempFieldName);
+} 
+
 /*
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::FLAG_FRECKLES(QString field, float constant, float bad_data,

@@ -103,6 +103,10 @@ public:
   Q_INVOKABLE QString COPY_BAD_FLAGS(QString field, float bad_data = FLT_MIN,
 				     size_t clip_gate = SIZE_MAX);
 
+  Q_INVOKABLE QString REMOVE_RING(QString field, float lower_threshold,
+              float upper_threshold, float bad_data = FLT_MIN,
+              size_t clip_gate = SIZE_MAX);
+
   Q_INVOKABLE double sqrt(double value) { return qSqrt(value); }
   Q_INVOKABLE QVector<double> add(QVector<double> v, QVector<double> v2) {
     int size = v.size();

@@ -47,6 +47,13 @@ public:
 		   float bad_data_value,
 		   string newFieldName);
 
+    string RemoveRing(string fieldName,  RadxVol *vol,
+		   int rayIdx, int sweepIdx,
+		   float lower_threshold, float upper_threshold,
+		   size_t clip_gate,
+		   float bad_data_value,
+		   string newFieldName);
+
   string BBUnfoldFirstGoodGate(string fieldName, RadxVol *vol,
 			       int rayIdx, int sweepIdx,
 			       float nyquist_velocity,

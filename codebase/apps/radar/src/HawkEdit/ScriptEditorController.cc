@@ -342,6 +342,7 @@ void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFun
   engine.globalObject().setProperty("FLAGGED_ADD", myExt.property("FLAGGED_ADD"));
   engine.globalObject().setProperty("FLAGGED_MULTIPLY", myExt.property("FLAGGED_MULTIPLY"));
 
+  engine.globalObject().setProperty("REMOVE_RING", myExt.property("REMOVE_RING"));
   engine.globalObject().setProperty("FLAG_FRECKLES", myExt.property("FLAG_FRECKLES"));
   engine.globalObject().setProperty("FLAG_GLITCHES", myExt.property("FLAG_GLITCHES"));
   engine.globalObject().setProperty("~+", myExt.property("FLAGGED_ADD"));
@@ -578,6 +579,7 @@ uncate(100);
     for (nameItr = initialFieldNames.begin(); nameItr != initialFieldNames.end(); ++nameItr) {
       QString vectorName(nameItr->c_str());
       //vectorName.append("_v");
+      //QString originalName(nameItr->c_str());
       currentVariableContext[vectorName] = vectorName;
     }
   
@@ -685,6 +687,32 @@ uncate(100);
   	      //}
   	    }
       }
+      if (value.isString()) {
+
+        QString theValue = it2.value().toString();
+        //theValue.truncate(100);
+        //LOG(DEBUG) << it2.name().toStdString() << ": " << theValue.toStdString();
+        if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
+          // we have a newly defined variable                                                            
+          LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
+          // COOL! at this point, we have the new field name AND the temporary field name in the RadxVol,
+          // so we can do an assignment now.
+          string tempName = theValue.toStdString();
+          string userDefinedName = it2.name().toStdString();
+          // only assign the ray data if this is a Solo Function, f(x)
+          // remove the ending # because it is not in the RadxVol
+          size_t length = tempName.length();
+          if (length > 0) {
+            if (tempName[length-1] == '#') {
+              tempName.resize(length-1);
+              //tempName.append("#");
+              _assign(tempName, userDefinedName);
+              // add Variable list ToScriptEditor(it2.name(), it2.value());
+              newFieldNames << it2.name();
+            }
+          }
+        }
+      }
     }
 
 
@@ -721,7 +749,8 @@ void ScriptEditorController::fieldNamesProvided(vector<string> fieldNames) {
       ////QJSValue objectValue = engine.newQObject(new DataField(*it));                                    
       ////engine.globalObject().setProperty(fieldName, objectValue.property("name"));    
 
-      engine.globalObject().setProperty(fieldName.append("_V"), fieldName);                                           
+      QString originalName = fieldName;
+      engine.globalObject().setProperty(fieldName.append("_V"), originalName); // fieldName);                                           
 
       //someValue += 1;                                                                                    
 
