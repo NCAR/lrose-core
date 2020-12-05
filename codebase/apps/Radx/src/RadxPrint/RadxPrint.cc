@@ -270,6 +270,10 @@ int RadxPrint::_handleViaPath(const string &path)
     vol.trimSurveillanceSweepsTo360Deg();
   }
 
+  // compute the sweep scan rates from the rays
+
+  vol.computeSweepScanRatesFromRays();
+
   // do print
 
   _printVol(vol);
