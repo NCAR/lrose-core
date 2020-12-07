@@ -442,25 +442,25 @@ int InputWatcher::_copyFile(const char *inputPath, time_t modTime)
 
   // compression extensions
   
-  char uncompressedName[MAX_PATH_LEN];
   if (_params.copy_to_time_stamped_file) {
+    string uncompressedName(copyName);
     if (isGzipped) {
-      sprintf(uncompressedName, "%s", copyName);
-      sprintf(copyName, "%s.gz", uncompressedName);
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s.gz", uncompressedName.c_str());
     } else if (isBzipped) {
-      sprintf(uncompressedName, "%s", copyName);
-      sprintf(copyName, "%s.bz2", uncompressedName);
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s.bz2", uncompressedName.c_str());
     } else if (isCompressed) {
-      sprintf(uncompressedName, "%s", copyName);
-      sprintf(copyName, "%s.Z", uncompressedName);
+      snprintf(copyName, MAX_PATH_LEN,
+               "%s.Z", uncompressedName.c_str());
     }
   }
 
   // copy path
 
-  char copyPath[MAX_PATH_LEN];
-  sprintf(copyPath, "%s%s%s",
-	  copySubDir, PATH_DELIM, copyName);
+  char copyPath[MAX_PATH_LEN * 2];
+  snprintf(copyPath, MAX_PATH_LEN * 2, "%s%s%s",
+           copySubDir, PATH_DELIM, copyName);
   
   if (_params.debug) {
     cerr << "Copying file: " << inputPath << endl;
