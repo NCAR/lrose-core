@@ -470,6 +470,9 @@ int MrmsGribIngest::_combineVolume()
     // create the volume field
 
     MdvxField *volField = new MdvxField(fhdrVol, vhdrVol, volData);
+    if (_params.convert_to_column_max) {
+      volField->convert2Composite();
+    }
     delete[] volData;
 
     // add to output volume

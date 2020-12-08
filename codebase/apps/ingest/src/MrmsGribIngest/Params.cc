@@ -991,6 +991,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("CONVERT TO COLUMN-MAX VALUES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'convert_to_column_max'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("convert_to_column_max");
+    tt->descr = tdrpStrDup("Option to compute the column max (composite) DBZ product.");
+    tt->help = tdrpStrDup("If true, for each grid point we compute the maximum value in the column, before writing the output files.");
+    tt->val_offset = (char *) &convert_to_column_max - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("REMAPPING GRID PROJECTION ON OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1277,11 +1298,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("PRINT OPTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1322,11 +1343,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("PRINT SECTIONS PARAMETERS");
     tt->comment_text = tdrpStrDup("Parameters only used with -printSec or debug > 1\n. For each grib message prints the sections defined below.");
     tt++;

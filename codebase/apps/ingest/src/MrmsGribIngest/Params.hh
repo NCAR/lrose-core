@@ -466,6 +466,8 @@ public:
 
   int min_time_between_output_files_in_secs;
 
+  tdrp_bool_t convert_to_column_max;
+
   tdrp_bool_t remap_output_grid;
 
   projection_t remap_projection;
@@ -531,7 +533,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[63];
+  mutable TDRPtable _table[65];
 
   const char *_className;
 

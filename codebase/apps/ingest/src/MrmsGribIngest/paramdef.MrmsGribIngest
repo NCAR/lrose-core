@@ -228,6 +228,16 @@ paramdef int {
 } min_time_between_output_files_in_secs;
 
 commentdef {
+  p_header = "CONVERT TO COLUMN-MAX VALUES";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute the column max (composite) DBZ product.";
+  p_help = "If true, for each grid point we compute the maximum value in the column, before writing the output files.";
+} convert_to_column_max;
+
+commentdef {
   p_header = "REMAPPING GRID PROJECTION ON OUTPUT";
 }
 
