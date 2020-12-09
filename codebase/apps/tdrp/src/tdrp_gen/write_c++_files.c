@@ -275,7 +275,7 @@ int write_hh_file(const char *class_name,
 
   write_comments_destructor(hfile);
   
-  fprintf(hfile, "  ~%s ();\n\n", class_name);
+  fprintf(hfile, "  virtual ~%s ();\n\n", class_name);
 
   /*
    * assignment
