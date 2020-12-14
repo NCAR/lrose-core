@@ -231,7 +231,7 @@ public:
   // Destructor
   //
 
-  ~FiltAlgParams ();
+  virtual ~FiltAlgParams ();
 
   ////////////////////////////////////////////
   // Assignment
