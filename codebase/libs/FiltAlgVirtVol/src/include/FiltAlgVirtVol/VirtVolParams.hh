@@ -83,7 +83,7 @@ public:
   // Destructor
   //
 
-  ~VirtVolParams ();
+  virtual ~VirtVolParams ();
 
   ////////////////////////////////////////////
   // Assignment

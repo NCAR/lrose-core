@@ -91,7 +91,7 @@ public:
   // Destructor
   //
 
-  ~AlgorithmParams ();
+  virtual ~AlgorithmParams ();
 
   ////////////////////////////////////////////
   // Assignment

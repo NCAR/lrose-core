@@ -97,7 +97,7 @@ public:
   // Destructor
   //
 
-  ~UrlParams ();
+  virtual ~UrlParams ();
 
   ////////////////////////////////////////////
   // Assignment
