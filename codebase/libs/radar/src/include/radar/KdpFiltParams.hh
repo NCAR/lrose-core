@@ -99,7 +99,7 @@ public:
   // Destructor
   //
 
-  ~KdpFiltParams ();
+  virtual ~KdpFiltParams ();
 
   ////////////////////////////////////////////
   // Assignment

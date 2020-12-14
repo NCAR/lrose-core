@@ -83,7 +83,7 @@ public:
   // Destructor
   //
 
-  ~PrecipRateParams ();
+  virtual ~PrecipRateParams ();
 
   ////////////////////////////////////////////
   // Assignment

@@ -90,7 +90,7 @@ public:
   // Destructor
   //
 
-  ~NcarPidParams ();
+  virtual ~NcarPidParams ();
 
   ////////////////////////////////////////////
   // Assignment

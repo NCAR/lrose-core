@@ -129,7 +129,7 @@ public:
   // Destructor
   //
 
-  ~RadxAppParams ();
+  virtual ~RadxAppParams ();
 
   ////////////////////////////////////////////
   // Assignment
