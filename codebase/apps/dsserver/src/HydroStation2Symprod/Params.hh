@@ -147,7 +147,7 @@ public:
   // Destructor
   //
 
-  ~Params ();
+  virtual ~Params ();
 
   ////////////////////////////////////////////
   // Assignment

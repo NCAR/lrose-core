@@ -117,7 +117,7 @@ public:
   // Destructor
   //
 
-  ~ProdParams ();
+  virtual ~ProdParams ();
 
   ////////////////////////////////////////////
   // Assignment

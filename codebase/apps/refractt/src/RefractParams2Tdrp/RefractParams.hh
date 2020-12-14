@@ -99,7 +99,7 @@ public:
   // Destructor
   //
 
-  ~RefractParams ();
+  virtual ~RefractParams ();
 
   ////////////////////////////////////////////
   // Assignment
