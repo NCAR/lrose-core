@@ -101,6 +101,13 @@ public:
     PACKING_SIGMET_FL16 = 3
   } packing_type_t;
 
+  // struct typedefs
+
+  typedef struct {
+    char* xml_tag_list;
+    char* col_label;
+  } status_xml_entry_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -203,15 +210,6 @@ public:
   //
 
   static bool isArgValid(const char *arg);
-
-  ////////////////////////////////////////////
-  // isArgValid()
-  // 
-  // Check if a command line arg is a valid TDRP arg.
-  // return number of args consumed.
-  //
-
-  static int isArgValidN(const char *arg);
 
   ////////////////////////////////////////////
   // load()
@@ -487,6 +485,11 @@ public:
 
   int server_port;
 
+  tdrp_bool_t add_cols_from_status_xml;
+
+  status_xml_entry_t *_xml_entries_for_extra_cols;
+  int xml_entries_for_extra_cols_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -494,7 +497,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[59];
+  mutable TDRPtable _table[62];
 
   const char *_className;
 

@@ -431,3 +431,38 @@ commentdef {
     "\n";
 };
 
+commentdef {
+  p_header = "ADDING COLUMNS FROM STATUS XML";
+  p_text = "If activated, this section allows you to add extra columns to the output, by parsing the status xml.";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add columns using data from status xml messages in the time series.";
+
+} add_cols_from_status_xml;
+
+typedef struct {
+  string xml_tag_list;
+  string col_label;
+} status_xml_entry_t;
+
+paramdef struct status_xml_entry_t {
+  p_default = {
+    {
+      xml_tag_list = "<HcrStatus><HcrReceiverStatus><VLnaTemp>",
+      col_label = "VLnaTemp"
+    }
+    ,
+    {
+      xml_tag_list = "<HcrStatus><HcrReceiverStatus><HLnaTemp>",
+      col_label = "HLnaTemp"
+    }
+  };
+  p_descr = "Details of XML entries to be added as columns to the printout.";
+  p_help =
+    "\txml_tag_list: list of tags, from outer to inner, for identifying the entry.\n"
+    "\tcol_label: column label\n"
+    ".";
+} xml_entries_for_extra_cols[];
+

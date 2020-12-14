@@ -140,6 +140,11 @@ private:
   double _prevAzimuth;
   double _prevElevation;
 
+  // extra columns from XML blocks
+
+  vector<string> _extraColLabels;
+  vector<string> _extraColValues;
+
   // methods
 
   int _runPrintMode();
@@ -220,6 +225,10 @@ private:
   // check angle change
 
   void _checkAngleChange(const IwrfTsPulse &pulse);
+
+  // read XML data for extra columns
+
+  void _decodeXmlForExtraCols();
   
 };
 

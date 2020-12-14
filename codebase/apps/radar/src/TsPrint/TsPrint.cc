@@ -49,6 +49,7 @@
 #include <toolsa/uusleep.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaXml.hh>
+#include <toolsa/TaStr.hh>
 #include <toolsa/TaArray.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/ServerSocket.hh>
@@ -394,6 +395,10 @@ int TsPrint::_runPrintMode()
         _computeDual();
       } else {
         _computeSummary();
+      }
+      // get extra col data from XML if needed
+      if (_params.add_cols_from_status_xml) {
+        _decodeXmlForExtraCols();
       }
       if (!_params.print_all_headers) {
         if (_fastAlternating) {
@@ -2006,7 +2011,7 @@ string TsPrint::_pulseString(const IwrfTsPulse &pulse)
   char text[4096];
   int index = gateNum * 2;
   
-  sprintf(text,
+  snprintf(text, 4096,
           "%lu,%d,%d"
           ",%.3f,%.5f,%d,%d,%.2f,%.2f"
           ",%d,%.3e",
@@ -2095,11 +2100,17 @@ void TsPrint::_printSummaryLabels(ostream &out)
 
   if (_dualChannel) {
     out << "#                  "
-	<< "time           prf      el      az  dbmChan0  dbmChan1" << endl;
+	<< "time           prf      el      az  dbmChan0  dbmChan1";
   } else {
     out << "#                  "
-	<< "time           prf      el      az  dbmChan0" << endl;
+	<< "time           prf      el      az  dbmChan0";
   }
+
+  for (size_t ii = 0; ii < _extraColLabels.size(); ii++) {
+    out << setw(12) << _extraColLabels[ii];
+  }
+
+  out << endl;
 
 }
 
@@ -2123,17 +2134,23 @@ void TsPrint::_printSummaryData(FILE *out)
   }
 
   if (_dualChannel) {
-    fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f %9.3f %9.3f%s\n",
+    fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f %9.3f %9.3f%s",
 	    DateTime::strm(midSecs).c_str(),
 	    midNanoSecs,
 	    prf, _midEl, _midAz, _stats.meanDbm0, _stats.meanDbm1, transStr);
   } else {
-    fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f %9.3f%s\n",
+    fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f %9.3f%s",
 	    DateTime::strm(midSecs).c_str(),
 	    midNanoSecs,
 	    prf, _midEl, _midAz, _stats.meanDbm0, transStr);
   }
   
+  for (size_t ii = 0; ii < _extraColValues.size(); ii++) {
+    fprintf(out, "%12s", _extraColValues[ii].c_str());
+  }
+
+  fprintf(out, "\n");
+
 }
 
 /////////////////////////////////
@@ -2147,8 +2164,13 @@ void TsPrint::_printAlternatingLabels(ostream &out)
       << "time           prf      el      az"
       << "       Hc       Hx    Hcorr     Harg"
       << "       Vc       Vx    Vcorr     Varg"
-      << "     IFD0     IFD1"
-      << endl;
+      << "     IFD0     IFD1";
+  
+  for (size_t ii = 0; ii < _extraColLabels.size(); ii++) {
+    out << setw(12) << _extraColLabels[ii];
+  }
+
+  out << endl;
 
 }
 
@@ -2163,8 +2185,13 @@ void TsPrint::_printDualLabels(ostream &out)
       << "time           prf      el      az"
       << "       Hc    Hcorr     Harg"
       << "       Vc    Vcorr     Varg"
-      << "     IFD0     IFD1"
-      << endl;
+      << "     IFD0     IFD1";
+  
+  for (size_t ii = 0; ii < _extraColLabels.size(); ii++) {
+    out << setw(12) << _extraColLabels[ii];
+  }
+
+  out << endl;
 
 }
 
@@ -2191,7 +2218,7 @@ void TsPrint::_printAlternatingData(FILE *out)
   fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f "
           "%8.3f %8.3f %8.3f %8.3f "
           "%8.3f %8.3f %8.3f %8.3f "
-          "%8.3f %8.3f%s\n",
+          "%8.3f %8.3f%s",
           DateTime::strm(midSecs).c_str(),
           midNanoSecs,
           prf, _midEl, _midAz,
@@ -2207,6 +2234,12 @@ void TsPrint::_printAlternatingData(FILE *out)
           _stats.meanDbm1,
           transStr);
   
+  for (size_t ii = 0; ii < _extraColValues.size(); ii++) {
+    fprintf(out, "%12s", _extraColValues[ii].c_str());
+  }
+
+  fprintf(out, "\n");
+
 }
 
 /////////////////////////////////
@@ -2232,7 +2265,7 @@ void TsPrint::_printDualData(FILE *out)
   fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f "
           "%8.3f %8.3f %8.3f "
           "%8.3f %8.3f %8.3f "
-          "%8.3f %8.3f%s\n",
+          "%8.3f %8.3f%s",
 	  DateTime::strm(midSecs).c_str(),
 	  midNanoSecs,
 	  prf, _midEl, _midAz,
@@ -2246,6 +2279,12 @@ void TsPrint::_printDualData(FILE *out)
           _stats.meanDbm1,
           transStr);
           
+  for (size_t ii = 0; ii < _extraColValues.size(); ii++) {
+    fprintf(out, "%12s", _extraColValues[ii].c_str());
+  }
+
+  fprintf(out, "\n");
+
 }
 
 /////////////////////////////////////
@@ -2599,3 +2638,58 @@ void TsPrint::_checkAngleChange(const IwrfTsPulse &pulse)
 
 }
     
+/////////////////////////////////////////////////////////////
+// decode the XML status block, to get data for extra columns
+
+void TsPrint::_decodeXmlForExtraCols()
+
+{
+
+  string xml = _pulseReader->getOpsInfo().getStatusXmlStr();
+
+  _extraColLabels.clear();
+  _extraColValues.clear();
+
+  for (int ii = 0; ii < _params.xml_entries_for_extra_cols_n; ii++) {
+
+    const Params::status_xml_entry_t *entry =
+      _params._xml_entries_for_extra_cols + ii;
+    
+    // add the column label
+    
+    _extraColLabels.push_back(entry->col_label);
+
+    // get tags in list
+    
+    string tagList = entry->xml_tag_list;
+    vector<string> tags;
+    TaStr::tokenize(tagList, "<>", tags);
+    if (tags.size() == 0) {
+      // tags not found
+      cerr << "ERROR - TsPrint::_decodeXmlForExtraCols()" << endl;
+      cerr << "  Cannot find XML tags in string: " << entry->xml_tag_list << endl;
+      _extraColValues.push_back("bad-tags");
+      continue;
+    }
+    
+    // read through the outer tags in status XML
+    
+    string valStr(xml);
+    for (size_t jj = 0; jj < tags.size(); jj++) {
+      string tmp;
+      if (TaXml::readString(valStr, tags[jj], tmp)) {
+        // tags not found
+        _extraColValues.push_back("tags-missing");
+        continue;
+      }
+      valStr = tmp;
+    }
+
+    // add value
+
+    _extraColValues.push_back(valStr);
+
+  } // ii
+
+}
+
