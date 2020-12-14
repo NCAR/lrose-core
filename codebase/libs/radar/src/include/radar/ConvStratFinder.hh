@@ -53,10 +53,19 @@ class ConvStratFinder {
 public:
 
   typedef enum {
-    CATEGORY_MISSING = 0,
-    CATEGORY_STRATIFORM = 1,
-    CATEGORY_CONVECTIVE = 2,
-    CATEGORY_MIXED = 3,
+    CATEGORY_MISSING = 99,
+    CATEGORY_STRATIFORM_SHALLOW = 14,
+    CATEGORY_STRATIFORM_MID = 15,
+    CATEGORY_STRATIFORM_ELEVATED = 16,
+    CATEGORY_STRATIFORM_DEEP = 17,
+    CATEGORY_STRATIFORM = 19,
+    CATEGORY_MIXED = 29,
+    CATEGORY_CONVECTIVE_SMALL = 33,
+    CATEGORY_CONVECTIVE_SHALLOW = 34,
+    CATEGORY_CONVECTIVE_MID = 35,
+    CATEGORY_CONVECTIVE_ELEVATED = 36,
+    CATEGORY_CONVECTIVE_DEEP = 37,
+    CATEGORY_CONVECTIVE = 39,
     CATEGORY_UNKNOWN
   } category_t;
 
@@ -221,7 +230,7 @@ public:
 
   // get the input fields
   
-  const fl32 *getVolDbz() const { return _volDbz.dat(); }
+  const fl32 *getDbz3D() const { return _dbz3D.dat(); }
   const fl32 *getFzHtKm() const { return _fzHtKm.dat(); }
   const fl32 *getDivHtKm() const { return _divHtKm.dat(); }
   
@@ -229,6 +238,7 @@ public:
   // get the resulting partition
   // will be set to the relevant category
 
+  const ui08 *getPartition3D() const { return _partition3D.dat(); }
   const ui08 *getPartition() const { return _partition.dat(); }
   const ui08 *getPartitionLow() const { return _partitionLow.dat(); }
   const ui08 *getPartitionMid() const { return _partitionMid.dat(); }
@@ -240,7 +250,7 @@ public:
   ////////////////////////////////////////////////////////////////////
   // get intermediate fields for debugging
 
-  const fl32 *getVolTexture() const { return _volTexture.dat(); }
+  const fl32 *getTexture3D() const { return _texture3D.dat(); }
   const fl32 *getMeanTexture() const { return _meanTexture.dat(); }
   const fl32 *getMeanTextureLow() const { return _meanTextureLow.dat(); }
   const fl32 *getMeanTextureMid() const { return _meanTextureMid.dat(); }
@@ -341,12 +351,13 @@ private:
   
   // inputs
   
-  TaArray<fl32> _volDbz;
+  TaArray<fl32> _dbz3D;
   TaArray<fl32> _fzHtKm;  // grid for ht of freezing level
   TaArray<fl32> _divHtKm; // grid for ht of divergence level
   
   // primary outputs
   
+  TaArray<ui08> _partition3D;
   TaArray<ui08> _partition;
   TaArray<ui08> _partitionLow;
   TaArray<ui08> _partitionMid;
@@ -357,7 +368,7 @@ private:
   
   // intermediate fields
   
-  TaArray<fl32> _volTexture;
+  TaArray<fl32> _texture3D;
   TaArray<fl32> _meanTexture;
   TaArray<fl32> _meanTextureLow;
   TaArray<fl32> _meanTextureMid;
@@ -385,6 +396,7 @@ private:
   void _expandConvection(ui08 *partition,
                          size_t ix, size_t iy, size_t index);
   void _computeTexture();
+  void _setPartition3D();
   void _computeProps();
   void _computeProps(size_t index, vector<fl32> &textureProfile);
   void _computeKernels();

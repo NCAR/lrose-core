@@ -451,8 +451,8 @@ void ConvStrat::_addFields()
   
   // the following fields are unsigned bytes
   
-  int volSize08 = fhdr2d.nx * fhdr2d.ny * sizeof(ui08);
-  fhdr2d.volume_size = volSize08;
+  size_t planeSize08 = fhdr2d.nx * fhdr2d.ny * sizeof(ui08);
+  fhdr2d.volume_size = planeSize08;
   fhdr2d.encoding_type = Mdvx::ENCODING_INT8;
   fhdr2d.data_element_nbytes = 1;
   fhdr2d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
@@ -466,28 +466,28 @@ void ConvStrat::_addFields()
                                  _finder.getPartition(),
                                  Mdvx::ENCODING_INT8,
                                  _params.partition_field_name,
-                                 "1 = stratiform, 2 = convective",
+                                 "Partition",
                                  ""));
     
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getPartitionLow(),
                                  Mdvx::ENCODING_INT8,
                                  "PartitionLow",
-                                 "1 = stratiform, 2 = convective",
+                                 "PartitionLow",
                                  ""));
     
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getPartitionMid(),
                                  Mdvx::ENCODING_INT8,
                                  "PartitionMid",
-                                 "1 = stratiform, 2 = convective",
+                                 "PartitionMid",
                                  ""));
     
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getPartitionHigh(),
                                  Mdvx::ENCODING_INT8,
                                  "PartitionHigh",
-                                 "1 = stratiform, 2 = convective",
+                                 "PartitionHigh",
                                  ""));
     
   }
@@ -530,15 +530,16 @@ void ConvStrat::_addFields()
     // texture for full volume
     
     _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getVolTexture(),
+                                 _finder.getTexture3D(),
                                  Mdvx::ENCODING_INT16,
                                  "DbzTexture3D",
                                  "ReflectivityTexture3D",
                                  "dBZ"));
+
     // echo the input field
     
     _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getVolDbz(),
+                                 _finder.getDbz3D(),
                                  Mdvx::ENCODING_INT16,
                                  "Dbz3D",
                                  "Reflectivity3D",
@@ -552,6 +553,26 @@ void ConvStrat::_addFields()
 
   }
   
+  if (_params.write_partition_field) {
+    
+    // partition for full volume
+    
+    size_t volSize08 = fhdr3d.nx * fhdr3d.ny * fhdr3d.nz * sizeof(ui08);
+    fhdr3d.volume_size = volSize08;
+    fhdr3d.encoding_type = Mdvx::ENCODING_INT8;
+    fhdr3d.data_element_nbytes = 1;
+    fhdr3d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
+    fhdr3d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
+    
+    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
+                                 _finder.getPartition3D(),
+                                 Mdvx::ENCODING_INT8,
+                                 "Partition3D",
+                                 "Conv-strat-partition-3D",
+                                 ""));
+
+  }
+
 }
 
 /////////////////////////////////////////////////////////

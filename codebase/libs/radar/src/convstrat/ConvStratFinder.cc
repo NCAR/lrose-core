@@ -189,7 +189,7 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
 
   // set dbz field to missing if below the min threshold
   
-  fl32 *volDbz = _volDbz.dat();
+  fl32 *volDbz = _dbz3D.dat();
   for (size_t ii = 0; ii < _nxyz; ii++) {
     if (dbz[ii] == dbzMissingVal || dbz[ii] < _minValidDbz) {
       volDbz[ii] = _missingFl32;
@@ -218,6 +218,10 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
   
   _computeTexture();
 
+  // set the 3D version of the partition
+
+  _setPartition3D();
+
   // compute the properties from the vertical profiles of texture
 
   _computeProps();
@@ -238,10 +242,11 @@ void ConvStratFinder::_allocArrays()
   
 {
 
-  _volDbz.alloc(_nxyz);
+  _dbz3D.alloc(_nxyz);
   _fzHtKm.alloc(_nxy);
   _divHtKm.alloc(_nxy);
 
+  _partition3D.alloc(_nxyz);
   _partition.alloc(_nxy);
   _partitionLow.alloc(_nxy);
   _partitionMid.alloc(_nxy);
@@ -250,7 +255,7 @@ void ConvStratFinder::_allocArrays()
   _convDbz.alloc(_nxyz);
   _stratDbz.alloc(_nxyz);
 
-  _volTexture.alloc(_nxyz);
+  _texture3D.alloc(_nxyz);
 
   _meanTexture.alloc(_nxy);
   _meanTextureLow.alloc(_nxy);
@@ -278,10 +283,11 @@ void ConvStratFinder::_initToMissing()
   
 {
 
-  _initToMissing(_volDbz, _missingFl32);
+  _initToMissing(_dbz3D, _missingFl32);
   _initToMissing(_fzHtKm, _missingFl32);
   _initToMissing(_divHtKm, _missingFl32);
 
+  _initToMissing(_partition3D, _missingUi08);
   _initToMissing(_partition, _missingUi08);
   _initToMissing(_partitionLow, _missingUi08);
   _initToMissing(_partitionMid, _missingUi08);
@@ -290,7 +296,7 @@ void ConvStratFinder::_initToMissing()
   _initToMissing(_convDbz, _missingFl32);
   _initToMissing(_stratDbz, _missingFl32);
 
-  _initToMissing(_volTexture, _missingFl32);
+  _initToMissing(_texture3D, _missingFl32);
 
   _initToMissing(_meanTexture, _missingFl32);
   _initToMissing(_meanTextureLow, _missingFl32);
@@ -336,10 +342,11 @@ void ConvStratFinder::freeArrays()
   
 {
 
-  _volDbz.free();
+  _dbz3D.free();
   _fzHtKm.free();
   _divHtKm.free();
 
+  _partition3D.free();
   _partition.free();
   _partitionLow.free();
   _partitionMid.free();
@@ -348,7 +355,7 @@ void ConvStratFinder::freeArrays()
   _convDbz.free();
   _stratDbz.free();
 
-  _volTexture.free();
+  _texture3D.free();
 
   _meanTexture.free();
   _meanTextureLow.free();
@@ -388,7 +395,7 @@ void ConvStratFinder::_computeColMax()
     colMaxDbz[ii] = _missingFl32;
   }
 
-  fl32 *dbz = _volDbz.dat();
+  fl32 *dbz = _dbz3D.dat();
   fl32 *topKm = _echoTopKm.dat();
   
   for (size_t iz = _minIz; iz <= _maxIz; iz++) {
@@ -452,7 +459,7 @@ void ConvStratFinder::_computeTexture()
 
   // array pointers
 
-  fl32 *volTexture = _volTexture.dat();
+  fl32 *volTexture = _texture3D.dat();
   fl32 *fractionTexture = _fractionActive.dat();
 
   // initialize
@@ -463,7 +470,7 @@ void ConvStratFinder::_computeTexture()
   
   // set up threads for computing texture at each level
 
-  const fl32 *dbz = _volDbz.dat();
+  const fl32 *dbz = _dbz3D.dat();
   const fl32 *colMaxDbz = _colMaxDbz.dat();
   vector<ComputeTexture *> threads;
   for (size_t iz = _minIz; iz <= _maxIz; iz++) {
@@ -501,6 +508,54 @@ void ConvStratFinder::_computeTexture()
 }
 
 /////////////////////////////////////////////////////////
+// set 3d partition array
+
+void ConvStratFinder::_setPartition3D()
+  
+{
+
+  // array pointers
+
+  ui08 *partition3D = _partition3D.dat();
+  fl32 *texture3D = _texture3D.dat();
+  fl32 *active2D = _fractionActive.dat();
+  
+  // loop through the vol
+  
+  size_t index3D = 0;
+
+  for (size_t iz = 0; iz < _zKm.size(); iz++) {
+
+    // loop through a plane
+    
+    size_t index2D = 0;
+    
+    for (size_t iy = 0; iy < _ny; iy++) {
+      for (size_t ix = 0; ix < _nx; ix++, index2D++, index3D++) {
+        
+        if (active2D[index2D] < _minValidFractionForTexture) {
+          partition3D[index3D] = CATEGORY_MISSING;
+          continue;
+        }
+        double texture = texture3D[index3D];
+        
+        if (texture == _missingFl32) {
+          partition3D[index3D] = CATEGORY_MISSING;
+        } else if (texture >= _minTextureForConvection) {
+          partition3D[index3D] = CATEGORY_CONVECTIVE;
+        } else if (texture <= _maxTextureForStratiform) {
+          partition3D[index3D] = CATEGORY_STRATIFORM;
+        } else {
+          partition3D[index3D] = CATEGORY_MIXED;
+        }
+
+      } // ix
+    } // iy
+  } // iz
+  
+}
+
+/////////////////////////////////////////////////////////
 // set properties from the vertical profile of texture
 
 void ConvStratFinder::_computeProps()
@@ -511,7 +566,7 @@ void ConvStratFinder::_computeProps()
 
   // array pointers
 
-  fl32 *volTexture = _volTexture.dat();
+  fl32 *volTexture = _texture3D.dat();
   fl32 *fractionTexture = _fractionActive.dat();
 
   // loop through the x/y arrays
@@ -737,7 +792,7 @@ void ConvStratFinder::_finalizePartition()
 
   // load up the partitioned dbz arrays
 
-  const fl32 *dbz = _volDbz.dat();
+  const fl32 *dbz = _dbz3D.dat();
   fl32 *convDbz = _convDbz.dat();
   fl32 *stratDbz = _stratDbz.dat();
 
