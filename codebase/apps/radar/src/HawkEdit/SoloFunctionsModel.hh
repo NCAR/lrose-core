@@ -181,15 +181,13 @@ public:
 			     float scaled_thr,
 			     int first_good_gate, string threshold_field,
 			     float threshold_bad_data_value,
-			     size_t clip_gate, float bad_data_value,
-			     string bad_flag_mask_field_name);
+			     size_t clip_gate, float bad_data_value);
 
   string ThresholdFieldBelow(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
 			     float scaled_thr,
 			     int first_good_gate, string threshold_field,
 			     float threshold_bad_data_value,
-			     size_t clip_gate, float bad_data_value,
-			     string bad_flag_mask_field_name);
+			     size_t clip_gate, float bad_data_value);
 
   string ThresholdFieldBetween(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
 			       float lower_threshold, float upper_threshold,

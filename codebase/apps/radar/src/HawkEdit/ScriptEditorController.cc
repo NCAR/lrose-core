@@ -343,6 +343,10 @@ void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFun
   engine.globalObject().setProperty("FLAGGED_MULTIPLY", myExt.property("FLAGGED_MULTIPLY"));
 
   engine.globalObject().setProperty("REMOVE_RING", myExt.property("REMOVE_RING"));
+
+  engine.globalObject().setProperty("THRESHOLD_ABOVE", myExt.property("THRESHOLD_ABOVE"));
+  engine.globalObject().setProperty("THRESHOLD_BELOW", myExt.property("THRESHOLD_BELOW"));
+
   engine.globalObject().setProperty("FLAG_FRECKLES", myExt.property("FLAG_FRECKLES"));
   engine.globalObject().setProperty("FLAG_GLITCHES", myExt.property("FLAG_GLITCHES"));
   engine.globalObject().setProperty("~+", myExt.property("FLAGGED_ADD"));

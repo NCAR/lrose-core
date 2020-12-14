@@ -476,6 +476,44 @@ QString SoloFunctionsController::REMOVE_RING(QString field, float lower_threshol
   return QString::fromStdString(tempFieldName);
 } 
 
+// return the name of the field in which the result is stored in the RadxVol
+QString SoloFunctionsController::THRESHOLD_ABOVE(QString field, 
+                  QString threshold_field, float threshold, 
+                  int first_good_gate, float bad_data_value,
+                  float threshold_bad_data_value,
+                  size_t clip_gate) {
+  // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
+  string tempFieldName = soloFunctionsModel.ThresholdFieldAbove(field.toStdString(), _data, 
+                     _currentRayIdx, _currentSweepIdx,
+                     threshold, first_good_gate, threshold_field.toStdString(),
+                     threshold_bad_data_value,
+                     clip_gate,
+                     bad_data_value);
+
+//                 int rayIdx, int sweepIdx,
+//                 float scaled_thr,
+//                 int first_good_gate, string threshold_field,
+//                 float threshold_bad_data_value,
+//                 size_t clip_gate, float bad_data_value) 
+                return QString::fromStdString(tempFieldName);
+} 
+
+// return the name of the field in which the result is stored in the RadxVol
+QString SoloFunctionsController::THRESHOLD_BELOW(QString field, 
+                  QString threshold_field, float threshold, 
+                  int first_good_gate, float bad_data_value,
+                  float threshold_bad_data_value,
+                  size_t clip_gate) {
+  // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
+  string tempFieldName = soloFunctionsModel.ThresholdFieldBelow(field.toStdString(), _data, 
+                     _currentRayIdx, _currentSweepIdx,
+                     threshold, first_good_gate, threshold_field.toStdString(),
+                     threshold_bad_data_value,
+                     clip_gate,
+                     bad_data_value);
+
+                return QString::fromStdString(tempFieldName);
+} 
 /*
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::FLAG_FRECKLES(QString field, float constant, float bad_data,

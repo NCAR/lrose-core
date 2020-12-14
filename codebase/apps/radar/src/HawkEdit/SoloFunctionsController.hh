@@ -37,7 +37,7 @@ public:
   Q_INVOKABLE QString ZERO_MIDDLE_THIRD(QString field); // return the name of the new field that contains the result
   Q_INVOKABLE QString ZERO_INSIDE_BOUNDARY(QString field); // return the name of the new field that contains the result
 
-  Q_INVOKABLE QString DESPECKLE(QString field, size_t speckle_length, float bad_data, size_t clip_gate); // return the name of the new field that contains the result
+  Q_INVOKABLE QString DESPECKLE(QString field, size_t speckle_length, float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX); // return the name of the new field that contains the result
   Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field, float nyquist, float bad_data, size_t clip_gate); // return the name of the new field that contains the result
 
  // return the name of the new field that contains the result
@@ -106,6 +106,18 @@ public:
   Q_INVOKABLE QString REMOVE_RING(QString field, float lower_threshold,
               float upper_threshold, float bad_data = FLT_MIN,
               size_t clip_gate = SIZE_MAX);
+
+  QString THRESHOLD_ABOVE(QString field, 
+                  QString threshold_field, float threshold, 
+                  int first_good_gate = 0, float bad_data_value = FLT_MIN,
+                  float threshold_bad_data_value = FLT_MIN,
+                  size_t clip_gate = SIZE_MAX);
+
+  QString THRESHOLD_BELOW(QString field, 
+                  QString threshold_field, float threshold, 
+                  int first_good_gate = 0, float bad_data_value = FLT_MIN,
+                  float threshold_bad_data_value = FLT_MIN,
+                  size_t clip_gate = SIZE_MAX);
 
   Q_INVOKABLE double sqrt(double value) { return qSqrt(value); }
   Q_INVOKABLE QVector<double> add(QVector<double> v, QVector<double> v2) {

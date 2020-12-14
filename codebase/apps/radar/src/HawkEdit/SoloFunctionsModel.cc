@@ -2124,13 +2124,15 @@ string SoloFunctionsModel::FlagGlitches(string fieldName,  RadxVol *vol, int ray
   return tempFieldName;
 }
 
+// TODO: remove bad_flag_mask_field_name because it is not used 
 string SoloFunctionsModel::ThresholdFieldAbove(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
 					       float scaled_thr,
 					       int first_good_gate, string threshold_field,
 					       float threshold_bad_data_value,
-					       size_t clip_gate, float bad_data_value,
-					       string bad_flag_mask_field_name) {
+					       size_t clip_gate, float bad_data_value) {
+					       // string bad_flag_mask_field_name) {
   SoloFunctionsApi api;
+  string bad_flag_mask_field_name = "";
   return _generalThresholdFx(fieldName, vol, rayIdx, sweepIdx,
 			      scaled_thr,
 			      first_good_gate, threshold_field,
@@ -2144,9 +2146,9 @@ string SoloFunctionsModel::ThresholdFieldBelow(string fieldName,  RadxVol *vol, 
 					       float scaled_thr,
 					       int first_good_gate, string threshold_field,
 					       float threshold_bad_data_value,
-					       size_t clip_gate, float bad_data_value,
-					       string bad_flag_mask_field_name) {
+					       size_t clip_gate, float bad_data_value) {
   SoloFunctionsApi api;
+  string bad_flag_mask_field_name = "";
   return _generalThresholdFx(fieldName, vol, rayIdx, sweepIdx,
 			      scaled_thr,
 			      first_good_gate, threshold_field,
