@@ -909,6 +909,18 @@
     tt->single_val.d = 1;
     tt++;
     
+    // Parameter 'range_gate_geom_equal'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("range_gate_geom_equal");
+    tt->descr = tdrpStrDup("Option to set the range geometry equal to the gate geometry of the data.");
+    tt->help = tdrpStrDup("If TRUE, the min_range, max_range, and delta_range will equal the start range, spacing, and nGates of the input radar data. All data values will be output, no averaging. If FALSE, the min_range, max_range, and delta_range will equal the values in the parameter file.");
+    tt->val_offset = (char *) &range_gate_geom_equal - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'slice_delta_azimuth'
     // ctype is 'double'
     

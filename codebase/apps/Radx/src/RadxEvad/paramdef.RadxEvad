@@ -182,6 +182,12 @@ paramdef double {
   p_descr = "Delta range for computing VAD circles - km.";
 } delta_range;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the range geometry equal to the gate geometry of the data.";
+  p_help = "If TRUE, the min_range, max_range, and delta_range will equal the start range, spacing, and nGates of the input radar data. All data values will be output, no averaging. If FALSE, the min_range, max_range, and delta_range will equal the values in the parameter file.";
+} range_gate_geom_equal;
+
 paramdef double {
   p_default = 2.0;
   p_descr = "Azimuth interval for separating data into azimuth slices (deg).";

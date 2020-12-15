@@ -100,7 +100,7 @@ public:
   // Destructor
   //
 
-  virtual ~Params ();
+  ~Params ();
 
   ////////////////////////////////////////////
   // Assignment
@@ -416,6 +416,8 @@ public:
 
   double delta_range;
 
+  tdrp_bool_t range_gate_geom_equal;
+
   double slice_delta_azimuth;
 
   int n_slices_for_vel_median;
@@ -459,7 +461,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[53];
 
   const char *_className;
 

@@ -9,7 +9,7 @@
 // ** 1) If the software is modified to produce derivative works,            
 // ** such modified software should be clearly marked, so as not             
 // ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
+// ** 2) Redistributions of source code must retain the above conypyright      
 // ** notice, this list of conditions and the following disclaimer.          
 // ** 3) Redistributions in binary form must reproduce the above copyright   
 // ** notice, this list of conditions and the following disclaimer in the    
@@ -400,6 +400,19 @@ int RadxEvad::_processDataSet()
 
   _rings.clear();
 
+  //double _max_range 
+   // _max_range = _params.max_range;
+  double _min_range = _params.min_range;
+  double _delta_range = _params.delta_range;
+  _nRanges = (int) ((_params.max_range - _params.min_range) /
+    _params.delta_range + 0.5);  
+
+  if (_params.range_gate_geom_equal) {
+    _min_range = _radxStartRange;
+    _delta_range = _radxGateSpacing;
+    _nRanges = _nGates;
+  } 
+
   // loop through the sweeps
 
   int ngood = 0;
@@ -411,14 +424,11 @@ int RadxEvad::_processDataSet()
     
     if (elev < _params.min_elev || elev > _params.max_elev) {
       if (_params.debug) {
-	cerr << "Ignoring sweep number: " << isweep << endl;
-	cerr << "    elev out of range: " << elev << endl;
+	      cerr << "Ignoring sweep number: " << isweep << endl;
+	      cerr << "    elev out of range: " << elev << endl;
       }
       continue;
     }
-
-    _nRanges = (int) ((_params.max_range - _params.min_range) /
-                      _params.delta_range + 0.5);
 
     for (int irange = 0; irange < _nRanges; irange++) {
 
@@ -430,8 +440,8 @@ int RadxEvad::_processDataSet()
       
       // compute gates to be used
       
-      _ring.startRange = _params.min_range + irange * _params.delta_range;
-      _ring.endRange = _ring.startRange + _params.delta_range;
+      _ring.startRange = _min_range + irange * _delta_range;
+      _ring.endRange = _ring.startRange + _delta_range;
       
       _ring.startGate = 
         (int) ((_ring.startRange - _radxStartRange) / _radxGateSpacing + 0.5);
@@ -442,6 +452,14 @@ int RadxEvad::_processDataSet()
       _ring.endGate = (int) ((_ring.endRange - _radxStartRange) / _radxGateSpacing + 0.5);
       if (_ring.endGate > _nGates - 1) {
 	_ring.endGate = _nGates - 1;
+      }
+
+      if (_params.debug) {
+        cerr << "ring at range " << irange << " ... " << endl;
+        cerr << " startRange=" << _ring.startRange << endl;
+        cerr << "   endRange=" << _ring.endRange << endl;
+        cerr << " startGate =" << _ring.startGate << endl;
+        cerr << "   endGate =" << _ring.endGate << endl;
       }
 
       // set elevation, compute range and height at ring mid-pt
