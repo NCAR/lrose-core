@@ -250,6 +250,13 @@ public:
 
   static string strm(const time_t mytime);
 
+  // Given a time, returns string with underscore instead of space.
+  // of format: "YYYY/MM/DD_HH:MM:SS"
+  // e.g. "1958/12/28 10:57:00"
+  // If mytime == 0, returns "=====_NOT_SET_====="
+
+  static string stru(const time_t mytime);
+
   // Given a time, returns string with one space between fields of format:
   //  "YYYY MM DD HH MM SS"
   // e.g. "1958 12 28 10 57 00"

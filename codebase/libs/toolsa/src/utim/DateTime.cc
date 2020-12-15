@@ -827,6 +827,31 @@ string DateTime::strm(const time_t mytime)
 
 }
 
+// Given a time, returns string with underscores instead of spaces.
+// of format: "YYYY/MM/DD_HH:MM:SS"
+// e.g. "1958/12/28 10:57:00"
+// If mytime == 0, returns "===== NOT SET ====="
+
+
+string DateTime::stru(const time_t mytime)
+
+{
+
+  if (mytime == 0) {
+    return "=====_NOT_SET_=====";
+  }
+
+  date_time_t mtime;
+  mtime.unix_time = mytime;
+  uconvert_from_utime(&mtime);
+  char str[32];
+  sprintf(str, "%.4d/%.2d/%.2d_%.2d:%.2d:%.2d",
+          mtime.year, mtime.month, mtime.day,
+          mtime.hour, mtime.min, mtime.sec);
+  return str;
+
+}
+
 // Given a time, returns string with one space between fields of format:
 //  "YYYY MM DD HH MM SS"
 // e.g. "1958 12 28 10 57 00"
