@@ -513,7 +513,7 @@ int TsPrint::_printPrtDetails()
             "Pulse seqNum, time, timeDiff, prt, prtNext: "
             "%10ld, %s.%.9d, %10.6f, %10.6f, %10.6f\n",
             pulseHdr.pulse_seq_num,
-            DateTime::strm(pulseTime.utime()).c_str(), 
+            DateTime::stru(pulseTime.utime()).c_str(), 
             pulseHdr.packet.time_nano_secs,
             timeDiffSecs,
             pulseHdr.prt,
@@ -604,7 +604,7 @@ int TsPrint::_runAscopeMode()
   cout << "#   Start gate: " << _startGate << endl;
   cout << "#   N gates: " << _nGates << endl;
   cout << "#   N samples: " << _nSamples << endl;
-  cout << "#   time: " << DateTime::strm(midSecs) << "."
+  cout << "#   time: " << DateTime::stru(midSecs) << "."
        << midNanoSecs << endl;
   cout << "#   PRF: " << prf << endl;
   cout << "#   EL (deg): " << _midEl << endl;
@@ -669,11 +669,11 @@ int TsPrint::_runCalMode()
   // compute output file name
 
   DateTime now(time(NULL));
-  char fileName[1024];
-  sprintf(fileName, "tscal_%.4d%.2d%.2d_%.2d%.2d%2d_%s.txt",
-	  now.getYear(), now.getMonth(), now.getDay(),
-	  now.getHour(), now.getMin(), now.getSec(),
-	  calName);
+  char fileName[4096];
+  snprintf(fileName, 4096, "tscal_%.4d%.2d%.2d_%.2d%.2d%2d_%s.txt",
+           now.getYear(), now.getMonth(), now.getDay(),
+           now.getHour(), now.getMin(), now.getSec(),
+           calName);
 
   // open file
 
@@ -2135,12 +2135,12 @@ void TsPrint::_printSummaryData(FILE *out)
 
   if (_dualChannel) {
     fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f %9.3f %9.3f%s",
-	    DateTime::strm(midSecs).c_str(),
+	    DateTime::stru(midSecs).c_str(),
 	    midNanoSecs,
 	    prf, _midEl, _midAz, _stats.meanDbm0, _stats.meanDbm1, transStr);
   } else {
     fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f %9.3f%s",
-	    DateTime::strm(midSecs).c_str(),
+	    DateTime::stru(midSecs).c_str(),
 	    midNanoSecs,
 	    prf, _midEl, _midAz, _stats.meanDbm0, transStr);
   }
@@ -2219,7 +2219,7 @@ void TsPrint::_printAlternatingData(FILE *out)
           "%8.3f %8.3f %8.3f %8.3f "
           "%8.3f %8.3f %8.3f %8.3f "
           "%8.3f %8.3f%s",
-          DateTime::strm(midSecs).c_str(),
+          DateTime::stru(midSecs).c_str(),
           midNanoSecs,
           prf, _midEl, _midAz,
           _stats.meanDbmHc,
@@ -2266,7 +2266,7 @@ void TsPrint::_printDualData(FILE *out)
           "%8.3f %8.3f %8.3f "
           "%8.3f %8.3f %8.3f "
           "%8.3f %8.3f%s",
-	  DateTime::strm(midSecs).c_str(),
+	  DateTime::stru(midSecs).c_str(),
 	  midNanoSecs,
 	  prf, _midEl, _midAz,
           _stats.meanDbmHc,
@@ -2542,7 +2542,7 @@ void TsPrint::_printMaxPowerData(FILE *out)
   double prf = 1.0 / _midPrt;
 
   fprintf(out, "%s.%.3d %7.1f %7.2f %8.2f %7.2f %10.0f",
-          DateTime::strm(midSecs).c_str(),
+          DateTime::stru(midSecs).c_str(),
           midMilliSecs,
           prf,
           _midEl, _midAz,
