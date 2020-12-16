@@ -143,7 +143,7 @@ private:
   // extra columns from XML blocks
 
   vector<string> _extraColLabels;
-  vector<string> _extraColValues;
+  vector<double> _extraColValues;
 
   // methods
 

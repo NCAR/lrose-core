@@ -2146,7 +2146,7 @@ void TsPrint::_printSummaryData(FILE *out)
   }
   
   for (size_t ii = 0; ii < _extraColValues.size(); ii++) {
-    fprintf(out, "%12s", _extraColValues[ii].c_str());
+    fprintf(out, "%12g", _extraColValues[ii]);
   }
 
   fprintf(out, "\n");
@@ -2235,7 +2235,7 @@ void TsPrint::_printAlternatingData(FILE *out)
           transStr);
   
   for (size_t ii = 0; ii < _extraColValues.size(); ii++) {
-    fprintf(out, "%12s", _extraColValues[ii].c_str());
+    fprintf(out, "%12g", _extraColValues[ii]);
   }
 
   fprintf(out, "\n");
@@ -2280,7 +2280,7 @@ void TsPrint::_printDualData(FILE *out)
           transStr);
           
   for (size_t ii = 0; ii < _extraColValues.size(); ii++) {
-    fprintf(out, "%12s", _extraColValues[ii].c_str());
+    fprintf(out, "%12g", _extraColValues[ii]);
   }
 
   fprintf(out, "\n");
@@ -2668,7 +2668,7 @@ void TsPrint::_decodeXmlForExtraCols()
       // tags not found
       cerr << "ERROR - TsPrint::_decodeXmlForExtraCols()" << endl;
       cerr << "  Cannot find XML tags in string: " << entry->xml_tag_list << endl;
-      _extraColValues.push_back("bad-tags");
+      _extraColValues.push_back(-9999.0);
       continue;
     }
     
@@ -2679,7 +2679,7 @@ void TsPrint::_decodeXmlForExtraCols()
       string tmp;
       if (TaXml::readString(valStr, tags[jj], tmp)) {
         // tags not found
-        _extraColValues.push_back("tags-missing");
+        _extraColValues.push_back(-9999.0);
         continue;
       }
       valStr = tmp;
@@ -2687,7 +2687,7 @@ void TsPrint::_decodeXmlForExtraCols()
 
     // add value
 
-    _extraColValues.push_back(valStr);
+    _extraColValues.push_back(atof(valStr.c_str()));
 
   } // ii
 
