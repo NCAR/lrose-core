@@ -143,7 +143,9 @@ private:
   // extra columns from XML blocks
 
   vector<string> _extraColLabels;
-  vector<double> _extraColValues;
+  vector<double> _extraColMeans;
+  vector<double> _extraColSums;
+  vector<double> _extraColCounts;
 
   // methods
 
@@ -228,8 +230,10 @@ private:
 
   // read XML data for extra columns
 
+  void _initExtraCols();
   void _decodeXmlForExtraCols();
-  
+  void _computeExtraColMeans();
+
 };
 
 #endif

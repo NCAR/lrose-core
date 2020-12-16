@@ -224,6 +224,10 @@ TsPrint::~TsPrint()
 int TsPrint::Run ()
 {
 
+  if (_params.add_cols_from_status_xml) {
+    _initExtraCols();
+  }
+
   if (_params.print_format) {
     iwrf_print_all_formats(stdout);
     return 0;
@@ -384,6 +388,10 @@ int TsPrint::_runPrintMode()
       _addToSummary(*pulse);
     }
     
+    if (_params.add_cols_from_status_xml) {
+      _decodeXmlForExtraCols();
+    }
+
     _pulseCount++;
     _totalPulseCount++;
     
@@ -396,9 +404,9 @@ int TsPrint::_runPrintMode()
       } else {
         _computeSummary();
       }
-      // get extra col data from XML if needed
+      // compute extra col means
       if (_params.add_cols_from_status_xml) {
-        _decodeXmlForExtraCols();
+        _computeExtraColMeans();
       }
       if (!_params.print_all_headers) {
         if (_fastAlternating) {
@@ -420,6 +428,9 @@ int TsPrint::_runPrintMode()
         _printCount++;
       }
       _pulseCount = 0;
+      if (_params.add_cols_from_status_xml) {
+        _initExtraCols();
+      }
       cout << flush;
       fflush(stdout);
       if (_params.once_only) {
@@ -2145,8 +2156,8 @@ void TsPrint::_printSummaryData(FILE *out)
 	    prf, _midEl, _midAz, _stats.meanDbm0, transStr);
   }
   
-  for (size_t ii = 0; ii < _extraColValues.size(); ii++) {
-    fprintf(out, "%12g", _extraColValues[ii]);
+  for (size_t ii = 0; ii < _extraColMeans.size(); ii++) {
+    fprintf(out, "%12g", _extraColMeans[ii]);
   }
 
   fprintf(out, "\n");
@@ -2234,8 +2245,8 @@ void TsPrint::_printAlternatingData(FILE *out)
           _stats.meanDbm1,
           transStr);
   
-  for (size_t ii = 0; ii < _extraColValues.size(); ii++) {
-    fprintf(out, "%12g", _extraColValues[ii]);
+  for (size_t ii = 0; ii < _extraColMeans.size(); ii++) {
+    fprintf(out, "%12g", _extraColMeans[ii]);
   }
 
   fprintf(out, "\n");
@@ -2279,8 +2290,8 @@ void TsPrint::_printDualData(FILE *out)
           _stats.meanDbm1,
           transStr);
           
-  for (size_t ii = 0; ii < _extraColValues.size(); ii++) {
-    fprintf(out, "%12g", _extraColValues[ii]);
+  for (size_t ii = 0; ii < _extraColMeans.size(); ii++) {
+    fprintf(out, "%12g", _extraColMeans[ii]);
   }
 
   fprintf(out, "\n");
@@ -2639,6 +2650,35 @@ void TsPrint::_checkAngleChange(const IwrfTsPulse &pulse)
 }
     
 /////////////////////////////////////////////////////////////
+// init computations for extra columns
+
+void TsPrint::_initExtraCols()
+
+{
+
+  _extraColLabels.clear();
+  _extraColMeans.clear();
+  _extraColSums.clear();
+  _extraColCounts.clear();
+
+  for (int ii = 0; ii < _params.xml_entries_for_extra_cols_n; ii++) {
+    
+    const Params::status_xml_entry_t *entry =
+      _params._xml_entries_for_extra_cols + ii;
+    
+    // add the column label
+    
+    _extraColLabels.push_back(entry->col_label);
+    _extraColMeans.push_back(-9999.0);
+    _extraColSums.push_back(0.0);
+    _extraColCounts.push_back(0.0);
+
+  }
+
+
+}
+
+/////////////////////////////////////////////////////////////
 // decode the XML status block, to get data for extra columns
 
 void TsPrint::_decodeXmlForExtraCols()
@@ -2648,7 +2688,7 @@ void TsPrint::_decodeXmlForExtraCols()
   string xml = _pulseReader->getOpsInfo().getStatusXmlStr();
 
   _extraColLabels.clear();
-  _extraColValues.clear();
+  _extraColMeans.clear();
 
   for (int ii = 0; ii < _params.xml_entries_for_extra_cols_n; ii++) {
 
@@ -2668,7 +2708,6 @@ void TsPrint::_decodeXmlForExtraCols()
       // tags not found
       cerr << "ERROR - TsPrint::_decodeXmlForExtraCols()" << endl;
       cerr << "  Cannot find XML tags in string: " << entry->xml_tag_list << endl;
-      _extraColValues.push_back(-9999.0);
       continue;
     }
     
@@ -2679,17 +2718,34 @@ void TsPrint::_decodeXmlForExtraCols()
       string tmp;
       if (TaXml::readString(valStr, tags[jj], tmp)) {
         // tags not found
-        _extraColValues.push_back(-9999.0);
         continue;
       }
       valStr = tmp;
     }
 
-    // add value
+    // add to sum and count
 
-    _extraColValues.push_back(atof(valStr.c_str()));
-
+    _extraColSums[ii] += atof(valStr.c_str());
+    _extraColCounts[ii] += 1.0;
+    
   } // ii
+
+}
+
+/////////////////////////////////////////////////////////////
+// compute means for extra columns
+
+void TsPrint::_computeExtraColMeans()
+
+{
+
+  for (int ii = 0; ii < _params.xml_entries_for_extra_cols_n; ii++) {
+    if (_extraColCounts[ii] > 0) {
+      _extraColMeans[ii] = _extraColSums[ii] / _extraColCounts[ii];
+    } else {
+      _extraColMeans[ii] = -9999.0;
+    }
+  }
 
 }
 
