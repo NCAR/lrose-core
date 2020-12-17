@@ -2660,6 +2660,7 @@ void TsPrint::_initExtraCols()
   _extraColMeans.clear();
   _extraColSums.clear();
   _extraColCounts.clear();
+  _statusXmlPktSeqNum = -1;
 
   for (int ii = 0; ii < _params.xml_entries_for_extra_cols_n; ii++) {
     
@@ -2685,20 +2686,22 @@ void TsPrint::_decodeXmlForExtraCols()
 
 {
 
-  string xml = _pulseReader->getOpsInfo().getStatusXmlStr();
+  // check we have new xml status
 
-  _extraColLabels.clear();
-  _extraColMeans.clear();
+  si64 statusXmlPktSeqNum = _pulseReader->getOpsInfo().getStatusXmlPktSeqNum();
+  if (statusXmlPktSeqNum == _statusXmlPktSeqNum) {
+    // have already used this value
+    return;
+  }
+  _statusXmlPktSeqNum = statusXmlPktSeqNum;
+
+  string xml = _pulseReader->getOpsInfo().getStatusXmlStr();
 
   for (int ii = 0; ii < _params.xml_entries_for_extra_cols_n; ii++) {
 
     const Params::status_xml_entry_t *entry =
       _params._xml_entries_for_extra_cols + ii;
     
-    // add the column label
-    
-    _extraColLabels.push_back(entry->col_label);
-
     // get tags in list
     
     string tagList = entry->xml_tag_list;
@@ -2723,11 +2726,15 @@ void TsPrint::_decodeXmlForExtraCols()
       valStr = tmp;
     }
 
+    if (valStr.size() < 1) {
+      continue;
+    }
+
     // add to sum and count
 
     _extraColSums[ii] += atof(valStr.c_str());
     _extraColCounts[ii] += 1.0;
-    
+
   } // ii
 
 }

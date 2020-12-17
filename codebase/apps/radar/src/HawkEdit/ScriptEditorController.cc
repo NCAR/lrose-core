@@ -316,6 +316,9 @@ void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFun
   engine.globalObject().setProperty("sqrt", myExt.property("sqrt"));
   engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
   engine.globalObject().setProperty("BB_UNFOLDING_FIRST_GOOD_GATE", myExt.property("BB_UNFOLDING_FIRST_GOOD_GATE"));
+  engine.globalObject().setProperty("BB_UNFOLDING_LOCAL_WIND", myExt.property("BB_UNFOLDING_LOCAL_WIND"));
+  engine.globalObject().setProperty("BB_UNFOLDING_AC_WIND", myExt.property("BB_UNFOLDING_AC_WIND"));
+
   engine.globalObject().setProperty("ZERO_MIDDLE_THIRD", myExt.property("ZERO_MIDDLE_THIRD"));
   engine.globalObject().setProperty("ZERO_INSIDE_BOUNDARY", myExt.property("ZERO_INSIDE_BOUNDARY"));
   engine.globalObject().setProperty("add", myExt.property("add"));

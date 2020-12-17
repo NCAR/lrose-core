@@ -146,6 +146,7 @@ private:
   vector<double> _extraColMeans;
   vector<double> _extraColSums;
   vector<double> _extraColCounts;
+  si64 _statusXmlPktSeqNum;
 
   // methods
 

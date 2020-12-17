@@ -47,6 +47,22 @@ public:
 						   size_t ngates_averaged,
 						   float bad_data, size_t clip_gate);
 
+  Q_INVOKABLE QString BB_UNFOLDING_LOCAL_WIND(QString field, float nyquist, 
+                     int max_pos_folds,
+                     int max_neg_folds,
+                     size_t ngates_averaged,
+                     float ew_wind,
+                     float ns_wind,
+                     float bad_data,
+                     size_t clip_gate);
+
+  Q_INVOKABLE QString BB_UNFOLDING_AC_WIND(QString field, float nyquist, 
+                     int max_pos_folds,
+                     int max_neg_folds,
+                     size_t ngates_averaged,
+                     float bad_data,
+                     size_t clip_gate);
+
   Q_INVOKABLE QString ASSERT_BAD_FLAGS(QString field, float bad_data,
 				       size_t clip_gate, QString badFlagMaskFieldName);
 
@@ -107,13 +123,13 @@ public:
               float upper_threshold, float bad_data = FLT_MIN,
               size_t clip_gate = SIZE_MAX);
 
-  QString THRESHOLD_ABOVE(QString field, 
+  Q_INVOKABLE QString THRESHOLD_ABOVE(QString field, 
                   QString threshold_field, float threshold, 
                   int first_good_gate = 0, float bad_data_value = FLT_MIN,
                   float threshold_bad_data_value = FLT_MIN,
                   size_t clip_gate = SIZE_MAX);
 
-  QString THRESHOLD_BELOW(QString field, 
+  Q_INVOKABLE QString THRESHOLD_BELOW(QString field, 
                   QString threshold_field, float threshold, 
                   int first_good_gate = 0, float bad_data_value = FLT_MIN,
                   float threshold_bad_data_value = FLT_MIN,

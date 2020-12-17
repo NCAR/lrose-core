@@ -201,7 +201,7 @@ public:
 		 float center,
 		 float bad_data_value, size_t dgi_clip_gate);
   
-/*
+
   string BBUnfoldAircraftWind(string fieldName, RadxVol *vol,
 			      int rayIdx, int sweepIdx,
 			      float nyquist_velocity,
@@ -212,7 +212,7 @@ public:
 			      float bad_data_value,
 			      string newFieldName);
 
-  */
+  
   /*
 const float *data, float *newData, size_t nGates,
                             float nyquist_velocity, float dds_radd_eff_unamb_vel,
@@ -226,18 +226,19 @@ const float *data, float *newData, size_t nGates,
                             size_t ngates_averaged,
                             float bad_data_value, size_t dgi_clip_gate, bool *boundary_mask);
   */
-  /*
+  
+  // TODO: need a version with ud_wind or vert_wind, that is supplied by the script.
   string BBUnfoldLocalWind(string fieldName, RadxVol *vol,
 			   int rayIdx, int sweepIdx,
 			   float nyquist_velocity,
-			   float ew_wind, float ns_wind, float ud_wind,
 			   int max_pos_folds,
 			   int max_neg_folds,
 			   size_t ngates_averaged,
+			   float ew_wind, float ns_wind,
 			   size_t clip_gate,
 			   float bad_data_value,
 			   string newFieldName);
-  */
+  
   /*
 const float *data, float *newData, size_t nGates,
 			 float nyquist_velocity, float dds_radd_eff_unamb_vel,

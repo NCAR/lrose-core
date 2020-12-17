@@ -101,6 +101,64 @@ QString  SoloFunctionsController::BB_UNFOLDING_FIRST_GOOD_GATE(QString field, fl
   return QString::fromStdString(tempFieldName);
 }
 
+QString  SoloFunctionsController::BB_UNFOLDING_LOCAL_WIND(QString field, float nyquist, 
+                     int max_pos_folds,
+                     int max_neg_folds,
+                     size_t ngates_averaged,
+                     float ew_wind,
+                     float ns_wind,
+                     float bad_data,
+                     size_t clip_gate) {
+
+  string tempFieldName = soloFunctionsModel.BBUnfoldLocalWind(field.toStdString(), _data,
+                 _currentRayIdx, _currentSweepIdx,
+                 nyquist,
+                 max_pos_folds,
+                 max_neg_folds,
+                 ngates_averaged,
+                 ew_wind, ns_wind,
+                 clip_gate,
+                 bad_data,
+                 field.toStdString());
+
+  /* ---
+  string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, RadxVol *vol,
+            int rayIdx, int sweepIdx,
+            float nyquist_velocity,
+            int max_pos_folds,
+            int max_neg_folds,
+            size_t ngates_averaged,
+            float ew_wind, float ns_wind, float ud_wind,
+            size_t clip_gate,
+            float bad_data_value, // TODO: pull this from data file?
+            string newFieldName) 
+  //-----
+  */
+
+  // returns name of new field in RadxVol                                                                                       
+  return QString::fromStdString(tempFieldName);
+}
+
+QString  SoloFunctionsController::BB_UNFOLDING_AC_WIND(QString field, float nyquist, 
+                     int max_pos_folds,
+                     int max_neg_folds,
+                     size_t ngates_averaged,
+                     float bad_data,
+                     size_t clip_gate) {
+
+  string tempFieldName = soloFunctionsModel.BBUnfoldAircraftWind(field.toStdString(), _data,
+                 _currentRayIdx, _currentSweepIdx,
+                 nyquist,
+                 max_pos_folds,
+                 max_neg_folds,
+                 ngates_averaged,
+                 clip_gate,
+                 bad_data,
+                 field.toStdString());
+
+  // returns name of new field in RadxVol                                                                                       
+  return QString::fromStdString(tempFieldName);
+}
 
 /*
 // How to return a vector

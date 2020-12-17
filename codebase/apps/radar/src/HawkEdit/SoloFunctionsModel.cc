@@ -301,7 +301,7 @@ const vector<float> *SoloFunctionsModel::GetData(string fieldName,  RadxVol *vol
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
 
   vector<float> *dataVector = new vector<float>(nGates);
@@ -366,7 +366,7 @@ void SoloFunctionsModel::SetData(string &fieldName, RadxVol *vol,
   //float *newData = new float[nGates];
 
   int nGates = fieldData->size();
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
 
   Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = false;
@@ -425,7 +425,7 @@ string SoloFunctionsModel::ZeroMiddleThird(string fieldName,  RadxVol *vol,
   // field = ray->getField(fieldName);
   field = fetchDataField(ray, fieldName);
   size_t nGates = ray->getNGates(); 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   float *newData = new float[nGates];
   for (int i=0; i<10; i++)
@@ -532,7 +532,7 @@ string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  RadxVol *vol,
     if (nGates > _boundaryMaskLength)
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
 
-    cerr << "there are nGates " << nGates;
+    // cerr << "there arenGates " << nGates;
     const float *data = field->getDataFl32();
   
     // perform the function ...
@@ -548,7 +548,7 @@ string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  RadxVol *vol,
     }
   */
   } else {  // no _boundaryMaskSet
-    cerr << "there are nGates " << nGates;
+    // cerr << "there arenGates " << nGates;
     const float *data = field->getDataFl32();
 
   
@@ -655,7 +655,7 @@ string SoloFunctionsModel::Despeckle(string fieldName,  RadxVol *vol,
 
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -812,7 +812,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVol *vol,
 
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   //==========
@@ -921,7 +921,7 @@ string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, RadxVol *vol,
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
 
   // manage the last good v0, initialized from first good gate in a sweep;
@@ -980,6 +980,261 @@ string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, RadxVol *vol,
 
 }
 
+string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, RadxVol *vol,
+            int rayIdx, int sweepIdx,
+            float nyquist_velocity,
+            int max_pos_folds,
+            int max_neg_folds,
+            size_t ngates_averaged,
+            size_t clip_gate,
+            float bad_data_value, // TODO: pull this from data file?
+            string newFieldName) { 
+
+  // find the ray and data
+
+  // get the missing data value
+
+  // What is being returned? the name of the new field in the model that
+  // contains the results.
+
+  LOG(DEBUG) << "entry with fieldName ... ";
+  LOG(DEBUG) << fieldName;
+
+  vol->loadRaysFromFields(); // loadFieldsFromRays();
+
+  const RadxField *field;
+  
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = vol->getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "WARNING - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  float dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
+  int seds_nyquist_velocity = nyquist_velocity; //  what is this value? It is the nyquist velocity set by "one time only" commands
+
+  float elevation_angle_degrees = ray->getElevationDeg();
+  float azimuth_angle_degrees = ray->getAzimuthDeg();
+
+  // ---
+  // get the winds from the aircraft platform
+  const RadxGeoref *georef = ray->getGeoreference();
+  if (georef == NULL) {
+    LOG(DEBUG) << "ERROR - georef is NULL";
+    LOG(DEBUG) << "      trying to recover ...";
+    vol->setLocationFromStartRay();
+    georef = ray->getGeoreference();
+    if (georef == NULL) {
+      throw "Georef is null";
+    }
+  } 
+ 
+  float vert_wind = georef->getVertWind();  // fl32
+  float ew_wind = georef->getEwWind(); // fl32
+  float ns_wind = georef->getNsWind(); // fl32;
+  //-- 
+
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  float *newData = new float[nGates];
+
+  // data, _boundaryMask, and newData should have all the same dimensions = nGates
+  if (_boundaryMaskSet) { //  && _boundaryMaskLength >= 3) {
+    // verify dimensions on data in/out and boundary mask
+    if (nGates > _boundaryMaskLength)
+      throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
+  }
+
+  // cerr << "there arenGates " << nGates;
+  const float *data = field->getDataFl32();
+
+  float missingValue = field->getMissingFl32();
+ 
+  LOG(DEBUG) << "args: ";
+  LOG(DEBUG) << "nyquist_velocity=" << nyquist_velocity;
+  LOG(DEBUG) << "dds_radd_eff_unamb_vel=" << dds_radd_eff_unamb_vel;
+  LOG(DEBUG) << "ew_wind=" << ew_wind;
+  LOG(DEBUG) << "nw_wind=" << ns_wind;
+  LOG(DEBUG) << "vert_wind=" << vert_wind;
+  LOG(DEBUG) << "azimuth_angle_degrees=" << azimuth_angle_degrees;
+  LOG(DEBUG) << "elevation_angle_degrees=" << elevation_angle_degrees;
+  LOG(DEBUG) << "ngates_averaged= " << ngates_averaged;
+  LOG(DEBUG) << "max_pos_folds=" << max_pos_folds;
+  LOG(DEBUG) << "max_neg_folds=" << max_neg_folds;
+  LOG(DEBUG) << "clip_gate=" << clip_gate;
+  LOG(DEBUG) << "bad_data_value=" << bad_data_value;
+  LOG(DEBUG) << "missingValue=" << missingValue;
+
+  SoloFunctionsApi soloFunctionsApi;
+
+  soloFunctionsApi.BBUnfoldAircraftWind(data, newData, nGates,
+                       nyquist_velocity, dds_radd_eff_unamb_vel,
+                       azimuth_angle_degrees, elevation_angle_degrees,
+                       ew_wind, ns_wind, vert_wind,
+                       max_pos_folds, max_neg_folds,
+                       ngates_averaged,
+                       bad_data_value, clip_gate, _boundaryMask);
+
+  // insert new field into RadxVol                                                                             
+  LOG(DEBUG) << "result = ";
+  for (int i=0; i<10; i++)
+    LOG(DEBUG) << newData[i] << ", ";
+
+  //Radx::fl32 missingValue = Radx::missingFl32; 
+  bool isLocal = false;
+  string field_units = field->getUnits();
+  //RadxField *newField = new RadxField(newFieldName, "m/s");
+  //newField->copyMetaData(*field);
+  //newField->addDataFl32(nGates, newData);
+  RadxField *field1 = ray->addField(newFieldName, field_units, nGates, missingValue, newData, isLocal);
+
+  string tempFieldName = field1->getName();
+  tempFieldName.append("#");
+
+  LOG(DEBUG) << "exit ";
+
+  return tempFieldName;
+
+}
+
+string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, RadxVol *vol,
+            int rayIdx, int sweepIdx,
+            float nyquist_velocity,
+            int max_pos_folds,
+            int max_neg_folds,
+            size_t ngates_averaged,
+            float ew_wind, float ns_wind,
+            size_t clip_gate,
+            float bad_data_value, // TODO: pull this from data file?
+            string newFieldName) { 
+
+  // find the ray and data
+
+  // get the missing data value
+
+  // What is being returned? the name of the new field in the model that
+  // contains the results.
+
+  LOG(DEBUG) << "entry with fieldName ... ";
+  LOG(DEBUG) << fieldName;
+
+  vol->loadRaysFromFields(); // loadFieldsFromRays();
+
+  const RadxField *field;
+  //  field = vol->getFieldFromRay(fieldName);
+  //  if (field == NULL) {
+  //    LOG(DEBUG) << "no RadxField found in volume";
+  //    throw "No data field with name " + fieldName;;
+  //  }
+  
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = vol->getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "WARNING - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  float dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
+  int seds_nyquist_velocity = nyquist_velocity; //  what is this value? It is the nyquist velocity set by "one time only" commands
+
+  float elevation_angle_degrees = ray->getElevationDeg();
+  float azimuth_angle_degrees = ray->getAzimuthDeg();
+
+  // get the winds from the aircraft platform
+  const RadxGeoref *georef = ray->getGeoreference();
+  if (georef == NULL) {
+    LOG(DEBUG) << "ERROR - georef is NULL";
+    LOG(DEBUG) << "      trying to recover ...";
+    vol->setLocationFromStartRay();
+    georef = ray->getGeoreference();
+    if (georef == NULL) {
+      throw "Georef is null";
+    }
+  } 
+ 
+  float ud_wind = georef->getVertWind();  // fl32
+
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  float *newData = new float[nGates];
+
+  // data, _boundaryMask, and newData should have all the same dimensions = nGates
+  if (_boundaryMaskSet) { //  && _boundaryMaskLength >= 3) {
+    // verify dimensions on data in/out and boundary mask
+    if (nGates > _boundaryMaskLength)
+      throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
+  }
+
+  const float *data = field->getDataFl32();
+
+  // manage the last good v0, initialized from first good gate in a sweep;
+  // and perpetuated for each ray in the sweep
+  static float last_good_v0;
+  float missingValue = field->getMissingFl32();
+ 
+  LOG(DEBUG) << "args: ";
+  LOG(DEBUG) << "nyquist_velocity=" << nyquist_velocity;
+  LOG(DEBUG) << "dds_radd_eff_unamb_vel=" << dds_radd_eff_unamb_vel;
+  LOG(DEBUG) << "ew_wind=" << ew_wind;
+  LOG(DEBUG) << "nw_wind=" << ns_wind;
+  LOG(DEBUG) << "ud_wind=" << ud_wind;
+  LOG(DEBUG) << "azimuth_angle_degrees=" << azimuth_angle_degrees;
+  LOG(DEBUG) << "elevation_angle_degrees=" << elevation_angle_degrees;
+  LOG(DEBUG) << "ngates_averaged= " << ngates_averaged;
+  LOG(DEBUG) << "max_pos_folds=" << max_pos_folds;
+  LOG(DEBUG) << "max_neg_folds=" << max_neg_folds;  
+  LOG(DEBUG) << "clip_gate=" << clip_gate;
+  LOG(DEBUG) << "bad_data_value=" << bad_data_value;
+  LOG(DEBUG) << "missingValue=" << missingValue;
+
+  SoloFunctionsApi soloFunctionsApi;
+
+  soloFunctionsApi.BBUnfoldLocalWind(data, newData, nGates,
+                       nyquist_velocity, dds_radd_eff_unamb_vel,
+                       azimuth_angle_degrees, elevation_angle_degrees,
+                       ew_wind, ns_wind, ud_wind,
+                       max_pos_folds, max_neg_folds,
+                       ngates_averaged,
+                       bad_data_value, clip_gate, _boundaryMask);
+
+  // insert new field into RadxVol                                                                             
+  LOG(DEBUG) << "result = ";
+  for (int i=0; i<10; i++)
+    LOG(DEBUG) << newData[i] << ", ";
+
+  //Radx::fl32 missingValue = Radx::missingFl32; 
+  bool isLocal = false;
+  string field_units = field->getUnits();
+  //RadxField *newField = new RadxField(newFieldName, "m/s");
+  //newField->copyMetaData(*field);
+  //newField->addDataFl32(nGates, newData);
+  RadxField *field1 = ray->addField(newFieldName, field_units, nGates, missingValue, newData, isLocal);
+
+  string tempFieldName = field1->getName();
+  tempFieldName.append("#");
+
+  LOG(DEBUG) << "exit ";
+
+  return tempFieldName;
+
+}
+
+
   // TODO: where are we getting the bad_flag_mask?
   // TODO: is bad_flag_mask a variable/vector from the environment? or 
   // is it held internally, like the boundary mask?
@@ -1029,7 +1284,7 @@ string SoloFunctionsModel::_flaggedAddMultiply(string fieldName,  RadxVol *vol,
 
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
 
     RadxField *flagField = fetchDataField(ray, flagFieldName);
@@ -1121,7 +1376,7 @@ string SoloFunctionsModel::SetBadFlagsAbove(string fieldName,  RadxVol *vol,
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -1200,7 +1455,7 @@ string SoloFunctionsModel::SetBadFlagsBelow(string fieldName,  RadxVol *vol,
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -1280,7 +1535,7 @@ string SoloFunctionsModel::SetBadFlagsBetween(string fieldName,  RadxVol *vol,
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -1358,7 +1613,7 @@ string SoloFunctionsModel::RemoveRing(string fieldName,  RadxVol *vol,
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // TODO: data, _boundaryMask, and newData should have all the same dimensions = nGates
@@ -1442,7 +1697,7 @@ string SoloFunctionsModel::AssertBadFlags(string fieldName,  RadxVol *vol,
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -1507,7 +1762,7 @@ string SoloFunctionsModel::ClearBadFlags(string badFlagMaskFieldName,  RadxVol *
   //    throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   //}
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   //  const bool *bad_flag_mask = (bool *) field->getDataSi08();
   
   // TODO: is this function really useful? aren't we just creating a new field with
@@ -1579,7 +1834,7 @@ string SoloFunctionsModel::ComplementBadFlags(string fieldName,  RadxVol *vol,
   //    throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   //}
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   //const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -1646,7 +1901,7 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  RadxVol *vol,
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   /*
   // perform the function ...
@@ -1839,7 +2094,7 @@ void CopyBadFlags(const float *data, size_t nGates,
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -1914,7 +2169,7 @@ string SoloFunctionsModel::FlaggedAssign(string fieldName,  RadxVol *vol, int ra
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -1979,7 +2234,7 @@ string SoloFunctionsModel::FlaggedCopy(string fieldName,  RadxVol *vol, int rayI
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -2037,7 +2292,7 @@ string SoloFunctionsModel::FlagFreckles(string fieldName,  RadxVol *vol, int ray
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -2100,7 +2355,7 @@ string SoloFunctionsModel::FlagGlitches(string fieldName,  RadxVol *vol, int ray
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -2209,7 +2464,7 @@ string SoloFunctionsModel::ThresholdFieldBetween(string fieldName,  RadxVol *vol
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
 
   const RadxField *field_thr;
@@ -2275,7 +2530,7 @@ string SoloFunctionsModel::ForceUnfolding(string fieldName,  RadxVol *vol, int r
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
  
   LOG(DEBUG) << "args: ";
@@ -2362,7 +2617,7 @@ string SoloFunctionsModel::_generalLogicalFx(string fieldName,  RadxVol *vol, in
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -2436,7 +2691,7 @@ string SoloFunctionsModel::_generalLogicalFx2(string fieldName,  RadxVol *vol, i
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
@@ -2495,12 +2750,12 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  RadxVol *vol, 
   float *newData = new float[nGates];
 
   // get the bad flag mask
-  RadxField *maskField = fetchDataField(ray, maskFieldName);
+  //RadxField *maskField = fetchDataField(ray, maskFieldName);
   // TODO: fix up this check ...
   // size_t nGatesMask = ray->getNGates(); 
   //if (nGatesMask != nGates)
   //   throw "Error: bad flag mask and field gate dimension are not equal (SoloFunctionsModel)";
-  const bool *bad_flag_mask = (bool *) maskField->getDataSi08();
+  const bool *bad_flag_mask = NULL; // (bool *) maskField->getDataSi08();
 
 
   // data, _boundaryMask, and bad flag mask should have all the same dimensions = nGates
@@ -2517,7 +2772,7 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  RadxVol *vol, 
   const float *threshold_data = field_thr->getDataFl32();
   float thr_bad_data_value = field_thr->getMissingFl32();
 
-  cerr << "there are nGates " << nGates;
+  // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
   
   // perform the function ...
