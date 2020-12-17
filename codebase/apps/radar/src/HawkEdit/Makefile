@@ -59,7 +59,6 @@ HDRS = \
 	ColorBar.hh \
 	ColorMap.hh \
 	ColorTableManager.hh \
-	CustomTableHeader.hh \
 	DisplayManager.hh \
 	FieldRenderer.hh \
 	FieldRendererController.hh \
@@ -144,7 +143,6 @@ MOC_SRCS = \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
-	CustomTableHeader.cc \
 	ScriptEditorView.cc \
 	ScriptEditorController.cc \
 	TextEdit.cc \
@@ -168,7 +166,6 @@ MOC_OUTPUT = \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \
-	moc_CustomTableHeader.cpp \
 	moc_ScriptEditorView.cpp \
 	moc_ScriptEditorController.cpp \
 	moc_TextEdit.cpp \

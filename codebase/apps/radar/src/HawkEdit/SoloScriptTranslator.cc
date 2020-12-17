@@ -302,23 +302,29 @@ bool SoloScriptTranslator::process_action_unfold(string line, std::iostream& jav
 	            string new_field = field1;  // make a copy of the destination field.
 	            construct_new_field(new_field);
 	            format_field_by_reference(field1);
-	            string extra_arg = "NYQUIST";
+	            string wind_args = "EW_WIND, NS_WIND";
+	            // TODO: optional arg VERT_WIND for local wind
+	            string extra_arg = ", BB_MAX_POS_FOLDS, BB_MAX_NEG_FOLDS, BB_GATES_AVERAGED, NYQUIST";
+	            string fgg_arg = "FIRST_GOOD_GATE";
 	            format_it(command);
 
 	            switch(BB_use) {
 	            	case AC_WIND:
 	            		cout << new_field << " = " << command << " ( " << field1 << "," << extra_arg << " )" << endl;
-	                    javascript << new_field <<" = " << command <<  "_AC_WIND" << " ( " << field1 << "," << extra_arg << " )" << endl;
+	                    javascript << new_field <<" = " << command <<  "_AC_WIND" 
+	                       << " ( " << field1 << "," << extra_arg << " )" << endl;
 	                    recognized = true;
 	            	break;
 	            	case LOCAL_WIND:
 	            		cout << new_field << " = " << command << " ( " << field1 << "," << extra_arg << " )" << endl;
-	                    javascript << new_field << "  = " << command << "_LOCAL_WIND" << " ( " << field1 << "," << extra_arg << " )" << endl;
+	                    javascript << new_field << "  = " << command << "_LOCAL_WIND" 
+	                       << " ( " << field1 << "," << wind_args << extra_arg << " )" << endl;
 	                    recognized = true;
 	            	break;
 	            	case FIRST_GOOD_GATE:
 	            		cout << new_field << " = " << command << " ( " << field1 << "," << extra_arg << " )" << endl;
-	                    javascript << new_field << " = " << command << "_FIRST_GOOD_GATE" << " ( " << field1 << "," << extra_arg << " )" << endl;
+	                    javascript << new_field << " = " << command << "_FIRST_GOOD_GATE" 
+	                       << " ( " << field1 << "," << fgg_arg << extra_arg << " )" << endl;
 	                    recognized = true;	            	
 	            	break;
 	            	default:

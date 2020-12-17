@@ -45,7 +45,12 @@ void se_threshold_field(Where where, float scaled_thr1, float scaled_thr2,
   float *tt;
   bool *bnd;
 
-  nc = dgi_clip_gate;
+  if (dgi_clip_gate > nGates) {
+    nc = nGates;
+  } else {
+    nc = dgi_clip_gate;
+  }
+
   fgg = first_good_gate;
   bnd = boundary_mask;
   //
