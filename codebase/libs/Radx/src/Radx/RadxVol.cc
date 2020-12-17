@@ -5357,6 +5357,10 @@ void RadxVol::_setPredomSweepModeFromAngles() const
 
   // sanity check
   
+  if (_rays.size() < 1) {
+    return;
+  }
+
   if (_rays.size() < 2) {
     _predomSweepModeFromAngles = _rays[0]->getSweepMode();
     _sweepModeFromAnglesChecked = true;
