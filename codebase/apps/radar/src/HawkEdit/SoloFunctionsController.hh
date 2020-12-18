@@ -37,31 +37,35 @@ public:
   Q_INVOKABLE QString ZERO_MIDDLE_THIRD(QString field); // return the name of the new field that contains the result
   Q_INVOKABLE QString ZERO_INSIDE_BOUNDARY(QString field); // return the name of the new field that contains the result
 
-  Q_INVOKABLE QString DESPECKLE(QString field, size_t speckle_length, float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX); // return the name of the new field that contains the result
-  Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field, float nyquist, float bad_data, size_t clip_gate); // return the name of the new field that contains the result
+  Q_INVOKABLE QString DESPECKLE(QString field, size_t speckle_length,
+    float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX); // return the name of the new field that contains the result
+  Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field, float nyquist,
+    float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX); // return the name of the new field that contains the result
 
  // return the name of the new field that contains the result
   Q_INVOKABLE QString BB_UNFOLDING_FIRST_GOOD_GATE(QString field, float nyquist,
 						   int max_pos_folds,
 						   int max_neg_folds,
 						   size_t ngates_averaged,
-						   float bad_data, size_t clip_gate);
+						   float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX);
 
-  Q_INVOKABLE QString BB_UNFOLDING_LOCAL_WIND(QString field, float nyquist, 
+  Q_INVOKABLE QString BB_UNFOLDING_LOCAL_WIND(QString field, 
                      int max_pos_folds,
                      int max_neg_folds,
                      size_t ngates_averaged,
                      float ew_wind,
                      float ns_wind,
-                     float bad_data,
-                     size_t clip_gate);
+                     float nyquist = 0,
+                     float bad_data = FLT_MIN,
+                     size_t clip_gate = SIZE_MAX);
 
-  Q_INVOKABLE QString BB_UNFOLDING_AC_WIND(QString field, float nyquist, 
+  Q_INVOKABLE QString BB_UNFOLDING_AC_WIND(QString field, 
                      int max_pos_folds,
                      int max_neg_folds,
                      size_t ngates_averaged,
-                     float bad_data,
-                     size_t clip_gate);
+                     float nyquist = 0, 
+                     float bad_data = FLT_MIN,
+                     size_t clip_gate = SIZE_MAX);
 
   Q_INVOKABLE QString ASSERT_BAD_FLAGS(QString field, float bad_data,
 				       size_t clip_gate, QString badFlagMaskFieldName);

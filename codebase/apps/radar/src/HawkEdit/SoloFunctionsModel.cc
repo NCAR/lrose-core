@@ -728,7 +728,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVol *vol,
     vol->setLocationFromStartRay();
     georef = ray->getGeoreference();
     if (georef == NULL) {
-      throw "Georef is null";
+      throw "Remove Aircraft Motion: Georef is null. Cannot find vert_velocity, ew_velocity, ns_velocity.";
     }
   } 
  
@@ -1030,7 +1030,7 @@ string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, RadxVol *vol,
     vol->setLocationFromStartRay();
     georef = ray->getGeoreference();
     if (georef == NULL) {
-      throw "Georef is null";
+      throw "BBUnfoldAircraftWind: Georef is null. Cannot find ew_wind, ns_wind, vert_wind";
     }
   } 
  
@@ -1152,7 +1152,7 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, RadxVol *vol,
   float elevation_angle_degrees = ray->getElevationDeg();
   float azimuth_angle_degrees = ray->getAzimuthDeg();
 
-  // get the winds from the aircraft platform
+  /* get the winds from the aircraft platform
   const RadxGeoref *georef = ray->getGeoreference();
   if (georef == NULL) {
     LOG(DEBUG) << "ERROR - georef is NULL";
@@ -1160,11 +1160,13 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, RadxVol *vol,
     vol->setLocationFromStartRay();
     georef = ray->getGeoreference();
     if (georef == NULL) {
-      throw "Georef is null";
+      throw "BBUnfoldLocalWind: Georef is null. Cannot find ud_wind";
     }
   } 
  
   float ud_wind = georef->getVertWind();  // fl32
+  */
+  float ud_wind = 0.0; // TODO: this is not used; remove it from args.
 
   // get the data (in) and create space for new data (out)  
   //  field = ray->getField(fieldName);
@@ -1192,7 +1194,7 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, RadxVol *vol,
   LOG(DEBUG) << "dds_radd_eff_unamb_vel=" << dds_radd_eff_unamb_vel;
   LOG(DEBUG) << "ew_wind=" << ew_wind;
   LOG(DEBUG) << "nw_wind=" << ns_wind;
-  LOG(DEBUG) << "ud_wind=" << ud_wind;
+  //LOG(DEBUG) << "ud_wind=" << ud_wind;
   LOG(DEBUG) << "azimuth_angle_degrees=" << azimuth_angle_degrees;
   LOG(DEBUG) << "elevation_angle_degrees=" << elevation_angle_degrees;
   LOG(DEBUG) << "ngates_averaged= " << ngates_averaged;

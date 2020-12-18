@@ -484,7 +484,7 @@ void se_BB_unfold_local_wind(const float *data, float *newData, size_t nGates,
   // local wind 
   u = ew_wind;
   v = ns_wind;
-  w = ud_wind;
+  // w = ud_wind;
 	
   dazm = RADIANS(azimuth_angle_degrees);
   dele = RADIANS(elevation_angle_degrees);

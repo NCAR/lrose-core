@@ -101,12 +101,13 @@ QString  SoloFunctionsController::BB_UNFOLDING_FIRST_GOOD_GATE(QString field, fl
   return QString::fromStdString(tempFieldName);
 }
 
-QString  SoloFunctionsController::BB_UNFOLDING_LOCAL_WIND(QString field, float nyquist, 
+QString  SoloFunctionsController::BB_UNFOLDING_LOCAL_WIND(QString field, 
                      int max_pos_folds,
                      int max_neg_folds,
                      size_t ngates_averaged,
                      float ew_wind,
                      float ns_wind,
+                     float nyquist,
                      float bad_data,
                      size_t clip_gate) {
 
@@ -139,10 +140,11 @@ QString  SoloFunctionsController::BB_UNFOLDING_LOCAL_WIND(QString field, float n
   return QString::fromStdString(tempFieldName);
 }
 
-QString  SoloFunctionsController::BB_UNFOLDING_AC_WIND(QString field, float nyquist, 
+QString  SoloFunctionsController::BB_UNFOLDING_AC_WIND(QString field, 
                      int max_pos_folds,
                      int max_neg_folds,
                      size_t ngates_averaged,
+                     float nyquist,
                      float bad_data,
                      size_t clip_gate) {
 
