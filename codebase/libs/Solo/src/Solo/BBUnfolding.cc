@@ -535,9 +535,11 @@ void se_BB_generic_unfold(const float *data, float *newData, size_t nGates,
     
   float bad;
 
-  nc = dgi_clip_gate;
+  zzIdx = nGates;
+  if ((dgi_clip_gate > 0) && (dgi_clip_gate < nGates))
+    zzIdx = dgi_clip_gate;
+
   ssIdx = 0;
-  zzIdx = nc;
 
   bad = bad_data_value;
   //    nyqv = nyquist_velocity ? nyquist_velocity

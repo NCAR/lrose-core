@@ -64,9 +64,12 @@ void se_remove_ac_motion(float vert_velocity, float ew_velocity, float ns_veloci
     ac_vel = dd_ac_vel(vert_velocity, ew_velocity, ns_velocity, 
 		       ew_gndspd_corr, tilt, elevation);
 
-    if (dgi_clip_gate > nGates) throw std::invalid_argument("dgi_clip_gate greater than number of\
- gates");
-    nc = dgi_clip_gate;
+    if (dgi_clip_gate > nGates) {
+      // throw std::invalid_argument("dgi_clip_gate greater than number of gates");
+      nc = nGates;
+    } else {
+      nc = dgi_clip_gate;
+    }
     //bnd = boundary_mask;
 
     // memcopy data into newData                                                                  

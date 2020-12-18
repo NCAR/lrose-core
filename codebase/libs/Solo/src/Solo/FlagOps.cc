@@ -674,7 +674,11 @@ void se_flag_freckles(float freckle_threshold, size_t freckle_avg_count,
     raq0 = new float[navg]; // float[navg]; // se_return_ravgs(navg);
     raq1 = new float[navg]; // se_return_ravgs(navg);
     //}
-  nc = dgi_clip_gate;
+  if (dgi_clip_gate > nGates) {
+    nc = nGates;
+  } else {
+    nc = dgi_clip_gate;
+  }
   nn = navg +1;  // number of average values
 
   // ndx_ss  is the index through the ray

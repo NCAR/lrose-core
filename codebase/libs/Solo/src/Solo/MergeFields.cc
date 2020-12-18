@@ -31,7 +31,11 @@ void se_merge_fields(const float *data1, const float *data2,
   const float *ss, *zz, *aa;
   float *tt;
 
-  nc = dgi_clip_gate;
+  if (dgi_clip_gate > nGates) {
+    nc = nGates;
+  } else {
+    nc = dgi_clip_gate;
+  }
   bnd = boundary_mask;
 
   aa = data1; //(short *)dds->qdat_ptrs[fn];

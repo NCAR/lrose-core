@@ -56,8 +56,12 @@ void se_despeckle(const float *data, float *newData, size_t nGates, float bad, i
   //  dgi = dd_window_dgi(seds->se_frame);
   //  dds = dgi->dds;
   //  if (dgi_clip_gate >= nGates) throw std::invalid_argument("dgi_clip_gate greater than number of gates");
-  if (dgi_clip_gate > nGates) throw std::invalid_argument("dgi_clip_gate greater than number of gates");
-  nc = dgi_clip_gate;
+  if ((dgi_clip_gate > nGates) || (dgi_clip_gate < 0)) {
+     // throw std::invalid_argument("dgi_clip_gate greater than number of gates");
+    nc = nGates;
+  } else {
+    nc = dgi_clip_gate;
+  }
   bnd = boundary_mask;
 
   // memcopy data into newData

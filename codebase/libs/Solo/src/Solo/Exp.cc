@@ -16,7 +16,12 @@ void se_mult_const(float f_const, const float *data, float *newData, size_t nGat
   float *tt;
   double d, d_const;
 
-  nc = dgi_clip_gate;
+  if (dgi_clip_gate > nGates) {
+    nc = nGates;
+  } else {
+    nc = dgi_clip_gate;
+  }
+
   bnd = boundary_mask;
 
   ss = data;

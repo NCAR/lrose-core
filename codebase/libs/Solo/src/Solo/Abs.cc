@@ -23,7 +23,12 @@ void se_absolute_value(const float *data, float *newData, size_t nGates,
     float *tt;
     bool *bnd;
 
-    nc = dgi_clip_gate;
+    if (dgi_clip_gate > nGates) {
+      nc = nGates;
+    } else {
+      nc = dgi_clip_gate;
+    }
+
     bnd = boundary_mask;
     ss = data;
     zz = ss +nc;

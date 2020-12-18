@@ -50,7 +50,11 @@ void se_funfold(const float *data, float *newData, size_t nGates,
 
     ctr = center; // (cmdq++)->uc_v.us_v_float;
 
-    nc = dgi_clip_gate;
+    if (dgi_clip_gate > nGates) {
+      nc = nGates;
+    } else {
+      nc = dgi_clip_gate;
+    }
     bnd = boundary_mask;
 
     ss = data; // (short *)dds->qdat_ptrs[fn];

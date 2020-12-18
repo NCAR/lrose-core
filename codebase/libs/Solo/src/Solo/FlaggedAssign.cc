@@ -14,7 +14,11 @@ void se_assign_value(float constant, const float *data, float *newData, size_t n
     const float *ss, *zz;
     float  *tt;
 
-    nc = dgi_clip_gate;
+    if (dgi_clip_gate > nGates) {
+      nc = nGates;
+    } else {
+      nc = dgi_clip_gate;
+    }
     bnd = boundary_mask;
     flag = bad_flag_mask;
 
