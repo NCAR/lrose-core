@@ -1918,7 +1918,8 @@ void TsPrint::_printRunDetails(ostream &out)
   out << "# RUN INFO: "
       << "year,month,day,hour,min,sec,nSamples,startGate,nGates"
       << endl;
-  
+
+  out << "# ";
   out << setfill('0');
   out << setw(4) << now.getYear() << ","
       << setw(2) << now.getMonth() << ","
@@ -1950,6 +1951,7 @@ void TsPrint::_printOpsInfo(ostream &out, const IwrfTsPulse *pulse)
 
   const IwrfTsInfo &info = _pulseReader->getOpsInfo();
   
+  out << "#";
   out << info.get_radar_site_name() << ","
       << info.get_radar_name() << ","
       << info.get_radar_altitude_m() << ","
