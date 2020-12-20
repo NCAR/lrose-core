@@ -3230,6 +3230,11 @@ bool OdimHdf5RadxFile::_isGematronikFieldFile(const string &path,
       break;
     }
   }
+  for (size_t ii = 0; ii < 16; ii++) {
+    if (!isdigit(fileName.c_str()[firstDigitLoc+ii])) {
+      return false;
+    }
+  }
 
   // read in date / time
 
