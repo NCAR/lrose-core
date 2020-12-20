@@ -3239,6 +3239,11 @@ bool OdimHdf5RadxFile::_isGematronikFieldFile(const string &path,
              &year, &month, &day, &hour, &min, &sec, &id) != 7) {
     return false;
   }
+  // sanity check on date
+  if (year < 1990 || month < 1 || month > 12 || day < 1 || day > 31 ||
+      hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
+    return false;
+  }
 
   RadxTime ptime(year, month, day, hour, min, sec);
   dateStr = fileName.substr(firstDigitLoc, 16);
@@ -3260,7 +3265,7 @@ bool OdimHdf5RadxFile::_isGematronikFieldFile(const string &path,
   
   volName = fileName.substr(endFieldNamePos + 1,
                             endVolPos - endFieldNamePos - 1);
-  
+
   return true;
 
 }
