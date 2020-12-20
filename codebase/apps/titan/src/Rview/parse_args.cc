@@ -49,7 +49,7 @@ void parse_args(int argc, char **argv)
   double dummy;
 
   char *end_pt;
-  char *mode_str, *debug_str, *localtime_str;
+  char *mode_str, *debug_str, *verbose_str, *localtime_str;
   char *time_requested_str;
   char *auto_advance_start_time_str;
   char *auto_advance_end_time_str;
@@ -68,6 +68,7 @@ void parse_args(int argc, char **argv)
 	  "       [ -auto_advance ] set auto_advance on\n"
 	  "         ARCHIVE mode only.\n"
 	  "       [ -debug ] debugging on\n"
+	  "       [ -verbose ] verbose debugging on\n"
 	  "       [ -d, -display ?] display name\n"
 	  "       [ -fg, -foreground ?] set foreground color\n"
 	  "       [ -g, -geometry ?] geometry as per X manual\n"
@@ -96,6 +97,9 @@ void parse_args(int argc, char **argv)
   
   debug_str = uGetParamString(Glob->prog_name,
 			      "debug", DEBUG_STR);
+  
+  verbose_str = uGetParamString(Glob->prog_name,
+                                "verbose", "false");
   
   localtime_str = uGetParamString(Glob->prog_name,
                                   "localtime", "false");
@@ -132,6 +136,10 @@ void parse_args(int argc, char **argv)
     } else if (!strcmp(argv[i], "-debug")) {
 
       debug_str = (char *) "true";
+      
+    } else if (!strcmp(argv[i], "-verbose")) {
+
+      verbose_str = (char *) "true";
       
     } else if (!strcmp(argv[i], "-localtime")) {
 
@@ -239,6 +247,22 @@ void parse_args(int argc, char **argv)
     fprintf(stderr,
 	    "Debug option '%s' invalid - should be 'true' or 'false'.\n",
 	    debug_str);
+    error_flag = TRUE;
+  }
+  
+  /*
+   * set verbose option
+   */
+  
+  if (!strcmp(verbose_str, "true")) {
+    Glob->verbose = TRUE;
+  } else if (!strcmp(verbose_str, "false")) {
+    Glob->verbose = FALSE;
+  } else {
+    fprintf(stderr, "ERROR - %s:parse_args\n", Glob->prog_name);
+    fprintf(stderr,
+	    "Verbose option '%s' invalid - should be 'true' or 'false'.\n",
+	    verbose_str);
     error_flag = TRUE;
   }
   

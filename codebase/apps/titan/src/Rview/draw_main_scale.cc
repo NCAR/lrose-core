@@ -87,7 +87,7 @@ void draw_main_scale(int dev,
   GC vector_legend_gc[MAX_VECTOR_LEGENDS];
   psgc_t *vector_legend_psgc[MAX_VECTOR_LEGENDS];
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_main_scale **\n");
   }
 

@@ -69,7 +69,7 @@ void setup_vsection_windows()
   static ui32 vsection_width = 0;
   static ui32 vsection_height = 0;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_vsection_windows **\n");
   }
 
@@ -363,7 +363,7 @@ void setup_vsection_windows()
    * debug output for X resource Id's
    */
   
-  if (Glob->debug) {
+  if (Glob->verbose) {
     
     fprintf(stderr, "vsection window = %ld\n", Glob->vsection_window);
     
@@ -383,7 +383,7 @@ void setup_vsection_windows()
     fprintf(stderr, "vsection plot window cursor = %ld\n",
 	    plot_window_cursor);
     
-  } /* if (Glob->debug) */
+  } /* if (Glob->verbose) */
 
 }
 

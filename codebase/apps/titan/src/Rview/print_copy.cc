@@ -41,7 +41,7 @@ void print_copy(char *ps_file_path)
   char *ps_printer, *print_command;
   char call_string[BUFSIZ];
   
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** print_copy **\n");
   }
 

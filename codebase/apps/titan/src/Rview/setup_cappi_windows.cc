@@ -85,7 +85,7 @@ void setup_cappi_windows()
   static ui32 cappi_width = 0;
   static ui32 cappi_height = 0;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_cappi_windows **\n");
   }
 
@@ -445,7 +445,7 @@ void setup_cappi_windows()
    * debug output for X resource Id's
    */
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
 
     fprintf(stderr, "main window = %ld\n", Glob->main_window);
 
@@ -469,7 +469,7 @@ void setup_cappi_windows()
     fprintf(stderr, "cappi plot window cursor = %ld\n",
 	    plot_window_cursor);
 
-  } /* if (Glob->debug) */
+  } /* if (Glob->verbose) */
 
   /*
    * reset first_call flag

@@ -50,7 +50,7 @@ void zoom_calc(int dev,
 
   zoom_t *zoom;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** zoom_calc **\n");
   }
 

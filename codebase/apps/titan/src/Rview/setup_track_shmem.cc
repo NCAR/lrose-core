@@ -49,7 +49,7 @@ void setup_track_shmem()
   time_hist_shmem_t *tshmem;
   coord_export_t *coord;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_track_shmem **\n");
   }
 

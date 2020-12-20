@@ -48,7 +48,7 @@ void get_ps_color_scales()
   int ifield;
   Colormap cmap;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** get_color_scales **\n");
   }
 

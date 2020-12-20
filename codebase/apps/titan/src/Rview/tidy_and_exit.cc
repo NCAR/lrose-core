@@ -42,7 +42,7 @@ void tidy_and_exit(int sig)
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** tidy_and_exit **\n");
   }
 

@@ -91,7 +91,7 @@ void set_cappi_sens()
   si32 i;
   ui08 sens;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_cappi_sens **\n");
   }
 
@@ -175,7 +175,7 @@ void set_vsection_sens()
   si32 i;
   ui08 sens;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_vsection_sens **\n");
   }
 
@@ -238,7 +238,7 @@ void set_help_sens()
   si32 i;
   ui08 sens;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_help_sens **\n");
   }
 

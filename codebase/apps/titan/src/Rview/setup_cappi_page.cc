@@ -60,7 +60,7 @@ void setup_cappi_page(FILE *copy_file)
 
   double aspect;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_cappi_page **\n");
   }
 

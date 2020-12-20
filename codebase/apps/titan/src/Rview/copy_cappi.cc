@@ -48,7 +48,7 @@ void copy_cappi()
 
   FILE *prologue_file, *ps_file;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** copy_cappi **\n");
   }
 

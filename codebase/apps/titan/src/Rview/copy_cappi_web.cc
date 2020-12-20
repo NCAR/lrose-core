@@ -249,14 +249,16 @@ void copy_cappi_named_gif()
    */
   
   char gif_file_name[MAX_PATH_LEN];
-  char gif_file_path[MAX_PATH_LEN];
+  char gif_file_path[MAX_PATH_LEN * 2];
   const date_time_t &cappiTime = get_cappi_time();
-  sprintf(gif_file_name, "%.4d%.2d%.2d_%.2d%.2d%.2d_%s.gif",
-	  cappiTime.year, cappiTime.month, cappiTime.day,
-	  cappiTime.hour, cappiTime.min, cappiTime.sec,
-	  get_cappi_field_name().c_str());
-  sprintf(gif_file_path, "%s%s%s",
-	  gif_dir_path, PATH_DELIM, gif_file_name);
+  snprintf(gif_file_name, MAX_PATH_LEN,
+           "%.4d%.2d%.2d_%.2d%.2d%.2d_%s.gif",
+           cappiTime.year, cappiTime.month, cappiTime.day,
+           cappiTime.hour, cappiTime.min, cappiTime.sec,
+           get_cappi_field_name().c_str());
+  snprintf(gif_file_path, MAX_PATH_LEN * 2,
+           "%s%s%s",
+           gif_dir_path, PATH_DELIM, gif_file_name);
 
   /*
    * Convert to gif format

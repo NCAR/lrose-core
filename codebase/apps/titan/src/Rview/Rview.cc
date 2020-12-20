@@ -295,6 +295,7 @@ RviewGlobal::RviewGlobal()
 
   this->time = std::time(NULL);
   debug = FALSE;
+  verbose = FALSE;
   localtime = FALSE;
   
   help = FALSE;

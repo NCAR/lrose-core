@@ -1296,7 +1296,7 @@ render_tracks(int dev,
   Mdvx::coord_t storm_coord;
   MdvxProj storm_proj;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** render_tracks **\n");
   }
 

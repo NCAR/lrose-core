@@ -43,7 +43,7 @@ void free_resources()
 
   int i;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** free_resources **\n");
   }
 

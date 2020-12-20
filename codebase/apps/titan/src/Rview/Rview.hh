@@ -618,6 +618,7 @@ public:
    */
 
   int debug;                           /* debug on - true or false */
+  int verbose;                         /* verbose on - true or false */
   int localtime;                       /* use local time - true or false */
   int timeOffsetSecs;                  /* time offset from UTC */
 

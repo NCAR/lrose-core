@@ -153,7 +153,7 @@ void draw_cappi_title(int dev)
 
   gframe_t *frame;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_cappi_title **\n");
   }
 
@@ -225,7 +225,7 @@ void draw_cappi_button(si32 n, ui32 background)
   int i;
   gframe_t *frame;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_cappi_button **\n");
   }
 
@@ -297,7 +297,7 @@ void draw_cappi_plot(int dev, g_color_scale_t *colors)
   
   GRectangle clip_rectangle[1];
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_cappi_plot **\n");
   }
 
@@ -330,7 +330,7 @@ void draw_cappi_plot(int dev, g_color_scale_t *colors)
   HaveCappiData = false;
   Glob->cappi_plotted = false;
   Glob->tracks_plotted = false;
-  
+
   if (read_cappi(mhdr, floatField, byteField) == 0) {
     HaveCappiData = true;
     float_cappi = (fl32*) floatField.getVol();
@@ -657,7 +657,7 @@ void expose_cappi_pixmap()
   gframe_t *frame;
   zoom_t *zoom;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** expose_cappi_pixmap **\n");
   }
 
@@ -1739,14 +1739,14 @@ static int read_cappi(Mdvx::master_header_t &mhdr,
 
 {
   
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** read_cappi **\n");
   }
 
   /*
    * return error if nfields is not positive
    */
-  
+
   if (Glob->nfields < 1) {
     return (-1);
   }
@@ -1775,6 +1775,9 @@ static int read_cappi(Mdvx::master_header_t &mhdr,
 
   // first read in all of the headers to get the vlevel info
 
+  if (Glob->debug) {
+    mdvx.printReadRequest(cerr);
+  }
   if (mdvx.readAllHeaders()) {
     if (Glob->debug) {
       cerr << mdvx.getErrStr() << endl;
@@ -1829,7 +1832,7 @@ static int read_cappi(Mdvx::master_header_t &mhdr,
   
   mdvx.setReadEncodingType(Mdvx::ENCODING_ASIS);
   mdvx.setReadCompressionType(Mdvx::COMPRESSION_ASIS);
-  
+
   if (Glob->debug) {
     mdvx.printReadRequest(cerr);
   }

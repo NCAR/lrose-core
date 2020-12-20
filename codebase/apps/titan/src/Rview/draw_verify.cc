@@ -76,7 +76,7 @@ void draw_verify(int dev,
   FILE *verify_file;
   verify_t verify;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_verify **\n");
   }
 

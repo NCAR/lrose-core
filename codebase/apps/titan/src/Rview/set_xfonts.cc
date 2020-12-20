@@ -43,7 +43,7 @@ void set_xfonts()
   char *x_ticklabel_font, *x_contourlabel_font, *x_text_font, *x_button_font;
   char *x_track_annotation_font;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_xfonts **\n");
   }
 
@@ -82,19 +82,19 @@ void set_xfonts()
   Glob->x_text_font = xLoadFont(Glob->rdisplay, x_text_font);
   Glob->x_button_font = xLoadFont(Glob->rdisplay, x_button_font);
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
 
-    fprintf(stderr, "x_title_font ID = %p\n", Glob->x_title_font);
-    fprintf(stderr, "x_scale_font ID = %p\n", Glob->x_scale_font);
-    fprintf(stderr, "x_ringlabel_font ID = %p\n", Glob->x_ringlabel_font);
-    fprintf(stderr, "x_ticklabel_font ID = %p\n", Glob->x_ticklabel_font);
-    fprintf(stderr, "x_contourlabel_font ID = %p\n", Glob->x_contourlabel_font);
+    fprintf(stderr, "x_title_font ID = %p\n", (void *) Glob->x_title_font);
+    fprintf(stderr, "x_scale_font ID = %p\n", (void *) Glob->x_scale_font);
+    fprintf(stderr, "x_ringlabel_font ID = %p\n", (void *) Glob->x_ringlabel_font);
+    fprintf(stderr, "x_ticklabel_font ID = %p\n", (void *) Glob->x_ticklabel_font);
+    fprintf(stderr, "x_contourlabel_font ID = %p\n", (void *) Glob->x_contourlabel_font);
     fprintf(stderr, "x_track_annotation_font ID = %p\n",
-	    Glob->x_track_annotation_font);
-    fprintf(stderr, "x_text_font ID = %p\n", Glob->x_text_font);
-    fprintf(stderr, "x_button_font ID = %p\n", Glob->x_button_font);
+	    (void *) Glob->x_track_annotation_font);
+    fprintf(stderr, "x_text_font ID = %p\n", (void *) Glob->x_text_font);
+    fprintf(stderr, "x_button_font ID = %p\n", (void *) Glob->x_button_font);
 
-  } /* if (Glob->debug) */
+  } /* if (Glob->verbose) */
 
 }
 

@@ -141,7 +141,7 @@ void draw_ac_posn(int dev,
 
   int i;
   
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_ac_posn **\n");
   }
   

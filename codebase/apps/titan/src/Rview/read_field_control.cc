@@ -65,7 +65,7 @@ void read_field_control()
 
   FILE *pfile;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** read_field_controls **\n");
   }
 
@@ -121,6 +121,20 @@ void read_field_control()
 
 	Glob->fcontrol.push_back(fcont);
 	
+        if (Glob->debug) {
+          cerr << "Got field description:" << endl;
+          cerr << "  description: " << description << endl;
+          cerr << "  url: " << url << endl;
+          cerr << "  field_num: " << field_num << endl;
+          cerr << "  field_name: " << field_name << endl;
+          cerr << "  time_window: " << time_window << endl;
+          cerr << "  x_colorscale_name: " << x_colorscale_name << endl;
+          cerr << "  ps_colorscale_name: " << ps_colorscale_name << endl;
+          cerr << "  contour_min: " << contour_min << endl;
+          cerr << "  contour_max: " << contour_max << endl;
+          cerr << "  contour_int: " << contour_int << endl;
+        }
+        
       }
 
     } /* if (fgets... */

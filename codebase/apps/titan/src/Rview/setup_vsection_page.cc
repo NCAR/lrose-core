@@ -59,7 +59,7 @@ void setup_vsection_page(FILE *copy_file)
   static ui32 plot_to_scale_margin, title_to_plot_margin;
   static char *fontname;
   
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_vsection_page **\n");
   }
 

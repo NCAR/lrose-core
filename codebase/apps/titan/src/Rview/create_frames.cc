@@ -42,7 +42,7 @@ void create_frames()
   double ps_pagewidth, ps_pagelength;
   si32 i;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** create_frames **\n");
   }
 
@@ -145,7 +145,7 @@ void create_frames()
    * debug output of GC Id's
    */
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
 
     fprintf(stderr, "cappi_title_frame gc = %ld\n",
 	    (long) Glob->cappi_title_frame->x->gc);
@@ -180,6 +180,6 @@ void create_frames()
     fprintf(stderr, "main_scale_frame gc = %ld\n",
 	    (long) Glob->main_scale_frame->x->gc);
 
-  } /* if (Glob->debug) */
+  } /* if (Glob->verbose) */
 
 }

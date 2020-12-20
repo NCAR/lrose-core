@@ -47,7 +47,7 @@ void get_x_color_scales()
   int ifield, ilevel;
   Colormap cmap;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** get_x_color_scales **\n");
   }
 
@@ -111,7 +111,7 @@ void get_x_color_scales()
      * print out GC ID values for the colors
      */
 
-    if (Glob->debug) {
+    if (Glob->verbose) {
 
       fprintf(stderr, "Colors for field %d\n", ifield);
 
@@ -125,7 +125,7 @@ void get_x_color_scales()
 
       } /* ilevel */
 
-    } /* if (Glob->debug) */
+    } /* if (Glob->verbose) */
 
   } /* ifield */
 

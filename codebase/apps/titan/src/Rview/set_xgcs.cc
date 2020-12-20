@@ -70,7 +70,7 @@ void set_xgcs()
   si32 i;
   unsigned int xor_color_num;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_xgcs **\n");
   }
 
@@ -519,7 +519,7 @@ void set_xgcs()
    * print x id values for debug purposes
    */
 
-  if (Glob->debug)
+  if (Glob->verbose)
     print_x_ids(cmap);
 
 }
@@ -537,7 +537,7 @@ static void setup_color_and_dim_gc(GC *gc,
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_color_and_dim_gc **\n");
   }
 
@@ -561,7 +561,7 @@ static void setup_color_gc(GC *gc,
   GC tmp_gc;
   char *colstr;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_color_gc **\n");
   }
 
@@ -597,7 +597,7 @@ static void setup_dim_gc(GC *gc,
   char *colstr, dim_colstr[40];
   XColor *xcolor;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_dim_gc **\n");
   }
 

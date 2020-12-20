@@ -141,7 +141,7 @@ void read_map_files()
 
   int imap;
   
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** read_map_files **\n");
   }
 
@@ -168,7 +168,7 @@ void draw_maps(int dev,
 
   int imap;
   
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_maps **\n");
   }
 
@@ -878,7 +878,7 @@ static int read_map_conf()
     return (0);
   }
   
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stdout,"Reading map conf in file '%s'\n", conf_file_path);
   }
 
@@ -1021,7 +1021,7 @@ void clip_map_gcs(int dev, gframe_t *frame,
 
 {
   int imap;
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** clip_map_gcs **\n");
   }
   for (imap = 0; imap < Nmaps; imap++) {
@@ -1038,7 +1038,7 @@ void unclip_map_gcs()
      
 {
   int imap;
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** unclip_map_gcs **\n");
   }
   for (imap = 0; imap < Nmaps; imap++) {
@@ -1055,7 +1055,7 @@ void free_map_gcs()
 
 {
   int imap;
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** free_map_gcs **\n");
   }
   for (imap = 0; imap < Nmaps; imap++) {
@@ -1071,7 +1071,7 @@ void free_map_fonts()
 
 {
   int imap;
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** free_map_fonts **\n");
   }
   for (imap = 0; imap < Nmaps; imap++) {

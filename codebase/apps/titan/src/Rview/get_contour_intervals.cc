@@ -45,7 +45,7 @@ void get_contour_intervals()
   si32 ncontours;
   double val;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** get_contour_intervals **\n");
   }
 

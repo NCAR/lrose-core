@@ -35,6 +35,7 @@
 #include "Rview.hh"
 #include <toolsa/servmap.h>
 #include <toolsa/pjg.h>
+#include <toolsa/str.h>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
 using namespace std;
@@ -88,7 +89,7 @@ void draw_vsection_title(int dev)
   char tstring[BUFSIZ];
   gframe_t *frame;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_vsection_title **\n");
   }
 
@@ -139,7 +140,7 @@ void draw_vsection_button(si32 n,
   int i;
   gframe_t *frame;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_vsection_button **\n");
   }
 
@@ -193,14 +194,14 @@ void draw_vsection_button(si32 n,
  * In X, goes to a pixmap. In PS, goes to an output file.
  */
 
-#define HDR_MAX 80
+static const int HDR_MAX = 2048;
 
 void draw_vsection_plot(int dev,
 			g_color_scale_t *colors)
   
 {
 
-  char label[20];
+  char label[128];
   char hstring[HDR_MAX];
 
   si32 i;
@@ -227,7 +228,7 @@ void draw_vsection_plot(int dev,
   Drawable window = 0;
   GRectangle clip_rectangle[1];
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_vsection_plot **\n");
   }
 
@@ -600,7 +601,7 @@ void draw_vsection_plot(int dev,
       GDrawLine(dev, frame, Glob->tick_gc, frame->psgc, 
 		gridx, frame->w_ymin,
 		gridx, frame->w_ymin + xticklength);
-      sprintf(label, "%d", ilabel);
+      snprintf(label, 128, "%d", ilabel);
       GDrawString(dev, frame, Glob->ticklabel_gc, frame->x->font,
 		  frame->psgc,
 		  XJ_CENTER, YJ_ABOVE, gridx, texty, label);
@@ -622,7 +623,7 @@ void draw_vsection_plot(int dev,
       GDrawLine(dev, frame, Glob->tick_gc, frame->psgc, 
 		frame->w_xmax, gridy, 
 		frame->w_xmax - yticklength, gridy);
-      sprintf(label, "%d", ilabel);
+      snprintf(label, 128, "%d", ilabel);
       GDrawString(dev, frame, Glob->ticklabel_gc, frame->x->font, frame->psgc,
 		  XJ_RIGHT, YJ_CENTER, textx, gridy, label);
 
@@ -642,23 +643,23 @@ void draw_vsection_plot(int dev,
   if (dev == PSDEV) {
     
     if (!strcmp(units_x, units_y)) {
-      sprintf(hstring,
-	      "%.4d/%.2d/%.2d   %.2d:%.2d:%.2d   (%g,%g) to (%g,%g) (%s)",
-	      VsectTime.year, VsectTime.month,
-	      VsectTime.day, VsectTime.hour,
-	      VsectTime.min, VsectTime.sec,
-	      Start_x, Start_y,
-	      End_x, End_y,
-	      units_x);
+      snprintf(hstring, HDR_MAX,
+               "%.4d/%.2d/%.2d   %.2d:%.2d:%.2d   (%g,%g) to (%g,%g) (%s)",
+               VsectTime.year, VsectTime.month,
+               VsectTime.day, VsectTime.hour,
+               VsectTime.min, VsectTime.sec,
+               Start_x, Start_y,
+               End_x, End_y,
+               units_x);
     } else {
-      sprintf(hstring,
-	      "%.4d/%.2d/%.2d   %.2d:%.2d:%.2d   (%g,%g) to (%g,%g) (%s,%s)",
-	      VsectTime.year, VsectTime.month,
-	      VsectTime.day, VsectTime.hour,
-	      VsectTime.min, VsectTime.sec,
-	      Start_x, Start_y,
-	      End_x, End_y,
-	      units_x, units_y);
+      snprintf(hstring, HDR_MAX,
+               "%.4d/%.2d/%.2d   %.2d:%.2d:%.2d   (%g,%g) to (%g,%g) (%s,%s)",
+               VsectTime.year, VsectTime.month,
+               VsectTime.day, VsectTime.hour,
+               VsectTime.min, VsectTime.sec,
+               Start_x, Start_y,
+               End_x, End_y,
+               units_x, units_y);
     }
     
     PsSetFont(frame->psgc->file, frame->psgc->fontname,
@@ -673,11 +674,11 @@ void draw_vsection_plot(int dev,
   }
   
   if (!strcmp(units_x, units_y))
-    strcpy(hstring, units_x);
+    STRncopy(hstring, units_x, HDR_MAX);
   else
-    sprintf(hstring, "%s/%s",
-	    units_x, units_y);
-
+    snprintf(hstring, HDR_MAX, "%s/%s",
+             units_x, units_y);
+  
   GDrawString(dev, frame, Glob->text_gc, Glob->x_text_font,
 	      frame->psgc, XJ_LEFT, YJ_ABOVE,
 	      frame->w_xmin + text_margin_x,
@@ -741,7 +742,7 @@ static void draw_vsection_variable(int dev,
   
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_vsection_variable **\n");
   }
 
@@ -815,7 +816,7 @@ void expose_vsection_pixmap()
 
   gframe_t *frame;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** expose_vsection_pixmap **\n");
   }
 
@@ -853,7 +854,7 @@ static int read_vsection(MdvxField &floatField,
 
   VsectFieldName = "";
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** read_vsection **\n");
   }
 
@@ -978,7 +979,7 @@ static void vsection_calc(int dev,
   double plot_min_y, plot_max_y;
   double xaxismargin, yaxismargin, topmargin;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** vsection_calc **\n");
   }
 
