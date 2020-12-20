@@ -2320,15 +2320,76 @@ bool RadxField::checkDataAllMissing() const
 }
 
 ///////////////////////////////////////////////////////////
-// compute the number of gates without missing data
-// i.e. all gates beyond this number have missing data
+/// Count non-missing gates
+/// Returns number of non-missing gates
 
-int RadxField::computeNGatesNonMissing(size_t rayNum) const
+size_t RadxField::countNonMissingGates() const
+  
+{
+
+  size_t count = 0;
+  
+  if (_dataType == Radx::FL64) {
+    
+    const Radx::fl64 *data = ((Radx::fl64*) _data);
+    for (size_t ii = 0; ii < _nPoints; ii++, data++) {
+      if (*data != _missingFl64) {
+        count++;
+      }
+    }
+
+  } else if (_dataType == Radx::FL32) {
+    
+    const Radx::fl32 *data = ((Radx::fl32*) _data);
+    for (size_t ii = 0; ii < _nPoints; ii++, data++) {
+      if (*data != _missingFl32) {
+        count++;
+      }
+    }
+
+  } else if (_dataType == Radx::SI32) {
+    
+    const Radx::si32 *data = ((Radx::si32*) _data);
+    for (size_t ii = 0; ii < _nPoints; ii++, data++) {
+      if (*data != _missingSi32) {
+        count++;
+      }
+    }
+
+  } else if (_dataType == Radx::SI16) {
+    
+    const Radx::si16 *data = ((Radx::si16*) _data);
+    for (size_t ii = 0; ii < _nPoints; ii++, data++) {
+      if (*data != _missingSi16) {
+        count++;
+      }
+    }
+
+  } else if (_dataType == Radx::SI08) {
+    
+    const Radx::si08 *data = ((Radx::si08*) _data);
+    for (size_t ii = 0; ii < _nPoints; ii++, data++) {
+      if (*data != _missingSi08) {
+        count++;
+      }
+    }
+
+  }
+
+  return count;
+
+}
+
+///////////////////////////////////////////////////////////
+/// Find the last gate with non-missing data.
+/// i.e. all gates beyond this number have missing data.
+
+int RadxField::findLastGateNonMissing(size_t rayNum) const
   
 {
   
   if (rayNum >= _rayStartIndex.size()) {
-    cerr << "ERROR - RadxField::computeNGatesNonMissing(rayNum)" << endl;
+    cerr << "ERROR - RadxField::findLastGateNonMissing(rayNum)" << endl;
     cerr << "  specified rayNum: " << rayNum << endl;
     cerr << "  exceeds max: " << _rayStartIndex.size()-1 << endl;
   }

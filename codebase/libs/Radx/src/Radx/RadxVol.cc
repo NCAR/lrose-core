@@ -5640,7 +5640,7 @@ void RadxVol::combineSweepsAtSameFixedAngleAndGeom
           sources.insert(jj);
           combo.sources.push_back(jj);
         }
-
+        
       }
       
     } // jj
@@ -5714,7 +5714,43 @@ void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
     // sweep modes do not match
     return;
   }
+
+  // check target fields, counting up non-missing gates
   
+  map<string, int> targetCounts;
+  for (size_t iray = sweepTarget->getStartRayIndex();
+       iray <= sweepTarget->getEndRayIndex(); iray++) {
+    RadxRay *ray = _rays[iray];
+    vector<RadxField *> flds = ray->getFields();
+    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+      RadxField *fld = flds[ifield];
+      string name = fld->getName();
+      if (iray == sweepTarget->getStartRayIndex()) {
+        // initialize cound
+        targetCounts[name] = 0;
+      }
+      targetCounts[name] += fld->countNonMissingGates();
+    } // ifield
+  } // iray
+
+  // check source fields, counting up non-missing gates
+  
+  map<string, int> sourceCounts;
+  for (size_t iray = sweepSource->getStartRayIndex();
+       iray <= sweepSource->getEndRayIndex(); iray++) {
+    RadxRay *ray = _rays[iray];
+    vector<RadxField *> flds = ray->getFields();
+    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+      RadxField *fld = flds[ifield];
+      string name = fld->getName();
+      if (iray == sweepSource->getStartRayIndex()) {
+        // initialize cound
+        sourceCounts[name] = 0;
+      }
+      sourceCounts[name] += fld->countNonMissingGates();
+    } // ifield
+  } // iray
+
   // loop through the target rays
   
   for (size_t iray = sweepTarget->getStartRayIndex();
@@ -5735,21 +5771,33 @@ void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
       // got a valid ray in source
       // loop through the fields in the source
       
-      vector<RadxField *> flds = raySource->getFields();
-      for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+      vector<RadxField *> sourceFlds = raySource->getFields();
+      for (size_t ifield = 0; ifield < sourceFlds.size(); ifield++) {
         
-        const RadxField *fld = flds[ifield];
+        const RadxField *sourceFld = sourceFlds[ifield];
         
         // does this field name already exist in the target?
         // test by trying to get the field from the target ray
         
-        RadxField *fldTarget = rayTarget->getField(fld->getName());
-        if (fldTarget == NULL) {
+        string name = sourceFld->getName();
+        RadxField *fldTarget = rayTarget->getField(name);
+        if (fldTarget != NULL) {
 
+          // source field name already exists on the target
+          // so use the field with the larger number of
+          // non-missing gates
+
+          if (targetCounts[name] < sourceCounts[name]) {
+            RadxField *fldCopy = new RadxField(*sourceFld);
+            rayTarget->replaceField(fldCopy);
+          }
+        
+        } else {
+          
           // source field does not exist on the target
           // so make a copy and add to the target ray
           
-          RadxField *fldCopy = new RadxField(*fld);
+          RadxField *fldCopy = new RadxField(*sourceFld);
           rayTarget->addField(fldCopy);
         
         }

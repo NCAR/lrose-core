@@ -651,11 +651,15 @@ public:
   
   bool checkDataAllMissing() const;
   
-  /// Compute the number of gates without missing data.
-  ///
+  /// Count non-missing gates
+  /// Returns number of non-missing gates
+  
+  size_t countNonMissingGates() const;
+  
+  /// Find the last gate with non-missing data.
   /// i.e. all gates beyond this number have missing data.
   
-  int computeNGatesNonMissing(size_t rayNum) const;
+  int findLastGateNonMissing(size_t rayNum) const;
   
   //@}
   
