@@ -61,7 +61,7 @@ void copy_thist(void)
 
   FILE *prologue_file, *ps_file;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** copy_thist **\n");
   }
 
@@ -670,7 +670,7 @@ void copy_union(void)
 
   FILE *prologue_file, *ps_file;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** copy_union **\n");
   }
 

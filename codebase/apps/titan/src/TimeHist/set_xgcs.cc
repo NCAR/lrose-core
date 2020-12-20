@@ -406,7 +406,7 @@ void set_xgcs(void)
    * print x id values for debug purposes
    */
   
-  if (Glob->debug == TRUE)
+  if (Glob->verbose == TRUE)
     print_x_ids(cmap);
   
 }
@@ -452,12 +452,17 @@ static void setup_gc_from_color(GC *gc,
 				const char *colstr)
 
 {
+
+  string color("white");
+  if (colstr && strlen(colstr) > 0) {
+    color = colstr;
+  }
   
   GC tmp_gc;
   
-  tmp_gc = xGetColorGC(Glob->rdisplay, cmap, &Glob->color_index, colstr);
+  tmp_gc = xGetColorGC(Glob->rdisplay, cmap, &Glob->color_index, color.c_str());
   
-  check_for_getgc_error(tmp_gc, colstr);
+  check_for_getgc_error(tmp_gc, color.c_str());
   
   *gc = XCreateGC(Glob->rdisplay,
 		  DefaultRootWindow(Glob->rdisplay), 0, 0);

@@ -51,7 +51,7 @@ void draw_help_title(void)
   char tstring[BUFSIZ];
   gframe_t *frame;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_help_title **\n");
   }
 
@@ -93,7 +93,7 @@ void draw_help_button(si32 n,
   int i;
   gframe_t *frame;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_help_button **\n");
   }
 
@@ -159,7 +159,7 @@ void draw_help_text(void)
   gframe_t *frame;
   int code;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_help_text **\n");
   }
 

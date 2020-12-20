@@ -70,7 +70,7 @@ void setup_rdist_windows(void)
   static ui32 prev_width = 0;
   static ui32 prev_height = 0;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_rdist_windows **\n");
   }
 
@@ -360,7 +360,7 @@ void setup_rdist_windows(void)
    * debug output for X resource Id's
    */
 
-  if (Glob->debug == TRUE) {
+  if (Glob->verbose == TRUE) {
 
     fprintf(stderr, "rdist window = %ld\n", Glob->rdist_window);
 
@@ -377,6 +377,6 @@ void setup_rdist_windows(void)
     fprintf(stderr, "rdist scale window = %ld\n",
 	    Glob->rdist_scale_frame->x->drawable);
 
-  } /* if (Glob->debug == TRUE) */
+  } /* if (Glob->verbose == TRUE) */
 
 }

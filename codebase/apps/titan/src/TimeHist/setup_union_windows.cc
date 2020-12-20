@@ -63,7 +63,7 @@ void setup_union_windows(void)
   static ui32 prev_width = 0;
   static ui32 prev_height = 0;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_union_windows **\n");
   }
 
@@ -335,7 +335,7 @@ void setup_union_windows(void)
    * debug output for X resource Id's
    */
 
-  if (Glob->debug == TRUE) {
+  if (Glob->verbose == TRUE) {
 
     fprintf(stderr, "union window = %ld\n", Glob->union_window);
 
@@ -349,6 +349,6 @@ void setup_union_windows(void)
     fprintf(stderr, "union plot window = %ld\n",
 	    Glob->union_plot_frame->x->drawable);
 
-  } /* if (Glob->debug == TRUE) */
+  } /* if (Glob->verbose == TRUE) */
 
 }

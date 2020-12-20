@@ -43,7 +43,7 @@ void setup_x(void)
 
   int i;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_x **\n");
   }
 

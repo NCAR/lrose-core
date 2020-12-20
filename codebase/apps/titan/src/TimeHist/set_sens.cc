@@ -134,7 +134,7 @@ void set_tscale_sens(void)
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_tscale_sens **\n");
   }
 
@@ -183,7 +183,7 @@ void set_thist_sens(void)
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_thist_sens **\n");
   }
 
@@ -217,7 +217,7 @@ void set_timeht_sens(void)
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_timeht_sens **\n");
   }
 
@@ -250,7 +250,7 @@ void set_rdist_sens(void)
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_rdist_sens **\n");
   }
 
@@ -283,7 +283,7 @@ void set_union_sens(void)
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_union_sens **\n");
   }
 
@@ -317,7 +317,7 @@ void set_help_sens(void)
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** set_help_sens **\n");
   }
 

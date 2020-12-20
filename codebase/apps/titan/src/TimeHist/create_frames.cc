@@ -43,7 +43,7 @@ void create_frames(void)
 
   si32 i;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** create_frames **\n");
   }
 
@@ -198,7 +198,7 @@ void create_frames(void)
   Glob->horiz_page_frame =
     GCreateFrame(0.0, 0.0, Glob->ps_page_length, Glob->ps_page_width);
 
-  if (Glob->debug == TRUE) {
+  if (Glob->verbose == TRUE) {
 
     fprintf(stderr, "tscale_title_frame gc = %ld\n",
 	    (long) Glob->tscale_title_frame->x->gc);
@@ -266,6 +266,6 @@ void create_frames(void)
       fprintf(stderr, "help_button_frame gc[%d] = %ld\n", i,
 	      (long) Glob->help_button_frame[i]->x->gc);
 
-  } /* if (Glob->debug == TRUE) */
+  } /* if (Glob->verbose == TRUE) */
 
 }

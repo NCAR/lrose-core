@@ -39,7 +39,7 @@ void get_titan_data(void)
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** TimeHist - get_titan_data **\n");
   }
 

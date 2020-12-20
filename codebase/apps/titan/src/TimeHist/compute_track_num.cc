@@ -89,7 +89,7 @@ void compute_track_num(void)
   time_hist_shmem_t *tshmem;
   coord_export_t *coord;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** compute_track_num **\n");
   }
 
@@ -99,7 +99,7 @@ void compute_track_num(void)
 
   if (_firstCall) {
     if (Glob->use_case_tracks) {
-      _cases.setDebug(Glob->debug);
+      _cases.setDebug(Glob->verbose);
       if (_cases.readCaseFile(Glob->case_tracks_file_path)) {
 	fprintf(stderr, "WARNING - %s:compute_track_num\n",
 		Glob->prog_name);

@@ -49,6 +49,7 @@ void parse_args(int argc, char **argv)
   int i;
 
   char *debug_str;
+  char *verbose_str;
   char usage[BUFSIZ];
 
   /*
@@ -61,6 +62,7 @@ void parse_args(int argc, char **argv)
 	  "       [ -bg, -background color] set background color\n"
 	  "       [ -d, -display name] display name\n"
 	  "       [ -debug ] debugging on\n"
+	  "       [ -verbose ] verbose debugging on\n"
 	  "       [ -fg, -foreground color] set foreground color\n"
 	  "       [ -instance ?] program instance\n"
 	  "       [ -noparams] use X data base instead of params file\n"
@@ -74,8 +76,11 @@ void parse_args(int argc, char **argv)
   debug_str = uGetParamString(Glob->prog_name,
 			      "debug", "false");
   
+  verbose_str = uGetParamString(Glob->prog_name,
+                                "verbose", "false");
+  
   /*
-   * set debug option
+   * set debug options
    */
   
   if (!strcmp(debug_str, "yes") || !strcmp(debug_str, "true")) {
@@ -86,6 +91,17 @@ void parse_args(int argc, char **argv)
     fprintf(stderr, "ERROR - %s:parse_args\n", Glob->prog_name);
     fprintf(stderr, "Debug option '%s' not recognized.\n",
 	    debug_str);
+    error_flag = 1;
+  }
+  
+  if (!strcmp(verbose_str, "yes") || !strcmp(verbose_str, "true")) {
+    Glob->verbose = TRUE;
+  } else if (!strcmp(verbose_str, "no") || !strcmp(verbose_str, "false")) {
+    Glob->verbose = FALSE;
+  } else {
+    fprintf(stderr, "ERROR - %s:parse_args\n", Glob->prog_name);
+    fprintf(stderr, "Verbose option '%s' not recognized.\n",
+	    verbose_str);
     error_flag = 1;
   }
   
@@ -106,6 +122,10 @@ void parse_args(int argc, char **argv)
     } else if (!strcmp(argv[i], "-debug")) {
       
       Glob->debug = TRUE;
+	
+    } else if (!strcmp(argv[i], "-verbose")) {
+      
+      Glob->verbose = TRUE;
 	
     } else if (!strcmp(argv[i], "-instance")) {
       

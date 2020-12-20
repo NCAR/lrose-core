@@ -67,7 +67,7 @@ void draw_scale(int dev,
   GC line_legend_gc[MAX_LINE_LEGENDS];
   psgc_t *line_legend_psgc[MAX_LINE_LEGENDS];
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_scale **\n");
   }
 

@@ -36,13 +36,14 @@
  *********************************************************************/
 
 #include "TimeHist.hh"
+#include <toolsa/DateTime.hh>
 using namespace std;
 
 void setup_track_shmem(void)
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_track_shmem **\n");
   }
 
@@ -69,21 +70,57 @@ void setup_track_shmem(void)
 	    Glob->track_shmem_key + 1);
     tidy_and_exit(-1);
   }
+  time_hist_shmem_t *tshmem = Glob->track_shmem;
+
+  if (Glob->debug) {
+    cerr << "Set up time_hist_shmem segment" << endl;
+    cerr << "titan_server_url: " << tshmem->titan_server_url << endl;
+    cerr << "time_label: " << tshmem->time_label << endl;
+    cerr << "time: " << DateTime::strm(tshmem->time) << endl;
+    cerr << "shmem_ready: " << tshmem->shmem_ready << endl;
+    cerr << "localtime: " << tshmem->localtime << endl;
+    cerr << "timeOffsetSecs: " << tshmem->timeOffsetSecs << endl;
+    cerr << "time_hist_active: " << tshmem->time_hist_active << endl;
+    cerr << "main_display_active: " << tshmem->main_display_active << endl;
+    cerr << "main_display_must_update: " << tshmem->main_display_must_update << endl;
+    cerr << "mode: " << tshmem->mode << endl;
+    cerr << "plot_forecast: " << tshmem->plot_forecast << endl;
+    cerr << "track_set: " << tshmem->track_set << endl;
+    cerr << "scan_delta_t: " << tshmem->scan_delta_t << endl;
+    cerr << "complex_track_num: " << tshmem->complex_track_num << endl;
+    cerr << "simple_track_num: " << tshmem->simple_track_num << endl;
+    cerr << "track_type: " << tshmem->track_type << endl;
+    cerr << "track_seq_num: " << tshmem->track_seq_num << endl;
+    cerr << "select_track_type: " << tshmem->select_track_type << endl;
+    cerr << "track_data_time_margin: " << tshmem->track_data_time_margin << endl;
+    cerr << "past_plot_period: " << tshmem->past_plot_period << endl;
+    cerr << "future_plot_period: " << tshmem->future_plot_period << endl;
+    cerr << "case_num: " << tshmem->case_num << endl;
+    cerr << "partial_track_ref_time: " << tshmem->partial_track_ref_time << endl;
+    cerr << "partial_track_past_period: " << tshmem->partial_track_past_period << endl;
+    cerr << "partial_track_future_period: " << tshmem->partial_track_future_period << endl;
+    cerr << "n_forecast_steps: " << tshmem->n_forecast_steps << endl;
+    cerr << "forecast_interval: " << tshmem->forecast_interval << endl;
+    cerr << "past_color: " << tshmem->past_color << endl;
+    cerr << "current_color: " << tshmem->current_color << endl;
+    cerr << "future_color: " << tshmem->future_color << endl;
+    cerr << "forecast_color: " << tshmem->forecast_color << endl;
+  }
 
   /*
    * initialize partial track params
    */
   
-  Glob->track_shmem->partial_track_past_period =
+  tshmem->partial_track_past_period =
     Glob->partial_track_past_period;
-  Glob->track_shmem->partial_track_future_period =
+  tshmem->partial_track_future_period =
     Glob->partial_track_future_period;
 
   /*
    * set flag on whether to use TitanServer
    */
   
-  Glob->_titanLdata.setDirFromUrl(Glob->track_shmem->titan_server_url);
+  Glob->_titanLdata.setDirFromUrl(tshmem->titan_server_url);
 
   /*
    * set archive time if applicable
@@ -91,7 +128,7 @@ void setup_track_shmem(void)
 
   if (Glob->archive_only) {
     if (!Glob->archive_time_set) {
-      Glob->archive_time = Glob->track_shmem->time;
+      Glob->archive_time = tshmem->time;
       Glob->archive_time_set = TRUE;
     }
   }

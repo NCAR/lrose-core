@@ -61,7 +61,7 @@ void draw_tscale_title(int dev)
   char tstring[128];
   double header_clearance_x = 0, header_clearance_y = 0;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_tscale_title **\n");
   }
 
@@ -131,7 +131,7 @@ void draw_tscale_button(si32 n,
   int i;
   gframe_t *frame;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_tscale_button **\n");
   }
 
@@ -223,7 +223,7 @@ void draw_tscale_plot(int dev)
   thist_track_data_t *tdata;
   time_hist_shmem_t *tshmem;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_tscale_plot **\n");
   }
 

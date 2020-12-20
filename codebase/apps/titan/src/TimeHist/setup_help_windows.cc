@@ -61,7 +61,7 @@ void setup_help_windows(void)
   static ui32 prev_width = 0;
   static ui32 prev_height = 0;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_help_windows **\n");
   }
 
@@ -307,7 +307,7 @@ void setup_help_windows(void)
    * debug output for X resource Id's
    */
 
-  if (Glob->debug == TRUE) {
+  if (Glob->verbose == TRUE) {
 
     fprintf(stderr, "help window = %ld\n", Glob->help_window);
 
@@ -321,6 +321,6 @@ void setup_help_windows(void)
     fprintf(stderr, "help plot window = %ld\n",
 	    Glob->help_text_frame->x->drawable);
 
-  } /* if (Glob->debug == TRUE) */
+  } /* if (Glob->verbose == TRUE) */
 
 }

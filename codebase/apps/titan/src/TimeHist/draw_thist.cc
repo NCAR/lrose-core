@@ -101,7 +101,7 @@ void draw_thist_title(int dev)
   gframe_t *frame;
   char tstring[128];
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_thist_title **\n");
   }
 
@@ -145,7 +145,7 @@ void draw_thist_button(si32 n,
   int i;
   gframe_t *frame;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_thist_button **\n");
   }
 
@@ -233,7 +233,7 @@ void draw_thist_plot(int dev)
   gframe_t *frame;
   thist_track_data_t *tdata;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** draw_thist_plot **\n");
   }
 

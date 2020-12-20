@@ -63,7 +63,7 @@ void setup_tscale_windows(void)
   static ui32 prev_width = 0;
   static ui32 prev_height = 0;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_tscale_windows **\n");
   }
 
@@ -318,7 +318,7 @@ void setup_tscale_windows(void)
    * debug output for X resource Id's
    */
 
-  if (Glob->debug == TRUE) {
+  if (Glob->verbose == TRUE) {
 
     fprintf(stderr, "tscale window = %ld\n", Glob->tscale_window);
 
@@ -332,6 +332,6 @@ void setup_tscale_windows(void)
     fprintf(stderr, "tscale plot window = %ld\n",
 	    Glob->tscale_plot_frame->x->drawable);
 
-  } /* if (Glob->debug == TRUE) */
+  } /* if (Glob->verbose == TRUE) */
 
 }

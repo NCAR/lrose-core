@@ -70,7 +70,7 @@ void setup_timeht_windows(void)
   static ui32 prev_width = 0;
   static ui32 prev_height = 0;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_timeht_windows **\n");
   }
 
@@ -361,7 +361,7 @@ void setup_timeht_windows(void)
    * debug output for X resource Id's
    */
 
-  if (Glob->debug == TRUE) {
+  if (Glob->verbose == TRUE) {
 
     fprintf(stderr, "timeht window = %ld\n", Glob->timeht_window);
 
@@ -378,6 +378,6 @@ void setup_timeht_windows(void)
     fprintf(stderr, "timeht scale window = %ld\n",
 	    Glob->timeht_scale_frame->x->drawable);
 
-  } /* if (Glob->debug == TRUE) */
+  } /* if (Glob->verbose == TRUE) */
 
 }

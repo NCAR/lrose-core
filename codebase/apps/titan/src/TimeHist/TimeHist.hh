@@ -634,7 +634,8 @@ public:
    * flags
    */
 
-  int debug;
+  int debug;                              /* debugging */
+  int verbose;                            /* verbose debugging */
   int x_sync;                             /* x synchronization flag */
   int draw_copy_title;                    /* draw title on copy flag */
 

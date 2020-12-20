@@ -67,7 +67,7 @@ void set_xfonts(void)
   Glob->x_header_font = xLoadFont(Glob->rdisplay, x_header_font);
   Glob->x_button_font = xLoadFont(Glob->rdisplay, x_button_font);
 
-  if (Glob->debug == TRUE) {
+  if (Glob->verbose == TRUE) {
 
     fprintf(stderr, "x_title_font ID = %p\n", Glob->x_text_font);
     fprintf(stderr, "x_title_font ID = %p\n", Glob->x_title_font);
@@ -76,6 +76,6 @@ void set_xfonts(void)
     fprintf(stderr, "x_header_font ID = %p\n", Glob->x_header_font);
     fprintf(stderr, "x_button_font ID = %p\n", Glob->x_button_font);
 
-  } /* if (Glob->debug == TRUE) */
+  } /* if (Glob->verbose == TRUE) */
 
 }

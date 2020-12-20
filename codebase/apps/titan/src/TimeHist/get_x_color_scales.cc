@@ -147,7 +147,7 @@ void get_x_color_scales(void)
      * print out GC ID values for the colors
      */
 
-    if (Glob->debug) {
+    if (Glob->verbose) {
 
       fprintf(stderr, "Colors for field %s\n", colorscale_name[iscale]);
 
@@ -160,7 +160,7 @@ void get_x_color_scales(void)
 
       } /* ilevel */
 
-    } /* if (Glob->debug) */
+    } /* if (Glob->verbose) */
 
   } /* iscale */
 

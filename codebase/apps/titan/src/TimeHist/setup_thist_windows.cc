@@ -63,7 +63,7 @@ void setup_thist_windows(void)
   static ui32 prev_width = 0;
   static ui32 prev_height = 0;
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** setup_thist_windows **\n");
   }
 
@@ -329,7 +329,7 @@ void setup_thist_windows(void)
    * debug output for X resource Id's
    */
 
-  if (Glob->debug == TRUE) {
+  if (Glob->verbose == TRUE) {
 
     fprintf(stderr, "thist window = %ld\n", Glob->thist_window);
 
@@ -343,6 +343,6 @@ void setup_thist_windows(void)
     fprintf(stderr, "thist plot window = %ld\n",
 	    Glob->thist_plot_frame->x->drawable);
 
-  } /* if (Glob->debug == TRUE) */
+  } /* if (Glob->verbose == TRUE) */
 
 }

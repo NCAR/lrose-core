@@ -112,10 +112,8 @@ void setup_track_shmem()
    */
   
   tshmem = Glob->track_shmem;
+  memset(tshmem, 0, sizeof(time_hist_shmem_t));
   
-  memset ((void *)  tshmem,
-          (int) 0, (size_t) sizeof(time_hist_shmem_t));
-
   char *time_label = uGetParamString(Glob->prog_name,
                                      "time_label", "UTC");
   STRncopy(tshmem->time_label, time_label,
@@ -147,14 +145,14 @@ void setup_track_shmem()
 
   ustrncpy(tshmem->past_color,
 	   uGetParamString(Glob->prog_name,
-			 "x_past_storm_color",
-			 X_PAST_STORM_COLOR),
+                           "x_past_storm_color",
+                           X_PAST_STORM_COLOR),
 	   TIME_HIST_SHMEM_COLOR_NAME_LEN);
-
+  
   ustrncpy(tshmem->current_color,
 	   uGetParamString(Glob->prog_name,
-			 "x_current_storm_color",
-			 X_CURRENT_STORM_COLOR),
+                           "x_current_storm_color",
+                           X_CURRENT_STORM_COLOR),
 	   TIME_HIST_SHMEM_COLOR_NAME_LEN);
 
   ustrncpy(tshmem->future_color,
@@ -169,10 +167,71 @@ void setup_track_shmem()
 			 X_FORECAST_STORM_COLOR),
 	   TIME_HIST_SHMEM_COLOR_NAME_LEN);
 
-  memcpy(&tshmem->grid, &Glob->proj.getCoord(), sizeof(Mdvx::coord_t));
-
+  // set the grid
+  
+  titan_grid_t *tgrid = &tshmem->grid;
+  const Mdvx::coord_t *mgrid = &Glob->proj.getCoord();
+  
+  tgrid->proj_origin_lat = mgrid->proj_origin_lat;
+  tgrid->proj_origin_lon = mgrid->proj_origin_lon;
+  tgrid->minx = mgrid->minx;
+  tgrid->miny = mgrid->miny;
+  tgrid->minz = mgrid->minz;
+  tgrid->dx = mgrid->dx;
+  tgrid->dy = mgrid->dy;
+  tgrid->dz = mgrid->dz;
+  tgrid->sensor_x = mgrid->sensor_x;
+  tgrid->sensor_y = mgrid->sensor_y;
+  tgrid->sensor_z = mgrid->sensor_z;
+  tgrid->sensor_lat = mgrid->sensor_lat;
+  tgrid->sensor_lon = mgrid->sensor_lon;
+  tgrid->proj_type = mgrid->proj_type;
+  tgrid->dz_constant = mgrid->dz_constant;
+  tgrid->nx = mgrid->nx;
+  tgrid->ny = mgrid->ny;
+  tgrid->nz = mgrid->nz;
+  
+  memcpy(tgrid->unitsx, mgrid->unitsx, TITAN_GRID_UNITS_LEN);
+  memcpy(tgrid->unitsy, mgrid->unitsy, TITAN_GRID_UNITS_LEN);
+  memcpy(tgrid->unitsz, mgrid->unitsz, TITAN_GRID_UNITS_LEN);
+  
   tshmem->main_display_active = TRUE;
   tshmem->shmem_ready = TRUE;
+
+  if (Glob->debug) {
+    cerr << "Set up time_hist_shmem segment" << endl;
+    cerr << "titan_server_url: " << tshmem->titan_server_url << endl;
+    cerr << "time_label: " << tshmem->time_label << endl;
+    cerr << "time: " << DateTime::strm(tshmem->time) << endl;
+    cerr << "shmem_ready: " << tshmem->shmem_ready << endl;
+    cerr << "localtime: " << tshmem->localtime << endl;
+    cerr << "timeOffsetSecs: " << tshmem->timeOffsetSecs << endl;
+    cerr << "time_hist_active: " << tshmem->time_hist_active << endl;
+    cerr << "main_display_active: " << tshmem->main_display_active << endl;
+    cerr << "main_display_must_update: " << tshmem->main_display_must_update << endl;
+    cerr << "mode: " << tshmem->mode << endl;
+    cerr << "plot_forecast: " << tshmem->plot_forecast << endl;
+    cerr << "track_set: " << tshmem->track_set << endl;
+    cerr << "scan_delta_t: " << tshmem->scan_delta_t << endl;
+    cerr << "complex_track_num: " << tshmem->complex_track_num << endl;
+    cerr << "simple_track_num: " << tshmem->simple_track_num << endl;
+    cerr << "track_type: " << tshmem->track_type << endl;
+    cerr << "track_seq_num: " << tshmem->track_seq_num << endl;
+    cerr << "select_track_type: " << tshmem->select_track_type << endl;
+    cerr << "track_data_time_margin: " << tshmem->track_data_time_margin << endl;
+    cerr << "past_plot_period: " << tshmem->past_plot_period << endl;
+    cerr << "future_plot_period: " << tshmem->future_plot_period << endl;
+    cerr << "case_num: " << tshmem->case_num << endl;
+    cerr << "partial_track_ref_time: " << tshmem->partial_track_ref_time << endl;
+    cerr << "partial_track_past_period: " << tshmem->partial_track_past_period << endl;
+    cerr << "partial_track_future_period: " << tshmem->partial_track_future_period << endl;
+    cerr << "n_forecast_steps: " << tshmem->n_forecast_steps << endl;
+    cerr << "forecast_interval: " << tshmem->forecast_interval << endl;
+    cerr << "past_color: " << tshmem->past_color << endl;
+    cerr << "current_color: " << tshmem->current_color << endl;
+    cerr << "future_color: " << tshmem->future_color << endl;
+    cerr << "forecast_color: " << tshmem->forecast_color << endl;
+  }
 
   /*
    * start time_hist if needed

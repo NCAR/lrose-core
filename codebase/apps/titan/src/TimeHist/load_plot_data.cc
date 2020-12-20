@@ -57,7 +57,7 @@ int load_plot_data()
 
 {
 
-  if (Glob->debug) {
+  if (Glob->verbose) {
     fprintf(stderr, "** load_plot_data_titan **\n");
   }
 
