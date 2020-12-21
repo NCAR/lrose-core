@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 
+
 #include "SoloScriptTranslator.hh"
  
 using namespace std;
@@ -18,17 +19,106 @@ void SoloScriptTranslator::format_it(string &command) {
 	replace(command.begin(), command.end(), '-', '_');
 }
 
-void SoloScriptTranslator::format_field_by_reference(string &field) {
-	std::transform(field.begin(), field.end(), field.begin(), ::toupper);
-	field.append("_V");
+
+/*
+void SoloScriptTranslator::construct_new_field(string &field) {
+
+    string next;
+	reference_as_assignment(field, next);
+	field = next;
+}
+*/
+
+void SoloScriptTranslator::reference_as_assignment(string &field) {
+	string next_assignment;
+
+    // is this a raw field?
+    if (field_map_raw.find(field) != field_map_raw.end()) {
+        next_assignment = field;
+        int x = field_map_raw[field];
+        x += 1;
+        next_assignment.append("_");
+        next_assignment.append(to_string(x));
+        field_map_raw[field] = x;
+    } else if (field_map_derived.find(field) != field_map_derived.end()) {
+        next_assignment = field;
+        int x = field_map_derived[field];
+        x += 1;
+        next_assignment.append("_");
+        next_assignment.append(to_string(x));
+        field_map_derived[field] = x;
+    } else { 
+    	// this is a new field, add it to the map of derived fields
+        field_map_derived[field] = 1;
+        next_assignment = field;
+    }
+    cout << "reference_as_assignment: field " << field << " next_assignment = " << next_assignment << endl;
+    field = next_assignment;
 }
 
-void SoloScriptTranslator::construct_new_field(string &field) {
-	// std::transform(field.begin(), field.end(), field.begin(), ::toupper);
-	static int current_count = 2;
-	field.append(to_string(current_count));
-	current_count += 1;
+void SoloScriptTranslator::reference_as_source(string &field) {
+    string next_source;
+
+	// is this a raw field? 
+    if (field_map_raw.find(field) != field_map_raw.end()) {
+        next_source = field;
+        int x = field_map_raw[field];
+        if (x > 1) {
+           next_source.append("_");
+           next_source.append(to_string(x));
+        } else {
+        	next_source.append("_V");
+        }
+        //next_source.append("_");
+        //next_source.append(to_string(x));
+        //field_map_raw[field] = x;
+    } else if (field_map_derived.find(field) != field_map_derived.end()) {  
+        // is this a derived field? 
+        next_source = field;
+        int x = field_map_derived[field];
+        if (x > 1) {
+           next_source.append("_");
+           next_source.append(to_string(x));
+        } else {
+           ; // do nothing to the name
+        } 
+
+    } else {    
+    	// have not seen this field before, it must be a raw field
+    	// because derived fields can only be added as assignment      
+    	field_map_raw[field] = 1;
+        next_source = field;
+        next_source.append("_V");
+    }
+    cout << "reference_as_source: field " << field << " next_source = " << next_source << endl;
+    field = next_source;
 }
+
+/*
+// only distinction is here  and only for the first time the field is referenced
+// if the field is a raw data field, then append _V for pass by reference
+// otherwise, the field is derived, then do not append _V
+void SoloScriptTranslator::format_field_by_reference(string &field) {
+	std::transform(field.begin(), field.end(), field.begin(), ::toupper);
+	//field.append("_V");
+    string last;
+    if (field_map.find(field) != field_map.end()) {
+    	cout << "format_field_by_reference: " << field << " found in map" << endl;
+        last = field;
+        int x = field_map[field];
+        if (x > 1) {
+           last.append("_");
+           last.append(to_string(x));
+        } 
+    } else {
+    	cout << "format_field_by_reference: " << field << " NOT found in map" << endl;
+        last = field;
+        last.append("_V");
+        field_map[field] = 1;
+    }
+	field = last;	
+}
+*/
 
 bool SoloScriptTranslator::process_from_to(string line, std::iostream& javascript) {
 	bool recognized = false;
@@ -42,15 +132,18 @@ bool SoloScriptTranslator::process_from_to(string line, std::iostream& javascrip
 	                std::ssub_match sub_match = pieces_match[i];
 	                std::string piece = sub_match.str();
 	                std::cout << "  submatch " << i << ": " << piece << '\n';
-	            }   
+	            }   	      
+
 	            string command = pieces_match[1];
 	            format_it(command);
 	            string field = pieces_match[2];
-	            format_field_by_reference(field);
+	            string new_field = field;  // make a copy of the destination field.
+	            reference_as_source(field);	            
+	            reference_as_assignment(new_field);
 	            string from = pieces_match[3];
 	            string to = pieces_match[4];
-	            cout << command << " ( " << field << "," << from << "," << to << " )" << endl;
-	            javascript << command << " ( " << field << "," << from << "," << to << " )" << endl;
+	            cout << new_field << " = " << command << " ( " << field << "," << from << "," << to << " )" << endl;
+	            javascript << new_field << " = " << command << " ( " << field << "," << from << "," << to << " )" << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -74,9 +167,11 @@ bool SoloScriptTranslator::process_action_in(string line, std::iostream& javascr
 	            string command = pieces_match[1];
 	            format_it(command);
 	            string field = pieces_match[3];
-	            format_field_by_reference(field);
-	            cout << command << " ( " << field << " )" << endl;
-	            javascript << command << " ( " << field << " )" << endl;	            
+	            string new_field = field;  // make a copy of the destination field.
+	            reference_as_source(field);	            
+	            reference_as_assignment(new_field);
+	            cout << new_field << " = " << command << " ( " << field << " )" << endl;
+	            javascript << new_field << " = " << command << " ( " << field << " )" << endl;	            
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -102,12 +197,14 @@ bool SoloScriptTranslator::process_when_above(string line, std::iostream& javasc
 	            string command = pieces_match[1];
 	            format_it(command);
 	            string field = pieces_match[3];
-	            format_field_by_reference(field);
+	            string new_field = field;  // make a copy of the destination field.
+	            reference_as_source(field);
+	            reference_as_assignment(new_field);	            
 	            string above_below = pieces_match[4];
 	            format_it(above_below);
 	            string value = pieces_match[5];
-	            cout << command << "_" << above_below << " ( " << field << "," << value << " )" << endl;
-	            javascript << command << "_" << above_below << " ( " << field << "," << value << " )" << endl;
+	            cout << new_field << " = " << command << "_" << above_below << " ( " << field << "," << value << " )" << endl;
+	            javascript << new_field << " = " << command << "_" << above_below << " ( " << field << "," << value << " )" << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -131,12 +228,13 @@ bool SoloScriptTranslator::process_on_var_below(string line, std::iostream& java
 	            string command = pieces_match[1];
 	            string field1 = pieces_match[2];
 	            string new_field = field1;  // make a copy of the destination field.
-	            construct_new_field(new_field);
-	            format_field_by_reference(field1);
+
+	            reference_as_source(field1);
 	            string field2 = pieces_match[3];
-	            format_field_by_reference(field2);
+	            reference_as_source(field2);
 	            string above_below = pieces_match[4];
 	            string value = pieces_match[5];
+	            reference_as_assignment(new_field);
 	            command.append("_");
 	            command.append(above_below);
 	            format_it(command);
@@ -162,8 +260,12 @@ bool SoloScriptTranslator::process_copy(string line, std::iostream& javascript) 
 	                std::string piece = sub_match.str();
 	                std::cout << "  submatch " << i << ": " << piece << '\n';
 	            }   
-	            cout << pieces_match[2] << " = " << pieces_match[1] << endl;
-	            javascript << pieces_match[2] << " = " << pieces_match[1] << endl;
+	            string field1 = pieces_match[2];
+	            string new_field = field1;  // make a copy of the destination field.
+	            reference_as_assignment(new_field);
+	            // -- 
+	            cout << new_field << " = " << pieces_match[1] << endl;
+	            javascript << new_field << " = " << pieces_match[1] << endl;
 	            recognized = true;
 	        } else {
 	        	std::cout << "regex_match returned false\n";
@@ -238,8 +340,9 @@ bool SoloScriptTranslator::process_action_extra_args(string line, std::iostream&
 	            string command = pieces_match[1];
 	            string field1 = pieces_match[2];
 	            string new_field = field1;  // make a copy of the destination field.
-	            construct_new_field(new_field);
-	            format_field_by_reference(field1);
+
+	            reference_as_source(field1);
+	            reference_as_assignment(new_field);	          
 	            string extra_arg = "A_SPECKLE";
 	            format_it(command);
 	            cout << new_field << " = " << command << " ( " << field1 << "," << extra_arg << " )" << endl;
@@ -300,11 +403,12 @@ bool SoloScriptTranslator::process_action_unfold(string line, std::iostream& jav
 	            string command = pieces_match[1];
 	            string field1 = pieces_match[2];
 	            string new_field = field1;  // make a copy of the destination field.
-	            construct_new_field(new_field);
-	            format_field_by_reference(field1);
+
+	            reference_as_source(field1);
+	            reference_as_assignment(new_field);	            
 	            string wind_args = "EW_WIND, NS_WIND";
 	            // TODO: optional arg VERT_WIND for local wind
-	            string extra_arg = ", BB_MAX_POS_FOLDS, BB_MAX_NEG_FOLDS, BB_GATES_AVERAGED, NYQUIST";
+	            string extra_arg = "BB_MAX_POS_FOLDS, BB_MAX_NEG_FOLDS, BB_GATES_AVERAGED";
 	            string fgg_arg = "FIRST_GOOD_GATE";
 	            format_it(command);
 
@@ -318,13 +422,13 @@ bool SoloScriptTranslator::process_action_unfold(string line, std::iostream& jav
 	            	case LOCAL_WIND:
 	            		cout << new_field << " = " << command << " ( " << field1 << "," << extra_arg << " )" << endl;
 	                    javascript << new_field << "  = " << command << "_LOCAL_WIND" 
-	                       << " ( " << field1 << "," << wind_args << extra_arg << " )" << endl;
+	                       << " ( " << field1 << "," << extra_arg << ", " << wind_args << " )" << endl;
 	                    recognized = true;
 	            	break;
 	            	case FIRST_GOOD_GATE:
 	            		cout << new_field << " = " << command << " ( " << field1 << "," << extra_arg << " )" << endl;
 	                    javascript << new_field << " = " << command << "_FIRST_GOOD_GATE" 
-	                       << " ( " << field1 << "," << fgg_arg << extra_arg << " )" << endl;
+	                       << " ( " << field1 << "," << fgg_arg << ", " << extra_arg << " )" << endl;
 	                    recognized = true;	            	
 	            	break;
 	            	default:
@@ -358,7 +462,7 @@ void SoloScriptTranslator::translate(ifstream& solo_script, std::iostream& javas
        if (!recognized) recognized = process_action_unfold(line, javascript, BB_use);
        if (!recognized) {
        	  cout << "ERROR not recognized " << line << endl;
-       	  javascript << "! ERROR, not recognized: " << line << endl;
+       	  javascript << "// ERROR, not recognized: " << line << endl;
        }
 	   std::cout << std::endl;
 	   //javascript << endl;

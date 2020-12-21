@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <map>
 
 using namespace std; 
 
@@ -18,8 +19,8 @@ public:
   enum unfold_alg {AC_WIND, LOCAL_WIND, FIRST_GOOD_GATE, UNKNOWN};
 
   void format_it(string &command);
-  void format_field_by_reference(string &field);
-  void construct_new_field(string &field);
+  //void format_field_by_reference(string &field);
+  //void construct_new_field(string &field);
   bool process_from_to(string line, std::iostream& javascript);
   bool process_action_in(string line, std::iostream& javascript);
   bool process_when_above(string line, std::iostream& javascript);
@@ -33,6 +34,13 @@ public:
   bool process_action_unfold(string line, std::iostream& javascript, unfold_alg BB_use);
 
   void translate(ifstream& solo_script, std::iostream& javascript);
+
+private:
+  std::map<string, int> field_map_raw;
+  std::map<string, int> field_map_derived;
+
+  void reference_as_assignment(string &field); // , string &next_reference);
+  void reference_as_source(string &field); // , string &next_reference);
 
 
 };

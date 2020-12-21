@@ -5,6 +5,8 @@
 #include <regex>
 #include <string>
 #include <algorithm>
+
+#include "SoloScriptTranslator.hh"
  
 using namespace std;
 
@@ -224,14 +226,17 @@ void translate(ifstream& solo_script, std::iostream& javascript) {
     }
 }
 
-int main()
+int main(int argc, char **argv)
 {
+
+   SoloScriptTranslator xlator;
 
    std::ifstream script_file;
    
-   script_file.open("/Users/brenda/data/solo_scripts/sed_med_auto", std::ios::in);
+   //script_file.open("/Users/brenda/data/solo_scripts/sed_med_auto", std::ios::in);
+   script_file.open(argv[1], std::ios::in);
    std::stringstream javascript;
-   translate(script_file, javascript);
+   xlator.translate(script_file, javascript);
 
    /*
    if (script_file.is_open()) {
