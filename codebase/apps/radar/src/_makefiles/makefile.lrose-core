@@ -19,7 +19,6 @@ SUB_DIRS = \
 	ChillTsFile2Fmq \
 	ChillTsTcp2Fmq \
 	CmdVerify \
-	Condor \
 	ConvStrat \
 	Cov2Mom \
 	DowSendFreq \
