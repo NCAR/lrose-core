@@ -15,7 +15,7 @@
 #include "SpreadSheetItem.hh"
 //#include "SoloFunctions.hh"
 #include "DataField.hh"
-#include "CustomTableHeader.hh"
+//#include "CustomTableHeader.hh"
 
 
 using namespace std;
