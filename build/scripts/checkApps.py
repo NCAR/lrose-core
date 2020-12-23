@@ -3,7 +3,7 @@
 #===========================================================================
 #
 # Check that all apps are installed
-# Checks against a list of expected apps
+# Checks against a list of expected apps.
 #
 #===========================================================================
 
