@@ -988,10 +988,10 @@ public:
   
   void setFixedAngleDeg(int sweepNum, double fixedAngle);
 
-  /// combine rays from sweeps with common fixed angle and
-  /// gate geometry, but with different fields
+  /// for NEXRAD volumes, combine fields from consecutive sweeps
+  /// with the same elevation angle
   
-  void combineSweepsAtSameFixedAngleAndGeom(bool keepLongRange = false);
+  void combineNexradSweeps(bool keepLongRange = false);
 
   /// Make fields uniform in the volume.
   /// This ensures that all rays in the volume have the same fields
@@ -1773,15 +1773,13 @@ private:
 
   // class for combining sweeps with same fixed angle but different fields
 
-  class Combo {
+  class SweepCombo {
   public:
-    size_t target;
-    vector<size_t> sources; 
-    Combo() {
-      target = 0;
-    }
-    Combo(size_t index) {
-      target = index;
+    size_t targetSweepIndex;
+    size_t sourceSweepIndex; 
+    SweepCombo(size_t target, size_t source) {
+      targetSweepIndex = target;
+      sourceSweepIndex = source;
     }
   };
   
@@ -1943,10 +1941,11 @@ private:
   void _computeNRaysTransition();
   void _findTransitions(int nRaysMargin);
   void _setPredomSweepModeFromAngles() const;
-  void _augmentSweepFields(size_t target, size_t source);
+  void _addFieldsFromDifferentSweep(RadxSweep *sweepTarget,
+                                    RadxSweep *sweepSource);
 
   int _loadPseudoFromRealRhis();
-  int _setupAngleSearch(size_t sweepNum);
+  int _setupAngleSearch(const RadxSweep *sweep);
   int _getSearchAngleIndex(double angle);
   double _getSearchAngle(int index);
   void _populateSearchRays(int start, int end);

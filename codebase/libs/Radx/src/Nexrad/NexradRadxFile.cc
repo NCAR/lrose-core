@@ -655,7 +655,7 @@ int NexradRadxFile::readFromPath(const string &path,
     // combine fields as appropriate for sweeps with the same
     // fixed angle
     
-    _readVol->combineSweepsAtSameFixedAngleAndGeom(!_readRemoveLongRange);
+    _readVol->combineNexradSweeps(!_readRemoveLongRange);
     
     // remove long or short range data as appropriate
     
@@ -3977,7 +3977,7 @@ RadxField *NexradRadxFile::_createPurpleHaze(const vector<Radx::ui08> &udata08,
       haze.push_back(-127);
     }
   }
-  purp->addDataSi08(udata08.size(), haze.data());
+  purp->addDataSi08(haze.size(), haze.data());
 
   return purp;
   

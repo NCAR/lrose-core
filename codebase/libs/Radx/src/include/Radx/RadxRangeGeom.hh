@@ -70,6 +70,11 @@ public:
   RadxRangeGeom& operator=(const RadxRangeGeom &rhs);
   
   /////////////////////////////////////////////////////////////////
+  // Check for equality
+
+  bool operator==(const RadxRangeGeom &rhs);
+
+  /////////////////////////////////////////////////////////////////
   /// copy the geometry from another object
   
   void copyRangeGeom(const RadxRangeGeom &master);

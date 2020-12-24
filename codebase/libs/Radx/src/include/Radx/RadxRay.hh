@@ -92,7 +92,7 @@ public:
   /// Assignment.
   
   RadxRay& operator=(const RadxRay &rhs);
-  
+
   /// Copy the meta data, but not the fields
 
   void copyMetaData(const RadxRay &rhs);

@@ -464,6 +464,7 @@ int RadxRay::replaceField(RadxField *newField)
     RadxField *fld = _fields[ii];
     if (fld->getName() == newName) {
       delete fld;
+      newField->remapRayGeom(_nGates, _startRangeKm, _gateSpacingKm, false);
       _fields[ii] = newField;
       loadFieldNameMap();
       return 0;
@@ -990,6 +991,7 @@ void RadxRay::remapRangeGeom(double newStartRangeKm,
   RadxRemap remap;
   if (remap.checkGeometryIsDifferent(_startRangeKm, _gateSpacingKm,
                                      newStartRangeKm, newGateSpacingKm)) {
+
     remap.prepareForInterp(_nGates,
                            _startRangeKm, _gateSpacingKm,
                            newStartRangeKm, newGateSpacingKm);

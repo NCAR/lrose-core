@@ -89,6 +89,23 @@ RadxField &RadxField::operator=(const RadxField &rhs)
   return _copy(rhs);
 }
 
+/////////////////////////////
+/// Check for common geometry with another ray
+
+bool RadxField::checkGeometryIsEqual(const RadxField &rhs)
+{
+  if (_nPoints != rhs._nPoints) {
+    return false;
+  }
+  if (fabs(_startRangeKm - rhs._startRangeKm) > 1.0e-5) {
+    return false;
+  }
+  if (fabs(_gateSpacingKm - rhs._gateSpacingKm) > 1.0e-6) {
+    return false;
+  }
+  return true;
+}
+
 //////////////////////////////////////////////////
 // initialize
 
@@ -2454,6 +2471,35 @@ int RadxField::findLastGateNonMissing(size_t rayNum) const
 
   return 0;
 
+}
+
+/////////////////////////////////////////////////
+// Remap data for a single ray onto new range
+// Utilizes remap lookup for efficiency
+
+void RadxField::remapRayGeom(size_t nGates,
+                             double newStartRangeKm,
+                             double newGateSpacingKm,
+                             bool interp /* = false */)
+  
+{
+
+  // no data yet?
+  
+  assert(_data != NULL);
+
+  // initialize lookups in case geom has changed
+  
+  if (_remap.checkGeometryIsDifferent(_startRangeKm, _gateSpacingKm,
+                                      newStartRangeKm, newGateSpacingKm)) {
+    _remap.prepareForInterp(_nPoints,
+                            _startRangeKm, _gateSpacingKm,
+                            newStartRangeKm, newGateSpacingKm);
+    remapRayGeom(_remap, interp);
+  }
+  
+  setNGates(nGates);
+    
 }
 
 /////////////////////////////////////////////////

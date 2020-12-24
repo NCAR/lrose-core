@@ -5596,11 +5596,10 @@ bool RadxVol::gateGeomVariesByRay() const
 }
 
 /////////////////////////////////////////////////////////////
-// combine rays from sweeps with common fixed angle and
-// gate geometry, but with different fields
+/// for NEXRAD volumes, combine fields from consecutive sweeps
+/// with the same elevation angle
 
-void RadxVol::combineSweepsAtSameFixedAngleAndGeom
-  (bool keepLongRange /* = false */)
+void RadxVol::combineNexradSweeps(bool keepLongRange /* = false */)
   
 {
 
@@ -5612,57 +5611,35 @@ void RadxVol::combineSweepsAtSameFixedAngleAndGeom
   
   loadSweepInfoFromRays();
   
-  // find sweeps that should be combined
-  
-  vector<Combo> combos;
-  set<int> sources;
+  // find consecutive sweeps that should be combined
+  // store these in combos
 
-  for (int ii = (int) _sweeps.size() - 1; ii > 0; ii--) {
-    
-    RadxSweep *sweep1 = _sweeps[ii];
-    RadxRay *ray1 = _rays[sweep1->getStartRayIndex()];
-    Combo combo(ii);
-    
-    for (int jj = ii - 1; jj >= 0; jj--) {
-      
-      RadxSweep *sweep0 = _sweeps[jj];
-      RadxRay *ray0 = _rays[sweep0->getStartRayIndex()];
-      
-      if ((fabs(sweep0->getFixedAngleDeg() -
-                sweep1->getFixedAngleDeg()) < 0.01) &&
-          (fabs(ray0->getStartRangeKm() -
-                ray1->getStartRangeKm()) < 0.01) &&
-          (fabs(ray0->getGateSpacingKm() -
-                ray1->getGateSpacingKm()) < 0.01)) {
-        
-        if (sources.find(jj) == sources.end()) {
-          // source sweep not previously used
-          sources.insert(jj);
-          combo.sources.push_back(jj);
-        }
-        
-      }
-      
-    } // jj
-    
-    combos.push_back(combo);
-    
+  set<size_t> sourceIndexes;
+  vector<SweepCombo> combos;
+  for (size_t ii = 0; ii < _sweeps.size() - 1; ii++) {
+    RadxSweep *sweepTarget = _sweeps[ii];
+    RadxSweep *sweepSource = _sweeps[ii + 1];
+    if (fabs(sweepTarget->getFixedAngleDeg() -
+             sweepSource->getFixedAngleDeg()) < 0.01) {
+      combos.push_back(SweepCombo(ii, ii + 1));
+      sourceIndexes.insert(ii + 1);
+      ii++;
+    } // ii
   } // ii
 
   // combine the data from the sweeps
 
   for (size_t ii = 0; ii < combos.size(); ii++) {
-    const Combo &combo = combos[ii];
-    for (size_t jj = 0; jj < combo.sources.size(); jj++) {
-      _augmentSweepFields(combo.target, combo.sources[jj]);
-    }
+    const SweepCombo &combo = combos[ii];
+    _addFieldsFromDifferentSweep(_sweeps[combo.targetSweepIndex],
+                                 _sweeps[combo.sourceSweepIndex]);
   }
 
   // select the rays to keep
   
   vector<RadxRay *> keepRays;
   for (int ii = 0; ii < (int) _sweeps.size(); ii++) {
-    if (sources.find(ii) == sources.end()) {
+    if (sourceIndexes.find(ii) == sourceIndexes.end()) {
       // not a source, so keep these rays
       RadxSweep *sweepTarget = _sweeps[ii];
       for (size_t kk = sweepTarget->getStartRayIndex();
@@ -5698,14 +5675,11 @@ void RadxVol::combineSweepsAtSameFixedAngleAndGeom
 ///
 /// We copy from a source sweep to a target sweep
 
-void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
-                                  size_t srcSweepIndex)
+void RadxVol::_addFieldsFromDifferentSweep(RadxSweep *sweepTarget,
+                                           RadxSweep *sweepSource)
 {
 
-  RadxSweep *sweepTarget = _sweeps[targetSweepIndex];
-  RadxSweep *sweepSource = _sweeps[srcSweepIndex];
-
-  _setupAngleSearch(srcSweepIndex);
+  _setupAngleSearch(sweepSource);
 
   // check sweep mode
 
@@ -5715,8 +5689,9 @@ void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
     return;
   }
 
-  // check target fields, counting up non-missing gates
-  
+  // count up non-missing gates in target fields
+
+  set<string> targetNames;
   map<string, int> targetCounts;
   for (size_t iray = sweepTarget->getStartRayIndex();
        iray <= sweepTarget->getEndRayIndex(); iray++) {
@@ -5725,6 +5700,7 @@ void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
     for (size_t ifield = 0; ifield < flds.size(); ifield++) {
       RadxField *fld = flds[ifield];
       string name = fld->getName();
+      targetNames.insert(name);
       if (iray == sweepTarget->getStartRayIndex()) {
         // initialize cound
         targetCounts[name] = 0;
@@ -5733,8 +5709,9 @@ void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
     } // ifield
   } // iray
 
-  // check source fields, counting up non-missing gates
+  // count up non-missing gates in source fields
   
+  set<string> sourceNames;
   map<string, int> sourceCounts;
   for (size_t iray = sweepSource->getStartRayIndex();
        iray <= sweepSource->getEndRayIndex(); iray++) {
@@ -5743,6 +5720,7 @@ void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
     for (size_t ifield = 0; ifield < flds.size(); ifield++) {
       RadxField *fld = flds[ifield];
       string name = fld->getName();
+      sourceNames.insert(name);
       if (iray == sweepSource->getStartRayIndex()) {
         // initialize cound
         sourceCounts[name] = 0;
@@ -5751,11 +5729,27 @@ void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
     } // ifield
   } // iray
 
+  if (_debug) {
+    cerr << "DEBUG - RadxVol::combineNexradSweeps()" << endl;
+    for (set<string>::iterator it = targetNames.begin();
+         it != targetNames.end(); it++) {
+      string name = *it;
+      cerr << "==>> target field: " 
+           << name << ", count: " << targetCounts[name] << endl;
+    }
+    for (set<string>::iterator it = sourceNames.begin();
+         it != sourceNames.end(); it++) {
+      string name = *it;
+      cerr << "==>> source field: "
+           << name << ", count: " << sourceCounts[name] << endl;
+    }
+  }
+
   // loop through the target rays
   
   for (size_t iray = sweepTarget->getStartRayIndex();
        iray <= sweepTarget->getEndRayIndex(); iray++) {
-    
+
     RadxRay *rayTarget = _rays[iray];
     double angle = rayTarget->getAzimuthDeg();
     if (sweepMode == Radx::SWEEP_MODE_RHI) {
@@ -5775,19 +5769,20 @@ void RadxVol::_augmentSweepFields(size_t targetSweepIndex,
       for (size_t ifield = 0; ifield < sourceFlds.size(); ifield++) {
         
         const RadxField *sourceFld = sourceFlds[ifield];
-        
+        string sourceName = sourceFld->getName();
+
         // does this field name already exist in the target?
         // test by trying to get the field from the target ray
         
-        string name = sourceFld->getName();
-        RadxField *fldTarget = rayTarget->getField(name);
+        RadxField *fldTarget = rayTarget->getField(sourceName);
         if (fldTarget != NULL) {
 
           // source field name already exists on the target
           // so use the field with the larger number of
-          // non-missing gates
+          // non-missing gates, make a copy and add it
+          // the original will be freed up in replaceField()
 
-          if (targetCounts[name] < sourceCounts[name]) {
+          if (targetCounts[sourceName] < sourceCounts[sourceName]) {
             RadxField *fldCopy = new RadxField(*sourceFld);
             rayTarget->replaceField(fldCopy);
           }
@@ -6585,13 +6580,9 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
 /// Set up angle search, for a given sweep
 /// Return 0 on success, -1 on failure
 
-int RadxVol::_setupAngleSearch(size_t sweepNum)
+int RadxVol::_setupAngleSearch(const RadxSweep *sweep)
   
 {
-
-  // check sweep num is valid
-
-  assert(sweepNum < _sweeps.size());
 
   // init rays to NULL - i.e. no match
   
@@ -6601,7 +6592,6 @@ int RadxVol::_setupAngleSearch(size_t sweepNum)
 
   // set the sweep pointers
 
-  const RadxSweep *sweep = _sweeps[sweepNum];
   size_t startRayIndex = sweep->getStartRayIndex();
   size_t endRayIndex = sweep->getEndRayIndex();
   

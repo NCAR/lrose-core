@@ -137,6 +137,10 @@ public:
 
   RadxField &copyMetaData(const RadxField &rhs);
   
+  /// Check for common geometry with another ray
+
+  bool checkGeometryIsEqual(const RadxField &rhs);
+
   /// \name Set methods:
   //@{
 
@@ -597,6 +601,15 @@ public:
   /// \name Remapping:
   //@{
 
+  /////////////////////////////////////////////////
+  // Remap data for a single ray onto new range
+  // Utilizes remap lookup for efficiency
+  
+  void remapRayGeom(size_t nGates,
+                    double newStartRangeKm,
+                    double newGateSpacingKm,
+                    bool interp = false);
+  
   /////////////////////////////////////////////////
   /// Remap data for a single ray onto new range
   /// geometry using lookup table passed in.
@@ -1118,6 +1131,10 @@ private:
 
   string _thresholdFieldName;
   double _thresholdValue;
+
+  // lookup table for remapping
+
+  RadxRemap _remap;
   
   // private methods
   
