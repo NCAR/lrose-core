@@ -164,6 +164,7 @@ void NexradRadxFile::clear()
   _vcpVelRes = 0.5;
   _vcpShortPulse = true;
   _vcpPpis.clear();
+  _prevSweepNum = -1;
 
   _startRangeKmLong = 0.5;
   _gateSpacingKmLong = 1.0;
@@ -573,16 +574,27 @@ int NexradRadxFile::readFromPath(const string &path,
 
         _checkIsLongRange(ray);
         
-        // add ray to vol
+        // add ray to vol, make sure sweep numbers are increasing
         
-        _readVol->addRay(ray);
-        
-        if (_verbose) {
-          cerr << "Adding msg 31 ray, el, az: "
-               << ray->getElevationDeg() << ", " << ray->getAzimuthDeg() << endl;
+        if ((ray->getSweepNumber() >= _prevSweepNum) || _readPreserveSweeps) {
+          _readVol->addRay(ray);
+          _prevSweepNum = ray->getSweepNumber();
+          if (_verbose) {
+            cerr << "Adding msg 31 ray, sweepNum, el, az: "
+                 << ray->getSweepNumber() << ", "
+                 << ray->getElevationDeg() << ", "
+                 << ray->getAzimuthDeg() << endl;
+          }
+        } else {
+          if (_verbose) {
+            cerr << "ERROR - sweep number decreased, msg 31 ray, sweepNum, el, az: "
+                 << ray->getSweepNumber() << ", "
+                 << ray->getElevationDeg() << ", "
+                 << ray->getAzimuthDeg() << endl;
+          }
         }
-
       }
+
     } else if (msgHdr.message_type == NexradData::DIGITAL_RADAR_DATA_1) {
 
       // create ray from message
@@ -593,9 +605,25 @@ int NexradRadxFile::readFromPath(const string &path,
 
         _checkIsLongRange(ray);
 
-        // add ray to vol
+        // add ray to vol, make sure sweep numbers are increasing
         
-        _readVol->addRay(ray);
+        if ((ray->getSweepNumber() >= _prevSweepNum) || _readPreserveSweeps) {
+          _readVol->addRay(ray);
+          _prevSweepNum = ray->getSweepNumber();
+          if (_verbose) {
+            cerr << "Adding msg 31 ray, sweepNum, el, az: "
+                 << ray->getSweepNumber() << ", "
+                 << ray->getElevationDeg() << ", "
+                 << ray->getAzimuthDeg() << endl;
+          }
+        } else {
+          if (_verbose) {
+            cerr << "ERROR - sweep number decreased, msg 31 ray, sweepNum, el, az: "
+                 << ray->getSweepNumber() << ", "
+                 << ray->getElevationDeg() << ", "
+                 << ray->getAzimuthDeg() << endl;
+          }
+        }
         
         if (_verbose) {
           cerr << "Adding msg 1 ray, el, az: "
