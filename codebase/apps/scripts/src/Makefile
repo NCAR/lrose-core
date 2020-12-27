@@ -52,6 +52,7 @@ SCRIPTS = \
 	push_spdb_files_ftp.py \
 	push_spdb_files_rcp.py \
 	rm_baks \
+	rm_CMakeLists \
 	rm_core \
 	rm_junk \
 	rm_ldata_fmq_files \
