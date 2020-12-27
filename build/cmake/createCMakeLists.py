@@ -221,7 +221,7 @@ def searchDir(dir):
     if (pathToks[ntoks-3] == "libs" and
         pathToks[ntoks-1] == "src"):
 
-        # src level of lib - create makefile.am for lib
+        # src level of lib - create CMakeLists.txt for lib
 
         libDir = absDir[:-4]
         sharedStr = ""
@@ -248,15 +248,15 @@ def searchDir(dir):
     elif ((pathToks[ntoks-4] == "apps") and
           (pathToks[ntoks-2] == "src")):
 
-        # app directory - create makefile.am for app
+        # app directory - create CMakeLists.txt for app
 
         # compute default script path - assumes core package
 
-        createScript = "createMakefile.am.app.lrose-core.py"
+        createScript = "createCMakeLists.app.lrose-core.py"
         scriptPath = os.path.join(thisScriptDir, createScript)
 
         # use package-specific version if available
-        pkgCreateScript = "createMakefile.am.app." + options.pkg + ".py"
+        pkgCreateScript = "createCMakeLists.app." + options.pkg + ".py"
         pkgScriptPath = os.path.join(thisScriptDir, pkgCreateScript)
         if (os.path.exists(pkgScriptPath)):
             createScript = pkgCreateScript
@@ -277,10 +277,10 @@ def searchDir(dir):
 
     else:
 
-        # create makefile.am for recursion
-        cmd = os.path.join(thisScriptDir, "createMakefile.am.recurse.py") + \
+        # create CMakeLists.txt for recursion
+        cmd = os.path.join(thisScriptDir, "createCMakeLists.recurse.py") + \
               " --dir " + absDir + debugStr
-        # runCommand(cmd)
+        runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
         # recurse
         loadSubdirList(dir)
