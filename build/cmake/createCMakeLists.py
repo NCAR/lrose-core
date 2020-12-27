@@ -36,57 +36,58 @@ def main():
     coreDirDefault = os.path.join(thisScriptDir, "../..")
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default='False',
+                      dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--verbose',
-                      dest='verbose', default='False',
+                      dest='verbose', default=False,
                       action="store_true",
                       help='Set verbose debugging on')
     parser.add_option('--coreDir',
                       dest='coreDir', default=coreDirDefault,
-                      help='Path of lrose-core top level directory, default is: ' + coreDirDefault)
+                      help='Path of lrose-core top level directory, default is: ' +
+                      coreDirDefault)
     parser.add_option('--shared',
-                      dest='shared', default='False',
+                      dest='shared', default=False,
                       action="store_true",
                       help='Create shared lib objects')
     parser.add_option('--pkg',
                       dest='pkg', default="lrose-core",
                       help='Name of package being built')
     parser.add_option('--osx',
-                      dest='osx', default='False',
+                      dest='osx', default=False,
                       action="store_true",
                       help='Configure for MAC OSX')
 
     (options, args) = parser.parse_args()
 
-    if (options.verbose == True):
+    if (options.verbose):
         options.debug = True
     
-    if (options.debug == True):
+    if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  Core dir: ", options.coreDir, file=sys.stderr)
         print("  shared: ", options.shared, file=sys.stderr)
         print("  pkg: ", options.pkg, file=sys.stderr)
         print("  osx: ", options.osx, file=sys.stderr)
 
-    # go to the top level core dir
+    # go to the top level codebase
 
-    os.chdir(options.coreDir)
+    codebaseDir = os.path.join(options.coreDir, "codebase")
+    os.chdir(codebaseDir)
 
-    # copy the top level CMakeLists.txt file
+    # copy the top level CMakeLists.txt file into place
 
-    
     print("  info: copying top level CMakeLists.txt file", file=sys.stderr)
-    shutil.copy('./build/cmake/CMakeLists.txt.top', './CMakeLists.txt')
-    sys.exit(0)
+    shutil.copy('../build/cmake/CMakeLists.txt.top', './CMakeLists.txt')
     
     # recursively search the libs and apps trees
 
-    libsDir = "libs"
-    appsDir = "apps"
+    libsDir =  os.path.join(codebaseDir, "libs")
+    appsDir =  os.path.join(codebaseDir, "apps")
 
-    if (options.debug == True):
+    if (options.debug):
+        print("  codebase dir: ", codebaseDir, file=sys.stderr)
         print("  libs dir: ", libsDir, file=sys.stderr)
         print("  apps dir: ", appsDir, file=sys.stderr)
 
@@ -100,10 +101,13 @@ def main():
     searchDir(libsDir)
     searchDir(appsDir)
 
-    if (options.debug == True):
+    if (options.debug):
         for path in makefileCreateList:
             print("  Need to create makefile: ", path, file=sys.stderr)
             
+    sys.exit(0)
+
+
     # write out configure.ac
             
     if (writeConfigureAc() != 0):
@@ -112,18 +116,18 @@ def main():
     # run autoconf
 
     debugStr = "";
-    if (options.verbose == True):
+    if (options.verbose):
         debugStr = " --verbose "
-    elif (options.debug == True):
+    elif (options.debug):
         debugStr = " --debug "
         
     sharedStr = ""
-    if (options.shared == True):
+    if (options.shared):
         sharedStr = " --shared "
 
     cmd = os.path.join(thisScriptDir, "runAutoConf.py") + \
-          " --dir " + options.dir + sharedStr + debugStr
-    runCommand(cmd)
+          " --dir " + options.coreDir + sharedStr + debugStr
+    # runCommand(cmd)
 
     sys.exit(0)
 
@@ -136,7 +140,7 @@ def getLibList(dir):
     libList = ""
     libArray = []
 
-    if (options.debug == True):
+    if (options.debug):
         print("  Getting lib list from dir: ", dir, file=sys.stderr)
 
     # check if this dir has a makefile or Makefile
@@ -147,7 +151,7 @@ def getLibList(dir):
         print("  No makefile in lib dir: ", dir, file=sys.stderr)
         exit(1)
 
-    if (options.debug == True):
+    if (options.debug):
         print("  Searching makefile template: ", makefilePath, file=sys.stderr)
 
     # search for SUB_DIRS key in makefile
@@ -157,12 +161,12 @@ def getLibList(dir):
     if (len(subNameList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  Cannot find SUB_DIRS in ", makefileName, file=sys.stderr)
-        print("  dir: ", options.dir, file=sys.stderr)
+        print("  coreDir: ", options.coreDir, file=sys.stderr)
         exit(1)
 
     for subName in subNameList:
         subPath = os.path.join(dir, subName)
-        if (os.path.isdir(subPath) == True):
+        if (os.path.isdir(subPath)):
             if (subName.find("perl5") < 0):
                 libArray.append(subName)
 
@@ -171,7 +175,7 @@ def getLibList(dir):
         if (index < len(libArray) - 1):
             libList += ","
 
-    if (options.debug == True):
+    if (options.debug):
         print("  libList: ", libList, file=sys.stderr)
 
     return
@@ -183,20 +187,20 @@ def searchDir(dir):
                     
     global makefileCreateList
 
-    if (options.debug == True):
+    if (options.debug):
         print("  Searching dir: ", dir, file=sys.stderr)
 
     # check if this dir has a makefile or Makefile
 
     makefilePath = getMakefileTemplatePath(dir)
     if (os.path.exists(makefilePath) == False):
-        if (options.verbose == True):
+        if (options.verbose):
             print("  No makefile or Makefile found", file=sys.stderr)
         return
 
     # detect which type of directory we are in
         
-    if (options.verbose == True):
+    if (options.verbose):
         print("  Found makefile: ", makefilePath, file=sys.stderr)
 
     if ((dir == "libs/perl5") or
@@ -206,10 +210,10 @@ def searchDir(dir):
         return
 
     debugStr = "";
-    if (options.verbose == True):
+    if (options.verbose):
         debugStr = " --debug "
 
-    absDir = os.path.join(options.dir, dir)
+    absDir = os.path.join(options.coreDir, dir)
     pathToks = absDir.split("/")
     ntoks = len(pathToks)
     makefileCreatePath = os.path.join(dir, 'makefile')
@@ -221,9 +225,9 @@ def searchDir(dir):
 
         libDir = absDir[:-4]
         sharedStr = ""
-        if (options.shared == True):
+        if (options.shared):
             sharedStr = " --shared "
-        cmd = os.path.join(thisScriptDir, "createMakefile.am.lib.py") + \
+        cmd = os.path.join(thisScriptDir, "createCMakeLists.lib.py") + \
               " --dir " + libDir + sharedStr + debugStr
         cmd += " --libList " + libList
         runCommand(cmd)
@@ -264,9 +268,9 @@ def searchDir(dir):
         cmd = scriptPath
         cmd += " --dir " + absDir + debugStr
         cmd += " --libList " + libList
-        if (options.osx == True):
+        if (options.osx):
             cmd += " --osx "
-        runCommand(cmd)
+        # runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
 
         return
@@ -276,7 +280,7 @@ def searchDir(dir):
         # create makefile.am for recursion
         cmd = os.path.join(thisScriptDir, "createMakefile.am.recurse.py") + \
               " --dir " + absDir + debugStr
-        runCommand(cmd)
+        # runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
         # recurse
         loadSubdirList(dir)
@@ -299,10 +303,10 @@ def loadSubdirList(dir):
     try:
         fp = open(makefilePath, 'r')
     except IOError as e:
-        if (options.verbose == True):
+        if (options.verbose):
             print("ERROR - ", thisScriptName, file=sys.stderr)
             print("  Cannot find makefile or Makefile", file=sys.stderr)
-            print("  dir: ", options.dir, file=sys.stderr)
+            print("  coreDir: ", options.coreDir, file=sys.stderr)
         return
 
     lines = fp.readlines()
@@ -345,7 +349,7 @@ def writeConfigureAc():
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  Cannot read base configure template", file=sys.stderr)
         print("  base name: ", options.baseName, file=sys.stderr)
-        print("  This file should be in: ", options.dir, file=sys.stderr)
+        print("  This file should be in: ", options.coreDir, file=sys.stderr)
         return 1
 
     base = open(options.baseName, "r")
@@ -359,7 +363,7 @@ def writeConfigureAc():
     except IOError as e:
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  Cannot open configure.ac for writing", file=sys.stderr)
-        print("  dir: ", options.dir, file=sys.stderr)
+        print("  dir: ", options.coreDir, file=sys.stderr)
         return 1
 
     confac = open("configure.ac", "w")
@@ -368,7 +372,7 @@ def writeConfigureAc():
     confac.write("#\n")
     confac.write("# configure template for autoconf\n")
     confac.write("#\n")
-    confac.write("# dir: %s\n" % options.dir)
+    confac.write("# dir: %s\n" % options.coreDir)
     confac.write("#\n")
     confac.write("# baseName: %s\n" % options.baseName)
     confac.write("#\n")
@@ -434,7 +438,7 @@ def getValueListForKey(path, key):
     except IOError as e:
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  Cannot open file:", path, file=sys.stderr)
-        print("  dir: ", options.dir, file=sys.stderr)
+        print("  dir: ", options.coreDir, file=sys.stderr)
         return valueList
 
     lines = fp.readlines()
@@ -448,7 +452,7 @@ def getValueListForKey(path, key):
             multiLine = multiLine + line
             if (line.find("\\") < 0):
                 break;
-        elif (foundKey == True):
+        elif (foundKey):
             if (line[0] == '#'):
                 break
             if (len(line) < 2):
@@ -479,7 +483,7 @@ def getValueListForKey(path, key):
 
 def runCommand(cmd):
 
-    if (options.debug == True):
+    if (options.debug):
         print("running cmd:",cmd, file=sys.stderr)
     
     try:
@@ -488,7 +492,7 @@ def runCommand(cmd):
             print("Child exited with code: ", retcode, file=sys.stderr)
             exit(1)
         else:
-            if (options.verbose == True):
+            if (options.verbose):
                 print("Child returned code: ", retcode, file=sys.stderr)
     except OSError as e:
         print("Execution failed:", e, retcode, file=sys.stderr)
