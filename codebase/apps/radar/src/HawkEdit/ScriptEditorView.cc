@@ -465,6 +465,10 @@ void ScriptEditorView::acceptFormulaInput()
 
 }
 
+void ScriptEditorView::scriptComplete() {
+    criticalMessage("Script evaluation complete. Results available in editor and color maps");
+}
+
 void ScriptEditorView::cancelFormulaInput()
 {
   // TODO: what action should cancel be?

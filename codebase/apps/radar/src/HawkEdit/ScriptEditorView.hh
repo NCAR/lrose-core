@@ -49,6 +49,7 @@ public slots:
     void acceptFormulaInput();
     void cancelFormulaInput();
     void displayHelp();
+    void scriptComplete();
   //void clear();
 
   void notImplementedMessage();

@@ -43,6 +43,7 @@ public:
 
 signals:
   void scriptChangedVolume(QStringList newFieldNames); // const RadxVol &radarDataVolume);
+  void scriptComplete();
 
 public slots:
   void needFieldNames();

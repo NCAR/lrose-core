@@ -76,6 +76,8 @@ ScriptEditorController::ScriptEditorController(ScriptEditorView *view, ScriptEdi
   connect(_currentView, SIGNAL(runForEachRayScript(QString, bool)),
 	  this, SLOT(runForEachRayScript(QString, bool)));
 
+  connect(this, SIGNAL(scriptComplete()), 
+    _currentView, SLOT(scriptComplete()));
 
     // connect controller slots to model signals 
 
@@ -724,6 +726,8 @@ uncate(100);
 
 
     volumeUpdated(newFieldNames);
+    emit scriptComplete();
+
     LOG(DEBUG) << "exit";
 }
 
