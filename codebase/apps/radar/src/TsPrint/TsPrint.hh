@@ -100,7 +100,7 @@ private:
   double _startTime, _endTime;
 
   Stats _stats;
-  vector<Stats> _aStats;
+  vector<Stats> _ascopeStats;
 
   vector<double> _maxPowers0, _maxPowers1;
   double _meanMaxPower0, _meanMaxPower1;

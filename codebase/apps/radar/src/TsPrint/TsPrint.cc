@@ -212,7 +212,7 @@ TsPrint::~TsPrint()
     delete _pulseReader;
   }
 
-  _aStats.clear();
+  _ascopeStats.clear();
 
   PMU_auto_unregister();
 
@@ -557,14 +557,14 @@ int TsPrint::_runAscopeMode()
 
   // allocate vector for Ascope stats
 
-  _aStats.clear();
+  _ascopeStats.clear();
   for (int ii = 0; ii < _nGatesRequested; ii++) {
     Stats stats;
     stats.setCalibration(_rxGainHc,
                          _rxGainVc,
                          _rxGainHx,
                          _rxGainVx);
-    _aStats.push_back(stats);
+    _ascopeStats.push_back(stats);
   }
   _pulseCount = 0;
 
@@ -602,7 +602,7 @@ int TsPrint::_runAscopeMode()
   // compute ascope stats
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _aStats[igate].computeAlternating(_haveChan1);
+    _ascopeStats[igate].computeAlternating(_haveChan1);
   }
     
   time_t midSecs = (time_t) _midTime;
@@ -642,16 +642,16 @@ int TsPrint::_runAscopeMode()
             "%8.3f %8.3f %8.3f %8.3f "
             "%8.3f %8.3f\n",
             gateNum, rangeKm,
-            _aStats[igate].meanDbmHc,
-            _aStats[igate].meanDbmHx,
-            _aStats[igate].corrH,
-            _aStats[igate].argH,
-            _aStats[igate].meanDbmVc,
-            _aStats[igate].meanDbmVx,
-            _aStats[igate].corrV,
-            _aStats[igate].argV,
-            _aStats[igate].meanDbm0,
-            _aStats[igate].meanDbm1);
+            _ascopeStats[igate].meanDbmHc,
+            _ascopeStats[igate].meanDbmHx,
+            _ascopeStats[igate].corrH,
+            _ascopeStats[igate].argH,
+            _ascopeStats[igate].meanDbmVc,
+            _ascopeStats[igate].meanDbmVx,
+            _ascopeStats[igate].corrV,
+            _ascopeStats[igate].argV,
+            _ascopeStats[igate].meanDbm0,
+            _ascopeStats[igate].meanDbm1);
 
   }
 
@@ -1270,15 +1270,15 @@ void TsPrint::_addToAscope(const IwrfTsPulse &pulse)
       double qq0 = iqChan0[index + 1];
       double power0 = ii0 * ii0 + qq0 * qq0;
       power0 /= _rxGainHc;
-      _aStats[igate].sumPower0 += power0;
-      _aStats[igate].nn0++;
+      _ascopeStats[igate].sumPower0 += power0;
+      _ascopeStats[igate].nn0++;
     
       if (isHoriz) {
-        _aStats[igate].nnH++;
-        _aStats[igate].sumPowerHc += power0;
+        _ascopeStats[igate].nnH++;
+        _ascopeStats[igate].sumPowerHc += power0;
       } else {
-        _aStats[igate].nnV++;
-        _aStats[igate].sumPowerVc += power0;
+        _ascopeStats[igate].nnV++;
+        _ascopeStats[igate].sumPowerVc += power0;
       }
 
     } else {
@@ -1287,15 +1287,15 @@ void TsPrint::_addToAscope(const IwrfTsPulse &pulse)
       double qq0 = iqChan0[index + 1];
       double power0 = ii0 * ii0 + qq0 * qq0;
       power0 /= _rxGainHc;
-      _aStats[igate].sumPower0 += power0;
-      _aStats[igate].nn0++;
+      _ascopeStats[igate].sumPower0 += power0;
+      _ascopeStats[igate].nn0++;
     
       double ii1 = iqChan1[index];
       double qq1 = iqChan1[index + 1];
       double power1 = ii1 * ii1 + qq1 * qq1;
       power1 /= _rxGainVc;
-      _aStats[igate].sumPower1 += power1;
-      _aStats[igate].nn1++;
+      _ascopeStats[igate].sumPower1 += power1;
+      _ascopeStats[igate].nn1++;
 
       RadarComplex_t c0, c1;
       c0.re = ii0;
@@ -1305,17 +1305,17 @@ void TsPrint::_addToAscope(const IwrfTsPulse &pulse)
       RadarComplex_t prod = RadarComplex::conjugateProduct(c0, c1);
       
       if (isHoriz) {
-        _aStats[igate].nnH++;
-        _aStats[igate].sumPowerHc += power0;
-        _aStats[igate].sumPowerVx += power1;
-        _aStats[igate].sumConjProdH =
-          RadarComplex::complexSum(_aStats[igate].sumConjProdH, prod);
+        _ascopeStats[igate].nnH++;
+        _ascopeStats[igate].sumPowerHc += power0;
+        _ascopeStats[igate].sumPowerVx += power1;
+        _ascopeStats[igate].sumConjProdH =
+          RadarComplex::complexSum(_ascopeStats[igate].sumConjProdH, prod);
       } else {
-        _aStats[igate].nnV++;
-        _aStats[igate].sumPowerVc += power0;
-        _aStats[igate].sumPowerHx += power1;
-        _aStats[igate].sumConjProdV =
-          RadarComplex::complexSum(_aStats[igate].sumConjProdV, prod);
+        _ascopeStats[igate].nnV++;
+        _ascopeStats[igate].sumPowerVc += power0;
+        _ascopeStats[igate].sumPowerHx += power1;
+        _ascopeStats[igate].sumConjProdV =
+          RadarComplex::complexSum(_ascopeStats[igate].sumConjProdV, prod);
       }
 
     }
