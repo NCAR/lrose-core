@@ -454,6 +454,7 @@ int RadxEvad::_processDataSet()
 	_ring.endGate = _nGates - 1;
       }
 
+/*
       if (_params.debug) {
         cerr << "ring at range " << irange << " ... " << endl;
         cerr << " startRange=" << _ring.startRange << endl;
@@ -461,6 +462,7 @@ int RadxEvad::_processDataSet()
         cerr << " startGate =" << _ring.startGate << endl;
         cerr << "   endGate =" << _ring.endGate << endl;
       }
+*/
 
       // set elevation, compute range and height at ring mid-pt
 
