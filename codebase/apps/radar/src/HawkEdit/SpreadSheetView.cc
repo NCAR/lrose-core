@@ -491,12 +491,12 @@ void SpreadSheetView::updateColor(QTableWidgetItem *item)
     QPainter pt(&pix);
     pt.fillRect(0, 0, 16, 16, col);
 
-    QColor lighter = col.light();
+    QColor lighter = col.lighter();
     pt.setPen(lighter);
     QPoint lightFrame[] = { QPoint(0, 15), QPoint(0, 0), QPoint(15, 0) };
     pt.drawPolyline(lightFrame, 3);
 
-    pt.setPen(col.dark());
+    pt.setPen(col.darker());
     QPoint darkFrame[] = { QPoint(1, 15), QPoint(15, 15), QPoint(15, 1) };
     pt.drawPolyline(darkFrame, 3);
 

@@ -84,6 +84,8 @@ HDRS = \
 	ScriptEditorController.hh \
 	ScriptEditorModel.hh \
 	ScriptEditorView.hh \
+	ScriptEditorHelpItem.hh \
+	ScriptEditorHelpModel.hh \
 	SoloDefaultColorWrapper.hh \
 	SoloFunctionsController.hh \
 	SoloScriptTranslator.hh \
@@ -145,6 +147,8 @@ MOC_SRCS = \
 	ClickableLabel.cc \
 	ScriptEditorView.cc \
 	ScriptEditorController.cc \
+	ScriptEditorHelpItem.cc \
+	ScriptEditorHelpModel.cc \
 	TextEdit.cc \
 	SoloFunctionsController.cc \
 	SpreadSheetView.cc \
@@ -168,6 +172,7 @@ MOC_OUTPUT = \
 	moc_ClickableLabel.cpp \
 	moc_ScriptEditorView.cpp \
 	moc_ScriptEditorController.cpp \
+	moc_ScriptEditorHelpModel.cpp \
 	moc_TextEdit.cpp \
 	moc_SoloFunctionsController.cpp \
 	moc_SpreadSheetView.cpp \

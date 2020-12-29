@@ -7,12 +7,14 @@
 #include <QJSValue>
 #include <QJSValueIterator>
 #include <QCheckBox>
+#include <QFile>
+#include <QTreeView>
 #include <vector>
 #include <iostream>
 #include <toolsa/LogStream.hh>
 //#include "TextEdit.hh"
 #include "ScriptEditorView.hh"
-//#include "ScriptEditorDelegate.hh"
+#include "ScriptEditorHelpModel.hh"
 //#include "ScriptEditorItem.hh"
 #include "SoloFunctionsController.hh"
 #include "SoloScriptTranslator.hh"
@@ -59,14 +61,14 @@ Q_DECLARE_METATYPE(QVector<double>)
     //cellLabel->setMinimumSize(80, 10);
 
 
-    QHBoxLayout *scriptEditLayout = new QHBoxLayout();
+    scriptEditLayout = new QHBoxLayout();
     QVBoxLayout *forEachLayout = new QVBoxLayout();
     QVBoxLayout *oneTimeOnlyLayout = new QVBoxLayout();
 
     toolBar->addWidget(cellLabel);
     oneTimeOnlyLayout->addWidget(new QLabel("One Time Only"));
     oneTimeOnlyLayout->addWidget(formulaInput);
-    forEachLayout->addWidget(new QLabel("For Each Ray"));
+    forEachLayout->addWidget(new QLabel("Script"));
     forEachLayout->addWidget(formulaInputForEachRay);
 
 
@@ -145,10 +147,32 @@ Q_DECLARE_METATYPE(QVector<double>)
     scriptEditLayout->addWidget(forEachWidget);
     // scriptEditLayout->addWidget(oneTimeWidget);
     scriptEditLayout->addWidget(useBoundaryWidget);
+
     QWidget *scriptEditWidget = new QWidget();
     scriptEditWidget->setLayout(scriptEditLayout);
 
+      //-------
+    //helpView = NULL;
+    //if (helpView == NULL) {
+      Q_INIT_RESOURCE(resources);
+      QFile file(":/script_help.txt");
+      file.open(QIODevice::ReadOnly);
+      ScriptEditorHelpModel *model = new ScriptEditorHelpModel(file.readAll());
+      file.close();
+      helpView = new QTreeView(this);
+      helpView->setModel(model);
+      //helpView->setWindowTitle(QObject::tr("Script Help"));
+    //}
+    QVBoxLayout *helpViewLayout = new QVBoxLayout();
+    helpViewLayout->addWidget(new QLabel("Script Commands"));
+    helpViewLayout->addWidget(helpView);
 
+    //helpView->setEnabled(true); // TODO: help window not showing. 
+    //scriptEditLayout->addWidget(helpView);
+    QWidget *helpWidget = new QWidget(); 
+    helpWidget->setLayout(helpViewLayout);
+    //-------    
+      
     createActions();
     LOG(DEBUG) << "Action created\n";
     //updateColor(0);
@@ -192,8 +216,15 @@ Q_DECLARE_METATYPE(QVector<double>)
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
     mainLayout->addWidget(scriptEditWidget);
-    mainLayout->addWidget(startTimeWidget);
-    mainLayout->addWidget(stopTimeWidget);
+    //mainLayout->addWidget(startTimeWidget);
+    //mainLayout->addWidget(stopTimeWidget);
+
+    //----
+    QDockWidget *dock = new QDockWidget(tr("Help"), this);
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dock->setWidget(helpView);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+    //----
 
     QWidget *mainWidget = new QWidget();
     mainWidget->setLayout(mainLayout);
@@ -207,6 +238,10 @@ Q_DECLARE_METATYPE(QVector<double>)
 
     LOG(DEBUG) << "after setup";
 
+}
+
+ScriptEditorView::~ScriptEditorView() {
+  if (helpView != NULL) delete helpView;
 }
 
 
@@ -343,7 +378,22 @@ void ScriptEditorView::importScriptFile() {
 }
 
 void ScriptEditorView::displayHelp() {
-  LOG(DEBUG) << "not implemented";
+  //LOG(DEBUG) << "not implemented";
+    //Q_INIT_RESOURCE(resources);
+    if (helpView == NULL) {
+      QFile file(":/script_help.txt");
+      file.open(QIODevice::ReadOnly);
+      ScriptEditorHelpModel model(file.readAll());
+      file.close();
+
+      helpView = new QTreeView(this);
+    
+      helpView->setModel(&model);
+      helpView->setWindowTitle(QObject::tr("Script Help"));
+    }
+
+    helpView->setEnabled(true); // TODO: help window not showing. 
+    scriptEditLayout->addWidget(helpView);
 }
 
 void ScriptEditorView::saveScriptFile() {

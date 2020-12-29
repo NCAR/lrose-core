@@ -15,6 +15,7 @@
 #include <QToolBar>
 #include <QTableWidgetItem>
 #include <QTableWidget>
+#include <QTreeView>
 #include <QString>
 // #include <QJSEngine>
 
@@ -26,6 +27,7 @@ public:
 
   //  ScriptEditorView(std::string fileName, QWidget *parent = 0);
   ScriptEditorView(QWidget *parent = 0);
+  ~ScriptEditorView();
 
   //  void setController(ScriptEditorController *controller);
 
@@ -103,27 +105,10 @@ private:
     TextEdit *formulaInput;
     TextEdit *formulaInputForEachRay;
     QCheckBox *useBoundaryWidget;
+    QTreeView *helpView;
+    QHBoxLayout *scriptEditLayout;
     //QTextEdit *formulaInput;
   // ScriptEditorDelegate *formulaInput;
-
-  //  QJSEngine engine;
-
-  
-  //  const char *LogFileName = "/tmp/HawkEye_log.txt";
- 
-const char *htmlText =
-"<HTML>"
-"<p><b>"
-"Some useful info .."
-"<ul>"
-"<li>Adding two cells.</li>"
-"<li>Subtracting one cell from another.</li>"
-"<li>Multiplying two cells.</li>"
-"<li>Dividing one cell with another.</li>"
-"<li>Summing the contents of an arbitrary number of cells.</li>"
-  "</HTML>";
 };
-
-
 
 #endif // SCRIPTEDITORVIEW_H
