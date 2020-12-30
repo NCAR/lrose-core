@@ -83,6 +83,27 @@ void Stats::init()
   sumConjProdH.im = 0.0;
   sumConjProdV.re = 0.0;
   sumConjProdV.im = 0.0;
+
+  iqHc.clear();
+  iqVc.clear();
+  iqHx.clear();
+  iqVx.clear();
+
+  _nGates = 0;
+
+}
+
+void Stats::setNGates(int nGates)
+  
+{
+
+  if (nGates > _nGates) {
+    _nGates = nGates;
+    iqHc.resize(_nGates);
+    iqVc.resize(_nGates);
+    iqHx.resize(_nGates);
+    iqVx.resize(_nGates);
+  }
   
 }
 
@@ -226,8 +247,12 @@ void Stats::computeSummary(bool haveChan1)
   
   meanDbm0 = -999.9;
   meanDbm1 = -999.9;
+
   meanDbmHc = -999.9;
   meanDbmVc = -999.9;
+
+  lag1DbmHc = -999.9;
+  lag1DbmHx = -999.9;
   
   if (nn0 > 0) {
     double meanPower0 = sumPower0 / nn0;
@@ -275,6 +300,32 @@ void Stats::computeSummary(bool haveChan1)
     
   }
   
+  // compute lag1 powers if appropriate
+
+  if (iqHc[0].size() > 0) {
+    double sumCpHc = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpHc =
+        RadarComplex::meanConjugateProduct(iqHc[ii].data() + 1,
+                                           iqHc[ii].data(),
+                                           iqHc[ii].size() - 1);
+      sumCpHc += RadarComplex::mag(cpHc);
+    }
+    lag1DbmHc = 10.0 * log10(sumCpHc / _nGates);
+  }
+  
+  if (iqVc[0].size() > 0) {
+    double sumCpVc = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpVc =
+        RadarComplex::meanConjugateProduct(iqVc[ii].data() + 1,
+                                           iqVc[ii].data(),
+                                           iqVc[ii].size() - 1);
+      sumCpVc += RadarComplex::mag(cpVc);
+    }
+    lag1DbmVc = 10.0 * log10(sumCpVc / _nGates);
+  }
+  
 }
 
 ////////////////////////////
@@ -288,10 +339,16 @@ void Stats::computeAlternating(bool haveChan1)
   
   meanDbm0 = -999.9;
   meanDbm1 = -999.9;
+
   meanDbmHc = -999.9;
   meanDbmHx = -999.9;
-  meanDbmVx = -999.9;
   meanDbmVc = -999.9;
+  meanDbmVx = -999.9;
+
+  lag1DbmHc = -999.9;
+  lag1DbmHx = -999.9;
+  lag1DbmVc = -999.9;
+  lag1DbmVx = -999.9;
 
   if (nn0 > 0) {
     double meanPower0 = sumPower0 / nn0;
@@ -339,5 +396,55 @@ void Stats::computeAlternating(bool haveChan1)
     
   }
 
+  // compute lag1 powers if appropriate
+
+  if (iqHc[0].size() > 0) {
+    double sumCpHc = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpHc =
+        RadarComplex::meanConjugateProduct(iqHc[ii].data() + 1,
+                                           iqHc[ii].data(),
+                                           iqHc[ii].size() - 1);
+      sumCpHc += RadarComplex::mag(cpHc);
+    }
+    lag1DbmHc = 10.0 * log10(sumCpHc / _nGates);
+  }
+  
+  if (iqVc[0].size() > 0) {
+    double sumCpVc = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpVc =
+        RadarComplex::meanConjugateProduct(iqVc[ii].data() + 1,
+                                           iqVc[ii].data(),
+                                           iqVc[ii].size() - 1);
+      sumCpVc += RadarComplex::mag(cpVc);
+    }
+    lag1DbmVc = 10.0 * log10(sumCpVc / _nGates);
+  }
+  
+  if (iqHx[0].size() > 0) {
+    double sumCpHx = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpHx =
+        RadarComplex::meanConjugateProduct(iqHx[ii].data() + 1,
+                                           iqHx[ii].data(),
+                                           iqHx[ii].size() - 1);
+      sumCpHx += RadarComplex::mag(cpHx);
+    }
+    lag1DbmHx = 10.0 * log10(sumCpHx / _nGates);
+  }
+  
+  if (iqVx[0].size() > 0) {
+    double sumCpVx = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpVx =
+        RadarComplex::meanConjugateProduct(iqVx[ii].data() + 1,
+                                           iqVx[ii].data(),
+                                           iqVx[ii].size() - 1);
+      sumCpVx += RadarComplex::mag(cpVx);
+    }
+    lag1DbmVx = 10.0 * log10(sumCpVx / _nGates);
+  }
+  
 }
 

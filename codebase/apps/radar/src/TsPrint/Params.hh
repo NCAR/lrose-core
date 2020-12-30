@@ -417,6 +417,8 @@ public:
 
   tdrp_bool_t print_all_headers;
 
+  tdrp_bool_t print_lag1_coherent_power;
+
   tdrp_bool_t print_all_pulses;
 
   tdrp_bool_t print_info_on_change;
@@ -501,7 +503,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[60];
+  mutable TDRPtable _table[61];
 
   const char *_className;
 

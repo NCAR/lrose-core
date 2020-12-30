@@ -1019,6 +1019,8 @@ void TsPrint::_conditionGateRange(const IwrfTsPulse &pulse)
     _nGates = _endGate - _startGate + 1;
   }
 
+  _stats.setNGates(_nGates);
+
 }
     
 ////////////////////////////////////////////
@@ -1054,12 +1056,17 @@ void TsPrint::_addToSummary(const IwrfTsPulse &pulse)
   _saveMetaData(pulse);
 
   const fl32 *iqChan0 = pulse.getIq0();
-  
+
+  int count = 0;
   int index = _startGate * 2;
-  for (int igate = _startGate; igate <= _endGate; igate++, index += 2) {
+  for (int igate = _startGate; igate <= _endGate; igate++, count++, index += 2) {
     
     double ii0 = iqChan0[index];
     double qq0 = iqChan0[index + 1];
+    if (_params.print_lag1_coherent_power) {
+      RadarComplex_t iq0(ii0, qq0);
+      _stats.iqHc[count].push_back(iq0);
+    }
 
     double ii1 = -9999;
     double qq1 = -9999;
@@ -1067,6 +1074,10 @@ void TsPrint::_addToSummary(const IwrfTsPulse &pulse)
       const fl32 *iqChan1 = pulse.getIq1();
       ii1 = iqChan1[index];
       qq1 = iqChan1[index + 1];
+      if (_params.print_lag1_coherent_power) {
+        RadarComplex_t iq1(ii1, qq1);
+        _stats.iqVc[count].push_back(iq1);
+      }
     }
     _stats.addToSummary(pulse, ii0, qq0, _haveChan1, ii1, qq1);
     
@@ -1088,16 +1099,33 @@ void TsPrint::_addToAlternating(const IwrfTsPulse &pulse)
   bool isHoriz = pulse.isHoriz();
 
   int index = _startGate * 2;
-  for (int igate = _startGate; igate <= _endGate; igate++, index += 2) {
+  int count = 0;
+  for (int igate = _startGate; igate <= _endGate; igate++, count++, index += 2) {
 
     double ii0 = iqChan0[index];
     double qq0 = iqChan0[index + 1];
+    if (_params.print_lag1_coherent_power) {
+      RadarComplex_t iq0(ii0, qq0);
+      if (isHoriz) {
+        _stats.iqHc[count].push_back(iq0);
+      } else {
+        _stats.iqVc[count].push_back(iq0);
+      }
+    }
 
     double ii1 = -9999;
     double qq1 = -9999;
     if (iqChan1) {
       ii1 = iqChan1[index];
       qq1 = iqChan1[index + 1];
+      if (_params.print_lag1_coherent_power) {
+        RadarComplex_t iq1(ii1, qq1);
+        if (isHoriz) {
+          _stats.iqVx[count].push_back(iq1);
+        } else {
+          _stats.iqHx[count].push_back(iq1);
+        }
+      }
     }
     _stats.addToAlternating(pulse, ii0, qq0, _haveChan1, ii1, qq1, isHoriz);
 
@@ -1126,6 +1154,7 @@ void TsPrint::_clearStats()
 {
 
   _stats.init();
+  _stats.setNGates(_nGates);
     
   _midTime = -999.9;
   _midPrt = -999.9;
@@ -1995,6 +2024,16 @@ void TsPrint::_printSummaryLabels(ostream &out)
         << "time           prf      el      az     IFD0";
   }
   
+  if (_params.print_lag1_coherent_power) {
+    if (_fastAlternating) {
+      out << "   Lag1Hc   Lag1Hx   Lag1Vc   Lag1Vx";
+    } else if (_haveChan1) {
+      out << "   Lag1Hc   Lag1Vc";
+    } else {
+      out << "   Lag1Hc";
+    }
+  }
+
   for (size_t ii = 0; ii < _extraColLabels.size(); ii++) {
     out << setw(12) << _extraColLabels[ii];
   }
@@ -2055,6 +2094,26 @@ void TsPrint::_printSummaryData(FILE *out)
   } else {
     fprintf(out, " %8.3f",
             _stats.meanDbm0);
+  }
+  
+  if (_params.print_lag1_coherent_power) {
+    if (_fastAlternating) {
+      fprintf(out,
+              " %8.3f %8.3f %8.3f %8.3f",
+              _stats.lag1DbmHc,
+              _stats.lag1DbmHx,
+              _stats.lag1DbmVc,
+              _stats.lag1DbmVx);
+    } else if (_haveChan1) {
+      fprintf(out,
+              " %8.3f %8.3f",
+              _stats.lag1DbmHc,
+              _stats.lag1DbmVc);
+    } else {
+      fprintf(out,
+              " %8.3f",
+              _stats.lag1DbmHc);
+    }
   }
   
   for (size_t ii = 0; ii < _extraColMeans.size(); ii++) {

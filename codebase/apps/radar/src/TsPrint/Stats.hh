@@ -65,9 +65,13 @@ public:
                       double gainHx,
                       double gainVx);
 
-  // initialize - set memvbers to 0
+  // initialize - set members to 0
 
   void init();
+
+  // resize arrays for number of gates
+
+  void setNGates(int nGates);
 
   // sum up summary information
   
@@ -108,6 +112,9 @@ public:
   double meanDbmHc, meanDbmHx;
   double meanDbmVc, meanDbmVx;
 
+  double lag1DbmHc, lag1DbmHx;
+  double lag1DbmVc, lag1DbmVx;
+
   double noiseDbmHc, noiseDbmHx;
   double noiseDbmVc, noiseDbmVx;
   
@@ -120,9 +127,13 @@ public:
   double argH;
   double argV;
 
+  vector<vector<RadarComplex_t> > iqHc, iqVc, iqHx, iqVx;
+
 protected:
   
 private:
+
+  int _nGates;
 
   // calibration
 

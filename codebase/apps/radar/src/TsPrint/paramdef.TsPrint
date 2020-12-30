@@ -80,6 +80,12 @@ paramdef boolean {
 } print_all_headers;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Print the lag1 (coherent) power in addition to lag0 power.";
+  p_help = "lag1 powers can help to distinguish between noise and coherent signal.";
+} print_lag1_coherent_power;
+
+paramdef boolean {
   p_default = FALSE;
   p_descr = "Print all pulses as they are read.";
 } print_all_pulses;

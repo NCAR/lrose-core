@@ -712,6 +712,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'print_lag1_coherent_power'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_lag1_coherent_power");
+    tt->descr = tdrpStrDup("Print the lag1 (coherent) power in addition to lag0 power.");
+    tt->help = tdrpStrDup("lag1 powers can help to distinguish between noise and coherent signal.");
+    tt->val_offset = (char *) &print_lag1_coherent_power - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'print_all_pulses'
     // ctype is 'tdrp_bool_t'
     
