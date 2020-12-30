@@ -1,11 +1,11 @@
-# qmake.pro for HawkEye
+# qmake.pro for HawkEdit
 
 QT += widgets
 QT += qml
 # requires(qtConfig(filedialog))
 
 TEMPLATE = app
-TARGET = HawkEyeEdit_Elle
+TARGET = HawkEdit
 ICON = HawkEyeElleIcon.icns 
 
 CONFIG += qt
@@ -177,4 +177,4 @@ LIBS += -framework QtQml
 
 # QMAKE_LFLAGS_SONAME  = -Wl,-install_name,@executable_path/../Frameworks/
 
-# QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
