@@ -69,6 +69,13 @@ public:
 
   void init();
 
+  // sum up summary information
+  
+  void addToSummary(const IwrfTsPulse &pulse,
+                    double ii0, double qq0,
+                    bool haveChan1,
+                    double ii1, double qq1);
+  
   // sum up alternating information
   
   void addToAlternating(const IwrfTsPulse &pulse,
@@ -77,22 +84,15 @@ public:
 			double ii1, double qq1,
 			bool isHoriz);
 
+  // compute summary stats
+  // Assumes data has been added
+  
+  void computeSummary(bool haveChan1);
+
   // compute alternating stats
   // Assumes data has been added
   
   void computeAlternating(bool haveChan1);
-
-  // sum up dual information
-  
-  void addToDual(const IwrfTsPulse &pulse,
-                 double ii0, double qq0,
-                 bool haveChan1,
-                 double ii1, double qq1);
-  
-  // compute dual stats
-  // Assumes data has been added
-  
-  void computeDual(bool haveChan1);
 
   // data
 

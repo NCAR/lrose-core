@@ -101,6 +101,49 @@ void Stats::setCalibration(double gainHc,
 }
 
 ////////////////////////////////////////////
+// sum up summary information
+
+void Stats::addToSummary(const IwrfTsPulse &pulse,
+                         double ii0, double qq0,
+                         bool haveChan1,
+                         double ii1, double qq1)
+  
+{
+
+  double power0 = ii0 * ii0 + qq0 * qq0;
+  power0 /= _rxGainHc;
+
+  sumPower0 += power0;
+  nn0++;
+  
+  sumPowerHc += power0;
+  nnH++;
+  
+  if (haveChan1) {
+
+    double power1 = ii1 * ii1 + qq1 * qq1;
+    power1 /= _rxGainVc;
+    sumPower1 += power1;
+    nn1++;
+
+    RadarComplex_t c0, c1;
+    c0.re = ii0;
+    c0.im = qq0;
+    c1.re = ii1;
+    c1.im = qq1;
+    RadarComplex_t prod = RadarComplex::conjugateProduct(c0, c1);
+
+    sumConjProdH = RadarComplex::complexSum(sumConjProdH, prod);
+
+    nnV++;
+    sumPowerVc += power1;
+    sumConjProdV = RadarComplex::complexSum(sumConjProdV, prod);
+    
+  } // if (haveChan1)
+    
+}
+
+////////////////////////////////////////////
 // sum up alternating information
 
 void Stats::addToAlternating(const IwrfTsPulse &pulse,
@@ -173,55 +216,65 @@ void Stats::addToAlternating(const IwrfTsPulse &pulse,
     
 }
 
-////////////////////////////////////////////
-// sum up dual information
+////////////////////////////
+// compute summary stats
+// Assumes data has been added
 
-void Stats::addToDual(const IwrfTsPulse &pulse,
-                      double ii0, double qq0,
-                      bool haveChan1,
-                      double ii1, double qq1)
-
+void Stats::computeSummary(bool haveChan1)
+  
 {
-
-  if (!haveChan1) {
-
-    double power0 = ii0 * ii0 + qq0 * qq0;
-    power0 /= _rxGainHc;
-    sumPower0 += power0;
-    nn0++;
-    
-    nnH++;
-    sumPowerHc += power0;
-    
-  } else {
-    
-    double power0 = ii0 * ii0 + qq0 * qq0;
-    power0 /= _rxGainHc;
-    sumPower0 += power0;
-    nn0++;
-    
-    double power1 = ii1 * ii1 + qq1 * qq1;
-    power1 /= _rxGainVc;
-    sumPower1 += power1;
-    nn1++;
-
-    RadarComplex_t c0, c1;
-    c0.re = ii0;
-    c0.im = qq0;
-    c1.re = ii1;
-    c1.im = qq1;
-    RadarComplex_t prod = RadarComplex::conjugateProduct(c0, c1);
-
-    nnH++;
-    sumPowerHc += power0;
-    sumConjProdH = RadarComplex::complexSum(sumConjProdH, prod);
-
-    nnV++;
-    sumPowerVc += power1;
-    sumConjProdV = RadarComplex::complexSum(sumConjProdV, prod);
-
+  
+  meanDbm0 = -999.9;
+  meanDbm1 = -999.9;
+  meanDbmHc = -999.9;
+  meanDbmVc = -999.9;
+  
+  if (nn0 > 0) {
+    double meanPower0 = sumPower0 / nn0;
+    meanDbm0 = 10.0 * log10(meanPower0);
   }
+
+  if (nn1 > 0) {
+    double meanPower1 = sumPower1 / nn1;
+    meanDbm1 = 10.0 * log10(meanPower1);
+  }
+
+  if (nnH > 0) {
+
+    double meanPowerHc = sumPowerHc / nnH;
+    meanDbmHc = 10.0 * log10(meanPowerHc);
+
+    if (haveChan1) {
+      
+      double meanPowerVc = sumPowerVc / nnH;
+      meanDbmVc = 10.0 * log10(meanPowerVc);
+      
+      double corrMagH = RadarComplex::mag(sumConjProdH) / nnH;
+      corrH = corrMagH / sqrt(meanPowerHc * meanPowerVc);
+      argH = RadarComplex::argDeg(sumConjProdH);
+
+    }
+  
+  }
+  
+  if (nnV > 0) {
+
+    double meanPowerVc = sumPowerVc / nnV;
+    meanDbmVc = 10.0 * log10(meanPowerVc);
+
+    if (haveChan1) {
+      
+      double meanPowerHc = sumPowerHc / nnV;
+      meanDbmHc = 10.0 * log10(meanPowerHc);
+      
+      double corrMagV = RadarComplex::mag(sumConjProdV) / nnV;
+      corrV = corrMagV / sqrt(meanPowerVc * meanPowerHc);
+      argV = RadarComplex::argDeg(sumConjProdV);
+
+    }
     
+  }
+  
 }
 
 ////////////////////////////
@@ -286,67 +339,5 @@ void Stats::computeAlternating(bool haveChan1)
     
   }
 
-}
-
-////////////////////////////
-// compute dual stats
-//
-// Assumes data has been added
-
-void Stats::computeDual(bool haveChan1)
-  
-{
-  
-  meanDbm0 = -999.9;
-  meanDbm1 = -999.9;
-  meanDbmHc = -999.9;
-  meanDbmVc = -999.9;
-  
-  if (nn0 > 0) {
-    double meanPower0 = sumPower0 / nn0;
-    meanDbm0 = 10.0 * log10(meanPower0);
-  }
-
-  if (nn1 > 0) {
-    double meanPower1 = sumPower1 / nn1;
-    meanDbm1 = 10.0 * log10(meanPower1);
-  }
-
-  if (nnH > 0) {
-
-    double meanPowerHc = sumPowerHc / nnH;
-    meanDbmHc = 10.0 * log10(meanPowerHc);
-
-    if (haveChan1) {
-      
-      double meanPowerVc = sumPowerVc / nnH;
-      meanDbmVc = 10.0 * log10(meanPowerVc);
-      
-      double corrMagH = RadarComplex::mag(sumConjProdH) / nnH;
-      corrH = corrMagH / sqrt(meanPowerHc * meanPowerVc);
-      argH = RadarComplex::argDeg(sumConjProdH);
-
-    }
-  
-  }
-  
-  if (nnV > 0) {
-
-    double meanPowerVc = sumPowerVc / nnV;
-    meanDbmVc = 10.0 * log10(meanPowerVc);
-
-    if (haveChan1) {
-      
-      double meanPowerHc = sumPowerHc / nnV;
-      meanDbmHc = 10.0 * log10(meanPowerHc);
-      
-      double corrMagV = RadarComplex::mag(sumConjProdV) / nnV;
-      corrV = corrMagV / sqrt(meanPowerVc * meanPowerHc);
-      argV = RadarComplex::argDeg(sumConjProdV);
-
-    }
-    
-  }
-  
 }
 

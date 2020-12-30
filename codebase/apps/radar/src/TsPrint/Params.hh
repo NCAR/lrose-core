@@ -77,10 +77,9 @@ public:
   typedef enum {
     PRINT_MODE = 0,
     ASCOPE_MODE = 1,
-    CAL_MODE = 2,
-    SERVER_MODE = 3,
-    MAX_POWER_MODE = 4,
-    MAX_POWER_SERVER_MODE = 5
+    SERVER_MODE = 2,
+    MAX_POWER_MODE = 3,
+    MAX_POWER_SERVER_MODE = 4
   } run_mode_t;
 
   typedef enum {
@@ -456,10 +455,6 @@ public:
 
   int tcp_server_port;
 
-  tdrp_bool_t dual_channel;
-
-  tdrp_bool_t fast_alternating;
-
   tdrp_bool_t invert_hv_flag;
 
   tdrp_bool_t rvp8_legacy_unpacking;
@@ -506,7 +501,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[62];
+  mutable TDRPtable _table[60];
 
   const char *_className;
 
