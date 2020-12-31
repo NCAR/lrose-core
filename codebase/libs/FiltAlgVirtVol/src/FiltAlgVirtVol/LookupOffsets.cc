@@ -3,6 +3,7 @@
  */
 #include <FiltAlgVirtVol/LookupOffsets.hh>
 #include <cmath>
+#include <cstdio>
 
 //------------------------------------------------------------------
 LookupOffsets::LookupOffsets(int xCenterIndex, int nx,

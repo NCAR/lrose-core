@@ -19,6 +19,8 @@
 
 #include <cmath>
 #include <cstring>
+#include <cstdio>
+#include <cstdlib>
 
 #include "Solo/BoundaryPointMap.hh"
 #include "Solo/dd_math.h"
