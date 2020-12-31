@@ -443,7 +443,7 @@ def writeCMakeLists():
     fo.write("###############################################\n")
     fo.write("\n")
 
-    fo.write("project ( %s )\n" % thisLibName)
+    fo.write("project ( lib%s )\n" % thisLibName)
     fo.write("\n")
     
     fo.write("# include directories\n")

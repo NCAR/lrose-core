@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for Refract.
+# Makefile for ComputeRefract.
 #
 # Nancy Rehak, RAP, NCAR, Boulder, CO, 80307, USA
 #
@@ -35,7 +35,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 MODULE_TYPE=progcpp
 
-TARGET_FILE = Refract
+TARGET_FILE = ComputeRefract
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -55,7 +55,7 @@ HDRS = \
 	CalibDayNight.hh \
 	PhaseFit.hh \
 	Processor.hh \
-	Refract.hh \
+	ComputeRefract.hh \
 	TargetInfo.hh \
 	TargetVector.hh
 
@@ -66,7 +66,7 @@ CPPC_SRCS = \
 	Main.cc \
 	PhaseFit.cc \
 	Processor.cc \
-	Refract.cc \
+	ComputeRefract.cc \
 	TargetInfo.cc \
 	TargetVector.cc
 
