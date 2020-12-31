@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// NidsRadial2Mdv.cc
+// NewNidsRadial2Mdv.cc
 //
-// NidsRadial2Mdv object
+// NewNidsRadial2Mdv object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -36,14 +36,14 @@
 #include <toolsa/pmu.h>
 #include <didss/DsInputPath.hh>
 #include <pthread.h>
-#include "NidsRadial2Mdv.hh"
+#include "NewNidsRadial2Mdv.hh"
 #include "RemapRadial.hh"
 #include "RemapRast.hh"
 using namespace std;
 
 // Constructor
 
-NidsRadial2Mdv::NidsRadial2Mdv(int argc, char **argv) 
+NewNidsRadial2Mdv::NewNidsRadial2Mdv(int argc, char **argv) 
 
 {
 
@@ -51,7 +51,7 @@ NidsRadial2Mdv::NidsRadial2Mdv(int argc, char **argv)
 
   // set programe name
 
-  _progName = "NidsRadial2Mdv";
+  _progName = "NewNidsRadial2Mdv";
   ucopyright((char *) _progName.c_str());
 
   // get command line args
@@ -85,7 +85,7 @@ NidsRadial2Mdv::NidsRadial2Mdv(int argc, char **argv)
 
 // destructor
 
-NidsRadial2Mdv::~NidsRadial2Mdv()
+NewNidsRadial2Mdv::~NewNidsRadial2Mdv()
 
 {
 
@@ -106,7 +106,7 @@ NidsRadial2Mdv::~NidsRadial2Mdv()
 //////////////////////////////////////////////////
 // Run
 
-int NidsRadial2Mdv::Run ()
+int NewNidsRadial2Mdv::Run ()
 {
 
   // register with procmap
@@ -134,7 +134,7 @@ int NidsRadial2Mdv::Run ()
 //////////////////////////////////////////////////
 // _runRealtime
 
-int NidsRadial2Mdv::_runRealtime ()
+int NewNidsRadial2Mdv::_runRealtime ()
 {
 
   // register with procmap
@@ -189,7 +189,7 @@ int NidsRadial2Mdv::_runRealtime ()
 //////////////////////////////////////////////////
 // _runArchive
 
-int NidsRadial2Mdv::_runArchive ()
+int NewNidsRadial2Mdv::_runArchive ()
 
 {
 
@@ -206,7 +206,7 @@ int NidsRadial2Mdv::_runArchive ()
     outputDir += _params.archive_data_set.radar_name;
   }
 
-cerr << "Debug is " << _params.debug << " verbose is " << Params::DEBUG_VERBOSE << " sending " << (_params.debug >= Params::DEBUG_VERBOSE) << endl;
+  cerr << "Debug is " << _params.debug << " verbose is " << Params::DEBUG_VERBOSE << " sending " << (_params.debug >= Params::DEBUG_VERBOSE) << endl;
 
   Remap * remap = NULL;
   if (_params.is_radial) {
@@ -233,27 +233,27 @@ cerr << "Debug is " << _params.debug << " verbose is " << Params::DEBUG_VERBOSE 
                             _params.processing_delay);
   }
   else {
-      remap = new RemapRast(_progName,
-                            _args.filePaths,
-                            _params.archive_data_set.radar_name,
-                            outputDir,
-                            _params.compute_scale_and_bias,
-                            _params.data_scale,
-                            _params.data_bias,
-                            _params.debug > 0,
-                            _params.debug >= Params::DEBUG_VERBOSE,
-                            _params.output_grid.nx,
-                            _params.output_grid.ny,
-                            _params.output_grid.dx,
-                            _params.output_grid.dy,
-                            _params.output_grid.minx,
-                            _params.output_grid.miny,
-                            _params.data_field_name_long,
-                            _params.data_field_name,
-                            _params.data_units,
-                            _params.data_transform,
-                            _params.data_field_code,
-                            _params.processing_delay);
+    remap = new RemapRast(_progName,
+                          _args.filePaths,
+                          _params.archive_data_set.radar_name,
+                          outputDir,
+                          _params.compute_scale_and_bias,
+                          _params.data_scale,
+                          _params.data_bias,
+                          _params.debug > 0,
+                          _params.debug >= Params::DEBUG_VERBOSE,
+                          _params.output_grid.nx,
+                          _params.output_grid.ny,
+                          _params.output_grid.dx,
+                          _params.output_grid.dy,
+                          _params.output_grid.minx,
+                          _params.output_grid.miny,
+                          _params.data_field_name_long,
+                          _params.data_field_name,
+                          _params.data_units,
+                          _params.data_transform,
+                          _params.data_field_code,
+                          _params.processing_delay);
   }
 
   remap->initInputPaths();
@@ -270,13 +270,13 @@ cerr << "Debug is " << _params.debug << " verbose is " << Params::DEBUG_VERBOSE 
 //////////////////////////////////
 // function for processing thread
 
-int NidsRadial2Mdv::_createRemapObject(const string & inputDir,
-                                       const string & radarName,
-                                       const string & outputDir)
+int NewNidsRadial2Mdv::_createRemapObject(const string & inputDir,
+                                          const string & radarName,
+                                          const string & outputDir)
   
 {
 
-cerr << "Debug is " << _params.debug << " verbose is " << Params::DEBUG_VERBOSE << " sending " << (_params.debug >= Params::DEBUG_VERBOSE) << endl;
+  cerr << "Debug is " << _params.debug << " verbose is " << Params::DEBUG_VERBOSE << " sending " << (_params.debug >= Params::DEBUG_VERBOSE) << endl;
 
   Remap * remap = NULL;
   if (_params.is_radial) {
@@ -306,30 +306,30 @@ cerr << "Debug is " << _params.debug << " verbose is " << Params::DEBUG_VERBOSE 
                             _params.processing_delay);
   }
   else {
-      remap = new RemapRast(_progName,
-                            inputDir,
-                            _params.archive_data_set.radar_name,
-                            outputDir,
-                            _params.max_realtime_data_age,
-                            _params.use_latest_data_info,
-                            _params.get_latest_file_only,
-                            _params.compute_scale_and_bias,
-                            _params.data_scale,
-                            _params.data_bias,
-                            _params.debug > 0,
-                            _params.debug >= Params::DEBUG_VERBOSE,
-                            _params.output_grid.nx,
-                            _params.output_grid.ny,
-                            _params.output_grid.dx,
-                            _params.output_grid.dy,
-                            _params.output_grid.minx,
-                            _params.output_grid.miny,
-                            _params.data_field_name_long,
-                            _params.data_field_name,
-                            _params.data_units,
-                            _params.data_transform,
-                            _params.data_field_code,
-                            _params.processing_delay);
+    remap = new RemapRast(_progName,
+                          inputDir,
+                          _params.archive_data_set.radar_name,
+                          outputDir,
+                          _params.max_realtime_data_age,
+                          _params.use_latest_data_info,
+                          _params.get_latest_file_only,
+                          _params.compute_scale_and_bias,
+                          _params.data_scale,
+                          _params.data_bias,
+                          _params.debug > 0,
+                          _params.debug >= Params::DEBUG_VERBOSE,
+                          _params.output_grid.nx,
+                          _params.output_grid.ny,
+                          _params.output_grid.dx,
+                          _params.output_grid.dy,
+                          _params.output_grid.minx,
+                          _params.output_grid.miny,
+                          _params.data_field_name_long,
+                          _params.data_field_name,
+                          _params.data_units,
+                          _params.data_transform,
+                          _params.data_field_code,
+                          _params.processing_delay);
   }
 
   remap->initInputPaths();

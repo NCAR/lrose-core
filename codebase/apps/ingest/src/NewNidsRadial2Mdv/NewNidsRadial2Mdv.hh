@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// NidsRadial2Mdv.hh
+// NewNidsRadial2Mdv.hh
 //
-// NidsRadial2Mdv object
+// NewNidsRadial2Mdv object
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -33,8 +33,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef NidsRadial2Mdv_H
-#define NidsRadial2Mdv_H
+#ifndef NewNidsRadial2Mdv_H
+#define NewNidsRadial2Mdv_H
 
 #include <string>
 #include <dataport/port_types.h>
@@ -46,17 +46,17 @@ using namespace std;
 ////////////////////////
 // This class
 
-class NidsRadial2Mdv {
+class NewNidsRadial2Mdv {
   
 public:
 
   // constructor
 
-  NidsRadial2Mdv (int argc, char **argv);
+  NewNidsRadial2Mdv (int argc, char **argv);
 
   // destructor
   
-  ~NidsRadial2Mdv();
+  ~NewNidsRadial2Mdv();
 
   // run 
 

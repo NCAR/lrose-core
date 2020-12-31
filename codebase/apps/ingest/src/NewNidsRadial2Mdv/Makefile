@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for NidsRadial2Mdv program
+# Makefile for NewNidsRadial2Mdv program
 #
 # Mike Dixon, RAP, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
@@ -34,7 +34,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = NidsRadial2Mdv
+TARGET_FILE = NewNidsRadial2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -50,7 +50,7 @@ LOC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	NidsRadial2Mdv.hh \
+	NewNidsRadial2Mdv.hh \
 	OutputMdv.hh \
 	Remap.hh \
 	RemapRast.hh \
@@ -60,7 +60,7 @@ CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	Main.cc \
-	NidsRadial2Mdv.cc \
+	NewNidsRadial2Mdv.cc \
 	OutputMdv.cc \
 	Remap.cc \
 	RemapRast.cc \
