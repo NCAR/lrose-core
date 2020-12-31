@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Create makefile.am for a RAL app
+# Create makefile.am for a LROSE app
 #
 #===========================================================================
 
@@ -115,7 +115,7 @@ def main():
     if (options.debug == True):
         print >>sys.stderr, "-->> using makefile template: ", makefileName
 
-    # parse the RAL Makefile to get the app name
+    # parse the LROSE Makefile to get the app name
 
     getAppName()
     if (options.debug == True):
@@ -151,7 +151,7 @@ def main():
             print >>sys.stderr, "loadLib: %s" % loadLib
         print >>sys.stderr, "======================="
 
-    # get list of RAL libs used
+    # get list of LROSE libs used
 
     setUsedLibList()
     if (options.debug == True):
@@ -231,7 +231,7 @@ def getValueListForKey(path, key):
     return valueList
 
 ########################################################################
-# parse the RAL Makefile to get the app name
+# parse the LROSE Makefile to get the app name
 
 def getAppName():
 
@@ -424,7 +424,7 @@ def setLoadLibList():
             appendToLibList(locLib)
 
 ########################################################################
-# set list of RAL libs actually used
+# set list of LROSE libs actually used
 
 def setUsedLibList():
                     

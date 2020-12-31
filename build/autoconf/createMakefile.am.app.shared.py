@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Create makefile.am for a RAL app
+# Create makefile.am for a LROSE app
 #
 #===========================================================================
 
@@ -101,7 +101,7 @@ def main():
     if (options.debug == True):
         print >>sys.stderr, "-->> using makefile template: ", makefileName
 
-    # parse the RAL Makefile to get the app name
+    # parse the LROSE Makefile to get the app name
 
     getAppName()
     if (options.debug == True):
@@ -243,7 +243,7 @@ def getValueListForKey(path, key):
     return valueList
 
 ########################################################################
-# parse the RAL Makefile to get the app name
+# parse the LROSE Makefile to get the app name
 
 def getAppName():
 

@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Create makefile.am for a RAL lib
+# Create makefile.am for a LROSE lib
 #
 #===========================================================================
 
@@ -256,7 +256,7 @@ def getValueListForKey(path, key):
     return valueList
 
 ########################################################################
-# parse the RAL Makefile to get the lib name
+# parse the LROSE Makefile to get the lib name
 
 def getLibName():
 
@@ -275,7 +275,7 @@ def getLibName():
     thisLibName = valList[len(valList)-1]
 
 ########################################################################
-# get list of makefiles - using RAL Makefile to locate subdirs
+# get list of makefiles - using LROSE Makefile to locate subdirs
 
 def getSubDirList():
 

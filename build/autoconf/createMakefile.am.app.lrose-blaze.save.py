@@ -111,7 +111,7 @@ def main():
     if (options.debug == True):
         print("-->> using makefile template: ", makefileName, file=sys.stderr)
 
-    # parse the RAL Makefile to get the app name
+    # parse the LROSE Makefile to get the app name
 
     getAppName()
     if (options.debug == True):
@@ -259,7 +259,7 @@ def getValueListForKey(path, key):
     return valueList
 
 ########################################################################
-# parse the RAL Makefile to get the app name
+# parse the LROSE Makefile to get the app name
 
 def getAppName():
 
