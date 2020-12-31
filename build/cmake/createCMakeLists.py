@@ -36,7 +36,7 @@ def main():
     coreDirDefault = os.path.join(thisScriptDir, "../..")
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default=False,
+                      dest='debug', default=True,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--verbose',
