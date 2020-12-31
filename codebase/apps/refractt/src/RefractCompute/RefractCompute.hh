@@ -23,18 +23,18 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  *
- * @file ComputeRefract.hh
+ * @file RefractCompute.hh
  *
- * @class ComputeRefract
+ * @class RefractCompute
  *
- * ComputeRefract program object.
+ * RefractCompute program object.
  *  
  * @date 12/1/2008
  *
  */
 
-#ifndef ComputeRefract_HH
-#define ComputeRefract_HH
+#ifndef RefractCompute_HH
+#define RefractCompute_HH
 
 #include "Processor.hh"
 #include "Params.hh"
@@ -45,10 +45,10 @@ class RefractInput;
 class DsMdvx;
 
 /** 
- * @class ComputeRefract
+ * @class RefractCompute
  */
 
-class ComputeRefract
+class RefractCompute
 {
  public:
 
@@ -75,7 +75,7 @@ class ComputeRefract
    * @brief Destructor
    */
 
-  virtual ~ComputeRefract(void);
+  virtual ~RefractCompute(void);
   
 
   /**
@@ -87,7 +87,7 @@ class ComputeRefract
    * @return Returns a pointer to the program instance.
    */
 
-  static ComputeRefract *Inst(int argc, char **argv);
+  static RefractCompute *Inst(int argc, char **argv);
 
   /**
    * @brief Retrieve the singleton instance of this class.
@@ -95,7 +95,7 @@ class ComputeRefract
    * @return Returns a pointer to the program instance.
    */
 
-  static ComputeRefract *Inst();
+  static RefractCompute *Inst();
   
 
   /**
@@ -129,7 +129,7 @@ class ComputeRefract
    * @brief Singleton instance pointer.
    */
 
-  static ComputeRefract *_instance;
+  static RefractCompute *_instance;
   
   /**
    * @brief Program name.
@@ -179,7 +179,7 @@ class ComputeRefract
    * @note Private because this is a singleton object.
    */
 
-  ComputeRefract(int argc, char **argv);
+  RefractCompute(int argc, char **argv);
   
 
   /**

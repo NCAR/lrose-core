@@ -34,7 +34,7 @@
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
- * Main.cc: ComputeRefract main routine
+ * Main.cc: RefractCompute main routine
  *
  * RAP, NCAR, Boulder CO
  *
@@ -49,7 +49,7 @@
 #include <toolsa/port.h>
 #include <toolsa/umisc.h>
 
-#include "ComputeRefract.hh"
+#include "RefractCompute.hh"
 
 
 // Prototypes for static functions
@@ -59,7 +59,7 @@ static void tidy_and_exit(int sig);
 
 // Global variables
 
-ComputeRefract *Prog = (ComputeRefract *)NULL;
+RefractCompute *Prog = (RefractCompute *)NULL;
 
 
 /*********************************************************************
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 {
   // Create program object.
 
-  Prog = ComputeRefract::Inst(argc, argv);
+  Prog = RefractCompute::Inst(argc, argv);
   if (!Prog->okay)
     return -1;
 
@@ -101,7 +101,7 @@ static void tidy_and_exit(int sig)
 {
   // Delete the program object.
 
-  if (Prog != (ComputeRefract *)NULL)
+  if (Prog != (RefractCompute *)NULL)
     delete Prog;
 
   // Now exit the program.

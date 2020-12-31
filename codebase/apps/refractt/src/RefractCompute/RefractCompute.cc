@@ -44,7 +44,7 @@
  *
  *********************************************************************/
 
-#include "ComputeRefract.hh"
+#include "RefractCompute.hh"
 #include "Params.hh"
 #include <Refract/ParmApp.hh>
 #include <Refract/RefractInput.hh>
@@ -57,17 +57,17 @@
 
 // Global variables
 
-ComputeRefract *ComputeRefract::_instance = (ComputeRefract *)NULL;
+RefractCompute *RefractCompute::_instance = (RefractCompute *)NULL;
 
 /*********************************************************************
  * Constructor
  */
 
-ComputeRefract::ComputeRefract(int argc, char **argv)
+RefractCompute::RefractCompute(int argc, char **argv)
 {
   // Make sure the singleton wasn't already created.
 
-  assert(_instance == (ComputeRefract *)NULL);
+  assert(_instance == (RefractCompute *)NULL);
   
   // Initialize the okay flag.
 
@@ -123,7 +123,7 @@ ComputeRefract::ComputeRefract(int argc, char **argv)
  * Destructor
  */
 
-ComputeRefract::~ComputeRefract()
+RefractCompute::~RefractCompute()
 {
   LOG(FORCE) << "N extraction completed!";
 
@@ -149,17 +149,17 @@ ComputeRefract::~ComputeRefract()
  * Inst() - Retrieve the singleton instance of this class.
  */
 
-ComputeRefract *ComputeRefract::Inst(int argc, char **argv)
+RefractCompute *RefractCompute::Inst(int argc, char **argv)
 {
-  if (_instance == (ComputeRefract *)NULL)
-    new ComputeRefract(argc, argv);
+  if (_instance == (RefractCompute *)NULL)
+    new RefractCompute(argc, argv);
   
   return(_instance);
 }
 
-ComputeRefract *ComputeRefract::Inst()
+RefractCompute *RefractCompute::Inst()
 {
-  assert(_instance != (ComputeRefract *)NULL);
+  assert(_instance != (RefractCompute *)NULL);
   
   return(_instance);
 }
@@ -171,7 +171,7 @@ ComputeRefract *ComputeRefract::Inst()
  * Returns true if the initialization was successful, false otherwise.
  */
 
-bool ComputeRefract::init()
+bool RefractCompute::init()
 {
   // Initialize the data trigger
   if (!_refparms.initTrigger(&_dataTrigger))
@@ -209,7 +209,7 @@ bool ComputeRefract::init()
  * run()
  */
 
-void ComputeRefract::run()
+void RefractCompute::run()
 {
   DateTime trigger_time;
   
@@ -239,7 +239,7 @@ void ComputeRefract::run()
  * _processData()
  */
 
-bool ComputeRefract::_processData(const DateTime &trigger_time)
+bool RefractCompute::_processData(const DateTime &trigger_time)
 {
   PMU_auto_register("Processing data");
   
@@ -279,7 +279,7 @@ bool ComputeRefract::_processData(const DateTime &trigger_time)
  * _readInputFile()
  */
 
-bool ComputeRefract::_readInputFile(DsMdvx &mdvx, const DateTime &data_time)
+bool RefractCompute::_readInputFile(DsMdvx &mdvx, const DateTime &data_time)
 {
   if (!_inputHandler->getScan(data_time, 0, _refparms.input_url, mdvx))
   {
