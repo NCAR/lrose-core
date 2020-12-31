@@ -524,6 +524,9 @@ def writeCMakeLists():
     fo.write("\n")
     fo.write("add_executable ( ${PROJECT_NAME} ${SRCS} )\n")
     fo.write("\n")
+
+    fo.close
+    return
     
     fo.write("AM_CFLAGS = -I.\n")
     fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")

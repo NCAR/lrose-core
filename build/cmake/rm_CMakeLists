@@ -1,4 +1,4 @@
 #! /bin/bash
 
-find . '(' -name CMakeLists.txt ')' \
+find . '(' -name CMakeLists.txt -o -name CMakeCache.txt ')' \
      -user $USER -type f -print -exec \rm '{}' \;

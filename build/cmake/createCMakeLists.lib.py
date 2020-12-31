@@ -443,6 +443,9 @@ def writeCMakeLists():
     fo.write("###############################################\n")
     fo.write("\n")
 
+    fo.write("project ( %s )\n" % thisLibName)
+    fo.write("\n")
+    
     fo.write("# include directories\n")
     fo.write("\n")
     fo.write("include_directories ( ./include )\n")
@@ -471,6 +474,8 @@ def writeCMakeLists():
     fo.write("        )\n")
     fo.write("\n")
 
+    fo.close
+    return
 
     fo.write("AM_CFLAGS += -fPIC\n")
     if (isDebianBased):

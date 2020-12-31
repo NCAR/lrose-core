@@ -22,5 +22,5 @@ enable_testing()
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_subdirectory(codebase/libs)
-add_subdirectory(codebase/apps)
+add_subdirectory(libs)
+add_subdirectory(apps)
