@@ -173,7 +173,7 @@ def main():
 
     # write out CMakeLists.txt
 
-    writeMakeLists()
+    writeCMakeLists()
 
     sys.exit(0)
 
@@ -424,9 +424,9 @@ def setIncludeList(sourceFile):
                 lib.used = True
             
 ########################################################################
-# Write out makefile.am
+# Write out CMakeLists.txt
 
-def writeMakeLists():
+def writeCMakeLists():
 
     fo = open("CMakeLists.txt", "w")
 
@@ -436,17 +436,43 @@ def writeMakeLists():
     fo.write("#\n")
     fo.write("# library name: %s\n" % thisLibName)
     fo.write("#\n")
-    fo.write("# written by script createMakeLists.lib\n")
+    fo.write("# written by script createCMakeLists.lib.py\n")
     fo.write("#\n")
     fo.write("# created %s\n" % datetime.now())
     fo.write("#\n")
     fo.write("###############################################\n")
     fo.write("\n")
-    fo.write("# compile flags - include header subdirectory\n")
+
+    fo.write("# include directories\n")
     fo.write("\n")
-    fo.write("AM_CFLAGS = -I./include\n")
+    fo.write("include_directories ( ./include )\n")
+    for lib in libList:
+        fo.write("include_directories ( ../../%s/src/include )\n" % lib)
+    fo.write("include_directories ( $ENV{LROSE_INSTALL_DIR}/include )\n")
+    fo.write("\n")
+
+    fo.write("# source files\n")
+    fo.write("\n")
+    fo.write("set ( SRCS\n")
+    for index, compileFile in enumerate(compileFileList):
+        fo.write("      %s\n" % compileFile)
+    fo.write("    )\n")
+    fo.write("\n")
+
+    fo.write("# build library\n")
+    fo.write("\n")
+    fo.write("add_library (%s ${SRCS} )\n" % thisLibName)
+    fo.write("\n")
+
+    fo.write("# install\n")
+    fo.write("\n")
+    fo.write("INSTALL(FILES lib%s.a\n" % thisLibName)
+    fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/lib\n")
+    fo.write("        )\n")
+    fo.write("\n")
+
+
     fo.write("AM_CFLAGS += -fPIC\n")
-    fo.write("\n")
     if (isDebianBased):
         fo.write("# NOTE: add in Debian location of HDF5\n")
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")

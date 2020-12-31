@@ -1,0 +1,4 @@
+#! /bin/bash
+
+find . '(' -name CMakeLists.txt ')' \
+     -user $USER -type f -print -exec \rm '{}' \;
