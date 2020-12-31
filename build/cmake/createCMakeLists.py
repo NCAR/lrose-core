@@ -252,15 +252,16 @@ def searchDir(dir):
 
         # compute default script path - assumes core package
 
-        createScript = "createCMakeLists.app.lrose-core.py"
+        #createScript = "createCMakeLists.app.lrose-core.py"
+        createScript = "createCMakeLists.app.py"
         scriptPath = os.path.join(thisScriptDir, createScript)
 
         # use package-specific version if available
-        pkgCreateScript = "createCMakeLists.app." + options.pkg + ".py"
-        pkgScriptPath = os.path.join(thisScriptDir, pkgCreateScript)
-        if (os.path.exists(pkgScriptPath)):
-            createScript = pkgCreateScript
-            scriptPath = pkgScriptPath
+        #pkgCreateScript = "createCMakeLists.app." + options.pkg + ".py"
+        #pkgScriptPath = os.path.join(thisScriptDir, pkgCreateScript)
+        #if (os.path.exists(pkgScriptPath)):
+        #    createScript = pkgCreateScript
+        #    scriptPath = pkgScriptPath
 
         if (options.debug):
             print("  createScript:", createScript, file=sys.stderr)
@@ -270,7 +271,7 @@ def searchDir(dir):
         cmd += " --libList " + libList
         if (options.osx):
             cmd += " --osx "
-        # runCommand(cmd)
+        runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
 
         return
