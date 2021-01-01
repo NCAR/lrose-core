@@ -16,6 +16,7 @@ SUB_DIRS = \
 	MdvAddSnr \
 	PhaseDiff \
 	RefractCalib \
+	RefractCompute \
 	RefractParams2Tdrp \
 	RefrMerge
 
