@@ -27,7 +27,6 @@ def main():
     global makefileName
     global compileFileList
     global headerFileList
-    global includeList
     global linkOrder
     global compiledLibList
     global orderedLibList
@@ -53,15 +52,15 @@ def main():
     homeDir = os.environ['HOME']
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default='False',
+                      dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--verbose',
-                      dest='verbose', default='False',
+                      dest='verbose', default=False,
                       action="store_true",
                       help='Set verbose debugging on')
     parser.add_option('--osx',
-                      dest='osx', default='False',
+                      dest='osx', default=False,
                       action="store_true",
                       help='Configure for MAC OSX')
     parser.add_option('--dir',
@@ -73,14 +72,14 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    if (options.verbose == True):
+    if (options.verbose):
         options.debug = True
     
     # get the app name
 
     pathParts = options.dir.split('/')
 
-    if (options.debug == True):
+    if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  App dir:", options.dir, file=sys.stderr)
         print("  Lib list: ", options.libList, file=sys.stderr)
@@ -109,13 +108,13 @@ def main():
     if (makefileName != "__makefile.template"):
         shutil.copy(makefileName, "__makefile.template")
 
-    if (options.debug == True):
+    if (options.debug):
         print("-->> using makefile template: ", makefileName, file=sys.stderr)
 
     # parse the LROSE Makefile to get the app name
 
     getAppName()
-    if (options.debug == True):
+    if (options.debug):
         print("thisAppName: %s" % thisAppName, file=sys.stderr)
 
     # load list of files to be compiled
@@ -123,7 +122,7 @@ def main():
     compileFileList = []
     setCompileList()
 
-    if (options.debug == True):
+    if (options.debug):
         print("=======================", file=sys.stderr)
         for compileFile in compileFileList:
             print("  compileFile: %s" % (compileFile), file=sys.stderr)
@@ -133,7 +132,7 @@ def main():
 
     headerFileList = []
     setHeaderFileList()
-    if (options.debug == True):
+    if (options.debug):
         print("=======================", file=sys.stderr)
         for headerFile in headerFileList:
             print("  headerFile: %s" % (headerFile), file=sys.stderr)
@@ -157,7 +156,7 @@ def main():
         if (entry in compiledLibList):
             orderedLibList.append(entry)
     # orderedLibList.reverse()
-    if (options.debug == True):
+    if (options.debug):
         print("======== ordered lib list ===================",
               file=sys.stderr)
         for lib in orderedLibList:
@@ -168,7 +167,7 @@ def main():
     # get list of libs listed in makefile
 
     makefileLibList = getMakefileLibList()
-    if (options.debug == True):
+    if (options.debug):
         print("========= makefile lib list ==============",
               file=sys.stderr)
         for lib in makefileLibList:
@@ -186,7 +185,7 @@ def main():
     # that are not included in the ordered libs
 
     loadLibList = getLoadLibList()
-    if (options.debug == True):
+    if (options.debug):
         print("======= load lib list ================",
               file=sys.stderr)
         for lib in loadLibList:
@@ -234,7 +233,7 @@ def getValueListForKey(path, key):
             multiLine = multiLine + line
             if (line.find("\\") < 0):
                 break;
-        elif (foundKey == True):
+        elif (foundKey):
             if (line[0] == '#'):
                 break
             if (len(line) < 2):
@@ -533,7 +532,7 @@ def getLoadLibList():
 
     # extend the lib list with required standard libs
 
-    if (options.osx == True):
+    if (options.osx):
         extendLibs = [ 'Ncxx',
                        # 'netcdf_c++',
                        'netcdf',
@@ -607,7 +606,7 @@ def writeMakefileAm():
     fo.write("AM_CFLAGS += -fPIC\n")
     fo.write("\n")
 
-    if (needQt == True):
+    if (needQt):
         fo.write("PKG_CONFIG_PATH = /usr/lib/pkgconfig\n")
         fo.write("PKG_CONFIG_PATH += /usr/local/opt/qt/lib/pkgconfig\n")
 
@@ -616,11 +615,11 @@ def writeMakefileAm():
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
-    if (options.osx == True):
+    if (options.osx):
         fo.write("# for OSX\n")
         fo.write("AM_CFLAGS += -I/opt/X11/include\n")
         fo.write("AM_CFLAGS += -I/usr/local/opt/flex/include\n")
-    if (needQt == True):
+    if (needQt):
         fo.write("# for QT\n")
         fo.write("AM_CFLAGS += -std=c++11\n")
         fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Core)\n")
@@ -641,11 +640,11 @@ def writeMakefileAm():
         fo.write("AM_LDFLAGS += -L/usr/lib/x86_64-linux-gnu/hdf5/serial\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
-    if (options.osx == True):
+    if (options.osx):
         fo.write("# for OSX\n")
         fo.write("AM_LDFLAGS += -L/opt/X11/lib\n")
         fo.write("AM_LDFLAGS += -L/usr/local/opt/flex/lib\n")
-    if (needQt == True):
+    if (needQt):
         fo.write("# for QT\n")
         fo.write("AM_LDFLAGS += -L$(shell pkg-config --variable=libdir Qt5Gui)\n")
         fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Core)\n")
@@ -665,7 +664,7 @@ def writeMakefileAm():
                 fo.write("LDADD += -l%s\n" % loadLib)
         fo.write("\n")
 
-    #if (needQt == True):
+    #if (needQt):
     #    fo.write("# qt libs\n")
     #    fo.write("\n")
     #    fo.write("LDADD += $(shell pkg-config --libs Qt5Core)\n")
