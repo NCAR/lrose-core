@@ -55,7 +55,11 @@ def main():
     response = response.lower()
     if (response.find('yes') == 0):
         os.chdir(options.topDir)
-        cmd = "find . \'(\' -name CMakeLists.txt -o -name CMakeCache.txt \')\' -user $USER -type f -print -exec /bin/rm \'{}\' \;"
+        cmd = "find . \'(\' -name CMakeLists.txt \')\' -user $USER -type f -print -exec /bin/rm \'{}\' \;"
+        runCommand(cmd)
+        cmd = "find . \'(\' -name CMakeCache.txt \')\' -user $USER -type f -print -exec /bin/rm \'{}\' \;"
+        runCommand(cmd)
+        cmd = "find . \'(\' -name CMakeFiles \')\' -user $USER -type d -print -exec /bin/rm -rf \'{}\' \;"
         runCommand(cmd)
 
     sys.exit(0)

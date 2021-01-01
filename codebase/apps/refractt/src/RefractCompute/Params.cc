@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RefractCompute");
+    tt->comment_hdr = tdrpStrDup("Refract");
     tt->comment_text = tdrpStrDup("This program calculates the refractivity fields from the raw polar radar data.");
     tt++;
     
