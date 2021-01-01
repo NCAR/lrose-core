@@ -87,7 +87,7 @@ def main():
     parser.add_option('--package',
                       dest='package', default='lrose-core',
                       help='Package name. Options are: ' + \
-                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd, samurai')
+                      'lrose-core (default), lrose-radx, lrose-cidd, samurai')
     parser.add_option('--releaseDate',
                       dest='releaseDate', default='latest',
                       help='Date from which to compute tag for git clone. Applies if --tag is not used.')
@@ -250,7 +250,6 @@ def main():
         print("  includeDir: ", includeDir, file=sys.stderr)
         print("  shareDir: ", shareDir, file=sys.stderr)
         print("  buildNetcdf: ", options.buildNetcdf, file=sys.stderr)
-        print("  package: ", package, file=sys.stderr)
         print("  use_cmake3: ", options.use_cmake3, file=sys.stderr)
         print("  build_geolib: ", options.build_geolib, file=sys.stderr)
         print("  build_fractl: ", options.build_fractl, file=sys.stderr)
