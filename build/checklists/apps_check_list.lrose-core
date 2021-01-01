@@ -380,7 +380,6 @@ mdv_repeat_day
 nexrad2dsr
 noaaportLtg2Spdb
 nprtLtg2Spdb
-print_mdv
 print_procmap
 print_server_mgr
 procmap
