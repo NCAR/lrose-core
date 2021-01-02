@@ -67,10 +67,10 @@ def main():
     parser.add_option('--libList',
                       dest='libList', default="",
                       help='List of libs in package')
-    parser.add_option('--shared',
-                      dest='shared', default=False,
+    parser.add_option('--static',
+                      dest='static', default=False,
                       action="store_true",
-                      help='Create shared lib objects')
+                      help='Create static lib objects')
 
     (options, args) = parser.parse_args()
 
@@ -464,10 +464,10 @@ def writeCMakeLists():
 
     fo.write("# build library\n")
     fo.write("\n")
-    if (options.shared):
-        fo.write("add_library (%s SHARED ${SRCS} )\n" % thisLibName)
-    else:
+    if (options.static):
         fo.write("add_library (%s STATIC ${SRCS} )\n" % thisLibName)
+    else:
+        fo.write("add_library (%s SHARED ${SRCS} )\n" % thisLibName)
     fo.write("\n")
 
     fo.write("# install\n")
@@ -489,7 +489,7 @@ def writeCMakeLists():
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
     fo.write("# NOTE: add in Mac OSX location of XQuartz\n")
     fo.write("AM_CFLAGS += -I/usr/X11R6/include -I/opt/X11/include\n")
-    if (options.shared):
+    if (not options.static):
         fo.write("ACLOCAL_AMFLAGS = -I m4\n")
     #    fo.write("AM_CFLAGS += -I$(prefix)/include\n")
 
@@ -502,7 +502,7 @@ def writeCMakeLists():
     fo.write("\n")
     fo.write("# target library file\n")
     fo.write("\n")
-    if (options.shared):
+    if (not options.static):
         fo.write("lib_LTLIBRARIES = lib%s.la\n" % thisLibName)
     else:
         fo.write("lib_LIBRARIES = lib%s.a\n" % thisLibName)
@@ -524,7 +524,7 @@ def writeCMakeLists():
             fo.write(" \\\n")
     fo.write("\n")
 
-    if (options.shared):
+    if (not options.static):
         fo.write("lib%s_la_SOURCES = \\\n" % thisLibName)
     else:
         fo.write("lib%s_a_SOURCES = \\\n" % thisLibName)

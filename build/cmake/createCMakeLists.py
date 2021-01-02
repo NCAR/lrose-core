@@ -49,10 +49,10 @@ def main():
                       dest='coreDir', default=coreDirDefault,
                       help='Path of lrose-core top level directory, default is: ' +
                       coreDirDefault)
-    parser.add_option('--shared',
-                      dest='shared', default=False,
+    parser.add_option('--static',
+                      dest='static', default=False,
                       action="store_true",
-                      help='Create shared lib objects')
+                      help='Create static lib objects. Default is shared')
     parser.add_option('--pkg',
                       dest='pkg', default="lrose-core",
                       help='Name of package being built')
@@ -69,7 +69,7 @@ def main():
     if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  Core dir: ", options.coreDir, file=sys.stderr)
-        print("  shared: ", options.shared, file=sys.stderr)
+        print("  static: ", options.static, file=sys.stderr)
         print("  pkg: ", options.pkg, file=sys.stderr)
         print("  osx: ", options.osx, file=sys.stderr)
 
@@ -201,11 +201,11 @@ def searchDir(dir):
         # src level of lib - create CMakeLists.txt for lib
 
         libDir = absDir[:-4]
-        sharedStr = ""
-        if (options.shared):
-            sharedStr = " --shared "
+        staticStr = ""
+        if (options.static):
+            staticStr = " --static "
         cmd = os.path.join(thisScriptDir, "createCMakeLists.lib.py") + \
-              " --dir " + libDir + sharedStr + debugStr
+              " --dir " + libDir + staticStr + debugStr
         cmd += " --libList " + libList
         runCommand(cmd)
         count = count + 1
@@ -383,8 +383,8 @@ def createCMakeListsRecurse(dir):
 
     # go to the dir
 
-    # currentDir = os.getcwd()
-    # os.chdir(dir)
+    currentDir = os.getcwd()
+    os.chdir(dir)
 
     # get makefile name in use
 
@@ -405,7 +405,9 @@ def createCMakeListsRecurse(dir):
             
     writeCMakeListsRecurse(dir, subdirList)
 
-    # os.chdir(currentDir)
+    # go back to original dir
+    
+    os.chdir(currentDir)
 
 ########################################################################
 # load list of sub directories
