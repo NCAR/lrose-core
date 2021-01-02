@@ -11,7 +11,6 @@ SUB_DIRS = \
 	CalcNexrad \
 	Chill2netCDFSweep \
 	CleanupRvp8Data \
-	ComputeRefract \
 	DsrAddSnr \
 	MdvAddSnr \
 	PhaseDiff \
