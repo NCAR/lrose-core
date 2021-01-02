@@ -34,7 +34,7 @@
 
 #include "storms_to_tifs.h"
 
-#define RAD_TO_DEG 57.29577951308092
+/* #define RAD_TO_DEG 57.29577951308092 */
 
 void process_track_file(storm_file_handle_t *s_handle,
 			track_file_handle_t *t_handle,

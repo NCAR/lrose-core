@@ -798,7 +798,7 @@ char*
 PDS::getLongName(const int& id, const int &layer_type, const int &v1, const int &v2)
 {
 
-  static char buf[1024];
+  static char buf[4096];
   char buf2[1024];
 
   strncpy(buf,(_parmTable + id)->long_name.c_str(),1024);

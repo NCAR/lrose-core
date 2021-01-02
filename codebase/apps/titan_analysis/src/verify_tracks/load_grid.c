@@ -46,8 +46,8 @@
 #define DO_CONSTRAIN(x, low, high) if ((x) < (low)) (x) = (low); \
                                 else if ((x) > (high)) (x) = (high)
 
-#define RAD_TO_DEG 57.29577951308092
-#define DEG_TO_RAD 0.01745329251994372
+/* #define RAD_TO_DEG 57.29577951308092 */
+/* #define DEG_TO_RAD 0.01745329251994372 */
 #define SMALL_ANGLE 0.000001
 #define PI_BY_TWO 1.570796327
 #define ALMOST_PI_BY_TWO (PI_BY_TWO - SMALL_ANGLE)

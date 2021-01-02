@@ -292,5 +292,6 @@ int SfcFromSigma::interp(vector<float*> *inputs, vector<float*> *data, vector<fl
     }
   }
 
+  return 0;
 					     
 }
