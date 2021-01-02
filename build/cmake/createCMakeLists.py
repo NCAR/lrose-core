@@ -19,10 +19,12 @@ def main():
     global options
     global subdirList
     global libList
-    global makefileCreateList
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
+
+    global count
+    count = 0
 
     # We will be executing some sibling scripts. Get our path so that
     # the sibling scripts from the same path can be executed explicitly.
@@ -80,6 +82,7 @@ def main():
 
     print("  info: copying top level CMakeLists.txt file", file=sys.stderr)
     shutil.copy('../build/cmake/CMakeLists.txt.top', './CMakeLists.txt')
+    count = count + 1
     
     # recursively search the libs and apps trees
 
@@ -97,37 +100,11 @@ def main():
 
     # search libs and apps for makefiles
 
-    makefileCreateList = []
     searchDir(libsDir)
     searchDir(appsDir)
 
     if (options.debug):
-        for path in makefileCreateList:
-            print("  Need to create makefile: ", path, file=sys.stderr)
-            
-    sys.exit(0)
-
-
-    # write out configure.ac
-            
-    if (writeConfigureAc() != 0):
-        sys.exit(1)
-        
-    # run autoconf
-
-    debugStr = "";
-    if (options.verbose):
-        debugStr = " --verbose "
-    elif (options.debug):
-        debugStr = " --debug "
-        
-    sharedStr = ""
-    if (options.shared):
-        sharedStr = " --shared "
-
-    cmd = os.path.join(thisScriptDir, "runAutoConf.py") + \
-          " --dir " + options.coreDir + sharedStr + debugStr
-    # runCommand(cmd)
+        print("==>> n CMakeLists.txt files created: ", count, file=sys.stderr)
 
     sys.exit(0)
 
@@ -145,7 +122,7 @@ def getLibList(dir):
 
     # check if this dir has a makefile or Makefile
 
-    makefilePath = getMakefileTemplatePath(dir)
+    makefilePath = getMakefilePath(dir)
     if (os.path.exists(makefilePath) == False):
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  No makefile in lib dir: ", dir, file=sys.stderr)
@@ -160,7 +137,7 @@ def getLibList(dir):
 
     if (len(subNameList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find SUB_DIRS in ", makefileName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", makefilePath, file=sys.stderr)
         print("  coreDir: ", options.coreDir, file=sys.stderr)
         exit(1)
 
@@ -185,14 +162,14 @@ def getLibList(dir):
 
 def searchDir(dir):
                     
-    global makefileCreateList
+    global count
 
     if (options.debug):
         print("  Searching dir: ", dir, file=sys.stderr)
 
     # check if this dir has a makefile or Makefile
 
-    makefilePath = getMakefileTemplatePath(dir)
+    makefilePath = getMakefilePath(dir)
     if (os.path.exists(makefilePath) == False):
         if (options.verbose):
             print("  No makefile or Makefile found", file=sys.stderr)
@@ -231,37 +208,15 @@ def searchDir(dir):
               " --dir " + libDir + sharedStr + debugStr
         cmd += " --libList " + libList
         runCommand(cmd)
-        makefileCreateList.append(makefileCreatePath)
-
-        return
-
-    elif ((pathToks[ntoks-4] == "apps") and
-          (pathToks[ntoks-2] == "src") and
-          (pathToks[ntoks-1] == "scripts")):
-
-        # scripts dir - do nothing
-        if (options.debug):
-            print("  Ignoring dir:", dir, file=sys.stderr)
-
-        return
+        count = count + 1
 
     elif ((pathToks[ntoks-4] == "apps") and
           (pathToks[ntoks-2] == "src")):
 
         # app directory - create CMakeLists.txt for app
 
-        # compute default script path - assumes core package
-
-        #createScript = "createCMakeLists.app.lrose-core.py"
         createScript = "createCMakeLists.app.py"
         scriptPath = os.path.join(thisScriptDir, createScript)
-
-        # use package-specific version if available
-        #pkgCreateScript = "createCMakeLists.app." + options.pkg + ".py"
-        #pkgScriptPath = os.path.join(thisScriptDir, pkgCreateScript)
-        #if (os.path.exists(pkgScriptPath)):
-        #    createScript = pkgCreateScript
-        #    scriptPath = pkgScriptPath
 
         if (options.debug):
             print("  createScript:", createScript, file=sys.stderr)
@@ -272,17 +227,21 @@ def searchDir(dir):
         if (options.osx):
             cmd += " --osx "
         runCommand(cmd)
-        makefileCreateList.append(makefileCreatePath)
+        count = count + 1
 
-        return
+    elif ((pathToks[ntoks-4] == "apps") and
+          (pathToks[ntoks-2] == "src") and
+          (pathToks[ntoks-1] == "scripts")):
+
+        # scripts dir - do nothing
+        if (options.debug):
+            print("  Ignoring dir:", dir, file=sys.stderr)
 
     else:
 
         # create CMakeLists.txt for recursion
-        cmd = os.path.join(thisScriptDir, "createCMakeLists.recurse.py") + \
-              " --dir " + absDir + debugStr
-        runCommand(cmd)
-        makefileCreateList.append(makefileCreatePath)
+        createCMakeListsRecurse(absDir)
+        count = count + 1
         # recurse
         loadSubdirList(dir)
         for subdir in subdirList:
@@ -299,7 +258,7 @@ def loadSubdirList(dir):
     global subdirList
     subdirList = []
 
-    makefilePath = getMakefileTemplatePath(dir)
+    makefilePath = getMakefilePath(dir)
 
     try:
         fp = open(makefilePath, 'r')
@@ -338,79 +297,9 @@ def loadSubdirList(dir):
                     subdirList.append(thisTok)
 
 ########################################################################
-# Write out configure.ac
-
-def writeConfigureAc():
-
-    # read preamble lines from base configure file
-
-    try:
-        base = open(options.baseName, "r")
-    except IOError as e:
-        print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot read base configure template", file=sys.stderr)
-        print("  base name: ", options.baseName, file=sys.stderr)
-        print("  This file should be in: ", options.coreDir, file=sys.stderr)
-        return 1
-
-    base = open(options.baseName, "r")
-    lines = base.readlines()
-    base.close()
-
-    # open configure.ac for writing
-
-    try:
-        confac = open("configure.ac", "w")
-    except IOError as e:
-        print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot open configure.ac for writing", file=sys.stderr)
-        print("  dir: ", options.coreDir, file=sys.stderr)
-        return 1
-
-    confac = open("configure.ac", "w")
-
-    confac.write("###############################################\n")
-    confac.write("#\n")
-    confac.write("# configure template for autoconf\n")
-    confac.write("#\n")
-    confac.write("# dir: %s\n" % options.coreDir)
-    confac.write("#\n")
-    confac.write("# baseName: %s\n" % options.baseName)
-    confac.write("#\n")
-    confac.write("# written by script %s\n" % thisScriptName)
-    confac.write("#\n")
-    confac.write("# created %s\n" % datetime.now())
-    confac.write("#\n")
-    confac.write("###############################################\n")
-    confac.write("######### COPIED FROM BASE TEMPLATE ###########\n")
-    confac.write("\n")
-
-    for line in lines:
-        confac.write(line)
-
-    confac.write("\n")
-    confac.write("############## DONE WITH BASE #################\n")
-    confac.write("###############################################\n")
-    confac.write("\n")
-    confac.write("\n")
-    confac.write("# create makefiles\n")
-    confac.write("\n")
-    confac.write("AC_CONFIG_FILES([\n")
-    confac.write("  makefile\n")
-    for path in makefileCreateList:
-        confac.write("  %s\n" % path)
-    confac.write("])\n")
-    confac.write("AC_OUTPUT\n")
-    confac.write("\n")
-
-    confac.close
-
-    return 0
-
-########################################################################
 # find makefile template
 
-def getMakefileTemplatePath(dir):
+def getMakefilePath(dir):
                     
     makefilePath = os.path.join(dir, '__makefile.template')
     if (os.path.exists(makefilePath) == False):
@@ -448,6 +337,8 @@ def getValueListForKey(path, key):
     foundKey = False
     multiLine = ""
     for line in lines:
+        if ((not foundKey) and (line[0] == '#')):
+            continue
         if (line.find(key) >= 0):
             foundKey = True
             multiLine = multiLine + line
@@ -478,6 +369,97 @@ def getValueListForKey(path, key):
             valueList.append(tok)
 
     return valueList
+
+#===========================================================================
+#
+# Create CMakeLists.txt for directory recursion
+#
+#===========================================================================
+
+def createCMakeListsRecurse(dir):
+
+    if (options.debug):
+        print("  Recurse, dir: ", dir, file=sys.stderr)
+
+    # go to the dir
+
+    # currentDir = os.getcwd()
+    # os.chdir(dir)
+
+    # get makefile name in use
+
+    makefilePath = getMakefilePath(dir)
+
+    # load list of subdirs
+    
+    subdirList = getSubdirList(makefilePath)
+
+    if (options.debug == True):
+        print("=======================", file=sys.stderr)
+        print("subdirList:", file=sys.stderr)
+        for subdir in subdirList:
+            print("subdir: %s" % (subdir), file=sys.stderr)
+        print("=======================", file=sys.stderr)
+
+    # write out CMakeLists.txt for recursion
+            
+    writeCMakeListsRecurse(dir, subdirList)
+
+    # os.chdir(currentDir)
+
+########################################################################
+# load list of sub directories
+
+def getSubdirList(makefilePath):
+                    
+    subdirList = []
+    
+    # search for SUB_DIRS key in makefile
+
+    subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
+
+    if (len(subNameList) < 1):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", makefilePath, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
+        exit(1)
+
+    for subName in subNameList:
+        if (os.path.isdir(subName) == True):
+            subdirList.append(subName)
+
+    return subdirList
+
+########################################################################
+# Write out CMakeLists.am
+
+def writeCMakeListsRecurse(dir, subdirList):
+
+    fo = open("CMakeLists.txt", "w")
+
+    fo.write("###############################################\n")
+    fo.write("#\n")
+    fo.write("# CMakeLists for cmake recursion\n")
+    fo.write("#\n")
+    fo.write("# dir: %s\n" % dir)
+    fo.write("#\n")
+    fo.write("# written by script %s\n" % thisScriptName)
+    fo.write("#\n")
+    fo.write("# created %s\n" % datetime.now())
+    fo.write("#\n")
+    fo.write("###############################################\n")
+    fo.write("\n")
+    fo.write("project (LROSE-CORE)\n")
+    fo.write("\n")
+
+    if (len(subdirList) > 0):
+        fo.write("# subdirectories\n")
+        fo.write("\n")
+        for subdir in subdirList:
+            fo.write("add_subdirectory (%s)\n" % subdir)
+
+    fo.write("\n")
+    fo.close
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
