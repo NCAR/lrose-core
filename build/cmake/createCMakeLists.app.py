@@ -670,11 +670,11 @@ def writeCMakeLists():
 
     fo.write("# install\n")
     fo.write("\n")
-    fo.write("INSTALL(FILES %s\n" % thisAppName)
+    fo.write("INSTALL(TARGETS ${PROJECT_NAME}\n")
     fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/bin\n")
     fo.write("        )\n")
     fo.write("\n")
-    
+
     fo.close
     return
     
