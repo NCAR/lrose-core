@@ -3,7 +3,8 @@ project(LROSE-CORE)
 
 set(CMAKE_C_COMPILER_NAMES clang gcc icc cc)
 set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/"
         CACHE INTERNAL "Location of our custom CMake modules.")

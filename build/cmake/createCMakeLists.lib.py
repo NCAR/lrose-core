@@ -472,6 +472,9 @@ def writeCMakeLists():
     fo.write("INSTALL(FILES lib%s.a\n" % thisLibName)
     fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/lib\n")
     fo.write("        )\n")
+    fo.write("INSTALL(DIRECTORY include/%s\n" % thisLibName)
+    fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/include\n")
+    fo.write("        )\n")
     fo.write("\n")
 
     fo.close
@@ -536,7 +539,7 @@ def writeCMakeLists():
 # get the LINUX type from the /etc/os-release file
 # or 'darwin' if OSX
 
-def getOsType():                                                                                  
+def getOsType():
 
     # check for Mac OSX
 
