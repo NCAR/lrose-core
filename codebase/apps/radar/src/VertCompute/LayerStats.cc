@@ -78,7 +78,7 @@ void LayerStats::addData(const MomentData &data)
 
   _momentData.push_back(data);
 
-};
+}
   
 // print
 
@@ -169,7 +169,7 @@ void LayerStats::computeStats()
     _dist.printHistogram(stderr);
   }
   
-};
+}
 
 // compute global stats
 
@@ -227,5 +227,5 @@ void LayerStats::_computeZdrmMeanSdev(double &mean, double &sdev)
     }
   }
 
-};
+}
   

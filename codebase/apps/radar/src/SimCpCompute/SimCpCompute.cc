@@ -1354,5 +1354,5 @@ void SimCpCompute::_markValidMoments(vector<MomentData> &momentData)
 
   }
 
-};
+}
 
