@@ -636,7 +636,6 @@ def writeCMakeLists():
         fo.write("link_libraries ( ${Qt5Qml_LIBRARIES} )\n")
     fo.write("\n")
 
-
     fo.write("# QT5\n")
     fo.write("\n")
 

@@ -464,12 +464,15 @@ def writeCMakeLists():
 
     fo.write("# build library\n")
     fo.write("\n")
-    fo.write("add_library (%s ${SRCS} )\n" % thisLibName)
+    if (options.shared):
+        fo.write("add_library (%s SHARED ${SRCS} )\n" % thisLibName)
+    else:
+        fo.write("add_library (%s STATIC ${SRCS} )\n" % thisLibName)
     fo.write("\n")
 
     fo.write("# install\n")
     fo.write("\n")
-    fo.write("INSTALL(FILES lib%s.a\n" % thisLibName)
+    fo.write("INSTALL(TARGETS %s\n" % thisLibName)
     fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/lib\n")
     fo.write("        )\n")
     fo.write("INSTALL(DIRECTORY include/%s\n" % thisLibName)

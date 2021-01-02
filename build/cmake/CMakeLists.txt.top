@@ -1,31 +1,32 @@
-cmake_minimum_required(VERSION 2.8)
-project(LROSE-CORE)
+cmake_minimum_required( VERSION 2.8 )
+project( LROSE-CORE )
 
-set(CMAKE_C_COMPILER_NAMES clang gcc icc cc)
-set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
-#set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_VERBOSE_MAKEFILE OFF)
+set( CMAKE_C_COMPILER_NAMES clang gcc icc cc )
+set( CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx )
+#set( CMAKE_VERBOSE_MAKEFILE ON )
+set( CMAKE_VERBOSE_MAKEFILE OFF )
 
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/"
-        CACHE INTERNAL "Location of our custom CMake modules.")
-SET(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
+SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/"
+        CACHE INTERNAL "Location of our custom CMake modules." )
+SET( CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake" )
 
-set(FETCHCONTENT_QUIET false CACHE BOOL "" FORCE)
+set( FETCHCONTENT_QUIET false CACHE BOOL "" FORCE )
 
-set(PACKAGE "LROSE-CORE" CACHE STRING "")
+set( PACKAGE "LROSE-CORE" CACHE STRING "" )
 
-find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)
+find_package ( Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH )
 
 # If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-	set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE)
-endif()
-message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")
+if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+	set( CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE )
+endif(  )
+message( "CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}" )
 
-enable_testing()
+enable_testing(  )
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB -fPIC")
+set( CMAKE_CXX_STANDARD 11 )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB -fPIC" )
+add_definitions( -DNO_JASPER_LIB  )
 
-add_subdirectory(libs)
-add_subdirectory(apps)
+add_subdirectory( libs )
+add_subdirectory( apps )
