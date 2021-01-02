@@ -289,7 +289,7 @@ def setCompileList():
                     'F90_SRCS', 'F95_SRCS', 'PGF90_SRCS', 
                     'PGF_SRCS', 'CC_SRCS', 'CPPC_SRCS', 
                     'CPP_SRCS', 'CXX_SRCS',
-                    'NORM_SRCS', 'MOC_SRCS', "MOC_OUTPUT" ]
+                    'NORM_SRCS', 'MOC_SRCS' ]
 
     try:
         fp = open(makefileName, 'r')
@@ -624,6 +624,19 @@ def writeCMakeLists():
     fo.write(")\n")
     fo.write("\n")
 
+    fo.write("# load libs\n")
+    fo.write("\n")
+    for lib in loadLibList:
+        fo.write("link_libraries ( %s )\n" % lib)
+    if (needQt):
+        fo.write("link_libraries ( ${Qt5Core_LIBRARIES} )\n")
+        fo.write("link_libraries ( ${Qt5Gui_LIBRARIES} )\n")
+        fo.write("link_libraries ( ${Qt5Widgets_LIBRARIES} )\n")
+        fo.write("link_libraries ( ${Qt5Network_LIBRARIES} )\n")
+        fo.write("link_libraries ( ${Qt5Qml_LIBRARIES} )\n")
+    fo.write("\n")
+
+
     fo.write("# QT5\n")
     fo.write("\n")
 
@@ -654,19 +667,6 @@ def writeCMakeLists():
     fo.write("\n")
     fo.write("add_executable ( ${PROJECT_NAME} ${SRCS} )\n")
     fo.write("\n")
-
-    fo.write("# load libs\n")
-    fo.write("\n")
-    for lib in loadLibList:
-        fo.write("target_link_libraries ( %s )\n" % lib)
-    if (needQt):
-        fo.write("target_link_libraries ( ${Qt5Core_LIBRARIES} )\n")
-        fo.write("target_link_libraries ( ${Qt5Gui_LIBRARIES} )\n")
-        fo.write("target_link_libraries ( ${Qt5Widgets_LIBRARIES} )\n")
-        fo.write("target_link_libraries ( ${Qt5Network_LIBRARIES} )\n")
-        fo.write("target_link_libraries ( ${Qt5Qml_LIBRARIES} )\n")
-    fo.write("\n")
-
 
     fo.close
     return
