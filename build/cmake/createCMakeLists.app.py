@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Create makefile.am for a LROSE app
+# Create CMakeLists.txt for LROSE app
 #
 #===========================================================================
 
@@ -11,6 +11,7 @@ import os
 import sys
 import shutil
 import subprocess
+import platform
 from optparse import OptionParser
 from datetime import datetime
 
@@ -26,14 +27,24 @@ def main():
     global makefileName
     global compileFileList
     global headerFileList
-    global includeList
-    global availLibList
-    global usedLibList
+    global linkOrder
+    global compiledLibList
+    global orderedLibList
+    global makefileLibList
     global loadLibList
     global needQt
+    global needX11
+    global isDebianBased
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
+
+    osType = getOsType()
+    isDebianBased = False
+    if (osType == "debian"):
+        isDebianBased = True
+    if (osType == "ubuntu"):
+        isDebianBased = True
 
     # parse the command line
 
@@ -41,13 +52,17 @@ def main():
     homeDir = os.environ['HOME']
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default='False',
+                      dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--verbose',
-                      dest='verbose', default='False',
+                      dest='verbose', default=False,
                       action="store_true",
                       help='Set verbose debugging on')
+    parser.add_option('--osx',
+                      dest='osx', default=False,
+                      action="store_true",
+                      help='Configure for MAC OSX')
     parser.add_option('--dir',
                       dest='dir', default=".",
                       help='Path of app directory')
@@ -57,38 +72,18 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    if (options.verbose == True):
+    if (options.verbose):
         options.debug = True
     
     # get the app name
 
     pathParts = options.dir.split('/')
 
-    if (options.debug == True):
+    if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  App dir:", options.dir, file=sys.stderr)
         print("  Lib list: ", options.libList, file=sys.stderr)
-
-    # set up list of other libs which may be used for include
-
-    if (len(options.libList) < 1):
-        availLibList = [ 'FiltAlg', 'Fmq', 'Mdv', 'Radx', 'Ncxx',
-                         'Refract', 'Spdb', 'SpdbServer', 'advect', 
-                         'cidd', 'contour',
-                         'dataport', 'devguide', 'didss', 'dsdata', 'dsserver',
-                         'euclid', 'forayRal', 'grib', 'grib2', 'hydro',
-                         'mdv', 'niwot_basic', 'niwot_util', 
-                         'olgx', 'physics', 'radar',
-                         'rapformats', 'rapmath', 'rapplot', 'rdi', 'shapelib',
-                         'spdb', 'spdbFormats', 'symprod', 'tdrp', 'titan',
-                         'toolsa', 'trmm_rsl', 'xview' ]
-    else:
-        availLibList = options.libList.split(",")
-
-    if (options.debug == True):
-        print("Running %s:" % thisScriptName, file=sys.stderr)
-        print("  App dir:", options.dir, file=sys.stderr)
-        print("  Lib list: ", availLibList, file=sys.stderr)
+        print("  osx: ", options.osx, file=sys.stderr)
 
     # go to the app dir
 
@@ -113,13 +108,13 @@ def main():
     if (makefileName != "__makefile.template"):
         shutil.copy(makefileName, "__makefile.template")
 
-    if (options.debug == True):
+    if (options.debug):
         print("-->> using makefile template: ", makefileName, file=sys.stderr)
 
     # parse the LROSE Makefile to get the app name
 
     getAppName()
-    if (options.debug == True):
+    if (options.debug):
         print("thisAppName: %s" % thisAppName, file=sys.stderr)
 
     # load list of files to be compiled
@@ -127,43 +122,76 @@ def main():
     compileFileList = []
     setCompileList()
 
-    if (options.debug == True):
+    if (options.debug):
         print("=======================", file=sys.stderr)
         for compileFile in compileFileList:
-            print("compileFile: %s" % (compileFile), file=sys.stderr)
+            print("  compileFile: %s" % (compileFile), file=sys.stderr)
         print("=======================", file=sys.stderr)
 
-    # get list of header files
+    # set list of header files
 
     headerFileList = []
     setHeaderFileList()
-    if (options.debug == True):
+    if (options.debug):
         print("=======================", file=sys.stderr)
         for headerFile in headerFileList:
-            print("headerFile: %s" % (headerFile), file=sys.stderr)
+            print("  headerFile: %s" % (headerFile), file=sys.stderr)
         print("=======================", file=sys.stderr)
             
-    # get list of libs to be loaded
+    # get list showing order in which compiled libs need to be linked
 
-    setLoadLibList()
-    if (options.debug == True):
-        print("=======================", file=sys.stderr)
-        for loadLib in loadLibList:
-            print("loadLib: %s" % loadLib, file=sys.stderr)
-        print("=======================", file=sys.stderr)
+    linkOrder = getLibLinkOrder()
 
-    # get list of LROSE libs used
+    # set up list of compiled libs
 
-    setUsedLibList()
-    if (options.debug == True):
-        print("=======================", file=sys.stderr)
-        for loadLib in usedLibList:
-            print("usedLib: %s" % loadLib, file=sys.stderr)
-        print("=======================", file=sys.stderr)
+    if (len(options.libList) < 1):
+        compiledLibList = linkOrder
+    else:
+        compiledLibList = options.libList.split(",")
+
+    # create ordered lib list
+
+    orderedLibList = []
+    for entry in linkOrder:
+        if (entry in compiledLibList):
+            orderedLibList.append(entry)
+    # orderedLibList.reverse()
+    if (options.debug):
+        print("======== ordered lib list ===================",
+              file=sys.stderr)
+        for lib in orderedLibList:
+            print("  ordered lib: %s" % lib, file=sys.stderr)
+        print("=============================================",
+              file=sys.stderr)
+
+    # get list of libs listed in makefile
+
+    makefileLibList = getMakefileLibList()
+    if (options.debug):
+        print("========= makefile lib list ==============",
+              file=sys.stderr)
+        for lib in makefileLibList:
+            print("  makefile lib: %s" % lib, file=sys.stderr)
+        print("==========================================",
+              file=sys.stderr)
 
     # check if we need Qt support
 
-    checkForQt()
+    needQt = checkForQt()
+    needX11 = checkForX11()
+    
+    # set list of libs to be loaded
+    # this will be the ordered lib list, plus any libs from the makefile
+    # that are not included in the ordered libs
+
+    loadLibList = getLoadLibList()
+    if (options.debug):
+        print("======= load lib list ================",
+              file=sys.stderr)
+        for lib in loadLibList:
+            print("  load lib: -l%s" % lib, file=sys.stderr)
+        print("======================================",
+              file=sys.stderr)
 
     # write out makefile.am
             
@@ -205,7 +233,7 @@ def getValueListForKey(path, key):
             multiLine = multiLine + line
             if (line.find("\\") < 0):
                 break;
-        elif (foundKey == True):
+        elif (foundKey):
             if (line[0] == '#'):
                 break
             if (len(line) < 2):
@@ -281,9 +309,6 @@ def setCompileList():
 
 def checkForQt():
                     
-    global needQt
-    needQt = False
-
     try:
         fp = open(makefileName, 'r')
     except IOError as e:
@@ -296,11 +321,30 @@ def checkForQt():
 
     for line in lines:
         if (line.find("QT") >= 0):
-            needQt = True
-            return
-        if (line.find("-lQtCore") >= 0):
-            needQt = True
-            return
+            return True
+
+    return False
+    
+########################################################################
+# check for dependence on X11
+
+def checkForX11():
+                    
+    try:
+        fp = open(makefileName, 'r')
+    except IOError as e:
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", makefileName, file=sys.stderr)
+        exit(1)
+
+    lines = fp.readlines()
+    fp.close()
+
+    for line in lines:
+        if (line.find("X11") >= 0):
+            return True
+
+    return False
     
 ########################################################################
 # append to compile list for given srcType
@@ -371,102 +415,167 @@ def setHeaderFileList():
             headerFileList.append(fileName)
 
 ########################################################################
-# set the list of libs to be used for include
+# get link order for libraries
 
-def setIncludeList(sourceFile):
-                    
-    global includeList
+def getLibLinkOrder():
+
+    # set up list showing order in which compiled libs need to be linked
     
-    if (options.verbose == True):
-        print("-->> looking for includes in:", sourceFile, file=sys.stderr)
-
-    fp = open(sourceFile, 'r')
-    lines = fp.readlines()
+    linkOrder = [ 'mm5',
+                  'Refract',
+                  'FiltAlg',
+                  'dsdata',
+                  'radar',
+                  'hydro',
+                  'titan',
+                  'Fmq',
+                  'Spdb',
+                  'Mdv',
+                  'advect',
+                  'rapplot',
+                  'Radx',
+                  'Ncxx',
+                  'rapformats',
+                  'dsserver',
+                  'didss',
+                  'grib',
+                  'grib2',
+                  'contour',
+                  'euclid',
+                  'rapmath',
+                  'kd',
+                  'physics',
+                  'toolsa',
+                  'dataport',
+                  'tdrp',
+                  'shapelib',
+                  'cidd',
+                  'devguide',
+                  'xview',
+                  'olgx',
+                  'trmm_rsl',
+                  'forayRal']
     
-    for line in lines:
-        if ((line[0] != '#') or
-            (line.find("include") < 0) or
-            (line.find("/") < 0) or
-            (line.find("<") < 0) or
-            (line.find(">") < 0)):
-            continue
-
-        if (options.verbose == True):
-            print("  -->> ", line.strip(), file=sys.stderr)
-        
-        for lib in includeList:
-            if (lib.name == thisAppName):
-                # skip this lib
-                continue
-            searchStr = "<%s/" % lib.name
-            if (line.find(searchStr) > 0):
-                if (options.verbose == True):
-                    print("  -->> found lib", lib.name, file=sys.stderr)
-                lib.used = True
-            
+    return linkOrder
+    
 ########################################################################
-# set list of libraries to be loaded by the linker
+# get list of libraries in makefile
 
-def setLoadLibList():
-                    
-    global loadLibList
-    loadLibList = []
+def getMakefileLibList():
+
+    makeLibList = []
 
     # search for LOC_LIBS key in makefile
 
-    locLibsList = getValueListForKey(makefileName, "LOC_LIBS")
-    if (len(locLibsList) < 1):
-        return
+    locLibs = getValueListForKey(makefileName, "LOC_LIBS")
+    if (len(locLibs) > 0):
+        for line in locLibs:
+            makeLibList.extend(decodeLibLine(line))
 
-    for locLib in locLibsList:
-        if (locLib == "$(TDRP_LIBS)"):
-            appendToLibList("-ltdrp")
-        else:
-            appendToLibList(locLib)
-
+    return makeLibList
+            
 ########################################################################
-# set list of LROSE libs actually used
+# decode a line from LOC_LIBS
 
-def setUsedLibList():
-                    
-    global usedLibList
-    usedLibList = []
+def decodeLibLine(line):
 
-    for loadLib in loadLibList:
-        for availLib in availLibList:
-            checkStr = "-l" + availLib
-            if (loadLib == checkStr):
-                usedLibList.append(availLib)
-                break
-
-########################################################################
-# append to lib list from given line
-
-def appendToLibList(line):
+    libs = []
 
     toks = line.split(' ')
     for tok in toks:
         thisTok = tok.strip(" \t\n\r")
         if (thisTok.find("-l") == 0):
-            loadLibList.append(thisTok)
+            libs.append(thisTok[2:]) # strip off '-l'
         elif ((thisTok.find("NETCDF4_LIBS") >= 0) or
               (thisTok.find("NETCDF_LIBS") >= 0)):
-            loadLibList.append("-lNcxx")
-            loadLibList.append("-lnetcdf")
-            loadLibList.append("-lhdf5_cpp")
-            loadLibList.append("-lhdf5_hl")
-            loadLibList.append("-lhdf5")
-            loadLibList.append("-lz")
-            loadLibList.append("-lbz2")
+            libs.append("Ncxx")
+            # libs.append("netcdf_c++")
+            libs.append("netcdf")
+            libs.append("hdf5_cpp")
+            libs.append("hdf5_hl")
+            libs.append("hdf5")
+            libs.append("z")
+            libs.append("bz2")
         elif (thisTok.find("NETCDF_C_AND_C++_LIBS") >= 0):
-            loadLibList.append("-lnetcdf")
+            # libs.append("netcdf_c++")
+            libs.append("netcdf")
         elif (thisTok.find("NETCDF_C_AND_F_LIBS") >= 0):
-            loadLibList.append("-lnetcdff")
-            loadLibList.append("-lnetcdf")
+            libs.append("netcdff")
+            libs.append("netcdf")
         elif (thisTok.find("NETCDF_C_LIB") >= 0):
-            loadLibList.append("-lnetcdf")
+            libs.append("netcdf")
         elif (thisTok.find("NETCDF_FF_LIB") >= 0):
-            loadLibList.append("-lnetcdff")
+            libs.append("netcdff")
+        elif (thisTok.find("TDRP_LIBS") >= 0):
+            libs.append("tdrp")
+        #elif (thisTok.find("QT_LIBS") >= 0):
+        #    libs.append("Qt5Core")
+        #    libs.append("Qt5Gui")
+        #    libs.append("Qt5Widgets")
+        #    libs.append("Qt5Network")
+
+    return libs
+
+########################################################################
+# get list of libraries to be loaded
+
+def getLoadLibList():
+
+    # set list of libs to be loaded
+    # this will be the ordered lib list, plus any libs from the makefile
+    # that are not included in the ordered libs
+
+    loadLibList = orderedLibList
+    for lib in makefileLibList:
+        if (lib not in orderedLibList):
+            loadLibList.append(lib)
+
+    # extend the lib list with required standard libs
+
+    if (options.osx):
+        extendLibs = [ 'Ncxx',
+                       # 'netcdf_c++',
+                       'netcdf',
+                       'hdf5_cpp',
+                       'hdf5_hl',
+                       'hdf5',
+                       # 'expat',
+                       # 'jasper',
+                       # 'fl',
+                       'X11',
+                       'Xext',
+                       'pthread',
+                       'png',
+                       'z',
+                       'bz2',
+                       'm' ]
+    else:
+        extendLibs = [ 'Ncxx',
+                       # 'netcdf_c++',
+                       'netcdf',
+                       'hdf5_cpp',
+                       'hdf5_hl',
+                       'hdf5',
+                       # 'expat',
+                       # 'jasper',
+                       # 'fl',
+                       'X11',
+                       'Xext',
+                       'pthread',
+                       'png',
+                       'z',
+                       'bz2',
+                       'm',
+                       'gfortran' ]
+    
+    for lib in extendLibs:
+        if (lib not in loadLibList):
+            loadLibList.append(lib)
+
+    if ("radar" in loadLibList and "fftw3" not in loadLibList):
+        loadLibList.append("fftw3")
+
+    return loadLibList
 
 ########################################################################
 # Write out makefile.am
@@ -485,6 +594,9 @@ def writeCMakeLists():
     fo.write("#\n")
     fo.write("# created %s\n" % datetime.now())
     fo.write("#\n")
+    fo.write("# dir: %s\n" % options.dir)
+    fo.write("# libList: %s\n" % options.libList)
+    fo.write("# osx: %s\n" % options.osx)
     fo.write("###############################################\n")
     fo.write("\n")
 
@@ -501,16 +613,8 @@ def writeCMakeLists():
 
     fo.write("# includes\n")
     fo.write("\n")
-    for lib in usedLibList:
+    for lib in compiledLibList:
         fo.write("include_directories ( ../../../../libs/%s/src/include )\n" % lib)
-    fo.write("\n")
-
-    fo.write("# link libs\n")
-    fo.write("\n")
-    for lib in usedLibList:
-        fo.write("link_libraries ( %s )\n" % lib)
-    for lib in loadLibList:
-        fo.write("link_libraries ( %s )\n" % lib)
     fo.write("\n")
 
     fo.write("# link directories\n")
@@ -520,42 +624,105 @@ def writeCMakeLists():
     fo.write(")\n")
     fo.write("\n")
 
+    fo.write("# QT5\n")
+    fo.write("\n")
+
+    if (needQt):
+        fo.write("set ( CMAKE_INCLUDE_CURRENT_DIR ON )\n")
+        fo.write("set ( CMAKE_AUTOMOC ON )\n")
+        fo.write("set ( CMAKE_AUTORCC ON )\n")
+        fo.write("set ( CMAKE_AUTOUIC ON )\n")
+        fo.write("find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH )\n")
+        fo.write("\n")
+
+        fo.write("include( FindPkgConfig )\n")
+        fo.write("pkg_search_module( Qt5Core REQUIRED )\n")
+        fo.write("pkg_search_module( Qt5Gui REQUIRED )\n")
+        fo.write("pkg_search_module( Qt5Widgets REQUIRED )\n")
+        fo.write("pkg_search_module( Qt5Network REQUIRED )\n")
+        fo.write("pkg_search_module( Qt5Qml REQUIRED )\n")
+        fo.write("\n")
+
+        fo.write("include_directories( ${Qt5Core_INCLUDE_DIRS} )\n")
+        fo.write("include_directories( ${Qt5Gui_INCLUDE_DIRS} )\n")
+        fo.write("include_directories( ${Qt5Widgets_INCLUDE_DIRS} )\n")
+        fo.write("include_directories( ${Qt5Network_INCLUDE_DIRS} )\n")
+        fo.write("include_directories( ${Qt5Qml_INCLUDE_DIRS} )\n")
+        fo.write("\n")
+
     fo.write("# application\n")
     fo.write("\n")
     fo.write("add_executable ( ${PROJECT_NAME} ${SRCS} )\n")
     fo.write("\n")
 
+    fo.write("# load libs\n")
+    fo.write("\n")
+    for lib in loadLibList:
+        fo.write("target_link_libraries ( %s )\n" % lib)
+    if (needQt):
+        fo.write("target_link_libraries ( ${Qt5Core_LIBRARIES} )\n")
+        fo.write("target_link_libraries ( ${Qt5Gui_LIBRARIES} )\n")
+        fo.write("target_link_libraries ( ${Qt5Widgets_LIBRARIES} )\n")
+        fo.write("target_link_libraries ( ${Qt5Network_LIBRARIES} )\n")
+        fo.write("target_link_libraries ( ${Qt5Qml_LIBRARIES} )\n")
+    fo.write("\n")
+
+
     fo.close
     return
     
+    fo.write("# compile flags\n")
+    fo.write("\n")
     fo.write("AM_CFLAGS = -I.\n")
-    fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")
-    fo.write("AM_CFLAGS += -I/usr/X11R6/include\n")
-    if (needQt == True):
-        fo.write("AM_CFLAGS += $(QT_CFLAGS)\n")
+    fo.write("AM_CFLAGS += -fPIC\n")
+    fo.write("\n")
 
-        fo.write("# compile flags - includes\n")
-    fo.write("\n")
-    fo.write("AM_CFLAGS = -I.\n")
-    fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")
-    fo.write("AM_CFLAGS += -I/usr/X11R6/include\n")
-    for lib in usedLibList:
+    if (needQt):
+        fo.write("PKG_CONFIG_PATH = /usr/lib/pkgconfig\n")
+        fo.write("PKG_CONFIG_PATH += /usr/local/opt/qt/lib/pkgconfig\n")
+
+    if (isDebianBased):
+        fo.write("# NOTE: add in Debian location of HDF5\n")
+        fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
+    for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
-    if (needQt == True):
-        fo.write("AM_CFLAGS += $(QT_CFLAGS)\n")
+    if (options.osx):
+        fo.write("# for OSX\n")
+        fo.write("AM_CFLAGS += -I/opt/X11/include\n")
+        fo.write("AM_CFLAGS += -I/usr/local/opt/flex/include\n")
+    if (needQt):
+        fo.write("# for QT\n")
+        fo.write("AM_CFLAGS += -std=c++11\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Core)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Gui)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Widgets)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Network)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Qml)\n")
     fo.write("\n")
+
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
 
     fo.write("# load flags\n")
     fo.write("\n")
     fo.write("AM_LDFLAGS = -L.\n")
-    fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")
-    fo.write("AM_LDFLAGS += -L/usr/X11R6/lib\n")
-    for lib in usedLibList:
+    if (isDebianBased):
+        fo.write("# NOTE: add in Debian location of HDF5\n")
+        fo.write("AM_LDFLAGS += -L/usr/lib/x86_64-linux-gnu/hdf5/serial\n")
+    for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
-    if (needQt == True):
-        fo.write("AM_LDFLAGS += $(QT_LIBS)\n")
+    if (options.osx):
+        fo.write("# for OSX\n")
+        fo.write("AM_LDFLAGS += -L/opt/X11/lib\n")
+        fo.write("AM_LDFLAGS += -L/usr/local/opt/flex/lib\n")
+    if (needQt):
+        fo.write("# for QT\n")
+        fo.write("AM_LDFLAGS += -L$(shell pkg-config --variable=libdir Qt5Gui)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Core)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Gui)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Widgets)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Network)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Qml)\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):
@@ -563,18 +730,73 @@ def writeCMakeLists():
         fo.write("\n")
         for index, loadLib in enumerate(loadLibList):
             if (index == 0):
-                fo.write("LDADD = %s\n" % loadLib)
+                fo.write("LDADD = -l%s\n" % loadLib)
             else:
-                fo.write("LDADD += %s\n" % loadLib)
+                fo.write("LDADD += -l%s\n" % loadLib)
         fo.write("\n")
+
+    #if (needQt):
+    #    fo.write("# qt libs\n")
+    #    fo.write("\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Core)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
+    #    fo.write("\n")
 
     fo.write("# set app name\n")
     fo.write("\n")
     fo.write("bin_PROGRAMS = %s\n" % thisAppName)
     fo.write("\n")
 
+    fo.write("# source files\n")
+    fo.write("\n")
+
+    fo.write("%s_SOURCES = \\\n" % thisAppName)
+    for index, compileFile in enumerate(compileFileList):
+        fo.write("\t%s" % compileFile)
+        if (index == len(compileFileList) - 1):
+            fo.write("\n")
+        else:
+            fo.write(" \\\n")
+    fo.write("\n")
+
     fo.close
 
+########################################################################                        
+# get the LINUX type from the /etc/os-release file
+# or 'darwin' if OSX
+
+def getOsType():                                                                                  
+
+    # check for Mac OSX
+
+    if sys.platform == "darwin":
+        return "osx"
+    elif sys.platform == "linux":
+        osrelease_file = open("/etc/os-release", "rt")
+        lines = osrelease_file.readlines()
+        osrelease_file.close()
+        osType = "unknown"
+        for line in lines:
+            if (line.find('PRETTY_NAME') == 0):
+                lineParts = line.split('=')
+                osParts = lineParts[1].split('"')
+                osType = osParts[1].lower()
+                if (osType.find("debian") >= 0):
+                    return "debian"
+                if (osType.find("ubuntu") >= 0):
+                    return "ubuntu"
+                if (osType.find("centos") >= 0):
+                    return "centos"
+                if (osType.find("rhel") >= 0):
+                    return "rhel"
+                if (osType.find("opensuse") >= 0):
+                    return "opensuse"
+                
+
+    return "unknown"
+            
 ########################################################################
 # Run - entry point
 

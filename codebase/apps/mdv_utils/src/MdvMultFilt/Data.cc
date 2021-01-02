@@ -24,25 +24,6 @@
 #include <toolsa/copyright.h>
 #include <cstdlib>
 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-/*
- * RCS info
- *  $Author: dixon $
- *  $Locker:  $
- *  $Date: 2016/03/04 02:22:12 $
- *  $Id: Data.cc,v 1.4 2016/03/04 02:22:12 dixon Exp $
- *  $Revision: 1.4 $
- *  $State: Exp $
- *
- */
-
-# ifndef    lint
-static char RCSid[] = "$Id: ";
-# endif     /* not lint */
-
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
-
 /************************************************************************
 
 Module:	Data
@@ -59,8 +40,8 @@ Description:   Holds limited data info locally
 
 /* System include files / Local include files */
 #include <cstdio>
-#include <Data.hh>
-#include <Algs.hh>
+#include "Data.hh"
+#include "Algs.hh"
 using namespace std;
 
 /* Constant definitions / Macro definitions / Type definitions */
@@ -69,14 +50,6 @@ using namespace std;
 
 /* External functions / Internal global functions / Internal static functions */
 
-/*----------------------------------------------------------------*/
-# ifndef    lint
-void Data_rcsprint(void)
-{
-    printf("rcsid=%s\n", RCSid);
-}
-# endif     /* not lint */
-  
 /*----------------------------------------------------------------*/
 Data::Data(MdvxField *f)
 {

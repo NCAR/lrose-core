@@ -21,20 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-/*
- * RCS info
- *  $Author: dixon $
- *  $Locker:  $
- *  $Date: 2016/03/04 02:22:12 $
- *  $Id: TempData.hh,v 1.2 2016/03/04 02:22:12 dixon Exp $
- *  $Revision: 1.2 $
- *  $State: Exp $
- *
- */
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
-
 /************************************************************************
 
 Header: TempData.hh
@@ -52,7 +38,7 @@ Description: Holds copy of one data grid that is needed later.
 
 /* System include files / Local include files */
 #include <Mdv/DsMdvx.hh>
-#include <Data.hh>
+#include "Data.hh"
 using namespace std;
 
 /* Class definitions */

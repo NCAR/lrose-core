@@ -3,6 +3,7 @@ project(LROSE-CORE)
 
 set(CMAKE_C_COMPILER_NAMES clang gcc icc cc)
 set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/"
         CACHE INTERNAL "Location of our custom CMake modules.")
@@ -11,6 +12,8 @@ SET(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
 set(FETCHCONTENT_QUIET false CACHE BOOL "" FORCE)
 
 set(PACKAGE "LROSE-CORE" CACHE STRING "")
+
+find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)
 
 # If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -21,6 +24,7 @@ message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")
 enable_testing()
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB -fPIC")
 
 add_subdirectory(libs)
 add_subdirectory(apps)

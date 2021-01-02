@@ -24,8 +24,6 @@
 #include <iostream>
 #include <sys/wait.h>
 
-#include <DsServerMgr.hh>
-
 #include <toolsa/TaStr.hh>
 #include <toolsa/GetHost.hh>
 #include <toolsa/DateTime.hh>
@@ -34,6 +32,9 @@
 
 #include <didss/DsMsgPart.hh>
 #include <dsserver/DsLocator.hh>
+
+#include "DsServerMgr.hh"
+
 using namespace std;
 
 // constructor

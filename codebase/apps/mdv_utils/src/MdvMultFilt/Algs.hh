@@ -21,20 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-/*
- * RCS info
- *  $Author: dixon $
- *  $Locker:  $
- *  $Date: 2016/03/04 02:22:12 $
- *  $Id: Algs.hh,v 1.2 2016/03/04 02:22:12 dixon Exp $
- *  $Revision: 1.2 $
- *  $State: Exp $
- *
- */
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
-
 /************************************************************************
 
 Header: Algs.hh
@@ -52,7 +38,7 @@ Description: The actual filtering algorithm code for all filters, contains
 # define    Algs_HH
 
 /* System include files / Local include files */
-#include <Params.hh>
+#include "Params.hh"
 #include <dataport/port_types.h>
 using namespace std;
 

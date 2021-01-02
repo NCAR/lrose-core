@@ -21,20 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-/*
- * RCS info
- *  $Author: dixon $
- *  $Locker:  $
- *  $Date: 2016/03/04 02:22:12 $
- *  $Id: TempDataState.hh,v 1.2 2016/03/04 02:22:12 dixon Exp $
- *  $Revision: 1.2 $
- *  $State: Exp $
- *
- */
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
-
 /************************************************************************
 
 Header: TempDataState.hh
@@ -54,9 +40,9 @@ Description: Temporary data storage class, all data that needs to be kept around
 #include <map>
 #include <string>
 #include <cstdio>
-#include <TempData.hh>
-#include <Data.hh>
-#include <Params.hh>
+#include "TempData.hh"
+#include "Data.hh"
+#include "Params.hh"
 using namespace std;
 
 /* Class definition */

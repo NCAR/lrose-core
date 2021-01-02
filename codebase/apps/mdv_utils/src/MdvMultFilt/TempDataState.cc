@@ -23,25 +23,6 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include <toolsa/copyright.h>
 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-/*
- * RCS info
- *  $Author: dixon $
- *  $Locker:  $
- *  $Date: 2016/03/04 02:22:12 $
- *  $Id: TempDataState.cc,v 1.3 2016/03/04 02:22:12 dixon Exp $
- *  $Revision: 1.3 $
- *  $State: Exp $
- *
- */
-
-# ifndef    lint
-static char RCSid[] = "$Id: ";
-# endif     /* not lint */
-
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
-
 /************************************************************************
 
 Module:	TempDataState
@@ -58,7 +39,7 @@ Description:   Temporary data storage class, all data.
 
 /* System include files / Local include files */
 #include <cstdio>
-#include <TempDataState.hh>
+#include "TempDataState.hh"
 using namespace std;
 
 /* Constant definitions / Macro definitions / Type definitions */
@@ -68,13 +49,6 @@ using namespace std;
 /* External functions / Internal global functions / Internal static functions */
 
 /*----------------------------------------------------------------*/
-# ifndef    lint
-void TempDataState_rcsprint(void)
-{
-    printf("rcsid=%s\n", RCSid);
-}
-# endif     /* not lint */
-  
 /*----------------------------------------------------------------*/
 TempDataState::TempDataState(void)
 {

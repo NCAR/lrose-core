@@ -23,25 +23,6 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include <toolsa/copyright.h>
 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-/*
- * RCS info
- *  $Author: dixon $
- *  $Locker:  $
- *  $Date: 2016/03/04 02:22:12 $
- *  $Id: Process.cc,v 1.3 2016/03/04 02:22:12 dixon Exp $
- *  $Revision: 1.3 $
- *  $State: Exp $
- *
- */
-
-# ifndef    lint
-static char RCSid[] = "$Id: ";
-# endif     /* not lint */
-
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
-
 /************************************************************************
 
 Module:	Process.cc
@@ -55,7 +36,7 @@ Description:   Processing of MDV. Built from Niles Oien Mdv filtering example.
 ************************************************************************/
 
 /* System include files / Local include files */
-#include <Process.hh>
+#include "Process.hh"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -67,15 +48,6 @@ Description:   Processing of MDV. Built from Niles Oien Mdv filtering example.
 #include <Mdv/MdvxChunk.hh>
 using namespace std;
 
-/*----------------------------------------------------------------*/
-# ifndef    lint
-void Process_rcsprint(void)
-{
-    printf("rcsid=%s\n", RCSid);
-}
-# endif     /* not lint */
-  
-/*----------------------------------------------------------------*/
 static const char * _filter_parm_name(Params::filter_parm_t &f)
 {
   switch (f.FilterType)

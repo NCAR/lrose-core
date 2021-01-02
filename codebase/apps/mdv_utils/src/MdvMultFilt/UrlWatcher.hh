@@ -28,8 +28,8 @@
 
 #include <toolsa/pmu.h>
 #include <Mdv/DsMdvxTimes.hh>
-#include <TempDataState.hh>
-#include <Params.hh>
+#include "TempDataState.hh"
+#include "Params.hh"
 using namespace std;
 
 class UrlWatcher {
