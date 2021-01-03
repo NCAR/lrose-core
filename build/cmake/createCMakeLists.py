@@ -19,6 +19,8 @@ def main():
     global options
     global subdirList
     global libList
+    global coreDir
+    global codebaseDir
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
@@ -45,6 +47,10 @@ def main():
                       dest='verbose', default=False,
                       action="store_true",
                       help='Set verbose debugging on')
+    parser.add_option('--silent',
+                      dest='silent', default=False,
+                      action="store_true",
+                      help='Set debugging off')
     parser.add_option('--coreDir',
                       dest='coreDir', default=coreDirDefault,
                       help='Path of lrose-core top level directory, default is: ' +
@@ -60,48 +66,54 @@ def main():
                       dest='osx', default=False,
                       action="store_true",
                       help='Configure for MAC OSX')
+    parser.add_option('--verboseMake',
+                      dest='verboseMake', default=False,
+                      action="store_true",
+                      help='Verbose output for make, default is summary')
 
     (options, args) = parser.parse_args()
 
     if (options.verbose):
         options.debug = True
+    if (options.silent):
+        options.debug = False
+        options.verbose = False
     
-    if (options.debug):
-        print("Running %s:" % thisScriptName, file=sys.stderr)
-        print("  Core dir: ", options.coreDir, file=sys.stderr)
-        print("  static: ", options.static, file=sys.stderr)
-        print("  pkg: ", options.pkg, file=sys.stderr)
-        print("  osx: ", options.osx, file=sys.stderr)
-
-    # go to the top level codebase
-
-    codebaseDir = os.path.join(options.coreDir, "codebase")
-    os.chdir(codebaseDir)
-
-    # copy the top level CMakeLists.txt file into place
-
-    print("  info: copying top level CMakeLists.txt file", file=sys.stderr)
-    shutil.copy('../build/cmake/CMakeLists.txt.top', './CMakeLists.txt')
-    count = count + 1
-    
-    # recursively search the libs and apps trees
-
+    os.chdir(options.coreDir)
+    coreDir = os.getcwd()
+    codebaseDir = os.path.join(coreDir, "codebase")
     libsDir =  os.path.join(codebaseDir, "libs")
     appsDir =  os.path.join(codebaseDir, "apps")
 
     if (options.debug):
-        print("  codebase dir: ", codebaseDir, file=sys.stderr)
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  coreDir: ", coreDir, file=sys.stderr)
+        print("  codebaseDir: ", codebaseDir, file=sys.stderr)
         print("  libs dir: ", libsDir, file=sys.stderr)
         print("  apps dir: ", appsDir, file=sys.stderr)
+        print("  static: ", options.static, file=sys.stderr)
+        print("  pkg: ", options.pkg, file=sys.stderr)
+        print("  osx: ", options.osx, file=sys.stderr)
+        print("  verboseMake: ", options.verboseMake, file=sys.stderr)
 
+    # go to the top level codebase
+
+    os.chdir(codebaseDir)
+
+    # write the top level CMakeLists.txt file
+
+    writeCMakeListsTop(codebaseDir)
+    count = count + 1
+    sys.exit(0)
+    
     # get list of libs
     
     getLibList(libsDir)
 
-    # search libs and apps for makefiles
+    # recursively search libs and apps for makefiles
 
-    searchDir(libsDir)
-    searchDir(appsDir)
+    searchDirRecurse(libsDir)
+    searchDirRecurse(appsDir)
 
     if (options.debug):
         print("==>> n CMakeLists.txt files created: ", count, file=sys.stderr)
@@ -160,7 +172,7 @@ def getLibList(dir):
 ########################################################################
 # search directory and subdirectories
 
-def searchDir(dir):
+def searchDirRecurse(dir):
                     
     global count
 
@@ -246,7 +258,7 @@ def searchDir(dir):
         loadSubdirList(dir)
         for subdir in subdirList:
             subdirPath = os.path.join(dir, subdir)
-            searchDir(subdirPath)
+            searchDirRecurse(subdirPath)
 
     return
 
@@ -379,7 +391,7 @@ def getValueListForKey(path, key):
 def createCMakeListsRecurse(dir):
 
     if (options.debug):
-        print("  Recurse, dir: ", dir, file=sys.stderr)
+        print("  creating CMakeLists.txt, dir: ", dir, file=sys.stderr)
 
     # go to the dir
 
@@ -431,6 +443,79 @@ def getSubdirList(makefilePath):
             subdirList.append(subName)
 
     return subdirList
+
+########################################################################
+# Write out top level CMakeLists.txt
+
+def writeCMakeListsTop(dir):
+
+    cmakePath = os.path.join(dir, "CMakeLists.txt")
+    if (options.debug):
+        print("  writing top level: ", cmakePath, file=sys.stderr)
+    fo = open(cmakePath, 'w')
+
+    fo.write('###############################################\n')
+    fo.write('#\n')
+    fo.write('# Top-level CMakeLists file for lrose-core\n')
+    fo.write('#\n')
+    fo.write('# dir: %s\n' % dir)
+    fo.write('#\n')
+    fo.write('# written by script %s\n' % thisScriptName)
+    fo.write('#\n')
+    fo.write('# created %s\n' % datetime.now())
+    fo.write('#\n')
+    fo.write('###############################################\n')
+    fo.write('\n')
+    fo.write('cmake_minimum_required( VERSION 2.8 )\n')
+    fo.write('\n')
+    fo.write('project (lrose-core)\n')
+    fo.write('\n')
+
+    fo.write('set( CMAKE_C_COMPILER_NAMES clang gcc icc cc )\n')
+    fo.write('set( CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx )\n')
+    fo.write('\n')
+
+    if (options.verboseMake):
+        fo.write('set( CMAKE_VERBOSE_MAKEFILE ON )\n')
+    else:
+        fo.write('set( CMAKE_VERBOSE_MAKEFILE OFF )\n')
+    fo.write('\n')
+
+    fo.write('SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/"\n')
+    fo.write('     CACHE INTERNAL "Location of our custom CMake modules." )\n')
+    fo.write('\n')
+
+    fo.write('SET( CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake" )\n')
+    fo.write('\n')
+
+    fo.write('set( FETCHCONTENT_QUIET false CACHE BOOL "" FORCE )\n')
+    fo.write('\n')
+
+    fo.write('set( PACKAGE "LROSE-CORE" CACHE STRING "" )\n')
+    fo.write('\n')
+
+    fo.write('find_package ( Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH )\n')
+    fo.write('\n')
+
+    fo.write('# If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose\n')
+    fo.write('if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )\n')
+    fo.write('  set( CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE )\n')
+    fo.write('endif(  )\n')
+    fo.write('message( "CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}" )\n')
+    fo.write('\n')
+
+    fo.write('enable_testing(  )\n')
+    fo.write('\n')
+
+    fo.write('set( CMAKE_CXX_STANDARD 11 )\n')
+    fo.write('set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB -fPIC" )\n')
+    fo.write('add_definitions( -DNO_JASPER_LIB  )\n')
+    fo.write('\n')
+
+    fo.write('add_subdirectory( libs )\n')
+    fo.write('add_subdirectory( apps )\n')
+    fo.write('\n')
+    fo.close
 
 ########################################################################
 # Write out CMakeLists.am
