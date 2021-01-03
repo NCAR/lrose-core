@@ -104,7 +104,6 @@ def main():
 
     writeCMakeListsTop(codebaseDir)
     count = count + 1
-    sys.exit(0)
     
     # get list of libs
     
