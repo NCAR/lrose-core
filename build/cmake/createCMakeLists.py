@@ -18,7 +18,6 @@ def main():
 
     global options
     global subdirList
-    global libList
     global coreDir
     global codebaseDir
 
@@ -107,12 +106,12 @@ def main():
     
     # get list of libs
     
-    getLibList(libsDir)
+    (libArray, libList) = getLibList(libsDir)
 
     # recursively search libs and apps for makefiles
 
-    searchDirRecurse(libsDir)
-    searchDirRecurse(appsDir)
+    searchDirRecurse(libsDir, libArray, libList)
+    searchDirRecurse(appsDir, libArray, libList)
 
     if (options.debug):
         print("==>> n CMakeLists.txt files created: ", count, file=sys.stderr)
@@ -124,9 +123,8 @@ def main():
 
 def getLibList(dir):
                     
-    global libList
-    libList = ""
     libArray = []
+    libList = ""
 
     if (options.debug):
         print("  Getting lib list from dir: ", dir, file=sys.stderr)
@@ -166,12 +164,12 @@ def getLibList(dir):
     if (options.debug):
         print("  libList: ", libList, file=sys.stderr)
 
-    return
+    return libArray, libList
 
 ########################################################################
 # search directory and subdirectories
 
-def searchDirRecurse(dir):
+def searchDirRecurse(dir, libArray, libList):
                     
     global count
 
@@ -257,7 +255,7 @@ def searchDirRecurse(dir):
         loadSubdirList(dir)
         for subdir in subdirList:
             subdirPath = os.path.join(dir, subdir)
-            searchDirRecurse(subdirPath)
+            searchDirRecurse(subdirPath, libArray, libList)
 
     return
 
