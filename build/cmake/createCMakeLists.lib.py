@@ -15,7 +15,7 @@ import platform
 from optparse import OptionParser
 from datetime import datetime
 
-class SubDir:
+class LibSubDir:
     def __init__(self, subDirName, makefilePath):
         self.subDirName = subDirName
         self.makefilePath = makefilePath
@@ -29,24 +29,9 @@ def main():
 
     global options
     global thisLibName
-    global makefileName
-    global subDirList
-    global compileFileList
-    global headerFileList
-    global includeList
-    global libList
-    global includesInSubDir
-    global isDebianBased
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
-
-    osType = getOsType()
-    isDebianBased = False
-    if (osType == "debian"):
-        isDebianBased = True
-    if (osType == "ubuntu"):
-        isDebianBased = True
 
     # parse the command line
 
@@ -105,44 +90,30 @@ def main():
 
     # go to the src dir
 
-    srcDir = os.path.join(options.dir, 'src')
+    libSrcDir = os.path.join(options.dir, 'src')
     if (options.debug):
-        print("src dir: ", srcDir, file=sys.stderr)
-    os.chdir(srcDir)
+        print("src dir: ", libSrcDir, file=sys.stderr)
+    os.chdir(libSrcDir)
 
-    # get makefile name in use
+    # get makefile in use
     # makefile has preference over Makefile
 
-    makefileName = '__makefile.template'
-    if (os.path.exists(makefileName) == False):
-        makefileName = 'makefile'
-        if (os.path.exists(makefileName) == False):
-            makefileName = 'Makefile'
-            if (os.path.exists(makefileName) == False):
-                print("ERROR - ", thisScriptName, file=sys.stderr)
-                print("  Cannot find makefile or Makefile", file=sys.stderr)
-                print("  dir: ", options.dir, file=sys.stderr)
-                exit(1)
-
-    # copy makefile in case we rerun this script
-
-    if (makefileName != "__makefile.template"):
-        shutil.copy(makefileName, "__makefile.template")
-
-    if (options.debug):
-        print("-->> using makefile template: ", makefileName, file=sys.stderr)
+    makefilePath = getMakefilePath(libSrcDir)
+    if (makefilePath.find('not_found') == 0):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find makefile or Makefile", file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
+        exit(1)
 
     # get the lib name
 
-    thisLibName = ""
-    getLibName()
+    thisLibName = getLibName(libSrcDir, makefilePath)
     if (options.debug):
         print("  Lib name: ", thisLibName, file=sys.stderr)
 
     # get list of subdirs and their makefiles
 
-    getSubDirList()
-
+    subDirList = getLibSubDirs(libSrcDir)
     if (options.debug):
         print("=======================", file=sys.stderr)
         for subDir in subDirList:
@@ -154,7 +125,7 @@ def main():
 
     compileFileList = []
     for subDir in subDirList:
-        addSubDirToCompileList(subDir)
+        addSubDirToCompileList(subDir, compileFileList)
 
     if (options.debug):
         print("=======================", file=sys.stderr)
@@ -164,18 +135,42 @@ def main():
 
     # get list of header files
 
-    loadHeaderFileList()
-    if (options.debug):
-        print("=======================", file=sys.stderr)
-        for headerFile in headerFileList:
-            print("headerFile: %s" % (headerFile), file=sys.stderr)
-        print("=======================", file=sys.stderr)
+    # headerFileList = loadHeaderFileList()
+    # if (options.debug):
+    #     print("=======================", file=sys.stderr)
+    #     for headerFile in headerFileList:
+    #         print("headerFile: %s" % (headerFile), file=sys.stderr)
+    #     print("=======================", file=sys.stderr)
 
     # write out CMakeLists.txt
 
-    writeCMakeLists()
+    writeCMakeListsLib(libSrcDir, libList, compileFileList)
 
     sys.exit(0)
+
+########################################################################
+# find makefile template
+
+def getMakefilePath(dir):
+                    
+    makefilePath = os.path.join(dir, '__makefile.template')
+    if (os.path.exists(makefilePath) == False):
+        makefilePath = os.path.join(dir, 'makefile')
+        if (os.path.exists(makefilePath) == False):
+            makefilePath = os.path.join(dir, 'Makefile')
+            if (os.path.exists(makefilePath) == False):
+                makefilePath = os.path.join(dir, 'not_found')
+
+    # copy makefile in case we rerun this script
+
+    if (makefilePath.find('__makefile.template') < 0):
+        templatePath = os.path.join(dir, '__makefile.template')
+        shutil.copy(makefilePath, templatePath)
+
+    if (options.debug):
+        print("-->> using makefile template: ", makefilePath, file=sys.stderr)
+
+    return makefilePath
 
 ########################################################################
 # get string value based on search key
@@ -240,59 +235,59 @@ def getValueListForKey(path, key):
 ########################################################################
 # parse the LROSE Makefile to get the lib name
 
-def getLibName():
-
-    global thisLibName
+def getLibName(dir, makefilePath):
 
     # search for MODULE_NAME key in makefile
 
-    valList = getValueListForKey(makefileName, "MODULE_NAME")
+    valList = getValueListForKey(makefilePath, "MODULE_NAME")
 
     if (len(valList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  Cannot find MODULE_NAME in ", makefileName, file=sys.stderr)
-        print("  dir: ", options.dir, file=sys.stderr)
+        print("  dir: ", dir, file=sys.stderr)
         exit(1)
 
-    thisLibName = valList[len(valList)-1]
+    libName = valList[len(valList)-1]
+    return libName
 
 ########################################################################
-# get list of makefiles - using LROSE Makefile to locate subdirs
+# get list of makefiles for library
+# using LROSE Makefile to locate subdirs
 
-def getSubDirList():
+def getLibSubDirs(libDir):
 
-    global subDirList
-    subDirList = []
+    libSubDirs = []
 
     # search for SUB_DIRS key in makefile
 
-    subNameList = getValueListForKey(makefileName, "SUB_DIRS")
+    makefilePath = getMakefilePath(libDir)
+    subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
 
     if (len(subNameList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find SUB_DIRS in ", makefileName, file=sys.stderr)
-        print("  dir: ", options.dir, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", makefilePath, file=sys.stderr)
+        print("  libDir: ", libDir, file=sys.stderr)
         exit(1)
 
     for subName in subNameList:
         if (os.path.isdir(subName)):
-            makefilePath = os.path.join(subName, 'makefile')
-            if (os.path.isfile(makefilePath)):
-                subDir = SubDir(subName, makefilePath)
-                subDirList.append(subDir)
+            subMakefilePath = os.path.join(subName, 'makefile')
+            if (os.path.isfile(subMakefilePath)):
+                subDir = LibSubDir(subName, subMakefilePath)
+                libsSubDirs.append(subDir)
             else:
-                makefilePath = os.path.join(subName, 'Makefile')
-                if (os.path.isfile(makefilePath)):
-                    subDir = SubDir(subName, makefilePath)
-                    subDirList.append(subDir)
+                subMakefilePath = os.path.join(subName, 'Makefile')
+                if (os.path.isfile(subMakefilePath)):
+                    subDir = LibSubDir(subName, subMakefilePath)
+                    libSubDirs.append(subDir)
+
+    return libSubDirs
 
 ########################################################################
 # append to list of files to be compiled
 
-def addSubDirToCompileList(subDir):
+def addSubDirToCompileList(subDir, compileFileList):
                     
-    global compileFileList
-    
     srcTypeList = [ 'SRCS', 'C_SRCS', 'F_SRCS', 'F_CPP_SRCS', 
                     'F90_SRCS', 'F95_SRCS', 'PGF90_SRCS', 
                     'PGF_SRCS', 'CC_SRCS', 'CPPC_SRCS', 
@@ -302,12 +297,12 @@ def addSubDirToCompileList(subDir):
     lines = fp.readlines()
 
     for srcType in srcTypeList:
-        handleSrcType(subDir, lines, srcType)
+        handleSrcType(subDir, lines, srcType, compileFileList)
     
 ########################################################################
 # append to compile list for given srcType
 
-def handleSrcType(subDir, lines, srcType):
+def handleSrcType(subDir, lines, srcType, compileFileList):
 
     # build up multiLine string containing all compile files
 
@@ -355,80 +350,39 @@ def handleSrcType(subDir, lines, srcType):
 ########################################################################
 # load up header file list
 
-def loadHeaderFileList():
+# def loadHeaderFileList():
 
-    global headerFileList
-    headerFileList = []
+#     headerFileList = []
 
-    global includesInSubDir
-    includesInSubDir = False
+#     incDirList = os.listdir("include")
 
-    subdirList = os.listdir("include")
+#     for incDir in incDirList:
+#         incPath = os.path.join("include", incDir)
+#         if ((os.path.isdir(incPath)) and (incDir != "CVS")):
+#             appendToHeaderFileList(incPath, headerFileList)
 
-    for subdir in subdirList:
-        incDir = os.path.join("include", subdir)
-        if ((os.path.isdir(incDir)) and (subdir != "CVS")):
-            appendToHeaderFileList(incDir)
-            includesInSubDir = True
+#     return headerFileList
 
-    if (includesInSubDir == False):
-        appendToHeaderFileList("include")
-            
 ########################################################################
 # append to header file list
 
-def appendToHeaderFileList(dir):
+# def appendToHeaderFileList(dir, headerFileList):
 
-    global headerFileList
+#     fileList = os.listdir(dir)
+#     for fileName in fileList:
+#         last2 = fileName[-2:]
+#         last3 = fileName[-3:]
+#         if (last2 == ".h") or (last3 == ".hh"):
+#             filePath = os.path.join(dir, fileName)
+#             headerFileList.append(filePath)
 
-    fileList = os.listdir(dir)
-    for fileName in fileList:
-        last2 = fileName[-2:]
-        last3 = fileName[-3:]
-        if (last2 == ".h") or (last3 == ".hh"):
-            filePath = os.path.join(dir, fileName)
-            headerFileList.append(filePath)
-
-########################################################################
-# set the list of libs to be used for include
-
-def setIncludeList(sourceFile):
-                    
-    global includeList
-    
-    if (options.verbose):
-        print("-->> looking for includes in: ", sourceFile, file=sys.stderr)
-
-    fp = open(sourceFile, 'r')
-    lines = fp.readlines()
-    
-    for line in lines:
-        if ((line[0] != '#') or
-            (line.find("include") < 0) or
-            (line.find("/") < 0) or
-            (line.find("<") < 0) or
-            (line.find(">") < 0)):
-            continue
-
-        if (options.verbose):
-            print("  -->> ", line.strip(), file=sys.stderr)
-        
-        for lib in includeList:
-            if (lib.name == thisLibName):
-                # skip this lib
-                continue
-            searchStr = "<%s/" % lib.name
-            if (line.find(searchStr) > 0):
-                if (options.verbose):
-                    print("  -->> found lib", lib.name, file=sys.stderr)
-                lib.used = True
-            
 ########################################################################
 # Write out CMakeLists.txt
 
-def writeCMakeLists():
+def writeCMakeListsLib(libDir, libList, compileFileList):
 
-    fo = open("CMakeLists.txt", "w")
+    cmakePath = os.path.join(libDir, 'CMakeLists.txt')
+    fo = open(cmakePath, "w")
 
     fo.write("###############################################\n")
     fo.write("#\n")
@@ -483,95 +437,6 @@ def writeCMakeLists():
     fo.close
     return
 
-    fo.write("AM_CFLAGS += -fPIC\n")
-    if (isDebianBased):
-        fo.write("# NOTE: add in Debian location of HDF5\n")
-        fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
-    fo.write("# NOTE: add in Mac OSX location of XQuartz\n")
-    fo.write("AM_CFLAGS += -I/usr/X11R6/include -I/opt/X11/include\n")
-    if (not options.static):
-        fo.write("ACLOCAL_AMFLAGS = -I m4\n")
-    #    fo.write("AM_CFLAGS += -I$(prefix)/include\n")
-
-    for lib in libList:
-        # if (lib.used):
-        #fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib.name)
-        fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib)
-    fo.write("\n")
-    fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
-    fo.write("\n")
-    fo.write("# target library file\n")
-    fo.write("\n")
-    if (not options.static):
-        fo.write("lib_LTLIBRARIES = lib%s.la\n" % thisLibName)
-    else:
-        fo.write("lib_LIBRARIES = lib%s.a\n" % thisLibName)
-    fo.write("\n")
-    fo.write("# headers to be installed\n")
-    fo.write("\n")
-    if (includesInSubDir):
-        fo.write("includedir = $(prefix)/include/%s\n" % thisLibName)
-    else:
-        fo.write("includedir = $(prefix)/include\n")
-    fo.write("\n")
-
-    fo.write("include_HEADERS = \\\n")
-    for index, headerFile in enumerate(headerFileList):
-        fo.write("\t%s" % headerFile)
-        if (index == len(headerFileList) - 1):
-            fo.write("\n")
-        else:
-            fo.write(" \\\n")
-    fo.write("\n")
-
-    if (not options.static):
-        fo.write("lib%s_la_SOURCES = \\\n" % thisLibName)
-    else:
-        fo.write("lib%s_a_SOURCES = \\\n" % thisLibName)
-    for index, compileFile in enumerate(compileFileList):
-        fo.write("\t%s" % compileFile)
-        if (index == len(compileFileList) - 1):
-            fo.write("\n")
-        else:
-            fo.write(" \\\n")
-    fo.write("\n")
-
-    fo.close
-
-########################################################################                        
-# get the LINUX type from the /etc/os-release file
-# or 'darwin' if OSX
-
-def getOsType():
-
-    # check for Mac OSX
-
-    if sys.platform == "darwin":
-        return "osx"
-    elif sys.platform == "linux":
-        osrelease_file = open("/etc/os-release", "rt")
-        lines = osrelease_file.readlines()
-        osrelease_file.close()
-        osType = "unknown"
-        for line in lines:
-            if (line.find('PRETTY_NAME') == 0):
-                lineParts = line.split('=')
-                osParts = lineParts[1].split('"')
-                osType = osParts[1].lower()
-                if (osType.find("debian") >= 0):
-                    return "debian"
-                if (osType.find("ubuntu") >= 0):
-                    return "ubuntu"
-                if (osType.find("centos") >= 0):
-                    return "centos"
-                if (osType.find("rhel") >= 0):
-                    return "rhel"
-                if (osType.find("opensuse") >= 0):
-                    return "opensuse"
-                
-
-    return "unknown"
-            
 ########################################################################
 # Run - entry point
 

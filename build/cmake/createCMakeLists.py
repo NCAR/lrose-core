@@ -14,6 +14,16 @@ import subprocess
 from optparse import OptionParser
 from datetime import datetime
 
+class LibSubDir:
+    def __init__(self, subDirName, makefilePath):
+        self.subDirName = subDirName
+        self.makefilePath = makefilePath
+
+class LibInclude:
+    def __init__(self, name, used):
+        self.name = name
+        self.used = used
+
 def main():
 
     global options
@@ -440,6 +450,39 @@ def getSubdirList(makefilePath):
             subdirList.append(subName)
 
     return subdirList
+
+########################################################################
+# get list of makefiles for library
+# using LROSE Makefile to locate subdirs
+
+def getLibSubDirs(libDir):
+
+    libSubDirs = []
+
+    # search for SUB_DIRS key in makefile
+
+    makefilePath = getMakefilePath(libDir)
+    subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
+
+    if (len(subNameList) < 1):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", makefilePath, file=sys.stderr)
+        print("  libDir: ", libDir, file=sys.stderr)
+        exit(1)
+
+    for subName in subNameList:
+        if (os.path.isdir(subName)):
+            subMakefilePath = os.path.join(subName, 'makefile')
+            if (os.path.isfile(subMakefilePath)):
+                subDir = LibSubDir(subName, subMakefilePath)
+                libsSubDirs.append(subDir)
+            else:
+                subMakefilePath = os.path.join(subName, 'Makefile')
+                if (os.path.isfile(subMakefilePath)):
+                    subDir = LibSubDir(subName, subMakefilePath)
+                    libSubDirs.append(subDir)
+
+    return libSubDirs
 
 ########################################################################
 # Write out top level CMakeLists.txt
