@@ -27,7 +27,6 @@ class LibInclude:
 def main():
 
     global options
-    global subdirList
     global coreDir
     global codebaseDir
 
@@ -267,7 +266,7 @@ def searchDirRecurse(dir, libArray, libList):
         createCMakeListsRecurse(absDir)
         count = count + 1
         # recurse
-        loadSubdirList(dir)
+        subdirList = getSubdirList(dir)
         for subdir in subdirList:
             subdirPath = os.path.join(dir, subdir)
             searchDirRecurse(subdirPath, libArray, libList)
@@ -277,48 +276,30 @@ def searchDirRecurse(dir, libArray, libList):
 ########################################################################
 # load list of sub directories
 
-def loadSubdirList(dir):
+def getSubdirList(dir):
                     
-    global subdirList
     subdirList = []
+    
+    # get makefile for this dir
 
     makefilePath = getMakefilePath(dir)
 
-    try:
-        fp = open(makefilePath, 'r')
-    except IOError as e:
-        if (options.verbose):
-            print("ERROR - ", thisScriptName, file=sys.stderr)
-            print("  Cannot find makefile or Makefile", file=sys.stderr)
-            print("  coreDir: ", options.coreDir, file=sys.stderr)
-        return
+    # search for SUB_DIRS key in makefile
 
-    lines = fp.readlines()
-    fp.close()
+    subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
 
-    subDirsFound = False
-    for line in lines:
-        if (subDirsFound == False):
-            if (line[0] == '#'):
-                continue
-            if (line.find("SUB_DIRS") >= 0):
-                subDirsFound = True
-                toks = line.split(' ')
-                for tok in toks:
-                    thisTok = tok.strip(" \t\n\r")
-                    if (thisTok != "SUB_DIRS"):
-                        if (len(thisTok) > 1):
-                            subdirList.append(thisTok)
-        else:
-            if (line[0] == '#'):
-                return
-            if (len(line) < 2):
-                return
-            toks = line.split(' ')
-            for tok in toks:
-                thisTok = tok.strip(" \t\n\r")
-                if (len(thisTok) > 1):
-                    subdirList.append(thisTok)
+    if (len(subNameList) < 1):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", makefilePath, file=sys.stderr)
+        print("  dir: ", dir, file=sys.stderr)
+        exit(1)
+
+    for subName in subNameList:
+        subPath = os.path.join(dir, subName)
+        if (os.path.isdir(subPath)):
+            subdirList.append(subName)
+
+    return subdirList
 
 ########################################################################
 # find makefile template
@@ -422,8 +403,8 @@ def createCMakeListsRecurse(dir):
 
     # go to the dir
 
-    currentDir = os.getcwd()
-    os.chdir(dir)
+    #currentDir = os.getcwd()
+    #os.chdir(dir)
 
     # get makefile name in use
 
@@ -431,7 +412,7 @@ def createCMakeListsRecurse(dir):
 
     # load list of subdirs
     
-    subdirList = getSubdirList(makefilePath)
+    subdirList = getSubdirList(dir)
 
     if (options.debug == True):
         print("=======================", file=sys.stderr)
@@ -446,30 +427,7 @@ def createCMakeListsRecurse(dir):
 
     # go back to original dir
     
-    os.chdir(currentDir)
-
-########################################################################
-# load list of sub directories
-
-def getSubdirList(makefilePath):
-                    
-    subdirList = []
-    
-    # search for SUB_DIRS key in makefile
-
-    subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
-
-    if (len(subNameList) < 1):
-        print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find SUB_DIRS in ", makefilePath, file=sys.stderr)
-        print("  dir: ", options.dir, file=sys.stderr)
-        exit(1)
-
-    for subName in subNameList:
-        if (os.path.isdir(subName) == True):
-            subdirList.append(subName)
-
-    return subdirList
+    #os.chdir(currentDir)
 
 ########################################################################
 # parse the LROSE Makefile to get the lib name
