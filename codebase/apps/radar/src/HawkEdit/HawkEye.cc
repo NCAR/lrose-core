@@ -54,6 +54,7 @@
 #include <string>
 #include <iostream>
 #include <QApplication>
+#include <QFileDialog>
 
 using namespace std;
 
@@ -211,8 +212,9 @@ int HawkEye::Run(QApplication &app)
     // but the Model can be edited by the parameter/color editor
     _polarManager = new PolarManager(_params, _reader,
                                      displayFieldController,
-				     _haveFilteredFields);
+				                             _haveFilteredFields);
 
+    bool noFilename = false;
     if (_args.inputFileList.size() > 0) {
       _polarManager->setArchiveFileList(_args.inputFileList);
       // override archive data url from input file
@@ -220,7 +222,38 @@ int HawkEye::Run(QApplication &app)
       TDRP_str_replace(&_params.archive_data_url, url.c_str());
     } else if (_params.begin_in_archive_mode) {
       if (_polarManager->loadArchiveFileList()) {
-        
+        noFilename = true;
+        //_polarManager->_openFile();
+         // seed with files for the day currently in view
+        // generate like this: *yyyymmdd*
+        //string pattern = _archiveStartTime.getDateStrPlain();
+        //QString finalPattern = "Cfradial (*.nc);; All Files (*.*);; All files (*";
+        //finalPattern.append(pattern.c_str());
+        //finalPattern.append("*)");
+/*
+        QString inputPath = "/"; // QDir::currentPath();
+        // get the path of the current file, if available 
+        //if (_archiveFileList.size() > 0) {
+        //  QDir temp(_archiveFileList[0].c_str());
+        //  inputPath = temp.absolutePath();
+        //} 
+
+        QString filename =  QFileDialog::getOpenFileName(
+                NULL,
+                "Open Document",
+                inputPath, "All files (*);; Cfradial (*.nc)");  //QDir::currentPath(),
+        vector<string> fileList;
+        fileList.push_back(filename.toStdString());
+        _polarManager->setArchiveFileList(fileList, false);
+        // override archive data url from input file
+        string url = _getArchiveUrl(fileList[0]);
+        TDRP_str_replace(&_params.archive_data_url, url.c_str());
+
+        // choose which fields to import
+        vector<string> *allFieldNames = _polarManager->userSelectFieldsForReading(fileList[0]);
+*/
+        //"All files (*.*)");
+        /*
         string errMsg = "WARNING\n";
         errMsg.append("<p>HawkEye cannot find archive data files. </p>");
         errMsg.append("<p> Choose a file to open or change the time limits. </p>");
@@ -232,12 +265,12 @@ int HawkEye::Run(QApplication &app)
         errorDialog.setMinimumSize(400, 250);
         errorDialog.showMessage(errMsg.c_str());
         errorDialog.exec();
-
+        */
         // return -1;
       }
     }
-
-    return _polarManager->run(app);
+    
+    return _polarManager->run(app); // , noFilename);
 
   } else if (_params.display_mode == Params::BSCAN_DISPLAY) {
 

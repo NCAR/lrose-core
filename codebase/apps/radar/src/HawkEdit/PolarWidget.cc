@@ -605,12 +605,14 @@ void PolarWidget::paintEvent(QPaintEvent *event)
 {
   QPainter painter(this);
   size_t selectedField = displayFieldController->getSelectedFieldNum();
-
+  try {
   FieldRenderer *fieldRenderer = _fieldRendererController->get(selectedField);
 
   painter.drawImage(0, 0, *(fieldRenderer->getImage()));
   //  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-
+  } catch (const std::out_of_range& ex) {
+    LOG(DEBUG) << ex.what();
+  } 
   _drawOverlays(painter);
 
   BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing

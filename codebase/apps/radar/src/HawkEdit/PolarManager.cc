@@ -38,6 +38,7 @@
 
 #include "PolarManager.hh"
 #include "DisplayField.hh"
+#include "FieldListView.hh"
 #include "PpiWidget.hh"
 #include "RhiWidget.hh"
 #include "RhiWindow.hh"
@@ -53,6 +54,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
+#include <QDialogButtonBox>
 #include <QFrame>
 #include <QFont>
 #include <QLabel>
@@ -69,6 +71,7 @@
 #include <QPushButton>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QStringListModel>
 #include <QRadioButton>
 #include <QStatusBar>
 #include <QDateTime>
@@ -225,10 +228,15 @@ int PolarManager::run(QApplication &app)
   // make window visible
 
   show();
-  
+/*
+  if (_archiveFileList.size() == 0) {
+    getFileAndFields();
+  }
+ */
+
   // set timer running
   
-  _beamTimerId = startTimer(2);
+  _beamTimerId = startTimer(2000);
   
   return app.exec();
 
@@ -1111,6 +1119,134 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
 // get data in archive mode
 // returns 0 on success, -1 on failure
 
+vector<string> *PolarManager::getFieldsArchiveData(string fileName)
+{
+
+  // set up file object for reading
+  
+  RadxFile file;
+  RadxVol vol;
+
+  vol.clear();
+  //_setupVolRead(file);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    file.setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    file.setDebug(true);
+    file.setVerbose(true);
+  }
+  file.setReadMetadataOnly(true);
+  
+  //if (_archiveScanIndex >= 0 &&
+  //    _archiveScanIndex < (int) _archiveFileList.size()) {
+    
+    string inputPath = fileName; // _archiveFileList[_archiveScanIndex];
+    
+    if(_params.debug) {
+      cerr << "  reading data file path: " << inputPath << endl;
+      //cerr << "  archive file index: " << _archiveScanIndex << endl;
+    }
+    
+    if (file.readFromPath(inputPath, vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "PolarManager::_getArchiveData\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + inputPath + "\n";
+      cerr << errMsg;
+      if (!_params.images_auto_create)  {
+        QErrorMessage errorDialog;
+        errorDialog.setMinimumSize(400, 250);
+        errorDialog.showMessage(errMsg.c_str());
+        errorDialog.exec();
+      }
+
+    } 
+    vol.loadFieldsFromRays();
+    const vector<RadxField *> fields = vol.getFields();
+    vector<string> *allFieldNames = new vector<string>;
+    for (vector<RadxField *>::const_iterator iter = fields.begin(); iter != fields.end(); ++iter)
+    {
+      RadxField *field = *iter;
+      cout << field->getName() << endl;
+      allFieldNames->push_back(field->getName());
+    }
+
+    return allFieldNames;
+  //}
+}
+
+
+vector<string> *PolarManager::userSelectFieldsForReading(string fileName) {
+  vector<string> *availableFields = getFieldsArchiveData(fileName);
+/*
+  QStringListModel model; //  = new QStringListModel();
+  QStringList list;
+  list << "a" << "b" << "c";
+  model.setStringList(list);
+  QListView theList;
+  theList.setModel(&model);
+  theList.show();
+*/
+  FieldListView *listview = new FieldListView(); // this);
+  listview->setList(availableFields);
+
+  QGroupBox *viewBox = new QGroupBox(tr("Select fields to import"));
+  QDialogButtonBox *buttonBox = new QDialogButtonBox;
+  QPushButton *saveButton = buttonBox->addButton(QDialogButtonBox::Apply);
+  QPushButton *closeButton = buttonBox->addButton(QDialogButtonBox::Cancel);
+
+
+  connect(saveButton, SIGNAL(clicked(bool)), listview, SLOT(fieldsSelected(bool)));
+  connect(listview, SIGNAL(sendSelectedFieldsForImport(vector<string> *)),
+    this, SLOT(fieldsSelected(vector<string> *)));
+        //lve->show();
+  QVBoxLayout* viewLayout = new QVBoxLayout;
+  viewLayout->addWidget(listview);
+  viewBox->setLayout(viewLayout);
+
+  QHBoxLayout* horizontalLayout = new QHBoxLayout;
+  horizontalLayout->addWidget(buttonBox);
+
+  QVBoxLayout* mainLayout = new QVBoxLayout;
+  mainLayout->addWidget(viewBox);
+  mainLayout->addLayout(horizontalLayout);
+
+  fieldListDialog = new QDialog(this);
+  fieldListDialog->setModal(true);
+  fieldListDialog->setLayout(mainLayout);
+  fieldListDialog->exec();  // this halts the app until fields are selected
+
+}
+
+
+void PolarManager::getFileAndFields() {
+          QString inputPath = "/"; // QDir::currentPath();
+        // get the path of the current file, if available 
+        //if (_archiveFileList.size() > 0) {
+        //  QDir temp(_archiveFileList[0].c_str());
+        //  inputPath = temp.absolutePath();
+        //} 
+
+        QString filename =  QFileDialog::getOpenFileName(
+                NULL,
+                "Open Document",
+                inputPath, "All files (*);; Cfradial (*.nc)");  //QDir::currentPath(),
+        vector<string> fileList;
+        fileList.push_back(filename.toStdString());
+
+        // override archive data url from input file
+        //string url = _getArchiveUrl(fileList[0]);
+        //TDRP_str_replace(&_params.archive_data_url, url.c_str());
+
+        // choose which fields to import
+        vector<string> *allFieldNames = userSelectFieldsForReading(fileList[0]);
+        //setArchiveFileList(fileList, false);
+}
+/////////////////////////////
+// get data in archive mode
+// returns 0 on success, -1 on failure
+
 int PolarManager::_getArchiveData()
 
 {
@@ -1657,6 +1793,7 @@ void PolarManager::_setupVolRead(RadxFile &file)
   for (it = fieldNames.begin(); it != fieldNames.end(); it++) {
     file.addReadField(*it);
   }
+  
   //  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
   //    const DisplayField *field = _fields[ifield];
   //    file.addReadField(field->getName());
@@ -2879,11 +3016,11 @@ void PolarManager::_openFile()
   // seed with files for the day currently in view
   // generate like this: *yyyymmdd*
   string pattern = _archiveStartTime.getDateStrPlain();
-  QString finalPattern = "Cfradial (*.nc);; All Files (*.*);; All files (*";
+  QString finalPattern = "All Files (*);; Cfradial (*.nc);; All files (*";
   finalPattern.append(pattern.c_str());
   finalPattern.append("*)");
 
-  QString inputPath = QDir::currentPath();
+  QString inputPath = "/"; // QDir::currentPath();
   // get the path of the current file, if available 
   if (_archiveFileList.size() > 0) {
     QDir temp(_archiveFileList[0].c_str());
@@ -2896,8 +3033,15 @@ void PolarManager::_openFile()
           inputPath, finalPattern);  //QDir::currentPath(),
   //"All files (*.*)");
  
-  if( !filename.isNull() )
-  {
+//------ begin 1/4/2020
+
+  vector<string> fileList;
+  fileList.push_back(filename.toStdString());
+
+  // choose which fields to import
+  userSelectFieldsForReading(fileList[0]);   
+
+
     QByteArray qb = filename.toUtf8();
     const char *name = qb.constData();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -2917,12 +3061,13 @@ void PolarManager::_openFile()
       // _timeControl->setCursor(Qt::ArrowCursor);
       return;
     }
-  }
+  
 
   // now update the time controller window
-  QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
-  _setArchiveStartTimeFromGui(epoch);
-  QDateTime now = QDateTime::currentDateTime();
+  QDateTime now = QDateTime::currentDateTime();  
+  //QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
+  _setArchiveStartTimeFromGui(now);
+
   _setArchiveEndTimeFromGui(now);
   
   _archiveStartTime = _guiStartTime;
@@ -2974,7 +3119,37 @@ void PolarManager::_openFile()
     _setGuiFromArchiveStartTime();
     _setGuiFromArchiveEndTime();
   } // end else pathList is not empty
+
+
 }
+
+
+
+void PolarManager::fieldsSelected(vector<string> *selectedFields) {
+
+// TODO:
+//  delete availableFields;
+
+  //vector<string> *selectedFields = new vector<string>;
+  //return selectedFields;
+  QStringList qselectedFields;
+  cout << selectedFields->size() << " selected\n";
+  for (vector<string>::iterator it=selectedFields->begin(); it != selectedFields->end(); ++it) {
+    cout << *it << endl;
+    qselectedFields.push_back(QString::fromStdString(*it));
+  }
+  // give the selected fields to the volume read ...
+
+// ----- end 1/4/2020
+
+  //_setupDisplayFields(selectedFields);
+  // close the modal dialog box for field selection
+  // HERE !!!
+  _volumeDataChanged(qselectedFields);
+  fieldListDialog->close();
+}
+
+
 
 ////////////////////////////////////////////////////
 // create the file chooser dialog

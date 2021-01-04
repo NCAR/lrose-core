@@ -105,6 +105,7 @@ public:
   // run 
 
   int run(QApplication &app);
+  //int run(QApplication &app, bool noFilename);  
 
   // enable the zoom button - called by PolarWidget
 
@@ -136,9 +137,14 @@ public:
   double getSelectedSweepAngle();
   size_t getSelectedFieldIndex();
 
+  vector<string> *getFieldsArchiveData(string fileName);
+  vector<string> *userSelectFieldsForReading(string fileName);
+  void getFileAndFields();
+
+
 
 public slots:
-
+  void fieldsSelected(vector<string> *selectedFields);
   //colorMapRedefineReceived(string, ColorMap)
   void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
 				QColor gridColor,
@@ -280,6 +286,8 @@ private:
   // saving images in real time mode
 
   RadxTime _imagesScheduledTime;
+
+  QDialog *fieldListDialog;
 
   //////////////////////////////
   // private methods

@@ -342,6 +342,7 @@ protected slots:
   virtual void _saveFile();
 
   void _changeFieldVariable(bool value);
+  int _setupDisplayFields(vector<string> *fieldNames);
 
 };
 

@@ -177,7 +177,9 @@ void FieldRendererController::selectField(size_t fieldIndex)
 // get the FieldRenderer at index ...
 FieldRenderer *FieldRendererController::get(size_t fieldIndex) 
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG) << "enter: fieldIndex = " << fieldIndex 
+  << " fieldRenderers.size = " << _fieldRenderers.size();
+  //if (fieldIndex >= _fieldRenderers.size()) throw "fieldIndex exceed number of fieldRenderers";
   return _fieldRenderers.at(fieldIndex);
   LOG(DEBUG) << "exit";
 }
