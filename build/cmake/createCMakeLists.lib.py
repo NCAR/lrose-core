@@ -123,15 +123,15 @@ def main():
 
     # load list of files to be compiled
 
-    compileFileList = []
+    libCompileFileList = []
     for subDir in subDirList:
-        addSubDirToCompileList(subDir, compileFileList)
+        addLibSubDirToCompileList(subDir, libCompileFileList)
 
     if (options.debug):
-        print("=======================", file=sys.stderr)
-        for compileFile in compileFileList:
+        print("======== lib compfile list ===============", file=sys.stderr)
+        for compileFile in libCompileFileList:
             print("compileFile: %s" % (compileFile), file=sys.stderr)
-        print("=======================", file=sys.stderr)
+        print("==========================================", file=sys.stderr)
 
     # get list of header files
 
@@ -144,7 +144,7 @@ def main():
 
     # write out CMakeLists.txt
 
-    writeCMakeListsLib(libSrcDir, libList, compileFileList)
+    writeCMakeListsLib(libSrcDir, libList, libCompileFileList)
 
     sys.exit(0)
 
@@ -286,7 +286,7 @@ def getLibSubDirs(libDir):
 ########################################################################
 # append to list of files to be compiled
 
-def addSubDirToCompileList(subDir, compileFileList):
+def addLibSubDirToCompileList(subDir, compileFileList):
                     
     srcTypeList = [ 'SRCS', 'C_SRCS', 'F_SRCS', 'F_CPP_SRCS', 
                     'F90_SRCS', 'F95_SRCS', 'PGF90_SRCS', 

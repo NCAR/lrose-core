@@ -321,12 +321,27 @@ def loadSubdirList(dir):
 def getMakefilePath(dir):
                     
     makefilePath = os.path.join(dir, '__makefile.template')
+
     if (os.path.exists(makefilePath) == False):
         makefilePath = os.path.join(dir, 'makefile')
-        if (os.path.exists(makefilePath) == False):
-            makefilePath = os.path.join(dir, 'Makefile')
-            if (os.path.exists(makefilePath) == False):
-                makefilePath = os.path.join(dir, 'not_found')
+
+    if (os.path.exists(makefilePath) == False):
+        makefilePath = os.path.join(dir, 'Makefile')
+
+    if (os.path.exists(makefilePath) == False):
+        if (options.debug):
+            print("-->> makefile not found, dir: ", dir, file=sys.stderr)
+        return 'not-found'
+
+    if (options.debug):
+        print("-->> using makefile template: ", makefilePath, file=sys.stderr)
+
+    # if template does not exist,
+    # copy makefile to template for later use if needed
+
+    if (makefilePath.find('__makefile.template') < 0):
+        templatePath = os.path.join(dir, '__makefile.template')
+        shutil.copy(makefilePath, templatePath)
 
     return makefilePath
 
@@ -450,6 +465,24 @@ def getSubdirList(makefilePath):
             subdirList.append(subName)
 
     return subdirList
+
+########################################################################
+# parse the LROSE Makefile to get the lib name
+
+def getLibName(dir, makefilePath):
+
+    # search for MODULE_NAME key in makefile
+
+    valList = getValueListForKey(makefilePath, "MODULE_NAME")
+
+    if (len(valList) < 1):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find MODULE_NAME in ", makefileName, file=sys.stderr)
+        print("  dir: ", dir, file=sys.stderr)
+        exit(1)
+
+    libName = valList[len(valList)-1]
+    return libName
 
 ########################################################################
 # get list of makefiles for library
