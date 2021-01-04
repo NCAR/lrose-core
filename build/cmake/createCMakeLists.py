@@ -224,13 +224,14 @@ def searchDirRecurse(dir, libArray, libList):
         # src level of lib - create CMakeLists.txt for lib
 
         libDir = absDir[:-4]
-        staticStr = ""
-        if (options.static):
-            staticStr = " --static "
-        cmd = os.path.join(thisScriptDir, "createCMakeLists.lib.py") + \
-              " --dir " + libDir + staticStr + debugStr
-        cmd += " --libList " + libList
-        runCommand(cmd)
+        createCMakeListsLib(libDir, libList)
+        # staticStr = ""
+        # if (options.static):
+        #     staticStr = " --static "
+        # cmd = os.path.join(thisScriptDir, "createCMakeLists.lib.py") + \
+        #       " --dir " + libDir + staticStr + debugStr
+        # cmd += " --libList " + libList
+        # runCommand(cmd)
         count = count + 1
 
     elif ((pathToks[ntoks-4] == "apps") and
@@ -430,24 +431,6 @@ def createCMakeListsRecurse(dir):
     #os.chdir(currentDir)
 
 ########################################################################
-# parse the LROSE Makefile to get the lib name
-
-def getLibName(dir, makefilePath):
-
-    # search for MODULE_NAME key in makefile
-
-    valList = getValueListForKey(makefilePath, "MODULE_NAME")
-
-    if (len(valList) < 1):
-        print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find MODULE_NAME in ", makefileName, file=sys.stderr)
-        print("  dir: ", dir, file=sys.stderr)
-        exit(1)
-
-    libName = valList[len(valList)-1]
-    return libName
-
-########################################################################
 # get list of makefiles for library
 # using LROSE Makefile to locate subdirs
 
@@ -585,6 +568,209 @@ def writeCMakeListsRecurse(dir, subdirList):
 
     fo.write("\n")
     fo.close
+
+########################################################################
+# parse the LROSE Makefile to get the lib name
+
+def getLibName(dir, makefilePath):
+
+    # search for MODULE_NAME key in makefile
+
+    valList = getValueListForKey(makefilePath, "MODULE_NAME")
+
+    if (len(valList) < 1):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find MODULE_NAME in ", makefileName, file=sys.stderr)
+        print("  dir: ", dir, file=sys.stderr)
+        exit(1)
+
+    libName = valList[len(valList)-1]
+    return libName
+
+########################################################################
+# append to list of files to be compiled
+
+def addLibSubDirToCompileList(subDir, compileFileList):
+                    
+    srcTypeList = [ 'SRCS', 'C_SRCS', 'F_SRCS', 'F_CPP_SRCS', 
+                    'F90_SRCS', 'F95_SRCS', 'PGF90_SRCS', 
+                    'PGF_SRCS', 'CC_SRCS', 'CPPC_SRCS', 
+                    'CPP_SRCS', 'CXX_SRCS' ]
+    
+    fp = open(subDir.makefilePath, 'r')
+    lines = fp.readlines()
+
+    for srcType in srcTypeList:
+        handleSrcType(subDir, lines, srcType, compileFileList)
+    
+########################################################################
+# append to compile list for given srcType
+
+def handleSrcType(subDir, lines, srcType, compileFileList):
+
+    # build up multiLine string containing all compile files
+
+    srcTypeFound = False
+    multiLine = ""
+    for line in lines:
+        line = line.strip()
+        if (srcTypeFound == False):
+            if (len(line) < 2):
+                continue
+            if (line[0] == '#'):
+                continue
+            if (line.find(srcType) == 0):
+                srcTypeFound = True
+                multiLine = multiLine + line;
+                if (line.find("\\") < 0):
+                    break;
+        else:
+            if (len(line) < 2):
+                break
+            if (line[0] == '#'):
+                break
+            multiLine = multiLine + line;
+            if (line.find("\\") < 0):
+                break;
+            
+    if (srcTypeFound == False):
+        return
+
+    # remove strings we don't want
+
+    multiLine = multiLine.replace(srcType, " ")
+    multiLine = multiLine.replace("=", " ")
+    multiLine = multiLine.replace("\t", " ")
+    multiLine = multiLine.replace("\\", " ")
+    multiLine = multiLine.replace("\r", " ")
+    multiLine = multiLine.replace("\n", " ")
+
+    toks = multiLine.split(' ')
+    for tok in toks:
+        if (tok.find(".") > 0):
+            compileFilePath = os.path.join(subDir.subDirName, tok)
+            compileFileList.append(compileFilePath)
+
+#===========================================================================
+#
+# Create CMakeLists.txt for library directory
+#
+#===========================================================================
+
+def createCMakeListsLib(libDir, libList):
+
+    if (options.debug):
+        print("  creating CMakeLists.txt for lib, dir: ", libDir, file=sys.stderr)
+
+    # compute the src dir
+
+    libSrcDir = os.path.join(libDir, 'src')
+    if (options.debug):
+        print("lib src dir: ", libSrcDir, file=sys.stderr)
+    # os.chdir(libSrcDir)
+
+    # get makefile in use
+    # makefile has preference over Makefile
+
+    makefilePath = getMakefilePath(libSrcDir)
+    if (makefilePath.find('not_found') == 0):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find makefile or Makefile", file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
+        return
+
+    # get the lib name
+
+    libName = getLibName(libSrcDir, makefilePath)
+    if (options.debug):
+        print("  Lib name: ", libName, file=sys.stderr)
+
+    # get list of subdirs and their makefiles
+
+    subDirList = getLibSubDirs(libSrcDir)
+    if (options.debug):
+        print("=======================", file=sys.stderr)
+        for subDir in subDirList:
+            print("subDir, makefile: %s, %s" % \
+                (subDir.subDirName, subDir.makefilePath), file=sys.stderr)
+        print("=======================", file=sys.stderr)
+
+    # load list of files to be compiled
+
+    libCompileFileList = []
+    for subDir in subDirList:
+        addLibSubDirToCompileList(subDir, libCompileFileList)
+
+    if (options.debug):
+        print("======== lib compfile list ===============", file=sys.stderr)
+        for compileFile in libCompileFileList:
+            print("compileFile: %s" % (compileFile), file=sys.stderr)
+        print("==========================================", file=sys.stderr)
+
+    # write out CMakeLists.txt
+
+    writeCMakeListsLib(libName, libSrcDir, libList, libCompileFileList)
+
+########################################################################
+# Write out CMakeLists.txt
+
+def writeCMakeListsLib(libName, libDir, libList, compileFileList):
+
+    cmakePath = os.path.join(libDir, 'CMakeLists.txt')
+    fo = open(cmakePath, "w")
+
+    fo.write("###############################################\n")
+    fo.write("#\n")
+    fo.write("# CMakeLists.txt - auto generated from Makefile\n")
+    fo.write("#\n")
+    fo.write("# library name: %s\n" % libName)
+    fo.write("#\n")
+    fo.write("# written by script createCMakeLists.lib.py\n")
+    fo.write("#\n")
+    fo.write("# created %s\n" % datetime.now())
+    fo.write("#\n")
+    fo.write("###############################################\n")
+    fo.write("\n")
+
+    fo.write("project ( lib%s )\n" % libName)
+    fo.write("\n")
+    
+    fo.write("# include directories\n")
+    fo.write("\n")
+    fo.write("include_directories ( ./include )\n")
+    for lib in libList:
+        fo.write("include_directories ( ../../%s/src/include )\n" % lib)
+    fo.write("include_directories ( $ENV{LROSE_INSTALL_DIR}/include )\n")
+    fo.write("\n")
+
+    fo.write("# source files\n")
+    fo.write("\n")
+    fo.write("set ( SRCS\n")
+    for index, compileFile in enumerate(compileFileList):
+        fo.write("      %s\n" % compileFile)
+    fo.write("    )\n")
+    fo.write("\n")
+
+    fo.write("# build library\n")
+    fo.write("\n")
+    if (options.static):
+        fo.write("add_library (%s STATIC ${SRCS} )\n" % libName)
+    else:
+        fo.write("add_library (%s SHARED ${SRCS} )\n" % libName)
+    fo.write("\n")
+
+    fo.write("# install\n")
+    fo.write("\n")
+    fo.write("INSTALL(TARGETS %s\n" % libName)
+    fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/lib\n")
+    fo.write("        )\n")
+    fo.write("INSTALL(DIRECTORY include/%s\n" % libName)
+    fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/include\n")
+    fo.write("        )\n")
+    fo.write("\n")
+
+    fo.close
+    return
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
