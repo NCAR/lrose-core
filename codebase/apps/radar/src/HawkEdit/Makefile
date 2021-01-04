@@ -60,6 +60,7 @@ HDRS = \
 	ColorMap.hh \
 	ColorTableManager.hh \
 	DisplayManager.hh \
+	FieldListView.hh \
 	FieldRenderer.hh \
 	FieldRendererController.hh \
 	FlowLayout.hh \
@@ -133,6 +134,7 @@ NORM_SRCS = \
 MOC_SRCS = \
 	DisplayManager.cc \
 	FieldRenderer.cc \
+	FieldListView.cc \
 	FieldRendererController.cc \
 	PolarManager.cc \
 	PolarWidget.cc \
@@ -158,6 +160,7 @@ MOC_SRCS = \
 
 MOC_OUTPUT = \
 	moc_DisplayManager.cpp \
+	moc_FieldListView.cpp \
 	moc_FieldRenderer.cpp \
 	moc_PolarManager.cpp \
 	moc_PolarWidget.cpp \

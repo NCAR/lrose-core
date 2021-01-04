@@ -1328,8 +1328,14 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
     // field name legend
     size_t selectedField = displayFieldController->getSelectedFieldNum();
-    FieldRenderer *selectedFieldRenderer = _fieldRendererController->get(selectedField);
-    string fieldName = selectedFieldRenderer->getField().getLabel();
+ 
+    //if (0) {
+    //FieldRenderer *selectedFieldRenderer = _fieldRendererController->get(selectedField);
+    //string fieldName = selectedFieldRenderer->getField().getLabel();
+    //}
+    string fieldName = displayFieldController->getSelectedFieldName();
+
+
     //string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
     sprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
