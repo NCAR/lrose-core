@@ -73,6 +73,12 @@ codebase/autom4te.cache
 
 .qmake*
 
+# cmake
+
+CMakeLists.txt
+CMakeCache.txt
+CMakeFiles
+
 # distro makefiles
 
 codebase/apps/Radx/src/makefile

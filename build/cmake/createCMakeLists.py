@@ -79,6 +79,10 @@ def main():
                       dest='verboseMake', default=False,
                       action="store_true",
                       help='Verbose output for make, default is summary')
+    parser.add_option('--withJasper',
+                      dest='withJasper', default=False,
+                      action="store_true",
+                      help='Set if jasper library is installed. This provides support for jpeg compression in grib files.')
 
     (options, args) = parser.parse_args()
 
@@ -104,6 +108,7 @@ def main():
         print("  pkg: ", options.pkg, file=sys.stderr)
         print("  osx: ", options.osx, file=sys.stderr)
         print("  verboseMake: ", options.verboseMake, file=sys.stderr)
+        print("  withJasper: ", options.withJasper, file=sys.stderr)
 
     # go to the top level codebase
 
@@ -580,9 +585,11 @@ def writeCMakeListsTop(dir):
     fo.write('enable_testing(  )\n')
     fo.write('\n')
 
-    fo.write('set( CMAKE_CXX_STANDARD 11 )\n')
-    fo.write('set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB -fPIC" )\n')
-    fo.write('add_definitions( -DNO_JASPER_LIB  )\n')
+    fo.write('set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 " )\n')
+    if (not options.withJasper):
+        fo.write('set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB " )\n')
+        # fo.write('add_definitions( -DNO_JASPER_LIB  )\n')
+
     fo.write('\n')
 
     fo.write('add_subdirectory( libs )\n')
