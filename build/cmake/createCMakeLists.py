@@ -796,9 +796,27 @@ def createCMakeListsApp(appDir, libList):
         print("  =======================", file=sys.stderr)
 
     # get list of libs to be linked with
+        
+    makefileLibList = getLinkLibList(makefilePath)
 
-    linkLibList = getLinkLibList(makefilePath)
+    if (options.static):
+        # for static libs, use libs from makefile
+        linkLibList = makefileLibList
+    else:
+        # for shared libs, we need to link with all lib
+        # order the list
+        linkOrder = getLroseLinkOrder()
+        linkLibList = []
+        for lib in linkOrder:
+            if (lib in libList):
+                linkLibList.append(lib)
+        for lib in makefileLibList:
+            if (lib not in linkLibList):
+                linkLibList.append(lib)
 
+    extendedLibs = getExtendedLibs(linkLibList)
+    linkLibList.extend(extendedLibs)
+                
     # check if we need Qt support
 
     needQt = checkForQt(makefilePath)
@@ -807,7 +825,7 @@ def createCMakeListsApp(appDir, libList):
     # write out CMakeLists.txt
 
     writeCMakeListsApp(appName, appDir, appCompileFileList,
-                       linkLibList, needQt, needX11)
+                       libList, linkLibList, needQt, needX11)
 
 ########################################################################
 # parse the LROSE Makefile to get the app name
@@ -846,7 +864,7 @@ def getAppCompileList(appName, makefilePath):
     srcTypeList = [ 'SRCS', 'C_SRCS', 'F_SRCS', 'F_CPP_SRCS', 
                     'F90_SRCS', 'F95_SRCS', 'PGF90_SRCS', 
                     'PGF_SRCS', 'CC_SRCS', 'CPPC_SRCS', 
-                    'CPP_SRCS', 'CXX_SRCS', 'NORM_SRCS' ]
+                    'CPP_SRCS', 'CXX_SRCS', 'NORM_SRCS', 'MOC_SRCS' ]
 
     for srcType in srcTypeList:
         appendSrcTypeApp(appName, makefileLines, srcType, appCompileList)
@@ -962,6 +980,95 @@ def decodeLibLine(line):
     return libs
 
 ########################################################################
+# get link order for lrose libraries
+
+def getLroseLinkOrder():
+
+    # set up list showing order in which compiled libs need to be linked
+    
+    linkOrder = [ 'mm5',
+                  'Refract',
+                  'FiltAlg',
+                  'dsdata',
+                  'radar',
+                  'hydro',
+                  'titan',
+                  'Fmq',
+                  'Spdb',
+                  'Mdv',
+                  'advect',
+                  'rapplot',
+                  'Radx',
+                  'Ncxx',
+                  'rapformats',
+                  'dsserver',
+                  'didss',
+                  'grib',
+                  'grib2',
+                  'contour',
+                  'euclid',
+                  'rapmath',
+                  'kd',
+                  'physics',
+                  'toolsa',
+                  'dataport',
+                  'tdrp',
+                  'shapelib',
+                  'cidd',
+                  'devguide',
+                  'xview',
+                  'olgx',
+                  'trmm_rsl',
+                  'forayRal']
+    
+    return linkOrder
+    
+########################################################################
+# get extended list of libraries to be loaded for shared libs
+
+def getExtendedLibs(linkLibList):
+
+    # extend the lib list with required standard libs
+
+    if (options.osx):
+        extendLibs = [ 'Ncxx',
+                       'netcdf',
+                       'hdf5_cpp',
+                       'hdf5_hl',
+                       'hdf5',
+                       'fftw3',
+                       'X11',
+                       'Xext',
+                       'pthread',
+                       'png',
+                       'z',
+                       'bz2',
+                       'm' ]
+    else:
+        extendLibs = [ 'Ncxx',
+                       'netcdf',
+                       'hdf5_cpp',
+                       'hdf5_hl',
+                       'hdf5',
+                       'fftw3',
+                       'X11',
+                       'Xext',
+                       'pthread',
+                       'png',
+                       'z',
+                       'bz2',
+                       'm',
+                       'gfortran' ]
+
+    if (options.withJasper):
+        extendLibs.append('jasper')
+    
+    #if ("radar" in linkLibList and "fftw3" not in linkLibList):
+    #    extendLibs.append("fftw3")
+
+    return extendLibs
+
+########################################################################
 # check for dependence on QT
 
 def checkForQt(makefilePath):
@@ -1007,7 +1114,7 @@ def checkForX11(makefilePath):
 # write out CMakeLists.txt for app
 
 def writeCMakeListsApp(appName, appDir, appCompileFileList,
-                       linkLibList, needQt, needX11):
+                       libList, linkLibList, needQt, needX11):
 
     cmakePath = os.path.join(appDir, 'CMakeLists.txt')
 
@@ -1046,7 +1153,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 
     fo.write("# includes\n")
     fo.write("\n")
-    for lib in linkLibList:
+    for lib in libList:
         fo.write("include_directories ( ../../../../libs/%s/src/include )\n" % lib)
     fo.write("include_directories( $ENV{LROSE_INSTALL_DIR}/include )\n")
     fo.write("\n")
@@ -1168,3 +1275,4 @@ def runCommand(cmd):
 
 if __name__ == "__main__":
    main()
+ 
