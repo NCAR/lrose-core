@@ -3133,22 +3133,19 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
 // TODO:
 //  delete availableFields;
 
-  //vector<string> *selectedFields = new vector<string>;
-  //return selectedFields;
-  QStringList qselectedFields;
-  cout << selectedFields->size() << " selected\n";
-  for (vector<string>::iterator it=selectedFields->begin(); it != selectedFields->end(); ++it) {
-    cout << *it << endl;
-    qselectedFields.push_back(QString::fromStdString(*it));
-  }
-  // give the selected fields to the volume read ...
-
-// ----- end 1/4/2020
-
-  //_setupDisplayFields(selectedFields);
+  if (selectedFields->size() > 0) {
+    QStringList qselectedFields;
+    cout << selectedFields->size() << " selected\n";
+    for (vector<string>::iterator it=selectedFields->begin(); it != selectedFields->end(); ++it) {
+      cout << *it << endl;
+      qselectedFields.push_back(QString::fromStdString(*it));
+    }
+    // give the selected fields to the volume read ...
+    //_setupDisplayFields(selectedFields);
+    _volumeDataChanged(qselectedFields);
+    
+  }  
   // close the modal dialog box for field selection
-  // HERE !!!
-  _volumeDataChanged(qselectedFields);
   closeFieldListDialog(true);
   //fieldListDialog->close();
 }
