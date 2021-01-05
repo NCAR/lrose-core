@@ -1,6 +1,9 @@
 
 #include <vector>
 #include <iostream>
+#include <regex>
+#include <stdio.h>
+#include <string.h>
 
 #include "SoloFunctionsModel.hh"
 //#include "RemoveAcMotion.cc" // This comes from an external library
@@ -2731,8 +2734,6 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  RadxVol *vol, 
 
   vol->loadRaysFromFields();
   
-  const RadxField *field;
-
   //  get the ray for this field 
   const vector<RadxRay *>  &rays = vol->getRays();
   if (rays.size() > 1) {
@@ -2744,8 +2745,14 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  RadxVol *vol, 
     throw "Ray is null";
   } 
 
-  // get the data (in) and create space for new data (out)  
+  const RadxField *field = NULL;
   field = fetchDataField(ray, fieldName);
+
+  // get the data (in) and create space for new data (out)  
+  const float *fieldData = fetchData(ray, fieldName);
+  const float *thrdata = fetchData(ray, threshold_field);
+
+  //field = fetchDataField(ray, fieldName);
   size_t nGates = ray->getNGates(); 
 
   // create new data field for return 
@@ -2769,13 +2776,17 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  RadxVol *vol, 
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
+  const float *threshold_data = thrdata; // field_thr->getDataFl32();
+
   const RadxField *field_thr;
   field_thr = fetchDataField(ray, threshold_field);
-  const float *threshold_data = field_thr->getDataFl32();
-  float thr_bad_data_value = field_thr->getMissingFl32();
+  float thr_bad_data_value = Radx::missingFl32;
+  if (field_thr != NULL) {
+    thr_bad_data_value = field_thr->getMissingFl32();
+  }
 
   // cerr << "there arenGates " << nGates;
-  const float *data = field->getDataFl32();
+  const float *data = fieldData; // field->getDataFl32();
   
   // perform the function ...
   //soloFunctionsApi.XorBadFlagsBetween(constantLower, constantUpper,
@@ -2786,8 +2797,15 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  RadxVol *vol, 
 		  clip_gate, _boundaryMask, bad_flag_mask);
 
   bool isLocal = false;
-  string field_units = field->getUnits();
-  Radx::fl32 missingValue = field->getMissingFl32();
+  string field_units = "";
+  Radx::fl32 missingValue = Radx::missingFl32;
+  if (field != NULL) {
+    field_units = field->getUnits();
+    missingValue = field->getMissingFl32();
+  }
+  if (field == NULL) {
+    fieldName = "NULL";
+  }
   RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
 
   // get the name that was actually inserted ...
@@ -2920,10 +2938,60 @@ RadxField *SoloFunctionsModel::fetchDataField(RadxRay *ray, string &fieldName) {
     fieldName.erase(endpt, 1);
   }
   RadxField *dataField = ray->getField(fieldName);
+  /*
   if (dataField == NULL) {
     char msg[180];
     sprintf(msg, "ERROR - ray field not found %s\n", fieldName.c_str());
-    throw msg;
+    string msgs;
+    msgs.append("no field ");
+    msgs.append(fieldName);
+    throw std::invalid_argument(msgs);
   }
+  */
   return dataField; 
+}
+
+float *SoloFunctionsModel::convertValueStringToFloatPtr(string &listOfValues) {
+  vector<float> *values = new vector<float>;
+
+  size_t nextPos = 0;
+  size_t idx = 0;
+  const char *s = listOfValues.c_str();
+  size_t length = strlen(s);
+  bool done = false;
+  while ((nextPos < length) && !done) {
+    float value;
+    const char *substring = &s[nextPos];
+    if (sscanf(substring, "%g", &value) <= 0) { done = true; }
+    else {
+      //printf("value[%lu] = \t%g\n", idx, value);
+      values->push_back(value);
+      const char *ptr = strchr(substring, ',');
+      nextPos = (ptr + 1) - s;
+      idx += 1;
+    }
+  }
+
+  return &(*values)[0];
+
+}
+
+const float *SoloFunctionsModel::fetchData(RadxRay *ray, string &fieldName) {
+
+  /*
+  std::regex values_regex("[-,\\s\\.[:digit:]]+",
+            std::regex_constants::ECMAScript);
+  std::regex variable_regex("[_|\\s|[:alpha:]]+",
+            std::regex_constants::ECMAScript);
+            */
+  if (strchr(fieldName.c_str(),',') != NULL) {
+    cout << "We have a pass by value argument" << endl;
+    return convertValueStringToFloatPtr(fieldName);
+  } else {
+    RadxField *dataField = fetchDataField(ray, fieldName);
+    if (dataField != NULL)
+      return dataField->getDataFl32();
+    else
+      return NULL;
+  }
 }

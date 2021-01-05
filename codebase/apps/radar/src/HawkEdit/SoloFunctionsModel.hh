@@ -261,6 +261,8 @@ const float *data, float *newData, size_t nGates,
   void DetermineBoundaryMask(RadxVol *vol, int rayIdx, int sweepIdx); 
   void printBoundaryMask();
   RadxField *fetchDataField(RadxRay *ray, string &fieldName);
+  const float *fetchData(RadxRay *ray, string &fieldName);
+  float *convertValueStringToFloatPtr(string &listOfValues);
   const vector<float> *GetData(string fieldName,  RadxVol *vol,
               int rayIdx, int sweepIdx);
   void SetData(string &fieldName,  RadxVol *vol,
