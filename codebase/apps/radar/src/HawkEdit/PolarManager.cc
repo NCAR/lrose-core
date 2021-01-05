@@ -1198,12 +1198,14 @@ vector<string> *PolarManager::userSelectFieldsForReading(string fileName) {
 
 
   connect(saveButton, SIGNAL(clicked(bool)), listview, SLOT(fieldsSelected(bool)));
+  connect(closeButton, SIGNAL(clicked(bool)), this, SLOT(closeFieldListDialog(bool)));
   connect(listview, SIGNAL(sendSelectedFieldsForImport(vector<string> *)),
     this, SLOT(fieldsSelected(vector<string> *)));
         //lve->show();
   QVBoxLayout* viewLayout = new QVBoxLayout;
   viewLayout->addWidget(listview);
   viewBox->setLayout(viewLayout);
+  viewBox->setMinimumHeight(200);
 
   QHBoxLayout* horizontalLayout = new QHBoxLayout;
   horizontalLayout->addWidget(buttonBox);
@@ -1215,6 +1217,7 @@ vector<string> *PolarManager::userSelectFieldsForReading(string fileName) {
   fieldListDialog = new QDialog(this);
   fieldListDialog->setModal(true);
   fieldListDialog->setLayout(mainLayout);
+
   fieldListDialog->exec();  // this halts the app until fields are selected
 
 }
@@ -3130,25 +3133,26 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
 // TODO:
 //  delete availableFields;
 
-  //vector<string> *selectedFields = new vector<string>;
-  //return selectedFields;
-  QStringList qselectedFields;
-  cout << selectedFields->size() << " selected\n";
-  for (vector<string>::iterator it=selectedFields->begin(); it != selectedFields->end(); ++it) {
-    cout << *it << endl;
-    qselectedFields.push_back(QString::fromStdString(*it));
-  }
-  // give the selected fields to the volume read ...
-
-// ----- end 1/4/2020
-
-  //_setupDisplayFields(selectedFields);
+  if (selectedFields->size() > 0) {
+    QStringList qselectedFields;
+    cout << selectedFields->size() << " selected\n";
+    for (vector<string>::iterator it=selectedFields->begin(); it != selectedFields->end(); ++it) {
+      cout << *it << endl;
+      qselectedFields.push_back(QString::fromStdString(*it));
+    }
+    // give the selected fields to the volume read ...
+    //_setupDisplayFields(selectedFields);
+    _volumeDataChanged(qselectedFields);
+    
+  }  
   // close the modal dialog box for field selection
-  // HERE !!!
-  _volumeDataChanged(qselectedFields);
-  fieldListDialog->close();
+  closeFieldListDialog(true);
+  //fieldListDialog->close();
 }
 
+void PolarManager::closeFieldListDialog(bool clicked) {
+  fieldListDialog->close();
+}
 
 
 ////////////////////////////////////////////////////
