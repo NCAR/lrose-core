@@ -14,16 +14,6 @@ import subprocess
 from optparse import OptionParser
 from datetime import datetime
 
-class LibSubDir:
-    def __init__(self, subDirName, makefilePath):
-        self.subDirName = subDirName
-        self.makefilePath = makefilePath
-
-class LibInclude:
-    def __init__(self, name, used):
-        self.name = name
-        self.used = used
-
 def main():
 
     global options
@@ -33,13 +23,26 @@ def main():
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
-    global count
-    count = 0
+    global nLibs, nApps, nRecurse, nOther, nTotal
+    nLibs = 0
+    nApps = 0
+    nRecurse = 0
+    nOther = 0
+    nTotal = 0
 
     # We will be executing some sibling scripts. Get our path so that
     # the sibling scripts from the same path can be executed explicitly.
     global thisScriptDir
     thisScriptDir = os.path.dirname(os.path.abspath(__file__))
+
+    # determine the OS type
+
+    osType = getOsType()
+    isDebianBased = False
+    if (osType == "debian"):
+        isDebianBased = True
+    if (osType == "ubuntu"):
+        isDebianBased = True
 
     # parse the command line
 
@@ -98,6 +101,7 @@ def main():
     appsDir =  os.path.join(codebaseDir, "apps")
 
     if (options.debug):
+        print("=============================================", file=sys.stderr)
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  coreDir: ", coreDir, file=sys.stderr)
         print("  codebaseDir: ", codebaseDir, file=sys.stderr)
@@ -108,27 +112,52 @@ def main():
         print("  osx: ", options.osx, file=sys.stderr)
         print("  verboseMake: ", options.verboseMake, file=sys.stderr)
         print("  withJasper: ", options.withJasper, file=sys.stderr)
+        print("=============================================", file=sys.stderr)
 
-    # go to the top level codebase
+    # go to the top level codebase directory
 
     os.chdir(codebaseDir)
 
     # write the top level CMakeLists.txt file
 
+    if (options.debug):
+        print("=============================================", file=sys.stderr)
+        print("Writing to top-level codebase dir: ",
+              codebaseDir, file=sys.stderr)
     writeCMakeListsTop(codebaseDir)
-    count = count + 1
+    nOther = nOther + 1
     
     # get list of libs
     
-    (libArray, libList) = getLibList(libsDir)
+    if (options.debug):
+        print("=============================================", file=sys.stderr)
+        print("Getting lib list from dir: ", libsDir, file=sys.stderr)
+
+    libList = getLibList(libsDir)
 
     # recursively search libs and apps for makefiles
 
-    searchDirRecurse(libsDir, libArray, libList)
-    searchDirRecurse(appsDir, libArray, libList)
+    if (options.debug):
+        print("#############################################", file=sys.stderr)
+        print("Searching libs, dir: ", libsDir, file=sys.stderr)
+
+    searchDirRecurse(libsDir, libList)
 
     if (options.debug):
-        print("==>> n CMakeLists.txt files created: ", count, file=sys.stderr)
+        print("#############################################", file=sys.stderr)
+        print("Searching apps, dir: ", libsDir, file=sys.stderr)
+
+    searchDirRecurse(appsDir, libList)
+
+    nTotal = nRecurse + nLibs + nApps + nOther
+    if (options.debug):
+        print("=============================================", file=sys.stderr)
+        print("==>> CMakeLists.txt files created", file=sys.stderr)
+        print("==>>   nRecurse: ", nRecurse, file=sys.stderr)
+        print("==>>   nLibs   : ", nLibs, file=sys.stderr)
+        print("==>>   nApps   : ", nApps, file=sys.stderr)
+        print("==>>   nOther  : ", nOther, file=sys.stderr)
+        print("==>>   nTotal  : ", nTotal, file=sys.stderr)
 
     sys.exit(0)
 
@@ -137,11 +166,7 @@ def main():
 
 def getLibList(dir):
                     
-    libArray = []
-    libList = ""
-
-    if (options.debug):
-        print("  Getting lib list from dir: ", dir, file=sys.stderr)
+    libList = []
 
     # check if this dir has a makefile or Makefile
 
@@ -149,46 +174,42 @@ def getLibList(dir):
     if (os.path.exists(makefilePath) == False):
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  No makefile in lib dir: ", dir, file=sys.stderr)
-        exit(1)
+        sys.exit(1)
 
     if (options.debug):
-        print("  Searching makefile template: ", makefilePath, file=sys.stderr)
+        print("Using makefile: ", makefilePath, file=sys.stderr)
 
     # search for SUB_DIRS key in makefile
 
-    subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
+    subNameList = getValuesForKey(makefilePath, "SUB_DIRS")
 
     if (len(subNameList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  Cannot find SUB_DIRS in ", makefilePath, file=sys.stderr)
         print("  coreDir: ", options.coreDir, file=sys.stderr)
-        exit(1)
+        sys.exit(1)
 
     for subName in subNameList:
         subPath = os.path.join(dir, subName)
         if (os.path.isdir(subPath)):
             if (subName.find("perl5") < 0):
-                libArray.append(subName)
-
-    for index, libName in enumerate(libArray):
-        libList += libName
-        if (index < len(libArray) - 1):
-            libList += ","
+                libList.append(subName)
 
     if (options.debug):
-        print("  libList: ", libList, file=sys.stderr)
+        print("libList: ", libList, file=sys.stderr)
 
-    return libArray, libList
+    return libList
 
 ########################################################################
 # search directory and subdirectories
 
-def searchDirRecurse(dir, libArray, libList):
+def searchDirRecurse(dir, libList):
                     
-    global count
+    global nLibs, nApps, nRecurse
 
     if (options.debug):
-        print("  Searching dir: ", dir, file=sys.stderr)
+        print("*********************************************", file=sys.stderr)
+        print("Recursively searching, dir: ", dir, file=sys.stderr)
 
     # check if this dir has a makefile or Makefile
 
@@ -200,58 +221,32 @@ def searchDirRecurse(dir, libArray, libList):
 
     # detect which type of directory we are in
         
-    if (options.verbose):
-        print("  Found makefile: ", makefilePath, file=sys.stderr)
-
     if ((dir == "libs/perl5") or
         (dir == "apps/scripts")):
         if (options.debug):
-            print("  Ignoring dir:", dir, file=sys.stderr)
+            print("=====>> Ignoring dir:", dir, file=sys.stderr)
         return
 
-    debugStr = "";
-    if (options.verbose):
-        debugStr = " --debug "
-
-    absDir = os.path.join(options.coreDir, dir)
-    pathToks = absDir.split("/")
+    thisDir = os.path.join(options.coreDir, dir)
+    pathToks = thisDir.split("/")
     ntoks = len(pathToks)
-    makefileCreatePath = os.path.join(dir, 'makefile')
 
     if (pathToks[ntoks-3] == "libs" and
         pathToks[ntoks-1] == "src"):
 
         # src level of lib - create CMakeLists.txt for lib
 
-        libDir = absDir[:-4]
+        libDir = thisDir[:-4]
         createCMakeListsLib(libDir, libList)
-        # staticStr = ""
-        # if (options.static):
-        #     staticStr = " --static "
-        # cmd = os.path.join(thisScriptDir, "createCMakeLists.lib.py") + \
-        #       " --dir " + libDir + staticStr + debugStr
-        # cmd += " --libList " + libList
-        # runCommand(cmd)
-        count = count + 1
+        nLibs = nLibs + 1
 
     elif ((pathToks[ntoks-4] == "apps") and
           (pathToks[ntoks-2] == "src")):
 
         # app directory - create CMakeLists.txt for app
 
-        createScript = "createCMakeLists.app.py"
-        scriptPath = os.path.join(thisScriptDir, createScript)
-
-        if (options.debug):
-            print("  createScript:", createScript, file=sys.stderr)
-
-        cmd = scriptPath
-        cmd += " --dir " + absDir + debugStr
-        cmd += " --libList " + libList
-        if (options.osx):
-            cmd += " --osx "
-        runCommand(cmd)
-        count = count + 1
+        createCMakeListsApp(thisDir, libList)
+        nApps = nApps + 1
 
     elif ((pathToks[ntoks-4] == "apps") and
           (pathToks[ntoks-2] == "src") and
@@ -264,13 +259,13 @@ def searchDirRecurse(dir, libArray, libList):
     else:
 
         # create CMakeLists.txt for recursion
-        createCMakeListsRecurse(absDir)
-        count = count + 1
+        createCMakeListsRecurse(thisDir)
+        nRecurse = nRecurse + 1
         # recurse
         subdirList = getSubdirList(dir)
         for subdir in subdirList:
             subdirPath = os.path.join(dir, subdir)
-            searchDirRecurse(subdirPath, libArray, libList)
+            searchDirRecurse(subdirPath, libList)
 
     return
 
@@ -287,13 +282,13 @@ def getSubdirList(dir):
 
     # search for SUB_DIRS key in makefile
 
-    subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
+    subNameList = getValuesForKey(makefilePath, "SUB_DIRS")
 
     if (len(subNameList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  Cannot find SUB_DIRS in ", makefilePath, file=sys.stderr)
         print("  dir: ", dir, file=sys.stderr)
-        exit(1)
+        sys.exit(1)
 
     for subName in subNameList:
         subPath = os.path.join(dir, subName)
@@ -320,9 +315,6 @@ def getMakefilePath(dir):
             print("-->> makefile not found, dir: ", dir, file=sys.stderr)
         return 'not-found'
 
-    if (options.debug):
-        print("-->> using makefile template: ", makefilePath, file=sys.stderr)
-
     # if template does not exist,
     # copy makefile to template for later use if needed
 
@@ -340,15 +332,15 @@ def getMakefilePath(dir):
 #
 # value is returned
 
-def getValueListForKey(path, key):
+def getValuesForKey(makefilePath, key):
 
     valueList = []
 
     try:
-        fp = open(path, 'r')
+        fp = open(makefilePath, 'r')
     except IOError as e:
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot open file:", path, file=sys.stderr)
+        print("  Cannot open file:", makefilePath, file=sys.stderr)
         print("  dir: ", options.coreDir, file=sys.stderr)
         return valueList
 
@@ -399,14 +391,6 @@ def getValueListForKey(path, key):
 
 def createCMakeListsRecurse(dir):
 
-    if (options.debug):
-        print("  creating CMakeLists.txt, dir: ", dir, file=sys.stderr)
-
-    # go to the dir
-
-    #currentDir = os.getcwd()
-    #os.chdir(dir)
-
     # get makefile name in use
 
     makefilePath = getMakefilePath(dir)
@@ -415,20 +399,9 @@ def createCMakeListsRecurse(dir):
     
     subdirList = getSubdirList(dir)
 
-    if (options.debug == True):
-        print("=======================", file=sys.stderr)
-        print("subdirList:", file=sys.stderr)
-        for subdir in subdirList:
-            print("subdir: %s" % (subdir), file=sys.stderr)
-        print("=======================", file=sys.stderr)
-
     # write out CMakeLists.txt for recursion
             
     writeCMakeListsRecurse(dir, subdirList)
-
-    # go back to original dir
-    
-    #os.chdir(currentDir)
 
 ########################################################################
 # get list of makefiles for library
@@ -436,32 +409,19 @@ def createCMakeListsRecurse(dir):
 
 def getLibSubDirs(libDir):
 
-    libSubDirs = []
+    subDirs = []
 
     # search for SUB_DIRS key in makefile
 
     makefilePath = getMakefilePath(libDir)
-    subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
+    subDirNames = getValuesForKey(makefilePath, "SUB_DIRS")
 
-    if (len(subNameList) < 1):
-        print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find SUB_DIRS in ", makefilePath, file=sys.stderr)
-        print("  libDir: ", libDir, file=sys.stderr)
-        exit(1)
+    for subDirName in subDirNames:
+        subDirPath = os.path.join(libDir, subDirName)
+        if (os.path.isdir(subDirPath)):
+            subDirs.append(subDirName)
 
-    for subName in subNameList:
-        if (os.path.isdir(subName)):
-            subMakefilePath = os.path.join(subName, 'makefile')
-            if (os.path.isfile(subMakefilePath)):
-                subDir = LibSubDir(subName, subMakefilePath)
-                libsSubDirs.append(subDir)
-            else:
-                subMakefilePath = os.path.join(subName, 'Makefile')
-                if (os.path.isfile(subMakefilePath)):
-                    subDir = LibSubDir(subName, subMakefilePath)
-                    libSubDirs.append(subDir)
-
-    return libSubDirs
+    return subDirs
 
 ########################################################################
 # Write out top level CMakeLists.txt
@@ -470,7 +430,10 @@ def writeCMakeListsTop(dir):
 
     cmakePath = os.path.join(dir, "CMakeLists.txt")
     if (options.debug):
-        print("  writing top level: ", cmakePath, file=sys.stderr)
+        print("--->> Writing top level CMakeLists.txt, dir: ",
+              dir, file=sys.stderr)
+        print("     ", cmakePath, file=sys.stderr)
+
     fo = open(cmakePath, 'w')
 
     fo.write('###############################################\n')
@@ -543,7 +506,14 @@ def writeCMakeListsTop(dir):
 
 def writeCMakeListsRecurse(dir, subdirList):
 
-    fo = open("CMakeLists.txt", "w")
+    cmakePath = os.path.join(dir, 'CMakeLists.txt')
+
+    if (options.debug):
+        print("--->> Writing recursive CMakeLists.txt, dir: ",
+              dir, file=sys.stderr)
+        print("     ", cmakePath, file=sys.stderr)
+
+    fo = open(cmakePath, "w")
 
     fo.write("###############################################\n")
     fo.write("#\n")
@@ -569,6 +539,66 @@ def writeCMakeListsRecurse(dir, subdirList):
     fo.write("\n")
     fo.close
 
+#===========================================================================
+#
+# Create CMakeLists.txt for library directory
+#
+#===========================================================================
+
+def createCMakeListsLib(libDir, libList):
+
+    # compute the src dir
+
+    libSrcDir = os.path.join(libDir, 'src')
+
+    # get makefile in use
+    # makefile has preference over Makefile
+
+    makefilePath = getMakefilePath(libSrcDir)
+    if (makefilePath.find('not_found') == 0):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find makefile or Makefile", file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
+        return
+
+    if (options.debug):
+        print("Using makefile: ", makefilePath, file=sys.stderr)
+
+    # get the lib name
+
+    libName = getLibName(libSrcDir, makefilePath)
+    if (options.debug):
+        print("=============================================", file=sys.stderr)
+        print("Lib name: ", libName, file=sys.stderr)
+
+    # get list of subdirs and their makefiles
+
+    libSubDirNames = getLibSubDirs(libSrcDir)
+    if (options.verbose):
+        for subDirName in libSubDirNames:
+            print("==>> subDir: %s" % subDirName, file=sys.stderr)
+
+    # load list of files to be compiled
+
+    libCompileFileList = []
+    for subDirName in libSubDirNames:
+        subDirPath = os.path.join(libSrcDir, subDirName)
+        srcNames = getLibSrcNames(subDirPath)
+        for srcName in srcNames:
+            relPath = os.path.join('.', subDirName)
+            relPath = os.path.join(relPath, srcName)
+            libCompileFileList.append(relPath)
+
+    if (options.verbose):
+        print("-------- lib compile list ---------------", file=sys.stderr)
+        for compileFile in libCompileFileList:
+            print("  compileFile: %s" % (compileFile), file=sys.stderr)
+        print("-----------------------------------------", file=sys.stderr)
+
+    # write out CMakeLists.txt
+
+    writeCMakeListsLib(libName, libSrcDir, libList, libCompileFileList)
+
 ########################################################################
 # parse the LROSE Makefile to get the lib name
 
@@ -576,13 +606,13 @@ def getLibName(dir, makefilePath):
 
     # search for MODULE_NAME key in makefile
 
-    valList = getValueListForKey(makefilePath, "MODULE_NAME")
+    valList = getValuesForKey(makefilePath, "MODULE_NAME")
 
     if (len(valList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  Cannot find MODULE_NAME in ", makefileName, file=sys.stderr)
         print("  dir: ", dir, file=sys.stderr)
-        exit(1)
+        sys.exit(1)
 
     libName = valList[len(valList)-1]
     return libName
@@ -590,29 +620,39 @@ def getLibName(dir, makefilePath):
 ########################################################################
 # append to list of files to be compiled
 
-def addLibSubDirToCompileList(subDir, compileFileList):
+def getLibSrcNames(subDir):
                     
+    srcNames = []
+
+    makefilePath = getMakefilePath(subDir)
+    if (makefilePath.find('not-found') == 0):
+        return srcNames
+
+    fp = open(makefilePath, 'r')
+    makefileLines = fp.readlines()
+    
     srcTypeList = [ 'SRCS', 'C_SRCS', 'F_SRCS', 'F_CPP_SRCS', 
                     'F90_SRCS', 'F95_SRCS', 'PGF90_SRCS', 
                     'PGF_SRCS', 'CC_SRCS', 'CPPC_SRCS', 
                     'CPP_SRCS', 'CXX_SRCS' ]
     
-    fp = open(subDir.makefilePath, 'r')
-    lines = fp.readlines()
-
     for srcType in srcTypeList:
-        handleSrcType(subDir, lines, srcType, compileFileList)
-    
-########################################################################
-# append to compile list for given srcType
+        srcNames.extend(getLibSrcNamesByType(makefileLines, srcType))
 
-def handleSrcType(subDir, lines, srcType, compileFileList):
+    return srcNames
+
+########################################################################
+# get lib srcs for a given type
+
+def getLibSrcNamesByType(makefileLines, srcType):
+
+    srcNames = []
 
     # build up multiLine string containing all compile files
 
     srcTypeFound = False
     multiLine = ""
-    for line in lines:
+    for line in makefileLines:
         line = line.strip()
         if (srcTypeFound == False):
             if (len(line) < 2):
@@ -634,7 +674,7 @@ def handleSrcType(subDir, lines, srcType, compileFileList):
                 break;
             
     if (srcTypeFound == False):
-        return
+        return srcNames
 
     # remove strings we don't want
 
@@ -645,78 +685,25 @@ def handleSrcType(subDir, lines, srcType, compileFileList):
     multiLine = multiLine.replace("\r", " ")
     multiLine = multiLine.replace("\n", " ")
 
-    toks = multiLine.split(' ')
-    for tok in toks:
-        if (tok.find(".") > 0):
-            compileFilePath = os.path.join(subDir.subDirName, tok)
-            compileFileList.append(compileFilePath)
+    names = multiLine.split(' ')
+    for name in names:
+        if (name.find(".") > 0):
+            srcNames.append(name)
 
-#===========================================================================
-#
-# Create CMakeLists.txt for library directory
-#
-#===========================================================================
-
-def createCMakeListsLib(libDir, libList):
-
-    if (options.debug):
-        print("  creating CMakeLists.txt for lib, dir: ", libDir, file=sys.stderr)
-
-    # compute the src dir
-
-    libSrcDir = os.path.join(libDir, 'src')
-    if (options.debug):
-        print("lib src dir: ", libSrcDir, file=sys.stderr)
-    # os.chdir(libSrcDir)
-
-    # get makefile in use
-    # makefile has preference over Makefile
-
-    makefilePath = getMakefilePath(libSrcDir)
-    if (makefilePath.find('not_found') == 0):
-        print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find makefile or Makefile", file=sys.stderr)
-        print("  dir: ", options.dir, file=sys.stderr)
-        return
-
-    # get the lib name
-
-    libName = getLibName(libSrcDir, makefilePath)
-    if (options.debug):
-        print("  Lib name: ", libName, file=sys.stderr)
-
-    # get list of subdirs and their makefiles
-
-    subDirList = getLibSubDirs(libSrcDir)
-    if (options.debug):
-        print("=======================", file=sys.stderr)
-        for subDir in subDirList:
-            print("subDir, makefile: %s, %s" % \
-                (subDir.subDirName, subDir.makefilePath), file=sys.stderr)
-        print("=======================", file=sys.stderr)
-
-    # load list of files to be compiled
-
-    libCompileFileList = []
-    for subDir in subDirList:
-        addLibSubDirToCompileList(subDir, libCompileFileList)
-
-    if (options.debug):
-        print("======== lib compfile list ===============", file=sys.stderr)
-        for compileFile in libCompileFileList:
-            print("compileFile: %s" % (compileFile), file=sys.stderr)
-        print("==========================================", file=sys.stderr)
-
-    # write out CMakeLists.txt
-
-    writeCMakeListsLib(libName, libSrcDir, libList, libCompileFileList)
+    return srcNames
 
 ########################################################################
 # Write out CMakeLists.txt
 
-def writeCMakeListsLib(libName, libDir, libList, compileFileList):
+def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
 
-    cmakePath = os.path.join(libDir, 'CMakeLists.txt')
+    cmakePath = os.path.join(libSrcDir, 'CMakeLists.txt')
+
+    if (options.debug):
+        print("--->> Writing CMakeLists.txt for lib: ",
+              libName, file=sys.stderr)
+        print("     ", cmakePath, file=sys.stderr)
+
     fo = open(cmakePath, "w")
 
     fo.write("###############################################\n")
@@ -746,7 +733,7 @@ def writeCMakeListsLib(libName, libDir, libList, compileFileList):
     fo.write("# source files\n")
     fo.write("\n")
     fo.write("set ( SRCS\n")
-    for index, compileFile in enumerate(compileFileList):
+    for compileFile in compileFileList:
         fo.write("      %s\n" % compileFile)
     fo.write("    )\n")
     fo.write("\n")
@@ -772,6 +759,390 @@ def writeCMakeListsLib(libName, libDir, libList, compileFileList):
     fo.close
     return
 
+#===========================================================================
+#
+# Create CMakeLists.txt for application
+#
+#===========================================================================
+
+def createCMakeListsApp(appDir, libList):
+
+    # get makefile in use
+    # makefile has preference over Makefile
+
+    makefilePath = getMakefilePath(appDir)
+    if (makefilePath.find('not_found') == 0):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find makefile or Makefile", file=sys.stderr)
+        print("  app dir: ", appDir, file=sys.stderr)
+        return
+
+    if (options.debug):
+        print("Using makefile: ", makefilePath, file=sys.stderr)
+
+    # parse the LROSE Makefile to get the app name
+
+    appName = getAppName(makefilePath)
+    if (appName.find('not-found') == 0):
+        return
+
+    # load list of files to be compiled
+
+    appCompileFileList = getAppCompileList(appName, makefilePath)
+    if (options.debug):
+        print("==>> appName: %s" % appName, file=sys.stderr)
+        for compileFile in appCompileFileList:
+            print("  app compile file: %s" % (compileFile), file=sys.stderr)
+        print("  =======================", file=sys.stderr)
+
+    # get list of libs to be linked with
+
+    linkLibList = getLinkLibList(makefilePath)
+
+    # check if we need Qt support
+
+    needQt = checkForQt(makefilePath)
+    needX11 = checkForX11(makefilePath)
+    
+    # write out CMakeLists.txt
+
+    writeCMakeListsApp(appName, appDir, appCompileFileList,
+                       linkLibList, needQt, needX11)
+
+########################################################################
+# parse the LROSE Makefile to get the app name
+
+def getAppName(makefilePath):
+
+    # search for TARGET_FILE key in makefile
+
+    valList = getValuesForKey(makefilePath, "TARGET_FILE")
+
+    if (len(valList) < 1):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find TARGET_FILE in ", makefilePath, file=sys.stderr)
+        return "not-found"
+
+    appName = valList[len(valList)-1]
+    return appName
+
+########################################################################
+# get list of files to be compiled for an app
+
+def getAppCompileList(appName, makefilePath):
+
+    appCompileList = []
+
+    try:
+        fp = open(makefilePath, 'r')
+    except IOError as e:
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", makefilePath, file=sys.stderr)
+        sys.exit(1)
+
+    makefileLines = fp.readlines()
+    fp.close()
+
+    srcTypeList = [ 'SRCS', 'C_SRCS', 'F_SRCS', 'F_CPP_SRCS', 
+                    'F90_SRCS', 'F95_SRCS', 'PGF90_SRCS', 
+                    'PGF_SRCS', 'CC_SRCS', 'CPPC_SRCS', 
+                    'CPP_SRCS', 'CXX_SRCS', 'NORM_SRCS' ]
+
+    for srcType in srcTypeList:
+        appendSrcTypeApp(appName, makefileLines, srcType, appCompileList)
+
+    return appCompileList
+    
+########################################################################
+# append to compile list for app for given srcType
+
+def appendSrcTypeApp(appName, makefileLines, srcType, appCompileList):
+
+    # build up multiLine string containing all compile files
+
+    srcTypeFound = False
+    multiLine = ""
+    for line in makefileLines:
+        line = line.strip()
+        if (srcTypeFound == False):
+            if (len(line) < 2):
+                continue
+            if (line[0] == '#'):
+                continue
+            if (line.find(srcType) == 0):
+                srcTypeFound = True
+                multiLine = multiLine + line;
+                if (line.find("\\") < 0):
+                    break;
+        else:
+            if (len(line) < 2):
+                break
+            if (line[0] == '#'):
+                break
+            multiLine = multiLine + line;
+            if (line.find("\\") < 0):
+                break;
+
+    if (srcTypeFound == False):
+        return
+
+    # remove strings we don't want
+
+    multiLine = multiLine.replace(srcType, " ")
+    multiLine = multiLine.replace("=", " ")
+    multiLine = multiLine.replace("\t", " ")
+    multiLine = multiLine.replace("\\", " ")
+    multiLine = multiLine.replace("\r", " ")
+    multiLine = multiLine.replace("\n", " ")
+
+    names = multiLine.split(' ')
+    for name in names:
+        if (name.find(".") > 0):
+            appCompileList.append(name)
+        elif (name == "$(PARAMS_CC)"):
+            appCompileList.append("Params.cc")
+        elif (name == "$(TDRP_C)"):
+            appCompileList.append(appName + "_tdrp.c")
+        elif (name == "$(_TDRP_C)"):
+            appCompileList.append("_tdrp.c")
+
+########################################################################
+# get list of libraries to be linked in makefile for an app
+
+def getLinkLibList(makefilePath):
+
+    linkLibList = []
+
+    # search for LOC_LIBS key in makefile
+
+    locLibs = getValuesForKey(makefilePath, "LOC_LIBS")
+    for line in locLibs:
+        linkLibList.extend(decodeLibLine(line))
+
+    return linkLibList
+            
+########################################################################
+# decode a line from LOC_LIBS
+
+def decodeLibLine(line):
+
+    libs = []
+
+    toks = line.split(' ')
+    for tok in toks:
+        thisTok = tok.strip(" \t\n\r")
+        if (thisTok.find("-l") == 0):
+            libs.append(thisTok[2:]) # strip off '-l'
+        elif ((thisTok.find("NETCDF4_LIBS") >= 0) or
+              (thisTok.find("NETCDF_LIBS") >= 0)):
+            libs.append("Ncxx")
+            libs.append("netcdf")
+            libs.append("hdf5_cpp")
+            libs.append("hdf5_hl")
+            libs.append("hdf5")
+            libs.append("z")
+            libs.append("bz2")
+        elif (thisTok.find("NETCDF_C_AND_C++_LIBS") >= 0):
+            libs.append("netcdf")
+        elif (thisTok.find("NETCDF_C_AND_F_LIBS") >= 0):
+            libs.append("netcdff")
+            libs.append("netcdf")
+        elif (thisTok.find("NETCDF_C_LIB") >= 0):
+            libs.append("netcdf")
+        elif (thisTok.find("NETCDF_FF_LIB") >= 0):
+            libs.append("netcdff")
+        elif (thisTok.find("TDRP_LIBS") >= 0):
+            libs.append("tdrp")
+        #elif (thisTok.find("QT_LIBS") >= 0):
+        #    libs.append("Qt5Core")
+        #    libs.append("Qt5Gui")
+        #    libs.append("Qt5Widgets")
+        #    libs.append("Qt5Network")
+
+    return libs
+
+########################################################################
+# check for dependence on QT
+
+def checkForQt(makefilePath):
+                    
+    try:
+        fp = open(makefilePath, 'r')
+    except IOError as e:
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", makefileName, file=sys.stderr)
+        sys.exit(1)
+
+    makefileLines = fp.readlines()
+    fp.close()
+
+    for line in makefileLines:
+        if (line.find("QT") >= 0):
+            return True
+
+    return False
+    
+########################################################################
+# check for dependence on X11
+
+def checkForX11(makefilePath):
+                    
+    try:
+        fp = open(makefilePath, 'r')
+    except IOError as e:
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", makefileName, file=sys.stderr)
+        sys.exit(1)
+
+    makefileLines = fp.readlines()
+    fp.close()
+
+    for line in makefileLines:
+        if (line.find("X11") >= 0):
+            return True
+
+    return False
+    
+########################################################################
+# write out CMakeLists.txt for app
+
+def writeCMakeListsApp(appName, appDir, appCompileFileList,
+                       linkLibList, needQt, needX11):
+
+    cmakePath = os.path.join(appDir, 'CMakeLists.txt')
+
+    if (options.debug):
+        print("--->> Writing CMakeLists.txt for app: ",
+              appName, file=sys.stderr)
+        print("     ", cmakePath, file=sys.stderr)
+
+    fo = open(cmakePath, "w")
+
+    fo.write("###############################################\n")
+    fo.write("#\n")
+    fo.write("# CMakeLists.txt file for cmake\n")
+    fo.write("#\n")
+    fo.write("# app name: %s\n" % appName)
+    fo.write("#\n")
+    fo.write("# written by script %s\n" % thisScriptName)
+    fo.write("#\n")
+    fo.write("# created %s\n" % datetime.now())
+    fo.write("#\n")
+    fo.write("# dir: %s\n" % appDir)
+    fo.write("# osx: %s\n" % options.osx)
+    fo.write("###############################################\n")
+    fo.write("\n")
+
+    fo.write("project ( %s )\n" % appName)
+    fo.write("\n")
+    
+    fo.write("# source files\n")
+    fo.write("\n")
+    fo.write("set ( SRCS\n")
+    for compileFile in appCompileFileList:
+        fo.write("      %s\n" % compileFile)
+    fo.write("    )\n")
+    fo.write("\n")
+
+    fo.write("# includes\n")
+    fo.write("\n")
+    for lib in linkLibList:
+        fo.write("include_directories ( ../../../../libs/%s/src/include )\n" % lib)
+    fo.write("include_directories( $ENV{LROSE_INSTALL_DIR}/include )\n")
+    fo.write("\n")
+
+    fo.write("# link directories\n")
+    fo.write("\n")
+    fo.write("link_directories( $ENV{LROSE_INSTALL_DIR}/lib )\n")
+    fo.write("\n")
+
+    fo.write("# link libs\n")
+    fo.write("\n")
+    for lib in linkLibList:
+        fo.write("link_libraries ( %s )\n" % lib)
+    if (needQt):
+        fo.write("link_libraries ( ${Qt5Core_LIBRARIES} )\n")
+        fo.write("link_libraries ( ${Qt5Gui_LIBRARIES} )\n")
+        fo.write("link_libraries ( ${Qt5Widgets_LIBRARIES} )\n")
+        fo.write("link_libraries ( ${Qt5Network_LIBRARIES} )\n")
+        fo.write("link_libraries ( ${Qt5Qml_LIBRARIES} )\n")
+    fo.write("\n")
+
+    if (needQt):
+        fo.write("# QT5\n")
+        fo.write("\n")
+        fo.write("set ( CMAKE_INCLUDE_CURRENT_DIR ON )\n")
+        fo.write("set ( CMAKE_AUTOMOC ON )\n")
+        fo.write("set ( CMAKE_AUTORCC ON )\n")
+        fo.write("set ( CMAKE_AUTOUIC ON )\n")
+        fo.write("find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH )\n")
+        fo.write("\n")
+
+        fo.write("include( FindPkgConfig )\n")
+        fo.write("pkg_search_module( Qt5Core REQUIRED )\n")
+        fo.write("pkg_search_module( Qt5Gui REQUIRED )\n")
+        fo.write("pkg_search_module( Qt5Widgets REQUIRED )\n")
+        fo.write("pkg_search_module( Qt5Network REQUIRED )\n")
+        fo.write("pkg_search_module( Qt5Qml REQUIRED )\n")
+        fo.write("\n")
+
+        fo.write("include_directories( ${Qt5Core_INCLUDE_DIRS} )\n")
+        fo.write("include_directories( ${Qt5Gui_INCLUDE_DIRS} )\n")
+        fo.write("include_directories( ${Qt5Widgets_INCLUDE_DIRS} )\n")
+        fo.write("include_directories( ${Qt5Network_INCLUDE_DIRS} )\n")
+        fo.write("include_directories( ${Qt5Qml_INCLUDE_DIRS} )\n")
+        fo.write("\n")
+
+    fo.write("# application\n")
+    fo.write("\n")
+    fo.write("add_executable ( %s ${SRCS} )\n" % appName)
+    fo.write("\n")
+
+    fo.write("# install\n")
+    fo.write("\n")
+    fo.write("INSTALL(TARGETS ${PROJECT_NAME}\n")
+    fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/bin\n")
+    fo.write("        )\n")
+    fo.write("\n")
+
+    fo.close
+    return
+    
+
+########################################################################                        
+# get the LINUX type from the /etc/os-release file
+# or 'darwin' if OSX
+
+def getOsType():                                                                                  
+
+    # check for Mac OSX
+
+    if sys.platform == "darwin":
+        return "osx"
+    elif sys.platform == "linux":
+        osrelease_file = open("/etc/os-release", "rt")
+        lines = osrelease_file.readlines()
+        osrelease_file.close()
+        osType = "unknown"
+        for line in lines:
+            if (line.find('PRETTY_NAME') == 0):
+                lineParts = line.split('=')
+                osParts = lineParts[1].split('"')
+                osType = osParts[1].lower()
+                if (osType.find("debian") >= 0):
+                    return "debian"
+                if (osType.find("ubuntu") >= 0):
+                    return "ubuntu"
+                if (osType.find("centos") >= 0):
+                    return "centos"
+                if (osType.find("rhel") >= 0):
+                    return "rhel"
+                if (osType.find("opensuse") >= 0):
+                    return "opensuse"
+                
+
+    return "unknown"
+            
 ########################################################################
 # Run a command in a shell, wait for it to complete
 
@@ -784,13 +1155,13 @@ def runCommand(cmd):
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
             print("Child exited with code: ", retcode, file=sys.stderr)
-            exit(1)
+            sys.exit(1)
         else:
             if (options.verbose):
                 print("Child returned code: ", retcode, file=sys.stderr)
     except OSError as e:
         print("Execution failed:", e, retcode, file=sys.stderr)
-        exit(1)
+        sys.exit(1)
 
 ########################################################################
 # Run - entry point
