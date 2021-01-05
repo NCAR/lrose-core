@@ -145,6 +145,8 @@ public:
 
 public slots:
   void fieldsSelected(vector<string> *selectedFields);
+  void closeFieldListDialog(bool clicked);
+  
   //colorMapRedefineReceived(string, ColorMap)
   void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
 				QColor gridColor,

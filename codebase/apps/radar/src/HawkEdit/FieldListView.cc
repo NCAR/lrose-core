@@ -32,6 +32,7 @@ void FieldListView::setList(vector<string> *listItems) {
     //set model
     m_listView->setModel(model);
     m_listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    //m_listView->setMinimumHeight(listItems->size()*50);
 }
 
 void FieldListView::fieldsSelected(bool clicked) {
