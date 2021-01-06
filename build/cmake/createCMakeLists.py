@@ -66,6 +66,9 @@ def main():
                       dest='coreDir', default=coreDirDefault,
                       help='Path of lrose-core top level directory, default is: ' +
                       coreDirDefault)
+    parser.add_option('--installDir',
+                      dest='installDir', default='',
+                      help='Path of lrose install dir, default is ~/lrose')
     parser.add_option('--static',
                       dest='static', default=False,
                       action="store_true",
@@ -102,16 +105,20 @@ def main():
 
     if (options.debug):
         print("=============================================", file=sys.stderr)
-        print("Running %s:" % thisScriptName, file=sys.stderr)
-        print("  coreDir: ", coreDir, file=sys.stderr)
-        print("  codebaseDir: ", codebaseDir, file=sys.stderr)
-        print("  libs dir: ", libsDir, file=sys.stderr)
-        print("  apps dir: ", appsDir, file=sys.stderr)
-        print("  static: ", options.static, file=sys.stderr)
-        print("  pkg: ", options.pkg, file=sys.stderr)
-        print("  osx: ", options.osx, file=sys.stderr)
-        print("  verboseMake: ", options.verboseMake, file=sys.stderr)
-        print("  withJasper: ", options.withJasper, file=sys.stderr)
+        print("Running %s      :" % thisScriptName, file=sys.stderr)
+        print("  coreDir       : ", coreDir, file=sys.stderr)
+        print("  codebaseDir   : ", codebaseDir, file=sys.stderr)
+        print("  libs dir      : ", libsDir, file=sys.stderr)
+        print("  apps dir      : ", appsDir, file=sys.stderr)
+        if (len(options.installDir) == 0):
+            print("  install dir   :  ~/lrose", file=sys.stderr)
+        else:
+            print("  install dir   : ", options.installDir, file=sys.stderr)
+        print("  static        : ", options.static, file=sys.stderr)
+        print("  pkg           : ", options.pkg, file=sys.stderr)
+        print("  osx           : ", options.osx, file=sys.stderr)
+        print("  verboseMake   : ", options.verboseMake, file=sys.stderr)
+        print("  withJasper    : ", options.withJasper, file=sys.stderr)
         print("=============================================", file=sys.stderr)
 
     # go to the top level codebase directory
@@ -479,10 +486,13 @@ def writeCMakeListsTop(dir):
     fo.write('find_package ( Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH )\n')
     fo.write('\n')
 
-    fo.write('# If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose\n')
-    fo.write('if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )\n')
-    fo.write('  set( CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE )\n')
-    fo.write('endif(  )\n')
+    if (len(options.installDir) == 0):
+        fo.write('# If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose\n')
+        fo.write('if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )\n')
+        fo.write('  set( CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE )\n')
+        fo.write('endif(  )\n')
+    else:
+        fo.write('set( CMAKE_INSTALL_PREFIX %s CACHE PATH "..." FORCE )\n' % options.installDir)
     fo.write('message( "CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}" )\n')
     fo.write('\n')
 
@@ -727,7 +737,7 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("include_directories ( ./include )\n")
     for lib in libList:
         fo.write("include_directories ( ../../%s/src/include )\n" % lib)
-    fo.write("include_directories ( $ENV{LROSE_INSTALL_DIR}/include )\n")
+    fo.write("include_directories ( ${CMAKE_INSTALL_PREFIX}/include )\n")
     fo.write("\n")
 
     fo.write("# source files\n")
@@ -749,10 +759,10 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("# install\n")
     fo.write("\n")
     fo.write("INSTALL(TARGETS %s\n" % libName)
-    fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/lib\n")
+    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib\n")
     fo.write("        )\n")
     fo.write("INSTALL(DIRECTORY include/%s\n" % libName)
-    fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/include\n")
+    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/include\n")
     fo.write("        )\n")
     fo.write("\n")
 
@@ -1155,12 +1165,12 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("\n")
     for lib in libList:
         fo.write("include_directories ( ../../../../libs/%s/src/include )\n" % lib)
-    fo.write("include_directories( $ENV{LROSE_INSTALL_DIR}/include )\n")
+    fo.write("include_directories( ${CMAKE_INSTALL_PREFIX}/include )\n")
     fo.write("\n")
 
     fo.write("# link directories\n")
     fo.write("\n")
-    fo.write("link_directories( $ENV{LROSE_INSTALL_DIR}/lib )\n")
+    fo.write("link_directories( ${CMAKE_INSTALL_PREFIX}/lib )\n")
     fo.write("\n")
 
     fo.write("# link libs\n")
@@ -1208,7 +1218,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("# install\n")
     fo.write("\n")
     fo.write("INSTALL(TARGETS ${PROJECT_NAME}\n")
-    fo.write("        DESTINATION $ENV{LROSE_INSTALL_DIR}/bin\n")
+    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/bin\n")
     fo.write("        )\n")
     fo.write("\n")
 
