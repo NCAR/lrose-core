@@ -44,7 +44,6 @@ makefile
 .deps
 makefile.in
 makefile.am
-__makefile.template
 .libs
 compile
 

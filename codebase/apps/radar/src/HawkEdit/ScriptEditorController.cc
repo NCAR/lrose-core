@@ -213,27 +213,32 @@ void ScriptEditorController::setupFieldArrays() {
 
           // ===== set field to array of numbers; begin =====
             // get the field data, for the current (sweep, ray)
-      const vector<float> *fieldData = _soloFunctionsController->getData(*it);  
+      try {
+        const vector<float> *fieldData = _soloFunctionsController->getData(*it);  
 
-      QJSValue fieldArray = engine.newArray(fieldData->size());
-      QString vectorName = fieldName; //  + "_v";    
+        QJSValue fieldArray = engine.newArray(fieldData->size());
+        QString vectorName = fieldName; //  + "_v";    
 
 
-      //std::vector<float> fieldData = getData(fieldName);
-      vector<float>::const_iterator itData;
-      int idx = 0;
-      for (itData=fieldData->begin(); itData != fieldData->end(); ++itData) {
-        fieldArray.setProperty(idx, *itData);
-        idx += 1;
+        //std::vector<float> fieldData = getData(fieldName);
+        vector<float>::const_iterator itData;
+        int idx = 0;
+        for (itData=fieldData->begin(); itData != fieldData->end(); ++itData) {
+          fieldArray.setProperty(idx, *itData);
+          idx += 1;
+        }
+
+        //for (int i=0; i<fieldData.size(); i++) {
+        //  fieldArray.setProperty(i, fieldData.at(i));
+        //}
+        LOG(DEBUG) << "adding vector form " << vectorName.toStdString();
+        engine.globalObject().setProperty(vectorName, fieldArray);
+        LOG(DEBUG) << "end adding vector form " << vectorName.toStdString();
+        // ===== set field to array of numbers; end ====
+      } catch (char *msg) {
+        LOG(DEBUG) << msg;
+        throw msg;
       }
-
-      //for (int i=0; i<fieldData.size(); i++) {
-      //  fieldArray.setProperty(i, fieldData.at(i));
-      //}
-      LOG(DEBUG) << "adding vector form " << vectorName.toStdString();
-      engine.globalObject().setProperty(vectorName, fieldArray);
-      LOG(DEBUG) << "end adding vector form " << vectorName.toStdString();
-      // ===== set field to array of numbers; end ====
     } 
 }
 
@@ -556,6 +561,7 @@ uncate(100);
 void ScriptEditorController::runForEachRayScript(QString script, bool useBoundary)
 {
   LOG(DEBUG) << "enter";
+  try {
 
   QStringList newFieldNames; //  = {"VEL_xyz"}; // , "123", "CDE"};
 
@@ -601,7 +607,7 @@ uncate(100);
    //while (_soloFunctionsController->moreSweeps()) {
     // for each ray
     _soloFunctionsController->setCurrentRayToFirst();
-
+  
     while (_soloFunctionsController->moreRays()) {
       LOG(DEBUG) << "more rays ...";
       // calculate boundary mask for each ray? 
@@ -610,10 +616,17 @@ uncate(100);
       _soloFunctionsController->applyBoundary(useBoundary);
 
       // TODO: set field values in javascript array? by (sweep, ray) would we apply boundary?
+      
       setupFieldArrays(); 
-      setupBoundaryArray();
 
-      QJSValue result = engine.evaluate(script);
+      setupBoundaryArray();
+      QJSValue result;
+      try {
+        result = engine.evaluate(script);
+      } catch (const char *msg) {
+        LOG(DEBUG) << "ERROR from engine.evaluate: " << msg;
+        throw new string(msg);
+      }
       if (result.isError()) {
         QString message;
         message.append(result.toString());
@@ -727,6 +740,10 @@ uncate(100);
 
     volumeUpdated(newFieldNames);
     emit scriptComplete();
+  } catch (std::invalid_argument &ex) {
+    LOG(DEBUG) << "ERROR running script: " << ex.what();
+    QMessageBox::warning(NULL, "Error running script", ex.what());
+  }
 
     LOG(DEBUG) << "exit";
 }

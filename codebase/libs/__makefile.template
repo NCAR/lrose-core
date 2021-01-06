@@ -1,0 +1,41 @@
+#
+# Recursive make for LROSE libraries
+#
+
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
+
+TARGETS = $(GENERAL_TARGETS) $(LIB_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
+
+SUB_DIRS = \
+	FiltAlg \
+	FiltAlgVirtVol \
+	Fmq \
+	Mdv \
+        Ncxx \
+	Radx \
+        Refract \
+	Solo \
+	Spdb \
+	advect \
+	cidd \
+	contour \
+	dataport \
+	didss \
+	dsdata \
+	dsserver \
+	euclid \
+	grib \
+	grib2 \
+	hydro \
+	kd \
+	physics \
+	radar \
+	rapformats \
+	rapmath \
+	rapplot \
+	shapelib \
+	tdrp \
+	titan \
+	toolsa
+
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
