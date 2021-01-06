@@ -80,6 +80,10 @@ def main():
                       dest='osx', default=False,
                       action="store_true",
                       help='Configure for MAC OSX')
+    parser.add_option('--renewTemplates',
+                      dest='renewTemplates', default=False,
+                      action="store_true",
+                      help='Copy Makefile to __makefile.template for all directories used')
     parser.add_option('--verboseMake',
                       dest='verboseMake', default=False,
                       action="store_true",
@@ -328,6 +332,11 @@ def getMakefilePath(dir):
     if (makefilePath.find('__makefile.template') < 0):
         templatePath = os.path.join(dir, '__makefile.template')
         shutil.copy(makefilePath, templatePath)
+
+    if (options.renewTemplates):
+        templatePath = os.path.join(dir, '__makefile.template')
+        MakePath = os.path.join(dir, 'Makefile')
+        shutil.copy(MakePath, templatePath)
 
     return makefilePath
 
