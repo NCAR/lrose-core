@@ -5631,6 +5631,13 @@ void RadxVol::combineNexradSweeps(bool keepLongRange /* = false */)
 
   for (size_t ii = 0; ii < combos.size(); ii++) {
     const SweepCombo &combo = combos[ii];
+    if (_debug) {
+      cerr << "==>> combineNexradSweeps: ii, "
+           << "targetSweepIndex, sourceSweepIndex: "
+           << ii << ", " 
+           << combo.targetSweepIndex << ", "
+           << combo.sourceSweepIndex << endl;
+    }
     _addFieldsFromDifferentSweep(_sweeps[combo.targetSweepIndex],
                                  _sweeps[combo.sourceSweepIndex]);
   }
@@ -5787,6 +5794,11 @@ void RadxVol::_addFieldsFromDifferentSweep(RadxSweep *sweepTarget,
             rayTarget->replaceField(fldCopy);
           }
         
+          if (_debug && iray == sweepTarget->getStartRayIndex()) {
+            cerr << "DEBUG - overwriting field in target: "
+                 << sourceName << endl;
+          }
+
         } else {
           
           // source field does not exist on the target
@@ -5794,7 +5806,12 @@ void RadxVol::_addFieldsFromDifferentSweep(RadxSweep *sweepTarget,
           
           RadxField *fldCopy = new RadxField(*sourceFld);
           rayTarget->addField(fldCopy);
-        
+          
+          if (_debug && iray == sweepTarget->getStartRayIndex()) {
+            cerr << "DEBUG - copying missing field to target: "
+                 << sourceName << endl;
+          }
+
         }
         
       } // ifield

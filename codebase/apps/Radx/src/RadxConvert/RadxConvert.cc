@@ -201,6 +201,9 @@ int RadxConvert::_runFilelist()
     // loop through the input file list
     
     RadxVol vol;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      vol.setDebug(true);
+    }
     for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
       string inputPath = _args.inputFileList[ii];
       // read input file
