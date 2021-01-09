@@ -5648,9 +5648,9 @@ void RadxVol::combineNexradSweeps(bool keepLongRange /* = false */)
   for (int ii = 0; ii < (int) _sweeps.size(); ii++) {
     if (sourceIndexes.find(ii) == sourceIndexes.end()) {
       // not a source, so keep these rays
-      RadxSweep *sweepTarget = _sweeps[ii];
-      for (size_t kk = sweepTarget->getStartRayIndex();
-           kk <= sweepTarget->getEndRayIndex(); kk++) {
+      RadxSweep *sweepKeep = _sweeps[ii];
+      for (size_t kk = sweepKeep->getStartRayIndex();
+           kk <= sweepKeep->getEndRayIndex(); kk++) {
         keepRays.push_back(_rays[kk]);
       }
     } else {
