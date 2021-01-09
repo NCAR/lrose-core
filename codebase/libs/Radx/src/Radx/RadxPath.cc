@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <Radx/RadxPath.hh>
+#include <toolsa/str.h>
 using namespace std;
 
 // static definitions
@@ -562,7 +563,7 @@ int RadxPath::makeDirRecurse(const char *path)
   // from the string.
   // If no delim, try to make the directory non-recursively.
  
-  strncpy(up_dir, path, RADX_MAX_PATH_LEN);
+  STRncopy(up_dir, path, RADX_MAX_PATH_LEN);
   last_delim = strrchr(up_dir, delim);
   if (last_delim == NULL) {
     return (makeDir(up_dir));

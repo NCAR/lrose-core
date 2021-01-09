@@ -2548,7 +2548,7 @@ void LeoCf2RadxFile::_readSweepsMetaAsInFile()
       err.addErrStr("  Cannot read sweep group, name", _sweepGroupNames[0]);
       throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
     }
-    int natts = group.getAttCount();
+    // int natts = group.getAttCount();
     const multimap<string, NcxxGroupAtt> &atts = group.getAtts();
 
     for (multimap<string, NcxxGroupAtt>::const_iterator iter = atts.begin();
@@ -3054,7 +3054,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _file.readDoubleVar(ALTITUDE, _altitudeM, 0.0);
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      _altitudeM = 0.0;
      cerr << "WARNING - LeoCf2RadxFile::_readLocation" << endl;
      cerr << "  No altitude variable" << endl;

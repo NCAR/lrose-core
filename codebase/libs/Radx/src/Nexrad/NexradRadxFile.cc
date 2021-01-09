@@ -681,9 +681,9 @@ int NexradRadxFile::readFromPath(const string &path,
     _readVol->remapRangeGeom(_startRangeKmShort, _gateSpacingKmShort, true);
     
     // combine fields as appropriate for sweeps with the same
-    // fixed angle
+    // fixed angle - these are the NEXRAD split cuts
     
-    _readVol->combineNexradSweeps(!_readRemoveLongRange);
+    _readVol->combineNexradSplitCuts(!_readRemoveLongRange);
     
     // remove long or short range data as appropriate
     

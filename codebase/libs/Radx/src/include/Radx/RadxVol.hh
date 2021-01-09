@@ -987,11 +987,17 @@ public:
   /// Also sets the fixed angle for the rays in the sweep
   
   void setFixedAngleDeg(int sweepNum, double fixedAngle);
-
-  /// for NEXRAD volumes, combine fields from consecutive sweeps
-  /// with the same elevation angle
   
-  void combineNexradSweeps(bool keepLongRange = false);
+  /// For NEXRAD volumes, combine fields from consecutive sweeps
+  /// with the same elevation angle.
+  /// These are the so-called split-cut sweeps.
+  /// The non-Doppler sweeps occur first, followed by the Doppler sweep.
+  /// The non-Doppler sweeps have REF, ZDR, RHO, PHI and CDP.
+  /// The Doppler sweeps have REF, VEL and SW.
+  /// We use the REF from the non-Doppler sweeps.
+  /// We copy in VEL and SW from the Doppler sweeps.
+
+  void combineNexradSplitCuts(bool keepLongRange = false);
 
   /// Make fields uniform in the volume.
   /// This ensures that all rays in the volume have the same fields
@@ -1775,11 +1781,11 @@ private:
 
   class SweepCombo {
   public:
-    size_t targetSweepIndex;
-    size_t sourceSweepIndex; 
-    SweepCombo(size_t target, size_t source) {
-      targetSweepIndex = target;
-      sourceSweepIndex = source;
+    size_t nonDopSweepIndex;
+    size_t dopplerSweepIndex; 
+    SweepCombo(size_t nonDop, size_t doppler) {
+      nonDopSweepIndex = nonDop;
+      dopplerSweepIndex = doppler;
     }
   };
   
@@ -1941,8 +1947,8 @@ private:
   void _computeNRaysTransition();
   void _findTransitions(int nRaysMargin);
   void _setPredomSweepModeFromAngles() const;
-  void _addFieldsFromDifferentSweep(RadxSweep *sweepTarget,
-                                    RadxSweep *sweepSource);
+  void _addFieldsFromDopplerSweep(RadxSweep *sweepPower,
+                                  RadxSweep *sweepDoppler);
 
   int _loadPseudoFromRealRhis();
   int _setupAngleSearch(const RadxSweep *sweep);

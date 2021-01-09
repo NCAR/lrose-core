@@ -5596,10 +5596,16 @@ bool RadxVol::gateGeomVariesByRay() const
 }
 
 /////////////////////////////////////////////////////////////
-/// for NEXRAD volumes, combine fields from consecutive sweeps
-/// with the same elevation angle
+/// For NEXRAD volumes, combine fields from consecutive sweeps
+/// with the same elevation angle.
+/// These are the so-called split-cut sweeps.
+/// The non-Doppler sweeps occur first, followed by the Doppler sweep.
+/// The non-Doppler sweeps have REF, ZDR, RHO, PHI and CDP.
+/// The Doppler sweeps have REF, VEL and SW.
+/// We use the REF from the non-Doppler sweeps.
+/// We copy in VEL and SW from the Doppler sweeps.
 
-void RadxVol::combineNexradSweeps(bool keepLongRange /* = false */)
+void RadxVol::combineNexradSplitCuts(bool keepLongRange /* = false */)
   
 {
 
@@ -5614,15 +5620,15 @@ void RadxVol::combineNexradSweeps(bool keepLongRange /* = false */)
   // find consecutive sweeps that should be combined
   // store these in combos
 
-  set<size_t> sourceIndexes;
+  set<size_t> dopplerIndexes;
   vector<SweepCombo> combos;
   for (size_t ii = 0; ii < _sweeps.size() - 1; ii++) {
-    RadxSweep *sweepTarget = _sweeps[ii];
-    RadxSweep *sweepSource = _sweeps[ii + 1];
-    if (fabs(sweepTarget->getFixedAngleDeg() -
-             sweepSource->getFixedAngleDeg()) < 0.01) {
+    RadxSweep *sweepNonDop = _sweeps[ii];
+    RadxSweep *sweepDoppler = _sweeps[ii + 1];
+    if (fabs(sweepNonDop->getFixedAngleDeg() -
+             sweepDoppler->getFixedAngleDeg()) < 0.01) {
       combos.push_back(SweepCombo(ii, ii + 1));
-      sourceIndexes.insert(ii + 1);
+      dopplerIndexes.insert(ii + 1);
       ii++;
     } // ii
   } // ii
@@ -5632,32 +5638,32 @@ void RadxVol::combineNexradSweeps(bool keepLongRange /* = false */)
   for (size_t ii = 0; ii < combos.size(); ii++) {
     const SweepCombo &combo = combos[ii];
     if (_debug) {
-      cerr << "==>> combineNexradSweeps: ii, "
-           << "targetSweepIndex, sourceSweepIndex: "
+      cerr << "==>> combineNexradSplitCuts: ii, "
+           << "nonDopSweepIndex, dopplerSweepIndex: "
            << ii << ", " 
-           << combo.targetSweepIndex << ", "
-           << combo.sourceSweepIndex << endl;
+           << combo.nonDopSweepIndex << ", "
+           << combo.dopplerSweepIndex << endl;
     }
-    _addFieldsFromDifferentSweep(_sweeps[combo.targetSweepIndex],
-                                 _sweeps[combo.sourceSweepIndex]);
+    _addFieldsFromDopplerSweep(_sweeps[combo.nonDopSweepIndex],
+                               _sweeps[combo.dopplerSweepIndex]);
   }
 
   // select the rays to keep
   
   vector<RadxRay *> keepRays;
   for (int ii = 0; ii < (int) _sweeps.size(); ii++) {
-    if (sourceIndexes.find(ii) == sourceIndexes.end()) {
-      // not a source, so keep these rays
+    if (dopplerIndexes.find(ii) == dopplerIndexes.end()) {
+      // not a doppler, so keep these rays
       RadxSweep *sweepKeep = _sweeps[ii];
       for (size_t kk = sweepKeep->getStartRayIndex();
            kk <= sweepKeep->getEndRayIndex(); kk++) {
         keepRays.push_back(_rays[kk]);
       }
     } else {
-      // discard the source sweeps if no longer needed
-      RadxSweep *sweepSource = _sweeps[ii];
-      for (size_t kk = sweepSource->getStartRayIndex();
-           kk <= sweepSource->getEndRayIndex(); kk++) {
+      // discard the doppler sweeps if no longer needed
+      RadxSweep *sweepDoppler = _sweeps[ii];
+      for (size_t kk = sweepDoppler->getStartRayIndex();
+           kk <= sweepDoppler->getEndRayIndex(); kk++) {
         if (keepLongRange && _rays[kk]->getIsLongRange()) {
           keepRays.push_back(_rays[kk]);
         } else {
@@ -5677,146 +5683,115 @@ void RadxVol::combineNexradSweeps(bool keepLongRange /* = false */)
 }
 
 ////////////////////////////////////////////////////////
-/// Augment fields in a sweep, by copying in fields from
-/// another sweep
-///
-/// We copy from a source sweep to a target sweep
+/// Augment fields in a non-Doppler sweep, by copying i
+/// fields from a Doppler sweep
 
-void RadxVol::_addFieldsFromDifferentSweep(RadxSweep *sweepTarget,
-                                           RadxSweep *sweepSource)
+void RadxVol::_addFieldsFromDopplerSweep(RadxSweep *sweepNonDop,
+                                         RadxSweep *sweepDoppler)
 {
 
-  _setupAngleSearch(sweepSource);
+  _setupAngleSearch(sweepDoppler);
 
-  // check sweep mode
+  // check sweep mode is same for nonDop and doppler
 
-  Radx::SweepMode_t sweepMode = sweepTarget->getSweepMode();
-  if (sweepMode != sweepSource->getSweepMode()) {
+  Radx::SweepMode_t sweepMode = sweepNonDop->getSweepMode();
+  if (sweepMode != sweepDoppler->getSweepMode()) {
     // sweep modes do not match
     return;
   }
 
-  // count up non-missing gates in target fields
+  // count up non-missing gates in nonDop fields
 
-  set<string> targetNames;
-  map<string, int> targetCounts;
-  for (size_t iray = sweepTarget->getStartRayIndex();
-       iray <= sweepTarget->getEndRayIndex(); iray++) {
-    RadxRay *ray = _rays[iray];
-    vector<RadxField *> flds = ray->getFields();
-    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
-      RadxField *fld = flds[ifield];
-      string name = fld->getName();
-      targetNames.insert(name);
-      if (iray == sweepTarget->getStartRayIndex()) {
-        // initialize cound
-        targetCounts[name] = 0;
-      }
-      targetCounts[name] += fld->countNonMissingGates();
-    } // ifield
-  } // iray
+  // map<string, int> nonDopCounts;
+  // for (size_t iray = sweepNonDop->getStartRayIndex();
+  //      iray <= sweepNonDop->getEndRayIndex(); iray++) {
+  //   RadxRay *ray = _rays[iray];
+  //   vector<RadxField *> flds = ray->getFields();
+  //   for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+  //     RadxField *fld = flds[ifield];
+  //     string name = fld->getName();
+  //     if (iray == sweepNonDop->getStartRayIndex()) {
+  //       // initialize cound
+  //       nonDopCounts[name] = 0;
+  //     }
+  //     nonDopCounts[name] += fld->countNonMissingGates();
+  //   } // ifield
+  // } // iray
 
-  // count up non-missing gates in source fields
+  // count up non-missing gates in doppler fields
   
-  set<string> sourceNames;
-  map<string, int> sourceCounts;
-  for (size_t iray = sweepSource->getStartRayIndex();
-       iray <= sweepSource->getEndRayIndex(); iray++) {
-    RadxRay *ray = _rays[iray];
-    vector<RadxField *> flds = ray->getFields();
-    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
-      RadxField *fld = flds[ifield];
-      string name = fld->getName();
-      sourceNames.insert(name);
-      if (iray == sweepSource->getStartRayIndex()) {
-        // initialize cound
-        sourceCounts[name] = 0;
-      }
-      sourceCounts[name] += fld->countNonMissingGates();
-    } // ifield
-  } // iray
+  // map<string, int> dopplerCounts;
+  // for (size_t iray = sweepDoppler->getStartRayIndex();
+  //      iray <= sweepDoppler->getEndRayIndex(); iray++) {
+  //   RadxRay *ray = _rays[iray];
+  //   vector<RadxField *> flds = ray->getFields();
+  //   for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+  //     RadxField *fld = flds[ifield];
+  //     string name = fld->getName();
+  //     if (iray == sweepDoppler->getStartRayIndex()) {
+  //       // initialize cound
+  //       dopplerCounts[name] = 0;
+  //     }
+  //     dopplerCounts[name] += fld->countNonMissingGates();
+  //   } // ifield
+  // } // iray
 
-  if (_debug) {
-    cerr << "DEBUG - RadxVol::combineNexradSweeps()" << endl;
-    for (set<string>::iterator it = targetNames.begin();
-         it != targetNames.end(); it++) {
-      string name = *it;
-      cerr << "==>> target field: " 
-           << name << ", count: " << targetCounts[name] << endl;
-    }
-    for (set<string>::iterator it = sourceNames.begin();
-         it != sourceNames.end(); it++) {
-      string name = *it;
-      cerr << "==>> source field: "
-           << name << ", count: " << sourceCounts[name] << endl;
-    }
-  }
+  // if (_debug) {
+  //   cerr << "DEBUG - RadxVol::combineNexradSweeps()" << endl;
+  //   for (map<string, int>::iterator it = nonDopCounts.begin();
+  //        it != nonDopCounts.end(); it++) {
+  //     cerr << "==>> nonDop field: " 
+  //          << it->first << ", count: " << it->second << endl;
+  //   }
+  //   for (map<string, int>::iterator it = dopplerCounts.begin();
+  //        it != dopplerCounts.end(); it++) {
+  //     cerr << "==>> doppler field: " 
+  //          << it->first << ", count: " << it->second << endl;
+  //   }
+  // }
 
-  // loop through the target rays
+  // loop through the nonDop rays
   
-  for (size_t iray = sweepTarget->getStartRayIndex();
-       iray <= sweepTarget->getEndRayIndex(); iray++) {
+  for (size_t iray = sweepNonDop->getStartRayIndex();
+       iray <= sweepNonDop->getEndRayIndex(); iray++) {
 
-    RadxRay *rayTarget = _rays[iray];
-    double angle = rayTarget->getAzimuthDeg();
+    RadxRay *rayNonDop = _rays[iray];
+    double angle = rayNonDop->getAzimuthDeg();
     if (sweepMode == Radx::SWEEP_MODE_RHI) {
-      angle = rayTarget->getElevationDeg();
+      angle = rayNonDop->getElevationDeg();
     }
 
-    // get the source ray
+    // get the doppler ray
 
     int angleIndex = _getSearchAngleIndex(angle);
-    const RadxRay *raySource = _searchRays[angleIndex];
-    if (raySource != NULL) {
+    const RadxRay *rayDoppler = _searchRays[angleIndex];
+    if (rayDoppler != NULL) {
 
-      // got a valid ray in source
-      // loop through the fields in the source
+      // got a valid ray in doppler
+      // loop through the fields in the doppler
       
-      vector<RadxField *> sourceFlds = raySource->getFields();
-      for (size_t ifield = 0; ifield < sourceFlds.size(); ifield++) {
+      vector<RadxField *> dopplerFlds = rayDoppler->getFields();
+      for (size_t ifield = 0; ifield < dopplerFlds.size(); ifield++) {
         
-        const RadxField *sourceFld = sourceFlds[ifield];
-        string sourceName = sourceFld->getName();
+        const RadxField *dopplerFld = dopplerFlds[ifield];
+        string dopplerName = dopplerFld->getName();
 
-        // does this field name already exist in the target?
-        // test by trying to get the field from the target ray
+        // if doppler field does not exist in the nonDop,
+        // copy it from the doppler to the nonDop
         
-        RadxField *fldTarget = rayTarget->getField(sourceName);
-        if (fldTarget != NULL) {
-
-          // source field name already exists on the target
-          // so use the field with the larger number of
-          // non-missing gates, make a copy and add it
-          // the original will be freed up in replaceField()
-
-          if (targetCounts[sourceName] < sourceCounts[sourceName]) {
-            RadxField *fldCopy = new RadxField(*sourceFld);
-            rayTarget->replaceField(fldCopy);
+        RadxField *fldNonDop = rayNonDop->getField(dopplerName);
+        if (fldNonDop == NULL) {
+          RadxField *fldCopy = new RadxField(*dopplerFld);
+          rayNonDop->addField(fldCopy);
+          if (_debug && iray == sweepNonDop->getStartRayIndex()) {
+            cerr << "DEBUG - copying missing field to nonDop: "
+                 << dopplerName << endl;
           }
-        
-          if (_debug && iray == sweepTarget->getStartRayIndex()) {
-            cerr << "DEBUG - overwriting field in target: "
-                 << sourceName << endl;
-          }
-
-        } else {
-          
-          // source field does not exist on the target
-          // so make a copy and add to the target ray
-          
-          RadxField *fldCopy = new RadxField(*sourceFld);
-          rayTarget->addField(fldCopy);
-          
-          if (_debug && iray == sweepTarget->getStartRayIndex()) {
-            cerr << "DEBUG - copying missing field to target: "
-                 << sourceName << endl;
-          }
-
-        }
+        } // if (fldNonDop == NULL)
         
       } // ifield
       
-    } // if (raySource != NULL)
+    } // if (rayDoppler != NULL)
 
   } // iray
 

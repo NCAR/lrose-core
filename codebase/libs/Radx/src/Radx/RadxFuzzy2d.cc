@@ -28,6 +28,7 @@
  */
 
 #include <Radx/RadxFuzzy2d.hh>
+#include <toolsa/str.h>
 #include <algorithm>
 #include <cstring>
 #include <cstdio>
@@ -86,7 +87,7 @@ static int _stringParse(const char *inpstr, const int nchars,
   int i, endFlag, inProgress;
   int	k = 0;
   char	tmpbuf[1000];
-  char  outtmp[1000];
+  char  outtmp[2000];
 
   instr = inpstr;
   tbuf = tmpbuf;
@@ -123,7 +124,7 @@ static int _stringParse(const char *inpstr, const int nchars,
     {	
       // tmpbuf is filled, terminate 
       *tbuf = '\0';	
-      strncpy(outtmp, tmpbuf, maxFLen-1);
+      STRncopy(outtmp, tmpbuf, maxFLen-1);
       string s = outtmp;
       outstr.push_back(s);
       k++;
@@ -139,7 +140,7 @@ static int _stringParse(const char *inpstr, const int nchars,
   {
     // still something in temp buffer
     *tbuf = '\0';
-    strncpy(outtmp, tmpbuf, maxFLen-1);
+    STRncopy(outtmp, tmpbuf, maxFLen-1);
     string s= outtmp;
     outstr.push_back(s);
     k++;

@@ -3840,7 +3840,7 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
             "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
             "_to_%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
             "%s%s%s"
-            "%s%s%s.nc",
+            "%s%s%s%s.nc",
             prefix.c_str(),
             startTime.getYear(), startTime.getMonth(), startTime.getDay(),
             dateTimeConnector,
@@ -3852,8 +3852,7 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
             endSubsecsStr,
             instName.c_str(), siteName.c_str(), volNumStr,
             scanName.c_str(), scanType.c_str(),  
-            rangeResolution.c_str(),
-            suffix.c_str());
+            rangeResolution.c_str(), suffix.c_str());
 
   } else {
     
