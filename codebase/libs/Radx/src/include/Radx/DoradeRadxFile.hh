@@ -216,6 +216,7 @@ private:
   RadxRay *_latestRay;
   bool _rayInProgress;
   int _nNullsFound;
+  bool _isTailRadar;
 
   // range geometry
 

@@ -140,6 +140,8 @@ void DoradeRadxFile::clear()
   
   _writeFileNameMode = FILENAME_WITH_START_TIME_ONLY;
 
+  _isTailRadar = false;
+
 }
 
 void DoradeRadxFile::_clearRays()
@@ -1814,6 +1816,7 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
       break;
     case DoradeData::SCAN_MODE_AIR:
       ray->setSweepMode(Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE);
+      _isTailRadar = true;
       break;
     default:
       ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
@@ -2396,6 +2399,12 @@ int DoradeRadxFile::_loadReadVolume()
   if (_radarName.find("ELDR") != string::npos) {
     _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
   } 
+
+  if (_isTailRadar) {
+    _readVol->setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_TAIL);
+    _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
+  }
+
   // if the extension_num contains a value
   // override the primary axis. 
   // the primary axis enum type starts at zero, but a zero
