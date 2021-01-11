@@ -133,7 +133,7 @@ PolarManager::PolarManager(const Params &params,
   _rhiMode = false;
 
   _nGates = 1000;
-  _maxRangeKm = _params.max_range_km;
+  _maxRangeKm = 1.0;
   
   _archiveMode = false;
   _archiveRetrievalPending = false;
@@ -777,14 +777,14 @@ void PolarManager::_createSweepRadioButtons()
   int fsizem2 = _params.label_font_size - 2;
   font.setPixelSize(fsize);
   fontm2.setPixelSize(fsizem2);
-  
+
   // radar and site name
   
   char buf[256];
   _sweepRButtons = new vector<QRadioButton *>();
 
   for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
-    
+
     std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
     QRadioButton *radio1 = new QRadioButton(buf); 
     radio1->setFont(fontm2);
@@ -1161,6 +1161,10 @@ int PolarManager::_getArchiveData()
 
   _selectedTimeLabel->setText(text);
 
+  // adjust angles for elevation surveillance if needed
+
+  _vol.setAnglesForElevSurveillance();
+
   // compute the fixed angles from the rays
   // so that we reflect reality
   
@@ -1204,11 +1208,6 @@ void PolarManager::_applyDataEdits()
   _plotArchiveData();
 }
 
-/*
-RadxVol PolarManager::getDataVolume() {
-  return _vol;
-}
-*/
 /////////////////////////////
 // plot data in archive mode
 
@@ -1294,14 +1293,11 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   // do we need to reconfigure the PPI?
 
   _nGates = ray->getNGates();
-
   double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
-  if (!_params.set_max_range) {
-    if ((maxRange - _maxRangeKm) > 0.001) {
-      _maxRangeKm = maxRange;
-      _ppi->configureRange(_maxRangeKm);
-      _rhi->configureRange(_maxRangeKm);
-    }
+  if (!_params.set_max_range && (maxRange > _maxRangeKm)) {
+    _maxRangeKm = maxRange;
+    _ppi->configureRange(_maxRangeKm);
+    _rhi->configureRange(_maxRangeKm);
   }
 
   // create 2D field data vector
@@ -1372,8 +1368,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   // draw beam on the PPI or RHI, as appropriate
 
   if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
-      ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI ||
-      ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+      ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
 
     _rhiMode = true;
 
@@ -1396,6 +1391,17 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   } else {
 
     _rhiMode = false;
+
+    // check for elevation surveillance sweep mode
+    // in this case, set azimuth to rotation if georef is available
+
+    if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+      const RadxGeoref *georef = ray->getGeoreference();
+      if (georef != NULL) {
+        ray->setAzimuthDeg(georef->getRotation());
+        ray->setElevationDeg(georef->getTilt());
+      }
+    }
 
     // Store the ray location using the azimuth angle and the PPI location
     // table
