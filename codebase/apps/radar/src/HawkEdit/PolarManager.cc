@@ -143,7 +143,7 @@ PolarManager::PolarManager(const Params &params,
   _rhiMode = false;
 
   _nGates = 1000;
-  _maxRangeKm = _params.max_range_km;
+  _maxRangeKm = 1.0;
   
   _archiveRetrievalPending = false;
   
@@ -1178,16 +1178,18 @@ vector<string> *PolarManager::getFieldsArchiveData(string fileName)
 
 
 vector<string> *PolarManager::userSelectFieldsForReading(string fileName) {
+
   vector<string> *availableFields = getFieldsArchiveData(fileName);
-/*
-  QStringListModel model; //  = new QStringListModel();
-  QStringList list;
-  list << "a" << "b" << "c";
-  model.setStringList(list);
-  QListView theList;
-  theList.setModel(&model);
-  theList.show();
-*/
+  /*
+    QStringListModel model; //  = new QStringListModel();
+    QStringList list;
+    list << "a" << "b" << "c";
+    model.setStringList(list);
+    QListView theList;
+    theList.setModel(&model);
+    theList.show();
+  */
+
   FieldListView *listview = new FieldListView(); // this);
   listview->setList(availableFields);
 
@@ -1220,6 +1222,8 @@ vector<string> *PolarManager::userSelectFieldsForReading(string fileName) {
 
   fieldListDialog->exec();  // this halts the app until fields are selected
 
+  return availableFields;
+
 }
 
 
@@ -1243,8 +1247,15 @@ void PolarManager::getFileAndFields() {
         //TDRP_str_replace(&_params.archive_data_url, url.c_str());
 
         // choose which fields to import
+
         vector<string> *allFieldNames = userSelectFieldsForReading(fileList[0]);
+        for (size_t ii = 0; ii < allFieldNames->size(); ii++) {
+          cerr << "ii, allFieldNames[ii]: "
+               << ii << ", " << allFieldNames + ii << endl;
+        }
+
         //setArchiveFileList(fileList, false);
+
 }
 /////////////////////////////
 // get data in archive mode
@@ -1303,6 +1314,10 @@ int PolarManager::_getArchiveData()
 
   _selectedTimeLabel->setText(text);
 
+  // adjust angles for elevation surveillance if needed
+  
+  _vol.setAnglesForElevSurveillance();
+  
   // compute the fixed angles from the rays
   // so that we reflect reality
   
@@ -1814,9 +1829,9 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   // do we need to reconfigure the PPI?
 
   _nGates = ray->getNGates();
+
   double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
-  
-  if ((maxRange - _maxRangeKm) > 0.001) {
+  if (!_params.set_max_range && (maxRange > _maxRangeKm)) {
     _maxRangeKm = maxRange;
     _ppi->configureRange(_maxRangeKm);
     _rhi->configureRange(_maxRangeKm);
@@ -1903,8 +1918,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   // draw beam on the PPI or RHI, as appropriate
 
   if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
-      ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI ||
-      ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+      ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
 
     _rhiMode = true;
 
@@ -1927,6 +1941,17 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   } else {
 
     _rhiMode = false;
+    
+    // check for elevation surveillance sweep mode
+    // in this case, set azimuth to rotation if georef is available
+    
+    if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+      const RadxGeoref *georef = ray->getGeoreference();
+      if (georef != NULL) {
+        ray->setAzimuthDeg(georef->getRotation());
+        ray->setElevationDeg(georef->getTilt());
+      }
+    }
 
     // Store the ray location using the azimuth angle and the PPI location
     // table
@@ -1967,12 +1992,12 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
   // fill data vector
   //vector<string> fieldNames = displayFieldController->getFieldNames();
   //vector<string>::iterator ifieldName;
-  size_t ifield = 0; // TODO: this is off; we are looping over the NEW fields, not ALL fields !!!!
+  /// size_t ifield = 0; // TODO: this is off; we are looping over the NEW fields, not ALL fields !!!!
   // TODO: Wait! Instead, should we be looping over all the fields? because we need to
   // send new fieldData and it needs to be the entire 2D matrix of data? or just an update???
   // NO. For update, we can just send a 2D array of the necessary data. 
   //for (ifieldName = newFieldNames.begin(); ifieldName != newFieldNames.end(); ifieldName++) {
-  for (int ifield=0; ifield < newFieldNames.size(); ++ifield) {
+  for (size_t ifield=0; ifield < newFieldNames.size(); ++ifield) {
     string fieldName = newFieldNames.at(ifield); // .toLocal8Bit().constData();
     vector<double> &data = fieldData[ifield];
     data.resize(_nGates);
@@ -2022,7 +2047,7 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
 	      newMinOrMax = true;
 	    }
 	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
-	      printf("field index %d, gate %d \t", ifield, igate);
+	      printf("field index %d, gate %d \t", (int) ifield, igate);
 	      printf("new min, max of data %g, %g\t", min,  max);
 	      printf("missing value %g\t", missingVal);
 	      printf("current value %g\n", val);

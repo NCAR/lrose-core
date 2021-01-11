@@ -493,6 +493,8 @@ public:
 
   tdrp_bool_t use_field_label_in_title;
 
+  tdrp_bool_t set_max_range;
+
   double max_range_km;
 
   display_mode_t display_mode;
@@ -745,7 +747,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[167];
+  mutable TDRPtable _table[168];
 
   const char *_className;
 
