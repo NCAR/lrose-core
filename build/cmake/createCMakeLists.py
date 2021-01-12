@@ -493,6 +493,7 @@ def writeCMakeListsTop(dir):
     fo.write('\n')
 
     fo.write('find_package ( Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH )\n')
+    fo.write('find_package ( HDF5 COMPONENTS C CXX )\n')
     fo.write('\n')
 
     if (len(options.installDir) == 0):
@@ -747,6 +748,7 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     for lib in libList:
         fo.write("include_directories ( ../../%s/src/include )\n" % lib)
     fo.write("include_directories ( ${CMAKE_INSTALL_PREFIX}/include )\n")
+    fo.write("include_directories ( ${HDF5_INCLUDE_DIRS} )\n")
     fo.write("\n")
 
     fo.write("# source files\n")
@@ -1174,12 +1176,14 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("\n")
     for lib in libList:
         fo.write("include_directories ( ../../../../libs/%s/src/include )\n" % lib)
-    fo.write("include_directories( ${CMAKE_INSTALL_PREFIX}/include )\n")
+    fo.write("include_directories ( ${CMAKE_INSTALL_PREFIX}/include )\n")
+    fo.write("include_directories ( ${HDF5_INCLUDE_DIRS} )\n")
     fo.write("\n")
 
     fo.write("# link directories\n")
     fo.write("\n")
     fo.write("link_directories( ${CMAKE_INSTALL_PREFIX}/lib )\n")
+    fo.write("link_directories( ${HDF5_LIBRARY_DIRS} )\n")
     fo.write("\n")
 
     fo.write("# link libs\n")
