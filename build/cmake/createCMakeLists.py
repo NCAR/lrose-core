@@ -1184,6 +1184,8 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("\n")
     fo.write("link_directories( ${CMAKE_INSTALL_PREFIX}/lib )\n")
     fo.write("link_directories( ${HDF5_LIBRARY_DIRS} )\n")
+    fo.write("# add serial, for odd Debian hdf5 install\n")
+    fo.write("link_directories( /usr/lib/x86_64-linux-gnu/hdf5/serial )\n")
     fo.write("\n")
 
     fo.write("# link libs\n")
