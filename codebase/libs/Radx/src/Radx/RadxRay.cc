@@ -1862,6 +1862,36 @@ void RadxRay::incrementGeorefNotMissingCount(RadxGeoref &count)
   }
 }
 
+/////////////////////////////////////////////////////////////////
+/// Set angles for elevation surveillance mode
+/// In SWEEP_MODE_ELEVATION_SURVEILLANCE mode, if georefs are
+/// available copy rotation to azimuth, and tilt to elevation.
+
+void RadxRay::setAnglesForElevSurveillance()
+  
+{
+  
+  if (getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    const RadxGeoref *georef = getGeoreference();
+    if (georef != NULL) {
+      double rollCorr = 0.0;
+      double rotCorr = 0.0;
+      double tiltCorr = 0.0;
+      const RadxCfactors *cfactors = getCfactors();
+      if (cfactors != NULL) {
+        rollCorr = cfactors->getRollCorr();
+        rotCorr = cfactors->getRotationCorr();
+        tiltCorr = cfactors->getTiltCorr();
+      }
+      double rotation = georef->getRotation() + rotCorr;
+      double roll = georef->getRoll() + rollCorr;
+      double tilt = georef->getTilt() + tiltCorr;
+      setAzimuthDeg(rotation + roll);
+      setElevationDeg(tilt);
+    }
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 /// Get vector of field pointers for this ray.
   

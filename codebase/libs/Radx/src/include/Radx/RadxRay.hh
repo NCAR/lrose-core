@@ -355,6 +355,12 @@ public:
   
   void incrementGeorefNotMissingCount(RadxGeoref &count);
 
+  /// Set angles for elevation surveillance mode
+  /// In SWEEP_MODE_ELEVATION_SURVEILLANCE mode, if georefs are
+  /// available copy rotation to azimuth, and tilt to elevation.
+  
+  void setAnglesForElevSurveillance();
+  
   //@}
 
   /////////////////////////////////////////////////////////////

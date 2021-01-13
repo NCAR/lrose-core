@@ -1946,11 +1946,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     // in this case, set azimuth to rotation if georef is available
     
     if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-      const RadxGeoref *georef = ray->getGeoreference();
-      if (georef != NULL) {
-        ray->setAzimuthDeg(georef->getRotation());
-        ray->setElevationDeg(georef->getTilt());
-      }
+      ray->setAnglesForElevSurveillance();
     }
 
     // Store the ray location using the azimuth angle and the PPI location
@@ -2069,8 +2065,7 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
   // draw beam on the PPI or RHI, as appropriate
 
   if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
-      ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI ||
-      ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+      ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
 
     _rhiMode = true;
 
@@ -2094,6 +2089,13 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
   } else {
 
     _rhiMode = false;
+
+    // check for elevation surveillance sweep mode
+    // in this case, set azimuth to rotation if georef is available
+    
+    if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+      ray->setAnglesForElevSurveillance();
+    }
 
     // Store the ray location using the azimuth angle and the PPI location
     // table

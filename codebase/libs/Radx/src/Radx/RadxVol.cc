@@ -4936,16 +4936,8 @@ void RadxVol::setAnglesForElevSurveillance()
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     RadxRay *ray = _rays[iray];
-    if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-      const RadxGeoref *georef = ray->getGeoreference();
-      if (georef != NULL) {
-        ray->setAzimuthDeg(georef->getRotation());
-        ray->setElevationDeg(georef->getTilt());
-      }
-    }
-
+    ray->setAnglesForElevSurveillance();
     loadSweepInfoFromRays();
-
   }
 }
 
