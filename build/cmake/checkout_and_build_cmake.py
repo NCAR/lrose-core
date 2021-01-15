@@ -53,12 +53,12 @@ def main():
     global scratchBuildDir
     global tmpBinDir
     global tmpLibDir
-    global binDir
+    global prefixBinDir
     global scriptsDir
-    global libDir
+    global prefixLibDir
     global runtimeLibRelDir
-    global includeDir
-    global shareDir
+    global prefixIncludeDir
+    global prefixShareDir
     global dateStr
     global logPath
     global logFp
@@ -219,11 +219,11 @@ def main():
 
     tmpBinDir = os.path.join(scratchBuildDir, 'bin')
     tmpLibDir = os.path.join(scratchBuildDir, 'lib')
-    binDir = os.path.join(prefix, 'bin')
+    prefixBinDir = os.path.join(prefix, 'bin')
     scriptsDir = os.path.join(prefix, 'scripts')
-    libDir = os.path.join(prefix, 'lib')
-    includeDir = os.path.join(prefix, 'include')
-    shareDir = os.path.join(prefix, 'share')
+    prefixLibDir = os.path.join(prefix, 'lib')
+    prefixIncludeDir = os.path.join(prefix, 'include')
+    prefixShareDir = os.path.join(prefix, 'share')
     
     # debug print
 
@@ -241,10 +241,10 @@ def main():
         print("  displaysDir: ", displaysDir, file=sys.stderr)
         print("  netcdfDir: ", netcdfDir, file=sys.stderr)
         print("  prefixDir: ", prefix, file=sys.stderr)
-        print("  binDir: ", binDir, file=sys.stderr)
-        print("  libDir: ", libDir, file=sys.stderr)
-        print("  includeDir: ", includeDir, file=sys.stderr)
-        print("  shareDir: ", shareDir, file=sys.stderr)
+        print("  prefixBinDir: ", prefixBinDir, file=sys.stderr)
+        print("  prefixLibDir: ", prefixLibDir, file=sys.stderr)
+        print("  prefixIncludeDir: ", prefixIncludeDir, file=sys.stderr)
+        print("  prefixShareDir: ", prefixShareDir, file=sys.stderr)
         print("  buildNetcdf: ", options.buildNetcdf, file=sys.stderr)
         print("  use_cmake3: ", options.use_cmake3, file=sys.stderr)
         print("  build_geolib: ", options.build_geolib, file=sys.stderr)
@@ -638,7 +638,7 @@ def buildPackage():
                             "-rpath," + \
                             "'$$ORIGIN/" + runtimeLibRelDir + \
                             ":$$ORIGIN/../lib" + \
-                            ":" + libDir + \
+                            ":" + prefixLibDir + \
                             ":" + tmpLibDir + "'"
 
     if (sys.platform == "darwin"):
@@ -731,10 +731,10 @@ def doFinalInstall():
     # make target dirs
 
     try:
-        os.makedirs(binDir)
-        os.makedirs(libDir)
-        os.makedirs(includeDir)
-        os.makedirs(shareDir)
+        os.makedirs(prefixBinDir)
+        os.makedirs(prefixLibDir)
+        os.makedirs(prefixIncludeDir)
+        os.makedirs(prefixShareDir)
     except:
         print("  note - dirs already exist", file=logFp)
     
@@ -754,7 +754,7 @@ def doFinalInstall():
 
     if (os.path.isdir(displaysDir)):
         os.chdir(displaysDir)
-        shellCmd("rsync -av color_scales " + shareDir)
+        shellCmd("rsync -av color_scales " + prefixShareDir)
 
     # install binaries and libs
 
@@ -872,9 +872,9 @@ def buildFractl():
 
     print("==>> buildFractl", file=sys.stderr)
     print("====>> prefix: ", prefix, file=sys.stderr)
-    print("====>> includeDir: ", includeDir, file=sys.stderr)
-    print("====>> libDir: ", libDir, file=sys.stderr)
-    print("====>> binDir: ", binDir, file=sys.stderr)
+    print("====>> includeDir: ", prefixIncludeDir, file=sys.stderr)
+    print("====>> libDir: ", prefixLibDir, file=sys.stderr)
+    print("====>> binDir: ", prefixBinDir, file=sys.stderr)
 
     # check out fractl
 
@@ -887,9 +887,9 @@ def buildFractl():
 
     os.environ["LROSE_PREFIX"] = prefix
     os.environ["LROSE_ROOT_DIR"] = prefix
-    os.environ["LROSE_INCLUDE_DIRS"] = includeDir
-    os.environ["LROSE_LIB_DIR"] = libDir
-    os.environ["LROSE_BIN_DIR"] = binDir
+    os.environ["LROSE_INCLUDE_DIRS"] = prefixIncludeDir
+    os.environ["LROSE_LIB_DIR"] = prefixLibDir
+    os.environ["LROSE_BIN_DIR"] = prefixBinDir
     os.environ["CMAKE_INSTALL_PREFIX"] = prefix
     
     # create makefiles
@@ -955,7 +955,7 @@ def buildVortrac():
     
     # do the install
 
-    cmd = "rsync ./vortrac " + binDir
+    cmd = "rsync ./vortrac " + prefixBinDir
     shellCmd(cmd)
 
     return
@@ -969,9 +969,9 @@ def buildSamurai():
 
     print("==>> buildSamurai", file=sys.stderr)
     print("====>> prefix: ", prefix, file=sys.stderr)
-    print("====>> includeDir: ", includeDir, file=sys.stderr)
-    print("====>> libDir: ", libDir, file=sys.stderr)
-    print("====>> binDir: ", binDir, file=sys.stderr)
+    print("====>> includeDir: ", prefixIncludeDir, file=sys.stderr)
+    print("====>> libDir: ", prefixLibDir, file=sys.stderr)
+    print("====>> binDir: ", prefixBinDir, file=sys.stderr)
 
     # check out samurai
 
@@ -984,9 +984,9 @@ def buildSamurai():
 
     os.environ["LROSE_PREFIX"] = prefix
     os.environ["LROSE_ROOT_DIR"] = prefix
-    os.environ["LROSE_INCLUDE_DIRS"] = includeDir
-    os.environ["LROSE_LIB_DIR"] = libDir
-    os.environ["LROSE_BIN_DIR"] = binDir
+    os.environ["LROSE_INCLUDE_DIRS"] = prefixIncludeDir
+    os.environ["LROSE_LIB_DIR"] = prefixLibDir
+    os.environ["LROSE_BIN_DIR"] = prefixBinDir
     os.environ["CMAKE_INSTALL_PREFIX"] = prefix
     
     # create makefiles
