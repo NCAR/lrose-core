@@ -19,7 +19,7 @@ def main():
     global options
     global coreDir
     global codebaseDir
-
+    global dependDirs
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
@@ -69,6 +69,9 @@ def main():
     parser.add_option('--installDir',
                       dest='installDir', default='',
                       help='Path of lrose install dir, default is ~/lrose')
+    parser.add_option('--dependDirs',
+                      dest='dependDirs', default='',
+                      help='Comma-delimited list of dirs to be searched as dependencies. Each dir in the list will have include/ and lib/ subdirs.')
     parser.add_option('--static',
                       dest='static', default=False,
                       action="store_true",
@@ -107,11 +110,16 @@ def main():
     libsDir =  os.path.join(codebaseDir, "libs")
     appsDir =  os.path.join(codebaseDir, "apps")
 
+    dependDirs = []
+    if (len(options.dependDirs) > 0):
+        dependDirs = options.dependDirs.split(",")
+
     if (options.debug):
         print("=============================================", file=sys.stderr)
         print("Running %s      :" % thisScriptName, file=sys.stderr)
         print("  coreDir       : ", coreDir, file=sys.stderr)
         print("  codebaseDir   : ", codebaseDir, file=sys.stderr)
+        print("  dependDirs    : ", dependDirs, file=sys.stderr)
         print("  libs dir      : ", libsDir, file=sys.stderr)
         print("  apps dir      : ", appsDir, file=sys.stderr)
         if (len(options.installDir) == 0):
@@ -748,7 +756,10 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     for lib in libList:
         fo.write("include_directories ( ../../%s/src/include )\n" % lib)
     fo.write("include_directories ( ${CMAKE_INSTALL_PREFIX}/include )\n")
-    fo.write("include_directories ( ${HDF5_INCLUDE_DIRS} )\n")
+    fo.write("include_directories ( ${HDF5_CXX_INCLUDE_DIR} )\n")
+    fo.write("include_directories ( ${HDF5_C_INCLUDE_DIR} )\n")
+    for dir in dependDirs:
+        fo.write("include_directories ( %s/include )\n" % dir)
     fo.write("\n")
 
     fo.write("# source files\n")
@@ -1177,7 +1188,10 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     for lib in libList:
         fo.write("include_directories ( ../../../../libs/%s/src/include )\n" % lib)
     fo.write("include_directories ( ${CMAKE_INSTALL_PREFIX}/include )\n")
-    fo.write("include_directories ( ${HDF5_INCLUDE_DIRS} )\n")
+    fo.write("include_directories ( ${HDF5_CXX_INCLUDE_DIR} )\n")
+    fo.write("include_directories ( ${HDF5_C_INCLUDE_DIR} )\n")
+    for dir in dependDirs:
+        fo.write("include_directories ( %s/include )\n" % dir)
     fo.write("\n")
 
     fo.write("# link directories\n")
@@ -1186,6 +1200,8 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("link_directories( ${HDF5_LIBRARY_DIRS} )\n")
     fo.write("# add serial, for odd Debian hdf5 install\n")
     fo.write("link_directories( /usr/lib/x86_64-linux-gnu/hdf5/serial )\n")
+    for dir in dependDirs:
+        fo.write("link_directories ( %s )\n" % dir)
     fo.write("\n")
 
     fo.write("# link libs\n")
