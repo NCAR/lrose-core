@@ -163,10 +163,14 @@ def checkForLibs():
         if (options.debug == True):
             print("Checking for installed lib: ", path, file=sys.stderr)
 
+        # check .a file
         if (os.path.isfile(path) == False):
-            if (options.debug == True):
-                print("   .... missing", file=sys.stderr)
-            missingLibs.append(name)
+            # check .so file
+            soPath = os.path.splitext(path)[0] + ".so"
+            if (os.path.isfile(soPath) == False):
+                if (options.debug == True):
+                    print("   .... missing", file=sys.stderr)
+                missingLibs.append(name)
         else:
             if (options.debug == True):
                 print("   .... found", file=sys.stderr)
