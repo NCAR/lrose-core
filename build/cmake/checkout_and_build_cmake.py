@@ -67,9 +67,9 @@ def main():
 
     usage = "usage: " + thisScriptName + " [options]"
     homeDir = os.environ['HOME']
-    prefixDirDefault = os.path.join(homeDir, 'lrose')
-    buildDirDefault = '/tmp/lrose_build'
-    logDirDefault = '/tmp/lrose_build/logs'
+    prefixDirDefault = os.path.join(homeDir, 'lrose-install')
+    buildDirDefault = '/tmp/lrose-build'
+    logDirDefault = '/tmp/lrose-build/logs'
     parser = OptionParser(usage)
     parser.add_option('--clean',
                       dest='clean', default=False,
@@ -95,13 +95,13 @@ def main():
                       help='Tag to check out lrose. Overrides --releaseDate')
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDirDefault,
-                      help='Install directory, default is ~/lrose')
+                      help='Install directory, default: ' + prefixDirDefault)
     parser.add_option('--buildDir',
                       dest='buildDir', default=buildDirDefault,
-                      help='Temporary build dir, default is /tmp/lrose_build')
+                      help='Temporary build dir, default: ' + buildDirDefault)
     parser.add_option('--logDir',
                       dest='logDir', default=logDirDefault,
-                      help='Logging dir, default is /tmp/lrose_build/logs')
+                      help='Logging dir, default: ' + logDirDefault)
     parser.add_option('--static',
                       dest='static', default=False,
                       action="store_true",
@@ -450,11 +450,6 @@ def createCMakeLists():
 
     os.chdir(codebaseDir)
 
-    # create files for configure
-
-    shutil.copy("../build/autoconf/Makefile.top",
-                "./Makefile")
-
     staticStr = " "
     if (options.static):
         staticStr = " --static "
@@ -475,7 +470,7 @@ def createCMakeLists():
 
     shellCmd("../build/cmake/createCMakeLists.py " +
              debugStr + staticStr + withJasperStr + dependDirsStr +
-             " --pkg " + package + " --installDir " + options.buildDir)
+             " --pkg " + package + " --installDir " + scratchBuildDir)
 
 ########################################################################
 # write release information file
