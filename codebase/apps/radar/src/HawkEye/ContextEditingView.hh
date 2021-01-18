@@ -14,7 +14,7 @@ class ContextEditingView : QWidget
   public:
 
   ContextEditingView(QWidget *parent);
-  ~ContextEditingView();
+  virtual ~ContextEditingView();
   void ShowContextMenu(const QPoint &pos); // , RadxVol &_vol);
 
   private slots:

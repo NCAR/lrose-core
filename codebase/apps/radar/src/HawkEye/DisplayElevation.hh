@@ -50,7 +50,7 @@ public:
                const string &units,
                const string &shortcut);
 
-  ~DisplayElevation();
+  virtual ~DisplayElevation();
 
   const string &getLabel() const { return _label; }
   const string &getName() const { return _name; }

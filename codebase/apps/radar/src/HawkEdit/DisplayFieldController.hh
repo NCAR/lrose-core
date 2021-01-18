@@ -10,7 +10,7 @@ class DisplayFieldController
 public:
 
   DisplayFieldController(DisplayFieldModel *model);
-  ~DisplayFieldController();
+  virtual ~DisplayFieldController();
 
   void addField(DisplayField *newField);
   size_t getNFields();

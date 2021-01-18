@@ -14,7 +14,7 @@ public:
   DisplayFieldModel(vector<DisplayField *> displayFields, string selectedFieldName,
 		    string gridColor, string emphasisColor,
 		    string annotationColor, string backgroundColor);
-  ~DisplayFieldModel();
+  virtual ~DisplayFieldModel();
 
   void addField(DisplayField *newField);
 

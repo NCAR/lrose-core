@@ -43,7 +43,7 @@ private slots:
 private:
 
   ColorMapTemplates(QWidget *parent = 0);
-  ~ColorMapTemplates();
+  virtual ~ColorMapTemplates();
   static ColorMapTemplates *_instance;
 
   ClickableLabel *_defaultColorMapLabel;

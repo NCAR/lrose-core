@@ -12,7 +12,7 @@ class TextEdit : public QTextEdit
 
 public:
     TextEdit(QWidget *parent = 0);
-    ~TextEdit();
+    virtual ~TextEdit();
 
     void setCompleter(QCompleter *c);
     QCompleter *completer() const;

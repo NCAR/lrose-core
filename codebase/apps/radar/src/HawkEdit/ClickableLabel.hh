@@ -11,7 +11,7 @@ class ClickableLabel : public QLabel {
 
 public:
   explicit ClickableLabel(QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
-  ~ClickableLabel();
+  virtual ~ClickableLabel();
   //  void setColorBar(ColorBar *colorBar);
 
 signals:

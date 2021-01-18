@@ -14,7 +14,7 @@ class SoloScriptTranslator
 public:
 
   SoloScriptTranslator();
-  ~SoloScriptTranslator();
+  virtual ~SoloScriptTranslator();
 
   enum unfold_alg {AC_WIND, LOCAL_WIND, FIRST_GOOD_GATE, UNKNOWN};
 

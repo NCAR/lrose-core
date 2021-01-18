@@ -58,7 +58,7 @@ class ScriptEditorHelpItem
 {
 public:
     explicit ScriptEditorHelpItem(const QVector<QVariant> &data, ScriptEditorHelpItem *parentItem = nullptr);
-    ~ScriptEditorHelpItem();
+    virtual ~ScriptEditorHelpItem();
 
     void appendChild(ScriptEditorHelpItem *child);
 

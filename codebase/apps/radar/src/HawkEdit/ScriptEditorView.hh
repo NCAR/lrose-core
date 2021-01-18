@@ -27,7 +27,7 @@ public:
 
   //  ScriptEditorView(std::string fileName, QWidget *parent = 0);
   ScriptEditorView(QWidget *parent = 0);
-  ~ScriptEditorView();
+  virtual ~ScriptEditorView();
 
   //  void setController(ScriptEditorController *controller);
 

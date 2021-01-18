@@ -50,7 +50,7 @@ public:
    IpsEyeLogger();
    IpsEyeLogger( const string &appName,
               const char *instance = NULL );
-  ~IpsEyeLogger();
+  virtual ~IpsEyeLogger();
 
   //   void ( char* description=NULL );
 

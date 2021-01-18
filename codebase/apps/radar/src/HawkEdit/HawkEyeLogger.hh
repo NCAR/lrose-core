@@ -50,7 +50,7 @@ public:
    HawkEyeLogger();
    HawkEyeLogger( const string &appName,
               const char *instance = NULL );
-  ~HawkEyeLogger();
+  virtual ~HawkEyeLogger();
 
   //   void ( char* description=NULL );
 

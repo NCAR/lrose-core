@@ -42,7 +42,7 @@ class FieldRendererController
 public:
 
   FieldRendererController();
-  ~FieldRendererController();
+  virtual ~FieldRendererController();
 
   // NOTE: only index by fieldIndex which must match the button row in the field Panel
 

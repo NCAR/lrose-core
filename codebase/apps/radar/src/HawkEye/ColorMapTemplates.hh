@@ -18,7 +18,7 @@ class ColorMapTemplates : public QDialog
 
 public:
     ColorMapTemplates(QWidget *parent = 0);
-    ~ColorMapTemplates();
+    virtual ~ColorMapTemplates();
 
 signals:
   void newColorPaletteSelected(string newColorMapName);

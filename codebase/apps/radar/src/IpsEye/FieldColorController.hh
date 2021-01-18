@@ -18,7 +18,7 @@ public:
 
   FieldColorController(ParameterColorView *parameterColorView,
 		       DisplayFieldModel *displayFieldModel);
-  ~FieldColorController();
+  virtual ~FieldColorController();
 
   DisplayFieldModel *_model;
   ParameterColorView *_view;
