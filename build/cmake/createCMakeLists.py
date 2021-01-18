@@ -487,7 +487,7 @@ def writeCMakeListsTop(dir):
         fo.write('set(CMAKE_VERBOSE_MAKEFILE OFF)\n')
     fo.write('\n')
 
-    fo.write('SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/"\n')
+    fo.write('SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../build/cmake/"\n')
     fo.write('     CACHE INTERNAL "Location of our custom CMake modules.")\n')
     fo.write('\n')
 
@@ -1224,7 +1224,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 
     fo.write("# find LROSE for tdrp_gen\n")
     fo.write("\n")
-    fo.write("find_package(Lrose REQUIRED)\n")
+    # fo.write("find_package(Lrose REQUIRED)\n")
 
     if (needQt):
         fo.write("# QT5\n")
