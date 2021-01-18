@@ -73,7 +73,7 @@ public:
   
   // destructor
   
-  ~BscanManager();
+  virtual ~BscanManager();
 
   // run 
 
