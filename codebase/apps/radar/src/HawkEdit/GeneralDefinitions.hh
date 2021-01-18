@@ -13,7 +13,9 @@
 # define SQRT(x) (sqrt((double)(x)))
 # define SQ(x) ((x)*(x))
 // # define RADIANS(x)  ((x)*0.017453292)
+#ifndef PI
 # define PI 3.141592654
+#endif
 # define PIOVR2 1.570796327
 # define TWOPI 6.283185307
 # define DD_SCALE(x,scale,offset) ((x)*(scale)+(offset)+.5)

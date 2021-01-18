@@ -94,7 +94,7 @@ public:
   */
   // destructor
   
-  ~DisplayManager();
+  virtual ~DisplayManager();
 
   // run 
 
