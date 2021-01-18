@@ -472,60 +472,66 @@ def writeCMakeListsTop(dir):
     fo.write('#\n')
     fo.write('###############################################\n')
     fo.write('\n')
-    fo.write('cmake_minimum_required( VERSION 2.8 )\n')
+    fo.write('cmake_minimum_required(VERSION 2.8)\n')
     fo.write('\n')
     fo.write('project (lrose-core)\n')
     fo.write('\n')
 
-    fo.write('set( CMAKE_C_COMPILER_NAMES clang gcc icc cc )\n')
-    fo.write('set( CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx )\n')
+    fo.write('set(CMAKE_C_COMPILER_NAMES clang gcc icc cc)\n')
+    fo.write('set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)\n')
     fo.write('\n')
 
     if (options.verboseMake):
-        fo.write('set( CMAKE_VERBOSE_MAKEFILE ON )\n')
+        fo.write('set(CMAKE_VERBOSE_MAKEFILE ON)\n')
     else:
-        fo.write('set( CMAKE_VERBOSE_MAKEFILE OFF )\n')
+        fo.write('set(CMAKE_VERBOSE_MAKEFILE OFF)\n')
     fo.write('\n')
 
-    fo.write('SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/"\n')
-    fo.write('     CACHE INTERNAL "Location of our custom CMake modules." )\n')
+    fo.write('SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/"\n')
+    fo.write('     CACHE INTERNAL "Location of our custom CMake modules.")\n')
     fo.write('\n')
 
-    fo.write('SET( CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake" )\n')
+    fo.write('SET(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")\n')
     fo.write('\n')
 
-    fo.write('set( FETCHCONTENT_QUIET false CACHE BOOL "" FORCE )\n')
+    fo.write('set(FETCHCONTENT_QUIET false CACHE BOOL "" FORCE)\n')
     fo.write('\n')
 
-    fo.write('set( PACKAGE "LROSE-CORE" CACHE STRING "" )\n')
+    fo.write('set(PACKAGE "LROSE-CORE" CACHE STRING "")\n')
     fo.write('\n')
 
-    fo.write('find_package ( Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH )\n')
-    fo.write('find_package ( HDF5 COMPONENTS C CXX )\n')
+    fo.write('find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n')
+    fo.write('find_package (HDF5 COMPONENTS C CXX)\n')
     fo.write('\n')
+
+    fo.write('# Finding Qt on mac OSX\n')
+    fo.write('\n')
+    fo.write('if(APPLE)\n')
+    fo.write('find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
+    fo.write('endif(APPLE)\n')
 
     if (len(options.installDir) == 0):
         fo.write('# If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose\n')
-        fo.write('if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )\n')
-        fo.write('  set( CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE )\n')
-        fo.write('endif(  )\n')
+        fo.write('if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)\n')
+        fo.write('  set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE)\n')
+        fo.write('endif()\n')
     else:
-        fo.write('set( CMAKE_INSTALL_PREFIX %s CACHE PATH "..." FORCE )\n' % options.installDir)
-    fo.write('message( "CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}" )\n')
+        fo.write('set(CMAKE_INSTALL_PREFIX %s CACHE PATH "..." FORCE)\n' % options.installDir)
+    fo.write('message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")\n')
     fo.write('\n')
 
-    fo.write('enable_testing(  )\n')
+    fo.write('enable_testing()\n')
     fo.write('\n')
 
-    fo.write('set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 " )\n')
+    fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
     if (not options.withJasper):
-        fo.write('set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB " )\n')
-        # fo.write('add_definitions( -DNO_JASPER_LIB  )\n')
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB ")\n')
+        # fo.write('add_definitions(-DNO_JASPER_LIB )\n')
 
     fo.write('\n')
 
-    fo.write('add_subdirectory( libs )\n')
-    fo.write('add_subdirectory( apps )\n')
+    fo.write('add_subdirectory(libs)\n')
+    fo.write('add_subdirectory(apps)\n')
     fo.write('\n')
     fo.close
 
@@ -747,45 +753,45 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("###############################################\n")
     fo.write("\n")
 
-    fo.write("project ( lib%s )\n" % libName)
+    fo.write("project (lib%s)\n" % libName)
     fo.write("\n")
     
     fo.write("# include directories\n")
     fo.write("\n")
-    fo.write("include_directories ( ./include )\n")
+    fo.write("include_directories (./include)\n")
     for lib in libList:
-        fo.write("include_directories ( ../../%s/src/include )\n" % lib)
-    fo.write("include_directories ( ${CMAKE_INSTALL_PREFIX}/include )\n")
-    fo.write("include_directories ( ${HDF5_CXX_INCLUDE_DIR} )\n")
-    fo.write("include_directories ( ${HDF5_C_INCLUDE_DIR} )\n")
+        fo.write("include_directories (../../%s/src/include)\n" % lib)
+    fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
+    fo.write("include_directories (${HDF5_CXX_INCLUDE_DIR})\n")
+    fo.write("include_directories (${HDF5_C_INCLUDE_DIR})\n")
     for dir in dependDirs:
-        fo.write("include_directories ( %s/include )\n" % dir)
+        fo.write("include_directories (%s/include)\n" % dir)
     fo.write("\n")
 
     fo.write("# source files\n")
     fo.write("\n")
-    fo.write("set ( SRCS\n")
+    fo.write("set (SRCS\n")
     for compileFile in compileFileList:
         fo.write("      %s\n" % compileFile)
-    fo.write("    )\n")
+    fo.write("   )\n")
     fo.write("\n")
 
     fo.write("# build library\n")
     fo.write("\n")
     if (options.static):
-        fo.write("add_library (%s STATIC ${SRCS} )\n" % libName)
+        fo.write("add_library (%s STATIC ${SRCS})\n" % libName)
     else:
-        fo.write("add_library (%s SHARED ${SRCS} )\n" % libName)
+        fo.write("add_library (%s SHARED ${SRCS})\n" % libName)
     fo.write("\n")
 
     fo.write("# install\n")
     fo.write("\n")
     fo.write("INSTALL(TARGETS %s\n" % libName)
     fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib\n")
-    fo.write("        )\n")
+    fo.write("       )\n")
     fo.write("INSTALL(DIRECTORY include/%s\n" % libName)
     fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/include\n")
-    fo.write("        )\n")
+    fo.write("       )\n")
     fo.write("\n")
 
     fo.close
@@ -1172,12 +1178,12 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("###############################################\n")
     fo.write("\n")
 
-    fo.write("project ( %s )\n" % appName)
+    fo.write("project (%s)\n" % appName)
     fo.write("\n")
     
     fo.write("# source files\n")
     fo.write("\n")
-    fo.write("set ( SRCS\n")
+    fo.write("set (SRCS\n")
     for compileFile in appCompileFileList:
         fo.write("      %s\n" % compileFile)
     fo.write("    )\n")
@@ -1186,71 +1192,75 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("# includes\n")
     fo.write("\n")
     for lib in libList:
-        fo.write("include_directories ( ../../../../libs/%s/src/include )\n" % lib)
-    fo.write("include_directories ( ${CMAKE_INSTALL_PREFIX}/include )\n")
-    fo.write("include_directories ( ${HDF5_CXX_INCLUDE_DIR} )\n")
-    fo.write("include_directories ( ${HDF5_C_INCLUDE_DIR} )\n")
+        fo.write("include_directories (../../../../libs/%s/src/include)\n" % lib)
+    fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
+    fo.write("include_directories (${HDF5_CXX_INCLUDE_DIR})\n")
+    fo.write("include_directories (${HDF5_C_INCLUDE_DIR})\n")
     for dir in dependDirs:
-        fo.write("include_directories ( %s/include )\n" % dir)
+        fo.write("include_directories (%s/include)\n" % dir)
     fo.write("\n")
 
     fo.write("# link directories\n")
     fo.write("\n")
-    fo.write("link_directories( ${CMAKE_INSTALL_PREFIX}/lib )\n")
-    fo.write("link_directories( ${HDF5_LIBRARY_DIRS} )\n")
+    fo.write("link_directories(${CMAKE_INSTALL_PREFIX}/lib)\n")
+    fo.write("link_directories(${HDF5_LIBRARY_DIRS})\n")
     fo.write("# add serial, for odd Debian hdf5 install\n")
-    fo.write("link_directories( /usr/lib/x86_64-linux-gnu/hdf5/serial )\n")
+    fo.write("link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
     for dir in dependDirs:
-        fo.write("link_directories ( %s )\n" % dir)
+        fo.write("link_directories (%s)\n" % dir)
     fo.write("\n")
 
     fo.write("# link libs\n")
     fo.write("\n")
     for lib in linkLibList:
-        fo.write("link_libraries ( %s )\n" % lib)
+        fo.write("link_libraries (%s)\n" % lib)
     if (needQt):
-        fo.write("link_libraries ( ${Qt5Core_LIBRARIES} )\n")
-        fo.write("link_libraries ( ${Qt5Gui_LIBRARIES} )\n")
-        fo.write("link_libraries ( ${Qt5Widgets_LIBRARIES} )\n")
-        fo.write("link_libraries ( ${Qt5Network_LIBRARIES} )\n")
-        fo.write("link_libraries ( ${Qt5Qml_LIBRARIES} )\n")
+        fo.write("link_libraries (${Qt5Core_LIBRARIES})\n")
+        fo.write("link_libraries (${Qt5Gui_LIBRARIES})\n")
+        fo.write("link_libraries (${Qt5Widgets_LIBRARIES})\n")
+        fo.write("link_libraries (${Qt5Network_LIBRARIES})\n")
+        fo.write("link_libraries (${Qt5Qml_LIBRARIES})\n")
     fo.write("\n")
+
+    fo.write("# find LROSE for tdrp_gen\n")
+    fo.write("\n")
+    fo.write("find_package(Lrose REQUIRED)\n")
 
     if (needQt):
         fo.write("# QT5\n")
         fo.write("\n")
-        fo.write("set ( CMAKE_INCLUDE_CURRENT_DIR ON )\n")
-        fo.write("set ( CMAKE_AUTOMOC ON )\n")
-        fo.write("set ( CMAKE_AUTORCC ON )\n")
-        fo.write("set ( CMAKE_AUTOUIC ON )\n")
-        fo.write("find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH )\n")
+        fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
+        fo.write("set (CMAKE_AUTOMOC ON)\n")
+        fo.write("set (CMAKE_AUTORCC ON)\n")
+        fo.write("set (CMAKE_AUTOUIC ON)\n")
+        fo.write("find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n")
         fo.write("\n")
 
-        fo.write("include( FindPkgConfig )\n")
-        fo.write("pkg_search_module( Qt5Core REQUIRED )\n")
-        fo.write("pkg_search_module( Qt5Gui REQUIRED )\n")
-        fo.write("pkg_search_module( Qt5Widgets REQUIRED )\n")
-        fo.write("pkg_search_module( Qt5Network REQUIRED )\n")
-        fo.write("pkg_search_module( Qt5Qml REQUIRED )\n")
+        fo.write("include(FindPkgConfig)\n")
+        fo.write("pkg_search_module(Qt5Core REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Gui REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Widgets REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Network REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Qml REQUIRED)\n")
         fo.write("\n")
 
-        fo.write("include_directories( ${Qt5Core_INCLUDE_DIRS} )\n")
-        fo.write("include_directories( ${Qt5Gui_INCLUDE_DIRS} )\n")
-        fo.write("include_directories( ${Qt5Widgets_INCLUDE_DIRS} )\n")
-        fo.write("include_directories( ${Qt5Network_INCLUDE_DIRS} )\n")
-        fo.write("include_directories( ${Qt5Qml_INCLUDE_DIRS} )\n")
+        fo.write("include_directories(${Qt5Core_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Gui_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Widgets_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Network_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Qml_INCLUDE_DIRS})\n")
         fo.write("\n")
 
     fo.write("# application\n")
     fo.write("\n")
-    fo.write("add_executable ( %s ${SRCS} )\n" % appName)
+    fo.write("add_executable (%s ${SRCS})\n" % appName)
     fo.write("\n")
 
     fo.write("# install\n")
     fo.write("\n")
     fo.write("INSTALL(TARGETS ${PROJECT_NAME}\n")
     fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/bin\n")
-    fo.write("        )\n")
+    fo.write("       )\n")
     fo.write("\n")
 
     fo.close
