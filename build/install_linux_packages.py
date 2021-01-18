@@ -219,7 +219,7 @@ def installPackagesCentos8():
 
     shellCmd("dnf install -y epel-release python2 python3")
     shellCmd("dnf install -y 'dnf-command(config-manager)'")
-    shellCmd("dnf config-manager --set-enabled PowerTools")
+    shellCmd("dnf config-manager --set-enabled powertools")
     shellCmd("alternatives --set python /usr/bin/python3")
 
     # install main packages

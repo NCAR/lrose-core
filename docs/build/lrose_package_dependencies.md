@@ -95,7 +95,7 @@ This requires upgrading the compiler toolchain.
 ```
   dnf install -y epel-release ; \
   dnf install -y 'dnf-command(config-manager)' ; \
-  dnf config-manager --set-enabled PowerTools ; \
+  dnf config-manager --set-enabled powertools ; \
   dnf install -y python3 ; \
   dnf install -y python2-devel platform-python-devel ; \
   dnf install -y \
