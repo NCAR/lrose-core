@@ -62,7 +62,7 @@ public:
   
   // destructor
   
-  ~IpsEye();
+  virtual ~IpsEye();
   
   // run 
   

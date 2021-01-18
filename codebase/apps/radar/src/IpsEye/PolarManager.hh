@@ -96,7 +96,7 @@ public:
   
   // destructor
   
-  ~PolarManager();
+  virtual ~PolarManager();
 
   // run 
 
