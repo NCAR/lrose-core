@@ -477,6 +477,10 @@ def writeCMakeListsTop(dir):
     fo.write('project (lrose-core)\n')
     fo.write('\n')
 
+    fo.write('# set policy CMP0100 so that AUTOMOC finds .hh files\n')
+    fo.write('cmake_policy(SET CMP0100 NEW)\n')
+    fo.write('\n')
+
     fo.write('set(CMAKE_C_COMPILER_NAMES clang gcc icc cc)\n')
     fo.write('set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)\n')
     fo.write('\n')
@@ -1222,9 +1226,10 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
         fo.write("link_libraries (${Qt5Qml_LIBRARIES})\n")
     fo.write("\n")
 
-    fo.write("# find LROSE for tdrp_gen\n")
+    fo.write("# If needed, generate TDRP Params.cc and Params.hh files\n")
+    fo.write("# from their associated paramdef.<app> file\n")
     fo.write("\n")
-    # fo.write("find_package(Lrose REQUIRED)\n")
+    fo.write("makeTdrpParams()\n")
 
     if (needQt):
         fo.write("# QT5\n")

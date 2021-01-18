@@ -50,18 +50,27 @@ set ( LROSE_LIBRARIES
 
 set ( TDRP_EXECUTABLE ${LROSE_BIN_DIR}/tdrp_gen )
 
-# Add a custom generator for TDRP Params.cc and Params.hh files
-# from their associated paramdef.<app> file
-add_custom_command (
-  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/paramdef.${PROJECT_NAME}
-  COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && ${TDRP_EXECUTABLE}
-            -c++
-            -f paramdef.${PROJECT_NAME}
-            -prog ${PROJECT_NAME}
-            -add_ncar_copyright
-  COMMENT "Generating/updating Params.hh and Params.cc for ${PROJECT_NAME}"
-  )
+# Function for creating TDRP Params.cc and Params.hh files
+
+function(makeTdrpParams)
+
+  # Add a custom generator for TDRP Params.cc and Params.hh files
+  # from their associated paramdef.<app> file
+
+  find_program(TDRP_EXECUTABLE tdrp_gen PATHS ${LROSE_PREFIX}/bin /usr/local/lrose/bin)
+  
+  add_custom_command (
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/paramdef.${PROJECT_NAME}
+    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && ${TDRP_EXECUTABLE}
+    -c++
+    -f paramdef.${PROJECT_NAME}
+    -prog ${PROJECT_NAME}
+    -add_ncar_copyright
+    COMMENT "Generating/updating Params.hh and Params.cc for ${PROJECT_NAME}"
+    )
+
+endFunction()
 
 message ( STATUS "lrose-config ======== start ========" )
 message ( STATUS "lrose-config: PROJECT_NAME: ${PROJECT_NAME}" )
