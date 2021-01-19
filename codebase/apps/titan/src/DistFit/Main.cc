@@ -36,21 +36,30 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "DistFit.h"
+#include "DistFit.hh"
 #include <toolsa/str.h>
+#include <toolsa/port.h>
 #include <signal.h>
 using namespace std;
 
 // file scope
 
 static void tidy_and_exit (int sig);
-static DistFit *Prog;
+static void out_of_store();
+static DistFit *_prog;
 
 // main
 
 int main(int argc, char **argv)
 
 {
+
+  // create program object
+
+  _prog = new DistFit(argc, argv);
+  if (!_prog->OK) {
+    return(-1);
+  }
 
   // set signal handling
   
@@ -59,24 +68,18 @@ int main(int argc, char **argv)
   PORTsignal(SIGTERM, tidy_and_exit);
   PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
 
-  // create program object
+  // set new() memory failure handler function
 
-  Prog = new DistFit(argc, argv);
-  if (!Prog->OK) {
-    return(-1);
-  }
-  if (Prog->Done) {
-    return(0);
-  }
+  set_new_handler(out_of_store);
 
   // run it
 
-  Prog->Run();
+  int iret = _prog->Run();
 
   // clean up
 
-  tidy_and_exit(0);
-  return (0);
+  tidy_and_exit(iret);
+  return (iret);
   
 }
 
@@ -85,7 +88,22 @@ int main(int argc, char **argv)
 static void tidy_and_exit (int sig)
 
 {
-  delete(Prog);
+  delete(_prog);
   exit(sig);
 }
 
+////////////////////////////////////
+// out_of_store()
+//
+// Handle out-of-memory conditions
+//
+
+static void out_of_store()
+
+{
+
+  fprintf(stderr, "FATAL ERROR - program Titan\n");
+  fprintf(stderr, "  Operator new failed - out of store\n");
+  exit(-1);
+
+}

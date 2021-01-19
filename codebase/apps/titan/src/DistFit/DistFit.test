@@ -1,235 +1,292 @@
-/****************************************************
+/**********************************************************************
  * TDRP params for DistFit
- ****************************************************/
+ **********************************************************************/
 
-/*
- * Debug option.
- * If set, debug messages will be printed appropriately.
- *
- * Type: enum
- * Default: DEBUG_OFF 
- * Legal values: DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE.
- */
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
 debug = DEBUG_OFF;
 
-/*
- * Malloc debug level.
- * 0 - none, 1 - corruption checking, 2 - records all malloc blocks
- *   and checks, 3 - printout of all mallocs etc.
- *
- * Type: long
- * Default: 0 
- * Min value: 0 
- * Max value: 3 
- */
-malloc_debug_level = 0;
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
 
-/*
- * Process instance.
- * Used for registration with procmap.
- *
- * Type: string
- * Default: "Test" 
- */
-instance = "Test";
+instance = "test";
 
-/*
- * Name of distribution.
- * Name of distribution to be fitted to the data. If DIST_ALL, all
- *   relevant distributions will be fitted.
-.
- *
- * Type: enum
- * Default: DIST_ALL 
- * Legal values: DIST_ALL, DIST_NORMAL, DIST_WEIBULL,
- *   DIST_EXPONENTIAL, DIST_GAMMA.
- */
+///////////// distribution_name ///////////////////////
+//
+// Name of distribution.
+//
+// Name of distribution to be fitted to the data. If DIST_ALL, all 
+//   relevant distributions will be fitted.
+//
+//
+// Type: enum
+// Options:
+//     DIST_ALL
+//     DIST_NORMAL
+//     DIST_WEIBULL
+//     DIST_EXPONENTIAL
+//     DIST_GAMMA
+//
+
 distribution_name = DIST_ALL;
 
-/*
- * Class of distribution.
- * If UNI_VARIATE, the x data is fitted. If BI_VARIATE, x and y data
- *   form the variates.
- *
- * Type: enum
- * Default: UNI_VARIATE 
- * Legal values: UNI_VARIATE, BI_VARIATE.
- */
+///////////// distribution_class //////////////////////
+//
+// Class of distribution.
+//
+// If UNI_VARIATE, the x data is fitted. If BI_VARIATE, x and y data 
+//   form the variates.
+//
+//
+// Type: enum
+// Options:
+//     UNI_VARIATE
+//     BI_VARIATE
+//
+
 distribution_class = UNI_VARIATE;
 
-/*
- * Number of bins for chisq parameter.
- * When computing the chisq parameter, this is the number of intervals
- *   used for binning the data.
- *
- * Type: long
- * Default: 20 
- * Min value: 2 
- */
+///////////// chisq_nbins /////////////////////////////
+//
+// Number of bins for chisq parameter.
+//
+// When computing the chisq parameter, this is the number of intervals 
+//   used for binning the data.
+//
+// Minimum val: 2
+//
+// Type: long
+//
+
 chisq_nbins = 20;
 
-/*
- * Do the statcode tests.
- * Run through the series of statcode tests, print results to stdout.
- *
- * Type: boolean
- * Default: FALSE 
- */
+///////////// x_label /////////////////////////////////
+//
+// Label for X data.
+//
+// Used to identify column for X data.
+//
+//
+// Type: string
+//
+
+x_label = "X";
+
+///////////// y_label /////////////////////////////////
+//
+// Label for Y data.
+//
+// Used to identify column for Y data.
+//
+//
+// Type: string
+//
+
+y_label = "Y";
+
+///////////// do_statcode_tests ///////////////////////
+//
+// Run statistics code tests.
+//
+// If TRUE, the tests are run.
+//
+//
+// Type: boolean
+//
+
 do_statcode_tests = FALSE;
 
-/*
- * Label for X data.
- * Used to identify column for X data.
- *
- * Type: string
- * Default: "X" 
- */
-x_label = "start_time_of_day";
-x_label = "activity_duration";
-x_label = "gap_since_previous";
-x_label = "dtimes";
-x_label = "U";
-x_label = "Dm";
-x_label = "GaussD";
+///////////// condition_input_data ////////////////////
+//
+// Apply conditions to input data.
+//
+// If TRUE, the input data values are conditioned on a given field, 
+//   which lie in a given intervals - see cond_min, cond_max.
+//
+//
+// Type: boolean
+//
 
-/*
- * Label for Y data.
- * Used to identify column for Y data.
- *
- * Type: string
- * Default: "Y" 
- */
-y_label = "activity_duration";
-
-/*
- * Apply conditions to input data.
- * If TRUE, the input data values are conditioned on a given field,
- *   which lie in a given intervals - see cond_min, cond_max.
- *
- * Type: boolean
- * Default: FALSE 
- */
 condition_input_data = FALSE;
 
-/*
- * Label for conditional data.
- * Used to identify column for conditional data.
- *
- * Type: string
- * Default: "cond" 
- */
+///////////// conditional_label ///////////////////////
+//
+// Label for conditional data.
+//
+// Used to identify column for conditional data.
+//
+//
+// Type: string
+//
+
 conditional_label = "cond";
 
-/*
- * Min value for conditional field.
- * See condition_input_data.
- *
- * Type: double
- * Default: 0 
- */
+///////////// cond_min ////////////////////////////////
+//
+// Min value for conditional field.
+//
+// See condition_input_data.
+//
+//
+// Type: double
+//
+
 cond_min = 0;
 
-/*
- * Max value for conditional field.
- * See condition_input_data.
- *
- * Type: double
- * Default: 0 
- */
+///////////// cond_max ////////////////////////////////
+//
+// Max value for conditional field.
+//
+// See condition_input_data.
+//
+//
+// Type: double
+//
+
 cond_max = 0;
 
-/*
- * Perform attrition on the input data.
- * If TRUE, only every n data points will be used, where n is the attrition_count.
- *
- * Type: boolean
- * Default: FALSE 
- */
+///////////// perform_attrition ///////////////////////
+//
+// Perform attrition on the input data.
+//
+// If TRUE, only every n data points will be used, where n is the 
+//   attrition_count.
+//
+//
+// Type: boolean
+//
+
 perform_attrition = FALSE;
 
-/*
- * Attrition count.
- * When perform_attrition is TRUE, this is the count used to save
- *   data. Every count point is saved.
- *
- * Type: long
- * Default: 5 
- * Min value: 2 
- */
+///////////// attrition_count /////////////////////////
+//
+// Attrition count.
+//
+// When perform_attrition is TRUE, this is the count used to save data. 
+//   Every count point is saved.
+//
+// Minimum val: 2
+//
+// Type: long
+//
+
 attrition_count = 5;
 
-/*
- * Transform x data using log.
- * If TRUE, x data will become log(x).
- *
- * Type: boolean
- * Default: FALSE 
- */
+///////////// log_x_data //////////////////////////////
+//
+// Transform x data using log.
+//
+// If TRUE, x data will become log(x).
+//
+//
+// Type: boolean
+//
+
 log_x_data = FALSE;
 
-/*
- * Apply limits to x data.
- * If TRUE, the input data values are limited to between x_min and
- *   x_max.
- *
- * Type: boolean
- * Default: FALSE 
- */
+///////////// limit_x_data ////////////////////////////
+//
+// Apply limits to x data.
+//
+// If TRUE, the input data values are limited to between x_min and 
+//   x_max.
+//
+//
+// Type: boolean
+//
+
 limit_x_data = FALSE;
 
-/*
- * Min value for x field.
- * See limit_x_data.
- *
- * Type: double
- * Default: 0 
- */
+///////////// x_min ///////////////////////////////////
+//
+// Min value for x field.
+//
+// See limit_x_data.
+//
+//
+// Type: double
+//
+
 x_min = 0;
 
-/*
- * Max value for x field.
- * See limit_x_data.
- *
- * Type: double
- * Default: 0 
- */
-x_max = 240;
+///////////// x_max ///////////////////////////////////
+//
+// Max value for x field.
+//
+// See limit_x_data.
+//
+//
+// Type: double
+//
 
-/*
- * Transform y data using log.
- * If TRUE, y data will become log(y).
- *
- * Type: boolean
- * Default: FALSE 
- */
+x_max = 0;
+
+///////////// log_y_data //////////////////////////////
+//
+// Transform y data using log.
+//
+// If TRUE, y data will become log(y).
+//
+//
+// Type: boolean
+//
+
 log_y_data = FALSE;
 
-/*
- * Apply limits to y data.
- * If TRUE, the input data values are limited to between y_min and
- *   y_max.
- *
- * Type: boolean
- * Default: FALSE 
- */
+///////////// limit_y_data ////////////////////////////
+//
+// Apply limits to y data.
+//
+// If TRUE, the input data values are limited to between y_min and 
+//   y_max.
+//
+//
+// Type: boolean
+//
+
 limit_y_data = FALSE;
 
-/*
- * Min value for y field.
- * See limit_y_data.
- *
- * Type: double
- * Default: 0 
- */
+///////////// y_min ///////////////////////////////////
+//
+// Min value for y field.
+//
+// See limit_y_data.
+//
+//
+// Type: double
+//
+
 y_min = 0;
 
-/*
- * Max value for y field.
- * See limit_y_data.
- *
- * Type: double
- * Default: 0 
- */
-y_max = 0;
+///////////// y_max ///////////////////////////////////
+//
+// Max value for y field.
+//
+// See limit_y_data.
+//
+//
+// Type: double
+//
 
+y_max = 0;
 

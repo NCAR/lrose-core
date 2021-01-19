@@ -32,8 +32,11 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "DistFit.h"
+#include "DistFit.hh"
 #include <toolsa/str.h>
+#include <toolsa/pmu.h>
+#include <toolsa/mem.h>
+#include <toolsa/ucopyright.h>
 #include <rapmath/math_macros.h>
 #include <rapmath/stats.h>
 using namespace std;
@@ -45,44 +48,27 @@ DistFit::DistFit(int argc, char **argv)
 {
 
   OK = TRUE;
-  Done = FALSE;
 
   // set programe name
 
   _progName = STRdup("DistFit");
-  ucopyright(_progName);
+  ucopyright((char *) _progName.c_str());
 
-  // get command line args
-
-  _args = new Args(argc, argv, _progName);
-  if (!_args->OK) {
-    fprintf(stderr, "ERROR: %s\n", _progName);
-    fprintf(stderr, "Problem with command line args\n");
-    OK = FALSE;
-    return;
-  }
-  if (_args->Done) {
-    Done = TRUE;
+  if (_args.parse(argc, argv, _progName)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with command line args" << endl;
+    OK = false;
     return;
   }
 
   // get TDRP params
-
-  _params = new Params(_args->paramsFilePath,
-		       &_args->override,
-		       _progName,
-		       _args->checkParams,
-		       _args->printParams,
-		       _args->printShort);
   
-  if (!_params->OK) {
-    fprintf(stderr, "ERROR: %s\n", _progName);
-    fprintf(stderr, "Problem with TDRP parameters\n");
-    OK = FALSE;
-    return;
-  }
-  if (_params->Done) {
-    Done = TRUE;
+  _paramsPath = (char *) "unknown";
+  if (_params.loadFromArgs(argc, argv, _args.override.list,
+			   &_paramsPath)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with TDRP parameters" << endl;
+    OK = false;
     return;
   }
 
@@ -90,7 +76,9 @@ DistFit::DistFit(int argc, char **argv)
     return;
   }
 
-  PMU_auto_init(_progName, _params->p.instance, PROCMAP_REGISTER_INTERVAL);
+  PMU_auto_init((char *) _progName.c_str(),
+                _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
   
 }
 
@@ -104,11 +92,6 @@ DistFit::~DistFit()
 
   PMU_auto_unregister();
 
-  // call destructors
-
-  delete _params;
-  delete _args;
-
 }
 
 //////////////////////////////////////////////////
@@ -118,30 +101,30 @@ int DistFit::Run ()
 {
 
   if (_loadLabels()) {
-    fprintf(stderr, "ERROR - %s:_loadLabels()\n", _progName);
-    return (-1);
+    fprintf(stderr, "ERROR - %s:_loadLabels()\n", _progName.c_str());
+    return -1;
   }
 
   if (_loadXYData()) {
-    fprintf(stderr, "ERROR - %s:_loadXYData()\n", _progName);
-    return (-1);
+    fprintf(stderr, "ERROR - %s:_loadXYData()\n", _progName.c_str());
+    return -1;
   }
 
-  fprintf(stdout, "\n\n  **** %s ****\n\n", _progName);
+  fprintf(stdout, "\n\n  **** %s ****\n\n", _progName.c_str());
   fprintf(stdout, "    xlabel: %s\n", _xLabel);
-  if (_params->p.log_x_data) {
+  if (_params.log_x_data) {
     fprintf(stdout, "    X data has log transform\n");
   }
-  if (_params->p.distribution_class == BI_VARIATE) {
+  if (_params.distribution_class == Params::BI_VARIATE) {
     fprintf(stdout, "    ylabel: %s\n", _yLabel);
   }
-  if (_params->p.condition_input_data) {
+  if (_params.condition_input_data) {
     fprintf(stdout, "    cond_label: %s\n", _condLabel);
   }
 
 
-  if (_params->p.distribution_name == DIST_NORMAL ||
-      _params->p.distribution_name == DIST_ALL) {
+  if (_params.distribution_name == Params::DIST_NORMAL ||
+      _params.distribution_name == Params::DIST_ALL) {
     fprintf(stdout, "\nNormal fit:\n\n");
     double mean, sdev;
     if (STATS_normal_fit(_nData, _xData, &mean, &sdev)) {
@@ -151,15 +134,15 @@ int DistFit::Run ()
 	      mean, sdev);
       double chisq;
       if (STATS_normal_chisq(_nData, _xData, mean, sdev,
-			     _params->p.chisq_nbins, &chisq) == 0) {
+			     _params.chisq_nbins, &chisq) == 0) {
 	fprintf(stdout, "    Normal chisq: %g, nbins %d\n",
-		chisq, (int) _params->p.chisq_nbins);
+		chisq, (int) _params.chisq_nbins);
       }
     }
   }
 
-  if (_params->p.distribution_name == DIST_EXPONENTIAL ||
-      _params->p.distribution_name == DIST_ALL) {
+  if (_params.distribution_name == Params::DIST_EXPONENTIAL ||
+      _params.distribution_name == Params::DIST_ALL) {
     fprintf(stdout, "\nExponential fit:\n\n");
     double b;
     if (STATS_exponential_fit(_nData, _xData, &b)) {
@@ -168,15 +151,15 @@ int DistFit::Run ()
       fprintf(stdout, "    Exponential params: b = %g\n", b);
       double chisq;
       if (STATS_exponential_chisq(_nData, _xData, b,
-				  _params->p.chisq_nbins, &chisq) == 0) {
+				  _params.chisq_nbins, &chisq) == 0) {
 	fprintf(stdout, "    Exponential chisq: %g, nbins %d\n",
-		chisq, (int) _params->p.chisq_nbins);
+		chisq, (int) _params.chisq_nbins);
       }
     }
   }
 
-  if (_params->p.distribution_name == DIST_GAMMA ||
-      _params->p.distribution_name == DIST_ALL) {
+  if (_params.distribution_name == Params::DIST_GAMMA ||
+      _params.distribution_name == Params::DIST_ALL) {
     fprintf(stdout, "\nGamma fit:\n\n");
     double a, b;
     if (STATS_gamma_fit(_nData, _xData, &a, &b)) {
@@ -185,15 +168,15 @@ int DistFit::Run ()
       fprintf(stdout, "    Gamma params: a = %g, b = %g\n", a, b);
       double chisq;
       if (STATS_gamma_chisq(_nData, _xData, a, b,
-			    _params->p.chisq_nbins, &chisq) == 0) {
+			    _params.chisq_nbins, &chisq) == 0) {
 	fprintf(stdout, "    Gamma chisq: %g, nbins %d\n",
-		chisq, (int) _params->p.chisq_nbins);
+		chisq, (int) _params.chisq_nbins);
       }
     }
   }
 
-  if (_params->p.distribution_name == DIST_WEIBULL ||
-      _params->p.distribution_name == DIST_ALL) {
+  if (_params.distribution_name == Params::DIST_WEIBULL ||
+      _params.distribution_name == Params::DIST_ALL) {
     fprintf(stdout, "\nWeibull fit:\n\n");
     double a, b;
     if (STATS_weibull_fit(_nData, _xData, &a, &b)) {
@@ -202,14 +185,14 @@ int DistFit::Run ()
       fprintf(stdout, "    Weibull params: a = %g, b = %g\n", a, b);
       double chisq;
       if (STATS_weibull_chisq(_nData, _xData, a, b,
-			      _params->p.chisq_nbins, &chisq) == 0) {
+			      _params.chisq_nbins, &chisq) == 0) {
 	fprintf(stdout, "    Weibull chisq: %g, nbins %d\n",
-		chisq, (int) _params->p.chisq_nbins);
+		chisq, (int) _params.chisq_nbins);
       }
     }
   }
 
-  return (0);
+  return 0;
 
 }
 
@@ -219,7 +202,7 @@ int DistFit::Run ()
 // load data label positions from stdin
 //
 
-#define LINE_MAX 1024
+#define LINE_MAX_LEN 1024
 
 int DistFit::_loadLabels()
   
@@ -227,7 +210,7 @@ int DistFit::_loadLabels()
 
   char *token;
   char *paren_p;
-  char line[LINE_MAX];
+  char line[LINE_MAX_LEN];
   int retval = 0;
   int n_match;
   si32 i;
@@ -238,7 +221,7 @@ int DistFit::_loadLabels()
 
   while (!feof(stdin)) {
 
-    if (fgets(line, LINE_MAX, stdin) != NULL) {
+    if (fgets(line, LINE_MAX_LEN, stdin) != NULL) {
 
       if (!strncmp(line, "#labels: ", 9)) {
       
@@ -261,18 +244,18 @@ int DistFit::_loadLabels()
 	    n_match = strlen(token);
 	  }
 	  
-	  if (!strncmp(_params->p.x_label, token, n_match)) {
-	    strncpy(_xLabel, token, LABEL_MAX);
+	  if (!strncmp(_params.x_label, token, n_match)) {
+	    STRncopy(_xLabel, token, LABEL_MAX);
 	    _xPos = i;
 	  }
 
-	  if (!strncmp(_params->p.y_label, token, n_match)) {
-	    strncpy(_yLabel, token, LABEL_MAX);
+	  if (!strncmp(_params.y_label, token, n_match)) {
+	    STRncopy(_yLabel, token, LABEL_MAX);
 	    _yPos = i;
 	  }
 
-	  if (!strncmp(_params->p.conditional_label, token, n_match)) {
-	    strncpy(_condLabel, token, LABEL_MAX);
+	  if (!strncmp(_params.conditional_label, token, n_match)) {
+	    STRncopy(_condLabel, token, LABEL_MAX);
 	    _condPos = i;
 	  }
 	  
@@ -295,28 +278,28 @@ int DistFit::_loadLabels()
 
   if (_xPos < 0) {
 
-    fprintf(stderr, "ERROR - %s:_loadLabels\n", _progName);
-    fprintf(stderr, "x label '%s' not found\n", _params->p.x_label);
+    fprintf(stderr, "ERROR - %s:_loadLabels\n", _progName.c_str());
+    fprintf(stderr, "x label '%s' not found\n", _params.x_label);
     retval = -1;
     
   }
 
   if (_yPos < 0) {
-    if (_params->p.distribution_class == BI_VARIATE) {
-      fprintf(stderr, "ERROR - %s:_loadLabels\n", _progName);
-      fprintf(stderr, "y label '%s' not found\n", _params->p.y_label);
+    if (_params.distribution_class == Params::BI_VARIATE) {
+      fprintf(stderr, "ERROR - %s:_loadLabels\n", _progName.c_str());
+      fprintf(stderr, "y label '%s' not found\n", _params.y_label);
       retval = -1;
     }
     _yPos = 0;
   }
 
-  if (_params->p.condition_input_data && _condPos < 0) {
-    fprintf(stderr, "ERROR - %s:_loadLabels\n", _progName);
-    fprintf(stderr, "cond label '%s' not found\n", _params->p.conditional_label);
+  if (_params.condition_input_data && _condPos < 0) {
+    fprintf(stderr, "ERROR - %s:_loadLabels\n", _progName.c_str());
+    fprintf(stderr, "cond label '%s' not found\n", _params.conditional_label);
     retval = -1;
   }
 
-  return (retval);
+  return retval;
   
 }
 
@@ -335,16 +318,16 @@ int DistFit::_loadXYData()
 
 {
 
-  char line[LINE_MAX];
+  char line[LINE_MAX_LEN];
   char *token, *end_pt;
   char *x_str, *y_str, *cond_str;
   
   int extreme_point;
-  int perform_attrition = _params->p.perform_attrition;
+  int perform_attrition = _params.perform_attrition;
   
   si32 i;
   si32 count = 0;
-  si32 attrition_count = _params->p.attrition_count;
+  si32 attrition_count = _params.attrition_count;
   
   double *x, *y;
   double xx, yy, cond_val;
@@ -359,7 +342,7 @@ int DistFit::_loadXYData()
 
   while (!feof(stdin)) {
     
-    if (fgets(line, LINE_MAX, stdin) != NULL) {
+    if (fgets(line, LINE_MAX_LEN, stdin) != NULL) {
       
       if (line[0] != '#') {
 	
@@ -377,10 +360,10 @@ int DistFit::_loadXYData()
 	  if (i == _yPos)
 	    y_str = token;
 	  
-	  if (_params->p.condition_input_data && i == _condPos)
+	  if (_params.condition_input_data && i == _condPos)
 	    cond_str = token;
 
-	  if (_params->p.condition_input_data) {
+	  if (_params.condition_input_data) {
 	    
 	    if (x_str != NULL && y_str != NULL && cond_str != NULL)
 	      break;
@@ -390,7 +373,7 @@ int DistFit::_loadXYData()
 	    if (x_str != NULL && y_str != NULL)
 	      break;
 	    
-	  } // if (_params->p.condition_input_data)
+	  } // if (_params.condition_input_data)
 
 	  i++;
 	  token = strtok((char *) NULL, " \n");
@@ -398,18 +381,18 @@ int DistFit::_loadXYData()
 	} // while (token ...
 	
 	if (x_str == NULL || y_str == NULL) {
-	  fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName);
+	  fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName.c_str());
 	  if (x_str == NULL) {
 	    fprintf(stderr, "x value not found in data\n");
 	  }
-	  if (_params->p.distribution_class == BI_VARIATE && y_str == NULL) {
+	  if (_params.distribution_class == Params::BI_VARIATE && y_str == NULL) {
 	    fprintf(stderr, "y value not found in data\n");
 	  }
 	  continue;
 	}
 	
-	if (_params->p.condition_input_data && cond_str == NULL) {
-	  fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName);
+	if (_params.condition_input_data && cond_str == NULL) {
+	  fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName.c_str());
 	  fprintf(stderr, "cond value not found in data\n");
 	  continue;
 	}
@@ -422,11 +405,11 @@ int DistFit::_loadXYData()
 	
 	errno = 0;
 	xx = strtod(x_str, &end_pt);
-	if (_params->p.log_x_data) {
+	if (_params.log_x_data) {
 	  xx = log(xx);
 	}
 	if (errno) {
-	  fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName);
+	  fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName.c_str());
 	  fprintf(stderr, "Error in data stream, reading x\n");
 	  perror(x_str);
 	  continue;
@@ -434,11 +417,11 @@ int DistFit::_loadXYData()
 
 	errno = 0;
 	yy = strtod(y_str, &end_pt);
-	if (_params->p.log_y_data) {
+	if (_params.log_y_data) {
 	  yy = log(yy);
 	}
 	if (errno) {
-	  fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName);
+	  fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName.c_str());
 	  fprintf(stderr, "Error in data stream, reading y\n");
 	  perror(y_str);
 	  continue;
@@ -446,37 +429,37 @@ int DistFit::_loadXYData()
 	
 	// check limits as required
 	
-	if (_params->p.limit_x_data) {
-	  if (xx < _params->p.x_min || xx > _params->p.x_max) {
+	if (_params.limit_x_data) {
+	  if (xx < _params.x_min || xx > _params.x_max) {
 	    continue;
 	  }
 	}
 
-	if (_params->p.limit_y_data) {
-	  if (yy < _params->p.y_min || yy > _params->p.y_max) {
+	if (_params.limit_y_data) {
+	  if (yy < _params.y_min || yy > _params.y_max) {
 	    continue;
 	  }
 	}
 	
 	// check conditional data
 	
-	if (_params->p.condition_input_data) {
+	if (_params.condition_input_data) {
 	  
 	  errno = 0;
 	  cond_val = strtod(cond_str, &end_pt);
 	  if (errno) {
-	    fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName);
+	    fprintf(stderr, "WARNING - %s:_loadXYData\n", _progName.c_str());
 	    fprintf(stderr, "Error in data stream, reading cond val\n");
 	    perror(cond_str);
 	    continue;
 	  }
 	  
-	  if (cond_val < _params->p.cond_min ||
-	      cond_val > _params->p.cond_max) {
+	  if (cond_val < _params.cond_min ||
+	      cond_val > _params.cond_max) {
 	    continue;
 	  }
 	  
-	} // if (_params->p.condition_input_data)
+	} // if (_params.condition_input_data)
 
 	/*
 	 * set extreme points
@@ -565,12 +548,12 @@ int DistFit::_loadXYData()
     ufree((char *) prev_point);
   }
 
-  if (_params->p.debug >= DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
 
     x = _xData;
     y = _yData;
     for (i = 0; i < _nData; i++, x++, y++) {
-      if (_params->p.distribution_class == UNI_VARIATE) {
+      if (_params.distribution_class == Params::UNI_VARIATE) {
 	fprintf(stdout, "index, x: %10d %10g\n", i, *x);
       } else {
 	fprintf(stdout, "index, x, y: %10d %10g %10g\n",
@@ -580,7 +563,7 @@ int DistFit::_loadXYData()
 
   }
 
-  return (0);
+  return 0;
 
 }
 

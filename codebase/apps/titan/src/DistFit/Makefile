@@ -33,28 +33,23 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
+TARGET_FILE = DistFit
+
 LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
-LOC_LIBS = \
-	-lrapmath -ltoolsa -lpthread -ldataport -ltdrp \
-	-lbz2 -lz -lm
-
-MODULE_TYPE = progcpp
-
-TARGET_FILE = DistFit
+LOC_LIBS = -lrapmath -ltoolsa -lpthread -ldataport -ltdrp \
+	-lbz2 -lz
 
 HDRS = \
-	Args.h \
-	Params.h \
-	DistFit.h
-
-C_SRCS = $(TDRP_C)
+	Params.hh \
+	Args.hh \
+	DistFit.hh
 
 CPPC_SRCS = \
+	Params.cc \
 	Args.cc \
 	Main.cc \
-	Params.cc \
 	DistFit.cc
 
 #
@@ -73,9 +68,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 # local targets
 #
 
-depend: $(TDRP_C) depend_generic
-
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

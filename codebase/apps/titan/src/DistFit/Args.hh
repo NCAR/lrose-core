@@ -30,29 +30,26 @@
 //
 /////////////////////////////////////////////////////////////
 
-#ifndef ARGS_H
-#define ARGS_H
+#ifndef ARGS_HH
+#define ARGS_HH
 
-#include <stdio.h>
 #include <tdrp/tdrp.h>
+#include <iostream>
+#include <string>
+using namespace std;
 
 class Args {
   
 public:
 
-  // constructor
+  Args();
+  ~Args();
 
-  Args (int argc, char **argv, char *prog_name);
+  // parse
+
+  int parse(int argc, char **argv, const string &prog_name);
 
   // public data
-
-  char *paramsFilePath;
-
-  int OK;
-  int Done;
-  int printParams;
-  int printShort;
-  int checkParams;
 
   tdrp_override_t override;
 
@@ -60,7 +57,8 @@ protected:
   
 private:
 
-  void usage(char *prog_name, FILE *out);
+  string _progName;
+  void _usage(const string &prog_name, ostream &out);
   
 };
 
