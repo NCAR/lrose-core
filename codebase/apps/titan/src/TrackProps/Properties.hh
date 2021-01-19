@@ -35,7 +35,8 @@
 #ifndef Properties_h
 #define Properties_h
 
-#include "TrackProps.h"
+#include "TrackProps.hh"
+#include "Params.hh"
 #include <toolsa/membuf.h>
 
 // struct for time series properties
@@ -102,8 +103,8 @@ public:
 
   // constructor
        
-  Properties (char *prog_name,
-	      TrackProps_tdrp_struct *params_struct,
+  Properties (const char *prog_name,
+	      const Params &params,
 	      storm_file_handle_t *s_handle,
 	      track_file_handle_t *t_handle);
   
@@ -127,7 +128,7 @@ private:
 
   char *_progName;
   int _debug;
-  TrackProps_tdrp_struct *_params;
+  const Params &_params;
 
   MEMbuf *_tSeriesBuf;
   time_series_props_t *_tSeriesProps;

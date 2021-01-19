@@ -32,8 +32,9 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "TrackProps.h"
+#include "TrackProps.hh"
 #include <toolsa/str.h>
+#include <toolsa/pmu.h>
 
 // Constructor
 
@@ -42,44 +43,30 @@ TrackProps::TrackProps(int argc, char **argv)
 {
 
   OK = TRUE;
-  Done = FALSE;
-
+  _input = NULL;
+  
   // set programe name
+  
+  _progName = "TrackProps";
+  ucopyright(_progName.c_str());
 
-  _name = STRdup("TrackProps");
-  ucopyright(_name);
-
-  // get command line args
-
-  _args = new Args(argc, argv, _name);
-  if (!_args->OK) {
-    fprintf(stderr, "ERROR: %s\n", _name);
-    fprintf(stderr, "Problem with command line args\n");
-    OK = FALSE;
-    return;
-  }
-  if (_args->Done) {
-    Done = TRUE;
+  // parse args
+  
+  if (_args.parse(argc, argv, _progName)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with command line args" << endl;
+    OK = false;
     return;
   }
 
   // get TDRP params
-
-  _params = new Params(_args->paramsFilePath,
-		       &_args->override,
-		       _name,
-		       _args->checkParams,
-		       _args->printParams,
-		       _args->printShort);
   
-  if (!_params->OK) {
-    fprintf(stderr, "ERROR: %s\n", _name);
-    fprintf(stderr, "Problem with TDRP parameters\n");
-    OK = FALSE;
-    return;
-  }
-  if (_params->Done) {
-    Done = TRUE;
+  _paramsPath = (char *) "unknown";
+  if (_params.loadFromArgs(argc, argv, _args.override.list,
+			   &_paramsPath)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with TDRP parameters" << endl;
+    OK = false;
     return;
   }
 
@@ -87,17 +74,16 @@ TrackProps::TrackProps(int argc, char **argv)
     return;
   }
 
+  PMU_auto_init((char *) _progName.c_str(),
+                _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
+  
   // input file object
 
-  _input = new InputFile(_name,
-			 _params->p.debug,
-			 _args->nFiles,
-			 _args->filePaths);
+  _input = new InputFile(_progName.c_str(),
+			 _params.debug,
+			 _args.filePaths);
 
-  // initialize process registration
-  
-  PMU_auto_init(_name, _params->p.instance, PROCMAP_REGISTER_INTERVAL);
-  
 }
 
 // destructor
@@ -112,13 +98,13 @@ TrackProps::~TrackProps()
 
   // call destructors
 
-  delete _input;
-  delete _params;
-  delete _args;
+  if (_input) {
+    delete _input;
+  }
 
 }
 
-#include "TrackFile.h"
+#include "TrackFile.hh"
 using namespace std;
 
 //////////////////////////////////////////////////
@@ -133,11 +119,14 @@ int TrackProps::Run ()
   
   // process all input files
 
-  TrackFile *trackFile = new TrackFile(_name, &_params->p);
+  TrackFile *trackFile = new TrackFile(_progName.c_str(), _params);
   
-  char *track_file_path;
-  while ((track_file_path = _input->next()) != NULL) {
-    trackFile->process(track_file_path);
+  while (true) {
+    string track_file_path = _input->next();
+    if (track_file_path.size() < 1) {
+      break;
+    }
+    trackFile->process(track_file_path.c_str());
   }
 
   delete(trackFile);
@@ -154,13 +143,13 @@ void TrackProps::_printHeader(FILE *out)
 
 {
 
-  fprintf(out, "#Program %s\n", _name);
+  fprintf(out, "#Program %s\n", _progName.c_str());
 
   date_time_t file_time;
   ulocaltime(&file_time);
   fprintf(out, "#File create time: %s\n", utimestr(&file_time));
   
-  fprintf(out, "#Min duration (secs): %g\n", _params->p.min_duration);
+  fprintf(out, "#Min duration (secs): %g\n", _params.min_duration);
   
   fprintf(out,
 	  "#labels: %s\n",

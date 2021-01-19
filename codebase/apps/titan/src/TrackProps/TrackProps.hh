@@ -22,43 +22,61 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// Params.h: TDRP params object
+// TrackProps.h
+//
+// TrackProps object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // January 1998
 //
-//////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
-#ifndef PARAMS_H
-#define PARAMS_H
+#ifndef TrackProps_H
+#define TrackProps_H
 
+#include <toolsa/umisc.h>
+#include <toolsa/pmu.h>
 #include <tdrp/tdrp.h>
-#include "TrackProps_tdrp.h"
 
-class Params {
+#include "Args.hh"
+#include "Params.hh"
+#include "InputFile.hh"
+#include "TrackFile.hh"
+
+class TrackProps {
   
 public:
 
-  TrackProps_tdrp_struct p; // parameter struct
+  // constructor
+
+  TrackProps (int argc, char **argv);
+
+  // destructor
+  
+  ~TrackProps();
+
+  // run 
+
+  int Run();
+
+  // data members
 
   int OK;
-  int Done;
 
-  Params (char *params_file_path,
-	  tdrp_override_t *override,
-	  char *prog_name,
-	  int check_params,
-	  int print_params,
-	  int print_short);
-  
 protected:
   
 private:
 
-  TDRPtable *table;         // TDRP parsing table
-  static Params* _instance;
+  string _progName;
+  char *_paramsPath;
+  Args _args;
+  Params _params;
+
+  InputFile *_input;
   
+  void _printHeader(FILE *out);
+
 };
 
 #endif

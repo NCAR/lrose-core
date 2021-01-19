@@ -33,6 +33,8 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
+TARGET_FILE = TrackProps
+
 LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
@@ -41,25 +43,19 @@ LOC_LIBS = \
 	-ldataport -ltdrp -lbz2 -lz \
 	-lm -lpthread
 
-MODULE_TYPE = progcpp
-
-TARGET_FILE = TrackProps
-
 HDRS = \
 	Args.h \
 	InputFile.h \
-	Params.h \
+	Params.hh \
 	Properties.h \
 	TrackProps.h \
 	TrackFile.h
 
-C_SRCS = $(TDRP_C)
-
 CPPC_SRCS = \
+	Params.cc \
 	Args.cc \
 	InputFile.cc \
 	Main.cc \
-	Params.cc \
 	Properties.cc \
 	TrackProps.cc \
 	TrackFile.cc
@@ -80,9 +76,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 # local targets
 #
 
-depend: $(TDRP_C) depend_generic
-
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

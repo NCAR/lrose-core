@@ -32,14 +32,14 @@
 //
 //////////////////////////////////////////////////////////
 
-#include "TrackEntry.h"
+#include "TrackEntry.hh"
 #include <toolsa/str.h>
 using namespace std;
 
 //////////////
 // Constructor
 
-TrackEntry::TrackEntry (char *prog_name,
+TrackEntry::TrackEntry (const char *prog_name,
 			int debug,
 			int complex_track_num,
 			track_file_handle_t *t_handle,

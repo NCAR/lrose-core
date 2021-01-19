@@ -39,28 +39,26 @@
 //
 ///////////////////////////////////////////////////////////
 
-#include "InputFile.h"
+#include "InputFile.hh"
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
 using namespace std;
 
 // Constructor
 
-InputFile::InputFile (char *prog_name,
+InputFile::InputFile (const char *prog_name,
 		      int debug,
-		      int n_files,
-		      char **file_paths)
-
+                      const vector<string> &filePaths)
+  
 {
 
   // initialize
-
+  
   _progName = STRdup(prog_name);
   _debug = (debug? 1 : 0);
   
   _fileNum = 0;
-  _nFiles = n_files;
-  _filePaths = file_paths;
+  _filePaths = filePaths;
 
 }
 
@@ -79,17 +77,17 @@ InputFile::~InputFile()
 //
 // returns NULL on failure - end of list
 
-char *InputFile::next()
+string InputFile::next()
 
 {
 
   // in archive mode, go through the file list
   
-  if (_fileNum < _nFiles) {
+  if (_fileNum < _filePaths.size()) {
     _fileNum++;
-    return (_filePaths[_fileNum - 1]);
+    return _filePaths[_fileNum - 1];
   } else {
-    return (NULL);
+    return "";
   }
 
 }

@@ -22,61 +22,45 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// TrackEntry.h
-//
-// Track Entry object - easy access to track entries in order
+// Args.h: Command line object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // January 1998
 //
-//////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-#ifndef TrackEntry_h
-#define TrackEntry_h
+#ifndef ARGS_H
+#define ARGS_H
 
-#include <toolsa/umisc.h>
-#include <titan/storm.h>
-#include <titan/track.h>
-#include <titan/partial_track.h>
+#include <cstdio>
+#include <vector>
+#include <string>
+#include <tdrp/tdrp.h>
+using namespace std;
 
-class TrackEntry {
+class Args {
   
 public:
-  
-  // constructor
-       
-  TrackEntry (char *prog_name,
-	      int debug,
-	      int complex_track_num,
-	      track_file_handle_t *t_handle,
-	      rf_partial_track_t *ptrack);
-  
-  // get next entry
-  
-  track_file_entry_t *next();
 
-  // destructor
-  
-  ~TrackEntry();
-  
-  int OK;
+  Args();
+  ~Args();
 
+  // parse
+
+  int parse(int argc, char **argv, const string &prog_name);
+
+  // public data
+  
+  vector<string> filePaths;
+  tdrp_override_t override;
+  
 protected:
   
 private:
 
-  int _debug;
-
-  char *_progName;
-
-  int _complexTrackNum;
-  int _simpleIndex;
-  int _entryIndex;
-
-  track_file_handle_t *_t_handle;
-  rf_partial_track_t *_pTrack;
-
+  void _usage(const string &prog_name, ostream &out);
+  
 };
 
 #endif

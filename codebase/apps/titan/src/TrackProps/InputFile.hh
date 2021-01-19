@@ -22,7 +22,7 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// Args.h: Command line object
+// InputFile.h: Input file handling
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,40 +30,43 @@
 //
 /////////////////////////////////////////////////////////////
 
-#ifndef ARGS_H
-#define ARGS_H
+#ifndef INPUTFILE_H
+#define INPUTFILE_H
 
-#include <stdio.h>
-#include <tdrp/tdrp.h>
+#include <toolsa/umisc.h>
+#include <toolsa/ldata_info.h>
+#include <string>
+#include <vector>
+using namespace std;
 
-class Args {
+class InputFile {
   
 public:
 
   // constructor
 
-  Args (int argc, char **argv, char *prog_name);
+  InputFile (const char *prog_name,
+	     int debug,
+             const vector<string> &filePaths);
 
-  // public data
+  // destructor
 
-  char *paramsFilePath;
-  char **filePaths;
+  ~InputFile();
 
-  int OK;
-  int Done;
-  int nFiles;
-  int printParams;
-  int printShort;
-  int checkParams;
+  // get next file
 
-  tdrp_override_t override;
+  string next();
 
 protected:
   
 private:
 
-  void usage(char *prog_name, FILE *out);
+  char *_progName;
+  vector<string> _filePaths;
   
+  size_t _fileNum;
+  int _debug;
+
 };
 
 #endif

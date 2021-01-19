@@ -36,15 +36,16 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "TrackProps.h"
+#include "TrackProps.hh"
+#include <toolsa/port.h>
 #include <toolsa/str.h>
-#include <signal.h>
+#include <csignal>
 using namespace std;
 
 // file scope
 
 static void tidy_and_exit (int sig);
-static TrackProps *Prog;
+static TrackProps *_prog;
 
 // main
 
@@ -60,23 +61,20 @@ int main(int argc, char **argv)
   PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
 
   // create program object
-
-  Prog = new TrackProps(argc, argv);
-  if (!Prog->OK) {
+  
+  _prog = new TrackProps(argc, argv);
+  if (!_prog->OK) {
     return(-1);
-  }
-  if (Prog->Done) {
-    return(0);
   }
 
   // run it
-
-  Prog->Run();
+  
+  int iret = _prog->Run();
 
   // clean up
 
-  tidy_and_exit(0);
-  return (0);
+  tidy_and_exit(iret);
+  return (iret);
   
 }
 
@@ -85,7 +83,7 @@ int main(int argc, char **argv)
 static void tidy_and_exit (int sig)
 
 {
-  delete(Prog);
+  delete(_prog);
   exit(sig);
 }
 

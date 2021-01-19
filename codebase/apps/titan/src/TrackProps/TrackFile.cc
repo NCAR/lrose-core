@@ -33,15 +33,16 @@
 //
 //////////////////////////////////////////////////////////
 
-#include "TrackFile.h"
-#include "Properties.h"
+#include "TrackFile.hh"
+#include "Properties.hh"
 #include <toolsa/str.h>
 using namespace std;
 
 // Constructor
 
-TrackFile::TrackFile (char *prog_name,
-		      TrackProps_tdrp_struct *params_struct)
+TrackFile::TrackFile (const char *prog_name,
+		      const Params &params) :
+        _params(params)
 
 {
 
@@ -49,8 +50,7 @@ TrackFile::TrackFile (char *prog_name,
   
   OK = TRUE;
   _progName = STRdup(prog_name);
-  _params = params_struct;
-  _debug = _params->debug;
+  _debug = _params.debug;
   _trackCount = 0;
 
   // initialize storm file handle
@@ -86,7 +86,7 @@ TrackFile::~TrackFile()
 // returns 0 on success, -1 on failure
 ////////////////////////////////////////
 
-int TrackFile::process(char *track_file_path)
+int TrackFile::process(const char *track_file_path)
 
 {
 

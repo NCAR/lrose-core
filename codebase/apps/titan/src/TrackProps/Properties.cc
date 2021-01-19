@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////
 
-#include "Properties.h"
-#include "TrackEntry.h"
+#include "Properties.hh"
+#include "TrackEntry.hh"
 #include <toolsa/str.h>
 #include <rapmath/math_macros.h>
 using namespace std;
@@ -41,18 +41,18 @@ using namespace std;
 //////////////
 // Constructor
 
-Properties::Properties (char *prog_name,
-			TrackProps_tdrp_struct *params_struct,
+Properties::Properties (const char *prog_name,
+			const Params &params,
 			storm_file_handle_t *s_handle,
-			track_file_handle_t *t_handle)
+			track_file_handle_t *t_handle) :
+        _params(params)
   
 {
   
   // set pointers & vals
 
   _progName = STRdup(prog_name);
-  _params = params_struct;
-  _debug = _params->debug;
+  _debug = _params.debug;
   _s_handle = s_handle;
   _t_handle = t_handle;
   OK = TRUE;
@@ -106,8 +106,8 @@ int Properties::compute (int complex_track_num)
   _endTime = ct_params->end_time;
   _dbzThresh = _s_handle->header->params.low_dbz_threshold;
 
-  if (ct_params->duration_in_secs < _params->min_duration ||
-      ct_params->duration_in_secs > _params->max_duration) {
+  if (ct_params->duration_in_secs < _params.min_duration ||
+      ct_params->duration_in_secs > _params.max_duration) {
     return (-1);
   }
   _duration = (double) ct_params->duration_in_secs / 3600.0;
@@ -400,7 +400,7 @@ void Properties::_compute_z_props(storm_file_global_props_t *gprops,
   double volume;
   double mass;
 
-  if (_params->altitude_threshold > top) {
+  if (_params.altitude_threshold > top) {
 
     volume = 0;
     mass = 0;
@@ -410,13 +410,13 @@ void Properties::_compute_z_props(storm_file_global_props_t *gprops,
     int threshold_layer;
     double threshold_fraction;
   
-    if (_params->altitude_threshold > base) {
+    if (_params.altitude_threshold > base) {
       
       threshold_layer = base_layer + 
-	(int) ((_params->altitude_threshold - base_z) / delta_z + 0.5);
+	(int) ((_params.altitude_threshold - base_z) / delta_z + 0.5);
       double threshold_layer_z = min_z + threshold_layer * delta_z;
       threshold_fraction =
-	(_params->altitude_threshold - threshold_layer_z) / delta_z + 0.5;
+	(_params.altitude_threshold - threshold_layer_z) / delta_z + 0.5;
 
     } else {
 
@@ -441,7 +441,7 @@ void Properties::_compute_z_props(storm_file_global_props_t *gprops,
       mass += layer->mass;
     }
 
-  } // if (_params->altitude_threshold > top) 
+  } // if (_params.altitude_threshold > top) 
 
   // set return values
 

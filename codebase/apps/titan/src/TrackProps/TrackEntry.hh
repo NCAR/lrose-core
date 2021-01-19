@@ -22,9 +22,9 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// TrackFile.h: TrackFile handling
+// TrackEntry.h
 //
-// Processes one track file
+// Track Entry object - easy access to track entries in order
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,49 +32,50 @@
 //
 //////////////////////////////////////////////////////////
 
-#ifndef TrackFile_h
-#define TrackFile_h
+#ifndef TrackEntry_h
+#define TrackEntry_h
 
 #include <toolsa/umisc.h>
+#include <titan/storm.h>
 #include <titan/track.h>
-#include "Params.h"
+#include <titan/partial_track.h>
 
-class TrackFile {
+class TrackEntry {
   
 public:
-
+  
   // constructor
        
-  TrackFile (char *prog_name,
-	     TrackProps_tdrp_struct *params_struct);
+  TrackEntry (const char *prog_name,
+	      int debug,
+	      int complex_track_num,
+	      track_file_handle_t *t_handle,
+	      rf_partial_track_t *ptrack);
   
-  // Destructor
+  // get next entry
   
-  virtual ~TrackFile();
-  
-  // process file
-  
-  int process(char *track_file_path);
+  track_file_entry_t *next();
 
-  // flag to indicate construction was successful
-
+  // destructor
+  
+  ~TrackEntry();
+  
   int OK;
 
 protected:
   
 private:
 
-  char *_progName;
   int _debug;
-  TrackProps_tdrp_struct *_params;
 
-  int _trackCount;
-  storm_file_handle_t _s_handle;
-  track_file_handle_t _t_handle;
+  char *_progName;
 
-  // memory allocation
+  int _complexTrackNum;
+  int _simpleIndex;
+  int _entryIndex;
 
-  void _inc_alloc_times_array();
+  track_file_handle_t *_t_handle;
+  rf_partial_track_t *_pTrack;
 
 };
 

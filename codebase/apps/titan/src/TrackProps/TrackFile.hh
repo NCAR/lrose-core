@@ -22,50 +22,59 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// InputFile.h: Input file handling
+// TrackFile.h: TrackFile handling
+//
+// Processes one track file
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // January 1998
 //
-/////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
-#ifndef INPUTFILE_H
-#define INPUTFILE_H
+#ifndef TrackFile_h
+#define TrackFile_h
 
 #include <toolsa/umisc.h>
-#include <toolsa/ldata_info.h>
+#include <titan/track.h>
+#include "Params.hh"
 
-class InputFile {
+class TrackFile {
   
 public:
 
   // constructor
+       
+  TrackFile (const char *prog_name,
+	     const Params &params);
+  
+  // Destructor
+  
+  virtual ~TrackFile();
+  
+  // process file
+  
+  int process(const char *track_file_path);
 
-  InputFile (char *prog_name,
-	     int debug,
-	     int n_files,
-	     char **file_paths);
+  // flag to indicate construction was successful
 
-  // destructor
-
-  ~InputFile();
-
-  // get next file
-
-  char *next();
+  int OK;
 
 protected:
   
 private:
 
   char *_progName;
-  char **_filePaths;
-  char _inputPath[MAX_PATH_LEN];
-
-  int _nFiles;
-  int _fileNum;
   int _debug;
+  const Params &_params;
+
+  int _trackCount;
+  storm_file_handle_t _s_handle;
+  track_file_handle_t _t_handle;
+
+  // memory allocation
+
+  void _inc_alloc_times_array();
 
 };
 
