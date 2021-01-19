@@ -536,7 +536,8 @@ def writeCMakeListsTop(dir):
     fo.write('# Add a custom generator for TDRP Params.cc and Params.hh files\n')
     fo.write('# from their associated paramdef.<app> file\n')
     fo.write('\n')
-    fo.write('find_program(TDRP_EXECUTABLE tdrp_gen PATHS ${LROSE_PREFIX}/bin /usr/local/lrose/bin)\n')
+    fo.write('set(TDRP_EXECUTABLE ${LROSE_PREFIX}/bin/tdrp_gen)\n');
+    fo.write('#find_program(TDRP_EXECUTABLE tdrp_gen PATHS ${LROSE_PREFIX}/bin /usr/local/lrose/bin)\n')
     fo.write('\n')
     fo.write('add_custom_command (\n')
     fo.write('OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc\n')
