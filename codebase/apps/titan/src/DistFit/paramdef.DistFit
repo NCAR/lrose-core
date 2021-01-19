@@ -60,12 +60,6 @@ paramdef string {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Run statistics code tests.";
-  p_help = "If TRUE, the tests are run.";
-} do_statcode_tests;
-
-paramdef boolean {
-  p_default = FALSE;
   p_descr = "Apply conditions to input data.";
   p_help = "If TRUE, the input data values are conditioned on a given field, which lie in a given intervals - see cond_min, cond_max.";
 } condition_input_data;

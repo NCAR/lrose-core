@@ -674,18 +674,6 @@
     tt->single_val.s = tdrpStrDup("Y");
     tt++;
     
-    // Parameter 'do_statcode_tests'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("do_statcode_tests");
-    tt->descr = tdrpStrDup("Run statistics code tests.");
-    tt->help = tdrpStrDup("If TRUE, the tests are run.");
-    tt->val_offset = (char *) &do_statcode_tests - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'condition_input_data'
     // ctype is 'tdrp_bool_t'
     

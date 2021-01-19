@@ -395,8 +395,6 @@ public:
 
   char* y_label;
 
-  tdrp_bool_t do_statcode_tests;
-
   tdrp_bool_t condition_input_data;
 
   char* conditional_label;
@@ -432,7 +430,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[23];
+  mutable TDRPtable _table[22];
 
   const char *_className;
 
