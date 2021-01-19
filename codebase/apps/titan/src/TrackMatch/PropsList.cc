@@ -154,7 +154,7 @@ int PropsList::update(char *line, initial_props_t *case_props)
   
   if (_params.time_margin >= 0) {
     int max_time_diff = (int) (_params.time_margin * 3600.0);
-    if (abs((double) props.time - (double) case_props->time) > max_time_diff) {
+    if (fabs((double) props.time - (double) case_props->time) > max_time_diff) {
       return (-1);
     }
   }
