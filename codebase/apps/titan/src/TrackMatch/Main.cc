@@ -52,13 +52,6 @@ int main(int argc, char **argv)
 
 {
 
-  // create program object
-
-  _prog = new TrackMatch(argc, argv);
-  if (!_prog->OK) {
-    return(-1);
-  }
-
   // set signal handling
   
   PORTsignal(SIGINT, tidy_and_exit);

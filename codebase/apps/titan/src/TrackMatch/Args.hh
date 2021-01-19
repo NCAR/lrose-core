@@ -53,7 +53,6 @@ public:
   // public data
   
   vector<string> filePaths;
-  time_t startTime, endTime;
   tdrp_override_t override;
   
 protected:

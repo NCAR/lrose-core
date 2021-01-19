@@ -65,8 +65,6 @@ int Args::parse(int argc, char **argv, const string &prog_name)
   
   // intialize
 
-  startTime = 0;
-  endTime = 0;
   TDRP_init_override(&override);
 
   // loop through args
