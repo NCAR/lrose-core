@@ -22,9 +22,9 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// MidPoint.h
+// Velocity.h
 //
-// Mid point generation object
+// Velocity generation object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,26 +32,26 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef MidPoint_H
-#define MidPoint_H
+#ifndef Velocity_H
+#define Velocity_H
 
-#include "Params.h"
+#include "Params.hh"
 
-class MidPoint {
+class Velocity {
   
 public:
 
   // constructor
 
-  MidPoint(char *prog_name, Params *params);
+  Velocity(const char *prog_name, const Params &params);
 
   // destructor
   
-  ~MidPoint();
+  ~Velocity();
 
-  // generate MidPoint for next storm
+  // Generate velocity given grid_index
 
-  void Generate(int *grid_index_p, double *xmid_p, double *ymid_p);
+  void Generate(int grid_index, double *u_p, double *v_p);
 
   int OK;
 
@@ -60,12 +60,9 @@ protected:
 private:
 
   char *_progName;
-  Params *_params;
+  const Params &_params;
 
-  double *_cdf;
-  int _nX, _nY, _nGrid;
-  double _minX, _minY;
-  double _dX, _dY;
+  double *_uMean, *_vMean;
   
 };
 

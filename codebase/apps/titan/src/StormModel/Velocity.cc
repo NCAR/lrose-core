@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Velocity.h"
+#include "Velocity.hh"
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <rapmath/stats.h>
@@ -42,12 +42,12 @@ using namespace std;
 
 // Constructor
 
-Velocity::Velocity(char *prog_name, Params *params)
+Velocity::Velocity(const char *prog_name, const Params &params) :
+        _params(params)
 
 {
   
   _progName = STRdup(prog_name);
-  _params = params;
   _uMean = (double *) NULL;
   _vMean = (double *) NULL;
   OK = TRUE;
@@ -66,10 +66,10 @@ Velocity::Velocity(char *prog_name, Params *params)
     return;
   }
 
-  if (MDV_read_all(&mdv, _params->p.velocity_file_path, MDV_INT8)) {
+  if (MDV_read_all(&mdv, _params.velocity_file_path, MDV_INT8)) {
     fprintf(stderr, "ERROR - %s:Velocity\n", _progName);
     fprintf(stderr, "Cannot read mdv file %s\n",
-	    _params->p.velocity_file_path);
+	    _params.velocity_file_path);
     MDV_free_handle(&mdv);
     OK = FALSE;
     return;
@@ -78,7 +78,7 @@ Velocity::Velocity(char *prog_name, Params *params)
   // allocate u and v arrays
   
   MDV_field_header_t *fld;
-  fld = mdv.fld_hdrs + _params->p.u_mean_field_num;
+  fld = mdv.fld_hdrs + _params.u_mean_field_num;
 
   int nX = fld->nx;
   int nY = fld->ny;
@@ -89,12 +89,12 @@ Velocity::Velocity(char *prog_name, Params *params)
 
   // load up uMean array
 
-  fld = mdv.fld_hdrs + _params->p.u_mean_field_num;
+  fld = mdv.fld_hdrs + _params.u_mean_field_num;
   double u_scale = fld->scale;
   double u_bias = fld->bias;
 
   ui08 *uByte =
-    (ui08 *) mdv.field_plane[_params->p.u_mean_field_num][0];
+    (ui08 *) mdv.field_plane[_params.u_mean_field_num][0];
   ui08 *ub = uByte;
   double *u = _uMean;
 
@@ -104,12 +104,12 @@ Velocity::Velocity(char *prog_name, Params *params)
 
   // load up vMean array
 
-  fld = mdv.fld_hdrs + _params->p.v_mean_field_num;
+  fld = mdv.fld_hdrs + _params.v_mean_field_num;
   double v_scale = fld->scale;
   double v_bias = fld->bias;
 
   ui08 *vByte =
-    (ui08 *) mdv.field_plane[_params->p.v_mean_field_num][0];
+    (ui08 *) mdv.field_plane[_params.v_mean_field_num][0];
   ui08 *vb = vByte;
   double *v = _vMean;
 
@@ -157,8 +157,8 @@ void Velocity::Generate(int grid_index, double *u_p, double *v_p)
 
   // generate u and v from normal distribution
 
-  double u = STATS_normal_gen(uMean, _params->p.u_sdev);
-  double v = STATS_normal_gen(vMean, _params->p.v_sdev);
+  double u = STATS_normal_gen(uMean, _params.u_sdev);
+  double v = STATS_normal_gen(vMean, _params.v_sdev);
 
   *u_p = u;
   *v_p = v;

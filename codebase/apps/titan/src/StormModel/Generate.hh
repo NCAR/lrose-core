@@ -22,9 +22,9 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// StormModel.h
+// Generate.h
 //
-// StormModel object
+// Storm generation object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,46 +32,63 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef StormModel_H
-#define StormModel_H
+#ifndef Generate_HH
+#define Generate_HH
 
-#include <toolsa/umisc.h>
-#include <toolsa/pmu.h>
-#include <tdrp/tdrp.h>
+#include "Params.hh"
+#include "MidPoint.hh"
+#include "Duration.hh"
+#include "Area.hh"
+#include "StartTime.hh"
+#include "Velocity.hh"
 
-#include "Args.h"
-#include "Params.h"
-
-#define LABEL_MAX 64
-
-class StormModel {
+class Generate {
   
 public:
 
   // constructor
 
-  StormModel (int argc, char **argv);
+  Generate(const char *prog_name, const Params &params);
 
   // destructor
   
-  ~StormModel();
+  ~Generate();
 
-  // run 
+  // Print the header
 
-  int Run();
+  void printHeader(FILE *out);
+  
+  // generate another storm, write to output file
 
-  // data members
+  int Another(int num, FILE *out);
 
   int OK;
-  int Done;
-  char *_progName;
-  Args *_args;
-  Params *_params;
+
+  double sumArea() { return (_sumArea); }
 
 protected:
   
 private:
 
+  char *_progName;
+  const Params &_params;
+
+  StartTime *_startTime;
+  MidPoint *_midPoint;
+  Duration *_duration;
+  Area *_area;
+  Velocity *_velocity;
+
+  double _sumArea;
+
+  void _interp_dBZmax(double Dm, double *mean_p, double *sdev_p);
+
+  static double _durDiff(double dur_guess);
+ 
+  double rtbis(double (*func)(double),
+	       double x1, double x2, double xacc);
+
 };
 
 #endif
+

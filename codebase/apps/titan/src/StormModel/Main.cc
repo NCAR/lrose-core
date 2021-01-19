@@ -35,9 +35,10 @@
 //
 ////////////////////////////////////////////////////////////////
 
-#include "StormModel.h"
+#include "StormModel.hh"
 #include <toolsa/str.h>
-#include <signal.h>
+#include <toolsa/port.h>
+#include <csignal>
 using namespace std;
 
 // file scope
@@ -63,9 +64,6 @@ int main(int argc, char **argv)
   Prog = new StormModel(argc, argv);
   if (!Prog->OK) {
     return(-1);
-  }
-  if (Prog->Done) {
-    return(0);
   }
 
   // run it

@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "StartTime.h"
+#include "StartTime.hh"
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <rapmath/stats.h>
@@ -40,12 +40,12 @@ using namespace std;
 
 // Constructor
 
-StartTime::StartTime(char *prog_name, Params *params)
+StartTime::StartTime(const char *prog_name, const Params &params) :
+        _params(params)
 
 {
 
   _progName = STRdup(prog_name);
-  _params = params;
   OK = TRUE;
   _eventStartTodCdf = (GenFromCdf *) NULL;
 
@@ -57,9 +57,8 @@ StartTime::StartTime(char *prog_name, Params *params)
 
   // create CDF object for event start TOD
 
-  int nstartHist = _params->p.event_start_tod_hist.len;
-  StormModel_event_start_tod_hist *startHist =
-    _params->p.event_start_tod_hist.val;
+  int nstartHist = _params.event_start_tod_hist_n;
+  Params::event_start_tod_hist_t *startHist = _params._event_start_tod_hist;
   
   double *startVals = (double *) umalloc(nstartHist * sizeof(double));
   double *startProb = (double *) umalloc(nstartHist * sizeof(double));
@@ -75,7 +74,7 @@ StartTime::StartTime(char *prog_name, Params *params)
   if (!_eventStartTodCdf) {
     OK = FALSE;
   }
-  if (_params->p.debug >= DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     _eventStartTodCdf->print(stderr);
   }
 
@@ -110,13 +109,13 @@ double StartTime::Generate()
   // generate storm start gap from lognormal - must be less
   // than event_gap_min
 
-  double storm_start_gap = _params->p.event_gap_min * 2.0;
+  double storm_start_gap = _params.event_gap_min * 2.0;
 
-  while (storm_start_gap >= _params->p.event_gap_min ||
-	 storm_start_gap <= _params->p.storm_start_gap_min) {
+  while (storm_start_gap >= _params.event_gap_min ||
+	 storm_start_gap <= _params.storm_start_gap_min) {
     double ln_storm_start_gap =
-      STATS_normal_gen(_params->p.ln_storm_start_gap_norm.mean,
-		       _params->p.ln_storm_start_gap_norm.sdev);
+      STATS_normal_gen(_params.ln_storm_start_gap_norm.mean,
+		       _params.ln_storm_start_gap_norm.sdev);
     storm_start_gap = exp(ln_storm_start_gap);
   }
 
@@ -157,17 +156,17 @@ void StartTime::_genEvent()
   double event_start = _eventEnd;
 
   while (event_start <=
-	 _eventEnd + _params->p.event_gap_min) {
+	 _eventEnd + _params.event_gap_min) {
     
     // generate the event gap from lognormal - must exceed
     // event_gap_min
     
     double event_gap = -1.0;
     
-    while (event_gap < _params->p.event_gap_min) {
+    while (event_gap < _params.event_gap_min) {
       event_gap =
-	STATS_gamma_gen(_params->p.event_gap_gamma.shape,
-			_params->p.event_gap_gamma.scale);
+	STATS_gamma_gen(_params.event_gap_gamma.shape,
+			_params.event_gap_gamma.scale);
     }
 
     // compute the first guess event start time
@@ -192,8 +191,8 @@ void StartTime::_genEvent()
   // generate event duration
   
   double event_dur =
-    STATS_gamma_gen(_params->p.event_dur_gamma.shape,
-		    _params->p.event_dur_gamma.scale);
+    STATS_gamma_gen(_params.event_dur_gamma.shape,
+		    _params.event_dur_gamma.scale);
 
   // set variables
 

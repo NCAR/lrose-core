@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Area.h"
+#include "Area.hh"
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <rapmath/stats.h>
@@ -42,12 +42,12 @@ using namespace std;
 
 // Constructor
 
-Area::Area(char *prog_name, Params *params)
+Area::Area(const char *prog_name, const Params &params) :
+        _params(params)
 
 {
   
   _progName = STRdup(prog_name);
-  _params = params;
   _lnArea = (double *) NULL;
   OK = TRUE;
 
@@ -65,10 +65,10 @@ Area::Area(char *prog_name, Params *params)
     return;
   }
 
-  if (MDV_read_all(&mdv, _params->p.ln_area_file_path, MDV_INT8)) {
+  if (MDV_read_all(&mdv, _params.ln_area_file_path, MDV_INT8)) {
     fprintf(stderr, "ERROR - %s:Area\n", _progName);
     fprintf(stderr, "Cannot read mdv file %s\n",
-	    _params->p.ln_area_file_path);
+	    _params.ln_area_file_path);
     MDV_free_handle(&mdv);
     OK = FALSE;
     return;
@@ -77,7 +77,7 @@ Area::Area(char *prog_name, Params *params)
   // allocate area array
   
   MDV_field_header_t *fld;
-  fld = mdv.fld_hdrs + _params->p.ln_area_field_num;
+  fld = mdv.fld_hdrs + _params.ln_area_field_num;
 
   int nX = fld->nx;
   int nY = fld->ny;
@@ -91,7 +91,7 @@ Area::Area(char *prog_name, Params *params)
   double bias = fld->bias;
 
   ui08 *db =
-    (ui08 *) mdv.field_plane[_params->p.ln_area_field_num][0];
+    (ui08 *) mdv.field_plane[_params.ln_area_field_num][0];
   double *lnArea = _lnArea;
   double sum = 0.0;
   double sum2 = 0.0;
@@ -151,9 +151,9 @@ double Area::Generate(int grid_index, double Dm)
   
   _interp_lnA(Dm, &lnA_shape, &lnA_scale, &lnA_lbound);
 
-  lnA = _params->p.max_lnA * 2.0;
+  lnA = _params.max_lnA * 2.0;
 
-  while (lnA > _params->p.max_lnA) {
+  while (lnA > _params.max_lnA) {
 
     lnA = STATS_gamma3_gen(lnA_shape, lnA_scale, lnA_lbound);
 
@@ -190,8 +190,8 @@ void Area::_interp_lnA(double Dm, double *shape_p,
 
 {
 
-  StormModel_lnA_vs_Dm *lnA = _params->p.lnA_vs_Dm.val;
-  int npts = _params->p.lnA_vs_Dm.len;
+  Params::lnA_vs_Dm_t *lnA = _params._lnA_vs_Dm;
+  int npts = _params.lnA_vs_Dm_n;
 
   if (Dm < lnA[0].Dm) {
 

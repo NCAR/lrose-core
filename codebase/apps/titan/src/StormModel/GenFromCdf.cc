@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "GenFromCdf.h"
+#include "GenFromCdf.hh"
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <rapmath/stats.h>

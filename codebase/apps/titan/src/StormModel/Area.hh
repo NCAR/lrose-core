@@ -22,46 +22,54 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// Args.h: Command line object
+// Area.h
+//
+// Area generation object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // February 1998
 //
-/////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
-#ifndef ARGS_H
-#define ARGS_H
+#ifndef Area_H
+#define Area_H
 
-#include <stdio.h>
-#include <tdrp/tdrp.h>
+#include "Params.hh"
 
-class Args {
+class Area {
   
 public:
 
   // constructor
 
-  Args (int argc, char **argv, char *prog_name);
+  Area(const char *prog_name, const Params &params);
 
-  // public data
+  // destructor
+  
+  ~Area();
 
-  char *paramsFilePath;
+  // Generate area given grid_index
+
+  double Generate(int grid_index, double Dm);
 
   int OK;
-  int Done;
-  int printParams;
-  int printShort;
-  int checkParams;
-
-  tdrp_override_t override;
 
 protected:
   
 private:
 
-  void usage(char *prog_name, FILE *out);
+  char *_progName;
+  const Params &_params;
+
+  double *_lnArea;
+  double _lnAreaMean;
+  double _lnAreaSdev;
   
+  void _interp_lnA(double Dm, double *shape_p,
+		   double *scale_p, double *lbound_p);
+
 };
 
 #endif
+

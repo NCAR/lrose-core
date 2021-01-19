@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "MidPoint.h"
+#include "MidPoint.hh"
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <rapmath/stats.h>
@@ -42,12 +42,12 @@ using namespace std;
 
 // Constructor
 
-MidPoint::MidPoint(char *prog_name, Params *params)
+MidPoint::MidPoint(const char *prog_name, const Params &params) :
+        _params(params)
 
 {
 
   _progName = STRdup(prog_name);
-  _params = params;
   _cdf = (double *) NULL;
   OK = TRUE;
 
@@ -65,10 +65,10 @@ MidPoint::MidPoint(char *prog_name, Params *params)
     return;
   }
 
-  if (MDV_read_all(&mdv, _params->p.mid_point_file_path, MDV_INT8)) {
+  if (MDV_read_all(&mdv, _params.mid_point_file_path, MDV_INT8)) {
     fprintf(stderr, "ERROR - %s:MidPoint\n", _progName);
     fprintf(stderr, "Cannot read mdv file %s\n",
-	    _params->p.mid_point_file_path);
+	    _params.mid_point_file_path);
     MDV_free_handle(&mdv);
     OK = FALSE;
     return;
@@ -77,7 +77,7 @@ MidPoint::MidPoint(char *prog_name, Params *params)
   // allocate cdf array
 
   MDV_field_header_t *fld;
-  fld = mdv.fld_hdrs + _params->p.mid_point_field_num;
+  fld = mdv.fld_hdrs + _params.mid_point_field_num;
 
   _nX = fld->nx;
   _nY = fld->ny;
@@ -95,7 +95,7 @@ MidPoint::MidPoint(char *prog_name, Params *params)
   double bias = fld->bias;
 
   ui08 *mid_count =
-    (ui08 *) mdv.field_plane[_params->p.mid_point_field_num][0];
+    (ui08 *) mdv.field_plane[_params.mid_point_field_num][0];
 
   ui08 *sc = mid_count;
   double *cdf = _cdf;
@@ -171,10 +171,10 @@ void MidPoint::Generate(int *grid_index_p,
 
   // compute random variations about the point
 
-  double dxx = STATS_normal_gen(0.0, _params->p.mid_point_sdev);
+  double dxx = STATS_normal_gen(0.0, _params.mid_point_sdev);
   xx += dxx;
 
-  double dyy = STATS_normal_gen(0.0, _params->p.mid_point_sdev);
+  double dyy = STATS_normal_gen(0.0, _params.mid_point_sdev);
   yy += dyy;
 
   // set return values

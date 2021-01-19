@@ -22,36 +22,37 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// Velocity.h
+// StartTime.h
 //
-// Velocity generation object
+// Start time generation object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// February 1998
+// March 1998
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef Velocity_H
-#define Velocity_H
+#ifndef StartTime_H
+#define StartTime_H
 
-#include "Params.h"
+#include "Params.hh"
+#include "GenFromCdf.hh"
 
-class Velocity {
+class StartTime {
   
 public:
 
   // constructor
 
-  Velocity(char *prog_name, Params *params);
+  StartTime(const char *prog_name, const Params &params);
 
   // destructor
   
-  ~Velocity();
+  ~StartTime();
 
-  // Generate velocity given grid_index
+  // generate StartTime for next storm
 
-  void Generate(int grid_index, double *u_p, double *v_p);
+  double Generate();
 
   int OK;
 
@@ -60,10 +61,18 @@ protected:
 private:
 
   char *_progName;
-  Params *_params;
+  const Params &_params;
 
-  double *_uMean, *_vMean;
-  
+  double _eventStart;
+  double _eventEnd;
+  double _eventDur;
+
+  double _prevStormTime;
+
+  GenFromCdf *_eventStartTodCdf;
+
+  void _genEvent();
+
 };
 
 #endif

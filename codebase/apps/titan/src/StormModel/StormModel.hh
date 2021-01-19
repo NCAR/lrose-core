@@ -22,9 +22,9 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// Duration.h
+// StormModel.h
 //
-// Duration generation object
+// StormModel object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,26 +32,32 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef Duration_H
-#define Duration_H
+#ifndef StormModel_H
+#define StormModel_H
 
-#include "Params.h"
+#include <string>
+#include "Args.hh"
+#include "Params.hh"
 
-class Duration {
+#define LABEL_MAX 64
+
+class StormModel {
   
 public:
 
   // constructor
 
-  Duration(char *prog_name, Params *params);
+  StormModel (int argc, char **argv);
 
   // destructor
   
-  ~Duration();
+  ~StormModel();
 
-  // Generate duration given grid_index
+  // run 
 
-  double Generate(int grid_index);
+  int Run();
+
+  // data members
 
   int OK;
 
@@ -59,13 +65,11 @@ protected:
   
 private:
 
-  char *_progName;
-  Params *_params;
+  string _progName;
+  char *_paramsPath;
+  Args _args;
+  Params _params;
 
-  double *_dur;
-  double _durMean;
-  
 };
 
 #endif
-

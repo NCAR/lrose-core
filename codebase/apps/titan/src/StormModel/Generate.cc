@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Generate.h"
+#include "Generate.hh"
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
 #include <rapmath/stats.h>
@@ -43,28 +43,28 @@ static double _Dm, _A, _aThresh;
 
 // Constructor
 
-Generate::Generate(char *prog_name, Params *params)
+Generate::Generate(const char *prog_name, const Params &params) :
+        _params(params)
 
 {
 
   OK = TRUE;
   _progName = STRdup(prog_name);
-  _params = params;
   _startTime = NULL;
   _midPoint = NULL;
   _duration = NULL;
   _area = NULL;
   _velocity = NULL;
-  _aThresh = _params->p.area_threshold;
+  _aThresh = _params.area_threshold;
   _sumArea = 0.0;
 
   // initialize stat distribution generation
 
-  if (_params->p.random_seed < 0) {
+  if (_params.random_seed < 0) {
     time_t now = time((time_t *) NULL);
     STATS_uniform_seed(now);
   } else {
-    STATS_uniform_seed(_params->p.random_seed);
+    STATS_uniform_seed(_params.random_seed);
   }
 
   // create StartTime object
@@ -149,7 +149,7 @@ void Generate::printHeader(FILE *out)
   date_time_t file_time;
   ulocaltime(&file_time);
   fprintf(out, "#File create time: %s\n", utimestr(&file_time));
-  fprintf(out, "#Min duration (secs): %g\n", _params->p.min_duration);
+  fprintf(out, "#Min duration (secs): %g\n", _params.min_duration);
   
   fprintf(out,
 	  "#labels: %s\n",
@@ -198,8 +198,8 @@ int Generate::Another(int num, FILE *out)
   double duration = -1.0;
   int count = 0;
 
-  while (duration < _params->p.min_duration ||
-	 duration > _params->p.max_duration) {
+  while (duration < _params.min_duration ||
+	 duration > _params.max_duration) {
 
     count++;
     if (count > 50) {
@@ -216,11 +216,11 @@ int Generate::Another(int num, FILE *out)
     
     // compute duration
     
-    duration = rtbis(_durDiff, _params->p.min_duration, 24.0, 0.001);
+    duration = rtbis(_durDiff, _params.min_duration, 24.0, 0.001);
 
-  } // while (duration < _params->p.min_duration) 
+  } // while (duration < _params.min_duration) 
 
-  nscans = (int) ((duration * 3600.0) / _params->p.scan_interval + 0.5);
+  nscans = (int) ((duration * 3600.0) / _params.scan_interval + 0.5);
   _sumArea += _A * nscans; 
 
   // Generate dBZmax
@@ -229,7 +229,7 @@ int Generate::Another(int num, FILE *out)
   double dBZmax, dBZmin, dBZmean;
   double dBZthresh;
 
-  dBZthresh = _params->p.dbz_threshold;
+  dBZthresh = _params.dbz_threshold;
   _interp_dBZmax(_Dm, &dBZmax_mean, &dBZmax_sdev);
   dBZmax = STATS_normal_gen(dBZmax_mean, dBZmax_sdev);
   dBZmin = dBZthresh + 10.0;
@@ -255,12 +255,12 @@ int Generate::Another(int num, FILE *out)
   // shape
 
   double ellipse_ratio =
-    exp(STATS_normal_gen(_params->p.ln_ellipse_ratio_norm.mean,
-			 _params->p.ln_ellipse_ratio_norm.sdev));
+    exp(STATS_normal_gen(_params.ln_ellipse_ratio_norm.mean,
+			 _params.ln_ellipse_ratio_norm.sdev));
 
   double ellipse_orientation =
-    STATS_normal_gen(_params->p.ellipse_orientation_norm.mean,
-		     _params->p.ellipse_orientation_norm.sdev);
+    STATS_normal_gen(_params.ellipse_orientation_norm.mean,
+		     _params.ellipse_orientation_norm.sdev);
   
   // output
 
@@ -285,8 +285,8 @@ void Generate::_interp_dBZmax(double Dm, double *mean_p, double *sdev_p)
 
 {
 
-  StormModel_dBZmax_vs_Dm *dBZmax = _params->p.dBZmax_vs_Dm.val;
-  int npts = _params->p.dBZmax_vs_Dm.len;
+  Params::dBZmax_vs_Dm_t *dBZmax = _params._dBZmax_vs_Dm;
+  int npts = _params.dBZmax_vs_Dm_n;
 
   if (Dm < dBZmax[0].Dm) {
 

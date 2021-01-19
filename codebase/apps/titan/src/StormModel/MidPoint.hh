@@ -22,37 +22,36 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// StartTime.h
+// MidPoint.h
 //
-// Start time generation object
+// Mid point generation object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 1998
+// February 1998
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef StartTime_H
-#define StartTime_H
+#ifndef MidPoint_H
+#define MidPoint_H
 
-#include "Params.h"
-#include "GenFromCdf.h"
+#include "Params.hh"
 
-class StartTime {
+class MidPoint {
   
 public:
 
   // constructor
 
-  StartTime(char *prog_name, Params *params);
+  MidPoint(const char *prog_name, const Params &params);
 
   // destructor
   
-  ~StartTime();
+  ~MidPoint();
 
-  // generate StartTime for next storm
+  // generate MidPoint for next storm
 
-  double Generate();
+  void Generate(int *grid_index_p, double *xmid_p, double *ymid_p);
 
   int OK;
 
@@ -61,18 +60,13 @@ protected:
 private:
 
   char *_progName;
-  Params *_params;
+  const Params &_params;
 
-  double _eventStart;
-  double _eventEnd;
-  double _eventDur;
-
-  double _prevStormTime;
-
-  GenFromCdf *_eventStartTodCdf;
-
-  void _genEvent();
-
+  double *_cdf;
+  int _nX, _nY, _nGrid;
+  double _minX, _minY;
+  double _dX, _dY;
+  
 };
 
 #endif

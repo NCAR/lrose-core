@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Duration.h"
+#include "Duration.hh"
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <rapmath/stats.h>
@@ -42,12 +42,12 @@ using namespace std;
 
 // Constructor
 
-Duration::Duration(char *prog_name, Params *params)
+Duration::Duration(const char *prog_name, const Params &params) :
+  _params(params)
 
 {
   
   _progName = STRdup(prog_name);
-  _params = params;
   _dur = (double *) NULL;
   OK = TRUE;
 
@@ -65,10 +65,10 @@ Duration::Duration(char *prog_name, Params *params)
     return;
   }
 
-  if (MDV_read_all(&mdv, _params->p.duration_file_path, MDV_INT8)) {
+  if (MDV_read_all(&mdv, _params.duration_file_path, MDV_INT8)) {
     fprintf(stderr, "ERROR - %s:Duration\n", _progName);
     fprintf(stderr, "Cannot read mdv file %s\n",
-	    _params->p.duration_file_path);
+	    _params.duration_file_path);
     MDV_free_handle(&mdv);
     OK = FALSE;
     return;
@@ -77,7 +77,7 @@ Duration::Duration(char *prog_name, Params *params)
   // allocate dur array
   
   MDV_field_header_t *fld;
-  fld = mdv.fld_hdrs + _params->p.duration_field_num;
+  fld = mdv.fld_hdrs + _params.duration_field_num;
 
   int nX = fld->nx;
   int nY = fld->ny;
@@ -91,7 +91,7 @@ Duration::Duration(char *prog_name, Params *params)
   double bias = fld->bias;
 
   ui08 *db =
-    (ui08 *) mdv.field_plane[_params->p.duration_field_num][0];
+    (ui08 *) mdv.field_plane[_params.duration_field_num][0];
   double *dur = _dur;
   double sum = 0.0;
 
@@ -134,9 +134,9 @@ double Duration::Generate(int grid_index)
 
   double Dm;
 
-  Dm = STATS_gamma3_gen(_params->p.Dm_gamma.shape,
-			_params->p.Dm_gamma.scale,
-			_params->p.Dm_gamma.lbound);
+  Dm = STATS_gamma3_gen(_params.Dm_gamma.shape,
+			_params.Dm_gamma.scale,
+			_params.Dm_gamma.lbound);
   
   // get duration for the given grid point
   

@@ -30,14 +30,32 @@
 //
 //////////////////////////////////////////////////////////
 
-#include "Args.h"
+#include "Args.hh"
+#include "Params.hh"
 #include <toolsa/str.h>
 #include <toolsa/umisc.h>
 using namespace std;
 
 // Constructor
 
-Args::Args (int argc, char **argv, char *prog_name)
+Args::Args()
+
+{
+  TDRP_init_override(&override);
+}
+
+// Destructor
+
+Args::~Args ()
+
+{
+  TDRP_free_override(&override);
+}
+
+// Parse command line
+// Returns 0 on success, -1 on failure
+
+int Args::parse(int argc, char **argv, const string &prog_name)
 
 {
 
@@ -45,13 +63,7 @@ Args::Args (int argc, char **argv, char *prog_name)
 
   // intialize
 
-  OK = TRUE;
-  Done = FALSE;
-  checkParams = FALSE;
-  printParams = FALSE;
-  printShort = FALSE;
-  paramsFilePath = (char *) NULL;
-  TDRP_init_override(&override);
+  int iret = 0;
 
   // loop through args
   
@@ -62,92 +74,63 @@ Args::Args (int argc, char **argv, char *prog_name)
 	!strcmp(argv[i], "-help") ||
 	!strcmp(argv[i], "-man")) {
       
-      usage(prog_name, stdout);
-      Done = TRUE;
+      _usage(prog_name, cout);
+      exit (0);
       
-    } else if (!strcmp(argv[i], "-check_params")) {
-      
-      checkParams = TRUE;
-      
-    } else if (!strcmp(argv[i], "-print_params")) {
-      
-      printParams = TRUE;
-      
-    } else if (!strcmp(argv[i], "-print_short")) {
-      
-      printShort = TRUE;
-      
-    } else if (!strcmp(argv[i], "-debug")) {
+    } else if (!strcmp(argv[i], "-d") ||
+               !strcmp(argv[i], "-debug")) {
       
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-verbose")) {
+    } else if (!strcmp(argv[i], "-v") ||
+               !strcmp(argv[i], "-verbose")) {
       
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-mdebug")) {
+    } else if (!strcmp(argv[i], "-vv") ||
+               !strcmp(argv[i], "-extra")) {
+      
+      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-instance")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "malloc_debug_level = %s;", argv[++i]);
+	sprintf(tmp_str, "instance = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       } else {
-	OK = FALSE;
-      }
-	
-    } else if (!strcmp(argv[i], "-deltas")) {
-      
-      sprintf(tmp_str, "output_deltas = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-	
-    } else if (!strcmp(argv[i], "-statcode")) {
-      
-      sprintf(tmp_str, "do_statcode_tests = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-	
-    } else if (!strcmp(argv[i], "-params")) {
-	
-      if (i < argc - 1) {
-	paramsFilePath = argv[++i];
-      } else {
-	OK = FALSE;
+	iret = -1;
       }
       
     } // if
     
   } // i
 
-  if (!OK) {
-    usage(prog_name, stderr);
+  if (iret) {
+    _usage(prog_name, cerr);
   }
+
+  return (iret);
     
 }
 
-void Args::usage(char *prog_name, FILE *out)
+void Args::_usage(const string &prog_name, ostream &out)
+
 {
 
-  fprintf(out, "%s%s%s%s",
-	  "Usage: ", prog_name, " [options as below]\n",
-	  "options:\n"
-	  "       [ --, -h, -help, -man ] produce this list.\n"
-	  "       [ -check_params ] check parameter usage\n"
-	  "       [ -debug ] print debug messages\n"
-	  "       [ -deltas ] output deltas\n"
-	  "       [ -mdebug level ] set malloc debug level\n"
-	  "       [ -params ?] params file path\n"
-	  "       [ -print_params ] print parameter usage\n"
-	  "       [ -print_short ] print short parameter usage\n"
-	  "       [ -statcode ] run statcode tests\n"
-	  "       [ -verbose ] print verbose debug messages\n"
-	  "\n");
-  
-  fprintf(out, "\n\n");
+  out << "Usage: " << _progName << " [options as below]\n"
+      << "options:\n"
+      << "       [ --, -h, -help, -man ] produce this list.\n"
+      << "       [ -d, -debug ] print debug messages\n"
+      << "       [ -instance ?] specify the instance\n"
+      << "       [ -v, -verbose ] print verbose debug messages\n"
+      << "       [ -vv, -extra ] print extra verbose debug messages\n"
+      << endl;
+
+  Params::usage(out);
 
 }
-
-
-
-
 
 

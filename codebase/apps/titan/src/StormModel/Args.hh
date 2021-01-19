@@ -22,73 +22,44 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// Generate.h
-//
-// Storm generation object
+// Args.h: Command line object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // February 1998
 //
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-#ifndef Generate_H
-#define Generate_H
+#ifndef ARGS_H
+#define ARGS_H
 
-#include "Params.h"
-#include "MidPoint.h"
-#include "Duration.h"
-#include "Area.h"
-#include "StartTime.h"
-#include "Velocity.h"
+#include <tdrp/tdrp.h>
+#include <iostream>
+#include <string>
+using namespace std;
 
-class Generate {
+class Args {
   
 public:
 
-  // constructor
+  Args();
+  ~Args();
 
-  Generate(char *prog_name, Params *params);
+  // parse
 
-  // destructor
-  
-  ~Generate();
+  int parse(int argc, char **argv, const string &prog_name);
 
-  // Print the header
+  // public data
 
-  void printHeader(FILE *out);
-
-  // generate another storm, write to output file
-
-  int Another(int num, FILE *out);
-
-  int OK;
-
-  double sumArea() { return (_sumArea); }
+  tdrp_override_t override;
 
 protected:
   
 private:
 
-  char *_progName;
-  Params *_params;
-
-  StartTime *_startTime;
-  MidPoint *_midPoint;
-  Duration *_duration;
-  Area *_area;
-  Velocity *_velocity;
-
-  double _sumArea;
-
-  void _interp_dBZmax(double Dm, double *mean_p, double *sdev_p);
-
-  static double _durDiff(double dur_guess);
- 
-  double rtbis(double (*func)(double),
-	       double x1, double x2, double xacc);
-
+  string _progName;
+  void _usage(const string &prog_name, ostream &out);
+  
 };
 
 #endif
-

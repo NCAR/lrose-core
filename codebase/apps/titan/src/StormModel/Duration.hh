@@ -22,9 +22,9 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// Area.h
+// Duration.h
 //
-// Area generation object
+// Duration generation object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,26 +32,26 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef Area_H
-#define Area_H
+#ifndef Duration_H
+#define Duration_H
 
-#include "Params.h"
+#include "Params.hh"
 
-class Area {
+class Duration {
   
 public:
 
   // constructor
 
-  Area(char *prog_name, Params *params);
+  Duration(const char *prog_name, const Params &params);
 
   // destructor
   
-  ~Area();
+  ~Duration();
 
-  // Generate area given grid_index
+  // Generate duration given grid_index
 
-  double Generate(int grid_index, double Dm);
+  double Generate(int grid_index);
 
   int OK;
 
@@ -60,15 +60,11 @@ protected:
 private:
 
   char *_progName;
-  Params *_params;
+  const Params &_params;
 
-  double *_lnArea;
-  double _lnAreaMean;
-  double _lnAreaSdev;
+  double *_dur;
+  double _durMean;
   
-  void _interp_lnA(double Dm, double *shape_p,
-		   double *scale_p, double *lbound_p);
-
 };
 
 #endif
