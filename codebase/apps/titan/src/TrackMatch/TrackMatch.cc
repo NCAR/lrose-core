@@ -48,72 +48,60 @@ TrackMatch::TrackMatch(int argc, char **argv)
 {
 
   OK = TRUE;
-  Done = FALSE;
 
   // set programe name
+  
+  _progName = "TrackMatch";
+  ucopyright(_progName.c_str());
 
-  _progName = STRdup("TrackMatch");
-  ucopyright(_progName);
-
-  // get command line args
-
-  _args = new Args(argc, argv, _progName);
-  if (!_args->OK) {
-    fprintf(stderr, "ERROR: %s\n", _progName);
-    fprintf(stderr, "Problem with command line args\n");
-    OK = FALSE;
-    return;
-  }
-  if (_args->Done) {
-    Done = TRUE;
+  // parse args
+  
+  if (_args.parse(argc, argv, _progName)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with command line args" << endl;
+    OK = false;
     return;
   }
 
   // get TDRP params
-
-  Params *params = new Params(_args->paramsFilePath,
-			      &_args->override,
-			      _progName,
-			      _args->checkParams,
-			      _args->printParams,
-			      _args->printShort);
   
-  if (!params->OK) {
-    fprintf(stderr, "ERROR: %s\n", _progName);
-    fprintf(stderr, "Problem with TDRP parameters\n");
-    OK = FALSE;
+  _paramsPath = (char *) "unknown";
+  if (_params.loadFromArgs(argc, argv, _args.override.list,
+			   &_paramsPath)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with TDRP parameters" << endl;
+    OK = false;
     return;
   }
-  if (params->Done) {
-    Done = TRUE;
-    return;
-  }
-  _params = &params->p;
 
   if (!OK) {
     return;
   }
 
+  PMU_auto_init((char *) _progName.c_str(),
+                _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
+  
   // props file object
 
-  if (_args->nFiles > 0) {
-
+  if (_args.filePaths.size() > 0) {
+    
     _props = new DsInputPath(_progName,
-			     _params->debug >= DEBUG_VERBOSE,
-			     _args->nFiles,
-			     _args->filePaths);
-      
+			     _params.debug >= Params::DEBUG_VERBOSE,
+			     _args.filePaths);
+    
   } else {
     
-    fprintf(stderr, "ERROR: %s\n", _progName);
-    fprintf(stderr,
-	    "You must specify a file list using -f\n");
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "You must specify a file list using -f arg" << endl;
     OK = FALSE;
-      
+    
   }
 
-  PMU_auto_init(_progName, _params->instance, PROCMAP_REGISTER_INTERVAL);
-
+  PMU_auto_init(_progName.c_str(),
+                _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
+  
   return;
 
 }
@@ -132,9 +120,6 @@ TrackMatch::~TrackMatch()
   // free up
 
   delete(_props);
-  delete _params;
-  delete _args;
-  STRfree(_progName);
 
 }
 
@@ -151,27 +136,27 @@ void TrackMatch::_printComments ()
   ulocaltime(&file_time);
   
   fprintf(stdout, "#  Run time: %s\n", utimestr(&file_time));
-  fprintf(stdout, "#  case_num: %d\n", (int) _params->case_num);
-  fprintf(stdout, "#  case_file_path: %s\n", _params->case_file_path);
-  fprintf(stdout, "#  n_candidates: %d\n", (int) _params->n_candidates);
+  fprintf(stdout, "#  case_num: %d\n", (int) _params.case_num);
+  fprintf(stdout, "#  case_file_path: %s\n", _params.case_file_path);
+  fprintf(stdout, "#  n_candidates: %d\n", (int) _params.n_candidates);
 
-  switch (_params->match_property) {
-  case VOLUME:
+  switch (_params.match_property) {
+  case Params::VOLUME:
     fprintf(stdout, "#  match_property: %s\n", "VOLUME");
     break;
-  case AREA:
+  case Params::AREA:
     fprintf(stdout, "#  match_property: %s\n", "AREA");
     break;
-  case MASS:
+  case Params::MASS:
     fprintf(stdout, "#  match_property: %s\n", "MASS");
     break;
-  case PRECIP_FLUX:
+  case Params::PRECIP_FLUX:
     fprintf(stdout, "#  match_property: %s\n", "PRECIP_FLUX");
     break;
   } // switch
 
-  fprintf(stdout, "#  time_margin: %g\n", _params->time_margin);
-  fprintf(stdout, "#  range_margin: %g\n", _params->range_margin);
+  fprintf(stdout, "#  time_margin: %g\n", _params.time_margin);
+  fprintf(stdout, "#  range_margin: %g\n", _params.range_margin);
   fprintf(stdout, "\n");
 
   fprintf(stdout, "#  File name(s):\n");
@@ -197,13 +182,13 @@ int TrackMatch::Run ()
 
   // create the list object
 
-  PropsList *list = new PropsList(_progName, _params);
+  PropsList *list = new PropsList(_progName.c_str(), _params);
 
   // create the Case file object
 
-  Cases *cases = new Cases(_progName,
-			   (_params->debug >= DEBUG_VERBOSE? 1:0),
-			   _params->case_file_path);
+  Cases *cases = new Cases(_progName.c_str(),
+			   (_params.debug >= Params::DEBUG_VERBOSE? 1:0),
+			   _params.case_file_path);
 
   if (!cases->OK) {
     return (-1);
@@ -215,15 +200,15 @@ int TrackMatch::Run ()
   case_track_t this_case;
   cases->reset();
   while (cases->next(&this_case) == 0) {
-    if (this_case.num == _params->case_num) {
+    if (this_case.num == _params.case_num) {
       case_found = TRUE;
       break;
     }
   }
   if (!case_found) {
-    fprintf(stderr, "ERROR - %s:TrackMatch::Run\n", _progName);
+    fprintf(stderr, "ERROR - %s:TrackMatch::Run\n", _progName.c_str());
     fprintf(stderr, "Cannot find case %d in file '%s'\n",
-	    (int) _params->case_num, _params->case_file_path);
+	    (int) _params.case_num, _params.case_file_path);
     return (-1);
   }
 
@@ -239,7 +224,7 @@ int TrackMatch::Run ()
   char *propsFilePath;
   _props->reset();
   while ((propsFilePath = _props->next()) != NULL) {
-    PropsFile *pfile = new PropsFile(_progName, _params,
+    PropsFile *pfile = new PropsFile(_progName.c_str(), _params,
 				     &this_case, propsFilePath,
 				     list);
     if (pfile->OK) {
@@ -254,9 +239,9 @@ int TrackMatch::Run ()
   } // while
 
   if (!case_props_found) {
-    fprintf(stderr, "ERROR - %s:TrackMatch::Run\n", _progName);
+    fprintf(stderr, "ERROR - %s:TrackMatch::Run\n", _progName.c_str());
     fprintf(stderr, "Cannot find case %d in props files\n",
-	    (int) _params->case_num);
+	    (int) _params.case_num);
     return (-1);
   }
 
@@ -266,17 +251,17 @@ int TrackMatch::Run ()
   _props->reset();
   while ((propsFilePath = _props->next()) != NULL) {
 
-    if (_params->debug) {
+    if (_params.debug) {
       fprintf(stderr, "Processing props file %s\n", propsFilePath);
     }
     
-    PropsFile *pfile = new PropsFile(_progName, _params,
+    PropsFile *pfile = new PropsFile(_progName.c_str(), _params,
 				     &this_case, propsFilePath,
 				     list);
     
     if (pfile->OK) {
       if (pfile->update_list(&case_props)) {
-	fprintf(stderr, "ERROR - %s:TrackMatch::Run\n", _progName);
+	fprintf(stderr, "ERROR - %s:TrackMatch::Run\n", _progName.c_str());
 	fprintf(stderr, "Processing props file '%s'\n", propsFilePath);
       }
       delete (pfile);

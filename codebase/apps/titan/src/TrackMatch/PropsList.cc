@@ -42,20 +42,19 @@ static int _props_compare(const void *v1, const void *v2);
 //////////////
 // Constructor
 
-PropsList::PropsList (char *prog_name,
-		      TrackMatch_tdrp_struct *params_struct)
+PropsList::PropsList (const char *prog_name,
+		      const Params &params) :
+        _params(params)
 
 {
 
   // initialize
   
-  OK = TRUE;
   _progName = STRdup(prog_name);
-  _params = params_struct;
 
   // list array
 
-  _nList = _params->n_candidates;
+  _nList = _params.n_candidates;
   _list = (initial_props_t *) ucalloc(_nList,
 				      sizeof(initial_props_t));
   for (int i = 0; i < _nList; i++) {
@@ -112,7 +111,7 @@ int PropsList::scan(char *line, initial_props_t *props)
 	     &props->mass, &props->precip_flux,
 	     &props->da_dt, &props->dv_dt,
 	     &props->dm_dt, &props->dp_dt) != 20) {
-    return (-1);
+    return -1;
   }
 
   // compute the unix time
@@ -129,7 +128,7 @@ int PropsList::scan(char *line, initial_props_t *props)
 
   // compute the delta between the case track this track
 
-  return(0);
+  return 0;
 
 }
 
@@ -153,8 +152,8 @@ int PropsList::update(char *line, initial_props_t *case_props)
 
   // check time
   
-  if (_params->time_margin >= 0) {
-    int max_time_diff = (int) (_params->time_margin * 3600.0);
+  if (_params.time_margin >= 0) {
+    int max_time_diff = (int) (_params.time_margin * 3600.0);
     if (abs((double) props.time - (double) case_props->time) > max_time_diff) {
       return (-1);
     }
@@ -162,38 +161,38 @@ int PropsList::update(char *line, initial_props_t *case_props)
   
   // check range
   
-  if (_params->range_margin >= 0) {
-    if (fabs(props.range - case_props->range) > _params->range_margin) {
+  if (_params.range_margin >= 0) {
+    if (fabs(props.range - case_props->range) > _params.range_margin) {
       return (-1);
     }
   }
   
   // compute the delta between the case props and these props
 
-  switch (_params->match_property) {
-  case VOLUME:
-    if (_params->use_rate_for_match) {
+  switch (_params.match_property) {
+  case Params::VOLUME:
+    if (_params.use_rate_for_match) {
       props.delta_prop = fabs(props.dv_dt - case_props->dv_dt);
     } else {
       props.delta_prop = fabs(props.volume - case_props->volume);
     }
     break;
-  case AREA:
-    if (_params->use_rate_for_match) {
+  case Params::AREA:
+    if (_params.use_rate_for_match) {
       props.delta_prop = fabs(props.da_dt - case_props->da_dt);
     } else {
       props.delta_prop = fabs(props.area - case_props->area);
     }
     break;
-  case MASS:
-    if (_params->use_rate_for_match) {
+  case Params::MASS:
+    if (_params.use_rate_for_match) {
       props.delta_prop = fabs(props.dm_dt - case_props->dm_dt);
     } else {
       props.delta_prop = fabs(props.mass - case_props->mass);
     }
     break;
-  case PRECIP_FLUX:
-    if (_params->use_rate_for_match) {
+  case Params::PRECIP_FLUX:
+    if (_params.use_rate_for_match) {
       props.delta_prop = fabs(props.dp_dt - case_props->dp_dt);
     } else {
       props.delta_prop = fabs(props.precip_flux - case_props->precip_flux);

@@ -120,7 +120,7 @@ void Args::_usage(const string &prog_name, ostream &out)
 
 {
 
-  out << "Usage: " << _progName << " [options as below]\n"
+  out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -d, -debug ] print debug messages\n"

@@ -45,8 +45,8 @@ public:
 
   // constructor
   
-  PropsFile (char *prog_name,
-	     TrackMatch_tdrp_struct *params_struct,
+  PropsFile (const char *prog_name,
+	     const Params &params,
 	     case_track_t *this_case,
 	     char *file_path,
 	     PropsList *list);
@@ -72,7 +72,7 @@ private:
 
   char *_progName;
   int _debug;
-  TrackMatch_tdrp_struct *_params;
+  const Params &_params;
   case_track_t *_this_case;
   char *_filePath;
   PropsList *_list;

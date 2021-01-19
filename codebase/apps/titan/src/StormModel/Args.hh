@@ -57,7 +57,6 @@ protected:
   
 private:
 
-  string _progName;
   void _usage(const string &prog_name, ostream &out);
   
 };

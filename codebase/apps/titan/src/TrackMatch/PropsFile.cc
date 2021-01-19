@@ -39,11 +39,12 @@ using namespace std;
 
 // Constructor
 
-PropsFile::PropsFile (char *prog_name,
-		      TrackMatch_tdrp_struct *params_struct,
+PropsFile::PropsFile (const char *prog_name,
+		      const Params &params,
 		      case_track_t *this_case,
 		      char *file_path,
-		      PropsList *list)
+		      PropsList *list) :
+        _params(params)
 
 {
 
@@ -51,7 +52,6 @@ PropsFile::PropsFile (char *prog_name,
   
   OK = TRUE;
   _progName = STRdup(prog_name);
-  _params = params_struct;
   _this_case = this_case;
   _filePath = STRdup(file_path);
   _list = list;
@@ -148,7 +148,7 @@ int PropsFile::update_list(initial_props_t *case_props)
 
   char line[1024];
   while (fgets(line, 1024, fp) != NULL) {
-    if (_params->debug >= DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       fprintf(stderr, "%s", line);
     }
     _list->update(line, case_props);

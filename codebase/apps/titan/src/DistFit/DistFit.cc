@@ -54,6 +54,8 @@ DistFit::DistFit(int argc, char **argv)
   _progName = STRdup("DistFit");
   ucopyright((char *) _progName.c_str());
 
+  // parse args
+  
   if (_args.parse(argc, argv, _progName)) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with command line args" << endl;

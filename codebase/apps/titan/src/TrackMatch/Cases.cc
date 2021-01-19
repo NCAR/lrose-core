@@ -39,7 +39,7 @@ using namespace std;
 //////////////
 // Constructor
 
-Cases::Cases (char *prog_name,
+Cases::Cases (const char *prog_name,
 	      int debug,
 	      char *case_file_path)
 

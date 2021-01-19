@@ -1,0 +1,130 @@
+/**********************************************************************
+ * TDRP params for TrackMatch
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed with the appropriate level of 
+//   detail.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_WARNINGS
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "Test";
+
+///////////// case_num ////////////////////////////////
+//
+// Case number for the match.
+//
+// This is the case for which the match is sought.
+//
+//
+// Type: int
+//
+
+case_num = 1;
+
+///////////// case_file_path //////////////////////////
+//
+// File path of seed cases.
+//
+// This file indicates the time and track numbers for each seeded case. 
+//   In addition the environmental conditions, such as cloud base and CAPE 
+//   are input from this file.
+//
+//
+// Type: string
+//
+
+case_file_path = "null";
+
+///////////// n_candidates ////////////////////////////
+//
+// Number of track candidates in list.
+//
+// This program finds tracks which match the given case as closely as 
+//   possible. A list of candidate tracks is found and sorted. The list is 
+//   n_candidates long.
+//
+//
+// Type: int
+//
+
+n_candidates = 20;
+
+///////////// match_property //////////////////////////
+//
+// Property for matching tracks.
+//
+// This is the property used for matching up the tracks.
+//
+//
+// Type: enum
+// Options:
+//     VOLUME
+//     AREA
+//     MASS
+//     PRECIP_FLUX
+//
+
+match_property = PRECIP_FLUX;
+
+///////////// use_rate_for_match //////////////////////
+//
+// Option to use rate for matching.
+//
+// If set, the rate of change will be used for matching. If not, the 
+//   absolute value will be used for the match.
+//
+//
+// Type: boolean
+//
+
+use_rate_for_match = TRUE;
+
+///////////// time_margin /////////////////////////////
+//
+// Margin between time of case track and candidate track (hr).
+//
+// Only tracks with a start time difference within this margin are 
+//   considered. Use -1.0 for no checking.
+//
+//
+// Type: double
+//
+
+time_margin = 2;
+
+///////////// range_margin ////////////////////////////
+//
+// Margin between range of case track and candidate track (km).
+//
+// Only tracks with a start range difference within this margin are 
+//   considered. Use -1.0 for no checking.
+//
+//
+// Type: double
+//
+
+range_margin = 25;
+

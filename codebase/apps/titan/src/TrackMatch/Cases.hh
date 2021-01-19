@@ -46,7 +46,7 @@ public:
 
   // constructor
 
-  Cases (char *prog_name,
+  Cases (const char *prog_name,
 	 int debug,
 	 char *case_file_path);
   

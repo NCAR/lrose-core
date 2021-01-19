@@ -31,6 +31,7 @@
 //////////////////////////////////////////////////////////
 
 #include "Args.hh"
+#include "Params.hh"
 #include <cstring>
 #include <toolsa/str.h>
 #include <toolsa/umisc.h>
@@ -38,21 +39,32 @@ using namespace std;
 
 // Constructor
 
-Args::Args (int argc, char **argv, char *prog_name)
+Args::Args()
+
+{
+  TDRP_init_override(&override);
+}
+
+// Destructor
+
+Args::~Args ()
+
+{
+  TDRP_free_override(&override);
+}
+
+// Parse command line
+// Returns 0 on success, -1 on failure
+
+int Args::parse(int argc, char **argv, const string &prog_name)
 
 {
 
   char tmp_str[BUFSIZ];
-
+  int iret = 0;
+  
   // intialize
 
-  OK = TRUE;
-  Done = FALSE;
-  checkParams = FALSE;
-  printParams = FALSE;
-  printShort = FALSE;
-  paramsFilePath = NULL;
-  nFiles = 0;
   startTime = 0;
   endTime = 0;
   TDRP_init_override(&override);
@@ -66,20 +78,8 @@ Args::Args (int argc, char **argv, char *prog_name)
 	!strcmp(argv[i], "-help") ||
 	!strcmp(argv[i], "-man")) {
       
-      usage(prog_name, stdout);
-      Done = TRUE;
-      
-    } else if (!strcmp(argv[i], "-check_params")) {
-      
-      checkParams = TRUE;
-      
-    } else if (!strcmp(argv[i], "-print_params")) {
-      
-      printParams = TRUE;
-      
-    } else if (!strcmp(argv[i], "-print_short")) {
-      
-      printShort = TRUE;
+      _usage(prog_name, cout);
+      exit(0);
       
     } else if (!strcmp(argv[i], "-case")) {
       
@@ -87,7 +87,7 @@ Args::Args (int argc, char **argv, char *prog_name)
 	sprintf(tmp_str, "case_number = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       } else {
-	OK = FALSE;
+	iret = -1;
       }
 	
     } else if (!strcmp(argv[i], "-prop")) {
@@ -96,9 +96,9 @@ Args::Args (int argc, char **argv, char *prog_name)
 	sprintf(tmp_str, "match_property = %s;", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       } else {
-	OK = FALSE;
+	iret = -1;
       }
-	
+      
     } else if (!strcmp(argv[i], "-debug")) {
       
       sprintf(tmp_str, "debug = DEBUG_NORM;");
@@ -109,83 +109,52 @@ Args::Args (int argc, char **argv, char *prog_name)
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-mdebug")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "malloc_debug_level = %s;", argv[i+1]);
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	OK = FALSE;
-      }
-	
-    } else if (!strcmp(argv[i], "-params")) {
-	
-      if (i < argc - 1) {
-	paramsFilePath = argv[i+1];
-      } else {
-	OK = FALSE;
-      }
-	
     } else if (!strcmp(argv[i], "-f")) {
       
-      if(i < argc - 1) {
-
-	int j;
-
-	// search for next arg which starts with '-'
-
-	for (j = i + 1; j < argc; j++)
-	  if (argv[j][0] == '-')
+      if (i < argc - 1) {
+	// load up file list vector. Break at next arg which
+	// start with -
+	for (int j = i + 1; j < argc; j++) {
+	  if (argv[j][0] == '-') {
 	    break;
-	
-	/*
-	 * compute number of files
-	 */
-
-	nFiles = j - i - 1;
-
-	// set file name array
-
-	filePaths = argv + i + 1;
-	
+	  } else {
+	    filePaths.push_back(argv[j]);
+	  }
+	}
+      } else {
+	iret = -1;
       }
-
+      
     } // if
     
   } // i
-
-  if (!OK) {
-    usage(prog_name, stderr);
+  
+  if (iret != 0) {
+    _usage(prog_name, cerr);
   }
+
+  return iret;
     
 }
 
-void Args::usage(char *prog_name, FILE *out)
+void Args::_usage(const string &prog_name, ostream &out)
+
 {
 
-  fprintf(out, "%s%s%s%s",
-	  "Usage: ", prog_name, " [options as below]\n",
-	  "options:\n"
-	  "       [ --, -h, -help, -man ] produce this list.\n"
-	  "       [ -check_params ] check parameter usage\n"
-	  "       [ -case ? ] case number\n"
-	  "       [ -debug ] print debug messages\n"
-	  "       [ -prop ?] match_property\n"
-	  "         VOLUME, AREA, MASS or PRECIP_FLUX\n"
-	  "       [ -f file_paths] input file path list\n"
-	  "       [ -mdebug level ] set malloc debug level\n"
-	  "       [ -params ?] params file path\n"
-	  "       [ -print_params ] print parameters with comments\n"
-	  "       [ -print_short ] print parameters - short version\n"
-	  "       [ -verbose ] print verbosedebug messages\n"
-	  "\n");
+  out << "Usage: " << prog_name << " [options as below]\n"
+      << "options:\n"
+      << "       [ --, -h, -help, -man ] produce this list.\n"
+      << "       [ -case ? ] case number\n"
+      << "       [ -d, -debug ] print debug messages\n"
+      << "       [ -f file_paths] input file path list\n"
+      << "       [ -instance ?] specify the instance\n"
+      << "       [ -prop ?] match_property\n"
+      << "         VOLUME, AREA, MASS or PRECIP_FLUX\n"
+      << "       [ -v, -verbose ] print verbose debug messages\n"
+      << "       [ -vv, -extra ] print extra verbose debug messages\n"
+      << endl;
 
-  fprintf(out, "\n\n");
+  Params::usage(out);
 
 }
-
-
-
-
-
 

@@ -36,20 +36,28 @@
 ////////////////////////////////////////////////////////////////
 
 #include "TrackMatch.hh"
+#include <toolsa/port.h>
 #include <toolsa/str.h>
-#include <signal.h>
+#include <csignal>
 using namespace std;
 
 // file scope
 
 static void tidy_and_exit (int sig);
-static TrackMatch *Prog;
+static TrackMatch *_prog;
 
 // main
 
 int main(int argc, char **argv)
 
 {
+
+  // create program object
+
+  _prog = new TrackMatch(argc, argv);
+  if (!_prog->OK) {
+    return(-1);
+  }
 
   // set signal handling
   
@@ -60,17 +68,14 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Prog = new TrackMatch(argc, argv);
-  if (!Prog->OK) {
+  _prog = new TrackMatch(argc, argv);
+  if (!_prog->OK) {
     return(-1);
-  }
-  if (Prog->Done) {
-    return(0);
   }
 
   // run it
-
-  int iret = Prog->Run();
+  
+  int iret = _prog->Run();
 
   // clean up
 
@@ -84,7 +89,7 @@ int main(int argc, char **argv)
 static void tidy_and_exit (int sig)
 
 {
-  delete(Prog);
+  delete(_prog);
   exit(sig);
 }
 

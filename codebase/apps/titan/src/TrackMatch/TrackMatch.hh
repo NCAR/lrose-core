@@ -62,15 +62,16 @@ public:
   // data members
 
   int OK;
-  int Done;
-  char *_progName;
-  Args *_args;
-  TrackMatch_tdrp_struct *_params;
-  DsInputPath *_props;
 
 protected:
   
 private:
+
+  string _progName;
+  char *_paramsPath;
+  Args _args;
+  Params _params;
+  DsInputPath *_props;
 
   void _printComments ();
 

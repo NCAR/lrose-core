@@ -61,8 +61,8 @@ public:
 
   // constructor
   
-  PropsList (char *prog_name,
-	     TrackMatch_tdrp_struct *params_struct);
+  PropsList(const char *prog_name,
+            const Params &params);
   
   // Destructor
   
@@ -81,17 +81,13 @@ public:
   void print(FILE *out);
   void print(FILE *out, initial_props_t *props);
 
-  // flag to indicate construction was successful
-
-  int OK;
-  
 protected:
   
 private:
 
   char *_progName;
   int _debug;
-  TrackMatch_tdrp_struct *_params;
+  const Params &_params;
   int _nList;
   initial_props_t *_list;
 
