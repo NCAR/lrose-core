@@ -22,54 +22,65 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// OverlayCreate.h
+// Circle.h
 //
-// OverlayCreate object
+// Circle class
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// April 1998
+// February 1998
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef OverlayCreate_H
-#define OverlayCreate_H
+#ifndef Circle_H
+#define Circle_H
 
-#include <toolsa/umisc.h>
-#include <tdrp/tdrp.h>
+#include "Params.hh"
 
-#include "Args.h"
-#include "Params.h"
+typedef struct {
+  double lat, lon;
+} circle_pt_t;
 
-class OverlayCreate {
+class Circle {
   
 public:
 
   // constructor
-
-  OverlayCreate (int argc, char **argv);
-
+  
+  Circle(const char *prog_name,
+	 const Params &params,
+	 double lat,
+	 double lon,
+	 double radius,
+	 int npoints);
+  
   // destructor
   
-  ~OverlayCreate();
+  virtual ~Circle();
 
-  // run 
+  // compute the circle grid
+  
+  void compute();
 
-  int Run();
+  // write the circle data to stdout
 
-  // data members
-
-  int OK;
-  int Done;
-  char *_progName;
-  Args *_args;
-  Params *_Params;
-  OverlayCreate_tdrp_struct *_params;
+  void write();
 
 protected:
   
 private:
 
+  char *_progName;
+  const Params &_params;
+
+  double _lat;
+  double _lon;
+  double _radius; // km
+  
+  int _nPoints;
+  circle_pt_t *_points;
+
 };
 
 #endif
+
