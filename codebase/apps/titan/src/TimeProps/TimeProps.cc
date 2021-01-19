@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "TimeProps.h"
+#include "TimeProps.hh"
 #include <toolsa/str.h>
 #include <toolsa/umisc.h>
 #include <rapmath/math_macros.h>
@@ -45,60 +45,51 @@ TimeProps::TimeProps(int argc, char **argv)
 {
 
   OK = TRUE;
-  Done = FALSE;
 
   // set programe name
 
-  _progName = STRdup("TimeProps");
-  ucopyright(_progName);
+  _progName = "TimeProps";
+  ucopyright(_progName.c_str());
 
-  // get command line args
-
-  _args = new Args(argc, argv, _progName);
-  if (!_args->OK) {
-    fprintf(stderr, "ERROR: %s\n", _progName);
-    fprintf(stderr, "Problem with command line args\n");
-    OK = FALSE;
-    return;
-  }
-  if (_args->Done) {
-    Done = TRUE;
+  // parse args
+  
+  if (_args.parse(argc, argv, _progName)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with command line args" << endl;
+    OK = false;
     return;
   }
 
   // get TDRP params
-
-  _params = new Params(_args->paramsFilePath,
-		       &_args->override,
-		       _progName,
-		       _args->checkParams,
-		       _args->printParams,
-		       _args->printShort);
   
-  if (!_params->OK) {
-    fprintf(stderr, "ERROR: %s\n", _progName);
-    fprintf(stderr, "Problem with TDRP parameters\n");
-    OK = FALSE;
+  _paramsPath = (char *) "unknown";
+  if (_params.loadFromArgs(argc, argv, _args.override.list,
+			   &_paramsPath)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with TDRP parameters" << endl;
+    OK = false;
     return;
-  }
-  if (_params->Done) {
-    Done = TRUE;
-    return;
-  }
-
-  // Set up dataSet object
-
-  _dataSet = new DataSet(_progName, _params);
-  if (!_dataSet->OK) {
-    OK = FALSE;
   }
 
   if (!OK) {
     return;
   }
 
-  PMU_auto_init(_progName, _params->p.instance, PROCMAP_REGISTER_INTERVAL);
+  PMU_auto_init((char *) _progName.c_str(),
+                _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
   
+  // Set up dataSet object
+
+  _dataSet = new DataSet(_progName.c_str(), _params);
+  if (!_dataSet->OK) {
+    OK = FALSE;
+  }
+  
+  if (!OK) {
+    return;
+  }
+
 }
 
 // destructor
@@ -114,8 +105,6 @@ TimeProps::~TimeProps()
   // call destructors
 
   delete _dataSet;
-  delete _params;
-  delete _args;
 
 }
 
@@ -125,11 +114,11 @@ TimeProps::~TimeProps()
 int TimeProps::Run ()
 {
 
-  if (_params->p.mode == DELTA_TIME_MODE) {
+  if (_params.mode == Params::DELTA_TIME_MODE) {
     _outputDtimes(stdout);
   }
   
-  if (_params->p.mode == ACTIVITY_MODE) {
+  if (_params.mode == Params::ACTIVITY_MODE) {
     _outputActivity(stdout);
   }
 
@@ -151,13 +140,13 @@ void TimeProps::_outputDtimes(FILE *out)
 
   int start_pos = 0;
   int end_pos;
-  double tod_offset = _params->p.activity_time_of_day_offet * 3600.0;
+  double tod_offset = _params.activity_time_of_day_offet * 3600.0;
 
   // loop through active periods
 
   while (_dataSet->GetActivePeriod(start_pos, &end_pos) == 0) {
     
-    if (end_pos - start_pos > _params->p.activity_nstorms_min) {
+    if (end_pos - start_pos > _params.activity_nstorms_min) {
     
       double time, dur;
       double prev_time;
@@ -179,9 +168,9 @@ void TimeProps::_outputDtimes(FILE *out)
 	  // output the required number of values
 	  
 	  for (int j = 0; j < count; j++) {
-	    if (!_params->p.limit_dtime_data ||
-		(dtime >= _params->p.dtime_min &&
-		 dtime <= _params->p.dtime_max)) {
+	    if (!_params.limit_dtime_data ||
+		(dtime >= _params.dtime_min &&
+		 dtime <= _params.dtime_max)) {
 	      double this_time = prev_time + j * dtime;
 	      double offset_time = this_time + tod_offset;
 	      double time_of_day = fmod(offset_time, 86400.0);
@@ -233,7 +222,7 @@ void TimeProps::_outputActivity(FILE *out)
 
   double time, dur;
   double prev_activity_end_time;
-  double tod_offset = _params->p.activity_time_of_day_offet * 3600.0;
+  double tod_offset = _params.activity_time_of_day_offet * 3600.0;
 
   // initialize initial gap to 1 year
 
@@ -242,7 +231,7 @@ void TimeProps::_outputActivity(FILE *out)
 
   while (_dataSet->GetActivePeriod(start_pos, &end_pos) == 0) {
   
-    if (end_pos - start_pos > _params->p.activity_nstorms_min) {
+    if (end_pos - start_pos > _params.activity_nstorms_min) {
 
       _dataSet->Get(start_pos, &time, &dur);
     

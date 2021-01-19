@@ -37,15 +37,16 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "TimeProps.h"
+#include "TimeProps.hh"
+#include <toolsa/port.h>
 #include <toolsa/str.h>
-#include <signal.h>
+#include <csignal>
 using namespace std;
 
 // file scope
 
 static void tidy_and_exit (int sig);
-static TimeProps *Prog;
+static TimeProps *_prog;
 
 // main
 
@@ -62,22 +63,19 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Prog = new TimeProps(argc, argv);
-  if (!Prog->OK) {
-    return(-1);
+  _prog = new TimeProps(argc, argv);
+  if (!_prog->OK) {
+    return -1;
   }
-  if (Prog->Done) {
-    return(0);
-  }
-
+  
   // run it
-
-  Prog->Run();
+  
+  int iret = _prog->Run();
 
   // clean up
 
-  tidy_and_exit(0);
-  return (0);
+  tidy_and_exit(iret);
+  return iret;
   
 }
 
@@ -86,7 +84,7 @@ int main(int argc, char **argv)
 static void tidy_and_exit (int sig)
 
 {
-  delete(Prog);
+  delete _prog;
   exit(sig);
 }
 

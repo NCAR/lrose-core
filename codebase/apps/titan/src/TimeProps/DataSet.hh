@@ -22,9 +22,9 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// TimeProps.h
+// DataSet.h
 //
-// TimeProps object
+// DataSet object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,51 +32,84 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef TimeProps_H
-#define TimeProps_H
+#ifndef DataSet_H
+#define DataSet_H
 
-#include <toolsa/umisc.h>
-#include <toolsa/pmu.h>
-#include <tdrp/tdrp.h>
+#include "Params.hh"
 
-#include "Args.h"
-#include "Params.h"
-#include "DataSet.h"
+#define DATASET_LABEL_MAX 64
 
-#define LABEL_MAX 64
+typedef struct {
+  double time;
+  double dur;
+} time_dur_t;
 
-class TimeProps {
+class DataSet {
   
 public:
 
   // constructor
 
-  TimeProps (int argc, char **argv);
+  DataSet (const char *prog_name,
+           const Params &params);
 
   // destructor
   
-  ~TimeProps();
+  ~DataSet();
 
-  // run 
+  // reset to start of data set
 
-  int Run();
+  void Reset();
+
+  // reset to given point in data
+
+  void Reset(int pos);
+
+  // get size of data set
+
+  int Size();
+
+  // get specified entry
+
+  int Get(int pos, double *time_p, double *dur_p);
+
+  // get next entry
+
+  int Next(double *time_p, double *dur_p);
+
+  // get next active period
+
+  int GetActivePeriod(int start_pos, int *end_pos_p);
 
   // data members
 
   int OK;
-  int Done;
-  char *_progName;
-  Args *_args;
-  Params *_params;
 
 protected:
   
 private:
 
-  DataSet *_dataSet;
+  char *_progName;
+  const Params &_params;
+  
+  char _timeLabel[DATASET_LABEL_MAX];
+  char _durLabel[DATASET_LABEL_MAX];
+  char _condLabel[DATASET_LABEL_MAX];
 
-  void _outputDtimes(FILE *out);
-  void _outputActivity(FILE *out);
+  int _timePos;
+  int _durPos;
+  int _condPos;
+  
+  int _nData;
+  int _dataPos;
+
+  time_dur_t *_inputData;
+
+  double _timeMin, _timeMax;
+  double _durMin, _durMax;
+
+  int _readLabels();
+  int _readData();
 
 };
 

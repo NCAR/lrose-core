@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "DataSet.h"
+#include "DataSet.hh"
 #include <cerrno>
 #include <cstdlib>
 #include <math.h>
@@ -45,14 +45,15 @@ static int time_dur_compare(const void *v1, const void *v2);
 
 // Constructor
 
-DataSet::DataSet(char *prog_name, Params *params)
+DataSet::DataSet(const char *prog_name,
+                 const Params &params) :
+        _params(params)
 
 {
 
   OK = TRUE;
-
+  
   _progName = STRdup(prog_name);
-  _params = params;
 
   if (_readLabels()) {
     fprintf(stderr, "ERROR - %s:DataSet::_readLabels()\n", _progName);
@@ -87,7 +88,7 @@ DataSet::~DataSet()
 // Errors go to log file
 //
 
-#define LINE_MAX 1024
+#define LINE_MAX_N 1024
 
 int DataSet::_readLabels()
   
@@ -95,7 +96,7 @@ int DataSet::_readLabels()
 
   char *token;
   char *paren_p;
-  char line[LINE_MAX];
+  char line[LINE_MAX_N];
   int retval = 0;
   int n_match;
   int i;
@@ -106,7 +107,7 @@ int DataSet::_readLabels()
 
   while (!feof(stdin)) {
 
-    if (fgets(line, LINE_MAX, stdin) != NULL) {
+    if (fgets(line, LINE_MAX_N, stdin) != NULL) {
 
       if (!strncmp(line, "#labels: ", 9)) {
       
@@ -129,18 +130,18 @@ int DataSet::_readLabels()
 	    n_match = strlen(token);
 	  }
 	  
-	  if (!strncmp(_params->p.time_label, token, n_match)) {
-	    strncpy(_timeLabel, token, DATASET_LABEL_MAX);
+	  if (!strncmp(_params.time_label, token, n_match)) {
+	    STRncopy(_timeLabel, token, DATASET_LABEL_MAX);
 	    _timePos = i;
 	  }
 
-	  if (!strncmp(_params->p.dur_label, token, n_match)) {
-	    strncpy(_durLabel, token, DATASET_LABEL_MAX);
+	  if (!strncmp(_params.dur_label, token, n_match)) {
+	    STRncopy(_durLabel, token, DATASET_LABEL_MAX);
 	    _durPos = i;
 	  }
 
-	  if (!strncmp(_params->p.conditional_label, token, n_match)) {
-	    strncpy(_condLabel, token, DATASET_LABEL_MAX);
+	  if (!strncmp(_params.conditional_label, token, n_match)) {
+	    STRncopy(_condLabel, token, DATASET_LABEL_MAX);
 	    _condPos = i;
 	  }
 	  
@@ -163,20 +164,20 @@ int DataSet::_readLabels()
 
   if (_timePos < 0) {
     fprintf(stderr, "ERROR - %s:_readLabels\n", _progName);
-    fprintf(stderr, "time label '%s' not found\n", _params->p.time_label);
+    fprintf(stderr, "time label '%s' not found\n", _params.time_label);
     retval = -1;
   }
 
   if (_durPos < 0) {
     fprintf(stderr, "ERROR - %s:_readLabels\n", _progName);
-    fprintf(stderr, "dur label '%s' not found\n", _params->p.dur_label);
+    fprintf(stderr, "dur label '%s' not found\n", _params.dur_label);
     retval = -1;
   }
 
-  if (_params->p.condition_input_data && _condPos < 0) {
+  if (_params.condition_input_data && _condPos < 0) {
     fprintf(stderr, "ERROR - %s:_readLabels\n", _progName);
     fprintf(stderr, "cond label '%s' not found\n",
-	    _params->p.conditional_label);
+	    _params.conditional_label);
     retval = -1;
   }
 
@@ -199,7 +200,7 @@ int DataSet::_readData()
 
 {
 
-  char line[LINE_MAX];
+  char line[LINE_MAX_N];
   char *token, *end_pt;
   char *time_str, *dur_str, *cond_str;
   
@@ -210,14 +211,14 @@ int DataSet::_readData()
   double mintime = LARGE_DOUBLE, maxtime = -LARGE_DOUBLE;
   double mindur = LARGE_DOUBLE, maxdur = -LARGE_DOUBLE;
   
-  time_dur_list_t *this_point, *prev_point = NULL;
-  time_dur_list_t *first_point; 
+  time_dur_list_t *this_point = NULL, *prev_point = NULL;
+  time_dur_list_t *first_point = NULL; 
   
   _nData = 0;
 
   while (!feof(stdin)) {
     
-    if (fgets(line, LINE_MAX, stdin) != NULL) {
+    if (fgets(line, LINE_MAX_N, stdin) != NULL) {
       
       if (line[0] != '#') {
 	
@@ -235,10 +236,10 @@ int DataSet::_readData()
 	  if (i == _durPos)
 	    dur_str = token;
 	  
-	  if (_params->p.condition_input_data && i == _condPos)
+	  if (_params.condition_input_data && i == _condPos)
 	    cond_str = token;
 
-	  if (_params->p.condition_input_data) {
+	  if (_params.condition_input_data) {
 	    
 	    if (time_str != NULL && dur_str != NULL && cond_str != NULL)
 	      break;
@@ -248,7 +249,7 @@ int DataSet::_readData()
 	    if (time_str != NULL && dur_str != NULL)
 	      break;
 	    
-	  } // if (_params->p.condition_input_data)
+	  } // if (_params.condition_input_data)
 
 	  i++;
 	  token = strtok((char *) NULL, " \n");
@@ -264,7 +265,7 @@ int DataSet::_readData()
 	  continue;
 	}
 	
-	if (_params->p.condition_input_data && cond_str == NULL) {
+	if (_params.condition_input_data && cond_str == NULL) {
 	  fprintf(stderr, "WARNING - %s:DataSet::_readData\n", _progName);
 	  fprintf(stderr, "cond value not found in data\n");
 	  continue;
@@ -296,21 +297,21 @@ int DataSet::_readData()
 	
 	// check limits as required
 	
-	if (_params->p.limit_time_data) {
-	  if (ttime < _params->p.time_min || ttime > _params->p.time_max) {
+	if (_params.limit_time_data) {
+	  if (ttime < _params.time_min || ttime > _params.time_max) {
 	    continue;
 	  }
 	}
 
-	if (_params->p.limit_dur_data) {
-	  if (ddur < _params->p.dur_min || ddur > _params->p.dur_max) {
+	if (_params.limit_dur_data) {
+	  if (ddur < _params.dur_min || ddur > _params.dur_max) {
 	    continue;
 	  }
 	}
 	
 	// check conditional data
 	
-	if (_params->p.condition_input_data) {
+	if (_params.condition_input_data) {
 	  
 	  errno = 0;
 	  cond_val = strtod(cond_str, &end_pt);
@@ -321,12 +322,12 @@ int DataSet::_readData()
 	    continue;
 	  }
 	  
-	  if (cond_val < _params->p.cond_min ||
-	      cond_val > _params->p.cond_max) {
+	  if (cond_val < _params.cond_min ||
+	      cond_val > _params.cond_max) {
 	    continue;
 	  }
 	  
-	} // if (_params->p.condition_input_data)
+	} // if (_params.condition_input_data)
 
 	// add point to linked list
 	
@@ -508,7 +509,7 @@ int DataSet::GetActivePeriod(int start_pos, int *end_pos_p)
   Get(start_pos, &time, &dur);
   
   double activity_end_time = time + dur;
-  double max_gap = _params->p.activity_gap_max;
+  double max_gap = _params.activity_gap_max;
   
   // search for gap
 

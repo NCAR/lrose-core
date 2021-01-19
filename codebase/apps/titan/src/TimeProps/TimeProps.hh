@@ -22,46 +22,63 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// Args.h: Command line object
+// TimeProps.h
+//
+// TimeProps object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // February 1998
 //
-/////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
-#ifndef ARGS_H
-#define ARGS_H
+#ifndef TimeProps_H
+#define TimeProps_H
 
-#include <stdio.h>
+#include <toolsa/umisc.h>
+#include <toolsa/pmu.h>
 #include <tdrp/tdrp.h>
 
-class Args {
+#include "Args.hh"
+#include "Params.hh"
+#include "DataSet.hh"
+
+#define LABEL_MAX 64
+
+class TimeProps {
   
 public:
 
   // constructor
 
-  Args (int argc, char **argv, char *prog_name);
+  TimeProps (int argc, char **argv);
 
-  // public data
+  // destructor
+  
+  ~TimeProps();
 
-  char *paramsFilePath;
+  // run 
+
+  int Run();
+
+  // data members
 
   int OK;
-  int Done;
-  int printParams;
-  int printShort;
-  int checkParams;
-
-  tdrp_override_t override;
 
 protected:
   
 private:
 
-  void usage(char *prog_name, FILE *out);
-  
+  string _progName;
+  char *_paramsPath;
+  Args _args;
+  Params _params;
+
+  DataSet *_dataSet;
+
+  void _outputDtimes(FILE *out);
+  void _outputActivity(FILE *out);
+
 };
 
 #endif

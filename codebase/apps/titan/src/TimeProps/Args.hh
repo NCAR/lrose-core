@@ -22,42 +22,44 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /////////////////////////////////////////////////////////////
-// Params.h: TDRP params object
+// Args.h: Command line object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // February 1998
 //
-//////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-#ifndef PARAMS_H
-#define PARAMS_H
+#ifndef ARGS_H
+#define ARGS_H
 
+#include <cstdio>
+#include <vector>
+#include <string>
 #include <tdrp/tdrp.h>
-#include "TimeProps_tdrp.h"
+using namespace std;
 
-class Params {
+class Args {
   
 public:
 
-  TimeProps_tdrp_struct p; // parameter struct
+  Args();
+  ~Args();
 
-  int OK;
-  int Done;
+  // parse
 
-  Params (char *params_file_path,
-	  tdrp_override_t *override,
-	  char *prog_name,
-	  int check_params,
-	  int print_params,
-	  int print_short);
+  int parse(int argc, char **argv, const string &prog_name);
+
+  // public data
+  
+  vector<string> filePaths;
+  tdrp_override_t override;
   
 protected:
   
 private:
 
-  TDRPtable *table;         // TDRP parsing table
-  static Params* _instance;
+  void _usage(const string &prog_name, ostream &out);
   
 };
 
