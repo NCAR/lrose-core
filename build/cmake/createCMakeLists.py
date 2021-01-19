@@ -481,6 +481,9 @@ def writeCMakeListsTop(dir):
     fo.write('if(${CMAKE_VERSION} VERSION_GREATER "3.17.0")\n')
     fo.write('  cmake_policy(SET CMP0100 NEW)\n')
     fo.write('endif()\n')
+    fo.write('if(${CMAKE_VERSION} VERSION_GREATER "3.10.0")\n')
+    fo.write('  cmake_policy(SET CMP0071 NEW)\n')
+    fo.write('endif()\n')
     fo.write('\n')
 
     fo.write('set(CMAKE_C_COMPILER_NAMES clang gcc icc cc)\n')

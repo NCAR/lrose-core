@@ -52,7 +52,6 @@ public:
 
   // public data
   
-  vector<string> filePaths;
   tdrp_override_t override;
   
 protected:
