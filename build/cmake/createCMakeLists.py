@@ -537,7 +537,7 @@ def writeCMakeListsTop(dir):
     fo.write('# from their associated paramdef.<app> file\n')
     fo.write('\n')
     fo.write('#set(TDRP_EXECUTABLE ${CMAKE_INSTALL_PREFIX}/bin/tdrp_gen)\n');
-    fo.write('find_program(TDRP_EXECUTABLE tdrp_gen PATHS ${CMAKE_INSTALL_PREFIX}/bin /usr/local/lrose/bin)\n')
+    fo.write('find_program(TDRP_EXECUTABLE NAMES tdrp_gen PATHS ${CMAKE_INSTALL_PREFIX} /usr/local/lrose PATH_SUFFIXES bin)\n')
     fo.write('\n')
     fo.write('add_custom_command (\n')
     fo.write('OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc\n')
