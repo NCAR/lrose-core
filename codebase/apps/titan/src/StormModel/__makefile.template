@@ -33,35 +33,32 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
+TARGET_FILE = StormModel
+
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lrapmath -lMdv -lRadx -lNcxx -lrapformats \
-	-ltoolsa -lpthread -ldataport -ltdrp $(NETCDF4_LIBS) \
-	-lbz2 -lz -lm
+	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
+	-lpthread -lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CFLAGS =
 
-MODULE_TYPE = progcpp
-
-TARGET_FILE = StormModel
-
 HDRS = \
-	Area.h \
-	Args.h \
-	Duration.h \
-	Generate.h \
-	GenFromCdf.h \
-	MidPoint.h \
-	Params.h \
-	StartTime.h \
-	StormModel.h \
-	Velocity.h
-
-C_SRCS = $(TDRP_C)
+	Params.hh \
+	Area.hh \
+	Args.hh \
+	Duration.hh \
+	Generate.hh \
+	GenFromCdf.hh \
+	MidPoint.hh \
+	StartTime.hh \
+	StormModel.hh \
+	Velocity.hh
 
 CPPC_SRCS = \
+	Params.cc \
 	Area.cc \
 	Args.cc \
 	Duration.cc \
@@ -69,7 +66,6 @@ CPPC_SRCS = \
 	GenFromCdf.cc \
 	Main.cc \
 	MidPoint.cc \
-	Params.cc \
 	StartTime.cc \
 	StormModel.cc \
 	Velocity.cc
@@ -90,9 +86,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 # local targets
 #
 
-depend: $(TDRP_C) depend_generic
-
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
