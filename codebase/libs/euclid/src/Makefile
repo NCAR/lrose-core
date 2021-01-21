@@ -20,13 +20,16 @@ LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
 	Attributes \
+	GeographicLib \
 	Grid \
 	Grid2d \
-	Pjg \
-	Polyline \
-	Point \
-	Projection \
 	GridTemplate \
+	Pjg \
+	Point \
+	Polygon_simplify \
+	Polyline \
+	Projection \
+	SunPosn \
 	WorldPoint \
 	affine \
 	alloc \
@@ -34,9 +37,7 @@ SUB_DIRS = \
 	clump \
 	geometry \
 	link \
-	search \
-	Polygon_simplify \
-	SunPosn
+	search
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 
