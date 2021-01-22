@@ -1226,7 +1226,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 
     fo.write("project (%s)\n" % appName)
     fo.write("\n")
-    
+
     fo.write("# source files\n")
     fo.write("\n")
     fo.write("set (SRCS\n")
@@ -1303,6 +1303,10 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("add_executable (%s ${SRCS})\n" % appName)
     fo.write("\n")
 
+    fo.write("# add tdrp_gen as a dependency\n")
+    fo.write("add_dependencies(${PROJECT_NAME} tdrp_gen)\n")
+    fo.write("\n")
+    
     fo.write("# install\n")
     fo.write("\n")
     fo.write("INSTALL(TARGETS ${PROJECT_NAME}\n")
