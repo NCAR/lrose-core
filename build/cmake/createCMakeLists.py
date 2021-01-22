@@ -563,6 +563,19 @@ def writeCMakeListsTop(dir):
 
     fo.write('\n')
 
+    fo.write('# Set RPATH so that executablefinds lrose libraries without needing LD_LIBRARY_PATH\n')
+    fo.write('\n')
+    fo.write('set(CMAKE_SKIP_BUILD_RPATH FALSE)\n')
+    fo.write('set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)\n')
+    fo.write('\n')
+    fo.write('set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)\n')
+    fo.write('set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)\n')
+    fo.write('\n')
+    fo.write('if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")\n')
+    fo.write('  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")\n')
+    fo.write('endif()\n')
+    fo.write('\n')
+
     fo.write('add_subdirectory(libs)\n')
     fo.write('add_subdirectory(apps)\n')
     fo.write('\n')
