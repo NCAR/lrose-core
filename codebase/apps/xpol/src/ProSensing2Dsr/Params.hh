@@ -372,9 +372,9 @@ public:
 
   char* instance;
 
-  char* xpold_host;
-
   int xpold_port;
+
+  char* xpold_host;
 
   char* cal_file_xml_path;
 

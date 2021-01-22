@@ -560,7 +560,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("Program name: ProSensing2Dsr");
-    tt->comment_text = tdrpStrDup("ProSensing2Dsr reads radar data from the ProSensing xpold server over a socket and writes the data to a DsRadarQueue beam by beam.");
+    tt->comment_text = tdrpStrDup("ProSensing2Dsr reads radar data from the ProSensing xpold server over a socket and writes the data to a DsRadarQueue beam by beam. Mike Dixon, EOL, NCAR, Boulder, CO, USA.");
     tt++;
     
     // Parameter 'Comment 1'
@@ -617,18 +617,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'xpold_host'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("xpold_host");
-    tt->descr = tdrpStrDup("Host running the xpold server.");
-    tt->help = tdrpStrDup("Communication with xpold is via TCP.");
-    tt->val_offset = (char *) &xpold_host - &_start_;
-    tt->single_val.s = tdrpStrDup("drx");
-    tt++;
-    
     // Parameter 'xpold_port'
     // ctype is 'int'
     
@@ -639,6 +627,18 @@
     tt->help = tdrpStrDup("Communication with xpold is via TCP.");
     tt->val_offset = (char *) &xpold_port - &_start_;
     tt->single_val.i = 3000;
+    tt++;
+    
+    // Parameter 'xpold_host'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("xpold_host");
+    tt->descr = tdrpStrDup("Host running the xpold server.");
+    tt->help = tdrpStrDup("Communication with xpold is via TCP.");
+    tt->val_offset = (char *) &xpold_host - &_start_;
+    tt->single_val.s = tdrpStrDup("drx");
     tt++;
     
     // Parameter 'Comment 3'
