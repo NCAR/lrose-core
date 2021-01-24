@@ -62,7 +62,8 @@ CPP_SRCS = \
 	SphericalEngine.cpp \
 	TransverseMercator.cpp \
 	TransverseMercatorExact.cpp \
-	UTMUPS.cpp
+	UTMUPS.cpp \
+	Utility.cpp
 
 #
 # general targets
