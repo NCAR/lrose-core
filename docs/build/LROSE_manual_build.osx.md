@@ -65,7 +65,7 @@ Run the following ruby script:
 ```
   brew install pkg-config
   brew install szip
-  brew install hdf5 --enable-cxx
+  brew install hdf5
   brew install netcdf
   brew install udunits
   brew install fftw
