@@ -95,6 +95,10 @@ def main():
                       dest='withJasper', default=False,
                       action="store_true",
                       help='Set if jasper library is installed. This provides support for jpeg compression in grib files.')
+    parser.add_option('--noFindNetcdf',
+                      dest='noFindNetcdf', default=False,
+                      action="store_true",
+                      help='Do not run a find for NetCDF and HDF5. Used if these libraries are compiled as part of the build process, rather than using system-installed libs.')
 
     (options, args) = parser.parse_args()
 
@@ -516,8 +520,9 @@ def writeCMakeListsTop(dir):
     fo.write('endif(APPLE)\n')
 
     fo.write('find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n')
-    fo.write('find_package (HDF5 COMPONENTS C CXX REQUIRED)\n')
-    fo.write('find_package (NETCDF REQUIRED)\n')
+    if (not options.noFindNetcdf):
+        fo.write('find_package (HDF5 COMPONENTS C CXX REQUIRED)\n')
+        fo.write('find_package (NETCDF REQUIRED)\n')
     fo.write('\n')
 
     if (len(options.installDir) == 0):
