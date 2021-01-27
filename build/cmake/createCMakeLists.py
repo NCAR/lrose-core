@@ -516,7 +516,8 @@ def writeCMakeListsTop(dir):
     fo.write('endif(APPLE)\n')
 
     fo.write('find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n')
-    fo.write('find_package (HDF5 COMPONENTS C CXX)\n')
+    fo.write('find_package (HDF5 COMPONENTS C CXX REQUIRED)\n')
+    fo.write('find_package (NETCDF REQUIRED)\n')
     fo.write('\n')
 
     if (len(options.installDir) == 0):
