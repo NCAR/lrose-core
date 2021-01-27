@@ -200,8 +200,12 @@ int HawkEye::Run(QApplication &app)
 
     string emphasis_color = "white";
     string annotation_color = "white";
+    string selectedFieldName = "";
+    if (_displayFields.size() > 0)
+      selectedFieldName = _displayFields[0]->getName();
+
     DisplayFieldModel *displayFieldModel =
-      new DisplayFieldModel(_displayFields, _displayFields[0]->getName(), // selectedField.getName(),
+      new DisplayFieldModel(_displayFields, selectedFieldName, // selectedField.getName(),
                           _params.grid_and_range_ring_color,
                           emphasis_color,
                           annotation_color,
@@ -356,7 +360,7 @@ int HawkEye::_setupDisplayFields()
       cerr << "  Color scale dir:: " << colorMapDir << endl;
     }
   }
-
+/*
   // we interleave unfiltered fields and filtered fields
 
   for (int ifield = 0; ifield < _params.fields_n; ifield++) {
@@ -444,7 +448,7 @@ int HawkEye::_setupDisplayFields()
     cerr << "  No fields found" << endl;
     return -1;
   }
-
+*/
   return 0;
 
 }

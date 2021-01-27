@@ -844,12 +844,14 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVol *vol,
   
 
 
-  // insert new field into RadxVol                                                                             
+  // insert new field into RadxVol   
+  /*                                                                          
   cerr << "result = ";
   for (int i=0; i<50; i++)
     cerr << newData[i] << ", ";
   cerr << endl;
-
+  */
+  
   Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = false;
 

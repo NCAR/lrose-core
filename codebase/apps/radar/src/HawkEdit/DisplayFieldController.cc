@@ -21,6 +21,18 @@ void DisplayFieldController::addField(DisplayField *newField) {
   _model->addField(newField);
 }
 
+void DisplayFieldController::hideField(DisplayField *field) {
+  //_model->hideField(field);
+}
+
+void DisplayFieldController::setFieldToMissing(DisplayField *field) {
+  //_model->setFieldToMissing(field);
+}
+
+void DisplayFieldController::deleteFieldFromVolume(DisplayField *field) {
+  //_model->deleteFieldFromVolume(field);
+}
+
 vector<string>  DisplayFieldController::getFieldNames() {
   return _model->getFieldNames();
 } 

@@ -415,7 +415,7 @@ void DisplayManager::_createFieldPanel()
   if (_haveFilteredFields) {
     nCols = 4;
   }
-
+/*
   _displayFieldController->setSelectedField(0);
   _selectedField = _displayFieldController->getSelectedField(); //_fields[0];
   _selectedLabel = _selectedField->getLabel(); //_fields[0]->getLabel();
@@ -428,7 +428,9 @@ void DisplayManager::_createFieldPanel()
   font6.setPixelSize(fsize6);
   _selectedLabelWidget->setFont(font6);
   _fieldsLayout->addWidget(_selectedLabelWidget, row, 0, 1, nCols, alignCenter);
+
   row++;
+
 
   QFont font4 = _selectedLabelWidget->font();
   font4.setPixelSize(fsize4);
@@ -436,6 +438,12 @@ void DisplayManager::_createFieldPanel()
   font2.setPixelSize(fsize2);
   QFont font = _selectedLabelWidget->font();
   font.setPixelSize(fsize);
+  */
+
+  QLabel dummy;
+  QFont font = dummy.font();
+  QFont font2 = dummy.font();
+  QFont font4 = dummy.font();
 
   _valueLabel = new QLabel("", _fieldPanel);
   _valueLabel->setFont(font);
@@ -561,7 +569,9 @@ void DisplayManager::_updateFieldPanel(string newFieldName)
   if (_haveFilteredFields) {
     nCols = 4;
   }
-  QFont font = _selectedLabelWidget->font();
+  //QFont font = _selectedLabelWidget->font();
+  QLabel dummy;
+  QFont font = dummy.font();
   font.setPixelSize(fsize);
 
 

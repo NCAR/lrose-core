@@ -24,8 +24,15 @@ DisplayFieldModel::DisplayFieldModel(vector<DisplayField *> displayFields,
   }
   
   LOG(DEBUG) << "selected field is " << selectedFieldName;
+
   _selectedFieldName = selectedFieldName;
-  _selectedFieldIndex = _lookupFieldIndex(selectedFieldName); 
+  if (!selectedFieldName.empty()) {  
+    _selectedFieldIndex = _lookupFieldIndex(selectedFieldName); 
+    _noSelectedField = false;
+  } else {
+    _selectedFieldIndex = 0;
+    _noSelectedField = true; 
+  }
   _gridColor = gridColor;
   _emphasisColor = emphasisColor;
   _annotationColor = annotationColor;
@@ -40,6 +47,18 @@ DisplayFieldModel::~DisplayFieldModel() {
 
 void DisplayFieldModel::addField(DisplayField *newField) {
   _fields.push_back(newField);
+}
+
+void DisplayFieldModel::hideField(DisplayField *field) {
+  //_fields.delete(newField);
+}
+
+void DisplayFieldModel::setFieldToMissing(DisplayField *field) {
+  // _fields.delete(newField);
+}
+
+void DisplayFieldModel::deleteFieldFromVolume(DisplayField *field) {
+  // _fields.delete(newField);
 }
 
 vector<string>  DisplayFieldModel::getFieldNames() {
@@ -69,6 +88,12 @@ size_t DisplayFieldModel::getFieldIndex(string fieldName) {
   return _lookupFieldIndex(fieldName);
 }
 
+size_t DisplayFieldModel::getSelectedFieldNum() { 
+  if (_noSelectedField)
+    throw std::range_error("No DisplayField selected; no display fields");
+  return _selectedFieldIndex;
+};
+
 string DisplayFieldModel::getFieldName(size_t fieldIndex) {
   DisplayField *displayField = getField(fieldIndex);
   if (displayField == NULL) {
@@ -97,6 +122,7 @@ void DisplayFieldModel::setSelectedField(string fieldName) {
   LOG(DEBUG) << "enter " << fieldName;
   _selectedFieldName = fieldName;
   _selectedFieldIndex = _lookupFieldIndex(fieldName);
+  _noSelectedField = false;
   LOG(DEBUG) << "exit";
 } 
 
@@ -105,6 +131,7 @@ void DisplayFieldModel::setSelectedField(size_t fieldIndex) {
     _selectedFieldIndex = fieldIndex;
     DisplayField *displayField = getField(fieldIndex);
     _selectedFieldName = displayField->getName();
+    _noSelectedField = false;
   }
   else
     throw std::invalid_argument("field index out of bounds");

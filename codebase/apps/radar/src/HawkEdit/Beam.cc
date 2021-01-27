@@ -146,9 +146,9 @@ void Beam::fillColors(const std::vector<std::vector<double> >& beam_data,
       double data = field_data[igate];
       
       if (data < -9990) {
-	_brushes[fieldIdx][igate] = background_brush;
+	      _brushes[fieldIdx][igate] = background_brush;
       } else {
-	_brushes[fieldIdx][igate] = map->dataBrush(data);
+	      _brushes[fieldIdx][igate] = map->dataBrush(data);
       }
 
     } // igate
@@ -231,19 +231,23 @@ void Beam::updateFillColors(const Radx::fl32 *beam_data,
     //    const ColorMap &map = fields[field]->getColorMap();
   // fieldIdx = start_of_new_fields + newFieldIdx;
   if (nData != _nGates)
-    throw "Error! nBeamData != nGates";
+    throw std::range_error("Error! nBeamData != nGates");
+  if (displayFieldIdx >= _brushes.size())
+    throw std::range_error("displayFieldIdx >= _brushes.size()");
+  if (nFields != _brushes.size())
+    throw std::range_error("nFields != _brushes.size()");
 
   //const ColorMap *map = displayFieldController->getColorMap(displayFieldIdx);
 
     //const double *field_data = &(beam_data[newFieldIdx][0]);
-    for (size_t igate = 0; igate < _nGates; ++igate) {
-      double data = beam_data[igate];
-      if (data < -9990) {
-	_brushes[displayFieldIdx][igate] = background_brush;
-      } else {
-	_brushes[displayFieldIdx][igate] = map->dataBrush(data);
-      }
-    } // igate
+  for (size_t igate = 0; igate < _nGates; ++igate) {
+    double data = beam_data[igate];
+    if (data < -9990) {
+	    _brushes[displayFieldIdx][igate] = background_brush;
+    } else {
+	    _brushes[displayFieldIdx][igate] = map->dataBrush(data);
+    }
+  } // igate
  
 }
 

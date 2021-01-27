@@ -118,8 +118,8 @@ void PpiBeam::paint(QImage *image,
   if ((field >= _nFields) || (field >= _brushes.size())) {
     LOG(DEBUG) << " aborting: field " << field << " is >= _nFields=" << _nFields
 	       << " or >= _brushes.size()=" << _brushes.size();
-    throw "number of fields NOT equal to number of brushes"; 
-    //return;
+    //throw std::range_error("number of fields NOT equal to number of brushes"); 
+    return;
   }
   QPainter painter(image);
   

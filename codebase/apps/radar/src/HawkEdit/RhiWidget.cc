@@ -566,6 +566,7 @@ void RhiWidget::_drawOverlays(QPainter &painter)
     legends.push_back(radarSiteLabel);
 
     // field name legend
+    try {
     size_t selectedField = displayFieldController->getSelectedFieldNum();
     FieldRenderer *selectedFieldRenderer = _fieldRendererController->get(selectedField);
     string fieldName = selectedFieldRenderer->getField().getLabel();
@@ -573,6 +574,10 @@ void RhiWidget::_drawOverlays(QPainter &painter)
     //string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
     sprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
+    } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+    }
     
     // azimuth legend
 
@@ -846,6 +851,7 @@ void RhiWidget::_refreshImages()
 
   _performRendering();
   */
+  try {
   bool isDeque = true;
   size_t selectedField = displayFieldController->getSelectedFieldNum();
 
@@ -857,6 +863,10 @@ void RhiWidget::_refreshImages()
 
 
   update();
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  }
 }
 
 
@@ -931,7 +941,7 @@ void RhiWidget::paintEvent(QPaintEvent *event)
   painter.save();
   painter.eraseRect(0, 0, width(), height());
   _zoomWorld.setClippingOn(painter);
-
+  try {
   size_t selectedField = displayFieldController->getSelectedFieldNum();
 
   //  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
@@ -940,6 +950,10 @@ void RhiWidget::paintEvent(QPaintEvent *event)
 
   painter.restore();
   _drawOverlays(painter);
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  }
 
 }
 
@@ -949,7 +963,7 @@ void RhiWidget::paintEvent(QPaintEvent *event)
 
 void RhiWidget::selectVar(const size_t index)
 {
-
+  try {
   // If the field index isn't actually changing, we don't need to do anything
   size_t selectedField = displayFieldController->getSelectedFieldNum();
 
@@ -991,6 +1005,10 @@ void RhiWidget::selectVar(const size_t index)
   // Update the display
 
   update();
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  }
 }
 
 

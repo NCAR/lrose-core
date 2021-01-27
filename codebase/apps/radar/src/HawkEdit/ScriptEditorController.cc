@@ -625,7 +625,7 @@ uncate(100);
         result = engine.evaluate(script);
       } catch (const char *msg) {
         LOG(DEBUG) << "ERROR from engine.evaluate: " << msg;
-        throw new string(msg);
+        throw std::invalid_argument(msg);
       }
       if (result.isError()) {
         QString message;

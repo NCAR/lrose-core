@@ -13,6 +13,10 @@ public:
   virtual ~DisplayFieldController();
 
   void addField(DisplayField *newField);
+  void hideField(DisplayField *field);
+  void setFieldToMissing(DisplayField *field);
+  void deleteFieldFromVolume(DisplayField *field);
+    
   size_t getNFields();
 
   DisplayField *getField(size_t fieldIndex);

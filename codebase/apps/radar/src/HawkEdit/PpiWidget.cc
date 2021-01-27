@@ -138,7 +138,7 @@ void PpiWidget::clear()
 void PpiWidget::selectVar(const size_t index)
 {
   LOG(DEBUG) << "enter, index = " << index;
-
+  try {
   // If the field index isn't actually changing, we don't need to do anything
   size_t selectedField = displayFieldController->getSelectedFieldNum();
   //  if (selectedField == index) {
@@ -195,6 +195,10 @@ void PpiWidget::selectVar(const size_t index)
   // Update the display
 
   update();
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      // QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  }
   LOG(DEBUG) << "exit";
 }
 
@@ -217,10 +221,14 @@ void PpiWidget::clearVar(const size_t index)
   for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
     (*beam)->resetFieldBrush(index, &_backgroundBrush);
   }
-  
+  try {
   size_t selectedField = displayFieldController->getSelectedFieldNum();
   if (index == selectedField) {
     update();
+  }
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
   }
 
 }
@@ -487,6 +495,13 @@ void PpiWidget::updateBeamII(const RadxRay *ray,
   // << " by " << beam_data[0].size();
   LOG(DEBUG) << "start_angle = " << start_angle;
   LOG(DEBUG) << "stop_angle = " << stop_angle;
+
+  LOG(DEBUG) << "There are " << _ppiBeams.size() << " beams in _ppiBeams";
+  for (vector<PpiBeam *>::iterator it = _ppiBeams.begin(); it != _ppiBeams.end(); ++ it) {
+    PpiBeam *beam = *it;
+    LOG(DEBUG) << "  ppiBeam has " << beam->getNFields() << " fields";
+  }
+  LOG(DEBUG) << " --------- end ppiBeams";
 
   // The start and stop angle MUST specify a clockwise fill for the sector.
   // Thus if start_angle > stop_angle, we know that we have crossed the 0
@@ -1292,7 +1307,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     legends.push_back(radarSiteLabel);
 
     // field name legend
-    size_t selectedField = displayFieldController->getSelectedFieldNum();
+    //size_t selectedField = displayFieldController->getSelectedFieldNum();
  
     //if (0) {
     //FieldRenderer *selectedFieldRenderer = _fieldRendererController->get(selectedField);
@@ -1426,6 +1441,21 @@ int PpiWidget::_beamIndex(const double start_angle,
 
   return ii;
 
+}
+
+// remove all beams that don't have the specified number of fields
+void PpiWidget::cleanBeams(size_t nFields) {
+
+  vector<PpiBeam *>::iterator it = _ppiBeams.begin(); 
+  while (it != _ppiBeams.end()) {
+    PpiBeam *beam = *it;
+    if (beam->getNFields() != nFields) {
+      it = _ppiBeams.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
 }
 
 
@@ -1666,6 +1696,7 @@ void PpiWidget::_refreshImages()
   } // ifield
   */  
   // do the rendering
+  try {
   size_t selectedField = displayFieldController->getSelectedFieldNum();
 
   _fieldRendererController->refreshImages(width(), height(), size(),
@@ -1674,7 +1705,10 @@ void PpiWidget::_refreshImages()
 					  selectedField, 
 					  _ppiBeams);
   // _performRendering();
-
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      // QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  }
   update();
 }
 

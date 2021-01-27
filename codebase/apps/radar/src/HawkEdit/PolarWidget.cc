@@ -327,13 +327,18 @@ void PolarWidget::activateRealtimeRendering()
 
 void PolarWidget::displayImage(const size_t field_num)
 {
-  size_t selectedField = displayFieldController->getSelectedFieldNum();
+  try {
+    size_t selectedField = displayFieldController->getSelectedFieldNum();
 
-  // If we weren't rendering the current field, do nothing
-  if (field_num != selectedField) {
-    return;
+    // If we weren't rendering the current field, do nothing
+    if (field_num != selectedField) {
+      return;
+    }
+    update();
+  } catch (std::range_error &ex) {
+    LOG(ERROR) << ex.what();
+    //QMessageBox::warning(NULL, "Error changing field (displayImage):", ex.what());
   }
-  update();
 }
 
 
@@ -603,19 +608,24 @@ void PolarWidget::smartBrush(int xPixel, int yPixel) {
 
 void PolarWidget::paintEvent(QPaintEvent *event)
 {
+  try {
   QPainter painter(this);
   size_t selectedField = displayFieldController->getSelectedFieldNum();
-  try {
+
   FieldRenderer *fieldRenderer = _fieldRendererController->get(selectedField);
 
   painter.drawImage(0, 0, *(fieldRenderer->getImage()));
   //  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-  } catch (const std::out_of_range& ex) {
-    LOG(DEBUG) << ex.what();
-  } 
+
   _drawOverlays(painter);
 
   BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
+  } catch (const std::out_of_range& ex) {
+    LOG(DEBUG) << ex.what();
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  }
 }
 
 
@@ -690,33 +700,14 @@ void PolarWidget::_setTransform(const QTransform &transform)
 void PolarWidget::_performRendering()
 {
   LOG(DEBUG) << "enter";
-  size_t selectedField = displayFieldController->getSelectedFieldNum();
-
-  _fieldRendererController->performRendering(selectedField);
-  /*
-  // start the rendering
-  LOG(DEBUG) << " _selectedField = " << _selectedField;
-  LOG(DEBUG) << "_fieldRenderers.size() = " << _fieldRenderers.size();
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    LOG(DEBUG) << "ifield " << ifield << " isBackgroundRendered() = " 
-	       << _fieldRenderers[ifield]->isBackgroundRendered();
-    if (ifield == _selectedField ||
-    	_fieldRenderers[ifield]->isBackgroundRendered()) {
-      LOG(DEBUG) << "signaling field " << ifield << " to start";
-      _fieldRenderers[ifield]->signalRunToStart();
-      }
-  } // ifield
-
-  // wait for rendering to complete
-  
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    if (ifield == _selectedField ||
-    	_fieldRenderers[ifield]->isBackgroundRendered()) {
-      _fieldRenderers[ifield]->waitForRunToComplete();
-      }
-  } // ifield
-  */
-  update();
+  try {
+    size_t selectedField = displayFieldController->getSelectedFieldNum();
+    _fieldRendererController->performRendering(selectedField);
+    update();
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      // QMessageBox::warning(NULL, "Error changing color map", ex.what());
+  }
   LOG(DEBUG) << "exit";
 }
 

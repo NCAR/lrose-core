@@ -185,6 +185,8 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   void contextMenuParameterColors();
   //  void changeToDisplayField(string fieldName); // , ColorMap newColorMap);
 
+  void cleanBeams(size_t nFields);
+
  protected:
 
   // pointers to active beams

@@ -191,7 +191,7 @@ PolarManager::PolarManager(const Params &params,
 
   // set initial field to 0
 
-  _changeField(0, false);
+  //_changeField(0, false);
 
 }
 
@@ -1350,7 +1350,12 @@ double PolarManager::getSelectedSweepAngle() {
 }
 
 size_t PolarManager::getSelectedFieldIndex() {
-  return _displayFieldController->getSelectedFieldNum();
+  try {
+    return _displayFieldController->getSelectedFieldNum();
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      QMessageBox::warning(NULL, "Error selectingField (_getArchiveData):", ex.what());
+  }
 }
 
 /////////////////////////////
@@ -2019,7 +2024,7 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
       LOG(DEBUG) << "ray->nGates = " << ray->getNGates();
       LOG(DEBUG) << "first 30 gates ...";
       for (int ii = 0; ii< 15; ii++)
-	LOG(DEBUG) << fdata[ii];
+	      LOG(DEBUG) << fdata[ii];
       // end print first 15 data values
       const Radx::fl32 missingVal = rfld->getMissingFl32();
       // we can only look at the data available, so only go to nGates
@@ -2032,22 +2037,22 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
         
           if (!haveColorMap) {
             // keep track of min and max data values
-	    // just display something.  The color scale can be edited as needed, later.
-	    bool newMinOrMax = false;
+	          // just display something.  The color scale can be edited as needed, later.
+	          bool newMinOrMax = false;
             if (val < min) {
               min = *fdata;
-	      newMinOrMax = true;
-	    }
+	            newMinOrMax = true;
+	          }
             if (val > max) {
-	      max = *fdata;
-	      newMinOrMax = true;
-	    }
-	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
-	      printf("field index %d, gate %d \t", (int) ifield, igate);
-	      printf("new min, max of data %g, %g\t", min,  max);
-	      printf("missing value %g\t", missingVal);
-	      printf("current value %g\n", val);
-	    }
+	            max = *fdata;
+	            newMinOrMax = true;
+	          }
+      	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
+      	      printf("field index %d, gate %d \t", (int) ifield, igate);
+      	      printf("new min, max of data %g, %g\t", min,  max);
+      	      printf("missing value %g\t", missingVal);
+      	      printf("current value %g\n", val);
+      	    }
           }
         } // end else not missing value
       } // end for each gate
@@ -2093,14 +2098,17 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
     // check for elevation surveillance sweep mode
     // in this case, set azimuth to rotation if georef is available
     
+    /*
     if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
       ray->setAnglesForElevSurveillance();
     }
+    */
 
     // Store the ray location using the azimuth angle and the PPI location
     // table
 
     double az = ray->getAzimuthDeg();
+    LOG(DEBUG) << "az = " << az;
     _storeRayLoc(ray, az, platform.getRadarBeamWidthDegH(), _ppiRayLoc);
 
     // Save the angle information for the next iteration
@@ -2112,6 +2120,7 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
     // ray contains data for ALL fields; fieldData contains only data for the new beams
     // nFields = total number of fields (old + new)
     size_t nFields = _displayFieldController->getNFields();
+    _ppi->cleanBeams(nFields);
     _ppi->updateBeamII(ray, _startAz, _endAz, fieldData, nFields, newFieldNames);
 
   }
@@ -2205,10 +2214,19 @@ void PolarManager::_handleColorMapChangeOnRay(RadxPlatform &platform,
     // ray contains data for ALL fields; fieldData contains only data for the new beams
     // nFields = total number of fields (old + new)
     */
-    size_t nFields = _displayFieldController->getNFields();
-    if (_nGates < 0) throw "Error, cannot convert _nGates < 0 to type size_t";
-    _ppi->updateBeamColors(nFields, fieldName, (size_t) _nGates); //ray, _startAz, _endAz, data, nFields, fieldName);
-
+    try {
+      size_t nFields = _displayFieldController->getNFields();
+      if (_nGates < 0) throw "Error, cannot convert _nGates < 0 to type size_t";
+      _ppi->updateBeamColors(nFields, fieldName, (size_t) _nGates); //ray, _startAz, _endAz, data, nFields, fieldName);
+    } catch (std::range_error &ex) {
+      LOG(ERROR) << fieldName;
+      LOG(ERROR) << ex.what();
+      QMessageBox::warning(NULL, "Error changing color map", ex.what());
+    } catch(std::exception &ex) {
+      LOG(ERROR) << fieldName;
+      LOG(ERROR) << ex.what();
+      QMessageBox::warning(NULL, "Error changing color map", ex.what());
+    }
     //}
   LOG(DEBUG) << "exit";
   
@@ -2428,8 +2446,9 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   size_t newSelectionNum = _displayFieldController->getFieldIndex(fieldName);
 
   // if we click the already-selected field, go back to previous field
+  try {
+    size_t fieldNum = _displayFieldController->getSelectedFieldNum();
 
-  size_t fieldNum = _displayFieldController->getSelectedFieldNum();
   if (guiMode) {
     if (fieldNum == newSelectionNum && _prevFieldNum >= 0) {
       QRadioButton *button =
@@ -2454,7 +2473,7 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   _selectedLabel = _selectedField->getLabel();
   _selectedUnits = _selectedField->getUnits();
   
-  _selectedLabelWidget->setText(_selectedLabel.c_str());
+  //_selectedLabelWidget->setText(_selectedLabel.c_str());
   char text[128];
   if (_selectedField->getSelectValue() > -9990) {
     sprintf(text, "%g %s", 
@@ -2464,7 +2483,10 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
     text[0] = '\0';
   }
   _valueLabel->setText(text);
-
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  }
 }
 
 // PolarManager::colorMapRedefineReceived(string, ColorMap)
@@ -2489,8 +2511,8 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
   } catch (std::invalid_argument ex) {
     LOG(ERROR) << fieldName;
     LOG(ERROR) << ex.what(); // "ERROR - field not found; no color map change";
-    // TODO: show error message box
-  }
+    QMessageBox::warning(NULL, "Error changing color map", ex.what());
+  } 
   _ppi->backgroundColor(backgroundColor);
   _ppi->gridRingsColor(gridColor);
   _ppi->colorScaleLegend(); // TODO: may not need this??
@@ -3117,21 +3139,21 @@ void PolarManager::_openFile()
     cerr << "  " << timeList.getErrStr() << endl;
   }
 
-  vector<string> pathList = timeList.getPathList();
-  if (pathList.size() <= 0) {
-    cerr << "ERROR - PolarManager::openFile()" << endl;
-    cerr << "  pathList is empty" << endl;
-    cerr << "  " << timeList.getErrStr() << endl;
-  } else {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "pathList is NOT empty" << endl;
-      for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-       cerr << *i << endl;
-      }
-      cerr << endl;
-    }
+  //vector<string> pathList = timeList.getPathList();
+  //if (pathList.size() <= 0) {
+  //  cerr << "ERROR - PolarManager::openFile()" << endl;
+  //  cerr << "  pathList is empty" << endl;
+  //  cerr << "  " << timeList.getErrStr() << endl;
+  //} else {
+  //  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  //    cerr << "pathList is NOT empty" << endl;
+  //    for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
+  //     cerr << *i << endl;
+  //    }
+  //    cerr << endl;
+  //  }
   
-    setArchiveFileList(pathList, false);
+    setArchiveFileList(fileList, false); // pathList, false);
 
     // now fetch the first time and last time from the directory
     // and set these values in the time controller display
@@ -3148,13 +3170,22 @@ void PolarManager::_openFile()
     _archiveEndTime = lastTime;
     _setGuiFromArchiveStartTime();
     _setGuiFromArchiveEndTime();
-  } // end else pathList is not empty
+  //} // end else pathList is not empty
 
+      // set initial field to 0
+
+      // _changeField(0, false);
+      //_reconcileDisplayFields();
 
 }
+/*
+void PolarManager::_reconcileDisplayFields() {
 
-
-
+  
+  DisplayField *field;
+  _displayFieldController->deleteFieldFromDisplay(field);
+}
+*/
 void PolarManager::fieldsSelected(vector<string> *selectedFields) {
 
 // TODO:
