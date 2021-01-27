@@ -807,11 +807,11 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("include_directories (./include)\n")
     for lib in libList:
         fo.write("include_directories (../../%s/src/include)\n" % lib)
+    for dir in dependDirs:
+        fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
     fo.write("include_directories (${HDF5_CXX_INCLUDE_DIR})\n")
     fo.write("include_directories (${HDF5_C_INCLUDE_DIR})\n")
-    for dir in dependDirs:
-        fo.write("include_directories (%s/include)\n" % dir)
     fo.write("\n")
 
     fo.write("# source files\n")
@@ -1248,12 +1248,12 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 
     fo.write("# link directories\n")
     fo.write("\n")
+    for dir in dependDirs:
+        fo.write("link_directories (%s/lib)\n" % dir)
     fo.write("link_directories(${CMAKE_INSTALL_PREFIX}/lib)\n")
     fo.write("link_directories(${HDF5_LIBRARY_DIRS})\n")
     fo.write("# add serial, for odd Debian hdf5 install\n")
     fo.write("link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
-    for dir in dependDirs:
-        fo.write("link_directories (%s)\n" % dir)
     fo.write("\n")
 
     fo.write("# link libs\n")
