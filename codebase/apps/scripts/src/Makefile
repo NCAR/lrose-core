@@ -70,6 +70,7 @@ SCRIPTS = \
 	snuff_inst \
 	snuff_usr1 \
 	sync2files \
+	tkdiff \
 	toggle_proc_in_auto_restart.pl \
 	ugen2validtime.pl \
 	utime_decode \
