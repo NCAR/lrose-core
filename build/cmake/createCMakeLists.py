@@ -520,9 +520,10 @@ def writeCMakeListsTop(dir):
     fo.write('endif(APPLE)\n')
 
     fo.write('find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n')
-    if (not options.noFindNetcdf):
+    if (NOT options.noFindNetcdf):
         fo.write('find_package (HDF5 COMPONENTS C CXX REQUIRED)\n')
         fo.write('find_package (NETCDF REQUIRED)\n')
+        fo.write('message("netCDF_INSTALL_PREFIX is ${netCDF_INSTALL_PREFIX}")\n')
     fo.write('\n')
 
     if (len(options.installPrefix) == 0):
@@ -816,6 +817,9 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     for dir in dependDirs:
         fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
+    fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
+    fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
+    fo.write("endif()\n")
     fo.write("include_directories (${HDF5_CXX_INCLUDE_DIR})\n")
     fo.write("include_directories (${HDF5_C_INCLUDE_DIR})\n")
     fo.write("\n")
@@ -1257,6 +1261,9 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     for dir in dependDirs:
         fo.write("link_directories (%s/lib)\n" % dir)
     fo.write("link_directories(${CMAKE_INSTALL_PREFIX}/lib)\n")
+    fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
+    fo.write("  link_directories (${netCDF_INSTALL_PREFIX}/lib)\n")
+    fo.write("endif()\n")
     fo.write("link_directories(${HDF5_LIBRARY_DIRS})\n")
     fo.write("# add serial, for odd Debian hdf5 install\n")
     fo.write("link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
