@@ -65,9 +65,9 @@ int STRparse_delim(const char *inpstr, char **outstr, const int nchars,
  
 {
   
-  register const char * instr;
-  register char * tbuf;
-  register int i, end_flag, check_spaces;
+  const char * instr;
+  char * tbuf;
+  int i, end_flag, check_spaces;
   int	num_fields = 0;
   char	tmpbuf[MAX_LINE];
 

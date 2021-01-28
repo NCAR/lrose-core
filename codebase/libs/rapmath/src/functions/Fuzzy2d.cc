@@ -81,9 +81,9 @@ static bool _get_before_after(const std::vector<double> xv,
 static int _stringParse(const char *inpstr, const int nchars,
 			const int maxFLen, vector<string> &outstr)
 {
-  register const char * instr;
-  register char * tbuf;
-  register int i, endFlag, inProgress;
+  const char * instr;
+  char * tbuf;
+  int i, endFlag, inProgress;
   int	k = 0;
   char	tmpbuf[1000];
   char  outtmp[1000];

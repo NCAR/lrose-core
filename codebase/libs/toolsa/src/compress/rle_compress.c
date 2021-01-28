@@ -172,12 +172,12 @@ ui08 *uRLEncode8(const ui08 *full_data,
      
 {
 
-  register ui08 byteval;
-  register ui08 *coded_data;
-  register const ui08 *fdata, *end;
-  register ui08 *cdata;
+  ui08 byteval;
+  ui08 *coded_data;
+  const ui08 *fdata, *end;
+  ui08 *cdata;
 
-  register ui32 runcount;
+  ui32 runcount;
 
   ui32 *lptr;
 
@@ -344,7 +344,7 @@ ui08 *uRLDecode8(const ui08 *coded_data,
      
 {
 
-  register int runcount;
+  int runcount;
   int swap;
   
   ui32 *lptr;
@@ -354,11 +354,11 @@ ui08 *uRLDecode8(const ui08 *coded_data,
   ui32 nbytes_coded;
   ui32 nbytes_extra;
 
-  register ui08 byteval;
+  ui08 byteval;
   ui08 *full_data;
-  register const ui08 *end;
-  register const ui08 *cdata;
-  register ui08 *fdata;
+  const ui08 *end;
+  const ui08 *cdata;
+  ui08 *fdata;
 
   if (coded_data != NULL) {
 
@@ -555,13 +555,13 @@ ui08 *uRLEncode(const ui08 *full_data, ui32 nbytes_full,
      
 {
 
-  register ui08 byteval;
-  register ui08 *coded_data;
-  register const ui08 *fdata;
-  register ui08 *cdata;
-  register const ui08 *end;
+  ui08 byteval;
+  ui08 *coded_data;
+  const ui08 *fdata;
+  ui08 *cdata;
+  const ui08 *end;
 
-  register ui32 runcount;
+  ui32 runcount;
 
   ui32 nbytes_coded;
   ui32 nbytes_extra;
@@ -721,15 +721,15 @@ ui08 *uRLDecode(const ui08 *coded_data, ui32 *nbytes_full)
      
 {
 
-  register int runcount;
+  int runcount;
   ui32 nbytes_coded;
   ui32 nbytes_extra;
 
-  register ui08 byteval;
+  ui08 byteval;
   ui08 *full_data;
-  register const ui08 *end;
-  register ui08 *fdata;
-  register const ui08 *cdata;
+  const ui08 *end;
+  ui08 *fdata;
+  const ui08 *cdata;
 
   if (coded_data != NULL) {
 

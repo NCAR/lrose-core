@@ -1959,14 +1959,14 @@ static ui08 *RLDecode(ui08 *coded_data, ui32 *nbytes_full)
      
 {
 
-  register int runcount;
+  int runcount;
   ui32 nbytes_coded;
   ui32 nbytes_extra;
 
-  register ui08 byteval;
+  ui08 byteval;
   ui08 *full_data;
-  register ui08 *last_data;
-  register ui08 *fdata, *cdata;
+  ui08 *last_data;
+  ui08 *fdata, *cdata;
 
   if (coded_data != NULL) {
 
@@ -2059,11 +2059,11 @@ static ui08 *RLEncode(ui08 *full_data, ui32 nbytes_full,
      
 {
 
-  register ui08 byteval;
-  register ui08 *coded_data;
-  register ui08 *fdata, *cdata, *last_data;
+  ui08 byteval;
+  ui08 *coded_data;
+  ui08 *fdata, *cdata, *last_data;
 
-  register ui32 runcount;
+  ui32 runcount;
 
   ui32 nbytes_coded;
   ui32 nbytes_extra;

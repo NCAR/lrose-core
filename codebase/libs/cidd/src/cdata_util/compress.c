@@ -60,14 +60,14 @@ ui08 *RLDecode7(ui08 *coded_data, unsigned int *nbytes_full)
 
 {
 
-  register int runcount;
+  int runcount;
   unsigned int nbytes_coded;
   unsigned int nbytes_extra;
 
-  register ui08 byteval;
+  ui08 byteval;
   ui08 *full_data;
-  register ui08 *last_data;
-  register ui08 *fdata, *cdata;
+  ui08 *last_data;
+  ui08 *fdata, *cdata;
 
   if (coded_data != NULL) {
 
@@ -151,7 +151,7 @@ ui08 *RLDecode8(ui08 *coded_data,
 
 {
 
-  register int runcount;
+  int runcount;
   
   ui32 *lptr;
   ui32 compress_flag;
@@ -160,10 +160,10 @@ ui08 *RLDecode8(ui08 *coded_data,
   unsigned int nbytes_coded;
   unsigned int nbytes_extra;
 
-  register ui08 byteval;
+  ui08 byteval;
   ui08 *full_data;
-  register ui08 *last_data;
-  register ui08 *fdata, *cdata;
+  ui08 *last_data;
+  ui08 *fdata, *cdata;
 
   if (coded_data != NULL) {
 
@@ -275,11 +275,11 @@ ui08 *RLEncode7(ui08 *full_data, unsigned int nbytes_full,
 
 {
 
-  register ui08 byteval;
-  register ui08 *coded_data;
-  register ui08 *fdata, *cdata, *last_data;
+  ui08 byteval;
+  ui08 *coded_data;
+  ui08 *fdata, *cdata, *last_data;
 
-  register unsigned int runcount;
+  unsigned int runcount;
 
   unsigned int nbytes_coded;
   unsigned int nbytes_extra;
@@ -441,11 +441,11 @@ ui08 *RLEncode8(ui08 *full_data,
 
 {
 
-  register ui08 byteval;
-  register ui08 *coded_data;
-  register ui08 *fdata, *cdata, *last_data;
+  ui08 byteval;
+  ui08 *coded_data;
+  ui08 *fdata, *cdata, *last_data;
 
-  register unsigned int runcount;
+  unsigned int runcount;
 
   ui32 *lptr;
 

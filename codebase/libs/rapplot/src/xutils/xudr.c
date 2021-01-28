@@ -147,8 +147,8 @@ void XUDRcircle(int x,int y,int rad,Display *dpy, Drawable xid, GC gc)
 void XUDRline_clip(Display *dpy,Drawable xid,GC gc,int x1,int y1,int x2,int y2,
         int xmin,int ymin,int xmax,int ymax)
 {
-register int dx,dy;
-register int tt;
+int dx,dy;
+int tt;
 
     /* Check to see if line is totally out of bounds */
     if(x1<xmin && x2<xmin) return;

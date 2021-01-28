@@ -922,7 +922,7 @@ static void print_usage(char *prog_name, FILE *out)
 
 static long gb_flip_cycle(void)
 {
-  register long *ii, *jj;
+  long *ii, *jj;
   for (ii = &A[1], jj = &A[32]; jj <= &A[55]; ii++, jj++)
     *ii = mod_diff(*ii, *jj);
   for (jj = &A[1]; ii <= &A[55]; ii++, jj++)
@@ -934,8 +934,8 @@ static long gb_flip_cycle(void)
 static void gb_init_rand(long seed)
 
 {
-  register long i;
-  register long prev = seed, next = 1;
+  long i;
+  long prev = seed, next = 1;
   seed = prev = mod_diff(prev, 0);
   A[55] = prev;
   for (i = 21; i; i = (i + 21) % 55)

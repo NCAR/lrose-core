@@ -28,9 +28,9 @@ typedef unsigned long Pixel;
 static int Get_XColors(Display *dpy, XWindowAttributes *win_info,
 		       Window root, XColor **colors);
 
-static int _swapshort(register char *bp, unsigned n);
+static int _swapshort(char *bp, unsigned n);
 
-static int _swaplong(register char *bp, register unsigned n);
+static int _swaplong(char *bp, unsigned n);
 
 static int Image_Size(XImage *image);
 
@@ -585,10 +585,10 @@ static int Get_XColors(Display * dpy,
  * _swapshort()
  */
 
-static int _swapshort(register char *bp, unsigned n)
+static int _swapshort(char *bp, unsigned n)
 {
-  register char c;
-  register char *ep = bp + n;
+  char c;
+  char *ep = bp + n;
 
   while (bp < ep)
   {
@@ -605,11 +605,11 @@ static int _swapshort(register char *bp, unsigned n)
  * _swaplong()
  */
 
-static int _swaplong(register char *bp, register unsigned n)
+static int _swaplong(char *bp, unsigned n)
 {
-  register char c;
-  register char *ep = bp + n;
-  register char *sp;
+  char c;
+  char *ep = bp + n;
+  char *sp;
 
   while (bp < ep)
   {
