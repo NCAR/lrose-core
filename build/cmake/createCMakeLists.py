@@ -504,6 +504,10 @@ def writeCMakeListsTop(dir):
     fo.write('set(PACKAGE "LROSE-CORE" CACHE STRING "")\n')
     fo.write('\n')
 
+    fo.write('# Finding pkg-config\n')
+    fo.write('find_package(PkgConfig REQUIRED)\n')
+    fo.write('\n')
+
     fo.write('# Finding Qt on mac OSX\n')
     fo.write('\n')
     fo.write('if(APPLE)\n')
@@ -1078,6 +1082,7 @@ def decodeLibLine(line):
         #    libs.append("Qt5Gui")
         #    libs.append("Qt5Widgets")
         #    libs.append("Qt5Network")
+        #    libs.append("Qt5Qml")
 
     return libs
 
@@ -1236,6 +1241,23 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("    )\n")
     fo.write("\n")
 
+    if (needQt):
+        fo.write("# QT5\n")
+        fo.write("\n")
+        fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
+        fo.write("set (CMAKE_AUTOMOC ON)\n")
+        fo.write("set (CMAKE_AUTORCC ON)\n")
+        fo.write("set (CMAKE_AUTOUIC ON)\n")
+        fo.write("find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n")
+        fo.write("\n")
+
+        fo.write("pkg_search_module(Qt5Core REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Gui REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Widgets REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Network REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Qml REQUIRED)\n")
+        fo.write("\n")
+
     fo.write("# include directories\n")
     fo.write("\n")
     for lib in libList:
@@ -1256,6 +1278,14 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
     fo.write("endif()\n")
     fo.write("\n")
+
+    if (needQt):
+        fo.write("include_directories(${Qt5Core_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Gui_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Widgets_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Network_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Qml_INCLUDE_DIRS})\n")
+        fo.write("\n")
 
     fo.write("# link directories\n")
     fo.write("\n")
@@ -1284,6 +1314,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("\n")
     for lib in linkLibList:
         fo.write("link_libraries (%s)\n" % lib)
+
     if (needQt):
         fo.write("link_libraries (${Qt5Core_LIBRARIES})\n")
         fo.write("link_libraries (${Qt5Gui_LIBRARIES})\n")
@@ -1296,31 +1327,6 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("# from their associated paramdef.<app> file\n")
     fo.write("\n")
     fo.write("makeTdrpParams()\n")
-
-    if (needQt):
-        fo.write("# QT5\n")
-        fo.write("\n")
-        fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
-        fo.write("set (CMAKE_AUTOMOC ON)\n")
-        fo.write("set (CMAKE_AUTORCC ON)\n")
-        fo.write("set (CMAKE_AUTOUIC ON)\n")
-        fo.write("find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n")
-        fo.write("\n")
-
-        fo.write("include(FindPkgConfig)\n")
-        fo.write("pkg_search_module(Qt5Core REQUIRED)\n")
-        fo.write("pkg_search_module(Qt5Gui REQUIRED)\n")
-        fo.write("pkg_search_module(Qt5Widgets REQUIRED)\n")
-        fo.write("pkg_search_module(Qt5Network REQUIRED)\n")
-        fo.write("pkg_search_module(Qt5Qml REQUIRED)\n")
-        fo.write("\n")
-
-        fo.write("include_directories(${Qt5Core_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt5Gui_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt5Widgets_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt5Network_INCLUDE_DIRS})\n")
-        fo.write("include_directories(${Qt5Qml_INCLUDE_DIRS})\n")
-        fo.write("\n")
 
     fo.write("# application\n")
     fo.write("\n")
