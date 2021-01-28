@@ -77,6 +77,7 @@ codebase/autom4te.cache
 CMakeLists.txt
 CMakeCache.txt
 CMakeFiles
+codebase/build
 
 # distro makefiles
 
