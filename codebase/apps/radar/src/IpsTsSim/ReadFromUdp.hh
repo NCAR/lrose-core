@@ -54,8 +54,6 @@
 #include <radar/IpsTsInfo.hh>
 #include <Radx/RadxTime.hh>
 
-using namespace std;
-
 ////////////////////////
 // This class
 

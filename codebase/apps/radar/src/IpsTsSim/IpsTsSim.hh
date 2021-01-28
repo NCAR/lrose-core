@@ -51,8 +51,6 @@
 #include <radar/iwrf_data.h>
 #include <radar/ips_ts_data.h>
 
-using namespace std;
-
 ////////////////////////
 // This class
 
