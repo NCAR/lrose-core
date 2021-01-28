@@ -1275,7 +1275,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
         fo.write("link_directories (%s/lib)\n" % dir)
     fo.write("link_directories(${CMAKE_INSTALL_PREFIX}/lib)\n")
     fo.write("if (DEFINED X11_LIB_DIR)\n")
-    fo.write("  link_directories (${X11_LIB_DIR}/lib)\n")
+    fo.write("  link_directories (${X11_LIB_DIR})\n")
     fo.write("endif()\n")
     fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
     fo.write("  link_directories (${netCDF_INSTALL_PREFIX}/lib)\n")
