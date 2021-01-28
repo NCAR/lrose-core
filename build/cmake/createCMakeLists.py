@@ -79,10 +79,6 @@ def main():
     parser.add_option('--pkg',
                       dest='pkg', default="lrose-core",
                       help='Name of package being built')
-    parser.add_option('--osx',
-                      dest='osx', default=False,
-                      action="store_true",
-                      help='Configure for MAC OSX')
     parser.add_option('--renewTemplates',
                       dest='renewTemplates', default=False,
                       action="store_true",
@@ -128,7 +124,6 @@ def main():
             print("  install prefix dir: ", options.installPrefix, file=sys.stderr)
         print("  static        : ", options.static, file=sys.stderr)
         print("  pkg           : ", options.pkg, file=sys.stderr)
-        print("  osx           : ", options.osx, file=sys.stderr)
         print("  verboseMake   : ", options.verboseMake, file=sys.stderr)
         print("  withJasper    : ", options.withJasper, file=sys.stderr)
         print("=============================================", file=sys.stderr)
@@ -1137,35 +1132,19 @@ def getExtendedLibs(linkLibList):
 
     # extend the lib list with required standard libs
 
-    if (options.osx):
-        extendLibs = [ 'Ncxx',
-                       'netcdf',
-                       'hdf5_cpp',
-                       'hdf5_hl',
-                       'hdf5',
-                       'fftw3',
-                       'X11',
-                       'Xext',
-                       'pthread',
-                       'png',
-                       'z',
-                       'bz2',
-                       'm' ]
-    else:
-        extendLibs = [ 'Ncxx',
-                       'netcdf',
-                       'hdf5_cpp',
-                       'hdf5_hl',
-                       'hdf5',
-                       'fftw3',
-                       'X11',
-                       'Xext',
-                       'pthread',
-                       'png',
-                       'z',
-                       'bz2',
-                       'm',
-                       'gfortran' ]
+    extendLibs = [ 'Ncxx',
+                   'netcdf',
+                   'hdf5_cpp',
+                   'hdf5_hl',
+                   'hdf5',
+                   'fftw3',
+                   'X11',
+                   'Xext',
+                   'pthread',
+                   'png',
+                   'z',
+                   'bz2',
+                   'm' ]
 
     if (options.withJasper):
         extendLibs.append('jasper')
@@ -1243,7 +1222,6 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("# created %s\n" % datetime.now())
     fo.write("#\n")
     fo.write("# dir: %s\n" % appDir)
-    fo.write("# osx: %s\n" % options.osx)
     fo.write("###############################################\n")
     fo.write("\n")
 
