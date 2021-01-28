@@ -95,10 +95,6 @@ def main():
                       dest='withJasper', default=False,
                       action="store_true",
                       help='Set if jasper library is installed. This provides support for jpeg compression in grib files.')
-    parser.add_option('--noFindNetcdf',
-                      dest='noFindNetcdf', default=False,
-                      action="store_true",
-                      help='Do not run a find for NetCDF and HDF5. Used if these libraries are compiled as part of the build process, rather than using system-installed libs.')
 
     (options, args) = parser.parse_args()
 
@@ -520,10 +516,15 @@ def writeCMakeListsTop(dir):
     fo.write('endif(APPLE)\n')
 
     fo.write('find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n')
-    if (not options.noFindNetcdf):
-        fo.write('find_package (HDF5 COMPONENTS C CXX REQUIRED)\n')
-        fo.write('find_package (NETCDF REQUIRED)\n')
-        fo.write('message("netCDF_INSTALL_PREFIX is ${netCDF_INSTALL_PREFIX}")\n')
+    fo.write('find_package (HDF5 COMPONENTS C CXX)\n')
+    fo.write('find_package (NETCDF)\n')
+    fo.write("if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)\n")
+    fo.write("  get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)\n")
+    fo.write("endif()\n")
+    fo.write('message("netCDF_INSTALL_PREFIX: ${netCDF_INSTALL_PREFIX}")\n')
+    fo.write('message("HDF5_INSTALL_PREFIX: ${HDF5_INSTALL_PREFIX}")\n')
+    fo.write('message("HDF5_CXX_INCLUDE_DIR: ${HDF5_CXX_INCLUDE_DIR}")\n')
+    fo.write('message("HDF5_C_INCLUDE_DIR: ${HDF5_C_INCLUDE_DIR}")\n')
     fo.write('\n')
 
     if (len(options.installPrefix) == 0):
@@ -820,8 +821,12 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
     fo.write("  include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
     fo.write("endif()\n")
-    fo.write("include_directories (${HDF5_CXX_INCLUDE_DIR})\n")
-    fo.write("include_directories (${HDF5_C_INCLUDE_DIR})\n")
+    fo.write("if (DEFINED HDF5_CXX_INCLUDE_DIR)\n")
+    fo.write("  include_directories (${HDF5_CXX_INCLUDE_DIR})\n")
+    fo.write("endif()\n")
+    fo.write("if (DEFINED HDF5_C_INCLUDE_DIR)\n")
+    fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
+    fo.write("endif()\n")
     fo.write("\n")
 
     fo.write("# source files\n")
@@ -1264,9 +1269,16 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("if (DEFINED netCDF_INSTALL_PREFIX)\n")
     fo.write("  link_directories (${netCDF_INSTALL_PREFIX}/lib)\n")
     fo.write("endif()\n")
-    fo.write("link_directories(${HDF5_LIBRARY_DIRS})\n")
+    fo.write("if (DEFINED HDF5_INSTALL_PREFIX)\n")
+    fo.write("  link_directories (${HDF5_INSTALL_PREFIX}/lib)\n")
+    fo.write("endif()\n")
+    fo.write("if (DEFINED HDF5_LIBRARY_DIRS)\n")
+    fo.write("  link_directories(${HDF5_LIBRARY_DIRS})\n")
+    fo.write("endif()\n")
     fo.write("# add serial, for odd Debian hdf5 install\n")
-    fo.write("link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
+    fo.write("if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
+    fo.write("  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
+    fo.write("endif()\n")
     fo.write("\n")
 
     fo.write("# link libs\n")
