@@ -520,7 +520,7 @@ def writeCMakeListsTop(dir):
     fo.write('endif(APPLE)\n')
 
     fo.write('find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n')
-    if (NOT options.noFindNetcdf):
+    if (not options.noFindNetcdf):
         fo.write('find_package (HDF5 COMPONENTS C CXX REQUIRED)\n')
         fo.write('find_package (NETCDF REQUIRED)\n')
         fo.write('message("netCDF_INSTALL_PREFIX is ${netCDF_INSTALL_PREFIX}")\n')
