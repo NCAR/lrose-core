@@ -467,7 +467,7 @@ def writeCMakeListsTop(dir):
     fo.write('#\n')
     fo.write('###############################################\n')
     fo.write('\n')
-    fo.write('cmake_minimum_required(VERSION 2.8)\n')
+    fo.write('cmake_minimum_required(VERSION 3.0)\n')
     fo.write('\n')
     fo.write('project (lrose-core)\n')
     fo.write('\n')
@@ -834,6 +834,9 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("if (DEFINED HDF5_C_INCLUDE_DIR)\n")
     fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
     fo.write("endif()\n")
+    fo.write("if(IS_DIRECTORY /usr/local/include)\n")
+    fo.write("  include_directories (/usr/local/include)\n")
+    fo.write("endif()\n")
     fo.write("\n")
 
     fo.write("# source files\n")
@@ -844,12 +847,17 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("   )\n")
     fo.write("\n")
 
-    fo.write("# build library\n")
-    fo.write("\n")
     if (options.static):
+        fo.write("# build static library\n")
         fo.write("add_library (%s STATIC ${SRCS})\n" % libName)
     else:
-        fo.write("add_library (%s SHARED ${SRCS})\n" % libName)
+        fo.write('if(APPLE)\n')
+        fo.write("# for apple, force static build\n")
+        fo.write("  add_library (%s STATIC ${SRCS})\n" % libName)
+        fo.write('else(APPLE)\n')
+        fo.write("# build shared library\n")
+        fo.write("  add_library (%s SHARED ${SRCS})\n" % libName)
+        fo.write('endif(APPLE)\n')
     fo.write("\n")
 
     fo.write("# install\n")
@@ -1277,6 +1285,9 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("if (DEFINED HDF5_C_INCLUDE_DIR)\n")
     fo.write("  include_directories (${HDF5_C_INCLUDE_DIR})\n")
     fo.write("endif()\n")
+    fo.write("if(IS_DIRECTORY /usr/local/include)\n")
+    fo.write("  include_directories (/usr/local/include)\n")
+    fo.write("endif()\n")
     fo.write("\n")
 
     if (needQt):
@@ -1307,6 +1318,9 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("# add serial, for odd Debian hdf5 install\n")
     fo.write("if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
     fo.write("  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
+    fo.write("endif()\n")
+    fo.write("if(IS_DIRECTORY /usr/local/lib)\n")
+    fo.write("  link_directories (/usr/local/lib)\n")
     fo.write("endif()\n")
     fo.write("\n")
 
