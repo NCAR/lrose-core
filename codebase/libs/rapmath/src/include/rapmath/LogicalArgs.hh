@@ -24,7 +24,7 @@ public:
    * Constructor, arguments map directly to the members
    */
   LogicalArg(const std::string &name, double value, bool missingValue,
-	     const FindSimple::Compare_t &test);
+	     const MathFindSimple::Compare_t &test);
 
   /**
    * Empty constructor
@@ -57,7 +57,7 @@ private:
   double _value;               /**< The value to compare to */
   bool _valueIsMissing;        /**< Special missing value
 				*  comparison indicator */
-  FindSimple::Compare_t _op;  /**< The test */
+  MathFindSimple::Compare_t _op;  /**< The test */
   MathLoopData *_data;         /**< place to store pointer to use */
 
 };

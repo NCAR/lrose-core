@@ -25,23 +25,23 @@ MY_CPPCHECKFLAGS = #-AddStyleFAA -exclude-rules="4.14,4.09,4.12,4.16"
 HDRS = \
 
 CPPC_SRCS = \
-AssignmentNode.cc \
-BinaryArgs.cc \
-BinaryNode.cc \
-Find.cc \
-FindSimple.cc \
-FloatUserData.cc \
-LeafContent.cc \
-LeafNode.cc \
-LogicalArgs.cc \
-LogicalNode.cc \
-MathData.cc \
-MathDataSimple.cc \
-MathParser.cc \
-ProcessingNode.cc \
-SpecialUserData.cc \
-StatusUserData.cc \
-UnaryNode.cc
+	AssignmentNode.cc \
+	BinaryArgs.cc \
+	BinaryNode.cc \
+	Find.cc \
+	FloatUserData.cc \
+	LeafContent.cc \
+	LeafNode.cc \
+	LogicalArgs.cc \
+	LogicalNode.cc \
+	MathData.cc \
+	MathDataSimple.cc \
+	MathFindSimple.cc \
+	MathParser.cc \
+	ProcessingNode.cc \
+	SpecialUserData.cc \
+	StatusUserData.cc \
+	UnaryNode.cc
 
 #
 # general targets

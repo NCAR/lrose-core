@@ -1,20 +1,20 @@
 /**
- * @file FindSimple.cc
+ * @file MathFindSimple.cc
  */
-#include <rapmath/FindSimple.hh>
+#include <rapmath/MathFindSimple.hh>
 #include <rapmath/LogicalArgs.hh>
 #include <toolsa/LogStream.hh>
 using std::string;
 
 //------------------------------------------------------------------
-FindSimple::FindSimple(void)
+MathFindSimple::MathFindSimple(void)
 {
   _ok = false;
 }
 
 //------------------------------------------------------------------
-FindSimple::FindSimple(const string &name, const string &comp,
-		       const string &value)
+MathFindSimple::MathFindSimple(const string &name, const string &comp,
+                               const string &value)
 {
   _ok = true;
   _data = LeafContent(name);
@@ -62,12 +62,12 @@ FindSimple::FindSimple(const string &name, const string &comp,
 }
 
 //------------------------------------------------------------------
-FindSimple::~FindSimple(void)
+MathFindSimple::~MathFindSimple(void)
 {
 }
 
 //------------------------------------------------------------------
-void FindSimple::print(void) const
+void MathFindSimple::print(void) const
 {
   _data.print();
   if (_missingValue)
@@ -81,8 +81,8 @@ void FindSimple::print(void) const
 }
 
 //------------------------------------------------------------------
-bool FindSimple::satisfiesCondition(const MathData *data,
-				    const int ipt) const
+bool MathFindSimple::satisfiesCondition(const MathData *data,
+                                        const int ipt) const
 {
   if (_missingValue)
   {
@@ -113,68 +113,68 @@ bool FindSimple::satisfiesCondition(const MathData *data,
     bool stat = false;
     switch (_test)
     {
-    case GT:
-      stat = v > _value;
-      break;
-    case GE:
-      stat = v >= _value;
-      break;
-    case LT:
-      stat = v < _value;
-      break;
-    case LE:
-      stat = v <= _value;
-      break;
-    case EQ:
-      stat = v == _value;
-      break;
-    default:
-      stat = false;
-      break;
+      case GT:
+        stat = v > _value;
+        break;
+      case GE:
+        stat = v >= _value;
+        break;
+      case LT:
+        stat = v < _value;
+        break;
+      case LE:
+        stat = v <= _value;
+        break;
+      case EQ:
+        stat = v == _value;
+        break;
+      default:
+        stat = false;
+        break;
     }
     return stat;
   }
 }
 
 //------------------------------------------------------------------
-string FindSimple::comparisonString(const Compare_t &c)
+string MathFindSimple::comparisonString(const Compare_t &c)
 {
   string ret;
   switch (c)
   {
-  case GT:
-    ret = ">";
-    break;
-  case GE:
-    ret = ">=";
-    break;
-  case EQ:
-    ret = "=";
-    break;
-  case LE:
-    ret = "<=";
-    break;
-  case LT:
-    ret = "<";
-    break;
-  default:
-    ret = "?";
-    break;
+    case GT:
+      ret = ">";
+      break;
+    case GE:
+      ret = ">=";
+      break;
+    case EQ:
+      ret = "=";
+      break;
+    case LE:
+      ret = "<=";
+      break;
+    case LT:
+      ret = "<";
+      break;
+    default:
+      ret = "?";
+      break;
   }
   return ret;
 }
 
 //------------------------------------------------------------------
-LogicalArg FindSimple::getLogicalArg(void) const
+LogicalArg MathFindSimple::getLogicalArg(void) const
 {
   return LogicalArg(_data.getName(), _value, _missingValue, _test);
 }
 
 //------------------------------------------------------------------
-bool FindSimple::getSimpleCompare(std::string &compareName,
-				  FindSimple::Compare_t &c,
-				  double &compareV,
-				  bool &compareMissing) const
+bool MathFindSimple::getSimpleCompare(std::string &compareName,
+                                      MathFindSimple::Compare_t &c,
+                                      double &compareV,
+                                      bool &compareMissing) const
 {
   compareName = _data.getName();
   c = _test;

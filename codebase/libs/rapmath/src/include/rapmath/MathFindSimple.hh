@@ -1,7 +1,7 @@
 /**
- * @file FindSimple.hh 
+ * @file MathFindSimple.hh 
  * @brief Mimics matlab 'find', logical test on one input
- * @class FindSimple
+ * @class MathFindSimple
  * @brief Mimics matlab 'find', logical tests on one input
  *
  * A simple comparison is a variable tested relative to a value, or to missing
@@ -19,7 +19,7 @@
 class LogicalArg;
 
 //------------------------------------------------------------------
-class FindSimple 
+class MathFindSimple 
 {
 public:
 
@@ -39,7 +39,7 @@ public:
   /**
    * Empty constructor
    */
-  FindSimple(void);
+  MathFindSimple(void);
 
   /**
    * Constructor with tokens
@@ -50,13 +50,13 @@ public:
    *
    * "A < 17"  name="A",  comp="<",  value="17"
    */
-  FindSimple(const std::string &name, const std::string &comp, 
+  MathFindSimple(const std::string &name, const std::string &comp, 
 	     const std::string &value);
 
   /**
    * Destructor
    */
-  virtual ~FindSimple(void);
+  virtual ~MathFindSimple(void);
 
   /**
    * @return true if well formed (parsed string success, non-empty)
@@ -110,7 +110,7 @@ public:
    * @param[out] compareMissing True if checking data for missing
    */
   bool getSimpleCompare(std::string &compareName,
-			FindSimple::Compare_t &c,
+			MathFindSimple::Compare_t &c,
 			double &compareV,
 			bool &compareMissing) const;
 

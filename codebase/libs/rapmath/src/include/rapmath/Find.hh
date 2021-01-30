@@ -7,7 +7,7 @@
 
 #ifndef FIND_H
 #define FIND_H
-#include <rapmath/FindSimple.hh>
+#include <rapmath/MathFindSimple.hh>
 #include <rapmath/VolumeData.hh>
 #include <rapmath/MathLoopData.hh>
 #include <string>
@@ -127,7 +127,7 @@ public:
   /**
    * @return reference to the Simple test (makes sense only when isSimple()
    */
-  inline FindSimple &getSimple(void) {return _simple;}
+  inline MathFindSimple &getSimple(void) {return _simple;}
 
   /**
    * Parse a string for an assumed logical and/or 
@@ -157,7 +157,7 @@ public:
    * @param[out] compareV  The value compared to
    * @param[out] compareMissing True if checking data for missing
    */
-  bool getSimpleCompare(std::string &compareName, FindSimple::Compare_t &c,
+  bool getSimpleCompare(std::string &compareName, MathFindSimple::Compare_t &c,
 			double &compareV, bool &compareMissing) const;
 
   /**
@@ -182,7 +182,7 @@ private:
   /**
    * The simple test when not multiple tests (_isSimple=true)
    */
-  FindSimple _simple;
+  MathFindSimple _simple;
 
   std::string::size_type _nextToken(const std::string &s,
 				    const std::string::size_type i,

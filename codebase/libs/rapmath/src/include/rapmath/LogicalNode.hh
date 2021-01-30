@@ -46,7 +46,7 @@ public:
    * @param[out]  assignMissing  True when Variable is set missing when true
    */
   bool getSimpleCompare(std::string &compareName, double &compareV,
-			bool &compareMissing, FindSimple::Compare_t &c,
+			bool &compareMissing, MathFindSimple::Compare_t &c,
 			std::string &assignName, double &assignV,
 			bool &assignMissing) const;
 
@@ -62,7 +62,7 @@ public:
    * @param[out]  assignFromName  Variable being assigned from when true
    */
   bool getSimpleCompare(std::string &compareName, double &compareV,
-			bool &compareMissing, FindSimple::Compare_t &c,
+			bool &compareMissing, MathFindSimple::Compare_t &c,
 			std::string &assignToName,
 			std::string &assignFromName) const;
 

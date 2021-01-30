@@ -583,7 +583,7 @@ bool ProcessingNode::getSimpleAssign(std::string &from, std::string &to) const
 //-------------------------------------------------------------------
 bool ProcessingNode::getSimpleCompare(std::string &compareName,
 				      double &compareV,  bool &compareMissing,
-				      FindSimple::Compare_t &c,
+				      MathFindSimple::Compare_t &c,
 				      std::string &assignName, double &assignV,
 				      bool &assignMissing) const
 {
@@ -666,7 +666,7 @@ bool ProcessingNode::getAssignSimpleBinaryArgs(BinaryArgs &args) const
 //-------------------------------------------------------------------
 bool ProcessingNode::getSimpleCompare(std::string &compareName,
 				      double &compareV,  bool &compareMissing, 
-				      FindSimple::Compare_t &c,
+				      MathFindSimple::Compare_t &c,
 				      std::string &assignToName,
 				      std::string &assignFromName) const
 {
