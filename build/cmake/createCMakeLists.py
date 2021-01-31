@@ -76,9 +76,6 @@ def main():
                       dest='static', default=False,
                       action="store_true",
                       help='Create static lib objects. Default is shared')
-    parser.add_option('--pkg',
-                      dest='pkg', default="lrose-core",
-                      help='Name of package being built')
     parser.add_option('--renewTemplates',
                       dest='renewTemplates', default=False,
                       action="store_true",
@@ -123,7 +120,6 @@ def main():
         else:
             print("  install prefix dir: ", options.installPrefix, file=sys.stderr)
         print("  static        : ", options.static, file=sys.stderr)
-        print("  pkg           : ", options.pkg, file=sys.stderr)
         print("  verboseMake   : ", options.verboseMake, file=sys.stderr)
         print("  withJasper    : ", options.withJasper, file=sys.stderr)
         print("=============================================", file=sys.stderr)

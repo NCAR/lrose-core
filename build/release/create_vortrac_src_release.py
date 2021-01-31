@@ -363,6 +363,8 @@ class LroseVortrac < Formula
   version '{1}'
   sha256 '{2}'
 
+  depends_on 'libx11'
+  depends_on 'libext'
   depends_on 'qt'
   depends_on 'armadillo'
   depends_on 'libzip'
@@ -373,7 +375,7 @@ class LroseVortrac < Formula
   def install
 
     # Build/install vortrac
-    ENV['LROSE_ROOT_DIR'] = prefix
+    ENV['LROSE_INSTALL_DIR'] = prefix
     system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
     system "make install"
 

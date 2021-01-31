@@ -366,14 +366,13 @@ class LroseFractl < Formula
   depends_on 'libzip'
   depends_on 'cmake'
   depends_on 'eigen'
-  depends_on 'geographiclib'
   depends_on 'rsync'
   depends_on 'lrose-core'
 
   def install
 
     # Build/install fractl
-    ENV['LROSE_ROOT_DIR'] = prefix
+    ENV['LROSE_INSTALL_DIR'] = prefix
     system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
     system "make install"
 

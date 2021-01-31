@@ -195,6 +195,10 @@ def main():
     logPath = prepareLogFile("setup-autoconf");
     setupAutoconf()
 
+    # create CMakeFiles.txt files for cmake
+    
+    createCMakeFiles()
+
     # create the release information file
     
     createReleaseInfoFile()
@@ -225,9 +229,9 @@ def main():
 
     # create the brew formula for OSX builds
 
-    if (options.osx):
-        logPath = prepareLogFile("create-brew-formula");
-        createBrewFormula()
+    #if (options.osx):
+    logPath = prepareLogFile("create-brew-formula");
+    createBrewFormula()
 
     # move the tar file up into release dir
 
@@ -365,6 +369,18 @@ def setupAutoconf():
                  " --pkg " + options.package + argsStr)
 
 ########################################################################
+# create CMakeFiles
+
+def createCMakeFiles():
+
+    os.chdir(coreDir)
+
+    if (options.static):
+        shellCmd("./build/cmake/createCMakeLists --coreDir . --static")
+    else:
+        shellCmd("./build/cmake/createCMakeLists --coreDir .")
+
+########################################################################
 # Run qmake for QT apps such as HawkEye to create _moc files
 
 def createQtMocFiles(appDir):
@@ -475,9 +491,9 @@ def createTarFile():
     shellCmd("tar cvfzh " + tarName + " " + releaseName)
     
 ########################################################################
-# template for brew formula
+# template for brew formula using autoconf
 
-formulaBody = """
+formulaBodyAuto = """
 
 require 'formula'
 
@@ -489,8 +505,8 @@ class LroseCore < Formula
   version '{1}'
   sha256 '{2}'
 
-  depends_on 'hdf5' => 'enable-cxx'
-  depends_on 'netcdf' => 'enable-cxx-compat'
+  depends_on 'hdf5'
+  depends_on 'netcdf'
   depends_on 'udunits'
   depends_on 'fftw'
   depends_on 'flex'
@@ -502,15 +518,76 @@ class LroseCore < Formula
   depends_on 'pkg-config'
   depends_on 'cmake'
   depends_on 'rsync'
-  depends_on :x11
+  depends_on 'libx11'
+  depends_on 'libxext'
 
   def install
 
     ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
+    ENV['LROSE_INSTALL_DIR'] = prefix
     Dir.chdir("codebase")
+    system
     system "./configure", "--disable-dependency-tracking", "--prefix=#{{prefix}}"
     system "make install"
     Dir.chdir("..")
+    system "rsync", "-av", "share", "#{{prefix}}"
+
+  end
+
+  def test
+    system "#{{bin}}/RadxPrint", "-h"
+  end
+
+end
+"""
+
+########################################################################
+# template for brew formula using cmake
+
+formulaBodyCmake = """
+
+require 'formula'
+
+class LroseCore < Formula
+
+  homepage 'https://github.com/NCAR/lrose-core'
+
+  url '{0}'
+  version '{1}'
+  sha256 '{2}'
+
+  depends_on 'hdf5'
+  depends_on 'netcdf'
+  depends_on 'udunits'
+  depends_on 'fftw'
+  depends_on 'flex'
+  depends_on 'jpeg'
+  depends_on 'libpng'
+  depends_on 'libzip'
+  depends_on 'qt'
+  depends_on 'szip'
+  depends_on 'pkg-config'
+  depends_on 'cmake'
+  depends_on 'rsync'
+  depends_on 'libx11'
+  depends_on 'libxext'
+
+  def install
+
+    ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
+    ENV['LROSE_INSTALL_DIR'] = prefix
+    Dir.chdir("codebase")
+    Dir.mkdir("build")
+    Dir.chdir("build")
+    system
+    system "cmake", "..", *args
+    Dir.chdir("libs")
+    system "make -j 8 install"
+    Dir.chdir("../apps/tdrp/src/tdrp_gen")
+    system "make -j 8 install"
+    Dir.chdir("../../..")
+    system "make -j 8 install"
+    Dir.chdir("../..")
     system "rsync", "-av", "share", "#{{prefix}}"
 
   end
@@ -535,7 +612,7 @@ def buildLroseCoreFormula(tar_url, tar_name, formula_name):
     version = tar_name[dash+1:period]
     result = str(subprocess.check_output(("sha256sum", tar_name), text=True))
     checksum = result.split()[0]
-    formula = formulaBody.format(tar_url, version, checksum)
+    formula = formulaBodyCmake.format(tar_url, version, checksum)
     outf = open(formula_name, 'w')
     outf.write(formula)
     outf.close()

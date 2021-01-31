@@ -365,21 +365,21 @@ class LroseSamurai < Formula
 
   depends_on 'hdf5' => 'enable-cxx'
   depends_on 'netcdf' => 'enable-cxx-compat'
-  depends_on :x11
+  depends_on 'libx11'
+  depends_on 'libxext'
   depends_on 'qt'
   depends_on 'fftw'
   depends_on 'libomp'
   depends_on 'libzip'
   depends_on 'cmake'
   depends_on 'eigen'
-  depends_on 'geographiclib'
   depends_on 'rsync'
   depends_on 'lrose-core'
 
   def install
 
     # Build/install samurai
-    ENV['LROSE_ROOT_DIR'] = prefix
+    ENV['LROSE_INSTALL_DIR'] = prefix
     system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
     system "make install"
 
