@@ -487,7 +487,7 @@ def buildPackage():
 
         # install perl5
         
-        perl5Dir = os.path.join(prefix, "lib/perl5")
+        perl5Dir = os.path.join(buildDir, "lib/perl5")
         try:
             os.makedirs(perl5Dir)
         except:
