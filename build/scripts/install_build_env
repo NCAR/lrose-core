@@ -1,6 +1,0 @@
-#! /bin/bash
-
-# copy the build env to the home directory
-
-/bin/cp build_env ~/.build_env
-
