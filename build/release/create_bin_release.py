@@ -72,6 +72,10 @@ def main():
     parser.add_option('--logDir',
                       dest='logDir', default=logDirDefault,
                       help='Logging dir')
+    parser.add_option('--automake',
+                      dest='automake', default=False,
+                      action="store_true",
+                      help='Use automake for the build. Default is cmake')
     parser.add_option('--force',
                       dest='force', default=False,
                       action="store_true",
@@ -211,7 +215,10 @@ def main():
     # build the package
 
     logPath = prepareLogFile("build-package");
-    buildPackage()
+    if (options.automake):
+        buildPackageAutomake()
+    else:
+        buildPackageCmake()
 
     # detect which dynamic libs are needed
     # copy the dynamic libraries into runtime area:
@@ -404,9 +411,9 @@ def buildNetcdf():
             shellCmd("./build_and_install_netcdf -x " + buildDir)
 
 ########################################################################
-# build package
+# build package using automake
 
-def buildPackage():
+def buildPackageAutomake():
 
     global logPath
 
@@ -461,8 +468,7 @@ def buildPackage():
 
     # install the libraries
 
-    logPath = prepareLogFile("install-libs-to-tmp");
-
+    logPath = prepareLogFile("install-libs");
     cmd = "make -k install-strip"
     shellCmd(cmd)
 
@@ -475,42 +481,92 @@ def buildPackage():
 
     # install the apps
 
-    logPath = prepareLogFile("install-apps-to-tmp");
+    logPath = prepareLogFile("install-apps");
     cmd = "make -k install-strip"
     shellCmd(cmd)
 
     # optionally install the scripts
 
     if (options.installScripts):
+        installScripts()
 
-        logPath = prepareLogFile("install-scripts");
+########################################################################
+# build package using cmake
 
-        # install perl5
+def buildPackageCmake():
+
+    global logPath
+
+    # set the environment
+
+    runtimeLibRelDir = package + "_runtime_libs"
+
+    # print out environment
+
+    logPath = prepareLogFile("print-environment");
+    cmd = "env"
+    shellCmd(cmd)
+
+    # the build is done relative to the current dir
+
+    cmakeBuildDir = os.path.join(runDir, "codebase/build")
+    os.makedirs(cmakeBuildDir)
+    os.chdir(cmakeBuildDir)
+
+    # run cmake
+
+    logPath = prepareLogFile("run-cmake")
+    cmd = "cmake -DCMAKE_INSTALL_PREFIX=" + buildDir + " .."
+    shellCmd(cmd)
+
+    # build and install
+
+    logPath = prepareLogFile("build-and-install");
+    cmd = "make -j 8 install"
+    shellCmd(cmd)
+
+    # optionally install the scripts
+
+    if (options.installScripts):
+        installScripts()
+
+########################################################################
+# install the scripts
+
+def installScripts():
+
+    logPath = prepareLogFile("install-scripts");
+
+    baseDir = os.path.join(runDir, "codebase")
+    os.chdir(baseDir)
+
+    # install perl5
+    
+    perl5Dir = os.path.join(buildDir, "lib/perl5")
+    try:
+        os.makedirs(perl5Dir)
+    except:
+        print("Dir exists: " + perl5Dir, file=sys.stderr)
+
+    perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
+    if (os.path.isdir(perl5LibDir)):
+        os.chdir(perl5LibDir)
+        shellCmd("rsync -av *pm " + perl5Dir)
+
+    # procmap
         
-        perl5Dir = os.path.join(buildDir, "lib/perl5")
-        try:
-            os.makedirs(perl5Dir)
-        except:
-            print("Dir exists: " + perl5Dir, file=sys.stderr)
+    scriptsDir = os.path.join(buildDir, "lib/perl5")
+    procmapScriptsDir = os.path.join(baseDir, "apps/procmap/src/scripts")
+    if (os.path.isdir(procmapScriptsDir)):
+        os.chdir(procmapScriptsDir)
+        shellCmd("./install_scripts.lrose " + scriptsDir)
 
-        perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
-        if (os.path.isdir(perl5LibDir)):
-            os.chdir(os.path.join(baseDir, "libs/perl5/src"))
-            shellCmd("rsync -av *pm " + perl5Dir)
-
-        # procmap
-
-        procmapScriptsDir = os.path.join(baseDir, "apps/procmap/src/scripts")
-        if (os.path.isdir(procmapScriptsDir)):
-            os.chdir(procmapScriptsDir)
-            shellCmd("./install_scripts.lrose " + scriptsDir)
-
-        # general
-
-        generalScriptsDir = os.path.join(baseDir, "apps/scripts/src")
-        if (os.path.isdir(generalScriptsDir)):
-            os.chdir(generalScriptsDir)
-            shellCmd("./install_scripts.lrose " + scriptsDir)
+    # general
+        
+    generalScriptsDir = os.path.join(baseDir, "apps/scripts/src")
+    if (os.path.isdir(generalScriptsDir)):
+        os.chdir(generalScriptsDir)
+        shellCmd("./install_scripts.lrose " + scriptsDir)
 
 ########################################################################
 # create the tar file
