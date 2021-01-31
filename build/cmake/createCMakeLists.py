@@ -315,31 +315,59 @@ def getSubdirList(dir):
 # find makefile template
 
 def getMakefilePath(dir):
-                    
-    makefilePath = os.path.join(dir, '__makefile.template')
 
-    if (os.path.exists(makefilePath) == False):
-        makefilePath = os.path.join(dir, 'makefile')
+    # get Makefile and template
+    
+    templateMakefilePath = os.path.join(dir, '__makefile.template')
+    upperMakefilePath = os.path.join(dir, 'Makefile')
+    lowerMakefilePath = os.path.join(dir, 'makefile')
 
-    if (os.path.exists(makefilePath) == False):
-        makefilePath = os.path.join(dir, 'Makefile')
+    # read the upper-case Makefile and template
+    # file contents as strings
+
+    templateContents = ""
+    upperContents = ""
+    try:
+        templateFp = open(templateMakefilePath, 'r')
+        templateContents = templateFp.read()
+        templateFp.close()
+    except IOError as e:
+        print("  no __makefileTemplate, dir: ", dir, file=sys.stderr)
+    try:
+        upperMakefileFp = open(upperMakefilePath, 'r')
+        upperContents = upperMakefileFp.read()
+        upperMakefileFp.close()
+    except IOError as e:
+        print("  no Makefile, dir: ", dir, file=sys.stderr)
+        
+    # update the template from Makefile if needed
+    # or vice versa
+    
+    if (upperContents.find("lrose_make_macros") > 0):
+        if (templateContents != upperContents):
+            shutil.copy(upperMakefilePath, templateMakefilePath)
+            print("  copying Makefile to template, dir: ", dir, file=sys.stderr)
+            print("  upperMakefilePath: ", upperMakefilePath, file=sys.stderr)
+            print("  templateMakefilePath: ", templateMakefilePath, file=sys.stderr)
+    elif (templateContents.find("lrose_make_macros") > 0):
+        shutil.copy(templateMakefilePath, upperMakefilePath)
+        print("  copying template to Makefile, dir: ", dir, file=sys.stderr)
+        print("  templateMakefilePath: ", templateMakefilePath, file=sys.stderr)
+        print("  upperMakefilePath: ", upperMakefilePath, file=sys.stderr)
+
+    # use lower case makefile if it exists
+    
+    makefilePath = lowerMakefilePath
+    if (os.path.exists(lowerMakefilePath)):
+        makefilePath = lowerMakefilePath
+        print("  using lower-case makefile, dir: ", dir, file=sys.stderr)
+    else:
+        makefilePath = upperMakefilePath
 
     if (os.path.exists(makefilePath) == False):
         if (options.debug):
-            print("-->> makefile not found, dir: ", dir, file=sys.stderr)
+            print("-->> Makefile not found, dir: ", dir, file=sys.stderr)
         return 'not-found'
-
-    # if template does not exist,
-    # copy makefile to template for later use if needed
-
-    if (makefilePath.find('__makefile.template') < 0):
-        templatePath = os.path.join(dir, '__makefile.template')
-        shutil.copy(makefilePath, templatePath)
-
-    if (options.renewTemplates):
-        templatePath = os.path.join(dir, '__makefile.template')
-        MakePath = os.path.join(dir, 'Makefile')
-        shutil.copy(MakePath, templatePath)
 
     return makefilePath
 
