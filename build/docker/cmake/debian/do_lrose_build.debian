@@ -76,7 +76,7 @@ fi
 
 # go to scripts dir
 
-cd ~/git/lrose-bootstrap/docker/debian
+cd ~/git/lrose-core/build/docker/cmake/debian
 
 # compute Dockerfile path
 

@@ -83,7 +83,7 @@ mkdir -p $pkgDir
 
 # go to scripts dir
 
-scriptsDir=~/git/lrose-bootstrap/docker/debian
+scriptsDir=~/git/lrose-core/build/docker/cmake/debian
 cd $scriptsDir
 
 # set the container image to run

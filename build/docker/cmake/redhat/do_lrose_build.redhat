@@ -76,7 +76,7 @@ fi
 
 # go to scripts dir
 
-cd ~/git/lrose-bootstrap/docker/redhat
+cd ~/git/lrose-core/build/docker/cmake/redhat
 
 # compute Dockerfile path
 
