@@ -70,13 +70,13 @@ def main():
                       'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
-                      help='Top-level release dir')
+                      help='Top-level release dir, default: ' + releaseDirDefault)
     parser.add_option('--tag',
                       dest='tag', default="master",
-                      help='Tag for checking out from git')
+                      help='Tag for cloning from git, default master')
     parser.add_option('--logDir',
                       dest='logDir', default=logDirDefault,
-                      help='Logging dir')
+                      help='Log dir, default: ' + logDirDefault)
     parser.add_option('--force',
                       dest='force', default=False,
                       action="store_true",
@@ -197,6 +197,7 @@ def main():
 
     # create CMakeFiles.txt files for cmake
     
+    logPath = prepareLogFile("create-cmakefiles");
     createCMakeFiles()
 
     # create the release information file
@@ -376,9 +377,9 @@ def createCMakeFiles():
     os.chdir(coreDir)
 
     if (options.static):
-        shellCmd("./build/cmake/createCMakeLists --coreDir . --static")
+        shellCmd("./build/cmake/createCMakeLists.py --coreDir . --static")
     else:
-        shellCmd("./build/cmake/createCMakeLists --coreDir .")
+        shellCmd("./build/cmake/createCMakeLists.py --coreDir .")
 
 ########################################################################
 # Run qmake for QT apps such as HawkEye to create _moc files
@@ -610,7 +611,8 @@ def buildLroseCoreFormula(tar_url, tar_name, formula_name):
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]
-    result = str(subprocess.check_output(("sha256sum", tar_name), text=True))
+    #result = str(subprocess.check_output(("sha256sum", tar_name), text=True))
+    result = str(subprocess.check_output(("sha256sum", tar_name)))
     checksum = result.split()[0]
     formula = formulaBodyCmake.format(tar_url, version, checksum)
     outf = open(formula_name, 'w')
