@@ -1,0 +1,101 @@
+#! /bin/bash
+
+###########################################################
+# build custom docker image for suse, with required packages
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Create custom docker image for lrose"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. opensuse"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. latest, leap, tumbleweed"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=opensuse
+os_version=latest
+debug=true
+
+# Parse command line options.
+while getopts hdt:v: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  creating custom docker image for lrose"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+fi
+
+# go to scripts dir
+
+cd ~/git/lrose-core/build/packages/suse
+
+# compute Dockerfile path
+
+DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
+echo "  Dockerfile path: " $DockerfilePath
+
+# create Dockerfile preamble with the FROM command
+
+mkdir -p /tmp/docker
+echo "####################################################" > ${DockerfilePath}
+echo "FROM ${os_type}:${os_version}" >> ${DockerfilePath}
+echo "#" >> ${DockerfilePath}
+
+# add install python and git
+
+echo "RUN zypper -y update; zypper install -y python git" >> $DockerfilePath
+
+# get lrose-bootstrap
+
+echo "RUN cd; mkdir git; cd git; git clone https://github.com/ncar/lrose-bootstrap" >> $DockerfilePath
+
+# add install packages by calling python script
+
+echo "RUN ~/git/lrose-bootstrap/scripts/install_linux_packages.py" >> $DockerfilePath
+
+# append the body of the Dockerfile
+# cat Dockerfile.suse.custom >> ${DockerfilePath}
+
+# using the Dockerfile, create the custom image
+
+cd /tmp/docker
+
+docker build \
+    --tag custom/${os_type}:${os_version} \
+    --file ${DockerfilePath} .
+

@@ -1,0 +1,6 @@
+#! /bin/bash
+
+# remove any running containers
+
+docker rm -f `docker ps -aq`
+

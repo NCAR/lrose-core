@@ -1,0 +1,58 @@
+#===========================================================
+# spec file body for suse package build for lrose
+# name, version and release are prepended by calling script
+#===========================================================
+
+%define _topdir     /root/rpmbuild
+%define buildroot %{_topdir}/%{name}-%{version}-%{release}-root
+ 
+BuildRoot:      %{_topdir}/installedhere
+Summary:        LROSE
+Name:           %{name}
+Version:        %{version}
+Release:        %{release}
+Prefix:         /usr/local/cidd
+Group:          Scientific Tools
+AutoReqProv:    no
+License:        BSD
+ 
+Requires: glibc-devel-32bit
+Requires: libX11-devel-32bit
+Requires: libXext-devel-32bit
+Requires: libtiff-devel-32bit
+Requires: libpng-devel-32bit
+Requires: libcurl-devel-32bit
+Requires: libstdc++-devel-32bit
+Requires: libtiff-devel-32bit
+Requires: zlib-devel-32bit
+Requires: libexpat-devel-32bit
+Requires: flex-32bit
+Requires: libfftw3-3-32bit
+Requires: libbz2-devel-32bit
+Requires: gnuplot
+Requires: ImageMagick-devel-32bit
+Requires: xorg-x11
+Requires: xorg-x11-devel
+Requires: xorg-x11-fonts
+Requires: xorg-x11-fonts-core
+
+%description
+CIDD - Cartesian Interactive Data Display
+
+# build has been done previously so no compile is needed
+# just copy the files into the correct location
+
+%install
+mkdir -p %{buildroot}%{prefix}
+mkdir -p %{buildroot}%{prefix}/bin
+rsync -a %{prefix}/bin/CIDD %{buildroot}%{prefix}/bin
+rsync -a %{prefix}/lib %{buildroot}%{prefix}
+rsync -a %{prefix}/LICENSE.txt %{buildroot}%{prefix}
+
+# add all files in /usr/local/cidd
+
+%files
+/usr/local/cidd
+
+############################################################
+

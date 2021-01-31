@@ -1,0 +1,143 @@
+#!/bin/bash
+
+###########################################################
+# This script is to be executed inside a docker debian container
+# It assume lrose-base is installed at /usr/local/lrose
+#
+# The package will be build and copied to the cross-mounted dir
+# so it will be visible from outside the container.
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Build the .deb package inside the docker container"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. lrose-core, lrose-radx, lrose-cidd"
+    echo "  -r ? :  set release_date"
+    echo "          e.g. latest, 20190105"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. debian, ubuntu"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. 9 for debian 9, 18.04 for ubuntu 18.04"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=debian
+os_version=9
+lrose_pkg=lrose-core
+debug=true
+release_date=latest
+
+# Parse command line options.
+while getopts hdt:v:p:r: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        r)
+            release_date=$OPTARG
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  building the package inside the docker container"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+  echo "    lrose_pkg: ${lrose_pkg}"
+  echo "    release_date: ${release_date}"
+fi
+
+# Make sure we have rsync
+
+apt-get update
+apt-get install -y rsync
+
+# set up build location
+
+ARCH=amd64
+DATE_STR=`date +"%Y%m%d"`
+VERSION=${release_date}
+if [ "$release_date" == "latest" ]
+then
+    VERSION=${DATE_STR}
+fi
+LROSE_ROOT=/usr/local/lrose
+BUILD_ROOT=/pkg_build
+PKG_NAME=${lrose_pkg}-${VERSION}.${os_type}_${os_version}.${ARCH}
+BUILD_DIR=${BUILD_ROOT}/${PKG_NAME}
+
+if [ ! -d "$LROSE_ROOT" ]; then
+    echo "-E- No such directory '$LROSE_ROOT'"
+    exit 1
+fi
+
+# Mirror the /usr/local/lrose hierarchy under the BUILD_ROOT
+
+mkdir -p $BUILD_DIR
+mkdir -p ${BUILD_DIR}/usr/local
+rsync -aL $LROSE_ROOT $BUILD_DIR/usr/local/
+
+# create the control file
+
+cd $BUILD_DIR
+mkdir -p DEBIAN
+cd DEBIAN
+/bin/rm -f control
+touch control
+echo "Package: ${lrose_pkg}" >> control
+echo "Version: ${VERSION}" >> control
+echo "Section: base" >> control
+echo "Priority: optional" >> control
+echo "Architecture: ${ARCH}" >> control
+#echo "Depends: tcsh, git, gcc, g++, gfortran, make, cmake, rsync, mlocate, automake, make, libtool, pkg-config, python, libcurl3-dev, curl, libfl-dev, libbz2-dev, libx11-dev, libpng-dev, libfftw3-dev, libexpat1-dev, qtbase5-dev, qtdeclarative5-dev, libgeographic-dev, libeigen3-dev, libzip-dev, libarmadillo-dev, libopenmpi-dev, libnetcdf-dev, netcdf-bin, libhdf5-dev, hdf5-tools" >> control
+echo "Depends: tcsh, git, gcc, g++, gfortran, make, cmake, rsync, mlocate, automake, make, libtool, pkg-config, python, libcurl3-dev, curl, libfl-dev, libbz2-dev, libx11-dev, libpng-dev, libfftw3-dev, libexpat1-dev, qtbase5-dev, qtdeclarative5-dev, libeigen3-dev, libzip-dev, libarmadillo-dev, libopenmpi-dev" >> control
+echo "Maintainer: NCAR/EOL/RSF <lrose-help@rams.colostate.edu>" >> control
+echo "Description: ${lrose_pkg}" >> control
+echo "  Binary package of ${lrose_pkg} on Debian x.xx" >> control
+
+# Make the package
+
+cd $BUILD_ROOT
+dpkg-deb --build ${PKG_NAME}
+
+# Copy the package to the cross-mount
+
+rsync -av ${PKG_NAME}.deb /pkgDir
+
+# add write permissions since this is created by root
+# and we need to remove them from the cross-mount later
+
+chmod o+w -R /pkgDir
+chmod g+w -R /pkgDir
+

@@ -1,0 +1,114 @@
+#! /bin/bash
+
+###########################################################
+# build custom docker image for redhat, with required packages
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Create custom docker image for lrose"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. centos, fedora"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. 7 for centos 7, 29 for fedora 29"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=centos
+os_version=7
+debug=true
+
+# Parse command line options.
+while getopts hdt:v: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  creating custom docker image for lrose"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+fi
+
+# go to scripts dir
+
+cd ~/git/lrose-core/build/packages/redhat
+
+# compute Dockerfile path
+
+mkdir -p /tmp/docker
+DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
+echo "  DockerfileName is: " $DockerfileName
+
+#########################################################
+# create Dockerfile
+
+echo "  Creating DockerfilePath: " $DockerfilePath
+
+# add get image
+
+echo "####################################################" > $DockerfilePath
+echo "FROM ${os_type}:${os_version}" >> $DockerfilePath
+echo "#" >> $DockerfilePath
+
+# update and add install python and git
+
+if [ "$os_type" = fedora ]
+then
+    echo "RUN yum -y update; yum install -y python git" >> $DockerfilePath
+else
+    # various version of centos
+    if [ "$os_version" = 6 ] ; then
+        echo "RUN yum -y update; yum install -y python git" >> $DockerfilePath
+    elif [ "$os_version" = 7 ] ; then
+        echo "RUN yum -y update; yum install -y python git" >> $DockerfilePath
+    else
+        echo "RUN dnf -y update; dnf install -y epel-release; dnf install -y 'dnf-command(config-manager)'; dnf config-manager --set-enabled powertools; dnf install -y python2 python3 git; alternatives --set python /usr/bin/python3" >> $DockerfilePath
+    fi
+fi
+
+# get lrose-bootstrap
+
+echo "RUN cd; mkdir git; cd git; git clone https://github.com/ncar/lrose-bootstrap" >> $DockerfilePath
+
+# add install packages by calling python script
+
+echo "RUN ~/git/lrose-bootstrap/scripts/install_linux_packages.py" >> $DockerfilePath
+
+# using the Dockerfile, create the custom image
+
+cd /tmp/docker
+
+docker build \
+    --tag custom/${os_type}:${os_version} \
+    --file ${DockerfilePath} .

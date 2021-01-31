@@ -1,0 +1,67 @@
+#! /bin/bash
+
+# delete build images for the specified package
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Delete build images for the specified package"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. core, blaze, cyclone, radx"
+    echo
+}
+
+scriptName=$(basename $0)
+lrose_pkg=lrose-core
+
+# Parse command line options.
+while getopts hdp: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# delete build images
+
+#docker image rm -f build.${lrose_pkg}/centos:6
+docker image rm -f build.${lrose_pkg}/centos:7
+docker image rm -f build.${lrose_pkg}/centos:8
+docker image rm -f build.${lrose_pkg}/centos:latest
+
+#docker image rm -f build.${lrose_pkg}/fedora:29
+#docker image rm -f build.${lrose_pkg}/fedora:30
+docker image rm -f build.${lrose_pkg}/fedora:31
+docker image rm -f build.${lrose_pkg}/fedora:32
+docker image rm -f build.${lrose_pkg}/fedora:33
+
+docker image rm -f build.${lrose_pkg}/debian:9
+docker image rm -f build.${lrose_pkg}/debian:10
+
+docker image rm -f build.${lrose_pkg}/ubuntu:16.04
+docker image rm -f build.${lrose_pkg}/ubuntu:18.04
+docker image rm -f build.${lrose_pkg}/ubuntu:20.04
+
+docker image rm -f build.${lrose_pkg}/opensuse:leap
+docker image rm -f build.${lrose_pkg}/opensuse:latest

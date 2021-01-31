@@ -1,0 +1,72 @@
+#! /bin/bash
+
+# perform builds for specified package
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Perform builds for specified package"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose-pkg"
+    echo "          e.g. lrose-core, radx"
+    echo "  -r ? :  set release_date"
+    echo "          e.g. latest, 20190105"
+    echo
+}
+
+scriptName=$(basename $0)
+lrose_pkg=lrose-core
+release_date=latest
+
+# Parse command line options.
+while getopts hdp:r: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        r)
+            release_date=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+#./redhat/do_lrose_build.redhat -t centos -v 6  -p ${lrose_pkg} -r ${release_date}
+./redhat/do_lrose_build.redhat -t centos -v 7  -p ${lrose_pkg} -r ${release_date}
+./redhat/do_lrose_build.redhat -t centos -v 8  -p ${lrose_pkg} -r ${release_date}
+./redhat/do_lrose_build.redhat -t centos -v latest  -p ${lrose_pkg} -r ${release_date}
+
+#./redhat/do_lrose_build.redhat -t fedora -v 29 -p ${lrose_pkg} -r ${release_date}
+#./redhat/do_lrose_build.redhat -t fedora -v 30 -p ${lrose_pkg} -r ${release_date}
+./redhat/do_lrose_build.redhat -t fedora -v 31 -p ${lrose_pkg} -r ${release_date}
+./redhat/do_lrose_build.redhat -t fedora -v 32 -p ${lrose_pkg} -r ${release_date}
+./redhat/do_lrose_build.redhat -t fedora -v 33 -p ${lrose_pkg} -r ${release_date}
+
+./debian/do_lrose_build.debian -t debian -v 9 -p ${lrose_pkg} -r ${release_date}
+./debian/do_lrose_build.debian -t debian -v 10 -p ${lrose_pkg} -r ${release_date}
+
+./debian/do_lrose_build.debian -t ubuntu -v 16.04  -p ${lrose_pkg} -r ${release_date}
+./debian/do_lrose_build.debian -t ubuntu -v 18.04  -p ${lrose_pkg} -r ${release_date}
+./debian/do_lrose_build.debian -t ubuntu -v 20.04  -p ${lrose_pkg} -r ${release_date}
+
+./suse/do_lrose_build.suse -t opensuse -v latest -p ${lrose_pkg} -r ${release_date}
+./suse/do_lrose_build.suse -t opensuse -v leap -p ${lrose_pkg} -r ${release_date}
+

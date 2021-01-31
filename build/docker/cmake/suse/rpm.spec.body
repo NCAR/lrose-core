@@ -1,0 +1,53 @@
+#===========================================================
+# spec file body for suse package build for lrose
+# name, version and release are prepended by calling script
+#===========================================================
+
+%define _topdir     /root/rpmbuild
+%define buildroot %{_topdir}/%{name}-%{version}-%{release}-root
+ 
+BuildRoot:      %{_topdir}/installedhere
+Summary:        LROSE
+Name:           %{name}
+Version:        %{version}
+Release:        %{release}
+Prefix:         /usr/local/lrose
+Group:          Scientific Tools
+AutoReqProv:    no
+License:        BSD
+ 
+Requires: libX11-devel
+Requires: libXext-devel
+Requires: libpng-devel
+Requires: libtiff-devel
+Requires: zlib-devel
+Requires: libexpat-devel
+Requires: libcurl-devel
+Requires: flex
+Requires: fftw3-devel
+Requires: libbz2-devel
+Requires: libzip-devel
+Requires: libqt5-qtbase-devel
+Requires: libqt5-qtdeclarative-devel
+Requires: hdf5-devel
+Requires: netcdf-devel
+Requires: xorg-x11-xauth
+
+%description
+LROSE - Lidar Radar Open Software Environment
+
+# build has been done previously so no compile is needed
+# just copy the files into the correct location
+
+%install
+echo "==>> rsync /usr/local/lrose to buildroot"
+mkdir -p %{buildroot}%{prefix}
+rsync -a %{prefix}/* %{buildroot}%{prefix}
+
+# add all files in /usr/local/lrose
+
+%files
+/usr/local/lrose
+
+############################################################
+
