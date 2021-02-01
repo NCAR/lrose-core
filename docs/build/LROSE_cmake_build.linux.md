@@ -1,4 +1,4 @@
-# Clone LROSE from GitHub and build from source using cmake - LINUX
+# Checkout and build LROSE from source - using cmake - LINUX
 
 This will checkout and build the latest source from GitHub.
 
@@ -72,20 +72,35 @@ To see the usage:
     --debug               Set debugging on
     --verbose             Set verbose debugging on
     --package=PACKAGE     Package name. Options are: lrose-core (default),
-                          lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd
+                          lrose-radx, lrose-cidd, samurai
     --releaseDate=RELEASEDATE
-                          Tag to check out lrose-core
-    --prefix=PREFIX       Install directory, default is ~/lrose
-    --buildDir=BUILDDIR   Temporary build dir, default is /tmp/lrose_build
-    --logDir=LOGDIR       Logging dir, default is /tmp/lrose_build/logs
+                          Date from which to compute tag for git clone. Applies
+                          if --tag is not used.
+    --tag=TAG             Tag to check out lrose. Overrides --releaseDate
+    --prefix=PREFIX       Install directory, default: /home/mdtest/lrose-install
+    --buildDir=BUILDDIR   Temporary build dir, default: /tmp/lrose-build
+    --logDir=LOGDIR       Logging dir, default: /tmp/lrose-build/logs
     --static              use static linking, default is dynamic
-    --buildNetcdf         Build NetCDF and HDF5 instead of using the system libs
+    --installAllRuntimeLibs
+                          Install dynamic runtime libraries for all binaries, in
+                          a directory relative to the bin dir. System libraries
+                          are included.
+    --installLroseRuntimeLibs
+                          Install dynamic runtime lrose libraries for all
+                          binaries, in a directory relative to the bin dir.
+                          System libraries are not included.
+    --noScripts           Do not install runtime scripts as well as binaries
+    --buildNetcdf         Build netcdf and hdf5 from source
     --fractl              Checkout and build fractl after core build is complete
-    --vortrac             Checkout and build vortrac after core build is complete
-    --samurai             Checkout and build samurai after core build is complete
+    --vortrac             Checkout and build vortrac after core build is
+                          complete
+    --samurai             Checkout and build samurai after core build is
+                          complete
     --cmake3              Use cmake3 instead of cmake for samurai
-    --geolib              Build and install geolib - for fractl, samurai
-
+    --no_core_apps        Do not build the lrose core apps
+    --withJasper          Set if jasper library is installed. This provides
+                          support for jpeg compression in grib files.
+    --verboseMake         Verbose output for make, default is summary
 ```
 
 `package` defaults to `lrose-core`
