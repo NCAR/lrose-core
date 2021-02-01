@@ -580,13 +580,7 @@ class LroseCore < Formula
     Dir.chdir("codebase")
     Dir.mkdir("build")
     Dir.chdir("build")
-    system
-    system "cmake", "..", *args
-    Dir.chdir("libs")
-    system "make -j 8 install"
-    Dir.chdir("../apps/tdrp/src/tdrp_gen")
-    system "make -j 8 install"
-    Dir.chdir("../../..")
+    system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", ".."
     system "make -j 8 install"
     Dir.chdir("../..")
     system "rsync", "-av", "share", "#{{prefix}}"
@@ -611,9 +605,8 @@ def buildLroseCoreFormula(tar_url, tar_name, formula_name):
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]
-    #result = str(subprocess.check_output(("sha256sum", tar_name), text=True))
-    result = str(subprocess.check_output(("sha256sum", tar_name)))
-    checksum = result.split()[0]
+    result = subprocess.check_output(("sha256sum", tar_name))
+    checksum = result.split()[0].decode('ascii')
     formula = formulaBodyCmake.format(tar_url, version, checksum)
     outf = open(formula_name, 'w')
     outf.write(formula)

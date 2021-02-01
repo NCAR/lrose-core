@@ -403,8 +403,8 @@ def buildSamuraiFormula(tar_url, tar_name, formula_name):
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]
-    result = str(subprocess.check_output(("sha256sum", tar_name), text=True))
-    checksum = result.split()[0]
+    result = subprocess.check_output(("sha256sum", tar_name))
+    checksum = result.split()[0].decode('ascii')
     formula = formulaBody.format(tar_url, version, checksum)
     outf = open(formula_name, 'w')
     outf.write(formula)
