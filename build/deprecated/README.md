@@ -1,6 +1,6 @@
 # Deprecated content
 
-The docker scripts etc have been moved to:
+The deprecated content has been moved to:
 
   https://github.com/ncar/lrose-bootstrap
 
