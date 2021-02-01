@@ -58,6 +58,10 @@ def main():
     parser.add_option('--prefix',
                       dest='prefix', default=prefixDefault,
                       help='Directory for installation')
+    parser.add_option('--automake',
+                      dest='automake', default=False,
+                      action="store_true",
+                      help='Use automake for the build. Default is cmake')
     parser.add_option('--scripts',
                       dest='installScripts', default=False,
                       action="store_true",
@@ -130,7 +134,10 @@ def main():
 
     # build and install the package
 
-    buildPackageAutomake()
+    if (options.automake):
+        buildPackageAutomake()
+    else:
+        buildPackageCmake()
 
     #--------------------------------------------------------------------
     # done
@@ -257,6 +264,21 @@ def buildPackageAutomake():
         args = args + " --scripts "
 
     shellCmd("./build/build_lrose_automake.py " + args)
+
+########################################################################
+# build package using cmake
+
+def buildPackageCmake():
+
+    os.chdir(runDir)
+
+    args = ""
+    args = args + " --prefix " + installDir
+    args = args + " --package " + package
+    if (options.installScripts):
+        args = args + " --scripts "
+
+    shellCmd("./build/build_lrose_cmake.py " + args)
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
