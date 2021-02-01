@@ -195,7 +195,7 @@ def main():
 
         # install perl5
         
-        perl5Dir = os.path.join(prefix, "lib/perl5")
+        perl5Dir = os.path.join(options.prefix, "lib/perl5")
         try:
             os.makedirs(perl5Dir)
         except:
@@ -211,14 +211,14 @@ def main():
         procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
         if (os.path.isdir(procmapScriptsDir)):
             os.chdir(procmapScriptsDir)
-            shellCmd("./install_scripts.lrose " + prefix + "bin")
+            shellCmd("./install_scripts.lrose " + options.prefix + "bin")
 
         # general
 
         generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
-            shellCmd("./install_scripts.lrose " + prefix + "bin")
+            shellCmd("./install_scripts.lrose " + options.prefix + "bin")
 
     # check the install
 
@@ -233,18 +233,18 @@ def checkInstall():
 
     print(("============= Checking libs for " + package + " ============="))
     shellCmd("./build/scripts/checkLibs.py" + \
-             " --prefix " + prefix + \
+             " --prefix " + options.prefix + \
              " --package " + package)
     print("====================================================")
     print(("============= Checking apps for " + package + " ============="))
     shellCmd("./build/scripts/checkApps.py" + \
-             " --prefix " + prefix + \
+             " --prefix " + options.prefix + \
              " --package " + package)
     print("====================================================")
     
     print("**************************************************")
     print("*** Done building auto release *******************")
-    print(("*** Installed in dir: " + prefix + " ***"))
+    print(("*** Installed in dir: " + options.prefix + " ***"))
     print("**************************************************")
 
 ########################################################################
