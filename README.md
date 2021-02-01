@@ -50,6 +50,7 @@ The latest release can be found at:
 | [LROSE make system](./docs/build/LROSE_manual_make_system.md) |
 | [Build manually - LINUX](./docs/build/LROSE_manual_build.linux.md) |
 | [Build manually - OSX](./docs/build/LROSE_manual_build.osx.md) |
+| [Build using cmake - LINUX](./docs/build/LROSE_cmake_build.linux.md) |
 | [Build using autoconf - LINUX](./docs/build/LROSE_autoconf_build.linux.md) |
 | [CIDD build - 32-bit mode - LINUX](./docs/build/CIDD_build.linux.md) |
 | [fractl build](./docs/build/build_fractl.md) |

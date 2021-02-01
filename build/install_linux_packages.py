@@ -182,7 +182,7 @@ def installPackagesCentos7():
              "gcc gcc-c++ gcc-gfortran glibc-devel " +
              "libX11-devel libXext-devel " +
              "libpng-devel libtiff-devel zlib-devel libzip-devel " +
-             "GeographicLib-devel eigen3-devel armadillo-devel ")
+             "eigen3-devel armadillo-devel ")
     shellCmd("yum install -y " +
              "expat-devel libcurl-devel openmpi-devel " +
              "flex-devel fftw3-devel " +
@@ -242,7 +242,6 @@ def installPackagesCentos8():
     shellCmd("dnf install -y --allowerasing " +
              "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
              "hdf5-devel netcdf-devel " +
-             "GeographicLib-devel " +
              "xorg-x11-xauth xorg-x11-apps " +
              "rpm-build redhat-rpm-config " +
              "rpm-devel rpmdevtools")
@@ -283,7 +282,7 @@ def installPackagesFedora():
              "gcc gcc-c++ gcc-gfortran glibc-devel " +
              "libX11-devel libXext-devel " +
              "libpng-devel libtiff-devel zlib-devel libzip-devel " +
-             "GeographicLib-devel eigen3-devel armadillo-devel ")
+             "eigen3-devel armadillo-devel ")
     shellCmd("yum install -y " +
              "expat-devel libcurl-devel openmpi-devel " +
              "flex-devel fftw3-devel " +
@@ -317,6 +316,10 @@ def installPackagesFedora():
 
 def installPackagesDebian():
 
+    # set the environment
+
+    os.environ["DEBIAN_FRONTEND"] = "noninteractive"
+
     # install main packages
     
     shellCmd("apt-get -y update")
@@ -327,7 +330,7 @@ def installPackagesDebian():
              "libfl-dev libbz2-dev libx11-dev libpng-dev " +
              "libfftw3-dev libexpat1-dev " +
              "qtbase5-dev qtdeclarative5-dev " +
-             "libgeographic-dev libeigen3-dev libzip-dev " +
+             "libeigen3-dev libzip-dev " +
              "libarmadillo-dev libopenmpi-dev " +
              "libnetcdf-dev libhdf5-dev hdf5-tools " +
              "libcurl4-openssl-dev")
