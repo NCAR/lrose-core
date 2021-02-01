@@ -364,7 +364,7 @@ class LroseVortrac < Formula
   sha256 '{2}'
 
   depends_on 'libx11'
-  depends_on 'libext'
+  depends_on 'libxext'
   depends_on 'qt'
   depends_on 'armadillo'
   depends_on 'libzip'
