@@ -94,6 +94,10 @@ def main():
                       dest='static', default=False,
                       action="store_true",
                       help='use static linking, default is dynamic')
+    parser.add_option('--cmake3',
+                      dest='use_cmake3', default=False,
+                      action="store_true",
+                      help='Use cmake3 instead of cmake for samurai')
 
     (options, args) = parser.parse_args()
 
@@ -147,23 +151,43 @@ def main():
     cmd = "./build/scripts/installPackageMakefiles.py --package " + options.package
     shellCmd(cmd)
 
-    # create CMakeFiles.txt files for cmake
+    # create CMakeLists.txt files for cmake
 
     os.chdir(coreDir)
-    shellCmd("./build/cmake/createCMakeFiles.py --coreDir . " +
+    shellCmd("./build/cmake/createCMakeLists.py --coreDir . " +
              " --installPrefix " + options.prefix + debugStr + staticStr)
 
     # run cmake to generate Makefiles from CMakeLists.txt files
     # this is done in a build directory, so it an out-of-source build
     
-    buildDir = os.path.join(codebaseDir, "build")
-    os.makedirs(buildDir)
-    os.chdir(buildDir)
-    shellCmd("cmake -DCMAKE_INSTALL_PREFIX=" + prefix + " ..")
+    cmakeBuildDir = os.path.join(codebaseDir, "build")
+    try:
+        os.makedirs(cmakeBuildDir)
+    except:
+        print("Dir exists: " + cmakeBuildDir, file=sys.stderr)
+    os.chdir(cmakeBuildDir)
+    if (options.use_cmake3):
+        shellCmd("cmake3 -DCMAKE_INSTALL_PREFIX=" + options.prefix + " ..")
+    else:
+        shellCmd("cmake -DCMAKE_INSTALL_PREFIX=" + options.prefix + " ..")
 
-    # do the build and install using cmake
-    
-    shellCmd("make -j 8 install")
+    # build and install libs
+
+    os.chdir(os.path.join(cmakeBuildDir, "libs"))
+    cmd = "make -j 8 install"
+    shellCmd(cmd)
+
+    # build and install tdrp_gen
+
+    os.chdir(os.path.join(cmakeBuildDir, "apps/tdrp/src/tdrp_gen"))
+    cmd = "make install"
+    shellCmd(cmd)
+
+    # build and install apps
+
+    os.chdir(os.path.join(cmakeBuildDir, "apps"))
+    cmd = "make -j 8 install"
+    shellCmd(cmd)
 
     # optionally install the scripts
 
