@@ -4,6 +4,9 @@ Update: 1999
 ===========================================================================
 The procmap scripts
 -------------------
+
+NOTE: the scripts reside in lrose-core/codebase/apps/scripts/src.
+
 The procmap scripts are:
 
 procmap_auto_restart	monitors a list of processes and restarts any that
@@ -21,8 +24,6 @@ auto_restart_stats	parses output from auto_restart to generate
 
 These scripts all operate on a process list file ("proc_list_file") which
 contains a list of processes and information about each of the processes.
-
-
 
 The proc_list_file
 ------------------

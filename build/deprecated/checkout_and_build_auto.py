@@ -749,13 +749,6 @@ def buildPackage():
             print("running cmd:", cmd, file=logFp)
             shellCmd("rsync -av *pm " + perl5InstallDir)
 
-        # procmap
-
-        procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
-        if (os.path.isdir(procmapScriptsDir)):
-            os.chdir(procmapScriptsDir)
-            shellCmd("./install_scripts.lrose " + scriptsDir)
-
         # general
 
         generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")

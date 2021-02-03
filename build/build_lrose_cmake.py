@@ -225,13 +225,6 @@ def main():
             os.chdir(os.path.join(codebaseDir, "libs/perl5/src"))
             shellCmd("rsync -av *pm " + perl5Dir)
 
-        # procmap
-
-        procmapScriptsDir = os.path.join(codebaseDir, "apps/procmap/src/scripts")
-        if (os.path.isdir(procmapScriptsDir)):
-            os.chdir(procmapScriptsDir)
-            shellCmd("./install_scripts.lrose " + options.prefix + "bin")
-
         # general
 
         generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")

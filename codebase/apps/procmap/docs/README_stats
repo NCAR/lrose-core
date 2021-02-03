@@ -2,6 +2,9 @@ Title:	README for auto_restart_stats
 Date:	09-JUN-1998
 Update:	1999
 ===========================================================================
+
+NOTE: the scripts reside in lrose-core/codebase/apps/scripts/src.
+
 Stats script
 ------------
 A Perl script for generating statistics from the procmap_auto_restart.log
