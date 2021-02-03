@@ -4,12 +4,14 @@ This will checkout and build the latest source from GitHub using cmake.
 
 You can choose to build manually, or using a script provided by lrose-core.
 
-1. [overview](#overview)
-2. [prepare](#prepare)
-3. [build-using-bootstrap](#build-using-bootstrap)
-4. [build-using-script](#build-using-script)
-5. [build-manually](#build-manually)
-6. [verify](#verify)
+1.  [overview](#overview)
+2.  [prepare](#prepare)
+3a. [build-using-bootstrap](#build-using-bootstrap)
+3b. [build-using-script](#build-using-script)
+3c. [build-manually](#build-manually)
+4.  [verify](#verify)
+
+Run one of 3a, 3b or 3c.
 
 <a name="overview"/>
 
@@ -98,7 +100,7 @@ You can install the packages automatically using a script in the bootstrap repos
 
 <a name="build-using-bootstrap"/>
 
-## 3. Build using scripts in the bootstrap repository
+## 3a. Build using scripts in the bootstrap repository
 
 ### Clone the bootstrap for LROSE
 
@@ -197,7 +199,7 @@ To cleanup between builds:
   ./checkout_and_build_cmake.py --clean
 ```
 
-## 4. Build using scripts in lrose-core.
+## 3b. Build using scripts in lrose-core.
 
 ### Clone lrose-core
 
@@ -261,7 +263,7 @@ To set the install directory:
 
 <a name="build-manually"/>
 
-## 5. Build manually
+## 3c. Build manually
 
 ### Clone lrose-core
 
@@ -359,7 +361,7 @@ To set the install directory:
 
 <a name="verify"/>
 
-## 6. Verify
+## 4. Verify
 
 Try the commands:
 ```
