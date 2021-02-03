@@ -2,7 +2,7 @@
 
 This will checkout and build the latest source from GitHub using cmake.
 
-You can choose to build manually, or using a script provided by lrose-core.
+You can choose to build manually, or using a scripts provided by lrose.
 
 1. [overview](#overview)
 2. [prepare](#prepare)
@@ -39,7 +39,7 @@ The source code is in /tmp and is not permament.
 
 The libraries and binaries are installed permanently.
 
-This leaves you with the source code in your home directory.
+The source code will reside in your home directory.
 
 ### (c) Build manually in the core (most user intensive):
 
@@ -61,6 +61,8 @@ The default directories for installation are:
   ~/lrose/lib
   ~/lrose/bin
 ```
+
+This can be changed using the ```--prefix``` argument on the scripts.
 
 <a name="prepare"/>
 
@@ -100,7 +102,7 @@ You can install the packages automatically using a script in the bootstrap repos
 
 <a name="build-using-bootstrap"/>
 
-## 3. Build using scripts in the bootstrap repository
+## 3. Build using scripts in the bootstrap repository (recommended)
 
 ### Clone the bootstrap for LROSE
 
@@ -201,7 +203,7 @@ To cleanup between builds:
 
 <a name="build-using-script"/>
 
-## 4. Build using scripts in lrose-core
+## 4. Build using scripts in lrose-core (intermediate)
 
 ### Clone lrose-core
 
@@ -265,7 +267,7 @@ To set the install directory:
 
 <a name="build-manually"/>
 
-## 5. Build manually
+## 5. Build manually (most user intensive)
 
 ### Clone lrose-core
 
@@ -314,7 +316,7 @@ The usage is:
     --silent              Set debugging off
     --coreDir=COREDIR     Path of lrose-core top level directory, default is:
                           /data/mdtest/git/lrose-core/build/cmake/../..
-    --prefixx=PREFIX
+    --prefix=PREFIX
                           Path of lrose install dir, default is ~/lrose
     --dependDirs=DEPENDDIRS
                           Comma-delimited list of dirs to be searched as
@@ -328,7 +330,7 @@ The usage is:
                           support for jpeg compression in grib files.
 ```
 
-Run it using the appropriate arguments:
+To install in ```~/lrose```:
 
 ```
   cd ~/git/lrose-core/build/cmake
@@ -350,7 +352,9 @@ To set the install directory:
   cmake ..
 ```
 
-### perform the build
+### Perform the build
+
+Note: we have to build ```tdrp_gen``` before the apps, since it is a dependency.
 
 ```
   cd ~/git/lrose-core/codebase/build/libs
