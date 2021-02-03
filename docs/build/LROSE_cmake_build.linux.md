@@ -48,6 +48,8 @@ This is the most hands-on method.
 
 It allows you to see all of the actions that are carried out in (b) above.
 
+### Default install directory
+
 The default install prefix is ```~/lrose```.
 
 The default directories for installation are:
@@ -62,9 +64,16 @@ The default directories for installation are:
 
 ## 2. Prepare
 
-First, you will need to install the required packages.
+### Create a working directory for cloning:
+
+```
+  mkdir -p ~/git
+  cd ~/git
+```
 
 ### Most good, up-to date LINUX distributions should work.
+
+First, you will need to install the required packages.
 
 Recommended distributions are:
 
@@ -74,15 +83,17 @@ Recommended distributions are:
   * CentOS (based on RedHat)
   * Fedora (based on RedHat)
 
-First, you will need to install the required packages.
+For the required packages on each OS, see:
 
-See: [LROSE package dependencies](../build//lrose_package_dependencies.md)
+* [LROSE package dependencies](../build//lrose_package_dependencies.md)
 
-Create a working directory for cloning:
+You can install the packages automatically using a script in the bootstrap repository.
 
 ```
-  mkdir -p ~/git
   cd ~/git
+  git clone https://github.com/ncar/lrose-bootstrap
+  cd ~/git/lrose-bootstrap/scripts
+  sudo ./install_linux_packages.py --debug
 ```
 
 <a name="build-using-bootstrap"/>
