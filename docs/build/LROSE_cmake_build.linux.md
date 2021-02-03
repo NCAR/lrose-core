@@ -4,12 +4,12 @@ This will checkout and build the latest source from GitHub using cmake.
 
 You can choose to build manually, or using a script provided by lrose-core.
 
-1.  [overview](#overview)
-2.  [prepare](#prepare)
+1. [overview](#overview)
+2. [prepare](#prepare)
 3. [build-using-bootstrap](#build-using-bootstrap)
 4. [build-using-script](#build-using-script)
 5. [build-manually](#build-manually)
-6.  [verify](#verify)
+6. [verify](#verify)
 
 Run one of steps 3, 4 or 5.
 
@@ -19,7 +19,7 @@ Run one of steps 3, 4 or 5.
 
 There are 3 ways to perform the build.
 
-### (a) Build using the bootstrap repository:
+### (a) Build using the bootstrap repository (recommended):
 
   * check out the bootstrap repository from github
   * run the ```checkout_and_build_cmake.py``` script
@@ -32,7 +32,7 @@ Only the libraries and binaries are installed permanently.
 
 The source code is in /tmp and is not permament.
 
-### (b) Build using a script in lrose-core:
+### (b) Build using a script in lrose-core (intermediate):
 
   * check out lrose-core
   * run the ```build_lrose_cmake.py``` script in the core
@@ -41,7 +41,7 @@ The libraries and binaries are installed permanently.
 
 This leaves you with the source code in your home directory.
 
-### (c) Build manually in the core:
+### (c) Build manually in the core (most user intensive):
 
   * check out lrose-core
   * build manually from within the core
@@ -201,7 +201,7 @@ To cleanup between builds:
 
 <a name="build-using-script"/>
 
-## 4. Build using scripts in lrose-core.
+## 4. Build using scripts in lrose-core
 
 ### Clone lrose-core
 
