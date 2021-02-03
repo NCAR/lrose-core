@@ -217,7 +217,7 @@ To cleanup between builds:
 To see the usage:
 
 ```
-  cd ~/git/lrose-corep/build
+  cd ~/git/lrose-core/build
   ./build_lrose_cmake.py --help
 ```
 

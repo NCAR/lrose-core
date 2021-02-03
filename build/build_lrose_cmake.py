@@ -72,7 +72,7 @@ def main():
     prefixDefault = os.path.join(homeDir, 'lrose')
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default=False,
+                      dest='debug', default=True,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--verbose',
@@ -116,6 +116,12 @@ def main():
 
     package = options.package
 
+    # For Centos 7, use cmake3
+
+    getOSType()
+    if (osId == "centos" and osVersion == "7"):
+        options.use_cmake3 = True
+
     # runtime
 
     now = time.gmtime()
@@ -145,6 +151,19 @@ def main():
         print("  Must be run just above codebase dir", file=sys.stderr)
         sys.exit(1)
         
+    # debug print
+
+    if (options.debug):
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  now %s:" % dateTimeStr, file=sys.stderr)
+        print("  osId: ", osId, file=sys.stderr)
+        print("  osVersion: ", osVersion, file=sys.stderr)
+        print("  use_cmake3: ", options.use_cmake3, file=sys.stderr)
+        print("  package: ", package, file=sys.stderr)
+        print("  static: ", options.static, file=sys.stderr)
+        print("  coreDir: ", coreDir, file=sys.stderr)
+        print("  codebaseDir: ", codebaseDir, file=sys.stderr)
+
     # install the distribution-specific makefiles
 
     os.chdir(coreDir)
@@ -246,6 +265,24 @@ def checkInstall():
     print("*** Done building auto release *******************")
     print(("*** Installed in dir: " + options.prefix + " ***"))
     print("**************************************************")
+
+########################################################################
+# get the OS type from the /etc/os-release file in linux
+
+def getOSType():
+
+    global osId, osVersion
+    osId = ""
+    osVersion = ""
+
+    osrelease_file = open("/etc/os-release", "rt")
+    lines = osrelease_file.readlines()
+    osrelease_file.close()
+    for line in lines:
+        if (line.find('ID=') == 0):
+            osId = line.split('=')[1].replace('"', '').strip()
+        elif (line.find('VERSION_ID=') == 0):
+            osVersion = line.split('=')[1].replace('"', '').strip()
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
