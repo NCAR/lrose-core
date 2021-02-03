@@ -32,7 +32,7 @@ The latest release can be found at:
 
 ### DOWNLOADS
 
-| Download and install |
+| Download and install (recommended) |
 | --------------------- |
 | [LINUX - install from RedHat .rpm package](./docs/download/download_rpm_and_install.md) |
 | [LINUX - install from Debian .deb package](./docs/download/download_deb_and_install.md) |
@@ -48,9 +48,9 @@ The latest release can be found at:
 | --------------------- |
 | [Build overview](./docs/build/LROSE_build_overview.md) |
 | [LROSE make system](./docs/build/LROSE_manual_make_system.md) |
+| [Build using cmake - LINUX - recommended](./docs/build/LROSE_cmake_build.linux.md) |
 | [Build manually - LINUX](./docs/build/LROSE_manual_build.linux.md) |
 | [Build manually - OSX](./docs/build/LROSE_manual_build.osx.md) |
-| [Build using cmake - LINUX](./docs/build/LROSE_cmake_build.linux.md) |
 | [Build using autoconf - LINUX](./docs/build/LROSE_autoconf_build.linux.md) |
 | [CIDD build - 32-bit mode - LINUX](./docs/build/CIDD_build.linux.md) |
 | [fractl build](./docs/build/build_fractl.md) |
