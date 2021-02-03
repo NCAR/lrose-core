@@ -4,12 +4,12 @@ This will checkout and build the latest source from GitHub using cmake.
 
 You can choose to build manually, or using a script provided by lrose-core.
 
-1.  [overview](#overview)
-2.  [prepare](#prepare)
-3a. [build-using-bootstrap](#build-using-bootstrap)
-3b. [build-using-script](#build-using-script)
-3c. [build-manually](#build-manually)
-4.  [verify](#verify)
+* 1.  [overview](#overview)
+* 2.  [prepare](#prepare)
+* 3a. [build-using-bootstrap](#build-using-bootstrap)
+* 3b. [build-using-script](#build-using-script)
+* 3c. [build-manually](#build-manually)
+* 4.  [verify](#verify)
 
 Run one of 3a, 3b or 3c.
 
