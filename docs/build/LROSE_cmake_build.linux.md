@@ -4,14 +4,14 @@ This will checkout and build the latest source from GitHub using cmake.
 
 You can choose to build manually, or using a script provided by lrose-core.
 
-* 1.  [overview](#overview)
-* 2.  [prepare](#prepare)
-* 3a. [build-using-bootstrap](#build-using-bootstrap)
-* 3b. [build-using-script](#build-using-script)
-* 3c. [build-manually](#build-manually)
-* 4.  [verify](#verify)
+1.  [overview](#overview)
+2.  [prepare](#prepare)
+3. [build-using-bootstrap](#build-using-bootstrap)
+4. [build-using-script](#build-using-script)
+5. [build-manually](#build-manually)
+6.  [verify](#verify)
 
-Run one of 3a, 3b or 3c.
+Run one of steps 3, 4 or 5.
 
 <a name="overview"/>
 
@@ -100,7 +100,7 @@ You can install the packages automatically using a script in the bootstrap repos
 
 <a name="build-using-bootstrap"/>
 
-## 3a. Build using scripts in the bootstrap repository
+## 3. Build using scripts in the bootstrap repository
 
 ### Clone the bootstrap for LROSE
 
@@ -199,7 +199,9 @@ To cleanup between builds:
   ./checkout_and_build_cmake.py --clean
 ```
 
-## 3b. Build using scripts in lrose-core.
+<a name="build-using-script"/>
+
+## 4. Build using scripts in lrose-core.
 
 ### Clone lrose-core
 
@@ -263,7 +265,7 @@ To set the install directory:
 
 <a name="build-manually"/>
 
-## 3c. Build manually
+## 5. Build manually
 
 ### Clone lrose-core
 
@@ -361,7 +363,7 @@ To set the install directory:
 
 <a name="verify"/>
 
-## 4. Verify
+## 6. Verify
 
 Try the commands:
 ```
@@ -370,29 +372,4 @@ Try the commands:
   ~/lrose/bin/Radx2Grid -h
   ~/lrose/bin/HawkEye
 ```
-
-## 5. Handling build errors
-
-If the build does not complete successfully, you will need to
-track down the errors.
-
-The very first errors in the build are the most important.
-
-If you get errors, go into the directory giving problems, and
-run the make as follows:
-
-```
-  make |& less
-```
-
-and scroll down searching for `error`.
-
-Alternatively, run
-
-```
-  make >& make.log
-```
-
-and then inspect the make.log file, searching for `error`.
-
 
