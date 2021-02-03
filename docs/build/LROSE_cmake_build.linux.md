@@ -103,6 +103,7 @@ You can install the packages automatically using a script in the bootstrap repos
 ### Clone the bootstrap for LROSE
 
 ```
+  cd ~/git
   git clone https://github.com/ncar/lrose-bootstrap
 ```
 
@@ -172,7 +173,7 @@ We recommend building the full core, unless you have specific limitations.
 
 For older systems, such as centos7, you will need to use ```--cmake3```.
 
-To build and install the full lrose package into the default directory:
+To build and install the full lrose package into ```~/lrose```:
 
 ```
   ./checkout_and_build_cmake.py
@@ -240,7 +241,7 @@ We recommend building the full core.
 
 For older systems, such as centos7, you will need to use ```--cmake3```.
 
-To build and install the full lrose package into the default directory:
+To build and install the full lrose package into ```~/lrose```:
 
 ```
   ./build_lrose_cmake.py
