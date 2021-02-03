@@ -316,7 +316,6 @@ procmap_list_kill
 procmap_list_start
 procmap_register
 procmap_unregister
-k
 pull_files
 pull_files_ftp.py
 pull_kavltg
