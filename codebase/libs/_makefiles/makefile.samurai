@@ -10,6 +10,7 @@ SUB_DIRS = \
 	Ncxx \
 	Radx \
 	dataport \
+        euclid \
 	kd \
 	physics \
 	rapmath \

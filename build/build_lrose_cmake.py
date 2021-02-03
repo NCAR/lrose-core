@@ -155,7 +155,7 @@ def main():
 
     os.chdir(coreDir)
     shellCmd("./build/cmake/createCMakeLists.py --coreDir . " +
-             " --installPrefix " + options.prefix + debugStr + staticStr)
+             " --prefix " + options.prefix + debugStr + staticStr)
 
     # run cmake to generate Makefiles from CMakeLists.txt files
     # this is done in a build directory, so it an out-of-source build

@@ -66,8 +66,8 @@ def main():
                       dest='coreDir', default=coreDirDefault,
                       help='Path of lrose-core top level directory, default is: ' +
                       coreDirDefault)
-    parser.add_option('--installPrefix',
-                      dest='installPrefix', default='',
+    parser.add_option('--prefix',
+                      dest='prefix', default='',
                       help='Path of lrose install dir, default is ~/lrose')
     parser.add_option('--dependDirs',
                       dest='dependDirs', default='',
@@ -115,10 +115,10 @@ def main():
         print("  dependDirs    : ", dependDirs, file=sys.stderr)
         print("  libs dir      : ", libsDir, file=sys.stderr)
         print("  apps dir      : ", appsDir, file=sys.stderr)
-        if (len(options.installPrefix) == 0):
+        if (len(options.prefix) == 0):
             print("  install prefix dir:  ~/lrose", file=sys.stderr)
         else:
-            print("  install prefix dir: ", options.installPrefix, file=sys.stderr)
+            print("  install prefix dir: ", options.prefix, file=sys.stderr)
         print("  static        : ", options.static, file=sys.stderr)
         print("  verboseMake   : ", options.verboseMake, file=sys.stderr)
         print("  withJasper    : ", options.withJasper, file=sys.stderr)
@@ -555,13 +555,13 @@ def writeCMakeListsTop(dir):
     fo.write('message("HDF5_C_INCLUDE_DIR: ${HDF5_C_INCLUDE_DIR}")\n')
     fo.write('\n')
 
-    if (len(options.installPrefix) == 0):
+    if (len(options.prefix) == 0):
         fo.write('# If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose\n')
         fo.write('if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)\n')
         fo.write('  set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE)\n')
         fo.write('endif()\n')
     else:
-        fo.write('set(CMAKE_INSTALL_PREFIX %s CACHE PATH "..." FORCE)\n' % options.installPrefix)
+        fo.write('set(CMAKE_INSTALL_PREFIX %s CACHE PATH "..." FORCE)\n' % options.prefix)
     fo.write('message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")\n')
     fo.write('\n')
 
