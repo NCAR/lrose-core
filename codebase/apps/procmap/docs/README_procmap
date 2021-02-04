@@ -90,18 +90,11 @@ or:
 
     time_hist -params time_hist.params -instance rtest
 
-
-
 Installing the procmap scripts
 ------------------------------
+The procmap scripts are now in apps/scripts/src.
 When you do a 'make install', the procmap scripts will be installed
-into $RAP_BIN_DIR. The procmap Perl library (Procmap.pm) will be
-installed into $RAP_LIB_DIR/perl5. The environment variables:
-
-	RAP_BIN_DIR
-	RAP_LIB_DIR
-
-must be defined before running 'make install'.
+into $LROSE_INSTALL_DIR/bin.
 
 
 
