@@ -77,11 +77,9 @@ SCRIPTS = \
 	auto_restart \
 	auto_restart_stats \
 	DataMapper_list_check \
-	procmap_auto_restart \
 	procmap_list_kill \
 	procmap_list_check \
 	procmap_list_start \
-	procmap_list_start.lrose \
 	start_inst
 
 #	Targets
