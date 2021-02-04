@@ -97,7 +97,7 @@ LROSE will be installed in:
 You can choose to build manually from the command line, or you
 can use the python script provided.
 
-The script ```build_lrose_manual.py``` is in ```lrose-core/build```.
+The script ```build_lrose_manual.py``` is in ```lrose-core/build/scripts```.
 
 The usage is:
 ```

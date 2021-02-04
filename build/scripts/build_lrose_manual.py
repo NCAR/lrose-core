@@ -20,7 +20,7 @@
 #
 # For example:
 #
-#   build_lrose_automake.py --prefix /usr/local/lrose
+#   build_lrose_manual.py --prefix /usr/local/lrose
 #
 # will install in:
 #

@@ -35,7 +35,7 @@ The source code is in /tmp and is not permament.
 ### (b) Build using a script in lrose-core (intermediate):
 
   * check out lrose-core
-  * run the ```build_lrose_cmake.py``` script in the core
+  * run the ```build_lrose_cmake.py``` script in ```lrose-core/build/scripts```.
 
 The libraries and binaries are installed permanently.
 
@@ -217,7 +217,7 @@ To cleanup between builds:
 To see the usage:
 
 ```
-  cd ~/git/lrose-core/build
+  cd ~/git/lrose-core/build/scripts
   ./build_lrose_cmake.py --help
 ```
 

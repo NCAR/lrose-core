@@ -263,7 +263,7 @@ def buildPackageAutomake():
     if (options.installScripts):
         args = args + " --scripts "
 
-    shellCmd("./build/build_lrose_automake.py " + args)
+    shellCmd("./build/scripts/build_lrose_automake.py " + args)
 
 ########################################################################
 # build package using cmake
@@ -278,7 +278,7 @@ def buildPackageCmake():
     if (options.installScripts):
         args = args + " --scripts "
 
-    shellCmd("./build/build_lrose_cmake.py " + args)
+    shellCmd("./build/scripts/build_lrose_cmake.py " + args)
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
