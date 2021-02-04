@@ -155,7 +155,7 @@ def main():
 
     if (options.debug):
         print("#############################################", file=sys.stderr)
-        print("Searching apps, dir: ", libsDir, file=sys.stderr)
+        print("Searching apps, dir: ", appsDir, file=sys.stderr)
 
     searchDirRecurse(appsDir, libList)
 
@@ -237,8 +237,7 @@ def searchDirRecurse(dir, libList):
             print("=====>> Ignoring dir:", dir, file=sys.stderr)
         return
 
-    thisDir = os.path.join(options.coreDir, dir)
-    pathToks = thisDir.split("/")
+    pathToks = dir.split("/")
     ntoks = len(pathToks)
 
     if (pathToks[ntoks-3] == "libs" and
@@ -246,7 +245,7 @@ def searchDirRecurse(dir, libList):
 
         # src level of lib - create CMakeLists.txt for lib
 
-        libDir = thisDir[:-4]
+        libDir = dir[:-4]
         createCMakeListsLib(libDir, libList)
         nLibs = nLibs + 1
 
@@ -255,21 +254,22 @@ def searchDirRecurse(dir, libList):
 
         # app directory - create CMakeLists.txt for app
 
-        createCMakeListsApp(thisDir, libList)
+        createCMakeListsApp(dir, libList)
         nApps = nApps + 1
 
-    elif ((pathToks[ntoks-4] == "apps") and
-          (pathToks[ntoks-2] == "src") and
-          (pathToks[ntoks-1] == "scripts")):
+    elif ((pathToks[ntoks-3] == "apps") and
+          (pathToks[ntoks-2] == "scripts") and
+          (pathToks[ntoks-1] == "src")):
 
-        # scripts dir - do nothing
+        # scripts dir - create special CMakeLists file
         if (options.debug):
-            print("  Ignoring dir:", dir, file=sys.stderr)
+            print("  Processing scripts dir:", dir, file=sys.stderr)
+        createCMakeListsScripts(dir)
 
     else:
 
         # create CMakeLists.txt for recursion
-        createCMakeListsRecurse(thisDir)
+        createCMakeListsRecurse(dir)
         nRecurse = nRecurse + 1
         # recurse
         subdirList = getSubdirList(dir)
@@ -1385,6 +1385,143 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.close
     return
     
+
+#===========================================================================
+#
+# Create CMakeLists.txt for scripts
+#
+#===========================================================================
+
+def createCMakeListsScripts(scriptsDir):
+
+    # get makefile in use
+    # makefile has preference over Makefile
+
+    makefilePath = getMakefilePath(scriptsDir)
+    if (makefilePath.find('not_found') == 0):
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find makefile or Makefile", file=sys.stderr)
+        print("  scripts dir: ", scriptsDir, file=sys.stderr)
+        return
+
+    if (options.debug):
+        print("Using makefile: ", makefilePath, file=sys.stderr)
+
+    # load list of files to be compiled
+
+    scriptsList = getScriptsList(makefilePath)
+    if (options.debug):
+        print("==>> scripts list:", file=sys.stderr)
+        for scriptName in scriptsList:
+            print("  script name: %s" % (scriptName), file=sys.stderr)
+        print("  =======================", file=sys.stderr)
+
+    # write out CMakeLists.txt
+
+    writeCMakeListsScripts(scriptsDir, scriptsList)
+
+########################################################################
+# get list of scripts to be installed
+
+def getScriptsList(makefilePath):
+
+    try:
+        fp = open(makefilePath, 'r')
+    except IOError as e:
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", makefilePath, file=sys.stderr)
+        sys.exit(1)
+
+    makefileLines = fp.readlines()
+    fp.close()
+
+    scriptsList = []
+
+    # build up multiLine string containing all compile files
+
+    scriptsFound = False
+    multiLine = ""
+    for line in makefileLines:
+        line = line.strip()
+        if (scriptsFound == False):
+            if (len(line) < 2):
+                continue
+            if (line[0] == '#'):
+                continue
+            if (line.find('SCRIPTS') == 0):
+                scriptsFound = True
+                multiLine = multiLine + line;
+                if (line.find("\\") < 0):
+                    break;
+        else:
+            if (len(line) < 2):
+                break
+            if (line[0] == '#'):
+                break
+            multiLine = multiLine + line;
+            if (line.find("\\") < 0):
+                break;
+
+    if (scriptsFound == False):
+        return
+
+    # remove strings we don't want, replace with spaces
+
+    multiLine = multiLine.replace('SCRIPTS', " ")
+    multiLine = multiLine.replace("=", " ")
+    multiLine = multiLine.replace("\t", " ")
+    multiLine = multiLine.replace("\\", " ")
+    multiLine = multiLine.replace("\r", " ")
+    multiLine = multiLine.replace("\n", " ")
+
+    # split line on spaces
+    
+    names = multiLine.split(' ')
+    for name in names:
+        if (len(name) > 0):
+            # only use names with non-zero len
+            scriptsList.append(name)
+
+    return scriptsList
+    
+########################################################################
+# Write out CMakeLists.txt for scripts
+
+def writeCMakeListsScripts(scriptsDir, scriptsList):
+
+    cmakePath = os.path.join(scriptsDir, 'CMakeLists.txt')
+
+    if (options.debug):
+        print("--->> Writing CMakeLists.txt for scripts, dir: ",
+              scriptsDir, file=sys.stderr)
+        print("     ", cmakePath, file=sys.stderr)
+
+    fo = open(cmakePath, "w")
+
+    fo.write("###############################################\n")
+    fo.write("#\n")
+    fo.write("# CMakeLists.txt - auto generated from Makefile\n")
+    fo.write("#\n")
+    fo.write("# scripts dir: %s\n" % scriptsDir)
+    fo.write("#\n")
+    fo.write("# written by script createCMakeLists.lib.py\n")
+    fo.write("#\n")
+    fo.write("# created %s\n" % datetime.now())
+    fo.write("#\n")
+    fo.write("###############################################\n")
+    fo.write("\n")
+
+    fo.write("project (scripts)\n")
+    fo.write("\n")
+    
+    fo.write("# install\n")
+    fo.write("\n")
+    for scriptName in scriptsList:
+        fo.write("install(FILES %s DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)\n" % scriptName)
+    fo.write("\n")
+
+    fo.close
+    return
 
 ########################################################################                        
 # get the LINUX type from the /etc/os-release file

@@ -9,6 +9,7 @@ TARGETS =  $(GENERAL_TARGETS) $(DOC_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	tdrp \
+	scripts \
 	procmap \
 	titan \
 	trec \
