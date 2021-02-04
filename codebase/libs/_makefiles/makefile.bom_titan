@@ -23,7 +23,6 @@ SUB_DIRS = \
 	dsserver \
 	euclid \
 	hydro \
-	perl5 \
 	physics \
 	radar \
 	rapformats \

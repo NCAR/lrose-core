@@ -218,26 +218,26 @@ def main():
 
     if (options.installScripts):
 
-        # install perl5
-        
-        print("==== installing perl5 modules ===========", file=sys.stderr)
-        perl5TargetDir = os.path.join(prefix, "lib/perl5")
-        try:
-            os.makedirs(perl5TargetDir)
-        except:
-            print("Dir exists: " + perl5TargetDir, file=sys.stderr)
-        perl5SourceDir = os.path.join(codebaseDir, "libs/perl5/src")
-        if (os.path.isdir(perl5SourceDir)):
-            os.chdir(perl5SourceDir)
-            shellCmd("rsync -av *pm " + perl5TargetDir)
-        print("==== finished installing perl5 modules ==", file=sys.stderr)
-
         # general
 
         generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
             shellCmd("./install_scripts.lrose " + prefix + "bin")
+
+        # install perl5 - deprecated
+        #
+        #print("==== installing perl5 modules ===========", file=sys.stderr)
+        #perl5TargetDir = os.path.join(prefix, "lib/perl5")
+        #try:
+        #    os.makedirs(perl5TargetDir)
+        #except:
+        #    print("Dir exists: " + perl5TargetDir, file=sys.stderr)
+        #perl5SourceDir = os.path.join(codebaseDir, "libs/perl5/src")
+        #if (os.path.isdir(perl5SourceDir)):
+        #    os.chdir(perl5SourceDir)
+        #    shellCmd("rsync -av *pm " + perl5TargetDir)
+        #print("==== finished installing perl5 modules ==", file=sys.stderr)
 
     # check the install
 

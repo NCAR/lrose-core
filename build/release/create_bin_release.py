@@ -540,25 +540,25 @@ def installScripts():
     baseDir = os.path.join(runDir, "codebase")
     os.chdir(baseDir)
 
-    # install perl5
-    
-    perl5Dir = os.path.join(buildDir, "lib/perl5")
-    try:
-        os.makedirs(perl5Dir)
-    except:
-        print("Dir exists: " + perl5Dir, file=sys.stderr)
-
-    perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
-    if (os.path.isdir(perl5LibDir)):
-        os.chdir(perl5LibDir)
-        shellCmd("rsync -av *pm " + perl5Dir)
-
     # general
         
     generalScriptsDir = os.path.join(baseDir, "apps/scripts/src")
     if (os.path.isdir(generalScriptsDir)):
         os.chdir(generalScriptsDir)
         shellCmd("./install_scripts.lrose " + scriptsDir)
+
+    # install perl5 - deprecated
+    #
+    #perl5Dir = os.path.join(buildDir, "lib/perl5")
+    #try:
+    #    os.makedirs(perl5Dir)
+    #except:
+    #    print("Dir exists: " + perl5Dir, file=sys.stderr)
+    #
+    #perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
+    #if (os.path.isdir(perl5LibDir)):
+    #    os.chdir(perl5LibDir)
+    #    shellCmd("rsync -av *pm " + perl5Dir)
 
 ########################################################################
 # create the tar file
