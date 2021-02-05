@@ -123,7 +123,6 @@ private:
   double *_fieldData;
 
   int _runFilelist();
-  int _runArchive();
   int _runRealtimeWithLdata();
   int _runRealtimeNoLdata();
   int _readFile(const string &filePath,
@@ -136,10 +135,8 @@ private:
 
   int _readBufrAscii(const string &readPath,
                      RadxVol &vol);
-
   int _readBufrMetaData();
   int _readBufrFieldData();
-
   int _readBufrMetaVariable(string varLabel, int &ival,
                             string precedingLabel = "");
   int _readBufrMetaVariable(string varLabel, double &dval,
