@@ -1250,7 +1250,7 @@ int Ascii2Radx::_readItalyRos2(const string &readPath,
   if (vh.V) fprintf(stdout,"V: DOPPLER VELOCITY\n");				   
   if (vh.S) fprintf(stdout,"S: SPREAD OF DOPPLER VELOCITY\n");				   
   
-  fprintf(stdout, "Time: %s\n", RadxTime::strm(vh.date).c_str());
+  fprintf(stdout, "TIME: %s\n", RadxTime::strm(vh.date).c_str());
   strcpy(date, ctime(&(vh.date)));
   date[strlen(date)-1]=0;
   fprintf(stdout,
@@ -1264,7 +1264,7 @@ int Ascii2Radx::_readItalyRos2(const string &readPath,
 
     // read in header
 
-    if (!fread(&bh, sizeof(bh),1,in) != 1){
+    if (fread(&bh, sizeof(bh), 1, in) != 1){
       int errNum = errno;
       cerr << "ERROR - Ascii2Radx::_readItalyRos2" << endl;
       cerr << "  Cannot read beam header, path: " << readPath << endl;
