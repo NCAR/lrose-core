@@ -82,7 +82,7 @@ public:
   typedef enum {
     BUFR_ASCII = 0,
     ITALY_ASCII = 1,
-    ITALY_COMPRESSED = 2
+    ITALY_ROS2 = 2
   } input_type_t;
 
   typedef enum {

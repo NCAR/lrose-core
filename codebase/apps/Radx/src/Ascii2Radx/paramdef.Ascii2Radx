@@ -58,7 +58,7 @@ paramdef enum mode_t {
 typedef enum {
   BUFR_ASCII,
   ITALY_ASCII,
-  ITALY_COMPRESSED
+  ITALY_ROS2
 } input_type_t;
 
 paramdef enum input_type_t {
@@ -68,7 +68,7 @@ paramdef enum input_type_t {
   "The ASCII data can be in various representations.\n"
   "  BUFR_ASCII: WMO BUFR in ASCII\n";
   "  ITALY_ASCII: ASCII from Northern Italian radars legacy format.\n"
-  "  ITALY_COMPRESSED: COMPRESSED data from Northern Italian radars legacy format.";
+  "  ITALY_ROS2: COMPRESSED data from Northern Italian radars legacy format.";
 } input_type;
 
 commentdef {

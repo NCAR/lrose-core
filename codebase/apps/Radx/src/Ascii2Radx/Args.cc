@@ -103,6 +103,21 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 	
+    } else if (!strcmp(argv[i], "-bufr_ascii")) {
+      
+      sprintf(tmp_str, "input_type = BUFR_ASCII;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-italy_ascii")) {
+      
+      sprintf(tmp_str, "input_type = ITALY_ASCII;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-italy_ros2")) {
+      
+      sprintf(tmp_str, "input_type = ITALY_ROS2;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-cf1")) {
       
       sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL1;");
@@ -222,6 +237,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -h ] produce this list.\n"
       << "\n"
+      << "  [ -bufr_ascii ] set input type to BUFR_ASCII\n"
+      << "\n"
       << "  [ -cf1 ] convert to cfradial1 (the default)\n"
       << "  [ -cf2 ] convert to cfradial2\n"
       << "  [ -odim ] convert to ODIM HDF5\n"
@@ -239,6 +256,9 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -outname ? ] specify output file name\n"
       << "     file of this name will be written to outdir\n"
+      << "\n"
+      << "  [ -italy_ascii ] set input type to ITALY ASCII\n"
+      << "  [ -italy_ros2 ] set input type to ITALY ROS2\n"
       << "\n"
       << "  [ -suffix ? ] specify output file name suffix\n"
       << "     Suffix goes just before the extension\n"

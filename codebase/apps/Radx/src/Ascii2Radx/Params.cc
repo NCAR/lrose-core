@@ -666,8 +666,8 @@
       tt->enum_def.fields[0].val = BUFR_ASCII;
       tt->enum_def.fields[1].name = tdrpStrDup("ITALY_ASCII");
       tt->enum_def.fields[1].val = ITALY_ASCII;
-      tt->enum_def.fields[2].name = tdrpStrDup("ITALY_COMPRESSED");
-      tt->enum_def.fields[2].val = ITALY_COMPRESSED;
+      tt->enum_def.fields[2].name = tdrpStrDup("ITALY_ROS2");
+      tt->enum_def.fields[2].val = ITALY_ROS2;
     tt->single_val.e = BUFR_ASCII;
     tt++;
     

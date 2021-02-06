@@ -45,6 +45,8 @@
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
 #include <toolsa/TaStr.hh>
+#include <toolsa/TaFile.hh>
+#include <zlib.h>
 using namespace std;
 
 // Constructor
@@ -55,7 +57,6 @@ Ascii2Radx::Ascii2Radx(int argc, char **argv)
 
   OK = TRUE;
   _volNum = 0;
-  _inFile = NULL;
 
   // set programe name
 
@@ -114,11 +115,6 @@ Ascii2Radx::Ascii2Radx(int argc, char **argv)
 Ascii2Radx::~Ascii2Radx()
 
 {
-
-  if (_inFile != NULL) {
-    fclose(_inFile);
-    _inFile = NULL;
-  }
 
   // unregister process
 
@@ -364,28 +360,25 @@ int Ascii2Radx::_readFile(const string &readPath,
     cerr << "  Input path: " << readPath << endl;
   }
 
-  // open the file
-
-  if ((_inFile = fopen(readPath.c_str(), "r")) == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - Ascii2Radx::_readFile" << endl;
-    cerr << "  path: " << readPath << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return -1;
-  }
-
   if (_params.input_type == Params::BUFR_ASCII) {
     if (_readBufrAscii(readPath, vol)) {
       cerr << "ERROR - Ascii2Radx::_readFile" << endl;
-      cerr << "  path: " << readPath << endl;
-      fclose(_inFile);
+      cerr << "  reading BUFR ASCII file: " << readPath << endl;
+      return -1;
+    }
+  } else if (_params.input_type == Params::ITALY_ASCII) {
+    if (_readItalyAscii(readPath, vol)) {
+      cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+      cerr << "  reading ITALY ASCII file: " << readPath << endl;
+      return -1;
+    }
+  } else if (_params.input_type == Params::ITALY_ROS2) {
+    if (_readItalyRos2(readPath, vol)) {
+      cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+      cerr << "  reading ITALY ROS2 compressed file: " << readPath << endl;
       return -1;
     }
   }
-
-  // close the file
-  
-  fclose(_inFile);
 
   // append the read path
 
@@ -409,23 +402,33 @@ int Ascii2Radx::_readBufrAscii(const string &readPath,
                                RadxVol &vol)
 {
 
+  // open the file
+  
+  TaFile taFile;
+  FILE *inFile = taFile.fopen(readPath, "r");
+  if (inFile == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - Ascii2Radx::_readBufrAscii" << endl;
+    cerr << "  path: " << readPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
   // read in the metadata
   
-  if (_readBufrMetaData()) {
+  if (_readBufrMetaData(inFile)) {
     cerr << "ERROR - Ascii2Radx::_readFile" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << "  cannot read metadata" << endl;
-    fclose(_inFile);
     return -1;
   }
 
   // read in the field data
   
-  if (_readBufrFieldData()) {
+  if (_readBufrFieldData(inFile)) {
     cerr << "ERROR - Ascii2Radx::_readFile" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << "  cannot read metadata" << endl;
-    fclose(_inFile);
     return -1;
   }
 
@@ -778,85 +781,85 @@ int Ascii2Radx::_writeVol(RadxVol &vol)
 //////////////////////////////////////////////////
 // read in the BUFR metadata
 
-int Ascii2Radx::_readBufrMetaData()
+int Ascii2Radx::_readBufrMetaData(FILE *inFile)
 {
 
   _year = _month = _day = _hour = _min = _sec = 0;
-  _readBufrMetaVariable("Year", _year);
-  _readBufrMetaVariable("Month", _month);
-  _readBufrMetaVariable("Day", _day);
-  _readBufrMetaVariable("Hour", _hour);
-  _readBufrMetaVariable("Minute", _min);
-  _readBufrMetaVariable("Second", _sec);
+  _readBufrMetaVariable(inFile, "Year", _year);
+  _readBufrMetaVariable(inFile, "Month", _month);
+  _readBufrMetaVariable(inFile, "Day", _day);
+  _readBufrMetaVariable(inFile, "Hour", _hour);
+  _readBufrMetaVariable(inFile, "Minute", _min);
+  _readBufrMetaVariable(inFile, "Second", _sec);
   _volStartTime.set(_year, _month, _day, _hour, _min, _sec);
 
   _latitude = 0.0;
-  _readBufrMetaVariable("Latitude (high accuracy)", _latitude);
+  _readBufrMetaVariable(inFile, "Latitude (high accuracy)", _latitude);
 
   _longitude = 0.0;
-  _readBufrMetaVariable("Longitude (high accuracy)", _longitude);
+  _readBufrMetaVariable(inFile, "Longitude (high accuracy)", _longitude);
 
   _altitudeM = 0.0;
-  _readBufrMetaVariable("Height or altitude", _altitudeM);
+  _readBufrMetaVariable(inFile, "Height or altitude", _altitudeM);
 
   _antennaGain = Radx::missingFl64;
-  _readBufrMetaVariable("Maximum antenna gain", _antennaGain);
+  _readBufrMetaVariable(inFile, "Maximum antenna gain", _antennaGain);
 
   _beamWidth = Radx::missingFl64;
-  _readBufrMetaVariable("3-dB beamwidth", _beamWidth);
+  _readBufrMetaVariable(inFile, "3-dB beamwidth", _beamWidth);
 
   _antennaSpeedAz = Radx::missingFl64;
-  _readBufrMetaVariable("Antenna speed (azimuth)", _antennaSpeedAz);
+  _readBufrMetaVariable(inFile, "Antenna speed (azimuth)", _antennaSpeedAz);
 
   _antennaSpeedEl = Radx::missingFl64;
-  _readBufrMetaVariable("Antenna speed (elevation)", _antennaSpeedEl);
+  _readBufrMetaVariable(inFile, "Antenna speed (elevation)", _antennaSpeedEl);
 
   _frequencyHz = Radx::missingFl64;
-  _readBufrMetaVariable("Mean frequency", _frequencyHz);
+  _readBufrMetaVariable(inFile, "Mean frequency", _frequencyHz);
 
   _peakPowerWatts = Radx::missingFl64;
-  _readBufrMetaVariable("Peak power", _peakPowerWatts);
+  _readBufrMetaVariable(inFile, "Peak power", _peakPowerWatts);
 
   _prf = Radx::missingFl64;
-  _readBufrMetaVariable("Pulse repetition frequency", _prf);
+  _readBufrMetaVariable(inFile, "Pulse repetition frequency", _prf);
 
   _pulseWidthSec = Radx::missingFl64;
-  _readBufrMetaVariable("Pulse width", _pulseWidthSec);
+  _readBufrMetaVariable(inFile, "Pulse width", _pulseWidthSec);
 
   _rxBandWidthHz = Radx::missingFl64;
-  _readBufrMetaVariable("Intermediate frequency bandwidth", _rxBandWidthHz);
+  _readBufrMetaVariable(inFile, "Intermediate frequency bandwidth", _rxBandWidthHz);
 
   _noiseLevelDbm = Radx::missingFl64;
-  _readBufrMetaVariable("Minimum detectable signal", _noiseLevelDbm);
+  _readBufrMetaVariable(inFile, "Minimum detectable signal", _noiseLevelDbm);
 
   _dynamicRangeDb = Radx::missingFl64;
-  _readBufrMetaVariable("Dynamic range", _dynamicRangeDb);
+  _readBufrMetaVariable(inFile, "Dynamic range", _dynamicRangeDb);
 
   _gateSpacingM = 1000.0;
-  _readBufrMetaVariable("Longueur de la porte distance apres integration", _gateSpacingM);
+  _readBufrMetaVariable(inFile, "Longueur de la porte distance apres integration", _gateSpacingM);
   _startRangeM = _gateSpacingM / 2.0;
 
   _azimuthResDeg = 0.5;
-  _readBufrMetaVariable("Increment de l'azimut entre chaque tir de l'image polaire", _azimuthResDeg);
+  _readBufrMetaVariable(inFile, "Increment de l'azimut entre chaque tir de l'image polaire", _azimuthResDeg);
 
   _nSamples = 1;
-  _readBufrMetaVariable("Number of integrated pulses", _nSamples);
+  _readBufrMetaVariable(inFile, "Number of integrated pulses", _nSamples);
 
   _radarConstant = Radx::missingFl64;
-  _readBufrMetaVariable("Constante radar", _radarConstant);
+  _readBufrMetaVariable(inFile, "Constante radar", _radarConstant);
 
   _elevDeg = 0.0;
-  _readBufrMetaVariable("Antenna elevation", _elevDeg);
+  _readBufrMetaVariable(inFile, "Antenna elevation", _elevDeg);
 
   _startAz = 0.0;
-  _readBufrMetaVariable("Antenna beam azimuth", _startAz);
+  _readBufrMetaVariable(inFile, "Antenna beam azimuth", _startAz);
   _startAz += _azimuthResDeg / 2.0;
 
   _nGates = 0;
-  _readBufrMetaVariable("Number of pixels per row", _nGates);
+  _readBufrMetaVariable(inFile, "Number of pixels per row", _nGates);
 
   _nAz = 0;
-  _readBufrMetaVariable("Number of pixels per column", _nAz);
+  _readBufrMetaVariable(inFile, "Number of pixels per column", _nAz);
 
   if(_params.debug) {
 
@@ -893,14 +896,14 @@ int Ascii2Radx::_readBufrMetaData()
 //////////////////////////////////////////////////
 // read in the BUFR field data
 
-int Ascii2Radx::_readBufrFieldData()
+int Ascii2Radx::_readBufrFieldData(FILE *inFile)
 {
 
   // read in number of total points (az * gates)
   // this also positions the file pointer to read the data
 
   _nPtsData = 0;
-  if (_readBufrMetaVariable("Facteur super elargi de repetition differe du descripteur",
+  if (_readBufrMetaVariable(inFile, "Facteur super elargi de repetition differe du descripteur",
                             _nPtsData)) {
     cerr << "ERROR - Ascii2Radx::_readBufrFieldData()" << endl;
     cerr << "  Cannot find variable for _nPtsData" << endl;
@@ -912,7 +915,7 @@ int Ascii2Radx::_readBufrFieldData()
   _fieldData = _fieldData_.alloc(_nPtsData);
   for (int ii = 0; ii < _nPtsData; ii++) {
     double dval;
-    if (_readBufrDataValue("Pixel value", dval)) {
+    if (_readBufrDataValue(inFile, "Pixel value", dval)) {
       cerr << "ERROR - Ascii2Radx::_readBufrFieldData()" << endl;
       cerr << "  Cannot read data value, ii: " << ii << endl;
       return -1;
@@ -929,11 +932,12 @@ int Ascii2Radx::_readBufrFieldData()
 // and then read in the variable
 // returns 0 on success, -1 on failure
 
-int Ascii2Radx::_readBufrMetaVariable(string varLabel, int &ival,
+int Ascii2Radx::_readBufrMetaVariable(FILE *inFile,
+                                      string varLabel, int &ival,
                                       string precedingLabel)
 {
   double dval;
-  if (_readBufrMetaVariable(varLabel, dval, precedingLabel)) {
+  if (_readBufrMetaVariable(inFile, varLabel, dval, precedingLabel)) {
     return -1;
   }
   ival = (int) floor(dval + 0.5);
@@ -946,20 +950,21 @@ int Ascii2Radx::_readBufrMetaVariable(string varLabel, int &ival,
 // and then read in the variable
 // returns 0 on success, -1 on failure
 
-int Ascii2Radx::_readBufrMetaVariable(string varLabel, double &dval,
+int Ascii2Radx::_readBufrMetaVariable(FILE *inFile,
+                                      string varLabel, double &dval,
                                       string precedingLabel)
 {
   
   // rewind file
 
-  rewind(_inFile);
+  rewind(inFile);
 
   // check for preceding label
-
+  
   if (precedingLabel.size() > 0) {
-    while (!feof(_inFile)) {
+    while (!feof(inFile)) {
       char line[1024];
-      if (fgets(line, 1024, _inFile) == NULL) {
+      if (fgets(line, 1024, inFile) == NULL) {
         continue;
       }
       if (strstr(line, precedingLabel.c_str()) != NULL) {
@@ -970,12 +975,12 @@ int Ascii2Radx::_readBufrMetaVariable(string varLabel, double &dval,
 
   // read in each line
   
-  while (!feof(_inFile)) {
+  while (!feof(inFile)) {
 
     // get next line
 
     char line[1024];
-    if (fgets(line, 1024, _inFile) == NULL) {
+    if (fgets(line, 1024, inFile) == NULL) {
       continue;
     }
 
@@ -1032,18 +1037,19 @@ int Ascii2Radx::_readBufrMetaVariable(string varLabel, double &dval,
 // read in data value
 // returns 0 on success, -1 on failure
 
-int Ascii2Radx::_readBufrDataValue(string varLabel, double &dval)
+int Ascii2Radx::_readBufrDataValue(FILE *inFile,
+                                   string varLabel, double &dval)
 
 {
   
   // read in each line
   
-  while (!feof(_inFile)) {
+  while (!feof(inFile)) {
 
     // get next line
 
     char line[1024];
-    if (fgets(line, 1024, _inFile) == NULL) {
+    if (fgets(line, 1024, inFile) == NULL) {
       continue;
     }
 
@@ -1094,5 +1100,407 @@ int Ascii2Radx::_readBufrDataValue(string varLabel, double &dval)
 
   return -1;
 
+}
+
+//////////////////////////////////////////////////
+// Read in an ITALY ASCII file
+// Returns 0 on success, -1 on failure
+
+int Ascii2Radx::_readItalyAscii(const string &readPath,
+                                RadxVol &vol)
+{
+
+#ifdef NOTYET
+  // read in the metadata
+  
+  if (_readBufrMetaData()) {
+    cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+    cerr << "  path: " << readPath << endl;
+    cerr << "  cannot read metadata" << endl;
+    return -1;
+  }
+
+  // read in the field data
+  
+  if (_readBufrFieldData()) {
+    cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+    cerr << "  path: " << readPath << endl;
+    cerr << "  cannot read metadata" << endl;
+    return -1;
+  }
+
+  // create the rays
+
+  double deltaAz = 0.0;
+  double az = _startAz;
+  for (int iray = 0; iray < _nAz; iray++) {
+
+    // create a ray
+    
+    RadxRay *ray = new RadxRay;
+
+    // set metadata
+
+    ray->setVolumeNumber(_volNum);
+    ray->setSweepNumber(_sweepNum);
+    ray->setCalibIndex(0);
+    ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+
+    RadxTime rayTime = _volStartTime + deltaAz / _antennaSpeedAz;
+    deltaAz += _azimuthResDeg;
+    ray->setTime(rayTime);
+
+    ray->setAzimuthDeg(az);
+    az += _azimuthResDeg;
+    if (az > 360.0) {
+      az -= 360.0;
+    } else if (az < 0) {
+      az += 360.0;
+    }
+    
+    ray->setElevationDeg(_elevDeg);
+    ray->setFixedAngleDeg(_elevDeg);
+
+    ray->setTrueScanRateDegPerSec(_antennaSpeedAz);
+    ray->setTargetScanRateDegPerSec(_antennaSpeedAz);
+    ray->setIsIndexed(true);
+    ray->setAngleResDeg(_azimuthResDeg);
+
+    ray->setNSamples(_nSamples);
+    ray->setPulseWidthUsec(_pulseWidthSec * 1.0e6);
+    ray->setPrtSec(1.0 / _prf);
+
+    ray->setEstimatedNoiseDbmHc(_noiseLevelDbm);
+    ray->setEstimatedNoiseDbmVc(_noiseLevelDbm);
+
+    // add field
+
+    ray->addField(_params._output_fields[0].output_field_name,
+                  _params._output_fields[0].units,
+                  _nGates, Radx::missingFl64,
+                  _fieldData + iray * _nGates, true);
+
+    ray->setRangeGeom(_startRangeM / 1000.0, _gateSpacingM / 1000.0);
+
+    ray->convertToSi16();
+
+    // add to volume
+
+    vol.addRay(ray);
+
+  } // iray
+
+  // set the metadata on the volume
+
+  _finalizeVol(vol);
+
+#endif
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Read in an ITALY ROS2 COMPRESSED file
+// Returns 0 on success, -1 on failure
+
+int Ascii2Radx::_readItalyRos2(const string &readPath,
+                               RadxVol &vol)
+{
+
+  char *buf=NULL,*beam=NULL,date[32];
+  int n=0,sweep=-1,data_type=0;
+  ros2_vol_hdr_t vh; 
+  ros2_beam_hdr_t bh; 
+
+  // open input file
+
+  TaFile inFile;
+  FILE *in = inFile.fopen(readPath, "r");
+  if (in == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - Ascii2Radx::_readItalyRos2" << endl;
+    cerr << "  Cannot open file, path: " << readPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  // read in vol header
+
+  if (fread(&vh, sizeof(vh), 1, in) != 1) {
+    int errNum = errno;
+    cerr << "ERROR - Ascii2Radx::_readItalyRos2" << endl;
+    cerr << "  Cannot read volume header, path: " << readPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  if(strcmp(vh.signature, "ROS2_V")) {
+    cerr << "ERROR - Ascii2Radx::_readItalyRos2" << endl;
+    cerr << "  Bad volume header, path: " << readPath << endl;
+    cerr << "  First bytes should be: ROS_V" << endl;
+    return -1;
+  }
+
+  if (vh.Z) fprintf(stdout,"Z: REFLECTIVITY\n");			   
+  if (vh.D) fprintf(stdout,"D: DIFFERENTIAL REFLECTIVITY\n");			   
+  if (vh.P) fprintf(stdout,"P: DIFFERENTIAL PHASE SHIFT\n");				   
+  if (vh.R) fprintf(stdout,"R: COEFFICIENT OF CORRELATION\n");				   
+  if (vh.L) fprintf(stdout,"L: LINEAR DEPOLARIZATION RATIO\n");				   
+  if (vh.V) fprintf(stdout,"V: DOPPLER VELOCITY\n");				   
+  if (vh.S) fprintf(stdout,"S: SPREAD OF DOPPLER VELOCITY\n");				   
+  
+  fprintf(stdout, "Time: %s\n", RadxTime::strm(vh.date).c_str());
+  strcpy(date, ctime(&(vh.date)));
+  date[strlen(date)-1]=0;
+  fprintf(stdout,
+          "\nVOLUME: time=%.ld (%s)   rad_lat=%.4f deg   rad_lon=%.4f deg   rad_alt=%.0f m"
+          "   range_bin=%.1f m   nyquist_velocity=%.2f m/s\n",
+          vh.date, date, vh.rad_lat, vh.rad_lon, vh.rad_alt, vh.l_bin, vh.nyquist_v); 
+
+  // read in beams
+  
+  while (true) {
+
+    // read in header
+
+    if (!fread(&bh, sizeof(bh),1,in) != 1){
+      int errNum = errno;
+      cerr << "ERROR - Ascii2Radx::_readItalyRos2" << endl;
+      cerr << "  Cannot read beam header, path: " << readPath << endl;
+      cerr << "  " << strerror(errNum) << endl;
+      return -1;
+    }
+
+    if (bh.sweep<0) {
+      break;
+    }
+          
+    if (!data_type) {
+      data_type= bh.data_type;
+      fprintf(stdout,"   data_type=%hd\n", data_type);
+    }
+          
+    fprintf(stdout,
+            "\nBEAM: t=%.2lf   el=%.1f   az=%.1f  n_bins=%hd\n",
+            bh.time,bh.el,bh.az,bh.n_bins); 
+          
+    if (sweep != bh.sweep) {
+      sweep = bh.sweep;
+      beam = (char *) realloc(beam, bh.n_values * sizeof(Radx::fl32));
+    }
+
+    /* ad inizio sweep il numero di range bin potrebbe variare */
+          
+    if (n < bh.beam_length) {
+      n=bh.beam_length;
+      buf=(char *) realloc(buf,n);
+    }
+
+    if (!fread(buf, bh.beam_length, 1, in)) {
+      printf("ERRORE: impossibile leggere la sezione dati di un beam ROS2\n");
+      break;
+    }
+    
+    if (bh.compression) {
+      if (!_ros2Uncompress((unsigned char*)buf,
+                           bh.beam_length,
+                           (unsigned char*)beam,
+                           bh.n_values*sizeof(float))) {
+        printf("ERRORE: impossibile decomprimere la sezione dati di un beam ROS2\n");
+        break;
+      }
+    } else {
+      memcpy(beam, buf, bh.beam_length);
+    }
+          
+    /* ora beam contiene i dati radar decompressi, che posso stampare  */   
+	  
+    if (vh.Z) {
+      fprintf(stdout,"Z:");
+      _ros2PrintValues(bh.data_type,vh.Z_pos,bh.n_bins,beam,stdout);
+    }
+    if (vh.D) {
+      fprintf(stdout,"D:");
+      _ros2PrintValues(bh.data_type,vh.D_pos,bh.n_bins,beam,stdout);
+    }
+    if (vh.P) {
+      fprintf(stdout,"P:");
+      _ros2PrintValues(bh.data_type,vh.P_pos,bh.n_bins,beam,stdout);
+    }
+    if (vh.R) {
+      fprintf(stdout,"R:");
+      _ros2PrintValues(bh.data_type,vh.R_pos,bh.n_bins,beam,stdout);
+    }
+    if (vh.L) {
+      fprintf(stdout,"L:");
+      _ros2PrintValues(bh.data_type,vh.L_pos,bh.n_bins,beam,stdout);
+    }
+    if (vh.V) {
+      fprintf(stdout,"V:");
+      _ros2PrintValues(bh.data_type,vh.V_pos,bh.n_bins,beam,stdout);
+    }
+    if (vh.S) {
+      fprintf(stdout,"S:");
+      _ros2PrintValues(bh.data_type,vh.S_pos,bh.n_bins,beam,stdout);
+    }
+    
+  } // while (true)
+
+  if (beam) free(beam);
+  if (buf) free(buf);
+  
+  return 0;
+
+#ifdef NOTYET
+
+  // create the rays
+
+  double deltaAz = 0.0;
+  double az = _startAz;
+  for (int iray = 0; iray < _nAz; iray++) {
+
+    // create a ray
+    
+    RadxRay *ray = new RadxRay;
+
+    // set metadata
+
+    ray->setVolumeNumber(_volNum);
+    ray->setSweepNumber(_sweepNum);
+    ray->setCalibIndex(0);
+    ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+
+    RadxTime rayTime = _volStartTime + deltaAz / _antennaSpeedAz;
+    deltaAz += _azimuthResDeg;
+    ray->setTime(rayTime);
+
+    ray->setAzimuthDeg(az);
+    az += _azimuthResDeg;
+    if (az > 360.0) {
+      az -= 360.0;
+    } else if (az < 0) {
+      az += 360.0;
+    }
+    
+    ray->setElevationDeg(_elevDeg);
+    ray->setFixedAngleDeg(_elevDeg);
+
+    ray->setTrueScanRateDegPerSec(_antennaSpeedAz);
+    ray->setTargetScanRateDegPerSec(_antennaSpeedAz);
+    ray->setIsIndexed(true);
+    ray->setAngleResDeg(_azimuthResDeg);
+
+    ray->setNSamples(_nSamples);
+    ray->setPulseWidthUsec(_pulseWidthSec * 1.0e6);
+    ray->setPrtSec(1.0 / _prf);
+
+    ray->setEstimatedNoiseDbmHc(_noiseLevelDbm);
+    ray->setEstimatedNoiseDbmVc(_noiseLevelDbm);
+
+    // add field
+
+    ray->addField(_params._output_fields[0].output_field_name,
+                  _params._output_fields[0].units,
+                  _nGates, Radx::missingFl64,
+                  _fieldData + iray * _nGates, true);
+
+    ray->setRangeGeom(_startRangeM / 1000.0, _gateSpacingM / 1000.0);
+
+    ray->convertToSi16();
+
+    // add to volume
+
+    vol.addRay(ray);
+
+  } // iray
+
+  // set the metadata on the volume
+
+  _finalizeVol(vol);
+
+#endif
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////
+// Uncompress a compressed file in ITALY compressed format
+
+int Ascii2Radx::_ros2Uncompress(unsigned char *in, int n_in,
+                                unsigned char *out, int n_out)
+  
+{
+  /* tries to uncompress (zlib) the contents of of the memory area pointed to by in,
+   * of size n_in.
+   * The result is written to the memory area pointed to by *out,
+   * of assigned size * n_out.
+   * If the decompression is successful the function returns the value 1,
+   * otherwise the input comes simply copied to the output and the value 0 is returned.
+   */
+
+  z_stream z;
+  
+  z.next_in =Z_NULL;
+  z.avail_in=Z_NULL;
+  z.zalloc  =Z_NULL;
+  z.zfree   =Z_NULL;
+  z.opaque  =Z_NULL;
+  inflateInit(&z);
+  
+  z.next_in   = in;
+  z.avail_in  = n_in;
+  z.next_out  = out;
+  z.avail_out = n_out;
+  
+  if (inflate(&z,Z_FINISH)==Z_STREAM_END) {
+    inflateEnd(&z);
+    return(1);
+  } else {
+    inflateEnd(&z);
+    return(0);
+  }
+}
+
+//////////////////////////////////////////////////////////
+// Print out field values
+
+void Ascii2Radx::_ros2PrintValues(int type,
+                                  int position,
+                                  int n_bins,
+                                  char* beam,
+                                  FILE* out)
+  
+{
+
+  int offset = position * n_bins;
+  
+  switch (type)
+  {
+    case 1:
+      /* unsigned char */
+      for (int i=0;i<n_bins;i++) {
+        fprintf(out," %03d" ,*((unsigned char*) beam+offset+i));
+      }
+      break;
+    case 2:
+      /* float */
+      for (int i=0;i<n_bins;i++) {
+        fprintf(out," %6.2f",*((float*) beam+offset+i));
+      }
+      break;
+    case 3:
+      /* ushort */
+      for (int i=0;i<n_bins;i++) {
+        fprintf(out," %05d" ,*((ushort*)beam+offset+i));
+      }
+      break;
+    case 4:
+      /* half */
+      break;
+  }           
+  fprintf(out,"\n");
+  return;
 }
 
