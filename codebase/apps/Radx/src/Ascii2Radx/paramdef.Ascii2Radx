@@ -144,25 +144,25 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = true;
+  p_default = false;
   p_descr = "Option to override the instrument name.";
   p_help = "If true, the name provided will be used.";
 } override_instrument_name;
 
 paramdef string {
-  p_default = "Guadeloupe";
+  p_default = "unknown";
   p_descr = "Instrument name.";
   p_help = "See override_instrument_name.";
 } instrument_name;
 
 paramdef boolean {
-  p_default = true;
+  p_default = false;
   p_descr = "Option to override the site name.";
   p_help = "If true, the name provided will be used.";
 } override_site_name;
 
 paramdef string {
-  p_default = "Guadeloupe";
+  p_default = "unknown";
   p_descr = "Site name.";
   p_help = "See override_site_name.";
 } site_name;

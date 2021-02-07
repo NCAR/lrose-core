@@ -1669,6 +1669,7 @@ void Ascii2Radx::_addFieldToRay(int fieldId,
       field->setUnits("m/s");
       field->setLongName("doppler_velocity");
       field->setStandardName("radial_velocity_of_scatterers_away_from_instrument");
+      field->setFieldFolds(-nyquist, nyquist);
       break;
       
     case 'S':
@@ -1686,8 +1687,14 @@ void Ascii2Radx::_addFieldToRay(int fieldId,
   _convertRos2ArrayToFloat(fieldId, dataType, position, n_bins,
                            beam, nyquist, fdata);
 
+  // for (int ii = 0; ii < n_bins; ii++) {
+  //   cerr << fdata[ii] << " ";
+  // }
+  // cerr << endl;
+
   // add the data
   
+  field->setTypeFl32(-9999.0);
   field->addDataFl32(fdata.size(), fdata.data());
   ray->addField(field);
 
@@ -1731,30 +1738,37 @@ void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
     
     case 'Z':
       scale = (96.0 - -31.5) / range;
+      bias = -31.5;
       break;
       
     case 'D':
       scale = (7.9375 - -7.9375) / range;
+      bias = -7.9375;
       break;
       
     case 'P':
       scale = (90.0 - -90.0) / range;
+      bias = -90;
       break;
       
     case 'R':
       scale = (1.275 - -0.0048) / range;
+      bias = -0.0048;
       break;
       
     case 'L':
       scale = (0.0 - -48.0) / range;
+      bias = -48.0;
       break;
       
     case 'V':
       scale = (nyquist - -nyquist) / range;
+      bias = -nyquist;
       break;
       
     case 'S':
       scale = (nyquist - 0.0) / range;
+      bias = 0.0;
       break;
       
   } // switch
@@ -1765,14 +1779,20 @@ void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
       /* unsigned char */
       for (int i = 0; i < n_bins; i++) {
         int ival = *((unsigned char*) beam + offset + i);
-        double fval = (ival - imin) * scale + bias;
+        double fval = -9999.0;
+        if (ival != 0) {
+          fval = (ival - imin) * scale + bias;
+        }
         floats.push_back(fval);
       }
       break;
     case 2:
       /* float */
       for (int i = 0; i < n_bins; i++) {
-        double fval = *((Radx::fl32*) beam + offset + i);
+        double fval = -9999.0;
+        if (fval != 0.0) {
+          fval = *((Radx::fl32*) beam + offset + i);
+        }
         floats.push_back(fval);
       }
       break;
@@ -1780,14 +1800,20 @@ void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
       /* ushort */
       for (int i = 0; i < n_bins; i++) {
         int ival = *((Radx::ui16*) beam + offset + i);
-        double fval = (ival - imin) * scale + bias;
+        double fval = -9999.0;
+        if (ival != 0) {
+          fval = (ival - imin) * scale + bias;
+        }
         floats.push_back(fval);
       }
       break;
     default:
       /* half - treat as floats */
       for (int i = 0; i < n_bins; i++) {
-        double fval = *((Radx::fl32*) beam + offset + i);
+        double fval = -9999.0;
+        if (fval != 0.0) {
+          fval = *((Radx::fl32*) beam + offset + i);
+        }
         floats.push_back(fval);
       }
   }           

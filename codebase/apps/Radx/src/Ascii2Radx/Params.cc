@@ -829,7 +829,7 @@
     tt->descr = tdrpStrDup("Option to override the instrument name.");
     tt->help = tdrpStrDup("If true, the name provided will be used.");
     tt->val_offset = (char *) &override_instrument_name - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'instrument_name'
@@ -841,7 +841,7 @@
     tt->descr = tdrpStrDup("Instrument name.");
     tt->help = tdrpStrDup("See override_instrument_name.");
     tt->val_offset = (char *) &instrument_name - &_start_;
-    tt->single_val.s = tdrpStrDup("Guadeloupe");
+    tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
     // Parameter 'override_site_name'
@@ -853,7 +853,7 @@
     tt->descr = tdrpStrDup("Option to override the site name.");
     tt->help = tdrpStrDup("If true, the name provided will be used.");
     tt->val_offset = (char *) &override_site_name - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'site_name'
@@ -865,7 +865,7 @@
     tt->descr = tdrpStrDup("Site name.");
     tt->help = tdrpStrDup("See override_site_name.");
     tt->val_offset = (char *) &site_name - &_start_;
-    tt->single_val.s = tdrpStrDup("Guadeloupe");
+    tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
     // Parameter 'Comment 6'
