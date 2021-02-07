@@ -327,7 +327,7 @@ int Ascii2Radx::_handleFile(const string &readPath,
   }
 
   if (_params.print_ros2_to_stdout) {
-    if (_printRos2ToStdout(readPath, stdout)) {
+    if (_printRos2ToFile(readPath, stdout)) {
       cerr << "ERROR - Ascii2Radx::_handleFile" << endl;
       cerr << "  printing ITALY ROS2 to stdout, path: " << readPath << endl;
       return -1;
@@ -1177,10 +1177,6 @@ int Ascii2Radx::_handleItalyAscii(const string &readPath,
 
   _finalizeVol(vol);
 
-  // set the metadata on the volume
-
-  _finalizeVol(vol);
-
   // write the volume out
 
   if (_writeVol(vol)) {
@@ -1202,11 +1198,12 @@ int Ascii2Radx::_handleItalyAscii(const string &readPath,
 // Returns 0 on success, -1 on failure
 
 int Ascii2Radx::_handleItalyRos2(const string &readPath,
-                               RadxVol &vol)
+                                 RadxVol &vol)
 {
-
-  char *buf=NULL,*beam=NULL,date[32];
-  int n=0,sweep=-1,data_type=0;
+  
+  char *buf=NULL;
+  char *beam=NULL;
+  int n=0,dataType=0;
   ros2_vol_hdr_t vh; 
   ros2_beam_hdr_t bh; 
 
@@ -1239,21 +1236,11 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
     return -1;
   }
 
-  if (vh.Z) fprintf(stdout,"Z: REFLECTIVITY\n");			   
-  if (vh.D) fprintf(stdout,"D: DIFFERENTIAL REFLECTIVITY\n");			   
-  if (vh.P) fprintf(stdout,"P: DIFFERENTIAL PHASE SHIFT\n");				   
-  if (vh.R) fprintf(stdout,"R: COEFFICIENT OF CORRELATION\n");				   
-  if (vh.L) fprintf(stdout,"L: LINEAR DEPOLARIZATION RATIO\n");				   
-  if (vh.V) fprintf(stdout,"V: DOPPLER VELOCITY\n");				   
-  if (vh.S) fprintf(stdout,"S: SPREAD OF DOPPLER VELOCITY\n");				   
-  
-  fprintf(stdout, "TIME: %s\n", RadxTime::strm(vh.date).c_str());
-  strcpy(date, ctime(&(vh.date)));
-  date[strlen(date)-1]=0;
-  fprintf(stdout,
-          "\nVOLUME: time=%.ld (%s)   rad_lat=%.4f deg   rad_lon=%.4f deg   rad_alt=%.0f m"
-          "   range_bin=%.1f m   nyquist_velocity=%.2f m/s\n",
-          vh.date, date, vh.rad_lat, vh.rad_lon, vh.rad_alt, vh.l_bin, vh.nyquist_v); 
+  vol.setScanName(vh.name);
+  vol.setLatitudeDeg(vh.rad_lat);
+  vol.setLongitudeDeg(vh.rad_lon);
+  vol.setAltitudeKm(vh.rad_alt / 1000.0);
+  vol.setFrequencyHz(vh.freq * 1.0e6);
 
   // read in beams
   
@@ -1269,25 +1256,42 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
       return -1;
     }
 
-    if (bh.sweep<0) {
+    if (bh.sweep < 0) {
       break;
     }
-          
-    if (!data_type) {
-      data_type= bh.data_type;
-      fprintf(stdout,"   data_type=%hd\n", data_type);
-    }
-          
-    fprintf(stdout,
-            "\nBEAM: t=%.2lf   el=%.1f   az=%.1f  n_bins=%hd\n",
-            bh.time,bh.el,bh.az,bh.n_bins); 
-          
-    if (sweep != bh.sweep) {
-      sweep = bh.sweep;
-      beam = (char *) realloc(beam, bh.n_values * sizeof(Radx::fl32));
-    }
+    
+    // create a ray
+    
+    RadxRay *ray = new RadxRay;
 
-    /* ad inizio sweep il numero di range bin potrebbe variare */
+    // set metadata
+
+    ray->setScanName(vh.name);
+    ray->setSweepNumber(bh.sweep);
+    ray->setCalibIndex(0);
+    ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+    ray->setNyquistMps(vh.nyquist_v);
+    ray->setRangeGeom(vh.l_bin / 2000.0, vh.l_bin / 1000.0);
+    
+    double timeSecs = (time_t) bh.time;
+    double subSecs = bh.time - timeSecs;
+    RadxTime rayTime(timeSecs, subSecs);
+    ray->setTime(rayTime);
+    
+    ray->setAzimuthDeg(bh.az);
+    ray->setElevationDeg(bh.el);
+    ray->setElevationDeg(_elevDeg);
+    ray->setFixedAngleDeg(bh.el);
+    
+    ray->setNSamples(bh.n_pulses);
+    ray->setPulseWidthUsec(vh.l_pulse / 1000.0);
+    ray->setPrtSec(1.0 / vh.PRF);
+
+    if (!dataType) {
+      dataType= bh.data_type;
+    }
+          
+    /* create buf for data */
           
     if (n < bh.beam_length) {
       n=bh.beam_length;
@@ -1311,35 +1315,28 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
       memcpy(beam, buf, bh.beam_length);
     }
           
-    /* ora beam contiene i dati radar decompressi, che posso stampare  */   
+    // add fields
 	  
     if (vh.Z) {
-      fprintf(stdout,"Z:");
-      _ros2PrintValues(bh.data_type,vh.Z_pos,bh.n_bins,beam,stdout);
+      _addFieldToRay('Z', bh.data_type, vh.Z_pos, bh.n_bins, beam, vh.nyquist_v, ray);
     }
     if (vh.D) {
-      fprintf(stdout,"D:");
-      _ros2PrintValues(bh.data_type,vh.D_pos,bh.n_bins,beam,stdout);
+      _addFieldToRay('D', bh.data_type, vh.D_pos, bh.n_bins, beam, vh.nyquist_v, ray);
     }
     if (vh.P) {
-      fprintf(stdout,"P:");
-      _ros2PrintValues(bh.data_type,vh.P_pos,bh.n_bins,beam,stdout);
+      _addFieldToRay('P', bh.data_type, vh.P_pos, bh.n_bins, beam, vh.nyquist_v, ray);
     }
     if (vh.R) {
-      fprintf(stdout,"R:");
-      _ros2PrintValues(bh.data_type,vh.R_pos,bh.n_bins,beam,stdout);
+      _addFieldToRay('R', bh.data_type, vh.R_pos, bh.n_bins, beam, vh.nyquist_v, ray);
     }
     if (vh.L) {
-      fprintf(stdout,"L:");
-      _ros2PrintValues(bh.data_type,vh.L_pos,bh.n_bins,beam,stdout);
+      _addFieldToRay('L', bh.data_type, vh.L_pos, bh.n_bins, beam, vh.nyquist_v, ray);
     }
     if (vh.V) {
-      fprintf(stdout,"V:");
-      _ros2PrintValues(bh.data_type,vh.V_pos,bh.n_bins,beam,stdout);
+      _addFieldToRay('V', bh.data_type, vh.V_pos, bh.n_bins, beam, vh.nyquist_v, ray);
     }
     if (vh.S) {
-      fprintf(stdout,"S:");
-      _ros2PrintValues(bh.data_type,vh.S_pos,bh.n_bins,beam,stdout);
+      _addFieldToRay('S', bh.data_type, vh.S_pos, bh.n_bins, beam, vh.nyquist_v, ray);
     }
     
   } // while (true)
@@ -1347,75 +1344,6 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
   if (beam) free(beam);
   if (buf) free(buf);
   
-  return 0;
-
-#ifdef NOTYET
-
-  // create the rays
-
-  double deltaAz = 0.0;
-  double az = _startAz;
-  for (int iray = 0; iray < _nAz; iray++) {
-
-    // create a ray
-    
-    RadxRay *ray = new RadxRay;
-
-    // set metadata
-
-    ray->setVolumeNumber(_volNum);
-    ray->setSweepNumber(_sweepNum);
-    ray->setCalibIndex(0);
-    ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-
-    RadxTime rayTime = _volStartTime + deltaAz / _antennaSpeedAz;
-    deltaAz += _azimuthResDeg;
-    ray->setTime(rayTime);
-
-    ray->setAzimuthDeg(az);
-    az += _azimuthResDeg;
-    if (az > 360.0) {
-      az -= 360.0;
-    } else if (az < 0) {
-      az += 360.0;
-    }
-    
-    ray->setElevationDeg(_elevDeg);
-    ray->setFixedAngleDeg(_elevDeg);
-
-    ray->setTrueScanRateDegPerSec(_antennaSpeedAz);
-    ray->setTargetScanRateDegPerSec(_antennaSpeedAz);
-    ray->setIsIndexed(true);
-    ray->setAngleResDeg(_azimuthResDeg);
-
-    ray->setNSamples(_nSamples);
-    ray->setPulseWidthUsec(_pulseWidthSec * 1.0e6);
-    ray->setPrtSec(1.0 / _prf);
-
-    ray->setEstimatedNoiseDbmHc(_noiseLevelDbm);
-    ray->setEstimatedNoiseDbmVc(_noiseLevelDbm);
-
-    // add field
-
-    ray->addField(_params._output_fields[0].output_field_name,
-                  _params._output_fields[0].units,
-                  _nGates, Radx::missingFl64,
-                  _fieldData + iray * _nGates, true);
-
-    ray->setRangeGeom(_startRangeM / 1000.0, _gateSpacingM / 1000.0);
-
-    ray->convertToSi16();
-
-    // add to volume
-
-    vol.addRay(ray);
-
-  } // iray
-
-  // set the metadata on the volume
-
-  _finalizeVol(vol);
-
   // set the metadata on the volume
 
   _finalizeVol(vol);
@@ -1425,12 +1353,8 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
   if (_writeVol(vol)) {
     cerr << "ERROR - Ascii2Radx::_handleItalyRos2" << endl;
     cerr << "  Cannot write volume to file" << endl;
-    return = -1;
+    return -1;
   }
-
-  // success
-
-#endif
 
   return 0;
 
@@ -1441,12 +1365,12 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
 // and print to stdout in ITALY ASCII format.
 // Returns 0 on success, -1 on failure
 
-int Ascii2Radx::_printRos2ToStdout(const string &readPath,
-                                   FILE *out)
+int Ascii2Radx::_printRos2ToFile(const string &readPath,
+                                 FILE *out)
 {
 
   char *buf=NULL,*beam=NULL,date[32];
-  int n=0,sweep=-1,data_type=0;
+  int n=0,sweep=-1,dataType=0;
   ros2_vol_hdr_t vh; 
   ros2_beam_hdr_t bh; 
 
@@ -1456,7 +1380,7 @@ int Ascii2Radx::_printRos2ToStdout(const string &readPath,
   FILE *in = inFile.fopen(readPath, "r");
   if (in == NULL) {
     int errNum = errno;
-    cerr << "ERROR - Ascii2Radx::_printRos2ToStdout" << endl;
+    cerr << "ERROR - Ascii2Radx::_printRos2ToFile" << endl;
     cerr << "  Cannot open file, path: " << readPath << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -1466,14 +1390,14 @@ int Ascii2Radx::_printRos2ToStdout(const string &readPath,
 
   if (fread(&vh, sizeof(vh), 1, in) != 1) {
     int errNum = errno;
-    cerr << "ERROR - Ascii2Radx::_printRos2ToStdout" << endl;
+    cerr << "ERROR - Ascii2Radx::_printRos2ToFile" << endl;
     cerr << "  Cannot read volume header, path: " << readPath << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
 
   if(strcmp(vh.signature, "ROS2_V")) {
-    cerr << "ERROR - Ascii2Radx::_printRos2ToStdout2" << endl;
+    cerr << "ERROR - Ascii2Radx::_printRos2ToFile2" << endl;
     cerr << "  Bad volume header, path: " << readPath << endl;
     cerr << "  First bytes should be: ROS_V" << endl;
     return -1;
@@ -1503,7 +1427,7 @@ int Ascii2Radx::_printRos2ToStdout(const string &readPath,
 
     if (fread(&bh, sizeof(bh), 1, in) != 1){
       int errNum = errno;
-      cerr << "ERROR - Ascii2Radx::_printRos2ToStdout" << endl;
+      cerr << "ERROR - Ascii2Radx::_printRos2ToFile" << endl;
       cerr << "  Cannot read beam header, path: " << readPath << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -1513,15 +1437,15 @@ int Ascii2Radx::_printRos2ToStdout(const string &readPath,
       break;
     }
           
-    if (!data_type) {
-      data_type= bh.data_type;
-      fprintf(out,"   data_type=%hd\n", data_type);
+    if (!dataType) {
+      dataType= bh.data_type;
+      fprintf(out,"   dataType=%hd\n", dataType);
     }
           
     fprintf(out,
             "\nBEAM: t=%.2lf   el=%.1f   az=%.1f  n_bins=%hd\n",
             bh.time,bh.el,bh.az,bh.n_bins); 
-          
+
     if (sweep != bh.sweep) {
       sweep = bh.sweep;
       beam = (char *) realloc(beam, bh.n_values * sizeof(Radx::fl32));
@@ -1633,7 +1557,7 @@ int Ascii2Radx::_ros2Uncompress(unsigned char *in, int n_in,
 //////////////////////////////////////////////////////////
 // Print out field values
 
-void Ascii2Radx::_ros2PrintValues(int type,
+void Ascii2Radx::_ros2PrintValues(int dataType,
                                   int position,
                                   int n_bins,
                                   char* beam,
@@ -1643,7 +1567,7 @@ void Ascii2Radx::_ros2PrintValues(int type,
 
   int offset = position * n_bins;
   
-  switch (type)
+  switch (dataType)
   {
     case 1:
       /* unsigned char */
@@ -1671,3 +1595,188 @@ void Ascii2Radx::_ros2PrintValues(int type,
   return;
 }
 
+//////////////////////////////////////////////////////////
+// Add a field to the ray
+
+void Ascii2Radx::_addFieldToRay(int fieldId,
+                                int dataType,
+                                int position,
+                                int n_bins,
+                                char* beam,
+                                double nyquist,
+                                RadxRay *ray)
+  
+{
+  
+  // create the field
+
+  RadxField *field = new RadxField;
+
+  // set names and units
+
+  switch (fieldId) {
+    
+    case 'Z':
+      field->setName("DBZ");
+      field->setUnits("dBZ");
+      field->setLongName("reflectivity");
+      field->setStandardName("equivalent_reflectivity_factor");
+      break;
+      
+    case 'D':
+      field->setName("ZDR");
+      field->setUnits("dB");
+      field->setLongName("differential_reflectivity");
+      field->setStandardName("log_differential_reflectivity_hv");
+      break;
+      
+    case 'P':
+      field->setName("PHIDP");
+      field->setUnits("deg");
+      field->setLongName("differential_phase");
+      field->setStandardName("differential_phase_hv");
+      break;
+      
+    case 'R':
+      field->setName("RHOHV");
+      field->setUnits("");
+      field->setLongName("cross_correlation_ratio");
+      field->setStandardName("cross_correlation_ratio_hv");
+      break;
+      
+    case 'L':
+      field->setName("LDR");
+      field->setUnits("dB");
+      field->setLongName("linear_depolarization_ratio_hc_to_vx");
+      field->setStandardName("log_linear_depolarization_ratio_h");
+      break;
+      
+    case 'V':
+      field->setName("VEL");
+      field->setUnits("m/s");
+      field->setLongName("doppler_velocity");
+      field->setStandardName("radial_velocity_of_scatterers_away_from_instrument");
+      break;
+      
+    case 'S':
+      field->setName("WIDTH");
+      field->setUnits("m/s");
+      field->setLongName("spectrum_width");
+      field->setStandardName("doppler_spectrum_width");
+      break;
+
+  }
+      
+  // convert the data to floats
+
+  vector<Radx::fl32> fdata;
+  _convertRos2ArrayToFloat(fieldId, dataType, position, n_bins,
+                           beam, nyquist, fdata);
+
+  // add the data
+  
+  field->addDataFl32(fdata.size(), fdata.data());
+  ray->addField(field);
+
+}
+
+//////////////////////////////////////////////////////////
+// Convert a ros2 data value to a float vector
+
+void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
+                                          int dataType,
+                                          int position,
+                                          int n_bins,
+                                          char* beam,
+                                          double nyquist,
+                                          vector<Radx::fl32> &floats)
+
+{
+
+  int offset = position * n_bins;
+  
+  // init
+
+  floats.clear();
+
+  // set min and max vals in integer data
+
+  int imin = 1;
+  int imax = 255;
+  if (dataType == 3) {
+    // shorts
+    imax = 65535;
+  }
+  double range = (double) (imax - imin);
+  
+  // set scale and offset
+
+  double scale = 1.0;
+  double bias = 0.0;
+
+  switch (fieldId) {
+    
+    case 'Z':
+      scale = (96.0 - -31.5) / range;
+      break;
+      
+    case 'D':
+      scale = (7.9375 - -7.9375) / range;
+      break;
+      
+    case 'P':
+      scale = (90.0 - -90.0) / range;
+      break;
+      
+    case 'R':
+      scale = (1.275 - -0.0048) / range;
+      break;
+      
+    case 'L':
+      scale = (0.0 - -48.0) / range;
+      break;
+      
+    case 'V':
+      scale = (nyquist - -nyquist) / range;
+      break;
+      
+    case 'S':
+      scale = (nyquist - 0.0) / range;
+      break;
+      
+  } // switch
+  
+
+  switch (dataType) {
+    case 1:
+      /* unsigned char */
+      for (int i = 0; i < n_bins; i++) {
+        int ival = *((unsigned char*) beam + offset + i);
+        double fval = (ival - imin) * scale + bias;
+        floats.push_back(fval);
+      }
+      break;
+    case 2:
+      /* float */
+      for (int i = 0; i < n_bins; i++) {
+        double fval = *((Radx::fl32*) beam + offset + i);
+        floats.push_back(fval);
+      }
+      break;
+    case 3:
+      /* ushort */
+      for (int i = 0; i < n_bins; i++) {
+        int ival = *((Radx::ui16*) beam + offset + i);
+        double fval = (ival - imin) * scale + bias;
+        floats.push_back(fval);
+      }
+      break;
+    default:
+      /* half - treat as floats */
+      for (int i = 0; i < n_bins; i++) {
+        double fval = *((Radx::fl32*) beam + offset + i);
+        floats.push_back(fval);
+      }
+  }           
+
+}

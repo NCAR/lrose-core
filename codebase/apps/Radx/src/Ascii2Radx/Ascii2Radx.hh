@@ -224,10 +224,27 @@ private:
   int _ros2Uncompress(unsigned char *in, int n_in,
                       unsigned char *out, int n_out);
   
-  void _ros2PrintValues(int type, int position, int n_bins,
+  void _ros2PrintValues(int dataType, int position, int n_bins,
                         char* beam, FILE* out);
+  
+  int _printRos2ToFile(const string &readPath, FILE *out);
+  
+  void _convertRos2ArrayToFloat(int fieldId,
+                                int dataType,
+                                int position,
+                                int n_bins,
+                                char* beam,
+                                double nyquist,
+                                vector<Radx::fl32> &floats);
 
-  int _printRos2ToStdout(const string &readPath, FILE *out);
+  void _addFieldToRay(int fieldId,
+                      int dataType,
+                      int position,
+                      int n_bins,
+                      char* beam,
+                      double nyquist,
+                      RadxRay *ray);
+  
 
 };
 
