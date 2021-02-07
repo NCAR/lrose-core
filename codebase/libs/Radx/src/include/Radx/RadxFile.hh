@@ -240,7 +240,13 @@ public:
   /// NOTE: for reading, the type will be set automatically determined
   /// by the reading method.
 
-  void setFileFormat(file_format_t val) { _fileFormat = val; }
+  void setFileFormat(file_format_t val) {
+    _fileFormat = val;
+    if (val == FILE_FORMAT_CFRADIAL ||
+        val == FILE_FORMAT_CFRADIAL2) {
+      setNcFormat(NETCDF4);
+    }
+  }
   
   /// Set compression for writing.
   /// The default is compression is true.
@@ -371,10 +377,10 @@ public:
   /// Set the NetCDF format for writing files - CfRadial only.
   /// 
   /// Options are:
-  ///  - Nc3File::Netcdf4
-  ///  - Nc3File::Classic
-  ///  - Nc3File::Offset64Bits
-  ///  - Nc3File::Netcdf4Classic
+  ///   NETCDF_CLASSIC        ///< netcdf 3 classic
+  ///   NETCDF4_CLASSIC       ///< netcdf 4 classic
+  ///   NETCDF_OFFSET_64BIT   ///< offset 64-bit
+  ///   NETCDF4               ///< full netcdf 4 data model
   
   void setNcFormat(netcdf_format_t val) { _ncFormat = val; }
   

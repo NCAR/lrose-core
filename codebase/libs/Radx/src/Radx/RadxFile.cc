@@ -85,6 +85,7 @@ RadxFile::RadxFile()
   _debug = false;
   _verbose = false;
   _fileFormat = FILE_FORMAT_CFRADIAL;
+  _ncFormat = NETCDF4;
   clearRead();
   clearWrite();
 }
