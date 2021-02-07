@@ -34,7 +34,6 @@
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxRay.hh>
-#include <Radx/RadxField.hh>
 #include <Mdv/GenericRadxFile.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxTimeList.hh>
@@ -1093,88 +1092,124 @@ int Ascii2Radx::_readBufrDataValue(FILE *inFile,
 // Returns 0 on success, -1 on failure
 
 int Ascii2Radx::_handleItalyAscii(const string &readPath,
-                                RadxVol &vol)
+                                  RadxVol &vol)
+
 {
 
-#ifdef NOTYET
-  // read in the metadata
+  // open input file
   
-  if (_readBufrMetaData()) {
+  TaFile inFile;
+  FILE *in = inFile.fopen(readPath, "r");
+  if (in == NULL) {
+    int errNum = errno;
     cerr << "ERROR - Ascii2Radx::_handleItalyAscii" << endl;
-    cerr << "  path: " << readPath << endl;
-    cerr << "  cannot read metadata" << endl;
+    cerr << "  Cannot open file, path: " << readPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
-
-  // read in the field data
   
-  if (_readBufrFieldData()) {
-    cerr << "ERROR - Ascii2Radx::_handleItalyAscii" << endl;
-    cerr << "  path: " << readPath << endl;
-    cerr << "  cannot read metadata" << endl;
-    return -1;
+  // read in vol header
+
+  char line[1000000];
+  while (!feof(in)) {
+    if (fgets(line, 1000000, in) == NULL) {
+      int errNum = errno;
+      cerr << "ERROR - Ascii2Radx::_handleItalyAscii" << endl;
+      cerr << "  Cannot read volume header, path: " << readPath << endl;
+      cerr << "  " << strerror(errNum) << endl;
+      return -1;
+    }
+    if (strlen(line) > 6 && !strncmp(line, "VOLUME", 6)) {
+      if (_readAsciiVolHeader(line)) {
+        cerr << "ERROR - Ascii2Radx::_handleItalyAscii" << endl;
+        cerr << "  Cannot decode volume header, path: " << readPath << endl;
+        cerr << "  line: " << line << endl;
+        return -1;
+      }
+      break;
+    }
   }
 
-  // create the rays
+  _frequencyHz = -9999.0;
+  _prf = -9999.0;
+  _pulseWidthSec = -9999.0;
+    
+  vol.setScanName("unknown");
+  vol.setLatitudeDeg(_latitude);
+  vol.setLongitudeDeg(_longitude);
+  vol.setAltitudeKm(_altitudeM / 1000.0);
 
-  double deltaAz = 0.0;
-  double az = _startAz;
-  for (int iray = 0; iray < _nAz; iray++) {
+  // read in beams
+  
+  while (!feof(in)) {
+    
+    // read in beam header
+
+    RadxTime beamTime;
+    double el, az;
+    size_t nGates;
+    
+    while (!feof(in)) {
+      if (fgets(line, 1000000, in) == NULL) {
+        // end of file
+        break;
+      }
+      if (strlen(line) > 4 && !strncmp(line, "BEAM", 4)) {
+        if (_readAsciiBeamHeader(line, beamTime, el, az, nGates)) {
+          cerr << "WARNING - Ascii2Radx::_handleItalyAscii" << endl;
+          cerr << "  Cannot decode beam header, path: " << readPath << endl;
+          cerr << "  line: " << line << endl;
+          break;
+        }
+        break;
+      }
+    }
+    if (feof(in)) {
+      continue;
+    }
 
     // create a ray
     
     RadxRay *ray = new RadxRay;
-
+    
     // set metadata
 
-    ray->setVolumeNumber(_volNum);
-    ray->setSweepNumber(_sweepNum);
+    ray->setScanName("unknown");
+    // ray->setSweepNumber(0);
     ray->setCalibIndex(0);
     ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-
-    RadxTime rayTime = _volStartTime + deltaAz / _antennaSpeedAz;
-    deltaAz += _azimuthResDeg;
-    ray->setTime(rayTime);
-
+    ray->setNyquistMps(_nyquist);
+    ray->setRangeGeom(_startRangeM / 1000.0, _gateSpacingM / 1000.0);
+    ray->setTime(beamTime);
+    
     ray->setAzimuthDeg(az);
-    az += _azimuthResDeg;
-    if (az > 360.0) {
-      az -= 360.0;
-    } else if (az < 0) {
-      az += 360.0;
+    ray->setElevationDeg(el);
+    ray->setFixedAngleDeg(el);
+
+    // read in fields
+    
+    while (!feof(in)) {
+      if (fgets(line, 1000000, in) == NULL) {
+        // end of file
+        break;
+      }
+      if ((strlen(line) > nGates) && (line[1] == ':')) {
+        if (_decodeAsciiBeamField(line, nGates, ray)) {
+          cerr << "WARNING - Ascii2Radx::_handleItalyAscii" << endl;
+          cerr << "  Cannot decode beam fields, path: " << readPath << endl;
+          cerr << "  line: " << line << endl;
+          break;
+        }
+      } else {
+        break;
+      }
     }
     
-    ray->setElevationDeg(_elevDeg);
-    ray->setFixedAngleDeg(_elevDeg);
-
-    ray->setTrueScanRateDegPerSec(_antennaSpeedAz);
-    ray->setTargetScanRateDegPerSec(_antennaSpeedAz);
-    ray->setIsIndexed(true);
-    ray->setAngleResDeg(_azimuthResDeg);
-
-    ray->setNSamples(_nSamples);
-    ray->setPulseWidthUsec(_pulseWidthSec * 1.0e6);
-    ray->setPrtSec(1.0 / _prf);
-
-    ray->setEstimatedNoiseDbmHc(_noiseLevelDbm);
-    ray->setEstimatedNoiseDbmVc(_noiseLevelDbm);
-
-    // add field
-
-    ray->addField(_params._output_fields[0].output_field_name,
-                  _params._output_fields[0].units,
-                  _nGates, Radx::missingFl64,
-                  _fieldData + iray * _nGates, true);
-
-    ray->setRangeGeom(_startRangeM / 1000.0, _gateSpacingM / 1000.0);
-
-    ray->convertToSi16();
-
-    // add to volume
+    // add ray to vol
 
     vol.addRay(ray);
-
-  } // iray
+    
+  } // while (true)
 
   // set the metadata on the volume
 
@@ -1183,17 +1218,254 @@ int Ascii2Radx::_handleItalyAscii(const string &readPath,
   // write the volume out
 
   if (_writeVol(vol)) {
-    cerr << "ERROR - Ascii2Radx::_handleItalyAscii" << endl;
+    cerr << "ERROR - Ascii2Radx::_handleItalyRos2" << endl;
     cerr << "  Cannot write volume to file" << endl;
-    return = -1;
+    return -1;
   }
-
-  // success
-
-#endif
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////
+// Read in volume header for an ITALY ASCII file
+// Returns 0 on success, -1 on failure
+
+int Ascii2Radx::_readAsciiVolHeader(const string &line)
+{
+
+  // tokenize the line, breaking at spaces
+
+  vector<string> toks;
+  TaStr::tokenize(line, " ", toks);
+  if (toks.size() < 6) {
+    return -1;
+  }
+
+  for (size_t ii = 0; ii < toks.size(); ii++) {
+
+    string tok = toks[ii];
+    
+    if (tok.find("rad_lat=") == 0) {
+
+      double val;
+      if (sscanf(tok.c_str(), "rad_lat=%lg", &val) == 1) {
+        _latitude = val;
+      } else {
+        cerr << "ERROR = _readAsciiVolHeader" << endl;
+        cerr << "  no rad_lat in line: " << line << endl;
+        return -1;
+      }
+
+    } else if (tok.find("rad_lon=") == 0) {
+
+      double val;
+      if (sscanf(tok.c_str(), "rad_lon=%lg", &val) == 1) {
+        _longitude = val;
+      } else {
+        cerr << "ERROR = _readAsciiVolHeader" << endl;
+        cerr << "  no rad_lon in line: " << line << endl;
+        return -1;
+      }
+
+    } else if (tok.find("rad_alt=") == 0) {
+
+      double val;
+      if (sscanf(tok.c_str(), "rad_alt=%lg", &val) == 1) {
+        _altitudeM = val;
+      } else {
+        cerr << "ERROR = _readAsciiVolHeader" << endl;
+        cerr << "  no rad_alt in line: " << line << endl;
+        return -1;
+      }
+
+    } else if (tok.find("range_bin=") == 0) {
+
+      double val;
+      if (sscanf(tok.c_str(), "range_bin=%lg", &val) == 1) {
+        _gateSpacingM = val;
+        _startRangeM = val / 2.0;
+      } else {
+        cerr << "ERROR = _readAsciiVolHeader" << endl;
+        cerr << "  no range_bin in line: " << line << endl;
+        return -1;
+      }
+
+    } else if (tok.find("nyquist_velocity=") == 0) {
+
+      double val;
+      if (sscanf(tok.c_str(), "nyquist_velocity=%lg", &val) == 1) {
+        _nyquist = val;
+      } else {
+        cerr << "ERROR = _readAsciiVolHeader" << endl;
+        cerr << "  no nyquist_velocity in line: " << line << endl;
+        return -1;
+      }
+
+    } else if (tok.find("data_type=") == 0) {
+
+      int val;
+      if (sscanf(tok.c_str(), "data_type=%d", &val) == 1) {
+        _dataType = val;
+      } else {
+        cerr << "ERROR = _readAsciiVolHeader" << endl;
+        cerr << "  no data_type in line: " << line << endl;
+        return -1;
+      }
+      
+    }
+    
+  } // ii
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "  _latitude: " << _latitude << endl;
+    cerr << "  _longitude: " << _longitude << endl;
+    cerr << "  _altitudeM: " << _altitudeM << endl;
+    cerr << "  _startRangeM: " << _startRangeM << endl;
+    cerr << "  _gateSpacingM: " << _gateSpacingM << endl;
+    cerr << "  _nyquist: " << _nyquist << endl;
+    cerr << "  _dataType: " << _dataType << endl;
+  }
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////
+// Read in beam header for an ITALY ASCII file
+// Returns 0 on success, -1 on failure
+
+int Ascii2Radx::_readAsciiBeamHeader(const string &line,
+                                     RadxTime &beamTime,
+                                     double &el,
+                                     double &az,
+                                     size_t &nGates)
+{
+
+  // tokenize the line, breaking at spaces
+
+  vector<string> toks;
+  TaStr::tokenize(line, " ", toks);
+  if (toks.size() < 5) {
+    return -1;
+  }
+
+  for (size_t ii = 0; ii < toks.size(); ii++) {
+
+    string tok = toks[ii];
+    
+    if (tok.find("t=") == 0) {
+
+      double val;
+      if (sscanf(tok.c_str(), "t=%lg", &val) == 1) {
+        time_t secs = (time_t) val;
+        double subSecs = val - secs;
+        beamTime.set(secs, subSecs);
+      } else {
+        cerr << "ERROR = _readAsciiBeamHeader" << endl;
+        cerr << "  cannot decode time, line: " << line << endl;
+        return -1;
+      }
+
+    } else if (tok.find("el=") == 0) {
+      
+      double val;
+      if (sscanf(tok.c_str(), "el=%lg", &val) == 1) {
+        el = val;
+      } else {
+        cerr << "ERROR = _readAsciiBeamHeader" << endl;
+        cerr << "  cannot decode elevation, line: " << line << endl;
+        return -1;
+      }
+
+    } else if (tok.find("az=") == 0) {
+      
+      double val;
+      if (sscanf(tok.c_str(), "az=%lg", &val) == 1) {
+        az = val;
+      } else {
+        cerr << "ERROR = _readAsciiBeamHeader" << endl;
+        cerr << "  cannot decode az, line: " << line << endl;
+        return -1;
+      }
+
+    } else if (tok.find("n_bins=") == 0) {
+
+      int val;
+      if (sscanf(tok.c_str(), "n_bins=%d", &val) == 1) {
+        nGates = val;
+      } else {
+        cerr << "ERROR = _readAsciiBeamHeader" << endl;
+        cerr << "  cannot decode n_bins, line: " << line << endl;
+        return -1;
+      }
+      
+    }
+    
+  } // ii
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> adding beam <<==" << endl;
+    cerr << "  beamTime: " << beamTime.asString(3) << endl;
+    cerr << "  el: " << el << endl;
+    cerr << "  az: " << az << endl;
+    cerr << "  nGates: " << nGates << endl;
+  }
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////
+// Decode beam field for an ITALY ASCII file
+// Returns 0 on success, -1 on failure
+
+int Ascii2Radx::_decodeAsciiBeamField(const string &line,
+                                      size_t nGates,
+                                      RadxRay *ray)
+{
+
+  // tokenize the line, breaking at spaces
+  
+  vector<string> toks;
+  TaStr::tokenize(line, " ", toks);
+
+  // check we have the field Id, followed by number of gates
+  
+  if (toks.size() != nGates + 1) {
+    return -1;
+  }
+
+  // decode the values
+  
+  int fieldId = line[0];
+  vector<double> vals;
+  for (size_t ii = 1; ii < toks.size(); ii++) {
+    string tok = toks[ii];
+    double val = atof(tok.c_str());
+    vals.push_back(val);
+  }
+
+  vector<Radx::fl32> fdata;
+  _convertItalyAscii2Floats(fieldId, _dataType,
+                            nGates, vals, fdata);
+  
+  // create the field
+
+  RadxField *field = new RadxField;
+  
+  // set names and units
+
+  _setFieldNames(fieldId, field);
+
+  // add the data
+  
+  field->setTypeFl32(-9999.0);
+  field->addDataFl32(fdata.size(), fdata.data());
+  ray->addField(field);
+
+  return 0;
+  
 }
 
 //////////////////////////////////////////////////
@@ -1247,6 +1519,9 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
   _frequencyHz = vh.freq * 1.0e6;
   _prf = vh.PRF;
   _pulseWidthSec = vh.l_pulse / 1.0e9;
+  _gateSpacingM = vh.l_bin;
+  _startRangeM = _gateSpacingM / 2.0;
+  _nyquist = vh.nyquist_v;
     
   vol.setScanName(vh.name);
   vol.setLatitudeDeg(_latitude);
@@ -1284,8 +1559,8 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
     ray->setSweepNumber(bh.sweep);
     ray->setCalibIndex(0);
     ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
-    ray->setNyquistMps(vh.nyquist_v);
-    ray->setRangeGeom(vh.l_bin / 2000.0, vh.l_bin / 1000.0);
+    ray->setNyquistMps(_nyquist);
+    ray->setRangeGeom(_startRangeM / 1000.0, _gateSpacingM / 1000.0);
     
     double timeSecs = (time_t) bh.time;
     double subSecs = bh.time - timeSecs;
@@ -1337,25 +1612,25 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
     // add fields
 	  
     if (vh.Z) {
-      _addFieldToRay('Z', bh.data_type, vh.Z_pos, bh.n_bins, beam, vh.nyquist_v, ray);
+      _addFieldToRay('Z', bh.data_type, vh.Z_pos, bh.n_bins, beam, ray);
     }
     if (vh.D) {
-      _addFieldToRay('D', bh.data_type, vh.D_pos, bh.n_bins, beam, vh.nyquist_v, ray);
+      _addFieldToRay('D', bh.data_type, vh.D_pos, bh.n_bins, beam, ray);
     }
     if (vh.P) {
-      _addFieldToRay('P', bh.data_type, vh.P_pos, bh.n_bins, beam, vh.nyquist_v, ray);
+      _addFieldToRay('P', bh.data_type, vh.P_pos, bh.n_bins, beam, ray);
     }
     if (vh.R) {
-      _addFieldToRay('R', bh.data_type, vh.R_pos, bh.n_bins, beam, vh.nyquist_v, ray);
+      _addFieldToRay('R', bh.data_type, vh.R_pos, bh.n_bins, beam, ray);
     }
     if (vh.L) {
-      _addFieldToRay('L', bh.data_type, vh.L_pos, bh.n_bins, beam, vh.nyquist_v, ray);
+      _addFieldToRay('L', bh.data_type, vh.L_pos, bh.n_bins, beam, ray);
     }
     if (vh.V) {
-      _addFieldToRay('V', bh.data_type, vh.V_pos, bh.n_bins, beam, vh.nyquist_v, ray);
+      _addFieldToRay('V', bh.data_type, vh.V_pos, bh.n_bins, beam, ray);
     }
     if (vh.S) {
-      _addFieldToRay('S', bh.data_type, vh.S_pos, bh.n_bins, beam, vh.nyquist_v, ray);
+      _addFieldToRay('S', bh.data_type, vh.S_pos, bh.n_bins, beam, ray);
     }
 
     // add ray to vol
@@ -1627,7 +1902,6 @@ void Ascii2Radx::_addFieldToRay(int fieldId,
                                 int position,
                                 int n_bins,
                                 char* beam,
-                                double nyquist,
                                 RadxRay *ray)
   
 {
@@ -1638,70 +1912,13 @@ void Ascii2Radx::_addFieldToRay(int fieldId,
 
   // set names and units
 
-  switch (fieldId) {
-    
-    case 'Z':
-      field->setName("DBZ");
-      field->setUnits("dBZ");
-      field->setLongName("reflectivity");
-      field->setStandardName("equivalent_reflectivity_factor");
-      break;
-      
-    case 'D':
-      field->setName("ZDR");
-      field->setUnits("dB");
-      field->setLongName("differential_reflectivity");
-      field->setStandardName("log_differential_reflectivity_hv");
-      break;
-      
-    case 'P':
-      field->setName("PHIDP");
-      field->setUnits("deg");
-      field->setLongName("differential_phase");
-      field->setStandardName("differential_phase_hv");
-      break;
-      
-    case 'R':
-      field->setName("RHOHV");
-      field->setUnits("");
-      field->setLongName("cross_correlation_ratio");
-      field->setStandardName("cross_correlation_ratio_hv");
-      break;
-      
-    case 'L':
-      field->setName("LDR");
-      field->setUnits("dB");
-      field->setLongName("linear_depolarization_ratio_hc_to_vx");
-      field->setStandardName("log_linear_depolarization_ratio_h");
-      break;
-      
-    case 'V':
-      field->setName("VEL");
-      field->setUnits("m/s");
-      field->setLongName("doppler_velocity");
-      field->setStandardName("radial_velocity_of_scatterers_away_from_instrument");
-      field->setFieldFolds(-nyquist, nyquist);
-      break;
-      
-    case 'S':
-      field->setName("WIDTH");
-      field->setUnits("m/s");
-      field->setLongName("spectrum_width");
-      field->setStandardName("doppler_spectrum_width");
-      break;
+  _setFieldNames(fieldId, field);
 
-  }
-      
   // convert the data to floats
 
   vector<Radx::fl32> fdata;
   _convertRos2ArrayToFloat(fieldId, dataType, position, n_bins,
-                           beam, nyquist, fdata);
-
-  // for (int ii = 0; ii < n_bins; ii++) {
-  //   cerr << fdata[ii] << " ";
-  // }
-  // cerr << endl;
+                           beam, fdata);
 
   // add the data
   
@@ -1719,7 +1936,6 @@ void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
                                           int position,
                                           int n_bins,
                                           char* beam,
-                                          double nyquist,
                                           vector<Radx::fl32> &floats)
 
 {
@@ -1773,12 +1989,12 @@ void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
       break;
       
     case 'V':
-      scale = (nyquist - -nyquist) / range;
-      bias = -nyquist;
+      scale = (_nyquist - -_nyquist) / range;
+      bias = -_nyquist;
       break;
       
     case 'S':
-      scale = (nyquist - 0.0) / range;
+      scale = (_nyquist - 0.0) / range;
       bias = 0.0;
       break;
       
@@ -1830,3 +2046,186 @@ void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
   }           
 
 }
+
+//////////////////////////////////////////////////////////
+// Convert italy ascii field data to a float vector
+
+void Ascii2Radx::_convertItalyAscii2Floats(int fieldId,
+                                           int dataType,
+                                           size_t nGates,
+                                           const vector<double> &doublesIn,
+                                           vector<Radx::fl32> &floatsOut)
+  
+{
+
+  // init
+  
+  floatsOut.clear();
+  
+  // set min and max vals in integer data
+  
+  int imin = 1;
+  int imax = 255;
+  if (dataType == 3) {
+    // shorts
+    imax = 65535;
+  }
+  double range = (double) (imax - imin);
+  
+  // set scale and offset
+
+  double scale = 1.0;
+  double bias = 0.0;
+
+  switch (fieldId) {
+    
+    case 'Z':
+      scale = (96.0 - -31.5) / range;
+      bias = -31.5;
+      break;
+      
+    case 'D':
+      scale = (7.9375 - -7.9375) / range;
+      bias = -7.9375;
+      break;
+      
+    case 'P':
+      scale = (90.0 - -90.0) / range;
+      bias = -90;
+      break;
+      
+    case 'R':
+      scale = (1.275 - -0.0048) / range;
+      bias = -0.0048;
+      break;
+      
+    case 'L':
+      scale = (0.0 - -48.0) / range;
+      bias = -48.0;
+      break;
+      
+    case 'V':
+      scale = (_nyquist - -_nyquist) / range;
+      bias = -_nyquist;
+      break;
+      
+    case 'S':
+      scale = (_nyquist - 0.0) / range;
+      bias = 0.0;
+      break;
+      
+  } // switch
+  
+
+  switch (dataType) {
+    case 1:
+      /* unsigned char */
+      for (size_t i = 0; i < nGates; i++) {
+        double ival = doublesIn[i];
+        double fval = -9999.0;
+        if (ival != 0.0) {
+          fval = (ival - imin) * scale + bias;
+        }
+        floatsOut.push_back(fval);
+      }
+      break;
+    case 2:
+      /* float */
+      for (size_t i = 0; i < nGates; i++) {
+        double ival = doublesIn[i];
+        double fval = -9999.0;
+        if (ival != 0.0) {
+          fval = ival;
+        }
+        floatsOut.push_back(fval);
+      }
+      break;
+    case 3:
+      /* ushort */
+      for (size_t i = 0; i < nGates; i++) {
+        double ival = doublesIn[i];
+        double fval = -9999.0;
+        if (ival != 0.0) {
+          fval = (ival - imin) * scale + bias;
+        }
+        floatsOut.push_back(fval);
+      }
+      break;
+    default:
+      /* half - treat as floats */
+      for (size_t i = 0; i < nGates; i++) {
+        double ival = doublesIn[i];
+        double fval = -9999.0;
+        if (fval != 0.0) {
+          fval = ival;
+        }
+        floatsOut.push_back(fval);
+      }
+  } // switch       
+
+}
+
+////////////////////////////////////////////////////////////
+// set names and units based on field Id
+
+void Ascii2Radx::_setFieldNames(int fieldId, RadxField *field)
+
+{
+
+  switch (fieldId) {
+    
+    case 'Z':
+      field->setName("DBZ");
+      field->setUnits("dBZ");
+      field->setLongName("reflectivity");
+      field->setStandardName("equivalent_reflectivity_factor");
+      break;
+      
+    case 'D':
+      field->setName("ZDR");
+      field->setUnits("dB");
+      field->setLongName("differential_reflectivity");
+      field->setStandardName("log_differential_reflectivity_hv");
+      break;
+      
+    case 'P':
+      field->setName("PHIDP");
+      field->setUnits("deg");
+      field->setLongName("differential_phase");
+      field->setStandardName("differential_phase_hv");
+      break;
+      
+    case 'R':
+      field->setName("RHOHV");
+      field->setUnits("");
+      field->setLongName("cross_correlation_ratio");
+      field->setStandardName("cross_correlation_ratio_hv");
+      break;
+      
+    case 'L':
+      field->setName("LDR");
+      field->setUnits("dB");
+      field->setLongName("linear_depolarization_ratio_hc_to_vx");
+      field->setStandardName("log_linear_depolarization_ratio_h");
+      break;
+      
+    case 'V':
+      field->setName("VEL");
+      field->setUnits("m/s");
+      field->setLongName("doppler_velocity");
+      field->setStandardName("radial_velocity_of_scatterers_away_from_instrument");
+      field->setFieldFolds(-_nyquist, _nyquist);
+      break;
+      
+    case 'S':
+      field->setName("WIDTH");
+      field->setUnits("m/s");
+      field->setLongName("spectrum_width");
+      field->setStandardName("doppler_spectrum_width");
+      break;
+
+  }
+
+}
+
+      

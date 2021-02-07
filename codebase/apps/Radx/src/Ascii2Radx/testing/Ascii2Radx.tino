@@ -95,7 +95,8 @@ mode = REALTIME;
 //     ITALY_ROS2
 //
 
-input_type = ITALY_ROS2;
+// input_type = ITALY_ROS2;
+input_type = ITALY_ASCII;
 
 //======================================================================
 //

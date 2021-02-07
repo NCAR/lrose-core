@@ -42,6 +42,7 @@
 #include <Radx/Radx.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxField.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -180,9 +181,8 @@ private:
 
   double _gateSpacingM;
   double _startRangeM;
-
+  
   double _azimuthResDeg;
-
   double _radarConstant;
 
   double _elevDeg;
@@ -190,6 +190,9 @@ private:
 
   RadxArray<double> _fieldData_;
   double *_fieldData;
+
+  double _nyquist;
+  int _dataType;
 
   int _runFilelist();
   int _runRealtimeWithLdata();
@@ -217,9 +220,23 @@ private:
   
   int _handleItalyAscii(const string &readPath,
                         RadxVol &vol);
-  
+
+  int _readAsciiVolHeader(const string &line);
+
+  int _readAsciiBeamHeader(const string &line,
+                           RadxTime &beamTime,
+                           double &el,
+                           double &az,
+                           size_t &nGates);
+
+  int _decodeAsciiBeamField(const string &line,
+                            size_t nGates,
+                            RadxRay *ray);
+
   int _handleItalyRos2(const string &readPath,
                        RadxVol &vol);
+  
+  int _printRos2ToFile(const string &readPath, FILE *out);
   
   int _ros2Uncompress(unsigned char *in, int n_in,
                       unsigned char *out, int n_out);
@@ -227,24 +244,27 @@ private:
   void _ros2PrintValues(int dataType, int position, int n_bins,
                         char* beam, FILE* out);
   
-  int _printRos2ToFile(const string &readPath, FILE *out);
+  void _addFieldToRay(int fieldId,
+                      int dataType,
+                      int position,
+                      int n_bins,
+                      char* beam,
+                      RadxRay *ray);
   
   void _convertRos2ArrayToFloat(int fieldId,
                                 int dataType,
                                 int position,
                                 int n_bins,
                                 char* beam,
-                                double nyquist,
                                 vector<Radx::fl32> &floats);
 
-  void _addFieldToRay(int fieldId,
-                      int dataType,
-                      int position,
-                      int n_bins,
-                      char* beam,
-                      double nyquist,
-                      RadxRay *ray);
+  void _convertItalyAscii2Floats(int fieldId,
+                                 int dataType,
+                                 size_t nGates,
+                                 const vector<double> &doublesIn,
+                                 vector<Radx::fl32> &floatsOut);
   
+  void _setFieldNames(int fieldId, RadxField *field);
 
 };
 
