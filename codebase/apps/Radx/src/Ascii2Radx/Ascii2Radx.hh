@@ -264,8 +264,12 @@ private:
                                  const vector<double> &doublesIn,
                                  vector<Radx::fl32> &floatsOut);
   
-  void _setFieldNames(int fieldId, RadxField *field);
+  void _setItalyFieldNames(int fieldId, RadxField *field);
 
+  void _computeItalyScaleAndBias(int fieldId, int dataType,
+                                 double &scale,
+                                 double &bias, double &range);
+    
 };
 
 #endif

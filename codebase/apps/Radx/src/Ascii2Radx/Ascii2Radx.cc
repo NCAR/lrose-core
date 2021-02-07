@@ -1133,12 +1133,13 @@ int Ascii2Radx::_handleItalyAscii(const string &readPath,
   _frequencyHz = -9999.0;
   _prf = -9999.0;
   _pulseWidthSec = -9999.0;
-    
+  _beamWidth = 1.0;
+  
   vol.setScanName("unknown");
   vol.setLatitudeDeg(_latitude);
   vol.setLongitudeDeg(_longitude);
   vol.setAltitudeKm(_altitudeM / 1000.0);
-
+  
   // read in beams
   
   while (!feof(in)) {
@@ -1456,7 +1457,7 @@ int Ascii2Radx::_decodeAsciiBeamField(const string &line,
   
   // set names and units
 
-  _setFieldNames(fieldId, field);
+  _setItalyFieldNames(fieldId, field);
 
   // add the data
   
@@ -1522,6 +1523,7 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
   _gateSpacingM = vh.l_bin;
   _startRangeM = _gateSpacingM / 2.0;
   _nyquist = vh.nyquist_v;
+  _beamWidth = 1.0;
     
   vol.setScanName(vh.name);
   vol.setLatitudeDeg(_latitude);
@@ -1912,7 +1914,7 @@ void Ascii2Radx::_addFieldToRay(int fieldId,
 
   // set names and units
 
-  _setFieldNames(fieldId, field);
+  _setItalyFieldNames(fieldId, field);
 
   // convert the data to floats
 
@@ -1946,61 +1948,13 @@ void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
 
   floats.clear();
 
-  // set min and max vals in integer data
-
-  int imin = 1;
-  int imax = 255;
-  if (dataType == 3) {
-    // shorts
-    imax = 65535;
-  }
-  double range = (double) (imax - imin);
-  
-  // set scale and offset
+  // get the scale and bias
 
   double scale = 1.0;
   double bias = 0.0;
-
-  switch (fieldId) {
-    
-    case 'Z':
-      scale = (96.0 - -31.5) / range;
-      bias = -31.5;
-      break;
-      
-    case 'D':
-      scale = (7.9375 - -7.9375) / range;
-      bias = -7.9375;
-      break;
-      
-    case 'P':
-      scale = (90.0 - -90.0) / range;
-      bias = -90;
-      break;
-      
-    case 'R':
-      scale = (1.275 - -0.0048) / range;
-      bias = -0.0048;
-      break;
-      
-    case 'L':
-      scale = (0.0 - -48.0) / range;
-      bias = -48.0;
-      break;
-      
-    case 'V':
-      scale = (_nyquist - -_nyquist) / range;
-      bias = -_nyquist;
-      break;
-      
-    case 'S':
-      scale = (_nyquist - 0.0) / range;
-      bias = 0.0;
-      break;
-      
-  } // switch
+  double range = 1.0;
+  _computeItalyScaleAndBias(fieldId, dataType, scale, bias, range);
   
-
   switch (dataType) {
     case 1:
       /* unsigned char */
@@ -2008,7 +1962,7 @@ void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
         int ival = *((unsigned char*) beam + offset + i);
         double fval = -9999.0;
         if (ival != 0) {
-          fval = (ival - imin) * scale + bias;
+          fval = (ival - 1.0) * scale + bias;
         }
         floats.push_back(fval);
       }
@@ -2029,7 +1983,7 @@ void Ascii2Radx::_convertRos2ArrayToFloat(int fieldId,
         int ival = *((Radx::ui16*) beam + offset + i);
         double fval = -9999.0;
         if (ival != 0) {
-          fval = (ival - imin) * scale + bias;
+          fval = (ival - 1.0) * scale + bias;
         }
         floats.push_back(fval);
       }
@@ -2061,61 +2015,13 @@ void Ascii2Radx::_convertItalyAscii2Floats(int fieldId,
   // init
   
   floatsOut.clear();
-  
-  // set min and max vals in integer data
-  
-  int imin = 1;
-  int imax = 255;
-  if (dataType == 3) {
-    // shorts
-    imax = 65535;
-  }
-  double range = (double) (imax - imin);
-  
-  // set scale and offset
+
+  // get the scale and bias
 
   double scale = 1.0;
   double bias = 0.0;
-
-  switch (fieldId) {
-    
-    case 'Z':
-      scale = (96.0 - -31.5) / range;
-      bias = -31.5;
-      break;
-      
-    case 'D':
-      scale = (7.9375 - -7.9375) / range;
-      bias = -7.9375;
-      break;
-      
-    case 'P':
-      scale = (90.0 - -90.0) / range;
-      bias = -90;
-      break;
-      
-    case 'R':
-      scale = (1.275 - -0.0048) / range;
-      bias = -0.0048;
-      break;
-      
-    case 'L':
-      scale = (0.0 - -48.0) / range;
-      bias = -48.0;
-      break;
-      
-    case 'V':
-      scale = (_nyquist - -_nyquist) / range;
-      bias = -_nyquist;
-      break;
-      
-    case 'S':
-      scale = (_nyquist - 0.0) / range;
-      bias = 0.0;
-      break;
-      
-  } // switch
-  
+  double range = 1.0;
+  _computeItalyScaleAndBias(fieldId, dataType, scale, bias, range);
 
   switch (dataType) {
     case 1:
@@ -2124,7 +2030,7 @@ void Ascii2Radx::_convertItalyAscii2Floats(int fieldId,
         double ival = doublesIn[i];
         double fval = -9999.0;
         if (ival != 0.0) {
-          fval = (ival - imin) * scale + bias;
+          fval = (ival - 1.0) * scale + bias;
         }
         floatsOut.push_back(fval);
       }
@@ -2146,7 +2052,7 @@ void Ascii2Radx::_convertItalyAscii2Floats(int fieldId,
         double ival = doublesIn[i];
         double fval = -9999.0;
         if (ival != 0.0) {
-          fval = (ival - imin) * scale + bias;
+          fval = (ival - 1.0) * scale + bias;
         }
         floatsOut.push_back(fval);
       }
@@ -2168,7 +2074,7 @@ void Ascii2Radx::_convertItalyAscii2Floats(int fieldId,
 ////////////////////////////////////////////////////////////
 // set names and units based on field Id
 
-void Ascii2Radx::_setFieldNames(int fieldId, RadxField *field)
+void Ascii2Radx::_setItalyFieldNames(int fieldId, RadxField *field)
 
 {
 
@@ -2228,4 +2134,72 @@ void Ascii2Radx::_setFieldNames(int fieldId, RadxField *field)
 
 }
 
+////////////////////////////////////////////////////////////
+// compute the scale and bias for a field
+
+void Ascii2Radx::_computeItalyScaleAndBias(int fieldId,
+                                           int dataType,
+                                           double &scale,
+                                           double &bias,
+                                           double &range)
+  
+{
+  
+  // set min and max vals in integer data
+  
+  int imin = 1;
+  int imax = 255;
+  if (dataType == 3) {
+    // shorts
+    imax = 65535;
+  }
+  range = (double) (imax - imin);
+  
+  // set scale and offset
+
+  scale = 1.0;
+  bias = 0.0;
+
+  switch (fieldId) {
+    
+    case 'Z':
+      scale = (96.0 - -31.5) / range;
+      bias = -31.5;
+      break;
+      
+    case 'D':
+      scale = (7.9375 - -7.9375) / range;
+      bias = -7.9375;
+      break;
+      
+    case 'P':
+      scale = (90.0 - -90.0) / range;
+      bias = -90;
+      break;
+      
+    case 'R':
+      scale = (1.275 - -0.0048) / range;
+      bias = -0.0048;
+      break;
+      
+    case 'L':
+      scale = (0.0 - -48.0) / range;
+      bias = -48.0;
+      break;
+      
+    case 'V':
+      scale = (_nyquist - -_nyquist) / range;
+      bias = -_nyquist;
+      break;
+      
+    case 'S':
+      scale = (_nyquist - 0.0) / range;
+      bias = 0.0;
+      break;
+      
+  } // switch
+
+}
+
+  
       
