@@ -1203,7 +1203,9 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
   
   char *buf=NULL;
   char *beam=NULL;
-  int n=0,dataType=0;
+  int n = 0;
+  int dataType = 0;
+  int sweep = -1;
   ros2_vol_hdr_t vh; 
   ros2_beam_hdr_t bh; 
 
@@ -1291,6 +1293,11 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
       dataType= bh.data_type;
     }
           
+    if (sweep != bh.sweep) {
+      sweep = bh.sweep;
+      beam = (char *) realloc(beam, bh.n_values * sizeof(Radx::fl32));
+    }
+
     /* create buf for data */
           
     if (n < bh.beam_length) {
@@ -1308,7 +1315,8 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
                            bh.beam_length,
                            (unsigned char*)beam,
                            bh.n_values*sizeof(float))) {
-        fprintf(stderr, "ERROR: cannot uncompress ROS2 beam\n");
+        cerr << "ERROR - Ascii2Radx::_handleItalyRos2" << endl;
+        cerr << "   cannot uncompress ROS2 beam\n" << endl;
         break;
       }
     } else {
@@ -1338,6 +1346,10 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
     if (vh.S) {
       _addFieldToRay('S', bh.data_type, vh.S_pos, bh.n_bins, beam, vh.nyquist_v, ray);
     }
+
+    // add ray to vol
+
+    vol.addRay(ray);
     
   } // while (true)
 
@@ -1468,7 +1480,8 @@ int Ascii2Radx::_printRos2ToFile(const string &readPath,
                            bh.beam_length,
                            (unsigned char*)beam,
                            bh.n_values*sizeof(float))) {
-        fprintf(stderr, "ERROR: cannot uncompress ROS2 beam\n");
+        cerr << "ERROR - Ascii2Radx::_printRos2ToFile" << endl;
+        cerr << "   cannot uncompress ROS2 beam\n" << endl;
         break;
       }
     } else {
