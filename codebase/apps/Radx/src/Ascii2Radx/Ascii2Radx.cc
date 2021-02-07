@@ -492,14 +492,17 @@ void Ascii2Radx::_finalizeVol(RadxVol &vol)
   
 {
 
+  // initialize sweep limits
+
+  vol.loadSweepInfoFromRays();
+
+  // set meta data
+  
   vol.setVolumeNumber(_volNum);
-
   vol.setStartTime(_volStartTime.utime(), _volStartTime.getSubSec());
-
   vol.setLatitudeDeg(_latitude);
   vol.setLongitudeDeg(_longitude);
   vol.setAltitudeKm(_altitudeM / 1000.0);
-
   vol.setFrequencyHz(_frequencyHz);
   vol.setRadarBeamWidthDegH(_beamWidth);
   vol.setRadarBeamWidthDegV(_beamWidth);
@@ -624,9 +627,6 @@ void Ascii2Radx::_setupWrite(RadxFile &file)
     file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
   }
 
-  file.setWriteCompressed(true);
-  file.setCompressionLevel(4);
-
   // set output format
 
   switch (_params.output_format) {
@@ -639,6 +639,9 @@ void Ascii2Radx::_setupWrite(RadxFile &file)
     default:
       file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
   }
+
+  file.setWriteCompressed(true);
+  file.setCompressionLevel(4);
 
   if (_params.cfradial_force_ngates_vary) {
     file.setWriteForceNgatesVary(true);
@@ -1238,11 +1241,20 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
     return -1;
   }
 
+  _latitude = vh.rad_lat;
+  _longitude = vh.rad_lon;
+  _altitudeM = vh.rad_alt;
+  _frequencyHz = vh.freq * 1.0e6;
+  _prf = vh.PRF;
+  _pulseWidthSec = vh.l_pulse / 1.0e9;
+    
   vol.setScanName(vh.name);
-  vol.setLatitudeDeg(vh.rad_lat);
-  vol.setLongitudeDeg(vh.rad_lon);
-  vol.setAltitudeKm(vh.rad_alt / 1000.0);
-  vol.setFrequencyHz(vh.freq * 1.0e6);
+  vol.setLatitudeDeg(_latitude);
+  vol.setLongitudeDeg(_longitude);
+  vol.setAltitudeKm(_altitudeM / 1000.0);
+  if (_frequencyHz > 0) {
+    vol.setFrequencyHz(_frequencyHz);
+  }
 
   // read in beams
   
@@ -1282,11 +1294,10 @@ int Ascii2Radx::_handleItalyRos2(const string &readPath,
     
     ray->setAzimuthDeg(bh.az);
     ray->setElevationDeg(bh.el);
-    ray->setElevationDeg(_elevDeg);
     ray->setFixedAngleDeg(bh.el);
-    
+
     ray->setNSamples(bh.n_pulses);
-    ray->setPulseWidthUsec(vh.l_pulse / 1000.0);
+    ray->setPulseWidthUsec(_pulseWidthSec * 1.0e6);
     ray->setPrtSec(1.0 / vh.PRF);
 
     if (!dataType) {
