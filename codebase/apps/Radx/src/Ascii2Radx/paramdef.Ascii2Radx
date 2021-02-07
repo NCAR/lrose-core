@@ -374,3 +374,9 @@ paramdef boolean {
   p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
 } write_latest_data_info;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print ROS2 data to stdout.";
+  p_help = "If true,ITALY ROS2 data will be decoded and printed to stdout, in the ITALY ASCII format.";
+} print_ros2_to_stdout;
+

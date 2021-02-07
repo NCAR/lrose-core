@@ -194,7 +194,7 @@ private:
   int _runFilelist();
   int _runRealtimeWithLdata();
   int _runRealtimeNoLdata();
-  int _readFile(const string &filePath,
+  int _handleFile(const string &filePath,
                 RadxVol &vol);
   void _finalizeVol(RadxVol &vol);
   void _convertFields(RadxVol &vol);
@@ -202,8 +202,8 @@ private:
   void _setGlobalAttr(RadxVol &vol);
   int _writeVol(RadxVol &vol);
 
-  int _readBufrAscii(const string &readPath,
-                     RadxVol &vol);
+  int _handleBufrAscii(const string &readPath,
+                       RadxVol &vol);
   int _readBufrMetaData(FILE *inFile);
   int _readBufrFieldData(FILE *inFile);
   int _readBufrMetaVariable(FILE *inFile,
@@ -215,17 +215,19 @@ private:
   int _readBufrDataValue(FILE *inFile,
                          string varLabel, double &dval);
   
-  int _readItalyAscii(const string &readPath,
-                      RadxVol &vol);
-
-  int _readItalyRos2(const string &readPath,
-                     RadxVol &vol);
+  int _handleItalyAscii(const string &readPath,
+                        RadxVol &vol);
+  
+  int _handleItalyRos2(const string &readPath,
+                       RadxVol &vol);
   
   int _ros2Uncompress(unsigned char *in, int n_in,
                       unsigned char *out, int n_out);
   
   void _ros2PrintValues(int type, int position, int n_bins,
                         char* beam, FILE* out);
+
+  int _printRos2ToStdout(const string &readPath, FILE *out);
 
 };
 

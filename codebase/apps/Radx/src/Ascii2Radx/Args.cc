@@ -118,6 +118,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "input_type = ITALY_ROS2;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-print_ros2")) {
+      
+      sprintf(tmp_str, "print_ros2_to_stdout = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-cf1")) {
       
       sprintf(tmp_str, "output_format = OUTPUT_FORMAT_CFRADIAL1;");
@@ -259,6 +264,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -italy_ascii ] set input type to ITALY ASCII\n"
       << "  [ -italy_ros2 ] set input type to ITALY ROS2\n"
+      << "  [ -print_ros2 ] print ITALY ROS2 data to stdout.\n"
+      << "    This will be producde the ITALY ASCII format.\n"
       << "\n"
       << "  [ -suffix ? ] specify output file name suffix\n"
       << "     Suffix goes just before the extension\n"

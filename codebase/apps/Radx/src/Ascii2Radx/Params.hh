@@ -495,6 +495,8 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
+  tdrp_bool_t print_ros2_to_stdout;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -502,7 +504,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[57];
+  mutable TDRPtable _table[58];
 
   const char *_className;
 

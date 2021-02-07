@@ -162,28 +162,15 @@ int Ascii2Radx::_runFilelist()
     _sweepNum = 0;
     string inputPath = _args.inputFileList[ii];
     // read input file
-    int jret = _readFile(inputPath, vol);
+    int jret = _handleFile(inputPath, vol);
     if (jret == 0) {
-      // finalize the volume
-      _finalizeVol(vol);
-      // write the volume out
-      if (_writeVol(vol)) {
-        cerr << "ERROR - Ascii2Radx::_runFileList" << endl;
-        cerr << "  Cannot write volume to file" << endl;
-        iret = -1;
-        nError++;
-        if (_params.debug) {
-          cerr << "  ====>> n errors so far: " << nError << endl;
-        }
-      } else {
-        nGood++;
-        if (_params.debug) {
-          cerr << "  ====>> n good files so far: " << nGood << endl;
-          cerr << "  ====>> n errors     so far: " << nError << endl;
-          cerr << "  ====>> sum          so far: " << nGood + nError << endl;
-        }
+      nGood++;
+      if (_params.debug) {
+        cerr << "  ====>> n good files so far: " << nGood << endl;
+        cerr << "  ====>> n errors     so far: " << nError << endl;
+        cerr << "  ====>> sum          so far: " << nGood + nError << endl;
       }
-    } else if (jret < 0) {
+    } else {
       iret = -1;
       nError++;
       if (_params.debug) {
@@ -230,17 +217,7 @@ int Ascii2Radx::_runRealtimeWithLdata()
                        msecsWait, PMU_auto_register);
     const string path = ldata.getDataPath();
     // read input file
-    int jret = _readFile(path, vol);
-    if (jret == 0) {
-      // finalize the volume
-      _finalizeVol(vol);
-      // write the volume out
-      if (_writeVol(vol)) {
-        cerr << "ERROR - Ascii2Radx::_runRealtimeWithLdata" << endl;
-        cerr << "  Cannot write volume to file" << endl;
-        return -1;
-      }
-    } else if (jret < 0) {
+    if (_handleFile(path, vol)) {
       iret = -1;
     }
     // free up
@@ -298,17 +275,7 @@ int Ascii2Radx::_runRealtimeNoLdata()
 
       // read the input file
       
-      int jret = _readFile(path, vol);
-      if (jret == 0) {
-        // finalize the volume
-        _finalizeVol(vol);
-        // write the volume out
-        if (_writeVol(vol)) {
-          cerr << "ERROR - Ascii2Radx::_runRealtimeNoLdata" << endl;
-          cerr << "  Cannot write volume to file" << endl;
-          return -1;
-        }
-      } else if (jret < 0) {
+      if (_handleFile(path, vol)) {
         iret = -1;
       }
 
@@ -324,14 +291,13 @@ int Ascii2Radx::_runRealtimeNoLdata()
 }
 
 //////////////////////////////////////////////////
-// Read in a file
-// accounting for special cases such as gematronik
+// Handle an input file
 // Returns 0 on success
 //         1 if already read,
 //         -1 on failure
 
-int Ascii2Radx::_readFile(const string &readPath,
-                          RadxVol &vol)
+int Ascii2Radx::_handleFile(const string &readPath,
+                            RadxVol &vol)
 {
 
   PMU_auto_register("Processing file");
@@ -360,22 +326,28 @@ int Ascii2Radx::_readFile(const string &readPath,
     cerr << "  Input path: " << readPath << endl;
   }
 
-  if (_params.input_type == Params::BUFR_ASCII) {
-    if (_readBufrAscii(readPath, vol)) {
-      cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+  if (_params.print_ros2_to_stdout) {
+    if (_printRos2ToStdout(readPath, stdout)) {
+      cerr << "ERROR - Ascii2Radx::_handleFile" << endl;
+      cerr << "  printing ITALY ROS2 to stdout, path: " << readPath << endl;
+      return -1;
+    }
+  } else if (_params.input_type == Params::ITALY_ROS2) {
+    if (_handleItalyRos2(readPath, vol)) {
+      cerr << "ERROR - Ascii2Radx::_handleFile" << endl;
+      cerr << "  reading ITALY ROS2 compressed file: " << readPath << endl;
+      return -1;
+    }
+  } else if (_params.input_type == Params::BUFR_ASCII) {
+    if (_handleBufrAscii(readPath, vol)) {
+      cerr << "ERROR - Ascii2Radx::_handleFile" << endl;
       cerr << "  reading BUFR ASCII file: " << readPath << endl;
       return -1;
     }
   } else if (_params.input_type == Params::ITALY_ASCII) {
-    if (_readItalyAscii(readPath, vol)) {
-      cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+    if (_handleItalyAscii(readPath, vol)) {
+      cerr << "ERROR - Ascii2Radx::_handleFile" << endl;
       cerr << "  reading ITALY ASCII file: " << readPath << endl;
-      return -1;
-    }
-  } else if (_params.input_type == Params::ITALY_ROS2) {
-    if (_readItalyRos2(readPath, vol)) {
-      cerr << "ERROR - Ascii2Radx::_readFile" << endl;
-      cerr << "  reading ITALY ROS2 compressed file: " << readPath << endl;
       return -1;
     }
   }
@@ -398,8 +370,8 @@ int Ascii2Radx::_readFile(const string &readPath,
 // Read in a BUFR ASCII file
 // Returns 0 on success, -1 on failure
 
-int Ascii2Radx::_readBufrAscii(const string &readPath,
-                               RadxVol &vol)
+int Ascii2Radx::_handleBufrAscii(const string &readPath,
+                                 RadxVol &vol)
 {
 
   // open the file
@@ -408,7 +380,7 @@ int Ascii2Radx::_readBufrAscii(const string &readPath,
   FILE *inFile = taFile.fopen(readPath, "r");
   if (inFile == NULL) {
     int errNum = errno;
-    cerr << "ERROR - Ascii2Radx::_readBufrAscii" << endl;
+    cerr << "ERROR - Ascii2Radx::_handleBufrAscii" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -417,7 +389,7 @@ int Ascii2Radx::_readBufrAscii(const string &readPath,
   // read in the metadata
   
   if (_readBufrMetaData(inFile)) {
-    cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+    cerr << "ERROR - Ascii2Radx::_handleBufrAscii" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << "  cannot read metadata" << endl;
     return -1;
@@ -426,7 +398,7 @@ int Ascii2Radx::_readBufrAscii(const string &readPath,
   // read in the field data
   
   if (_readBufrFieldData(inFile)) {
-    cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+    cerr << "ERROR - Ascii2Radx::_handleBufrAscii" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << "  cannot read metadata" << endl;
     return -1;
@@ -496,6 +468,16 @@ int Ascii2Radx::_readBufrAscii(const string &readPath,
   // set the metadata on the volume
 
   _finalizeVol(vol);
+
+  // write the volume out
+
+  if (_writeVol(vol)) {
+    cerr << "ERROR - Ascii2Radx::_handleBufrAscii" << endl;
+    cerr << "  Cannot write volume to file" << endl;
+    return -1;
+  }
+
+  // success
 
   return 0;
 
@@ -903,7 +885,8 @@ int Ascii2Radx::_readBufrFieldData(FILE *inFile)
   // this also positions the file pointer to read the data
 
   _nPtsData = 0;
-  if (_readBufrMetaVariable(inFile, "Facteur super elargi de repetition differe du descripteur",
+  if (_readBufrMetaVariable(inFile, 
+                            "Facteur super elargi de repetition differe du descripteur",
                             _nPtsData)) {
     cerr << "ERROR - Ascii2Radx::_readBufrFieldData()" << endl;
     cerr << "  Cannot find variable for _nPtsData" << endl;
@@ -1106,7 +1089,7 @@ int Ascii2Radx::_readBufrDataValue(FILE *inFile,
 // Read in an ITALY ASCII file
 // Returns 0 on success, -1 on failure
 
-int Ascii2Radx::_readItalyAscii(const string &readPath,
+int Ascii2Radx::_handleItalyAscii(const string &readPath,
                                 RadxVol &vol)
 {
 
@@ -1114,7 +1097,7 @@ int Ascii2Radx::_readItalyAscii(const string &readPath,
   // read in the metadata
   
   if (_readBufrMetaData()) {
-    cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+    cerr << "ERROR - Ascii2Radx::_handleItalyAscii" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << "  cannot read metadata" << endl;
     return -1;
@@ -1123,7 +1106,7 @@ int Ascii2Radx::_readItalyAscii(const string &readPath,
   // read in the field data
   
   if (_readBufrFieldData()) {
-    cerr << "ERROR - Ascii2Radx::_readFile" << endl;
+    cerr << "ERROR - Ascii2Radx::_handleItalyAscii" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << "  cannot read metadata" << endl;
     return -1;
@@ -1194,6 +1177,20 @@ int Ascii2Radx::_readItalyAscii(const string &readPath,
 
   _finalizeVol(vol);
 
+  // set the metadata on the volume
+
+  _finalizeVol(vol);
+
+  // write the volume out
+
+  if (_writeVol(vol)) {
+    cerr << "ERROR - Ascii2Radx::_handleItalyAscii" << endl;
+    cerr << "  Cannot write volume to file" << endl;
+    return = -1;
+  }
+
+  // success
+
 #endif
 
   return 0;
@@ -1204,7 +1201,7 @@ int Ascii2Radx::_readItalyAscii(const string &readPath,
 // Read in an ITALY ROS2 COMPRESSED file
 // Returns 0 on success, -1 on failure
 
-int Ascii2Radx::_readItalyRos2(const string &readPath,
+int Ascii2Radx::_handleItalyRos2(const string &readPath,
                                RadxVol &vol)
 {
 
@@ -1219,7 +1216,7 @@ int Ascii2Radx::_readItalyRos2(const string &readPath,
   FILE *in = inFile.fopen(readPath, "r");
   if (in == NULL) {
     int errNum = errno;
-    cerr << "ERROR - Ascii2Radx::_readItalyRos2" << endl;
+    cerr << "ERROR - Ascii2Radx::_handleItalyRos2" << endl;
     cerr << "  Cannot open file, path: " << readPath << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -1229,14 +1226,14 @@ int Ascii2Radx::_readItalyRos2(const string &readPath,
 
   if (fread(&vh, sizeof(vh), 1, in) != 1) {
     int errNum = errno;
-    cerr << "ERROR - Ascii2Radx::_readItalyRos2" << endl;
+    cerr << "ERROR - Ascii2Radx::_handleItalyRos2" << endl;
     cerr << "  Cannot read volume header, path: " << readPath << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
 
   if(strcmp(vh.signature, "ROS2_V")) {
-    cerr << "ERROR - Ascii2Radx::_readItalyRos2" << endl;
+    cerr << "ERROR - Ascii2Radx::_handleItalyRos2" << endl;
     cerr << "  Bad volume header, path: " << readPath << endl;
     cerr << "  First bytes should be: ROS_V" << endl;
     return -1;
@@ -1266,7 +1263,7 @@ int Ascii2Radx::_readItalyRos2(const string &readPath,
 
     if (fread(&bh, sizeof(bh), 1, in) != 1){
       int errNum = errno;
-      cerr << "ERROR - Ascii2Radx::_readItalyRos2" << endl;
+      cerr << "ERROR - Ascii2Radx::_handleItalyRos2" << endl;
       cerr << "  Cannot read beam header, path: " << readPath << endl;
       cerr << "  " << strerror(errNum) << endl;
       return -1;
@@ -1298,7 +1295,7 @@ int Ascii2Radx::_readItalyRos2(const string &readPath,
     }
 
     if (!fread(buf, bh.beam_length, 1, in)) {
-      printf("ERRORE: impossibile leggere la sezione dati di un beam ROS2\n");
+      fprintf(stderr, "ERROR: cannot read ROS2 beam\n");
       break;
     }
     
@@ -1307,7 +1304,7 @@ int Ascii2Radx::_readItalyRos2(const string &readPath,
                            bh.beam_length,
                            (unsigned char*)beam,
                            bh.n_values*sizeof(float))) {
-        printf("ERRORE: impossibile decomprimere la sezione dati di un beam ROS2\n");
+        fprintf(stderr, "ERROR: cannot uncompress ROS2 beam\n");
         break;
       }
     } else {
@@ -1419,11 +1416,181 @@ int Ascii2Radx::_readItalyRos2(const string &readPath,
 
   _finalizeVol(vol);
 
+  // set the metadata on the volume
+
+  _finalizeVol(vol);
+
+  // write the volume out
+
+  if (_writeVol(vol)) {
+    cerr << "ERROR - Ascii2Radx::_handleItalyRos2" << endl;
+    cerr << "  Cannot write volume to file" << endl;
+    return = -1;
+  }
+
+  // success
+
 #endif
 
   return 0;
 
 }
+
+//////////////////////////////////////////////////
+// Read in an ITALY ROS2 COMPRESSED file
+// and print to stdout in ITALY ASCII format.
+// Returns 0 on success, -1 on failure
+
+int Ascii2Radx::_printRos2ToStdout(const string &readPath,
+                                   FILE *out)
+{
+
+  char *buf=NULL,*beam=NULL,date[32];
+  int n=0,sweep=-1,data_type=0;
+  ros2_vol_hdr_t vh; 
+  ros2_beam_hdr_t bh; 
+
+  // open input file
+
+  TaFile inFile;
+  FILE *in = inFile.fopen(readPath, "r");
+  if (in == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - Ascii2Radx::_printRos2ToStdout" << endl;
+    cerr << "  Cannot open file, path: " << readPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  // read in vol header
+
+  if (fread(&vh, sizeof(vh), 1, in) != 1) {
+    int errNum = errno;
+    cerr << "ERROR - Ascii2Radx::_printRos2ToStdout" << endl;
+    cerr << "  Cannot read volume header, path: " << readPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  if(strcmp(vh.signature, "ROS2_V")) {
+    cerr << "ERROR - Ascii2Radx::_printRos2ToStdout2" << endl;
+    cerr << "  Bad volume header, path: " << readPath << endl;
+    cerr << "  First bytes should be: ROS_V" << endl;
+    return -1;
+  }
+
+  if (vh.Z) fprintf(out,"Z: REFLECTIVITY\n");			   
+  if (vh.D) fprintf(out,"D: DIFFERENTIAL REFLECTIVITY\n");			   
+  if (vh.P) fprintf(out,"P: DIFFERENTIAL PHASE SHIFT\n");				   
+  if (vh.R) fprintf(out,"R: COEFFICIENT OF CORRELATION\n");				   
+  if (vh.L) fprintf(out,"L: LINEAR DEPOLARIZATION RATIO\n");				   
+  if (vh.V) fprintf(out,"V: DOPPLER VELOCITY\n");				   
+  if (vh.S) fprintf(out,"S: SPREAD OF DOPPLER VELOCITY\n");				   
+  // fprintf(out, "TIME: %s\n", RadxTime::strm(vh.date).c_str());
+    
+  strcpy(date, ctime(&(vh.date)));
+  date[strlen(date)-1]=0;
+  fprintf(out,
+          "\nVOLUME: time=%.ld (%s)   rad_lat=%.4f deg   rad_lon=%.4f deg   rad_alt=%.0f m"
+          "   range_bin=%.1f m   nyquist_velocity=%.2f m/s",
+          vh.date, date, vh.rad_lat, vh.rad_lon, vh.rad_alt, vh.l_bin, vh.nyquist_v); 
+
+  // read in beams
+  
+  while (true) {
+
+    // read in header
+
+    if (fread(&bh, sizeof(bh), 1, in) != 1){
+      int errNum = errno;
+      cerr << "ERROR - Ascii2Radx::_printRos2ToStdout" << endl;
+      cerr << "  Cannot read beam header, path: " << readPath << endl;
+      cerr << "  " << strerror(errNum) << endl;
+      return -1;
+    }
+
+    if (bh.sweep<0) {
+      break;
+    }
+          
+    if (!data_type) {
+      data_type= bh.data_type;
+      fprintf(out,"   data_type=%hd\n", data_type);
+    }
+          
+    fprintf(out,
+            "\nBEAM: t=%.2lf   el=%.1f   az=%.1f  n_bins=%hd\n",
+            bh.time,bh.el,bh.az,bh.n_bins); 
+          
+    if (sweep != bh.sweep) {
+      sweep = bh.sweep;
+      beam = (char *) realloc(beam, bh.n_values * sizeof(Radx::fl32));
+    }
+
+    /* ad inizio sweep il numero di range bin potrebbe variare */
+          
+    if (n < bh.beam_length) {
+      n=bh.beam_length;
+      buf=(char *) realloc(buf,n);
+    }
+
+    if (!fread(buf, bh.beam_length, 1, in)) {
+      fprintf(stderr, "ERROR: cannot read ROS2 beam\n");
+      break;
+    }
+    
+    if (bh.compression) {
+      if (!_ros2Uncompress((unsigned char*)buf,
+                           bh.beam_length,
+                           (unsigned char*)beam,
+                           bh.n_values*sizeof(float))) {
+        fprintf(stderr, "ERROR: cannot uncompress ROS2 beam\n");
+        break;
+      }
+    } else {
+      memcpy(beam, buf, bh.beam_length);
+    }
+          
+    /* ora beam contiene i dati radar decompressi, che posso stampare  */   
+	  
+    if (vh.Z) {
+      fprintf(out,"Z:");
+      _ros2PrintValues(bh.data_type,vh.Z_pos,bh.n_bins,beam,out);
+    }
+    if (vh.D) {
+      fprintf(out,"D:");
+      _ros2PrintValues(bh.data_type,vh.D_pos,bh.n_bins,beam,out);
+    }
+    if (vh.P) {
+      fprintf(out,"P:");
+      _ros2PrintValues(bh.data_type,vh.P_pos,bh.n_bins,beam,out);
+    }
+    if (vh.R) {
+      fprintf(out,"R:");
+      _ros2PrintValues(bh.data_type,vh.R_pos,bh.n_bins,beam,out);
+    }
+    if (vh.L) {
+      fprintf(out,"L:");
+      _ros2PrintValues(bh.data_type,vh.L_pos,bh.n_bins,beam,out);
+    }
+    if (vh.V) {
+      fprintf(out,"V:");
+      _ros2PrintValues(bh.data_type,vh.V_pos,bh.n_bins,beam,out);
+    }
+    if (vh.S) {
+      fprintf(out,"S:");
+      _ros2PrintValues(bh.data_type,vh.S_pos,bh.n_bins,beam,out);
+    }
+    
+  } // while (true)
+
+  if (beam) free(beam);
+  if (buf) free(buf);
+  
+  return 0;
+
+}
+
 
 //////////////////////////////////////////////////////////
 // Uncompress a compressed file in ITALY compressed format

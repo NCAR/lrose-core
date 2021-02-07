@@ -1292,6 +1292,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'print_ros2_to_stdout'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_ros2_to_stdout");
+    tt->descr = tdrpStrDup("Option to print ROS2 data to stdout.");
+    tt->help = tdrpStrDup("If true,ITALY ROS2 data will be decoded and printed to stdout, in the ITALY ASCII format.");
+    tt->val_offset = (char *) &print_ros2_to_stdout - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;
