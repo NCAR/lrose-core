@@ -75,7 +75,9 @@ protected:
   string CfConvention;
   string BaseConvention;
   string CurrentVersion;
-  string CurrentVersion2;
+
+  string CfRadial2Conventions;
+  string CfRadial2Version;
 
   // char * constants
 

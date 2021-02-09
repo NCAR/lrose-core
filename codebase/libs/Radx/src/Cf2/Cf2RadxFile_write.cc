@@ -595,39 +595,17 @@ void Cf2RadxFile::_addGlobalAttributes()
 
   // Add required CF global attributes
   
-  _conventions = CfConvention;
-  _subconventions = BaseConvention;
-  // _subconventions += " ";
-  // _subconventions += INSTRUMENT_PARAMETERS;
-  // if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
-  //   _subconventions += " ";
-  //   _subconventions += RADAR_PARAMETERS;
-  //   if (_writeVol->getRcalibs().size() > 0) {
-  //     _subconventions += " ";
-  //     _subconventions += RADAR_CALIBRATION;
-  //   }
-  // } else {
-  //   _subconventions += " ";
-  //   _subconventions += LIDAR_PARAMETERS;
-  // }
-  // if (_writeVol->getPlatformType() != Radx::PLATFORM_TYPE_FIXED) {
-  //   _subconventions += " ";
-  //   _subconventions += PLATFORM_VELOCITY;
-  // }
-  // if (_writeVol->getCfactors() != NULL) {
-  //   _subconventions += " ";
-  //   _subconventions += GEOMETRY_CORRECTION;
-  // }
-
-  _file.addGlobAttr(CONVENTIONS, _conventions);
-  _file.addGlobAttr(SUB_CONVENTIONS, _subconventions);
+  _convention = CfRadial2Conventions;
+  _file.addGlobAttr(CONVENTIONS, _convention);
   
   // Version
 
-  _version = CurrentVersion2;
+  _version = CfRadial2Version;
+
   // if (_writeVol->getVersion().size() > 0) {
   //   _version = _writeVol->getVersion();
   // }
+
   _file.addGlobAttr(VERSION, _version);
   
   // info strings

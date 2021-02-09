@@ -241,6 +241,7 @@ void RadxVol::copyMeta(const RadxVol &rhs)
 
   _debug = rhs._debug;
 
+  _convention = rhs._convention;
   _version = rhs._version;
   _title = rhs._title;
   _institution = rhs._institution;
@@ -386,6 +387,7 @@ void RadxVol::clear()
   _sweepModeFromAnglesChecked = false;
   _predomSweepModeFromAngles = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
 
+  _convention.clear();
   _version.clear();
   _title.clear();
   _institution.clear();
@@ -1723,6 +1725,7 @@ void RadxVol::print(ostream &out) const
 {
   
   out << "=============== RadxVol ===============" << endl;
+  out << "  convention: " << _convention << endl;
   out << "  version: " << _version << endl;
   out << "  title: " << _title << endl;
   out << "  institution: " << _institution << endl;
@@ -7157,6 +7160,7 @@ void RadxVol::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
 {
   xml.clear();
   xml += RadxXml::writeStartTag("RadxVol", level);
+  xml += RadxXml::writeString("convention", level + 1, _convention);
   xml += RadxXml::writeString("version", level + 1, _version);
   xml += RadxXml::writeString("title", level + 1, _title);
   xml += RadxXml::writeString("institution", level + 1, _institution);
@@ -7230,6 +7234,7 @@ int RadxVol::_setMetaStringsFromXml(const char *xml,
     return -1;
   }
 
+  RadxXml::readString(contents, "convention", _convention);
   RadxXml::readString(contents, "version", _version);
   RadxXml::readString(contents, "title", _title);
   RadxXml::readString(contents, "institution", _institution);

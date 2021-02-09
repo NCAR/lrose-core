@@ -182,8 +182,7 @@ private:
   
   // format version
 
-  string _conventions;
-  string _subconventions;
+  string _convention;
   string _version;
   
   // netcdf file

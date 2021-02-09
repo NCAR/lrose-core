@@ -678,42 +678,24 @@ void Cf2RadxFile::_readGlobalAttributes()
 {
 
   // check for conventions
-  
+
   try {
     NcxxGroupAtt att = _file.getAtt(CONVENTIONS);
-    _conventions = att.asString();
+    _convention = att.asString();
   } catch (NcxxException& e) {
     NcxxErrStr err;
     err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
     err.addErrStr("  Cannot find conventions attribute");
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
-  if (_conventions.find(BaseConvention) == string::npos) {
-    if (_conventions.find("CF") == string::npos) {
+  if (_convention.find(CfRadial2Conventions) == string::npos) {
+    if (_convention.find("Cf/Radial") == string::npos) {
       NcxxErrStr err;
       err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-      err.addErrStr("  Invalid Conventions attribute: ", _conventions);
-      err.addErrStr("  Should be 'CF...'");
+      err.addErrStr("  Invalid Conventions attribute: ", _convention);
+      err.addErrStr("  Should be 'Cf/Radial'");
       throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
     }
-  }
-
-  // check for conventions
-  
-  try {
-    NcxxGroupAtt att = _file.getAtt(SUB_CONVENTIONS);
-    _subconventions = att.asString();
-  } catch (NcxxException& e) {
-    NcxxErrStr err;
-    err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-    err.addErrStr("  Cannot find subconventions attribute");
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
-  }
-  if (_subconventions.find(BaseConvention) == string::npos) {
-    NcxxErrStr err;
-    err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
-    err.addErrStr("  Invalid sub_conventions attribute: ", _subconventions);
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
   // check for version
@@ -728,7 +710,7 @@ void Cf2RadxFile::_readGlobalAttributes()
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
   if (_version.size() < 1 ||
-      _version.find("CF-Radial-2") == string::npos) {
+      _version.find("2") == string::npos) {
     NcxxErrStr err;
     err.addErrStr("ERROR - Cf2RadxFile::_readGlobalAttributes");
     err.addErrStr("  Invalid version: ", _version);
@@ -750,6 +732,8 @@ void Cf2RadxFile::_readGlobalAttributes()
     if (att.isNull()) {
       continue;
     } else if (att.getName().find(INSTRUMENT_NAME) != string::npos) {
+      _instrumentName = att.asString();
+    } else if (att.getName().find("radar_name") != string::npos) {
       _instrumentName = att.asString();
     } else if (att.getName().find(TITLE) != string::npos) {
       _title = att.asString();
@@ -1364,28 +1348,51 @@ void Cf2RadxFile::_readFrequency(NcxxGroup &group)
 
  {
 
-   // latitude
+   // loop through the variables, checking for latitude, longitude, altitude
 
-   try {
-     _file.readDoubleVar(LATITUDE, _latitude, Radx::missingFl64);
-   } catch (NcxxException &e) {
-     _latitude = 0.0;
-     cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
-     cerr << "  No latitude variable" << endl;
-     cerr << "  Setting latitude to 0" << endl;
-   }
+   const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
+   
+   for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
+        iter != vars.end(); iter++) {
+     
+     NcxxVar var = iter->second;
+     if (var.isNull()) {
+       continue;
+     }
+     string name = var.getName();
+     int numDims = var.getDimCount();
+     if (numDims != 1) {
+       continue;
+     }
+     
+     // latitude
+     
+     if (name.find("latitude") != string::npos) {
+       try {
+         _file.readDoubleVar(name, _latitude, Radx::missingFl64);
+       } catch (NcxxException &e) {
+         _latitude = 0.0;
+         cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
+         cerr << "  No latitude variable" << endl;
+         cerr << "  Setting latitude to 0" << endl;
+       }
+     }
+     
+     // longitude
 
-   // longitude
+     if (name.find("longitude") != string::npos) {
+       try {
+         _file.readDoubleVar(name, _longitude, Radx::missingFl64);
+       } catch (NcxxException &e) {
+         _longitude = 0.0;
+         cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
+         cerr << "  No longitude variable" << endl;
+         cerr << "  Setting longitude to 0" << endl;
+       }
+     }
 
-   try {
-     _file.readDoubleVar(LONGITUDE, _longitude, Radx::missingFl64);
-   } catch (NcxxException &e) {
-     _longitude = 0.0;
-     cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
-     cerr << "  No longitude variable" << endl;
-     cerr << "  Setting longitude to 0" << endl;
-   }
-
+   } // multimap iter
+     
    // altitude
 
    try {
@@ -3425,6 +3432,7 @@ void Cf2RadxFile::_loadReadVolume()
     _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz); // missing
   }
 
+  _readVol->setConvention(_convention);
   _readVol->setVersion(_version);
   _readVol->setTitle(_title);
   _readVol->setSource(_source);

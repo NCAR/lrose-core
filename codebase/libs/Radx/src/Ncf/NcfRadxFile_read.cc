@@ -4168,6 +4168,7 @@ void NcfRadxFile::_loadReadVolume()
     }
   }
 
+  _readVol->setConvention(_conventions);
   _readVol->setVersion(_version);
   _readVol->setTitle(_title);
   _readVol->setSource(_source);
