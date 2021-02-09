@@ -1711,11 +1711,12 @@ int Ascii2Radx::_printRos2ToFile(const string &readPath,
   if (vh.V) fprintf(out,"V: DOPPLER VELOCITY\n");				   
   if (vh.S) fprintf(out,"S: SPREAD OF DOPPLER VELOCITY\n");				   
   // fprintf(out, "TIME: %s\n", RadxTime::strm(vh.date).c_str());
-    
-  strcpy(date, ctime(&(vh.date)));
+
+  time_t dtime = vh.date;
+  strcpy(date, ctime(&dtime));
   date[strlen(date)-1]=0;
   fprintf(out,
-          "\nVOLUME: time=%.ld (%s)   rad_lat=%.4f deg   rad_lon=%.4f deg   rad_alt=%.0f m"
+          "\nVOLUME: time=%.lld (%s)   rad_lat=%.4f deg   rad_lon=%.4f deg   rad_alt=%.0f m"
           "   range_bin=%.1f m   nyquist_velocity=%.2f m/s",
           vh.date, date, vh.rad_lat, vh.rad_lon, vh.rad_alt, vh.l_bin, vh.nyquist_v); 
 
@@ -1739,7 +1740,7 @@ int Ascii2Radx::_printRos2ToFile(const string &readPath,
           
     if (!dataType) {
       dataType= bh.data_type;
-      fprintf(out,"   dataType=%hd\n", dataType);
+      fprintf(out,"   dataType=%d\n", dataType);
     }
           
     fprintf(out,
