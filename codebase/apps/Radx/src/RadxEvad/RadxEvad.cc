@@ -50,7 +50,6 @@
 #include <physics/IcaoStdAtmos.hh>
 #include <physics/thermo.h>
 #include <Spdb/SoundingPut.hh>
-#include <algorithm>
 using namespace std;
 
 const double RadxEvad::missingVal = -9999.0;
@@ -119,7 +118,6 @@ RadxEvad::RadxEvad(int argc, char **argv)
   _sliceDeltaAz = 360.0 / _nAzSlices;
 
   // profile geometry
-
   _profileMinHt = _params.profile_min_height;
   _profileMaxHt = _params.profile_max_height;
   _profileDeltaHt = _params.profile_height_interval;
@@ -416,6 +414,9 @@ int RadxEvad::_processDataSet()
   // loop through the sweeps
 
   int ngood = 0;
+
+  double firstval, lastval, vallo, valmid, valhi;
+
   const vector<RadxSweep *> &radxSweeps = _readVol.getSweeps();
   for (size_t isweep = 0; isweep < radxSweeps.size(); isweep++) {
     
@@ -454,15 +455,13 @@ int RadxEvad::_processDataSet()
 	_ring.endGate = _nGates - 1;
       }
 
-/*
-      if (_params.debug) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "ring at range " << irange << " ... " << endl;
         cerr << " startRange=" << _ring.startRange << endl;
         cerr << "   endRange=" << _ring.endRange << endl;
         cerr << " startGate =" << _ring.startGate << endl;
         cerr << "   endGate =" << _ring.endGate << endl;
       }
-*/
 
       // set elevation, compute range and height at ring mid-pt
 
@@ -470,6 +469,17 @@ int RadxEvad::_processDataSet()
       _ring.midRange = (_ring.startRange + _ring.endRange) / 2.0;
       _ring.midHt = (_ring.midRange * sin(_ring.elev * DEG_TO_RAD) +
                      (_ring.midRange * _ring.midRange / pseudoEarthDiamKm));
+
+      if (_params.compute_profile_spacing_from_data) {
+        if (irange == 1) firstval = _ring.midHt; // pick the 2nd value (zero-based) to be the profileMin
+        if (irange % 3 == 1) lastval = _ring.midHt;
+        if (irange == 1) vallo = _ring.midHt;
+        if (irange == 3) valmid = _ring.midHt;
+        if (irange == 4) valhi = _ring.midHt;
+        if (_params.debug > Params::DEBUG_VERBOSE) {
+          cout << "ring_midHt " << _ring.midHt << endl;
+        }
+      }
 
       // compute corrected elevation and coefficient for use in
       // computing divergence and vertical velocity
@@ -510,6 +520,22 @@ int RadxEvad::_processDataSet()
     cerr << "  Probably cannot find VEL field, name: " 
          << _params.VEL_field_name << endl;
     return -1;
+  }
+
+  if (_params.compute_profile_spacing_from_data) {
+    double one_delta = valhi - valmid;
+    _profileMinHt = firstval;
+    _profileMaxHt = lastval;
+    _profileDeltaHt = (valhi - vallo);
+    _profileNLevels = (int) ((_profileMaxHt - _profileMinHt) / _profileDeltaHt) + 1;
+
+    if (_params.debug > Params::DEBUG_VERBOSE) {
+      cout << "one_delta " << one_delta << endl;
+      cout << "_profileMinHt " << _profileMinHt << endl;
+      cout << "_profileMaxHt " << _profileMaxHt << endl;
+      cout << "_profileDeltaHt " << _profileDeltaHt << endl;
+      cout << "_profileNLevels " << _profileNLevels << endl;  
+    }    
   }
 
   // load up the raw profile
@@ -1674,6 +1700,17 @@ void RadxEvad::_computeDivergence()
     double midHt = _profileMinHt + ilevel * _profileDeltaHt;
     double lowerLimit = midHt - _profileDeltaHt;
     double upperLimit = midHt + _profileDeltaHt;
+    if (_params.compute_profile_spacing_from_data) {
+      lowerLimit = midHt - _profileDeltaHt*0.5;
+      upperLimit = midHt + _profileDeltaHt*0.5;      
+    }
+
+    if (_params.debug > Params::DEBUG_VERBOSE) {
+      cout << "lowerLimit " << lowerLimit << endl;
+      cout << "midHt      " << midHt << endl;
+      cout << "upperLimit " << upperLimit << endl;
+      cout << "----------" << endl;
+    }
 
     // initialize matrices
     
