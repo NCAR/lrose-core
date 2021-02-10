@@ -270,7 +270,7 @@ void setReadRemapPolarStereo(int nx, int ny,
 			     double tangent_lon, 
 			     Mdvx::pole_type_t poleType,
 			     double central_scale,
-			     double lad);
+			     double lad = 90.0);
 
 // Stereographic - oblique aspect
 
