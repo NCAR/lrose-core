@@ -217,10 +217,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "netcdf_style = NETCDF4;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-ncxx")) {
+    // } else if (!strcmp(argv[i], "-ncxx")) {
       
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_NCXX;");
-      TDRP_add_override(&override, tmp_str);
+    //   sprintf(tmp_str, "output_format = OUTPUT_FORMAT_NCXX;");
+    //   TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-dorade")) {
       
@@ -944,8 +944,8 @@ void Args::_usage(ostream &out)
       << "  [ -cfradial ] convert to cfradial (the default)\n"
       << "  [ -cf2 ] convert to cfradial2, forces use of netcdf4\n"
       << "\n"
-      << "  [ -cf_classic ] output classic-style netcdf (the default)\n"
-      << "  [ -cf_netcdf4 ] output netcdf4 style\n"
+      << "  [ -cf_classic ] output classic-style netcdf\n"
+      << "  [ -cf_netcdf4 ] output netcdf4 style (the default)\n"
       << "  [ -cf_classic4 ] output classic-style netcdf4\n"
       << "  [ -cf_nc64bit ] output 64-bit NC netcdf\n"
       << "     The above only apply to cfradial and foray output.\n"
@@ -1028,8 +1028,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -name ? ] override instrument name\n"
       << "\n"
-      << "  [ -ncxx ] convert to cfradial using Ncxx classes\n"
-      << "\n"
+      // << "  [ -ncxx ] convert to cfradial using Ncxx classes\n"
+      // << "\n"
       << "  [ -nexrad ] convert to NEXRAD archive level 2\n"
       << "\n"
       << "  [ -nssl_mrd ] convert to NSSL MRD format\n"

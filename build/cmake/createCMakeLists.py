@@ -1517,7 +1517,7 @@ def writeCMakeListsScripts(scriptsDir, scriptsList):
     fo.write("# install\n")
     fo.write("\n")
     for scriptName in scriptsList:
-        fo.write("install(FILES %s DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)\n" % scriptName)
+        fo.write("install(PROGRAMS %s DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)\n" % scriptName)
     fo.write("\n")
 
     fo.close

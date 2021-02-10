@@ -150,6 +150,10 @@ public:
 
   void setDebug(bool val);
 
+  /// Set the volume convention, if available.
+
+  void setConvention(const string &val) { _convention = val; }
+
   /// Set the volume version, if available. Use this for the project name.
 
   void setVersion(const string &val) { _version = val; }
@@ -1227,6 +1231,10 @@ public:
   /// \name Get methods - except for platform parameters
   //@{
 
+  /// Get convention. May be used for project name.
+
+  inline const string &getConvention() const { return _convention; }
+
   /// Get version. May be used for project name.
 
   inline const string &getVersion() const { return _version; }
@@ -1838,6 +1846,7 @@ private:
 
   // meta strings
 
+  string _convention;  // from CF
   string _version;     // from CF
   string _title;       // from CF
   string _institution; // from CF

@@ -43,34 +43,37 @@ paramdef string {
 } input_dir;
 
 typedef enum {
-  REALTIME, ARCHIVE, FILELIST
+  REALTIME, FILELIST
 } mode_t;
 
 paramdef enum mode_t {
   p_default = REALTIME;
   p_descr = "Operating mode";
-  p_help = "In REALTIME mode, the program waits for a new input file.  "
-           "In ARCHIVE mode, it moves through the data between the start "
-           "and end times set on the command line. "
-           "In FILELIST mode, it moves through the list of file names "
-           "specified on the command line. "
-           "Paths (in ARCHIVE mode, at least) MUST contain a "
-           "day-directory above the data file -- ./data_file.ext will not "
-           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+  p_help =
+  "In REALTIME mode, the program waits for a new input file.  "
+  "In FILELIST mode, it moves through the list of file names "
+  "specified on the command line. ";
 } mode;
 
 typedef enum {
-  BUFR_ASCII
+  BUFR_ASCII,
+  ITALY_ASCII,
+  ITALY_ROS2
 } input_type_t;
 
 paramdef enum input_type_t {
   p_default = BUFR_ASCII;
   p_descr = "Input data type";
   p_help =
-  "The ASCII data can be in various representations.  "
-  "The input type is specified here.";
+  "The ASCII data can be in various representations.\n"
+  "  BUFR_ASCII: WMO BUFR in ASCII\n";
+  "  ITALY_ASCII: ASCII from Northern Italian radars legacy format.\n"
+  "  ITALY_ROS2: COMPRESSED data from Northern Italian radars legacy format.";
 } input_type;
 
+commentdef {
+  p_header = "FILE SEARCH OPTIONS";
+}
 paramdef int {
   p_default = 300;
   p_descr = "Maximum age of realtime data (secs)";
@@ -115,133 +118,20 @@ paramdef string {
 } search_ext;
 
 commentdef {
-  p_header = "READ OPTIONS";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set the radar number.";
-  p_help = "See read_radar_num.";
-} read_set_radar_num;
-
-paramdef int {
-  p_default = -1;
-  p_descr = "Set the radar number for the data to be extracted.";
-  p_help = "Most files have data from a single radar, so this does not apply. The NOAA HRD files, however, have data from both the lower fuselage (LF, radar_num = 1) and tail (TA, radar_num = 2) radars. For HRD files, by default the TA radar will be used, unless the radar num is set to 1 for the LF radar. If this is set to 1, it will force the convert to assume a lower fuselage radar. If set to 2, it will assume a tail radar.";
-} read_radar_num;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to aggregate sweep files into a volume on read.";
-  p_help = "If true, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.";
-} aggregate_sweep_files_on_read;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to aggregate all files in the file list on read.";
-  p_help = "If true, all of the files specified with the '-f' arg will be aggregated into a single volume as they are read in. This only applies to FILELIST mode. Overrides 'aggregate_sweep_files_on_read'.";
-} aggregate_all_files_on_read;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
-  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
-} trim_surveillance_sweeps_to_360deg;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set the max range for any ray.";
-} set_max_range;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Specified maximim range - km.";
-  p_help = "Gates beyond this range are removed.";
-} max_range_km;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to force the number of gates to be constant.";
-  p_help = "If TRUE, the number of gates on all rays will be set to the maximum, and gates added to shorter rays will be filled with missing values.";
-} set_ngates_constant;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to remap all rays to the predominant range geometry.";
-  p_help = "If TRUE, all rays will be remapped onto the same range geometry, determined as the most common geometry amongst all of the rays read in.";
-} remap_to_predominant_range_geometry;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to remap all rays to the finest range geometry.";
-  p_help = "If TRUE, all rays will be remapped onto the same range geometry, determined as that with the finest resolution in range - i.e. with the minimum gate spacing.";
-} remap_to_finest_range_geometry;
-
-commentdef {
-  p_header = "OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS";
-  p_text = "Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set fixed angle limits";
-  p_help = "Only use sweeps within the specified fixed angle limits.";
-  p_help = "If 'apply_strict_angle_limits' is set, only read sweeps within the specified fixed angle limits. If strict checking is false and no data lies within the limits, return the closest applicable sweep. NOTE - fixed angles are elevation in PPI mode and azimuth in RHI mode.";
-} set_fixed_angle_limits;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Lower fixed angle limit - degrees.";
-} lower_fixed_angle_limit;
-
-paramdef double {
-  p_default = 90;
-  p_descr = "Upper fixed angle limit - degrees.";
-} upper_fixed_angle_limit;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set sweep number limits";
-  p_help = "If 'apply_strict_angle_limits' is set, only read sweeps within the specified limits. If strict checking is false and no data lies within the limits, return the closest applicable sweep.";
-} set_sweep_num_limits;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Lower sweep number limit.";
-} lower_sweep_num;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Upper sweep number limit.";
-} upper_sweep_num;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to apply strict checking for angle or sweep number limits on read.";
-  p_help = "If true, an error will occur if the fixed angle limits or sweep num limits are outside the bounds of the data. If false, a read is guaranteed to return at least 1 sweep - if no sweep lies within the angle limits set, the nearest sweep will be returned.";
-} apply_strict_angle_limits;
-
-commentdef {
   p_header = "OPTION TO OVERRIDE GATE GEOMETRY";
 }
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to override the start range.";
-  p_help = "If true, the specified start range in this file will be used. If not, the start range in the data file will be used.";
-} override_start_range;
+  p_descr = "Option to override the gate geometry.";
+  p_help = "See 'start_range_km' and 'gate_spacing_km'.";
+} override_gate_geometry;
 
 paramdef double {
   p_default = 0.0;
   p_descr = "Specified start range (km).";
   p_help = "See override_start_range.";
 } start_range_km;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the gate spacing.";
-  p_help = "If true, the specified gate spacing in this file will be used. If not, the gate spacing in the data file will be used.";
-} override_gate_spacing;
 
 paramdef double {
   p_default = 0.0075;
@@ -254,25 +144,25 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = true;
+  p_default = false;
   p_descr = "Option to override the instrument name.";
   p_help = "If true, the name provided will be used.";
 } override_instrument_name;
 
 paramdef string {
-  p_default = "Guadeloupe";
+  p_default = "unknown";
   p_descr = "Instrument name.";
   p_help = "See override_instrument_name.";
 } instrument_name;
 
 paramdef boolean {
-  p_default = true;
+  p_default = false;
   p_descr = "Option to override the site name.";
   p_help = "If true, the name provided will be used.";
 } override_site_name;
 
 paramdef string {
-  p_default = "Guadeloupe";
+  p_default = "unknown";
   p_descr = "Site name.";
   p_help = "See override_site_name.";
 } site_name;
@@ -305,12 +195,6 @@ paramdef double {
   p_help = "See override_radar_location.";
 } radar_altitude_meters;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to negate the latitude.";
-  p_help = "Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.";
-} change_radar_latitude_sign;
-
 commentdef {
   p_header = "OPTION TO CORRECT TIME";
 }
@@ -326,56 +210,6 @@ paramdef double {
   p_descr = "Time offset (secs).";
   p_help = "See 'apply_time_offset'. This value will be ADDED to the existing ray times.";
 } time_offset_secs;
-
-commentdef {
-  p_header = "OPTION TO CORRECT ANTENNA ANGLES";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to apply an offset to the azimuth values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
-} apply_azimuth_offset;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Azimuth offset (degrees).";
-  p_help = "See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.";
-} azimuth_offset;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to apply an offset to the elevation values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
-} apply_elevation_offset;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Elevation offset (degrees).";
-  p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
-} elevation_offset;
-
-commentdef {
-  p_header = "OPTION TO ADJUST SWEEP LIMITS USING FIXED AND MEASURED ANGLES";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Adjust the limits of sweeps, by comparing the measured angles to the fixed angles.";
-  p_help = "Sometimes the transitions from one fixed angle to another are not accurately described by the scan flags, and as a result rays are not correctly assigned to the sweeps. This option goes through the volume in ray order, and adjusts the way rays are associated with each sweep. It does this by comparing the actual angle with the fixed angle, and minimizes the angular difference.";
-} adjust_sweep_limits_using_angles;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Optimize the transitions in surveillance mode.";
-  p_help = "If true, we check the transitions between sweeps in surveillance mode, and move problem rays into the correct sweep. We also set the transition flag on/off based on the max elevation error speficied. See below.";
-} optimize_surveillance_transitions;
-
-paramdef double {
-  p_default = 0.25;
-  p_descr = "Max elevation angle error when optimizing surveillance transitions (degrees).";
-  p_help = "If the difference between the fixed angle and measured angle exceeds this value, the transition flag will be set. If not, it will be cleared.";
-} optimized_transitions_max_elev_error;
 
 commentdef {
   p_header = "SET SELECTED GLOBAL ATTRIBUTES";
@@ -430,165 +264,74 @@ paramdef string {
 } author;
 
 commentdef {
-  p_header = "OPTION TO ADD USER-SPECIFIED GLOBAL ATTRIBUTES to output file";
-  p_text = "Only applies to CfRadial output format.";
+  p_header = "SPECIFY FIELD NAMES";
+  p_text = "At least 1 field is required.";
 }
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Add user-specified global attributes to output file.";
-  p_help = "Only applies to CfRadial files. See below for details.";
-} add_user_specified_global_attributes;
-
-typedef enum {
-  ATTR_STRING,
-  ATTR_INT,
-  ATTR_DOUBLE,
-  ATTR_INT_ARRAY,
-  ATTR_DOUBLE_ARRAY
-} attr_type_t;
+  p_descr = "Option to specify the output field details.";
+  p_help = "If false, all fields are written to output file.";
+} set_output_fields;
 
 typedef struct {
-  string name; 
-  attr_type_t attrType; 
-  string val;
-} attr_t;
-
-paramdef struct attr_t {
-  p_default = {
-    { name = "attr_string",
-      attrType = ATTR_STRING,
-      val = "user-attribute"
-    }
-    ,
-    { name = "attr_int",
-      attrType = ATTR_INT,
-      val = "99"
-    }
-    ,
-    { name = "attr_double",
-      attrType = ATTR_DOUBLE,
-      val = "99.99"
-    }
-    ,
-    { name = "attr_int_array",
-      attrType = ATTR_INT_ARRAY,
-      val = "1,2,3,4,5"
-    }
-    ,
-    { name = "attr_double_array",
-      attrType = ATTR_DOUBLE_ARRAY,
-      val = "1.1,2.2,3.3,4.4,5.5"
-    }
-  };
-  p_descr = "User-defined global attributes.";
-  p_help = "Applies if 'add_user_specified_global_attributes' is true. Array attributes are comma-delimited.";
-} user_defined_global_attributes[];
-
-commentdef {
-  p_header = "SPECIFY FIELD NAMES AND OUTPUT ENCODING";
-  p_text = "At least 1 field is required.";
-}
-
-typedef enum {
-  OUTPUT_ENCODING_ASIS,
-  OUTPUT_ENCODING_FLOAT32,
-  OUTPUT_ENCODING_INT32,
-  OUTPUT_ENCODING_INT16,
-  OUTPUT_ENCODING_INT08
-} output_encoding_t;
-
-typedef enum {
-  SCALING_DYNAMIC,
-  SCALING_SPECIFIED
-} output_scaling_t;
-
-typedef struct {
-  string field_name; 
+  string input_field_name; 
+  string output_field_name; 
   string long_name; 
   string standard_name; 
   string units;
-  output_encoding_t encoding;
-  output_scaling_t output_scaling;
-  double output_scale;
-  double output_offset;
 } output_field_t;
 
 paramdef struct output_field_t {
   p_default = {
-    { "DBZ",
-      "reflectivity",
-      "equivalent_reflectivity_factor",
-      "dBZ",
-      OUTPUT_ENCODING_INT16,
-      SCALING_DYNAMIC, 0.01, 0.0
+    { input_field_name = "DBZ",
+      output_field_name = "DBZ",
+      long_name = "reflectivity",
+      standard_name = "equivalent_reflectivity_factor",
+      units = "dBZ"
     }
   };
   p_descr = "Output field details.";
-  p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.";
+  p_help = "Optionally set the output field details, based on the input field name.";
 } output_fields[];
+
+commentdef {
+  p_header = "SPECIFY OUTPUT ENCODING";
+}
+
+typedef enum {
+  OUTPUT_ENCODING_FLOAT32,
+  OUTPUT_ENCODING_INT16,
+  OUTPUT_ENCODING_INT08
+} output_encoding_t;
+
+paramdef enum output_encoding_t {
+  p_default = OUTPUT_ENCODING_INT16;
+  p_descr = "Specify output encoding for field data.";
+  p_help = "INT16 is a good option for most radar fields.";
+} output_encoding;
 
 commentdef {
   p_header = "OUTPUT FORMAT";
 }
 
 typedef enum {
-  OUTPUT_FORMAT_CFRADIAL,
-  OUTPUT_FORMAT_DORADE,
-  OUTPUT_FORMAT_FORAY,
-  OUTPUT_FORMAT_NEXRAD,
-  OUTPUT_FORMAT_UF,
-  OUTPUT_FORMAT_MDV_RADIAL,
-  OUTPUT_FORMAT_NSSL_MRD,
+  OUTPUT_FORMAT_CFRADIAL1,
+  OUTPUT_FORMAT_CFRADIAL2,
   OUTPUT_FORMAT_ODIM_HDF5
 } output_format_t;
 
 paramdef enum output_format_t {
-  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_default = OUTPUT_FORMAT_CFRADIAL1;
   p_descr = "Format for the output files.";
+  p_help = "CFRADIAL is a good option. CFRADIAL2 is a work in progress.";
 } output_format;
-
-typedef enum {
-  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
-} netcdf_style_t;
-
-paramdef enum netcdf_style_t {
-  p_default = NETCDF4;
-  p_descr = "NetCDF style - if output_format is CFRADIAL";
-  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
-} netcdf_style;
-
-commentdef {
-  p_header = "OUTPUT BYTE-SWAPPING and COMPRESSION";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to leave data in native byte order.";
-  p_help = "If false, data will be byte-swapped as appropriate on output.";
-} output_native_byte_order;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to compress data fields on output.";
-  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
-} output_compressed;
-
-commentdef {
-  p_header = "OUTPUT OPTIONS FOR CfRadial FILES";
-}
 
 paramdef boolean {
   p_default = false;
   p_descr = "Option to force the use of ragged arrays for CfRadial files.";
   p_help = "Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.";
-} output_force_ngates_vary;
-
-paramdef int {
-  p_default = 4;
-  p_descr = "Compression level for output, if compressed.";
-  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
-} compression_level;
+} cfradial_force_ngates_vary;
 
 commentdef {
   p_header = "OUTPUT DIRECTORY AND FILE NAME";
@@ -615,51 +358,9 @@ paramdef enum filename_mode_t {
 
 paramdef string {
   p_default = "";
-  p_descr = "Optional prefix for output filename.";
-  p_help = "If empty, the standard prefix will be used. Only applies to CfRadial files. Standard prefix is 'cfrad.'";
-} output_filename_prefix;
-
-paramdef string {
-  p_default = "";
   p_descr = "Optional suffix for output filename.";
   p_help = "If not empty, the suffix will be inserted immediately prior to the extension.";
 } output_filename_suffix;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to include the instrument name in the file name.";
-  p_help = "Default is true. Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
-} include_instrument_name_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to include the site name in the file name.";
-  p_help = "Only applies to CfRadial files. If true, the site name will be included just before the volume number in the output file name.";
-} include_site_name_in_file_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to include sub-seconds in date-time part of file name.";
-  p_help = "Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.";
-} include_subsecs_in_file_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to include the scan type in the file name.";
-  p_help = "Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.";
-} include_scan_type_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to include the volume number in the file name.";
-  p_help = "Default is false. Only applies to CfRadial files. If true, the volume number is included in the file name, preceded by '_v'.";
-} include_vol_num_in_file_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to use a hyphen between date and time in filename.";
-  p_help = "Default is false. Only applies to CfRadial files. Normally an underscore is used.";
-} use_hyphen_in_file_name_datetime_part;
 
 paramdef string {
   p_default = "cfradial.test.nc";
@@ -668,137 +369,14 @@ paramdef string {
 } output_filename;
 
 paramdef boolean {
-  p_default = true;
-  p_descr = "Add the day directory to the output directory.";
-  p_help = "Path will be output_dir/yyyymmdd/filename.";
-} append_day_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Add the year directory to the output directory.";
-  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
-} append_year_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out individual sweeps if appropriate.";
-  p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
-} write_individual_sweeps;
-
-paramdef boolean {
   p_default = false;
   p_descr = "Option to write out _latest_data_info files.";
   p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
 } write_latest_data_info;
 
-commentdef {
-  p_header = "SEPARATING VOLUMES BY TYPE";
-};
-
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to separate the files based on scan type.";
-  p_help = "Sometimes a scan strategy will switch between surveillance scans, sector scans, rhi scans, vertically-pointing scans and sun scans. If true, the files will be separated into subdirectories based on scan type.";
-} separate_output_dirs_by_scan_type;
-
-paramdef string {
-  p_default = "sur";
-  p_descr = "The directory path for surveillance scan files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is surveillance, this subdirectory will be created under the ouput dir.";
-} surveillance_subdir;
-
-paramdef string {
-  p_default = "sec";
-  p_descr = "The directory path for sector scan files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is sector, this subdirectory will be created under the ouput dir.";
-} sector_subdir;
-
-paramdef string {
-  p_default = "rhi";
-  p_descr = "The directory path for rhi files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is rhi, this subdirectory will be created under the ouput dir.";
-} rhi_subdir;
-
-paramdef string {
-  p_default = "vert";
-  p_descr = "The directory path for vert scan files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is vert, this subdirectory will be created under the ouput dir.";
-} vert_subdir;
-
-paramdef string {
-  p_default = "sun";
-  p_descr = "The directory path for sun scan files.";
-  p_help = "See 'separate_by_scan_type'. If the scan mode is sun, this subdirectory will be created under the ouput dir.";
-} sun_subdir;
-
-commentdef {
-  p_header = "OPTION TO OVERRIDE MISSING VALUES";
-  p_text = "Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the missing values for meta-data";
-  p_help = "See following parameter options.";
-} override_missing_metadata_values;
-
-paramdef double {
-  p_default = -9999.0;
-  p_descr = "Missing value for metadata of type double.";
-  p_help = "Only applies if override_missing_metadata_values is TRUE";
-} missing_metadata_double;
-
-paramdef float {
-  p_default = -9999.0;
-  p_descr = "Missing value for metadata of type float.";
-  p_help = "Only applies if override_missing_metadata_values is TRUE";
-} missing_metadata_float;
-
-paramdef int {
-  p_default = -9999;
-  p_descr = "Missing value for metadata of type int.";
-  p_help = "Only applies if override_missing_metadata_values is TRUE";
-} missing_metadata_int;
-
-paramdef int {
-  p_default = -128;
-  p_descr = "Missing value for metadata of type char.";
-  p_help = "Only applies if override_missing_metadata_values is TRUE";
-} missing_metadata_char;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the missing values for field data";
-  p_help = "See following parameter options.";
-} override_missing_field_values;
-
-paramdef double {
-  p_default = -9.0e33;
-  p_descr = "Missing value for field data of type 64-bit float.";
-  p_help = "Only applies if override_missing_field_values is TRUE";
-} missing_field_fl64;
-
-paramdef double {
-  p_default = -9.0e33;
-  p_descr = "Missing value for field data of type 32-bit float.";
-  p_help = "Only applies if override_missing_field_values is TRUE";
-} missing_field_fl32;
-
-paramdef int {
-  p_default = -2147483647;
-  p_descr = "Missing value for field data of type 32-bit integer.";
-  p_help = "Only applies if override_missing_field_values is TRUE";
-} missing_field_si32;
-
-paramdef int {
-  p_default = -232768;
-  p_descr = "Missing value for field data of type 16-bit integer.";
-  p_help = "Only applies if override_missing_field_values is TRUE";
-} missing_field_si16;
-
-paramdef int {
-  p_default = -128;
-  p_descr = "Missing value for field data of type 8-bit integer.";
-  p_help = "Only applies if override_missing_field_values is TRUE";
-} missing_field_si08;
+  p_descr = "Option to print ROS2 data to stdout.";
+  p_help = "If true,ITALY ROS2 data will be decoded and printed to stdout, in the ITALY ASCII format.";
+} print_ros2_to_stdout;
 

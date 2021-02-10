@@ -47,7 +47,7 @@
 #include <Radx/HrdRadxFile.hh>
 #include <Radx/LeoRadxFile.hh>
 #include <Radx/LeoCf2RadxFile.hh>
-#include <Radx/NcxxRadxFile.hh>
+// #include <Radx/NcxxRadxFile.hh>
 #include <Radx/NcfRadxFile.hh>
 #include <Radx/NexradCmdRadxFile.hh>
 #include <Radx/NexradRadxFile.hh>
@@ -85,6 +85,7 @@ RadxFile::RadxFile()
   _debug = false;
   _verbose = false;
   _fileFormat = FILE_FORMAT_CFRADIAL;
+  _ncFormat = NETCDF4;
   clearRead();
   clearWrite();
 }
@@ -168,12 +169,12 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
   }
   
   // try CFXX radial
-  {
-    NcxxRadxFile file;
-    if (file.isCfRadialXx(path)) {
-      return true;
-    }
-  }
+  // {
+  //   NcxxRadxFile file;
+  //   if (file.isCfRadialXx(path)) {
+  //     return true;
+  //   }
+  // }
   
   // try Foray NetCDF
   {
@@ -625,33 +626,33 @@ int RadxFile::writeToDir(const RadxVol &vol,
       }
     }
 
-  } else if (_fileFormat == FILE_FORMAT_NCXX) {
+  // } else if (_fileFormat == FILE_FORMAT_NCXX) {
 
-    // CfRadial using Ncxx interface
+  //   // CfRadial using Ncxx interface
     
-    if (_debug) {
-      cerr << "INFO: RadxFile::writeToDir" << endl;
-      cerr << "  Writing Ncxx file to dir: " << dir << endl;
-    }
+  //   if (_debug) {
+  //     cerr << "INFO: RadxFile::writeToDir" << endl;
+  //     cerr << "  Writing Ncxx file to dir: " << dir << endl;
+  //   }
 
-    NcxxRadxFile file;
-    file.copyWriteDirectives(*this);
-    iret = file.writeToDir(vol, dir, addDaySubDir, addYearSubDir);
-    _errStr = file.getErrStr();
-    _dirInUse = file.getDirInUse();
-    _pathInUse = file.getPathInUse();
-    vol.setPathInUse(_pathInUse);
-    _writePaths = file.getWritePaths();
-    _writeDataTimes = file.getWriteDataTimes();
+  //   NcxxRadxFile file;
+  //   file.copyWriteDirectives(*this);
+  //   iret = file.writeToDir(vol, dir, addDaySubDir, addYearSubDir);
+  //   _errStr = file.getErrStr();
+  //   _dirInUse = file.getDirInUse();
+  //   _pathInUse = file.getPathInUse();
+  //   vol.setPathInUse(_pathInUse);
+  //   _writePaths = file.getWritePaths();
+  //   _writeDataTimes = file.getWriteDataTimes();
 
-    if (_debug) {
-      if (iret) {
-        cerr << file.getErrStr() << endl;
-      } else {
-        cerr << "INFO: RadxFile::writeToDir" << endl;
-        cerr << "  Wrote Ncxx file to path: " << _pathInUse << endl;
-      }
-    }
+  //   if (_debug) {
+  //     if (iret) {
+  //       cerr << file.getErrStr() << endl;
+  //     } else {
+  //       cerr << "INFO: RadxFile::writeToDir" << endl;
+  //       cerr << "  Wrote Ncxx file to path: " << _pathInUse << endl;
+  //     }
+  //   }
 
   } else if (_fileFormat == FILE_FORMAT_FORAY_NC) {
 
@@ -921,33 +922,33 @@ int RadxFile::writeToPath(const RadxVol &vol,
       }
     }
 
-  } else if (_fileFormat == FILE_FORMAT_NCXX) {
+  // } else if (_fileFormat == FILE_FORMAT_NCXX) {
 
-    // CfRadial using Ncxx interface
+  //   // CfRadial using Ncxx interface
     
-    if (_debug) {
-      cerr << "INFO: RadxFile::writeToPath" << endl;
-      cerr << "  Writing Ncxx file to path: " << path << endl;
-    }
+  //   if (_debug) {
+  //     cerr << "INFO: RadxFile::writeToPath" << endl;
+  //     cerr << "  Writing Ncxx file to path: " << path << endl;
+  //   }
 
-    NcxxRadxFile file;
-    file.copyWriteDirectives(*this);
-    iret = file.writeToPath(vol, path);
-    _errStr = file.getErrStr();
-    _dirInUse = file.getDirInUse();
-    _pathInUse = file.getPathInUse();
-    vol.setPathInUse(_pathInUse);
-    _writePaths = file.getWritePaths();
-    _writeDataTimes = file.getWriteDataTimes();
+  //   NcxxRadxFile file;
+  //   file.copyWriteDirectives(*this);
+  //   iret = file.writeToPath(vol, path);
+  //   _errStr = file.getErrStr();
+  //   _dirInUse = file.getDirInUse();
+  //   _pathInUse = file.getPathInUse();
+  //   vol.setPathInUse(_pathInUse);
+  //   _writePaths = file.getWritePaths();
+  //   _writeDataTimes = file.getWriteDataTimes();
 
-    if (_debug) {
-      if (iret) {
-        cerr << file.getErrStr() << endl;
-      } else {
-        cerr << "INFO: RadxFile::writeToPath" << endl;
-        cerr << "  Wrote Ncxx file to path: " << _pathInUse << endl;
-      }
-    }
+  //   if (_debug) {
+  //     if (iret) {
+  //       cerr << file.getErrStr() << endl;
+  //     } else {
+  //       cerr << "INFO: RadxFile::writeToPath" << endl;
+  //       cerr << "  Wrote Ncxx file to path: " << _pathInUse << endl;
+  //     }
+  //   }
 
   } else if (_fileFormat == FILE_FORMAT_FORAY_NC) {
 
@@ -1214,26 +1215,26 @@ int RadxFile::_readFromPathNetCDF(const string &path,
 
   // try CF Ncxx next
 
-  {
-    NcxxRadxFile file;
-    file.copyReadDirectives(*this);
-    if (file.isCfRadialXx(path)) {
-      int iret = file.readFromPath(path, vol);
-      if (_verbose) file.print(cerr);
-      _errStr = file.getErrStr();
-      _dirInUse = file.getDirInUse();
-      _pathInUse = file.getPathInUse();
-      vol.setPathInUse(_pathInUse);
-      _readPaths = file.getReadPaths();
-      if (iret == 0) {
-        if (_debug) {
-          cerr << "INFO: RadxFile::readFromPath" << endl;
-          cerr << "  Read Ncxx file, path: " << _pathInUse << endl;
-        }
-      }
-      return iret;
-    }
-  }
+  // {
+  //   NcxxRadxFile file;
+  //   file.copyReadDirectives(*this);
+  //   if (file.isCfRadialXx(path)) {
+  //     int iret = file.readFromPath(path, vol);
+  //     if (_verbose) file.print(cerr);
+  //     _errStr = file.getErrStr();
+  //     _dirInUse = file.getDirInUse();
+  //     _pathInUse = file.getPathInUse();
+  //     vol.setPathInUse(_pathInUse);
+  //     _readPaths = file.getReadPaths();
+  //     if (iret == 0) {
+  //       if (_debug) {
+  //         cerr << "INFO: RadxFile::readFromPath" << endl;
+  //         cerr << "  Read Ncxx file, path: " << _pathInUse << endl;
+  //       }
+  //     }
+  //     return iret;
+  //   }
+  // }
 
   // try Foray NetCDF next
 
@@ -2613,8 +2614,8 @@ string RadxFile::getFileFormatAsString() const
   
   if (_fileFormat == FILE_FORMAT_CFRADIAL) {
     return "CFRADIAL";
-  } else if (_fileFormat == FILE_FORMAT_NCXX) {
-    return "NCXX";
+  // } else if (_fileFormat == FILE_FORMAT_NCXX) {
+  //   return "NCXX";
   } else if (_fileFormat == FILE_FORMAT_CFRADIAL2) {
     return "CFRADIAL2";
   } else if (_fileFormat == FILE_FORMAT_DORADE) {

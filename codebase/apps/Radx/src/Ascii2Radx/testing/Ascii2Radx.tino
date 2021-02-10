@@ -1,0 +1,692 @@
+/**********************************************************************
+ * TDRP params for ./Ascii2Radx
+ **********************************************************************/
+
+//======================================================================
+//
+// Reads in polar radar data in ASCII, converts to Radx-supported 
+//   formats. By default converts to CfRadial.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "tino";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = ".";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In 
+//   FILELIST mode, it moves through the list of file names specified on 
+//   the command line. .
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// input_type //////////////////////////////
+//
+// Input data type.
+//
+// The ASCII data can be in various representations.
+//   BUFR_ASCII: WMO BUFR in ASCII.
+//
+//
+// Type: enum
+// Options:
+//     BUFR_ASCII
+//     ITALY_ASCII
+//     ITALY_ROS2
+//
+
+// input_type = ITALY_ROS2;
+input_type = ITALY_ASCII;
+
+//======================================================================
+//
+// FILE SEARCH OPTIONS.
+//
+//======================================================================
+ 
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// latest_data_info_avail //////////////////
+//
+// Is _latest_data_info file available?.
+//
+// If TRUE, will watch the latest_data_info file. If FALSE, will scan 
+//   the input directory for new files.
+//
+//
+// Type: boolean
+//
+
+latest_data_info_avail = TRUE;
+
+///////////// search_recursively //////////////////////
+//
+// Option to recurse to subdirectories while looking for new files.
+//
+// If TRUE, all subdirectories with ages less than max_dir_age will be 
+//   searched. This may take considerable CPU, so be careful in its use. 
+//   Only applies if latest_data_info_avail is FALSE.
+//
+//
+// Type: boolean
+//
+
+search_recursively = TRUE;
+
+///////////// max_recursion_depth /////////////////////
+//
+// Maximum depth for recursive directory scan.
+//
+// Only applies search_recursively is TRUE. This is the max depth, below 
+//   input_dir, to which the recursive directory search will be carried 
+//   out. A depth of 0 will search the top-level directory only. A depth 
+//   of 1 will search the level below the top directory, etc.
+//
+//
+// Type: int
+//
+
+max_recursion_depth = 5;
+
+///////////// wait_between_checks /////////////////////
+//
+// Sleep time between checking directory for input - secs.
+//
+// If a directory is large and files do not arrive frequently, set this 
+//   to a higher value to reduce the CPU load from checking the directory. 
+//   Only applies if latest_data_info_avail is FALSE.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+wait_between_checks = 2;
+
+///////////// file_quiescence /////////////////////////
+//
+// File quiescence when checking for files - secs.
+//
+// This allows you to make sure that a file coming from a remote machine 
+//   is complete before reading it. Only applies if latest_data_info_avail 
+//   is FALSE.
+//
+//
+// Type: int
+//
+
+file_quiescence = 5;
+
+///////////// search_ext //////////////////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+search_ext = "";
+
+//======================================================================
+//
+// OPTION TO OVERRIDE GATE GEOMETRY.
+//
+//======================================================================
+ 
+///////////// override_gate_geometry //////////////////
+//
+// Option to override the gate geometry.
+//
+// See 'start_range_km' and 'gate_spacing_km'.
+//
+//
+// Type: boolean
+//
+
+override_gate_geometry = FALSE;
+
+///////////// start_range_km //////////////////////////
+//
+// Specified start range (km).
+//
+// See override_start_range.
+//
+//
+// Type: double
+//
+
+start_range_km = 0;
+
+///////////// gate_spacing_km /////////////////////////
+//
+// Specified gate spacing (km).
+//
+// See override_gate_spacing.
+//
+//
+// Type: double
+//
+
+gate_spacing_km = 0.0075;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE INSTRUMENT AND/OR SITE NAME.
+//
+//======================================================================
+ 
+///////////// override_instrument_name ////////////////
+//
+// Option to override the instrument name.
+//
+// If true, the name provided will be used.
+//
+//
+// Type: boolean
+//
+
+override_instrument_name = TRUE;
+
+///////////// instrument_name /////////////////////////
+//
+// Instrument name.
+//
+// See override_instrument_name.
+//
+//
+// Type: string
+//
+
+instrument_name = "test";
+
+///////////// override_site_name //////////////////////
+//
+// Option to override the site name.
+//
+// If true, the name provided will be used.
+//
+//
+// Type: boolean
+//
+
+override_site_name = TRUE;
+
+///////////// site_name ///////////////////////////////
+//
+// Site name.
+//
+// See override_site_name.
+//
+//
+// Type: string
+//
+
+site_name = "test";
+
+//======================================================================
+//
+// OPTION TO OVERRIDE RADAR LOCATION.
+//
+//======================================================================
+ 
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+//
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+//
+//
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_latitude_deg = -999;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_longitude_deg = -999;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_altitude_meters = -999;
+
+//======================================================================
+//
+// OPTION TO CORRECT TIME.
+//
+//======================================================================
+ 
+///////////// apply_time_offset ///////////////////////
+//
+// Option to apply an offset to the ray times.
+//
+// If TRUE, this offset will be ADDED to the existing ray times. This is 
+//   useful, for example, for correcting time errors, or converting from 
+//   local time to UTC.
+//
+//
+// Type: boolean
+//
+
+apply_time_offset = FALSE;
+
+///////////// time_offset_secs ////////////////////////
+//
+// Time offset (secs).
+//
+// See 'apply_time_offset'. This value will be ADDED to the existing ray 
+//   times.
+//
+//
+// Type: double
+//
+
+time_offset_secs = 0;
+
+//======================================================================
+//
+// SET SELECTED GLOBAL ATTRIBUTES.
+//
+//======================================================================
+ 
+///////////// version /////////////////////////////////
+//
+// Option to set the version global attribute.
+//
+// If empty, no effect. If not empty, this string is used to set the 
+//   version attribute.
+//
+//
+// Type: string
+//
+
+version = "";
+
+///////////// title ///////////////////////////////////
+//
+// Option to set the title global attribute.
+//
+// If empty, no effect. If not empty, this string is used to set the 
+//   title attribute.
+//
+//
+// Type: string
+//
+
+title = "";
+
+///////////// institution /////////////////////////////
+//
+// Option to set the institution global attribute.
+//
+// If empty, no effect. If not empty, this string is used to set the 
+//   institution attribute.
+//
+//
+// Type: string
+//
+
+institution = "";
+
+///////////// references //////////////////////////////
+//
+// Option to set the references global attribute.
+//
+// If empty, no effect. If not empty, this string is used to set the 
+//   references attribute.
+//
+//
+// Type: string
+//
+
+references = "";
+
+///////////// source //////////////////////////////////
+//
+// Option to set the source global attribute.
+//
+// If empty, no effect. If not empty, this string is used to set the 
+//   source attribute.
+//
+//
+// Type: string
+//
+
+source = "";
+
+///////////// history /////////////////////////////////
+//
+// Option to set the history global attribute.
+//
+// If empty, no effect. If not empty, this string is used to set the 
+//   history attribute.
+//
+//
+// Type: string
+//
+
+history = "";
+
+///////////// comment /////////////////////////////////
+//
+// Option to set the comment global attribute.
+//
+// If empty, no effect. If not empty, this string is used to set the 
+//   comment attribute.
+//
+//
+// Type: string
+//
+
+comment = "";
+
+///////////// author //////////////////////////////////
+//
+// Option to set the author global attribute.
+//
+// If empty, no effect. If not empty, this string is used to set the 
+//   author attribute.
+//
+//
+// Type: string
+//
+
+author = "";
+
+//======================================================================
+//
+// SPECIFY FIELD NAMES.
+//
+// At least 1 field is required.
+//
+//======================================================================
+ 
+///////////// set_output_fields ///////////////////////
+//
+// Option to specify the output field details.
+//
+// If false, all fields are written to output file.
+//
+//
+// Type: boolean
+//
+
+set_output_fields = FALSE;
+
+///////////// output_fields ///////////////////////////
+//
+// Output field details.
+//
+// Optionally set the output field details, based on the input field 
+//   name.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    input_field_name = "DBZ",
+    output_field_name = "DBZ",
+    long_name = "reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    units = "dBZ"
+  }
+};
+
+//======================================================================
+//
+// SPECIFY OUTPUT ENCODING.
+//
+//======================================================================
+ 
+///////////// output_encoding /////////////////////////
+//
+// Specify output encoding for field data.
+//
+// INT16 is a good option for most radar fields.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_ENCODING_FLOAT32
+//     OUTPUT_ENCODING_INT16
+//     OUTPUT_ENCODING_INT08
+//
+
+output_encoding = OUTPUT_ENCODING_FLOAT32;
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+// CFRADIAL is a good option. CFRADIAL2 is a work in progress.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL1
+//     OUTPUT_FORMAT_CFRADIAL2
+//     OUTPUT_FORMAT_ODIM_HDF5
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL1;
+
+///////////// cfradial_force_ngates_vary //////////////
+//
+// Option to force the use of ragged arrays for CfRadial files.
+//
+// Only applies to CfRadial. If true, forces the use of ragged arrays 
+//   even if the number of gates for all rays is constant.
+//
+//
+// Type: boolean
+//
+
+cfradial_force_ngates_vary = FALSE;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "/tmp/tino-test";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name. SPECIFY_FILE_NAME: file of this 
+//   name will be written to output_dir.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename_suffix //////////////////
+//
+// Optional suffix for output filename.
+//
+// If not empty, the suffix will be inserted immediately prior to the 
+//   extension.
+//
+//
+// Type: string
+//
+
+output_filename_suffix = "";
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
+///////////// print_ros2_to_stdout ////////////////////
+//
+// Option to print ROS2 data to stdout.
+//
+// If true,ITALY ROS2 data will be decoded and printed to stdout, in the 
+//   ITALY ASCII format.
+//
+//
+// Type: boolean
+//
+
+print_ros2_to_stdout = FALSE;
+

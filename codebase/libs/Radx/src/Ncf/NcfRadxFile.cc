@@ -64,7 +64,7 @@ NcfRadxFile::NcfRadxFile() : RadxFile(), RadxNcfStr()
   _conventions = BaseConvention;
   _version = CurrentVersion;
 
-  _ncFormat = NETCDF_CLASSIC;
+  _ncFormat = NETCDF4;
 
   _writeVol = NULL;
   _readVol = NULL;

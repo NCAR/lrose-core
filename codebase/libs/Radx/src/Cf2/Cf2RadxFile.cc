@@ -59,8 +59,8 @@ Cf2RadxFile::Cf2RadxFile() : RadxFile(), RadxNcfStr()
   
 {
 
-  _conventions = BaseConvention;
-  _version = CurrentVersion2;
+  _convention = CfRadial2Conventions;
+  _version = CfRadial2Version;
 
   _ncFormat = NETCDF4;
 
@@ -99,7 +99,7 @@ void Cf2RadxFile::clear()
   _georefsActive = false;
   _correctionsActive = false;
 
-  _conventions.clear();
+  _convention.clear();
   _version.clear();
   _title.clear();
   _institution.clear();
