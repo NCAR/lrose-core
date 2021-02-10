@@ -172,6 +172,17 @@ int DsUrlTrigger::defaultMaxValidAge(void)
 bool DsUrlTrigger::checkArgs(int argc, char **argv, time_t &t0, time_t &t1,
 			     bool &archive, bool &error)
 {
+  if (hasHelpArg(argc, argv))
+  {
+    printf("USAGE : %s [-print_params to get parameters]\n", argv[0]);
+    printf("  -h or -- or -? to get this help message\n");
+    printf("Archive mode:\n");
+    printf("  -interval YYYYMMDDhhmmss YYYYMMDDhhmmss\n");
+    printf("  -start \"yyyy mm dd hh mm ss\" -end \"yyyy mm dd hh mm ss\"\n");
+    printf("  -params parmfilename\n");
+    return false;
+  }
+
   archive = false;
   error = false;
   bool t0_set=false, t1_set=false;
@@ -180,18 +191,6 @@ bool DsUrlTrigger::checkArgs(int argc, char **argv, time_t &t0, time_t &t1,
 
   for (int i=1; i<argc; )
   {
-    if ( (!strcmp(argv[i], "-h")) ||
-         (!strcmp(argv[i], "--")) ||
-         (!strcmp(argv[i], "-?")) )
-    {
-      printf("USAGE : %s [-print_params to get parameters]\n", argv[0]);
-      printf("  -h or -- or -? to get this help message\n");
-      printf("Archive mode:\n");
-      printf("  -interval YYYYMMDDhhmmss YYYYMMDDhhmmss\n");
-      printf("  -start \"yyyy mm dd hh mm ss\" -end \"yyyy mm dd hh mm ss\"\n");
-      printf("  -params parmfilename\n");
-      return false;
-    }
     if (!strcmp(argv[i], "-start"))
     {
       if (i + 1 >= argc)
@@ -311,6 +310,21 @@ std::string DsUrlTrigger::sprintMode(Trigger_t t)
     break;
   }
   return s;
+}
+
+//----------------------------------------------------------------
+bool DsUrlTrigger::hasHelpArg(int argc, char **argv)
+{
+  for (int i=1; i<argc; ++i)
+  {
+    if ( (!strcmp(argv[i], "-h")) ||
+         (!strcmp(argv[i], "--")) ||
+         (!strcmp(argv[i], "-?")) )
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 //----------------------------------------------------------------
