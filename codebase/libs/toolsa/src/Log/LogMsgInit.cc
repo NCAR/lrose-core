@@ -31,6 +31,20 @@ void LogMsgInit::init(bool debug, bool debugVerbose, bool showRealtime,
   LOG_INIT(debug, debugVerbose, showRealtime, showClassAndMethod);
 }
 
+// //----------------------------------------------------------------------
+// void LogMsgInit::setLogFile(const std::string &app, const std::string &instance,
+// 			    const std::string &logPath)
+// {
+//   LOG_TO_LOGFILE(app, instance, logPath);
+// }
+
+//----------------------------------------------------------------------
+void LogMsgInit::showAllSeverityKeys(bool showAll)
+{
+  LOG_SET_SHOW_ALL_SEVERITY_KEYS(showAll);
+}
+
+
 //----------------------------------------------------------------------
 void LogMsgInit::setDebug(bool state)
 {

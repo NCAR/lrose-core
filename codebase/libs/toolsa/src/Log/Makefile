@@ -26,7 +26,7 @@
 # Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 # January 1998
 #
-# $Id: Makefile,v 1.12 2016/03/13 00:12:02 dixon Exp $
+# $Id: Makefile,v 1.13 2019/09/20 20:42:57 dave Exp $
 #
 ###########################################################################
 
@@ -47,6 +47,7 @@ MODULE_TYPE=library
 HDRS = \
 	../include/toolsa/Benchmark.hh \
 	../include/toolsa/Log.hh \
+	../include/toolsa/LogFile.hh \
 	../include/toolsa/LogMsg.hh \
 	../include/toolsa/LogMsgInit.hh \
 	../include/toolsa/LogMsgStreamInit.hh \
@@ -59,11 +60,12 @@ HDRS = \
 CPPC_SRCS = \
 	Benchmark.cc \
 	Log.cc \
+	LogFile.cc \
+	MsgLog.cc \
 	LogMsg.cc \
+	LogStream.cc \
 	LogMsgInit.cc \
 	LogMsgStreamInit.cc \
-	MsgLog.cc \
-	LogStream.cc \
 	LogStreamInit.cc \
 	TaThreadLog.cc \
 	TaTriggerLog.cc 

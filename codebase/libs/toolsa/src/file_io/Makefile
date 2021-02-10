@@ -54,6 +54,7 @@ CPPC_SRCS = \
 	ldmFileStrobe.cc \
 	InputDir.cc \
 	InputDirRecurse.cc \
+	PlaybackTable.cc \
 	ReadDir.cc \
 	TaFile.cc
 

@@ -344,6 +344,8 @@ void PMU_register_pid(const char *prog_name, const char *instance,
     proc_host = getenv("PROCMAP_HOST");
     proc_host2 = getenv("PROCMAP_HOST2");
     proc_user = getenv("USER");
+    if(proc_user == NULL)
+      proc_user = getenv("LOGNAME");
     first_call = FALSE;
   }
 
@@ -414,7 +416,9 @@ void PMU_unregister_pid(const char *prog_name, const char *instance, int pid)
   proc_host = getenv("PROCMAP_HOST");
   proc_host2 = getenv("PROCMAP_HOST2");
   proc_user = getenv("USER");
-  
+  if(proc_user == NULL)
+    proc_user = getenv("LOGNAME");
+
   /*
    * load up info struct
    */

@@ -32,6 +32,8 @@
 #ifndef LOG_STREAM_INIT_HH
 #define LOG_STREAM_INIT_HH
 
+#include <string>
+
 class LogStreamInit
 {
 public:
@@ -45,6 +47,22 @@ public:
    * @param[in] showFile  Boolean value for showing file/line/class
    */
   static void init(bool debug, bool debugVerbose, bool realtime, bool showFile);
+
+  /**
+   * Set to put output into log files
+   * @param[in] app  Name of app to use in file names
+   * @param[in] instance  Instance to use in file names
+   * @param[in] logPath  Top directory to put log file subdirs, if empty
+   *                     the default is $LOG_DIR
+   */
+  static void setLogFile(const std::string &app, const std::string &instance,
+			 const std::string &logPath="");
+
+  /**
+   * Set so all severity keys are shown or not based on flag
+   * @param[in] showAll
+   */
+  static void showAllSeverityKeys(bool showAll);
 
   /**
    * Set DEBUG flag to input
