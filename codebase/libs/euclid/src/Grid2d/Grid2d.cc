@@ -378,6 +378,85 @@ void Grid2d::setAllToValue(double value)
   }
 }
 
+//----------------------------------------------------------------
+bool Grid2d::reduce(const int f)
+{
+  if (f < 2)
+  {
+    LOG(ERROR) << "cant reduce grid , factor too small " << f;
+    return false;
+  }
+  int nx = _nx/f;
+  int ny = _ny/f;
+  if (nx < 1 || ny < 1)
+  {
+    LOG(ERROR) << "cant reduce grid, factor too big " << f;
+    return false;
+  }
+
+  // make a grid for results
+  Grid2d g(_name, nx, ny, _missing);
+
+  // simply subsample the grid
+  for (int y=0; y<ny; ++y)
+  {
+    int fullY = y*f;
+    if (fullY >= _ny)
+    {
+      LOG(ERROR) << "fullY=" << fullY << " > _ny=" << _ny;
+      continue;
+    }
+    for (int x=0; x<nx; ++x)
+    {
+      int fullX = x*f;
+      if (fullX >= _nx)
+      {
+	LOG(ERROR) << "fullX= " << fullX << " > _nx=" << _nx;
+	continue;
+      }
+
+      // store from fullX, fullY to grid at x,y
+      g.setValue(x, y, _data[_ipt(fullX, fullY)]);
+    }
+  }
+  *this = g;
+  return true;
+}
+
+//----------------------------------------------------------------
+bool Grid2d::interpolate(const Grid2d &lowres, const int res)
+{
+  if (lowres._nx != _nx/res)
+  {
+    LOG(ERROR) <<  "lowres nx= " << lowres._nx << " != _nx/res" << _nx/res;
+    return false;
+  }
+  if (lowres._ny != _ny/res)
+  {
+    LOG(ERROR) <<  "lowres ny= " << lowres._ny << " != _ny/res" << _ny/res;
+    return false;
+  }
+
+  // loop through high res grid, compute low res point 
+  for (int y=0; y<_ny; ++y)
+  {
+    int ry0 = y/res;
+    for (int x=0; x<_nx; ++x)
+    {
+      int rx0 = x/res;
+
+      // do bilinear interpolation 
+      double v = _bilinear(ry0, rx0, res, y, x, lowres);
+
+      // store to high res (local) grid
+      setValue(x, y, v);
+    }
+  }
+  return true;
+}
+
+
+
 int Grid2d::_firstValidIndex(int y) const
 {
   for (int x=0; x<_nx; ++x)
@@ -403,4 +482,64 @@ int Grid2d::_lastValidIndex(int y) const
   return -1;
 }
 
+
+//----------------------------------------------------------------
+double Grid2d::_bilinear(int ry0, int rx0, int res, int y, int x,
+			 const Grid2d &lowres) const
+{
+  int x0 = rx0*res;
+  int y0 = ry0*res;
+  int x1 = x0 + res;
+  int y1 = y0 + res;
+  double f00=_missing, f01=_missing, f10=_missing, f11=_missing;
+  int rx1 = rx0 + 1;
+  int ry1 = ry0 + 1;
+  bool ok = true;
+  if (lowres.inRange(rx0, ry0))
+  {
+    if (!lowres.getValue(rx0, ry0, f00))
+    {
+      f00 = _missing;
+      ok = false;
+    }
+  }
+  if (lowres.inRange(rx0, ry1))
+  {
+    if (!lowres.getValue(rx0, ry1, f01))
+    {
+      f01 = _missing;
+      ok = false;
+    }
+  }
+  if (lowres.inRange(rx1, ry0))
+  {
+    if (!lowres.getValue(rx1, ry0, f10))
+    {
+      f10 = _missing;
+      ok = false;
+    }
+  }
+  if (lowres.inRange(rx1, ry1))
+  {
+    if (!lowres.getValue(rx1, ry1, f11))
+    {
+      f11 = _missing;
+      ok = false;
+    }
+  }
+
+  if (!ok)
+  {
+    return _missing;
+  }
+  else
+  {
+    double ret = (f00*(x1-x)*(y1-y) +
+		  f10*(x-x0)*(y1-y) +
+		  f01*(x1-x)*(y-y0) +
+		  f11*(x-x0)*(y-y0));
+    ret = ret/((x1-x0)*(y1-y0));
+    return ret;
+  }
+}
 

@@ -243,6 +243,13 @@ public:
 
 
   /**
+   * Set each point to minimum of local value and input grid value at point.
+   * @param[in] g  Grid to compare to 
+   */
+  void min(const Grid2d &g);
+
+
+  /**
    * @return max of data in a box around a point, missing value if nothing
    *
    * @param[in] ix  center point X

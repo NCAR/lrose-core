@@ -765,6 +765,35 @@ void GridAlgs::max(const Grid2d &g)
 }
 
 //---------------------------------------------------------------------------
+void GridAlgs::min(const Grid2d &g)
+{
+  if (_nx != g._nx || _ny != g._ny)
+  {
+    printf("ERROR in grid min, dims unequal\n");
+    return;
+  }
+  for (int i=0; i<_nx*_ny; ++i)
+  {
+    double v2;
+    if (g.getValue(i, v2))
+    {
+      double v;
+      if (getValue(i, v))
+      {
+	if (v2 < v)
+	{
+	  setValue(i, v2);
+	}
+      }
+      else
+      {
+	setValue(i, v2);
+      }
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
 double GridAlgs::localMax(int ix, int iy, int sx,  int sy) const
 {
   double vt = 0.0;
