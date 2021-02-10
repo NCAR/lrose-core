@@ -33,6 +33,7 @@ PolarCircularTemplate::PolarCircularTemplate(double radiusKm,
       LookupOffsets l(i, _ngates, _startRangeKm, _deltaGateKm,
 		      _deltaAzDeg, radiusKm);
       _lookup.push_back(l);
+      LOG(DEBUG_VERBOSE) << "Lookup[" << i << "] R=" << R << " npt=" << l.num();
     }
   }
 }

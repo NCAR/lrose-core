@@ -171,7 +171,10 @@ public:
    */
   inline bool clockwise(void) const {return _mdv.clockwise();}
   
+  bool isCircular(void) const;
+
   inline MdvxProj proj(void) const {return _mdv.proj(); }
+
 
   inline std::vector<double> getVlevel(void) const {return _mdv.getVlevel();}
   

@@ -474,6 +474,13 @@ synchUserDefinedInputs(const std::string &userKey,
 }
 
 //------------------------------------------------------------------
+bool VirtVolVolume::isCircular(void) const
+{
+  Mdvx::coord_t coord = proj().getCoord();
+  return fabs(coord.ny*coord.dy >= 358);
+}
+
+//------------------------------------------------------------------
 int VirtVolVolume::getNGates(void) const
 {
   return _mdv.getNGates();
