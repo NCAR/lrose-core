@@ -238,7 +238,9 @@ void WxHazardBuffer::writeToDatabase(char *database_url)
     fprintf(stderr, "Error writing weather hazard buffer to URL <%s>\n",
 	    database_url);
   }
-  
+
+  delete [] spdb_buffer;
+
 }
 
 
