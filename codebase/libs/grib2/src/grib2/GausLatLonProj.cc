@@ -346,8 +346,15 @@ void GausLatLonProj::print(FILE *stream) const
  */
 int GausLatLonProj::getQuasiLons(fl32 **lons, int rowIndex)
 {
+  int nlon = -1;
+  if(_pointsList == NULL && _ni == GribSection::U4MISSING)
+    return nlon;
+  if(_pointsList == NULL)
+    nlon = _ni;
+  else
+    nlon = _pointsList[rowIndex];
+
   double d = _lo2 + (_lo2 / (double)(_maxNi-1)) - _lo1;
-  int nlon = _pointsList[rowIndex];
 
   (*lons) = new fl32[nlon];
 

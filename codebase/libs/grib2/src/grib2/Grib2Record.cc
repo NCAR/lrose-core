@@ -23,8 +23,6 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////
 // Grib2Record - Main class for manipulating GRIB records.
-//
-// $Id: Grib2Record.cc,v 1.26 2019/01/11 21:08:22 jcraig Exp $
 ////////////////////////////////////////////
 
 #include <iostream>
@@ -138,7 +136,7 @@ Grib2Record::~Grib2Record()
 }
 
 
-int Grib2Record::unpack(ui08 **file_ptr, ui32 file_size)
+int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
 {
   ui08 *section_ptr = *file_ptr;
 
@@ -158,6 +156,7 @@ int Grib2Record::unpack(ui08 **file_ptr, ui32 file_size)
   {
     cerr << "ERROR: Grib2Record::unpack()" << endl;
     cerr << "Indicated file size is bigger than actual file, message may be incomplete." << endl;
+    cerr << "Indicated Size: " << _is.getTotalSize() << " Actual size: " << file_size << endl;
     return GRIB_FAILURE;
   }
 
@@ -202,6 +201,7 @@ int Grib2Record::unpack(ui08 **file_ptr, ui32 file_size)
   sectionsPtr.bms = NULL;
   sectionsPtr.ds = NULL;
   sectionsPtr.es = &_es;
+  sectionsPtr.summary = NULL;
 
   while (current_len < _is.getTotalSize() - 4) {
 
@@ -771,6 +771,7 @@ int Grib2Record::addField(si32 prodDefNum, ProdDefTemp *productTemplate,
       sectionsPtr.bms = NULL;
       sectionsPtr.ds = NULL;
       sectionsPtr.es = &_es;
+      sectionsPtr.summary = NULL;
 
       si32 numDataPoints = RS.gds->getNumDataPoints();
 
@@ -815,7 +816,7 @@ int Grib2Record::addField(si32 prodDefNum, ProdDefTemp *productTemplate,
       RS.pds->getRecSummary(&summary);
       RS.summary = summary;
       sectionsPtr.summary = &(RS.summary);
-      return GRIB_SUCCESS;;
+      return GRIB_SUCCESS;
     } else {
       cerr << "ERROR: Grib2Record::addField()" << endl;
       cerr << "Must call addGrid before addField." << endl;

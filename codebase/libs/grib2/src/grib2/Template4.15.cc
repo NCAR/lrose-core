@@ -219,8 +219,6 @@ void Template4_pt_15::getRecSummary (Grib2Record::rec_summary_t *summary)
 	summary->levelVal2 *= pow(10.0, _scaleFactorSecondSurface & 127);
     }
 
-  summary->name.append ( _getStatisticalProcess(_processId) );
-
   return;
 }
 

@@ -194,7 +194,7 @@ public:
    *  @param[in] filePtr Pointer to start of record
    *  @param[in] file_size Size of filePtr
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack(ui08 **filePtr, ui32 file_size);
+  int unpack(ui08 **filePtr, ui64 file_size);
 
   /** @brief Packs all the data of this record into a byte array.
    *  @return A ui08 array with the data of this record into it.

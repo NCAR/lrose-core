@@ -23,9 +23,6 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////
 // PDS - Product Definition Section
-//
-// $Id: PDS.cc,v 1.18 2016/03/03 18:38:02 dixon Exp $   
-//
 //////////////////////////////////////////////////////
 
 #include <iostream>
@@ -111,9 +108,8 @@ int PDS::unpack( ui08 *pdsPtr)
    _coordinateValsize = (si32) _upkUnsigned2 (pdsPtr[5], pdsPtr[6]);
 
    if(_coordinateValsize != 0) {
-     cerr << "ERROR: PDS::unpack()" << endl;
-     cerr << "Additional coordinate values is not implemented" << endl;
-     return (GRIB_FAILURE);
+     cerr << "WARNING: PDS::unpack()" << endl;
+     cerr << "Additional coordinate values are present, reading additional values is not implemented" << endl;
    }
 
    _prodDefTempNum = (si32) _upkUnsigned2 (pdsPtr[7], pdsPtr[8]);
