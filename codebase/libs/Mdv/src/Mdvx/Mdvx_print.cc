@@ -436,12 +436,17 @@ void Mdvx::printFieldHeader(const field_header_t &fhdr,
   out << "proj4_str:              " << fhdr.proj4_str << endl;
   out << "vert_reference:         " << fhdr.vert_reference << endl;
   out << endl;
+
+  streamsize original_precision = out.precision();
+  out.precision(8);
   out << "grid_dx:                " << fhdr.grid_dx << endl;
   out << "grid_dy:                " << fhdr.grid_dy << endl;
   out << "grid_dz:                " << fhdr.grid_dz << endl;
   out << "grid_minx:              " << fhdr.grid_minx << endl;
   out << "grid_miny:              " << fhdr.grid_miny << endl;
   out << "grid_minz:              " << fhdr.grid_minz << endl;
+  out.precision(original_precision);
+  
   out << "scale:                  " << fhdr.scale << endl;
   out << "bias:                   " << fhdr.bias << endl;
   out << "bad_data_value:         " << fhdr.bad_data_value << endl;

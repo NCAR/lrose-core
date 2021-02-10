@@ -604,7 +604,8 @@ void Mdvx::setReadRemapPolarStereo(int nx, int ny,
 				   double origin_lat, double origin_lon,
 				   double tangent_lon, 
 				   Mdvx::pole_type_t poleType,
-				   double central_scale)
+				   double central_scale,
+				   double lad)
 {
 
   MEM_zero(_readRemapCoords);
@@ -617,16 +618,18 @@ void Mdvx::setReadRemapPolarStereo(int nx, int ny,
   _readRemapCoords.dx = dx;
   _readRemapCoords.dy = dy;
 
-  _readRemapCoords.proj_origin_lat = origin_lat;
-  _readRemapCoords.proj_origin_lon = origin_lon;
+  _readRemapCoords.proj_origin_lon = tangent_lon;
   
   _readRemapCoords.proj_params.ps.tan_lon = tangent_lon;
   if (poleType == Mdvx::POLE_NORTH) {
     _readRemapCoords.proj_params.ps.pole_type = 0;
+    _readRemapCoords.proj_origin_lat = 90;
   } else {
     _readRemapCoords.proj_params.ps.pole_type = 1;
+    _readRemapCoords.proj_origin_lat = -90;
   }
   _readRemapCoords.proj_params.ps.central_scale = central_scale;
+  _readRemapCoords.proj_params.ps.lad = lad;
 
   _readRemapSet = true;
   _readQualifiersActive = true;
@@ -871,7 +874,8 @@ int Mdvx::setReadRemap(const MdvxProj &proj)
                               coord.proj_origin_lon,
                               coord.proj_params.ps.tan_lon,
                               poleType,
-                              coord.proj_params.ps.central_scale);
+                              coord.proj_params.ps.central_scale,
+                              coord.proj_params.ps.lad);
       break;
     }
 

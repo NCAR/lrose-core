@@ -425,7 +425,8 @@ public:
 			Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH,
 			double central_scale = 1.0,
                         double false_northing = 0.0,
-                        double false_easting = 0.0);
+                        double false_easting = 0.0,
+			double lad = 90.0);
 
   // Remap onto an OBLIQUE STEREOGRAPHIC projection.
   // Returns 0 on success, -1 on failure.

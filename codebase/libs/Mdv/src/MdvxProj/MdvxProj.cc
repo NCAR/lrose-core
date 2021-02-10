@@ -1780,6 +1780,7 @@ void MdvxProj::_coord2ProjParams(Mdvx::projection_type_t proj_type,
     proj_params[0] = coord.proj_params.ps.tan_lon;
     proj_params[1] = coord.proj_params.ps.pole_type;
     proj_params[2] = coord.proj_params.ps.central_scale;
+    proj_params[3] = coord.proj_params.ps.lad;
     break;
   }
     
@@ -1846,6 +1847,7 @@ void MdvxProj::_projParams2Coord(Mdvx::projection_type_t proj_type,
       coord.proj_params.ps.pole_type = 1;
     }
     coord.proj_params.ps.central_scale = proj_params[2];
+    coord.proj_params.ps.lad = proj_params[3];
     break;
 
   case Mdvx::PROJ_OBLIQUE_STEREO:

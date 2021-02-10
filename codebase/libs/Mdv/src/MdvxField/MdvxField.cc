@@ -2802,7 +2802,8 @@ int MdvxField::remap2PolarStereo(MdvxRemapLut &lut,
 				 Mdvx::pole_type_t poleType,
 				 double central_scale,
                                  double false_northing /* = 0.0 */,
-                                 double false_easting /* = 0.0 */)
+                                 double false_easting /* = 0.0 */,
+				 double lad /* = 90.0 */)
   
 {
   
@@ -2819,17 +2820,19 @@ int MdvxField::remap2PolarStereo(MdvxRemapLut &lut,
   coords.miny = miny;
   coords.dx = dx;
   coords.dy = dy;
-  coords.proj_origin_lat = origin_lat;
-  coords.proj_origin_lon = origin_lon;
+  coords.proj_origin_lon = tangent_lon;
   coords.proj_params.ps.tan_lon = tangent_lon;
   if (poleType == Mdvx::POLE_NORTH) {
     coords.proj_params.ps.pole_type = 0;
+    coords.proj_origin_lat = 90;
   } else {
     coords.proj_params.ps.pole_type = 1;
+    coords.proj_origin_lat = -90;
   }
   coords.proj_params.ps.central_scale = central_scale;
   coords.false_northing = false_northing;
   coords.false_easting = false_easting;
+  coords.proj_params.ps.lad = lad;
   MdvxProj projTarget(coords);
   
   // do the remapping
