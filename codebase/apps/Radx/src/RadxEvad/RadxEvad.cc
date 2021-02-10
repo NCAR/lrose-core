@@ -50,6 +50,8 @@
 #include <physics/IcaoStdAtmos.hh>
 #include <physics/thermo.h>
 #include <Spdb/SoundingPut.hh>
+#include <algorithm>
+
 using namespace std;
 
 const double RadxEvad::missingVal = -9999.0;
@@ -2230,12 +2232,12 @@ int RadxEvad::_writeNetcdfOutput()
   
   // compute file name
   
-  char fileName[BUFSIZ];
-  sprintf(fileName,
-          "profile.%.4d%.2d%.2d_%.2d%.2d%.2d.%s.nc",
-          fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
-          fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
-          _radarName.c_str());
+  char fileName[128];
+  snprintf(fileName, 128,
+           "profile.%.4d%.2d%.2d_%.2d%.2d%.2d.%s.nc",
+           fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
+           fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
+           _radarName.c_str());
   
   char outPath[BUFSIZ];
   snprintf(outPath, BUFSIZ, "%s%s%s",
