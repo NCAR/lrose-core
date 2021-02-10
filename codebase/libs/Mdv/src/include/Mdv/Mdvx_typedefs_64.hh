@@ -703,7 +703,8 @@ typedef struct {
   fl64 tan_lon;
   fl64 central_scale;
   si64 pole_type; // 0 - POLE_NORTH, 1 - POLE_SOUTH
-  fl64 spare[5];
+  fl64 lad;
+  fl64 spare[4];
   
 } ps_params_64_t;
   

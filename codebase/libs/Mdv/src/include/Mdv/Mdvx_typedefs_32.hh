@@ -690,7 +690,8 @@ typedef struct {
   fl32 tan_lon;
   fl32 central_scale;
   si32 pole_type; // 0 - POLE_NORTH, 1 - POLE_SOUTH
-  fl32 spare[5];
+  fl32 lad;
+  fl32 spare[4];
   
 } ps_params_32_t;
   
