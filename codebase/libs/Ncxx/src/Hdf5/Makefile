@@ -42,7 +42,38 @@ HDRS = \
 	../include/Ncxx/Hdf5xx.hh
 
 CPPC_SRCS = \
-	Hdf5xx.cc
+	Hdf5xx.cc \
+	H5xAbstractDs.cc \
+	H5xArrayType.cc \
+	H5xAtomType.cc \
+	H5xAttribute.cc \
+	H5xCommonFG.cc \
+	H5xCompType.cc \
+	H5xDaccProp.cc \
+	H5xDataSet.cc \
+	H5xDataSpace.cc \
+	H5xDataType.cc \
+	H5xDcreatProp.cc \
+	H5xDxferProp.cc \
+	H5xEnumType.cc \
+	H5xException.cc \
+	H5xFaccProp.cc \
+	H5xFcreatProp.cc \
+	H5xFile.cc \
+	H5xFloatType.cc \
+	H5xGroup.cc \
+	H5xIdComponent.cc \
+	H5xIntType.cc \
+	H5xLaccProp.cc \
+	H5xLcreatProp.cc \
+	H5xLibrary.cc \
+	H5xLocation.cc \
+	H5xObject.cc \
+	H5xOcreatProp.cc \
+	H5xPredType.cc \
+	H5xPropList.cc \
+	H5xStrType.cc \
+	H5xVarLenType.cc
 
 #
 # general targets

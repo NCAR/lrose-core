@@ -92,7 +92,7 @@ size_t DisplayFieldModel::getSelectedFieldNum() {
   if (_noSelectedField)
     throw std::range_error("No DisplayField selected; no display fields");
   return _selectedFieldIndex;
-};
+}
 
 string DisplayFieldModel::getFieldName(size_t fieldIndex) {
   DisplayField *displayField = getField(fieldIndex);

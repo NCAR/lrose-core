@@ -50,7 +50,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
-#include <H5Cpp.h>
+#include <Ncxx/H5x.hh>
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
@@ -100,7 +100,7 @@
 #include <Radx/RadxPath.hh>
 
 using namespace std;
-using namespace H5;
+using namespace H5x;
 
 PolarManager* PolarManager::m_pInstance = NULL;
 
@@ -1037,20 +1037,6 @@ int PolarManager::loadArchiveFileList()
     _urlOK = false;
     return -1;
 
-    /*
-    if (_archiveFileList.size() > 0) {
-      cerr << "Trying previously opened file ..." << endl;
-      // try to read from previous Open file chooser
-      try {
-        _getArchiveData();
-      } catch (FileIException ex) {
-        cerr << "   failed. " << endl;
-        return -1;
-      }
-    } else {
-      return -1;
-    }
-    */
   }
 
   setArchiveFileList(timeList.getPathList(), false);
@@ -1084,7 +1070,7 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
   // get data
   try {
     _getArchiveData();
-  } catch (FileIException ex) {
+  } catch (FileIException &ex) {
     this->setCursor(Qt::ArrowCursor);
     _timeControl->setCursor(Qt::ArrowCursor);
     return;
@@ -1355,6 +1341,7 @@ size_t PolarManager::getSelectedFieldIndex() {
   } catch (std::range_error &ex) {
       LOG(ERROR) << ex.what();
       QMessageBox::warning(NULL, "Error selectingField (_getArchiveData):", ex.what());
+      return 0;
   }
 }
 
@@ -2508,7 +2495,7 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
     //fieldNames.push_back(fieldName);
     //_updateArchiveData(fieldNames);  // ?? or  _updateField(fieldId);
     _updateColorMap(fieldName);
-  } catch (std::invalid_argument ex) {
+  } catch (std::invalid_argument &ex) {
     LOG(ERROR) << fieldName;
     LOG(ERROR) << ex.what(); // "ERROR - field not found; no color map change";
     QMessageBox::warning(NULL, "Error changing color map", ex.what());
@@ -3108,7 +3095,7 @@ void PolarManager::_openFile()
 
     try {
       _getArchiveData();
-    } catch (FileIException ex) { 
+    } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
       return;
@@ -3252,7 +3239,7 @@ void PolarManager::_saveFile()
     try {
       LOG(DEBUG) << "writing to file " << name;
       outFile.writeToPath(_vol, name);
-    } catch (FileIException ex) {
+    } catch (FileIException &ex) {
       this->setCursor(Qt::ArrowCursor);
       return;
     }

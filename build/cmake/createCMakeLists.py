@@ -1093,7 +1093,6 @@ def decodeLibLine(line):
               (thisTok.find("NETCDF_LIBS") >= 0)):
             libs.append("Ncxx")
             libs.append("netcdf")
-            libs.append("hdf5_cpp")
             libs.append("hdf5_hl")
             libs.append("hdf5")
             libs.append("z")
@@ -1171,7 +1170,6 @@ def getExtendedLibs(linkLibList):
 
     extendLibs = [ 'Ncxx',
                    'netcdf',
-                   'hdf5_cpp',
                    'hdf5_hl',
                    'hdf5',
                    'fftw3',

@@ -114,7 +114,7 @@ public:
   // Destructor
   //
 
-  ~Params ();
+  virtual ~Params ();
 
   ////////////////////////////////////////////
   // Assignment
@@ -196,6 +196,15 @@ public:
   //
 
   static bool isArgValid(const char *arg);
+
+  ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  static int isArgValidN(const char *arg);
 
   ////////////////////////////////////////////
   // load()

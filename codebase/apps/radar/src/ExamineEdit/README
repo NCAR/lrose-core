@@ -21,7 +21,7 @@ SpreadSheetModel.cc:136:7: warning: unused variable 'rows' [-Wunused-variable]
       ^
 2 warnings generated.
 [eol-albireo:radar/src/ExamineEdit] brenda% g++ -Wall -DOSX_LROSE -D_BSD_TYPES -DF_UNDERSCORE2 -g -c -I/usr/local/netcdf4/include -I/Users/brenda/lrose/include -I/Users/brenda/lrose/include testing_SpreadSheetModel.cc
-[eol-albireo:radar/src/ExamineEdit] brenda% g++ -g testing_SpreadSheetModel.o SpreadSheetModel.o -o testing_SpreadSheetModel  -L/Users/brenda/lrose/lib -L/Users/brenda/lrose/lib -L/usr/local/netcdf4/lib -lMdv -lRadx -lNcxx -ldsserver -ldidss -lrapformats -leuclid -ltoolsa -ltdrp -ldataport -lNcxx -lnetcdf_c++ -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat -lbz2 -lz
+[eol-albireo:radar/src/ExamineEdit] brenda% g++ -g testing_SpreadSheetModel.o SpreadSheetModel.o -o testing_SpreadSheetModel  -L/Users/brenda/lrose/lib -L/Users/brenda/lrose/lib -L/usr/local/netcdf4/lib -lMdv -lRadx -lNcxx -ldsserver -ldidss -lrapformats -leuclid -ltoolsa -ltdrp -ldataport -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat -lbz2 -lz
 ld: warning: directory not found for option '-L/usr/local/netcdf4/lib'
 
 #

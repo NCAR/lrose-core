@@ -44,7 +44,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
-#include <H5Cpp.h>
+#include <Ncxx/H5x.hh>
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
@@ -96,7 +96,7 @@
 #include <Radx/RadxPath.hh>
 
 using namespace std;
-using namespace H5;
+using namespace H5x;
 
 PolarManager* PolarManager::m_pInstance = NULL;
 

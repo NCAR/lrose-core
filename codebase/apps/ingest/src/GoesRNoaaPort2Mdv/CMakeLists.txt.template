@@ -56,10 +56,6 @@ target_link_libraries(GoesRNoaaPort2Mdv
     libbz2.a
     libudunits2.a
     libhdf5_hl.a
-    libhdf5_hl_cpp.a
     libhdf5.a
-    libhdf5_cpp.a
-    libnetcdff.a
-    libnetcdf_c++.a
-    libnetcdf_c++4.a
+    libnetcdf.a
     )

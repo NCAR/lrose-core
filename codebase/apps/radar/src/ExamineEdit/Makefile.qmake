@@ -38,7 +38,7 @@ DISTNAME      = ExamineEdit1.0.0
 DISTDIR = /Users/brenda/git/lrose-core/codebase/apps/radar/src/ExamineEdit/.tmp/ExamineEdit1.0.0
 LINK          = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 LFLAGS        = -stdlib=libc++ -headerpad_max_install_names $(EXPORT_ARCH_ARGS) -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk -mmacosx-version-min=10.13 -Wl,-rpath,@executable_path/Frameworks
-LIBS          = $(SUBLIBS) -F/usr/local/Cellar/qt/5.10.1/lib -L$(HOME)/lrose/lib -L$(RAP_LIB_DIR) -lFmq -ldsserver -ldidss -lRadx -lradar -lrapformats -ltoolsa -ldataport -ltdrp -lNcxx -lnetcdf_c++ -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat -lpthread -lm -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework OpenGL -framework AGL 
+LIBS          = $(SUBLIBS) -F/usr/local/Cellar/qt/5.10.1/lib -L$(HOME)/lrose/lib -L$(RAP_LIB_DIR) -lFmq -ldsserver -ldidss -lRadx -lradar -lrapformats -ltoolsa -ldataport -ltdrp -lNcxx -lnetcdf_c++ -lnetcdf -lhdf5_hl -lhdf5 -lz -ludunits2 -lbz2 -lexpat -lpthread -lm -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework OpenGL -framework AGL 
 AR            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar cq
 RANLIB        = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib -s
 SED           = sed

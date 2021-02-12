@@ -62,10 +62,6 @@ if test ! "x$HDF5DIR" = x; then
    CPPFLAGS="${CPPFLAGS} -I${HDF5DIR}/include"
    LDFLAGS="${LDFLAGS} -L${HDF5DIR}/lib"
 #  Add in hdf libraries specifically for LINUX
-#  For some reason, libhdf5_cpp.so does not correctly get into the
-#  link line for HawkEye, so we need to force it
-#  TODO - Dixon - figure out why this occurs
-   LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5_cpp.so"
    LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5_hl.so"
    LIBS="${LIBS} ${HDF5DIR}/lib/libhdf5.so"
 fi    

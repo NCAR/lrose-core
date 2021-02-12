@@ -161,9 +161,7 @@ LIBS += -ltdrp
 # LIBS += -lglut
 
 LIBS += -lNcxx 
-LIBS += -lnetcdf_c++ 
 LIBS += -lnetcdf 
-LIBS += -lhdf5_cpp 
 LIBS += -lhdf5_hl 
 LIBS += -lhdf5 
 LIBS += -lz 

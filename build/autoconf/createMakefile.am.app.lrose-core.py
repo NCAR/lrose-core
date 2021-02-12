@@ -489,15 +489,12 @@ def decodeLibLine(line):
         elif ((thisTok.find("NETCDF4_LIBS") >= 0) or
               (thisTok.find("NETCDF_LIBS") >= 0)):
             libs.append("Ncxx")
-            # libs.append("netcdf_c++")
             libs.append("netcdf")
-            libs.append("hdf5_cpp")
             libs.append("hdf5_hl")
             libs.append("hdf5")
             libs.append("z")
             libs.append("bz2")
         elif (thisTok.find("NETCDF_C_AND_C++_LIBS") >= 0):
-            # libs.append("netcdf_c++")
             libs.append("netcdf")
         elif (thisTok.find("NETCDF_C_AND_F_LIBS") >= 0):
             libs.append("netcdff")
@@ -534,9 +531,7 @@ def getLoadLibList():
 
     if (options.osx):
         extendLibs = [ 'Ncxx',
-                       # 'netcdf_c++',
                        'netcdf',
-                       'hdf5_cpp',
                        'hdf5_hl',
                        'hdf5',
                        # 'expat',
@@ -551,9 +546,7 @@ def getLoadLibList():
                        'm' ]
     else:
         extendLibs = [ 'Ncxx',
-                       # 'netcdf_c++',
                        'netcdf',
-                       'hdf5_cpp',
                        'hdf5_hl',
                        'hdf5',
                        # 'expat',

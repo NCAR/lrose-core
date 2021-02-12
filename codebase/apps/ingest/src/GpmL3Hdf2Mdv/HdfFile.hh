@@ -16,8 +16,8 @@
 #include <dataport/port_types.h>
 #include <toolsa/DateTime.hh>
 #include <dataport/port_types.h>
-#include "H5Cpp.h"
-using namespace H5;
+#include <Ncxx/H5x.hh>
+using namespace H5x;
 using namespace std;
 
 

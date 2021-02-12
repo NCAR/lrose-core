@@ -40,7 +40,6 @@ set ( LROSE_LIBRARIES
         dataport
         tdrp
         netcdf
-        hdf5_cpp
         hdf5
         z
         bz2
