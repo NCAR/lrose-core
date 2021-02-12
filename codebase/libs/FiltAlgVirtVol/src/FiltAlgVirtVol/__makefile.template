@@ -24,6 +24,7 @@ CPPC_SRCS = \
 	FiltAlgParms.cc \
 	GriddedData.cc \
 	GridUserData.cc \
+	Histo.cc \
 	InterfaceAlgorithm.cc \
 	LookupOffsets.cc \
 	PolarCircularFilter.cc \

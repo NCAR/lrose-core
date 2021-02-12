@@ -1,0 +1,22 @@
+###############################################
+#
+# CMakeLists for cmake recursion
+#
+# dir: /home/dixon/git/lrose-core/codebase/apps/cidd/src
+#
+# written by script createCMakeLists.py
+#
+# created 2021-02-12 14:00:33.375156
+#
+###############################################
+
+project (LROSE-CORE)
+
+# subdirectories
+
+add_subdirectory (fix_map)
+add_subdirectory (MapCircles)
+add_subdirectory (MapGrid)
+add_subdirectory (OverlayCreate)
+add_subdirectory (toneDownColorscale)
+

@@ -34,6 +34,7 @@ HDRS = \
 	../include/euclid/Box.hh \
 	../include/euclid/GridAlgs.hh \
 	../include/euclid/GridExpand.hh \
+	../include/euclid/GridExpandX.hh \
 	../include/euclid/Grid2d.hh \
 	../include/euclid/Grid2dClump.hh \
 	../include/euclid/Grid2dDistToNonMissing.hh \
@@ -50,6 +51,7 @@ CPPC_SRCS = \
 	Box.cc \
 	GridAlgs.cc \
 	GridExpand.cc \
+	GridExpandX.cc \
 	Grid2d.cc \
 	Grid2dClump.cc \
 	Grid2dDistToNonMissing.cc \

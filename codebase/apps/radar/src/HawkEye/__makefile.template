@@ -219,27 +219,12 @@ hawkeye_app:
 	make from_qmake
 # copy the system libraries to the .app tree structure
 	mkdir -p HawkEye.app/Contents/Frameworks
-	cp /usr/lib/libexpat.1.dylib HawkEye.app/Contents/Frameworks/.
-	cp /usr/lib/libbz2.1.0.dylib HawkEye.app/Contents/Frameworks/.
-	cp /usr/lib/libz.1.dylib HawkEye.app/Contents/Frameworks/.
-	cp /usr/lib/libSystem.B.dylib HawkEye.app/Contents/Frameworks/.
 	mkdir -p HawkEye.app/Contents/MacOS/../share
 	cp -r ~/git/lrose-displays/color_scales HawkEye.app/Contents/MacOS/../share/.
 # make the dmg  
-	macdeployqt HawkEye.app -dmg -always-overwrite -codesign="${CERT_NAME}"
+	`pkg-config --variable=host_bins Qt5Core`/macdeployqt HawkEye.app -dmg -always-overwrite -codesign="${CERT_NAME}"
 # now build the folder for the dmg installer
-	mkdir -p HawkEye_bkg_test
-	cp ~/Desktop/arrow.pdf HawkEye_bkg_test/.background
-	rsync -r HawkEye.app HawkEye_bkg_test/.
-	hdiutil create -volname HawkEye_Installer4 -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye_bkg_test -ov -format UDZO HawkEye_test4.dmg
-
-
-# rm -r HawkEye_staging/HawkEye.app
-# mkdir -p HawkEye_staging
-# cp arrow.pdf HawkEye_staging/.background
-# ln -s /Applications HawkEye_staging/Applications
-# rsync -r HawkEye.app HawkEye_staging/.
-	hdiutil create -volname HawkEye_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Cyclone.dmg
+	hdiutil create -volname HawkEye_Installer -srcfolder ${LROSE_CORE_DIR}/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Elle.dmg
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

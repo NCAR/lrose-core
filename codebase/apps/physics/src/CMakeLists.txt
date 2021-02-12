@@ -1,0 +1,27 @@
+###############################################
+#
+# CMakeLists for cmake recursion
+#
+# dir: /home/dixon/git/lrose-core/codebase/apps/physics/src
+#
+# written by script createCMakeLists.py
+#
+# created 2021-02-12 14:00:33.245156
+#
+###############################################
+
+project (LROSE-CORE)
+
+# subdirectories
+
+add_subdirectory (AverageFields)
+add_subdirectory (CalcHumidity)
+add_subdirectory (ModelDerive)
+add_subdirectory (NegBuoyancy)
+add_subdirectory (Pressure2Height)
+add_subdirectory (ShearForLeadingEdge)
+add_subdirectory (ThetaEAdvect)
+add_subdirectory (TrendField)
+add_subdirectory (VerticalAverage)
+add_subdirectory (VerticalShear)
+

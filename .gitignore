@@ -74,7 +74,6 @@ codebase/autom4te.cache
 
 # cmake
 
-CMakeLists.txt
 CMakeCache.txt
 CMakeFiles
 codebase/build
