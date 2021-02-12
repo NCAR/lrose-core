@@ -377,20 +377,25 @@ int DsServer::waitForClients(int timeoutMSecs /* = 1000 */)
             TaStr::AddInt(errMsg,
                           "Service Denied. Too many clients being handled: ",
                           _numClients);
+	    pthread_mutex_unlock(&_numClientsMutex);
         }
         else {
             int status = incrementNumClients();
 
             // Error handling, if increment failed.
             if (status == -1) {
+  	        // do not unlock the mutex, -1 means it was somehow not locked
+  	        // correctly when incrementNumClients was called
                 accepted = false;
                 errMsg  = "Service Denied: ";
                 errMsg += "Error in DsServer::waitForClients(): ";
                 errMsg += "Could not increment client count:\n    ";
                 errMsg += "The _numClientsMutex was not locked for increment.";
             }
+	    else {
+	      pthread_mutex_unlock(&_numClientsMutex);
+	    }
         }
-        pthread_mutex_unlock(&_numClientsMutex);
 
         // If the message was not accepted, reply with a service denied message.
         if (!accepted) {
@@ -802,11 +807,12 @@ void DsServer::clientDone()
     // 
     pthread_mutex_lock(&_numClientsMutex);
     int status = decrementNumClients();
-    pthread_mutex_unlock(&_numClientsMutex);
 
     // Error handling, if decrement failed.
     if (status == -1) {
 
+        // do not unlock the mutex, -1 means it was somehow not locked
+  	// correctly when incrementNumClients was called
         // Don't use _errString in this method -- called by threads.
         string newError  = "Error in DsServer::clientDone(): ";
                newError += "Could not decrement client count:\n    ";
@@ -817,7 +823,10 @@ void DsServer::clientDone()
             cerr << newError << endl;
         }
     }
-
+    else {
+      pthread_mutex_unlock(&_numClientsMutex);
+    }
+    
     pthread_mutex_unlock(&_lastActionMutex);
     
     // set the thread status to done
@@ -866,12 +875,16 @@ int DsServer::decrementNumClients()
 //
 int DsServer::changeNumClients(int delta)
 {
+    // the mutex should be locked on entry
+    // check for that.  Expected return status is EBUSY
     int failure = pthread_mutex_trylock(&_numClientsMutex);
 
     if (failure != EBUSY) {
         // Free the mutex lock if it was obtained.
         // 
         if (failure == 0) {
+  	    // the call to pthread_mutex_trylock did in fact lock the mutex
+	    // unlock it now
             pthread_mutex_unlock(&_numClientsMutex);
         }
 
@@ -880,6 +893,8 @@ int DsServer::changeNumClients(int delta)
                  << "_numClientsMutex was not locked for the change." << endl;
         }
 
+	// at this point, the mutex is NOT locked.  So all returns with
+	// -1 indicate no mutex lock
         return -1;
     }
 

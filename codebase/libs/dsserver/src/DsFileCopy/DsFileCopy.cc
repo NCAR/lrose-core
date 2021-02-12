@@ -285,7 +285,11 @@ int DsFileCopy::putAfterEnquire(ta_compression_method_t
   // remove the file if requested
 
   if (remove_after_copy) {
-    remove(_filePath.c_str());
+    if ( remove(_filePath.c_str())){
+     string removeErr = string("Failure to remove ") + _filePath;
+     TaStr::AddStr(_errStr, "ERROR - DsFileCopy::putAfterEnquire", removeErr);
+     return -1;
+    }
   }
 
   return 0;
@@ -446,7 +450,11 @@ int DsFileCopy::putForced(const string &data_dir,
   // remove the file if requested
 
   if (remove_after_copy) {
-    remove(_filePath.c_str());
+    if ( remove(_filePath.c_str())){
+      string removeErr = string("Failure to remove ") + _filePath;
+      TaStr::AddStr(_errStr, "ERROR - DsFileCopy::putForced", removeErr);
+      return -1;
+    }
   }
 
   return 0;
