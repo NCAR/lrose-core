@@ -264,7 +264,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     how = new Group(file.openGroup("how"));
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No 'how' group, not ODIM file" << endl;
     }
@@ -279,7 +279,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     what = new Group(file.openGroup("what"));
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No 'what' group, not ODIM file" << endl;
     }
@@ -294,7 +294,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     where = new Group(file.openGroup("where"));
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No 'where' group, not ODIM file" << endl;
     }
@@ -309,7 +309,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     dataset1 = new Group(file.openGroup("dataset1"));
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No 'dataset1' group, not ODIM file" << endl;
     }
@@ -461,7 +461,7 @@ int OdimHdf5RadxFile::writeToPath(const RadxVol &vol,
       return -1;
     }
   }
-  catch (H5x::Exception error) {
+  catch (H5x::Exception &error) {
     _addErrStr("ERROR - OdimHdf5RadxFile::writeToPath");
     _addErrStr("  Error in _doWrite()");
     _addErrStr(error.getDetailMsg());
@@ -629,7 +629,7 @@ int OdimHdf5RadxFile::printNative(const string &path, ostream &out,
     Group root(file.openGroup("/"));
     _utils.printGroup(root, "/", out, printRays, printData);
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - trying to read ODIM HDF5 file");
     _addErrStr(e.getDetailMsg());
     return -1;
@@ -744,7 +744,7 @@ int OdimHdf5RadxFile::_readFromPath(const string &path,
 
   }
 
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - reading ODIM HDF5 file");
     _addErrStr(e.getDetailMsg());
     return -1;
@@ -795,7 +795,7 @@ int OdimHdf5RadxFile::_getNSweeps(Group &root)
     try {
       ds = new Group(root.openGroup(datasetName));
     }
-    catch (H5x::Exception e) {
+    catch (H5x::Exception &e) {
       // data set does not exist
       if (ds) delete ds;
       continue;
@@ -840,7 +840,7 @@ int OdimHdf5RadxFile::_getNFields(Group &sweep)
     try {
       data = new Group(sweep.openGroup(dataName));
     }
-    catch (H5x::Exception e) {
+    catch (H5x::Exception &e) {
       // data set does not exist
       if (data) delete data;
       continue;
@@ -856,7 +856,7 @@ int OdimHdf5RadxFile::_getNFields(Group &sweep)
     try {
       quality = new Group(sweep.openGroup(qualityName));
     }
-    catch (H5x::Exception e) {
+    catch (H5x::Exception &e) {
       // quality set does not exist
       if (quality) delete quality;
       continue;
@@ -935,7 +935,7 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
       return -1;
     }
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     if (_debug) {
       cerr << "NOTE - no 'what' group for sweep: " << sweepName << endl;
     }
@@ -954,7 +954,7 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
       return -1;
     }
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     if (_debug) {
       cerr << "NOTE - no 'where' group for sweep: " << sweepName << endl;
     }
@@ -972,7 +972,7 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
       return -1;
     }
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "NOTE - no 'how' group for sweep: " << sweepName << endl;
     }
@@ -2094,7 +2094,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
   try {
     dg = new Group(sweep.openGroup(dataGroupName));
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - OdimHdf5RadxFile::_addFieldToRays");
     _addErrStr("  Cannot open data grop");
     _addErrStr("  Data group name: ", dataGroupName);
@@ -2116,7 +2116,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
       return -1;
     }
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     if (_debug) {
       cerr << "NOTE - no 'what' group for data field: " << dataGroupName << endl;
     }
@@ -2132,7 +2132,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
     sprintf(label, "%s how", dataGroupName);
     _readHow(*how, label);
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "NOTE - no 'how' group for data field: " << dataGroupName << endl;
     }
@@ -2161,7 +2161,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
   try {
     ds = new DataSet(dg->openDataSet("data"));
   }
-  catch (H5x::Exception e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - OdimHdf5RadxFile::_addFieldToRays");
     _addErrStr("  Cannot open data set for field: ", _fieldName);
     _addErrStr(e.getDetailMsg());
@@ -3385,7 +3385,7 @@ int OdimHdf5RadxFile::_openFileForWriting(const string &writePath)
   }
   
   // catch failure caused by the H5File operations
-  catch(H5x::Exception error)
+  catch(H5x::Exception &error)
   {
     _addErrStr("ERROR - OdimHdf5RadxFile::_openFileForWriting");
     _addErrStr("  Cannot open file for writing: ", writePath);
