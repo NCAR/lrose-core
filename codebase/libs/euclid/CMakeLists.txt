@@ -6,8 +6,6 @@
 #
 # written by script createCMakeLists.py
 #
-# created 2021-02-12 14:00:32.993199
-#
 ###############################################
 
 project (LROSE-CORE)

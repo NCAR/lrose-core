@@ -6,8 +6,6 @@
 #
 # written by script createCMakeLists.py
 #
-# created 2021-02-12 14:00:33.264896
-#
 # dir: /home/dixon/git/lrose-core/codebase/apps/filters/src/LogFilter
 ###############################################
 
@@ -60,11 +58,11 @@ endif()
 if (DEFINED netCDF_INSTALL_PREFIX)
   include_directories (${netCDF_INSTALL_PREFIX}/include)
 endif()
-if (DEFINED HDF5_CXX_INCLUDE_DIR)
-  include_directories (${HDF5_CXX_INCLUDE_DIR})
-endif()
 if (DEFINED HDF5_C_INCLUDE_DIR)
   include_directories (${HDF5_C_INCLUDE_DIR})
+endif()
+if(IS_DIRECTORY /usr/include/hdf5/serial)
+  include_directories (/usr/include/hdf5/serial)
 endif()
 if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)

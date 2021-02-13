@@ -6,8 +6,6 @@
 #
 # written by script createCMakeLists.py
 #
-# created 2021-02-12 14:00:32.955082
-#
 ###############################################
 
 cmake_minimum_required(VERSION 3.0)
@@ -48,7 +46,7 @@ find_package (X11)
 if (DEFINED X11_X11_LIB)
   get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)
 endif()
-find_package (HDF5 COMPONENTS C CXX)
+find_package (HDF5)
 find_package (NETCDF)
 if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)
   get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)
@@ -56,7 +54,6 @@ endif()
 message("X11_X11_INCLUDE_PATH: ${X11_X11_INCLUDE_PATH}")
 message("X11_LIB_DIR: ${X11_LIB_DIR}")
 message("HDF5_INSTALL_PREFIX: ${HDF5_INSTALL_PREFIX}")
-message("HDF5_CXX_INCLUDE_DIR: ${HDF5_CXX_INCLUDE_DIR}")
 message("HDF5_C_INCLUDE_DIR: ${HDF5_C_INCLUDE_DIR}")
 
 # If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose

@@ -6,8 +6,6 @@
 #
 # written by script createCMakeLists.lib.py
 #
-# created 2021-02-12 14:00:33.044179
-#
 ###############################################
 
 project (scripts)
