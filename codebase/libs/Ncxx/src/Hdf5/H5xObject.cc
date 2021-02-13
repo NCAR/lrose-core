@@ -318,8 +318,7 @@ unsigned H5Object::objVersion() const
 int H5Object::getNumAttrs() const
 {
 
-
-#ifdef HDF5_V10
+#if defined(H5Oget_info_vers) && H5Oget_info_vers == 3
     H5O_info2_t oinfo;    /* Object info */
     if(H5Oget_info3(getId(), &oinfo, H5O_INFO_NUM_ATTRS) < 0)
 #else
