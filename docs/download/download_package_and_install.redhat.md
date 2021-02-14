@@ -13,14 +13,34 @@
 
 It is a good idea to update your OS first:
 
+For Centos 7:
+
 ```
   yum update -y
+  yum install -y epel-release
 ```
 
 WARNING - this will update to the latest sub-version of the release.
 For example, from Centos 7.5 to 7.6.
 
 If you do not want to do this, you can omit this step.
+
+For Centos 8:
+
+```
+  dnf -y update
+  dnf install -y epel-release
+  dnf install -y 'dnf-command(config-manager)'
+  dnf config-manager --set-enabled powertools
+  dnf install -y python2 python3
+  alternatives --set python /usr/bin/python3
+```
+
+For Fedora:
+
+```
+  yum update -y
+```
 
 <a name="download"/>
 
