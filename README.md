@@ -34,10 +34,10 @@ The latest release can be found at:
 
 | Download and install (recommended) |
 | --------------------- |
-| [LINUX - install from RedHat .rpm package](./docs/download/download_package_and_install.redhat.md) |
-| [LINUX - install from Debian .deb package](./docs/download/download_package_and_install.debian.md) |
-| [LINUX - install from Suse .rpm package](./docs/download/download_package_and_install.suse.md) |
-| [LINUX - install from Oracle .rpm package](./docs/download/download_package_and_install.oracle.md) |
+| [LINUX - Centos, Fedora, RHEL - install from .rpm package](./docs/download/download_package_and_install.redhat.md) |
+| [LINUX - Debian, Ubuntu - install from .deb package](./docs/download/download_package_and_install.debian.md) |
+| [LINUX - Suse - install from .rpm package](./docs/download/download_package_and_install.suse.md) |
+| [LINUX - Oracle - install .rpm package](./docs/download/download_package_and_install.oracle.md) |
 | [OSX - homebrew build and install](./docs/download/homebrew_install.mac_osx.md) |
 | [OSX - install HawkEye from DMG file](./docs/download/hawkeye_install_from_dmg.md) |
 | [homebrew notes](./docs/download/homebrew_notes.md) |
