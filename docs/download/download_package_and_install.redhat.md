@@ -55,7 +55,7 @@ Download the RPM file from:
 A typical RPM release would be:
 
 ```
-  lrose-core-20190129-1.centos_7.x86_64.rpm
+  lrose-core-20210214-centos_8.x86_64.rpm
 ```
 
 Choose the RPM that matches your operating system.
@@ -70,11 +70,18 @@ Assume the download is in:
   $HOME/Downloads
 ```
 
-Then:
+Then for Centos 7 or Fedora:
 
 ```
   cd ~/Downloads
-  yum install -y ./lrose-core-20190129-1.centos_7.x86_64.rpm
+  yum install -y ./lrose-core-20210214-centos_8.x86_64.rpm
+```
+
+Then for Centos 8:
+
+```
+  cd ~/Downloads
+  dnf install -y ./lrose-core-20210214-centos_8.x86_64.rpm
 ```
 
 Make sure you include the leading ```.```.
@@ -132,11 +139,18 @@ Assume the new RPM is in:
   $HOME/downloads
 ```
 
-Then:
+Then for Centos 7 or Fedora:
 
 ```
   cd ~/Downloads
-  yum install -y ./lrose-core-20190130-1.centos_7.x86_64.rpm
+  yum install -y ./lrose-core-20210215-centos_8.x86_64.rpm
+```
+
+or Centos 8:
+
+```
+  cd ~/Downloads
+  dnf install -y ./lrose-core-20210215-centos_8.x86_64.rpm
 ```
 
 This will upgrade to the new version.

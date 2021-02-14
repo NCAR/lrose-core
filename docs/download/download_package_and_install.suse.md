@@ -49,7 +49,7 @@ Then:
 
 ```
   cd ~/Downloads
-  zypper install -y ./lrose-core-20190129-1.centos_7.x86_64.rpm
+  zypper install -y ./lrose-core-20210201-opensuse_latest.x86_64.rpm
 ```
 
 Make sure you include the leading ```.```.
@@ -111,7 +111,7 @@ Then:
 
 ```
   cd ~/Downloads
-  zypper install -y ./lrose-core-20190130-1.centos_7.x86_64.rpm
+  zypper install -y ./lrose-core-20210301-opensuse_latest.x86_64.rpm
 ```
 
 This will upgrade to the new version.
