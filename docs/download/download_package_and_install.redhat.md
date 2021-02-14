@@ -87,7 +87,6 @@ LROSE will be installed in:
 
 ```
   /usr/local/lrose/bin
-  /usr/local/lrose/scripts
   /usr/local/lrose/include
   /usr/local/lrose/lib
   /usr/local/lrose/share
@@ -110,7 +109,6 @@ Since the binaries and scripts are installed in:
 
 ```
   /usr/local/lrose/bin
-  /usr/local/lrose/scripts
 ```
 
 you need to add these directories to your path.
