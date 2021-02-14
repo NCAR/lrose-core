@@ -111,6 +111,7 @@ Then:
 
 ```
   cd ~/Downloads
+  dnf remove -y lrose-core
   dnf install -y ./lrose-core-20210301-oraclelinux_8.x86_64.rpm
 ```
 

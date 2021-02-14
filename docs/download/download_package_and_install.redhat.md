@@ -143,6 +143,7 @@ Then for Centos 7 or Fedora:
 
 ```
   cd ~/Downloads
+  yum remove -y lrose-core
   yum install -y ./lrose-core-20210215-centos_8.x86_64.rpm
 ```
 
@@ -150,6 +151,7 @@ or Centos 8:
 
 ```
   cd ~/Downloads
+  dnf remove -y lrose-core
   dnf install -y ./lrose-core-20210215-centos_8.x86_64.rpm
 ```
 

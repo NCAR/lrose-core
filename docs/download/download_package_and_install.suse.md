@@ -111,6 +111,7 @@ Then:
 
 ```
   cd ~/Downloads
+  zypper remove -y lrose-core
   zypper install -y ./lrose-core-20210301-opensuse_latest.x86_64.rpm
 ```
 

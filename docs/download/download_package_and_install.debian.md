@@ -111,7 +111,8 @@ Then:
 
 ```
   cd ~/Downloads
-  yum install -y ./lrose-core-20190130.debian_9.amd64.deb
+  apt-get remove -y lrose-core
+  apt-get install -y ./lrose-core-20190130.debian_9.amd64.deb
 ```
 
 This will upgrade to the new version.
