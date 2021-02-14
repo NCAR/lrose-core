@@ -17,10 +17,6 @@ It is a good idea to update your OS first:
   zypper update -y
 ```
 
-WARNING - this will update to the latest sub-version of the release.
-
-If you do not want to do this, you can omit this step.
-
 <a name="download"/>
 
 ## 2. Download
