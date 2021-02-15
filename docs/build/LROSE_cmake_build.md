@@ -109,20 +109,7 @@ For details, see section 1 of:
 Then, use Homebrew to install the required packages:
 
 ```
-  brew install hdf5
-  brew install netcdf
-  brew install fftw
-  brew install flex
-  brew install jpeg
-  brew install libpng
-  brew install libzip
-  brew install qt
-  brew install szip
-  brew install pkg-config
-  brew install cmake
-  brew install rsync
-  brew install libx11
-  brew install libxext
+  brew install hdf5 netcdf fftw flex jpeg libpng libzip qt szip pkg-config cmake rsync libx11 libxext
 ```
 
 <a name="build-using-bootstrap"/>
