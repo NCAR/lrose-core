@@ -52,14 +52,34 @@ The reboot will perform some steps to complete the XCode install.
 
 ### Install homebrew
 
-The default location for homebrew is /usr/local. So you need write permission
-to /usr/local to perform the install.
-
 Run the following ruby script:
 
 ```
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   /usr/local/bin/brew update
+```
+
+WARNING - do not install homebrew as root or using sudo.
+
+The default location for homebrew is ```/usr/local```. So your account needs write permission
+to ```/usr/local``` to perform the install.
+
+More specifically, you need write permission for the following directories:
+
+```
+  /usr/local/Caskroom
+  /usr/local/Cellar
+  /usr/local/Frameworks
+  /usr/local/Homebrew
+  /usr/local/bin
+  /usr/local/etc
+  /usr/local/include
+  /usr/local/lib
+  /usr/local/opt
+  /usr/local/sbin
+  /usr/local/share
+  /usr/local/var
+
 ```
 
 ## 2. Download
