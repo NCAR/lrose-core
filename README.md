@@ -40,7 +40,6 @@ The latest release can be found at:
 | [LINUX - Oracle - install .rpm package](./docs/download/download_package_and_install.oracle.md) |
 | [MAC - build and install using homebrew](./docs/download/install_using_homebrew.mac_osx.md) |
 | [MAC - install HawkEye from DMG file](./docs/download/hawkeye_install_from_dmg.md) |
-| [homebrew notes](./docs/download/homebrew_notes.md) |
 | [CIDD binary install](./docs/download/CIDD_binary_download_and_install.linux.md) |
 | [Cyclone release](https://github.com/nsf-lrose/lrose-cyclone) |
 | [Elle release](https://github.com/nsf-lrose/lrose-elle) |
