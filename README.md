@@ -28,7 +28,7 @@ To download this repository from GitHub, run:
 
 The latest release can be found at:
 
-* [lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
+* [NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 | Release | Notes  |
 | ------- |:------:|
