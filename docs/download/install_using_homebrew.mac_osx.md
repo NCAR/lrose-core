@@ -59,8 +59,6 @@ Run the following ruby script:
   /usr/local/bin/brew update
 ```
 
-WARNING - do not install homebrew as root or using sudo.
-
 The default location for homebrew is ```/usr/local```. So your account needs write permission
 to ```/usr/local``` to perform the install.
 
@@ -81,6 +79,8 @@ More specifically, you need write permission for the following directories:
   /usr/local/var
 
 ```
+
+WARNING - when using brew to install packages, do not use ```root``` or ```sudo```. This is very important. If you do, it will lead to permissions problems.
 
 ## 2. Download
 
