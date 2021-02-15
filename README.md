@@ -76,7 +76,7 @@ The DOI entry information is stored at:
 
 * [https://search.datacite.org/works/10.5065/60hz-ry38](https://search.datacite.org/works/10.5065/60hz-ry38)
 
-### DOCUMENTATION
+### DOCUMENTATION LINKS
 
 | Name           | Description   |
 | -------------- |:-------------:|
