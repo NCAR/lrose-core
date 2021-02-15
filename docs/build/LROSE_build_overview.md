@@ -52,7 +52,7 @@ To build CIDD, see:
 
 See:
 
-* [homebrew_install.mac_osx.md](../downloads/homebrew_install.mac_osx.md).
+* [install_using_homebrew.mac_osx.md](../downloads/install_using_homebrew.mac_osx.md).
 
 ## Supported operating systems
 

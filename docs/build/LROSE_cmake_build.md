@@ -1,6 +1,4 @@
-# Checkout and build LROSE from source - using cmake - LINUX
-
-This will checkout and build the latest source from GitHub using cmake.
+# Build LROSE from source using cmake - LINUX and MAC
 
 You can choose to build manually, or using a scripts provided by lrose.
 
@@ -46,9 +44,7 @@ The source code will reside in your home directory.
   * check out lrose-core
   * build manually from within the core
 
-This is the most hands-on method.
-
-It allows you to see all of the actions that are carried out in (b) above.
+This is the most hands-on method. It allows you to see all of the actions that are carried out in (b) above.
 
 ### Default install directory
 
@@ -75,7 +71,9 @@ This can be changed using the ```--prefix``` argument on the scripts.
   cd ~/git
 ```
 
-### Most good, up-to date LINUX distributions should work.
+### 2.1 Prepare LINUX
+
+Most good, up-to date versions or LINUX should work.
 
 First, you will need to install the required packages.
 
@@ -98,6 +96,33 @@ You can install the packages automatically using a script in the bootstrap repos
   git clone https://github.com/ncar/lrose-bootstrap
   cd ~/git/lrose-bootstrap/scripts
   sudo ./install_linux_packages.py --debug
+```
+
+### 2.2 Prepare MAX OSX
+
+In preparation for building on a mac, you need to install XCode and Homebrew.
+
+For details, see section 1 of:
+
+* [Install XCode and Homebrew](../download/install_using_homebrew.mac_osx.md)
+
+Then, use Homebrew to install the required packages:
+
+```
+  brew install hdf5
+  brew install netcdf
+  brew install fftw
+  brew install flex
+  brew install jpeg
+  brew install libpng
+  brew install libzip
+  brew install qt
+  brew install szip
+  brew install pkg-config
+  brew install cmake
+  brew install rsync
+  brew install libx11
+  brew install libxext
 ```
 
 <a name="build-using-bootstrap"/>
