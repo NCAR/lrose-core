@@ -66,7 +66,14 @@ For details on builds and the code development environment, see:
 | [codebase/apps](./codebase/apps) | application source code |
 | [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
 
-### DOI
+### DOCUMENTATION LINKS
+
+| Name           | Description   |
+| -------------- |:-------------:|
+| [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
+| [RadxDualPolApps.md](./docs/apps/radx/dualpol/RadxDualpolApps.md) | Dual-polarization apps |
+
+### DOIs
 
 The DOI for lrose-core is:
 
@@ -75,13 +82,6 @@ The DOI for lrose-core is:
 The DOI entry information is stored at:
 
 * [https://search.datacite.org/works/10.5065/60hz-ry38](https://search.datacite.org/works/10.5065/60hz-ry38)
-
-### DOCUMENTATION LINKS
-
-| Name           | Description   |
-| -------------- |:-------------:|
-| [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
-| [RadxDualPolApps.md](./docs/apps/radx/dualpol/RadxDualpolApps.md) | Dual-polarization apps |
 
 ### This page is published at:
 
