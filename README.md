@@ -49,9 +49,9 @@ The latest release can be found at:
 
 ### BUILDS
 
-For details on builds see:
+For details on builds and the code development environment, see:
 
-* [Build main page](./docs/build/LROSE_build_main_page.md)
+* [BUILD DOCUMENTATION](./docs/build/LROSE_build_main_page.md)
 
 ### REPOSITORY ORGANIZATION
 
