@@ -30,10 +30,15 @@ The latest release can be found at:
 
 * [lrose-core releases](https://github.com/NCAR/lrose-core/releases)
 
-### DOWNLOADS
+| Links to release details |
+| ------------------------ |
+| [Cyclone release](https://github.com/nsf-lrose/lrose-cyclone) |
+| [Elle release](https://github.com/nsf-lrose/lrose-elle) |
 
-| Download and install (recommended) |
-| --------------------- |
+### INSTALLING FROM DOWNLOADS
+
+| Download and install |
+| -------------------- |
 | [LINUX - Centos, Fedora, RHEL - install from .rpm package](./docs/download/download_package_and_install.redhat.md) |
 | [LINUX - Debian, Ubuntu - install from .deb package](./docs/download/download_package_and_install.debian.md) |
 | [LINUX - Suse - install from .rpm package](./docs/download/download_package_and_install.suse.md) |
@@ -41,8 +46,6 @@ The latest release can be found at:
 | [MAC - build and install using homebrew](./docs/download/install_using_homebrew.mac_osx.md) |
 | [MAC - install HawkEye from DMG file](./docs/download/hawkeye_install_from_dmg.md) |
 | [CIDD binary install](./docs/download/CIDD_binary_download_and_install.linux.md) |
-| [Cyclone release](https://github.com/nsf-lrose/lrose-cyclone) |
-| [Elle release](https://github.com/nsf-lrose/lrose-elle) |
 
 ### BUILDS
 
