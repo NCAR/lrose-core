@@ -49,28 +49,9 @@ The latest release can be found at:
 
 ### BUILDS
 
-| Build and install |
-| --------------------- |
-| [Build using cmake - recommended - LINUX and MAC](./docs/build/LROSE_cmake_build.md) |
-| [Build using autoconf - LINUX](./docs/build/LROSE_autoconf_build.linux.md) |
-| [CIDD build - 32-bit mode - LINUX](./docs/build/CIDD_build.linux.md) |
-| [fractl build](./docs/build/build_fractl.md) |
-| [vortrac build](./docs/build/build_vortrac.md) |
-| [samurai build](./docs/build/build_samurai.md) |
-| [NetCdf build - LINUX](./docs/build/NETCDF_build.linux.md) |
-| [LROSE package dependencies - core](./docs/build/lrose_package_dependencies.md) |
-| [LROSE package dependencies - CIDD](./docs/build/lrose_package_dependencies.cidd.md) |
+For details on builds see:
 
-### CODE DEVELOPMENT
-
-Use the following if you need to set up an environment suitable for code development.
-
-| Setup instructions |
-| --------------------- |
-| [Build overview](./docs/build/LROSE_build_overview.md) |
-| [LROSE make system](./docs/build/LROSE_manual_make_system.md) |
-| [Build manually - LINUX](./docs/build/LROSE_manual_build.linux.md) |
-| [Build manually - MAC](./docs/build/LROSE_manual_build.osx.md) |
+* [Build main page](./docs/build/LROSE_build_main_page.md)
 
 ### REPOSITORY ORGANIZATION
 
