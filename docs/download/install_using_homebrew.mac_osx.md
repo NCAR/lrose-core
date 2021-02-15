@@ -5,6 +5,9 @@
 3. [install](#install)
 4. [verify](#verify)
 5. [upgrade](#upgrade)
+6. [fractl](#fractl)
+7. [vortrac](#vortrac)
+8. [samurai](#samurai)
 
 <a name="prepare"/>
 
@@ -179,5 +182,89 @@ Then:
 ```
 
 See [install](#install) for checking on the install.
+
+<a name="fractl"/>
+
+## 6. Installing fractl
+
+The ```fractl``` application performs dual-Doppler analysis. It is maintained by CSU.
+
+Fractl can be installed using the ```lrose-fractl.rb``` brew formula.
+
+Download ```lrose-fractl.rb``` from:
+
+```
+  https://github.com/NCAR/lrose-core/releases 
+```
+
+To perform the install:
+
+```
+  cd ~/Downloads
+  brew install lrose-fractl.rb
+```
+
+To upgrade:
+
+```
+  brew uninstall lrose-fractl
+  brew install lrose-fractl.rb
+```
+
+<a name="vortrac"/>
+
+## 7. Installing vortrac
+
+The ```vortrac``` application analyses rotations in single Doppler data. It is maintained by CSU.
+
+Vortrac can be installed using the ```lrose-vortrac.rb``` brew formula.
+
+Download ```lrose-vortrac.rb``` from:
+
+```
+  https://github.com/NCAR/lrose-core/releases 
+```
+
+To perform the install:
+
+```
+  cd ~/Downloads
+  brew install lrose-vortrac.rb
+```
+
+To upgrade:
+
+```
+  brew uninstall lrose-vortrac
+  brew install lrose-vortrac.rb
+```
+
+<a name="samurai"/>
+
+## 8. Installing samurai
+
+The ```samurai``` performs multi-Doppler retrievals. It is maintained by CSU.
+
+Samurai can be installed using the ```lrose-samurai.rb``` brew formula.
+
+Download ```lrose-samurai.rb``` from:
+
+```
+  https://github.com/NCAR/lrose-core/releases 
+```
+
+To perform the install:
+
+```
+  cd ~/Downloads
+  brew install lrose-samurai.rb
+```
+
+To upgrade:
+
+```
+  brew uninstall lrose-samurai
+  brew install lrose-samurai.rb
+```
 
 
