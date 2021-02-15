@@ -28,12 +28,12 @@ To download this repository from GitHub, run:
 
 The latest release can be found at:
 
-* [lrose-core releases](https://github.com/NCAR/lrose-core/releases)
+* [lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
-| Links to release details |
-| ------------------------ |
-| [Cyclone release](https://github.com/nsf-lrose/lrose-cyclone) |
-| [Elle release](https://github.com/nsf-lrose/lrose-elle) |
+| Release | Notes  |
+| ------- |:------:|
+| [Cyclone](https://github.com/nsf-lrose/lrose-cyclone) | Release published in LROSE year 2 |
+| [Elle](https://github.com/nsf-lrose/lrose-elle) | Release published in LROSE year 3 |
 
 ### INSTALLING FROM DOWNLOADS
 
