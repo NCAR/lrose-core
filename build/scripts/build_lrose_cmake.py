@@ -49,7 +49,6 @@ from datetime import timedelta
 import glob
 from sys import platform
 
-
 def main():
 
     # globals
@@ -265,8 +264,15 @@ def checkInstall():
 def getOSType():
 
     global osId, osVersion
-    osId = ""
-    osVersion = ""
+    osId = "unknown"
+    osVersion = "unknown"
+
+    if sys.platform == "darwin":
+        osId = "darwin"
+        return
+
+    if (os.path.isdir("/etc/os-release") == False):
+        return
 
     osrelease_file = open("/etc/os-release", "rt")
     lines = osrelease_file.readlines()

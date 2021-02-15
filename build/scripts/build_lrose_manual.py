@@ -49,7 +49,6 @@ from datetime import timedelta
 import glob
 from sys import platform
 
-
 def main():
 
     # globals
