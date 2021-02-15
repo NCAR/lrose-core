@@ -166,6 +166,13 @@ Uninstall it as follows:
 ```
   brew uninstall lrose-core
 ```
+
+If needed, uninstall fractl, vortrac and samurai:
+
+```
+  brew uninstall lrose-fractl lrose-vortrac lrose-samurai
+```
+
 Next, download the new version of the brew formula, from:
 
 ```
@@ -187,9 +194,10 @@ See [install](#install) for checking on the install.
 
 ## 6. Installing fractl
 
-The ```fractl``` application performs dual-Doppler analysis. It is maintained by CSU.
+The ```fractl``` application performs dual-Doppler analysis. It is maintained by CSU. ```fractl``` is dependent on ```lrose-core```.
 
-Fractl can be installed using the ```lrose-fractl.rb``` brew formula.
+fractl can be installed using the ```lrose-fractl.rb``` brew formula.
+
 
 Download ```lrose-fractl.rb``` from:
 
@@ -215,9 +223,9 @@ To upgrade:
 
 ## 7. Installing vortrac
 
-The ```vortrac``` application analyses rotations in single Doppler data. It is maintained by CSU.
+The ```vortrac``` application analyses rotations in single Doppler data. It is maintained by CSU. ```vortrac``` is dependent on ```lrose-core```.
 
-Vortrac can be installed using the ```lrose-vortrac.rb``` brew formula.
+```vortrac``` can be installed using the ```lrose-vortrac.rb``` brew formula.
 
 Download ```lrose-vortrac.rb``` from:
 
@@ -243,9 +251,9 @@ To upgrade:
 
 ## 8. Installing samurai
 
-The ```samurai``` performs multi-Doppler retrievals. It is maintained by CSU.
+The ```samurai``` performs multi-Doppler retrievals. It is maintained by CSU. ```samurai``` is dependent on ```lrose-core```.
 
-Samurai can be installed using the ```lrose-samurai.rb``` brew formula.
+```samurai``` can be installed using the ```lrose-samurai.rb``` brew formula.
 
 Download ```lrose-samurai.rb``` from:
 
