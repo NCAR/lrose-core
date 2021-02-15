@@ -137,7 +137,7 @@ def main():
 
     # compute core dir relative to script dir
 
-    coreDir = os.path.join(thisScriptDir, "..")
+    coreDir = os.path.join(thisScriptDir, "../..")
     os.chdir(coreDir)
     coreDir = os.getcwd()
     
