@@ -19,7 +19,7 @@ want to use an IDE, then install XCode.
 
 You also need to install Homebrew.
 
-* [Install XCode and Homebrew](./lrose_package_dependencies.md)
+* [Install XCode and Homebrew](../build/lrose_package_dependencies.osx.md)
 
 ## 2. Download
 
