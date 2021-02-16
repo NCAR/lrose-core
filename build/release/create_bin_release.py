@@ -516,7 +516,9 @@ def buildPackageCmake():
 
     # the build is done relative to the current dir
 
-    cmakeBuildDir = os.path.join(runDir, "codebase/build")
+    cmakeBuildDir = os.path.join(codebaseDir, "build")
+    cmd = "/bin/rm -rf " + cmakeBuildDir
+    shellCmd(cmd)
     os.makedirs(cmakeBuildDir)
     os.chdir(cmakeBuildDir)
 
