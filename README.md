@@ -61,7 +61,6 @@ For details on builds and the code development environment, see:
 | Location      | Description   |
 | ------------- |:-------------:|
 | [docs](./docs) | README files |
-| [release_notes](./release_notes) | release notes for the various packages in LROSE |
 | [build](./build) | build scripts, release scripts and associated files |
 | [codebase/libs](./codebase/libs) | library source code |
 | [codebase/apps](./codebase/apps) | application source code |
