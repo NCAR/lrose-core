@@ -27,11 +27,11 @@ If NetCDF does not properly install on your system, you can build it instead.
 
 ## Package dependencies
 
-| Target | Dependencies |
-| ------ |:------------:|
-| [LROSE dependencies - core](./lrose_package_dependencies.md) |
-| [LROSE dependencies - CIDD](./lrose_package_dependencies.cidd.md) |
-| [LROSE dependencies - homebrew](./lrose_package_dependencies.homebrew.md) |
+| Target | Operating System | Description |
+| ------ |:------------:|:------------:|
+| [lrose-core](./lrose_package_dependencies.linux.md) | LINUX | Full core |
+| [lrose-core](./lrose_package_dependencies.homebrew.md) | MAC OSX | Full core |
+| [lrose-cidd](./lrose_package_dependencies.cidd.md) | LINUX | CIDD display |
 
 ## Code development
 
