@@ -155,7 +155,16 @@ To cleanup between builds:
 
 ## 4. Verify
 
-Try the commands:
+As the build proceeds, the compile details will be saved to log files. The paths to these files are printed on in the terminal.
+
+If the build fails, check the log files.
+
+To see the build progress, use the ```--verbose``` option.
+
+To see the full compile commands, use the ```--verbose``` and ```--verboseMake``` options.
+
+If the build succeeds, test out some of the executables. Try the commands:
+
 ```
   ~/lrose/bin/RadxPrint -h
   ~/lrose/bin/RadxConvert -h
