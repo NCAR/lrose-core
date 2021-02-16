@@ -138,6 +138,7 @@ def main():
     cmd += " --releaseDir " + options.releaseDir
     cmd += " --force"
     cmd += " --buildNetcdf"
+    #cmd += " --automake"
     shellCmd(cmd)
 
     # exit

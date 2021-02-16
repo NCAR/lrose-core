@@ -529,6 +529,19 @@ def buildPackageCmake():
     # build and install
 
     logPath = prepareLogFile("build-and-install");
+
+    libsBuildDir = os.path.join(runDir, "codebase/build/libs")
+    os.chdir(libsBuildDir)
+    cmd = "make -j 8 install"
+    shellCmd(cmd)
+
+    tdrpGenBuildDir = os.path.join(runDir, "codebase/build/apps/tdrp/src/tdrp_gen")
+    os.chdir(tdrpGenBuildDir)
+    cmd = "make -j 8 install"
+    shellCmd(cmd)
+
+    appsBuildDir = os.path.join(runDir, "codebase/build/apps")
+    os.chdir(appsBuildDir)
     cmd = "make -j 8 install"
     shellCmd(cmd)
 
