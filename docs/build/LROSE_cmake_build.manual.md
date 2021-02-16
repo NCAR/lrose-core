@@ -79,6 +79,8 @@ Select the package you want with ```--package```.
 
 ### Generate the CMakeLists.txt files for cmake
 
+This step is not needed if you are building the full core, and do not want extra debugging.
+
 ```
   cd ~/git/lrose-core/build/cmake
   ./createCMakeLists.py --help
@@ -97,13 +99,7 @@ The usage is:
                           /data/mdtest/git/lrose-core/build/cmake/../..
     --prefix=PREFIX
                           Path of lrose install dir, default is ~/lrose
-    --dependDirs=DEPENDDIRS
-                          Comma-delimited list of dirs to be searched as
-                          dependencies. Each dir in the list will have include/
-                          and lib/ subdirs.
     --static              Create static lib objects. Default is shared
-    --renewTemplates      Copy Makefile to __makefile.template for all
-                          directories used
     --verboseMake         Verbose output for make, default is summary
     --withJasper          Set if jasper library is installed. This provides
                           support for jpeg compression in grib files.

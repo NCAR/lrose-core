@@ -91,14 +91,6 @@ To see the usage:
     --buildDir=BUILDDIR   Temporary build dir, default: /tmp/lrose-build
     --logDir=LOGDIR       Logging dir, default: /tmp/lrose-build/logs
     --static              use static linking, default is dynamic
-    --installAllRuntimeLibs
-                          Install dynamic runtime libraries for all binaries, in
-                          a directory relative to the bin dir. System libraries
-                          are included.
-    --installLroseRuntimeLibs
-                          Install dynamic runtime lrose libraries for all
-                          binaries, in a directory relative to the bin dir.
-                          System libraries are not included.
     --noScripts           Do not install runtime scripts as well as binaries
     --buildNetcdf         Build netcdf and hdf5 from source
     --fractl              Checkout and build fractl after core build is complete
@@ -112,6 +104,10 @@ To see the usage:
                           support for jpeg compression in grib files.
     --verboseMake         Verbose output for make, default is summary
 ```
+
+For most cases, the defaults work well.
+
+For MAC OSX, static builds are forced.
 
 `package` defaults to `lrose-core`.
 
