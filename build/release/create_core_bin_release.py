@@ -44,7 +44,8 @@ def main():
     thisScriptDir = os.getcwd()
 
     homeDir = os.environ['HOME']
-    releaseDirDefault = os.path.join(homeDir, 'releases')
+    global releaseDirDefault
+    releaseDirDefault = os.path.join(homeDir, 'bin_releases')
     
     global options
 
@@ -97,7 +98,7 @@ def main():
             print("  tag: ", options.tag, file=sys.stderr)
         else:
             print("  releaseDate: ", options.releaseDate, file=sys.stderr)
-        if (options.releaseDir != "not-set"):
+        if (options.releaseDir != releaseDirDefault):
             print("  releaseDir: ", options.releaseDir, file=sys.stderr)
 
     ################################################################

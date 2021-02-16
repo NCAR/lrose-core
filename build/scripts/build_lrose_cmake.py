@@ -192,19 +192,19 @@ def main():
     # build and install libs
 
     os.chdir(os.path.join(cmakeBuildDir, "libs"))
-    cmd = "make -j 8 install"
+    cmd = "make -j 8 install/strip"
     shellCmd(cmd)
 
     # build and install tdrp_gen
 
     os.chdir(os.path.join(cmakeBuildDir, "apps/tdrp/src/tdrp_gen"))
-    cmd = "make install"
+    cmd = "make install/strip"
     shellCmd(cmd)
 
     # build and install apps
 
     os.chdir(os.path.join(cmakeBuildDir, "apps"))
-    cmd = "make -j 8 install"
+    cmd = "make -j 8 install/strip"
     shellCmd(cmd)
 
     # optionally install the scripts
