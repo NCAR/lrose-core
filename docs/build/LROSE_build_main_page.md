@@ -3,6 +3,7 @@
 ## CMAKE builds for scientific users
 
 cmake works well on both LINUX and MAC OSX.
+
 These are the recommended builds, if you just want working apps and cannot get the normal installs to work.
 
 | Target | Notes  |
