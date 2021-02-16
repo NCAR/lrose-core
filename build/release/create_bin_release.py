@@ -26,8 +26,13 @@ def main():
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
-    global options
+    global thisScriptDir
     global runDir
+    thisScriptDir = os.path.dirname(__file__)
+    os.chdir(thisScriptDir)
+    runDir = os.getcwd()
+
+    global options
     global releaseDir
     global buildDir
     global coreDir
@@ -47,12 +52,13 @@ def main():
     global logFp
 
     global ostype
+    global prefixDefault
 
     # parse the command line
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
-    prefixDefault = os.path.join(homeDir, 'lrose')
+    prefixDefault = "/tmp/lrose-scratch"
     releaseDirDefault = os.path.join(homeDir, 'releases')
     logDirDefault = '/tmp/create_bin_release/logs'
     parser = OptionParser(usage)
@@ -70,6 +76,9 @@ def main():
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
+    parser.add_option('--runDir',
+                      dest='runDir', default='.',
+                      help='This script should either be run from the top level of the src tree, or you should specify this location')
     parser.add_option('--logDir',
                       dest='logDir', default=logDirDefault,
                       help='Logging dir')
@@ -101,6 +110,10 @@ def main():
     elif (options.debug):
         debugStr = " --debug "
 
+    if (options.runDir != "."):
+        os.chdir(options.runDir)
+        runDir = os.getcwd()
+
     # initialize logging
 
     if (os.path.isdir(options.logDir)):
@@ -118,7 +131,6 @@ def main():
     dateStr = nowTime.strftime("%Y%m%d")
     timeStr = nowTime.strftime("%Y%m%d%H%M%S")
     dateTimeStr = nowTime.strftime("%Y/%m/%d-%H:%M:%S")
-    runDir = os.getcwd()
 
     # read in release info
 
@@ -139,12 +151,12 @@ def main():
     # ensure there is space available for the rename
 
     if (sys.platform == "darwin"):
-        if (options.prefix == "not-set"):
+        if (options.prefix == prefixDefault):
             buildDir = "/usr/local/lrose"
         else:
             buildDir = options.prefix
     else:
-        if (options.prefix == "not-set"):
+        if (options.prefix == prefixDefault):
             buildDir = os.path.join("/tmp", 
                                     package + "_prepare_release_bin_directory")
         else:
