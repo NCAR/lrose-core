@@ -98,6 +98,8 @@ def main():
          installPackagesDebian()
     elif (osType == "suse"):
          installPackagesSuse()
+    elif (osType == "oracle"):
+         installPackagesOracle()
     else:
         print("ERROR - unsupported OS type: ", osType, " version: ", osVersion, file=sys.stderr)
             
@@ -121,18 +123,18 @@ def installPackagesCentos6():
     # install main packages
 
     shellCmd("yum install -y tcsh wget git tkcvs " +
-            "emacs rsync python " +
-            "m4 make cmake libtool autoconf automake " +
-            "gcc gcc-c++ gcc-gfortran glibc-devel " +
-            "libX11-devel libXext-devel " +
-            "libpng-devel libtiff-devel zlib-devel " +
-            "expat-devel libcurl-devel " +
-            "flex-devel fftw3-devel " +
-            "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
-            "hdf5-devel netcdf-devel " +
-            "xorg-x11-xauth xorg-x11-apps " +
-            "rpm-build redhat-rpm-config " +
-                 "rpm-devel rpmdevtools ")
+             "emacs rsync python " +
+             "m4 make cmake libtool autoconf automake " +
+             "gcc gcc-c++ gcc-gfortran glibc-devel " +
+             "libX11-devel libXext-devel " +
+             "libpng-devel libtiff-devel zlib-devel " +
+             "expat-devel libcurl-devel " +
+             "flex-devel fftw3-devel " +
+             "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+             "hdf5-devel netcdf-devel " +
+             "xorg-x11-xauth xorg-x11-apps " +
+             "rpm-build redhat-rpm-config " +
+             "rpm-devel rpmdevtools ")
 
     # install required 32-bit packages for CIDD
 
@@ -312,6 +314,43 @@ def installPackagesFedora():
     shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
 
 ########################################################################
+# install packages for ORACLE 8
+
+def installPackagesOracle():
+
+    # install epel
+
+    shellCmd("dnf install -y oracle-epel-release-el8 python2 python3")
+    shellCmd("dnf install -y 'dnf-command(config-manager)'")
+    shellCmd("alternatives --set python /usr/bin/python3")
+
+    # install main packages
+    # break this up into pieces so it does not crash inside docker
+
+    shellCmd("dnf install -y --allowerasing " +
+             "tcsh wget git " +
+             "emacs rsync python2 python3 mlocate " +
+             "python2-devel platform-python-devel " +
+             "m4 make cmake libtool autoconf automake " +
+             "gcc gcc-c++ gcc-gfortran glibc-devel")
+
+    shellCmd("dnf install -y --allowerasing " +
+             "libX11-devel libXext-devel libcurl-devel " +
+             "libpng-devel libtiff-devel zlib-devel libzip-devel " +
+             "expat-devel libcurl-devel openmpi-devel " +
+             "flex fftw3-devel ")
+
+    shellCmd("dnf install -y --allowerasing " +
+             "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+             "xorg-x11-xauth " +
+             "rpm-build redhat-rpm-config " +
+             "rpm-devel rpmdevtools")
+
+    # create link for qtmake
+
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    
+########################################################################
 # install packages for Debian
 
 def installPackagesDebian():
@@ -454,6 +493,8 @@ def getOsType():
             osType = "ubuntu"
           elif (nameline.find("suse") >= 0):
             osType = "suse"
+          elif (nameline.find("oracle") >= 0):
+            osType = "oracle"
             
         if (line.find("VERSION_ID") == 0):
           lineParts = line.split('=')
