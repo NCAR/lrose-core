@@ -131,6 +131,8 @@ To set the install directory:
 
 Note: we have to build ```tdrp_gen``` before the apps, since it is a dependency.
 
+Run the following commands:
+
 ```
   cd ~/git/lrose-core/codebase/build/libs
   make -j 8 install

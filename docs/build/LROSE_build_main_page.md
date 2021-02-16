@@ -25,7 +25,7 @@ It should be installed with the same prefix as you plan to use for the core.
 
 | Target | Notes  |
 | ---------- |:------:|
-| [lrose-core](./LROSE_autoconf_build.linux.md) | Build using autoconf from lrose-bootstrap repo |
+| [lrose-core](./LROSE_autoconf_build.linux.md) | Build using autoconf |
 | [CIDD](./CIDD_build.linux.md) | Build CIDD in 32-bit emulation mode. LINUX only |
 | [NetCDF](./NETCDF_build.linux.md) | Build HDF5 and NetCDF |
 
@@ -35,7 +35,6 @@ Use the following if you need to set up an environment suitable for code develop
 
 | Topic | Description |
 | ------ |:------------:|
-| [Build overview](./LROSE_build_overview.md) | Overview of the LROSE build systems |
 | [LROSE make system](./LROSE_manual_make_system.md) | Details of the manual make system |
 | [Manual build - LINUX](./LROSE_manual_build.linux.md) | Manual build for LROSE, for LINUX |
 | [Manual build - MAC OSC](./LROSE_manual_build.osx.md) | Manual build for LROSE, for MAC OSX |
