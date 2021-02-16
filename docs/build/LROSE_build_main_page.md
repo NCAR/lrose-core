@@ -21,7 +21,7 @@ If NetCDF does not properly install on your system, you can build it instead.
 
 | Target | Notes  |
 | ---------- |:------:|
-| [lrose-core](./LROSE_autconf_build.linux.md) | Build using autoconf from lrose-bootstrap repo |
+| [lrose-core](./LROSE_autoconf_build.linux.md) | Build using autoconf from lrose-bootstrap repo |
 | [CIDD](./CIDD_build.linux.md) | Build CIDD in 32-bit emulation mode. LINUX only |
 | [NetCDF](./NETCDF_build.linux.md) | Build HDF5 and NetCDF |
 
