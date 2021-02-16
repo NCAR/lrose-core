@@ -1,4 +1,4 @@
-# LROSE 32-bit package dependencies - CIDD
+# LROSE-CIDD 32-bit package dependencies - LINUX ONLY
 
 **NOTE:** the following procedures require **root** or **sudo** privileges.
 

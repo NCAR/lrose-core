@@ -30,7 +30,7 @@ If NetCDF does not properly install on your system, you can build it instead.
 | Target | Operating System | Description |
 | ------ |:------------:|:------------:|
 | [lrose-core](./lrose_package_dependencies.linux.md) | LINUX | Full core |
-| [lrose-core](./lrose_package_dependencies.homebrew.md) | MAC OSX | Full core |
+| [lrose-core](./lrose_package_dependencies.osx.md) | MAC OSX | Full core |
 | [lrose-cidd](./lrose_package_dependencies.cidd.md) | LINUX | CIDD display |
 
 ## Code development

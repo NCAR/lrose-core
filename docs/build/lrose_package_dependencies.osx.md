@@ -1,4 +1,4 @@
-# LROSE package dependencies - OSX
+# LROSE-CORE package dependencies - OSX
 
 ## Install XCode
 

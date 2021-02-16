@@ -1,4 +1,4 @@
-# LROSE package dependencies - LINUX
+# LROSE-CORE package dependencies - LINUX
 
 **NOTE:** the following procedures require **root** or **sudo** privileges.
 
