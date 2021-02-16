@@ -12,7 +12,7 @@
 
 You need to install the dependencies for both. See:
 
-* [lrose_package_dependencies.cidd.md](./lrose_package_dependencies.md)
+* [lrose-core package dependencies](./lrose_package_dependencies.md)
 
 ## Do the build - uses cmake
 
