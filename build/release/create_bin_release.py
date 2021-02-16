@@ -497,6 +497,13 @@ def buildPackageCmake():
 
     global logPath
 
+    # For Centos 7, use cmake3
+
+    getOSType()
+    cmakeCmd = "cmake"
+    if (osId == "centos" and osVersion == "7"):
+        cmakeCmd = "cmake3"
+
     # set the environment
 
     runtimeLibRelDir = package + "_runtime_libs"
@@ -516,7 +523,7 @@ def buildPackageCmake():
     # run cmake
 
     logPath = prepareLogFile("run-cmake")
-    cmd = "cmake -DCMAKE_INSTALL_PREFIX=" + buildDir + " .."
+    cmd = cmakeCmd + " -DCMAKE_INSTALL_PREFIX=" + buildDir + " .."
     shellCmd(cmd)
 
     # build and install
@@ -613,6 +620,31 @@ def prepareLogFile(logFileName):
     logFp.write("Log file from script: " + thisScriptName + "\n")
 
     return logPath
+
+########################################################################
+# get the OS type from the /etc/os-release file in linux
+
+def getOSType():
+
+    global osId, osVersion
+    osId = "unknown"
+    osVersion = "unknown"
+
+    if sys.platform == "darwin":
+        osId = "darwin"
+        return
+
+    if (os.path.isdir("/etc/os-release") == False):
+        return
+
+    osrelease_file = open("/etc/os-release", "rt")
+    lines = osrelease_file.readlines()
+    osrelease_file.close()
+    for line in lines:
+        if (line.find('ID=') == 0):
+            osId = line.split('=')[1].replace('"', '').strip()
+        elif (line.find('VERSION_ID=') == 0):
+            osVersion = line.split('=')[1].replace('"', '').strip()
 
 ########################################################################
 # Run a command in a shell, wait for it to complete
