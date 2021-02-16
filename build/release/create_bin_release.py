@@ -52,6 +52,7 @@ def main():
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
+    prefixDefault = os.path.join(homeDir, 'lrose')
     releaseDirDefault = os.path.join(homeDir, 'releases')
     logDirDefault = '/tmp/create_bin_release/logs'
     parser = OptionParser(usage)
@@ -64,7 +65,7 @@ def main():
                       action="store_true",
                       help='Set verbose debugging on')
     parser.add_option('--prefix',
-                      dest='prefix', default='not-set',
+                      dest='prefix', default=prefixDefault,
                       help='Temporary directory for build')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
@@ -516,7 +517,8 @@ def buildPackageCmake():
 
     # the build is done relative to the current dir
 
-    cmakeBuildDir = os.path.join(codebaseDir, "build")
+    baseDir = os.path.join(runDir, "codebase")
+    cmakeBuildDir = os.path.join(baseDir, "build")
     cmd = "/bin/rm -rf " + cmakeBuildDir
     shellCmd(cmd)
     os.makedirs(cmakeBuildDir)
@@ -530,17 +532,21 @@ def buildPackageCmake():
 
     # build and install
 
-    logPath = prepareLogFile("build-and-install");
+    logPath = prepareLogFile("build-libs");
 
     libsBuildDir = os.path.join(runDir, "codebase/build/libs")
     os.chdir(libsBuildDir)
     cmd = "make -j 8 install"
     shellCmd(cmd)
 
+    logPath = prepareLogFile("build-tdrp_gen");
+
     tdrpGenBuildDir = os.path.join(runDir, "codebase/build/apps/tdrp/src/tdrp_gen")
     os.chdir(tdrpGenBuildDir)
     cmd = "make -j 8 install"
     shellCmd(cmd)
+
+    logPath = prepareLogFile("build-apps");
 
     appsBuildDir = os.path.join(runDir, "codebase/build/apps")
     os.chdir(appsBuildDir)
@@ -568,19 +574,6 @@ def installScripts():
     if (os.path.isdir(generalScriptsDir)):
         os.chdir(generalScriptsDir)
         shellCmd("./install_scripts.lrose " + scriptsDir)
-
-    # install perl5 - deprecated
-    #
-    #perl5Dir = os.path.join(buildDir, "lib/perl5")
-    #try:
-    #    os.makedirs(perl5Dir)
-    #except:
-    #    print("Dir exists: " + perl5Dir, file=sys.stderr)
-    #
-    #perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
-    #if (os.path.isdir(perl5LibDir)):
-    #    os.chdir(perl5LibDir)
-    #    shellCmd("rsync -av *pm " + perl5Dir)
 
 ########################################################################
 # create the tar file
@@ -649,7 +642,7 @@ def getOSType():
         osId = "darwin"
         return
 
-    if (os.path.isdir("/etc/os-release") == False):
+    if (os.path.exists("/etc/os-release") == False):
         return
 
     osrelease_file = open("/etc/os-release", "rt")

@@ -207,12 +207,9 @@ def main():
     # run qmake for QT apps to create moc_ files
 
     logPath = prepareLogFile("create-qt-moc-files");
-    if (options.package.find("lrose-core") >= 0):
-        mocDirs = ["apps/radar/src/HawkEye",
-                   "apps/radar/src/HawkEdit",
-                   "apps/radar/src/Condor"]
-    elif (options.package.find("lrose") >= 0):
-        mocDirs = ["apps/radar/src/HawkEye"]
+    mocDirs = ["apps/radar/src/HawkEye",
+               "apps/radar/src/HawkEdit",
+               "apps/radar/src/IpsEye"]
 
     for dir in mocDirs:
         mocPath = os.path.join(codebaseDir, dir)

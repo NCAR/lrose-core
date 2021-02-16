@@ -271,7 +271,7 @@ def getOSType():
         osId = "darwin"
         return
 
-    if (os.path.isdir("/etc/os-release") == False):
+    if (os.path.exists("/etc/os-release") == False):
         return
 
     osrelease_file = open("/etc/os-release", "rt")
