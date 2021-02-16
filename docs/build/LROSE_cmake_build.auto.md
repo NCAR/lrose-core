@@ -9,6 +9,16 @@
 
 ## 1. Overview
 
+Here we document the most autonomous way to perform the build.
+
+We do this by checking out the build scripts from the bootstrap repository.
+
+The lrose-core is checked out and built in /tmp.
+
+Only the libraries and binaries are installed permanently.
+
+The source code is in /tmp and is not permament.
+
 The default install prefix is ```~/lrose```.
 
 The default directories for installation are:
@@ -32,50 +42,15 @@ This can be changed using the ```--prefix``` argument on the scripts.
   cd ~/git
 ```
 
-### 2.1 Prepare LINUX
+### Install required packages
 
-Most good, up-to date versions or LINUX should work.
+See:
 
-First, you will need to install the required packages.
+* [lrose-core package dependencies](./lrose_package_dependencies.md)
 
-Recommended distributions are:
+<a name="build"/>
 
-  * Debian
-  * Ubuntu (based on Debian)
-  * RedHat
-  * CentOS (based on RedHat)
-  * Fedora (based on RedHat)
-
-For the required packages on each OS, see:
-
-* [LROSE package dependencies](../build/lrose_package_dependencies.md)
-
-You can install the packages automatically using a script in the bootstrap repository.
-
-```
-  cd ~/git
-  git clone https://github.com/ncar/lrose-bootstrap
-  cd ~/git/lrose-bootstrap/scripts
-  sudo ./install_linux_packages.py --debug
-```
-
-### 2.2 Prepare MAX OSX
-
-In preparation for building on a mac, you need to install XCode and Homebrew.
-
-For details, see section 1 of:
-
-* [Install XCode and Homebrew](../download/install_using_homebrew.mac_osx.md)
-
-Then, use Homebrew to install the required packages:
-
-```
-  brew install hdf5 netcdf fftw flex jpeg libpng libzip qt szip pkg-config cmake rsync libx11 libxext
-```
-
-<a name="build-using-bootstrap"/>
-
-## 3. Build using scripts in the bootstrap repository (recommended)
+## 3. Build automatically using scripts in the bootstrap repository
 
 ### Clone the bootstrap for LROSE
 
@@ -176,171 +151,9 @@ To cleanup between builds:
 
 <a name="build-using-script"/>
 
-## 4. Build using scripts in lrose-core (intermediate)
-
-### Clone lrose-core
-
-```
-  cd ~/git
-  git clone https://github.com/ncar/lrose-core
-```
-
-### Run the ```build_lrose_cmake.py``` script:
-
-To see the usage:
-
-```
-  cd ~/git/lrose-core/build/scripts
-  ./build_lrose_cmake.py --help
-```
-
-```
-  Usage: build_lrose_cmake.py [options]
-  Options:
-    -h, --help         show this help message and exit
-    --debug            Set debugging on
-    --verbose          Set verbose debugging on
-    --package=PACKAGE  Package name. Options are: lrose-core (default), lrose-
-                       radx, lrose-cidd, samurai
-    --prefix=PREFIX    Prefix name for install location
-    --scripts          Install scripts as well as binaries
-    --static           use static linking, default is dynamic
-    --cmake3           Use cmake3 instead of cmake for samurai
-```
-
-`package` defaults to `lrose-core`.
-
-Available packages are:
-
-```
-  lrose-core lrose-cidd lrose-radx samurai
-```
-
-We recommend building the full core.
-
-For older systems, such as centos7, you will need to use ```--cmake3```.
-
-To build and install the full lrose package into ```~/lrose```:
-
-```
-  ./build_lrose_cmake.py
-```
-
-To specify the sub-package, e.g. lrose-radx:
-
-```
-  ./build_lrose_cmake.py --package lrose-radx
-```
-
-To set the install directory:
-
-```
-  ./build_lrose_cmake.py --prefix /my/install/dir
-```
-
-<a name="build-manually"/>
-
-## 5. Build manually (most user intensive)
-
-### Clone lrose-core
-
-```
-  cd ~/git
-  git clone https://github.com/ncar/lrose-core
-```
-
-### Install the required package makefiles
-
-This step is not needed if you are building the full core.
-
-```
-  cd ~/git/lrose-core/build/scripts
-  ./installPackageMakefiles.py --help
-```
-
-The usage is:
-
-```
-  Usage: installPackageMakefiles.py [options]
-  Options:
-    -h, --help         show this help message and exit
-    --debug            Set debugging on
-    --package=PACKAGE  Package name.
-                       lrose-core (default), lrose-radx, lrose-cidd, samurai
-```
-
-Select the package you want with ```--package```.
-
-### Generate the CMakeLists.txt files for cmake
-
-```
-  cd ~/git/lrose-core/build/cmake
-  ./createCMakeLists.py --help
-```
-
-The usage is:
-
-```
-  Usage: createCMakeLists.py [options]
-  Options:
-    -h, --help            show this help message and exit
-    --debug               Set debugging on
-    --verbose             Set verbose debugging on
-    --silent              Set debugging off
-    --coreDir=COREDIR     Path of lrose-core top level directory, default is:
-                          /data/mdtest/git/lrose-core/build/cmake/../..
-    --prefix=PREFIX
-                          Path of lrose install dir, default is ~/lrose
-    --dependDirs=DEPENDDIRS
-                          Comma-delimited list of dirs to be searched as
-                          dependencies. Each dir in the list will have include/
-                          and lib/ subdirs.
-    --static              Create static lib objects. Default is shared
-    --renewTemplates      Copy Makefile to __makefile.template for all
-                          directories used
-    --verboseMake         Verbose output for make, default is summary
-    --withJasper          Set if jasper library is installed. This provides
-                          support for jpeg compression in grib files.
-```
-
-To install in ```~/lrose```:
-
-```
-  cd ~/git/lrose-core/build/cmake
-  ./createCMakeLists.py
-```
-
-To set the install directory:
-
-```
-  ./createCMakeLists.py --prefix /my/install/dir
-```
-
-### Make build directory and run cmake
-
-```
-  cd ~/git/lrose-core/codebase
-  mkdir build
-  cd build
-  cmake ..
-```
-
-### Perform the build
-
-Note: we have to build ```tdrp_gen``` before the apps, since it is a dependency.
-
-```
-  cd ~/git/lrose-core/codebase/build/libs
-  make -j 8 install
-  cd ~/git/lrose-core/codebase/build/apps/tdrp/src/tdrp_gen
-  make -j 8 install
-  cd ~/git/lrose-core/codebase/build/apps
-  make -j 8 install
-```
-
 <a name="verify"/>
 
-## 6. Verify
+## 4. Verify
 
 Try the commands:
 ```
