@@ -39,6 +39,10 @@ Use the following if you need to set up an environment suitable for code develop
 | [Manual build - LINUX](./LROSE_manual_build.linux.md) | Manual build for LROSE, for LINUX |
 | [Manual build - MAC OSC](./LROSE_manual_build.osx.md) | Manual build for LROSE, for MAC OSX |
 
+## Creating .rpm and .deb package files
+
+See: [Building package files](https://github.com/NCAR/lrose-bootstrap/blob/main/docker/README.md)
+
 ## Package dependencies
 
 | Target | Operating System | Description |
