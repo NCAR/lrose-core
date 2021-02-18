@@ -409,6 +409,11 @@ paramdef string {
   p_descr = "Color of labels in iq plots.";
 } iqplot_labels_color;
 
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of line in iq spectrum plots.";
+} iqplot_spectrum_line_color;
+
 paramdef boolean {
   p_default = true;
   p_descr = "Option to draw grid lines in the Y direction.";

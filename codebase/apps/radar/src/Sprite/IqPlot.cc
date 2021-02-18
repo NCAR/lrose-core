@@ -217,22 +217,19 @@ void IqPlot::plotBeam(QPainter &painter,
                         ii-1, valPrev);
   }
 
-  // draw the reflectivity field vs range - as line
+  // draw the spectrum - as line
 
-  // painter.save();
-  // painter.setPen(_params.iqplot_line_color);
-  // QVector<QPointF> pts;
-  // for (int ii = 0; ii < nGates; ii++) {
-  //   double range = startRange + gateSpacing * ii;
-  //   double val = getFieldVal(_plotType, fields[ii]);
-  //   if (val > -9990) {
-  //     QPointF pt(val, range);
-  //     pts.push_back(pt);
-  //   }
-  // }
-  // _zoomWorld.drawLines(painter, pts);
-  // painter.restore();
-
+  painter.save();
+  painter.setPen(_params.iqplot_spectrum_line_color);
+  QVector<QPointF> pts;
+  for (int ii = 0; ii < nSamples; ii++) {
+    int jj = (ii + nSamples / 2) % nSamples;
+    double val = powerDbm[jj];
+    QPointF pt(ii, val);
+    pts.push_back(pt);
+  }
+  _zoomWorld.drawLines(painter, pts);
+  painter.restore();
   
   // draw the overlays
 

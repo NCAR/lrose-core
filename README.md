@@ -54,7 +54,7 @@ For details on builds and the code development environment, see:
 
 | Location      | Description   |
 | ------------- |:-------------:|
-| [BUILD DOCUMENATION](./docs/build/LROSE_build_main_page.md) | Building and code development |
+| [BUILD DOCUMENTATION](./docs/build/LROSE_build_main_page.md) | Building and code development |
 
 ### REPOSITORY ORGANIZATION
 

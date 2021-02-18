@@ -185,7 +185,7 @@ public:
   // Destructor
   //
 
-  ~Params ();
+  virtual ~Params ();
 
   ////////////////////////////////////////////
   // Assignment
@@ -564,6 +564,8 @@ public:
 
   char* iqplot_labels_color;
 
+  char* iqplot_spectrum_line_color;
+
   tdrp_bool_t iqplot_y_grid_lines_on;
 
   tdrp_bool_t iqplot_x_grid_lines_on;
@@ -742,7 +744,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[156];
+  mutable TDRPtable _table[157];
 
   const char *_className;
 
