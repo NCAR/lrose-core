@@ -194,6 +194,10 @@ void IqPlot::plotBeam(QPainter &painter,
   
   // compute power
 
+  double pwr = RadarComplex::meanPower(gateData.iqhcOrig, nSamples);
+  double dbm = 10.0 * log10(pwr);
+  cerr << "11111111111111 gateNum, dbm: " << gateNum << ", " << dbm << endl;
+
   TaArray<double> powerDbm_;
   double *powerDbm = powerDbm_.alloc(nSamples);
   for (int ii = 0; ii < nSamples; ii++) {
@@ -205,17 +209,17 @@ void IqPlot::plotBeam(QPainter &painter,
     }
   }
   
-  double yMin = _zoomWorld.getYMinWorld();
-  for (int ii = 1; ii < nSamples; ii++) {
-    int jj = (ii + nSamples / 2) % nSamples;
-    double valPrev = powerDbm[jj-1];
-    double val = powerDbm[jj];
-    _zoomWorld.fillTrap(painter, brush,
-                        ii-1, yMin,
-                        ii, yMin,
-                        ii, val,
-                        ii-1, valPrev);
-  }
+  // double yMin = _zoomWorld.getYMinWorld();
+  // for (int ii = 1; ii < nSamples; ii++) {
+  //   // int jj = (ii + nSamples / 2) % nSamples;
+  //   double valPrev = powerDbm[ii-1];
+  //   double val = powerDbm[ii];
+  //   _zoomWorld.fillTrap(painter, brush,
+  //                       ii-1, yMin,
+  //                       ii, yMin,
+  //                       ii, val,
+  //                       ii-1, valPrev);
+  // }
 
   // draw the spectrum - as line
 
@@ -223,8 +227,8 @@ void IqPlot::plotBeam(QPainter &painter,
   painter.setPen(_params.iqplot_spectrum_line_color);
   QVector<QPointF> pts;
   for (int ii = 0; ii < nSamples; ii++) {
-    int jj = (ii + nSamples / 2) % nSamples;
-    double val = powerDbm[jj];
+    // int jj = (ii + nSamples / 2) % nSamples;
+    double val = powerDbm[ii];
     QPointF pt(ii, val);
     pts.push_back(pt);
   }

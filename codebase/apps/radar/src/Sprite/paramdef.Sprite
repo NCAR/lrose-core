@@ -410,8 +410,8 @@ paramdef string {
 } iqplot_labels_color;
 
 paramdef string {
-  p_default = "red";
-  p_descr = "Color of line in iq spectrum plots.";
+  p_default = "yellow";
+  p_descr = "Color of line in iq spectrum.";
 } iqplot_spectrum_line_color;
 
 paramdef boolean {

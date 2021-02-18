@@ -1463,10 +1463,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("iqplot_spectrum_line_color");
-    tt->descr = tdrpStrDup("Color of line in iq spectrum plots.");
+    tt->descr = tdrpStrDup("Color of line in iq spectrum.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_spectrum_line_color - &_start_;
-    tt->single_val.s = tdrpStrDup("red");
+    tt->single_val.s = tdrpStrDup("yellow");
     tt++;
     
     // Parameter 'iqplot_y_grid_lines_on'
