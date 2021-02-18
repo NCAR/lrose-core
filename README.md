@@ -64,7 +64,7 @@ For details on builds and the code development environment, see:
 | [build](./build) | build scripts, release scripts and associated files |
 | [codebase/libs](./codebase/libs) | library source code |
 | [codebase/apps](./codebase/apps) | application source code |
-| [LROSE_DOCS_OVERVIEW.md](./docs/LROSE_DOCS_OVERVIEW.md) | Documentation index |
+| [lrose-bootstrap](https://github.com/NCAR/lrose-bootstrap) | Bootstrap scripts |
 
 ### DOCUMENTATION LINKS
 
