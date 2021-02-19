@@ -415,11 +415,6 @@ paramdef string {
 } iqplot_line_color;
 
 paramdef string {
-  p_default = "yellow";
-  p_descr = "Color of line in iq spectrum.";
-} iqplot_spectrum_line_color;
-
-paramdef string {
   p_default = "red";
   p_descr = "Color of I values in time series.";
 } iqplot_ival_line_color;
