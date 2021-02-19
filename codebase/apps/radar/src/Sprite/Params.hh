@@ -564,7 +564,13 @@ public:
 
   char* iqplot_labels_color;
 
+  char* iqplot_line_color;
+
   char* iqplot_spectrum_line_color;
+
+  char* iqplot_ival_line_color;
+
+  char* iqplot_qval_line_color;
 
   tdrp_bool_t iqplot_y_grid_lines_on;
 
@@ -744,7 +750,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[157];
+  mutable TDRPtable _table[160];
 
   const char *_className;
 

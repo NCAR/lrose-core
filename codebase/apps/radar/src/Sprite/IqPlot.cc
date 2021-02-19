@@ -36,6 +36,7 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/pjg.h>
@@ -181,9 +182,6 @@ void IqPlot::_plotSpectrum(QPainter &painter,
   
 {
 
-  QBrush brush(_params.iqplot_fill_color);
-  brush.setStyle(Qt::SolidPattern);
-
   // set the windowing
 
   TaArray<double> windowCoeff_;
@@ -240,12 +238,8 @@ void IqPlot::_plotSpectrum(QPainter &painter,
       dbm = -120.0;
     }
     powerDbm[ii] = dbm;
-    if (dbm < minDbm) {
-      minDbm = dbm;
-    }
-    if (dbm > maxDbm) {
-      maxDbm = dbm;
-    }
+    minDbm = min(dbm, minDbm);
+    maxDbm = max(dbm, maxDbm);
   }
   
   // set the Y axis range
@@ -298,80 +292,57 @@ void IqPlot::_plotIandQ(QPainter &painter,
   
 {
 
-  QBrush brush(_params.iqplot_fill_color);
-  brush.setStyle(Qt::SolidPattern);
-  
-  TaArray<double> windowCoeff_;
-  double *windowCoeff = windowCoeff_.alloc(nSamples);
-  switch (_params.window) {
-    case Params::WINDOW_RECT:
-    default:
-      RadarMoments::initWindowRect(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_VONHANN:
-      RadarMoments::initWindowVonhann(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_BLACKMAN:
-      RadarMoments::initWindowBlackman(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_BLACKMAN_NUTTALL:
-      RadarMoments::initWindowBlackmanNuttall(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_10:
-      RadarMoments::initWindowTukey(0.1, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_20:
-      RadarMoments::initWindowTukey(0.2, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_30:
-      RadarMoments::initWindowTukey(0.3, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_50:
-      RadarMoments::initWindowTukey(0.5, nSamples, windowCoeff);
-      break;
-  }
+  // get I and Q vals
 
-  // compute power spectrum
-  
-  TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  RadarMoments::applyWindow(gateData->iqhcOrig, windowCoeff, iqWindowed, nSamples);
-  
-  TaArray<RadarComplex_t> powerSpec_;
-  RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
-  RadarFft fft(nSamples);
-  fft.fwd(iqWindowed, powerSpec);
-  fft.shift(powerSpec);
-  
-  // compute power
-
-  TaArray<double> powerDbm_;
-  double *powerDbm = powerDbm_.alloc(nSamples);
+  TaArray<double> iVals_, qVals_;
+  double *iVals = iVals_.alloc(nSamples);
+  double *qVals = qVals_.alloc(nSamples);
+  double minVal = 9999.0;
+  double maxVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double power = RadarComplex::power(powerSpec[ii]);
-    if (power <= 0) {
-      powerDbm[ii] = -120.0;
-    } else {
-      powerDbm[ii] = 10.0 * log10(power);
-    }
+    double iVal = gateData->iqhcOrig[ii].re;
+    double qVal = gateData->iqhcOrig[ii].im;
+    qVals[ii] = iVal;
+    iVals[ii] = qVal;
+    minVal = min(iVal, minVal);
+    minVal = min(qVal, minVal);
+    maxVal = max(iVal, maxVal);
+    maxVal = max(qVal, maxVal);
+  }
+  
+  // set the Y axis range
+
+  double rangeY = maxVal - minVal;
+  if (!_isZoomed) {
+    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.1);
   }
   
   // draw the overlays
 
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the spectrum
+  // draw the I and Q data
 
   painter.save();
-  painter.setPen(_params.iqplot_spectrum_line_color);
-  QVector<QPointF> pts;
+
+  painter.setPen(_params.iqplot_ival_line_color);
+  QVector<QPointF> ipts;
   for (int ii = 0; ii < nSamples; ii++) {
-    int jj = (ii + nSamples) % nSamples;
-    double val = powerDbm[ii];
-    QPointF pt(jj, val);
-    pts.push_back(pt);
+    double ival = iVals[ii];
+    QPointF pt(ii, ival);
+    ipts.push_back(pt);
   }
-  _zoomWorld.drawLines(painter, pts);
+  _zoomWorld.drawLines(painter, ipts);
+
+  painter.setPen(_params.iqplot_qval_line_color);
+  QVector<QPointF> qpts;
+  for (int ii = 0; ii < nSamples; ii++) {
+    double qval = qVals[ii];
+    QPointF pt(ii, qval);
+    qpts.push_back(pt);
+  }
+  _zoomWorld.drawLines(painter, qpts);
+
   painter.restore();
   
   // draw the title
@@ -399,80 +370,53 @@ void IqPlot::_plotIvsQ(QPainter &painter,
   
 {
 
-  QBrush brush(_params.iqplot_fill_color);
-  brush.setStyle(Qt::SolidPattern);
-  
-  TaArray<double> windowCoeff_;
-  double *windowCoeff = windowCoeff_.alloc(nSamples);
-  switch (_params.window) {
-    case Params::WINDOW_RECT:
-    default:
-      RadarMoments::initWindowRect(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_VONHANN:
-      RadarMoments::initWindowVonhann(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_BLACKMAN:
-      RadarMoments::initWindowBlackman(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_BLACKMAN_NUTTALL:
-      RadarMoments::initWindowBlackmanNuttall(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_10:
-      RadarMoments::initWindowTukey(0.1, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_20:
-      RadarMoments::initWindowTukey(0.2, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_30:
-      RadarMoments::initWindowTukey(0.3, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_50:
-      RadarMoments::initWindowTukey(0.5, nSamples, windowCoeff);
-      break;
-  }
+  // get I and Q vals
 
-  // compute power spectrum
-  
-  TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  RadarMoments::applyWindow(gateData->iqhcOrig, windowCoeff, iqWindowed, nSamples);
-  
-  TaArray<RadarComplex_t> powerSpec_;
-  RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
-  RadarFft fft(nSamples);
-  fft.fwd(iqWindowed, powerSpec);
-  fft.shift(powerSpec);
-  
-  // compute power
-
-  TaArray<double> powerDbm_;
-  double *powerDbm = powerDbm_.alloc(nSamples);
+  TaArray<double> iVals_, qVals_;
+  double *iVals = iVals_.alloc(nSamples);
+  double *qVals = qVals_.alloc(nSamples);
+  double minIVal = 9999.0;
+  double maxIVal = -9999.0;
+  double minQVal = 9999.0;
+  double maxQVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double power = RadarComplex::power(powerSpec[ii]);
-    if (power <= 0) {
-      powerDbm[ii] = -120.0;
-    } else {
-      powerDbm[ii] = 10.0 * log10(power);
-    }
+    double iVal = gateData->iqhcOrig[ii].re;
+    double qVal = gateData->iqhcOrig[ii].im;
+    iVals[ii] = iVal;
+    qVals[ii] = qVal;
+    minIVal = min(iVal, minIVal);
+    maxIVal = max(iVal, maxIVal);
+    minQVal = min(qVal, minQVal);
+    maxQVal = max(qVal, maxQVal);
+  }
+  
+  // set the Y axis range
+
+  double rangeX = maxIVal - minIVal;
+  double rangeY = maxQVal - minQVal;
+  if (!_isZoomed) {
+    setWorldLimits(minIVal - rangeX * 0.05,
+                   minQVal - rangeY * 0.05,
+                   maxIVal + rangeX * 0.05,
+                   maxQVal + rangeY * 0.1);
   }
   
   // draw the overlays
-
+  
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the spectrum - as line
+  // draw the I vs Q data
 
   painter.save();
-  painter.setPen(_params.iqplot_spectrum_line_color);
-  QVector<QPointF> pts;
+  painter.setPen(_params.iqplot_line_color);
+  QVector<QPointF> iqpts;
   for (int ii = 0; ii < nSamples; ii++) {
-    int jj = (ii + nSamples) % nSamples;
-    double val = powerDbm[ii];
-    QPointF pt(jj, val);
-    pts.push_back(pt);
+    double ival = iVals[ii];
+    double qval = qVals[ii];
+    QPointF pt(ival, qval);
+    iqpts.push_back(pt);
   }
-  _zoomWorld.drawLines(painter, pts);
+  _zoomWorld.drawLines(painter, iqpts);
   painter.restore();
   
   // draw the title
