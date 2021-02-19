@@ -382,6 +382,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // beam data
 
   Beam *_currentBeam;
+  int _nSamplesPlot;
 
   ///////////////////////
   // Protected methods //

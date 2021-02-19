@@ -84,7 +84,7 @@ public:
 
   typedef enum {
     SPECTRUM = 0,
-    TIME_SERIES = 1,
+    I_AND_Q = 1,
     I_VS_Q = 2,
     PHASOR = 3
   } iqplot_type_t;

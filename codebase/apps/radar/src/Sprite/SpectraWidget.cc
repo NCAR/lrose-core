@@ -58,7 +58,8 @@ SpectraWidget::SpectraWidget(QWidget* parent,
         _worldReleaseX(0),
         _worldReleaseY(0),
         _rubberBand(0),
-        _currentBeam(NULL)
+        _currentBeam(NULL),
+        _nSamplesPlot(0)
 
 {
 
@@ -309,6 +310,14 @@ void SpectraWidget::plotBeam(Beam *beam)
   }
 
   _currentBeam = beam;
+  _nSamplesPlot = _currentBeam->getNSamples();
+  iwrf_xmit_rcv_mode_t xmitRcvMode = _currentBeam->getXmitRcvMode();
+  if (xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
+      xmitRcvMode == IWRF_ALT_HV_CO_ONLY ||
+      xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
+    _nSamplesPlot /= 2; // alternating mode
+  }
+
 
   if (_ascopes.size() > 0 && !_ascopesConfigured) {
     for (size_t ii = 0; ii < _ascopes.size(); ii++) {
@@ -595,7 +604,7 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
       _ascopes[ii]->plotBeam(painter, _currentBeam, _selectedRangeKm);
     }
     for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
-      _iqPlots[ii]->plotBeam(painter, _currentBeam, _selectedRangeKm);
+      _iqPlots[ii]->plotBeam(painter, _currentBeam, _nSamplesPlot, _selectedRangeKm);
     }
   }
 
@@ -1309,15 +1318,7 @@ void SpectraWidget::_configureIqPlot(int id)
   double minVal = IqPlot::getMinVal(plotType);
   double maxVal = IqPlot::getMaxVal(plotType);
   
-  int nSamples = _currentBeam->getNSamples();
-  iwrf_xmit_rcv_mode_t xmitRcvMode = _currentBeam->getXmitRcvMode();
-  if (xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
-      xmitRcvMode == IWRF_ALT_HV_CO_ONLY ||
-      xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
-    nSamples /= 2; // alternating mode
-  }
-
-  _iqPlots[id]->setWorldLimits(0.0, minVal, nSamples, maxVal);
+  _iqPlots[id]->setWorldLimits(0.0, minVal, _nSamplesPlot, maxVal);
 
 }
 

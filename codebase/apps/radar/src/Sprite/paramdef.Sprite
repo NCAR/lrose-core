@@ -295,13 +295,13 @@ paramdef int {
 
 typedef enum {
   SPECTRUM,
-  TIME_SERIES,
+  I_AND_Q,
   I_VS_Q,
   PHASOR
 } iqplot_type_t;
 
 paramdef enum iqplot_type_t {
-  p_default = { SPECTRUM, TIME_SERIES, I_VS_Q, PHASOR };
+  p_default = { SPECTRUM, I_AND_Q, I_VS_Q, PHASOR };
   p_descr = "Array of types of IQ plots for each sub panel.";
   p_help = "The array size must match n_rows times n_columns.";
 } iqplot_types[];

@@ -98,7 +98,7 @@ int BeamMgr::readCalFromFile(const string &calPath)
     cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
-  int fileLen = calStat.st_size;
+  size_t fileLen = calStat.st_size;
 
   // open file
   

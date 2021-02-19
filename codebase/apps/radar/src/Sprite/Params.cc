@@ -1206,8 +1206,8 @@
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("SPECTRUM");
       tt->enum_def.fields[0].val = SPECTRUM;
-      tt->enum_def.fields[1].name = tdrpStrDup("TIME_SERIES");
-      tt->enum_def.fields[1].val = TIME_SERIES;
+      tt->enum_def.fields[1].name = tdrpStrDup("I_AND_Q");
+      tt->enum_def.fields[1].val = I_AND_Q;
       tt->enum_def.fields[2].name = tdrpStrDup("I_VS_Q");
       tt->enum_def.fields[2].val = I_VS_Q;
       tt->enum_def.fields[3].name = tdrpStrDup("PHASOR");
@@ -1215,7 +1215,7 @@
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].e = SPECTRUM;
-      tt->array_vals[1].e = TIME_SERIES;
+      tt->array_vals[1].e = I_AND_Q;
       tt->array_vals[2].e = I_VS_Q;
       tt->array_vals[3].e = PHASOR;
     tt++;

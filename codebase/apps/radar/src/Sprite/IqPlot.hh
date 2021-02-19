@@ -122,6 +122,7 @@ public:
   
   void plotBeam(QPainter &painter,
                 Beam *beam,
+                int nSamples,
                 double selectedRangeKm);
 
   // set grid lines on/off
@@ -192,6 +193,34 @@ protected:
   
   void _drawOverlays(QPainter &painter, double selectedRangeKm);
   
+  void _plotSpectrum(QPainter &painter,
+                     Beam *beam,
+                     int nSamples,
+                     double selectedRangeKm,
+                     int gateNum,
+                     const GateData *gateData);
+
+  void _plotIandQ(QPainter &painter,
+                  Beam *beam,
+                  int nSamples,
+                  double selectedRangeKm,
+                  int gateNum,
+                  const GateData *gateData);
+
+  void _plotIvsQ(QPainter &painter,
+                 Beam *beam,
+                 int nSamples,
+                 double selectedRangeKm,
+                 int gateNum,
+                 const GateData *gateData);
+
+  void _plotPhasor(QPainter &painter,
+                   Beam *beam,
+                   int nSamples,
+                   double selectedRangeKm,
+                   int gateNum,
+                   const GateData *gateData);
+
 };
 
 #endif
