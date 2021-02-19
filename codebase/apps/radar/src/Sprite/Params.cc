@@ -1201,7 +1201,7 @@
     tt->array_elem_size = sizeof(iqplot_type_t);
     tt->array_n = 4;
     tt->enum_def.name = tdrpStrDup("iqplot_type_t");
-    tt->enum_def.nfields = 4;
+    tt->enum_def.nfields = 5;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("SPECTRUM");
@@ -1212,6 +1212,8 @@
       tt->enum_def.fields[2].val = I_VS_Q;
       tt->enum_def.fields[3].name = tdrpStrDup("PHASOR");
       tt->enum_def.fields[3].val = PHASOR;
+      tt->enum_def.fields[4].name = tdrpStrDup("POWER_DBM");
+      tt->enum_def.fields[4].val = POWER_DBM;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].e = SPECTRUM;

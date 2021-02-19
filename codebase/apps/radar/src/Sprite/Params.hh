@@ -86,7 +86,8 @@ public:
     SPECTRUM = 0,
     I_AND_Q = 1,
     I_VS_Q = 2,
-    PHASOR = 3
+    PHASOR = 3,
+    POWER_DBM = 4
   } iqplot_type_t;
 
   typedef enum {

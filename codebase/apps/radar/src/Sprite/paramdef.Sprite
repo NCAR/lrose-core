@@ -297,7 +297,8 @@ typedef enum {
   SPECTRUM,
   I_AND_Q,
   I_VS_Q,
-  PHASOR
+  PHASOR,
+  POWER_DBM
 } iqplot_type_t;
 
 paramdef enum iqplot_type_t {
