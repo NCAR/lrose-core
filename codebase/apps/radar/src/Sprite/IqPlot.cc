@@ -151,12 +151,15 @@ void IqPlot::plotBeam(QPainter &painter,
     case Params::I_AND_Q:
       _plotIandQ(painter, beam, nSamples, selectedRangeKm,
                  gateNum, gateData);
+      break;
     case Params::I_VS_Q:
       _plotIvsQ(painter, beam, nSamples, selectedRangeKm,
                 gateNum, gateData);
+      break;
     case Params::PHASOR:
       _plotPhasor(painter, beam, nSamples, selectedRangeKm,
                   gateNum, gateData);
+      break;
     case Params::SPECTRUM:
     default:
       _plotSpectrum(painter, beam, nSamples, selectedRangeKm,
@@ -225,31 +228,33 @@ void IqPlot::_plotSpectrum(QPainter &painter,
   fft.fwd(iqWindowed, powerSpec);
   fft.shift(powerSpec);
   
-  // compute power
+  // compute power, plus min and max
 
   TaArray<double> powerDbm_;
   double *powerDbm = powerDbm_.alloc(nSamples);
+  double minDbm = 9999.0, maxDbm = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
     double power = RadarComplex::power(powerSpec[ii]);
+    double dbm = 10.0 * log10(power);
     if (power <= 0) {
-      powerDbm[ii] = -120.0;
-    } else {
-      powerDbm[ii] = 10.0 * log10(power);
+      dbm = -120.0;
+    }
+    powerDbm[ii] = dbm;
+    if (dbm < minDbm) {
+      minDbm = dbm;
+    }
+    if (dbm > maxDbm) {
+      maxDbm = dbm;
     }
   }
   
-  // double yMin = _zoomWorld.getYMinWorld();
-  // for (int ii = 1; ii < nSamples; ii++) {
-  //   // int jj = (ii + nSamples / 2) % nSamples;
-  //   double valPrev = powerDbm[ii-1];
-  //   double val = powerDbm[ii];
-  //   _zoomWorld.fillTrap(painter, brush,
-  //                       ii-1, yMin,
-  //                       ii, yMin,
-  //                       ii, val,
-  //                       ii-1, valPrev);
-  // }
+  // set the Y axis range
 
+  double rangeY = maxDbm - minDbm;
+  if (!_isZoomed) {
+    setWorldLimitsY(minDbm - rangeY * 0.05, maxDbm + rangeY * 0.1);
+  }
+  
   // draw the overlays
 
   _drawOverlays(painter, selectedRangeKm);
@@ -701,6 +706,23 @@ void IqPlot::setWorldLimits(double xMinWorld,
   _fullWorld.setWorldLimits(xMinWorld, yMinWorld,
                             xMaxWorld, yMaxWorld);
   _zoomWorld = _fullWorld;
+  _isZoomed = false;
+}
+
+void IqPlot::setWorldLimitsX(double xMinWorld,
+                             double xMaxWorld)
+{
+  _fullWorld.setWorldLimitsX(xMinWorld, xMaxWorld);
+  _zoomWorld = _fullWorld;
+  _isZoomed = false;
+}
+
+void IqPlot::setWorldLimitsY(double yMinWorld,
+                             double yMaxWorld)
+{
+  _fullWorld.setWorldLimitsY(yMinWorld, yMaxWorld);
+  _zoomWorld = _fullWorld;
+  _isZoomed = false;
 }
 
 /*************************************************************************

@@ -96,6 +96,11 @@ public:
                       double xMaxWorld,
                       double yMaxWorld);
 
+  void setWorldLimitsX(double xMinWorld,
+                       double xMaxWorld);
+  void setWorldLimitsY(double yMinWorld,
+                       double yMaxWorld);
+
   // set the zoom limits, using pixel space
 
   void setZoomLimits(int xMin,

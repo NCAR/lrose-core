@@ -256,6 +256,40 @@ void WorldPlot::setWorldLimits(double xMinWorld,
 
 }
 
+void WorldPlot::setWorldLimitsX(double xMinWorld,
+                                double xMaxWorld)
+  
+{
+  
+  if (_xMinWorld < _xMaxWorld) {
+    _xMinWorld = MIN(xMinWorld, xMaxWorld);
+    _xMaxWorld = MAX(xMinWorld, xMaxWorld);
+  } else {
+    _xMinWorld = MAX(xMinWorld, xMaxWorld);
+    _xMaxWorld = MIN(xMinWorld, xMaxWorld);
+  }
+    
+  _computeTransform();
+
+}
+
+void WorldPlot::setWorldLimitsY(double yMinWorld,
+                                double yMaxWorld)
+  
+{
+  
+  if (_yMinWorld < _yMaxWorld) {
+    _yMinWorld = MIN(yMinWorld, yMaxWorld);
+    _yMaxWorld = MAX(yMinWorld, yMaxWorld);
+  } else {
+    _yMinWorld = MAX(yMinWorld, yMaxWorld);
+    _yMaxWorld = MIN(yMinWorld, yMaxWorld);
+  }
+
+  _computeTransform();
+
+}
+
 ///////////////////////////////////////////////////////
 // set zoom limits from pixel space
 
