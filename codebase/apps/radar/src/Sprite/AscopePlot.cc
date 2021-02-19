@@ -126,7 +126,7 @@ void AscopePlot::plotBeam(QPainter &painter,
     return;
   }
   
-  if(_params.debug) {
+  if(_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "======== Ascope - plotting beam data ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;

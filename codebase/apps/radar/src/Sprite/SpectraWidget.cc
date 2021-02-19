@@ -303,7 +303,7 @@ void SpectraWidget::plotBeam(Beam *beam)
 {
 
   if(_params.debug) {
-    cerr << "======== SpectraWidget plotting beam data ================" << endl;
+    cerr << "======== SpectraWidget handling beam ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
   }
@@ -1309,8 +1309,15 @@ void SpectraWidget::_configureIqPlot(int id)
   double minVal = IqPlot::getMinVal(plotType);
   double maxVal = IqPlot::getMaxVal(plotType);
   
-  _iqPlots[id]->setWorldLimits(0.0, minVal,
-                               _params.n_samples, maxVal);
+  int nSamples = _currentBeam->getNSamples();
+  iwrf_xmit_rcv_mode_t xmitRcvMode = _currentBeam->getXmitRcvMode();
+  if (xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
+      xmitRcvMode == IWRF_ALT_HV_CO_ONLY ||
+      xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
+    nSamples /= 2; // alternating mode
+  }
+
+  _iqPlots[id]->setWorldLimits(0.0, minVal, nSamples, maxVal);
 
 }
 

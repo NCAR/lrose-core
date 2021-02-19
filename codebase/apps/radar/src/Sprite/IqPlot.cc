@@ -132,7 +132,7 @@ void IqPlot::plotBeam(QPainter &painter,
   
   int gateNum = beam->getGateNum(selectedRangeKm);
 
-  if(_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "======== Iqplot - plotting beam data ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
@@ -150,6 +150,13 @@ void IqPlot::plotBeam(QPainter &painter,
   // create window for the iq data, for FFT operations
 
   int nSamples = beam->getNSamples();
+  iwrf_xmit_rcv_mode_t xmitRcvMode = beam->getXmitRcvMode();
+  if (xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
+      xmitRcvMode == IWRF_ALT_HV_CO_ONLY ||
+      xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
+    nSamples /= 2; // alternating mode
+  }
+
   TaArray<double> windowCoeff_;
   double *windowCoeff = windowCoeff_.alloc(nSamples);
   switch (_params.window) {
@@ -194,10 +201,6 @@ void IqPlot::plotBeam(QPainter &painter,
   
   // compute power
 
-  double pwr = RadarComplex::meanPower(gateData.iqhcOrig, nSamples);
-  double dbm = 10.0 * log10(pwr);
-  cerr << "11111111111111 gateNum, dbm: " << gateNum << ", " << dbm << endl;
-
   TaArray<double> powerDbm_;
   double *powerDbm = powerDbm_.alloc(nSamples);
   for (int ii = 0; ii < nSamples; ii++) {
@@ -221,24 +224,24 @@ void IqPlot::plotBeam(QPainter &painter,
   //                       ii-1, valPrev);
   // }
 
+  // draw the overlays
+
+  _drawOverlays(painter, selectedRangeKm);
+
   // draw the spectrum - as line
 
   painter.save();
   painter.setPen(_params.iqplot_spectrum_line_color);
   QVector<QPointF> pts;
   for (int ii = 0; ii < nSamples; ii++) {
-    // int jj = (ii + nSamples / 2) % nSamples;
+    int jj = (ii + nSamples) % nSamples;
     double val = powerDbm[ii];
-    QPointF pt(ii, val);
+    QPointF pt(jj, val);
     pts.push_back(pt);
   }
   _zoomWorld.drawLines(painter, pts);
   painter.restore();
   
-  // draw the overlays
-
-  _drawOverlays(painter, selectedRangeKm);
-
   // draw the title
 
   painter.save();

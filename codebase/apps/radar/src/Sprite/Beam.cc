@@ -1097,8 +1097,7 @@ void Beam::_computeMomDpAltHvCoCross()
                                    fields.lag2_vc,
                                    igate, 
                                    fields);
-    
-    
+
   } // igate
 
   // copy back to gate data
