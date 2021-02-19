@@ -145,7 +145,7 @@ void IqPlot::plotBeam(QPainter &painter,
   
   // get data for this gate
 
-  const GateData &gateData = *beam->getGateData()[gateNum];
+  const GateData &gateData = *(beam->getGateData()[gateNum]);
   
   // create window for the iq data, for FFT operations
 
