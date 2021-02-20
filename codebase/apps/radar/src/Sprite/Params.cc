@@ -1006,7 +1006,7 @@
     tt->descr = tdrpStrDup("Startup width of main window (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &main_window_width - &_start_;
-    tt->single_val.i = 1250;
+    tt->single_val.i = 1500;
     tt++;
     
     // Parameter 'main_window_height'
@@ -1221,13 +1221,13 @@
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].e = SPECTRUM_POWER;
-      tt->array_vals[1].e = I_AND_Q;
-      tt->array_vals[2].e = I_VS_Q;
-      tt->array_vals[3].e = PHASOR;
-      tt->array_vals[4].e = SPECTRUM_POWER;
-      tt->array_vals[5].e = I_AND_Q;
-      tt->array_vals[6].e = I_VS_Q;
-      tt->array_vals[7].e = PHASOR;
+      tt->array_vals[1].e = SPECTRUM_PHASE;
+      tt->array_vals[2].e = TS_POWER;
+      tt->array_vals[3].e = TS_PHASE;
+      tt->array_vals[4].e = I_AND_Q;
+      tt->array_vals[5].e = I_VS_Q;
+      tt->array_vals[6].e = PHASOR;
+      tt->array_vals[7].e = SPECTRUM_POWER;
     tt++;
     
     // Parameter 'iqplot_top_margin'

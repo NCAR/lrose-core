@@ -166,24 +166,36 @@ void IqPlot::plotBeam(QPainter &painter,
       _plotPhasor(painter, beam, nSamples, selectedRangeKm,
                   gateNum, gateData);
       break;
+    case Params::SPECTRUM_PHASE:
+      _plotSpectrumPhase(painter, beam, nSamples, selectedRangeKm,
+                         gateNum, gateData);
+      break;
+    case Params::TS_POWER:
+      _plotTsPower(painter, beam, nSamples, selectedRangeKm,
+                   gateNum, gateData);
+      break;
+    case Params::TS_PHASE:
+      _plotTsPhase(painter, beam, nSamples, selectedRangeKm,
+                   gateNum, gateData);
+      break;
     case Params::SPECTRUM_POWER:
     default:
-      _plotSpectrum(painter, beam, nSamples, selectedRangeKm,
-                    gateNum, gateData);
+      _plotSpectrumPower(painter, beam, nSamples, selectedRangeKm,
+                         gateNum, gateData);
   }
 
 }
 
 /*************************************************************************
- * plot the spectrum
+ * plot the power spectrum
  */
 
-void IqPlot::_plotSpectrum(QPainter &painter,
-                           Beam *beam,
-                           int nSamples,
-                           double selectedRangeKm,
-                           int gateNum,
-                           const GateData *gateData)
+void IqPlot::_plotSpectrumPower(QPainter &painter,
+                                Beam *beam,
+                                int nSamples,
+                                double selectedRangeKm,
+                                int gateNum,
+                                const GateData *gateData)
   
 {
 
@@ -276,10 +288,235 @@ void IqPlot::_plotSpectrum(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  char title[1024];
-  snprintf(title, 1024, "%s range: %.3fkm",
-           getName(_plotType).c_str(), selectedRangeKm);
-  _zoomWorld.drawTitleTopCenter(painter, title);
+  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot the spectrum phase
+ */
+
+void IqPlot::_plotSpectrumPhase(QPainter &painter,
+                                Beam *beam,
+                                int nSamples,
+                                double selectedRangeKm,
+                                int gateNum,
+                                const GateData *gateData)
+  
+{
+
+  // set the windowing
+
+  TaArray<double> windowCoeff_;
+  double *windowCoeff = windowCoeff_.alloc(nSamples);
+  switch (_params.window) {
+    case Params::WINDOW_RECT:
+    default:
+      RadarMoments::initWindowRect(nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_VONHANN:
+      RadarMoments::initWindowVonhann(nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_BLACKMAN:
+      RadarMoments::initWindowBlackman(nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_BLACKMAN_NUTTALL:
+      RadarMoments::initWindowBlackmanNuttall(nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_TUKEY_10:
+      RadarMoments::initWindowTukey(0.1, nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_TUKEY_20:
+      RadarMoments::initWindowTukey(0.2, nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_TUKEY_30:
+      RadarMoments::initWindowTukey(0.3, nSamples, windowCoeff);
+      break;
+    case Params::WINDOW_TUKEY_50:
+      RadarMoments::initWindowTukey(0.5, nSamples, windowCoeff);
+      break;
+  }
+
+  // compute spectrum
+  
+  TaArray<RadarComplex_t> iqWindowed_;
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
+  RadarMoments::applyWindow(gateData->iqhcOrig, windowCoeff, iqWindowed, nSamples);
+  
+  TaArray<RadarComplex_t> spec_;
+  RadarComplex_t *spec = spec_.alloc(nSamples);
+  RadarFft fft(nSamples);
+  fft.fwd(iqWindowed, spec);
+  fft.shift(spec);
+  
+  // compute phase
+
+  TaArray<double> phase_;
+  double *phase = phase_.alloc(nSamples);
+  double minVal = 9999.0, maxVal = -9999.0;
+  for (int ii = 0; ii < nSamples; ii++) {
+    double phaseRad = atan2(spec[ii].im, spec[ii].re);
+    double phaseDeg = phaseRad * RAD_TO_DEG;
+    phase[ii] = phaseDeg;
+    minVal = min(phaseDeg, minVal);
+    maxVal = max(phaseDeg, maxVal);
+  }
+  
+  // set the Y axis range
+  
+  double rangeY = maxVal - minVal;
+  if (!_isZoomed) {
+    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.1);
+  }
+  
+  // draw the overlays
+
+  _drawOverlays(painter, selectedRangeKm);
+
+  // draw the spectrum phase - as line
+
+  painter.save();
+  painter.setPen(_params.iqplot_line_color);
+  QVector<QPointF> pts;
+  for (int ii = 0; ii < nSamples; ii++) {
+    int jj = (ii + nSamples) % nSamples;
+    double val = phase[ii];
+    QPointF pt(jj, val);
+    pts.push_back(pt);
+  }
+  _zoomWorld.drawLines(painter, pts);
+  painter.restore();
+  
+  // draw the title
+  
+  painter.save();
+  painter.setPen(_params.iqplot_title_color);
+  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot the time series power
+ */
+
+void IqPlot::_plotTsPower(QPainter &painter,
+                          Beam *beam,
+                          int nSamples,
+                          double selectedRangeKm,
+                          int gateNum,
+                          const GateData *gateData)
+  
+{
+
+  // compute power, plus min and max
+  
+  TaArray<double> powerDbm_;
+  double *powerDbm = powerDbm_.alloc(nSamples);
+  double minDbm = 9999.0, maxDbm = -9999.0;
+  for (int ii = 0; ii < nSamples; ii++) {
+    double power = RadarComplex::power(gateData->iqhcOrig[ii]);
+    double dbm = 10.0 * log10(power);
+    if (power <= 0) {
+      dbm = -120.0;
+    }
+    powerDbm[ii] = dbm;
+    minDbm = min(dbm, minDbm);
+    maxDbm = max(dbm, maxDbm);
+  }
+  
+  // set the Y axis range
+  
+  double rangeY = maxDbm - minDbm;
+  if (!_isZoomed) {
+    setWorldLimitsY(minDbm - rangeY * 0.05, maxDbm + rangeY * 0.1);
+  }
+  
+  // draw the overlays
+
+  _drawOverlays(painter, selectedRangeKm);
+
+  // draw the spectrum - as line
+
+  painter.save();
+  painter.setPen(_params.iqplot_line_color);
+  QVector<QPointF> pts;
+  for (int ii = 0; ii < nSamples; ii++) {
+    int jj = (ii + nSamples) % nSamples;
+    double val = powerDbm[ii];
+    QPointF pt(jj, val);
+    pts.push_back(pt);
+  }
+  _zoomWorld.drawLines(painter, pts);
+  painter.restore();
+  
+  // draw the title
+
+  painter.save();
+  painter.setPen(_params.iqplot_title_color);
+  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot the time series phase
+ */
+
+void IqPlot::_plotTsPhase(QPainter &painter,
+                          Beam *beam,
+                          int nSamples,
+                          double selectedRangeKm,
+                          int gateNum,
+                          const GateData *gateData)
+  
+{
+
+  // compute time series phases
+  
+  TaArray<double> phase_;
+  double *phase = phase_.alloc(nSamples);
+  double minVal = 9999.0, maxVal = -9999.0;
+  for (int ii = 0; ii < nSamples; ii++) {
+    double phaseRad = atan2(gateData->iqhcOrig[ii].im,
+                            gateData->iqhcOrig[ii].re);
+    double phaseDeg = phaseRad * RAD_TO_DEG;
+    phase[ii] = phaseDeg;
+    minVal = min(phaseDeg, minVal);
+    maxVal = max(phaseDeg, maxVal);
+  }
+  
+  // set the Y axis range
+
+  double rangeY = maxVal - minVal;
+  if (!_isZoomed) {
+    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.1);
+  }
+  
+  // draw the overlays
+  
+  _drawOverlays(painter, selectedRangeKm);
+  
+  // draw the time series phase - as line
+
+  painter.save();
+  painter.setPen(_params.iqplot_line_color);
+  QVector<QPointF> pts;
+  for (int ii = 0; ii < nSamples; ii++) {
+    int jj = (ii + nSamples) % nSamples;
+    double val = phase[ii];
+    QPointF pt(jj, val);
+    pts.push_back(pt);
+  }
+  _zoomWorld.drawLines(painter, pts);
+  painter.restore();
+  
+  // draw the title
+  
+  painter.save();
+  painter.setPen(_params.iqplot_title_color);
+  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
   painter.restore();
 
 }
@@ -354,10 +591,7 @@ void IqPlot::_plotIandQ(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  char title[1024];
-  snprintf(title, 1024, "%s range: %.3fkm",
-           getName(_plotType).c_str(), selectedRangeKm);
-  _zoomWorld.drawTitleTopCenter(painter, title);
+  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
   painter.restore();
 
 }
@@ -428,10 +662,7 @@ void IqPlot::_plotIvsQ(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  char title[1024];
-  snprintf(title, 1024, "%s range: %.3fkm",
-           getName(_plotType).c_str(), selectedRangeKm);
-  _zoomWorld.drawTitleTopCenter(painter, title);
+  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
   painter.restore();
 
 }
@@ -504,10 +735,7 @@ void IqPlot::_plotPhasor(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  char title[1024];
-  snprintf(title, 1024, "%s range: %.3fkm",
-           getName(_plotType).c_str(), selectedRangeKm);
-  _zoomWorld.drawTitleTopCenter(painter, title);
+  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
   painter.restore();
 
 }
@@ -520,6 +748,12 @@ string IqPlot::getName(Params::iqplot_type_t ptype)
   switch (ptype) {
     case Params::SPECTRUM_POWER:
       return "SPECTRUM_POWER";
+    case Params::SPECTRUM_PHASE:
+      return "SPECTRUM_PHASE";
+    case Params::TS_POWER:
+      return "TS_POWER";
+    case Params::TS_PHASE:
+      return "TS_PHASE";
     case Params::I_AND_Q:
       return "I_AND_Q";
     case Params::I_VS_Q:
@@ -539,12 +773,18 @@ string IqPlot::getXUnits(Params::iqplot_type_t ptype)
   switch (ptype) {
     case Params::SPECTRUM_POWER:
       return "sample";
+    case Params::SPECTRUM_PHASE:
+      return "sample";
+    case Params::TS_POWER:
+      return "sample";
+    case Params::TS_PHASE:
+      return "sample";
     case Params::I_AND_Q:
       return "sample";
     case Params::I_VS_Q:
       return "volts";
     case Params::PHASOR:
-      return "sample";
+      return "volts";
     default:
       return "";
   }
@@ -557,7 +797,13 @@ string IqPlot::getYUnits(Params::iqplot_type_t ptype)
 {
   switch (ptype) {
     case Params::SPECTRUM_POWER:
-      return "power";
+      return "dbm";
+    case Params::SPECTRUM_PHASE:
+      return "deg";
+    case Params::TS_POWER:
+      return "dbm";
+    case Params::TS_PHASE:
+      return "deg";
     case Params::I_AND_Q:
       return "volts";
     case Params::I_VS_Q:
@@ -566,44 +812,6 @@ string IqPlot::getYUnits(Params::iqplot_type_t ptype)
       return "volts";
     default:
       return "";
-  }
-}
-
-////////////////////////////////////////////
-// get min val for plotting
-
-double IqPlot::getMinVal(Params::iqplot_type_t ptype)
-{
-  switch (ptype) {
-    case Params::SPECTRUM_POWER:
-      return -120;
-    case Params::I_AND_Q:
-      return -120;
-    case Params::I_VS_Q:
-      return -120;
-    case Params::PHASOR:
-      return 0;
-    default:
-      return 0;
-  }
-}
-
-////////////////////////////////////////////
-// get max val for plotting
-
-double IqPlot::getMaxVal(Params::iqplot_type_t ptype)
-{
-  switch (ptype) {
-    case Params::SPECTRUM_POWER:
-      return 20;
-    case Params::I_AND_Q:
-      return 20;
-    case Params::I_VS_Q:
-      return 20;
-    case Params::PHASOR:
-      return 1;
-    default:
-      return 0;
   }
 }
 

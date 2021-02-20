@@ -1141,8 +1141,11 @@ void SpectraWidget::_drawMainTitle(QPainter &painter)
              (nanoSecs / 1000000));
     title.append("-");
     title.append(timeStr);
+    char rangeStr[1024];
+    snprintf(rangeStr, 1024, "Selected range: %.3fkm  ", _selectedRangeKm);
+    title.append(" ");
+    title.append(rangeStr);
   }
-
 
   // get bounding rectangle
   
@@ -1314,11 +1317,7 @@ void SpectraWidget::_configureIqPlot(int id)
     return;
   }
 
-  Params::iqplot_type_t plotType = _iqPlots[id]->getPlotType();
-  double minVal = IqPlot::getMinVal(plotType);
-  double maxVal = IqPlot::getMaxVal(plotType);
-  
-  _iqPlots[id]->setWorldLimits(0.0, minVal, _nSamplesPlot, maxVal);
+  _iqPlots[id]->setWorldLimits(0.0, 0.0, _nSamplesPlot, 1.0);
 
 }
 

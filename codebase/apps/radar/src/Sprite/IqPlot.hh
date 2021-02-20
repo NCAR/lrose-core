@@ -159,8 +159,6 @@ public:
   static string getName(Params::iqplot_type_t ptype);
   static string getXUnits(Params::iqplot_type_t ptype);
   static string getYUnits(Params::iqplot_type_t ptype);
-  static double getMinVal(Params::iqplot_type_t ptype);
-  static double getMaxVal(Params::iqplot_type_t ptype);
   
 protected:
 
@@ -198,12 +196,33 @@ protected:
   
   void _drawOverlays(QPainter &painter, double selectedRangeKm);
   
-  void _plotSpectrum(QPainter &painter,
-                     Beam *beam,
-                     int nSamples,
-                     double selectedRangeKm,
-                     int gateNum,
-                     const GateData *gateData);
+  void _plotSpectrumPower(QPainter &painter,
+                          Beam *beam,
+                          int nSamples,
+                          double selectedRangeKm,
+                          int gateNum,
+                          const GateData *gateData);
+
+  void _plotSpectrumPhase(QPainter &painter,
+                          Beam *beam,
+                          int nSamples,
+                          double selectedRangeKm,
+                          int gateNum,
+                          const GateData *gateData);
+
+  void _plotTsPower(QPainter &painter,
+                    Beam *beam,
+                    int nSamples,
+                    double selectedRangeKm,
+                    int gateNum,
+                    const GateData *gateData);
+  
+  void _plotTsPhase(QPainter &painter,
+                    Beam *beam,
+                    int nSamples,
+                    double selectedRangeKm,
+                    int gateNum,
+                    const GateData *gateData);
 
   void _plotIandQ(QPainter &painter,
                   Beam *beam,
