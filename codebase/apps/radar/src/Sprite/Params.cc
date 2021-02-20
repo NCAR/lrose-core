@@ -1183,7 +1183,7 @@
     tt->descr = tdrpStrDup("Number of columns of plots in iq plots.");
     tt->help = tdrpStrDup("The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.");
     tt->val_offset = (char *) &iqplots_n_columns - &_start_;
-    tt->single_val.i = 2;
+    tt->single_val.i = 4;
     tt++;
     
     // Parameter 'iqplot_types'
@@ -1199,7 +1199,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(iqplot_type_t);
-    tt->array_n = 4;
+    tt->array_n = 8;
     tt->enum_def.name = tdrpStrDup("iqplot_type_t");
     tt->enum_def.nfields = 7;
     tt->enum_def.fields = (enum_field_t *)
@@ -1224,6 +1224,10 @@
       tt->array_vals[1].e = I_AND_Q;
       tt->array_vals[2].e = I_VS_Q;
       tt->array_vals[3].e = PHASOR;
+      tt->array_vals[4].e = SPECTRUM_POWER;
+      tt->array_vals[5].e = I_AND_Q;
+      tt->array_vals[6].e = I_VS_Q;
+      tt->array_vals[7].e = PHASOR;
     tt++;
     
     // Parameter 'iqplot_top_margin'
@@ -1259,7 +1263,7 @@
     tt->descr = tdrpStrDup("Width of left margin in IQPLOT mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the left margin.");
     tt->val_offset = (char *) &iqplot_left_margin - &_start_;
-    tt->single_val.i = 20;
+    tt->single_val.i = 30;
     tt++;
     
     // Parameter 'iqplot_right_margin'
