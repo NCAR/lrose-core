@@ -133,6 +133,11 @@ void IqPlot::plotBeam(QPainter &painter,
   }
   
   int gateNum = beam->getGateNum(selectedRangeKm);
+  if (gateNum > beam->getNGates() - 1) {
+    cerr << "ERROR - Iqplot::plotBeam()" << endl;
+    cerr << "  range exceeds max: " << selectedRangeKm << endl;
+    return;
+  }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "======== Iqplot - plotting beam data ================" << endl;
@@ -161,7 +166,7 @@ void IqPlot::plotBeam(QPainter &painter,
       _plotPhasor(painter, beam, nSamples, selectedRangeKm,
                   gateNum, gateData);
       break;
-    case Params::SPECTRUM:
+    case Params::SPECTRUM_POWER:
     default:
       _plotSpectrum(painter, beam, nSamples, selectedRangeKm,
                     gateNum, gateData);
@@ -513,8 +518,8 @@ void IqPlot::_plotPhasor(QPainter &painter,
 string IqPlot::getName(Params::iqplot_type_t ptype)
 {
   switch (ptype) {
-    case Params::SPECTRUM:
-      return "SPECTRUM";
+    case Params::SPECTRUM_POWER:
+      return "SPECTRUM_POWER";
     case Params::I_AND_Q:
       return "I_AND_Q";
     case Params::I_VS_Q:
@@ -532,7 +537,7 @@ string IqPlot::getName(Params::iqplot_type_t ptype)
 string IqPlot::getXUnits(Params::iqplot_type_t ptype)
 {
   switch (ptype) {
-    case Params::SPECTRUM:
+    case Params::SPECTRUM_POWER:
       return "sample";
     case Params::I_AND_Q:
       return "sample";
@@ -551,7 +556,7 @@ string IqPlot::getXUnits(Params::iqplot_type_t ptype)
 string IqPlot::getYUnits(Params::iqplot_type_t ptype)
 {
   switch (ptype) {
-    case Params::SPECTRUM:
+    case Params::SPECTRUM_POWER:
       return "power";
     case Params::I_AND_Q:
       return "volts";
@@ -570,7 +575,7 @@ string IqPlot::getYUnits(Params::iqplot_type_t ptype)
 double IqPlot::getMinVal(Params::iqplot_type_t ptype)
 {
   switch (ptype) {
-    case Params::SPECTRUM:
+    case Params::SPECTRUM_POWER:
       return -120;
     case Params::I_AND_Q:
       return -120;
@@ -589,7 +594,7 @@ double IqPlot::getMinVal(Params::iqplot_type_t ptype)
 double IqPlot::getMaxVal(Params::iqplot_type_t ptype)
 {
   switch (ptype) {
-    case Params::SPECTRUM:
+    case Params::SPECTRUM_POWER:
       return 20;
     case Params::I_AND_Q:
       return 20;

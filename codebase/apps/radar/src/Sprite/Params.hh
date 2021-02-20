@@ -83,11 +83,13 @@ public:
   } input_mode_t;
 
   typedef enum {
-    SPECTRUM = 0,
-    I_AND_Q = 1,
-    I_VS_Q = 2,
-    PHASOR = 3,
-    POWER_DBM = 4
+    SPECTRUM_POWER = 0,
+    SPECTRUM_PHASE = 1,
+    TS_POWER = 2,
+    TS_PHASE = 3,
+    I_AND_Q = 4,
+    I_VS_Q = 5,
+    PHASOR = 6
   } iqplot_type_t;
 
   typedef enum {

@@ -1193,7 +1193,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("iqplot_types");
     tt->descr = tdrpStrDup("Array of types of IQ plots for each sub panel.");
-    tt->help = tdrpStrDup("The array size must match n_rows times n_columns.");
+    tt->help = tdrpStrDup("SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_AND_Q: time series of I and Q.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.");
     tt->array_offset = (char *) &_iqplot_types - &_start_;
     tt->array_n_offset = (char *) &iqplot_types_n - &_start_;
     tt->is_array = TRUE;
@@ -1201,22 +1201,26 @@
     tt->array_elem_size = sizeof(iqplot_type_t);
     tt->array_n = 4;
     tt->enum_def.name = tdrpStrDup("iqplot_type_t");
-    tt->enum_def.nfields = 5;
+    tt->enum_def.nfields = 7;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("SPECTRUM");
-      tt->enum_def.fields[0].val = SPECTRUM;
-      tt->enum_def.fields[1].name = tdrpStrDup("I_AND_Q");
-      tt->enum_def.fields[1].val = I_AND_Q;
-      tt->enum_def.fields[2].name = tdrpStrDup("I_VS_Q");
-      tt->enum_def.fields[2].val = I_VS_Q;
-      tt->enum_def.fields[3].name = tdrpStrDup("PHASOR");
-      tt->enum_def.fields[3].val = PHASOR;
-      tt->enum_def.fields[4].name = tdrpStrDup("POWER_DBM");
-      tt->enum_def.fields[4].val = POWER_DBM;
+      tt->enum_def.fields[0].name = tdrpStrDup("SPECTRUM_POWER");
+      tt->enum_def.fields[0].val = SPECTRUM_POWER;
+      tt->enum_def.fields[1].name = tdrpStrDup("SPECTRUM_PHASE");
+      tt->enum_def.fields[1].val = SPECTRUM_PHASE;
+      tt->enum_def.fields[2].name = tdrpStrDup("TS_POWER");
+      tt->enum_def.fields[2].val = TS_POWER;
+      tt->enum_def.fields[3].name = tdrpStrDup("TS_PHASE");
+      tt->enum_def.fields[3].val = TS_PHASE;
+      tt->enum_def.fields[4].name = tdrpStrDup("I_AND_Q");
+      tt->enum_def.fields[4].val = I_AND_Q;
+      tt->enum_def.fields[5].name = tdrpStrDup("I_VS_Q");
+      tt->enum_def.fields[5].val = I_VS_Q;
+      tt->enum_def.fields[6].name = tdrpStrDup("PHASOR");
+      tt->enum_def.fields[6].val = PHASOR;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].e = SPECTRUM;
+      tt->array_vals[0].e = SPECTRUM_POWER;
       tt->array_vals[1].e = I_AND_Q;
       tt->array_vals[2].e = I_VS_Q;
       tt->array_vals[3].e = PHASOR;

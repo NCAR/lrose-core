@@ -294,17 +294,19 @@ paramdef int {
 } iqplots_n_columns;
 
 typedef enum {
-  SPECTRUM,
+  SPECTRUM_POWER,
+  SPECTRUM_PHASE,
+  TS_POWER,
+  TS_PHASE,
   I_AND_Q,
   I_VS_Q,
-  PHASOR,
-  POWER_DBM
+  PHASOR
 } iqplot_type_t;
 
 paramdef enum iqplot_type_t {
-  p_default = { SPECTRUM, I_AND_Q, I_VS_Q, PHASOR };
+  p_default = { SPECTRUM_POWER, I_AND_Q, I_VS_Q, PHASOR };
   p_descr = "Array of types of IQ plots for each sub panel.";
-  p_help = "The array size must match n_rows times n_columns.";
+  p_help = "SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_AND_Q: time series of I and Q.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.";
 } iqplot_types[];
 
 paramdef int {
