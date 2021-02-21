@@ -49,10 +49,12 @@
 
 #include <QMainWindow>
 
+#include <toolsa/DateTime.hh>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>
+#include <Fmq/DsFmq.hh>
 
 class TsReader;
 class SpectraWidget;
@@ -303,6 +305,18 @@ private:
 
   deque<Beam *> _beamQueue;
 
+  // user click Xml FMQ - from HawkEye
+  
+  DsFmq _clickPointFmq;
+  string _clickPointXml;
+  time_t _clickPointTimeSecs;
+  int _clickPointNanoSecs;
+  DateTime _clickPointTime;
+  double _clickPointElevation;
+  double _clickPointAzimuth;
+  double _clickPointRangeKm;
+  int _clickPointGateNum;
+
   // set top bar
 
   virtual void _setTitleBar(const string &radarName);
@@ -371,7 +385,10 @@ private:
   void _handleRealtimeData();
   void _handleArchiveData();
 
-private slots:
+  int _readClickPointFmq(bool &gotNew);
+  int _checkClickPointFmqIsOpen();
+
+  private slots:
 
   // Qt slots //
 

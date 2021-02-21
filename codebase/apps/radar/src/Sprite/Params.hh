@@ -744,6 +744,8 @@ public:
 
   tdrp_bool_t use_cal_from_time_series;
 
+  char* click_point_fmq_url;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -751,7 +753,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[159];
+  mutable TDRPtable _table[161];
 
   const char *_className;
 

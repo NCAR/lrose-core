@@ -2720,6 +2720,27 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'Comment 18'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 18");
+    tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING");
+    tt->comment_text = tdrpStrDup("Reading and writing the click point location to an FMQ in XML format.");
+    tt++;
+    
+    // Parameter 'click_point_fmq_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("click_point_fmq_url");
+    tt->descr = tdrpStrDup("URL for click point URL.");
+    tt->help = tdrpStrDup("If the user clicks on a point in HawkEye, the details of the latest click point are read from the FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT. Also, if the user changes the time or range in Sprite, this change will be written to the FMQ.");
+    tt->val_offset = (char *) &click_point_fmq_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/fmq/click_point");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

@@ -992,3 +992,14 @@ paramdef boolean {
   p_help = "If false, the cal information in the time series data will be used. If true, the cal info in the param file will be used.";
 } use_cal_from_time_series;
 
+commentdef {
+  p_header = "CLICK POINT DATA MESSAGING";
+  p_text = "Reading and writing the click point location to an FMQ in XML format.";
+}
+
+paramdef string {
+  p_default = "/tmp/fmq/click_point";
+  p_descr = "URL for click point URL.";
+  p_help = "If the user clicks on a point in HawkEye, the details of the latest click point are read from the FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT. Also, if the user changes the time or range in Sprite, this change will be written to the FMQ.";
+} click_point_fmq_url;
+
