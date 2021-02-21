@@ -166,6 +166,8 @@ public:
   inline const fl32* *getIqChan0() const { return _iqChan0; }
   inline const fl32* *getIqChan1() const { return _iqChan1; }
 
+  const RadarMoments *getMoments() { return _mom; }
+
 protected:
   
 private:

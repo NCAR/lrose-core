@@ -1323,7 +1323,7 @@ void SpectraWidget::_configureIqPlot(int id)
 
 /////////////////////////////////////////////////////////////	
 // determine the selected panel
-    
+
 void SpectraWidget::_identSelectedPanel(int xx, int yy,
                                         panel_type_t &panelType,
                                         int &panelId)

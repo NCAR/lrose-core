@@ -1392,7 +1392,7 @@
     tt->descr = tdrpStrDup("Font size for plot legends (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_legend_font_size - &_start_;
-    tt->single_val.i = 6;
+    tt->single_val.i = 8;
     tt++;
     
     // Parameter 'iqplot_axis_label_color'

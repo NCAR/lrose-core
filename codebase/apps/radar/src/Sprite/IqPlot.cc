@@ -263,7 +263,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   double rangeY = maxDbm - minDbm;
   if (!_isZoomed) {
-    setWorldLimitsY(minDbm - rangeY * 0.05, maxDbm + rangeY * 0.1);
+    setWorldLimitsY(minDbm - rangeY * 0.05, maxDbm + rangeY * 0.125);
   }
   
   // draw the overlays
@@ -283,6 +283,16 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   }
   _zoomWorld.drawLines(painter, pts);
   painter.restore();
+  
+  // legends
+
+  double power = RadarComplex::meanPower(gateData->iqhcOrig, nSamples);
+  double dbm = 10.0 * log10(power);
+  char text[1024];
+  snprintf(text, 1024, "DbmMean: %.2f", dbm);
+  vector<string> legends;
+  legends.push_back(text);
+  _zoomWorld.drawLegendsTopLeft(painter, legends);
   
   // draw the title
 
@@ -367,7 +377,7 @@ void IqPlot::_plotSpectrumPhase(QPainter &painter,
   
   double rangeY = maxVal - minVal;
   if (!_isZoomed) {
-    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.1);
+    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.125);
   }
   
   // draw the overlays
@@ -430,7 +440,7 @@ void IqPlot::_plotTsPower(QPainter &painter,
   
   double rangeY = maxDbm - minDbm;
   if (!_isZoomed) {
-    setWorldLimitsY(minDbm - rangeY * 0.05, maxDbm + rangeY * 0.1);
+    setWorldLimitsY(minDbm - rangeY * 0.05, maxDbm + rangeY * 0.125);
   }
   
   // draw the overlays
@@ -450,6 +460,16 @@ void IqPlot::_plotTsPower(QPainter &painter,
   }
   _zoomWorld.drawLines(painter, pts);
   painter.restore();
+  
+  // legends
+
+  double power = RadarComplex::meanPower(gateData->iqhcOrig, nSamples);
+  double dbm = 10.0 * log10(power);
+  char text[1024];
+  snprintf(text, 1024, "DbmMean: %.2f", dbm);
+  vector<string> legends;
+  legends.push_back(text);
+  _zoomWorld.drawLegendsTopLeft(painter, legends);
   
   // draw the title
 
@@ -491,7 +511,7 @@ void IqPlot::_plotTsPhase(QPainter &painter,
 
   double rangeY = maxVal - minVal;
   if (!_isZoomed) {
-    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.1);
+    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.125);
   }
   
   // draw the overlays
@@ -556,7 +576,7 @@ void IqPlot::_plotIandQ(QPainter &painter,
 
   double rangeY = maxVal - minVal;
   if (!_isZoomed) {
-    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.1);
+    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.125);
   }
   
   // draw the overlays
@@ -586,6 +606,20 @@ void IqPlot::_plotIandQ(QPainter &painter,
   _zoomWorld.drawLines(painter, qpts);
 
   painter.restore();
+
+  // Legends
+
+  vector<string> legends;
+  string iLegend("I: ");
+  iLegend.append(_params.iqplot_ival_line_color);
+  legends.push_back(iLegend);
+  _zoomWorld.drawLegendsTopLeft(painter, legends);
+
+  legends.clear();
+  string qLegend("Q: ");
+  qLegend.append(_params.iqplot_qval_line_color);
+  legends.push_back(qLegend);
+  _zoomWorld.drawLegendsTopRight(painter, legends);
   
   // draw the title
 
@@ -637,7 +671,7 @@ void IqPlot::_plotIvsQ(QPainter &painter,
     setWorldLimits(minIVal - rangeX * 0.05,
                    minQVal - rangeY * 0.05,
                    maxIVal + rangeX * 0.05,
-                   maxQVal + rangeY * 0.1);
+                   maxQVal + rangeY * 0.125);
   }
   
   // draw the overlays
@@ -710,7 +744,7 @@ void IqPlot::_plotPhasor(QPainter &painter,
     setWorldLimits(minISum - rangeX * 0.05,
                    minQSum - rangeY * 0.05,
                    maxISum + rangeX * 0.05,
-                   maxQSum + rangeY * 0.1);
+                   maxQSum + rangeY * 0.125);
   }
   
   // draw the overlays
@@ -730,6 +764,15 @@ void IqPlot::_plotPhasor(QPainter &painter,
   }
   _zoomWorld.drawLines(painter, iqpts);
   painter.restore();
+
+  // legends
+
+  double cpa = RadarMoments::computeCpa(gateData->iqhcOrig, nSamples);
+  char text[1024];
+  snprintf(text, 1024, "CPA: %.2f", cpa);
+  vector<string> legends;
+  legends.push_back(text);
+  _zoomWorld.drawLegendsTopLeft(painter, legends);
   
   // draw the title
 
