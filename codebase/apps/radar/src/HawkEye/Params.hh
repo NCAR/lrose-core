@@ -740,6 +740,8 @@ public:
 
   double sim_gate_spacing_km;
 
+  char* click_point_fmq_url;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -747,7 +749,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[168];
+  mutable TDRPtable _table[170];
 
   const char *_className;
 

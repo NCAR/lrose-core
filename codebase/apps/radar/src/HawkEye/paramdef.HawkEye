@@ -1129,3 +1129,14 @@ paramdef double {
   p_descr = "Gate spacing in simulated mode (km).";
 } sim_gate_spacing_km;
 
+commentdef {
+  p_header = "CLICK POINT DATA MESSAGING";
+  p_text = "Writing the click point location to an FMQ in XML format.";
+}
+
+paramdef string {
+  p_default = "/tmp/fmq/click_point";
+  p_descr = "URL for click point URL.";
+  p_help = "The details of the latest click point are written to an FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.";
+} click_point_fmq_url;
+

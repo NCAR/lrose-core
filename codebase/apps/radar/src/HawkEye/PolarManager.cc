@@ -1853,11 +1853,11 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     cerr << "*** Entering PolarManager::_locationClicked()" << endl;
   }
   
-  double range = sqrt(xkm * xkm + ykm * ykm);
-  int gate = (int) 
-    ((range - ray->getStartRangeKm()) / ray->getGateSpacingKm() + 0.5);
+  double rangeKm = sqrt(xkm * xkm + ykm * ykm);
+  int gateNum = (int) 
+    ((rangeKm - ray->getStartRangeKm()) / ray->getGateSpacingKm() + 0.5);
 
-  if (gate < 0 || gate >= (int) ray->getNGates())
+  if (gateNum < 0 || gateNum >= (int) ray->getNGates())
   {
     //user clicked outside of ray
     return;
@@ -1865,7 +1865,7 @@ void PolarManager::_locationClicked(double xkm, double ykm,
 
   if (_params.debug) {
     cerr << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm << endl;
-    cerr << "  range, gate: " << range << ", " << gate << endl;
+    cerr << "  rangeKm, gateNum: " << rangeKm << ", " << gateNum << endl;
     cerr << "  az, el from ray: "
          << ray->getAzimuthDeg() << ", "
          << ray->getElevationDeg() << endl;
@@ -1905,10 +1905,10 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   _setText(text, "%6.2f", ray->getAzimuthDeg());
   _azClicked->setText(text);
   
-  _setText(text, "%d", gate);
+  _setText(text, "%d", gateNum);
   _gateNumClicked->setText(text);
   
-  _setText(text, "%6.2f", range);
+  _setText(text, "%6.2f", rangeKm);
   _rangeClicked->setText(text);
   
   for (size_t ii = 0; ii < _fields.size(); ii++) {
@@ -1927,7 +1927,7 @@ void PolarManager::_locationClicked(double xkm, double ykm,
       continue;
     }
     Radx::fl32 *data = (Radx::fl32 *) field->getData();
-    double val = data[gate];
+    double val = data[gateNum];
     const string fieldUnits = field->getUnits();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Field name, selected name: "
@@ -1969,7 +1969,11 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   // update the status panel
   
   _updateStatusPanel(ray);
-    
+
+  // write the click location to FMQ
+
+  _writeClickPointXml2Fmq(ray, rangeKm, gateNum);
+  
 }
 
 //////////////////////////////////////////////

@@ -2883,6 +2883,27 @@
     tt->single_val.d = 0.15;
     tt++;
     
+    // Parameter 'Comment 25'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 25");
+    tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING");
+    tt->comment_text = tdrpStrDup("Writing the click point location to an FMQ in XML format.");
+    tt++;
+    
+    // Parameter 'click_point_fmq_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("click_point_fmq_url");
+    tt->descr = tdrpStrDup("URL for click point URL.");
+    tt->help = tdrpStrDup("The details of the latest click point are written to an FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.");
+    tt->val_offset = (char *) &click_point_fmq_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/fmq/click_point");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;
