@@ -488,11 +488,11 @@ public:
 
   double min_secs_between_rendering;
 
-  int moments_shmem_key;
+  double start_elevation;
 
-  double moments_max_search_angle_error;
+  double start_azimuth;
 
-  double selected_range_km;
+  double start_range_km;
 
   show_status_t show_status_in_gui;
 
@@ -745,6 +745,8 @@ public:
   tdrp_bool_t use_cal_from_time_series;
 
   char* click_point_fmq_url;
+
+  double click_point_search_angle_error;
 
   char _end_; // end of data region
               // needed for zeroing out data

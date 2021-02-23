@@ -768,32 +768,44 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("GETTING CLICK-POINT INFO FROM MOMENTS DISPLAY (CIDD or HawkEye)");
+    tt->comment_hdr = tdrpStrDup("INITIAL location");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'moments_shmem_key'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("moments_shmem_key");
-    tt->descr = tdrpStrDup("The shared memory key for the moments display coordinate struct.");
-    tt->help = tdrpStrDup("When the user clicks in the moments main window, the coordinate struct is updated with the location and time.");
-    tt->val_offset = (char *) &moments_shmem_key - &_start_;
-    tt->single_val.i = 61500;
-    tt++;
-    
-    // Parameter 'moments_max_search_angle_error'
+    // Parameter 'start_elevation'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("moments_max_search_angle_error");
-    tt->descr = tdrpStrDup("Max angular error when searching for spectra close to the click point (deg).");
-    tt->help = tdrpStrDup("When the user clicks in CIDD, the (x) location is saved. From this, the elevation, elevation and range of the click point can be determined. The data base is then searched for spectra from a beam close to this. This parameter gives the max angular error allowable in this search.");
-    tt->val_offset = (char *) &moments_max_search_angle_error - &_start_;
-    tt->single_val.d = 10;
+    tt->param_name = tdrpStrDup("start_elevation");
+    tt->descr = tdrpStrDup("Initial elevation for selecting a radar gate (deg).");
+    tt->help = tdrpStrDup("The display begins using this elevation. The user can then change the elevation either by selecting a point in HawkEye, or by clicking in the ascope plots.");
+    tt->val_offset = (char *) &start_elevation - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'start_azimuth'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("start_azimuth");
+    tt->descr = tdrpStrDup("Initial azimuth for selecting a radar gate (deg).");
+    tt->help = tdrpStrDup("The display begins using this azimuth. The user can then change the azimuth either by selecting a point in HawkEye, or by clicking in the ascope plots.");
+    tt->val_offset = (char *) &start_azimuth - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'start_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("start_range_km");
+    tt->descr = tdrpStrDup("Initial range for selecting a radar gate (km).");
+    tt->help = tdrpStrDup("The display begins using this range. The user can then change the range either by selecting a point in CIDD or HawkEye, or by clicking in the ascope plots.");
+    tt->val_offset = (char *) &start_range_km - &_start_;
+    tt->single_val.d = 50;
     tt++;
     
     // Parameter 'Comment 4'
@@ -801,27 +813,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("INITIAL RANGE");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'selected_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("selected_range_km");
-    tt->descr = tdrpStrDup("Initial range for selecting a radar gate (km).");
-    tt->help = tdrpStrDup("The display begins using this range. The user can then change the range either by selecting a point in CIDD or HawkEye, or by clicking in the ascope plots.");
-    tt->val_offset = (char *) &selected_range_km - &_start_;
-    tt->single_val.d = 50;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("STATUS TO BE SHOWN IN GUI");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -988,11 +979,11 @@
       tt->struct_vals[23].b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1153,11 +1144,11 @@
     tt->single_val.i = 11;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("IQ PLOTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1338,11 +1329,11 @@
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("IQPLOT TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1563,11 +1554,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("IQPLOT LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1668,11 +1659,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("ASCOPE DISPLAY PANEL");
     tt->comment_text = tdrpStrDup("The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.");
     tt++;
@@ -2011,11 +2002,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("CLUTTER FILTERING");
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
@@ -2152,11 +2143,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("SPECTRUM WIDTH METHOD");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2183,11 +2174,11 @@
     tt->single_val.e = WIDTH_METHOD_R0R1;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -2400,11 +2391,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("BEAM SAMPLING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2505,11 +2496,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("OVERRIDING RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
     tt++;
@@ -2646,11 +2637,11 @@
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("FFT WINDOWING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2687,11 +2678,11 @@
     tt->single_val.e = WINDOW_VONHANN;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("RADAR CALIBRATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2720,12 +2711,12 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
-    tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING");
+    tt->param_name = tdrpStrDup("Comment 17");
+    tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING from display (HawkEye or CIDD)");
     tt->comment_text = tdrpStrDup("Reading and writing the click point location to an FMQ in XML format.");
     tt++;
     
@@ -2739,6 +2730,18 @@
     tt->help = tdrpStrDup("If the user clicks on a point in HawkEye, the details of the latest click point are read from the FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT. Also, if the user changes the time or range in Sprite, this change will be written to the FMQ.");
     tt->val_offset = (char *) &click_point_fmq_url - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/fmq/click_point");
+    tt++;
+    
+    // Parameter 'click_point_search_angle_error'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("click_point_search_angle_error");
+    tt->descr = tdrpStrDup("Max angular error when searching for dwell close to the click point (deg).");
+    tt->help = tdrpStrDup("When the user clicks in HawkEye, the (x,y) location is saved. From this, the elevation, azimuth and range of the click point can be determined. This parameter gives the max angular error allowable in this search.");
+    tt->val_offset = (char *) &click_point_search_angle_error - &_start_;
+    tt->single_val.d = 10;
     tt++;
     
     // trailing entry has param_name set to NULL

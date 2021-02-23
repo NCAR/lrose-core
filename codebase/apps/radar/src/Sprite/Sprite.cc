@@ -115,14 +115,14 @@ Sprite::Sprite(int argc, char **argv) :
 
   // create CIDD coord shmem 
   
-  _coordShmem = (coord_export_t *)
-    ushm_create(_params.moments_shmem_key, sizeof(coord_export_t), 0666);
-  if (_coordShmem == NULL) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "  Could not attach shared memory from moments display app" << endl;
-    cerr << "  shmem key: " << _params.moments_shmem_key << endl;
-    OK = false;
-  }
+  // _coordShmem = (coord_export_t *)
+  //   ushm_create(_params.moments_shmem_key, sizeof(coord_export_t), 0666);
+  // if (_coordShmem == NULL) {
+  //   cerr << "ERROR: " << _progName << endl;
+  //   cerr << "  Could not attach shared memory from moments display app" << endl;
+  //   cerr << "  shmem key: " << _params.moments_shmem_key << endl;
+  //   OK = false;
+  // }
 
   // beam manager
 

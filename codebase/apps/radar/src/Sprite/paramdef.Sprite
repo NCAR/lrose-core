@@ -112,30 +112,26 @@ paramdef double {
 } min_secs_between_rendering;
 
 commentdef {
-  p_header = "GETTING CLICK-POINT INFO FROM MOMENTS DISPLAY (CIDD or HawkEye)";
+  p_header = "INITIAL location";
 }
-
-paramdef int {
-  p_default = 61500;
-  p_descr = "The shared memory key for the moments display coordinate struct.";
-  p_help = "When the user clicks in the moments main window, the coordinate struct is updated with the location and time.";
-} moments_shmem_key;
 
 paramdef double {
-  p_default = 10.0;
-  p_descr = "Max angular error when searching for spectra close to the click point (deg).";
-  p_help = "When the user clicks in CIDD, the (x) location is saved. From this, the elevation, elevation and range of the click point can be determined. The data base is then searched for spectra from a beam close to this. This parameter gives the max angular error allowable in this search.";
-} moments_max_search_angle_error;
+  p_default = 0.5;
+  p_descr = "Initial elevation for selecting a radar gate (deg).";
+  p_help = "The display begins using this elevation. The user can then change the elevation either by selecting a point in HawkEye, or by clicking in the ascope plots.";
+} start_elevation;
 
-commentdef {
-  p_header = "INITIAL RANGE";
-}
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Initial azimuth for selecting a radar gate (deg).";
+  p_help = "The display begins using this azimuth. The user can then change the azimuth either by selecting a point in HawkEye, or by clicking in the ascope plots.";
+} start_azimuth;
 
 paramdef double {
   p_default = 50.0;
   p_descr = "Initial range for selecting a radar gate (km).";
   p_help = "The display begins using this range. The user can then change the range either by selecting a point in CIDD or HawkEye, or by clicking in the ascope plots.";
-} selected_range_km;
+} start_range_km;
 
 commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
@@ -993,7 +989,7 @@ paramdef boolean {
 } use_cal_from_time_series;
 
 commentdef {
-  p_header = "CLICK POINT DATA MESSAGING";
+  p_header = "CLICK POINT DATA MESSAGING from display (HawkEye or CIDD)";
   p_text = "Reading and writing the click point location to an FMQ in XML format.";
 }
 
@@ -1002,4 +998,10 @@ paramdef string {
   p_descr = "URL for click point URL.";
   p_help = "If the user clicks on a point in HawkEye, the details of the latest click point are read from the FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT. Also, if the user changes the time or range in Sprite, this change will be written to the FMQ.";
 } click_point_fmq_url;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Max angular error when searching for dwell close to the click point (deg).";
+  p_help = "When the user clicks in HawkEye, the (x,y) location is saved. From this, the elevation, azimuth and range of the click point can be determined. This parameter gives the max angular error allowable in this search.";
+} click_point_search_angle_error;
 

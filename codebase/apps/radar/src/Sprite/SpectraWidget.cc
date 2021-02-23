@@ -87,7 +87,7 @@ SpectraWidget::SpectraWidget(QWidget* parent,
   _ascopesConfigured = false;
   _iqPlotsConfigured = false;
 
-  _selectedRangeKm = _params.selected_range_km;
+  _selectedRangeKm = _params.start_range_km;
 
   // Set up the background color
 
