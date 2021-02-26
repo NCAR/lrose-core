@@ -269,6 +269,8 @@ int RadxDealias::_processOne(string filePath)
   // read input file
   _readFile(filePath, vol);
 
+  vol.sortSweepRaysByAzimuth();
+
   vol.loadFieldsFromRays();
 
   // TODO: force same geometry ...
