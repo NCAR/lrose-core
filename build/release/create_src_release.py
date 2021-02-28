@@ -373,7 +373,9 @@ def createCMakeFiles():
 
     os.chdir(coreDir)
 
-    if (options.static):
+    if (options.package == "lrose-cidd"):
+        shellCmd("./build/cmake/createCMakeLists.py --coreDir . --static -m32")
+    elif (options.static):
         shellCmd("./build/cmake/createCMakeLists.py --coreDir . --static")
     else:
         shellCmd("./build/cmake/createCMakeLists.py --coreDir .")
