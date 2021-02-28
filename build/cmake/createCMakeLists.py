@@ -76,6 +76,10 @@ def main():
                       dest='static', default=False,
                       action="store_true",
                       help='Create static lib objects. Default is shared')
+    parser.add_option('--m32',
+                      dest='m32', default=False,
+                      action="store_true",
+                      help='Build with 32-bit emulation, for CIDD')
     parser.add_option('--renewTemplates',
                       dest='renewTemplates', default=False,
                       action="store_true",
@@ -120,6 +124,7 @@ def main():
         else:
             print("  install prefix dir: ", options.prefix, file=sys.stderr)
         print("  static        : ", options.static, file=sys.stderr)
+        print("  m32           : ", options.m32, file=sys.stderr)
         print("  verboseMake   : ", options.verboseMake, file=sys.stderr)
         print("  withJasper    : ", options.withJasper, file=sys.stderr)
         print("=============================================", file=sys.stderr)
@@ -600,7 +605,13 @@ def writeCMakeListsTop(dir):
     fo.write('enable_testing()\n')
     fo.write('\n')
 
+    if (options.m32):
+        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -m32 ")\n')
+
     fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
+    if (options.m32):
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 ")\n')
+
     if (not options.withJasper):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB ")\n')
         # fo.write('add_definitions(-DNO_JASPER_LIB )\n')
