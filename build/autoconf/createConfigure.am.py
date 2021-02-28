@@ -145,18 +145,18 @@ def getLibList(dir):
 
     # check if this dir has a makefile or Makefile
 
-    makefilePath = getMakefileTemplatePath(dir)
-    if (os.path.exists(makefilePath) == False):
+    templatePath = getMakefileTemplatePath(dir)
+    if (os.path.exists(templatePath) == False):
         print("ERROR - ", thisScriptName, file=sys.stderr)
         print("  No makefile in lib dir: ", dir, file=sys.stderr)
         exit(1)
 
     if (options.debug == True):
-        print("  Searching makefile template: ", makefilePath, file=sys.stderr)
+        print("  Searching makefile template: ", templatePath, file=sys.stderr)
 
     # search for SUB_DIRS key in makefile
 
-    subNameList = getValueListForKey(makefilePath, "SUB_DIRS")
+    subNameList = getValueListForKey(templatePath, "SUB_DIRS")
 
     if (len(subNameList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
@@ -191,9 +191,9 @@ def searchDir(dir):
         print("  Searching dir: ", dir, file=sys.stderr)
 
     # check if this dir has a makefile or Makefile
-
-    makefilePath = getMakefileTemplatePath(dir)
-    if (os.path.exists(makefilePath) == False):
+    
+    templatePath = getMakefileTemplatePath(dir)
+    if (os.path.exists(templatePath) == False):
         if (options.verbose == True):
             print("  No makefile or Makefile found", file=sys.stderr)
         return
@@ -201,7 +201,7 @@ def searchDir(dir):
     # detect which type of directory we are in
         
     if (options.verbose == True):
-        print("  Found makefile: ", makefilePath, file=sys.stderr)
+        print("  Found makefile: ", templatePath, file=sys.stderr)
 
     if ((dir == "libs/perl5") or
         (dir == "apps/scripts")):
@@ -228,7 +228,9 @@ def searchDir(dir):
         if (options.shared == True):
             sharedStr = " --shared "
         cmd = os.path.join(thisScriptDir, "createMakefile.am.lib.py") + \
-              " --dir " + libDir + sharedStr + debugStr
+            " --dir " + libDir + \
+            " --template " + templatePath + \
+            sharedStr + debugStr
         cmd += " --libList " + libList
         runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
@@ -267,6 +269,7 @@ def searchDir(dir):
 
         cmd = scriptPath
         cmd += " --dir " + absDir + debugStr
+        cmd += " --template " + templatePath
         cmd += " --libList " + libList
         if (options.osx == True):
             cmd += " --osx "
@@ -279,7 +282,9 @@ def searchDir(dir):
 
         # create makefile.am for recursion
         cmd = os.path.join(thisScriptDir, "createMakefile.am.recurse.py") + \
-              " --dir " + absDir + debugStr
+              " --dir " + absDir + \
+              " --template " + templatePath + \
+              debugStr
         runCommand(cmd)
         makefileCreateList.append(makefileCreatePath)
         # recurse
@@ -298,10 +303,10 @@ def loadSubdirList(dir):
     global subdirList
     subdirList = []
 
-    makefilePath = getMakefileTemplatePath(dir)
+    templatePath = getMakefileTemplatePath(dir)
 
     try:
-        fp = open(makefilePath, 'r')
+        fp = open(templatePath, 'r')
     except IOError as e:
         if (options.verbose == True):
             print("ERROR - ", thisScriptName, file=sys.stderr)
@@ -411,15 +416,30 @@ def writeConfigureAc():
 
 def getMakefileTemplatePath(dir):
                     
-    makefilePath = os.path.join(dir, '__makefile.template')
-    if (os.path.exists(makefilePath) == False):
-        makefilePath = os.path.join(dir, 'makefile')
-        if (os.path.exists(makefilePath) == False):
-            makefilePath = os.path.join(dir, 'Makefile')
-            if (os.path.exists(makefilePath) == False):
-                makefilePath = os.path.join(dir, 'not_found')
+    # get Makefile and template
 
-    return makefilePath
+    cwd = os.getcwd()
+    dirPath = os.path.join(cwd, dir)
+    
+    templateMakefilePath = os.path.join(dirPath, '__makefile.template')
+    upperMakefilePath = os.path.join(dirPath, 'Makefile')
+    lowerMakefilePath = os.path.join(dirPath, 'makefile')
+
+    # use lower case makefile if it exists
+    
+    if (os.path.exists(lowerMakefilePath)):
+        templatePath = lowerMakefilePath
+    elif (os.path.exists(upperMakefilePath)):
+        templatePath = upperMakefilePath
+    elif (os.path.exists(templateMakefilePath)):
+        templatePath = templateMakefilePath
+    else:
+        print("-->> Makefile not found, dir: ", dirPath, file=sys.stderr)
+        return 'not-found'
+    
+    print("  ---->> makefile template path: ", templatePath, file=sys.stderr)
+
+    return templatePath
 
 ########################################################################
 # get string value based on search key

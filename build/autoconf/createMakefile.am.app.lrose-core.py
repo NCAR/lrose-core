@@ -24,7 +24,6 @@ def main():
 
     global options
     global thisAppName
-    global makefileName
     global compileFileList
     global headerFileList
     global linkOrder
@@ -66,6 +65,9 @@ def main():
     parser.add_option('--dir',
                       dest='dir', default=".",
                       help='Path of app directory')
+    parser.add_option('--template',
+                      dest='template', default="unknown",
+                      help='Path of makefile template')
     parser.add_option('--libList',
                       dest='libList', default="",
                       help='List of libs in package')
@@ -82,34 +84,13 @@ def main():
     if (options.debug):
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  App dir:", options.dir, file=sys.stderr)
+        print("  Makefile template: ", options.template, file=sys.stderr)
         print("  Lib list: ", options.libList, file=sys.stderr)
         print("  osx: ", options.osx, file=sys.stderr)
 
     # go to the app dir
 
     os.chdir(options.dir)
-
-    # get makefile name in use
-    # makefile has preference over Makefile
-
-    makefileName = '__makefile.template'
-    if (os.path.exists(makefileName) == False):
-        makefileName = 'makefile'
-        if (os.path.exists(makefileName) == False):
-            makefileName = 'Makefile'
-            if (os.path.exists(makefileName) == False):
-                print("ERROR - ", thisScriptName, file=sys.stderr)
-                print("  Cannot find makefile or Makefile", file=sys.stderr)
-                print("  dir: ", options.dir, file=sys.stderr)
-                exit(1)
-
-    # copy makefile in case we rerun this script
-
-    if (makefileName != "__makefile.template"):
-        shutil.copy(makefileName, "__makefile.template")
-
-    if (options.debug):
-        print("-->> using makefile template: ", makefileName, file=sys.stderr)
 
     # parse the LROSE Makefile to get the app name
 
@@ -268,11 +249,11 @@ def getAppName():
 
     # search for TARGET_FILE key in makefile
 
-    valList = getValueListForKey(makefileName, "TARGET_FILE")
+    valList = getValueListForKey(options.template, "TARGET_FILE")
 
     if (len(valList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find TARGET_FILE in ", makefileName, file=sys.stderr)
+        print("  Cannot find TARGET_FILE in ", options.template, file=sys.stderr)
         print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
@@ -292,10 +273,10 @@ def setCompileList():
                     'NORM_SRCS', 'MOC_SRCS', "MOC_OUTPUT" ]
 
     try:
-        fp = open(makefileName, 'r')
+        fp = open(options.template, 'r')
     except IOError as e:
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot open: ", makefileName, file=sys.stderr)
+        print("  Cannot open: ", options.template, file=sys.stderr)
         exit(1)
 
     lines = fp.readlines()
@@ -310,10 +291,10 @@ def setCompileList():
 def checkForQt():
                     
     try:
-        fp = open(makefileName, 'r')
+        fp = open(options.template, 'r')
     except IOError as e:
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot open: ", makefileName, file=sys.stderr)
+        print("  Cannot open: ", options.template, file=sys.stderr)
         exit(1)
 
     lines = fp.readlines()
@@ -331,10 +312,10 @@ def checkForQt():
 def checkForX11():
                     
     try:
-        fp = open(makefileName, 'r')
+        fp = open(options.template, 'r')
     except IOError as e:
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot open: ", makefileName, file=sys.stderr)
+        print("  Cannot open: ", options.template, file=sys.stderr)
         exit(1)
 
     lines = fp.readlines()
@@ -467,7 +448,7 @@ def getMakefileLibList():
 
     # search for LOC_LIBS key in makefile
 
-    locLibs = getValueListForKey(makefileName, "LOC_LIBS")
+    locLibs = getValueListForKey(options.template, "LOC_LIBS")
     if (len(locLibs) > 0):
         for line in locLibs:
             makeLibList.extend(decodeLibLine(line))
