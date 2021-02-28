@@ -460,25 +460,23 @@ def writeMakefileAm():
     fo.write("#\n")
     fo.write("###############################################\n")
     fo.write("\n")
-    fo.write("# compile flags - include header subdirectory\n")
+    fo.write("# compile flags\n")
     fo.write("\n")
-    fo.write("AM_CFLAGS = -I./include\n")
-    fo.write("AM_CFLAGS += -fPIC\n")
-    fo.write("\n")
+    fo.write("AM_CFLAGS = -fPIC\n")
+    fo.write("AM_CFLAGS += -I./include\n")
+    for lib in libList:
+        fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib)
+    fo.write("# add includes already installed in prefix\n")
+    fo.write("AM_CFLAGS += -I$(prefix)/include\n")
     if (isDebianBased):
-        fo.write("# NOTE: add in Debian location of HDF5\n")
+        fo.write("# add in Debian location of HDF5\n")
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
-    fo.write("# NOTE: add in Mac OSX location of XQuartz\n")
+    fo.write("# add in Mac OSX location of XQuartz\n")
     fo.write("AM_CFLAGS += -I/usr/X11R6/include -I/opt/X11/include\n")
     if (options.shared == True):
         fo.write("ACLOCAL_AMFLAGS = -I m4\n")
-    #    fo.write("AM_CFLAGS += -I$(prefix)/include\n")
-
-    for lib in libList:
-        # if (lib.used):
-        #fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib.name)
-        fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib)
     fo.write("\n")
+
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
     fo.write("# target library file\n")

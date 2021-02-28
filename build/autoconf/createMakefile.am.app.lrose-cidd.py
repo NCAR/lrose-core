@@ -534,13 +534,18 @@ def writeMakefileAm():
     fo.write("###############################################\n")
     fo.write("\n")
 
-    fo.write("# compile flags - includes\n")
+    fo.write("# compile flags\n")
     fo.write("\n")
-    fo.write("AM_CFLAGS = -I.\n")
-    fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")
-    fo.write("AM_CFLAGS += -I/usr/X11R6/include\n")
+    fo.write("AM_CFLAGS = -fPIC\n")
+    fo.write("AM_CFLAGS += -I.\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
+    fo.write("# add includes already installed in prefix\n")
+    fo.write("AM_CFLAGS += -I$(prefix)/include\n")
+    fo.write("# X11R6 is for Mac OSX location of XQuartz\n")
+    fo.write("AM_CFLAGS += -I/usr/X11R6/include\n")
+    fo.write("# add in Debian location of HDF5\n")
+    fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
     if (needQt):
         fo.write("AM_CFLAGS += $(QT_CFLAGS)\n")
     fo.write("\n")
@@ -550,7 +555,8 @@ def writeMakefileAm():
     fo.write("# load flags\n")
     fo.write("\n")
     fo.write("AM_LDFLAGS = -L. \n")
-    fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")
+    fo.write("AM_LDFLAGS += -L$(prefix)/lib\n")
+    fo.write("X11R6 is for Mac OSX location of XQuartz\n")
     fo.write("AM_LDFLAGS += -L/usr/X11R6/lib\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
