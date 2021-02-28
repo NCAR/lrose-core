@@ -7,6 +7,7 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
@@ -100,27 +101,27 @@ def main():
 
     # let users know what we are doing
 
-    print >>sys.stderr, "****************************************************"
-    print >>sys.stderr, "  Running " + thisScriptName
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  Building and installing " + package + " release"
-    print >>sys.stderr, "  OS type: " + ostype
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  NCAR, Boulder, CO, USA"
-    print >>sys.stderr, ""
-    print >>sys.stderr, "  " + dateTimeStr
-    print >>sys.stderr, ""
-    print >>sys.stderr, "****************************************************"
-    print >>sys.stderr, "  dateStr: ", dateStr
-    print >>sys.stderr, "  timeStr: ", timeStr
-    print >>sys.stderr, "  platform: ", platform
-    print >>sys.stderr, "  runDir: ", runDir
-    print >>sys.stderr, "  installDir: ", installDir
-    print >>sys.stderr, "  package: ", package
-    print >>sys.stderr, "  version: ", version
-    print >>sys.stderr, "  srcRelease: ", srcRelease
-    print >>sys.stderr, "  installScripts: ", options.installScripts
-    print >>sys.stderr, "****************************************************"
+    print("****************************************************", file=sys.stderr)
+    print("  Running " + thisScriptName, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  Building and installing " + package + " release", file=sys.stderr)
+    print("  OS type: " + ostype, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  NCAR, Boulder, CO, USA", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("  " + dateTimeStr, file=sys.stderr)
+    print("", file=sys.stderr)
+    print("****************************************************", file=sys.stderr)
+    print("  dateStr: ", dateStr, file=sys.stderr)
+    print("  timeStr: ", timeStr, file=sys.stderr)
+    print("  platform: ", platform, file=sys.stderr)
+    print("  runDir: ", runDir, file=sys.stderr)
+    print("  installDir: ", installDir, file=sys.stderr)
+    print("  package: ", package, file=sys.stderr)
+    print("  version: ", version, file=sys.stderr)
+    print("  srcRelease: ", srcRelease, file=sys.stderr)
+    print("  installScripts: ", options.installScripts, file=sys.stderr)
+    print("****************************************************", file=sys.stderr)
 
     # create the install dir
 
@@ -144,7 +145,7 @@ def main():
     
     print("  **************************************************")
     print("  *** Done building and installing src release ***")
-    print("  *** installed in dir: " + installDir + " ***")
+    print(("  *** installed in dir: " + installDir + " ***"))
     print("  **************************************************")
 
     sys.exit(0)
@@ -166,7 +167,7 @@ def readReleaseInfoFile():
     
     releaseInfoPath = "ReleaseInfo.txt"
     if (options.verbose):
-        print >>sys.stderr, "==>> reading info file: ", releaseInfoPath
+        print("==>> reading info file: ", releaseInfoPath, file=sys.stderr)
         
     info = open(releaseInfoPath, 'r')
 
@@ -181,16 +182,16 @@ def readReleaseInfoFile():
     # decode lines
 
     if (len(lines) < 1):
-        print >>sys.stderr, "ERROR reading info file: ", releaseInfoPath
-        print >>sys.stderr, "  No contents"
+        print("ERROR reading info file: ", releaseInfoPath, file=sys.stderr)
+        print("  No contents", file=sys.stderr)
         sys.exit(1)
 
     for line in lines:
         line = line.strip()
         toks = line.split(":")
         if (options.verbose):
-            print >>sys.stderr, "  line: ", line
-            print >>sys.stderr, "  toks: ", toks
+            print("  line: ", line, file=sys.stderr)
+            print("  toks: ", toks, file=sys.stderr)
         if (len(toks) == 2):
             if (toks[0] == "package"):
                 package = toks[1]
@@ -200,7 +201,7 @@ def readReleaseInfoFile():
                 srcRelease = toks[1]
         
     if (options.verbose):
-        print >>sys.stderr, "==>> done reading info file: ", releaseInfoPath
+        print("==>> done reading info file: ", releaseInfoPath, file=sys.stderr)
 
 ########################################################################
 # get the OS type
@@ -222,14 +223,14 @@ def getOsType():
     f.close()
 
     if (len(lines) < 1):
-        print >>sys.stderr, "ERROR getting OS type"
-        print >>sys.stderr, "  'uname -a' call did not succeed"
+        print("ERROR getting OS type", file=sys.stderr)
+        print("  'uname -a' call did not succeed", file=sys.stderr)
         sys.exit(1)
 
     for line in lines:
         line = line.strip()
         if (options.verbose):
-            print >>sys.stderr, "  line: ", line
+            print("  line: ", line, file=sys.stderr)
         if (line.find("x86_64") > 0):
             ostype = "x86_64"
         elif (line.find("i686") > 0):
@@ -286,22 +287,22 @@ def buildPackageCmake():
 def shellCmd(cmd):
 
     if (options.debug):
-        print >>sys.stderr, "running cmd:", cmd, " ....."
+        print("running cmd:", cmd, " .....", file=sys.stderr)
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print >>sys.stderr, "Child exited with code: ", retcode
+            print("Child exited with code: ", retcode, file=sys.stderr)
             sys.exit(1)
         else:
             if (options.verbose):
-                print >>sys.stderr, "Child returned code: ", retcode
+                print("Child returned code: ", retcode, file=sys.stderr)
     except OSError as e:
-        print >>sys.stderr, "Execution failed:", e
+        print("Execution failed:", e, file=sys.stderr)
         sys.exit(1)
 
     if (options.debug):
-        print >>sys.stderr, ".... done"
+        print(".... done", file=sys.stderr)
     
 ########################################################################
 # Run - entry point
