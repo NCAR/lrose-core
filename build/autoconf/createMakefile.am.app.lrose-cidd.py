@@ -556,7 +556,7 @@ def writeMakefileAm():
     fo.write("\n")
     fo.write("AM_LDFLAGS = -L. \n")
     fo.write("AM_LDFLAGS += -L${prefix}/lib\n")
-    fo.write("X11R6 is for Mac OSX location of XQuartz\n")
+    fo.write("# X11R6 is for Mac OSX location of XQuartz\n")
     fo.write("AM_LDFLAGS += -L/usr/X11R6/lib\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
