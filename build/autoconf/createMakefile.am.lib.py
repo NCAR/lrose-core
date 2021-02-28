@@ -467,7 +467,7 @@ def writeMakefileAm():
     for lib in libList:
         fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib)
     fo.write("# add includes already installed in prefix\n")
-    fo.write("AM_CFLAGS += -I$(prefix)/include\n")
+    fo.write("AM_CFLAGS += -I${prefix}/include\n")
     if (isDebianBased):
         fo.write("# add in Debian location of HDF5\n")
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
@@ -489,9 +489,9 @@ def writeMakefileAm():
     fo.write("# headers to be installed\n")
     fo.write("\n")
     if (includesInSubDir == True):
-        fo.write("includedir = $(prefix)/include/%s\n" % thisLibName)
+        fo.write("includedir = ${prefix}/include/%s\n" % thisLibName)
     else:
-        fo.write("includedir = $(prefix)/include\n")
+        fo.write("includedir = ${prefix}/include\n")
     fo.write("\n")
 
     fo.write("include_HEADERS = \\\n")

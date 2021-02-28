@@ -600,7 +600,7 @@ def writeMakefileAm():
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
     fo.write("# add includes already installed in prefix\n")
-    fo.write("AM_CFLAGS += -I$(prefix)/include\n")
+    fo.write("AM_CFLAGS += -I${prefix}/include\n")
     fo.write("\n")
 
     if (needQt):
@@ -630,6 +630,7 @@ def writeMakefileAm():
     fo.write("# load flags\n")
     fo.write("\n")
     fo.write("AM_LDFLAGS = -L.\n")
+    fo.write("AM_LDFLAGS += -L${prefix}/lib\n")
     if (isDebianBased):
         fo.write("# NOTE: add in Debian location of HDF5\n")
         fo.write("AM_LDFLAGS += -L/usr/lib/x86_64-linux-gnu/hdf5/serial\n")
