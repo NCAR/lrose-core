@@ -47,10 +47,8 @@ opt:
 lint:
 depend:
 pure:
-insure:
 clean_bin:
 clean_tdrp:
-clean_insure:
 clean_depend:
 clean_all:
 dbgopt:

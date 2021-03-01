@@ -76,13 +76,10 @@ opt:
 opt4:
 lint:
 depend:
-pure:
-insure:
 install_include:
 clean_bin:
 clean_lib:
 clean_tdrp:
-clean_insure:
 clean_depend:
 clean_all:
 staticopt:
