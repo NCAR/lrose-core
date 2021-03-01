@@ -406,13 +406,13 @@ public:
 
   int temp_profile_search_margin;
 
-  double freezing_level_ht;
+  double shallow_threshold_ht;
 
-  double freezing_level_temp;
+  double shallow_threshold_temp;
 
-  double divergence_level_ht;
+  double deep_threshold_ht;
 
-  double divergence_level_temp;
+  double deep_threshold_temp;
 
   double min_valid_height;
 

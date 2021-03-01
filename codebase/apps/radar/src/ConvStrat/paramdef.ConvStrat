@@ -92,27 +92,27 @@ paramdef int {
 
 paramdef double {
   p_default = 4.5;
-  p_descr = "Freezing level height (km).";	
-  p_help = "Used if vert_levels_type = VERT_LEVELS_BY_HT.";
-} freezing_level_ht;
+  p_descr = "Shallow cloud height threshold (km).";	
+  p_help = "Shallow cloud tops are below this height. Used if vert_levels_type = VERT_LEVELS_BY_HT.";
+} shallow_threshold_ht;
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "Freezing level temperature (degC).";	
-  p_help = "Used if vert_levels_type = VERT_LEVELS_BY_TEMP.";
-} freezing_level_temp;
+  p_descr = "Shallow cloud temperature threshold (degC).";	
+  p_help = "Shallow cloud tops are below this temperature. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.";
+} shallow_threshold_temp;
 
 paramdef double {
   p_default = 8.0;
-  p_descr = "Divergence level height (km).";	
-  p_help = "Convective divergence occurs above this height, forming anvils. Used if vert_levels_type = VERT_LEVELS_BY_HT.";
-} divergence_level_ht;
+  p_descr = "Deep cloud height threshold (km).";	
+  p_help = "Deep clouds extend above this height. Used if vert_levels_type = VERT_LEVELS_BY_HT.";
+} deep_threshold_ht;
 
 paramdef double {
   p_default = -12.0;
-  p_descr = "Divergence level temperature (degC).";	
-  p_help = "Convective divergence occurs above this height, forming anvils. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.";
-} divergence_level_temp;
+  p_descr = "Deep cloud temperature threshold (degC).";	
+  p_help = "Deep clouds extend above this height. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.";
+} deep_threshold_temp;
 
 commentdef {
   p_header = "ALGORITHM PARAMETERS";

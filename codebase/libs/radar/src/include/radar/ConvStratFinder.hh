@@ -103,6 +103,18 @@ public:
 
   void setMinValidDbz(double val) { _minValidDbz = val; }
 
+  // converting texture to convectivity interest
+  // these are the limits mapping to 0 and 1
+  
+  void setTextureLimitLow(double val) { _textureLimitLow = val; }
+  void setTextureLimitHigh(double val) { _textureLimitHigh = val; }
+  
+  // set interest threshold for convection
+
+  void setConvInterestThreshold(double val) {
+    _convInterestThreshold = val;
+  }
+  
   ////////////////////////////////////////////////////////////////////
   // Reflectivity value that indicates definite convection.  If the
   // reflectivity exceeds this value at a point, we assume convection
@@ -198,17 +210,19 @@ public:
                bool projIsLatLon = false);
   
   ////////////////////////////////////////////////////////////////////
-  // Set the freezing level and divergence level in km MSL
+  // Set the shallow and deep height thresholds, in km.
+  // This sets the heights to constant values.
   
-  void setLevelHtValues(double fzLevelHtKm,
-                        double divLevelHtKm);
+  void setConstantHtThresholds(double shallowHtKm,
+                               double deepHtKm);
 
-  // Set the freezing level and divergence level as grids
+  // Set the shallow and deep height thresholds as a grid
+  // These are generally derived from model temperature
   // These must be on the same grid as the radar DBZ data
   
-  void setLevelHtGrids(const fl32 *fzHtKm,
-                       const fl32 *divHtKm,
-                       size_t nptsPlane);
+  void setGridHtThresholds(const fl32 *shallowHtGrid,
+                           const fl32 *deepHtGrid,
+                           size_t nptsPlane);
   
   ////////////////////////////////////////////////////////////////////
   // Set debugging to on or verbose
@@ -231,8 +245,8 @@ public:
   // get the input fields
   
   const fl32 *getDbz3D() const { return _dbz3D.dat(); }
-  const fl32 *getFzHtKm() const { return _fzHtKm.dat(); }
-  const fl32 *getDivHtKm() const { return _divHtKm.dat(); }
+  const fl32 *getShallowHtGrid() const { return _shallowHtGrid.dat(); }
+  const fl32 *getDeepHtGrid() const { return _deepHtGrid.dat(); }
   
   ////////////////////////////////////////////////////////////////////
   // get the resulting partition
@@ -248,9 +262,10 @@ public:
   const fl32 *getStratiformDbz() const { return _stratDbz.dat(); }
 
   ////////////////////////////////////////////////////////////////////
-  // get intermediate fields for debugging
+  // get derived fields
 
   const fl32 *getTexture3D() const { return _texture3D.dat(); }
+  const fl32 *getInterest3D() const { return _interest3D.dat(); }
   const fl32 *getMeanTexture() const { return _meanTexture.dat(); }
   const fl32 *getMeanTextureLow() const { return _meanTextureLow.dat(); }
   const fl32 *getMeanTextureMid() const { return _meanTextureMid.dat(); }
@@ -346,14 +361,24 @@ private:
   // if this is false, grids for fz and div level must be passed in
   
   bool _specifyLevelsByHtValues;
-  double _fzLevelHtKm;
-  double _divLevelHtKm;
+  double _shallowHtKm;
+  double _deepHtKm;
+
+  // converting texture to convectivity interest
+  // these are the limits mapping to 0 and 1
+  
+  double _textureLimitLow;
+  double _textureLimitHigh;
+
+  // interest threshold for convection
+
+  double _convInterestThreshold;
   
   // inputs
   
   TaArray<fl32> _dbz3D;
-  TaArray<fl32> _fzHtKm;  // grid for ht of freezing level
-  TaArray<fl32> _divHtKm; // grid for ht of divergence level
+  TaArray<fl32> _shallowHtGrid; // grid for shallow cloud ht threshold
+  TaArray<fl32> _deepHtGrid;    // grid for deep cloud ht threshold
   
   // primary outputs
   
@@ -369,6 +394,7 @@ private:
   // intermediate fields
   
   TaArray<fl32> _texture3D;
+  TaArray<fl32> _interest3D;
   TaArray<fl32> _meanTexture;
   TaArray<fl32> _meanTextureLow;
   TaArray<fl32> _meanTextureMid;
@@ -396,6 +422,7 @@ private:
   void _expandConvection(ui08 *partition,
                          size_t ix, size_t iy, size_t index);
   void _computeTexture();
+  void _computeInterest();
   void _setPartition3D();
   void _computeProps();
   void _computeProps(size_t index, vector<fl32> &textureProfile);

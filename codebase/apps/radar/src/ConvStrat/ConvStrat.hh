@@ -87,8 +87,8 @@ private:
   ConvStratFinder _finder;
 
   MdvxField *_tempField;
-  MdvxField _fzHtField;
-  MdvxField _divHtField;
+  MdvxField _shallowHtField;
+  MdvxField _deepHtField;
 
   int _doRead();
   void _addFields();
