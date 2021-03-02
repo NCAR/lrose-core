@@ -72,7 +72,7 @@ This requires upgrading the compiler toolchain.
     gcc gcc-c++ gcc-gfortran glibc-devel \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
-    GeographicLib-devel eigen3-devel armadillo-devel \
+    eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
     bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
@@ -103,7 +103,7 @@ This requires upgrading the compiler toolchain.
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
-    GeographicLib-devel eigen3-devel armadillo-devel \
+    eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
     bzip2-devel \
@@ -136,7 +136,7 @@ This requires upgrading the compiler toolchain.
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
-    GeographicLib-devel eigen3-devel armadillo-devel \
+    eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
     bzip2-devel \
@@ -211,7 +211,7 @@ and install in
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
     libpng-devel libtiff-devel zlib-devel libzip-devel \
-    GeographicLib-devel eigen3-devel armadillo-devel \
+    eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
     bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
@@ -237,7 +237,7 @@ and install in
     libfl-dev libbz2-dev libx11-dev libpng-dev \
     libfftw3-dev libexpat1-dev \
     qtbase5-dev qtdeclarative5-dev \
-    libgeographic-dev libeigen3-dev libzip-dev \
+    libeigen3-dev libzip-dev \
     libarmadillo-dev libopenmpi-dev \
     libnetcdf-dev libhdf5-dev hdf5-tools \
     libcurl4-openssl-dev
