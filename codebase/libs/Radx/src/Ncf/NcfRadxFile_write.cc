@@ -3824,10 +3824,17 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
   }
 
   char fileName[BUFSIZ];
-  if (_writeFileNameMode == FILENAME_WITH_START_AND_END_TIMES) {
-
-    char startSubsecsStr[64];
-    char endSubsecsStr[64];
+  /* handle all these cases:
+    typedef enum {
+    FILENAME_WITH_START_AND_END_TIMES,
+    FILENAME_WITH_START_TIME_ONLY,
+    FILENAME_WITH_END_TIME_ONLY
+  } file_name_mode_t;
+  */
+  char startSubsecsStr[64];
+  char endSubsecsStr[64];
+  switch (_writeFileNameMode) {
+  case FILENAME_WITH_START_AND_END_TIMES:
     if (_writeSubsecsInFileName) {
       sprintf(startSubsecsStr, ".%.3d", startMillisecs);
       sprintf(endSubsecsStr, ".%.3d", endMillisecs);
@@ -3853,9 +3860,48 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
             instName.c_str(), siteName.c_str(), volNumStr,
             scanName.c_str(), scanType.c_str(),  
             rangeResolution.c_str(), suffix.c_str());
+    break;
+  case FILENAME_WITH_START_TIME_ONLY:
+    if (_writeSubsecsInFileName) {
+      sprintf(startSubsecsStr, ".%.3d", startMillisecs);
+    } else {
+      startSubsecsStr[0] = '\0';
+    }
 
-  } else {
-    
+    sprintf(fileName,
+            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+            "%s%s%s"
+            "%s%s%s%s.nc",
+            prefix.c_str(),
+            startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+            dateTimeConnector,
+            startTime.getHour(), startTime.getMin(), startTime.getSec(),
+            startSubsecsStr,
+            instName.c_str(), siteName.c_str(), volNumStr,
+            scanName.c_str(), scanType.c_str(),  
+            rangeResolution.c_str(), suffix.c_str());
+    break;
+  case FILENAME_WITH_END_TIME_ONLY:
+    if (_writeSubsecsInFileName) {
+      sprintf(endSubsecsStr, ".%.3d", endMillisecs);
+    } else {
+      endSubsecsStr[0] = '\0';
+    }
+
+    sprintf(fileName,
+            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+            "%s%s%s"
+            "%s%s%s%s.nc",
+            prefix.c_str(),
+            endTime.getYear(), endTime.getMonth(), endTime.getDay(),
+            dateTimeConnector,
+            endTime.getHour(), endTime.getMin(), endTime.getSec(),
+            endSubsecsStr,
+            instName.c_str(), siteName.c_str(), volNumStr,
+            scanName.c_str(), scanType.c_str(),  
+            rangeResolution.c_str(), suffix.c_str());
+    break;
+  default:
     char fileSubsecsStr[64];
     if (_writeSubsecsInFileName) {
       sprintf(fileSubsecsStr, ".%.3d", fileMillisecs);
@@ -3874,7 +3920,6 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
             fileSubsecsStr,
             instName.c_str(), siteName.c_str(), volNumStr,
             scanName.c_str(), scanType.c_str(), suffix.c_str());
-
   }
 
   // make sure the file name is valid - i.e. no / or whitespace
