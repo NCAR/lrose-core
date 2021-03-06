@@ -48,7 +48,7 @@ GridClump::GridClump()
   _initDone = FALSE;
 }
 
-GridClump::GridClump(Clump_order *clump,
+GridClump::GridClump(const Clump_order *clump,
 		     const titan_grid_t &titan_grid,
 		     int start_ix, int start_iy)
 
@@ -70,7 +70,7 @@ GridClump::~GridClump()
 // initializer
 //
 
-void GridClump::init(Clump_order *clump_order,
+void GridClump::init(const Clump_order *clump_order,
 		     const titan_grid_t &titan_grid,
 		     int start_ix, int start_iy)
 
@@ -112,7 +112,7 @@ void GridClump::init(Clump_order *clump_order,
 // Create a set of intervals relative to the bounding box.
 //
 
-void GridClump::_shrinkWrap(Clump_order *clump)
+void GridClump::_shrinkWrap(const Clump_order *clump)
 
 {
 

@@ -53,7 +53,7 @@ DualThresh::DualThresh(const string &prog_name, const Params &params,
   Worker(prog_name, params),
   _inputMdv(input_mdv),
   _inputGrid(input_mdv.grid),
-  _clumping(prog_name)
+  _clumping()
   
 
 {
@@ -225,7 +225,7 @@ int DualThresh::compute(const GridClump &grid_clump)
 
   if (_params.create_dual_threshold_files) {
     for (int i = 0; i < nSecondary; i++) {
-      Clump_order *clump =  _clumping.clumps + i + 1;
+      const Clump_order *clump =  _clumping.getClumps() + i + 1;
       for (int j = 0; j < clump->size; j++) {
 	Interval *intv = clump->ptr[j];
 	int offset = intv->row_in_plane * _nxWork + intv->begin;
@@ -245,7 +245,7 @@ int DualThresh::compute(const GridClump &grid_clump)
   vector<int> valid;
 
   for (int i = 0; i < nSecondary; i++) {
-    Clump_order *clump =  _clumping.clumps + i + 1;
+    const Clump_order *clump =  _clumping.getClumps() + i + 1;
     GridClump gridClump;
     gridClump.init(clump, grid_clump.grid,
 		   grid_clump.startIx, grid_clump.startIy);
@@ -292,7 +292,7 @@ int DualThresh::compute(const GridClump &grid_clump)
   for (int i = 0; i < nSecondary; i++) {
     if (valid[i]) {
       n++;
-      Clump_order *clump =  _clumping.clumps + i + 1;
+      const Clump_order *clump =  _clumping.getClumps() + i + 1;
       for (int j = 0; j < clump->size; j++) {
 	Interval *intv = clump->ptr[j];
 	int offset = intv->row_in_plane * _nxWork + intv->begin;
@@ -720,10 +720,10 @@ void DualThresh::_allocSubClumps()
   _subClumps = new GridClump[_nSubClumps];
 
   if (_nSubClumps > _nSubClumpsAlloc) {
-    _subClumping = (Clumping **)
-      urealloc(_subClumping, _nSubClumps * sizeof(Clumping *));
+    _subClumping = (GridClumping **)
+      urealloc(_subClumping, _nSubClumps * sizeof(GridClumping *));
     for (int i = _nSubClumpsAlloc; i < _nSubClumps; i++) {
-      _subClumping[i] = new Clumping(_progName);
+      _subClumping[i] = new GridClumping();
     }
     _nSubClumpsAlloc = _nSubClumps;
   }
@@ -756,16 +756,16 @@ void DualThresh::_computeSubClump(const GridClump &grid_clump, int clump_id)
   } else {
     int maxPts = 0;
     for (int i = 1; i <= nclumps; i++) {
-      if (_subClumping[clump_id-1]->clumps[i].pts > maxPts) {
+      if (_subClumping[clump_id-1]->getClumps()[i].pts > maxPts) {
 	clumpNum = i;
-	maxPts = _subClumping[clump_id-1]->clumps[i].pts;
+	maxPts = _subClumping[clump_id-1]->getClumps()[i].pts;
       }
     }
   }
 
   // set up the grid clump object
 
-  _subClumps[clump_id-1].init(_subClumping[clump_id-1]->clumps + clumpNum,
+  _subClumps[clump_id-1].init(_subClumping[clump_id-1]->getClumps() + clumpNum,
 			      _inputGrid,
 			      grid_clump.startIx - 1,
 			      grid_clump.startIy - 1);

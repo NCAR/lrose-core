@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Clumping.hh
+// GridClumping.hh
 //
-// Clumping class
+// GridClumping class
 //
 // Provides services for run identification and clumping.
 //
@@ -32,35 +32,35 @@
 //
 // November 1998
 //
+// Copied over from apps/titan/src/Titan/Clumping class
+//
 ///////////////////////////////////////////////////////////////
 
-#ifndef Clumping_HH
-#define Clumping_HH
+#ifndef GridClumping_HH
+#define GridClumping_HH
 
-#include <euclid/clump.h>
 #include <string>
+#include <euclid/clump.h>
 #include <dataport/port_types.h>
 using namespace std;
 
 ////////////////////////////////
-// Clumping
+// GridClumping
 
-class Clumping {
+class GridClumping {
   
 public:
 
   // constructor
 
-  Clumping(const string &prog_name);
+  GridClumping();
 
   // destructor
   
-  virtual ~Clumping();
+  virtual ~GridClumping();
 
-  int OK;
-
-  Clump_order *clumps;
-  int nClumps;
+  const Clump_order *getClumps() const { return _clumps; }
+  int getNClumps() const { return _nClumps; }
 
   // Find the run intervals in a 2D data grid
   int findIntervals(int nx, int ny,
@@ -106,7 +106,8 @@ protected:
   
 private:
 
-  const string &_progName;
+  Clump_order *_clumps;
+  int _nClumps;
 
   Row_hdr *_rowh;
   int _nRowsAlloc;

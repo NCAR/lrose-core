@@ -53,7 +53,7 @@ Identify::Identify(const string &prog_name, const Params &params,
   Worker(prog_name, params),
   _inputMdv(input_mdv),
   _sfile(storm_file),
-  _clumping(prog_name)
+  _clumping()
 
 {
 
@@ -140,8 +140,8 @@ int Identify::run(int scan_num)
   // update the verification grid
 
   if (_verify) {
-    Clump_order *clump = _clumping.clumps + 1;
-    for (int i = 0; i < _clumping.nClumps; i++, clump++) {
+    const Clump_order *clump = _clumping.getClumps() + 1;
+    for (int i = 0; i < _clumping.getNClumps(); i++, clump++) {
       _verify->updateAllStormsGrid(*clump);
     }
   }
@@ -209,7 +209,7 @@ int Identify::_processClumps(int scan_num)
 
   // loop through the clumps - index starts at 1
   
-  Clump_order *clump = _clumping.clumps + 1;
+  const Clump_order *clump = _clumping.getClumps() + 1;
   
   for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
     

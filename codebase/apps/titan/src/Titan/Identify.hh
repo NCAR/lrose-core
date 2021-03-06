@@ -37,8 +37,7 @@
 
 #include "Worker.hh"
 #include "InputMdv.hh"
-#include "Clumping.hh"
-#include <euclid/clump.h>
+#include <euclid/GridClumping.hh>
 #include <titan/TitanStormFile.hh>
 using namespace std;
 
@@ -73,7 +72,7 @@ private:
 
   const InputMdv &_inputMdv;
   TitanStormFile &_sfile;
-  Clumping _clumping;
+  GridClumping _clumping;
 
   int _nClumps;
   int _nStorms;

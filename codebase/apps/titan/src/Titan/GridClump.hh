@@ -52,13 +52,13 @@ public:
 
   GridClump();
 
-  GridClump(Clump_order *clump,
+  GridClump(const Clump_order *clump,
 	    const titan_grid_t &titan_grid,
 	    int start_ix, int start_iy);
 
   // initializer
 
-  void init(Clump_order *clump,
+  void init(const Clump_order *clump,
 	    const titan_grid_t &titan_grid,
 	    int start_ix, int start_iy);
 
@@ -98,7 +98,7 @@ private:
   double _dVolFlat, _dVolAtEquator;
   double _dAreaFlat, _dAreaAtEquator;
 
-  void _shrinkWrap(Clump_order *clump_order);
+  void _shrinkWrap(const Clump_order *clump_order);
   void _computeGeometry();
   
 };

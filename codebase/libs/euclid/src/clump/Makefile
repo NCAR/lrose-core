@@ -69,6 +69,9 @@ SRCS = \
 	union_intervals.c \
 	zero_clump.c
 
+CPPC_SRCS = \
+	GridClumping.cc
+
 #
 # general targets
 #

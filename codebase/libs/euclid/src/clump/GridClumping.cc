@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Clumping.cc
+// GridClumping.cc
 //
-// Clumping class
+// GridClumping class
 //
 // Provides services for run identification and clumping.
 //
@@ -32,9 +32,11 @@
 //
 // November 1998
 //
+// Copied over from apps/titan/src/Titan/Clumping class
+//
 ///////////////////////////////////////////////////////////////
 
-#include "Clumping.hh"
+#include <euclid/GridClumping.hh>
 #include <toolsa/umisc.h>
 using namespace std;
 
@@ -42,12 +44,9 @@ using namespace std;
 // constructor
 //
 
-Clumping::Clumping(const string &prog_name) :
-  _progName(prog_name)
+GridClumping::GridClumping()
 
 {
-
-  OK = TRUE;
 
   _rowh = NULL;
   _nRowsAlloc = 0;
@@ -57,8 +56,8 @@ Clumping::Clumping(const string &prog_name) :
   _nIntOrderAlloc = 0;
   _intervalOrder = NULL;
 
-  clumps = NULL;
-  nClumps = 0;
+  _clumps = NULL;
+  _nClumps = 0;
 
 }
 
@@ -66,11 +65,11 @@ Clumping::Clumping(const string &prog_name) :
 // destructor
 //
 
-Clumping::~Clumping()
+GridClumping::~GridClumping()
 
 {
 
-  EG_free_clumps(&_nIntOrderAlloc, &clumps, &_intervalOrder);
+  EG_free_clumps(&_nIntOrderAlloc, &_clumps, &_intervalOrder);
   EG_free_rowh(&_nRowsAlloc, &_rowh);
   EG_free_intervals(&_intervals, &_nIntervalsAlloc);
 
@@ -84,7 +83,7 @@ Clumping::~Clumping()
 // returns number of intervals
 //
 
-int Clumping::findIntervals(int nx, int ny,
+int GridClumping::findIntervals(int nx, int ny,
 			    unsigned char *data_grid,
                             int byte_threshold)
 
@@ -95,12 +94,12 @@ int Clumping::findIntervals(int nx, int ny,
 			       &_intervals, &_nIntervalsAlloc,
 			       _rowh, byte_threshold);
 
-  return (nInt);
+  return nInt;
 }
 
 // for floats
 
-int Clumping::findIntervals(int nx, int ny,
+int GridClumping::findIntervals(int nx, int ny,
 			    fl32 *data_grid,
                             fl32 threshold)
 
@@ -111,7 +110,7 @@ int Clumping::findIntervals(int nx, int ny,
                                      &_intervals, &_nIntervalsAlloc,
                                      _rowh, threshold);
 
-  return (nInt);
+  return nInt;
 }
 
 ///////////////////////////////////////////
@@ -122,7 +121,7 @@ int Clumping::findIntervals(int nx, int ny,
 // returns number of intervals
 //
 
-int Clumping::findIntervals3D(int nx, int ny, int nz,
+int GridClumping::findIntervals3D(int nx, int ny, int nz,
 			      unsigned char *data_grid,
 			      int byte_threshold)
 
@@ -139,13 +138,13 @@ int Clumping::findIntervals3D(int nx, int ny, int nz,
 				  &_intervals, &_nIntervalsAlloc,
 				  _rowh, byte_threshold);
 
-  return (nInt);
+  return nInt;
 
 }
 
 // for floats
 
-int Clumping::findIntervals3D(int nx, int ny, int nz,
+int GridClumping::findIntervals3D(int nx, int ny, int nz,
 			      fl32 *data_grid,
 			      fl32 threshold)
 
@@ -163,7 +162,7 @@ int Clumping::findIntervals3D(int nx, int ny, int nz,
                                         &_intervals, &_nIntervalsAlloc,
                                         _rowh, threshold);
 
-  return (nInt);
+  return nInt;
 
 }
 
@@ -175,7 +174,7 @@ int Clumping::findIntervals3D(int nx, int ny, int nz,
 //
 //
 
-void Clumping::edm2D(int nx, int ny,
+void GridClumping::edm2D(int nx, int ny,
 		     unsigned char *edm_grid)
   
 {
@@ -188,7 +187,7 @@ void Clumping::edm2D(int nx, int ny,
 // Erode clumps, put result in eroded grid
 //
 
-void Clumping::erode(int nx, int ny, unsigned char *eroded_grid,
+void GridClumping::erode(int nx, int ny, unsigned char *eroded_grid,
 		     int erosion_threshold)
 
 {
@@ -206,12 +205,12 @@ void Clumping::erode(int nx, int ny, unsigned char *eroded_grid,
 }
 
 ///////////////////////////////////////////////////
-// performClumping
+// performGridClumping
 //
 // returns number of clumps
 //
 
-int Clumping::performClumping(int nx, int ny, int nz,
+int GridClumping::performClumping(int nx, int ny, int nz,
 			      unsigned char *data_grid,
 			      int min_overlap,
 			      int byte_threshold)
@@ -240,7 +239,7 @@ int Clumping::performClumping(int nx, int ny, int nz,
   // allocate space for intervals and clumps
   
   EG_alloc_clumps(nInt, &_nIntOrderAlloc,
-		  &clumps, &_intervalOrder);
+		  &_clumps, &_intervalOrder);
   
   // set clump ids to NULL_ID
   
@@ -248,10 +247,10 @@ int Clumping::performClumping(int nx, int ny, int nz,
   
   // clump
   
-  nClumps = EG_rclump_3d(_rowh, nrows_per_plane, nplanes, TRUE,
-			 min_overlap, _intervalOrder, clumps);
+  _nClumps = EG_rclump_3d(_rowh, nrows_per_plane, nplanes, TRUE,
+			 min_overlap, _intervalOrder, _clumps);
 
-  return (nClumps);
+  return _nClumps;
   
 }
     
@@ -261,7 +260,7 @@ int Clumping::performClumping(int nx, int ny, int nz,
 // returns number of clumps
 //
 
-int Clumping::performClumping(int nx, int ny, int nz,
+int GridClumping::performClumping(int nx, int ny, int nz,
 			      fl32 *data_grid,
 			      int min_overlap,
 			      fl32 threshold)
@@ -290,7 +289,7 @@ int Clumping::performClumping(int nx, int ny, int nz,
   // allocate space for intervals and clumps
   
   EG_alloc_clumps(nInt, &_nIntOrderAlloc,
-		  &clumps, &_intervalOrder);
+		  &_clumps, &_intervalOrder);
   
   // set clump ids to NULL_ID
   
@@ -298,10 +297,10 @@ int Clumping::performClumping(int nx, int ny, int nz,
   
   // clump
   
-  nClumps = EG_rclump_3d(_rowh, nrows_per_plane, nplanes, TRUE,
-			 min_overlap, _intervalOrder, clumps);
+  _nClumps = EG_rclump_3d(_rowh, nrows_per_plane, nplanes, TRUE,
+                          min_overlap, _intervalOrder, _clumps);
 
-  return (nClumps);
+  return _nClumps;
   
 }
     
@@ -311,7 +310,7 @@ int Clumping::performClumping(int nx, int ny, int nz,
 // allocate row headers
 //
 
-void Clumping::_allocRowh(int nrows_per_vol)
+void GridClumping::_allocRowh(int nrows_per_vol)
 
 {
   EG_alloc_rowh(nrows_per_vol, &_nRowsAlloc, &_rowh);

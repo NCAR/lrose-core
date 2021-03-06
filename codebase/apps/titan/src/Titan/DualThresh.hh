@@ -38,13 +38,13 @@
 #define DualThresh_HH
 
 #include "Worker.hh"
-#include "Clumping.hh"
 
 class InputMdv;
 class GridClump;
 
 #include <dataport/port_types.h>
 #include <rapformats/titan_grid.h>
+#include <euclid/GridClumping.hh>
 using namespace std;
 
 ////////////////////////////////
@@ -86,7 +86,7 @@ private:
 
   const InputMdv &_inputMdv;
   const titan_grid_t &_inputGrid;
-  Clumping _clumping;
+  GridClumping _clumping;
 
   int _nxInput;
   int _nyInput;
@@ -101,7 +101,7 @@ private:
   int _nSubClumps;
   int _nSubClumpsAlloc;
   GridClump *_subClumps;
-  Clumping **_subClumping;
+  GridClumping **_subClumping;
   
   int _nComp;
 
