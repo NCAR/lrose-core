@@ -52,7 +52,6 @@ HDRS = \
 	Args.hh \
 	Area.hh \
 	Boundary.hh \
-	Clumping.hh \
 	ConvectionFinder.hh \
 	DataTimes.hh \
 	DualThresh.hh \
@@ -79,7 +78,6 @@ CPPC_SRCS = \
 	Args.cc \
 	Area.cc \
 	Boundary.cc \
-	Clumping.cc \
 	ConvectionFinder.cc \
 	DataTimes.cc \
 	DualThresh.cc \
