@@ -227,6 +227,10 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
   
   _computeInterest();
 
+  // perform clumping on the interest field
+
+  _performClumping();
+
   // set the 3D version of the partition
 
   _setPartition3D();
@@ -563,6 +567,26 @@ void ConvStratFinder::_computeInterest()
       } // ix
     } // iy
   } // iz
+  
+}
+
+/////////////////////////////////////////////////////////
+// perform clumping on the interest field
+
+void ConvStratFinder::_performClumping()
+  
+{
+
+  int nOverlap = 1;
+  _nClumps = _clumping.performClumping(_nx, _ny, _zKm.size(),
+                                       _interest3D.dat(),
+                                       nOverlap,
+                                       _convInterestThreshold);
+  
+  if (_verbose) {
+    cerr << "ConvStratFinder::_performClumping()" << endl;
+    cerr << "  N clumps: " << _nClumps << endl;
+  }
   
 }
 

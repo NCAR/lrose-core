@@ -43,6 +43,7 @@
 #include <toolsa/TaArray.hh>
 #include <toolsa/TaThread.hh>
 #include <dataport/port_types.h>
+#include <euclid/GridClumping.hh>
 using namespace std;
 
 ////////////////////////
@@ -373,6 +374,11 @@ private:
   // interest threshold for convection
 
   double _convInterestThreshold;
+
+  // clumping the convective regions
+  
+  GridClumping _clumping;
+  int _nClumps;
   
   // inputs
   
@@ -423,6 +429,7 @@ private:
                          size_t ix, size_t iy, size_t index);
   void _computeTexture();
   void _computeInterest();
+  void _performClumping();
   void _setPartition3D();
   void _computeProps();
   void _computeProps(size_t index, vector<fl32> &textureProfile);
