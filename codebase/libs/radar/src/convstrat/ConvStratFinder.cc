@@ -76,6 +76,7 @@ ConvStratFinder::ConvStratFinder()
 
   _nx = _ny = 0;
   _dx = _dy = 0.0;
+  _dxKm = _dyKm = 0.0;
   _minx = _miny = 0;
   _nxy = _nxyz = 0;
   _projIsLatLon = false;
@@ -123,6 +124,18 @@ void ConvStratFinder::setGrid(size_t nx, size_t ny,
   _specifyLevelsByHtValues = true;
   _gridSet = true;
 
+  // set geometry in km
+  
+  if (_projIsLatLon) {
+    double meanLat = (_miny + _ny * _dy / 2.0);
+    double cosLat = cos(meanLat * DEG_TO_RAD);
+    _dyKm = _dy * KM_PER_DEG_AT_EQ;
+    _dxKm = _dx * KM_PER_DEG_AT_EQ * cosLat;
+  } else {
+    _dxKm = _dx;
+    _dyKm = _dy;
+  }
+
   // allocate the arrays and set to missing
 
   _allocArrays();
@@ -167,15 +180,6 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
 
   int iret = 0;
   PMU_auto_register("ConvStratFinder::partition()");
-
-  // set geometry in km
-  
-  if (_projIsLatLon) {
-    double meanLat = (_miny + _ny * _dy / 2.0);
-    double cosLat = cos(meanLat * DEG_TO_RAD);
-    _dy = _dy * KM_PER_DEG_AT_EQ;
-    _dx = _dx * KM_PER_DEG_AT_EQ * cosLat;
-  }
 
   // compute min and max vert indices
 
@@ -587,6 +591,12 @@ void ConvStratFinder::_performClumping()
     cerr << "ConvStratFinder::_performClumping()" << endl;
     cerr << "  N clumps: " << _nClumps << endl;
   }
+
+  for (int ii = 0; ii < _nClumps; ii++) {
+    ClumpGeom clump(this, _clumping.getClumps() + ii);
+    clump.computeGeom();
+    _clumps.push_back(clump);
+  }
   
 }
 
@@ -918,13 +928,13 @@ void ConvStratFinder::_expandConvection(ui08 *partition,
   double radius = _computeConvRadiusKm(backgroundDbz);
   _convRadiusKm.dat()[index] = radius;
   double radSq = radius * radius;
-  size_t ny = (size_t) floor(radius / _dy + 0.5);
-  size_t nx = (size_t) floor(radius / _dx + 0.5);
+  size_t ny = (size_t) floor(radius / _dyKm + 0.5);
+  size_t nx = (size_t) floor(radius / _dxKm + 0.5);
 
   for (size_t jy = -ny; jy <= ny; jy++) {
-    double yy = jy * _dy;
+    double yy = jy * _dyKm;
     for (size_t jx = -nx; jx <= nx; jx++) {
-      double xx = jx * _dx;
+      double xx = jx * _dxKm;
       double rSq = yy * yy + xx * xx;
       if (rSq <= radSq) {
         size_t ky = iy + jy;
@@ -953,22 +963,22 @@ void ConvStratFinder::_computeKernels()
 
   _textureKernelOffsets.clear();
 
-  _nyTexture = (size_t) floor(_textureRadiusKm / _dy + 0.5);
-  _nxTexture = (size_t) floor(_textureRadiusKm / _dx + 0.5);
+  _nyTexture = (size_t) floor(_textureRadiusKm / _dyKm + 0.5);
+  _nxTexture = (size_t) floor(_textureRadiusKm / _dxKm + 0.5);
   
   if (_verbose) {
     cerr << "Texture kernel size:" << endl;
     cerr << "  ny: " << _nyTexture << endl;
     cerr << "  nx: " << _nxTexture << endl;
-    cerr << "  _dy: " << _dy << endl;
-    cerr << "  _dx: " << _dx << endl;
+    cerr << "  _dyKm: " << _dyKm << endl;
+    cerr << "  _dxKm: " << _dxKm << endl;
   }
 
   kernel_t entry;
   for (int jdy = -_nyTexture; jdy <= _nyTexture; jdy++) {
-    double yy = jdy * _dy;
+    double yy = jdy * _dyKm;
     for (int jdx = -_nxTexture; jdx <= _nxTexture; jdx++) {
-      double xx = jdx * _dx;
+      double xx = jdx * _dxKm;
       double radius = sqrt(yy * yy + xx * xx);
       if (radius <= _textureRadiusKm) {
         entry.xx = xx;
@@ -983,8 +993,8 @@ void ConvStratFinder::_computeKernels()
 
   _backgroundKernelOffsets.clear();
   
-  _nyBackground = (size_t) floor(_backgroundRadiusKm / _dy + 0.5);
-  _nxBackground = (size_t) floor(_backgroundRadiusKm / _dx + 0.5);
+  _nyBackground = (size_t) floor(_backgroundRadiusKm / _dyKm + 0.5);
+  _nxBackground = (size_t) floor(_backgroundRadiusKm / _dxKm + 0.5);
   
   if (_verbose) {
     cerr << "Background kernel size:" << endl;
@@ -993,9 +1003,9 @@ void ConvStratFinder::_computeKernels()
   }
   
   for (int jdy = -_nyBackground; jdy <= _nyBackground; jdy++) {
-    double yy = jdy * _dy;
+    double yy = jdy * _dyKm;
     for (int jdx = -_nxBackground; jdx <= _nxBackground; jdx++) {
-      double xx = jdx * _dx;
+      double xx = jdx * _dxKm;
       double radius = sqrt(yy * yy + xx * xx);
       if (radius <= _backgroundRadiusKm) {
         ssize_t offset = jdx + jdy * _nx;
@@ -1028,8 +1038,8 @@ void ConvStratFinder::_printSettings(ostream &out)
   out << "  _ny: " << _ny << endl;
   out << "  _minx: " << _minx << endl;
   out << "  _miny: " << _miny << endl;
-  out << "  _dx: " << _dx << endl;
-  out << "  _dy: " << _dy << endl;
+  out << "  _dxKm: " << _dxKm << endl;
+  out << "  _dyKm: " << _dyKm << endl;
 
   out << "  nz: " << _zKm.size();
   for (size_t ii = 0; ii < _zKm.size(); ii++) {
@@ -1257,5 +1267,104 @@ void ConvStratFinder::ComputeTexture::run()
     
   } // iy
   
+}
+
+///////////////////////////////////////////////////////////////
+// ClumpGeom inner class
+//
+///////////////////////////////////////////////////////////////
+
+// Constructor
+
+ConvStratFinder::ClumpGeom::ClumpGeom(const ConvStratFinder *finder,
+                                      const Clump_order *clump) :
+        _finder(finder),
+        _clump(clump)
+{
+  _id = 0;
+  _volumeKm3 = 0.0;
+  _nPtsTotal = 0;
+  _nPtsShallow = 0;
+  _nPtsMid = 0;
+  _nPtsDeep = 0;
+}  
+
+// destructor
+
+ConvStratFinder::ClumpGeom::~ClumpGeom() 
+{
+}
+
+// compute clump geom
+
+
+void ConvStratFinder::ClumpGeom::computeGeom() 
+{
+
+  _nPtsTotal = _clump->pts;
+
+  _volumeKm3 = 0.0;
+  _nPtsShallow = 0;
+  _nPtsMid = 0;
+  _nPtsDeep = 0;
+
+  // int nPtsPlane = _finder->_nx * _finder->_ny;
+  int nx = _finder->_nx;
+  int nz = _finder->_zKm.size();
+  
+  const fl32 *shallowHtGrid = _finder->_shallowHtGrid.dat();
+  const fl32 *deepHtGrid = _finder->_deepHtGrid.dat();
+
+  for (int irun = 0; irun < _clump->size; irun++) {
+    
+    Interval *intvl = _clump->ptr[irun];
+    if (irun == 0) {
+      _id = intvl->id;
+    }
+    
+    int iz = intvl->plane;
+    int iy = intvl->row_in_plane;
+
+    double zKm = _finder->_zKm[iz];
+    double dxKm = _finder->_dxKm;
+    double dyKm = _finder->_dyKm;
+    
+    double dzKm = 0.0;
+    if (iz == 0) {
+      dzKm = _finder->_zKm[iz+1] - _finder->_zKm[iz];
+    } else if (iz == nz - 1) {
+      dzKm = _finder->_zKm[iz] - _finder->_zKm[iz-1];
+    } else {
+      dzKm = (_finder->_zKm[iz+1] - _finder->_zKm[iz-1]) / 2.0;
+    }
+    
+    if (_finder->_projIsLatLon) {
+      double latDeg = (_finder->_miny + _finder->_ny * _finder->_dy / 2.0);
+      double cosLat = cos(latDeg * DEG_TO_RAD);
+      dxKm = _finder->_dx * KM_PER_DEG_AT_EQ * cosLat;
+    }
+
+    double dVol = dxKm * dyKm * dzKm;
+    int offset2D = iy * nx + intvl->begin;
+    // int offset3D = iz * nPtsPlane + offset2D;
+
+    for (int ix = intvl->begin; ix <= intvl->end; ix++, offset2D++) {
+
+      fl32 shallowHtKm = shallowHtGrid[offset2D];
+      fl32 deepHtKm = deepHtGrid[offset2D];
+      _volumeKm3 += dVol;
+
+      if (zKm <= shallowHtKm) {
+        _nPtsShallow++;
+      } else if (zKm >= deepHtKm) {
+        _nPtsDeep++;
+      } else {
+        _nPtsMid++;
+      }
+
+    } // ix
+    
+  } // irun
+
 }
 

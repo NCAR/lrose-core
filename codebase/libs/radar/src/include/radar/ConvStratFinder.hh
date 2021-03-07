@@ -75,7 +75,7 @@ public:
     double yy;
     ssize_t offset;
   } kernel_t;
-  
+
   // constructor
   
   ConvStratFinder();
@@ -312,6 +312,8 @@ protected:
   
 private:
 
+  class ClumpGeom;
+  
   // private data
   
   static const fl32 _missingFl32;
@@ -349,6 +351,7 @@ private:
   size_t _nx, _ny;
   double _minx, _miny;
   double _dx, _dy;
+  double _dxKm, _dyKm;
   vector<double> _zKm;
   bool _projIsLatLon;
 
@@ -379,6 +382,7 @@ private:
   
   GridClumping _clumping;
   int _nClumps;
+  vector<ClumpGeom> _clumps;
   
   // inputs
   
@@ -437,7 +441,8 @@ private:
   void _printSettings(ostream &out);
   double _computeConvRadiusKm(double backgroundDbz);
   void _computeBackgroundDbz();
-  
+
+  /////////////////////////////////////////////////////////
   // inner class for starting timers in a separate thread
 
   class ComputeTexture : public TaThread
@@ -511,6 +516,49 @@ private:
     const fl32 *_fractionCovered;
     fl32 *_texture;
     vector<kernel_t> _kernelOffsets;
+    
+  };
+
+  /////////////////////////////////////////////////////////
+  // inner class for clump geometry
+
+  class ClumpGeom
+  {  
+    
+  public:   
+    
+    // constructor
+    
+    ClumpGeom(const ConvStratFinder *finder,
+              const Clump_order *clump);
+    
+    // destructor
+    
+    virtual ~ClumpGeom();
+    
+    // compute geom
+    
+    void computeGeom();
+
+    // get methods
+
+    int getVolumeKm3() const { return _volumeKm3; }
+    int getNPtsTotal() const { return _nPtsTotal; }
+    int getNPtsShallow() const { return _nPtsShallow; }
+    int getNPtsMid() const { return _nPtsMid; }
+    int getNPtsDeep() const { return _nPtsDeep; }
+    
+  private:
+
+    const ConvStratFinder *_finder;
+    const Clump_order *_clump;
+    int _id;
+    double _volumeKm3;
+    int _nPtsTotal;
+    int _nPtsShallow;
+    int _nPtsMid;
+    int _nPtsDeep;
+    
     
   };
 
