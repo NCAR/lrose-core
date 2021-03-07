@@ -420,7 +420,9 @@ public:
 
   double min_valid_dbz;
 
-  double dbz_threshold_for_definite_convection;
+  double min_valid_volume_for_convective;
+
+  double dbz_threshold_for_definite_convective;
 
   double dbz_for_echo_tops;
 
@@ -432,9 +434,13 @@ public:
 
   double min_valid_fraction_for_texture;
 
-  double min_texture_for_convection;
+  double min_texture_for_convective;
 
   double max_texture_for_stratiform;
+
+  double min_interest_for_convective;
+
+  double max_interest_for_stratiform;
 
   char* output_url;
 
@@ -463,7 +469,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[43];
+  mutable TDRPtable _table[47];
 
   const char *_className;
 

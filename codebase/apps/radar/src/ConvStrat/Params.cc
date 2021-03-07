@@ -821,15 +821,27 @@
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'dbz_threshold_for_definite_convection'
+    // Parameter 'min_valid_volume_for_convective'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("dbz_threshold_for_definite_convection");
+    tt->param_name = tdrpStrDup("min_valid_volume_for_convective");
+    tt->descr = tdrpStrDup("Min volume of a convective region (km3).");
+    tt->help = tdrpStrDup("Regions of smaller volume will be labeled SMALL.");
+    tt->val_offset = (char *) &min_valid_volume_for_convective - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
+    // Parameter 'dbz_threshold_for_definite_convective'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("dbz_threshold_for_definite_convective");
     tt->descr = tdrpStrDup("Reflectivity value that indicates definite convection.");
     tt->help = tdrpStrDup("If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.");
-    tt->val_offset = (char *) &dbz_threshold_for_definite_convection - &_start_;
+    tt->val_offset = (char *) &dbz_threshold_for_definite_convective - &_start_;
     tt->single_val.d = 53;
     tt++;
     
@@ -941,15 +953,15 @@
     tt->single_val.d = 0.33;
     tt++;
     
-    // Parameter 'min_texture_for_convection'
+    // Parameter 'min_texture_for_convective'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_texture_for_convection");
-    tt->descr = tdrpStrDup("Minimum texture for convection at a point.");
+    tt->param_name = tdrpStrDup("min_texture_for_convective");
+    tt->descr = tdrpStrDup("Minimum texture for convective at a point.");
     tt->help = tdrpStrDup("If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using a computed radius that depends on the strength of the background reflectivity.");
-    tt->val_offset = (char *) &min_texture_for_convection - &_start_;
+    tt->val_offset = (char *) &min_texture_for_convective - &_start_;
     tt->single_val.d = 15;
     tt++;
     
@@ -970,6 +982,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON INTEREST");
+    tt->comment_text = tdrpStrDup("If neither is set, we flag the point as MIXED.");
+    tt++;
+    
+    // Parameter 'min_interest_for_convective'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_interest_for_convective");
+    tt->descr = tdrpStrDup("Minimum interest for convective at a point.");
+    tt->help = tdrpStrDup("If the interest at a point exceeds this value, we set the convective flag at this point.");
+    tt->val_offset = (char *) &min_interest_for_convective - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'max_interest_for_stratiform'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_interest_for_stratiform");
+    tt->descr = tdrpStrDup("Maximum interest for stratiform at a point.");
+    tt->help = tdrpStrDup("If the interest at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_interest_for_convective we flag the point as MIXED.");
+    tt->val_offset = (char *) &max_interest_for_stratiform - &_start_;
+    tt->single_val.d = 0.4;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

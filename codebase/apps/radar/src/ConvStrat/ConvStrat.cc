@@ -123,8 +123,8 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setMinValidHtKm(_params.min_valid_height);
   _finder.setMaxValidHtKm(_params.max_valid_height);
   _finder.setMinValidDbz(_params.min_valid_dbz);
-  _finder.setDbzForDefiniteConvection
-    (_params.dbz_threshold_for_definite_convection);
+  _finder.setDbzForDefiniteConvective
+    (_params.dbz_threshold_for_definite_convective);
   _finder.setDbzForEchoTops(_params.dbz_for_echo_tops);
   _finder.setComputeConvRadius(_params.conv_radius_function.min_dbz,
                                _params.conv_radius_function.max_dbz,
@@ -134,8 +134,10 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setTextureRadiusKm(_params.texture_radius_km);
   _finder.setMinValidFractionForTexture
     (_params.min_valid_fraction_for_texture);
-  _finder.setMinTextureForConvection(_params.min_texture_for_convection);
+  _finder.setMinTextureForConvective(_params.min_texture_for_convective);
   _finder.setMaxTextureForStratiform(_params.max_texture_for_stratiform);
+  _finder.setMinInterestForConvective(_params.min_interest_for_convective);
+  _finder.setMaxInterestForStratiform(_params.max_interest_for_stratiform);
   
   return;
 

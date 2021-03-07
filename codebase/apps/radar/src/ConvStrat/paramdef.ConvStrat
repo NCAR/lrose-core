@@ -137,10 +137,16 @@ paramdef double {
 } min_valid_dbz;
 
 paramdef double {
+  p_default = 20.0;
+  p_descr = "Min volume of a convective region (km3).";	
+  p_help = "Regions of smaller volume will be labeled SMALL.";
+} min_valid_volume_for_convective;
+
+paramdef double {
   p_default = 53;
   p_descr = "Reflectivity value that indicates definite convection.";
   p_help = "If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.";
-} dbz_threshold_for_definite_convection;
+} dbz_threshold_for_definite_convective;
 
 paramdef double {
   p_default = 18;
@@ -194,15 +200,32 @@ paramdef double {
 
 paramdef double {
   p_default = 15.0;
-  p_descr = "Minimum texture for convection at a point.";
+  p_descr = "Minimum texture for convective at a point.";
   p_help = "If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using a computed radius that depends on the strength of the background reflectivity.";
-} min_texture_for_convection;
+} min_texture_for_convective;
 
 paramdef double {
   p_default = 11.0;
   p_descr = "Maximum texture for stratiform at a point.";
   p_help = "If the texture at a point is less than this value, we set the stratiform flag at this point.";
 } max_texture_for_stratiform;
+
+commentdef {
+  p_header = "SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON INTEREST";
+  p_text = "If neither is set, we flag the point as MIXED.";
+}
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum interest for convective at a point.";
+  p_help = "If the interest at a point exceeds this value, we set the convective flag at this point.";
+} min_interest_for_convective;
+
+paramdef double {
+  p_default = 0.4;
+  p_descr = "Maximum interest for stratiform at a point.";
+  p_help = "If the interest at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_interest_for_convective we flag the point as MIXED.";
+} max_interest_for_stratiform;
 
 commentdef {
   p_header = "DATA OUTPUT";

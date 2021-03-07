@@ -55,10 +55,9 @@ public:
 
   typedef enum {
     CATEGORY_MISSING = 99,
-    CATEGORY_STRATIFORM_SHALLOW = 14,
+    CATEGORY_STRATIFORM_LOW = 14,
     CATEGORY_STRATIFORM_MID = 15,
-    CATEGORY_STRATIFORM_ELEVATED = 16,
-    CATEGORY_STRATIFORM_DEEP = 17,
+    CATEGORY_STRATIFORM_HIGH = 16,
     CATEGORY_STRATIFORM = 19,
     CATEGORY_MIXED = 29,
     CATEGORY_CONVECTIVE_SMALL = 33,
@@ -110,10 +109,20 @@ public:
   void setTextureLimitLow(double val) { _textureLimitLow = val; }
   void setTextureLimitHigh(double val) { _textureLimitHigh = val; }
   
-  // set interest threshold for convection
-
-  void setConvInterestThreshold(double val) {
-    _convInterestThreshold = val;
+  // Set interest threshold for stratiform regions.
+  // Interest values below this indicate stratiform.
+  // Interest values between this and minInterestForConvective
+  // indicate mixed.
+  
+  void setMaxInterestForStratiform(double val) {
+    _maxInterestForStratiform = val;
+  }
+  
+  // set interest threshold for convective regions
+  // interest values above this indicate convective
+  
+  void setMinInterestForConvective(double val) {
+    _minInterestForConvective = val;
   }
   
   ////////////////////////////////////////////////////////////////////
@@ -123,8 +132,8 @@ public:
   // the column maximum reflectivity. If the column max dbz at a point
   // exceeds this threshold, then we flag that point as convective.
 
-  void setDbzForDefiniteConvection(double val) {
-    _dbzForDefiniteConvection = val; 
+  void setDbzForDefiniteConvective(double val) {
+    _dbzForDefiniteConvective = val; 
   }
   
   ////////////////////////////////////////////////////////////////////
@@ -187,8 +196,8 @@ public:
   // point. We then expand the convective influence around the point
   // using convetive_radius_km.
 
-  void setMinTextureForConvection(double val) {
-    _minTextureForConvection = val; 
+  void setMinTextureForConvective(double val) {
+    _minTextureForConvective = val; 
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -199,6 +208,15 @@ public:
 
   void setMaxTextureForStratiform(double val) {
     _maxTextureForStratiform = val; 
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  // Set the minimum volume for convection (km3)
+  // If a convective clump is smaller than this, the
+  // clump is set to mixed
+  
+  void setMinVolForConvectiveKm3(double val) {
+    _minVolForConvectiveKm3 = val; 
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -325,11 +343,12 @@ private:
   double _minValidHtKm;
   double _maxValidHtKm;
   double _minValidDbz;
-  double _dbzForDefiniteConvection;
+  double _dbzForDefiniteConvective;
   double _textureRadiusKm;
   double _minValidFractionForTexture;
-  double _minTextureForConvection;
+  double _minTextureForConvective;
   double _maxTextureForStratiform;
+  double _minVolForConvectiveKm3;
 
   double _minConvRadiusKm; // min convective radius if computed
   double _maxConvRadiusKm; // max convective radius if computed
@@ -374,9 +393,10 @@ private:
   double _textureLimitLow;
   double _textureLimitHigh;
 
-  // interest threshold for convection
-
-  double _convInterestThreshold;
+  // interest threshold for convection and stratiform regions
+  
+  double _maxInterestForStratiform;
+  double _minInterestForConvective;
 
   // clumping the convective regions
   
@@ -429,7 +449,7 @@ private:
   void _initToMissing(TaArray<ui08> &array, ui08 missingVal);
   void _computeColMax();
   void _finalizePartition();
-  void _expandConvection(ui08 *partition,
+  void _expandConvective(ui08 *partition,
                          size_t ix, size_t iy, size_t index);
   void _computeTexture();
   void _computeInterest();
@@ -529,7 +549,7 @@ private:
     
     // constructor
     
-    ClumpGeom(const ConvStratFinder *finder,
+    ClumpGeom(ConvStratFinder *finder,
               const Clump_order *clump);
     
     // destructor
@@ -540,6 +560,10 @@ private:
     
     void computeGeom();
 
+    // Set the partition based on clump properties
+    
+    void setPartition();
+    
     // get methods
 
     int getVolumeKm3() const { return _volumeKm3; }
@@ -550,7 +574,7 @@ private:
     
   private:
 
-    const ConvStratFinder *_finder;
+    ConvStratFinder *_finder;
     const Clump_order *_clump;
     int _id;
     double _volumeKm3;
@@ -558,7 +582,6 @@ private:
     int _nPtsShallow;
     int _nPtsMid;
     int _nPtsDeep;
-    
     
   };
 
