@@ -631,10 +631,6 @@ void ConvStratFinder::_setPartition3D()
   const fl32 *shallowHtGrid = _shallowHtGrid.dat();
   const fl32 *deepHtGrid = _deepHtGrid.dat();
 
-  // for (size_t ii = 0; ii < _nxy; ii++) {
-  //   cerr << "AAAAAAAAAAA ii, shallow ht: " << _shallowHtGrid.dat()[ii] << endl;
-  // }
-
   // loop through (x,y)
 
   int nPtsPlane = _nx * _ny;
@@ -677,18 +673,13 @@ void ConvStratFinder::_setPartition3D()
         // assign a height-based stratiform category
         
         double zKm = _zKm[iz];
-        // cerr << "11111111111 iz, zkm: " << iz << ", " << zKm;
         if (zKm <= shallowHtKm) {
           partition3D[offset3D] = CATEGORY_STRATIFORM_LOW;
-          cerr << "  low" << endl;
         } else if (zKm >= deepHtKm) {
           partition3D[offset3D] = CATEGORY_STRATIFORM_HIGH;
-          cerr << "  high" << endl;
         } else {
           partition3D[offset3D] = CATEGORY_STRATIFORM_MID;
-          cerr << "  mid" << endl;
         }
-        // cerr << "2222222 shallow, deep: " << shallowHtKm << ", " << deepHtKm << endl;
 
       } // iz
     } // iy
