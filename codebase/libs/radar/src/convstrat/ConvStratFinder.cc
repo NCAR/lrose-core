@@ -520,6 +520,9 @@ void ConvStratFinder::_computeTexture()
   // set threads going
 
   for (size_t ii = 0; ii < threads.size(); ii++) {
+    if (_verbose) {
+      cerr << "====>> starting texture thread: " << ii << endl;
+    }
     threads[ii]->signalRunToStart();
   }
 
@@ -527,14 +530,24 @@ void ConvStratFinder::_computeTexture()
 
   for (size_t ii = 0; ii < threads.size(); ii++) {
     threads[ii]->waitForRunToComplete();
+    if (_verbose) {
+      cerr << "====>> texture thread complete: " << ii << endl;
+    }
   }
 
   // delete threads
 
   for (size_t ii = 0; ii < threads.size(); ii++) {
+    if (_verbose) {
+      cerr << "====>> deleting texture thread: " << ii << endl;
+    }
     delete threads[ii];
   }
+
   threads.clear();
+  if (_verbose) {
+    cerr << "====>> All threads freed" << endl;
+  }
 
 }
 
