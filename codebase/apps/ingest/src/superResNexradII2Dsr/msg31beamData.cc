@@ -118,32 +118,36 @@ msg31beamData::msg31beamData ( Params *TDRP_params, int compressionFlags,
 
   int potentialFieldNum = 0;
 
-  if (0 == strncmp((const char *) buffer, "DREF", 4)){
+  char fname[256];
+  memcpy(fname, buffer, 4);
+  fname[4] = '\0';
+
+  if (0 == strncmp(fname, "DREF", 4)){
     haveFieldName = true; _fieldName = "DBZ";  if (_params->fieldList.wantDBZ) _fieldNum = potentialFieldNum;
   }
   if (_params->fieldList.wantDBZ) potentialFieldNum++;
 
-  if (0 == strncmp((const char *) buffer, "DVEL", 4)){
+  if (0 == strncmp(fname, "DVEL", 4)){
     haveFieldName = true; _fieldName = "VEL"; if (_params->fieldList.wantVEL)  _fieldNum = potentialFieldNum;
   }
   if (_params->fieldList.wantVEL) potentialFieldNum++;
 
-  if (0 == strncmp((const char *) buffer, "DSW", 3)){
+  if (0 == strncmp(fname, "DSW", 3)){
     haveFieldName = true; _fieldName = "SW";  if (_params->fieldList.wantSW) _fieldNum = potentialFieldNum;
   }
   if (_params->fieldList.wantSW) potentialFieldNum++;
 
-  if (0 == strncmp((const char *) buffer, "DZDR", 4)){
+  if (0 == strncmp(fname, "DZDR", 4)){
     haveFieldName = true; _fieldName = "ZDR";  if (_params->fieldList.wantZDR) _fieldNum = potentialFieldNum;
   }
   if (_params->fieldList.wantZDR) potentialFieldNum++;
 
-  if (0 == strncmp((const char *) buffer, "DPHI", 4)){
+  if (0 == strncmp(fname, "DPHI", 4)){
     haveFieldName = true; _fieldName = "PHI"; if (_params->fieldList.wantPHI) _fieldNum = potentialFieldNum;
   }
   if (_params->fieldList.wantPHI) potentialFieldNum++;
 
-  if (0 == strncmp((const char *) buffer, "DRHO", 4)){
+  if (0 == strncmp(fname, "DRHO", 4)){
     haveFieldName = true; _fieldName = "RHO"; if (_params->fieldList.wantRHO) _fieldNum = potentialFieldNum;
   }
 
@@ -151,8 +155,11 @@ msg31beamData::msg31beamData ( Params *TDRP_params, int compressionFlags,
   // If we were unable to get a valid field name, this is a serious error.
   //
   if (!(haveFieldName)){
-    cerr << "ERROR : Unable to get field name." << endl;
-    exit(-1);
+    if (_params->debug >= Params::DEBUG_NORM){
+      cerr << "WARNING : unexpected field name: " << fname << endl;
+    }
+    _wanted = false;
+    return;
   }
 
   if (_params->debug >= Params::DEBUG_NORM){
@@ -225,8 +232,8 @@ msg31beamData::msg31beamData ( Params *TDRP_params, int compressionFlags,
 #endif
 
       if (bzError){
-	cerr << "bunzip attempt retrurned " << bzError << endl;
-	exit(-1);
+	cerr << "bunzip attempt returned " << bzError << endl;
+	return;
       }
 
       break;
@@ -236,12 +243,12 @@ msg31beamData::msg31beamData ( Params *TDRP_params, int compressionFlags,
       // because I'd like an example of it before I perpetrate the code.
       // It's also not clear to me that it will ever be implemented. Niles Oien.
       cerr << "zlib decompression not yet implemented" << endl;
-      exit(0);
+      return;
       break;
 
     default :
       cerr << "Unrecognized compression flag " << compressionFlags << endl;
-      exit(-1);
+      return;
       break;
 
     }
