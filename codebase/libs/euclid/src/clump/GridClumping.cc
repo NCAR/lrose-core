@@ -84,11 +84,11 @@ GridClumping::~GridClumping()
 //
 
 int GridClumping::findIntervals(int nx, int ny,
-			    unsigned char *data_grid,
-                            int byte_threshold)
+                                unsigned char *data_grid,
+                                int byte_threshold)
 
 {
-
+  
   _allocRowh(ny);
   int nInt = EG_find_intervals(ny, nx, data_grid,
 			       &_intervals, &_nIntervalsAlloc,
@@ -100,8 +100,8 @@ int GridClumping::findIntervals(int nx, int ny,
 // for floats
 
 int GridClumping::findIntervals(int nx, int ny,
-			    fl32 *data_grid,
-                            fl32 threshold)
+                                fl32 *data_grid,
+                                fl32 threshold)
 
 {
 
@@ -122,8 +122,8 @@ int GridClumping::findIntervals(int nx, int ny,
 //
 
 int GridClumping::findIntervals3D(int nx, int ny, int nz,
-			      unsigned char *data_grid,
-			      int byte_threshold)
+                                  unsigned char *data_grid,
+                                  int byte_threshold)
 
 {
 
@@ -145,8 +145,8 @@ int GridClumping::findIntervals3D(int nx, int ny, int nz,
 // for floats
 
 int GridClumping::findIntervals3D(int nx, int ny, int nz,
-			      fl32 *data_grid,
-			      fl32 threshold)
+                                  fl32 *data_grid,
+                                  fl32 threshold)
 
 {
 
@@ -175,7 +175,7 @@ int GridClumping::findIntervals3D(int nx, int ny, int nz,
 //
 
 void GridClumping::edm2D(int nx, int ny,
-		     unsigned char *edm_grid)
+                         unsigned char *edm_grid)
   
 {
   EG_edm_2d(_rowh, edm_grid, nx, ny, 1);
@@ -188,8 +188,8 @@ void GridClumping::edm2D(int nx, int ny,
 //
 
 void GridClumping::erode(int nx, int ny, unsigned char *eroded_grid,
-		     int erosion_threshold)
-
+                         int erosion_threshold)
+  
 {
 
   if (erosion_threshold > 0) {
@@ -211,9 +211,9 @@ void GridClumping::erode(int nx, int ny, unsigned char *eroded_grid,
 //
 
 int GridClumping::performClumping(int nx, int ny, int nz,
-			      unsigned char *data_grid,
-			      int min_overlap,
-			      int byte_threshold)
+                                  unsigned char *data_grid,
+                                  int min_overlap,
+                                  int byte_threshold)
 
 {
 
@@ -261,9 +261,9 @@ int GridClumping::performClumping(int nx, int ny, int nz,
 //
 
 int GridClumping::performClumping(int nx, int ny, int nz,
-			      fl32 *data_grid,
-			      int min_overlap,
-			      fl32 threshold)
+                                  fl32 *data_grid,
+                                  int min_overlap,
+                                  fl32 threshold)
 
 {
 

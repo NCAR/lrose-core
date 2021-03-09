@@ -234,7 +234,7 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
   
   _computeBackgroundDbz();
 
-  // compute spatial texture
+  // compute spatial texture of reflectivity
   
   _computeTexture();
 
@@ -249,6 +249,8 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
   // set the 3D version of the partition
 
   _setPartition3D();
+
+  // clean up clumps
 
   // compute the properties from the vertical profiles of texture
 
@@ -616,12 +618,16 @@ void ConvStratFinder::_performClumping()
     cerr << "  N clumps: " << _nClumps << endl;
   }
 
+  _freeClumps();
+  const Clump_order *clumpOrders = _clumping.getClumps() + 1;
   for (int ii = 0; ii < _nClumps; ii++) {
-    ClumpGeom clump(this, _clumping.getClumps() + ii);
-    clump.computeGeom();
+    const Clump_order *clumpOrder = clumpOrders + ii;
+    ClumpGeom *clump = new ClumpGeom(this, clumpOrder);
+    clump->computeGeom();
     _clumps.push_back(clump);
   }
   
+
 }
 
 /////////////////////////////////////////////////////////
@@ -633,8 +639,8 @@ void ConvStratFinder::_setPartition3D()
 
   // loop through the convective clumps, setting the category
   
-  for (int ii = 0; ii < _nClumps; ii++) {
-    _clumps[ii].setPartition();
+  for (size_t ii = 0; ii < _clumps.size(); ii++) {
+    _clumps[ii]->setPartition();
   }
   
   // set the stratiform categories
@@ -700,6 +706,17 @@ void ConvStratFinder::_setPartition3D()
   
 }
 
+/////////////////////////////////////////////////////////
+// free up clumps
+
+void ConvStratFinder::_freeClumps()
+  
+{
+  for (size_t ii = 0; ii < _clumps.size(); ii++) {
+    delete _clumps[ii];
+  }
+  _clumps.clear();
+}
 
 /////////////////////////////////////////////////////////
 // set properties from the vertical profile of texture

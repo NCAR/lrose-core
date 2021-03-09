@@ -59,7 +59,7 @@ public:
     CATEGORY_STRATIFORM_MID = 15,
     CATEGORY_STRATIFORM_HIGH = 16,
     CATEGORY_STRATIFORM = 19,
-    CATEGORY_MIXED = 29,
+    CATEGORY_MIXED = 25,
     CATEGORY_CONVECTIVE_SMALL = 33,
     CATEGORY_CONVECTIVE_SHALLOW = 34,
     CATEGORY_CONVECTIVE_MID = 35,
@@ -402,7 +402,7 @@ private:
   
   GridClumping _clumping;
   int _nClumps;
-  vector<ClumpGeom> _clumps;
+  vector<ClumpGeom *> _clumps;
   
   // inputs
   
@@ -455,6 +455,7 @@ private:
   void _computeInterest();
   void _performClumping();
   void _setPartition3D();
+  void _freeClumps();
   void _computeProps();
   void _computeProps(size_t index, vector<fl32> &textureProfile);
   void _computeKernels();

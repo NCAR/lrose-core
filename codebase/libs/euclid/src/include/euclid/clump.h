@@ -81,18 +81,18 @@ typedef struct box_3d box_3d_t;
 /* the interval structure is general enough to support 3d intervals */
 typedef struct interval
 {
-  int id;               /* clump id */
-  short overlaps[4][2]; /* overlaps[i][0] - index of begin overlap,
-			 * overlaps[i][1] - index of end overlap */
-  short plane;          /* plane index of interval */
-  short row_in_vol;	/* row index of interval in volume -
-			 * not row index in plane if there are
-			 * multiple planes */
-  short row_in_plane;   /* row in current plane. If only one
-			 * plane, this is same as row_in_vol */
-  short begin;          /* interval begins in this column */
-  short end;            /* interval ends in this column */
-  short len;            /* interval len = (end - begin + 1) */
+  int id;             /* clump id */
+  int overlaps[4][2]; /* overlaps[i][0] - index of begin overlap,
+	               * overlaps[i][1] - index of end overlap */
+  int plane;          /* plane index of interval */
+  int row_in_vol;     /* row index of interval in volume -
+		       * not row index in plane if there are
+		       * multiple planes */
+  int row_in_plane;   /* row in current plane. If only one
+		       * plane, this is same as row_in_vol */
+  int begin;          /* interval begins in this column */
+  int end;            /* interval ends in this column */
+  int len;            /* interval len = (end - begin + 1) */
 } Interval;
 
 /*
@@ -120,10 +120,10 @@ typedef struct interval_link
 typedef struct sinterval 
 {
   int id;			/* clump id */
-  short plane;			/* plane index of interval */
-  short row;		    /* row index of interval in volume - not row index in plane if there are multiple planes */
-  short begin;		    /* interval begins in this column */
-  short end;		     /* interval ends in this column */
+  int plane;			/* plane index of interval */
+  int row;		    /* row index of interval in volume - not row index in plane if there are multiple planes */
+  int begin;		    /* interval begins in this column */
+  int end;		     /* interval ends in this column */
 } Sinterval;
 
 typedef struct row_hdr /* row header */
@@ -134,7 +134,7 @@ typedef struct row_hdr /* row header */
 
 typedef struct srow_hdr /* row header for short intervals */
 {
-  int size;			/* number of intervals in row */
+  int size;		/* number of intervals in row */
   Sinterval *intervals;	  /* ptr to intervals in row */
 } Srow_hdr;
 
