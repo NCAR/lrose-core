@@ -93,6 +93,8 @@ ConvStratFinder::ConvStratFinder()
   _maxInterestForStratiform = 0.4;
   _minInterestForConvective = 0.5;
 
+  _minOverlapForClumping = 1;
+
 }
 
 // destructor
@@ -607,10 +609,9 @@ void ConvStratFinder::_performClumping()
   
 {
 
-  int nOverlap = 1;
   _nClumps = _clumping.performClumping(_nx, _ny, _zKm.size(),
                                        _interest3D.dat(),
-                                       nOverlap,
+                                       _minOverlapForClumping,
                                        _minInterestForConvective);
   
   if (_verbose) {

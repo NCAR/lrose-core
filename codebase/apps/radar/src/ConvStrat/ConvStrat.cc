@@ -138,8 +138,7 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setMaxTextureForStratiform(_params.max_texture_for_stratiform);
   _finder.setMinInterestForConvective(_params.min_interest_for_convective);
   _finder.setMaxInterestForStratiform(_params.max_interest_for_stratiform);
-  
-  return;
+  _finder.setMinGridOverlapForClumping(_params.min_overlap_for_convective_clumps);
 
 }
 

@@ -1010,6 +1010,18 @@
     tt->single_val.d = 0.4;
     tt++;
     
+    // Parameter 'min_overlap_for_convective_clumps'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("min_overlap_for_convective_clumps");
+    tt->descr = tdrpStrDup("Minimum grid overlap in convective regions.");
+    tt->help = tdrpStrDup("A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.");
+    tt->val_offset = (char *) &min_overlap_for_convective_clumps - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));

@@ -442,6 +442,8 @@ public:
 
   double max_interest_for_stratiform;
 
+  int min_overlap_for_convective_clumps;
+
   char* output_url;
 
   tdrp_bool_t write_partition_field;
@@ -469,7 +471,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[47];
+  mutable TDRPtable _table[48];
 
   const char *_className;
 

@@ -227,6 +227,12 @@ paramdef double {
   p_help = "If the interest at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_interest_for_convective we flag the point as MIXED.";
 } max_interest_for_stratiform;
 
+paramdef int {
+  p_default = 3;
+  p_descr = "Minimum grid overlap in convective regions.";
+  p_help = "A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.";
+} min_overlap_for_convective_clumps;
+
 commentdef {
   p_header = "DATA OUTPUT";
 }

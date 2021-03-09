@@ -125,6 +125,12 @@ public:
     _minInterestForConvective = val;
   }
   
+  // set minimum grid overlap for clumping the convective regions
+  
+  void setMinGridOverlapForClumping(int val) {
+    _minOverlapForClumping = val;
+  }
+  
   ////////////////////////////////////////////////////////////////////
   // Reflectivity value that indicates definite convection.  If the
   // reflectivity exceeds this value at a point, we assume convection
@@ -403,6 +409,7 @@ private:
   GridClumping _clumping;
   int _nClumps;
   vector<ClumpGeom *> _clumps;
+  int _minOverlapForClumping;
   
   // inputs
   
