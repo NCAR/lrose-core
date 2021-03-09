@@ -59,9 +59,6 @@ public:
   
   virtual ~GridClumping();
 
-  const Clump_order *getClumps() const { return _clumps; }
-  int getNClumps() const { return _nClumps; }
-
   // Find the run intervals in a 2D data grid
   int findIntervals(int nx, int ny,
 		    unsigned char *data_grid,
@@ -82,25 +79,38 @@ public:
 		      fl32 *data_grid,
 		      fl32 byte_threshold);
 
-   // Compute the EDM (Euclidean Distance Measure) of clumps,
+  // Compute the EDM (Euclidean Distance Measure) of clumps,
   // load grid.
+  
   void edm2D(int nx, int ny, unsigned char *edm_grid);
   
   // Erode clumps, put result in eroded grid
+
   void erode(int nx, int ny, unsigned char *eroded_grid,
 	     int erosion_threshold);
 
   // perform clumping
+
   int performClumping(int nx, int ny, int nz,
 		      unsigned char *data_grid,
 		      int min_overlap,
 		      int byte_threshold);
 
   // For float data
+
   int performClumping(int nx, int ny, int nz,
                       fl32 *data_grid,
                       int min_overlap,
                       fl32 threshold);
+
+  // get number of clumps, after performClumping()
+
+  int getNClumps() const { return _nClumps; }
+
+  // get clumps after performClumping()
+  // turn 1-based into 0-based
+
+  const Clump_order *getClumps() const { return _clumps + 1; }
 
 protected:
   

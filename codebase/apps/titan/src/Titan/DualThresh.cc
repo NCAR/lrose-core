@@ -225,7 +225,7 @@ int DualThresh::compute(const GridClump &grid_clump)
 
   if (_params.create_dual_threshold_files) {
     for (int i = 0; i < nSecondary; i++) {
-      const Clump_order *clump =  _clumping.getClumps() + i + 1;
+      const Clump_order *clump =  _clumping.getClumps() + i;
       for (int j = 0; j < clump->size; j++) {
 	Interval *intv = clump->ptr[j];
 	int offset = intv->row_in_plane * _nxWork + intv->begin;
@@ -245,7 +245,7 @@ int DualThresh::compute(const GridClump &grid_clump)
   vector<int> valid;
 
   for (int i = 0; i < nSecondary; i++) {
-    const Clump_order *clump =  _clumping.getClumps() + i + 1;
+    const Clump_order *clump =  _clumping.getClumps() + i;
     GridClump gridClump;
     gridClump.init(clump, grid_clump.grid,
 		   grid_clump.startIx, grid_clump.startIy);
@@ -292,7 +292,7 @@ int DualThresh::compute(const GridClump &grid_clump)
   for (int i = 0; i < nSecondary; i++) {
     if (valid[i]) {
       n++;
-      const Clump_order *clump =  _clumping.getClumps() + i + 1;
+      const Clump_order *clump =  _clumping.getClumps() + i;
       for (int j = 0; j < clump->size; j++) {
 	Interval *intv = clump->ptr[j];
 	int offset = intv->row_in_plane * _nxWork + intv->begin;
@@ -751,14 +751,14 @@ void DualThresh::_computeSubClump(const GridClump &grid_clump, int clump_id)
 					      _gridMask, 1, 1);
 
   int clumpNum = 0;
-  if (nclumps == 1) {
-    clumpNum = 1;
-  } else {
+  if (nclumps > 1) {
+    // find clump with max number of pts
     int maxPts = 0;
-    for (int i = 1; i <= nclumps; i++) {
-      if (_subClumping[clump_id-1]->getClumps()[i].pts > maxPts) {
+    for (int i = 0; i < nclumps; i++) {
+      int nPts = _subClumping[clump_id-1]->getClumps()[i].pts;
+      if (nPts > maxPts) {
 	clumpNum = i;
-	maxPts = _subClumping[clump_id-1]->getClumps()[i].pts;
+	maxPts = nPts;
       }
     }
   }

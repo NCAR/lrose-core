@@ -619,7 +619,7 @@ void ConvStratFinder::_performClumping()
   }
 
   _freeClumps();
-  const Clump_order *clumpOrders = _clumping.getClumps() + 1;
+  const Clump_order *clumpOrders = _clumping.getClumps();
   for (int ii = 0; ii < _nClumps; ii++) {
     const Clump_order *clumpOrder = clumpOrders + ii;
     ClumpGeom *clump = new ClumpGeom(this, clumpOrder);
@@ -1455,7 +1455,11 @@ void ConvStratFinder::ClumpGeom::setPartition()
   
   int category = CATEGORY_MISSING;
   if (_volumeKm3 < _finder->_minVolForConvectiveKm3) {
-    category = CATEGORY_CONVECTIVE_SMALL;
+    if (fracShallow < 0.05) {
+      category = CATEGORY_CONVECTIVE_ELEVATED;
+    } else {
+      category = CATEGORY_CONVECTIVE_SMALL;
+    }
   } else if (fracShallow < 0.05) {
     category = CATEGORY_CONVECTIVE_ELEVATED;
   } else if (fracShallow > 0.95) {

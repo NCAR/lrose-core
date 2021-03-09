@@ -140,7 +140,7 @@ int Identify::run(int scan_num)
   // update the verification grid
 
   if (_verify) {
-    const Clump_order *clump = _clumping.getClumps() + 1;
+    const Clump_order *clump = _clumping.getClumps();
     for (int i = 0; i < _clumping.getNClumps(); i++, clump++) {
       _verify->updateAllStormsGrid(*clump);
     }
@@ -209,7 +209,7 @@ int Identify::_processClumps(int scan_num)
 
   // loop through the clumps - index starts at 1
   
-  const Clump_order *clump = _clumping.getClumps() + 1;
+  const Clump_order *clump = _clumping.getClumps();
   
   for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
     
