@@ -3003,18 +3003,6 @@
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'conv_strat_dbz_threshold_for_definite_convection'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_dbz_threshold_for_definite_convection");
-    tt->descr = tdrpStrDup("Reflectivity value that indicates definite convection.");
-    tt->help = tdrpStrDup("If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.");
-    tt->val_offset = (char *) &conv_strat_dbz_threshold_for_definite_convection - &_start_;
-    tt->single_val.d = 53;
-    tt++;
-    
     // Parameter 'conv_strat_background_dbz_radius_km'
     // ctype is 'double'
     
@@ -3115,6 +3103,42 @@
     tt->help = tdrpStrDup("If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.");
     tt->val_offset = (char *) &conv_strat_min_texture_for_convection - &_start_;
     tt->single_val.d = 15;
+    tt++;
+    
+    // Parameter 'conv_strat_min_interest_for_convective'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_min_interest_for_convective");
+    tt->descr = tdrpStrDup("Minimum interest for convective at a point.");
+    tt->help = tdrpStrDup("If the interest at a point exceeds this value, we set the convective flag at this point.");
+    tt->val_offset = (char *) &conv_strat_min_interest_for_convective - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'conv_strat_max_interest_for_stratiform'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_max_interest_for_stratiform");
+    tt->descr = tdrpStrDup("Maximum interest for stratiform at a point.");
+    tt->help = tdrpStrDup("If the interest at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_interest_for_convective we flag the point as MIXED.");
+    tt->val_offset = (char *) &conv_strat_max_interest_for_stratiform - &_start_;
+    tt->single_val.d = 0.4;
+    tt++;
+    
+    // Parameter 'conv_strat_min_overlap_for_convective_clumps'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_min_overlap_for_convective_clumps");
+    tt->descr = tdrpStrDup("Minimum grid overlap in convective regions.");
+    tt->help = tdrpStrDup("A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.");
+    tt->val_offset = (char *) &conv_strat_min_overlap_for_convective_clumps - &_start_;
+    tt->single_val.i = 3;
     tt++;
     
     // Parameter 'conv_strat_write_partition'

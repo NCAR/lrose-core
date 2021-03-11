@@ -783,8 +783,6 @@ public:
 
   double conv_strat_min_valid_dbz;
 
-  double conv_strat_dbz_threshold_for_definite_convection;
-
   double conv_strat_background_dbz_radius_km;
 
   conv_radius_function_t conv_radius_function;
@@ -796,6 +794,12 @@ public:
   double conv_strat_min_valid_fraction_for_texture;
 
   double conv_strat_min_texture_for_convection;
+
+  double conv_strat_min_interest_for_convective;
+
+  double conv_strat_max_interest_for_stratiform;
+
+  int conv_strat_min_overlap_for_convective_clumps;
 
   tdrp_bool_t conv_strat_write_partition;
 
@@ -851,7 +855,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[212];
+  mutable TDRPtable _table[214];
 
   const char *_className;
 

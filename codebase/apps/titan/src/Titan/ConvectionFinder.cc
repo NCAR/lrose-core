@@ -67,8 +67,8 @@ ConvectionFinder::ConvectionFinder(const string &progName,
   _convStrat.setMinValidHtKm(_params.convection_finder_min_valid_height);
   _convStrat.setMaxValidHtKm(_params.convection_finder_max_valid_height);
   _convStrat.setMinValidDbz(_params.convection_finder_min_valid_dbz);
-  _convStrat.setDbzForDefiniteConvection
-    (_params.dbz_threshold_for_definite_convection);
+  // _convStrat.setDbzForDefiniteConvection
+  //   (_params.dbz_threshold_for_definite_convection);
   _convStrat.setComputeConvRadius(_params.conv_radius_function.min_dbz,
                                   _params.conv_radius_function.max_dbz,
                                   _params.conv_radius_function.min_radius_km,
@@ -77,8 +77,11 @@ ConvectionFinder::ConvectionFinder(const string &progName,
   _convStrat.setTextureRadiusKm(_params.convection_finder_texture_radius_km);
   _convStrat.setMinValidFractionForTexture
     (_params.convection_finder_min_valid_fraction_for_texture);
-  _convStrat.setMinTextureForConvection
-    (_params.convection_finder_min_texture_value);
+  // _convStrat.setMinTextureForConvection
+  //   (_params.convection_finder_min_texture_value);
+  _convStrat.setMinInterestForConvective(_params.convection_finder_min_interest_for_convective);
+  _convStrat.setMaxInterestForStratiform(_params.convection_finder_max_interest_for_stratiform);
+  _convStrat.setMinGridOverlapForClumping(_params.convection_finder_min_overlap_for_convective_clumps);
 
 }
 

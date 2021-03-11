@@ -397,6 +397,24 @@ paramdef double {
   p_help = "If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.";
 } convection_finder_min_texture_value;
 
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum interest for convective at a point.";
+  p_help = "If the interest at a point exceeds this value, we set the convective flag at this point.";
+} convection_finder_min_interest_for_convective;
+
+paramdef double {
+  p_default = 0.4;
+  p_descr = "Maximum interest for stratiform at a point.";
+  p_help = "If the interest at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_interest_for_convective we flag the point as MIXED.";
+} convection_finder_max_interest_for_stratiform;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Minimum grid overlap in convective regions.";
+  p_help = "A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.";
+} convection_finder_min_overlap_for_convective_clumps;
+
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to write out the gridded fields computed for the convective filter.";

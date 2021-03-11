@@ -123,8 +123,8 @@ CartInterp::CartInterp(const string &progName,
     _convStrat.setMinValidHtKm(_params.conv_strat_min_valid_height);
     _convStrat.setMaxValidHtKm(_params.conv_strat_max_valid_height);
     _convStrat.setMinValidDbz(_params.conv_strat_min_valid_dbz);
-    _convStrat.setDbzForDefiniteConvection
-      (_params.conv_strat_dbz_threshold_for_definite_convection);
+    // _convStrat.setDbzForDefiniteConvection
+    //   (_params.conv_strat_dbz_threshold_for_definite_convection);
     _convStrat.setComputeConvRadius(_params.conv_radius_function.min_dbz,
                                     _params.conv_radius_function.max_dbz,
                                     _params.conv_radius_function.min_radius_km,
@@ -133,8 +133,11 @@ CartInterp::CartInterp(const string &progName,
     _convStrat.setTextureRadiusKm(_params.conv_strat_texture_radius_km);
     _convStrat.setMinValidFractionForTexture
       (_params.conv_strat_min_valid_fraction_for_texture);
-    _convStrat.setMinTextureForConvection
-      (_params.conv_strat_min_texture_for_convection);
+    // _convStrat.setMinTextureForConvection
+    //   (_params.conv_strat_min_texture_for_convection);
+    _convStrat.setMinInterestForConvective(_params.conv_strat_min_interest_for_convective);
+    _convStrat.setMaxInterestForStratiform(_params.conv_strat_max_interest_for_stratiform);
+    _convStrat.setMinGridOverlapForClumping(_params.conv_strat_min_overlap_for_convective_clumps);
   }
   _gotConvStrat = false;
 

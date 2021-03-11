@@ -1420,6 +1420,42 @@
     tt->single_val.d = 15;
     tt++;
     
+    // Parameter 'convection_finder_min_interest_for_convective'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_min_interest_for_convective");
+    tt->descr = tdrpStrDup("Minimum interest for convective at a point.");
+    tt->help = tdrpStrDup("If the interest at a point exceeds this value, we set the convective flag at this point.");
+    tt->val_offset = (char *) &convection_finder_min_interest_for_convective - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'convection_finder_max_interest_for_stratiform'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_max_interest_for_stratiform");
+    tt->descr = tdrpStrDup("Maximum interest for stratiform at a point.");
+    tt->help = tdrpStrDup("If the interest at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_interest_for_convective we flag the point as MIXED.");
+    tt->val_offset = (char *) &convection_finder_max_interest_for_stratiform - &_start_;
+    tt->single_val.d = 0.4;
+    tt++;
+    
+    // Parameter 'convection_finder_min_overlap_for_convective_clumps'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("convection_finder_min_overlap_for_convective_clumps");
+    tt->descr = tdrpStrDup("Minimum grid overlap in convective regions.");
+    tt->help = tdrpStrDup("A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.");
+    tt->val_offset = (char *) &convection_finder_min_overlap_for_convective_clumps - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
     // Parameter 'convection_finder_write_debug_files'
     // ctype is 'tdrp_bool_t'
     
