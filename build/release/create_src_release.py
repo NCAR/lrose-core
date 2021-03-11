@@ -513,7 +513,7 @@ class LroseCore < Formula
   depends_on 'jpeg'
   depends_on 'libpng'
   depends_on 'libzip'
-  depends_on 'qt'
+  depends_on 'qt5'
   depends_on 'szip'
   depends_on 'pkg-config'
   depends_on 'cmake'
