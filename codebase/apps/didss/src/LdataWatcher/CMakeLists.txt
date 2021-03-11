@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/didss/src/LdataWatcher
+# dir: /data/mdtest/git/lrose-core/codebase/apps/didss/src/LdataWatcher
 ###############################################
 
 project (LdataWatcher)

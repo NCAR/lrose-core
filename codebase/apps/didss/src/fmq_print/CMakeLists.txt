@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/didss/src/fmq_print
+# dir: /data/mdtest/git/lrose-core/codebase/apps/didss/src/fmq_print
 ###############################################
 
 project (fmq_print)

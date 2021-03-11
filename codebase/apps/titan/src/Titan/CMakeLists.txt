@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/Titan
+# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/Titan
 ###############################################
 
 project (Titan)
@@ -18,7 +18,6 @@ set (SRCS
       Args.cc
       Area.cc
       Boundary.cc
-      Clumping.cc
       ConvectionFinder.cc
       DataTimes.cc
       DualThresh.cc

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/hydro/src/BasinPrecipSpdb2Xml
+# dir: /data/mdtest/git/lrose-core/codebase/apps/hydro/src/BasinPrecipSpdb2Xml
 ###############################################
 
 project (BasinPrecipSpdb2Xml)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/hydro/src/RateAccum
+# dir: /data/mdtest/git/lrose-core/codebase/apps/hydro/src/RateAccum
 ###############################################
 
 project (RateAccum)

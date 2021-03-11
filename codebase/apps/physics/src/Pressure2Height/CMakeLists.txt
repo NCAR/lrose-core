@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/physics/src/Pressure2Height
+# dir: /data/mdtest/git/lrose-core/codebase/apps/physics/src/Pressure2Height
 ###############################################
 
 project (Pressure2Height)

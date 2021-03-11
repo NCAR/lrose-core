@@ -239,6 +239,7 @@ set (SRCS
       ./clump/translate_intervals.c
       ./clump/union_intervals.c
       ./clump/zero_clump.c
+      ./clump/GridClumping.cc
       ./geometry/coord_system.c
       ./geometry/convex_hull.c
       ./geometry/create_box.c

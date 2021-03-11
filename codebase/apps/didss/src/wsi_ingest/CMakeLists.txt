@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/didss/src/wsi_ingest
+# dir: /data/mdtest/git/lrose-core/codebase/apps/didss/src/wsi_ingest
 ###############################################
 
 project (wsi_ingest)

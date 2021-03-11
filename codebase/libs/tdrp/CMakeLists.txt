@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /home/dixon/git/lrose-core/codebase/libs/tdrp
+# dir: /data/mdtest/git/lrose-core/codebase/libs/tdrp
 #
 # written by script createCMakeLists.py
 #

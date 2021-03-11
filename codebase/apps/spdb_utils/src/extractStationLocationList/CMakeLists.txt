@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/spdb_utils/src/extractStationLocationList
+# dir: /data/mdtest/git/lrose-core/codebase/apps/spdb_utils/src/extractStationLocationList
 ###############################################
 
 project (extractStationLocationList)

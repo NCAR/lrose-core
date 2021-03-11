@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/didss/src/File2Dsr
+# dir: /data/mdtest/git/lrose-core/codebase/apps/didss/src/File2Dsr
 ###############################################
 
 project (File2Dsr)

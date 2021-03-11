@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/awc/src/LtgSpdb2Mdv
+# dir: /data/mdtest/git/lrose-core/codebase/apps/awc/src/LtgSpdb2Mdv
 ###############################################
 
 project (LtgSpdb2Mdv)

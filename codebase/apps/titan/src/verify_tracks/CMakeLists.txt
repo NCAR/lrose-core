@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/verify_tracks
+# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/verify_tracks
 ###############################################
 
 project (verify_tracks)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/hydro/src/Shape2Map
+# dir: /data/mdtest/git/lrose-core/codebase/apps/hydro/src/Shape2Map
 ###############################################
 
 project (Shape2Map)

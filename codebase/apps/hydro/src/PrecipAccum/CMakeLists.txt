@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/hydro/src/PrecipAccum
+# dir: /data/mdtest/git/lrose-core/codebase/apps/hydro/src/PrecipAccum
 ###############################################
 
 project (PrecipAccum)

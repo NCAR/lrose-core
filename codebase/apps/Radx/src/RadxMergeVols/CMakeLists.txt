@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/Radx/src/RadxMergeVols
+# dir: /data/mdtest/git/lrose-core/codebase/apps/Radx/src/RadxMergeVols
 ###############################################
 
 project (RadxMergeVols)

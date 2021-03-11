@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/filters/src/tops_filter
+# dir: /data/mdtest/git/lrose-core/codebase/apps/filters/src/tops_filter
 ###############################################
 
 project (tops_filter)

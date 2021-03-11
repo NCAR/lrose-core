@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /home/dixon/git/lrose-core/codebase/libs/Fmq
+# dir: /data/mdtest/git/lrose-core/codebase/libs/Fmq
 #
 # written by script createCMakeLists.py
 #

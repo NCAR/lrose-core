@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/GoesRnetCDF2Mdv
+# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/GoesRnetCDF2Mdv
 ###############################################
 
 project (GoesRnetCDF2Mdv)

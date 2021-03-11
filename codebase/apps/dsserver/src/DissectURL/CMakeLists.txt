@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/dsserver/src/DissectURL
+# dir: /data/mdtest/git/lrose-core/codebase/apps/dsserver/src/DissectURL
 ###############################################
 
 project (DissectURL)

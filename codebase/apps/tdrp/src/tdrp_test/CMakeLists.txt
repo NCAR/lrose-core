@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/tdrp/src/tdrp_test
+# dir: /data/mdtest/git/lrose-core/codebase/apps/tdrp/src/tdrp_test
 ###############################################
 
 project (tdrp_test)

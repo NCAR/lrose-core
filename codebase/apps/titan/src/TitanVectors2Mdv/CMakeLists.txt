@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/TitanVectors2Mdv
+# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/TitanVectors2Mdv
 ###############################################
 
 project (TitanVectors2Mdv)

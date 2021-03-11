@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/spol/src
+# dir: /data/mdtest/git/lrose-core/codebase/apps/spol/src
 #
 # written by script createCMakeLists.py
 #

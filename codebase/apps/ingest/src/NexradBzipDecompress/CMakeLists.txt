@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/NexradBzipDecompress
+# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/NexradBzipDecompress
 ###############################################
 
 project (NexradBzipDecompress)

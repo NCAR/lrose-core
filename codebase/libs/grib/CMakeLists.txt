@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /home/dixon/git/lrose-core/codebase/libs/grib
+# dir: /data/mdtest/git/lrose-core/codebase/libs/grib
 #
 # written by script createCMakeLists.py
 #

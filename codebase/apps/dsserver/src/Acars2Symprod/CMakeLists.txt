@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/dsserver/src/Acars2Symprod
+# dir: /data/mdtest/git/lrose-core/codebase/apps/dsserver/src/Acars2Symprod
 ###############################################
 
 project (Acars2Symprod)

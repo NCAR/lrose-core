@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/TsSmartSave
+# dir: /data/mdtest/git/lrose-core/codebase/apps/radar/src/TsSmartSave
 ###############################################
 
 project (TsSmartSave)

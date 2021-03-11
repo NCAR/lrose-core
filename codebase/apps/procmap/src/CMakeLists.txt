@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/procmap/src
+# dir: /data/mdtest/git/lrose-core/codebase/apps/procmap/src
 #
 # written by script createCMakeLists.py
 #

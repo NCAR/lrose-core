@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/dsserver/src/GenPoly2Symprod
+# dir: /data/mdtest/git/lrose-core/codebase/apps/dsserver/src/GenPoly2Symprod
 ###############################################
 
 project (GenPoly2Symprod)

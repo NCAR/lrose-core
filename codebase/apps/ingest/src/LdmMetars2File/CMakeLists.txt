@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/LdmMetars2File
+# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/LdmMetars2File
 ###############################################
 
 project (LdmMetars2File)

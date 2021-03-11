@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/AcGeoref2Spdb
+# dir: /data/mdtest/git/lrose-core/codebase/apps/radar/src/AcGeoref2Spdb
 ###############################################
 
 project (AcGeoref2Spdb)

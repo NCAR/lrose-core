@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/TsTcp2File
+# dir: /data/mdtest/git/lrose-core/codebase/apps/radar/src/TsTcp2File
 ###############################################
 
 project (TsTcp2File)

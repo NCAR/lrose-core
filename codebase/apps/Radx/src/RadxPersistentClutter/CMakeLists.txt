@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/Radx/src/RadxPersistentClutter
+# dir: /data/mdtest/git/lrose-core/codebase/apps/Radx/src/RadxPersistentClutter
 ###############################################
 
 project (RadxPersistentClutter)

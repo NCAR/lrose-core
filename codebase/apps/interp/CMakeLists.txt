@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/interp
+# dir: /data/mdtest/git/lrose-core/codebase/apps/interp
 #
 # written by script createCMakeLists.py
 #

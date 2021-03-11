@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/physics/src/VerticalAverage
+# dir: /data/mdtest/git/lrose-core/codebase/apps/physics/src/VerticalAverage
 ###############################################
 
 project (VerticalAverage)

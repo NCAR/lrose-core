@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/storms_to_ascii
+# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/storms_to_ascii
 ###############################################
 
 project (storms_to_ascii)

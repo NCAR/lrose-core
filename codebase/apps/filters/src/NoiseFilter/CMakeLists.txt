@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/filters/src/NoiseFilter
+# dir: /data/mdtest/git/lrose-core/codebase/apps/filters/src/NoiseFilter
 ###############################################
 
 project (NoiseFilter)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/TsRefract2Dsr
+# dir: /data/mdtest/git/lrose-core/codebase/apps/radar/src/TsRefract2Dsr
 ###############################################
 
 project (TsRefract2Dsr)

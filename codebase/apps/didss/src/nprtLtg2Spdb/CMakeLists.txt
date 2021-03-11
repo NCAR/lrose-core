@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/didss/src/nprtLtg2Spdb
+# dir: /data/mdtest/git/lrose-core/codebase/apps/didss/src/nprtLtg2Spdb
 ###############################################
 
 project (nprtLtg2Spdb)

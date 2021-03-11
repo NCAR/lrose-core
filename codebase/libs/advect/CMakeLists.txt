@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /home/dixon/git/lrose-core/codebase/libs/advect
+# dir: /data/mdtest/git/lrose-core/codebase/libs/advect
 #
 # written by script createCMakeLists.py
 #

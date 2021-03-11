@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/GemVolXml2Dsr
+# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/GemVolXml2Dsr
 ###############################################
 
 project (GemVolXml2Dsr)

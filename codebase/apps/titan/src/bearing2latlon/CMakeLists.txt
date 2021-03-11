@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/bearing2latlon
+# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/bearing2latlon
 ###############################################
 
 project (bearing2latlon)
