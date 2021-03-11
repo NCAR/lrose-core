@@ -523,7 +523,7 @@ class LroseCore < Formula
 
   def install
 
-    ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
+    ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt@5/lib/pkgconfig"
     ENV['LROSE_INSTALL_DIR'] = prefix
     Dir.chdir("codebase")
     system
@@ -564,7 +564,7 @@ class LroseCore < Formula
   depends_on 'jpeg'
   depends_on 'libpng'
   depends_on 'libzip'
-  depends_on 'qt'
+  depends_on 'qt5'
   depends_on 'szip'
   depends_on 'pkg-config'
   depends_on 'cmake'
@@ -574,7 +574,7 @@ class LroseCore < Formula
 
   def install
 
-    ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt/lib/pkgconfig"
+    ENV["PKG_CONFIG_PATH"] = "/usr/local/opt/qt@5/lib/pkgconfig"
     ENV['LROSE_INSTALL_DIR'] = prefix
     Dir.chdir("codebase")
     Dir.mkdir("build")
