@@ -833,18 +833,6 @@
     tt->single_val.d = 20;
     tt++;
     
-    // Parameter 'dbz_threshold_for_definite_convective'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("dbz_threshold_for_definite_convective");
-    tt->descr = tdrpStrDup("Reflectivity value that indicates definite convection.");
-    tt->help = tdrpStrDup("If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.");
-    tt->val_offset = (char *) &dbz_threshold_for_definite_convective - &_start_;
-    tt->single_val.d = 53;
-    tt++;
-    
     // Parameter 'dbz_for_echo_tops'
     // ctype is 'double'
     
@@ -862,69 +850,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("COMPUTING THE CONVECTIVE RADIUS");
-    tt->comment_text = tdrpStrDup("The convective radius is the distance by which identified convection will be expanded around the convective point. A linear function is used to compute the radius from the background reflectivity");
-    tt++;
-    
-    // Parameter 'background_dbz_radius_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("background_dbz_radius_km");
-    tt->descr = tdrpStrDup("Radius for computing background reflectivity (km).");
-    tt->help = tdrpStrDup("The background dbz at a point is the mean within this specified radius of the point.");
-    tt->val_offset = (char *) &background_dbz_radius_km - &_start_;
-    tt->single_val.d = 11;
-    tt++;
-    
-    // Parameter 'conv_radius_function'
-    // ctype is '_conv_radius_function_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("conv_radius_function");
-    tt->descr = tdrpStrDup("End points of the linear function to compute the radius from the background reflectivity.");
-    tt->help = tdrpStrDup("The radius function varies linearly between the min and max dbz. For dbz below the min, the min radius applies. For dbz above the max, the max radius applies.");
-    tt->val_offset = (char *) &conv_radius_function - &_start_;
-    tt->struct_def.name = tdrpStrDup("conv_radius_function_t");
-    tt->struct_def.nfields = 4;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("min_dbz");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &conv_radius_function.min_dbz - (char *) &conv_radius_function;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("max_dbz");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &conv_radius_function.max_dbz - (char *) &conv_radius_function;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("min_radius_km");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &conv_radius_function.min_radius_km - (char *) &conv_radius_function;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("max_radius_km");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &conv_radius_function.max_radius_km - (char *) &conv_radius_function;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 22.5;
-      tt->struct_vals[1].d = 42.5;
-      tt->struct_vals[2].d = 1;
-      tt->struct_vals[3].d = 5;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("COMPUTING REFLECTIVITY TEXTURE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -947,66 +872,54 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("min_valid_fraction_for_texture");
-    tt->descr = tdrpStrDup("Minimum fraction of surroundingpoints for texture computations.");
-    tt->help = tdrpStrDup("For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.");
+    tt->descr = tdrpStrDup("Minimum fraction of surrounding points for texture computations.");
+    tt->help = tdrpStrDup("For a valid computation of texture, we require at least this fraction of points around the central point to have valid reflectivity.");
     tt->val_offset = (char *) &min_valid_fraction_for_texture - &_start_;
-    tt->single_val.d = 0.33;
+    tt->single_val.d = 0.25;
     tt++;
     
-    // Parameter 'min_texture_for_convective'
+    // Parameter 'min_valid_fraction_for_fit'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_texture_for_convective");
-    tt->descr = tdrpStrDup("Minimum texture for convective at a point.");
-    tt->help = tdrpStrDup("If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using a computed radius that depends on the strength of the background reflectivity.");
-    tt->val_offset = (char *) &min_texture_for_convective - &_start_;
-    tt->single_val.d = 15;
+    tt->param_name = tdrpStrDup("min_valid_fraction_for_fit");
+    tt->descr = tdrpStrDup("Minimum fraction of surrounding points for 2D fit to DBZ.");
+    tt->help = tdrpStrDup("We compute a 2D fit to the reflectivity around a grid point, to remove any systematic gradient. For a valid fit, we require at least this fraction of points around the central point to have valid reflectivity.");
+    tt->val_offset = (char *) &min_valid_fraction_for_fit - &_start_;
+    tt->single_val.d = 0.67;
     tt++;
     
-    // Parameter 'max_texture_for_stratiform'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_texture_for_stratiform");
-    tt->descr = tdrpStrDup("Maximum texture for stratiform at a point.");
-    tt->help = tdrpStrDup("If the texture at a point is less than this value, we set the stratiform flag at this point.");
-    tt->val_offset = (char *) &max_texture_for_stratiform - &_start_;
-    tt->single_val.d = 11;
-    tt++;
-    
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON INTEREST");
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY");
     tt->comment_text = tdrpStrDup("If neither is set, we flag the point as MIXED.");
     tt++;
     
-    // Parameter 'min_interest_for_convective'
+    // Parameter 'min_convectivity_for_convective'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_interest_for_convective");
-    tt->descr = tdrpStrDup("Minimum interest for convective at a point.");
-    tt->help = tdrpStrDup("If the interest at a point exceeds this value, we set the convective flag at this point.");
-    tt->val_offset = (char *) &min_interest_for_convective - &_start_;
+    tt->param_name = tdrpStrDup("min_convectivity_for_convective");
+    tt->descr = tdrpStrDup("Minimum convectivity for convective at a point.");
+    tt->help = tdrpStrDup("If the convectivity at a point exceeds this value, we set the convective flag at this point.");
+    tt->val_offset = (char *) &min_convectivity_for_convective - &_start_;
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'max_interest_for_stratiform'
+    // Parameter 'max_convectivity_for_stratiform'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_interest_for_stratiform");
-    tt->descr = tdrpStrDup("Maximum interest for stratiform at a point.");
-    tt->help = tdrpStrDup("If the interest at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_interest_for_convective we flag the point as MIXED.");
-    tt->val_offset = (char *) &max_interest_for_stratiform - &_start_;
+    tt->param_name = tdrpStrDup("max_convectivity_for_stratiform");
+    tt->descr = tdrpStrDup("Maximum convectivity for stratiform at a point.");
+    tt->help = tdrpStrDup("If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.");
+    tt->val_offset = (char *) &max_convectivity_for_stratiform - &_start_;
     tt->single_val.d = 0.4;
     tt++;
     
@@ -1019,14 +932,14 @@
     tt->descr = tdrpStrDup("Minimum grid overlap in convective regions.");
     tt->help = tdrpStrDup("A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.");
     tt->val_offset = (char *) &min_overlap_for_convective_clumps - &_start_;
-    tt->single_val.i = 3;
+    tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1043,28 +956,52 @@
     tt->single_val.s = tdrpStrDup("mdv/stratiform");
     tt++;
     
-    // Parameter 'write_partition_field'
+    // Parameter 'write_partition'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_partition_field");
-    tt->descr = tdrpStrDup("Option to write out partition field.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &write_partition_field - &_start_;
+    tt->param_name = tdrpStrDup("write_partition");
+    tt->descr = tdrpStrDup("Write out partition fields.");
+    tt->help = tdrpStrDup("This will write out the 3D, 2D and column-max partition.");
+    tt->val_offset = (char *) &write_partition - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'partition_field_name'
-    // ctype is 'char*'
+    // Parameter 'write_texture'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("partition_field_name");
-    tt->descr = tdrpStrDup("Name of convective / stratiform partition field.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &partition_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("ConvStrat");
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_texture");
+    tt->descr = tdrpStrDup("Write out texture fields.");
+    tt->help = tdrpStrDup("This will write out the 3D and column-max texture.");
+    tt->val_offset = (char *) &write_texture - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'write_convectivity'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_convectivity");
+    tt->descr = tdrpStrDup("Write out convectivity fields.");
+    tt->help = tdrpStrDup("This will write out the 3D and column-max convectivity.");
+    tt->val_offset = (char *) &write_convectivity - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'write_3D_dbz'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_3D_dbz");
+    tt->descr = tdrpStrDup("Write out 3D dbz field.");
+    tt->help = tdrpStrDup("This will be an echo of the input field.");
+    tt->val_offset = (char *) &write_3D_dbz - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'write_convective_dbz'
@@ -1073,82 +1010,70 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("write_convective_dbz");
-    tt->descr = tdrpStrDup("Option to write out convective dbz field.");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Write out convective dbz field.");
+    tt->help = tdrpStrDup("This will write out the 3D convective DBZ field.");
     tt->val_offset = (char *) &write_convective_dbz - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'convective_dbz_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("convective_dbz_field_name");
-    tt->descr = tdrpStrDup("Name of convective dbz field.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &convective_dbz_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("DbzConv");
-    tt++;
-    
-    // Parameter 'convert_convective_dbz_to_column_max'
+    // Parameter 'write_col_max_dbz'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("convert_convective_dbz_to_column_max");
-    tt->descr = tdrpStrDup("Option to convert convective dbz field to col max before writing.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &convert_convective_dbz_to_column_max - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'write_stratiform_dbz'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_stratiform_dbz");
-    tt->descr = tdrpStrDup("Option to write out conveective dbz field.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &write_stratiform_dbz - &_start_;
+    tt->param_name = tdrpStrDup("write_col_max_dbz");
+    tt->descr = tdrpStrDup("Write out column maximum dbz field.");
+    tt->help = tdrpStrDup("This is the max reflectivity at any height.");
+    tt->val_offset = (char *) &write_col_max_dbz - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'stratiform_dbz_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("stratiform_dbz_field_name");
-    tt->descr = tdrpStrDup("Name of convective dbz field.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &stratiform_dbz_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("DbzStrat");
-    tt++;
-    
-    // Parameter 'convert_stratiform_dbz_to_column_max'
+    // Parameter 'write_tops'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("convert_stratiform_dbz_to_column_max");
-    tt->descr = tdrpStrDup("Option to convert stratiform dbz field to col max before writing.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &convert_stratiform_dbz_to_column_max - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->param_name = tdrpStrDup("write_tops");
+    tt->descr = tdrpStrDup("Write out echo, convective and stratiform tops.");
+    tt->help = tdrpStrDup("These are 2D fields.");
+    tt->val_offset = (char *) &write_tops - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'write_debug_fields'
+    // Parameter 'write_fraction_active'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_debug_fields");
-    tt->descr = tdrpStrDup("Option to write out debug fields.");
-    tt->help = tdrpStrDup("These are the intermediate fields used for the computation: 'FractionActive', 'DbzTexture', 'ColMaxDbz', 'ConvFromColMax', 'ConvFromTexture'");
-    tt->val_offset = (char *) &write_debug_fields - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->param_name = tdrpStrDup("write_fraction_active");
+    tt->descr = tdrpStrDup("Write out 2D field showing fraction active.");
+    tt->help = tdrpStrDup("This the active fraction in the computational circle.");
+    tt->val_offset = (char *) &write_fraction_active - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'write_height_grids'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_height_grids");
+    tt->descr = tdrpStrDup("Write out 2D field showing shallow and deep heights.");
+    tt->help = tdrpStrDup("These are based on model temperature.");
+    tt->val_offset = (char *) &write_height_grids - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'write_temperature'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_temperature");
+    tt->descr = tdrpStrDup("Write out 3D temperature field.");
+    tt->help = tdrpStrDup("This comes from a model, remapped onto the reflectivity grid.");
+    tt->val_offset = (char *) &write_temperature - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // trailing entry has param_name set to NULL

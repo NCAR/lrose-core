@@ -85,15 +85,6 @@ public:
     VERT_LEVELS_BY_HT = 1
   } vert_levels_type_t;
 
-  // struct typedefs
-
-  typedef struct {
-    double min_dbz;
-    double max_dbz;
-    double min_radius_km;
-    double max_radius_km;
-  } conv_radius_function_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -422,47 +413,41 @@ public:
 
   double min_valid_volume_for_convective;
 
-  double dbz_threshold_for_definite_convective;
-
   double dbz_for_echo_tops;
-
-  double background_dbz_radius_km;
-
-  conv_radius_function_t conv_radius_function;
 
   double texture_radius_km;
 
   double min_valid_fraction_for_texture;
 
-  double min_texture_for_convective;
+  double min_valid_fraction_for_fit;
 
-  double max_texture_for_stratiform;
+  double min_convectivity_for_convective;
 
-  double min_interest_for_convective;
-
-  double max_interest_for_stratiform;
+  double max_convectivity_for_stratiform;
 
   int min_overlap_for_convective_clumps;
 
   char* output_url;
 
-  tdrp_bool_t write_partition_field;
+  tdrp_bool_t write_partition;
 
-  char* partition_field_name;
+  tdrp_bool_t write_texture;
+
+  tdrp_bool_t write_convectivity;
+
+  tdrp_bool_t write_3D_dbz;
 
   tdrp_bool_t write_convective_dbz;
 
-  char* convective_dbz_field_name;
+  tdrp_bool_t write_col_max_dbz;
 
-  tdrp_bool_t convert_convective_dbz_to_column_max;
+  tdrp_bool_t write_tops;
 
-  tdrp_bool_t write_stratiform_dbz;
+  tdrp_bool_t write_fraction_active;
 
-  char* stratiform_dbz_field_name;
+  tdrp_bool_t write_height_grids;
 
-  tdrp_bool_t convert_stratiform_dbz_to_column_max;
-
-  tdrp_bool_t write_debug_fields;
+  tdrp_bool_t write_temperature;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -471,7 +456,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[48];
+  mutable TDRPtable _table[44];
 
   const char *_className;
 

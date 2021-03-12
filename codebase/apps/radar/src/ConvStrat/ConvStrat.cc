@@ -123,21 +123,14 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setMinValidHtKm(_params.min_valid_height);
   _finder.setMaxValidHtKm(_params.max_valid_height);
   _finder.setMinValidDbz(_params.min_valid_dbz);
-  _finder.setDbzForDefiniteConvective
-    (_params.dbz_threshold_for_definite_convective);
   _finder.setDbzForEchoTops(_params.dbz_for_echo_tops);
-  _finder.setComputeConvRadius(_params.conv_radius_function.min_dbz,
-                               _params.conv_radius_function.max_dbz,
-                               _params.conv_radius_function.min_radius_km,
-                               _params.conv_radius_function.max_radius_km,
-                               _params.background_dbz_radius_km);
   _finder.setTextureRadiusKm(_params.texture_radius_km);
   _finder.setMinValidFractionForTexture
     (_params.min_valid_fraction_for_texture);
-  _finder.setMinTextureForConvective(_params.min_texture_for_convective);
-  _finder.setMaxTextureForStratiform(_params.max_texture_for_stratiform);
-  _finder.setMinInterestForConvective(_params.min_interest_for_convective);
-  _finder.setMaxInterestForStratiform(_params.max_interest_for_stratiform);
+  _finder.setMinValidFractionForFit
+    (_params.min_valid_fraction_for_fit);
+  _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
+  _finder.setMaxConvectivityForStratiform(_params.max_convectivity_for_stratiform);
   _finder.setMinGridOverlapForClumping(_params.min_overlap_for_convective_clumps);
 
 }
@@ -330,127 +323,81 @@ void ConvStrat::_addFields()
   vhdr2d.level[0] = 0;
   vhdr2d.type[0] = Mdvx::VERT_TYPE_SURFACE;
 
-  if (_params.write_debug_fields) {
-
-    // load up fraction of texture kernel covered
-    
+  if (_params.write_texture) {
+    // add 2D max texture field
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getFractionActive(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "FractionActive",
-                                 "Fraction of texture kernel active",
-                                 ""));
-                      
-    // add mean texture fields
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getMeanTexture(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "DbzTextureMean",
-                                 "Mean texture of dbz",
-                                 "dBZ"));
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getMeanTextureLow(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "DbzTextureLow",
-                                 "Mean texture of dbz - low",
-                                 "dBZ"));
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getMeanTextureMid(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "DbzTextureMid",
-                                 "Mean texture of dbz - mid",
-                                 "dBZ"));
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getMeanTextureHigh(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "DbzTextureHigh",
-                                 "Mean texture of dbz - high",
-                                 "dBZ"));
-    
-    // add max texture field
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getMaxTexture(),
-                                 Mdvx::ENCODING_FLOAT32,
+                                 _finder.getTextureMax(),
+                                 Mdvx::ENCODING_INT16,
                                  "DbzTextureMax",
                                  "Max texture of dbz",
                                  "dBZ"));
-    
-    // max dbz
-    
+  }
+  
+  if (_params.write_convectivity) {
+    // convectivity in 2D
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getConvectivityMax(),
+                                 Mdvx::ENCODING_INT16,
+                                 "ConvectivityMax",
+                                 "ColumnMax-LikelihoodOfConvection",
+                                 ""));
+  }
+
+  if (_params.write_col_max_dbz) {
+    // col max dbz
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getColMaxDbz(),
-                                 Mdvx::ENCODING_FLOAT32,
+                                 Mdvx::ENCODING_INT16,
                                  "DbzColMax",
                                  "Max dbz in column",
                                  "dBZ"));
+  }
     
-    // background dbz
-    
+  if (_params.write_fraction_active) {
+    // load up fraction of texture kernel covered
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getBackgroundDbz(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "DbzBackground",
-                                 "Background dbz",
-                                 "dBZ"));
+                                 _finder.getFractionActive(),
+                                 Mdvx::ENCODING_INT16,
+                                 "FractionActive",
+                                 "Fraction of texture kernel active",
+                                 ""));
+  }
     
-    // convective radius in km
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getConvRadiusKm(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "ConvRadius",
-                                 "ConvectiveRadius",
-                                 "km"));
-    
-    // convective base, top
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getConvBaseKm(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "ConvBase",
-                                 "ConvectiveBase",
-                                 "km"));
-    
+  if (_params.write_tops) {
+    // tops
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getConvTopKm(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "ConvTop",
-                                 "ConvectiveTop",
+                                 Mdvx::ENCODING_INT16,
+                                 "ConvTops",
+                                 "ConvectiveTops",
                                  "km"));
-    
-    // stratiform base, top
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getStratBaseKm(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "StratBase",
-                                 "StratiformBase",
-                                 "km"));
-    
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getStratTopKm(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "StratTop",
-                                 "StratiformTop",
+                                 Mdvx::ENCODING_INT16,
+                                 "StratTops",
+                                 "StratiformTops",
                                  "km"));
-    
-    // echo top
-    
+    char longName[256];
+    snprintf(longName, 256, "%g-dbz-echo-tops", _params.dbz_for_echo_tops);
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getEchoTopKm(),
-                                 Mdvx::ENCODING_FLOAT32,
-                                 "EchoTop",
-                                 "EchoTop",
-                                 "km"));
-    
+                                 Mdvx::ENCODING_INT16,
+                                 "EchoTops", longName, "km"));
   }
   
-  // the following fields are unsigned bytes
+  if (_params.write_height_grids) {
+    _shallowHtField.convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+    _outMdvx.addField(new MdvxField(_shallowHtField));
+    _deepHtField.convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+    _outMdvx.addField(new MdvxField(_deepHtField));
+  }
+  
+  if (_params.write_temperature) {
+    _tempField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+    _outMdvx.addField(new MdvxField(*_tempField));
+  }
+
+  // the following 2d fields are unsigned bytes
   
   size_t planeSize08 = fhdr2d.nx * fhdr2d.ny * sizeof(ui08);
   fhdr2d.volume_size = planeSize08;
@@ -461,36 +408,19 @@ void ConvStrat::_addFields()
   
   // partition field
   
-  if (_params.write_partition_field) {
-    
+  if (_params.write_partition) {
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getPartition(),
+                                 _finder.getPartition2D(),
                                  Mdvx::ENCODING_INT8,
-                                 _params.partition_field_name,
-                                 "Partition",
+                                 "Partition2D",
+                                 "ConvStratPartition2D",
                                  ""));
-    
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getPartitionLow(),
+                                 _finder.getPartitionMax(),
                                  Mdvx::ENCODING_INT8,
-                                 "PartitionLow",
-                                 "PartitionLow",
+                                 "PartitionMax",
+                                 "ConvStratPartitionMax",
                                  ""));
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getPartitionMid(),
-                                 Mdvx::ENCODING_INT8,
-                                 "PartitionMid",
-                                 "PartitionMid",
-                                 ""));
-    
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getPartitionHigh(),
-                                 Mdvx::ENCODING_INT8,
-                                 "PartitionHigh",
-                                 "PartitionHigh",
-                                 ""));
-    
   }
   
   // the following 3d fields are floats
@@ -501,90 +431,60 @@ void ConvStrat::_addFields()
   fhdr3d.bad_data_value = _missing;
 
   if (_params.write_convective_dbz) {
+    // reflectivity only where convection has been identified
     MdvxField *convDbz = _makeField(fhdr3d, vhdr3d,
                                     _finder.getConvectiveDbz(),
                                     Mdvx::ENCODING_INT16,
-                                    _params.convective_dbz_field_name,
+                                    "ConvDbz",
                                     "Convective reflectivity",
                                     "dBZ");
-    if (_params.convert_convective_dbz_to_column_max) {
-      convDbz->convert2Composite();
-    }
     _outMdvx.addField(convDbz);
   }
   
-  if (_params.write_stratiform_dbz) {
-    MdvxField *stratDbz = _makeField(fhdr3d, vhdr3d,
-                                     _finder.getStratiformDbz(),
-                                     Mdvx::ENCODING_INT16,
-                                     _params.stratiform_dbz_field_name,
-                                     "Stratiform reflectivity",
-                                     "dBZ");
-    if (_params.convert_stratiform_dbz_to_column_max) {
-      stratDbz->convert2Composite();
-    }
-    _outMdvx.addField(stratDbz);
-  }
-  
-  if (_params.write_partition_field) {
-    
-    // texture for full volume
-    
+  if (_params.write_texture) {
+    // texture in 3D
     _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
                                  _finder.getTexture3D(),
                                  Mdvx::ENCODING_INT16,
                                  "DbzTexture3D",
                                  "ReflectivityTexture3D",
                                  "dBZ"));
+  }
 
-    // convectivity interest for full volume
-    
+  if (_params.write_convectivity) {
+    // convectivity in 3D
     _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getInterest3D(),
+                                 _finder.getConvectivity3D(),
                                  Mdvx::ENCODING_INT16,
                                  "Convectivity3D",
                                  "LikelihoodOfConvection3D",
                                  ""));
-
   }
 
-  if (_params.write_debug_fields) {
-    
-    // echo the input field
-    
+  if (_params.write_3D_dbz) {
+    // echo the input DBZ field
     _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
                                  _finder.getDbz3D(),
                                  Mdvx::ENCODING_INT16,
                                  "Dbz3D",
                                  "Reflectivity3D",
                                  "dBZ"));
-
-    // freezing level, divergence level ht, temp field
-
-    _outMdvx.addField(new MdvxField(_shallowHtField));
-    _outMdvx.addField(new MdvxField(_deepHtField));
-    _outMdvx.addField(new MdvxField(*_tempField));
-
   }
   
-  if (_params.write_partition_field) {
-    
+  if (_params.write_partition) {
     // partition for full volume
-    
     size_t volSize08 = fhdr3d.nx * fhdr3d.ny * fhdr3d.nz * sizeof(ui08);
     fhdr3d.volume_size = volSize08;
     fhdr3d.encoding_type = Mdvx::ENCODING_INT8;
     fhdr3d.data_element_nbytes = 1;
     fhdr3d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
     fhdr3d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
-    
     _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
                                  _finder.getPartition3D(),
                                  Mdvx::ENCODING_INT8,
                                  "Partition3D",
                                  "Conv-strat-partition-3D",
                                  ""));
-
   }
 
 }

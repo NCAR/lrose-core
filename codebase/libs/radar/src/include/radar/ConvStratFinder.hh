@@ -54,17 +54,16 @@ class ConvStratFinder {
 public:
 
   typedef enum {
-    CATEGORY_MISSING = 99,
+    CATEGORY_MISSING = 0,
     CATEGORY_STRATIFORM_LOW = 14,
     CATEGORY_STRATIFORM_MID = 15,
     CATEGORY_STRATIFORM_HIGH = 16,
     CATEGORY_STRATIFORM = 19,
     CATEGORY_MIXED = 25,
-    CATEGORY_CONVECTIVE_SMALL = 33,
-    CATEGORY_CONVECTIVE_SHALLOW = 34,
-    CATEGORY_CONVECTIVE_MID = 35,
-    CATEGORY_CONVECTIVE_ELEVATED = 36,
-    CATEGORY_CONVECTIVE_DEEP = 37,
+    CATEGORY_CONVECTIVE_SHALLOW = 33,
+    CATEGORY_CONVECTIVE_MID = 34,
+    CATEGORY_CONVECTIVE_ELEVATED = 35,
+    CATEGORY_CONVECTIVE_DEEP = 36,
     CATEGORY_CONVECTIVE = 39,
     CATEGORY_UNKNOWN
   } category_t;
@@ -84,6 +83,18 @@ public:
   
   ~ConvStratFinder();
 
+  ////////////////////////////////////////////////////////////////////
+  // Set debugging to on or verbose
+
+  void setDebug(bool state) { _debug = state; }
+
+  void setVerbose(bool state) {
+    _verbose = state;
+    if (state) {
+      _debug = true;
+    }
+  }
+  
   // set algorithm parameters
 
   ////////////////////////////////////////////////////////////////////
@@ -104,26 +115,20 @@ public:
 
   void setMinValidDbz(double val) { _minValidDbz = val; }
 
-  // converting texture to convectivity interest
-  // these are the limits mapping to 0 and 1
+  // set convectivity threshold for convective regions
+  // convectivity values above this indicate convective
   
-  void setTextureLimitLow(double val) { _textureLimitLow = val; }
-  void setTextureLimitHigh(double val) { _textureLimitHigh = val; }
-  
-  // Set interest threshold for stratiform regions.
-  // Interest values below this indicate stratiform.
-  // Interest values between this and minInterestForConvective
-  // indicate mixed.
-  
-  void setMaxInterestForStratiform(double val) {
-    _maxInterestForStratiform = val;
+  void setMinConvectivityForConvective(double val) {
+    _minConvectivityForConvective = val;
   }
   
-  // set interest threshold for convective regions
-  // interest values above this indicate convective
+  // Set convectivity threshold for stratiform regions.
+  // Convectivity values below this indicate stratiform.
+  // Convectivity values between this and minConvectivityForConvective
+  // indicate mixed.
   
-  void setMinInterestForConvective(double val) {
-    _minInterestForConvective = val;
+  void setMaxConvectivityForStratiform(double val) {
+    _maxConvectivityForStratiform = val;
   }
   
   // set minimum grid overlap for clumping the convective regions
@@ -133,51 +138,12 @@ public:
   }
   
   ////////////////////////////////////////////////////////////////////
-  // Reflectivity value that indicates definite convection.  If the
-  // reflectivity exceeds this value at a point, we assume convection
-  // is definitely active at that point. To use this, we first compute
-  // the column maximum reflectivity. If the column max dbz at a point
-  // exceeds this threshold, then we flag that point as convective.
-
-  void setDbzForDefiniteConvective(double val) {
-    _dbzForDefiniteConvective = val; 
-  }
-  
-  ////////////////////////////////////////////////////////////////////
   // Reflectivity threshold for echo tops (dBZ).
   // Echo tops are defined as the max ht with reflectivity at or
   // above this value.
   
   void setDbzForEchoTops(double val) { _dbzForEchoTops = val; }
   
-  ////////////////////////////////////////////////////////////////////
-  // Compute the radius of convective influence from the background
-  // reflectivity.
-  // Given definite convection at a point (see above),
-  // we set all points within the computed radius to be convective.
-  //
-  //
-  // minConvRadiusKm = min convective radius if computed
-  // maxConvRadiusKm = max convective radius if computed
-  // dbzForMinRadius = background dbz for min radius
-  // dbzForMaxRadius = background dbz for max radius
-  // backgroundRadiusKm = kernel radius for computing background dbz
-
-  void setComputeConvRadius(double dbzForMinRadius,
-                            double dbzForMaxRadius,
-                            double minConvRadiusKm,
-                            double maxConvRadiusKm,
-                            double backgroundRadiusKm) {
-    _minConvRadiusKm = minConvRadiusKm;
-    _maxConvRadiusKm = maxConvRadiusKm;
-    _dbzForMinRadius = dbzForMinRadius;
-    _dbzForMaxRadius = dbzForMaxRadius;
-    _backgroundRadiusKm = backgroundRadiusKm;
-    _deltaRadius = _maxConvRadiusKm - _minConvRadiusKm;
-    _deltaBackgroundDbz = _dbzForMaxRadius -_dbzForMinRadius;
-    _radiusSlope = _deltaRadius / _deltaBackgroundDbz;
-  }
-
   ////////////////////////////////////////////////////////////////////
   // Radius for texture analysis (km).  We determine the reflectivity
   // 'texture' at a point by computing the standard deviation of the
@@ -203,28 +169,8 @@ public:
   // fraction of points around the central point to have reflectivity
   // in excess of min_valid_dbz.
 
-  void setMinValidFractionFit(double val) {
+  void setMinValidFractionForFit(double val) {
     _minValidFractionForFit = val; 
-  }
-
-  ////////////////////////////////////////////////////////////////////
-  // Minimum texture for convection at a point.  If the texture at a
-  // point exceeds this value, we set the convective flag at this
-  // point. We then expand the convective influence around the point
-  // using convetive_radius_km.
-
-  void setMinTextureForConvective(double val) {
-    _minTextureForConvective = val; 
-  }
-
-  ////////////////////////////////////////////////////////////////////
-  // Minimum texture for convection at a point.  If the texture at a
-  // point exceeds this value, we set the convective flag at this
-  // point. We then expand the convective influence around the point
-  // using convetive_radius_km.
-
-  void setMaxTextureForStratiform(double val) {
-    _maxTextureForStratiform = val; 
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -236,15 +182,6 @@ public:
     _minVolForConvectiveKm3 = val; 
   }
 
-  ////////////////////////////////////////////////////////////////////
-  // Set grid details
-
-  void setGrid(size_t nx, size_t ny,
-               double dx, double dy,
-               double minx, double miny,
-               const vector<double> &zKm,
-               bool projIsLatLon = false);
-  
   ////////////////////////////////////////////////////////////////////
   // Set the shallow and deep height thresholds, in km.
   // This sets the heights to constant values.
@@ -261,16 +198,13 @@ public:
                            size_t nptsPlane);
   
   ////////////////////////////////////////////////////////////////////
-  // Set debugging to on or verbose
+  // Set grid details
 
-  void setDebug(bool state) { _debug = state; }
-
-  void setVerbose(bool state) {
-    _verbose = state;
-    if (state) {
-      _debug = true;
-    }
-  }
+  void setGrid(size_t nx, size_t ny,
+               double dx, double dy,
+               double minx, double miny,
+               const vector<double> &zKm,
+               bool projIsLatLon = false);
   
   ////////////////////////////////////////////////////////////////////
   // compute the partition
@@ -283,41 +217,28 @@ public:
   const fl32 *getDbz3D() const { return _dbz3D.dat(); }
   const fl32 *getShallowHtGrid() const { return _shallowHtGrid.dat(); }
   const fl32 *getDeepHtGrid() const { return _deepHtGrid.dat(); }
+  const fl32 *getColMaxDbz() const { return _colMaxDbz.dat(); }
+  const fl32 *getFractionActive() const { return _fractionActive.dat(); }
   
   ////////////////////////////////////////////////////////////////////
   // get the resulting partition
   // will be set to the relevant category
 
   const ui08 *getPartition3D() const { return _partition3D.dat(); }
-  const ui08 *getPartition() const { return _partition.dat(); }
-  const ui08 *getPartitionLow() const { return _partitionLow.dat(); }
-  const ui08 *getPartitionMid() const { return _partitionMid.dat(); }
-  const ui08 *getPartitionHigh() const { return _partitionHigh.dat(); }
-
+  const ui08 *getPartitionMax() const { return _partitionMax.dat(); }
+  const ui08 *getPartition2D() const { return _partition2D.dat(); }
   const fl32 *getConvectiveDbz() const { return _convDbz.dat(); }
-  const fl32 *getStratiformDbz() const { return _stratDbz.dat(); }
 
   ////////////////////////////////////////////////////////////////////
   // get derived fields
-
+  
   const fl32 *getTexture3D() const { return _texture3D.dat(); }
-  const fl32 *getInterest3D() const { return _interest3D.dat(); }
-  const fl32 *getMeanTexture() const { return _meanTexture.dat(); }
-  const fl32 *getMeanTextureLow() const { return _meanTextureLow.dat(); }
-  const fl32 *getMeanTextureMid() const { return _meanTextureMid.dat(); }
-  const fl32 *getMeanTextureHigh() const { return _meanTextureHigh.dat(); }
-  const fl32 *getMaxTexture() const { return _maxTexture.dat(); }
-  const fl32 *getFractionActive() const { return _fractionActive.dat(); }
-  const fl32 *getColMaxDbz() const { return _colMaxDbz.dat(); }
-  const fl32 *getBackgroundDbz() const { return _backgroundDbz.dat(); }
-  const fl32 *getConvRadiusKm() const { return _convRadiusKm.dat(); }
+  const fl32 *getTextureMax() const { return _textureMax.dat(); }
+  const fl32 *getConvectivity3D() const { return _convectivity3D.dat(); }
+  const fl32 *getConvectivityMax() const { return _convectivityMax.dat(); }
 
-  const fl32 *getConvBaseKm() const { return _convBaseKm.dat(); }
   const fl32 *getConvTopKm() const { return _convTopKm.dat(); }
-
-  const fl32 *getStratBaseKm() const { return _stratBaseKm.dat(); }
   const fl32 *getStratTopKm() const { return _stratTopKm.dat(); }
-
   const fl32 *getEchoTopKm() const { return _echoTopKm.dat(); }
 
   // get missing value for float arrays
@@ -360,26 +281,30 @@ private:
   double _minValidHtKm;
   double _maxValidHtKm;
   double _minValidDbz;
-  double _dbzForDefiniteConvective;
+
+  double _minConvectivityForConvective;
+  double _maxConvectivityForStratiform;
+  int _minOverlapForClumping;
+
+  double _dbzForEchoTops;
+
   double _textureRadiusKm;
   double _minValidFractionForTexture;
   double _minValidFractionForFit;
-  double _minTextureForConvective;
-  double _maxTextureForStratiform;
   double _minVolForConvectiveKm3;
 
-  double _minConvRadiusKm; // min convective radius if computed
-  double _maxConvRadiusKm; // max convective radius if computed
-  double _dbzForMinRadius; // background dbz for min radius
-  double _dbzForMaxRadius; // background dbz for max radius
-  double _deltaRadius;
-  double _deltaBackgroundDbz;
-  double _radiusSlope;
-  double _backgroundRadiusKm; // radius for computing background dbz
-  double _dbzForEchoTops; // reflectivity for storm tops
+  // specify freezing level, and divergence level, by ht MSL
+  // if this is false, grids for fz and div level must be passed in
+  
+  bool _specifyLevelsByHtValues;
+  double _shallowHtKm;
+  double _deepHtKm;
 
-  vector<kernel_t> _textureKernelOffsets;
-  vector<ssize_t> _backgroundKernelOffsets;
+  // converting texture to convectivity convectivity
+  // these are the limits mapping to 0 and 1
+  
+  double _textureLimitLow;
+  double _textureLimitHigh;
 
   // grid details
 
@@ -396,26 +321,10 @@ private:
   size_t _minIz, _maxIz;
   
   int _nxTexture, _nyTexture;
-  int _nxBackground, _nyBackground;
 
-  // specify freezing level, and divergence level, by ht MSL
-  // if this is false, grids for fz and div level must be passed in
-  
-  bool _specifyLevelsByHtValues;
-  double _shallowHtKm;
-  double _deepHtKm;
+  // kernel computations
 
-  // converting texture to convectivity interest
-  // these are the limits mapping to 0 and 1
-  
-  double _textureLimitLow;
-  double _textureLimitHigh;
-
-  // interest threshold for convection and stratiform regions
-  
-  double _maxInterestForStratiform;
-  double _minInterestForConvective;
-  int _minOverlapForClumping;
+  vector<kernel_t> _textureKernelOffsets;
 
   // clumping the convective regions
   
@@ -428,35 +337,26 @@ private:
   TaArray<fl32> _dbz3D;
   TaArray<fl32> _shallowHtGrid; // grid for shallow cloud ht threshold
   TaArray<fl32> _deepHtGrid;    // grid for deep cloud ht threshold
+  TaArray<fl32> _colMaxDbz;
+  TaArray<fl32> _fractionActive;
   
   // primary outputs
   
   TaArray<ui08> _partition3D;
-  TaArray<ui08> _partition;
-  TaArray<ui08> _partitionLow;
-  TaArray<ui08> _partitionMid;
-  TaArray<ui08> _partitionHigh;
-
+  TaArray<ui08> _partitionMax;
+  TaArray<ui08> _partition2D;
   TaArray<fl32> _convDbz;
-  TaArray<fl32> _stratDbz;
-  
+
   // intermediate fields
   
   TaArray<fl32> _texture3D;
-  TaArray<fl32> _interest3D;
-  TaArray<fl32> _meanTexture;
-  TaArray<fl32> _meanTextureLow;
-  TaArray<fl32> _meanTextureMid;
-  TaArray<fl32> _meanTextureHigh;
-  TaArray<fl32> _maxTexture;
-  TaArray<fl32> _fractionActive;
-  TaArray<fl32> _colMaxDbz;
-  TaArray<fl32> _backgroundDbz;
-  TaArray<fl32> _convRadiusKm;
+  TaArray<fl32> _textureMax;
+  TaArray<fl32> _convectivity3D;
+  TaArray<fl32> _convectivityMax;
 
-  TaArray<fl32> _convBaseKm;
+  // tops
+
   TaArray<fl32> _convTopKm;
-  TaArray<fl32> _stratBaseKm;
   TaArray<fl32> _stratTopKm;
   TaArray<fl32> _echoTopKm;
 
@@ -468,19 +368,14 @@ private:
   void _initToMissing(TaArray<ui08> &array, ui08 missingVal);
   void _computeColMax();
   void _finalizePartition();
-  void _expandConvective(ui08 *partition,
-                         size_t ix, size_t iy, size_t index);
   void _computeTexture();
-  void _computeInterest();
+  void _computeConvectivity();
   void _performClumping();
-  void _setPartition3D();
   void _freeClumps();
-  void _computeProps();
-  void _computeProps(size_t index, vector<fl32> &textureProfile);
+  void _setPartition3D();
+  void _set2DFields();
   void _computeKernels();
   void _printSettings(ostream &out);
-  double _computeConvRadiusKm(double backgroundDbz);
-  void _computeBackgroundDbz();
 
   /////////////////////////////////////////////////////////
   // inner class for starting timers in a separate thread
