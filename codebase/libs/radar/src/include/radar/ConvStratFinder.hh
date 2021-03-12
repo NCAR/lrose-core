@@ -188,13 +188,23 @@ public:
   void setTextureRadiusKm(double val) { _textureRadiusKm = val; }
 
   ////////////////////////////////////////////////////////////////////
-  // Minimum fraction of surroundingpoints for texture computations.
+  // Minimum fraction of surrounding points for planar fit.
+  // For a valid computation of the 2D fit to reflectivity at a point,
+  // we require at least this fraction of points around the central
+  // point to have reflectivity in excess of min_valid_dbz.
+
+  void setMinValidFractionForTexture(double val) {
+    _minValidFractionForTexture = val; 
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  // Minimum fraction of surrounding points for texture computations.
   // For a valid computation of texture, we require at least this
   // fraction of points around the central point to have reflectivity
   // in excess of min_valid_dbz.
 
-  void setMinValidFractionForTexture(double val) {
-    _minValidFractionForTexture = val; 
+  void setMinValidFractionFit(double val) {
+    _minValidFractionForFit = val; 
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -353,6 +363,7 @@ private:
   double _dbzForDefiniteConvective;
   double _textureRadiusKm;
   double _minValidFractionForTexture;
+  double _minValidFractionForFit;
   double _minTextureForConvective;
   double _maxTextureForStratiform;
   double _minVolForConvectiveKm3;
@@ -404,13 +415,13 @@ private:
   
   double _maxInterestForStratiform;
   double _minInterestForConvective;
+  int _minOverlapForClumping;
 
   // clumping the convective regions
   
   GridClumping _clumping;
   int _nClumps;
   vector<ClumpGeom *> _clumps;
-  int _minOverlapForClumping;
   
   // inputs
   
@@ -501,9 +512,14 @@ private:
       _nyTexture = ny;
     }
     
-    void setMinValidFraction(double val)
+    void setMinValidFractionForTexture(double val)
     {
-      _minValidFraction = val;
+      _minValidFractionForTexture = val;
+    }
+    
+    void setMinValidFractionForFit(double val)
+    {
+      _minValidFractionForFit = val;
     }
     
     void setDbz(const fl32 *dbz, const fl32 *dbzColMax,
@@ -538,7 +554,8 @@ private:
     size_t _iz;
     size_t _nx, _ny;
     int _nxTexture, _nyTexture;
-    double _minValidFraction;
+    double _minValidFractionForTexture;
+    double _minValidFractionForFit;
     fl32 _missingVal;
     const fl32 *_dbz;
     const fl32 *_dbzColMax;

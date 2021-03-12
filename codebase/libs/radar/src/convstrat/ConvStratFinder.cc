@@ -63,7 +63,8 @@ ConvStratFinder::ConvStratFinder()
   _minValidDbz = 0.0;
   _dbzForDefiniteConvective = 53;
   _textureRadiusKm = 5.0;
-  _minValidFractionForTexture = 0.33; 
+  _minValidFractionForTexture = 0.25; 
+  _minValidFractionForFit = 0.67; 
   _minTextureForConvective = 15.0; 
   _maxTextureForStratiform = 11.0; 
   _minVolForConvectiveKm3 = 20.0; 
@@ -92,7 +93,6 @@ ConvStratFinder::ConvStratFinder()
 
   _maxInterestForStratiform = 0.4;
   _minInterestForConvective = 0.5;
-
   _minOverlapForClumping = 1;
 
 }
@@ -513,7 +513,8 @@ void ConvStratFinder::_computeTexture()
     ComputeTexture *thread = new ComputeTexture(iz);
     thread->setGridSize(_nx, _ny);
     thread->setKernelSize(_nxTexture, _nyTexture);
-    thread->setMinValidFraction(_minValidFractionForTexture);
+    thread->setMinValidFractionForTexture(_minValidFractionForTexture);
+    thread->setMinValidFractionForFit(_minValidFractionForFit);
     thread->setDbz(dbz + zoffset, colMaxDbz, _missingFl32);
     thread->setFractionCovered(fractionTexture);
     thread->setKernelOffsets(_textureKernelOffsets);
@@ -1104,8 +1105,9 @@ void ConvStratFinder::_printSettings(ostream &out)
   out << "  _dbzForDefiniteConvective: " << _dbzForDefiniteConvective << endl;
   out << "  _textureRadiusKm: " << _textureRadiusKm << endl;
   out << "  _minValidFractionForTexture: " << _minValidFractionForTexture << endl;
-  out << "  _minTextureForConvective: " << _minTextureForConvective << endl;
-  out << "  _maxTextureForStratiform: " << _maxTextureForStratiform << endl;
+  out << "  _maxInterestForStratiform: " << _maxInterestForStratiform << endl;
+  out << "  _minInterestForConvective: " << _minInterestForConvective << endl;
+  out << "  _minOverlapForClumping: " << _minOverlapForClumping << endl;
 
   out << "  _nx: " << _nx << endl;
   out << "  _ny: " << _ny << endl;
@@ -1259,7 +1261,10 @@ void ConvStratFinder::ComputeTexture::run()
   // compute texture at each point in the plane
 
   size_t minPtsForTexture = 
-    (size_t) (_minValidFraction * _kernelOffsets.size() + 0.5);
+    (size_t) (_minValidFractionForTexture * _kernelOffsets.size() + 0.5);
+  size_t minPtsForFit = 
+    (size_t) (_minValidFractionForFit * _kernelOffsets.size() + 0.5);
+
   PlaneFit pfit;
   
   for (int iy = _nyTexture; iy < (int) _ny - _nyTexture; iy++) {
@@ -1268,7 +1273,7 @@ void ConvStratFinder::ComputeTexture::run()
     
     for (int ix = _nxTexture; ix < (int) _nx - _nxTexture; ix++, icenter++) {
       
-      if (_fractionCovered[icenter] < _minValidFraction) {
+      if (_fractionCovered[icenter] < _minValidFractionForTexture) {
         continue;
       }
       if (_dbz[icenter] == _missingVal) {
@@ -1280,6 +1285,7 @@ void ConvStratFinder::ComputeTexture::run()
       pfit.clear();
       size_t count = 0;
       vector<double> dbzVals;
+      double sumDbz = 0.0;
       vector<double> xx, yy;
       for (size_t ii = 0; ii < _kernelOffsets.size(); ii++) {
         const kernel_t &kern = _kernelOffsets[ii];
@@ -1290,14 +1296,18 @@ void ConvStratFinder::ComputeTexture::run()
           dbzVals.push_back(val);
           xx.push_back(kern.xx);
           yy.push_back(kern.yy);
+          sumDbz += val;
           count++;
         }
       } // ii
 
-      // check we have sufficient data around this point
-      
-      if (count >= minPtsForTexture) {
+      double meanDbz = sumDbz / count;
+      meanDbz = max(meanDbz, 1.0);
 
+      // check we have sufficient data around this point
+      // for computing the fit
+      
+      if (count >= minPtsForFit) {
         // fit a plane to the reflectivity
         if (pfit.performFit() == 0) {
           // subtract plane fit from dbz values to
@@ -1309,6 +1319,12 @@ void ConvStratFinder::ComputeTexture::run()
             dbzVals[ii] -= delta;
           }
         }
+      } // if (count >= minPtsForFit)
+
+      // check we have sufficient data around this point
+      // for computing the texture
+      
+      if (count >= minPtsForTexture) {
 
         // compute sdev of dbz squared
         
@@ -1318,14 +1334,21 @@ void ConvStratFinder::ComputeTexture::run()
         for (size_t ii = 0; ii < dbzVals.size(); ii++) {
           double val = dbzVals[ii];
           // constrain to positive values
-          if (val < 1.0) {
-            val = 1.0;
-          }
+          val = max(val, 1.0);
           double dbzSq = val * val;
           sum += dbzSq;
           sumSq += dbzSq * dbzSq;
           nn++;
         } // ii
+        // for missing points, substitute the mean
+        if (dbzVals.size() < _kernelOffsets.size()) {
+          double minSq = meanDbz * meanDbz;
+          for (size_t ii = dbzVals.size(); ii < _kernelOffsets.size(); ii++) {
+            sum += minSq;
+            sumSq += minSq * minSq;
+            nn++;
+          }
+        }
         double mean = sum / nn;
         double var = sumSq / nn - (mean * mean);
         if (var < 0.0) {
