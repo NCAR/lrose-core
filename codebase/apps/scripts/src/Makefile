@@ -49,7 +49,6 @@ SCRIPTS = \
 	snuff_inst \
 	snuff_usr1 \
 	sync2files \
-	tkdiff \
 	utime_decode \
 	auto_restart \
 	auto_restart_stats \
