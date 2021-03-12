@@ -1458,11 +1458,7 @@ void ConvStratFinder::ClumpGeom::setPartition()
   
   int category = CATEGORY_MISSING;
   if (_volumeKm3 < _finder->_minVolForConvectiveKm3) {
-    if (fracShallow < 0.05) {
-      category = CATEGORY_CONVECTIVE_ELEVATED;
-    } else {
-      category = CATEGORY_CONVECTIVE_SMALL;
-    }
+    category = CATEGORY_MIXED;
   } else if (fracShallow < 0.05) {
     category = CATEGORY_CONVECTIVE_ELEVATED;
   } else if (fracShallow > 0.95) {
