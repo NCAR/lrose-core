@@ -70,6 +70,7 @@ public:
   } category_t;
 
   typedef struct {
+    int jx, jy;
     double xx;
     double yy;
     ssize_t offset;

@@ -1052,6 +1052,8 @@ void ConvStratFinder::_computeKernels()
       double xx = jdx * _dxKm;
       double radius = sqrt(yy * yy + xx * xx);
       if (radius <= _textureRadiusKm) {
+        entry.jx = jdx;
+        entry.jy = jdy;
         entry.xx = xx;
         entry.yy = yy;
         entry.offset = jdx + jdy * _nx;
@@ -1269,7 +1271,7 @@ void ConvStratFinder::ComputeTexture::run()
       if (_fractionCovered[icenter] < _minValidFraction) {
         continue;
       }
-      if (_dbzColMax[icenter] == _missingVal) {
+      if (_dbz[icenter] == _missingVal) {
         continue;
       }
 
