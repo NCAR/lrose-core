@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/awc/src/combine_ltg_radar
+# dir: /home/dixon/git/lrose-core/codebase/apps/awc/src/combine_ltg_radar
 ###############################################
 
 project (combine_ltg_radar)

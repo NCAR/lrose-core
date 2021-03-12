@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/libs/rapmath
+# dir: lrose-core/codebase/libs/rapmath
 #
 # written by script createCMakeLists.py
 #

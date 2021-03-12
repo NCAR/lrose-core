@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/nexrad2dsr
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/nexrad2dsr
 ###############################################
 
 project (nexrad2dsr)

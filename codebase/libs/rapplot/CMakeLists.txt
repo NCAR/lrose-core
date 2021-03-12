@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/libs/rapplot
+# dir: lrose-core/codebase/libs/rapplot
 #
 # written by script createCMakeLists.py
 #

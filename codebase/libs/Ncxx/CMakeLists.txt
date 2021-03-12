@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/libs/Ncxx
+# dir: lrose-core/codebase/libs/Ncxx
 #
 # written by script createCMakeLists.py
 #

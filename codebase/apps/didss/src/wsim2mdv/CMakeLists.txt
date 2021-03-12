@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/didss/src/wsim2mdv
+# dir: /home/dixon/git/lrose-core/codebase/apps/didss/src/wsim2mdv
 ###############################################
 
 project (wsim2mdv)

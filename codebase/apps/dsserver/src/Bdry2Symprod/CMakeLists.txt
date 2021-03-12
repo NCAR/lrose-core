@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/dsserver/src/Bdry2Symprod
+# dir: /home/dixon/git/lrose-core/codebase/apps/dsserver/src/Bdry2Symprod
 ###############################################
 
 project (Bdry2Symprod)

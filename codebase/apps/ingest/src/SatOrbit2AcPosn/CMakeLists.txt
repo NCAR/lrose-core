@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/SatOrbit2AcPosn
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/SatOrbit2AcPosn
 ###############################################
 
 project (SatOrbit2AcPosn)

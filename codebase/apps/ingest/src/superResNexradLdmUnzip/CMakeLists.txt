@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/superResNexradLdmUnzip
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/superResNexradLdmUnzip
 ###############################################
 
 project (superResNexradLdmUnzip)

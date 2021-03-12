@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/NidsVad2Spdb
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/NidsVad2Spdb
 ###############################################
 
 project (NidsVad2Spdb)

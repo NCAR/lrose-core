@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/libs/physics
+# dir: lrose-core/codebase/libs/physics
 #
 # written by script createCMakeLists.py
 #

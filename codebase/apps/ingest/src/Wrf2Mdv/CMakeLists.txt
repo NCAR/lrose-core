@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/Wrf2Mdv
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/Wrf2Mdv
 ###############################################
 
 project (Wrf2Mdv)

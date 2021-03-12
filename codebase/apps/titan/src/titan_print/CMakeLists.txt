@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/titan_print
+# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/titan_print
 ###############################################
 
 project (titan_print)

@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/libs/toolsa
+# dir: lrose-core/codebase/libs/toolsa
 #
 # written by script createCMakeLists.py
 #

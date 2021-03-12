@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/Tstorms2Xml
+# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/Tstorms2Xml
 ###############################################
 
 project (Tstorms2Xml)

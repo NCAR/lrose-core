@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/libs/FiltAlg
+# dir: lrose-core/codebase/libs/FiltAlg
 #
 # written by script createCMakeLists.py
 #

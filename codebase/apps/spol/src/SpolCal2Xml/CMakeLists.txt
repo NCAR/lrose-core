@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/spol/src/SpolCal2Xml
+# dir: /home/dixon/git/lrose-core/codebase/apps/spol/src/SpolCal2Xml
 ###############################################
 
 project (SpolCal2Xml)

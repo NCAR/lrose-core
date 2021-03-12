@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/noaaportLtg2Spdb
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/noaaportLtg2Spdb
 ###############################################
 
 project (noaaportLtg2Spdb)

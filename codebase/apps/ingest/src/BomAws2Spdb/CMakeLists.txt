@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/BomAws2Spdb
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/BomAws2Spdb
 ###############################################
 
 project (BomAws2Spdb)

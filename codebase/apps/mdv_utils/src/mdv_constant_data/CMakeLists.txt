@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/mdv_utils/src/mdv_constant_data
+# dir: /home/dixon/git/lrose-core/codebase/apps/mdv_utils/src/mdv_constant_data
 ###############################################
 
 project (mdv_constant_data)

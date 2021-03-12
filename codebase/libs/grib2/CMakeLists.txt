@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/libs/grib2
+# dir: lrose-core/codebase/libs/grib2
 #
 # written by script createCMakeLists.py
 #

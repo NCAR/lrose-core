@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/mdv_utils/src/SweepNetCDF2Mdv
+# dir: /home/dixon/git/lrose-core/codebase/apps/mdv_utils/src/SweepNetCDF2Mdv
 ###############################################
 
 project (SweepNetCDF2Mdv)

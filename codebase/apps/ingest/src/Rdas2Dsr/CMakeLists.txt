@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/Rdas2Dsr
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/Rdas2Dsr
 ###############################################
 
 project (Rdas2Dsr)

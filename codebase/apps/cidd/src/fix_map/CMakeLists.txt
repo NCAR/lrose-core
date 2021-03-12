@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/cidd/src/fix_map
+# dir: /home/dixon/git/lrose-core/codebase/apps/cidd/src/fix_map
 ###############################################
 
 project (fix_map)

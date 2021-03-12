@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/mdv_utils/src/MdvSpdDir2UV
+# dir: /home/dixon/git/lrose-core/codebase/apps/mdv_utils/src/MdvSpdDir2UV
 ###############################################
 
 project (MdvSpdDir2UV)

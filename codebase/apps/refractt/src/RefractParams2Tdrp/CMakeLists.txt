@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/refractt/src/RefractParams2Tdrp
+# dir: /home/dixon/git/lrose-core/codebase/apps/refractt/src/RefractParams2Tdrp
 ###############################################
 
 project (RefractParams2Tdrp)
