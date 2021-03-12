@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/didss/src/TimeCalc
+# dir: /home/dixon/git/lrose-core/codebase/apps/didss/src/TimeCalc
 ###############################################
 
 project (TimeCalc)

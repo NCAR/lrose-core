@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/hydro/src/RainGage
+# dir: /home/dixon/git/lrose-core/codebase/apps/hydro/src/RainGage
 ###############################################
 
 project (RainGage)

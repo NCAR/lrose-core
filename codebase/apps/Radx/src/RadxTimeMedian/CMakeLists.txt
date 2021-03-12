@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/Radx/src/RadxTimeMedian
+# dir: /home/dixon/git/lrose-core/codebase/apps/Radx/src/RadxTimeMedian
 ###############################################
 
 project (RadxTimeMedian)

@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/satApps
+# dir: lrose-core/codebase/apps/satApps
 #
 # written by script createCMakeLists.py
 #

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/Rview
+# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/Rview
 ###############################################
 
 project (Rview)

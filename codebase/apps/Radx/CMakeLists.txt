@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/Radx
+# dir: lrose-core/codebase/apps/Radx
 #
 # written by script createCMakeLists.py
 #

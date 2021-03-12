@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/refractt/src/CalcMoisture
+# dir: /home/dixon/git/lrose-core/codebase/apps/refractt/src/CalcMoisture
 ###############################################
 
 project (CalcMoisture)

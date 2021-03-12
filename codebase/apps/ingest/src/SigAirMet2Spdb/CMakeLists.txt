@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/SigAirMet2Spdb
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/SigAirMet2Spdb
 ###############################################
 
 project (SigAirMet2Spdb)

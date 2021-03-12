@@ -2,7 +2,8 @@
 #
 # CMakeLists.txt - auto generated from Makefile
 #
-# scripts dir: /data/mdtest/git/lrose-core/codebase/apps/scripts/src
+# scripts dir: /home/dixon/git/lrose-core/codebase/apps/scripts/src
+# scripts dir: lrose-core/codebase/apps/scripts/src
 #
 # written by script createCMakeLists.lib.py
 #
@@ -50,7 +51,6 @@ install(PROGRAMS snuff_slow DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(PROGRAMS snuff_inst DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(PROGRAMS snuff_usr1 DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(PROGRAMS sync2files DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
-install(PROGRAMS tkdiff DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(PROGRAMS utime_decode DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(PROGRAMS auto_restart DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(PROGRAMS auto_restart_stats DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)

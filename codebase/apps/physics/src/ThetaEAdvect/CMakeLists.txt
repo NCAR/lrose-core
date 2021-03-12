@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/physics/src/ThetaEAdvect
+# dir: /home/dixon/git/lrose-core/codebase/apps/physics/src/ThetaEAdvect
 ###############################################
 
 project (ThetaEAdvect)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/mdv_utils/src/MdvFixTimes
+# dir: /home/dixon/git/lrose-core/codebase/apps/mdv_utils/src/MdvFixTimes
 ###############################################
 
 project (MdvFixTimes)

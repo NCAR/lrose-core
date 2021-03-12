@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/xpol/src/ProSensing2Dsr
+# dir: /home/dixon/git/lrose-core/codebase/apps/xpol/src/ProSensing2Dsr
 ###############################################
 
 project (ProSensing2Dsr)

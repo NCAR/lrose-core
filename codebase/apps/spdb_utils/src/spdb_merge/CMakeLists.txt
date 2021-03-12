@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/spdb_utils/src/spdb_merge
+# dir: /home/dixon/git/lrose-core/codebase/apps/spdb_utils/src/spdb_merge
 ###############################################
 
 project (spdb_merge)

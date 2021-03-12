@@ -2,7 +2,7 @@
 #
 # Top-level CMakeLists file for lrose-core
 #
-# dir: /data/mdtest/git/lrose-core/codebase
+# dir: lrose-core/codebase
 #
 # written by script createCMakeLists.py
 #

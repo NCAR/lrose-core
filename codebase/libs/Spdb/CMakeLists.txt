@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/libs/Spdb
+# dir: lrose-core/codebase/libs/Spdb
 #
 # written by script createCMakeLists.py
 #

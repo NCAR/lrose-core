@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/spdb_utils/src/PrintGenPt1D
+# dir: /home/dixon/git/lrose-core/codebase/apps/spdb_utils/src/PrintGenPt1D
 ###############################################
 
 project (PrintGenPt1D)

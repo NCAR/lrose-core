@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/mdv_utils/src/Mdv2SoundingSpdb
+# dir: /home/dixon/git/lrose-core/codebase/apps/mdv_utils/src/Mdv2SoundingSpdb
 ###############################################
 
 project (Mdv2SoundingSpdb)

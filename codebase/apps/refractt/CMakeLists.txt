@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/refractt
+# dir: lrose-core/codebase/apps/refractt
 #
 # written by script createCMakeLists.py
 #

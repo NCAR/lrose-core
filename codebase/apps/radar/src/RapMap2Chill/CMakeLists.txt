@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/radar/src/RapMap2Chill
+# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/RapMap2Chill
 ###############################################
 
 project (RapMap2Chill)

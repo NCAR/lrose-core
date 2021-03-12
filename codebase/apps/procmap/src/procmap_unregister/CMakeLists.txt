@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/procmap/src/procmap_unregister
+# dir: /home/dixon/git/lrose-core/codebase/apps/procmap/src/procmap_unregister
 ###############################################
 
 project (procmap_unregister)

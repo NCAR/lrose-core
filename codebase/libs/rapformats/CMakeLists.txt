@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/libs/rapformats
+# dir: lrose-core/codebase/libs/rapformats
 #
 # written by script createCMakeLists.py
 #

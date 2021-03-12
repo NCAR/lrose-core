@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/radar/src/ChillCal2Xml
+# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/ChillCal2Xml
 ###############################################
 
 project (ChillCal2Xml)

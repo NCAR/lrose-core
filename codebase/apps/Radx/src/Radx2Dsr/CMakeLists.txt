@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/Radx/src/Radx2Dsr
+# dir: /home/dixon/git/lrose-core/codebase/apps/Radx/src/Radx2Dsr
 ###############################################
 
 project (Radx2Dsr)

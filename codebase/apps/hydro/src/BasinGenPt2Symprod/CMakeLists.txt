@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/hydro/src/BasinGenPt2Symprod
+# dir: /home/dixon/git/lrose-core/codebase/apps/hydro/src/BasinGenPt2Symprod
 ###############################################
 
 project (BasinGenPt2Symprod)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/satApps/src/IR2Height
+# dir: /home/dixon/git/lrose-core/codebase/apps/satApps/src/IR2Height
 ###############################################
 
 project (IR2Height)

@@ -2,7 +2,7 @@
 #
 # CMakeLists for cmake recursion
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/hydro/src
+# dir: lrose-core/codebase/apps/hydro/src
 #
 # written by script createCMakeLists.py
 #

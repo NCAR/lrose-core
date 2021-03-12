@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/procmap/src/test_procmap
+# dir: /home/dixon/git/lrose-core/codebase/apps/procmap/src/test_procmap
 ###############################################
 
 project (test_procmap)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/Tracks2Ascii
+# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/Tracks2Ascii
 ###############################################
 
 project (Tracks2Ascii)

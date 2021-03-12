@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/ingest/src/file_repeat_day
+# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/file_repeat_day
 ###############################################
 
 project (file_repeat_day)

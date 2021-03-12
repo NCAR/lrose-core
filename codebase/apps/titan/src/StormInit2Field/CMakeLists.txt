@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/titan/src/StormInit2Field
+# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/StormInit2Field
 ###############################################
 
 project (StormInit2Field)

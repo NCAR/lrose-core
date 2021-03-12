@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/radar/src/HawkEye
+# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/HawkEye
 ###############################################
 
 project (HawkEye)

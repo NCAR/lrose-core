@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /data/mdtest/git/lrose-core/codebase/apps/spol/src/SpolTs2Fmq
+# dir: /home/dixon/git/lrose-core/codebase/apps/spol/src/SpolTs2Fmq
 ###############################################
 
 project (SpolTs2Fmq)
