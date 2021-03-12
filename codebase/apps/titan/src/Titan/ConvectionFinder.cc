@@ -67,21 +67,15 @@ ConvectionFinder::ConvectionFinder(const string &progName,
   _convStrat.setMinValidHtKm(_params.convection_finder_min_valid_height);
   _convStrat.setMaxValidHtKm(_params.convection_finder_max_valid_height);
   _convStrat.setMinValidDbz(_params.convection_finder_min_valid_dbz);
-  // _convStrat.setDbzForDefiniteConvection
-  //   (_params.dbz_threshold_for_definite_convection);
-  _convStrat.setComputeConvRadius(_params.conv_radius_function.min_dbz,
-                                  _params.conv_radius_function.max_dbz,
-                                  _params.conv_radius_function.min_radius_km,
-                                  _params.conv_radius_function.max_radius_km,
-                                  _params.convection_finder_background_dbz_radius_km);
   _convStrat.setTextureRadiusKm(_params.convection_finder_texture_radius_km);
   _convStrat.setMinValidFractionForTexture
     (_params.convection_finder_min_valid_fraction_for_texture);
-  // _convStrat.setMinTextureForConvection
-  //   (_params.convection_finder_min_texture_value);
-  _convStrat.setMinInterestForConvective(_params.convection_finder_min_interest_for_convective);
-  _convStrat.setMaxInterestForStratiform(_params.convection_finder_max_interest_for_stratiform);
-  _convStrat.setMinGridOverlapForClumping(_params.convection_finder_min_overlap_for_convective_clumps);
+  _convStrat.setMinConvectivityForConvective
+    (_params.convection_finder_min_convectivity_for_convective);
+  _convStrat.setMaxConvectivityForStratiform
+    (_params.convection_finder_max_convectivity_for_stratiform);
+  _convStrat.setMinGridOverlapForClumping
+    (_params.convection_finder_min_overlap_for_convective_clumps);
 
 }
 
@@ -192,13 +186,13 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   
   Mdvx::field_header_t textureFhdr = fhdr;
   MdvxField *textureField = new MdvxField(textureFhdr, vhdr);
-  textureField->setVolData(_convStrat.getMeanTexture(), 
+  textureField->setVolData(_convStrat.getTextureMax(), 
                            volSize32,
                            Mdvx::ENCODING_FLOAT32);
   textureField->convertType(Mdvx::ENCODING_FLOAT32,
-                         Mdvx::COMPRESSION_GZIP);
+                            Mdvx::COMPRESSION_GZIP);
   textureField->setFieldName("DbzTexture");
-  textureField->setFieldNameLong("Mean texture of dbz");
+  textureField->setFieldNameLong("Max texture of dbz");
   textureField->setUnits("dBZ");
   outMdvx.addField(textureField);
   
@@ -216,34 +210,6 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   maxField->setUnits("dBZ");
   outMdvx.addField(maxField);
   
-  // background dbz
-  
-  Mdvx::field_header_t backgrFhdr = fhdr;
-  MdvxField *backgrField = new MdvxField(backgrFhdr, vhdr);
-  backgrField->setVolData(_convStrat.getBackgroundDbz(),
-                          volSize32,
-                          Mdvx::ENCODING_FLOAT32);
-  backgrField->convertType(Mdvx::ENCODING_FLOAT32,
-                           Mdvx::COMPRESSION_GZIP);
-  backgrField->setFieldName("BackgroundDbz");
-  backgrField->setFieldNameLong("Background_mean_dbz");
-  backgrField->setUnits("dBZ");
-  outMdvx.addField(backgrField);
-  
-  // convective radius
-  
-  Mdvx::field_header_t convRadFhdr = fhdr;
-  MdvxField *convRadField = new MdvxField(convRadFhdr, vhdr);
-  convRadField->setVolData(_convStrat.getConvRadiusKm(),
-                           volSize32,
-                           Mdvx::ENCODING_FLOAT32);
-  convRadField->convertType(Mdvx::ENCODING_FLOAT32,
-                            Mdvx::COMPRESSION_GZIP);
-  convRadField->setFieldName("ConvRadius");
-  convRadField->setFieldNameLong("Convective-radius");
-  convRadField->setUnits("km");
-  outMdvx.addField(convRadField);
-  
   // the following fields are unsigned bytes
 
   int volSize08 = fhdr.nx * fhdr.ny * sizeof(ui08);
@@ -257,7 +223,7 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   
   Mdvx::field_header_t partitionFhdr = fhdr;
   MdvxField *partitionField = new MdvxField(partitionFhdr, vhdr);
-  partitionField->setVolData(_convStrat.getPartition(),
+  partitionField->setVolData(_convStrat.getPartitionMax(),
                              volSize08,
                              Mdvx::ENCODING_INT8);
   partitionField->convertType(Mdvx::ENCODING_INT8,

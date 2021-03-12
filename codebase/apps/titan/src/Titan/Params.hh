@@ -545,9 +545,9 @@ public:
 
   double convection_finder_min_texture_value;
 
-  double convection_finder_min_interest_for_convective;
+  double convection_finder_min_convectivity_for_convective;
 
-  double convection_finder_max_interest_for_stratiform;
+  double convection_finder_max_convectivity_for_stratiform;
 
   int convection_finder_min_overlap_for_convective_clumps;
 

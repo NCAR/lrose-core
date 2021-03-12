@@ -399,15 +399,15 @@ paramdef double {
 
 paramdef double {
   p_default = 0.5;
-  p_descr = "Minimum interest for convective at a point.";
-  p_help = "If the interest at a point exceeds this value, we set the convective flag at this point.";
-} convection_finder_min_interest_for_convective;
+  p_descr = "Minimum convectivity for convective at a point.";
+  p_help = "If the convectivity at a point exceeds this value, we set the convective flag at this point.";
+} convection_finder_min_convectivity_for_convective;
 
 paramdef double {
   p_default = 0.4;
-  p_descr = "Maximum interest for stratiform at a point.";
-  p_help = "If the interest at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_interest_for_convective we flag the point as MIXED.";
-} convection_finder_max_interest_for_stratiform;
+  p_descr = "Maximum convectivity for stratiform at a point.";
+  p_help = "If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.";
+} convection_finder_max_convectivity_for_stratiform;
 
 paramdef int {
   p_default = 3;

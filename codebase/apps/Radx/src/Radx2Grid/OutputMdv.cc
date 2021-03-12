@@ -409,17 +409,17 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
                      "ConvStrat",
                      "1 = stratiform, 2 = convective",
                      ConvStratFinder::CATEGORY_MISSING,
-                     convStrat.getPartition());
+                     convStrat.getPartition2D());
   }
 
-  if (_params.conv_strat_write_mean_texture) {
+  if (_params.conv_strat_write_max_texture) {
     addField(vol, proj, vlevel2D,
-             "DbzTextureMean",
-             "mean_of_dbz_texture_over_height",
+             "DbzTextureMax",
+             "max_of_dbz_texture_over_height",
              "dBZ",
              Radx::FL32, 1.0, 0.0,
              convStrat.getMissingFl32(),
-             convStrat.getMeanTexture());
+             convStrat.getTextureMax());
   }
   
   if (_params.conv_strat_write_convective_dbz) {
@@ -441,22 +441,6 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              Radx::FL32, 1.0, 0.0,
              convStrat.getMissingFl32(),
              convStrat.getColMaxDbz());
-    
-    addField(vol, proj, vlevel2D,
-             "DbzBackground",
-             "dbz_background_mean",
-             "dBZ",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getBackgroundDbz());
-    
-    addField(vol, proj, vlevel2D,
-             "ConvRadius",
-             "convective_radius",
-             "km",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getConvRadiusKm());
     
     addField(vol, proj, vlevel2D,
              "FractionActive",
