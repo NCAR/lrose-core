@@ -131,13 +131,13 @@ paramdef double {
 } max_valid_height;
 
 paramdef double {
-  p_default = 10.0;
+  p_default = 0.0;
   p_descr = "Minimum reflectivity threshold for this analysis (dBZ).";
   p_help = "Reflectivity below this threshold is set to missing.";
 } min_valid_dbz;
 
 paramdef double {
-  p_default = 20.0;
+  p_default = 30.0;
   p_descr = "Min volume of a convective region (km3).";	
   p_help = "Regions of smaller volume will be labeled SMALL.";
 } min_valid_volume_for_convective;

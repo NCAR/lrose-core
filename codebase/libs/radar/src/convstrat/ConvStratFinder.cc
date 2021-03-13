@@ -263,14 +263,13 @@ void ConvStratFinder::_allocArrays()
   _fractionActive.alloc(_nxy);
 
   _partition3D.alloc(_nxyz);
-  _partitionMax.alloc(_nxy);
   _partition2D.alloc(_nxy);
   _convDbz.alloc(_nxyz);
 
   _texture3D.alloc(_nxyz);
-  _textureMax.alloc(_nxy);
+  _texture2D.alloc(_nxy);
   _convectivity3D.alloc(_nxyz);
-  _convectivityMax.alloc(_nxy);
+  _convectivity2D.alloc(_nxy);
 
   _convTopKm.alloc(_nxy);
   _stratTopKm.alloc(_nxy);
@@ -292,14 +291,13 @@ void ConvStratFinder::_initToMissing()
   _initToMissing(_fractionActive, _missingFl32);
 
   _initToMissing(_partition3D, _missingUi08);
-  _initToMissing(_partitionMax, _missingUi08);
   _initToMissing(_partition2D, _missingUi08);
   _initToMissing(_convDbz, _missingFl32);
 
   _initToMissing(_texture3D, _missingFl32);
-  _initToMissing(_textureMax, _missingFl32);
+  _initToMissing(_texture2D, _missingFl32);
   _initToMissing(_convectivity3D, _missingFl32);
-  _initToMissing(_convectivityMax, _missingFl32);
+  _initToMissing(_convectivity2D, _missingFl32);
 
   _initToMissing(_convTopKm, _missingFl32);
   _initToMissing(_stratTopKm, _missingFl32);
@@ -339,14 +337,13 @@ void ConvStratFinder::freeArrays()
   _fractionActive.free();
 
   _partition3D.free();
-  _partitionMax.free();
   _partition2D.free();
   _convDbz.free();
 
   _texture3D.free();
-  _textureMax.free();
+  _texture2D.free();
   _convectivity3D.free();
-  _convectivityMax.free();
+  _convectivity2D.free();
 
   _convTopKm.free();
   _stratTopKm.free();
@@ -680,11 +677,10 @@ void ConvStratFinder::_set2DFields()
   
   ui08 *partition3D = _partition3D.dat();
   ui08 *partition2D = _partition2D.dat();
-  ui08 *partitionMax = _partitionMax.dat();
   fl32 *texture3D = _texture3D.dat();
-  fl32 *textureMax = _textureMax.dat();
+  fl32 *texture2D = _texture2D.dat();
   fl32 *convectivity3D = _convectivity3D.dat();
-  fl32 *convectivityMax = _convectivityMax.dat();
+  fl32 *convectivity2D = _convectivity2D.dat();
   fl32 *fractionActive = _fractionActive.dat();
   fl32 *convTopKm = _convTopKm.dat();
   fl32 *stratTopKm = _stratTopKm.dat();
@@ -704,8 +700,6 @@ void ConvStratFinder::_set2DFields()
       // init
 
       int pMax = 0;
-      int nConv = 0;
-      int nStrat = 0;
       fl32 tMax = _missingFl32;
       fl32 cMax = _missingFl32;
       fl32 cTop = _missingFl32;
@@ -724,11 +718,9 @@ void ConvStratFinder::_set2DFields()
         }
         if (p3D >= CATEGORY_STRATIFORM_LOW &&
             p3D <= CATEGORY_STRATIFORM_HIGH) {
-          nStrat++;
           sTop = zKm;
         } else if (p3D >= CATEGORY_CONVECTIVE_SHALLOW &&
                    p3D <= CATEGORY_CONVECTIVE_DEEP) {
-          nConv++;
           cTop = zKm;
         }
 
@@ -744,14 +736,9 @@ void ConvStratFinder::_set2DFields()
 
       } // iz
 
-      partitionMax[xycenter] = pMax;
-      if (nConv > 0 && nConv >= nStrat / 4.0) {
-        partition2D[xycenter] = CATEGORY_CONVECTIVE;
-      } else if (nStrat > 0) {
-        partition2D[xycenter] = CATEGORY_STRATIFORM;
-      }
-      textureMax[xycenter] = tMax;
-      convectivityMax[xycenter] = cMax;
+      partition2D[xycenter] = pMax;
+      texture2D[xycenter] = tMax;
+      convectivity2D[xycenter] = cMax;
       convTopKm[xycenter] = cTop;
       stratTopKm[xycenter] = sTop;
 

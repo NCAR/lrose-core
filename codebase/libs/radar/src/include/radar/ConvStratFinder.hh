@@ -58,13 +58,11 @@ public:
     CATEGORY_STRATIFORM_LOW = 14,
     CATEGORY_STRATIFORM_MID = 15,
     CATEGORY_STRATIFORM_HIGH = 16,
-    CATEGORY_STRATIFORM = 19,
     CATEGORY_MIXED = 25,
     CATEGORY_CONVECTIVE_SHALLOW = 33,
     CATEGORY_CONVECTIVE_MID = 34,
     CATEGORY_CONVECTIVE_ELEVATED = 35,
     CATEGORY_CONVECTIVE_DEEP = 36,
-    CATEGORY_CONVECTIVE = 39,
     CATEGORY_UNKNOWN
   } category_t;
 
@@ -225,7 +223,6 @@ public:
   // will be set to the relevant category
 
   const ui08 *getPartition3D() const { return _partition3D.dat(); }
-  const ui08 *getPartitionMax() const { return _partitionMax.dat(); }
   const ui08 *getPartition2D() const { return _partition2D.dat(); }
   const fl32 *getConvectiveDbz() const { return _convDbz.dat(); }
 
@@ -233,9 +230,9 @@ public:
   // get derived fields
   
   const fl32 *getTexture3D() const { return _texture3D.dat(); }
-  const fl32 *getTextureMax() const { return _textureMax.dat(); }
+  const fl32 *getTexture2D() const { return _texture2D.dat(); }
   const fl32 *getConvectivity3D() const { return _convectivity3D.dat(); }
-  const fl32 *getConvectivityMax() const { return _convectivityMax.dat(); }
+  const fl32 *getConvectivity2D() const { return _convectivity2D.dat(); }
 
   const fl32 *getConvTopKm() const { return _convTopKm.dat(); }
   const fl32 *getStratTopKm() const { return _stratTopKm.dat(); }
@@ -343,16 +340,15 @@ private:
   // primary outputs
   
   TaArray<ui08> _partition3D;
-  TaArray<ui08> _partitionMax;
   TaArray<ui08> _partition2D;
   TaArray<fl32> _convDbz;
 
   // intermediate fields
   
   TaArray<fl32> _texture3D;
-  TaArray<fl32> _textureMax;
+  TaArray<fl32> _texture2D;
   TaArray<fl32> _convectivity3D;
-  TaArray<fl32> _convectivityMax;
+  TaArray<fl32> _convectivity2D;
 
   // tops
 
@@ -417,7 +413,8 @@ private:
       _minValidFractionForFit = val;
     }
     
-    void setDbz(const fl32 *dbz, const fl32 *dbzColMax,
+    void setDbz(const fl32 *dbz,
+                const fl32 *dbzColMax,
                 fl32 missingVal)
     {
       _dbz = dbz;

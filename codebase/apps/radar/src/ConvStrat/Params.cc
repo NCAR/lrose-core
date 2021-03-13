@@ -818,7 +818,7 @@
     tt->descr = tdrpStrDup("Minimum reflectivity threshold for this analysis (dBZ).");
     tt->help = tdrpStrDup("Reflectivity below this threshold is set to missing.");
     tt->val_offset = (char *) &min_valid_dbz - &_start_;
-    tt->single_val.d = 10;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'min_valid_volume_for_convective'
@@ -830,7 +830,7 @@
     tt->descr = tdrpStrDup("Min volume of a convective region (km3).");
     tt->help = tdrpStrDup("Regions of smaller volume will be labeled SMALL.");
     tt->val_offset = (char *) &min_valid_volume_for_convective - &_start_;
-    tt->single_val.d = 20;
+    tt->single_val.d = 30;
     tt++;
     
     // Parameter 'dbz_for_echo_tops'
