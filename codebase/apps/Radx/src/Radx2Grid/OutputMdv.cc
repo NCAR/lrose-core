@@ -419,7 +419,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              "dBZ",
              Radx::FL32, 1.0, 0.0,
              convStrat.getMissingFl32(),
-             convStrat.getTextureMax());
+             convStrat.getTexture2D());
   }
   
   if (_params.conv_strat_write_convective_dbz) {
