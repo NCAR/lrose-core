@@ -70,14 +70,29 @@ public:
   
   virtual void resetToEnd();
   
-  // get the current file path in use
+  // get methods
 
-  virtual const string getPathInUse() const { return _pathInUse; }
+  const string getPathInUse() const { return _pathInUse; }
+  const string getPrevPathInUse() const { return _prevPathInUse; }
   
-  // get the previous file path in use
+  double getLatitudeDeg() const { return _latitudeDeg; }
+  double getLongitudeDeg() const { return _longitudeDeg; }
+  double getAltitudeM() const { return _altitudeM; }
+
+  iwrf_radar_platform_t getRadarPlatform() const { return _platformType; }
+
+  double getBeamWidthDegH() const { return _beamwidthDegH; }
+  double getBeamWidthDegV() const { return _beamwidthDegV; }
+  double getWavelengthCm() const { return _wavelengthCm; }
   
-  virtual const string getPrevPathInUse() const { return _prevPathInUse; }
-  
+  double getNominalAntGainDbH() const { return _nominalAntGainDbH; }
+  double getNominalAntGainDbV() const { return _nominalAntGainDbV; }
+
+  string getRadarName() const { return _radarName; }
+  string getSiteName() const { return _siteName; }
+
+  const IwrfCalib &getCalib() const { return _calib; }
+
 protected:
   
   /////////////////////////////////////////////////////////
@@ -99,6 +114,14 @@ protected:
     // get methods
     
     IwrfTsPulse *getPulse() { return _pulse; }
+    IwrfTsBurst *getBurst() { return _burst; }
+
+    double getScanRate() const { return _scanRate; }
+    
+    iwrf_xmit_rcv_mode_t getXmitRcvMode() const { return _xmitRcvMode; }
+    iwrf_xmit_phase_mode_t getXmitPhaseMode() const { return _xmitPhaseMode; }
+    iwrf_prf_mode_t getPrfMode() const { return _prfMode; }
+    iwrf_pol_mode_t getPolMode() const { return _polMode; }
     
   private:
 
@@ -111,7 +134,6 @@ protected:
     iwrf_xmit_phase_mode_t _xmitPhaseMode;
     iwrf_prf_mode_t _prfMode;
     iwrf_pol_mode_t _polMode;
-  
     
   }; // class PulseEntry
 
