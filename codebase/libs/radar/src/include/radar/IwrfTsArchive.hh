@@ -22,7 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// IwrfTsArray
+// IwrfTsArchive
+//
+// Retrieves time series data from a file archive.
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -31,29 +33,30 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef IwrfTsArray_hh
-#define IwrfTsArray_hh
+#ifndef IwrfTsArchive_hh
+#define IwrfTsArchive_hh
 
 #include <string>
 #include <toolsa/pmu.h>
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
+#include <radar/IwrfTsBurst.hh>
 using namespace std;
 
 ////////////////////////
 // Base class
 
-class IwrfTsArray {
+class IwrfTsArchive {
   
 public:
 
   // constructor
   
-  IwrfTsArray(IwrfDebug_t debug = IWRF_DEBUG_OFF);
+  IwrfTsArchive(IwrfDebug_t debug = IWRF_DEBUG_OFF);
   
   // destructor
   
-  virtual ~IwrfTsArray();
+  virtual ~IwrfTsArchive();
 
   // debugging
 
@@ -100,14 +103,49 @@ protected:
   private:
 
     IwrfTsPulse *_pulse;
-    IwrfTsInfo _info;
+    IwrfTsBurst *_burst;
+
+    double _scanRate;
+
+    iwrf_xmit_rcv_mode_t _xmitRcvMode;
+    iwrf_xmit_phase_mode_t _xmitPhaseMode;
+    iwrf_prf_mode_t _prfMode;
+    iwrf_pol_mode_t _polMode;
+  
     
-  };
+  }; // class PulseEntry
+
+  ////////////////////////////////////////////////
+  // protected members of IwrfTsArchive
   
   IwrfDebug_t _debug;
+
+  // paths in the read
+  
   string _pathInUse;
   string _prevPathInUse;
+
+  // radar info
   
+  double _latitudeDeg;
+  double _longitudeDeg;
+  double _altitudeM;
+  iwrf_radar_platform_t _platformType;
+
+  double _beamwidthDegH;
+  double _beamwidthDegV;
+  double _wavelengthCm;
+  
+  double _nominalAntGainDbH;
+  double _nominalAntGainDbV;
+
+  string _radarName;
+  string _siteName;
+
+  // calibration
+
+  IwrfCalib _calib;
+
 private:
   
 };

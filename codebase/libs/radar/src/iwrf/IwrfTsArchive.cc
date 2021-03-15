@@ -22,28 +22,31 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// IwrfTsArray.cc
+// IwrfTsArchive.cc
 //
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Retrieves time series data from a file archive.
 //
 // March 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// IwrfTsArray holds an arry of IwrfTsPulse objects, along with
+// IwrfTsArchive holds an arry of IwrfTsPulse objects, along with
 // the associated IwrfTsInfo objects.
 //
 ////////////////////////////////////////////////////////////////
 
 #include <cerrno>
 #include <iostream>
-#include <radar/IwrfTsArray.hh>
+#include <radar/IwrfTsArchive.hh>
 using namespace std;
 
 ////////////////////////////////////////////////////
 // Base class
 
-IwrfTsArray::IwrfTsArray(IwrfDebug_t debug) :
+IwrfTsArchive::IwrfTsArchive(IwrfDebug_t debug) :
         _debug(debug)
         
 {
@@ -52,7 +55,7 @@ IwrfTsArray::IwrfTsArray(IwrfDebug_t debug) :
 //////////////////////////////////////////////////////////////////
 // destructor
 
-IwrfTsArray::~IwrfTsArray()
+IwrfTsArchive::~IwrfTsArchive()
 
 {
 
@@ -61,7 +64,7 @@ IwrfTsArray::~IwrfTsArray()
 //////////////////////////////////////////////////////////////////
 // reset queue to start
 
-void IwrfTsArray::resetToStart()
+void IwrfTsArchive::resetToStart()
 
 {
 }
@@ -69,7 +72,7 @@ void IwrfTsArray::resetToStart()
 //////////////////////////////////////////////////////////////////
 // reset queue to end
 
-void IwrfTsArray::resetToEnd()
+void IwrfTsArchive::resetToEnd()
 
 {
 }
@@ -80,27 +83,28 @@ void IwrfTsArray::resetToEnd()
 
 // Constructor
 
-IwrfTsArray::PulseEntry::PulseEntry(IwrfTsPulse *pulse) :
+IwrfTsArchive::PulseEntry::PulseEntry(IwrfTsPulse *pulse) :
         _pulse(pulse)
 
 {
 
-  // we make a local copy of the info object, and
-  // set the reference on the pulse
-  _info = _pulse->getTsInfo();
-  _pulse->setOpsInfo(_info);
+  _burst = NULL;
+  
 }  
 
 // destructor
 
-IwrfTsArray::PulseEntry::~PulseEntry() 
+IwrfTsArchive::PulseEntry::~PulseEntry() 
 {
   delete _pulse;
+  if (_burst != NULL) {
+    delete _burst;
+  }
 }
 
 // compute clump geom
 
-// void IwrfTsArray::PulseEntry::computeGeom() 
+// void IwrfTsArchive::PulseEntry::computeGeom() 
 // {
 
 // }
