@@ -186,7 +186,7 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   
   Mdvx::field_header_t textureFhdr = fhdr;
   MdvxField *textureField = new MdvxField(textureFhdr, vhdr);
-  textureField->setVolData(_convStrat.getTextureMax(), 
+  textureField->setVolData(_convStrat.getTexture2D(), 
                            volSize32,
                            Mdvx::ENCODING_FLOAT32);
   textureField->convertType(Mdvx::ENCODING_FLOAT32,
@@ -223,7 +223,7 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   
   Mdvx::field_header_t partitionFhdr = fhdr;
   MdvxField *partitionField = new MdvxField(partitionFhdr, vhdr);
-  partitionField->setVolData(_convStrat.getPartitionMax(),
+  partitionField->setVolData(_convStrat.getPartition2D(),
                              volSize08,
                              Mdvx::ENCODING_INT8);
   partitionField->convertType(Mdvx::ENCODING_INT8,
