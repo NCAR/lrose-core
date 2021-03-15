@@ -611,14 +611,25 @@ void ConvStrat::_computeHts(double tempC,
 
       // initialize with lowest plane height
 
-      double lowestHt = tempVhdr.level[0]; // if temp level is below grid
-      hts[xyIndex] = lowestHt;
-      double tempBelow = temp[xyIndex]; // plane below starts at plane 0
-
-      // interpolate to find the height for tempC
-      // provided lowest temp is lower that that required
-
-      if (tempBelow < tempC) {
+      si64 bottomXyIndex = xyIndex;
+      double bottomTemp = temp[bottomXyIndex]; // plane below starts at plane 0
+      double bottomHt = tempVhdr.level[0]; // if temp level is below grid
+      
+      si64 topXyIndex = xyIndex + nxy * (tempFhdr.nz - 1);
+      double topTemp = temp[topXyIndex]; // plane below starts at plane 0
+      double topHt = tempVhdr.level[tempFhdr.nz - 1]; // if temp level is below grid
+      
+      if (tempC >= bottomTemp) {
+        // required temp is below grid
+        hts[xyIndex] = bottomHt;
+      } else if (tempC <= topTemp) {
+        // required temp is above grid
+        hts[xyIndex] = topHt;
+      } else {
+        // required temp is within grid vert limits
+        // interpolate to find the height for tempC
+        hts[xyIndex] = bottomHt;
+        double tempBelow = bottomTemp;
         si64 index3D = xyIndex + nxy; // index starts at plane 1
         for (si64 iz = 1; iz < tempFhdr.nz; iz++, index3D += nxy) {
           double tempAbove = temp[index3D]; // plane above starts at plane 1
@@ -631,14 +642,8 @@ void ConvStrat::_computeHts(double tempC,
             break;
           }
           tempBelow = tempAbove;
-          // check if temp level is above grid?
-          // i.e. is this the top of the grid
-          if (iz == tempFhdr.nz - 1) {
-            // use top height
-            hts[xyIndex] = tempVhdr.level[tempFhdr.nz-1];
-          }
         } // iz
-      } // if (tempBelow < tempC) 
+      } // if (tempC >= bottomTemp)
 
     } // ix
   } // iy
