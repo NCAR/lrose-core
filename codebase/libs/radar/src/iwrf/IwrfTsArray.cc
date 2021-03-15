@@ -74,3 +74,34 @@ void IwrfTsArray::resetToEnd()
 {
 }
 
+///////////////////////////////////////////////////////////////
+// PulseEntry inner class
+///////////////////////////////////////////////////////////////
+
+// Constructor
+
+IwrfTsArray::PulseEntry::PulseEntry(IwrfTsPulse *pulse) :
+        _pulse(pulse)
+
+{
+
+  // we make a local copy of the info object, and
+  // set the reference on the pulse
+  _info = _pulse->getTsInfo();
+  _pulse->setOpsInfo(_info);
+}  
+
+// destructor
+
+IwrfTsArray::PulseEntry::~PulseEntry() 
+{
+  delete _pulse;
+}
+
+// compute clump geom
+
+// void IwrfTsArray::PulseEntry::computeGeom() 
+// {
+
+// }
+

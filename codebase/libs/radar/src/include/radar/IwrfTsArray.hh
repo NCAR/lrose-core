@@ -77,6 +77,33 @@ public:
   
 protected:
   
+  /////////////////////////////////////////////////////////
+  // inner class for pulse and info entries
+
+  class PulseEntry
+  {  
+    
+  public:   
+    
+    // constructor
+    
+    PulseEntry(IwrfTsPulse *pulse);
+    
+    // destructor
+    
+    virtual ~PulseEntry();
+    
+    // get methods
+    
+    IwrfTsPulse *getPulse() { return _pulse; }
+    
+  private:
+
+    IwrfTsPulse *_pulse;
+    IwrfTsInfo _info;
+    
+  };
+  
   IwrfDebug_t _debug;
   string _pathInUse;
   string _prevPathInUse;
