@@ -604,33 +604,41 @@ void ConvStrat::_computeHts(double tempC,
   
   // loop through the (x, y) plane
   
-  si64 planeIndex = 0;
+  si64 xyIndex = 0;
   size_t nxy = fhdr.nx * fhdr.ny;
   for (si64 iy = 0; iy < tempFhdr.ny; iy++) {
-    for (si64 ix = 0; ix < tempFhdr.nx; ix++, planeIndex++) {
+    for (si64 ix = 0; ix < tempFhdr.nx; ix++, xyIndex++) {
+
+      // initialize with lowest plane height
+
+      double lowestHt = tempVhdr.level[0]; // if temp level is below grid
+      hts[xyIndex] = lowestHt;
+      double tempBelow = temp[xyIndex]; // plane below starts at plane 0
 
       // interpolate to find the height for tempC
+      // provided lowest temp is lower that that required
 
-      double interpHt = tempVhdr.level[0]; // if temp level is below grid
-      si64 index = planeIndex;
-      double tempBelow = temp[index];
-      index += nxy;
-      for (si64 iz = 1; iz < tempFhdr.nz; iz++, index += nxy) {
-        double tempAbove = temp[index];
-        if ((tempC <= tempBelow && tempC >= tempAbove) ||
-            (tempC >= tempBelow && tempC <= tempAbove)) {
-          double deltaTemp = tempAbove - tempBelow;
-          double deltaHt = zProfile[iz] - zProfile[iz-1];
-          interpHt = zProfile[iz] + ((tempC - tempBelow) / deltaTemp) * deltaHt;
-          hts[planeIndex] = interpHt;
-          break;
-        }
-        tempBelow = tempAbove;
-        // check if temp level is above grid
-        if (iz == tempFhdr.nz - 1) {
-          hts[planeIndex] = tempVhdr.level[tempFhdr.nz-1];
-        }
-      } // iz
+      if (tempBelow < tempC) {
+        si64 index3D = xyIndex + nxy; // index starts at plane 1
+        for (si64 iz = 1; iz < tempFhdr.nz; iz++, index3D += nxy) {
+          double tempAbove = temp[index3D]; // plane above starts at plane 1
+          if ((tempC <= tempBelow && tempC >= tempAbove) ||
+              (tempC >= tempBelow && tempC <= tempAbove)) {
+            double deltaTemp = tempAbove - tempBelow;
+            double deltaHt = zProfile[iz] - zProfile[iz-1];
+            double interpHt = zProfile[iz] + ((tempC - tempBelow) / deltaTemp) * deltaHt;
+            hts[xyIndex] = interpHt;
+            break;
+          }
+          tempBelow = tempAbove;
+          // check if temp level is above grid?
+          // i.e. is this the top of the grid
+          if (iz == tempFhdr.nz - 1) {
+            // use top height
+            hts[xyIndex] = tempVhdr.level[tempFhdr.nz-1];
+          }
+        } // iz
+      } // if (tempBelow < tempC) 
 
     } // ix
   } // iy
