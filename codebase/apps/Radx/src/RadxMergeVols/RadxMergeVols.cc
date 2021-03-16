@@ -42,6 +42,7 @@
 #include <Radx/RadxRay.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DataFileNames.hh>
+#include <didss/DsInputPath.hh>
 #include <toolsa/pmu.h>
 using namespace std;
 
@@ -121,7 +122,11 @@ int RadxMergeVols::Run()
   } else if (_params.mode == Params::FILELIST) {
     return _runFilelist();
   } else {
-    return _runRealtime();
+    if (_params.latest_data_info_avail) {
+      return _runRealtimeWithLdata();
+    } else {
+      return _runRealtimeNoLdata();
+    }
   }
 }
 
@@ -194,9 +199,9 @@ int RadxMergeVols::_runArchive()
 }
 
 //////////////////////////////////////////////////
-// Run in realtime mode
+// Run in realtime mode with latest data info
 
-int RadxMergeVols::_runRealtime()
+int RadxMergeVols::_runRealtimeWithLdata()
 {
 
   // init process mapper registration
@@ -220,6 +225,64 @@ int RadxMergeVols::_runRealtime()
       iret = -1;
     }
   }
+
+  return iret;
+
+}
+
+//////////////////////////////////////////////////
+// Run in realtime mode without latest data info
+
+int RadxMergeVols::_runRealtimeNoLdata()
+{
+
+  // init process mapper registration
+
+  PMU_auto_init(_progName.c_str(), _params.instance,
+                PROCMAP_REGISTER_INTERVAL);
+  
+  // Set up input path
+
+  DsInputPath input(_progName,
+		    _params.debug >= Params::DEBUG_VERBOSE,
+		    _params.primary_dataset_dir,
+		    _params.max_realtime_data_age_secs,
+		    PMU_auto_register,
+		    _params.latest_data_info_avail,
+		    false);
+
+  input.setFileQuiescence(_params.file_quiescence);
+  input.setRecursion(_params.search_recursively);
+  input.setMaxRecursionDepth(_params.max_recursion_depth);
+  input.setMaxDirAge(_params.max_realtime_data_age_secs);
+
+  int iret = 0;
+  RadxVol vol;
+
+  while(true) {
+
+    // check for new data
+    
+    char *path = input.next(false);
+    
+    if (path == NULL) {
+      
+      // sleep a bit
+      
+      PMU_auto_register("Waiting for data");
+      umsleep(_params.wait_between_checks * 1000);
+
+    } else {
+    
+      // got a file
+
+      if (_processFile(path)) {
+        iret = -1;
+      }
+
+    }
+    
+  } // while
 
   return iret;
 

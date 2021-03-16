@@ -651,6 +651,68 @@
     tt->single_val.i = 300;
     tt++;
     
+    // Parameter 'latest_data_info_avail'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("latest_data_info_avail");
+    tt->descr = tdrpStrDup("Is _latest_data_info file available?");
+    tt->help = tdrpStrDup("If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.");
+    tt->val_offset = (char *) &latest_data_info_avail - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'search_recursively'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("search_recursively");
+    tt->descr = tdrpStrDup("Option to recurse to subdirectories while looking for new files.");
+    tt->help = tdrpStrDup("If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE.");
+    tt->val_offset = (char *) &search_recursively - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'max_recursion_depth'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("max_recursion_depth");
+    tt->descr = tdrpStrDup("Maximum depth for recursive directory scan.");
+    tt->help = tdrpStrDup("Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.");
+    tt->val_offset = (char *) &max_recursion_depth - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'wait_between_checks'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("wait_between_checks");
+    tt->descr = tdrpStrDup("Sleep time between checking directory for input - secs.");
+    tt->help = tdrpStrDup("If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.");
+    tt->val_offset = (char *) &wait_between_checks - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.i = 1;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'file_quiescence'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("file_quiescence");
+    tt->descr = tdrpStrDup("File quiescence when checking for files - secs.");
+    tt->help = tdrpStrDup("This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.");
+    tt->val_offset = (char *) &file_quiescence - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));

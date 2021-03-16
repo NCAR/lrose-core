@@ -80,7 +80,8 @@ private:
 
   int _runFilelist();
   int _runArchive();
-  int _runRealtime();
+  int _runRealtimeWithLdata();
+  int _runRealtimeNoLdata();
   void _setupRead(RadxFile &file);
   void _setupWrite(RadxFile &file);
   int _writeVol(RadxVol &vol);

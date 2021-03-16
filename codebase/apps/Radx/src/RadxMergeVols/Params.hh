@@ -422,6 +422,16 @@ public:
 
   int max_realtime_data_age_secs;
 
+  tdrp_bool_t latest_data_info_avail;
+
+  tdrp_bool_t search_recursively;
+
+  int max_recursion_depth;
+
+  int wait_between_checks;
+
+  int file_quiescence;
+
   char* primary_dataset_dir;
 
   merge_method_t merge_method;
@@ -497,7 +507,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 
