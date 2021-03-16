@@ -22,83 +22,85 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// HawkEye.h
+// SweepView.hh
 //
-// HawkEye object
+// SweepView object
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2010
+// March 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// HawkEye is the engineering display for the Hawk radar system
+// Manage the sweep details, return sweep information
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef HawkEye_HH
-#define HawkEye_HH
+#ifndef SweepView_HH
+#define SweepView_HH
 
+#include <cmath>
 #include <string>
 #include <vector>
-
-#include "Args.hh"
-#include "Params.hh"
+#include <QGroupBox>
+#include <QRadioButton>
+#include <QVBoxLayout>
 #include "ParamFile.hh"
-#include <euclid/SunPosn.hh>
 
-class QApplication;
-class DisplayField;
-class Reader;
-class PolarManager;
+class SweepView : public QGroupBox {
 
-class HawkEye {
+  Q_OBJECT
   
 public:
 
   // constructor
-
-  HawkEye (int argc, char **argv);
-
+  
+  SweepView(QWidget *parent); 
+  
   // destructor
   
-  virtual ~HawkEye();
+  virtual ~SweepView();
 
-  // run 
+  // set from volume
 
-  int Run(QApplication &app);
+  void setAngle(double selectedAngle);
 
-  // data members
+  // set the index for the GUI
 
-  bool OK;
+  void setGuiIndex(int index);
 
-protected:
+  // change selected index by the specified increment
+
+  void changeSelectedIndex(int increment);
+
+  // get methods
+
+  size_t getNSweeps() const { return 0; } // _sweeps.size(); }
+
+  double getSelectedAngle() const { return _selectedAngle; }
+
+  //void _createSweepPanel(QWidget *parent);
+
+  void createSweepRadioButtons(vector<double> &sweepAngles);
+
+  void clearSweepRadioButtons();
+
 private:
-
-  // basic
-
-  string _progName;
-  ParamFile *_params;
-  Args _args;
-
-  // reading data in
-
-  Reader *_reader;
-
-  // data fields
-
-  vector<DisplayField *> _displayFields;
-  bool _haveFilteredFields;
-
-  // managing the rendering objects
-
-  PolarManager *_polarManager;
   
-  // methods
+  ParamFile *_params;
+  
+  // sweeps
 
-  int _setupDisplayFields();
-  int _setupReader();
-  string _getArchiveUrl(const string &filePath);
+  void _changeSweep(bool value);
+
+
+  // selection
+
+  int _guiIndex;  // index of selected sweep
+  double _selectedAngle;
+
+  QVBoxLayout *_sweepVBoxLayout;
+  vector<QRadioButton *> *_sweepRButtons;
 
 };
 

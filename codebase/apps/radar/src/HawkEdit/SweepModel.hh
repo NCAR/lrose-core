@@ -22,83 +22,63 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// HawkEye.h
+// SweepModel.hh
 //
-// HawkEye object
+// SweepModel object
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2010
+// March 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// HawkEye is the engineering display for the Hawk radar system
+// Manage the sweep details, return sweep information
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef HawkEye_HH
-#define HawkEye_HH
+#ifndef SweepModel_HH
+#define SweepModel_HH
 
+#include <cmath>
 #include <string>
 #include <vector>
+#include <Radx/RadxTime.hh>
+#include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
+#include <Radx/RadxRay.hh>
+#include "DataModel.hh"
 
-#include "Args.hh"
-#include "Params.hh"
-#include "ParamFile.hh"
-#include <euclid/SunPosn.hh>
-
-class QApplication;
-class DisplayField;
-class Reader;
-class PolarManager;
-
-class HawkEye {
+class SweepModel {
   
 public:
 
   // constructor
-
-  HawkEye (int argc, char **argv);
-
+  
+  SweepModel(); // const Params &params);
+  
   // destructor
   
-  virtual ~HawkEye();
+  virtual ~SweepModel();
 
-  // run 
+  // set from volume
 
-  int Run(QApplication &app);
-
-  // data members
-
-  bool OK;
-
-protected:
-private:
-
-  // basic
-
-  string _progName;
-  ParamFile *_params;
-  Args _args;
-
-  // reading data in
-
-  Reader *_reader;
-
-  // data fields
-
-  vector<DisplayField *> _displayFields;
-  bool _haveFilteredFields;
-
-  // managing the rendering objects
-
-  PolarManager *_polarManager;
+  void set(); // const RadxVol &vol);
   
-  // methods
+  // set the angle
+  // size effect: sets the selected index
 
-  int _setupDisplayFields();
-  int _setupReader();
-  string _getArchiveUrl(const string &filePath);
+  //void setAngle(double selectedAngle);
+
+  // get methods
+  vector<double> &getSweepAngles();
+
+  size_t getNSweeps() const { return somevalues.size(); } // _sweeps.size(); }
+
+  //double getSelectedAngle() const { return _selectedAngle; }
+  
+private:
+    vector<double> somevalues = {100, 200, 300};
+
 
 };
 

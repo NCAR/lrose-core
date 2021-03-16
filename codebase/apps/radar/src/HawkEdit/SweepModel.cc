@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// SweepManager.cc
+// SweepModel.cc
 //
-// SweepManager object
+// SweepModel object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -40,7 +40,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "SweepManager.hh"
+#include "SweepModel.hh"
 #include <toolsa/LogStream.hh>
 
 #include <string>
@@ -52,23 +52,19 @@ using namespace std;
 /////////////////////////////////////////////////////////////
 // Constructor
 
-SweepManager::SweepManager()
+SweepModel::SweepModel()
 //const Params &params) :
 //        _params(params)
         
 {
 
-  //_params = ParamFile::Instance();
-  //_reversedInGui = false;
-  _guiIndex = 0;
-  _selectedAngle = 0.0;
 
 }
 
 /////////////////////////////////////////////////////////////
 // destructor
 
-SweepManager::~SweepManager()
+SweepModel::~SweepModel()
 
 {
   //_sweeps.clear();
@@ -77,7 +73,7 @@ SweepManager::~SweepManager()
 /////////////////////////////////////////////////////////////
 // set from a volume
 
-void SweepManager::set() // const RadxVol &vol)
+void SweepModel::set() // const RadxVol &vol)
   
 {
 
@@ -132,14 +128,14 @@ void SweepManager::set() // const RadxVol &vol)
 */
   //if (_params.debug >= Params::DEBUG_VERBOSE) {
 //    if (_reversedInGui) {
-//      LOG(DEBUG) << "INFO - SweepManager: sweep list is reversed in GUI";
+//      LOG(DEBUG) << "INFO - SweepModel: sweep list is reversed in GUI";
 //    }
   //}
 
 }
 
 /*
-void SweepManager::reset(const RadxVol &vol)
+void SweepModel::reset(const RadxVol &vol)
   
 {
 
@@ -199,7 +195,7 @@ void SweepManager::reset(const RadxVol &vol)
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     if (_reversedInGui) {
-      cerr << "INFO - SweepManager: sweep list is reversed in GUI" << endl;
+      cerr << "INFO - SweepModel: sweep list is reversed in GUI" << endl;
     }
   }
 
@@ -207,62 +203,12 @@ void SweepManager::reset(const RadxVol &vol)
 */
 
 
-
-/////////////////////////////////////////////////////////////
-// set angle
-// size effect: sets the selected index
-
-void SweepManager::setAngle(double angle)
-  
-{
-  /*
-  _selectedAngle = angle;
-  _guiIndex = 0;
-  
-  if (_sweeps.size() == 0) {
-    return;
-  }
-
-  double minDiff = 1.0e99;
-  for (size_t ii = 0; ii < _sweeps.size(); ii++) {
-    double angle = _sweeps[ii].radx->getFixedAngleDeg();
-    double diff = fabs(angle - _selectedAngle);
-    if (diff < minDiff) {
-      _guiIndex = ii;
-      minDiff = diff;
-    }
-  } // ii
-
-  _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
-*/
-}
-
-/////////////////////////////////////////////////////////////
-// set selected gui index
-
-void SweepManager::setGuiIndex(int index) 
-{
-/*
-  _guiIndex = index;
-  if (_guiIndex <= 0) {
-    _guiIndex = 0;
-  } else if (_guiIndex > (int) _sweeps.size() - 1) {
-    _guiIndex = _sweeps.size() - 1;
-  }
-  if (_sweeps.size() > 0) {
-    _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
-  } else {
-    _selectedAngle = 0;
-  }
-*/
-
-}
 
 
 /////////////////////////////////////////////////////////////
 /* set selected file index
 
-void SweepManager::setFileIndex(int index) 
+void SweepModel::setFileIndex(int index) 
 {
 
   for (size_t ii = 0; ii < _sweeps.size(); ii++) {
@@ -274,27 +220,19 @@ void SweepManager::setFileIndex(int index)
 }
 */
 
-/////////////////////////////////////////////////////////////
-// change selected index by the specified value
+vector<double> &SweepModel::getSweepAngles() {
+  // TODO: connect to DataModel to get the sweep angles.
 
-void SweepManager::changeSelectedIndex(int increment) 
-{
-/*
-  _guiIndex += increment;
-  if (_guiIndex < 0) {
-    _guiIndex = 0;
-  } else if (_guiIndex > (int) _sweeps.size() - 1) {
-    _guiIndex = _sweeps.size() - 1;
-  }
-  _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
-*/
+  return somevalues;
 }
+
+
 
 
 /////////////////////////////////////////////////////////////
 // get the fixed angle, optionally specifying an index
 /*
-double SweepManager::getFixedAngleDeg(ssize_t sweepIndex ) const 
+double SweepModel::getFixedAngleDeg(ssize_t sweepIndex ) const 
 {
  
   if (sweepIndex < 0) {

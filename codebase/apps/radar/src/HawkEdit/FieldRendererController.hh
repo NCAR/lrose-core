@@ -34,7 +34,7 @@
 #include "FieldRenderer.hh"
 #include "Beam.hh"
 #include "PpiBeam.hh"
-#include "RhiBeam.hh"
+#include <QImage>
 
 class FieldRendererController
 {
@@ -51,25 +51,29 @@ public:
   void addBeam(size_t fieldIndex, Beam *beam);
   //  void addBeam(string newFieldName, Beam *beam);
   void addBeamToBackgroundRenderedFields(Beam *beam);
-  void selectField(size_t fieldIndex);
-  void unselectField(size_t fieldIndex);
+  //void selectField(size_t fieldIndex);
+  //void unselectField(size_t fieldIndex);
   FieldRenderer *get(size_t fieldIndex);
-  void activateArchiveRendering();
-  void activateRealtimeRendering(size_t selectedField);
+  FieldRenderer *get(string fieldName);
+  //void activateArchiveRendering();
+  //void activateRealtimeRendering(size_t selectedField);
+  QImage *renderImage(int width, int height,
+    string fieldName, double sweepAngle);
   void performRendering(size_t selectedField);
-  bool isBackgroundRendered(size_t index);
-  void setBackgroundRenderingOn(size_t index) {_fieldRenderers[index]->setBackgroundRenderingOn();;};
+  //bool isBackgroundRendered(size_t index);
+  //void setBackgroundRenderingOn(size_t index) {_fieldRenderers[index]->setBackgroundRenderingOn();;};
   void refreshImages(int width, int height, QSize image_size,
 					      QRgb background_brush_color_rgb,
 					      QTransform zoomTransform,
 					      size_t selectedField,
 		     vector< PpiBeam* > &Beams);
-
+/*
   void refreshImagesAsDeque(int width, int height, QSize image_size,
 					      QRgb background_brush_color_rgb,
 					      QTransform zoomTransform,
 					      size_t selectedField,
 			    std::deque< RhiBeam* > &Beams);
+          */
 
 private:
  

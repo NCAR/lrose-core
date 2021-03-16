@@ -38,7 +38,6 @@
 
 #include "HawkEye.hh"
 #include "PolarManager.hh"
-//#include "BscanManager.hh"
 #include "DisplayField.hh"
 #include "ColorMap.hh"
 #include "Params.hh"
@@ -67,18 +66,17 @@ HawkEye::HawkEye(int argc, char **argv) :
 
   OK = true;
   _polarManager = NULL;
-  _bscanManager = NULL;
   _reader = NULL;
 
   // set programe name
 
   _progName = strdup("HawkEye");
 
-  HawkEyeLogger logger("HawkEye");
+  HawkEyeLogger logger("HawkEdit");
   logger.setDayMode();
-  logger.setOutputDir("/tmp/Applications/HawkEye/Logs");
+  logger.setOutputDir("/tmp/Applications/HawkEdit/Logs");
   logger.openFile();
-  logger.postLine("HawkEye starting");
+  logger.postLine("HawkEdit starting");
   logger.closeFile();
 
   // get command line args
@@ -91,9 +89,12 @@ HawkEye::HawkEye(int argc, char **argv) :
   }
 
   // load TDRP params from command line
-  
+  // TODO: create ParamFile object
+
   char *paramsPath = (char *) "unknown";
-  if (_params.loadFromArgs(argc, argv,
+  _params = ParamFile::Instance();
+  // TODO: make this a try catch and display error message 
+  if (!_params->loadFromArgs(argc, argv,
 			   _args.override.list,
 			   &paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
@@ -102,7 +103,7 @@ HawkEye::HawkEye(int argc, char **argv) :
     return;
   }
 
-  if (_params.fields_n < 1) {
+  if (_params->fields_n < 1) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "  0 fields specified" << endl;
     cerr << "  At least 1 field is required" << endl;
@@ -113,51 +114,44 @@ HawkEye::HawkEye(int argc, char **argv) :
   // check for any filtered fields
 
   _haveFilteredFields = false;
-  for (int ifield = 0; ifield < _params.fields_n; ifield++) {
-    if (strlen(_params._fields[ifield].filtered_name) > 0) {
+  for (int ifield = 0; ifield < _params->fields_n; ifield++) {
+    if (strlen(_params->fields[ifield].filtered_name) > 0) {
       _haveFilteredFields = true;
     }
   }
 
+  // Moved to ParamFile.cc
   // set params on alloc checker
+  //AllocCheck::inst().setParams(_params);
 
-  AllocCheck::inst().setParams(&_params);
-
-  if (_params.debug) {
+  if (_params->debug) {
     LOG_STREAM_INIT(true, false, true, true);
   } else {
     LOG_STREAM_INIT(false, false, false, false);
     LOG_STREAM_TO_CERR();
   }
 
-  // print color scales if debugging
+  /* print color scales if debugging
   if (0) { // _params.debug) {
     SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
     sd.PrintColorScales();
   } 
-
-  // set up display fields
+*/
+  /* set up display fields
 
   if (_setupDisplayFields()) {
     OK = false;
     return;
   }
+  */
 
   // create reader
-
+/*
   if (_setupReader()) {
     OK = false;
     return;
   }
-
-  // init process mapper registration
-
-  if (_params.register_with_procmap) {
-    PMU_auto_init((char *) _progName.c_str(),
-                  _params.instance,
-                  PROCMAP_REGISTER_INTERVAL);
-  }
-
+*/
 }
 
 // destructor
@@ -168,10 +162,6 @@ HawkEye::~HawkEye()
 
   if (_polarManager) {
     delete _polarManager;
-  }
-
-  if (_bscanManager) {
-    delete _bscanManager;
   }
 
   if (_reader) {
@@ -194,9 +184,9 @@ int HawkEye::Run(QApplication &app)
 
   // start the reader thread
 
-  _reader->signalRunToStart();
+  //_reader->signalRunToStart();
   
-  if (_params.display_mode == Params::POLAR_DISPLAY) {
+  if (_params->display_mode == Params::POLAR_DISPLAY) {
 
     string emphasis_color = "white";
     string annotation_color = "white";
@@ -206,16 +196,15 @@ int HawkEye::Run(QApplication &app)
 
     DisplayFieldModel *displayFieldModel =
       new DisplayFieldModel(_displayFields, selectedFieldName, // selectedField.getName(),
-                          _params.grid_and_range_ring_color,
+                          _params->gridColor, // grid_and_range_ring_color,
                           emphasis_color,
                           annotation_color,
-                          _params.background_color);  
+                          _params->backgroundColor);  
     DisplayFieldController *displayFieldController = 
       new DisplayFieldController(displayFieldModel);
     // TODO: the displayFields are in both the Controller and the Model
     // but the Model can be edited by the parameter/color editor
-    _polarManager = new PolarManager(_params, _reader,
-                                     displayFieldController,
+    _polarManager = new PolarManager(displayFieldController,
 				                             _haveFilteredFields);
 
     bool noFilename = false;
@@ -223,11 +212,12 @@ int HawkEye::Run(QApplication &app)
       _polarManager->setArchiveFileList(_args.inputFileList);
       // override archive data url from input file
       string url = _getArchiveUrl(_args.inputFileList[0]);
-      TDRP_str_replace(&_params.archive_data_url, url.c_str());
-    } else if (_params.begin_in_archive_mode) {
+      //TDRP_str_replace(&_params.archive_data_url, url.c_str());
+      _params->setArchiveDataUrl(url.c_str());
+    } else if (_params->begin_in_archive_mode) {
       if (_polarManager->loadArchiveFileList()) {
         noFilename = true;
-        //_polarManager->_openFile();
+        //_polarManager->getFileAndFields();
          // seed with files for the day currently in view
         // generate like this: *yyyymmdd*
         //string pattern = _archiveStartTime.getDateStrPlain();
@@ -276,7 +266,7 @@ int HawkEye::Run(QApplication &app)
     
     return _polarManager->run(app); // , noFilename);
 
-  } else if (_params.display_mode == Params::BSCAN_DISPLAY) {
+  } else if (_params->display_mode == Params::BSCAN_DISPLAY) {
 
     cerr << " BScans not available" << endl;
     /*
@@ -293,7 +283,7 @@ int HawkEye::Run(QApplication &app)
 //////////////////////////////////////////////////
 // set up reader thread
 // returns 0 on success, -1 on failure
-  
+/*  
 int HawkEye::_setupReader()
 {
   
@@ -331,12 +321,14 @@ int HawkEye::_setupReader()
   return 0;
 
 }
+*/
 
 //////////////////////////////////////////////////
 // set up field objects, with their color maps
 // use same map for raw and unfiltered fields
 // returns 0 on success, -1 on failure
-  
+  // TODO: move to DisplayFieldController
+/*
 int HawkEye::_setupDisplayFields()
 {
 
@@ -360,7 +352,7 @@ int HawkEye::_setupDisplayFields()
       cerr << "  Color scale dir:: " << colorMapDir << endl;
     }
   }
-/*
+
   // we interleave unfiltered fields and filtered fields
 
   for (int ifield = 0; ifield < _params.fields_n; ifield++) {
@@ -448,10 +440,11 @@ int HawkEye::_setupDisplayFields()
     cerr << "  No fields found" << endl;
     return -1;
   }
-*/
+
   return 0;
 
 }
+*/
 
 
 ///////////////////////////////////////////////////
@@ -483,7 +476,7 @@ string HawkEye::_getArchiveUrl(const string &filePath)
     if (sscanf(start, "%4d%2d%2d/", &year, &month, &day) == 3) {
       int urlLen = start - filePath.c_str() - 1;
       string url(filePath.substr(0, urlLen));
-      if (_params.debug) {
+      if (_params->debug) {
         cerr << "===>> Setting archive url to: " << url << endl;
       }
       return url;

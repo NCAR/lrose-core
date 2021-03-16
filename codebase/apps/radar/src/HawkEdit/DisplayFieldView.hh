@@ -22,85 +22,90 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// HawkEye.h
+// DisplayFieldView.hh
 //
-// HawkEye object
+// DisplayFieldView class 
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Brenda Javornik, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2010
+// Mar 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// HawkEye is the engineering display for the Hawk radar system
+// DisplayFieldView manages the display and selection 
+// of data fields.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef HawkEye_HH
-#define HawkEye_HH
+#ifndef DISPLAYFIELDVIEW_HH
+#define DISPLAYFIELDVIEW_HH
 
 #include <string>
 #include <vector>
 
-#include "Args.hh"
-#include "Params.hh"
 #include "ParamFile.hh"
-#include <euclid/SunPosn.hh>
+#include "RayLoc.hh"
+//#include "ContextEditingView.hh"
+#include "ClickableLabel.hh"
+#include "ParameterColorView.hh"
+#include "FieldColorController.hh"
+#include <QMainWindow>
+#include <QListWidgetItem>
+#include <QStringList>
 
 class QApplication;
-class DisplayField;
-class Reader;
-class PolarManager;
+class QActionGroup;
+class QButtonGroup;
+class QRadioButton;
+class QPushButton;
+class QListWidget;
+class QFrame;
+class QDialog;
+class QLabel;
+class QGroupBox;
+class QGridLayout;
+class QDateTime;
+class QDateTimeEdit;
+class QFileDialog;
 
-class HawkEye {
+class DisplayField;
+
+class DisplayFieldView : public QGroupBox {
   
+  Q_OBJECT
+
 public:
 
-  // constructor
+  DisplayFieldView(QWidget *parent);
+  ~DisplayFieldView();
 
-  HawkEye (int argc, char **argv);
+  void createFieldPanel(QWidget *parent);
+  void updateFieldPanel(string rawFieldLabel, string newFieldName,
+    string rawFieldShortCut);
 
-  // destructor
-  
-  virtual ~HawkEye();
+  //QWidget *getViewWidget();
 
-  // run 
+  void set_label_font_size(int size);
+  void setHaveFilteredFields(bool value);
 
-  int Run(QApplication &app);
-
-  // data members
-
-  bool OK;
-
-protected:
 private:
-
-  // basic
-
-  string _progName;
-  ParamFile *_params;
-  Args _args;
-
-  // reading data in
-
-  Reader *_reader;
-
-  // data fields
-
-  vector<DisplayField *> _displayFields;
-  bool _haveFilteredFields;
-
-  // managing the rendering objects
-
-  PolarManager *_polarManager;
   
-  // methods
+  QGroupBox *_fieldPanel;
+  QGridLayout *_fieldsLayout;
+  QLabel *_selectedLabelWidget;
+  QButtonGroup *_fieldGroup;
+  vector<QRadioButton *> _fieldButtons;
+  DisplayField *_selectedField;
+  string _selectedName;
+  string _selectedLabel;
+  string _selectedUnits;
+  QLabel *_valueLabel;
+  //int _fieldNum;
+  int _prevFieldNum;
 
-  int _setupDisplayFields();
-  int _setupReader();
-  string _getArchiveUrl(const string &filePath);
+  int _label_font_size;
+  bool _haveFilteredFields;
 
 };
 
 #endif
-

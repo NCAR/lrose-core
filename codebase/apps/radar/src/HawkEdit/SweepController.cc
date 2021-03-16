@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// SweepManager.cc
+// SweepController.cc
 //
-// SweepManager object
+// SweepController object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -40,7 +40,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "SweepManager.hh"
+#include "SweepController.hh"
 #include <toolsa/LogStream.hh>
 
 #include <string>
@@ -52,34 +52,39 @@ using namespace std;
 /////////////////////////////////////////////////////////////
 // Constructor
 
-SweepManager::SweepManager()
+SweepController::SweepController()
 //const Params &params) :
 //        _params(params)
         
 {
 
+  _model = new SweepModel();
   //_params = ParamFile::Instance();
   //_reversedInGui = false;
-  _guiIndex = 0;
-  _selectedAngle = 0.0;
+  //_guiIndex = 0;
+  //_selectedAngle = 0.0;
 
 }
 
 /////////////////////////////////////////////////////////////
 // destructor
 
-SweepManager::~SweepManager()
+SweepController::~SweepController()
 
 {
   //_sweeps.clear();
 }
 
+
+//double SweepController::getSelectedSweepAngle() {
+//  return _model->getSelectedSweepAngle();
+//}
 /////////////////////////////////////////////////////////////
 // set from a volume
 
-void SweepManager::set() // const RadxVol &vol)
+//void SweepController::set() // const RadxVol &vol)
   
-{
+//{
 
   //DataModel *vol = DataModel::Instance();
 
@@ -132,14 +137,14 @@ void SweepManager::set() // const RadxVol &vol)
 */
   //if (_params.debug >= Params::DEBUG_VERBOSE) {
 //    if (_reversedInGui) {
-//      LOG(DEBUG) << "INFO - SweepManager: sweep list is reversed in GUI";
+//      LOG(DEBUG) << "INFO - SweepController: sweep list is reversed in GUI";
 //    }
   //}
 
-}
+//}
 
 /*
-void SweepManager::reset(const RadxVol &vol)
+void SweepController::reset(const RadxVol &vol)
   
 {
 
@@ -199,7 +204,7 @@ void SweepManager::reset(const RadxVol &vol)
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     if (_reversedInGui) {
-      cerr << "INFO - SweepManager: sweep list is reversed in GUI" << endl;
+      cerr << "INFO - SweepController: sweep list is reversed in GUI" << endl;
     }
   }
 
@@ -212,7 +217,7 @@ void SweepManager::reset(const RadxVol &vol)
 // set angle
 // size effect: sets the selected index
 
-void SweepManager::setAngle(double angle)
+void SweepController::setAngle(double angle)
   
 {
   /*
@@ -240,7 +245,7 @@ void SweepManager::setAngle(double angle)
 /////////////////////////////////////////////////////////////
 // set selected gui index
 
-void SweepManager::setGuiIndex(int index) 
+void SweepController::setGuiIndex(int index) 
 {
 /*
   _guiIndex = index;
@@ -262,7 +267,7 @@ void SweepManager::setGuiIndex(int index)
 /////////////////////////////////////////////////////////////
 /* set selected file index
 
-void SweepManager::setFileIndex(int index) 
+void SweepController::setFileIndex(int index) 
 {
 
   for (size_t ii = 0; ii < _sweeps.size(); ii++) {
@@ -274,10 +279,23 @@ void SweepManager::setFileIndex(int index)
 }
 */
 
+void SweepController::createSweepRadioButtons() {
+ 
+  vector<double> sweepAngles = _model->getSweepAngles();
+  _view->createSweepRadioButtons(sweepAngles);
+
+}
+
+void SweepController::clearSweepRadioButtons() {
+ 
+  _view->clearSweepRadioButtons();
+
+}
+
 /////////////////////////////////////////////////////////////
 // change selected index by the specified value
 
-void SweepManager::changeSelectedIndex(int increment) 
+void SweepController::changeSelectedIndex(int increment) 
 {
 /*
   _guiIndex += increment;
@@ -294,7 +312,7 @@ void SweepManager::changeSelectedIndex(int increment)
 /////////////////////////////////////////////////////////////
 // get the fixed angle, optionally specifying an index
 /*
-double SweepManager::getFixedAngleDeg(ssize_t sweepIndex ) const 
+double SweepController::getFixedAngleDeg(ssize_t sweepIndex ) const 
 {
  
   if (sweepIndex < 0) {

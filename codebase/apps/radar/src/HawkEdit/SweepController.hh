@@ -22,83 +22,107 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// HawkEye.h
+// SweepController.hh
 //
-// HawkEye object
+// SweepController object
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2010
+// March 2018
 //
 ///////////////////////////////////////////////////////////////
 //
-// HawkEye is the engineering display for the Hawk radar system
+// Manage the sweep details, return sweep information
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef HawkEye_HH
-#define HawkEye_HH
+#ifndef SweepController_HH
+#define SweepController_HH
 
+#include <cmath>
 #include <string>
 #include <vector>
-
-#include "Args.hh"
 #include "Params.hh"
-#include "ParamFile.hh"
-#include <euclid/SunPosn.hh>
+#include <Radx/RadxTime.hh>
+#include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
+#include <Radx/RadxRay.hh>
+#include "SweepView.hh"
+#include "SweepModel.hh"
+//#include "DataModel.hh"
 
-class QApplication;
-class DisplayField;
-class Reader;
-class PolarManager;
-
-class HawkEye {
+class SweepController {
   
 public:
 
+/*
+  class GuiSweep {
+  public:
+    //RadxSweep *radx;
+    //int indexInFile;
+    int indexInGui;
+    GuiSweep() {
+      //radx = NULL;
+      //indexInFile = 0;
+      indexInGui = 0;
+    }
+  };
+*/
+
   // constructor
-
-  HawkEye (int argc, char **argv);
-
+  
+  SweepController(); // const Params &params);
+  
   // destructor
   
-  virtual ~HawkEye();
+  ~SweepController();
 
-  // run 
 
-  int Run(QApplication &app);
-
-  // data members
-
-  bool OK;
-
-protected:
-private:
-
-  // basic
-
-  string _progName;
-  ParamFile *_params;
-  Args _args;
-
-  // reading data in
-
-  Reader *_reader;
-
-  // data fields
-
-  vector<DisplayField *> _displayFields;
-  bool _haveFilteredFields;
-
-  // managing the rendering objects
-
-  PolarManager *_polarManager;
+  void setView(SweepView *view) {
+    _view = view;
+  }
   
-  // methods
+  // set the angle
+  // size effect: sets the selected index
 
-  int _setupDisplayFields();
-  int _setupReader();
-  string _getArchiveUrl(const string &filePath);
+  void setAngle(double selectedAngle);
+
+  // set the index for the GUI
+
+  void setGuiIndex(int index);
+
+  // set the index for the file
+
+  //void setFileIndex(int index);
+
+  // change selected index by the specified increment
+
+  void changeSelectedIndex(int increment);
+
+  // get methods
+
+  size_t getNSweeps() const { return 0; } // _sweeps.size(); }
+  //const vector<GuiSweep> &getGuiSweeps() const { return _sweeps; }
+  //const GuiSweep getSelectedSweep() const { return _sweeps[_guiIndex]; }
+
+  //int getGuiIndex() const { return _guiIndex; }
+  //int getFileIndex() const { return _sweeps[_guiIndex].indexInFile; }
+  double getSelectedAngle() const { 
+
+    if (_view == NULL) throw "SweepView not set";
+    return _view->getSelectedAngle(); 
+  }
+
+  //double getFixedAngleDeg(ssize_t sweepIndex = -1) const;
+  //bool getReversedInGui() const { return _reversedInGui; }
+
+  void createSweepRadioButtons();
+  void clearSweepRadioButtons();
+  
+private:
+  
+  SweepView *_view;
+  SweepModel *_model;
 
 };
 

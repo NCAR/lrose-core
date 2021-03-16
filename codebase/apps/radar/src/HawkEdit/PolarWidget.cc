@@ -63,7 +63,6 @@ const double PolarWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 PolarWidget::PolarWidget(QWidget* parent,
                          const PolarManager &manager,
-                         const Params &params,
                          const RadxPlatform &platform,
 			 DisplayFieldController *displayFieldController,
 			 //                         const vector<DisplayField *> &fields,
@@ -71,14 +70,11 @@ PolarWidget::PolarWidget(QWidget* parent,
         QWidget(parent),
         _parent(parent),
         _manager(manager),
-        _params(params),
         _platform(platform),
         //_fields(fields),
-	displayFieldController(displayFieldController),
+	      displayFieldController(displayFieldController),
         _haveFilteredFields(haveFilteredFields),
         // _selectedField(0),
-        _backgroundBrush(QColor(_params.background_color)),
-        _gridRingsColor(_params.grid_and_range_ring_color),
         _ringsEnabled(false),
         _gridsEnabled(false),
         _angleLinesEnabled(false),
@@ -88,9 +84,14 @@ PolarWidget::PolarWidget(QWidget* parent,
 
 {
 
+  _params = ParamFile::Instance();
+  string color = _params->backgroundColor;
+  _backgroundBrush = QColor(color.c_str());
+  _gridRingsColor = _params->gridColor.c_str();
+
   // mode
 
-  _archiveMode = _params.begin_in_archive_mode;
+  _archiveMode = _params->begin_in_archive_mode;
 
   // Set up the background color
 
@@ -114,16 +115,21 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   qRegisterMetaType<size_t>("size_t");
 
+
   // create the field renderers
   _fieldRendererController = new FieldRendererController();
+  /*
   size_t nFields = displayFieldController->getNFields();
   for (size_t ii = 0; ii < nFields; ii++) {
     DisplayField *displayField = displayFieldController->getField(ii);
     FieldRenderer *fieldRenderer =
-      new FieldRenderer(_params, ii, *displayField); // *_fields[ii]);
+      new FieldRenderer(displayField->getName()); // *_fields[ii]);
     fieldRenderer->createImage(width(), height());
     _fieldRendererController->addFieldRenderer(fieldRenderer);
   }
+*/
+
+
 
   // init other values
 
@@ -151,7 +157,7 @@ PolarWidget::~PolarWidget()
 
   
   // Delete all of the field renderers
-  delete _fieldRendererController;
+  //delete _fieldRendererController;
   /*
   for (size_t i = 0; i < _fieldRenderers.size(); ++i) {
     delete _fieldRenderers[i];
@@ -239,7 +245,7 @@ void PolarWidget::addNewFields(vector<DisplayField *> &newFields)
     LOG(DEBUG) << *it;
   }
   */
-
+/*
   //LOG(DEBUG) << "fieldRenderers ...";
   for (size_t ii = 0; ii < newFields.size(); ii++) {
 
@@ -258,7 +264,7 @@ void PolarWidget::addNewFields(vector<DisplayField *> &newFields)
     //LOG(DEBUG) << "_fieldRenderers.size() after insert = " << _fieldRenderers.size(); 
 
   }
-
+*/
   // TODO: this may be handled by addBeam, or fillColor?
   //_ppiBeamController->addFieldsToEachBeam(needRay, newFields);    
 
@@ -291,8 +297,8 @@ void PolarWidget::updateField(size_t fieldIdx)
 void PolarWidget::activateArchiveRendering()
 {
   LOG(DEBUG) << "enter";
-  _fieldRendererController->activateArchiveRendering();
-  _fieldRendererController->performRendering(0); 
+  //_fieldRendererController->activateArchiveRendering();
+  //_fieldRendererController->performRendering(0); 
   /*
   LOG(DEBUG) << "_fieldRenderers.size()  = " << _fieldRenderers.size(); 
   for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
@@ -304,36 +310,20 @@ void PolarWidget::activateArchiveRendering()
 
 
 /*************************************************************************
- * turn on reatlime-style rendering - non-selected fields in background
- */
-
-void PolarWidget::activateRealtimeRendering()
-{
-  LOG(DEBUG) << "enter";
-  size_t selectedField = displayFieldController->getSelectedFieldNum();
-  _fieldRendererController->activateRealtimeRendering(selectedField);
-  /*
-  for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-    if (ii != _selectedField) {
-      _fieldRenderers[ii]->activateBackgroundRendering();
-    }
-  }
-  */
-}
-
-/*************************************************************************
  * displayImage()
  */
 
-void PolarWidget::displayImage(const size_t field_num)
+void PolarWidget::displayImage(string currentFieldName, double currentSweepAngle)
 {
   try {
-    size_t selectedField = displayFieldController->getSelectedFieldNum();
 
     // If we weren't rendering the current field, do nothing
-    if (field_num != selectedField) {
-      return;
-    }
+    //if (field_num != selectedField) {
+    //  return;
+    //}
+    //update();
+
+    _image = _fieldRendererController->renderImage(width(), height(), currentFieldName, currentSweepAngle);
     update();
   } catch (std::range_error &ex) {
     LOG(ERROR) << ex.what();
@@ -584,7 +574,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   }
 }
 
-/**************   testing ******/
+/**************   testing *****
 void PolarWidget::smartBrush(int xPixel, int yPixel) {
   //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
   //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
@@ -600,7 +590,12 @@ void PolarWidget::smartBrush(int xPixel, int yPixel) {
 
 }
 
+*/
 
+void PolarWidget::imageReady(QImage *image) {
+  _image = image;  // TODO: make sure this isn't a copy!  just assign a pointer
+  update();
+}
 
 /*************************************************************************
  * paintEvent()
@@ -610,13 +605,17 @@ void PolarWidget::paintEvent(QPaintEvent *event)
 {
   try {
   QPainter painter(this);
-  size_t selectedField = displayFieldController->getSelectedFieldNum();
+  //size_t selectedField = displayFieldController->getSelectedFieldNum();
 
-  FieldRenderer *fieldRenderer = _fieldRendererController->get(selectedField);
+  //FieldRenderer *fieldRenderer = _fieldRendererController->get(selectedField);
 
-  painter.drawImage(0, 0, *(fieldRenderer->getImage()));
+  //QImage *image = _fieldRendererController->getImage(selectedField, selectedSweep);
+  //painter.drawImage(0, 0, *(displayFieldController->getSelectedFieldImage()));
+  //painter.(0, 0, *(fieldRenderer->getImage()));
   //  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
+  // _image should already be set by previous slot imageReady
+  painter.drawImage(0, 0, *_image);
   _drawOverlays(painter);
 
   BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
@@ -700,6 +699,7 @@ void PolarWidget::_setTransform(const QTransform &transform)
 void PolarWidget::_performRendering()
 {
   LOG(DEBUG) << "enter";
+  /*
   try {
     size_t selectedField = displayFieldController->getSelectedFieldNum();
     _fieldRendererController->performRendering(selectedField);
@@ -708,6 +708,7 @@ void PolarWidget::_performRendering()
       LOG(ERROR) << ex.what();
       // QMessageBox::warning(NULL, "Error changing color map", ex.what());
   }
+  */
   LOG(DEBUG) << "exit";
 }
 
@@ -755,35 +756,7 @@ void PolarWidget::contextMenuCancel()
 
 void PolarWidget::contextMenuParameterColors()
 {
-  /*
-  LOG(DEBUG) << "enter";
 
-  //DisplayField selectedField;
-
-  const DisplayField &field = _manager.getSelectedField();
-  const ColorMap &colorMapForSelectedField = field.getColorMap();
-  ParameterColorView *parameterColorView = new ParameterColorView(this);
-  vector<DisplayField> displayFields = _manager.getDisplayFields();
-  DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields);
-  FieldColorController fieldColorController(parameterColorView, displayFieldModel);
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display 
-  connect(&parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-  connect(&parameterColorView, SIGNAL(changesToDisplay()), &_manager, SLOT(changesToDisplayFields()));
-
-  // TODO: move this call to the controller?
-  parameterColorView.exec();
-
-  if(parameterColorController.Changes()) {
-    // TODO: what are changes?  new displayField(s)?
-  }
-  
-  // TODO: where to delete the ParameterColor objects & disconnect the signals and slots??
-  delete parameterColorView;
-  delete parameterColorModel;
-
-  LOG(DEBUG) << "exit ";
-  */
   informationMessage();
    
 }
