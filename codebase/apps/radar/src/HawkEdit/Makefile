@@ -59,7 +59,6 @@ HDRS = \
 	ColorBar.hh \
 	ColorMap.hh \
 	ColorTableManager.hh \
-	DisplayManager.hh \
 	FieldListView.hh \
 	FieldRenderer.hh \
 	FieldRendererController.hh \
@@ -69,17 +68,17 @@ HDRS = \
 	PaletteManager.hh \
         ParameterColorView.hh \
         FieldColorController.hh \
+	DataModel.hh \
         DisplayFieldModel.hh \
         DisplayFieldController.hh \
+        DisplayFieldView.hh \
 	Params.hh \
+	ParamFile.hh \
 	PpiBeam.hh \
 	PolarManager.hh \
 	PolarWidget.hh \
 	PpiWidget.hh \
 	Reader.hh \
-	RhiBeam.hh \
-	RhiWidget.hh \
-	RhiWindow.hh \
 	ScaledLabel.hh \
 	SiiPalette.hh \
 	ScriptEditorController.hh \
@@ -95,7 +94,9 @@ HDRS = \
 	SpreadSheetModel.hh \
 	SpreadSheetUtils.hh \
 	SpreadSheetView.hh \
-	SweepManager.hh \
+	SweepView.hh \
+	SweepController.hh \
+	SweepModel.hh \
 	TimeScaleWidget.hh \
 	WorldPlot.hh
 
@@ -104,10 +105,10 @@ NORM_SRCS = \
 	AllocCheck.cc \
 	Args.cc \
 	Beam.cc \
-	BscanBeam.cc \
 	BoundaryPointEditor.cc \
 	ColorMap.cc \
 	ColorTableManager.cc \
+	DataModel.cc \
 	DisplayField.cc \
 	DisplayFieldModel.cc \
 	DisplayFieldController.cc \
@@ -116,9 +117,9 @@ NORM_SRCS = \
 	HawkEyeLogger.cc \
 	Main.cc \
 	PaletteManager.cc \
+	ParamFile.cc \
 	PpiBeam.cc \
 	Reader.cc \
-	RhiBeam.cc \
 	ScaledLabel.cc \
 	ScriptEditorModel.cc \
 	SiiPalette.cc \
@@ -128,25 +129,24 @@ NORM_SRCS = \
 	SpreadSheetItem.cc \
 	SpreadSheetModel.cc \
 	SpreadSheetUtils.cc \
-	SweepManager.cc \
+	SweepController.cc \
+	SweepModel.cc \
 	WorldPlot.cc 
 
 MOC_SRCS = \
-	DisplayManager.cc \
 	FieldRenderer.cc \
 	FieldListView.cc \
 	FieldRendererController.cc \
 	PolarManager.cc \
 	PolarWidget.cc \
 	PpiWidget.cc \
-	RhiWidget.cc \
-	RhiWindow.cc \
 	TimeScaleWidget.cc \
 	ParameterColorView.cc \
         FieldColorController.cc \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
+	DisplayFieldView.cc \
 	ScriptEditorView.cc \
 	ScriptEditorController.cc \
 	ScriptEditorHelpItem.cc \
@@ -156,23 +156,22 @@ MOC_SRCS = \
 	SpreadSheetView.cc \
 	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
+	SweepView.cc \
 	FunctionEditor.cc 
 
 MOC_OUTPUT = \
-	moc_DisplayManager.cpp \
 	moc_FieldListView.cpp \
 	moc_FieldRenderer.cpp \
 	moc_PolarManager.cpp \
 	moc_PolarWidget.cpp \
 	moc_PpiWidget.cpp \
-	moc_RhiWidget.cpp \
-	moc_RhiWindow.cpp \
 	moc_TimeScaleWidget.cpp \
 	moc_ParameterColorView.cpp \
         moc_FieldColorController.cpp \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \
+	moc_DisplayFieldView.cpp \
 	moc_ScriptEditorView.cpp \
 	moc_ScriptEditorController.cpp \
 	moc_ScriptEditorHelpModel.cpp \
@@ -181,6 +180,7 @@ MOC_OUTPUT = \
 	moc_SpreadSheetView.cpp \
 	moc_SpreadSheetController.cpp \
 	moc_SpreadSheetDelegate.cpp \
+	moc_SweepView.cpp \
 	moc_FunctionEditor.cpp \
 	qrc_resources.cpp \
 	qrc_customcompleter.cpp

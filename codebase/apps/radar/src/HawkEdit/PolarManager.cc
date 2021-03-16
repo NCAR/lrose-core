@@ -99,6 +99,9 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxPath.hh>
 
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/Path.hh>
+
 using namespace std;
 using namespace H5x;
 
@@ -120,16 +123,35 @@ PolarManager::PolarManager(const Params &params,
 {
 */
 
-PolarManager::PolarManager(const Params &params,
-                           Reader *reader,
-			   DisplayFieldController *displayFieldController,
+PolarManager::PolarManager(DisplayFieldController *displayFieldController,
                            bool haveFilteredFields) :
-  DisplayManager(params, reader, displayFieldController, haveFilteredFields), _sweepManager(params), _rhiWindowDisplayed(false)
+// DisplayManager(params, reader, displayFieldController, haveFilteredFields), 
+        //_sweepManager(params),
+        _rhiWindowDisplayed(false),
+        QMainWindow(NULL),
+        //_params->params),
+        //_reader(reader),
+        _initialRay(true),
+        _displayFieldController(displayFieldController),
+        _haveFilteredFields(haveFilteredFields)
 {
 
 	m_pInstance = this;
 
   // initialize
+
+  // from DisplayManager ...
+  _beamTimerId = 0;
+  _frozen = false;
+  //  _displayFieldController->setSelectedField(0);
+  _prevFieldNum = -1;
+
+  _radarLat = -9999.0;
+  _radarLon = -9999.0;
+  _radarAltKm = -9999.0;
+
+  _altitudeInFeet = false;
+  // end from DisplayManager    
 
   _firstTime = true;
 
@@ -153,7 +175,7 @@ PolarManager::PolarManager(const Params &params,
   _rhiWindow = NULL;
   _rhi = NULL;
 
-  _sweepVBoxLayout = NULL;
+  //_sweepVBoxLayout = NULL;
   _sweepPanel = NULL;
 
   _archiveStartTimeEdit = NULL;
@@ -171,14 +193,16 @@ PolarManager::PolarManager(const Params &params,
   _timeLayout = NULL;
   _timeSlider = NULL;
 
-  _setArchiveMode(_params.begin_in_archive_mode);
-  _archiveStartTime.set(_params.archive_start_time);
-  _archiveEndTime = _archiveStartTime + _params.archive_time_span_secs;
+  ParamFile *_params = ParamFile::Instance();
+
+  _setArchiveMode(_params->begin_in_archive_mode);
+  _archiveStartTime.set(_params->archive_start_time);
+  _archiveEndTime = _archiveStartTime + _params->archive_time_span_secs;
   _archiveScanIndex = 0;
 
-  _imagesArchiveStartTime.set(_params.images_archive_start_time);
-  _imagesArchiveEndTime.set(_params.images_archive_end_time);
-  _imagesScanIntervalSecs = _params.images_scan_interval_secs;
+  _imagesArchiveStartTime.set(_params->images_archive_start_time);
+  _imagesArchiveEndTime.set(_params->images_archive_end_time);
+  _imagesScanIntervalSecs = _params->images_scan_interval_secs;
 
   // set up ray locators
 
@@ -221,18 +245,17 @@ PolarManager::~PolarManager()
 int PolarManager::run(QApplication &app)
 {
 
-  if (_params.debug) {
-    cerr << "Running in POLAR mode" << endl;
-  }
+  LOG(DEBUG) << "Running in POLAR mode";  
 
   // make window visible
 
   show();
-/*
+
   if (_archiveFileList.size() == 0) {
-    getFileAndFields();
+    //getFileAndFields();
+    _openFile();
   }
- */
+ 
 
   // set timer running
   
@@ -241,7 +264,11 @@ int PolarManager::run(QApplication &app)
   return app.exec();
 
 }
-
+/*
+void PolarManager::setParamsFile() {
+  _params = ParamFile::Instance();
+}
+*/
 //////////////////////////////////////////////////
 // enable the zoom button - called by PolarWidgets
 
@@ -250,97 +277,12 @@ void PolarManager::enableZoomButton() const
   _unzoomAct->setEnabled(true);
 }
 
-//////////////////////////////////////////////////////////////
-// respond to timer events
-  
-void PolarManager::timerEvent(QTimerEvent *event)
-{
-
-  // register with procmap
-
-  PMU_auto_register("timerEvent");
-  
-  // Handle widget stuff that can't be done at initial setup.  For some reason
-  // the widget sizes are off until we get to this point.  There's probably
-  // a better way to do this, but I couldn't figure anything out.
-
-  if (_firstTimerEvent) {
-
-    _ppi->resize(_ppiFrame->width(), _ppiFrame->height());
-    
-    // Set the size of the second column to the size of the largest
-    // label.  This should keep the column from wiggling as the values change.
-    // The default values for the labels must be their maximum size for this
-    // to work.  This is ugly, but it works.
-
-    int maxWidth = 0;
-    for (size_t ii = 0; ii < _valsRight.size(); ii++) {
-      if (maxWidth < _valsRight[ii]->width()) {
-        maxWidth = _valsRight[ii]->width();
-      }
-    }
-    _statusLayout->setColumnMinimumWidth(1, maxWidth);
-  
-    if ((_archiveMode) && (_urlOK)) {
-      _archiveRetrievalPending = true;
-    }
-
-    _firstTimerEvent = false;
-
-  } // if (_firstTimerEvent)
-
-  // handle event
-  
-  if (event->timerId() == _beamTimerId) {
-    
-    if (_archiveMode) {
-      if (_archiveRetrievalPending) {
-        _handleArchiveData(event);
-        _archiveRetrievalPending = false;
-      }
-    } else {
-      _handleRealtimeData(event);
-    }
-
-  }
-
-  // check for image creation
-  
-  if (_params.images_auto_create) {
-    
-    // if we are just creating files in archive mode
-    // and then exiting, do that now
-    
-    if ((_params.images_creation_mode ==
-         Params::CREATE_IMAGES_THEN_EXIT) ||
-        (_params.images_creation_mode ==
-         Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE)) {
-      _createArchiveImageFiles();
-      close();
-      return;
-    }
-    
-    // if we are creating files in realtime mode, do that now
-    
-    if (_params.images_creation_mode ==
-        Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
-      _handleRealtimeData(event);
-      _createRealtimeImageFiles();
-      return;
-    }
-    
-  }
-
-}
-
 ///////////////////////////////////////////////
 // override resize event
 
 void PolarManager::resizeEvent(QResizeEvent *event)
 {
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "resizeEvent: " << event << endl;
-  }
+  LOG(DEBUG) << "resizeEvent: " << event;
   emit frameResized(_ppiFrame->width(), _ppiFrame->height());
 }
 
@@ -354,10 +296,10 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
   char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
 
-  if (_params.debug) {
-    cerr << "Clicked char: " << keychar << ":" << (int) keychar << endl;
-    cerr << "         key: " << hex << key << dec << endl;
-  }
+  
+    LOG(DEBUG) << "Clicked char: " << keychar << ":" << (int) keychar;
+    //LOG(DEBUG) << "         key: " << hex << key << dec;
+  
   
   // for '.', swap with previous field
 
@@ -399,11 +341,11 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     }
 
     if (correctField) {
-      if (_params.debug) {
-	cerr << "Short-cut key pressed: " << shortcut << endl;
-	cerr << "  field label: " << field->getLabel() << endl;
-	cerr << "   field name: " << field->getName() << endl;
-      }
+
+    	LOG(DEBUG) << "Short-cut key pressed: " << shortcut;
+    	LOG(DEBUG) << "  field label: " << field->getLabel();
+    	LOG(DEBUG) << "   field name: " << field->getName();
+      
       QRadioButton *button = (QRadioButton *) _fieldGroup->button(ifield);
       button->click();
       break;
@@ -415,47 +357,42 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
   if (key == Qt::Key_Left) {
 
-    if (_params.debug) {
-      cerr << "Clicked left arrow, go back in time" << endl;
-    }
+    LOG(DEBUG) << "Clicked left arrow, go back in time";
+
     _ppi->setStartOfSweep(true);
-    _rhi->setStartOfSweep(true);
+    //_rhi->setStartOfSweep(true);
     _goBack1();
 
   } else if (key == Qt::Key_Right) {
 
-    if (_params.debug) {
-      cerr << "Clicked right arrow, go forward in time" << endl;
-    }
+    LOG(DEBUG) << "Clicked right arrow, go forward in time";
+    
     _ppi->setStartOfSweep(true);
-    _rhi->setStartOfSweep(true);
+    //_rhi->setStartOfSweep(true);
     _goFwd1();
     
   } else if (key == Qt::Key_Up) {
 
-    if (_sweepManager.getGuiIndex() > 0) {
+    //if (_sweepManager.getGuiIndex() > 0) {
 
-      if (_params.debug) {
-        cerr << "Clicked up arrow, go up a sweep" << endl;
-      }
+      LOG(DEBUG) << "Clicked up arrow, go up a sweep";
       _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
+      //_rhi->setStartOfSweep(true);
       _changeSweepRadioButton(-1);
 
-    }
+    //}
 
   } else if (key == Qt::Key_Down) {
 
-    if (_sweepManager.getGuiIndex() < (int) _sweepManager.getNSweeps() - 1) {
+    //if (_sweepManager.getGuiIndex() < (int) _sweepManager.getNSweeps() - 1) {
 
-      if (_params.debug) {
-        cerr << "Clicked down arrow, go down a sweep" << endl;
-      }
+      LOG(DEBUG) << "Clicked down arrow, go down a sweep";
+      
       _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
+      //_rhi->setStartOfSweep(true);
       _changeSweepRadioButton(+1);
 
-    }
+    //}
 
   }
 
@@ -499,27 +436,27 @@ void PolarManager::_setupWindows()
 
   // configure the PPI
 
-  _ppi = new PpiWidget(_ppiFrame, *this, _params, _platform, _displayFieldController, _haveFilteredFields);
+  _ppi = new PpiWidget(_ppiFrame, *this, _platform, _displayFieldController, _haveFilteredFields);
 
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _ppi, SLOT(resize(const int, const int)));
   
   // Create the RHI window
 
-  _rhiWindow = new RhiWindow(this, _params, _platform,
-                             _displayFieldController, _haveFilteredFields);
-  _rhiWindow->setRadarName(_params.radar_name);
+  //_rhiWindow = new RhiWindow(this, _params-> _platform,
+  //                           _displayFieldController, _haveFilteredFields);
+  //_rhiWindow->setRadarName(_params->radar_name);
 
   // set pointer to the rhiWidget
 
-  _rhi = _rhiWindow->getWidget();
+  //_rhi = _rhiWindow->getWidget();
   
   // connect slots for location
 
   connect(_ppi, SIGNAL(locationClicked(double, double, const RadxRay*)),
           this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
-  connect(_rhi, SIGNAL(locationClicked(double, double, const RadxRay*)),
-          this, SLOT(_rhiLocationClicked(double, double, const RadxRay*)));
+  //connect(_rhi, SIGNAL(locationClicked(double, double, const RadxRay*)),
+  //        this, SLOT(_rhiLocationClicked(double, double, const RadxRay*)));
 
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
@@ -533,17 +470,22 @@ void PolarManager::_setupWindows()
 
   // create fields panel
   
-  _createFieldPanel();
+  //_createFieldPanel();
+  _fieldPanel = new DisplayFieldView(_main);
+  _displayFieldController->setView(_fieldPanel);
 
   // add widgets
 
   mainLayout->addWidget(_statusPanel);
-  mainLayout->addWidget(_fieldPanel);
+  mainLayout->addWidget(_fieldPanel); // <=== here 
   mainLayout->addWidget(_ppiFrame);
 
   // sweep panel
 
-   _createSweepPanel();
+   //_createSweepPanel();
+  _sweepPanel = new SweepView(_main);
+  _sweepController = new SweepController();
+  _sweepController->setView(_sweepPanel);
    mainLayout->addWidget(_sweepPanel);
 
   // time panel
@@ -557,15 +499,17 @@ void PolarManager::_setupWindows()
 
   // title bar
 
-  _setTitleBar(_params.radar_name);
+  _params = ParamFile::Instance();
+
+  _setTitleBar(_params->radar_name);
   setMinimumSize(400, 300);
-  resize(_params.main_window_width, _params.main_window_height);
+  resize(_params->main_window_width, _params->main_window_height);
   
   // set location on screen
 
   QPoint pos;
-  pos.setX(_params.main_window_start_x);
-  pos.setY(_params.main_window_start_y);
+  pos.setX(_params->main_window_start_x);
+  pos.setY(_params->main_window_start_y);
   move(pos);
   
   // set up field status dialog
@@ -599,6 +543,9 @@ void PolarManager::_setSweepPanelVisibility()
 
 void PolarManager::_createActions()
 {
+
+  _params = ParamFile::Instance();
+
   // freeze display
   _freezeAct = new QAction(tr("Freeze"), this);
   _freezeAct->setShortcut(tr("Esc"));
@@ -627,13 +574,14 @@ void PolarManager::_createActions()
   connect(_showTimeControlAct, SIGNAL(triggered()), _timeControl,
           SLOT(show()));
 
-  // realtime mode
+  /* realtime mode
   _realtimeAct = new QAction(tr("Set realtime mode"), this);
   _realtimeAct->setStatusTip(tr("Turn realtime mode on/off"));
   _realtimeAct->setCheckable(true);
-  _realtimeAct->setChecked(!_params.begin_in_archive_mode);
+  _realtimeAct->setChecked(!_params->begin_in_archive_mode);
   connect(_realtimeAct, SIGNAL(triggered(bool)),
 	  this, SLOT(_setRealtime(bool)));
+  */
 
   // unzoom display
   _unzoomAct = new QAction(tr("Unzoom"), this);
@@ -675,7 +623,7 @@ void PolarManager::_createActions()
   _ringsAct = new QAction(tr("Range Rings"), this);
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
-  _ringsAct->setChecked(_params.ppi_range_rings_on_at_startup);
+  _ringsAct->setChecked(_params->ppi_range_rings_on_at_startup);
   connect(_ringsAct, SIGNAL(triggered(bool)),
 	  _ppi, SLOT(setRings(bool)));
 
@@ -684,7 +632,7 @@ void PolarManager::_createActions()
   _gridsAct = new QAction(tr("Grids"), this);
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
-  _gridsAct->setChecked(_params.ppi_grids_on_at_startup);
+  _gridsAct->setChecked(_params->ppi_grids_on_at_startup);
   connect(_gridsAct, SIGNAL(triggered(bool)),
 	  _ppi, SLOT(setGrids(bool)));
 
@@ -693,7 +641,7 @@ void PolarManager::_createActions()
   _azLinesAct = new QAction(tr("Az Lines"), this);
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
   _azLinesAct->setCheckable(true);
-  _azLinesAct->setChecked(_params.ppi_azimuth_lines_on_at_startup);
+  _azLinesAct->setChecked(_params->ppi_azimuth_lines_on_at_startup);
   connect(_azLinesAct, SIGNAL(triggered(bool)),
 	  _ppi, SLOT(setAngleLines(bool)));
 
@@ -763,87 +711,9 @@ void PolarManager::_createMenus()
 
 }
 
-/////////////////////////////////////////////////////////////
-// create the sweep panel
-// buttons will be filled in by createSweepRadioButtons()
-
-void PolarManager::_createSweepPanel()
-{
-  
-  _sweepPanel = new QGroupBox("Sweeps", _main);
-  _sweepVBoxLayout = new QVBoxLayout;
-  _sweepPanel->setLayout(_sweepVBoxLayout);
-  _sweepPanel->setAlignment(Qt::AlignHCenter);
-
-  _sweepRButtons = new vector<QRadioButton *>();
-
-
-}
-
-/////////////////////////////////////////////////////////////////////
-// create radio buttons
-// this requires that _sweepManager is up to date with sweep info
-
-void PolarManager::_createSweepRadioButtons() 
-{
-
-  // fonts
-  
-  QLabel dummy;
-  QFont font = dummy.font();
-  QFont fontm2 = dummy.font();
-  int fsize = _params.label_font_size;
-  int fsizem2 = _params.label_font_size - 2;
-  font.setPixelSize(fsize);
-  fontm2.setPixelSize(fsizem2);
-  
-  // radar and site name
-  
-  char buf[256];
-  _sweepRButtons = new vector<QRadioButton *>();
-
-  for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
-    
-    std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
-    QRadioButton *radio1 = new QRadioButton(buf); 
-    radio1->setFont(fontm2);
-    
-    if (ielev == _sweepManager.getGuiIndex()) {
-      radio1->setChecked(true);
-    }
-    
-    _sweepRButtons->push_back(radio1);
-    _sweepVBoxLayout->addWidget(radio1);
-    
-    // connect slot for sweep change
-
-    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeSweep(bool)));
-
-  }
-
-}
-
-/////////////////////////////////////////////////////////////////////
-// create sweep panel of radio buttons
-
-void PolarManager::_clearSweepRadioButtons() 
-{
-
-  QLayoutItem* child;
-  if (_sweepVBoxLayout != NULL) {
-    while (_sweepVBoxLayout->count() !=0) {
-      child = _sweepVBoxLayout->takeAt(0);
-      if (child->widget() !=0) {
-        delete child->widget();
-      }
-      delete child;
-    }
-  }
- 
-}
 
 ///////////////////////////////////////////////////////////////
-// change sweep
+/* change sweep
 
 void PolarManager::_changeSweep(bool value) {
 
@@ -858,13 +728,14 @@ void PolarManager::_changeSweep(bool value) {
       LOG(DEBUG) << "sweepRButton " << ii << " is checked; moving to sweep index " << ii;
       _sweepManager.setGuiIndex(ii);
       _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
+      //_rhi->setStartOfSweep(true);
       _moveUpDown();
       return;
     }
   } // ii
 
 }
+*/
 
 ///////////////////////////////////////////////////////////////
 // change sweep
@@ -878,71 +749,13 @@ void PolarManager::_changeSweep(bool value) {
 void PolarManager::_changeSweepRadioButton(int increment)
 
 {
-  
-  if (_params.debug) {
-    cerr << "-->> changing sweep index by increment: " << increment << endl;
-  }
+  LOG(DEBUG) << "-->> changing sweep index by increment: " << increment;
   
   if (increment != 0) {
-    _sweepManager.changeSelectedIndex(increment);
-    _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
+    _sweepController->changeSelectedIndex(increment);
+   // _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
   }
 
-}
-
-/////////////////////////////
-// get data in realtime mode
-
-void PolarManager::_handleRealtimeData(QTimerEvent * event)
-
-{
-
-  _ppi->setArchiveMode(false);
-  _rhi->setArchiveMode(false);
-
-  // do nothing if freeze is on
-
-  if (_frozen) {
-    return;
-  }
-
-  if (event->timerId() == _beamTimerId && !_frozen) {
-
-    // get all available beams
-
-    while (true) {
-
-      // get the next ray from the reader queue
-      // responsibility for this ray memory passes to
-      // this (the master) thread
-
-      RadxRay *ray = _reader->getNextRay(_platform);
-      if (ray == NULL) {
-        break; // no pending rays
-      }
-
-      if (_params.debug >= Params::DEBUG_EXTRA) {
-        cerr << "  Got a ray, time, el, az: "
-             << DateTime::strm(ray->getTimeSecs()) << ", "
-             << ray->getElevationDeg() << ", "
-             << ray->getAzimuthDeg() << endl;
-      }
-
-      // update the status panel
-      
-      _updateStatusPanel(ray);
-      
-      // draw the beam
-      
-      if (_params.images_creation_mode != 
-          Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
-        _handleRay(_platform, ray);
-      }
-    
-    } // while
-
-  }
-    
 }
 
 ///////////////////////////////////////
@@ -1023,7 +836,7 @@ int PolarManager::loadArchiveFileList()
 
 {
   RadxTimeList timeList;
-  timeList.setDir(_params.archive_data_url);
+  timeList.setDir(_params->archive_data_url);
   timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
   timeList.compile();
   _urlOK = true;
@@ -1031,7 +844,7 @@ int PolarManager::loadArchiveFileList()
   if (timeList.getPathList().size() < 1) {
     cerr << "ERROR - PolarManager::loadArchiveFileList()" << endl;
     cerr << "  Cannot load file list for url: " 
-         << _params.archive_data_url << endl;
+         << _params->archive_data_url << endl;
     cerr << "  Start time: " << _archiveStartTime.getStr() << endl;
     cerr << "  End time: " << _archiveEndTime.getStr() << endl;
     _urlOK = false;
@@ -1048,19 +861,15 @@ int PolarManager::loadArchiveFileList()
 ///////////////////////////////////////
 // handle data in archive mode
 
-void PolarManager::_handleArchiveData(QTimerEvent * event)
-
+void PolarManager::_handleArchiveData()
 {
-  
-  if (_params.debug) {
-    cerr << "handling archive data ..." << endl;
-  }
+    LOG(DEBUG) << "enter";
 
   _ppi->setArchiveMode(true);
   _ppi->setStartOfSweep(true);
 
-  _rhi->setArchiveMode(true);
-  _rhi->setStartOfSweep(true);
+  //_rhi->setArchiveMode(true);
+  //_rhi->setStartOfSweep(true);
 
   // set cursor to wait cursor
 
@@ -1078,8 +887,8 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
 
   // set up sweep GUI
 
-  _clearSweepRadioButtons();
-  _createSweepRadioButtons();
+  _sweepController->clearSweepRadioButtons();
+  _sweepController->createSweepRadioButtons();
   
   if (_vol.checkIsRhi()) {
     _rhiMode = true;
@@ -1108,6 +917,8 @@ void PolarManager::_handleArchiveData(QTimerEvent * event)
 vector<string> *PolarManager::getFieldsArchiveData(string fileName)
 {
 
+  LOG(DEBUG) << "enter";
+
   // set up file object for reading
   
   RadxFile file;
@@ -1115,10 +926,10 @@ vector<string> *PolarManager::getFieldsArchiveData(string fileName)
 
   vol.clear();
   //_setupVolRead(file);
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
     file.setDebug(true);
   }
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params->debug >= Params::DEBUG_EXTRA) {
     file.setDebug(true);
     file.setVerbose(true);
   }
@@ -1129,18 +940,18 @@ vector<string> *PolarManager::getFieldsArchiveData(string fileName)
     
     string inputPath = fileName; // _archiveFileList[_archiveScanIndex];
     
-    if(_params.debug) {
-      cerr << "  reading data file path: " << inputPath << endl;
+  
+      LOG(DEBUG) << "  reading data file path: " << inputPath;
       //cerr << "  archive file index: " << _archiveScanIndex << endl;
-    }
+    
     
     if (file.readFromPath(inputPath, vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "PolarManager::_getArchiveData\n";
+      errMsg += "PolarManager::_getFieldsArchiveData\n";
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + inputPath + "\n";
       cerr << errMsg;
-      if (!_params.images_auto_create)  {
+      if (!_params->images_auto_create)  {
         QErrorMessage errorDialog;
         errorDialog.setMinimumSize(400, 250);
         errorDialog.showMessage(errMsg.c_str());
@@ -1158,6 +969,7 @@ vector<string> *PolarManager::getFieldsArchiveData(string fileName)
       allFieldNames->push_back(field->getName());
     }
 
+    LOG(DEBUG) << "exit";
     return allFieldNames;
   //}
 }
@@ -1213,6 +1025,7 @@ vector<string> *PolarManager::userSelectFieldsForReading(string fileName) {
 }
 
 
+// TODO: I don't think this is used
 void PolarManager::getFileAndFields() {
           QString inputPath = "/"; // QDir::currentPath();
         // get the path of the current file, if available 
@@ -1225,12 +1038,15 @@ void PolarManager::getFileAndFields() {
                 NULL,
                 "Open Document",
                 inputPath, "All files (*);; Cfradial (*.nc)");  //QDir::currentPath(),
+        if (filename.isNull() || filename.isEmpty()) {
+          return;
+        }
         vector<string> fileList;
         fileList.push_back(filename.toStdString());
 
         // override archive data url from input file
         //string url = _getArchiveUrl(fileList[0]);
-        //TDRP_str_replace(&_params.archive_data_url, url.c_str());
+        //TDRP_str_replace(&_params->archive_data_url, url.c_str());
 
         // choose which fields to import
 
@@ -1246,6 +1062,7 @@ void PolarManager::getFileAndFields() {
 /////////////////////////////
 // get data in archive mode
 // returns 0 on success, -1 on failure
+// precondition: assumes setArchiveFileList is called before
 
 int PolarManager::_getArchiveData()
 
@@ -1257,15 +1074,16 @@ int PolarManager::_getArchiveData()
   _vol.clear();
   _setupVolRead(file);
   
+  // be sure to call setArchiveFileList before we get here!
   if (_archiveScanIndex >= 0 &&
       _archiveScanIndex < (int) _archiveFileList.size()) {
     
     string inputPath = _archiveFileList[_archiveScanIndex];
     
-    if(_params.debug) {
-      cerr << "  reading data file path: " << inputPath << endl;
-      cerr << "  archive file index: " << _archiveScanIndex << endl;
-    }
+ 
+      LOG(DEBUG) << "  reading data file path: " << inputPath;
+      LOG(DEBUG) << "  archive file index: " << _archiveScanIndex;
+    
     
     if (file.readFromPath(inputPath, _vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
@@ -1273,7 +1091,7 @@ int PolarManager::_getArchiveData()
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + inputPath + "\n";
       cerr << errMsg;
-      if (!_params.images_auto_create)  {
+      if (!_params->images_auto_create)  {
         QErrorMessage errorDialog;
         errorDialog.setMinimumSize(400, 250);
         errorDialog.showMessage(errMsg.c_str());
@@ -1311,18 +1129,19 @@ int PolarManager::_getArchiveData()
 
   // load the sweep manager
   
-  _sweepManager.set(_vol);
+  //_sweepManager.set(_vol);
+  // TODO: signal new volume read?
 
-  if (_params.debug) {
-    cerr << "----------------------------------------------------" << endl;
-    cerr << "perform archive retrieval" << endl;
-    cerr << "  read file: " << _vol.getPathInUse() << endl;
-    cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
-    cerr << "  guiIndex, fixedAngle: " 
-         << _sweepManager.getGuiIndex() << ", "
-         << _sweepManager.getSelectedAngle() << endl;
-    cerr << "----------------------------------------------------" << endl;
-  }
+
+    LOG(DEBUG) << "----------------------------------------------------";
+    LOG(DEBUG) << "perform archive retrieval";
+    LOG(DEBUG) << "  read file: " << _vol.getPathInUse();
+    LOG(DEBUG) << "  nSweeps: " << _vol.getNSweeps();
+   // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
+   //      << _sweepManager.getGuiIndex() << ", "
+   //      << _sweepManager.getSelectedAngle();
+    LOG(DEBUG) << "----------------------------------------------------";
+  
   
    _platform = _vol.getPlatform();
    
@@ -1331,18 +1150,20 @@ int PolarManager::_getArchiveData()
 }
 
 double PolarManager::getSelectedSweepAngle() {
-  double angle = _sweepManager.getSelectedAngle();
+  double angle = _sweepController->getSelectedAngle();
   return angle;
 }
 
 size_t PolarManager::getSelectedFieldIndex() {
+  size_t selectedFieldIndex = 0;
   try {
-    return _displayFieldController->getSelectedFieldNum();
+    selectedFieldIndex = _displayFieldController->getSelectedFieldNum();
   } catch (std::range_error &ex) {
       LOG(ERROR) << ex.what();
       QMessageBox::warning(NULL, "Error selectingField (_getArchiveData):", ex.what());
       return 0;
   }
+  return selectedFieldIndex;
 }
 
 /////////////////////////////
@@ -1352,7 +1173,7 @@ size_t PolarManager::getSelectedFieldIndex() {
 void PolarManager::_applyDataEdits()
 {
 
-  if (0) { // _params.debug) {
+  if (0) { // _params->debug) {
     std::ofstream outfile("/tmp/voldebug_PolarManager_applyDataEdits.txt");
     _vol.printWithFieldData(outfile);  
     outfile << "_vol = " << &_vol << endl;
@@ -1425,9 +1246,9 @@ void PolarManager::_addNewFields(QStringList  newFieldNames)
     _ppi->addNewFields(newFields);
   }
   
-  if (_rhi) {
-    _rhi->addNewFields(newFields);
-  }
+  //if (_rhi) {
+  //  _rhi->addNewFields(newFields);
+  //}
   LOG(DEBUG) << "exit";
 }
 
@@ -1607,6 +1428,7 @@ void PolarManager::_volumeDataChanged(QStringList newFieldNames)
   LOG(DEBUG) << "exit"; 
 }
 
+
 /*
 RadxVol PolarManager::getDataVolume() {
   return _vol;
@@ -1619,15 +1441,16 @@ void PolarManager::_plotArchiveData()
 
 {
 
-  if(_params.debug) {
-    cerr << "Plotting archive data" << endl;
-    cerr << "  volume start time: " << _plotStartTime.asString() << endl;
-  }
+  
+    LOG(DEBUG) << "enter";
+    LOG(DEBUG) << "  volume start time: " << _plotStartTime.asString();
+  
 
   // initialize plotting
 
   _initialRay = true;
 
+  /*
   // handle the rays
   
   const vector<RadxRay *> &rays = _vol.getRays();
@@ -1643,11 +1466,12 @@ void PolarManager::_plotArchiveData()
     cerr << "  No sweeps found" << endl;
     return;
   }
-
+*/
   // clear the canvas
 
   _clear();
 
+/*
   // handle the rays
 
   const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
@@ -1659,8 +1483,17 @@ void PolarManager::_plotArchiveData()
       _updateStatusPanel(ray);
     }
   }
+  */
 
-  
+  string currentFieldName = _displayFieldController->getSelectedFieldName();
+  double currentSweepAngle = _sweepController->getSelectedAngle();
+
+  _ppi->displayImage(currentFieldName, currentSweepAngle); 
+  // _sweepController->getSelectedAngle(),
+  // _displayFieldController->getSelectedFieldName());
+  //_updateStatusPanel(???);
+
+  LOG(DEBUG) << "exit";
 }
 
 void PolarManager::_updateArchiveData(QStringList newFieldNames)
@@ -1678,10 +1511,9 @@ void PolarManager::_updateArchiveData(QStringList newFieldNames)
 void PolarManager::_updateArchiveData(vector<string> &newFieldNamesConverted) 
 {
 
-  if(_params.debug) {
-    cerr << "Updating archive data" << endl;
-    cerr << "  volume start time: " << _plotStartTime.asString() << endl;
-  }
+    LOG(DEBUG) << "Updating archive data";
+    LOG(DEBUG) << "  volume start time: " << _plotStartTime.asString();
+  
 
   // initialize plotting
   //_initialRay = true;
@@ -1707,7 +1539,7 @@ void PolarManager::_updateArchiveData(vector<string> &newFieldNamesConverted)
   
   // TODO: reload the sweeps into the sweepManager?
   //  I added this ...
-  _sweepManager.set(_vol);
+  //_sweepManager.set(_vol);
 
   //const vector<RadxSweep *> &sweeps = _vol.getSweeps();
   //if (sweeps.size() < 1) {
@@ -1728,7 +1560,7 @@ void PolarManager::_updateArchiveData(vector<string> &newFieldNamesConverted)
   */
 
   // handle the rays
-
+/*
   const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
   for (size_t ii = gsweep.radx->getStartRayIndex();
        ii <= gsweep.radx->getEndRayIndex(); ii++) {
@@ -1738,15 +1570,15 @@ void PolarManager::_updateArchiveData(vector<string> &newFieldNamesConverted)
     //  _updateStatusPanel(ray);
     //}
   }
-  
+ */ 
 }
 
 void PolarManager::_updateColorMap(string fieldName) 
 {
 
-  if(_params.debug) {
-    cerr << "Updating color map" << endl;
-  }
+  
+    LOG(DEBUG) << "Updating color map";
+  
   /*
   // handle the rays
   _vol.loadRaysFromFields();  // this line makes the select field update properly  
@@ -1790,10 +1622,10 @@ void PolarManager::_updateColorMap(string fieldName)
 void PolarManager::_setupVolRead(RadxFile &file)
 {
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
     file.setDebug(true);
   }
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params->debug >= Params::DEBUG_EXTRA) {
     file.setDebug(true);
     file.setVerbose(true);
   }
@@ -1823,10 +1655,10 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   _nGates = ray->getNGates();
 
   double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
-  if (!_params.set_max_range && (maxRange > _maxRangeKm)) {
+  if (!_params->set_max_range && (maxRange > _maxRangeKm)) {
     _maxRangeKm = maxRange;
     _ppi->configureRange(_maxRangeKm);
-    _rhi->configureRange(_maxRangeKm);
+    //_rhi->configureRange(_maxRangeKm);
   }
 
   // create 2D field data vector
@@ -1879,15 +1711,15 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
             // keep track of min and max data values
 	    // just display something.  The color scale can be edited as needed, later.
 	    bool newMinOrMax = false;
-            if (val < min) {
+      if (val < min) {
               min = *fdata;
-	      newMinOrMax = true;
+	            newMinOrMax = true;
 	    }
-            if (val > max) {
+      if (val > max) {
 	      max = *fdata;
 	      newMinOrMax = true;
 	    }
-	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
+	    if ((newMinOrMax) && (_params->debug >= Params::DEBUG_VERBOSE)) { 
 	      printf("field index %zu, gate %d \t", ifield, igate);
 	      printf("new min, max of data %g, %g\t", min,  max);
 	      printf("missing value %g\t", missingVal);
@@ -1918,17 +1750,17 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     // the RHI window.  After this, opening and closing the window will be
     // left to the user.
 
-    if (!_rhiWindowDisplayed) {
-      _rhiWindow->show();
-      _rhiWindow->resize();
-      _rhiWindowDisplayed = true;
-    }
+    //if (!_rhiWindowDisplayed) {
+    //  _rhiWindow->show();
+      //_rhiWindow->resize();
+    //  _rhiWindowDisplayed = true;
+    //}
 
     // Add the beam to the display
 
-    _rhi->addBeam(ray, fieldData, nFields); // _fields);
-    _rhiWindow->setAzimuth(ray->getAzimuthDeg());
-    _rhiWindow->setElevation(ray->getElevationDeg());
+    //_rhi->addBeam(ray, fieldData, nFields); // _fields);
+    //_rhiWindow->setAzimuth(ray->getAzimuthDeg());
+    //_rhiWindow->setElevation(ray->getElevationDeg());
     
   } else {
 
@@ -1954,7 +1786,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     // Add the beam to the display
     
-    _ppi->addCullTrackBeam(ray, _startAz, _endAz, fieldData, nFields);
+    //_ppi->addCullTrackBeam(ray, _startAz, _endAz, fieldData, nFields);
     //    _ppi->addBeam(ray, _startAz, _endAz, fieldData, nFields);
 
   }
@@ -2034,7 +1866,7 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
 	            max = *fdata;
 	            newMinOrMax = true;
 	          }
-      	    if ((newMinOrMax) && (_params.debug >= Params::DEBUG_VERBOSE)) { 
+      	    if ((newMinOrMax) && (_params->debug >= Params::DEBUG_VERBOSE)) { 
       	      printf("field index %d, gate %d \t", (int) ifield, igate);
       	      printf("new min, max of data %g, %g\t", min,  max);
       	      printf("missing value %g\t", missingVal);
@@ -2067,7 +1899,7 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
 
     if (!_rhiWindowDisplayed) {
       _rhiWindow->show();
-      _rhiWindow->resize();
+      //_rhiWindow->resize();
       _rhiWindowDisplayed = true;
     }
 
@@ -2107,8 +1939,8 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
     // ray contains data for ALL fields; fieldData contains only data for the new beams
     // nFields = total number of fields (old + new)
     size_t nFields = _displayFieldController->getNFields();
-    _ppi->cleanBeams(nFields);
-    _ppi->updateBeamII(ray, _startAz, _endAz, fieldData, nFields, newFieldNames);
+    //_ppi->cleanBeams(nFields);
+    //_ppi->updateBeamII(ray, _startAz, _endAz, fieldData, nFields, newFieldNames);
 
   }
   LOG(DEBUG) << "exit";
@@ -2229,8 +2061,8 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
 
   // Determine the extent of this ray
 
-  if (_params.ppi_override_rendering_beam_width) {
-    double half_angle = _params.ppi_rendering_beam_width / 2.0;
+  if (_params->ppi_override_rendering_beam_width) {
+    double half_angle = _params->ppi_rendering_beam_width / 2.0;
     _startAz = az - half_angle - 0.1;
     _endAz = az + half_angle + 0.1;
   } else if (ray->getIsIndexed()) {
@@ -2419,7 +2251,7 @@ void PolarManager::_refresh()
 void PolarManager::_changeField(int fieldId, bool guiMode)
 
 {  
-  //  if (_params.debug) {
+  //  if (_params->debug) {
   //  cerr << "Changing to field id: " << fieldId << endl;
   //  _selectedField->print(cerr);
   //}
@@ -2489,7 +2321,7 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
   try {
     //  This should save/perpetuate the color map in the DisplayField object
     _displayFieldController->saveColorMap(fieldName, &newColorMap);
-    _updateFieldPanel(fieldName);
+    _displayFieldController->updateFieldPanel(fieldName);
     //size_t fieldId = _displayFieldController->getFieldIndex(fieldName);
     //vector<string> fieldNames;
     //fieldNames.push_back(fieldName);
@@ -2584,25 +2416,25 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
       azDeg += 360.0;
     }
   }
-  if (_params.debug) {
-    cerr << "    azDeg = " << azDeg << endl;
-  }
+
+    LOG(DEBUG) << "    azDeg = " << azDeg;
+  
   
   int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
-  if (_params.debug) {
-    cerr << "    rayIndex = " << rayIndex << endl;
-  }
+
+    LOG(DEBUG) << "    rayIndex = " << rayIndex;
+  
   
   const RadxRay *ray = _ppiRayLoc[rayIndex].ray;
   if (ray == NULL) {
     // no ray data yet
-    if (_params.debug) {
-      cerr << "    No ray data yet..." << endl;
-      cerr << "      active = " << _ppiRayLoc[rayIndex].active << endl;
+
+      LOG(DEBUG) << "    No ray data yet...";
+      LOG(DEBUG) << "      active = " << _ppiRayLoc[rayIndex].active;
       // cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
-      cerr << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex << endl;
-      cerr << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex << endl;
-    }
+      LOG(DEBUG) << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex;
+      LOG(DEBUG) << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex;
+    
     return;
   }
 
@@ -2618,7 +2450,7 @@ void PolarManager::_rhiLocationClicked(double xkm, double ykm,
   
 {
 
-  _locationClicked(xkm, ykm, _rhi->getRayLoc(), closestRay);
+//  _locationClicked(xkm, ykm, _rhi->getRayLoc(), closestRay);
 
 }
 
@@ -2630,9 +2462,9 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   
 {
 
-  if (_params.debug) {
-    cerr << "*** Entering PolarManager::_locationClicked()" << endl;
-  }
+
+    LOG(DEBUG) << "*** Entering PolarManager::_locationClicked()";
+  
   
   double range = sqrt(xkm * xkm + ykm * ykm);
   int gate = (int) 
@@ -2644,13 +2476,13 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     return;
   }
 
-  if (_params.debug) {
-    cerr << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm << endl;
-    cerr << "  range, gate: " << range << ", " << gate << endl;
-    cerr << "  az, el from ray: "
+  if (_params->debug) {
+    LOG(DEBUG) << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm;
+    LOG(DEBUG) << "  range, gate: " << range << ", " << gate;
+    LOG(DEBUG) << "  az, el from ray: "
          << ray->getAzimuthDeg() << ", "
-         << ray->getElevationDeg() << endl;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+         << ray->getElevationDeg();
+    if (_params->debug >= Params::DEBUG_VERBOSE) {
       ray->print(cerr);
     }
   }
@@ -2711,11 +2543,11 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     Radx::fl32 *data = (Radx::fl32 *) field->getData();
     double val = data[gate];
     const string fieldUnits = field->getUnits();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, selected name: "
+
+      LOG(DEBUG) << "Field name, selected name: "
 	   << fieldName << ", "
-	   << _selectedName << endl;
-    }
+	   << _selectedName;
+    
     if (fieldName == _selectedName) {
       char text[128];
       if (fabs(val) < 10000) {
@@ -2725,12 +2557,12 @@ void PolarManager::_locationClicked(double xkm, double ykm,
       }
       _valueLabel->setText(text);
     }
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, units, val: "
+
+      LOG(DEBUG) << "Field name, units, val: "
 	   << field->getName() << ", "
 	   << field->getUnits() << ", "
-	   << val << endl;
-    }
+	   << val;
+    
     //for (size_t ii = 0; ii < _fields.size(); ii++) {
     //  if (_fields[ii]->getName() == fieldName) {
     //_fields[ii]->setSelectValue(val);
@@ -2962,7 +2794,7 @@ void PolarManager::_placeTimeControl()
 // print time slider actions for debugging
 
 void PolarManager::_timeSliderActionTriggered(int action) {
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
     switch (action) {
       case QAbstractSlider::SliderNoAction:
         cerr << "SliderNoAction action in _timeSliderActionTriggered" << endl;
@@ -3008,7 +2840,7 @@ void PolarManager::_timeSliderValueChanged(int value)
   // set selected time
   _selectedTime = pathTime;
   _setGuiFromSelectedTime();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider changed, value: " << value << endl;
   }
 }
@@ -3032,7 +2864,7 @@ void PolarManager::_timeSliderReleased()
     _archiveScanIndex = value;
     _setArchiveRetrievalPending();
   }
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider released, value: " << value << endl;
   }
 }
@@ -3040,7 +2872,7 @@ void PolarManager::_timeSliderReleased()
 void PolarManager::_timeSliderPressed() 
 {
   int value = _timeSlider->value();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider released, value: " << value << endl;
   }
 }
@@ -3068,30 +2900,44 @@ void PolarManager::_openFile()
 
   QString filename =  QFileDialog::getOpenFileName(
           this,
-          "Open Document",
+          "Open Data File",
           inputPath, finalPattern);  //QDir::currentPath(),
   //"All files (*.*)");
  
 //------ begin 1/4/2020
+  if (filename.isNull() || filename.isEmpty()) {
+    return;
+  }
 
   vector<string> fileList;
   fileList.push_back(filename.toStdString());
 
+  setArchiveFileList(fileList, false);
+
+  QMessageBox::information(this, "Status", "retrieving field names ...");
   // choose which fields to import
   userSelectFieldsForReading(fileList[0]);   
 
+  QByteArray qb = filename.toUtf8();
+  const char *name = qb.constData();
 
-    QByteArray qb = filename.toUtf8();
-    const char *name = qb.constData();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "selected file path : " << name << endl;
-    }
+    LOG(DEBUG) << "selected file path : " << name;
+  
+}
 
+void PolarManager::_readDataFile(vector<string> *selectedFields) {
+
+  LOG(DEBUG) << "enter";
+  if (selectedFields->size() <= 0) {
+    QMessageBox::information(this, "Status", "No fields selected for import."); 
+  } else {
+    QMessageBox::information(this, "Status", "reading data ...");
+
+    _updateDisplayFields(selectedFields);
+  //_setupDisplayFields(allFieldNames);
+    _displayFieldController->setSelectedField(selectedFields->at(0));
     // trying this ... to get the data from the file selected
     _setArchiveRetrievalPending();
-    vector<string> list;
-    list.push_back(name);
-    setArchiveFileList(list, false);
 
     try {
       _getArchiveData();
@@ -3101,7 +2947,7 @@ void PolarManager::_openFile()
       return;
     }
   
-
+/*
   // now update the time controller window
   QDateTime now = QDateTime::currentDateTime();  
   //QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
@@ -3113,7 +2959,7 @@ void PolarManager::_openFile()
   _archiveEndTime = _guiEndTime;
   QFileInfo fileInfo(filename);
   string absolutePath = fileInfo.absolutePath().toStdString();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
     cerr << "changing to path " << absolutePath << endl;
   }
 //  loadArchiveFileList(dir.absolutePath());
@@ -3132,7 +2978,7 @@ void PolarManager::_openFile()
   //  cerr << "  pathList is empty" << endl;
   //  cerr << "  " << timeList.getErrStr() << endl;
   //} else {
-  //  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  //  if (_params->debug >= Params::DEBUG_VERBOSE) {
   //    cerr << "pathList is NOT empty" << endl;
   //    for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
   //     cerr << *i << endl;
@@ -3148,7 +2994,7 @@ void PolarManager::_openFile()
     RadxTime firstTime;
     RadxTime lastTime;
     timeList.getFirstAndLastTime(firstTime, lastTime);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params->debug >= Params::DEBUG_VERBOSE) {
       cerr << "first time " << firstTime << endl;
       cerr << "last time " << lastTime << endl;
     }
@@ -3163,7 +3009,9 @@ void PolarManager::_openFile()
 
       // _changeField(0, false);
       //_reconcileDisplayFields();
-
+*/
+    LOG(DEBUG) << "exit";
+  }
 }
 /*
 void PolarManager::_reconcileDisplayFields() {
@@ -3177,6 +3025,7 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
 
 // TODO:
 //  delete availableFields;
+  LOG(DEBUG) << "enter";
 
   if (selectedFields->size() > 0) {
     QStringList qselectedFields;
@@ -3187,12 +3036,13 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
     }
     // give the selected fields to the volume read ...
     //_setupDisplayFields(selectedFields);
-    _volumeDataChanged(qselectedFields);
+    _readDataFile(selectedFields);
     
   }  
   // close the modal dialog box for field selection
   closeFieldListDialog(true);
   //fieldListDialog->close();
+  LOG(DEBUG) << "exit";
 }
 
 void PolarManager::closeFieldListDialog(bool clicked) {
@@ -3227,9 +3077,9 @@ void PolarManager::_saveFile()
   {
     QByteArray qb = filename.toUtf8();
     const char *name = qb.constData();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+
       LOG(DEBUG) << "selected file path : " << name;
-    }
+
 
     // TODO: hold it! the save message should
     // go to the Model (Data) level because
@@ -3382,9 +3232,9 @@ void PolarManager::_goBack1()
     _archiveScanIndex -= 1;
     _setArchiveRetrievalPending();
   } else {
-    if (_params.debug) {
-      cerr << "At start of data, cannot go back" << endl;
-    }
+
+      LOG(DEBUG) << "At start of data, cannot go back";
+    
   }
   _timeSlider->setSliderPosition(_archiveScanIndex);
 }
@@ -3409,9 +3259,9 @@ void PolarManager::_goFwd1()
     _archiveScanIndex += 1;
     _setArchiveRetrievalPending();
   } else {
-    if (_params.debug) {
-      cerr << "At end of data, cannot go forward" << endl;
-    }
+
+      LOG(DEBUG) << "At end of data, cannot go forward";
+    
   }
   _timeSlider->setSliderPosition(_archiveScanIndex);
 }
@@ -3446,9 +3296,9 @@ void PolarManager::_clear()
   if (_ppi) {
     _ppi->clear();
   }
-  if (_rhi) {
-    _rhi->clear();
-  }
+  //if (_rhi) {
+  //  _rhi->clear();
+  //}
 }
 
 /////////////////////////////////////
@@ -3462,46 +3312,12 @@ void PolarManager::_setArchiveMode(bool state)
   if (_ppi) {
     _ppi->setArchiveMode(state);
   }
-  if (_rhi) {
-    _rhi->setArchiveMode(state);
-  }
+
 }
 
 ////////////////////////////////////////////////////////
 // set modes for retrieving the data
 
-void PolarManager::_setRealtime(bool enabled)
-{
-  if (enabled) {
-    if (_archiveMode) {
-      _setArchiveMode(false);
-      _activateRealtimeRendering();
-    }
-  } else {
-    if (!_archiveMode) {
-      _setArchiveMode(true);
-      _activateArchiveRendering();
-      loadArchiveFileList();
-    }
-  }
-}
-
-
-/////////////////////////////////////
-// activate realtime rendering
-
-void PolarManager::_activateRealtimeRendering()
-{
-  _nGates = 1000;
-  _maxRangeKm = _params.max_range_km;
-  _clear();
-  if (_ppi) {
-    _ppi->activateRealtimeRendering();
-  }
-  if (_rhi) {
-    _rhi->activateRealtimeRendering();
-  }
-}
 
 /////////////////////////////////////
 // activate archive rendering
@@ -3509,60 +3325,15 @@ void PolarManager::_activateRealtimeRendering()
 void PolarManager::_activateArchiveRendering()
 {
   _clear();
-  if (_ppi) {
+  //_displayFieldController->renderFields();
+  //if (_ppi) {
     //_fieldRendererController->performRendering(0);
-    _ppi->activateArchiveRendering();
-  }
-  if (_rhi) {
-    _rhi->activateArchiveRendering();
+  //  _ppi->activateArchiveRendering();
+  //}
+  //if (_rhi) {
+  //  _rhi->activateArchiveRendering();
     //_fieldRendererController->performRendering(0); // activateArchiveRendering();
-  }
-}
-
-/////////////////////////////////////////////////////
-// creating image files in realtime mode
-
-void PolarManager::_createRealtimeImageFiles()
-{
-
-  int interval = _params.images_schedule_interval_secs;
-  int delay = _params.images_schedule_delay_secs;
-  time_t latestRayTime = _readerRayTime.utime();
-  
-  // initialize the schedule if required
-
-  if (_imagesScheduledTime.utime() == 0) {
-    if (latestRayTime == 0) {
-      // no data yet
-      return;
-    }
-    time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-    _imagesScheduledTime.set(nextUtime + delay);
-    if (_params.debug) {
-      cerr << "Next scheduled time for images: " 
-           << _imagesScheduledTime.asString() << endl;
-    }
-  }
-  
-  if (_readerRayTime > _imagesScheduledTime) {
-
-    // create images
-
-    _archiveEndTime = _imagesScheduledTime - delay;
-    _archiveStartTime = _archiveEndTime - _imagesScanIntervalSecs;
-    _createImageFilesAllSweeps();
-
-    // set next scheduled time
-    
-    time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-    _imagesScheduledTime.set(nextUtime + delay);
-    if (_params.debug) {
-      cerr << "Next scheduled time for images: "
-           << _imagesScheduledTime.asString() << endl;
-    }
-
-  }
-
+  //}
 }
 
 /////////////////////////////////////////////////////
@@ -3571,7 +3342,7 @@ void PolarManager::_createRealtimeImageFiles()
 void PolarManager::_createArchiveImageFiles()
 {
   
-  if (_params.images_creation_mode ==
+  if (_params->images_creation_mode ==
       Params::CREATE_IMAGES_THEN_EXIT) {
     
     if (_archiveFileList.size() > 0) {
@@ -3595,12 +3366,12 @@ void PolarManager::_createArchiveImageFiles()
       
     }
     
-  } else if (_params.images_creation_mode ==
+  } else if (_params->images_creation_mode ==
              Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
     
     for (RadxTime stime = _imagesArchiveStartTime;
          stime <= _imagesArchiveEndTime;
-         stime += _params.images_schedule_interval_secs) {
+         stime += _params->images_schedule_interval_secs) {
       
       _archiveStartTime = stime;
       _archiveEndTime = _archiveStartTime + _imagesScanIntervalSecs;
@@ -3609,7 +3380,7 @@ void PolarManager::_createArchiveImageFiles()
       
     } // stime
     
-  } // if (_params.images_creation_mode ...
+  } // if (_params->images_creation_mode ...
 
 }
 
@@ -3618,11 +3389,11 @@ void PolarManager::_createArchiveImageFiles()
 
 void PolarManager::_createImageFilesAllSweeps()
 {
-  
-  if (_params.images_set_sweep_index_list) {
+  /*
+  if (_params->images_set_sweep_index_list) {
     
-    for (int ii = 0; ii < _params.images_sweep_index_list_n; ii++) {
-      int index = _params._images_sweep_index_list[ii];
+    for (int ii = 0; ii < _params->images_sweep_index_list_n; ii++) {
+      int index = _params->_images_sweep_index_list[ii];
       if (index >= 0 && index < (int) _vol.getNSweeps()) {
         _sweepManager.setFileIndex(index);
         _createImageFiles();
@@ -3637,7 +3408,7 @@ void PolarManager::_createImageFilesAllSweeps()
     }
     
   }
-
+*/
 }
 
 /////////////////////////////////////////////////////
@@ -3646,9 +3417,9 @@ void PolarManager::_createImageFilesAllSweeps()
 void PolarManager::_createImageFiles()
 {
 
-  if (_params.debug) {
-    cerr << "PolarManager::_createImageFiles()" << endl;
-  }
+
+    LOG(DEBUG) << "PolarManager::_createImageFiles()";
+  /*
 
   PMU_auto_register("createImageFiles");
 
@@ -3682,9 +3453,9 @@ void PolarManager::_createImageFiles()
     
     // create plot
     
-    if (_params.debug) {
-      cerr << "Creating image for field: " << getSelectedFieldLabel() << endl;
-    }
+
+      LOG(DEBUG) << "Creating image for field: " << getSelectedFieldLabel();
+    
     
     // save image for plot
     
@@ -3696,14 +3467,15 @@ void PolarManager::_createImageFiles()
 
   _changeField(fieldNum, false);
 
-  if (_params.debug) {
-    cerr << "Done creating image files" << endl;
-  }
+
+    LOG(DEBUG) << "Done creating image files";
+*/  
 
 }
 
 string PolarManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
 {
+  /*
 	  // set times from plots
 	  if (_rhiMode) {
 	    _plotStartTime = _rhi->getPlotStartTime();
@@ -3715,9 +3487,9 @@ string PolarManager::_getOutputPath(bool interactive, string &outputDir, string 
 
 	  // compute output dir
 
-	  outputDir = _params.images_output_dir;
+	  outputDir = _params->images_output_dir;
 	  char dayStr[1024];
-	  if (_params.images_write_to_day_dir) {
+	  if (_params->images_write_to_day_dir) {
 	    sprintf(dayStr, "%.4d%.2d%.2d",
 	            _plotStartTime.getYear(),
 	            _plotStartTime.getMonth(),
@@ -3744,23 +3516,23 @@ string PolarManager::_getOutputPath(bool interactive, string &outputDir, string 
 
 	  // category
 
-	  if (strlen(_params.images_file_name_category) > 0) {
-	    fileName += _params.images_file_name_category;
+	  if (strlen(_params->images_file_name_category) > 0) {
+	    fileName += _params->images_file_name_category;
 	  }
 
 	  // platform
 
-	  if (strlen(_params.images_file_name_platform) > 0) {
-	    fileName += _params.images_file_name_delimiter;
-	    fileName += _params.images_file_name_platform;
+	  if (strlen(_params->images_file_name_platform) > 0) {
+	    fileName += _params->images_file_name_delimiter;
+	    fileName += _params->images_file_name_platform;
 	  }
 
 	  // time
 
-	  if (_params.images_include_time_part_in_file_name) {
-	    fileName += _params.images_file_name_delimiter;
+	  if (_params->images_include_time_part_in_file_name) {
+	    fileName += _params->images_file_name_delimiter;
 	    char timeStr[1024];
-	    if (_params.images_include_seconds_in_time_part) {
+	    if (_params->images_include_seconds_in_time_part) {
 	      sprintf(timeStr, "%.4d%.2d%.2d%.2d%.2d%.2d",
 	              _plotStartTime.getYear(),
 	              _plotStartTime.getMonth(),
@@ -3781,8 +3553,8 @@ string PolarManager::_getOutputPath(bool interactive, string &outputDir, string 
 
 	  // field label
 
-	  if (_params.images_include_field_label_in_file_name) {
-	    fileName += _params.images_file_name_delimiter;
+	  if (_params->images_include_field_label_in_file_name) {
+	    fileName += _params->images_file_name_delimiter;
 	    fileName += getSelectedFieldLabel();
 	  }
 
@@ -3798,6 +3570,8 @@ string PolarManager::_getOutputPath(bool interactive, string &outputDir, string 
 	  outputPath += fileName;
 
 	  return(outputPath);
+    */
+  return "not implemented";
 }
 
 /////////////////////////////////////////////////////
@@ -3807,6 +3581,7 @@ string PolarManager::_getOutputPath(bool interactive, string &outputDir, string 
 
 void PolarManager::_saveImageToFile(bool interactive)
 {
+  /*
 	  // create image
   QPixmap pixmap;
   if (_rhiMode)
@@ -3816,7 +3591,7 @@ void PolarManager::_saveImageToFile(bool interactive)
   QImage image = pixmap.toImage();
 
   string outputDir;
-  string outputPath = _getOutputPath(interactive, outputDir, _params.images_file_name_extension);
+  string outputPath = _getOutputPath(interactive, outputDir, _params->images_file_name_extension);
 
   // write the file
   if (!image.save(outputPath.c_str())) {
@@ -3834,26 +3609,26 @@ void PolarManager::_saveImageToFile(bool interactive)
       QMessageBox::information(this, "Image Saved", infoMsg.c_str());
   }
 
-  if (_params.debug) {
-    cerr << "==>> saved image to file: " << outputPath << endl;
-  }
+
+    LOG(DEBUG) << "==>> saved image to file: " << outputPath;
+  
 
   // write latest data info
 
-  if (_params.images_write_latest_data_info) {
+  if (_params->images_write_latest_data_info) {
     
-    DsLdataInfo ldataInfo(_params.images_output_dir);
+    DsLdataInfo ldataInfo(_params->images_output_dir);
     
     string relPath;
-    RadxPath::stripDir(_params.images_output_dir, outputPath, relPath);
+    RadxPath::stripDir(_params->images_output_dir, outputPath, relPath);
     
-    if(_params.debug) {
+    if(_params->debug) {
       ldataInfo.setDebug();
     }
     ldataInfo.setLatestTime(_plotStartTime.utime());
     ldataInfo.setWriter("HawkEye");
-    ldataInfo.setDataFileExt(_params.images_file_name_extension);
-    ldataInfo.setDataType(_params.images_file_name_extension);
+    ldataInfo.setDataFileExt(_params->images_file_name_extension);
+    ldataInfo.setDataType(_params->images_file_name_extension);
     ldataInfo.setRelDataPath(relPath);
     
     if(ldataInfo.write(_plotStartTime.utime())) {
@@ -3862,8 +3637,8 @@ void PolarManager::_saveImageToFile(bool interactive)
       return;
     }
     
-  } // if (_params.images_write_latest_data_info)
-
+  } // if (_params->images_write_latest_data_info)
+*/
 }
 
 
@@ -4024,4 +3799,1520 @@ void PolarManager::_showBoundaryEditor()
     }
   }
 }
+
+// from DisplayManager ...
+
+//////////////////////////////////////////////
+// create the status panel
+
+void PolarManager::_createStatusPanel()
+{
+ 
+  Qt::Alignment alignLeft(Qt::AlignLeft);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignTop(Qt::AlignTop);
+
+  // status panel - rows of label value pairs
+  
+  _statusPanel = new QGroupBox(_main);
+  _statusLayout = new QGridLayout(_statusPanel);
+  _statusLayout->setVerticalSpacing(5);
+
+  int row = 0;
+  
+  ParamFile *_params = ParamFile::Instance();
+  // fonts
+  
+  QLabel dummy;
+  QFont font = dummy.font();
+  QFont font2 = dummy.font();
+  QFont font6 = dummy.font();
+  int fsize = _params->label_font_size;
+  int fsize2 = _params->label_font_size + 2;
+  int fsize6 = _params->label_font_size + 6;
+  font.setPixelSize(fsize);
+  font2.setPixelSize(fsize2);
+  font6.setPixelSize(fsize6);
+
+  // radar and site name
+  
+  _radarName = new QLabel(_statusPanel);
+  string rname(_params->radar_name);
+  if (_params->display_site_name) {
+    rname += ":";
+    rname += _params->site_name;
+  }
+  _radarName->setText(rname.c_str());
+  _radarName->setFont(font6);
+  _statusLayout->addWidget(_radarName, row, 0, 1, 4, alignCenter);
+  row++;
+
+  // date and time
+
+  _dateVal = new QLabel("9999/99/99", _statusPanel);
+  _dateVal->setFont(font2);
+  _statusLayout->addWidget(_dateVal, row, 0, 1, 2, alignCenter);
+  row++;
+
+  _timeVal = new QLabel("99:99:99.999", _statusPanel);
+  _timeVal->setFont(font2);
+  _statusLayout->addWidget(_timeVal, row, 0, 1, 2, alignCenter);
+  row++;
+
+
+  // other labels.  Note that we set the minimum size of the column
+  // containing the right hand labels in timerEvent() to prevent the
+  // wiggling we were seeing in certain circumstances.  For this to work,
+  // the default values for these fields must represent the maximum digits
+  // posible for each field.
+
+  _elevVal = _createStatusVal("Elev", "-99.99", row++, fsize2);
+  _azVal = _createStatusVal("Az", "-999.99", row++, fsize2);
+
+  if (_params->show_status_in_gui.fixed_angle) {
+    _fixedAngVal = _createStatusVal("Fixed ang", "-99.99", row++, fsize2);
+  } else {
+    _fixedAngVal = NULL;
+  }
+  
+  if (_params->show_status_in_gui.volume_number) {
+    _volNumVal = _createStatusVal("Volume", "0", row++, fsize);
+  } else {
+    _volNumVal = NULL;
+  }
+  
+  if (_params->show_status_in_gui.sweep_number) {
+    _sweepNumVal = _createStatusVal("Sweep", "0", row++, fsize);
+  } else {
+    _sweepNumVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.n_samples) {
+    _nSamplesVal = _createStatusVal("N samp", "0", row++, fsize);
+  } else {
+    _nSamplesVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.n_gates) {
+    _nGatesVal = _createStatusVal("N gates", "0", row++, fsize);
+  } else {
+    _nGatesVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.gate_length) {
+    _gateSpacingVal = _createStatusVal("Gate len", "0", row++, fsize);
+  } else {
+    _gateSpacingVal = NULL;
+  }
+  
+  if (_params->show_status_in_gui.pulse_width) {
+    _pulseWidthVal = _createStatusVal("Pulse width", "-9999", row++, fsize);
+  } else {
+    _pulseWidthVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.prf_mode) {
+    _prfModeVal = _createStatusVal("PRF mode", "Fixed", row++, fsize);
+  } else {
+    _prfModeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.prf) {
+    _prfVal = _createStatusVal("PRF", "-9999", row++, fsize);
+  } else {
+    _prfVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.nyquist) {
+    _nyquistVal = _createStatusVal("Nyquist", "-9999", row++, fsize);
+  } else {
+    _nyquistVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.max_range) {
+    _maxRangeVal = _createStatusVal("Max range", "-9999", row++, fsize);
+  } else {
+    _maxRangeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.unambiguous_range) {
+    _unambigRangeVal = _createStatusVal("U-A range", "-9999", row++, fsize);
+  } else {
+    _unambigRangeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.measured_power_h) {
+    _powerHVal = _createStatusVal("Power H", "-9999", row++, fsize);
+  } else {
+    _powerHVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.measured_power_v) {
+    _powerVVal = _createStatusVal("Power V", "-9999", row++, fsize);
+  } else {
+    _powerVVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.scan_name) {
+    _scanNameVal = _createStatusVal("Scan name", "unknown", row++, fsize);
+  } else {
+    _scanNameVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.scan_mode) {
+    _sweepModeVal = _createStatusVal("Scan mode", "SUR", row++, fsize);
+  } else {
+    _sweepModeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.polarization_mode) {
+    _polModeVal = _createStatusVal("Pol mode", "Single", row++, fsize);
+  } else {
+    _polModeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.latitude) {
+    _latVal = _createStatusVal("Lat", "-99.999", row++, fsize);
+  } else {
+    _latVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.longitude) {
+    _lonVal = _createStatusVal("Lon", "-999.999", row++, fsize);
+  } else {
+    _lonVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.altitude) {
+    if (_altitudeInFeet) {
+      _altVal = _createStatusVal("Alt(kft)", "-999.999",
+                                 row++, fsize, &_altLabel);
+    } else {
+      _altVal = _createStatusVal("Alt(km)", "-999.999",
+                                 row++, fsize, &_altLabel);
+    }
+  } else {
+    _altVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.altitude_rate) {
+    if (_altitudeInFeet) {
+      _altRateVal = _createStatusVal("AltRate(ft/s)", "-999.999",
+                                     row++, fsize, &_altRateLabel);
+    } else {
+      _altRateVal = _createStatusVal("AltRate(m/s)", "-999.999",
+                                     row++, fsize, &_altRateLabel);
+    }
+  } else {
+    _altRateVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.speed) {
+    _speedVal = _createStatusVal("Speed(m/s)", "-999.99", row++, fsize);
+  } else {
+    _speedVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.heading) {
+    _headingVal = _createStatusVal("Heading(deg)", "-999.99", row++, fsize);
+  } else {
+    _headingVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.track) {
+    _trackVal = _createStatusVal("Track(deg)", "-999.99", row++, fsize);
+  } else {
+    _trackVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.sun_elevation) {
+    _sunElVal = _createStatusVal("Sun el (deg)", "-999.999", row++, fsize);
+  } else {
+    _sunElVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.sun_azimuth) {
+    _sunAzVal = _createStatusVal("Sun az (deg)", "-999.999", row++, fsize);
+  } else {
+    _sunAzVal = NULL;
+  }
+
+  QLabel *spacerRow = new QLabel("", _statusPanel);
+  _statusLayout->addWidget(spacerRow, row, 0);
+  _statusLayout->setRowStretch(row, 1);
+  row++;
+
+}
+
+/* moved to DisplayFieldView
+//////////////////////////////////////////////
+// create the field panel
+
+void PolarManager::_createFieldPanel()
+{
+  
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  
+  int fsize = _params->label_font_size;
+  int fsize2 = _params->label_font_size + 2;
+  int fsize4 = _params->label_font_size + 4;
+  int fsize6 = _params->label_font_size + 6;
+
+  _fieldPanel = new QGroupBox(_main);
+  _fieldGroup = new QButtonGroup;
+  _fieldsLayout = new QGridLayout(_fieldPanel);
+  _fieldsLayout->setVerticalSpacing(5);
+
+  int row = 0;
+  int nCols = 3;
+  if (_haveFilteredFields) {
+    nCols = 4;
+  }
+
+  _displayFieldController->setSelectedField(0);
+  _selectedField = _displayFieldController->getSelectedField(); //_fields[0];
+  _selectedLabel = _selectedField->getLabel(); //_fields[0]->getLabel();
+  _selectedName = _selectedField->getName(); // _fields[0]->getName();
+  //  _selectedField = _fields[0];
+  //_selectedLabel = _fields[0]->getLabel();
+  //_selectedName = _fields[0]->getName();
+  _selectedLabelWidget = new QLabel(_selectedLabel.c_str(), _fieldPanel);
+  QFont font6 = _selectedLabelWidget->font();
+  font6.setPixelSize(fsize6);
+  _selectedLabelWidget->setFont(font6);
+  _fieldsLayout->addWidget(_selectedLabelWidget, row, 0, 1, nCols, alignCenter);
+
+  row++;
+
+
+  QFont font4 = _selectedLabelWidget->font();
+  font4.setPixelSize(fsize4);
+  QFont font2 = _selectedLabelWidget->font();
+  font2.setPixelSize(fsize2);
+  QFont font = _selectedLabelWidget->font();
+  font.setPixelSize(fsize);
+  
+
+  QLabel dummy;
+  QFont font = dummy.font();
+  QFont font2 = dummy.font();
+  QFont font4 = dummy.font();
+
+  _valueLabel = new QLabel("", _fieldPanel);
+  _valueLabel->setFont(font);
+  _fieldsLayout->addWidget(_valueLabel, row, 0, 1, nCols, alignCenter);
+  row++;
+
+  QLabel *fieldHeader = new QLabel("FIELD LIST", _fieldPanel);
+  fieldHeader->setFont(font);
+  _fieldsLayout->addWidget(fieldHeader, row, 0, 1, nCols, alignCenter);
+  row++;
+
+  QLabel *nameHeader = new QLabel("Name", _fieldPanel);
+  nameHeader->setFont(font);
+  _fieldsLayout->addWidget(nameHeader, row, 0, alignCenter);
+  QLabel *keyHeader = new QLabel("HotKey", _fieldPanel);
+  keyHeader->setFont(font);
+  _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
+  if (_haveFilteredFields) {
+    QLabel *rawHeader = new QLabel("Raw", _fieldPanel);
+    rawHeader->setFont(font);
+    _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
+    QLabel *filtHeader = new QLabel("Filt", _fieldPanel);
+    filtHeader->setFont(font);
+    _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
+  }
+  row++;
+  _rowOffset = row;
+
+  // add fields, one row at a time
+  // a row can have 1 or 2 buttons, depending on whether the
+  // filtered field is present
+  size_t nFields = _displayFieldController->getNFields();
+  for (size_t ifield = 0; ifield < nFields; ifield++) {
+
+    // get raw field - always present
+    
+    const DisplayField *rawField = _displayFieldController->getField(ifield); // _fields[ifield];
+    int buttonRow = rawField->getButtonRow();
+    
+    // get filt field - may not be present
+    const DisplayField *filtField = _displayFieldController->getFiltered(ifield, buttonRow);
+
+    QLabel *label = new QLabel(_fieldPanel);
+    label->setFont(font);
+    label->setText(rawField->getLabel().c_str());
+    QLabel *key = new QLabel(_fieldPanel);
+    key->setFont(font);
+    if (rawField->getShortcut().size() > 0) {
+      char text[4];
+      text[0] = rawField->getShortcut()[0];
+      text[1] = '\0';
+      key->setText(text);
+      char text2[128];
+      sprintf(text2, "Hit %s for %s, ALT-%s for filtered",
+        text, rawField->getName().c_str(), text);
+      label->setToolTip(text2);
+      key->setToolTip(text2);
+    }
+
+    QRadioButton *rawButton = new QRadioButton(_fieldPanel);
+    rawButton->setToolTip(rawField->getName().c_str());
+    if (ifield == 0) {
+      rawButton->click();
+    }
+    _fieldsLayout->addWidget(label, row, 0, alignCenter);
+    _fieldsLayout->addWidget(key, row, 1, alignCenter);
+    _fieldsLayout->addWidget(rawButton, row, 2, alignCenter);
+    _fieldGroup->addButton(rawButton, ifield);
+    // connect slot for field change
+    connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+
+    _fieldButtons.push_back(rawButton);
+    if (filtField != NULL) {
+      QRadioButton *filtButton = new QRadioButton(_fieldPanel);
+      filtButton->setToolTip(filtField->getName().c_str());
+      _fieldsLayout->addWidget(filtButton, row, 3, alignCenter);
+      _fieldGroup->addButton(filtButton, ifield + 1);
+      _fieldButtons.push_back(filtButton);
+      // connect slot for field change
+      connect(filtButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+    }
+
+    _displayFieldController->setVisible(ifield);
+
+    if (filtField != NULL) {
+      ifield++;
+    }
+    _fieldsLayout->setRowStretch(row, 1);
+
+    row++;
+  }
+
+  //QLabel *spacerRow = new QLabel("", _fieldPanel);
+  //_fieldsLayout->addWidget(spacerRow, row, 0);
+  //_fieldsLayout->setRowStretch(row, 1);
+  //row++;
+
+  // HERE <<=== 
+  //  _lastButtonRowFixed = row; // Q: is this just the size of _fieldButtons?
+  // connect slot for field change
+  
+  //connect(_fieldGroup, SIGNAL(buttonClicked(int)),
+  //        this, SLOT(_changeField(int)));
+
+}
+
+//////////////////////////////////////////////
+// update the field panel
+
+void PolarManager::_updateFieldPanel(string newFieldName)
+{
+  LOG(DEBUG) << "enter";
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  
+  int fsize = _params->label_font_size;
+  int fsize2 = _params->label_font_size + 2;
+  int fsize4 = _params->label_font_size + 4;
+  int fsize6 = _params->label_font_size + 6;
+
+  int row; //  = _rowOffset;
+  int nCols = 3;
+  if (_haveFilteredFields) {
+    nCols = 4;
+  }
+  //QFont font = _selectedLabelWidget->font();
+  QLabel dummy;
+  QFont font = dummy.font();
+  font.setPixelSize(fsize);
+
+
+
+  // a row can have 1 or 2 buttons, depending on whether the
+  // filtered field is present
+
+  size_t nFields = _displayFieldController->getNFields(); // 0 - based index
+  size_t ifield = _displayFieldController->getFieldIndex(newFieldName);
+  //if (ifield < lastButtonRowFixed - 1) {
+    // field already in panel
+  //  return;
+  //}
+
+    // get raw field - always present
+    
+  DisplayField *rawField = _displayFieldController->getField(ifield); //_fields[ifield];
+  if (rawField->isHidden()) {
+    int lastButtonRowFixed = _fieldButtons.size(); // 1 - based index
+
+    row = lastButtonRowFixed + _rowOffset;
+    rawField->setButtonRow(row);
+    
+    // get filt field - may not be present
+    const DisplayField *filtField = _displayFieldController->getFiltered(ifield, -1);
+
+//----
+//    _spolDivColorMapLabel = new ClickableLabel();
+//ColorMapTemplates.cc:    // connect(cmapLabel, &ClickableLabel::clicked, this, &ParameterColorDialog::pickColorPalette);
+//ColorMapTemplates.cc:    connect(_defaultColorMapLabel,   &ClickableLabel::clicked, this, &ColorMapTemplates::defaultClicked);
+
+//---
+
+    //QLabel *label = new QLabel(_fieldPanel);
+    ClickableLabel *label = new ClickableLabel(_fieldPanel);
+    connect(label, SIGNAL(ClickableLabel::clicked), this, SLOT(contextMenuParameterColors));
+    label->setFont(font);
+    label->setText(rawField->getLabel().c_str());
+    QLabel *key = new QLabel(_fieldPanel);
+    key->setFont(font);
+    if (rawField->getShortcut().size() > 0) {
+      char text[4];
+      text[0] = rawField->getShortcut()[0];
+      text[1] = '\0';
+      key->setText(text);
+      char text2[128];
+      sprintf(text2, "Hit %s for %s, ALT-%s for filtered",
+        text, rawField->getName().c_str(), text);
+      label->setToolTip(text2);
+      key->setToolTip(text2);
+    }
+
+    QRadioButton *rawButton = new QRadioButton(_fieldPanel);
+    rawButton->setToolTip(rawField->getName().c_str());
+    //if (ifield == 0) {
+      rawButton->click();
+    //}
+    //row = buttonRow + 4;
+    _fieldsLayout->addWidget(label, row, 0, alignCenter);
+    _fieldsLayout->addWidget(key, row, 1, alignCenter);
+    _fieldsLayout->addWidget(rawButton, row, 2, alignCenter);
+    _fieldGroup->addButton(rawButton, ifield);
+    // connect slot for field change
+    connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+
+    _fieldButtons.push_back(rawButton);
+    if (filtField != NULL) {
+      QRadioButton *filtButton = new QRadioButton(_fieldPanel);
+      filtButton->setToolTip(filtField->getName().c_str());
+      _fieldsLayout->addWidget(filtButton, row, 3, alignCenter);
+      _fieldGroup->addButton(filtButton, ifield + 1);
+      _fieldButtons.push_back(filtButton);
+      // connect slot for field change
+      connect(filtButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+    }
+
+    //if (filtField != NULL) {
+    //  ifield++;
+    //}
+
+    //QLabel *spacerRow = new QLabel("", _fieldPanel);
+    //_fieldsLayout->addWidget(spacerRow, row, 0);
+    _fieldsLayout->setRowStretch(row, 1);
+    
+    rawField->setStateVisible();
+    _displayFieldController->setSelectedField(ifield);
+
+  }
+
+  // connect slot for field change
+  
+  //connect(_fieldGroup, SIGNAL(buttonClicked(int)),
+  //        this, SLOT(_changeField(int)));
+  LOG(DEBUG) << "exit";
+}
+*/
+void PolarManager::contextMenuParameterColors()
+{
+  
+  LOG(DEBUG) << "enter";
+
+  //DisplayField selectedField;                                                                             
+
+  // const DisplayField &field = _manager.getSelectedField();
+  // const ColorMap &colorMapForSelectedField = field.getColorMap();
+  ParameterColorView *parameterColorView = new ParameterColorView(this);
+  // vector<DisplayField *> displayFields = displayFieldController->getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
+  DisplayField *selectedField = _displayFieldController->getSelectedField();
+  string emphasis_color = "white";
+  string annotation_color = "white";
+
+  DisplayFieldModel *displayFieldModel = _displayFieldController->getModel();
+
+  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+                                                                         
+  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
+      this, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
+
+  fieldColorController->startUp(); 
+ 
+  LOG(DEBUG) << "exit ";
+  
+}
+
+
+void PolarManager::_changeFieldVariable(bool value) {
+
+  LOG(DEBUG) << " field variable changed ";
+
+  if (value) {
+    for (size_t i = 0; i < _fieldButtons.size(); i++) {
+      if (_fieldButtons.at(i)->isChecked()) {
+        LOG(DEBUG) << "_fieldButton " << i
+        << "out of " << _fieldButtons.size() 
+        << " is checked";
+        QString fieldNameQ = _fieldButtons.at(i)->text();
+        LOG(DEBUG) << "fieldname is " << fieldNameQ.toStdString();
+        _changeField(i, true);
+      }
+    }
+  }
+
+}
+
+/*
+void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
+
+  LOG(DEBUG) << "enter"; 
+  
+  // connect the new color map with the field
+  // find the fieldName in the list of FieldDisplays
+  // This should save/perpetuate the color map in the DisplayField object
+  _displayFieldController->saveColorMap(fieldName, &newColorMap);
+  size_t fieldIndex = _displayFieldController->getFieldIndex(fieldName);
+  _changeField(fieldIndex, true); 
+*/
+  /*
+  bool found = false;
+  vector<DisplayField *>::iterator it;
+  int fieldId = 0;
+
+  it = _fields.begin(); 
+  while ( it != _fields.end() && !found ) {
+    DisplayField *field = *it;
+   
+    string name = field->getName();
+    if (name.compare(fieldName) == 0) {
+      found = true;
+      field->replaceColorMap(newColorMap);
+    }
+    fieldId++;
+    it++;
+  }
+  if (!found) {
+    LOG(ERROR) << fieldName;
+    LOG(ERROR) << "ERROR - field not found; no color map change";
+    // TODO: present error message box 
+  } else {
+    // look up the fieldId from the fieldName
+    // change the field variable
+    _changeField(fieldId, true); 
+  }
+  */
+/*
+  LOG(DEBUG) << "exit";
+}
+*/
+
+
+///////////////////////////////////////////////////////
+// create the click report dialog
+//
+// This shows the field values at the latest click point
+
+void PolarManager::_createClickReportDialog()
+{
+  
+  _clickReportDialog = new QDialog(this);
+  _clickReportDialog->setMinimumSize(100, 100);
+  _clickReportDialog->setWindowTitle("Field values");
+
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  
+  _clickReportDialogLayout = new QGridLayout(_clickReportDialog);
+  _clickReportDialogLayout->setVerticalSpacing(5);
+
+  int row = 0;
+  QLabel *mainHeader = new QLabel("CLICK POINT DATA", _clickReportDialog);
+  _clickReportDialogLayout->addWidget(mainHeader, row, 0, 1, 3, alignCenter);
+  row++;
+
+  // _clickReportDialogLayout->addWidget(left, row, 0, alignRight);
+
+  _dateClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
+                              "Date", "9999/99/99", row++);
+  _timeClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
+                              "Time", "99:99:99.999", row++);
+  _elevClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
+                              "Elevation", "-9999", row++);
+  _azClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
+                            "Azimuth", "-9999", row++);
+  _gateNumClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
+                                 "Gate num", "-9999", row++);
+  _rangeClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
+                               "Range", "-9999", row++);
+  _altitudeClicked = _addLabelRow(_clickReportDialog, _clickReportDialogLayout,
+                                  "Altitude", "-9999", row++);
+
+  QLabel *valHeader = new QLabel("FIELD VALUES", _clickReportDialog);
+  _clickReportDialogLayout->addWidget(valHeader, row, 0, 1, 3, alignCenter);
+  row++;
+
+  QLabel *nameHeader = new QLabel("Name", _clickReportDialog);
+  _clickReportDialogLayout->addWidget(nameHeader, row, 0, alignCenter);
+  QLabel *rawHeader = new QLabel("Raw", _clickReportDialog);
+  _clickReportDialogLayout->addWidget(rawHeader, row, 1, alignCenter);
+  if (_haveFilteredFields) {
+    QLabel *filtHeader = new QLabel("Filt", _clickReportDialog);
+    _clickReportDialogLayout->addWidget(filtHeader, row, 2, alignCenter);
+  }
+  row++;
+
+  // add fields, one row at a time
+  // a row can have 1 or 2 buttons, depending on whether the
+  // filtered field is present
+  size_t nFields = _displayFieldController->getNFields();
+  for (size_t ifield = 0; ifield < nFields; ifield++) {
+
+    // get raw field - always present
+    
+    DisplayField *rawField = _displayFieldController->getField(ifield); // _fields[ifield];
+    int buttonRow = rawField->getButtonRow();
+    
+    // get filt field - may not be present
+    DisplayField *filtField = _displayFieldController->getFiltered(ifield, buttonRow);
+
+    QLabel *label = new QLabel(_clickReportDialog);
+    label->setText(rawField->getLabel().c_str());
+    _clickReportDialogLayout->addWidget(label, row, 0, alignCenter);
+    
+    rawField->createDialog(_clickReportDialog, "-------------");
+    _clickReportDialogLayout->addWidget(rawField->getDialog(), row, 1, alignCenter);
+
+    if (filtField) {
+      filtField->createDialog(_clickReportDialog, "-------------");
+      _clickReportDialogLayout->addWidget(filtField->getDialog(), row, 2, alignCenter);
+    }
+      
+    if (filtField != NULL) {
+      ifield++;
+    }
+
+    row++;
+  }
+}
+
+//////////////////////////////////////////////
+// make a new label with right justification
+
+QLabel *PolarManager::_newLabelRight(const string &text)
+{
+  QLabel *label = new QLabel;
+  label->setText("-----");
+  label->setAlignment(Qt::AlignRight);
+  return label;
+}
+
+//////////////////////////////////////////////////
+// create a row in the status panel
+
+QLabel *PolarManager::_createStatusVal(const string &leftLabel,
+                                         const string &rightLabel,
+                                         int row, 
+                                         int fontSize,
+                                         QLabel **label)
+  
+{
+
+  QLabel *left = new QLabel(_statusPanel);
+  left->setText(leftLabel.c_str());
+  Qt::Alignment alignRight(Qt::AlignRight);
+  _statusLayout->addWidget(left, row, 0, alignRight);
+  if (label != NULL) {
+    *label = left;
+  }
+
+  QLabel *right = new QLabel(_statusPanel);
+  right->setText(rightLabel.c_str());
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  _statusLayout->addWidget(right, row, 1, alignRight);
+
+  if (fontSize > 0) {
+    QFont font = left->font();
+    font.setPixelSize(fontSize);
+    left->setFont(font);
+    right->setFont(font);
+  }
+
+  _valsRight.push_back(right);
+
+  return right;
+}
+
+//////////////////////////////////////////////////
+// create a label row in a dialog
+
+QLabel *PolarManager::_addLabelRow(QWidget *parent,
+                                     QGridLayout *layout,
+                                     const string &leftLabel,
+                                     const string &rightLabel,
+                                     int row, 
+                                     int fontSize)
+  
+{
+
+  QLabel *left = new QLabel(parent);
+  left->setText(leftLabel.c_str());
+  Qt::Alignment alignRight(Qt::AlignRight);
+  layout->addWidget(left, row, 0, alignRight);
+  
+  QLabel *right = new QLabel(parent);
+  right->setText(rightLabel.c_str());
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  layout->addWidget(right, row, 1, 1, 2, alignCenter);
+
+  if (fontSize > 0) {
+    QFont font = left->font();
+    font.setPixelSize(fontSize);
+    left->setFont(font);
+    right->setFont(font);
+  }
+
+  return right;
+}
+
+/* only used by BScanManager
+//////////////////////////////////////////////////
+// create a user input row in a widget
+
+QLineEdit *PolarManager::_addInputRow(QWidget *parent,
+                                        QVBoxLayout *layout,
+                                        const string &leftLabel,
+                                        const string &rightContent,
+                                        int fontSize,
+                                        QLabel **label)
+  
+{
+  
+  QFrame *frame = new QFrame(parent);
+  QHBoxLayout *horiz = new QHBoxLayout;
+  frame->setLayout(horiz);
+    
+  QLabel *left = new QLabel(frame);
+  left->setText(leftLabel.c_str());
+  horiz->addWidget(left);
+  
+  QLineEdit *right = new QLineEdit(frame);
+  right->setText(rightContent.c_str());
+  horiz->addWidget(right);
+
+  layout->addWidget(frame);
+  
+  if (fontSize > 0) {
+    QFont font = left->font();
+    font.setPixelSize(fontSize);
+    left->setFont(font);
+    right->setFont(font);
+  }
+
+  if (label != NULL) {
+    *label = left;
+  }
+  return right;
+
+}
+*/
+/* only used by BScanManager
+//////////////////////////////////////////////////
+// create a user input row in a widget
+
+QLineEdit *PolarManager::_addInputRow(QWidget *parent,
+                                        QVBoxLayout *layout,
+                                        const string &leftLabel,
+                                        const string &rightContent,
+                                        int fontSize,
+                                        QFrame **framePtr)
+  
+{
+  
+  QFrame *frame = new QFrame(parent);
+  QHBoxLayout *horiz = new QHBoxLayout;
+  frame->setLayout(horiz);
+    
+  QLabel *left = new QLabel(frame);
+  left->setText(leftLabel.c_str());
+  horiz->addWidget(left);
+  
+  QLineEdit *right = new QLineEdit(frame);
+  right->setText(rightContent.c_str());
+  horiz->addWidget(right);
+
+  layout->addWidget(frame);
+
+  if (fontSize > 0) {
+    QFont font = left->font();
+    font.setPixelSize(fontSize);
+    left->setFont(font);
+    right->setFont(font);
+  }
+
+  if (framePtr != NULL) {
+    *framePtr = frame;
+  }
+  return right;
+
+}
+*/
+
+//////////////////////////////////////////////
+// update the status panel
+
+void PolarManager::_updateStatusPanel(const RadxRay *ray)
+{
+
+  // set time etc
+
+  char text[1024];
+  
+  QString prev_radar_name = _radarName->text();
+  
+  string rname(_platform.getInstrumentName());
+  if (_params->override_radar_name) rname = _params->radar_name;
+  if (_params->display_site_name) {
+    rname += ":";
+    if (_params->override_site_name) {
+      rname += _params->site_name;
+    } else {
+      rname += _platform.getSiteName();
+    }
+  }
+  _radarName->setText(rname.c_str());
+
+  if (prev_radar_name != _radarName->text()) {
+    _setTitleBar(rname);
+  }
+  
+  DateTime rayTime(ray->getTimeSecs());
+  sprintf(text, "%.4d/%.2d/%.2d",
+          rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
+  _dateVal->setText(text);
+
+  sprintf(text, "%.2d:%.2d:%.2d.%.3d",
+          rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
+          ((int) ray->getNanoSecs() / 1000000));
+  _timeVal->setText(text);
+  
+  if (_volNumVal) {
+    _setText(text, "%d", ray->getVolumeNumber());
+    _volNumVal->setText(text);
+  }
+  
+  if (_sweepNumVal) {
+    _setText(text, "%d", ray->getSweepNumber());
+    _sweepNumVal->setText(text);
+  }
+  
+  if (_fixedAngVal) {  
+    _setText(text, "%6.2f", ray->getFixedAngleDeg());
+    _fixedAngVal->setText(text);
+  }
+  
+  if (_elevVal) {
+    if (fabs(ray->getElevationDeg()) < 1000) {
+      _setText(text, "%6.2f", ray->getElevationDeg());
+      _elevVal->setText(text);
+    }
+  }
+
+  if (_azVal) {
+    if (fabs(ray->getAzimuthDeg()) < 1000) {
+      _setText(text, "%6.2f", ray->getAzimuthDeg());
+      _azVal->setText(text);
+    }
+  }
+  
+  if (_nSamplesVal) {
+    _setText(text, "%d", (int) ray->getNSamples());
+    _nSamplesVal->setText(text);
+  }
+  
+  if (_nGatesVal) {
+    _setText(text, "%d", (int) ray->getNGates());
+    _nGatesVal->setText(text);
+  }
+  
+  if (_gateSpacingVal) {
+    _setText(text, "%.4f", ray->getGateSpacingKm());
+    _gateSpacingVal->setText(text);
+  }
+  
+  if (_pulseWidthVal) {
+    _setText(text, "%.2f", ray->getPulseWidthUsec());
+    _pulseWidthVal->setText(text);
+  }
+
+  if (_prfVal) {
+    if (ray->getPrtMode() == Radx::PRT_MODE_FIXED) {
+      if (ray->getPrtSec() <= 0) {
+        _setText(text, "%d", -9999);
+      } else {
+        _setText(text, "%d", (int) ((1.0 / ray->getPrtSec()) * 10.0 + 0.5) / 10);
+      }
+    } else {
+      double prtSec = ray->getPrtSec();
+      if (prtSec <= 0) {
+        _setText(text, "%d", -9999);
+      } else {
+        int iprt = (int) ((1.0 / ray->getPrtSec()) * 10.0 + 0.5) / 10;
+        double prtRatio = ray->getPrtRatio();
+        if (prtRatio > 0.6 && prtRatio < 0.7) {
+          _setText(text, "%d(2/3)", iprt);
+        } else if (prtRatio < 0.775) {
+          _setText(text, "%d(3/4)", iprt);
+        } else if (prtRatio < 0.825) {
+          _setText(text, "%d(4/5)", iprt);
+        } else {
+          _setText(text, "%d", iprt);
+        }
+      }
+    }
+    _prfVal->setText(text);
+  }
+
+  if (_nyquistVal) {
+    if (fabs(ray->getNyquistMps()) < 1000) {
+      _setText(text, "%.1f", ray->getNyquistMps());
+      _nyquistVal->setText(text);
+    }
+  }
+
+  if (_maxRangeVal) {
+    double maxRangeData = ray->getStartRangeKm() +
+      ray->getNGates() * ray->getGateSpacingKm();
+    _setText(text, "%.1f", maxRangeData);
+    _maxRangeVal->setText(text);
+  }
+
+  if (_unambigRangeVal) {
+    if (fabs(ray->getUnambigRangeKm()) < 100000) {
+      _setText(text, "%.1f", ray->getUnambigRangeKm());
+      _unambigRangeVal->setText(text);
+    }
+  }
+  
+  if (_powerHVal) {
+    if (ray->getMeasXmitPowerDbmH() > -9990) {
+      _setText(text, "%.1f", ray->getMeasXmitPowerDbmH());
+      _powerHVal->setText(text);
+    }
+  }
+   
+  if (_powerVVal) {
+    if (ray->getMeasXmitPowerDbmV() > -9990) {
+      _setText(text, "%.1f", ray->getMeasXmitPowerDbmV());
+      _powerVVal->setText(text);
+    }
+  }
+
+  if (_scanNameVal) {
+    string scanName = ray->getScanName();
+    size_t len = scanName.size();
+    if (len > 8) {
+      scanName = scanName.substr(0, 8);
+    }
+    _scanNameVal->setText(scanName.c_str());
+  }
+
+  if (_sweepModeVal) {
+    switch (ray->getSweepMode()) {
+      case Radx::SWEEP_MODE_SECTOR: {
+        _sweepModeVal->setText("sector"); break;
+      }
+      case Radx::SWEEP_MODE_COPLANE: {
+        _sweepModeVal->setText("coplane"); break;
+      }
+      case Radx::SWEEP_MODE_RHI: {
+        _sweepModeVal->setText("RHI"); break;
+      }
+      case Radx::SWEEP_MODE_VERTICAL_POINTING: {
+        _sweepModeVal->setText("vert"); break;
+      }
+      case Radx::SWEEP_MODE_IDLE: {
+        _sweepModeVal->setText("idle"); break;
+      }
+      case Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE:
+      case Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE: {
+        _sweepModeVal->setText("SUR"); break;
+      }
+      case Radx::SWEEP_MODE_SUNSCAN: {
+        _sweepModeVal->setText("sunscan"); break;
+      }
+      case Radx::SWEEP_MODE_SUNSCAN_RHI: {
+        _sweepModeVal->setText("sun_rhi"); break;
+      }
+      case Radx::SWEEP_MODE_POINTING: {
+        _sweepModeVal->setText("point"); break;
+      }
+      case Radx::SWEEP_MODE_CALIBRATION: {
+        _sweepModeVal->setText("cal"); break;
+      }
+      default: {
+        _sweepModeVal->setText("unknown");
+      }
+    }
+  }
+
+  if (_polModeVal) {
+    _polModeVal->setText(Radx::polarizationModeToStr
+                         (ray->getPolarizationMode()).c_str());
+  }
+   
+  if (_prfModeVal) {
+    _prfModeVal->setText(Radx::prtModeToStr
+                         (ray->getPrtMode()).c_str());
+  }
+
+  if (fabs(_radarLat - _platform.getLatitudeDeg()) > 0.0001 ||
+      fabs(_radarLon - _platform.getLongitudeDeg()) > 0.0001 ||
+      fabs(_radarAltKm - _platform.getAltitudeKm()) > 0.0001) {
+    _radarLat = _platform.getLatitudeDeg();
+    _radarLon = _platform.getLongitudeDeg();
+    _radarAltKm = _platform.getAltitudeKm();
+    _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm * 1000.0);
+  }
+
+  if (ray->getGeoreference() != NULL) {
+
+    if (_latVal) {
+      _radarLat = ray->getGeoreference()->getLatitude();
+      _setText(text, "%.3f", _radarLat);
+      _latVal->setText(text);
+    }
+     
+    if (_lonVal) {
+      _radarLon = ray->getGeoreference()->getLongitude();
+      _setText(text, "%.3f", _radarLon);
+      _lonVal->setText(text);
+    }
+
+    if (_altVal) {
+      _radarAltKm = ray->getGeoreference()->getAltitudeKmMsl();
+      if (_altitudeInFeet) {
+        _setText(text, "%.3f", _radarAltKm / 0.3048);
+      } else {
+        _setText(text, "%.3f", _radarAltKm);
+      }
+      _altVal->setText(text);
+    }
+
+    // compute altitude rate every 2 secs
+    
+    if (_prevAltKm > -9990) {
+      double deltaTime = ray->getRadxTime() - _prevAltTime;
+      if (deltaTime > 2.0) {
+        double altKm = ray->getGeoreference()->getAltitudeKmMsl();
+        double deltaAltKm = altKm - _prevAltKm;
+        _altRateMps = (deltaAltKm / deltaTime) * 1000.0;
+        _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
+        _prevAltTime = ray->getRadxTime();
+      }
+    } else {
+      _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
+      _prevAltTime = ray->getRadxTime();
+    }
+    
+    if (_altitudeInFeet) {
+      _setText(text, "%.1f", _altRateMps / 0.3048);
+    } else {
+      _setText(text, "%.1f", _altRateMps);
+    }
+    if (_altRateVal) {
+      _altRateVal->setText(text);
+    }
+
+    if (_speedVal) {
+      double ewVel = ray->getGeoreference()->getEwVelocity();
+      double nsVel = ray->getGeoreference()->getNsVelocity();
+      double speed = sqrt(ewVel * ewVel + nsVel * nsVel);
+      _setText(text, "%.2f", speed);
+      _speedVal->setText(text);
+    }
+     
+    if (_headingVal) {
+      double heading = ray->getGeoreference()->getHeading();
+      if (heading >= 0 && heading <= 360.0) {
+        _setText(text, "%.2f", heading);
+        _headingVal->setText(text);
+      }
+    }
+     
+    if (_trackVal) {
+      double track = ray->getGeoreference()->getTrack();
+      if (track >= 0 && track <= 360.0) {
+        _setText(text, "%.2f", track);
+        _trackVal->setText(text);
+      }
+    }
+     
+  } else {
+    
+    _setText(text, "%.3f", _platform.getLatitudeDeg());
+    if (_latVal) {
+      _latVal->setText(text);
+    }
+    
+    _setText(text, "%.3f", _platform.getLongitudeDeg());
+    if (_lonVal) {
+      _lonVal->setText(text);
+    }
+    
+    if (_altitudeInFeet) {
+      _setText(text, "%.3f", _platform.getAltitudeKm() / 0.3048);
+    } else {
+      _setText(text, "%.3f", _platform.getAltitudeKm());
+    }
+    if (_altVal) {
+      _altVal->setText(text);
+    }
+    if (_altRateVal) {
+      _altRateVal->setText("0.0");
+    }
+
+  }
+  
+  double sunEl, sunAz;
+  _sunPosn.computePosn(ray->getTimeDouble(), sunEl, sunAz);
+  _setText(text, "%.3f", sunEl);
+  if (_sunElVal) {
+    _sunElVal->setText(text);
+  }
+  _setText(text, "%.3f", sunAz);
+  if (_sunAzVal) {
+    _sunAzVal->setText(text);
+  }
+
+}
+
+///////////////////////////////////////////
+// set text for GUI panels
+
+void PolarManager::_setText(char *text,
+                              const char *format,
+                              int val)
+{
+  if (abs(val) < 9999) {
+    sprintf(text, format, val);
+  } else {
+    sprintf(text, format, -9999);
+  }
+}
+
+void PolarManager::_setText(char *text,
+                              const char *format,
+                              double val)
+{
+  if (fabs(val) < 9999) {
+    sprintf(text, format, val);
+  } else {
+    sprintf(text, format, -9999.0);
+  }
+}
+
+////////////////////////////////////////////////////////////////
+
+double PolarManager::_getInstHtKm(const RadxRay *ray)
+
+{
+  double instHtKm = _platform.getAltitudeKm();
+  if (ray->getGeoreference() != NULL) {
+    instHtKm = ray->getGeoreference()->getAltitudeKmMsl();
+  }
+  return instHtKm;
+}
+
+/////////////////////////////////////////////////////////////////////  
+// slots
+
+/////////////////////////////
+// show data at click point
+void PolarManager::_showClick()
+{
+  if (_clickReportDialog) {
+    if (_clickReportDialog->isVisible()) {
+      _clickReportDialog->setVisible(false);
+    } else {
+      if (_clickReportDialog->x() == 0 &&
+          _clickReportDialog->y() == 0) {
+        QPoint pos;
+        pos.setX(x() + width() + 5);
+        pos.setY(y());
+        _clickReportDialog->move(pos);
+      }
+      _clickReportDialog->setVisible(true);
+      _clickReportDialog->raise();
+    }
+  }
+}
+
+/*
+  //////////////////////////////////////////////////
+// set up field objects, with their color maps
+// use same map for raw and unfiltered fields
+// returns 0 on success, -1 on failure
+HERE ==> call this with the _params->fields at initialization 
+or move to HawkEye.cc  YES! Do this in HawkEye, the code is there, just commented.
+Then, on updateDisplayFields, check if the field is already there, before adding it.
+int PolarManager::_setupDisplayFields(
+  string colorMapDir, //  = _params->color_scale_dir,
+  vector<string> label,
+  vector<string> raw_name,
+  vector<string> filtered_name,
+  vector<string> units,
+  vector<string> color_map_path,
+  vector<string> shortcut,
+  // include in vector: _params->fields_n,
+  //const Params::field_t &pfld = _params->_fields,
+  bool debug = _params->debug,  
+  )
+{
+
+  // check for color map location
+  
+  string colorMapDir = _params->color_scale_dir;
+  Path mapDir(_params->color_scale_dir);
+  if (!mapDir.dirExists()) {
+    colorMapDir = Path::getPathRelToExec(_params->color_scale_dir);
+    mapDir.setPath(colorMapDir);
+    if (!mapDir.dirExists()) {
+      cerr << "ERROR - HawkEye" << endl;
+      cerr << "  Cannot find color scale directory" << endl;
+      cerr << "  Primary is: " << _params->color_scale_dir << endl;
+      cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
+      return -1;
+    }
+    if (_params->debug) {
+      cerr << "NOTE - using color scales relative to executable location" << endl;
+      cerr << "  Exec path: " << Path::getExecPath() << endl;
+      cerr << "  Color scale dir:: " << colorMapDir << endl;
+    }
+  }
+
+  // we interleave unfiltered fields and filtered fields
+
+  for (int ifield = 0; ifield < _params->fields_n; ifield++) {
+
+    const Params::field_t &pfld = _params->_fields[ifield];
+
+    // check we have a valid label
+    
+    if (strlen(pfld.label) == 0) {
+      cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
+      cerr << "  Empty field label, ifield: " << ifield << endl;
+      cerr << "  Ignoring" << endl;
+      continue;
+    }
+    
+    // check we have a raw field name
+    
+    if (strlen(pfld.raw_name) == 0) {
+      cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
+      cerr << "  Empty raw field name, ifield: " << ifield << endl;
+      cerr << "  Ignoring" << endl;
+      continue;
+    }
+
+    // create color map
+    
+    string colorMapPath = colorMapDir;
+    colorMapPath += PATH_DELIM;
+    colorMapPath += pfld.color_map;
+    ColorMap map;
+    map.setName(pfld.label);
+    map.setUnits(pfld.units);
+    // TODO: the logic here is a little weird ... the label and units have been set, but are we throwing them away?
+
+    bool noColorMap = false;
+
+    if (map.readMap(colorMapPath)) {
+        cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
+        cerr << "  Cannot read in color map file: " << colorMapPath << endl;
+        cerr << "  Looking for default color map for field " << pfld.label << endl; 
+
+        try {
+          // check here for smart color scale; look up by field name/label and
+          // see if the name is a usual parameter for a known color map
+          SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+          ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
+          cerr << "  found default color map for " <<  pfld.label  << endl;
+          // if (_params->debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
+          map = colorMap;
+          // HERE: What is missing from the ColorMap object??? 
+        } catch (std::out_of_range ex) {
+          cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
+    // Just set the colormap to a generic color map
+    // use range to indicate it needs update; update when we have access to the actual data values
+          map = ColorMap(0.0, 1.0);
+    noColorMap = true; 
+          // return -1
+        }
+    }
+
+    // unfiltered field
+
+    DisplayField *field =
+      new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
+                       pfld.shortcut, map, ifield, false);
+    if (noColorMap)
+      field->setNoColorMap();
+
+    _displayFields.push_back(field);
+
+    // filtered field
+
+    if (strlen(pfld.filtered_name) > 0) {
+      string filtLabel = string(pfld.label) + "-filt";
+      DisplayField *filt =
+        new DisplayField(filtLabel, pfld.filtered_name, pfld.units, pfld.shortcut, 
+                         map, ifield, true);
+      _displayFields.push_back(filt);
+    }
+
+  } // ifield
+
+  if (_displayFields.size() < 1) {
+    cerr << "ERROR - HawkEye::_setupDisplayFields()" << endl;
+    cerr << "  No fields found" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+*/
+
+//TODO: change model for displayFieldController
+//_displayFieldController->setModel(new DisplayFieldModel(...))
+  
+int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
+
+  // check for color map location
+  
+  string colorMapDir = _params->color_scale_dir;
+  Path mapDir(_params->color_scale_dir);
+  if (!mapDir.dirExists()) {
+    colorMapDir = Path::getPathRelToExec(_params->color_scale_dir);
+    mapDir.setPath(colorMapDir);
+    if (!mapDir.dirExists()) {
+      cerr << "ERROR - DisplayManager" << endl;
+      cerr << "  Cannot find color scale directory" << endl;
+      cerr << "  Primary is: " << _params->color_scale_dir << endl;
+      cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
+      return -1;
+    }
+    if (_params->debug) {
+      cerr << "NOTE - using color scales relative to executable location" << endl;
+      cerr << "  Exec path: " << Path::getExecPath() << endl;
+      cerr << "  Color scale dir:: " << colorMapDir << endl;
+    }
+  }
+
+  //vector<DisplayField *> displayFields;
+
+  //for (int ifield = 0; ifield < _params->fields_n; ifield++) {
+  int ifield = (int) _displayFieldController->getNFields() + 1;
+  for (vector<string>::iterator it = fieldNames->begin(); it != fieldNames->end(); ++it) {
+    string fieldName = *it;
+
+    if (!_displayFieldController->contains(fieldName)) {
+
+      ColorMap map;
+      map = ColorMap(0.0, 1.0);
+      bool noColorMap = true; 
+      // unfiltered field
+      string shortcut = to_string(ifield);
+      DisplayField *field =
+        new DisplayField(fieldName, fieldName, "m/s", 
+                         shortcut, map, ifield, false);
+      if (noColorMap)
+        field->setNoColorMap();
+
+      //displayFields.push_back(field);
+      _displayFieldController->addField(field);
+      //_updateFieldPanel(fieldName);
+      ifield += 1;
+    }
+
+  } // ifield
+
+
+  if (fieldNames->size() < 1) {
+    cerr << "ERROR - PolarManager::_setupDisplayFields()" << endl;
+    cerr << "  No fields found" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+
+/////////////////////////////////////////////////////
+// howto help
+/*
+void PolarManager::_howto()
+{
+  string text;
+  text += "HOWTO HINTS FOR HAWK-EYE\n";
+  text += "========================\n";
+  text += "\n";
+  text += "Use NUMBER keys to display RAW fields\n";
+  text += "Use ALT-NUMBER keys to display FILTERED fields\n";
+  text += "Hit '.' to toggle between the two latest fields\n";
+  text += "\n";
+  text += "You can also use the arrow keys to select different fields\n";
+  text += "\n";
+  text += "Click in main window to get field data at a point.\n";
+  QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
+}
+*/
+
+void PolarManager::_about()
+{
+  //QMessageBox::about(this, tr("About Menu"),
+         //tr("HawkEye is an engineering display for beam-by-beam radar data. "));
+  string text;
+  
+  text += "HawkEdit is an LROSE application for engineering and research display of radar data. \n\n";
+  text += "Get help with HawkEdit ...  \n ";
+  text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
+  text += "\nHawkEdit Version ... \n ";  
+  text += "\nCopyright UCAR (c) 2019 - 2021  ";  
+  text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
+  text += "\nNational Center for Atmospheric Research (NCAR)   ";  
+  text += "\nBoulder, Colorado, USA ";  
+  text += "\n\nBSD licence applies - redistribution and use in source and binary";  
+  text += " forms, with or without modification, are permitted provided that";  
+  text += " the following conditions are met: ";  
+  text += "\n1) If the software is modified to produce derivative works,";  
+  text += " such modified software should be clearly marked, so as not";  
+  text += " to confuse it with the version available from UCAR. ";  
+  text += "\n2) Redistributions of source code must retain the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer.";  
+  text += "\n3) Redistributions in binary form must reproduce the above copyright";  
+  text += " notice, this list of conditions and the following disclaimer in the";  
+  text += " documentation and/or other materials provided with the distribution.";  
+  text += "\n4) Neither the name of UCAR nor the names of its contributors,";  
+  text += "if any, may be used to endorse or promote products derived from";  
+  text += " this software without specific prior written permission.";  
+  text += "\n\nDISCLAIMER: THIS SOFTWARE IS PROVIDED \"AS IS\" AND WITHOUT ANY EXPRESS ";  
+  text += " OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED";  
+  text += " WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.";  
+
+  QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
+}
+
 

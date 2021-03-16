@@ -46,10 +46,12 @@
 #include <QTransform>
 
 #include <toolsa/TaThread.hh>
-#include "Params.hh"
+//#include "Params.hh"
 #include "Beam.hh"
 
-class DLL_EXPORT FieldRenderer : public QObject, public TaThread
+// Really, this is a View 
+
+class DLL_EXPORT FieldRenderer : public QObject  // , public TaThread
 {
 
   Q_OBJECT
@@ -64,9 +66,10 @@ public:
    * @brief Constructor.
    */
   
-  FieldRenderer(const Params &params,
-                const size_t field_index,
-                const DisplayField &field);
+  FieldRenderer(string fieldName);
+  // const Params &params,
+                //const size_t field_index,
+                // const DisplayField &field);
 
   /**
    * @brief Destructor
@@ -76,11 +79,11 @@ public:
 
   // parameters for this field
 
-  const DisplayField &getField() { return _field; }
+  //const DisplayField &getField() { return _field; }
   
   // setting state
   
-  void createImage(int width, int height);
+
   void setTransform(const QTransform &transform) { _transform = transform; }
 
   // setting state - bscan only
@@ -91,28 +94,28 @@ public:
   /**
    * @brief Add the given beam to the beams to be rendered.
    */
+ 
 
-  void addBeam(Beam *beam);
 
   /**
    * @brief Perform the housekeeping needed when this field is newly selected.
    */
 
-  void selectField();
+  //void selectField();
 
   /**
    * @brief Perform the housekeeping needed when this field is newly unselected.
    */
 
-  void unselectField();
+  //void unselectField();
 
   // Activate background rendering - turn on until time resets
   
-  void activateBackgroundRendering();
+  //void activateBackgroundRendering();
 
   // Set background rendering on - until set off
   
-  void setBackgroundRenderingOn();
+  //void setBackgroundRenderingOn();
 
   ////////////////////
   // Access methods //
@@ -123,81 +126,96 @@ public:
    */
 
   inline QImage *getImage() const { return _image; }
+
+  bool imageReady() { return _imageReady; }
   
   /**
    * @brief Check whether the field is currently being rendered in the
    *        background.
    */
   
-  inline bool isBackgroundRendered() const { return _backgroundRender; }
+  //inline bool isBackgroundRendered() const { return _backgroundRender; }
   
   //////////////
   // Qt slots //
   //////////////
 
-public slots:
+//public slots:
   
   /**
    * @brief Slot called when the background rendering timer expires.
    */
 
-  void setBackgroundRenderOff()
-  {
-    _backgroundRender = false;
-  }
+//  void setBackgroundRenderOff()
+//  {
+//    _backgroundRender = false;
+//  }
   
-  void setBackgroundRenderOn()
-  {
-    _backgroundRender = true;
-  }
+//  void setBackgroundRenderOn()
+//  {
+//    _backgroundRender = true;
+//  }
   
   ////////////////
   // Qt signals //
   ////////////////
   
-signals:
+//signals:
+
+  //void imageReady(QImage *image);
   
   //////////////
   // Qt slots //
   //////////////
 
-protected:
+//protected:
 
   ///////////////////////
   // Protected members //
   ///////////////////////
+
+
   
-  const Params &_params;
+  //const Params &_params;
 
   /**
    * @brief The index for this field.
    */
 
-  size_t _fieldIndex;
+  //size_t _fieldIndex;
   
   // parameters for this field
   
-  const DisplayField &_field;
+  //const DisplayField &_field;
+
+  void renderImage(int width, int height, double sweepAngle);
   
+  void addBeam(Beam *beam);
+
+  void createImage(int width, int height);  
   /**
    * @brief Image used for background rendering of this field.
    */
 
+  string getName() { return _name; };
+
   QImage *_image;
+  bool _imageReady;
+  string _name;
   
   /**
    * @brief Flag indicating whether this field should be rendered in the
    *        background.
    */
 
-  bool _backgroundRender;
+  //bool _backgroundRender;
 
   /**
    * @brief Timer used for turning off the background rendering after the
    *        specified period of time.
    */
 
-  QTimer *_backgroundRenderTimer;
+  //QTimer *_backgroundRenderTimer;
 
   /**
    * @brief The transform to use for rendering.
@@ -231,7 +249,7 @@ protected:
    * This is where the rendering actually gets done
    */
 
-  void run();
+  void runIt();
   
 };
 

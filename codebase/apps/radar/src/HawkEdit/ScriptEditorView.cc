@@ -154,8 +154,15 @@ Q_DECLARE_METATYPE(QVector<double>)
       //-------
     //helpView = NULL;
     //if (helpView == NULL) {
-      Q_INIT_RESOURCE(resources);
-      QFile file(":/script_help.txt");
+    Q_INIT_RESOURCE(resources);
+
+    // ----
+    QString fileName(":/resources/script_help.txt");
+
+    QFile file(fileName);
+    // ---
+
+      // QFile file(":/script_help.txt");
       file.open(QIODevice::ReadOnly);
       ScriptEditorHelpModel *model = new ScriptEditorHelpModel(file.readAll());
       file.close();

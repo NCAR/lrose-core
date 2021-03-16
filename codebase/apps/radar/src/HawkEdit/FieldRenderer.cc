@@ -24,38 +24,45 @@
 #include "FieldRenderer.hh"
 #include <toolsa/LogStream.hh>
 
+
 using namespace std;
 
+// This is really a view
 
 /*************************************************************************
  * Constructor
  */
 
-FieldRenderer::FieldRenderer(const Params &params,
-                             const size_t field_index,
-                             const DisplayField &field) :
-        _params(params),
-        _fieldIndex(field_index),
-        _field(field),
+FieldRenderer::FieldRenderer(string fieldName) : //const Params &params,
+          //                   const size_t field_index,
+           //                  const DisplayField &field) :
+        //_params(params),
+        //_fieldIndex(field_index),
+        _name(fieldName),
         _image(NULL),
-        _backgroundRender(true), // false),
-        _backgroundRenderTimer(NULL),
+        _imageReady(false),
+        //_backgroundRenderTimer(NULL),
         _useHeight(false),
         _drawInstHt(false)
 {
 
-  LOG(DEBUG) << " enter " << " field_index = " << field_index;
+
+
+  //_fieldIndex(field_index),
+  //_field(field),
+
+  LOG(DEBUG) << " enter " << " field = " << fieldName;
   // set up background rendering timer
   
-  //  _beams.resize(0);
+  _beams.resize(0);
 
-  _backgroundRenderTimer = new QTimer(this);
-  _backgroundRenderTimer->setSingleShot(true);
-  _backgroundRenderTimer->setInterval
-    ((int)(_params.background_render_mins * 60000.0));
+  //_backgroundRenderTimer = new QTimer(this);
+  //_backgroundRenderTimer->setSingleShot(true);
+  //_backgroundRenderTimer->setInterval
+  //  ((int)(_params.background_render_mins * 60000.0));
   
-  connect(_backgroundRenderTimer, SIGNAL(timeout()),
-	  this, SLOT(setBackgroundRenderOff()));
+  //connect(_backgroundRenderTimer, SIGNAL(timeout()),
+	//  this, SLOT(setBackgroundRenderOff()));
   LOG(DEBUG) << "exit";
 }
 
@@ -68,6 +75,12 @@ FieldRenderer::~FieldRenderer()
   delete _image;
 }
 
+
+void FieldRenderer::renderImage(int width, int height, double sweepAngle) {
+
+  createImage(width, height);
+  
+} 
 /////////////////////////////////////
 // create image into which we render
 
@@ -76,6 +89,7 @@ void FieldRenderer::createImage(int width, int height)
 {
   delete _image;
   _image = new QImage(width, height, QImage::Format_RGB32);
+  _imageReady = false;
 }
 
 //////////////////////////////////////////////////
@@ -87,13 +101,13 @@ void FieldRenderer::addBeam(Beam *beam)
   TaThread::LockForScope locker;
   
   _beams.push_back(beam);
-  beam->addClient();
+  //beam->addClient();
 
 }
 
 ////////////////////////////////////////////////////////////////////
 // Perform the housekeeping needed when this field is newly selected.
-
+/*
 void FieldRenderer::selectField() 
 
 {
@@ -117,7 +131,7 @@ void FieldRenderer::unselectField()
   //_backgroundRenderTimer->start();
   
 }
-
+*/
 /*
 // TODO: Need DisplayFieldController, to get the the colorMap
 //       we have DisplayField &_field, get colorMap from there
@@ -146,7 +160,7 @@ void FieldRenderer::colorMapChanged(float *beam_data,
 
 ////////////////////////////////////////////////////////////////////
 // Activate background rendering - turn on until time resets
-
+/*
 void FieldRenderer::activateBackgroundRendering() 
 
 {
@@ -161,10 +175,10 @@ void FieldRenderer::activateBackgroundRendering()
   _backgroundRenderTimer->start();
   
 }
-  
+*/  
 ////////////////////////////////////////////////////////////////////
 // Set background rendering on - until set off
-
+/*
 void FieldRenderer::setBackgroundRenderingOn() 
 
 {
@@ -174,15 +188,15 @@ void FieldRenderer::setBackgroundRenderingOn()
   _backgroundRender = true;
   
 }
-  
+*/  
 ////////////////////////////////////////////////////////////////
 // Thread run method
 // Actually performs the rendering
 
-void FieldRenderer::run()
+void FieldRenderer::runIt()
 {
-  LOG(DEBUG) << "Start of run() for field: " 
-         << _field.getLabel() << " there are " << _beams.size() << " beams to render";
+  //LOG(DEBUG) << "Start of run() for field: " 
+  //       << _field.getLabel() << " there are " << _beams.size() << " beams to render";
 
 
   if (_beams.size() == 0) {
@@ -194,7 +208,7 @@ void FieldRenderer::run()
     return;
   }
   
-  TaThread::LockForScope locker;
+  //TaThread::LockForScope locker;
 
 
   vector< Beam* >::iterator beam;
@@ -210,14 +224,15 @@ void FieldRenderer::run()
       (*beam)->print(cerr);
     }
     */
-    (*beam)->paint(_image, _transform, _fieldIndex, _useHeight, _drawInstHt);
-    (*beam)->setBeingRendered(_fieldIndex, false);
+    (*beam)->paint(_image, _transform, _useHeight, _drawInstHt);
+    //(*beam)->setBeingRendered(_fieldIndex, false);
   }
   
+  _imageReady = true;
   //for (beam = _beams.begin(); beam != _beams.end(); ++beam)
   //{
   //  Beam::deleteIfUnused(*beam);
   //}
-  _beams.clear();
+  //_beams.clear();
   LOG(DEBUG) << "exit";
 }

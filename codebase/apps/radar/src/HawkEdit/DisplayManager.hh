@@ -126,7 +126,7 @@ public:
 
 public slots:
 
-  void colorMapRedefineReceived(string fieldName, ColorMap newColorMap);
+  //void colorMapRedefineReceived(string fieldName, ColorMap newColorMap);
 
 
 signals:
@@ -285,6 +285,7 @@ protected:
   void _createStatusPanel();
   void _createFieldPanel();
   void _updateFieldPanel(string newFieldName);
+  void contextMenuParameterColors();
   void _createClickReportDialog();
   void _updateStatusPanel(const RadxRay *ray);
   double _getInstHtKm(const RadxRay *ray);

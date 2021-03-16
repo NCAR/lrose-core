@@ -39,9 +39,12 @@
 #include "DisplayManager.hh"
 #include "DisplayField.hh"
 #include "DisplayElevation.hh"
+#include "ClickableLabel.hh"
 #include "ColorMap.hh"
 #include "Params.hh"
 #include "Reader.hh"
+#include "ParameterColorView.hh"
+#include "FieldColorController.hh"
 
 #include <string>
 #include <cmath>
@@ -598,7 +601,16 @@ void DisplayManager::_updateFieldPanel(string newFieldName)
     // get filt field - may not be present
     const DisplayField *filtField = _displayFieldController->getFiltered(ifield, -1);
 
-    QLabel *label = new QLabel(_fieldPanel);
+//----
+//    _spolDivColorMapLabel = new ClickableLabel();
+//ColorMapTemplates.cc:    // connect(cmapLabel, &ClickableLabel::clicked, this, &ParameterColorDialog::pickColorPalette);
+//ColorMapTemplates.cc:    connect(_defaultColorMapLabel,   &ClickableLabel::clicked, this, &ColorMapTemplates::defaultClicked);
+
+//---
+
+    //QLabel *label = new QLabel(_fieldPanel);
+    ClickableLabel *label = new ClickableLabel(_fieldPanel);
+    connect(label, &ClickableLabel::clicked, this, SLOT(contextMenuParameterColors()));
     label->setFont(font);
     label->setText(rawField->getLabel().c_str());
     QLabel *key = new QLabel(_fieldPanel);
@@ -659,6 +671,36 @@ void DisplayManager::_updateFieldPanel(string newFieldName)
   LOG(DEBUG) << "exit";
 }
 
+void DisplayManager::contextMenuParameterColors()
+{
+  
+  LOG(DEBUG) << "enter";
+
+  //DisplayField selectedField;                                                                             
+
+  // const DisplayField &field = _manager.getSelectedField();
+  // const ColorMap &colorMapForSelectedField = field.getColorMap();
+  ParameterColorView *parameterColorView = new ParameterColorView(this);
+  // vector<DisplayField *> displayFields = displayFieldController->getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
+  DisplayField *selectedField = _displayFieldController->getSelectedField();
+  string emphasis_color = "white";
+  string annotation_color = "white";
+
+  DisplayFieldModel *displayFieldModel = _displayFieldController->getModel();
+
+  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+                                                                         
+  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
+      this, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
+
+  fieldColorController->startUp(); 
+ 
+  LOG(DEBUG) << "exit ";
+  
+}
+
 
 void DisplayManager::_changeFieldVariable(bool value) {
 
@@ -679,6 +721,7 @@ void DisplayManager::_changeFieldVariable(bool value) {
 
 }
 
+/*
 void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
 
   LOG(DEBUG) << "enter"; 
@@ -689,7 +732,7 @@ void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColo
   _displayFieldController->saveColorMap(fieldName, &newColorMap);
   size_t fieldIndex = _displayFieldController->getFieldIndex(fieldName);
   _changeField(fieldIndex, true); 
-
+*/
   /*
   bool found = false;
   vector<DisplayField *>::iterator it;
@@ -717,9 +760,10 @@ void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColo
     _changeField(fieldId, true); 
   }
   */
+/*
   LOG(DEBUG) << "exit";
 }
-
+*/
 
 void DisplayManager::_openFile() {
 }

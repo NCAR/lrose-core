@@ -48,27 +48,26 @@ using namespace std;
 
 PpiWidget::PpiWidget(QWidget* parent,
                      const PolarManager &manager,
-                     const Params &params,
                      const RadxPlatform &platform,
                      //const vector<DisplayField *> &fields,
 		     DisplayFieldController *displayFieldController,
                      bool haveFilteredFields) :
-        PolarWidget(parent, manager, params, platform,
+        PolarWidget(parent, manager, platform,
                     displayFieldController, // fields, 
 		    haveFilteredFields)
         
 {
 
-  _aspectRatio = _params.ppi_aspect_ratio;
-  _colorScaleWidth = _params.color_scale_width;
+  _aspectRatio = _params->ppi_aspect_ratio;
+  _colorScaleWidth = _params->color_scale_width;
 
   // initialoze world view
 
-  configureRange(_params.max_range_km);
+  configureRange(_params->max_range_km);
 
-  setGrids(_params.ppi_grids_on_at_startup);
-  setRings(_params.ppi_range_rings_on_at_startup);
-  setAngleLines(_params.ppi_azimuth_lines_on_at_startup);
+  setGrids(_params->ppi_grids_on_at_startup);
+  setRings(_params->ppi_range_rings_on_at_startup);
+  setAngleLines(_params->ppi_azimuth_lines_on_at_startup);
 
   _isArchiveMode = false;
   _isStartOfSweep = true;
@@ -96,12 +95,12 @@ PpiWidget::~PpiWidget()
   LOG(DEBUG) << "enter";
   // delete all of the dynamically created beams
   
-  for (size_t i = 0; i < _ppiBeams.size(); ++i) {
-    Beam::deleteIfUnused(_ppiBeams[i]);
-  }
-  LOG(DEBUG) << "_ppiBeams.clear()";
-  _ppiBeams.clear();
-  LOG(DEBUG) << "exit";
+  //for (size_t i = 0; i < _ppiBeams.size(); ++i) {
+  //  Beam::deleteIfUnused(_ppiBeams[i]);
+  //}
+  //LOG(DEBUG) << "_ppiBeams.clear()";
+  //_ppiBeams.clear();
+  //LOG(DEBUG) << "exit";
   //  delete _ppiBeamController;
 
   // TODO: free SpreadSheetControl & sheetView
@@ -138,16 +137,16 @@ void PpiWidget::clear()
 void PpiWidget::selectVar(const size_t index)
 {
   LOG(DEBUG) << "enter, index = " << index;
-  try {
+  //try {
   // If the field index isn't actually changing, we don't need to do anything
-  size_t selectedField = displayFieldController->getSelectedFieldNum();
+  //size_t selectedField = displayFieldController->getSelectedFieldNum();
   //  if (selectedField == index) {
   //  return;
   //}
   
-    string fieldName = displayFieldController->getField(index)->getName();
-    LOG(DEBUG) << "=========>> PpiWidget::selectVar() for field index: " 
-         << index << " for field " << fieldName;
+    //string fieldName = displayFieldController->getField(index)->getName();
+    //LOG(DEBUG) << "=========>> PpiWidget::selectVar() for field index: " 
+    //     << index << " for field " << fieldName;
 
   // If this field isn't being rendered in the background, render all of
   // the beams for it
@@ -190,16 +189,16 @@ void PpiWidget::selectVar(const size_t index)
   // _selectedField = index;
   //displayFieldController->setSelectedField(index);
 
-  _fieldRendererController->performRendering(index);
+  //_fieldRendererController->performRendering(index);
 
   // Update the display
 
   update();
-  } catch (std::range_error &ex) {
-      LOG(ERROR) << ex.what();
+  //} catch (std::range_error &ex) {
+  //    LOG(ERROR) << ex.what();
       // QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
-  }
-  LOG(DEBUG) << "exit";
+  //}
+  //LOG(DEBUG) << "exit";
 }
 
 
@@ -210,13 +209,13 @@ void PpiWidget::selectVar(const size_t index)
 void PpiWidget::clearVar(const size_t index)
 {
 
-  if (index >= displayFieldController->getNFields()) { // _fields.size()) {
-    return;
-  }
+  //if (index >= displayFieldController->getNFields()) { // _fields.size()) {
+  //  return;
+  //}
 
   // Set the brush for every beam/gate for this field to use the background
   // color
-
+/*
   std::vector< PpiBeam* >::iterator beam;
   for (beam = _ppiBeams.begin(); beam != _ppiBeams.end(); ++beam) {
     (*beam)->resetFieldBrush(index, &_backgroundBrush);
@@ -230,14 +229,14 @@ void PpiWidget::clearVar(const size_t index)
       LOG(ERROR) << ex.what();
       //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
   }
-
+*/
 }
 
-// always return one or at most two beams. 
+/* always return one or at most two beams. 
 void PpiWidget::addCullTrackBeam(const RadxRay *ray,
                         const float start_angle,
                         const float stop_angle,
-                        const std::vector< std::vector< double > > &beam_data,
+                        const std::vector< double > &beam_data,
 			size_t nFields)
 {
 
@@ -265,7 +264,7 @@ void PpiWidget::addCullTrackBeam(const RadxRay *ray,
     // the beam list.
     PpiBeam* b = new PpiBeam(_params, ray, nFields, 
                              n_start_angle, n_stop_angle);
-    b->addClient(); // add tracking information
+    //b->addClient(); // add tracking information
     _cullBeams(b);
     _ppiBeams.push_back(b);
     //_accumulateStats(b);
@@ -280,7 +279,7 @@ void PpiWidget::addCullTrackBeam(const RadxRay *ray,
     // beam to the left of the 0 degree point.
 
     PpiBeam* b1 = new PpiBeam(_params, ray, nFields, n_start_angle, 360.0);
-    b1->addClient();
+    //b1->addClient();
     _cullBeams(b1);
     _ppiBeams.push_back(b1);
     // newBeams.push_back(b1);
@@ -293,7 +292,7 @@ void PpiWidget::addCullTrackBeam(const RadxRay *ray,
     // Now add the portion of the beam to the right of the 0 degree point.
 
     PpiBeam* b2 = new PpiBeam(_params, ray, nFields, 0.0, n_stop_angle);
-    b2->addClient();
+    //b2->addClient();
     _cullBeams(b2);
     _ppiBeams.push_back(b2);
     //newBeams.push_back(b2);
@@ -304,8 +303,10 @@ void PpiWidget::addCullTrackBeam(const RadxRay *ray,
     _fieldRendererController->addBeam(b2); // selectedField, beam);
   }
   _accumulateStats(ray);
+  */
     
-}
+//}
+
 
 void PpiWidget::_accumulateStats(const RadxRay *ray) {
 
@@ -342,7 +343,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
 {
 
   LOG(DEBUG) << "enter";
-
+/*
    
   // add a new beam to the display. 
   // The steps are:
@@ -431,7 +432,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
   } // if (newBeams.size() > 0) 
 
 
-  if (_params.debug >= Params::DEBUG_VERBOSE &&
+  if (_params->debug >= Params::DEBUG_VERBOSE &&
       _ppiBeams.size() % 10 == 0) {
     cerr << "==>> _ppiBeams.size(): " << _ppiBeams.size() << endl;
   }
@@ -439,7 +440,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
 
   // newBeams has pointers to all of the newly added beams.  Render the
   // beam data.
-
+// TODO: this should be a call to _displayFieldController->addBeam(beam_data, &_backgroundBrush)
   //size_t selectedField = displayFieldController->getSelectedFieldNum();
 
   for (size_t ii = 0; ii < newBeams.size(); ii++) {
@@ -455,22 +456,12 @@ void PpiWidget::addBeam(const RadxRay *ray,
     _fieldRendererController->addBeam(beam); // selectedField, beam);
     //_fieldRendererController->addBeamToBackgroundRenderedFields(beam);
 
-    /*
-    for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-      if (field == _selectedField ||
-          _fieldRenderers[field]->isBackgroundRendered()) {
-        _fieldRenderers[field]->addBeam(beam);
-      } else {
-        beam->setBeingRendered(field, false);
-      }
-    }
-    */
   } // endfor - beam 
 
   // Start the threads to render the new beams
 
   // _performRendering();
-
+*/
   LOG(DEBUG) << "exit";
 }
 
@@ -490,7 +481,7 @@ void PpiWidget::updateBeamII(const RadxRay *ray,
 {
 
   LOG(DEBUG) << "enter";
-  
+ /* 
   LOG(DEBUG) << "beam_data size = " << beam_data.size();
   // << " by " << beam_data[0].size();
   LOG(DEBUG) << "start_angle = " << start_angle;
@@ -563,6 +554,7 @@ void PpiWidget::updateBeamII(const RadxRay *ray,
     // Add the new beams to the render lists for each of the fields
     //_fieldRendererController->addBeam(b2, newFields); // selectedField, beam);
   }
+  */
 }
 
 
@@ -571,6 +563,7 @@ void PpiWidget::updateBeamII(const RadxRay *ray,
 void PpiWidget::movingDownTheLine(PpiBeam *beam, vector<string> fieldNames,
 				  const std::vector< std::vector< double > > &beam_data,
 				  size_t nFields) {
+  /*
   //---------
   //size_t nFields = beam_data.size();
     // Set up the brushes for all of the fields in this beam.  This can be
@@ -590,7 +583,7 @@ void PpiWidget::movingDownTheLine(PpiBeam *beam, vector<string> fieldNames,
   }
   // Start the threads to render the new beams
   // _performRendering();
-
+*/
   LOG(DEBUG) << "exit";
 }
 
@@ -603,7 +596,7 @@ void PpiWidget::updateBeamColors(//const RadxRay *ray,
 				 const string fieldName,
 				 size_t nGates)
 {
-
+/*
   //LOG(DEBUG) << "enter";
 
   //LOG(DEBUG) << "_ppiBeams.size() = " << _ppiBeams.size();  
@@ -629,7 +622,7 @@ void PpiWidget::updateBeamColors(//const RadxRay *ray,
     //    const std::vector<double> &beam_data = ray->getFieldFl32();
     updateColorsOnFields(b, fieldName, nFields, fdata, nGates, map, displayFieldIdx);
   }
-
+*/
 }
 
 
@@ -641,6 +634,7 @@ void PpiWidget::updateBeamColors(//const RadxRay *ray,
 				       size_t nGates,
 				       const ColorMap *map,
 				       size_t displayFieldIdx) {
+    /*
   //---------
   //size_t nFields = beam_data.size();
     // Set up the brushes for all of the fields in this beam.  This can be
@@ -657,7 +651,7 @@ void PpiWidget::updateBeamColors(//const RadxRay *ray,
 			 map, &_backgroundBrush);
   // just add beam to the new fields 
   _fieldRendererController->addBeam(displayFieldIdx, beam);
-
+*/
   //LOG(DEBUG) << "exit";
 }
 
@@ -868,12 +862,12 @@ void PpiWidget::configureRange(double max_range)
   int rightMargin = 0;
   int topMargin = 0;
   int bottomMargin = 0;
-  int colorScaleWidth = _params.color_scale_width;
+  int colorScaleWidth = _params->color_scale_width;
   int axisTickLen = 7;
   int nTicksIdeal = 7;
   int textMargin = 5;
 
-  if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
+  if (_params->ppi_display_type == Params::PPI_AIRBORNE) {
 
     _fullWorld.set(width(), height(),
                    leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
@@ -1026,6 +1020,8 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
 
 {
 
+  /* TODO: fix up ... 
+
   double clickAz = atan2(y_km, x_km) * RAD_TO_DEG;
   double radarDisplayAz = 90.0 - clickAz;
   if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
@@ -1059,6 +1055,8 @@ const RadxRay *PpiWidget::_getClosestRay(double x_km, double y_km)
   else
     LOG(DEBUG) << "Error: No ray found";
   return closestRay;
+  */
+  return NULL;
 
 }
 
@@ -1173,7 +1171,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     // Draw the labels
     
     QFont font = painter.font();
-    font.setPointSizeF(_params.range_ring_label_font_size);
+    font.setPointSizeF(_params->range_ring_label_font_size);
     painter.setFont(font);
     // painter.setWindow(0, 0, width(), height());
     
@@ -1257,10 +1255,10 @@ void PpiWidget::_drawOverlays(QPainter &painter)
   
   if (_pointClicked) {
 
-    int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    int endY = _mouseReleaseY + _params.click_cross_size / 2;
+    int startX = _mouseReleaseX - _params->click_cross_size / 2;
+    int endX = _mouseReleaseX + _params->click_cross_size / 2;
+    int startY = _mouseReleaseY - _params->click_cross_size / 2;
+    int endY = _mouseReleaseY + _params->click_cross_size / 2;
 
     painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
     painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
@@ -1275,7 +1273,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
   DisplayField *field = displayFieldController->getSelectedField();
   _zoomWorld.drawColorScale(field->getColorMap(), painter,
-                            _params.label_font_size);
+                            _params->label_font_size);
 
   if (_archiveMode) {
 
@@ -1292,12 +1290,12 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     // radar and site name legend
 
     string radarName(_platform.getInstrumentName());
-    if (_params.override_radar_name) {
-      radarName = _params.radar_name;
+    if (_params->override_radar_name) {
+      radarName = _params->radar_name;
     }
     string siteName(_platform.getInstrumentName());
-    if (_params.override_site_name) {
-      siteName = _params.site_name;
+    if (_params->override_site_name) {
+      siteName = _params->site_name;
     }
     string radarSiteLabel = radarName;
     if (siteName.size() > 0 && siteName != radarName) {
@@ -1335,7 +1333,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     painter.setBrush(Qt::black);
     painter.setBackgroundMode(Qt::OpaqueMode);
 
-    switch (_params.ppi_main_legend_pos) {
+    switch (_params->ppi_main_legend_pos) {
       case Params::LEGEND_TOP_LEFT:
         _zoomWorld.drawLegendsTopLeft(painter, legends);
         break;
@@ -1368,7 +1366,7 @@ void PpiWidget::drawColorScaleLegend() {
 
   DisplayField *field = displayFieldController->getSelectedField();
   _zoomWorld.drawColorScale(field->getColorMap(), painter,
-                            _params.label_font_size);
+                            _params->label_font_size);
 
 }
 
@@ -1444,6 +1442,7 @@ int PpiWidget::_beamIndex(const double start_angle,
 }
 
 // remove all beams that don't have the specified number of fields
+/*
 void PpiWidget::cleanBeams(size_t nFields) {
 
   vector<PpiBeam *>::iterator it = _ppiBeams.begin(); 
@@ -1457,7 +1456,7 @@ void PpiWidget::cleanBeams(size_t nFields) {
     }
   }
 }
-
+*/
 
 /*************************************************************************
  * _cullBeams()
@@ -1634,7 +1633,7 @@ void PpiWidget::_cullBeams(const PpiBeam *beamAB)
   {
     // Note that i has to be an int rather than a size_t since we are going
     // backwards through the list and will end when i < 0.
-
+/*
     for (int i = _ppiBeams.size()-1; i >= 0; i--)
     {
       // Delete beams who are hidden but aren't currently being rendered.
@@ -1648,10 +1647,10 @@ void PpiWidget::_cullBeams(const PpiBeam *beamAB)
       if (_ppiBeams[i]->hidden && !_ppiBeams[i]->isBeingRendered())
       {
         Beam::deleteIfUnused(_ppiBeams[i]);
-	_ppiBeams.erase(_ppiBeams.begin()+i);
+	      _ppiBeams.erase(_ppiBeams.begin()+i);
       }
     }
-
+*/
   } /* endif - need_to_cull */
   
 }
@@ -1695,6 +1694,7 @@ void PpiWidget::_refreshImages()
     
   } // ifield
   */  
+  /*
   // do the rendering
   try {
   size_t selectedField = displayFieldController->getSelectedFieldNum();
@@ -1710,6 +1710,7 @@ void PpiWidget::_refreshImages()
       // QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
   }
   update();
+  */
 }
 
 void PpiWidget::contextMenuParameterColors()
@@ -1726,15 +1727,7 @@ void PpiWidget::contextMenuParameterColors()
   DisplayField *selectedField = displayFieldController->getSelectedField();
   string emphasis_color = "white";
   string annotation_color = "white";
-  // This is already created ...
-  /*
-  DisplayFieldModel *displayFieldModel = 
-    new DisplayFieldModel(displayFields, selectedField->getName(),
-			  _params.grid_and_range_ring_color,
-			  emphasis_color,
-			  annotation_color,
-			  _params.background_color);
-  */
+
   DisplayFieldModel *displayFieldModel = displayFieldController->getModel();
 
   FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);

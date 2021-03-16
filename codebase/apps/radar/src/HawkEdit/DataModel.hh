@@ -21,86 +21,43 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// HawkEye.h
+////////////////////////////////////////////////////////////////////////////////
 //
-// HawkEye object
+// Brenda Javornik, UCAR, Boulder, CO, 80307, USA
+// March 2021
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2010
-//
-///////////////////////////////////////////////////////////////
-//
-// HawkEye is the engineering display for the Hawk radar system
-//
-///////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _DATAMODEL_HH
+#define _DATAMODEL_HH
 
-#ifndef HawkEye_HH
-#define HawkEye_HH
+#include <Radx/RadxVol.hh>
 
-#include <string>
-#include <vector>
+using namespace std;
 
-#include "Args.hh"
-#include "Params.hh"
-#include "ParamFile.hh"
-#include <euclid/SunPosn.hh>
 
-class QApplication;
-class DisplayField;
-class Reader;
-class PolarManager;
+class DataModel {
 
-class HawkEye {
-  
 public:
+  DataModel *Instance();
 
-  // constructor
+  ~DataModel();
 
-  HawkEye (int argc, char **argv);
+  void setData(RadxVol *vol);
+  void readData(string path);
+  void writeData(string path);
+  void update();
+  void get();
 
-  // destructor
-  
-  virtual ~HawkEye();
 
-  // run 
-
-  int Run(QApplication &app);
-
-  // data members
-
-  bool OK;
-
-protected:
 private:
-
-  // basic
-
-  string _progName;
-  ParamFile *_params;
-  Args _args;
-
-  // reading data in
-
-  Reader *_reader;
-
-  // data fields
-
-  vector<DisplayField *> _displayFields;
-  bool _haveFilteredFields;
-
-  // managing the rendering objects
-
-  PolarManager *_polarManager;
   
-  // methods
+  DataModel();
 
-  int _setupDisplayFields();
-  int _setupReader();
-  string _getArchiveUrl(const string &filePath);
+  void init();
+
+  static DataModel *_instance;
 
 };
 
 #endif
-

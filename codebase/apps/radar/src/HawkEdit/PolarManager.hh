@@ -50,6 +50,11 @@
 #include "DisplayManager.hh"
 #include "RayLoc.hh"
 #include "ContextEditingView.hh"
+#include "ClickableLabel.hh"
+#include "ParameterColorView.hh"
+#include "FieldColorController.hh"
+#include "SweepView.hh"
+#include "SweepController.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -79,7 +84,7 @@ class Reader;
 class RadxPlatform;
 class TimeScaleWidget;
 
-class PolarManager : public DisplayManager {
+class PolarManager : public QMainWindow { // public DisplayManager {
   
   Q_OBJECT
 
@@ -92,15 +97,13 @@ public:
 
   // constructor
   
-  PolarManager(const Params &params,
-               Reader *reader,
-	       DisplayFieldController *displayFieldController,
+  PolarManager(DisplayFieldController *displayFieldController,
 	       //               const vector<DisplayField *> &fields,
                bool haveFilteredFields);
   
   // destructor
   
-  virtual ~PolarManager();
+  ~PolarManager();
 
   // run 
 
@@ -113,9 +116,9 @@ public:
 
   // override event handling
 
-  virtual void timerEvent (QTimerEvent * event);
-  virtual void resizeEvent (QResizeEvent * event);
-  virtual void keyPressEvent(QKeyEvent* event);
+  //void timerEvent (QTimerEvent * event);
+  void resizeEvent (QResizeEvent * event);
+  void keyPressEvent(QKeyEvent* event);
 
   // check on archive mode
   
@@ -141,11 +144,39 @@ public:
   vector<string> *userSelectFieldsForReading(string fileName);
   void getFileAndFields();
 
+// from DisplayManager ...
 
+  // get selected name and units
+
+  const string &getSelectedFieldLabel() const { return _selectedLabel; }
+  const string &getSelectedFieldName() const { return _selectedName; }
+  const string &getSelectedFieldUnits() const { return _selectedUnits; }
+  // const DisplayField &getSelectedField() const { return _displayFieldController->getField(_fieldNum); }
+  // const vector<DisplayField *> &getDisplayFields() const { return _fields; }
+  //  const DisplayField &getSelectedField() const { return *_fields[_fieldNum]; }
+  //  const vector<DisplayField *> &getDisplayFields() const { return _fields; }
+
+  // location
+
+  double getRadarLat() const { return _radarLat; }
+  double getRadarLon() const { return _radarLon; }
+  double getRadarAltKm() const { return _radarAltKm; }
+  const RadxPlatform &getPlatform() const { return _platform; }
+
+  // enable the zoom button
+  
+  //virtual void enableZoomButton() const = 0;
+
+  //virtual double getSelectedSweepAngle() {return 0.0;}
+  //virtual size_t getSelectedFieldIndex() {return 0;}
+
+// end from DisplayManager
 
 public slots:
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
+
+  void contextMenuParameterColors();
   
   //colorMapRedefineReceived(string, ColorMap)
   void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
@@ -163,9 +194,208 @@ public slots:
 
 signals:
 
+// from DisplayManager ...
+  ////////////////
+  // Qt signals //
+  ////////////////
+
+  /**
+   * @brief Signal emitted when the main frame is resized.
+   *
+   * @param[in] width    The new width of the frame.
+   * @param[in] height   The new height of the frame.
+   */
+  
+  void frameResized(const int width, const int height);
+  //void setParamsFile();
+
+// end from DisplayManager
+
 private:
 
   static PolarManager* m_pInstance;
+
+  // from DisplayManager ...
+  ParamFile *_params;
+  
+  // reading data in
+  
+  Reader *_reader;
+  vector<const RadxRay *> _rays;
+  bool _initialRay;
+  
+  // instrument platform details 
+
+  RadxPlatform _platform;
+  
+  // beam reading timer
+
+  //static bool _firstTimerEvent;
+  int _beamTimerId;
+  bool _frozen;
+
+  // data fields
+  //  vector <DisplayField *> _fields;
+  DisplayFieldController *_displayFieldController;
+  bool _haveFilteredFields;
+  int _rowOffset;
+
+  // windows
+
+  QFrame *_main;
+
+  // actions
+  
+  QAction *_exitAct;
+  QAction *_freezeAct;
+  QAction *_clearAct;
+  QAction *_unzoomAct;
+  QAction *_refreshAct;
+  QAction *_showClickAct;
+  QAction *_showBoundaryEditorAct;
+  QAction *_howtoAct;
+  QAction *_aboutAct;
+  QAction *_aboutQtAct;
+  //QAction *_openFileAct;
+  //QAction *_saveFileAct;
+
+  // status panel
+
+  QGroupBox *_statusPanel;
+  QGridLayout *_statusLayout;
+
+  QLabel *_radarName;
+  QLabel *_dateVal;
+  QLabel *_timeVal;
+
+  QLabel *_volNumVal;
+  QLabel *_sweepNumVal;
+
+  QLabel *_fixedAngVal;
+  QLabel *_elevVal;
+  QLabel *_azVal;
+
+  QLabel *_nSamplesVal;
+  QLabel *_nGatesVal;
+  QLabel *_gateSpacingVal;
+
+  QLabel *_pulseWidthVal;
+  QLabel *_prfVal;
+  QLabel *_nyquistVal;
+  QLabel *_maxRangeVal;
+  QLabel *_unambigRangeVal;
+  QLabel *_powerHVal;
+  QLabel *_powerVVal;
+
+  QLabel *_scanNameVal;
+  QLabel *_sweepModeVal;
+  QLabel *_polModeVal;
+  QLabel *_prfModeVal;
+
+  QLabel *_latVal;
+  QLabel *_lonVal;
+
+  QLabel *_altVal;
+  QLabel *_altLabel;
+
+  QLabel *_altRateVal;
+  QLabel *_altRateLabel;
+  double _prevAltKm;
+  RadxTime _prevAltTime;
+  double _altRateMps;
+
+  QLabel *_speedVal;
+  QLabel *_headingVal;
+  QLabel *_trackVal;
+
+  QLabel *_sunElVal;
+  QLabel *_sunAzVal;
+
+  bool _altitudeInFeet;
+
+  vector<QLabel *> _valsRight;
+  
+  // field panel
+  
+  DisplayFieldView *_fieldPanel;
+  QGridLayout *_fieldsLayout;
+  QLabel *_selectedLabelWidget;
+  QButtonGroup *_fieldGroup;
+  vector<QRadioButton *> _fieldButtons;
+  DisplayField *_selectedField;
+  string _selectedName;
+  string _selectedLabel;
+  string _selectedUnits;
+  QLabel *_valueLabel;
+  //int _fieldNum;
+  int _prevFieldNum;
+
+  // click location report dialog
+  QDialog *_clickReportDialog;
+  QGridLayout *_clickReportDialogLayout;
+  QLabel *_dateClicked;
+  QLabel *_timeClicked;
+  QLabel *_elevClicked;
+  QLabel *_azClicked;
+  QLabel *_gateNumClicked;
+  QLabel *_rangeClicked;
+  QLabel *_altitudeClicked;
+  
+  // sun position calculator
+  double _radarLat, _radarLon, _radarAltKm;
+  SunPosn _sunPosn;
+
+  // set top bar
+
+  //virtual void _setTitleBar(const string &radarName) = 0;
+
+  // panels
+  
+  void _createStatusPanel();
+  void _createFieldPanel();
+  void _updateFieldPanel(string newFieldName);
+
+  void _createClickReportDialog();
+  void _updateStatusPanel(const RadxRay *ray);
+  double _getInstHtKm(const RadxRay *ray);
+
+  // setting text
+
+  void _setText(char *text, const char *format, int val);
+  void _setText(char *text, const char *format, double val);
+  
+  // adding vals / labels
+
+  QLabel *_newLabelRight(const string &text);
+
+  QLabel *_createStatusVal(const string &leftLabel,
+                           const string &rightLabel,
+                           int row, 
+                           int fontSize,
+                           QLabel **label = NULL);
+  
+  QLabel *_addLabelRow(QWidget *widget,
+                       QGridLayout *layout,
+                       const string &leftLabel,
+                       const string &rightLabel,
+                       int row,
+                       int fontSize = 0);
+/*
+  QLineEdit *_addInputRow(QWidget *widget,
+                          QVBoxLayout *layout,
+                          const string &leftLabel,
+                          const string &rightContent,
+                          int fontSize = 0,
+                          QLabel **label = NULL);
+
+  QLineEdit *_addInputRow(QWidget *parent,
+                          QVBoxLayout *layout,
+                          const string &leftLabel,
+                          const string &rightContent,
+                          int fontSize = 0,
+                          QFrame **framePtr = NULL);
+*/
+  // end from DisplayManager
 
 
   bool _firstTime;
@@ -186,10 +416,10 @@ private:
 
   // sweeps
 
-  SweepManager _sweepManager;
-  QVBoxLayout *_sweepVBoxLayout;
-  QGroupBox *_sweepPanel;
-  vector<QRadioButton *> *_sweepRButtons;
+  SweepController *_sweepController;
+  //QVBoxLayout *_sweepVBoxLayout;
+  SweepView *_sweepPanel;
+  //vector<QRadioButton *> *_sweepRButtons;
 
   // windows
 
@@ -303,7 +533,7 @@ private:
 
   // set top bar
 
-  virtual void _setTitleBar(const string &radarName);
+  void _setTitleBar(const string &radarName);
   
   // local methods
 
@@ -314,8 +544,31 @@ private:
 
   // data retrieval
 
-  void _handleRealtimeData(QTimerEvent * event);
-  void _handleArchiveData(QTimerEvent * event);
+  void _readDataFile(vector<string> *selectedFields);
+
+  // handleArchiveData calls:
+  // getArchiveData
+  // plotArchiveData
+  // activateArchiveRendering
+
+  // volumeDataChanged (from script or editor) calls:
+  // addNewFields
+  // fieldPanel->update()
+  // updateArchiveData  --> calls _handleRayUpdate for each ray of selected sweep
+  // activateArchiveRendering
+
+  // plotArchiveData vs. activateArchiveRendering?
+  // activateArchiveRendering calls _ppi->ActivateArchiveRendering ... FieldRenderers
+  // plotArchiveData gets selected Sweep, 
+  //   then calls handleRay for each ray of the sweep. ???
+  //      handleRay and handleRayUpdate both replace missing data with fill value (TODO: move to displayFieldX)
+  //          then call _storeRayLoc
+  // ray_loc used to determine which ray is closest to click point. 
+  // Q: What about _ppiRayLoc? this is where the index is used. Ah, _ppiRayLoc 
+  //       an instance of RayLoc.
+
+
+  void _handleArchiveData();
   int _getArchiveData();
   void _plotArchiveData();
   void _updateArchiveData(vector<string> &fieldNames);
@@ -345,7 +598,7 @@ private:
   // modes
 
   void _setArchiveMode(bool state);
-  void _activateRealtimeRendering();
+  //void _activateRealtimeRendering();
   void _activateArchiveRendering();
 
   // archive mode
@@ -369,19 +622,33 @@ private slots:
   // Qt slots //
   //////////////
 
-  // override
+ // from DisplayManager ...
+  //virtual void _howto();
+  void _about();
+  void _showClick();
+  //virtual void _freeze() = 0;
+  //virtual void _unzoom() = 0;
+  //virtual void _refresh() = 0;
+  //virtual void _changeField(int fieldId, bool guiMode) = 0;
+  //virtual void _openFile();
+  //virtual void _saveFile();
 
-  virtual void _freeze();
-  virtual void _unzoom();
-  virtual void _refresh();
-  virtual void _changeField(int fieldId, bool guiMode = true);
+  void _changeFieldVariable(bool value);
+  int _updateDisplayFields(vector<string> *fieldNames);
+  // end from DisplayManager
+
+
+  void _freeze();
+  void _unzoom();
+  void _refresh();
+  void _changeField(int fieldId, bool guiMode = true);
 
   // sweeps
 
-  void _createSweepPanel();
-  void _createSweepRadioButtons();
-  void _clearSweepRadioButtons();
-  void _changeSweep(bool value);
+  //void _createSweepPanel();
+  //void _createSweepRadioButtons();
+  //void _clearSweepRadioButtons();
+  //void _changeSweep(bool value);
   void _changeSweepRadioButton(int value);
 
   // local
@@ -395,7 +662,7 @@ private slots:
 
   // modes
   
-  void _setRealtime(bool enabled);
+  //void _setRealtime(bool enabled);
 
   // archive mode
   
@@ -428,7 +695,7 @@ private slots:
   // images
 
   void _saveImageToFile(bool interactive = true);
-  void _createRealtimeImageFiles();
+  //void _createRealtimeImageFiles();
   void _createArchiveImageFiles();
   void _createImageFilesAllSweeps();
   void _createImageFiles();

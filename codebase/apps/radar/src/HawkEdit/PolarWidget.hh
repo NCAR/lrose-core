@@ -60,6 +60,7 @@
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 #include "DisplayField.hh"
+#include "DisplayFieldController.hh"
 
 class PolarManager;
 
@@ -111,7 +112,6 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   PolarWidget(QWidget* parent, 
               const PolarManager &manager,
-              const Params &params,
               const RadxPlatform &platform,
               //const vector<DisplayField *> &fields,
 	      DisplayFieldController *displayFieldController,
@@ -203,6 +203,7 @@ class DLL_EXPORT PolarWidget : public QWidget
  signals:
 
   void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+  void renderImage(int width, int height, string currentFieldName, double currentSweepAngle);
 
   //////////////
   // Qt slots //
@@ -217,8 +218,9 @@ class DLL_EXPORT PolarWidget : public QWidget
    *                         is used to check if this was the selected field.
    */
 
-  void displayImage(const size_t field_num);
-
+  //void displayImage(const size_t field_num);
+  void displayImage(string currentFieldName, double currentSweepAngle);
+  //void imageReady(QImage *image);
   /**
    * set archive mode
    */
@@ -306,7 +308,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @brief TDRP params.
    */
 
-  const Params &_params;
+  ParamFile *_params;
 
   // instrument platform details 
 
@@ -447,6 +449,8 @@ class DLL_EXPORT PolarWidget : public QWidget
   bool _isZoomed;
   QTransform _zoomTransform;
   WorldPlot _zoomWorld;
+
+  QImage *_image;
   
 
   ///////////////////////
@@ -562,6 +566,8 @@ class DLL_EXPORT PolarWidget : public QWidget
   virtual void contextMenuExamine(); // const QPoint &pos);
   virtual void contextMenuDataWidget();
   virtual void contextMenuHistogram();
+
+  void imageReady(QImage *image);
   
 
 };

@@ -22,13 +22,14 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// SweepManager.cc
+// SweepView.cc
 //
-// SweepManager object
+// SweepView object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Brenda Javornik
 //
-// March 2018
+// March 2021
 //
 ///////////////////////////////////////////////////////////////
 //
@@ -40,19 +41,21 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "SweepManager.hh"
+#include "SweepView.hh"
 #include <toolsa/LogStream.hh>
 
 #include <string>
 #include <cmath>
 #include <iostream>
 
+#include <QLabel>
+
 using namespace std;
 
 /////////////////////////////////////////////////////////////
 // Constructor
 
-SweepManager::SweepManager()
+SweepView::SweepView(QWidget *parent)
 //const Params &params) :
 //        _params(params)
         
@@ -62,13 +65,30 @@ SweepManager::SweepManager()
   //_reversedInGui = false;
   _guiIndex = 0;
   _selectedAngle = 0.0;
+//  _createSweepPanel(parent);
+//}
+
+/////////////////////////////////////////////////////////////
+// create the sweep panel
+// buttons will be filled in by createSweepRadioButtons()
+
+//void SweepView::_createSweepPanel(QWidget *parent)
+//{
+  
+//  _sweepPanel = new QGroupBox("Sweeps", parent);
+  setTitle("Sweeps");
+  _sweepVBoxLayout = new QVBoxLayout;
+  setLayout(_sweepVBoxLayout);
+  setAlignment(Qt::AlignHCenter);
+
+  _sweepRButtons = new vector<QRadioButton *>();
 
 }
 
 /////////////////////////////////////////////////////////////
 // destructor
 
-SweepManager::~SweepManager()
+SweepView::~SweepView()
 
 {
   //_sweeps.clear();
@@ -77,9 +97,9 @@ SweepManager::~SweepManager()
 /////////////////////////////////////////////////////////////
 // set from a volume
 
-void SweepManager::set() // const RadxVol &vol)
+//void SweepView::set() // const RadxVol &vol)
   
-{
+//{
 
   //DataModel *vol = DataModel::Instance();
 
@@ -132,14 +152,14 @@ void SweepManager::set() // const RadxVol &vol)
 */
   //if (_params.debug >= Params::DEBUG_VERBOSE) {
 //    if (_reversedInGui) {
-//      LOG(DEBUG) << "INFO - SweepManager: sweep list is reversed in GUI";
+//      LOG(DEBUG) << "INFO - SweepView: sweep list is reversed in GUI";
 //    }
   //}
 
-}
+//}
 
 /*
-void SweepManager::reset(const RadxVol &vol)
+void SweepView::reset(const RadxVol &vol)
   
 {
 
@@ -199,7 +219,7 @@ void SweepManager::reset(const RadxVol &vol)
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     if (_reversedInGui) {
-      cerr << "INFO - SweepManager: sweep list is reversed in GUI" << endl;
+      cerr << "INFO - SweepView: sweep list is reversed in GUI" << endl;
     }
   }
 
@@ -212,7 +232,7 @@ void SweepManager::reset(const RadxVol &vol)
 // set angle
 // size effect: sets the selected index
 
-void SweepManager::setAngle(double angle)
+void SweepView::setAngle(double angle)
   
 {
   /*
@@ -240,7 +260,7 @@ void SweepManager::setAngle(double angle)
 /////////////////////////////////////////////////////////////
 // set selected gui index
 
-void SweepManager::setGuiIndex(int index) 
+void SweepView::setGuiIndex(int index) 
 {
 /*
   _guiIndex = index;
@@ -262,7 +282,7 @@ void SweepManager::setGuiIndex(int index)
 /////////////////////////////////////////////////////////////
 /* set selected file index
 
-void SweepManager::setFileIndex(int index) 
+void SweepView::setFileIndex(int index) 
 {
 
   for (size_t ii = 0; ii < _sweeps.size(); ii++) {
@@ -274,10 +294,35 @@ void SweepManager::setFileIndex(int index)
 }
 */
 
+///////////////////////////////////////////////////////////////
+// change sweep
+
+void SweepView::_changeSweep(bool value) {
+
+  LOG(DEBUG) << "enter";
+
+/* TODO: fix up ...
+  if (!value) {
+    return;
+  }
+
+  for (size_t ii = 0; ii < _sweepRButtons->size(); ii++) {
+    if (_sweepRButtons->at(ii)->isChecked()) {
+      LOG(DEBUG) << "sweepRButton " << ii << " is checked; moving to sweep index " << ii;
+      _sweepManager.setGuiIndex(ii);
+      _ppi->setStartOfSweep(true);
+      //_rhi->setStartOfSweep(true);
+      _moveUpDown();
+      return;
+    }
+  } // ii
+*/
+}
+
 /////////////////////////////////////////////////////////////
 // change selected index by the specified value
 
-void SweepManager::changeSelectedIndex(int increment) 
+void SweepView::changeSelectedIndex(int increment) 
 {
 /*
   _guiIndex += increment;
@@ -294,7 +339,7 @@ void SweepManager::changeSelectedIndex(int increment)
 /////////////////////////////////////////////////////////////
 // get the fixed angle, optionally specifying an index
 /*
-double SweepManager::getFixedAngleDeg(ssize_t sweepIndex ) const 
+double SweepView::getFixedAngleDeg(ssize_t sweepIndex ) const 
 {
  
   if (sweepIndex < 0) {
@@ -313,4 +358,70 @@ double SweepManager::getFixedAngleDeg(ssize_t sweepIndex ) const
 
 }
 */
+
+/////////////////////////////////////////////////////////////////////
+// create radio buttons
+// this requires that _sweepManager is up to date with sweep info
+
+void SweepView::createSweepRadioButtons(vector<double> &sweepAngles) 
+{
+
+  _params = ParamFile::Instance();
+  // fonts
   
+  QLabel dummy;
+  QFont font = dummy.font();
+  QFont fontm2 = dummy.font();
+  int fsize = _params->label_font_size;
+  int fsizem2 = _params->label_font_size - 2;
+  font.setPixelSize(fsize);
+  fontm2.setPixelSize(fsizem2);
+  
+  // radar and site name
+  
+  char buf[256];
+  _sweepRButtons = new vector<QRadioButton *>();
+
+  for (vector<double>::iterator it = sweepAngles.begin(); it != sweepAngles.end(); ++it) {
+  //for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
+    
+    //std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
+    std::snprintf(buf, 256, "%.2f", *it);
+    QRadioButton *radio1 = new QRadioButton(buf); 
+    radio1->setFont(fontm2);
+    
+    //if (ielev == _sweepManager.getGuiIndex()) {
+    //  radio1->setChecked(true);
+    //}
+    
+    _sweepRButtons->push_back(radio1);
+    _sweepVBoxLayout->addWidget(radio1);
+    
+    // connect slot for sweep change
+
+    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeSweep(bool)));
+
+  }
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// create sweep panel of radio buttons
+
+void SweepView::clearSweepRadioButtons() 
+{
+
+  QLayoutItem* child;
+  if (_sweepVBoxLayout != NULL) {
+    while (_sweepVBoxLayout->count() !=0) {
+      child = _sweepVBoxLayout->takeAt(0);
+      if (child->widget() !=0) {
+        delete child->widget();
+      }
+      delete child;
+    }
+  }
+ 
+} 
+
+

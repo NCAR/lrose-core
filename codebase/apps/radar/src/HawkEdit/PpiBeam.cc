@@ -43,12 +43,13 @@ using namespace std;
 /////////////////////
 // polar constructor
 
-PpiBeam::PpiBeam(const Params &params,
-                 const RadxRay *ray,
-                 int n_fields,
+PpiBeam::PpiBeam(// const RadxRay *ray,
                  double start_angle,
-                 double stop_angle) :
-        Beam(params, ray, n_fields),
+                 double stop_angle,
+                 double startRangeKm,
+                 double gateSpacingKm
+                 ) :
+        //Beam(ray),
         startAngle(start_angle),
         stopAngle(stop_angle),
         leftEnd(-1.0),
@@ -73,8 +74,8 @@ PpiBeam::PpiBeam(const Params &params,
   
   _polygons.resize(_nGates);
 
-  double startRangeKm = _ray->getStartRangeKm();
-  double gateSpacingKm = _ray->getGateSpacingKm();
+  //double startRangeKm = _ray->getStartRangeKm();
+  //double gateSpacingKm = _ray->getGateSpacingKm();
 
   double innerRange = startRangeKm;
   double outerRange = innerRange + gateSpacingKm;
@@ -108,19 +109,19 @@ PpiBeam::~PpiBeam()
 ////////////////////////////////////////////////////////////////
 void PpiBeam::paint(QImage *image,
                     const QTransform &transform,
-                    size_t field,
                     bool useHeight,
                     bool drawInstHt)
 {
   // LOG(DEBUG) << "enter field = " << field;
 
-  // TODO: fix HACK
+  /* TODO: fix HACK
   if ((field >= _nFields) || (field >= _brushes.size())) {
     LOG(DEBUG) << " aborting: field " << field << " is >= _nFields=" << _nFields
 	       << " or >= _brushes.size()=" << _brushes.size();
     //throw std::range_error("number of fields NOT equal to number of brushes"); 
     return;
   }
+  */
   QPainter painter(image);
   
   painter.setTransform(transform);
@@ -135,7 +136,7 @@ void PpiBeam::paint(QImage *image,
   polygon[2] = QPointF(_polygons[0].pts[2].x, _polygons[0].pts[2].y);
   polygon[3] = QPointF(_polygons[0].pts[3].x, _polygons[0].pts[3].y);
   
-  const QBrush *prev_brush = _brushes[field][0];
+  const QBrush *prev_brush = _brushes[0];
   const QBrush *curr_brush = 0;
   
   for (size_t igate = 0; igate < _nGates; ++igate) {
@@ -144,7 +145,7 @@ void PpiBeam::paint(QImage *image,
       continue;
     }
 
-    curr_brush = _brushes[field][igate];
+    curr_brush = _brushes[igate];
     /*
     if ((field == 1) && (igate < 10)) {
       QColor qcolor = curr_brush->color();
@@ -189,13 +190,13 @@ void PpiBeam::print(ostream &out)
 
 {
   out << "================= PpiBeam =================" << endl;
-  RadxTime btime(_ray->getTimeSecs());
-  out << "  time: " << btime.asString() << endl;
-  out << "  elevation: " << _ray->getElevationDeg() << endl;
-  out << "  azimuth: " << _ray->getAzimuthDeg() << endl;
+  //RadxTime btime(_ray->getTimeSecs());
+  //out << "  time: " << btime.asString() << endl;
+  //out << "  elevation: " << _ray->getElevationDeg() << endl;
+  //out << "  azimuth: " << _ray->getAzimuthDeg() << endl;
   out << "  startAngle: " << startAngle << endl;
   out << "  stopAngle: " << stopAngle << endl;
-  out << "  nFields: " << _nFields << endl;
+  //out << "  nFields: " << _nFields << endl;
   out << "=============================================" << endl;
 }
 

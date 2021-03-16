@@ -60,6 +60,9 @@ DisplayField::DisplayField(const string &label,
   LOG(DEBUG) << "units = " << _units;
   LOG(DEBUG) << "buttonRow = " << _buttonRow;
   _haveColorMap = true;
+
+  _renderer = new FieldRenderer(name);
+  _image = NULL;
 }
 
 // destructor
@@ -155,3 +158,21 @@ void DisplayField::replaceColorMap(ColorMap newColorMap)
 {
   _colorMap = newColorMap;
 }
+
+QImage &DisplayField::getImage() {
+  if (_image == NULL) {
+    //render();   HERE still working here ...
+    return *_image;
+  } else {
+    return *_image;  // TODO: emit a signal
+  }
+}
+/*
+void DisplayField::render() {
+  int _width, _height; // TODO: fix this ...
+  _renderer->createImage(_width, _height);
+  // add Beams for each ray of data ...
+  _renderer->run();
+  return; // send a signal when the image is done.
+}
+*/

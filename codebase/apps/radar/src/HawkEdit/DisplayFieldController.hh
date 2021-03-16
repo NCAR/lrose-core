@@ -2,7 +2,10 @@
 #define DISPLAYFIELDCONTROLLER_H
 
 #include "DisplayFieldModel.hh"
+#include "DisplayFieldView.hh"
 //#include "ColorMap.hh"
+#include "ParamFile.hh"
+#include <QFrame>
 
 class DisplayFieldController
 {
@@ -12,6 +15,20 @@ public:
   DisplayFieldController(DisplayFieldModel *model);
   virtual ~DisplayFieldController();
 
+  void setupDisplayFields(
+    string colorMapDir, 
+    vector<Params::field_t> &fields,
+    string gridColor, 
+    string emphasisColor,
+    string annotationColor, 
+    string backgroundColor,
+    Params::debug_t debug  
+  );
+
+  //void createFieldPanel(QFrame *main);
+  void updateFieldPanel(string fieldName);
+
+  bool contains(string fieldName);
   void addField(DisplayField *newField);
   void hideField(DisplayField *field);
   void setFieldToMissing(DisplayField *field);
@@ -68,12 +85,17 @@ public:
 
   DisplayFieldModel *getModel() {return _model;};
 
+    void setView(DisplayFieldView *view);
+
+    //void renderFields();
+    QImage &getSelectedFieldImage();
+
 private:
  
   //vector<DisplayField *> *_current;
   DisplayFieldModel *_model; // edit version 
  
-  
+  DisplayFieldView *_displayFieldView;
 
 };
 

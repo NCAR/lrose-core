@@ -52,7 +52,6 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   PpiWidget(QWidget* parent,
             const PolarManager &manager,
-            const Params &params,
             const RadxPlatform &platform,
 	    DisplayFieldController *displayFieldController,
 	    //            const vector<DisplayField *> &fields,
@@ -185,7 +184,7 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   void contextMenuParameterColors();
   //  void changeToDisplayField(string fieldName); // , ColorMap newColorMap);
 
-  void cleanBeams(size_t nFields);
+  //void cleanBeams(size_t nFields);
 
  protected:
 
