@@ -77,6 +77,24 @@ void IwrfTsArchive::resetToEnd()
 {
 }
 
+//////////////////////////////////////////////////////////////////
+// get a beam of pulses, given the time, el and az
+// returns empty vector on failure
+// data in the beam must be used before any other operations
+// are performed on the archive
+
+vector<IwrfTsArchive::PulseEntry *>
+  IwrfTsArchive::getBeam(DateTime &searchTime,
+                         double searchElev,
+                         double searchAz)
+{
+  
+  vector<PulseEntry *> beamPulses;
+  
+  return beamPulses;
+  
+}
+
 ///////////////////////////////////////////////////////////////
 // PulseEntry inner class
 ///////////////////////////////////////////////////////////////
