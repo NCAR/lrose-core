@@ -42,7 +42,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
-class RadxVol;
+#include <Radx/RadxVol.hh>
 class RadxFile;
 using namespace std;
 
@@ -74,6 +74,10 @@ private:
   Args _args;
   Params _params;
   
+  int _serialStartIndex;
+  int _serialThisIndex;
+  RadxVol _mergedVol;
+
   int _runFilelist();
   int _runArchive();
   int _runRealtime();
@@ -81,6 +85,8 @@ private:
   void _setupWrite(RadxFile &file);
   int _writeVol(RadxVol &vol);
   int _processFile(const string &primaryPath);
+  int _processFileParallel(const string &primaryPath);
+  int _processFileSerial(const string &serialPath);
   int _checkGeom(const RadxVol &primaryVol, const RadxVol &secondaryVol);
   int _mergeVol(RadxVol &primaryVol, const RadxVol &secondaryVol);
   

@@ -102,6 +102,44 @@ max_realtime_data_age_secs = 300;
 
 primary_dataset_dir = "/tmp/cfradial/primary";
 
+//======================================================================
+//
+// MERGE_METHOD - parallel or serial.
+//
+//======================================================================
+ 
+///////////// merge_method ////////////////////////////
+//
+// The method for performing the merge - PARALLEL or SERIAL.
+//
+// MERGE_PARALLEL: read volumes from different directories, that arrive 
+//   at similar times. The primary_dataset_dir will be monitored for new 
+//   file activity. When a new file arrives, the secondary directories 
+//   will be searched for files at a similar time, and the data from those 
+//   files will be merged in to the primary data set.
+//
+// MERGE_SERIAL: we watch a single directory for files that arrive in 
+//   sequence. We examing the scanName to decide whether the volume 
+//   belongs in the merged data set. Once all of the required data sets 
+//   have arrived, in time order, the individual volumes are merged in 
+//   time sequence, and a single output file is written with the merged 
+//   volume.
+//
+//
+// Type: enum
+// Options:
+//     MERGE_PARALLEL
+//     MERGE_SERIAL
+//
+
+merge_method = MERGE_SERIAL;
+
+//======================================================================
+//
+// MERGE_PARALLEL.
+//
+//======================================================================
+ 
 ///////////// secondary_datasets //////////////////////
 //
 // List of directories containing the data files.
@@ -150,6 +188,77 @@ secondary_datasets = {
     find_mode = FIND_FIRST_AFTER
   }
 };
+
+//======================================================================
+//
+// MERGE_SERIAL.
+//
+// This was developed for Vaisala volume files, which are sometime split 
+//   into parts based on the PRF, max range etc. Typically a volume might 
+//   be split into sub-volumes named, for example, 'VOL_A', 'VOL_B' and 
+//   'VOL_C'. The serial ingest allows you to merge these sub-volumes into 
+//   a single volume, and then write out the combined volume.
+//
+//======================================================================
+ 
+///////////// serial_vol_types ////////////////////////
+//
+// Array of volume types for the volumes to be merged. The volume will 
+//   only be written when all of the specified input volumes have arrived.
+//
+// If you do not want to specify a particular string property, set it to 
+//   an empty string.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string vol_title;
+//      string scan_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+serial_vol_types = {
+  {
+    vol_title = "VOL_A",
+    scan_name = "VOL_A"
+  }
+  ,
+  {
+    vol_title = "VOL_B",
+    scan_name = "VOL_B"
+  }
+  // ,
+  // {
+  //   vol_title = "VOL_C",
+  //   scan_name = "VOL_C"
+  // }
+};
+
+///////////// serial_merge_vol_title //////////////////
+//
+// Title for merged volume.
+//
+// The will be applied before the volume is written out.
+//
+//
+// Type: string
+//
+
+serial_merge_vol_title = "MERGED";
+
+///////////// serial_merge_scan_name //////////////////
+//
+// Scan name for merged volume.
+//
+// The will be applied before the volume is written out.
+//
+//
+// Type: string
+//
+
+serial_merge_scan_name = "MERGED";
 
 //======================================================================
 //
@@ -333,7 +442,7 @@ compression_level = 4;
 // Type: string
 //
 
-output_dir = "./output";
+output_dir = "/tmp/merged";
 
 ///////////// output_filename_mode ////////////////////
 //

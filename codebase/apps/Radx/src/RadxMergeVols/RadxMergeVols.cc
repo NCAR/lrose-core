@@ -35,7 +35,6 @@
 ////////////////////////////////////////////////////////////////
 
 #include "RadxMergeVols.hh"
-#include <Radx/RadxVol.hh>
 #include <Mdv/GenericRadxFile.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
@@ -93,6 +92,9 @@ RadxMergeVols::RadxMergeVols(int argc, char **argv)
     Radx::setMissingSi16(_params.missing_field_si16);
     Radx::setMissingSi08(_params.missing_field_si08);
   }
+
+  _serialStartIndex = -1;
+  _serialThisIndex = -1;
 
 }
 
@@ -230,8 +232,23 @@ int RadxMergeVols::_runRealtime()
 int RadxMergeVols::_processFile(const string &primaryPath)
 {
 
+  if (_params.merge_method == Params::MERGE_PARALLEL) {
+    return _processFileParallel(primaryPath);
+  } else {
+    return _processFileSerial(primaryPath);
+  }
+
+}
+  
+//////////////////////////////////////////////////
+// Process a file using the parallel method
+// Returns 0 on success, -1 on failure
+
+int RadxMergeVols::_processFileParallel(const string &primaryPath)
+{
+
   if (_params.debug) {
-    cerr << "INFO - RadxMergeVols::_processFile" << endl;
+    cerr << "INFO - RadxMergeVols::_processFileParallel" << endl;
     cerr << "  Input path primary file: " << primaryPath << endl;
   }
   
@@ -247,7 +264,7 @@ int RadxMergeVols::_processFile(const string &primaryPath)
   
   RadxVol primaryVol;
   if (primaryFile.readFromPath(primaryPath, primaryVol)) {
-    cerr << "ERROR - RadxMergeVols::_processFile" << endl;
+    cerr << "ERROR - RadxMergeVols::_processFileParallel" << endl;
     cerr << "  Cannot read in primary file: " << primaryPath << endl;
     cerr << primaryFile.getErrStr() << endl;
     return -1;
@@ -256,7 +273,7 @@ int RadxMergeVols::_processFile(const string &primaryPath)
   time_t primaryTime = primaryVol.getEndTimeSecs();
   bool dateOnly;
   if (DataFileNames::getDataTime(primaryPath, primaryTime, dateOnly)) {
-    cerr << "ERROR - RadxMergeVols::_processFile" << endl;
+    cerr << "ERROR - RadxMergeVols::_processFileParallel" << endl;
     cerr << "  Cannot get time from file path: " << primaryPath << endl;
     return -1;
   }
@@ -288,14 +305,14 @@ int RadxMergeVols::_processFile(const string &primaryPath)
     }
     
     if (tlist.compile()) {
-      cerr << "ERROR - RadxMergeVols::_processFile()" << endl;
+      cerr << "ERROR - RadxMergeVols::_processFileParallel()" << endl;
       cerr << "  Cannot compile secondary file time list" << endl;
       cerr << tlist.getErrStr() << endl;
       return -1;
     }
     const vector<string> &pathList = tlist.getPathList();
     if (pathList.size() < 1) {
-      cerr << "WARNING - RadxMergeVols::_processFile()" << endl;
+      cerr << "WARNING - RadxMergeVols::_processFileParallel()" << endl;
       cerr << "  No suitable secondary file found" << endl;
       cerr << "  Primary file: " << primaryPath << endl;
       return -1;
@@ -316,7 +333,7 @@ int RadxMergeVols::_processFile(const string &primaryPath)
     }
     RadxVol secondaryVol;
     if (secondaryFile.readFromPath(secondaryPath, secondaryVol)) {
-      cerr << "ERROR - RadxMergeVols::_processFile" << endl;
+      cerr << "ERROR - RadxMergeVols::_processFileParallel" << endl;
       cerr << "  Cannot read in secondary file: " << secondaryPath << endl;
       cerr << secondaryFile.getErrStr() << endl;
       return -1;
@@ -326,7 +343,7 @@ int RadxMergeVols::_processFile(const string &primaryPath)
     // volume to hold the merged data
     
     if (_mergeVol(primaryVol, secondaryVol)) {
-      cerr << "ERROR - RadxMergeVols::_processFile" << endl;
+      cerr << "ERROR - RadxMergeVols::_processFileParallel" << endl;
       cerr << "  Merge failed" << endl;
       cerr << "  Primary file: " << primaryPath << endl;
       cerr << "  Secondary file: " << secondaryPath << endl;
@@ -346,6 +363,120 @@ int RadxMergeVols::_processFile(const string &primaryPath)
 
   if (_writeVol(primaryVol)) {
     return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Process a file using the serial method
+// Returns 0 on success, -1 on failure
+
+int RadxMergeVols::_processFileSerial(const string &serialPath)
+{
+
+  if (_params.debug) {
+    cerr << "INFO - RadxMergeVols::_processFileSerial" << endl;
+    cerr << "  Input path serial file: " << serialPath << endl;
+  }
+  
+  // read in file
+  
+  GenericRadxFile serialFile;
+  _setupRead(serialFile);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "===== SETTING UP READ FOR FILES =====" << endl;
+    serialFile.printReadRequest(cerr);
+    cerr << "=====================================" << endl;
+  }
+  
+  RadxVol latestVol;
+  if (serialFile.readFromPath(serialPath, latestVol)) {
+    cerr << "ERROR - RadxMergeVols::_processFileSerial" << endl;
+    cerr << "  Cannot read in serial file: " << serialPath << endl;
+    cerr << serialFile.getErrStr() << endl;
+    return -1;
+  }
+
+  // check if this vol is one of the request types
+  
+  int typeNum = -1;
+  string latestTitle = latestVol.getTitle();
+  string latestScanName = latestVol.getScanName();
+  for (int itype = 0; itype < _params.serial_vol_types_n; itype++) {
+    Params::serial_vol_type_t type = _params._serial_vol_types[itype];
+    string searchTitle = type.vol_title;
+    string searchScanName = type.scan_name;
+    if (searchTitle.size() == 0 && searchScanName.size() == 0) {
+      // none specified
+      continue;
+    }
+    if (searchTitle.size() > 0) {
+      if (searchTitle != latestTitle) {
+        // wrong title
+        continue;
+      }
+    }
+    if (searchScanName.size() > 0) {
+      if (searchScanName != latestScanName) {
+        // wrong scanName
+        continue;
+      }
+    }
+    // success
+    typeNum = itype;
+    break;
+  } // itype
+
+  if (typeNum < 0) {
+    // not wanted
+    return -1;
+  }
+  
+  if (typeNum == 0) {
+
+    // initial vol type, save the volume
+    
+    _mergedVol.clear();
+    _mergedVol = latestVol;
+    _mergedVol.setTitle(_params.serial_merge_vol_title);
+    _mergedVol.setScanName(_params.serial_merge_scan_name);
+
+    if (_params.debug) {
+      cerr << "Init mergeVol from path: " << serialPath << endl;
+      cerr << "  title, scanName: " << latestTitle << ", " << latestScanName << endl;
+    }
+
+  } else {
+
+    // later vol type, copy the rays across
+    
+    size_t nSweepsSoFar = _mergedVol.getNSweeps();
+    vector<RadxRay *> &latestRays = latestVol.getRays();
+    for (size_t iray = 0; iray < latestRays.size(); iray++) {
+      RadxRay *newRay = new RadxRay(*latestRays[iray]);
+      int sweepNum = newRay->getSweepNumber() + nSweepsSoFar;
+      newRay->setSweepNumber(sweepNum);
+      _mergedVol.addRay(newRay);
+    }
+    _mergedVol.loadSweepInfoFromRays();
+    _mergedVol.loadVolumeInfoFromRays();
+
+    if (_params.debug) {
+      cerr << "Adding vol to merge, path: " << serialPath << endl;
+      cerr << "  title, scanName: " << latestTitle << ", " << latestScanName << endl;
+    }
+
+  }
+
+  if (typeNum == _params.serial_vol_types_n - 1) {
+    // last type, write out
+    if (_writeVol(_mergedVol)) {
+      _mergedVol.clear();
+      return -1;
+    }
+    _mergedVol.clear();
   }
 
   return 0;
@@ -441,6 +572,16 @@ void RadxMergeVols::_setupWrite(RadxFile &file)
 
 int RadxMergeVols::_writeVol(RadxVol &vol)
 {
+
+  // ensure radar name is only alphanumeric
+
+  string radarName = vol.getInstrumentName();
+  for (size_t ii = 0; ii < radarName.size(); ii++) {
+    if (!isalnum(radarName[ii])) {
+      radarName[ii] = '_';
+    }
+  }
+  vol.setInstrumentName(radarName);
 
   // output file
 

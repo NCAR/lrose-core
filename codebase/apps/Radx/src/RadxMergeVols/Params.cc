@@ -672,6 +672,44 @@
     tt->single_val.s = tdrpStrDup("/tmp/cfradial/primary");
     tt++;
     
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("MERGE_METHOD - parallel or serial");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'merge_method'
+    // ctype is '_merge_method_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("merge_method");
+    tt->descr = tdrpStrDup("The method for performing the merge - PARALLEL or SERIAL");
+    tt->help = tdrpStrDup("MERGE_PARALLEL: read volumes from different directories, that arrive at similar times. The primary_dataset_dir will be monitored for new file activity. When a new file arrives, the secondary directories will be searched for files at a similar time, and the data from those files will be merged in to the primary data set.\n\nMERGE_SERIAL: we watch a single directory for files that arrive in sequence. We examing the scanName to decide whether the volume belongs in the merged data set. Once all of the required data sets have arrived, in time order, the individual volumes are merged in time sequence, and a single output file is written with the merged volume.");
+    tt->val_offset = (char *) &merge_method - &_start_;
+    tt->enum_def.name = tdrpStrDup("merge_method_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("MERGE_PARALLEL");
+      tt->enum_def.fields[0].val = MERGE_PARALLEL;
+      tt->enum_def.fields[1].name = tdrpStrDup("MERGE_SERIAL");
+      tt->enum_def.fields[1].val = MERGE_SERIAL;
+    tt->single_val.e = MERGE_PARALLEL;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("MERGE_PARALLEL");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'secondary_datasets'
     // ctype is '_secondary_dataset_t'
     
@@ -737,11 +775,83 @@
       tt->struct_vals[11].e = FIND_FIRST_AFTER;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("MERGE_SERIAL");
+    tt->comment_text = tdrpStrDup("This was developed for Vaisala volume files, which are sometime split into parts based on the PRF, max range etc. Typically a volume might be split into sub-volumes named, for example, 'VOL_A', 'VOL_B' and 'VOL_C'. The serial ingest allows you to merge these sub-volumes into a single volume, and then write out the combined volume.");
+    tt++;
+    
+    // Parameter 'serial_vol_types'
+    // ctype is '_serial_vol_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("serial_vol_types");
+    tt->descr = tdrpStrDup("Array of volume types for the volumes to be merged. The volume will only be written when all of the specified input volumes have arrived.");
+    tt->help = tdrpStrDup("If you do not want to specify a particular string property, set it to an empty string.");
+    tt->array_offset = (char *) &_serial_vol_types - &_start_;
+    tt->array_n_offset = (char *) &serial_vol_types_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(serial_vol_type_t);
+    tt->array_n = 3;
+    tt->struct_def.name = tdrpStrDup("serial_vol_type_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("vol_title");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_serial_vol_types->vol_title - (char *) _serial_vol_types;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("scan_name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_serial_vol_types->scan_name - (char *) _serial_vol_types;
+    tt->n_struct_vals = 6;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("VOL_A");
+      tt->struct_vals[1].s = tdrpStrDup("VOL_A");
+      tt->struct_vals[2].s = tdrpStrDup("VOL_B");
+      tt->struct_vals[3].s = tdrpStrDup("VOL_B");
+      tt->struct_vals[4].s = tdrpStrDup("VOL_C");
+      tt->struct_vals[5].s = tdrpStrDup("VOL_C");
+    tt++;
+    
+    // Parameter 'serial_merge_vol_title'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("serial_merge_vol_title");
+    tt->descr = tdrpStrDup("Title for merged volume.");
+    tt->help = tdrpStrDup("The will be applied before the volume is written out.");
+    tt->val_offset = (char *) &serial_merge_vol_title - &_start_;
+    tt->single_val.s = tdrpStrDup("MERGED");
+    tt++;
+    
+    // Parameter 'serial_merge_scan_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("serial_merge_scan_name");
+    tt->descr = tdrpStrDup("Scan name for merged volume.");
+    tt->help = tdrpStrDup("The will be applied before the volume is written out.");
+    tt->val_offset = (char *) &serial_merge_scan_name - &_start_;
+    tt->single_val.s = tdrpStrDup("MERGED");
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS");
     tt->comment_text = tdrpStrDup("Fixed angles are elevation in PPI mode and azimuth in RHI mode.");
     tt++;
@@ -818,11 +928,11 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO CHECK FOR CONSTANT GEOMETRY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -839,11 +949,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("SWEEP FILE AGGREGATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -860,11 +970,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -895,11 +1005,11 @@
     tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CFRADIAL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -928,11 +1038,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1009,11 +1119,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
     tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
     tt++;
