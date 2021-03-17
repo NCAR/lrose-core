@@ -2916,12 +2916,14 @@ void PolarManager::_openFile()
 
   QMessageBox::information(this, "Status", "retrieving field names ...");
   // choose which fields to import
-  userSelectFieldsForReading(fileList[0]);   
+  vector<string> *selectedFields = userSelectFieldsForReading(fileList[0]);   
 
   QByteArray qb = filename.toUtf8();
   const char *name = qb.constData();
 
     LOG(DEBUG) << "selected file path : " << name;
+// TODO: HERE!  somehow, ALL fields are listed as selected ACK!
+  //fieldsSelected(selectedFields);
   
 }
 
@@ -3028,14 +3030,14 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
   LOG(DEBUG) << "enter";
 
   if (selectedFields->size() > 0) {
-    QStringList qselectedFields;
-    cout << selectedFields->size() << " selected\n";
+    //QStringList qselectedFields;
+    LOG(DEBUG) << selectedFields->size() << " selected";
     for (vector<string>::iterator it=selectedFields->begin(); it != selectedFields->end(); ++it) {
-      cout << *it << endl;
-      qselectedFields.push_back(QString::fromStdString(*it));
+      LOG(DEBUG) << *it;
+      //qselectedFields.push_back(QString::fromStdString(*it));
+      _displayFieldController->addField(*it);
     }
     // give the selected fields to the volume read ...
-    //_setupDisplayFields(selectedFields);
     _readDataFile(selectedFields);
     
   }  
