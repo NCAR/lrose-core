@@ -50,7 +50,7 @@ def main():
 
     usage = "usage: %prog [options]"
     releaseDirDefault = os.path.join(homeDir, 'releases')
-    logDirDefault = '/tmp/logs/create_src_release
+    logDirDefault = '/tmp/logs/create_src_release'
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=True,

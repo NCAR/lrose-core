@@ -60,7 +60,7 @@ def main():
     homeDir = os.environ['HOME']
     prefixDefault = "/tmp/lrose-scratch"
     releaseDirDefault = os.path.join(homeDir, 'releases')
-    logDirDefault = '/tmp/logs/create_bin_release
+    logDirDefault = '/tmp/logs/create_bin_release'
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=False,
