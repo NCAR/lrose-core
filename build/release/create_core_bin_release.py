@@ -71,6 +71,10 @@ def main():
     parser.add_option('--releaseDir',
                       dest='releaseDir', default=releaseDirDefault,
                       help='Top-level release dir')
+    parser.add_option('--static',
+                      dest='static', default=False,
+                      action="store_true",
+                      help='Create static lib objects. Default is shared')
 
     (options, args) = parser.parse_args()
     
@@ -117,7 +121,8 @@ def main():
         cmd += " --tag " + tag
     cmd += " --releaseDir " + options.releaseDir
     cmd += " --force"
-    cmd += " --static"
+    if (options.static):
+        cmd += " --static"
     shellCmd(cmd)
 
     ################################################################

@@ -470,7 +470,6 @@ tdrp_test
 test_procmap
 test_tserver
 titan_print
-tkdiff
 toneDownColorscale
 tops_filter
 track_print
