@@ -36,6 +36,32 @@ void DisplayFieldController::addField(DisplayField *newField) {
   _model->addField(newField);
 }
 
+
+void DisplayFieldController::addField(string newFieldName) {
+  DisplayField *displayField = _model->getField(newFieldName);
+  if (displayField == NULL) {
+    DisplayField *newDisplayField = new DisplayField(newFieldName);
+    addField(newDisplayField);
+    _displayFieldView->updateFieldPanel(newFieldName, newFieldName, newFieldName);
+  } else {
+    updateFieldPanel(newFieldName);
+  }
+}
+
+
+void DisplayFieldController::updateFieldPanel(string fieldName) {
+  //_displayFieldView->updateFieldPanel(fieldName);
+
+    size_t index = getFieldIndex(fieldName);
+    DisplayField *rawField = getField(index);
+    if (rawField->isHidden()) { 
+      _displayFieldView->updateFieldPanel(rawField->getLabel(), fieldName,
+        rawField->getShortcut());
+      rawField->setStateVisible();
+    }
+    setSelectedField(index);
+}
+
 void DisplayFieldController::hideField(DisplayField *field) {
   //_model->hideField(field);
 }
@@ -353,17 +379,7 @@ void DisplayFieldController::setView(DisplayFieldView *view) {
 //  _displayFieldView->createFieldPanel(mainFrame);
 //}
 
-void DisplayFieldController::updateFieldPanel(string fieldName) {
-  //_displayFieldView->updateFieldPanel(fieldName);
-  size_t index = getFieldIndex(fieldName);
-  DisplayField *rawField = getField(index);
-  if (rawField->isHidden()) { 
-    _displayFieldView->updateFieldPanel(rawField->getLabel(), fieldName,
-    rawField->getShortcut());
-    rawField->setStateVisible();
-  }
-  setSelectedField(index);
-}
+
 // TODO: make this a signal and slot??
 QImage &DisplayFieldController::getSelectedFieldImage() {
    DisplayField *selectedField = _model->getSelectedField();

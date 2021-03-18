@@ -90,7 +90,7 @@ public:
 
 private:
   
-  QGroupBox *_fieldPanel;
+  // QGroupBox *_fieldPanel;
   QGridLayout *_fieldsLayout;
   QLabel *_selectedLabelWidget;
   QButtonGroup *_fieldGroup;

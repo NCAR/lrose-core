@@ -53,6 +53,8 @@ public:
                const ColorMap &colorMap,
                int buttonRow,
                bool isFilt);
+  
+  DisplayField(string &fieldName);
 
   virtual ~DisplayField();
 

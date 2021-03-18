@@ -14,7 +14,7 @@ DisplayFieldView::~DisplayFieldView() {
 }
 
 //QWidget *DisplayFieldView::getViewWidget() {
-//  return _fieldPanel;
+//  return this;
 //}
 
 void DisplayFieldView::set_label_font_size(int size) {
@@ -41,7 +41,7 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
   int fsize4 = _label_font_size + 4;
   int fsize6 = _label_font_size + 6;
 
-  //_fieldPanel = new QGroupBox(parent); // <=== here is the connection
+  //this = new QGroupBox(parent); // <=== here is the connection
   _fieldGroup = new QButtonGroup;
   _fieldsLayout = new QGridLayout(this);
   _fieldsLayout->setVerticalSpacing(5);
@@ -59,7 +59,7 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
   //  _selectedField = _fields[0];
   //_selectedLabel = _fields[0]->getLabel();
   //_selectedName = _fields[0]->getName();
-  _selectedLabelWidget = new QLabel(_selectedLabel.c_str(), _fieldPanel);
+  _selectedLabelWidget = new QLabel(_selectedLabel.c_str(), this);
   QFont font6 = _selectedLabelWidget->font();
   font6.setPixelSize(fsize6);
   _selectedLabelWidget->setFont(font6);
@@ -81,27 +81,27 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
   QFont font2 = dummy.font();
   QFont font4 = dummy.font();
 
-  _valueLabel = new QLabel("", _fieldPanel);
+  _valueLabel = new QLabel("", this);
   _valueLabel->setFont(font);
   _fieldsLayout->addWidget(_valueLabel, row, 0, 1, nCols, alignCenter);
   row++;
 
-  QLabel *fieldHeader = new QLabel("FIELD LIST", _fieldPanel);
+  QLabel *fieldHeader = new QLabel("FIELD LIST", this);
   fieldHeader->setFont(font);
   _fieldsLayout->addWidget(fieldHeader, row, 0, 1, nCols, alignCenter);
   row++;
 
-  QLabel *nameHeader = new QLabel("Name", _fieldPanel);
+  QLabel *nameHeader = new QLabel("Name", this);
   nameHeader->setFont(font);
   _fieldsLayout->addWidget(nameHeader, row, 0, alignCenter);
-  QLabel *keyHeader = new QLabel("HotKey", _fieldPanel);
+  QLabel *keyHeader = new QLabel("HotKey", this);
   keyHeader->setFont(font);
   _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
   if (_haveFilteredFields) {
-    QLabel *rawHeader = new QLabel("Raw", _fieldPanel);
+    QLabel *rawHeader = new QLabel("Raw", this);
     rawHeader->setFont(font);
     _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
-    QLabel *filtHeader = new QLabel("Filt", _fieldPanel);
+    QLabel *filtHeader = new QLabel("Filt", this);
     filtHeader->setFont(font);
     _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
   }
@@ -123,10 +123,10 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
     // get filt field - may not be present
     const DisplayField *filtField = _displayFieldController->getFiltered(ifield, buttonRow);
 
-    QLabel *label = new QLabel(_fieldPanel);
+    QLabel *label = new QLabel(this);
     label->setFont(font);
     label->setText(rawField->getLabel().c_str());
-    QLabel *key = new QLabel(_fieldPanel);
+    QLabel *key = new QLabel(this);
     key->setFont(font);
     if (rawField->getShortcut().size() > 0) {
       char text[4];
@@ -140,7 +140,7 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
       key->setToolTip(text2);
     }
 
-    QRadioButton *rawButton = new QRadioButton(_fieldPanel);
+    QRadioButton *rawButton = new QRadioButton(this);
     rawButton->setToolTip(rawField->getName().c_str());
     if (ifield == 0) {
       rawButton->click();
@@ -154,7 +154,7 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
 
     _fieldButtons.push_back(rawButton);
     if (filtField != NULL) {
-      QRadioButton *filtButton = new QRadioButton(_fieldPanel);
+      QRadioButton *filtButton = new QRadioButton(this);
       filtButton->setToolTip(filtField->getName().c_str());
       _fieldsLayout->addWidget(filtButton, row, 3, alignCenter);
       _fieldGroup->addButton(filtButton, ifield + 1);
@@ -175,7 +175,7 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
 */
   
 
-  //QLabel *spacerRow = new QLabel("", _fieldPanel);
+  //QLabel *spacerRow = new QLabel("", this);
   //_fieldsLayout->addWidget(spacerRow, row, 0);
   //_fieldsLayout->setRowStretch(row, 1);
   //row++;
@@ -236,7 +236,7 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
  // DisplayField *rawField = _displayFieldController->getField(ifield); //_fields[ifield];
   //if (rawField->isHidden()) {  // TODO: move to controller
     int lastButtonRowFixed = _fieldButtons.size(); // 1 - based index
-    int _rowOffset = 1;
+    int _rowOffset = 3;
     row = lastButtonRowFixed + _rowOffset;
     //rawField->setButtonRow(row);  // TODO: why does the displayField need the button row?
     
@@ -250,12 +250,12 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
 
 //---
 
-    //QLabel *label = new QLabel(_fieldPanel);
-    ClickableLabel *label = new ClickableLabel(_fieldPanel);
+    //QLabel *label = new QLabel(this);
+    ClickableLabel *label = new ClickableLabel(this);
     connect(label, SIGNAL(ClickableLabel::clicked), this, SLOT(contextMenuParameterColors));
     label->setFont(font);
     label->setText(rawFieldLabel.c_str()); // (rawField->getLabel().c_str());
-    QLabel *key = new QLabel(_fieldPanel);
+    QLabel *key = new QLabel(this);
     key->setFont(font);
     if (rawFieldShortCut.size() > 0) {
       char text[4];
@@ -269,7 +269,7 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
       key->setToolTip(text2);
     }
 
-    QRadioButton *rawButton = new QRadioButton(_fieldPanel);
+    QRadioButton *rawButton = new QRadioButton(this);
     rawButton->setToolTip(newFieldName.c_str());
     //if (ifield == 0) {
       rawButton->click();
@@ -285,7 +285,7 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
     _fieldButtons.push_back(rawButton);
     /* TODO: fix up ...
     if (filtField != NULL) {
-      QRadioButton *filtButton = new QRadioButton(_fieldPanel);
+      QRadioButton *filtButton = new QRadioButton(this);
       filtButton->setToolTip(filtField->getName().c_str());
       _fieldsLayout->addWidget(filtButton, row, 3, alignCenter);
       _fieldGroup->addButton(filtButton, ifield + 1);
@@ -299,7 +299,7 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
     //  ifield++;
     //}
 
-    //QLabel *spacerRow = new QLabel("", _fieldPanel);
+    //QLabel *spacerRow = new QLabel("", this);
     //_fieldsLayout->addWidget(spacerRow, row, 0);
     _fieldsLayout->setRowStretch(row, 1);
     
