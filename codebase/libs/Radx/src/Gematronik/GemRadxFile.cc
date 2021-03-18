@@ -786,8 +786,8 @@ int GemRadxFile::_loadSweep(int sweepNum,
   }
 
   const GemSweep &sweepField0 = *(_fields[0]->getSweeps()[sweepNum]);
-  const vector<double> &angles = sweepField0.getAngles();
-  double prevAngle = angles[0];
+  const vector<double> &anglesField0 = sweepField0.getAngles();
+  double prevAngle = anglesField0[0];
 
   double deltaTime = ((double) endTime - (double) startTime) / (_nAngles + 1.0);
 
@@ -808,27 +808,27 @@ int GemRadxFile::_loadSweep(int sweepNum,
 
     // compute change in azimuth
 
-    double angle = angles[iangle];
-    double absDeltaAngle = fabs(angle - prevAngle);
+    double angleField0 = anglesField0[iangle];
+    double absDeltaAngle = fabs(angleField0 - prevAngle);
     if (absDeltaAngle > 180) {
       absDeltaAngle = fabs(absDeltaAngle - 360);
     }
-    prevAngle = angle;
+    prevAngle = angleField0;
 
     // set angles
 
     if (_fields[0]->getIsRhi()) {
-      if (angle > 180.0) {
-        ray->setElevationDeg(angle - 360.0);
+      if (angleField0 > 180.0) {
+        ray->setElevationDeg(angleField0 - 360.0);
       } else {
-        ray->setElevationDeg(angle);
+        ray->setElevationDeg(angleField0);
       }
       ray->setAzimuthDeg(sweepField0.getFixedAngle());
     } else {
-      if (angle < 0) {
-        ray->setAzimuthDeg(angle + 360.0);
+      if (angleField0 < 0) {
+        ray->setAzimuthDeg(angleField0 + 360.0);
       } else {
-        ray->setAzimuthDeg(angle);
+        ray->setAzimuthDeg(angleField0);
       }
       ray->setElevationDeg(sweepField0.getFixedAngle());
     }
@@ -897,15 +897,10 @@ int GemRadxFile::_loadSweep(int sweepNum,
     
     ray->setPulseWidthUsec(sweepField0.getPulseWidthUs());
     ray->setNyquistMps(sweepField0.getNyquist());
-
     // ray->setUnambigRangeKm(_unambigRange);
 
     // compose data
-
     // some fields are 2 bytes, map all fields into 2 bytes
-
-    // int nBytes = _nFields * _nGates * _outputByteWidth;
-    // ui16 *beamData = new ui16[nBytes];
 
     for (int ifld = 0; ifld < (int) _fields.size(); ifld++) {
 
@@ -933,12 +928,33 @@ int GemRadxFile::_loadSweep(int sweepNum,
       }
       double offset = (minVal + maxVal) / 2.0;
 
+      // the angles on the rays are from the first field processed
+      // find the angle index for this field
+      // this may differ from iangle if the angle list for the
+      // field is different from the first field
+
+      const GemSweep &sweepField = *(_fields[ifld]->getSweeps()[sweepNum]);
+      const vector<double> &anglesField = sweepField.getAngles();
+      int nAnglesField = sweepField.getNAngles();
+      int angleIndex = iangle;
+      for (int jangle = 0; jangle < nAnglesField; jangle++) {
+        double angleField = anglesField[jangle];
+        double angleDiff = fabs(angleField0 - angleField);
+        if (angleDiff > 180.0) {
+          angleDiff = fabs(angleDiff - 360.0);
+        }
+        if (angleDiff < 0.1) {
+          angleIndex = jangle;
+          break;
+        }
+      }
+        
       if (byteWidth == 1) {
 
         // get input data - unsigned
         
         const Radx::ui08 *uData = sweep.getFieldData();
-        const Radx::ui08 *ud = uData + (iangle * _nGates);
+        const Radx::ui08 *ud = uData + (angleIndex * _nGates);
 
         // convert to signed
 
@@ -956,7 +972,7 @@ int GemRadxFile::_loadSweep(int sweepNum,
         // get input data - unsigned
         
         const Radx::ui16 *uData = (Radx::ui16 *) sweep.getFieldData();
-        const Radx::ui16 *ud = uData + (iangle * _nGates);
+        const Radx::ui16 *ud = uData + (angleIndex * _nGates);
 
         // convert to signed
 
