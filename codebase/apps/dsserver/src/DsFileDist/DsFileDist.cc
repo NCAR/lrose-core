@@ -365,6 +365,18 @@ int DsFileDist::_checkDirForParams(const string &dirPath, int level)
     
     if (S_ISDIR(dirStat.st_mode)) {
 
+      // exclude day dirs
+      
+      int year, month, day;
+      if (sscanf(dp->d_name, "%4d%2d%2d", &year, &month, &day) == 3) {
+        if (year > 2000 && year < 3000) {
+          if (_params.debug >= Params::DEBUG_VERBOSE) {
+            cerr << "---->> ignoring day dir, path: " << path << endl;
+          }
+          continue;
+        }
+      }
+
       // this is a directory, so recurse into it
 
       _checkDirForParams(path, level + 1);
