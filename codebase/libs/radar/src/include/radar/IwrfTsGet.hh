@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// IwrfTsArchive
+// IwrfTsGet
 //
 // Retrieves time series data from a file archive.
 //
@@ -33,8 +33,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef IwrfTsArchive_hh
-#define IwrfTsArchive_hh
+#ifndef IwrfTsGet_hh
+#define IwrfTsGet_hh
 
 #include <string>
 #include <deque>
@@ -48,7 +48,7 @@ using namespace std;
 ////////////////////////
 // Base class
 
-class IwrfTsArchive {
+class IwrfTsGet {
   
 public:
 
@@ -68,11 +68,25 @@ public:
     
     virtual ~PulseEntry();
     
+    // set methods
+    
+    void setPulse(IwrfTsPulse *val) { _pulse = val; }
+    void setBurst(IwrfTsBurst *val) { _burst = val; }
+
+    void setFileNum(int val) { _fileNum = val; }
+    void setScanRate(double val) { _scanRate = val; }
+    
+    void setXmitRcvMode(iwrf_xmit_rcv_mode_t val) { _xmitRcvMode = val; }
+    void setXmitPhaseMode(iwrf_xmit_phase_mode_t val) { _xmitPhaseMode = val; }
+    void setPrfMode(iwrf_prf_mode_t val) { _prfMode = val; }
+    void setPolMode(iwrf_pol_mode_t val) { _polMode = val; }
+    
     // get methods
     
     IwrfTsPulse *getPulse() { return _pulse; }
     IwrfTsBurst *getBurst() { return _burst; }
 
+    int getFileNum() const { return _fileNum; }
     double getScanRate() const { return _scanRate; }
     
     iwrf_xmit_rcv_mode_t getXmitRcvMode() const { return _xmitRcvMode; }
@@ -85,6 +99,8 @@ public:
     IwrfTsPulse *_pulse;
     IwrfTsBurst *_burst;
 
+    int _fileNum;
+    
     double _scanRate;
 
     iwrf_xmit_rcv_mode_t _xmitRcvMode;
@@ -96,11 +112,11 @@ public:
 
   // constructor
   
-  IwrfTsArchive(IwrfDebug_t debug = IWRF_DEBUG_OFF);
+  IwrfTsGet(IwrfDebug_t debug = IWRF_DEBUG_OFF);
   
   // destructor
   
-  virtual ~IwrfTsArchive();
+  virtual ~IwrfTsGet();
 
   // debugging
 
@@ -111,6 +127,15 @@ public:
   
   void setTopDir(const string &topDir) { _topDir = topDir; }
 
+  // set the time margin, which is applied
+  // to time range in secs for search.
+  // We ensure that we have at
+  // least this margin on either side of the
+  // search time so that a beam can be suitably
+  // constructed from the stored pulses
+  
+  void setTimeMaginSecs(double val) { _timeMarginSecs = val; }
+  
   // reset the queue to the beginning
 
   virtual void resetToStart();
@@ -150,13 +175,14 @@ public:
   // data in the beam must be used before any other operations
   // are performed on the archive
   
-  vector<PulseEntry *> getBeam(DateTime &searchTime,
-                               double searchElev, double searchAz);
+  vector<PulseEntry *> getBeam(const DateTime &searchTime,
+                               double searchElev,
+                               double searchAz);
   
 protected:
   
   ////////////////////////////////////////////////
-  // protected members of IwrfTsArchive
+  // protected members of IwrfTsGet
   
   IwrfDebug_t _debug;
 
@@ -170,10 +196,19 @@ protected:
   DateTime _startTime;
   DateTime _endTime;
 
+  // margin applied to time range in secs
+  // for search. We ensure that we have at
+  // least this margin on either side of the
+  // search time so that a beam can be suitably
+  // constructed from the stored pulses
+  
+  double _timeMarginSecs;
+  
   // paths in the read
   
   string _pathInUse;
   string _prevPathInUse;
+  int _fileCount;
 
   // radar info
   
@@ -200,6 +235,11 @@ protected:
 
   deque<PulseEntry *> _pulseEntries;
 
+  // methods
+
+  void _doRetrieve(const DateTime &searchTime);
+  string _getFirstPathAfter(const DateTime &searchTime);
+  
 private:
   
 };
