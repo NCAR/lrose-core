@@ -1,12 +1,12 @@
 #include "DisplayFieldView.hh"
 #include <toolsa/LogStream.hh>
 
-DisplayFieldView::DisplayFieldView(QWidget *parent) {
-  //DisplayFieldController *displayFieldController) {
-  //_displayFieldController = displayFieldController;
+
+DisplayFieldView::DisplayFieldView(DisplayFieldController *displayFieldController) {
+  _controller = displayFieldController;
   _haveFilteredFields = false;
   _label_font_size = 12;
-  createFieldPanel(parent);
+  //createFieldPanel(parent);
 }
 
 DisplayFieldView::~DisplayFieldView() {
@@ -252,7 +252,9 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
 
     //QLabel *label = new QLabel(this);
     ClickableLabel *label = new ClickableLabel(this);
-    connect(label, SIGNAL(ClickableLabel::clicked), this, SLOT(contextMenuParameterColors));
+    // TODO: HERE ===> contextMenu is not here .... do we want DisplayField Dialog?
+    // make a special dialog for this field only?
+    //connect(label, SIGNAL(ClickableLabel::clicked), this, SLOT(contextMenuParameterColors));
     label->setFont(font);
     label->setText(rawFieldLabel.c_str()); // (rawField->getLabel().c_str());
     QLabel *key = new QLabel(this);
@@ -314,4 +316,28 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
   //        this, SLOT(_changeField(int)));
   LOG(DEBUG) << "exit";
   
+}
+
+void DisplayFieldView::_changeFieldVariable(bool value) {
+
+  LOG(DEBUG) << "enter";
+
+  if (value) {
+    for (size_t i = 0; i < _fieldButtons.size(); i++) {
+      if (_fieldButtons.at(i)->isChecked()) {
+        LOG(DEBUG) << "_fieldButton " << i
+        << "out of " << _fieldButtons.size() 
+        << " is checked";
+        QString fieldNameQ = _fieldButtons.at(i)->text();
+        string fieldName = fieldNameQ.toStdString();
+        _controller->setSelectedField(fieldName);
+        LOG(DEBUG) << "fieldname is " << fieldName;
+        emit selectedFieldChanged(fieldNameQ);
+      }
+    }
+    //emit selectedFieldChanged();
+  }
+
+  LOG(DEBUG) << "exit";
+
 }

@@ -42,9 +42,9 @@ void DisplayFieldController::addField(string newFieldName) {
   if (displayField == NULL) {
     DisplayField *newDisplayField = new DisplayField(newFieldName);
     addField(newDisplayField);
-    _displayFieldView->updateFieldPanel(newFieldName, newFieldName, newFieldName);
+    //_displayFieldView->updateFieldPanel(newFieldName, newFieldName, newFieldName);
   } else {
-    updateFieldPanel(newFieldName);
+    //updateFieldPanel(newFieldName);
   }
 }
 
@@ -52,15 +52,22 @@ void DisplayFieldController::addField(string newFieldName) {
 void DisplayFieldController::updateFieldPanel(string fieldName) {
   //_displayFieldView->updateFieldPanel(fieldName);
 
+  LOG(DEBUG) << "enter";
+  if (contains(fieldName)) {
     size_t index = getFieldIndex(fieldName);
     DisplayField *rawField = getField(index);
     if (rawField->isHidden()) { 
-      _displayFieldView->updateFieldPanel(rawField->getLabel(), fieldName,
-        rawField->getShortcut());
+      //_displayFieldView->updateFieldPanel(rawField->getLabel(), fieldName,
+      //  rawField->getShortcut());
       rawField->setStateVisible();
     }
     setSelectedField(index);
+  } else {
+    LOG(DEBUG) << "unknown fieldName " << fieldName;
+  }
+  LOG(DEBUG) << "exit";
 }
+
 
 void DisplayFieldController::hideField(DisplayField *field) {
   //_model->hideField(field);
@@ -117,13 +124,27 @@ size_t DisplayFieldController::getSelectedFieldNum() {
 void DisplayFieldController::setSelectedField(string fieldName) {
   LOG(DEBUG) << "enter " << fieldName;
   _model->setSelectedField(fieldName);
+  //notifyFieldChange();
   LOG(DEBUG) << "exit";
 } 
 
 
 void DisplayFieldController::setSelectedField(size_t fieldIndex) {
+  LOG(DEBUG) << "enter";
   _model->setSelectedField(fieldIndex);
+  //notifyFieldChange();
+  LOG(DEBUG) << "exit";
 } 
+
+/*
+void DisplayFieldController::notifyFieldChange() {
+   // the DisplayFieldController notifies everyone that
+//the field has changed?  the order should be:
+//DisplayFieldModel is updated
+  bool guiMode = true; 
+  emit selectedFieldChanged(); 
+}
+*/
 
 DisplayField *DisplayFieldController::getFiltered(size_t ifield, int buttonRow)
 {
@@ -371,14 +392,17 @@ void DisplayFieldController::setupDisplayFields(
 
 }
 
+/*
 void DisplayFieldController::setView(DisplayFieldView *view) {
  _displayFieldView = view;
+//connect(_displayFieldView, SIGNAL(changeToField(string)),
+//        this, SLOT(setSelectedField(string)));
 }
 
 //void DisplayFieldController::createFieldPanel(QFrame *mainFrame) {
 //  _displayFieldView->createFieldPanel(mainFrame);
 //}
-
+*/
 
 // TODO: make this a signal and slot??
 QImage &DisplayFieldController::getSelectedFieldImage() {

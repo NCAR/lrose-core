@@ -2,7 +2,7 @@
 #define DISPLAYFIELDCONTROLLER_H
 
 #include "DisplayFieldModel.hh"
-#include "DisplayFieldView.hh"
+//#include "DisplayFieldView.hh"
 //#include "ColorMap.hh"
 #include "ParamFile.hh"
 #include <QFrame>
@@ -86,17 +86,26 @@ public:
 
   DisplayFieldModel *getModel() {return _model;};
 
-    void setView(DisplayFieldView *view);
+    //void setView(DisplayFieldView *view);
 
     //void renderFields();
     QImage &getSelectedFieldImage();
+
+    //void notifyFieldChange();
+
+//signals:
+
+//    void selectedFieldChanged();
+
+//slots:
+//  void setSelectedField(string fieldName);
 
 private:
  
   //vector<DisplayField *> *_current;
   DisplayFieldModel *_model; // edit version 
  
-  DisplayFieldView *_displayFieldView;
+  //DisplayFieldView *_displayFieldView;
 
 };
 
