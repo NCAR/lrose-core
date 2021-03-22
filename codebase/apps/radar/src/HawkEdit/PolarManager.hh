@@ -47,7 +47,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "DisplayManager.hh"
+//#include "DisplayManager.hh"
 #include "RayLoc.hh"
 #include "ContextEditingView.hh"
 #include "ClickableLabel.hh"
@@ -55,6 +55,7 @@
 #include "FieldColorController.hh"
 #include "SweepView.hh"
 #include "SweepController.hh"
+#include "DisplayFieldView.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -190,6 +191,7 @@ public slots:
   void updateVolume(QStringList newFieldNames);
   void _volumeDataChanged(QStringList newFieldNames);
   void _addNewFields(QStringList newFieldNames);
+  void selectedFieldChanged(QString newFieldName);
   //void _updateField(size_t fieldId);
 
 signals:
@@ -633,7 +635,7 @@ private slots:
   //virtual void _openFile();
   //virtual void _saveFile();
 
-  void _changeFieldVariable(bool value);
+  //void _changeFieldVariable(bool value);
   int _updateDisplayFields(vector<string> *fieldNames);
   // end from DisplayManager
 
@@ -641,8 +643,8 @@ private slots:
   void _freeze();
   void _unzoom();
   void _refresh();
-  void _changeField(int fieldId, bool guiMode = true);
-
+  //void _changeField(int fieldId, bool guiMode = true);
+  void changeToField(QString newFieldName);
   // sweeps
 
   //void _createSweepPanel();

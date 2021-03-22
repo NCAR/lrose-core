@@ -47,9 +47,10 @@ PpiBeam::PpiBeam(// const RadxRay *ray,
                  double start_angle,
                  double stop_angle,
                  double startRangeKm,
-                 double gateSpacingKm
+                 double gateSpacingKm,
+                 size_t nGates
                  ) :
-        //Beam(ray),
+        Beam(nGates),
         startAngle(start_angle),
         stopAngle(stop_angle),
         leftEnd(-1.0),

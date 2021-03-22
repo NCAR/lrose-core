@@ -100,7 +100,7 @@ public:
    * @param[in] n_fields    Number of fields in the beam.
    */
   
-  Beam(); // const RadxRay *ray);
+  Beam(size_t nGates); // const RadxRay *ray);
 
   
   /**

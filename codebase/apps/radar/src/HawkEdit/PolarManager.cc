@@ -415,7 +415,8 @@ void PolarManager::_setTitleBar(const string &radarName)
 }
   
 //////////////////////////////////////////////////
-// set up windows and widgets
+// set up windows and widgets 
+// make signal and slot connections between controllers
   
 void PolarManager::_setupWindows()
 {
@@ -471,14 +472,23 @@ void PolarManager::_setupWindows()
   // create fields panel
   
   //_createFieldPanel();
-  _fieldPanel = new DisplayFieldView(_main);
-  _displayFieldController->setView(_fieldPanel);
+  _fieldPanel = new DisplayFieldView(_displayFieldController);
+  //_displayFieldController->setView(_fieldPanel);
+  _fieldPanel->createFieldPanel(_main);
+ //TODO: can only connect QObjects with signals and slots...
+  //connect(_fieldPanel, SIGNAL(selectedFieldChanged(QString)),
+  //  this, SLOT(changeToField(QString)));
+
+  connect(_fieldPanel, SIGNAL(selectedFieldChanged(QString)),
+          this, SLOT(selectedFieldChanged(QString)));
+       //SLOT(_plotArchiveData()));
 
   // add widgets
 
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_fieldPanel); // <=== here 
   mainLayout->addWidget(_ppiFrame);
+  _ppi->show();
 
   // sweep panel
 
@@ -1429,14 +1439,20 @@ void PolarManager::_volumeDataChanged(QStringList newFieldNames)
 }
 
 
+void PolarManager::selectedFieldChanged(QString newFieldName) {
+  string fieldName = newFieldName.toStdString();
+  _displayFieldController->setSelectedField(fieldName);
+  _plotArchiveData();
+}
+
 /*
 RadxVol PolarManager::getDataVolume() {
   return _vol;
 }
 */
 /////////////////////////////
-// plot data in archive mode
-
+// plot the selected field and sweep
+// call when the field is changed, or the sweep is changed
 void PolarManager::_plotArchiveData()
 
 {
@@ -2248,64 +2264,64 @@ void PolarManager::_refresh()
 ///////////////////////////////////////////////////////////
 // respond to change field request from field button group
 
-void PolarManager::_changeField(int fieldId, bool guiMode)
-
+//void PolarManager::_changeField(string fieldName, bool guiMode)
+void PolarManager::changeToField(QString newFieldName)
 {  
-  //  if (_params->debug) {
-  //  cerr << "Changing to field id: " << fieldId << endl;
-  //  _selectedField->print(cerr);
-  //}
+  LOG(DEBUG) << "enter";
 
   // convert fieldId to field name (from the tool tip) because not all fields are displayed,
   // so we cannot rely on the id/index.
-  QString fieldNameQt = _fieldButtons.at(fieldId)->toolTip();
-  string fieldName = fieldNameQt.toStdString();
-  LOG(DEBUG) << "fieldName is " << fieldName;
+  //QString fieldNameQt = _fieldButtons.at(fieldId)->toolTip();
+  //string fieldName = fieldNameQt.toStdString();
 
-  size_t newSelectionNum = _displayFieldController->getFieldIndex(fieldName);
 
-  // if we click the already-selected field, go back to previous field
+  //size_t newSelectionNum = _displayFieldController->getFieldIndex(fieldName);
+/*
+  // removing this: if we click the already-selected field, go back to previous field
+  // 
   try {
-    size_t fieldNum = _displayFieldController->getSelectedFieldNum();
+    size_t ;
+      LOG(DEBUG) << "fieldName is " << fieldName;
 
-  if (guiMode) {
-    if (fieldNum == newSelectionNum && _prevFieldNum >= 0) {
-      QRadioButton *button =
-        (QRadioButton *) _fieldGroup->button(_prevFieldNum);
-      button->click();
-      return;
+    if (guiMode) {
+      if (fieldNum == newSelectionNum && _prevFieldNum >= 0) {
+        QRadioButton *button =
+          (QRadioButton *) _fieldGroup->button(_prevFieldNum);
+        button->click();
+        return;
+      }
     }
-  }
-
-  _prevFieldNum = fieldNum;
-  fieldNum = newSelectionNum;
-
-  _ppi->selectVar(fieldNum);
+*/   
+  
+  //_prevFieldNum = fieldNum;
+  //fieldNum = newSelectionNum;
+  string fieldName = newFieldName.toStdString();
+  //_displayFieldController->setSelectedField(fieldName);
+  // I don't think this does anything ... _ppi->selectVar(fieldName);
+  _plotArchiveData();  // either one of these, not both?
   //_rhi->selectVar(fieldNum);  TODO: reinstate this 
+// TODO: update the statusPanel
+//  _statusPanel->???
 
-  _displayFieldController->setSelectedField(fieldName);
-
-  // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
-  _selectedField = _displayFieldController->getField(fieldNum);
-
-  _selectedName = _selectedField->getName();
-  _selectedLabel = _selectedField->getLabel();
-  _selectedUnits = _selectedField->getUnits();
+  //_selectedName = _selectedField->getName();
+  //_selectedLabel = _selectedField->getLabel();
+  //_selectedUnits = _selectedField->getUnits();
   
   //_selectedLabelWidget->setText(_selectedLabel.c_str());
-  char text[128];
-  if (_selectedField->getSelectValue() > -9990) {
-    sprintf(text, "%g %s", 
-            _selectedField->getSelectValue(),
-            _selectedField->getUnits().c_str());
-  } else {
-    text[0] = '\0';
-  }
-  _valueLabel->setText(text);
-  } catch (std::range_error &ex) {
-      LOG(ERROR) << ex.what();
-      QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
-  }
+  //char text[128];
+  //if (_selectedField->getSelectValue() > -9990) {
+  //  sprintf(text, "%g %s", 
+  //          _selectedField->getSelectValue(),
+  //          _selectedField->getUnits().c_str());
+  //} else {
+  //  text[0] = '\0';
+  //}
+  //_valueLabel->setText(text);
+  //} catch (std::range_error &ex) {
+  //    LOG(ERROR) << ex.what();
+  //    QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  //}
+  LOG(DEBUG) << "exit";
 }
 
 // PolarManager::colorMapRedefineReceived(string, ColorMap)
@@ -4355,7 +4371,7 @@ void PolarManager::contextMenuParameterColors()
   
 }
 
-
+/* Moved to DisplayFieldView
 void PolarManager::_changeFieldVariable(bool value) {
 
   LOG(DEBUG) << " field variable changed ";
@@ -4374,6 +4390,7 @@ void PolarManager::_changeFieldVariable(bool value) {
   }
 
 }
+*/
 
 /*
 void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
@@ -5229,6 +5246,10 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
   for (vector<string>::iterator it = fieldNames->begin(); it != fieldNames->end(); ++it) {
     string fieldName = *it;
 
+//HERE TODO:
+//distingquish between add and update on fieldName;
+//then set last field or first field as selected? or do something to render image
+
     if (!_displayFieldController->contains(fieldName)) {
 
       ColorMap map;
@@ -5245,17 +5266,18 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
       //displayFields.push_back(field);
       _displayFieldController->addField(field);
       //_updateFieldPanel(fieldName);
+      _fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
       ifield += 1;
     }
 
   } // ifield
-
 
   if (fieldNames->size() < 1) {
     cerr << "ERROR - PolarManager::_setupDisplayFields()" << endl;
     cerr << "  No fields found" << endl;
     return -1;
   }
+  selectedFieldChanged(QString().fromStdString(fieldNames->at(0)));
 
   return 0;
 

@@ -242,8 +242,8 @@ QImage *FieldRendererController::renderImage(int width, int height,
     //DataModel *dataModel = DataModel::Instance();
     for (int i=0; i<10; i++) { // each field ray in sweep) {
       //float *ray = dataModel->getRayData();
-      vector<float> rayFake = {0,1,2,3,4,5,6,7,8,9,10};
-      size_t nData = rayFake.size();
+      float rayFake[] = {0,1,2,3,4,5,6,7,8,9,10};
+      size_t nData = 11;
       double start_angle = 36.0 * i;
       double stop_angle = start_angle + 35.9;
       double startRangeKm = 10;
@@ -251,8 +251,8 @@ QImage *FieldRendererController::renderImage(int width, int height,
       // create Beam for ray
       PpiBeam *beam = new PpiBeam(
                  start_angle,  stop_angle,
-           startRangeKm,  gateSpacingKm);
-      beam->updateFillColors(&rayFake[0], nData, &colorMap, background_brush);  
+           startRangeKm,  gateSpacingKm, nData);
+      beam->updateFillColors(rayFake, nData, &colorMap, background_brush);  
       fieldRenderer->addBeam(beam);
     }
     // add Beam to FieldRenderer

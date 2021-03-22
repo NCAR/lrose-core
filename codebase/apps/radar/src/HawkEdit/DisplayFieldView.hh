@@ -49,6 +49,7 @@
 #include "ClickableLabel.hh"
 #include "ParameterColorView.hh"
 #include "FieldColorController.hh"
+#include "DisplayFieldController.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -69,6 +70,7 @@ class QDateTimeEdit;
 class QFileDialog;
 
 class DisplayField;
+class DisplayFieldController;
 
 class DisplayFieldView : public QGroupBox {
   
@@ -76,7 +78,7 @@ class DisplayFieldView : public QGroupBox {
 
 public:
 
-  DisplayFieldView(QWidget *parent);
+  DisplayFieldView(DisplayFieldController *controller);
   ~DisplayFieldView();
 
   void createFieldPanel(QWidget *parent);
@@ -88,23 +90,34 @@ public:
   void set_label_font_size(int size);
   void setHaveFilteredFields(bool value);
 
+  // signal that user has selected fieldName for display
+  void changeToField(string fieldName, bool guiMode);
+
+
+  void _changeFieldVariable(bool value);
+
+signals:
+  void selectedFieldChanged(QString newFieldName);
+
 private:
   
   // QGroupBox *_fieldPanel;
   QGridLayout *_fieldsLayout;
-  QLabel *_selectedLabelWidget;
+  //QLabel *_selectedLabelWidget;
   QButtonGroup *_fieldGroup;
   vector<QRadioButton *> _fieldButtons;
-  DisplayField *_selectedField;
-  string _selectedName;
-  string _selectedLabel;
-  string _selectedUnits;
+  //DisplayField *_selectedField;
+  //string _selectedName;
+  //string _selectedLabel;
+  //string _selectedUnits;
   QLabel *_valueLabel;
   //int _fieldNum;
-  int _prevFieldNum;
+  //int _prevFieldNum;
 
   int _label_font_size;
   bool _haveFilteredFields;
+
+  DisplayFieldController *_controller;
 
 };
 

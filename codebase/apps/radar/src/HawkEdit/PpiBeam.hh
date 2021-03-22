@@ -101,7 +101,8 @@ public:
   
   PpiBeam( // const RadxRay *ray,
           double start_angle, double stop_angle,
-          double startRangeKm, double gateSpacingKm);
+          double startRangeKm, double gateSpacingKm,
+          size_t nGates);
   
   /**
    * @brief Destructor

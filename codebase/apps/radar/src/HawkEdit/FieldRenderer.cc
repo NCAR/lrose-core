@@ -98,7 +98,7 @@ void FieldRenderer::createImage(int width, int height)
 void FieldRenderer::addBeam(Beam *beam)
 {
 
-  TaThread::LockForScope locker;
+  //TaThread::LockForScope locker;
   
   _beams.push_back(beam);
   //beam->addClient();
@@ -198,6 +198,7 @@ void FieldRenderer::runIt()
   //LOG(DEBUG) << "Start of run() for field: " 
   //       << _field.getLabel() << " there are " << _beams.size() << " beams to render";
 
+  LOG(DEBUG) << "enter: " << _name;
 
   if (_beams.size() == 0) {
     LOG(DEBUG) << "_beams.size() == 0, returning";

@@ -47,12 +47,12 @@ using namespace std;
 
 // TODO: Beam is at View Level!  See all the Qt stuff!
 // No Radx* at the View level; instead, send base types, e.g. vector<float> *data
-Beam::Beam() // const RadxRay *ray) :
+Beam::Beam(size_t nGates) // const RadxRay *ray) :
         //_ray(ray),
         //_nGates(ray->getNGates())
+       
 {
-
-
+  
   // Set the "being rendered" flags.  We always render the new beams, so start
   // out with all of the flags being set to true.
 /*
@@ -68,7 +68,8 @@ Beam::Beam() // const RadxRay *ray) :
   
   //_brushes.resize(n_fields);
   //for (int field = 0; field < n_fields; ++field) {
-    _brushes.resize(_nGates);
+  _nGates = nGates;
+  _brushes.resize(_nGates);
   //}
 
   // initialize client counting for this object
@@ -224,16 +225,26 @@ void Beam::updateFillColors(float *beam_data,
     //size_t absolute_index = new_field_start_index + fieldIdx;
     //    const ColorMap &map = fields[field]->getColorMap();
   // fieldIdx = start_of_new_fields + newFieldIdx;
-  if (nData != _nGates)
-    throw std::range_error("Error! nBeamData != nGates");
+  if (nData != _nGates) {
+    //throw std::range_error("Error! nBeamData != nGates");
+    // _nGates need to be set, or found somehow.
+   _brushes.resize(nData);
+   _nGates = nData;
+  }
 
-  for (size_t igate = 0; igate < _nGates; ++igate) {
-    double data = beam_data[igate];
+  size_t igate = 0;
+  for (vector<const QBrush*>::iterator it = _brushes.begin();
+    it != _brushes.end(); ++it) {
+    // size_t igate = 0; igate < _nGates; ++igate) {
+    float data = beam_data[igate];
     if (data < -9990) {
-	    _brushes[igate] = background_brush;
+      *it = background_brush;
+	    //_brushes[igate] = background_brush;
     } else {
-	    _brushes[igate] = map->dataBrush(data);
+	    //_brushes[igate] = map->dataBrush(data);
+      *it = map->dataBrush(data);
     }
+    igate++;
   } // igate
  
 }
