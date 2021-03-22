@@ -82,7 +82,9 @@ public:
     void setXmitPhaseMode(iwrf_xmit_phase_mode_t val) { _xmitPhaseMode = val; }
     void setPrfMode(iwrf_prf_mode_t val) { _prfMode = val; }
     void setPolMode(iwrf_pol_mode_t val) { _polMode = val; }
-    
+
+    void setFilePath(const string &val) { _filePath = val; }
+
     // get methods
     
     IwrfTsPulse *getPulse() { return _pulse; }
@@ -98,9 +100,11 @@ public:
     iwrf_xmit_phase_mode_t getXmitPhaseMode() const { return _xmitPhaseMode; }
     iwrf_prf_mode_t getPrfMode() const { return _prfMode; }
     iwrf_pol_mode_t getPolMode() const { return _polMode; }
+
+    const string &getFilePath() const { return _filePath; }
     
   private:
-
+    
     IwrfTsPulse *_pulse;
     IwrfTsBurst *_burst;
 
@@ -113,6 +117,8 @@ public:
     iwrf_xmit_phase_mode_t _xmitPhaseMode;
     iwrf_prf_mode_t _prfMode;
     iwrf_pol_mode_t _polMode;
+
+    string _filePath;
     
   }; // class PulseEntry
 

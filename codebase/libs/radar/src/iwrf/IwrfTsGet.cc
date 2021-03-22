@@ -319,11 +319,13 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   bool infoSet = false;
   while ((pulse = reader.getNextPulse()) != NULL) {
     PulseEntry *entry = new PulseEntry(pulse);
+    entry->setFilePath(reader.getPathInUse());
     _pulseEntries.push_back(entry);
     if (!infoSet) {
       info = reader.getOpsInfo();
       infoSet = true;
     }
+    
   }
 
   if (_pulseEntries.size() < 2) {
@@ -752,7 +754,7 @@ IwrfTsGet::PulseEntry::PulseEntry(IwrfTsPulse *pulse) :
   setXmitPhaseMode((iwrf_xmit_phase_mode_t)info.get_proc_xmit_phase_mode());
   setPrfMode((iwrf_prf_mode_t) info.get_proc_prf_mode());
   setPolMode((iwrf_pol_mode_t) info.get_proc_pol_mode());
-  
+
 }  
 
 // destructor
