@@ -37,7 +37,9 @@
 #define IwrfTsGet_hh
 
 #include <string>
+#include <vector>
 #include <deque>
+#include <map>
 #include <toolsa/pmu.h>
 #include <toolsa/DateTime.hh>
 #include <radar/IwrfTsInfo.hh>
@@ -73,7 +75,7 @@ public:
     void setPulse(IwrfTsPulse *val) { _pulse = val; }
     void setBurst(IwrfTsBurst *val) { _burst = val; }
 
-    void setFileNum(int val) { _fileNum = val; }
+    void setTime(const DateTime &val) { _time = val; }
     void setScanRate(double val) { _scanRate = val; }
     
     void setXmitRcvMode(iwrf_xmit_rcv_mode_t val) { _xmitRcvMode = val; }
@@ -86,7 +88,10 @@ public:
     IwrfTsPulse *getPulse() { return _pulse; }
     IwrfTsBurst *getBurst() { return _burst; }
 
-    int getFileNum() const { return _fileNum; }
+    const DateTime &getTime() const { return _time; }
+    double getEl() const { return _el; }
+    double getAz() const { return _az; }
+    
     double getScanRate() const { return _scanRate; }
     
     iwrf_xmit_rcv_mode_t getXmitRcvMode() const { return _xmitRcvMode; }
@@ -99,8 +104,9 @@ public:
     IwrfTsPulse *_pulse;
     IwrfTsBurst *_burst;
 
-    int _fileNum;
-    
+    DateTime _time;
+    double _el, _az;
+
     double _scanRate;
 
     iwrf_xmit_rcv_mode_t _xmitRcvMode;
@@ -134,17 +140,22 @@ public:
   // search time so that a beam can be suitably
   // constructed from the stored pulses
   
-  void setTimeMaginSecs(double val) { _timeMarginSecs = val; }
+  void setTimeMarginSecs(double val) { _timeMarginSecs = val; }
   
-  // reset the queue to the beginning
-
-  virtual void resetToStart();
-
-  // reset the queue at the end
+  // Retrieve a beam of pulses, given the time, el and az.
+  // Fills the beamPulses vector.
+  // Returns 0 on success, -1 on failure.
+  // The beamPulses vector points to pulses managed by this object.
+  // Data in the beam must be used before any further get operations
+  // are performed on this object.
   
-  virtual void resetToEnd();
+  int retrieveBeam(const DateTime &searchTime,
+                   double searchElev,
+                   double searchAz,
+                   int nSamples,
+                   vector<IwrfTsGet::PulseEntry *> &beamPulses);
   
-  // get methods
+  // get methods, use after retrieve
 
   const string getPathInUse() const { return _pathInUse; }
   const string getPrevPathInUse() const { return _prevPathInUse; }
@@ -167,18 +178,15 @@ public:
   
   const IwrfCalib &getCalib() const { return _calib; }
 
-  const DateTime &getStartTime() const { return _startTime; }
-  const DateTime &getEndTime() const { return _endTime; }
+  const DateTime &getPulsesStartTime() const { return _pulsesStartTime; }
+  const DateTime &getPulsesEndTime() const { return _pulsesEndTime; }
 
-  // get a beam of pulses, given the time, el and az
-  // returns empty vector on failure
-  // data in the beam must be used before any other operations
-  // are performed on the archive
-  
-  vector<PulseEntry *> getBeam(const DateTime &searchTime,
-                               double searchElev,
-                               double searchAz);
-  
+  const DateTime &getFilesStartTime() const { return _filesStartTime; }
+  const DateTime &getFilesEndTime() const { return _filesEndTime; }
+
+  bool getIsAlternating() const { return _isAlternating; }
+  bool getIsStaggeredPrt() const { return _isStaggeredPrt; }
+
 protected:
   
   ////////////////////////////////////////////////
@@ -190,11 +198,6 @@ protected:
   // the actual files will be in day dirs below this level
 
   string _topDir;
-
-  // start and end times for the pulses in the queue
-
-  DateTime _startTime;
-  DateTime _endTime;
 
   // margin applied to time range in secs
   // for search. We ensure that we have at
@@ -208,7 +211,6 @@ protected:
   
   string _pathInUse;
   string _prevPathInUse;
-  int _fileCount;
 
   // radar info
   
@@ -231,15 +233,60 @@ protected:
 
   IwrfCalib _calib;
 
+  // files
+
+  map<time_t, string> _fileListMap;
+  vector<time_t> _fileListStartTimes;
+  vector<time_t> _fileListEndTimes;
+  vector<string> _fileListPaths;
+  DateTime _filesStartTime, _filesEndTime;
+
   // pulses
 
-  deque<PulseEntry *> _pulseEntries;
+  vector<PulseEntry *> _pulseEntries;
+  DateTime _pulsesStartTime;
+  DateTime _pulsesEndTime;
 
+  // pulse-to-pulse HV alternating mode
+
+  bool _isAlternating;
+
+  // staggered PRT
+
+  bool _isStaggeredPrt;
+  double _prtShort;
+  double _prtLong;
+  int _nGatesPrtShort;
+  int _nGatesPrtLong;
+  double _prt;
+  int _nGates;
+  
   // methods
 
-  void _doRetrieve(const DateTime &searchTime);
-  string _getFirstPathAfter(const DateTime &searchTime);
+  int _loadFileList(const DateTime &searchTime);
+  void _clearFileList();
+
+  int _loadPulseList(const DateTime &searchTime);
+  void _clearPulseList();
   
+  int _loadBeamPulses(const DateTime &searchTime,
+                      double searchElev,
+                      double searchAz,
+                      int nSamples,
+                      vector<IwrfTsGet::PulseEntry *> &beamPulses);
+
+  bool _checkIsBeamPpi(ssize_t midIndex, double az, double indexedRes);
+  bool _checkIsBeamRhi(ssize_t midIndex, double el, double indexedRes);
+
+  double _conditionAz(double az);
+  double _conditionAz(double az, double refAz);
+  double _conditionEl(double el);
+  double _conditionDeltaAz(double deltaAz);
+  ssize_t _conditionPulseIndex(ssize_t index);
+
+  void _checkIsAlternating(ssize_t index1, ssize_t index2);
+  void _checkIsStaggeredPrt(ssize_t index1, ssize_t index2);
+
 private:
   
 };
