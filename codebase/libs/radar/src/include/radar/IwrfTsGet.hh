@@ -164,7 +164,6 @@ public:
   // get methods, use after retrieve
 
   const string getPathInUse() const { return _pathInUse; }
-  const string getPrevPathInUse() const { return _prevPathInUse; }
   
   double getLatitudeDeg() const { return _latitudeDeg; }
   double getLongitudeDeg() const { return _longitudeDeg; }
@@ -216,7 +215,6 @@ protected:
   // paths in the read
   
   string _pathInUse;
-  string _prevPathInUse;
 
   // radar info
   

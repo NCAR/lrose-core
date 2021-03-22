@@ -464,6 +464,8 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     } // ii
   }
 
+  _pathInUse = _pulseEntries[centerIndex]->getFilePath();
+  
   // check for alternating or staggered mode
 
   _checkIsAlternating(index1, index2);
