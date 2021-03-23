@@ -78,6 +78,13 @@ void EG_alloc_clumps(int n_intervals,
 
 {
 
+  // make sure we allocate for at least 1 interval
+  // so that we don't test (0 == 0)
+  
+  if (n_intervals == 0) {
+    n_intervals = 1;
+  }
+  
   int n_intervals_alloc = *n_intervals_alloc_p;
   Clump_order *clumps = *clumps_p;
   Interval **interval_order = *interval_order_p;
