@@ -582,10 +582,11 @@ def installScripts():
 
     # general
     
+    installDir = os.path.join(buildDir, "bin")
     scriptsDir = os.path.join(baseDir, "apps/scripts/src")
     if (os.path.isdir(scriptsDir)):
         os.chdir(scriptsDir)
-        shellCmd("./install_scripts.lrose " + scriptsDir)
+        shellCmd("./install_scripts.lrose " + installDir)
 
 ########################################################################
 # create the tar file
