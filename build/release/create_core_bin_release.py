@@ -143,6 +143,7 @@ def main():
     cmd += " --prefix /tmp/core-build"
     cmd += " --releaseDir " + options.releaseDir
     cmd += " --force"
+    cmd += " --scripts"
     shellCmd(cmd)
 
     # exit
