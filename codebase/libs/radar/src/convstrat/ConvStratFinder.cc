@@ -1149,9 +1149,13 @@ void ConvStratFinder::ClumpGeom::setPartition()
 bool ConvStratFinder::ClumpGeom::stratiformBelow() 
 {
 
-  // for each clumped point,
-  // check for stratiform below the lowest convective grid point
-  // count up stratiform compared to misses
+  // we go through each point in the clump, and check the point
+  // immediately below. We count up misses and stratiform points
+  // and then compute the fraction of stratiform points in
+  // the total. If greater than 0.5, we say there is stratiform
+  // below. Also, if any clump point is at the lowest point in the
+  // grid, we return false since there is no room for stratiform
+  // below.
   
   const fl32 *convectivity3D = _finder->_convectivity3D.dat();
   int nPtsPlane = _finder->_nx * _finder->_ny;
@@ -1167,7 +1171,9 @@ bool ConvStratFinder::ClumpGeom::stratiformBelow()
     int iy = intvl->row_in_plane;
     int iz = intvl->plane;
     if (iz == 0) {
-      continue;
+      // clump is at lowest level
+      // so no stratiform can be below
+      return false;
     }
     
     // check grid points on plane below this one
@@ -1177,10 +1183,10 @@ bool ConvStratFinder::ClumpGeom::stratiformBelow()
     for (int ix = intvl->begin; ix <= intvl->end; ix++, offset3D++) {
       fl32 conv = convectivity3D[offset3D];
       if (conv == _missingFl32) {
-        // missing point below convection
+        // point below convection is missing
         nMiss++;
       } else if (conv < _finder->_minConvectivityForConvective) {
-        // stratiform point just below convection
+        // point just below convection is stratiform
         nStrat++;
       }
     } // ix
@@ -1192,9 +1198,10 @@ bool ConvStratFinder::ClumpGeom::stratiformBelow()
   double nTotal = nMiss + nStrat;
   double fractionStrat = nStrat / nTotal;
 
-  // if fraction stratiform exceeds 0.1, then we have stratiform below
+  // if fraction stratiform exceeds 0.5
+  // we conclude we have stratiform below
 
-  if (fractionStrat > 0.1) {
+  if (fractionStrat > 0.5) {
     return true;
   } else {
     return false;
