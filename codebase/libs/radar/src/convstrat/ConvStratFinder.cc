@@ -1149,8 +1149,9 @@ void ConvStratFinder::ClumpGeom::setPartition()
 bool ConvStratFinder::ClumpGeom::stratiformBelow() 
 {
 
-  // for each clumped point, check for stratiform below
-  // the lowest convective grid point
+  // for each clumped point,
+  // check for stratiform below the lowest convective grid point
+  // count up stratiform compared to misses
   
   const fl32 *convectivity3D = _finder->_convectivity3D.dat();
   int nPtsPlane = _finder->_nx * _finder->_ny;
@@ -1186,8 +1187,12 @@ bool ConvStratFinder::ClumpGeom::stratiformBelow()
     
   } // irun
 
+  // compute the fraction of stratiform points below convective points
+
   double nTotal = nMiss + nStrat;
   double fractionStrat = nStrat / nTotal;
+
+  // if fraction stratiform exceeds 0.1, then we have stratiform below
 
   if (fractionStrat > 0.1) {
     return true;
