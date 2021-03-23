@@ -581,10 +581,10 @@ def installScripts():
     os.chdir(baseDir)
 
     # general
-        
-    generalScriptsDir = os.path.join(baseDir, "apps/scripts/src")
-    if (os.path.isdir(generalScriptsDir)):
-        os.chdir(generalScriptsDir)
+    
+    scriptsDir = os.path.join(baseDir, "apps/scripts/src")
+    if (os.path.isdir(scriptsDir)):
+        os.chdir(scriptsDir)
         shellCmd("./install_scripts.lrose " + scriptsDir)
 
 ########################################################################
