@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cstring>
+#include <map>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include <radar/ConvStratFinder.hh>
@@ -1106,7 +1107,7 @@ void ConvStratFinder::ClumpGeom::setPartition()
   int category = CATEGORY_MISSING;
   if (_volumeKm3 < _finder->_minVolForConvectiveKm3) {
     category = CATEGORY_MIXED;
-  } else if (fracShallow < 0.05) {
+  } else if (fracShallow < 0.05 && stratiformBelow()) {
     category = CATEGORY_CONVECTIVE_ELEVATED;
   } else if (fracShallow > 0.95) {
     category = CATEGORY_CONVECTIVE_SHALLOW;
@@ -1115,7 +1116,7 @@ void ConvStratFinder::ClumpGeom::setPartition()
   } else {
     category = CATEGORY_CONVECTIVE_MID;
   }
-  
+
   // compute the volume, and number of points
   // in each height layer
   
@@ -1139,6 +1140,60 @@ void ConvStratFinder::ClumpGeom::setPartition()
     } // ix
     
   } // irun
+
+}
+
+///////////////////////////////////////////////////////////
+// Check for stratiform echo below
+
+bool ConvStratFinder::ClumpGeom::stratiformBelow() 
+{
+
+  // for each clumped point, check for stratiform below
+  // the lowest convective grid point
+  
+  const fl32 *convectivity3D = _finder->_convectivity3D.dat();
+  int nPtsPlane = _finder->_nx * _finder->_ny;
+  int nx = _finder->_nx;
+
+  double nMiss = 0.0;
+  double nStrat = 0.0;
+  
+  for (int irun = 0; irun < _clump->size; irun++) {
+    
+    Interval *intvl = _clump->ptr[irun];
+    
+    int iy = intvl->row_in_plane;
+    int iz = intvl->plane;
+    if (iz == 0) {
+      continue;
+    }
+    
+    // check grid points on plane below this one
+    int offset2D = iy * nx + intvl->begin;
+    int offset3D = (iz - 1) * nPtsPlane + offset2D;
+    
+    for (int ix = intvl->begin; ix <= intvl->end; ix++, offset3D++) {
+      fl32 conv = convectivity3D[offset3D];
+      if (conv == _missingFl32) {
+        // missing point below convection
+        nMiss++;
+      } else if (conv < _finder->_minConvectivityForConvective) {
+        // stratiform point just below convection
+        nStrat++;
+      }
+    } // ix
+    
+  } // irun
+
+  double nTotal = nMiss + nStrat;
+  double fractionStrat = nStrat / nTotal;
+
+  if (fractionStrat > 0.1) {
+    return true;
+  } else {
+    return false;
+  }
 
 }
 

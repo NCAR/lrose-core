@@ -482,6 +482,10 @@ private:
     
     void setPartition();
     
+    // check for stratiform below
+    
+    bool stratiformBelow();
+    
     // get methods
 
     int getVolumeKm3() const { return _volumeKm3; }
