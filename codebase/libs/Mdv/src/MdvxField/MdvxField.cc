@@ -17,7 +17,7 @@
 // ** 4) Neither the name of UCAR nor the names of its contributors,         
 // ** if any, may be used to endorse or promote products derived from        
 // ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED ::AS IS" AND WITHOUT ANY EXPRESS  
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
@@ -6833,6 +6833,10 @@ int MdvxField::_write_volume(TaFile &outfile,
 {
 
   clearErrStr();
+
+  // compute min and max
+
+  computeMinAndMax(true);
 
   // compress if previously requested
 
