@@ -831,7 +831,7 @@ public:
   // Note: this is automatically done in convert(), so if you call convert()
   // you need not make this call separately
 
-  int computeMinAndMax(bool force = false);
+  int computeMinAndMax(bool force = false) const;
 
   // access to the data as a volume
   
@@ -1054,7 +1054,7 @@ protected:
   
   double _round_dz(double dz);
 
-  void _check_finite( const void *vol_data );
+  void _check_finite(const void *vol_data) const;
 
   // Clearing data
 

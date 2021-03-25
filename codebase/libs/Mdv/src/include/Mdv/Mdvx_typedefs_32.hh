@@ -499,12 +499,13 @@ typedef struct {
                                //   are guaranteed to be available to
                                //   users for their own purposes.
 
-  fl32 min_value;              // 27 - min val in data set
-  fl32 max_value;              // 28 - max val in data set
-  fl32 min_value_orig_vol;     // 29 - min val in original vol before 
-                               //      clipping to get data set
-  fl32 max_value_orig_vol;     // 30 - max val in original vol before 
-                               //      clipping to get data set
+  mutable fl32 min_value;          // 27 - min val in data set
+  mutable fl32 max_value;          // 28 - max val in data set
+  mutable fl32 min_value_orig_vol; // 29 - min val in original vol before 
+                                   //      clipping to get data set
+  mutable fl32 max_value_orig_vol; // 30 - max val in original vol before 
+                                   //      clipping to get data set
+
   fl32 unused_fl32;            // 31   Spare, to fill out array 
                                //      to 31 fl32's
 

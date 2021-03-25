@@ -6400,7 +6400,7 @@ void MdvxField::_set_data_element_nbytes()
 //
 // Returns 0 on success, -1 on failure
 
-int MdvxField::computeMinAndMax(bool force /* = false*/ )
+int MdvxField::computeMinAndMax(bool force /* = false*/ ) const
 
 {
   
@@ -8387,7 +8387,7 @@ double MdvxField::_round_dz(double dz)
 // bad data value and print a warning message. This is only done for
 // uncompressed, FLOAT32 encoded data.
 
-void MdvxField::_check_finite(const void *vol_data)
+void MdvxField::_check_finite(const void *vol_data) const
 
 {
 

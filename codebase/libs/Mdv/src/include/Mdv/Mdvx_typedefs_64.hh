@@ -506,12 +506,12 @@ typedef struct {
                                //   are guaranteed to be available to
                                //   users for their own purposes.
 
-  fl32 min_value;              // min val in data set
-  fl32 max_value;              // max val in data set
-  fl32 min_value_orig_vol;     // min val in original vol before 
-                               //      clipping to get data set
-  fl32 max_value_orig_vol;     // max val in original vol before 
-                               //      clipping to get data set
+  mutable fl32 min_value;          // min val in data set
+  mutable fl32 max_value;          // max val in data set
+  mutable fl32 min_value_orig_vol; // min val in original vol before 
+                                   //  clipping to get data set
+  mutable fl32 max_value_orig_vol; // max val in original vol before 
+                                   //  clipping to get data set
   fl32 unused_fl32[11];        // Spare, fill out array to 64-bit boundary, set to 0
 
   // chars
@@ -523,7 +523,7 @@ typedef struct {
   char units[MDV64_UNITS_LEN];                // Units label (64 bytes)
 
   char transform[MDV64_TRANSFORM_LEN];        // Data transformation type 
-                                            // (64 bytes)
+                                              // (64 bytes)
 
   char proj4_str[MDV64_PROJ4_STR_LEN];      // Projection type string 
                                             // (256 bytes)
