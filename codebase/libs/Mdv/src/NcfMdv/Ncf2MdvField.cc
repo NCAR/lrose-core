@@ -945,7 +945,23 @@ int Ncf2MdvField::_setGridData()
     delete offsetAtt;
   }
 
-  // decode data, fill _flData array
+  // read min and max value if available
+
+  Nc3Att *minValueAtt = _var4Data->get_att(NcfMdv::min_value); 
+  if (minValueAtt != NULL) {
+    _fhdr.min_value = minValueAtt->as_float(0);
+    _fhdr.min_value_orig_vol = _fhdr.min_value;
+    delete minValueAtt;
+  }
+
+  Nc3Att *maxValueAtt = _var4Data->get_att(NcfMdv::max_value); 
+  if (maxValueAtt != NULL) {
+    _fhdr.max_value = maxValueAtt->as_float(0);
+    _fhdr.max_value_orig_vol = _fhdr.max_value;
+    delete maxValueAtt;
+  }
+
+  // decode data, fill _data array
 
   switch (_dataType) {
 
