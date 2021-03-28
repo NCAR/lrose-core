@@ -57,11 +57,17 @@ IwrfTsGet::IwrfTsGet(IwrfDebug_t debug) :
   _clearFileList();
   _clearPulseList();
   _timeMarginSecs = 15.0;
-  _isAlternating = false;
-  _isStaggeredPrt = false;
   _invertHvFlag = false;
   _prtIsForNextInterval = false;
   _reader = NULL;
+  _isAlternating = false;
+  _isStaggeredPrt = false;
+  _prt = 0.0;
+  _prtShort = 0.0;
+  _prtLong = 0.0;
+  _nGates = 0;
+  _nGatesPrtShort = 0;
+  _nGatesPrtLong = 0;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -471,6 +477,7 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   // pulse at the central index
 
   PulseEntry *centralEntry = _pulseEntries[centralIndex];
+  IwrfTsPulse *centralPulse = centralEntry->getPulse();
   _pathInUse = centralEntry->getFilePath();
   _info.set_scan_rate(centralEntry->getScanRate());
   _info.set_xmit_info_xmit_rcv_mode(centralEntry->getXmitRcvMode());
@@ -478,6 +485,9 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   _info.set_xmit_info_prf_mode(centralEntry->getPrfMode());
   _info.set_proc_pol_mode(centralEntry->getPolMode());
   
+  _prt = centralPulse->getPrt();
+  _nGates = centralPulse->getNGates();
+
   // check for alternating or staggered mode
 
   _checkIsAlternating(index1, index2);

@@ -351,6 +351,12 @@ void Beam::setPulses(bool isRhi,
   _pulses = pulses;
   _georefActive = false;
 
+  if (_isStagPrt) {
+    _nGatesOut = _nGatesPrtShort;
+  } else {
+    _nGatesOut = _nGates;
+  }
+
   // override OpsInfo time-series values as needed
   
   _overrideOpsInfo();
@@ -2532,9 +2538,11 @@ void Beam::_initMomentsObject()
                       _nGatesPrtLong,
                       _opsInfo);
   } else {
+    
     _mom->init(_prt, _opsInfo);
-  }
   
+  }
+
 }
 
 //////////////////////////////////////
