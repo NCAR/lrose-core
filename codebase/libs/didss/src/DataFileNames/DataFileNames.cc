@@ -481,7 +481,7 @@ int DataFileNames::getDataTime(const string& file_path,
   // move start3 forward until we get a digit
 
   char *firstDigit = start3;
-  while (!isdigit(*firstDigit)) {
+  while (*firstDigit != '\0' && !isdigit(*firstDigit)) {
     firstDigit++;
   }
   if (strlen(firstDigit) < 6) {
