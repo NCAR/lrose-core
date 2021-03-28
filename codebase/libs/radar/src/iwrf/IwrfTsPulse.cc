@@ -142,6 +142,26 @@ void IwrfTsPulse::clear()
 
 }
 
+//////////////////////////////////////////////////////////////////
+// set the ops info
+
+void IwrfTsPulse::setOpsInfo(IwrfTsInfo &info)
+{
+  if (&_info != &info) {
+    _info = info;
+  }
+}
+  
+//////////////////////////////////////////////////////////////////
+// set the ops info except for the metadata queue
+
+void IwrfTsPulse::setOpsInfoExceptMetadataQueue(IwrfTsInfo &info)
+{
+  if (&_info != &info) {
+    _info.copyExceptMetadataQueue(info);
+  }
+}
+  
 ////////////////////////////////////////////////////////////
 // set time
 

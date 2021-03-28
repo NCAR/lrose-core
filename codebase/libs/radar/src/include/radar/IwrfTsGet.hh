@@ -45,6 +45,7 @@
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsBurst.hh>
+#include <radar/IwrfTsReader.hh>
 using namespace std;
 
 ////////////////////////
@@ -186,6 +187,16 @@ public:
   bool getIsAlternating() const { return _isAlternating; }
   bool getIsStaggeredPrt() const { return _isStaggeredPrt; }
 
+  double getPrt() const { return _prt; }
+  int getNGates() const { return _nGates; }
+  
+  double getPrtShort() const { return _prtShort; }
+  double getPrtLong() const { return _prtLong; }
+  int getNGatesPrtShort() const { return _nGatesPrtShort; }
+  int getNGatesPrtLong() const { return _nGatesPrtLong; }
+
+  const IwrfTsInfo &getTsInfo() const { return _info; }
+  
 protected:
   
   ////////////////////////////////////////////////
@@ -215,6 +226,10 @@ protected:
   
   string _pathInUse;
 
+  // time series reader
+  
+  IwrfTsReaderFile *_reader;
+
   // radar info
 
   IwrfTsInfo _info;
@@ -236,6 +251,11 @@ protected:
   vector<PulseEntry *> _pulseEntries;
   DateTime _pulsesStartTime;
   DateTime _pulsesEndTime;
+
+  // prt and number of gates
+  
+  double _prt;
+  int _nGates;
   
   // pulse-to-pulse HV alternating mode
 
@@ -248,9 +268,7 @@ protected:
   double _prtLong;
   int _nGatesPrtShort;
   int _nGatesPrtLong;
-  double _prt;
-  int _nGates;
-  
+
   // methods
 
   int _loadFileList(const DateTime &searchTime);

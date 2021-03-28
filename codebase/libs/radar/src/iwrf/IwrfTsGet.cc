@@ -44,8 +44,6 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <radar/IwrfTsGet.hh>
-#include <radar/IwrfTsReader.hh>
-#include <radar/IwrfTsInfo.hh>
 #include <didss/DataFileNames.hh>
 using namespace std;
 
@@ -63,6 +61,7 @@ IwrfTsGet::IwrfTsGet(IwrfDebug_t debug) :
   _isStaggeredPrt = false;
   _invertHvFlag = false;
   _prtIsForNextInterval = false;
+  _reader = NULL;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -72,6 +71,9 @@ IwrfTsGet::~IwrfTsGet()
 
 {
 
+  if (_reader) {
+    delete _reader;
+  }
   _clearFileList();
   _clearPulseList();
 
@@ -311,17 +313,23 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   if (searchIndex < (int) _fileListMap.size() - 1) {
     fileList.push_back(_fileListPaths[searchIndex + 1]);
   }
+
+  // create reader
   
   IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
   if (_debug) {
     iwrfDebug = IWRF_DEBUG_NORM;
   }
-
-  IwrfTsReaderFile reader(fileList, iwrfDebug);
+  if (_reader) {
+    delete _reader;
+  }
+  _reader = new IwrfTsReaderFile(fileList, iwrfDebug);
   IwrfTsPulse *pulse = NULL;
 
+  // read in pulses
+  
   bool infoSet = false;
-  while ((pulse = reader.getNextPulse()) != NULL) {
+  while ((pulse = _reader->getNextPulse()) != NULL) {
     if (_invertHvFlag) {
       pulse->setInvertHvFlag(true);
     }
@@ -329,10 +337,10 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
       pulse->swapPrtValues();
     }
     PulseEntry *entry = new PulseEntry(pulse);
-    entry->setFilePath(reader.getPathInUse());
+    entry->setFilePath(_reader->getPathInUse());
     _pulseEntries.push_back(entry);
     if (!infoSet) {
-      _info = reader.getOpsInfo();
+      _info = _reader->getOpsInfo();
       infoSet = true;
     }
   } // while
@@ -345,23 +353,6 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   
   _pulsesStartTime = _pulseEntries[0]->getPulse()->getTime();
   _pulsesEndTime = _pulseEntries[_pulseEntries.size()-1]->getPulse()->getTime();
-
-  // metadata from info object
-
-  // _latitudeDeg = _info.get_radar_latitude_deg();
-  // _longitudeDeg = _info.get_radar_longitude_deg();
-  // _altitudeM = _info.get_radar_altitude_m();
-  // _platformType = (iwrf_radar_platform_t) _info.get_radar_platform_type();
-
-  // _beamwidthDegH = _info.get_radar_beamwidth_deg_h();
-  // _beamwidthDegV = _info.get_radar_beamwidth_deg_v();
-  // _wavelengthCm = _info.get_radar_wavelength_cm();
-  
-  // _nominalAntGainDbH = _info.get_radar_nominal_gain_ant_db_h();
-  // _nominalAntGainDbV = _info.get_radar_nominal_gain_ant_db_v();
-
-  // _radarName = _info.get_radar_name();
-  // _siteName = _info.get_radar_site_name();
 
   // calibration
 

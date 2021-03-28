@@ -84,6 +84,10 @@ public:
   
   int setFromBuffer(const void *buf, int len);
   
+  // copy all except the metadata queue
+  
+  void copyExceptMetadataQueue(const IwrfTsInfo &rhs);
+
   // override radar name and/or site name
   
   void overrideRadarName(const string &radarName);
