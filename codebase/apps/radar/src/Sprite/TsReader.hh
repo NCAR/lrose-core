@@ -41,6 +41,7 @@
 #include <toolsa/DateTime.hh>
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
+#include <radar/IwrfTsGet.hh>
 #include <radar/IwrfTsReader.hh>
 #include "Params.hh"
 #include "Args.hh"
@@ -169,10 +170,13 @@ private:
 
   // Pulse reader
   
+  IwrfTsGet *_pulseGetter;
   IwrfTsReader *_pulseReader;
   string _filePath;
   DateTime _archiveStartTime;
   DateTime _archiveEndTime;
+  DateTime _beamTime;
+  double _beamIntervalSecs;
   int _timeSpanSecs;
 
   // pulse queue
@@ -216,6 +220,9 @@ private:
   int _nGatesPrtLong;
 
   // private functions
+
+  Beam *_getBeamViaGetter();
+  Beam *_getBeamViaReader();
 
   Beam *_getBeamPpi();
   Beam *_getBeamRhi();

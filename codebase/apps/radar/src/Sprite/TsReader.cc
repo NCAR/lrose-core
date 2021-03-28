@@ -88,6 +88,7 @@ TsReader::TsReader(const string &prog_name,
   OK = true;
 
   _pulseReader = NULL;
+  _pulseGetter = NULL;
   _scanType = SCAN_TYPE_UNKNOWN;
   
   _pulseSeqNum = 0;
@@ -139,20 +140,30 @@ TsReader::TsReader(const string &prog_name,
       _timeSpanSecs = _params.archive_time_span_secs;
       _archiveStartTime.set(_params.archive_start_time);
       _archiveEndTime = _archiveStartTime + _timeSpanSecs;
-      DsInputPath input(_progName,
-                        _params.debug >= Params::DEBUG_VERBOSE,
-                        _params.archive_data_dir,
-                        _archiveStartTime.utime(),
-                        _archiveEndTime.utime());
-      vector<string> paths = input.getPathList();
-      if (paths.size() < 1) {
-        cerr << "ERROR: " << _progName << " - ARCHIVE mode" << endl;
-        cerr << "  No paths found, dir: " << _params.archive_data_dir << endl;
-        cerr << "  Start time: " << DateTime::strm(_archiveStartTime.utime()) << endl;
-        cerr << "  End time: " << DateTime::strm(_archiveEndTime.utime()) << endl;
-        OK = false;
+      _beamTime = _archiveStartTime;
+      _beamIntervalSecs = 0.0;
+      // DsInputPath input(_progName,
+      //                   _params.debug >= Params::DEBUG_VERBOSE,
+      //                   _params.archive_data_dir,
+      //                   _archiveStartTime.utime(),
+      //                   _archiveEndTime.utime());
+      // vector<string> paths = input.getPathList();
+      // if (paths.size() < 1) {
+      //   cerr << "ERROR: " << _progName << " - ARCHIVE mode" << endl;
+      //   cerr << "  No paths found, dir: " << _params.archive_data_dir << endl;
+      //   cerr << "  Start time: " << DateTime::strm(_archiveStartTime.utime()) << endl;
+      //   cerr << "  End time: " << DateTime::strm(_archiveEndTime.utime()) << endl;
+      //   OK = false;
+      // }
+      // _pulseReader = new IwrfTsReaderFile(paths, _iwrfDebug);
+      _pulseGetter = new IwrfTsGet(_iwrfDebug);
+      _pulseGetter->setTopDir(_params.archive_data_dir);
+      if (_params.invert_hv_flag) {
+        _pulseGetter->setInvertHvFlag(true);
       }
-      _pulseReader = new IwrfTsReaderFile(paths, _iwrfDebug);
+      if (!_params.prt_is_for_previous_interval) {
+        _pulseGetter->setPrtIsForNextInterval(true);
+      }
       break;
     }
     case Params::FILE_LIST_MODE: {
@@ -160,7 +171,7 @@ TsReader::TsReader(const string &prog_name,
                                           _iwrfDebug);
       break;
     }
-    case Params::FOLLOW_MOMENTS_MODE: {
+    case Params::FOLLOW_DISPLAY_MODE: {
       // leave pulse reader NULL for now
       break;
     }
@@ -180,6 +191,10 @@ TsReader::~TsReader()
     delete _pulseReader;
   }
 
+  if (_pulseGetter) {
+    delete _pulseGetter;
+  }
+
   _clearPulseQueue();
 
 }
@@ -194,6 +209,185 @@ Beam *TsReader::getNextBeam()
 {
   
   _clearPulseQueue();
+
+  if (_pulseGetter != NULL) {
+
+    // advance beam time
+    
+    _beamTime += _beamIntervalSecs;
+
+    // get IwrfTsGet
+    
+    return _getBeamViaGetter();
+
+  } else {
+
+    // get IwrfTsReader
+    
+    return _getBeamViaReader();
+
+  }
+
+}
+
+/////////////////////////////////////////////////////////
+// get the previous beam in realtime or archive sequence
+// we need to reset the queue and position to read the 
+// previous beam
+//
+// returns Beam object pointer on success, NULL on failure
+// caller must free beam
+
+Beam *TsReader::getPreviousBeam()
+  
+{
+  
+  _clearPulseQueue();
+
+  if (_pulseGetter != NULL) {
+
+    // go back in time
+    
+    _beamTime -= _beamIntervalSecs;
+
+    // use IwrfTsGet
+    
+    return _getBeamViaGetter();
+
+  } else {
+
+    // position for previous beam
+    
+    if (positionForPreviousBeam()) {
+      cerr << "ERROR - TsReader::getPreviousBeam()" << endl;
+      return NULL;
+    }
+    
+    // use IwrfTsReader
+    
+    return _getBeamViaReader();
+
+  }
+}
+
+/////////////////////////////////////////////////////////
+// using IwrfTsGet
+// get the next beam in realtime or archive sequence
+// returns Beam object pointer on success, NULL on failure
+// caller must free beam
+
+Beam *TsReader::_getBeamViaGetter()
+  
+{
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Getting beam at time: " << _beamTime.asString(3) << endl;
+  }
+    
+  // retrieve pulses for beam
+
+  vector<IwrfTsPulse *> beamPulses;
+  if (_pulseGetter->retrieveBeam(_beamTime,
+                                 -9999.0,
+                                 -9999.0,
+                                 _nSamples,
+                                 beamPulses)) {
+    cerr << "ERROR - TsReader::_getBeamViaGetter()" << endl;
+    cerr << "  cannot retrieve beam" << endl;
+    return NULL;
+  }
+
+  // compute beam interval
+
+  IwrfTsPulse *firstPulse = beamPulses[0];
+  IwrfTsPulse *lastPulse = beamPulses[beamPulses.size() - 1];
+  DateTime beamStartTime(firstPulse->getTime(), true,
+                         (double) firstPulse->getNanoSecs() / 1.0e9);
+  DateTime beamEndTime(lastPulse->getTime(), true,
+                       (double) lastPulse->getNanoSecs() / 1.0e9);
+  _beamIntervalSecs =
+    ((beamEndTime - beamStartTime) *
+     (((double) _nSamples + 1.0) / (double) _nSamples));
+
+  // set the pulse queue
+  
+  _clearPulseQueue();
+  for (size_t ii = 0; ii < beamPulses.size(); ii++) {
+    _addPulseToQueue(beamPulses[ii]);
+  }
+
+  // set prt and nGates, assuming single PRT for now
+  
+  _prt = _pulseQueue[0]->getPrt();
+  _nGates = _pulseQueue[0]->getNGates();
+  
+  // check if we have alternating h/v pulses
+  
+  _checkIsAlternating();
+
+  // check if we have staggered PRT pulses - does not apply
+  // to alternating mode
+
+  if (_isAlternating) {
+    _isStaggeredPrt = false;
+  } else {
+    _checkIsStaggeredPrt();
+  }
+
+  // in non-staggered mode check we have constant nGates
+  
+  if (!_isStaggeredPrt) {
+    int nGates0 = _pulseQueue[0]->getNGates();
+    for (int i = 1; i < (int) _pulseQueue.size(); i += 2) {
+      if (_pulseQueue[i]->getNGates() != nGates0) {
+        cerr << "ERROR - TsReader::getNextBeam()" << endl;
+        cerr << "  nGates varies in non-staggered mode" << endl;
+        return NULL;
+      }
+    }
+  }
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_isAlternating) {
+      cerr << "==>> Fast alternating mode" << endl;
+      cerr << "     prt: " << _prt << endl;
+      cerr << "     ngates: " << _nGates << endl;
+    } else if (_isStaggeredPrt) {
+      cerr << "==>> Staggered PRT mode" << endl;
+      cerr << "     prt short: " << _prtShort << endl;
+      cerr << "     prt long: " << _prtLong << endl;
+      cerr << "     ngates short PRT: " << _nGatesPrtShort << endl;
+      cerr << "     ngates long PRT: " << _nGatesPrtLong << endl;
+    } else {
+      cerr << "==>> Single PRT mode" << endl;
+      cerr << "     prt: " << _prt << endl;
+      cerr << "     ngates: " << _nGates << endl;
+    }
+  }
+
+  _filePath = _pulseReader->getPathInUse();
+
+  size_t midIndex = _pulseQueue.size() / 2;
+  _az = _conditionAz(_pulseQueue[midIndex]->getAz());
+  _el = _conditionEl(_pulseQueue[midIndex]->getEl());
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "got beam, _nPulsesRead: " << _nPulsesRead << endl;
+  }
+
+  return _makeBeam(midIndex);
+
+}
+
+/////////////////////////////////////////////////////////
+// using the IwrfTsReader
+// get the next beam in realtime or archive sequence
+// returns Beam object pointer on success, NULL on failure
+// caller must free beam
+
+Beam *TsReader::_getBeamViaReader()
+  
+{
   
   // read in pulses, load up pulse queue
   
@@ -270,6 +464,13 @@ Beam *TsReader::getNextBeam()
     
   } // while
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    const IwrfTsPulse *firstPulse = _pulseQueue[0];
+    DateTime beamStartTime(firstPulse->getTime(), true,
+                           (double) firstPulse->getNanoSecs() / 1.0e9);
+    cerr << "Read pulse at time: " << beamStartTime.asString(3) << endl;
+  }
+    
   // set prt and nGates, assuming single PRT for now
   
   _prt = _pulseQueue[0]->getPrt();
@@ -330,31 +531,6 @@ Beam *TsReader::getNextBeam()
   }
 
   return _makeBeam(midIndex);
-
-}
-
-/////////////////////////////////////////////////////////
-// get the previous beam in realtime or archive sequence
-// we need to reset the queue and position to read the 
-// previous beam
-//
-// returns Beam object pointer on success, NULL on failure
-// caller must free beam
-
-Beam *TsReader::getPreviousBeam()
-  
-{
-  
-  // first position for previous beam
-
-  if (positionForPreviousBeam()) {
-    cerr << "ERROR - TsReader::getPreviousBeam()" << endl;
-    return NULL;
-  }
-
-  // then read the next beam
-
-  return getNextBeam();
 
 }
 

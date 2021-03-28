@@ -56,13 +56,13 @@ typedef enum {
   REALTIME_TCP_MODE, 
   ARCHIVE_TIME_MODE,
   FILE_LIST_MODE,
-  FOLLOW_MOMENTS_MODE
+  FOLLOW_DISPLAY_MODE
 } input_mode_t;
 
 paramdef enum input_mode_t {
   p_default = REALTIME_FMQ_MODE;
   p_descr = "Method for reading the input time series data";
-  p_help = "\n\nREALTIME_FMQ_MODE: read a real-time IWRF data stream from an FMQ.\n\nREALTIME_TCP_MODE: read a real-time IWRF data stream from a TCP server.\n\nARCHIVE_TIME_MODE: given a time span and data directory, identify the list of files within that time span and read those files.\n\nFILE_LIST_MODE: the list of time series files is specified on the command line.\n\nFOLLOW_MOMENTS_MODE: the user is running a moments display (e.g. HawkEye or CIDD) and clicks on locations of interest. Sprite polls a shared memory segment for information on the user's clicks, and reads in the data for the time and location specified in the latest click.";
+  p_help = "\n\nREALTIME_FMQ_MODE: read a real-time IWRF data stream from an FMQ.\n\nREALTIME_TCP_MODE: read a real-time IWRF data stream from a TCP server.\n\nARCHIVE_TIME_MODE: given a time span and data directory, identify the list of files within that time span and read those files.\n\nFILE_LIST_MODE: the list of time series files is specified on the command line.\n\nFOLLOW_DISPLAY_MODE: the user is running a moments display (e.g. HawkEye or CIDD) and clicks on locations of interest. Sprite polls a shared memory segment for information on the user's clicks, and reads in the data for the time and location specified in the latest click.";
 } input_mode;
 
 paramdef string {

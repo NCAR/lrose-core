@@ -79,7 +79,7 @@ public:
     REALTIME_TCP_MODE = 1,
     ARCHIVE_TIME_MODE = 2,
     FILE_LIST_MODE = 3,
-    FOLLOW_MOMENTS_MODE = 4
+    FOLLOW_DISPLAY_MODE = 4
   } input_mode_t;
 
   typedef enum {

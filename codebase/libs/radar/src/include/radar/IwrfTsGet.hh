@@ -139,6 +139,15 @@ public:
   
   void setTopDir(const string &topDir) { _topDir = topDir; }
 
+  // invert HV flag? - alternating mode
+
+  void setInvertHvFlag(bool val) { _invertHvFlag = val; }
+
+  // the default is for PRT to apply to previous interval
+  // if not true, set flag appropriately
+  
+  void setPrtIsForNextInterval(bool val) { _prtIsForNextInterval = val; }
+
   // set the time margin, which is applied
   // to time range in secs for search.
   // We ensure that we have at
@@ -151,35 +160,20 @@ public:
   // Retrieve a beam of pulses, given the time, el and az.
   // Fills the beamPulses vector.
   // Returns 0 on success, -1 on failure.
+  // To search on time only, set az and el to -9999.
   // The beamPulses vector points to pulses managed by this object.
   // Data in the beam must be used before any further get operations
   // are performed on this object.
   
   int retrieveBeam(const DateTime &searchTime,
-                   double searchElev,
+                   double searchEl,
                    double searchAz,
                    int nSamples,
-                   vector<IwrfTsGet::PulseEntry *> &beamPulses);
+                   vector<IwrfTsPulse *> &beamPulses);
   
   // get methods, use after retrieve
 
   const string getPathInUse() const { return _pathInUse; }
-  
-  double getLatitudeDeg() const { return _latitudeDeg; }
-  double getLongitudeDeg() const { return _longitudeDeg; }
-  double getAltitudeM() const { return _altitudeM; }
-
-  iwrf_radar_platform_t getRadarPlatform() const { return _platformType; }
-
-  double getBeamWidthDegH() const { return _beamwidthDegH; }
-  double getBeamWidthDegV() const { return _beamwidthDegV; }
-  double getWavelengthCm() const { return _wavelengthCm; }
-  
-  double getNominalAntGainDbH() const { return _nominalAntGainDbH; }
-  double getNominalAntGainDbV() const { return _nominalAntGainDbV; }
-  
-  string getRadarName() const { return _radarName; }
-  string getSiteName() const { return _siteName; }
   
   const IwrfCalib &getCalib() const { return _calib; }
 
@@ -204,6 +198,11 @@ protected:
 
   string _topDir;
 
+  // read directives
+
+  bool _invertHvFlag;
+  bool _prtIsForNextInterval;
+
   // margin applied to time range in secs
   // for search. We ensure that we have at
   // least this margin on either side of the
@@ -217,22 +216,9 @@ protected:
   string _pathInUse;
 
   // radar info
+
+  IwrfTsInfo _info;
   
-  double _latitudeDeg;
-  double _longitudeDeg;
-  double _altitudeM;
-  iwrf_radar_platform_t _platformType;
-
-  double _beamwidthDegH;
-  double _beamwidthDegV;
-  double _wavelengthCm;
-  
-  double _nominalAntGainDbH;
-  double _nominalAntGainDbV;
-
-  string _radarName;
-  string _siteName;
-
   // calibration
 
   IwrfCalib _calib;
@@ -250,7 +236,7 @@ protected:
   vector<PulseEntry *> _pulseEntries;
   DateTime _pulsesStartTime;
   DateTime _pulsesEndTime;
-
+  
   // pulse-to-pulse HV alternating mode
 
   bool _isAlternating;
@@ -274,10 +260,10 @@ protected:
   void _clearPulseList();
   
   int _loadBeamPulses(const DateTime &searchTime,
-                      double searchElev,
+                      double searchEl,
                       double searchAz,
                       int nSamples,
-                      vector<IwrfTsGet::PulseEntry *> &beamPulses);
+                      vector<IwrfTsPulse *> &beamPulses);
 
   bool _checkIsBeamPpi(ssize_t midIndex, double az, double indexedRes);
   bool _checkIsBeamRhi(ssize_t midIndex, double el, double indexedRes);

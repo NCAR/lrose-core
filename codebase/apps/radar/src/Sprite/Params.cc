@@ -648,7 +648,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
     tt->descr = tdrpStrDup("Method for reading the input time series data");
-    tt->help = tdrpStrDup("\n\nREALTIME_FMQ_MODE: read a real-time IWRF data stream from an FMQ.\n\nREALTIME_TCP_MODE: read a real-time IWRF data stream from a TCP server.\n\nARCHIVE_TIME_MODE: given a time span and data directory, identify the list of files within that time span and read those files.\n\nFILE_LIST_MODE: the list of time series files is specified on the command line.\n\nFOLLOW_MOMENTS_MODE: the user is running a moments display (e.g. HawkEye or CIDD) and clicks on locations of interest. Sprite polls a shared memory segment for information on the user's clicks, and reads in the data for the time and location specified in the latest click.");
+    tt->help = tdrpStrDup("\n\nREALTIME_FMQ_MODE: read a real-time IWRF data stream from an FMQ.\n\nREALTIME_TCP_MODE: read a real-time IWRF data stream from a TCP server.\n\nARCHIVE_TIME_MODE: given a time span and data directory, identify the list of files within that time span and read those files.\n\nFILE_LIST_MODE: the list of time series files is specified on the command line.\n\nFOLLOW_DISPLAY_MODE: the user is running a moments display (e.g. HawkEye or CIDD) and clicks on locations of interest. Sprite polls a shared memory segment for information on the user's clicks, and reads in the data for the time and location specified in the latest click.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
     tt->enum_def.nfields = 5;
@@ -662,8 +662,8 @@
       tt->enum_def.fields[2].val = ARCHIVE_TIME_MODE;
       tt->enum_def.fields[3].name = tdrpStrDup("FILE_LIST_MODE");
       tt->enum_def.fields[3].val = FILE_LIST_MODE;
-      tt->enum_def.fields[4].name = tdrpStrDup("FOLLOW_MOMENTS_MODE");
-      tt->enum_def.fields[4].val = FOLLOW_MOMENTS_MODE;
+      tt->enum_def.fields[4].name = tdrpStrDup("FOLLOW_DISPLAY_MODE");
+      tt->enum_def.fields[4].val = FOLLOW_DISPLAY_MODE;
     tt->single_val.e = REALTIME_FMQ_MODE;
     tt++;
     

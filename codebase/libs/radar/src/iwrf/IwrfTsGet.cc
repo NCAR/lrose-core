@@ -61,6 +61,8 @@ IwrfTsGet::IwrfTsGet(IwrfDebug_t debug) :
   _timeMarginSecs = 15.0;
   _isAlternating = false;
   _isStaggeredPrt = false;
+  _invertHvFlag = false;
+  _prtIsForNextInterval = false;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -79,15 +81,16 @@ IwrfTsGet::~IwrfTsGet()
 // Get a beam of pulses, given the time, el and az.
 // Fills the beamPulses vector.
 // Returns 0 on success, -1 on failure.
+// To search on time only, set az and el to -9999.
 // The beamPulses vector points to pulses managed by this object.
 // Data in the beam must be used before any further get operations
 // are performed on this object.
 
 int IwrfTsGet::retrieveBeam(const DateTime &searchTime,
-                            double searchElev,
+                            double searchEl,
                             double searchAz,
                             int nSamples,
-                            vector<IwrfTsGet::PulseEntry *> &beamPulses)
+                            vector<IwrfTsPulse *> &beamPulses)
 
 {
 
@@ -107,7 +110,7 @@ int IwrfTsGet::retrieveBeam(const DateTime &searchTime,
 
   // load the beam pulses
   
-  if (_loadBeamPulses(searchTime, searchElev, searchAz,
+  if (_loadBeamPulses(searchTime, searchEl, searchAz,
                       nSamples, beamPulses)) {
     return -1;
   }
@@ -164,7 +167,7 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
       cerr << "WARNING - IwrfTsGet::_loadFileList()" << endl;
       cerr << "  Cannot open dir: " << subdirPath << endl;
       cerr << "  " << strerror(errNum) << endl;
-      return -1;
+      continue;
     }
 
     // read entries
@@ -313,20 +316,26 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   if (_debug) {
     iwrfDebug = IWRF_DEBUG_NORM;
   }
+
   IwrfTsReaderFile reader(fileList, iwrfDebug);
   IwrfTsPulse *pulse = NULL;
-  IwrfTsInfo info;
+
   bool infoSet = false;
   while ((pulse = reader.getNextPulse()) != NULL) {
+    if (_invertHvFlag) {
+      pulse->setInvertHvFlag(true);
+    }
+    if (_prtIsForNextInterval) {
+      pulse->swapPrtValues();
+    }
     PulseEntry *entry = new PulseEntry(pulse);
     entry->setFilePath(reader.getPathInUse());
     _pulseEntries.push_back(entry);
     if (!infoSet) {
-      info = reader.getOpsInfo();
+      _info = reader.getOpsInfo();
       infoSet = true;
     }
-    
-  }
+  } // while
 
   if (_pulseEntries.size() < 2) {
     cerr << "ERROR - IwrfTsGet::_loadPulseList()" << endl;
@@ -339,24 +348,24 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
 
   // metadata from info object
 
-  _latitudeDeg = info.get_radar_latitude_deg();
-  _longitudeDeg = info.get_radar_longitude_deg();
-  _altitudeM = info.get_radar_altitude_m();
-  _platformType = (iwrf_radar_platform_t) info.get_radar_platform_type();
+  // _latitudeDeg = _info.get_radar_latitude_deg();
+  // _longitudeDeg = _info.get_radar_longitude_deg();
+  // _altitudeM = _info.get_radar_altitude_m();
+  // _platformType = (iwrf_radar_platform_t) _info.get_radar_platform_type();
 
-  _beamwidthDegH = info.get_radar_beamwidth_deg_h();
-  _beamwidthDegV = info.get_radar_beamwidth_deg_v();
-  _wavelengthCm = info.get_radar_wavelength_cm();
+  // _beamwidthDegH = _info.get_radar_beamwidth_deg_h();
+  // _beamwidthDegV = _info.get_radar_beamwidth_deg_v();
+  // _wavelengthCm = _info.get_radar_wavelength_cm();
   
-  _nominalAntGainDbH = info.get_radar_nominal_gain_ant_db_h();
-  _nominalAntGainDbV = info.get_radar_nominal_gain_ant_db_v();
+  // _nominalAntGainDbH = _info.get_radar_nominal_gain_ant_db_h();
+  // _nominalAntGainDbV = _info.get_radar_nominal_gain_ant_db_v();
 
-  _radarName = info.get_radar_name();
-  _siteName = info.get_radar_site_name();
+  // _radarName = _info.get_radar_name();
+  // _siteName = _info.get_radar_site_name();
 
   // calibration
 
-  _calib.set(info.getCalibration());
+  _calib.set(_info.getCalibration());
 
   if (_debug) {
     cerr << "  loaded n pulses  : " << _pulseEntries.size() << endl;
@@ -391,12 +400,13 @@ void IwrfTsGet::_clearPulseList()
   
 //////////////////////////////////////////////////////////////////
 // Load the pulses for a beam
+// To search on time only, set az and el to -9999.
 
 int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
-                               double searchElev,
+                               double searchEl,
                                double searchAz,
                                int nSamples,
-                               vector<IwrfTsGet::PulseEntry *> &beamPulses)
+                               vector<IwrfTsPulse *> &beamPulses)
   
 {
 
@@ -447,24 +457,35 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
 
   // find the mid index - where the angles straddle the required value
   
-  ssize_t centerIndex = midIndex;
-  if (isRhi) {
-    for (ssize_t ii = index1; ii <= index2; ii++) {
-      if (_checkIsBeamRhi(ii, searchElev, 1.0)) {
-        centerIndex = ii;
-        break;
-      }
-    } // ii
-  } else {
-    for (ssize_t ii = index1; ii <= index2; ii++) {
-      if (_checkIsBeamPpi(ii, searchAz, 1.0)) {
-        centerIndex = ii;
-        break;
-      }
-    } // ii
-  }
+  ssize_t centralIndex = midIndex;
+  if (searchAz > -9990.0 && searchEl > -9999.0) {
+    if (isRhi) {
+      for (ssize_t ii = index1; ii <= index2; ii++) {
+        if (_checkIsBeamRhi(ii, searchEl, 1.0)) {
+          centralIndex = ii;
+          break;
+        }
+      } // ii
+    } else {
+      for (ssize_t ii = index1; ii <= index2; ii++) {
+        if (_checkIsBeamPpi(ii, searchAz, 1.0)) {
+          centralIndex = ii;
+          break;
+        }
+      } // ii
+    }
+  } // if (searchAz > -9990.0 && searchEl > -9999.0) {
 
-  _pathInUse = _pulseEntries[centerIndex]->getFilePath();
+  // update the info object based on properties of the
+  // pulse at the central index
+
+  PulseEntry *centralEntry = _pulseEntries[centralIndex];
+  _pathInUse = centralEntry->getFilePath();
+  _info.set_scan_rate(centralEntry->getScanRate());
+  _info.set_xmit_info_xmit_rcv_mode(centralEntry->getXmitRcvMode());
+  _info.set_xmit_info_xmit_phase_mode(centralEntry->getXmitPhaseMode());
+  _info.set_xmit_info_prf_mode(centralEntry->getPrfMode());
+  _info.set_proc_pol_mode(centralEntry->getPolMode());
   
   // check for alternating or staggered mode
 
@@ -473,7 +494,7 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
 
   // set index limits
   
-  ssize_t startIndex = _conditionPulseIndex(centerIndex - nSamples / 2);
+  ssize_t startIndex = _conditionPulseIndex(centralIndex - nSamples / 2);
   ssize_t endIndex = startIndex + nSamples - 1;
   ssize_t qSize = _pulseEntries.size();
   if (endIndex > qSize - 4) {
@@ -502,7 +523,12 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   
   beamPulses.clear();
   for (ssize_t ii = startIndex; ii <= endIndex; ii++) {
-    beamPulses.push_back(_pulseEntries[ii]);
+    // get the pulse
+    IwrfTsPulse *pulse = _pulseEntries[ii]->getPulse();
+    // update the info
+    pulse->setOpsInfo(_info);
+    // add to vector
+    beamPulses.push_back(pulse);
   }
   
   return 0;
