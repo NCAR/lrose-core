@@ -318,22 +318,22 @@ Beam *TsReader::_getBeamViaGetter()
 
   // set prt and nGates, assuming single PRT for now
   
-  _prt = _pulseQueue[0]->getPrt();
-  _nGates = _pulseQueue[0]->getNGates();
+  _prt = _pulseGetter->getPrt();
+  _nGates = _pulseGetter->getNGates();
   
   // check if we have alternating h/v pulses
   
-  _checkIsAlternating();
+  _isAlternating = _pulseGetter->getIsAlternating();
 
   // check if we have staggered PRT pulses - does not apply
   // to alternating mode
 
-  if (_isAlternating) {
-    _isStaggeredPrt = false;
-  } else {
-    _checkIsStaggeredPrt();
-  }
-
+  _isStaggeredPrt = _pulseGetter->getIsStaggeredPrt();
+  _prtShort = _pulseGetter->getPrtShort();
+  _prtLong = _pulseGetter->getPrtLong();
+  _nGatesPrtShort = _pulseGetter->getNGatesPrtShort();
+  _nGatesPrtLong = _pulseGetter->getNGatesPrtLong();
+  
   // in non-staggered mode check we have constant nGates
   
   if (!_isStaggeredPrt) {
@@ -365,7 +365,7 @@ Beam *TsReader::_getBeamViaGetter()
     }
   }
 
-  _filePath = _pulseReader->getPathInUse();
+  _filePath = _pulseGetter->getPathInUse();
 
   size_t midIndex = _pulseQueue.size() / 2;
   _az = _conditionAz(_pulseQueue[midIndex]->getAz());
@@ -375,6 +375,23 @@ Beam *TsReader::_getBeamViaGetter()
     cerr << "got beam, _nPulsesRead: " << _nPulsesRead << endl;
   }
 
+  // create new beam
+  
+  Beam *beam = new Beam(_progName, _params);
+  beam->setPulses(_scanType == SCAN_TYPE_RHI,
+                  _nSamples,
+                  _nGates,
+                  _nGatesPrtLong,
+                  _indexedBeams,
+                  _indexedRes,
+                  _isAlternating,
+                  _isStaggeredPrt,
+                  _prt,
+                  _prtLong,
+                  _pulseGetter->getTsInfo(),
+                  _pulseQueue);
+  
+  return beam;
   return _makeBeam(midIndex);
 
 }
