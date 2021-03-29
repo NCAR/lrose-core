@@ -117,6 +117,7 @@ SpectraMgr::SpectraMgr(const Params &params,
 
   _archiveStartTime.set(_params.archive_start_time);
   _archiveEndTime = _archiveStartTime + _timeSpanSecs;
+  _goForward = true;
 
   // set up windows
   
@@ -648,7 +649,12 @@ void SpectraMgr::_handleArchiveData()
   
   // read in a beam
 
-  Beam *beam = _tsReader->getNextBeam();
+  Beam *beam = NULL;
+  if (_goForward) {
+    beam = _tsReader->getNextBeam();
+  } else {
+    beam = _tsReader->getPreviousBeam();
+  }
   if (beam == NULL) {
     cerr << "ERROR - end of data in archive mode" << endl;
     // reset cursor
@@ -1135,13 +1141,14 @@ void SpectraMgr::_setDataRetrievalMode()
 
 void SpectraMgr::_goBack()
 {
-  _tsReader->positionForPreviousBeam();
+  _goForward = false;
   _archiveStartTime -= 1 * _timeSpanSecs;
   _setGuiFromStartTime();
 }
 
 void SpectraMgr::_goFwd()
 {
+  _goForward = true;
   _archiveStartTime += 1 * _timeSpanSecs;
   _setGuiFromStartTime();
 }

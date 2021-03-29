@@ -128,7 +128,8 @@ private:
   // reading data in
   
   TsReader *_tsReader;
-  
+  bool _goForward;
+
   // beam reading timer
 
   static bool _firstTimerEvent;

@@ -122,12 +122,6 @@ public:
   
   Beam *getPreviousBeam();
   
-  // position to get the previous beam in realtime or archive sequence
-  // we need to reset the queue and position to read the previous beam
-  // returns 0 on success, -1 on error
-  
-  int positionForPreviousBeam();
-  
   // position at end of queue
   
   void seekToEndOfQueue();
@@ -137,8 +131,8 @@ public:
   // returns Beam object pointer on success, NULL on failure
   // caller must free beam
   
-  Beam *getClosestBeam(time_t startTime, time_t endTime,
-                       double az, double el, bool isRhi);
+  // Beam *getClosestBeam(time_t startTime, time_t endTime,
+  //                      double az, double el, bool isRhi);
 
   //////////////////////////////////////////////////////
   // reading data in follow mode
@@ -168,10 +162,11 @@ private:
   string _scanModeStr;
   IwrfDebug_t _iwrfDebug;
 
-  // Pulse reader
+  // Pulse readers
   
   IwrfTsGet *_pulseGetter;
   IwrfTsReader *_pulseReader;
+  
   string _filePath;
   DateTime _archiveStartTime;
   DateTime _archiveEndTime;
@@ -179,10 +174,10 @@ private:
   double _beamIntervalSecs;
   int _timeSpanSecs;
 
-  // pulse queue
+  // pulse queues
   
-  deque<const IwrfTsPulse *> _pulseQueue;
-  long _pulseSeqNum;
+  deque<const IwrfTsPulse *> _getterQueue;
+  deque<const IwrfTsPulse *> _readerQueue;
   int64_t _nPulsesRead;
   int64_t _prevPulseSeqNum;
   
@@ -223,21 +218,14 @@ private:
 
   Beam *_getBeamViaGetter();
   Beam *_getBeamViaReader();
-
-  Beam *_getBeamPpi();
-  Beam *_getBeamRhi();
-  bool _checkIsBeamPpi(size_t midIndex);
-  bool _checkIsBeamRhi(size_t midIndex);
-  Beam *_makeBeam(size_t midIndex);
+  int _positionReaderForPreviousBeam();
   
-  void _addPulseToQueue(const IwrfTsPulse *pulse);
-  void _clearPulseQueue();
+  void _addPulseToGetterQueue(const IwrfTsPulse *pulse);
+  void _clearPulseGetterQueue();
 
-  int _findBestFile(time_t startTime, time_t endTime,
-                    double az, double el, bool isRhi);
-  void _getDayDirs(const string &topDir, TimePathSet &dayDirs);
-  int _readFile();
-  
+  void _addPulseToReaderQueue(const IwrfTsPulse *pulse);
+  void _clearPulseReaderQueue();
+
   void _checkIsAlternating();
   void _checkIsStaggeredPrt();
   double _conditionAz(double az);

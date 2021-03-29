@@ -253,17 +253,17 @@ void Beam::_init()
   _targetAngle = 0;
 
   _scanMode = IWRF_SCAN_MODE_NOT_SET;
-  _xmitRcvMode = IWRF_XMIT_RCV_MODE_NOT_SET;
+  _xmitRcvMode = IWRF_SINGLE_POL;
   _sweepNum = 0;
   _volNum = 0;
 
   _startRangeKm = 0.0;
   _gateSpacingKm = 0.0;
 
+  
   _beamIsIndexed = true;
   _angularResolution = 1.0;
   _isAlternating = false;
-  _xmitRcvMode = IWRF_SINGLE_POL;
   _dualPol = false;
 
   _prt = 0;
@@ -289,7 +289,7 @@ void Beam::_init()
 
   _mom = NULL;
 
-  _applyFiltering = false;
+  _applyFiltering = true;
 
   _window = NULL;
   _windowHalf = NULL;
@@ -2756,7 +2756,7 @@ void Beam::_allocGateData(int nGates)
   int nNeeded = nGates - (int) _gateData.size();
   if (nNeeded > 0) {
     for (int ii = 0; ii < nNeeded; ii++) {
-      GateData *gate = new GateData();
+      GateData *gate = new GateData;
       _gateData.push_back(gate);
     }
   }
