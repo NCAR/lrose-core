@@ -335,7 +335,7 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   // read in pulses
   
   bool infoSet = false;
-  while ((pulse = _reader->getNextPulse()) != NULL) {
+  while ((pulse = _reader->getNextPulse(true)) != NULL) {
     if (_invertHvFlag) {
       pulse->setInvertHvFlag(true);
     }
@@ -418,7 +418,7 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   // find closest pulse to search time
 
   double midDiff = 1.0e99;
-  size_t midIndex = 0;
+  size_t midIndex = _pulseEntries.size() / 2;
   for (size_t ii = 0; ii < _pulseEntries.size(); ii++) {
     const DateTime &pulseTime = _pulseEntries[ii]->getTime();
     double tdiff = fabs(searchTime - pulseTime);
@@ -428,43 +428,51 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     }
   } // ii
 
-  // compute the mean PRT
+  // set index limits relative to midIndex
   
-  ssize_t index1 = _conditionPulseIndex(midIndex - nSamples / 2);
-  ssize_t index2 = _conditionPulseIndex(midIndex + nSamples / 2 - 1);
-  double meanPrt = (_pulseEntries[index2]->getTime() -
-                    _pulseEntries[index1]->getTime()) / (double) nSamples;
-  
-  // set search indices to look back and fwd by 1 sec
-  
-  int nSamples1Sec = (int) (1.0 / meanPrt + 0.5);
-  index1 = _conditionPulseIndex(midIndex - nSamples1Sec);
-  index2 = _conditionPulseIndex(midIndex + nSamples1Sec - 1);
-  
+  ssize_t index0 = _conditionPulseIndex(midIndex - nSamples / 2);
+  ssize_t index1 = _conditionPulseIndex(index0 + nSamples);
+
   // determine whether this is a PPI or RHI
   
-  double deltaAz = _conditionDeltaAz(_pulseEntries[index1]->getAz() -
-                                     _pulseEntries[index2]->getAz());
-  double deltaEl = fabs(_pulseEntries[index1]->getEl() -
-                        _pulseEntries[index2]->getEl());
+  double deltaAz = _conditionDeltaAz(_pulseEntries[index0]->getAz() -
+                                     _pulseEntries[index1]->getAz());
+  double deltaEl = fabs(_pulseEntries[index0]->getEl() -
+                        _pulseEntries[index1]->getEl());
   bool isRhi = false;
   if (deltaEl > deltaAz) {
     isRhi = true;
   }
 
+  // compute the mean PRT
+  
+  const DateTime &time0 = _pulseEntries[index0]->getTime();
+  const DateTime &time1 = _pulseEntries[index1]->getTime();
+  double deltaTime = time1 - time0;
+  double meanPrt = deltaTime / (double) (index1 - index0);
+  
+  // set search indices to look back and fwd by an extra 1 sec
+  
+  int nSamples1Sec = (int) (1.0 / meanPrt + 0.5);
+  if (nSamples1Sec < nSamples) {
+    nSamples1Sec = nSamples;
+  }
+  index0 = _conditionPulseIndex(index0 - nSamples1Sec);
+  index1 = _conditionPulseIndex(index1 + nSamples1Sec);
+  
   // find the mid index - where the angles straddle the required value
   
   ssize_t centralIndex = midIndex;
   if (searchAz > -9990.0 && searchEl > -9999.0) {
     if (isRhi) {
-      for (ssize_t ii = index1; ii <= index2; ii++) {
+      for (ssize_t ii = index0; ii <= index1; ii++) {
         if (_checkIsBeamRhi(ii, searchEl, 1.0)) {
           centralIndex = ii;
           break;
         }
       } // ii
     } else {
-      for (ssize_t ii = index1; ii <= index2; ii++) {
+      for (ssize_t ii = index0; ii <= index1; ii++) {
         if (_checkIsBeamPpi(ii, searchAz, 1.0)) {
           centralIndex = ii;
           break;
@@ -473,6 +481,11 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     }
   } // if (searchAz > -9990.0 && searchEl > -9999.0) {
 
+  // reset index limits relative to centralIndex
+  
+  index0 = _conditionPulseIndex(centralIndex - nSamples / 2);
+  index1 = _conditionPulseIndex(index0 + nSamples);
+  
   // update the info object based on properties of the
   // pulse at the central index
 
@@ -484,46 +497,38 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   _info.set_xmit_info_xmit_phase_mode(centralEntry->getXmitPhaseMode());
   _info.set_xmit_info_prf_mode(centralEntry->getPrfMode());
   _info.set_proc_pol_mode(centralEntry->getPolMode());
-  
   _prt = centralPulse->getPrt();
   _nGates = centralPulse->getNGates();
 
   // check for alternating or staggered mode
-
-  _checkIsAlternating(index1, index2);
-  _checkIsStaggeredPrt(index1, index2);
-
-  // set index limits
   
-  ssize_t startIndex = _conditionPulseIndex(centralIndex - nSamples / 2);
-  ssize_t endIndex = startIndex + nSamples - 1;
-  ssize_t qSize = _pulseEntries.size();
-  if (endIndex > qSize - 4) {
-    endIndex = qSize - 4;
-    startIndex = endIndex - nSamples + 1;
+  _isAlternating = _checkIsAlternating(index0, index1);
+  _isStaggeredPrt = _checkIsStaggeredPrt(index0, index1);
+  if (_isAlternating) {
+    _isStaggeredPrt = false;
   }
 
   // adjust to make sure we start on correct pulse
   
   if (_isAlternating) {
-    bool startsOnHoriz = _pulseEntries[startIndex]->getPulse()->isHoriz();
+    bool startsOnHoriz = _pulseEntries[index0]->getPulse()->isHoriz();
     if (!startsOnHoriz) {
-      startIndex++;
-      endIndex++;
+      index0++;
+      index1++;
     }
   } else if (_isStaggeredPrt) {
-    double prt0 = _pulseEntries[startIndex]->getPulse()->getPrt();
-    double prt1 = _pulseEntries[startIndex+1]->getPulse()->getPrt();
+    double prt0 = _pulseEntries[index0]->getPulse()->getPrt();
+    double prt1 = _pulseEntries[index0+1]->getPulse()->getPrt();
     if (prt0 > prt1) {
-      startIndex++;
-      endIndex++;
+      index0++;
+      index1++;
     }
   }
 
   // load up beam pulses
   
   beamPulses.clear();
-  for (ssize_t ii = startIndex; ii <= endIndex; ii++) {
+  for (ssize_t ii = index0; ii < index1; ii++) {
     // get the pulse
     IwrfTsPulse *pulse = _pulseEntries[ii]->getPulse();
     // update the info
@@ -539,17 +544,16 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
 /////////////////////////////////////////////////
 // check for a ppi beam at the stated index
 
-bool IwrfTsGet::_checkIsBeamPpi(ssize_t midIndex, double az, double indexedRes)
+bool IwrfTsGet::_checkIsBeamPpi(ssize_t centralIndex,
+                                double az, double indexedRes)
   
 {
   
   // compute azimuths which need to straddle the center of the beam
   
-  double midAz1 = _conditionAz(_pulseEntries[midIndex]->getAz(), az);
-  double midAz2 = _conditionAz(_pulseEntries[midIndex+1]->getAz(), midAz1);
+  double midAz1 = _conditionAz(_pulseEntries[centralIndex]->getAz(), az);
+  double midAz2 = _conditionAz(_pulseEntries[centralIndex+1]->getAz(), midAz1);
   
-  cerr << "az, midAz1, midAz2: " << az << ", " << midAz1 << ", " << midAz2 << endl;
-
   // Check if the azimuths at the center of the data straddle
   // the target azimuth
   
@@ -576,14 +580,14 @@ bool IwrfTsGet::_checkIsBeamPpi(ssize_t midIndex, double az, double indexedRes)
 /////////////////////////////////////////////////
 // check for an rhi beam at the stated index
 
-bool IwrfTsGet::_checkIsBeamRhi(ssize_t midIndex, double el, double indexedRes)
+bool IwrfTsGet::_checkIsBeamRhi(ssize_t centralIndex, double el, double indexedRes)
   
 {
   
   // compute elevations which need to straddle the center of the beam
   
-  double midEl1 = _conditionEl(_pulseEntries[midIndex]->getEl());
-  double midEl2 = _conditionEl(_pulseEntries[midIndex+1]->getEl());
+  double midEl1 = _conditionEl(_pulseEntries[centralIndex]->getEl());
+  double midEl2 = _conditionEl(_pulseEntries[centralIndex+1]->getEl());
   
   // Check if the elevations at the center of the data straddle
   // the target elevation
@@ -631,7 +635,7 @@ double IwrfTsGet::_conditionDeltaAz(double deltaAz)
 {
   deltaAz = fabs(deltaAz);
   if (deltaAz > 180.0) {
-    return fabs(deltaAz - 360.0);
+    deltaAz = fabs(deltaAz - 360.0);
   }
   return deltaAz;
 }
@@ -671,23 +675,23 @@ ssize_t IwrfTsGet::_conditionPulseIndex(ssize_t index)
 // Also check that we start on a horizontal pulse
 // If so, the queue is ready to make a beam
 
-void IwrfTsGet::_checkIsAlternating(ssize_t index1,
-                                    ssize_t index2)
+bool IwrfTsGet::_checkIsAlternating(ssize_t index0,
+                                    ssize_t index1)
   
 {
   
   _isAlternating = false;
   
-  bool prevHoriz = _pulseEntries[index1]->getPulse()->isHoriz();
-  for (ssize_t ii = index1 + 1; ii <= index2; ii++) {
+  bool prevHoriz = _pulseEntries[index0]->getPulse()->isHoriz();
+  for (ssize_t ii = index0 + 1; ii <= index1; ii++) {
     bool thisHoriz = _pulseEntries[ii]->getPulse()->isHoriz();
     if (thisHoriz == prevHoriz) {
-      return;
+      return false;
     }
     prevHoriz = thisHoriz;
   }
 
-  _isAlternating = true;
+  return true;
   
 }
 
@@ -697,43 +701,47 @@ void IwrfTsGet::_checkIsAlternating(ssize_t index1,
 // Also check that we start on a short prt
 // If so, the queue is ready to make a beam
 
-void IwrfTsGet::_checkIsStaggeredPrt(ssize_t index1,
-                                     ssize_t index2)
+bool IwrfTsGet::_checkIsStaggeredPrt(ssize_t index0,
+                                     ssize_t index1)
 
 {
 
   _isStaggeredPrt = false;
   
-  double prt0 = _pulseEntries[index1]->getPulse()->getPrt();
-  double prt1 = _pulseEntries[index1+1]->getPulse()->getPrt();
+  double prt0 = _pulseEntries[index0]->getPulse()->getPrt();
+  double prt1 = _pulseEntries[index0+1]->getPulse()->getPrt();
   
-  int nGates0 = _pulseEntries[index1]->getPulse()->getNGates();
-  int nGates1 = _pulseEntries[index1+1]->getPulse()->getNGates();
+  int nGates0 = _pulseEntries[index0]->getPulse()->getNGates();
+  int nGates1 = _pulseEntries[index0+1]->getPulse()->getNGates();
+
+  // do the PRTs differ?
   
   if (fabs(prt0 - prt1) < 0.00001) {
-    return;
+    return false;
   }
 
-  for (int ii = index1 + 1; ii <= index2; ii += 2) {
+  // are the prt and ngates constant for each prt?
+  
+  for (ssize_t ii = index0; ii < index1; ii += 2) {
     if (fabs(_pulseEntries[ii]->getPulse()->getPrt() - prt0) > 0.00001) {
-      return;
+      return false;
     }
     if (_pulseEntries[ii]->getPulse()->getNGates() != nGates0) {
-      return;
+      return false;
     }
   }
   
-  for (int ii = index1 + 1; ii <= index2; ii += 2) {
+  for (int ii = index0 + 1; ii < index1; ii += 2) {
     if (fabs(_pulseEntries[ii]->getPulse()->getPrt() - prt1) > 0.00001) {
-      return;
+      return false;
     }
     if (_pulseEntries[ii]->getPulse()->getNGates() != nGates1) {
-      return;
+      return false;
     }
   }
 
-  _isStaggeredPrt = true;
-
+  // is staggered
+  
   // We want to start on short PRT, which means we must
   // end on long PRT, since we always have an even number
   // of pulses.
@@ -756,6 +764,8 @@ void IwrfTsGet::_checkIsStaggeredPrt(ssize_t index1,
 
   _prt = _prtShort;
   _nGates = _nGatesPrtShort;
+
+  return true;
 
 }
 

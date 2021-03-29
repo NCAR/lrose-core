@@ -292,8 +292,8 @@ protected:
   double _conditionDeltaAz(double deltaAz);
   ssize_t _conditionPulseIndex(ssize_t index);
 
-  void _checkIsAlternating(ssize_t index1, ssize_t index2);
-  void _checkIsStaggeredPrt(ssize_t index1, ssize_t index2);
+  bool _checkIsAlternating(ssize_t index1, ssize_t index2);
+  bool _checkIsStaggeredPrt(ssize_t index1, ssize_t index2);
 
 private:
   
