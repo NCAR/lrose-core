@@ -89,6 +89,10 @@ int LogFilter::Run()
   fclose(stdout);
   // fclose(stderr);
 
+  // Unbuffer stdin
+
+  setbuf(stdin, NULL);
+  
   // message log for output
 
   MsgLog msgLog;
