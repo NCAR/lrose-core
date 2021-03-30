@@ -198,6 +198,7 @@ private:
 
   int _nFields;
   int _nRaysSweep;
+  int _nRaysPerRevolution;
   int _nGates;
   int _nBytesData;
 
@@ -207,12 +208,13 @@ private:
   ingest_header_t _inHdr;
   int _nbytesExtendedHdr;
   raw_product_header_t _rawHdr;
-  ingest_data_header_t _inDatHdr0;
   vector<ingest_data_header_t> _inDatHdrs;
 
   // record to hold raw data as it is read in
 
   Radx::ui08 _record[RAW_RECORD_LEN];
+  Radx::ui08 _saved[RAW_RECORD_LEN];
+  bool _recordSaved;
 
   // derived values
 
@@ -278,6 +280,7 @@ private:
   int _finalizeReadVolume();
 
   int _readRecord();
+  void _saveRecord();
   int _readHeaders(bool doPrint,
                    ostream &out);
   int _readSweepData(bool doPrint,
