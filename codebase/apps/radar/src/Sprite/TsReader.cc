@@ -211,7 +211,10 @@ Beam *TsReader::getNextBeam()
   if (_pulseGetter != NULL) {
     
     // advance beam time
-    
+
+    if (_beamIntervalSecs != 0) {
+      _prevBeamTime = _beamTime;
+    }
     _beamTime += _beamIntervalSecs;
     
     // get IwrfTsGet
@@ -244,6 +247,9 @@ Beam *TsReader::getPreviousBeam()
     
     // go back in time
     
+    if (_beamIntervalSecs != 0) {
+      _prevBeamTime = _beamTime;
+    }
     _beamTime -= _beamIntervalSecs;
     
     // use IwrfTsGet
@@ -276,9 +282,9 @@ Beam *TsReader::_getBeamViaGetter()
   
 {
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  // if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Getting beam at time: " << _beamTime.asString(3) << endl;
-  }
+  // }
     
   // retrieve pulses for beam
 
@@ -288,9 +294,20 @@ Beam *TsReader::_getBeamViaGetter()
                                  -9999.0,
                                  _nSamples,
                                  beamPulses)) {
-    cerr << "ERROR - TsReader::_getBeamViaGetter()" << endl;
-    cerr << "  cannot retrieve beam" << endl;
-    return NULL;
+    // on failure, try previous time
+    if (_prevBeamTime.isValid()) {
+      _beamTime = _prevBeamTime;
+      cerr << "====>> Retry, beam at time: " << _beamTime.asString(3) << endl;
+      if (_pulseGetter->retrieveBeam(_beamTime,
+                                     -9999.0,
+                                     -9999.0,
+                                     _nSamples,
+                                     beamPulses)) {
+        cerr << "ERROR - TsReader::_getBeamViaGetter()" << endl;
+        cerr << "  cannot retrieve beam" << endl;
+        return NULL;
+      }
+    }
   }
 
   // compute beam interval

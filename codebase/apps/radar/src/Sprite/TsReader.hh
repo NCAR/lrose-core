@@ -171,6 +171,7 @@ private:
   DateTime _archiveStartTime;
   DateTime _archiveEndTime;
   DateTime _beamTime;
+  DateTime _prevBeamTime;
   double _beamIntervalSecs;
   int _timeSpanSecs;
 
