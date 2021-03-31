@@ -48,7 +48,7 @@
 #include "Args.hh"
 #include "Params.hh"
 //#include "DisplayManager.hh"
-#include "RayLoc.hh"
+#include "RayLocationController.hh"
 #include "ContextEditingView.hh"
 #include "ClickableLabel.hh"
 #include "ParameterColorView.hh"
@@ -163,6 +163,7 @@ public:
   double getRadarLon() const { return _radarLon; }
   double getRadarAltKm() const { return _radarAltKm; }
   const RadxPlatform &getPlatform() const { return _platform; }
+
 
   // enable the zoom button
   
@@ -408,9 +409,9 @@ private:
   int _nGates;
   double _maxRangeKm;
 
-  RayLoc* _ppiRayLoc; // for use, allows negative indices at north line
-  RayLoc* _ppiRays;   // for new and delete
-
+  //RayLoc* _ppiRayLoc; // for use, allows negative indices at north line
+  //RayLoc* _ppiRays;   // for new and delete
+  RayLocationController *_rayLocationController;
   // input data
   
   RadxTime _readerRayTime;
@@ -597,6 +598,8 @@ private:
   void _clearRayOverlap(const int start_index, const int end_index,
 			RayLoc *ray_loc);
 
+  void _setupRayLocation();
+
   // modes
 
   void _setArchiveMode(bool state);
@@ -660,7 +663,8 @@ private slots:
   void _rhiLocationClicked(double xkm, double ykm,
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
-                        RayLoc *ray_loc, const RadxRay *ray);
+                        //RayLoc *ray_loc, 
+                        const RadxRay *ray);
 
   // modes
   

@@ -23,6 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*                     
 
 #include "FieldRendererController.hh"
+#include "RayLocationController.hh"
 
 using namespace std;
 
@@ -227,7 +228,8 @@ void FieldRendererController::activateRealtimeRendering(size_t selectedField)
 */
 
 QImage *FieldRendererController::renderImage(int width, int height,
-  string fieldName, double sweepAngle) {
+  string fieldName, double sweepAngle, 
+  RayLocationController *rayLocationController) {
 
   FieldRenderer *fieldRenderer = get(fieldName);
   if (fieldRenderer == NULL) {
@@ -235,25 +237,32 @@ QImage *FieldRendererController::renderImage(int width, int height,
     _fieldRenderers.push_back(fieldRenderer);
   }
   if (!fieldRenderer->imageReady()) {
-    // TODO: somehow get these? 
+    // create a beam for each ray  
     ColorMap colorMap;
     QBrush *background_brush = new QBrush(QColor("orange"));
     // get the Data
-    //DataModel *dataModel = DataModel::Instance();
-    for (int i=0; i<10; i++) { // each field ray in sweep) {
-      //float *ray = dataModel->getRayData();
-      float rayFake[] = {0,1,2,3,4,5,6,7,8,9,10};
-      size_t nData = 11;
-      double start_angle = 36.0 * i;
-      double stop_angle = start_angle + 35.9;
-      double startRangeKm = 10;
-      double gateSpacingKm = 10;
+    DataModel *dataModel = DataModel::Instance();
+    //or send a vector?
+    size_t nRayLocations = rayLocationController->getNRayLocations();
+    // get rays in sorted order from RayLocationController
+    size_t rayIdx=0;
+    while ( rayIdx < nRayLocations) { // each field ray in sweep) {
+      vector<float> *rayData = rayLocationController->getRayData(rayIdx, fieldName);
+      //float rayFake[] = {0,1,2,3,4,5,6,7,8,9,10};
+      size_t nData = rayData->size();
+      size_t endIndex = rayLocationController->getEndIndex(rayIdx);
+      double start_angle = rayLocationController->getStartAngle(rayIdx);
+      double stop_angle = rayLocationController->getStopAngle(rayIdx);
+      double startRangeKm = rayLocationController->getStartRangeKm(rayIdx);
+      double gateSpacingKm = rayLocationController->getGateSpacingKm(rayIdx);
       // create Beam for ray
       PpiBeam *beam = new PpiBeam(
                  start_angle,  stop_angle,
            startRangeKm,  gateSpacingKm, nData);
-      beam->updateFillColors(rayFake, nData, &colorMap, background_brush);  
+      float *data = &(*rayData)[0];
+      beam->updateFillColors(data, nData, &colorMap, background_brush);  
       fieldRenderer->addBeam(beam);
+      rayIdx = endIndex;
     }
     // add Beam to FieldRenderer
     fieldRenderer->createImage(width, height);

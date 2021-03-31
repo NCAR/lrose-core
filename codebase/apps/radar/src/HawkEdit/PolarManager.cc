@@ -161,7 +161,7 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   _prevEl = -9999.0;
   _startAz = -9999.0;
   _endAz = -9999.0;
-  _ppiRays = NULL;
+  //_ppiRays = NULL;
   _rhiMode = false;
 
   _nGates = 1000;
@@ -206,8 +206,10 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
 
   // set up ray locators
 
-  _ppiRays = new RayLoc[RayLoc::RAY_LOC_N];
-  _ppiRayLoc = _ppiRays + RayLoc::RAY_LOC_OFFSET;
+// move to RayLocModel
+  //_ppiRays = new RayLoc[RayLoc::RAY_LOC_N];
+  //_ppiRayLoc = _ppiRays + RayLoc::RAY_LOC_OFFSET;
+  _rayLocationController = new RayLocationController();
 
   // set up windows
 
@@ -233,10 +235,10 @@ PolarManager::~PolarManager()
     delete _rhi;
   }
 
-  if (_ppiRays) {
-    delete[] _ppiRays;
-  }
-  
+  //if (_ppiRays) {
+  //  delete[] _ppiRays;
+  //}
+  // TODO: delete all controllers
 }
 
 //////////////////////////////////////////////////
@@ -513,7 +515,7 @@ void PolarManager::_setupWindows()
 
   _setTitleBar(_params->radar_name);
   setMinimumSize(400, 300);
-  resize(_params->main_window_width, _params->main_window_height);
+  resize(400,300); // _params->main_window_width, _params->main_window_height);
   
   // set location on screen
 
@@ -889,6 +891,7 @@ void PolarManager::_handleArchiveData()
   // get data
   try {
     _getArchiveData();
+    _setupRayLocation();
   } catch (FileIException &ex) {
     this->setCursor(Qt::ArrowCursor);
     _timeControl->setCursor(Qt::ArrowCursor);
@@ -1077,20 +1080,43 @@ void PolarManager::getFileAndFields() {
 int PolarManager::_getArchiveData()
 
 {
-
+/* moved to DataModel::readData()
   // set up file object for reading
   
   RadxFile file;
   _vol.clear();
   _setupVolRead(file);
-  
+  */
+  bool debug_verbose = false;
+  bool debug_extra = false;
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    debug_verbose = true;
+  }
+  if (_params->debug >= Params::DEBUG_EXTRA) {
+    debug_verbose = true;
+    debug_extra = true;
+  }
+
+  DataModel *dataModel = DataModel::Instance();
+
   // be sure to call setArchiveFileList before we get here!
   if (_archiveScanIndex >= 0 &&
       _archiveScanIndex < (int) _archiveFileList.size()) {
     
-    string inputPath = _archiveFileList[_archiveScanIndex];
-    
- 
+    try {
+      string inputPath = _archiveFileList[_archiveScanIndex];
+      vector<string> fieldNames = _displayFieldController->getFieldNames();
+      dataModel->readData(inputPath, fieldNames,
+        debug_verbose, debug_extra);
+    } catch (const string &errMsg) {
+      if (!_params->images_auto_create)  {
+        QErrorMessage errorDialog;
+        errorDialog.setMinimumSize(400, 250);
+        errorDialog.showMessage(errMsg.c_str());
+        errorDialog.exec();
+      }
+    }
+ /*
       LOG(DEBUG) << "  reading data file path: " << inputPath;
       LOG(DEBUG) << "  archive file index: " << _archiveScanIndex;
     
@@ -1109,13 +1135,13 @@ int PolarManager::_getArchiveData()
       }
       return -1;
     } 
-
+*/
   }
 
   // set plot times
   
-  _plotStartTime = _vol.getStartTimeSecs();
-  _plotEndTime = _vol.getEndTimeSecs();
+  _plotStartTime = dataModel->getStartTimeSecs();
+  _plotEndTime = dataModel->getEndTimeSecs();
 
   char text[128];
   snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
@@ -1130,12 +1156,12 @@ int PolarManager::_getArchiveData()
 
   // adjust angles for elevation surveillance if needed
   
-  _vol.setAnglesForElevSurveillance();
+  //dataModel->setAnglesForElevSurveillance();
   
   // compute the fixed angles from the rays
   // so that we reflect reality
   
-  _vol.computeFixedAnglesFromRays();
+  //dataModel->computeFixedAnglesFromRays();
 
   // load the sweep manager
   
@@ -1145,18 +1171,18 @@ int PolarManager::_getArchiveData()
 
     LOG(DEBUG) << "----------------------------------------------------";
     LOG(DEBUG) << "perform archive retrieval";
-    LOG(DEBUG) << "  read file: " << _vol.getPathInUse();
-    LOG(DEBUG) << "  nSweeps: " << _vol.getNSweeps();
+    LOG(DEBUG) << "  read file: " << dataModel->getPathInUse();
+    LOG(DEBUG) << "  nSweeps: " << dataModel->getNSweeps();
    // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
    //      << _sweepManager.getGuiIndex() << ", "
    //      << _sweepManager.getSelectedAngle();
     LOG(DEBUG) << "----------------------------------------------------";
   
   
-   _platform = _vol.getPlatform();
-   
-  return 0;
+  _platform = dataModel->getPlatform();
 
+  LOG(DEBUG) << "exit";
+  return 0;
 }
 
 double PolarManager::getSelectedSweepAngle() {
@@ -1504,7 +1530,8 @@ void PolarManager::_plotArchiveData()
   string currentFieldName = _displayFieldController->getSelectedFieldName();
   double currentSweepAngle = _sweepController->getSelectedAngle();
 
-  _ppi->displayImage(currentFieldName, currentSweepAngle); 
+  _ppi->displayImage(currentFieldName, currentSweepAngle,
+    _rayLocationController); 
   // _sweepController->getSelectedAngle(),
   // _displayFieldController->getSelectedFieldName());
   //_updateStatusPanel(???);
@@ -1635,6 +1662,7 @@ void PolarManager::_updateColorMap(string fieldName)
 //////////////////////////////////////////////////
 // set up read
 
+/* moved to DataModel
 void PolarManager::_setupVolRead(RadxFile &file)
 {
 
@@ -1658,7 +1686,7 @@ void PolarManager::_setupVolRead(RadxFile &file)
   //  }
 
 }
-
+*/
 //////////////////////////////////////////////////////////////
 // handle an incoming ray
 
@@ -1793,7 +1821,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     // table
 
     double az = ray->getAzimuthDeg();
-    _storeRayLoc(ray, az, platform.getRadarBeamWidthDegH(), _ppiRayLoc);
+    //_storeRayLoc(ray, az, platform.getRadarBeamWidthDegH(), _ppiRayLoc);
 
     // Save the angle information for the next iteration
 
@@ -1809,6 +1837,16 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   
 }
 
+// call when new data file is read; or when switching to new sweep?
+// or when new parameter file is read
+void PolarManager::_setupRayLocation() {
+  float ppi_rendering_beam_width = _platform.getRadarBeamWidthDegH();
+  if (_params->ppi_override_rendering_beam_width) {
+    ppi_rendering_beam_width = _params->ppi_rendering_beam_width;
+  }
+  _rayLocationController->sortRaysIntoRayLocations(ppi_rendering_beam_width);
+}
+
 // We need to resize the arrays that are retained and look up the field Index by field name,
 // because we are only redrawing the new fields and these stores have a field index
 // dependence:  DisplayFieldModel::_fields, FieldRenderers::_fieldRenderers, Beams::_brushes and buttonRow
@@ -1819,6 +1857,7 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
 {
 
   LOG(DEBUG) << "enter";
+
   // create 2D field data vector
   size_t nNewFields = newFieldNames.size();
   vector< vector<double> > fieldData;
@@ -1921,11 +1960,11 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
 
     // Add the beam to the display
     LOG(DEBUG) << "RHI not being updated";
-    /* TODO: update the rhi code ...
-    _rhi->addBeam(ray, fieldData, displayFieldController); // _fields);
-    _rhiWindow->setAzimuth(ray->getAzimuthDeg());
-    _rhiWindow->setElevation(ray->getElevationDeg());
-    */
+    // TODO: update the rhi code ...
+    //_rhi->addBeam(ray, fieldData, displayFieldController); // _fields);
+    //_rhiWindow->setAzimuth(ray->getAzimuthDeg());
+    //_rhiWindow->setElevation(ray->getElevationDeg());
+    
   } else {
 
     _rhiMode = false;
@@ -1933,18 +1972,19 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
     // check for elevation surveillance sweep mode
     // in this case, set azimuth to rotation if georef is available
     
-    /*
-    if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-      ray->setAnglesForElevSurveillance();
-    }
-    */
+    
+    // TODO: fix for airborne data
+    //if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    //  ray->setAnglesForElevSurveillance();
+    //}
+    
 
     // Store the ray location using the azimuth angle and the PPI location
     // table
 
     double az = ray->getAzimuthDeg();
     LOG(DEBUG) << "az = " << az;
-    _storeRayLoc(ray, az, platform.getRadarBeamWidthDegH(), _ppiRayLoc);
+    //_storeRayLoc(ray, az, platform.getRadarBeamWidthDegH(), _ppiRayLoc);
 
     // Save the angle information for the next iteration
 
@@ -2069,7 +2109,7 @@ void PolarManager::_handleColorMapChangeOnRay(RadxPlatform &platform,
 
 
 ///////////////////////////////////////////////////////////
-// store ray location
+/* store ray location
 
 void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
                                 const double beam_width, RayLoc *ray_loc)
@@ -2091,11 +2131,11 @@ void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
     if (_prevAz >= 0.0) {
       double az_diff = az - _prevAz;
       if (az_diff < 0.0)
-	az_diff += 360.0;
+	      az_diff += 360.0;
       double half_az_diff = az_diff / 2.0;
 	
       if (prev_offset > half_az_diff)
-	prev_offset = half_az_diff;
+	      prev_offset = half_az_diff;
     }
     _startAz = az - prev_offset - 0.1;
     _endAz = az + max_half_angle + 0.1;
@@ -2224,9 +2264,10 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
     
     i = loc_end_index + 1;
 
-  } /* endwhile - i */
+  } // endwhile - i 
   
 }
+*/
 
 ////////////////////////////////////////////
 // freeze / unfreeze
@@ -2436,25 +2477,25 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
     LOG(DEBUG) << "    azDeg = " << azDeg;
   
   
-  int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
+  //int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
 
-    LOG(DEBUG) << "    rayIndex = " << rayIndex;
+  //  LOG(DEBUG) << "    rayIndex = " << rayIndex;
   
-  
-  const RadxRay *ray = _ppiRayLoc[rayIndex].ray;
+  const RadxRay *ray = _rayLocationController->getClosestRay(azDeg);
+  //const RadxRay *ray = _ppiRayLoc[rayIndex].ray;
   if (ray == NULL) {
     // no ray data yet
 
       LOG(DEBUG) << "    No ray data yet...";
-      LOG(DEBUG) << "      active = " << _ppiRayLoc[rayIndex].active;
+      //LOG(DEBUG) << "      active = " << _ppiRayLoc[rayIndex].active;
       // cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
-      LOG(DEBUG) << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex;
-      LOG(DEBUG) << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex;
+      //LOG(DEBUG) << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex;
+      //LOG(DEBUG) << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex;
     
     return;
   }
 
-  _locationClicked(xkm, ykm, _ppiRayLoc, ray);
+  _locationClicked(xkm, ykm, ray);
 
 }
 
@@ -2474,7 +2515,8 @@ void PolarManager::_rhiLocationClicked(double xkm, double ykm,
 // respond to a change in click location on one of the windows
 
 void PolarManager::_locationClicked(double xkm, double ykm,
-                                    RayLoc *ray_loc, const RadxRay *ray)
+                                    // RayLoc *ray_loc, 
+                                    const RadxRay *ray)
   
 {
 
@@ -2900,6 +2942,7 @@ void PolarManager::_timeSliderPressed()
 
 void PolarManager::_openFile()
 {
+  LOG(DEBUG) << "enter";
   // seed with files for the day currently in view
   // generate like this: *yyyymmdd*
   string pattern = _archiveStartTime.getDateStrPlain();
@@ -2940,7 +2983,7 @@ void PolarManager::_openFile()
     LOG(DEBUG) << "selected file path : " << name;
 // TODO: HERE!  somehow, ALL fields are listed as selected ACK!
   //fieldsSelected(selectedFields);
-  
+  LOG(DEBUG) << "exit";
 }
 
 void PolarManager::_readDataFile(vector<string> *selectedFields) {
@@ -2953,12 +2996,13 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
 
     _updateDisplayFields(selectedFields);
   //_setupDisplayFields(allFieldNames);
-    _displayFieldController->setSelectedField(selectedFields->at(0));
-    // trying this ... to get the data from the file selected
+     // trying this ... to get the data from the file selected
     _setArchiveRetrievalPending();
 
     try {
       _getArchiveData();
+      _setupRayLocation();
+      _displayFieldController->setSelectedField(selectedFields->at(0));
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
@@ -5277,7 +5321,7 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
     cerr << "  No fields found" << endl;
     return -1;
   }
-  selectedFieldChanged(QString().fromStdString(fieldNames->at(0)));
+  //selectedFieldChanged(QString().fromStdString(fieldNames->at(0)));
 
   return 0;
 

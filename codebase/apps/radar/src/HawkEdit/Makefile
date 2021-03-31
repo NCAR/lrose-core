@@ -78,6 +78,9 @@ HDRS = \
 	PolarManager.hh \
 	PolarWidget.hh \
 	PpiWidget.hh \
+	RayLoc.hh \
+	RayLocationController.hh \
+	RayLocationModel.hh \
 	Reader.hh \
 	ScaledLabel.hh \
 	SiiPalette.hh \
@@ -119,6 +122,8 @@ NORM_SRCS = \
 	PaletteManager.cc \
 	ParamFile.cc \
 	PpiBeam.cc \
+	RayLocationController.cc \
+	RayLocationModel.cc \
 	Reader.cc \
 	ScaledLabel.cc \
 	ScriptEditorModel.cc \

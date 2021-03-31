@@ -313,7 +313,8 @@ void PolarWidget::activateArchiveRendering()
  * displayImage()
  */
 
-void PolarWidget::displayImage(string currentFieldName, double currentSweepAngle)
+void PolarWidget::displayImage(string currentFieldName, double currentSweepAngle,
+  RayLocationController *rayLocationController)
 {
   try {
 
@@ -323,7 +324,9 @@ void PolarWidget::displayImage(string currentFieldName, double currentSweepAngle
     //}
     //update();
 
-    _image = _fieldRendererController->renderImage(width(), height(), currentFieldName, currentSweepAngle);
+    _image = _fieldRendererController->renderImage(width(), height(), 
+      currentFieldName, currentSweepAngle,
+      rayLocationController);
     update();
   } catch (std::range_error &ex) {
     LOG(ERROR) << ex.what();
@@ -615,7 +618,10 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   //  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
 
   // _image should already be set by previous slot imageReady
-  painter.drawImage(0, 0, *_image);
+  if (_image != NULL) {
+    painter.drawImage(0, 0, *_image);
+  }
+  
   _drawOverlays(painter);
 
   BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing

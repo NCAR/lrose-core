@@ -31,7 +31,11 @@
 #ifndef _DATAMODEL_HH
 #define _DATAMODEL_HH
 
+#include <Radx/RadxRay.hh>
 #include <Radx/RadxVol.hh>
+
+#include <vector>
+
 
 using namespace std;
 
@@ -39,15 +43,31 @@ using namespace std;
 class DataModel {
 
 public:
-  DataModel *Instance();
+  static DataModel *Instance();
 
   ~DataModel();
 
-  void setData(RadxVol *vol);
-  void readData(string path);
+  //void setData(RadxVol *vol);
+  void readData(string path, vector<string> &fieldNames,
+    bool debug_verbose, bool debug_extra);
   void writeData(string path);
   void update();
   void get();
+
+  RadxTime getStartTimeSecs();
+  RadxTime getEndTimeSecs();
+
+  RadxField *fetchDataField(RadxRay *ray, string &fieldName);
+  const float *fetchData(RadxRay *ray, string &fieldName);
+  size_t getNRays(string fieldName, double sweepAngle);
+  const vector<RadxRay *> &getRays();
+  vector<float> *getRayData(size_t rayIdx, 
+    string fieldName, double sweepHeight);
+  double getRayAzimuthDeg(size_t rayIdx);
+
+  int getNSweeps();
+  const string &getPathInUse();
+  const RadxPlatform &getPlatform();
 
 
 private:
@@ -55,8 +75,13 @@ private:
   DataModel();
 
   void init();
+  void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
+    bool debug_verbose, bool debug_extra);
 
+//DataModel *DataModel::_instance = NULL;  
   static DataModel *_instance;
+
+  RadxVol _vol;
 
 };
 

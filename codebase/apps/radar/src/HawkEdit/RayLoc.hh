@@ -35,7 +35,7 @@
 #ifndef RayLoc_HH
 #define RayLoc_HH
 
-class RadxRay;
+#include <Radx/RadxRay.hh>
 
 class RayLoc {
 
@@ -68,8 +68,8 @@ public:
   // around the 360 degree circle
   
   static const int RAY_LOC_RES = 10;
-  static const int RAY_LOC_N = 4800;
-  static const int RAY_LOC_OFFSET = 600;
+  static const int RAY_LOC_N = 3600; // 4800;
+  static const int RAY_LOC_OFFSET = 0; // 600;
   
 };
 

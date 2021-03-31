@@ -34,6 +34,8 @@
 #include "FieldRenderer.hh"
 #include "Beam.hh"
 #include "PpiBeam.hh"
+#include "RayLocationController.hh"
+#include "DataModel.hh"
 #include <QImage>
 
 class FieldRendererController
@@ -58,7 +60,8 @@ public:
   //void activateArchiveRendering();
   //void activateRealtimeRendering(size_t selectedField);
   QImage *renderImage(int width, int height,
-    string fieldName, double sweepAngle);
+    string fieldName, double sweepAngle,
+    RayLocationController *rayLocationController);
   void performRendering(size_t selectedField);
   //bool isBackgroundRendered(size_t index);
   //void setBackgroundRenderingOn(size_t index) {_fieldRenderers[index]->setBackgroundRenderingOn();;};

@@ -61,6 +61,7 @@
 #include "WorldPlot.hh"
 #include "DisplayField.hh"
 #include "DisplayFieldController.hh"
+#include "RayLocationController.hh"
 
 class PolarManager;
 
@@ -219,7 +220,8 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   //void displayImage(const size_t field_num);
-  void displayImage(string currentFieldName, double currentSweepAngle);
+  void displayImage(string currentFieldName, double currentSweepAngle,
+    RayLocationController *rayLocationController);
   //void imageReady(QImage *image);
   /**
    * set archive mode
