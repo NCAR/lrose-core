@@ -67,6 +67,7 @@ ConvStratFinder::ConvStratFinder()
   _minValidFractionForTexture = 0.25; 
   _minValidFractionForFit = 0.67; 
   _minVolForConvectiveKm3 = 20.0; 
+  _minVertExtentForConvectiveKm = 1.0; 
 
   _minConvectivityForConvective = 0.5;
   _maxConvectivityForStratiform = 0.4;
@@ -1004,6 +1005,7 @@ ConvStratFinder::ClumpGeom::ClumpGeom(ConvStratFinder *finder,
 {
   _id = 0;
   _volumeKm3 = 0.0;
+  _vertExtentKm = 0.0;
   _nPtsTotal = 0;
   _nPtsShallow = 0;
   _nPtsMid = 0;
@@ -1026,6 +1028,7 @@ void ConvStratFinder::ClumpGeom::computeGeom()
   
   _nPtsTotal = _clump->pts;
   _volumeKm3 = 0.0;
+  _vertExtentKm = 0.0;
   _nPtsShallow = 0;
   _nPtsMid = 0;
   _nPtsDeep = 0;
@@ -1039,6 +1042,9 @@ void ConvStratFinder::ClumpGeom::computeGeom()
   const fl32 *shallowHtGrid = _finder->_shallowHtGrid.dat();
   const fl32 *deepHtGrid = _finder->_deepHtGrid.dat();
 
+  double minZKm = 9999.0;
+  double maxZKm = -9999.0;
+
   for (int irun = 0; irun < _clump->size; irun++) {
     
     Interval *intvl = _clump->ptr[irun];
@@ -1050,9 +1056,11 @@ void ConvStratFinder::ClumpGeom::computeGeom()
     int iy = intvl->row_in_plane;
 
     double zKm = _finder->_zKm[iz];
+    minZKm = min(zKm, minZKm);
+    maxZKm = max(zKm, maxZKm);
+
     double dxKm = _finder->_dxKm;
     double dyKm = _finder->_dyKm;
-    
     double dzKm = 0.0;
     if (iz == 0) {
       dzKm = _finder->_zKm[iz+1] - _finder->_zKm[iz];
@@ -1089,6 +1097,8 @@ void ConvStratFinder::ClumpGeom::computeGeom()
     
   } // irun
 
+  _vertExtentKm = maxZKm - minZKm;
+
 }
 
 // Set the partition category based on clump properties
@@ -1106,6 +1116,8 @@ void ConvStratFinder::ClumpGeom::setPartition()
   
   int category = CATEGORY_MISSING;
   if (_volumeKm3 < _finder->_minVolForConvectiveKm3) {
+    category = CATEGORY_MIXED;
+  } else if (_vertExtentKm < _finder->_minVertExtentForConvectiveKm) {
     category = CATEGORY_MIXED;
   } else if (fracShallow < 0.05 && stratiformBelow()) {
     category = CATEGORY_CONVECTIVE_ELEVATED;

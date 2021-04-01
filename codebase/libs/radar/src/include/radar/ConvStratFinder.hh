@@ -56,13 +56,13 @@ public:
   typedef enum {
     CATEGORY_MISSING = 0,
     CATEGORY_STRATIFORM_LOW = 14,
-    CATEGORY_STRATIFORM_MID = 15,
-    CATEGORY_STRATIFORM_HIGH = 16,
+    CATEGORY_STRATIFORM_MID = 16,
+    CATEGORY_STRATIFORM_HIGH = 18,
     CATEGORY_MIXED = 25,
-    CATEGORY_CONVECTIVE_SHALLOW = 33,
-    CATEGORY_CONVECTIVE_MID = 34,
-    CATEGORY_CONVECTIVE_ELEVATED = 35,
-    CATEGORY_CONVECTIVE_DEEP = 36,
+    CATEGORY_CONVECTIVE_ELEVATED = 32,
+    CATEGORY_CONVECTIVE_SHALLOW = 34,
+    CATEGORY_CONVECTIVE_MID = 36,
+    CATEGORY_CONVECTIVE_DEEP = 38,
     CATEGORY_UNKNOWN
   } category_t;
 
@@ -136,13 +136,6 @@ public:
   }
   
   ////////////////////////////////////////////////////////////////////
-  // Reflectivity threshold for echo tops (dBZ).
-  // Echo tops are defined as the max ht with reflectivity at or
-  // above this value.
-  
-  void setDbzForEchoTops(double val) { _dbzForEchoTops = val; }
-  
-  ////////////////////////////////////////////////////////////////////
   // Radius for texture analysis (km).  We determine the reflectivity
   // 'texture' at a point by computing the standard deviation of the
   // square of the reflectivity, for all grid points within this
@@ -181,6 +174,21 @@ public:
   }
 
   ////////////////////////////////////////////////////////////////////
+  // Set the minimum vertical extent for convective echoes.
+  // The vertical extent is computed as the mid height of the top layer
+  // in the echo minus the mid height of the bottom layer.
+  // For an echo that exists in only one layer, the vertical extent
+  // would therefore be zero.
+  // This parameter lets us require that a valid convective echo
+  // exist in multiple layers, which is desirable and helps to remove
+  // spurious echoes as candidates for convection.
+  // The default is 1.0.
+  
+  void setMinVertExtentForConvectiveKm(double val) {
+    _minVertExtentForConvectiveKm = val; 
+  }
+
+  ////////////////////////////////////////////////////////////////////
   // Set the shallow and deep height thresholds, in km.
   // This sets the heights to constant values.
   
@@ -194,6 +202,13 @@ public:
   void setGridHtThresholds(const fl32 *shallowHtGrid,
                            const fl32 *deepHtGrid,
                            size_t nptsPlane);
+  
+  ////////////////////////////////////////////////////////////////////
+  // Reflectivity threshold for echo tops (dBZ).
+  // Echo tops are defined as the max ht with reflectivity at or
+  // above this value.
+  
+  void setDbzForEchoTops(double val) { _dbzForEchoTops = val; }
   
   ////////////////////////////////////////////////////////////////////
   // Set grid details
@@ -289,6 +304,8 @@ private:
   double _minValidFractionForTexture;
   double _minValidFractionForFit;
   double _minVolForConvectiveKm3;
+  double _minVertExtentForConvectiveKm;
+
 
   // specify freezing level, and divergence level, by ht MSL
   // if this is false, grids for fz and div level must be passed in
@@ -500,6 +517,7 @@ private:
     const Clump_order *_clump;
     int _id;
     double _volumeKm3;
+    double _vertExtentKm;
     int _nPtsTotal;
     int _nPtsShallow;
     int _nPtsMid;
