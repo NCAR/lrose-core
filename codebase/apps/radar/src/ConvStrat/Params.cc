@@ -833,6 +833,18 @@
     tt->single_val.d = 30;
     tt++;
     
+    // Parameter 'min_vert_extent_for_convective'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_vert_extent_for_convective");
+    tt->descr = tdrpStrDup("Min vertical echo extent of a convective region (km).");
+    tt->help = tdrpStrDup("The vertical extent is computed as the mid height of the top layer in the echo minus the mid height of the bottom layer. For an echo that exists in only one layer, the vertical extent would therefore be zero. This parameter lets us require that a valid convective echo exist in multiple layers, which is desirable and helps to remove spurious echoes as candidates for convection.");
+    tt->val_offset = (char *) &min_vert_extent_for_convective - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // Parameter 'dbz_for_echo_tops'
     // ctype is 'double'
     

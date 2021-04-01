@@ -143,6 +143,12 @@ paramdef double {
 } min_valid_volume_for_convective;
 
 paramdef double {
+  p_default = 1.0;
+  p_descr = "Min vertical echo extent of a convective region (km).";	
+  p_help = "The vertical extent is computed as the mid height of the top layer in the echo minus the mid height of the bottom layer. For an echo that exists in only one layer, the vertical extent would therefore be zero. This parameter lets us require that a valid convective echo exist in multiple layers, which is desirable and helps to remove spurious echoes as candidates for convection.";
+} min_vert_extent_for_convective;
+
+paramdef double {
   p_default = 18;
   p_descr = "Reflectivity for determing echo tops.";
   p_help = "Echo tops are defined as the max ht with reflectivity at or above this value.";

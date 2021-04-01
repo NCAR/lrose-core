@@ -413,6 +413,8 @@ public:
 
   double min_valid_volume_for_convective;
 
+  double min_vert_extent_for_convective;
+
   double dbz_for_echo_tops;
 
   double texture_radius_km;
@@ -456,7 +458,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[44];
+  mutable TDRPtable _table[45];
 
   const char *_className;
 

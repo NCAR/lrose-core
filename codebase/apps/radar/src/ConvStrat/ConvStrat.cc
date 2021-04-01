@@ -123,15 +123,17 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setMinValidHtKm(_params.min_valid_height);
   _finder.setMaxValidHtKm(_params.max_valid_height);
   _finder.setMinValidDbz(_params.min_valid_dbz);
-  _finder.setDbzForEchoTops(_params.dbz_for_echo_tops);
+  _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
+  _finder.setMaxConvectivityForStratiform(_params.max_convectivity_for_stratiform);
+  _finder.setMinGridOverlapForClumping(_params.min_overlap_for_convective_clumps);
   _finder.setTextureRadiusKm(_params.texture_radius_km);
   _finder.setMinValidFractionForTexture
     (_params.min_valid_fraction_for_texture);
   _finder.setMinValidFractionForFit
     (_params.min_valid_fraction_for_fit);
-  _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
-  _finder.setMaxConvectivityForStratiform(_params.max_convectivity_for_stratiform);
-  _finder.setMinGridOverlapForClumping(_params.min_overlap_for_convective_clumps);
+  _finder.setMinVolForConvectiveKm3(_params.min_valid_volume_for_convective);
+  _finder.setMinVertExtentForConvectiveKm(_params.min_vert_extent_for_convective);
+  _finder.setDbzForEchoTops(_params.dbz_for_echo_tops);
 
 }
 
