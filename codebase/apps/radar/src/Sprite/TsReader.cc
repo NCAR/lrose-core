@@ -101,6 +101,8 @@ TsReader::TsReader(const string &prog_name,
   _time = 0;
   _az = 0.0;
   _el = 0.0;
+  _searchEl = 0.0;
+  _searchAz = 0.0;
 
   _nGates = 0;
 
@@ -141,20 +143,6 @@ TsReader::TsReader(const string &prog_name,
       _archiveEndTime = _archiveStartTime + _timeSpanSecs;
       _beamTime = _archiveStartTime;
       _beamIntervalSecs = 0.0;
-      // DsInputPath input(_progName,
-      //                   _params.debug >= Params::DEBUG_VERBOSE,
-      //                   _params.archive_data_dir,
-      //                   _archiveStartTime.utime(),
-      //                   _archiveEndTime.utime());
-      // vector<string> paths = input.getPathList();
-      // if (paths.size() < 1) {
-      //   cerr << "ERROR: " << _progName << " - ARCHIVE mode" << endl;
-      //   cerr << "  No paths found, dir: " << _params.archive_data_dir << endl;
-      //   cerr << "  Start time: " << DateTime::strm(_archiveStartTime.utime()) << endl;
-      //   cerr << "  End time: " << DateTime::strm(_archiveEndTime.utime()) << endl;
-      //   OK = false;
-      // }
-      // _pulseReader = new IwrfTsReaderFile(paths, _iwrfDebug);
       _pulseGetter = new IwrfTsGet(_iwrfDebug);
       _pulseGetter->setTopDir(_params.archive_data_dir);
       if (_params.invert_hv_flag) {
@@ -171,7 +159,19 @@ TsReader::TsReader(const string &prog_name,
       break;
     }
     case Params::FOLLOW_DISPLAY_MODE: {
-      // leave pulse reader NULL for now
+      _timeSpanSecs = _params.archive_time_span_secs;
+      _archiveStartTime.set(_params.archive_start_time);
+      _archiveEndTime = _archiveStartTime + _timeSpanSecs;
+      _beamTime = _archiveStartTime;
+      _beamIntervalSecs = 0.0;
+      _pulseGetter = new IwrfTsGet(_iwrfDebug);
+      _pulseGetter->setTopDir(_params.archive_data_dir);
+      if (_params.invert_hv_flag) {
+        _pulseGetter->setInvertHvFlag(true);
+      }
+      if (!_params.prt_is_for_previous_interval) {
+        _pulseGetter->setPrtIsForNextInterval(true);
+      }
       break;
     }
 
@@ -218,8 +218,9 @@ Beam *TsReader::getNextBeam()
     _beamTime += _beamIntervalSecs;
     
     // get IwrfTsGet
-    
-    return _getBeamViaGetter();
+    // pass in missing values for el and az
+
+    return _getBeamViaGetter(_beamTime, -9999.0, -9999.0);
 
   } else {
 
@@ -253,8 +254,9 @@ Beam *TsReader::getPreviousBeam()
     _beamTime -= _beamIntervalSecs;
     
     // use IwrfTsGet
+    // pass in missing values for el and az
     
-    return _getBeamViaGetter();
+    return _getBeamViaGetter(_beamTime, -9999.0, -9999.0);
 
   } else {
 
@@ -273,25 +275,54 @@ Beam *TsReader::getPreviousBeam()
 }
 
 /////////////////////////////////////////////////////////
+// get a beam from the getter, based on the time and
+// location from the display
+
+Beam *TsReader::getBeamFollowDisplay(const DateTime &searchTime,
+                                     double searchEl, 
+                                     double searchAz)
+  
+{
+  
+  if (_pulseGetter == NULL) {
+    cerr << "ERROR - TsReader::getBeamFollowDisplay()" << endl;
+    cerr << "  No IwrfTsGet opened" << endl;
+    return NULL;
+  }
+    
+  // set beam time
+  
+  _prevBeamTime = _beamTime;
+  _beamTime = searchTime;
+  _searchEl = searchEl;
+  _searchAz = searchAz;
+    
+  return _getBeamViaGetter(_beamTime, _searchEl, _searchAz);
+
+}
+
+/////////////////////////////////////////////////////////
 // using IwrfTsGet
 // get the next beam in realtime or archive sequence
 // returns Beam object pointer on success, NULL on failure
 // caller must free beam
 
-Beam *TsReader::_getBeamViaGetter()
+Beam *TsReader::_getBeamViaGetter(const DateTime &searchTime, 
+                                  double searchEl,
+                                  double searchAz)
   
 {
 
   // if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Getting beam at time: " << _beamTime.asString(3) << endl;
+    cerr << "Getting beam at time: " << searchTime.asString(3) << endl;
   // }
     
   // retrieve pulses for beam
 
   vector<IwrfTsPulse *> beamPulses;
-  if (_pulseGetter->retrieveBeam(_beamTime,
-                                 -9999.0,
-                                 -9999.0,
+  if (_pulseGetter->retrieveBeam(searchTime,
+                                 searchEl,
+                                 searchAz,
                                  _nSamples,
                                  beamPulses)) {
     // on failure, try previous time
@@ -299,8 +330,8 @@ Beam *TsReader::_getBeamViaGetter()
       _beamTime = _prevBeamTime;
       cerr << "====>> Retry, beam at time: " << _beamTime.asString(3) << endl;
       if (_pulseGetter->retrieveBeam(_beamTime,
-                                     -9999.0,
-                                     -9999.0,
+                                     searchEl,
+                                     searchAz,
                                      _nSamples,
                                      beamPulses)) {
         cerr << "ERROR - TsReader::_getBeamViaGetter()" << endl;
@@ -670,7 +701,9 @@ int TsReader::_positionReaderForPreviousBeam()
 void TsReader::seekToEndOfQueue()
   
 {
-  _pulseReader->seekToEnd();
+  if (_pulseReader) {
+    _pulseReader->seekToEnd();
+  }
 }
 
 /////////////////////////////////////////////////

@@ -122,6 +122,13 @@ public:
   
   Beam *getPreviousBeam();
   
+  // get a beam from the getter, based on the time and
+  // location from the display
+  
+  Beam *getBeamFollowDisplay(const DateTime &searchTime,
+                             double searchEl, 
+                             double searchAz);
+  
   // position at end of queue
   
   void seekToEndOfQueue();
@@ -175,6 +182,8 @@ private:
   double _beamIntervalSecs;
   int _timeSpanSecs;
 
+  double _searchEl, _searchAz;
+
   // pulse queues
   
   deque<const IwrfTsPulse *> _getterQueue;
@@ -217,7 +226,8 @@ private:
 
   // private functions
 
-  Beam *_getBeamViaGetter();
+  Beam *_getBeamViaGetter(const DateTime &searchTime,
+                          double searchEl, double searchAz);
   Beam *_getBeamViaReader();
   int _positionReaderForPreviousBeam();
   

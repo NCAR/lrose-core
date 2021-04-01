@@ -160,6 +160,10 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   bool getPointClicked() const { return _pointClicked; }
 
+  // set the range
+
+  void setRange(double rangeKm);
+
   // increment/decrement the range in response to up/down arrow keys
 
   void changeRange(int nGatesDelta);

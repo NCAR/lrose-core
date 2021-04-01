@@ -770,6 +770,23 @@ void SpectraWidget::changeRange(int nGatesDelta)
   update();
 }
 
+/*************************************************************************
+ * set the range in km
+ */
+
+void SpectraWidget::setRange(double rangeKm)
+{
+  if (_currentBeam != NULL) {
+    _selectedRangeKm = rangeKm;
+    double maxRange = _currentBeam->getMaxRange();
+    if (_selectedRangeKm < _currentBeam->getStartRangeKm()) {
+      _selectedRangeKm = _currentBeam->getStartRangeKm();
+    } else if (_selectedRangeKm > maxRange) {
+      _selectedRangeKm = maxRange;
+    }
+  }
+  update();
+}
 
 /*************************************************************************
  * Protected methods

@@ -385,6 +385,7 @@ private:
   
   void _handleRealtimeData();
   void _handleArchiveData();
+  void _followDisplay();
 
   int _readClickPointFmq(bool &gotNew);
   int _checkClickPointFmqIsOpen();
@@ -420,7 +421,8 @@ private:
   void _goBack();
   void _goFwd();
   void _changeRange(int deltaGates);
-
+  void _setRange(double rangeKm);
+  
   void _performArchiveRetrieval();
   
 };

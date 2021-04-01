@@ -105,7 +105,8 @@ SpectraMgr::SpectraMgr(const Params &params,
 
   _timeSpanSecs = _params.archive_time_span_secs;
   if (_params.input_mode == Params::ARCHIVE_TIME_MODE ||
-      _params.input_mode == Params::FILE_LIST_MODE) {
+      _params.input_mode == Params::FILE_LIST_MODE ||
+      _params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
     _archiveMode = true;
   } else {
     _archiveMode = false;
@@ -473,29 +474,34 @@ void SpectraMgr::timerEvent(QTimerEvent *event)
 
   }
 
-  // read HawkEye click point info from FMQ
+  if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
 
-  bool gotNew = false;
-  if (_readClickPointFmq(gotNew) == 0) {
-    if (gotNew) {
-      cerr << "====>> gotNewClickInfo" << endl;
-    }
-  }
-
-  // handle data
-
-  if (event->timerId() == _dataTimerId) {
+    // read HawkEye click point info from FMQ
     
-    if (_archiveMode) {
-      if (_archiveRetrievalPending) {
-        _handleArchiveData();
-        _archiveRetrievalPending = false;
+    bool gotNew = false;
+    if (_readClickPointFmq(gotNew) == 0) {
+      if (gotNew) {
+        cerr << "====>> gotNewClickInfo" << endl;
+        _followDisplay();
       }
-    } else {
-      _handleRealtimeData();
     }
     
-  }
+  } else {
+
+    // handle data
+    
+    if (event->timerId() == _dataTimerId) {
+      if (_archiveMode) {
+        if (_archiveRetrievalPending) {
+          _handleArchiveData();
+          _archiveRetrievalPending = false;
+        }
+      } else {
+        _handleRealtimeData();
+      }
+    }
+
+  } // if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE)
   
 }
 
@@ -523,8 +529,7 @@ void SpectraMgr::keyPressEvent(QKeyEvent * e)
   if (mods & Qt::AltModifier) {
     cerr << "!!!!!!!!!!!!" << endl;
   }
-  char keychar = e->text().toLatin1().data()[0];
-  int key = e->key();
+  char keychar = e->text().toLatin1().data()[0];  int key = e->key();
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Clicked char: " << keychar << ":" << (int) keychar << endl;
@@ -671,6 +676,69 @@ void SpectraMgr::_handleArchiveData()
   if (beam->computeMoments()) {
 
     cerr << "ERROR - SpectraMgr::_handleArchiveData()" << endl;
+    cerr << "  Cannot compute moments" << endl;
+
+  } else {
+
+    // set cursor to wait cursor
+    
+    this->setCursor(Qt::WaitCursor);
+    
+    // plot the data
+    
+    _spectra->plotBeam(beam);
+    this->setCursor(Qt::ArrowCursor);
+
+  }
+
+  // clean up
+  
+  _manageBeamQueue(beam);
+
+}
+
+///////////////////////////////////////
+// following display click point
+
+void SpectraMgr::_followDisplay()
+
+{
+
+  cerr << "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
+
+  if (_params.debug) {
+    cerr << "SpectraMgr::_followDisplay()" << endl;
+  }
+  
+  // set cursor to wait cursor
+  
+  this->setCursor(Qt::WaitCursor);
+  
+  // read in a beam
+
+  DateTime searchTime(_clickPointTimeSecs,
+                      (double) _clickPointNanoSecs / 1.0e9);
+  Beam *beam = _tsReader->getBeamFollowDisplay(searchTime,
+                                               _clickPointElevation,
+                                               _clickPointAzimuth);
+  if (beam == NULL) {
+    cerr << "ERROR - no data in followDisplay mode" << endl;
+    // reset cursor
+    this->setCursor(Qt::ArrowCursor);
+    return;
+  }
+
+  _setRange(_clickPointRangeKm);
+
+  // update status
+
+  _updateStatusPanel(beam);
+
+  // compute the moments
+  
+  if (beam->computeMoments()) {
+
+    cerr << "ERROR - SpectraMgr::_followDisplay()" << endl;
     cerr << "  Cannot compute moments" << endl;
 
   } else {
@@ -1165,6 +1233,11 @@ void SpectraMgr::_changeRange(int deltaGates)
   // _yKmClicked += deltaGates * _rayClicked->getGateSpacingKm();
   // _locationClicked(_xSecsClicked, _yKmClicked, _rayClicked);
   // _spectra->setMouseClickPoint(_xSecsClicked, _yKmClicked);
+}
+
+void SpectraMgr::_setRange(double rangeKm)
+{
+  _spectra->setRange(rangeKm);
 }
 
 ////////////////////////////////////////////////////////
