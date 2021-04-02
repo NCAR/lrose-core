@@ -313,10 +313,12 @@ Beam *TsReader::_getBeamViaGetter(const DateTime &searchTime,
   
 {
 
-  // if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Getting beam at time: " << searchTime.asString(3) << endl;
-  // }
-    
+  if (_params.debug) {
+    cerr << "Getting beam at time, el, az: "
+         << searchTime.asString(3) << ", "
+         << searchEl << ", " << searchAz << endl;
+  }
+  
   // retrieve pulses for beam
 
   vector<IwrfTsPulse *> beamPulses;

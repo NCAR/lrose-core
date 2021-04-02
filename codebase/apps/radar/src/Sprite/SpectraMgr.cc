@@ -474,34 +474,30 @@ void SpectraMgr::timerEvent(QTimerEvent *event)
 
   }
 
-  if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
-
-    // read HawkEye click point info from FMQ
-    
-    bool gotNew = false;
-    if (_readClickPointFmq(gotNew) == 0) {
-      if (gotNew) {
-        cerr << "====>> gotNewClickInfo" << endl;
+  // read HawkEye click point info from FMQ
+  
+  bool gotNew = false;
+  if (_readClickPointFmq(gotNew) == 0) {
+    if (gotNew) {
+      cerr << "====>> gotNewClickInfo" << endl;
+      if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
         _followDisplay();
       }
     }
-    
-  } else {
+  }
 
-    // handle data
-    
-    if (event->timerId() == _dataTimerId) {
-      if (_archiveMode) {
-        if (_archiveRetrievalPending) {
-          _handleArchiveData();
-          _archiveRetrievalPending = false;
-        }
-      } else {
-        _handleRealtimeData();
+  // handle data
+  
+  if (event->timerId() == _dataTimerId) {
+    if (_archiveMode) {
+      if (_archiveRetrievalPending) {
+        _handleArchiveData();
+        _archiveRetrievalPending = false;
       }
+    } else {
+      _handleRealtimeData();
     }
-
-  } // if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE)
+  }
   
 }
 
@@ -703,8 +699,6 @@ void SpectraMgr::_handleArchiveData()
 void SpectraMgr::_followDisplay()
 
 {
-
-  cerr << "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
 
   if (_params.debug) {
     cerr << "SpectraMgr::_followDisplay()" << endl;
@@ -1943,7 +1937,7 @@ int SpectraMgr::_readClickPointFmq(bool &gotNew)
   _clickPointRangeKm = rangeKm;
   _clickPointGateNum = gateNum;
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug) {
     cerr << "=========== latest click point XML ==================" << endl;
     cerr << "_clickPointTime: " << _clickPointTime.asString(6) << endl;
     cerr << "_clickPointElevation: " << _clickPointElevation << endl;
