@@ -81,7 +81,7 @@
 #include <Radx/RadxFile.hh>
 
 using namespace std;
-bool DisplayManager::_firstTimerEvent = true;
+int DisplayManager::_timerEventCount = 0;
 
 // Constructor
 

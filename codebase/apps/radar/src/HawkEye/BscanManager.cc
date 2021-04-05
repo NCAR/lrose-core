@@ -1158,7 +1158,7 @@ void BscanManager::timerEvent(QTimerEvent *event)
   // the widget sizes are off until we get to this point.  There's probably
   // a better way to do this, but I couldn't figure anything out.
   
-  if (_firstTimerEvent) {
+  if (_timerEventCount == 0) {
 
     _bscan->resize(_bscanFrame->width(), _bscanFrame->height());
     
@@ -1179,9 +1179,9 @@ void BscanManager::timerEvent(QTimerEvent *event)
       _archiveRetrievalPending = true;
     }
 
-    _firstTimerEvent = false;
-
   }
+
+  _timerEventCount++;
 
   // check for image creation
 

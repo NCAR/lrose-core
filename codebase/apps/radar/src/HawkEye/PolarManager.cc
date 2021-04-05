@@ -158,9 +158,9 @@ PolarManager::PolarManager(const Params &params,
   _fwdPeriod = NULL;
 
   _timeControl = NULL;
-  _timeControlPlaced = false;
   _timeLayout = NULL;
   _timeSlider = NULL;
+  _timeControlPlaced = false;
 
   _setArchiveMode(_params.begin_in_archive_mode);
   _archiveStartTime.set(_params.archive_start_time);
@@ -245,7 +245,7 @@ void PolarManager::timerEvent(QTimerEvent *event)
   // the widget sizes are off until we get to this point.  There's probably
   // a better way to do this, but I couldn't figure anything out.
 
-  if (_firstTimerEvent) {
+  if (_timerEventCount == 0) {
 
     _ppi->resize(_ppiFrame->width(), _ppiFrame->height());
     
@@ -266,9 +266,9 @@ void PolarManager::timerEvent(QTimerEvent *event)
       _archiveRetrievalPending = true;
     }
 
-    _firstTimerEvent = false;
-
   } // if (_firstTimerEvent)
+
+  _timerEventCount++;
 
   // handle event
   
@@ -283,6 +283,13 @@ void PolarManager::timerEvent(QTimerEvent *event)
       _handleRealtimeData(event);
     }
 
+  }
+
+  // get the time control into the right place
+  // we need to let the windows fully draw
+
+  if (_timerEventCount > 10) {
+    _placeTimeControl();
   }
 
   // check for image creation
@@ -557,7 +564,7 @@ void PolarManager::_setupWindows()
   if (_archiveMode) {
     _showTimeControl();
   }
-   _setSweepPanelVisibility();
+  _setSweepPanelVisibility();
 
 }
 
@@ -605,17 +612,19 @@ void PolarManager::_createActions()
   // show time control window
   _showTimeControlAct = new QAction(tr("Show time control window"), this);
   _showTimeControlAct->setStatusTip(tr("Show time control window"));
-  connect(_showTimeControlAct, SIGNAL(triggered()), _timeControl,
-          SLOT(show()));
-
+  connect(_showTimeControlAct, SIGNAL(triggered()),
+          this, SLOT(_showTimeControl()));
+  // connect(_showTimeControlAct, SIGNAL(triggered()), _timeControl,
+  //         SLOT(show()));
+  
   // realtime mode
   _realtimeAct = new QAction(tr("Set realtime mode"), this);
   _realtimeAct->setStatusTip(tr("Turn realtime mode on/off"));
   _realtimeAct->setCheckable(true);
   _realtimeAct->setChecked(!_params.begin_in_archive_mode);
   connect(_realtimeAct, SIGNAL(triggered(bool)),
-	  this, SLOT(_setRealtime(bool)));
-
+          this, SLOT(_setRealtime(bool)));
+  
   // unzoom display
   _unzoomAct = new QAction(tr("Unzoom"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to original view"));
@@ -2144,19 +2153,12 @@ void PolarManager::_showTimeControl()
     if (_timeControl->isVisible()) {
       _timeControl->setVisible(false);
     } else {
-      if (!_timeControlPlaced) {
-        _timeControl->setVisible(true);
-        QPoint pos;
-        pos.setX(x() + 
-                 (frameGeometry().width() / 2) -
-                 (_timeControl->width() / 2));
-        pos.setY(y() + frameGeometry().height());
-        _timeControl->move(pos);
-      }
       _timeControl->setVisible(true);
       _timeControl->raise();
+      _placeTimeControl();
     }
   }
+
 }
 
 /////////////////////////////////////
@@ -2168,13 +2170,14 @@ void PolarManager::_placeTimeControl()
   if (_timeControl) {
     if (!_timeControlPlaced) {
       int topFrameWidth = _timeControl->geometry().y() - _timeControl->y();
+      int topFrameHeight = _timeControl->frameGeometry().height() - _timeControl->height();
       QPoint pos;
-      pos.setX(x() + 
-               (frameGeometry().width() / 2) -
-               (_timeControl->width() / 2));
-      pos.setY(y() + frameGeometry().height() + topFrameWidth);
+      pos.setX(x() + (frameGeometry().width() / 2) - (_timeControl->frameGeometry().width()/2));
+      pos.setY(y() + frameGeometry().height());
       _timeControl->move(pos);
-      _timeControlPlaced = true;
+      if (topFrameWidth != 0 || topFrameHeight != 0) {
+        _timeControlPlaced = true;
+      }
     }
   }
 }
