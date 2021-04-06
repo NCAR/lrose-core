@@ -41,10 +41,32 @@ using namespace std;
 
 const double ClickPointFmq::missingValue = -9999.0;
 
-// Constructor
+// Constructors
+
+ClickPointFmq::ClickPointFmq()
+{
+  _init();
+}
 
 ClickPointFmq::ClickPointFmq(const string &url) :
         _url(url)
+{
+  _init();
+}
+
+// destructor
+
+ClickPointFmq::~ClickPointFmq()
+
+{
+
+  _fmq.closeMsgQueue();
+
+}
+
+// initialize
+
+void ClickPointFmq::_init()
 {
 
   _debug = false;
@@ -56,16 +78,6 @@ ClickPointFmq::ClickPointFmq(const string &url) :
   _azimuth = 0;
   _rangeKm = 0;
   _gateNum = 0;
-
-}
-
-// destructor
-
-ClickPointFmq::~ClickPointFmq()
-
-{
-
-  _fmq.closeMsgQueue();
 
 }
 

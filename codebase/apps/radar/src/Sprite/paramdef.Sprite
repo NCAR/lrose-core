@@ -1005,3 +1005,9 @@ paramdef double {
   p_help = "When the user clicks in HawkEye, the (x,y) location is saved. From this, the elevation, azimuth and range of the click point can be determined. This parameter gives the max angular error allowable in this search.";
 } click_point_search_angle_error;
 
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Change in azimuth when clicking left or right keys in follow mode (deg).";
+  p_help = "In display follow mode, you can navigate left and right in azimuth using the arrow keys. This is the requested change in azimuth when navigating.";
+} click_point_delta_azimuth_deg;
+

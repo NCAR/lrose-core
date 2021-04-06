@@ -112,6 +112,13 @@ DisplayManager::DisplayManager(const Params &params,
 
   _altitudeInFeet = false;
 
+  _clickPointFmq.setUrl(_params.click_point_fmq_url);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _clickPointFmq.setVerbose();
+  } else if (_params.debug) {
+    _clickPointFmq.setDebug();
+  }
+
 }
 
 // destructor
@@ -1292,78 +1299,17 @@ int DisplayManager::_writeClickPointXml2Fmq(const RadxRay *ray,
     fprintf(stderr, "DisplayManager::_writeClickPointXml2Fmq() called\n");
   }
 
-  // create XML
-
-  string xml;
-
-  xml.append(TaXml::writeStartTag("HawkEye-ClickPoint", 0));
-  
-  xml.append(TaXml::writeTime("timeSecs", 1, ray->getTimeSecs()));
-  xml.append(TaXml::writeInt("nanoSecs", 1, ray->getNanoSecs()));
-  xml.append(TaXml::writeDouble("azimuth", 1, ray->getAzimuthDeg()));
-  xml.append(TaXml::writeDouble("elevation", 1, ray->getElevationDeg()));
-  xml.append(TaXml::writeDouble("rangeKm", 1, rangeKm));
-  xml.append(TaXml::writeInt("gateNum", 1, gateNum));
-
-  xml.append(TaXml::writeEndTag("HawkEye-ClickPoint", 0));
-  
-  // check FMQ is open
-  
-  if (_checkClickPointFmqIsOpen() == 0) {
-    
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "====>> DisplayManager::_writeClickPointXml2Fmq() <<====" << endl;
-      cerr << "====>> writing Click Point XML to FMQ <<====" << endl;
-      cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-      cerr << xml;
-      cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-    }
-
-    // write to output FMQ
-    
-    if (_clickPointFmq.writeMsg(0, 0,
-                                xml.c_str(), xml.size() + 1)) {
-      cerr << "ERROR - DisplayManager::_writeClickPointXml2Fmq()" << endl;
-      cerr << _clickPointFmq.getErrStr() << endl;
-      _clickPointFmq.closeMsgQueue();
-      return -1;
-    }
-
-  }
-
-  return 0;
-}
-
-//////////////////////////////////////////
-// Check FMQ for click point XML is open
-// returns 0 on success, -1 on failure
-
-int DisplayManager::_checkClickPointFmqIsOpen()
-{
-  
-  if (_clickPointFmq.isOpen()) {
-    return 0;
-  }
-  
-  // create output FMQ
-
-  bool compression = false;
-  size_t nSlots = 100;
-  size_t bufSize = 1000000;
-  if (_clickPointFmq.initReadWrite(_params.click_point_fmq_url,
-                                   "DisplayManager",
-                                   _params.debug >= Params::DEBUG_VERBOSE,
-                                   DsFmq::END, compression,
-                                   nSlots, bufSize)) {
-    cerr << "WARNING - DisplayManager::_checkClickPointFmqIsOpen" << endl;
-    cerr << "  Cannot create fmq for click point data" << endl;
-    cerr << "  URL: " << _params.click_point_fmq_url << endl;
-    cerr << "  nslots: " << nSlots << endl;
-    cerr << "  size: " << bufSize << endl;
-    cerr << _clickPointFmq.getErrStr() << endl;
+  if (_clickPointFmq.write(ray->getTimeSecs(),
+                           ray->getNanoSecs(),
+                           ray->getAzimuthDeg(),
+                           ray->getElevationDeg(),
+                           rangeKm,
+                           gateNum)) {
+    cerr << "ERROR - DisplayManager::_writeClickPointXml2Fmq()" << endl;
     return -1;
   }
-  
+
   return 0;
 
 }
+

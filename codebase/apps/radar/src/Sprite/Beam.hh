@@ -41,6 +41,7 @@
 #include <vector>
 #include <deque>
 #include <cstdio>
+#include <toolsa/DateTime.hh>
 #include <radar/RadarMoments.hh>
 #include <radar/RadarComplex.hh>
 #include <radar/IwrfTsInfo.hh>
@@ -122,7 +123,7 @@ public:
   
   time_t getTimeSecs() const { return _timeSecs; }
   time_t getNanoSecs() const { return _nanoSecs; }
-  double getTimeDouble() const { return _timeDouble; }
+  const DateTime &getTime() const { return _time; }
   
   int getScanMode() const;
   int getSweepNumber() const { return _sweepNum; }
@@ -201,7 +202,7 @@ private:
 
   time_t _timeSecs;
   int _nanoSecs;
-  double _timeDouble;
+  DateTime _time;
 
   double _el;
   double _az;

@@ -53,7 +53,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxGeoref.hh>
-#include <Fmq/DsFmq.hh>
+#include <radar/ClickPointFmq.hh>
 #include "SweepManager.hh"
 
 class QApplication;
@@ -266,7 +266,7 @@ protected:
 
   // click point export fmq
 
-  DsFmq _clickPointFmq;
+  ClickPointFmq _clickPointFmq;
 
   // set top bar
 
@@ -319,8 +319,6 @@ protected:
   int _writeClickPointXml2Fmq(const RadxRay *ray,
                               double rangeKm, int gateNum);
   
-  int _checkClickPointFmqIsOpen();
-
 protected slots:
 
   //////////////

@@ -54,7 +54,7 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>
-#include <Fmq/DsFmq.hh>
+#include <radar/ClickPointFmq.hh>
 
 class TsReader;
 class SpectraWidget;
@@ -308,8 +308,7 @@ private:
 
   // user click Xml FMQ - from HawkEye
   
-  DsFmq _clickPointFmq;
-  string _clickPointXml;
+  ClickPointFmq _clickPointFmq;
   time_t _clickPointTimeSecs;
   int _clickPointNanoSecs;
   DateTime _clickPointTime;
@@ -388,9 +387,8 @@ private:
   void _followDisplay();
 
   int _readClickPointFmq(bool &gotNew);
-  int _checkClickPointFmqIsOpen();
 
-  private slots:
+private slots:
 
   // Qt slots //
 

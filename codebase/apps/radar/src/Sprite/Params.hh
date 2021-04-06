@@ -748,6 +748,8 @@ public:
 
   double click_point_search_angle_error;
 
+  double click_point_delta_azimuth_deg;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -755,7 +757,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[161];
+  mutable TDRPtable _table[162];
 
   const char *_className;
 

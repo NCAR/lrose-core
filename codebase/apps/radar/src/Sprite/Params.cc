@@ -2744,6 +2744,18 @@
     tt->single_val.d = 10;
     tt++;
     
+    // Parameter 'click_point_delta_azimuth_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("click_point_delta_azimuth_deg");
+    tt->descr = tdrpStrDup("Change in azimuth when clicking left or right keys in follow mode (deg).");
+    tt->help = tdrpStrDup("In display follow mode, you can navigate left and right in azimuth using the arrow keys. This is the requested change in azimuth when navigating.");
+    tt->val_offset = (char *) &click_point_delta_azimuth_deg - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

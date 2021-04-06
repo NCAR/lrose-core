@@ -106,7 +106,7 @@ Beam &Beam::_copy(const Beam &rhs)
 
   _timeSecs = rhs._timeSecs;
   _nanoSecs = rhs._nanoSecs;
-  _timeDouble = rhs._timeDouble;
+  _time = rhs._time;
 
   _el = rhs._el;
   _az = rhs._az;
@@ -246,7 +246,7 @@ void Beam::_init()
 
   _timeSecs = 0;
   _nanoSecs = 0;
-  _timeDouble = 0;
+  _time.set(DateTime::NEVER);
 
   _az = 0;
   _el = 0;
@@ -409,7 +409,7 @@ void Beam::setPulses(bool isRhi,
 
   _timeSecs = (time_t) midPulse->getTime();
   _nanoSecs = midPulse->getNanoSecs();
-  _timeDouble = midPulse->getFTime();
+  _time.set(_timeSecs, (double) _nanoSecs / 1.0e9);
 
   // select the georeference from the mid pulse
 

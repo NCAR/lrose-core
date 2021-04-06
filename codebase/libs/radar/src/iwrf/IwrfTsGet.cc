@@ -105,14 +105,45 @@ int IwrfTsGet::retrieveBeam(const DateTime &searchTime,
   // init
   
   beamPulses.clear();
+
+  cerr << "===========>> searchTime: " << searchTime.asString(3) << endl;
+  cerr << "===========>> PstartTime: " << _pulsesStartTime.asString(3) << endl;
+  cerr << "===========>>   PendTime: " << _pulsesEndTime.asString(3) << endl;
+
+  if (searchTime < _pulsesStartTime || searchTime > _pulsesEndTime) {
+    // current data does not cover the time requested
+    // load the pulse list
+    cerr << "===========================>>>>><<<<<======================" << endl;
+    _loadPulseList(searchTime);
+  }
   
+  if (_loadBeamPulses(searchTime, searchEl, searchAz,
+                      nSamples, beamPulses)) {
+    _loadPulseList(searchTime);
+    if (_loadBeamPulses(searchTime, searchEl, searchAz,
+                        nSamples, beamPulses)) {
+      return -1;
+    }
+  }
+
+  return 0;
+
+#ifdef JUNK
+
   // check if we have data already
   
   DateTime minTime = searchTime - _timeMarginSecs;
   DateTime maxTime = searchTime + _timeMarginSecs;
+  cerr << "=======>> timeMarginSecs: " << _timeMarginSecs << endl;
+  cerr << "===========>> searchTime: " << searchTime.asString(3) << endl;
+  cerr << "===========>>    minTime: " << minTime.asString(3) << endl;
+  cerr << "===========>>    maxTime: " << maxTime.asString(3) << endl;
+  cerr << "===========>> PstartTime: " << _pulsesStartTime.asString(3) << endl;
+  cerr << "===========>>   PendTime: " << _pulsesEndTime.asString(3) << endl;
   if (minTime < _pulsesStartTime || maxTime > _pulsesEndTime) {
     // current data does not cover the time requested
     // load the pulse list
+    cerr << "===========================>>>>><<<<<======================" << endl;
     _loadPulseList(searchTime);
   }
 
@@ -124,6 +155,7 @@ int IwrfTsGet::retrieveBeam(const DateTime &searchTime,
   }
   
   return 0;
+#endif
   
 }
 
@@ -136,6 +168,8 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
   
 {
 
+  cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+
   // check if we already have a suitable list
   
   if (_fileListMap.size() > 0) {
@@ -143,13 +177,13 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
         _filesEndTime - searchTime > _timeMarginSecs) {
       // we already have files and the search time is
       // more than margin secs from each end
+      cerr << "YYYYYYYYYYYYYYYYYYYYYYYYYYYY" << endl;
       return 0;
     }
   }
 
   // init
 
-  _clearPulseList();
   _clearFileList();
   
   // we don't yet have the file list
@@ -250,6 +284,7 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
     }
   }
 
+  cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
   return 0;
 
 }
@@ -278,13 +313,17 @@ void IwrfTsGet::_clearFileList()
 int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
 {
 
+  cerr << "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP" << endl;
+
   // clear
   
-  _pulseEntries.clear();
+  _clearPulseList();
+  // _pulseEntries.clear();
 
   // load the file list if needed
   
   if (_loadFileList(searchTime)) {
+    cerr << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
     return -1;
   }
 
@@ -303,6 +342,7 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   if (searchIndex < 0) {
     cerr << "ERROR - IwrfTsGet::_loadPulseList()" << endl;
     cerr << "  Cannot find file for time: " << searchTime.asString(3) << endl;
+    cerr << "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRP" << endl;
     return -1;
   }
   
@@ -333,7 +373,9 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   IwrfTsPulse *pulse = NULL;
 
   // read in pulses
-  
+
+  cerr << "........................................................." << endl;
+
   bool infoSet = false;
   while ((pulse = _reader->getNextPulse(true)) != NULL) {
     if (_invertHvFlag) {
@@ -354,6 +396,7 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   if (_pulseEntries.size() < 2) {
     cerr << "ERROR - IwrfTsGet::_loadPulseList()" << endl;
     cerr << "  n pulses found: " << _pulseEntries.size() << endl;
+    cerr << "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS" << endl;
     return -1;
   }
   
@@ -370,6 +413,7 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
     cerr << "  pulses end time  : " << _pulsesEndTime.asString(3) << endl;
   }
 
+  cerr << "TTTTTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
   return 0;
   
 }
@@ -382,10 +426,6 @@ void IwrfTsGet::_clearPulseList()
 
   for (size_t ii = 0; ii < _pulseEntries.size(); ii++) {
     PulseEntry *entry = _pulseEntries[ii];
-    delete entry->getPulse();
-    if (entry->getBurst() != NULL) {
-      delete entry->getBurst();
-    }
     delete entry;
   }
   _pulseEntries.clear();
@@ -407,6 +447,8 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   
 {
 
+  cerr << "LLLLLLLLL searchAz: " << searchAz << endl;
+  
   // check we have enough pulses
 
   if ((int) _pulseEntries.size() < (nSamples + 4)) {
@@ -417,21 +459,21 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
 
   // find closest pulse to search time
 
-  double midDiff = 1.0e99;
-  size_t midIndex = _pulseEntries.size() / 2;
+  double midTimeDiff = 1.0e99;
+  size_t midTimeIndex = _pulseEntries.size() / 2;
   for (size_t ii = 0; ii < _pulseEntries.size(); ii++) {
     const DateTime &pulseTime = _pulseEntries[ii]->getTime();
-    double tdiff = fabs(searchTime - pulseTime);
-    if (tdiff < midDiff) {
-      midDiff = tdiff;
-      midIndex = ii;
+    double timeDiff = fabs(searchTime - pulseTime);
+    if (timeDiff < midTimeDiff) {
+      midTimeDiff = timeDiff;
+      midTimeIndex = ii;
     }
   } // ii
 
-  // set index limits relative to midIndex
+  // set index limits relative to midTimeIndex
   
-  ssize_t index0 = _conditionPulseIndex(midIndex - nSamples / 2);
-  ssize_t index1 = _conditionPulseIndex(index0 + nSamples);
+  ssize_t index0 = _conditionPulseIndex(midTimeIndex - nSamples / 2);
+  ssize_t index1 = _conditionPulseIndex(index0 + nSamples / 2);
 
   // determine whether this is a PPI or RHI
   
@@ -443,6 +485,42 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   if (deltaEl > deltaAz) {
     isRhi = true;
   }
+
+  if (_debug) {
+    cerr << "===========>>>> isRhi: " << isRhi << endl;
+  }
+
+  // now find the optimal location
+
+  double midDiff = 1.0e99;
+  size_t midIndex = _pulseEntries.size() / 2;
+  for (size_t ii = 0; ii < _pulseEntries.size(); ii++) {
+    const PulseEntry *entry = _pulseEntries[ii];
+    const DateTime &pulseTime = entry->getTime();
+    double timeDiff = fabs(searchTime - pulseTime);
+    double azDiff = _conditionDeltaAz(searchAz - entry->getAz());
+    double elDiff = fabs(searchEl - entry->getEl());
+    double diff = 0;
+    if (isRhi) {
+      diff = azDiff * 50.0 + elDiff + timeDiff;
+    } else {
+      diff = azDiff + elDiff * 50.0 + timeDiff;
+    }
+    if (diff < midDiff) {
+      midDiff = diff;
+      midIndex = ii;
+    }
+  } // ii
+  
+  const PulseEntry *centEntry = _pulseEntries[midIndex];
+  cerr << "SSSSSSSSSSS time, el, az: "
+       << centEntry->getTime().asString(3) << ", "
+       << centEntry->getEl() << ", "
+       << centEntry->getAz() << endl;
+  
+
+  index0 = _conditionPulseIndex(midIndex - nSamples);
+  index1 = _conditionPulseIndex(index0 + nSamples);
 
   // compute the mean PRT
   
@@ -461,7 +539,7 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   index1 = _conditionPulseIndex(index1 + nSamples1Sec);
   
   // find the mid index - where the angles straddle the required value
-  
+
   ssize_t centralIndex = midIndex;
   if (searchAz > -9990.0 && searchEl > -9999.0) {
     if (isRhi) {
@@ -481,16 +559,28 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     }
   } // if (searchAz > -9990.0 && searchEl > -9999.0) {
 
+  cerr  << "SSSSSSSSSSSS index0, index1, nSamples: " 
+        << index0 << ", " 
+        << index1 << ", "
+        << index1 - index0 + 1 << endl;
+
   // reset index limits relative to centralIndex
   
   index0 = _conditionPulseIndex(centralIndex - nSamples / 2);
-  index1 = _conditionPulseIndex(index0 + nSamples);
+  index1 = _conditionPulseIndex(centralIndex + nSamples / 2);
   
+  cerr  << "UUUUUUUUUUUUUUUUUUU index0, index1, nSamples: " 
+        << index0 << ", " 
+        << index1 << ", "
+        << index1 - index0 + 1 << endl;
+
   // update the info object based on properties of the
   // pulse at the central index
 
   PulseEntry *centralEntry = _pulseEntries[centralIndex];
   IwrfTsPulse *centralPulse = centralEntry->getPulse();
+  DateTime pulseTime(centralPulse->getTime(), centralPulse->getNanoSecs() / 1.0e9);
+  cerr << "CCCCCCCCCCCC centralPulseTime: " << pulseTime.asString(3) << endl;
   _pathInUse = centralEntry->getFilePath();
   _info.set_scan_rate(centralEntry->getScanRate());
   _info.set_xmit_info_xmit_rcv_mode(centralEntry->getXmitRcvMode());
@@ -525,6 +615,8 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     }
   }
 
+  cerr  << "TTTTTTTTTTTTTT index0, index1: " << index0 << ", " << index1 << endl;
+
   // load up beam pulses
   
   beamPulses.clear();
@@ -535,6 +627,15 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     pulse->setOpsInfo(_info);
     // add to vector
     beamPulses.push_back(pulse);
+  }
+
+  cerr << "DDDDDDDDDDDDDDDDDDDDDDDDDDd nSamples, beamPulses.size(): " 
+       << nSamples << ", " << beamPulses.size() << endl;
+
+  if ((int) beamPulses.size() < nSamples) {
+    cerr << "EEEEEEEEEEEEEEEEEEEEEEEEE nSamples, beamPulses.size(): " 
+         << nSamples << ", " << beamPulses.size() << endl;
+    return -1;
   }
   
   return 0;

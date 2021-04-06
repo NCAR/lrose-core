@@ -50,11 +50,16 @@ public:
 
   // constructor
   
+  ClickPointFmq();
   ClickPointFmq(const string &url);
   
   // destructor
   
   ~ClickPointFmq();
+
+  // set the url
+
+  void setUrl(const string &url) { _url = url; }
 
   // write click point data, in XML format, to FMQ
   
@@ -140,6 +145,7 @@ private:
 
   // methods
 
+  void _init();
   int _checkFmqIsOpen();
 
 };

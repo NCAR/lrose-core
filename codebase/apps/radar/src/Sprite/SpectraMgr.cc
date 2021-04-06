@@ -124,6 +124,15 @@ SpectraMgr::SpectraMgr(const Params &params,
   
   _setupWindows();
 
+  // initialize the click point FMQ object
+
+  _clickPointFmq.setUrl(_params.click_point_fmq_url);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _clickPointFmq.setVerbose();
+  } else if (_params.debug) {
+    _clickPointFmq.setDebug();
+  }
+
   // set initial field to 0
   
   // _changeField(0, false);
@@ -491,7 +500,11 @@ void SpectraMgr::timerEvent(QTimerEvent *event)
   if (event->timerId() == _dataTimerId) {
     if (_archiveMode) {
       if (_archiveRetrievalPending) {
-        _handleArchiveData();
+        if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
+          _followDisplay();
+        } else {
+          _handleArchiveData();
+        }
         _archiveRetrievalPending = false;
       }
     } else {
@@ -710,9 +723,7 @@ void SpectraMgr::_followDisplay()
   
   // read in a beam
 
-  DateTime searchTime(_clickPointTimeSecs,
-                      (double) _clickPointNanoSecs / 1.0e9);
-  Beam *beam = _tsReader->getBeamFollowDisplay(searchTime,
+  Beam *beam = _tsReader->getBeamFollowDisplay(_clickPointTime,
                                                _clickPointElevation,
                                                _clickPointAzimuth);
   if (beam == NULL) {
@@ -722,6 +733,7 @@ void SpectraMgr::_followDisplay()
     return;
   }
 
+  _clickPointTime = beam->getTime();
   _setRange(_clickPointRangeKm);
 
   // update status
@@ -1199,20 +1211,36 @@ void SpectraMgr::_setDataRetrievalMode()
 }
 
 ////////////////////////////////////////////////////////
-// change start time
+// change time or azimuth
 
 void SpectraMgr::_goBack()
 {
-  _goForward = false;
-  _archiveStartTime -= 1 * _timeSpanSecs;
-  _setGuiFromStartTime();
+  if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
+    _clickPointAzimuth -= _params.click_point_delta_azimuth_deg;
+    if (_clickPointAzimuth < 0) {
+      _clickPointAzimuth += 360.0;
+    }
+    cerr << "BBBBBBBBBBB _clickPointAzimuth: " << _clickPointAzimuth << endl;
+  } else {
+    _goForward = false;
+    _archiveStartTime -= 1 * _timeSpanSecs;
+    _setGuiFromStartTime();
+  }
 }
 
 void SpectraMgr::_goFwd()
 {
-  _goForward = true;
-  _archiveStartTime += 1 * _timeSpanSecs;
-  _setGuiFromStartTime();
+  if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
+    _clickPointAzimuth += _params.click_point_delta_azimuth_deg;
+    if (_clickPointAzimuth >= 360.0) {
+      _clickPointAzimuth -= 360.0;
+    }
+    cerr << "FFFFFFFFFF _clickPointAzimuth: " << _clickPointAzimuth << endl;
+  } else {
+    _goForward = true;
+    _archiveStartTime += 1 * _timeSpanSecs;
+    _setGuiFromStartTime();
+  }
 }
 
 void SpectraMgr::_changeRange(int deltaGates)
@@ -1812,7 +1840,7 @@ void SpectraMgr::_updateStatusPanel(const Beam *beam)
   }
   
   double sunEl, sunAz;
-  _sunPosn.computePosn(beam->getTimeDouble(), sunEl, sunAz);
+  _sunPosn.computePosn(beam->getTime().getTimeAsDouble(), sunEl, sunAz);
   _setText(text, "%.3f", sunEl);
   if (_sunElVal) {
     _sunElVal->setText(text);
@@ -1857,20 +1885,12 @@ int SpectraMgr::_readClickPointFmq(bool &gotNew)
   
 {
   
-  // check we have an open FMQ
-  
-  if (_checkClickPointFmqIsOpen()) {
-    return -1;
-  }
-
   // read in a new message
   
-  if (_clickPointFmq.readMsg(&gotNew)) {
+  if (_clickPointFmq.read(gotNew)) {
     cerr << "ERROR -  SpectraMgr::_readClickPointFmq" << endl;
     cerr << "  Cannot read click point info from FMQ" << endl;
     cerr << "  Fmq: " << _params.click_point_fmq_url << endl;
-    cerr << _clickPointFmq.getErrStr() << endl;
-    _clickPointFmq.closeMsgQueue();
     return -1;
   }
   
@@ -1878,65 +1898,17 @@ int SpectraMgr::_readClickPointFmq(bool &gotNew)
     // no data
     return 0;
   }
-  
-  // get the xml, ensure null termination
-  
-  const void *msg = _clickPointFmq.getMsg();
-  int len = _clickPointFmq.getMsgLen();
-  TaArray<char> xml_;
-  char *xml = xml_.alloc(len);
-  memcpy(xml, msg, len);
-  xml[len-1] = '\0';
-  _clickPointXml = xml;
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========== latest click point XML ==================" << endl;
-    cerr << _clickPointXml << endl;
-    cerr << "=====================================================" << endl;
-  }
-  
-  // decode the XML
+  // set the members
 
-  bool success = true;
-  time_t timeSecs;
-  if (TaXml::readTime(_clickPointXml, "timeSecs", timeSecs)) {
-    success = false;
-  }
-  int nanoSecs;
-  if (TaXml::readInt(_clickPointXml, "nanoSecs", nanoSecs)) {
-    success = false;
-  }
-  double azimuth;
-  if (TaXml::readDouble(_clickPointXml, "azimuth", azimuth)) {
-    success = false;
-  }
-  double elevation;
-  if (TaXml::readDouble(_clickPointXml, "elevation", elevation)) {
-    success = false;
-  }
-  double rangeKm;
-  if (TaXml::readDouble(_clickPointXml, "rangeKm", rangeKm)) {
-    success = false;
-  }
-  int gateNum;
-  if (TaXml::readInt(_clickPointXml, "gateNum", gateNum)) {
-    success = false;
-  }
-  if (!success) {
-    cerr << "ERROR - SpectraMgr::_readClickPointFmq()" << endl;
-    cerr << "Cannot decode click point XML:" << endl;
-    cerr << _clickPointXml << endl;
-    return -1;
-  }
-  
-  _clickPointTimeSecs = timeSecs;
-  _clickPointNanoSecs = nanoSecs;
-  _clickPointTime.set(timeSecs, (double) nanoSecs * 1.0e-9);
-  _clickPointElevation = elevation;
-  _clickPointAzimuth = azimuth;
-  _clickPointRangeKm = rangeKm;
-  _clickPointGateNum = gateNum;
-  
+  _clickPointTimeSecs = _clickPointFmq.getTimeSecs();
+  _clickPointNanoSecs = _clickPointFmq.getNanoSecs();
+  _clickPointTime.set(_clickPointTimeSecs, (double) _clickPointNanoSecs * 1.0e-9);
+  _clickPointElevation = _clickPointFmq.getElevation();
+  _clickPointAzimuth = _clickPointFmq.getAzimuth();
+  _clickPointRangeKm = _clickPointFmq.getRangeKm();
+  _clickPointGateNum = _clickPointFmq.getGateNum();
+
   if (_params.debug) {
     cerr << "=========== latest click point XML ==================" << endl;
     cerr << "_clickPointTime: " << _clickPointTime.asString(6) << endl;
@@ -1951,36 +1923,3 @@ int SpectraMgr::_readClickPointFmq(bool &gotNew)
 
 }
 
-//////////////////////////////////////////
-// Check FMQ for click point XML is open
-// returns 0 on success, -1 on failure
-
-int SpectraMgr::_checkClickPointFmqIsOpen()
-{
-  
-  if (_clickPointFmq.isOpen()) {
-    return 0;
-  }
-  
-  // create output FMQ
-
-  bool compression = false;
-  size_t nSlots = 100;
-  size_t bufSize = 1000000;
-  if (_clickPointFmq.initReadWrite(_params.click_point_fmq_url,
-                                   "SpectraMgr",
-                                   _params.debug >= Params::DEBUG_VERBOSE,
-                                   DsFmq::END, compression,
-                                   nSlots, bufSize)) {
-    cerr << "WARNING - SpectraMgr::_checkClickPointFmqIsOpen" << endl;
-    cerr << "  Cannot create fmq for click point data" << endl;
-    cerr << "  URL: " << _params.click_point_fmq_url << endl;
-    cerr << "  nslots: " << nSlots << endl;
-    cerr << "  size: " << bufSize << endl;
-    cerr << _clickPointFmq.getErrStr() << endl;
-    return -1;
-  }
-  
-  return 0;
-
-}

@@ -152,7 +152,7 @@ void BeamMgr::loadBeamData(const Beam &beam)
   if (beam.getIsStagPrt()) {
     loadBeamDataStaggeredPrt(beam.getInfo(),
                              beam.getTimeSecs(),
-                             beam.getTimeDouble(),
+                             beam.getTime().getTimeAsDouble(),
                              beam.getEl(),
                              beam.getAz(),
                              beam.getPrtShort(), 
@@ -164,7 +164,7 @@ void BeamMgr::loadBeamData(const Beam &beam)
   } else {
     loadBeamData(beam.getInfo(),
                  beam.getTimeSecs(),
-                 beam.getTimeDouble(),
+                 beam.getTime().getTimeAsDouble(),
                  beam.getEl(),
                  beam.getAz(),
                  beam.getPrt(),
