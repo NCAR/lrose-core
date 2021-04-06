@@ -12,6 +12,7 @@ INSTALL_DIR=$(LROSE_INSTALL_DIR)/bin
 
 SCRIPTS = \
         RUNtests.sh \
+	GetAwsRadar.py \
 	TimeCmd.py \
 	copyright_prepend \
 	copyright_remove \
