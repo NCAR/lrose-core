@@ -330,7 +330,9 @@ Beam *TsReader::_getBeamViaGetter(const DateTime &searchTime,
     // on failure, try previous time
     if (_prevBeamTime.isValid()) {
       _beamTime = _prevBeamTime;
-      cerr << "====>> Retry, beam at time: " << _beamTime.asString(3) << endl;
+      if (_params.debug) {
+        cerr << "====>> Retry, beam at time: " << _beamTime.asString(3) << endl;
+      }
       if (_pulseGetter->retrieveBeam(_beamTime,
                                      searchEl,
                                      searchAz,

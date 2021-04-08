@@ -488,7 +488,9 @@ void SpectraMgr::timerEvent(QTimerEvent *event)
   bool gotNew = false;
   if (_readClickPointFmq(gotNew) == 0) {
     if (gotNew) {
-      cerr << "====>> gotNewClickInfo" << endl;
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "====>> gotNewClickInfo" << endl;
+      }
       if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
         _followDisplay();
       }
@@ -1089,7 +1091,6 @@ void SpectraMgr::_goBack()
     if (_clickPointAzimuth < 0) {
       _clickPointAzimuth += 360.0;
     }
-    cerr << "BBBBBBBBBBB _clickPointAzimuth: " << _clickPointAzimuth << endl;
   } else {
     _goForward = false;
     _archiveStartTime -= 1 * _timeSpanSecs;
@@ -1104,7 +1105,6 @@ void SpectraMgr::_goFwd()
     if (_clickPointAzimuth >= 360.0) {
       _clickPointAzimuth -= 360.0;
     }
-    cerr << "FFFFFFFFFF _clickPointAzimuth: " << _clickPointAzimuth << endl;
   } else {
     _goForward = true;
     _archiveStartTime += 1 * _timeSpanSecs;

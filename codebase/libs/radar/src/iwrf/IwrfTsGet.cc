@@ -106,19 +106,27 @@ int IwrfTsGet::retrieveBeam(const DateTime &searchTime,
   
   beamPulses.clear();
 
-  cerr << "===========>> searchTime: " << searchTime.asString(3) << endl;
-  cerr << "===========>> PstartTime: " << _pulsesStartTime.asString(3) << endl;
-  cerr << "===========>>   PendTime: " << _pulsesEndTime.asString(3) << endl;
+  if (_debug >= IWRF_DEBUG_VERBOSE) {
+    cerr << "==== IwrfTsGet::retrieveBeam() ====" << endl;
+    cerr << "=====>> searchTime: " << searchTime.asString(3) << endl;
+    cerr << "=====>> searchEl  : " << searchEl << endl;
+    cerr << "=====>> searchAz  : " << searchAz << endl;
+    cerr << "=====>> nSamples  : " << searchAz << endl;
+    cerr << "=====>> cached pulse list start time: " << _pulsesStartTime.asString(3) << endl;
+    cerr << "=====>> cached pulse list end   time: " << _pulsesEndTime.asString(3) << endl;
+  }
 
   if (searchTime < _pulsesStartTime || searchTime > _pulsesEndTime) {
     // current data does not cover the time requested
     // load the pulse list
-    cerr << "===========================>>>>><<<<<======================" << endl;
     _loadPulseList(searchTime);
   }
   
+  // load up the pulses for the beam at this search time and location
+  
   if (_loadBeamPulses(searchTime, searchEl, searchAz,
                       nSamples, beamPulses)) {
+    // if this fails, reload the pulse list and try again
     _loadPulseList(searchTime);
     if (_loadBeamPulses(searchTime, searchEl, searchAz,
                         nSamples, beamPulses)) {
@@ -128,35 +136,6 @@ int IwrfTsGet::retrieveBeam(const DateTime &searchTime,
 
   return 0;
 
-#ifdef JUNK
-
-  // check if we have data already
-  
-  DateTime minTime = searchTime - _timeMarginSecs;
-  DateTime maxTime = searchTime + _timeMarginSecs;
-  cerr << "=======>> timeMarginSecs: " << _timeMarginSecs << endl;
-  cerr << "===========>> searchTime: " << searchTime.asString(3) << endl;
-  cerr << "===========>>    minTime: " << minTime.asString(3) << endl;
-  cerr << "===========>>    maxTime: " << maxTime.asString(3) << endl;
-  cerr << "===========>> PstartTime: " << _pulsesStartTime.asString(3) << endl;
-  cerr << "===========>>   PendTime: " << _pulsesEndTime.asString(3) << endl;
-  if (minTime < _pulsesStartTime || maxTime > _pulsesEndTime) {
-    // current data does not cover the time requested
-    // load the pulse list
-    cerr << "===========================>>>>><<<<<======================" << endl;
-    _loadPulseList(searchTime);
-  }
-
-  // load the beam pulses
-  
-  if (_loadBeamPulses(searchTime, searchEl, searchAz,
-                      nSamples, beamPulses)) {
-    return -1;
-  }
-  
-  return 0;
-#endif
-  
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -168,8 +147,6 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
   
 {
 
-  cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-
   // check if we already have a suitable list
   
   if (_fileListMap.size() > 0) {
@@ -177,7 +154,6 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
         _filesEndTime - searchTime > _timeMarginSecs) {
       // we already have files and the search time is
       // more than margin secs from each end
-      cerr << "YYYYYYYYYYYYYYYYYYYYYYYYYYYY" << endl;
       return 0;
     }
   }
@@ -205,10 +181,12 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
     
     DIR *dirp;
     if((dirp = opendir(subdirPath)) == NULL) {
-      int errNum = errno;
-      cerr << "WARNING - IwrfTsGet::_loadFileList()" << endl;
-      cerr << "  Cannot open dir: " << subdirPath << endl;
-      cerr << "  " << strerror(errNum) << endl;
+      if (_debug >= IWRF_DEBUG_VERBOSE) {
+        int errNum = errno;
+        cerr << "WARNING - IwrfTsGet::_loadFileList()" << endl;
+        cerr << "  Cannot open dir: " << subdirPath << endl;
+        cerr << "  " << strerror(errNum) << endl;
+      }
       continue;
     }
 
@@ -248,9 +226,11 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
   // check we got files
   
   if (_fileListMap.size() < 1) {
-    cerr << "ERROR - IwrfTsGet::_loadFileList()" << endl;
-    cerr << "  No files found, dir: " << _topDir << endl;
-    cerr << "  Search time: " << searchTime.asString(3) << endl;
+    if (_debug >= IWRF_DEBUG_VERBOSE) {
+      cerr << "ERROR - IwrfTsGet::_loadFileList()" << endl;
+      cerr << "  No files found, dir: " << _topDir << endl;
+      cerr << "  Search time: " << searchTime.asString(3) << endl;
+    }
     return -1;
   }
 
@@ -284,7 +264,6 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
     }
   }
 
-  cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
   return 0;
 
 }
@@ -313,8 +292,6 @@ void IwrfTsGet::_clearFileList()
 int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
 {
 
-  cerr << "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP" << endl;
-
   // clear
   
   _clearPulseList();
@@ -323,7 +300,6 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   // load the file list if needed
   
   if (_loadFileList(searchTime)) {
-    cerr << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
     return -1;
   }
 
@@ -342,7 +318,6 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   if (searchIndex < 0) {
     cerr << "ERROR - IwrfTsGet::_loadPulseList()" << endl;
     cerr << "  Cannot find file for time: " << searchTime.asString(3) << endl;
-    cerr << "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRP" << endl;
     return -1;
   }
   
@@ -374,7 +349,9 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
 
   // read in pulses
 
-  cerr << "........................................................." << endl;
+  if (_debug) {
+    cerr << "  ====>> reading in pulses ......." << endl;
+  }
 
   bool infoSet = false;
   while ((pulse = _reader->getNextPulse(true)) != NULL) {
@@ -396,7 +373,6 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
   if (_pulseEntries.size() < 2) {
     cerr << "ERROR - IwrfTsGet::_loadPulseList()" << endl;
     cerr << "  n pulses found: " << _pulseEntries.size() << endl;
-    cerr << "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS" << endl;
     return -1;
   }
   
@@ -413,7 +389,6 @@ int IwrfTsGet::_loadPulseList(const DateTime &searchTime)
     cerr << "  pulses end time  : " << _pulsesEndTime.asString(3) << endl;
   }
 
-  cerr << "TTTTTTTTTTTTTTTTTTTTTTTTTTTT" << endl;
   return 0;
   
 }
@@ -447,13 +422,14 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   
 {
 
-  cerr << "LLLLLLLLL searchAz: " << searchAz << endl;
-  
   // check we have enough pulses
 
   if ((int) _pulseEntries.size() < (nSamples + 4)) {
     // too few pulses
-    cerr << "ERROR - IwrfTsGet::_loadBeamPulses()" << endl;
+    if (_debug >= IWRF_DEBUG_VERBOSE) {
+      cerr << "ERROR - IwrfTsGet::_loadBeamPulses()" << endl;
+      cerr << "  too few pulses" << endl;
+    }
     return -1;
   }
 
@@ -485,12 +461,12 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   if (deltaEl > deltaAz) {
     isRhi = true;
   }
-
+  
   if (_debug) {
     cerr << "===========>>>> isRhi: " << isRhi << endl;
   }
 
-  // now find the optimal location
+  // now find the initial search location
 
   double midDiff = 1.0e99;
   size_t midIndex = _pulseEntries.size() / 2;
@@ -512,13 +488,6 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     }
   } // ii
   
-  const PulseEntry *centEntry = _pulseEntries[midIndex];
-  cerr << "SSSSSSSSSSS time, el, az: "
-       << centEntry->getTime().asString(3) << ", "
-       << centEntry->getEl() << ", "
-       << centEntry->getAz() << endl;
-  
-
   index0 = _conditionPulseIndex(midIndex - nSamples);
   index1 = _conditionPulseIndex(index0 + nSamples);
 
@@ -538,7 +507,7 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
   index0 = _conditionPulseIndex(index0 - nSamples1Sec);
   index1 = _conditionPulseIndex(index1 + nSamples1Sec);
   
-  // find the mid index - where the angles straddle the required value
+  // find the mid index where the angles straddle the required value
 
   ssize_t centralIndex = midIndex;
   if (searchAz > -9990.0 && searchEl > -9999.0) {
@@ -559,28 +528,17 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     }
   } // if (searchAz > -9990.0 && searchEl > -9999.0) {
 
-  cerr  << "SSSSSSSSSSSS index0, index1, nSamples: " 
-        << index0 << ", " 
-        << index1 << ", "
-        << index1 - index0 + 1 << endl;
-
   // reset index limits relative to centralIndex
   
   index0 = _conditionPulseIndex(centralIndex - nSamples / 2);
   index1 = _conditionPulseIndex(centralIndex + nSamples / 2);
   
-  cerr  << "UUUUUUUUUUUUUUUUUUU index0, index1, nSamples: " 
-        << index0 << ", " 
-        << index1 << ", "
-        << index1 - index0 + 1 << endl;
-
   // update the info object based on properties of the
   // pulse at the central index
 
   PulseEntry *centralEntry = _pulseEntries[centralIndex];
   IwrfTsPulse *centralPulse = centralEntry->getPulse();
   DateTime pulseTime(centralPulse->getTime(), centralPulse->getNanoSecs() / 1.0e9);
-  cerr << "CCCCCCCCCCCC centralPulseTime: " << pulseTime.asString(3) << endl;
   _pathInUse = centralEntry->getFilePath();
   _info.set_scan_rate(centralEntry->getScanRate());
   _info.set_xmit_info_xmit_rcv_mode(centralEntry->getXmitRcvMode());
@@ -615,8 +573,6 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     }
   }
 
-  cerr  << "TTTTTTTTTTTTTT index0, index1: " << index0 << ", " << index1 << endl;
-
   // load up beam pulses
   
   beamPulses.clear();
@@ -629,12 +585,12 @@ int IwrfTsGet::_loadBeamPulses(const DateTime &searchTime,
     beamPulses.push_back(pulse);
   }
 
-  cerr << "DDDDDDDDDDDDDDDDDDDDDDDDDDd nSamples, beamPulses.size(): " 
-       << nSamples << ", " << beamPulses.size() << endl;
-
   if ((int) beamPulses.size() < nSamples) {
-    cerr << "EEEEEEEEEEEEEEEEEEEEEEEEE nSamples, beamPulses.size(): " 
-         << nSamples << ", " << beamPulses.size() << endl;
+    if (_debug >= IWRF_DEBUG_VERBOSE) {
+      cerr << "  Beam has too few pulses, beamPulses.size(): " 
+           << nSamples << ", " << beamPulses.size() << endl;
+      cerr << "  retyring ..." << endl;
+    }
     return -1;
   }
   
