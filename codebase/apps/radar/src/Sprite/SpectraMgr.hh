@@ -387,6 +387,7 @@ private:
   void _followDisplay();
 
   int _readClickPointFmq(bool &gotNew);
+  int _writeClickPointXml2Fmq();
 
 private slots:
 
@@ -403,9 +404,11 @@ private slots:
   
   void _manageBeamQueue(Beam *beam);
 
+  void _clickPointChanged();
+
   // local slots
 
-  void _locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+  void _spectraLocationClicked(double selectedRangeKm, int selectedGateNum);
 
   void _setTimeSpan();
   void _resetTimeSpanToDefault();
@@ -419,7 +422,6 @@ private slots:
   void _goBack();
   void _goFwd();
   void _changeRange(int deltaGates);
-  void _setRange(double rangeKm);
   
   void _performArchiveRetrieval();
   

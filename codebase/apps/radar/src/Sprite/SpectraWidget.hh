@@ -168,13 +168,18 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   void changeRange(int nGatesDelta);
 
+  // get currently selected range
+
+  double getSelectedRangeKm() const { return _selectedRangeKm; }
+  int getSelectedGateNum() const { return _selectedGateNum; }
+  
   ////////////////
   // Qt signals //
   ////////////////
 
  signals:
 
-  void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+  void locationClicked(double selectedRangeKm, int selectedGateNum);
 
   //////////////
   // Qt slots //
@@ -305,6 +310,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // currently selected range
 
   double _selectedRangeKm;
+  int _selectedGateNum;
   
   // time of plot
 
@@ -385,7 +391,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   // beam data
 
-  Beam *_currentBeam;
+  Beam *_beam;
   int _nSamplesPlot;
 
   ///////////////////////
@@ -489,6 +495,10 @@ class DLL_EXPORT SpectraWidget : public QWidget
   void _identSelectedPanel(int xx, int yy,
                            panel_type_t &panelType,
                            int &panelId);
+
+  // compute selected gate num from selected range
+
+  void _computeSelectedGateNum();
 
 };
 

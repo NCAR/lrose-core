@@ -37,6 +37,7 @@
 #include <radar/ClickPointFmq.hh>
 #include <toolsa/TaArray.hh>
 #include <toolsa/TaXml.hh>
+#include <unistd.h>
 using namespace std;
 
 const double ClickPointFmq::missingValue = -9999.0;
@@ -72,8 +73,9 @@ void ClickPointFmq::_init()
   _debug = false;
   _verbose = false;
 
-  _timeSecs = 0;
-  _nanoSecs = 0;
+  _msgTimeSecs = 0;
+  _dataTimeSecs = 0;
+  _dataNanoSecs = 0;
   _elevation = 0;
   _azimuth = 0;
   _rangeKm = 0;
@@ -130,12 +132,21 @@ int ClickPointFmq::read(bool &gotNew)
   // decode the XML
 
   bool success = true;
-  time_t timeSecs;
-  if (TaXml::readTime(_xml, "timeSecs", timeSecs)) {
+
+  time_t msgTimeSecs;
+  if (TaXml::readTime(_xml, "msgTimeSecs", msgTimeSecs)) {
     success = false;
   }
-  int nanoSecs;
-  if (TaXml::readInt(_xml, "nanoSecs", nanoSecs)) {
+  int writerPid;
+  if (TaXml::readInt(_xml, "writerPid", writerPid)) {
+    success = false;
+  }
+  time_t dataTimeSecs;
+  if (TaXml::readTime(_xml, "dataTimeSecs", dataTimeSecs)) {
+    success = false;
+  }
+  int dataNanoSecs;
+  if (TaXml::readInt(_xml, "dataNanoSecs", dataNanoSecs)) {
     success = false;
   }
   double azimuth;
@@ -160,10 +171,12 @@ int ClickPointFmq::read(bool &gotNew)
     cerr << _xml << endl;
     return -1;
   }
-  
-  _timeSecs = timeSecs;
-  _nanoSecs = nanoSecs;
-  _time.set(timeSecs, (double) nanoSecs * 1.0e-9);
+
+  _msgTimeSecs = msgTimeSecs;
+  _writerPid = writerPid;
+  _dataTimeSecs = dataTimeSecs;
+  _dataNanoSecs = dataNanoSecs;
+  _dataTime.set(dataTimeSecs, (double) dataNanoSecs * 1.0e-9);
   _elevation = elevation;
   _azimuth = azimuth;
   _rangeKm = rangeKm;
@@ -171,14 +184,43 @@ int ClickPointFmq::read(bool &gotNew)
   
   if (_debug) {
     cerr << "=========== latest click point XML ==================" << endl;
-    cerr << "  time: " << _time.asString(6) << endl;
+    cerr << "  msgTime: " << DateTime::strm(_msgTimeSecs) << endl;
+    cerr << "  writerPid: " << _writerPid << endl;
+    cerr << "  dataTime: " << _dataTime.asString(6) << endl;
     cerr << "  elevation: " << _elevation << endl;
     cerr << "  azimuth: " << _azimuth << endl;
     cerr << "  rangeKm: " << _rangeKm << endl;
     cerr << "  gateNum: " << gateNum << endl;
     cerr << "=====================================================" << endl;
   }
-  
+
+  // check that we did not write this message
+
+  int pid = getpid();
+  if (pid == _writerPid) {
+    // ignore this message if this process wrote it
+    if (_debug) {
+      cerr << "Ignoring message, we wrote it" << endl;
+    }
+    gotNew = false;
+    return 0;
+  }
+
+  // check that the message is not too old
+
+  time_t now = time(NULL);
+  double msgAge = now - _msgTimeSecs;
+  if (msgAge > 60.0) {
+    // old message
+    if (_debug) {
+      cerr << "WARNING - ClickPointFmq::read" << endl;
+      cerr << "  message is too old, age: " << msgAge << endl;
+      cerr << _xml << endl;
+    }
+    gotNew = false;
+    return 0;
+  }
+
   return 0;
 
 }
@@ -186,8 +228,8 @@ int ClickPointFmq::read(bool &gotNew)
 /////////////////////////////////////////////////////////////////
 // write click point data, in XML format, to FMQ
 
-int ClickPointFmq::write(time_t timeSecs,
-                         int nanoSecs,
+int ClickPointFmq::write(time_t dataTimeSecs,
+                         int dataNanoSecs,
                          double azimuth,
                          double elevation,
                          double rangeKm,
@@ -201,12 +243,17 @@ int ClickPointFmq::write(time_t timeSecs,
 
   // create XML
 
+  time_t now = time(NULL);
+  int pid = getpid();
+
   string xml;
 
   xml.append(TaXml::writeStartTag("ClickPoint", 0));
   
-  xml.append(TaXml::writeTime("timeSecs", 1, timeSecs));
-  xml.append(TaXml::writeInt("nanoSecs", 1, nanoSecs));
+  xml.append(TaXml::writeTime("msgTimeSecs", 1, now));
+  xml.append(TaXml::writeInt("writerPid", 1, pid));
+  xml.append(TaXml::writeTime("dataTimeSecs", 1, dataTimeSecs));
+  xml.append(TaXml::writeInt("dataNanoSecs", 1, dataNanoSecs));
   xml.append(TaXml::writeDouble("azimuth", 1, azimuth));
   xml.append(TaXml::writeDouble("elevation", 1, elevation));
   xml.append(TaXml::writeDouble("rangeKm", 1, rangeKm));

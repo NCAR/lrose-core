@@ -805,10 +805,10 @@ double Beam::getRange(int gateNum) const
 ////////////////////////////////////////////////
 // get closest exact range to a give range
 
-double Beam::getClosestRange(double range) const
+double Beam::getClosestRange(double range, int &gateNum) const
   
 {
-  int gateNum = getGateNum(range);
+  gateNum = getGateNum(range);
   double closestRange = getRange(gateNum);
   return closestRange;
 }

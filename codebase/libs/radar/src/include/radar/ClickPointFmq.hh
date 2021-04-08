@@ -63,8 +63,8 @@ public:
 
   // write click point data, in XML format, to FMQ
   
-  int write(time_t timeSecs,
-            int nanoSecs,
+  int write(time_t dataTimeSecs,
+            int dataNanoSecs,
             double azimuth,
             double elevation,
             double rangeKm,
@@ -79,17 +79,25 @@ public:
   const string &getXml() const {
     return _xml; 
   }
-
-  time_t getTimeSecs() const {
-    return _timeSecs; 
+  
+  time_t getMsgTimeSecs() const {
+    return _msgTimeSecs; 
   }
   
-  int getNanoSecs() const {
-    return _nanoSecs; 
+  pid_t getWriterPid() const {
+    return _writerPid; 
   }
   
-  const DateTime &getDateTime() const {
-    return _time; 
+  time_t getDataTimeSecs() const {
+    return _dataTimeSecs; 
+  }
+  
+  int getDataNanoSecs() const {
+    return _dataNanoSecs; 
+  }
+  
+  const DateTime &getDataTime() const {
+    return _dataTime; 
   }
   
   double getElevation() const {
@@ -133,11 +141,13 @@ private:
   DsFmq _fmq;
 
   // data for click point
-
+  
+  time_t _msgTimeSecs;
+  pid_t _writerPid;
   string _xml;
-  time_t _timeSecs;
-  int _nanoSecs;
-  DateTime _time;
+  time_t _dataTimeSecs;
+  int _dataNanoSecs;
+  DateTime _dataTime;
   double _elevation;
   double _azimuth;
   double _rangeKm;

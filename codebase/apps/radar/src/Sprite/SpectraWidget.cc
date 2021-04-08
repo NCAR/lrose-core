@@ -58,7 +58,7 @@ SpectraWidget::SpectraWidget(QWidget* parent,
         _worldReleaseX(0),
         _worldReleaseY(0),
         _rubberBand(0),
-        _currentBeam(NULL),
+        _beam(NULL),
         _nSamplesPlot(0)
 
 {
@@ -309,9 +309,9 @@ void SpectraWidget::plotBeam(Beam *beam)
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
   }
 
-  _currentBeam = beam;
-  _nSamplesPlot = _currentBeam->getNSamples();
-  iwrf_xmit_rcv_mode_t xmitRcvMode = _currentBeam->getXmitRcvMode();
+  _beam = beam;
+  _nSamplesPlot = _beam->getNSamples();
+  iwrf_xmit_rcv_mode_t xmitRcvMode = _beam->getXmitRcvMode();
   if (xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
       xmitRcvMode == IWRF_ALT_HV_CO_ONLY ||
       xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
@@ -468,8 +468,9 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
       // change ascope range
       AscopePlot *ascope = _ascopes[_mouseReleasePanelId];
       _selectedRangeKm = ascope->getZoomWorld().getYWorld(_mouseReleaseY);
-      if (_currentBeam != NULL) {
-        _selectedRangeKm = _currentBeam->getClosestRange(_selectedRangeKm);
+      if (_beam != NULL) {
+        _selectedRangeKm = _beam->getClosestRange(_selectedRangeKm, _selectedGateNum);
+        emit locationClicked(_selectedRangeKm, _selectedGateNum);
       }
     } else {
       _pointClicked = true;
@@ -599,12 +600,12 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
 
   // render ascopes and iq plots
 
-  if (_currentBeam) {
+  if (_beam) {
     for (size_t ii = 0; ii < _ascopes.size(); ii++) {
-      _ascopes[ii]->plotBeam(painter, _currentBeam, _selectedRangeKm);
+      _ascopes[ii]->plotBeam(painter, _beam, _selectedRangeKm);
     }
     for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
-      _iqPlots[ii]->plotBeam(painter, _currentBeam, _nSamplesPlot, _selectedRangeKm);
+      _iqPlots[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
     }
   }
 
@@ -758,16 +759,7 @@ void SpectraWidget::setMouseClickPoint(double worldX,
 
 void SpectraWidget::changeRange(int nGatesDelta)
 {
-  if (_currentBeam != NULL) {
-    _selectedRangeKm += nGatesDelta * _currentBeam->getGateSpacingKm();
-    double maxRange = _currentBeam->getMaxRange();
-    if (_selectedRangeKm < _currentBeam->getStartRangeKm()) {
-      _selectedRangeKm = _currentBeam->getStartRangeKm();
-    } else if (_selectedRangeKm > maxRange) {
-      _selectedRangeKm = maxRange;
-    }
-  }
-  update();
+  setRange(_selectedRangeKm + nGatesDelta * _beam->getGateSpacingKm());
 }
 
 /*************************************************************************
@@ -776,16 +768,35 @@ void SpectraWidget::changeRange(int nGatesDelta)
 
 void SpectraWidget::setRange(double rangeKm)
 {
-  if (_currentBeam != NULL) {
+  if (_beam != NULL) {
     _selectedRangeKm = rangeKm;
-    double maxRange = _currentBeam->getMaxRange();
-    if (_selectedRangeKm < _currentBeam->getStartRangeKm()) {
-      _selectedRangeKm = _currentBeam->getStartRangeKm();
+    double maxRange = _beam->getMaxRange();
+    if (_selectedRangeKm < _beam->getStartRangeKm()) {
+      _selectedRangeKm = _beam->getStartRangeKm();
     } else if (_selectedRangeKm > maxRange) {
       _selectedRangeKm = maxRange;
     }
   }
+  _computeSelectedGateNum();
   update();
+}
+
+/*************************************************************************
+ * compute selected gate num from selected range
+ */
+
+void SpectraWidget::_computeSelectedGateNum()
+{
+  if (_beam != NULL) {
+    _selectedGateNum = 
+      (int) ((_selectedRangeKm - _beam->getStartRangeKm()) / _beam->getGateSpacingKm() + 0.5);
+    if (_selectedGateNum < 0) {
+      _selectedGateNum = 0;
+    } else if (_selectedGateNum > _beam->getNGates() - 1) {
+      _selectedGateNum = _beam->getNGates() - 1;
+    }
+    _selectedRangeKm = _beam->getStartRangeKm() + _selectedGateNum * _beam->getGateSpacingKm();
+  }
 }
 
 /*************************************************************************
@@ -1140,19 +1151,19 @@ void SpectraWidget::_drawMainTitle(QPainter &painter)
 
   string title("TIME SERIES PLOTS");
 
-  if (_currentBeam) {
-    string rname(_currentBeam->getInfo().get_radar_name());
+  if (_beam) {
+    string rname(_beam->getInfo().get_radar_name());
     if (_params.override_radar_name) rname = _params.radar_name;
     title.append(":");
     title.append(rname);
     char dateStr[1024];
-    DateTime beamTime(_currentBeam->getTimeSecs());
+    DateTime beamTime(_beam->getTimeSecs());
     snprintf(dateStr, 1024, "%.4d/%.2d/%.2d",
              beamTime.getYear(), beamTime.getMonth(), beamTime.getDay());
     title.append(" ");
     title.append(dateStr);
     char timeStr[1024];
-    int nanoSecs = _currentBeam->getNanoSecs();
+    int nanoSecs = _beam->getNanoSecs();
     snprintf(timeStr, 1024, "%.2d:%.2d:%.2d.%.3d",
              beamTime.getHour(), beamTime.getMin(), beamTime.getSec(),
              (nanoSecs / 1000000));
@@ -1245,7 +1256,7 @@ void SpectraWidget::_configureAscope(int id)
   _ascopes[id]->setWindowGeom(_ascopeWidth, _ascopeHeight,
                               xOffset, yOffset);
   
-  if (_currentBeam == NULL) {
+  if (_beam == NULL) {
     return;
   }
 
@@ -1254,7 +1265,7 @@ void SpectraWidget::_configureAscope(int id)
   double maxVal = AscopePlot::getMaxVal(momentType);
   
   _ascopes[id]->setWorldLimits(minVal, 0.0,
-                               maxVal, _currentBeam->getMaxRange());
+                               maxVal, _beam->getMaxRange());
 
 }
 
@@ -1330,7 +1341,7 @@ void SpectraWidget::_configureIqPlot(int id)
   _iqPlots[id]->setWindowGeom(_iqPlotWidth, _iqPlotHeight,
                               xOffset, yOffset);
   
-  if (_currentBeam == NULL) {
+  if (_beam == NULL) {
     return;
   }
 
