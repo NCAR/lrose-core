@@ -286,14 +286,27 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   
   // legends
 
-  double power = RadarComplex::meanPower(gateData->iqhcOrig, nSamples);
-  double dbm = 10.0 * log10(power);
+  const MomentsFields* fields = beam->getOutFields();
+  double dbm = fields[gateNum].dbm;
+  double dbz = fields[gateNum].dbz;
+  double vel = fields[gateNum].vel;
+
+  // double power = RadarComplex::meanPower(gateData->iqhcOrig, nSamples);
+  // double dbm = 10.0 * log10(power);
+
   char text[1024];
-  snprintf(text, 1024, "DbmMean: %.2f", dbm);
+  snprintf(text, 1024, "Dbm: %.2f", dbm);
   vector<string> legends;
   legends.push_back(text);
+  snprintf(text, 1024, "Vel: %.2f", vel);
+  legends.push_back(text);
   _zoomWorld.drawLegendsTopLeft(painter, legends);
-  
+
+  legends.clear();
+  snprintf(text, 1024, "Dbz: %.2f", dbz);
+  legends.push_back(text);
+  _zoomWorld.drawLegendsTopRight(painter, legends);
+
   // draw the title
 
   painter.save();
