@@ -115,6 +115,15 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   void clearVar(const size_t index);
 
+  /**
+   * react to click point from remote display - Sprite
+   * redraw the click point cursor
+   */
+
+  void setClickPoint(double azimuthDeg,
+                     double elevationDeg,
+                     double rangeKm);
+
   // get plot times
 
   const RadxTime &getPlotStartTime() { return _plotStartTime; }

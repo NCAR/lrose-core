@@ -1391,3 +1391,26 @@ void PpiWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)
 
   contextMenu.exec(this->mapToGlobal(pos));
 }
+
+/*************************************************************************
+ * react to click point from remote display - Sprite
+ * redraw the click point cursor
+ */
+
+void PpiWidget::setClickPoint(double azimuthDeg,
+                              double elevationDeg,
+                              double rangeKm)
+{
+
+  double x_km =
+    rangeKm * sin(azimuthDeg * DEG_TO_RAD) * cos(elevationDeg * DEG_TO_RAD);
+  double y_km =
+    rangeKm * cos(azimuthDeg * DEG_TO_RAD) * cos(elevationDeg * DEG_TO_RAD);
+
+  _mouseReleaseX = _zoomWorld.getIxPixel(x_km);
+  _mouseReleaseY = _zoomWorld.getIyPixel(y_km);
+  _pointClicked = true;
+
+  update();
+
+}

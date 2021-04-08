@@ -319,6 +319,8 @@ protected:
   int _writeClickPointXml2Fmq(const RadxRay *ray,
                               double rangeKm, int gateNum);
   
+  int _readClickPointFmq(bool &gotNew);
+  
 protected slots:
 
   //////////////

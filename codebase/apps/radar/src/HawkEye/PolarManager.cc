@@ -270,6 +270,22 @@ void PolarManager::timerEvent(QTimerEvent *event)
 
   _timerEventCount++;
 
+  // read Sprite update of click point info from FMQ
+  
+  bool gotNew = false;
+  if (_readClickPointFmq(gotNew) == 0) {
+    if (gotNew) {
+      if (_params.debug) {
+        cerr << "====>> gotNewClickInfo" << endl;
+      }
+    }
+    if (_ppi) {
+      _ppi->setClickPoint(_clickPointFmq.getAzimuth(),
+                          _clickPointFmq.getElevation(),
+                          _clickPointFmq.getRangeKm());
+    }
+  }
+
   // handle event
   
   if (event->timerId() == _beamTimerId) {

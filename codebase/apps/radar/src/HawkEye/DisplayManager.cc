@@ -1313,3 +1313,40 @@ int DisplayManager::_writeClickPointXml2Fmq(const RadxRay *ray,
 
 }
 
+/////////////////////////////////////////////////
+// read click point data from FMQ
+// Returns 0 on success, -1 on failure
+
+int DisplayManager::_readClickPointFmq(bool &gotNew)
+  
+{
+  
+  // read in a new message
+  
+  if (_clickPointFmq.read(gotNew)) {
+    cerr << "ERROR -  DisplayManager::_readClickPointFmq" << endl;
+    cerr << "  Cannot read click point info from FMQ" << endl;
+    cerr << "  Fmq: " << _params.click_point_fmq_url << endl;
+    return -1;
+  }
+  
+  if (!gotNew) {
+    // no data
+    return 0;
+  }
+
+  if (_params.debug) {
+    cerr << "=========== latest click point XML ==================" << endl;
+    cerr << "_clickPointTime: " << _clickPointFmq.getDataTime().asString(6) << endl;
+    cerr << "_clickPointElevation: " << _clickPointFmq.getElevation() << endl;
+    cerr << "_clickPointAzimuth: " << _clickPointFmq.getAzimuth() << endl;
+    cerr << "_clickPointRangeKm: " << _clickPointFmq.getRangeKm() << endl;
+    cerr << "_clickPointGateNum: " << _clickPointFmq.getGateNum() << endl;
+    cerr << "=====================================================" << endl;
+  }
+  
+  return 0;
+
+}
+
+
