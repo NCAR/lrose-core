@@ -1635,7 +1635,7 @@ KDP_debug = FALSE;
 // Type: int
 //
 
-n_samples = 128;
+n_samples = 256;
 
 ///////////// indexed_beams ///////////////////////////
 //
@@ -1952,7 +1952,7 @@ use_cal_from_time_series = FALSE;
 // Type: string
 //
 
-click_point_fmq_url = "/tmp/fmq/click_point";
+click_point_fmq_url = "/tmp/fmq/click_point2";
 
 ///////////// click_point_search_angle_error //////////
 //
