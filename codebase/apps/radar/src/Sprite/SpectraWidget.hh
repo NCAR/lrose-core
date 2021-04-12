@@ -142,15 +142,6 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   QPixmap *getPixmap();
 		      
-  // initalize the plot start time
-  
-  void setPlotStartTime(const RadxTime &plot_start_time,
-                        bool clearBeams = false);
-
-  // reset the plot start time
-  
-  void resetPlotStartTime(const RadxTime &plot_start_time);
-
   // set mouse click point from external routine, to simulate and actual
   // mouse release event
 
@@ -245,6 +236,14 @@ class DLL_EXPORT SpectraWidget : public QWidget
   void ascopeSetXGridLinesOff();
   void ascopeSetYGridLinesOn();
   void ascopeSetYGridLinesOff();
+  
+  void iqPlotSelectSpectrumPower();
+  void iqPlotSelectSpectrumPhase();
+  void iqPlotSelectTsPower();
+  void iqPlotSelectTsPhase();
+  void iqPlotSelectIandQ();
+  void iqPlotSelectIvsQ();
+  void iqPlotSelectPhasor();
 
  protected:
 
@@ -421,10 +420,6 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   void _setTransform(const QTransform &transform);
   
-  // update the renderers
-
-  void _updateRenderers();
-
   /////////////////////////////////
   // Overridden QtWidget methods //
   /////////////////////////////////
@@ -499,6 +494,11 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // compute selected gate num from selected range
 
   void _computeSelectedGateNum();
+
+  // create the context menus
+  
+  void _createAscopeContextMenu(const QPoint &pos);
+  void _createIqPlotContextMenu(const QPoint &pos);
 
 };
 

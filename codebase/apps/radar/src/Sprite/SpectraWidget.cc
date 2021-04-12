@@ -476,33 +476,10 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
       _pointClicked = true;
     }
     
-    // double x_secs = _worldReleaseX;
-    // RadxTime clickTime(_plotStartTime.utime(), x_secs);
-    
-    // get closest ray to this time
-    
-    // double minDiff = 1.0e99;
-    // const RadxRay *closestRay = NULL;
-    // for (size_t ii = 0; ii < _beams.size(); ii++) {
-    //   const RadxRay *ray = _beams[ii]->getRay();
-    //   RadxTime rayTime(ray->getTimeSecs(), ray->getNanoSecs() / 1.0e9);
-    //   double diff = fabs(rayTime - clickTime);
-    //   if (diff < minDiff) {
-    //     closestRay = ray;
-    //     minDiff = diff;
-    //   }
-    // }
-
-    // Emit a signal to indicate that the click location has changed
-    // _pointClicked = true;
-    // if (closestRay != NULL) {
-    //   emit locationClicked(x_secs, y_km, closestRay);
-    // }
-
   } else {
 
     // mouse moved more than 20 pixels, so a zoom occurred
-
+    
     if (_mousePressPanelType == PANEL_ASCOPE &&
         _mouseReleasePanelType == PANEL_ASCOPE) {
       // ascope zoom
@@ -540,9 +517,9 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
             // perform 2D zoom
             iqPlot->setZoomLimits(_mousePressX, _mousePressY,
                                   _mouseReleaseX, _mouseReleaseY);
-          // } else {
-          //   // perform zoom in range only
-          //   iqPlot->setZoomLimitsY(_mousePressY, _mouseReleaseY);
+            // } else {
+            //   // perform zoom in range only
+            //   iqPlot->setZoomLimitsY(_mousePressY, _mouseReleaseY);
           }
         } // ii
       }
@@ -789,13 +766,15 @@ void SpectraWidget::_computeSelectedGateNum()
 {
   if (_beam != NULL) {
     _selectedGateNum = 
-      (int) ((_selectedRangeKm - _beam->getStartRangeKm()) / _beam->getGateSpacingKm() + 0.5);
+      (int) ((_selectedRangeKm - _beam->getStartRangeKm()) /
+             _beam->getGateSpacingKm() + 0.5);
     if (_selectedGateNum < 0) {
       _selectedGateNum = 0;
     } else if (_selectedGateNum > _beam->getNGates() - 1) {
       _selectedGateNum = _beam->getNGates() - 1;
     }
-    _selectedRangeKm = _beam->getStartRangeKm() + _selectedGateNum * _beam->getGateSpacingKm();
+    _selectedRangeKm = _beam->getStartRangeKm() +
+      _selectedGateNum * _beam->getGateSpacingKm();
   }
 }
 
@@ -979,11 +958,11 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   string title;
   title = (radarName + "   SPECTRAL PLOTS   ");
   _zoomWorld.drawTitleTopCenter(painter, title);
-
+  
   _zoomWorld.drawAxesBox(painter);
 
   // draw the color scale
-
+  
   // const DisplayField &field = _manager.getSelectedField();
   // _zoomWorld.drawColorScale(field.getColorMap(), painter,
   //                           _params.iqplot_axis_label_font_size);
@@ -1049,90 +1028,6 @@ void SpectraWidget::_setTransform(const QTransform &transform)
   
 }
   
-/*************************************************************************
- * update the renderers
- */
-
-void SpectraWidget::_updateRenderers()
-
-{
-  
-  // Update the window in the renderers
-  
-  // for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-  //   _fieldRenderers[field]->setTransform(_zoomTransform);
-  // }
-
-  // Refresh the images
-
-  _refresh();
-
-}
-
-//////////////////////////////////
-// initalize the plot start time
-
-void SpectraWidget::setPlotStartTime(const RadxTime &plot_start_time,
-                                     bool clearBeams /* = false */)
-{
-  
-  _plotStartTime = plot_start_time;
-  _plotEndTime = _plotStartTime + _timeSpanSecs;
-  _pointClicked = false;
-
-  // if (clearBeams) {
-  //   for (size_t ii = 0; ii < _beams.size(); ii++) {
-  //     Beam::deleteIfUnused(_beams[ii]);
-  //   }
-  //   _beams.clear();
-  // }
-
-  _refresh();
-
-}
-
-//////////////////////////////
-// reset the plot start time
-
-void SpectraWidget::resetPlotStartTime(const RadxTime &plot_start_time)
-{
-
-  // reset the plot start time
-
-  setPlotStartTime(plot_start_time);
-
-  // find the index for which the time is later than plot start time
-  
-  // vector<SpectraBeam *> toBeKept, toBeErased;
-  // for (size_t ii = 0; ii < _beams.size(); ii++) {
-  //   SpectraBeam *beam = _beams[ii];
-  //   if ((beam->getBeamStartTime() - plot_start_time) >= 0.0) {
-  //     toBeKept.push_back(beam);
-  //   } else {
-  //     toBeErased.push_back(beam);
-  //   }
-  // } // ii
-
-  // erase beams
-  
-  // for (size_t ii = 0; ii < toBeErased.size(); ii++) {
-  //   Beam::deleteIfUnused(toBeErased[ii]);
-  // }
-  // _beams.clear();
-  // _beams = toBeKept;
-  
-  // set plot start time on remaining beams
-  
-  // for (size_t ii = 0; ii < _beams.size(); ii++) {
-  //   _beams[ii]->resetPlotStartTime(_plotStartTime);
-  // }
-
-  // re-render
-
-  _refresh();
-
-}
-
 /////////////////////////////////////////////////////////////	
 // Title
     
@@ -1383,6 +1278,9 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
 
 }
 
+//////////////////////////////////////////////////////////
+// create and show context menu
+
 void SpectraWidget::showContextMenu(const QPoint &pos) 
 {
 
@@ -1390,108 +1288,110 @@ void SpectraWidget::showContextMenu(const QPoint &pos)
                       _contextMenuPanelType,
                       _contextMenuPanelId);
 
-  // if (_contextMenuPanelType == PANEL_ASCOPE) {
-  //   cerr << "In ASCOPE, id: " << _contextMenuPanelId << endl;
-  // } else if (_contextMenuPanelType == PANEL_SPECTRA) {
-  //   cerr << "In SPECTRA, id: " << _contextMenuPanelId << endl;
-  // } else {
-  //   cerr << "In title" << endl;
-  // }
-
   if (_contextMenuPanelType == PANEL_ASCOPE) {
-
-    QMenu contextMenu("AscopeMenu", this);
-
-    QAction setToDbz("Set to DBZ", this);
-    connect(&setToDbz, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToDbz()));
-    contextMenu.addAction(&setToDbz);
-  
-    QAction setToVel("Set to VEL", this);
-    connect(&setToVel, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToVel()));
-    contextMenu.addAction(&setToVel);
-  
-    QAction setToWidth("Set to WIDTH", this);
-    connect(&setToWidth, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToWidth()));
-    contextMenu.addAction(&setToWidth);
-  
-    QAction setToNcp("Set to NCP", this);
-    connect(&setToNcp, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToNcp()));
-    contextMenu.addAction(&setToNcp);
-  
-    QAction setToSnr("Set to SNR", this);
-    connect(&setToSnr, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToSnr()));
-    contextMenu.addAction(&setToSnr);
-  
-    QAction setToDbm("Set to DBM", this);
-    connect(&setToDbm, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToDbm()));
-    contextMenu.addAction(&setToDbm);
-  
-    QAction setToZdr("Set to ZDR", this);
-    connect(&setToZdr, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToZdr()));
-    contextMenu.addAction(&setToZdr);
-  
-    QAction setToLdr("Set to LDR", this);
-    connect(&setToLdr, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToLdr()));
-    contextMenu.addAction(&setToLdr);
-  
-    QAction setToRhohv("Set to RHOHV", this);
-    connect(&setToRhohv, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToRhohv()));
-    contextMenu.addAction(&setToRhohv);
-  
-    QAction setToPhidp("Set to PHIDP", this);
-    connect(&setToPhidp, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToPhidp()));
-    contextMenu.addAction(&setToPhidp);
-  
-    QAction setToKdp("Set to KDP", this);
-    connect(&setToKdp, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToKdp()));
-    contextMenu.addAction(&setToKdp);
-
-    QAction unzoom("Unzoom", this);
-    connect(&unzoom, SIGNAL(triggered()), this,
-            SLOT(ascopeUnzoom()));
-    if (_ascopes[_contextMenuPanelId]->getIsZoomed()) {
-      contextMenu.addAction(&unzoom);
-    }
-      
-    QAction xGridLinesOn("X grid lines on", this);
-    connect(&xGridLinesOn, SIGNAL(triggered()), this,
-            SLOT(ascopeSetXGridLinesOn()));
-    QAction xGridLinesOff("X grid lines off", this);
-    connect(&xGridLinesOff, SIGNAL(triggered()), this,
-            SLOT(ascopeSetXGridLinesOff()));
-    if (_ascopes[_contextMenuPanelId]->getXGridLinesOn()) {
-      contextMenu.addAction(&xGridLinesOff);
-    } else {
-      contextMenu.addAction(&xGridLinesOn);
-    }
-      
-    QAction yGridLinesOn("Y grid lines on", this);
-    connect(&yGridLinesOn, SIGNAL(triggered()), this,
-            SLOT(ascopeSetYGridLinesOn()));
-    QAction yGridLinesOff("Y grid lines off", this);
-    connect(&yGridLinesOff, SIGNAL(triggered()), this,
-            SLOT(ascopeSetYGridLinesOff()));
-    if (_ascopes[_contextMenuPanelId]->getYGridLinesOn()) {
-      contextMenu.addAction(&yGridLinesOff);
-    } else {
-      contextMenu.addAction(&yGridLinesOn);
-    }
-      
-    contextMenu.exec(this->mapToGlobal(pos));
-
+    _createAscopeContextMenu(pos);
+  } else if (_contextMenuPanelType == PANEL_IQPLOT) {
+    _createIqPlotContextMenu(pos);
   }
 
+}
+
+//////////////////////////////////////////////////////////
+// context menu for Ascope
+
+void SpectraWidget::_createAscopeContextMenu(const QPoint &pos) 
+{
+
+  QMenu contextMenu("AscopeMenu", this);
+  
+  QAction setToDbz("Set to DBZ", this);
+  connect(&setToDbz, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToDbz()));
+  contextMenu.addAction(&setToDbz);
+  
+  QAction setToVel("Set to VEL", this);
+  connect(&setToVel, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToVel()));
+  contextMenu.addAction(&setToVel);
+  
+  QAction setToWidth("Set to WIDTH", this);
+  connect(&setToWidth, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToWidth()));
+  contextMenu.addAction(&setToWidth);
+  
+  QAction setToNcp("Set to NCP", this);
+  connect(&setToNcp, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToNcp()));
+  contextMenu.addAction(&setToNcp);
+  
+  QAction setToSnr("Set to SNR", this);
+  connect(&setToSnr, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToSnr()));
+  contextMenu.addAction(&setToSnr);
+  
+  QAction setToDbm("Set to DBM", this);
+  connect(&setToDbm, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToDbm()));
+  contextMenu.addAction(&setToDbm);
+  
+  QAction setToZdr("Set to ZDR", this);
+  connect(&setToZdr, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToZdr()));
+  contextMenu.addAction(&setToZdr);
+  
+  QAction setToLdr("Set to LDR", this);
+  connect(&setToLdr, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToLdr()));
+  contextMenu.addAction(&setToLdr);
+  
+  QAction setToRhohv("Set to RHOHV", this);
+  connect(&setToRhohv, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToRhohv()));
+  contextMenu.addAction(&setToRhohv);
+  
+  QAction setToPhidp("Set to PHIDP", this);
+  connect(&setToPhidp, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToPhidp()));
+  contextMenu.addAction(&setToPhidp);
+  
+  QAction setToKdp("Set to KDP", this);
+  connect(&setToKdp, SIGNAL(triggered()), this,
+          SLOT(ascopeSetFieldToKdp()));
+  contextMenu.addAction(&setToKdp);
+  
+  QAction unzoom("Unzoom", this);
+  connect(&unzoom, SIGNAL(triggered()), this,
+          SLOT(ascopeUnzoom()));
+  if (_ascopes[_contextMenuPanelId]->getIsZoomed()) {
+    contextMenu.addAction(&unzoom);
+  }
+  
+  QAction xGridLinesOn("X grid lines on", this);
+  connect(&xGridLinesOn, SIGNAL(triggered()), this,
+          SLOT(ascopeSetXGridLinesOn()));
+  QAction xGridLinesOff("X grid lines off", this);
+  connect(&xGridLinesOff, SIGNAL(triggered()), this,
+          SLOT(ascopeSetXGridLinesOff()));
+  if (_ascopes[_contextMenuPanelId]->getXGridLinesOn()) {
+    contextMenu.addAction(&xGridLinesOff);
+  } else {
+    contextMenu.addAction(&xGridLinesOn);
+  }
+  
+  QAction yGridLinesOn("Y grid lines on", this);
+  connect(&yGridLinesOn, SIGNAL(triggered()), this,
+          SLOT(ascopeSetYGridLinesOn()));
+  QAction yGridLinesOff("Y grid lines off", this);
+  connect(&yGridLinesOff, SIGNAL(triggered()), this,
+          SLOT(ascopeSetYGridLinesOff()));
+  if (_ascopes[_contextMenuPanelId]->getYGridLinesOn()) {
+    contextMenu.addAction(&yGridLinesOff);
+  } else {
+    contextMenu.addAction(&yGridLinesOn);
+  }
+  
+  contextMenu.exec(this->mapToGlobal(pos));
+  
 }
 
 void SpectraWidget::ascopeSetFieldToDbz()
@@ -1560,6 +1460,9 @@ void SpectraWidget::ascopeSetFieldToKdp()
   _configureAscope(_contextMenuPanelId);
 }
 
+//////////////////////////////////////////////////////////////
+// ascope actions
+
 void SpectraWidget::ascopeUnzoom()
 {
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
@@ -1585,5 +1488,94 @@ void SpectraWidget::ascopeSetYGridLinesOn()
 void SpectraWidget::ascopeSetYGridLinesOff()
 {
   _ascopes[_contextMenuPanelId]->setYGridLinesOn(false);
+}
+
+//////////////////////////////////////////////////////////
+// context menu for IqPlot
+
+void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos) 
+{
+
+  QMenu contextMenu("IqPlotMenu", this);
+  
+  QAction selectSpectrumPower("Select Spectrum Power", this);
+  connect(&selectSpectrumPower, SIGNAL(triggered()), this,
+          SLOT(iqPlotSelectSpectrumPower()));
+  contextMenu.addAction(&selectSpectrumPower);
+  
+  QAction selectSpectrumPhase("Select Spectrum Phase", this);
+  connect(&selectSpectrumPhase, SIGNAL(triggered()), this,
+          SLOT(iqPlotSelectSpectrumPhase()));
+  contextMenu.addAction(&selectSpectrumPhase);
+  
+  QAction selectTsPower("Select TS Power", this);
+  connect(&selectTsPower, SIGNAL(triggered()), this,
+          SLOT(iqPlotSelectTsPower()));
+  contextMenu.addAction(&selectTsPower);
+  
+  QAction selectTsPhase("Select TS Phase", this);
+  connect(&selectTsPhase, SIGNAL(triggered()), this,
+          SLOT(iqPlotSelectTsPhase()));
+  contextMenu.addAction(&selectTsPhase);
+  
+  QAction selectIandQ("Select I and Q", this);
+  connect(&selectIandQ, SIGNAL(triggered()), this,
+          SLOT(iqPlotSelectIandQ()));
+  contextMenu.addAction(&selectIandQ);
+  
+  QAction selectIvsQ("Select I vs Q", this);
+  connect(&selectIvsQ, SIGNAL(triggered()), this,
+          SLOT(iqPlotSelectIvsQ()));
+  contextMenu.addAction(&selectIvsQ);
+  
+  QAction selectPhasor("SelectPhasor", this);
+  connect(&selectPhasor, SIGNAL(triggered()), this,
+          SLOT(iqPlotSelectPhasor()));
+  contextMenu.addAction(&selectPhasor);
+  
+  contextMenu.exec(this->mapToGlobal(pos));
+  
+}
+
+void SpectraWidget::iqPlotSelectSpectrumPower()
+{
+  _iqPlots[_contextMenuPanelId]->setPlotType(Params::SPECTRUM_POWER);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSelectSpectrumPhase()
+{
+  _iqPlots[_contextMenuPanelId]->setPlotType(Params::SPECTRUM_PHASE);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSelectTsPower()
+{
+  _iqPlots[_contextMenuPanelId]->setPlotType(Params::TS_POWER);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSelectTsPhase()
+{
+  _iqPlots[_contextMenuPanelId]->setPlotType(Params::TS_PHASE);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSelectIandQ()
+{
+  _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_AND_Q);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSelectIvsQ()
+{
+  _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_VS_Q);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSelectPhasor()
+{
+  _iqPlots[_contextMenuPanelId]->setPlotType(Params::PHASOR);
+  _configureIqPlot(_contextMenuPanelId);
 }
 

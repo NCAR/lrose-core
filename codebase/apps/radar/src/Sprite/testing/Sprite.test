@@ -170,8 +170,8 @@ input_tcp_port = 11000;
 // Type: string
 //
 
-// archive_data_dir = "$(HOME)/data/bomb_snowstorm/time_series";
-archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
+archive_data_dir = "$(HOME)/data/bomb_snowstorm/time_series";
+// archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
 
 ///////////// archive_start_time //////////////////////
 //
