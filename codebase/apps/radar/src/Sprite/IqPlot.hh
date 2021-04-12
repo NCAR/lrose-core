@@ -114,9 +114,10 @@ public:
   void setZoomLimitsY(int yMin,
                       int yMax);
 
-  // set the moment type
+  // set the plot type and channel
 
   void setPlotType(Params::iqplot_type_t val) { _plotType = val; }
+  void setRxChannel(Params::rx_channel_t val) { _rxChannel = val; }
   
   // zooming
 
@@ -156,9 +157,10 @@ public:
   // get the moment type
 
   const Params::iqplot_type_t getPlotType() const { return _plotType; }
-  static string getName(Params::iqplot_type_t ptype);
-  static string getXUnits(Params::iqplot_type_t ptype);
-  static string getYUnits(Params::iqplot_type_t ptype);
+  const Params::rx_channel_t getRxChannelType() const { return _rxChannel; }
+  string getName();
+  string getXUnits();
+  string getYUnits();
   
 protected:
 
@@ -170,9 +172,10 @@ protected:
   const Params &_params;
   int _id;
 
-  // moment type active for plotting
+  // plot type and channel
 
   Params::iqplot_type_t _plotType;
+  Params::rx_channel_t _rxChannel;
   
   // unzoomed world
 

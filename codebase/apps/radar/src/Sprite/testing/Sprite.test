@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for Sprite
+ * TDRP params for ./Sprite
  **********************************************************************/
 
 //======================================================================
@@ -109,7 +109,6 @@ check_alloc = FALSE;
 //     FOLLOW_DISPLAY_MODE
 //
 
-// input_mode = ARCHIVE_TIME_MODE;
 input_mode = FOLLOW_DISPLAY_MODE;
 
 ///////////// input_fmq_url ///////////////////////////
@@ -171,7 +170,6 @@ input_tcp_port = 11000;
 //
 
 archive_data_dir = "$(HOME)/data/bomb_snowstorm/time_series";
-// archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
 
 ///////////// archive_start_time //////////////////////
 //
@@ -184,7 +182,6 @@ archive_data_dir = "$(HOME)/data/bomb_snowstorm/time_series";
 //
 
 archive_start_time = "2019 03 13 22 06 25";
-// archive_start_time = "2019 08 25 00 06 00";
 
 ///////////// archive_time_span_secs //////////////////
 //
@@ -502,9 +499,9 @@ iqplots_n_rows = 2;
 
 iqplots_n_columns = 4;
 
-///////////// iqplot_types ////////////////////////////
+///////////// iqplots /////////////////////////////////
 //
-// Array of types of IQ plots for each sub panel.
+// Details of IQ plots for each sub panel.
 //
 // SPECTRUM_POWER: power spectrum, log.
 // SPECTRUM_PHASE: phase in the spectral domain.
@@ -515,27 +512,68 @@ iqplots_n_columns = 4;
 // PHASE: sum of I vs sum of Q. I on x axis.
 //
 //
-// Type: enum
-// Options:
-//     SPECTRUM_POWER
-//     SPECTRUM_PHASE
-//     TS_POWER
-//     TS_PHASE
-//     I_AND_Q
-//     I_VS_Q
-//     PHASOR
+// Type: struct
+//   typedef struct {
+//      iqplot_type_t plot_type;
+//        Options:
+//          SPECTRUM_POWER
+//          SPECTRUM_PHASE
+//          TS_POWER
+//          TS_PHASE
+//          I_AND_Q
+//          I_VS_Q
+//          PHASOR
+//      rx_channel_t rx_channel;
+//        Options:
+//          CHANNEL_HC
+//          CHANNEL_VC
+//          CHANNEL_HX
+//          CHANNEL_VX
+//   }
+//
 // 1D array - variable length.
 //
 
-iqplot_types = {
- SPECTRUM_POWER,
- SPECTRUM_PHASE,
- TS_POWER,
- TS_PHASE,
- I_AND_Q,
- I_VS_Q,
- PHASOR,
- SPECTRUM_POWER
+iqplots = {
+  {
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_HC
+  }
+  ,
+  {
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_VC
+  }
+  ,
+  {
+    plot_type = SPECTRUM_PHASE,
+    rx_channel = CHANNEL_HC
+  }
+  ,
+  {
+    plot_type = TS_POWER,
+    rx_channel = CHANNEL_HC
+  }
+  ,
+  {
+    plot_type = TS_PHASE,
+    rx_channel = CHANNEL_HC
+  }
+  ,
+  {
+    plot_type = I_AND_Q,
+    rx_channel = CHANNEL_HC
+  }
+  ,
+  {
+    plot_type = I_VS_Q,
+    rx_channel = CHANNEL_HC
+  }
+  ,
+  {
+    plot_type = PHASOR,
+    rx_channel = CHANNEL_HC
+  }
 };
 
 ///////////// iqplot_top_margin ///////////////////////
@@ -1969,4 +2007,19 @@ click_point_fmq_url = "/tmp/fmq/click_point";
 //
 
 click_point_search_angle_error = 10;
+
+///////////// click_point_delta_azimuth_deg ///////////
+//
+// Change in azimuth when clicking left or right keys in follow mode 
+//   (deg).
+//
+// In display follow mode, you can navigate left and right in azimuth 
+//   using the arrow keys. This is the requested change in azimuth when 
+//   navigating.
+//
+//
+// Type: double
+//
+
+click_point_delta_azimuth_deg = 1;
 

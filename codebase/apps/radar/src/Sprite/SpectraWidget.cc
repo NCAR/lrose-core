@@ -1173,8 +1173,10 @@ void SpectraWidget::_createIqPlot(int id)
 {
   
   IqPlot *iqplot = new IqPlot(this, _params, id);
-  Params::iqplot_type_t plotType = _params._iqplot_types[id];
+  Params::iqplot_type_t plotType = _params._iqplots[id].plot_type;
   iqplot->setPlotType(plotType);
+  Params::rx_channel_t rxChannel = _params._iqplots[id].rx_channel;
+  iqplot->setRxChannel(rxChannel);
 
   WorldPlot &iqplotWorld = iqplot->getFullWorld();
   
@@ -1496,42 +1498,76 @@ void SpectraWidget::ascopeSetYGridLinesOff()
 void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos) 
 {
 
+  // context menu
+  
   QMenu contextMenu("IqPlotMenu", this);
+
+  // select plot type
   
-  QAction selectSpectrumPower("Select Spectrum Power", this);
-  connect(&selectSpectrumPower, SIGNAL(triggered()), this,
-          SLOT(iqPlotSelectSpectrumPower()));
-  contextMenu.addAction(&selectSpectrumPower);
+  QMenu selectTypeMenu("Select Plot Type", &contextMenu);
+  contextMenu.addMenu(&selectTypeMenu);
   
-  QAction selectSpectrumPhase("Select Spectrum Phase", this);
-  connect(&selectSpectrumPhase, SIGNAL(triggered()), this,
-          SLOT(iqPlotSelectSpectrumPhase()));
-  contextMenu.addAction(&selectSpectrumPhase);
+  QAction selectSpectrumPower("Select Spectrum Power", &contextMenu);
+  connect(&selectSpectrumPower, SIGNAL(triggered()),
+          this, SLOT(iqPlotSelectSpectrumPower()));
+  selectTypeMenu.addAction(&selectSpectrumPower);
   
-  QAction selectTsPower("Select TS Power", this);
-  connect(&selectTsPower, SIGNAL(triggered()), this,
-          SLOT(iqPlotSelectTsPower()));
-  contextMenu.addAction(&selectTsPower);
+  QAction selectSpectrumPhase("Select Spectrum Phase", &contextMenu);
+  connect(&selectSpectrumPhase, SIGNAL(triggered()),
+          this, SLOT(iqPlotSelectSpectrumPhase()));
+  selectTypeMenu.addAction(&selectSpectrumPhase);
   
-  QAction selectTsPhase("Select TS Phase", this);
-  connect(&selectTsPhase, SIGNAL(triggered()), this,
-          SLOT(iqPlotSelectTsPhase()));
-  contextMenu.addAction(&selectTsPhase);
+  QAction selectTsPower("Select TS Power", &contextMenu);
+  connect(&selectTsPower, SIGNAL(triggered()),
+          this, SLOT(iqPlotSelectTsPower()));
+  selectTypeMenu.addAction(&selectTsPower);
   
-  QAction selectIandQ("Select I and Q", this);
-  connect(&selectIandQ, SIGNAL(triggered()), this,
-          SLOT(iqPlotSelectIandQ()));
-  contextMenu.addAction(&selectIandQ);
+  QAction selectTsPhase("Select TS Phase", &contextMenu);
+  connect(&selectTsPhase, SIGNAL(triggered()),
+          this, SLOT(iqPlotSelectTsPhase()));
+  selectTypeMenu.addAction(&selectTsPhase);
   
-  QAction selectIvsQ("Select I vs Q", this);
-  connect(&selectIvsQ, SIGNAL(triggered()), this,
-          SLOT(iqPlotSelectIvsQ()));
-  contextMenu.addAction(&selectIvsQ);
+  QAction selectIandQ("Select I and Q", &contextMenu);
+  connect(&selectIandQ, SIGNAL(triggered()),
+          this, SLOT(iqPlotSelectIandQ()));
+  selectTypeMenu.addAction(&selectIandQ);
   
-  QAction selectPhasor("SelectPhasor", this);
-  connect(&selectPhasor, SIGNAL(triggered()), this,
-          SLOT(iqPlotSelectPhasor()));
-  contextMenu.addAction(&selectPhasor);
+  QAction selectIvsQ("Select I vs Q", &contextMenu);
+  connect(&selectIvsQ, SIGNAL(triggered()),
+          this, SLOT(iqPlotSelectIvsQ()));
+  selectTypeMenu.addAction(&selectIvsQ);
+  
+  QAction selectPhasor("SelectPhasor", &contextMenu);
+  connect(&selectPhasor, SIGNAL(triggered()),
+          this, SLOT(iqPlotSelectPhasor()));
+  selectTypeMenu.addAction(&selectPhasor);
+
+  // set channel
+  
+  QMenu setChannelMenu("Set Channel", &contextMenu);
+  contextMenu.addMenu(&setChannelMenu);
+
+  QAction setChannelHc("Set channel HC", &contextMenu);
+  connect(&setChannelHc, SIGNAL(triggered()),
+          this, SLOT(iqPlotSetChannelHc()));
+  setChannelMenu.addAction(&setChannelHc);
+
+  QAction setChannelVc("Set channel VC", &contextMenu);
+  connect(&setChannelVc, SIGNAL(triggered()),
+          this, SLOT(iqPlotSetChannelVc()));
+  setChannelMenu.addAction(&setChannelVc);
+
+  QAction setChannelHx("Set channel HX", &contextMenu);
+  connect(&setChannelHx, SIGNAL(triggered()),
+          this, SLOT(iqPlotSetChannelHx()));
+  setChannelMenu.addAction(&setChannelHx);
+
+  QAction setChannelVx("Set channel VX", &contextMenu);
+  connect(&setChannelVx, SIGNAL(triggered()),
+          this, SLOT(iqPlotSetChannelVx()));
+  setChannelMenu.addAction(&setChannelVx);
+
+  // show the context menu
   
   contextMenu.exec(this->mapToGlobal(pos));
   
@@ -1576,6 +1612,30 @@ void SpectraWidget::iqPlotSelectIvsQ()
 void SpectraWidget::iqPlotSelectPhasor()
 {
   _iqPlots[_contextMenuPanelId]->setPlotType(Params::PHASOR);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSetChannelHc()
+{
+  _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_HC);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSetChannelVc()
+{
+  _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_VC);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSetChannelHx()
+{
+  _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_HX);
+  _configureIqPlot(_contextMenuPanelId);
+}
+
+void SpectraWidget::iqPlotSetChannelVx()
+{
+  _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_VX);
   _configureIqPlot(_contextMenuPanelId);
 }
 

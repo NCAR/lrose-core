@@ -1177,48 +1177,83 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'iqplot_types'
-    // ctype is '_iqplot_type_t'
+    // Parameter 'iqplots'
+    // ctype is '_iqplot_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("iqplot_types");
-    tt->descr = tdrpStrDup("Array of types of IQ plots for each sub panel.");
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("iqplots");
+    tt->descr = tdrpStrDup("Details of IQ plots for each sub panel.");
     tt->help = tdrpStrDup("SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_AND_Q: time series of I and Q.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.");
-    tt->array_offset = (char *) &_iqplot_types - &_start_;
-    tt->array_n_offset = (char *) &iqplot_types_n - &_start_;
+    tt->array_offset = (char *) &_iqplots - &_start_;
+    tt->array_n_offset = (char *) &iqplots_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(iqplot_type_t);
+    tt->array_elem_size = sizeof(iqplot_t);
     tt->array_n = 8;
-    tt->enum_def.name = tdrpStrDup("iqplot_type_t");
-    tt->enum_def.nfields = 7;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("SPECTRUM_POWER");
-      tt->enum_def.fields[0].val = SPECTRUM_POWER;
-      tt->enum_def.fields[1].name = tdrpStrDup("SPECTRUM_PHASE");
-      tt->enum_def.fields[1].val = SPECTRUM_PHASE;
-      tt->enum_def.fields[2].name = tdrpStrDup("TS_POWER");
-      tt->enum_def.fields[2].val = TS_POWER;
-      tt->enum_def.fields[3].name = tdrpStrDup("TS_PHASE");
-      tt->enum_def.fields[3].val = TS_PHASE;
-      tt->enum_def.fields[4].name = tdrpStrDup("I_AND_Q");
-      tt->enum_def.fields[4].val = I_AND_Q;
-      tt->enum_def.fields[5].name = tdrpStrDup("I_VS_Q");
-      tt->enum_def.fields[5].val = I_VS_Q;
-      tt->enum_def.fields[6].name = tdrpStrDup("PHASOR");
-      tt->enum_def.fields[6].val = PHASOR;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].e = SPECTRUM_POWER;
-      tt->array_vals[1].e = SPECTRUM_PHASE;
-      tt->array_vals[2].e = TS_POWER;
-      tt->array_vals[3].e = TS_PHASE;
-      tt->array_vals[4].e = I_AND_Q;
-      tt->array_vals[5].e = I_VS_Q;
-      tt->array_vals[6].e = PHASOR;
-      tt->array_vals[7].e = SPECTRUM_POWER;
+    tt->struct_def.name = tdrpStrDup("iqplot_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("iqplot_type_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("plot_type");
+      tt->struct_def.fields[0].ptype = ENUM_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_iqplots->plot_type - (char *) _iqplots;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("iqplot_type_t");
+        tt->struct_def.fields[0].enum_def.nfields = 7;
+        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SPECTRUM_POWER");
+        tt->struct_def.fields[0].enum_def.fields[0].val = SPECTRUM_POWER;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("SPECTRUM_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[1].val = SPECTRUM_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("TS_POWER");
+        tt->struct_def.fields[0].enum_def.fields[2].val = TS_POWER;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("TS_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[3].val = TS_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("I_AND_Q");
+        tt->struct_def.fields[0].enum_def.fields[4].val = I_AND_Q;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("I_VS_Q");
+        tt->struct_def.fields[0].enum_def.fields[5].val = I_VS_Q;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("PHASOR");
+        tt->struct_def.fields[0].enum_def.fields[6].val = PHASOR;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("rx_channel_t");
+      tt->struct_def.fields[1].fname = tdrpStrDup("rx_channel");
+      tt->struct_def.fields[1].ptype = ENUM_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_iqplots->rx_channel - (char *) _iqplots;
+        tt->struct_def.fields[1].enum_def.name = tdrpStrDup("rx_channel_t");
+        tt->struct_def.fields[1].enum_def.nfields = 4;
+        tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("CHANNEL_HC");
+        tt->struct_def.fields[1].enum_def.fields[0].val = CHANNEL_HC;
+        tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("CHANNEL_VC");
+        tt->struct_def.fields[1].enum_def.fields[1].val = CHANNEL_VC;
+        tt->struct_def.fields[1].enum_def.fields[2].name = tdrpStrDup("CHANNEL_HX");
+        tt->struct_def.fields[1].enum_def.fields[2].val = CHANNEL_HX;
+        tt->struct_def.fields[1].enum_def.fields[3].name = tdrpStrDup("CHANNEL_VX");
+        tt->struct_def.fields[1].enum_def.fields[3].val = CHANNEL_VX;
+    tt->n_struct_vals = 16;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].e = SPECTRUM_POWER;
+      tt->struct_vals[1].e = CHANNEL_HC;
+      tt->struct_vals[2].e = SPECTRUM_POWER;
+      tt->struct_vals[3].e = CHANNEL_VC;
+      tt->struct_vals[4].e = SPECTRUM_PHASE;
+      tt->struct_vals[5].e = CHANNEL_HC;
+      tt->struct_vals[6].e = TS_POWER;
+      tt->struct_vals[7].e = CHANNEL_HC;
+      tt->struct_vals[8].e = TS_PHASE;
+      tt->struct_vals[9].e = CHANNEL_HC;
+      tt->struct_vals[10].e = I_AND_Q;
+      tt->struct_vals[11].e = CHANNEL_HC;
+      tt->struct_vals[12].e = I_VS_Q;
+      tt->struct_vals[13].e = CHANNEL_HC;
+      tt->struct_vals[14].e = PHASOR;
+      tt->struct_vals[15].e = CHANNEL_HC;
     tt++;
     
     // Parameter 'iqplot_top_margin'

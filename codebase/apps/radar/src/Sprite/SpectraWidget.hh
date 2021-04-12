@@ -245,6 +245,11 @@ class DLL_EXPORT SpectraWidget : public QWidget
   void iqPlotSelectIvsQ();
   void iqPlotSelectPhasor();
 
+  void iqPlotSetChannelHc();
+  void iqPlotSetChannelVc();
+  void iqPlotSetChannelHx();
+  void iqPlotSetChannelVx();
+
  protected:
 
   ///////////////////////

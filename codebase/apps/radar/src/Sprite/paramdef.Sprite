@@ -299,11 +299,32 @@ typedef enum {
   PHASOR
 } iqplot_type_t;
 
-paramdef enum iqplot_type_t {
-  p_default = { SPECTRUM_POWER, SPECTRUM_PHASE, TS_POWER, TS_PHASE, I_AND_Q, I_VS_Q, PHASOR, SPECTRUM_POWER };
-  p_descr = "Array of types of IQ plots for each sub panel.";
+typedef enum {
+  CHANNEL_HC,
+  CHANNEL_VC,
+  CHANNEL_HX,
+  CHANNEL_VX
+} rx_channel_t;
+
+typedef struct {
+  iqplot_type_t plot_type;
+  rx_channel_t rx_channel;
+} iqplot_t;
+
+paramdef struct iqplot_t {
+  p_default = {
+   { SPECTRUM_POWER, CHANNEL_HC },
+   { SPECTRUM_POWER, CHANNEL_VC },
+   { SPECTRUM_PHASE, CHANNEL_HC },
+   { TS_POWER, CHANNEL_HC },
+   { TS_PHASE, CHANNEL_HC },
+   { I_AND_Q, CHANNEL_HC },
+   { I_VS_Q, CHANNEL_HC },
+   { PHASOR, CHANNEL_HC }
+  };
+  p_descr = "Details of IQ plots for each sub panel.";
   p_help = "SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_AND_Q: time series of I and Q.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.";
-} iqplot_types[];
+} iqplots[];
 
 paramdef int {
   p_default = 0;

@@ -93,6 +93,13 @@ public:
   } iqplot_type_t;
 
   typedef enum {
+    CHANNEL_HC = 0,
+    CHANNEL_VC = 1,
+    CHANNEL_HX = 2,
+    CHANNEL_VX = 3
+  } rx_channel_t;
+
+  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
@@ -167,6 +174,11 @@ public:
     tdrp_bool_t sun_elevation;
     tdrp_bool_t sun_azimuth;
   } show_status_t;
+
+  typedef struct {
+    iqplot_type_t plot_type;
+    rx_channel_t rx_channel;
+  } iqplot_t;
 
   ///////////////////////////
   // Member functions
@@ -526,8 +538,8 @@ public:
 
   int iqplots_n_columns;
 
-  iqplot_type_t *_iqplot_types;
-  int iqplot_types_n;
+  iqplot_t *_iqplots;
+  int iqplots_n;
 
   int iqplot_top_margin;
 

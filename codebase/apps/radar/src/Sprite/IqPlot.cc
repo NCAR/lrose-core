@@ -235,7 +235,24 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   
   TaArray<RadarComplex_t> iqWindowed_;
   RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  RadarMoments::applyWindow(gateData->iqhcOrig, windowCoeff, iqWindowed, nSamples);
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      RadarMoments::applyWindow(gateData->iqhcOrig, windowCoeff,
+                                iqWindowed, nSamples);
+      break;
+    case Params::CHANNEL_VC:
+      RadarMoments::applyWindow(gateData->iqvcOrig, windowCoeff,
+                                iqWindowed, nSamples);
+      break;
+    case Params::CHANNEL_HX:
+      RadarMoments::applyWindow(gateData->iqhxOrig, windowCoeff,
+                                iqWindowed, nSamples);
+      break;
+    case Params::CHANNEL_VX:
+      RadarMoments::applyWindow(gateData->iqvxOrig, windowCoeff,
+                                iqWindowed, nSamples);
+      break;
+  }
   
   TaArray<RadarComplex_t> powerSpec_;
   RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
@@ -291,9 +308,6 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   double dbz = fields[gateNum].dbz;
   double vel = fields[gateNum].vel;
 
-  // double power = RadarComplex::meanPower(gateData->iqhcOrig, nSamples);
-  // double dbm = 10.0 * log10(power);
-
   char text[1024];
   snprintf(text, 1024, "Dbm: %.2f", dbm);
   vector<string> legends;
@@ -311,7 +325,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  _zoomWorld.drawTitleTopCenter(painter, getName());
   painter.restore();
 
 }
@@ -365,7 +379,24 @@ void IqPlot::_plotSpectrumPhase(QPainter &painter,
   
   TaArray<RadarComplex_t> iqWindowed_;
   RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  RadarMoments::applyWindow(gateData->iqhcOrig, windowCoeff, iqWindowed, nSamples);
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      RadarMoments::applyWindow(gateData->iqhcOrig, windowCoeff,
+                                iqWindowed, nSamples);
+      break;
+    case Params::CHANNEL_VC:
+      RadarMoments::applyWindow(gateData->iqvcOrig, windowCoeff,
+                                iqWindowed, nSamples);
+      break;
+    case Params::CHANNEL_HX:
+      RadarMoments::applyWindow(gateData->iqhxOrig, windowCoeff,
+                                iqWindowed, nSamples);
+      break;
+    case Params::CHANNEL_VX:
+      RadarMoments::applyWindow(gateData->iqvxOrig, windowCoeff,
+                                iqWindowed, nSamples);
+      break;
+  }
   
   TaArray<RadarComplex_t> spec_;
   RadarComplex_t *spec = spec_.alloc(nSamples);
@@ -415,7 +446,7 @@ void IqPlot::_plotSpectrumPhase(QPainter &painter,
   
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  _zoomWorld.drawTitleTopCenter(painter, getName());
   painter.restore();
 
 }
@@ -439,7 +470,21 @@ void IqPlot::_plotTsPower(QPainter &painter,
   double *powerDbm = powerDbm_.alloc(nSamples);
   double minDbm = 9999.0, maxDbm = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double power = RadarComplex::power(gateData->iqhcOrig[ii]);
+    double power = 1.0e-100;
+    switch (_rxChannel) {
+      case Params::CHANNEL_HC:
+        power = RadarComplex::power(gateData->iqhcOrig[ii]);
+        break;
+      case Params::CHANNEL_VC:
+        power = RadarComplex::power(gateData->iqvcOrig[ii]);
+        break;
+      case Params::CHANNEL_HX:
+        power = RadarComplex::power(gateData->iqhxOrig[ii]);
+        break;
+      case Params::CHANNEL_VX:
+        power = RadarComplex::power(gateData->iqvxOrig[ii]);
+        break;
+    }
     double dbm = 10.0 * log10(power);
     if (power <= 0) {
       dbm = -120.0;
@@ -488,7 +533,7 @@ void IqPlot::_plotTsPower(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  _zoomWorld.drawTitleTopCenter(painter, getName());
   painter.restore();
 
 }
@@ -512,8 +557,25 @@ void IqPlot::_plotTsPhase(QPainter &painter,
   double *phase = phase_.alloc(nSamples);
   double minVal = 9999.0, maxVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double phaseRad = atan2(gateData->iqhcOrig[ii].im,
-                            gateData->iqhcOrig[ii].re);
+    double phaseRad = 0.0;
+    switch (_rxChannel) {
+      case Params::CHANNEL_HC:
+        phaseRad = atan2(gateData->iqhcOrig[ii].im,
+                         gateData->iqhcOrig[ii].re);
+        break;
+      case Params::CHANNEL_VC:
+        phaseRad = atan2(gateData->iqvcOrig[ii].im,
+                         gateData->iqvcOrig[ii].re);
+        break;
+      case Params::CHANNEL_HX:
+        phaseRad = atan2(gateData->iqhxOrig[ii].im,
+                         gateData->iqhxOrig[ii].re);
+        break;
+      case Params::CHANNEL_VX:
+        phaseRad = atan2(gateData->iqvxOrig[ii].im,
+                         gateData->iqvxOrig[ii].re);
+        break;
+    }
     double phaseDeg = phaseRad * RAD_TO_DEG;
     phase[ii] = phaseDeg;
     minVal = min(phaseDeg, minVal);
@@ -549,7 +611,7 @@ void IqPlot::_plotTsPhase(QPainter &painter,
   
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  _zoomWorld.drawTitleTopCenter(painter, getName());
   painter.restore();
 
 }
@@ -575,8 +637,26 @@ void IqPlot::_plotIandQ(QPainter &painter,
   double minVal = 9999.0;
   double maxVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double iVal = gateData->iqhcOrig[ii].re;
-    double qVal = gateData->iqhcOrig[ii].im;
+    double iVal = 0.0;
+    double qVal = 0.0;
+    switch (_rxChannel) {
+      case Params::CHANNEL_HC:
+        iVal = gateData->iqhcOrig[ii].re;
+        qVal = gateData->iqhcOrig[ii].im;
+        break;
+      case Params::CHANNEL_VC:
+        iVal = gateData->iqvcOrig[ii].re;
+        qVal = gateData->iqvcOrig[ii].im;
+        break;
+      case Params::CHANNEL_HX:
+        iVal = gateData->iqhxOrig[ii].re;
+        qVal = gateData->iqhxOrig[ii].im;
+        break;
+      case Params::CHANNEL_VX:
+        iVal = gateData->iqvxOrig[ii].re;
+        qVal = gateData->iqvxOrig[ii].im;
+        break;
+    }
     qVals[ii] = iVal;
     iVals[ii] = qVal;
     minVal = min(iVal, minVal);
@@ -638,7 +718,7 @@ void IqPlot::_plotIandQ(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  _zoomWorld.drawTitleTopCenter(painter, getName());
   painter.restore();
 
 }
@@ -666,8 +746,26 @@ void IqPlot::_plotIvsQ(QPainter &painter,
   double minQVal = 9999.0;
   double maxQVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double iVal = gateData->iqhcOrig[ii].re;
-    double qVal = gateData->iqhcOrig[ii].im;
+    double iVal = 0.0;
+    double qVal = 0.0;
+    switch (_rxChannel) {
+      case Params::CHANNEL_HC:
+        iVal = gateData->iqhcOrig[ii].re;
+        qVal = gateData->iqhcOrig[ii].im;
+        break;
+      case Params::CHANNEL_VC:
+        iVal = gateData->iqvcOrig[ii].re;
+        qVal = gateData->iqvcOrig[ii].im;
+        break;
+      case Params::CHANNEL_HX:
+        iVal = gateData->iqhxOrig[ii].re;
+        qVal = gateData->iqhxOrig[ii].im;
+        break;
+      case Params::CHANNEL_VX:
+        iVal = gateData->iqvxOrig[ii].re;
+        qVal = gateData->iqvxOrig[ii].im;
+        break;
+    }
     iVals[ii] = iVal;
     qVals[ii] = qVal;
     minIVal = min(iVal, minIVal);
@@ -709,7 +807,7 @@ void IqPlot::_plotIvsQ(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  _zoomWorld.drawTitleTopCenter(painter, getName());
   painter.restore();
 
 }
@@ -739,8 +837,24 @@ void IqPlot::_plotPhasor(QPainter &painter,
   double iSum = 0.0;
   double qSum = 0.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    iSum += gateData->iqhcOrig[ii].re;
-    qSum += gateData->iqhcOrig[ii].im;
+    switch (_rxChannel) {
+      case Params::CHANNEL_HC:
+        iSum += gateData->iqhcOrig[ii].re;
+        qSum += gateData->iqhcOrig[ii].im;
+        break;
+      case Params::CHANNEL_VC:
+        iSum += gateData->iqvcOrig[ii].re;
+        qSum += gateData->iqvcOrig[ii].im;
+        break;
+      case Params::CHANNEL_HX:
+        iSum += gateData->iqhxOrig[ii].re;
+        qSum += gateData->iqhxOrig[ii].im;
+        break;
+      case Params::CHANNEL_VX:
+        iSum += gateData->iqvxOrig[ii].re;
+        qSum += gateData->iqvxOrig[ii].im;
+        break;
+    }
     iSums[ii] = iSum;
     qSums[ii] = qSum;
     minISum = min(iSum, minISum);
@@ -791,7 +905,7 @@ void IqPlot::_plotPhasor(QPainter &painter,
 
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  _zoomWorld.drawTitleTopCenter(painter, getName(_plotType));
+  _zoomWorld.drawTitleTopCenter(painter, getName());
   painter.restore();
 
 }
@@ -799,34 +913,62 @@ void IqPlot::_plotPhasor(QPainter &painter,
 //////////////////////////////////
 // get a string for the field name
 
-string IqPlot::getName(Params::iqplot_type_t ptype)
+string IqPlot::getName()
 {
-  switch (ptype) {
+
+  string ptypeStr;
+  switch (_plotType) {
     case Params::SPECTRUM_POWER:
-      return "SPECTRUM_POWER";
+      ptypeStr =  "SPECTRUM_POWER";
+      break;
     case Params::SPECTRUM_PHASE:
-      return "SPECTRUM_PHASE";
+      ptypeStr =  "SPECTRUM_PHASE";
+      break;
     case Params::TS_POWER:
-      return "TS_POWER";
+      ptypeStr =  "TS_POWER";
+      break;
     case Params::TS_PHASE:
-      return "TS_PHASE";
+      ptypeStr =  "TS_PHASE";
+      break;
     case Params::I_AND_Q:
-      return "I_AND_Q";
+      ptypeStr =  "I_AND_Q";
+      break;
     case Params::I_VS_Q:
-      return "I_VS_Q";
+      ptypeStr =  "I_VS_Q";
+      break;
     case Params::PHASOR:
-      return "PHASOR";
-    default:
-      return "UNKNOWN";
+      ptypeStr =  "PHASOR";
+      break;
   }
+  
+  string chanStr;
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      chanStr =  "HC";
+      break;
+    case Params::CHANNEL_VC:
+      chanStr =  "VC";
+      break;
+    case Params::CHANNEL_HX:
+      chanStr =  "HX";
+      break;
+    case Params::CHANNEL_VX:
+      chanStr =  "VX";
+      break;
+  }
+
+  string name = ptypeStr + " " + chanStr;
+
+  return name;
+
 }
 
 //////////////////////////////////
 // get a string for the X axis units
 
-string IqPlot::getXUnits(Params::iqplot_type_t ptype)
+string IqPlot::getXUnits()
 {
-  switch (ptype) {
+  switch (_plotType) {
     case Params::SPECTRUM_POWER:
       return "sample";
     case Params::SPECTRUM_PHASE:
@@ -849,9 +991,9 @@ string IqPlot::getXUnits(Params::iqplot_type_t ptype)
 //////////////////////////////////
 // get a string for the Y axis units
 
-string IqPlot::getYUnits(Params::iqplot_type_t ptype)
+string IqPlot::getYUnits()
 {
-  switch (ptype) {
+  switch (_plotType) {
     case Params::SPECTRUM_POWER:
       return "dbm";
     case Params::SPECTRUM_PHASE:
@@ -961,10 +1103,10 @@ void IqPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
   
   painter.setPen(_params.iqplot_axis_label_color);
 
-  _zoomWorld.drawAxisBottom(painter, getXUnits(_plotType),
+  _zoomWorld.drawAxisBottom(painter, getXUnits(),
                             true, true, true, _xGridLinesOn);
 
-  _zoomWorld.drawAxisLeft(painter, getYUnits(_plotType), 
+  _zoomWorld.drawAxisLeft(painter, getYUnits(), 
                           true, true, true, _yGridLinesOn);
 
   // _zoomWorld.drawYAxisLabelLeft(painter, "Range");
