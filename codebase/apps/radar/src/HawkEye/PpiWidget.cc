@@ -74,15 +74,15 @@ PpiWidget::PpiWidget(QWidget* parent,
   _meanElev = -9999.0;
   _sumElev = 0.0;
   _nRays = 0.0;
+  
+  _openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
+  _openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
+  _openingFileInfoLabel->setVisible(false);
 
-	_openingFileInfoLabel = new QLabel("Opening file, please wait...", parent);
-	_openingFileInfoLabel->setStyleSheet("QLabel { background-color : darkBlue; color : yellow; qproperty-alignment: AlignCenter; }");
-	_openingFileInfoLabel->setVisible(false);
-
-	//fires every 50ms. used for boundary editor to
-	// (1) detect shift key down (changes cursor)
-	// (2) get notified if user zooms in or out so the boundary can be rescaled
-	// Todo: investigate implementing a listener pattern instead
+  //fires every 50ms. used for boundary editor to
+  // (1) detect shift key down (changes cursor)
+  // (2) get notified if user zooms in or out so the boundary can be rescaled
+  // Todo: investigate implementing a listener pattern instead
   startTimer(50);
 }
 
@@ -355,7 +355,8 @@ void PpiWidget::configureRange(double max_range)
   if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
 
     _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
+                   leftMargin, rightMargin,
+                   topMargin, bottomMargin, colorScaleWidth,
                    -_maxRangeKm, 0.0,
                    _maxRangeKm, _maxRangeKm,
                    axisTickLen, nTicksIdeal, textMargin);
@@ -363,7 +364,8 @@ void PpiWidget::configureRange(double max_range)
   } else {
     
     _fullWorld.set(width(), height(),
-                   leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
+                   leftMargin, rightMargin,
+                   topMargin, bottomMargin, colorScaleWidth,
                    -_maxRangeKm, -_maxRangeKm,
                    _maxRangeKm, _maxRangeKm,
                    axisTickLen, nTicksIdeal, textMargin);
@@ -383,26 +385,34 @@ void PpiWidget::configureRange(double max_range)
   
 }
 
-// Used to notify BoundaryPointEditor if the user has zoomed in/out or is pressing the Shift key
+////////////////////////////////////////////////////////////////////////
+// Used to notify BoundaryPointEditor if the user has zoomed in/out
+// or is pressing the Shift key
 // Todo: investigate implementing a listener pattern instead
+
 void PpiWidget::timerEvent(QTimerEvent *event)
 {
-	bool doUpdate = false;
-	bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
-	if (isBoundaryEditorVisible)
-	{
-		double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
-		doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);   //user may have zoomed in or out, so update the polygon point boxes so they are the right size on screen
-	}
+  bool doUpdate = false;
+  bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
+  if (isBoundaryEditorVisible) {
+    double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
+    // user may have zoomed in or out, so update the polygon point boxes
+    // so they are the right size on screen
+    doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
+  }
   bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
-  bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
-  if ((isBoundaryEditorVisible && !isBoundaryFinished) || (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown))
+  bool isShiftKeyDown =
+    (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+  if ((isBoundaryEditorVisible && !isBoundaryFinished) ||
+      (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown)){
     this->setCursor(Qt::CrossCursor);
-  else
+  } else {
     this->setCursor(Qt::ArrowCursor);
-
-  if (doUpdate)  //only update if something has changed
-  	update();
+  }
+  
+  if (doUpdate) {  //only update if something has changed
+    update();
+  }
 }
 
 
@@ -426,47 +436,47 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
 
   // get click location in world coords
 
-  if (rgeom.width() <= 20)
-  {
-
-		// Emit a signal to indicate that the click location has changed
+  if (rgeom.width() <= 20) {
+    
+    // Emit a signal to indicate that the click location has changed
     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-
+    
     // If boundary editor active, then interpret boundary mouse release event
-    if (_manager._boundaryEditorDialog->isVisible())
-    {
-    	if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::polygon)
-    	{
-				if (!BoundaryPointEditor::Instance()->isAClosedPolygon())
-					BoundaryPointEditor::Instance()->addPoint(_worldReleaseX, _worldReleaseY);
-				else  //polygon finished, user may want to insert/delete a point
-					BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
+    BoundaryPointEditor *editor = BoundaryPointEditor::Instance(); 
+    if (_manager._boundaryEditorDialog->isVisible()) {
+      if (editor->getCurrentTool() == BoundaryToolType::polygon) {
+        if (!editor->isAClosedPolygon()) {
+          editor->addPoint(_worldReleaseX, _worldReleaseY);
+        } else { //polygon finished, user may want to insert/delete a point
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
     	}
-    	else if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::circle)
-    	{
-				if (BoundaryPointEditor::Instance()->isAClosedPolygon())
-					BoundaryPointEditor::Instance()->checkToAddOrDelPoint(_worldReleaseX, _worldReleaseY);
-				else
-					BoundaryPointEditor::Instance()->makeCircle(_worldReleaseX, _worldReleaseY, BoundaryPointEditor::Instance()->getCircleRadius());
+      } else if (editor->getCurrentTool() == BoundaryToolType::circle) {
+        if (editor->isAClosedPolygon()) {
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
+        } else {
+          editor->makeCircle(_worldReleaseX,
+                             _worldReleaseY,
+                             editor->getCircleRadius());
     	}
+      }
     }
 
     double x_km = _worldReleaseX;
     double y_km = _worldReleaseY;
     _pointClicked = true;
-
+    
     // get ray closest to click point
-
+    
     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-
+    
     // emit signal
 
     emit locationClicked(x_km, y_km, closestRay);
-  
-  }
-  else
-  {
+    
+  } else {
 
     // mouse moved more than 20 pixels, so a zoom occurred
     

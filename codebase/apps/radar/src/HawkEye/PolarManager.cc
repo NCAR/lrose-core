@@ -1758,7 +1758,6 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
   refreshBoundaries();
 }
 
-// PolarManager::colorMapRedefineReceived(string, ColorMap)
 // TODO: need to add the background changed, etc. 
 void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
 					    QColor gridColor,
@@ -1767,6 +1766,7 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
 					    QColor backgroundColor) {
 
   LOG(DEBUG) << "enter";
+
   // connect the new color map with the field                                                       
   // find the fieldName in the list of FieldDisplays                                                
   bool found = false;
@@ -1882,8 +1882,7 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   int gateNum = (int) 
     ((rangeKm - ray->getStartRangeKm()) / ray->getGateSpacingKm() + 0.5);
 
-  if (gateNum < 0 || gateNum >= (int) ray->getNGates())
-  {
+  if (gateNum < 0 || gateNum >= (int) ray->getNGates()) {
     //user clicked outside of ray
     return;
   }
@@ -1898,20 +1897,6 @@ void PolarManager::_locationClicked(double xkm, double ykm,
       ray->print(cerr);
     }
   }
-
-  //**** testing ****
-  //  QToolTip::showText(this->mapToGlobal(QPoint(xkm, ykm)), "cindy");
-  //QToolTip::showText(mapToGlobal(QPoint(xkm, ykm)), "cindy");
-  //QToolTip::showText(mapToGlobal(QPoint(xkm, ykm)), "louise");
-  //QToolTip::showText(QPoint(xkm, ykm), "jay");
-  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
-  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
-  //QToolTip::showText(_ppi->mapToGlobal(QPoint(xp, yp)), "louigi");
-
-  //_ppi->smartBrush(xkm, ykm);
-  //qImage->convertToFormat(QImage::Format_RGB32);
-  //qImage->invertPixels()
-  // ****** end testing *****
 
   DateTime rayTime(ray->getTimeSecs());
   char text[256];
@@ -1945,8 +1930,6 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   for (size_t ifield = 0; ifield < rflds.size(); ifield++) {
     const RadxField *field = rflds[ifield];
   
-    //for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-    //const RadxField *field = ray->getField(ifield);
     const string fieldName = field->getName();
     if (fieldName.size() == 0) {
       continue;
@@ -2049,7 +2032,7 @@ void PolarManager::_createTimeControl()
   _timeSlider->setToolTip("Drag to change time selection");
   
   // active time
-
+  
   // _selectedTimeLabel = new QLabel("yyyy/MM/dd hh:mm:ss", _timePanel);
   _selectedTimeLabel = new QPushButton(_timePanel);
   _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
@@ -2182,13 +2165,14 @@ void PolarManager::_showTimeControl()
 
 void PolarManager::_placeTimeControl()
 {
-
   if (_timeControl) {
     if (!_timeControlPlaced) {
       int topFrameWidth = _timeControl->geometry().y() - _timeControl->y();
-      int topFrameHeight = _timeControl->frameGeometry().height() - _timeControl->height();
+      int topFrameHeight =
+        _timeControl->frameGeometry().height() - _timeControl->height();
       QPoint pos;
-      pos.setX(x() + (frameGeometry().width() / 2) - (_timeControl->frameGeometry().width()/2));
+      pos.setX(x() + (frameGeometry().width() / 2) -
+               (_timeControl->frameGeometry().width()/2));
       pos.setY(y() + frameGeometry().height());
       _timeControl->move(pos);
       if (topFrameWidth != 0 || topFrameHeight != 0) {
@@ -2201,14 +2185,16 @@ void PolarManager::_placeTimeControl()
 // BoundaryEditor circle (radius) slider has changed value
 void PolarManager::_circleRadiusSliderValueChanged(int value)
 {
-	if (BoundaryPointEditor::Instance()->setCircleRadius(value))  //returns true if existing circle was resized with this new radius
-		_ppi->update();
+  //returns true if existing circle was resized with this new radius
+  if (BoundaryPointEditor::Instance()->setCircleRadius(value)){
+    _ppi->update();
+  }
 }
 
 // BoundaryEditor brush (size) slider has changed value
 void PolarManager::_brushRadiusSliderValueChanged(int value)
 {
-	BoundaryPointEditor::Instance()->setBrushRadius(value);
+  BoundaryPointEditor::Instance()->setBrushRadius(value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2301,10 +2287,13 @@ void PolarManager::_timeSliderPressed()
 // sets the directory (_boundaryDir) into which boundary files will be read/written for current radar file (_openFilePath)
 void PolarManager::setBoundaryDir()
 {
-	if (!_openFilePath.empty())
-		_boundaryDir = BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath(BoundaryPointEditor::Instance()->getRootBoundaryDir(), _openFilePath);
-	else
-		_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
+  if (!_openFilePath.empty()) {
+    _boundaryDir =
+      BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath
+      (BoundaryPointEditor::Instance()->getRootBoundaryDir(), _openFilePath);
+  } else {
+    _boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
+  }
 }
 
 ////////////////////////////////////////////////////
@@ -2319,32 +2308,34 @@ void PolarManager::_openFile()
   QString finalPattern = "Cfradial (*.nc);; All Files (*.*);; All files (*";
   finalPattern.append(pattern.c_str());
   finalPattern.append("*)");
-
+  
   QString inputPath = QDir::currentPath();
   // get the path of the current file, if available
   if (_archiveFileList.size() > 0) {
     QDir temp(_archiveFileList[0].c_str());
     inputPath = temp.absolutePath();
   }
-
+  
   //since we are opening a new radar file, close any boundaries currently being displayed
-	BoundaryPointEditor::Instance()->clear();
-	if (_boundaryEditorDialog)
-	{
-		clearBoundaryEditorClick();
-		_boundaryEditorDialog->setVisible(false);
-	}
+  BoundaryPointEditor::Instance()->clear();
+  if (_boundaryEditorDialog) {
+    clearBoundaryEditorClick();
+    _boundaryEditorDialog->setVisible(false);
+  }
 
-	if (_ppi)
-  	_ppi->showOpeningFileMsg(true);
-
-  QString filePath =  QFileDialog::getOpenFileName(
-          this,
-          "Open Document",
-          inputPath, finalPattern);  //QDir::currentPath(),
+  if (_ppi){
+    _ppi->showOpeningFileMsg(true);
+  }
+  
+  QString filePath =
+    QFileDialog::getOpenFileName(this,
+                                 "Open Document",
+                                 inputPath, finalPattern);
+  //QDir::currentPath(),
   //"All files (*.*)");
 
-  QTimer::singleShot(10, [=]()   //wait 10ms so the QFileDialog has time to close before proceeding...
+   //wait 10ms so the QFileDialog has time to close before proceeding...
+  QTimer::singleShot(10, [=]()
   {
     if( !filePath.isNull() )
     {
@@ -2354,7 +2345,8 @@ void PolarManager::_openFile()
 
       cout << "_openFilePath=" << _openFilePath << endl;
 
-      //use _openFilePath to determine the new directory into which boundaries will be read/written
+      //use _openFilePath to determine the new directory
+      // into which boundaries will be read/written
       setBoundaryDir();
 
       // trying this ... to get the data from the file selected
@@ -2387,8 +2379,8 @@ void PolarManager::_openFile()
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "changing to path " << absolutePath << endl;
     }
-  //  loadArchiveFileList(dir.absolutePath());
-
+    //  loadArchiveFileList(dir.absolutePath());
+    
     RadxTimeList timeList;
     timeList.setDir(absolutePath);
     timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
