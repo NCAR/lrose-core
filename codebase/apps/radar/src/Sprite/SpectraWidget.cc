@@ -1255,7 +1255,7 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
 
 {
 
-  // frist check for clicks in the top title bar
+  // first check for clicks in the top title bar
 
   if (yy < _titleMargin) {
     panelType = PANEL_TITLE;
@@ -1276,7 +1276,7 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
   panelType = PANEL_IQPLOT;
   int icol = (xx - _ascopeGrossWidth) / _iqPlotWidth;
   int irow = (yy - _titleMargin) / _iqPlotHeight;
-  panelId = irow * _nIqRows + icol;
+  panelId = irow * _nIqCols + icol;
 
 }
 

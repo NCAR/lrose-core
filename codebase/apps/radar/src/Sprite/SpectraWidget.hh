@@ -344,7 +344,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   panel_type_t _contextMenuPanelType;
   int _contextMenuPanelId;
-
+  
   /**
    * @brief Location world of the latest click point.
    */
