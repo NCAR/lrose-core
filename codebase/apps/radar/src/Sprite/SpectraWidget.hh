@@ -216,40 +216,6 @@ class DLL_EXPORT SpectraWidget : public QWidget
   
   void showContextMenu(const QPoint &pos);
 
-  // actions examine the context menu
-
-  void ascopeSetFieldToDbz();
-  void ascopeSetFieldToVel();
-  void ascopeSetFieldToWidth();
-  void ascopeSetFieldToNcp();
-  void ascopeSetFieldToSnr();
-  void ascopeSetFieldToDbm();
-  void ascopeSetFieldToZdr();
-  void ascopeSetFieldToLdr();
-  void ascopeSetFieldToRhohv();
-  void ascopeSetFieldToPhidp();
-  void ascopeSetFieldToKdp();
-
-  void ascopeUnzoom();
-  
-  void ascopeSetXGridLinesOn();
-  void ascopeSetXGridLinesOff();
-  void ascopeSetYGridLinesOn();
-  void ascopeSetYGridLinesOff();
-  
-  void iqPlotSelectSpectrumPower();
-  void iqPlotSelectSpectrumPhase();
-  void iqPlotSelectTsPower();
-  void iqPlotSelectTsPhase();
-  void iqPlotSelectIandQ();
-  void iqPlotSelectIvsQ();
-  void iqPlotSelectPhasor();
-
-  void iqPlotSetChannelHc();
-  void iqPlotSetChannelVc();
-  void iqPlotSetChannelHx();
-  void iqPlotSetChannelVx();
-
  protected:
 
   ///////////////////////

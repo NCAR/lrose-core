@@ -1305,87 +1305,140 @@ void SpectraWidget::_createAscopeContextMenu(const QPoint &pos)
 {
 
   QMenu contextMenu("AscopeMenu", this);
-  
+
+  // set the field selection menu
+
   QAction setToDbz("Set to DBZ", this);
-  connect(&setToDbz, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToDbz()));
+  connect(&setToDbz, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::DBZ);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToDbz);
   
   QAction setToVel("Set to VEL", this);
-  connect(&setToVel, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToVel()));
+  connect(&setToVel, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::VEL);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToVel);
   
   QAction setToWidth("Set to WIDTH", this);
-  connect(&setToWidth, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToWidth()));
+  connect(&setToWidth, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::WIDTH);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToWidth);
   
   QAction setToNcp("Set to NCP", this);
-  connect(&setToNcp, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToNcp()));
+  connect(&setToNcp, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::NCP);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToNcp);
   
   QAction setToSnr("Set to SNR", this);
-  connect(&setToSnr, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToSnr()));
+  connect(&setToSnr, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::SNR);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToSnr);
   
   QAction setToDbm("Set to DBM", this);
-  connect(&setToDbm, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToDbm()));
+  connect(&setToDbm, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::DBM);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToDbm);
   
   QAction setToZdr("Set to ZDR", this);
-  connect(&setToZdr, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToZdr()));
+  connect(&setToZdr, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::ZDR);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToZdr);
   
   QAction setToLdr("Set to LDR", this);
-  connect(&setToLdr, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToLdr()));
+  connect(&setToLdr, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::LDR);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToLdr);
   
   QAction setToRhohv("Set to RHOHV", this);
-  connect(&setToRhohv, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToRhohv()));
+  connect(&setToRhohv, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::RHOHV);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToRhohv);
   
   QAction setToPhidp("Set to PHIDP", this);
-  connect(&setToPhidp, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToPhidp()));
+  connect(&setToPhidp, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::PHIDP);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToPhidp);
   
   QAction setToKdp("Set to KDP", this);
-  connect(&setToKdp, SIGNAL(triggered()), this,
-          SLOT(ascopeSetFieldToKdp()));
+  connect(&setToKdp, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setMomentType(Params::KDP);
+            _configureAscope(_contextMenuPanelId);
+          } );
   contextMenu.addAction(&setToKdp);
-  
+
+  // unzoom action
+
   QAction unzoom("Unzoom", this);
-  connect(&unzoom, SIGNAL(triggered()), this,
-          SLOT(ascopeUnzoom()));
+  connect(&unzoom, &QAction::triggered,
+          [this] () {
+            for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+              _ascopes[ii]->unzoom();
+            }
+          } );
   if (_ascopes[_contextMenuPanelId]->getIsZoomed()) {
     contextMenu.addAction(&unzoom);
   }
-  
+
+  // X grid lines on/off
+
   QAction xGridLinesOn("X grid lines on", this);
-  connect(&xGridLinesOn, SIGNAL(triggered()), this,
-          SLOT(ascopeSetXGridLinesOn()));
+  connect(&xGridLinesOn, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setXGridLinesOn(true);
+          } );
   QAction xGridLinesOff("X grid lines off", this);
-  connect(&xGridLinesOff, SIGNAL(triggered()), this,
-          SLOT(ascopeSetXGridLinesOff()));
+  connect(&xGridLinesOff, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setXGridLinesOn(false);
+          } );
   if (_ascopes[_contextMenuPanelId]->getXGridLinesOn()) {
     contextMenu.addAction(&xGridLinesOff);
   } else {
     contextMenu.addAction(&xGridLinesOn);
   }
   
+  // Y grid lines on/off
+
   QAction yGridLinesOn("Y grid lines on", this);
-  connect(&yGridLinesOn, SIGNAL(triggered()), this,
-          SLOT(ascopeSetYGridLinesOn()));
+  connect(&yGridLinesOn, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setYGridLinesOn(true);
+          } );
   QAction yGridLinesOff("Y grid lines off", this);
-  connect(&yGridLinesOff, SIGNAL(triggered()), this,
-          SLOT(ascopeSetYGridLinesOff()));
+  connect(&yGridLinesOff, &QAction::triggered,
+          [this] () {
+            _ascopes[_contextMenuPanelId]->setYGridLinesOn(false);
+          } );
   if (_ascopes[_contextMenuPanelId]->getYGridLinesOn()) {
     contextMenu.addAction(&yGridLinesOff);
   } else {
@@ -1394,102 +1447,6 @@ void SpectraWidget::_createAscopeContextMenu(const QPoint &pos)
   
   contextMenu.exec(this->mapToGlobal(pos));
   
-}
-
-void SpectraWidget::ascopeSetFieldToDbz()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::DBZ);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToVel()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::VEL);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToWidth()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::WIDTH);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToSnr()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::SNR);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToNcp()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::NCP);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToDbm()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::DBM);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToZdr()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::ZDR);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToLdr()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::LDR);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToRhohv()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::RHOHV);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToPhidp()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::PHIDP);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToKdp()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::KDP);
-  _configureAscope(_contextMenuPanelId);
-}
-
-//////////////////////////////////////////////////////////////
-// ascope actions
-
-void SpectraWidget::ascopeUnzoom()
-{
-  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
-    _ascopes[ii]->unzoom();
-  }
-}
-
-void SpectraWidget::ascopeSetXGridLinesOn()
-{
-  _ascopes[_contextMenuPanelId]->setXGridLinesOn(true);
-}
-
-void SpectraWidget::ascopeSetXGridLinesOff()
-{
-  _ascopes[_contextMenuPanelId]->setXGridLinesOn(false);
-}
-
-void SpectraWidget::ascopeSetYGridLinesOn()
-{
-  _ascopes[_contextMenuPanelId]->setYGridLinesOn(true);
-}
-
-void SpectraWidget::ascopeSetYGridLinesOff()
-{
-  _ascopes[_contextMenuPanelId]->setYGridLinesOn(false);
 }
 
 //////////////////////////////////////////////////////////
@@ -1506,136 +1463,103 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   
   QMenu selectTypeMenu("Select Plot Type", &contextMenu);
   contextMenu.addMenu(&selectTypeMenu);
-  
+
   QAction selectSpectrumPower("Select Spectrum Power", &contextMenu);
-  connect(&selectSpectrumPower, SIGNAL(triggered()),
-          this, SLOT(iqPlotSelectSpectrumPower()));
+  connect(&selectSpectrumPower, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setPlotType(Params::SPECTRUM_POWER);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   selectTypeMenu.addAction(&selectSpectrumPower);
   
   QAction selectSpectrumPhase("Select Spectrum Phase", &contextMenu);
-  connect(&selectSpectrumPhase, SIGNAL(triggered()),
-          this, SLOT(iqPlotSelectSpectrumPhase()));
+  connect(&selectSpectrumPhase, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setPlotType(Params::SPECTRUM_PHASE);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   selectTypeMenu.addAction(&selectSpectrumPhase);
   
   QAction selectTsPower("Select TS Power", &contextMenu);
-  connect(&selectTsPower, SIGNAL(triggered()),
-          this, SLOT(iqPlotSelectTsPower()));
+  connect(&selectTsPower, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setPlotType(Params::TS_POWER);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   selectTypeMenu.addAction(&selectTsPower);
   
   QAction selectTsPhase("Select TS Phase", &contextMenu);
-  connect(&selectTsPhase, SIGNAL(triggered()),
-          this, SLOT(iqPlotSelectTsPhase()));
+  connect(&selectTsPhase, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setPlotType(Params::TS_PHASE);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   selectTypeMenu.addAction(&selectTsPhase);
   
   QAction selectIandQ("Select I and Q", &contextMenu);
-  connect(&selectIandQ, SIGNAL(triggered()),
-          this, SLOT(iqPlotSelectIandQ()));
+  connect(&selectIandQ, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_AND_Q);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   selectTypeMenu.addAction(&selectIandQ);
   
   QAction selectIvsQ("Select I vs Q", &contextMenu);
-  connect(&selectIvsQ, SIGNAL(triggered()),
-          this, SLOT(iqPlotSelectIvsQ()));
+  connect(&selectIvsQ, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_VS_Q);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   selectTypeMenu.addAction(&selectIvsQ);
   
   QAction selectPhasor("SelectPhasor", &contextMenu);
-  connect(&selectPhasor, SIGNAL(triggered()),
-          this, SLOT(iqPlotSelectPhasor()));
+  connect(&selectPhasor, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setPlotType(Params::PHASOR);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   selectTypeMenu.addAction(&selectPhasor);
 
   // set channel
   
   QMenu setChannelMenu("Set Channel", &contextMenu);
   contextMenu.addMenu(&setChannelMenu);
-
+  
   QAction setChannelHc("Set channel HC", &contextMenu);
-  connect(&setChannelHc, SIGNAL(triggered()),
-          this, SLOT(iqPlotSetChannelHc()));
+  connect(&setChannelHc, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_HC);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   setChannelMenu.addAction(&setChannelHc);
 
   QAction setChannelVc("Set channel VC", &contextMenu);
-  connect(&setChannelVc, SIGNAL(triggered()),
-          this, SLOT(iqPlotSetChannelVc()));
+  connect(&setChannelVc, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_VC);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   setChannelMenu.addAction(&setChannelVc);
 
   QAction setChannelHx("Set channel HX", &contextMenu);
-  connect(&setChannelHx, SIGNAL(triggered()),
-          this, SLOT(iqPlotSetChannelHx()));
+  connect(&setChannelHx, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_HX);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   setChannelMenu.addAction(&setChannelHx);
 
   QAction setChannelVx("Set channel VX", &contextMenu);
-  connect(&setChannelVx, SIGNAL(triggered()),
-          this, SLOT(iqPlotSetChannelVx()));
+  connect(&setChannelVx, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_VX);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
   setChannelMenu.addAction(&setChannelVx);
 
   // show the context menu
   
   contextMenu.exec(this->mapToGlobal(pos));
   
-}
-
-void SpectraWidget::iqPlotSelectSpectrumPower()
-{
-  _iqPlots[_contextMenuPanelId]->setPlotType(Params::SPECTRUM_POWER);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSelectSpectrumPhase()
-{
-  _iqPlots[_contextMenuPanelId]->setPlotType(Params::SPECTRUM_PHASE);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSelectTsPower()
-{
-  _iqPlots[_contextMenuPanelId]->setPlotType(Params::TS_POWER);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSelectTsPhase()
-{
-  _iqPlots[_contextMenuPanelId]->setPlotType(Params::TS_PHASE);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSelectIandQ()
-{
-  _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_AND_Q);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSelectIvsQ()
-{
-  _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_VS_Q);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSelectPhasor()
-{
-  _iqPlots[_contextMenuPanelId]->setPlotType(Params::PHASOR);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSetChannelHc()
-{
-  _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_HC);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSetChannelVc()
-{
-  _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_VC);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSetChannelHx()
-{
-  _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_HX);
-  _configureIqPlot(_contextMenuPanelId);
-}
-
-void SpectraWidget::iqPlotSetChannelVx()
-{
-  _iqPlots[_contextMenuPanelId]->setRxChannel(Params::CHANNEL_VX);
-  _configureIqPlot(_contextMenuPanelId);
 }
 

@@ -57,7 +57,7 @@ register_with_procmap = FALSE;
 // Type: string
 //
 
-instance = "test";
+instance = "kddc";
 
 ///////////// check_alloc /////////////////////////////
 //
@@ -170,7 +170,7 @@ input_tcp_port = 11000;
 //
 
 // archive_data_dir = "$(HOME)/data/bomb_snowstorm/time_series/spol";
-archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
+archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/kddc";
 
 ///////////// archive_start_time //////////////////////
 //
@@ -182,7 +182,7 @@ archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband"
 // Type: string
 //
 
-archive_start_time = "2019 03 13 22 06 25";
+archive_start_time = "2020 05 25 03 00 00";
 
 ///////////// archive_time_span_secs //////////////////
 //
