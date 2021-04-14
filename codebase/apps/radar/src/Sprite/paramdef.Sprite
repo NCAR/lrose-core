@@ -306,21 +306,33 @@ typedef enum {
   CHANNEL_VX
 } rx_channel_t;
 
+typedef enum {
+  FFT_WINDOW_RECT,
+  FFT_WINDOW_VONHANN,
+  FFT_WINDOW_BLACKMAN,
+  FFT_WINDOW_BLACKMAN_NUTTALL,
+  FFT_WINDOW_TUKEY_10,
+  FFT_WINDOW_TUKEY_20,
+  FFT_WINDOW_TUKEY_30,
+  FFT_WINDOW_TUKEY_50
+} fft_window_t;
+
 typedef struct {
   iqplot_type_t plot_type;
   rx_channel_t rx_channel;
+  fft_window_t fft_window;
 } iqplot_t;
 
 paramdef struct iqplot_t {
   p_default = {
-   { SPECTRUM_POWER, CHANNEL_HC },
-   { SPECTRUM_POWER, CHANNEL_VC },
-   { SPECTRUM_PHASE, CHANNEL_HC },
-   { TS_POWER, CHANNEL_HC },
-   { TS_PHASE, CHANNEL_HC },
-   { I_AND_Q, CHANNEL_HC },
-   { I_VS_Q, CHANNEL_HC },
-   { PHASOR, CHANNEL_HC }
+   { SPECTRUM_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN },
+   { SPECTRUM_POWER, CHANNEL_VC, FFT_WINDOW_VONHANN },
+   { SPECTRUM_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN },
+   { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN },
+   { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN },
+   { I_AND_Q, CHANNEL_HC, FFT_WINDOW_VONHANN },
+   { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN },
+   { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN }
   };
   p_descr = "Details of IQ plots for each sub panel.";
   p_help = "SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_AND_Q: time series of I and Q.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.";
@@ -978,21 +990,10 @@ commentdef {
   p_header = "FFT WINDOWING";
 }
 
-typedef enum {
-  WINDOW_RECT,
-  WINDOW_VONHANN,
-  WINDOW_BLACKMAN,
-  WINDOW_BLACKMAN_NUTTALL,
-  WINDOW_TUKEY_10,
-  WINDOW_TUKEY_20,
-  WINDOW_TUKEY_30,
-  WINDOW_TUKEY_50
-} window_t;
-
-paramdef enum window_t {
-  p_default = WINDOW_VONHANN;
+paramdef enum fft_window_t {
+  p_default = FFT_WINDOW_VONHANN;
   p_descr = "Window to be applied to time series before computing spectra.";
-} window;
+} fft_window;
 
 commentdef {
   p_header = "RADAR CALIBRATION";

@@ -150,38 +150,53 @@ void IqPlot::plotBeam(QPainter &painter,
   // get data for this gate
 
   const GateData *gateData = beam->getGateData()[gateNum];
+  TaArray<RadarComplex_t> iq_;
+  RadarComplex_t *iq = iq_.alloc(nSamples);
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      memcpy(iq, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
+      break;
+    case Params::CHANNEL_VC:
+      memcpy(iq, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
+      break;
+    case Params::CHANNEL_HX:
+      memcpy(iq, gateData->iqhxOrig, nSamples * sizeof(RadarComplex_t));
+      break;
+    case Params::CHANNEL_VX:
+      memcpy(iq, gateData->iqvxOrig, nSamples * sizeof(RadarComplex_t));
+  }
   
   // perform the relevant plot
 
   switch (_plotType) {
     case Params::I_AND_Q:
       _plotIandQ(painter, beam, nSamples, selectedRangeKm,
-                 gateNum, gateData);
+                 gateNum, iq);
       break;
     case Params::I_VS_Q:
       _plotIvsQ(painter, beam, nSamples, selectedRangeKm,
-                gateNum, gateData);
+                gateNum, iq);
       break;
     case Params::PHASOR:
       _plotPhasor(painter, beam, nSamples, selectedRangeKm,
-                  gateNum, gateData);
+                  gateNum, iq);
       break;
     case Params::SPECTRUM_PHASE:
       _plotSpectrumPhase(painter, beam, nSamples, selectedRangeKm,
-                         gateNum, gateData);
+                         gateNum, iq);
       break;
     case Params::TS_POWER:
       _plotTsPower(painter, beam, nSamples, selectedRangeKm,
-                   gateNum, gateData);
+                   gateNum, iq);
       break;
     case Params::TS_PHASE:
       _plotTsPhase(painter, beam, nSamples, selectedRangeKm,
-                   gateNum, gateData);
+                   gateNum, iq);
       break;
     case Params::SPECTRUM_POWER:
     default:
       _plotSpectrumPower(painter, beam, nSamples, selectedRangeKm,
-                         gateNum, gateData);
+                         gateNum, iq);
   }
 
 }
@@ -195,64 +210,17 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
                                 int nSamples,
                                 double selectedRangeKm,
                                 int gateNum,
-                                const GateData *gateData)
+                                const RadarComplex_t *iq)
   
 {
 
-  // set the windowing
-
-  TaArray<double> windowCoeff_;
-  double *windowCoeff = windowCoeff_.alloc(nSamples);
-  switch (_params.window) {
-    case Params::WINDOW_RECT:
-    default:
-      RadarMoments::initWindowRect(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_VONHANN:
-      RadarMoments::initWindowVonhann(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_BLACKMAN:
-      RadarMoments::initWindowBlackman(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_BLACKMAN_NUTTALL:
-      RadarMoments::initWindowBlackmanNuttall(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_10:
-      RadarMoments::initWindowTukey(0.1, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_20:
-      RadarMoments::initWindowTukey(0.2, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_30:
-      RadarMoments::initWindowTukey(0.3, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_50:
-      RadarMoments::initWindowTukey(0.5, nSamples, windowCoeff);
-      break;
-  }
-
-  // compute power spectrum
+  // apply window to time series
   
   TaArray<RadarComplex_t> iqWindowed_;
   RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  switch (_rxChannel) {
-    case Params::CHANNEL_HC:
-      RadarMoments::applyWindow(gateData->iqhcOrig, windowCoeff,
-                                iqWindowed, nSamples);
-      break;
-    case Params::CHANNEL_VC:
-      RadarMoments::applyWindow(gateData->iqvcOrig, windowCoeff,
-                                iqWindowed, nSamples);
-      break;
-    case Params::CHANNEL_HX:
-      RadarMoments::applyWindow(gateData->iqhxOrig, windowCoeff,
-                                iqWindowed, nSamples);
-      break;
-    case Params::CHANNEL_VX:
-      RadarMoments::applyWindow(gateData->iqvxOrig, windowCoeff,
-                                iqWindowed, nSamples);
-      break;
-  }
+  _applyWindow(iq, iqWindowed, nSamples);
+  
+  // compute power spectrum
   
   TaArray<RadarComplex_t> powerSpec_;
   RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
@@ -309,17 +277,18 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   double vel = fields[gateNum].vel;
 
   char text[1024];
+  vector<string> legendsLeft;
   snprintf(text, 1024, "Dbm: %.2f", dbm);
-  vector<string> legends;
-  legends.push_back(text);
-  snprintf(text, 1024, "Vel: %.2f", vel);
-  legends.push_back(text);
-  _zoomWorld.drawLegendsTopLeft(painter, legends);
-
-  legends.clear();
+  legendsLeft.push_back(text);
   snprintf(text, 1024, "Dbz: %.2f", dbz);
-  legends.push_back(text);
-  _zoomWorld.drawLegendsTopRight(painter, legends);
+  legendsLeft.push_back(text);
+  snprintf(text, 1024, "Vel: %.2f", vel);
+  legendsLeft.push_back(text);
+  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+
+  vector<string> legendsRight;
+  legendsRight.push_back(getFftWindowName());
+  _zoomWorld.drawLegendsTopRight(painter, legendsRight);
 
   // draw the title
 
@@ -339,64 +308,17 @@ void IqPlot::_plotSpectrumPhase(QPainter &painter,
                                 int nSamples,
                                 double selectedRangeKm,
                                 int gateNum,
-                                const GateData *gateData)
+                                const RadarComplex_t *iq)
   
 {
 
-  // set the windowing
-
-  TaArray<double> windowCoeff_;
-  double *windowCoeff = windowCoeff_.alloc(nSamples);
-  switch (_params.window) {
-    case Params::WINDOW_RECT:
-    default:
-      RadarMoments::initWindowRect(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_VONHANN:
-      RadarMoments::initWindowVonhann(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_BLACKMAN:
-      RadarMoments::initWindowBlackman(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_BLACKMAN_NUTTALL:
-      RadarMoments::initWindowBlackmanNuttall(nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_10:
-      RadarMoments::initWindowTukey(0.1, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_20:
-      RadarMoments::initWindowTukey(0.2, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_30:
-      RadarMoments::initWindowTukey(0.3, nSamples, windowCoeff);
-      break;
-    case Params::WINDOW_TUKEY_50:
-      RadarMoments::initWindowTukey(0.5, nSamples, windowCoeff);
-      break;
-  }
-
-  // compute spectrum
+  // apply window to time series
   
   TaArray<RadarComplex_t> iqWindowed_;
   RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  switch (_rxChannel) {
-    case Params::CHANNEL_HC:
-      RadarMoments::applyWindow(gateData->iqhcOrig, windowCoeff,
-                                iqWindowed, nSamples);
-      break;
-    case Params::CHANNEL_VC:
-      RadarMoments::applyWindow(gateData->iqvcOrig, windowCoeff,
-                                iqWindowed, nSamples);
-      break;
-    case Params::CHANNEL_HX:
-      RadarMoments::applyWindow(gateData->iqhxOrig, windowCoeff,
-                                iqWindowed, nSamples);
-      break;
-    case Params::CHANNEL_VX:
-      RadarMoments::applyWindow(gateData->iqvxOrig, windowCoeff,
-                                iqWindowed, nSamples);
-      break;
-  }
+  _applyWindow(iq, iqWindowed, nSamples);
+  
+  // compute spectrum
   
   TaArray<RadarComplex_t> spec_;
   RadarComplex_t *spec = spec_.alloc(nSamples);
@@ -442,6 +364,21 @@ void IqPlot::_plotSpectrumPhase(QPainter &painter,
   _zoomWorld.drawLines(painter, pts);
   painter.restore();
   
+  // legends
+
+  const MomentsFields* fields = beam->getOutFields();
+  double vel = fields[gateNum].vel;
+  
+  char text[1024];
+  vector<string> legendsLeft;
+  snprintf(text, 1024, "Vel: %.2f", vel);
+  legendsLeft.push_back(text);
+  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  
+  vector<string> legendsRight;
+  legendsRight.push_back(getFftWindowName());
+  _zoomWorld.drawLegendsTopRight(painter, legendsRight);
+
   // draw the title
   
   painter.save();
@@ -460,7 +397,7 @@ void IqPlot::_plotTsPower(QPainter &painter,
                           int nSamples,
                           double selectedRangeKm,
                           int gateNum,
-                          const GateData *gateData)
+                          const RadarComplex_t *iq)
   
 {
 
@@ -470,21 +407,7 @@ void IqPlot::_plotTsPower(QPainter &painter,
   double *powerDbm = powerDbm_.alloc(nSamples);
   double minDbm = 9999.0, maxDbm = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double power = 1.0e-100;
-    switch (_rxChannel) {
-      case Params::CHANNEL_HC:
-        power = RadarComplex::power(gateData->iqhcOrig[ii]);
-        break;
-      case Params::CHANNEL_VC:
-        power = RadarComplex::power(gateData->iqvcOrig[ii]);
-        break;
-      case Params::CHANNEL_HX:
-        power = RadarComplex::power(gateData->iqhxOrig[ii]);
-        break;
-      case Params::CHANNEL_VX:
-        power = RadarComplex::power(gateData->iqvxOrig[ii]);
-        break;
-    }
+    double power = RadarComplex::power(iq[ii]);
     double dbm = 10.0 * log10(power);
     if (power <= 0) {
       dbm = -120.0;
@@ -521,7 +444,7 @@ void IqPlot::_plotTsPower(QPainter &painter,
   
   // legends
 
-  double power = RadarComplex::meanPower(gateData->iqhcOrig, nSamples);
+  double power = RadarComplex::meanPower(iq, nSamples);
   double dbm = 10.0 * log10(power);
   char text[1024];
   snprintf(text, 1024, "DbmMean: %.2f", dbm);
@@ -547,7 +470,7 @@ void IqPlot::_plotTsPhase(QPainter &painter,
                           int nSamples,
                           double selectedRangeKm,
                           int gateNum,
-                          const GateData *gateData)
+                          const RadarComplex_t *iq)
   
 {
 
@@ -557,25 +480,7 @@ void IqPlot::_plotTsPhase(QPainter &painter,
   double *phase = phase_.alloc(nSamples);
   double minVal = 9999.0, maxVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double phaseRad = 0.0;
-    switch (_rxChannel) {
-      case Params::CHANNEL_HC:
-        phaseRad = atan2(gateData->iqhcOrig[ii].im,
-                         gateData->iqhcOrig[ii].re);
-        break;
-      case Params::CHANNEL_VC:
-        phaseRad = atan2(gateData->iqvcOrig[ii].im,
-                         gateData->iqvcOrig[ii].re);
-        break;
-      case Params::CHANNEL_HX:
-        phaseRad = atan2(gateData->iqhxOrig[ii].im,
-                         gateData->iqhxOrig[ii].re);
-        break;
-      case Params::CHANNEL_VX:
-        phaseRad = atan2(gateData->iqvxOrig[ii].im,
-                         gateData->iqvxOrig[ii].re);
-        break;
-    }
+    double phaseRad = atan2(iq[ii].im, iq[ii].re);
     double phaseDeg = phaseRad * RAD_TO_DEG;
     phase[ii] = phaseDeg;
     minVal = min(phaseDeg, minVal);
@@ -625,7 +530,7 @@ void IqPlot::_plotIandQ(QPainter &painter,
                         int nSamples,
                         double selectedRangeKm,
                         int gateNum,
-                        const GateData *gateData)
+                        const RadarComplex_t *iq)
   
 {
 
@@ -637,26 +542,8 @@ void IqPlot::_plotIandQ(QPainter &painter,
   double minVal = 9999.0;
   double maxVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double iVal = 0.0;
-    double qVal = 0.0;
-    switch (_rxChannel) {
-      case Params::CHANNEL_HC:
-        iVal = gateData->iqhcOrig[ii].re;
-        qVal = gateData->iqhcOrig[ii].im;
-        break;
-      case Params::CHANNEL_VC:
-        iVal = gateData->iqvcOrig[ii].re;
-        qVal = gateData->iqvcOrig[ii].im;
-        break;
-      case Params::CHANNEL_HX:
-        iVal = gateData->iqhxOrig[ii].re;
-        qVal = gateData->iqhxOrig[ii].im;
-        break;
-      case Params::CHANNEL_VX:
-        iVal = gateData->iqvxOrig[ii].re;
-        qVal = gateData->iqvxOrig[ii].im;
-        break;
-    }
+    double iVal = iq[ii].re;
+    double qVal = iq[ii].im;
     qVals[ii] = iVal;
     iVals[ii] = qVal;
     minVal = min(iVal, minVal);
@@ -732,7 +619,7 @@ void IqPlot::_plotIvsQ(QPainter &painter,
                        int nSamples,
                        double selectedRangeKm,
                        int gateNum,
-                       const GateData *gateData)
+                       const RadarComplex_t *iq)
   
 {
 
@@ -746,26 +633,8 @@ void IqPlot::_plotIvsQ(QPainter &painter,
   double minQVal = 9999.0;
   double maxQVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double iVal = 0.0;
-    double qVal = 0.0;
-    switch (_rxChannel) {
-      case Params::CHANNEL_HC:
-        iVal = gateData->iqhcOrig[ii].re;
-        qVal = gateData->iqhcOrig[ii].im;
-        break;
-      case Params::CHANNEL_VC:
-        iVal = gateData->iqvcOrig[ii].re;
-        qVal = gateData->iqvcOrig[ii].im;
-        break;
-      case Params::CHANNEL_HX:
-        iVal = gateData->iqhxOrig[ii].re;
-        qVal = gateData->iqhxOrig[ii].im;
-        break;
-      case Params::CHANNEL_VX:
-        iVal = gateData->iqvxOrig[ii].re;
-        qVal = gateData->iqvxOrig[ii].im;
-        break;
-    }
+    double iVal = iq[ii].re;
+    double qVal = iq[ii].im;
     iVals[ii] = iVal;
     qVals[ii] = qVal;
     minIVal = min(iVal, minIVal);
@@ -821,7 +690,7 @@ void IqPlot::_plotPhasor(QPainter &painter,
                          int nSamples,
                          double selectedRangeKm,
                          int gateNum,
-                         const GateData *gateData)
+                         const RadarComplex_t *iq)
 
 {
                            
@@ -837,24 +706,8 @@ void IqPlot::_plotPhasor(QPainter &painter,
   double iSum = 0.0;
   double qSum = 0.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    switch (_rxChannel) {
-      case Params::CHANNEL_HC:
-        iSum += gateData->iqhcOrig[ii].re;
-        qSum += gateData->iqhcOrig[ii].im;
-        break;
-      case Params::CHANNEL_VC:
-        iSum += gateData->iqvcOrig[ii].re;
-        qSum += gateData->iqvcOrig[ii].im;
-        break;
-      case Params::CHANNEL_HX:
-        iSum += gateData->iqhxOrig[ii].re;
-        qSum += gateData->iqhxOrig[ii].im;
-        break;
-      case Params::CHANNEL_VX:
-        iSum += gateData->iqvxOrig[ii].re;
-        qSum += gateData->iqvxOrig[ii].im;
-        break;
-    }
+    iSum += iq[ii].re;
+    qSum += iq[ii].im;
     iSums[ii] = iSum;
     qSums[ii] = qSum;
     minISum = min(iSum, minISum);
@@ -894,7 +747,7 @@ void IqPlot::_plotPhasor(QPainter &painter,
 
   // legends
 
-  double cpa = RadarMoments::computeCpa(gateData->iqhcOrig, nSamples);
+  double cpa = RadarMoments::computeCpa(iq, nSamples);
   char text[1024];
   snprintf(text, 1024, "CPA: %.2f", cpa);
   vector<string> legends;
@@ -910,6 +763,51 @@ void IqPlot::_plotPhasor(QPainter &painter,
 
 }
 
+///////////////////////////////////////
+// Apply the window to the time series
+
+void IqPlot::_applyWindow(const RadarComplex_t *iq, 
+                          RadarComplex_t *iqWindowed,
+                          int nSamples)
+{
+  
+  // initialize the window
+  
+  TaArray<double> windowCoeff_;
+  double *windowCoeff = windowCoeff_.alloc(nSamples);
+  switch (_fftWindow) {
+    case Params::FFT_WINDOW_RECT:
+    default:
+      RadarMoments::initWindowRect(nSamples, windowCoeff);
+      break;
+    case Params::FFT_WINDOW_VONHANN:
+      RadarMoments::initWindowVonhann(nSamples, windowCoeff);
+      break;
+    case Params::FFT_WINDOW_BLACKMAN:
+      RadarMoments::initWindowBlackman(nSamples, windowCoeff);
+      break;
+    case Params::FFT_WINDOW_BLACKMAN_NUTTALL:
+      RadarMoments::initWindowBlackmanNuttall(nSamples, windowCoeff);
+      break;
+    case Params::FFT_WINDOW_TUKEY_10:
+      RadarMoments::initWindowTukey(0.1, nSamples, windowCoeff);
+      break;
+    case Params::FFT_WINDOW_TUKEY_20:
+      RadarMoments::initWindowTukey(0.2, nSamples, windowCoeff);
+      break;
+    case Params::FFT_WINDOW_TUKEY_30:
+      RadarMoments::initWindowTukey(0.3, nSamples, windowCoeff);
+      break;
+    case Params::FFT_WINDOW_TUKEY_50:
+      RadarMoments::initWindowTukey(0.5, nSamples, windowCoeff);
+  }
+
+  // compute power spectrum
+  
+  RadarMoments::applyWindow(iq, windowCoeff, iqWindowed, nSamples);
+
+}
+  
 //////////////////////////////////
 // get a string for the field name
 
@@ -1008,6 +906,33 @@ string IqPlot::getYUnits()
       return "volts";
     case Params::PHASOR:
       return "volts";
+    default:
+      return "";
+  }
+}
+
+//////////////////////////////////
+// get fft window name
+
+string IqPlot::getFftWindowName()
+{
+  switch (_fftWindow) {
+    case Params::FFT_WINDOW_RECT:
+      return "Rectangular";
+    case Params::FFT_WINDOW_VONHANN:
+      return "VonHann";
+    case Params::FFT_WINDOW_BLACKMAN:
+      return "Blackman";
+    case Params::FFT_WINDOW_BLACKMAN_NUTTALL:
+      return "Blackman-Nuttall";
+    case Params::FFT_WINDOW_TUKEY_10:
+      return "Tukey-10";
+    case Params::FFT_WINDOW_TUKEY_20:
+      return "Tukey-20";
+    case Params::FFT_WINDOW_TUKEY_30:
+      return "Tukey-30";
+    case Params::FFT_WINDOW_TUKEY_50:
+      return "Tukey-50";
     default:
       return "";
   }

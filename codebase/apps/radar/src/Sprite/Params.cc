@@ -1192,7 +1192,7 @@
     tt->array_elem_size = sizeof(iqplot_t);
     tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("iqplot_t");
-    tt->struct_def.nfields = 2;
+    tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("iqplot_type_t");
@@ -1235,25 +1235,58 @@
         tt->struct_def.fields[1].enum_def.fields[2].val = CHANNEL_HX;
         tt->struct_def.fields[1].enum_def.fields[3].name = tdrpStrDup("CHANNEL_VX");
         tt->struct_def.fields[1].enum_def.fields[3].val = CHANNEL_VX;
-    tt->n_struct_vals = 16;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("fft_window_t");
+      tt->struct_def.fields[2].fname = tdrpStrDup("fft_window");
+      tt->struct_def.fields[2].ptype = ENUM_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_iqplots->fft_window - (char *) _iqplots;
+        tt->struct_def.fields[2].enum_def.name = tdrpStrDup("fft_window_t");
+        tt->struct_def.fields[2].enum_def.nfields = 8;
+        tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("FFT_WINDOW_RECT");
+        tt->struct_def.fields[2].enum_def.fields[0].val = FFT_WINDOW_RECT;
+        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("FFT_WINDOW_VONHANN");
+        tt->struct_def.fields[2].enum_def.fields[1].val = FFT_WINDOW_VONHANN;
+        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("FFT_WINDOW_BLACKMAN");
+        tt->struct_def.fields[2].enum_def.fields[2].val = FFT_WINDOW_BLACKMAN;
+        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("FFT_WINDOW_BLACKMAN_NUTTALL");
+        tt->struct_def.fields[2].enum_def.fields[3].val = FFT_WINDOW_BLACKMAN_NUTTALL;
+        tt->struct_def.fields[2].enum_def.fields[4].name = tdrpStrDup("FFT_WINDOW_TUKEY_10");
+        tt->struct_def.fields[2].enum_def.fields[4].val = FFT_WINDOW_TUKEY_10;
+        tt->struct_def.fields[2].enum_def.fields[5].name = tdrpStrDup("FFT_WINDOW_TUKEY_20");
+        tt->struct_def.fields[2].enum_def.fields[5].val = FFT_WINDOW_TUKEY_20;
+        tt->struct_def.fields[2].enum_def.fields[6].name = tdrpStrDup("FFT_WINDOW_TUKEY_30");
+        tt->struct_def.fields[2].enum_def.fields[6].val = FFT_WINDOW_TUKEY_30;
+        tt->struct_def.fields[2].enum_def.fields[7].name = tdrpStrDup("FFT_WINDOW_TUKEY_50");
+        tt->struct_def.fields[2].enum_def.fields[7].val = FFT_WINDOW_TUKEY_50;
+    tt->n_struct_vals = 24;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = SPECTRUM_POWER;
       tt->struct_vals[1].e = CHANNEL_HC;
-      tt->struct_vals[2].e = SPECTRUM_POWER;
-      tt->struct_vals[3].e = CHANNEL_VC;
-      tt->struct_vals[4].e = SPECTRUM_PHASE;
-      tt->struct_vals[5].e = CHANNEL_HC;
-      tt->struct_vals[6].e = TS_POWER;
+      tt->struct_vals[2].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[3].e = SPECTRUM_POWER;
+      tt->struct_vals[4].e = CHANNEL_VC;
+      tt->struct_vals[5].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[6].e = SPECTRUM_PHASE;
       tt->struct_vals[7].e = CHANNEL_HC;
-      tt->struct_vals[8].e = TS_PHASE;
-      tt->struct_vals[9].e = CHANNEL_HC;
-      tt->struct_vals[10].e = I_AND_Q;
-      tt->struct_vals[11].e = CHANNEL_HC;
-      tt->struct_vals[12].e = I_VS_Q;
+      tt->struct_vals[8].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[9].e = TS_POWER;
+      tt->struct_vals[10].e = CHANNEL_HC;
+      tt->struct_vals[11].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[12].e = TS_PHASE;
       tt->struct_vals[13].e = CHANNEL_HC;
-      tt->struct_vals[14].e = PHASOR;
-      tt->struct_vals[15].e = CHANNEL_HC;
+      tt->struct_vals[14].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[15].e = I_AND_Q;
+      tt->struct_vals[16].e = CHANNEL_HC;
+      tt->struct_vals[17].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[18].e = I_VS_Q;
+      tt->struct_vals[19].e = CHANNEL_HC;
+      tt->struct_vals[20].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[21].e = PHASOR;
+      tt->struct_vals[22].e = CHANNEL_HC;
+      tt->struct_vals[23].e = FFT_WINDOW_VONHANN;
     tt++;
     
     // Parameter 'iqplot_top_margin'
@@ -2681,36 +2714,36 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'window'
-    // ctype is '_window_t'
+    // Parameter 'fft_window'
+    // ctype is '_fft_window_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("window");
+    tt->param_name = tdrpStrDup("fft_window");
     tt->descr = tdrpStrDup("Window to be applied to time series before computing spectra.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &window - &_start_;
-    tt->enum_def.name = tdrpStrDup("window_t");
+    tt->val_offset = (char *) &fft_window - &_start_;
+    tt->enum_def.name = tdrpStrDup("fft_window_t");
     tt->enum_def.nfields = 8;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("WINDOW_RECT");
-      tt->enum_def.fields[0].val = WINDOW_RECT;
-      tt->enum_def.fields[1].name = tdrpStrDup("WINDOW_VONHANN");
-      tt->enum_def.fields[1].val = WINDOW_VONHANN;
-      tt->enum_def.fields[2].name = tdrpStrDup("WINDOW_BLACKMAN");
-      tt->enum_def.fields[2].val = WINDOW_BLACKMAN;
-      tt->enum_def.fields[3].name = tdrpStrDup("WINDOW_BLACKMAN_NUTTALL");
-      tt->enum_def.fields[3].val = WINDOW_BLACKMAN_NUTTALL;
-      tt->enum_def.fields[4].name = tdrpStrDup("WINDOW_TUKEY_10");
-      tt->enum_def.fields[4].val = WINDOW_TUKEY_10;
-      tt->enum_def.fields[5].name = tdrpStrDup("WINDOW_TUKEY_20");
-      tt->enum_def.fields[5].val = WINDOW_TUKEY_20;
-      tt->enum_def.fields[6].name = tdrpStrDup("WINDOW_TUKEY_30");
-      tt->enum_def.fields[6].val = WINDOW_TUKEY_30;
-      tt->enum_def.fields[7].name = tdrpStrDup("WINDOW_TUKEY_50");
-      tt->enum_def.fields[7].val = WINDOW_TUKEY_50;
-    tt->single_val.e = WINDOW_VONHANN;
+      tt->enum_def.fields[0].name = tdrpStrDup("FFT_WINDOW_RECT");
+      tt->enum_def.fields[0].val = FFT_WINDOW_RECT;
+      tt->enum_def.fields[1].name = tdrpStrDup("FFT_WINDOW_VONHANN");
+      tt->enum_def.fields[1].val = FFT_WINDOW_VONHANN;
+      tt->enum_def.fields[2].name = tdrpStrDup("FFT_WINDOW_BLACKMAN");
+      tt->enum_def.fields[2].val = FFT_WINDOW_BLACKMAN;
+      tt->enum_def.fields[3].name = tdrpStrDup("FFT_WINDOW_BLACKMAN_NUTTALL");
+      tt->enum_def.fields[3].val = FFT_WINDOW_BLACKMAN_NUTTALL;
+      tt->enum_def.fields[4].name = tdrpStrDup("FFT_WINDOW_TUKEY_10");
+      tt->enum_def.fields[4].val = FFT_WINDOW_TUKEY_10;
+      tt->enum_def.fields[5].name = tdrpStrDup("FFT_WINDOW_TUKEY_20");
+      tt->enum_def.fields[5].val = FFT_WINDOW_TUKEY_20;
+      tt->enum_def.fields[6].name = tdrpStrDup("FFT_WINDOW_TUKEY_30");
+      tt->enum_def.fields[6].val = FFT_WINDOW_TUKEY_30;
+      tt->enum_def.fields[7].name = tdrpStrDup("FFT_WINDOW_TUKEY_50");
+      tt->enum_def.fields[7].val = FFT_WINDOW_TUKEY_50;
+    tt->single_val.e = FFT_WINDOW_VONHANN;
     tt++;
     
     // Parameter 'Comment 16'

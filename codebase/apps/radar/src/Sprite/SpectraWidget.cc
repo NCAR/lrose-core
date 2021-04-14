@@ -1173,10 +1173,9 @@ void SpectraWidget::_createIqPlot(int id)
 {
   
   IqPlot *iqplot = new IqPlot(this, _params, id);
-  Params::iqplot_type_t plotType = _params._iqplots[id].plot_type;
-  iqplot->setPlotType(plotType);
-  Params::rx_channel_t rxChannel = _params._iqplots[id].rx_channel;
-  iqplot->setRxChannel(rxChannel);
+  iqplot->setPlotType(_params._iqplots[id].plot_type);
+  iqplot->setRxChannel(_params._iqplots[id].rx_channel);
+  iqplot->setFftWindow(_params._iqplots[id].fft_window);
 
   WorldPlot &iqplotWorld = iqplot->getFullWorld();
   
@@ -1556,6 +1555,75 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
             _configureIqPlot(_contextMenuPanelId);
           } );
   setChannelMenu.addAction(&setChannelVx);
+
+  // set FFT window
+  
+  QMenu setFftWindowMenu("Set FFT Window", &contextMenu);
+  contextMenu.addMenu(&setFftWindowMenu);
+  
+  QAction setFftWindowRect("Rectangular", &contextMenu);
+  connect(&setFftWindowRect, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setFftWindow(Params::FFT_WINDOW_RECT);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowRect);
+
+  QAction setFftWindowVonHann("VonHann", &contextMenu);
+  connect(&setFftWindowVonHann, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setFftWindow(Params::FFT_WINDOW_VONHANN);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowVonHann);
+
+  QAction setFftWindowBlackman("Blackman", &contextMenu);
+  connect(&setFftWindowBlackman, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setFftWindow(Params::FFT_WINDOW_BLACKMAN);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowBlackman);
+
+  QAction setFftWindowBlackmanNuttall("BlackmanNuttall", &contextMenu);
+  connect(&setFftWindowBlackmanNuttall, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setFftWindow(Params::FFT_WINDOW_BLACKMAN_NUTTALL);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowBlackmanNuttall);
+
+  QAction setFftWindowTukey10("Tukey10", &contextMenu);
+  connect(&setFftWindowTukey10, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setFftWindow(Params::FFT_WINDOW_TUKEY_10);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey10);
+
+  QAction setFftWindowTukey20("Tukey20", &contextMenu);
+  connect(&setFftWindowTukey20, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setFftWindow(Params::FFT_WINDOW_TUKEY_20);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey20);
+
+  QAction setFftWindowTukey30("Tukey30", &contextMenu);
+  connect(&setFftWindowTukey30, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setFftWindow(Params::FFT_WINDOW_TUKEY_30);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey30);
+
+  QAction setFftWindowTukey50("Tukey50", &contextMenu);
+  connect(&setFftWindowTukey50, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setFftWindow(Params::FFT_WINDOW_TUKEY_50);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey50);
 
   // show the context menu
   

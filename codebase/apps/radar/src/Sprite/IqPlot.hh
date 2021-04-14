@@ -118,6 +118,7 @@ public:
 
   void setPlotType(Params::iqplot_type_t val) { _plotType = val; }
   void setRxChannel(Params::rx_channel_t val) { _rxChannel = val; }
+  void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
   
   // zooming
 
@@ -154,13 +155,18 @@ public:
   bool getXGridLinesOn() const { return _xGridLinesOn; }
   bool getYGridLinesOn() const { return _yGridLinesOn; }
   
-  // get the moment type
+  // get the plot details
 
   const Params::iqplot_type_t getPlotType() const { return _plotType; }
   const Params::rx_channel_t getRxChannelType() const { return _rxChannel; }
+  const Params::fft_window_t getFftWindow() const { return _fftWindow; }
+
+  // get the moment type
+
   string getName();
   string getXUnits();
   string getYUnits();
+  string getFftWindowName();
   
 protected:
 
@@ -176,7 +182,11 @@ protected:
 
   Params::iqplot_type_t _plotType;
   Params::rx_channel_t _rxChannel;
+
+  // fft window
   
+  Params::fft_window_t _fftWindow;
+
   // unzoomed world
 
   WorldPlot _fullWorld;
@@ -204,50 +214,54 @@ protected:
                           int nSamples,
                           double selectedRangeKm,
                           int gateNum,
-                          const GateData *gateData);
+                          const RadarComplex_t *iq);
 
   void _plotSpectrumPhase(QPainter &painter,
                           Beam *beam,
                           int nSamples,
                           double selectedRangeKm,
                           int gateNum,
-                          const GateData *gateData);
+                          const RadarComplex_t *iq);
 
   void _plotTsPower(QPainter &painter,
                     Beam *beam,
                     int nSamples,
                     double selectedRangeKm,
                     int gateNum,
-                    const GateData *gateData);
+                    const RadarComplex_t *iq);
   
   void _plotTsPhase(QPainter &painter,
                     Beam *beam,
                     int nSamples,
                     double selectedRangeKm,
                     int gateNum,
-                    const GateData *gateData);
+                    const RadarComplex_t *iq);
 
   void _plotIandQ(QPainter &painter,
                   Beam *beam,
                   int nSamples,
                   double selectedRangeKm,
                   int gateNum,
-                  const GateData *gateData);
+                  const RadarComplex_t *iq);
 
   void _plotIvsQ(QPainter &painter,
                  Beam *beam,
                  int nSamples,
                  double selectedRangeKm,
                  int gateNum,
-                 const GateData *gateData);
+                 const RadarComplex_t *iq);
 
   void _plotPhasor(QPainter &painter,
                    Beam *beam,
                    int nSamples,
                    double selectedRangeKm,
                    int gateNum,
-                   const GateData *gateData);
+                   const RadarComplex_t *iq);
 
+  void _applyWindow(const RadarComplex_t *iq, 
+                    RadarComplex_t *iqWindowed,
+                    int nSamples);
+  
 };
 
 #endif

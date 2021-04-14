@@ -169,7 +169,7 @@ input_tcp_port = 11000;
 // Type: string
 //
 
-// archive_data_dir = "$(HOME)/data/bomb_snowstorm/time_series/spol";
+// archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
 archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
 
 ///////////// archive_start_time //////////////////////
@@ -182,7 +182,8 @@ archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband"
 // Type: string
 //
 
-archive_start_time = "2019 03 13 22 06 25";
+// archive_start_time = "2019 03 13 22 06 25";
+archive_start_time = "2019 08 25 00 05 30";
 
 ///////////// archive_time_span_secs //////////////////
 //
@@ -241,7 +242,7 @@ start_elevation = 0.5;
 // Type: double
 //
 
-start_azimuth = 0.5;
+start_azimuth = 0.0;
 
 ///////////// start_range_km //////////////////////////
 //
@@ -255,7 +256,7 @@ start_azimuth = 0.5;
 // Type: double
 //
 
-start_range_km = 50;
+start_range_km = 30;
 
 //======================================================================
 //
@@ -530,6 +531,16 @@ iqplots_n_columns = 4;
 //          CHANNEL_VC
 //          CHANNEL_HX
 //          CHANNEL_VX
+//      fft_window_t fft_window;
+//        Options:
+//          FFT_WINDOW_RECT
+//          FFT_WINDOW_VONHANN
+//          FFT_WINDOW_BLACKMAN
+//          FFT_WINDOW_BLACKMAN_NUTTALL
+//          FFT_WINDOW_TUKEY_10
+//          FFT_WINDOW_TUKEY_20
+//          FFT_WINDOW_TUKEY_30
+//          FFT_WINDOW_TUKEY_50
 //   }
 //
 // 1D array - variable length.
@@ -538,42 +549,50 @@ iqplots_n_columns = 4;
 iqplots = {
   {
     plot_type = SPECTRUM_POWER,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN
   }
   ,
   {
     plot_type = SPECTRUM_POWER,
-    rx_channel = CHANNEL_VC
+    rx_channel = CHANNEL_VC,
+    fft_window = FFT_WINDOW_VONHANN
   }
   ,
   {
     plot_type = SPECTRUM_PHASE,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN
   }
   ,
   {
     plot_type = TS_POWER,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN
   }
   ,
   {
     plot_type = TS_PHASE,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN
   }
   ,
   {
     plot_type = I_AND_Q,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN
   }
   ,
   {
     plot_type = I_VS_Q,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN
   }
   ,
   {
     plot_type = PHASOR,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN
   }
 };
 
@@ -1922,24 +1941,24 @@ radar_wavelength_cm = 10;
 //
 //======================================================================
  
-///////////// window //////////////////////////////////
+///////////// fft_window //////////////////////////////
 //
 // Window to be applied to time series before computing spectra.
 //
 //
 // Type: enum
 // Options:
-//     WINDOW_RECT
-//     WINDOW_VONHANN
-//     WINDOW_BLACKMAN
-//     WINDOW_BLACKMAN_NUTTALL
-//     WINDOW_TUKEY_10
-//     WINDOW_TUKEY_20
-//     WINDOW_TUKEY_30
-//     WINDOW_TUKEY_50
+//     FFT_WINDOW_RECT
+//     FFT_WINDOW_VONHANN
+//     FFT_WINDOW_BLACKMAN
+//     FFT_WINDOW_BLACKMAN_NUTTALL
+//     FFT_WINDOW_TUKEY_10
+//     FFT_WINDOW_TUKEY_20
+//     FFT_WINDOW_TUKEY_30
+//     FFT_WINDOW_TUKEY_50
 //
 
-window = WINDOW_VONHANN;
+fft_window = FFT_WINDOW_VONHANN;
 
 //======================================================================
 //

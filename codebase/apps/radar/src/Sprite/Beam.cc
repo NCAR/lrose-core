@@ -2452,7 +2452,7 @@ void Beam::_computeWindows()
       _params.use_polynomial_regression_clutter_filter) {
     _window = RadarMoments::createWindowRect(_nSamples);
     _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_RECT) {
+  } else if (_params.fft_window == Params::FFT_WINDOW_RECT) {
     if (_applyFiltering) {
       _window = RadarMoments::createWindowVonhann(_nSamples);
       _windowHalf = RadarMoments::createWindowVonhann(_nSamplesHalf);
@@ -2460,25 +2460,25 @@ void Beam::_computeWindows()
       _window = RadarMoments::createWindowRect(_nSamples);
       _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
     }
-  } else if (_params.window == Params::WINDOW_VONHANN) {
+  } else if (_params.fft_window == Params::FFT_WINDOW_VONHANN) {
     _window = RadarMoments::createWindowVonhann(_nSamples);
     _windowHalf = RadarMoments::createWindowVonhann(_nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_BLACKMAN) {
+  } else if (_params.fft_window == Params::FFT_WINDOW_BLACKMAN) {
     _window = RadarMoments::createWindowBlackman(_nSamples);
     _windowHalf = RadarMoments::createWindowBlackman(_nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_BLACKMAN_NUTTALL) {
+  } else if (_params.fft_window == Params::FFT_WINDOW_BLACKMAN_NUTTALL) {
     _window = RadarMoments::createWindowBlackmanNuttall(_nSamples);
     _windowHalf = RadarMoments::createWindowBlackmanNuttall(_nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_TUKEY_10) {
+  } else if (_params.fft_window == Params::FFT_WINDOW_TUKEY_10) {
     _window = RadarMoments::createWindowTukey(0.1, _nSamples);
     _windowHalf = RadarMoments::createWindowTukey(0.1, _nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_TUKEY_20) {
+  } else if (_params.fft_window == Params::FFT_WINDOW_TUKEY_20) {
     _window = RadarMoments::createWindowTukey(0.2, _nSamples);
     _windowHalf = RadarMoments::createWindowTukey(0.2, _nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_TUKEY_30) {
+  } else if (_params.fft_window == Params::FFT_WINDOW_TUKEY_30) {
     _window = RadarMoments::createWindowTukey(0.3, _nSamples);
     _windowHalf = RadarMoments::createWindowTukey(0.3, _nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_TUKEY_50) {
+  } else if (_params.fft_window == Params::FFT_WINDOW_TUKEY_50) {
     _window = RadarMoments::createWindowTukey(0.5, _nSamples);
     _windowHalf = RadarMoments::createWindowTukey(0.5, _nSamplesHalf);
   }

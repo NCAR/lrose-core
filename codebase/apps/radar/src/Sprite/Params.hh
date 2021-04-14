@@ -100,6 +100,17 @@ public:
   } rx_channel_t;
 
   typedef enum {
+    FFT_WINDOW_RECT = 0,
+    FFT_WINDOW_VONHANN = 1,
+    FFT_WINDOW_BLACKMAN = 2,
+    FFT_WINDOW_BLACKMAN_NUTTALL = 3,
+    FFT_WINDOW_TUKEY_10 = 4,
+    FFT_WINDOW_TUKEY_20 = 5,
+    FFT_WINDOW_TUKEY_30 = 6,
+    FFT_WINDOW_TUKEY_50 = 7
+  } fft_window_t;
+
+  typedef enum {
     LEGEND_TOP_LEFT = 0,
     LEGEND_TOP_RIGHT = 1,
     LEGEND_BOTTOM_LEFT = 2,
@@ -135,17 +146,6 @@ public:
     FIR_LEN_10 = 5
   } fir_filter_len_t;
 
-  typedef enum {
-    WINDOW_RECT = 0,
-    WINDOW_VONHANN = 1,
-    WINDOW_BLACKMAN = 2,
-    WINDOW_BLACKMAN_NUTTALL = 3,
-    WINDOW_TUKEY_10 = 4,
-    WINDOW_TUKEY_20 = 5,
-    WINDOW_TUKEY_30 = 6,
-    WINDOW_TUKEY_50 = 7
-  } window_t;
-
   // struct typedefs
 
   typedef struct {
@@ -178,6 +178,7 @@ public:
   typedef struct {
     iqplot_type_t plot_type;
     rx_channel_t rx_channel;
+    fft_window_t fft_window;
   } iqplot_t;
 
   ///////////////////////////
@@ -750,7 +751,7 @@ public:
 
   double radar_wavelength_cm;
 
-  window_t window;
+  fft_window_t fft_window;
 
   char* cal_file_path;
 
