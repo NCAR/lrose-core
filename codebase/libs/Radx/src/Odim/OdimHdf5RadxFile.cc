@@ -3008,13 +3008,13 @@ void OdimHdf5RadxFile::_lookupUnitsAndNames(const string &fieldName,
     standardName = "signal_to_noise_ratio";
   }
 
-  if (fieldName == "VRAD") {
+  if (fieldName.find("VRAD") != string::npos) {
     units = "m/s";
     longName = "Radial velocity";
     standardName = "radial_velocity_of_scatterers_away_from_instrument";
   }
 
-  if (fieldName == "WRAD") {
+  if (fieldName.find("WRAD") != string::npos) {
     units = "m/s";
     longName = "Spectral width of radial velocity";
     standardName = "doppler_spectrum_width";
