@@ -73,9 +73,8 @@ ConvStratFinder::ConvStratFinder()
   _maxConvectivityForStratiform = 0.4;
   _minOverlapForClumping = 1;
 
-  _specifyLevelsByHtValues = true;
-  _shallowHtKm = 4.5;
-  _deepHtKm = 12.0;
+  _shallowHtKm = 5.0;
+  _deepHtKm = 10.0;
 
   _textureLimitLow = 0.0;
   _textureLimitHigh = 30.0;
@@ -121,7 +120,6 @@ void ConvStratFinder::setGrid(size_t nx, size_t ny,
   _nxy = _nx * _ny;
   _nxyz = _nxy * _zKm.size();
   _projIsLatLon = projIsLatLon;
-  _specifyLevelsByHtValues = true;
   _gridSet = true;
 
   // set geometry in km
@@ -140,7 +138,11 @@ void ConvStratFinder::setGrid(size_t nx, size_t ny,
 
   _allocArrays();
   _initToMissing();
-  
+
+  // initialize height arrays
+
+  setConstantHtThresholds(_shallowHtKm, _deepHtKm);
+
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -150,17 +152,20 @@ void ConvStratFinder::setConstantHtThresholds(double shallowHtKm,
                                               double deepHtKm)
 
 {
-  _specifyLevelsByHtValues = true;
+
+  assert(_gridSet);
+
   _shallowHtKm = shallowHtKm;
   _deepHtKm = deepHtKm;
-
+  
   fl32 *shallowHtArray = _shallowHtGrid.dat();
   fl32 *deepHtArray = _deepHtGrid.dat();
+  
   for (size_t ii = 0; ii < _nxy; ii++) {
-    shallowHtArray[ii] = shallowHtKm;
-    deepHtArray[ii] = deepHtKm;
+    shallowHtArray[ii] = _shallowHtKm;
+    deepHtArray[ii] = _deepHtKm;
   }
-
+  
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -171,6 +176,7 @@ void ConvStratFinder::setGridHtThresholds(const fl32 *shallowHtGrid,
                                           const fl32 *deepHtGrid,
                                           size_t nptsPlane)
 {
+
   assert(_gridSet);
   assert(nptsPlane == _nxy);
   memcpy(_shallowHtGrid.dat(), shallowHtGrid, _nxy * sizeof(fl32));
@@ -570,7 +576,6 @@ void ConvStratFinder::_performClumping()
     clump->computeGeom();
     _clumps.push_back(clump);
   }
-  
 
 }
 

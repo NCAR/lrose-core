@@ -310,7 +310,6 @@ private:
   // specify freezing level, and divergence level, by ht MSL
   // if this is false, grids for fz and div level must be passed in
   
-  bool _specifyLevelsByHtValues;
   double _shallowHtKm;
   double _deepHtKm;
 

@@ -212,16 +212,18 @@ int ConvStrat::Run()
     // and set the freezing and divergence level ht grids
 
     if (_params.vert_levels_type == Params::VERT_LEVELS_BY_TEMP) {
-      if (_readTempProfile(_inMdvx.getValidTime(), dbzField)) {
+      if (_readTempProfile(_inMdvx.getValidTime(), dbzField) == 0) {
+        _finder.setGridHtThresholds((fl32 *) _shallowHtField.getVol(),
+                                    (fl32 *) _deepHtField.getVol(),
+                                    fhdr.nx * fhdr.ny);
+      } else {
         cerr << "WARNING - ConvStrat::Run()" << endl;
         cerr << "  Cannot read in temperature profile, url: "
              << _params.temp_profile_url << endl;
-        cerr << "  Not using temp profile" << endl;
+        cerr << "  Using specifed heights instead" << endl;
+        cerr << "    ==>> shallowHtKm: " << _params.shallow_threshold_ht << endl;
+        cerr << "    ==>> deepHtKm: " << _params.deep_threshold_ht << endl;
       }
-      _finder.setGridHtThresholds((fl32 *) _shallowHtField.getVol(),
-                                  (fl32 *) _deepHtField.getVol(),
-                                  fhdr.nx * fhdr.ny);
-                              
     }
 
     // compute the convective/stratiform partition
