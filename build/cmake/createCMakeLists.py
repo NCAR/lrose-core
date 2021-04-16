@@ -1289,7 +1289,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
         fo.write("set (CMAKE_AUTOMOC ON)\n")
         fo.write("set (CMAKE_AUTORCC ON)\n")
         fo.write("set (CMAKE_AUTOUIC ON)\n")
-        fo.write("find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n")
+        fo.write("find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
         fo.write("\n")
 
         fo.write("pkg_search_module(Qt5Core REQUIRED)\n")
