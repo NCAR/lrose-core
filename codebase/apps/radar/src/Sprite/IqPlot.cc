@@ -73,8 +73,8 @@ IqPlot::IqPlot(QWidget* parent,
   _plotType = Params::SPECTRUM_POWER;
   _rxChannel = Params::CHANNEL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
-  _adaptiveFilter = false;
-  _regressionFilter = false;
+  _useAdaptiveFilter = false;
+  _useRegressionFilter = false;
   _regressionOrder = 3;
 }
 

@@ -122,8 +122,8 @@ public:
 
   // set filtering
   
-  void setAdaptiveFilter(bool val) { _adaptiveFilter = val; }
-  void setRegressionFilter(bool val) { _regressionFilter = val; }
+  void setUseAdaptiveFilter(bool val) { _useAdaptiveFilter = val; }
+  void setUseRegressionFilter(bool val) { _useRegressionFilter = val; }
   void setRegressionOrder(int val) { _regressionOrder = val; }
 
   // zooming
@@ -169,8 +169,8 @@ public:
 
   // get the filter details
   
-  bool getAdaptiveFilter() const { return _adaptiveFilter; }
-  bool getRegressionFilter() const { return _regressionFilter; }
+  bool getUseAdaptiveFilter() const { return _useAdaptiveFilter; }
+  bool getUseRegressionFilter() const { return _useRegressionFilter; }
   int getRegressionOrder() const { return _regressionOrder; }
 
   // get the moment type
@@ -201,8 +201,8 @@ protected:
 
   // filtering
 
-  bool _adaptiveFilter;
-  bool _regressionFilter;
+  bool _useAdaptiveFilter;
+  bool _useRegressionFilter;
   int _regressionOrder;
 
   // unzoomed world

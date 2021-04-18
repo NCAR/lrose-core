@@ -32,10 +32,9 @@
 #include <QTimer>
 #include <QBrush>
 #include <QPalette>
-#include <QPaintEngine>
 #include <QPen>
 #include <QResizeEvent>
-#include <QStylePainter>
+#include <QInputDialog>
 
 #include "SpectraWidget.hh"
 #include "SpectraMgr.hh"
@@ -1634,25 +1633,41 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   QMenu setFilteringMenu("Set Filtering", &contextMenu);
   contextMenu.addMenu(&setFilteringMenu);
   
-  QAction setAdaptiveFilter("Set adaptive filter", &contextMenu);
-  setAdaptiveFilter.setCheckable(true);
-  setAdaptiveFilter.setChecked(_iqPlots[_contextMenuPanelId]->getAdaptiveFilter());
-  connect(&setAdaptiveFilter, &QAction::triggered,
+  QAction useAdaptiveFilter("Use adaptive filter", &contextMenu);
+  useAdaptiveFilter.setCheckable(true);
+  useAdaptiveFilter.setChecked
+    (_iqPlots[_contextMenuPanelId]->getUseAdaptiveFilter());
+  connect(&useAdaptiveFilter, &QAction::triggered,
           [this] (bool state) {
-            _iqPlots[_contextMenuPanelId]->setAdaptiveFilter(state);
+            _iqPlots[_contextMenuPanelId]->setUseAdaptiveFilter(state);
             _configureIqPlot(_contextMenuPanelId);
           } );
-  setFilteringMenu.addAction(&setAdaptiveFilter);
+  setFilteringMenu.addAction(&useAdaptiveFilter);
 
-  QAction setRegressionFilter("Set regression filter", &contextMenu);
-  setRegressionFilter.setCheckable(true);
-  setRegressionFilter.setChecked(_iqPlots[_contextMenuPanelId]->getRegressionFilter());
-  connect(&setRegressionFilter, &QAction::triggered,
+  QAction useRegressionFilter("Use regression filter", &contextMenu);
+  useRegressionFilter.setCheckable(true);
+  useRegressionFilter.setChecked
+    (_iqPlots[_contextMenuPanelId]->getUseRegressionFilter());
+  connect(&useRegressionFilter, &QAction::triggered,
           [this] (bool state) {
-            _iqPlots[_contextMenuPanelId]->setRegressionFilter(state);
+            _iqPlots[_contextMenuPanelId]->setUseRegressionFilter(state);
             _configureIqPlot(_contextMenuPanelId);
           } );
-  setFilteringMenu.addAction(&setRegressionFilter);
+  setFilteringMenu.addAction(&useRegressionFilter);
+
+  QAction setRegressionOrder("Set regression order", &contextMenu);
+  connect(&setRegressionOrder, &QAction::triggered,
+          [this] () {
+            bool ok;
+            int order = QInputDialog::getInt
+              (this,
+               tr("QInputDialog::getInt()"), tr("Set regression order:"),
+               _iqPlots[_contextMenuPanelId]->getRegressionOrder(),
+               1, 100, 1, &ok);
+            _iqPlots[_contextMenuPanelId]->setRegressionOrder(order);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFilteringMenu.addAction(&setRegressionOrder);
 
   // show the context menu
   
