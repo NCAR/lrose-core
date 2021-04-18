@@ -450,6 +450,11 @@ paramdef string {
 } iqplot_line_color;
 
 paramdef string {
+  p_default = "pink";
+  p_descr = "Color of adaptive filtered lines in iq plots.";
+} iqplot_adaptive_filtered_color;
+
+paramdef string {
   p_default = "red";
   p_descr = "Color of I values in time series.";
 } iqplot_ival_line_color;

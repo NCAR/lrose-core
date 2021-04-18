@@ -251,7 +251,6 @@ void SpectraWidget::unzoom()
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
-  _refresh();
 
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->unzoom();
@@ -261,7 +260,7 @@ void SpectraWidget::unzoom()
     _iqPlots[ii]->unzoom();
   }
 
-  update();
+  _refresh();
 
 }
 
@@ -670,7 +669,6 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
   _resetWorld(width(), height());
 
   _refresh();
-  update();
   
 }
 
@@ -869,7 +867,6 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   QFont font(origFont);
   font.setPointSizeF(_params.iqplot_axis_label_font_size);
   painter.setFont(font);
-  // painter.setWindow(0, 0, width(), height());
 
   // axes
 
@@ -882,18 +879,6 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   QFont valuesFont(origFont);
   valuesFont.setPointSizeF(_params.iqplot_tick_values_font_size);
   
-  // _zoomWorld.drawRangeAxes(painter,
-  //                          "xxx", _yGridEnabled,
-  //                          lineColor, gridColor, textColor,
-  //                          labelFont, valuesFont, true);
-  
-  // _zoomWorld.drawTimeAxes(painter,
-  //                         _plotStartTime, _plotEndTime,
-  //                         _xGridEnabled,
-  //                         lineColor, gridColor, textColor,
-  //                         labelFont, valuesFont,
-  //                         false);
-
   _zoomWorld.drawAxisBottom(painter, "xu", true, true, true, _xGridEnabled);
   _zoomWorld.drawAxisLeft(painter, "yu", true, true, true, _yGridEnabled);
 
@@ -975,43 +960,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
 void SpectraWidget::_refresh()
 {
-
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-
-  //   FieldRenderer *field = _fieldRenderers[ifield];
-
-  //   // If needed, create new image for this field
-    
-  //   if (size() != field->getImage()->size()) {
-  //     field->createImage(width(), height());
-  //   }
-
-  //   // clear image
-    
-  //   field->getImage()->fill(_backgroundBrush.color().rgb());
-    
-  //   // set up rendering details
-
-  //   field->setTransform(_zoomTransform);
-  //   field->setUseHeight(_rangeAxisMode == Params::RANGE_AXIS_ALTITUDE);
-  //   field->setDrawInstHt(_instHtLineEnabled);
-    
-  //   // Add pointers to the beams to be rendered
-
-  //   if (ifield == _selectedField || field->isBackgroundRendered()) {
-
-  //     std::vector< SpectraBeam* >::iterator beam;
-  //     for (beam = _beams.begin(); beam != _beams.end(); ++beam) {
-  //       (*beam)->setBeingRendered(ifield, true);
-  //       field->addBeam(*beam);
-  //     }
-      
-  //   }
-    
-  // } // ifield
-  
   update();
-
 }
 
 

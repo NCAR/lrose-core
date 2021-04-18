@@ -585,6 +585,8 @@ public:
 
   char* iqplot_line_color;
 
+  char* iqplot_adaptive_filtered_color;
+
   char* iqplot_ival_line_color;
 
   char* iqplot_qval_line_color;
@@ -773,7 +775,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[162];
+  mutable TDRPtable _table[163];
 
   const char *_className;
 

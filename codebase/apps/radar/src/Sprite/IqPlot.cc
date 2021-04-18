@@ -267,14 +267,73 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   painter.setPen(_params.iqplot_line_color);
   QVector<QPointF> pts;
   for (int ii = 0; ii < nSamples; ii++) {
-    int jj = (ii + nSamples) % nSamples;
     double val = powerDbm[ii];
-    QPointF pt(jj, val);
+    QPointF pt(ii, val);
     pts.push_back(pt);
   }
   _zoomWorld.drawLines(painter, pts);
   painter.restore();
-  
+
+  // apply adaptive filter
+
+  if (_useAdaptiveFilter) {
+    
+    const IwrfCalib &calib = beam->getCalib();
+    double calibNoise = 0.0;
+    switch (_rxChannel) {
+      case Params::CHANNEL_HC:
+        calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
+        break;
+      case Params::CHANNEL_VC:
+        calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
+        break;
+      case Params::CHANNEL_HX:
+        calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
+        break;
+      case Params::CHANNEL_VX:
+        calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+        break;
+    }
+    
+    RadarMoments moments;
+    moments.setNSamples(nSamples);
+    moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
+                 beam->getStartRangeKm(), beam->getGateSpacingKm());
+    moments.setCalib(calib);
+    
+    TaArray<RadarComplex_t> filtWindowed_;
+    RadarComplex_t *filtWindowed = filtWindowed_.alloc(nSamples);
+    double filterRatio, spectralNoise, spectralSnr;
+    moments.applyAdaptiveFilter(nSamples, fft,
+                                iqWindowed, NULL,
+                                calibNoise,
+                                filtWindowed, NULL,
+                                filterRatio,
+                                spectralNoise,
+                                spectralSnr);
+    
+    TaArray<RadarComplex_t> filtSpec_;
+    RadarComplex_t *filtSpec = filtSpec_.alloc(nSamples);
+    fft.fwd(filtWindowed, filtSpec);
+    fft.shift(filtSpec);
+    
+    painter.save();
+    painter.setPen(_params.iqplot_adaptive_filtered_color);
+    QVector<QPointF> filtPts;
+    for (int ii = 0; ii < nSamples; ii++) {
+      double power = RadarComplex::power(filtSpec[ii]);
+      double dbm = 10.0 * log10(power);
+      if (power <= 0) {
+        dbm = -120.0;
+      }
+      QPointF pt(ii, dbm);
+      filtPts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, filtPts);
+    painter.restore();
+
+  } // if (_useAdaptiveFilter)
+
   // legends
 
   const MomentsFields* fields = beam->getOutFields();
