@@ -1453,11 +1453,13 @@ void SpectraWidget::_createAscopeContextMenu(const QPoint &pos)
 void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos) 
 {
 
+  ///////////////////////////////////////
   // context menu
   
   QMenu contextMenu("IqPlotMenu", this);
 
-  // select plot type
+  ///////////////////////////////////////
+  // select plot type sub-menu
   
   QMenu selectTypeMenu("Select Plot Type", &contextMenu);
   contextMenu.addMenu(&selectTypeMenu);
@@ -1518,7 +1520,8 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   selectTypeMenu.addAction(&selectPhasor);
 
-  // set channel
+  ///////////////////////////////////////
+  // set channel sub-menu
   
   QMenu setChannelMenu("Set Channel", &contextMenu);
   contextMenu.addMenu(&setChannelMenu);
@@ -1555,23 +1558,8 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setChannelMenu.addAction(&setChannelVx);
 
-  // add FFT window menu
-  
-  _addFftWindowMenu(contextMenu);
-
-  // show the context menu
-  
-  contextMenu.exec(this->mapToGlobal(pos));
-  
-}
-
-//////////////////////////////////////////////////////////
-// add the fftw window menu
-
-void SpectraWidget::_addFftWindowMenu(QMenu &contextMenu) 
-{
-
-  // set FFT window
+  ///////////////////////////////////////
+  // select FFT window menu
   
   QMenu setFftWindowMenu("Set FFT Window", &contextMenu);
   contextMenu.addMenu(&setFftWindowMenu);
@@ -1640,6 +1628,36 @@ void SpectraWidget::_addFftWindowMenu(QMenu &contextMenu)
           } );
   setFftWindowMenu.addAction(&setFftWindowTukey50);
 
+  ///////////////////////////////////////
+  // filtering details menu
+  
+  QMenu setFilteringMenu("Set Filtering", &contextMenu);
+  contextMenu.addMenu(&setFilteringMenu);
+  
+  QAction setAdaptiveFilter("Set adaptive filter", &contextMenu);
+  setAdaptiveFilter.setCheckable(true);
+  setAdaptiveFilter.setChecked(_iqPlots[_contextMenuPanelId]->getAdaptiveFilter());
+  connect(&setAdaptiveFilter, &QAction::triggered,
+          [this] (bool state) {
+            _iqPlots[_contextMenuPanelId]->setAdaptiveFilter(state);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFilteringMenu.addAction(&setAdaptiveFilter);
+
+  QAction setRegressionFilter("Set regression filter", &contextMenu);
+  setRegressionFilter.setCheckable(true);
+  setRegressionFilter.setChecked(_iqPlots[_contextMenuPanelId]->getRegressionFilter());
+  connect(&setRegressionFilter, &QAction::triggered,
+          [this] (bool state) {
+            _iqPlots[_contextMenuPanelId]->setRegressionFilter(state);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setFilteringMenu.addAction(&setRegressionFilter);
+
+  // show the context menu
+  
+  contextMenu.exec(this->mapToGlobal(pos));
+  
 }
 
 

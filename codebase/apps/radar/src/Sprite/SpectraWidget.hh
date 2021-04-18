@@ -471,7 +471,6 @@ class DLL_EXPORT SpectraWidget : public QWidget
   
   void _createAscopeContextMenu(const QPoint &pos);
   void _createIqPlotContextMenu(const QPoint &pos);
-  void _addFftWindowMenu(QMenu &contextMenu);
 
 };
 
