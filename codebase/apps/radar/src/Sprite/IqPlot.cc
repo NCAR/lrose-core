@@ -40,6 +40,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/pjg.h>
+#include <rapmath/ForsytheFit.hh>
 #include <radar/GateData.hh>
 #include <radar/RadarFft.hh>
 #include <radar/RegressionFilter.hh>
@@ -683,8 +684,8 @@ void IqPlot::_plotIandQ(QPainter &painter,
   for (int ii = 0; ii < nSamples; ii++) {
     double iVal = iq[ii].re;
     double qVal = iq[ii].im;
-    qVals[ii] = iVal;
-    iVals[ii] = qVal;
+    iVals[ii] = iVal;
+    qVals[ii] = qVal;
     minVal = min(iVal, minVal);
     minVal = min(qVal, minVal);
     maxVal = max(iVal, maxVal);
@@ -709,8 +710,7 @@ void IqPlot::_plotIandQ(QPainter &painter,
   painter.setPen(_params.iqplot_ival_line_color);
   QVector<QPointF> ipts;
   for (int ii = 0; ii < nSamples; ii++) {
-    double ival = iVals[ii];
-    QPointF pt(ii, ival);
+    QPointF pt(ii, iVals[ii]);
     ipts.push_back(pt);
   }
   _zoomWorld.drawLines(painter, ipts);
@@ -718,13 +718,115 @@ void IqPlot::_plotIandQ(QPainter &painter,
   painter.setPen(_params.iqplot_qval_line_color);
   QVector<QPointF> qpts;
   for (int ii = 0; ii < nSamples; ii++) {
-    double qval = qVals[ii];
-    QPointF pt(ii, qval);
+    QPointF pt(ii, qVals[ii]);
     qpts.push_back(pt);
   }
   _zoomWorld.drawLines(painter, qpts);
 
   painter.restore();
+
+  // plot regression filter as appropriate
+
+  if (_useRegressionFilter) {
+
+    // load reals into arrays
+
+    vector<double> rawI, rawQ;
+    for (int ii = 0; ii < nSamples; ii++) {
+      rawI.push_back(iq[ii].re);
+      rawQ.push_back(iq[ii].im);
+    }
+
+    // prepare Forsythe compute object
+
+    vector<double> xVals;
+    for (int ii = 0; ii < nSamples; ii++) {
+      xVals.push_back(ii);
+    }
+    ForsytheFit forsythe;
+    forsythe.prepareForFit(_regressionOrder, xVals);
+
+    // polynomial fit to I
+    
+    forsythe.performFit(rawI);
+    vector<double> iSmoothed = forsythe.getYEstVector();
+    vector<double> iResidual;
+    for (int ii = 0; ii < nSamples; ii++) {
+      iResidual.push_back(rawI[ii] - iSmoothed[ii]);
+    }
+    
+    // polynomial fit to Q
+    
+    forsythe.performFit(rawQ);
+    vector<double> qSmoothed = forsythe.getYEstVector();
+    vector<double> qResidual;
+    for (int ii = 0; ii < nSamples; ii++) {
+      qResidual.push_back(rawQ[ii] - qSmoothed[ii]);
+    }
+    
+    // draw the I and Q polynmial fit
+
+    {
+      painter.save();
+      
+      QPen pen(painter.pen());
+      pen.setColor(_params.iqplot_ival_line_color);
+      pen.setStyle(Qt::DashLine);
+      pen.setWidth(2);
+      painter.setPen(pen);
+      
+      QVector<QPointF> ipts;
+      for (int ii = 0; ii < nSamples; ii++) {
+        QPointF pt(ii, iSmoothed[ii]);
+        ipts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, ipts);
+      
+      pen.setColor(_params.iqplot_qval_line_color);
+      painter.setPen(pen);
+      
+      QVector<QPointF> qpts;
+      for (int ii = 0; ii < nSamples; ii++) {
+        QPointF pt(ii, qSmoothed[ii]);
+        qpts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, qpts);
+      
+      painter.restore();
+    }
+      
+      // draw the residuals from I and Q polynmial fit
+
+    {
+      painter.save();
+      
+      QPen pen(painter.pen());
+      pen.setColor(_params.iqplot_ival_line_color);
+      pen.setStyle(Qt::DotLine);
+      pen.setWidth(2);
+      painter.setPen(pen);
+      
+      QVector<QPointF> ipts;
+      for (int ii = 0; ii < nSamples; ii++) {
+        QPointF pt(ii, iResidual[ii]);
+        ipts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, ipts);
+      
+      pen.setColor(_params.iqplot_qval_line_color);
+      painter.setPen(pen);
+      
+      QVector<QPointF> qpts;
+      for (int ii = 0; ii < nSamples; ii++) {
+        QPointF pt(ii, qResidual[ii]);
+        qpts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, qpts);
+      
+      painter.restore();
+    }
+
+  } // if (_useRegressionFilter)
 
   // Legends
 
