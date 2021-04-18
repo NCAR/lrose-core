@@ -1946,7 +1946,7 @@ static void load_plot_data_single_prt()
   RadarComplex_t *regrWindowed = regrWindowed_.alloc(_nSamples);
   RadarMoments::applyWindow(regrFiltered, windowCoeff, regrWindowed, _nSamples);
 
-  // get the polygon fit
+  // get the polynomial fit
 
   const RadarComplex_t *regrPolyFit = regrF.getPolyfitIq();
   const double *regrX = regrF.getX();

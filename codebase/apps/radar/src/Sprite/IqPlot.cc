@@ -274,7 +274,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   _zoomWorld.drawLines(painter, pts);
   painter.restore();
 
-  // apply adaptive filter
+  // plot adaptive filter as appropriate
 
   if (_useAdaptiveFilter) {
     
@@ -333,6 +333,80 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
     painter.restore();
 
   } // if (_useAdaptiveFilter)
+
+  // plot regression filter as appropriate
+
+  if (_useRegressionFilter) {
+    
+    const IwrfCalib &calib = beam->getCalib();
+    double calibNoise = 0.0;
+    switch (_rxChannel) {
+      case Params::CHANNEL_HC:
+        calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
+        break;
+      case Params::CHANNEL_VC:
+        calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
+        break;
+      case Params::CHANNEL_HX:
+        calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
+        break;
+      case Params::CHANNEL_VX:
+        calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+        break;
+    }
+    
+    RegressionFilter regrF;
+    if (beam->getIsStagPrt()) {
+      regrF.setupStaggered(nSamples, beam->getStagM(),
+                           beam->getStagN(), _regressionOrder);
+    } else {
+      regrF.setup(nSamples, _regressionOrder);
+    }
+    
+    RadarMoments moments;
+    moments.setNSamples(nSamples);
+    moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
+                 beam->getStartRangeKm(), beam->getGateSpacingKm());
+    moments.setCalib(calib);
+    
+    TaArray<RadarComplex_t> filtered_;
+    RadarComplex_t *filtered = filtered_.alloc(nSamples);
+    double filterRatio, spectralNoise, spectralSnr;
+    moments.applyRegressionFilter(nSamples, fft,
+                                  regrF, _windowCoeff,
+                                  iq,
+                                  calibNoise,
+                                  _params.regression_filter_interp_across_notch,
+                                  filtered, NULL,
+                                  filterRatio,
+                                  spectralNoise,
+                                  spectralSnr);
+    
+    TaArray<RadarComplex_t> filtWindowed_;
+    RadarComplex_t *filtWindowed = filtWindowed_.alloc(nSamples);
+    _applyWindow(filtered, filtWindowed, nSamples);
+  
+    TaArray<RadarComplex_t> filtSpec_;
+    RadarComplex_t *filtSpec = filtSpec_.alloc(nSamples);
+    fft.fwd(filtWindowed, filtSpec);
+    fft.shift(filtSpec);
+    
+    painter.save();
+    painter.setPen(_params.iqplot_regression_filtered_color);
+    QVector<QPointF> filtPts;
+    for (int ii = 0; ii < nSamples; ii++) {
+      double power = RadarComplex::power(filtSpec[ii]);
+      double dbm = 10.0 * log10(power);
+      if (power <= 0) {
+        dbm = -120.0;
+      }
+      QPointF pt(ii, dbm);
+      filtPts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, filtPts);
+    painter.restore();
+
+  } // if (_useRegressionFilter)
 
   // legends
 
@@ -838,38 +912,37 @@ void IqPlot::_applyWindow(const RadarComplex_t *iq,
   
   // initialize the window
   
-  TaArray<double> windowCoeff_;
-  double *windowCoeff = windowCoeff_.alloc(nSamples);
+  _windowCoeff = _windowCoeff_.alloc(nSamples);
   switch (_fftWindow) {
     case Params::FFT_WINDOW_RECT:
     default:
-      RadarMoments::initWindowRect(nSamples, windowCoeff);
+      RadarMoments::initWindowRect(nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_VONHANN:
-      RadarMoments::initWindowVonhann(nSamples, windowCoeff);
+      RadarMoments::initWindowVonhann(nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_BLACKMAN:
-      RadarMoments::initWindowBlackman(nSamples, windowCoeff);
+      RadarMoments::initWindowBlackman(nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_BLACKMAN_NUTTALL:
-      RadarMoments::initWindowBlackmanNuttall(nSamples, windowCoeff);
+      RadarMoments::initWindowBlackmanNuttall(nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_TUKEY_10:
-      RadarMoments::initWindowTukey(0.1, nSamples, windowCoeff);
+      RadarMoments::initWindowTukey(0.1, nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_TUKEY_20:
-      RadarMoments::initWindowTukey(0.2, nSamples, windowCoeff);
+      RadarMoments::initWindowTukey(0.2, nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_TUKEY_30:
-      RadarMoments::initWindowTukey(0.3, nSamples, windowCoeff);
+      RadarMoments::initWindowTukey(0.3, nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_TUKEY_50:
-      RadarMoments::initWindowTukey(0.5, nSamples, windowCoeff);
+      RadarMoments::initWindowTukey(0.5, nSamples, _windowCoeff);
   }
 
   // compute power spectrum
   
-  RadarMoments::applyWindow(iq, windowCoeff, iqWindowed, nSamples);
+  RadarMoments::applyWindow(iq, _windowCoeff, iqWindowed, nSamples);
 
 }
   

@@ -198,6 +198,8 @@ protected:
   // fft window
   
   Params::fft_window_t _fftWindow;
+  TaArray<double> _windowCoeff_;
+  double *_windowCoeff;
 
   // filtering
 

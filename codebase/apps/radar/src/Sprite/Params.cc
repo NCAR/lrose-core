@@ -1589,6 +1589,18 @@
     tt->single_val.s = tdrpStrDup("pink");
     tt++;
     
+    // Parameter 'iqplot_regression_filtered_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_regression_filtered_color");
+    tt->descr = tdrpStrDup("Color of regression filtered lines in iq plots.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &iqplot_regression_filtered_color - &_start_;
+    tt->single_val.s = tdrpStrDup("orange");
+    tt++;
+    
     // Parameter 'iqplot_ival_line_color'
     // ctype is 'char*'
     
