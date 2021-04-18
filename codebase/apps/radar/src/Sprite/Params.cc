@@ -1192,7 +1192,7 @@
     tt->array_elem_size = sizeof(iqplot_t);
     tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("iqplot_t");
-    tt->struct_def.nfields = 3;
+    tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("iqplot_type_t");
@@ -1260,33 +1260,72 @@
         tt->struct_def.fields[2].enum_def.fields[6].val = FFT_WINDOW_TUKEY_30;
         tt->struct_def.fields[2].enum_def.fields[7].name = tdrpStrDup("FFT_WINDOW_TUKEY_50");
         tt->struct_def.fields[2].enum_def.fields[7].val = FFT_WINDOW_TUKEY_50;
-    tt->n_struct_vals = 24;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[3].fname = tdrpStrDup("adaptive_filter");
+      tt->struct_def.fields[3].ptype = BOOL_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_iqplots->adaptive_filter - (char *) _iqplots;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[4].fname = tdrpStrDup("regression_filter");
+      tt->struct_def.fields[4].ptype = BOOL_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_iqplots->regression_filter - (char *) _iqplots;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[5].fname = tdrpStrDup("regression_order");
+      tt->struct_def.fields[5].ptype = INT_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_iqplots->regression_order - (char *) _iqplots;
+    tt->n_struct_vals = 48;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = SPECTRUM_POWER;
       tt->struct_vals[1].e = CHANNEL_HC;
       tt->struct_vals[2].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[3].e = SPECTRUM_POWER;
-      tt->struct_vals[4].e = CHANNEL_VC;
-      tt->struct_vals[5].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[6].e = SPECTRUM_PHASE;
-      tt->struct_vals[7].e = CHANNEL_HC;
+      tt->struct_vals[3].b = pTRUE;
+      tt->struct_vals[4].b = pFALSE;
+      tt->struct_vals[5].i = 3;
+      tt->struct_vals[6].e = SPECTRUM_POWER;
+      tt->struct_vals[7].e = CHANNEL_VC;
       tt->struct_vals[8].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[9].e = TS_POWER;
-      tt->struct_vals[10].e = CHANNEL_HC;
-      tt->struct_vals[11].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[12].e = TS_PHASE;
+      tt->struct_vals[9].b = pTRUE;
+      tt->struct_vals[10].b = pFALSE;
+      tt->struct_vals[11].i = 3;
+      tt->struct_vals[12].e = SPECTRUM_PHASE;
       tt->struct_vals[13].e = CHANNEL_HC;
       tt->struct_vals[14].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[15].e = I_AND_Q;
-      tt->struct_vals[16].e = CHANNEL_HC;
-      tt->struct_vals[17].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[18].e = I_VS_Q;
+      tt->struct_vals[15].b = pTRUE;
+      tt->struct_vals[16].b = pFALSE;
+      tt->struct_vals[17].i = 3;
+      tt->struct_vals[18].e = TS_POWER;
       tt->struct_vals[19].e = CHANNEL_HC;
       tt->struct_vals[20].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[21].e = PHASOR;
-      tt->struct_vals[22].e = CHANNEL_HC;
-      tt->struct_vals[23].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[21].b = pTRUE;
+      tt->struct_vals[22].b = pFALSE;
+      tt->struct_vals[23].i = 3;
+      tt->struct_vals[24].e = TS_PHASE;
+      tt->struct_vals[25].e = CHANNEL_HC;
+      tt->struct_vals[26].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[27].b = pTRUE;
+      tt->struct_vals[28].b = pFALSE;
+      tt->struct_vals[29].i = 3;
+      tt->struct_vals[30].e = I_AND_Q;
+      tt->struct_vals[31].e = CHANNEL_HC;
+      tt->struct_vals[32].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[33].b = pTRUE;
+      tt->struct_vals[34].b = pFALSE;
+      tt->struct_vals[35].i = 3;
+      tt->struct_vals[36].e = I_VS_Q;
+      tt->struct_vals[37].e = CHANNEL_HC;
+      tt->struct_vals[38].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[39].b = pTRUE;
+      tt->struct_vals[40].b = pFALSE;
+      tt->struct_vals[41].i = 3;
+      tt->struct_vals[42].e = PHASOR;
+      tt->struct_vals[43].e = CHANNEL_HC;
+      tt->struct_vals[44].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[45].b = pTRUE;
+      tt->struct_vals[46].b = pFALSE;
+      tt->struct_vals[47].i = 3;
     tt++;
     
     // Parameter 'iqplot_top_margin'
@@ -2711,7 +2750,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("FFT WINDOWING");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("Applies to the general case.");
     tt++;
     
     // Parameter 'fft_window'

@@ -70,6 +70,12 @@ IqPlot::IqPlot(QWidget* parent,
   _isZoomed = false;
   _xGridLinesOn = _params.iqplot_x_grid_lines_on;
   _yGridLinesOn = _params.iqplot_y_grid_lines_on;
+  _plotType = Params::SPECTRUM_POWER;
+  _rxChannel = Params::CHANNEL_HC;
+  _fftWindow = Params::FFT_WINDOW_VONHANN;
+  _adaptiveFilter = false;
+  _regressionFilter = false;
+  _regressionOrder = 3;
 }
 
 /*************************************************************************

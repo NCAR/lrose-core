@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Sprite
+ * TDRP params for Sprite
  **********************************************************************/
 
 //======================================================================
@@ -169,8 +169,9 @@ input_tcp_port = 11000;
 // Type: string
 //
 
+archive_data_dir = "/home/dixon/data/bomb_snowstorm/time_series";
 // archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
-archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
+// archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
 
 ///////////// archive_start_time //////////////////////
 //
@@ -182,8 +183,9 @@ archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband"
 // Type: string
 //
 
-// archive_start_time = "2019 03 13 22 06 25";
-archive_start_time = "2019 08 25 00 05 30";
+archive_start_time = "2019 03 13 22 06 25";
+// archive_start_time = "2019 08 25 00 05 30";
+
 
 ///////////// archive_time_span_secs //////////////////
 //
@@ -242,7 +244,7 @@ start_elevation = 0.5;
 // Type: double
 //
 
-start_azimuth = 0.0;
+start_azimuth = 0;
 
 ///////////// start_range_km //////////////////////////
 //
@@ -541,6 +543,9 @@ iqplots_n_columns = 4;
 //          FFT_WINDOW_TUKEY_20
 //          FFT_WINDOW_TUKEY_30
 //          FFT_WINDOW_TUKEY_50
+//      boolean adaptive_filter;
+//      boolean regression_filter;
+//      int regression_order;
 //   }
 //
 // 1D array - variable length.
@@ -550,49 +555,73 @@ iqplots = {
   {
     plot_type = SPECTRUM_POWER,
     rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN
+    fft_window = FFT_WINDOW_VONHANN,
+    adaptive_filter = TRUE,
+    regression_filter = FALSE,
+    regression_order = 3
   }
   ,
   {
     plot_type = SPECTRUM_POWER,
     rx_channel = CHANNEL_VC,
-    fft_window = FFT_WINDOW_VONHANN
+    fft_window = FFT_WINDOW_VONHANN,
+    adaptive_filter = TRUE,
+    regression_filter = FALSE,
+    regression_order = 3
   }
   ,
   {
     plot_type = SPECTRUM_PHASE,
     rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN
+    fft_window = FFT_WINDOW_VONHANN,
+    adaptive_filter = TRUE,
+    regression_filter = FALSE,
+    regression_order = 3
   }
   ,
   {
     plot_type = TS_POWER,
     rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN
+    fft_window = FFT_WINDOW_VONHANN,
+    adaptive_filter = TRUE,
+    regression_filter = FALSE,
+    regression_order = 3
   }
   ,
   {
     plot_type = TS_PHASE,
     rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN
+    fft_window = FFT_WINDOW_VONHANN,
+    adaptive_filter = TRUE,
+    regression_filter = FALSE,
+    regression_order = 3
   }
   ,
   {
     plot_type = I_AND_Q,
     rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN
+    fft_window = FFT_WINDOW_VONHANN,
+    adaptive_filter = TRUE,
+    regression_filter = FALSE,
+    regression_order = 3
   }
   ,
   {
     plot_type = I_VS_Q,
     rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN
+    fft_window = FFT_WINDOW_VONHANN,
+    adaptive_filter = TRUE,
+    regression_filter = FALSE,
+    regression_order = 3
   }
   ,
   {
     plot_type = PHASOR,
     rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN
+    fft_window = FFT_WINDOW_VONHANN,
+    adaptive_filter = TRUE,
+    regression_filter = FALSE,
+    regression_order = 3
   }
 };
 
@@ -1938,6 +1967,8 @@ radar_wavelength_cm = 10;
 //======================================================================
 //
 // FFT WINDOWING.
+//
+// Applies to the general case.
 //
 //======================================================================
  

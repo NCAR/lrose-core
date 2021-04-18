@@ -119,7 +119,13 @@ public:
   void setPlotType(Params::iqplot_type_t val) { _plotType = val; }
   void setRxChannel(Params::rx_channel_t val) { _rxChannel = val; }
   void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
+
+  // set filtering
   
+  void setAdaptiveFilter(bool val) { _adaptiveFilter = val; }
+  void setRegressionFilter(bool val) { _regressionFilter = val; }
+  void setRegressionOrder(int val) { _regressionOrder = val; }
+
   // zooming
 
   void zoom(int x1, int y1, int x2, int y2);
@@ -161,6 +167,12 @@ public:
   const Params::rx_channel_t getRxChannelType() const { return _rxChannel; }
   const Params::fft_window_t getFftWindow() const { return _fftWindow; }
 
+  // get the filter details
+  
+  bool getAdaptiveFilter() const { return _adaptiveFilter; }
+  bool getRegressionFilter() const { return _regressionFilter; }
+  int getRegressionOrder() const { return _regressionOrder; }
+
   // get the moment type
 
   string getName();
@@ -186,6 +198,12 @@ protected:
   // fft window
   
   Params::fft_window_t _fftWindow;
+
+  // filtering
+
+  bool _adaptiveFilter;
+  bool _regressionFilter;
+  int _regressionOrder;
 
   // unzoomed world
 

@@ -321,18 +321,21 @@ typedef struct {
   iqplot_type_t plot_type;
   rx_channel_t rx_channel;
   fft_window_t fft_window;
+  boolean adaptive_filter;
+  boolean regression_filter;
+  int regression_order;
 } iqplot_t;
 
 paramdef struct iqplot_t {
   p_default = {
-   { SPECTRUM_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN },
-   { SPECTRUM_POWER, CHANNEL_VC, FFT_WINDOW_VONHANN },
-   { SPECTRUM_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN },
-   { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN },
-   { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN },
-   { I_AND_Q, CHANNEL_HC, FFT_WINDOW_VONHANN },
-   { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN },
-   { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN }
+   { SPECTRUM_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
+   { SPECTRUM_POWER, CHANNEL_VC, FFT_WINDOW_VONHANN, true, false, 3 },
+   { SPECTRUM_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
+   { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
+   { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
+   { I_AND_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
+   { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
+   { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 }
   };
   p_descr = "Details of IQ plots for each sub panel.";
   p_help = "SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_AND_Q: time series of I and Q.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.";
@@ -988,6 +991,7 @@ paramdef double {
 
 commentdef {
   p_header = "FFT WINDOWING";
+  p_text = "Applies to the general case.";
 }
 
 paramdef enum fft_window_t {

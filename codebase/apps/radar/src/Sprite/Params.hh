@@ -179,6 +179,9 @@ public:
     iqplot_type_t plot_type;
     rx_channel_t rx_channel;
     fft_window_t fft_window;
+    tdrp_bool_t adaptive_filter;
+    tdrp_bool_t regression_filter;
+    int regression_order;
   } iqplot_t;
 
   ///////////////////////////

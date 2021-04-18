@@ -95,7 +95,8 @@ public:
 
   // compute moments
   
-  int computeMoments();
+  int computeMoments(Params::fft_window_t windowType
+                     = Params::FFT_WINDOW_VONHANN);
 
   // set methods
 
@@ -282,9 +283,9 @@ private:
 
   // window
 
+  Params::fft_window_t _fftWindowType;
   double *_window;
   double *_windowHalf;
-  double *_windowVonHann;
   
   // R values, at various lags, for the windows
   // used to correct R values used in width computations

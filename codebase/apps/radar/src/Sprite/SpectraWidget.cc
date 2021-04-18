@@ -36,7 +36,6 @@
 #include <QPen>
 #include <QResizeEvent>
 #include <QStylePainter>
-#include <QMenu>
 
 #include "SpectraWidget.hh"
 #include "SpectraMgr.hh"
@@ -1556,6 +1555,22 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setChannelMenu.addAction(&setChannelVx);
 
+  // add FFT window menu
+  
+  _addFftWindowMenu(contextMenu);
+
+  // show the context menu
+  
+  contextMenu.exec(this->mapToGlobal(pos));
+  
+}
+
+//////////////////////////////////////////////////////////
+// add the fftw window menu
+
+void SpectraWidget::_addFftWindowMenu(QMenu &contextMenu) 
+{
+
   // set FFT window
   
   QMenu setFftWindowMenu("Set FFT Window", &contextMenu);
@@ -1625,9 +1640,6 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setFftWindowMenu.addAction(&setFftWindowTukey50);
 
-  // show the context menu
-  
-  contextMenu.exec(this->mapToGlobal(pos));
-  
 }
+
 

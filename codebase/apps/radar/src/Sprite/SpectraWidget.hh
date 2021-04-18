@@ -47,6 +47,7 @@
 #include <QRubberBand>
 #include <QPoint>
 #include <QTransform>
+#include <QMenu>
 
 #include "Params.hh"
 #include "ScaledLabel.hh"
@@ -470,6 +471,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
   
   void _createAscopeContextMenu(const QPoint &pos);
   void _createIqPlotContextMenu(const QPoint &pos);
+  void _addFftWindowMenu(QMenu &contextMenu);
 
 };
 
