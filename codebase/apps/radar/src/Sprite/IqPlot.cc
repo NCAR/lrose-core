@@ -176,9 +176,25 @@ void IqPlot::plotBeam(QPainter &painter,
   // perform the relevant plot
 
   switch (_plotType) {
-    case Params::I_AND_Q:
-      _plotIandQ(painter, beam, nSamples, selectedRangeKm,
-                 gateNum, iq);
+    case Params::I_VALS: {
+      TaArray<double> iVals_;
+      double *iVals = iVals_.alloc(nSamples);
+      for (int ii = 0; ii < nSamples; ii++) {
+        iVals[ii] = iq[ii].re;
+      }
+      _plotIQVals(painter, beam, nSamples, selectedRangeKm,
+                  gateNum, iVals);
+    }
+      break;
+    case Params::Q_VALS: {
+      TaArray<double> qVals_;
+      double *qVals = qVals_.alloc(nSamples);
+      for (int ii = 0; ii < nSamples; ii++) {
+        qVals[ii] = iq[ii].im;
+      }
+      _plotIQVals(painter, beam, nSamples, selectedRangeKm,
+                  gateNum, qVals);
+    }
       break;
     case Params::I_VS_Q:
       _plotIvsQ(painter, beam, nSamples, selectedRangeKm,
@@ -265,7 +281,11 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   // draw the spectrum - as line
 
   painter.save();
-  painter.setPen(_params.iqplot_line_color);
+  QPen pen(painter.pen());
+  pen.setColor(_params.iqplot_line_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(_params.iqplot_line_width);
+  painter.setPen(pen);
   QVector<QPointF> pts;
   for (int ii = 0; ii < nSamples; ii++) {
     double val = powerDbm[ii];
@@ -319,7 +339,11 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
     fft.shift(filtSpec);
     
     painter.save();
-    painter.setPen(_params.iqplot_adaptive_filtered_color);
+    QPen pen(painter.pen());
+    pen.setColor(_params.iqplot_adaptive_filtered_color);
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.iqplot_line_width);
+    painter.setPen(pen);
     QVector<QPointF> filtPts;
     for (int ii = 0; ii < nSamples; ii++) {
       double power = RadarComplex::power(filtSpec[ii]);
@@ -393,7 +417,11 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
     fft.shift(filtSpec);
     
     painter.save();
-    painter.setPen(_params.iqplot_regression_filtered_color);
+    QPen pen(painter.pen());
+    pen.setColor(_params.iqplot_regression_filtered_color);
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.iqplot_line_width);
+    painter.setPen(pen);
     QVector<QPointF> filtPts;
     for (int ii = 0; ii < nSamples; ii++) {
       double power = RadarComplex::power(filtSpec[ii]);
@@ -493,7 +521,11 @@ void IqPlot::_plotSpectrumPhase(QPainter &painter,
   // draw the spectrum phase - as line
 
   painter.save();
-  painter.setPen(_params.iqplot_line_color);
+  QPen pen(painter.pen());
+  pen.setColor(_params.iqplot_line_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(_params.iqplot_line_width);
+  painter.setPen(pen);
   QVector<QPointF> pts;
   for (int ii = 0; ii < nSamples; ii++) {
     int jj = (ii + nSamples) % nSamples;
@@ -571,7 +603,11 @@ void IqPlot::_plotTsPower(QPainter &painter,
   // draw the spectrum - as line
 
   painter.save();
-  painter.setPen(_params.iqplot_line_color);
+  QPen pen(painter.pen());
+  pen.setColor(_params.iqplot_line_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(_params.iqplot_line_width);
+  painter.setPen(pen);
   QVector<QPointF> pts;
   for (int ii = 0; ii < nSamples; ii++) {
     int jj = (ii + nSamples) % nSamples;
@@ -641,7 +677,11 @@ void IqPlot::_plotTsPhase(QPainter &painter,
   // draw the time series phase - as line
 
   painter.save();
-  painter.setPen(_params.iqplot_line_color);
+  QPen pen(painter.pen());
+  pen.setColor(_params.iqplot_line_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(_params.iqplot_line_width);
+  painter.setPen(pen);
   QVector<QPointF> pts;
   for (int ii = 0; ii < nSamples; ii++) {
     int jj = (ii + nSamples) % nSamples;
@@ -662,38 +702,55 @@ void IqPlot::_plotTsPhase(QPainter &painter,
 }
 
 /*************************************************************************
- * plot the I and Q time series
+ * plot the time series for I or Q separately
  */
 
-void IqPlot::_plotIandQ(QPainter &painter,
-                        Beam *beam,
-                        int nSamples,
-                        double selectedRangeKm,
-                        int gateNum,
-                        const RadarComplex_t *iq)
+void IqPlot::_plotIQVals(QPainter &painter,
+                         Beam *beam,
+                         int nSamples,
+                         double selectedRangeKm,
+                         int gateNum,
+                         const double *vals)
   
 {
 
-  // get I and Q vals
+  // prepare Forsythe compute object for regression
+  
+  vector<double> xVals;
+  for (int ii = 0; ii < nSamples; ii++) {
+    xVals.push_back(ii);
+  }
+  ForsytheFit forsythe;
+  forsythe.prepareForFit(_regressionOrder, xVals);
+  
+  // compute polynomial regression fit
 
-  TaArray<double> iVals_, qVals_;
-  double *iVals = iVals_.alloc(nSamples);
-  double *qVals = qVals_.alloc(nSamples);
+  vector<double> raw;
+  for (int ii = 0; ii < nSamples; ii++) {
+    raw.push_back(vals[ii]);
+  }
+  forsythe.performFit(raw);
+  vector<double> smoothed = forsythe.getYEstVector();
+  vector<double> residual;
+  for (int ii = 0; ii < nSamples; ii++) {
+    residual.push_back(raw[ii] - smoothed[ii]);
+  }
+
+  // compute min and max vals for plot
+  
   double minVal = 9999.0;
   double maxVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    double iVal = iq[ii].re;
-    double qVal = iq[ii].im;
-    iVals[ii] = iVal;
-    qVals[ii] = qVal;
-    minVal = min(iVal, minVal);
-    minVal = min(qVal, minVal);
-    maxVal = max(iVal, maxVal);
-    maxVal = max(qVal, maxVal);
+    minVal = min(vals[ii], minVal);
+    minVal = min(smoothed[ii], minVal);
+    minVal = min(residual[ii], minVal);
+    maxVal = max(vals[ii], maxVal);
+    maxVal = max(smoothed[ii], maxVal);
+    maxVal = max(residual[ii], maxVal);
   }
   
   // set the Y axis range
-
+  
   double rangeY = maxVal - minVal;
   if (!_isZoomed) {
     setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.125);
@@ -703,145 +760,67 @@ void IqPlot::_plotIandQ(QPainter &painter,
 
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the I and Q data
+  // draw the I data
 
   painter.save();
-
-  painter.setPen(_params.iqplot_ival_line_color);
-  QVector<QPointF> ipts;
+  QPen pen(painter.pen());
+  pen.setColor(_params.iqplot_line_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(_params.iqplot_line_width);
+  painter.setPen(pen);
+  QVector<QPointF> pts;
   for (int ii = 0; ii < nSamples; ii++) {
-    QPointF pt(ii, iVals[ii]);
-    ipts.push_back(pt);
+    QPointF pt(ii, vals[ii]);
+    pts.push_back(pt);
   }
-  _zoomWorld.drawLines(painter, ipts);
-
-  painter.setPen(_params.iqplot_qval_line_color);
-  QVector<QPointF> qpts;
-  for (int ii = 0; ii < nSamples; ii++) {
-    QPointF pt(ii, qVals[ii]);
-    qpts.push_back(pt);
-  }
-  _zoomWorld.drawLines(painter, qpts);
-
+  _zoomWorld.drawLines(painter, pts);
   painter.restore();
-
+  
   // plot regression filter as appropriate
 
   if (_useRegressionFilter) {
-
-    // load reals into arrays
-
-    vector<double> rawI, rawQ;
-    for (int ii = 0; ii < nSamples; ii++) {
-      rawI.push_back(iq[ii].re);
-      rawQ.push_back(iq[ii].im);
-    }
-
-    // prepare Forsythe compute object
-
-    vector<double> xVals;
-    for (int ii = 0; ii < nSamples; ii++) {
-      xVals.push_back(ii);
-    }
-    ForsytheFit forsythe;
-    forsythe.prepareForFit(_regressionOrder, xVals);
-
-    // polynomial fit to I
     
-    forsythe.performFit(rawI);
-    vector<double> iSmoothed = forsythe.getYEstVector();
-    vector<double> iResidual;
+    // plot the polynomial fit
+    
+    painter.save();
+    QPen pen(painter.pen());
+    pen.setColor(_params.iqplot_polynomial_fit_color);
+    pen.setStyle(Qt::DashLine);
+    pen.setWidth(_params.iqplot_polynomial_line_width);
+    painter.setPen(pen);
+    QVector<QPointF> pts;
     for (int ii = 0; ii < nSamples; ii++) {
-      iResidual.push_back(rawI[ii] - iSmoothed[ii]);
+      QPointF pt(ii, smoothed[ii]);
+      pts.push_back(pt);
     }
+    _zoomWorld.drawLines(painter, pts);
+    painter.restore();
     
-    // polynomial fit to Q
+    // draw the residuals from polynmial fit
     
-    forsythe.performFit(rawQ);
-    vector<double> qSmoothed = forsythe.getYEstVector();
-    vector<double> qResidual;
+    painter.save();
+    pen.setColor(_params.iqplot_polynomial_residual_color);
+    pen.setStyle(Qt::DotLine);
+    pen.setWidth(_params.iqplot_polynomial_line_width);
+    painter.setPen(pen);
+    pts.clear();
     for (int ii = 0; ii < nSamples; ii++) {
-      qResidual.push_back(rawQ[ii] - qSmoothed[ii]);
+      QPointF pt(ii, residual[ii]);
+      pts.push_back(pt);
     }
+    _zoomWorld.drawLines(painter, pts);
+    painter.restore();
+
+    // Legend
     
-    // draw the I and Q polynmial fit
-
-    {
-      painter.save();
-      
-      QPen pen(painter.pen());
-      pen.setColor(_params.iqplot_ival_line_color);
-      pen.setStyle(Qt::DashLine);
-      pen.setWidth(2);
-      painter.setPen(pen);
-      
-      QVector<QPointF> ipts;
-      for (int ii = 0; ii < nSamples; ii++) {
-        QPointF pt(ii, iSmoothed[ii]);
-        ipts.push_back(pt);
-      }
-      _zoomWorld.drawLines(painter, ipts);
-      
-      pen.setColor(_params.iqplot_qval_line_color);
-      painter.setPen(pen);
-      
-      QVector<QPointF> qpts;
-      for (int ii = 0; ii < nSamples; ii++) {
-        QPointF pt(ii, qSmoothed[ii]);
-        qpts.push_back(pt);
-      }
-      _zoomWorld.drawLines(painter, qpts);
-      
-      painter.restore();
-    }
-      
-      // draw the residuals from I and Q polynmial fit
-
-    {
-      painter.save();
-      
-      QPen pen(painter.pen());
-      pen.setColor(_params.iqplot_ival_line_color);
-      pen.setStyle(Qt::DotLine);
-      pen.setWidth(2);
-      painter.setPen(pen);
-      
-      QVector<QPointF> ipts;
-      for (int ii = 0; ii < nSamples; ii++) {
-        QPointF pt(ii, iResidual[ii]);
-        ipts.push_back(pt);
-      }
-      _zoomWorld.drawLines(painter, ipts);
-      
-      pen.setColor(_params.iqplot_qval_line_color);
-      painter.setPen(pen);
-      
-      QVector<QPointF> qpts;
-      for (int ii = 0; ii < nSamples; ii++) {
-        QPointF pt(ii, qResidual[ii]);
-        qpts.push_back(pt);
-      }
-      _zoomWorld.drawLines(painter, qpts);
-      
-      painter.restore();
-    }
+    char text[1024];
+    snprintf(text, 1024, "Regression order: %d", _regressionOrder);
+    vector<string> legends;
+    legends.push_back(text);
+    _zoomWorld.drawLegendsTopLeft(painter, legends);
 
   } // if (_useRegressionFilter)
 
-  // Legends
-
-  vector<string> legends;
-  string iLegend("I: ");
-  iLegend.append(_params.iqplot_ival_line_color);
-  legends.push_back(iLegend);
-  _zoomWorld.drawLegendsTopLeft(painter, legends);
-
-  legends.clear();
-  string qLegend("Q: ");
-  qLegend.append(_params.iqplot_qval_line_color);
-  legends.push_back(qLegend);
-  _zoomWorld.drawLegendsTopRight(painter, legends);
-  
   // draw the title
 
   painter.save();
@@ -902,7 +881,11 @@ void IqPlot::_plotIvsQ(QPainter &painter,
   // draw the I vs Q data
 
   painter.save();
-  painter.setPen(_params.iqplot_line_color);
+  QPen pen(painter.pen());
+  pen.setColor(_params.iqplot_line_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(_params.iqplot_line_width);
+  painter.setPen(pen);
   QVector<QPointF> iqpts;
   for (int ii = 0; ii < nSamples; ii++) {
     double ival = iVals[ii];
@@ -975,7 +958,11 @@ void IqPlot::_plotPhasor(QPainter &painter,
   // draw the I vs Q data
 
   painter.save();
-  painter.setPen(_params.iqplot_line_color);
+  QPen pen(painter.pen());
+  pen.setColor(_params.iqplot_line_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(_params.iqplot_line_width);
+  painter.setPen(pen);
   QVector<QPointF> iqpts;
   for (int ii = 0; ii < nSamples; ii++) {
     double ival = iSums[ii];
@@ -1068,8 +1055,11 @@ string IqPlot::getName()
     case Params::TS_PHASE:
       ptypeStr =  "TS_PHASE";
       break;
-    case Params::I_AND_Q:
-      ptypeStr =  "I_AND_Q";
+    case Params::I_VALS:
+      ptypeStr =  "I_VALS";
+      break;
+    case Params::Q_VALS:
+      ptypeStr =  "Q_VALS";
       break;
     case Params::I_VS_Q:
       ptypeStr =  "I_VS_Q";
@@ -1108,14 +1098,10 @@ string IqPlot::getXUnits()
 {
   switch (_plotType) {
     case Params::SPECTRUM_POWER:
-      return "sample";
     case Params::SPECTRUM_PHASE:
-      return "sample";
     case Params::TS_POWER:
-      return "sample";
     case Params::TS_PHASE:
-      return "sample";
-    case Params::I_AND_Q:
+    case Params::I_VALS:
       return "sample";
     case Params::I_VS_Q:
       return "volts";
@@ -1140,7 +1126,8 @@ string IqPlot::getYUnits()
       return "dbm";
     case Params::TS_PHASE:
       return "deg";
-    case Params::I_AND_Q:
+    case Params::I_VALS:
+    case Params::Q_VALS:
       return "volts";
     case Params::I_VS_Q:
       return "volts";

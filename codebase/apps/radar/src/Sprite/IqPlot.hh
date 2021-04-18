@@ -257,13 +257,13 @@ protected:
                     int gateNum,
                     const RadarComplex_t *iq);
 
-  void _plotIandQ(QPainter &painter,
-                  Beam *beam,
-                  int nSamples,
-                  double selectedRangeKm,
-                  int gateNum,
-                  const RadarComplex_t *iq);
-
+  void _plotIQVals(QPainter &painter,
+                   Beam *beam,
+                   int nSamples,
+                   double selectedRangeKm,
+                   int gateNum,
+                   const double *vals);
+  
   void _plotIvsQ(QPainter &painter,
                  Beam *beam,
                  int nSamples,

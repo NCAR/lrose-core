@@ -1184,7 +1184,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("iqplots");
     tt->descr = tdrpStrDup("Details of IQ plots for each sub panel.");
-    tt->help = tdrpStrDup("SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_AND_Q: time series of I and Q.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.");
+    tt->help = tdrpStrDup("SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.");
     tt->array_offset = (char *) &_iqplots - &_start_;
     tt->array_n_offset = (char *) &iqplots_n - &_start_;
     tt->is_array = TRUE;
@@ -1201,7 +1201,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_iqplots->plot_type - (char *) _iqplots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("iqplot_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 7;
+        tt->struct_def.fields[0].enum_def.nfields = 8;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SPECTRUM_POWER");
@@ -1212,12 +1212,14 @@
         tt->struct_def.fields[0].enum_def.fields[2].val = TS_POWER;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("TS_PHASE");
         tt->struct_def.fields[0].enum_def.fields[3].val = TS_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("I_AND_Q");
-        tt->struct_def.fields[0].enum_def.fields[4].val = I_AND_Q;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("I_VS_Q");
-        tt->struct_def.fields[0].enum_def.fields[5].val = I_VS_Q;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("PHASOR");
-        tt->struct_def.fields[0].enum_def.fields[6].val = PHASOR;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("I_VALS");
+        tt->struct_def.fields[0].enum_def.fields[4].val = I_VALS;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("Q_VALS");
+        tt->struct_def.fields[0].enum_def.fields[5].val = Q_VALS;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("I_VS_Q");
+        tt->struct_def.fields[0].enum_def.fields[6].val = I_VS_Q;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("PHASOR");
+        tt->struct_def.fields[0].enum_def.fields[7].val = PHASOR;
       tt->struct_def.fields[1].ftype = tdrpStrDup("rx_channel_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("rx_channel");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -1261,15 +1263,15 @@
         tt->struct_def.fields[2].enum_def.fields[7].name = tdrpStrDup("FFT_WINDOW_TUKEY_50");
         tt->struct_def.fields[2].enum_def.fields[7].val = FFT_WINDOW_TUKEY_50;
       tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[3].fname = tdrpStrDup("adaptive_filter");
+      tt->struct_def.fields[3].fname = tdrpStrDup("use_adaptive_filter");
       tt->struct_def.fields[3].ptype = BOOL_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_iqplots->adaptive_filter - (char *) _iqplots;
+        (char *) &_iqplots->use_adaptive_filter - (char *) _iqplots;
       tt->struct_def.fields[4].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[4].fname = tdrpStrDup("regression_filter");
+      tt->struct_def.fields[4].fname = tdrpStrDup("use_regression_filter");
       tt->struct_def.fields[4].ptype = BOOL_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_iqplots->regression_filter - (char *) _iqplots;
+        (char *) &_iqplots->use_regression_filter - (char *) _iqplots;
       tt->struct_def.fields[5].ftype = tdrpStrDup("int");
       tt->struct_def.fields[5].fname = tdrpStrDup("regression_order");
       tt->struct_def.fields[5].ptype = INT_TYPE;
@@ -1284,46 +1286,46 @@
       tt->struct_vals[3].b = pTRUE;
       tt->struct_vals[4].b = pFALSE;
       tt->struct_vals[5].i = 3;
-      tt->struct_vals[6].e = SPECTRUM_POWER;
-      tt->struct_vals[7].e = CHANNEL_VC;
+      tt->struct_vals[6].e = SPECTRUM_PHASE;
+      tt->struct_vals[7].e = CHANNEL_HC;
       tt->struct_vals[8].e = FFT_WINDOW_VONHANN;
       tt->struct_vals[9].b = pTRUE;
       tt->struct_vals[10].b = pFALSE;
       tt->struct_vals[11].i = 3;
-      tt->struct_vals[12].e = SPECTRUM_PHASE;
+      tt->struct_vals[12].e = TS_POWER;
       tt->struct_vals[13].e = CHANNEL_HC;
       tt->struct_vals[14].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[15].b = pTRUE;
+      tt->struct_vals[15].b = pFALSE;
       tt->struct_vals[16].b = pFALSE;
       tt->struct_vals[17].i = 3;
-      tt->struct_vals[18].e = TS_POWER;
+      tt->struct_vals[18].e = TS_PHASE;
       tt->struct_vals[19].e = CHANNEL_HC;
       tt->struct_vals[20].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[21].b = pTRUE;
+      tt->struct_vals[21].b = pFALSE;
       tt->struct_vals[22].b = pFALSE;
       tt->struct_vals[23].i = 3;
-      tt->struct_vals[24].e = TS_PHASE;
+      tt->struct_vals[24].e = I_VALS;
       tt->struct_vals[25].e = CHANNEL_HC;
       tt->struct_vals[26].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[27].b = pTRUE;
-      tt->struct_vals[28].b = pFALSE;
+      tt->struct_vals[27].b = pFALSE;
+      tt->struct_vals[28].b = pTRUE;
       tt->struct_vals[29].i = 3;
-      tt->struct_vals[30].e = I_AND_Q;
+      tt->struct_vals[30].e = Q_VALS;
       tt->struct_vals[31].e = CHANNEL_HC;
       tt->struct_vals[32].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[33].b = pTRUE;
-      tt->struct_vals[34].b = pFALSE;
+      tt->struct_vals[33].b = pFALSE;
+      tt->struct_vals[34].b = pTRUE;
       tt->struct_vals[35].i = 3;
       tt->struct_vals[36].e = I_VS_Q;
       tt->struct_vals[37].e = CHANNEL_HC;
       tt->struct_vals[38].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[39].b = pTRUE;
+      tt->struct_vals[39].b = pFALSE;
       tt->struct_vals[40].b = pFALSE;
       tt->struct_vals[41].i = 3;
       tt->struct_vals[42].e = PHASOR;
       tt->struct_vals[43].e = CHANNEL_HC;
       tt->struct_vals[44].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[45].b = pTRUE;
+      tt->struct_vals[45].b = pFALSE;
       tt->struct_vals[46].b = pFALSE;
       tt->struct_vals[47].i = 3;
     tt++;
@@ -1571,10 +1573,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("iqplot_line_color");
-    tt->descr = tdrpStrDup("Color of general lines in iq plots.");
+    tt->descr = tdrpStrDup("Color of data lines in iq plots.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_line_color - &_start_;
     tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'iqplot_line_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_line_width");
+    tt->descr = tdrpStrDup("Width of data lines in iq plots.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &iqplot_line_width - &_start_;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'iqplot_adaptive_filtered_color'
@@ -1583,7 +1597,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("iqplot_adaptive_filtered_color");
-    tt->descr = tdrpStrDup("Color of adaptive filtered lines in iq plots.");
+    tt->descr = tdrpStrDup("Color of adaptive filtered lines in spectra plots.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_adaptive_filtered_color - &_start_;
     tt->single_val.s = tdrpStrDup("pink");
@@ -1595,34 +1609,46 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("iqplot_regression_filtered_color");
-    tt->descr = tdrpStrDup("Color of regression filtered lines in iq plots.");
+    tt->descr = tdrpStrDup("Color of regression filtered lines in spectra plots.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_regression_filtered_color - &_start_;
     tt->single_val.s = tdrpStrDup("orange");
     tt++;
     
-    // Parameter 'iqplot_ival_line_color'
+    // Parameter 'iqplot_polynomial_fit_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("iqplot_ival_line_color");
-    tt->descr = tdrpStrDup("Color of I values in time series.");
+    tt->param_name = tdrpStrDup("iqplot_polynomial_fit_color");
+    tt->descr = tdrpStrDup("Color of polynomial fit in time series.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &iqplot_ival_line_color - &_start_;
+    tt->val_offset = (char *) &iqplot_polynomial_fit_color - &_start_;
+    tt->single_val.s = tdrpStrDup("orange");
+    tt++;
+    
+    // Parameter 'iqplot_polynomial_residual_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_polynomial_residual_color");
+    tt->descr = tdrpStrDup("Color of polynomial residuals in time series.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &iqplot_polynomial_residual_color - &_start_;
     tt->single_val.s = tdrpStrDup("red");
     tt++;
     
-    // Parameter 'iqplot_qval_line_color'
-    // ctype is 'char*'
+    // Parameter 'iqplot_polynomial_line_width'
+    // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("iqplot_qval_line_color");
-    tt->descr = tdrpStrDup("Color of V values in time series.");
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_polynomial_line_width");
+    tt->descr = tdrpStrDup("Width of data lines in polynomial plots.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &iqplot_qval_line_color - &_start_;
-    tt->single_val.s = tdrpStrDup("orange");
+    tt->val_offset = (char *) &iqplot_polynomial_line_width - &_start_;
+    tt->single_val.i = 2;
     tt++;
     
     // Parameter 'iqplot_y_grid_lines_on'

@@ -294,7 +294,8 @@ typedef enum {
   SPECTRUM_PHASE,
   TS_POWER,
   TS_PHASE,
-  I_AND_Q,
+  I_VALS,
+  Q_VALS,
   I_VS_Q,
   PHASOR
 } iqplot_type_t;
@@ -321,24 +322,24 @@ typedef struct {
   iqplot_type_t plot_type;
   rx_channel_t rx_channel;
   fft_window_t fft_window;
-  boolean adaptive_filter;
-  boolean regression_filter;
+  boolean use_adaptive_filter;
+  boolean use_regression_filter;
   int regression_order;
 } iqplot_t;
 
 paramdef struct iqplot_t {
   p_default = {
    { SPECTRUM_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
-   { SPECTRUM_POWER, CHANNEL_VC, FFT_WINDOW_VONHANN, true, false, 3 },
    { SPECTRUM_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
-   { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
-   { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
-   { I_AND_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
-   { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 },
-   { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 3 }
+   { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, false, false, 3 },
+   { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, false, false, 3 },
+   { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, false, true, 3 },
+   { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, false, true, 3 },
+   { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, false, false, 3 },
+   { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, false, false, 3 }
   };
   p_descr = "Details of IQ plots for each sub panel.";
-  p_help = "SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_AND_Q: time series of I and Q.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.";
+  p_help = "SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.";
 } iqplots[];
 
 paramdef int {
@@ -446,28 +447,38 @@ paramdef string {
 
 paramdef string {
   p_default = "yellow";
-  p_descr = "Color of general lines in iq plots.";
+  p_descr = "Color of data lines in iq plots.";
 } iqplot_line_color;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Width of data lines in iq plots.";
+} iqplot_line_width;
 
 paramdef string {
   p_default = "pink";
-  p_descr = "Color of adaptive filtered lines in iq plots.";
+  p_descr = "Color of adaptive filtered lines in spectra plots.";
 } iqplot_adaptive_filtered_color;
 
 paramdef string {
   p_default = "orange";
-  p_descr = "Color of regression filtered lines in iq plots.";
+  p_descr = "Color of regression filtered lines in spectra plots.";
 } iqplot_regression_filtered_color;
 
 paramdef string {
-  p_default = "red";
-  p_descr = "Color of I values in time series.";
-} iqplot_ival_line_color;
+  p_default = "orange";
+  p_descr = "Color of polynomial fit in time series.";
+} iqplot_polynomial_fit_color;
 
 paramdef string {
-  p_default = "orange";
-  p_descr = "Color of V values in time series.";
-} iqplot_qval_line_color;
+  p_default = "red";
+  p_descr = "Color of polynomial residuals in time series.";
+} iqplot_polynomial_residual_color;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Width of data lines in polynomial plots.";
+} iqplot_polynomial_line_width;
 
 paramdef boolean {
   p_default = true;

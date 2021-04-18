@@ -87,9 +87,10 @@ public:
     SPECTRUM_PHASE = 1,
     TS_POWER = 2,
     TS_PHASE = 3,
-    I_AND_Q = 4,
-    I_VS_Q = 5,
-    PHASOR = 6
+    I_VALS = 4,
+    Q_VALS = 5,
+    I_VS_Q = 6,
+    PHASOR = 7
   } iqplot_type_t;
 
   typedef enum {
@@ -179,8 +180,8 @@ public:
     iqplot_type_t plot_type;
     rx_channel_t rx_channel;
     fft_window_t fft_window;
-    tdrp_bool_t adaptive_filter;
-    tdrp_bool_t regression_filter;
+    tdrp_bool_t use_adaptive_filter;
+    tdrp_bool_t use_regression_filter;
     int regression_order;
   } iqplot_t;
 
@@ -585,13 +586,17 @@ public:
 
   char* iqplot_line_color;
 
+  int iqplot_line_width;
+
   char* iqplot_adaptive_filtered_color;
 
   char* iqplot_regression_filtered_color;
 
-  char* iqplot_ival_line_color;
+  char* iqplot_polynomial_fit_color;
 
-  char* iqplot_qval_line_color;
+  char* iqplot_polynomial_residual_color;
+
+  int iqplot_polynomial_line_width;
 
   tdrp_bool_t iqplot_y_grid_lines_on;
 
@@ -777,7 +782,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[164];
+  mutable TDRPtable _table[166];
 
   const char *_className;
 

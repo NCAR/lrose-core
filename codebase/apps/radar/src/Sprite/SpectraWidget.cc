@@ -1123,6 +1123,9 @@ void SpectraWidget::_createIqPlot(int id)
   iqplot->setPlotType(_params._iqplots[id].plot_type);
   iqplot->setRxChannel(_params._iqplots[id].rx_channel);
   iqplot->setFftWindow(_params._iqplots[id].fft_window);
+  iqplot->setUseAdaptiveFilter(_params._iqplots[id].use_adaptive_filter);
+  iqplot->setUseRegressionFilter(_params._iqplots[id].use_regression_filter);
+  iqplot->setRegressionOrder(_params._iqplots[id].regression_order);
 
   WorldPlot &iqplotWorld = iqplot->getFullWorld();
   
@@ -1409,64 +1412,72 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   ///////////////////////////////////////
   // select plot type sub-menu
   
-  QMenu selectTypeMenu("Select Plot Type", &contextMenu);
-  contextMenu.addMenu(&selectTypeMenu);
-
-  QAction selectSpectrumPower("Select Spectrum Power", &contextMenu);
-  connect(&selectSpectrumPower, &QAction::triggered,
+  QMenu setPlotTypeMenu("Set Plot Type", &contextMenu);
+  contextMenu.addMenu(&setPlotTypeMenu);
+  
+  QAction plotSpectrumPower("Plot Spectrum Power", &contextMenu);
+  connect(&plotSpectrumPower, &QAction::triggered,
           [this] () {
             _iqPlots[_contextMenuPanelId]->setPlotType(Params::SPECTRUM_POWER);
             _configureIqPlot(_contextMenuPanelId);
           } );
-  selectTypeMenu.addAction(&selectSpectrumPower);
+  setPlotTypeMenu.addAction(&plotSpectrumPower);
   
-  QAction selectSpectrumPhase("Select Spectrum Phase", &contextMenu);
-  connect(&selectSpectrumPhase, &QAction::triggered,
+  QAction plotSpectrumPhase("Plot Spectrum Phase", &contextMenu);
+  connect(&plotSpectrumPhase, &QAction::triggered,
           [this] () {
             _iqPlots[_contextMenuPanelId]->setPlotType(Params::SPECTRUM_PHASE);
             _configureIqPlot(_contextMenuPanelId);
           } );
-  selectTypeMenu.addAction(&selectSpectrumPhase);
+  setPlotTypeMenu.addAction(&plotSpectrumPhase);
   
-  QAction selectTsPower("Select TS Power", &contextMenu);
-  connect(&selectTsPower, &QAction::triggered,
+  QAction plotTsPower("Plot TS Power", &contextMenu);
+  connect(&plotTsPower, &QAction::triggered,
           [this] () {
             _iqPlots[_contextMenuPanelId]->setPlotType(Params::TS_POWER);
             _configureIqPlot(_contextMenuPanelId);
           } );
-  selectTypeMenu.addAction(&selectTsPower);
+  setPlotTypeMenu.addAction(&plotTsPower);
   
-  QAction selectTsPhase("Select TS Phase", &contextMenu);
-  connect(&selectTsPhase, &QAction::triggered,
+  QAction plotTsPhase("Plot TS Phase", &contextMenu);
+  connect(&plotTsPhase, &QAction::triggered,
           [this] () {
             _iqPlots[_contextMenuPanelId]->setPlotType(Params::TS_PHASE);
             _configureIqPlot(_contextMenuPanelId);
           } );
-  selectTypeMenu.addAction(&selectTsPhase);
+  setPlotTypeMenu.addAction(&plotTsPhase);
   
-  QAction selectIandQ("Select I and Q", &contextMenu);
-  connect(&selectIandQ, &QAction::triggered,
+  QAction plotIVals("Plot I Vals", &contextMenu);
+  connect(&plotIVals, &QAction::triggered,
           [this] () {
-            _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_AND_Q);
+            _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_VALS);
             _configureIqPlot(_contextMenuPanelId);
           } );
-  selectTypeMenu.addAction(&selectIandQ);
+  setPlotTypeMenu.addAction(&plotIVals);
   
-  QAction selectIvsQ("Select I vs Q", &contextMenu);
-  connect(&selectIvsQ, &QAction::triggered,
+  QAction plotQVals("Plot Q Vals", &contextMenu);
+  connect(&plotQVals, &QAction::triggered,
+          [this] () {
+            _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_VALS);
+            _configureIqPlot(_contextMenuPanelId);
+          } );
+  setPlotTypeMenu.addAction(&plotQVals);
+  
+  QAction plotIvsQ("Plot I vs Q", &contextMenu);
+  connect(&plotIvsQ, &QAction::triggered,
           [this] () {
             _iqPlots[_contextMenuPanelId]->setPlotType(Params::I_VS_Q);
             _configureIqPlot(_contextMenuPanelId);
           } );
-  selectTypeMenu.addAction(&selectIvsQ);
+  setPlotTypeMenu.addAction(&plotIvsQ);
   
-  QAction selectPhasor("SelectPhasor", &contextMenu);
-  connect(&selectPhasor, &QAction::triggered,
+  QAction plotPhasor("PlotPhasor", &contextMenu);
+  connect(&plotPhasor, &QAction::triggered,
           [this] () {
             _iqPlots[_contextMenuPanelId]->setPlotType(Params::PHASOR);
             _configureIqPlot(_contextMenuPanelId);
           } );
-  selectTypeMenu.addAction(&selectPhasor);
+  setPlotTypeMenu.addAction(&plotPhasor);
 
   ///////////////////////////////////////
   // set channel sub-menu
