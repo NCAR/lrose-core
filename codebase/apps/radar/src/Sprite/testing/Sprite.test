@@ -848,7 +848,7 @@ iqplot_line_color = "yellow";
 // Type: int
 //
 
-iqplot_line_width = 2;
+iqplot_line_width = 1;
 
 ///////////// iqplot_adaptive_filtered_color //////////
 //
@@ -1457,7 +1457,7 @@ regression_filter_min_csr_db = -5;
 // Type: boolean
 //
 
-regression_filter_interp_across_notch = TRUE;
+regression_filter_interp_across_notch = FALSE;
 
 ///////////// use_simple_notch_clutter_filter /////////
 //
@@ -1763,7 +1763,7 @@ KDP_debug = FALSE;
 // Type: int
 //
 
-n_samples = 128;
+n_samples = 256;
 
 ///////////// indexed_beams ///////////////////////////
 //

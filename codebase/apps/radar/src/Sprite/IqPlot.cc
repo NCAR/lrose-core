@@ -456,6 +456,10 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   vector<string> legendsRight;
   legendsRight.push_back(getFftWindowName());
+  if (_useRegressionFilter) {
+    snprintf(text, 1024, "Regr-order: %d", _regressionOrder);
+    legendsRight.push_back(text);
+  }
   _zoomWorld.drawLegendsTopRight(painter, legendsRight);
 
   // draw the title
@@ -814,7 +818,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     // Legend
     
     char text[1024];
-    snprintf(text, 1024, "Regression order: %d", _regressionOrder);
+    snprintf(text, 1024, "Regr-order: %d", _regressionOrder);
     vector<string> legends;
     legends.push_back(text);
     _zoomWorld.drawLegendsTopLeft(painter, legends);
