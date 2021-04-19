@@ -46,6 +46,8 @@
 #include <QPoint>
 #include <QTransform>
 
+#include <toolsa/TaArray.hh>
+#include <radar/RadarComplex.hh>
 #include "Params.hh"
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
