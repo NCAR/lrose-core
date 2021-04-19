@@ -259,7 +259,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   for (int ii = 0; ii < nSamples; ii++) {
     double power = RadarComplex::power(powerSpec[ii]);
     double dbm = 10.0 * log10(power);
-    if (power <= 0) {
+    if (power <= 1.0e-12) {
       dbm = -120.0;
     }
     powerDbm[ii] = dbm;
@@ -267,6 +267,115 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
     maxDbm = max(dbm, maxDbm);
   }
   
+  // compute adaptive filter as appropriate
+  
+  TaArray<double> filtAdaptDbm_;
+  double *filtAdaptDbm = filtAdaptDbm_.alloc(nSamples);
+  
+  const IwrfCalib &calib = beam->getCalib();
+  double calibNoise = 0.0;
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
+      break;
+    case Params::CHANNEL_VC:
+      calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
+      break;
+    case Params::CHANNEL_HX:
+      calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
+      break;
+    case Params::CHANNEL_VX:
+      calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+      break;
+  }
+  
+  RadarMoments moments;
+  moments.setNSamples(nSamples);
+  moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
+               beam->getStartRangeKm(), beam->getGateSpacingKm());
+  moments.setCalib(calib);
+  
+  if (_useAdaptiveFilter) {
+    
+    TaArray<RadarComplex_t> filtAdaptWindowed_;
+    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
+    double filterRatio, spectralNoise, spectralSnr;
+    moments.applyAdaptiveFilter(nSamples, fft,
+                                iqWindowed, NULL,
+                                calibNoise,
+                                filtAdaptWindowed, NULL,
+                                filterRatio,
+                                spectralNoise,
+                                spectralSnr);
+    
+    TaArray<RadarComplex_t> filtAdaptSpec_;
+    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(nSamples);
+    fft.fwd(filtAdaptWindowed, filtAdaptSpec);
+    fft.shift(filtAdaptSpec);
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+      double power = RadarComplex::power(filtAdaptSpec[ii]);
+      double dbm = 10.0 * log10(power);
+      if (power <= 1.0e-12) {
+        dbm = -120.0;
+      }
+      filtAdaptDbm[ii] = dbm;
+      minDbm = min(dbm, minDbm);
+      maxDbm = max(dbm, maxDbm);
+    }
+
+  } // if (_useAdaptiveFilter)
+
+  // compute regression filter as appropriate
+
+  TaArray<double> filtRegrDbm_;
+  double *filtRegrDbm = filtRegrDbm_.alloc(nSamples);
+
+  if (_useRegressionFilter) {
+    
+    RegressionFilter regrF;
+    if (beam->getIsStagPrt()) {
+      regrF.setupStaggered(nSamples, beam->getStagM(),
+                           beam->getStagN(), _regressionOrder);
+    } else {
+      regrF.setup(nSamples, _regressionOrder);
+    }
+    
+    TaArray<RadarComplex_t> filtered_;
+    RadarComplex_t *filtered = filtered_.alloc(nSamples);
+    double filterRatio, spectralNoise, spectralSnr;
+    moments.applyRegressionFilter(nSamples, fft,
+                                  regrF, _windowCoeff,
+                                  iq,
+                                  calibNoise,
+                                  _params.regression_filter_interp_across_notch,
+                                  filtered, NULL,
+                                  filterRatio,
+                                  spectralNoise,
+                                  spectralSnr);
+    
+    TaArray<RadarComplex_t> filtRegrWindowed_;
+    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(nSamples);
+    _applyWindow(filtered, filtRegrWindowed, nSamples);
+  
+    TaArray<RadarComplex_t> filtRegrSpec_;
+    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(nSamples);
+    fft.fwd(filtRegrWindowed, filtRegrSpec);
+    fft.shift(filtRegrSpec);
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+      double power = RadarComplex::power(filtRegrSpec[ii]);
+      double dbm = 10.0 * log10(power);
+      if (power <= 1.0e-12) {
+        dbm = -120.0;
+      }
+      minDbm = min(dbm, minDbm);
+      maxDbm = max(dbm, maxDbm);
+      filtRegrDbm[ii] = dbm;
+    }
+    
+  } // if (_useRegressionFilter)
+
   // set the Y axis range
 
   double rangeY = maxDbm - minDbm;
@@ -278,7 +387,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the spectrum - as line
+  // draw the unfiltered spectrum
 
   painter.save();
   QPen pen(painter.pen());
@@ -295,48 +404,9 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   _zoomWorld.drawLines(painter, pts);
   painter.restore();
 
-  // plot adaptive filter as appropriate
-
+  // draw adaptive filter
+  
   if (_useAdaptiveFilter) {
-    
-    const IwrfCalib &calib = beam->getCalib();
-    double calibNoise = 0.0;
-    switch (_rxChannel) {
-      case Params::CHANNEL_HC:
-        calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
-        break;
-      case Params::CHANNEL_VC:
-        calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
-        break;
-      case Params::CHANNEL_HX:
-        calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
-        break;
-      case Params::CHANNEL_VX:
-        calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
-        break;
-    }
-    
-    RadarMoments moments;
-    moments.setNSamples(nSamples);
-    moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
-                 beam->getStartRangeKm(), beam->getGateSpacingKm());
-    moments.setCalib(calib);
-    
-    TaArray<RadarComplex_t> filtWindowed_;
-    RadarComplex_t *filtWindowed = filtWindowed_.alloc(nSamples);
-    double filterRatio, spectralNoise, spectralSnr;
-    moments.applyAdaptiveFilter(nSamples, fft,
-                                iqWindowed, NULL,
-                                calibNoise,
-                                filtWindowed, NULL,
-                                filterRatio,
-                                spectralNoise,
-                                spectralSnr);
-    
-    TaArray<RadarComplex_t> filtSpec_;
-    RadarComplex_t *filtSpec = filtSpec_.alloc(nSamples);
-    fft.fwd(filtWindowed, filtSpec);
-    fft.shift(filtSpec);
     
     painter.save();
     QPen pen(painter.pen());
@@ -346,12 +416,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
     painter.setPen(pen);
     QVector<QPointF> filtPts;
     for (int ii = 0; ii < nSamples; ii++) {
-      double power = RadarComplex::power(filtSpec[ii]);
-      double dbm = 10.0 * log10(power);
-      if (power <= 0) {
-        dbm = -120.0;
-      }
-      QPointF pt(ii, dbm);
+      QPointF pt(ii, filtAdaptDbm[ii]);
       filtPts.push_back(pt);
     }
     _zoomWorld.drawLines(painter, filtPts);
@@ -359,62 +424,9 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   } // if (_useAdaptiveFilter)
 
-  // plot regression filter as appropriate
+  // draw regression filter
 
   if (_useRegressionFilter) {
-    
-    const IwrfCalib &calib = beam->getCalib();
-    double calibNoise = 0.0;
-    switch (_rxChannel) {
-      case Params::CHANNEL_HC:
-        calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
-        break;
-      case Params::CHANNEL_VC:
-        calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
-        break;
-      case Params::CHANNEL_HX:
-        calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
-        break;
-      case Params::CHANNEL_VX:
-        calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
-        break;
-    }
-    
-    RegressionFilter regrF;
-    if (beam->getIsStagPrt()) {
-      regrF.setupStaggered(nSamples, beam->getStagM(),
-                           beam->getStagN(), _regressionOrder);
-    } else {
-      regrF.setup(nSamples, _regressionOrder);
-    }
-    
-    RadarMoments moments;
-    moments.setNSamples(nSamples);
-    moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
-                 beam->getStartRangeKm(), beam->getGateSpacingKm());
-    moments.setCalib(calib);
-    
-    TaArray<RadarComplex_t> filtered_;
-    RadarComplex_t *filtered = filtered_.alloc(nSamples);
-    double filterRatio, spectralNoise, spectralSnr;
-    moments.applyRegressionFilter(nSamples, fft,
-                                  regrF, _windowCoeff,
-                                  iq,
-                                  calibNoise,
-                                  _params.regression_filter_interp_across_notch,
-                                  filtered, NULL,
-                                  filterRatio,
-                                  spectralNoise,
-                                  spectralSnr);
-    
-    TaArray<RadarComplex_t> filtWindowed_;
-    RadarComplex_t *filtWindowed = filtWindowed_.alloc(nSamples);
-    _applyWindow(filtered, filtWindowed, nSamples);
-  
-    TaArray<RadarComplex_t> filtSpec_;
-    RadarComplex_t *filtSpec = filtSpec_.alloc(nSamples);
-    fft.fwd(filtWindowed, filtSpec);
-    fft.shift(filtSpec);
     
     painter.save();
     QPen pen(painter.pen());
@@ -424,12 +436,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
     painter.setPen(pen);
     QVector<QPointF> filtPts;
     for (int ii = 0; ii < nSamples; ii++) {
-      double power = RadarComplex::power(filtSpec[ii]);
-      double dbm = 10.0 * log10(power);
-      if (power <= 0) {
-        dbm = -120.0;
-      }
-      QPointF pt(ii, dbm);
+      QPointF pt(ii, filtRegrDbm[ii]);
       filtPts.push_back(pt);
     }
     _zoomWorld.drawLines(painter, filtPts);
@@ -437,6 +444,10 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   } // if (_useRegressionFilter)
 
+  // plot clutter model
+
+  double width = 2.0;
+  
   // legends
 
   const MomentsFields* fields = beam->getOutFields();
