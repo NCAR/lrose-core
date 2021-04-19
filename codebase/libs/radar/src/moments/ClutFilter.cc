@@ -35,6 +35,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <algorithm>
 #include <cstring>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
@@ -912,5 +913,94 @@ double ClutFilter::computeSpectralNoise(const double *powerSpec,
   } // isect
 
   return noisePower;
+
+}
+
+//////////////////////////////////////////////
+// Compute a gaussian clutter model, based
+// on an observed power spectrum.
+//
+// Powers are linear - i.e. not dBm.
+//
+// Assume:
+// (a) Spectrum is shifted so DC is centered.
+// (b) Clutter is centered - i.e. 0 vel.
+// (c) Clutter width is supplied.
+//
+// The model will match the peak of the spectrum at DC.
+// If the peak is not at DC, the model will be set to missing.
+// Missing power values are set to 1.0e-12 = -120 dBm. 
+//
+// The caller manages the memory for gaussianModel.
+//
+// Returns 0 if clutter is found, -1 otherwise.
+
+int ClutFilter::computeGaussianClutterModel(const double *powerSpectrum,
+                                            int nSamples, 
+                                            double widthMps,
+                                            double nyquistMps,
+                                            double *gaussianModel)
+  
+{
+
+  int nSamplesHalf = nSamples / 2;
+  double missingPower = 1.0e-12;
+
+  // find max power
+  // if clutter this is in the 3 middle spectral points
+
+  double maxPower = 0.0;
+  int maxIndex = 0;
+  
+  for (int ii = 0; ii < nSamples; ii++) {
+    double power = powerSpectrum[ii];
+    if (power > maxPower) {
+      maxPower = power;
+      maxIndex = ii;
+    }
+  }
+  
+  if (maxIndex < nSamplesHalf - 2 ||
+      maxIndex > nSamplesHalf + 2) {
+    // clutter does not dominate
+    for (int ii = 0; ii < nSamples; ii++) {
+      gaussianModel[ii] = missingPower;
+    }
+    return -1;
+  }
+
+  // set clutter properties
+
+  double clutPower = maxPower;
+  double sampleMps = nyquistMps / (nSamples / 2.0);
+
+  // compute model powers
+
+  vector<double> modelPowers;
+  double maxModelPower = 0.0;
+  for (int ii = 0; ii < nSamples; ii++) {
+    int jj = (nSamples / 2) - ii;
+    double xx = jj * sampleMps;
+    double modelPower = 
+      ((clutPower / (widthMps * sqrt(M_PI * 2.0))) * 
+       exp(-0.5 * pow(xx / widthMps, 2.0)));
+    maxModelPower = max(maxModelPower, modelPower);
+    modelPowers.push_back(modelPower);
+  }
+
+  // adjust model power so that the peak observation
+  // and peak of the model are the same
+
+  double powerRatio = clutPower / maxModelPower;
+  for (int ii = 0; ii < nSamples; ii++) {
+    double power = modelPowers[ii] * powerRatio;
+    if (power >= missingPower) {
+      gaussianModel[ii] = power;
+    } else {
+      gaussianModel[ii] = missingPower;
+    }
+  }
+
+  return 0;
 
 }

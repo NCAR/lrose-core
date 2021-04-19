@@ -446,7 +446,82 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   // plot clutter model
 
-  double width = 2.0;
+  ClutFilter clut;
+  TaArray<double> clutterModel_;
+  double *clutterModel = clutterModel_.alloc(nSamples);
+  TaArray<double> powerReal_;
+  double *powerReal = powerReal_.alloc(nSamples);
+  for (int ii = 0; ii < nSamples; ii++) {
+    powerReal[ii] = RadarComplex::power(powerSpec[ii]);
+  }
+  
+  double widthMps = 1.0;
+  if (clut.computeGaussianClutterModel(powerReal,
+                                       nSamples,
+                                       widthMps,
+                                       beam->getNyquist(),
+                                       clutterModel) == 0) {
+    
+    painter.save();
+    pen = painter.pen();
+    pen.setColor("red");
+    pen.setStyle(Qt::DotLine);
+    pen.setWidth(2);
+    painter.setPen(pen);
+    QVector<QPointF> clutPts;
+    for (int ii = 0; ii < nSamples; ii++) {
+      double power = clutterModel[ii];
+      double dbm = 10.0 * log10(power);
+      if (dbm < minDbm) {
+        dbm = minDbm;
+      }
+      QPointF pt(ii, dbm);
+      clutPts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, clutPts);
+    painter.restore();
+  }
+  
+
+  // double clutDbm = powerDbm[nSamples/2];
+  // clutDbm = max(clutDbm, powerDbm[nSamples/2 - 1]);
+  // clutDbm = max(clutDbm, powerDbm[nSamples/2 + 1]);
+  // double clutPower = pow(10.0, clutDbm / 10.0);
+
+  // double widthMps = 1.0;
+  // double sampleMps = beam->getNyquist() / (nSamples / 2.0);
+
+  // vector<double> modelPowers;
+  // double maxModelPower = 0.0;
+  // for (int ii = 0; ii < nSamples; ii++) {
+  //   int jj = (nSamples / 2) - ii;
+  //   double xx = jj * sampleMps;
+  //   double modelPower = 
+  //     ((clutPower / (widthMps * sqrt(M_PI * 2.0))) * 
+  //      exp(-0.5 * pow(xx / widthMps, 2.0)));
+  //   maxModelPower = max(maxModelPower, modelPower);
+  //   modelPowers.push_back(modelPower);
+  // }
+  // double powerRatio = clutPower / maxModelPower;
+
+  // painter.save();
+  // pen = painter.pen();
+  // pen.setColor("red");
+  // pen.setStyle(Qt::DotLine);
+  // pen.setWidth(2);
+  // painter.setPen(pen);
+  // QVector<QPointF> clutPts;
+  // for (int ii = 0; ii < nSamples; ii++) {
+  //   double power = modelPowers[ii] * powerRatio;
+  //   double dbm = 10.0 * log10(power);
+  //   if (dbm < minDbm) {
+  //     dbm = minDbm;
+  //   }
+  //   QPointF pt(ii, dbm);
+  //   clutPts.push_back(pt);
+  // }
+  // _zoomWorld.drawLines(painter, clutPts);
+  // painter.restore();
   
   // legends
 

@@ -225,6 +225,31 @@ public:
   static double computeSpectralNoise(const double *powerSpec,
 				     int nSamples);
   
+  //////////////////////////////////////////////
+  // Compute a gaussian clutter model, based
+  // on an observed power spectrum.
+  //
+  // Powers are linear - i.e. not dBm.
+  //
+  // Assume:
+  // (a) Spectrum is shifted so DC is centered.
+  // (b) Clutter is centered - i.e. 0 vel.
+  // (c) Clutter width is supplied.
+  //
+  // The model will match the peak of the spectrum at DC.
+  // If the peak is not at DC, the model will be set to missing.
+  // Missing power values are set to 1.0e-12 = -120 dBm. 
+  //
+  // The caller manages the memory for gaussianModel.
+  //
+  // Returns 0 if clutter is found, -1 otherwise.
+  
+  static int computeGaussianClutterModel(const double *powerSpectrum,
+                                         int nSamples, 
+                                         double widthMps,
+                                         double nyquistMps,
+                                         double *gaussianModel);
+  
 protected:
 private:
   
