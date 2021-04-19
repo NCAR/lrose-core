@@ -1192,7 +1192,7 @@
     tt->array_elem_size = sizeof(iqplot_t);
     tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("iqplot_t");
-    tt->struct_def.nfields = 6;
+    tt->struct_def.nfields = 9;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("iqplot_type_t");
@@ -1268,16 +1268,31 @@
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_iqplots->use_adaptive_filter - (char *) _iqplots;
       tt->struct_def.fields[4].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[4].fname = tdrpStrDup("use_regression_filter");
+      tt->struct_def.fields[4].fname = tdrpStrDup("plot_clutter_model");
       tt->struct_def.fields[4].ptype = BOOL_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_iqplots->use_regression_filter - (char *) _iqplots;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[5].fname = tdrpStrDup("regression_order");
-      tt->struct_def.fields[5].ptype = INT_TYPE;
+        (char *) &_iqplots->plot_clutter_model - (char *) _iqplots;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("clutter_width_mps");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[5].rel_offset = 
+        (char *) &_iqplots->clutter_width_mps - (char *) _iqplots;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[6].fname = tdrpStrDup("use_regression_filter");
+      tt->struct_def.fields[6].ptype = BOOL_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_iqplots->use_regression_filter - (char *) _iqplots;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[7].fname = tdrpStrDup("regression_order");
+      tt->struct_def.fields[7].ptype = INT_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
         (char *) &_iqplots->regression_order - (char *) _iqplots;
-    tt->n_struct_vals = 48;
+      tt->struct_def.fields[8].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[8].fname = tdrpStrDup("regression_filter_interp_across_notch");
+      tt->struct_def.fields[8].ptype = BOOL_TYPE;
+      tt->struct_def.fields[8].rel_offset = 
+        (char *) &_iqplots->regression_filter_interp_across_notch - (char *) _iqplots;
+    tt->n_struct_vals = 72;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = SPECTRUM_POWER;
@@ -1285,49 +1300,73 @@
       tt->struct_vals[2].e = FFT_WINDOW_VONHANN;
       tt->struct_vals[3].b = pTRUE;
       tt->struct_vals[4].b = pFALSE;
-      tt->struct_vals[5].i = 3;
-      tt->struct_vals[6].e = SPECTRUM_PHASE;
-      tt->struct_vals[7].e = CHANNEL_HC;
-      tt->struct_vals[8].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[9].b = pTRUE;
-      tt->struct_vals[10].b = pFALSE;
-      tt->struct_vals[11].i = 3;
-      tt->struct_vals[12].e = TS_POWER;
-      tt->struct_vals[13].e = CHANNEL_HC;
-      tt->struct_vals[14].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[5].d = 0.75;
+      tt->struct_vals[6].b = pFALSE;
+      tt->struct_vals[7].i = 3;
+      tt->struct_vals[8].b = pTRUE;
+      tt->struct_vals[9].e = SPECTRUM_PHASE;
+      tt->struct_vals[10].e = CHANNEL_HC;
+      tt->struct_vals[11].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[12].b = pTRUE;
+      tt->struct_vals[13].b = pFALSE;
+      tt->struct_vals[14].d = 0.75;
       tt->struct_vals[15].b = pFALSE;
-      tt->struct_vals[16].b = pFALSE;
-      tt->struct_vals[17].i = 3;
-      tt->struct_vals[18].e = TS_PHASE;
+      tt->struct_vals[16].i = 3;
+      tt->struct_vals[17].b = pTRUE;
+      tt->struct_vals[18].e = TS_POWER;
       tt->struct_vals[19].e = CHANNEL_HC;
       tt->struct_vals[20].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[21].b = pFALSE;
+      tt->struct_vals[21].b = pTRUE;
       tt->struct_vals[22].b = pFALSE;
-      tt->struct_vals[23].i = 3;
-      tt->struct_vals[24].e = I_VALS;
-      tt->struct_vals[25].e = CHANNEL_HC;
-      tt->struct_vals[26].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[27].b = pFALSE;
-      tt->struct_vals[28].b = pTRUE;
-      tt->struct_vals[29].i = 3;
-      tt->struct_vals[30].e = Q_VALS;
-      tt->struct_vals[31].e = CHANNEL_HC;
-      tt->struct_vals[32].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[23].d = 0.75;
+      tt->struct_vals[24].b = pFALSE;
+      tt->struct_vals[25].i = 3;
+      tt->struct_vals[26].b = pTRUE;
+      tt->struct_vals[27].e = TS_PHASE;
+      tt->struct_vals[28].e = CHANNEL_HC;
+      tt->struct_vals[29].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[30].b = pTRUE;
+      tt->struct_vals[31].b = pFALSE;
+      tt->struct_vals[32].d = 0.75;
       tt->struct_vals[33].b = pFALSE;
-      tt->struct_vals[34].b = pTRUE;
-      tt->struct_vals[35].i = 3;
-      tt->struct_vals[36].e = I_VS_Q;
+      tt->struct_vals[34].i = 3;
+      tt->struct_vals[35].b = pTRUE;
+      tt->struct_vals[36].e = I_VALS;
       tt->struct_vals[37].e = CHANNEL_HC;
       tt->struct_vals[38].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[39].b = pFALSE;
+      tt->struct_vals[39].b = pTRUE;
       tt->struct_vals[40].b = pFALSE;
-      tt->struct_vals[41].i = 3;
-      tt->struct_vals[42].e = PHASOR;
-      tt->struct_vals[43].e = CHANNEL_HC;
-      tt->struct_vals[44].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[45].b = pFALSE;
-      tt->struct_vals[46].b = pFALSE;
-      tt->struct_vals[47].i = 3;
+      tt->struct_vals[41].d = 0.75;
+      tt->struct_vals[42].b = pFALSE;
+      tt->struct_vals[43].i = 3;
+      tt->struct_vals[44].b = pTRUE;
+      tt->struct_vals[45].e = Q_VALS;
+      tt->struct_vals[46].e = CHANNEL_HC;
+      tt->struct_vals[47].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[48].b = pTRUE;
+      tt->struct_vals[49].b = pFALSE;
+      tt->struct_vals[50].d = 0.75;
+      tt->struct_vals[51].b = pFALSE;
+      tt->struct_vals[52].i = 3;
+      tt->struct_vals[53].b = pTRUE;
+      tt->struct_vals[54].e = I_VS_Q;
+      tt->struct_vals[55].e = CHANNEL_HC;
+      tt->struct_vals[56].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[57].b = pTRUE;
+      tt->struct_vals[58].b = pFALSE;
+      tt->struct_vals[59].d = 0.75;
+      tt->struct_vals[60].b = pFALSE;
+      tt->struct_vals[61].i = 3;
+      tt->struct_vals[62].b = pTRUE;
+      tt->struct_vals[63].e = PHASOR;
+      tt->struct_vals[64].e = CHANNEL_HC;
+      tt->struct_vals[65].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[66].b = pTRUE;
+      tt->struct_vals[67].b = pFALSE;
+      tt->struct_vals[68].d = 0.75;
+      tt->struct_vals[69].b = pFALSE;
+      tt->struct_vals[70].i = 3;
+      tt->struct_vals[71].b = pTRUE;
     tt++;
     
     // Parameter 'iqplot_top_margin'
@@ -1601,6 +1640,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_adaptive_filtered_color - &_start_;
     tt->single_val.s = tdrpStrDup("pink");
+    tt++;
+    
+    // Parameter 'iqplot_clutter_model_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_clutter_model_color");
+    tt->descr = tdrpStrDup("Color of clutter model iq plots.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &iqplot_clutter_model_color - &_start_;
+    tt->single_val.s = tdrpStrDup("red");
     tt++;
     
     // Parameter 'iqplot_regression_filtered_color'
@@ -2250,18 +2301,6 @@
     tt->help = tdrpStrDup("As a first step, we compute the CSR using a 3rd order regression fit. If the CSR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.");
     tt->val_offset = (char *) &regression_filter_min_csr_db - &_start_;
     tt->single_val.d = -5;
-    tt++;
-    
-    // Parameter 'regression_filter_interp_across_notch'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("regression_filter_interp_across_notch");
-    tt->descr = tdrpStrDup("For the regression filter, option to interpolate power across the notch.");
-    tt->help = tdrpStrDup("If true, the spectral power in the notch created by the filter will be interpolated using values to each side of the notch.");
-    tt->val_offset = (char *) &regression_filter_interp_across_notch - &_start_;
-    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'use_simple_notch_clutter_filter'

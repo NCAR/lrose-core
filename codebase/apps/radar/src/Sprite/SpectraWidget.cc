@@ -1123,9 +1123,9 @@ void SpectraWidget::_createIqPlot(int id)
   iqplot->setPlotType(_params._iqplots[id].plot_type);
   iqplot->setRxChannel(_params._iqplots[id].rx_channel);
   iqplot->setFftWindow(_params._iqplots[id].fft_window);
-  iqplot->setUseAdaptiveFilter(_params._iqplots[id].use_adaptive_filter);
-  iqplot->setUseRegressionFilter(_params._iqplots[id].use_regression_filter);
-  iqplot->setRegressionOrder(_params._iqplots[id].regression_order);
+  iqplot->setUseAdaptiveFilt(_params._iqplots[id].use_adaptive_filter);
+  iqplot->setUseRegrFilt(_params._iqplots[id].use_regression_filter);
+  iqplot->setRegrOrder(_params._iqplots[id].regression_order);
 
   WorldPlot &iqplotWorld = iqplot->getFullWorld();
   
@@ -1598,21 +1598,46 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   QAction useAdaptiveFilter("Use adaptive filter", &contextMenu);
   useAdaptiveFilter.setCheckable(true);
   useAdaptiveFilter.setChecked
-    (_iqPlots[id]->getUseAdaptiveFilter());
+    (_iqPlots[id]->getUseAdaptiveFilt());
   connect(&useAdaptiveFilter, &QAction::triggered,
           [this, id] (bool state) {
-            _iqPlots[id]->setUseAdaptiveFilter(state);
+            _iqPlots[id]->setUseAdaptiveFilt(state);
             _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&useAdaptiveFilter);
 
+  QAction plotClutModel("Plot clutter model", &contextMenu);
+  plotClutModel.setCheckable(true);
+  plotClutModel.setChecked
+    (_iqPlots[id]->getPlotClutModel());
+  connect(&plotClutModel, &QAction::triggered,
+          [this, id] (bool state) {
+            _iqPlots[id]->setPlotClutModel(state);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&plotClutModel);
+
+  QAction setClutterWidth("Set clutter width", &contextMenu);
+  connect(&setClutterWidth, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            double width = QInputDialog::getDouble
+              (this,
+               tr("QInputDialog::getDouble()"), tr("Set clutter width (mps):"),
+               _iqPlots[id]->getClutWidthMps(), 0.05, 5.0, 2,
+               &ok, Qt::WindowFlags());
+            _iqPlots[id]->setClutWidthMps(width);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&setClutterWidth);
+
   QAction useRegressionFilter("Use regression filter", &contextMenu);
   useRegressionFilter.setCheckable(true);
   useRegressionFilter.setChecked
-    (_iqPlots[id]->getUseRegressionFilter());
+    (_iqPlots[id]->getUseRegrFilt());
   connect(&useRegressionFilter, &QAction::triggered,
           [this, id] (bool state) {
-            _iqPlots[id]->setUseRegressionFilter(state);
+            _iqPlots[id]->setUseRegrFilt(state);
             _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&useRegressionFilter);
@@ -1624,13 +1649,24 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
             int order = QInputDialog::getInt
               (this,
                tr("QInputDialog::getInt()"), tr("Set regression order:"),
-               _iqPlots[id]->getRegressionOrder(),
+               _iqPlots[id]->getRegrOrder(),
                1, 100, 1, &ok);
-            _iqPlots[id]->setRegressionOrder(order);
+            _iqPlots[id]->setRegrOrder(order);
             _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&setRegressionOrder);
-
+  
+  QAction regrInterpNotch("Regr interp across notch", &contextMenu);
+  regrInterpNotch.setCheckable(true);
+  regrInterpNotch.setChecked
+    (_iqPlots[id]->getRegrFiltInterpAcrossNotch());
+  connect(&regrInterpNotch, &QAction::triggered,
+          [this, id] (bool state) {
+            _iqPlots[id]->setRegrFiltInterpAcrossNotch(state);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&regrInterpNotch);
+  
   // show the context menu
   
   contextMenu.exec(this->mapToGlobal(pos));

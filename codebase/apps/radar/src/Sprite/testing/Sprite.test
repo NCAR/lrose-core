@@ -544,8 +544,11 @@ iqplots_n_columns = 4;
 //          FFT_WINDOW_TUKEY_30
 //          FFT_WINDOW_TUKEY_50
 //      boolean use_adaptive_filter;
+//      boolean plot_clutter_model;
+//      double clutter_width_mps;
 //      boolean use_regression_filter;
 //      int regression_order;
+//      boolean regression_filter_interp_across_notch;
 //   }
 //
 // 1D array - variable length.
@@ -557,8 +560,11 @@ iqplots = {
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
-    regression_order = 3
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
@@ -566,8 +572,11 @@ iqplots = {
     rx_channel = CHANNEL_VC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
-    regression_order = 3
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
@@ -575,8 +584,11 @@ iqplots = {
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
-    regression_order = 3
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
@@ -584,8 +596,11 @@ iqplots = {
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
-    regression_order = 3
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
@@ -593,8 +608,11 @@ iqplots = {
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_RECT,
     use_adaptive_filter = FALSE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
     use_regression_filter = TRUE,
-    regression_order = 3
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
@@ -602,8 +620,11 @@ iqplots = {
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_RECT,
     use_adaptive_filter = FALSE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
     use_regression_filter = TRUE,
-    regression_order = 3
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
@@ -611,8 +632,11 @@ iqplots = {
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
-    regression_order = 3
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
@@ -620,8 +644,11 @@ iqplots = {
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
-    regression_order = 3
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
 };
 
@@ -858,6 +885,16 @@ iqplot_line_width = 1;
 //
 
 iqplot_adaptive_filtered_color = "pink";
+
+///////////// iqplot_clutter_model_color //////////////
+//
+// Color of clutter model iq plots.
+//
+//
+// Type: string
+//
+
+iqplot_clutter_model_color = "red";
 
 ///////////// iqplot_regression_filtered_color ////////
 //
@@ -1443,20 +1480,6 @@ regression_filter_notch_edge_power_ratio_threshold_db = -45;
 //
 
 regression_filter_min_csr_db = -5;
-
-///////////// regression_filter_interp_across_notch ///
-//
-// For the regression filter, option to interpolate power across the 
-//   notch.
-//
-// If true, the spectral power in the notch created by the filter will 
-//   be interpolated using values to each side of the notch.
-//
-//
-// Type: boolean
-//
-
-regression_filter_interp_across_notch = FALSE;
 
 ///////////// use_simple_notch_clutter_filter /////////
 //

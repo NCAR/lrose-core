@@ -181,8 +181,11 @@ public:
     rx_channel_t rx_channel;
     fft_window_t fft_window;
     tdrp_bool_t use_adaptive_filter;
+    tdrp_bool_t plot_clutter_model;
+    double clutter_width_mps;
     tdrp_bool_t use_regression_filter;
     int regression_order;
+    tdrp_bool_t regression_filter_interp_across_notch;
   } iqplot_t;
 
   ///////////////////////////
@@ -590,6 +593,8 @@ public:
 
   char* iqplot_adaptive_filtered_color;
 
+  char* iqplot_clutter_model_color;
+
   char* iqplot_regression_filtered_color;
 
   char* iqplot_polynomial_fit_color;
@@ -682,8 +687,6 @@ public:
   double regression_filter_notch_edge_power_ratio_threshold_db;
 
   double regression_filter_min_csr_db;
-
-  tdrp_bool_t regression_filter_interp_across_notch;
 
   tdrp_bool_t use_simple_notch_clutter_filter;
 

@@ -74,9 +74,12 @@ IqPlot::IqPlot(QWidget* parent,
   _plotType = Params::SPECTRUM_POWER;
   _rxChannel = Params::CHANNEL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
-  _useAdaptiveFilter = false;
-  _useRegressionFilter = false;
-  _regressionOrder = 3;
+  _useAdaptiveFilt = false;
+  _plotClutModel = false;
+  _clutWidthMps = 1.0;
+  _useRegrFilt = false;
+  _regrOrder = 3;
+  _regrFiltInterpAcrossNotch = true;
 }
 
 /*************************************************************************
@@ -295,7 +298,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
                beam->getStartRangeKm(), beam->getGateSpacingKm());
   moments.setCalib(calib);
   
-  if (_useAdaptiveFilter) {
+  if (_useAdaptiveFilt) {
     
     TaArray<RadarComplex_t> filtAdaptWindowed_;
     RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
@@ -324,21 +327,21 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
       maxDbm = max(dbm, maxDbm);
     }
 
-  } // if (_useAdaptiveFilter)
+  } // if (_useAdaptiveFilt)
 
   // compute regression filter as appropriate
 
   TaArray<double> filtRegrDbm_;
   double *filtRegrDbm = filtRegrDbm_.alloc(nSamples);
 
-  if (_useRegressionFilter) {
+  if (_useRegrFilt) {
     
     RegressionFilter regrF;
     if (beam->getIsStagPrt()) {
       regrF.setupStaggered(nSamples, beam->getStagM(),
-                           beam->getStagN(), _regressionOrder);
+                           beam->getStagN(), _regrOrder);
     } else {
-      regrF.setup(nSamples, _regressionOrder);
+      regrF.setup(nSamples, _regrOrder);
     }
     
     TaArray<RadarComplex_t> filtered_;
@@ -348,7 +351,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
                                   regrF, _windowCoeff,
                                   iq,
                                   calibNoise,
-                                  _params.regression_filter_interp_across_notch,
+                                  _regrFiltInterpAcrossNotch,
                                   filtered, NULL,
                                   filterRatio,
                                   spectralNoise,
@@ -374,7 +377,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
       filtRegrDbm[ii] = dbm;
     }
     
-  } // if (_useRegressionFilter)
+  } // if (_useRegrFilt)
 
   // set the Y axis range
 
@@ -406,7 +409,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   // draw adaptive filter
   
-  if (_useAdaptiveFilter) {
+  if (_useAdaptiveFilt) {
     
     painter.save();
     QPen pen(painter.pen());
@@ -422,11 +425,11 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
     _zoomWorld.drawLines(painter, filtPts);
     painter.restore();
 
-  } // if (_useAdaptiveFilter)
+  } // if (_useAdaptiveFilt)
 
-  // draw regression filter
+  // draw regr filter
 
-  if (_useRegressionFilter) {
+  if (_useRegrFilt) {
     
     painter.save();
     QPen pen(painter.pen());
@@ -442,87 +445,50 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
     _zoomWorld.drawLines(painter, filtPts);
     painter.restore();
 
-  } // if (_useRegressionFilter)
+  } // if (_useRegrFilt)
 
   // plot clutter model
 
-  ClutFilter clut;
-  TaArray<double> clutterModel_;
-  double *clutterModel = clutterModel_.alloc(nSamples);
-  TaArray<double> powerReal_;
-  double *powerReal = powerReal_.alloc(nSamples);
-  for (int ii = 0; ii < nSamples; ii++) {
-    powerReal[ii] = RadarComplex::power(powerSpec[ii]);
-  }
-  
-  double widthMps = 1.0;
-  if (clut.computeGaussianClutterModel(powerReal,
-                                       nSamples,
-                                       widthMps,
-                                       beam->getNyquist(),
-                                       clutterModel) == 0) {
-    
-    painter.save();
-    pen = painter.pen();
-    pen.setColor("red");
-    pen.setStyle(Qt::DotLine);
-    pen.setWidth(2);
-    painter.setPen(pen);
-    QVector<QPointF> clutPts;
+  if (_plotClutModel) {
+
+    ClutFilter clut;
+    TaArray<double> clutModel_;
+    double *clutModel = clutModel_.alloc(nSamples);
+    TaArray<double> powerReal_;
+    double *powerReal = powerReal_.alloc(nSamples);
     for (int ii = 0; ii < nSamples; ii++) {
-      double power = clutterModel[ii];
-      double dbm = 10.0 * log10(power);
-      if (dbm < minDbm) {
-        dbm = minDbm;
-      }
-      QPointF pt(ii, dbm);
-      clutPts.push_back(pt);
+      powerReal[ii] = RadarComplex::power(powerSpec[ii]);
     }
-    _zoomWorld.drawLines(painter, clutPts);
-    painter.restore();
-  }
-  
+    
+    if (clut.computeGaussianClutterModel(powerReal,
+                                         nSamples,
+                                         _clutWidthMps,
+                                         beam->getNyquist(),
+                                         clutModel) == 0) {
+      
+      painter.save();
+      pen = painter.pen();
+      pen.setColor(_params.iqplot_clutter_model_color);
+      pen.setStyle(Qt::DotLine);
+      pen.setWidth(2);
+      painter.setPen(pen);
+      QVector<QPointF> clutPts;
+      for (int ii = 0; ii < nSamples; ii++) {
+        double power = clutModel[ii];
+        double dbm = 10.0 * log10(power);
+        if (dbm < minDbm) {
+          dbm = minDbm;
+        }
+        QPointF pt(ii, dbm);
+        clutPts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, clutPts);
+      painter.restore();
 
-  // double clutDbm = powerDbm[nSamples/2];
-  // clutDbm = max(clutDbm, powerDbm[nSamples/2 - 1]);
-  // clutDbm = max(clutDbm, powerDbm[nSamples/2 + 1]);
-  // double clutPower = pow(10.0, clutDbm / 10.0);
+    } // if (clut.computeGaussianClutterModel
 
-  // double widthMps = 1.0;
-  // double sampleMps = beam->getNyquist() / (nSamples / 2.0);
+  } // if (_plotClutModel)
 
-  // vector<double> modelPowers;
-  // double maxModelPower = 0.0;
-  // for (int ii = 0; ii < nSamples; ii++) {
-  //   int jj = (nSamples / 2) - ii;
-  //   double xx = jj * sampleMps;
-  //   double modelPower = 
-  //     ((clutPower / (widthMps * sqrt(M_PI * 2.0))) * 
-  //      exp(-0.5 * pow(xx / widthMps, 2.0)));
-  //   maxModelPower = max(maxModelPower, modelPower);
-  //   modelPowers.push_back(modelPower);
-  // }
-  // double powerRatio = clutPower / maxModelPower;
-
-  // painter.save();
-  // pen = painter.pen();
-  // pen.setColor("red");
-  // pen.setStyle(Qt::DotLine);
-  // pen.setWidth(2);
-  // painter.setPen(pen);
-  // QVector<QPointF> clutPts;
-  // for (int ii = 0; ii < nSamples; ii++) {
-  //   double power = modelPowers[ii] * powerRatio;
-  //   double dbm = 10.0 * log10(power);
-  //   if (dbm < minDbm) {
-  //     dbm = minDbm;
-  //   }
-  //   QPointF pt(ii, dbm);
-  //   clutPts.push_back(pt);
-  // }
-  // _zoomWorld.drawLines(painter, clutPts);
-  // painter.restore();
-  
   // legends
 
   const MomentsFields* fields = beam->getOutFields();
@@ -542,8 +508,8 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   vector<string> legendsRight;
   legendsRight.push_back(getFftWindowName());
-  if (_useRegressionFilter) {
-    snprintf(text, 1024, "Regr-order: %d", _regressionOrder);
+  if (_useRegrFilt) {
+    snprintf(text, 1024, "Regr-order: %d", _regrOrder);
     legendsRight.push_back(text);
   }
   _zoomWorld.drawLegendsTopRight(painter, legendsRight);
@@ -811,7 +777,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     xVals.push_back(ii);
   }
   ForsytheFit forsythe;
-  forsythe.prepareForFit(_regressionOrder, xVals);
+  forsythe.prepareForFit(_regrOrder, xVals);
   
   // compute polynomial regression fit
 
@@ -868,7 +834,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
   
   // plot regression filter as appropriate
 
-  if (_useRegressionFilter) {
+  if (_useRegrFilt) {
     
     // plot the polynomial fit
     
@@ -904,12 +870,12 @@ void IqPlot::_plotIQVals(QPainter &painter,
     // Legend
     
     char text[1024];
-    snprintf(text, 1024, "Regr-order: %d", _regressionOrder);
+    snprintf(text, 1024, "Regr-order: %d", _regrOrder);
     vector<string> legends;
     legends.push_back(text);
     _zoomWorld.drawLegendsTopLeft(painter, legends);
 
-  } // if (_useRegressionFilter)
+  } // if (_useRegrFilt)
 
   // draw the title
 

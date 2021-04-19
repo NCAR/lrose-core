@@ -124,9 +124,12 @@ public:
 
   // set filtering
   
-  void setUseAdaptiveFilter(bool val) { _useAdaptiveFilter = val; }
-  void setUseRegressionFilter(bool val) { _useRegressionFilter = val; }
-  void setRegressionOrder(int val) { _regressionOrder = val; }
+  void setUseAdaptiveFilt(bool val) { _useAdaptiveFilt = val; }
+  void setPlotClutModel(bool val) { _plotClutModel = val; }
+  void setClutWidthMps(double val) { _clutWidthMps = val; }
+  void setUseRegrFilt(bool val) { _useRegrFilt = val; }
+  void setRegrOrder(int val) { _regrOrder = val; }
+  void setRegrFiltInterpAcrossNotch(bool val) { _regrFiltInterpAcrossNotch = val; }
 
   // zooming
 
@@ -171,9 +174,12 @@ public:
 
   // get the filter details
   
-  bool getUseAdaptiveFilter() const { return _useAdaptiveFilter; }
-  bool getUseRegressionFilter() const { return _useRegressionFilter; }
-  int getRegressionOrder() const { return _regressionOrder; }
+  bool getUseAdaptiveFilt() const { return _useAdaptiveFilt; }
+  bool getPlotClutModel() const { return _plotClutModel; }
+  double getClutWidthMps() const { return _clutWidthMps; }
+  bool getUseRegrFilt() const { return _useRegrFilt; }
+  int getRegrOrder() const { return _regrOrder; }
+  bool getRegrFiltInterpAcrossNotch() const { return _regrFiltInterpAcrossNotch; }
 
   // get the moment type
 
@@ -205,9 +211,12 @@ protected:
 
   // filtering
 
-  bool _useAdaptiveFilter;
-  bool _useRegressionFilter;
-  int _regressionOrder;
+  bool _useAdaptiveFilt;
+  bool _plotClutModel;
+  double _clutWidthMps;
+  bool _useRegrFilt;
+  int _regrOrder;
+  bool _regrFiltInterpAcrossNotch;
 
   // unzoomed world
 
