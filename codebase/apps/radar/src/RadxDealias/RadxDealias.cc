@@ -704,7 +704,7 @@ void RadxDealias::_processVol(Volume *prevVelVol, Volume *currVelVol,
   soundVolume = Rsl::copy_volume(currVelVol);
 
   FirstGuess firstGuess(
-			_params.debug,
+			_params.debug >= Params::DEBUG_VERBOSE,
 			_params.sounding_url,
 			(float) _params.sounding_look_back,
 			(float) _params.wind_alt_min,

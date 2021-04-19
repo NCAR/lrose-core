@@ -91,6 +91,8 @@ public:
 
   int loadSoundingData(time_t issueTime);
 
+  int loadSoundingDataText(time_t issueTime);
+
   void outputSoundVolume();
 
 private:
