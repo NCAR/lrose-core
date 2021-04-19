@@ -1,5 +1,7 @@
 
 #include "FirstGuess.hh"
+#include "ClassIngest.hh"
+
 using namespace std;
 
 // Assume that all data in the volumes has been scaled and bias applied
@@ -136,6 +138,11 @@ bool FirstGuess::firstGuess(Volume* soundVolume, time_t soundingTime)
   
   if( ret <= 0 )
     {
+
+      // try reading a text file for the sounding
+      int ret = loadSoundingDataText(soundingTime);
+
+
       success = false;
       return success;
     }
@@ -395,6 +402,59 @@ int FirstGuess::loadSoundingData( time_t issueTime )
 
    //   if (success) 
    // outputSoundVolume();
+
+   return( ret );
+
+}
+
+int FirstGuess::loadSoundingDataText( time_t issueTime )
+{   
+  
+   //
+   // Try to read a sounding
+   // 
+
+  time_t startTime = issueTime - (time_t)_sounding_look_back*60;
+
+
+   ClassIngest *classIngest = new ClassIngest(_sounding_url,
+    _debug, //  >= Params::DEBUG_VERBOSE,
+    _sounding_url,
+    startTime, issueTime);
+
+   classIngest->readSoundingText();
+
+   // get the sounding from classIngest
+   // convert to SoundingGet 
+
+   int ret = sounding.readSounding( issueTime );
+
+   if ( ret < 0 ) {
+      fprintf( stderr, "Cannot read sounding data at %s\n",
+                       DateTime::str( issueTime ).c_str() );
+      return( ret  );
+   }
+
+   if ( ret == 0 ) {
+      fprintf(stderr, "No sounding data available at %s\n",
+                         DateTime::str( issueTime ).c_str() );
+      return( ret);
+   }
+
+   DateTime soundingTime = sounding.getLaunchTime();
+   string   soundingName = sounding.getSourceName();
+
+   string   timeStampName = "Sounding data: ";
+   timeStampName += soundingName;
+   
+   if(_debug)
+   fprintf( stderr, "Sounding: Got '%s' at %s\n",
+      soundingName.c_str(), soundingTime.dtime() );
+
+   //   if (success) 
+   // outputSoundVolume();
+
+  delete classIngest;
 
    return( ret );
 

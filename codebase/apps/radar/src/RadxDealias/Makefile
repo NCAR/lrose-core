@@ -25,6 +25,7 @@ HDRS = \
 	$(PARAMS_HH) \
 	Rsl.hh \
 	Args.hh \
+	ClassIngest.hh \
 	FirstGuess.hh \
 	RadxDealias.hh \
 	FourDD.hh
@@ -33,6 +34,7 @@ CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Rsl.cc \
 	Args.cc \
+	ClassIngest.cc \
 	FirstGuess.cc \
 	RadxDealias.cc \
 	FourDD.cc \
