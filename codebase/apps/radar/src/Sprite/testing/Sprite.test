@@ -1785,7 +1785,7 @@ KDP_debug = FALSE;
 // Type: int
 //
 
-n_samples = 256;
+n_samples = 128;
 
 ///////////// indexed_beams ///////////////////////////
 //
