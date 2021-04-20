@@ -37,6 +37,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cstring>
+#include <vector>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
 #include <radar/ClutFilter.hh>
@@ -949,6 +950,7 @@ int ClutFilter::computeGaussianClutterModel(const double *powerSpectrum,
   // find max power
   // if clutter this is in the 3 middle spectral points
 
+  double sumClutPower = 0.0;
   double maxPower = 0.0;
   int maxIndex = 0;
   
@@ -958,10 +960,13 @@ int ClutFilter::computeGaussianClutterModel(const double *powerSpectrum,
       maxPower = power;
       maxIndex = ii;
     }
+    if (ii > nSamplesHalf - 2 && ii < nSamplesHalf + 2) {
+      sumClutPower += power;
+    }
   }
-  
-  if (maxIndex < nSamplesHalf - 2 ||
-      maxIndex > nSamplesHalf + 2) {
+
+  if (maxIndex < nSamplesHalf - 1 ||
+      maxIndex > nSamplesHalf + 1) {
     // clutter does not dominate
     for (int ii = 0; ii < nSamples; ii++) {
       gaussianModel[ii] = missingPower;
@@ -971,22 +976,25 @@ int ClutFilter::computeGaussianClutterModel(const double *powerSpectrum,
 
   // set clutter properties
 
-  double clutPower = maxPower;
+  double clutPower = sumClutPower / 3.0;
   double sampleMps = nyquistMps / (nSamples / 2.0);
 
   // compute model powers
 
+  double sumModelPower = 0.0;
   vector<double> modelPowers;
-  double maxModelPower = 0.0;
   for (int ii = 0; ii < nSamples; ii++) {
     int jj = (nSamples / 2) - ii;
     double xx = jj * sampleMps;
     double modelPower = 
       ((clutPower / (widthMps * sqrt(M_PI * 2.0))) * 
        exp(-0.5 * pow(xx / widthMps, 2.0)));
-    maxModelPower = max(maxModelPower, modelPower);
     modelPowers.push_back(modelPower);
+    if (ii > nSamplesHalf - 2 && ii < nSamplesHalf + 2) {
+      sumModelPower += modelPower;
+    }
   }
+  double maxModelPower = sumModelPower / 3.0;
 
   // adjust model power so that the peak observation
   // and peak of the model are the same

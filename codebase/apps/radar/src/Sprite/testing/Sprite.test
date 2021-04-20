@@ -169,8 +169,8 @@ input_tcp_port = 11000;
 // Type: string
 //
 
-// archive_data_dir = "/home/dixon/data/bomb_snowstorm/time_series";
-archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
+archive_data_dir = "/home/dixon/data/bomb_snowstorm/time_series";
+// archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
 
 ///////////// archive_start_time //////////////////////
 //
@@ -182,8 +182,8 @@ archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband"
 // Type: string
 //
 
-// archive_start_time = "2019 03 13 22 06 25";
-archive_start_time = "2019 08 25 00 05 30";
+archive_start_time = "2019 03 13 22 06 25";
+// archive_start_time = "2019 08 25 00 05 30";
 
 ///////////// archive_time_span_secs //////////////////
 //
