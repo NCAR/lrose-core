@@ -37,6 +37,13 @@
 ////////////////////////////////////////////////////////////////
 
 #include <cerrno>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iterator>
+#include <regex>
+#include <string>
+#include <algorithm>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/file_io.h>
 #include <toolsa/pmu.h>
@@ -332,50 +339,62 @@ int ClassIngest::_processFile(const char *filePath)
   //}
 
   // open file
+  //
 
   FILE *in;
 
-  if ((in = ta_fopen_uncompress(filePath, "r")) == NULL) {
-    int errNum = errno;
+  std::ifstream sounding_file;
+  try {
+    sounding_file.open(filePath, std::ios::in);
+  } catch (const ifstream::failure& e) {
+
+
+
+  //if ((in = ta_fopen_uncompress(filePath, "r")) == NULL) {
+    //int errNum = errno;
     cerr << "ERROR - ClassIngest::_processFile" << endl;
     cerr << "  Cannot open sounding file: " << filePath << endl;
-    cerr << "  " << strerror(errNum) << endl;
+    cerr << "  " << e.what() << endl; // strerror(errNum) << endl;
     return -1;
   }
+
+
 
   // Read the file
 
-  if (_readHeader(in, sounding)) {
+  // ifstream& solo_script, std::iostream& javascript
+
+  if (_readHeader(sounding_file, sounding)) {
     cerr << "ERROR - ClassIngest::_processFile" << endl;
     cerr << "  Cannot read header" << endl;
-    fclose(in);
+    sounding_file.close();
     return -1;
   }
 
-  if (_findColumns(in)) {
+  if (_findColumns(sounding_file)) {
     cerr << "ERROR - ClassIngest::_processFile" << endl;
     cerr << "  Cannot find columns" << endl;
-    fclose(in);
+    sounding_file.close();
     return -1;
   }
 
-  if (_findFirstData(in)) {
+  if (_findFirstData(sounding_file)) {
     cerr << "ERROR - ClassIngest::_processFile" << endl;
     cerr << "  Cannot find first data" << endl;
-    fclose(in);
+    sounding_file.close();
     return -1;
   }
 
-  if (_readData(in)) {
+  if (_readData(sounding_file)) {
     cerr << "ERROR - ClassIngest::_processFile" << endl;
     cerr << "  Cannot read data" << endl;
-    fclose(in);
+    sounding_file.close();
     return -1;
   }
 
   // Close the file
   
-  fclose(in);
+  sounding_file.close();
 
   /* write out the sounding
 
@@ -398,33 +417,117 @@ int ClassIngest::_processFile(const char *filePath)
 ///////////////////////////////////////////////////////////////////////
 // Read in file header
 
-int ClassIngest::_readHeader(FILE *in, SoundingPut &sounding)
+bool ClassIngest::_process_HeaderText(string line, std::iostream& javascript) {
+  bool recognized = false;
+            // "Launch Site Type/Site ID",
+      const std::regex pieces_regex("(Release|Launch) Site Type/Site ID:[\\s]+([\\w]+[,\\s\\w]*)"); // [,[:space:][:alnum:]]*)"); // [\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
+      std::smatch pieces_match;
+          //string mytest2 = "Release Site Type Site ID:    Moulton, AL";
+          if (std::regex_match(line, pieces_match, pieces_regex)) {
+              //std::cout << line << '\n';
+              for (size_t i = 0; i < pieces_match.size(); ++i) {
+                  std::ssub_match sub_match = pieces_match[i];
+                  std::string piece = sub_match.str();
+                  std::cout << "  submatch " << i << ": " << piece << '\n';
+              }   
+              string command = pieces_match[1];
+              //format_it(command);
+              string siteName = pieces_match[2];
+              cout << command << " : " << siteName << endl;
+              javascript << siteName << endl;
+              recognized = true;
+          } else {
+            std::cout << "regex_match returned false\n";
+          } 
+  return recognized;
+}
 
-{
-  string text;
+bool ClassIngest::_process_Location(string line, std::iostream& javascript) {
+  bool recognized = false;
+  // "Release Location (lon,lat,alt):    087 25.55'W, 34 29.04'N, -87.426, 34.484, 199.0",
+  const std::regex pieces_regex("(Release|Launch) Location \\(lon,lat,alt\\):[\\s]+([\\d]+\\s[\\d]+\\.[\\d]+)'[W|E],"); // " ()'[N|S], ([:digit:]), ([:num"); // [,[:space:][:alnum:]]*)"); // [\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
+  std::smatch pieces_match;
+/*
+    if (_getHeaderText(in, "Launch Location", text) == 0) {
+    vector<string> toks;
+    TaStr::tokenize(text, ", ", toks);
+    if (toks.size() >= 3) {
+      alt = atof(toks[toks.size()-1].c_str());
+      lat = atof(toks[toks.size()-2].c_str());
+      lon = atof(toks[toks.size()-3].c_str());
+    }
+    */
+
+          string mytest2 = "Release Location (lon,lat,alt):    087 25.55'W,"; // " 34 29.04'N, -87.426, 34.484, 199.0";
+          if (std::regex_match(mytest2, pieces_match, pieces_regex)) {
+              //std::cout << line << '\n';
+              for (size_t i = 0; i < pieces_match.size(); ++i) {
+                  std::ssub_match sub_match = pieces_match[i];
+                  std::string piece = sub_match.str();
+                  std::cout << "  submatch " << i << ": " << piece << '\n';
+              }   
+              string command = pieces_match[1];
+              //format_it(command);
+              string siteName = pieces_match[2];
+              cout << command << " : " << siteName << endl;
+              javascript << siteName << endl;
+              recognized = true;
+          } else {
+            std::cout << "regex_match returned false\n";
+          } 
+  return recognized;
+}    
+
+
+int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
+  if (!sounding_file.is_open()) {
+    return -1;
+  }
+
+    std::string line;
+    std::stringstream javascript;
+    bool recognized = false;
+    while (getline(sounding_file, line) && !recognized) {
+      std::cout << "|" << line << "| \n";
+      recognized = _process_HeaderText(line, javascript);
+    }
+
+  if (!recognized) return -1;
+//int ClassIngest::_readHeader(FILE *in, SoundingPut &sounding)
+
+//{
+//  string text;
   
   // set the siteId
 
   int siteId; //  = _params.specified_siteID;
   //if (_params.take_siteID_from_file){
-    if (_getHeaderText(in, "Launch Site Type/Site ID", text) == 0) {
-      vector<string> toks;
-      TaStr::tokenize(text, ", ", toks);
-      if (toks.size() == 2) {
-        if (_debug) {
-          cerr << "StationId: " << toks[1] << endl;
-        }
-        siteId = Spdb::hash4CharsToInt32(toks[1].c_str());
-      }
-    }
+    //if (_getHeaderText(in, "Launch Site Type/Site ID", text) == 0) {
+    //  vector<string> toks;
+    //  TaStr::tokenize(text, ", ", toks);
+    //  if (toks.size() == 2) {
+    //    if (_debug) {
+    //      cerr << "StationId: " << toks[1] << endl;
+    //    }
+    //    siteId = Spdb::hash4CharsToInt32(toks[1].c_str());
+    //  }
+    //}
   //}
+  //std::string line;
+  getline(javascript, line);
+  siteId = Spdb::hash4CharsToInt32(line.c_str());
   sounding.setSiteId(siteId);
-  
+ 
+ 
   // Get/set the launch location
+
+  recognized = _process_Location(line, javascript);
+  if (!recognized) return -1;
 
   double lat = 0.0;
   double lon = 0.0;
   double alt = 0.0;
+  /*
   if (_getHeaderText(in, "Launch Location", text) == 0) {
     vector<string> toks;
     TaStr::tokenize(text, ", ", toks);
@@ -434,6 +537,7 @@ int ClassIngest::_readHeader(FILE *in, SoundingPut &sounding)
       lon = atof(toks[toks.size()-3].c_str());
     }
   }
+
   if (lat == 0.0 && lon == 0.0 && alt == 0.0) {
     cerr << "ERROR - ClassIngest::_readHeader" << endl;
     cerr << "  no lat/lon/alt available from file" << endl;
@@ -459,6 +563,7 @@ int ClassIngest::_readHeader(FILE *in, SoundingPut &sounding)
   if (_getHeaderText(in, "Project ID", text) == 0) {
     sounding.setSiteName(text);
   }
+  */
 
   return 0;
 
@@ -469,9 +574,9 @@ int ClassIngest::_readHeader(FILE *in, SoundingPut &sounding)
 //
 // returns 0 on success, -1 on failure
 
-int ClassIngest::_getHeaderText(FILE *in, const char* label, string &text)
+int ClassIngest::_getHeaderText(ifstream& sounding_file, const char* label, string &text)
 {
-
+/*
   long  posStart, posCurrent = -1L;
   bool  found = false;
   char  line[BUFSIZ];
@@ -545,7 +650,7 @@ int ClassIngest::_getHeaderText(FILE *in, const char* label, string &text)
     }
 
   }
-
+*/
   return -1;
 
 }
@@ -553,9 +658,9 @@ int ClassIngest::_getHeaderText(FILE *in, const char* label, string &text)
 ///////////////////////////////////////////////////////////////////////
 // Get column location in file
 
-int ClassIngest::_findColumns(FILE *in)
+int ClassIngest::_findColumns(ifstream& sounding_file)
 {
-
+/*
   int column = 0;
   char *field, line[BUFSIZ];
   
@@ -625,7 +730,7 @@ int ClassIngest::_findColumns(FILE *in)
   if (columnData.size() != NFIELDS_IN) {
     return -1;
   }
- 
+ */
   return 0;
 
 }
@@ -633,9 +738,9 @@ int ClassIngest::_findColumns(FILE *in)
 ///////////////////////////////////////////////////////////////////////
 // Find the first data in the file
 
-int ClassIngest::_findFirstData(FILE *in)
+int ClassIngest::_findFirstData(ifstream& sounding_file)
 {
-
+/*
   char *field, line[BUFSIZ];
   long fpos;
 
@@ -674,6 +779,7 @@ int ClassIngest::_findFirstData(FILE *in)
   // Reset the file pointer to the beginning of this line of data.
 
   fseek(in, fpos, SEEK_SET);
+  */
   return 0;
 
 }
@@ -681,9 +787,10 @@ int ClassIngest::_findFirstData(FILE *in)
 ///////////////////////////////////////////////////////////////////////
 // Read in actual data
 
-int ClassIngest::_readData(FILE *in)
+int ClassIngest::_readData(ifstream& sounding_file)
 
 {
+  /*
   int targetCol, icol, status = 0; // Set to 0 to avoid compiler warnings.
   double value, *dataArray;
   char line[BUFSIZ], lineCopy[BUFSIZ], *fptr;
@@ -785,7 +892,8 @@ int ClassIngest::_readData(FILE *in)
   } else {
     return 0;
   }
-
+  */
+  return -1;
 }
 
 ////////////////////////

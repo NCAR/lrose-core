@@ -122,11 +122,14 @@ private:
   void _init(bool params_debug);
 
   int _processFile(const char *file_path);
-  int _readHeader(FILE *in, SoundingPut &sounding);
-  int _getHeaderText(FILE *in, const char* label, string &text);
-  int _findColumns(FILE *in);
-  int _findFirstData(FILE *in);
-  int _readData(FILE *in);
+  bool _process_HeaderText(string line, std::iostream& javascript);
+  bool _process_Location(string line, std::iostream& javascript);
+  int _readHeader(ifstream& solo_script, SoundingPut &sounding);
+  // (FILE *in, SoundingPut &sounding);
+  int _getHeaderText(ifstream& sounding_file, const char* label, string &text);
+  int _findColumns(ifstream& sounding_file);
+  int _findFirstData(ifstream& sounding_file);
+  int _readData(ifstream& sounding_file);
   int _writeSounding(SoundingPut &sounding);
 
 };
