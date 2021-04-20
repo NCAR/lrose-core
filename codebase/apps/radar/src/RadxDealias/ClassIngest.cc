@@ -445,7 +445,7 @@ bool ClassIngest::_process_HeaderText(string line, std::iostream& javascript) {
 bool ClassIngest::_process_Location(string line, std::iostream& javascript) {
   bool recognized = false;
   // "Release Location (lon,lat,alt):    087 25.55'W, 34 29.04'N, -87.426, 34.484, 199.0",
-  const std::regex pieces_regex("(Release|Launch) Location \\(lon,lat,alt\\):[\\s]+([\\d]+\\s[\\d]+\\.[\\d]+)'[W|E],"); // " ()'[N|S], ([:digit:]), ([:num"); // [,[:space:][:alnum:]]*)"); // [\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
+  const std::regex pieces_regex("(Release|Launch) Location \\(lon,lat,alt\\):[\\s]+([\\d]+)\\s([\\d]+\\.[\\d]+)'(W|E), ([\\d]+) ([\\d]+\\.[\\d]+)'(N|S),([+-.,\\s\\d]+)"); // " ()'[N|S], ([:digit:]), ([:num"); // [,[:space:][:alnum:]]*)"); // [\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
   std::smatch pieces_match;
 /*
     if (_getHeaderText(in, "Launch Location", text) == 0) {
@@ -458,7 +458,7 @@ bool ClassIngest::_process_Location(string line, std::iostream& javascript) {
     }
     */
 
-          string mytest2 = "Release Location (lon,lat,alt):    087 25.55'W,"; // " 34 29.04'N, -87.426, 34.484, 199.0";
+          string mytest2 = "Release Location (lon,lat,alt):    087 25.55'W, 34 29.04'N, -87.426, 34.484, 199.0";
           if (std::regex_match(mytest2, pieces_match, pieces_regex)) {
               //std::cout << line << '\n';
               for (size_t i = 0; i < pieces_match.size(); ++i) {
@@ -471,10 +471,12 @@ bool ClassIngest::_process_Location(string line, std::iostream& javascript) {
               string siteName = pieces_match[2];
               cout << command << " : " << siteName << endl;
               javascript << siteName << endl;
+              // TODO: tokenize submatch[8] which contains final three numeric values
               recognized = true;
           } else {
             std::cout << "regex_match returned false\n";
           } 
+          exit(0);
   return recognized;
 }    
 
