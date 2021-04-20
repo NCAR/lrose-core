@@ -476,6 +476,64 @@ bool ClassIngest::_process_Location(string line, std::iostream& javascript) {
           } else {
             std::cout << "regex_match returned false\n";
           } 
+  return recognized;
+}    
+
+
+bool ClassIngest::_process_LaunchTime(string line, std::iostream& javascript) {
+  bool recognized = false;
+  // "UTC Release Time (y,m,d,h,m,s):    2016, 03, 31, 00:01:00",
+  //  if (_getHeaderText(in, "GMT Launch Time", text) == 0) 
+  const std::regex pieces_regex("(UTC|GMT) (Release|Launch) Time \\(y,m,d,h,m,s\\):[\\s]+([:,\\s\\d]+)");
+  std::smatch pieces_match;
+
+          string mytest2 = "UTC Release Time (y,m,d,h,m,s):    2016, 03, 31, 00:01:00";
+          if (std::regex_match(mytest2, pieces_match, pieces_regex)) {
+              //std::cout << line << '\n';
+              for (size_t i = 0; i < pieces_match.size(); ++i) {
+                  std::ssub_match sub_match = pieces_match[i];
+                  std::string piece = sub_match.str();
+                  std::cout << "  submatch " << i << ": " << piece << '\n';
+              }   
+              string command = pieces_match[1];
+              //format_it(command);
+              string siteName = pieces_match[2];
+              cout << command << " : " << siteName << endl;
+              javascript << siteName << endl;
+              // TODO: return date and time in javascript stream 
+              recognized = true;
+          } else {
+            std::cout << "regex_match returned false\n";
+          } 
+        
+  return recognized;
+}    
+
+bool ClassIngest::_process_ProjectId(string line, std::iostream& javascript) {
+  bool recognized = false;
+  // "Project ID:                        VORTEX-SE_2016",
+
+  const std::regex pieces_regex("Project ID:[\\s]+([-_[:alnum:]]+)");
+  std::smatch pieces_match;
+
+          string mytest2 = "Project ID:                        VORTEX-SE_2016";
+          if (std::regex_match(mytest2, pieces_match, pieces_regex)) {
+              //std::cout << line << '\n';
+              for (size_t i = 0; i < pieces_match.size(); ++i) {
+                  std::ssub_match sub_match = pieces_match[i];
+                  std::string piece = sub_match.str();
+                  std::cout << "  submatch " << i << ": " << piece << '\n';
+              }   
+              string command = pieces_match[1];
+              //format_it(command);
+              string siteName = pieces_match[2];
+              cout << command << " : " << siteName << endl;
+              javascript << siteName << endl;
+              // TODO: return date and time in javascript stream 
+              recognized = true;
+          } else {
+            std::cout << "regex_match returned false\n";
+          } 
           exit(0);
   return recognized;
 }    
@@ -546,10 +604,13 @@ int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
     return -1;
   }
   sounding.setLocation(lat, lon, alt);
-  
+  */
   // get the launch time
   
   _launchTime = 0L;
+  recognized = _process_LaunchTime(line, javascript);
+  if (!recognized) return -1;
+  /*
   if (_getHeaderText(in, "GMT Launch Time", text) == 0) {
     date_time_t T;
     if (6 == sscanf(text.c_str(),
@@ -561,7 +622,11 @@ int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
   }
 
   // Set the site name from the Project ID
+  */
+  recognized = _process_ProjectId(line, javascript);
+  if (!recognized) return -1;
 
+  /*
   if (_getHeaderText(in, "Project ID", text) == 0) {
     sounding.setSiteName(text);
   }

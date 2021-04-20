@@ -124,6 +124,8 @@ private:
   int _processFile(const char *file_path);
   bool _process_HeaderText(string line, std::iostream& javascript);
   bool _process_Location(string line, std::iostream& javascript);
+  bool _process_LaunchTime(string line, std::iostream& javascript);
+  bool _process_ProjectId(string line, std::iostream& javascript);
   int _readHeader(ifstream& solo_script, SoundingPut &sounding);
   // (FILE *in, SoundingPut &sounding);
   int _getHeaderText(ifstream& sounding_file, const char* label, string &text);
