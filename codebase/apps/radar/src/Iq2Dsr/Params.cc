@@ -2436,6 +2436,30 @@
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
     
+    // Parameter 'clutter_model_width_in_adaptive_filter'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("clutter_model_width_in_adaptive_filter");
+    tt->descr = tdrpStrDup("Width of clutter, in model used by adaptive filter (m/s).");
+    tt->help = tdrpStrDup("The adaptive filter computes a clutter model with the specified width, and uses that model to determing the width of the initial notch.");
+    tt->val_offset = (char *) &clutter_model_width_in_adaptive_filter - &_start_;
+    tt->single_val.d = 0.75;
+    tt++;
+    
+    // Parameter 'init_notch_width_in_adaptive_filter'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("init_notch_width_in_adaptive_filter");
+    tt->descr = tdrpStrDup("Width of initial notch in adaptive filter (m/s).");
+    tt->help = tdrpStrDup("This is the initial notch width used if the clutter model does not succeed in providing the notch width.");
+    tt->val_offset = (char *) &init_notch_width_in_adaptive_filter - &_start_;
+    tt->single_val.d = 1.5;
+    tt++;
+    
     // Parameter 'apply_residue_correction_in_adaptive_filter'
     // ctype is 'tdrp_bool_t'
     

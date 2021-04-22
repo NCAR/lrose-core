@@ -941,6 +941,10 @@ public:
 
   double atmos_atten_db_per_km;
 
+  double clutter_model_width_in_adaptive_filter;
+
+  double init_notch_width_in_adaptive_filter;
+
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
   double min_snr_db_for_residue_correction;
@@ -1244,7 +1248,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[274];
+  mutable TDRPtable _table[276];
 
   const char *_className;
 
