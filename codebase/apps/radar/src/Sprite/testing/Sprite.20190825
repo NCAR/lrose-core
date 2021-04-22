@@ -558,7 +558,19 @@ iqplots = {
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.5,
+    use_regression_filter = FALSE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
     regression_order = 3,
@@ -570,31 +582,19 @@ iqplots = {
     rx_channel = CHANNEL_VC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
-    clutter_width_mps = 0.75,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.5,
     use_regression_filter = FALSE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }
   ,
   {
-    plot_type = SPECTRUM_PHASE,
-    rx_channel = CHANNEL_HC,
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_VC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = TS_POWER,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
+    plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
     regression_order = 3,

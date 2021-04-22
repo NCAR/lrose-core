@@ -203,6 +203,11 @@ public:
     CLUTTER_FILTER_NOTCH
   } clutter_filter_type_t;
 
+  // set the estimated clutter width in MPS
+
+  void setClutterWidthMps(double val) { _clutterWidthMps = val; }
+  void setClutterInitNotchWidthMps(double val) { _clutterInitNotchWidthMps = val; }
+
   // use the adaptive filter (default)
   
   void setUseAdaptiveFilter() {
@@ -1371,6 +1376,8 @@ private:
   // clutter filtering parameters
   
   clutter_filter_type_t _clutterFilterType;
+  double _clutterWidthMps;
+  double _clutterInitNotchWidthMps;
 
   bool _applySpectralResidueCorrection;
   double _minSnrDbForResidueCorrection; // if SNR is below this, do not correct

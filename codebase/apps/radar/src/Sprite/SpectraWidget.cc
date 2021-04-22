@@ -1124,6 +1124,8 @@ void SpectraWidget::_createIqPlot(int id)
   iqplot->setRxChannel(_params._iqplots[id].rx_channel);
   iqplot->setFftWindow(_params._iqplots[id].fft_window);
   iqplot->setUseAdaptiveFilt(_params._iqplots[id].use_adaptive_filter);
+  iqplot->setPlotClutModel(_params._iqplots[id].plot_clutter_model);
+  iqplot->setClutWidthMps(_params._iqplots[id].clutter_width_mps);
   iqplot->setUseRegrFilt(_params._iqplots[id].use_regression_filter);
   iqplot->setRegrOrder(_params._iqplots[id].regression_order);
 
