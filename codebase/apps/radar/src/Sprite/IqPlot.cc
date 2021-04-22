@@ -384,8 +384,10 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   // set the Y axis range
 
   double rangeY = maxDbm - minDbm;
+  double minY = minDbm - rangeY * 0.05;
+  double maxY = maxDbm + rangeY * 0.125;
   if (!_isZoomed) {
-    setWorldLimitsY(minDbm - rangeY * 0.05, maxDbm + rangeY * 0.125);
+    setWorldLimitsY(minY, maxY);
   }
   
   // draw the overlays

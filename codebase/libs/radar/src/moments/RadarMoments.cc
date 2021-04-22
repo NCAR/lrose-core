@@ -6686,6 +6686,12 @@ void RadarMoments::initWindowTukey(double alpha, int nSamples, double *window)
     }
   }
 
+  for (int ii = 0; ii < nSamples; ii++) {
+    if (window[ii] <= 0.0) {
+      window[ii] = 0.0001;
+    }
+  }
+
   // adjust window to keep power constant
   
   double sumsq = 0.0;
