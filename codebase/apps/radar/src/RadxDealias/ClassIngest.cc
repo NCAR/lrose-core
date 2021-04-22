@@ -61,7 +61,9 @@ using namespace std;
 const unsigned int ClassIngest::NFIELDS_IN = 6;
 const char* ClassIngest::HEIGHT_LABEL = "Alt";
 const char* ClassIngest::U_WIND_LABEL = "Uwind";
+const char* ClassIngest::U_WIND2_LABEL = "Ucmp";
 const char* ClassIngest::V_WIND_LABEL = "Vwind";
+const char* ClassIngest::V_WIND2_LABEL = "Vcmp";
 const char* ClassIngest::PRESSURE_LABEL = "Press";
 const char* ClassIngest::REL_HUM_LABEL = "RH";
 const char* ClassIngest::TEMPERATURE_LABEL = "Temp";
@@ -377,14 +379,14 @@ int ClassIngest::_processFile(const char *filePath)
     sounding_file.close();
     return -1;
   }
-
+/*
   if (_findFirstData(sounding_file)) {
     cerr << "ERROR - ClassIngest::_processFile" << endl;
     cerr << "  Cannot find first data" << endl;
     sounding_file.close();
     return -1;
   }
-
+*/
   if (_readData(sounding_file)) {
     cerr << "ERROR - ClassIngest::_processFile" << endl;
     cerr << "  Cannot read data" << endl;
@@ -392,18 +394,15 @@ int ClassIngest::_processFile(const char *filePath)
     return -1;
   }
 
+
   // Close the file
   
   sounding_file.close();
 
-  /* write out the sounding
+  // write out the sounding data
 
-  if (_writeSounding(sounding)) {
-    cerr << "ERROR - ClassIngest::_processFile" << endl;
-    cerr << "  Writing to SPDB" << endl;
-    iret = -1;
-  }
-  */
+  _writeSoundingData();
+  
   // done
 
   if (_debug) {
@@ -534,10 +533,37 @@ bool ClassIngest::_process_ProjectId(string line, std::iostream& javascript) {
           } else {
             std::cout << "regex_match returned false\n";
           } 
-          exit(0);
+        
   return recognized;
 }    
 
+
+
+bool ClassIngest::_process_columnData(string line, std::iostream& javascript) {
+  bool recognized = false;
+  //  Time  Press  Temp  Dewpt  RH    Ucmp  ...
+
+  const std::regex pieces_regex("[-+]?[0-9]*\\.?[0-9]+"); // ("[^[:digit:]]-+[:digit:].[:digit:]+]+"); // Temp)[\\s]+[.]*");
+  std::smatch pieces_match;
+
+          //string mytest2 = "    0.0  978.4  21.5  18.1  81.1   -1.4    3.8   4.0 160.0 999.0  -87.426  34.484 999.0  13.6 ";
+          if (std::regex_search(line, pieces_match, pieces_regex)) {
+              //std::cout << line << '\n';
+            /*
+              for (size_t i = 0; i < pieces_match.size(); ++i) {
+                  std::ssub_match sub_match = pieces_match[i];
+                  std::string piece = sub_match.str();
+                  std::cout << "  submatch " << i << ": " << piece << '\n';
+              }   
+              */
+              //javascript << line << endl;
+              recognized = true;
+          } else {
+            std::cout << "regex_match returned false\n";
+          } 
+        
+  return recognized;
+} 
 
 int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
   if (!sounding_file.is_open()) {
@@ -727,16 +753,39 @@ int ClassIngest::_getHeaderText(ifstream& sounding_file, const char* label, stri
 
 int ClassIngest::_findColumns(ifstream& sounding_file)
 {
-/*
+
   int column = 0;
-  char *field, line[BUFSIZ];
+  char *field; // , line[BUFSIZ];
   
   // Find the labels line.  It must start with the label "Time".
-
-  if (fgets(line, BUFSIZ, in) == NULL) {
+  if (!sounding_file.is_open()) {
     return -1;
   }
-  field = strtok(line, DELIMETER);
+  
+
+  // Don't use regex, just use tokenizer on line. 
+// TODO: read the column names from the javascript stream returned
+  // Remember, we need to column number as well!
+
+  //if (fgets(line, BUFSIZ, in) == NULL) {
+  //  return -1;
+  //}
+
+  std::string line;
+  bool recognized = false;
+  //ssize_t linelen = 
+  getline(sounding_file, line);
+  while ((sounding_file.good()) && !recognized) {
+    std::cout << "|" << line << "| \n";
+    field = strtok(const_cast<char*>(line.c_str()), DELIMETER);
+    if (strcmp(field, "Time") == 0) {
+      recognized = true;
+    } else {
+      getline(sounding_file, line);
+    }
+  }
+  if (!recognized) return -1;
+  /*
   while((field == NULL) ||
          ((field != NULL) && (strcmp(field, "Time") != 0))) {
     if (fgets(line, BUFSIZ, in) == NULL) {
@@ -744,18 +793,23 @@ int ClassIngest::_findColumns(ifstream& sounding_file)
     }
     field = strtok(line, DELIMETER);
   }
+  */
+  // TODO: do we not record the time data?
+  //columnData[column] = &time[0];
 
   // Look for all the labels we need and note the column for each.
 
   while(field != NULL) {
 
-    if (strcmp(field, U_WIND_LABEL) == 0) {
+    if ((strcmp(field, U_WIND_LABEL) == 0) || 
+      (strcmp(field, U_WIND2_LABEL) == 0)) {
       columnData[column] = &uwind[0];
       if (_debug ) {
         fprintf(stderr, "   Field '%s' found in column %d\n", 
                 U_WIND_LABEL, column);
       }
-    } else if (strcmp(field, V_WIND_LABEL) == 0) {
+    } else if ((strcmp(field, V_WIND_LABEL) == 0) ||
+      (strcmp(field, V_WIND2_LABEL) == 0)) {
       columnData[column] = &vwind[0];
       if (_debug ) {
         fprintf(stderr, "   Field '%s' found in column %d\n", 
@@ -797,7 +851,7 @@ int ClassIngest::_findColumns(ifstream& sounding_file)
   if (columnData.size() != NFIELDS_IN) {
     return -1;
   }
- */
+ 
   return 0;
 
 }
@@ -857,10 +911,41 @@ int ClassIngest::_findFirstData(ifstream& sounding_file)
 int ClassIngest::_readData(ifstream& sounding_file)
 
 {
-  /*
+  // Read in each line of data.
+
+  if (!sounding_file.is_open()) {
+    return -1;
+  }
+
+    _numPoints = 0;
+    std::string line;
+    std::stringstream javascript;
+    bool recognized = false;
+    while (getline(sounding_file, line)) { // } && !recognized) {
+      std::cout << "|" << line << "| \n";
+      recognized = _process_columnData(line, javascript);
+      if (recognized) {
+         // extract selected columns of data ...
+         _extractSelectedData(line);
+      }
+    }
+
+  // Make sure we found some data
+
+  if (_numPoints <= 0) {
+    cerr << "ERROR - ClassIngest::_readData" << endl;
+    cerr << "  No data points in the sounding file" << endl;
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
+int ClassIngest::_extractSelectedData(std::string line) {
+
   int targetCol, icol, status = 0; // Set to 0 to avoid compiler warnings.
   double value, *dataArray;
-  char line[BUFSIZ], lineCopy[BUFSIZ], *fptr;
+  char lineCopy[BUFSIZ], *fptr;
   const char *BLANK = " ";
 
   map<int, double*, less<int> >::iterator item;
@@ -869,10 +954,8 @@ int ClassIngest::_readData(ifstream& sounding_file)
 
   const float BAD_ALT  = 99999.0;
 
-  // Read in each line of data.
-
-  _numPoints = 0;
-  while (fgets(line, BUFSIZ, in) != NULL) {
+  //_numPoints = 0;
+  //while (fgets(line, BUFSIZ, in) != NULL) {
 
     // Get each field of interest
 
@@ -884,7 +967,7 @@ int ClassIngest::_readData(ifstream& sounding_file)
 
       status = 1;
       targetCol = (*item).first;
-      strncpy(lineCopy, line, BUFSIZ);
+      strncpy(lineCopy, line.c_str(), BUFSIZ);
 
       // Scan for the zero'th column
 
@@ -948,8 +1031,7 @@ int ClassIngest::_readData(ifstream& sounding_file)
       _numPoints++;
     }
 
-  } // while
-
+/*
   // Make sure we found some data
 
   if (_numPoints <= 0) {
@@ -959,8 +1041,21 @@ int ClassIngest::_readData(ifstream& sounding_file)
   } else {
     return 0;
   }
-  */
-  return -1;
+*/  
+    return 0;
+}
+
+void ClassIngest::_writeSoundingData() {
+
+  map<int, double*, less<int> >::iterator item;
+  for(item=columnData.begin(); item != columnData.end(); item ++) {
+    cerr << "column " << item->first << " : ";
+    double *values = item->second;
+    for (int i=0; i< _numPoints; i++) {
+      cerr << values[i] << " ";
+    }
+    cerr << endl;
+  }
 }
 
 ////////////////////////

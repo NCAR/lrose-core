@@ -99,7 +99,9 @@ private:
   static const unsigned int NFIELDS_IN;
   static const char* HEIGHT_LABEL;
   static const char* U_WIND_LABEL;
+  static const char* U_WIND2_LABEL;
   static const char* V_WIND_LABEL;
+  static const char* V_WIND2_LABEL;
   static const char* PRESSURE_LABEL;
   static const char* REL_HUM_LABEL;
   static const char* TEMPERATURE_LABEL;
@@ -113,6 +115,8 @@ private:
   double temperature[MAX_POINTS];
   
   //map<int, double*, less<int> > columnData;
+  // 
+  // map, of data column index, to array of double data values
   map<int, double*> columnData;
 
   int _numPoints;
@@ -126,14 +130,18 @@ private:
   bool _process_Location(string line, std::iostream& javascript);
   bool _process_LaunchTime(string line, std::iostream& javascript);
   bool _process_ProjectId(string line, std::iostream& javascript);
+  bool _process_columnData(string line, std::iostream& javascript);
+
+  
   int _readHeader(ifstream& solo_script, SoundingPut &sounding);
   // (FILE *in, SoundingPut &sounding);
   int _getHeaderText(ifstream& sounding_file, const char* label, string &text);
   int _findColumns(ifstream& sounding_file);
   int _findFirstData(ifstream& sounding_file);
   int _readData(ifstream& sounding_file);
+  int _extractSelectedData(std::string line);
   int _writeSounding(SoundingPut &sounding);
-
+  void _writeSoundingData();
 };
 
 #endif
