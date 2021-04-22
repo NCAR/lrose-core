@@ -57,7 +57,7 @@ register_with_procmap = FALSE;
 // Type: string
 //
 
-instance = "test";
+instance = "bomb_snowstorm";
 
 ///////////// check_alloc /////////////////////////////
 //
@@ -169,7 +169,7 @@ input_tcp_port = 11000;
 // Type: string
 //
 
-archive_data_dir = "/home/dixon/data/bomb_snowstorm/time_series";
+archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
 
 ///////////// archive_start_time //////////////////////
 //
@@ -558,9 +558,21 @@ iqplots = {
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.5,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
+    use_regression_filter = TRUE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }
@@ -570,37 +582,49 @@ iqplots = {
     rx_channel = CHANNEL_VC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.5,
+    use_regression_filter = TRUE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }
   ,
   {
-    plot_type = SPECTRUM_PHASE,
-    rx_channel = CHANNEL_HC,
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_VC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
+    plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
+    use_regression_filter = TRUE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }
   ,
-  {
-    plot_type = TS_POWER,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
+  // {
+  //   plot_type = SPECTRUM_PHASE,
+  //   rx_channel = CHANNEL_HC,
+  //   fft_window = FFT_WINDOW_VONHANN,
+  //   use_adaptive_filter = TRUE,
+  //   plot_clutter_model = FALSE,
+  //   clutter_width_mps = 0.75,
+  //   use_regression_filter = FALSE,
+  //   regression_order = 3,
+  //   regression_filter_interp_across_notch = TRUE
+  // }
+  // ,
+  // {
+  //   plot_type = TS_POWER,
+  //   rx_channel = CHANNEL_HC,
+  //   fft_window = FFT_WINDOW_VONHANN,
+  //   use_adaptive_filter = TRUE,
+  //   plot_clutter_model = FALSE,
+  //   clutter_width_mps = 0.75,
+  //   use_regression_filter = FALSE,
+  //   regression_order = 3,
+  //   regression_filter_interp_across_notch = TRUE
+  // }
+  // ,
   {
     plot_type = I_VALS,
     rx_channel = CHANNEL_HC,
@@ -2066,7 +2090,7 @@ fft_window = FFT_WINDOW_VONHANN;
 // Type: string
 //
 
-cal_file_path = "./sband_cal.xml";
+cal_file_path = "./spol_cal.xml";
 
 ///////////// use_cal_from_time_series ////////////////
 //
@@ -2102,7 +2126,7 @@ use_cal_from_time_series = FALSE;
 // Type: string
 //
 
-click_point_fmq_url = "/tmp/fmq/click_point";
+click_point_fmq_url = "/tmp/fmq/click_point/bomb_snowstorm";
 
 ///////////// click_point_search_angle_error //////////
 //

@@ -297,6 +297,8 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
                beam->getStartRangeKm(), beam->getGateSpacingKm());
   moments.setCalib(calib);
+  moments.setClutterWidthMps(_clutWidthMps);
+  moments.setClutterInitNotchWidthMps(3.0);
   
   if (_useAdaptiveFilt) {
     
@@ -382,8 +384,10 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   // set the Y axis range
 
   double rangeY = maxDbm - minDbm;
+  double minY = minDbm - rangeY * 0.05;
+  double maxY = maxDbm + rangeY * 0.125;
   if (!_isZoomed) {
-    setWorldLimitsY(minDbm - rangeY * 0.05, maxDbm + rangeY * 0.125);
+    setWorldLimitsY(minY, maxY);
   }
   
   // draw the overlays
@@ -510,6 +514,10 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   legendsRight.push_back(getFftWindowName());
   if (_useRegrFilt) {
     snprintf(text, 1024, "Regr-order: %d", _regrOrder);
+    legendsRight.push_back(text);
+  }
+  if (_plotClutModel) {
+    snprintf(text, 1024, "Clut-width: %g", _clutWidthMps);
     legendsRight.push_back(text);
   }
   _zoomWorld.drawLegendsTopRight(painter, legendsRight);
@@ -792,6 +800,16 @@ void IqPlot::_plotIQVals(QPainter &painter,
     residual.push_back(raw[ii] - smoothed[ii]);
   }
 
+  // compute RRR
+  
+  double sumAbsVal = 0.0;
+  double sumAbsResid = 0.0;
+  for (int ii = 0; ii < nSamples; ii++) {
+    sumAbsVal += fabs(vals[ii]);
+    sumAbsResid += fabs(residual[ii]);
+  }
+  double RRR = sumAbsVal / sumAbsResid;
+  
   // compute min and max vals for plot
   
   double minVal = 9999.0;
@@ -870,8 +888,10 @@ void IqPlot::_plotIQVals(QPainter &painter,
     // Legend
     
     char text[1024];
-    snprintf(text, 1024, "Regr-order: %d", _regrOrder);
     vector<string> legends;
+    snprintf(text, 1024, "Regr-order: %d", _regrOrder);
+    legends.push_back(text);
+    snprintf(text, 1024, "RRR: %g", RRR);
     legends.push_back(text);
     _zoomWorld.drawLegendsTopLeft(painter, legends);
 

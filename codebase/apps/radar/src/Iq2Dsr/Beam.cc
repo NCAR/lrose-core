@@ -580,6 +580,9 @@ void Beam::_prepareForComputeMoments()
     _mom->setMinSnrDbForLdr(_params.min_snr_db_for_ldr);
   }
 
+  _mom->setClutterWidthMps(_params.clutter_model_width_in_adaptive_filter);
+  _mom->setClutterInitNotchWidthMps(_params.init_notch_width_in_adaptive_filter);
+  
   // compute windows for FFTs
 
   _computeWindows();

@@ -1916,7 +1916,7 @@ window = WINDOW_VONHANN;
 // Type: string
 //
 
-cal_file_path = "./sband_cal.xml";
+cal_file_path = "./spol_cal.xml";
 
 ///////////// use_cal_from_time_series ////////////////
 //
