@@ -1965,12 +1965,37 @@ int IwrfTsInfo::_readRvp8Info(FILE *in)
     if (!iPolarizationFound && sscanf(line, "iPolarization=%d", &ival) == 1) {
       _rvp8.i_polarization = ival;
       iPolarizationFound = true;
+      switch (ival) {
+        case RVP8_SINGLE_POL_H:
+          tsProc.xmit_rcv_mode = IWRF_SINGLE_POL;
+          break;
+        case RVP8_SINGLE_POL_V:
+          tsProc.xmit_rcv_mode = IWRF_SINGLE_POL_V;
+          break;
+        case RVP8_HV_ALTERNATING:
+          tsProc.xmit_rcv_mode = IWRF_ALT_HV_CO_CROSS;
+          break;
+        case RVP8_HV_SIMULTANEOUS:
+          tsProc.xmit_rcv_mode = IWRF_SIM_HV_FIXED_HV;
+          break;
+      }
       continue;
     }
 
     if (!iPhaseModSeqFound && sscanf(line, "iPhaseModSeq=%d", &ival) == 1) {
       _rvp8.i_phase_mode_seq = ival;
       iPhaseModSeqFound = true;
+      switch (ival) {
+        case RVP8_PHASE_MODE_FIXED:
+          tsProc.xmit_phase_mode = IWRF_XMIT_PHASE_MODE_FIXED;
+          break;
+        case RVP8_PHASE_MODE_RANDOM:
+          tsProc.xmit_phase_mode = IWRF_XMIT_PHASE_MODE_RANDOM;
+          break;
+        case RVP8_PHASE_MODE_CUSTOM:
+          tsProc.xmit_phase_mode = IWRF_XMIT_PHASE_MODE_SZ864;
+          break;
+      }
       continue;
     }
 
@@ -2080,6 +2105,8 @@ int IwrfTsInfo::_readRvp8Info(FILE *in)
     if (!fRangeMaskResFound && sscanf(line, "fRangeMaskRes=%lg", &dval) == 1) {
       _rvp8.f_range_mask_res = dval;
       fRangeMaskResFound = true;
+      tsProc.gate_spacing_m = dval;
+      tsProc.start_range_m = dval / 2.0;
       continue;
     }
 
