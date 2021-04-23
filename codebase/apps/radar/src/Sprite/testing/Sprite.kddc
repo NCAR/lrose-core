@@ -1832,7 +1832,7 @@ indexed_beams = TRUE;
 // Type: double
 //
 
-indexed_resolution_ppi = 1;
+indexed_resolution_ppi = 0.5;
 
 ///////////// indexed_resolution_rhi //////////////////
 //
@@ -2157,5 +2157,5 @@ click_point_search_angle_error = 10;
 // Type: double
 //
 
-click_point_delta_azimuth_deg = 1;
+click_point_delta_azimuth_deg = 0.25;
 
