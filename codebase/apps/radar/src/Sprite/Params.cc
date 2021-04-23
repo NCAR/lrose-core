@@ -1149,6 +1149,349 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("ASCOPE DISPLAY PANEL");
+    tt->comment_text = tdrpStrDup("The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.");
+    tt++;
+    
+    // Parameter 'ascope_n_panels'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_n_panels");
+    tt->descr = tdrpStrDup("Number of ascope panels in spectra window (pixels).");
+    tt->help = tdrpStrDup("The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.");
+    tt->val_offset = (char *) &ascope_n_panels - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'ascope_moments'
+    // ctype is '_moment_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("ascope_moments");
+    tt->descr = tdrpStrDup("Moments to be displaed on ascope panels.");
+    tt->help = tdrpStrDup("The number of specified moments must match the number of ascope panels.");
+    tt->array_offset = (char *) &_ascope_moments - &_start_;
+    tt->array_n_offset = (char *) &ascope_moments_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(moment_type_t);
+    tt->array_n = 2;
+    tt->enum_def.name = tdrpStrDup("moment_type_t");
+    tt->enum_def.nfields = 11;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("DBZ");
+      tt->enum_def.fields[0].val = DBZ;
+      tt->enum_def.fields[1].name = tdrpStrDup("VEL");
+      tt->enum_def.fields[1].val = VEL;
+      tt->enum_def.fields[2].name = tdrpStrDup("WIDTH");
+      tt->enum_def.fields[2].val = WIDTH;
+      tt->enum_def.fields[3].name = tdrpStrDup("NCP");
+      tt->enum_def.fields[3].val = NCP;
+      tt->enum_def.fields[4].name = tdrpStrDup("SNR");
+      tt->enum_def.fields[4].val = SNR;
+      tt->enum_def.fields[5].name = tdrpStrDup("DBM");
+      tt->enum_def.fields[5].val = DBM;
+      tt->enum_def.fields[6].name = tdrpStrDup("ZDR");
+      tt->enum_def.fields[6].val = ZDR;
+      tt->enum_def.fields[7].name = tdrpStrDup("LDR");
+      tt->enum_def.fields[7].val = LDR;
+      tt->enum_def.fields[8].name = tdrpStrDup("RHOHV");
+      tt->enum_def.fields[8].val = RHOHV;
+      tt->enum_def.fields[9].name = tdrpStrDup("PHIDP");
+      tt->enum_def.fields[9].val = PHIDP;
+      tt->enum_def.fields[10].name = tdrpStrDup("KDP");
+      tt->enum_def.fields[10].val = KDP;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].e = DBZ;
+      tt->array_vals[1].e = VEL;
+    tt++;
+    
+    // Parameter 'ascope_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_width");
+    tt->descr = tdrpStrDup("Width of ASCOPE panel in spectra window (pixels).");
+    tt->help = tdrpStrDup("The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.");
+    tt->val_offset = (char *) &ascope_width - &_start_;
+    tt->single_val.i = 150;
+    tt++;
+    
+    // Parameter 'ascope_title_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_title_font_size");
+    tt->descr = tdrpStrDup("Font size of center title (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_title_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'ascope_axis_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_label_font_size");
+    tt->descr = tdrpStrDup("Font size of axis labels in ascope (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_label_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'ascope_tick_values_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_tick_values_font_size");
+    tt->descr = tdrpStrDup("Font size of axis tick values (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_tick_values_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'ascope_legend_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_legend_font_size");
+    tt->descr = tdrpStrDup("Font size for plot legends (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_legend_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'ascope_title_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_title_text_margin");
+    tt->descr = tdrpStrDup("Margin around title text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_title_text_margin - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'ascope_legend_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_legend_text_margin");
+    tt->descr = tdrpStrDup("Margin around legend text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_legend_text_margin - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'ascope_axis_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_text_margin");
+    tt->descr = tdrpStrDup("Margin around axis text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_text_margin - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'ascope_axis_tick_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_tick_len");
+    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_tick_len - &_start_;
+    tt->single_val.i = 4;
+    tt++;
+    
+    // Parameter 'ascope_n_ticks_ideal'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_n_ticks_ideal");
+    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_n_ticks_ideal - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'ascope_left_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin for ascope plot (pixels).");
+    tt->help = tdrpStrDup("The Y axis labels are plotted here.");
+    tt->val_offset = (char *) &ascope_left_margin - &_start_;
+    tt->single_val.i = 18;
+    tt++;
+    
+    // Parameter 'ascope_bottom_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("ascope_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin for ascope plot (pixels).");
+    tt->help = tdrpStrDup("The X axis labels are plotted here.");
+    tt->val_offset = (char *) &ascope_bottom_margin - &_start_;
+    tt->single_val.i = 18;
+    tt++;
+    
+    // Parameter 'ascope_x_grid_lines_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_x_grid_lines_on");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_x_grid_lines_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ascope_y_grid_lines_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_y_grid_lines_on");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_y_grid_lines_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ascope_axis_label_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axis_label_color");
+    tt->descr = tdrpStrDup("Color of ascope axis labels.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axis_label_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'ascope_axes_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_axes_color");
+    tt->descr = tdrpStrDup("Color of axes in ascope.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_axes_color - &_start_;
+    tt->single_val.s = tdrpStrDup("green");
+    tt++;
+    
+    // Parameter 'ascope_grid_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_grid_color");
+    tt->descr = tdrpStrDup("Color of grid lines on ascope.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_grid_color - &_start_;
+    tt->single_val.s = tdrpStrDup("gray");
+    tt++;
+    
+    // Parameter 'ascope_line_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_line_color");
+    tt->descr = tdrpStrDup("Color of ascope line.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_line_color - &_start_;
+    tt->single_val.s = tdrpStrDup("lightgray");
+    tt++;
+    
+    // Parameter 'ascope_selected_range_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_selected_range_color");
+    tt->descr = tdrpStrDup("Color of line showing currently selected range.");
+    tt->help = tdrpStrDup("The user can double click in the ascope to move this line.");
+    tt->val_offset = (char *) &ascope_selected_range_color - &_start_;
+    tt->single_val.s = tdrpStrDup("cyan");
+    tt++;
+    
+    // Parameter 'ascope_fill_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_fill_color");
+    tt->descr = tdrpStrDup("Color of ascope fill.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_fill_color - &_start_;
+    tt->single_val.s = tdrpStrDup("darkgreen");
+    tt++;
+    
+    // Parameter 'ascope_title_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ascope_title_color");
+    tt->descr = tdrpStrDup("Color of ascope title.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ascope_title_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'ascope_x_axis_labels_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_x_axis_labels_inside");
+    tt->descr = tdrpStrDup("Location of tick labels, relative to x axis.");
+    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
+    tt->val_offset = (char *) &ascope_x_axis_labels_inside - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'ascope_y_axis_labels_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("ascope_y_axis_labels_inside");
+    tt->descr = tdrpStrDup("Location of tick labels, relative to y axis.");
+    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
+    tt->val_offset = (char *) &ascope_y_axis_labels_inside - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("IQ PLOTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1477,11 +1820,11 @@
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("IQPLOT TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1762,11 +2105,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("IQPLOT LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1867,37 +2210,37 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("ASCOPE DISPLAY PANEL");
-    tt->comment_text = tdrpStrDup("The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.");
+    tt->param_name = tdrpStrDup("Comment 10");
+    tt->comment_hdr = tdrpStrDup("WATERFALL DISPLAY PANEL");
+    tt->comment_text = tdrpStrDup("The waterfall plots show spectra plotted against range.");
     tt++;
     
-    // Parameter 'ascope_n_panels_in_spectra_window'
+    // Parameter 'waterfall_n_panels'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_n_panels_in_spectra_window");
-    tt->descr = tdrpStrDup("Number of ascope panels in spectra window (pixels).");
-    tt->help = tdrpStrDup("The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.");
-    tt->val_offset = (char *) &ascope_n_panels_in_spectra_window - &_start_;
+    tt->param_name = tdrpStrDup("waterfall_n_panels");
+    tt->descr = tdrpStrDup("Number of waterfall panels in spectra window (pixels).");
+    tt->help = tdrpStrDup("The waterfalls will be on the left of the plot. Set to 0 for no WATERFALL panel.");
+    tt->val_offset = (char *) &waterfall_n_panels - &_start_;
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'ascope_moments'
+    // Parameter 'waterfall_moments'
     // ctype is '_moment_type_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("ascope_moments");
-    tt->descr = tdrpStrDup("Moments to be displaed on ascope panels.");
-    tt->help = tdrpStrDup("The number of specified moments must match the number of ascope panels.");
-    tt->array_offset = (char *) &_ascope_moments - &_start_;
-    tt->array_n_offset = (char *) &ascope_moments_n - &_start_;
+    tt->param_name = tdrpStrDup("waterfall_moments");
+    tt->descr = tdrpStrDup("Moments to be displaed on waterfall panels.");
+    tt->help = tdrpStrDup("The number of specified moments must match the number of waterfall panels.");
+    tt->array_offset = (char *) &_waterfall_moments - &_start_;
+    tt->array_n_offset = (char *) &waterfall_moments_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(moment_type_t);
@@ -1934,287 +2277,287 @@
       tt->array_vals[1].e = VEL;
     tt++;
     
-    // Parameter 'ascope_width_in_spectra_window'
+    // Parameter 'waterfall_width'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_width_in_spectra_window");
-    tt->descr = tdrpStrDup("Width of ASCOPE panel in spectra window (pixels).");
-    tt->help = tdrpStrDup("The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.");
-    tt->val_offset = (char *) &ascope_width_in_spectra_window - &_start_;
+    tt->param_name = tdrpStrDup("waterfall_width");
+    tt->descr = tdrpStrDup("Width of WATERFALL panel in spectra window (pixels).");
+    tt->help = tdrpStrDup("The WATERFALL will be on the left of the plot. Set to 0 for no WATERFALL panel.");
+    tt->val_offset = (char *) &waterfall_width - &_start_;
     tt->single_val.i = 150;
     tt++;
     
-    // Parameter 'ascope_title_font_size'
+    // Parameter 'waterfall_title_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_title_font_size");
+    tt->param_name = tdrpStrDup("waterfall_title_font_size");
     tt->descr = tdrpStrDup("Font size of center title (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_title_font_size - &_start_;
+    tt->val_offset = (char *) &waterfall_title_font_size - &_start_;
     tt->single_val.i = 10;
     tt++;
     
-    // Parameter 'ascope_axis_label_font_size'
+    // Parameter 'waterfall_axis_label_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_axis_label_font_size");
-    tt->descr = tdrpStrDup("Font size of axis labels in ascope (pixels).");
+    tt->param_name = tdrpStrDup("waterfall_axis_label_font_size");
+    tt->descr = tdrpStrDup("Font size of axis labels in waterfall (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_axis_label_font_size - &_start_;
+    tt->val_offset = (char *) &waterfall_axis_label_font_size - &_start_;
     tt->single_val.i = 8;
     tt++;
     
-    // Parameter 'ascope_tick_values_font_size'
+    // Parameter 'waterfall_tick_values_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_tick_values_font_size");
+    tt->param_name = tdrpStrDup("waterfall_tick_values_font_size");
     tt->descr = tdrpStrDup("Font size of axis tick values (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_tick_values_font_size - &_start_;
+    tt->val_offset = (char *) &waterfall_tick_values_font_size - &_start_;
     tt->single_val.i = 6;
     tt++;
     
-    // Parameter 'ascope_legend_font_size'
+    // Parameter 'waterfall_legend_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_legend_font_size");
+    tt->param_name = tdrpStrDup("waterfall_legend_font_size");
     tt->descr = tdrpStrDup("Font size for plot legends (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_legend_font_size - &_start_;
+    tt->val_offset = (char *) &waterfall_legend_font_size - &_start_;
     tt->single_val.i = 6;
     tt++;
     
-    // Parameter 'ascope_title_text_margin'
+    // Parameter 'waterfall_title_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_title_text_margin");
+    tt->param_name = tdrpStrDup("waterfall_title_text_margin");
     tt->descr = tdrpStrDup("Margin around title text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_title_text_margin - &_start_;
+    tt->val_offset = (char *) &waterfall_title_text_margin - &_start_;
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'ascope_legend_text_margin'
+    // Parameter 'waterfall_legend_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_legend_text_margin");
+    tt->param_name = tdrpStrDup("waterfall_legend_text_margin");
     tt->descr = tdrpStrDup("Margin around legend text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_legend_text_margin - &_start_;
+    tt->val_offset = (char *) &waterfall_legend_text_margin - &_start_;
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'ascope_axis_text_margin'
+    // Parameter 'waterfall_axis_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_axis_text_margin");
+    tt->param_name = tdrpStrDup("waterfall_axis_text_margin");
     tt->descr = tdrpStrDup("Margin around axis text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_axis_text_margin - &_start_;
+    tt->val_offset = (char *) &waterfall_axis_text_margin - &_start_;
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'ascope_axis_tick_len'
+    // Parameter 'waterfall_axis_tick_len'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_axis_tick_len");
+    tt->param_name = tdrpStrDup("waterfall_axis_tick_len");
     tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_axis_tick_len - &_start_;
+    tt->val_offset = (char *) &waterfall_axis_tick_len - &_start_;
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'ascope_n_ticks_ideal'
+    // Parameter 'waterfall_n_ticks_ideal'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_n_ticks_ideal");
+    tt->param_name = tdrpStrDup("waterfall_n_ticks_ideal");
     tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_n_ticks_ideal - &_start_;
+    tt->val_offset = (char *) &waterfall_n_ticks_ideal - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'ascope_left_margin'
+    // Parameter 'waterfall_left_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_left_margin");
-    tt->descr = tdrpStrDup("Width of left margin for ascope plot (pixels).");
+    tt->param_name = tdrpStrDup("waterfall_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin for waterfall plot (pixels).");
     tt->help = tdrpStrDup("The Y axis labels are plotted here.");
-    tt->val_offset = (char *) &ascope_left_margin - &_start_;
+    tt->val_offset = (char *) &waterfall_left_margin - &_start_;
     tt->single_val.i = 18;
     tt++;
     
-    // Parameter 'ascope_bottom_margin'
+    // Parameter 'waterfall_bottom_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ascope_bottom_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin for ascope plot (pixels).");
+    tt->param_name = tdrpStrDup("waterfall_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin for waterfall plot (pixels).");
     tt->help = tdrpStrDup("The X axis labels are plotted here.");
-    tt->val_offset = (char *) &ascope_bottom_margin - &_start_;
+    tt->val_offset = (char *) &waterfall_bottom_margin - &_start_;
     tt->single_val.i = 18;
     tt++;
     
-    // Parameter 'ascope_x_grid_lines_on'
+    // Parameter 'waterfall_x_grid_lines_on'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_x_grid_lines_on");
+    tt->param_name = tdrpStrDup("waterfall_x_grid_lines_on");
     tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_x_grid_lines_on - &_start_;
+    tt->val_offset = (char *) &waterfall_x_grid_lines_on - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'ascope_y_grid_lines_on'
+    // Parameter 'waterfall_y_grid_lines_on'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_y_grid_lines_on");
+    tt->param_name = tdrpStrDup("waterfall_y_grid_lines_on");
     tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_y_grid_lines_on - &_start_;
+    tt->val_offset = (char *) &waterfall_y_grid_lines_on - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'ascope_axis_label_color'
+    // Parameter 'waterfall_axis_label_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_axis_label_color");
-    tt->descr = tdrpStrDup("Color of ascope axis labels.");
+    tt->param_name = tdrpStrDup("waterfall_axis_label_color");
+    tt->descr = tdrpStrDup("Color of waterfall axis labels.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_axis_label_color - &_start_;
+    tt->val_offset = (char *) &waterfall_axis_label_color - &_start_;
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'ascope_axes_color'
+    // Parameter 'waterfall_axes_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_axes_color");
-    tt->descr = tdrpStrDup("Color of axes in ascope.");
+    tt->param_name = tdrpStrDup("waterfall_axes_color");
+    tt->descr = tdrpStrDup("Color of axes in waterfall.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_axes_color - &_start_;
+    tt->val_offset = (char *) &waterfall_axes_color - &_start_;
     tt->single_val.s = tdrpStrDup("green");
     tt++;
     
-    // Parameter 'ascope_grid_color'
+    // Parameter 'waterfall_grid_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_grid_color");
-    tt->descr = tdrpStrDup("Color of grid lines on ascope.");
+    tt->param_name = tdrpStrDup("waterfall_grid_color");
+    tt->descr = tdrpStrDup("Color of grid lines on waterfall.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_grid_color - &_start_;
+    tt->val_offset = (char *) &waterfall_grid_color - &_start_;
     tt->single_val.s = tdrpStrDup("gray");
     tt++;
     
-    // Parameter 'ascope_line_color'
+    // Parameter 'waterfall_line_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_line_color");
-    tt->descr = tdrpStrDup("Color of ascope line.");
+    tt->param_name = tdrpStrDup("waterfall_line_color");
+    tt->descr = tdrpStrDup("Color of waterfall line.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_line_color - &_start_;
+    tt->val_offset = (char *) &waterfall_line_color - &_start_;
     tt->single_val.s = tdrpStrDup("lightgray");
     tt++;
     
-    // Parameter 'ascope_selected_range_color'
+    // Parameter 'waterfall_selected_range_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_selected_range_color");
+    tt->param_name = tdrpStrDup("waterfall_selected_range_color");
     tt->descr = tdrpStrDup("Color of line showing currently selected range.");
-    tt->help = tdrpStrDup("The user can double click in the ascope to move this line.");
-    tt->val_offset = (char *) &ascope_selected_range_color - &_start_;
+    tt->help = tdrpStrDup("The user can double click in the waterfall to move this line.");
+    tt->val_offset = (char *) &waterfall_selected_range_color - &_start_;
     tt->single_val.s = tdrpStrDup("cyan");
     tt++;
     
-    // Parameter 'ascope_fill_color'
+    // Parameter 'waterfall_fill_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_fill_color");
-    tt->descr = tdrpStrDup("Color of ascope fill.");
+    tt->param_name = tdrpStrDup("waterfall_fill_color");
+    tt->descr = tdrpStrDup("Color of waterfall fill.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_fill_color - &_start_;
+    tt->val_offset = (char *) &waterfall_fill_color - &_start_;
     tt->single_val.s = tdrpStrDup("darkgreen");
     tt++;
     
-    // Parameter 'ascope_title_color'
+    // Parameter 'waterfall_title_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ascope_title_color");
-    tt->descr = tdrpStrDup("Color of ascope title.");
+    tt->param_name = tdrpStrDup("waterfall_title_color");
+    tt->descr = tdrpStrDup("Color of waterfall title.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_title_color - &_start_;
+    tt->val_offset = (char *) &waterfall_title_color - &_start_;
     tt->single_val.s = tdrpStrDup("yellow");
     tt++;
     
-    // Parameter 'ascope_x_axis_labels_inside'
+    // Parameter 'waterfall_x_axis_labels_inside'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_x_axis_labels_inside");
+    tt->param_name = tdrpStrDup("waterfall_x_axis_labels_inside");
     tt->descr = tdrpStrDup("Location of tick labels, relative to x axis.");
     tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
-    tt->val_offset = (char *) &ascope_x_axis_labels_inside - &_start_;
+    tt->val_offset = (char *) &waterfall_x_axis_labels_inside - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'ascope_y_axis_labels_inside'
+    // Parameter 'waterfall_y_axis_labels_inside'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_y_axis_labels_inside");
+    tt->param_name = tdrpStrDup("waterfall_y_axis_labels_inside");
     tt->descr = tdrpStrDup("Location of tick labels, relative to y axis.");
     tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
-    tt->val_offset = (char *) &ascope_y_axis_labels_inside - &_start_;
+    tt->val_offset = (char *) &waterfall_y_axis_labels_inside - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("CLUTTER FILTERING");
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
@@ -2339,11 +2682,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("SPECTRUM WIDTH METHOD");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2370,11 +2713,11 @@
     tt->single_val.e = WIDTH_METHOD_R0R1;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -2587,11 +2930,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("BEAM SAMPLING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2692,11 +3035,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OVERRIDING RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
     tt++;
@@ -2833,11 +3176,11 @@
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("FFT WINDOWING");
     tt->comment_text = tdrpStrDup("Applies to the general case.");
     tt++;
@@ -2874,11 +3217,11 @@
     tt->single_val.e = FFT_WINDOW_VONHANN;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("RADAR CALIBRATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2907,11 +3250,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING from display (HawkEye or CIDD)");
     tt->comment_text = tdrpStrDup("Reading and writing the click point location to an FMQ in XML format.");
     tt++;

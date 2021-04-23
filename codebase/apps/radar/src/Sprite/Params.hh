@@ -83,6 +83,20 @@ public:
   } input_mode_t;
 
   typedef enum {
+    DBZ = 0,
+    VEL = 1,
+    WIDTH = 2,
+    NCP = 3,
+    SNR = 4,
+    DBM = 5,
+    ZDR = 6,
+    LDR = 7,
+    RHOHV = 8,
+    PHIDP = 9,
+    KDP = 10
+  } moment_type_t;
+
+  typedef enum {
     SPECTRUM_POWER = 0,
     SPECTRUM_PHASE = 1,
     TS_POWER = 2,
@@ -117,20 +131,6 @@ public:
     LEGEND_BOTTOM_LEFT = 2,
     LEGEND_BOTTOM_RIGHT = 3
   } legend_pos_t;
-
-  typedef enum {
-    DBZ = 0,
-    VEL = 1,
-    WIDTH = 2,
-    NCP = 3,
-    SNR = 4,
-    DBM = 5,
-    ZDR = 6,
-    LDR = 7,
-    RHOHV = 8,
-    PHIDP = 9,
-    KDP = 10
-  } moment_type_t;
 
   typedef enum {
     WIDTH_METHOD_R0R1 = 0,
@@ -542,6 +542,57 @@ public:
 
   int click_cross_size;
 
+  int ascope_n_panels;
+
+  moment_type_t *_ascope_moments;
+  int ascope_moments_n;
+
+  int ascope_width;
+
+  int ascope_title_font_size;
+
+  int ascope_axis_label_font_size;
+
+  int ascope_tick_values_font_size;
+
+  int ascope_legend_font_size;
+
+  int ascope_title_text_margin;
+
+  int ascope_legend_text_margin;
+
+  int ascope_axis_text_margin;
+
+  int ascope_axis_tick_len;
+
+  int ascope_n_ticks_ideal;
+
+  int ascope_left_margin;
+
+  int ascope_bottom_margin;
+
+  tdrp_bool_t ascope_x_grid_lines_on;
+
+  tdrp_bool_t ascope_y_grid_lines_on;
+
+  char* ascope_axis_label_color;
+
+  char* ascope_axes_color;
+
+  char* ascope_grid_color;
+
+  char* ascope_line_color;
+
+  char* ascope_selected_range_color;
+
+  char* ascope_fill_color;
+
+  char* ascope_title_color;
+
+  tdrp_bool_t ascope_x_axis_labels_inside;
+
+  tdrp_bool_t ascope_y_axis_labels_inside;
+
   int iqplots_n_rows;
 
   int iqplots_n_columns;
@@ -623,56 +674,56 @@ public:
 
   tdrp_bool_t iqplot_plot_legend2;
 
-  int ascope_n_panels_in_spectra_window;
+  int waterfall_n_panels;
 
-  moment_type_t *_ascope_moments;
-  int ascope_moments_n;
+  moment_type_t *_waterfall_moments;
+  int waterfall_moments_n;
 
-  int ascope_width_in_spectra_window;
+  int waterfall_width;
 
-  int ascope_title_font_size;
+  int waterfall_title_font_size;
 
-  int ascope_axis_label_font_size;
+  int waterfall_axis_label_font_size;
 
-  int ascope_tick_values_font_size;
+  int waterfall_tick_values_font_size;
 
-  int ascope_legend_font_size;
+  int waterfall_legend_font_size;
 
-  int ascope_title_text_margin;
+  int waterfall_title_text_margin;
 
-  int ascope_legend_text_margin;
+  int waterfall_legend_text_margin;
 
-  int ascope_axis_text_margin;
+  int waterfall_axis_text_margin;
 
-  int ascope_axis_tick_len;
+  int waterfall_axis_tick_len;
 
-  int ascope_n_ticks_ideal;
+  int waterfall_n_ticks_ideal;
 
-  int ascope_left_margin;
+  int waterfall_left_margin;
 
-  int ascope_bottom_margin;
+  int waterfall_bottom_margin;
 
-  tdrp_bool_t ascope_x_grid_lines_on;
+  tdrp_bool_t waterfall_x_grid_lines_on;
 
-  tdrp_bool_t ascope_y_grid_lines_on;
+  tdrp_bool_t waterfall_y_grid_lines_on;
 
-  char* ascope_axis_label_color;
+  char* waterfall_axis_label_color;
 
-  char* ascope_axes_color;
+  char* waterfall_axes_color;
 
-  char* ascope_grid_color;
+  char* waterfall_grid_color;
 
-  char* ascope_line_color;
+  char* waterfall_line_color;
 
-  char* ascope_selected_range_color;
+  char* waterfall_selected_range_color;
 
-  char* ascope_fill_color;
+  char* waterfall_fill_color;
 
-  char* ascope_title_color;
+  char* waterfall_title_color;
 
-  tdrp_bool_t ascope_x_axis_labels_inside;
+  tdrp_bool_t waterfall_x_axis_labels_inside;
 
-  tdrp_bool_t ascope_y_axis_labels_inside;
+  tdrp_bool_t waterfall_y_axis_labels_inside;
 
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
@@ -785,7 +836,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[166];
+  mutable TDRPtable _table[192];
 
   const char *_className;
 

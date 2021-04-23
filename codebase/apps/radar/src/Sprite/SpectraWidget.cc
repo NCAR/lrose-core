@@ -68,8 +68,8 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 
   _titleMargin = _params.main_window_title_margin;
 
-  _nAscopes = _params.ascope_n_panels_in_spectra_window;
-  _ascopeWidth = _params.ascope_width_in_spectra_window; // constant
+  _nAscopes = _params.ascope_n_panels;
+  _ascopeWidth = _params.ascope_width; // constant
   _ascopeHeight = 100;
   _ascopeGrossWidth = _ascopeWidth * _nAscopes;
 

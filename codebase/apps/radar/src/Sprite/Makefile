@@ -62,6 +62,7 @@ HDRS = \
 	SpectraWidget.hh \
 	Sprite.hh \
 	TsReader.hh \
+	WaterfallPlot.hh \
 	WorldPlot.hh
 
 NORM_SRCS = \
@@ -76,6 +77,7 @@ NORM_SRCS = \
 	ScaledLabel.cc \
 	Sprite.cc \
 	TsReader.cc \
+	WaterfallPlot.cc \
 	WorldPlot.cc
 
 MOC_SRCS = \

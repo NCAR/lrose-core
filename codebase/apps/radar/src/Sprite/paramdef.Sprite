@@ -274,6 +274,158 @@ paramdef int {
 } click_cross_size;
 
 commentdef {
+  p_header = "ASCOPE DISPLAY PANEL";
+  p_text = "The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.";
+}
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of ascope panels in spectra window (pixels).";
+  p_help = "The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.";
+} ascope_n_panels;
+
+typedef enum {
+  DBZ,
+  VEL,
+  WIDTH,
+  NCP,
+  SNR,
+  DBM,
+  ZDR,
+  LDR,
+  RHOHV,
+  PHIDP,
+  KDP
+} moment_type_t;
+
+paramdef enum moment_type_t {
+  p_default = { DBZ, VEL };
+  p_descr = "Moments to be displaed on ascope panels.";
+  p_help = "The number of specified moments must match the number of ascope panels.";
+} ascope_moments[];
+
+paramdef int {
+  p_default = 150;
+  p_descr = "Width of ASCOPE panel in spectra window (pixels).";
+  p_help = "The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.";
+} ascope_width;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of center title (pixels).";
+} ascope_title_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of axis labels in ascope (pixels).";
+} ascope_axis_label_font_size;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Font size of axis tick values (pixels).";
+} ascope_tick_values_font_size;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Font size for plot legends (pixels).";
+} ascope_legend_font_size;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Margin around title text (pixels).";
+} ascope_title_text_margin;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Margin around legend text (pixels).";
+} ascope_legend_text_margin;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Margin around axis text (pixels).";
+} ascope_axis_text_margin;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Length of ticks on axes (pixels).";
+} ascope_axis_tick_len;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Ideal number of ticks on axes.";
+} ascope_n_ticks_ideal;
+
+paramdef int {
+  p_default = 18;
+  p_descr = "Width of left margin for ascope plot (pixels).";
+  p_help = "The Y axis labels are plotted here.";
+} ascope_left_margin;
+
+paramdef int {
+  p_default = 18;
+  p_descr = "Height of bottom margin for ascope plot (pixels).";
+  p_help = "The X axis labels are plotted here.";
+} ascope_bottom_margin;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the X direction.";
+} ascope_x_grid_lines_on;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the Y direction.";
+} ascope_y_grid_lines_on;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of ascope axis labels.";
+} ascope_axis_label_color;
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of axes in ascope.";
+} ascope_axes_color;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of grid lines on ascope.";
+} ascope_grid_color;
+
+paramdef string {
+  p_default = "lightgray";
+  p_descr = "Color of ascope line.";
+} ascope_line_color;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of line showing currently selected range.";
+  p_help = "The user can double click in the ascope to move this line.";
+} ascope_selected_range_color;
+
+paramdef string {
+  p_default = "darkgreen";
+  p_descr = "Color of ascope fill.";
+} ascope_fill_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of ascope title.";
+} ascope_title_color;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to x axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} ascope_x_axis_labels_inside;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to y axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} ascope_y_axis_labels_inside;
+
+commentdef {
   p_header = "IQ PLOTS";
 }
 
@@ -555,156 +707,142 @@ paramdef boolean {
 } iqplot_plot_legend2;
 
 commentdef {
-  p_header = "ASCOPE DISPLAY PANEL";
-  p_text = "The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.";
+  p_header = "WATERFALL DISPLAY PANEL";
+  p_text = "The waterfall plots show spectra plotted against range.";
 }
 
 paramdef int {
   p_default = 2;
-  p_descr = "Number of ascope panels in spectra window (pixels).";
-  p_help = "The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.";
-} ascope_n_panels_in_spectra_window;
-
-typedef enum {
-  DBZ,
-  VEL,
-  WIDTH,
-  NCP,
-  SNR,
-  DBM,
-  ZDR,
-  LDR,
-  RHOHV,
-  PHIDP,
-  KDP
-} moment_type_t;
+  p_descr = "Number of waterfall panels in spectra window (pixels).";
+  p_help = "The waterfalls will be on the left of the plot. Set to 0 for no WATERFALL panel.";
+} waterfall_n_panels;
 
 paramdef enum moment_type_t {
   p_default = { DBZ, VEL };
-  p_descr = "Moments to be displaed on ascope panels.";
-  p_help = "The number of specified moments must match the number of ascope panels.";
-} ascope_moments[];
+  p_descr = "Moments to be displaed on waterfall panels.";
+  p_help = "The number of specified moments must match the number of waterfall panels.";
+} waterfall_moments[];
 
 paramdef int {
   p_default = 150;
-  p_descr = "Width of ASCOPE panel in spectra window (pixels).";
-  p_help = "The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.";
-} ascope_width_in_spectra_window;
+  p_descr = "Width of WATERFALL panel in spectra window (pixels).";
+  p_help = "The WATERFALL will be on the left of the plot. Set to 0 for no WATERFALL panel.";
+} waterfall_width;
 
 paramdef int {
   p_default = 10;
   p_descr = "Font size of center title (pixels).";
-} ascope_title_font_size;
+} waterfall_title_font_size;
 
 paramdef int {
   p_default = 8;
-  p_descr = "Font size of axis labels in ascope (pixels).";
-} ascope_axis_label_font_size;
+  p_descr = "Font size of axis labels in waterfall (pixels).";
+} waterfall_axis_label_font_size;
 
 paramdef int {
   p_default = 6;
   p_descr = "Font size of axis tick values (pixels).";
-} ascope_tick_values_font_size;
+} waterfall_tick_values_font_size;
 
 paramdef int {
   p_default = 6;
   p_descr = "Font size for plot legends (pixels).";
-} ascope_legend_font_size;
+} waterfall_legend_font_size;
 
 paramdef int {
   p_default = 3;
   p_descr = "Margin around title text (pixels).";
-} ascope_title_text_margin;
+} waterfall_title_text_margin;
 
 paramdef int {
   p_default = 3;
   p_descr = "Margin around legend text (pixels).";
-} ascope_legend_text_margin;
+} waterfall_legend_text_margin;
 
 paramdef int {
   p_default = 2;
   p_descr = "Margin around axis text (pixels).";
-} ascope_axis_text_margin;
+} waterfall_axis_text_margin;
 
 paramdef int {
   p_default = 4;
   p_descr = "Length of ticks on axes (pixels).";
-} ascope_axis_tick_len;
+} waterfall_axis_tick_len;
 
 paramdef int {
   p_default = 5;
   p_descr = "Ideal number of ticks on axes.";
-} ascope_n_ticks_ideal;
+} waterfall_n_ticks_ideal;
 
 paramdef int {
   p_default = 18;
-  p_descr = "Width of left margin for ascope plot (pixels).";
+  p_descr = "Width of left margin for waterfall plot (pixels).";
   p_help = "The Y axis labels are plotted here.";
-} ascope_left_margin;
+} waterfall_left_margin;
 
 paramdef int {
   p_default = 18;
-  p_descr = "Height of bottom margin for ascope plot (pixels).";
+  p_descr = "Height of bottom margin for waterfall plot (pixels).";
   p_help = "The X axis labels are plotted here.";
-} ascope_bottom_margin;
+} waterfall_bottom_margin;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to draw grid lines in the X direction.";
-} ascope_x_grid_lines_on;
+} waterfall_x_grid_lines_on;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Option to draw grid lines in the Y direction.";
-} ascope_y_grid_lines_on;
+} waterfall_y_grid_lines_on;
 
 paramdef string {
   p_default = "white";
-  p_descr = "Color of ascope axis labels.";
-} ascope_axis_label_color;
+  p_descr = "Color of waterfall axis labels.";
+} waterfall_axis_label_color;
 
 paramdef string {
   p_default = "green";
-  p_descr = "Color of axes in ascope.";
-} ascope_axes_color;
+  p_descr = "Color of axes in waterfall.";
+} waterfall_axes_color;
 
 paramdef string {
   p_default = "gray";
-  p_descr = "Color of grid lines on ascope.";
-} ascope_grid_color;
+  p_descr = "Color of grid lines on waterfall.";
+} waterfall_grid_color;
 
 paramdef string {
   p_default = "lightgray";
-  p_descr = "Color of ascope line.";
-} ascope_line_color;
+  p_descr = "Color of waterfall line.";
+} waterfall_line_color;
 
 paramdef string {
   p_default = "cyan";
   p_descr = "Color of line showing currently selected range.";
-  p_help = "The user can double click in the ascope to move this line.";
-} ascope_selected_range_color;
+  p_help = "The user can double click in the waterfall to move this line.";
+} waterfall_selected_range_color;
 
 paramdef string {
   p_default = "darkgreen";
-  p_descr = "Color of ascope fill.";
-} ascope_fill_color;
+  p_descr = "Color of waterfall fill.";
+} waterfall_fill_color;
 
 paramdef string {
   p_default = "yellow";
-  p_descr = "Color of ascope title.";
-} ascope_title_color;
+  p_descr = "Color of waterfall title.";
+} waterfall_title_color;
 
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Location of tick labels, relative to x axis.";
   p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
-} ascope_x_axis_labels_inside;
+} waterfall_x_axis_labels_inside;
 
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Location of tick labels, relative to y axis.";
   p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
-} ascope_y_axis_labels_inside;
+} waterfall_y_axis_labels_inside;
 
 commentdef {
   p_header = "CLUTTER FILTERING";
