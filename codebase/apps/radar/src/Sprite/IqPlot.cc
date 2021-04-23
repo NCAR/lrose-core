@@ -810,6 +810,20 @@ void IqPlot::_plotIQVals(QPainter &painter,
   }
   double RRR = sumAbsVal / sumAbsResid;
   
+  // compute CSR
+  
+  double sumPowerTotal = 0.0;
+  double sumPowerResid = 0.0;
+  for (int ii = 0; ii < nSamples; ii++) {
+    sumPowerTotal += vals[ii] * vals[ii];
+    sumPowerResid += residual[ii] * residual[ii];
+  }
+  double clutterPower = sumPowerTotal - sumPowerResid;
+  double CSR = 0.0;
+  if (clutterPower > 0) {
+    CSR = 10.0 * log10(clutterPower / sumPowerResid) * 10.0;
+  }
+  
   // compute min and max vals for plot
   
   double minVal = 9999.0;

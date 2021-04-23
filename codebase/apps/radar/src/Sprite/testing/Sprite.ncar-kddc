@@ -560,7 +560,7 @@ iqplots = {
     use_adaptive_filter = TRUE,
     plot_clutter_model = TRUE,
     clutter_width_mps = 0.5,
-    use_regression_filter = TRUE,
+    use_regression_filter = FALSE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }
@@ -572,7 +572,7 @@ iqplots = {
     use_adaptive_filter = TRUE,
     plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
-    use_regression_filter = TRUE,
+    use_regression_filter = FALSE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }
@@ -584,7 +584,7 @@ iqplots = {
     use_adaptive_filter = TRUE,
     plot_clutter_model = TRUE,
     clutter_width_mps = 0.5,
-    use_regression_filter = TRUE,
+    use_regression_filter = FALSE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }
@@ -596,7 +596,7 @@ iqplots = {
     use_adaptive_filter = TRUE,
     plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
-    use_regression_filter = TRUE,
+    use_regression_filter = FALSE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }

@@ -488,6 +488,15 @@ fields = {
   }
   ,
   {
+    label = "CMD",
+    raw_name = "CMD",
+    filtered_name = "",
+    units = "",
+    color_map = "cmd.colors",
+    shortcut = "q"
+  }
+  ,
+  {
     label = "CPA",
     raw_name = "CPA",
     filtered_name = "",
