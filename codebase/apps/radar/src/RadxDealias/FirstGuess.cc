@@ -190,7 +190,7 @@ bool FirstGuess::firstGuess(Volume* soundVolume, time_t soundingTime)
 
   int k = 1;
   //float missingValue = sounding.getMissingValue();
-  cout << "sounding missing value = " << missingValue << endl;
+  if (_debug) cerr << "sounding missing value = " << missingValue << endl;
   for( int i = 0 ; i < numPoints; i++)
     {
       //
@@ -387,13 +387,13 @@ int FirstGuess::loadSoundingData( time_t issueTime )
    int ret = sounding.readSounding( issueTime );
 
    if ( ret < 0 ) {
-      fprintf( stderr, "Cannot read sounding data at %s\n",
+      fprintf( stderr, "Cannot read spdb sounding data at %s\n",
                        DateTime::str( issueTime ).c_str() );
       return( ret  );
    }
 
    if ( ret == 0 ) {
-      fprintf(stderr, "No sounding data available at %s\n",
+      fprintf(stderr, "No spdb sounding data available at %s\n",
                          DateTime::str( issueTime ).c_str() );
       return( ret);
    }
@@ -404,8 +404,7 @@ int FirstGuess::loadSoundingData( time_t issueTime )
    string   timeStampName = "Sounding data: ";
    timeStampName += soundingName;
    
-   if(_debug)
-   fprintf( stderr, "Sounding: Got '%s' at %s\n",
+   fprintf( stderr, "Spdb Sounding: Got '%s' at %s\n",
 	    soundingName.c_str(), soundingTime.dtime() );
 
    //   if (success) 
@@ -431,10 +430,10 @@ ClassIngest *FirstGuess::loadSoundingDataText( time_t issueTime )
 
   // get the sounding from classIngest
   if ( ret < 0 ) {
-    fprintf( stderr, "Cannot read sounding data at %s\n",
+    fprintf( stderr, "Cannot read text sounding data at %s\n",
                        DateTime::str( issueTime ).c_str() );
   } else if ( ret == 0 ) {
-    fprintf(stderr, "No sounding data available at %s\n",
+    fprintf(stderr, "No text sounding data available at %s\n",
                          DateTime::str( issueTime ).c_str() );
   } else {
 
@@ -445,10 +444,10 @@ ClassIngest *FirstGuess::loadSoundingDataText( time_t issueTime )
     string   timeStampName = "Sounding data: ";
     timeStampName += soundingName;
      
-    if(_debug) {
-      fprintf( stderr, "Sounding: Got '%s' at %s\n",
-        soundingName.c_str(), soundingTime.dtime() );
-    }
+    
+    fprintf( stderr, "Text Sounding: Got '%s' at %s\n",
+      soundingName.c_str(), soundingTime.dtime() );
+    
 
   }
   if (ret <= 0) {

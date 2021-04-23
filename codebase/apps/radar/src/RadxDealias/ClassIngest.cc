@@ -137,13 +137,6 @@ ClassIngest::ClassIngest(char *sounding_url,
           time_t startTime, time_t endTime) 
 {
 
-  //isOK = true;
-
-  // set programe name
-
-  //_progName = "ClassIngest";
-  //ucopyright((char *) _progName.c_str());
-
   _init(params_debug); 
 
 
@@ -156,32 +149,6 @@ ClassIngest::ClassIngest(char *sounding_url,
           params_input_dir,
           startTime, endTime);
 
-  // get command line args
-
-  //if (_args.parse(argc, argv, _progName)) {
-  //  cerr << "ERROR: " << _progName << endl;
-  //  cerr << "Problem with command line args" << endl;
-  //  isOK = FALSE;
-  //  return;
-  //}
-
-  // get TDRP params
-  
-  //_paramsPath = (char *) "unknown";
-  //if (_params.loadFromArgs(argc, argv, _args.override.list,
-	//		   &_paramsPath)) {
-  //  cerr << "ERROR: " << _progName << endl;
-  //  cerr << "Problem with TDRP parameters" << endl;
-  //  isOK = FALSE;
-  //  return;
-  //}
-
-  // init process mapper registration
-
-  //PMU_auto_init((char *) _progName.c_str(),
-	//	_params.instance,
-	//	PROCMAP_REGISTER_INTERVAL);
-
   return;
 
 }
@@ -192,10 +159,6 @@ ClassIngest::~ClassIngest()
 
 {
 
-  // unregister process
-
-  //PMU_auto_unregister();
-
 }
 
 DateTime ClassIngest::getLaunchTime() {
@@ -204,7 +167,6 @@ DateTime ClassIngest::getLaunchTime() {
 
 string   ClassIngest::getSourceName() {
   return _projectId;
-  // return "not available";
 }
 
 void ClassIngest::_init(bool params_debug) {
@@ -214,7 +176,7 @@ void ClassIngest::_init(bool params_debug) {
   // set programe name
 
   _progName = "ClassIngest";
-  ucopyright((char *) _progName.c_str());
+
 }
 
 //////////////////////////////////////////////////
@@ -435,22 +397,22 @@ bool ClassIngest::_process_HeaderText(string line, std::iostream& javascript) {
       const std::regex pieces_regex("(Release|Launch) Site Type/Site ID:[\\s]+([\\w]+[,\\s\\w]*)"); // [,[:space:][:alnum:]]*)"); // [\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
       std::smatch pieces_match;
           //string mytest2 = "Release Site Type Site ID:    Moulton, AL";
-          if (std::regex_match(line, pieces_match, pieces_regex)) {
+      if (std::regex_match(line, pieces_match, pieces_regex)) {
               //std::cout << line << '\n';
-              for (size_t i = 0; i < pieces_match.size(); ++i) {
-                  std::ssub_match sub_match = pieces_match[i];
-                  std::string piece = sub_match.str();
-                  std::cout << "  submatch " << i << ": " << piece << '\n';
-              }   
-              string command = pieces_match[1];
+        for (size_t i = 0; i < pieces_match.size(); ++i) {
+          std::ssub_match sub_match = pieces_match[i];
+          std::string piece = sub_match.str();
+          if (_debug) std::cerr << "  submatch " << i << ": " << piece << '\n';
+        }   
+        string command = pieces_match[1];
               //format_it(command);
-              string siteName = pieces_match[2];
-              cout << command << " : " << siteName << endl;
-              javascript << siteName << endl;
-              recognized = true;
-          } else {
+        string siteName = pieces_match[2];
+        if (_debug) cerr << command << " : " << siteName << endl;
+        javascript << siteName << endl;
+        recognized = true;
+      } else {
             //std::cout << "regex_match returned false\n";
-          } 
+      } 
   return recognized;
 }
 
@@ -460,33 +422,23 @@ bool ClassIngest::_process_Location(string line, std::iostream& javascript) {
   // "Release Location (lon,lat,alt):    087 25.55'W, 34 29.04'N, -87.426, 34.484, 199.0",
   const std::regex pieces_regex("(Release|Launch) Location \\(lon,lat,alt\\):[\\s]+([\\d]+)\\s([\\d]+\\.[\\d]+)'(W|E), ([\\d]+) ([\\d]+\\.[\\d]+)'(N|S),([+-.,\\s\\d]+)"); // " ()'[N|S], ([:digit:]), ([:num"); // [,[:space:][:alnum:]]*)"); // [\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
   std::smatch pieces_match;
-/*
-    if (_getHeaderText(in, "Launch Location", text) == 0) {
-    vector<string> toks;
-    TaStr::tokenize(text, ", ", toks);
-    if (toks.size() >= 3) {
-      alt = atof(toks[toks.size()-1].c_str());
-      lat = atof(toks[toks.size()-2].c_str());
-      lon = atof(toks[toks.size()-3].c_str());
-    }
-    */
 
-          string mytest2 = "Release Location (lon,lat,alt):    087 25.55'W, 34 29.04'N, -87.426, 34.484, 199.0";
-          if (std::regex_match(line, pieces_match, pieces_regex)) {
+  string mytest2 = "Release Location (lon,lat,alt):    087 25.55'W, 34 29.04'N, -87.426, 34.484, 199.0";
+  if (std::regex_match(line, pieces_match, pieces_regex)) {
               //std::cout << line << '\n';
-              for (size_t i = 0; i < pieces_match.size(); ++i) {
-                  std::ssub_match sub_match = pieces_match[i];
-                  std::string piece = sub_match.str();
-                  std::cout << "  submatch " << i << ": " << piece << '\n';
-              }   
-              string lat_lon_alt = pieces_match[8];
-              cout << "found lon, lat, alt : " << lat_lon_alt << endl;
-              javascript << lat_lon_alt << endl;
+    for (size_t i = 0; i < pieces_match.size(); ++i) {
+      std::ssub_match sub_match = pieces_match[i];
+      std::string piece = sub_match.str();
+      if (_debug) std::cerr << "  submatch " << i << ": " << piece << '\n';
+    }   
+    string lat_lon_alt = pieces_match[8];
+    if (_debug) cerr << "found lon, lat, alt : " << lat_lon_alt << endl;
+    javascript << lat_lon_alt << endl;
               // TODO: tokenize submatch[8] which contains final three numeric values
-              recognized = true;
-          } else {
+    recognized = true;
+  } else {
             //std::cout << "regex_match returned false\n";
-          } 
+  } 
   return recognized;
 }    
 
@@ -498,24 +450,22 @@ bool ClassIngest::_process_LaunchTime(string line, std::iostream& javascript) {
   const std::regex pieces_regex("(UTC|GMT) (Release|Launch) Time \\(y,m,d,h,m,s\\):[\\s]+([:,\\s\\d]+)");
   std::smatch pieces_match;
 
-          string mytest2 = "UTC Release Time (y,m,d,h,m,s):    2016, 03, 31, 00:01:00";
-          if (std::regex_match(line, pieces_match, pieces_regex)) {
+  string mytest2 = "UTC Release Time (y,m,d,h,m,s):    2016, 03, 31, 00:01:00";
+  if (std::regex_match(line, pieces_match, pieces_regex)) {
               //std::cout << line << '\n';
-              for (size_t i = 0; i < pieces_match.size(); ++i) {
-                  std::ssub_match sub_match = pieces_match[i];
-                  std::string piece = sub_match.str();
-                  std::cout << "  submatch " << i << ": " << piece << '\n';
-              }   
-              string dateTime = pieces_match[3];
-              //format_it(command);
-              //string siteName = pieces_match[2];
-              cout << "Launch Time : " << dateTime << endl;
-              javascript << dateTime << endl;
+    for (size_t i = 0; i < pieces_match.size(); ++i) {
+      std::ssub_match sub_match = pieces_match[i];
+      std::string piece = sub_match.str();
+      if (_debug) std::cerr << "  submatch " << i << ": " << piece << '\n';
+    }   
+    string dateTime = pieces_match[3];
+    if (_debug) cerr << "Launch Time : " << dateTime << endl;
+    javascript << dateTime << endl;
               // TODO: return date and time in javascript stream 
-              recognized = true;
-          } else {
+    recognized = true;
+  } else {
             //std::cout << "regex_match returned false\n";
-          } 
+  } 
         
   return recognized;
 }    
@@ -527,24 +477,24 @@ bool ClassIngest::_process_ProjectId(string line, std::iostream& javascript) {
   const std::regex pieces_regex("Project ID:[\\s]+([-_[:alnum:]]+)");
   std::smatch pieces_match;
 
-          string mytest2 = "Project ID:                        VORTEX-SE_2016";
-          if (std::regex_match(line, pieces_match, pieces_regex)) {
+  string mytest2 = "Project ID:                        VORTEX-SE_2016";
+  if (std::regex_match(line, pieces_match, pieces_regex)) {
               //std::cout << line << '\n';
-              for (size_t i = 0; i < pieces_match.size(); ++i) {
-                  std::ssub_match sub_match = pieces_match[i];
-                  std::string piece = sub_match.str();
-                  std::cout << "  submatch " << i << ": " << piece << '\n';
-              }   
+    for (size_t i = 0; i < pieces_match.size(); ++i) {
+      std::ssub_match sub_match = pieces_match[i];
+      std::string piece = sub_match.str();
+      if (_debug) std::cerr << "  submatch " << i << ": " << piece << '\n';
+    }   
               //string command = pieces_match[1];
               //format_it(command);
-              string siteName = pieces_match[1];
-              cout << "Project ID : " << siteName << endl;
-              javascript << siteName << endl;
+    string siteName = pieces_match[1];
+    if (_debug) cerr << "Project ID : " << siteName << endl;
+    javascript << siteName << endl;
               // TODO: return date and time in javascript stream 
-              recognized = true;
-          } else {
+    recognized = true;
+  } else {
             //std::cout << "regex_match returned false\n";
-          } 
+  } 
         
   return recognized;
 }    
@@ -553,27 +503,17 @@ bool ClassIngest::_process_ProjectId(string line, std::iostream& javascript) {
 
 bool ClassIngest::_process_columnData(string line, std::iostream& javascript) {
   bool recognized = false;
-  //  Time  Press  Temp  Dewpt  RH    Ucmp  ...
+  //  list of floating point numbers ...
 
   const std::regex pieces_regex("[-+]?[0-9]*\\.?[0-9]+"); // ("[^[:digit:]]-+[:digit:].[:digit:]+]+"); // Temp)[\\s]+[.]*");
   std::smatch pieces_match;
 
-          //string mytest2 = "    0.0  978.4  21.5  18.1  81.1   -1.4    3.8   4.0 160.0 999.0  -87.426  34.484 999.0  13.6 ";
-          if (std::regex_search(line, pieces_match, pieces_regex)) {
-              //std::cout << line << '\n';
-            /*
-              for (size_t i = 0; i < pieces_match.size(); ++i) {
-                  std::ssub_match sub_match = pieces_match[i];
-                  std::string piece = sub_match.str();
-                  std::cout << "  submatch " << i << ": " << piece << '\n';
-              }   
-              */
-              //javascript << line << endl;
-              recognized = true;
-          } else {
-            std::cout << "regex_match returned false\n";
-          } 
-        
+  //string mytest2 = "    0.0  978.4  21.5  18.1  81.1   -1.4    3.8   4.0 160.0 999.0  -87.426  34.484 999.0  13.6 ";
+  if (std::regex_search(line, pieces_match, pieces_regex)) {
+    recognized = true;
+  } else {
+    //std::cout << "regex_match returned false\n";
+  }         
   return recognized;
 } 
 
@@ -582,7 +522,7 @@ int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
     return -1;
   }
 
-  // TODO: somehow loop through the lines, and try the regex until done???
+  // loop through the lines, and try the regex until done
 
   std::string line;
   //std::string siteName;
@@ -591,7 +531,7 @@ int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
   int nNeeded = 4;
 
   while (getline(sounding_file, line) && (numRecognized < nNeeded)) {
-    std::cout << "|" << line << "| \n";
+    if (_debug) std::cerr << "|" << line << "| \n";
     bool recognized = _process_HeaderText(line, javascript);
     if (recognized) {
       // set the siteId
@@ -613,15 +553,13 @@ int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
       std::string text;
       getline(javascript, text);
       
-      //if (_getHeaderText(in, "Launch Location", text) == 0) {
-        vector<string> toks;
-        TaStr::tokenize(text, ", ", toks);
-        if (toks.size() >= 3) {
-          alt = atof(toks[toks.size()-1].c_str());
-          lat = atof(toks[toks.size()-2].c_str());
-          lon = atof(toks[toks.size()-3].c_str());
-        }
-      //}
+      vector<string> toks;
+      TaStr::tokenize(text, ", ", toks);
+      if (toks.size() >= 3) {
+        alt = atof(toks[toks.size()-1].c_str());
+        lat = atof(toks[toks.size()-2].c_str());
+        lon = atof(toks[toks.size()-3].c_str());
+      }
 
       if (lat == 0.0 && lon == 0.0 && alt == 0.0) {
         cerr << "ERROR - ClassIngest::_readHeader" << endl;
@@ -654,7 +592,7 @@ int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
       std::string text;
       getline(javascript, text);
       if (_debug) {
-        cout << "project ID = " << text << endl;
+        cerr << "project ID = " << text << endl;
       }
       numRecognized += 1;
     //if (_getHeaderText(in, "Project ID", text) == 0) {
@@ -662,9 +600,9 @@ int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
       _projectId = text;
     //}
     } else {
-      cout << "line not recognized " << endl;
+      if (_debug) cerr << "line not recognized " << endl;
     }
-    cout << "numRecognized = " << numRecognized << " nNeeded = " << nNeeded << endl;
+    if (_debug) cerr << "numRecognized = " << numRecognized << " nNeeded = " << nNeeded << endl;
 
   }
 
@@ -679,81 +617,7 @@ int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
 
 int ClassIngest::_getHeaderText(ifstream& sounding_file, const char* label, string &text)
 {
-/*
-  long  posStart, posCurrent = -1L;
-  bool  found = false;
-  char  line[BUFSIZ];
-  char *lptr = NULL; // Set to NULL to avoid compiler warnings.
 
-  // Hang onto the starting file position
-
-  if ((posStart = ftell(in)) == -1L) {
-    return -1;
-  }
-
-  // Read each line until we either find what we're looking for
-  // or we come back around to our starting point
-
-  while (posCurrent != posStart) {
-    
-    lptr = fgets(line, BUFSIZ, in);
-    posCurrent = ftell(in);
-
-    if (feof(in)){
-      // We've reached the end of file -- wrap around
-      rewind(in);
-      posCurrent = ftell(in);
-    } else {
-      // See if this is the line we want
-      if (strstr(line, label) != NULL) {
-        // This is it
-        found = true;
-        break;
-      }
-    }
-  }
-
-  if (found) {
-
-    // jump past label
-
-    lptr += 35;
-
-    // move forward to first printing character
-
-    while (*lptr != '\n') {
-      if (isblank(*lptr)) {
-        lptr++;
-      } else {
-        break;
-      }
-    }
-
-    // strip line feed
-
-    for (size_t ii = 0; ii < strlen(lptr); ii++) {
-      if (lptr[ii] == '\n') {
-        lptr[ii] = '\0';
-      }
-    }
-    
-    // assign to return string
-
-    text.assign(lptr);
-
-    if (_debug) {
-      cerr << "Header label: " << label << endl;
-      cerr << "       value: " << text << endl;
-    }
-
-    if (text.size() > 0) {
-      return 0;
-    } else {
-      return -1;
-    }
-
-  }
-*/
   return -1;
 
 }
@@ -772,21 +636,15 @@ int ClassIngest::_findColumns(ifstream& sounding_file)
     return -1;
   }
   
-
   // Don't use regex, just use tokenizer on line. 
-// TODO: read the column names from the javascript stream returned
-  // Remember, we need to column number as well!
-
-  //if (fgets(line, BUFSIZ, in) == NULL) {
-  //  return -1;
-  //}
+  // Remember, we need the column number as well!
 
   std::string line;
   bool recognized = false;
-  //ssize_t linelen = 
+
   getline(sounding_file, line);
   while ((sounding_file.good()) && !recognized) {
-    std::cout << "|" << line << "| \n";
+    if (_debug) std::cout << "|" << line << "| \n";
     field = strtok(const_cast<char*>(line.c_str()), DELIMETER);
     if (strcmp(field, "Time") == 0) {
       recognized = true;
@@ -795,16 +653,8 @@ int ClassIngest::_findColumns(ifstream& sounding_file)
     }
   }
   if (!recognized) return -1;
-  /*
-  while((field == NULL) ||
-         ((field != NULL) && (strcmp(field, "Time") != 0))) {
-    if (fgets(line, BUFSIZ, in) == NULL) {
-      return -1;
-    }
-    field = strtok(line, DELIMETER);
-  }
-  */
-  // TODO: do we not record the time data?
+
+  //  do we not record the time data?
   //columnData[column] = &time[0];
 
   // Look for all the labels we need and note the column for each.
@@ -871,46 +721,7 @@ int ClassIngest::_findColumns(ifstream& sounding_file)
 
 int ClassIngest::_findFirstData(ifstream& sounding_file)
 {
-/*
-  char *field, line[BUFSIZ];
-  long fpos;
 
-  // Hang onto the current file position.
-
-  if ((fpos = ftell(in)) == -1L) {
-    return -1;
-  }
-
-  // Look for the first line of data.  There might be non-data lines between
-  // the labels line and the first line of data.
-
-  if (fgets(line, BUFSIZ, in) == NULL) {
-    return -1;
-  }
-  field = strtok(line, DELIMETER);
-  
-  // Check the first two chars of field since a digit may be negative and
-  // thus, start with '-'.
-
-  while((field == NULL) ||
-        ((field != NULL) && (!isdigit(*field) && !isdigit(*(field+1))))) {
-
-    // Get the current file position.
-
-    if ((fpos = ftell(in)) == -1L) {
-      return -1;
-    }
-
-    if (fgets(line, BUFSIZ, in) == NULL) {
-      return -1;
-    }
-    field = strtok(line, DELIMETER);
-  }
-
-  // Reset the file pointer to the beginning of this line of data.
-
-  fseek(in, fpos, SEEK_SET);
-  */
   return 0;
 
 }
@@ -927,18 +738,18 @@ int ClassIngest::_readData(ifstream& sounding_file)
     return -1;
   }
 
-    _numPoints = 0;
-    std::string line;
-    std::stringstream javascript;
-    bool recognized = false;
+  _numPoints = 0;
+  std::string line;
+  std::stringstream javascript;
+  bool recognized = false;
     while (getline(sounding_file, line)) { // } && !recognized) {
-      std::cout << "|" << line << "| \n";
+      if (_debug) std::cerr << "|" << line << "| \n";
       recognized = _process_columnData(line, javascript);
       if (recognized) {
          // extract selected columns of data ...
-         _extractSelectedData(line);
-      }
-    }
+       _extractSelectedData(line);
+     }
+   }
 
   // Make sure we found some data
 
@@ -963,9 +774,6 @@ int ClassIngest::_extractSelectedData(std::string line) {
   // Bad altitude indicator is 99999.0 in the CLASS format.
 
   const float BAD_ALT  = 99999.0;
-
-  //_numPoints = 0;
-  //while (fgets(line, BUFSIZ, in) != NULL) {
 
     // Get each field of interest
 
@@ -1134,20 +942,6 @@ int ClassIngest::_writeSounding(SoundingPut &sounding)
             "   TEMP  :  (min, max, avg) (%9.2lf%9.2lf%9.2lf)\n", 
             min, max, avg);
   }
-
-  // Write the sounding to the database
-  
-  //status = sounding.writeSounding(when, when + _params.expire_secs);
-
-  //if (status  != 0) {
-  //  cerr << "ERROR - ClassIngest::_writeSounding" << endl;
-  //  cerr << "Could not write to the sounding database." << endl;
-  //  return -1;
-  //}
-
-  //if (_debug) {
-  //  cerr << "Wrote the sounding for time: " << DateTime::strm(_dataTime) << endl;
-  //}
   
   return 0;
 
