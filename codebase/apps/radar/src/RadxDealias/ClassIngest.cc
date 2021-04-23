@@ -198,6 +198,15 @@ ClassIngest::~ClassIngest()
 
 }
 
+DateTime ClassIngest::getLaunchTime() {
+  return _launchTime;
+}
+
+string   ClassIngest::getSourceName() {
+  return _projectId;
+  // return "not available";
+}
+
 void ClassIngest::_init(bool params_debug) {
 
   _debug = params_debug;
@@ -211,7 +220,7 @@ void ClassIngest::_init(bool params_debug) {
 //////////////////////////////////////////////////
 // Run
 
-int ClassIngest::readSoundingText() // RunIt ()
+int ClassIngest::readSoundingText()
 {
 
   // register with procmap
@@ -267,23 +276,25 @@ int ClassIngest::readSoundingText() // RunIt ()
   */
   // loop through available files
   
+  int iret = 1;
   char *inputPath;
   if (_input == NULL) {
-      cerr << "WARNING - ClassIngest::Run" << endl;
+      cerr << "WARNING - ClassIngest::readSoundingText" << endl;
       cerr << "  Error: file input object is NULL." << endl;
-      return -1;
+      return 0;
   }
   inputPath = _input->next();
-  while (inputPath != NULL) {
+  //while (inputPath != NULL) {
     
     if (_processFile(inputPath)) {
-      cerr << "WARNING - ClassIngest::Run" << endl;
+      cerr << "WARNING - ClassIngest::readSoundingText" << endl;
       cerr << "  Errors in processing file: " << inputPath << endl;
-    }
-    inputPath = _input->next();
-  } // while
+      iret = -1;
+    } 
+    //inputPath = _input->next();
+  //} // while
     
-  return 0;
+  return iret;
 
 }
 
@@ -343,7 +354,7 @@ int ClassIngest::_processFile(const char *filePath)
   // open file
   //
 
-  FILE *in;
+  //FILE *in;
 
   std::ifstream sounding_file;
   try {
@@ -401,8 +412,10 @@ int ClassIngest::_processFile(const char *filePath)
 
   // write out the sounding data
 
-  _writeSoundingData();
-  
+  if (_debug) {
+    _writeSoundingData();
+  }
+
   // done
 
   if (_debug) {
@@ -436,11 +449,12 @@ bool ClassIngest::_process_HeaderText(string line, std::iostream& javascript) {
               javascript << siteName << endl;
               recognized = true;
           } else {
-            std::cout << "regex_match returned false\n";
+            //std::cout << "regex_match returned false\n";
           } 
   return recognized;
 }
 
+// TODO: how to return the location
 bool ClassIngest::_process_Location(string line, std::iostream& javascript) {
   bool recognized = false;
   // "Release Location (lon,lat,alt):    087 25.55'W, 34 29.04'N, -87.426, 34.484, 199.0",
@@ -458,22 +472,20 @@ bool ClassIngest::_process_Location(string line, std::iostream& javascript) {
     */
 
           string mytest2 = "Release Location (lon,lat,alt):    087 25.55'W, 34 29.04'N, -87.426, 34.484, 199.0";
-          if (std::regex_match(mytest2, pieces_match, pieces_regex)) {
+          if (std::regex_match(line, pieces_match, pieces_regex)) {
               //std::cout << line << '\n';
               for (size_t i = 0; i < pieces_match.size(); ++i) {
                   std::ssub_match sub_match = pieces_match[i];
                   std::string piece = sub_match.str();
                   std::cout << "  submatch " << i << ": " << piece << '\n';
               }   
-              string command = pieces_match[1];
-              //format_it(command);
-              string siteName = pieces_match[2];
-              cout << command << " : " << siteName << endl;
-              javascript << siteName << endl;
+              string lat_lon_alt = pieces_match[8];
+              cout << "found lon, lat, alt : " << lat_lon_alt << endl;
+              javascript << lat_lon_alt << endl;
               // TODO: tokenize submatch[8] which contains final three numeric values
               recognized = true;
           } else {
-            std::cout << "regex_match returned false\n";
+            //std::cout << "regex_match returned false\n";
           } 
   return recognized;
 }    
@@ -487,22 +499,22 @@ bool ClassIngest::_process_LaunchTime(string line, std::iostream& javascript) {
   std::smatch pieces_match;
 
           string mytest2 = "UTC Release Time (y,m,d,h,m,s):    2016, 03, 31, 00:01:00";
-          if (std::regex_match(mytest2, pieces_match, pieces_regex)) {
+          if (std::regex_match(line, pieces_match, pieces_regex)) {
               //std::cout << line << '\n';
               for (size_t i = 0; i < pieces_match.size(); ++i) {
                   std::ssub_match sub_match = pieces_match[i];
                   std::string piece = sub_match.str();
                   std::cout << "  submatch " << i << ": " << piece << '\n';
               }   
-              string command = pieces_match[1];
+              string dateTime = pieces_match[3];
               //format_it(command);
-              string siteName = pieces_match[2];
-              cout << command << " : " << siteName << endl;
-              javascript << siteName << endl;
+              //string siteName = pieces_match[2];
+              cout << "Launch Time : " << dateTime << endl;
+              javascript << dateTime << endl;
               // TODO: return date and time in javascript stream 
               recognized = true;
           } else {
-            std::cout << "regex_match returned false\n";
+            //std::cout << "regex_match returned false\n";
           } 
         
   return recognized;
@@ -516,22 +528,22 @@ bool ClassIngest::_process_ProjectId(string line, std::iostream& javascript) {
   std::smatch pieces_match;
 
           string mytest2 = "Project ID:                        VORTEX-SE_2016";
-          if (std::regex_match(mytest2, pieces_match, pieces_regex)) {
+          if (std::regex_match(line, pieces_match, pieces_regex)) {
               //std::cout << line << '\n';
               for (size_t i = 0; i < pieces_match.size(); ++i) {
                   std::ssub_match sub_match = pieces_match[i];
                   std::string piece = sub_match.str();
                   std::cout << "  submatch " << i << ": " << piece << '\n';
               }   
-              string command = pieces_match[1];
+              //string command = pieces_match[1];
               //format_it(command);
-              string siteName = pieces_match[2];
-              cout << command << " : " << siteName << endl;
+              string siteName = pieces_match[1];
+              cout << "Project ID : " << siteName << endl;
               javascript << siteName << endl;
               // TODO: return date and time in javascript stream 
               recognized = true;
           } else {
-            std::cout << "regex_match returned false\n";
+            //std::cout << "regex_match returned false\n";
           } 
         
   return recognized;
@@ -570,96 +582,94 @@ int ClassIngest::_readHeader(ifstream& sounding_file, SoundingPut &sounding) {
     return -1;
   }
 
-    std::string line;
-    std::stringstream javascript;
-    bool recognized = false;
-    while (getline(sounding_file, line) && !recognized) {
-      std::cout << "|" << line << "| \n";
-      recognized = _process_HeaderText(line, javascript);
-    }
+  // TODO: somehow loop through the lines, and try the regex until done???
 
-  if (!recognized) return -1;
-//int ClassIngest::_readHeader(FILE *in, SoundingPut &sounding)
+  std::string line;
+  //std::string siteName;
+  std::stringstream javascript;
+  int numRecognized = 0;
+  int nNeeded = 4;
 
-//{
-//  string text;
-  
-  // set the siteId
+  while (getline(sounding_file, line) && (numRecognized < nNeeded)) {
+    std::cout << "|" << line << "| \n";
+    bool recognized = _process_HeaderText(line, javascript);
+    if (recognized) {
+      // set the siteId
+      int siteId; 
+      std::string text;
+      getline(javascript, text);
+      siteId = Spdb::hash4CharsToInt32(text.c_str());
+      sounding.setSiteId(siteId);
+      if (_debug) {
+        cerr << "siteId " << line << " converted to " << siteId << endl;
+      }
+      numRecognized += 1;
+    } else if (_process_Location(line, javascript)) {
+      // Get/set the launch location
 
-  int siteId; //  = _params.specified_siteID;
-  //if (_params.take_siteID_from_file){
-    //if (_getHeaderText(in, "Launch Site Type/Site ID", text) == 0) {
-    //  vector<string> toks;
-    //  TaStr::tokenize(text, ", ", toks);
-    //  if (toks.size() == 2) {
-    //    if (_debug) {
-    //      cerr << "StationId: " << toks[1] << endl;
-    //    }
-    //    siteId = Spdb::hash4CharsToInt32(toks[1].c_str());
-    //  }
+      double lat = 0.0;
+      double lon = 0.0;
+      double alt = 0.0;
+      std::string text;
+      getline(javascript, text);
+      
+      //if (_getHeaderText(in, "Launch Location", text) == 0) {
+        vector<string> toks;
+        TaStr::tokenize(text, ", ", toks);
+        if (toks.size() >= 3) {
+          alt = atof(toks[toks.size()-1].c_str());
+          lat = atof(toks[toks.size()-2].c_str());
+          lon = atof(toks[toks.size()-3].c_str());
+        }
+      //}
+
+      if (lat == 0.0 && lon == 0.0 && alt == 0.0) {
+        cerr << "ERROR - ClassIngest::_readHeader" << endl;
+        cerr << "  no lat/lon/alt available from file" << endl;
+        return -1;
+      }
+      if (_debug) {
+        cerr << "lat, lon, alt = " << lat << "," << lon << "," << alt << endl;
+      }
+      sounding.setLocation(lat, lon, alt);
+      numRecognized += 1;      
+    } else if (_process_LaunchTime(line, javascript)) { 
+      // get the launch time
+      _launchTime = 0L;
+      string dateTime;
+      date_time_t T;
+      getline(javascript, dateTime);
+      if (6 == sscanf(dateTime.c_str(),
+                      "%d, %d, %d, %d:%d:%d",
+                      &T.year, &T.month, &T.day, &T.hour, &T.min, &T.sec)){
+        uconvert_to_utime(&T);
+        _launchTime = T.unix_time;
+      }
+      if (_debug) {
+        cerr << "launch time " << _launchTime << endl;
+      }
+      numRecognized += 1;      
+    } else if (_process_ProjectId(line, javascript)) {
+        // Set the site name from the Project ID
+      std::string text;
+      getline(javascript, text);
+      if (_debug) {
+        cout << "project ID = " << text << endl;
+      }
+      numRecognized += 1;
+    //if (_getHeaderText(in, "Project ID", text) == 0) {
+      //sounding.setSiteName(text);
+      _projectId = text;
     //}
-  //}
-  //std::string line;
-  getline(javascript, line);
-  siteId = Spdb::hash4CharsToInt32(line.c_str());
-  sounding.setSiteId(siteId);
- 
- 
-  // Get/set the launch location
-
-  recognized = _process_Location(line, javascript);
-  if (!recognized) return -1;
-
-  double lat = 0.0;
-  double lon = 0.0;
-  double alt = 0.0;
-  /*
-  if (_getHeaderText(in, "Launch Location", text) == 0) {
-    vector<string> toks;
-    TaStr::tokenize(text, ", ", toks);
-    if (toks.size() >= 3) {
-      alt = atof(toks[toks.size()-1].c_str());
-      lat = atof(toks[toks.size()-2].c_str());
-      lon = atof(toks[toks.size()-3].c_str());
+    } else {
+      cout << "line not recognized " << endl;
     }
+    cout << "numRecognized = " << numRecognized << " nNeeded = " << nNeeded << endl;
+
   }
 
-  if (lat == 0.0 && lon == 0.0 && alt == 0.0) {
-    cerr << "ERROR - ClassIngest::_readHeader" << endl;
-    cerr << "  no lat/lon/alt available from file" << endl;
-    return -1;
-  }
-  sounding.setLocation(lat, lon, alt);
-  */
-  // get the launch time
-  
-  _launchTime = 0L;
-  recognized = _process_LaunchTime(line, javascript);
-  if (!recognized) return -1;
-  /*
-  if (_getHeaderText(in, "GMT Launch Time", text) == 0) {
-    date_time_t T;
-    if (6 == sscanf(text.c_str(),
-                    "%d, %d, %d, %d:%d:%d",
-                    &T.year, &T.month, &T.day, &T.hour, &T.min, &T.sec)){
-      uconvert_to_utime(&T);
-      _launchTime = T.unix_time;
-    }
-  }
-
-  // Set the site name from the Project ID
-  */
-  recognized = _process_ProjectId(line, javascript);
-  if (!recognized) return -1;
-
-  /*
-  if (_getHeaderText(in, "Project ID", text) == 0) {
-    sounding.setSiteName(text);
-  }
-  */
-
+  if (numRecognized < nNeeded) return -1;
   return 0;
-
 }
 
 ///////////////////////////////////////////////////////////////////////
