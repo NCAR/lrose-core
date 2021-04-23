@@ -134,29 +134,39 @@ bool FirstGuess::firstGuess(Volume* soundVolume, time_t soundingTime)
   //
   // Load and retrieve spdb sounding data
   //
+  double *soundingU = NULL;
+  double *soundingV = NULL;
+  double *soundingAlt = NULL;
+  int numPoints = 0;
+  float missingValue = sounding.getMissingValue();
+
   int ret =  loadSoundingData(soundingTime);
-  
-  if( ret <= 0 )
-    {
-
+  if( ret <= 0 ) {
       // try reading a text file for the sounding
-      int ret = loadSoundingDataText(soundingTime);
-
-
-      success = false;
-      return success;
-    }
-
-  double *soundingU = sounding.getU();
-
-  double *soundingV = sounding.getV();
-  
-  double *soundingAlt = sounding.getAlts();
+      ClassIngest *classIngest = loadSoundingDataText(soundingTime);
+      if (classIngest != NULL) {
+        soundingU = classIngest->getU();
+        soundingV = classIngest->getV();
+        soundingAlt = classIngest->getAlts();
+        numPoints = classIngest->getNumPoints();
+        missingValue = classIngest->getMissingValue();
+        delete classIngest;
+      }
+      //success = false;
+      //return success;
+  } else {
+      // data in sounding is good, extract it
+      soundingU = sounding.getU();
+      soundingV = sounding.getV();
+      soundingAlt = sounding.getAlts();
+      numPoints = sounding.getNumPoints();
+      missingValue = sounding.getMissingValue();
+  }
 
   if( (soundingU == NULL) || (soundingV == NULL) || (soundingAlt == NULL) )
     {
       if (_debug)
-	cerr << "Failed to obtain U and V from sounding. Sounding will not be used\n";
+	      cerr << "Failed to obtain U and V from sounding. Sounding will not be used\n";
       success = false;
       return success;
     }
@@ -164,7 +174,7 @@ bool FirstGuess::firstGuess(Volume* soundVolume, time_t soundingTime)
   //
   // Allocate space for matrix to a hold sounding data and derived data
   //
-  int numPoints = sounding.getNumPoints();
+  //int numPoints = sounding.getNumPoints();
 
   float** ua_data = new float*[numPoints + 1];
   
@@ -179,7 +189,7 @@ bool FirstGuess::firstGuess(Volume* soundVolume, time_t soundingTime)
   
 
   int k = 1;
-  float missingValue = sounding.getMissingValue();
+  //float missingValue = sounding.getMissingValue();
   cout << "sounding missing value = " << missingValue << endl;
   for( int i = 0 ; i < numPoints; i++)
     {
@@ -187,18 +197,16 @@ bool FirstGuess::firstGuess(Volume* soundVolume, time_t soundingTime)
       // Get U,V and Alt
       //
       ua_data[k][0] = soundingAlt[i];
-      
       ua_data[k][1] = soundingU[i];
-      
       ua_data[k][2] = soundingV[i];
       
       // TODO: what if the missing value for the sounding is different than
       // the missing value for the velocity field?
 
       if (ua_data[k][0] == missingValue || 
-	  ua_data[k][1] == missingValue ||
-	  ua_data[k][2]  == missingValue)
-	continue;
+	      ua_data[k][1] == missingValue ||
+	      ua_data[k][2]  == missingValue)
+	        continue;
 
       //
       // calculate shear U
@@ -407,57 +415,49 @@ int FirstGuess::loadSoundingData( time_t issueTime )
 
 }
 
-int FirstGuess::loadSoundingDataText( time_t issueTime )
+ClassIngest *FirstGuess::loadSoundingDataText( time_t issueTime )
 {   
-  
    //
    // Try to read a sounding
    // 
-
   time_t startTime = issueTime - (time_t)_sounding_look_back*60;
 
-
-   ClassIngest *classIngest = new ClassIngest(_sounding_url,
+  ClassIngest *classIngest = new ClassIngest(_sounding_url,
     _debug, //  >= Params::DEBUG_VERBOSE,
     _sounding_url,
     startTime, issueTime);
 
-   classIngest->readSoundingText();
+  int ret = classIngest->readSoundingText();
 
-   // get the sounding from classIngest
-   // convert to SoundingGet 
-
-   int ret = sounding.readSounding( issueTime );
-
-   if ( ret < 0 ) {
-      fprintf( stderr, "Cannot read sounding data at %s\n",
+  // get the sounding from classIngest
+  if ( ret < 0 ) {
+    fprintf( stderr, "Cannot read sounding data at %s\n",
                        DateTime::str( issueTime ).c_str() );
-      return( ret  );
-   }
-
-   if ( ret == 0 ) {
-      fprintf(stderr, "No sounding data available at %s\n",
+  } else if ( ret == 0 ) {
+    fprintf(stderr, "No sounding data available at %s\n",
                          DateTime::str( issueTime ).c_str() );
-      return( ret);
-   }
+  } else {
 
-   DateTime soundingTime = sounding.getLaunchTime();
-   string   soundingName = sounding.getSourceName();
+    // TODO: fix up this info; grab from classIngest instead of sounding.
+    DateTime soundingTime = classIngest->getLaunchTime();
+    string   soundingName = classIngest->getSourceName();
 
-   string   timeStampName = "Sounding data: ";
-   timeStampName += soundingName;
-   
-   if(_debug)
-   fprintf( stderr, "Sounding: Got '%s' at %s\n",
-      soundingName.c_str(), soundingTime.dtime() );
+    string   timeStampName = "Sounding data: ";
+    timeStampName += soundingName;
+     
+    if(_debug) {
+      fprintf( stderr, "Sounding: Got '%s' at %s\n",
+        soundingName.c_str(), soundingTime.dtime() );
+    }
 
-   //   if (success) 
-   // outputSoundVolume();
-
-  delete classIngest;
-
-   return( ret );
-
+  }
+  if (ret <= 0) {
+    if (classIngest != NULL) {
+      delete classIngest;
+      classIngest = NULL;
+    }
+  }
+  return( classIngest );
 }
 
 

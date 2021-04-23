@@ -72,6 +72,15 @@ public:
   //int Run();
   int readSoundingText();
 
+  DateTime getLaunchTime();
+  string   getSourceName();
+
+  double *getU() { return uwind; };
+  double *getV() { return vwind; }
+  double *getAlts() { return height; };
+  int getNumPoints() { return _numPoints; };
+  double getMissingValue() { return MISSING_VALUE; };
+
   // data members
 
   bool isOK;
@@ -122,6 +131,7 @@ private:
   int _numPoints;
   time_t _dataTime;
   time_t _launchTime;
+  string _projectId;
 
   void _init(bool params_debug);
 
