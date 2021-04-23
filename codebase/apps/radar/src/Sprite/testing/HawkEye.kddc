@@ -214,7 +214,7 @@ archive_time_span_secs = 3600;
 // Type: string
 //
 
-archive_data_url = "/scr/sleet1/rsfdata/projects/eolbase/cfradial/kddc_all_sweeps";
+archive_data_url = "$(HOME)/data/sprite/cfradial/kddc_all_sweeps";
 
 //======================================================================
 //

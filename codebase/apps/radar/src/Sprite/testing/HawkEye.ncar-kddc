@@ -2167,5 +2167,5 @@ sim_gate_spacing_km = 0.15;
 // Type: string
 //
 
-click_point_fmq_url = "/tmp/fmq/click_point/kddc";
+click_point_fmq_url = "/tmp/fmq/click_point/ncar_kddc";
 

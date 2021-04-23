@@ -2126,7 +2126,7 @@ use_cal_from_time_series = FALSE;
 // Type: string
 //
 
-click_point_fmq_url = "/tmp/fmq/click_point/kddc";
+click_point_fmq_url = "/tmp/fmq/click_point/ncar_kddc";
 
 ///////////// click_point_search_angle_error //////////
 //
