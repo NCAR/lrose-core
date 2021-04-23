@@ -1117,7 +1117,7 @@ iqplot_plot_legend2 = TRUE;
 // Type: int
 //
 
-ascope_n_panels_in_spectra_window = 2;
+ascope_n_panels = 2;
 
 ///////////// ascope_moments //////////////////////////
 //
@@ -1159,7 +1159,7 @@ ascope_moments = {
 // Type: int
 //
 
-ascope_width_in_spectra_window = 150;
+ascope_width = 150;
 
 ///////////// ascope_title_font_size //////////////////
 //

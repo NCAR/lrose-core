@@ -55,6 +55,7 @@
 
 class Beam;
 class AscopePlot;
+class WaterfallPlot;
 class IqPlot;
 class RadxRay;
 class SpectraMgr;
@@ -247,15 +248,19 @@ class DLL_EXPORT SpectraWidget : public QWidget
   int _titleMargin;
 
   int _nAscopes;
+  int _ascopeWidth;
+  int _ascopeHeight;
+  int _ascopeGrossWidth;
+
+  int _nWaterfalls;
+  int _waterfallWidth;
+  int _waterfallHeight;
+  int _waterfallGrossWidth;
 
   int _nIqRows;
   int _nIqCols;
   int _nIqPlots;
-
-  int _ascopeWidth;
-  int _ascopeHeight;
-  int _ascopeGrossWidth;
-  
+  int _iqStartIx;
   int _iqPlotWidth;
   int _iqPlotHeight;
   int _iqGrossWidth;
@@ -265,6 +270,11 @@ class DLL_EXPORT SpectraWidget : public QWidget
   
   vector<AscopePlot *> _ascopes;
   bool _ascopesConfigured;
+
+  // waterfall plots
+  
+  vector<WaterfallPlot *> _waterfalls;
+  bool _waterfallsConfigured;
 
   // IQ plots
   
@@ -452,6 +462,11 @@ class DLL_EXPORT SpectraWidget : public QWidget
   void _createAscope(int id);
   void _configureAscope(int id);
 
+  // waterfall panels
+
+  void _createWaterfall(int id);
+  void _configureWaterfall(int id);
+
   // iqplots
 
   void _createIqPlot(int id);
@@ -470,6 +485,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // create the context menus
   
   void _createAscopeContextMenu(const QPoint &pos);
+  void _createWaterfallContextMenu(const QPoint &pos);
   void _createIqPlotContextMenu(const QPoint &pos);
 
 };

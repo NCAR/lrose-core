@@ -279,7 +279,7 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 2;
+  p_default = 1;
   p_descr = "Number of ascope panels in spectra window (pixels).";
   p_help = "The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.";
 } ascope_n_panels;
@@ -299,7 +299,7 @@ typedef enum {
 } moment_type_t;
 
 paramdef enum moment_type_t {
-  p_default = { DBZ, VEL };
+  p_default = { DBZ };
   p_descr = "Moments to be displaed on ascope panels.";
   p_help = "The number of specified moments must match the number of ascope panels.";
 } ascope_moments[];
@@ -712,13 +712,13 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 2;
+  p_default = 1;
   p_descr = "Number of waterfall panels in spectra window (pixels).";
   p_help = "The waterfalls will be on the left of the plot. Set to 0 for no WATERFALL panel.";
 } waterfall_n_panels;
 
 paramdef enum moment_type_t {
-  p_default = { DBZ, VEL };
+  p_default = { VEL };
   p_descr = "Moments to be displaed on waterfall panels.";
   p_help = "The number of specified moments must match the number of waterfall panels.";
 } waterfall_moments[];

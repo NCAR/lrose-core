@@ -40,6 +40,7 @@
 #include "SpectraMgr.hh"
 #include "Beam.hh"
 #include "AscopePlot.hh"
+#include "WaterfallPlot.hh"
 #include "IqPlot.hh"
 
 using namespace std;
@@ -73,16 +74,23 @@ SpectraWidget::SpectraWidget(QWidget* parent,
   _ascopeHeight = 100;
   _ascopeGrossWidth = _ascopeWidth * _nAscopes;
 
+  _nWaterfalls = _params.waterfall_n_panels;
+  _waterfallWidth = _params.waterfall_width; // constant
+  _waterfallHeight = 100;
+  _waterfallGrossWidth = _waterfallWidth * _nWaterfalls;
+
+  _iqStartIx = _ascopeGrossWidth + _waterfallGrossWidth;
   _nIqRows = _params.iqplots_n_rows;
   _nIqCols = _params.iqplots_n_columns;
   _nIqPlots = _nIqRows * _nIqCols;
   
   _iqGrossHeight = height() - _titleMargin;
-  _iqGrossWidth = width() - _ascopeGrossWidth;
+  _iqGrossWidth = width() - _iqStartIx;
   _iqPlotWidth = _iqGrossWidth / _nIqCols;
   _iqPlotHeight = _iqGrossHeight / _nIqRows;
 
   _ascopesConfigured = false;
+  _waterfallsConfigured = false;
   _iqPlotsConfigured = false;
 
   _selectedRangeKm = _params.start_range_km;
@@ -120,6 +128,12 @@ SpectraWidget::SpectraWidget(QWidget* parent,
     _createAscope(ii);
   }
 
+  // create waterfalls
+
+  for (int ii = 0; ii < _nWaterfalls; ii++) {
+    _createWaterfall(ii);
+  }
+
   // create iqPlots
 
   for (int ii = 0; ii < _nIqPlots; ii++) {
@@ -145,6 +159,11 @@ SpectraWidget::~SpectraWidget()
     delete _ascopes[ii];
   }
   _ascopes.clear();
+
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+    delete _waterfalls[ii];
+  }
+  _waterfalls.clear();
 
   for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
     delete _iqPlots[ii];
@@ -190,9 +209,6 @@ void SpectraWidget::configureAxes(double min_amplitude,
   _fullWorld.setXNTicksIdeal(_params.iqplot_n_ticks_ideal);
   _fullWorld.setYAxisTickLen(_params.iqplot_axis_tick_len);
   _fullWorld.setYNTicksIdeal(_params.iqplot_n_ticks_ideal);
-
-  // _fullWorld.setXAxisLabelsInside(_params.ascope_x_axis_labels_inside);
-  // _fullWorld.setYAxisLabelsInside(_params.ascope_y_axis_labels_inside);
 
   _fullWorld.setTitleFontSize(_params.iqplot_title_font_size);
   _fullWorld.setAxisLabelFontSize(_params.iqplot_axis_label_font_size);
@@ -256,6 +272,10 @@ void SpectraWidget::unzoom()
     _ascopes[ii]->unzoom();
   }
 
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+    _waterfalls[ii]->unzoom();
+  }
+
   for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
     _iqPlots[ii]->unzoom();
   }
@@ -274,6 +294,9 @@ void SpectraWidget::setXGridEnabled(bool state)
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->setXGridLinesOn(state);
   }
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+    _waterfalls[ii]->setXGridLinesOn(state);
+  }
   for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
     _iqPlots[ii]->setXGridLinesOn(state);
   }
@@ -285,6 +308,9 @@ void SpectraWidget::setYGridEnabled(bool state)
   _yGridEnabled = state;
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->setYGridLinesOn(state);
+  }
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+    _waterfalls[ii]->setYGridLinesOn(state);
   }
   for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
     _iqPlots[ii]->setYGridLinesOn(state);
@@ -321,6 +347,13 @@ void SpectraWidget::plotBeam(Beam *beam)
       _configureAscope(ii);
     }
     _ascopesConfigured = true;
+  }
+  
+  if (_waterfalls.size() > 0 && !_waterfallsConfigured) {
+    for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+      _configureWaterfall(ii);
+    }
+    _waterfallsConfigured = true;
   }
   
   if (_iqPlots.size() > 0 && !_iqPlotsConfigured) {
@@ -624,7 +657,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
   }
   
   _iqGrossHeight = height() - _titleMargin;
-  _iqGrossWidth = width() - _ascopeGrossWidth;
+  _iqGrossWidth = width() - _iqStartIx;
   _iqPlotWidth = _iqGrossWidth / _nIqCols;
   _iqPlotHeight = _iqGrossHeight / _nIqRows;
 
@@ -632,7 +665,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
 
     int rowNum = ii / _nIqCols;
     int colNum = ii - rowNum * _nIqCols; 
-    int xOffset = _ascopeGrossWidth + colNum * _iqPlotWidth;
+    int xOffset = _iqStartIx + colNum * _iqPlotWidth;
     int yOffset = _titleMargin + rowNum * _iqPlotHeight; 
 
     _iqPlots[ii]->setWindowGeom(_iqPlotWidth, _iqPlotHeight,
@@ -694,7 +727,7 @@ void SpectraWidget::_resetWorld(int width, int height)
   
   _fullWorld.resize(width / 3, height / 3);
 
-  _fullWorld.setWindowOffsets(_ascopeGrossWidth, _titleMargin);
+  _fullWorld.setWindowOffsets(_iqStartIx, _titleMargin);
   
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
@@ -821,7 +854,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   // iq panels lower boundaries
 
   for (int irow = 1; irow < _nIqRows; irow++) {
-    QLineF lowerBoundary(_ascopeGrossWidth, _titleMargin + irow * _iqPlotHeight,
+    QLineF lowerBoundary(_iqStartIx, _titleMargin + irow * _iqPlotHeight,
                          width(), _titleMargin + irow * _iqPlotHeight);
     painter.drawLine(lowerBoundary);
   }
@@ -829,8 +862,8 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   // iq panels right boundaries
   
   for (int icol = 1; icol < _nIqCols; icol++) {
-    QLineF rightBoundary(_ascopeGrossWidth + icol * _iqPlotWidth, _titleMargin,
-                         _ascopeGrossWidth + icol * _iqPlotWidth, height());
+    QLineF rightBoundary(_iqStartIx + icol * _iqPlotWidth, _titleMargin,
+                         _iqStartIx + icol * _iqPlotWidth, height());
     painter.drawLine(rightBoundary);
   }
   painter.restore();
@@ -1112,6 +1145,84 @@ void SpectraWidget::_configureAscope(int id)
 }
 
 /*************************************************************************
+ * create waterfall
+ */
+
+void SpectraWidget::_createWaterfall(int id)
+  
+{
+
+  WaterfallPlot *waterfall = new WaterfallPlot(this, _params, id);
+  waterfall->setMomentType(_params._waterfall_moments[id]);
+
+  WorldPlot &waterfallWorld = waterfall->getFullWorld();
+  
+  waterfallWorld.setLeftMargin(_params.waterfall_left_margin);
+  waterfallWorld.setRightMargin(0);
+  waterfallWorld.setTopMargin(0);
+  waterfallWorld.setBottomMargin(_params.waterfall_bottom_margin);
+  waterfallWorld.setTitleTextMargin(_params.waterfall_title_text_margin);
+  waterfallWorld.setLegendTextMargin(_params.waterfall_legend_text_margin);
+  waterfallWorld.setAxisTextMargin(_params.waterfall_axis_text_margin);
+
+  waterfallWorld.setColorScaleWidth(0);
+  
+  waterfallWorld.setXAxisTickLen(_params.waterfall_axis_tick_len);
+  waterfallWorld.setXNTicksIdeal(_params.waterfall_n_ticks_ideal);
+  waterfallWorld.setYAxisTickLen(_params.waterfall_axis_tick_len);
+  waterfallWorld.setYNTicksIdeal(_params.waterfall_n_ticks_ideal);
+
+  waterfallWorld.setXAxisLabelsInside(_params.waterfall_x_axis_labels_inside);
+  waterfallWorld.setYAxisLabelsInside(_params.waterfall_y_axis_labels_inside);
+
+  waterfallWorld.setTitleFontSize(_params.waterfall_title_font_size);
+  waterfallWorld.setAxisLabelFontSize(_params.waterfall_axis_label_font_size);
+  waterfallWorld.setTickValuesFontSize(_params.waterfall_tick_values_font_size);
+  waterfallWorld.setLegendFontSize(_params.waterfall_legend_font_size);
+
+  waterfallWorld.setTitleColor(_params.waterfall_title_color);
+  waterfallWorld.setAxisLineColor(_params.waterfall_axes_color);
+  waterfallWorld.setAxisTextColor(_params.waterfall_axes_color);
+  waterfallWorld.setGridColor(_params.waterfall_grid_color);
+
+  int xOffset = id * _waterfallWidth;
+  int yOffset = _titleMargin;
+  waterfallWorld.setWindowGeom(_waterfallWidth, _waterfallHeight,
+                            xOffset, yOffset);
+  
+  waterfallWorld.setWorldLimits(0.0, 0.0, 1.0, 1.0);
+
+  _waterfalls.push_back(waterfall);
+  
+}
+
+/*************************************************************************
+ * configure waterfall
+ */
+
+void SpectraWidget::_configureWaterfall(int id)
+  
+{
+
+  int xOffset = id * _waterfallWidth;
+  int yOffset = _titleMargin;
+  _waterfalls[id]->setWindowGeom(_waterfallWidth, _waterfallHeight,
+                              xOffset, yOffset);
+  
+  if (_beam == NULL) {
+    return;
+  }
+
+  Params::moment_type_t momentType = _waterfalls[id]->getMomentType();
+  double minVal = WaterfallPlot::getMinVal(momentType);
+  double maxVal = WaterfallPlot::getMaxVal(momentType);
+  
+  _waterfalls[id]->setWorldLimits(minVal, 0.0,
+                               maxVal, _beam->getMaxRange());
+
+}
+
+/*************************************************************************
  * create IqPlot
  */
 
@@ -1161,7 +1272,7 @@ void SpectraWidget::_createIqPlot(int id)
 
   int rowNum = id / _nIqCols;
   int colNum = id - rowNum * _nIqCols; 
-  int xOffset = _ascopeGrossWidth + colNum * _iqPlotWidth;
+  int xOffset = _iqStartIx + colNum * _iqPlotWidth;
   int yOffset = _titleMargin + rowNum * _iqPlotHeight; 
 
   iqplotWorld.setWindowGeom(_iqPlotWidth, _iqPlotHeight,
@@ -1183,7 +1294,7 @@ void SpectraWidget::_configureIqPlot(int id)
 
   int rowNum = id / _nIqCols;
   int colNum = id - rowNum * _nIqCols; 
-  int xOffset = _ascopeGrossWidth + colNum * _iqPlotWidth;
+  int xOffset = _iqStartIx + colNum * _iqPlotWidth;
   int yOffset = _titleMargin + rowNum * _iqPlotHeight; 
   
   _iqPlots[id]->setWindowGeom(_iqPlotWidth, _iqPlotHeight,
@@ -1216,7 +1327,7 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
 
   // then check for clicks in the ascope panels to the left
 
-  if (xx < _ascopeGrossWidth) {
+  if (xx < _iqStartIx) {
     panelType = PANEL_ASCOPE;
     panelId = xx / _ascopeWidth;
     return;
@@ -1225,7 +1336,7 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
   // we must therefore be in the spectra panels
 
   panelType = PANEL_IQPLOT;
-  int icol = (xx - _ascopeGrossWidth) / _iqPlotWidth;
+  int icol = (xx - _iqStartIx) / _iqPlotWidth;
   int irow = (yy - _titleMargin) / _iqPlotHeight;
   panelId = irow * _nIqCols + icol;
 

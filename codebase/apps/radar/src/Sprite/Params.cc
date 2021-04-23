@@ -1162,7 +1162,7 @@
     tt->descr = tdrpStrDup("Number of ascope panels in spectra window (pixels).");
     tt->help = tdrpStrDup("The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.");
     tt->val_offset = (char *) &ascope_n_panels - &_start_;
-    tt->single_val.i = 2;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'ascope_moments'
@@ -1178,7 +1178,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(moment_type_t);
-    tt->array_n = 2;
+    tt->array_n = 1;
     tt->enum_def.name = tdrpStrDup("moment_type_t");
     tt->enum_def.nfields = 11;
     tt->enum_def.fields = (enum_field_t *)
@@ -1208,7 +1208,6 @@
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].e = DBZ;
-      tt->array_vals[1].e = VEL;
     tt++;
     
     // Parameter 'ascope_width'
@@ -2228,7 +2227,7 @@
     tt->descr = tdrpStrDup("Number of waterfall panels in spectra window (pixels).");
     tt->help = tdrpStrDup("The waterfalls will be on the left of the plot. Set to 0 for no WATERFALL panel.");
     tt->val_offset = (char *) &waterfall_n_panels - &_start_;
-    tt->single_val.i = 2;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'waterfall_moments'
@@ -2244,7 +2243,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(moment_type_t);
-    tt->array_n = 2;
+    tt->array_n = 1;
     tt->enum_def.name = tdrpStrDup("moment_type_t");
     tt->enum_def.nfields = 11;
     tt->enum_def.fields = (enum_field_t *)
@@ -2273,8 +2272,7 @@
       tt->enum_def.fields[10].val = KDP;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].e = DBZ;
-      tt->array_vals[1].e = VEL;
+      tt->array_vals[0].e = VEL;
     tt++;
     
     // Parameter 'waterfall_width'
