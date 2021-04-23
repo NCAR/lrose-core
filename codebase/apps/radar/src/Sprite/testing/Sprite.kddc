@@ -169,7 +169,6 @@ input_tcp_port = 11000;
 // Type: string
 //
 
-// archive_data_dir = "$(HOME)/data/bomb_snowstorm/time_series/spol";
 archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/kddc";
 
 ///////////// archive_start_time //////////////////////
@@ -182,7 +181,7 @@ archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/kddc";
 // Type: string
 //
 
-archive_start_time = "2020 05 25 03 00 00";
+archive_start_time = "2020 05 25 02 54 00";
 
 ///////////// archive_time_span_secs //////////////////
 //
@@ -241,7 +240,7 @@ start_elevation = 0.5;
 // Type: double
 //
 
-start_azimuth = 0.5;
+start_azimuth = 0;
 
 ///////////// start_range_km //////////////////////////
 //
@@ -255,7 +254,7 @@ start_azimuth = 0.5;
 // Type: double
 //
 
-start_range_km = 50;
+start_range_km = 30;
 
 //======================================================================
 //
@@ -508,7 +507,8 @@ iqplots_n_columns = 4;
 // SPECTRUM_PHASE: phase in the spectral domain.
 // TS_POWER: time domain power, log.
 // TS_PHASE: time domain phase.
-// I_AND_Q: time series of I and Q.
+// I_VALS: I vals of time series.
+// Q_VALS: Q vals of time series.
 // I_VS_Q: I on x axis, Q on y axis.
 // PHASE: sum of I vs sum of Q. I on x axis.
 //
@@ -521,7 +521,8 @@ iqplots_n_columns = 4;
 //          SPECTRUM_PHASE
 //          TS_POWER
 //          TS_PHASE
-//          I_AND_Q
+//          I_VALS
+//          Q_VALS
 //          I_VS_Q
 //          PHASOR
 //      rx_channel_t rx_channel;
@@ -530,6 +531,22 @@ iqplots_n_columns = 4;
 //          CHANNEL_VC
 //          CHANNEL_HX
 //          CHANNEL_VX
+//      fft_window_t fft_window;
+//        Options:
+//          FFT_WINDOW_RECT
+//          FFT_WINDOW_VONHANN
+//          FFT_WINDOW_BLACKMAN
+//          FFT_WINDOW_BLACKMAN_NUTTALL
+//          FFT_WINDOW_TUKEY_10
+//          FFT_WINDOW_TUKEY_20
+//          FFT_WINDOW_TUKEY_30
+//          FFT_WINDOW_TUKEY_50
+//      boolean use_adaptive_filter;
+//      boolean plot_clutter_model;
+//      double clutter_width_mps;
+//      boolean use_regression_filter;
+//      int regression_order;
+//      boolean regression_filter_interp_across_notch;
 //   }
 //
 // 1D array - variable length.
@@ -538,42 +555,122 @@ iqplots_n_columns = 4;
 iqplots = {
   {
     plot_type = SPECTRUM_POWER,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.5,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
     plot_type = SPECTRUM_POWER,
-    rx_channel = CHANNEL_VC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
-    plot_type = SPECTRUM_PHASE,
-    rx_channel = CHANNEL_HC
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_VC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.5,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
-    plot_type = TS_POWER,
-    rx_channel = CHANNEL_HC
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_VC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  // {
+  //   plot_type = SPECTRUM_PHASE,
+  //   rx_channel = CHANNEL_HC,
+  //   fft_window = FFT_WINDOW_VONHANN,
+  //   use_adaptive_filter = TRUE,
+  //   plot_clutter_model = FALSE,
+  //   clutter_width_mps = 0.75,
+  //   use_regression_filter = FALSE,
+  //   regression_order = 3,
+  //   regression_filter_interp_across_notch = TRUE
+  // }
+  // ,
+  // {
+  //   plot_type = TS_POWER,
+  //   rx_channel = CHANNEL_HC,
+  //   fft_window = FFT_WINDOW_VONHANN,
+  //   use_adaptive_filter = TRUE,
+  //   plot_clutter_model = FALSE,
+  //   clutter_width_mps = 0.75,
+  //   use_regression_filter = FALSE,
+  //   regression_order = 3,
+  //   regression_filter_interp_across_notch = TRUE
+  // }
+  // ,
+  {
+    plot_type = I_VALS,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_RECT,
+    use_adaptive_filter = FALSE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
-    plot_type = TS_PHASE,
-    rx_channel = CHANNEL_HC
-  }
-  ,
-  {
-    plot_type = I_AND_Q,
-    rx_channel = CHANNEL_HC
+    plot_type = Q_VALS,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_RECT,
+    use_adaptive_filter = FALSE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
     plot_type = I_VS_Q,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
   ,
   {
     plot_type = PHASOR,
-    rx_channel = CHANNEL_HC
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
   }
 };
 
@@ -783,7 +880,7 @@ iqplot_labels_color = "red";
 
 ///////////// iqplot_line_color ///////////////////////
 //
-// Color of general lines in iq plots.
+// Color of data lines in iq plots.
 //
 //
 // Type: string
@@ -791,25 +888,75 @@ iqplot_labels_color = "red";
 
 iqplot_line_color = "yellow";
 
-///////////// iqplot_ival_line_color //////////////////
+///////////// iqplot_line_width ///////////////////////
 //
-// Color of I values in time series.
+// Width of data lines in iq plots.
+//
+//
+// Type: int
+//
+
+iqplot_line_width = 1;
+
+///////////// iqplot_adaptive_filtered_color //////////
+//
+// Color of adaptive filtered lines in spectra plots.
 //
 //
 // Type: string
 //
 
-iqplot_ival_line_color = "red";
+iqplot_adaptive_filtered_color = "pink";
 
-///////////// iqplot_qval_line_color //////////////////
+///////////// iqplot_clutter_model_color //////////////
 //
-// Color of V values in time series.
+// Color of clutter model iq plots.
 //
 //
 // Type: string
 //
 
-iqplot_qval_line_color = "orange";
+iqplot_clutter_model_color = "red";
+
+///////////// iqplot_regression_filtered_color ////////
+//
+// Color of regression filtered lines in spectra plots.
+//
+//
+// Type: string
+//
+
+iqplot_regression_filtered_color = "orange";
+
+///////////// iqplot_polynomial_fit_color /////////////
+//
+// Color of polynomial fit in time series.
+//
+//
+// Type: string
+//
+
+iqplot_polynomial_fit_color = "orange";
+
+///////////// iqplot_polynomial_residual_color ////////
+//
+// Color of polynomial residuals in time series.
+//
+//
+// Type: string
+//
+
+iqplot_polynomial_residual_color = "red";
+
+///////////// iqplot_polynomial_line_width ////////////
+//
+// Width of data lines in polynomial plots.
+//
+//
+// Type: int
+//
+
+iqplot_polynomial_line_width = 2;
 
 ///////////// iqplot_y_grid_lines_on //////////////////
 //
@@ -1355,20 +1502,6 @@ regression_filter_notch_edge_power_ratio_threshold_db = -45;
 //
 
 regression_filter_min_csr_db = -5;
-
-///////////// regression_filter_interp_across_notch ///
-//
-// For the regression filter, option to interpolate power across the 
-//   notch.
-//
-// If true, the spectral power in the notch created by the filter will 
-//   be interpolated using values to each side of the notch.
-//
-//
-// Type: boolean
-//
-
-regression_filter_interp_across_notch = TRUE;
 
 ///////////// use_simple_notch_clutter_filter /////////
 //
@@ -1920,26 +2053,28 @@ radar_wavelength_cm = 10;
 //
 // FFT WINDOWING.
 //
+// Applies to the general case.
+//
 //======================================================================
  
-///////////// window //////////////////////////////////
+///////////// fft_window //////////////////////////////
 //
 // Window to be applied to time series before computing spectra.
 //
 //
 // Type: enum
 // Options:
-//     WINDOW_RECT
-//     WINDOW_VONHANN
-//     WINDOW_BLACKMAN
-//     WINDOW_BLACKMAN_NUTTALL
-//     WINDOW_TUKEY_10
-//     WINDOW_TUKEY_20
-//     WINDOW_TUKEY_30
-//     WINDOW_TUKEY_50
+//     FFT_WINDOW_RECT
+//     FFT_WINDOW_VONHANN
+//     FFT_WINDOW_BLACKMAN
+//     FFT_WINDOW_BLACKMAN_NUTTALL
+//     FFT_WINDOW_TUKEY_10
+//     FFT_WINDOW_TUKEY_20
+//     FFT_WINDOW_TUKEY_30
+//     FFT_WINDOW_TUKEY_50
 //
 
-window = WINDOW_VONHANN;
+fft_window = FFT_WINDOW_VONHANN;
 
 //======================================================================
 //
@@ -1991,7 +2126,7 @@ use_cal_from_time_series = FALSE;
 // Type: string
 //
 
-click_point_fmq_url = "/tmp/fmq/click_point";
+click_point_fmq_url = "/tmp/fmq/click_point/kddc";
 
 ///////////// click_point_search_angle_error //////////
 //
