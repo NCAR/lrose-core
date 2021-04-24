@@ -113,7 +113,7 @@ public:
 
   // set the moment type
 
-  void setMomentType(Params::moment_type_t val) { _momentType = val; }
+  void setPlotType(Params::waterfall_type_t val) { _plotType = val; }
   
   // zooming
 
@@ -150,14 +150,10 @@ public:
   bool getYGridLinesOn() const { return _yGridLinesOn; }
   
   // get the moment type
-
-  const Params::moment_type_t getMomentType() const { return _momentType; }
-  static string getName(Params::moment_type_t mtype);
-  static string getUnits(Params::moment_type_t mtype);
-  static double getFieldVal(Params::moment_type_t mtype,
-                            const MomentsFields &fields);
-  static double getMinVal(Params::moment_type_t mtype);
-  static double getMaxVal(Params::moment_type_t mtype);
+  
+  const Params::waterfall_type_t getPlotType() const { return _plotType; }
+  static string getName(Params::waterfall_type_t wtype);
+  static string getUnits(Params::waterfall_type_t wtype);
   
 protected:
 
@@ -171,7 +167,7 @@ protected:
 
   // moment type active for plotting
 
-  Params::moment_type_t _momentType;
+  Params::waterfall_type_t _plotType;
   
   // unzoomed world
 

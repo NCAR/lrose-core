@@ -552,7 +552,7 @@ iqplots_n_columns = 4;
 // 1D array - variable length.
 //
 
-iqplots = {
+iq_plots = {
   {
     plot_type = SPECTRUM_POWER,
     rx_channel = CHANNEL_HC,

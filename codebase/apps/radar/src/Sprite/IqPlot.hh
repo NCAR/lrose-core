@@ -118,7 +118,7 @@ public:
 
   // set the plot type and channel
 
-  void setPlotType(Params::iqplot_type_t val) { _plotType = val; }
+  void setPlotType(Params::iq_plot_type_t val) { _plotType = val; }
   void setRxChannel(Params::rx_channel_t val) { _rxChannel = val; }
   void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
 
@@ -168,7 +168,7 @@ public:
   
   // get the plot details
 
-  const Params::iqplot_type_t getPlotType() const { return _plotType; }
+  const Params::iq_plot_type_t getPlotType() const { return _plotType; }
   const Params::rx_channel_t getRxChannelType() const { return _rxChannel; }
   const Params::fft_window_t getFftWindow() const { return _fftWindow; }
 
@@ -200,7 +200,7 @@ protected:
 
   // plot type and channel
 
-  Params::iqplot_type_t _plotType;
+  Params::iq_plot_type_t _plotType;
   Params::rx_channel_t _rxChannel;
 
   // fft window

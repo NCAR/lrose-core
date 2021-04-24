@@ -97,24 +97,6 @@ public:
   } moment_type_t;
 
   typedef enum {
-    SPECTRUM_POWER = 0,
-    SPECTRUM_PHASE = 1,
-    TS_POWER = 2,
-    TS_PHASE = 3,
-    I_VALS = 4,
-    Q_VALS = 5,
-    I_VS_Q = 6,
-    PHASOR = 7
-  } iqplot_type_t;
-
-  typedef enum {
-    CHANNEL_HC = 0,
-    CHANNEL_VC = 1,
-    CHANNEL_HX = 2,
-    CHANNEL_VX = 3
-  } rx_channel_t;
-
-  typedef enum {
     FFT_WINDOW_RECT = 0,
     FFT_WINDOW_VONHANN = 1,
     FFT_WINDOW_BLACKMAN = 2,
@@ -124,6 +106,33 @@ public:
     FFT_WINDOW_TUKEY_30 = 6,
     FFT_WINDOW_TUKEY_50 = 7
   } fft_window_t;
+
+  typedef enum {
+    WATERFALL_HC = 0,
+    WATERFALL_VC = 1,
+    WATERFALL_HX = 2,
+    WATERFALL_VX = 3,
+    WATERFALL_ZDR = 4,
+    WATERFALL_PHIDP = 5
+  } waterfall_type_t;
+
+  typedef enum {
+    SPECTRUM_POWER = 0,
+    SPECTRUM_PHASE = 1,
+    TS_POWER = 2,
+    TS_PHASE = 3,
+    I_VALS = 4,
+    Q_VALS = 5,
+    I_VS_Q = 6,
+    PHASOR = 7
+  } iq_plot_type_t;
+
+  typedef enum {
+    CHANNEL_HC = 0,
+    CHANNEL_VC = 1,
+    CHANNEL_HX = 2,
+    CHANNEL_VX = 3
+  } rx_channel_t;
 
   typedef enum {
     LEGEND_TOP_LEFT = 0,
@@ -177,7 +186,17 @@ public:
   } show_status_t;
 
   typedef struct {
-    iqplot_type_t plot_type;
+    waterfall_type_t plot_type;
+    char* color_scale;
+    fft_window_t fft_window;
+    tdrp_bool_t use_adaptive_filter;
+    double clutter_width_mps;
+    tdrp_bool_t use_regression_filter;
+    int regression_order;
+  } waterfall_plot_t;
+
+  typedef struct {
+    iq_plot_type_t plot_type;
     rx_channel_t rx_channel;
     fft_window_t fft_window;
     tdrp_bool_t use_adaptive_filter;
@@ -186,7 +205,7 @@ public:
     tdrp_bool_t use_regression_filter;
     int regression_order;
     tdrp_bool_t regression_filter_interp_across_notch;
-  } iqplot_t;
+  } iq_plot_t;
 
   ///////////////////////////
   // Member functions
@@ -593,12 +612,63 @@ public:
 
   tdrp_bool_t ascope_y_axis_labels_inside;
 
+  int waterfall_n_panels;
+
+  waterfall_plot_t *_waterfall_plots;
+  int waterfall_plots_n;
+
+  int waterfall_width;
+
+  int waterfall_title_font_size;
+
+  int waterfall_axis_label_font_size;
+
+  int waterfall_tick_values_font_size;
+
+  int waterfall_legend_font_size;
+
+  int waterfall_title_text_margin;
+
+  int waterfall_legend_text_margin;
+
+  int waterfall_axis_text_margin;
+
+  int waterfall_axis_tick_len;
+
+  int waterfall_n_ticks_ideal;
+
+  int waterfall_left_margin;
+
+  int waterfall_bottom_margin;
+
+  tdrp_bool_t waterfall_x_grid_lines_on;
+
+  tdrp_bool_t waterfall_y_grid_lines_on;
+
+  char* waterfall_axis_label_color;
+
+  char* waterfall_axes_color;
+
+  char* waterfall_grid_color;
+
+  char* waterfall_line_color;
+
+  char* waterfall_selected_range_color;
+
+  char* waterfall_fill_color;
+
+  char* waterfall_title_color;
+
+  tdrp_bool_t waterfall_x_axis_labels_inside;
+
+  tdrp_bool_t waterfall_y_axis_labels_inside;
+
   int iqplots_n_rows;
 
   int iqplots_n_columns;
 
-  iqplot_t *_iqplots;
-  int iqplots_n;
+  iq_plot_t *_iq_plots;
+  int iq_plots_n;
 
   int iqplot_top_margin;
 
@@ -673,57 +743,6 @@ public:
   legend_pos_t iqplot_legend2_pos;
 
   tdrp_bool_t iqplot_plot_legend2;
-
-  int waterfall_n_panels;
-
-  moment_type_t *_waterfall_moments;
-  int waterfall_moments_n;
-
-  int waterfall_width;
-
-  int waterfall_title_font_size;
-
-  int waterfall_axis_label_font_size;
-
-  int waterfall_tick_values_font_size;
-
-  int waterfall_legend_font_size;
-
-  int waterfall_title_text_margin;
-
-  int waterfall_legend_text_margin;
-
-  int waterfall_axis_text_margin;
-
-  int waterfall_axis_tick_len;
-
-  int waterfall_n_ticks_ideal;
-
-  int waterfall_left_margin;
-
-  int waterfall_bottom_margin;
-
-  tdrp_bool_t waterfall_x_grid_lines_on;
-
-  tdrp_bool_t waterfall_y_grid_lines_on;
-
-  char* waterfall_axis_label_color;
-
-  char* waterfall_axes_color;
-
-  char* waterfall_grid_color;
-
-  char* waterfall_line_color;
-
-  char* waterfall_selected_range_color;
-
-  char* waterfall_fill_color;
-
-  char* waterfall_title_color;
-
-  tdrp_bool_t waterfall_x_axis_labels_inside;
-
-  tdrp_bool_t waterfall_y_axis_labels_inside;
 
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 

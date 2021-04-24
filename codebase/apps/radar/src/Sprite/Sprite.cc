@@ -102,13 +102,13 @@ Sprite::Sprite(int argc, char **argv) :
     OK = false;
   }
 
-  if (_params.iqplots_n != _params.iqplots_n_rows * _params.iqplots_n_columns) {
+  if (_params.iq_plots_n != _params.iqplots_n_rows * _params.iqplots_n_columns) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "  Mismatch in number of iq panels in spectra window" << endl;
     cerr << "    n_rows: " << _params.iqplots_n_rows << endl;
     cerr << "    n_columns: " << _params.iqplots_n_columns << endl;
     cerr << "  Number of iq_plot_types: " 
-         << _params.iqplots_n << endl;
+         << _params.iq_plots_n << endl;
     cerr << "  This must equal n_rows * n_columns" << endl;
     OK = false;
   }

@@ -1227,7 +1227,7 @@ void SpectraWidget::_createWaterfall(int id)
 {
 
   WaterfallPlot *waterfall = new WaterfallPlot(this, _params, id);
-  waterfall->setMomentType(_params._waterfall_moments[id]);
+  waterfall->setPlotType(_params._waterfall_plots[id].plot_type);
   
   WorldPlot &waterfallWorld = waterfall->getFullWorld();
   
@@ -1287,12 +1287,8 @@ void SpectraWidget::_configureWaterfall(int id)
     return;
   }
 
-  Params::moment_type_t momentType = _waterfalls[id]->getMomentType();
-  double minVal = WaterfallPlot::getMinVal(momentType);
-  double maxVal = WaterfallPlot::getMaxVal(momentType);
-  
-  _waterfalls[id]->setWorldLimits(minVal, 0.0,
-                                  maxVal, _beam->getMaxRange());
+  _waterfalls[id]->setWorldLimits(0.0, 0.0,
+                                  _beam->getNSamples(), _beam->getMaxRange());
 
 }
 
@@ -1305,14 +1301,14 @@ void SpectraWidget::_createIqPlot(int id)
 {
   
   IqPlot *iqplot = new IqPlot(this, _params, id);
-  iqplot->setPlotType(_params._iqplots[id].plot_type);
-  iqplot->setRxChannel(_params._iqplots[id].rx_channel);
-  iqplot->setFftWindow(_params._iqplots[id].fft_window);
-  iqplot->setUseAdaptiveFilt(_params._iqplots[id].use_adaptive_filter);
-  iqplot->setPlotClutModel(_params._iqplots[id].plot_clutter_model);
-  iqplot->setClutWidthMps(_params._iqplots[id].clutter_width_mps);
-  iqplot->setUseRegrFilt(_params._iqplots[id].use_regression_filter);
-  iqplot->setRegrOrder(_params._iqplots[id].regression_order);
+  iqplot->setPlotType(_params._iq_plots[id].plot_type);
+  iqplot->setRxChannel(_params._iq_plots[id].rx_channel);
+  iqplot->setFftWindow(_params._iq_plots[id].fft_window);
+  iqplot->setUseAdaptiveFilt(_params._iq_plots[id].use_adaptive_filter);
+  iqplot->setPlotClutModel(_params._iq_plots[id].plot_clutter_model);
+  iqplot->setClutWidthMps(_params._iq_plots[id].clutter_width_mps);
+  iqplot->setUseRegrFilt(_params._iq_plots[id].use_regression_filter);
+  iqplot->setRegrOrder(_params._iq_plots[id].regression_order);
 
   WorldPlot &iqplotWorld = iqplot->getFullWorld();
   
@@ -1611,94 +1607,54 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
   // set the field selection menu
 
   int id = _contextMenuPanelId;
-  QAction setToDbz("Set to DBZ", this);
-  connect(&setToDbz, &QAction::triggered,
+  QAction setToHc("Set to HC", this);
+  connect(&setToHc, &QAction::triggered,
           [this, id] () {
-            _waterfalls[id]->setMomentType(Params::DBZ);
+            _waterfalls[id]->setPlotType(Params::WATERFALL_HC);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToDbz);
+  contextMenu.addAction(&setToHc);
   
-  QAction setToVel("Set to VEL", this);
-  connect(&setToVel, &QAction::triggered,
+  QAction setToVc("Set to VC", this);
+  connect(&setToVc, &QAction::triggered,
           [this, id] () {
-            _waterfalls[id]->setMomentType(Params::VEL);
+            _waterfalls[id]->setPlotType(Params::WATERFALL_VC);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToVel);
+  contextMenu.addAction(&setToVc);
   
-  QAction setToWidth("Set to WIDTH", this);
-  connect(&setToWidth, &QAction::triggered,
+  QAction setToHx("Set to HX", this);
+  connect(&setToHx, &QAction::triggered,
           [this, id] () {
-            _waterfalls[id]->setMomentType(Params::WIDTH);
+            _waterfalls[id]->setPlotType(Params::WATERFALL_HX);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToWidth);
+  contextMenu.addAction(&setToHx);
   
-  QAction setToNcp("Set to NCP", this);
-  connect(&setToNcp, &QAction::triggered,
+  QAction setToVx("Set to VX", this);
+  connect(&setToVx, &QAction::triggered,
           [this, id] () {
-            _waterfalls[id]->setMomentType(Params::NCP);
+            _waterfalls[id]->setPlotType(Params::WATERFALL_VX);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToNcp);
-  
-  QAction setToSnr("Set to SNR", this);
-  connect(&setToSnr, &QAction::triggered,
-          [this, id] () {
-            _waterfalls[id]->setMomentType(Params::SNR);
-            _configureWaterfall(id);
-          } );
-  contextMenu.addAction(&setToSnr);
-  
-  QAction setToDbm("Set to DBM", this);
-  connect(&setToDbm, &QAction::triggered,
-          [this, id] () {
-            _waterfalls[id]->setMomentType(Params::DBM);
-            _configureWaterfall(id);
-          } );
-  contextMenu.addAction(&setToDbm);
+  contextMenu.addAction(&setToVx);
   
   QAction setToZdr("Set to ZDR", this);
   connect(&setToZdr, &QAction::triggered,
           [this, id] () {
-            _waterfalls[id]->setMomentType(Params::ZDR);
+            _waterfalls[id]->setPlotType(Params::WATERFALL_ZDR);
             _configureWaterfall(id);
           } );
   contextMenu.addAction(&setToZdr);
   
-  QAction setToLdr("Set to LDR", this);
-  connect(&setToLdr, &QAction::triggered,
-          [this, id] () {
-            _waterfalls[id]->setMomentType(Params::LDR);
-            _configureWaterfall(id);
-          } );
-  contextMenu.addAction(&setToLdr);
-  
-  QAction setToRhohv("Set to RHOHV", this);
-  connect(&setToRhohv, &QAction::triggered,
-          [this, id] () {
-            _waterfalls[id]->setMomentType(Params::RHOHV);
-            _configureWaterfall(id);
-          } );
-  contextMenu.addAction(&setToRhohv);
-  
   QAction setToPhidp("Set to PHIDP", this);
   connect(&setToPhidp, &QAction::triggered,
           [this, id] () {
-            _waterfalls[id]->setMomentType(Params::PHIDP);
+            _waterfalls[id]->setPlotType(Params::WATERFALL_PHIDP);
             _configureWaterfall(id);
           } );
   contextMenu.addAction(&setToPhidp);
   
-  QAction setToKdp("Set to KDP", this);
-  connect(&setToKdp, &QAction::triggered,
-          [this, id] () {
-            _waterfalls[id]->setMomentType(Params::KDP);
-            _configureWaterfall(id);
-          } );
-  contextMenu.addAction(&setToKdp);
-
   // unzoom action
 
   QAction unzoom("Unzoom", this);

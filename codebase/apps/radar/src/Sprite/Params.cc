@@ -1491,6 +1491,411 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("WATERFALL DISPLAY PANEL");
+    tt->comment_text = tdrpStrDup("The waterfall plots show spectra plotted against range.");
+    tt++;
+    
+    // Parameter 'waterfall_n_panels'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_n_panels");
+    tt->descr = tdrpStrDup("Number of waterfall panels in spectra window (pixels).");
+    tt->help = tdrpStrDup("The waterfalls will be on the left of the plot. Set to 0 for no WATERFALL panel.");
+    tt->val_offset = (char *) &waterfall_n_panels - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'waterfall_plots'
+    // ctype is '_waterfall_plot_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_plots");
+    tt->descr = tdrpStrDup("Details of waterfall plots for each sub panel.");
+    tt->help = tdrpStrDup("WATERFALL_HC: H-Co power spectrum vs range.\nWATERFALL_VC: V-Co power spectrum vs range.\nWATERFALL_HX: H-cross power spectrum vs range.\nWATERFALL_VX: V-cross power spectrum vs range.\nWATERFALL_ZDR: zdr spectrum vs range.\nWATERFALL_PHIDP: phidp spectrum vs. range.");
+    tt->array_offset = (char *) &_waterfall_plots - &_start_;
+    tt->array_n_offset = (char *) &waterfall_plots_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(waterfall_plot_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("waterfall_plot_t");
+    tt->struct_def.nfields = 7;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("waterfall_type_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("plot_type");
+      tt->struct_def.fields[0].ptype = ENUM_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_waterfall_plots->plot_type - (char *) _waterfall_plots;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("waterfall_type_t");
+        tt->struct_def.fields[0].enum_def.nfields = 6;
+        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("WATERFALL_HC");
+        tt->struct_def.fields[0].enum_def.fields[0].val = WATERFALL_HC;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("WATERFALL_VC");
+        tt->struct_def.fields[0].enum_def.fields[1].val = WATERFALL_VC;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("WATERFALL_HX");
+        tt->struct_def.fields[0].enum_def.fields[2].val = WATERFALL_HX;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("WATERFALL_VX");
+        tt->struct_def.fields[0].enum_def.fields[3].val = WATERFALL_VX;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("WATERFALL_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[4].val = WATERFALL_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_PHIDP;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("color_scale");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_waterfall_plots->color_scale - (char *) _waterfall_plots;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("fft_window_t");
+      tt->struct_def.fields[2].fname = tdrpStrDup("fft_window");
+      tt->struct_def.fields[2].ptype = ENUM_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_waterfall_plots->fft_window - (char *) _waterfall_plots;
+        tt->struct_def.fields[2].enum_def.name = tdrpStrDup("fft_window_t");
+        tt->struct_def.fields[2].enum_def.nfields = 8;
+        tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("FFT_WINDOW_RECT");
+        tt->struct_def.fields[2].enum_def.fields[0].val = FFT_WINDOW_RECT;
+        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("FFT_WINDOW_VONHANN");
+        tt->struct_def.fields[2].enum_def.fields[1].val = FFT_WINDOW_VONHANN;
+        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("FFT_WINDOW_BLACKMAN");
+        tt->struct_def.fields[2].enum_def.fields[2].val = FFT_WINDOW_BLACKMAN;
+        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("FFT_WINDOW_BLACKMAN_NUTTALL");
+        tt->struct_def.fields[2].enum_def.fields[3].val = FFT_WINDOW_BLACKMAN_NUTTALL;
+        tt->struct_def.fields[2].enum_def.fields[4].name = tdrpStrDup("FFT_WINDOW_TUKEY_10");
+        tt->struct_def.fields[2].enum_def.fields[4].val = FFT_WINDOW_TUKEY_10;
+        tt->struct_def.fields[2].enum_def.fields[5].name = tdrpStrDup("FFT_WINDOW_TUKEY_20");
+        tt->struct_def.fields[2].enum_def.fields[5].val = FFT_WINDOW_TUKEY_20;
+        tt->struct_def.fields[2].enum_def.fields[6].name = tdrpStrDup("FFT_WINDOW_TUKEY_30");
+        tt->struct_def.fields[2].enum_def.fields[6].val = FFT_WINDOW_TUKEY_30;
+        tt->struct_def.fields[2].enum_def.fields[7].name = tdrpStrDup("FFT_WINDOW_TUKEY_50");
+        tt->struct_def.fields[2].enum_def.fields[7].val = FFT_WINDOW_TUKEY_50;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[3].fname = tdrpStrDup("use_adaptive_filter");
+      tt->struct_def.fields[3].ptype = BOOL_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_waterfall_plots->use_adaptive_filter - (char *) _waterfall_plots;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("clutter_width_mps");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_waterfall_plots->clutter_width_mps - (char *) _waterfall_plots;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[5].fname = tdrpStrDup("use_regression_filter");
+      tt->struct_def.fields[5].ptype = BOOL_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_waterfall_plots->use_regression_filter - (char *) _waterfall_plots;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[6].fname = tdrpStrDup("regression_order");
+      tt->struct_def.fields[6].ptype = INT_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_waterfall_plots->regression_order - (char *) _waterfall_plots;
+    tt->n_struct_vals = 14;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].e = WATERFALL_HC;
+      tt->struct_vals[1].s = tdrpStrDup("dbm.colors");
+      tt->struct_vals[2].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[3].b = pTRUE;
+      tt->struct_vals[4].d = 0.75;
+      tt->struct_vals[5].b = pFALSE;
+      tt->struct_vals[6].i = 3;
+      tt->struct_vals[7].e = WATERFALL_ZDR;
+      tt->struct_vals[8].s = tdrpStrDup("zdr.colors");
+      tt->struct_vals[9].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[10].b = pTRUE;
+      tt->struct_vals[11].d = 0.75;
+      tt->struct_vals[12].b = pFALSE;
+      tt->struct_vals[13].i = 3;
+    tt++;
+    
+    // Parameter 'waterfall_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_width");
+    tt->descr = tdrpStrDup("Width of WATERFALL panel in spectra window (pixels).");
+    tt->help = tdrpStrDup("The WATERFALL will be on the left of the plot. Set to 0 for no WATERFALL panel.");
+    tt->val_offset = (char *) &waterfall_width - &_start_;
+    tt->single_val.i = 150;
+    tt++;
+    
+    // Parameter 'waterfall_title_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_title_font_size");
+    tt->descr = tdrpStrDup("Font size of center title (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_title_font_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
+    // Parameter 'waterfall_axis_label_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_axis_label_font_size");
+    tt->descr = tdrpStrDup("Font size of axis labels in waterfall (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_axis_label_font_size - &_start_;
+    tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'waterfall_tick_values_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_tick_values_font_size");
+    tt->descr = tdrpStrDup("Font size of axis tick values (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_tick_values_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'waterfall_legend_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_legend_font_size");
+    tt->descr = tdrpStrDup("Font size for plot legends (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_legend_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'waterfall_title_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_title_text_margin");
+    tt->descr = tdrpStrDup("Margin around title text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_title_text_margin - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'waterfall_legend_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_legend_text_margin");
+    tt->descr = tdrpStrDup("Margin around legend text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_legend_text_margin - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'waterfall_axis_text_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_axis_text_margin");
+    tt->descr = tdrpStrDup("Margin around axis text (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_axis_text_margin - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'waterfall_axis_tick_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_axis_tick_len");
+    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_axis_tick_len - &_start_;
+    tt->single_val.i = 4;
+    tt++;
+    
+    // Parameter 'waterfall_n_ticks_ideal'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_n_ticks_ideal");
+    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_n_ticks_ideal - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'waterfall_left_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin for waterfall plot (pixels).");
+    tt->help = tdrpStrDup("The Y axis labels are plotted here.");
+    tt->val_offset = (char *) &waterfall_left_margin - &_start_;
+    tt->single_val.i = 18;
+    tt++;
+    
+    // Parameter 'waterfall_bottom_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin for waterfall plot (pixels).");
+    tt->help = tdrpStrDup("The X axis labels are plotted here.");
+    tt->val_offset = (char *) &waterfall_bottom_margin - &_start_;
+    tt->single_val.i = 18;
+    tt++;
+    
+    // Parameter 'waterfall_x_grid_lines_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_x_grid_lines_on");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_x_grid_lines_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'waterfall_y_grid_lines_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_y_grid_lines_on");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_y_grid_lines_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'waterfall_axis_label_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_axis_label_color");
+    tt->descr = tdrpStrDup("Color of waterfall axis labels.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_axis_label_color - &_start_;
+    tt->single_val.s = tdrpStrDup("white");
+    tt++;
+    
+    // Parameter 'waterfall_axes_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_axes_color");
+    tt->descr = tdrpStrDup("Color of axes in waterfall.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_axes_color - &_start_;
+    tt->single_val.s = tdrpStrDup("green");
+    tt++;
+    
+    // Parameter 'waterfall_grid_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_grid_color");
+    tt->descr = tdrpStrDup("Color of grid lines on waterfall.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_grid_color - &_start_;
+    tt->single_val.s = tdrpStrDup("gray");
+    tt++;
+    
+    // Parameter 'waterfall_line_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_line_color");
+    tt->descr = tdrpStrDup("Color of waterfall line.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_line_color - &_start_;
+    tt->single_val.s = tdrpStrDup("lightgray");
+    tt++;
+    
+    // Parameter 'waterfall_selected_range_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_selected_range_color");
+    tt->descr = tdrpStrDup("Color of line showing currently selected range.");
+    tt->help = tdrpStrDup("The user can double click in the waterfall to move this line.");
+    tt->val_offset = (char *) &waterfall_selected_range_color - &_start_;
+    tt->single_val.s = tdrpStrDup("cyan");
+    tt++;
+    
+    // Parameter 'waterfall_fill_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_fill_color");
+    tt->descr = tdrpStrDup("Color of waterfall fill.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_fill_color - &_start_;
+    tt->single_val.s = tdrpStrDup("darkgreen");
+    tt++;
+    
+    // Parameter 'waterfall_title_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_title_color");
+    tt->descr = tdrpStrDup("Color of waterfall title.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_title_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'waterfall_x_axis_labels_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_x_axis_labels_inside");
+    tt->descr = tdrpStrDup("Location of tick labels, relative to x axis.");
+    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
+    tt->val_offset = (char *) &waterfall_x_axis_labels_inside - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'waterfall_y_axis_labels_inside'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_y_axis_labels_inside");
+    tt->descr = tdrpStrDup("Location of tick labels, relative to y axis.");
+    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
+    tt->val_offset = (char *) &waterfall_y_axis_labels_inside - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("IQ PLOTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1519,30 +1924,30 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'iqplots'
-    // ctype is '_iqplot_t'
+    // Parameter 'iq_plots'
+    // ctype is '_iq_plot_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("iqplots");
+    tt->param_name = tdrpStrDup("iq_plots");
     tt->descr = tdrpStrDup("Details of IQ plots for each sub panel.");
     tt->help = tdrpStrDup("SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.");
-    tt->array_offset = (char *) &_iqplots - &_start_;
-    tt->array_n_offset = (char *) &iqplots_n - &_start_;
+    tt->array_offset = (char *) &_iq_plots - &_start_;
+    tt->array_n_offset = (char *) &iq_plots_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(iqplot_t);
+    tt->array_elem_size = sizeof(iq_plot_t);
     tt->array_n = 8;
-    tt->struct_def.name = tdrpStrDup("iqplot_t");
+    tt->struct_def.name = tdrpStrDup("iq_plot_t");
     tt->struct_def.nfields = 9;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("iqplot_type_t");
+      tt->struct_def.fields[0].ftype = tdrpStrDup("iq_plot_type_t");
       tt->struct_def.fields[0].fname = tdrpStrDup("plot_type");
       tt->struct_def.fields[0].ptype = ENUM_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_iqplots->plot_type - (char *) _iqplots;
-        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("iqplot_type_t");
+        (char *) &_iq_plots->plot_type - (char *) _iq_plots;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("iq_plot_type_t");
         tt->struct_def.fields[0].enum_def.nfields = 8;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
@@ -1566,7 +1971,7 @@
       tt->struct_def.fields[1].fname = tdrpStrDup("rx_channel");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_iqplots->rx_channel - (char *) _iqplots;
+        (char *) &_iq_plots->rx_channel - (char *) _iq_plots;
         tt->struct_def.fields[1].enum_def.name = tdrpStrDup("rx_channel_t");
         tt->struct_def.fields[1].enum_def.nfields = 4;
         tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
@@ -1583,7 +1988,7 @@
       tt->struct_def.fields[2].fname = tdrpStrDup("fft_window");
       tt->struct_def.fields[2].ptype = ENUM_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_iqplots->fft_window - (char *) _iqplots;
+        (char *) &_iq_plots->fft_window - (char *) _iq_plots;
         tt->struct_def.fields[2].enum_def.name = tdrpStrDup("fft_window_t");
         tt->struct_def.fields[2].enum_def.nfields = 8;
         tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
@@ -1608,32 +2013,32 @@
       tt->struct_def.fields[3].fname = tdrpStrDup("use_adaptive_filter");
       tt->struct_def.fields[3].ptype = BOOL_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_iqplots->use_adaptive_filter - (char *) _iqplots;
+        (char *) &_iq_plots->use_adaptive_filter - (char *) _iq_plots;
       tt->struct_def.fields[4].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[4].fname = tdrpStrDup("plot_clutter_model");
       tt->struct_def.fields[4].ptype = BOOL_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_iqplots->plot_clutter_model - (char *) _iqplots;
+        (char *) &_iq_plots->plot_clutter_model - (char *) _iq_plots;
       tt->struct_def.fields[5].ftype = tdrpStrDup("double");
       tt->struct_def.fields[5].fname = tdrpStrDup("clutter_width_mps");
       tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &_iqplots->clutter_width_mps - (char *) _iqplots;
+        (char *) &_iq_plots->clutter_width_mps - (char *) _iq_plots;
       tt->struct_def.fields[6].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[6].fname = tdrpStrDup("use_regression_filter");
       tt->struct_def.fields[6].ptype = BOOL_TYPE;
       tt->struct_def.fields[6].rel_offset = 
-        (char *) &_iqplots->use_regression_filter - (char *) _iqplots;
+        (char *) &_iq_plots->use_regression_filter - (char *) _iq_plots;
       tt->struct_def.fields[7].ftype = tdrpStrDup("int");
       tt->struct_def.fields[7].fname = tdrpStrDup("regression_order");
       tt->struct_def.fields[7].ptype = INT_TYPE;
       tt->struct_def.fields[7].rel_offset = 
-        (char *) &_iqplots->regression_order - (char *) _iqplots;
+        (char *) &_iq_plots->regression_order - (char *) _iq_plots;
       tt->struct_def.fields[8].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[8].fname = tdrpStrDup("regression_filter_interp_across_notch");
       tt->struct_def.fields[8].ptype = BOOL_TYPE;
       tt->struct_def.fields[8].rel_offset = 
-        (char *) &_iqplots->regression_filter_interp_across_notch - (char *) _iqplots;
+        (char *) &_iq_plots->regression_filter_interp_across_notch - (char *) _iq_plots;
     tt->n_struct_vals = 72;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
@@ -1819,11 +2224,11 @@
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("IQPLOT TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2104,11 +2509,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("IQPLOT LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2207,348 +2612,6 @@
     tt->help = tdrpStrDup("This helps in geolocating the data from a mobile system.");
     tt->val_offset = (char *) &iqplot_plot_legend2 - &_start_;
     tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("WATERFALL DISPLAY PANEL");
-    tt->comment_text = tdrpStrDup("The waterfall plots show spectra plotted against range.");
-    tt++;
-    
-    // Parameter 'waterfall_n_panels'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_n_panels");
-    tt->descr = tdrpStrDup("Number of waterfall panels in spectra window (pixels).");
-    tt->help = tdrpStrDup("The waterfalls will be on the left of the plot. Set to 0 for no WATERFALL panel.");
-    tt->val_offset = (char *) &waterfall_n_panels - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'waterfall_moments'
-    // ctype is '_moment_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_moments");
-    tt->descr = tdrpStrDup("Moments to be displaed on waterfall panels.");
-    tt->help = tdrpStrDup("The number of specified moments must match the number of waterfall panels.");
-    tt->array_offset = (char *) &_waterfall_moments - &_start_;
-    tt->array_n_offset = (char *) &waterfall_moments_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(moment_type_t);
-    tt->array_n = 1;
-    tt->enum_def.name = tdrpStrDup("moment_type_t");
-    tt->enum_def.nfields = 11;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("DBZ");
-      tt->enum_def.fields[0].val = DBZ;
-      tt->enum_def.fields[1].name = tdrpStrDup("VEL");
-      tt->enum_def.fields[1].val = VEL;
-      tt->enum_def.fields[2].name = tdrpStrDup("WIDTH");
-      tt->enum_def.fields[2].val = WIDTH;
-      tt->enum_def.fields[3].name = tdrpStrDup("NCP");
-      tt->enum_def.fields[3].val = NCP;
-      tt->enum_def.fields[4].name = tdrpStrDup("SNR");
-      tt->enum_def.fields[4].val = SNR;
-      tt->enum_def.fields[5].name = tdrpStrDup("DBM");
-      tt->enum_def.fields[5].val = DBM;
-      tt->enum_def.fields[6].name = tdrpStrDup("ZDR");
-      tt->enum_def.fields[6].val = ZDR;
-      tt->enum_def.fields[7].name = tdrpStrDup("LDR");
-      tt->enum_def.fields[7].val = LDR;
-      tt->enum_def.fields[8].name = tdrpStrDup("RHOHV");
-      tt->enum_def.fields[8].val = RHOHV;
-      tt->enum_def.fields[9].name = tdrpStrDup("PHIDP");
-      tt->enum_def.fields[9].val = PHIDP;
-      tt->enum_def.fields[10].name = tdrpStrDup("KDP");
-      tt->enum_def.fields[10].val = KDP;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].e = ZDR;
-    tt++;
-    
-    // Parameter 'waterfall_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_width");
-    tt->descr = tdrpStrDup("Width of WATERFALL panel in spectra window (pixels).");
-    tt->help = tdrpStrDup("The WATERFALL will be on the left of the plot. Set to 0 for no WATERFALL panel.");
-    tt->val_offset = (char *) &waterfall_width - &_start_;
-    tt->single_val.i = 150;
-    tt++;
-    
-    // Parameter 'waterfall_title_font_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_title_font_size");
-    tt->descr = tdrpStrDup("Font size of center title (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_title_font_size - &_start_;
-    tt->single_val.i = 10;
-    tt++;
-    
-    // Parameter 'waterfall_axis_label_font_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_axis_label_font_size");
-    tt->descr = tdrpStrDup("Font size of axis labels in waterfall (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_axis_label_font_size - &_start_;
-    tt->single_val.i = 8;
-    tt++;
-    
-    // Parameter 'waterfall_tick_values_font_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_tick_values_font_size");
-    tt->descr = tdrpStrDup("Font size of axis tick values (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_tick_values_font_size - &_start_;
-    tt->single_val.i = 6;
-    tt++;
-    
-    // Parameter 'waterfall_legend_font_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_legend_font_size");
-    tt->descr = tdrpStrDup("Font size for plot legends (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_legend_font_size - &_start_;
-    tt->single_val.i = 6;
-    tt++;
-    
-    // Parameter 'waterfall_title_text_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_title_text_margin");
-    tt->descr = tdrpStrDup("Margin around title text (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_title_text_margin - &_start_;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'waterfall_legend_text_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_legend_text_margin");
-    tt->descr = tdrpStrDup("Margin around legend text (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_legend_text_margin - &_start_;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'waterfall_axis_text_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_axis_text_margin");
-    tt->descr = tdrpStrDup("Margin around axis text (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_axis_text_margin - &_start_;
-    tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'waterfall_axis_tick_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_axis_tick_len");
-    tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_axis_tick_len - &_start_;
-    tt->single_val.i = 4;
-    tt++;
-    
-    // Parameter 'waterfall_n_ticks_ideal'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_n_ticks_ideal");
-    tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_n_ticks_ideal - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'waterfall_left_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_left_margin");
-    tt->descr = tdrpStrDup("Width of left margin for waterfall plot (pixels).");
-    tt->help = tdrpStrDup("The Y axis labels are plotted here.");
-    tt->val_offset = (char *) &waterfall_left_margin - &_start_;
-    tt->single_val.i = 18;
-    tt++;
-    
-    // Parameter 'waterfall_bottom_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_bottom_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin for waterfall plot (pixels).");
-    tt->help = tdrpStrDup("The X axis labels are plotted here.");
-    tt->val_offset = (char *) &waterfall_bottom_margin - &_start_;
-    tt->single_val.i = 18;
-    tt++;
-    
-    // Parameter 'waterfall_x_grid_lines_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_x_grid_lines_on");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_x_grid_lines_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'waterfall_y_grid_lines_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_y_grid_lines_on");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_y_grid_lines_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'waterfall_axis_label_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_axis_label_color");
-    tt->descr = tdrpStrDup("Color of waterfall axis labels.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_axis_label_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
-    tt++;
-    
-    // Parameter 'waterfall_axes_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_axes_color");
-    tt->descr = tdrpStrDup("Color of axes in waterfall.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_axes_color - &_start_;
-    tt->single_val.s = tdrpStrDup("green");
-    tt++;
-    
-    // Parameter 'waterfall_grid_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_grid_color");
-    tt->descr = tdrpStrDup("Color of grid lines on waterfall.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_grid_color - &_start_;
-    tt->single_val.s = tdrpStrDup("gray");
-    tt++;
-    
-    // Parameter 'waterfall_line_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_line_color");
-    tt->descr = tdrpStrDup("Color of waterfall line.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_line_color - &_start_;
-    tt->single_val.s = tdrpStrDup("lightgray");
-    tt++;
-    
-    // Parameter 'waterfall_selected_range_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_selected_range_color");
-    tt->descr = tdrpStrDup("Color of line showing currently selected range.");
-    tt->help = tdrpStrDup("The user can double click in the waterfall to move this line.");
-    tt->val_offset = (char *) &waterfall_selected_range_color - &_start_;
-    tt->single_val.s = tdrpStrDup("cyan");
-    tt++;
-    
-    // Parameter 'waterfall_fill_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_fill_color");
-    tt->descr = tdrpStrDup("Color of waterfall fill.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_fill_color - &_start_;
-    tt->single_val.s = tdrpStrDup("darkgreen");
-    tt++;
-    
-    // Parameter 'waterfall_title_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_title_color");
-    tt->descr = tdrpStrDup("Color of waterfall title.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_title_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
-    tt++;
-    
-    // Parameter 'waterfall_x_axis_labels_inside'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_x_axis_labels_inside");
-    tt->descr = tdrpStrDup("Location of tick labels, relative to x axis.");
-    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
-    tt->val_offset = (char *) &waterfall_x_axis_labels_inside - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'waterfall_y_axis_labels_inside'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_y_axis_labels_inside");
-    tt->descr = tdrpStrDup("Location of tick labels, relative to y axis.");
-    tt->help = tdrpStrDup("These can either be outside the axes, or inside - i.e. within the data area of the plot.");
-    tt->val_offset = (char *) &waterfall_y_axis_labels_inside - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 11'

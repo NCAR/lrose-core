@@ -133,6 +133,7 @@ void WaterfallPlot::plotBeam(QPainter &painter,
     cerr << "  Max range: " << beam->getMaxRange() << endl;
   }
 
+#ifdef JUNK  
   const MomentsFields* fields = beam->getOutFields();
   int nGates = beam->getNGates();
   double startRange = beam->getStartRangeKm();
@@ -143,7 +144,7 @@ void WaterfallPlot::plotBeam(QPainter &painter,
   double xMin = _zoomWorld.getXMinWorld();
   QBrush brush(_params.waterfall_fill_color);
   brush.setStyle(Qt::SolidPattern);
-  
+
   for (int ii = 1; ii < nGates; ii++) {
     double rangePrev = startRange + gateSpacing * (ii-1);
     double range = startRange + gateSpacing * (ii);
@@ -173,6 +174,7 @@ void WaterfallPlot::plotBeam(QPainter &painter,
   }
   _zoomWorld.drawLines(painter, pts);
   painter.restore();
+#endif
 
   // draw the overlays
 
@@ -183,7 +185,7 @@ void WaterfallPlot::plotBeam(QPainter &painter,
   painter.save();
   painter.setPen(_params.waterfall_title_color);
   string title("Waterfall:");
-  title.append(getName(_momentType));
+  title.append(getName(_plotType));
   _zoomWorld.drawTitleTopCenter(painter, title);
   painter.restore();
 
@@ -192,31 +194,21 @@ void WaterfallPlot::plotBeam(QPainter &painter,
 //////////////////////////////////
 // get a string for the field name
 
-string WaterfallPlot::getName(Params::moment_type_t mtype)
+string WaterfallPlot::getName(Params::waterfall_type_t wtype)
 {
-  switch (mtype) {
-    case Params::DBZ:
-      return "DBZ";
-    case Params::VEL:
-      return "VEL";
-    case Params::WIDTH:
-      return "WIDTH";
-    case Params::NCP:
-      return "NCP";
-    case Params::SNR:
-      return "SNR";
-    case Params::DBM:
-      return "DBM";
-    case Params::ZDR:
+  switch (wtype) {
+    case Params::WATERFALL_HC:
+      return "HC";
+    case Params::WATERFALL_VC:
+      return "VC";
+    case Params::WATERFALL_HX:
+      return "HX";
+    case Params::WATERFALL_VX:
+      return "VX";
+    case Params::WATERFALL_ZDR:
       return "ZDR";
-    case Params::LDR:
-      return "LDR";
-    case Params::RHOHV:
-      return "RHOHV";
-    case Params::PHIDP:
+    case Params::WATERFALL_PHIDP:
       return "PHIDP";
-    case Params::KDP:
-      return "KDP";
     default:
       return "UNKNOWN";
   }
@@ -225,133 +217,20 @@ string WaterfallPlot::getName(Params::moment_type_t mtype)
 //////////////////////////////////
 // get a string for the field units
 
-string WaterfallPlot::getUnits(Params::moment_type_t mtype)
+string WaterfallPlot::getUnits(Params::waterfall_type_t wtype)
 {
-  switch (mtype) {
-    case Params::DBZ:
-      return "dBZ";
-    case Params::VEL:
-      return "m/s";
-    case Params::WIDTH:
-      return "m/s";
-    case Params::NCP:
-      return "";
-    case Params::SNR:
-      return "dB";
-    case Params::DBM:
+  switch (wtype) {
+    case Params::WATERFALL_HC:
+    case Params::WATERFALL_VC:
+    case Params::WATERFALL_HX:
+    case Params::WATERFALL_VX:
       return "dBm";
-    case Params::ZDR:
+    case Params::WATERFALL_ZDR:
       return "dB";
-    case Params::LDR:
-      return "dB";
-    case Params::RHOHV:
-      return "";
-    case Params::PHIDP:
+    case Params::WATERFALL_PHIDP:
       return "deg";
-    case Params::KDP:
-      return "deg/km";
     default:
       return "";
-  }
-}
-
-////////////////////////////////////////////
-// get a field value based on the field type
-
-double WaterfallPlot::getFieldVal(Params::moment_type_t mtype,
-                                  const MomentsFields &fields)
-{
-  switch (mtype) {
-    case Params::DBZ:
-      return fields.dbz;
-    case Params::VEL:
-      return fields.vel;
-    case Params::WIDTH:
-      return fields.width;
-    case Params::NCP:
-      return fields.ncp;
-    case Params::SNR:
-      return fields.snr;
-    case Params::DBM:
-      return fields.dbm;
-    case Params::ZDR:
-      return fields.zdr;
-    case Params::LDR:
-      return fields.ldr;
-    case Params::RHOHV:
-      return fields.rhohv;
-    case Params::PHIDP:
-      return fields.phidp;
-    case Params::KDP:
-      return fields.kdp;
-    default:
-      return -9999.0;
-  }
-}
-
-////////////////////////////////////////////
-// get min val for plotting
-
-double WaterfallPlot::getMinVal(Params::moment_type_t mtype)
-{
-  switch (mtype) {
-    case Params::DBZ:
-      return -30;
-    case Params::VEL:
-      return -40;
-    case Params::WIDTH:
-      return 0;
-    case Params::NCP:
-      return 0;
-    case Params::SNR:
-      return -20;
-    case Params::DBM:
-      return -120;
-    case Params::ZDR:
-      return -4;
-    case Params::LDR:
-      return -40;
-    case Params::RHOHV:
-      return 0;
-    case Params::PHIDP:
-      return -180;
-    case Params::KDP:
-      return -2;
-    default:
-      return 0;
-  }
-}
-
-////////////////////////////////////////////
-// get max val for plotting
-
-double WaterfallPlot::getMaxVal(Params::moment_type_t mtype)
-{
-  switch (mtype) {
-    case Params::DBZ:
-      return 80;
-    case Params::VEL:
-      return 40;
-    case Params::WIDTH:
-      return 20;
-    case Params::NCP:
-      return 1;
-    case Params::SNR:
-      return 80;
-    case Params::DBM:
-      return 10;
-    case Params::ZDR:
-      return 16;
-    case Params::LDR:
-      return 15;
-    case Params::RHOHV:
-      return 1;
-    case Params::PHIDP:
-      return 180;
-    case Params::KDP:
-      return 8;
-    default:
-      return 10;
   }
 }
 
@@ -428,9 +307,9 @@ void WaterfallPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
   
   painter.setPen(_params.waterfall_axis_label_color);
 
-  _zoomWorld.drawAxisBottom(painter, getUnits(_momentType),
+  _zoomWorld.drawAxisBottom(painter, "sample",
                             true, true, true, _xGridLinesOn);
-
+  
   _zoomWorld.drawAxisLeft(painter, "km", 
                           true, true, true, _yGridLinesOn);
 
