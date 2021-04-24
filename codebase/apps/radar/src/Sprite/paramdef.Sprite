@@ -718,7 +718,7 @@ paramdef int {
 } waterfall_n_panels;
 
 paramdef enum moment_type_t {
-  p_default = { VEL };
+  p_default = { ZDR };
   p_descr = "Moments to be displaed on waterfall panels.";
   p_help = "The number of specified moments must match the number of waterfall panels.";
 } waterfall_moments[];

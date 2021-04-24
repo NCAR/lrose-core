@@ -2272,7 +2272,7 @@
       tt->enum_def.fields[10].val = KDP;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].e = VEL;
+      tt->array_vals[0].e = ZDR;
     tt++;
     
     // Parameter 'waterfall_width'

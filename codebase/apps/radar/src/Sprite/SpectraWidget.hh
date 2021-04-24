@@ -74,6 +74,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
   typedef enum {
     PANEL_TITLE,
     PANEL_ASCOPE,
+    PANEL_WATERFALL,
     PANEL_IQPLOT
   } panel_type_t;
 
@@ -248,11 +249,13 @@ class DLL_EXPORT SpectraWidget : public QWidget
   int _titleMargin;
 
   int _nAscopes;
+  int _ascopeStartIx;
   int _ascopeWidth;
   int _ascopeHeight;
   int _ascopeGrossWidth;
 
   int _nWaterfalls;
+  int _waterfallStartIx;
   int _waterfallWidth;
   int _waterfallHeight;
   int _waterfallGrossWidth;

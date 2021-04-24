@@ -55,8 +55,8 @@
 using namespace std;
 
 WaterfallPlot::WaterfallPlot(QWidget* parent,
-                       const Params &params,
-                       int id) :
+                             const Params &params,
+                             int id) :
         _parent(parent),
         _params(params),
         _id(id)
@@ -115,8 +115,8 @@ void WaterfallPlot::unzoom()
  */
 
 void WaterfallPlot::plotBeam(QPainter &painter,
-                          Beam *beam,
-                          double selectedRangeKm)
+                             Beam *beam,
+                             double selectedRangeKm)
   
 {
 
@@ -259,7 +259,7 @@ string WaterfallPlot::getUnits(Params::moment_type_t mtype)
 // get a field value based on the field type
 
 double WaterfallPlot::getFieldVal(Params::moment_type_t mtype,
-                               const MomentsFields &fields)
+                                  const MomentsFields &fields)
 {
   switch (mtype) {
     case Params::DBZ:
@@ -360,7 +360,7 @@ double WaterfallPlot::getMaxVal(Params::moment_type_t mtype)
  */
 
 void WaterfallPlot::setWindowGeom(int width, int height,
-                               int xOffset, int yOffset)
+                                  int xOffset, int yOffset)
 {
   _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
   _zoomWorld = _fullWorld;
@@ -371,9 +371,9 @@ void WaterfallPlot::setWindowGeom(int width, int height,
  */
 
 void WaterfallPlot::setWorldLimits(double xMinWorld,
-                                double yMinWorld,
-                                double xMaxWorld,
-                                double yMaxWorld)
+                                   double yMinWorld,
+                                   double xMaxWorld,
+                                   double yMaxWorld)
 {
   _fullWorld.setWorldLimits(xMinWorld, yMinWorld,
                             xMaxWorld, yMaxWorld);
@@ -385,23 +385,23 @@ void WaterfallPlot::setWorldLimits(double xMinWorld,
  */
 
 void WaterfallPlot::setZoomLimits(int xMin,
-                               int yMin,
-                               int xMax,
-                               int yMax)
+                                  int yMin,
+                                  int xMax,
+                                  int yMax)
 {
   _zoomWorld.setZoomLimits(xMin, yMin, xMax, yMax);
   _isZoomed = true;
 }
 
 void WaterfallPlot::setZoomLimitsX(int xMin,
-                                int xMax)
+                                   int xMax)
 {
   _zoomWorld.setZoomLimitsX(xMin, xMax);
   _isZoomed = true;
 }
 
 void WaterfallPlot::setZoomLimitsY(int yMin,
-                                int yMax)
+                                   int yMax)
 {
   _zoomWorld.setZoomLimitsY(yMin, yMax);
   _isZoomed = true;

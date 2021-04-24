@@ -69,12 +69,14 @@ SpectraWidget::SpectraWidget(QWidget* parent,
 
   _titleMargin = _params.main_window_title_margin;
 
+  _ascopeStartIx = 0;
   _nAscopes = _params.ascope_n_panels;
   _ascopeWidth = _params.ascope_width; // constant
   _ascopeHeight = 100;
   _ascopeGrossWidth = _ascopeWidth * _nAscopes;
 
   _nWaterfalls = _params.waterfall_n_panels;
+  _waterfallStartIx = _ascopeGrossWidth;
   _waterfallWidth = _params.waterfall_width; // constant
   _waterfallHeight = 100;
   _waterfallGrossWidth = _waterfallWidth * _nWaterfalls;
@@ -482,8 +484,10 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
   
   // save the panel details for the mouse release point
 
-  _identSelectedPanel(_mouseReleaseX, _mouseReleaseY,
-                      _mouseReleasePanelType, _mouseReleasePanelId);
+  _identSelectedPanel(_mouseReleaseX,
+                      _mouseReleaseY,
+                      _mouseReleasePanelType,
+                      _mouseReleasePanelId);
 
   // get click location in world coords
 
@@ -499,7 +503,19 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
       AscopePlot *ascope = _ascopes[_mouseReleasePanelId];
       _selectedRangeKm = ascope->getZoomWorld().getYWorld(_mouseReleaseY);
       if (_beam != NULL) {
-        _selectedRangeKm = _beam->getClosestRange(_selectedRangeKm, _selectedGateNum);
+        _selectedRangeKm =
+          _beam->getClosestRange(_selectedRangeKm, _selectedGateNum);
+        emit locationClicked(_selectedRangeKm, _selectedGateNum);
+      }
+    } else if (_mousePressPanelType == PANEL_WATERFALL &&
+               _mouseReleasePanelType == PANEL_WATERFALL &&
+               _mousePressPanelId == _mouseReleasePanelId) {
+      // change waterfall range
+      WaterfallPlot *waterfall = _waterfalls[_mouseReleasePanelId];
+      _selectedRangeKm = waterfall->getZoomWorld().getYWorld(_mouseReleaseY);
+      if (_beam != NULL) {
+        _selectedRangeKm =
+          _beam->getClosestRange(_selectedRangeKm, _selectedGateNum);
         emit locationClicked(_selectedRangeKm, _selectedGateNum);
       }
     } else {
@@ -532,6 +548,31 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
         for (int ii = 0; ii < (int) _ascopes.size(); ii++) {
           AscopePlot *ascope = _ascopes[ii];
           ascope->setZoomLimitsY(_mousePressY, _mouseReleaseY);
+        }
+      }
+
+    } else if (_mousePressPanelType == PANEL_WATERFALL &&
+               _mouseReleasePanelType == PANEL_WATERFALL) {
+      // waterfall zoom
+      if (_mousePressPanelId == _mouseReleasePanelId) {
+        // zoom in one panel, reflect the range change in 
+        // other panels
+        for (int ii = 0; ii < (int) _waterfalls.size(); ii++) {
+          WaterfallPlot *waterfall = _waterfalls[ii];
+          if (ii == _mouseReleasePanelId) {
+            // perform 2D zoom
+            waterfall->setZoomLimits(_mousePressX, _mousePressY,
+                                  _mouseReleaseX, _mouseReleaseY);
+          } else {
+            // perform zoom in range only
+            waterfall->setZoomLimitsY(_mousePressY, _mouseReleaseY);
+          }
+        } // ii
+      } else {
+        // zoom box crosses panels, zoom in range only
+        for (int ii = 0; ii < (int) _waterfalls.size(); ii++) {
+          WaterfallPlot *waterfall = _waterfalls[ii];
+          waterfall->setZoomLimitsY(_mousePressY, _mouseReleaseY);
         }
       }
 
@@ -611,6 +652,9 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
     for (size_t ii = 0; ii < _ascopes.size(); ii++) {
       _ascopes[ii]->plotBeam(painter, _beam, _selectedRangeKm);
     }
+    for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+      _waterfalls[ii]->plotBeam(painter, _beam, _selectedRangeKm);
+    }
     for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
       _iqPlots[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
     }
@@ -635,6 +679,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
 {
 
   _ascopeHeight = height() - _titleMargin;
+  _waterfallHeight = height() - _titleMargin;
 
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
 
@@ -652,6 +697,26 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
            << _ascopes[ii]->getXOffset() << endl;
       cerr << "       yOffset[" << ii << "]: "
            << _ascopes[ii]->getYOffset() << endl;
+    }
+
+  }
+  
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+
+    int xOffset = _waterfallStartIx + ii * _waterfallWidth;
+    int yOffset = _titleMargin;
+    _waterfalls[ii]->setWindowGeom(_waterfallWidth, _waterfallHeight,
+                                xOffset, yOffset);
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "   waterfallWidth[" << ii << "]: "
+           << _waterfalls[ii]->getWidth() << endl;
+      cerr << "  waterfallHeight[" << ii << "]: "
+           << _waterfalls[ii]->getHeight() << endl;
+      cerr << "       xOffset[" << ii << "]: "
+           << _waterfalls[ii]->getXOffset() << endl;
+      cerr << "       yOffset[" << ii << "]: "
+           << _waterfalls[ii]->getYOffset() << endl;
     }
 
   }
@@ -696,8 +761,6 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
     cerr << "  _iqPlotWidth: " << _iqPlotWidth << endl;
     cerr << "  _iqPlotHeight: " << _iqPlotHeight << endl;
   }
-
-
   
   _resetWorld(width(), height());
 
@@ -849,6 +912,13 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
     QLineF ascopeBoundary(_ascopeWidth * (ii+1), _titleMargin,
                           _ascopeWidth * (ii+1), height());
     painter.drawLine(ascopeBoundary);
+  }
+
+  // waterfall right boundaries
+  for (int ii = 0; ii < _nWaterfalls; ii++) {
+    QLineF waterfallBoundary(_waterfallWidth * (ii+1), _titleMargin,
+                             _waterfallWidth * (ii+1), height());
+    painter.drawLine(waterfallBoundary);
   }
 
   // iq panels lower boundaries
@@ -1154,7 +1224,7 @@ void SpectraWidget::_createWaterfall(int id)
 
   WaterfallPlot *waterfall = new WaterfallPlot(this, _params, id);
   waterfall->setMomentType(_params._waterfall_moments[id]);
-
+  
   WorldPlot &waterfallWorld = waterfall->getFullWorld();
   
   waterfallWorld.setLeftMargin(_params.waterfall_left_margin);
@@ -1188,7 +1258,7 @@ void SpectraWidget::_createWaterfall(int id)
   int xOffset = id * _waterfallWidth;
   int yOffset = _titleMargin;
   waterfallWorld.setWindowGeom(_waterfallWidth, _waterfallHeight,
-                            xOffset, yOffset);
+                               xOffset, yOffset);
   
   waterfallWorld.setWorldLimits(0.0, 0.0, 1.0, 1.0);
 
@@ -1204,10 +1274,10 @@ void SpectraWidget::_configureWaterfall(int id)
   
 {
 
-  int xOffset = id * _waterfallWidth;
+  int xOffset = _waterfallStartIx + id * _waterfallWidth;
   int yOffset = _titleMargin;
   _waterfalls[id]->setWindowGeom(_waterfallWidth, _waterfallHeight,
-                              xOffset, yOffset);
+                                 xOffset, yOffset);
   
   if (_beam == NULL) {
     return;
@@ -1218,7 +1288,7 @@ void SpectraWidget::_configureWaterfall(int id)
   double maxVal = WaterfallPlot::getMaxVal(momentType);
   
   _waterfalls[id]->setWorldLimits(minVal, 0.0,
-                               maxVal, _beam->getMaxRange());
+                                  maxVal, _beam->getMaxRange());
 
 }
 
@@ -1327,18 +1397,30 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
 
   // then check for clicks in the ascope panels to the left
 
-  if (xx < _iqStartIx) {
+  if (xx >= _iqStartIx) {
+
+    // IQ plot
+    
+    panelType = PANEL_IQPLOT;
+    int icol = (xx - _iqStartIx) / _iqPlotWidth;
+    int irow = (yy - _titleMargin) / _iqPlotHeight;
+    panelId = irow * _nIqCols + icol;
+    
+  } else if (xx < _waterfallStartIx) {
+
+    // waterfall plot
+    
+    panelType = PANEL_WATERFALL;
+    panelId = (xx - _ascopeStartIx) / _waterfallWidth;
+    
+  } else {
+
+    // ascope plot
+    
     panelType = PANEL_ASCOPE;
     panelId = xx / _ascopeWidth;
-    return;
+    
   }
-
-  // we must therefore be in the spectra panels
-
-  panelType = PANEL_IQPLOT;
-  int icol = (xx - _iqStartIx) / _iqPlotWidth;
-  int irow = (yy - _titleMargin) / _iqPlotHeight;
-  panelId = irow * _nIqCols + icol;
 
 }
 
@@ -1354,6 +1436,8 @@ void SpectraWidget::showContextMenu(const QPoint &pos)
 
   if (_contextMenuPanelType == PANEL_ASCOPE) {
     _createAscopeContextMenu(pos);
+  } else if (_contextMenuPanelType == PANEL_WATERFALL) {
+    _createWaterfallContextMenu(pos);
   } else if (_contextMenuPanelType == PANEL_IQPLOT) {
     _createIqPlotContextMenu(pos);
   }
@@ -1503,6 +1587,158 @@ void SpectraWidget::_createAscopeContextMenu(const QPoint &pos)
             _ascopes[id]->setYGridLinesOn(false);
           } );
   if (_ascopes[id]->getYGridLinesOn()) {
+    contextMenu.addAction(&yGridLinesOff);
+  } else {
+    contextMenu.addAction(&yGridLinesOn);
+  }
+  
+  contextMenu.exec(this->mapToGlobal(pos));
+  
+}
+
+//////////////////////////////////////////////////////////
+// context menu for Waterfall
+
+void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos) 
+{
+
+  QMenu contextMenu("WaterfallMenu", this);
+
+  // set the field selection menu
+
+  int id = _contextMenuPanelId;
+  QAction setToDbz("Set to DBZ", this);
+  connect(&setToDbz, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::DBZ);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToDbz);
+  
+  QAction setToVel("Set to VEL", this);
+  connect(&setToVel, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::VEL);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToVel);
+  
+  QAction setToWidth("Set to WIDTH", this);
+  connect(&setToWidth, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::WIDTH);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToWidth);
+  
+  QAction setToNcp("Set to NCP", this);
+  connect(&setToNcp, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::NCP);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToNcp);
+  
+  QAction setToSnr("Set to SNR", this);
+  connect(&setToSnr, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::SNR);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToSnr);
+  
+  QAction setToDbm("Set to DBM", this);
+  connect(&setToDbm, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::DBM);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToDbm);
+  
+  QAction setToZdr("Set to ZDR", this);
+  connect(&setToZdr, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::ZDR);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToZdr);
+  
+  QAction setToLdr("Set to LDR", this);
+  connect(&setToLdr, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::LDR);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToLdr);
+  
+  QAction setToRhohv("Set to RHOHV", this);
+  connect(&setToRhohv, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::RHOHV);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToRhohv);
+  
+  QAction setToPhidp("Set to PHIDP", this);
+  connect(&setToPhidp, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::PHIDP);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToPhidp);
+  
+  QAction setToKdp("Set to KDP", this);
+  connect(&setToKdp, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setMomentType(Params::KDP);
+            _configureWaterfall(id);
+          } );
+  contextMenu.addAction(&setToKdp);
+
+  // unzoom action
+
+  QAction unzoom("Unzoom", this);
+  connect(&unzoom, &QAction::triggered,
+          [this, id] () {
+            for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+              _waterfalls[ii]->unzoom();
+            }
+          } );
+  if (_waterfalls[id]->getIsZoomed()) {
+    contextMenu.addAction(&unzoom);
+  }
+
+  // X grid lines on/off
+
+  QAction xGridLinesOn("X grid lines on", this);
+  connect(&xGridLinesOn, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setXGridLinesOn(true);
+          } );
+  QAction xGridLinesOff("X grid lines off", this);
+  connect(&xGridLinesOff, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setXGridLinesOn(false);
+          } );
+  if (_waterfalls[id]->getXGridLinesOn()) {
+    contextMenu.addAction(&xGridLinesOff);
+  } else {
+    contextMenu.addAction(&xGridLinesOn);
+  }
+  
+  // Y grid lines on/off
+
+  QAction yGridLinesOn("Y grid lines on", this);
+  connect(&yGridLinesOn, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setYGridLinesOn(true);
+          } );
+  QAction yGridLinesOff("Y grid lines off", this);
+  connect(&yGridLinesOff, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setYGridLinesOn(false);
+          } );
+  if (_waterfalls[id]->getYGridLinesOn()) {
     contextMenu.addAction(&yGridLinesOff);
   } else {
     contextMenu.addAction(&yGridLinesOn);
