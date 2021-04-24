@@ -909,15 +909,19 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
   // ascope right boundaries
   for (int ii = 0; ii < _nAscopes; ii++) {
-    QLineF ascopeBoundary(_ascopeWidth * (ii+1), _titleMargin,
-                          _ascopeWidth * (ii+1), height());
+    QLineF ascopeBoundary(_ascopeStartIx + _ascopeWidth * (ii+1),
+                          _titleMargin,
+                          _ascopeStartIx + _ascopeWidth * (ii+1),
+                          height());
     painter.drawLine(ascopeBoundary);
   }
 
   // waterfall right boundaries
   for (int ii = 0; ii < _nWaterfalls; ii++) {
-    QLineF waterfallBoundary(_waterfallWidth * (ii+1), _titleMargin,
-                             _waterfallWidth * (ii+1), height());
+    QLineF waterfallBoundary(_waterfallStartIx + _waterfallWidth * (ii+1),
+                             _titleMargin,
+                             _waterfallStartIx + _waterfallWidth * (ii+1),
+                             height());
     painter.drawLine(waterfallBoundary);
   }
 
@@ -1406,19 +1410,19 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
     int irow = (yy - _titleMargin) / _iqPlotHeight;
     panelId = irow * _nIqCols + icol;
     
-  } else if (xx < _waterfallStartIx) {
+  } else if (xx >= _waterfallStartIx) {
 
     // waterfall plot
     
     panelType = PANEL_WATERFALL;
-    panelId = (xx - _ascopeStartIx) / _waterfallWidth;
+    panelId = (xx - _waterfallStartIx) / _waterfallWidth;
     
   } else {
 
     // ascope plot
     
     panelType = PANEL_ASCOPE;
-    panelId = xx / _ascopeWidth;
+    panelId = (xx - _ascopeStartIx) / _ascopeWidth;
     
   }
 
