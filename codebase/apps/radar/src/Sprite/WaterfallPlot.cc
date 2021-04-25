@@ -262,7 +262,7 @@ void WaterfallPlot::_plotHc(QPainter &painter,
 
       double width = 1.0;
       double height = gateSpacing;
-      _zoomWorld.fillRectangle(painter, brush, xx, yy, width, height);
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
 
     } // ii
 
