@@ -124,7 +124,8 @@ public:
 
   // set filtering
   
-  void setUseAdaptiveFilt(bool val) { _useAdaptiveFilt = val; }
+  void setMedianFiltLen(int val) { _medianFiltLen = val; }
+  void setUseAdaptFilt(bool val) { _useAdaptFilt = val; }
   void setPlotClutModel(bool val) { _plotClutModel = val; }
   void setClutWidthMps(double val) { _clutWidthMps = val; }
   void setUseRegrFilt(bool val) { _useRegrFilt = val; }
@@ -174,7 +175,8 @@ public:
 
   // get the filter details
   
-  bool getUseAdaptiveFilt() const { return _useAdaptiveFilt; }
+  int getMedianFiltLen() const { return _medianFiltLen; }
+  bool getUseAdaptFilt() const { return _useAdaptFilt; }
   bool getPlotClutModel() const { return _plotClutModel; }
   double getClutWidthMps() const { return _clutWidthMps; }
   bool getUseRegrFilt() const { return _useRegrFilt; }
@@ -211,7 +213,8 @@ protected:
 
   // filtering
 
-  bool _useAdaptiveFilt;
+  int _medianFiltLen;
+  bool _useAdaptFilt;
   bool _plotClutModel;
   double _clutWidthMps;
   bool _useRegrFilt;
@@ -240,19 +243,35 @@ protected:
   
   void _drawOverlays(QPainter &painter, double selectedRangeKm);
   
-  void _plotSpectrumPower(QPainter &painter,
+  void _plotSpectralPower(QPainter &painter,
                           Beam *beam,
                           int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iq);
 
-  void _plotSpectrumPhase(QPainter &painter,
+  void _plotSpectralPhase(QPainter &painter,
                           Beam *beam,
                           int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iq);
+
+  void _plotSpectralZdr(QPainter &painter,
+                        Beam *beam,
+                        int nSamples,
+                        double selectedRangeKm,
+                        int gateNum,
+                        const RadarComplex_t *iqHc,
+                        const RadarComplex_t *iqVc);
+
+  void _plotSpectralPhidp(QPainter &painter,
+                          Beam *beam,
+                          int nSamples,
+                          double selectedRangeKm,
+                          int gateNum,
+                          const RadarComplex_t *iqHc,
+                          const RadarComplex_t *iqVc);
 
   void _plotTsPower(QPainter &painter,
                     Beam *beam,
@@ -289,6 +308,12 @@ protected:
                    int gateNum,
                    const RadarComplex_t *iq);
 
+  void _computePowerSpectrum(Beam *beam,
+                             int nSamples,
+                             const RadarComplex_t *iq,
+                             double *power,
+                             double *dbm);
+  
   void _applyWindow(const RadarComplex_t *iq, 
                     RadarComplex_t *iqWindowed,
                     int nSamples);

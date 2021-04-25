@@ -655,8 +655,10 @@ paramdef int {
 } iqplots_n_columns;
 
 typedef enum {
-  SPECTRUM_POWER,
-  SPECTRUM_PHASE,
+  SPECTRAL_POWER,
+  SPECTRAL_PHASE,
+  SPECTRAL_ZDR,
+  SPECTRAL_PHIDP,
   TS_POWER,
   TS_PHASE,
   I_VALS,
@@ -676,6 +678,7 @@ typedef struct {
   iq_plot_type_t plot_type;
   rx_channel_t rx_channel;
   fft_window_t fft_window;
+  int median_filter_len;
   boolean use_adaptive_filter;
   boolean plot_clutter_model;
   double clutter_width_mps;
@@ -686,17 +689,17 @@ typedef struct {
 
 paramdef struct iq_plot_t {
   p_default = {
-    { SPECTRUM_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 0.75, false, 3, true },
-    { SPECTRUM_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 0.75, false, 3, true },
-    { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 0.75, false, 3, true },
-    { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 0.75, false, 3, true },
-    { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 0.75, false, 3, true },
-    { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 0.75, false, 3, true },
-    { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 0.75, false, 3, true },
-    { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, true, false, 0.75, false, 3, true }
+    { SPECTRAL_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
+    { SPECTRAL_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
+    { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
+    { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
+    { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
+    { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
+    { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
+    { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true }
   };
   p_descr = "Details of IQ plots for each sub panel.";
-  p_help = "SPECTRUM_POWER: power spectrum, log.\nSPECTRUM_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.";
+  p_help = "SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.";
 } iq_plots[];
 
 paramdef int {

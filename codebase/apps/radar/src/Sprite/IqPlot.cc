@@ -45,6 +45,7 @@
 #include <radar/RadarFft.hh>
 #include <radar/RegressionFilter.hh>
 #include <radar/ClutFilter.hh>
+#include <radar/FilterUtils.hh>
 
 #include <QTimer>
 #include <QBrush>
@@ -71,10 +72,10 @@ IqPlot::IqPlot(QWidget* parent,
   _isZoomed = false;
   _xGridLinesOn = _params.iqplot_x_grid_lines_on;
   _yGridLinesOn = _params.iqplot_y_grid_lines_on;
-  _plotType = Params::SPECTRUM_POWER;
+  _plotType = Params::SPECTRAL_POWER;
   _rxChannel = Params::CHANNEL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
-  _useAdaptiveFilt = false;
+  _useAdaptFilt = false;
   _plotClutModel = false;
   _clutWidthMps = 0.75;
   _useRegrFilt = false;
@@ -200,29 +201,31 @@ void IqPlot::plotBeam(QPainter &painter,
     }
       break;
     case Params::I_VS_Q:
-      _plotIvsQ(painter, beam, nSamples, selectedRangeKm,
-                gateNum, iq);
+      _plotIvsQ(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
       break;
     case Params::PHASOR:
-      _plotPhasor(painter, beam, nSamples, selectedRangeKm,
-                  gateNum, iq);
+      _plotPhasor(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
       break;
-    case Params::SPECTRUM_PHASE:
-      _plotSpectrumPhase(painter, beam, nSamples, selectedRangeKm,
-                         gateNum, iq);
+    case Params::SPECTRAL_PHASE:
+      _plotSpectralPhase(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
+      break;
+    case Params::SPECTRAL_ZDR:
+      _plotSpectralZdr(painter, beam, nSamples, selectedRangeKm, gateNum,
+                       gateData->iqhcOrig, gateData->iqvcOrig);
+      break;
+    case Params::SPECTRAL_PHIDP:
+      _plotSpectralPhidp(painter, beam, nSamples, selectedRangeKm, gateNum,
+                         gateData->iqhcOrig, gateData->iqvcOrig);
       break;
     case Params::TS_POWER:
-      _plotTsPower(painter, beam, nSamples, selectedRangeKm,
-                   gateNum, iq);
+      _plotTsPower(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
       break;
     case Params::TS_PHASE:
-      _plotTsPhase(painter, beam, nSamples, selectedRangeKm,
-                   gateNum, iq);
+      _plotTsPhase(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
       break;
-    case Params::SPECTRUM_POWER:
+    case Params::SPECTRAL_POWER:
     default:
-      _plotSpectrumPower(painter, beam, nSamples, selectedRangeKm,
-                         gateNum, iq);
+      _plotSpectralPower(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
   }
 
 }
@@ -231,7 +234,7 @@ void IqPlot::plotBeam(QPainter &painter,
  * plot the power spectrum
  */
 
-void IqPlot::_plotSpectrumPower(QPainter &painter,
+void IqPlot::_plotSpectralPower(QPainter &painter,
                                 Beam *beam,
                                 int nSamples,
                                 double selectedRangeKm,
@@ -300,7 +303,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   moments.setClutterWidthMps(_clutWidthMps);
   moments.setClutterInitNotchWidthMps(3.0);
   
-  if (_useAdaptiveFilt) {
+  if (_useAdaptFilt) {
     
     TaArray<RadarComplex_t> filtAdaptWindowed_;
     RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
@@ -329,7 +332,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
       maxDbm = max(dbm, maxDbm);
     }
 
-  } // if (_useAdaptiveFilt)
+  } // if (_useAdaptFilt)
 
   // compute regression filter as appropriate
 
@@ -396,6 +399,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   // draw the unfiltered spectrum
 
+  FilterUtils::applyMedianFilter(powerDbm, nSamples, _medianFiltLen);
   painter.save();
   QPen pen(painter.pen());
   pen.setColor(_params.iqplot_line_color);
@@ -413,8 +417,9 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
 
   // draw adaptive filter
   
-  if (_useAdaptiveFilt) {
+  if (_useAdaptFilt) {
     
+    FilterUtils::applyMedianFilter(filtAdaptDbm, nSamples, _medianFiltLen);
     painter.save();
     QPen pen(painter.pen());
     pen.setColor(_params.iqplot_adaptive_filtered_color);
@@ -429,12 +434,13 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
     _zoomWorld.drawLines(painter, filtPts);
     painter.restore();
 
-  } // if (_useAdaptiveFilt)
+  } // if (_useAdaptFilt)
 
   // draw regr filter
 
   if (_useRegrFilt) {
     
+    FilterUtils::applyMedianFilter(filtRegrDbm, nSamples, _medianFiltLen);
     painter.save();
     QPen pen(painter.pen());
     pen.setColor(_params.iqplot_regression_filtered_color);
@@ -501,25 +507,30 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
   double vel = fields[gateNum].vel;
 
   char text[1024];
-  vector<string> legendsLeft;
-  snprintf(text, 1024, "Dbm: %.2f", dbm);
-  legendsLeft.push_back(text);
-  snprintf(text, 1024, "Dbz: %.2f", dbz);
-  legendsLeft.push_back(text);
-  snprintf(text, 1024, "Vel: %.2f", vel);
-  legendsLeft.push_back(text);
-  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
 
-  vector<string> legendsRight;
-  legendsRight.push_back(getFftWindowName());
+  vector<string> legendsLeft;
+  legendsLeft.push_back(getFftWindowName());
+  if (_medianFiltLen > 1) {
+    snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
+    legendsLeft.push_back(text);
+  }
   if (_useRegrFilt) {
     snprintf(text, 1024, "Regr-order: %d", _regrOrder);
-    legendsRight.push_back(text);
+    legendsLeft.push_back(text);
   }
   if (_plotClutModel) {
     snprintf(text, 1024, "Clut-width: %g", _clutWidthMps);
-    legendsRight.push_back(text);
+    legendsLeft.push_back(text);
   }
+  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+
+  vector<string> legendsRight;
+  snprintf(text, 1024, "Dbm: %.2f", dbm);
+  legendsRight.push_back(text);
+  snprintf(text, 1024, "Dbz: %.2f", dbz);
+  legendsRight.push_back(text);
+  snprintf(text, 1024, "Vel: %.2f", vel);
+  legendsRight.push_back(text);
   _zoomWorld.drawLegendsTopRight(painter, legendsRight);
 
   // draw the title
@@ -535,7 +546,7 @@ void IqPlot::_plotSpectrumPower(QPainter &painter,
  * plot the spectrum phase
  */
 
-void IqPlot::_plotSpectrumPhase(QPainter &painter,
+void IqPlot::_plotSpectralPhase(QPainter &painter,
                                 Beam *beam,
                                 int nSamples,
                                 double selectedRangeKm,
@@ -582,7 +593,7 @@ void IqPlot::_plotSpectrumPhase(QPainter &painter,
 
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the spectrum phase - as line
+  // draw the spectrum phase
 
   painter.save();
   QPen pen(painter.pen());
@@ -615,6 +626,194 @@ void IqPlot::_plotSpectrumPhase(QPainter &painter,
   legendsRight.push_back(getFftWindowName());
   _zoomWorld.drawLegendsTopRight(painter, legendsRight);
 
+  // draw the title
+  
+  painter.save();
+  painter.setPen(_params.iqplot_title_color);
+  _zoomWorld.drawTitleTopCenter(painter, getName());
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot the spectrum ZDR
+ */
+
+void IqPlot::_plotSpectralZdr(QPainter &painter,
+                              Beam *beam,
+                              int nSamples,
+                              double selectedRangeKm,
+                              int gateNum,
+                              const RadarComplex_t *iqHc,
+                              const RadarComplex_t *iqVc)
+  
+{
+
+  // compute ZDR spectrum
+  
+  TaArray<double> powerHc_, dbmHc_;
+  double *powerHc = powerHc_.alloc(nSamples);
+  double *dbmHc = dbmHc_.alloc(nSamples);
+  _computePowerSpectrum(beam, nSamples, iqHc, powerHc, dbmHc);
+  
+  TaArray<double> powerVc_, dbmVc_;
+  double *powerVc = powerVc_.alloc(nSamples);
+  double *dbmVc = dbmVc_.alloc(nSamples);
+  _computePowerSpectrum(beam, nSamples, iqVc, powerVc, dbmVc);
+  
+  TaArray<double> zdr_;
+  double minVal = 9999.0, maxVal = -9999.0;
+  double *zdr = zdr_.alloc(nSamples);
+  for (int ii = 0; ii < nSamples; ii++) {
+    zdr[ii] = dbmHc[ii] - dbmVc[ii];
+    minVal = min(zdr[ii], minVal);
+    maxVal = max(zdr[ii], maxVal);
+  }
+
+  // set the Y axis range
+  
+  double rangeY = maxVal - minVal;
+  if (!_isZoomed) {
+    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.125);
+  }
+  
+  // draw the overlays
+
+  _drawOverlays(painter, selectedRangeKm);
+
+  // draw the spectral zdr
+  
+  FilterUtils::applyMedianFilter(zdr, nSamples, _medianFiltLen);
+  painter.save();
+  QPen pen(painter.pen());
+  pen.setColor(_params.iqplot_line_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(_params.iqplot_line_width);
+  painter.setPen(pen);
+  QVector<QPointF> pts;
+  for (int ii = 0; ii < nSamples; ii++) {
+    int jj = (ii + nSamples) % nSamples;
+    double val = zdr[ii];
+    QPointF pt(jj, val);
+    pts.push_back(pt);
+  }
+  _zoomWorld.drawLines(painter, pts);
+  painter.restore();
+  
+  // legends
+  
+  char text[1024];
+  vector<string> legendsLeft;
+  if (_useAdaptFilt) {
+    snprintf(text, 1024, "Adapt filt, width: %.2f", _clutWidthMps);
+    legendsLeft.push_back(text);
+  } else if (_useRegrFilt) {
+    snprintf(text, 1024, "Regr filt, order: %d", _regrOrder);
+    legendsLeft.push_back(text);
+  }
+  if (_medianFiltLen > 1) {
+    snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
+    legendsLeft.push_back(text);
+  }
+  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+
+  // draw the title
+  
+  painter.save();
+  painter.setPen(_params.iqplot_title_color);
+  _zoomWorld.drawTitleTopCenter(painter, getName());
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot the spectral phidp
+ */
+
+void IqPlot::_plotSpectralPhidp(QPainter &painter,
+                                Beam *beam,
+                                int nSamples,
+                                double selectedRangeKm,
+                                int gateNum,
+                                const RadarComplex_t *iqHc,
+                                const RadarComplex_t *iqVc)
+  
+{
+
+  // apply window to time series
+  
+  TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
+  RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(nSamples);
+  RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(nSamples);
+  _applyWindow(iqHc, iqWindowedHc, nSamples);
+  _applyWindow(iqVc, iqWindowedVc, nSamples);
+  
+  // compute spectra
+  
+  TaArray<RadarComplex_t> specHc_, specVc_;
+  RadarComplex_t *specHc = specHc_.alloc(nSamples);
+  RadarComplex_t *specVc = specVc_.alloc(nSamples);
+  RadarFft fft(nSamples);
+  fft.fwd(iqWindowedHc, specHc);
+  fft.shift(specHc);
+  fft.fwd(iqWindowedVc, specVc);
+  fft.shift(specVc);
+  
+  // compute phidp spectrum
+  
+  TaArray<double> phidp_;
+  double minVal = 9999.0, maxVal = -9999.0;
+  double *phidp = phidp_.alloc(nSamples);
+  for (int ii = 0; ii < nSamples; ii++) {
+    RadarComplex_t diff = RadarComplex::conjugateProduct(specHc[ii], specVc[ii]);
+    phidp[ii] = RadarComplex::argDeg(diff);
+    minVal = min(phidp[ii], minVal);
+    maxVal = max(phidp[ii], maxVal);
+  }
+
+  // set the Y axis range
+  
+  double rangeY = maxVal - minVal;
+  if (!_isZoomed) {
+    setWorldLimitsY(minVal - rangeY * 0.05, maxVal + rangeY * 0.125);
+  }
+  
+  // draw the overlays
+
+  _drawOverlays(painter, selectedRangeKm);
+
+  // draw the spectrum phidp
+  
+  FilterUtils::applyMedianFilter(phidp, nSamples, _medianFiltLen);
+  painter.save();
+  QPen pen(painter.pen());
+  pen.setColor(_params.iqplot_line_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(_params.iqplot_line_width);
+  painter.setPen(pen);
+  QVector<QPointF> pts;
+  for (int ii = 0; ii < nSamples; ii++) {
+    int jj = (ii + nSamples) % nSamples;
+    double val = phidp[ii];
+    QPointF pt(jj, val);
+    pts.push_back(pt);
+  }
+  _zoomWorld.drawLines(painter, pts);
+  painter.restore();
+  
+  // legends
+
+  const MomentsFields* fields = beam->getOutFields();
+  char text[1024];
+  vector<string> legendsLeft;
+  snprintf(text, 1024, "phidp: %.2f", fields[gateNum].phidp);
+  legendsLeft.push_back(text);
+  if (_medianFiltLen > 1) {
+    snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
+    legendsLeft.push_back(text);
+  }
+  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  
   // draw the title
   
   painter.save();
@@ -664,7 +863,7 @@ void IqPlot::_plotTsPower(QPainter &painter,
 
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the spectrum - as line
+  // draw the spectrum
 
   painter.save();
   QPen pen(painter.pen());
@@ -738,7 +937,7 @@ void IqPlot::_plotTsPhase(QPainter &painter,
   
   _drawOverlays(painter, selectedRangeKm);
   
-  // draw the time series phase - as line
+  // draw the time series phase
 
   painter.save();
   QPen pen(painter.pen());
@@ -1081,6 +1280,152 @@ void IqPlot::_plotPhasor(QPainter &painter,
 
 }
 
+/*************************************************************************
+ * compute the spectrum
+ */
+
+void IqPlot::_computePowerSpectrum(Beam *beam,
+                                   int nSamples,
+                                   const RadarComplex_t *iq,
+                                   double *power,
+                                   double *dbm)
+  
+{
+
+  // init
+  
+  for (int ii = 0; ii < nSamples; ii++) {
+    power[ii] = 1.0e-12;
+    dbm[ii] = -120.0;
+  }
+
+  // apply window to time series
+  
+  TaArray<RadarComplex_t> iqWindowed_;
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
+  _applyWindow(iq, iqWindowed, nSamples);
+  
+  // compute power spectrum
+  
+  TaArray<RadarComplex_t> powerSpec_;
+  RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
+  RadarFft fft(nSamples);
+  fft.fwd(iqWindowed, powerSpec);
+  fft.shift(powerSpec);
+  
+  // set up filtering
+  
+  const IwrfCalib &calib = beam->getCalib();
+  double calibNoise = 0.0;
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
+      break;
+    case Params::CHANNEL_VC:
+      calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
+      break;
+    case Params::CHANNEL_HX:
+      calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
+      break;
+    case Params::CHANNEL_VX:
+      calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+      break;
+  }
+  
+  RadarMoments moments;
+  moments.setNSamples(nSamples);
+  moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
+               beam->getStartRangeKm(), beam->getGateSpacingKm());
+  moments.setCalib(calib);
+  moments.setClutterWidthMps(_clutWidthMps);
+  moments.setClutterInitNotchWidthMps(3.0);
+  
+  // filter as appropriate
+  
+  if (_useAdaptFilt) {
+
+    // adaptive filtering takes precedence over regression
+    
+    TaArray<RadarComplex_t> filtAdaptWindowed_;
+    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
+    double filterRatio, spectralNoise, spectralSnr;
+    moments.applyAdaptiveFilter(nSamples, fft,
+                                iqWindowed, NULL,
+                                calibNoise,
+                                filtAdaptWindowed, NULL,
+                                filterRatio,
+                                spectralNoise,
+                                spectralSnr);
+    
+    TaArray<RadarComplex_t> filtAdaptSpec_;
+    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(nSamples);
+    fft.fwd(filtAdaptWindowed, filtAdaptSpec);
+    fft.shift(filtAdaptSpec);
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+      power[ii] = RadarComplex::power(filtAdaptSpec[ii]);
+    }
+    
+  } else if (_useRegrFilt) {
+
+    // regression
+    
+    RegressionFilter regrF;
+    if (beam->getIsStagPrt()) {
+      regrF.setupStaggered(nSamples, beam->getStagM(),
+                           beam->getStagN(), _regrOrder);
+    } else {
+      regrF.setup(nSamples, _regrOrder);
+    }
+    
+    TaArray<RadarComplex_t> filtered_;
+    RadarComplex_t *filtered = filtered_.alloc(nSamples);
+    double filterRatio, spectralNoise, spectralSnr;
+    moments.applyRegressionFilter(nSamples, fft,
+                                  regrF, _windowCoeff,
+                                  iq,
+                                  calibNoise,
+                                  true,
+                                  filtered, NULL,
+                                  filterRatio,
+                                  spectralNoise,
+                                  spectralSnr);
+    
+    TaArray<RadarComplex_t> filtRegrWindowed_;
+    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(nSamples);
+    _applyWindow(filtered, filtRegrWindowed, nSamples);
+    
+    TaArray<RadarComplex_t> filtRegrSpec_;
+    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(nSamples);
+    fft.fwd(filtRegrWindowed, filtRegrSpec);
+    fft.shift(filtRegrSpec);
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+      power[ii] = RadarComplex::power(filtRegrSpec[ii]);
+    }
+    
+  } else {
+
+    // no filtering
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+      power[ii] = RadarComplex::power(powerSpec[ii]);
+    }
+    
+  }
+
+  // compute dbm
+  
+  for (int ii = 0; ii < nSamples; ii++) {
+    if (power[ii] <= 1.0e-12) {
+      dbm[ii] = -120.0;
+    } else {
+      dbm[ii] = 10.0 * log10(power[ii]);
+    }
+  }
+
+}
+
 ///////////////////////////////////////
 // Apply the window to the time series
 
@@ -1133,11 +1478,17 @@ string IqPlot::getName()
 
   string ptypeStr;
   switch (_plotType) {
-    case Params::SPECTRUM_POWER:
-      ptypeStr =  "SPECTRUM_POWER";
+    case Params::SPECTRAL_POWER:
+      ptypeStr =  "SPECTRAL_POWER";
       break;
-    case Params::SPECTRUM_PHASE:
-      ptypeStr =  "SPECTRUM_PHASE";
+    case Params::SPECTRAL_PHASE:
+      ptypeStr =  "SPECTRAL_PHASE";
+      break;
+    case Params::SPECTRAL_ZDR:
+      ptypeStr =  "SPECTRAL_ZDR";
+      break;
+    case Params::SPECTRAL_PHIDP:
+      ptypeStr =  "SPECTRAL_PHIDP";
       break;
     case Params::TS_POWER:
       ptypeStr =  "TS_POWER";
@@ -1187,8 +1538,10 @@ string IqPlot::getName()
 string IqPlot::getXUnits()
 {
   switch (_plotType) {
-    case Params::SPECTRUM_POWER:
-    case Params::SPECTRUM_PHASE:
+    case Params::SPECTRAL_POWER:
+    case Params::SPECTRAL_PHASE:
+    case Params::SPECTRAL_ZDR:
+    case Params::SPECTRAL_PHIDP:
     case Params::TS_POWER:
     case Params::TS_PHASE:
     case Params::I_VALS:
@@ -1208,9 +1561,13 @@ string IqPlot::getXUnits()
 string IqPlot::getYUnits()
 {
   switch (_plotType) {
-    case Params::SPECTRUM_POWER:
+    case Params::SPECTRAL_POWER:
       return "dbm";
-    case Params::SPECTRUM_PHASE:
+    case Params::SPECTRAL_PHASE:
+      return "deg";
+    case Params::SPECTRAL_ZDR:
+      return "dB";
+    case Params::SPECTRAL_PHIDP:
       return "deg";
     case Params::TS_POWER:
       return "dbm";

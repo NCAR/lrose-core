@@ -117,14 +117,16 @@ public:
   } waterfall_type_t;
 
   typedef enum {
-    SPECTRUM_POWER = 0,
-    SPECTRUM_PHASE = 1,
-    TS_POWER = 2,
-    TS_PHASE = 3,
-    I_VALS = 4,
-    Q_VALS = 5,
-    I_VS_Q = 6,
-    PHASOR = 7
+    SPECTRAL_POWER = 0,
+    SPECTRAL_PHASE = 1,
+    SPECTRAL_ZDR = 2,
+    SPECTRAL_PHIDP = 3,
+    TS_POWER = 4,
+    TS_PHASE = 5,
+    I_VALS = 6,
+    Q_VALS = 7,
+    I_VS_Q = 8,
+    PHASOR = 9
   } iq_plot_type_t;
 
   typedef enum {
@@ -199,6 +201,7 @@ public:
     iq_plot_type_t plot_type;
     rx_channel_t rx_channel;
     fft_window_t fft_window;
+    int median_filter_len;
     tdrp_bool_t use_adaptive_filter;
     tdrp_bool_t plot_clutter_model;
     double clutter_width_mps;

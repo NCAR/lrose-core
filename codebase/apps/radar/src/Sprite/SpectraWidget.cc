@@ -1324,7 +1324,8 @@ void SpectraWidget::_createIqPlot(int id)
   iqplot->setPlotType(_params._iq_plots[id].plot_type);
   iqplot->setRxChannel(_params._iq_plots[id].rx_channel);
   iqplot->setFftWindow(_params._iq_plots[id].fft_window);
-  iqplot->setUseAdaptiveFilt(_params._iq_plots[id].use_adaptive_filter);
+  iqplot->setMedianFiltLen(_params._iq_plots[id].median_filter_len);
+  iqplot->setUseAdaptFilt(_params._iq_plots[id].use_adaptive_filter);
   iqplot->setPlotClutModel(_params._iq_plots[id].plot_clutter_model);
   iqplot->setClutWidthMps(_params._iq_plots[id].clutter_width_mps);
   iqplot->setUseRegrFilt(_params._iq_plots[id].use_regression_filter);
@@ -1899,7 +1900,7 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   QAction plotSpectrumPower("Plot Spectrum Power", &contextMenu);
   connect(&plotSpectrumPower, &QAction::triggered,
           [this, id] () {
-            _iqPlots[id]->setPlotType(Params::SPECTRUM_POWER);
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_POWER);
             _configureIqPlot(id);
           } );
   setPlotTypeMenu.addAction(&plotSpectrumPower);
@@ -1907,7 +1908,7 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   QAction plotSpectrumPhase("Plot Spectrum Phase", &contextMenu);
   connect(&plotSpectrumPhase, &QAction::triggered,
           [this, id] () {
-            _iqPlots[id]->setPlotType(Params::SPECTRUM_PHASE);
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_PHASE);
             _configureIqPlot(id);
           } );
   setPlotTypeMenu.addAction(&plotSpectrumPhase);
@@ -2074,16 +2075,30 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   QMenu setFilteringMenu("Set Filtering", &contextMenu);
   contextMenu.addMenu(&setFilteringMenu);
   
-  QAction useAdaptiveFilter("Use adaptive filter", &contextMenu);
-  useAdaptiveFilter.setCheckable(true);
-  useAdaptiveFilter.setChecked
-    (_iqPlots[id]->getUseAdaptiveFilt());
-  connect(&useAdaptiveFilter, &QAction::triggered,
+  QAction setMedianFiltLen("Set median filter len", &contextMenu);
+  connect(&setMedianFiltLen, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            int len = QInputDialog::getInt
+              (this,
+               tr("QInputDialog::getInt()"), tr("Set median filter len:"),
+               _iqPlots[id]->getMedianFiltLen(),
+               1, 100, 1, &ok);
+            _iqPlots[id]->setMedianFiltLen(len);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&setMedianFiltLen);
+  
+  QAction useAdaptFilt("Use adaptive filter", &contextMenu);
+  useAdaptFilt.setCheckable(true);
+  useAdaptFilt.setChecked
+    (_iqPlots[id]->getUseAdaptFilt());
+  connect(&useAdaptFilt, &QAction::triggered,
           [this, id] (bool state) {
-            _iqPlots[id]->setUseAdaptiveFilt(state);
+            _iqPlots[id]->setUseAdaptFilt(state);
             _configureIqPlot(id);
           } );
-  setFilteringMenu.addAction(&useAdaptiveFilter);
+  setFilteringMenu.addAction(&useAdaptFilt);
 
   QAction plotClutModel("Plot clutter model", &contextMenu);
   plotClutModel.setCheckable(true);

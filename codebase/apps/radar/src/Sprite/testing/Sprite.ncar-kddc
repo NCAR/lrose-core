@@ -370,7 +370,7 @@ max_range_km = 100;
 // Type: int
 //
 
-main_window_width = 1500;
+main_window_width = 1800;
 
 ///////////// main_window_height //////////////////////
 //
@@ -834,6 +834,7 @@ waterfall_n_panels = 2;
 //          FFT_WINDOW_TUKEY_20
 //          FFT_WINDOW_TUKEY_30
 //          FFT_WINDOW_TUKEY_50
+//      int median_filter_len;
 //      boolean use_adaptive_filter;
 //      double clutter_width_mps;
 //      boolean use_regression_filter;
@@ -1209,14 +1210,14 @@ iqplots_n_rows = 2;
 // Type: int
 //
 
-iqplots_n_columns = 3;
+iqplots_n_columns = 4;
 
 ///////////// iq_plots ////////////////////////////////
 //
 // Details of IQ plots for each sub panel.
 //
-// SPECTRUM_POWER: power spectrum, log.
-// SPECTRUM_PHASE: phase in the spectral domain.
+// SPECTRAL_POWER: power spectrum, log.
+// SPECTRAL_PHASE: phase in the spectral domain.
 // TS_POWER: time domain power, log.
 // TS_PHASE: time domain phase.
 // I_VALS: I vals of time series.
@@ -1229,8 +1230,10 @@ iqplots_n_columns = 3;
 //   typedef struct {
 //      iq_plot_type_t plot_type;
 //        Options:
-//          SPECTRUM_POWER
-//          SPECTRUM_PHASE
+//          SPECTRAL_POWER
+//          SPECTRAL_PHASE
+//          SPECTRAL_ZDR
+//          SPECTRAL_PHIDP
 //          TS_POWER
 //          TS_PHASE
 //          I_VALS
@@ -1253,6 +1256,7 @@ iqplots_n_columns = 3;
 //          FFT_WINDOW_TUKEY_20
 //          FFT_WINDOW_TUKEY_30
 //          FFT_WINDOW_TUKEY_50
+//      int median_filter_len;
 //      boolean use_adaptive_filter;
 //      boolean plot_clutter_model;
 //      double clutter_width_mps;
@@ -1266,9 +1270,10 @@ iqplots_n_columns = 3;
 
 iq_plots = {
   {
-    plot_type = SPECTRUM_POWER,
+    plot_type = SPECTRAL_POWER,
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 1,
     use_adaptive_filter = TRUE,
     plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
@@ -1278,10 +1283,37 @@ iq_plots = {
   }
   ,
   {
-    plot_type = SPECTRUM_POWER,
+    plot_type = SPECTRAL_POWER,
     rx_channel = CHANNEL_VC,
     fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 1,
     use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = SPECTRAL_ZDR,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 1,
+    use_adaptive_filter = FALSE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = SPECTRAL_PHIDP,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 1,
+    use_adaptive_filter = FALSE,
     plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
@@ -1293,6 +1325,7 @@ iq_plots = {
     plot_type = I_VS_Q,
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 1,
     use_adaptive_filter = TRUE,
     plot_clutter_model = FALSE,
     clutter_width_mps = 0.75,
@@ -1305,6 +1338,7 @@ iq_plots = {
     plot_type = I_VALS,
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_RECT,
+    median_filter_len = 1,
     use_adaptive_filter = FALSE,
     plot_clutter_model = FALSE,
     clutter_width_mps = 0.75,
@@ -1317,6 +1351,7 @@ iq_plots = {
     plot_type = Q_VALS,
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_RECT,
+    median_filter_len = 1,
     use_adaptive_filter = FALSE,
     plot_clutter_model = FALSE,
     clutter_width_mps = 0.75,
@@ -1329,6 +1364,7 @@ iq_plots = {
     plot_type = PHASOR,
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 1,
     use_adaptive_filter = TRUE,
     plot_clutter_model = FALSE,
     clutter_width_mps = 0.75,
