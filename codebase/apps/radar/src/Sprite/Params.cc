@@ -1495,6 +1495,18 @@
     tt->comment_text = tdrpStrDup("The waterfall plots show spectra plotted against range.");
     tt++;
     
+    // Parameter 'color_scale_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("color_scale_dir");
+    tt->descr = tdrpStrDup("Directory for color scales");
+    tt->help = tdrpStrDup("You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.");
+    tt->val_offset = (char *) &color_scale_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("../share/color_scales");
+    tt++;
+    
     // Parameter 'waterfall_n_panels'
     // ctype is 'int'
     
@@ -1624,7 +1636,19 @@
     tt->descr = tdrpStrDup("Width of WATERFALL panel in spectra window (pixels).");
     tt->help = tdrpStrDup("The WATERFALL will be on the left of the plot. Set to 0 for no WATERFALL panel.");
     tt->val_offset = (char *) &waterfall_width - &_start_;
-    tt->single_val.i = 150;
+    tt->single_val.i = 200;
+    tt++;
+    
+    // Parameter 'waterfall_color_scale_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_color_scale_width");
+    tt->descr = tdrpStrDup("Width of color scale in waterfall plots (pixels).");
+    tt->help = tdrpStrDup("The color scale sits to the right of the data.");
+    tt->val_offset = (char *) &waterfall_color_scale_width - &_start_;
+    tt->single_val.i = 30;
     tt++;
     
     // Parameter 'waterfall_title_font_size'
@@ -1672,6 +1696,18 @@
     tt->descr = tdrpStrDup("Font size for plot legends (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &waterfall_legend_font_size - &_start_;
+    tt->single_val.i = 6;
+    tt++;
+    
+    // Parameter 'waterfall_color_scale_font_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_color_scale_font_size");
+    tt->descr = tdrpStrDup("Font size for labels in color scales (pixels).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_color_scale_font_size - &_start_;
     tt->single_val.i = 6;
     tt++;
     

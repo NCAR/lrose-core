@@ -612,12 +612,16 @@ public:
 
   tdrp_bool_t ascope_y_axis_labels_inside;
 
+  char* color_scale_dir;
+
   int waterfall_n_panels;
 
   waterfall_plot_t *_waterfall_plots;
   int waterfall_plots_n;
 
   int waterfall_width;
+
+  int waterfall_color_scale_width;
 
   int waterfall_title_font_size;
 
@@ -626,6 +630,8 @@ public:
   int waterfall_tick_values_font_size;
 
   int waterfall_legend_font_size;
+
+  int waterfall_color_scale_font_size;
 
   int waterfall_title_text_margin;
 
@@ -855,7 +861,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[192];
+  mutable TDRPtable _table[195];
 
   const char *_className;
 

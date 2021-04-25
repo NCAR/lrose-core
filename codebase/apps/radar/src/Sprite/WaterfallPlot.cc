@@ -38,6 +38,7 @@
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/Path.hh>
 #include <toolsa/pjg.h>
 
 #include <QTimer>
@@ -176,6 +177,13 @@ void WaterfallPlot::plotBeam(QPainter &painter,
   painter.restore();
 #endif
 
+  // draw the color scale
+
+  if (_readColorMap() == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+
   // draw the overlays
 
   _drawOverlays(painter, selectedRangeKm);
@@ -242,6 +250,7 @@ void WaterfallPlot::setWindowGeom(int width, int height,
                                   int xOffset, int yOffset)
 {
   _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
+  _fullWorld.setColorScaleWidth(_params.waterfall_color_scale_width);
   _zoomWorld = _fullWorld;
 }
 
@@ -256,6 +265,7 @@ void WaterfallPlot::setWorldLimits(double xMinWorld,
 {
   _fullWorld.setWorldLimits(xMinWorld, yMinWorld,
                             xMaxWorld, yMaxWorld);
+  _fullWorld.setColorScaleWidth(_params.waterfall_color_scale_width);
   _zoomWorld = _fullWorld;
 }
 
@@ -326,3 +336,52 @@ void WaterfallPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
 
 }
 
+//////////////////////////////////////////////////
+// read color map
+// returns 0 on success, -1 on failure
+  
+int WaterfallPlot::_readColorMap()
+{
+  
+  // check for color map location
+  
+  string colorMapDir = _params.color_scale_dir;
+  Path mapDir(_params.color_scale_dir);
+  if (!mapDir.dirExists()) {
+    colorMapDir = Path::getPathRelToExec(_params.color_scale_dir);
+    mapDir.setPath(colorMapDir);
+    if (!mapDir.dirExists()) {
+      cerr << "ERROR - WaterfallPlot::_readColorMap()" << endl;
+      cerr << "  Cannot find color scale directory" << endl;
+      cerr << "  Primary is: " << _params.color_scale_dir << endl;
+      cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
+      return -1;
+    }
+    if (_params.debug) {
+      cerr << "NOTE - using color scales relative to executable location" << endl;
+      cerr << "  Exec path: " << Path::getExecPath() << endl;
+      cerr << "  Color scale dir:: " << colorMapDir << endl;
+    }
+  }
+
+  // get color scale name
+
+  string colorScaleName = _params._waterfall_plots[_id].color_scale;
+
+  // create color map
+  
+  string colorMapPath = colorMapDir;
+  colorMapPath += PATH_DELIM;
+  colorMapPath += colorScaleName;
+  _cmap.setName(getName(_plotType));
+  _cmap.setUnits(getUnits(_plotType));
+
+  if (_cmap.readMap(colorMapPath)) {
+    cerr << "ERROR - WaterfallPlot::_readColorMap()" << endl;
+    cerr << "  Cannot read color map, path: " << colorMapPath << endl;
+    return -1;
+  }
+
+  return 0;
+
+}

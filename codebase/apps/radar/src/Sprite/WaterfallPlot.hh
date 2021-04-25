@@ -49,6 +49,7 @@
 #include "Params.hh"
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
+#include "ColorMap.hh"
 
 class Beam;
 class MomentsFields;
@@ -173,6 +174,10 @@ protected:
 
   WorldPlot _fullWorld;
 
+  // color map
+
+  ColorMap _cmap;
+
   // zoomed world
 
   bool _isZoomed;
@@ -187,9 +192,8 @@ protected:
   // Protected methods //
   ///////////////////////
 
-  // draw the overlays
-  
   void _drawOverlays(QPainter &painter, double selectedRangeKm);
+  int _readColorMap();
   
 };
 
