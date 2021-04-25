@@ -251,6 +251,7 @@ class DLL_EXPORT ColorMap {
 
   const string &getName() const { return _name; }
   const string &getUnits() const { return _units; }
+  const string &getPath() const { return _path; }
   
   /**
    * @returns the color table

@@ -76,7 +76,7 @@ IqPlot::IqPlot(QWidget* parent,
   _fftWindow = Params::FFT_WINDOW_VONHANN;
   _useAdaptiveFilt = false;
   _plotClutModel = false;
-  _clutWidthMps = 1.0;
+  _clutWidthMps = 0.75;
   _useRegrFilt = false;
   _regrOrder = 3;
   _regrFiltInterpAcrossNotch = true;

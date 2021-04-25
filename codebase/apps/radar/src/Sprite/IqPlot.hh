@@ -181,7 +181,7 @@ public:
   int getRegrOrder() const { return _regrOrder; }
   bool getRegrFiltInterpAcrossNotch() const { return _regrFiltInterpAcrossNotch; }
 
-  // get the moment type
+  // get strings
 
   string getName();
   string getXUnits();

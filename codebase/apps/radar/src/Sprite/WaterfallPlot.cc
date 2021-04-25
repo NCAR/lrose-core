@@ -66,6 +66,12 @@ WaterfallPlot::WaterfallPlot(QWidget* parent,
   _isZoomed = false;
   _xGridLinesOn = _params.waterfall_x_grid_lines_on;
   _yGridLinesOn = _params.waterfall_y_grid_lines_on;
+  _plotType = Params::WATERFALL_HC;
+  _fftWindow = Params::FFT_WINDOW_VONHANN;
+  _useAdaptiveFilt = false;
+  _clutWidthMps = 0.75;
+  _useRegrFilt = false;
+  _regrOrder = 3;
 }
 
 /*************************************************************************
@@ -117,6 +123,7 @@ void WaterfallPlot::unzoom()
 
 void WaterfallPlot::plotBeam(QPainter &painter,
                              Beam *beam,
+                             int nSamples,
                              double selectedRangeKm)
   
 {
@@ -134,54 +141,36 @@ void WaterfallPlot::plotBeam(QPainter &painter,
     cerr << "  Max range: " << beam->getMaxRange() << endl;
   }
 
-#ifdef JUNK  
-  const MomentsFields* fields = beam->getOutFields();
-  int nGates = beam->getNGates();
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
-
-  // first use filled polygons (trapezia)
-  
-  double xMin = _zoomWorld.getXMinWorld();
-  QBrush brush(_params.waterfall_fill_color);
-  brush.setStyle(Qt::SolidPattern);
-
-  for (int ii = 1; ii < nGates; ii++) {
-    double rangePrev = startRange + gateSpacing * (ii-1);
-    double range = startRange + gateSpacing * (ii);
-    double valPrev = getFieldVal(_momentType, fields[ii-1]);
-    double val = getFieldVal(_momentType, fields[ii]);
-    if (val > -9990 && valPrev > -9990) {
-      _zoomWorld.fillTrap(painter, brush,
-                          xMin, rangePrev,
-                          valPrev, rangePrev,
-                          val, range,
-                          xMin, range);
-    }
-  }
-
-  // draw the reflectivity field vs range - as line
-
-  painter.save();
-  painter.setPen(_params.waterfall_line_color);
-  QVector<QPointF> pts;
-  for (int ii = 0; ii < nGates; ii++) {
-    double range = startRange + gateSpacing * ii;
-    double val = getFieldVal(_momentType, fields[ii]);
-    if (val > -9990) {
-      QPointF pt(val, range);
-      pts.push_back(pt);
-    }
-  }
-  _zoomWorld.drawLines(painter, pts);
-  painter.restore();
-#endif
-
   // draw the color scale
-
+  
   if (_readColorMap() == 0) {
     _zoomWorld.drawColorScale(_cmap, painter,
                               _params.waterfall_color_scale_font_size);
+  }
+  
+  // perform the relevant plot
+
+  switch (_plotType) {
+
+    case Params::WATERFALL_HC:
+      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      break;
+    case Params::WATERFALL_VC:
+      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      break;
+    case Params::WATERFALL_HX:
+      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      break;
+    case Params::WATERFALL_VX:
+      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      break;
+    case Params::WATERFALL_ZDR:
+      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      break;
+    case Params::WATERFALL_PHIDP:
+      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      break;
+      
   }
 
   // draw the overlays
@@ -195,6 +184,90 @@ void WaterfallPlot::plotBeam(QPainter &painter,
   string title("Waterfall:");
   title.append(getName(_plotType));
   _zoomWorld.drawTitleTopCenter(painter, title);
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot HC spectrum
+ */
+
+void WaterfallPlot::_plotHc(QPainter &painter,
+                            Beam *beam,
+                            int nSamples,
+                            double selectedRangeKm)
+  
+{
+
+
+  int nGates = beam->getNGates();
+  double startRange = beam->getStartRangeKm();
+  double gateSpacing = beam->getGateSpacingKm();
+
+  painter.save();
+
+  // loop through the gates
+  
+  for (int igate = 0; igate < nGates; igate++) {
+
+    // set limits for plotting this gate
+    
+    double yy = startRange + gateSpacing * (igate-0.5);
+    
+    // get Iq data for this gate
+
+    const GateData *gateData = beam->getGateData()[igate];
+    TaArray<RadarComplex_t> iq_;
+    RadarComplex_t *iq = iq_.alloc(nSamples);
+    memcpy(iq, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
+    
+    // apply window to time series
+    
+    TaArray<RadarComplex_t> iqWindowed_;
+    RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
+    _applyWindow(iq, iqWindowed, nSamples);
+  
+    // compute power spectrum
+    
+    TaArray<RadarComplex_t> powerSpec_;
+    RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
+    RadarFft fft(nSamples);
+    fft.fwd(iqWindowed, powerSpec);
+    fft.shift(powerSpec);
+
+    // loop through the samples
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+
+      // compute power
+
+      double power = RadarComplex::power(powerSpec[ii]);
+      double dbm = 10.0 * log10(power);
+      if (power <= 1.0e-12) {
+        dbm = -120.0;
+      }
+      
+      // get color
+
+      int red, green, blue;
+      _cmap.dataColor(dbm, red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      
+      // set x limits
+
+      double xx = ii;
+      
+      // fill rectangle
+
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width, height);
+
+    } // ii
+
+  } // igate
+  
   painter.restore();
 
 }
@@ -385,3 +458,48 @@ int WaterfallPlot::_readColorMap()
   return 0;
 
 }
+
+///////////////////////////////////////
+// Apply the window to the time series
+
+void WaterfallPlot::_applyWindow(const RadarComplex_t *iq, 
+                                 RadarComplex_t *iqWindowed,
+                                 int nSamples)
+{
+  
+  // initialize the window
+  
+  _windowCoeff = _windowCoeff_.alloc(nSamples);
+  switch (_fftWindow) {
+    case Params::FFT_WINDOW_RECT:
+    default:
+      RadarMoments::initWindowRect(nSamples, _windowCoeff);
+      break;
+    case Params::FFT_WINDOW_VONHANN:
+      RadarMoments::initWindowVonhann(nSamples, _windowCoeff);
+      break;
+    case Params::FFT_WINDOW_BLACKMAN:
+      RadarMoments::initWindowBlackman(nSamples, _windowCoeff);
+      break;
+    case Params::FFT_WINDOW_BLACKMAN_NUTTALL:
+      RadarMoments::initWindowBlackmanNuttall(nSamples, _windowCoeff);
+      break;
+    case Params::FFT_WINDOW_TUKEY_10:
+      RadarMoments::initWindowTukey(0.1, nSamples, _windowCoeff);
+      break;
+    case Params::FFT_WINDOW_TUKEY_20:
+      RadarMoments::initWindowTukey(0.2, nSamples, _windowCoeff);
+      break;
+    case Params::FFT_WINDOW_TUKEY_30:
+      RadarMoments::initWindowTukey(0.3, nSamples, _windowCoeff);
+      break;
+    case Params::FFT_WINDOW_TUKEY_50:
+      RadarMoments::initWindowTukey(0.5, nSamples, _windowCoeff);
+  }
+
+  // compute power spectrum
+  
+  RadarMoments::applyWindow(iq, _windowCoeff, iqWindowed, nSamples);
+
+}
+  

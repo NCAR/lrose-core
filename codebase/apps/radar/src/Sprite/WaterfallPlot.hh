@@ -45,6 +45,8 @@
 #include <QRubberBand>
 #include <QPoint>
 #include <QTransform>
+#include <toolsa/TaArray.hh>
+#include <radar/RadarComplex.hh>
 
 #include "Params.hh"
 #include "ScaledLabel.hh"
@@ -112,10 +114,18 @@ public:
   void setZoomLimitsY(int yMin,
                       int yMax);
 
-  // set the moment type
+  // set the plot details
 
   void setPlotType(Params::waterfall_type_t val) { _plotType = val; }
+  void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
+
+  // set filtering
   
+  void setUseAdaptiveFilt(bool val) { _useAdaptiveFilt = val; }
+  void setClutWidthMps(double val) { _clutWidthMps = val; }
+  void setUseRegrFilt(bool val) { _useRegrFilt = val; }
+  void setRegrOrder(int val) { _regrOrder = val; }
+
   // zooming
 
   void zoom(int x1, int y1, int x2, int y2);
@@ -125,6 +135,7 @@ public:
   
   void plotBeam(QPainter &painter,
                 Beam *beam,
+                int nSamples,
                 double selectedRangeKm);
 
   // set grid lines on/off
@@ -150,9 +161,20 @@ public:
   bool getXGridLinesOn() const { return _xGridLinesOn; }
   bool getYGridLinesOn() const { return _yGridLinesOn; }
   
-  // get the moment type
+  // get the plot details
   
   const Params::waterfall_type_t getPlotType() const { return _plotType; }
+  const Params::fft_window_t getFftWindow() const { return _fftWindow; }
+
+  // get the filter details
+  
+  bool getUseAdaptiveFilt() const { return _useAdaptiveFilt; }
+  double getClutWidthMps() const { return _clutWidthMps; }
+  bool getUseRegrFilt() const { return _useRegrFilt; }
+  int getRegrOrder() const { return _regrOrder; }
+
+  // get strings
+
   static string getName(Params::waterfall_type_t wtype);
   static string getUnits(Params::waterfall_type_t wtype);
   
@@ -170,6 +192,19 @@ protected:
 
   Params::waterfall_type_t _plotType;
   
+  // fft window
+  
+  Params::fft_window_t _fftWindow;
+  TaArray<double> _windowCoeff_;
+  double *_windowCoeff;
+
+  // filtering
+
+  bool _useAdaptiveFilt;
+  double _clutWidthMps;
+  bool _useRegrFilt;
+  int _regrOrder;
+
   // unzoomed world
 
   WorldPlot _fullWorld;
@@ -192,8 +227,18 @@ protected:
   // Protected methods //
   ///////////////////////
 
+  void _plotHc(QPainter &painter,
+               Beam *beam,
+               int nSamples,
+               double selectedRangeKm);
+  
   void _drawOverlays(QPainter &painter, double selectedRangeKm);
+
   int _readColorMap();
+
+  void _applyWindow(const RadarComplex_t *iq, 
+                    RadarComplex_t *iqWindowed,
+                    int nSamples);
   
 };
 

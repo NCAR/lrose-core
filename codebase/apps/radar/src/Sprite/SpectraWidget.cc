@@ -653,7 +653,7 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
       _ascopes[ii]->plotBeam(painter, _beam, _selectedRangeKm);
     }
     for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
-      _waterfalls[ii]->plotBeam(painter, _beam, _selectedRangeKm);
+      _waterfalls[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
     }
     for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
       _iqPlots[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
@@ -1228,6 +1228,12 @@ void SpectraWidget::_createWaterfall(int id)
 
   WaterfallPlot *waterfall = new WaterfallPlot(this, _params, id);
   waterfall->setPlotType(_params._waterfall_plots[id].plot_type);
+  waterfall->setFftWindow(_params._waterfall_plots[id].fft_window);
+  waterfall->setUseAdaptiveFilt(_params._waterfall_plots[id].use_adaptive_filter);
+  waterfall->setClutWidthMps(_params._waterfall_plots[id].clutter_width_mps);
+  waterfall->setUseRegrFilt(_params._waterfall_plots[id].use_regression_filter);
+  waterfall->setRegrOrder(_params._waterfall_plots[id].regression_order);
+
   
   WorldPlot &waterfallWorld = waterfall->getFullWorld();
   
@@ -1309,6 +1315,8 @@ void SpectraWidget::_createIqPlot(int id)
   iqplot->setClutWidthMps(_params._iq_plots[id].clutter_width_mps);
   iqplot->setUseRegrFilt(_params._iq_plots[id].use_regression_filter);
   iqplot->setRegrOrder(_params._iq_plots[id].regression_order);
+  iqplot->setRegrFiltInterpAcrossNotch
+    (_params._iq_plots[id].regression_filter_interp_across_notch);
 
   WorldPlot &iqplotWorld = iqplot->getFullWorld();
   
