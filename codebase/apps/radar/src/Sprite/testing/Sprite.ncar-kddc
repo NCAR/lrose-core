@@ -1209,7 +1209,7 @@ iqplots_n_rows = 2;
 // Type: int
 //
 
-iqplots_n_columns = 4;
+iqplots_n_columns = 3;
 
 ///////////// iq_plots ////////////////////////////////
 //
@@ -1271,18 +1271,6 @@ iq_plots = {
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
     plot_clutter_model = TRUE,
-    clutter_width_mps = 0.5,
-    use_regression_filter = FALSE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = SPECTRUM_POWER,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
     regression_order = 3,
@@ -1295,18 +1283,18 @@ iq_plots = {
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
     plot_clutter_model = TRUE,
-    clutter_width_mps = 0.5,
+    clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }
   ,
   {
-    plot_type = SPECTRUM_POWER,
-    rx_channel = CHANNEL_VC,
+    plot_type = I_VS_Q,
+    rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
     use_adaptive_filter = TRUE,
-    plot_clutter_model = TRUE,
+    plot_clutter_model = FALSE,
     clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
     regression_order = 3,
@@ -1333,18 +1321,6 @@ iq_plots = {
     plot_clutter_model = FALSE,
     clutter_width_mps = 0.75,
     use_regression_filter = TRUE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = I_VS_Q,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }
@@ -2199,7 +2175,7 @@ KDP_debug = FALSE;
 // Type: int
 //
 
-n_samples = 128;
+n_samples = 64;
 
 ///////////// indexed_beams ///////////////////////////
 //
