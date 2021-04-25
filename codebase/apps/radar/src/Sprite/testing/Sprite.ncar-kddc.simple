@@ -370,7 +370,7 @@ max_range_km = 100;
 // Type: int
 //
 
-main_window_width = 1800;
+main_window_width = 1100;
 
 ///////////// main_window_height //////////////////////
 //
@@ -800,7 +800,7 @@ ascope_y_axis_labels_inside = FALSE;
 // Type: int
 //
 
-waterfall_n_panels = 2;
+waterfall_n_panels = 1;
 
 ///////////// waterfall_plots /////////////////////////
 //
@@ -1210,7 +1210,7 @@ iqplots_n_rows = 2;
 // Type: int
 //
 
-iqplots_n_columns = 4;
+iqplots_n_columns = 2;
 
 ///////////// iq_plots ////////////////////////////////
 //
@@ -1296,32 +1296,6 @@ iq_plots = {
   }
   ,
   {
-    plot_type = SPECTRAL_ZDR,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    median_filter_len = 1,
-    use_adaptive_filter = FALSE,
-    plot_clutter_model = TRUE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = SPECTRAL_PHIDP,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    median_filter_len = 1,
-    use_adaptive_filter = FALSE,
-    plot_clutter_model = TRUE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
     plot_type = I_VALS,
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_RECT,
@@ -1343,32 +1317,6 @@ iq_plots = {
     plot_clutter_model = FALSE,
     clutter_width_mps = 0.75,
     use_regression_filter = TRUE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = I_VS_Q,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    median_filter_len = 1,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = PHASOR,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    median_filter_len = 1,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = FALSE,
     regression_order = 3,
     regression_filter_interp_across_notch = TRUE
   }

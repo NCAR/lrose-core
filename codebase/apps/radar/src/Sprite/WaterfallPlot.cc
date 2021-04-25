@@ -185,6 +185,7 @@ void WaterfallPlot::plotBeam(QPainter &painter,
   
   char text[1024];
   vector<string> legendsLeft;
+  painter.setBackgroundMode(Qt::OpaqueMode);
   if (_useAdaptFilt) {
     snprintf(text, 1024, "Adapt filt, width: %.2f", _clutWidthMps);
     legendsLeft.push_back(text);

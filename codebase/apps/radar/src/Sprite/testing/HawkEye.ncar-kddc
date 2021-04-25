@@ -717,7 +717,7 @@ site_name = "MARSHALL";
 // Type: int
 //
 
-main_window_width = 1100;
+main_window_width = 1200;
 
 ///////////// main_window_height //////////////////////
 //
@@ -727,7 +727,7 @@ main_window_width = 1100;
 // Type: int
 //
 
-main_window_height = 635;
+main_window_height = 710;
 
 ///////////// main_window_start_x /////////////////////
 //
