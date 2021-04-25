@@ -1892,6 +1892,24 @@ output_fields = {
     output_units = "none",
     output_encoding = OUTPUT_SHORT
   }
+  ,
+  {
+    dsr_name = "SPECTRAL_SNR",
+    output_name = "SPECTRAL_SNR",
+    long_name = "spectral_signal_to_noise_ratio",
+    standard_name = "spectral_signal_to_noise_ratio",
+    output_units = "dB",
+    output_encoding = OUTPUT_SHORT
+  }
+  ,
+  {
+    dsr_name = "SPECTRAL_NOISE",
+    output_name = "SPECTRAL_NOISE",
+    long_name = "spectral_noise_power",
+    standard_name = "spectral_noise_power",
+    output_units = "dBm",
+    output_encoding = OUTPUT_SHORT
+  }
 };
 
 //======================================================================

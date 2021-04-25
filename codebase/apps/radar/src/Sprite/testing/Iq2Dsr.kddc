@@ -900,7 +900,7 @@ moments_params = {
     beam_n_samples = 64,
     beam_angle_deg = 1,
     index_the_beams = TRUE,
-    indexed_resolution = 0.75,
+    indexed_resolution = 0.5,
     min_antenna_rate_for_indexing = 1,
     window = WINDOW_VONHANN,
     switching_receiver = TRUE,
@@ -3153,7 +3153,7 @@ notch_width_for_offzero_snr = 4;
 // Type: boolean
 //
 
-cmd_check_for_windfarm_clutter = FALSE;
+cmd_check_for_windfarm_clutter = TRUE;
 
 ///////////// min_spectral_snr_for_windfarm_clutter ///
 //
@@ -4258,6 +4258,26 @@ output_fields = {
     scale = 1,
     bias = -1000,
     write_unfiltered = FALSE,
+    write_filtered = FALSE
+  }
+  ,
+  {
+    id = SPECTRAL_NOISE,
+    name = "SPECTRAL_NOISE",
+    units = "dBm",
+    scale = 0.01,
+    bias = -320,
+    write_unfiltered = TRUE,
+    write_filtered = FALSE
+  }
+  ,
+  {
+    id = SPECTRAL_SNR,
+    name = "SPECTRAL_SNR",
+    units = "dB",
+    scale = 0.01,
+    bias = -320,
+    write_unfiltered = TRUE,
     write_filtered = FALSE
   }
 };
