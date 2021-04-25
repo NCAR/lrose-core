@@ -121,8 +121,8 @@ public:
 
   // set filtering
 
-  void setMedianFilterLen(int val) { _medianFilterLen = val; }
-  void setUseAdaptiveFilt(bool val) { _useAdaptiveFilt = val; }
+  void setMedianFiltLen(int val) { _medianFiltLen = val; }
+  void setUseAdaptFilt(bool val) { _useAdaptFilt = val; }
   void setClutWidthMps(double val) { _clutWidthMps = val; }
   void setUseRegrFilt(bool val) { _useRegrFilt = val; }
   void setRegrOrder(int val) { _regrOrder = val; }
@@ -169,8 +169,8 @@ public:
 
   // get the filter details
   
-  int getMedianFilterLen() const { return _medianFilterLen; }
-  bool getUseAdaptiveFilt() const { return _useAdaptiveFilt; }
+  int getMedianFiltLen() const { return _medianFiltLen; }
+  bool getUseAdaptFilt() const { return _useAdaptFilt; }
   double getClutWidthMps() const { return _clutWidthMps; }
   bool getUseRegrFilt() const { return _useRegrFilt; }
   int getRegrOrder() const { return _regrOrder; }
@@ -202,8 +202,8 @@ protected:
 
   // filtering
 
-  int _medianFilterLen;
-  bool _useAdaptiveFilt;
+  int _medianFiltLen;
+  bool _useAdaptFilt;
   double _clutWidthMps;
   bool _useRegrFilt;
   int _regrOrder;
@@ -265,6 +265,12 @@ protected:
                   int nSamples,
                   int nGates,
                   double selectedRangeKm);
+  
+  void _computePowerSpectrum(Beam *beam,
+                             int nSamples,
+                             const RadarComplex_t *iq,
+                             double *power,
+                             double *dbm);
   
   void _drawOverlays(QPainter &painter, double selectedRangeKm);
 

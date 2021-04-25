@@ -69,10 +69,11 @@ WaterfallPlot::WaterfallPlot(QWidget* parent,
   _yGridLinesOn = _params.waterfall_y_grid_lines_on;
   _plotType = Params::WATERFALL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
-  _useAdaptiveFilt = false;
+  _useAdaptFilt = false;
   _clutWidthMps = 0.75;
   _useRegrFilt = false;
   _regrOrder = 3;
+  _medianFiltLen = 3;
 }
 
 /*************************************************************************
@@ -180,6 +181,23 @@ void WaterfallPlot::plotBeam(QPainter &painter,
 
   _drawOverlays(painter, selectedRangeKm);
 
+  // legends
+  
+  char text[1024];
+  vector<string> legendsLeft;
+  if (_useAdaptFilt) {
+    snprintf(text, 1024, "Adapt filt, width: %.2f", _clutWidthMps);
+    legendsLeft.push_back(text);
+  } else if (_useRegrFilt) {
+    snprintf(text, 1024, "Regr filt, order: %d", _regrOrder);
+    legendsLeft.push_back(text);
+  }
+  if (_medianFiltLen > 1) {
+    snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
+    legendsLeft.push_back(text);
+  }
+  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+
   // draw the title
 
   painter.save();
@@ -202,7 +220,6 @@ void WaterfallPlot::_plotHc(QPainter &painter,
                             double selectedRangeKm)
   
 {
-
 
   double startRange = beam->getStartRangeKm();
   double gateSpacing = beam->getGateSpacingKm();
@@ -236,31 +253,17 @@ void WaterfallPlot::_plotHc(QPainter &painter,
     TaArray<RadarComplex_t> iqWindowed_;
     RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
     _applyWindow(iq, iqWindowed, nSamples);
-  
+    
     // compute power spectrum
     
-    TaArray<RadarComplex_t> powerSpec_;
-    RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
-    RadarFft fft(nSamples);
-    fft.fwd(iqWindowed, powerSpec);
-    fft.shift(powerSpec);
-
-    // compute dbm
-    
-    TaArray<double> dbm_;
+    TaArray<double> power_, dbm_;
+    double *power = power_.alloc(nSamples);
     double *dbm = dbm_.alloc(nSamples);
-
-    for (int ii = 0; ii < nSamples; ii++) {
-      double power = RadarComplex::power(powerSpec[ii]);
-      dbm[ii] = 10.0 * log10(power);
-      if (power <= 1.0e-12) {
-        dbm[ii] = -120.0;
-      }
-    }
-
+    _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+    
     // apply 3-pt median filter
-
-    FilterUtils::applyMedianFilter(dbm, nSamples, _medianFilterLen);
+    
+    FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
       
     // plot the samples
     
@@ -288,6 +291,154 @@ void WaterfallPlot::_plotHc(QPainter &painter,
   } // igate
   
   painter.restore();
+
+}
+
+/*************************************************************************
+ * compute the spectrum
+ */
+
+void WaterfallPlot::_computePowerSpectrum(Beam *beam,
+                                          int nSamples,
+                                          const RadarComplex_t *iq,
+                                          double *power,
+                                          double *dbm)
+  
+{
+
+  // init
+  
+  for (int ii = 0; ii < nSamples; ii++) {
+    power[ii] = 1.0e-12;
+    dbm[ii] = -120.0;
+  }
+
+  // apply window to time series
+  
+  TaArray<RadarComplex_t> iqWindowed_;
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
+  _applyWindow(iq, iqWindowed, nSamples);
+  
+  // compute power spectrum
+  
+  TaArray<RadarComplex_t> powerSpec_;
+  RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
+  RadarFft fft(nSamples);
+  fft.fwd(iqWindowed, powerSpec);
+  fft.shift(powerSpec);
+  
+  // set up filtering
+  
+  const IwrfCalib &calib = beam->getCalib();
+  double calibNoise = 0.0;
+  switch (_plotType) {
+    case Params::WATERFALL_HC:
+    case Params::WATERFALL_ZDR:
+    case Params::WATERFALL_PHIDP:
+      calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
+      break;
+    case Params::WATERFALL_VC:
+      calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
+      break;
+    case Params::WATERFALL_HX:
+      calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
+      break;
+    case Params::WATERFALL_VX:
+      calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+      break;
+  }
+  
+  RadarMoments moments;
+  moments.setNSamples(nSamples);
+  moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
+               beam->getStartRangeKm(), beam->getGateSpacingKm());
+  moments.setCalib(calib);
+  moments.setClutterWidthMps(_clutWidthMps);
+  moments.setClutterInitNotchWidthMps(3.0);
+  
+  // filter as appropriate
+  
+  if (_useAdaptFilt) {
+
+    // adaptive filtering takes precedence over regression
+    
+    TaArray<RadarComplex_t> filtAdaptWindowed_;
+    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
+    double filterRatio, spectralNoise, spectralSnr;
+    moments.applyAdaptiveFilter(nSamples, fft,
+                                iqWindowed, NULL,
+                                calibNoise,
+                                filtAdaptWindowed, NULL,
+                                filterRatio,
+                                spectralNoise,
+                                spectralSnr);
+    
+    TaArray<RadarComplex_t> filtAdaptSpec_;
+    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(nSamples);
+    fft.fwd(filtAdaptWindowed, filtAdaptSpec);
+    fft.shift(filtAdaptSpec);
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+      power[ii] = RadarComplex::power(filtAdaptSpec[ii]);
+    }
+    
+  } else if (_useRegrFilt) {
+
+    // regression
+    
+    RegressionFilter regrF;
+    if (beam->getIsStagPrt()) {
+      regrF.setupStaggered(nSamples, beam->getStagM(),
+                           beam->getStagN(), _regrOrder);
+    } else {
+      regrF.setup(nSamples, _regrOrder);
+    }
+    
+    TaArray<RadarComplex_t> filtered_;
+    RadarComplex_t *filtered = filtered_.alloc(nSamples);
+    double filterRatio, spectralNoise, spectralSnr;
+    moments.applyRegressionFilter(nSamples, fft,
+                                  regrF, _windowCoeff,
+                                  iq,
+                                  calibNoise,
+                                  true,
+                                  filtered, NULL,
+                                  filterRatio,
+                                  spectralNoise,
+                                  spectralSnr);
+    
+    TaArray<RadarComplex_t> filtRegrWindowed_;
+    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(nSamples);
+    _applyWindow(filtered, filtRegrWindowed, nSamples);
+    
+    TaArray<RadarComplex_t> filtRegrSpec_;
+    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(nSamples);
+    fft.fwd(filtRegrWindowed, filtRegrSpec);
+    fft.shift(filtRegrSpec);
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+      power[ii] = RadarComplex::power(filtRegrSpec[ii]);
+    }
+    
+  } else {
+
+    // no filtering
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+      power[ii] = RadarComplex::power(powerSpec[ii]);
+    }
+    
+  }
+
+  // compute dbm
+  
+  for (int ii = 0; ii < nSamples; ii++) {
+    if (power[ii] <= 1.0e-12) {
+      dbm[ii] = -120.0;
+    } else {
+      dbm[ii] = 10.0 * log10(power[ii]);
+    }
+  }
 
 }
 

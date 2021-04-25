@@ -1236,9 +1236,9 @@ void SpectraWidget::_createWaterfall(int id)
 
   WaterfallPlot *waterfall = new WaterfallPlot(this, _params, id);
   waterfall->setPlotType(_params._waterfall_plots[id].plot_type);
-  waterfall->setMedianFilterLen(_params._waterfall_plots[id].median_filter_len);
+  waterfall->setMedianFiltLen(_params._waterfall_plots[id].median_filter_len);
   waterfall->setFftWindow(_params._waterfall_plots[id].fft_window);
-  waterfall->setUseAdaptiveFilt(_params._waterfall_plots[id].use_adaptive_filter);
+  waterfall->setUseAdaptFilt(_params._waterfall_plots[id].use_adaptive_filter);
   waterfall->setClutWidthMps(_params._waterfall_plots[id].clutter_width_mps);
   waterfall->setUseRegrFilt(_params._waterfall_plots[id].use_regression_filter);
   waterfall->setRegrOrder(_params._waterfall_plots[id].regression_order);
@@ -1759,30 +1759,30 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
   QMenu setFilteringMenu("Set Filtering", &contextMenu);
   contextMenu.addMenu(&setFilteringMenu);
   
-  QAction setMedianFilterLen("Set median filter len", &contextMenu);
-  connect(&setMedianFilterLen, &QAction::triggered,
+  QAction setMedianFiltLen("Set median filter len", &contextMenu);
+  connect(&setMedianFiltLen, &QAction::triggered,
           [this, id] () {
             bool ok;
             int len = QInputDialog::getInt
               (this,
                tr("QInputDialog::getInt()"), tr("Set median filter len:"),
-               _waterfalls[id]->getMedianFilterLen(),
+               _waterfalls[id]->getMedianFiltLen(),
                1, 100, 1, &ok);
-            _waterfalls[id]->setMedianFilterLen(len);
+            _waterfalls[id]->setMedianFiltLen(len);
             _configureWaterfall(id);
           } );
-  setFilteringMenu.addAction(&setMedianFilterLen);
+  setFilteringMenu.addAction(&setMedianFiltLen);
   
-  QAction useAdaptiveFilter("Use adaptive filter", &contextMenu);
-  useAdaptiveFilter.setCheckable(true);
-  useAdaptiveFilter.setChecked
-    (_waterfalls[id]->getUseAdaptiveFilt());
-  connect(&useAdaptiveFilter, &QAction::triggered,
+  QAction useAdaptFilter("Use adaptive filter", &contextMenu);
+  useAdaptFilter.setCheckable(true);
+  useAdaptFilter.setChecked
+    (_waterfalls[id]->getUseAdaptFilt());
+  connect(&useAdaptFilter, &QAction::triggered,
           [this, id] (bool state) {
-            _waterfalls[id]->setUseAdaptiveFilt(state);
+            _waterfalls[id]->setUseAdaptFilt(state);
             _configureWaterfall(id);
           } );
-  setFilteringMenu.addAction(&useAdaptiveFilter);
+  setFilteringMenu.addAction(&useAdaptFilter);
 
   QAction setClutterWidth("Set clutter width", &contextMenu);
   connect(&setClutterWidth, &QAction::triggered,

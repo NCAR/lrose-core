@@ -478,8 +478,8 @@ typedef struct {
 
 paramdef struct waterfall_plot_t {
   p_default = {
-    { WATERFALL_HC, FFT_WINDOW_VONHANN, 3, true, 0.75, false, 3 },
-    { WATERFALL_ZDR, FFT_WINDOW_VONHANN, 3, true, 0.75, false, 3 }
+    { WATERFALL_HC, FFT_WINDOW_VONHANN, 3, false, 0.75, false, 3 },
+    { WATERFALL_ZDR, FFT_WINDOW_VONHANN, 3, false, 0.75, false, 3 }
   };
   p_descr = "Details of waterfall plots for each sub panel.";
   p_help = "WATERFALL_HC: H-Co power spectrum vs range.\nWATERFALL_VC: V-Co power spectrum vs range.\nWATERFALL_HX: H-cross power spectrum vs range.\nWATERFALL_VX: V-cross power spectrum vs range.\nWATERFALL_ZDR: zdr spectrum vs range.\nWATERFALL_PHIDP: phidp spectrum vs. range.";

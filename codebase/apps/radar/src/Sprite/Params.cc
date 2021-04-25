@@ -1623,14 +1623,14 @@
       tt->struct_vals[0].e = WATERFALL_HC;
       tt->struct_vals[1].e = FFT_WINDOW_VONHANN;
       tt->struct_vals[2].i = 3;
-      tt->struct_vals[3].b = pTRUE;
+      tt->struct_vals[3].b = pFALSE;
       tt->struct_vals[4].d = 0.75;
       tt->struct_vals[5].b = pFALSE;
       tt->struct_vals[6].i = 3;
       tt->struct_vals[7].e = WATERFALL_ZDR;
       tt->struct_vals[8].e = FFT_WINDOW_VONHANN;
       tt->struct_vals[9].i = 3;
-      tt->struct_vals[10].b = pTRUE;
+      tt->struct_vals[10].b = pFALSE;
       tt->struct_vals[11].d = 0.75;
       tt->struct_vals[12].b = pFALSE;
       tt->struct_vals[13].i = 3;
