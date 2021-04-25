@@ -137,6 +137,12 @@ void AscopePlot::plotBeam(QPainter &painter,
   int nGates = beam->getNGates();
   double startRange = beam->getStartRangeKm();
   double gateSpacing = beam->getGateSpacingKm();
+  if (_params.set_max_range) {
+    int nGatesMax = (_params.max_range_km - startRange) / gateSpacing;
+    if (nGatesMax < nGates) {
+      nGates = nGatesMax;
+    }
+  }
 
   // first use filled polygons (trapezia)
   

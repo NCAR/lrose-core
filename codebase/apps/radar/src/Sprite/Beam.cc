@@ -570,14 +570,6 @@ Beam::~Beam()
 
 {
 
-  // if (_outFields) {
-  //   delete[] _outFields;
-  // }
-
-  // if (_outFieldsF) {
-  //   delete[] _outFieldsF;
-  // }
-  
   if (_mom) {
     delete _mom;
   }

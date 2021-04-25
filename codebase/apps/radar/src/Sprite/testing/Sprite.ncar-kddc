@@ -329,6 +329,35 @@ show_status_in_gui = {
 
 //======================================================================
 //
+// SET MAX RANGE.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range to be used for plotting.
+//
+// If FALSE, the max range of the data will be used. If TRUE, 
+//   max_range_km will override the max range in the data.
+//
+//
+// Type: boolean
+//
+
+set_max_range = TRUE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Max range for the display (km).
+//
+//
+// Type: double
+//
+
+max_range_km = 100;
+
+//======================================================================
+//
 // MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS.
 //
 //======================================================================
@@ -445,16 +474,6 @@ main_window_panel_divider_line_width = 1;
 
 main_window_panel_divider_color = "yellow";
 
-///////////// main_color_scale_width //////////////////
-//
-// Width of color scale (pixels).
-//
-//
-// Type: int
-//
-
-main_color_scale_width = 40;
-
 ///////////// click_cross_size ////////////////////////
 //
 // Size of cross at click point (pixels).
@@ -487,7 +506,7 @@ click_cross_size = 11;
 // Type: int
 //
 
-ascope_n_panels = 2;
+ascope_n_panels = 1;
 
 ///////////// ascope_moments //////////////////////////
 //
@@ -514,8 +533,7 @@ ascope_n_panels = 2;
 //
 
 ascope_moments = {
- DBZ,
- VEL
+ DBZ
 };
 
 ///////////// ascope_width ////////////////////////////
@@ -771,23 +789,6 @@ ascope_y_axis_labels_inside = FALSE;
 //
 //======================================================================
  
-///////////// color_scale_dir /////////////////////////
-//
-// Directory for color scales.
-//
-// You can set this in 2 ways:
-//
-// (a) Set to the absolute path
-//
-// (b)Set as a path relative to the location of the application binary 
-//   executable.
-//
-//
-// Type: string
-//
-
-color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
-
 ///////////// waterfall_n_panels //////////////////////
 //
 // Number of waterfall panels in spectra window (pixels).
@@ -823,7 +824,6 @@ waterfall_n_panels = 1;
 //          WATERFALL_VX
 //          WATERFALL_ZDR
 //          WATERFALL_PHIDP
-//      string color_scale;
 //      fft_window_t fft_window;
 //        Options:
 //          FFT_WINDOW_RECT
@@ -846,8 +846,8 @@ waterfall_n_panels = 1;
 waterfall_plots = {
   {
     plot_type = WATERFALL_HC,
-    color_scale = "dbm_spectra.colors",
     fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 3,
     use_adaptive_filter = TRUE,
     clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
@@ -856,8 +856,8 @@ waterfall_plots = {
   ,
   {
     plot_type = WATERFALL_ZDR,
-    color_scale = "zdr.colors",
     fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 3,
     use_adaptive_filter = TRUE,
     clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
@@ -889,6 +889,53 @@ waterfall_width = 200;
 //
 
 waterfall_color_scale_width = 30;
+
+///////////// color_scale_dir /////////////////////////
+//
+// Directory for color scales.
+//
+// You can set this in 2 ways:
+//
+// (a) Set to the absolute path
+//
+// (b)Set as a path relative to the location of the application binary 
+//   executable.
+//
+//
+// Type: string
+//
+
+color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
+
+///////////// waterfall_dbm_color_scale_name //////////
+//
+// Color scale name for dbm units.
+//
+//
+// Type: string
+//
+
+waterfall_dbm_color_scale_name = "dbm_spectra.colors";
+
+///////////// waterfall_zdr_color_scale_name //////////
+//
+// Color scale name for zdr units.
+//
+//
+// Type: string
+//
+
+waterfall_zdr_color_scale_name = "zdr.colors";
+
+///////////// waterfall_phidp_color_scale_name ////////
+//
+// Color scale name for phidp units.
+//
+//
+// Type: string
+//
+
+waterfall_phidp_color_scale_name = "phidp.colors";
 
 ///////////// waterfall_title_font_size ///////////////
 //

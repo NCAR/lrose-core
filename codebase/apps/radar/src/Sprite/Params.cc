@@ -984,6 +984,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("SET MAX RANGE");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'set_max_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_max_range");
+    tt->descr = tdrpStrDup("Option to set the max range to be used for plotting.");
+    tt->help = tdrpStrDup("If FALSE, the max range of the data will be used. If TRUE, max_range_km will override the max range in the data.");
+    tt->val_offset = (char *) &set_max_range - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'max_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_range_km");
+    tt->descr = tdrpStrDup("Max range for the display (km).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &max_range_km - &_start_;
+    tt->single_val.d = 120;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1120,18 +1153,6 @@
     tt->single_val.s = tdrpStrDup("yellow");
     tt++;
     
-    // Parameter 'main_color_scale_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("main_color_scale_width");
-    tt->descr = tdrpStrDup("Width of color scale (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &main_color_scale_width - &_start_;
-    tt->single_val.i = 40;
-    tt++;
-    
     // Parameter 'click_cross_size'
     // ctype is 'int'
     
@@ -1144,11 +1165,11 @@
     tt->single_val.i = 11;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("ASCOPE DISPLAY PANEL");
     tt->comment_text = tdrpStrDup("The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.");
     tt++;
@@ -1486,25 +1507,13 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("WATERFALL DISPLAY PANEL");
     tt->comment_text = tdrpStrDup("The waterfall plots show spectra plotted against range.");
-    tt++;
-    
-    // Parameter 'color_scale_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("color_scale_dir");
-    tt->descr = tdrpStrDup("Directory for color scales");
-    tt->help = tdrpStrDup("You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.");
-    tt->val_offset = (char *) &color_scale_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("../share/color_scales");
     tt++;
     
     // Parameter 'waterfall_n_panels'
@@ -1558,36 +1567,36 @@
         tt->struct_def.fields[0].enum_def.fields[4].val = WATERFALL_ZDR;
         tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_PHIDP");
         tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_PHIDP;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("color_scale");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("fft_window_t");
+      tt->struct_def.fields[1].fname = tdrpStrDup("fft_window");
+      tt->struct_def.fields[1].ptype = ENUM_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_waterfall_plots->color_scale - (char *) _waterfall_plots;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("fft_window_t");
-      tt->struct_def.fields[2].fname = tdrpStrDup("fft_window");
-      tt->struct_def.fields[2].ptype = ENUM_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
         (char *) &_waterfall_plots->fft_window - (char *) _waterfall_plots;
-        tt->struct_def.fields[2].enum_def.name = tdrpStrDup("fft_window_t");
-        tt->struct_def.fields[2].enum_def.nfields = 8;
-        tt->struct_def.fields[2].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[2].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[2].enum_def.fields[0].name = tdrpStrDup("FFT_WINDOW_RECT");
-        tt->struct_def.fields[2].enum_def.fields[0].val = FFT_WINDOW_RECT;
-        tt->struct_def.fields[2].enum_def.fields[1].name = tdrpStrDup("FFT_WINDOW_VONHANN");
-        tt->struct_def.fields[2].enum_def.fields[1].val = FFT_WINDOW_VONHANN;
-        tt->struct_def.fields[2].enum_def.fields[2].name = tdrpStrDup("FFT_WINDOW_BLACKMAN");
-        tt->struct_def.fields[2].enum_def.fields[2].val = FFT_WINDOW_BLACKMAN;
-        tt->struct_def.fields[2].enum_def.fields[3].name = tdrpStrDup("FFT_WINDOW_BLACKMAN_NUTTALL");
-        tt->struct_def.fields[2].enum_def.fields[3].val = FFT_WINDOW_BLACKMAN_NUTTALL;
-        tt->struct_def.fields[2].enum_def.fields[4].name = tdrpStrDup("FFT_WINDOW_TUKEY_10");
-        tt->struct_def.fields[2].enum_def.fields[4].val = FFT_WINDOW_TUKEY_10;
-        tt->struct_def.fields[2].enum_def.fields[5].name = tdrpStrDup("FFT_WINDOW_TUKEY_20");
-        tt->struct_def.fields[2].enum_def.fields[5].val = FFT_WINDOW_TUKEY_20;
-        tt->struct_def.fields[2].enum_def.fields[6].name = tdrpStrDup("FFT_WINDOW_TUKEY_30");
-        tt->struct_def.fields[2].enum_def.fields[6].val = FFT_WINDOW_TUKEY_30;
-        tt->struct_def.fields[2].enum_def.fields[7].name = tdrpStrDup("FFT_WINDOW_TUKEY_50");
-        tt->struct_def.fields[2].enum_def.fields[7].val = FFT_WINDOW_TUKEY_50;
+        tt->struct_def.fields[1].enum_def.name = tdrpStrDup("fft_window_t");
+        tt->struct_def.fields[1].enum_def.nfields = 8;
+        tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("FFT_WINDOW_RECT");
+        tt->struct_def.fields[1].enum_def.fields[0].val = FFT_WINDOW_RECT;
+        tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("FFT_WINDOW_VONHANN");
+        tt->struct_def.fields[1].enum_def.fields[1].val = FFT_WINDOW_VONHANN;
+        tt->struct_def.fields[1].enum_def.fields[2].name = tdrpStrDup("FFT_WINDOW_BLACKMAN");
+        tt->struct_def.fields[1].enum_def.fields[2].val = FFT_WINDOW_BLACKMAN;
+        tt->struct_def.fields[1].enum_def.fields[3].name = tdrpStrDup("FFT_WINDOW_BLACKMAN_NUTTALL");
+        tt->struct_def.fields[1].enum_def.fields[3].val = FFT_WINDOW_BLACKMAN_NUTTALL;
+        tt->struct_def.fields[1].enum_def.fields[4].name = tdrpStrDup("FFT_WINDOW_TUKEY_10");
+        tt->struct_def.fields[1].enum_def.fields[4].val = FFT_WINDOW_TUKEY_10;
+        tt->struct_def.fields[1].enum_def.fields[5].name = tdrpStrDup("FFT_WINDOW_TUKEY_20");
+        tt->struct_def.fields[1].enum_def.fields[5].val = FFT_WINDOW_TUKEY_20;
+        tt->struct_def.fields[1].enum_def.fields[6].name = tdrpStrDup("FFT_WINDOW_TUKEY_30");
+        tt->struct_def.fields[1].enum_def.fields[6].val = FFT_WINDOW_TUKEY_30;
+        tt->struct_def.fields[1].enum_def.fields[7].name = tdrpStrDup("FFT_WINDOW_TUKEY_50");
+        tt->struct_def.fields[1].enum_def.fields[7].val = FFT_WINDOW_TUKEY_50;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[2].fname = tdrpStrDup("median_filter_len");
+      tt->struct_def.fields[2].ptype = INT_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_waterfall_plots->median_filter_len - (char *) _waterfall_plots;
       tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[3].fname = tdrpStrDup("use_adaptive_filter");
       tt->struct_def.fields[3].ptype = BOOL_TYPE;
@@ -1612,15 +1621,15 @@
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = WATERFALL_HC;
-      tt->struct_vals[1].s = tdrpStrDup("dbm.colors");
-      tt->struct_vals[2].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[1].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[2].i = 3;
       tt->struct_vals[3].b = pTRUE;
       tt->struct_vals[4].d = 0.75;
       tt->struct_vals[5].b = pFALSE;
       tt->struct_vals[6].i = 3;
       tt->struct_vals[7].e = WATERFALL_ZDR;
-      tt->struct_vals[8].s = tdrpStrDup("zdr.colors");
-      tt->struct_vals[9].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[8].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[9].i = 3;
       tt->struct_vals[10].b = pTRUE;
       tt->struct_vals[11].d = 0.75;
       tt->struct_vals[12].b = pFALSE;
@@ -1649,6 +1658,54 @@
     tt->help = tdrpStrDup("The color scale sits to the right of the data.");
     tt->val_offset = (char *) &waterfall_color_scale_width - &_start_;
     tt->single_val.i = 30;
+    tt++;
+    
+    // Parameter 'color_scale_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("color_scale_dir");
+    tt->descr = tdrpStrDup("Directory for color scales");
+    tt->help = tdrpStrDup("You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.");
+    tt->val_offset = (char *) &color_scale_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("../share/color_scales");
+    tt++;
+    
+    // Parameter 'waterfall_dbm_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_dbm_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for dbm units");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_dbm_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbm_spectra.colors");
+    tt++;
+    
+    // Parameter 'waterfall_zdr_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_zdr_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for zdr units");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_zdr_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("zdr.colors");
+    tt++;
+    
+    // Parameter 'waterfall_phidp_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_phidp_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for phidp units");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_phidp_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("phidp.colors");
     tt++;
     
     // Parameter 'waterfall_title_font_size'
@@ -1927,11 +1984,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("IQ PLOTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2260,11 +2317,11 @@
     tt->single_val.i = 2;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("IQPLOT TITLES, LABELS AND AXES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2545,11 +2602,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("IQPLOT LEGENDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2650,11 +2707,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("CLUTTER FILTERING");
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
@@ -2779,11 +2836,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("SPECTRUM WIDTH METHOD");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2810,11 +2867,11 @@
     tt->single_val.e = WIDTH_METHOD_R0R1;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
@@ -3027,11 +3084,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("BEAM SAMPLING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3132,11 +3189,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("OVERRIDING RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
     tt++;
@@ -3273,11 +3330,11 @@
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("FFT WINDOWING");
     tt->comment_text = tdrpStrDup("Applies to the general case.");
     tt++;
@@ -3314,11 +3371,11 @@
     tt->single_val.e = FFT_WINDOW_VONHANN;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("RADAR CALIBRATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3347,11 +3404,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING from display (HawkEye or CIDD)");
     tt->comment_text = tdrpStrDup("Reading and writing the click point location to an FMQ in XML format.");
     tt++;

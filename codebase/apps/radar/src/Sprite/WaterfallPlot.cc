@@ -142,34 +142,36 @@ void WaterfallPlot::plotBeam(QPainter &painter,
     cerr << "  Max range: " << beam->getMaxRange() << endl;
   }
 
-  // draw the color scale
-  
-  if (_readColorMap() == 0) {
-    _zoomWorld.drawColorScale(_cmap, painter,
-                              _params.waterfall_color_scale_font_size);
+  int nGates = beam->getNGates();
+  if (_params.set_max_range) {
+    int nGatesMax =
+      (_params.max_range_km - beam->getStartRangeKm()) / beam->getGateSpacingKm();
+    if (nGatesMax < nGates) {
+      nGates = nGatesMax;
+    }
   }
-  
+
   // perform the relevant plot
 
   switch (_plotType) {
 
     case Params::WATERFALL_HC:
-      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      _plotHc(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
     case Params::WATERFALL_VC:
-      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      _plotHc(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
     case Params::WATERFALL_HX:
-      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      _plotHc(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
     case Params::WATERFALL_VX:
-      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      _plotHc(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
     case Params::WATERFALL_ZDR:
-      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      _plotHc(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
     case Params::WATERFALL_PHIDP:
-      _plotHc(painter, beam, nSamples, selectedRangeKm);
+      _plotHc(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
       
   }
@@ -196,15 +198,22 @@ void WaterfallPlot::plotBeam(QPainter &painter,
 void WaterfallPlot::_plotHc(QPainter &painter,
                             Beam *beam,
                             int nSamples,
+                            int nGates,
                             double selectedRangeKm)
   
 {
 
 
-  int nGates = beam->getNGates();
   double startRange = beam->getStartRangeKm();
   double gateSpacing = beam->getGateSpacingKm();
 
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_dbm_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+  
   painter.save();
 
   // loop through the gates
@@ -251,7 +260,7 @@ void WaterfallPlot::_plotHc(QPainter &painter,
 
     // apply 3-pt median filter
 
-    FilterUtils::applyMedianFilter(dbm, nSamples, 3);
+    FilterUtils::applyMedianFilter(dbm, nSamples, _medianFilterLen);
       
     // plot the samples
     
@@ -423,7 +432,7 @@ void WaterfallPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
 // read color map
 // returns 0 on success, -1 on failure
   
-int WaterfallPlot::_readColorMap()
+int WaterfallPlot::_readColorMap(string colorScaleName)
 {
   
   // check for color map location
@@ -446,10 +455,6 @@ int WaterfallPlot::_readColorMap()
       cerr << "  Color scale dir:: " << colorMapDir << endl;
     }
   }
-
-  // get color scale name
-
-  string colorScaleName = _params._waterfall_plots[_id].color_scale;
 
   // create color map
   

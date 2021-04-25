@@ -120,7 +120,8 @@ public:
   void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
 
   // set filtering
-  
+
+  void setMedianFilterLen(int val) { _medianFilterLen = val; }
   void setUseAdaptiveFilt(bool val) { _useAdaptiveFilt = val; }
   void setClutWidthMps(double val) { _clutWidthMps = val; }
   void setUseRegrFilt(bool val) { _useRegrFilt = val; }
@@ -168,6 +169,7 @@ public:
 
   // get the filter details
   
+  int getMedianFilterLen() const { return _medianFilterLen; }
   bool getUseAdaptiveFilt() const { return _useAdaptiveFilt; }
   double getClutWidthMps() const { return _clutWidthMps; }
   bool getUseRegrFilt() const { return _useRegrFilt; }
@@ -200,6 +202,7 @@ protected:
 
   // filtering
 
+  int _medianFilterLen;
   bool _useAdaptiveFilt;
   double _clutWidthMps;
   bool _useRegrFilt;
@@ -230,11 +233,42 @@ protected:
   void _plotHc(QPainter &painter,
                Beam *beam,
                int nSamples,
+               int nGates,
                double selectedRangeKm);
+  
+  void _plotVc(QPainter &painter,
+               Beam *beam,
+               int nSamples,
+               int nGates,
+               double selectedRangeKm);
+  
+  void _plotHx(QPainter &painter,
+               Beam *beam,
+               int nSamples,
+               int nGates,
+               double selectedRangeKm);
+  
+  void _plotVx(QPainter &painter,
+               Beam *beam,
+               int nSamples,
+               int nGates,
+               double selectedRangeKm);
+  
+  void _plotZdr(QPainter &painter,
+                Beam *beam,
+                int nSamples,
+                int nGates,
+                double selectedRangeKm);
+  
+  void _plotPhidp(QPainter &painter,
+                  Beam *beam,
+                  int nSamples,
+                  int nGates,
+                  double selectedRangeKm);
   
   void _drawOverlays(QPainter &painter, double selectedRangeKm);
 
-  int _readColorMap();
+  int _readColorMap(string colorScaleName);
 
   void _applyWindow(const RadarComplex_t *iq, 
                     RadarComplex_t *iqWindowed,

@@ -203,6 +203,21 @@ paramdef struct show_status_t {
 } show_status_in_gui;
 
 commentdef {
+  p_header = "SET MAX RANGE";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the max range to be used for plotting.";
+  p_help = "If FALSE, the max range of the data will be used. If TRUE, max_range_km will override the max range in the data.";
+} set_max_range;
+
+paramdef double {
+  p_default = 120.0;
+  p_descr = "Max range for the display (km).";
+} max_range_km;
+
+commentdef {
   p_header = "MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS";
 }
 
@@ -261,11 +276,6 @@ paramdef string {
   p_default = "yellow";
   p_descr = "Color for lines dividing up the main window into panels.";
 } main_window_panel_divider_color;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of color scale (pixels).";
-} main_color_scale_width;
 
 paramdef int {
   p_default = 11;
@@ -430,12 +440,6 @@ commentdef {
   p_text = "The waterfall plots show spectra plotted against range.";
 }
 
-paramdef string {
-  p_default = "../share/color_scales";
-  p_descr = "Directory for color scales";
-  p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
-} color_scale_dir;
-
 paramdef int {
   p_default = 1;
   p_descr = "Number of waterfall panels in spectra window (pixels).";
@@ -464,8 +468,8 @@ typedef enum {
 
 typedef struct {
   waterfall_type_t plot_type;
-  string color_scale;
   fft_window_t fft_window;
+  int median_filter_len;
   boolean use_adaptive_filter;
   double clutter_width_mps;
   boolean use_regression_filter;
@@ -474,8 +478,8 @@ typedef struct {
 
 paramdef struct waterfall_plot_t {
   p_default = {
-    { WATERFALL_HC, "dbm.colors", FFT_WINDOW_VONHANN, true, 0.75, false, 3 },
-    { WATERFALL_ZDR, "zdr.colors", FFT_WINDOW_VONHANN, true, 0.75, false, 3 }
+    { WATERFALL_HC, FFT_WINDOW_VONHANN, 3, true, 0.75, false, 3 },
+    { WATERFALL_ZDR, FFT_WINDOW_VONHANN, 3, true, 0.75, false, 3 }
   };
   p_descr = "Details of waterfall plots for each sub panel.";
   p_help = "WATERFALL_HC: H-Co power spectrum vs range.\nWATERFALL_VC: V-Co power spectrum vs range.\nWATERFALL_HX: H-cross power spectrum vs range.\nWATERFALL_VX: V-cross power spectrum vs range.\nWATERFALL_ZDR: zdr spectrum vs range.\nWATERFALL_PHIDP: phidp spectrum vs. range.";
@@ -492,6 +496,27 @@ paramdef int {
   p_descr = "Width of color scale in waterfall plots (pixels).";
   p_help = "The color scale sits to the right of the data.";
 } waterfall_color_scale_width;
+
+paramdef string {
+  p_default = "../share/color_scales";
+  p_descr = "Directory for color scales";
+  p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
+} color_scale_dir;
+
+paramdef string {
+  p_default = "dbm_spectra.colors";
+  p_descr = "Color scale name for dbm units";
+} waterfall_dbm_color_scale_name;
+
+paramdef string {
+  p_default = "zdr.colors";
+  p_descr = "Color scale name for zdr units";
+} waterfall_zdr_color_scale_name;
+
+paramdef string {
+  p_default = "phidp.colors";
+  p_descr = "Color scale name for phidp units";
+} waterfall_phidp_color_scale_name;
 
 paramdef int {
   p_default = 10;

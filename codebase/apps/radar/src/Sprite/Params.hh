@@ -187,8 +187,8 @@ public:
 
   typedef struct {
     waterfall_type_t plot_type;
-    char* color_scale;
     fft_window_t fft_window;
+    int median_filter_len;
     tdrp_bool_t use_adaptive_filter;
     double clutter_width_mps;
     tdrp_bool_t use_regression_filter;
@@ -535,6 +535,10 @@ public:
 
   show_status_t show_status_in_gui;
 
+  tdrp_bool_t set_max_range;
+
+  double max_range_km;
+
   int main_window_width;
 
   int main_window_height;
@@ -556,8 +560,6 @@ public:
   int main_window_panel_divider_line_width;
 
   char* main_window_panel_divider_color;
-
-  int main_color_scale_width;
 
   int click_cross_size;
 
@@ -612,8 +614,6 @@ public:
 
   tdrp_bool_t ascope_y_axis_labels_inside;
 
-  char* color_scale_dir;
-
   int waterfall_n_panels;
 
   waterfall_plot_t *_waterfall_plots;
@@ -622,6 +622,14 @@ public:
   int waterfall_width;
 
   int waterfall_color_scale_width;
+
+  char* color_scale_dir;
+
+  char* waterfall_dbm_color_scale_name;
+
+  char* waterfall_zdr_color_scale_name;
+
+  char* waterfall_phidp_color_scale_name;
 
   int waterfall_title_font_size;
 
@@ -861,7 +869,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[195];
+  mutable TDRPtable _table[200];
 
   const char *_className;
 

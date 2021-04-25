@@ -65,7 +65,6 @@ SpectraWidget::SpectraWidget(QWidget* parent,
   // init
 
   _pointClicked = false;
-  _colorScaleWidth = _params.main_color_scale_width;
 
   _titleMargin = _params.main_window_title_margin;
 
@@ -840,6 +839,9 @@ void SpectraWidget::setRange(double rangeKm)
   if (_beam != NULL) {
     _selectedRangeKm = rangeKm;
     double maxRange = _beam->getMaxRange();
+    if (_params.set_max_range) {
+      maxRange = _params.max_range_km;
+    }
     if (_selectedRangeKm < _beam->getStartRangeKm()) {
       _selectedRangeKm = _beam->getStartRangeKm();
     } else if (_selectedRangeKm > maxRange) {
@@ -1213,8 +1215,14 @@ void SpectraWidget::_configureAscope(int id)
   double minVal = AscopePlot::getMinVal(momentType);
   double maxVal = AscopePlot::getMaxVal(momentType);
   
-  _ascopes[id]->setWorldLimits(minVal, 0.0,
-                               maxVal, _beam->getMaxRange());
+  double maxRange = _beam->getMaxRange();
+  if (_params.set_max_range) {
+    maxRange = _params.max_range_km;
+  }
+  
+  _ascopes[id]->setWorldLimits(minVal, 0.0, maxVal, maxRange);
+  
+  update();
 
 }
 
@@ -1228,12 +1236,12 @@ void SpectraWidget::_createWaterfall(int id)
 
   WaterfallPlot *waterfall = new WaterfallPlot(this, _params, id);
   waterfall->setPlotType(_params._waterfall_plots[id].plot_type);
+  waterfall->setMedianFilterLen(_params._waterfall_plots[id].median_filter_len);
   waterfall->setFftWindow(_params._waterfall_plots[id].fft_window);
   waterfall->setUseAdaptiveFilt(_params._waterfall_plots[id].use_adaptive_filter);
   waterfall->setClutWidthMps(_params._waterfall_plots[id].clutter_width_mps);
   waterfall->setUseRegrFilt(_params._waterfall_plots[id].use_regression_filter);
   waterfall->setRegrOrder(_params._waterfall_plots[id].regression_order);
-
   
   WorldPlot &waterfallWorld = waterfall->getFullWorld();
   
@@ -1293,8 +1301,14 @@ void SpectraWidget::_configureWaterfall(int id)
     return;
   }
 
-  _waterfalls[id]->setWorldLimits(0.0, 0.0,
-                                  _beam->getNSamples(), _beam->getMaxRange());
+  double maxRange = _beam->getMaxRange();
+  if (_params.set_max_range) {
+    maxRange = _params.max_range_km;
+  }
+  
+  _waterfalls[id]->setWorldLimits(0.0, 0.0, _beam->getNSamples(), maxRange);
+
+  update();
 
 }
 
@@ -1383,6 +1397,8 @@ void SpectraWidget::_configureIqPlot(int id)
   }
 
   _iqPlots[id]->setWorldLimits(0.0, 0.0, _nSamplesPlot, 1.0);
+
+  update();
 
 }
 
@@ -1612,56 +1628,200 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
 
   QMenu contextMenu("WaterfallMenu", this);
 
-  // set the field selection menu
-
+  ///////////////////////////////////////
+  // select plot type sub-menu
+  
   int id = _contextMenuPanelId;
-  QAction setToHc("Set to HC", this);
-  connect(&setToHc, &QAction::triggered,
+  QMenu setPlotTypeMenu("Set Plot Type", &contextMenu);
+  contextMenu.addMenu(&setPlotTypeMenu);
+  
+  QAction plotHc("Plot HC", &contextMenu);
+  connect(&plotHc, &QAction::triggered,
           [this, id] () {
             _waterfalls[id]->setPlotType(Params::WATERFALL_HC);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToHc);
+  setPlotTypeMenu.addAction(&plotHc);
   
-  QAction setToVc("Set to VC", this);
-  connect(&setToVc, &QAction::triggered,
+  QAction plotVc("Plot VC", &contextMenu);
+  connect(&plotVc, &QAction::triggered,
           [this, id] () {
             _waterfalls[id]->setPlotType(Params::WATERFALL_VC);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToVc);
+  setPlotTypeMenu.addAction(&plotVc);
   
-  QAction setToHx("Set to HX", this);
-  connect(&setToHx, &QAction::triggered,
+  QAction plotHx("Plot HX", &contextMenu);
+  connect(&plotHx, &QAction::triggered,
           [this, id] () {
             _waterfalls[id]->setPlotType(Params::WATERFALL_HX);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToHx);
+  setPlotTypeMenu.addAction(&plotHx);
   
-  QAction setToVx("Set to VX", this);
-  connect(&setToVx, &QAction::triggered,
+  QAction plotVx("Plot VX", &contextMenu);
+  connect(&plotVx, &QAction::triggered,
           [this, id] () {
             _waterfalls[id]->setPlotType(Params::WATERFALL_VX);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToVx);
+  setPlotTypeMenu.addAction(&plotVx);
   
-  QAction setToZdr("Set to ZDR", this);
-  connect(&setToZdr, &QAction::triggered,
+  QAction plotZdr("Plot ZDR", &contextMenu);
+  connect(&plotZdr, &QAction::triggered,
           [this, id] () {
             _waterfalls[id]->setPlotType(Params::WATERFALL_ZDR);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToZdr);
+  setPlotTypeMenu.addAction(&plotZdr);
   
-  QAction setToPhidp("Set to PHIDP", this);
-  connect(&setToPhidp, &QAction::triggered,
+  QAction plotPhidp("Plot PHIDP", &contextMenu);
+  connect(&plotPhidp, &QAction::triggered,
           [this, id] () {
             _waterfalls[id]->setPlotType(Params::WATERFALL_PHIDP);
             _configureWaterfall(id);
           } );
-  contextMenu.addAction(&setToPhidp);
+  setPlotTypeMenu.addAction(&plotPhidp);
+  
+  ///////////////////////////////////////
+  // select FFT window menu
+  
+  QMenu setFftWindowMenu("Set FFT Window", &contextMenu);
+  contextMenu.addMenu(&setFftWindowMenu);
+  
+  QAction setFftWindowRect("Rectangular", &contextMenu);
+  connect(&setFftWindowRect, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_RECT);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowRect);
+
+  QAction setFftWindowVonHann("VonHann", &contextMenu);
+  connect(&setFftWindowVonHann, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_VONHANN);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowVonHann);
+
+  QAction setFftWindowBlackman("Blackman", &contextMenu);
+  connect(&setFftWindowBlackman, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_BLACKMAN);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowBlackman);
+
+  QAction setFftWindowBlackmanNuttall("BlackmanNuttall", &contextMenu);
+  connect(&setFftWindowBlackmanNuttall, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_BLACKMAN_NUTTALL);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowBlackmanNuttall);
+
+  QAction setFftWindowTukey10("Tukey10", &contextMenu);
+  connect(&setFftWindowTukey10, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_10);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey10);
+
+  QAction setFftWindowTukey20("Tukey20", &contextMenu);
+  connect(&setFftWindowTukey20, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_20);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey20);
+
+  QAction setFftWindowTukey30("Tukey30", &contextMenu);
+  connect(&setFftWindowTukey30, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_30);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey30);
+
+  QAction setFftWindowTukey50("Tukey50", &contextMenu);
+  connect(&setFftWindowTukey50, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_50);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey50);
+
+  ///////////////////////////////////////
+  // filtering details menu
+  
+  QMenu setFilteringMenu("Set Filtering", &contextMenu);
+  contextMenu.addMenu(&setFilteringMenu);
+  
+  QAction setMedianFilterLen("Set median filter len", &contextMenu);
+  connect(&setMedianFilterLen, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            int len = QInputDialog::getInt
+              (this,
+               tr("QInputDialog::getInt()"), tr("Set median filter len:"),
+               _waterfalls[id]->getMedianFilterLen(),
+               1, 100, 1, &ok);
+            _waterfalls[id]->setMedianFilterLen(len);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&setMedianFilterLen);
+  
+  QAction useAdaptiveFilter("Use adaptive filter", &contextMenu);
+  useAdaptiveFilter.setCheckable(true);
+  useAdaptiveFilter.setChecked
+    (_waterfalls[id]->getUseAdaptiveFilt());
+  connect(&useAdaptiveFilter, &QAction::triggered,
+          [this, id] (bool state) {
+            _waterfalls[id]->setUseAdaptiveFilt(state);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&useAdaptiveFilter);
+
+  QAction setClutterWidth("Set clutter width", &contextMenu);
+  connect(&setClutterWidth, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            double width = QInputDialog::getDouble
+              (this,
+               tr("QInputDialog::getDouble()"), tr("Set clutter width (mps):"),
+               _waterfalls[id]->getClutWidthMps(), 0.05, 5.0, 2,
+               &ok, Qt::WindowFlags());
+            _waterfalls[id]->setClutWidthMps(width);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&setClutterWidth);
+
+  QAction useRegressionFilter("Use regression filter", &contextMenu);
+  useRegressionFilter.setCheckable(true);
+  useRegressionFilter.setChecked
+    (_waterfalls[id]->getUseRegrFilt());
+  connect(&useRegressionFilter, &QAction::triggered,
+          [this, id] (bool state) {
+            _waterfalls[id]->setUseRegrFilt(state);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&useRegressionFilter);
+
+  QAction setRegressionOrder("Set regression order", &contextMenu);
+  connect(&setRegressionOrder, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            int order = QInputDialog::getInt
+              (this,
+               tr("QInputDialog::getInt()"), tr("Set regression order:"),
+               _waterfalls[id]->getRegrOrder(),
+               1, 100, 1, &ok);
+            _waterfalls[id]->setRegrOrder(order);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&setRegressionOrder);
   
   // unzoom action
 
@@ -1711,6 +1871,8 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
   } else {
     contextMenu.addAction(&yGridLinesOn);
   }
+  
+  // show the context menu
   
   contextMenu.exec(this->mapToGlobal(pos));
   
