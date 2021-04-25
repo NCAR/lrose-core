@@ -40,6 +40,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
 #include <toolsa/pjg.h>
+#include <radar/FilterUtils.hh>
 
 #include <QTimer>
 #include <QBrush>
@@ -235,22 +236,31 @@ void WaterfallPlot::_plotHc(QPainter &painter,
     fft.fwd(iqWindowed, powerSpec);
     fft.shift(powerSpec);
 
-    // loop through the samples
+    // compute dbm
+    
+    TaArray<double> dbm_;
+    double *dbm = dbm_.alloc(nSamples);
+
+    for (int ii = 0; ii < nSamples; ii++) {
+      double power = RadarComplex::power(powerSpec[ii]);
+      dbm[ii] = 10.0 * log10(power);
+      if (power <= 1.0e-12) {
+        dbm[ii] = -120.0;
+      }
+    }
+
+    // apply 3-pt median filter
+
+    FilterUtils::applyMedianFilter(dbm, nSamples, 3);
+      
+    // plot the samples
     
     for (int ii = 0; ii < nSamples; ii++) {
-
-      // compute power
-
-      double power = RadarComplex::power(powerSpec[ii]);
-      double dbm = 10.0 * log10(power);
-      if (power <= 1.0e-12) {
-        dbm = -120.0;
-      }
       
       // get color
 
       int red, green, blue;
-      _cmap.dataColor(dbm, red, green, blue);
+      _cmap.dataColor(dbm[ii], red, green, blue);
       QColor color(red, green, blue);
       QBrush brush(color);
       

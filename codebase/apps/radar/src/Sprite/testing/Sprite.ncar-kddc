@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Sprite
+ * TDRP params for Sprite
  **********************************************************************/
 
 //======================================================================
@@ -469,6 +469,671 @@ click_cross_size = 11;
 
 //======================================================================
 //
+// ASCOPE DISPLAY PANEL.
+//
+// The ascope panel shows the power plotted against range. It can be 
+//   configured for both the spectra plot and the waterfall plot.
+//
+//======================================================================
+ 
+///////////// ascope_n_panels /////////////////////////
+//
+// Number of ascope panels in spectra window (pixels).
+//
+// The ascopes will be on the left of the plot. Set to 0 for no ASCOPE 
+//   panel.
+//
+//
+// Type: int
+//
+
+ascope_n_panels = 2;
+
+///////////// ascope_moments //////////////////////////
+//
+// Moments to be displaed on ascope panels.
+//
+// The number of specified moments must match the number of ascope 
+//   panels.
+//
+//
+// Type: enum
+// Options:
+//     DBZ
+//     VEL
+//     WIDTH
+//     NCP
+//     SNR
+//     DBM
+//     ZDR
+//     LDR
+//     RHOHV
+//     PHIDP
+//     KDP
+// 1D array - variable length.
+//
+
+ascope_moments = {
+ DBZ,
+ VEL
+};
+
+///////////// ascope_width ////////////////////////////
+//
+// Width of ASCOPE panel in spectra window (pixels).
+//
+// The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE 
+//   panel.
+//
+//
+// Type: int
+//
+
+ascope_width = 150;
+
+///////////// ascope_title_font_size //////////////////
+//
+// Font size of center title (pixels).
+//
+//
+// Type: int
+//
+
+ascope_title_font_size = 10;
+
+///////////// ascope_axis_label_font_size /////////////
+//
+// Font size of axis labels in ascope (pixels).
+//
+//
+// Type: int
+//
+
+ascope_axis_label_font_size = 8;
+
+///////////// ascope_tick_values_font_size ////////////
+//
+// Font size of axis tick values (pixels).
+//
+//
+// Type: int
+//
+
+ascope_tick_values_font_size = 6;
+
+///////////// ascope_legend_font_size /////////////////
+//
+// Font size for plot legends (pixels).
+//
+//
+// Type: int
+//
+
+ascope_legend_font_size = 6;
+
+///////////// ascope_title_text_margin ////////////////
+//
+// Margin around title text (pixels).
+//
+//
+// Type: int
+//
+
+ascope_title_text_margin = 3;
+
+///////////// ascope_legend_text_margin ///////////////
+//
+// Margin around legend text (pixels).
+//
+//
+// Type: int
+//
+
+ascope_legend_text_margin = 3;
+
+///////////// ascope_axis_text_margin /////////////////
+//
+// Margin around axis text (pixels).
+//
+//
+// Type: int
+//
+
+ascope_axis_text_margin = 2;
+
+///////////// ascope_axis_tick_len ////////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+ascope_axis_tick_len = 4;
+
+///////////// ascope_n_ticks_ideal ////////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+ascope_n_ticks_ideal = 5;
+
+///////////// ascope_left_margin //////////////////////
+//
+// Width of left margin for ascope plot (pixels).
+//
+// The Y axis labels are plotted here.
+//
+//
+// Type: int
+//
+
+ascope_left_margin = 18;
+
+///////////// ascope_bottom_margin ////////////////////
+//
+// Height of bottom margin for ascope plot (pixels).
+//
+// The X axis labels are plotted here.
+//
+//
+// Type: int
+//
+
+ascope_bottom_margin = 18;
+
+///////////// ascope_x_grid_lines_on //////////////////
+//
+// Option to draw grid lines in the X direction.
+//
+//
+// Type: boolean
+//
+
+ascope_x_grid_lines_on = TRUE;
+
+///////////// ascope_y_grid_lines_on //////////////////
+//
+// Option to draw grid lines in the Y direction.
+//
+//
+// Type: boolean
+//
+
+ascope_y_grid_lines_on = TRUE;
+
+///////////// ascope_axis_label_color /////////////////
+//
+// Color of ascope axis labels.
+//
+//
+// Type: string
+//
+
+ascope_axis_label_color = "white";
+
+///////////// ascope_axes_color ///////////////////////
+//
+// Color of axes in ascope.
+//
+//
+// Type: string
+//
+
+ascope_axes_color = "green";
+
+///////////// ascope_grid_color ///////////////////////
+//
+// Color of grid lines on ascope.
+//
+//
+// Type: string
+//
+
+ascope_grid_color = "gray";
+
+///////////// ascope_line_color ///////////////////////
+//
+// Color of ascope line.
+//
+//
+// Type: string
+//
+
+ascope_line_color = "lightgray";
+
+///////////// ascope_selected_range_color /////////////
+//
+// Color of line showing currently selected range.
+//
+// The user can double click in the ascope to move this line.
+//
+//
+// Type: string
+//
+
+ascope_selected_range_color = "cyan";
+
+///////////// ascope_fill_color ///////////////////////
+//
+// Color of ascope fill.
+//
+//
+// Type: string
+//
+
+ascope_fill_color = "darkgreen";
+
+///////////// ascope_title_color //////////////////////
+//
+// Color of ascope title.
+//
+//
+// Type: string
+//
+
+ascope_title_color = "yellow";
+
+///////////// ascope_x_axis_labels_inside /////////////
+//
+// Location of tick labels, relative to x axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+ascope_x_axis_labels_inside = FALSE;
+
+///////////// ascope_y_axis_labels_inside /////////////
+//
+// Location of tick labels, relative to y axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+ascope_y_axis_labels_inside = FALSE;
+
+//======================================================================
+//
+// WATERFALL DISPLAY PANEL.
+//
+// The waterfall plots show spectra plotted against range.
+//
+//======================================================================
+ 
+///////////// color_scale_dir /////////////////////////
+//
+// Directory for color scales.
+//
+// You can set this in 2 ways:
+//
+// (a) Set to the absolute path
+//
+// (b)Set as a path relative to the location of the application binary 
+//   executable.
+//
+//
+// Type: string
+//
+
+color_scale_dir = "../share/color_scales";
+
+///////////// waterfall_n_panels //////////////////////
+//
+// Number of waterfall panels in spectra window (pixels).
+//
+// The waterfalls will be on the left of the plot. Set to 0 for no 
+//   WATERFALL panel.
+//
+//
+// Type: int
+//
+
+waterfall_n_panels = 1;
+
+///////////// waterfall_plots /////////////////////////
+//
+// Details of waterfall plots for each sub panel.
+//
+// WATERFALL_HC: H-Co power spectrum vs range.
+// WATERFALL_VC: V-Co power spectrum vs range.
+// WATERFALL_HX: H-cross power spectrum vs range.
+// WATERFALL_VX: V-cross power spectrum vs range.
+// WATERFALL_ZDR: zdr spectrum vs range.
+// WATERFALL_PHIDP: phidp spectrum vs. range.
+//
+//
+// Type: struct
+//   typedef struct {
+//      waterfall_type_t plot_type;
+//        Options:
+//          WATERFALL_HC
+//          WATERFALL_VC
+//          WATERFALL_HX
+//          WATERFALL_VX
+//          WATERFALL_ZDR
+//          WATERFALL_PHIDP
+//      string color_scale;
+//      fft_window_t fft_window;
+//        Options:
+//          FFT_WINDOW_RECT
+//          FFT_WINDOW_VONHANN
+//          FFT_WINDOW_BLACKMAN
+//          FFT_WINDOW_BLACKMAN_NUTTALL
+//          FFT_WINDOW_TUKEY_10
+//          FFT_WINDOW_TUKEY_20
+//          FFT_WINDOW_TUKEY_30
+//          FFT_WINDOW_TUKEY_50
+//      boolean use_adaptive_filter;
+//      double clutter_width_mps;
+//      boolean use_regression_filter;
+//      int regression_order;
+//   }
+//
+// 1D array - variable length.
+//
+
+waterfall_plots = {
+  {
+    plot_type = WATERFALL_HC,
+    color_scale = "dbm_spectra.colors",
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3
+  }
+  ,
+  {
+    plot_type = WATERFALL_ZDR,
+    color_scale = "zdr.colors",
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3
+  }
+};
+
+///////////// waterfall_width /////////////////////////
+//
+// Width of WATERFALL panel in spectra window (pixels).
+//
+// The WATERFALL will be on the left of the plot. Set to 0 for no 
+//   WATERFALL panel.
+//
+//
+// Type: int
+//
+
+waterfall_width = 200;
+
+///////////// waterfall_color_scale_width /////////////
+//
+// Width of color scale in waterfall plots (pixels).
+//
+// The color scale sits to the right of the data.
+//
+//
+// Type: int
+//
+
+waterfall_color_scale_width = 30;
+
+///////////// waterfall_title_font_size ///////////////
+//
+// Font size of center title (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_title_font_size = 10;
+
+///////////// waterfall_axis_label_font_size //////////
+//
+// Font size of axis labels in waterfall (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_axis_label_font_size = 8;
+
+///////////// waterfall_tick_values_font_size /////////
+//
+// Font size of axis tick values (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_tick_values_font_size = 6;
+
+///////////// waterfall_legend_font_size //////////////
+//
+// Font size for plot legends (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_legend_font_size = 6;
+
+///////////// waterfall_color_scale_font_size /////////
+//
+// Font size for labels in color scales (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_color_scale_font_size = 6;
+
+///////////// waterfall_title_text_margin /////////////
+//
+// Margin around title text (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_title_text_margin = 3;
+
+///////////// waterfall_legend_text_margin ////////////
+//
+// Margin around legend text (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_legend_text_margin = 3;
+
+///////////// waterfall_axis_text_margin //////////////
+//
+// Margin around axis text (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_axis_text_margin = 2;
+
+///////////// waterfall_axis_tick_len /////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_axis_tick_len = 4;
+
+///////////// waterfall_n_ticks_ideal /////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+waterfall_n_ticks_ideal = 5;
+
+///////////// waterfall_left_margin ///////////////////
+//
+// Width of left margin for waterfall plot (pixels).
+//
+// The Y axis labels are plotted here.
+//
+//
+// Type: int
+//
+
+waterfall_left_margin = 18;
+
+///////////// waterfall_bottom_margin /////////////////
+//
+// Height of bottom margin for waterfall plot (pixels).
+//
+// The X axis labels are plotted here.
+//
+//
+// Type: int
+//
+
+waterfall_bottom_margin = 18;
+
+///////////// waterfall_x_grid_lines_on ///////////////
+//
+// Option to draw grid lines in the X direction.
+//
+//
+// Type: boolean
+//
+
+waterfall_x_grid_lines_on = TRUE;
+
+///////////// waterfall_y_grid_lines_on ///////////////
+//
+// Option to draw grid lines in the Y direction.
+//
+//
+// Type: boolean
+//
+
+waterfall_y_grid_lines_on = TRUE;
+
+///////////// waterfall_axis_label_color //////////////
+//
+// Color of waterfall axis labels.
+//
+//
+// Type: string
+//
+
+waterfall_axis_label_color = "white";
+
+///////////// waterfall_axes_color ////////////////////
+//
+// Color of axes in waterfall.
+//
+//
+// Type: string
+//
+
+waterfall_axes_color = "green";
+
+///////////// waterfall_grid_color ////////////////////
+//
+// Color of grid lines on waterfall.
+//
+//
+// Type: string
+//
+
+waterfall_grid_color = "gray";
+
+///////////// waterfall_line_color ////////////////////
+//
+// Color of waterfall line.
+//
+//
+// Type: string
+//
+
+waterfall_line_color = "lightgray";
+
+///////////// waterfall_selected_range_color //////////
+//
+// Color of line showing currently selected range.
+//
+// The user can double click in the waterfall to move this line.
+//
+//
+// Type: string
+//
+
+waterfall_selected_range_color = "cyan";
+
+///////////// waterfall_fill_color ////////////////////
+//
+// Color of waterfall fill.
+//
+//
+// Type: string
+//
+
+waterfall_fill_color = "darkgreen";
+
+///////////// waterfall_title_color ///////////////////
+//
+// Color of waterfall title.
+//
+//
+// Type: string
+//
+
+waterfall_title_color = "yellow";
+
+///////////// waterfall_x_axis_labels_inside //////////
+//
+// Location of tick labels, relative to x axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+waterfall_x_axis_labels_inside = FALSE;
+
+///////////// waterfall_y_axis_labels_inside //////////
+//
+// Location of tick labels, relative to y axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+waterfall_y_axis_labels_inside = FALSE;
+
+//======================================================================
+//
 // IQ PLOTS.
 //
 //======================================================================
@@ -499,7 +1164,7 @@ iqplots_n_rows = 2;
 
 iqplots_n_columns = 4;
 
-///////////// iqplots /////////////////////////////////
+///////////// iq_plots ////////////////////////////////
 //
 // Details of IQ plots for each sub panel.
 //
@@ -515,7 +1180,7 @@ iqplots_n_columns = 4;
 //
 // Type: struct
 //   typedef struct {
-//      iqplot_type_t plot_type;
+//      iq_plot_type_t plot_type;
 //        Options:
 //          SPECTRUM_POWER
 //          SPECTRUM_PHASE
@@ -601,30 +1266,6 @@ iq_plots = {
     regression_filter_interp_across_notch = TRUE
   }
   ,
-  // {
-  //   plot_type = SPECTRUM_PHASE,
-  //   rx_channel = CHANNEL_HC,
-  //   fft_window = FFT_WINDOW_VONHANN,
-  //   use_adaptive_filter = TRUE,
-  //   plot_clutter_model = FALSE,
-  //   clutter_width_mps = 0.75,
-  //   use_regression_filter = FALSE,
-  //   regression_order = 3,
-  //   regression_filter_interp_across_notch = TRUE
-  // }
-  // ,
-  // {
-  //   plot_type = TS_POWER,
-  //   rx_channel = CHANNEL_HC,
-  //   fft_window = FFT_WINDOW_VONHANN,
-  //   use_adaptive_filter = TRUE,
-  //   plot_clutter_model = FALSE,
-  //   clutter_width_mps = 0.75,
-  //   use_regression_filter = FALSE,
-  //   regression_order = 3,
-  //   regression_filter_interp_across_notch = TRUE
-  // }
-  // ,
   {
     plot_type = I_VALS,
     rx_channel = CHANNEL_HC,
@@ -1099,302 +1740,6 @@ iqplot_plot_legend2 = TRUE;
 
 //======================================================================
 //
-// ASCOPE DISPLAY PANEL.
-//
-// The ascope panel shows the power plotted against range. It can be 
-//   configured for both the spectra plot and the waterfall plot.
-//
-//======================================================================
- 
-///////////// ascope_n_panels_in_spectra_window ///////
-//
-// Number of ascope panels in spectra window (pixels).
-//
-// The ascopes will be on the left of the plot. Set to 0 for no ASCOPE 
-//   panel.
-//
-//
-// Type: int
-//
-
-ascope_n_panels = 2;
-
-///////////// ascope_moments //////////////////////////
-//
-// Moments to be displaed on ascope panels.
-//
-// The number of specified moments must match the number of ascope 
-//   panels.
-//
-//
-// Type: enum
-// Options:
-//     DBZ
-//     VEL
-//     WIDTH
-//     NCP
-//     SNR
-//     DBM
-//     ZDR
-//     LDR
-//     RHOHV
-//     PHIDP
-//     KDP
-// 1D array - variable length.
-//
-
-ascope_moments = {
- DBZ,
- VEL
-};
-
-///////////// ascope_width_in_spectra_window //////////
-//
-// Width of ASCOPE panel in spectra window (pixels).
-//
-// The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE 
-//   panel.
-//
-//
-// Type: int
-//
-
-ascope_width = 150;
-
-///////////// ascope_title_font_size //////////////////
-//
-// Font size of center title (pixels).
-//
-//
-// Type: int
-//
-
-ascope_title_font_size = 10;
-
-///////////// ascope_axis_label_font_size /////////////
-//
-// Font size of axis labels in ascope (pixels).
-//
-//
-// Type: int
-//
-
-ascope_axis_label_font_size = 8;
-
-///////////// ascope_tick_values_font_size ////////////
-//
-// Font size of axis tick values (pixels).
-//
-//
-// Type: int
-//
-
-ascope_tick_values_font_size = 6;
-
-///////////// ascope_legend_font_size /////////////////
-//
-// Font size for plot legends (pixels).
-//
-//
-// Type: int
-//
-
-ascope_legend_font_size = 6;
-
-///////////// ascope_title_text_margin ////////////////
-//
-// Margin around title text (pixels).
-//
-//
-// Type: int
-//
-
-ascope_title_text_margin = 3;
-
-///////////// ascope_legend_text_margin ///////////////
-//
-// Margin around legend text (pixels).
-//
-//
-// Type: int
-//
-
-ascope_legend_text_margin = 3;
-
-///////////// ascope_axis_text_margin /////////////////
-//
-// Margin around axis text (pixels).
-//
-//
-// Type: int
-//
-
-ascope_axis_text_margin = 2;
-
-///////////// ascope_axis_tick_len ////////////////////
-//
-// Length of ticks on axes (pixels).
-//
-//
-// Type: int
-//
-
-ascope_axis_tick_len = 4;
-
-///////////// ascope_n_ticks_ideal ////////////////////
-//
-// Ideal number of ticks on axes.
-//
-//
-// Type: int
-//
-
-ascope_n_ticks_ideal = 5;
-
-///////////// ascope_left_margin //////////////////////
-//
-// Width of left margin for ascope plot (pixels).
-//
-// The Y axis labels are plotted here.
-//
-//
-// Type: int
-//
-
-ascope_left_margin = 18;
-
-///////////// ascope_bottom_margin ////////////////////
-//
-// Height of bottom margin for ascope plot (pixels).
-//
-// The X axis labels are plotted here.
-//
-//
-// Type: int
-//
-
-ascope_bottom_margin = 18;
-
-///////////// ascope_x_grid_lines_on //////////////////
-//
-// Option to draw grid lines in the X direction.
-//
-//
-// Type: boolean
-//
-
-ascope_x_grid_lines_on = TRUE;
-
-///////////// ascope_y_grid_lines_on //////////////////
-//
-// Option to draw grid lines in the Y direction.
-//
-//
-// Type: boolean
-//
-
-ascope_y_grid_lines_on = TRUE;
-
-///////////// ascope_axis_label_color /////////////////
-//
-// Color of ascope axis labels.
-//
-//
-// Type: string
-//
-
-ascope_axis_label_color = "white";
-
-///////////// ascope_axes_color ///////////////////////
-//
-// Color of axes in ascope.
-//
-//
-// Type: string
-//
-
-ascope_axes_color = "green";
-
-///////////// ascope_grid_color ///////////////////////
-//
-// Color of grid lines on ascope.
-//
-//
-// Type: string
-//
-
-ascope_grid_color = "gray";
-
-///////////// ascope_line_color ///////////////////////
-//
-// Color of ascope line.
-//
-//
-// Type: string
-//
-
-ascope_line_color = "lightgray";
-
-///////////// ascope_selected_range_color /////////////
-//
-// Color of line showing currently selected range.
-//
-// The user can double click in the ascope to move this line.
-//
-//
-// Type: string
-//
-
-ascope_selected_range_color = "cyan";
-
-///////////// ascope_fill_color ///////////////////////
-//
-// Color of ascope fill.
-//
-//
-// Type: string
-//
-
-ascope_fill_color = "darkgreen";
-
-///////////// ascope_title_color //////////////////////
-//
-// Color of ascope title.
-//
-//
-// Type: string
-//
-
-ascope_title_color = "yellow";
-
-///////////// ascope_x_axis_labels_inside /////////////
-//
-// Location of tick labels, relative to x axis.
-//
-// These can either be outside the axes, or inside - i.e. within the 
-//   data area of the plot.
-//
-//
-// Type: boolean
-//
-
-ascope_x_axis_labels_inside = FALSE;
-
-///////////// ascope_y_axis_labels_inside /////////////
-//
-// Location of tick labels, relative to y axis.
-//
-// These can either be outside the axes, or inside - i.e. within the 
-//   data area of the plot.
-//
-//
-// Type: boolean
-//
-
-ascope_y_axis_labels_inside = FALSE;
-
-//======================================================================
-//
 // CLUTTER FILTERING.
 //
 // The default clutter filtering method is the Adaptive Filter, with 
@@ -1807,7 +2152,7 @@ KDP_debug = FALSE;
 // Type: int
 //
 
-n_samples = 64;
+n_samples = 128;
 
 ///////////// indexed_beams ///////////////////////////
 //
