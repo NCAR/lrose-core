@@ -169,7 +169,7 @@ input_tcp_port = 11000;
 // Type: string
 //
 
-archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/kddc";
+archive_data_dir = "$(HOME)/data/sprite/time_series/kddc";
 
 ///////////// archive_start_time //////////////////////
 //
@@ -786,7 +786,7 @@ ascope_y_axis_labels_inside = FALSE;
 // Type: string
 //
 
-color_scale_dir = "../share/color_scales";
+color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 
 ///////////// waterfall_n_panels //////////////////////
 //
