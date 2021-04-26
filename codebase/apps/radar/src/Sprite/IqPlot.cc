@@ -180,25 +180,22 @@ void IqPlot::plotBeam(QPainter &painter,
   // perform the relevant plot
 
   switch (_plotType) {
-    case Params::I_VALS: {
-      TaArray<double> iVals_;
-      double *iVals = iVals_.alloc(nSamples);
-      for (int ii = 0; ii < nSamples; ii++) {
-        iVals[ii] = iq[ii].re;
+    case Params::I_VALS:
+    case Params::Q_VALS: 
+      {
+        TaArray<double> iVals_;
+        double *iVals = iVals_.alloc(nSamples);
+        for (int ii = 0; ii < nSamples; ii++) {
+          iVals[ii] = iq[ii].re;
+        }
+        TaArray<double> qVals_;
+        double *qVals = qVals_.alloc(nSamples);
+        for (int ii = 0; ii < nSamples; ii++) {
+          qVals[ii] = iq[ii].im;
+        }
+        _plotIQVals(painter, beam, nSamples, selectedRangeKm,
+                    gateNum, iVals, qVals);
       }
-      _plotIQVals(painter, beam, nSamples, selectedRangeKm,
-                  gateNum, iVals);
-    }
-      break;
-    case Params::Q_VALS: {
-      TaArray<double> qVals_;
-      double *qVals = qVals_.alloc(nSamples);
-      for (int ii = 0; ii < nSamples; ii++) {
-        qVals[ii] = iq[ii].im;
-      }
-      _plotIQVals(painter, beam, nSamples, selectedRangeKm,
-                  gateNum, qVals);
-    }
       break;
     case Params::I_VS_Q:
       _plotIvsQ(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
@@ -973,7 +970,8 @@ void IqPlot::_plotIQVals(QPainter &painter,
                          int nSamples,
                          double selectedRangeKm,
                          int gateNum,
-                         const double *vals)
+                         const double *iVals,
+                         const double *qVals)
   
 {
 
@@ -987,53 +985,64 @@ void IqPlot::_plotIQVals(QPainter &painter,
   forsythe.prepareForFit(_regrOrder, xVals);
   
   // compute polynomial regression fit
-
-  vector<double> raw;
-  for (int ii = 0; ii < nSamples; ii++) {
-    raw.push_back(vals[ii]);
-  }
-  forsythe.performFit(raw);
-  vector<double> smoothed = forsythe.getYEstVector();
-  vector<double> residual;
-  for (int ii = 0; ii < nSamples; ii++) {
-    residual.push_back(raw[ii] - smoothed[ii]);
-  }
-
-  // compute RRR
   
-  double sumAbsVal = 0.0;
-  double sumAbsResid = 0.0;
+  vector<double> iRaw;
   for (int ii = 0; ii < nSamples; ii++) {
-    sumAbsVal += fabs(vals[ii]);
-    sumAbsResid += fabs(residual[ii]);
+    iRaw.push_back(iVals[ii]);
   }
-  double RRR = sumAbsVal / sumAbsResid;
-  
+  forsythe.performFit(iRaw);
+  vector<double> iSmooth = forsythe.getYEstVector();
+  vector<double> iResid;
+  for (int ii = 0; ii < nSamples; ii++) {
+    iResid.push_back(iRaw[ii] - iSmooth[ii]);
+  }
+
+  vector<double> qRaw;
+  for (int ii = 0; ii < nSamples; ii++) {
+    qRaw.push_back(qVals[ii]);
+  }
+  forsythe.performFit(qRaw);
+  vector<double> qSmooth = forsythe.getYEstVector();
+  vector<double> qResid;
+  for (int ii = 0; ii < nSamples; ii++) {
+    qResid.push_back(qRaw[ii] - qSmooth[ii]);
+  }
+
   // compute CSR
-  
-  // double sumPowerTotal = 0.0;
-  // double sumPowerResid = 0.0;
-  // for (int ii = 0; ii < nSamples; ii++) {
-  //   sumPowerTotal += vals[ii] * vals[ii];
-  //   sumPowerResid += residual[ii] * residual[ii];
-  // }
-  // double clutterPower = sumPowerTotal - sumPowerResid;
-  // double CSR = 0.0;
-  // if (clutterPower > 0) {
-  //   CSR = 10.0 * log10(clutterPower / sumPowerResid) * 10.0;
-  // }
-  
+
+  double sumPowerUnfilt = 0.0;
+  double sumPowerFilt = 0.0;
+  for (int ii = 0; ii < nSamples; ii++) {
+    sumPowerUnfilt += iVals[ii] * iVals[ii] + qVals[ii] * qVals[ii];
+    sumPowerFilt += iResid[ii] * iResid[ii] + qResid[ii] * qResid[ii];
+  }
+  double meanPowerUnfilt = sumPowerUnfilt / nSamples;
+  double meanPowerFilt = sumPowerFilt / nSamples;
+  double dbmUnfilt = 10.0 * log10(meanPowerUnfilt);
+  double dbmFilt = 10.0 * log10(meanPowerFilt);
+  double clutPower = meanPowerUnfilt - meanPowerFilt;
+  double csrDb = 0.0;
+  if (clutPower > 0) {
+    csrDb = 10.0 * log10(clutPower / meanPowerFilt);
+  }
+
   // compute min and max vals for plot
   
   double minVal = 9999.0;
   double maxVal = -9999.0;
   for (int ii = 0; ii < nSamples; ii++) {
-    minVal = min(vals[ii], minVal);
-    minVal = min(smoothed[ii], minVal);
-    minVal = min(residual[ii], minVal);
-    maxVal = max(vals[ii], maxVal);
-    maxVal = max(smoothed[ii], maxVal);
-    maxVal = max(residual[ii], maxVal);
+    minVal = min(iVals[ii], minVal);
+    minVal = min(iSmooth[ii], minVal);
+    minVal = min(iResid[ii], minVal);
+    maxVal = max(iVals[ii], maxVal);
+    maxVal = max(iSmooth[ii], maxVal);
+    maxVal = max(iResid[ii], maxVal);
+    minVal = min(qVals[ii], minVal);
+    minVal = min(qSmooth[ii], minVal);
+    minVal = min(qResid[ii], minVal);
+    maxVal = max(qVals[ii], maxVal);
+    maxVal = max(qSmooth[ii], maxVal);
+    maxVal = max(qResid[ii], maxVal);
   }
   
   // set the Y axis range
@@ -1047,8 +1056,17 @@ void IqPlot::_plotIQVals(QPainter &painter,
 
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the I data
+  // draw the data
 
+  const double *vals = iVals;
+  double *resid = iResid.data();
+  double *smooth = iSmooth.data();
+  if (_plotType == Params::Q_VALS) {
+    vals = qVals;
+    resid = qResid.data();
+    smooth = qSmooth.data();
+  }
+  
   painter.save();
   QPen pen(painter.pen());
   pen.setColor(_params.iqplot_line_color);
@@ -1077,7 +1095,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     painter.setPen(pen);
     QVector<QPointF> pts;
     for (int ii = 0; ii < nSamples; ii++) {
-      QPointF pt(ii, smoothed[ii]);
+      QPointF pt(ii, smooth[ii]);
       pts.push_back(pt);
     }
     _zoomWorld.drawLines(painter, pts);
@@ -1092,7 +1110,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     painter.setPen(pen);
     pts.clear();
     for (int ii = 0; ii < nSamples; ii++) {
-      QPointF pt(ii, residual[ii]);
+      QPointF pt(ii, resid[ii]);
       pts.push_back(pt);
     }
     _zoomWorld.drawLines(painter, pts);
@@ -1104,7 +1122,11 @@ void IqPlot::_plotIQVals(QPainter &painter,
     vector<string> legends;
     snprintf(text, 1024, "Regr-order: %d", _regrOrder);
     legends.push_back(text);
-    snprintf(text, 1024, "RRR: %g", RRR);
+    snprintf(text, 1024, "PwrUnfilt(dBm): %.2f", dbmUnfilt);
+    legends.push_back(text);
+    snprintf(text, 1024, "PwrFilt(dBm): %.2f", dbmFilt);
+    legends.push_back(text);
+    snprintf(text, 1024, "CSR(dB): %.2f", csrDb);
     legends.push_back(text);
     _zoomWorld.drawLegendsTopLeft(painter, legends);
 

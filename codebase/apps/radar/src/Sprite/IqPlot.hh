@@ -292,7 +292,8 @@ protected:
                    int nSamples,
                    double selectedRangeKm,
                    int gateNum,
-                   const double *vals);
+                   const double *iVals, 
+                   const double *qVals);
   
   void _plotIvsQ(QPainter &painter,
                  Beam *beam,
