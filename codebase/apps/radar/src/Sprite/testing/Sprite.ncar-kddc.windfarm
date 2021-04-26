@@ -354,7 +354,7 @@ set_max_range = TRUE;
 // Type: double
 //
 
-max_range_km = 100;
+max_range_km = 80;
 
 //======================================================================
 //
@@ -1524,7 +1524,7 @@ iqplot_axis_label_color = "white";
 // Type: string
 //
 
-iqplot_title_color = "orange";
+iqplot_title_color = "white";
 
 ///////////// iqplot_axes_color ///////////////////////
 //

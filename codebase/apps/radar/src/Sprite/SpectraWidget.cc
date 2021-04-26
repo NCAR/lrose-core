@@ -1913,7 +1913,7 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   QMenu setPlotTypeMenu("Set Plot Type", &contextMenu);
   contextMenu.addMenu(&setPlotTypeMenu);
   
-  QAction plotSpectrumPower("Plot Spectrum Power", &contextMenu);
+  QAction plotSpectrumPower("Plot spectral power", &contextMenu);
   connect(&plotSpectrumPower, &QAction::triggered,
           [this, id] () {
             _iqPlots[id]->setPlotType(Params::SPECTRAL_POWER);
@@ -1921,13 +1921,29 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotSpectrumPower);
   
-  QAction plotSpectrumPhase("Plot Spectrum Phase", &contextMenu);
+  QAction plotSpectrumPhase("Plot spectral phase", &contextMenu);
   connect(&plotSpectrumPhase, &QAction::triggered,
           [this, id] () {
             _iqPlots[id]->setPlotType(Params::SPECTRAL_PHASE);
             _configureIqPlot(id);
           } );
   setPlotTypeMenu.addAction(&plotSpectrumPhase);
+  
+  QAction plotSpectrumZdr("Plot spectral zdr", &contextMenu);
+  connect(&plotSpectrumZdr, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_ZDR);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSpectrumZdr);
+  
+  QAction plotSpectrumPhidp("Plot spectral phidp", &contextMenu);
+  connect(&plotSpectrumPhidp, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_PHIDP);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSpectrumPhidp);
   
   QAction plotTsPower("Plot TS Power", &contextMenu);
   connect(&plotTsPower, &QAction::triggered,

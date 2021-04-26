@@ -718,7 +718,7 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
   
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  _zoomWorld.drawTitleTopCenter(painter, getName());
+  _zoomWorld.drawTitleTopCenter(painter, "SPECTRAL ZDR (H-V)");
   painter.restore();
 
 }
@@ -815,7 +815,7 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
   
   painter.save();
   painter.setPen(_params.iqplot_title_color);
-  _zoomWorld.drawTitleTopCenter(painter, getName());
+  _zoomWorld.drawTitleTopCenter(painter, "SPECTRAL PHIDP (H-V)");
   painter.restore();
 
 }
