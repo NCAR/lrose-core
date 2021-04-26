@@ -1552,7 +1552,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_waterfall_plots->plot_type - (char *) _waterfall_plots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("waterfall_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 6;
+        tt->struct_def.fields[0].enum_def.nfields = 8;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("WATERFALL_HC");
@@ -1567,6 +1567,10 @@
         tt->struct_def.fields[0].enum_def.fields[4].val = WATERFALL_ZDR;
         tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_PHIDP");
         tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("WATERFALL_SDEV_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_SDEV_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_SDEV_PHIDP;
       tt->struct_def.fields[1].ftype = tdrpStrDup("fft_window_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("fft_window");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -1660,6 +1664,30 @@
     tt->single_val.i = 30;
     tt++;
     
+    // Parameter 'waterfall_sdev_zdr_kernel_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_sdev_zdr_kernel_size");
+    tt->descr = tdrpStrDup("Kernal size (ngates, nsamples) for computing sdev of zdr");
+    tt->help = tdrpStrDup("The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel.");
+    tt->val_offset = (char *) &waterfall_sdev_zdr_kernel_size - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'waterfall_sdev_phidp_kernel_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_sdev_phidp_kernel_size");
+    tt->descr = tdrpStrDup("Kernal size (ngates, nsamples) for computing sdev of phidp");
+    tt->help = tdrpStrDup("The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel.");
+    tt->val_offset = (char *) &waterfall_sdev_phidp_kernel_size - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
     // Parameter 'color_scale_dir'
     // ctype is 'char*'
     
@@ -1678,7 +1706,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("waterfall_dbm_color_scale_name");
-    tt->descr = tdrpStrDup("Color scale name for dbm units");
+    tt->descr = tdrpStrDup("Color scale name for dbm");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &waterfall_dbm_color_scale_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbm_spectra.colors");
@@ -1690,7 +1718,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("waterfall_zdr_color_scale_name");
-    tt->descr = tdrpStrDup("Color scale name for zdr units");
+    tt->descr = tdrpStrDup("Color scale name for zdr");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &waterfall_zdr_color_scale_name - &_start_;
     tt->single_val.s = tdrpStrDup("zdr.colors");
@@ -1702,10 +1730,34 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("waterfall_phidp_color_scale_name");
-    tt->descr = tdrpStrDup("Color scale name for phidp units");
+    tt->descr = tdrpStrDup("Color scale name for phidp");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &waterfall_phidp_color_scale_name - &_start_;
     tt->single_val.s = tdrpStrDup("phidp.colors");
+    tt++;
+    
+    // Parameter 'waterfall_sdev_zdr_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_sdev_zdr_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for sdev of zdr");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_sdev_zdr_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("sdzdr_spectra.colors");
+    tt++;
+    
+    // Parameter 'waterfall_sdev_phidp_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_sdev_phidp_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for sdev of phidp");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_sdev_phidp_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("sdphidp_spectra.colors");
     tt++;
     
     // Parameter 'waterfall_title_font_size'

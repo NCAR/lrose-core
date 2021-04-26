@@ -113,7 +113,9 @@ public:
     WATERFALL_HX = 2,
     WATERFALL_VX = 3,
     WATERFALL_ZDR = 4,
-    WATERFALL_PHIDP = 5
+    WATERFALL_PHIDP = 5,
+    WATERFALL_SDEV_ZDR = 6,
+    WATERFALL_SDEV_PHIDP = 7
   } waterfall_type_t;
 
   typedef enum {
@@ -626,6 +628,10 @@ public:
 
   int waterfall_color_scale_width;
 
+  int waterfall_sdev_zdr_kernel_size;
+
+  int waterfall_sdev_phidp_kernel_size;
+
   char* color_scale_dir;
 
   char* waterfall_dbm_color_scale_name;
@@ -633,6 +639,10 @@ public:
   char* waterfall_zdr_color_scale_name;
 
   char* waterfall_phidp_color_scale_name;
+
+  char* waterfall_sdev_zdr_color_scale_name;
+
+  char* waterfall_sdev_phidp_color_scale_name;
 
   int waterfall_title_font_size;
 
@@ -872,7 +882,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[200];
+  mutable TDRPtable _table[204];
 
   const char *_className;
 

@@ -1684,6 +1684,22 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotPhidp);
   
+  QAction plotSdevZdr("Plot SDEV_ZDR", &contextMenu);
+  connect(&plotSdevZdr, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_SDEV_ZDR);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSdevZdr);
+  
+  QAction plotSdevPhidp("Plot SDEV_PHIDP", &contextMenu);
+  connect(&plotSdevPhidp, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_SDEV_PHIDP);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSdevPhidp);
+  
   ///////////////////////////////////////
   // select FFT window menu
   

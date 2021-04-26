@@ -179,7 +179,11 @@ public:
 
   static string getName(Params::waterfall_type_t wtype);
   static string getUnits(Params::waterfall_type_t wtype);
-  
+
+  // missing value
+
+  static double missingVal;
+
 protected:
 
   ///////////////////////
@@ -225,7 +229,12 @@ protected:
 
   bool _xGridLinesOn;
   bool _yGridLinesOn;
-  
+
+  // phidp sdev
+
+  bool _phidpFoldsAt90;
+  double _phidpFoldVal, _phidpFoldRange;
+
   ///////////////////////
   // Protected methods //
   ///////////////////////
@@ -266,6 +275,18 @@ protected:
                   int nGates,
                   double selectedRangeKm);
   
+  void _plotSdevZdr(QPainter &painter,
+                    Beam *beam,
+                    int nSamples,
+                    int nGates,
+                    double selectedRangeKm);
+  
+  void _plotSdevPhidp(QPainter &painter,
+                      Beam *beam,
+                      int nSamples,
+                      int nGates,
+                      double selectedRangeKm);
+  
   void _computePowerSpectrum(Beam *beam,
                              int nSamples,
                              const RadarComplex_t *iq,
@@ -280,6 +301,11 @@ protected:
                     RadarComplex_t *iqWindowed,
                     int nSamples);
   
+  double _computeSdevZdr(const vector<double> &zdr);
+  double _computeSdevPhidp(const vector<double> &phidp);
+  void _computePhidpFoldingRange(int nGates, int nSamples, 
+                                 double **phidp2D);
+
 };
 
 #endif

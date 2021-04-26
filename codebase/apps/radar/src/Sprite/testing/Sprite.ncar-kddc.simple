@@ -1484,7 +1484,7 @@ iqplot_axis_label_color = "white";
 // Type: string
 //
 
-iqplot_title_color = "orange";
+iqplot_title_color = "white";
 
 ///////////// iqplot_axes_color ///////////////////////
 //

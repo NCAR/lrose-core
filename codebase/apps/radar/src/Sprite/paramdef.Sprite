@@ -463,7 +463,9 @@ typedef enum {
   WATERFALL_HX,
   WATERFALL_VX,
   WATERFALL_ZDR,
-  WATERFALL_PHIDP
+  WATERFALL_PHIDP,
+  WATERFALL_SDEV_ZDR,
+  WATERFALL_SDEV_PHIDP
 } waterfall_type_t;
 
 typedef struct {
@@ -497,6 +499,18 @@ paramdef int {
   p_help = "The color scale sits to the right of the data.";
 } waterfall_color_scale_width;
 
+paramdef int {
+  p_default = 5;
+  p_descr = "Kernal size (ngates, nsamples) for computing sdev of zdr";
+  p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel.";
+} waterfall_sdev_zdr_kernel_size;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Kernal size (ngates, nsamples) for computing sdev of phidp";
+  p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel.";
+} waterfall_sdev_phidp_kernel_size;
+
 paramdef string {
   p_default = "../share/color_scales";
   p_descr = "Directory for color scales";
@@ -505,18 +519,28 @@ paramdef string {
 
 paramdef string {
   p_default = "dbm_spectra.colors";
-  p_descr = "Color scale name for dbm units";
+  p_descr = "Color scale name for dbm";
 } waterfall_dbm_color_scale_name;
 
 paramdef string {
   p_default = "zdr.colors";
-  p_descr = "Color scale name for zdr units";
+  p_descr = "Color scale name for zdr";
 } waterfall_zdr_color_scale_name;
 
 paramdef string {
   p_default = "phidp.colors";
-  p_descr = "Color scale name for phidp units";
+  p_descr = "Color scale name for phidp";
 } waterfall_phidp_color_scale_name;
+
+paramdef string {
+  p_default = "sdzdr_spectra.colors";
+  p_descr = "Color scale name for sdev of zdr";
+} waterfall_sdev_zdr_color_scale_name;
+
+paramdef string {
+  p_default = "sdphidp_spectra.colors";
+  p_descr = "Color scale name for sdev of phidp";
+} waterfall_sdev_phidp_color_scale_name;
 
 paramdef int {
   p_default = 10;

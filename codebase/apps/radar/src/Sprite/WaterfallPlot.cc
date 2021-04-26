@@ -39,7 +39,10 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
+#include <toolsa/TaArray.hh>
+#include <toolsa/TaArray2D.hh>
 #include <toolsa/pjg.h>
+#include <toolsa/sincos.h>
 #include <radar/FilterUtils.hh>
 
 #include <QTimer>
@@ -49,10 +52,13 @@
 #include <QPen>
 #include <QResizeEvent>
 #include <QStylePainter>
+#include <algorithm>
 
 #include "WaterfallPlot.hh"
 #include "SpectraMgr.hh"
 #include "Beam.hh"
+
+double WaterfallPlot::missingVal = -9999.0;
 
 using namespace std;
 
@@ -173,6 +179,12 @@ void WaterfallPlot::plotBeam(QPainter &painter,
       break;
     case Params::WATERFALL_PHIDP:
       _plotPhidp(painter, beam, nSamples, nGates, selectedRangeKm);
+      break;
+    case Params::WATERFALL_SDEV_ZDR:
+      _plotSdevZdr(painter, beam, nSamples, nGates, selectedRangeKm);
+      break;
+    case Params::WATERFALL_SDEV_PHIDP:
+      _plotSdevPhidp(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
       
   }
@@ -561,23 +573,18 @@ void WaterfallPlot::_plotZdr(QPainter &painter,
     // get Iq data for this gate
     
     const GateData *gateData = beam->getGateData()[igate];
-    TaArray<RadarComplex_t> iqHc_, iqVc_;
-    RadarComplex_t *iqHc = iqHc_.alloc(nSamples);
-    RadarComplex_t *iqVc = iqVc_.alloc(nSamples);
-    memcpy(iqHc, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
-    memcpy(iqVc, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
     
     // compute ZDR spectrum
     
     TaArray<double> powerHc_, dbmHc_;
     double *powerHc = powerHc_.alloc(nSamples);
     double *dbmHc = dbmHc_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, iqHc, powerHc, dbmHc);
+    _computePowerSpectrum(beam, nSamples, gateData->iqhcOrig, powerHc, dbmHc);
     
     TaArray<double> powerVc_, dbmVc_;
     double *powerVc = powerVc_.alloc(nSamples);
     double *dbmVc = dbmVc_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, iqVc, powerVc, dbmVc);
+    _computePowerSpectrum(beam, nSamples, gateData->iqvcOrig, powerVc, dbmVc);
     
     TaArray<double> zdr_;
     double *zdr = zdr_.alloc(nSamples);
@@ -721,6 +728,271 @@ void WaterfallPlot::_plotPhidp(QPainter &painter,
 }
 
 /*************************************************************************
+ * plot SDEV of ZDR spectrum
+ */
+
+void WaterfallPlot::_plotSdevZdr(QPainter &painter,
+                                 Beam *beam,
+                                 int nSamples,
+                                 int nGates,
+                                 double selectedRangeKm)
+  
+{
+
+  double startRange = beam->getStartRangeKm();
+  double gateSpacing = beam->getGateSpacingKm();
+
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_sdev_zdr_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+  
+  // load up 2D array of spectral zdr
+
+  TaArray2D<double> zdr2D_;
+  double **zdr2D = zdr2D_.alloc(nGates, nSamples);
+
+  double minVal = 9999.0;
+  double maxVal = -9999.0;
+
+  for (int igate = 0; igate < nGates; igate++) {
+
+    // get Iq data for this gate
+    
+    const GateData *gateData = beam->getGateData()[igate];
+    
+    // compute ZDR spectrum
+    
+    TaArray<double> powerHc_, dbmHc_;
+    double *powerHc = powerHc_.alloc(nSamples);
+    double *dbmHc = dbmHc_.alloc(nSamples);
+    _computePowerSpectrum(beam, nSamples, gateData->iqhcOrig, powerHc, dbmHc);
+    
+    TaArray<double> powerVc_, dbmVc_;
+    double *powerVc = powerVc_.alloc(nSamples);
+    double *dbmVc = dbmVc_.alloc(nSamples);
+    _computePowerSpectrum(beam, nSamples, gateData->iqvcOrig, powerVc, dbmVc);
+    
+    for (int isample = 0; isample < nSamples; isample++) {
+      double zdr = dbmHc[isample] - dbmVc[isample];
+      zdr2D[igate][isample] = zdr;
+    } // isample
+
+  } // igate
+  
+  // compute 2D sdev of spectral zdr
+  
+  TaArray2D<double> sdev2D_;
+  double **sdev2D = sdev2D_.alloc(nGates, nSamples);
+  int nSamplesSdev = min(_params.waterfall_sdev_zdr_kernel_size, nSamples);
+  int nGatesSdev = min(_params.waterfall_sdev_zdr_kernel_size, nGates);
+  int nSamplesSdevHalf = nSamplesSdev / 2;
+  int nGatesSdevHalf = nGatesSdev / 2;
+  
+  for (int igate = 0; igate < nGates; igate++) {
+    for (int isample = 0; isample < nSamples; isample++) {
+      
+      // compute index limits for computing sdev
+
+      int sampleStart = isample - nSamplesSdevHalf;
+      sampleStart = max(0, sampleStart);
+      int sampleEnd = sampleStart + nSamplesSdev;
+      sampleEnd = min(nSamples, sampleEnd);
+      sampleStart = sampleEnd - nSamplesSdev;
+
+      int gateStart = igate - nGatesSdevHalf;
+      gateStart = max(0, gateStart);
+      int gateEnd = gateStart + nGatesSdev;
+      gateEnd = min(nGates, gateEnd);
+      gateStart = gateEnd - nGatesSdev;
+
+      // load up zdr values for kernel region
+
+      vector<double> zdrKernel;
+      for (int jgate = gateStart; jgate < gateEnd; jgate++) {
+        for (int jsample = sampleStart; jsample < sampleEnd; jsample++) {
+          zdrKernel.push_back(zdr2D[jgate][jsample]);
+        } // jsample
+      } // jgate
+
+      // compute sdev of zdr
+      
+      double zdrSdev = _computeSdevZdr(zdrKernel);
+      sdev2D[igate][isample] = zdrSdev;
+      
+      minVal = min(minVal, zdrSdev);
+      maxVal = max(maxVal, zdrSdev);
+      
+    } // isample
+  } // igate
+
+  // plot the data
+
+  painter.save();
+
+  for (int igate = 0; igate < nGates; igate++) {
+    double yy = startRange + gateSpacing * (igate-0.5);
+    for (int isample = 0; isample < nSamples; isample++) {
+      // get color
+      int red, green, blue;
+      _cmap.dataColor(sdev2D[igate][isample], red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      // set x limits
+      double xx = isample;
+      // fill rectangle
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
+    } // isample
+  } // igate
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot sdev of PHIDP spectrum
+ */
+
+void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
+                                   Beam *beam,
+                                   int nSamples,
+                                   int nGates,
+                                   double selectedRangeKm)
+  
+{
+
+  double startRange = beam->getStartRangeKm();
+  double gateSpacing = beam->getGateSpacingKm();
+
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_sdev_phidp_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+  
+  // load up 2D array of spectral phidp
+
+  TaArray2D<double> phidp2D_;
+  double **phidp2D = phidp2D_.alloc(nGates, nSamples);
+
+  double minVal = 9999.0;
+  double maxVal = -9999.0;
+
+  for (int igate = 0; igate < nGates; igate++) {
+
+    // get Iq data for this gate
+    
+    const GateData *gateData = beam->getGateData()[igate];
+    
+    // apply window to time series
+    
+    TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
+    RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(nSamples);
+    RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(nSamples);
+    _applyWindow(gateData->iqhcOrig, iqWindowedHc, nSamples);
+    _applyWindow(gateData->iqvcOrig, iqWindowedVc, nSamples);
+    
+    // compute spectra
+    
+    TaArray<RadarComplex_t> specHc_, specVc_;
+    RadarComplex_t *specHc = specHc_.alloc(nSamples);
+    RadarComplex_t *specVc = specVc_.alloc(nSamples);
+    RadarFft fft(nSamples);
+    fft.fwd(iqWindowedHc, specHc);
+    fft.shift(specHc);
+    fft.fwd(iqWindowedVc, specVc);
+    fft.shift(specVc);
+
+    // compute phidp spectrum, store in 2D array
+
+    for (int isample = 0; isample < nSamples; isample++) {
+      RadarComplex_t diff = RadarComplex::conjugateProduct(specHc[isample], specVc[isample]);
+      phidp2D[igate][isample] = RadarComplex::argDeg(diff);
+    } // isample
+    
+  } // igate
+
+  // compute the phidp folding range
+
+  _computePhidpFoldingRange(nGates, nSamples, phidp2D);
+
+  // compute 2D sdev of spectral phidp
+
+  TaArray2D<double> sdev2D_;
+  double **sdev2D = sdev2D_.alloc(nGates, nSamples);
+  int nSamplesSdev = min(_params.waterfall_sdev_phidp_kernel_size, nSamples);
+  int nGatesSdev = min(_params.waterfall_sdev_phidp_kernel_size, nGates);
+  int nSamplesSdevHalf = nSamplesSdev / 2;
+  int nGatesSdevHalf = nGatesSdev / 2;
+  
+  for (int igate = 0; igate < nGates; igate++) {
+    for (int isample = 0; isample < nSamples; isample++) {
+
+      // compute index limits for computing sdev
+
+      int sampleStart = isample - nSamplesSdevHalf;
+      sampleStart = max(0, sampleStart);
+      int sampleEnd = sampleStart + nSamplesSdev;
+      sampleEnd = min(nSamples, sampleEnd);
+      sampleStart = sampleEnd - nSamplesSdev;
+
+      int gateStart = igate - nGatesSdevHalf;
+      gateStart = max(0, gateStart);
+      int gateEnd = gateStart + nGatesSdev;
+      gateEnd = min(nGates, gateEnd);
+      gateStart = gateEnd - nGatesSdev;
+
+      // load up phidp values for kernel region
+
+      vector<double> phidpKernel;
+      for (int jgate = gateStart; jgate < gateEnd; jgate++) {
+        for (int jsample = sampleStart; jsample < sampleEnd; jsample++) {
+          phidpKernel.push_back(phidp2D[jgate][jsample]);
+        } // jsample
+      } // jgate
+
+      // compute sdev of phidp
+
+      double phidpSdev = _computeSdevPhidp(phidpKernel);
+      sdev2D[igate][isample] = phidpSdev;
+      
+      minVal = min(minVal, phidpSdev);
+      maxVal = max(maxVal, phidpSdev);
+      
+    } // isample
+  } // igate
+
+  // plot the data
+
+  painter.save();
+
+  for (int igate = 0; igate < nGates; igate++) {
+    double yy = startRange + gateSpacing * (igate-0.5);
+    for (int isample = 0; isample < nSamples; isample++) {
+      // get color
+      int red, green, blue;
+      _cmap.dataColor(sdev2D[igate][isample], red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      // set x limits
+      double xx = isample;
+      // fill rectangle
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
+    } // isample
+  } // igate
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
  * compute the spectrum
  */
 
@@ -760,7 +1032,9 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
   switch (_plotType) {
     case Params::WATERFALL_HC:
     case Params::WATERFALL_ZDR:
+    case Params::WATERFALL_SDEV_ZDR:
     case Params::WATERFALL_PHIDP:
+    case Params::WATERFALL_SDEV_PHIDP:
       calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
       break;
     case Params::WATERFALL_VC:
@@ -886,6 +1160,10 @@ string WaterfallPlot::getName(Params::waterfall_type_t wtype)
       return "ZDR";
     case Params::WATERFALL_PHIDP:
       return "PHIDP";
+    case Params::WATERFALL_SDEV_ZDR:
+      return "SDEV_ZDR";
+    case Params::WATERFALL_SDEV_PHIDP:
+      return "SDEV_PHIDP";
     default:
       return "UNKNOWN";
   }
@@ -903,8 +1181,10 @@ string WaterfallPlot::getUnits(Params::waterfall_type_t wtype)
     case Params::WATERFALL_VX:
       return "dBm";
     case Params::WATERFALL_ZDR:
+    case Params::WATERFALL_SDEV_ZDR:
       return "dB";
     case Params::WATERFALL_PHIDP:
+    case Params::WATERFALL_SDEV_PHIDP:
       return "deg";
     default:
       return "";
@@ -996,7 +1276,11 @@ void WaterfallPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
 
   // selected range line
   
-  painter.setPen(_params.waterfall_selected_range_color);
+  QPen pen(painter.pen());
+  pen.setColor(_params.waterfall_selected_range_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(2);
+  painter.setPen(pen);
   _zoomWorld.drawLine(painter,
                       _zoomWorld.getXMinWorld(), selectedRangeKm,
                       _zoomWorld.getXMaxWorld(), selectedRangeKm);
@@ -1095,3 +1379,126 @@ void WaterfallPlot::_applyWindow(const RadarComplex_t *iq,
 
 }
   
+/////////////////////////////////////////////////
+// compute for ZDR SDEV
+
+double WaterfallPlot::_computeSdevZdr(const vector<double> &zdr)
+  
+{
+  
+  double nZdr = 0.0;
+  double sumZdr = 0.0;
+  double sumZdrSq = 0.0;
+  
+  for (size_t ii = 0; ii < zdr.size(); ii++) {
+    double val = zdr[ii];
+    sumZdr += val;
+    sumZdrSq += (val * val);
+    nZdr++;
+  }
+    
+  double meanZdr = sumZdr / nZdr;
+  double sdev = 0.001;
+  if (nZdr > 2) {
+    double term1 = sumZdrSq / nZdr;
+    double term2 = meanZdr * meanZdr;
+    if (term1 >= term2) {
+      sdev = sqrt(term1 - term2);
+    }
+  }
+
+  return sdev;
+
+}
+
+/////////////////////////////////////////////////
+// compute SDEV for PHIDP
+// takes account of folding
+
+double WaterfallPlot::_computeSdevPhidp(const vector<double> &phidp)
+   
+{
+  
+  // compute mean phidp
+
+  double count = 0.0;
+  double sumxx = 0.0;
+  double sumyy = 0.0;
+  for (size_t ii = 0; ii < phidp.size(); ii++) {
+    double xx, yy;
+    ta_sincos(phidp[ii] * DEG_TO_RAD, &yy, &xx);
+    sumxx += xx;
+    sumyy += yy;
+    count++;
+  }
+  double meanxx = sumxx / count;
+  double meanyy = sumyy / count;
+  double phidpMean = atan2(meanyy, meanxx) * RAD_TO_DEG;
+  if (_phidpFoldsAt90) {
+    phidpMean *= 0.5;
+  }
+  
+  // compute standard deviation centered on the mean value
+  
+  count = 0.0;
+  double sum = 0.0;
+  double sumSq = 0.0;
+  for (size_t ii = 0; ii < phidp.size(); ii++) {
+    double diff = phidp[ii] - phidpMean;
+    // constrain diff
+    while (diff < -_phidpFoldVal) {
+      diff += 2 * _phidpFoldVal;
+    }
+    while (diff > _phidpFoldVal) {
+      diff -= 2 * _phidpFoldVal;
+    }
+    // sum up
+    count++;
+    sum += diff;
+    sumSq += diff * diff;
+  }
+
+  double meanDiff = sum / count;
+  double term1 = sumSq / count;
+  double term2 = meanDiff * meanDiff;
+  double sdev = 0.001;
+  if (term1 >= term2) {
+    sdev = sqrt(term1 - term2);
+  }
+
+  return sdev;
+  
+}
+
+/////////////////////////////////////////////
+// compute the folding values and range
+// by inspecting the phidp values
+
+void WaterfallPlot::_computePhidpFoldingRange(int nGates, int nSamples, 
+                                              double **phidp2D)
+  
+{
+  
+  // check if fold is at 90 or 180
+  
+  double phidpMin = 9999;
+  double phidpMax = -9999;
+
+  for (int igate = 0; igate < nGates; igate++) {
+    for (int isample = 0; isample < nSamples; isample++) {
+      double phidp = phidp2D[igate][isample];
+      phidpMin = min(phidpMin, phidp);
+      phidpMax = max(phidpMax, phidp);
+    } // isample
+  } // igate
+  
+  _phidpFoldsAt90 = false;
+  _phidpFoldVal = 180.0;
+  if (phidpMin > -90 && phidpMax < 90) {
+    _phidpFoldVal = 90.0;
+    _phidpFoldsAt90 = true;
+  }
+  _phidpFoldRange = _phidpFoldVal * 2.0;
+  
+}
+
