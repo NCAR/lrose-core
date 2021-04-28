@@ -465,7 +465,8 @@ typedef enum {
   WATERFALL_ZDR,
   WATERFALL_PHIDP,
   WATERFALL_SDEV_ZDR,
-  WATERFALL_SDEV_PHIDP
+  WATERFALL_SDEV_PHIDP,
+  WATERFALL_CMD
 } waterfall_type_t;
 
 typedef struct {
@@ -484,7 +485,7 @@ paramdef struct waterfall_plot_t {
     { WATERFALL_ZDR, FFT_WINDOW_VONHANN, 3, false, 0.75, false, 3 }
   };
   p_descr = "Details of waterfall plots for each sub panel.";
-  p_help = "WATERFALL_HC: H-Co power spectrum vs range.\nWATERFALL_VC: V-Co power spectrum vs range.\nWATERFALL_HX: H-cross power spectrum vs range.\nWATERFALL_VX: V-cross power spectrum vs range.\nWATERFALL_ZDR: zdr spectrum vs range.\nWATERFALL_PHIDP: phidp spectrum vs. range.";
+  p_help = "HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood.";
 } waterfall_plots[];
 
 paramdef int {
@@ -553,6 +554,11 @@ paramdef string {
   p_default = "sdphidp_spectra.colors";
   p_descr = "Color scale name for sdev of phidp";
 } waterfall_sdev_phidp_color_scale_name;
+
+paramdef string {
+  p_default = "cmd_spectra.colors";
+  p_descr = "Color scale name for CMD";
+} waterfall_cmd_color_scale_name;
 
 paramdef int {
   p_default = 10;

@@ -1535,7 +1535,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("waterfall_plots");
     tt->descr = tdrpStrDup("Details of waterfall plots for each sub panel.");
-    tt->help = tdrpStrDup("WATERFALL_HC: H-Co power spectrum vs range.\nWATERFALL_VC: V-Co power spectrum vs range.\nWATERFALL_HX: H-cross power spectrum vs range.\nWATERFALL_VX: V-cross power spectrum vs range.\nWATERFALL_ZDR: zdr spectrum vs range.\nWATERFALL_PHIDP: phidp spectrum vs. range.");
+    tt->help = tdrpStrDup("HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood.");
     tt->array_offset = (char *) &_waterfall_plots - &_start_;
     tt->array_n_offset = (char *) &waterfall_plots_n - &_start_;
     tt->is_array = TRUE;
@@ -1552,7 +1552,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_waterfall_plots->plot_type - (char *) _waterfall_plots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("waterfall_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 8;
+        tt->struct_def.fields[0].enum_def.nfields = 9;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("WATERFALL_HC");
@@ -1571,6 +1571,8 @@
         tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_SDEV_ZDR;
         tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
         tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_SDEV_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("WATERFALL_CMD");
+        tt->struct_def.fields[0].enum_def.fields[8].val = WATERFALL_CMD;
       tt->struct_def.fields[1].ftype = tdrpStrDup("fft_window_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("fft_window");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -1782,6 +1784,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &waterfall_sdev_phidp_color_scale_name - &_start_;
     tt->single_val.s = tdrpStrDup("sdphidp_spectra.colors");
+    tt++;
+    
+    // Parameter 'waterfall_cmd_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_cmd_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for CMD");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_cmd_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("cmd_spectra.colors");
     tt++;
     
     // Parameter 'waterfall_title_font_size'

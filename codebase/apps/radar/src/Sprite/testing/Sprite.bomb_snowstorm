@@ -170,7 +170,6 @@ input_tcp_port = 11000;
 //
 
 archive_data_dir = "$(HOME)/data/bomb_snowstorm/time_series/spol";
-// archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/spol/sband";
 
 ///////////// archive_start_time //////////////////////
 //
@@ -807,12 +806,15 @@ waterfall_n_panels = 4;
 //
 // Details of waterfall plots for each sub panel.
 //
-// WATERFALL_HC: H-Co power spectrum vs range.
-// WATERFALL_VC: V-Co power spectrum vs range.
-// WATERFALL_HX: H-cross power spectrum vs range.
-// WATERFALL_VX: V-cross power spectrum vs range.
-// WATERFALL_ZDR: zdr spectrum vs range.
-// WATERFALL_PHIDP: phidp spectrum vs. range.
+// HC: H-Co power spectrum vs range.
+// VC: V-Co power spectrum vs range.
+// HX: H-cross power spectrum vs range.
+// VX: V-cross power spectrum vs range.
+// ZDR: zdr spectrum vs range.
+// PHIDP: phidp spectrum vs. range.
+// SDEV_ZDR: standard deviation of ZDR.
+// SDEV_PHIDP: standard deviation of PHIDP.
+// CMD: interest field for clutter likelihood.
 //
 //
 // Type: struct
@@ -825,6 +827,9 @@ waterfall_n_panels = 4;
 //          WATERFALL_VX
 //          WATERFALL_ZDR
 //          WATERFALL_PHIDP
+//          WATERFALL_SDEV_ZDR
+//          WATERFALL_SDEV_PHIDP
+//          WATERFALL_CMD
 //      fft_window_t fft_window;
 //        Options:
 //          FFT_WINDOW_RECT
@@ -912,6 +917,58 @@ waterfall_width = 200;
 
 waterfall_color_scale_width = 30;
 
+///////////// waterfall_sdev_zdr_kernel_ngates ////////
+//
+// Kernal size in range for computing sdev of zdr.
+//
+// The standard deviation of ZDR is computed over a rectangular kernel. 
+//   This is the size of that kernel in range.
+//
+//
+// Type: int
+//
+
+waterfall_sdev_zdr_kernel_ngates = 5;
+
+///////////// waterfall_sdev_zdr_kernel_nsamples //////
+//
+// Kernal size in samples for computing sdev of zdr.
+//
+// The standard deviation of ZDR is computed over a rectangular kernel. 
+//   This is the number of samples in that kernel.
+//
+//
+// Type: int
+//
+
+waterfall_sdev_zdr_kernel_nsamples = 3;
+
+///////////// waterfall_sdev_phidp_kernel_ngates //////
+//
+// Kernal size in range for computing sdev of phidp.
+//
+// The standard deviation of PHIDP is computed over a rectangular 
+//   kernel. This is the size of that kernel in range.
+//
+//
+// Type: int
+//
+
+waterfall_sdev_phidp_kernel_ngates = 5;
+
+///////////// waterfall_sdev_phidp_kernel_nsamples ////
+//
+// Kernal size in samples for computing sdev of phidp.
+//
+// The standard deviation of PHIDP is computed over a rectangular 
+//   kernel. This is the number of samples in that kernel.
+//
+//
+// Type: int
+//
+
+waterfall_sdev_phidp_kernel_nsamples = 3;
+
 ///////////// color_scale_dir /////////////////////////
 //
 // Directory for color scales.
@@ -931,7 +988,7 @@ color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 
 ///////////// waterfall_dbm_color_scale_name //////////
 //
-// Color scale name for dbm units.
+// Color scale name for dbm.
 //
 //
 // Type: string
@@ -941,7 +998,7 @@ waterfall_dbm_color_scale_name = "dbm_spectra.colors";
 
 ///////////// waterfall_zdr_color_scale_name //////////
 //
-// Color scale name for zdr units.
+// Color scale name for zdr.
 //
 //
 // Type: string
@@ -951,17 +1008,17 @@ waterfall_zdr_color_scale_name = "zdr.colors";
 
 ///////////// waterfall_phidp_color_scale_name ////////
 //
-// Color scale name for phidp units.
+// Color scale name for phidp.
 //
 //
 // Type: string
 //
 
-waterfall_sdev_phidp_color_scale_name = "sdphidp_spectra.colors";
+waterfall_phidp_color_scale_name = "phidp.colors";
 
-///////////// waterfall_zdr_color_scale_name //////////
+///////////// waterfall_sdev_zdr_color_scale_name /////
 //
-// Color scale name for zdr units.
+// Color scale name for sdev of zdr.
 //
 //
 // Type: string
@@ -969,15 +1026,25 @@ waterfall_sdev_phidp_color_scale_name = "sdphidp_spectra.colors";
 
 waterfall_sdev_zdr_color_scale_name = "sdzdr_spectra.colors";
 
-///////////// waterfall_phidp_color_scale_name ////////
+///////////// waterfall_sdev_phidp_color_scale_name ///
 //
-// Color scale name for phidp units.
+// Color scale name for sdev of phidp.
 //
 //
 // Type: string
 //
 
-waterfall_phidp_color_scale_name = "phidp.colors";
+waterfall_sdev_phidp_color_scale_name = "sdphidp_spectra.colors";
+
+///////////// waterfall_cmd_color_scale_name //////////
+//
+// Color scale name for CMD.
+//
+//
+// Type: string
+//
+
+waterfall_cmd_color_scale_name = "cmd_spectra.colors";
 
 ///////////// waterfall_title_font_size ///////////////
 //

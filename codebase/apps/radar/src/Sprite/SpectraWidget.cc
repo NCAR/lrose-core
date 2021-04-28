@@ -1700,6 +1700,14 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotSdevPhidp);
   
+  QAction plotCmd("Plot CMD", &contextMenu);
+  connect(&plotCmd, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_CMD);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotCmd);
+  
   ///////////////////////////////////////
   // select FFT window menu
   

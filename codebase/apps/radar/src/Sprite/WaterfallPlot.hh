@@ -287,6 +287,12 @@ protected:
                       int nGates,
                       double selectedRangeKm);
   
+  void _plotCmd(QPainter &painter,
+                Beam *beam,
+                int nSamples,
+                int nGates,
+                double selectedRangeKm);
+  
   void _computePowerSpectrum(Beam *beam,
                              int nSamples,
                              const RadarComplex_t *iq,

@@ -269,7 +269,8 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     minDbm = min(dbm, minDbm);
     maxDbm = max(dbm, maxDbm);
   }
-  
+  double totalPower = RadarComplex::meanPower(powerSpec, nSamples);
+
   // compute adaptive filter as appropriate
   
   TaArray<double> filtAdaptDbm_;
@@ -300,6 +301,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   moments.setClutterWidthMps(_clutWidthMps);
   moments.setClutterInitNotchWidthMps(3.0);
   
+  double adaptPower = 0.0;
   if (_useAdaptFilt) {
     
     TaArray<RadarComplex_t> filtAdaptWindowed_;
@@ -329,6 +331,8 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
       maxDbm = max(dbm, maxDbm);
     }
 
+    adaptPower = RadarComplex::meanPower(filtAdaptSpec, nSamples);
+    
   } // if (_useAdaptFilt)
 
   // compute regression filter as appropriate
@@ -336,6 +340,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   TaArray<double> filtRegrDbm_;
   double *filtRegrDbm = filtRegrDbm_.alloc(nSamples);
 
+  double regrPower = 0.0;
   if (_useRegrFilt) {
     
     RegressionFilter regrF;
@@ -378,6 +383,8 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
       maxDbm = max(dbm, maxDbm);
       filtRegrDbm[ii] = dbm;
     }
+
+    regrPower = RadarComplex::meanPower(filtRegrSpec, nSamples);
     
   } // if (_useRegrFilt)
 
@@ -497,11 +504,11 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   } // if (_plotClutModel)
 
   // legends
-
-  const MomentsFields* fields = beam->getOutFields();
-  double dbm = fields[gateNum].dbm;
-  double dbz = fields[gateNum].dbz;
-  double vel = fields[gateNum].vel;
+  
+  // const MomentsFields* fields = beam->getOutFields();
+  // double dbm = fields[gateNum].dbm;
+  // double dbz = fields[gateNum].dbz;
+  // double vel = fields[gateNum].vel;
 
   char text[1024];
 
@@ -522,12 +529,31 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
 
   vector<string> legendsRight;
-  snprintf(text, 1024, "Dbm: %.2f", dbm);
+  double totalPowerDbm = 10.0 * log10(totalPower);
+  snprintf(text, 1024, "TotalPower (dBm): %.2f", totalPowerDbm);
   legendsRight.push_back(text);
-  snprintf(text, 1024, "Dbz: %.2f", dbz);
-  legendsRight.push_back(text);
-  snprintf(text, 1024, "Vel: %.2f", vel);
-  legendsRight.push_back(text);
+  if (_useAdaptFilt) {
+    double adaptClutPower = totalPower - adaptPower;
+    double adaptPowerDbm = 10.0 * log10(adaptPower);
+    double adaptClutPowerDbm = 10.0 * log10(adaptClutPower);
+    snprintf(text, 1024, "AdaptFiltPower: %.2f", adaptPowerDbm);
+    legendsRight.push_back(text);
+    snprintf(text, 1024, "AdaptClutPower: %.2f", adaptClutPowerDbm);
+    legendsRight.push_back(text);
+    snprintf(text, 1024, "AdaptCSR: %.2f", adaptClutPowerDbm - adaptPowerDbm);
+    legendsRight.push_back(text);
+  }
+  if (_useRegrFilt) {
+    double regrClutPower = totalPower - regrPower;
+    double regrPowerDbm = 10.0 * log10(regrPower);
+    double regrClutPowerDbm = 10.0 * log10(regrClutPower);
+    snprintf(text, 1024, "RegrFiltPower: %.2f", regrPowerDbm);
+    legendsRight.push_back(text);
+    snprintf(text, 1024, "RegrClutPower: %.2f", regrClutPowerDbm);
+    legendsRight.push_back(text);
+    snprintf(text, 1024, "RegrCSR: %.2f", regrClutPowerDbm - regrPowerDbm);
+    legendsRight.push_back(text);
+  }
   _zoomWorld.drawLegendsTopRight(painter, legendsRight);
 
   // draw the title
