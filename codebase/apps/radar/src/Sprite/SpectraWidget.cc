@@ -1306,7 +1306,7 @@ void SpectraWidget::_configureWaterfall(int id)
     maxRange = _params.max_range_km;
   }
   
-  _waterfalls[id]->setWorldLimits(0.0, 0.0, _beam->getNSamples(), maxRange);
+  _waterfalls[id]->setWorldLimits(0.0, 0.0, _nSamplesPlot, maxRange);
 
   update();
 

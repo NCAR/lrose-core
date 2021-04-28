@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ../Sprite
+ * TDRP params for Sprite
  **********************************************************************/
 
 //======================================================================
@@ -57,7 +57,7 @@ register_with_procmap = FALSE;
 // Type: string
 //
 
-instance = "bomb_snowstorm";
+instance = "kddc";
 
 ///////////// check_alloc /////////////////////////////
 //
@@ -330,6 +330,35 @@ show_status_in_gui = {
 
 //======================================================================
 //
+// SET MAX RANGE.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range to be used for plotting.
+//
+// If FALSE, the max range of the data will be used. If TRUE, 
+//   max_range_km will override the max range in the data.
+//
+//
+// Type: boolean
+//
+
+set_max_range = TRUE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Max range for the display (km).
+//
+//
+// Type: double
+//
+
+max_range_km = 150;
+
+//======================================================================
+//
 // MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS.
 //
 //======================================================================
@@ -342,7 +371,7 @@ show_status_in_gui = {
 // Type: int
 //
 
-main_window_width = 1500;
+main_window_width = 1800;
 
 ///////////// main_window_height //////////////////////
 //
@@ -352,7 +381,7 @@ main_window_width = 1500;
 // Type: int
 //
 
-main_window_height = 800;
+main_window_height = 1200;
 
 ///////////// main_window_start_x /////////////////////
 //
@@ -446,16 +475,6 @@ main_window_panel_divider_line_width = 1;
 
 main_window_panel_divider_color = "yellow";
 
-///////////// main_color_scale_width //////////////////
-//
-// Width of color scale (pixels).
-//
-//
-// Type: int
-//
-
-main_color_scale_width = 40;
-
 ///////////// click_cross_size ////////////////////////
 //
 // Size of cross at click point (pixels).
@@ -488,7 +507,7 @@ click_cross_size = 11;
 // Type: int
 //
 
-ascope_n_panels = 2;
+ascope_n_panels = 1;
 
 ///////////// ascope_moments //////////////////////////
 //
@@ -515,8 +534,7 @@ ascope_n_panels = 2;
 //
 
 ascope_moments = {
- DBZ,
- VEL
+ DBZ
 };
 
 ///////////// ascope_width ////////////////////////////
@@ -736,7 +754,7 @@ ascope_fill_color = "darkgreen";
 // Type: string
 //
 
-ascope_title_color = "yellow";
+ascope_title_color = "white";
 
 ///////////// ascope_x_axis_labels_inside /////////////
 //
@@ -763,6 +781,445 @@ ascope_x_axis_labels_inside = FALSE;
 //
 
 ascope_y_axis_labels_inside = FALSE;
+
+//======================================================================
+//
+// WATERFALL DISPLAY PANEL.
+//
+// The waterfall plots show spectra plotted against range.
+//
+//======================================================================
+ 
+///////////// waterfall_n_panels //////////////////////
+//
+// Number of waterfall panels in spectra window (pixels).
+//
+// The waterfalls will be on the left of the plot. Set to 0 for no 
+//   WATERFALL panel.
+//
+//
+// Type: int
+//
+
+waterfall_n_panels = 4;
+
+///////////// waterfall_plots /////////////////////////
+//
+// Details of waterfall plots for each sub panel.
+//
+// WATERFALL_HC: H-Co power spectrum vs range.
+// WATERFALL_VC: V-Co power spectrum vs range.
+// WATERFALL_HX: H-cross power spectrum vs range.
+// WATERFALL_VX: V-cross power spectrum vs range.
+// WATERFALL_ZDR: zdr spectrum vs range.
+// WATERFALL_PHIDP: phidp spectrum vs. range.
+//
+//
+// Type: struct
+//   typedef struct {
+//      waterfall_type_t plot_type;
+//        Options:
+//          WATERFALL_HC
+//          WATERFALL_VC
+//          WATERFALL_HX
+//          WATERFALL_VX
+//          WATERFALL_ZDR
+//          WATERFALL_PHIDP
+//      fft_window_t fft_window;
+//        Options:
+//          FFT_WINDOW_RECT
+//          FFT_WINDOW_VONHANN
+//          FFT_WINDOW_BLACKMAN
+//          FFT_WINDOW_BLACKMAN_NUTTALL
+//          FFT_WINDOW_TUKEY_10
+//          FFT_WINDOW_TUKEY_20
+//          FFT_WINDOW_TUKEY_30
+//          FFT_WINDOW_TUKEY_50
+//      int median_filter_len;
+//      boolean use_adaptive_filter;
+//      double clutter_width_mps;
+//      boolean use_regression_filter;
+//      int regression_order;
+//   }
+//
+// 1D array - variable length.
+//
+
+waterfall_plots = {
+  {
+    plot_type = WATERFALL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 3,
+    use_adaptive_filter = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3
+  }
+  ,
+  {
+    plot_type = WATERFALL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 3,
+    use_adaptive_filter = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3
+  }
+  ,
+  {
+    plot_type = WATERFALL_ZDR,
+    fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 3,
+    use_adaptive_filter = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3
+  }
+  ,
+  {
+    plot_type = WATERFALL_PHIDP,
+    fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 3,
+    use_adaptive_filter = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3
+  }
+};
+
+///////////// waterfall_width /////////////////////////
+//
+// Width of WATERFALL panel in spectra window (pixels).
+//
+// The WATERFALL will be on the left of the plot. Set to 0 for no 
+//   WATERFALL panel.
+//
+//
+// Type: int
+//
+
+waterfall_width = 200;
+
+///////////// waterfall_color_scale_width /////////////
+//
+// Width of color scale in waterfall plots (pixels).
+//
+// The color scale sits to the right of the data.
+//
+//
+// Type: int
+//
+
+waterfall_color_scale_width = 30;
+
+///////////// color_scale_dir /////////////////////////
+//
+// Directory for color scales.
+//
+// You can set this in 2 ways:
+//
+// (a) Set to the absolute path
+//
+// (b)Set as a path relative to the location of the application binary 
+//   executable.
+//
+//
+// Type: string
+//
+
+color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
+
+///////////// waterfall_dbm_color_scale_name //////////
+//
+// Color scale name for dbm units.
+//
+//
+// Type: string
+//
+
+waterfall_dbm_color_scale_name = "dbm_spectra.colors";
+
+///////////// waterfall_zdr_color_scale_name //////////
+//
+// Color scale name for zdr units.
+//
+//
+// Type: string
+//
+
+waterfall_zdr_color_scale_name = "zdr.colors";
+
+///////////// waterfall_phidp_color_scale_name ////////
+//
+// Color scale name for phidp units.
+//
+//
+// Type: string
+//
+
+waterfall_sdev_phidp_color_scale_name = "sdphidp_spectra.colors";
+
+///////////// waterfall_zdr_color_scale_name //////////
+//
+// Color scale name for zdr units.
+//
+//
+// Type: string
+//
+
+waterfall_sdev_zdr_color_scale_name = "sdzdr_spectra.colors";
+
+///////////// waterfall_phidp_color_scale_name ////////
+//
+// Color scale name for phidp units.
+//
+//
+// Type: string
+//
+
+waterfall_phidp_color_scale_name = "phidp.colors";
+
+///////////// waterfall_title_font_size ///////////////
+//
+// Font size of center title (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_title_font_size = 10;
+
+///////////// waterfall_axis_label_font_size //////////
+//
+// Font size of axis labels in waterfall (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_axis_label_font_size = 8;
+
+///////////// waterfall_tick_values_font_size /////////
+//
+// Font size of axis tick values (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_tick_values_font_size = 6;
+
+///////////// waterfall_legend_font_size //////////////
+//
+// Font size for plot legends (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_legend_font_size = 8;
+
+///////////// waterfall_color_scale_font_size /////////
+//
+// Font size for labels in color scales (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_color_scale_font_size = 6;
+
+///////////// waterfall_title_text_margin /////////////
+//
+// Margin around title text (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_title_text_margin = 3;
+
+///////////// waterfall_legend_text_margin ////////////
+//
+// Margin around legend text (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_legend_text_margin = 3;
+
+///////////// waterfall_axis_text_margin //////////////
+//
+// Margin around axis text (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_axis_text_margin = 2;
+
+///////////// waterfall_axis_tick_len /////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+waterfall_axis_tick_len = 4;
+
+///////////// waterfall_n_ticks_ideal /////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+waterfall_n_ticks_ideal = 5;
+
+///////////// waterfall_left_margin ///////////////////
+//
+// Width of left margin for waterfall plot (pixels).
+//
+// The Y axis labels are plotted here.
+//
+//
+// Type: int
+//
+
+waterfall_left_margin = 18;
+
+///////////// waterfall_bottom_margin /////////////////
+//
+// Height of bottom margin for waterfall plot (pixels).
+//
+// The X axis labels are plotted here.
+//
+//
+// Type: int
+//
+
+waterfall_bottom_margin = 18;
+
+///////////// waterfall_x_grid_lines_on ///////////////
+//
+// Option to draw grid lines in the X direction.
+//
+//
+// Type: boolean
+//
+
+waterfall_x_grid_lines_on = TRUE;
+
+///////////// waterfall_y_grid_lines_on ///////////////
+//
+// Option to draw grid lines in the Y direction.
+//
+//
+// Type: boolean
+//
+
+waterfall_y_grid_lines_on = TRUE;
+
+///////////// waterfall_axis_label_color //////////////
+//
+// Color of waterfall axis labels.
+//
+//
+// Type: string
+//
+
+waterfall_axis_label_color = "white";
+
+///////////// waterfall_axes_color ////////////////////
+//
+// Color of axes in waterfall.
+//
+//
+// Type: string
+//
+
+waterfall_axes_color = "green";
+
+///////////// waterfall_grid_color ////////////////////
+//
+// Color of grid lines on waterfall.
+//
+//
+// Type: string
+//
+
+waterfall_grid_color = "gray";
+
+///////////// waterfall_line_color ////////////////////
+//
+// Color of waterfall line.
+//
+//
+// Type: string
+//
+
+waterfall_line_color = "lightgray";
+
+///////////// waterfall_selected_range_color //////////
+//
+// Color of line showing currently selected range.
+//
+// The user can double click in the waterfall to move this line.
+//
+//
+// Type: string
+//
+
+waterfall_selected_range_color = "cyan";
+
+///////////// waterfall_fill_color ////////////////////
+//
+// Color of waterfall fill.
+//
+//
+// Type: string
+//
+
+waterfall_fill_color = "darkgreen";
+
+///////////// waterfall_title_color ///////////////////
+//
+// Color of waterfall title.
+//
+//
+// Type: string
+//
+
+waterfall_title_color = "white";
+
+///////////// waterfall_x_axis_labels_inside //////////
+//
+// Location of tick labels, relative to x axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+waterfall_x_axis_labels_inside = FALSE;
+
+///////////// waterfall_y_axis_labels_inside //////////
+//
+// Location of tick labels, relative to y axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+waterfall_y_axis_labels_inside = FALSE;
 
 //======================================================================
 //
@@ -794,14 +1251,14 @@ iqplots_n_rows = 2;
 // Type: int
 //
 
-iqplots_n_columns = 4;
+iqplots_n_columns = 2;
 
-///////////// iqplots /////////////////////////////////
+///////////// iq_plots ////////////////////////////////
 //
 // Details of IQ plots for each sub panel.
 //
-// SPECTRUM_POWER: power spectrum, log.
-// SPECTRUM_PHASE: phase in the spectral domain.
+// SPECTRAL_POWER: power spectrum, log.
+// SPECTRAL_PHASE: phase in the spectral domain.
 // TS_POWER: time domain power, log.
 // TS_PHASE: time domain phase.
 // I_VALS: I vals of time series.
@@ -812,10 +1269,12 @@ iqplots_n_columns = 4;
 //
 // Type: struct
 //   typedef struct {
-//      iqplot_type_t plot_type;
+//      iq_plot_type_t plot_type;
 //        Options:
-//          SPECTRUM_POWER
-//          SPECTRUM_PHASE
+//          SPECTRAL_POWER
+//          SPECTRAL_PHASE
+//          SPECTRAL_ZDR
+//          SPECTRAL_PHIDP
 //          TS_POWER
 //          TS_PHASE
 //          I_VALS
@@ -838,6 +1297,7 @@ iqplots_n_columns = 4;
 //          FFT_WINDOW_TUKEY_20
 //          FFT_WINDOW_TUKEY_30
 //          FFT_WINDOW_TUKEY_50
+//      int median_filter_len;
 //      boolean use_adaptive_filter;
 //      boolean plot_clutter_model;
 //      double clutter_width_mps;
@@ -849,85 +1309,14 @@ iqplots_n_columns = 4;
 // 1D array - variable length.
 //
 
-iqplots = {
+iq_plots = {
   {
-    plot_type = SPECTRUM_POWER,
+    plot_type = SPECTRAL_POWER,
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 1,
     use_adaptive_filter = TRUE,
     plot_clutter_model = TRUE,
-    clutter_width_mps = 0.5,
-    use_regression_filter = TRUE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = SPECTRUM_POWER,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = TRUE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = TRUE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = SPECTRUM_POWER,
-    rx_channel = CHANNEL_VC,
-    fft_window = FFT_WINDOW_VONHANN,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = TRUE,
-    clutter_width_mps = 0.5,
-    use_regression_filter = TRUE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = SPECTRUM_POWER,
-    rx_channel = CHANNEL_VC,
-    fft_window = FFT_WINDOW_VONHANN,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = TRUE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = TRUE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = I_VALS,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_RECT,
-    use_adaptive_filter = FALSE,
-    plot_clutter_model = FALSE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = TRUE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = Q_VALS,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_RECT,
-    use_adaptive_filter = FALSE,
-    plot_clutter_model = FALSE,
-    clutter_width_mps = 0.75,
-    use_regression_filter = TRUE,
-    regression_order = 3,
-    regression_filter_interp_across_notch = TRUE
-  }
-  ,
-  {
-    plot_type = I_VS_Q,
-    rx_channel = CHANNEL_HC,
-    fft_window = FFT_WINDOW_VONHANN,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
     clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
     regression_order = 3,
@@ -935,11 +1324,38 @@ iqplots = {
   }
   ,
   {
-    plot_type = PHASOR,
+    plot_type = SPECTRAL_POWER,
+    rx_channel = CHANNEL_VC,
+    fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 1,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = SPECTRAL_ZDR,
     rx_channel = CHANNEL_HC,
     fft_window = FFT_WINDOW_VONHANN,
-    use_adaptive_filter = TRUE,
-    plot_clutter_model = FALSE,
+    median_filter_len = 1,
+    use_adaptive_filter = FALSE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = SPECTRAL_PHIDP,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    median_filter_len = 1,
+    use_adaptive_filter = FALSE,
+    plot_clutter_model = TRUE,
     clutter_width_mps = 0.75,
     use_regression_filter = FALSE,
     regression_order = 3,
@@ -1109,7 +1525,7 @@ iqplot_axis_label_color = "white";
 // Type: string
 //
 
-iqplot_title_color = "orange";
+iqplot_title_color = "white";
 
 ///////////// iqplot_axes_color ///////////////////////
 //
@@ -1169,7 +1585,7 @@ iqplot_line_color = "yellow";
 // Type: int
 //
 
-iqplot_line_width = 1;
+iqplot_line_width = 2;
 
 ///////////// iqplot_adaptive_filtered_color //////////
 //
@@ -1369,300 +1785,6 @@ iqplot_legend2_pos = LEGEND_TOP_LEFT;
 //
 
 iqplot_plot_legend2 = TRUE;
-
-//======================================================================
-//
-// WATERFALL DISPLAY PANEL.
-//
-// The waterfall plots show spectra plotted against range.
-//
-//======================================================================
- 
-///////////// waterfall_n_panels //////////////////////
-//
-// Number of waterfall panels in spectra window (pixels).
-//
-// The waterfalls will be on the left of the plot. Set to 0 for no 
-//   WATERFALL panel.
-//
-//
-// Type: int
-//
-
-waterfall_n_panels = 1;
-
-///////////// waterfall_moments ///////////////////////
-//
-// Moments to be displaed on waterfall panels.
-//
-// The number of specified moments must match the number of waterfall 
-//   panels.
-//
-//
-// Type: enum
-// Options:
-//     DBZ
-//     VEL
-//     WIDTH
-//     NCP
-//     SNR
-//     DBM
-//     ZDR
-//     LDR
-//     RHOHV
-//     PHIDP
-//     KDP
-// 1D array - variable length.
-//
-
-waterfall_moments = {
- VEL
-};
-
-///////////// waterfall_width /////////////////////////
-//
-// Width of WATERFALL panel in spectra window (pixels).
-//
-// The WATERFALL will be on the left of the plot. Set to 0 for no 
-//   WATERFALL panel.
-//
-//
-// Type: int
-//
-
-waterfall_width = 150;
-
-///////////// waterfall_title_font_size ///////////////
-//
-// Font size of center title (pixels).
-//
-//
-// Type: int
-//
-
-waterfall_title_font_size = 10;
-
-///////////// waterfall_axis_label_font_size //////////
-//
-// Font size of axis labels in waterfall (pixels).
-//
-//
-// Type: int
-//
-
-waterfall_axis_label_font_size = 8;
-
-///////////// waterfall_tick_values_font_size /////////
-//
-// Font size of axis tick values (pixels).
-//
-//
-// Type: int
-//
-
-waterfall_tick_values_font_size = 6;
-
-///////////// waterfall_legend_font_size //////////////
-//
-// Font size for plot legends (pixels).
-//
-//
-// Type: int
-//
-
-waterfall_legend_font_size = 6;
-
-///////////// waterfall_title_text_margin /////////////
-//
-// Margin around title text (pixels).
-//
-//
-// Type: int
-//
-
-waterfall_title_text_margin = 3;
-
-///////////// waterfall_legend_text_margin ////////////
-//
-// Margin around legend text (pixels).
-//
-//
-// Type: int
-//
-
-waterfall_legend_text_margin = 3;
-
-///////////// waterfall_axis_text_margin //////////////
-//
-// Margin around axis text (pixels).
-//
-//
-// Type: int
-//
-
-waterfall_axis_text_margin = 2;
-
-///////////// waterfall_axis_tick_len /////////////////
-//
-// Length of ticks on axes (pixels).
-//
-//
-// Type: int
-//
-
-waterfall_axis_tick_len = 4;
-
-///////////// waterfall_n_ticks_ideal /////////////////
-//
-// Ideal number of ticks on axes.
-//
-//
-// Type: int
-//
-
-waterfall_n_ticks_ideal = 5;
-
-///////////// waterfall_left_margin ///////////////////
-//
-// Width of left margin for waterfall plot (pixels).
-//
-// The Y axis labels are plotted here.
-//
-//
-// Type: int
-//
-
-waterfall_left_margin = 18;
-
-///////////// waterfall_bottom_margin /////////////////
-//
-// Height of bottom margin for waterfall plot (pixels).
-//
-// The X axis labels are plotted here.
-//
-//
-// Type: int
-//
-
-waterfall_bottom_margin = 18;
-
-///////////// waterfall_x_grid_lines_on ///////////////
-//
-// Option to draw grid lines in the X direction.
-//
-//
-// Type: boolean
-//
-
-waterfall_x_grid_lines_on = TRUE;
-
-///////////// waterfall_y_grid_lines_on ///////////////
-//
-// Option to draw grid lines in the Y direction.
-//
-//
-// Type: boolean
-//
-
-waterfall_y_grid_lines_on = TRUE;
-
-///////////// waterfall_axis_label_color //////////////
-//
-// Color of waterfall axis labels.
-//
-//
-// Type: string
-//
-
-waterfall_axis_label_color = "white";
-
-///////////// waterfall_axes_color ////////////////////
-//
-// Color of axes in waterfall.
-//
-//
-// Type: string
-//
-
-waterfall_axes_color = "green";
-
-///////////// waterfall_grid_color ////////////////////
-//
-// Color of grid lines on waterfall.
-//
-//
-// Type: string
-//
-
-waterfall_grid_color = "gray";
-
-///////////// waterfall_line_color ////////////////////
-//
-// Color of waterfall line.
-//
-//
-// Type: string
-//
-
-waterfall_line_color = "lightgray";
-
-///////////// waterfall_selected_range_color //////////
-//
-// Color of line showing currently selected range.
-//
-// The user can double click in the waterfall to move this line.
-//
-//
-// Type: string
-//
-
-waterfall_selected_range_color = "cyan";
-
-///////////// waterfall_fill_color ////////////////////
-//
-// Color of waterfall fill.
-//
-//
-// Type: string
-//
-
-waterfall_fill_color = "darkgreen";
-
-///////////// waterfall_title_color ///////////////////
-//
-// Color of waterfall title.
-//
-//
-// Type: string
-//
-
-waterfall_title_color = "yellow";
-
-///////////// waterfall_x_axis_labels_inside //////////
-//
-// Location of tick labels, relative to x axis.
-//
-// These can either be outside the axes, or inside - i.e. within the 
-//   data area of the plot.
-//
-//
-// Type: boolean
-//
-
-waterfall_x_axis_labels_inside = FALSE;
-
-///////////// waterfall_y_axis_labels_inside //////////
-//
-// Location of tick labels, relative to y axis.
-//
-// These can either be outside the axes, or inside - i.e. within the 
-//   data area of the plot.
-//
-//
-// Type: boolean
-//
-
-waterfall_y_axis_labels_inside = FALSE;
 
 //======================================================================
 //
@@ -2103,7 +2225,7 @@ indexed_beams = TRUE;
 // Type: double
 //
 
-indexed_resolution_ppi = 1;
+indexed_resolution_ppi = 0.5;
 
 ///////////// indexed_resolution_rhi //////////////////
 //
@@ -2361,7 +2483,7 @@ fft_window = FFT_WINDOW_VONHANN;
 // Type: string
 //
 
-cal_file_path = "./testing/spol_cal.xml";
+cal_file_path = "./spol_cal.xml";
 
 ///////////// use_cal_from_time_series ////////////////
 //
@@ -2428,5 +2550,5 @@ click_point_search_angle_error = 10;
 // Type: double
 //
 
-click_point_delta_azimuth_deg = 1;
+click_point_delta_azimuth_deg = 0.25;
 
