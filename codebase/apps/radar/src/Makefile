@@ -54,6 +54,7 @@ SUB_DIRS = \
 	RapMap2Chill \
 	SimCpCompute \
 	SpectraPrint \
+	Sprite \
 	StaggeredLimits \
 	SunCal \
 	SunCpCompute \
