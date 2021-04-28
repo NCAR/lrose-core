@@ -628,9 +628,13 @@ public:
 
   int waterfall_color_scale_width;
 
-  int waterfall_sdev_zdr_kernel_size;
+  int waterfall_sdev_zdr_kernel_ngates;
 
-  int waterfall_sdev_phidp_kernel_size;
+  int waterfall_sdev_zdr_kernel_nsamples;
+
+  int waterfall_sdev_phidp_kernel_ngates;
+
+  int waterfall_sdev_phidp_kernel_nsamples;
 
   char* color_scale_dir;
 
@@ -882,7 +886,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[204];
+  mutable TDRPtable _table[206];
 
   const char *_className;
 

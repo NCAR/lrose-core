@@ -1664,28 +1664,52 @@
     tt->single_val.i = 30;
     tt++;
     
-    // Parameter 'waterfall_sdev_zdr_kernel_size'
+    // Parameter 'waterfall_sdev_zdr_kernel_ngates'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_sdev_zdr_kernel_size");
-    tt->descr = tdrpStrDup("Kernal size (ngates, nsamples) for computing sdev of zdr");
-    tt->help = tdrpStrDup("The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel.");
-    tt->val_offset = (char *) &waterfall_sdev_zdr_kernel_size - &_start_;
+    tt->param_name = tdrpStrDup("waterfall_sdev_zdr_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernal size in range for computing sdev of zdr");
+    tt->help = tdrpStrDup("The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &waterfall_sdev_zdr_kernel_ngates - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'waterfall_sdev_phidp_kernel_size'
+    // Parameter 'waterfall_sdev_zdr_kernel_nsamples'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_sdev_phidp_kernel_size");
-    tt->descr = tdrpStrDup("Kernal size (ngates, nsamples) for computing sdev of phidp");
-    tt->help = tdrpStrDup("The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel.");
-    tt->val_offset = (char *) &waterfall_sdev_phidp_kernel_size - &_start_;
+    tt->param_name = tdrpStrDup("waterfall_sdev_zdr_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernal size in samples for computing sdev of zdr");
+    tt->help = tdrpStrDup("The standard deviation of ZDR is computed over a rectangular kernel. This is the number of samples in that kernel.");
+    tt->val_offset = (char *) &waterfall_sdev_zdr_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'waterfall_sdev_phidp_kernel_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_sdev_phidp_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernal size in range for computing sdev of phidp");
+    tt->help = tdrpStrDup("The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &waterfall_sdev_phidp_kernel_ngates - &_start_;
     tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'waterfall_sdev_phidp_kernel_nsamples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_sdev_phidp_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernal size in samples for computing sdev of phidp");
+    tt->help = tdrpStrDup("The standard deviation of PHIDP is computed over a rectangular kernel. This is the number of samples in that kernel.");
+    tt->val_offset = (char *) &waterfall_sdev_phidp_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
     tt++;
     
     // Parameter 'color_scale_dir'

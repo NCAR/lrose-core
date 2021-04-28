@@ -786,8 +786,8 @@ void WaterfallPlot::_plotSdevZdr(QPainter &painter,
   
   TaArray2D<double> sdev2D_;
   double **sdev2D = sdev2D_.alloc(nGates, nSamples);
-  int nSamplesSdev = min(_params.waterfall_sdev_zdr_kernel_size, nSamples);
-  int nGatesSdev = min(_params.waterfall_sdev_zdr_kernel_size, nGates);
+  int nSamplesSdev = min(_params.waterfall_sdev_zdr_kernel_nsamples, nSamples);
+  int nGatesSdev = min(_params.waterfall_sdev_zdr_kernel_ngates, nGates);
   int nSamplesSdevHalf = nSamplesSdev / 2;
   int nGatesSdevHalf = nGatesSdev / 2;
   
@@ -925,8 +925,8 @@ void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
 
   TaArray2D<double> sdev2D_;
   double **sdev2D = sdev2D_.alloc(nGates, nSamples);
-  int nSamplesSdev = min(_params.waterfall_sdev_phidp_kernel_size, nSamples);
-  int nGatesSdev = min(_params.waterfall_sdev_phidp_kernel_size, nGates);
+  int nSamplesSdev = min(_params.waterfall_sdev_phidp_kernel_nsamples, nSamples);
+  int nGatesSdev = min(_params.waterfall_sdev_phidp_kernel_ngates, nGates);
   int nSamplesSdevHalf = nSamplesSdev / 2;
   int nGatesSdevHalf = nGatesSdev / 2;
   

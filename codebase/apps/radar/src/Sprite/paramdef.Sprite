@@ -501,15 +501,27 @@ paramdef int {
 
 paramdef int {
   p_default = 5;
-  p_descr = "Kernal size (ngates, nsamples) for computing sdev of zdr";
-  p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel.";
-} waterfall_sdev_zdr_kernel_size;
+  p_descr = "Kernal size in range for computing sdev of zdr";
+  p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel in range.";
+} waterfall_sdev_zdr_kernel_ngates;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernal size in samples for computing sdev of zdr";
+  p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the number of samples in that kernel.";
+} waterfall_sdev_zdr_kernel_nsamples;
 
 paramdef int {
   p_default = 5;
-  p_descr = "Kernal size (ngates, nsamples) for computing sdev of phidp";
-  p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel.";
-} waterfall_sdev_phidp_kernel_size;
+  p_descr = "Kernal size in range for computing sdev of phidp";
+  p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel in range.";
+} waterfall_sdev_phidp_kernel_ngates;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernal size in samples for computing sdev of phidp";
+  p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the number of samples in that kernel.";
+} waterfall_sdev_phidp_kernel_nsamples;
 
 paramdef string {
   p_default = "../share/color_scales";
