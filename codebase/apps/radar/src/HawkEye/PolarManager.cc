@@ -278,11 +278,11 @@ void PolarManager::timerEvent(QTimerEvent *event)
       if (_params.debug) {
         cerr << "====>> gotNewClickInfo" << endl;
       }
-    }
-    if (_ppi) {
-      _ppi->setClickPoint(_clickPointFmq.getAzimuth(),
-                          _clickPointFmq.getElevation(),
-                          _clickPointFmq.getRangeKm());
+      if (_ppi) {
+        _ppi->setClickPoint(_clickPointFmq.getAzimuth(),
+                            _clickPointFmq.getElevation(),
+                            _clickPointFmq.getRangeKm());
+      }
     }
   }
 
