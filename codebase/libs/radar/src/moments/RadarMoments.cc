@@ -4310,6 +4310,9 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 
   spectralNoise = _spectralNoise;
   spectralSnr = (spectralNoise - calibratedNoise) / calibratedNoise;
+  if (spectralSnr < 0) {
+    spectralSnr = 1.0e-99;
+  }
   filterRatio = rawPower / filteredPower;
   
   if (powerRemoved > 0) {
