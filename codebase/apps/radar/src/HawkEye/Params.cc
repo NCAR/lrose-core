@@ -1373,6 +1373,18 @@
     tt->single_val.i = 8;
     tt++;
     
+    // Parameter 'click_cross_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("click_cross_color");
+    tt->descr = tdrpStrDup("Color of cross at click point.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &click_cross_color - &_start_;
+    tt->single_val.s = tdrpStrDup("cyan");
+    tt++;
+    
     // Parameter 'click_cross_size'
     // ctype is 'int'
     
@@ -1383,6 +1395,18 @@
     tt->help = tdrpStrDup("Size of cross drawn at click point, to select data.");
     tt->val_offset = (char *) &click_cross_size - &_start_;
     tt->single_val.i = 11;
+    tt++;
+    
+    // Parameter 'click_cross_line_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("click_cross_line_width");
+    tt->descr = tdrpStrDup("Line width for click cross.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &click_cross_line_width - &_start_;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'Comment 10'

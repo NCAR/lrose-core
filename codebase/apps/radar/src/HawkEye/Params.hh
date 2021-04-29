@@ -527,7 +527,11 @@ public:
 
   int range_ring_label_font_size;
 
+  char* click_cross_color;
+
   int click_cross_size;
+
+  int click_cross_line_width;
 
   ppi_display_type_t ppi_display_type;
 
@@ -749,7 +753,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[170];
+  mutable TDRPtable _table[172];
 
   const char *_className;
 

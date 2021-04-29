@@ -725,6 +725,12 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     int startY = _mouseReleaseY - _params.click_cross_size / 2;
     int endY = _mouseReleaseY + _params.click_cross_size / 2;
 
+    QPen pen(painter.pen());
+    pen.setColor(_params.click_cross_color);
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.click_cross_line_width);
+    painter.setPen(pen);
+
     painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
     painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
 

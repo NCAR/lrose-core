@@ -426,11 +426,21 @@ paramdef int {
   p_descr = "Font size for labels on range rings (pixels).";
 } range_ring_label_font_size;
 
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of cross at click point.";
+} click_cross_color;
+
 paramdef int {
   p_default = 11;
   p_descr = "Size of cross at click point (pixels).";
   p_help = "Size of cross drawn at click point, to select data.";
 } click_cross_size;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Line width for click cross.";
+} click_cross_line_width;
 
 commentdef {
   p_header = "PPI MODE DISPLAY";
