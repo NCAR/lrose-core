@@ -301,19 +301,21 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   moments.setClutterWidthMps(_clutWidthMps);
   moments.setClutterInitNotchWidthMps(3.0);
   
-  double adaptPower = 0.0;
+  double adaptPower = 1.0e-12;
+  double adaptSpectralSnr = 1.0e-12;
+
   if (_useAdaptFilt) {
     
     TaArray<RadarComplex_t> filtAdaptWindowed_;
     RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
-    double filterRatio, spectralNoise, spectralSnr;
+    double filterRatio, spectralNoise;
     moments.applyAdaptiveFilter(nSamples, fft,
                                 iqWindowed, NULL,
                                 calibNoise,
                                 filtAdaptWindowed, NULL,
                                 filterRatio,
                                 spectralNoise,
-                                spectralSnr);
+                                adaptSpectralSnr);
     
     TaArray<RadarComplex_t> filtAdaptSpec_;
     RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(nSamples);
@@ -536,11 +538,14 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     double adaptClutPower = totalPower - adaptPower;
     double adaptPowerDbm = 10.0 * log10(adaptPower);
     double adaptClutPowerDbm = 10.0 * log10(adaptClutPower);
+    double adaptSpectralSnrDb = 10.0 * log10(adaptSpectralSnr);
     snprintf(text, 1024, "AdaptFiltPower: %.2f", adaptPowerDbm);
     legendsRight.push_back(text);
     snprintf(text, 1024, "AdaptClutPower: %.2f", adaptClutPowerDbm);
     legendsRight.push_back(text);
     snprintf(text, 1024, "AdaptCSR: %.2f", adaptClutPowerDbm - adaptPowerDbm);
+    legendsRight.push_back(text);
+    snprintf(text, 1024, "AdaptSpecSNR: %.2f", adaptSpectralSnrDb);
     legendsRight.push_back(text);
   }
   if (_useRegrFilt) {

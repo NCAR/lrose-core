@@ -801,6 +801,16 @@ grid_and_range_ring_color = "white";
 
 range_ring_label_font_size = 8;
 
+///////////// click_cross_color ///////////////////////
+//
+// Color of cross at click point.
+//
+//
+// Type: string
+//
+
+click_cross_color = "cyan";
+
 ///////////// click_cross_size ////////////////////////
 //
 // Size of cross at click point (pixels).
@@ -811,7 +821,17 @@ range_ring_label_font_size = 8;
 // Type: int
 //
 
-click_cross_size = 11;
+click_cross_size = 15;
+
+///////////// click_cross_line_width //////////////////
+//
+// Line width for click cross.
+//
+//
+// Type: int
+//
+
+click_cross_line_width = 2;
 
 //======================================================================
 //
