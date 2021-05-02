@@ -76,8 +76,312 @@ paramdef string {
 } output_dir;
 
 commentdef {
-  p_header = "INTERPOLATION MODE";
+  p_header = "INPUT FIELD INFORMATION for computing KDP, PID and RATE.";
+  p_text = "Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. If SNR is not available, it is computed from DBZ.";
 }
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is SNR data available?";
+  p_help = "If not, SNR will be computed from the DBZ field. See 'noise_dbz_at_100km'.";
+} SNR_available;
+
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Field name for SNR.";
+  p_help = "Signal-to-noise ratio (dB).";
+} SNR_field_name;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "The noise value, represented as dBZ at a range of 100km.";
+  p_help = "This is used for computing the SNR from the DBZ field. It is only used if SNR_available is FALSE. The SNR will be computed by range-correcting this value and using it as the noise value.";
+} noise_dbz_at_100km;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for DBZ.";
+  p_help = "Horizontally-polarized reflectivity factor.";
+} DBZ_field_name;
+
+paramdef string {
+  p_default = "ZDR";
+  p_descr = "Field name for ZDR.";
+} ZDR_field_name;
+
+paramdef string {
+  p_default = "PHIDP";
+  p_descr = "Field name for PHIDP.";
+} PHIDP_field_name;
+
+paramdef string {
+  p_default = "RHOHV";
+  p_descr = "Field name for RHOHV.";
+} RHOHV_field_name;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is LDR data available?";
+} LDR_available;
+
+paramdef string {
+  p_default = "LDR";
+  p_descr = "Field name for LDR.";
+} LDR_field_name;
+    
+commentdef {
+  p_header = "COMPUTING KDP";
+}
+
+paramdef string {
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for computing KDP.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} KDP_params_file_path;
+
+commentdef {
+  p_header = "COMPUTING PID";
+}
+
+paramdef string {
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for computing PID.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} PID_params_file_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When computing PID, using KDP conditioned for self-consistency.";
+  p_help = "When KDP is computed, we compute both a standard result, and a conditioned result based on the self-consistency method. If this parameter is set to TRUE, the self-consistency result will be used instead of the standard result.";
+} PID_use_KDP_self_consistency;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use Z and ZDR fields that are corrected for attenuation.";
+  p_help = "If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PID.";
+} PID_use_attenuation_corrected_fields;
+
+commentdef {
+  p_header = "COMPUTING PRECIP RATE";
+}
+
+paramdef string {
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for computing PRECIP.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} RATE_params_file_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "When computing PRECIP, using KDP conditioned for self-consistency.";
+  p_help = "When KDP is computed, we compute both a standard result, and a conditioned result based on the self-consistency method. If this parameter is set to TRUE, the self-consistency result will be used instead of the standard result.";
+} RATE_use_KDP_self_consistency;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to use Z and ZDR fields that are corrected for attenuation.";
+  p_help = "If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PRECIP.";
+} RATE_use_attenuation_corrected_fields;
+
+commentdef {
+  p_header = "SPECIFYING PID OUTPUT FIELDS";
+}
+
+typedef enum {
+
+  RATE_ZH,
+  RATE_ZH_SNOW,
+  RATE_Z_ZDR,
+  RATE_KDP,
+  RATE_KDP_ZDR,
+  RATE_HYBRID,
+  RATE_PID,
+  RATE_HIDRO,
+  RATE_BRINGI,
+
+  PID,
+  PID_INTEREST,
+  TEMP_FOR_PID,
+
+  KDP,
+  KDP_SC,
+
+  DBZ_ATTEN_CORRECTION,
+  ZDR_ATTEN_CORRECTION,
+  DBZ_ATTEN_CORRECTED,
+  ZDR_ATTEN_CORRECTED
+
+} pid_output_field_id_t;
+
+typedef struct {
+  pid_output_field_id_t id;
+  string name; 
+  string long_name; 
+  string standard_name; 
+  string units;
+  boolean do_write;
+} pid_output_field_t;
+
+paramdef struct pid_output_field_t {
+  p_default = {
+    {
+      id = RATE_ZH,
+      name = "RATE_ZH",
+      long_name = "precip_rate_from_z",
+      standard_name = "precip_rate_from_z",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = RATE_ZH_SNOW,
+      name = "RATE_ZH_SNOW",
+      long_name = "precip_rate_from_z_for_snow",
+      standard_name = "precip_rate_from_z_for_snow",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = RATE_Z_ZDR,
+      name = "RATE_Z_ZDR",
+      long_name = "precip_rate_from_z_and_zdr",
+      standard_name = "precip_rate_from_z_and_zdr",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = RATE_KDP,
+      name = "RATE_KDP",
+      long_name = "precip_rate_from_kdp",
+      standard_name = "precip_rate_from_kdp",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = RATE_KDP_ZDR,
+      name = "RATE_KDP_ZDR",
+      long_name = "precip_rate_from_kdp_and_zdr",
+      standard_name = "precip_rate_from_kdp_and_zdr",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = RATE_HYBRID,
+      name = "RATE_HYBRID",
+      long_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+      standard_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = RATE_PID,
+      name = "RATE_PID",
+      long_name = "precip_rate_based_on_pid",
+      standard_name = "precip_rate_based_on_pid",
+      units = "mm/hr",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PID,
+      name = "PID",
+      long_name = "particle_id",
+      standard_name = "hydrometeor_type",
+      units = "",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = PID_INTEREST,
+      name = "PID_INTEREST",
+      long_name = "final_interest_value_for_pid_decision",
+      standard_name = "final_interest_value_for_pid_decision",
+      units = "",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = TEMP_FOR_PID,
+      name = "TEMP_FOR_PID",
+      long_name = "temperature_for_computing_pid",
+      standard_name = "temperature",
+      units = "C",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = KDP,
+      name = "KDP",
+      long_name = "specific_differential_phase",
+      standard_name = "specific_differential_phase_hv",
+      units = "deg/km",
+      do_write = TRUE
+    }
+    ,
+    {
+      id = KDP_SC,
+      name = "KDP_SC",
+      long_name = "kdp_conditioned_using_ZZDR_self_consistency",
+      standard_name = "specific_differential_phase_hv",
+      units = "deg/km",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = ZDR_ATTEN_CORRECTION,
+      name = "ZDR_ATTEN_CORRECTION",
+      long_name = "correction_to_zdr_for_attenuation",
+      standard_name = "zdr_attenuation_correction",
+      units = "dB",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = DBZ_ATTEN_CORRECTED,
+      name = "DBZ_ATTEN_CORRECTED",
+      long_name = "dbz_corrected_for_attenuation",
+      standard_name = "dbz_corrected_for_attenuation",
+      units = "dBZ",
+      do_write = FALSE
+    }
+    ,
+    {
+      id = ZDR_ATTEN_CORRECTED,
+      name = "ZDR_ATTEN_CORRECTED",
+      long_name = "zdr_corrected_for_attenuation",
+      standard_name = "zdr_corrected_for_attenuation",
+      units = "dB",
+      do_write = FALSE
+    }
+  };
+  p_descr = "Indicate which fields should be written to the output file.";
+  p_help = "Choose the ID from the list.\n"
+    "\nThe name and units can be set however the user prefers.\n"
+    "\nThe output_encoding apply to CfRadial output only. \n\n"
+    "\tRATE_ZH: Precip rate from ZH\n"
+    "\tRATE_ZH_SNOW: Precip rate from ZH in dry snow\n"
+    "\tRATE_Z_ZDR: Precip rate from Z and ZDR\n"
+    "\tRATE_KDP: Precip rate from KDP\n"
+    "\tRATE_KDP_ZDR: Precip rate from KDP and ZDR\n"
+    "\tRATE_HYBRID: Precip rate from NCAR hybrid\n"
+    "\tRATE_PID: Precip rate using PID to select the appropriate rate\n"
+    "\tRATE_HIDRO: Precip rate using CSU HIDRO hybrid\n"
+    "\tRATE_BRINGI: Precip rate using Bringi hybrid\n"
+    "\tPID: NCAR Particle ID\n"
+    "\tPID_INTEREST: final interest map for NCAR Particle ID values\n"
+    "\tTEMP_FOR_PID: temperature field for PID (C)\n"
+    "\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n"
+    "\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n"
+    "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
+    "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
+    "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"
+    "\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n";
+} pid_output_fields[];
 
 commentdef {
   p_header = "INTERPOLATION OPTIONS";
@@ -313,30 +617,38 @@ paramdef double {
 } grid_offset_origin_longitude;
 
 commentdef {
-  p_header = "SPECIFYING ADDITIONAL FIELDS FOR INTERPOLATION";
-  p_text = "By default, all fields in the input files will be interpolated. If you want to select individual fields to be interpolated, specify them here.";
+  p_header = "SPECIFY COPY-THROUGH FIELDS";
+  p_text = "These input fields are read from the input file and added to the interpolated output. This allows the user to consolidate the input and output data set in a single file.";
 }
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Option to select the fields for interpolation.";
-  p_help = "If FALSE, all fields will be processed.";
-} select_fields;
+  p_descr = "Option to copy input fields unchanged to the output file.";
+} copy_selected_input_fields_to_output;
 
 typedef struct {
-  string input_name;
-  boolean process_this_field;
-} select_field_t;
+  string input_name; 
+  string output_name;
+  boolean censor_non_weather;
+} copy_field_t;
 
-paramdef struct select_field_t {
-  p_default = { 
-    { "DBZ", TRUE },
-    { "VEL", TRUE },
-    { "WIDTH", FALSE }
+paramdef struct copy_field_t {
+  p_default = {
+    {
+      input_name = "DBZ",
+      output_name = "DBZ",
+      censor_non_weather = FALSE
+    }
+    ,
+    {
+      input_name = "VEL",
+      output_name = "VEL",
+      censor_non_weather = FALSE
+    }
   };
-  p_descr = "Select the list of fields to be processed.";
-  p_help = "See 'select_fields'. You specify the list of field names to be processed. In addition you need to set 'process_this_field' to TRUE or FALSE. This is provided as a convenience, so that you can select or deselect fields without having to change the list.";
-} selected_fields[];
+  p_descr = "These fields are copied through unchanged to the output file.";
+  p_help = "You can change the name of the field on output. Optionally you can censor the non-weather echoes, based on the PID.";
+} copy_fields[];
 
 commentdef {
   p_header = "TRANSFORMING FIELDS FOR INTERPOLATION";
@@ -448,31 +760,6 @@ paramdef struct discrete_field_t {
   p_descr = "Use this to set the 'is_discrete' flag on a field.";
   p_help = "If this is specified, nearest neighbor will be used for this field. You can use this to override the is_discrete flag on a field in the input file.\n\nNOTE: 'input_name' for this step refers to the 'input_name' in 'select_fields' and 'output_name' in 'transform_fields'. This step is performed prior to renaming fields (see below).";
 } discrete_fields[];
-
-commentdef {
-  p_header = "OPTION TO RENAME FIELDS ON OUTPUT";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to rename some or all of the fields when they are written out.";
-  p_help = "If FALSE, no fields will be renamed.";
-} rename_fields;
-
-typedef struct {
-  string input_name;
-  string output_name;
-} rename_field_t;
-
-paramdef struct rename_field_t {
-  p_default = { 
-    { "DBZ", "DBZ_S" },
-    { "VEL", "VEL_S" },
-    { "WIDTH", "WIDTH_S" }
-  };
-  p_descr = "Specify the list of fields to be renamed.";
-  p_help = "Only applies if 'rename_fields' is TRUE.\n\nThe field name is changed from 'input_name' to 'output_name'.\n\nNOTE: for transformed fields (see previous section), 'input_name' in 'renamed_fields' matches 'output_name' in 'transform_fields'. The transform occurs first, and then the fields are renamed.";
-} renamed_fields[];
 
 commentdef {
   p_header = "OPTION TO ADD GEOMETRY AND TIME FIELDS";
@@ -633,30 +920,6 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = false;
-  p_descr = "Option to aggregate sweep files into a volume on read.";
-  p_help = "If true, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.";
-} aggregate_sweep_files_on_read;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to ignore data taken in IDLE mode.";
-  p_help = "If true, on read will ignore files with an IDLE scan mode.";
-} ignore_idle_scan_mode_on_read;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to remove rays taken while the antenna was in transition.";
-  p_help = "If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.";
-} remove_rays_with_antenna_transitions;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Number of transition rays to include as a margin";
-  p_help =  "Sometimes the transition flag is turned on too early in a transition, on not turned off quickly enough after a transition. If you set this to a number greater than 0, that number of rays will be included at each end of the transition, i.e. the transition will effectively be shorter at each end by this number of rays.";
-} transition_nrays_margin;
-
-paramdef boolean {
   p_default = true;
   p_descr = "Option to remove long range rays.";
   p_help = "Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be removed.";
@@ -693,22 +956,6 @@ paramdef boolean {
 } compute_sweep_angles_from_vcp_tables;
 
 commentdef {
-  p_header = "OPTION TO CORRECT TIME";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to apply an offset to the ray times.";
-  p_help = "If TRUE, this offset will be ADDED to the existing ray times. This is useful, for example, for correcting time errors, or converting from local time to UTC.";
-} apply_time_offset;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Time offset (secs).";
-  p_help = "See 'apply_time_offset'. This value will be ADDED to the existing ray times.";
-} time_offset_secs;
-
-commentdef {
   p_header = "SETTING LIMITS ON THE VALID DATA";
 }
 
@@ -722,86 +969,6 @@ paramdef double {
   p_descr = "Specified maximim range - km.";
   p_help = "Gates beyond this range are removed.";
 } max_range_km;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set elevation angle limits";
-  p_help = "Only use rays within the specified elevation angle limits.";
-} set_elevation_angle_limits;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Lower elevation angle limit (deg).";
-} lower_elevation_angle_limit;
-
-paramdef double {
-  p_default = 90;
-  p_descr = "Upper elevation angle limit (deg).";
-} upper_elevation_angle_limit;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set azimuth angle limits.";
-  p_help = "Only use rays within the specified azimuth angle limits. This essentially specifies a sector for valid data. Rays outside this sector are ignored.";
-} set_azimuth_angle_limits;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Counter-clockwise azimuth angle limit (deg).";
-  p_help = "This is the azimuth limit at the lower (counter clockwise) end of the sector. For azimuths to the west of north, use values between 180 and 360.";
-} lower_azimuth_angle_limit;
-
-paramdef double {
-  p_default = 360;
-  p_descr = "Clockwise azimuth angle limit (deg).";
-  p_help = "This is the azimuth limit at the upper (clockwise) end of the sector.";
-} upper_azimuth_angle_limit;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to limit the fixed angle error to a specfied maximum value.";
-  p_help = "If true, we compute the error between the actual pointing angle and the fixed angle for the sweep. If the error exceeds the specified limit, we reject the ray. For PPIs, we check th elevation angle against the fixed angle. For RHIs, we check the azimuth against the fixed angle.";
-} check_fixed_angle_error;
-
-paramdef double {
-  p_default = 2.0;
-  p_descr = "Maximum permissable error in the pointing angle (deg).";
-  p_help = "See 'check_fixed_angle'.";
-} max_fixed_angle_error;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to check that the file has a minimum number of sweeps";
-  p_help = "See 'min_number_of_sweeps'.";
-} check_number_of_sweeps;
-
-paramdef double {
-  p_default = 1;
-  p_descr = "Minimum number of sweeps for valid file.";
-  p_help = "Applies if 'check_number_of_sweeps' is true. Only process files with this number of sweeps, or more.";
-} min_number_of_sweeps;
-
-commentdef {
-  p_header = "OPTION TO OVERRIDE VOLUME NUMBER, OR AUTOINCREMENT";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the volume number in the file.";
-  p_help = "Useful is there is no volume number in the data.";
-} override_volume_number;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Volume number at startup.";
-  p_help = "Applies if 'override_volume_number' is true.";
-} starting_volume_number;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to automatically increment the volume number.";
-  p_help = "Starts at 'starting_volume_number' and increments from there.";
-} autoincrement_volume_number;
 
 commentdef {
   p_header = "OPTION TO OVERRIDE RADAR LOCATION";
@@ -906,23 +1073,6 @@ paramdef double {
 } gate_spacing_km;
 
 commentdef {
-  p_header = "OPTION TO APPLY ANGLE CORRECTIONS";
-  p_text = "This section allows you to correct the azimuth and/or elevation angles for a known error.";
-}
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Add this value to the azimuth.";
-  p_help = "Normally only used for testing, but can be used if there is a constant azimuth error in the data.";
-} azimuth_correction_deg;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Add this value to the elevation.";
-  p_help = "Normally only used for testing, but can be used if there is a constant elevation error in the data.";
-} elevation_correction_deg;
-
-commentdef {
   p_header = "CF NetCDF OUTPUT DETAILS";
 }
 
@@ -939,7 +1089,7 @@ paramdef string {
 } output_filename;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "If true, name the output file using the start time.";
   p_help = "If false, the end time is used, in the MDV tradition.";
 } name_file_from_start_time;
@@ -959,59 +1109,6 @@ paramdef boolean {
   p_descr = "If true the output filename uses the prefix, followed by ISO 8601 timestamp convention";
   p_help = "eg. prefix.2008-05-22T14:00:00.nc";
 } use_iso8601_filename_convention;
-
-commentdef {
-  p_header = "NETCDF COMPRESSION";
-}
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to compress data fields on output.";
-  p_help = "Applies to CfRadial netCDF and Dorade.";
-} netcdf_compressed;
-
-paramdef int {
-  p_default = 4;
-  p_min = 1;
-  p_max = 9;
-  p_descr = "Level of compression for output data.";
-  p_help = "Valid range is 1 through 9. 1 gives lowest compression, 9 highest. 4 is a good compromise between speed and compression efficiency. Only applies to NetCDF file format.";
-} netcdf_compression_level;
-
-commentdef {
-  p_header = "NETCDF STYLE";
-}
-
-typedef enum {
-  CLASSIC, 
-  NC64BIT, 
-  NETCDF4_CLASSIC, 
-  NETCDF4
-} netcdf_style_t;
-
-paramdef enum netcdf_style_t {
-  p_default = NETCDF4;
-  p_descr = "NetCDF style - if output_format is CFRADIAL";
-  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
-} netcdf_style;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "If true latitude and longitude arrays of each grid point are output";
-  p_help = "The CF convention requires that these arrays are present in the netCDF file; however, the information is redundant since the lat and lon arrays could be constructed using the other projection and grid information required with a gridded data field";
-} netcdf_include_latlon_arrays;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to output non-CF compliant MDV attributes.";
-  p_help = "If true, MDV attributes which are not CF compliant will be output. This will facilitate the translation of the data back into MDV with the minimal loss of information.";
-} netcdf_output_mdv_attributes;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to output non-CF compliant MDV chunks.";
-  p_help = "If true, MDV chunks will be included as byte binary variables. This will also write the radar parameters, e.g. location, gate spacing, etc. - to the global attributes.";
-} netcdf_output_mdv_chunks;
 
 paramdef string {
   p_default = "SPOL radar data";
@@ -1066,7 +1163,7 @@ commentdef {
 paramdef boolean {
   p_default = true;
   p_descr = "Option to free up memory between each new file.";
-  p_help = "If true, we free up as much memory as possible between handling the files. If false, we reduse allocated memory to the extent possible.";
+  p_help = "If true, we free up as much memory as possible between handling the files. If false, we reduce allocated memory to the extent possible.";
 } free_memory_between_files;
 
 commentdef {

@@ -105,13 +105,6 @@ Pid2Grid::Pid2Grid(int argc, char **argv)
     }
   }
 
-  // volume number
-
-  if (_params.override_volume_number ||
-      _params.autoincrement_volume_number) {
-    _volNum = _params.starting_volume_number;
-  }
-
 }
 
 //////////////////////////////////////
@@ -216,9 +209,6 @@ int Pid2Grid::_runArchive()
   RadxTimeList tlist;
   tlist.setDir(_params.input_dir);
   tlist.setModeInterval(startTime, endTime);
-  if (_params.aggregate_sweep_files_on_read) {
-    tlist.setReadAggregateSweeps(true);
-  }
   if (tlist.compile()) {
     cerr << "ERROR - Pid2Grid::_runArchive()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
@@ -332,15 +322,6 @@ int Pid2Grid::_processFile(const string &filePath)
     return -1;
   }
 
-  if (_params.check_number_of_sweeps) {
-    if (_readVol.getNSweeps() < _params.min_number_of_sweeps) {
-      cerr << "ERROR - Pid2Grid::_processFile" << endl;
-      cerr << "  Too few sweeps: " << _readVol.getNSweeps() << endl;
-      cerr << "  Min valid: " << _params.min_number_of_sweeps << endl;
-      return -1;
-    }
-  }
-
   // make sure gate geom is constant
 
   _readVol.remapToFinestGeom();
@@ -390,18 +371,6 @@ int Pid2Grid::_readFile(const string &filePath)
   }
   _readPaths = inFile.getReadPaths();
   
-  // apply time offset
-
-  if (_params.apply_time_offset) {
-    _readVol.applyTimeOffsetSecs(_params.time_offset_secs);
-  }
-
-  // apply angle corrections as appropriate
-  // side effect - forces el between -180 and 180
-  
-  _readVol.applyAzimuthOffset(_params.azimuth_correction_deg);
-  _readVol.applyElevationOffset(_params.elevation_correction_deg);
-
   // pad out the gates to the longest range
 
   _readVol.setNGatesConstant();
@@ -416,16 +385,6 @@ int Pid2Grid::_readFile(const string &filePath)
     _readVol.overrideLocation(_params.radar_latitude_deg,
                               _params.radar_longitude_deg,
                               _params.radar_altitude_meters / 1000.0);
-  }
-
-  // volume number
-  
-  if (_params.override_volume_number ||
-      _params.autoincrement_volume_number) {
-    _readVol.setVolumeNumber(_volNum);
-  }
-  if (_params.autoincrement_volume_number) {
-    _volNum++;
   }
 
   // override radar name and site name if requested
@@ -509,24 +468,6 @@ void Pid2Grid::_setupRead(RadxFile &file)
     file.setDebug(true);
   }
 
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
-  }
-
-  if (_params.ignore_idle_scan_mode_on_read) {
-    file.setReadIgnoreIdleMode(true);
-  } else {
-    file.setReadIgnoreIdleMode(false);
-  }
-
-  if (_params.remove_rays_with_antenna_transitions &&
-      !_params.trim_surveillance_sweeps_to_360deg) {
-    file.setReadIgnoreTransitions(true);
-    file.setReadTransitionNraysMargin(_params.transition_nrays_margin);
-  }
-
   if (_params.remove_long_range_rays) {
     file.setReadRemoveLongRange(true);
   } else {
@@ -549,16 +490,15 @@ void Pid2Grid::_setupRead(RadxFile &file)
     file.setReadMaxRangeKm(_params.max_range_km);
   }
 
-  if (_params.select_fields) {
-    for (int ii = 0; ii < _params.selected_fields_n; ii++) {
-      if (_params._selected_fields[ii].process_this_field) {
-        file.addReadField(_params._selected_fields[ii].input_name);
-      }
+  if (_params.copy_selected_input_fields_to_output) {
+    for (int ii = 0; ii < _params.copy_fields_n; ii++) {
+      file.addReadField(_params._copy_fields[ii].input_name);
     }
-    if (_params.apply_censoring) {
-      for (int ii = 0; ii < _params.censoring_fields_n; ii++) {
-        file.addReadField(_params._censoring_fields[ii].name);
-      }
+  }
+
+  if (_params.apply_censoring) {
+    for (int ii = 0; ii < _params.censoring_fields_n; ii++) {
+      file.addReadField(_params._censoring_fields[ii].name);
     }
   }
   
@@ -616,50 +556,6 @@ void Pid2Grid::_loadInterpRays()
 
     for (size_t iray = sweep->getStartRayIndex();
          iray <= sweep->getEndRayIndex(); iray++) {
-
-      const RadxRay *ray = rays[iray];
-
-      // check azimith limits if required
-
-      if (_params.set_azimuth_angle_limits) {
-        double az = ray->getAzimuthDeg();
-        double minAz = _params.lower_azimuth_angle_limit;
-        double maxAz = _params.upper_azimuth_angle_limit;
-        if (minAz <= maxAz) {
-          // valid sector does not cross north
-          if (az < minAz || az > maxAz) {
-            continue;
-          }
-        } else {
-          // valid sector does cross north
-          if (az < minAz && az > maxAz) {
-            continue;
-          }
-        }
-      }
-
-      // check fixed angle error?
-      
-      if (_params.check_fixed_angle_error) {
-        double fixedAngle = ray->getFixedAngleDeg();
-        double maxError = _params.max_fixed_angle_error;
-        if (_rhiMode) {
-          // RHI
-          double error = fabs(fixedAngle - ray->getAzimuthDeg());
-          if (error > 180) {
-            error = fabs(error - 360.0);
-          }
-          if (error > maxError) {
-            continue;
-          }
-        } else {
-          // PPI
-          double error = fabs(fixedAngle - ray->getElevationDeg());
-          if (error > maxError) {
-            continue;
-          }
-        }
-      }
 
       // accept ray
       
@@ -1244,10 +1140,10 @@ void Pid2Grid::_initInterpFields()
 
   // rename fields
 
-  if (_params.rename_fields) {
-    for (int ii = 0; ii < _params.renamed_fields_n; ii++) {
-      string inputName = _params._renamed_fields[ii].input_name;
-      string outputName = _params._renamed_fields[ii].output_name;
+  if (_params.copy_selected_input_fields_to_output) {
+    for (int ii = 0; ii < _params.copy_fields_n; ii++) {
+      string inputName = _params._copy_fields[ii].input_name;
+      string outputName = _params._copy_fields[ii].output_name;
       for (size_t ifld = 0; ifld < _interpFields.size(); ifld++) {
         if (_interpFields[ifld].radxName == inputName) {
           _interpFields[ifld].outputName = outputName;

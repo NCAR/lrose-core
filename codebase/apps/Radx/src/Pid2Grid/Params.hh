@@ -81,6 +81,27 @@ public:
   } mode_t;
 
   typedef enum {
+    RATE_ZH = 0,
+    RATE_ZH_SNOW = 1,
+    RATE_Z_ZDR = 2,
+    RATE_KDP = 3,
+    RATE_KDP_ZDR = 4,
+    RATE_HYBRID = 5,
+    RATE_PID = 6,
+    RATE_HIDRO = 7,
+    RATE_BRINGI = 8,
+    PID = 9,
+    PID_INTEREST = 10,
+    TEMP_FOR_PID = 11,
+    KDP = 12,
+    KDP_SC = 13,
+    DBZ_ATTEN_CORRECTION = 14,
+    ZDR_ATTEN_CORRECTION = 15,
+    DBZ_ATTEN_CORRECTED = 16,
+    ZDR_ATTEN_CORRECTED = 17
+  } pid_output_field_id_t;
+
+  typedef enum {
     PROJ_LATLON = 0,
     PROJ_LAMBERT_CONF = 3,
     PROJ_MERCATOR = 4,
@@ -105,14 +126,16 @@ public:
     LOGICAL_OR = 1
   } logical_t;
 
-  typedef enum {
-    CLASSIC = 0,
-    NC64BIT = 1,
-    NETCDF4_CLASSIC = 2,
-    NETCDF4 = 3
-  } netcdf_style_t;
-
   // struct typedefs
+
+  typedef struct {
+    pid_output_field_id_t id;
+    char* name;
+    char* long_name;
+    char* standard_name;
+    char* units;
+    tdrp_bool_t do_write;
+  } pid_output_field_t;
 
   typedef struct {
     int nz;
@@ -131,8 +154,9 @@ public:
 
   typedef struct {
     char* input_name;
-    tdrp_bool_t process_this_field;
-  } select_field_t;
+    char* output_name;
+    tdrp_bool_t censor_non_weather;
+  } copy_field_t;
 
   typedef struct {
     char* input_name;
@@ -153,11 +177,6 @@ public:
     char* input_name;
     tdrp_bool_t is_discrete;
   } discrete_field_t;
-
-  typedef struct {
-    char* input_name;
-    char* output_name;
-  } rename_field_t;
 
   typedef struct {
     char* azimuth_field_name;
@@ -482,6 +501,41 @@ public:
 
   char* output_dir;
 
+  tdrp_bool_t SNR_available;
+
+  char* SNR_field_name;
+
+  double noise_dbz_at_100km;
+
+  char* DBZ_field_name;
+
+  char* ZDR_field_name;
+
+  char* PHIDP_field_name;
+
+  char* RHOHV_field_name;
+
+  tdrp_bool_t LDR_available;
+
+  char* LDR_field_name;
+
+  char* KDP_params_file_path;
+
+  char* PID_params_file_path;
+
+  tdrp_bool_t PID_use_KDP_self_consistency;
+
+  tdrp_bool_t PID_use_attenuation_corrected_fields;
+
+  char* RATE_params_file_path;
+
+  tdrp_bool_t RATE_use_KDP_self_consistency;
+
+  tdrp_bool_t RATE_use_attenuation_corrected_fields;
+
+  pid_output_field_t *_pid_output_fields;
+  int pid_output_fields_n;
+
   tdrp_bool_t use_nearest_neighbor;
 
   int min_nvalid_for_interp;
@@ -537,10 +591,10 @@ public:
 
   double grid_offset_origin_longitude;
 
-  tdrp_bool_t select_fields;
+  tdrp_bool_t copy_selected_input_fields_to_output;
 
-  select_field_t *_selected_fields;
-  int selected_fields_n;
+  copy_field_t *_copy_fields;
+  int copy_fields_n;
 
   tdrp_bool_t transform_fields_for_interpolation;
 
@@ -560,11 +614,6 @@ public:
 
   discrete_field_t *_discrete_fields;
   int discrete_fields_n;
-
-  tdrp_bool_t rename_fields;
-
-  rename_field_t *_renamed_fields;
-  int renamed_fields_n;
 
   tdrp_bool_t output_angle_fields;
 
@@ -601,14 +650,6 @@ public:
 
   double pseudo_earth_radius_ratio;
 
-  tdrp_bool_t aggregate_sweep_files_on_read;
-
-  tdrp_bool_t ignore_idle_scan_mode_on_read;
-
-  tdrp_bool_t remove_rays_with_antenna_transitions;
-
-  int transition_nrays_margin;
-
   tdrp_bool_t remove_long_range_rays;
 
   tdrp_bool_t remove_short_range_rays;
@@ -621,39 +662,9 @@ public:
 
   tdrp_bool_t compute_sweep_angles_from_vcp_tables;
 
-  tdrp_bool_t apply_time_offset;
-
-  double time_offset_secs;
-
   tdrp_bool_t set_max_range;
 
   double max_range_km;
-
-  tdrp_bool_t set_elevation_angle_limits;
-
-  double lower_elevation_angle_limit;
-
-  double upper_elevation_angle_limit;
-
-  tdrp_bool_t set_azimuth_angle_limits;
-
-  double lower_azimuth_angle_limit;
-
-  double upper_azimuth_angle_limit;
-
-  tdrp_bool_t check_fixed_angle_error;
-
-  double max_fixed_angle_error;
-
-  tdrp_bool_t check_number_of_sweeps;
-
-  double min_number_of_sweeps;
-
-  tdrp_bool_t override_volume_number;
-
-  int starting_volume_number;
-
-  tdrp_bool_t autoincrement_volume_number;
 
   tdrp_bool_t override_radar_location;
 
@@ -683,10 +694,6 @@ public:
 
   double gate_spacing_km;
 
-  double azimuth_correction_deg;
-
-  double elevation_correction_deg;
-
   tdrp_bool_t specify_output_filename;
 
   char* output_filename;
@@ -698,18 +705,6 @@ public:
   char* netcdf_file_suffix;
 
   tdrp_bool_t use_iso8601_filename_convention;
-
-  tdrp_bool_t netcdf_compressed;
-
-  int netcdf_compression_level;
-
-  netcdf_style_t netcdf_style;
-
-  tdrp_bool_t netcdf_include_latlon_arrays;
-
-  tdrp_bool_t netcdf_output_mdv_attributes;
-
-  tdrp_bool_t netcdf_output_mdv_chunks;
 
   char* ncf_title;
 
@@ -780,7 +775,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[186];
+  mutable TDRPtable _table[172];
 
   const char *_className;
 

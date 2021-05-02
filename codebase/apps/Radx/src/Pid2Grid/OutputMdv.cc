@@ -832,23 +832,10 @@ int OutputMdv::writeVol()
                        _params.ncf_references,
                        _params.ncf_comment);
 
-  if (_params.netcdf_style == Params::CLASSIC) {
-    _mdvx.setMdv2NcfFormat(DsMdvx::NCF_FORMAT_CLASSIC);
-  } else if (_params.netcdf_style == Params::NC64BIT) {
-    _mdvx.setMdv2NcfFormat(DsMdvx::NCF_FORMAT_OFFSET64BITS);
-  } else if  (_params.netcdf_style == Params::NETCDF4_CLASSIC) {
-    _mdvx.setMdv2NcfFormat(DsMdvx::NCF_FORMAT_NETCFD4_CLASSIC);
-  } else {
-    _mdvx.setMdv2NcfFormat(DsMdvx::NCF_FORMAT_NETCDF4);
-  }
+  _mdvx.setMdv2NcfFormat(DsMdvx::NCF_FORMAT_NETCDF4);
+  _mdvx.setMdv2NcfCompression(true, 4);
+  _mdvx.setMdv2NcfOutput(true, true, true);
   
-  _mdvx.setMdv2NcfCompression(_params.netcdf_compressed,
-                              _params.netcdf_compression_level);
-  
-  _mdvx.setMdv2NcfOutput(_params.netcdf_include_latlon_arrays,
-                         _params.netcdf_output_mdv_attributes,
-                         _params.netcdf_output_mdv_chunks);
-
   // write out as CF
   
   string outputPath;
