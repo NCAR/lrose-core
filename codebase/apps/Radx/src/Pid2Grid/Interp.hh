@@ -350,8 +350,6 @@ protected:
 
   void _printRunTime(const string& str, bool verbose = false);
 
-  void _transformForOutput();
-
 private:
 
 };

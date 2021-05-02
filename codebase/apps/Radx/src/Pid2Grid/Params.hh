@@ -114,19 +114,12 @@ public:
     PROJ_VERT_PERSP = 18
   } projection_t;
 
-  typedef enum {
-    TRANSFORM_DB_TO_LINEAR = 0,
-    TRANSFORM_DB_TO_LINEAR_AND_BACK = 1,
-    TRANSFORM_LINEAR_TO_DB = 2,
-    TRANSFORM_LINEAR_TO_DB_AND_BACK = 3
-  } interp_transform_t;
-
-  typedef enum {
-    LOGICAL_AND = 0,
-    LOGICAL_OR = 1
-  } logical_t;
-
   // struct typedefs
+
+  typedef struct {
+    char* input_name;
+    char* output_name;
+  } rename_field_t;
 
   typedef struct {
     pid_output_field_id_t id;
@@ -153,30 +146,17 @@ public:
   } grid_xy_geom_t;
 
   typedef struct {
-    char* input_name;
-    char* output_name;
+    char* field_name;
     tdrp_bool_t censor_non_weather;
   } copy_field_t;
 
   typedef struct {
-    char* input_name;
-    char* output_name;
-    char* output_units;
-    interp_transform_t transform;
-  } transform_field_t;
-
-  typedef struct {
-    char* input_name;
+    char* field_name;
     tdrp_bool_t field_folds;
     tdrp_bool_t use_global_nyquist;
     double fold_limit_lower;
     double fold_limit_upper;
   } fold_field_t;
-
-  typedef struct {
-    char* input_name;
-    tdrp_bool_t is_discrete;
-  } discrete_field_t;
 
   typedef struct {
     char* azimuth_field_name;
@@ -185,13 +165,6 @@ public:
     char* beta_field_name;
     char* gamma_field_name;
   } angle_fields_t;
-
-  typedef struct {
-    char* name;
-    double min_valid_value;
-    double max_valid_value;
-    logical_t combination_method;
-  } censoring_field_t;
 
   ///////////////////////////
   // Member functions
@@ -501,6 +474,11 @@ public:
 
   char* output_dir;
 
+  tdrp_bool_t rename_fields_on_input;
+
+  rename_field_t *_renamed_fields;
+  int renamed_fields_n;
+
   tdrp_bool_t SNR_available;
 
   char* SNR_field_name;
@@ -596,11 +574,6 @@ public:
   copy_field_t *_copy_fields;
   int copy_fields_n;
 
-  tdrp_bool_t transform_fields_for_interpolation;
-
-  transform_field_t *_transform_fields;
-  int transform_fields_n;
-
   tdrp_bool_t set_fold_limits;
 
   fold_field_t *_folded_fields;
@@ -609,11 +582,6 @@ public:
   tdrp_bool_t override_nyquist;
 
   double nyquist_velocity;
-
-  tdrp_bool_t set_discrete_fields;
-
-  discrete_field_t *_discrete_fields;
-  int discrete_fields_n;
 
   tdrp_bool_t output_angle_fields;
 
@@ -638,13 +606,6 @@ public:
   tdrp_bool_t interp_time_field;
 
   tdrp_bool_t output_debug_fields;
-
-  tdrp_bool_t apply_censoring;
-
-  censoring_field_t *_censoring_fields;
-  int censoring_fields_n;
-
-  int censoring_min_valid_run;
 
   tdrp_bool_t override_standard_pseudo_earth_radius;
 
@@ -775,7 +736,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[172];
+  mutable TDRPtable _table[165];
 
   const char *_className;
 

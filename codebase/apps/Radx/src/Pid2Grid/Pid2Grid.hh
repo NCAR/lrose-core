@@ -88,7 +88,6 @@ private:
   vector<string> _readPaths;
   RadxVol _readVol;
   bool _rhiMode;
-  int _volNum;
 
   // interpolation fields
   
@@ -98,10 +97,6 @@ private:
   // interpolation objects
 
   CartInterp *_cartInterp;
-
-  // censoring
-
-  int _nWarnCensorPrint;
 
   // private methods
 
@@ -113,10 +108,8 @@ private:
   int _readFile(const string &filePath);
   void _checkFields(const string &filePath);
   void _loadInterpRays();
-  void _censorInterpRay(Interp::Ray *interpRay);
   void _addGeometryFields();
   void _addTimeField();
-  void _setupTransformFields();
 
   bool _isRhi();
 

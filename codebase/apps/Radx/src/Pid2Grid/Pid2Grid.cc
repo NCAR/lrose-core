@@ -63,7 +63,6 @@ Pid2Grid::Pid2Grid(int argc, char **argv)
   OK = TRUE;
 
   _cartInterp = NULL;
-  _nWarnCensorPrint = 0;
 
   // set programe name
 
@@ -372,12 +371,22 @@ int Pid2Grid::_readFile(const string &filePath)
   _readPaths = inFile.getReadPaths();
   
   // pad out the gates to the longest range
-
+  
   _readVol.setNGatesConstant();
   
   //  check for rhi
   
   _rhiMode = _isRhi();
+
+  // rename fields if requested
+
+  if (_params.rename_fields_on_input) {
+    for (int ii = 0; ii < _params.renamed_fields_n; ii++) {
+      string inputName = _params._renamed_fields[ii].input_name;
+      string outputName = _params._renamed_fields[ii].output_name;
+      _readVol.renameField(inputName, outputName);
+    } // ii
+  } // if (_params.rename_fields_on_input)
 
   // override radar location if requested
 
@@ -431,10 +440,6 @@ int Pid2Grid::_readFile(const string &filePath)
     cerr << "  _startRangeKm: " << _readVol.getStartRangeKm() << endl;
     cerr << "  _gateSpacingKm: " << _readVol.getGateSpacingKm() << endl;
   }
-
-  // set up and fields than need transforming
-
-  _setupTransformFields();
 
   // add extra fields fields
   
@@ -492,16 +497,10 @@ void Pid2Grid::_setupRead(RadxFile &file)
 
   if (_params.copy_selected_input_fields_to_output) {
     for (int ii = 0; ii < _params.copy_fields_n; ii++) {
-      file.addReadField(_params._copy_fields[ii].input_name);
+      file.addReadField(_params._copy_fields[ii].field_name);
     }
   }
 
-  if (_params.apply_censoring) {
-    for (int ii = 0; ii < _params.censoring_fields_n; ii++) {
-      file.addReadField(_params._censoring_fields[ii].name);
-    }
-  }
-  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     file.printReadRequest(cerr);
   }
@@ -565,9 +564,6 @@ void Pid2Grid::_loadInterpRays()
                         _interpFields,
                         _params.use_fixed_angle_for_interpolation,
                         _params.use_fixed_angle_for_data_limits);
-      if (_params.apply_censoring) {
-        _censorInterpRay(interpRay);
-      }
       _interpRays.push_back(interpRay);
 
     } // iray
@@ -577,153 +573,6 @@ void Pid2Grid::_loadInterpRays()
 
 }
   
-////////////////////////////////////////////////////////////////////
-// censor an interp ray
-
-void Pid2Grid::_censorInterpRay(Interp::Ray *interpRay)
-
-{
-
-  RadxRay *ray = interpRay->inputRay;
-
-  if (!_params.apply_censoring) {
-    return;
-  }
-
-  // initialize censoring flags to true to
-  // turn censoring ON everywhere
-  
-  vector<int> censorFlag;
-  size_t nGates = ray->getNGates();
-  for (size_t igate = 0; igate < nGates; igate++) {
-    censorFlag.push_back(1);
-  }
-
-  // check OR fields
-  // if any of these have VALID data, we turn censoring OFF
-
-  int orFieldCount = 0;
-
-  for (int ifield = 0; ifield < _params.censoring_fields_n; ifield++) {
-
-    const Params::censoring_field_t &cfld = _params._censoring_fields[ifield];
-    if (cfld.combination_method != Params::LOGICAL_OR) {
-      continue;
-    }
-
-    RadxField *field = ray->getField(cfld.name);
-    if (field == NULL) {
-      // field missing, do not censor
-      if (_nWarnCensorPrint % 360 == 0) {
-        cerr << "WARNING - censoring field missing: " << cfld.name << endl;
-        cerr << "  Censoring will not be applied for this field." << endl;
-      }
-      _nWarnCensorPrint++;
-      for (size_t igate = 0; igate < nGates; igate++) {
-        censorFlag[igate] = 0;
-      }
-      continue;
-    }
-    
-    orFieldCount++;
-    
-    double minValidVal = cfld.min_valid_value;
-    double maxValidVal = cfld.max_valid_value;
-
-    const Radx::fl32 *fdata = (const Radx::fl32 *) field->getData();
-    for (size_t igate = 0; igate < nGates; igate++) {
-      double val = fdata[igate];
-      if (val >= minValidVal && val <= maxValidVal) {
-        censorFlag[igate] = 0;
-      }
-    }
-    
-  } // ifield
-
-  // if no OR fields were found, turn off ALL censoring at this stage
-
-  if (orFieldCount == 0) {
-    for (size_t igate = 0; igate < nGates; igate++) {
-      censorFlag[igate] = 0;
-    }
-  }
-
-  // check AND fields
-  // if any of these have INVALID data, we turn censoring ON
-
-  for (int ifield = 0; ifield < _params.censoring_fields_n; ifield++) {
-    
-    const Params::censoring_field_t &cfld = _params._censoring_fields[ifield];
-    if (cfld.combination_method != Params::LOGICAL_AND) {
-      continue;
-    }
-
-    RadxField *field = ray->getField(cfld.name);
-    if (field == NULL) {
-      continue;
-    }
-    
-    double minValidVal = cfld.min_valid_value;
-    double maxValidVal = cfld.max_valid_value;
-
-    const Radx::fl32 *fdata = (const Radx::fl32 *) field->getData();
-    for (size_t igate = 0; igate < nGates; igate++) {
-      double val = fdata[igate];
-      if (val < minValidVal || val > maxValidVal) {
-        censorFlag[igate] = 1;
-      }
-    }
-    
-  } // ifield
-
-  // check that uncensored runs meet the minimum length
-  // those which do not are censored
-
-  int minValidRun = _params.censoring_min_valid_run;
-  if (minValidRun > 1) {
-    int runLength = 0;
-    bool doCheck = false;
-    for (int igate = 0; igate < (int) nGates; igate++) {
-      if (censorFlag[igate] == 0) {
-        doCheck = false;
-        runLength++;
-      } else {
-        doCheck = true;
-      }
-      // last gate?
-      if (igate == (int) nGates - 1) doCheck = true;
-      // check run length
-      if (doCheck) {
-        if (runLength < minValidRun) {
-          // clear the run which is too short
-          for (int jgate = igate - runLength; jgate < igate; jgate++) {
-            censorFlag[jgate] = 1;
-          } // jgate
-        }
-        runLength = 0;
-      } // if (doCheck ...
-    } // igate
-  }
-
-  // apply censoring by setting censored gates to missing for all fields
-
-  vector<RadxField *> fields = ray->getFields();
-  for (size_t ifield = 0; ifield < fields.size(); ifield++) {
-    RadxField *field = fields[ifield];
-    if (field->getLongName().find("diagnostic_field_") != string::npos) {
-      // do not censor diagnostic fields
-      continue;
-    }
-    Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
-    for (size_t igate = 0; igate < nGates; igate++) {
-      if (censorFlag[igate] == 1) {
-        fdata[igate] = Radx::missingFl32;
-      }
-    } // igate
-  } // ifield
-  
-}
-
 //////////////////////////////////////////////////
 // add geometry fields
 
@@ -942,75 +791,6 @@ void Pid2Grid::_addTimeField()
 
 }
 
-//////////////////////////////////////////////////
-// set up the transform fields, as needed
-
-void Pid2Grid::_setupTransformFields()
-{
-
-  if (!_params.transform_fields_for_interpolation) {
-    return;
-  }
-
-  // loop through rays
-
-  vector<RadxRay *> &rays = _readVol.getRays();
-  for (size_t iray = 0; iray < rays.size(); iray++) {
-
-    RadxRay *ray = rays[iray];
-    
-    // loop through fields to be transformed
-
-    for (int jfield = 0; jfield < _params.transform_fields_n; jfield++) {
-
-      bool makeCopy = true;
-      const Params::transform_field_t &transform = _params._transform_fields[jfield];
-      if (strcmp(transform.input_name, transform.output_name) == 0) {
-        makeCopy = false;
-      }
-
-      // find field on ray
-
-      RadxField *rfield = ray->getField(transform.input_name);
-      if (rfield == NULL) {
-        continue;
-      }
-
-      // get working field
-      
-      RadxField *xfield = rfield;
-      if (makeCopy) {
-        // copy field
-        xfield = new RadxField(*rfield);
-        xfield->setName(transform.output_name);
-      }
-
-      // set units
-
-      xfield->setUnits(transform.output_units);
-      
-      // transform
-
-      xfield->convertToFl32();
-      if (transform.transform == Params::TRANSFORM_DB_TO_LINEAR ||
-          transform.transform == Params::TRANSFORM_DB_TO_LINEAR_AND_BACK) {
-        xfield->transformDbToLinear();
-      } else if (transform.transform == Params::TRANSFORM_LINEAR_TO_DB ||
-                 transform.transform == Params::TRANSFORM_LINEAR_TO_DB_AND_BACK) {
-        xfield->transformLinearToDb();
-      }
-
-      if (makeCopy) {
-        // add to ray
-        ray->addField(xfield);
-      }
-
-    } // jfield
-
-  } // iray
-
-}
-
 /////////////////////////////////////////////////////
 // check whether volume is predominantly in RHI mode
 
@@ -1100,7 +880,7 @@ void Pid2Grid::_initInterpFields()
 
   if (_params.set_fold_limits) {
     for (int ii = 0; ii < _params.folded_fields_n; ii++) {
-      string radxName = _params._folded_fields[ii].input_name;
+      string radxName = _params._folded_fields[ii].field_name;
       bool fieldFolds = _params._folded_fields[ii].field_folds;
       bool useNyquist = _params._folded_fields[ii].use_global_nyquist;
       double foldLimitLower = _params._folded_fields[ii].fold_limit_lower;
@@ -1122,36 +902,6 @@ void Pid2Grid::_initInterpFields()
       } // ifld
     } // ii
   }
-
-  // override discrete flag from the parameters
-  
-  if (_params.set_discrete_fields) {
-    for (int ii = 0; ii < _params.discrete_fields_n; ii++) {
-      string radxName = _params._discrete_fields[ii].input_name;
-      bool isDiscrete = _params._discrete_fields[ii].is_discrete;
-      for (size_t ifld = 0; ifld < _interpFields.size(); ifld++) {
-        if (_interpFields[ifld].radxName == radxName) {
-          _interpFields[ifld].isDiscrete = isDiscrete;
-          break;
-        }
-      } // ifld
-    } // ii
-  }
-
-  // rename fields
-
-  if (_params.copy_selected_input_fields_to_output) {
-    for (int ii = 0; ii < _params.copy_fields_n; ii++) {
-      string inputName = _params._copy_fields[ii].input_name;
-      string outputName = _params._copy_fields[ii].output_name;
-      for (size_t ifld = 0; ifld < _interpFields.size(); ifld++) {
-        if (_interpFields[ifld].radxName == inputName) {
-          _interpFields[ifld].outputName = outputName;
-          break;
-        }
-      } // ifld
-    } // ii
-  } // if (_params.specify_field_names)
 
 }
 

@@ -76,6 +76,31 @@ paramdef string {
 } output_dir;
 
 commentdef {
+  p_header = "OPTION TO RENAME FIELDS ON INPUT";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to rename some or all of the fields when they are read in.";
+  p_help = "This operation is performed immediately after the read completes. All field names specified later in the parameter file refer to these new names.";
+} rename_fields_on_input;
+
+typedef struct {
+  string input_name;
+  string output_name;
+} rename_field_t;
+
+paramdef struct rename_field_t {
+  p_default = { 
+    { "DBZ", "DBZ_S" },
+    { "VEL", "VEL_S" },
+    { "WIDTH", "WIDTH_S" }
+  };
+  p_descr = "Specify the list of fields to be renamed.";
+  p_help = "Only applies if 'rename_fields_on_input' is TRUE.\n\nThe field name is changed from 'input_name' to 'output_name'.\n\n";
+} renamed_fields[];
+
+commentdef {
   p_header = "INPUT FIELD INFORMATION for computing KDP, PID and RATE.";
   p_text = "Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. If SNR is not available, it is computed from DBZ.";
 }
@@ -627,65 +652,25 @@ paramdef boolean {
 } copy_selected_input_fields_to_output;
 
 typedef struct {
-  string input_name; 
-  string output_name;
+  string field_name; 
   boolean censor_non_weather;
 } copy_field_t;
 
 paramdef struct copy_field_t {
   p_default = {
     {
-      input_name = "DBZ",
-      output_name = "DBZ",
+      field_name = "DBZ",
       censor_non_weather = FALSE
     }
     ,
     {
-      input_name = "VEL",
-      output_name = "VEL",
+      field_name = "VEL",
       censor_non_weather = FALSE
     }
   };
-  p_descr = "These fields are copied through unchanged to the output file.";
-  p_help = "You can change the name of the field on output. Optionally you can censor the non-weather echoes, based on the PID.";
+  p_descr = "These fields are copied through unchanged, and then interpolated.";
+  p_help = "Optionally you can censor the non-weather echoes, based on the PID.";
 } copy_fields[];
-
-commentdef {
-  p_header = "TRANSFORMING FIELDS FOR INTERPOLATION";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to perform a transform on specified fields prior to interpolation.";
-  p_help = "If TRUE, the field you specify in this section will be transformed prior to interpolation, and possibly back again afterwards.";
-} transform_fields_for_interpolation;
-
-typedef enum {
-  TRANSFORM_DB_TO_LINEAR,
-  TRANSFORM_DB_TO_LINEAR_AND_BACK,
-  TRANSFORM_LINEAR_TO_DB,
-  TRANSFORM_LINEAR_TO_DB_AND_BACK
-} interp_transform_t;
-
-typedef struct {
-  string input_name;
-  string output_name;
-  string output_units;
-  interp_transform_t transform;
-} transform_field_t;
-
-paramdef struct transform_field_t {
-  p_default = {
-    {
-      input_name = "DBZ",
-      output_name = "DBZ",
-      output_units = "dBZ",
-      transform = TRANSFORM_DB_TO_LINEAR_AND_BACK
-    }
-  };
-  p_descr = "Transform fields for interpolation";
-  p_help = "NOTE: this is done immediately after the fields are read from the file.\n\n'input_name' refers to the name of the field read in, before any renaming occurs. If 'output_name' is the same as 'input_name', the field is transformed in place. If 'output_name' differs from 'input_name', a copy of the field is made prior to interpolation, and this field copy is named 'output_name'.\n\nNOTE: the transform occurs first, before any rename operations (see next section). 'output_name' in transform_fields matches 'input_name' in 'rename_fields'.\n\nTRANSFORM_DB_TO_LINEAR: transform the field from dB to linear units, perform the interpolation, and write out the interpolated field in linear units.\n\nTRANSFORM_DB_TO_LINEAR_AND_BACK: transform the field from dB units to linear units, perform the interpolation, and then transform back to dB units before writing to the output file.\n\nTRANSFORM_LINEAR_TO_DB: transform the field from linear units to dB units, perform the interpolation, and write out the interpolated field in dB units.\n\nTRANSFORM_LINEAR_TO_DB_AND_BACK: transform the field from linear units to dB units, perform the interpolation, and then transform back to linear units before writing to the output file.";
-} transform_fields[];
 
 commentdef {
   p_header = "OPTION TO SET FOLDING LIMITS ON SELECTED FIELDS";
@@ -698,7 +683,7 @@ paramdef boolean {
 } set_fold_limits;
 
 typedef struct {
-  string input_name;
+  string field_name;
   boolean field_folds;
   boolean use_global_nyquist;
   double fold_limit_lower;
@@ -708,7 +693,7 @@ typedef struct {
 paramdef struct fold_field_t {
   p_default = {
     {
-      input_name = "VEL",
+      field_name = "VEL",
       field_folds = TRUE,
       use_global_nyquist = TRUE,
       fold_limit_lower = -25.0,
@@ -716,7 +701,7 @@ paramdef struct fold_field_t {
     }
   };
   p_descr = "Use this to set the fold limits for a particular field.";
-  p_help = "If this is specified, the interpolation for this field will be performed 'on the circle' so that folding is handled correctly. If use_global_nyquist is true, the fold limits are set to plus and minus the main nyquist velocity. If false, the fold limits specified here are used instead.\n\nNOTE: 'input_name' for this step refers to the 'input_name' in 'select_fields' and 'output_name' in 'transform_fields'. This step is performed prior to renaming fields (see below).";
+  p_help = "If this is specified, the interpolation for this field will be performed 'on the circle' so that folding is handled correctly. If use_global_nyquist is true, the fold limits are set to plus and minus the main nyquist velocity. If false, the fold limits specified here are used instead.\n\nNOTE: 'field_name' for this step refers to the 'field_name' in 'select_fields' and 'output_name' in 'transform_fields'. This step is performed prior to renaming fields (see below).";
 } folded_fields[];
 
 commentdef {
@@ -734,32 +719,6 @@ paramdef double {
   p_descr = "Specify nyquist velocity (m/s).";
   p_help = "See 'override_nyquist'.";
 } nyquist_velocity;
-
-commentdef {
-  p_header = "OPTION TO DESIGNATE SELECTED FIELDS AS DISCRETE IN NATURE";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to set 'is_discrete' flag for individual fields.";
-  p_help = "If TRUE, the specified fields will be treated as holding discrete values, and the nearest neighbor method will be used instead of interpolation.\n\nYou should do this for fields such as PID (particle ID). In CfRadial files there is an option to store this information as attributes on each field. You can override what is in the file, or add to it.";
-} set_discrete_fields;
-
-typedef struct {
-  string input_name;
-  boolean is_discrete;
-} discrete_field_t;
-
-paramdef struct discrete_field_t {
-  p_default = {
-    {
-      input_name = "PID",
-      is_discrete = TRUE
-    }
-  };
-  p_descr = "Use this to set the 'is_discrete' flag on a field.";
-  p_help = "If this is specified, nearest neighbor will be used for this field. You can use this to override the is_discrete flag on a field in the input file.\n\nNOTE: 'input_name' for this step refers to the 'input_name' in 'select_fields' and 'output_name' in 'transform_fields'. This step is performed prior to renaming fields (see below).";
-} discrete_fields[];
 
 commentdef {
   p_header = "OPTION TO ADD GEOMETRY AND TIME FIELDS";
@@ -861,43 +820,6 @@ paramdef boolean {
   p_descr = "Option to add debug fields for checking the interpolation.";
   p_help = "The test fields allow us to ensure that the interpolation is working correctly.\n\nThe debug fields are:\n\n\tnContrib - number of points used in interpolation\n\tgridAz: azimuth deg\n\tgridEl: elevation deg\n\tgridRange: range km\n\tllEl: lower left elevation deg\n\tllAz: lower left azimuth deg\n\tlrEl: lower right elevation deg\n\tlrAz: lower right azimuth deg\n\tulEl: upper left elevation deg\n\tulAz: upper left azimuth deg\n\turEl: upper right elevation deg\n\turAz: upper right azimuth deg";
 } output_debug_fields;
-
-commentdef {
-  p_header = "CENSORING OUTPUT FIELDS";
-  p_text = "You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria based on the values in the input fields.\n\nIf this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Apply censoring based on field values and thresholds.";
-  p_help = "If TRUE, censoring will be performed. See 'censoring_fields' for details on how the censoring will be applied.";
-} apply_censoring;
-
-typedef enum {
-  LOGICAL_AND, LOGICAL_OR
-} logical_t;
-
-typedef struct {
-  string name;
-  double min_valid_value;
-  double max_valid_value;
-  logical_t combination_method;
-} censoring_field_t;
-
-paramdef struct censoring_field_t {
-  p_default = {
-    { "SNR", 0.0, 1000.0, LOGICAL_OR },
-    { "NCP", 0.15, 1000.0, LOGICAL_OR }
-  };
-  p_descr = "Fields to be used for censoring.";
-  p_help = "Specify the fields to be used to determine whether a gate should be censored.\n\nThe name refers to the field name in the input files.\n\nValid field values lie in the range from min_valid_value to max_valid_value, inclusively. If the value of a field at a gate lies within this range, it is considered valid.\n\nEach specified field is examined at each gate, and is flagged as valid if its value lies in the valid range.\n\nThese field flags are then combined as follows:\n\nFirst, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true.\n\nNext the combined_or flag is combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true.\n\nIf this computed flag is true, then the data at the gate is regarded as valid and is retained.\n\nIf the computed flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.";
-} censoring_fields[];
-  
-paramdef int {
-  p_default = 1;
-  p_descr = "Minimum valid run of non-censored gates.";
-  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
-} censoring_min_valid_run;
 
 commentdef {
   p_header = "SETTING THE PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";

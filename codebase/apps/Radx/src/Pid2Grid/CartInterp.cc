@@ -271,12 +271,6 @@ int CartInterp::interpVol()
   _doInterp();
   _printRunTime("Interpolating");
 
-  // transform for output
-  // this will change any transformed fields back to
-  // their original form as appropriate
-
-  _transformForOutput();
-
   // compute convective stratiform split
 
   _gotConvStrat = false;

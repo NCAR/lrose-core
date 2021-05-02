@@ -902,69 +902,6 @@ void Interp::_printRunTime(const string& str, bool verbose /* = false */)
   _timeA.tv_usec = tvb.tv_usec;
 }
 
-//////////////////////////////////////////////////////////////////
-// transform fields back as required for output
-
-void Interp::_transformForOutput()
-
-{
-
-  if (!_params.transform_fields_for_interpolation) {
-    return;
-  }
-
-  // loop through interp fields
-  
-  for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
-    
-    Field &ifld = _interpFields[ifield];
-    string &radxName = ifld.radxName;
-    
-    // loop through transform fields
-    
-    for (int jfield = 0; jfield < _params.transform_fields_n; jfield++) {
-
-      const Params::transform_field_t &transform =
-        _params._transform_fields[jfield];
-      string transName = transform.output_name;
-      if (radxName == transName) {
-        
-        if (transform.transform ==
-            Params::TRANSFORM_DB_TO_LINEAR_AND_BACK) {
-          
-          fl32 *data = _outputFields[ifield];
-          for (int ipt = 0; ipt < _nPointsVol; ipt++) {
-            fl32 val = data[ipt];
-            if (val != Interp::missingFl32) {
-              if (val <= 0.0) {
-                data[ipt] = Interp::missingFl32;
-              } else {
-                data[ipt] = 10.0 * log10(val);
-              }
-            }
-          } // ipt
-          
-        } else if (transform.transform ==
-                   Params::TRANSFORM_LINEAR_TO_DB_AND_BACK) {
-          
-          fl32 *data = _outputFields[ifield];
-          for (int ipt = 0; ipt < _nPointsVol; ipt++) {
-            fl32 val = data[ipt];
-            if (val != Interp::missingFl32) {
-              data[ipt] = pow(10.0, val / 10.0);
-            }
-          } // ipt
-        
-        } // if (transform.transform ...
-
-      } // if (outputName == transName)
-
-    } // jfield
-
-  } // ifield
-
-}
-
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 ///////////////////////////
