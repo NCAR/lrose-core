@@ -50,6 +50,9 @@
 #include <radar/NoiseLocator.hh>
 #include <Radx/RadxVol.hh>
 #include <Mdv/MdvxProj.hh>
+#include <radar/KdpFiltParams.hh>
+#include <radar/NcarPidParams.hh>
+#include <radar/PrecipRateParams.hh>
 class RadxFile;
 class RadxRay;
 class RadxField;
@@ -82,6 +85,10 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+
+  PrecipRateParams _precipRateParams;
+  NcarPidParams _ncarPidParams;
+  KdpFiltParams _kdpFiltParams;
 
   // input data
   
@@ -116,6 +123,10 @@ private:
   void _initInterpFields();
   void _allocCartInterp();
   void _freeInterpRays();
+
+  void _printParamsRate();
+  void _printParamsPid();
+  void _printParamsKdp();
 
 };
 

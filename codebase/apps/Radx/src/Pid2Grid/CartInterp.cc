@@ -298,7 +298,7 @@ int CartInterp::interpVol()
   // clean up
 
   _freeSearchMatrix();
-   if (_params.free_memory_between_files) {
+  if (_params.free_memory_between_files) {
     _freeGridLoc();
   }
  

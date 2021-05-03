@@ -42,6 +42,10 @@ using namespace std;
 Args::Args ()
 {
   TDRP_init_override(&override);
+  tdrpDebug = false;
+  printParamsKdp = false;
+  printParamsPid = false;
+  printParamsRate = false;
   startTimeSet = false;
   endTimeSet = false;
 }
@@ -163,6 +167,27 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 
+    } else if (!strcmp(argv[i], "-print_params_rate")) {
+
+      printParamsRate = true;
+      if (i < argc - 1) {
+	printParamsRateMode = argv[++i];
+      }
+	
+    } else if (!strcmp(argv[i], "-print_params_pid")) {
+
+      printParamsPid = true;
+      if (i < argc - 1) {
+	printParamsPidMode = argv[++i];
+      }
+	
+    } else if (!strcmp(argv[i], "-print_params_kdp")) {
+
+      printParamsKdp = true;
+      if (i < argc - 1) {
+	printParamsKdpMode = argv[++i];
+      }
+	
     } // if
 	
   } // i
@@ -214,5 +239,22 @@ void Args::_usage(ostream &out)
       << endl;
   
   Params::usage(out);
+
+  out << endl;
+  out << "RATE-specific parameters:" << endl;
+  out << "   [ -print_params_rate [mode]] print RATE params" << endl;
+  out << "     see modes from -print_params above" << endl;
   
+  out << endl;
+  out << "PID-specific parameters:" << endl;
+  out << "   [ -print_params_pid [mode]] print PID params" << endl;
+  out << "     see modes from -print_params above" << endl;
+
+  out << endl;
+  out << "KDP-specific parameters:" << endl;
+  out << "   [ -print_params_kdp [mode]] print KDP params" << endl;
+  out << "     see modes from -print_params above" << endl;
+
+  out << endl;
+
 }

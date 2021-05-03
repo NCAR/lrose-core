@@ -59,6 +59,17 @@ public:
   // public data
   
   tdrp_override_t override;
+  bool tdrpDebug;
+
+  bool printParamsRate;
+  string printParamsRateMode;
+
+  bool printParamsPid;
+  string printParamsPidMode;
+
+  bool printParamsKdp;
+  string printParamsKdpMode;
+
   bool startTimeSet, endTimeSet;
   vector<string> inputFileList;
 

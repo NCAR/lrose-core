@@ -103,6 +103,69 @@ Pid2Grid::Pid2Grid(int argc, char **argv)
       OK = FALSE;
     }
   }
+  
+  // if requested, print params for RATE then exit
+  
+  if (_args.printParamsRate) {
+    _printParamsRate();
+    exit(0);
+  }
+  
+  // if requested, print params for PID then exit
+  
+  if (_args.printParamsPid) {
+    _printParamsPid();
+    exit(0);
+  }
+  
+  // if requested, print params for KDP then exit
+  
+  if (_args.printParamsKdp) {
+    _printParamsKdp();
+    exit(0);
+  }
+
+  // read params for Ncar PID
+  
+  if (strstr(_params.PID_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_ncarPidParams.load(_params.PID_params_file_path,
+                            NULL, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for NcarPid: "
+           << _params.PID_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+  
+  // read params for KdpFilt
+  
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            NULL, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // read in RATE params if applicable
+  
+  if (strstr(_params.RATE_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_precipRateParams.load(_params.RATE_params_file_path,
+                               NULL, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for PrecipFilt: "
+           << _params.RATE_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
 
 }
 
@@ -116,6 +179,7 @@ Pid2Grid::~Pid2Grid()
   // free up
 
   _freeInterpRays();
+
   if (_cartInterp) {
     delete _cartInterp;
   }
@@ -280,32 +344,17 @@ int Pid2Grid::_processFile(const string &filePath)
 
   PMU_auto_register("Processing file");
 
-  // ensure memory is freed up
-  
-  _readVol.clear();
-  _freeInterpRays();
-
-  // check we have not already processed this file
-  // in the file aggregation step
-
-  RadxPath thisPath(filePath);
-  for (size_t ipath = 0; ipath < _readPaths.size(); ipath++) {
-    RadxPath rpath(_readPaths[ipath]);
-    if (thisPath.getFile() == rpath.getFile()) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Skipping file: " << filePath << endl;
-        cerr << "  Previously processed in aggregation step" << endl;
-      }
-      return 0;
-    }
-  }
-  
   if (_params.debug) {
     cerr << "INFO - Pid2Grid::_processFile" << endl;
     cerr << "  Input file path: " << filePath << endl;
     cerr << "  Reading in file ..." << endl;
   }
   
+  // ensure memory is freed up
+  
+  _readVol.clear();
+  _freeInterpRays();
+
   // read in file
   
   if (_readFile(filePath)) {
@@ -314,13 +363,13 @@ int Pid2Grid::_processFile(const string &filePath)
   }
 
   // check we have at least 2 rays
-
+  
   if (_readVol.getNRays() < 2) {
     cerr << "ERROR - Pid2Grid::_processFile" << endl;
     cerr << "  Too few rays: " << _readVol.getNRays() << endl;
     return -1;
   }
-
+  
   // make sure gate geom is constant
 
   _readVol.remapToFinestGeom();
@@ -346,7 +395,7 @@ int Pid2Grid::_processFile(const string &filePath)
     _readVol.clear();
     _freeInterpRays();
   }
-
+  
   return 0;
 
 }
@@ -926,5 +975,150 @@ void Pid2Grid::_freeInterpRays()
     delete _interpRays[ii];
   }
   _interpRays.clear();
+}
+
+//////////////////////////////////////////////////
+// Print params for RATE
+
+void Pid2Grid::_printParamsRate()
+{
+
+  if (_params.debug) {
+    cerr << "Reading RATE params from file: "
+         << _params.RATE_params_file_path << endl;
+  }
+  
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsRateMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in RATE params if applicable
+  
+  if (strstr(_params.RATE_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_precipRateParams.load(_params.RATE_params_file_path,
+                               NULL, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for PrecipFilt: "
+           << _params.RATE_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsRateMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsRateMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsRateMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _precipRateParams.print(stdout, printMode);
+
+}
+
+//////////////////////////////////////////////////
+// Print params for PID
+
+void Pid2Grid::_printParamsPid()
+{
+
+  if (_params.debug) {
+    cerr << "Reading PID params from file: " << _params.PID_params_file_path << endl;
+  }
+
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsPidMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in PID params if applicable
+
+  if (strstr(_params.PID_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_ncarPidParams.load(_params.PID_params_file_path,
+                            NULL, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for PidFilt: "
+           << _params.PID_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsPidMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsPidMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsPidMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _ncarPidParams.print(stdout, printMode);
+
+}
+
+//////////////////////////////////////////////////
+// Print params for KDP
+
+void Pid2Grid::_printParamsKdp()
+{
+
+  if (_params.debug) {
+    cerr << "Reading KDP params from file: " << _params.KDP_params_file_path << endl;
+  }
+
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsKdpMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in KDP params if applicable
+
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            NULL, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsKdpMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsKdpMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsKdpMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _kdpFiltParams.print(stdout, printMode);
+
 }
 
