@@ -1218,7 +1218,7 @@ bool ConvStratFinder::ClumpGeom::stratiformBelow()
   // if fraction stratiform exceeds 0.5
   // we conclude we have stratiform below
 
-  if (fractionStrat > 0.5) {
+  if (fractionStrat > 0.9) {
     return true;
   } else {
     return false;
