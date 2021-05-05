@@ -918,6 +918,18 @@
     tt->single_val.s = tdrpStrDup("use-defaults");
     tt++;
     
+    // Parameter 'KDP_write_debug_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("KDP_write_debug_fields");
+    tt->descr = tdrpStrDup("Write extra fields to assist with KDP debugging.");
+    tt->help = tdrpStrDup("These are the intermediate fields used in computing KDP and attenuation.");
+    tt->val_offset = (char *) &KDP_write_debug_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -960,6 +972,18 @@
     tt->descr = tdrpStrDup("Option to use Z and ZDR fields that are corrected for attenuation.");
     tt->help = tdrpStrDup("If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PID.");
     tt->val_offset = (char *) &PID_use_attenuation_corrected_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'PID_write_debug_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("PID_write_debug_fields");
+    tt->descr = tdrpStrDup("Write extra fields to assist with PID debugging.");
+    tt->help = tdrpStrDup("These are the intermediate fields used in computing PID.");
+    tt->val_offset = (char *) &PID_write_debug_fields - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

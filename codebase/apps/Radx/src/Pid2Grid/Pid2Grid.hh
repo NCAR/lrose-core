@@ -53,6 +53,7 @@
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
 #include <radar/PrecipRateParams.hh>
+#include <toolsa/TaThreadPool.hh>
 class RadxFile;
 class RadxRay;
 class RadxField;
@@ -78,6 +79,12 @@ public:
 
   int OK;
 
+  // get methods for threading
+
+  const Params &getParams() const { return _params; }
+  double getRadarHtKm() const { return _radarHtKm; }
+  double getWavelengthM() const { return _wavelengthM; }
+
 protected:
 private:
 
@@ -95,6 +102,11 @@ private:
   vector<string> _readPaths;
   RadxVol _readVol;
   bool _rhiMode;
+
+  // radar properties
+
+  double _radarHtKm;
+  double _wavelengthM;
 
   // interpolation fields
   

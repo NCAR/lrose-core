@@ -176,6 +176,12 @@ paramdef string {
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
 } KDP_params_file_path;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write extra fields to assist with KDP debugging.";
+  p_help = "These are the intermediate fields used in computing KDP and attenuation.";
+} KDP_write_debug_fields;
+
 commentdef {
   p_header = "COMPUTING PID";
 }
@@ -197,6 +203,12 @@ paramdef boolean {
   p_descr = "Option to use Z and ZDR fields that are corrected for attenuation.";
   p_help = "If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PID.";
 } PID_use_attenuation_corrected_fields;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write extra fields to assist with PID debugging.";
+  p_help = "These are the intermediate fields used in computing PID.";
+} PID_write_debug_fields;
 
 commentdef {
   p_header = "COMPUTING PRECIP RATE";

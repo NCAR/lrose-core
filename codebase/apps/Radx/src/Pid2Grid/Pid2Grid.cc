@@ -539,6 +539,11 @@ int Pid2Grid::_readFile(const string &filePath)
 
   _checkFields(filePath);
 
+  // set radar properties
+
+  _radarHtKm = _readVol.getAltitudeKm();
+  _wavelengthM = _readVol.getWavelengthM();
+
   return 0;
 
 }

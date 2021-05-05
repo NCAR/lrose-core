@@ -503,11 +503,15 @@ public:
 
   char* KDP_params_file_path;
 
+  tdrp_bool_t KDP_write_debug_fields;
+
   char* PID_params_file_path;
 
   tdrp_bool_t PID_use_KDP_self_consistency;
 
   tdrp_bool_t PID_use_attenuation_corrected_fields;
+
+  tdrp_bool_t PID_write_debug_fields;
 
   char* RATE_params_file_path;
 
@@ -740,7 +744,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[167];
+  mutable TDRPtable _table[169];
 
   const char *_className;
 

@@ -56,6 +56,8 @@ HDRS = \
 	Orient.hh \
 	OutputMdv.hh \
 	Pid2Grid.hh \
+	PolarCompute.hh \
+	PolarThread.hh \
 	RhiOrient.hh
 
 CPPC_SRCS = \
@@ -66,6 +68,8 @@ CPPC_SRCS = \
 	Main.cc \
 	Orient.cc \
 	OutputMdv.cc \
+	PolarCompute.cc \
+	PolarThread.cc \
 	Pid2Grid.cc \
 	RhiOrient.cc
 
