@@ -57,6 +57,8 @@
 class RadxFile;
 class RadxRay;
 class RadxField;
+class PolarCompute;
+class PolarThread;
 using namespace std;
 
 class Pid2Grid {
@@ -85,6 +87,20 @@ public:
   double getRadarHtKm() const { return _radarHtKm; }
   double getWavelengthM() const { return _wavelengthM; }
 
+  // names for extra fields
+
+  static string smoothedDbzFieldName;
+  static string smoothedRhohvFieldName;
+  static string elevationFieldName;
+  static string rangeFieldName;
+  static string beamHtFieldName;
+  static string tempFieldName;
+  static string pidFieldName;
+  static string pidInterestFieldName;
+  static string mlFieldName;
+  static string mlExtendedFieldName;
+  static string convFlagFieldName;
+  
 protected:
 private:
 
@@ -108,6 +124,10 @@ private:
   double _radarHtKm;
   double _wavelengthM;
 
+  // derived rays - after computing PID
+
+  vector <RadxRay *> _derivedRays;
+
   // interpolation fields
   
   vector<Interp::Field> _interpFields;
@@ -116,6 +136,15 @@ private:
   // interpolation objects
 
   CartInterp *_cartInterp;
+
+  // mutex for debug prints
+  
+  pthread_mutex_t _debugPrintMutex;
+  
+  // instantiate thread pool for computations
+
+  TaThreadPool _threadPool;
+  vector<PolarCompute *> _computeThreads;
 
   // private methods
 
@@ -126,6 +155,14 @@ private:
   int _processFile(const string &filePath);
   int _readFile(const string &filePath);
   void _checkFields(const string &filePath);
+
+  void _addExtraFieldsToInput();
+  void _addExtraFieldsToOutput();
+  void _encodeFieldsForOutput();
+
+  int _computeDerived();
+  int _storeDerivedRay(PolarThread *thread);
+
   void _loadInterpRays();
   void _addGeometryFields();
   void _addTimeField();
@@ -135,6 +172,7 @@ private:
   void _initInterpFields();
   void _allocCartInterp();
   void _freeInterpRays();
+
 
   void _printParamsRate();
   void _printParamsPid();

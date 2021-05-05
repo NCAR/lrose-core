@@ -594,7 +594,7 @@ int RadxRate::_processFile(const string &filePath)
   
   if (_compute()) {
     cerr << "ERROR - RadxRate::Run" << endl;
-    cerr << "  Cannot compute KDP and attenuation" << endl;
+    cerr << "  Cannot compute derived fields" << endl;
     return -1;
   }
 

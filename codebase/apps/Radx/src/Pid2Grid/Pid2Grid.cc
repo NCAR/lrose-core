@@ -38,6 +38,8 @@
 
 #include "Pid2Grid.hh"
 #include "OutputMdv.hh"
+#include "PolarCompute.hh"
+#include "PolarThread.hh"
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
 #include <toolsa/pjg.h>
@@ -53,6 +55,20 @@
 #include <Radx/RadxPath.hh>
 #include <Mdv/GenericRadxFile.hh>
 using namespace std;
+
+// initialize extra field names
+
+string Pid2Grid::smoothedDbzFieldName = "DBZ_SMOOTHED";
+string Pid2Grid::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
+string Pid2Grid::elevationFieldName = "ELEV";
+string Pid2Grid::rangeFieldName = "RANGE";
+string Pid2Grid::beamHtFieldName = "BEAM_HT";
+string Pid2Grid::tempFieldName = "TEMPC";
+string Pid2Grid::pidFieldName = "PID";
+string Pid2Grid::pidInterestFieldName = "PID_INTEREST";
+string Pid2Grid::mlFieldName = "MELTING_LAYER";
+string Pid2Grid::mlExtendedFieldName = "ML_EXTENDED";
+string Pid2Grid::convFlagFieldName = "CONV_FLAG";
 
 // Constructor
 
@@ -153,7 +169,7 @@ Pid2Grid::Pid2Grid(int argc, char **argv)
     }
   }
 
-  // read in RATE params if applicable
+  // read in RATE params
   
   if (strstr(_params.RATE_params_file_path, "use-defaults") == NULL) {
     // not using defaults
@@ -165,6 +181,28 @@ Pid2Grid::Pid2Grid(int argc, char **argv)
       OK = FALSE;
       return;
     }
+  }
+
+  // initialize compute object
+  
+  pthread_mutex_init(&_debugPrintMutex, NULL);
+  
+  // set up compute thread pool
+  
+  for (int ii = 0; ii < _params.n_compute_threads; ii++) {
+    PolarThread *thread =
+      new PolarThread(this, _params, 
+                      _kdpFiltParams,
+                      _ncarPidParams,
+                      _precipRateParams,
+                      ii);
+    if (!thread->OK) {
+      delete thread;
+      OK = FALSE;
+      return;
+    }
+    _threadPool.addThreadToMain(thread);
+    _computeThreads.push_back(thread->getPolarCompute());
   }
 
 }
@@ -183,6 +221,10 @@ Pid2Grid::~Pid2Grid()
   if (_cartInterp) {
     delete _cartInterp;
   }
+
+  // mutex
+
+  pthread_mutex_destroy(&_debugPrintMutex);
 
   // unregister process
 
@@ -371,6 +413,21 @@ int Pid2Grid::_processFile(const string &filePath)
     }
   }
 
+  // check we have not already processed this file
+  // in the file aggregation step
+
+  RadxPath thisPath(filePath);
+  for (size_t ipath = 0; ipath < _readPaths.size(); ipath++) {
+    RadxPath rpath(_readPaths[ipath]);
+    if (thisPath.getFile() == rpath.getFile()) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "Skipping file: " << filePath << endl;
+        cerr << "  Previously processed in aggregation step" << endl;
+      }
+      return 0;
+    }
+  }
+  
   if (_params.debug) {
     cerr << "INFO - Pid2Grid::_processFile" << endl;
     cerr << "  Input file path: " << filePath << endl;
@@ -400,6 +457,35 @@ int Pid2Grid::_processFile(const string &filePath)
   // make sure gate geom is constant
 
   _readVol.remapToFinestGeom();
+
+  // read the temperature profile into the threads
+
+  if (_computeThreads.size() > 0) {
+    // thread 0
+    PolarCompute *thread0 = _computeThreads[0];
+    if (_params.debug) {
+      cerr << "Thread #: " << 0 << endl;
+      cerr << "  Loading temp profile for time: "
+           << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
+    }
+    thread0->loadTempProfile(_readVol.getStartTimeSecs());
+    // copy to other threads
+    for (size_t ii = 1; ii < _computeThreads.size(); ii++) {
+      _computeThreads[ii]->setTempProfile(thread0->getTempProfile());
+    }
+  }
+  
+  // add geometry and pid fields to the volume
+  
+  _addExtraFieldsToInput();
+
+  // compute the derived fields
+  
+  if (_computeDerived()) {
+    cerr << "ERROR - Pid2Grid::Run" << endl;
+    cerr << "  Cannot compute derived fields" << endl;
+    return -1;
+  }
 
   // interpolate and write out
   
@@ -623,6 +709,207 @@ void Pid2Grid::_checkFields(const string &filePath)
 
 }
 
+//////////////////////////////////////////////////
+// add geometry and pid fields to the volume
+
+void Pid2Grid::_addExtraFieldsToInput()
+
+{
+
+  vector<RadxRay *> &rays = _readVol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+
+    RadxRay *ray = rays[iray];
+
+    RadxField *smoothDbzFld = new RadxField(smoothedDbzFieldName, "dBZ");
+    RadxField *smoothRhohvFld = new RadxField(smoothedRhohvFieldName, "");
+    RadxField *elevFld = new RadxField(elevationFieldName, "deg");
+    RadxField *rangeFld = new RadxField(rangeFieldName, "km");
+    RadxField *beamHtFld = new RadxField(beamHtFieldName, "km");
+    RadxField *tempFld = new RadxField(tempFieldName, "C");
+    RadxField *pidFld = new RadxField(pidFieldName, "");
+    RadxField *pidIntrFld = new RadxField(pidInterestFieldName, "");
+    RadxField *mlFld = new RadxField(mlFieldName, "");
+
+    size_t nGates = ray->getNGates();
+
+    TaArray<Radx::fl32> elev_, rng_, ht_, temp_;
+    Radx::fl32 *elev = elev_.alloc(nGates);
+    Radx::fl32 *rng = rng_.alloc(nGates);
+    Radx::fl32 *ht = ht_.alloc(nGates);
+    Radx::fl32 *temp = temp_.alloc(nGates);
+    
+    double startRangeKm = ray->getStartRangeKm();
+    double gateSpacingKm = ray->getGateSpacingKm();
+
+    BeamHeight beamHt;
+    beamHt.setInstrumentHtKm(_readVol.getAltitudeKm());
+    if (_params.override_standard_pseudo_earth_radius) {
+      beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+    }
+
+    // loop through the gates
+    
+    double rangeKm = startRangeKm;
+    double elevationDeg = ray->getElevationDeg();
+    const TempProfile &profile = _computeThreads[0]->getTempProfile();
+    for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
+      double htKm = beamHt.computeHtKm(elevationDeg, rangeKm);
+      double tempC = profile.getTempForHtKm(htKm);
+      elev[igate] = elevationDeg;
+      rng[igate] = rangeKm;
+      ht[igate] = htKm;
+      temp[igate] = tempC;
+    } // igate
+
+    smoothDbzFld->setTypeFl32(-9999.0);
+    smoothRhohvFld->setTypeFl32(-9999.0);
+    elevFld->setTypeFl32(-9999.0);
+    rangeFld->setTypeFl32(-9999.0);
+    beamHtFld->setTypeFl32(-9999.0);
+    tempFld->setTypeFl32(-9999.0);
+    pidFld->setTypeSi32(-9999, 1.0, 0.0);
+    pidIntrFld->setTypeFl32(-9999.0);
+    mlFld->setTypeSi32(-9999, 1.0, 0.0);
+    
+    smoothDbzFld->addDataMissing(nGates);
+    smoothRhohvFld->addDataMissing(nGates);
+    elevFld->addDataFl32(nGates, elev);
+    rangeFld->addDataFl32(nGates, rng);
+    beamHtFld->addDataFl32(nGates, ht);
+    tempFld->addDataFl32(nGates, temp);
+    pidFld->addDataMissing(nGates);
+    pidIntrFld->addDataMissing(nGates);
+    mlFld->addDataMissing(nGates);
+
+    ray->addField(smoothDbzFld);
+    ray->addField(smoothRhohvFld);
+    ray->addField(elevFld);
+    ray->addField(rangeFld);
+    ray->addField(beamHtFld);
+    ray->addField(tempFld);
+    ray->addField(pidFld);
+    ray->addField(pidIntrFld);
+    ray->addField(mlFld);
+
+  } // iray
+
+}
+
+//////////////////////////////////////////////////
+// add extra output fields
+
+void Pid2Grid::_addExtraFieldsToOutput()
+
+{
+
+  // loop through rays
+
+  vector<RadxRay *> &inputRays = _readVol.getRays();
+  for (size_t iray = 0; iray < inputRays.size(); iray++) {
+    
+    RadxRay *inputRay = inputRays[iray];
+    RadxRay *outputRay = _derivedRays[iray];
+
+    // make a copy of the input fields
+
+    RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
+
+    // add to output
+
+    outputRay->addField(mlFld);
+
+  } // iray
+
+}
+
+/////////////////////////////////////////////////////
+// compute the derived fields for all rays in volume
+
+int Pid2Grid::_computeDerived()
+{
+
+  // initialize the volume with ray numbers
+  
+  _readVol.setRayNumbersInOrder();
+
+  // initialize derived
+
+  _derivedRays.clear();
+  
+  // loop through the input rays,
+  // computing the derived fields
+
+  const vector<RadxRay *> &inputRays = _readVol.getRays();
+  for (size_t iray = 0; iray < inputRays.size(); iray++) {
+
+    // get a thread from the pool
+    bool isDone = true;
+    PolarThread *thread = 
+      (PolarThread *) _threadPool.getNextThread(true, isDone);
+    if (thread == NULL) {
+      break;
+    }
+    if (isDone) {
+      // store the results computed by the thread
+      if (_storeDerivedRay(thread)) {
+        cerr << "ERROR - RadxRate::_compute()" << endl;
+        cerr << "  Cannot compute for ray num: " << iray << endl;
+        break;
+      }
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
+      // reduce iray by 1 since we did not actually process this ray
+      // we only handled a previously started thread
+      iray--;
+    } else {
+      // got a thread to use, set the input ray
+      thread->setInputRay(inputRays[iray]);
+      // set it running
+      thread->signalRunToStart();
+    }
+
+  } // iray
+    
+  // collect remaining done threads
+
+  _threadPool.setReadyForDoneCheck();
+  while (!_threadPool.checkAllDone()) {
+    PolarThread *thread = (PolarThread *) _threadPool.getNextDoneThread();
+    if (thread == NULL) {
+      break;
+    } else {
+      // store the results computed by the thread
+      _storeDerivedRay(thread);
+      // return thread to the available pool
+      _threadPool.addThreadToAvail(thread);
+    }
+  } // while
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////
+// Store the derived ray
+
+int Pid2Grid::_storeDerivedRay(PolarThread *thread)
+
+{
+  
+  RadxRay *derivedRay = thread->getOutputRay();
+  if (derivedRay == NULL) {
+    // error
+    return -1;
+  }
+
+  // good return, add to results
+  _derivedRays.push_back(derivedRay);
+  
+  return 0;
+
+}
+      
 //////////////////////////////////////////////////
 // load up the input ray data vector
 
