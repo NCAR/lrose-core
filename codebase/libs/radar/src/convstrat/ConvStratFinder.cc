@@ -1125,7 +1125,11 @@ void ConvStratFinder::ClumpGeom::setPartition()
   } else if (_vertExtentKm < _finder->_minVertExtentForConvectiveKm) {
     category = CATEGORY_MIXED;
   } else if (fracShallow < 0.05 && stratiformBelow()) {
-    category = CATEGORY_CONVECTIVE_ELEVATED;
+    if (fracDeep > 0.75) {
+      category = CATEGORY_MIXED;
+    } else {
+      category = CATEGORY_CONVECTIVE_ELEVATED;
+    }
   } else if (fracShallow > 0.95) {
     category = CATEGORY_CONVECTIVE_SHALLOW;
   } else if (fracDeep > 0.05) {
