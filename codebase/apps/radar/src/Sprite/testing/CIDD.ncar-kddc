@@ -75,60 +75,130 @@
 # KDDC
 #
 
-KDDC_DBZ_F     KDDC_DBZ_F      $(HOME)/data/sprite/cfradial/kddc&DBZ_F      dbz.colors   dBZ -5 80 5 radial 1 0
-KDDC_DBZ       KDDC_DBZ        $(HOME)/data/sprite/cfradial/kddc&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
-KDDC_WIDTH_F     KDDC_WIDTH_F   $(HOME)/data/sprite/cfradial/kddc&WIDTH_F   width.colors m/s -5 80 5 radial 1 0
-KDDC_WIDTH       KDDC_WIDTH     $(HOME)/data/sprite/cfradial/kddc&WIDTH     width.colors m/s -5 80 5 radial 1 0
+LONGPRT_DBZ_F     LONGPRT_DBZ_F      $(HOME)/data/sprite/cfradial/kddc.longprt&DBZ_F      dbz.colors   dBZ -5 80 5 radial 1 0
+LONGPRT_DBZ       LONGPRT_DBZ        $(HOME)/data/sprite/cfradial/kddc.longprt&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+LONGPRT_WIDTH_F   LONGPRT_WIDTH_F   $(HOME)/data/sprite/cfradial/kddc.longprt&WIDTH_F   width.colors m/s -5 80 5 radial 1 0
+LONGPRT_WIDTH     LONGPRT_WIDTH     $(HOME)/data/sprite/cfradial/kddc.longprt&WIDTH     width.colors m/s -5 80 5 radial 1 0
 
-KDDC_VEL_F     KDDC_VEL_F      $(HOME)/data/sprite/cfradial/kddc&VEL_F      vel30.colors   m/s -5 80 5 radial 1 0
-KDDC_VEL       KDDC_VEL        $(HOME)/data/sprite/cfradial/kddc&VEL        vel30.colors   m/s -5 80 5 radial 1 0
-KDDC_VELNEX  KDDC_VELNEX      $(HOME)/data/sprite/cfradial/kddc&VEL      vel_nexrad.colors   m/s -5 80 5 radial 1 0
-KDDC_VELNEX_F  KDDC_VELNEX_F      $(HOME)/data/sprite/cfradial/kddc&VEL_F      vel_nexrad.colors   m/s -5 80 5 radial 1 0
+LONGPRT_VEL_F     LONGPRT_VEL_F      $(HOME)/data/sprite/cfradial/kddc.longprt&VEL_F      vel30.colors   m/s -5 80 5 radial 1 0
+LONGPRT_VEL       LONGPRT_VEL        $(HOME)/data/sprite/cfradial/kddc.longprt&VEL        vel30.colors   m/s -5 80 5 radial 1 0
+LONGPRT_VELNEX    LONGPRT_VELNEX      $(HOME)/data/sprite/cfradial/kddc.longprt&VEL      vel_nexrad.colors   m/s -5 80 5 radial 1 0
+LONGPRT_VELNEX_F  LONGPRT_VELNEX_F      $(HOME)/data/sprite/cfradial/kddc.longprt&VEL_F      vel_nexrad.colors   m/s -5 80 5 radial 1 0
 
-KDDC_ZDR_F       KDDC_ZDR_F      $(HOME)/data/sprite/cfradial/kddc&ZDR_F     zdr.colors   dB  -5 80 5 radial 1 0
-KDDC_ZDR         KDDC_ZDR        $(HOME)/data/sprite/cfradial/kddc&ZDR       zdr.colors   dB  -5 80 5 radial 1 0
+LONGPRT_ZDR_F       LONGPRT_ZDR_F      $(HOME)/data/sprite/cfradial/kddc.longprt&ZDR_F     zdr.colors   dB  -5 80 5 radial 1 0
+LONGPRT_ZDR         LONGPRT_ZDR        $(HOME)/data/sprite/cfradial/kddc.longprt&ZDR       zdr.colors   dB  -5 80 5 radial 1 0
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
 
-KDDC_PHIDP_F     KDDC_PHIDP_F   $(HOME)/data/sprite/cfradial/kddc&PHIDP_F   phidp_alt.colors deg -5 80 5 radial 1 0
-KDDC_PHIDP       KDDC_PHIDP     $(HOME)/data/sprite/cfradial/kddc&PHIDP     phidp_alt.colors deg -5 80 5 radial 1 0
-KDDC_PHIDP0_F    KDDC_PHIDP0_F  $(HOME)/data/sprite/cfradial/kddc&PHIDP0_F  phidp_alt.colors deg -5 80 5 radial 1 0
-KDDC_PHIDP0      KDDC_PHIDP0    $(HOME)/data/sprite/cfradial/kddc&PHIDP0    phidp_alt.colors deg -5 80 5 radial 1 0
+LONGPRT_PHIDP_F     LONGPRT_PHIDP_F   $(HOME)/data/sprite/cfradial/kddc.longprt&PHIDP_F   phidp_alt.colors deg -5 80 5 radial 1 0
+LONGPRT_PHIDP       LONGPRT_PHIDP     $(HOME)/data/sprite/cfradial/kddc.longprt&PHIDP     phidp_alt.colors deg -5 80 5 radial 1 0
+LONGPRT_PHIDP0_F    LONGPRT_PHIDP0_F  $(HOME)/data/sprite/cfradial/kddc.longprt&PHIDP0_F  phidp_alt.colors deg -5 80 5 radial 1 0
+LONGPRT_PHIDP0      LONGPRT_PHIDP0    $(HOME)/data/sprite/cfradial/kddc.longprt&PHIDP0    phidp_alt.colors deg -5 80 5 radial 1 0
 
-KDDC_NCP         KDDC_NCP       $(HOME)/data/sprite/cfradial/kddc&NCP         ncp.colors  dB   -5   80  5  radial   1 0
-KDDC_NCP_F       KDDC_NCP_F     $(HOME)/data/sprite/cfradial/kddc&NCP_F       ncp.colors  dB   -5   80  5  radial   1 0
-KDDC_KDP_F       KDDC_KDP_F      $(HOME)/data/sprite/cfradial/kddc&KDP_F     kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-KDDC_KDP         KDDC_KDP        $(HOME)/data/sprite/cfradial/kddc&KDP       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+LONGPRT_NCP         LONGPRT_NCP       $(HOME)/data/sprite/cfradial/kddc.longprt&NCP         ncp.colors  dB   -5   80  5  radial   1 0
+LONGPRT_NCP_F       LONGPRT_NCP_F     $(HOME)/data/sprite/cfradial/kddc.longprt&NCP_F       ncp.colors  dB   -5   80  5  radial   1 0
+LONGPRT_KDP_F       LONGPRT_KDP_F      $(HOME)/data/sprite/cfradial/kddc.longprt&KDP_F     kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+LONGPRT_KDP         LONGPRT_KDP        $(HOME)/data/sprite/cfradial/kddc.longprt&KDP       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
 
-KDDC_RHOHV_F     KDDC_RHOHV_F   $(HOME)/data/sprite/cfradial/kddc&RHOHV_F     rhohv.colors _   -5 80 5 radial 1 0
-KDDC_RHOHV       KDDC_RHOHV     $(HOME)/data/sprite/cfradial/kddc&RHOHV       rhohv.colors _   -5 80 5 radial 1 0
-KDDC_RHONNC_F    KDDC_RHONNC_F  $(HOME)/data/sprite/cfradial/kddc&RHOHV_NNC_F rhohv.colors _   -5 80 5 radial 1 0
-KDDC_RHONNC      KDDC_RHONNC    $(HOME)/data/sprite/cfradial/kddc&RHOHV_NNC   rhohv.colors _   -5 80 5 radial 1 0
+LONGPRT_RHOHV_F     LONGPRT_RHOHV_F   $(HOME)/data/sprite/cfradial/kddc.longprt&RHOHV_F     rhohv.colors _   -5 80 5 radial 1 0
+LONGPRT_RHOHV       LONGPRT_RHOHV     $(HOME)/data/sprite/cfradial/kddc.longprt&RHOHV       rhohv.colors _   -5 80 5 radial 1 0
+LONGPRT_RHONNC_F    LONGPRT_RHONNC_F  $(HOME)/data/sprite/cfradial/kddc.longprt&RHOHV_NNC_F rhohv.colors _   -5 80 5 radial 1 0
+LONGPRT_RHONNC      LONGPRT_RHONNC    $(HOME)/data/sprite/cfradial/kddc.longprt&RHOHV_NNC   rhohv.colors _   -5 80 5 radial 1 0
 
-KDDC_RHO_HC_VX   KDDC_RHO_HC_VX $(HOME)/data/sprite/cfradial/kddc&RHO_HC_VX   rho_cross.colors _   -5 80 5 radial 1 0
-KDDC_RHO_VC_HX   KDDC_RHO_VC_HX $(HOME)/data/sprite/cfradial/kddc&RHO_VC_HX   rho_cross.colors _   -5 80 5 radial 1 0
-KDDC_RHO_VX_HX   KDDC_RHO_VX_HX $(HOME)/data/sprite/cfradial/kddc&RHO_VX_HX   rho_cross.colors _   -5 80 5 radial 1 0
-KDDC_NOISE_BIAS  KDDC_NOISE_BIAS $(HOME)/data/sprite/cfradial/kddc&NOISE_BIAS noise_bias.colors dB   -5 80 5 radial 1 0
+LONGPRT_RHO_HC_VX   LONGPRT_RHO_HC_VX $(HOME)/data/sprite/cfradial/kddc.longprt&RHO_HC_VX   rho_cross.colors _   -5 80 5 radial 1 0
+LONGPRT_RHO_VC_HX   LONGPRT_RHO_VC_HX $(HOME)/data/sprite/cfradial/kddc.longprt&RHO_VC_HX   rho_cross.colors _   -5 80 5 radial 1 0
+LONGPRT_RHO_VX_HX   LONGPRT_RHO_VX_HX $(HOME)/data/sprite/cfradial/kddc.longprt&RHO_VX_HX   rho_cross.colors _   -5 80 5 radial 1 0
+LONGPRT_NOISE_BIAS  LONGPRT_NOISE_BIAS $(HOME)/data/sprite/cfradial/kddc.longprt&NOISE_BIAS noise_bias.colors dB   -5 80 5 radial 1 0
 
-KDDC_SNRHC_F     KDDC_SNRHC_F   $(HOME)/data/sprite/cfradial/kddc&SNRHC_F  snr.colors   dB     -5 80 5 radial 1 0
-KDDC_SNRHC       KDDC_SNRHC     $(HOME)/data/sprite/cfradial/kddc&SNRHC    snr.colors   dB     -5 80 5 radial 1 0
-KDDC_SNRVC_F     KDDC_SNRVC_F   $(HOME)/data/sprite/cfradial/kddc&SNRVC_F  snr.colors   dB     -5 80 5 radial 1 0
-KDDC_SNRVC       KDDC_SNRVC     $(HOME)/data/sprite/cfradial/kddc&SNRVC    snr.colors   dB     -5 80 5 radial 1 0
+LONGPRT_SNRHC_F     LONGPRT_SNRHC_F   $(HOME)/data/sprite/cfradial/kddc.longprt&SNRHC_F  snr.colors   dB     -5 80 5 radial 1 0
+LONGPRT_SNRHC       LONGPRT_SNRHC     $(HOME)/data/sprite/cfradial/kddc.longprt&SNRHC    snr.colors   dB     -5 80 5 radial 1 0
+LONGPRT_SNRVC_F     LONGPRT_SNRVC_F   $(HOME)/data/sprite/cfradial/kddc.longprt&SNRVC_F  snr.colors   dB     -5 80 5 radial 1 0
+LONGPRT_SNRVC       LONGPRT_SNRVC     $(HOME)/data/sprite/cfradial/kddc.longprt&SNRVC    snr.colors   dB     -5 80 5 radial 1 0
 
-KDDC_DBMHC_F     KDDC_DBMHC_F   $(HOME)/data/sprite/cfradial/kddc&DBMHC_F  dbmlow.colors dBm -5 80 5 radial 1 0
-KDDC_DBMHC       KDDC_DBMHC     $(HOME)/data/sprite/cfradial/kddc&DBMHC    dbmlow.colors dBm -5 80 5 radial 1 0
-KDDC_DBMVC_F     KDDC_DBMVC_F   $(HOME)/data/sprite/cfradial/kddc&DBMVC_F  dbmlow.colors dBm -5 80 5 radial 1 0
-KDDC_DBMVC       KDDC_DBMVC     $(HOME)/data/sprite/cfradial/kddc&DBMVC    dbmlow.colors dBm -5 80 5 radial 1 0
+LONGPRT_DBMHC_F     LONGPRT_DBMHC_F   $(HOME)/data/sprite/cfradial/kddc.longprt&DBMHC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+LONGPRT_DBMHC       LONGPRT_DBMHC     $(HOME)/data/sprite/cfradial/kddc.longprt&DBMHC    dbmlow.colors dBm -5 80 5 radial 1 0
+LONGPRT_DBMVC_F     LONGPRT_DBMVC_F   $(HOME)/data/sprite/cfradial/kddc.longprt&DBMVC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+LONGPRT_DBMVC       LONGPRT_DBMVC     $(HOME)/data/sprite/cfradial/kddc.longprt&DBMVC    dbmlow.colors dBm -5 80 5 radial 1 0
 
-KDDC_CPA         KDDC_CPA       $(HOME)/data/sprite/cfradial/kddc&CPA         cpa.colors  - -5 80 5 radial 1 0
-KDDC_CMD         KDDC_CMD       $(HOME)/data/sprite/cfradial/kddc&CMD         cmd.colors  none -5 80 5 radial 1 0
-KDDC_CMD_FLAG    KDDC_CMD_FLAG  $(HOME)/data/sprite/cfradial/kddc&CMD_FLAG    cmd_flag.colors  none -5 80 5 radial 1 0
-KDDC_TDBZ        KDDC_TDBZ      $(HOME)/data/sprite/cfradial/kddc&TDBZ        tdbz.colors  dBZSq -5 80 5 radial 1 0
+LONGPRT_CPA         LONGPRT_CPA       $(HOME)/data/sprite/cfradial/kddc.longprt&CPA         cpa.colors  - -5 80 5 radial 1 0
+LONGPRT_CMD         LONGPRT_CMD       $(HOME)/data/sprite/cfradial/kddc.longprt&CMD         cmd.colors  none -5 80 5 radial 1 0
+LONGPRT_CMD_FLAG    LONGPRT_CMD_FLAG  $(HOME)/data/sprite/cfradial/kddc.longprt&CMD_FLAG    cmd_flag.colors  none -5 80 5 radial 1 0
+LONGPRT_TDBZ        LONGPRT_TDBZ      $(HOME)/data/sprite/cfradial/kddc.longprt&TDBZ        tdbz.colors  dBZSq -5 80 5 radial 1 0
 
-KDDC_SPIN        KDDC_SPIN      $(HOME)/data/sprite/cfradial/kddc&SPIN        spin.colors  dBZSq -5 80 5 radial 1 0
-KDDC_ZDR_SDEV    KDDC_ZDR_SDEV  $(HOME)/data/sprite/cfradial/kddc&ZDR_SDEV    sdzdr.colors    dB -5 80 5 radial 1 0
-KDDC_PHI_SDEV    KDDC_PHI_SDEV  $(HOME)/data/sprite/cfradial/kddc&PHIDP_SDEV  sdphidp.colors  - -5 80 5 radial 1 0
-KDDC_CLUT        KDDC_CLUT      $(HOME)/data/sprite/cfradial/kddc&CLUT        dbz.colors dB -5 80 5 radial 1 0
+LONGPRT_SPIN        LONGPRT_SPIN      $(HOME)/data/sprite/cfradial/kddc.longprt&SPIN        spin.colors  dBZSq -5 80 5 radial 1 0
+LONGPRT_ZDR_SDEV    LONGPRT_ZDR_SDEV  $(HOME)/data/sprite/cfradial/kddc.longprt&ZDR_SDEV    sdzdr.colors    dB -5 80 5 radial 1 0
+LONGPRT_PHI_SDEV    LONGPRT_PHI_SDEV  $(HOME)/data/sprite/cfradial/kddc.longprt&PHIDP_SDEV  sdphidp.colors  - -5 80 5 radial 1 0
+LONGPRT_CLUT        LONGPRT_CLUT      $(HOME)/data/sprite/cfradial/kddc.longprt&CLUT        dbz.colors dB -5 80 5 radial 1 0
+
+LONGPRT_SPECTRAL_NOISE   LONGPRT_SPECTRAL_NOISE  $(HOME)/data/sprite/cfradial/kddc.longprt&SPECTRAL_NOISE   dbm.colors dB -5 80 5 radial 1 0
+LONGPRT_SPECTRAL_SNR     LONGPRT_SPECTRAL_SNR    $(HOME)/data/sprite/cfradial/kddc.longprt&SPECTRAL_SNR   snr.colors dB -5 80 5 radial 1 0
+LONGPRT_SPECTRAL_NOISE2  LONGPRT_SPECTRAL_NOISE2 $(HOME)/data/sprite/cfradial/kddc.longprt&SPECTRAL_NOISE   dbm.colors dB -5 80 5 radial 1 0
+LONGPRT_SPECTRAL_SNR2    LONGPRT_SPECTRAL_SNR2   $(HOME)/data/sprite/cfradial/kddc.longprt&SPECTRAL_SNR   snr.windfarm.colors dB -5 80 5 radial 1 0
+
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
+
+SHORTPRT_DBZ_F     SHORTPRT_DBZ_F      $(HOME)/data/sprite/cfradial/kddc.shortprt&DBZ_F      dbz.colors   dBZ -5 80 5 radial 1 0
+SHORTPRT_DBZ       SHORTPRT_DBZ        $(HOME)/data/sprite/cfradial/kddc.shortprt&DBZ        dbz.colors   dBZ -5 80 5 radial 1 0
+SHORTPRT_WIDTH_F   SHORTPRT_WIDTH_F   $(HOME)/data/sprite/cfradial/kddc.shortprt&WIDTH_F   width.colors m/s -5 80 5 radial 1 0
+SHORTPRT_WIDTH     SHORTPRT_WIDTH     $(HOME)/data/sprite/cfradial/kddc.shortprt&WIDTH     width.colors m/s -5 80 5 radial 1 0
+
+SHORTPRT_VEL_F     SHORTPRT_VEL_F      $(HOME)/data/sprite/cfradial/kddc.shortprt&VEL_F      vel30.colors   m/s -5 80 5 radial 1 0
+SHORTPRT_VEL       SHORTPRT_VEL        $(HOME)/data/sprite/cfradial/kddc.shortprt&VEL        vel30.colors   m/s -5 80 5 radial 1 0
+SHORTPRT_VELNEX    SHORTPRT_VELNEX      $(HOME)/data/sprite/cfradial/kddc.shortprt&VEL      vel_nexrad.colors   m/s -5 80 5 radial 1 0
+SHORTPRT_VELNEX_F  SHORTPRT_VELNEX_F      $(HOME)/data/sprite/cfradial/kddc.shortprt&VEL_F      vel_nexrad.colors   m/s -5 80 5 radial 1 0
+
+SHORTPRT_ZDR_F       SHORTPRT_ZDR_F      $(HOME)/data/sprite/cfradial/kddc.shortprt&ZDR_F     zdr.colors   dB  -5 80 5 radial 1 0
+SHORTPRT_ZDR         SHORTPRT_ZDR        $(HOME)/data/sprite/cfradial/kddc.shortprt&ZDR       zdr.colors   dB  -5 80 5 radial 1 0
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
+
+SHORTPRT_PHIDP_F     SHORTPRT_PHIDP_F   $(HOME)/data/sprite/cfradial/kddc.shortprt&PHIDP_F   phidp_alt.colors deg -5 80 5 radial 1 0
+SHORTPRT_PHIDP       SHORTPRT_PHIDP     $(HOME)/data/sprite/cfradial/kddc.shortprt&PHIDP     phidp_alt.colors deg -5 80 5 radial 1 0
+SHORTPRT_PHIDP0_F    SHORTPRT_PHIDP0_F  $(HOME)/data/sprite/cfradial/kddc.shortprt&PHIDP0_F  phidp_alt.colors deg -5 80 5 radial 1 0
+SHORTPRT_PHIDP0      SHORTPRT_PHIDP0    $(HOME)/data/sprite/cfradial/kddc.shortprt&PHIDP0    phidp_alt.colors deg -5 80 5 radial 1 0
+
+SHORTPRT_NCP         SHORTPRT_NCP       $(HOME)/data/sprite/cfradial/kddc.shortprt&NCP         ncp.colors  dB   -5   80  5  radial   1 0
+SHORTPRT_NCP_F       SHORTPRT_NCP_F     $(HOME)/data/sprite/cfradial/kddc.shortprt&NCP_F       ncp.colors  dB   -5   80  5  radial   1 0
+SHORTPRT_KDP_F       SHORTPRT_KDP_F      $(HOME)/data/sprite/cfradial/kddc.shortprt&KDP_F     kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+SHORTPRT_KDP         SHORTPRT_KDP        $(HOME)/data/sprite/cfradial/kddc.shortprt&KDP       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+
+SHORTPRT_RHOHV_F     SHORTPRT_RHOHV_F   $(HOME)/data/sprite/cfradial/kddc.shortprt&RHOHV_F     rhohv.colors _   -5 80 5 radial 1 0
+SHORTPRT_RHOHV       SHORTPRT_RHOHV     $(HOME)/data/sprite/cfradial/kddc.shortprt&RHOHV       rhohv.colors _   -5 80 5 radial 1 0
+SHORTPRT_RHONNC_F    SHORTPRT_RHONNC_F  $(HOME)/data/sprite/cfradial/kddc.shortprt&RHOHV_NNC_F rhohv.colors _   -5 80 5 radial 1 0
+SHORTPRT_RHONNC      SHORTPRT_RHONNC    $(HOME)/data/sprite/cfradial/kddc.shortprt&RHOHV_NNC   rhohv.colors _   -5 80 5 radial 1 0
+
+SHORTPRT_RHO_HC_VX   SHORTPRT_RHO_HC_VX $(HOME)/data/sprite/cfradial/kddc.shortprt&RHO_HC_VX   rho_cross.colors _   -5 80 5 radial 1 0
+SHORTPRT_RHO_VC_HX   SHORTPRT_RHO_VC_HX $(HOME)/data/sprite/cfradial/kddc.shortprt&RHO_VC_HX   rho_cross.colors _   -5 80 5 radial 1 0
+SHORTPRT_RHO_VX_HX   SHORTPRT_RHO_VX_HX $(HOME)/data/sprite/cfradial/kddc.shortprt&RHO_VX_HX   rho_cross.colors _   -5 80 5 radial 1 0
+SHORTPRT_NOISE_BIAS  SHORTPRT_NOISE_BIAS $(HOME)/data/sprite/cfradial/kddc.shortprt&NOISE_BIAS noise_bias.colors dB   -5 80 5 radial 1 0
+
+SHORTPRT_SNRHC_F     SHORTPRT_SNRHC_F   $(HOME)/data/sprite/cfradial/kddc.shortprt&SNRHC_F  snr.colors   dB     -5 80 5 radial 1 0
+SHORTPRT_SNRHC       SHORTPRT_SNRHC     $(HOME)/data/sprite/cfradial/kddc.shortprt&SNRHC    snr.colors   dB     -5 80 5 radial 1 0
+SHORTPRT_SNRVC_F     SHORTPRT_SNRVC_F   $(HOME)/data/sprite/cfradial/kddc.shortprt&SNRVC_F  snr.colors   dB     -5 80 5 radial 1 0
+SHORTPRT_SNRVC       SHORTPRT_SNRVC     $(HOME)/data/sprite/cfradial/kddc.shortprt&SNRVC    snr.colors   dB     -5 80 5 radial 1 0
+
+SHORTPRT_DBMHC_F     SHORTPRT_DBMHC_F   $(HOME)/data/sprite/cfradial/kddc.shortprt&DBMHC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+SHORTPRT_DBMHC       SHORTPRT_DBMHC     $(HOME)/data/sprite/cfradial/kddc.shortprt&DBMHC    dbmlow.colors dBm -5 80 5 radial 1 0
+SHORTPRT_DBMVC_F     SHORTPRT_DBMVC_F   $(HOME)/data/sprite/cfradial/kddc.shortprt&DBMVC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+SHORTPRT_DBMVC       SHORTPRT_DBMVC     $(HOME)/data/sprite/cfradial/kddc.shortprt&DBMVC    dbmlow.colors dBm -5 80 5 radial 1 0
+
+SHORTPRT_CPA         SHORTPRT_CPA       $(HOME)/data/sprite/cfradial/kddc.shortprt&CPA         cpa.colors  - -5 80 5 radial 1 0
+SHORTPRT_CMD         SHORTPRT_CMD       $(HOME)/data/sprite/cfradial/kddc.shortprt&CMD         cmd.colors  none -5 80 5 radial 1 0
+SHORTPRT_CMD_FLAG    SHORTPRT_CMD_FLAG  $(HOME)/data/sprite/cfradial/kddc.shortprt&CMD_FLAG    cmd_flag.colors  none -5 80 5 radial 1 0
+SHORTPRT_TDBZ        SHORTPRT_TDBZ      $(HOME)/data/sprite/cfradial/kddc.shortprt&TDBZ        tdbz.colors  dBZSq -5 80 5 radial 1 0
+
+SHORTPRT_SPIN        SHORTPRT_SPIN      $(HOME)/data/sprite/cfradial/kddc.shortprt&SPIN        spin.colors  dBZSq -5 80 5 radial 1 0
+SHORTPRT_ZDR_SDEV    SHORTPRT_ZDR_SDEV  $(HOME)/data/sprite/cfradial/kddc.shortprt&ZDR_SDEV    sdzdr.colors    dB -5 80 5 radial 1 0
+SHORTPRT_PHI_SDEV    SHORTPRT_PHI_SDEV  $(HOME)/data/sprite/cfradial/kddc.shortprt&PHIDP_SDEV  sdphidp.colors  - -5 80 5 radial 1 0
+SHORTPRT_CLUT        SHORTPRT_CLUT      $(HOME)/data/sprite/cfradial/kddc.shortprt&CLUT        dbz.colors dB -5 80 5 radial 1 0
+
+SHORTPRT_SPECTRAL_NOISE   SHORTPRT_SPECTRAL_NOISE  $(HOME)/data/sprite/cfradial/kddc.shortprt&SPECTRAL_NOISE   dbm.colors dB -5 80 5 radial 1 0
+SHORTPRT_SPECTRAL_SNR     SHORTPRT_SPECTRAL_SNR    $(HOME)/data/sprite/cfradial/kddc.shortprt&SPECTRAL_SNR   snr.colors dB -5 80 5 radial 1 0
+SHORTPRT_SPECTRAL_NOISE2  SHORTPRT_SPECTRAL_NOISE2 $(HOME)/data/sprite/cfradial/kddc.shortprt&SPECTRAL_NOISE   dbm.colors dB -5 80 5 radial 1 0
+SHORTPRT_SPECTRAL_SNR2    SHORTPRT_SPECTRAL_SNR2   $(HOME)/data/sprite/cfradial/kddc.shortprt&SPECTRAL_SNR   snr.windfarm.colors dB -5 80 5 radial 1 0
 
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
@@ -272,7 +342,7 @@ cidd.starting_movie_frames:  12
 # minutes per movie frame on startup
 # The display will atomatically update every this interval, throwing away its
 # oldest movie frame and creating and drawing a new one.
-cidd.time_interval:  5
+cidd.time_interval:  5.0
 
 # This parameter sets the maximum number of hours in the future a user can select
 # from the quick forecast menu. See SHOW_FORECAST_MENU menu bar button
@@ -481,7 +551,7 @@ cidd.xsect_start_page:      1
 #
 # The Outer most domain:
 cidd.num_zoom_levels:       8
-cidd.start_zoom_level:      3
+cidd.start_zoom_level:      1
 
 # The number of Cached images for zooms.
 cidd.num_cache_zooms:       0
@@ -490,11 +560,11 @@ cidd.num_cache_zooms:       0
 # It's suggested that names without spaces be used when running
 # in.
 #
-cidd.level1_label:                  40km
-cidd.level1_min_xkm:                -40.0
-cidd.level1_min_ykm:                -40.0
-cidd.level1_max_xkm:                40.0
-cidd.level1_max_ykm:                40.0
+cidd.level1_label:                  50km
+cidd.level1_min_xkm:                -50.0
+cidd.level1_min_ykm:                -50.0
+cidd.level1_max_xkm:                50.0
+cidd.level1_max_ykm:                50.0
 #
 cidd.level2_label:                  75km
 cidd.level2_min_xkm:                -75.0
@@ -560,8 +630,8 @@ cidd.max_adeg:               360.0
 
 # List of comma delimited local directories or HTTP URLs to search
 # Searchs . then each directory/URL in order 
-cidd.color_file_subdir:   http://front.eol.ucar.edu/color_scales
-cidd.map_file_subdir:     http://front.eol.ucar.edu/maps
+cidd.color_file_subdir:   $(HOME)/git/lrose-displays/color_scales,http://front.eol.ucar.edu/color_scales
+cidd.map_file_subdir:     $(HOME)/git/lrose-displays/maps,http://front.eol.ucar.edu/maps
 
 #
 # Station locator features
