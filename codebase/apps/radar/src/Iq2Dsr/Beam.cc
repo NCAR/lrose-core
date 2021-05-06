@@ -2645,6 +2645,14 @@ void Beam::_filterDpSimHvFixedPrt()
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
     fields.test5 = _mom->getRegr3CsrDb();
+
+    // wind farm test
+
+    if (fields.spectral_snr >= 25.0 && fields.clut_2_wx_ratio >= 10.0) {
+      fields.test2 = 1.0;
+    } else {
+      fields.test2 = MomentsFields::missingDouble;
+    }
     
     // apply the filter ratio to other channel
     

@@ -135,6 +135,11 @@ LONGPRT_SPECTRAL_SNR     LONGPRT_SPECTRAL_SNR    $(HOME)/data/sprite/cfradial/kd
 LONGPRT_SPECTRAL_NOISE2  LONGPRT_SPECTRAL_NOISE2 $(HOME)/data/sprite/cfradial/kddc.longprt&SPECTRAL_NOISE   dbm.colors dB -5 80 5 radial 1 0
 LONGPRT_SPECTRAL_SNR2    LONGPRT_SPECTRAL_SNR2   $(HOME)/data/sprite/cfradial/kddc.longprt&SPECTRAL_SNR   snr.windfarm.colors dB -5 80 5 radial 1 0
 
+LONGPRT_CSR LONGPRT_CSR  $(HOME)/data/sprite/cfradial/kddc.longprt&CSR  snr.colors dB -5 80 5 radial 1 0
+LONGPRT_WFARM_FLAG    LONGPRT_WFARM_FLAG  $(HOME)/data/sprite/cfradial/kddc.longprt&WFARM_FLAG    cmd_flag.colors  none -5 80 5 radial 1 0
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
+
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
@@ -199,6 +204,11 @@ SHORTPRT_SPECTRAL_NOISE   SHORTPRT_SPECTRAL_NOISE  $(HOME)/data/sprite/cfradial/
 SHORTPRT_SPECTRAL_SNR     SHORTPRT_SPECTRAL_SNR    $(HOME)/data/sprite/cfradial/kddc.shortprt&SPECTRAL_SNR   snr.colors dB -5 80 5 radial 1 0
 SHORTPRT_SPECTRAL_NOISE2  SHORTPRT_SPECTRAL_NOISE2 $(HOME)/data/sprite/cfradial/kddc.shortprt&SPECTRAL_NOISE   dbm.colors dB -5 80 5 radial 1 0
 SHORTPRT_SPECTRAL_SNR2    SHORTPRT_SPECTRAL_SNR2   $(HOME)/data/sprite/cfradial/kddc.shortprt&SPECTRAL_SNR   snr.windfarm.colors dB -5 80 5 radial 1 0
+
+SHORTPRT_CSR SHORTPRT_CSR  $(HOME)/data/sprite/cfradial/kddc.shortprt&CSR  snr.colors dB -5 80 5 radial 1 0
+SHORTPRT_WFARM_FLAG    SHORTPRT_WFARM_FLAG  $(HOME)/data/sprite/cfradial/kddc.shortprt&WFARM_FLAG    cmd_flag.colors  none -5 80 5 radial 1 0
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
+======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
 
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0

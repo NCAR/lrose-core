@@ -1840,6 +1840,24 @@ output_fields = {
   }
   ,
   {
+    dsr_name = "CSR",
+    output_name = "CSR",
+    long_name = "clutter_to_signal_ratio",
+    standard_name = "clutter_to_signal_ratio",
+    output_units = "dB",
+    output_encoding = OUTPUT_SHORT
+  }
+  ,
+  {
+    dsr_name = "WFARM_FLAG",
+    output_name = "WFARM_FLAG",
+    long_name = "wind_farm_flag",
+    standard_name = "wind_farm_flag",
+    output_units = "none",
+    output_encoding = OUTPUT_SHORT
+  }
+  ,
+  {
     dsr_name = "CMD",
     output_name = "CMD",
     long_name = "clutter_mitigation_interest",

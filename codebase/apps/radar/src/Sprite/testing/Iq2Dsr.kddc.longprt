@@ -4012,6 +4012,26 @@ output_fields = {
   }
   ,
   {
+    id = CLUT_2_WX_RATIO,
+    name = "CSR",
+    units = "dB",
+    scale = 0.01,
+    bias = -320,
+    write_unfiltered = TRUE,
+    write_filtered = FALSE
+  }
+  ,
+  {
+    id = TEST2,
+    name = "WFARM_FLAG",
+    units = "",
+    scale = 0.01,
+    bias = -320,
+    write_unfiltered = TRUE,
+    write_filtered = FALSE
+  }
+  ,
+  {
     id = ZDR,
     name = "ZDR",
     units = "dB",
