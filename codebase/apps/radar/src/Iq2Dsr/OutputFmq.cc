@@ -107,7 +107,8 @@ int OutputFmq::writeParams(const Beam &beam)
   iwrf_xmit_rcv_mode_t xmitRcvMode = beam.getXmitRcvMode();
                            
   int nGatesOut = beam.getNGatesOut();
-  int nSamples = beam.getNSamplesEffective();
+  // int nSamples = beam.getNSamplesEffective();
+  int nSamples = beam.getNSamples();
   double pulseWidthUs = beam.getPulseWidth() * 1.0e6;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -380,7 +381,7 @@ int OutputFmq::writeBeam(const Beam &beam)
               iwrf_scan_mode_to_short_str(beam.getScanMode()).c_str(), 
               beam.getVolNum(), beam.getSweepNum(),
               beam.getAz(), beam.getEl(),
-              beam.getNSamplesEffective());
+              beam.getNSamples());
     } else {
       fprintf(stderr,
               "-->> OutputFmq::writeBeam %s (late %d) - %s, vol: %.3d, "
@@ -390,7 +391,7 @@ int OutputFmq::writeBeam(const Beam &beam)
               iwrf_scan_mode_to_short_str(beam.getScanMode()).c_str(), 
               beam.getVolNum(), beam.getSweepNum(),
               beam.getAz(), beam.getEl(),
-              beam.getNSamplesEffective());
+              beam.getNSamples());
     }
   }
 
@@ -431,7 +432,8 @@ int OutputFmq::writeBeam(const Beam &beam)
   dsBeam.scanMode = beam.getScanMode();
   dsBeam.beamIsIndexed = beam.getBeamIsIndexed();
   dsBeam.angularResolution = beam.getAngularResolution();
-  dsBeam.nSamples = beam.getNSamplesEffective();
+  dsBeam.nSamples = beam.getNSamples();
+  // dsBeam.nSamples = beam.getNSamplesEffective();
   dsBeam.measXmitPowerDbmH = beam.getMeasXmitPowerDbmH();
   dsBeam.measXmitPowerDbmV = beam.getMeasXmitPowerDbmV();
 
