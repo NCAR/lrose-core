@@ -24,6 +24,7 @@
 
 #include "FieldRendererController.hh"
 #include "RayLocationController.hh"
+#include <toolsa/LogStream.hh>
 
 using namespace std;
 
@@ -39,6 +40,10 @@ FieldRendererController::~FieldRendererController()
 }
 
 
+void FieldRendererController::addField(string &fieldName) {
+  FieldRendererView *fieldRenderer = new FieldRendererView(fieldName);
+  addFieldRenderer(fieldRenderer);
+}
 
 // add a new FieldRenderer; one FieldRenderer for each field
 void FieldRendererController::addFieldRenderer(FieldRendererView *fieldRenderer)
@@ -279,6 +284,8 @@ QImage *FieldRendererController::renderImage(int width, int height,
   ColorMap &colorMap,
   QColor backgroundColor) {
 
+  LOG(DEBUG) << "enter: ";
+
   FieldRendererView *fieldRenderer = get(fieldName);
   if (fieldRenderer == NULL) {
     fieldRenderer = new FieldRendererView(fieldName);
@@ -293,8 +300,11 @@ QImage *FieldRendererController::renderImage(int width, int height,
     //or send a vector?
     size_t nRayLocations = rayLocationController->getNRayLocations();
     // get rays in sorted order from RayLocationController
+    LOG(DEBUG) << "nRayLocations " << nRayLocations;
     size_t rayIdx=0;
-    while ( rayIdx < nRayLocations) { // each field ray in sweep) {
+    bool done = false;
+    while ((rayIdx < nRayLocations) && (!done)) { // each field ray in sweep) {
+      LOG(DEBUG) << "  rayIdx = " << rayIdx;
       vector<float> *rayData = rayLocationController->getRayData(rayIdx, fieldName);
       if (rayData->size() > 0) {
         takeCareOfMissingValues(rayData);
@@ -312,6 +322,8 @@ QImage *FieldRendererController::renderImage(int width, int height,
         float *data = &(*rayData)[0];
         beam->updateFillColors(data, nData, &colorMap, background_brush);  
         fieldRenderer->addBeam(beam);
+        // rayIdx must be increasing
+        if (endIndex < rayIdx) done = true;
         rayIdx = endIndex;
       } else {
         rayIdx += 1;
@@ -321,6 +333,9 @@ QImage *FieldRendererController::renderImage(int width, int height,
     fieldRenderer->createImage(width, height);
     fieldRenderer->runIt();  // calls paint method on each beam
   }
+
+  LOG(DEBUG) << "exit: ";
+
   return fieldRenderer->getImage();
 }
 

@@ -37,10 +37,10 @@ void DisplayFieldController::addField(DisplayField *newField) {
 }
 
 
-void DisplayFieldController::addField(string newFieldName) {
-  DisplayField *displayField = _model->getField(newFieldName);
+void DisplayFieldController::addField(string &fieldName) {
+  DisplayField *displayField = _model->getField(fieldName);
   if (displayField == NULL) {
-    DisplayField *newDisplayField = new DisplayField(newFieldName);
+    DisplayField *newDisplayField = new DisplayField(fieldName);
     addField(newDisplayField);
     // this is done by the PolarManager ...
     //_displayFieldView->updateFieldPanel(newFieldName, newFieldName, newFieldName);

@@ -227,13 +227,20 @@ void PolarWidget::setAngleLines(const bool enabled)
 }
 
 
+
 // TODO: this should be a slot?
 // TODO: sort out new fields in PolarManager
 // Who needs to know about the new fields?
 // Beams, FieldRenderers, DisplayFieldController 
 void PolarWidget::addNewFields(vector<DisplayField *> &newFields) 
+//void PolarWidget::addField(string &fieldName) 
 {
   LOG(DEBUG) << "enter";
+
+  //FieldRendererView *fieldRenderer =
+  //    new FieldRenderer(_params, fieldIdx, *newFields[ii]);
+  //fieldRenderer->createImage(width(), height());
+
 
   // add to the field renderers any new fields in the volume
   // for each field in the volume

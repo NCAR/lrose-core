@@ -30,7 +30,7 @@ public:
 
   bool contains(string fieldName);
   void addField(DisplayField *newField);
-  void addField(string newFieldName);
+  void addField(string &fieldName);
   void hideField(DisplayField *field);
   void setFieldToMissing(DisplayField *field);
   void deleteFieldFromVolume(DisplayField *field);

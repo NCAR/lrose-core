@@ -57,13 +57,15 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width) 
     double startAz = az - half_angle - 0.1;
     double endAz = az + half_angle + 0.1;
 
-    if (startAz < 0) startAz = 0;
-    if (endAz >= RayLoc::RAY_LOC_N) endAz = RayLoc::RAY_LOC_N - 1;
+
 
   // store
     
     int startIndex = (int) (startAz * RayLoc::RAY_LOC_RES);
     int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES + 1);
+
+    if (startIndex < 0) startIndex = 0;
+    if (endIndex >= RayLoc::RAY_LOC_N) endIndex = RayLoc::RAY_LOC_N - 1;   
 
   // Clear out any rays in the locations list that are overlapped by the
   // new ray
@@ -72,13 +74,23 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width) 
 
   // Set the locations associated with this ray
 
-    for (int ii = startIndex; ii <= endIndex; ii++) {
-      ray_loc[ii].ray = ray;
-      ray_loc[ii].active = true;
-      ray_loc[ii].startIndex = startIndex;
-      ray_loc[ii].endIndex = endIndex;
+    if (endIndex < startIndex) {
+    	LOG(DEBUG) << "ERROR endIndex: " << endIndex << " < startIndex: " << startIndex;
+    } else {
+	    for (int ii = startIndex; ii < endIndex; ii++) {
+	      ray_loc[ii].ray = ray;
+	      ray_loc[ii].active = true;
+	      ray_loc[ii].startIndex = startIndex;
+	      ray_loc[ii].endIndex = endIndex;
+	    }
     }
   }
+
+  for (int i = 0; i< RayLoc::RAY_LOC_N; i++) {
+  	LOG(DEBUG) << "ray_loc[" << i << "].startIdx = " << ray_loc[i].startIndex;
+  	LOG(DEBUG) << "  ray_loc[" << i << "].endIdx = " << ray_loc[i].endIndex;
+  }
+
   LOG(DEBUG) << "exit";
 }
 

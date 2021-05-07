@@ -43,6 +43,8 @@ void DataModel::readData(string path, vector<string> &fieldNames,
       throw errMsg;
   } 
 
+  _vol.convertToFl32();
+  
   // adjust angles for elevation surveillance if needed
   
   _vol.setAnglesForElevSurveillance();

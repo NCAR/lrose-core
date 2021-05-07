@@ -192,6 +192,7 @@ public slots:
   void updateVolume(QStringList newFieldNames);
   void _volumeDataChanged(QStringList newFieldNames);
   void _addNewFields(QStringList newFieldNames);
+  void _addNewFields(vector<string> *newFieldNames);
   void selectedFieldChanged(QString newFieldName);
   //void _updateField(size_t fieldId);
 
@@ -211,6 +212,8 @@ signals:
   
   void frameResized(const int width, const int height);
   //void setParamsFile();
+
+  void addField(QString fieldName);
 
 // end from DisplayManager
 

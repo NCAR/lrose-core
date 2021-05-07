@@ -267,6 +267,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   void setAngleLines(const bool enabled);
   void addNewFields(vector<DisplayField *> &newFields);
+  //void addField(QString fieldName);
 
  protected:
 

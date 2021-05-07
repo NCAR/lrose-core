@@ -47,7 +47,7 @@ public:
   virtual ~FieldRendererController();
 
   // NOTE: only index by fieldIndex which must match the button row in the field Panel
-
+  void addField(string &fieldName);
   void addFieldRenderer(FieldRendererView *);
   void addBeam(Beam *beam);
   void addBeam(size_t fieldIndex, Beam *beam);

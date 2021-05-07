@@ -33,6 +33,14 @@
 ///////////////////////////////////////////////////////////////
 //
 // PolarManager manages polar rendering - PPIs and RHIs
+// Manages top level Menus
+// Connects actions to Controllers
+// Transfers actions from Menus to top level Controllers
+// FieldPanelController
+// SweepController
+// PpiWidget/Controller
+// SpreadsheetController
+// ScriptController
 //
 ///////////////////////////////////////////////////////////////
 
@@ -484,6 +492,11 @@ void PolarManager::_setupWindows()
   connect(_fieldPanel, SIGNAL(selectedFieldChanged(QString)),
           this, SLOT(selectedFieldChanged(QString)));
        //SLOT(_plotArchiveData()));
+
+  //connect(this, SIGNAL(addField(QString)), 
+  //  _displayFieldController, SLOT(addField(QString)));
+  //connect(this, SIGNAL(addField(QString)), 
+  //  _ppi, SLOT(addField(QString)));
 
   // add widgets
 
@@ -1206,6 +1219,8 @@ size_t PolarManager::getSelectedFieldIndex() {
 // apply new, edited  data in archive mode
 // the volume has been updated 
 
+
+
 void PolarManager::_applyDataEdits()
 {
 
@@ -1258,6 +1273,73 @@ void PolarManager::_addNewFields(QStringList  newFieldNames)
     DisplayField *field =
       new DisplayField(name, name, "m/s",
 		       "-1", map, buttonRow, false);
+    //if (noColorMap)
+    field->setNoColorMap();
+
+    newFields.push_back(field);
+    _displayFieldController->addField(field);
+
+    // filtered field                                                                                    
+    
+    /*
+      if (strlen(pfld.filtered_name) > 0) {
+      string filtLabel = string(pfld.label) + "-filt";
+      DisplayField *filt =
+      new DisplayField(filtLabel, pfld.filtered_name, pfld.units, pfld.shortcut,
+      map, ifield, true);
+      newFields.push_back(filt);
+      }
+    */
+    // -----------
+  }   
+  
+  if (_ppi) {
+    _ppi->addNewFields(newFields);
+  }
+  
+  //if (_rhi) {
+  //  _rhi->addNewFields(newFields);
+  //}
+  LOG(DEBUG) << "exit";
+}
+
+
+void PolarManager::_addNewFields(vector<string> *newFieldNames)
+{
+  LOG(DEBUG) << "enter";
+  LOG(DEBUG) << "all fields in _vol ... ";
+  vector<RadxField *> allFields = _vol.getFields();
+  vector<RadxField *>::iterator it;
+  for (it = allFields.begin(); it != allFields.end(); it++) {
+    RadxField *radxField = *it;
+    LOG(DEBUG) << radxField->getName();
+  }
+
+
+  // TODO: 
+  // inheret the color map, units, etc. from the similar field
+  // Do this in the ScriptEditor, when the new field is added to RadxVol
+
+  // make new DisplayFields for PpiWidget
+  // -----
+
+  vector<DisplayField *> newFields;
+
+  LOG(DEBUG) << "newFieldNames ...";
+  //  newFieldNames.split(',');
+  for (int i=0; i < newFieldNames->size(); ++i) {
+    string name = newFieldNames->at(i); // .toLocal8Bit().constData();
+
+    LOG(DEBUG) << name;
+ 
+    ColorMap map(-20.0, 20.0, "default");
+
+     // new DisplayField(pfld.label, pfld.raw_name, pfld.units,
+      //           pfld.shortcut, map, ifield, false);
+    int buttonRow = _displayFieldController->getNFields() + 1;
+    DisplayField *field =
+      new DisplayField(name, name, "m/s",
+           "-1", map, buttonRow, false);
     //if (noColorMap)
     field->setNoColorMap();
 
@@ -3099,8 +3181,10 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
     for (vector<string>::iterator it=selectedFields->begin(); it != selectedFields->end(); ++it) {
       LOG(DEBUG) << *it;
       //qselectedFields.push_back(QString::fromStdString(*it));
-      _displayFieldController->addField(*it);
+      //_displayFieldController->addField(*it);
+      //emit addField(*it);
     }
+    _addNewFields(selectedFields);
     // give the selected fields to the volume read ...
     _readDataFile(selectedFields);
     
