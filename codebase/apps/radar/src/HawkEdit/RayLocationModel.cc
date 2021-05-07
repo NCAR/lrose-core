@@ -1,6 +1,7 @@
 
 #include "RayLocationModel.hh"
 #include "DataModel.hh"
+#include <toolsa/LogStream.hh>
 
 RayLocationModel::RayLocationModel() {
   //_ppiRays = new RayLoc[RayLoc::RAY_LOC_N];
@@ -12,7 +13,7 @@ RayLocationModel::~RayLocationModel() {}
 
 // call when new data file is read, or when switching to new sweep?
 void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width) {
-	
+  LOG(DEBUG) << "enter";
 //	_storeRayLoc(const RadxRay *ray, const double az,
 //                                const double beam_width, RayLoc *ray_loc)
 
@@ -78,6 +79,7 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width) 
       ray_loc[ii].endIndex = endIndex;
     }
   }
+  LOG(DEBUG) << "exit";
 }
 
 size_t RayLocationModel::getNRayLocations() {
@@ -111,18 +113,24 @@ double RayLocationModel::getStopAngle(size_t rayIdx) {
 }
 
 vector <float> *RayLocationModel::getRayData(size_t rayIdx, string fieldName) {
+  vector<float> *dataVector = new vector<float>(0);
 	// get the ray 
   const RadxRay *ray = ray_loc.at(rayIdx).ray;
+  if (ray != NULL)  {// throw std::invalid_argument("rayIdx has no ray data");
   size_t nGates = ray->getNGates(); 
 
   // get the field data
   const RadxField *field = ray->getField(fieldName);
 
   // cerr << "there arenGates " << nGates;
-  const float *data = field->getDataFl32();
 
-  vector<float> *dataVector = new vector<float>(nGates);
+  //field->convertToFl32();
+  //convertToType(Radx::Fl32);
+  
+  const float *data = field->getDataFl32();
+  dataVector->resize(nGates);
   dataVector->assign(data, data+nGates);
+  }
 // TODO: have calling method free the memory
   return dataVector;
 }

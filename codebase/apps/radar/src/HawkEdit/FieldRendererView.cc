@@ -21,7 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#include "FieldRenderer.hh"
+#include "FieldRendererView.hh"
 #include <toolsa/LogStream.hh>
 
 
@@ -33,7 +33,7 @@ using namespace std;
  * Constructor
  */
 
-FieldRenderer::FieldRenderer(string fieldName) : //const Params &params,
+FieldRendererView::FieldRendererView(string fieldName) : //const Params &params,
           //                   const size_t field_index,
            //                  const DisplayField &field) :
         //_params(params),
@@ -70,13 +70,13 @@ FieldRenderer::FieldRenderer(string fieldName) : //const Params &params,
  * Destructor
  */
 
-FieldRenderer::~FieldRenderer()
+FieldRendererView::~FieldRendererView()
 {
   delete _image;
 }
 
 
-void FieldRenderer::renderImage(int width, int height, double sweepAngle) {
+void FieldRendererView::renderImage(int width, int height, double sweepAngle) {
 
   createImage(width, height);
   
@@ -84,7 +84,7 @@ void FieldRenderer::renderImage(int width, int height, double sweepAngle) {
 /////////////////////////////////////
 // create image into which we render
 
-void FieldRenderer::createImage(int width, int height)
+void FieldRendererView::createImage(int width, int height)
 
 {
   delete _image;
@@ -95,7 +95,7 @@ void FieldRenderer::createImage(int width, int height)
 //////////////////////////////////////////////////
 // Add to the beams to be rendered.
 
-void FieldRenderer::addBeam(Beam *beam)
+void FieldRendererView::addBeam(Beam *beam)
 {
 
   //TaThread::LockForScope locker;
@@ -108,7 +108,7 @@ void FieldRenderer::addBeam(Beam *beam)
 ////////////////////////////////////////////////////////////////////
 // Perform the housekeeping needed when this field is newly selected.
 /*
-void FieldRenderer::selectField() 
+void FieldRendererView::selectField() 
 
 {
   //  activateBackgroundRendering();
@@ -117,7 +117,7 @@ void FieldRenderer::selectField()
 ////////////////////////////////////////////////////////////////////
 // Perform the housekeeping needed when this field is newly unselected.
 
-void FieldRenderer::unselectField() 
+void FieldRendererView::unselectField() 
 
 {
 
@@ -138,10 +138,10 @@ void FieldRenderer::unselectField()
 
 // TODO: Need beam data for this field 
 //       send this???
-void FieldRenderer::colorMapChanged(float *beam_data,
+void FieldRendererView::colorMapChanged(float *beam_data,
 &_backgroundBrush) {
 
-  // inside FieldRenderer, loop is ...                                                               
+  // inside FieldRendererView, loop is ...                                                               
   // for each beam                                                                                   
   //                 
   const ColorMap &colorMap = _field.getColorMap();                                                                                
@@ -161,7 +161,7 @@ void FieldRenderer::colorMapChanged(float *beam_data,
 ////////////////////////////////////////////////////////////////////
 // Activate background rendering - turn on until time resets
 /*
-void FieldRenderer::activateBackgroundRendering() 
+void FieldRendererView::activateBackgroundRendering() 
 
 {
 
@@ -179,7 +179,7 @@ void FieldRenderer::activateBackgroundRendering()
 ////////////////////////////////////////////////////////////////////
 // Set background rendering on - until set off
 /*
-void FieldRenderer::setBackgroundRenderingOn() 
+void FieldRendererView::setBackgroundRenderingOn() 
 
 {
 
@@ -193,7 +193,7 @@ void FieldRenderer::setBackgroundRenderingOn()
 // Thread run method
 // Actually performs the rendering
 
-void FieldRenderer::runIt()
+void FieldRendererView::runIt()
 {
   //LOG(DEBUG) << "Start of run() for field: " 
   //       << _field.getLabel() << " there are " << _beams.size() << " beams to render";

@@ -31,7 +31,7 @@
 
 #include <deque>
 
-#include "FieldRenderer.hh"
+#include "FieldRendererView.hh"
 #include "Beam.hh"
 #include "PpiBeam.hh"
 #include "RayLocationController.hh"
@@ -48,20 +48,23 @@ public:
 
   // NOTE: only index by fieldIndex which must match the button row in the field Panel
 
-  void addFieldRenderer(FieldRenderer *);
+  void addFieldRenderer(FieldRendererView *);
   void addBeam(Beam *beam);
   void addBeam(size_t fieldIndex, Beam *beam);
   //  void addBeam(string newFieldName, Beam *beam);
   void addBeamToBackgroundRenderedFields(Beam *beam);
   //void selectField(size_t fieldIndex);
   //void unselectField(size_t fieldIndex);
-  FieldRenderer *get(size_t fieldIndex);
-  FieldRenderer *get(string fieldName);
+  FieldRendererView *get(size_t fieldIndex);
+  FieldRendererView *get(string fieldName);
   //void activateArchiveRendering();
   //void activateRealtimeRendering(size_t selectedField);
   QImage *renderImage(int width, int height,
     string fieldName, double sweepAngle,
-    RayLocationController *rayLocationController);
+    RayLocationController *rayLocationController,
+    ColorMap &colorMap,
+    QColor backgroundColor);
+  
   void performRendering(size_t selectedField);
   //bool isBackgroundRendered(size_t index);
   //void setBackgroundRenderingOn(size_t index) {_fieldRenderers[index]->setBackgroundRenderingOn();;};
@@ -77,10 +80,11 @@ public:
 					      size_t selectedField,
 			    std::deque< RhiBeam* > &Beams);
           */
+  void takeCareOfMissingValues(vector<float> *rayData);
 
 private:
  
-  vector<FieldRenderer *> _fieldRenderers;
+  vector<FieldRendererView *> _fieldRenderers;
   //  vector<FieldRenderer *> _working;
  
   // size_t _findFieldIndex(string fieldName);

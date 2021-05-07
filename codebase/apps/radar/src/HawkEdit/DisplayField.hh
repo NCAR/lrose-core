@@ -38,7 +38,7 @@
 #include <QDialog>
 #include <iostream>
 #include "ColorMap.hh"
-#include "FieldRenderer.hh"
+#include "FieldRendererView.hh"
 
 using namespace std;
 
@@ -110,8 +110,8 @@ private:
   double _selectValue;
   QLabel *_dialog;
   DisplayFieldState _state;
-  FieldRenderer *_renderer;
-  QImage *_image;  // TODO: should this go into the FieldRenderer?  
+  FieldRendererView *_renderer;
+  //QImage *_image;  // TODO: should this go into the FieldRenderer Yes  
   // TODO: Keep Qt out of this level????
 };
 

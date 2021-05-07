@@ -1530,8 +1530,12 @@ void PolarManager::_plotArchiveData()
   string currentFieldName = _displayFieldController->getSelectedFieldName();
   double currentSweepAngle = _sweepController->getSelectedAngle();
 
+  ColorMap *colorMap = _displayFieldController->getColorMap(currentFieldName);
+  
+  QColor backgroundColor("orange");
+
   _ppi->displayImage(currentFieldName, currentSweepAngle,
-    _rayLocationController); 
+    _rayLocationController, *colorMap, backgroundColor); 
   // _sweepController->getSelectedAngle(),
   // _displayFieldController->getSelectedFieldName());
   //_updateStatusPanel(???);
@@ -3002,7 +3006,7 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
     try {
       _getArchiveData();
       _setupRayLocation();
-      _displayFieldController->setSelectedField(selectedFields->at(0));
+      //_displayFieldController->setSelectedField(selectedFields->at(0));
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
@@ -5310,9 +5314,13 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
       //displayFields.push_back(field);
       _displayFieldController->addField(field);
       //_updateFieldPanel(fieldName);
-      _fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
+      // TODO: causes a EXC_BAD_ACCESS if outside the loop
+      // somehow this is called when setting up the menus???
+      //_fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
       ifield += 1;
     }
+    _fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
+
 
   } // ifield
 

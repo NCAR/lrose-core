@@ -93,8 +93,9 @@ public:
   // signal that user has selected fieldName for display
   void changeToField(string fieldName, bool guiMode);
 
-
+public slots:
   void _changeFieldVariable(bool value);
+  void _changeField(int fieldIdx);
 
 signals:
   void selectedFieldChanged(QString newFieldName);

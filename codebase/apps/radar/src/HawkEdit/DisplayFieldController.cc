@@ -42,6 +42,7 @@ void DisplayFieldController::addField(string newFieldName) {
   if (displayField == NULL) {
     DisplayField *newDisplayField = new DisplayField(newFieldName);
     addField(newDisplayField);
+    // this is done by the PolarManager ...
     //_displayFieldView->updateFieldPanel(newFieldName, newFieldName, newFieldName);
   } else {
     //updateFieldPanel(newFieldName);
@@ -405,10 +406,17 @@ void DisplayFieldController::setView(DisplayFieldView *view) {
 */
 
 // TODO: make this a signal and slot??
-QImage &DisplayFieldController::getSelectedFieldImage() {
-   DisplayField *selectedField = _model->getSelectedField();
-   return selectedField->getImage();
-};
+//QImage &DisplayFieldController::getSelectedFieldImage() {
+
+  //DisplayField *selectedField = _model->getSelectedField();
+  //QImage *FieldRendererController::renderImage(int width, int height,
+  //string fieldName, double sweepAngle, 
+  //RayLocationController *rayLocationController,
+  //ColorMap &colorMap,
+  //QColor backgroundColor)
+  //return _fieldRendererController->renderImage(fieldName ...);
+  //return selectedField->getImage();
+//};
 
 /*
 void DisplayFieldController::renderFields() {

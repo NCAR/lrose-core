@@ -89,7 +89,7 @@ public:
     //void setView(DisplayFieldView *view);
 
     //void renderFields();
-    QImage &getSelectedFieldImage();
+    //QImage &getSelectedFieldImage();
 
     //void notifyFieldChange();
 

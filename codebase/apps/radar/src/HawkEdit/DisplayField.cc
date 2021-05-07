@@ -61,8 +61,8 @@ DisplayField::DisplayField(const string &label,
   //LOG(DEBUG) << "buttonRow = " << _buttonRow;
   _haveColorMap = true;
 
-  _renderer = new FieldRenderer(name);
-  _image = NULL;
+  //_renderer = new FieldRenderer(name);
+  //_image = NULL;  TODO: move to FieldRenderer
 }
 
 
@@ -85,8 +85,8 @@ DisplayField::DisplayField(string &fieldName) {
   //LOG(DEBUG) << "buttonRow = " << _buttonRow;
   _haveColorMap = true;
 
-  _renderer = new FieldRenderer(fieldName);
-  _image = NULL;
+  //_renderer = new FieldRenderer(fieldName);
+  // _image = NULL; TODO: move to FieldRenderer
 
 }
 // destructor
@@ -182,7 +182,8 @@ void DisplayField::replaceColorMap(ColorMap newColorMap)
 {
   _colorMap = newColorMap;
 }
-
+// TODO: move colorMap to FieldRenderer
+/*
 QImage &DisplayField::getImage() {
   if (_image == NULL) {
     //render();   HERE still working here ...
@@ -191,6 +192,7 @@ QImage &DisplayField::getImage() {
     return *_image;  // TODO: emit a signal
   }
 }
+*/
 /*
 void DisplayField::render() {
   int _width, _height; // TODO: fix this ...

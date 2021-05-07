@@ -47,6 +47,9 @@ DisplayFieldModel::~DisplayFieldModel() {
 
 void DisplayFieldModel::addField(DisplayField *newField) {
   _fields.push_back(newField);
+  if (_fields.size() == 1) {
+    setSelectedField(0);
+  }
 }
 
 void DisplayFieldModel::hideField(DisplayField *field) {

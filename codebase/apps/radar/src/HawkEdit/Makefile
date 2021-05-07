@@ -60,7 +60,7 @@ HDRS = \
 	ColorMap.hh \
 	ColorTableManager.hh \
 	FieldListView.hh \
-	FieldRenderer.hh \
+	FieldRendererView.hh \
 	FieldRendererController.hh \
 	FlowLayout.hh \
 	HawkEye.hh \
@@ -139,7 +139,7 @@ NORM_SRCS = \
 	WorldPlot.cc 
 
 MOC_SRCS = \
-	FieldRenderer.cc \
+	FieldRendererView.cc \
 	FieldListView.cc \
 	FieldRendererController.cc \
 	PolarManager.cc \
@@ -166,7 +166,7 @@ MOC_SRCS = \
 
 MOC_OUTPUT = \
 	moc_FieldListView.cpp \
-	moc_FieldRenderer.cpp \
+	moc_FieldRendererView.cpp \
 	moc_PolarManager.cpp \
 	moc_PolarWidget.cpp \
 	moc_PpiWidget.cpp \

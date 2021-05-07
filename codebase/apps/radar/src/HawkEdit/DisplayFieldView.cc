@@ -190,6 +190,13 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
   LOG(DEBUG) << "exit";
 }
 
+/* TODO: fix this ...
+void DisplayFieldView::update() {
+  // TODO: get the displayfields from the controller
+
+}
+*/
+
 //////////////////////////////////////////////
 // update the field panel
 
@@ -271,10 +278,10 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
       key->setToolTip(text2);
     }
 
-    QRadioButton *rawButton = new QRadioButton(this);
+    QRadioButton *rawButton = new QRadioButton(newFieldName.c_str(), this);
     rawButton->setToolTip(newFieldName.c_str());
     //if (ifield == 0) {
-      rawButton->click();
+     // rawButton->click();
     //}
     //row = buttonRow + 4;
     _fieldsLayout->addWidget(label, row, 0, alignCenter);
@@ -318,6 +325,11 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
   
 }
 
+void DisplayFieldView::_changeField(int fieldIdx) {
+  LOG(DEBUG) << "enter fieldIdx= " << fieldIdx;
+  LOG(DEBUG) << "exit";
+}
+
 void DisplayFieldView::_changeFieldVariable(bool value) {
 
   LOG(DEBUG) << "enter";
@@ -326,7 +338,7 @@ void DisplayFieldView::_changeFieldVariable(bool value) {
     for (size_t i = 0; i < _fieldButtons.size(); i++) {
       if (_fieldButtons.at(i)->isChecked()) {
         LOG(DEBUG) << "_fieldButton " << i
-        << "out of " << _fieldButtons.size() 
+        << " out of " << _fieldButtons.size() 
         << " is checked";
         QString fieldNameQ = _fieldButtons.at(i)->text();
         string fieldName = fieldNameQ.toStdString();

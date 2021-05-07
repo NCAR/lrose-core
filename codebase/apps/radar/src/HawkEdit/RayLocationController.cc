@@ -1,9 +1,12 @@
 
 #include "RayLocationController.hh"
+#include <toolsa/LogStream.hh>
 
 
 RayLocationController::RayLocationController() {
+  LOG(DEBUG) << "enter";
   _model = new RayLocationModel();
+  LOG(DEBUG) << "exit";
 }
 
 RayLocationController::~RayLocationController() {}

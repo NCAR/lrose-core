@@ -22,8 +22,8 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-#ifndef FieldRenderer_HH
-#define FieldRenderer_HH
+#ifndef FieldRendererView_HH
+#define FieldRendererView_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -51,7 +51,7 @@
 
 // Really, this is a View 
 
-class DLL_EXPORT FieldRenderer : public QObject  // , public TaThread
+class DLL_EXPORT FieldRendererView : public QObject  // , public TaThread
 {
 
   Q_OBJECT
@@ -66,7 +66,7 @@ public:
    * @brief Constructor.
    */
   
-  FieldRenderer(string fieldName);
+  FieldRendererView(string fieldName);
   // const Params &params,
                 //const size_t field_index,
                 // const DisplayField &field);
@@ -75,7 +75,7 @@ public:
    * @brief Destructor
    */
 
-  virtual ~FieldRenderer();
+  virtual ~FieldRendererView();
 
   // parameters for this field
 
@@ -239,6 +239,12 @@ public:
   // draw in instrument height
 
   bool _drawInstHt;
+  const ColorMap &getColorMap() const { return _colorMap; }
+
+  bool haveColorMap() const { return _haveColorMap; }
+  void setNoColorMap() { _haveColorMap = false; }
+  void changeColorMap() { _haveColorMap = true; }
+  void replaceColorMap(ColorMap newColorMap);
     
   ///////////////////////
   // Protected methods //
@@ -250,6 +256,10 @@ public:
    */
 
   void runIt();
+
+private:
+  ColorMap _colorMap;
+  bool _haveColorMap;
   
 };
 

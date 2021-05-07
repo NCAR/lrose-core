@@ -138,6 +138,7 @@ vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName, double swe
   size_t nGates = ray->getNGates(); 
 
   // cerr << "there arenGates " << nGates;
+  //field->convertToFl32();
   const float *data = field->getDataFl32();
 
   vector<float> *dataVector = new vector<float>(nGates);

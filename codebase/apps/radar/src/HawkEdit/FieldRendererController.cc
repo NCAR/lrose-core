@@ -41,7 +41,7 @@ FieldRendererController::~FieldRendererController()
 
 
 // add a new FieldRenderer; one FieldRenderer for each field
-void FieldRendererController::addFieldRenderer(FieldRenderer *fieldRenderer)
+void FieldRendererController::addFieldRenderer(FieldRendererView *fieldRenderer)
 {
   LOG(DEBUG) << "enter";
   _fieldRenderers.push_back(fieldRenderer);
@@ -178,7 +178,7 @@ void FieldRendererController::selectField(size_t fieldIndex)
 */
 
 // get the FieldRenderer at index ...
-FieldRenderer *FieldRendererController::get(size_t fieldIndex) 
+FieldRendererView *FieldRendererController::get(size_t fieldIndex) 
 {
   LOG(DEBUG) << "enter: fieldIndex = " << fieldIndex 
   << " fieldRenderers.size = " << _fieldRenderers.size();
@@ -188,14 +188,14 @@ FieldRenderer *FieldRendererController::get(size_t fieldIndex)
 }
 
 // get the FieldRenderer by name ...
-FieldRenderer *FieldRendererController::get(string fieldName) 
+FieldRendererView *FieldRendererController::get(string fieldName) 
 {
   LOG(DEBUG) << "enter: fieldName = " << fieldName 
   << " fieldRenderers.size = " << _fieldRenderers.size();
   //if (fieldIndex >= _fieldRenderers.size()) throw "fieldIndex exceed number of fieldRenderers";
-  vector<FieldRenderer *>::iterator it;
+  vector<FieldRendererView *>::iterator it;
   for (it = _fieldRenderers.begin(); it != _fieldRenderers.end(); ++it) {
-    FieldRenderer *fr = *it;
+    FieldRendererView *fr = *it;
     if (fr->getName().compare(fieldName) == 0) {
       return fr;
     }
@@ -227,19 +227,67 @@ void FieldRendererController::activateRealtimeRendering(size_t selectedField)
 }
 */
 
+void FieldRendererController::takeCareOfMissingValues(vector<float> *rayData) {
+
+  //for (int ifield=0; ifield < newFieldNames.size(); ++ifield) {
+  //string fieldName = newFieldNames.at(ifield); // .toLocal8Bit().constData();
+  // vector<double> &data = fieldData[ifield];
+  //  data.resize(_nGates);
+   // RadxField *rfld = ray->getField(fieldName);
+
+    // at this point, we know the data values for the field AND the color map                                                                        
+    //ColorMap *fieldColorMap = _displayFieldController->getColorMap(fieldName); 
+    //bool haveColorMap = fieldColorMap != NULL;
+
+/* TODO: fix this code, need missing value
+
+    if (rfld == NULL) {
+      // fill with missing
+      for (int igate = 0; igate < _nGates; igate++) {
+        data[igate] = -9999.0;
+      }
+    } else {
+      rfld->convertToFl32();
+      const Radx::fl32 *fdata = rfld->getDataFl32();
+      // print first 15 data values
+      //LOG(DEBUG) << "ray->nGates = " << ray->getNGates();
+      //LOG(DEBUG) << "first 30 gates ...";
+      //for (int ii = 0; ii< 15; ii++)
+      //LOG(DEBUG) << fdata[ii];
+      // end print first 15 data values
+      const Radx::fl32 missingVal = rfld->getMissingFl32();
+      // we can only look at the data available, so only go to nGates
+      for (int igate = 0; igate < _nGates; igate++, fdata++) {  // was _nGates
+        Radx::fl32 val = *fdata;
+        if (fabs(val - missingVal) < 0.0001) {
+          data[igate] = -9999.0;
+        } else {
+          data[igate] = val;
+        
+        } // end else not missing value
+      } // end for each gate
+
+    } // end else vector not NULL
+    */
+} 
+
+
+
 QImage *FieldRendererController::renderImage(int width, int height,
   string fieldName, double sweepAngle, 
-  RayLocationController *rayLocationController) {
+  RayLocationController *rayLocationController,
+  ColorMap &colorMap,
+  QColor backgroundColor) {
 
-  FieldRenderer *fieldRenderer = get(fieldName);
+  FieldRendererView *fieldRenderer = get(fieldName);
   if (fieldRenderer == NULL) {
-    fieldRenderer = new FieldRenderer(fieldName);
+    fieldRenderer = new FieldRendererView(fieldName);
     _fieldRenderers.push_back(fieldRenderer);
   }
   if (!fieldRenderer->imageReady()) {
     // create a beam for each ray  
-    ColorMap colorMap;
-    QBrush *background_brush = new QBrush(QColor("orange"));
+    //ColorMap colorMap;
+    QBrush *background_brush = new QBrush(backgroundColor); // QColor("orange"));
     // get the Data
     DataModel *dataModel = DataModel::Instance();
     //or send a vector?
@@ -248,21 +296,26 @@ QImage *FieldRendererController::renderImage(int width, int height,
     size_t rayIdx=0;
     while ( rayIdx < nRayLocations) { // each field ray in sweep) {
       vector<float> *rayData = rayLocationController->getRayData(rayIdx, fieldName);
-      //float rayFake[] = {0,1,2,3,4,5,6,7,8,9,10};
-      size_t nData = rayData->size();
-      size_t endIndex = rayLocationController->getEndIndex(rayIdx);
-      double start_angle = rayLocationController->getStartAngle(rayIdx);
-      double stop_angle = rayLocationController->getStopAngle(rayIdx);
-      double startRangeKm = rayLocationController->getStartRangeKm(rayIdx);
-      double gateSpacingKm = rayLocationController->getGateSpacingKm(rayIdx);
-      // create Beam for ray
-      PpiBeam *beam = new PpiBeam(
-                 start_angle,  stop_angle,
-           startRangeKm,  gateSpacingKm, nData);
-      float *data = &(*rayData)[0];
-      beam->updateFillColors(data, nData, &colorMap, background_brush);  
-      fieldRenderer->addBeam(beam);
-      rayIdx = endIndex;
+      if (rayData->size() > 0) {
+        takeCareOfMissingValues(rayData);
+        //float rayFake[] = {0,1,2,3,4,5,6,7,8,9,10};
+        size_t nData = rayData->size();
+        size_t endIndex = rayLocationController->getEndIndex(rayIdx);
+        double start_angle = rayLocationController->getStartAngle(rayIdx);
+        double stop_angle = rayLocationController->getStopAngle(rayIdx);
+        double startRangeKm = rayLocationController->getStartRangeKm(rayIdx);
+        double gateSpacingKm = rayLocationController->getGateSpacingKm(rayIdx);
+        // create Beam for ray
+        PpiBeam *beam = new PpiBeam(
+                   start_angle,  stop_angle,
+             startRangeKm,  gateSpacingKm, nData);
+        float *data = &(*rayData)[0];
+        beam->updateFillColors(data, nData, &colorMap, background_brush);  
+        fieldRenderer->addBeam(beam);
+        rayIdx = endIndex;
+      } else {
+        rayIdx += 1;
+      }
     }
     // add Beam to FieldRenderer
     fieldRenderer->createImage(width, height);
@@ -329,7 +382,7 @@ void FieldRendererController::refreshImages(int width, int height, QSize image_s
 
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
 
-    FieldRenderer *field = _fieldRenderers[ifield];
+    FieldRendererView *field = _fieldRenderers[ifield];
 
     // If needed, create new image for this field                                          
 
