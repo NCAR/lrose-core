@@ -333,8 +333,18 @@ void PolarWidget::displayImage(string currentFieldName, double currentSweepAngle
     //update();
 
     _image = _fieldRendererController->renderImage(width(), height(), 
-      currentFieldName, currentSweepAngle,
+      currentFieldName, _zoomTransform, currentSweepAngle,
       rayLocationController, colorMap, backgroundColor);
+
+
+/*
+  _fieldRendererController->refreshImages(width(), height(), size(),
+            _backgroundBrush.color().rgb(),
+            _zoomTransform, 
+            selectedField, 
+            _ppiBeams);
+            */
+
     update();
   } catch (std::range_error &ex) {
     LOG(ERROR) << ex.what();
@@ -628,6 +638,7 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   // _image should already be set by previous slot imageReady
   if (_image != NULL) {
     painter.drawImage(0, 0, *_image);
+        //painter.drawImage(100, 300, *_image);
   }
 
   _drawOverlays(painter);

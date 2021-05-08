@@ -279,18 +279,22 @@ void FieldRendererController::takeCareOfMissingValues(vector<float> *rayData) {
 
 
 QImage *FieldRendererController::renderImage(int width, int height,
-  string fieldName, double sweepAngle, 
+  string fieldName, QTransform zoomTransform, double sweepAngle, 
   RayLocationController *rayLocationController,
   ColorMap &colorMap,
   QColor backgroundColor) {
 
   LOG(DEBUG) << "enter: ";
+  LOG(DEBUG) << "requested width = " << width << " height " << height;
 
   FieldRendererView *fieldRenderer = get(fieldName);
   if (fieldRenderer == NULL) {
     fieldRenderer = new FieldRendererView(fieldName);
     _fieldRenderers.push_back(fieldRenderer);
   }
+
+  fieldRenderer->setTransform(zoomTransform);
+
   if (!fieldRenderer->imageReady()) {
     // create a beam for each ray  
     //ColorMap colorMap;
@@ -304,7 +308,7 @@ QImage *FieldRendererController::renderImage(int width, int height,
     size_t rayIdx=0;
     bool done = false;
     while ((rayIdx < nRayLocations) && (!done)) { // each field ray in sweep) {
-      LOG(DEBUG) << "  rayIdx = " << rayIdx;
+      // LOG(DEBUG) << "  rayIdx = " << rayIdx;
       vector<float> *rayData = rayLocationController->getRayData(rayIdx, fieldName);
       if (rayData->size() > 0) {
         takeCareOfMissingValues(rayData);
@@ -334,9 +338,12 @@ QImage *FieldRendererController::renderImage(int width, int height,
     fieldRenderer->runIt();  // calls paint method on each beam
   }
 
+  QImage *image = fieldRenderer->getImage();
+  LOG(DEBUG) << "image width = " << image->width() << " height " << image->height();
+
   LOG(DEBUG) << "exit: ";
 
-  return fieldRenderer->getImage();
+  return image;
 }
 
 

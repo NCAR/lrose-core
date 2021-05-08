@@ -229,7 +229,7 @@ void FieldRendererView::runIt()
     //(*beam)->setBeingRendered(_fieldIndex, false);
   }
   
-  _imageReady = true;
+  //_imageReady = true;
   //for (beam = _beams.begin(); beam != _beams.end(); ++beam)
   //{
   //  Beam::deleteIfUnused(*beam);
