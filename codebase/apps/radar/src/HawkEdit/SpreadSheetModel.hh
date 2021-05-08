@@ -13,7 +13,7 @@ class SpreadSheetModel
 public:
 
   SpreadSheetModel();
-  SpreadSheetModel(RadxRay *closestRay, RadxVol *dataVolume);
+  SpreadSheetModel(RadxRay *closestRay); // , RadxVol *dataVolume);
   
   //void initData(string fileName);
   void getRangeGeom(float *startRangeKm, float *gateSpacingKm);
@@ -28,7 +28,7 @@ public:
   void setData(string fieldName, vector<float> *data);
   void findClosestRay(float azimuth, float elevation);
 
-  RadxVol *_vol;
+  //RadxVol *_vol;
   RadxRay *_closestRay;
   size_t _closestRayIdx;
 

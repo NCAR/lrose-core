@@ -219,6 +219,8 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   //_ppiRayLoc = _ppiRays + RayLoc::RAY_LOC_OFFSET;
   _rayLocationController = new RayLocationController();
 
+  sheetView = NULL;
+
   // set up windows
 
   _setupWindows();
@@ -696,6 +698,16 @@ void PolarManager::_createActions()
   _saveImageAct->setStatusTip(tr("Save image to png file"));
   connect(_saveImageAct, SIGNAL(triggered()), this, SLOT(_saveImageToFile()));
 
+  // Solo Editing
+  
+  _examineAct = new QAction(tr("Examine SpreadSheet"), this);
+  _examineAct->setStatusTip(tr("Solo Examine using a spreadsheet"));
+  connect(_examineAct, SIGNAL(triggered()), this, SLOT(_examineSpreadSheetSetup()));
+
+  _editAct = new QAction(tr("Edit Script"), this);
+  _editAct->setStatusTip(tr("Solo Edit using (Java)Script"));
+  //connect(_editAct, SIGNAL(triggered()), this, SLOT(_scriptEditorSetup()));  
+
 }
 
 ////////////////
@@ -728,6 +740,12 @@ void PolarManager::_createMenus()
   menuBar()->addAction(_showBoundaryEditorAct);
   menuBar()->addAction(_unzoomAct);
   menuBar()->addAction(_clearAct);
+
+  _editMenu = menuBar()->addMenu(tr("&Edit"));
+  _editMenu->addSeparator();
+  _editMenu->addAction(_examineAct);
+  _editMenu->addAction(_editAct);
+
 
   _helpMenu = menuBar()->addMenu(tr("&Help"));
   _helpMenu->addAction(_howtoAct);
@@ -5420,6 +5438,115 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
 }
 
 
+void PolarManager::_examineSpreadSheetSetup()
+{
+  LOG(DEBUG) << "enter";
+
+  // get click location in world coords
+  // by using the location stored in class variables
+  //double x_km = _worldPressX;
+  //double y_km = _worldPressY;
+
+  // get azimuth closest to click point
+  double  closestAz =  30.0; // _getClosestAz(x_km, y_km);
+  // TODO: make sure the point is in the valid area
+  //if (closestRay == NULL) {
+    // report error
+  //  QMessageBox::information(this, QString::fromStdString(""), QString::fromStdString("No ray found at location clicked"));
+    // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
+  //} else {
+  try {
+    double elevation = getSelectedSweepAngle();
+    size_t fieldIdx = getSelectedFieldIndex();
+    LOG(DEBUG) << "elevation=" << elevation << ", fieldIdx=" << fieldIdx;
+    ExamineEdit(closestAz, elevation, fieldIdx);
+  } catch (const string& ex) {
+    errorMessage("ExamineEdit Error", ex);
+  }
+  LOG(DEBUG) << "exit";
+}
+
+
+void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldIndex) {   
+
+  // get an version of the ray that we can edit
+  // we'll need the az, and sweep number to get a list from
+  // the volume
+
+  LOG(DEBUG) << "azimuth=" << azimuth << ", elevation=" << elevation << ", fieldIndex=" << fieldIndex;
+  // TODO: replace with ...
+  const RadxRay *closestRayToEdit = _rayLocationController->getClosestRay(azimuth);
+
+/*
+  vector<RadxRay *> rays = _vol->getRays();
+  // find that ray
+  bool foundIt = false;
+  double minDiff = 1.0e99;
+  double delta = 0.01;
+  RadxRay *closestRayToEdit = NULL;
+  vector<RadxRay *>::iterator r;
+  r=rays.begin();
+  int idx = 0;
+  while(r<rays.end()) {
+    RadxRay *rayr = *r;
+    double diff = fabs(azimuth - rayr->getAzimuthDeg());
+    if (diff > 180.0) {
+      diff = fabs(diff - 360.0);
+    }
+    if (diff < minDiff) {
+      if (abs(elevation - rayr->getElevationDeg()) <= delta) {
+        foundIt = true;
+        closestRayToEdit = *r;
+        minDiff = diff;
+      }
+    }
+    r += 1;
+    idx += 1;
+  }  
+  if (!foundIt || closestRayToEdit == NULL) {
+    //throw "couldn't find closest ray";
+    errorMessage("ExamineEdit Error", "couldn't find closest ray");
+    return;
+  }
+  */
+
+  LOG(DEBUG) << "Found closest ray: pointer = " << closestRayToEdit;
+  closestRayToEdit->print(cout); 
+
+
+  // create the view
+  //SpreadSheetView *sheetView;
+  if (sheetView == NULL) {
+    sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
+    sheetView->newElevation(elevation);
+    // create the model
+
+    // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
+    SpreadSheetModel *model = new SpreadSheetModel(const_cast<RadxRay *> (closestRayToEdit)); // , _vol);
+    //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
+    
+    // create the controller
+    spreadSheetControl = new SpreadSheetController(sheetView, model);
+
+    // finish the other connections ..
+    //sheetView->addController(sheetController);
+    // model->setController(sheetController);
+
+    // connect some signals and slots in order to retrieve information
+    // and send changes back to display
+                                                                           
+    connect(spreadSheetControl, SIGNAL(volumeChanged()),
+        this, SLOT(setVolume()));
+    
+    sheetView->init();
+    sheetView->show();
+  } else {
+    //spreadSheetControl->switchRay(closestRayToEdit->getAzimuthDeg(), elevation);
+    sheetView->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);
+  }
+  
+}
+
 /////////////////////////////////////////////////////
 // howto help
 /*
@@ -5475,4 +5602,8 @@ void PolarManager::_about()
   QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
 }
 
+
+void PolarManager::errorMessage(string title, string message) {
+  QMessageBox::information(this, QString::fromStdString(title), QString::fromStdString(message));
+}
 

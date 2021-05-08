@@ -44,7 +44,7 @@ void DataModel::readData(string path, vector<string> &fieldNames,
   } 
 
   _vol.convertToFl32();
-  
+
   // adjust angles for elevation surveillance if needed
   
   _vol.setAnglesForElevSurveillance();
@@ -100,7 +100,7 @@ const float *DataModel::fetchData(RadxRay *ray, string &fieldName) {
       return NULL;
 }
 
-size_t DataModel::getNRays(string fieldName, double sweepAngle) {
+size_t DataModel::getNRays() { // string fieldName, double sweepAngle) {
   _vol.loadRaysFromFields();
   const RadxField *field;
   const vector<RadxRay *>  &rays = _vol.getRays();
@@ -170,6 +170,21 @@ int DataModel::getNSweeps() {
 const RadxPlatform &DataModel::getPlatform() {
   return _vol.getPlatform();
 } 
+
+void DataModel::getPredomRayGeom(double *startRangeKm, double *gateSpacingKm) {
+  double startRange;
+  double gateSpace;
+  _vol.getPredomRayGeom(startRange, gateSpace);
+  *startRangeKm = startRange;
+  *gateSpacingKm = gateSpace;  
+}
+
+
+const vector<string> &DataModel::getUniqueFieldNameList() {
+    _vol.loadFieldsFromRays();
+    return _vol.getUniqueFieldNameList();
+}
+
 
 void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
 	bool debug_verbose, bool debug_extra)

@@ -1076,8 +1076,8 @@ void SpreadSheetView::changeAzEl(float azimuth, float elevation) {
     newAzimuth(azimuth);
     newElevation(elevation);
     //needRangeData();
-  } catch (const string &ex) {
-    criticalMessage(ex);
+  } catch (std::invalid_argument &ex) {
+    criticalMessage(ex.what());
   }
 }
 

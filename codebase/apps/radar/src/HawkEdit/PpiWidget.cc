@@ -1808,7 +1808,7 @@ void PpiWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMa
 
  
 void PpiWidget::ExamineEdit(double azimuth, double elevation, size_t fieldIndex) {   
-
+/* moved to PolarManager ...
   // get an version of the ray that we can edit
   // we'll need the az, and sweep number to get a list from
   // the volume
@@ -1879,7 +1879,7 @@ void PpiWidget::ExamineEdit(double azimuth, double elevation, size_t fieldIndex)
     //spreadSheetControl->switchRay(closestRayToEdit->getAzimuthDeg(), elevation);
     sheetView->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);
   }
-  
+ */ 
 }
 
 void PpiWidget::contextMenuEditor()

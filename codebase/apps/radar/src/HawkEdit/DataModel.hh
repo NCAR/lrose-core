@@ -59,15 +59,18 @@ public:
 
   RadxField *fetchDataField(RadxRay *ray, string &fieldName);
   const float *fetchData(RadxRay *ray, string &fieldName);
-  size_t getNRays(string fieldName, double sweepAngle);
+  size_t getNRays(); // string fieldName, double sweepAngle);
   const vector<RadxRay *> &getRays();
-  vector<float> *getRayData(size_t rayIdx, 
-    string fieldName, double sweepHeight);
+  vector<float> *getRayData(size_t rayIdx, string fieldName, double sweepHeight);
   double getRayAzimuthDeg(size_t rayIdx);
 
   int getNSweeps();
   const string &getPathInUse();
   const RadxPlatform &getPlatform();
+
+  void getPredomRayGeom(double *startRangeKm, double *gateSpacingKm);
+  const vector<string> &getUniqueFieldNameList();
+
 
 
 private:

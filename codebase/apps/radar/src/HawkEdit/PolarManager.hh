@@ -56,6 +56,8 @@
 #include "SweepView.hh"
 #include "SweepController.hh"
 #include "DisplayFieldView.hh"
+#include "SpreadSheetController.hh"
+#include "SpreadSheetView.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -196,6 +198,8 @@ public slots:
   void selectedFieldChanged(QString newFieldName);
   //void _updateField(size_t fieldId);
 
+  void errorMessage(string title, string message);
+
 signals:
 
 // from DisplayManager ...
@@ -245,6 +249,9 @@ private:
   DisplayFieldController *_displayFieldController;
   bool _haveFilteredFields;
   int _rowOffset;
+
+  SpreadSheetController *spreadSheetControl;
+  SpreadSheetView *sheetView;
 
   // windows
 
@@ -456,6 +463,7 @@ private:
   QMenu *_timeMenu;
   QMenu *_overlaysMenu;
   QMenu *_helpMenu;
+  QMenu *_editMenu;
 
   // actions
 
@@ -470,6 +478,9 @@ private:
   QAction *_openFileAct;
   QAction *_saveFileAct;
   QAction *_saveImageAct;
+
+  QAction *_examineAct;
+  QAction *_editAct;
 
   // archive mode
   
@@ -724,6 +735,9 @@ private slots:
   void _clearBoundaryEditorClick();
   void onBoundaryEditorListItemClicked(QListWidgetItem* item);
   void _saveBoundaryEditorClick();
+
+  void _examineSpreadSheetSetup();
+  void ExamineEdit(double azimuth, double elevation, size_t fieldIndex);
 
 };
 
