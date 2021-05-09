@@ -281,9 +281,9 @@ void SweepController::setFileIndex(int index)
 
 void SweepController::createSweepRadioButtons() {
  
-  vector<double> sweepAngles = _model->getSweepAngles();
+  vector<double> *sweepAngles = _model->getSweepAngles();
   _view->createSweepRadioButtons(sweepAngles);
-
+  delete sweepAngles;
 }
 
 void SweepController::clearSweepRadioButtons() {

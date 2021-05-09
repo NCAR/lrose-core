@@ -297,11 +297,11 @@ void SweepView::setFileIndex(int index)
 ///////////////////////////////////////////////////////////////
 // change sweep
 
-void SweepView::_changeSweep(bool value) {
+void SweepView::changeSweep(bool value) {
 
   LOG(DEBUG) << "enter";
 
-/* TODO: fix up ...
+// TODO: fix up ...
   if (!value) {
     return;
   }
@@ -309,14 +309,15 @@ void SweepView::_changeSweep(bool value) {
   for (size_t ii = 0; ii < _sweepRButtons->size(); ii++) {
     if (_sweepRButtons->at(ii)->isChecked()) {
       LOG(DEBUG) << "sweepRButton " << ii << " is checked; moving to sweep index " << ii;
-      _sweepManager.setGuiIndex(ii);
-      _ppi->setStartOfSweep(true);
+      _selectedAngle = _sweepRButtons->at(ii)->text().toDouble();
+      //_sweepManager.setGuiIndex(ii);
+      //_ppi->setStartOfSweep(true);
       //_rhi->setStartOfSweep(true);
-      _moveUpDown();
-      return;
+      //_moveUpDown();
+      //return;
     }
   } // ii
-*/
+
 }
 
 /////////////////////////////////////////////////////////////
@@ -363,7 +364,7 @@ double SweepView::getFixedAngleDeg(ssize_t sweepIndex ) const
 // create radio buttons
 // this requires that _sweepManager is up to date with sweep info
 
-void SweepView::createSweepRadioButtons(vector<double> &sweepAngles) 
+void SweepView::createSweepRadioButtons(vector<double> *sweepAngles) 
 {
 
   _params = ParamFile::Instance();
@@ -382,7 +383,7 @@ void SweepView::createSweepRadioButtons(vector<double> &sweepAngles)
   char buf[256];
   _sweepRButtons = new vector<QRadioButton *>();
 
-  for (vector<double>::iterator it = sweepAngles.begin(); it != sweepAngles.end(); ++it) {
+  for (vector<double>::iterator it = sweepAngles->begin(); it != sweepAngles->end(); ++it) {
   //for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
     
     //std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
@@ -399,7 +400,7 @@ void SweepView::createSweepRadioButtons(vector<double> &sweepAngles)
     
     // connect slot for sweep change
 
-    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeSweep(bool)));
+    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(changeSweep(bool)));
 
   }
 

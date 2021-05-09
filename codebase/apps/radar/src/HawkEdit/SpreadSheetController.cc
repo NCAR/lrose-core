@@ -90,10 +90,15 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
 
 void SpreadSheetController::switchRay(float azimuth, float elevation) {
   LOG(DEBUG) << "enter";
-  _currentModel->findClosestRay(azimuth, elevation);
-  LOG(DEBUG) << "switching to ray " << azimuth;
-  _currentView->newElevation(elevation);
-  _currentView->newAzimuth(azimuth);
+  //try {
+    _currentModel->findClosestRay(azimuth, elevation);
+    LOG(DEBUG) << "switching to ray " << azimuth;
+    _currentView->newElevation(elevation);
+    _currentView->newAzimuth(azimuth);
+  //} catch (std::invalid_argument &ex) {
+  //  LOG(DEBUG) << "ERROR: " << ex.what();
+    //_currentView->criticalMessage(ex.what());
+  //}
   LOG(DEBUG) << "exit";
 }
 

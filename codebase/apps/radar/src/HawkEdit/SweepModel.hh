@@ -70,14 +70,14 @@ public:
   //void setAngle(double selectedAngle);
 
   // get methods
-  vector<double> &getSweepAngles();
+  vector<double> *getSweepAngles();
 
-  size_t getNSweeps() const { return somevalues.size(); } // _sweeps.size(); }
+  size_t getNSweeps(); //  const  // _sweeps.size(); }
 
   //double getSelectedAngle() const { return _selectedAngle; }
   
 private:
-    vector<double> somevalues = {100, 200, 300};
+   // vector<double> somevalues = {100, 200, 300};
 
 
 };

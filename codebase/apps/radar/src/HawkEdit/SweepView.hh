@@ -81,9 +81,13 @@ public:
 
   //void _createSweepPanel(QWidget *parent);
 
-  void createSweepRadioButtons(vector<double> &sweepAngles);
+  void createSweepRadioButtons(vector<double> *sweepAngles);
 
   void clearSweepRadioButtons();
+
+public slots:
+
+  void changeSweep(bool value);
 
 private:
   
@@ -91,7 +95,7 @@ private:
   
   // sweeps
 
-  void _changeSweep(bool value);
+
 
 
   // selection
