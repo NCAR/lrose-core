@@ -515,6 +515,9 @@ void PolarManager::_setupWindows()
   _sweepController->setView(_sweepPanel);
    mainLayout->addWidget(_sweepPanel);
 
+  connect(_sweepPanel, SIGNAL(selectedSweepChanged(double)),
+          this, SLOT(selectedSweepChanged(double)));
+
   // time panel
 
   _createTimeControl();
@@ -3107,6 +3110,8 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
       _getArchiveData();
       _setupRayLocation();
       //_displayFieldController->setSelectedField(selectedFields->at(0));
+      _sweepController->clearSweepRadioButtons();
+      _sweepController->createSweepRadioButtons();
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);

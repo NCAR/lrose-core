@@ -41,6 +41,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "SweepModel.hh"
+#include "DataModel.hh"
 #include <toolsa/LogStream.hh>
 
 #include <string>
@@ -220,10 +221,16 @@ void SweepModel::setFileIndex(int index)
 }
 */
 
-vector<double> &SweepModel::getSweepAngles() {
-  // TODO: connect to DataModel to get the sweep angles.
+size_t SweepModel::getNSweeps() {
+  DataModel *dataModel = DataModel::Instance();
+  return dataModel->getNSweeps();
+}
 
-  return somevalues;
+vector<double> *SweepModel::getSweepAngles() {
+  // connect to DataModel to get the sweep angles.
+  DataModel *dataModel = DataModel::Instance();
+  vector<double> *sweepAngles = dataModel->getSweepAngles();
+  return sweepAngles;
 }
 
 

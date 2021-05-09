@@ -65,6 +65,7 @@ public:
   double getRayAzimuthDeg(size_t rayIdx);
 
   int getNSweeps();
+  vector<double> *getSweepAngles();
   const string &getPathInUse();
   const RadxPlatform &getPlatform();
 

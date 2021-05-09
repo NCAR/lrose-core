@@ -1,6 +1,7 @@
 #include "DataModel.hh"  
 #include <toolsa/LogStream.hh>
 #include <Radx/RadxFile.hh>
+#include <Radx/RadxSweep.hh>
 
 
 using namespace std;
@@ -164,6 +165,17 @@ const string &DataModel::getPathInUse() {
 
 int DataModel::getNSweeps() {
 	return _vol.getNSweeps();
+}
+
+vector<double> *DataModel::getSweepAngles() {
+  vector<RadxSweep *> sweeps = _vol.getSweeps();
+  vector<double> *sweepAngles = new vector<double>;
+  vector<RadxSweep *>::iterator it;
+  for (it = sweeps.begin(); it != sweeps.end(); ++it) {
+  	RadxSweep *sweep = *it;
+    sweepAngles->push_back(sweep->getFixedAngleDeg());
+  }
+  return sweepAngles;
 }
 
 // TODO: remove RadxPlatform and return base types
