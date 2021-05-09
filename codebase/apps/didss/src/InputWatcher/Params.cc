@@ -770,7 +770,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("search_ext");
     tt->descr = tdrpStrDup("File name extension.");
-    tt->help = tdrpStrDup("If set, only files with this extension will be processed. This can be a comma-delimited list of extensions.");
+    tt->help = tdrpStrDup("If not empty, only files with this extension will be processed. This can be a comma-delimited list of extensions.");
     tt->val_offset = (char *) &search_ext - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
@@ -782,8 +782,20 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("search_substr");
     tt->descr = tdrpStrDup("File name sub-string.");
-    tt->help = tdrpStrDup("If set, only files with names containing this sub-string will be processed.");
+    tt->help = tdrpStrDup("If not empty, only files with names containing this sub-string will be processed.");
     tt->val_offset = (char *) &search_substr - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'ignore_substr'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ignore_substr");
+    tt->descr = tdrpStrDup("File name ignore string.");
+    tt->help = tdrpStrDup("If not empty, only files with names NOT containing this sub-string will be processed.");
+    tt->val_offset = (char *) &ignore_substr - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     

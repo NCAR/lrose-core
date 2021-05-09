@@ -406,6 +406,8 @@ public:
 
   char* search_substr;
 
+  char* ignore_substr;
+
   tdrp_bool_t save_latest_read_time;
 
   tdrp_bool_t ignore_hidden;
@@ -477,7 +479,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[56];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 
