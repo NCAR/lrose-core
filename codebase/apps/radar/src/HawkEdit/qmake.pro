@@ -21,6 +21,7 @@ HEADERS += BoundaryPointEditor.hh
 # HEADERS += BscanBeam.hh
 # HEADERS += BscanManager.hh
 # HEADERS += BscanWidget.hh
+HEADERS += CloseEventFilter.hh
 HEADERS += ColorBar.hh
 HEADERS += ColorMap.hh
 HEADERS += ColorTableManager.hh

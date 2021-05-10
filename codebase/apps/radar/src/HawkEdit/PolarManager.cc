@@ -110,8 +110,10 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/Path.hh>
 
+#include "CloseEventFilter.hh"
 using namespace std;
 using namespace H5x;
+
 
 PolarManager* PolarManager::m_pInstance = NULL;
 
@@ -2594,6 +2596,7 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
     // no ray data yet
 
       LOG(DEBUG) << "    No ray data yet...";
+      errorMessage("Error", "No ray data found at " + to_string(azDeg));
       //LOG(DEBUG) << "      active = " << _ppiRayLoc[rayIndex].active;
       // cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
       //LOG(DEBUG) << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex;
@@ -2603,6 +2606,10 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
   }
 
   _locationClicked(xkm, ykm, ray);
+  // update the spreadsheet if it is active
+  if (sheetView != NULL) {
+    _examineSpreadSheetSetup(azDeg);
+  }
 
 }
 
@@ -5443,7 +5450,7 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
 }
 
 
-void PolarManager::_examineSpreadSheetSetup()
+void PolarManager::_examineSpreadSheetSetup(double  closestAz)
 {
   LOG(DEBUG) << "enter";
 
@@ -5453,7 +5460,7 @@ void PolarManager::_examineSpreadSheetSetup()
   //double y_km = _worldPressY;
 
   // get azimuth closest to click point
-  double  closestAz =  30.0; // _getClosestAz(x_km, y_km);
+  //double  closestAz =  30.0; // _getClosestAz(x_km, y_km);
   // TODO: make sure the point is in the valid area
   //if (closestRay == NULL) {
     // report error
@@ -5523,6 +5530,11 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
   //SpreadSheetView *sheetView;
   if (sheetView == NULL) {
     sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
+
+    // install event filter to catch when the spreadsheet is closed
+    CloseEventFilter *closeFilter = new CloseEventFilter(sheetView);
+    sheetView->installEventFilter(closeFilter);
+
     sheetView->newElevation(elevation);
     // create the model
 
@@ -5542,6 +5554,7 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
                                                                            
     connect(spreadSheetControl, SIGNAL(volumeChanged()),
         this, SLOT(setVolume()));
+    connect(sheetView, SIGNAL(spreadSheetClosed()), this, SLOT(spreadSheetClosed()));
     
     sheetView->init();
     sheetView->show();
@@ -5550,6 +5563,11 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     sheetView->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);
   }
   
+}
+
+void PolarManager::spreadSheetClosed() {
+  //delete sheetView;  this is handled by the close event
+  sheetView = NULL;
 }
 
 /////////////////////////////////////////////////////

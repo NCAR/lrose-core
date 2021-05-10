@@ -198,6 +198,8 @@ public slots:
   void selectedFieldChanged(QString newFieldName);
   //void _updateField(size_t fieldId);
 
+  void spreadSheetClosed();
+
   void errorMessage(string title, string message);
 
 signals:
@@ -736,7 +738,7 @@ private slots:
   void onBoundaryEditorListItemClicked(QListWidgetItem* item);
   void _saveBoundaryEditorClick();
 
-  void _examineSpreadSheetSetup();
+  void _examineSpreadSheetSetup(double  closestAz = 30.0);
   void ExamineEdit(double azimuth, double elevation, size_t fieldIndex);
 
 };

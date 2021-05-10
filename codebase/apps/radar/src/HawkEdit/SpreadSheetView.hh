@@ -45,7 +45,9 @@ public:
   vector<string> *getVariablesFromSpreadSheet();
   vector<float> *getDataForVariableFromSpreadSheet(int column, string fieldName);
 
-   void setSelectionToValue(QString value);
+  void setSelectionToValue(QString value);
+
+  void closeEvent();
 
 
 public slots:
@@ -101,6 +103,7 @@ signals:
   void signalRayAzimuthChange(float rayAzimuth, float elevation);
   void needRangeData(size_t nPoints);
   void setDataMissing(string fieldName, float missingDataValue);
+  void spreadSheetClosed();
 
 protected:
     void setupContextMenu();

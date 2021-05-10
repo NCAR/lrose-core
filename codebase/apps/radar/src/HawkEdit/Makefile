@@ -56,6 +56,7 @@ HDRS = \
 	Args.hh \
 	Beam.hh \
 	BoundaryPointEditor.hh \
+	CloseEventFilter.hh \
 	ColorBar.hh \
 	ColorMap.hh \
 	ColorTableManager.hh \
@@ -165,6 +166,7 @@ MOC_SRCS = \
 	FunctionEditor.cc 
 
 MOC_OUTPUT = \
+	moc_CloseEventFilter.cpp \
 	moc_FieldListView.cpp \
 	moc_FieldRendererView.cpp \
 	moc_PolarManager.cpp \

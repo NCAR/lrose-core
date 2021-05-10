@@ -1241,3 +1241,7 @@ void SpreadSheetView::printQJSEngineContext() {
     LOG(DEBUG) << "end current QJSEngine context";
 
 }
+
+void SpreadSheetView::closeEvent() {
+    emit spreadSheetClosed();
+}
