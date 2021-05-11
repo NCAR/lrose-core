@@ -627,6 +627,44 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   LOG(DEBUG) << "enter";
   try {
     _refreshImages();
+    showSelectedField();
+    /*
+    string selectedField = displayFieldController->getSelectedFieldName();
+    _image = _fieldRendererController->getImage(selectedField);
+  //update(); 
+  QPainter painter(this);
+  //size_t selectedField = displayFieldController->getSelectedFieldNum();
+
+  //FieldRenderer *fieldRenderer = _fieldRendererController->get(selectedField);
+
+  //QImage *image = _fieldRendererController->getImage(selectedField, selectedSweep);
+  //painter.drawImage(0, 0, *(displayFieldController->getSelectedFieldImage()));
+  //painter.(0, 0, *(fieldRenderer->getImage()));
+  //  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
+
+  // _image should already be set by previous slot imageReady
+  if (_image != NULL) {
+    painter.drawImage(0, 0, *_image);
+        //painter.drawImage(100, 300, *_image);
+  }
+
+  _drawOverlays(painter);
+
+  BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
+   */
+  } catch (const std::out_of_range& ex) {
+    LOG(DEBUG) << ex.what();
+  } catch (std::range_error &ex) {
+      LOG(ERROR) << ex.what();
+      //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  }
+  LOG(DEBUG) << "exit";
+}
+
+void PolarWidget::showSelectedField()
+{
+  LOG(DEBUG) << "enter";
+  try {
     string selectedField = displayFieldController->getSelectedFieldName();
     _image = _fieldRendererController->getImage(selectedField);
   //update(); 

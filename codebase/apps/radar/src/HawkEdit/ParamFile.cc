@@ -165,7 +165,7 @@ bool ParamFile::loadFromArgs(int argc, char **argv,
     images_archive_start_time = _params.images_archive_start_time;
     images_scan_interval_secs = _params.images_scan_interval_secs;
     ppi_range_rings_on_at_startup = _params.ppi_range_rings_on_at_startup;
-    ppi_grids_on_at_startup = _params.ppi_range_rings_on_at_startup;
+    ppi_grids_on_at_startup = _params.ppi_grids_on_at_startup;
     ppi_azimuth_lines_on_at_startup = _params.ppi_azimuth_lines_on_at_startup;
     ppi_override_rendering_beam_width = _params.ppi_override_rendering_beam_width;
     ppi_rendering_beam_width = _params.ppi_rendering_beam_width;

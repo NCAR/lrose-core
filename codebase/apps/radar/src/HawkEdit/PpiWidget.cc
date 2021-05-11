@@ -979,7 +979,7 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
   }
   else
   {
-	  cerr << "Jeff: Zoom occurred" << endl;
+	  LOG(DEBUG) << "Zoom occurred";
 
     // mouse moved more than 20 pixels, so a zoom occurred
     
@@ -1002,6 +1002,7 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
     // Update the window in the renderers
     
     _refreshImages();
+    showSelectedField();
 
   }
     

@@ -939,11 +939,11 @@ void PolarManager::_handleArchiveData()
   _sweepController->clearSweepRadioButtons();
   _sweepController->createSweepRadioButtons();
   
-  if (_vol.checkIsRhi()) {
-    _rhiMode = true;
-  } else {
+  //if (_vol.checkIsRhi()) {
+  //  _rhiMode = true;
+  //} else {
     _rhiMode = false;
-  }
+  //}
 
   // plot the data
   
@@ -1899,7 +1899,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
       ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
 
-    _rhiMode = true;
+    //_rhiMode = true;
 
     // If this is the first RHI beam we've encountered, automatically open
     // the RHI window.  After this, opening and closing the window will be
@@ -2057,18 +2057,19 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
   if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
       ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
 
-    _rhiMode = true;
+    //_rhiMode = true;
 
     // If this is the first RHI beam we've encountered, automatically open
     // the RHI window.  After this, opening and closing the window will be
     // left to the user.
 
+    /*
     if (!_rhiWindowDisplayed) {
       _rhiWindow->show();
       //_rhiWindow->resize();
       _rhiWindowDisplayed = true;
     }
-
+    */
     // Add the beam to the display
     LOG(DEBUG) << "RHI not being updated";
     // TODO: update the rhi code ...

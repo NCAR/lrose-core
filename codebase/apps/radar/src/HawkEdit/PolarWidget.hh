@@ -532,6 +532,8 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @brief event   The resize event.
    */
 
+  void showSelectedField();
+  
   void smartBrush(int xPixel, int yPixel);
 
   virtual void resizeEvent(QResizeEvent * event);
