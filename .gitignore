@@ -417,6 +417,7 @@ codebase/apps/procmap/src/test_procmap/test_procmap
 codebase/apps/radar/src/AcGeorefCompare/AcGeorefCompare
 codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
 codebase/apps/radar/src/AltCpCompute/AltCpCompute
+codebase/apps/radar/src/Colide/Colide
 codebase/apps/radar/src/ConvStrat/ConvStrat
 codebase/apps/radar/src/CP2Udp2Fmq/CP2Udp2Fmq
 codebase/apps/radar/src/CalCompute/CalCompute
@@ -460,6 +461,8 @@ codebase/apps/radar/src/IpsTsPrint/IpsTsPrint
 codebase/apps/radar/src/IpsTsSim/IpsTsSim
 codebase/apps/radar/src/IpsTs2Moments/IpsTs2Moments
 codebase/apps/radar/src/IpsTs2NetCDF/IpsTs2NetCDF
+
+codebase/apps/radar/src/QpeVerify/QpeVerify
 
 codebase/apps/radar/src/Sprite/Sprite
 codebase/apps/radar/src/Sprite/Makefile.qmake

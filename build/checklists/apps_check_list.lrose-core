@@ -42,6 +42,7 @@ ClutterAuto
 ClutterCompute
 ClutterRemove
 CmdVerify
+Colide
 Cov2Mom
 CreateStationList
 CsuSounding2Spdb
@@ -231,6 +232,7 @@ PrintTitanFiles
 PrintTitanServer
 ProSensing2Dsr
 Qmap2Cidd
+QpeVerify
 QuadratureTest
 RUNtests.sh
 RadMon
