@@ -188,11 +188,13 @@ public:
   
   //const DisplayField &_field;
 
-  void renderImage(int width, int height, double sweepAngle);
+  //void renderImage(int width, int height, double sweepAngle);
   
   void addBeam(Beam *beam);
 
   void createImage(int width, int height);  
+
+  void fillBackground(QBrush *backgroundBrush);
   /**
    * @brief Image used for background rendering of this field.
    */

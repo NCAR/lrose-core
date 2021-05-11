@@ -69,7 +69,7 @@ public:
   //bool isBackgroundRendered(size_t index);
   //void setBackgroundRenderingOn(size_t index) {_fieldRenderers[index]->setBackgroundRenderingOn();;};
   void refreshImages(int width, int height, QSize image_size,
-					      QRgb background_brush_color_rgb,
+					      QColor backgroundColor, // QRgb background_brush_color_rgb,
 					      QTransform zoomTransform,
 					      size_t selectedField,
 		     vector< PpiBeam* > &Beams);
@@ -80,7 +80,7 @@ public:
 					      size_t selectedField,
 			    std::deque< RhiBeam* > &Beams);
           */
-  void takeCareOfMissingValues(vector<float> *rayData);
+  void takeCareOfMissingValues(vector<float> *rayData, float missingValue);
 
 private:
  

@@ -1637,7 +1637,8 @@ void PolarManager::_plotArchiveData()
 
   ColorMap *colorMap = _displayFieldController->getColorMap(currentFieldName);
   
-  QColor backgroundColor("orange");
+  string backgroundColorName = _displayFieldController->getBackgroundColor();
+  QColor backgroundColor(backgroundColorName.c_str());
 
   _ppi->displayImage(currentFieldName, currentSweepAngle,
     _rayLocationController, *colorMap, backgroundColor); 

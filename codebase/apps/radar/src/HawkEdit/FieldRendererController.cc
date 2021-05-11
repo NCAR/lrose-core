@@ -232,7 +232,16 @@ void FieldRendererController::activateRealtimeRendering(size_t selectedField)
 }
 */
 
-void FieldRendererController::takeCareOfMissingValues(vector<float> *rayData) {
+void FieldRendererController::takeCareOfMissingValues(vector<float> *rayData,
+  float missingValue) {
+
+  vector<float>::iterator it;
+  for (it = rayData->begin(); it != rayData->end(); ++it) {
+        float val = *it;
+        if (fabs(val - missingValue) < 0.0001) {
+          *it = -9999.0;
+        } 
+  }
 
   //for (int ifield=0; ifield < newFieldNames.size(); ++ifield) {
   //string fieldName = newFieldNames.at(ifield); // .toLocal8Bit().constData();
@@ -244,7 +253,7 @@ void FieldRendererController::takeCareOfMissingValues(vector<float> *rayData) {
     //ColorMap *fieldColorMap = _displayFieldController->getColorMap(fieldName); 
     //bool haveColorMap = fieldColorMap != NULL;
 
-/* TODO: fix this code, need missing value
+/*TODO: fix this code, need missing value
 
     if (rfld == NULL) {
       // fill with missing
@@ -301,6 +310,7 @@ QImage *FieldRendererController::renderImage(int width, int height,
     QBrush *background_brush = new QBrush(backgroundColor); // QColor("orange"));
     // get the Data
     DataModel *dataModel = DataModel::Instance();
+    float missingVal = dataModel->getMissingFl32(fieldName);
     //or send a vector?
     size_t nRayLocations = rayLocationController->getNRayLocations();
     // get rays in sorted order from RayLocationController
@@ -311,7 +321,7 @@ QImage *FieldRendererController::renderImage(int width, int height,
       // LOG(DEBUG) << "  rayIdx = " << rayIdx;
       vector<float> *rayData = rayLocationController->getRayData(rayIdx, fieldName);
       if (rayData->size() > 0) {
-        takeCareOfMissingValues(rayData);
+        takeCareOfMissingValues(rayData, missingVal);
         //float rayFake[] = {0,1,2,3,4,5,6,7,8,9,10};
         size_t nData = rayData->size();
         size_t endIndex = rayLocationController->getEndIndex(rayIdx);
@@ -335,7 +345,9 @@ QImage *FieldRendererController::renderImage(int width, int height,
     }
     // add Beam to FieldRenderer
     fieldRenderer->createImage(width, height);
+    fieldRenderer->fillBackground(background_brush);
     fieldRenderer->runIt();  // calls paint method on each beam
+    delete background_brush;
   }
 
   QImage *image = fieldRenderer->getImage();
@@ -390,7 +402,7 @@ void FieldRendererController::colorMapChanged(size_t ifield)
 
 
 void FieldRendererController::refreshImages(int width, int height, QSize image_size,
-					    QRgb background_brush_color_rgb,
+					    QColor backgroundColor, // QRgb background_brush_color_rgb,
 					    QTransform zoomTransform,
 					    size_t selectedField,
 					    vector< PpiBeam* > &Beams)
@@ -406,6 +418,8 @@ void FieldRendererController::refreshImages(int width, int height, QSize image_s
 
     FieldRendererView *field = _fieldRenderers[ifield];
 
+    QBrush *background_brush = new QBrush(backgroundColor);
+
     // If needed, create new image for this field                                          
 
     if (image_size != field->getImage()->size()) {
@@ -414,7 +428,7 @@ void FieldRendererController::refreshImages(int width, int height, QSize image_s
 
     // clear image                                                                         
 
-    field->getImage()->fill(background_brush_color_rgb);
+    field->fillBackground(background_brush); // background_brush_color_rgb);
 
     // set up rendering details                                                            
 
@@ -429,7 +443,7 @@ void FieldRendererController::refreshImages(int width, int height, QSize image_s
 	  //    field->addBeam(*beam);
     //  }
     //}
-
+    delete background_brush;
   } // ifield                                                                              
 
   // do the rendering                                                                      

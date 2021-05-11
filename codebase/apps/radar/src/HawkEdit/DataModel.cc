@@ -149,6 +149,13 @@ vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName, double swe
 
   return dataVector;
 }
+
+float DataModel::getMissingFl32(string fieldName) {
+  //_vol.loadFieldsFromRays();
+  const RadxField *field = _vol.getFieldFromRay(fieldName);
+  Radx::fl32 missingValue = field->getMissingFl32();
+  return (float) missingValue;
+}
   
 DataModel::DataModel() {
 	init();

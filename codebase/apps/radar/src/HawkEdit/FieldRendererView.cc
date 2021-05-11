@@ -76,11 +76,11 @@ FieldRendererView::~FieldRendererView()
 }
 
 
-void FieldRendererView::renderImage(int width, int height, double sweepAngle) {
+//void FieldRendererView::renderImage(int width, int height, double sweepAngle) {
 
-  createImage(width, height);
+//  createImage(width, height);
   
-} 
+//} 
 /////////////////////////////////////
 // create image into which we render
 
@@ -89,7 +89,13 @@ void FieldRendererView::createImage(int width, int height)
 {
   delete _image;
   _image = new QImage(width, height, QImage::Format_RGB32);
+  //_image->fill(backgroundBrush->color().rgb());
   _imageReady = false;
+}
+
+void FieldRendererView::fillBackground(QBrush *backgroundBrush) {
+  if (_image != NULL)
+    _image->fill(backgroundBrush->color().rgb());
 }
 
 //////////////////////////////////////////////////
@@ -210,6 +216,8 @@ void FieldRendererView::runIt()
   }
   
   //TaThread::LockForScope locker;
+
+
 
 
   vector< Beam* >::iterator beam;
