@@ -23,9 +23,13 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include "FieldRendererView.hh"
 #include <toolsa/LogStream.hh>
+#include <thread>  
+#include <mutex>
 
 
 using namespace std;
+
+std::mutex rendering;
 
 // This is really a view
 
@@ -72,7 +76,8 @@ FieldRendererView::FieldRendererView(string fieldName) : //const Params &params,
 
 FieldRendererView::~FieldRendererView()
 {
-  delete _image;
+  if (_image != NULL)
+    delete _image;
 }
 
 
@@ -87,7 +92,11 @@ FieldRendererView::~FieldRendererView()
 void FieldRendererView::createImage(int width, int height)
 
 {
-  delete _image;
+  rendering.lock();
+  LOG(DEBUG) << "grabbed lock";
+
+  if (_image != NULL)
+    delete _image;
   _image = new QImage(width, height, QImage::Format_RGB32);
   //_image->fill(backgroundBrush->color().rgb());
   _imageReady = false;
@@ -237,7 +246,8 @@ void FieldRendererView::runIt()
     //(*beam)->setBeingRendered(_fieldIndex, false);
   }
   
-  //_imageReady = true;
+  _imageReady = true;
+  rendering.unlock();
   //for (beam = _beams.begin(); beam != _beams.end(); ++beam)
   //{
   //  Beam::deleteIfUnused(*beam);

@@ -1661,6 +1661,19 @@ void PpiWidget::_cullBeams(const PpiBeam *beamAB)
 
 void PpiWidget::_refreshImages()
 {
+
+  //FieldRendererController::refreshImages(int width, int height, QSize image_size,
+  //            QColor backgroundColor, // QRgb background_brush_color_rgb,
+  //            QTransform zoomTransform,
+  //            size_t selectedField,
+  //            vector< PpiBeam* > &Beams);
+
+  _fieldRendererController->refreshImages(width(), height(), size(),
+            _backgroundBrush, // .color().rgb(),
+            _zoomTransform); 
+            //selectedField);
+            // _ppiBeams);
+
   /*
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     

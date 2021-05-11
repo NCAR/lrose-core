@@ -1576,6 +1576,7 @@ void PolarManager::selectedFieldChanged(QString newFieldName) {
   _plotArchiveData();
 }
 
+
 /*
 RadxVol PolarManager::getDataVolume() {
   return _vol;
