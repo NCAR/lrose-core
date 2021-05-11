@@ -675,6 +675,7 @@ codebase/apps/Radx/src/RadxHca/RadxHca
 codebase/apps/Radx/src/RadxKdp/RadxKdp
 codebase/apps/Radx/src/RadxMergeFields/RadxMergeFields
 codebase/apps/Radx/src/RadxMergeVols/RadxMergeVols
+codebase/apps/Radx/src/RadxMesoCyclone/RadxMesoCyclone
 codebase/apps/Radx/src/RadxMon/RadxMon
 codebase/apps/Radx/src/RadxModelQc/RadxModelQc
 codebase/apps/Radx/src/RadxPartRain/RadxPartRain

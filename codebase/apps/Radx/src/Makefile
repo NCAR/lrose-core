@@ -31,6 +31,7 @@ SUB_DIRS = \
 	RadxKdp \
 	RadxMergeFields \
 	RadxMergeVols \
+	RadxMesoCyclone \
 	RadxModelQc \
 	RadxMon \
 	RadxPartRain \
