@@ -567,7 +567,7 @@ int ScaleSep::_doWrite()
   
   // copy any chunks
   
-  for (int i = 0; i < _inMdvx.getNChunks(); i++) {
+  for (size_t i = 0; i < _inMdvx.getNChunks(); i++) {
     MdvxChunk *chunk = new MdvxChunk(*_inMdvx.getChunkByNum(i));
     _outMdvx.addChunk(chunk);
   }
