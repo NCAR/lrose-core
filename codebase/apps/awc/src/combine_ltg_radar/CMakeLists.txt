@@ -1,4 +1,4 @@
-###############################################
+###############################################################
 #
 # CMakeLists.txt file for cmake
 #
@@ -6,8 +6,8 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/rsfdata/git/lrose-core/codebase/apps/awc/src/combine_ltg_radar
-###############################################
+# dir: lrose-core/codebase/apps/awc/src/combine_ltg_radar
+###############################################################
 
 project (combine_ltg_radar)
 

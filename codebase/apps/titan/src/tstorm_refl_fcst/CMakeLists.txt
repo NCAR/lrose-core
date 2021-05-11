@@ -1,4 +1,4 @@
-###############################################
+###############################################################
 #
 # CMakeLists.txt file for cmake
 #
@@ -6,8 +6,8 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/rsfdata/git/lrose-core/codebase/apps/titan/src/tstorm_refl_fcst
-###############################################
+# dir: lrose-core/codebase/apps/titan/src/tstorm_refl_fcst
+###############################################################
 
 project (tstorm_refl_fcst)
 

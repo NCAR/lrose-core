@@ -1,4 +1,4 @@
-###############################################
+###############################################################
 #
 # CMakeLists.txt - auto generated from Makefile
 #
@@ -6,7 +6,8 @@
 #
 # written by script createCMakeLists.lib.py
 #
-###############################################
+# dir: lrose-core/codebase/libs/titan/src
+###############################################################
 
 project (libtitan)
 

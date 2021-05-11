@@ -1,4 +1,4 @@
-###############################################
+###############################################################
 #
 # CMakeLists for cmake recursion
 #
@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-###############################################
+###############################################################
 
 project (LROSE-CORE)
 
@@ -23,6 +23,7 @@ add_subdirectory (ChillSdbServer)
 add_subdirectory (ChillTsFile2Fmq)
 add_subdirectory (ChillTsTcp2Fmq)
 add_subdirectory (CmdVerify)
+add_subdirectory (Colide)
 add_subdirectory (ConvStrat)
 add_subdirectory (Cov2Mom)
 add_subdirectory (DowSendFreq)
@@ -49,6 +50,7 @@ add_subdirectory (NexradPowerStats)
 add_subdirectory (PointingCpCompute)
 add_subdirectory (PowerInfo2Spdb)
 add_subdirectory (Qmap2Cidd)
+add_subdirectory (QpeVerify)
 add_subdirectory (QuadratureTest)
 add_subdirectory (RadarCal)
 add_subdirectory (RadarConst)

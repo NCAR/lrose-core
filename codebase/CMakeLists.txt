@@ -1,4 +1,4 @@
-###############################################
+###############################################################
 #
 # Top-level CMakeLists file for lrose-core
 #
@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-###############################################
+###############################################################
 
 cmake_minimum_required(VERSION 3.0)
 
@@ -65,7 +65,10 @@ message("X11_LIB_DIR: ${X11_LIB_DIR}")
 message("HDF5_INSTALL_PREFIX: ${HDF5_INSTALL_PREFIX}")
 message("HDF5_C_INCLUDE_DIR: ${HDF5_C_INCLUDE_DIR}")
 
-set(CMAKE_INSTALL_PREFIX /tmp/build-test CACHE PATH "..." FORCE)
+# If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE)
+endif()
 message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")
 
 # Function for creating TDRP Params.cc and Params.hh files

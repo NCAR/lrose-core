@@ -1,4 +1,4 @@
-###############################################
+###############################################################
 #
 # CMakeLists.txt file for cmake
 #
@@ -6,8 +6,8 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/rsfdata/git/lrose-core/codebase/apps/didss/src/wsim2mdv
-###############################################
+# dir: lrose-core/codebase/apps/didss/src/wsim2mdv
+###############################################################
 
 project (wsim2mdv)
 

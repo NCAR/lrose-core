@@ -1,4 +1,4 @@
-###############################################
+###############################################################
 #
 # CMakeLists.txt file for cmake
 #
@@ -6,8 +6,8 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/rsfdata/git/lrose-core/codebase/apps/mdv_utils/src/mdv_le2be
-###############################################
+# dir: lrose-core/codebase/apps/mdv_utils/src/mdv_le2be
+###############################################################
 
 project (mdv_le2be)
 
