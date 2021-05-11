@@ -1858,6 +1858,24 @@ output_fields = {
   }
   ,
   {
+    dsr_name = "WFARM_CLUT",
+    output_name = "WFARM_CLUT",
+    long_name = "clutter_power",
+    standard_name = "clutter_power",
+    output_units = "dB",
+    output_encoding = OUTPUT_SHORT
+  }
+  ,
+  {
+    dsr_name = "DBZ_WFARM",
+    output_name = "DBZ_WFARM",
+    long_name = "reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    output_units = "dBZ",
+    output_encoding = OUTPUT_SHORT
+  }
+  ,
+  {
     dsr_name = "CMD",
     output_name = "CMD",
     long_name = "clutter_mitigation_interest",

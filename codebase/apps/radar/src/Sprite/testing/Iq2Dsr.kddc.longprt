@@ -4032,6 +4032,26 @@ output_fields = {
   }
   ,
   {
+    id = TEST3,
+    name = "WFARM_CLUT",
+    units = "dB",
+    scale = 0.01,
+    bias = -320,
+    write_unfiltered = TRUE,
+    write_filtered = FALSE
+  }
+  ,
+  {
+    id = TEST4,
+    name = "DBZ_WFARM",
+    units = "dBZ",
+    scale = 0.01,
+    bias = -320,
+    write_unfiltered = TRUE,
+    write_filtered = FALSE
+  }
+  ,
+  {
     id = ZDR,
     name = "ZDR",
     units = "dB",

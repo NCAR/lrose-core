@@ -2640,20 +2640,6 @@ void Beam::_filterDpSimHvFixedPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
-    // testing csr from 3-order regression filter
-
-    fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CsrDb();
-
-    // wind farm test
-
-    if (fields.spectral_snr >= 25.0 && fields.clut_2_wx_ratio >= 10.0) {
-      fields.test2 = 1.0;
-    } else {
-      fields.test2 = MomentsFields::missingDouble;
-    }
-    
     // apply the filter ratio to other channel
     
     _mom->applyFilterRatio(_nSamples, *_fft,
@@ -2679,6 +2665,31 @@ void Beam::_filterDpSimHvFixedPrt()
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
+
+    // wind farm test
+
+    if (fields.spectral_snr >= 25.0 &&
+        fields.clut_2_wx_ratio >= 5.0 &&
+        fields.cmd >= 0.5) {
+    // if (fields.spectral_snr >= 25.0 &&
+    //     fields.cmd >= 0.5) {
+      fields.test2 = 1.0;
+    } else {
+      fields.test2 = MomentsFields::missingDouble;
+    }
+
+    fields.test3 = fields.spectral_snr + fields.clut_2_wx_ratio;
+    if (fields.test2 == 1.0) {
+      fields.test4 = fieldsF.dbz - fields.spectral_snr;
+    } else {
+      fields.test4 = fieldsF.dbz;
+    }
+    
+    // testing csr from 3-order regression filter
+
+    // fields.test3 = _mom->getRegrInterpRatioDb();
+    // fields.test4 = _regr->getPolyOrderInUse();
+    // fields.test5 = _mom->getRegr3CsrDb();
 
   } // igate
 
