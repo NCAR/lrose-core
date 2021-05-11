@@ -37,6 +37,7 @@ ChillSdb2Dsr
 ChillSdbServer
 ChillTsFile2Fmq
 ChillTsTcp2Fmq
+classIngest
 CleanupRvp8Data
 ClutterAuto
 ClutterCompute
