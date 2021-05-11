@@ -614,8 +614,8 @@ void PolarWidget::smartBrush(int xPixel, int yPixel) {
 */
 
 void PolarWidget::imageReady(QImage *image) {
-  _image = image;  // TODO: make sure this isn't a copy!  just assign a pointer
-  update();
+//  _image = image;  // TODO: make sure this isn't a copy!  just assign a pointer
+//  update();
 }
 
 /*************************************************************************
@@ -624,7 +624,12 @@ void PolarWidget::imageReady(QImage *image) {
 
 void PolarWidget::paintEvent(QPaintEvent *event)
 {
+  LOG(DEBUG) << "enter";
   try {
+    _refreshImages();
+    string selectedField = displayFieldController->getSelectedFieldName();
+    _image = _fieldRendererController->getImage(selectedField);
+  //update(); 
   QPainter painter(this);
   //size_t selectedField = displayFieldController->getSelectedFieldNum();
 
@@ -650,6 +655,7 @@ void PolarWidget::paintEvent(QPaintEvent *event)
       LOG(ERROR) << ex.what();
       //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
   }
+  LOG(DEBUG) << "exit";
 }
 
 
@@ -658,10 +664,10 @@ void PolarWidget::paintEvent(QPaintEvent *event)
  */
 
 void PolarWidget::resizeEvent(QResizeEvent * e)
-{
+{ 
+  LOG(DEBUG) << "enter";
   _resetWorld(width(), height());
-  _refreshImages();
-  update();
+  LOG(DEBUG) << "exit";
 }
 
 
@@ -672,6 +678,7 @@ void PolarWidget::resizeEvent(QResizeEvent * e)
 void PolarWidget::resize(const int width, const int height)
 {
 
+  LOG(DEBUG) << "enter";
   // Set the geometry based on the aspect ratio that we need for this display.
   // The setGeometry() method will fire off the resizeEvent() so we leave the
   // updating of the display to that event.
@@ -680,11 +687,11 @@ void PolarWidget::resize(const int width, const int height)
   if (height < sizeNeeded) {
     sizeNeeded = height;
   }
-
+  // setGeometry triggers a resizeEvent
   setGeometry(0, 0, 
               (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth,
               sizeNeeded);
-
+  LOG(DEBUG) << "exit";
 }
 
 //////////////////////////////////////////////////////////////
