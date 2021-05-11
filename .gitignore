@@ -226,6 +226,7 @@ codebase/apps/ingest/src/Aws2Spdb/Aws2Spdb
 codebase/apps/ingest/src/BomAws2Spdb/BomAws2Spdb
 codebase/apps/ingest/src/BomSounding2Spdb/BomSounding2Spdb
 codebase/apps/ingest/src/Bprp2Dsr/Bprp2Dsr
+codebase/apps/ingest/src/classIngest/classIngest
 codebase/apps/ingest/src/CreateStationList/CreateStationList
 codebase/apps/ingest/src/CsuSounding2Spdb/CsuSounding2Spdb
 codebase/apps/ingest/src/Dorade2Dsr/Dorade2Dsr

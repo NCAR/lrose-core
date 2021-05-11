@@ -15,6 +15,7 @@ SUB_DIRS = \
 	Aws2Spdb \
 	BomAws2Spdb \
 	BomSounding2Spdb \
+	classIngest \
 	CreateStationList \
 	CsuSounding2Spdb \
 	EolMobileKml2Spdb \
