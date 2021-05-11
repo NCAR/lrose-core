@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/IpsTs2NetCDF
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/radar/src/IpsTs2NetCDF
 ###############################################
 
 project (IpsTs2NetCDF)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/physics/src/ModelDerive
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/physics/src/ModelDerive
 ###############################################
 
 project (ModelDerive)

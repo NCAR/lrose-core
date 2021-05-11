@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/CsuSounding2Spdb
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/ingest/src/CsuSounding2Spdb
 ###############################################
 
 project (CsuSounding2Spdb)

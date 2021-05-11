@@ -2,7 +2,6 @@
 #
 # CMakeLists.txt - auto generated from Makefile
 #
-# scripts dir: /home/dixon/git/lrose-core/codebase/apps/scripts/src
 # scripts dir: lrose-core/codebase/apps/scripts/src
 #
 # written by script createCMakeLists.lib.py

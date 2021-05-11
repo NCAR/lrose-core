@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/filters/src/stratiform_filter
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/filters/src/stratiform_filter
 ###############################################
 
 project (stratiform_filter)

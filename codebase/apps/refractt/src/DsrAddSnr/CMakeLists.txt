@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/refractt/src/DsrAddSnr
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/refractt/src/DsrAddSnr
 ###############################################
 
 project (DsrAddSnr)

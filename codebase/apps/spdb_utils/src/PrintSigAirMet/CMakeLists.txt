@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/spdb_utils/src/PrintSigAirMet
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/spdb_utils/src/PrintSigAirMet
 ###############################################
 
 project (PrintSigAirMet)

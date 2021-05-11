@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/StormInitClimatology
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/titan/src/StormInitClimatology
 ###############################################
 
 project (StormInitClimatology)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/dsserver/src/GenPtField2Symprod
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/dsserver/src/GenPtField2Symprod
 ###############################################
 
 project (GenPtField2Symprod)

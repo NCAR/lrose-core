@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/WafsTiled2Mdv
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/ingest/src/WafsTiled2Mdv
 ###############################################
 
 project (WafsTiled2Mdv)

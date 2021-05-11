@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/dsserver/src/SunCal2Symprod
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/dsserver/src/SunCal2Symprod
 ###############################################
 
 project (SunCal2Symprod)

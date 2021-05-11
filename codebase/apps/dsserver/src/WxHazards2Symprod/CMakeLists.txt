@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/dsserver/src/WxHazards2Symprod
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/dsserver/src/WxHazards2Symprod
 ###############################################
 
 project (WxHazards2Symprod)

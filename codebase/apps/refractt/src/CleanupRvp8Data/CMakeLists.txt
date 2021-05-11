@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/refractt/src/CleanupRvp8Data
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/refractt/src/CleanupRvp8Data
 ###############################################
 
 project (CleanupRvp8Data)

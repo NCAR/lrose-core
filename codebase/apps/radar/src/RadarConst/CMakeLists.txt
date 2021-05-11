@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/RadarConst
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/radar/src/RadarConst
 ###############################################
 
 project (RadarConst)

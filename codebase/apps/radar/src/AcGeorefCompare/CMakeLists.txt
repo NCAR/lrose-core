@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/AcGeorefCompare
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/radar/src/AcGeorefCompare
 ###############################################
 
 project (AcGeorefCompare)

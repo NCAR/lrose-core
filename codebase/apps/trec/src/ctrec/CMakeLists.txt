@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/trec/src/ctrec
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/trec/src/ctrec
 ###############################################
 
 project (ctrec)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/mdv_utils/src/MdvCircularFilt
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/mdv_utils/src/MdvCircularFilt
 ###############################################
 
 project (MdvCircularFilt)

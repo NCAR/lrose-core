@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/dsserver/src/DsFmqServer
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/dsserver/src/DsFmqServer
 ###############################################
 
 project (DsFmqServer)

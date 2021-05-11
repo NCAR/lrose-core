@@ -17,6 +17,7 @@ SUB_DIRS = \
 	convstrat \
 	dorade \
 	filter \
+	fmq \
 	geom \
 	hsrl \
 	ips \

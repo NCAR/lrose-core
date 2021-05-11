@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/refractt/src/Chill2netCDFSweep
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/refractt/src/Chill2netCDFSweep
 ###############################################
 
 project (Chill2netCDFSweep)

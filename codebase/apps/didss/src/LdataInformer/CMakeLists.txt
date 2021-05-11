@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/didss/src/LdataInformer
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/didss/src/LdataInformer
 ###############################################
 
 project (LdataInformer)

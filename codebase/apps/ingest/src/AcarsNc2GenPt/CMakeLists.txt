@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/AcarsNc2GenPt
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/ingest/src/AcarsNc2GenPt
 ###############################################
 
 project (AcarsNc2GenPt)

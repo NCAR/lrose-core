@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/Awos2Spdb
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/ingest/src/Awos2Spdb
 ###############################################
 
 project (Awos2Spdb)

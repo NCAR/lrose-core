@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/ChillTsTcp2Fmq
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/radar/src/ChillTsTcp2Fmq
 ###############################################
 
 project (ChillTsTcp2Fmq)

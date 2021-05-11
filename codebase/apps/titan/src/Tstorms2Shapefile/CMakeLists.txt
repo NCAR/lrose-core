@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/Tstorms2Shapefile
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/titan/src/Tstorms2Shapefile
 ###############################################
 
 project (Tstorms2Shapefile)

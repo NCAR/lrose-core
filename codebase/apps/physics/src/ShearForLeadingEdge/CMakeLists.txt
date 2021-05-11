@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/physics/src/ShearForLeadingEdge
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/physics/src/ShearForLeadingEdge
 ###############################################
 
 project (ShearForLeadingEdge)

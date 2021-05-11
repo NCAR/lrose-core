@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/grid_forecast
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/titan/src/grid_forecast
 ###############################################
 
 project (grid_forecast)

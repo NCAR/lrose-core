@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/hydro/src/BasinPrecip
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/hydro/src/BasinPrecip
 ###############################################
 
 project (BasinPrecip)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/AcPosnAscii2Spdb
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/titan/src/AcPosnAscii2Spdb
 ###############################################
 
 project (AcPosnAscii2Spdb)

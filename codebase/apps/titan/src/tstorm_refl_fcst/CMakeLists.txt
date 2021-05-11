@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/titan/src/tstorm_refl_fcst
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/titan/src/tstorm_refl_fcst
 ###############################################
 
 project (tstorm_refl_fcst)

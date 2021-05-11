@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/hiResNidsStormPrecip2Mdv
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/ingest/src/hiResNidsStormPrecip2Mdv
 ###############################################
 
 project (hiResNidsStormPrecip2Mdv)

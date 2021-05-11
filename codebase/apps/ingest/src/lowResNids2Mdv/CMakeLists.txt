@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/lowResNids2Mdv
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/ingest/src/lowResNids2Mdv
 ###############################################
 
 project (lowResNids2Mdv)

@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/IpsEye
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/radar/src/IpsEye
 ###############################################
 
 project (IpsEye)
@@ -70,7 +70,7 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
-find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)
+find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
 
 pkg_search_module(Qt5Core REQUIRED)
 pkg_search_module(Qt5Gui REQUIRED)

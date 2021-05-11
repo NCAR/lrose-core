@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/radar/src/RadxDealias
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/radar/src/RadxDealias
 ###############################################
 
 project (RadxDealias)
@@ -17,6 +17,7 @@ set (SRCS
       Params.cc
       Rsl.cc
       Args.cc
+      ClassIngest.cc
       FirstGuess.cc
       RadxDealias.cc
       FourDD.cc

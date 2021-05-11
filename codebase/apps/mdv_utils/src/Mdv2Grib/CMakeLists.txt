@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/mdv_utils/src/Mdv2Grib
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/mdv_utils/src/Mdv2Grib
 ###############################################
 
 project (Mdv2Grib)

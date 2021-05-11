@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/mdv_utils/src/Mdv2AsciiContour
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/mdv_utils/src/Mdv2AsciiContour
 ###############################################
 
 project (Mdv2AsciiContour)

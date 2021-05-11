@@ -216,21 +216,9 @@ def main():
         generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
-            shellCmd("./install_scripts.lrose " + options.prefix + "bin")
-
-        # install perl5 - deprecated
-        #
-        #perl5Dir = os.path.join(options.prefix, "lib/perl5")
-        #try:
-        #    os.makedirs(perl5Dir)
-        #except:
-        #    print("Dir exists: " + perl5Dir, file=sys.stderr)
-        #
-        #perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
-        #if (os.path.isdir(perl5LibDir)):
-        #    os.chdir(os.path.join(codebaseDir, "libs/perl5/src"))
-        #    shellCmd("rsync -av *pm " + perl5Dir)
-
+            scriptsBinDir = os.path.join(options.prefix, "bin")
+            shellCmd("./install_scripts.lrose " + scriptsBinDir)
+            
     # check the install
 
     checkInstall()

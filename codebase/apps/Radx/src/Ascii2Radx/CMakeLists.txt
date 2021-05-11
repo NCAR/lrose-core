@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/Radx/src/Ascii2Radx
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/Radx/src/Ascii2Radx
 ###############################################
 
 project (Ascii2Radx)

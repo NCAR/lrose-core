@@ -19,7 +19,6 @@ SUB_DIRS = \
 	ChillTsFile2Fmq \
 	ChillTsTcp2Fmq \
 	CmdVerify \
-	Colide \
 	ConvStrat \
 	Cov2Mom \
 	DowSendFreq \
@@ -47,7 +46,6 @@ SUB_DIRS = \
 	PointingCpCompute \
 	PowerInfo2Spdb \
 	Qmap2Cidd \
-	QpeVerify \
 	QuadratureTest \
 	RadarCal \
 	RadarConst \

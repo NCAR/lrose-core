@@ -23,6 +23,7 @@ CPPC_SRCS = \
 	iwrf_functions.cc \
 	IwrfCalib.cc \
 	IwrfTsBurst.cc \
+	IwrfTsGet.cc \
 	IwrfTsInfo.cc \
 	IwrfTsPulse.cc \
 	IwrfTsReader.cc \

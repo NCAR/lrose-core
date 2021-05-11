@@ -76,6 +76,7 @@ set (SRCS
       ./filter/DpolFilter.cc
       ./filter/FilterUtils.cc
       ./filter/PhidpFilt.cc
+      ./fmq/ClickPointFmq.cc
       ./geom/BeamHeight.cc
       ./geom/Egm2008.cc
       ./hsrl/HsrlRawRay.cc
@@ -93,6 +94,7 @@ set (SRCS
       ./iwrf/iwrf_functions.cc
       ./iwrf/IwrfCalib.cc
       ./iwrf/IwrfTsBurst.cc
+      ./iwrf/IwrfTsGet.cc
       ./iwrf/IwrfTsInfo.cc
       ./iwrf/IwrfTsPulse.cc
       ./iwrf/IwrfTsReader.cc

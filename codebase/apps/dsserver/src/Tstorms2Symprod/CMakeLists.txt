@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/dsserver/src/Tstorms2Symprod
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/dsserver/src/Tstorms2Symprod
 ###############################################
 
 project (Tstorms2Symprod)

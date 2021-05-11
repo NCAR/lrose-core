@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: /home/dixon/git/lrose-core/codebase/apps/ingest/src/sndgIngest
+# dir: /home/rsfdata/git/lrose-core/codebase/apps/ingest/src/sndgIngest
 ###############################################
 
 project (sndgIngest)

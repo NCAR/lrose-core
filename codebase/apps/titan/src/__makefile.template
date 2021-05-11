@@ -21,6 +21,7 @@ SUB_DIRS = \
 	PrintTitanServer \
 	RdasSim \
 	Rview \
+	ScaleSep \
 	StormInit2Field \
 	StormInitBdry \
 	StormInitClimatology \
