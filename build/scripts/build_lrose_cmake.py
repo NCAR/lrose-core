@@ -216,9 +216,9 @@ def main():
         generalScriptsDir = os.path.join(codebaseDir, "apps/scripts/src")
         if (os.path.isdir(generalScriptsDir)):
             os.chdir(generalScriptsDir)
-            scriptsBinDir = os.path.join(options.prefix, "bin")
-            shellCmd("./install_scripts.lrose " + scriptsBinDir)
-            
+            installDir = os.path.join(options.prefix, "bin")
+            shellCmd("./install_scripts.lrose " + installDir)
+
     # check the install
 
     checkInstall()

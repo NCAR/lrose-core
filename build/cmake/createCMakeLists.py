@@ -484,7 +484,7 @@ def writeCMakeListsTop(dir):
 
     fo = open(cmakePath, 'w')
 
-    fo.write('###############################################\n')
+    fo.write("###############################################################\n")
     fo.write('#\n')
     fo.write('# Top-level CMakeLists file for lrose-core\n')
     fo.write('#\n')
@@ -492,7 +492,7 @@ def writeCMakeListsTop(dir):
     fo.write('#\n')
     fo.write('# written by script %s\n' % thisScriptName)
     fo.write('#\n')
-    fo.write('###############################################\n')
+    fo.write("###############################################################\n")
     fo.write('\n')
     fo.write('cmake_minimum_required(VERSION 3.0)\n')
     fo.write('\n')
@@ -648,7 +648,7 @@ def writeCMakeListsRecurse(dir, subdirList):
 
     fo = open(cmakePath, "w")
 
-    fo.write("###############################################\n")
+    fo.write("###############################################################\n")
     fo.write("#\n")
     fo.write("# CMakeLists for cmake recursion\n")
     fo.write("#\n")
@@ -656,7 +656,7 @@ def writeCMakeListsRecurse(dir, subdirList):
     fo.write("#\n")
     fo.write("# written by script %s\n" % thisScriptName)
     fo.write("#\n")
-    fo.write("###############################################\n")
+    fo.write("###############################################################\n")
     fo.write("\n")
     fo.write("project (LROSE-CORE)\n")
     fo.write("\n")
@@ -837,7 +837,7 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
 
     fo = open(cmakePath, "w")
 
-    fo.write("###############################################\n")
+    fo.write("###############################################################\n")
     fo.write("#\n")
     fo.write("# CMakeLists.txt - auto generated from Makefile\n")
     fo.write("#\n")
@@ -845,7 +845,8 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("#\n")
     fo.write("# written by script createCMakeLists.lib.py\n")
     fo.write("#\n")
-    fo.write("###############################################\n")
+    fo.write('# dir: %s\n' % libSrcDir[libSrcDir.find('lrose-core'):])
+    fo.write("###############################################################\n")
     fo.write("\n")
 
     fo.write("project (lib%s)\n" % libName)
@@ -1259,7 +1260,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
 
     fo = open(cmakePath, "w")
 
-    fo.write("###############################################\n")
+    fo.write("###############################################################\n")
     fo.write("#\n")
     fo.write("# CMakeLists.txt file for cmake\n")
     fo.write("#\n")
@@ -1267,8 +1268,8 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("#\n")
     fo.write("# written by script %s\n" % thisScriptName)
     fo.write("#\n")
-    fo.write("# dir: %s\n" % appDir)
-    fo.write("###############################################\n")
+    fo.write('# dir: %s\n' % appDir[appDir.find('lrose-core'):])
+    fo.write("###############################################################\n")
     fo.write("\n")
 
     fo.write("project (%s)\n" % appName)
@@ -1507,7 +1508,7 @@ def writeCMakeListsScripts(scriptsDir, scriptsList):
 
     fo = open(cmakePath, "w")
 
-    fo.write("###############################################\n")
+    fo.write("###############################################################\n")
     fo.write("#\n")
     fo.write("# CMakeLists.txt - auto generated from Makefile\n")
     fo.write("#\n")
@@ -1515,7 +1516,7 @@ def writeCMakeListsScripts(scriptsDir, scriptsList):
     fo.write("#\n")
     fo.write("# written by script createCMakeLists.lib.py\n")
     fo.write("#\n")
-    fo.write("###############################################\n")
+    fo.write("###############################################################\n")
     fo.write("\n")
 
     fo.write("project (scripts)\n")
