@@ -592,6 +592,7 @@ codebase/apps/titan/src/PrintTitanFiles/PrintTitanFiles
 codebase/apps/titan/src/PrintTitanServer/PrintTitanServer
 codebase/apps/titan/src/RdasSim/RdasSim
 codebase/apps/titan/src/Rview/Rview
+codebase/apps/titan/src/ScaleSep/ScaleSep
 codebase/apps/titan/src/StormInit2Field/StormInit2Field
 codebase/apps/titan/src/StormInitBdry/StormInitBdry
 codebase/apps/titan/src/StormInitClimatology/StormInitClimatology
