@@ -14,7 +14,7 @@ LROSE is a co-operative project between:
 
 LROSE is funded by the [National Science Foundation](https://www.nsf.gov).
 
-### LROSE REPOSITORY
+### LROSE CORE REPOSITORY
 
 This GitHub distribution contains the core software for LROSE.
 
