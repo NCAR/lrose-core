@@ -445,7 +445,7 @@ int PrintTitanFiles::_printTrackFull(TitanStormFile &sfile,
   
   for (int icomplex = 0;
        icomplex < tfile.header().n_complex_tracks; icomplex++) {
-  
+
     int complex_track_num = tfile.complex_track_nums()[icomplex];
     
     if (_args.trackNum >= 0 &&
@@ -664,6 +664,14 @@ int PrintTitanFiles::_printTrackSummary(TitanStormFile &sfile,
       
 	const track_file_entry_t &entry = tfile.entry();
 
+        // read in scan info
+        
+        if (sfile.ReadScan(entry.scan_num)) {
+          cerr << "ERROR - PrintTitanFiles::_printTrackSummary" << endl;
+          cerr << sfile.getErrStr() << endl;
+          return -1;
+        }
+        
 	if (sfile.ReadProps(entry.scan_num)) {
 	  cerr << "ERROR - PrintTitanFiles::_printTrackSummary" << endl;
 	  cerr << sfile.getErrStr() << endl;
