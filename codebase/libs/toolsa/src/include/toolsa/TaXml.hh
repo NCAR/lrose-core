@@ -119,6 +119,13 @@ public:
     attribute(const string &name,
               const string &val) :
             _name(name), _val(val) {}
+    attribute(const string &name, int val) :
+            _name(name) 
+    {
+      char text[128];
+      snprintf(text, 128, "%d", val);
+      setVal(text);
+    }
     inline const string &getName() const { return _name; }
     inline const string &getVal() const { return _val; }
     inline void setName(const string &name) { _name = name; }
