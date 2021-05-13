@@ -43,6 +43,7 @@
 #include <string>
 #include <titan/storm.h>
 #include <titan/track.h>
+#include <rapformats/titan_grid.h>
 
 using namespace std;
 
@@ -51,10 +52,15 @@ class Titan2Xml
 
 public:
   
+  // simple params
+  
+  static string simpleParams(const simple_track_params_t &params,
+                             int level);
+
   // complex params
   
-  string complexParams(const complex_track_params_t &params,
-                       int level);
+  static string complexParams(const complex_track_params_t &params,
+                              int level);
 
   // track entry
   // if entry num is not supplied, it will not be included
@@ -66,14 +72,22 @@ public:
   // forecast props
   
   static string forecastProps(const string &tag,
-                              const track_file_forecast_props_t &props,
-                              int level);
+                              int level,
+                              const track_file_forecast_props_t &props);
   
+  static string titanGrid(const string &tag,
+                          int level,
+                          const titan_grid_t &grid);
+  
+  static string trackVerify(const string &tag,
+                            int level,
+                            const track_file_verify_t &verify);
+
   // contingency data
   
-  string contingencyData(const string &tag,
-                         const track_file_contingency_data_t &cont,
-                         int level);
+  static string contingencyData(const string &tag,
+                                int level,
+                                const track_file_contingency_data_t &cont);
   
 protected:
 private:
