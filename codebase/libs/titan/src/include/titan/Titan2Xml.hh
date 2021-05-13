@@ -52,21 +52,26 @@ class Titan2Xml
 
 public:
   
+  // track file params
+  
+  static string trackFileParams(int level,
+                                const track_file_params_t &params);
+  
   // simple params
   
-  static string simpleParams(const simple_track_params_t &params,
-                             int level);
-
+  static string simpleParams(int level,
+                             const simple_track_params_t &params);
+  
   // complex params
   
-  static string complexParams(const complex_track_params_t &params,
-                              int level);
+  static string complexParams(int level,
+                              const complex_track_params_t &params);
 
   // track entry
   // if entry num is not supplied, it will not be included
   
-  static string trackEntry(const track_file_entry_t &entry,
-                           int level,
+  static string trackEntry(int level,
+                           const track_file_entry_t &entry,
                            int entry_num = -1);
 
   // forecast props
@@ -89,6 +94,10 @@ public:
                                 int level,
                                 const track_file_contingency_data_t &cont);
   
+  static string gridType(int grid_type);
+
+  static string forecastType(int forecast_type);
+
 protected:
 private:
 

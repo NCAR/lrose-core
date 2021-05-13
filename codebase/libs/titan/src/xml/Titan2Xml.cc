@@ -43,10 +43,52 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////
+// track file params
+
+string Titan2Xml::trackFileParams(int level,
+                                  const track_file_params_t &params)
+
+{
+  
+  string xml;
+  
+  xml += TaXml::writeStartTag("track_file_params", level);
+
+  xml += TaXml::writeInt("nweights_forecast", level + 1, params.nweights_forecast);
+  xml += TaXml::writeStartTag("forecast_weights", level + 1);
+  for (int ii = 0; ii < params.nweights_forecast; ii++) {
+    xml += TaXml::writeInt("weight", level + 2, params.forecast_weights[ii]);
+  }
+  xml += TaXml::writeEndTag("forecast_weights", level + 1);
+
+  xml += TaXml::writeDouble("weight_distance", level + 1, params.weight_distance);
+  xml += TaXml::writeDouble("weight_delta_cube_root_volume", level + 1, params.weight_delta_cube_root_volume);
+  xml += TaXml::writeDouble("merge_split_search_ratio", level + 1, params.merge_split_search_ratio);
+  xml += TaXml::writeDouble("max_tracking_speed", level + 1, params.max_tracking_speed);
+  xml += TaXml::writeDouble("max_speed_for_valid_forecast", level + 1, params.max_speed_for_valid_forecast);
+  xml += TaXml::writeDouble("parabolic_growth_period", level + 1, params.parabolic_growth_period);
+  xml += TaXml::writeDouble("smoothing_radius", level + 1, params.smoothing_radius);
+  xml += TaXml::writeDouble("min_fraction_overlap", level + 1, params.min_fraction_overlap);
+  xml += TaXml::writeDouble("min_sum_fraction_overlap", level + 1, params.min_sum_fraction_overlap);
+  xml += TaXml::writeBoolean("scale_forecasts_by_history", level + 1, params.scale_forecasts_by_history);
+  xml += TaXml::writeBoolean("use_runs_for_overlaps", level + 1, params.use_runs_for_overlaps);
+  xml += TaXml::writeString("grid_type", level + 1, Titan2Xml::gridType(params.grid_type));
+  xml += TaXml::writeString("forecast_type", level + 1, Titan2Xml::forecastType(params.forecast_type));
+  xml += TaXml::writeInt("max_delta_time", level + 1, params.max_delta_time);
+  xml += TaXml::writeInt("min_history_for_valid_forecast", level + 1, params.min_history_for_valid_forecast);
+  xml += TaXml::writeBoolean("spatial_smoothing", level + 1, params.spatial_smoothing);
+
+  xml += TaXml::writeStartTag("track_file_params", level);
+  
+  return xml;
+
+}
+
+////////////////////////////////////////////////////////////
 // simple params
 
-string Titan2Xml::simpleParams(const simple_track_params_t &params,
-                               int level)
+string Titan2Xml::simpleParams(int level, 
+                               const simple_track_params_t &params)
 
 {
 
@@ -83,6 +125,7 @@ string Titan2Xml::simpleParams(const simple_track_params_t &params,
   xml += TaXml::writeStartTag("children", level + 1);
   for (int ii = 0; ii < nchildren; ii++) {
     xml += TaXml::writeInt("child", level + 2, params.child[ii]);
+
   }
   xml += TaXml::writeEndTag("children", level + 1);
 
@@ -96,10 +139,10 @@ string Titan2Xml::simpleParams(const simple_track_params_t &params,
 }
 
 ////////////////////////////////////////////////////////////
-// complex params
+// simple params
 
-string Titan2Xml::complexParams(const complex_track_params_t &params,
-                                int level)
+string Titan2Xml::complexParams(int level,
+                                const complex_track_params_t &params)
 
 {
 
@@ -145,8 +188,8 @@ string Titan2Xml::complexParams(const complex_track_params_t &params,
 ////////////////////////////////////////////////////////////
 // track entry
 
-string Titan2Xml::trackEntry(const track_file_entry_t &entry,
-                             int level,
+string Titan2Xml::trackEntry(int level,
+                             const track_file_entry_t &entry,
                              int entry_num /* = -1 */)
 
 {
@@ -276,53 +319,7 @@ string Titan2Xml::titanGrid(const string &tag,
   xml += TaXml::writeDouble("sensor_lat", level + 1, grid.sensor_lat);
   xml += TaXml::writeDouble("sensor_lon", level + 1, grid.sensor_lon);
 
-  switch (grid.proj_type) {
-    case TITAN_PROJ_LATLON:
-      xml += TaXml::writeString("proj_type", level + 1, "LATLON");
-      break;
-    case TITAN_PROJ_STEREOGRAPHIC:
-      xml += TaXml::writeString("proj_type", level + 1, "STEREOGRAPHIC");
-      break;
-    case TITAN_PROJ_LAMBERT_CONF:
-      xml += TaXml::writeString("proj_type", level + 1, "LAMBERT_CONF");
-      break;
-    case TITAN_PROJ_MERCATOR:
-      xml += TaXml::writeString("proj_type", level + 1, "MERCATOR");
-      break;
-    case TITAN_PROJ_POLAR_STEREO:
-      xml += TaXml::writeString("proj_type", level + 1, "POLAR_STEREO");
-      break;
-    case TITAN_PROJ_POLAR_ST_ELLIP:
-      xml += TaXml::writeString("proj_type", level + 1, "POLAR_ST_ELLIP");
-      break;
-    case TITAN_PROJ_CYL_EQUIDIST:
-      xml += TaXml::writeString("proj_type", level + 1, "CYL_EQUIDIST");
-      break;
-    case TITAN_PROJ_FLAT:
-      xml += TaXml::writeString("proj_type", level + 1, "FLAT");
-      break;
-    case TITAN_PROJ_POLAR_RADAR:
-      xml += TaXml::writeString("proj_type", level + 1, "POLAR_RADAR");
-      break;
-    case TITAN_PROJ_RADIAL:
-      xml += TaXml::writeString("proj_type", level + 1, "RADIAL");
-      break;
-    case TITAN_PROJ_OBLIQUE_STEREO:
-      xml += TaXml::writeString("proj_type", level + 1, "OBLIQUE_STEREO");
-      break;
-    case TITAN_PROJ_TRANS_MERCATOR:
-      xml += TaXml::writeString("proj_type", level + 1, "TRANS_MERCATOR");
-      break;
-    case TITAN_PROJ_ALBERS:
-      xml += TaXml::writeString("proj_type", level + 1, "ALBERS");
-      break;
-    case TITAN_PROJ_LAMBERT_AZIM:
-      xml += TaXml::writeString("proj_type", level + 1, "LAMBERT_AZIM");
-      break;
-    case TITAN_PROJ_UNKNOWN:
-      xml += TaXml::writeString("proj_type", level + 1, "UNKNOWN");
-      break;
-  }
+  xml += TaXml::writeString("proj_type", level + 1, Titan2Xml::gridType(grid.proj_type));
 
   xml += TaXml::writeBoolean("dz_constant", level + 1, grid.dz_constant);
   xml += TaXml::writeString("unitsx", level + 1, grid.unitsx);
@@ -383,6 +380,68 @@ string Titan2Xml::contingencyData(const string &tag,
   xml += TaXml::writeEndTag(tag, level);
   
   return xml;
+
+}
+
+////////////////////////////////////////////////////////////
+// grid type
+
+string Titan2Xml::gridType(int grid_type)
+
+{
+  
+  switch (grid_type) {
+    case TITAN_PROJ_LATLON:
+      return "LATLON";
+    case TITAN_PROJ_STEREOGRAPHIC:
+      return "STEREOGRAPHIC";
+    case TITAN_PROJ_LAMBERT_CONF:
+      return "LAMBERT_CONF";
+    case TITAN_PROJ_MERCATOR:
+      return "MERCATOR";
+    case TITAN_PROJ_POLAR_STEREO:
+      return "POLAR_STEREO";
+    case TITAN_PROJ_POLAR_ST_ELLIP:
+      return "POLAR_ST_ELLIP";
+    case TITAN_PROJ_CYL_EQUIDIST:
+      return "CYL_EQUIDIST";
+    case TITAN_PROJ_FLAT:
+      return "FLAT";
+    case TITAN_PROJ_POLAR_RADAR:
+      return "POLAR_RADAR";
+    case TITAN_PROJ_RADIAL:
+      return "RADIAL";
+    case TITAN_PROJ_OBLIQUE_STEREO:
+      return "OBLIQUE_STEREO";
+    case TITAN_PROJ_TRANS_MERCATOR:
+      return "TRANS_MERCATOR";
+    case TITAN_PROJ_ALBERS:
+      return "ALBERS";
+    case TITAN_PROJ_LAMBERT_AZIM:
+      return "LAMBERT_AZIM";
+  }
+
+  return "UNKNOWN";
+  
+}
+
+////////////////////////////////////////////////////////////
+// forecast type
+
+string Titan2Xml::forecastType(int forecast_type)
+
+{
+  
+  switch (forecast_type) {
+    case FORECAST_BY_TREND:
+      return "TREND";
+    case FORECAST_BY_PARABOLA:
+      return "PARABOLA";
+    case FORECAST_BY_REGRESSION:
+      return "REGRESSION";
+  }
+
+  return "UNKNOWN";
 
 }
 
