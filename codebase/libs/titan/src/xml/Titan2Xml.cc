@@ -43,6 +43,55 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////
+// track file header
+
+string Titan2Xml::trackFileHeader(int level,
+                                  const track_file_header_t &header)
+
+{
+  
+  string xml;
+  
+  xml += TaXml::writeStartTag("track_file_header", level);
+  
+  xml += TaXml::writeInt("major_rev", level + 1, header.major_rev);
+  xml += TaXml::writeInt("minor_rev", level + 1, header.minor_rev);
+  xml += TaXml::writeInt("file_valid", level + 1, header.file_valid);
+  xml += TaXml::writeInt("modify_code", level + 1, header.modify_code);
+  xml += Titan2Xml::trackFileParams(level + 1, header.params);
+  xml += TaXml::writeInt("n_simple_tracks", level + 1, header.n_simple_tracks);
+  xml += TaXml::writeInt("n_complex_tracks", level + 1, header.n_complex_tracks);
+
+  xml += Titan2Xml::contingencyData("ellipse_verify", level + 1, header.ellipse_verify);
+  xml += Titan2Xml::contingencyData("polygon_verify", level + 1, header.polygon_verify);
+
+  xml += Titan2Xml::forecastProps("forecast_bias", level + 1, header.forecast_bias);
+  xml += Titan2Xml::forecastProps("forecast_rmse", level + 1, header.forecast_rmse);
+    
+  xml += TaXml::writeInt("n_samples_for_forecast_stats", level + 1, header.n_samples_for_forecast_stats);
+  xml += TaXml::writeInt("n_scans", level + 1, header.n_scans);
+  xml += TaXml::writeInt("last_scan_num", level + 1, header.last_scan_num);
+  xml += TaXml::writeInt("max_simple_track_num", level + 1, header.max_simple_track_num);
+  xml += TaXml::writeInt("max_complex_track_num", level + 1, header.max_complex_track_num);
+  xml += TaXml::writeInt("data_file_size", level + 1, header.data_file_size);
+  xml += TaXml::writeTime("file_time", level + 1, header.file_time);
+  xml += TaXml::writeInt("max_parents", level + 1, header.max_parents);
+  xml += TaXml::writeInt("max_children", level + 1, header.max_children);
+  xml += TaXml::writeInt("max_nweights_forecast", level + 1, header.max_nweights_forecast);
+
+  xml += Titan2Xml::trackVerify("verify", level + 1, header.verify);
+
+  xml += TaXml::writeString("header_file_name", level + 1, header.header_file_name);
+  xml += TaXml::writeString("data_file_name", level + 1, header.data_file_name);
+  xml += TaXml::writeString("storm_header_file_name", level + 1, header.storm_header_file_name);
+
+  xml += TaXml::writeStartTag("track_file_header", level);
+  
+  return xml;
+
+}
+
+////////////////////////////////////////////////////////////
 // track file params
 
 string Titan2Xml::trackFileParams(int level,

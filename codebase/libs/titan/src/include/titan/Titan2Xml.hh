@@ -52,6 +52,11 @@ class Titan2Xml
 
 public:
   
+  // track file header
+  
+  static string trackFileHeader(int level,
+                                const track_file_header_t &header);
+
   // track file params
   
   static string trackFileParams(int level,
