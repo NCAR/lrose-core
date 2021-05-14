@@ -52,6 +52,22 @@ class Titan2Xml
 
 public:
   
+  // storm file header
+  
+  static string stormFileHeader(int level,
+                                const storm_file_header_t &header);
+
+  // storm file params
+
+  static string stormFileParams(int level,
+                                const storm_file_params_t &params);
+  
+  // storm global props
+  
+  string stormGlobalProps(int level,
+                          const storm_file_params_t &params,
+                          const storm_file_global_props_t &props);
+
   // track file header
   
   static string trackFileHeader(int level,
@@ -64,13 +80,13 @@ public:
   
   // simple params
   
-  static string simpleParams(int level,
-                             const simple_track_params_t &params);
+  static string simpleTrackParams(int level,
+                                  const simple_track_params_t &params);
   
   // complex params
   
-  static string complexParams(int level,
-                              const complex_track_params_t &params);
+  static string complexTrackParams(int level,
+                                   const complex_track_params_t &params);
 
   // track entry
   // if entry num is not supplied, it will not be included
@@ -102,6 +118,14 @@ public:
   static string gridType(int grid_type);
 
   static string forecastType(int forecast_type);
+
+  // precip mode
+
+  static string precipMode(int precip_mode);
+
+  // global props hail union type
+  
+  static string gpropsHailUnion(int gprops_union_type);
 
 protected:
 private:

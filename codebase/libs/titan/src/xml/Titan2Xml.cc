@@ -43,6 +43,197 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////
+// storm file header
+
+string Titan2Xml::stormFileHeader(int level,
+                                  const storm_file_header_t &header)
+
+{
+  
+  string xml;
+  string tag("storm_file_header");
+
+  xml += TaXml::writeStartTag(tag, level);
+  
+  xml += TaXml::writeInt("major_rev", level + 1, header.major_rev);
+  xml += TaXml::writeInt("minor_rev", level + 1, header.minor_rev);
+  xml += TaXml::writeInt("n_scans", level + 1, header.n_scans);
+  xml += TaXml::writeInt("data_file_size", level + 1, header.data_file_size);
+  xml += TaXml::writeTime("file_time", level + 1, header.file_time);
+  xml += TaXml::writeTime("start_time", level + 1, header.start_time);
+  xml += TaXml::writeTime("end_time", level + 1, header.end_time);
+  xml += TaXml::writeString("header_file_name", level + 1, header.header_file_name);
+  xml += TaXml::writeString("data_file_name", level + 1, header.data_file_name);
+
+  xml += stormFileParams(level + 1, header.params);
+
+  xml += TaXml::writeEndTag(tag, level);
+  
+  return xml;
+
+}
+
+////////////////////////////////////////////////////////////
+// storm file params
+
+string Titan2Xml::stormFileParams(int level,
+                                  const storm_file_params_t &params)
+
+{
+  
+  string xml;
+  string tag("storm_file_params");
+  
+  xml += TaXml::writeStartTag(tag, level);
+
+  xml += TaXml::writeDouble("low_dbz_threshold", level + 1, params.low_dbz_threshold);
+  xml += TaXml::writeDouble("high_dbz_threshold", level + 1, params.high_dbz_threshold);
+  xml += TaXml::writeDouble("dbz_hist_interval", level + 1, params.dbz_hist_interval);
+  xml += TaXml::writeDouble("hail_dbz_threshold", level + 1, params.hail_dbz_threshold);
+  xml += TaXml::writeDouble("base_threshold", level + 1, params.base_threshold);
+  xml += TaXml::writeDouble("top_threshold", level + 1, params.top_threshold);
+  xml += TaXml::writeDouble("min_storm_size", level + 1, params.min_storm_size);
+  xml += TaXml::writeDouble("max_storm_size", level + 1, params.max_storm_size);
+  xml += TaXml::writeDouble("morphology_erosion_threshold", level + 1, params.morphology_erosion_threshold);
+  xml += TaXml::writeDouble("morphology_refl_divisor", level + 1, params.morphology_refl_divisor);
+  xml += TaXml::writeDouble("min_radar_tops", level + 1, params.min_radar_tops);
+  xml += TaXml::writeDouble("tops_edge_margin", level + 1, params.tops_edge_margin);
+  xml += TaXml::writeDouble("z_p_coeff", level + 1, params.z_p_coeff);
+  xml += TaXml::writeDouble("z_p_exponent", level + 1, params.z_p_exponent);
+  xml += TaXml::writeDouble("z_m_coeff", level + 1, params.z_m_coeff);
+  xml += TaXml::writeDouble("z_m_exponent", level + 1, params.z_m_exponent);
+  xml += TaXml::writeDouble("sectrip_vert_aspect", level + 1, params.sectrip_vert_aspect);
+  xml += TaXml::writeDouble("sectrip_horiz_aspect", level + 1, params.sectrip_horiz_aspect);
+  xml += TaXml::writeDouble("sectrip_orientation_error", level + 1, params.sectrip_orientation_error);
+  xml += TaXml::writeDouble("poly_start_az", level + 1, params.poly_start_az);
+  xml += TaXml::writeDouble("poly_delta_az", level + 1, params.poly_delta_az);
+  
+  xml += TaXml::writeBoolean("check_morphology", level + 1, params.check_morphology);
+  xml += TaXml::writeBoolean("check_tops", level + 1, params.check_tops);
+  xml += TaXml::writeBoolean("vel_available", level + 1, params.vel_available);
+  xml += TaXml::writeInt("n_poly_sides", level + 1, params.n_poly_sides);
+
+  xml += TaXml::writeDouble("ltg_count_time", level + 1, params.ltg_count_time);
+  xml += TaXml::writeDouble("ltg_count_margin_km", level + 1, params.ltg_count_margin_km);
+  xml += TaXml::writeDouble("hail_z_m_coeff", level + 1, params.hail_z_m_coeff);
+  xml += TaXml::writeDouble("hail_z_m_exponent", level + 1, params.hail_z_m_exponent);
+  xml += TaXml::writeDouble("hail_mass_dbz_threshold", level + 1, params.hail_mass_dbz_threshold);
+
+  xml += TaXml::writeString("gprops_union_type", level + 1, gpropsHailUnion(params.gprops_union_type));
+
+  xml += TaXml::writeDouble("tops_dbz_threshold", level + 1, params.tops_dbz_threshold);
+
+  xml += TaXml::writeString("precip_computation_mode", level + 1, precipMode(params.precip_computation_mode));
+
+  xml += TaXml::writeDouble("precip_plane_ht", level + 1, params.precip_plane_ht);
+
+  xml += TaXml::writeEndTag(tag, level);
+  
+  return xml;
+
+}
+
+////////////////////////////////////////////////////////////
+// storm global props
+
+string Titan2Xml::stormGlobalProps(int level,
+                                   const storm_file_params_t &params,
+                                   const storm_file_global_props_t &props)
+
+{
+  
+  string xml;
+  string tag("storm_file_global_props");
+  
+  xml += TaXml::writeStartTag(tag, level);
+
+  xml += TaXml::writeDouble("low_dbz_threshold", level + 1, params.low_dbz_threshold);
+  xml += TaXml::writeBoolean("check_morphology", level + 1, params.check_morphology);
+  xml += TaXml::writeInt("n_poly_sides", level + 1, params.n_poly_sides);
+  xml += TaXml::writeString("precip_computation_mode", level + 1, precipMode(params.precip_computation_mode));
+
+  xml += TaXml::writeEndTag("storm_file_global_props", level);
+  
+  xml += TaXml::writeDouble("vol_centroid_x", level + 1, props.vol_centroid_x);
+  xml += TaXml::writeDouble("vol_centroid_y", level + 1, props.vol_centroid_y);
+  xml += TaXml::writeDouble("vol_centroid_z", level + 1, props.vol_centroid_z);
+  xml += TaXml::writeDouble("refl_centroid_x", level + 1, props.refl_centroid_x);
+  xml += TaXml::writeDouble("refl_centroid_y", level + 1, props.refl_centroid_y);
+  xml += TaXml::writeDouble("refl_centroid_z", level + 1, props.refl_centroid_z);
+  xml += TaXml::writeDouble("top", level + 1, props.top);
+  xml += TaXml::writeDouble("base", level + 1, props.base);
+  xml += TaXml::writeDouble("volume", level + 1, props.volume);
+  xml += TaXml::writeDouble("area_mean", level + 1, props.area_mean);
+  xml += TaXml::writeDouble("precip_flux", level + 1, props.precip_flux);
+  xml += TaXml::writeDouble("mass", level + 1, props.mass);
+  xml += TaXml::writeDouble("tilt_angle", level + 1, props.tilt_angle);
+  xml += TaXml::writeDouble("tilt_dirn", level + 1, props.tilt_dirn);
+  xml += TaXml::writeDouble("dbz_max", level + 1, props.dbz_max);
+  xml += TaXml::writeDouble("dbz_mean", level + 1, props.dbz_mean);
+  xml += TaXml::writeDouble("dbz_max_gradient", level + 1, props.dbz_max_gradient);
+  xml += TaXml::writeDouble("dbz_mean_gradient", level + 1, props.dbz_mean_gradient);
+  xml += TaXml::writeDouble("ht_of_dbz_max", level + 1, props.ht_of_dbz_max);
+  xml += TaXml::writeDouble("rad_vel_mean", level + 1, props.rad_vel_mean);
+  xml += TaXml::writeDouble("rad_vel_sd", level + 1, props.rad_vel_sd);
+  xml += TaXml::writeDouble("vorticity", level + 1, props.vorticity);
+  xml += TaXml::writeDouble("precip_area", level + 1, props.precip_area);
+  xml += TaXml::writeDouble("precip_area_centroid_x", level + 1, props.precip_area_centroid_x);
+  xml += TaXml::writeDouble("precip_area_centroid_y", level + 1, props.precip_area_centroid_y);
+  xml += TaXml::writeDouble("precip_area_orientation", level + 1, props.precip_area_orientation);
+  xml += TaXml::writeDouble("precip_area_minor_radius", level + 1, props.precip_area_minor_radius);
+  xml += TaXml::writeDouble("precip_area_major_radius", level + 1, props.precip_area_major_radius);
+  xml += TaXml::writeDouble("proj_area", level + 1, props.proj_area);
+  xml += TaXml::writeDouble("proj_area_centroid_x", level + 1, props.proj_area_centroid_x);
+  xml += TaXml::writeDouble("proj_area_centroid_y", level + 1, props.proj_area_centroid_y);
+  xml += TaXml::writeDouble("proj_area_orientation", level + 1, props.proj_area_orientation);
+  xml += TaXml::writeDouble("proj_area_minor_radius", level + 1, props.proj_area_minor_radius);
+  xml += TaXml::writeDouble("proj_area_major_radius", level + 1, props.proj_area_major_radius);
+  xml += TaXml::writeStartTag("proj_area_polygon", level + 1);
+  for (int ii = 0; ii < N_POLY_SIDES; ii++) {
+    xml += TaXml::writeDouble("radius", level + 2, props.proj_area_polygon[ii]);
+  }
+  xml += TaXml::writeEndTag("proj_area_polygon", level + 1);
+  xml += TaXml::writeInt("storm_num", level + 1, props.storm_num);
+  xml += TaXml::writeInt("n_layers", level + 1, props.n_layers);
+  xml += TaXml::writeInt("base_layer", level + 1, props.base_layer);
+  xml += TaXml::writeInt("n_dbz_intervals", level + 1, props.n_dbz_intervals);
+  xml += TaXml::writeInt("n_runs", level + 1, props.n_runs);
+  xml += TaXml::writeInt("n_proj_runs", level + 1, props.n_proj_runs);
+  xml += TaXml::writeBoolean("top_missing", level + 1, props.top_missing);
+  xml += TaXml::writeBoolean("range_limited", level + 1, props.range_limited);
+  xml += TaXml::writeBoolean("second_trip", level + 1, props.second_trip);
+  xml += TaXml::writeBoolean("hail_present", level + 1, props.hail_present);
+  xml += TaXml::writeBoolean("anom_prop", level + 1, props.anom_prop);
+  xml += TaXml::writeInt("bounding_min_ix", level + 1, props.bounding_min_ix);
+  xml += TaXml::writeInt("bounding_min_iy", level + 1, props.bounding_min_iy);
+  xml += TaXml::writeInt("bounding_max_ix", level + 1, props.bounding_max_ix);
+  xml += TaXml::writeInt("bounding_max_iy", level + 1, props.bounding_max_iy);
+  xml += TaXml::writeDouble("vil_from_maxz", level + 1, props.vil_from_maxz);
+  xml += TaXml::writeDouble("ltg_count", level + 1, props.ltg_count);
+
+  if (params.gprops_union_type == UNION_HAIL) {
+
+    xml += TaXml::writeInt("FOKRcategory", level + 1, props.add_on.hail_metrics.FOKRcategory);
+    xml += TaXml::writeDouble("waldvogelProbability", level + 1, props.add_on.hail_metrics.waldvogelProbability);
+    xml += TaXml::writeDouble("hailMassAloft", level + 1, props.add_on.hail_metrics.hailMassAloft);
+    xml += TaXml::writeDouble("vihm", level + 1, props.add_on.hail_metrics.vihm);
+
+  } else if (params.gprops_union_type == UNION_NEXRAD_HDA) {
+    
+    xml += TaXml::writeDouble("poh", level + 1, props.add_on.hda.poh);
+    xml += TaXml::writeDouble("shi", level + 1, props.add_on.hda.shi);
+    xml += TaXml::writeDouble("posh", level + 1, props.add_on.hda.posh);
+    xml += TaXml::writeDouble("mehs", level + 1, props.add_on.hda.mehs);
+
+  }
+
+  xml += TaXml::writeEndTag(tag, level);
+
+  return xml;
+
+}
+
+////////////////////////////////////////////////////////////
 // track file header
 
 string Titan2Xml::trackFileHeader(int level,
@@ -51,22 +242,23 @@ string Titan2Xml::trackFileHeader(int level,
 {
   
   string xml;
+  string tag("track_file_header");
   
-  xml += TaXml::writeStartTag("track_file_header", level);
+  xml += TaXml::writeStartTag(tag, level);
   
   xml += TaXml::writeInt("major_rev", level + 1, header.major_rev);
   xml += TaXml::writeInt("minor_rev", level + 1, header.minor_rev);
-  xml += TaXml::writeInt("file_valid", level + 1, header.file_valid);
+  xml += TaXml::writeBoolean("file_valid", level + 1, header.file_valid);
   xml += TaXml::writeInt("modify_code", level + 1, header.modify_code);
-  xml += Titan2Xml::trackFileParams(level + 1, header.params);
+
   xml += TaXml::writeInt("n_simple_tracks", level + 1, header.n_simple_tracks);
   xml += TaXml::writeInt("n_complex_tracks", level + 1, header.n_complex_tracks);
 
-  xml += Titan2Xml::contingencyData("ellipse_verify", level + 1, header.ellipse_verify);
-  xml += Titan2Xml::contingencyData("polygon_verify", level + 1, header.polygon_verify);
+  xml += contingencyData("ellipse_verify", level + 1, header.ellipse_verify);
+  xml += contingencyData("polygon_verify", level + 1, header.polygon_verify);
 
-  xml += Titan2Xml::forecastProps("forecast_bias", level + 1, header.forecast_bias);
-  xml += Titan2Xml::forecastProps("forecast_rmse", level + 1, header.forecast_rmse);
+  xml += forecastProps("forecast_bias", level + 1, header.forecast_bias);
+  xml += forecastProps("forecast_rmse", level + 1, header.forecast_rmse);
     
   xml += TaXml::writeInt("n_samples_for_forecast_stats", level + 1, header.n_samples_for_forecast_stats);
   xml += TaXml::writeInt("n_scans", level + 1, header.n_scans);
@@ -79,13 +271,15 @@ string Titan2Xml::trackFileHeader(int level,
   xml += TaXml::writeInt("max_children", level + 1, header.max_children);
   xml += TaXml::writeInt("max_nweights_forecast", level + 1, header.max_nweights_forecast);
 
-  xml += Titan2Xml::trackVerify("verify", level + 1, header.verify);
+  xml += trackVerify("verify", level + 1, header.verify);
 
   xml += TaXml::writeString("header_file_name", level + 1, header.header_file_name);
   xml += TaXml::writeString("data_file_name", level + 1, header.data_file_name);
   xml += TaXml::writeString("storm_header_file_name", level + 1, header.storm_header_file_name);
 
-  xml += TaXml::writeStartTag("track_file_header", level);
+  xml += trackFileParams(level + 1, header.params);
+
+  xml += TaXml::writeEndTag(tag, level);
   
   return xml;
 
@@ -100,8 +294,9 @@ string Titan2Xml::trackFileParams(int level,
 {
   
   string xml;
+  string tag("track_file_params");
   
-  xml += TaXml::writeStartTag("track_file_params", level);
+  xml += TaXml::writeStartTag(tag, level);
 
   xml += TaXml::writeInt("nweights_forecast", level + 1, params.nweights_forecast);
   xml += TaXml::writeStartTag("forecast_weights", level + 1);
@@ -121,13 +316,13 @@ string Titan2Xml::trackFileParams(int level,
   xml += TaXml::writeDouble("min_sum_fraction_overlap", level + 1, params.min_sum_fraction_overlap);
   xml += TaXml::writeBoolean("scale_forecasts_by_history", level + 1, params.scale_forecasts_by_history);
   xml += TaXml::writeBoolean("use_runs_for_overlaps", level + 1, params.use_runs_for_overlaps);
-  xml += TaXml::writeString("grid_type", level + 1, Titan2Xml::gridType(params.grid_type));
-  xml += TaXml::writeString("forecast_type", level + 1, Titan2Xml::forecastType(params.forecast_type));
+  xml += TaXml::writeString("grid_type", level + 1, gridType(params.grid_type));
+  xml += TaXml::writeString("forecast_type", level + 1, forecastType(params.forecast_type));
   xml += TaXml::writeInt("max_delta_time", level + 1, params.max_delta_time);
   xml += TaXml::writeInt("min_history_for_valid_forecast", level + 1, params.min_history_for_valid_forecast);
   xml += TaXml::writeBoolean("spatial_smoothing", level + 1, params.spatial_smoothing);
 
-  xml += TaXml::writeStartTag("track_file_params", level);
+  xml += TaXml::writeEndTag(tag, level);
   
   return xml;
 
@@ -136,14 +331,15 @@ string Titan2Xml::trackFileParams(int level,
 ////////////////////////////////////////////////////////////
 // simple params
 
-string Titan2Xml::simpleParams(int level, 
-                               const simple_track_params_t &params)
+string Titan2Xml::simpleTrackParams(int level, 
+                                    const simple_track_params_t &params)
 
 {
 
   string xml;
+  string tag("simple_track_params");
   
-  xml += TaXml::writeStartTag("simple_track_params", level);
+  xml += TaXml::writeStartTag(tag, level);
 
   xml += TaXml::writeInt("simple_track_num", level + 1, params.simple_track_num);
   xml += TaXml::writeInt("last_descendant_simple_track_num", level + 1, params.last_descendant_simple_track_num);
@@ -181,7 +377,7 @@ string Titan2Xml::simpleParams(int level,
   xml += TaXml::writeInt("complex_track_num", level + 1, params.complex_track_num);
   xml += TaXml::writeInt("first_entry_offset", level + 1, params.first_entry_offset);
 
-  xml += TaXml::writeEndTag("simple_track_params", level);
+  xml += TaXml::writeEndTag(tag, level);
 
   return xml;
 
@@ -190,14 +386,15 @@ string Titan2Xml::simpleParams(int level,
 ////////////////////////////////////////////////////////////
 // simple params
 
-string Titan2Xml::complexParams(int level,
-                                const complex_track_params_t &params)
+string Titan2Xml::complexTrackParams(int level,
+                                     const complex_track_params_t &params)
 
 {
 
   string xml;
+  string tag("complex_track_params");
   
-  xml += TaXml::writeStartTag("complex_track_params", level);
+  xml += TaXml::writeStartTag(tag, level);
   
   xml += TaXml::writeDouble("volume_at_start_of_sampling",
                             level + 1, params.volume_at_start_of_sampling);
@@ -223,12 +420,12 @@ string Titan2Xml::complexParams(int level,
   xml += TaXml::writeInt("end_missing", level + 1, params.end_missing);
   xml += TaXml::writeInt("n_samples_for_forecast_stats", level + 1, params.n_samples_for_forecast_stats);
 
-  xml += Titan2Xml::contingencyData("ellipse_verify", level + 1, params.ellipse_verify);
-  xml += Titan2Xml::contingencyData("polygon_verify", level + 1, params.polygon_verify);
-  xml += Titan2Xml::forecastProps("forecast_bias", level + 1, params.forecast_bias);
-  xml += Titan2Xml::forecastProps("forecast_rmse", level + 1, params.forecast_rmse);
+  xml += contingencyData("ellipse_verify", level + 1, params.ellipse_verify);
+  xml += contingencyData("polygon_verify", level + 1, params.polygon_verify);
+  xml += forecastProps("forecast_bias", level + 1, params.forecast_bias);
+  xml += forecastProps("forecast_rmse", level + 1, params.forecast_rmse);
 
-  xml += TaXml::writeEndTag("complex_track_params", level);
+  xml += TaXml::writeEndTag(tag, level);
   
   return xml;
 
@@ -244,13 +441,14 @@ string Titan2Xml::trackEntry(int level,
 {
 
   string xml;
+  string tag("track_entry");
   
   if (entry_num >= 0) {
     vector<TaXml::attribute> attrs;
     attrs.push_back(TaXml::attribute("entry_number", entry_num));
-    xml += TaXml::writeStartTag("track_entry", level, attrs, true);
+    xml += TaXml::writeStartTag(tag, level, attrs, true);
   } else {
-    xml += TaXml::writeStartTag("track_entry", level);
+    xml += TaXml::writeStartTag(tag, level);
   }
 
   xml += TaXml::writeTime("time", level + 1, entry.time);
@@ -266,9 +464,9 @@ string Titan2Xml::trackEntry(int level,
   xml += TaXml::writeInt("duration_in_secs", level + 1, entry.duration_in_secs);
   xml += TaXml::writeBoolean("forecast_valid", level + 1, entry.forecast_valid);
 
-  xml += Titan2Xml::forecastProps("dval_dt", level + 1, entry.dval_dt);
+  xml += forecastProps("dval_dt", level + 1, entry.dval_dt);
 
-  xml += TaXml::writeEndTag("track_entry", level);
+  xml += TaXml::writeEndTag(tag, level);
   
   return xml;
 
@@ -368,7 +566,7 @@ string Titan2Xml::titanGrid(const string &tag,
   xml += TaXml::writeDouble("sensor_lat", level + 1, grid.sensor_lat);
   xml += TaXml::writeDouble("sensor_lon", level + 1, grid.sensor_lon);
 
-  xml += TaXml::writeString("proj_type", level + 1, Titan2Xml::gridType(grid.proj_type));
+  xml += TaXml::writeString("proj_type", level + 1, gridType(grid.proj_type));
 
   xml += TaXml::writeBoolean("dz_constant", level + 1, grid.dz_constant);
   xml += TaXml::writeString("unitsx", level + 1, grid.unitsx);
@@ -492,5 +690,45 @@ string Titan2Xml::forecastType(int forecast_type)
 
   return "UNKNOWN";
 
+}
+
+////////////////////////////////////////////////////////////
+// precip mode
+
+string Titan2Xml::precipMode(int precip_mode)
+
+{
+  
+  switch (precip_mode) {
+    case TITAN_PRECIP_FROM_COLUMN_MAX:
+      return "COLUMN_MAX";
+    case TITAN_PRECIP_AT_SPECIFIED_HT:
+      return "SPECIFIED_HT";
+    case TITAN_PRECIP_AT_LOWEST_VALID_HT:
+      return "LOWEST_VALID_HT";
+    case TITAN_PRECIP_FROM_LOWEST_AVAILABLE_REFL:
+      return "LOWEST_AVAILABLE_REFL";
+  }
+
+  return "UNKNOWN";
+
+}
+
+////////////////////////////////////////////////////////////
+// global props hail union type
+
+string Titan2Xml::gpropsHailUnion(int gprops_union_type)
+
+{
+  
+  switch (gprops_union_type) {
+    case UNION_HAIL:
+      return "HAIL";
+    case UNION_NEXRAD_HDA:
+      return "NEXRAD_HDA";
+  }
+
+  return "NONE";
+  
 }
 
