@@ -298,6 +298,30 @@ string Titan2Xml::stormLayerProps(int level,
 }
 
 ////////////////////////////////////////////////////////////
+// storm dbz histogram
+
+string Titan2Xml::stormDbzHistEntry(int level,
+                                    int binNum,
+                                    const storm_file_dbz_hist_t &hist)
+  
+{
+  
+  string xml;
+  string tag("dbz_hist_entry");
+  
+  xml += TaXml::writeStartTag(tag, level);
+  
+  xml += TaXml::writeInt("bin_num", level + 1, binNum);
+  xml += TaXml::writeDouble("percent_volume", level + 1, hist.percent_volume);
+  xml += TaXml::writeDouble("percent_area", level + 1, hist.percent_area);
+  
+  xml += TaXml::writeEndTag(tag, level);
+
+  return xml;
+
+}
+
+////////////////////////////////////////////////////////////
 // track file header
 
 string Titan2Xml::trackFileHeader(int level,

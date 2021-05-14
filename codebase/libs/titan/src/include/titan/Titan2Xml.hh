@@ -81,6 +81,11 @@ public:
                                 const titan_grid_t &grid,
                                 const storm_file_layer_props_t &lprops);
 
+  // storm dbz histogram
+  
+  static string stormDbzHistEntry(int level,
+                                  int binNum,
+                                  const storm_file_dbz_hist_t &hist);
   // track file header
   
   static string trackFileHeader(int level,

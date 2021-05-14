@@ -81,6 +81,9 @@ private:
   int _printCsvTableType3(TitanStormFile &sfile, TitanTrackFile &tfile);
   int _printCsvTableType4(TitanStormFile &sfile, TitanTrackFile &tfile);
   int _printCsvTableType5(TitanStormFile &sfile, TitanTrackFile &tfile);
+
+  int _printStormsXml();
+  int _printTracksXml();
   
 };
 

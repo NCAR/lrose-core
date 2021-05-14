@@ -101,14 +101,26 @@ int PrintTitanFiles::Run()
 
   if (!strcmp(file_label, STORM_HEADER_FILE_TYPE)) {
 
-    if (_printStormFile()) {
-      return -1;
+    if (_args.printAsXml) {
+      if (_printStormsXml()) {
+        return -1;
+      }
+    } else {
+      if (_printStormFile()) {
+        return -1;
+      }
     }
 
   } else if (!strcmp(file_label, TRACK_HEADER_FILE_TYPE)) {
 
-    if (_printTrackFile()) {
-      return -1;
+    if (_args.printAsXml) {
+      if (_printTracksXml()) {
+        return -1;
+      }
+    } else {
+      if (_printTrackFile()) {
+        return -1;
+      }
     }
 
   } else {
@@ -1287,6 +1299,268 @@ int PrintTitanFiles::_printCsvTableType5(TitanStormFile &sfile,
     } // isimple
     
   } // icomplex
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// print storms as XML
+
+int PrintTitanFiles::_printStormsXml()
+
+{
+
+  TitanStormFile sfile;
+  
+  // open storm properties files
+  
+  if (sfile.OpenFiles("r", _args.path.c_str())) {
+    cerr << "ERROR - PrintTitanFiles::_printStormsXml" << endl;
+    cerr << sfile.getErrStr() << endl;
+    return -1;
+  }
+
+  //  read in storm properties file header
+
+  if (sfile.ReadHeader()) {
+    cerr << "ERROR - PrintTitanFiles::_printStormsXml" << endl;
+    cerr << sfile.getErrStr() << endl;
+    return -1;
+  }
+
+  int n_scans = sfile.header().n_scans;
+  const storm_file_params_t &params = sfile.header().params;
+  
+  // print out header
+  
+  fprintf(stdout, "STORM FILE\n");
+  fprintf(stdout, "==========\n");
+  fprintf(stdout, "Header file label : %s\n",
+	  sfile.header_file_label().c_str());
+  fprintf(stdout, "Data   file label : %s\n",
+	  sfile.data_file_label().c_str());
+  fprintf(stdout, "\n");
+  
+  RfPrintStormHeader(stdout, "  ", &sfile.header());
+
+  /*
+   * loop through scans
+   */
+  
+  for (int iscan = 0; iscan < n_scans; iscan++) {
+
+    /*
+     * read in scan info
+     */
+
+    if (sfile.ReadScan(iscan)) {
+      cerr << "ERROR - PrintTitanFiles::_printStormsXml" << endl;
+      cerr << sfile.getErrStr() << endl;
+      return -1;
+    }
+
+    const storm_file_scan_header_t &scan = sfile.scan();
+    
+    /*
+     * print out s_handle.scan info
+     */
+
+    if (_args.printSummary) {
+      
+      printf("Scan, time, nstorms : %4d %s %4d\n",
+	     scan.scan_num, utimstr(scan.time), scan.nstorms);
+
+    } else {
+      
+      RfPrintStormScan(stdout, "    ", &params, &sfile.scan());
+      
+      if (_args.printFull) {
+	
+	for (int istorm = 0; istorm < scan.nstorms; istorm++) {
+	  
+	  if (sfile.ReadProps(istorm)) {
+	    cerr << "ERROR - PrintTitanFiles::_printStormsXml" << endl;
+	    cerr << sfile.getErrStr() << endl;
+	    return -1;
+	  }
+	  
+	  RfPrintStormProps(stdout, "      ", &params,
+			    &sfile.scan(),
+			    sfile.gprops() + istorm);
+	  
+	  RfPrintStormLayer(stdout, "      ", &params,
+			    &sfile.scan(),
+			    sfile.gprops() + istorm,
+			    sfile.lprops());
+	  
+	  RfPrintStormHist(stdout, "      ", &params,
+			   sfile.gprops() + istorm,
+			   sfile.hist());
+	  
+	  
+	  RfPrintStormRuns(stdout, "      ",
+			   sfile.gprops() + istorm,
+			   sfile.runs());
+	  
+	  RfPrintStormProjRuns(stdout, "      ",
+			       sfile.gprops() + istorm,
+			       sfile.proj_runs());
+	  
+	} // istorm
+
+      } // f (_args.printFull)
+
+    } // if (_args.printSummary)
+
+  } // iscan
+  
+  // close files
+
+  sfile.CloseFiles();
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// print tracks as XML
+
+int PrintTitanFiles::_printTracksXml()
+
+{
+
+  // open track properties files
+  
+  TitanTrackFile tfile;
+  if (tfile.OpenFiles("r", _args.path.c_str())) {
+    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << tfile.getErrStr() << endl;
+    return -1;
+  }
+  
+  // read in track properties file header
+
+  if (tfile.ReadHeader()) {
+    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << tfile.getErrStr() << endl;
+    return -1;
+  }
+
+  if (tfile.ReadSimplesPerComplex()) {
+    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << tfile.getErrStr() << endl;
+    return -1;
+  }
+
+  // print out header
+  
+  if (_args.printCsvTable) {
+      
+    if (_args.csvTableType == 1) {
+      // table type 1
+      printf("%%timestep; id;  centerx;  centery; volume;"
+             "  boxxmin;  boxxmax;  boxymin;  boxymax;"
+             " lwpmean;  lwpmin;  lwpmax\n");
+    } else if (_args.csvTableType == 2) {
+      // table type 2
+      printf("%%timestep; idstep1; idstep2;  weight\n");
+    } else if (_args.csvTableType == 3) {
+      // table type 3
+      printf("%%timestep; nstorms\n");
+    } else if (_args.csvTableType == 4) {
+      // table type 4
+      printf("%%complex_track_num; duration_in_scans; duration_in_secs\n");
+    } else if (_args.csvTableType == 5) {
+      // table type 5
+      printf("%%complex_track_num; simple_track_num; "
+             "duration_in_scans; duration_in_secs\n");
+    }
+
+  } else {
+    
+    printf("TRACK FILE\n");
+    printf("==========\n");
+    printf("Header file label : %s\n", tfile.header_file_label().c_str());
+    printf("Data   file label : %s\n", tfile.data_file_label().c_str());
+    printf("\n");
+  
+    RfPrintTrackHeader(stdout, "  ", &tfile.header());
+
+  }
+
+  if (_args.printFull) {
+    RfPrintTrackHeaderArrays(stdout, "  ",
+			     &tfile.header(),
+			     tfile.complex_track_nums(),
+			     tfile.complex_track_offsets(),
+			     tfile.simple_track_offsets(),
+			     tfile.nsimples_per_complex(),
+			     tfile.simples_per_complex_offsets(),
+			     (const si32 **) tfile.simples_per_complex(),
+			     tfile.scan_index());
+  }
+
+  // open storm file
+
+  Path trackPath(_args.path);
+  string stormFilePath = trackPath.getDirectory();
+  stormFilePath += PATH_DELIM;
+  stormFilePath += tfile.header().storm_header_file_name;
+
+  TitanStormFile sfile;
+  if (sfile.OpenFiles("r", stormFilePath.c_str())) {
+    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << sfile.getErrStr() << endl;
+    return -1;
+  }
+
+  // read in storm properties file header
+  
+  if (sfile.ReadHeader()) {
+    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << sfile.getErrStr() << endl;
+    return -1;
+  }
+
+  // if full listing, print out track info
+  
+  if (_args.printFull) {
+    if (_printTrackFull(sfile, tfile)) {
+      return -1;
+    }
+  } else if (_args.printSummary) {
+    if (_printTrackSummary(sfile, tfile)) {
+      return -1;
+    }
+  } else if (_args.printCsvTable) {
+    if (_args.csvTableType == 1) {
+      if (_printCsvTableType1(sfile, tfile)) {
+        return -1;
+      }
+    } else if (_args.csvTableType == 2) {
+      if (_printCsvTableType2(sfile, tfile)) {
+        return -1;
+      }
+    } else if (_args.csvTableType == 3) {
+      if (_printCsvTableType3(sfile, tfile)) {
+        return -1;
+      }
+    } else if (_args.csvTableType == 4) {
+      if (_printCsvTableType4(sfile, tfile)) {
+        return -1;
+      }
+    } else if (_args.csvTableType == 5) {
+      if (_printCsvTableType5(sfile, tfile)) {
+        return -1;
+      }
+    }
+  }
+    
+  // close files
+
+  sfile.CloseFiles();
+  tfile.CloseFiles();
 
   return 0;
 
