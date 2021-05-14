@@ -179,8 +179,6 @@ string Titan2Xml::stormGlobalProps(int level,
   xml += TaXml::writeInt("n_poly_sides", level + 1, params.n_poly_sides);
   xml += TaXml::writeString("precip_computation_mode", level + 1, precipMode(params.precip_computation_mode));
 
-  xml += TaXml::writeEndTag("storm_file_global_props", level);
-  
   xml += TaXml::writeDouble("vol_centroid_x", level + 1, gprops.vol_centroid_x);
   xml += TaXml::writeDouble("vol_centroid_y", level + 1, gprops.vol_centroid_y);
   xml += TaXml::writeDouble("vol_centroid_z", level + 1, gprops.vol_centroid_z);

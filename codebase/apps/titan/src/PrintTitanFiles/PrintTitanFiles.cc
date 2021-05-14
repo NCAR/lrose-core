@@ -44,6 +44,8 @@
 #include <toolsa/str.h>
 #include <toolsa/Path.hh>
 #include <toolsa/sincos.h>
+#include <toolsa/TaXml.hh>
+#include <titan/Titan2Xml.hh>
 #include <cerrno>
 #include <vector>
 #include <map>
@@ -1332,18 +1334,12 @@ int PrintTitanFiles::_printStormsXml()
   int n_scans = sfile.header().n_scans;
   const storm_file_params_t &params = sfile.header().params;
   
-  // print out header
-  
-  fprintf(stdout, "STORM FILE\n");
-  fprintf(stdout, "==========\n");
-  fprintf(stdout, "Header file label : %s\n",
-	  sfile.header_file_label().c_str());
-  fprintf(stdout, "Data   file label : %s\n",
-	  sfile.data_file_label().c_str());
-  fprintf(stdout, "\n");
-  
-  RfPrintStormHeader(stdout, "  ", &sfile.header());
+  // header
 
+  string xml;
+  string mainTag = "PrintTitanFiles";
+  xml += TaXml::writeStartTag(mainTag, 0);
+  xml += Titan2Xml::stormFileHeader(1, sfile.header());
   /*
    * loop through scans
    */
@@ -1361,63 +1357,56 @@ int PrintTitanFiles::_printStormsXml()
     }
 
     const storm_file_scan_header_t &scan = sfile.scan();
+    xml += Titan2Xml::stormScanHeader(1, scan);
     
-    /*
-     * print out s_handle.scan info
-     */
-
-    if (_args.printSummary) {
+    for (int istorm = 0; istorm < scan.nstorms; istorm++) {
       
-      printf("Scan, time, nstorms : %4d %s %4d\n",
-	     scan.scan_num, utimstr(scan.time), scan.nstorms);
+      if (sfile.ReadProps(istorm)) {
+        cerr << "ERROR - PrintTitanFiles::_printStormsXml" << endl;
+        cerr << sfile.getErrStr() << endl;
+        return -1;
+      }
+	  
+      xml += Titan2Xml::stormGlobalProps(1, sfile.header().params,
+                                         sfile.gprops()[istorm]);
 
-    } else {
+      continue;
       
-      RfPrintStormScan(stdout, "    ", &params, &sfile.scan());
+      RfPrintStormProps(stdout, "      ", &params,
+                        &sfile.scan(),
+                        sfile.gprops() + istorm);
       
-      if (_args.printFull) {
-	
-	for (int istorm = 0; istorm < scan.nstorms; istorm++) {
-	  
-	  if (sfile.ReadProps(istorm)) {
-	    cerr << "ERROR - PrintTitanFiles::_printStormsXml" << endl;
-	    cerr << sfile.getErrStr() << endl;
-	    return -1;
-	  }
-	  
-	  RfPrintStormProps(stdout, "      ", &params,
-			    &sfile.scan(),
-			    sfile.gprops() + istorm);
-	  
-	  RfPrintStormLayer(stdout, "      ", &params,
-			    &sfile.scan(),
-			    sfile.gprops() + istorm,
-			    sfile.lprops());
-	  
-	  RfPrintStormHist(stdout, "      ", &params,
-			   sfile.gprops() + istorm,
-			   sfile.hist());
-	  
-	  
-	  RfPrintStormRuns(stdout, "      ",
-			   sfile.gprops() + istorm,
-			   sfile.runs());
-	  
-	  RfPrintStormProjRuns(stdout, "      ",
-			       sfile.gprops() + istorm,
-			       sfile.proj_runs());
-	  
-	} // istorm
-
-      } // f (_args.printFull)
-
-    } // if (_args.printSummary)
-
+      RfPrintStormLayer(stdout, "      ", &params,
+                        &sfile.scan(),
+                        sfile.gprops() + istorm,
+                        sfile.lprops());
+      
+      RfPrintStormHist(stdout, "      ", &params,
+                       sfile.gprops() + istorm,
+                       sfile.hist());
+      
+      
+      RfPrintStormRuns(stdout, "      ",
+                       sfile.gprops() + istorm,
+                       sfile.runs());
+      
+      RfPrintStormProjRuns(stdout, "      ",
+                           sfile.gprops() + istorm,
+                           sfile.proj_runs());
+      
+    } // istorm
+    
   } // iscan
   
   // close files
 
   sfile.CloseFiles();
+
+  xml += TaXml::writeEndTag(mainTag, 0);
+
+  cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+  cerr << xml << endl;
+  cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
 
   return 0;
 
