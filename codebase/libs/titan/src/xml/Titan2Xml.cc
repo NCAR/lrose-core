@@ -134,11 +134,38 @@ string Titan2Xml::stormFileParams(int level,
 }
 
 ////////////////////////////////////////////////////////////
+// storm file scan header
+
+string Titan2Xml::stormScanHeader(int level,
+                                  const storm_file_scan_header_t &header)
+
+{
+  
+  string xml;
+  string tag("storm_file_scan_header");
+
+  xml += TaXml::writeStartTag(tag, level);
+  
+  xml += TaXml::writeDouble("min_z", level + 1, header.min_z);
+  xml += TaXml::writeDouble("delta_z", level + 1, header.delta_z);
+  xml += TaXml::writeInt("scan_num", level + 1, header.scan_num);
+  xml += TaXml::writeInt("nstorms", level + 1, header.nstorms);
+  xml += TaXml::writeTime("time", level + 1, header.time);
+  xml += TaXml::writeDouble("ht_of_freezing", level + 1, header.ht_of_freezing);
+  xml += titanGrid("grid", level + 1, header.grid);
+
+  xml += TaXml::writeEndTag(tag, level);
+  
+  return xml;
+
+}
+
+////////////////////////////////////////////////////////////
 // storm global props
 
 string Titan2Xml::stormGlobalProps(int level,
                                    const storm_file_params_t &params,
-                                   const storm_file_global_props_t &props)
+                                   const storm_file_global_props_t &gprops)
 
 {
   
@@ -154,79 +181,116 @@ string Titan2Xml::stormGlobalProps(int level,
 
   xml += TaXml::writeEndTag("storm_file_global_props", level);
   
-  xml += TaXml::writeDouble("vol_centroid_x", level + 1, props.vol_centroid_x);
-  xml += TaXml::writeDouble("vol_centroid_y", level + 1, props.vol_centroid_y);
-  xml += TaXml::writeDouble("vol_centroid_z", level + 1, props.vol_centroid_z);
-  xml += TaXml::writeDouble("refl_centroid_x", level + 1, props.refl_centroid_x);
-  xml += TaXml::writeDouble("refl_centroid_y", level + 1, props.refl_centroid_y);
-  xml += TaXml::writeDouble("refl_centroid_z", level + 1, props.refl_centroid_z);
-  xml += TaXml::writeDouble("top", level + 1, props.top);
-  xml += TaXml::writeDouble("base", level + 1, props.base);
-  xml += TaXml::writeDouble("volume", level + 1, props.volume);
-  xml += TaXml::writeDouble("area_mean", level + 1, props.area_mean);
-  xml += TaXml::writeDouble("precip_flux", level + 1, props.precip_flux);
-  xml += TaXml::writeDouble("mass", level + 1, props.mass);
-  xml += TaXml::writeDouble("tilt_angle", level + 1, props.tilt_angle);
-  xml += TaXml::writeDouble("tilt_dirn", level + 1, props.tilt_dirn);
-  xml += TaXml::writeDouble("dbz_max", level + 1, props.dbz_max);
-  xml += TaXml::writeDouble("dbz_mean", level + 1, props.dbz_mean);
-  xml += TaXml::writeDouble("dbz_max_gradient", level + 1, props.dbz_max_gradient);
-  xml += TaXml::writeDouble("dbz_mean_gradient", level + 1, props.dbz_mean_gradient);
-  xml += TaXml::writeDouble("ht_of_dbz_max", level + 1, props.ht_of_dbz_max);
-  xml += TaXml::writeDouble("rad_vel_mean", level + 1, props.rad_vel_mean);
-  xml += TaXml::writeDouble("rad_vel_sd", level + 1, props.rad_vel_sd);
-  xml += TaXml::writeDouble("vorticity", level + 1, props.vorticity);
-  xml += TaXml::writeDouble("precip_area", level + 1, props.precip_area);
-  xml += TaXml::writeDouble("precip_area_centroid_x", level + 1, props.precip_area_centroid_x);
-  xml += TaXml::writeDouble("precip_area_centroid_y", level + 1, props.precip_area_centroid_y);
-  xml += TaXml::writeDouble("precip_area_orientation", level + 1, props.precip_area_orientation);
-  xml += TaXml::writeDouble("precip_area_minor_radius", level + 1, props.precip_area_minor_radius);
-  xml += TaXml::writeDouble("precip_area_major_radius", level + 1, props.precip_area_major_radius);
-  xml += TaXml::writeDouble("proj_area", level + 1, props.proj_area);
-  xml += TaXml::writeDouble("proj_area_centroid_x", level + 1, props.proj_area_centroid_x);
-  xml += TaXml::writeDouble("proj_area_centroid_y", level + 1, props.proj_area_centroid_y);
-  xml += TaXml::writeDouble("proj_area_orientation", level + 1, props.proj_area_orientation);
-  xml += TaXml::writeDouble("proj_area_minor_radius", level + 1, props.proj_area_minor_radius);
-  xml += TaXml::writeDouble("proj_area_major_radius", level + 1, props.proj_area_major_radius);
+  xml += TaXml::writeDouble("vol_centroid_x", level + 1, gprops.vol_centroid_x);
+  xml += TaXml::writeDouble("vol_centroid_y", level + 1, gprops.vol_centroid_y);
+  xml += TaXml::writeDouble("vol_centroid_z", level + 1, gprops.vol_centroid_z);
+  xml += TaXml::writeDouble("refl_centroid_x", level + 1, gprops.refl_centroid_x);
+  xml += TaXml::writeDouble("refl_centroid_y", level + 1, gprops.refl_centroid_y);
+  xml += TaXml::writeDouble("refl_centroid_z", level + 1, gprops.refl_centroid_z);
+  xml += TaXml::writeDouble("top", level + 1, gprops.top);
+  xml += TaXml::writeDouble("base", level + 1, gprops.base);
+  xml += TaXml::writeDouble("volume", level + 1, gprops.volume);
+  xml += TaXml::writeDouble("area_mean", level + 1, gprops.area_mean);
+  xml += TaXml::writeDouble("precip_flux", level + 1, gprops.precip_flux);
+  xml += TaXml::writeDouble("mass", level + 1, gprops.mass);
+  xml += TaXml::writeDouble("tilt_angle", level + 1, gprops.tilt_angle);
+  xml += TaXml::writeDouble("tilt_dirn", level + 1, gprops.tilt_dirn);
+  xml += TaXml::writeDouble("dbz_max", level + 1, gprops.dbz_max);
+  xml += TaXml::writeDouble("dbz_mean", level + 1, gprops.dbz_mean);
+  xml += TaXml::writeDouble("dbz_max_gradient", level + 1, gprops.dbz_max_gradient);
+  xml += TaXml::writeDouble("dbz_mean_gradient", level + 1, gprops.dbz_mean_gradient);
+  xml += TaXml::writeDouble("ht_of_dbz_max", level + 1, gprops.ht_of_dbz_max);
+  xml += TaXml::writeDouble("rad_vel_mean", level + 1, gprops.rad_vel_mean);
+  xml += TaXml::writeDouble("rad_vel_sd", level + 1, gprops.rad_vel_sd);
+  xml += TaXml::writeDouble("vorticity", level + 1, gprops.vorticity);
+  xml += TaXml::writeDouble("precip_area", level + 1, gprops.precip_area);
+  xml += TaXml::writeDouble("precip_area_centroid_x", level + 1, gprops.precip_area_centroid_x);
+  xml += TaXml::writeDouble("precip_area_centroid_y", level + 1, gprops.precip_area_centroid_y);
+  xml += TaXml::writeDouble("precip_area_orientation", level + 1, gprops.precip_area_orientation);
+  xml += TaXml::writeDouble("precip_area_minor_radius", level + 1, gprops.precip_area_minor_radius);
+  xml += TaXml::writeDouble("precip_area_major_radius", level + 1, gprops.precip_area_major_radius);
+  xml += TaXml::writeDouble("proj_area", level + 1, gprops.proj_area);
+  xml += TaXml::writeDouble("proj_area_centroid_x", level + 1, gprops.proj_area_centroid_x);
+  xml += TaXml::writeDouble("proj_area_centroid_y", level + 1, gprops.proj_area_centroid_y);
+  xml += TaXml::writeDouble("proj_area_orientation", level + 1, gprops.proj_area_orientation);
+  xml += TaXml::writeDouble("proj_area_minor_radius", level + 1, gprops.proj_area_minor_radius);
+  xml += TaXml::writeDouble("proj_area_major_radius", level + 1, gprops.proj_area_major_radius);
   xml += TaXml::writeStartTag("proj_area_polygon", level + 1);
   for (int ii = 0; ii < N_POLY_SIDES; ii++) {
-    xml += TaXml::writeDouble("radius", level + 2, props.proj_area_polygon[ii]);
+    xml += TaXml::writeDouble("radius", level + 2, gprops.proj_area_polygon[ii]);
   }
   xml += TaXml::writeEndTag("proj_area_polygon", level + 1);
-  xml += TaXml::writeInt("storm_num", level + 1, props.storm_num);
-  xml += TaXml::writeInt("n_layers", level + 1, props.n_layers);
-  xml += TaXml::writeInt("base_layer", level + 1, props.base_layer);
-  xml += TaXml::writeInt("n_dbz_intervals", level + 1, props.n_dbz_intervals);
-  xml += TaXml::writeInt("n_runs", level + 1, props.n_runs);
-  xml += TaXml::writeInt("n_proj_runs", level + 1, props.n_proj_runs);
-  xml += TaXml::writeBoolean("top_missing", level + 1, props.top_missing);
-  xml += TaXml::writeBoolean("range_limited", level + 1, props.range_limited);
-  xml += TaXml::writeBoolean("second_trip", level + 1, props.second_trip);
-  xml += TaXml::writeBoolean("hail_present", level + 1, props.hail_present);
-  xml += TaXml::writeBoolean("anom_prop", level + 1, props.anom_prop);
-  xml += TaXml::writeInt("bounding_min_ix", level + 1, props.bounding_min_ix);
-  xml += TaXml::writeInt("bounding_min_iy", level + 1, props.bounding_min_iy);
-  xml += TaXml::writeInt("bounding_max_ix", level + 1, props.bounding_max_ix);
-  xml += TaXml::writeInt("bounding_max_iy", level + 1, props.bounding_max_iy);
-  xml += TaXml::writeDouble("vil_from_maxz", level + 1, props.vil_from_maxz);
-  xml += TaXml::writeDouble("ltg_count", level + 1, props.ltg_count);
+  xml += TaXml::writeInt("storm_num", level + 1, gprops.storm_num);
+  xml += TaXml::writeInt("n_layers", level + 1, gprops.n_layers);
+  xml += TaXml::writeInt("base_layer", level + 1, gprops.base_layer);
+  xml += TaXml::writeInt("n_dbz_intervals", level + 1, gprops.n_dbz_intervals);
+  xml += TaXml::writeInt("n_runs", level + 1, gprops.n_runs);
+  xml += TaXml::writeInt("n_proj_runs", level + 1, gprops.n_proj_runs);
+  xml += TaXml::writeBoolean("top_missing", level + 1, gprops.top_missing);
+  xml += TaXml::writeBoolean("range_limited", level + 1, gprops.range_limited);
+  xml += TaXml::writeBoolean("second_trip", level + 1, gprops.second_trip);
+  xml += TaXml::writeBoolean("hail_present", level + 1, gprops.hail_present);
+  xml += TaXml::writeBoolean("anom_prop", level + 1, gprops.anom_prop);
+  xml += TaXml::writeInt("bounding_min_ix", level + 1, gprops.bounding_min_ix);
+  xml += TaXml::writeInt("bounding_min_iy", level + 1, gprops.bounding_min_iy);
+  xml += TaXml::writeInt("bounding_max_ix", level + 1, gprops.bounding_max_ix);
+  xml += TaXml::writeInt("bounding_max_iy", level + 1, gprops.bounding_max_iy);
+  xml += TaXml::writeDouble("vil_from_maxz", level + 1, gprops.vil_from_maxz);
+  xml += TaXml::writeDouble("ltg_count", level + 1, gprops.ltg_count);
 
   if (params.gprops_union_type == UNION_HAIL) {
 
-    xml += TaXml::writeInt("FOKRcategory", level + 1, props.add_on.hail_metrics.FOKRcategory);
-    xml += TaXml::writeDouble("waldvogelProbability", level + 1, props.add_on.hail_metrics.waldvogelProbability);
-    xml += TaXml::writeDouble("hailMassAloft", level + 1, props.add_on.hail_metrics.hailMassAloft);
-    xml += TaXml::writeDouble("vihm", level + 1, props.add_on.hail_metrics.vihm);
+    xml += TaXml::writeInt("FOKRcategory", level + 1, gprops.add_on.hail_metrics.FOKRcategory);
+    xml += TaXml::writeDouble("waldvogelProbability", level + 1, gprops.add_on.hail_metrics.waldvogelProbability);
+    xml += TaXml::writeDouble("hailMassAloft", level + 1, gprops.add_on.hail_metrics.hailMassAloft);
+    xml += TaXml::writeDouble("vihm", level + 1, gprops.add_on.hail_metrics.vihm);
 
   } else if (params.gprops_union_type == UNION_NEXRAD_HDA) {
     
-    xml += TaXml::writeDouble("poh", level + 1, props.add_on.hda.poh);
-    xml += TaXml::writeDouble("shi", level + 1, props.add_on.hda.shi);
-    xml += TaXml::writeDouble("posh", level + 1, props.add_on.hda.posh);
-    xml += TaXml::writeDouble("mehs", level + 1, props.add_on.hda.mehs);
+    xml += TaXml::writeDouble("poh", level + 1, gprops.add_on.hda.poh);
+    xml += TaXml::writeDouble("shi", level + 1, gprops.add_on.hda.shi);
+    xml += TaXml::writeDouble("posh", level + 1, gprops.add_on.hda.posh);
+    xml += TaXml::writeDouble("mehs", level + 1, gprops.add_on.hda.mehs);
 
   }
 
+  xml += TaXml::writeEndTag(tag, level);
+
+  return xml;
+
+}
+
+////////////////////////////////////////////////////////////
+// storm layer props
+// NOTE: layerNum is relative to grid minz
+
+string Titan2Xml::stormLayerProps(int level,
+                                  int layerNum,
+                                  const titan_grid_t &grid,
+                                  const storm_file_layer_props_t &lprops)
+
+{
+  
+  double layerHtKm = grid.minz + layerNum * grid.dz;
+  string xml;
+  string tag("storm_file_layer_props");
+  
+  xml += TaXml::writeStartTag(tag, level);
+  
+  xml += TaXml::writeInt("layer_num", level + 1, layerNum);
+  xml += TaXml::writeDouble("layer_ht_km", level + 1, layerHtKm);
+  xml += TaXml::writeDouble("vol_centroid_x", level + 1, lprops.vol_centroid_x);
+  xml += TaXml::writeDouble("vol_centroid_y", level + 1, lprops.vol_centroid_y);
+  xml += TaXml::writeDouble("refl_centroid_x", level + 1, lprops.refl_centroid_x);
+  xml += TaXml::writeDouble("refl_centroid_y", level + 1, lprops.refl_centroid_y);
+  xml += TaXml::writeDouble("area", level + 1, lprops.area);
+  xml += TaXml::writeDouble("dbz_max", level + 1, lprops.dbz_max);
+  xml += TaXml::writeDouble("dbz_mean", level + 1, lprops.dbz_mean);
+  xml += TaXml::writeDouble("mass", level + 1, lprops.mass);
+  xml += TaXml::writeDouble("rad_vel_mean", level + 1, lprops.rad_vel_mean);
+  xml += TaXml::writeDouble("rad_vel_sd", level + 1, lprops.rad_vel_sd);
+  xml += TaXml::writeDouble("vorticity", level + 1, lprops.vorticity);
+  
   xml += TaXml::writeEndTag(tag, level);
 
   return xml;

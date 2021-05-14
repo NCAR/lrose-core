@@ -62,11 +62,24 @@ public:
   static string stormFileParams(int level,
                                 const storm_file_params_t &params);
   
+  // storm file scan header
+  
+  static string stormScanHeader(int level,
+                                const storm_file_scan_header_t &header);
+  
   // storm global props
   
-  string stormGlobalProps(int level,
-                          const storm_file_params_t &params,
-                          const storm_file_global_props_t &props);
+  static string stormGlobalProps(int level,
+                                 const storm_file_params_t &params,
+                                 const storm_file_global_props_t &gprops);
+
+  // storm layer props
+  // NOTE: layerNum is relative to grid minz
+  
+  static string stormLayerProps(int level,
+                                int layerNum,
+                                const titan_grid_t &grid,
+                                const storm_file_layer_props_t &lprops);
 
   // track file header
   
