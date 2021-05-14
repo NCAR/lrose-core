@@ -1367,7 +1367,7 @@ int PrintTitanFiles::_printStormsXml()
         return -1;
       }
 	  
-      xml += Titan2Xml::stormGlobalProps(1, sfile.header().params,
+      xml += Titan2Xml::stormGlobalProps(1,sfile.header().params,
                                          sfile.gprops()[istorm]);
 
       continue;

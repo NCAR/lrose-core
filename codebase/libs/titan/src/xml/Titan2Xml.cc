@@ -146,9 +146,9 @@ string Titan2Xml::stormScanHeader(int level,
 
   xml += TaXml::writeStartTag(tag, level);
   
+  xml += TaXml::writeInt("scan_num", level + 1, header.scan_num);
   xml += TaXml::writeDouble("min_z", level + 1, header.min_z);
   xml += TaXml::writeDouble("delta_z", level + 1, header.delta_z);
-  xml += TaXml::writeInt("scan_num", level + 1, header.scan_num);
   xml += TaXml::writeInt("nstorms", level + 1, header.nstorms);
   xml += TaXml::writeTime("time", level + 1, header.time);
   xml += TaXml::writeDouble("ht_of_freezing", level + 1, header.ht_of_freezing);
@@ -174,6 +174,7 @@ string Titan2Xml::stormGlobalProps(int level,
   
   xml += TaXml::writeStartTag(tag, level);
 
+  xml += TaXml::writeInt("storm_num", level + 1, gprops.storm_num);
   xml += TaXml::writeDouble("low_dbz_threshold", level + 1, params.low_dbz_threshold);
   xml += TaXml::writeBoolean("check_morphology", level + 1, params.check_morphology);
   xml += TaXml::writeInt("n_poly_sides", level + 1, params.n_poly_sides);
@@ -218,7 +219,6 @@ string Titan2Xml::stormGlobalProps(int level,
     xml += TaXml::writeDouble("radius", level + 2, gprops.proj_area_polygon[ii]);
   }
   xml += TaXml::writeEndTag("proj_area_polygon", level + 1);
-  xml += TaXml::writeInt("storm_num", level + 1, gprops.storm_num);
   xml += TaXml::writeInt("n_layers", level + 1, gprops.n_layers);
   xml += TaXml::writeInt("base_layer", level + 1, gprops.base_layer);
   xml += TaXml::writeInt("n_dbz_intervals", level + 1, gprops.n_dbz_intervals);
