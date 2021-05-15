@@ -156,7 +156,7 @@ string Titan2Xml::stormScanHeader(string tag,
 
   string xml;
 
-  xml += TaXml::writeStartTag(tag, level, "scan_num", header.scan_num);
+  xml += TaXml::writeStartTag(tag, level);
   
   xml += TaXml::writeInt("scan_num", level + 1, header.scan_num);
   xml += TaXml::writeDouble("min_z", level + 1, header.min_z);

@@ -1340,7 +1340,7 @@ int PrintTitanFiles::_printStormsXml()
   string xml;
   string mainTag = "titan_data";
   xml += TaXml::writeStartTag(mainTag, 0);
-  xml += Titan2Xml::stormFileHeader("storm_file", 1, fileHeader);
+  xml += Titan2Xml::stormFileHeader("storm_file_header", 1, fileHeader);
 
   /*
    * loop through scans
@@ -1422,9 +1422,7 @@ int PrintTitanFiles::_printStormsXml()
 
   xml += TaXml::writeEndTag(mainTag, 0);
 
-  cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-  cerr << xml << endl;
-  cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+  cout << xml << endl;
 
   return 0;
 
