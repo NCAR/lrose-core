@@ -1332,15 +1332,15 @@ int PrintTitanFiles::_printStormsXml()
   }
 
   int n_scans = sfile.header().n_scans;
-  const storm_file_header_t &fileHeader = sfile.header();
-  const storm_file_params_t &fileParams = fileHeader.params;
+  const storm_file_header_t &sHeader = sfile.header();
+  const storm_file_params_t &sParams = sHeader.params;
   
   // header
 
   string xml;
   string mainTag = "titan_data";
   xml += TaXml::writeStartTag(mainTag, 0);
-  xml += Titan2Xml::stormFileHeader("storm_file_header", 1, fileHeader);
+  xml += Titan2Xml::stormFileHeader("storm_file_header", 1, sHeader);
 
   /*
    * loop through scans
@@ -1378,36 +1378,20 @@ int PrintTitanFiles::_printStormsXml()
       }
       
       const storm_file_global_props_t &gprops = sfile.gprops()[istorm];
-      xml += Titan2Xml::stormGlobalProps("global_props", 3, fileParams, gprops);
+      xml += Titan2Xml::stormGlobalProps("global_props", 3, sParams, gprops);
 
       for (int ilayer = 0; ilayer < gprops.n_layers; ilayer++) {
         const storm_file_layer_props_t &lprops = sfile.lprops()[ilayer];
         int layerNum = ilayer + gprops.base_layer;
         xml += Titan2Xml::stormLayerProps("layer_props", 3, layerNum, grid, lprops);
       }
+      
+      for (int ihist = 0; ihist < gprops.n_dbz_intervals; ihist++) {
+        const storm_file_dbz_hist_t &entry = sfile.hist()[ihist];
+        xml += Titan2Xml::stormDbzHistEntry("dbz_hist_bin", 3,
+                                            ihist, sParams, entry);
+      }
 
-      // RfPrintStormProps(stdout, "      ", &params,
-      //                   &sfile.scan(),
-      //                   sfile.gprops() + istorm);
-      
-      // RfPrintStormLayer(stdout, "      ", &params,
-      //                   &sfile.scan(),
-      //                   sfile.gprops() + istorm,
-      //                   sfile.lprops());
-      
-      // RfPrintStormHist(stdout, "      ", &params,
-      //                  sfile.gprops() + istorm,
-      //                  sfile.hist());
-      
-      
-      // RfPrintStormRuns(stdout, "      ",
-      //                  sfile.gprops() + istorm,
-      //                  sfile.runs());
-      
-      // RfPrintStormProjRuns(stdout, "      ",
-      //                      sfile.gprops() + istorm,
-      //                      sfile.proj_runs());
-      
       xml += TaXml::writeEndTag(stormTag, 2);
 
     } // istorm

@@ -321,19 +321,26 @@ string Titan2Xml::stormLayerProps(string tag,
 string Titan2Xml::stormDbzHistEntry(string tag,
                                     int level,
                                     int binNum,
+                                    const storm_file_params_t &sparams,
                                     const storm_file_dbz_hist_t &hist)
   
 {
-  
+
+  double minDbz = sparams.low_dbz_threshold +
+    binNum * sparams.dbz_hist_interval;
+  double maxDbz = minDbz + sparams.dbz_hist_interval;
+
   if (tag.size() == 0) {
     tag = "dbz_hist_entry";
   }
 
   string xml;
   
-  xml += TaXml::writeStartTag(tag, level);
+  xml += TaXml::writeStartTag(tag, level, "bin", binNum);
   
   xml += TaXml::writeInt("bin_num", level + 1, binNum);
+  xml += TaXml::writeDouble("min_dbz", level + 1, minDbz);
+  xml += TaXml::writeDouble("max_dbz", level + 1, maxDbz);
   xml += TaXml::writeDouble("percent_volume", level + 1, hist.percent_volume);
   xml += TaXml::writeDouble("percent_area", level + 1, hist.percent_area);
   

@@ -91,6 +91,7 @@ public:
   static string stormDbzHistEntry(string tag,
                                   int level,
                                   int binNum,
+                                  const storm_file_params_t &sparams,
                                   const storm_file_dbz_hist_t &hist);
   // track file header
   
