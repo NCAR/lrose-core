@@ -1338,9 +1338,9 @@ int PrintTitanFiles::_printStormsXml()
   // header
 
   string xml;
-  string mainTag = "PrintTitanFiles";
+  string mainTag = "titan_data";
   xml += TaXml::writeStartTag(mainTag, 0);
-  xml += Titan2Xml::stormFileHeader(1, fileHeader);
+  xml += Titan2Xml::stormFileHeader("storm_file", 1, fileHeader);
 
   /*
    * loop through scans
@@ -1348,6 +1348,9 @@ int PrintTitanFiles::_printStormsXml()
   
   for (int iscan = 0; iscan < n_scans; iscan++) {
 
+    string scanTag("scan");
+    xml += TaXml::writeStartTag(scanTag, 1, "scan_num", iscan);
+    
     /*
      * read in scan info
      */
@@ -1359,11 +1362,14 @@ int PrintTitanFiles::_printStormsXml()
     }
 
     const storm_file_scan_header_t &scan = sfile.scan();
-    xml += Titan2Xml::stormScanHeader(1, scan);
-
     const titan_grid_t &grid = scan.grid;
     
+    xml += Titan2Xml::stormScanHeader("scan_header", 2, scan);
+    
     for (int istorm = 0; istorm < scan.nstorms; istorm++) {
+      
+      string stormTag("storm");
+      xml += TaXml::writeStartTag(stormTag, 2, "storm_num", istorm);
       
       if (sfile.ReadProps(istorm)) {
         cerr << "ERROR - PrintTitanFiles::_printStormsXml" << endl;
@@ -1372,17 +1378,14 @@ int PrintTitanFiles::_printStormsXml()
       }
       
       const storm_file_global_props_t &gprops = sfile.gprops()[istorm];
-      
-      xml += Titan2Xml::stormGlobalProps(2, fileParams, gprops);
+      xml += Titan2Xml::stormGlobalProps("global_props", 3, fileParams, gprops);
 
       for (int ilayer = 0; ilayer < gprops.n_layers; ilayer++) {
         const storm_file_layer_props_t &lprops = sfile.lprops()[ilayer];
         int layerNum = ilayer + gprops.base_layer;
-        xml += Titan2Xml::stormLayerProps(3, layerNum, grid, lprops);
+        xml += Titan2Xml::stormLayerProps("layer_props", 3, layerNum, grid, lprops);
       }
 
-      continue;
-      
       // RfPrintStormProps(stdout, "      ", &params,
       //                   &sfile.scan(),
       //                   sfile.gprops() + istorm);
@@ -1405,8 +1408,12 @@ int PrintTitanFiles::_printStormsXml()
       //                      sfile.gprops() + istorm,
       //                      sfile.proj_runs());
       
+      xml += TaXml::writeEndTag(stormTag, 2);
+
     } // istorm
     
+    xml += TaXml::writeEndTag(scanTag, 1);
+
   } // iscan
   
   // close files

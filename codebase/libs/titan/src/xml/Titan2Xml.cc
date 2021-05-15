@@ -293,7 +293,7 @@ string Titan2Xml::stormLayerProps(string tag,
   double layerHtKm = grid.minz + layerNum * grid.dz;
   string xml;
   
-  xml += TaXml::writeStartTag(tag, level);
+  xml += TaXml::writeStartTag(tag, level, "layer_num", layerNum);
   
   xml += TaXml::writeInt("layer_num", level + 1, layerNum);
   xml += TaXml::writeDouble("layer_ht_km", level + 1, layerHtKm);
