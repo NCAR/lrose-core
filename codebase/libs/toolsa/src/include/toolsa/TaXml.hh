@@ -423,7 +423,7 @@ public:
   static string writeStartTag(const string &tag, int level);
   static string writeEndTag(const string &tag, int level);
 
-  // Write start tage with attributes
+  // Write start tag with attributes
   // New line is appended if requested.
   
   static string writeStartTag(const string &tag,
@@ -431,6 +431,28 @@ public:
                               const vector<attribute> &attrs,
                               bool addNewLine);
 
+  // Write start tag with single attribute
+  
+  static string writeStartTag(const string &tag,
+                              int level,
+                              const string &attrName,
+                              const string &attrVal);
+  
+  static string writeStartTag(const string &tag,
+                              int level,
+                              const string &attrName,
+                              bool attrVal);
+  
+  static string writeStartTag(const string &tag,
+                              int level,
+                              const string &attrName,
+                              int attrVal);
+  
+  static string writeStartTag(const string &tag,
+                              int level,
+                              const string &attrName,
+                              double attrVal);
+  
   // write tag with attributes, close tag
   
   static string writeTagClosed(const string &tag,
