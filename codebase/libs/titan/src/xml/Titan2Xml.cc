@@ -45,13 +45,17 @@ using namespace std;
 ////////////////////////////////////////////////////////////
 // storm file header
 
-string Titan2Xml::stormFileHeader(int level,
+string Titan2Xml::stormFileHeader(string tag,
+                                  int level,
                                   const storm_file_header_t &header)
 
 {
-  
+
+  if (tag.size() == 0) {
+    tag = "storm_file_header";
+  }
+
   string xml;
-  string tag("storm_file_header");
 
   xml += TaXml::writeStartTag(tag, level);
   
@@ -65,7 +69,7 @@ string Titan2Xml::stormFileHeader(int level,
   xml += TaXml::writeString("header_file_name", level + 1, header.header_file_name);
   xml += TaXml::writeString("data_file_name", level + 1, header.data_file_name);
 
-  xml += stormFileParams(level + 1, header.params);
+  xml += stormFileParams("", level + 1, header.params);
 
   xml += TaXml::writeEndTag(tag, level);
   
@@ -76,13 +80,17 @@ string Titan2Xml::stormFileHeader(int level,
 ////////////////////////////////////////////////////////////
 // storm file params
 
-string Titan2Xml::stormFileParams(int level,
+string Titan2Xml::stormFileParams(string tag,
+                                  int level,
                                   const storm_file_params_t &params)
 
 {
   
+  if (tag.size() == 0) {
+    tag = "storm_file_params";
+  }
+
   string xml;
-  string tag("storm_file_params");
   
   xml += TaXml::writeStartTag(tag, level);
 
@@ -136,15 +144,19 @@ string Titan2Xml::stormFileParams(int level,
 ////////////////////////////////////////////////////////////
 // storm file scan header
 
-string Titan2Xml::stormScanHeader(int level,
+string Titan2Xml::stormScanHeader(string tag,
+                                  int level,
                                   const storm_file_scan_header_t &header)
 
 {
   
-  string xml;
-  string tag("storm_file_scan_header");
+  if (tag.size() == 0) {
+    tag = "scan";
+  }
 
-  xml += TaXml::writeStartTag(tag, level);
+  string xml;
+
+  xml += TaXml::writeStartTag(tag, level, "scan_num", header.scan_num);
   
   xml += TaXml::writeInt("scan_num", level + 1, header.scan_num);
   xml += TaXml::writeDouble("min_z", level + 1, header.min_z);
@@ -163,14 +175,18 @@ string Titan2Xml::stormScanHeader(int level,
 ////////////////////////////////////////////////////////////
 // storm global props
 
-string Titan2Xml::stormGlobalProps(int level,
+string Titan2Xml::stormGlobalProps(string tag,
+                                   int level,
                                    const storm_file_params_t &params,
                                    const storm_file_global_props_t &gprops)
 
 {
   
+  if (tag.size() == 0) {
+    tag = "storm_global_props";
+  }
+
   string xml;
-  string tag("storm_file_global_props");
   
   xml += TaXml::writeStartTag(tag, level);
 
@@ -262,16 +278,20 @@ string Titan2Xml::stormGlobalProps(int level,
 // storm layer props
 // NOTE: layerNum is relative to grid minz
 
-string Titan2Xml::stormLayerProps(int level,
+string Titan2Xml::stormLayerProps(string tag,
+                                  int level,
                                   int layerNum,
                                   const titan_grid_t &grid,
                                   const storm_file_layer_props_t &lprops)
 
 {
   
+  if (tag.size() == 0) {
+    tag = "storm_layer_props";
+  }
+
   double layerHtKm = grid.minz + layerNum * grid.dz;
   string xml;
-  string tag("storm_file_layer_props");
   
   xml += TaXml::writeStartTag(tag, level);
   
@@ -298,14 +318,18 @@ string Titan2Xml::stormLayerProps(int level,
 ////////////////////////////////////////////////////////////
 // storm dbz histogram
 
-string Titan2Xml::stormDbzHistEntry(int level,
+string Titan2Xml::stormDbzHistEntry(string tag,
+                                    int level,
                                     int binNum,
                                     const storm_file_dbz_hist_t &hist)
   
 {
   
+  if (tag.size() == 0) {
+    tag = "dbz_hist_entry";
+  }
+
   string xml;
-  string tag("dbz_hist_entry");
   
   xml += TaXml::writeStartTag(tag, level);
   
@@ -322,13 +346,17 @@ string Titan2Xml::stormDbzHistEntry(int level,
 ////////////////////////////////////////////////////////////
 // track file header
 
-string Titan2Xml::trackFileHeader(int level,
+string Titan2Xml::trackFileHeader(string tag,
+                                  int level,
                                   const track_file_header_t &header)
 
 {
   
+  if (tag.size() == 0) {
+    tag = "track_file_header";
+  }
+
   string xml;
-  string tag("track_file_header");
   
   xml += TaXml::writeStartTag(tag, level);
   
@@ -363,7 +391,7 @@ string Titan2Xml::trackFileHeader(int level,
   xml += TaXml::writeString("data_file_name", level + 1, header.data_file_name);
   xml += TaXml::writeString("storm_header_file_name", level + 1, header.storm_header_file_name);
 
-  xml += trackFileParams(level + 1, header.params);
+  xml += trackFileParams("", level + 1, header.params);
 
   xml += TaXml::writeEndTag(tag, level);
   
@@ -374,13 +402,17 @@ string Titan2Xml::trackFileHeader(int level,
 ////////////////////////////////////////////////////////////
 // track file params
 
-string Titan2Xml::trackFileParams(int level,
+string Titan2Xml::trackFileParams(string tag,
+                                  int level,
                                   const track_file_params_t &params)
 
 {
   
+  if (tag.size() == 0) {
+    tag = "track_file_params";
+  }
+
   string xml;
-  string tag("track_file_params");
   
   xml += TaXml::writeStartTag(tag, level);
 
@@ -417,13 +449,17 @@ string Titan2Xml::trackFileParams(int level,
 ////////////////////////////////////////////////////////////
 // simple params
 
-string Titan2Xml::simpleTrackParams(int level, 
+string Titan2Xml::simpleTrackParams(string tag,
+                                    int level, 
                                     const simple_track_params_t &params)
 
 {
 
+  if (tag.size() == 0) {
+    tag = "simple_track_params";
+  }
+
   string xml;
-  string tag("simple_track_params");
   
   xml += TaXml::writeStartTag(tag, level);
 
@@ -472,13 +508,17 @@ string Titan2Xml::simpleTrackParams(int level,
 ////////////////////////////////////////////////////////////
 // simple params
 
-string Titan2Xml::complexTrackParams(int level,
+string Titan2Xml::complexTrackParams(string tag,
+                                     int level,
                                      const complex_track_params_t &params)
 
 {
 
+  if (tag.size() == 0) {
+    tag = "complex_track_params";
+  }
+
   string xml;
-  string tag("complex_track_params");
   
   xml += TaXml::writeStartTag(tag, level);
   
@@ -520,14 +560,18 @@ string Titan2Xml::complexTrackParams(int level,
 ////////////////////////////////////////////////////////////
 // track entry
 
-string Titan2Xml::trackEntry(int level,
+string Titan2Xml::trackEntry(string tag,
+                             int level,
                              const track_file_entry_t &entry,
                              int entry_num /* = -1 */)
 
 {
 
+  if (tag.size() == 0) {
+    tag = "track_entry";
+  }
+
   string xml;
-  string tag("track_entry");
   
   if (entry_num >= 0) {
     vector<TaXml::attribute> attrs;
@@ -561,11 +605,15 @@ string Titan2Xml::trackEntry(int level,
 ////////////////////////////////////////////////////////////
 // forecast props
 
-string Titan2Xml::forecastProps(const string &tag,
+string Titan2Xml::forecastProps(string tag,
                                 int level,
                                 const track_file_forecast_props_t &props)
   
 {
+
+  if (tag.size() == 0) {
+    tag = "forecast_props";
+  }
 
   string xml;
 
@@ -609,12 +657,16 @@ string Titan2Xml::forecastProps(const string &tag,
 ////////////////////////////////////////////////////////////
 // titan grid
 
-string Titan2Xml::titanGrid(const string &tag,
+string Titan2Xml::titanGrid(string tag,
                             int level,
                             const titan_grid_t &grid)
   
 {
   
+  if (tag.size() == 0) {
+    tag = "grid";
+  }
+
   string xml;
 
   xml += TaXml::writeStartTag(tag, level);
@@ -668,12 +720,16 @@ string Titan2Xml::titanGrid(const string &tag,
 ////////////////////////////////////////////////////////////
 // track verify
 
-string Titan2Xml::trackVerify(const string &tag,
+string Titan2Xml::trackVerify(string tag,
                               int level,
                               const track_file_verify_t &verify)
 
 {
   
+  if (tag.size() == 0) {
+    tag = "track_verify";
+  }
+
   string xml;
   
   xml += TaXml::writeStartTag(tag, level);
@@ -697,11 +753,15 @@ string Titan2Xml::trackVerify(const string &tag,
 ////////////////////////////////////////////////////////////
 // contingency data
 
-string Titan2Xml::contingencyData(const string &tag,
+string Titan2Xml::contingencyData(string tag,
                                   int level,
                                   const track_file_contingency_data_t &cont)
   
 {
+
+  if (tag.size() == 0) {
+    tag = "contingency_data";
+  }
 
   string xml;
 

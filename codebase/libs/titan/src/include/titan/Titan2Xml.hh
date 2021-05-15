@@ -54,82 +54,93 @@ public:
   
   // storm file header
   
-  static string stormFileHeader(int level,
+  static string stormFileHeader(string tag,
+                                int level,
                                 const storm_file_header_t &header);
 
   // storm file params
 
-  static string stormFileParams(int level,
+  static string stormFileParams(string tag,
+                                int level,
                                 const storm_file_params_t &params);
   
   // storm file scan header
   
-  static string stormScanHeader(int level,
+  static string stormScanHeader(string tag,
+                                int level,
                                 const storm_file_scan_header_t &header);
   
   // storm global props
   
-  static string stormGlobalProps(int level,
+  static string stormGlobalProps(string tag,
+                                 int level,
                                  const storm_file_params_t &params,
                                  const storm_file_global_props_t &gprops);
 
   // storm layer props
   // NOTE: layerNum is relative to grid minz
   
-  static string stormLayerProps(int level,
+  static string stormLayerProps(string tag,
+                                int level,
                                 int layerNum,
                                 const titan_grid_t &grid,
                                 const storm_file_layer_props_t &lprops);
 
   // storm dbz histogram
   
-  static string stormDbzHistEntry(int level,
+  static string stormDbzHistEntry(string tag,
+                                  int level,
                                   int binNum,
                                   const storm_file_dbz_hist_t &hist);
   // track file header
   
-  static string trackFileHeader(int level,
+  static string trackFileHeader(string tag,
+                                int level,
                                 const track_file_header_t &header);
 
   // track file params
   
-  static string trackFileParams(int level,
+  static string trackFileParams(string tag,
+                                int level,
                                 const track_file_params_t &params);
   
   // simple params
   
-  static string simpleTrackParams(int level,
+  static string simpleTrackParams(string tag,
+                                  int level,
                                   const simple_track_params_t &params);
   
   // complex params
   
-  static string complexTrackParams(int level,
+  static string complexTrackParams(string tag,
+                                   int level,
                                    const complex_track_params_t &params);
 
   // track entry
   // if entry num is not supplied, it will not be included
   
-  static string trackEntry(int level,
+  static string trackEntry(string tag,
+                           int level,
                            const track_file_entry_t &entry,
                            int entry_num = -1);
 
   // forecast props
   
-  static string forecastProps(const string &tag,
+  static string forecastProps(string tag,
                               int level,
                               const track_file_forecast_props_t &props);
   
-  static string titanGrid(const string &tag,
+  static string titanGrid(string tag,
                           int level,
                           const titan_grid_t &grid);
   
-  static string trackVerify(const string &tag,
+  static string trackVerify(string tag,
                             int level,
                             const track_file_verify_t &verify);
 
   // contingency data
   
-  static string contingencyData(const string &tag,
+  static string contingencyData(string tag,
                                 int level,
                                 const track_file_contingency_data_t &cont);
   
