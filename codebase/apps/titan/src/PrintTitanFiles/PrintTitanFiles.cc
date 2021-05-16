@@ -1348,10 +1348,6 @@ int PrintTitanFiles::_printStormsXml()
   
   for (int iscan = 0; iscan < n_scans; iscan++) {
 
-    if (iscan > 3) {
-      break;
-    }
-
     string scanTag("scan");
     xml += TaXml::writeStartTag(scanTag, 1, "scan_num", iscan);
     
@@ -1372,10 +1368,6 @@ int PrintTitanFiles::_printStormsXml()
     
     for (int istorm = 0; istorm < scan.nstorms; istorm++) {
 
-      if (istorm > 4) {
-        break;
-      }
-      
       string stormTag("storm");
       xml += TaXml::writeStartTag(stormTag, 2, "storm_num", istorm);
       
@@ -1492,10 +1484,6 @@ int PrintTitanFiles::_printTracksXml()
   for (int icomplex = 0;
        icomplex < tfile.header().n_complex_tracks; icomplex++) {
 
-    if (icomplex > 10) {
-      break;
-    }
-    
     int complex_track_num = tfile.complex_track_nums()[icomplex];
     
     if (_args.trackNum >= 0 &&
@@ -1546,10 +1534,6 @@ int PrintTitanFiles::_printTracksXml()
       for (int ientry = 0;
 	   ientry < tfile.simple_params().duration_in_scans; ientry++) {
 
-        if (ientry > 4) {
-          break;
-        }
-        
 	if (tfile.ReadEntry()) {
 	  cerr << "ERROR - PrintTitanFiles::_printTrackXml" << endl;
 	  cerr << tfile.getErrStr() << endl;
