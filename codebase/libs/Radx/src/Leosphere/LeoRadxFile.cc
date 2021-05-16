@@ -149,7 +149,7 @@ bool LeoRadxFile::isLeosphere(const string &path)
   }
   _close();
   
-  if (strncmp(line, "HeaderSize", 10) == 0) {
+  if ((strncmp(line, "HeaderSize", 10) == 0) || (strncmp(line, "HeaderLength", 10) == 0)) {
     return true;
   }
 
@@ -252,7 +252,8 @@ int LeoRadxFile::readFromPath(const string &path,
   _azimuthIndex = -1;
 
   for (size_t ii = 0; ii < _columnLabels.size(); ii++) {
-    if (_columnLabels[ii].find("Timestamp") != string::npos) {
+    if ((_columnLabels[ii].find("Timestamp") != string::npos) || 
+     (_columnLabels[ii].find("Date") != string::npos)) {
       _timeStampIndex = ii;
     } else if (_columnLabels[ii].find("Azimuth Angle") != string::npos) {
       _azimuthIndex = ii;
@@ -347,6 +348,11 @@ int LeoRadxFile::_readHeaderData(string &xml)
   
 {
 
+  int nHeaderLines = 0;
+  int nLinesRead = 0;
+
+  _ranges.clear();
+
   // read through the header records
   
   char line[65536];
@@ -358,12 +364,20 @@ int LeoRadxFile::_readHeaderData(string &xml)
       break;
     }
 
+    nLinesRead += 1;
+
     string ll(_stripLine(line));
 
     // look for data column labels array - this is the last
     // entry in the header
+    // WLS7 has "Date" instead of "Timestamp" to start column labels
+    // but let's look for the absence of an equals ("=") which indicates key/value pair
+    // Darn, there are also lines in the WLS7 Header that don't have "=", so I'm adding
+    // a check of the header length which corresponds to the number of lines read
+    // for the header.
 
-    if (ll.find("Timestamp") != string::npos) {
+    if ( (ll.find("Timestamp") != string::npos) || 
+         ((ll.find("=") == string::npos) && (nLinesRead >= nHeaderLines)) ) {
 
       // data columns array
       
@@ -487,7 +501,6 @@ int LeoRadxFile::_readHeaderData(string &xml)
     
     // range array
 
-    _ranges.clear();
     if (tag.find("Altitudes") != string::npos) {
       vector<string> toks;
       RadxStr::tokenize(valStr, "\t", toks);
@@ -509,6 +522,10 @@ int LeoRadxFile::_readHeaderData(string &xml)
         }
         cerr << endl;
       }
+    }
+
+    if (tag.find("Header") != string::npos) {
+      nHeaderLines = stoi(valStr);
     }
 
   } // while
