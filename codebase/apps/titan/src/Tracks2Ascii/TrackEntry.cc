@@ -49,6 +49,32 @@ TrackEntry::TrackEntry(const string &prog_name, const Params &params) :
 
 {
 
+  _labelsPrinted = false;
+
+}
+
+/////////////
+// destructor
+
+TrackEntry::~TrackEntry()
+
+{
+
+
+}
+
+//////////////////////////////
+// print the column labels
+
+void TrackEntry::_printLabels(storm_file_handle_t *s_handle)
+  
+{
+
+  if (_labelsPrinted) {
+    // previously done
+    return;
+  }
+  
   // print labels
 
   if (_params.refl_histogram_only) {
@@ -164,25 +190,48 @@ TrackEntry::TrackEntry(const string &prog_name, const Params &params) :
 	    "ReflCentroidAzimuth(deg),"
             "parents,"
             "children");
-            
+
+    if (_params.print_level_properties) {
+
+      // set field list
+      
+      vector<string> flds;
+      flds.push_back("VolCentroidX");
+      flds.push_back("VolCentroidY");
+      flds.push_back("ReflCentroidX");
+      flds.push_back("ReflCentroidY");
+      flds.push_back("Area");
+      flds.push_back("MaxDBZ");
+      flds.push_back("MeanDBZ");
+      flds.push_back("Mass");
+      flds.push_back("MeanVel");
+      flds.push_back("SdevVel");
+      flds.push_back("Vorticity");
+
+      // loop through all grid heights
+      
+      titan_grid_t grid = s_handle->scan->grid;
+      for (int iz = 0; iz < grid.nz; iz++) {
+        double htKm = grid.minz + iz * grid.dz;
+        char htKmLabel[128];
+        snprintf(htKmLabel, 128, "Ht_%.2f_", htKm);
+        for (size_t ii = 0; ii < flds.size(); ii++) {
+          fprintf(stdout, ",%s%s", htKmLabel, flds[ii].c_str());
+        }
+      } // iz
+
+    } // if (_params.print_level_properties) 
+
     if (_params.print_polygons) {
-      fprintf(stdout, " nPolySidesPolygonRays*%d", N_POLY_SIDES);
+      fprintf(stdout, ",nPolySidesPolygonRays*%d", N_POLY_SIDES);
     }
 
   }
   
   fprintf(stdout, "\n");
 
-}
-
-/////////////
-// destructor
-
-TrackEntry::~TrackEntry()
-
-{
-
-
+  _labelsPrinted = true;
+  
 }
 
 ////////////////
@@ -218,6 +267,10 @@ int TrackEntry::compute(storm_file_handle_t *s_handle,
 		       "TrackEntry::compute") != R_SUCCESS) {
     return -1;
   }
+
+  // print labels if not already done
+  
+  _printLabels(s_handle);
 
   // Decide if this entry is within a 'sampling region in time'. 
   // A 'sampling region' starts at regular sampling intervals, and
@@ -406,16 +459,6 @@ void TrackEntry::_computeAll(storm_file_handle_t *s_handle,
   double speed, dirn;
   double uu, vv;
 
-#ifdef OLD_VERSION
-  if (dx_dt == 0.0 && dy_dt == 0.0) {
-    speed = 0.0;
-    dirn = 0.0;
-  } else {
-    speed = sqrt(dx_dt * dx_dt + dy_dt * dy_dt);
-    dirn = atan2(dx_dt, dy_dt) * RAD_TO_DEG;
-  }
-#endif
-
   _compute_speed_and_dirn(isLatLon,
                           proj_area_centroid_x, proj_area_centroid_y,
                           dx_dt, dy_dt,
@@ -561,13 +604,40 @@ void TrackEntry::_computeAll(storm_file_handle_t *s_handle,
     fprintf(stdout, "-");
   }
     
+  if (_params.print_level_properties) {
+    int baseLayer = gprops->base_layer;
+    int topLayer = baseLayer + gprops->n_layers - 1;
+    // loop through all grid heights
+    for (int iz = 0; iz < grid.nz; iz++) {
+      if (iz >= baseLayer && iz <= topLayer) {
+        storm_file_layer_props_t &layer = s_handle->layer[iz - baseLayer];
+        fprintf(stdout, " %g", layer.vol_centroid_x);
+        fprintf(stdout, " %g", layer.vol_centroid_y);
+        fprintf(stdout, " %g", layer.refl_centroid_x);
+        fprintf(stdout, " %g", layer.refl_centroid_y);
+        fprintf(stdout, " %g", layer.area);
+        fprintf(stdout, " %g", layer.dbz_max);
+        fprintf(stdout, " %g", layer.dbz_mean);
+        fprintf(stdout, " %g", layer.mass);
+        fprintf(stdout, " %g", layer.rad_vel_mean);
+        fprintf(stdout, " %g", layer.rad_vel_sd);
+        fprintf(stdout, " %g", layer.vorticity);
+      } else {
+        // layer has no data
+        for (int jj = 0; jj < 11; jj++) {
+          fprintf(stdout, " -9999.0");
+        }
+      }
+    } // iz
+  } // if (_params.print_level_properties) 
+
   if (_params.print_polygons) {
     fprintf(stdout, " %d", (int) sparams->n_poly_sides);
     for (int i = 0; i < sparams->n_poly_sides; i++) {
       fprintf(stdout, " %3.1f", gprops->proj_area_polygon[i]);
     }
   }
-
+  
   fprintf(stdout, "\n");
 
 }

@@ -61,7 +61,11 @@ public:
 		 track_file_handle_t *t_handle);
 
 protected:
+
+  bool _labelsPrinted;
   
+  void _printLabels(storm_file_handle_t *s_handle);
+
   void _compute_percent_gt_refl(storm_file_handle_t *s_handle,
 				storm_file_global_props_t *gprops,
 				double dbz_threshold,

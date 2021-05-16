@@ -428,6 +428,8 @@ public:
 
   char* case_tracks_file_path;
 
+  tdrp_bool_t print_level_properties;
+
   tdrp_bool_t print_polygons;
 
   int initial_props_nscans;
@@ -451,7 +453,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[35];
+  mutable TDRPtable _table[36];
 
   const char *_className;
 

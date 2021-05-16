@@ -916,6 +916,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'print_level_properties'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_level_properties");
+    tt->descr = tdrpStrDup("Option to add level properties to storm properties.");
+    tt->help = tdrpStrDup("If true, extra columns are added to include the storms properties at each level. This option only applies to the TRACK_ENTRY type target.");
+    tt->val_offset = (char *) &print_level_properties - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'print_polygons'
     // ctype is 'tdrp_bool_t'
     

@@ -167,6 +167,12 @@ commentdef {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Option to add level properties to storm properties.";
+  p_help = "If true, extra columns are added to include the storms properties at each level. This option only applies to the TRACK_ENTRY type target.";
+} print_level_properties;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Option to print storm polygons.";
   p_help = "TRACK_ENTRY only. If set the storm polygons are printed out for each track entry.";
 } print_polygons;

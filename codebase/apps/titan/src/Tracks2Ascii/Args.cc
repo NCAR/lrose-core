@@ -153,7 +153,12 @@ int Args::parse(int argc, char **argv, string &prog_name)
       
       sprintf(tmp_str, "target_entity = TRACK_ENTRY;");
       TDRP_add_override(&override, tmp_str);
-	
+
+    } else if (!strcmp(argv[i], "-levels")) {
+      
+      sprintf(tmp_str, "print_level_properties = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+
     } else if (!strcmp(argv[i], "-initial")) {
       
       sprintf(tmp_str, "target_entity = INITIAL_PROPS;");
@@ -210,6 +215,7 @@ void Args::usage(string &prog_name, ostream &out)
       << "       [ -entry] set target_entity to TRACK_ENTRY\n"
       << "       [ -f ? ?] input file list\n"
       << "       [ -initial] set target_entity to INITIAL_PROPS\n"
+      << "       [ -levels] add level properties to output\n"
       << "       [ -simple ?] specify simpletrack number\n"
       << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "       [ -verbose ] print verbose debug messages\n"
