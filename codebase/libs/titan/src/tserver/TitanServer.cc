@@ -40,6 +40,7 @@
 #include <titan/TitanTrackFile.hh>
 #include <dataport/bigend.h>
 #include <toolsa/TaStr.hh>
+#include <toolsa/TaXml.hh>
 #include <toolsa/ReadDir.hh>
 #include <toolsa/DateTime.hh>
 #include <didss/LdataInfo.hh>
@@ -338,6 +339,40 @@ void TitanServer::printXML(FILE *out)
       _currentEntries[ii]->printXML(out, ii, _stormFileParams, _trackFileParams);
     }
   }
+  
+}
+
+////////////////////////////////////////////////////////////
+// Convert to XML
+
+string TitanServer::convertToXML() const
+
+{
+
+  string xml;
+  string mainTag = "titan_server_data";
+  xml += TaXml::writeStartTag(mainTag, 0);
+
+  if (_complexTracks.size() > 0) {
+    xml += TaXml::writeInt("n_complex_tracks", 1, _complexTracks.size());
+    for (size_t ii = 0; ii < _complexTracks.size(); ii++) {
+      xml += _complexTracks[ii]->convertToXML(1, _stormFileParams,
+                                              _trackFileParams);
+    }
+  }
+  
+  if (_currentEntries.size() > 0) {
+    xml += TaXml::writeInt("num_track_entries", 1, _currentEntries.size());
+    for (size_t ii = 0; ii < _currentEntries.size(); ii++) {
+      xml += _currentEntries[ii]->convertToXML(1, ii,
+                                               _stormFileParams,
+                                               _trackFileParams);
+    }
+  }
+
+  xml += TaXml::writeEndTag(mainTag, 0);
+  
+  return xml;
   
 }
 

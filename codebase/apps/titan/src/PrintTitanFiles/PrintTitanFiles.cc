@@ -1576,7 +1576,7 @@ int PrintTitanFiles::_printTracksXml()
 
           // track selected, print entry header plus storm props
           
-          string etag("track_entry_plus_storm_props");
+          string etag("track_entry");
           xml += TaXml::writeStartTag(etag, 3, "entry_num", ientry);
           
 	  // read in scan plus global props
@@ -1618,7 +1618,7 @@ int PrintTitanFiles::_printTracksXml()
           
           for (int ihist = 0; ihist < gprops.n_dbz_intervals; ihist++) {
             const storm_file_dbz_hist_t &entry = sfile.hist()[ihist];
-            xml += Titan2Xml::stormDbzHistEntry("dbz_hist_bin", 5,
+            xml += Titan2Xml::stormDbzHistEntry("hist", 5,
                                                 ihist, sparams, entry);
           }
           

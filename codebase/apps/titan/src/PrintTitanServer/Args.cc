@@ -76,6 +76,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
   readRuns = false;
   readProjRuns = false;
   readCompressed = false;
+  printAsXml = false;
 
   // loop through args
   
@@ -112,6 +113,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-proj_runs")) {
       
       readProjRuns = true;
+      
+    } else if (!strcmp(argv[i], "-xml")) {
+      
+      printAsXml = true;
       
     } else if (!strcmp(argv[i], "-margin")) {
       
@@ -307,10 +312,12 @@ void Args::_usage(ostream &out)
       << "  [ -url ] specify url\n"       
       << "    Format is \"titanp:://host:port:dir\"\n"
       << "\n"
+      << "  [ -xml ] print as XML instead of normal ASCII.\n"
+      << "\n"
       << endl;
 
   out << _progName
-      << " produces ASCII output from TITAN server." << endl;
+      << " produces ASCII or XML output from TITAN server." << endl;
   out << "  Output goes to stdout." << endl << endl;
 
 }

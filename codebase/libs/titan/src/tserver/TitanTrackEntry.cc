@@ -33,8 +33,9 @@
 //
 ////////////////////////////////////////////////////////////////
 
-
 #include <titan/TitanTrackEntry.hh>
+#include <toolsa/TaXml.hh>
+#include <titan/Titan2Xml.hh>
 #include <dataport/bigend.h>
 using namespace std;
 
@@ -314,5 +315,46 @@ void TitanTrackEntry::printXML(FILE *out,
   RfPrintStormProjRunsXML(out, "        ", &_gprops, &_proj_runs[0]);
   fprintf(out, "    </track_entry>\n");
   
+}
+
+////////////////////////////////////////////////////////////
+// Convert to XML
+
+string TitanTrackEntry::convertToXML(int level,
+                                     int entry_num,
+                                     const storm_file_params_t &sparams,
+                                     const track_file_params_t &tparams) const
+  
+{
+
+  const titan_grid_t &grid = _scan.grid;
+  string xml;
+  
+  string entryTag("track_entry");
+  xml += TaXml::writeStartTag(entryTag, level, "entry_num", entry_num);
+  xml += Titan2Xml::stormScanHeader("scan_header", 4, _scan);
+  
+  int storm_num = _entry.storm_num;
+  string stormTag("storm");
+  xml += TaXml::writeStartTag(stormTag, level + 1, "storm_num", storm_num);
+          
+  xml += Titan2Xml::stormGlobalProps("global_props", level + 2, sparams, _gprops);
+  
+  for (int ilayer = 0; ilayer < _gprops.n_layers; ilayer++) {
+    int layerNum = ilayer + _gprops.base_layer;
+    xml += Titan2Xml::stormLayerProps("layer_props", level + 2,
+                                      layerNum, grid, _lprops[ilayer]);
+  }
+          
+  for (int ihist = 0; ihist < _gprops.n_dbz_intervals; ihist++) {
+    xml += Titan2Xml::stormDbzHistEntry("dbz_hist_bin", level + 2,
+                                        ihist, sparams, _hist[ihist]);
+  }
+          
+  xml += TaXml::writeEndTag(stormTag, level + 1);
+  xml += TaXml::writeEndTag(entryTag, level);
+
+  return xml;
+          
 }
 

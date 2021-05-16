@@ -163,30 +163,38 @@ int PrintTitanServer::Run()
     cerr << titan.getErrStr() << endl;
     return -1;
   }
-  
-  // print out
 
-  cout << "dirInUse: "
-       << titan.getDirInUse() << endl;
-  cout << "timeInUse: "
-       << DateTime::str(titan.getTimeInUse()) << endl;
-  cout << endl;
+  if (_args.printAsXml) {
 
-  if (_args.readTimeMode != TITAN_SERVER_READ_LATEST_TIME) {
+    cout << titan.convertToXML();
     
-    cout << "scanInUse: "
-	 << titan.getScanInUse() << endl;
-    cout << "idayInUse: "
-	 << DateTime::str(titan.getIdayInUse() * SECS_IN_DAY) << endl;
+  } else {
     
-    cout << "stormPathInUse: " << titan.getStormPathInUse() << endl;
-    cout << "trackPathInUse: " << titan.getTrackPathInUse() << endl;
+    // print out
+    
+    cout << "dirInUse: "
+         << titan.getDirInUse() << endl;
+    cout << "timeInUse: "
+         << DateTime::str(titan.getTimeInUse()) << endl;
     cout << endl;
+    
+    if (_args.readTimeMode != TITAN_SERVER_READ_LATEST_TIME) {
+      
+      cout << "scanInUse: "
+           << titan.getScanInUse() << endl;
+      cout << "idayInUse: "
+           << DateTime::str(titan.getIdayInUse() * SECS_IN_DAY) << endl;
+      
+      cout << "stormPathInUse: " << titan.getStormPathInUse() << endl;
+      cout << "trackPathInUse: " << titan.getTrackPathInUse() << endl;
+      cout << endl;
+      
+    }
+    
+    titan.print(stdout);
 
   }
-
-  titan.print(stdout);
-
+    
   return 0;
 
 }

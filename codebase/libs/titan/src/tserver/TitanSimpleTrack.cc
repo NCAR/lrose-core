@@ -35,6 +35,8 @@
 
 
 #include <titan/TitanSimpleTrack.hh>
+#include <titan/Titan2Xml.hh>
+#include <toolsa/TaXml.hh>
 #include <dataport/bigend.h>
 using namespace std;
 
@@ -234,8 +236,8 @@ void TitanSimpleTrack::print(FILE *out,
 // PrintXML
 
 void TitanSimpleTrack::printXML(FILE *out,
-			     const storm_file_params_t &sparams,
-			     const track_file_params_t &tparams)
+                                const storm_file_params_t &sparams,
+                                const track_file_params_t &tparams)
 
 {
 
@@ -250,5 +252,43 @@ void TitanSimpleTrack::printXML(FILE *out,
   }
   fprintf(out, "    </simple_track>\n");
   
+}
+
+////////////////////////////////////////////////////////////
+// Convert to xml
+
+string TitanSimpleTrack::convertToXML(int level,
+                                      const storm_file_params_t &sparams,
+                                      const track_file_params_t &tparams) const
+  
+{
+  
+  string xml;
+  
+  // start tag
+  
+  int simple_track_num = _simple_params.simple_track_num;
+  string strackTag("simple_track");
+  xml += TaXml::writeStartTag(strackTag, level,
+                              "simple_track_num", simple_track_num);
+  
+  // simple track params
+  
+  xml += Titan2Xml::simpleTrackParams("simple_track_params",
+                                      level + 1, _simple_params);
+      
+  // track entries
+  
+  for (size_t ientry = 0; ientry < _entries.size(); ientry++) {
+    const TitanTrackEntry &entry = *_entries[ientry];
+    xml += entry.convertToXML(level + 1, ientry, sparams, tparams);
+  } // ientry
+
+  // end tag
+  
+  xml += TaXml::writeEndTag(strackTag, level);
+
+  return xml;
+
 }
 
