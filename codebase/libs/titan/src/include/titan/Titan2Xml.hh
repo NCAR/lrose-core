@@ -105,18 +105,19 @@ public:
                                 int level,
                                 const track_file_params_t &params);
   
+  // complex params
+  
+  static string complexTrackParams(string tag,
+                                   int level,
+                                   bool verificationPerformed,
+                                   const complex_track_params_t &params);
+
   // simple params
   
   static string simpleTrackParams(string tag,
                                   int level,
                                   const simple_track_params_t &params);
   
-  // complex params
-  
-  static string complexTrackParams(string tag,
-                                   int level,
-                                   const complex_track_params_t &params);
-
   // track entry
   // if entry num is not supplied, it will not be included
   

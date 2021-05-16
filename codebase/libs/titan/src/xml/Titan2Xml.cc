@@ -232,7 +232,7 @@ string Titan2Xml::stormGlobalProps(string tag,
   xml += TaXml::writeDouble("proj_area_major_radius", level + 1, gprops.proj_area_major_radius);
   xml += TaXml::writeStartTag("proj_area_polygon", level + 1);
   for (int ii = 0; ii < N_POLY_SIDES; ii++) {
-    xml += TaXml::writeDouble("radius", level + 2, gprops.proj_area_polygon[ii]);
+    xml += TaXml::writeDouble("len", level + 2, gprops.proj_area_polygon[ii]);
   }
   xml += TaXml::writeEndTag("proj_area_polygon", level + 1);
   xml += TaXml::writeInt("n_layers", level + 1, gprops.n_layers);
@@ -370,33 +370,41 @@ string Titan2Xml::trackFileHeader(string tag,
   xml += TaXml::writeInt("major_rev", level + 1, header.major_rev);
   xml += TaXml::writeInt("minor_rev", level + 1, header.minor_rev);
   xml += TaXml::writeBoolean("file_valid", level + 1, header.file_valid);
-  xml += TaXml::writeInt("modify_code", level + 1, header.modify_code);
+  xml += TaXml::writeTime("modify_code", level + 1, header.modify_code);
 
   xml += TaXml::writeInt("n_simple_tracks", level + 1, header.n_simple_tracks);
   xml += TaXml::writeInt("n_complex_tracks", level + 1, header.n_complex_tracks);
 
-  xml += contingencyData("ellipse_verify", level + 1, header.ellipse_verify);
-  xml += contingencyData("polygon_verify", level + 1, header.polygon_verify);
-
-  xml += forecastProps("forecast_bias", level + 1, header.forecast_bias);
-  xml += forecastProps("forecast_rmse", level + 1, header.forecast_rmse);
+  if (header.verify.verification_performed) {
+    xml += contingencyData("ellipse_verify", level + 1, header.ellipse_verify);
+    xml += contingencyData("polygon_verify", level + 1, header.polygon_verify);
+    xml += forecastProps("forecast_bias", level + 1, header.forecast_bias);
+    xml += forecastProps("forecast_rmse", level + 1, header.forecast_rmse);
+  }
     
-  xml += TaXml::writeInt("n_samples_for_forecast_stats", level + 1, header.n_samples_for_forecast_stats);
+  xml += TaXml::writeInt("n_samples_for_forecast_stats", level + 1,
+                         header.n_samples_for_forecast_stats);
   xml += TaXml::writeInt("n_scans", level + 1, header.n_scans);
   xml += TaXml::writeInt("last_scan_num", level + 1, header.last_scan_num);
-  xml += TaXml::writeInt("max_simple_track_num", level + 1, header.max_simple_track_num);
-  xml += TaXml::writeInt("max_complex_track_num", level + 1, header.max_complex_track_num);
+  xml += TaXml::writeInt("max_simple_track_num", level + 1,
+                         header.max_simple_track_num);
+  xml += TaXml::writeInt("max_complex_track_num", level + 1,
+                         header.max_complex_track_num);
   xml += TaXml::writeInt("data_file_size", level + 1, header.data_file_size);
   xml += TaXml::writeTime("file_time", level + 1, header.file_time);
   xml += TaXml::writeInt("max_parents", level + 1, header.max_parents);
   xml += TaXml::writeInt("max_children", level + 1, header.max_children);
-  xml += TaXml::writeInt("max_nweights_forecast", level + 1, header.max_nweights_forecast);
+  xml += TaXml::writeInt("max_nweights_forecast", level + 1,
+                         header.max_nweights_forecast);
 
-  xml += trackVerify("verify", level + 1, header.verify);
+  if (header.verify.verification_performed) {
+    xml += trackVerify("verify", level + 1, header.verify);
+  }
 
   xml += TaXml::writeString("header_file_name", level + 1, header.header_file_name);
   xml += TaXml::writeString("data_file_name", level + 1, header.data_file_name);
-  xml += TaXml::writeString("storm_header_file_name", level + 1, header.storm_header_file_name);
+  xml += TaXml::writeString("storm_header_file_name", level + 1,
+                            header.storm_header_file_name);
 
   xml += trackFileParams("", level + 1, header.params);
 
@@ -456,69 +464,11 @@ string Titan2Xml::trackFileParams(string tag,
 ////////////////////////////////////////////////////////////
 // simple params
 
-string Titan2Xml::simpleTrackParams(string tag,
-                                    int level, 
-                                    const simple_track_params_t &params)
-
-{
-
-  if (tag.size() == 0) {
-    tag = "simple_track_params";
-  }
-
-  string xml;
-  
-  xml += TaXml::writeStartTag(tag, level);
-
-  xml += TaXml::writeInt("simple_track_num", level + 1, params.simple_track_num);
-  xml += TaXml::writeInt("last_descendant_simple_track_num", level + 1, params.last_descendant_simple_track_num);
-  xml += TaXml::writeInt("start_scan", level + 1, params.start_scan);
-  xml += TaXml::writeInt("end_scan", level + 1, params.end_scan);
-  xml += TaXml::writeInt("last_descendant_end_scan", level + 1, params.last_descendant_end_scan);
-  xml += TaXml::writeInt("scan_origin", level + 1, params.scan_origin);
-  xml += TaXml::writeInt("start_time", level + 1, params.start_time);
-  xml += TaXml::writeInt("end_time", level + 1, params.end_time);
-  xml += TaXml::writeInt("last_descendant_end_time", level + 1, params.last_descendant_end_time);
-  xml += TaXml::writeInt("time_origin", level + 1, params.time_origin);
-  xml += TaXml::writeInt("history_in_scans", level + 1, params.history_in_scans);
-  xml += TaXml::writeInt("history_in_secs", level + 1, params.history_in_secs);
-  
-  xml += TaXml::writeInt("duration_in_scans", level + 1, params.duration_in_scans);
-  xml += TaXml::writeInt("duration_in_secs", level + 1, params.duration_in_secs);
-  int nparents = max(params.nparents, MAX_PARENTS_V5);
-  xml += TaXml::writeInt("nparents", level + 1, nparents);
-  int nchildren = max(params.nchildren, MAX_CHILDREN_V5);
-  xml += TaXml::writeInt("nchildren", level + 1, nchildren);
-
-  xml += TaXml::writeStartTag("parents", level + 1);
-  for (int ii = 0; ii < nparents; ii++) {
-    xml += TaXml::writeInt("parent", level + 2, params.parent[ii]);
-  }
-  xml += TaXml::writeEndTag("parents", level + 1);
-
-  xml += TaXml::writeStartTag("children", level + 1);
-  for (int ii = 0; ii < nchildren; ii++) {
-    xml += TaXml::writeInt("child", level + 2, params.child[ii]);
-
-  }
-  xml += TaXml::writeEndTag("children", level + 1);
-
-  xml += TaXml::writeInt("complex_track_num", level + 1, params.complex_track_num);
-  xml += TaXml::writeInt("first_entry_offset", level + 1, params.first_entry_offset);
-
-  xml += TaXml::writeEndTag(tag, level);
-
-  return xml;
-
-}
-
-////////////////////////////////////////////////////////////
-// simple params
-
 string Titan2Xml::complexTrackParams(string tag,
                                      int level,
+                                     bool verificationPerformed,
                                      const complex_track_params_t &params)
-
+  
 {
 
   if (tag.size() == 0) {
@@ -546,20 +496,100 @@ string Titan2Xml::complexTrackParams(string tag,
   xml += TaXml::writeTime("end_time", level + 1, params.end_time);
 
   xml += TaXml::writeInt("n_simple_tracks", level + 1, params.n_simple_tracks);
-
+  
   xml += TaXml::writeInt("n_top_missing", level + 1, params.n_top_missing);
   xml += TaXml::writeInt("n_range_limited", level + 1, params.n_range_limited);
   xml += TaXml::writeInt("start_missing", level + 1, params.start_missing);
   xml += TaXml::writeInt("end_missing", level + 1, params.end_missing);
-  xml += TaXml::writeInt("n_samples_for_forecast_stats", level + 1, params.n_samples_for_forecast_stats);
 
-  xml += contingencyData("ellipse_verify", level + 1, params.ellipse_verify);
-  xml += contingencyData("polygon_verify", level + 1, params.polygon_verify);
-  xml += forecastProps("forecast_bias", level + 1, params.forecast_bias);
-  xml += forecastProps("forecast_rmse", level + 1, params.forecast_rmse);
+  if (verificationPerformed) {
+    xml += TaXml::writeInt("n_samples_for_forecast_stats",
+                           level + 1, params.n_samples_for_forecast_stats);
+    xml += contingencyData("ellipse_verify", level + 1, params.ellipse_verify);
+    xml += contingencyData("polygon_verify", level + 1, params.polygon_verify);
+    xml += forecastProps("forecast_bias", level + 1, params.forecast_bias);
+    xml += forecastProps("forecast_rmse", level + 1, params.forecast_rmse);
+  }
 
   xml += TaXml::writeEndTag(tag, level);
   
+  return xml;
+
+}
+
+////////////////////////////////////////////////////////////
+// simple params
+
+string Titan2Xml::simpleTrackParams(string tag,
+                                    int level, 
+                                    const simple_track_params_t &params)
+
+{
+
+  if (tag.size() == 0) {
+    tag = "simple_track_params";
+  }
+
+  string xml;
+  
+  xml += TaXml::writeStartTag(tag, level);
+
+  xml += TaXml::writeInt("simple_track_num", level + 1, params.simple_track_num);
+  xml += TaXml::writeInt("last_descendant_simple_track_num", level + 1, params.last_descendant_simple_track_num);
+  xml += TaXml::writeInt("start_scan", level + 1, params.start_scan);
+  xml += TaXml::writeInt("end_scan", level + 1, params.end_scan);
+  xml += TaXml::writeInt("last_descendant_end_scan", level + 1, params.last_descendant_end_scan);
+  xml += TaXml::writeInt("scan_origin", level + 1, params.scan_origin);
+  xml += TaXml::writeTime("start_time", level + 1, params.start_time);
+  xml += TaXml::writeTime("end_time", level + 1, params.end_time);
+  xml += TaXml::writeTime("last_descendant_end_time", level + 1, params.last_descendant_end_time);
+  xml += TaXml::writeTime("time_origin", level + 1, params.time_origin);
+  xml += TaXml::writeInt("history_in_scans", level + 1, params.history_in_scans);
+  xml += TaXml::writeInt("history_in_secs", level + 1, params.history_in_secs);
+  
+  xml += TaXml::writeInt("duration_in_scans", level + 1, params.duration_in_scans);
+  xml += TaXml::writeInt("duration_in_secs", level + 1, params.duration_in_secs);
+
+  int nparents = 0;
+  for (int ii = 0; ii < MAX_PARENTS_V5; ii++) {
+    if (params.parent[ii] > 0) {
+      nparents++;
+    } else {
+      break;
+    }
+  }
+  int nchildren = 0;
+  for (int ii = 0; ii < MAX_CHILDREN_V5; ii++) {
+    if (params.child[ii] > 0) {
+      nchildren++;
+    } else {
+      break;
+    }
+  }
+
+  if (nparents > 0) {
+    xml += TaXml::writeInt("nparents", level + 1, nparents);
+    xml += TaXml::writeStartTag("parents", level + 1);
+    for (int ii = 0; ii < nparents; ii++) {
+      xml += TaXml::writeInt("parent", level + 2, params.parent[ii]);
+    }
+    xml += TaXml::writeEndTag("parents", level + 1);
+  }
+
+  if (nchildren > 0) {
+    xml += TaXml::writeInt("nchildren", level + 1, nchildren);
+    xml += TaXml::writeStartTag("children", level + 1);
+    for (int ii = 0; ii < nchildren; ii++) {
+      xml += TaXml::writeInt("child", level + 2, params.child[ii]);
+    }
+    xml += TaXml::writeEndTag("children", level + 1);
+  }
+
+  xml += TaXml::writeInt("complex_track_num", level + 1, params.complex_track_num);
+  xml += TaXml::writeInt("first_entry_offset", level + 1, params.first_entry_offset);
+
+  xml += TaXml::writeEndTag(tag, level);
+
   return xml;
 
 }
@@ -582,7 +612,7 @@ string Titan2Xml::trackEntry(string tag,
   
   if (entry_num >= 0) {
     vector<TaXml::attribute> attrs;
-    attrs.push_back(TaXml::attribute("entry_number", entry_num));
+    attrs.push_back(TaXml::attribute("entry_num", entry_num));
     xml += TaXml::writeStartTag(tag, level, attrs, true);
   } else {
     xml += TaXml::writeStartTag(tag, level);

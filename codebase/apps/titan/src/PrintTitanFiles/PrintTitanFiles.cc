@@ -1332,21 +1332,25 @@ int PrintTitanFiles::_printStormsXml()
   }
 
   int n_scans = sfile.header().n_scans;
-  const storm_file_header_t &sHeader = sfile.header();
-  const storm_file_params_t &sParams = sHeader.params;
+  const storm_file_header_t &sheader = sfile.header();
+  const storm_file_params_t &sparams = sheader.params;
   
   // header
 
   string xml;
-  string mainTag = "titan_data";
+  string mainTag = "titan_storm_data";
   xml += TaXml::writeStartTag(mainTag, 0);
-  xml += Titan2Xml::stormFileHeader("storm_file_header", 1, sHeader);
+  xml += Titan2Xml::stormFileHeader("storm_file_header", 1, sheader);
 
   /*
    * loop through scans
    */
   
   for (int iscan = 0; iscan < n_scans; iscan++) {
+
+    if (iscan > 3) {
+      break;
+    }
 
     string scanTag("scan");
     xml += TaXml::writeStartTag(scanTag, 1, "scan_num", iscan);
@@ -1367,6 +1371,10 @@ int PrintTitanFiles::_printStormsXml()
     xml += Titan2Xml::stormScanHeader("scan_header", 2, scan);
     
     for (int istorm = 0; istorm < scan.nstorms; istorm++) {
+
+      if (istorm > 4) {
+        break;
+      }
       
       string stormTag("storm");
       xml += TaXml::writeStartTag(stormTag, 2, "storm_num", istorm);
@@ -1378,7 +1386,7 @@ int PrintTitanFiles::_printStormsXml()
       }
       
       const storm_file_global_props_t &gprops = sfile.gprops()[istorm];
-      xml += Titan2Xml::stormGlobalProps("global_props", 3, sParams, gprops);
+      xml += Titan2Xml::stormGlobalProps("global_props", 3, sparams, gprops);
 
       for (int ilayer = 0; ilayer < gprops.n_layers; ilayer++) {
         const storm_file_layer_props_t &lprops = sfile.lprops()[ilayer];
@@ -1389,7 +1397,7 @@ int PrintTitanFiles::_printStormsXml()
       for (int ihist = 0; ihist < gprops.n_dbz_intervals; ihist++) {
         const storm_file_dbz_hist_t &entry = sfile.hist()[ihist];
         xml += Titan2Xml::stormDbzHistEntry("dbz_hist_bin", 3,
-                                            ihist, sParams, entry);
+                                            ihist, sparams, entry);
       }
 
       xml += TaXml::writeEndTag(stormTag, 2);
@@ -1400,12 +1408,14 @@ int PrintTitanFiles::_printStormsXml()
 
   } // iscan
   
-  // close files
+  xml += TaXml::writeEndTag(mainTag, 0);
+
+   // close files and return
 
   sfile.CloseFiles();
 
-  xml += TaXml::writeEndTag(mainTag, 0);
-
+  // print to stdout
+  
   cout << xml << endl;
 
   return 0;
@@ -1423,7 +1433,7 @@ int PrintTitanFiles::_printTracksXml()
   
   TitanTrackFile tfile;
   if (tfile.OpenFiles("r", _args.path.c_str())) {
-    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << "ERROR - PrintTitanFiles::_printTracksXml" << endl;
     cerr << tfile.getErrStr() << endl;
     return -1;
   }
@@ -1431,64 +1441,26 @@ int PrintTitanFiles::_printTracksXml()
   // read in track properties file header
 
   if (tfile.ReadHeader()) {
-    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << "ERROR - PrintTitanFiles::_printTracksXml" << endl;
     cerr << tfile.getErrStr() << endl;
     return -1;
   }
+
+  const track_file_header_t &theader = tfile.header();
+  const track_file_verify_t &verify = theader.verify;
 
   if (tfile.ReadSimplesPerComplex()) {
-    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << "ERROR - PrintTitanFiles::_printTracksXml" << endl;
     cerr << tfile.getErrStr() << endl;
     return -1;
   }
 
-  // print out header
-  
-  if (_args.printCsvTable) {
-      
-    if (_args.csvTableType == 1) {
-      // table type 1
-      printf("%%timestep; id;  centerx;  centery; volume;"
-             "  boxxmin;  boxxmax;  boxymin;  boxymax;"
-             " lwpmean;  lwpmin;  lwpmax\n");
-    } else if (_args.csvTableType == 2) {
-      // table type 2
-      printf("%%timestep; idstep1; idstep2;  weight\n");
-    } else if (_args.csvTableType == 3) {
-      // table type 3
-      printf("%%timestep; nstorms\n");
-    } else if (_args.csvTableType == 4) {
-      // table type 4
-      printf("%%complex_track_num; duration_in_scans; duration_in_secs\n");
-    } else if (_args.csvTableType == 5) {
-      // table type 5
-      printf("%%complex_track_num; simple_track_num; "
-             "duration_in_scans; duration_in_secs\n");
-    }
+  // header
 
-  } else {
-    
-    printf("TRACK FILE\n");
-    printf("==========\n");
-    printf("Header file label : %s\n", tfile.header_file_label().c_str());
-    printf("Data   file label : %s\n", tfile.data_file_label().c_str());
-    printf("\n");
-  
-    RfPrintTrackHeader(stdout, "  ", &tfile.header());
-
-  }
-
-  if (_args.printFull) {
-    RfPrintTrackHeaderArrays(stdout, "  ",
-			     &tfile.header(),
-			     tfile.complex_track_nums(),
-			     tfile.complex_track_offsets(),
-			     tfile.simple_track_offsets(),
-			     tfile.nsimples_per_complex(),
-			     tfile.simples_per_complex_offsets(),
-			     (const si32 **) tfile.simples_per_complex(),
-			     tfile.scan_index());
-  }
+  string xml;
+  string mainTag = "titan_track_data";
+  xml += TaXml::writeStartTag(mainTag, 0);
+  xml += Titan2Xml::trackFileHeader("track_file_header", 1, theader);
 
   // open storm file
 
@@ -1499,7 +1471,7 @@ int PrintTitanFiles::_printTracksXml()
 
   TitanStormFile sfile;
   if (sfile.OpenFiles("r", stormFilePath.c_str())) {
-    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << "ERROR - PrintTitanFiles::_printTracksXml" << endl;
     cerr << sfile.getErrStr() << endl;
     return -1;
   }
@@ -1507,49 +1479,190 @@ int PrintTitanFiles::_printTracksXml()
   // read in storm properties file header
   
   if (sfile.ReadHeader()) {
-    cerr << "ERROR - PrintTitanFiles::_printTrackFile" << endl;
+    cerr << "ERROR - PrintTitanFiles::_printTracksXml" << endl;
     cerr << sfile.getErrStr() << endl;
     return -1;
   }
 
-  // if full listing, print out track info
-  
-  if (_args.printFull) {
-    if (_printTrackFull(sfile, tfile)) {
-      return -1;
-    }
-  } else if (_args.printSummary) {
-    if (_printTrackSummary(sfile, tfile)) {
-      return -1;
-    }
-  } else if (_args.printCsvTable) {
-    if (_args.csvTableType == 1) {
-      if (_printCsvTableType1(sfile, tfile)) {
-        return -1;
-      }
-    } else if (_args.csvTableType == 2) {
-      if (_printCsvTableType2(sfile, tfile)) {
-        return -1;
-      }
-    } else if (_args.csvTableType == 3) {
-      if (_printCsvTableType3(sfile, tfile)) {
-        return -1;
-      }
-    } else if (_args.csvTableType == 4) {
-      if (_printCsvTableType4(sfile, tfile)) {
-        return -1;
-      }
-    } else if (_args.csvTableType == 5) {
-      if (_printCsvTableType5(sfile, tfile)) {
-        return -1;
-      }
-    }
-  }
-    
-  // close files
+  const storm_file_header_t &sheader = sfile.header();
+  const storm_file_params_t &sparams = sheader.params;
 
+  // complex tracks
+  
+  for (int icomplex = 0;
+       icomplex < tfile.header().n_complex_tracks; icomplex++) {
+
+    if (icomplex > 10) {
+      break;
+    }
+    
+    int complex_track_num = tfile.complex_track_nums()[icomplex];
+    
+    if (_args.trackNum >= 0 &&
+	_args.trackNum != complex_track_num) {
+      continue;
+    }
+    
+    string ctrackTag("complex_track");
+    xml += TaXml::writeStartTag(ctrackTag, 1,
+                                "complex_track_num", complex_track_num);
+    
+    if (tfile.ReadComplexParams(complex_track_num, true)) {
+      cerr << "ERROR - PrintTitanFiles::_printTrackXml" << endl;
+      cerr << tfile.getErrStr() << endl;
+      return -1;
+    }
+    
+    xml += Titan2Xml::complexTrackParams("complex_track_params", 2,
+                                         verify.verification_performed,
+                                         tfile.complex_params());
+    
+    // simple tracks in this complex track
+    
+    for (int isimple = 0;
+	 isimple < tfile.complex_params().n_simple_tracks; isimple++) {
+      
+      int simple_track_num =
+	tfile.simples_per_complex()[complex_track_num][isimple];
+      
+      string strackTag("simple_track");
+      xml += TaXml::writeStartTag(strackTag, 2,
+                                  "simple_track_num", simple_track_num);
+      
+      // prepare to read in simple track
+      
+      if (tfile.RewindSimple(simple_track_num)) {
+	cerr << "ERROR - PrintTitanFiles::_printTrackXml" << endl;
+	cerr << tfile.getErrStr() << endl;
+	return -1;
+      }
+      
+      xml += Titan2Xml::simpleTrackParams("simple_track_params",
+                                          3,
+                                          tfile.simple_params());
+      
+      // loop through the track entries
+      
+      for (int ientry = 0;
+	   ientry < tfile.simple_params().duration_in_scans; ientry++) {
+
+        if (ientry > 4) {
+          break;
+        }
+        
+	if (tfile.ReadEntry()) {
+	  cerr << "ERROR - PrintTitanFiles::_printTrackXml" << endl;
+	  cerr << tfile.getErrStr() << endl;
+	  return -1;
+	}
+	
+	const track_file_entry_t &entry = tfile.entry();
+	
+	// check that simple and complex track numbers are
+	// correct
+	
+	if (entry.complex_track_num !=
+	    tfile.complex_params().complex_track_num) {
+	  fprintf(stderr, "\aERROR: complex track num "
+		  "incorrect in entry\n");
+	  fprintf(stderr, "complex_params->complex_track_num : %d\n",
+		  tfile.complex_params().complex_track_num);
+	  fprintf(stderr, "entry.complex_track_num : %d\n",
+		  entry.complex_track_num);
+	}
+	
+	if (entry.simple_track_num !=
+	    tfile.simple_params().simple_track_num) {
+	  fprintf(stderr, "\aERROR: simple track num "
+		  "incorrect in entry\n");
+	  fprintf(stderr, "simple_params->simple_track_num : %d\n",
+		  tfile.simple_params().simple_track_num);
+	  fprintf(stderr, "entry.simple_track_num : %d\n",
+		  entry.simple_track_num);
+	}
+
+	if (_args.trackNum < 0) {
+
+          // no track selected
+          // just print out the track entry header
+          
+          xml += Titan2Xml::trackEntry("track_entry", 3, entry, ientry);
+
+        } else {
+
+          // track selected, print entry header plus storm props
+          
+          string etag("track_entry_plus_storm_props");
+          xml += TaXml::writeStartTag(etag, 3, "entry_num", ientry);
+          
+	  // read in scan plus global props
+	  
+	  if (sfile.ReadScan(entry.scan_num)) {
+	    cerr << "ERROR - PrintTitanFiles::_printTrackXml" << endl;
+	    cerr << sfile.getErrStr() << endl;
+	    return -1;
+	  }
+
+          const storm_file_scan_header_t &scan = sfile.scan();
+          const titan_grid_t &grid = scan.grid;
+          
+          xml += Titan2Xml::stormScanHeader("scan_header", 4, scan);
+          
+          // read in full props for this storm
+
+          int storm_num = entry.storm_num;
+          string stormTag("storm");
+          xml += TaXml::writeStartTag(stormTag, 4,
+                                      "storm_num", storm_num);
+          
+	  if (sfile.ReadProps(storm_num)) {
+	    cerr << "ERROR - PrintTitanFiles::_printTrackXml" << endl;
+	    cerr << sfile.getErrStr() << endl;
+	    return -1;
+	  }
+          
+          const storm_file_global_props_t &gprops = sfile.gprops()[storm_num];
+          xml += Titan2Xml::stormGlobalProps("global_props", 5,
+                                             sparams, gprops);
+
+          for (int ilayer = 0; ilayer < gprops.n_layers; ilayer++) {
+            const storm_file_layer_props_t &lprops = sfile.lprops()[ilayer];
+            int layerNum = ilayer + gprops.base_layer;
+            xml += Titan2Xml::stormLayerProps("layer_props", 5,
+                                              layerNum, grid, lprops);
+          }
+          
+          for (int ihist = 0; ihist < gprops.n_dbz_intervals; ihist++) {
+            const storm_file_dbz_hist_t &entry = sfile.hist()[ihist];
+            xml += Titan2Xml::stormDbzHistEntry("dbz_hist_bin", 5,
+                                                ihist, sparams, entry);
+          }
+          
+          xml += TaXml::writeEndTag(stormTag, 4);
+          xml += TaXml::writeEndTag(etag, 3);
+          
+	} // if (_args.trackNum < 0)
+	
+      } // ientry
+      
+      xml += TaXml::writeEndTag(strackTag, 2);
+
+    } // isimple
+    
+    xml += TaXml::writeEndTag(ctrackTag, 1);
+    
+  } // icomplex
+  
+  xml += TaXml::writeEndTag(mainTag, 0);
+
+  // close files and return
+  
   sfile.CloseFiles();
   tfile.CloseFiles();
+
+  // print to stdout
+  
+  cout << xml << endl;
 
   return 0;
 
