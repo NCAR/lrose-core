@@ -738,8 +738,9 @@ private slots:
   void onBoundaryEditorListItemClicked(QListWidgetItem* item);
   void _saveBoundaryEditorClick();
 
-  void _examineSpreadSheetSetup(double  closestAz = 30.0);
-  void ExamineEdit(double azimuth, double elevation, size_t fieldIndex);
+  void _examineSpreadSheetSetup(double  closestAz = 30.0, double range = 0.0);
+  void ExamineEdit(double azimuth, double elevation, size_t fieldIndex,
+    double range);
 
 };
 

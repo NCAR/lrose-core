@@ -1,11 +1,13 @@
 
 #include <stdio.h>
+#include <string.h>
 #include <QtWidgets>
 #include <QMessageBox>
 #include <QModelIndex>
 #include <QJSEngine>
 #include <QJSValue>
 #include <QJSValueIterator>
+#include <QStringList>
 #include <vector>
 #include <iostream>
 #include <toolsa/LogStream.hh>
@@ -287,6 +289,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     LOG(DEBUG) << "creating table";
     table->setItemPrototype(table->item(rows - 1, cols - 1));
     table->setItemDelegate(new SpreadSheetDelegate());
+
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     createActions();
     LOG(DEBUG) << "Action created\n";
@@ -1092,6 +1096,58 @@ void SpreadSheetView::newAzimuth(float azimuth) {
     rayLineEdit->insert(n);
 
     setTheWindowTitle(azimuth);
+}
+
+void SpreadSheetView::highlightClickedData(string fieldName, float azimuth, float range) {
+    // map the fieldName, azimuth, and range to a cell in the table
+    // get the column labels, find the fieldName, then the azimuth
+    // get the row labels, find the closest range
+    LOG(DEBUG) << "enter";
+    int row = 0;
+    QString label1 = table->verticalHeaderItem(row)->text();
+    QString label2 = table->verticalHeaderItem(row+1)->text();
+
+    string label1_string = label1.toStdString();
+    string label2_string = label2.toStdString();
+
+    LOG(DEBUG) << "label1 = " << label1_string;
+    LOG(DEBUG) << "label2 = " << label2_string;
+   
+    float gate1 = 0;
+    float gate2 = 0;
+    sscanf(label1_string.c_str(), "%f", &gate1);
+    sscanf(label2_string.c_str(), "%f", &gate2);  
+    LOG(DEBUG) << "gate1 = " << gate1;
+    LOG(DEBUG) << "gate2 = " << gate2;      
+    /*
+    bool ok;
+    QStringList list1 = label1.split(QLatin1Char(' '));
+      gate1 = list1.at(0).toFloat(&ok);
+    if (!ok) {
+        // TODO: some error message "cannot determine range";
+    }
+    ok;
+    QStringList list2= label2.split(QLatin1Char(' '));
+      gate2 = list2.at(0).toFloat(&ok);
+    if (!ok) {
+        // TODO: some error message "cannot determine range";
+    }
+    */
+    float gateSpacing = gate2 - gate1;
+    int top = 1;
+    if (gateSpacing > 0) {
+      top = (int) (range - gate1) / gateSpacing;
+    }
+    LOG(DEBUG) << "top = " << top;
+    if ((top <= 0) || (top > table->rowCount())) top = 1;
+    LOG(DEBUG) << "top = " << top;
+    bool selected = true;
+    int left = 1;  int bottom = top; int right = left;
+    const QTableWidgetSelectionRange selectionRange(top, left, bottom, right);
+    table->setRangeSelected(selectionRange, selected);
+    QList<QTableWidgetItem *> selectedItems = table->selectedItems();
+    table->scrollToItem(selectedItems.at(0), QAbstractItemView::PositionAtCenter);
+    LOG(DEBUG) << "exit";
 }
 
 

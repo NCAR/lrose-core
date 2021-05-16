@@ -47,6 +47,8 @@ public:
 
   void setSelectionToValue(QString value);
 
+  void highlightClickedData(string fieldName, float azimuth, float range);
+
   void closeEvent();
 
 

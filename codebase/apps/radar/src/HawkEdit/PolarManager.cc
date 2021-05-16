@@ -2585,9 +2585,13 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
       azDeg += 360.0;
     }
   }
-
-    LOG(DEBUG) << "    azDeg = " << azDeg;
+  LOG(DEBUG) << "    azDeg = " << azDeg;
   
+  double range = 0.0;
+  if (xkm != 0 || ykm != 0) {
+    range = sqrt(xkm * xkm + ykm * ykm);
+  }
+  LOG(DEBUG) << "    range = " << range;
   
   //int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
 
@@ -2611,7 +2615,7 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
   _locationClicked(xkm, ykm, ray);
   // update the spreadsheet if it is active
   if (sheetView != NULL) {
-    _examineSpreadSheetSetup(azDeg);
+    _examineSpreadSheetSetup(azDeg, range);
   }
 
 }
@@ -5453,7 +5457,7 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
 }
 
 
-void PolarManager::_examineSpreadSheetSetup(double  closestAz)
+void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)
 {
   LOG(DEBUG) << "enter";
 
@@ -5474,7 +5478,7 @@ void PolarManager::_examineSpreadSheetSetup(double  closestAz)
     double elevation = getSelectedSweepAngle();
     size_t fieldIdx = getSelectedFieldIndex();
     LOG(DEBUG) << "elevation=" << elevation << ", fieldIdx=" << fieldIdx;
-    ExamineEdit(closestAz, elevation, fieldIdx);
+    ExamineEdit(closestAz, elevation, fieldIdx, range);
   } catch (const string& ex) {
     errorMessage("ExamineEdit Error", ex);
   }
@@ -5482,7 +5486,8 @@ void PolarManager::_examineSpreadSheetSetup(double  closestAz)
 }
 
 
-void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldIndex) {   
+void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldIndex,
+  double range) {   
 
   // get an version of the ray that we can edit
   // we'll need the az, and sweep number to get a list from
@@ -5563,7 +5568,10 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     sheetView->show();
   } else {
     //spreadSheetControl->switchRay(closestRayToEdit->getAzimuthDeg(), elevation);
+    float azimuth = closestRayToEdit->getAzimuthDeg();
     sheetView->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);
+    string currentFieldName = _displayFieldController->getSelectedFieldName();
+    sheetView->highlightClickedData(currentFieldName, azimuth, (float) range);
   }
   
 }
