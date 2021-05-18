@@ -2720,7 +2720,7 @@ int DsMdvxMsg::_getConvertMdv2Ncf(DsMdvx &mdvx)
     outputStartEndTimes = false;
   }
   mdvx.setMdv2NcfOutput(outputLatlonArrays, outputMdvAttr,
-                        outputMdvChunks,outputStartEndTimes);
+                        outputMdvChunks, outputStartEndTimes);
 
   // field translation
 

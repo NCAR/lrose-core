@@ -50,7 +50,7 @@ NcfGridInfo::NcfGridInfo ( Mdvx::field_header_t fHdr) :
   _proj.init(fHdr);
   _coord = _proj.getCoord();
   _isXSect = false;
-  _outputLatlonArrays = true;
+  _outputLatlonArrays = false;
 
   // Initialize netCDF object pointers
 
