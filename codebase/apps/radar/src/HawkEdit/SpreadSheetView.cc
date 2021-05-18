@@ -1103,6 +1103,9 @@ void SpreadSheetView::highlightClickedData(string fieldName, float azimuth, floa
     // get the column labels, find the fieldName, then the azimuth
     // get the row labels, find the closest range
     LOG(DEBUG) << "enter";
+
+    // find the row
+
     int row = 0;
     QString label1 = table->verticalHeaderItem(row)->text();
     QString label2 = table->verticalHeaderItem(row+1)->text();
@@ -1119,20 +1122,7 @@ void SpreadSheetView::highlightClickedData(string fieldName, float azimuth, floa
     sscanf(label2_string.c_str(), "%f", &gate2);  
     LOG(DEBUG) << "gate1 = " << gate1;
     LOG(DEBUG) << "gate2 = " << gate2;      
-    /*
-    bool ok;
-    QStringList list1 = label1.split(QLatin1Char(' '));
-      gate1 = list1.at(0).toFloat(&ok);
-    if (!ok) {
-        // TODO: some error message "cannot determine range";
-    }
-    ok;
-    QStringList list2= label2.split(QLatin1Char(' '));
-      gate2 = list2.at(0).toFloat(&ok);
-    if (!ok) {
-        // TODO: some error message "cannot determine range";
-    }
-    */
+
     float gateSpacing = gate2 - gate1;
     int top = 1;
     if (gateSpacing > 0) {
@@ -1141,8 +1131,37 @@ void SpreadSheetView::highlightClickedData(string fieldName, float azimuth, floa
     LOG(DEBUG) << "top = " << top;
     if ((top <= 0) || (top > table->rowCount())) top = 1;
     LOG(DEBUG) << "top = " << top;
+
+    // find the column
+    int nColumns = table->columnCount();
+    LOG(DEBUG) << "nColumns = " << nColumns;
+    //bool found = false;
+    int column = 0;
+    float minDiff = 9e+33;
+    int left = 0;
+    QString fieldNameQ(fieldName.c_str());
+    while ((column < nColumns)) {
+        QString labelQ = table->horizontalHeaderItem(column)->text();
+        string label_string = labelQ.toStdString();
+        LOG(DEBUG) << "label = " << label_string;
+        
+        if (labelQ.contains(fieldNameQ)) {
+            // look for the closest azimuth
+            float label_azimuth = 0.0;
+            sscanf(label_string.c_str(), "%f", &label_azimuth);  
+            LOG(DEBUG) << "label azimuth = " << label_azimuth;
+            float diff = fabs(label_azimuth - azimuth);
+            if (diff < minDiff) {
+                minDiff = diff;
+                left = column; 
+            }
+        }
+        column += 1;
+    }
+    LOG(DEBUG) << "left = " << left;
+
     bool selected = true;
-    int left = 1;  int bottom = top; int right = left;
+    int bottom = top; int right = left;
     const QTableWidgetSelectionRange selectionRange(top, left, bottom, right);
     table->setRangeSelected(selectionRange, selected);
     QList<QTableWidgetItem *> selectedItems = table->selectedItems();
@@ -1160,7 +1179,7 @@ void SpreadSheetView::fieldNamesSelected(vector<string> fieldNames) {
 
   // fill everything that needs the fieldNames ...
     _nFieldsToDisplay = fieldNames.size();
-    int somethingHideous = 10;
+    int somethingHideous = 0;
     table->setColumnCount(_nFieldsToDisplay * _nRays + somethingHideous);
     LOG(DEBUG) << "there are " << fieldNames.size() << " field namess";
     // rayIdx goes from 0 to nRays; map to -nRays/2 ... 0 ... nRays/2
