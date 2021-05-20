@@ -2497,6 +2497,7 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
     //fieldNames.push_back(fieldName);
     //_updateArchiveData(fieldNames);  // ?? or  _updateField(fieldId);
     _updateColorMap(fieldName);
+    _fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
   } catch (std::invalid_argument &ex) {
     LOG(ERROR) << fieldName;
     LOG(ERROR) << ex.what(); // "ERROR - field not found; no color map change";
