@@ -37,16 +37,17 @@ void SpreadSheetModel::getRangeGeom(float *startRangeKm, float *gateSpacingKm) {
   *gateSpacingKm = gateSpace;
 }
 
-vector<string> SpreadSheetModel::getFields()
+vector<string> *SpreadSheetModel::getFields()
 {
-  vector<string> fieldNames;
+  vector<string> *fieldNames;
   if (_closestRay != NULL) {
     _closestRay->loadFieldNameMap();
 
     RadxRay::FieldNameMap fieldNameMap = _closestRay->getFieldNameMap();
     RadxRay::FieldNameMapIt it;
+    fieldNames = new vector<string>;
     for (it = fieldNameMap.begin(); it != fieldNameMap.end(); it++) {
-      fieldNames.push_back(it->first);
+      fieldNames->push_back(it->first);
       cout << it->first << ':' << it->second << endl;
     }
   } else {

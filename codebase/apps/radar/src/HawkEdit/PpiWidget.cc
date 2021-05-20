@@ -1930,7 +1930,7 @@ void PpiWidget::contextMenuEditor()
 }
 
 void PpiWidget::EditRunScript() {
-  
+  /*
   // create the view
   ScriptEditorView *scriptEditorView;
   scriptEditorView = new ScriptEditorView(this);
@@ -1950,7 +1950,7 @@ void PpiWidget::EditRunScript() {
   scriptEditorView->init();
   scriptEditorView->show();
   // scriptEditorView->layout()->setSizeConstraint(QLayout::SetFixedSize);
-  
+  */
 }
 
 

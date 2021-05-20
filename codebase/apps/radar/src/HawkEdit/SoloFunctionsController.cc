@@ -8,17 +8,17 @@
 
 #include <Radx/RadxRay.hh>
 #include <toolsa/LogStream.hh>
+#include "DataModel.hh"
 
 #include "SoloFunctionsController.hh"
 // #include "SpreadSheetModel.hh"
 
 using namespace std;
 
-SoloFunctionsController::SoloFunctionsController(RadxVol *data, QObject *parent) : QObject(parent) {
-  _data = data;
-  _nRays = _data->getNRays();
-  _nSweeps = _data->getNSweeps();
-
+SoloFunctionsController::SoloFunctionsController(QObject *parent) : QObject(parent) {
+  DataModel *dataModel = DataModel::Instance();
+  _nRays = dataModel->getNRays();
+  _nSweeps = dataModel->getNSweeps();
 }
 
 
@@ -68,7 +68,7 @@ QVector<double> add(QVector<double> v, QVector<double> v2) {
 QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field, float nyquist, float bad_data,
 					   size_t clip_gate) { 
 
-  string tempFieldName = soloFunctionsModel.RemoveAircraftMotion(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.RemoveAircraftMotion(field.toStdString(), //_data,
 						     _currentRayIdx, _currentSweepIdx,
 						      nyquist,
 						      clip_gate,
@@ -87,7 +87,7 @@ QString  SoloFunctionsController::BB_UNFOLDING_FIRST_GOOD_GATE(QString field, fl
 							       float bad_data,
 							       size_t clip_gate) {
 
-  string tempFieldName = soloFunctionsModel.BBUnfoldFirstGoodGate(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.BBUnfoldFirstGoodGate(field.toStdString(), //_data,
 								 _currentRayIdx, _currentSweepIdx,
 								 nyquist,
 								 max_pos_folds,
@@ -111,7 +111,7 @@ QString  SoloFunctionsController::BB_UNFOLDING_LOCAL_WIND(QString field,
                      float bad_data,
                      size_t clip_gate) {
 
-  string tempFieldName = soloFunctionsModel.BBUnfoldLocalWind(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.BBUnfoldLocalWind(field.toStdString(), //_data,
                  _currentRayIdx, _currentSweepIdx,
                  nyquist,
                  max_pos_folds,
@@ -148,7 +148,7 @@ QString  SoloFunctionsController::BB_UNFOLDING_AC_WIND(QString field,
                      float bad_data,
                      size_t clip_gate) {
 
-  string tempFieldName = soloFunctionsModel.BBUnfoldAircraftWind(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.BBUnfoldAircraftWind(field.toStdString(), //_data,
                  _currentRayIdx, _currentSweepIdx,
                  nyquist,
                  max_pos_folds,
@@ -208,7 +208,7 @@ QString SoloFunctionsController::ZERO_MIDDLE_THIRD(QString field) {
 
   //SoloFunctionsModel soloFunctionsModel;
 
-  string tempFieldName = soloFunctionsModel.ZeroMiddleThird(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.ZeroMiddleThird(field.toStdString(), //_data,
 						     _currentRayIdx, _currentSweepIdx,
 						     field.toStdString()); // "VEL_xyz");
 
@@ -223,7 +223,7 @@ QString SoloFunctionsController::ZERO_INSIDE_BOUNDARY(QString field) {
 
   //SoloFunctionsModel soloFunctionsModel;
 
-  string tempFieldName = soloFunctionsModel.ZeroInsideBoundary(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.ZeroInsideBoundary(field.toStdString(), //_data,
 						     _currentRayIdx, _currentSweepIdx,
 						     field.toStdString()); // "VEL_xyz");
 
@@ -239,7 +239,7 @@ QString SoloFunctionsController::DESPECKLE(QString field, size_t speckle_length,
 
   //SoloFunctionsModel soloFunctionsModel;
 
-  string tempFieldName = soloFunctionsModel.Despeckle(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.Despeckle(field.toStdString(), //_data,
 						     _currentRayIdx, _currentSweepIdx,
 						      speckle_length,
 						      clip_gate,
@@ -255,7 +255,7 @@ QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, floa
 					     size_t clip_gate, QString bad_flag_field) { 
 
   // updated bad_flag_field is returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.FlaggedAdd(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.FlaggedAdd(field.toStdString(), //_data,
 						       _currentRayIdx, _currentSweepIdx,
 						       constant,
 						       clip_gate,
@@ -268,7 +268,7 @@ QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, floa
 QString SoloFunctionsController::FLAGGED_MULTIPLY(QString field, float constant, float bad_data,
 					   size_t clip_gate, QString bad_flag_field) { 
 
-  string tempFieldName = soloFunctionsModel.FlaggedMultiply(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.FlaggedMultiply(field.toStdString(), //_data,
 						     _currentRayIdx, _currentSweepIdx,
 						      constant,
 						      clip_gate,
@@ -285,7 +285,7 @@ QString SoloFunctionsController::AND_BAD_FLAGS_ABOVE(QString field, float consta
 						     QString mask_field, float bad_data,
 						     size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.AndBadFlagsAbove(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.AndBadFlagsAbove(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constant,
 							     clip_gate,
@@ -298,7 +298,7 @@ QString SoloFunctionsController::AND_BAD_FLAGS_BELOW(QString field, float consta
 						     QString mask_field, float bad_data,
 						     size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.AndBadFlagsBelow(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.AndBadFlagsBelow(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constant,
 							     clip_gate,
@@ -312,7 +312,7 @@ QString SoloFunctionsController::AND_BAD_FLAGS_BETWEEN(QString field, float cons
 						       QString mask_field, float bad_data,
 					               size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.AndBadFlagsBetween(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.AndBadFlagsBetween(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constantLower, constantUpper,
 							     clip_gate,
@@ -326,7 +326,7 @@ QString SoloFunctionsController::OR_BAD_FLAGS_ABOVE(QString field, float constan
 						    QString mask_field, float bad_data,
 						    size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.AndBadFlagsAbove(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.AndBadFlagsAbove(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constant,
 							     clip_gate,
@@ -339,7 +339,7 @@ QString SoloFunctionsController::OR_BAD_FLAGS_BELOW(QString field, float constan
 						    QString mask_field, float bad_data,
 						    size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.AndBadFlagsBelow(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.AndBadFlagsBelow(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constant,
 							     clip_gate,
@@ -353,7 +353,7 @@ QString SoloFunctionsController::OR_BAD_FLAGS_BETWEEN(QString field, float const
 						      QString mask_field, float bad_data,
 						      size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.OrBadFlagsBetween(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.OrBadFlagsBetween(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constantLower, constantUpper,
 							     clip_gate,
@@ -367,7 +367,7 @@ QString SoloFunctionsController::XOR_BAD_FLAGS_ABOVE(QString field, float consta
 						     QString mask_field, float bad_data,
 						     size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.XorBadFlagsAbove(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.XorBadFlagsAbove(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constant,
 							     clip_gate,
@@ -381,7 +381,7 @@ QString SoloFunctionsController::XOR_BAD_FLAGS_BELOW(QString field, float consta
 						     float bad_data,
 						     size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.XorBadFlagsBelow(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.XorBadFlagsBelow(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constant,
 							     clip_gate,
@@ -397,7 +397,7 @@ QString SoloFunctionsController::XOR_BAD_FLAGS_BETWEEN(QString field,
 						       float bad_data,
 					               size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.XorBadFlagsBetween(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.XorBadFlagsBetween(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constantLower, constantUpper,
 							     clip_gate,
@@ -419,7 +419,7 @@ QString SoloFunctionsController::XOR_BAD_FLAGS_ABOVE(QString field, float consta
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::ASSERT_BAD_FLAGS(QString field, float bad_data,
 						  size_t clip_gate, QString badFlagMaskFieldName) { 
-  string tempFieldName = soloFunctionsModel.AssertBadFlags(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.AssertBadFlags(field.toStdString(), //_data,
 							   _currentRayIdx, _currentSweepIdx,
 							   clip_gate, bad_data,
 							   badFlagMaskFieldName.toStdString());
@@ -437,7 +437,7 @@ QString SoloFunctionsController::ASSERT_BAD_FLAGS(QString field, float bad_data,
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::CLEAR_BAD_FLAGS(QString field) { //float constant, float bad_data,
   // size_t clip_gate) { 
-  string tempFieldName = soloFunctionsModel.ClearBadFlags(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.ClearBadFlags(field.toStdString(), //_data,
 							  _currentRayIdx, _currentSweepIdx);
 							  
   return QString::fromStdString(tempFieldName);
@@ -446,7 +446,7 @@ QString SoloFunctionsController::CLEAR_BAD_FLAGS(QString field) { //float consta
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::COMPLEMENT_BAD_FLAGS(QString field) { 
 
-  string tempFieldName = soloFunctionsModel.ComplementBadFlags(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.ComplementBadFlags(field.toStdString(), //_data,
 							  _currentRayIdx, _currentSweepIdx);
 							  
   return QString::fromStdString(tempFieldName);
@@ -455,7 +455,7 @@ QString SoloFunctionsController::COMPLEMENT_BAD_FLAGS(QString field) {
 
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::COPY_BAD_FLAGS(QString field, float bad_data, size_t clip_gate) {
-  string tempFieldName = soloFunctionsModel.CopyBadFlags(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.CopyBadFlags(field.toStdString(), //_data,
 							 _currentRayIdx, _currentSweepIdx,
 							 clip_gate, bad_data); 
   return QString::fromStdString(tempFieldName);
@@ -484,7 +484,7 @@ QString SoloFunctionsController::COPY_BAD_FLAGS(QString field, float bad_data, s
 QString SoloFunctionsController::SET_BAD_FLAGS_ABOVE(QString field, float constant, float bad_data,
 					   size_t clip_gate) { 
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.SetBadFlagsAbove(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.SetBadFlagsAbove(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constant,
 							     clip_gate,
@@ -498,7 +498,7 @@ QString SoloFunctionsController::SET_BAD_FLAGS_ABOVE(QString field, float consta
 QString SoloFunctionsController::SET_BAD_FLAGS_BELOW(QString field, float constant, float bad_data,
 					   size_t clip_gate) { 
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.SetBadFlagsBelow(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.SetBadFlagsBelow(field.toStdString(), //_data,
 							     _currentRayIdx, _currentSweepIdx,
 							     constant,
 							     clip_gate,
@@ -513,7 +513,7 @@ QString SoloFunctionsController::SET_BAD_FLAGS_BETWEEN(QString field, float lowe
 						       float upper_threshold, float bad_data,
 						       size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.SetBadFlagsBetween(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.SetBadFlagsBetween(field.toStdString(), //_data,
 							       _currentRayIdx, _currentSweepIdx,
 							       lower_threshold, upper_threshold,
 							       clip_gate,
@@ -527,7 +527,7 @@ QString SoloFunctionsController::REMOVE_RING(QString field, float lower_threshol
                    float upper_threshold, float bad_data,
                    size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.RemoveRing(field.toStdString(), _data,
+  string tempFieldName = soloFunctionsModel.RemoveRing(field.toStdString(), //_data,
                      _currentRayIdx, _currentSweepIdx,
                      lower_threshold, upper_threshold,
                      clip_gate,
@@ -543,7 +543,7 @@ QString SoloFunctionsController::THRESHOLD_ABOVE(QString field,
                   float threshold_bad_data_value,
                   size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.ThresholdFieldAbove(field.toStdString(), _data, 
+  string tempFieldName = soloFunctionsModel.ThresholdFieldAbove(field.toStdString(), //_data, 
                      _currentRayIdx, _currentSweepIdx,
                      threshold, first_good_gate, threshold_field.toStdString(),
                      threshold_bad_data_value,
@@ -565,7 +565,7 @@ QString SoloFunctionsController::THRESHOLD_BELOW(QString field,
                   float threshold_bad_data_value,
                   size_t clip_gate) {
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
-  string tempFieldName = soloFunctionsModel.ThresholdFieldBelow(field.toStdString(), _data, 
+  string tempFieldName = soloFunctionsModel.ThresholdFieldBelow(field.toStdString(), //_data, 
                      _currentRayIdx, _currentSweepIdx,
                      threshold, first_good_gate, threshold_field.toStdString(),
                      threshold_bad_data_value,
@@ -597,7 +597,7 @@ const vector<bool> *SoloFunctionsController::GetBoundaryMask() {
 void SoloFunctionsController::applyBoundary(bool useBoundaryMask) {
 
   //SoloFunctionsModel soloFunctionsModel;
-  soloFunctionsModel.SetBoundaryMask(_data, _currentRayIdx, _currentSweepIdx,
+  soloFunctionsModel.SetBoundaryMask(_currentRayIdx, _currentSweepIdx,
 				     useBoundaryMask);
 }
 
@@ -670,8 +670,13 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName) {
   //_data->loadFieldsFromRays(); // TODO: this is a costly function as it moves the data/or pointers
   // TODO: where are the field names kept? in the table map? can i just change that?
   // Because each RadxRay holds its own FieldNameMap,
-  // TODO: maybe ...
-  vector<RadxRay *> rays = _data->getRays();
+  // TODO: maybe ... no longer relavant?
+
+  // Let the DataModel handle the changes? the renaming?
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->renameField(tempName, userDefinedName);
+  /* moved to DataModel::renameField 
+  vector<RadxRay *> rays = dataModel->getRays();
   // for each ray, 
   vector<RadxRay *>::iterator it;
   for (it=rays.begin(); it != rays.end(); ++it) {
@@ -681,6 +686,7 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName) {
     (*it)->loadFieldNameMap();
 
   }
+  */
   // end for each ray
   //
   /* 
@@ -696,12 +702,16 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName) {
 // Return data for the field, at the current sweep and ray indexes.
 const vector<float> *SoloFunctionsController::getData(string &fieldName) {
 
-  return soloFunctionsModel.GetData(fieldName, _data, _currentRayIdx, _currentSweepIdx);
+  //return soloFunctionsModel.GetData(fieldName, _data, _currentRayIdx, _currentSweepIdx);
+  DataModel *dataModel = DataModel::Instance();
+  return dataModel->GetData(fieldName, _currentRayIdx, _currentSweepIdx);
 
 }
 
 void SoloFunctionsController::setData(string &fieldName, vector<float> *fieldData) {
-        soloFunctionsModel.SetData(fieldName, _data, _currentRayIdx, _currentSweepIdx, fieldData); 
+        //soloFunctionsModel.SetData(fieldName, _data, _currentRayIdx, _currentSweepIdx, fieldData); 
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->SetData(fieldName, _currentRayIdx, _currentSweepIdx, fieldData); 
 }
 
 /*

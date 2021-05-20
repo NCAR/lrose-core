@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdexcept>
+#include "DataModel.hh"
 #include "ScriptEditorModel.hh"
 #include <toolsa/LogStream.hh>
 #include <fstream>
@@ -14,17 +15,19 @@ ScriptEditorModel::ScriptEditorModel()
 
 }
 
+/*
 ScriptEditorModel::ScriptEditorModel(RadxVol *dataVolume)
 {
   _vol = dataVolume;
   _vol->loadFieldsFromRays();
 }
+*/
 
 
 
-vector<string> ScriptEditorModel::getFields()
+vector<string> *ScriptEditorModel::getFields()
 {
-  vector<string> fieldNames;
+  //vector<string> fieldNames;
   /*
   if (_closestRay != NULL) {
     _closestRay->loadFieldNameMap();
@@ -37,10 +40,11 @@ vector<string> ScriptEditorModel::getFields()
     }
   } else {
   */
-    _vol->loadFieldsFromRays();
-    fieldNames = _vol->getUniqueFieldNameList();
+    DataModel *dataModel = DataModel::Instance();
+    //dataModel->loadFieldsFromRays();
+    //fieldNames = dataModel->getUniqueFieldNameList();
     //}
-  return fieldNames;
+  return dataModel->getUniqueFieldNameList();
 }
 
 // TODO: we'll need some way of looping through the rays; "for each ray"

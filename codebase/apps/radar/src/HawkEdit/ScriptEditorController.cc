@@ -57,7 +57,7 @@ ScriptEditorController::ScriptEditorController(ScriptEditorView *view, ScriptEdi
   _currentModel = model;
 
   //  functionsModel = new SoloFunctionsModel(_currentModel);
-  _soloFunctionsController = new SoloFunctionsController(_currentModel->_vol);
+  _soloFunctionsController = new SoloFunctionsController(); // _currentModel->_vol);
 
   setupSoloFunctions(_soloFunctionsController);
   //setupFieldArrays();
@@ -99,10 +99,10 @@ ScriptEditorController::ScriptEditorController(ScriptEditorView *view, ScriptEdi
 
 
 
-vector<string>  ScriptEditorController::getFieldNames()
+vector<string> *ScriptEditorController::getFieldNames()
 {
-  vector<string> names = _currentModel->getFields();
-  cout << " In ScriptEditorController::getFieldNames, there are " << names.size() << " field names" << endl;
+  vector<string> *names = _currentModel->getFields();
+  cout << " In ScriptEditorController::getFieldNames, there are " << names->size() << " field names" << endl;
   return names;
 }
 
@@ -208,7 +208,7 @@ void ScriptEditorController::setupFieldArrays() {
     
     vector<string>::iterator it;
 
-    for(it = initialFieldNames.begin(); it != initialFieldNames.end(); it++) {
+    for(it = initialFieldNames->begin(); it != initialFieldNames->end(); it++) {
       QString fieldName(QString::fromStdString(*it));
 
           // ===== set field to array of numbers; begin =====
@@ -591,13 +591,13 @@ uncate(100);
     // add initialFieldNames_v to currentVariableContext!
     //_addFieldNameVectorsToContext(initialFieldNames, &currentVariableContext);
     vector<string>::iterator nameItr;
-    for (nameItr = initialFieldNames.begin(); nameItr != initialFieldNames.end(); ++nameItr) {
+    for (nameItr = initialFieldNames->begin(); nameItr != initialFieldNames->end(); ++nameItr) {
       QString vectorName(nameItr->c_str());
       //vectorName.append("_v");
       //QString originalName(nameItr->c_str());
       currentVariableContext[vectorName] = vectorName;
     }
-  
+    // TODO: free initialFieldNames they are a copy of the unique fieldNames
       // ======                                                                                            
     //    try {
 
@@ -757,7 +757,7 @@ void ScriptEditorController::_assign(string tempName, string userDefinedName) {
 
 
 // request filled by Controller in response to needFieldNames signal                                       
-void ScriptEditorController::fieldNamesProvided(vector<string> fieldNames) {
+void ScriptEditorController::fieldNamesProvided(vector<string> *fieldNames) {
 
   int useless = 0;
 
@@ -771,7 +771,7 @@ void ScriptEditorController::fieldNamesProvided(vector<string> fieldNames) {
     int someValue = 0;
     vector<string>::iterator it;
 
-    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
+    for(it = fieldNames->begin(); it != fieldNames->end(); it++) {
       QString fieldName(QString::fromStdString(*it));
       // //    try {                                                                                       
       ////QJSValue objectValue = engine.newQObject(new DataField(*it));                                    

@@ -23,6 +23,73 @@ void DataModel::setData(RadxVol *vol) {
 }
 */
 
+// return data for the field, at the sweep and ray index
+const vector<float> *DataModel::GetData(string fieldName,
+              int rayIdx, int sweepIdx)  {
+
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
+       << " sweepIdx=" << sweepIdx;
+
+  _vol.loadRaysFromFields();
+  
+  const RadxField *field;
+
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = _vol.getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  // cerr << "there arenGates " << nGates;
+  const float *data = field->getDataFl32();
+
+  vector<float> *dataVector = new vector<float>(nGates);
+  dataVector->assign(data, data+nGates);
+
+  return dataVector;
+}
+
+void DataModel::SetData(string &fieldName, 
+            int rayIdx, int sweepIdx, vector<float> *fieldData) { 
+
+  // What is being returned? the name of the new field in the model that
+  // contains the results.
+
+  LOG(DEBUG) << "entry with fieldName ... ";
+  LOG(DEBUG) << fieldName;
+
+  _vol.loadRaysFromFields(); // loadFieldsFromRays();
+
+  const RadxField *field;
+  
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = _vol.getRays();
+
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  int nGates = fieldData->size();
+
+  Radx::fl32 missingValue = Radx::missingFl32; 
+  bool isLocal = false;
+  const float *flatData = fieldData->data();
+  RadxField *field1 = ray->addField(fieldName, "m/s", nGates, missingValue, flatData, isLocal);
+  LOG(DEBUG) << "exit ";
+}
+
 void DataModel::readData(string path, vector<string> &fieldNames,
 	bool debug_verbose, bool debug_extra) {
 
@@ -86,6 +153,18 @@ void DataModel::update() {
 
 }
 
+void DataModel::renameField(string currentName, string newName) {
+  vector<RadxRay *> rays = _vol.getRays();	
+  // for each ray, 
+  vector<RadxRay *>::iterator it;
+  for (it=rays.begin(); it != rays.end(); ++it) {
+     // renameField(oldName, newName);
+    (*it)->renameField(currentName, newName);
+    // loadFieldNameMap
+    (*it)->loadFieldNameMap();
+  }
+}
+
 RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
 
   RadxField *dataField = ray->getField(fieldName);
@@ -121,6 +200,21 @@ const vector<RadxRay *> &DataModel::getRays() {
 	return _vol.getRays();
 }
 
+RadxRay *DataModel::getRay(size_t rayIdx) {
+  _vol.loadRaysFromFields();
+  
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = _vol.getRays();
+
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } else {
+  	return ray;
+  }
+}
+
 vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName, double sweepHeight) {
 // TODO: which sweep? 
   _vol.loadRaysFromFields();
@@ -148,6 +242,28 @@ vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName, double swe
   dataVector->assign(data, data+nGates);
 
   return dataVector;
+}
+
+int DataModel::getNGates(size_t rayIdx, string fieldName, double sweepHeight) {
+
+// TODO: which sweep? 
+  _vol.loadRaysFromFields();
+  
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = _vol.getRays();
+
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  const RadxField *field;
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+  return nGates;
 }
 
 float DataModel::getMissingFl32(string fieldName) {
@@ -199,11 +315,49 @@ void DataModel::getPredomRayGeom(double *startRangeKm, double *gateSpacingKm) {
 }
 
 
-const vector<string> &DataModel::getUniqueFieldNameList() {
+vector<string> *DataModel::getUniqueFieldNameList() {
     _vol.loadFieldsFromRays();
-    return _vol.getUniqueFieldNameList();
+    LOG(DEBUG) << "enter";
+    const vector<string> fieldNames = _vol.getUniqueFieldNameList();
+    vector<string> *fieldNamesCopy = new vector<string>;
+    vector<string>::const_iterator it;
+    for (it=fieldNames.begin(); it!=fieldNames.end(); ++it) {
+    	fieldNamesCopy->push_back(*it);
+    }
+    LOG(DEBUG) << "there are " << fieldNamesCopy->size() << " fieldNames";
+    LOG(DEBUG) << "exit";
+    return fieldNamesCopy;
 }
 
+float DataModel::getLatitudeDeg() {
+  return _vol.getLatitudeDeg();
+}
+
+float DataModel::getLongitudeDeg() {
+  return _vol.getLongitudeDeg();
+}
+
+float DataModel::getAltitudeKm() {
+  return _vol.getAltitudeKm();
+}
+
+const RadxGeoref *DataModel::getGeoreference(size_t rayIdx) {
+
+  RadxRay *ray = getRay(rayIdx);
+  // get the winds from the aircraft platform
+  const RadxGeoref *georef = ray->getGeoreference();
+
+  if (georef == NULL) {
+    LOG(DEBUG) << "ERROR - georef is NULL";
+    LOG(DEBUG) << "      trying to recover ...";
+    _vol.setLocationFromStartRay();
+    georef = ray->getGeoreference();
+    if (georef == NULL) {
+      throw "BBUnfoldAircraftWind: Georef is null. Cannot find ew_wind, ns_wind, vert_wind";
+    }
+  } 
+  return georef;
+}
 
 void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
 	bool debug_verbose, bool debug_extra)

@@ -77,7 +77,7 @@ public slots:
   //  void setupSoloFunctions(SoloFunctions *soloFunctions);
 
   void fieldNamesSelected(vector<string> fieldNames);
-  void fieldNamesProvided(vector<string> fieldNames);
+  void fieldNamesProvided(vector<string> *fieldNames);
   void fieldDataSent(vector<float> *data, int useless, int c);
   void azimuthForRaySent(float azimuth, int offsetFromClosestRay,
     int fieldIdx, string fieldName);

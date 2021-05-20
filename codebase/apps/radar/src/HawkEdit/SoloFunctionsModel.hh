@@ -19,12 +19,12 @@ class SoloFunctionsModel
 public:
   SoloFunctionsModel();
 
-  vector<double> RemoveAircraftMotion(vector<double>, RadxVol *vol);
-  vector<double> RemoveAircraftMotion(string fieldName, RadxVol *vol);
-  vector<double> RemoveAircraftMotion(string fieldName, RadxVol *vol,
+  vector<double> RemoveAircraftMotion(vector<double>); // , RadxVol *vol);
+  vector<double> RemoveAircraftMotion(string fieldName); // RadxVol *vol);
+  vector<double> RemoveAircraftMotion(string fieldName, //RadxVol *vol,
 				      int rayIdx, int sweepIdx);
 
-  string RemoveAircraftMotion(string fieldName, RadxVol *vol,
+  string RemoveAircraftMotion(string fieldName, //RadxVol *vol,
 			      int rayIdx, int sweepIdx,
 			      float nyquist_velocity,
 			      size_t clip_gate,
@@ -32,29 +32,29 @@ public:
 			      string newFieldName);
 
 
-  string ZeroMiddleThird(string fieldName,  RadxVol *vol,
+  string ZeroMiddleThird(string fieldName,  //RadxVol *vol,
 			 int rayIdx, int sweepIdx,
 			 string newFieldName);
 
-  string ZeroInsideBoundary(string fieldName,  RadxVol *vol,
+  string ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
 			 int rayIdx, int sweepIdx,
 			 string newFieldName);
 
-  string Despeckle(string fieldName,  RadxVol *vol,
+  string Despeckle(string fieldName,  //RadxVol *vol,
 		   int rayIdx, int sweepIdx,
 		   size_t speckle_length,
 		   size_t clip_gate,
 		   float bad_data_value,
 		   string newFieldName);
 
-    string RemoveRing(string fieldName,  RadxVol *vol,
+    string RemoveRing(string fieldName,  //RadxVol *vol,
 		   int rayIdx, int sweepIdx,
 		   float lower_threshold, float upper_threshold,
 		   size_t clip_gate,
 		   float bad_data_value,
 		   string newFieldName);
 
-  string BBUnfoldFirstGoodGate(string fieldName, RadxVol *vol,
+  string BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vol,
 			       int rayIdx, int sweepIdx,
 			       float nyquist_velocity,
 			       int max_pos_folds,
@@ -67,21 +67,21 @@ public:
 
   // Bad flags operations ...
 
-  string SetBadFlagsAbove(string fieldName,  RadxVol *vol,
+  string SetBadFlagsAbove(string fieldName,  //RadxVol *vol,
 			  int rayIdx, int sweepIdx,
 			  float lower_threshold,
 			  size_t clip_gate,
 			  float bad_data_value,
 			  string badFlagMaskFieldName);
 
-  string SetBadFlagsBelow(string fieldName,  RadxVol *vol,
+  string SetBadFlagsBelow(string fieldName,  //RadxVol *vol,
 			  int rayIdx, int sweepIdx,
 			  float lower_threshold,
 			  size_t clip_gate,
 			  float bad_data_value,
 			  string badFlagMaskFieldName);
 
-  string SetBadFlagsBetween(string fieldName,  RadxVol *vol,
+  string SetBadFlagsBetween(string fieldName,  //RadxVol *vol,
 			  int rayIdx, int sweepIdx,
 			  float lower_threshold,
 			  float upper_threshold,
@@ -89,7 +89,7 @@ public:
 			  float bad_data_value,
 			  string badFlagMaskFieldName);
 
-  string SetBadFlags(string fieldName,  RadxVol *vol,
+  string SetBadFlags(string fieldName,  //RadxVol *vol,
 		     int rayIdx, int sweepIdx,
                      string where,
 		     float lower_threshold, float upper_threshold,
@@ -98,111 +98,129 @@ public:
 		     string badFlagMaskFieldName);
 
 
-  string AssertBadFlags(string fieldName,  RadxVol *vol,
+  string AssertBadFlags(string fieldName,  //RadxVol *vol,
 			int rayIdx, int sweepIdx,
 			size_t clip_gate,
 			float bad_data_value,
 			string badFlagMaskFieldName);
 
-  string ClearBadFlags(string badFlagMaskFieldName,  RadxVol *vol,
+  string ClearBadFlags(string badFlagMaskFieldName,  //RadxVol *vol,
 		       int rayIdx, int sweepIdx);
 		       //size_t clip_gate,
 		       //float bad_data_value,
 		       //string badFlagMaskFieldName);
 
-  string ComplementBadFlags(string fieldName,  RadxVol *vol,
+  string ComplementBadFlags(string fieldName,  //RadxVol *vol,
 			    int rayIdx, int sweepIdx);
 
-  string FlaggedAdd(string fieldName,  RadxVol *vol,
+  string FlaggedAdd(string fieldName,  //RadxVol *vol,
 	     int rayIdx, int sweepIdx,
 	     float constant,
 	     size_t clip_gate,
 	     float bad_data_value,
 	     string flagFieldName);
 
-  string FlaggedMultiply(string fieldName,  RadxVol *vol,
+  string FlaggedMultiply(string fieldName,  //RadxVol *vol,
 	     int rayIdx, int sweepIdx,
 	     float constant,
 	     size_t clip_gate,
 	     float bad_data_value,
 	     string flagFieldName);
 
-  string AndBadFlagsAbove(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string AndBadFlagsAbove(string fieldName,  //RadxVol *vol, 
+  	         int rayIdx, int sweepIdx,
 			 float constant, size_t clip_gate, float bad_data_value,
 			 string newFieldName);
-  string AndBadFlagsBelow(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string AndBadFlagsBelow(string fieldName,  //RadxVol *vol, 
+  	         int rayIdx, int sweepIdx,
 			 float constant, size_t clip_gate, float bad_data_value,
 			 string newFieldName);
-  string AndBadFlagsBetween(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string AndBadFlagsBetween(string fieldName,  //RadxVol *vol, 
+  	         int rayIdx, int sweepIdx,
 			 float constantLower, float constantUpper, size_t clip_gate, float bad_data_value,
 			 string newFieldName);
 
-  string OrBadFlagsAbove(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string OrBadFlagsAbove(string fieldName,  //RadxVol *vol, 
+  	         int rayIdx, int sweepIdx,
 			 float constant, size_t clip_gate, float bad_data_value,
 			 string newFieldName);
-  string OrBadFlagsBelow(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string OrBadFlagsBelow(string fieldName,  //RadxVol *vol, 
+  	         int rayIdx, int sweepIdx,
 			 float constant, size_t clip_gate, float bad_data_value,
 			 string newFieldName);
-  string OrBadFlagsBetween(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string OrBadFlagsBetween(string fieldName,  //RadxVol *vol, 
+  	         int rayIdx, int sweepIdx,
 			 float constantLower, float constantUpper, size_t clip_gate, float bad_data_value,
 			 string newFieldName);
 
-  string XorBadFlagsAbove(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string XorBadFlagsAbove(string fieldName,  //RadxVol *vol, 
+  	         int rayIdx, int sweepIdx,
 			 float constant, size_t clip_gate, float bad_data_value,
 			 string newFieldName);
-  string XorBadFlagsBelow(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string XorBadFlagsBelow(string fieldName,  //RadxVol *vol, 
+  	         int rayIdx, int sweepIdx,
 			 float constant, size_t clip_gate, float bad_data_value,
 			 string newFieldName);
-  string XorBadFlagsBetween(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string XorBadFlagsBetween(string fieldName,  //RadxVol *vol, 
+  	         int rayIdx, int sweepIdx,
 			 float constantLower, float constantUpper, size_t clip_gate, float bad_data_value,
 			 string newFieldName);
   
-  string CopyBadFlags(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string CopyBadFlags(string fieldName,  //RadxVol *vol, 
+  	          int rayIdx, int sweepIdx,
 		      size_t clip_gate, float bad_data_value);
 
   // string flagFieldName
-  string FlaggedAssign(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string FlaggedAssign(string fieldName,  //RadxVol *vol, 
+  	           int rayIdx, int sweepIdx,
 		       float constant,
 		       size_t clip_gate, string maskFieldName);
   // Not implemented
-  string FlaggedCopy(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string FlaggedCopy(string fieldName,  //RadxVol *vol, 
+  	           int rayIdx, int sweepIdx,
 		       size_t clip_gate, string maskFieldName);
 
-  string FlagFreckles(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string FlagFreckles(string fieldName,  //RadxVol *vol, 
+  	          int rayIdx, int sweepIdx,
 		      float freckle_threshold, size_t freckle_avg_count,
 		      size_t clip_gate, float bad_data_value);
 
-  string FlagGlitches(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string FlagGlitches(string fieldName,  //RadxVol *vol, 
+  	          int rayIdx, int sweepIdx,
 		      float deglitch_threshold, int deglitch_radius,
 		      int deglitch_min_gates,
 		      size_t clip_gate, float bad_data_value);
 
-  string ThresholdFieldAbove(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string ThresholdFieldAbove(string fieldName,  //RadxVol *vol, 
+  	             int rayIdx, int sweepIdx,
 			     float scaled_thr,
 			     int first_good_gate, string threshold_field,
 			     float threshold_bad_data_value,
 			     size_t clip_gate, float bad_data_value);
 
-  string ThresholdFieldBelow(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string ThresholdFieldBelow(string fieldName,  //RadxVol *vol, 
+  	             int rayIdx, int sweepIdx,
 			     float scaled_thr,
 			     int first_good_gate, string threshold_field,
 			     float threshold_bad_data_value,
 			     size_t clip_gate, float bad_data_value);
 
-  string ThresholdFieldBetween(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string ThresholdFieldBetween(string fieldName,  //RadxVol *vol, 
+  	               int rayIdx, int sweepIdx,
 			       float lower_threshold, float upper_threshold,
 			       int first_good_gate, string threshold_field,
 			       float threshold_bad_data_value,
 			       size_t clip_gate, float bad_data_value,
 			       string bad_flag_mask_field_name);
 
-  string ForceUnfolding(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string ForceUnfolding(string fieldName,  //RadxVol *vol, 
+  	     int rayIdx, int sweepIdx,
 		 float nyquist_velocity, 
 		 float center,
 		 float bad_data_value, size_t dgi_clip_gate);
   
 
-  string BBUnfoldAircraftWind(string fieldName, RadxVol *vol,
+  string BBUnfoldAircraftWind(string fieldName, //RadxVol *vol,
 			      int rayIdx, int sweepIdx,
 			      float nyquist_velocity,
 			      int max_pos_folds,
@@ -228,7 +246,7 @@ const float *data, float *newData, size_t nGates,
   */
   
   // TODO: need a version with ud_wind or vert_wind, that is supplied by the script.
-  string BBUnfoldLocalWind(string fieldName, RadxVol *vol,
+  string BBUnfoldLocalWind(string fieldName, //RadxVol *vol,
 			   int rayIdx, int sweepIdx,
 			   float nyquist_velocity,
 			   int max_pos_folds,
@@ -252,21 +270,21 @@ const float *data, float *newData, size_t nGates,
   */
 
 
-  void SetBoundaryMask(RadxVol *vol, int rayIdx, int sweepIdx, bool useBoundaryMask);
-  void SetBoundaryMaskOriginal(RadxVol *vol, int rayIdx, int sweepIdx);
-  void CheckForDefaultMask(RadxVol *vol, int rayIdx, int sweepIdx, bool determineMask);
-  void SetDefaultMask(RadxVol *vol, int rayIdx, int sweepIdx);
+  void SetBoundaryMask(int rayIdx, int sweepIdx, bool useBoundaryMask);
+  void SetBoundaryMaskOriginal(int rayIdx, int sweepIdx);
+  void CheckForDefaultMask(int rayIdx, int sweepIdx, bool determineMask);
+  void SetDefaultMask(int rayIdx, int sweepIdx);
   const vector<bool> *GetBoundaryMask();
 
-  void DetermineBoundaryMask(RadxVol *vol, int rayIdx, int sweepIdx); 
+  void DetermineBoundaryMask(int rayIdx, int sweepIdx); 
   void printBoundaryMask();
   RadxField *fetchDataField(RadxRay *ray, string &fieldName);
   const float *fetchData(RadxRay *ray, string &fieldName);
   float *convertValueStringToFloatPtr(string &listOfValues);
-  const vector<float> *GetData(string fieldName,  RadxVol *vol,
-              int rayIdx, int sweepIdx);
-  void SetData(string &fieldName,  RadxVol *vol,
-            int rayIdx, int sweepIdx, vector<float> *data);
+  //const vector<float> *GetData(string fieldName,  RadxVol *vol,
+  //            int rayIdx, int sweepIdx);
+  //void SetData(string &fieldName,  RadxVol *vol,
+  //          int rayIdx, int sweepIdx, vector<float> *data);
 
 
 private:
@@ -276,7 +294,7 @@ private:
   size_t _boundaryMaskLength;
   bool _boundaryMaskSet;
 
-  string _flaggedAddMultiply(string fieldName,  RadxVol *vol,
+  string _flaggedAddMultiply(string fieldName,  //RadxVol *vol,
 	     int rayIdx, int sweepIdx,
              bool multiply,
 	     float constant,
@@ -284,21 +302,24 @@ private:
 	     float bad_data_value,
 	     string flagFieldName);
 
-  string _generalLogicalFx(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string _generalLogicalFx(string fieldName,  //RadxVol *vol, 
+  	           int rayIdx, int sweepIdx,
 			   float constant,
 			   size_t clip_gate, float bad_data_value,
 			   string maskFieldName,
 			   void (SoloFunctionsApi::*function) (float, const float *, size_t,
 			       float, size_t, bool *, const bool *, bool *), SoloFunctionsApi& api);
 
-  string _generalLogicalFx2(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
-			    float constantLower, float constantUpper,
+  string _generalLogicalFx2(string fieldName,  //RadxVol *vol, 
+  	           int rayIdx, int sweepIdx,
+			   float constantLower, float constantUpper,
 			   size_t clip_gate, float bad_data_value,
 			   string maskFieldName,
 			    void (SoloFunctionsApi::*function) (float, float, const float *, size_t,
 			       float, size_t, bool *, const bool *, bool *), SoloFunctionsApi& api);
 
-  string _generalThresholdFx(string fieldName,  RadxVol *vol, int rayIdx, int sweepIdx,
+  string _generalThresholdFx(string fieldName,  //RadxVol *vol, 
+  	          int rayIdx, int sweepIdx,
 		      float threshold,
 		      int first_good_gate, string threshold_field,
 		      float threshold_bad_data_value,

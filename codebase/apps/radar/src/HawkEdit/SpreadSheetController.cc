@@ -102,10 +102,10 @@ void SpreadSheetController::switchRay(float azimuth, float elevation) {
   LOG(DEBUG) << "exit";
 }
 
-vector<string>  SpreadSheetController::getFieldNames()
+vector<string>  *SpreadSheetController::getFieldNames()
 {
-  vector<string> names = _currentModel->getFields();
-  cout << " In SpreadSheetController::getFieldNames, there are " << names.size() << " field names" << endl;
+  vector<string> *names = _currentModel->getFields();
+  LOG(DEBUG) << " In SpreadSheetController::getFieldNames, there are " << names->size() << " field names";
   return names;
 }
 

@@ -21,7 +21,7 @@ public:
 
   // return lists of data
   vector<float> *getData(string fieldName, int offsetFromClosest);
-  vector<string> getFields();
+  vector<string> *getFields();
   float getAzimuthForRay(int offsetFromClosest);
   //  RadxVol getVolume(); 
 

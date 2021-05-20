@@ -1208,7 +1208,7 @@ void SpreadSheetView::fieldNamesSelected(vector<string> fieldNames) {
 
 // request filled by Controller in response to needFieldNames signal
 // fill the list of fields to choose
-void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
+void SpreadSheetView::fieldNamesProvided(vector<string> *fieldNames) {
 
 //  fieldListWidget->addItems(new QStringList(fieldNames));
 /*
@@ -1219,12 +1219,12 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
 */
     int c = 0;
     vector<string>::iterator it; 
-    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
+    for(it = fieldNames->begin(); it != fieldNames->end(); it++) {
       QString the_name(QString::fromStdString(*it));
       LOG(DEBUG) << *it;
       fieldListWidget->addItem(the_name); // , new QTableWidgetItem(the_name));
     }
-
+    delete fieldNames;
     LOG(DEBUG) << "exit";
 }
 

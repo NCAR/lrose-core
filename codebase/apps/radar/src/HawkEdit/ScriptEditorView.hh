@@ -42,7 +42,7 @@ public:
   vector<float> *getDataForVariableFromScriptEditor(int column, string fieldName);
 
   //void setSelectionToValue(QString value);
-
+  void closeEvent();
 
 public slots:
     void updateStatus(QTableWidgetItem *item);
@@ -72,6 +72,7 @@ signals:
   void applyVolumeEdits();
   void runOneTimeOnlyScript(QString oneTimeOnlyScript);
   void runForEachRayScript(QString forEachRayScript, bool useBoundary);
+  void scriptEditorClosed();
 
 protected:
     void setupContextMenu();

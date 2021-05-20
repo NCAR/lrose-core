@@ -29,7 +29,7 @@ public:
   ScriptEditorController(ScriptEditorView *view);
   ScriptEditorController(ScriptEditorView *view, ScriptEditorModel *model);
 
-  vector<string> getFieldNames();
+  vector<string> *getFieldNames();
   // vector<float> *getData(string fieldName);
   //void setData(string fieldName, vector<float> *data);
 
@@ -61,13 +61,13 @@ private:
 
   QJSEngine engine;
 
-  vector<string> initialFieldNames;
+  vector<string> *initialFieldNames;
 
   void setupBoundaryArray();
   void setupFieldArrays();
   void saveFieldArrays(std::map<QString, QString> &previousVariableContext);
   void setupSoloFunctions(SoloFunctionsController *soloFunctions);
-  void fieldNamesProvided(vector<string> fieldNames);
+  void fieldNamesProvided(vector<string> *fieldNames);
   void _assign(string tempName, string userDefinedName);
   void _addFieldNameVectorsToContext(vector<string> &fieldNames, 
     std::map<QString, QString> *currentVariableContext);

@@ -222,6 +222,7 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   _rayLocationController = new RayLocationController();
 
   sheetView = NULL;
+  scriptEditorView = NULL;
 
   // set up windows
 
@@ -711,7 +712,7 @@ void PolarManager::_createActions()
 
   _editAct = new QAction(tr("Edit Script"), this);
   _editAct->setStatusTip(tr("Solo Edit using (Java)Script"));
-  //connect(_editAct, SIGNAL(triggered()), this, SLOT(_scriptEditorSetup()));  
+  connect(_editAct, SIGNAL(triggered()), this, SLOT(_scriptEditorSetup()));  
 
 }
 
@@ -5456,6 +5457,45 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
 
 }
 
+void PolarManager::_scriptEditorSetup() {
+  LOG(DEBUG) << "enter";
+  try {
+    EditRunScript();
+  } catch (const string& ex) {
+    errorMessage("EditRunScript Error", ex);
+  }  
+  LOG(DEBUG) << "exit";  
+}
+
+
+void PolarManager::EditRunScript() {
+  LOG(DEBUG) << "enter";
+  if (scriptEditorView == NULL) {
+    // create the view
+
+    scriptEditorView = new ScriptEditorView(this);
+
+    // create the model
+    ScriptEditorModel *model = new ScriptEditorModel(); // _vol);
+    
+    // create the controller
+    //ScriptEditorController *
+    scriptEditorControl = new ScriptEditorController(scriptEditorView, model);
+
+    // connect some signals and slots in order to retrieve information
+    // and send changes back to display
+                                                                           
+    connect(scriptEditorControl, SIGNAL(scriptChangedVolume(QStringList)),
+        this, SLOT(updateVolume(QStringList)));
+    connect(scriptEditorView, SIGNAL(scriptEditorClosed()), this, SLOT(scriptEditorClosed()));
+
+    
+    scriptEditorView->init();
+  }
+  scriptEditorView->show();
+  // scriptEditorView->layout()->setSizeConstraint(QLayout::SetFixedSize);
+  LOG(DEBUG) << "exit";
+}
 
 void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)
 {
@@ -5579,6 +5619,11 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
 void PolarManager::spreadSheetClosed() {
   //delete sheetView;  this is handled by the close event
   sheetView = NULL;
+}
+
+void PolarManager::scriptEditorClosed() {
+  //delete sheetView;  this is handled by the close event
+  scriptEditorView = NULL;
 }
 
 /////////////////////////////////////////////////////

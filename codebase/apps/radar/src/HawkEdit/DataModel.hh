@@ -33,6 +33,7 @@
 
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxGeoref.hh>
 
 #include <vector>
 
@@ -51,8 +52,16 @@ public:
   void readData(string path, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
   void writeData(string path);
+
   void update();
+  void SetData(string &fieldName, 
+            int rayIdx, int sweepIdx, vector<float> *fieldData);
+
+  void renameField(string currentName, string newName);
+
   void get();
+  const vector<float> *GetData(string fieldName,
+              int rayIdx, int sweepIdx);
 
   RadxTime getStartTimeSecs();
   RadxTime getEndTimeSecs();
@@ -61,6 +70,7 @@ public:
   const float *fetchData(RadxRay *ray, string &fieldName);
   size_t getNRays(); // string fieldName, double sweepAngle);
   const vector<RadxRay *> &getRays();
+  RadxRay *getRay(size_t rayIdx);
   vector<float> *getRayData(size_t rayIdx, string fieldName, double sweepHeight);
   float getMissingFl32(string fieldName);
   double getRayAzimuthDeg(size_t rayIdx);
@@ -70,9 +80,15 @@ public:
   const string &getPathInUse();
   const RadxPlatform &getPlatform();
 
-  void getPredomRayGeom(double *startRangeKm, double *gateSpacingKm);
-  const vector<string> &getUniqueFieldNameList();
+  float getLatitudeDeg();
+  float getLongitudeDeg();
+  float getAltitudeKm();
 
+  void getPredomRayGeom(double *startRangeKm, double *gateSpacingKm);
+  const RadxGeoref *getGeoreference(size_t rayIdx);
+  vector<string> *getUniqueFieldNameList();
+
+  int getNGates(size_t rayIdx, string fieldName = "", double sweepHeight = 0.0);
 
 
 private:

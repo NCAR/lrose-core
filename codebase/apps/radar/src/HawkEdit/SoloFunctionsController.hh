@@ -24,7 +24,7 @@ class SoloFunctionsController : public QObject
 
 public:
   //  SoloFunctions(SpreadSheetController *controller);
-  SoloFunctionsController(RadxVol *data, QObject *parent = nullptr);
+  SoloFunctionsController(QObject *parent = nullptr);
   //SoloFunctions(QObject *parent = nullptr) : QObject(parent) { }
 
 

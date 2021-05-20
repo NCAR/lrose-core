@@ -829,6 +829,10 @@ void ScriptEditorView::criticalMessage(std::string message)
 }
 
 
+void ScriptEditorView::closeEvent() {
+    emit scriptEditorClosed();
+}
+
 /*
 void ScriptEditorView::printQJSEngineContext() {
 

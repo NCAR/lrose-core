@@ -58,6 +58,8 @@
 #include "DisplayFieldView.hh"
 #include "SpreadSheetController.hh"
 #include "SpreadSheetView.hh"
+#include "ScriptEditorController.hh"
+#include "ScriptEditorView.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -199,6 +201,7 @@ public slots:
   //void _updateField(size_t fieldId);
 
   void spreadSheetClosed();
+  void scriptEditorClosed();
 
   void errorMessage(string title, string message);
 
@@ -254,6 +257,9 @@ private:
 
   SpreadSheetController *spreadSheetControl;
   SpreadSheetView *sheetView;
+
+  ScriptEditorController *scriptEditorControl;
+  ScriptEditorView *scriptEditorView;
 
   // windows
 
@@ -741,6 +747,9 @@ private slots:
   void _examineSpreadSheetSetup(double  closestAz = 30.0, double range = 0.0);
   void ExamineEdit(double azimuth, double elevation, size_t fieldIndex,
     double range);
+
+  void _scriptEditorSetup();
+  void EditRunScript();
 
 };
 

@@ -29,7 +29,7 @@ public:
 
 
 
-  vector<string> getFieldNames();
+  vector<string> *getFieldNames();
   vector<float> *getData(string fieldName, int offsetFromClosest);
   float getAzimuthForRay(int offsetFromClosest);
   void getRangeData(float *startingRangeKm, float *gateSpacingKm);
