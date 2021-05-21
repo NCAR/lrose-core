@@ -6123,9 +6123,9 @@ int MdvxField::decompress() const
   
   for (int iz = 0; iz < nz; iz++) {
 
-    char *compressed_plane;
-    void *uncompressed_plane;
-    ui64 nbytes_uncompressed;
+    char *compressed_plane = NULL;
+    void *uncompressed_plane = NULL;
+    ui64 nbytes_uncompressed = 0;
     ui32 this_offset = plane_offsets[iz] + 2 * index_array_size;
 
     // check for valid offset
