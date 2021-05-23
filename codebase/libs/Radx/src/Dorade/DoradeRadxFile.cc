@@ -3881,10 +3881,10 @@ int DoradeRadxFile::_writeRadar()
       // check for missing data values
       double prt2 = ray.getPrtSec();
       if (prt2 != Radx::missingMetaDouble) {
-        _ddRadar.prt2 = prt2 * 1000.0 / ray.getPrtRatio(); // msecs
+        _ddRadar.prt2 = (prt2 * 1000.0) / ray.getPrtRatio(); // msecs
       }
     }
-    //    double pulseWidthUsec = ray.getPulseWidthUsec();
+    //double pulseWidthUsec = ray.getPulseWidthUsec();
     //double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
     //_ddRadar.pulse_width = pulseWidthMeters;
     //double pulseWidthUsec = ray.getPulseWidthUsec();
