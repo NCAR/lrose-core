@@ -665,7 +665,7 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
   _nyquist = _wavelengthM / (4.0 * _prtSec);
   switch (_prodHdr.end.trig_rate_scheme) {
     case PRF_DUAL_4_5:
-      _prtRatio = 5.0 / 4.0;
+      _prtRatio = 4.0 / 5.0;
       _nyquist *= 4.0;
       _dualPrt = true;
       _prtRatio = 5.0 / 4.0;
@@ -673,12 +673,12 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
     case PRF_DUAL_3_4:
       _nyquist *= 3.0;
       _dualPrt = true;
-      _prtRatio = 4.0 / 3.0;
+      _prtRatio = 3.0 / 4.0;
       break;
     case PRF_DUAL_2_3:
       _nyquist *= 2.0;
       _dualPrt = true;
-      _prtRatio = 3.0 / 2.0;
+      _prtRatio = 2.0 / 3.0;
       break;
     default:
       _dualPrt = false;
