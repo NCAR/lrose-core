@@ -97,6 +97,7 @@ set (SRCS
       ./tserver/TitanSimpleTrack.cc
       ./tserver/TitanServer.cc
       ./tserver/TitanTrackEntry.cc
+      ./xml/Titan2Xml.cc
    )
 
 if(APPLE)
