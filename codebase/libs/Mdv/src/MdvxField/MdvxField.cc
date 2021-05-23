@@ -246,7 +246,7 @@ MdvxField::MdvxField(const Mdvx::field_header_t &f_hdr,
     
   } // else if (alloc_mem)
 
-  if (_volbufSizeValid()) {
+  if (_volbufSizeValid() && _fhdr.volume_size > 0 && vol_data != NULL) {
     
     // uncompress if needed
     // compression is deferred until write
@@ -747,7 +747,7 @@ void MdvxField::setHdrsAndVolData(const Mdvx::field_header_t &f_hdr,
     
   } // else if (alloc_mem)
 
-  if (_volbufSizeValid()) {
+  if (_volbufSizeValid() && _fhdr.volume_size > 0 && vol_data != NULL) {
     
     // uncompress if needed
     // compression is deferred until write
