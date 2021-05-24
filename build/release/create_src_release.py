@@ -555,6 +555,7 @@ class LroseCore < Formula
   url '{0}'
   version '{1}'
   sha256 '{2}'
+  license 'BSD'
 
   depends_on 'hdf5'
   depends_on 'netcdf'

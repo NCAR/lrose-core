@@ -45,6 +45,16 @@ Let us assume you have downloaded the latest core distribution, containing all o
   brew install lrose-core.rb
 ```
 
+Note that homebrew often prints warnings that are benign.
+This is because we are using formulae rather than casks.
+For example you should expect to see:
+
+```
+  Error: Failed to load cask: lrose-core.rb
+  Cask 'lrose-core' is unreadable
+  Warning: Treating lrose-core.rb as a formula.
+```
+
 While homebrew is building, it creates log files so you can track the progress.
 
 You can ignore the following message:
@@ -70,13 +80,27 @@ You will see the following log files:
   01.configure
   02.make
   02.make.cc
+  03.make
+  03.make.cc
+  04.make
+  04.make.cc
 ```
+
+The log files contain the following:
+
+* 02.make: building libs/tdrp
+* 03.make: building apps/tdrp/src/tdrp_gen
+* 04.make: building everything else
+
+02.make contains the logs for building libs/tdrp.
 
 You can watch the progress using:
 
 ```
   tail -f 01.configure
   tail -f 02.make
+  tail -f 03.make
+  tail -f 04.make
 ```
 
 If the build is successful, lrose will be installed in:
@@ -171,6 +195,16 @@ To perform the install:
   brew install lrose-fractl.rb
 ```
 
+Note that homebrew often prints warnings that are benign.
+This is because we are using formulae rather than casks.
+For example you should expect to see:
+
+```
+  Error: Failed to load cask: lrose-fractl.rb
+  Cask 'lrose-fractl' is unreadable
+  Warning: Treating lrose-fractl.rb as a formula.
+```
+
 To upgrade:
 
 ```
@@ -199,6 +233,16 @@ To perform the install:
   brew install lrose-vortrac.rb
 ```
 
+Note that homebrew often prints warnings that are benign.
+This is because we are using formulae rather than casks.
+For example you should expect to see:
+
+```
+  Error: Failed to load cask: lrose-vortrac.rb
+  Cask 'lrose-vortrac' is unreadable
+  Warning: Treating lrose-vortrac.rb as a formula.
+```
+
 To upgrade:
 
 ```
@@ -225,6 +269,16 @@ To perform the install:
 ```
   cd ~/Downloads
   brew install lrose-samurai.rb
+```
+
+Note that homebrew often prints warnings that are benign.
+This is because we are using formulae rather than casks.
+For example you should expect to see:
+
+```
+  Error: Failed to load cask: lrose-samurai.rb
+  Cask 'lrose-samurai' is unreadable
+  Warning: Treating lrose-samurai.rb as a formula.
 ```
 
 To upgrade:
