@@ -726,9 +726,15 @@ def createCMakeListsLib(libDir, libList):
             print("  compileFile: %s" % (compileFile), file=sys.stderr)
         print("-----------------------------------------", file=sys.stderr)
 
+    # determine the lib list to use
+
+    libListInUse = libList
+    if (libName == 'tdrp'):
+        libListInUse = [ 'tdrp' ]
+
     # write out CMakeLists.txt
 
-    writeCMakeListsLib(libName, libSrcDir, libList, libCompileFileList)
+    writeCMakeListsLib(libName, libSrcDir, libListInUse, libCompileFileList)
 
 ########################################################################
 # parse the LROSE Makefile to get the lib name
@@ -974,10 +980,19 @@ def createCMakeListsApp(appDir, libList):
     needQt = checkForQt(makefilePath)
     needX11 = checkForX11(makefilePath)
     
+    # determine the lib list to use
+
+    libListInUse = libList
+    linkLibListInUse = linkLibList
+    if (appName == 'tdrp_gen'):
+        libListInUse = [ 'tdrp' ]
+        linkLibListInUse = [ 'tdrp' ]
+
     # write out CMakeLists.txt
 
     writeCMakeListsApp(appName, appDir, appCompileFileList,
-                       libList, linkLibList, needQt, needX11)
+                       libListInUse, linkLibListInUse,
+                       needQt, needX11)
 
 ########################################################################
 # parse the LROSE Makefile to get the app name
