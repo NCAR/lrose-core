@@ -1,0 +1,330 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/**********************************************************
+ * paramdef.GpmHdf2Mdv
+ *
+ * This file contains the TDRP parameter definitions for
+ * GpmHdf2Mdv
+ */
+
+commentdef
+{
+  p_header = "GpmHdf2Mdv";
+  p_text = "This program converts TRMM Version 7 HDF4 files into MDV format.";
+};
+
+
+/***********************************************************************
+ * Debugging
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING PARAMETERS";
+  p_text = "Parameters controlling debug outputs.";
+};
+
+paramdef boolean
+{
+  p_descr = "debug flag";
+  p_default = false;
+} debug;
+
+paramdef boolean
+{
+  p_descr = "verbose debug flag";
+  p_default = false;
+} verbose;
+
+
+/***********************************************************************
+ * Process parameters
+ */
+
+commentdef
+{
+  p_header = "PROCESS PARAMETERS";
+};
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+
+/***********************************************************************
+ * Process I/O.
+ */
+
+commentdef
+{
+  p_header = "PROCESS I/O PARAMETERS";
+  p_text = "Parameters describing the input and output locations.";
+};
+
+typedef enum
+{
+  FILE_LIST,
+  INPUT_DIR,
+  INPUT_DIR_RECURSE,
+  LATEST_DATA
+} trigger_mode_t;
+
+paramdef enum trigger_mode_t
+{
+  p_descr = "Input triggering mode";
+  p_help = "\tIn FILE_LIST mode, the program operates on the files specified "
+           "on the command line.\n"
+           "\tIn INPUT_DIR mode, the program will process new files as they "
+           "appear in the input_dir directory.\n"
+           "\tIn INPUT_DIR_RECURSE mode, the program will process new files "
+           "as they appear in the input_dir directory or in any "
+           "subdirectory.\n"
+           "\tIn LATEST_DATA mode, the program will process new files as they "
+           "appear in the _latest_data_info file in the input_dir directory.\n";
+  p_default = "FILE_LIST";
+} trigger_mode;
+
+paramdef string
+{
+  p_descr = "Input directory";
+  p_default = "$(RAP_DATA_DIR)/raw/TRMM";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Input filename substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will only process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} input_substring;
+
+paramdef string
+{
+  p_descr = "Input filename exclude substring";
+  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
+           "The program will not process files whose name contains "
+           "this substring. "
+           "Set to \"\" to process all files in the input directory.\n";
+  p_default = "";
+} exclude_substring;
+
+paramdef long
+{
+  p_descr = "Maximum number of seconds input files are valid.";
+  p_help = "Used only if trigger_mode is set to LATEST_DATA.";
+  p_default = 600;
+} max_valid_secs;
+
+paramdef string
+{
+  p_descr = "Output URL";
+  p_default = "mdvp:://localhost::mdv/TRMM";
+} output_url;
+
+typedef enum
+{
+  PROJ_FLAT,
+  PROJ_LATLON,
+  PROJ_LC2
+} proj_type_t;
+
+typedef struct
+{
+  proj_type_t proj_type;
+  double minx;
+  double miny;
+  int nx;
+  int ny;
+  double dx;
+  double dy;
+  double origin_lat;
+  double origin_lon;
+  double rotation;
+  double lat1;
+  double lat2;
+} proj_t;
+
+paramdef struct proj_t
+{
+  p_descr = "Output projection";
+  p_default = { PROJ_FLAT, 0.0, 0.0, 0, 0, 0.0, 0.0, 
+                0.0, 0.0, 0.0, 0.0, 0.0 };
+} output_proj;
+
+typedef enum
+{
+  FULL_RES_DATA,
+  LOW_RES_DATA
+} data_type_t;
+
+typedef enum
+{
+  LEVELS_LISTED,
+  LEVELS_CONST_DZ
+} level_spec_type_t;
+
+typedef enum
+{
+  VERT_TYPE_SATELLITE_IMAGE,
+  VERT_TYPE_Z
+} vert_type_t;
+
+typedef struct
+{
+  string sds_field_name;
+  data_type_t data_type;
+  long num_fields;
+  string scales;
+  string biases;
+  string missing_values1;
+  string missing_values2;
+  string missing_values3;
+  string bad_values1;
+  string bad_values2;
+  string bad_values3;
+  string mdv_field_names;
+  string mdv_field_units;
+  level_spec_type_t level_spec_type;
+  vert_type_t vert_level_type;
+  long num_vert_levels;
+  string vert_levels;
+  double min_vert_level;
+  double delta_vert_level;
+  string radiance_convert;
+  boolean invert_vert_levels;
+} output_field_t;
+
+paramdef struct output_field_t
+{
+  p_descr = "Information about the TRMM data fields to be included in "
+            "the output file.";
+  p_help = "\tsds_field_name - The name of the field in the SDS section of "
+           "the HDF file.\n"
+           "\tdata_type - How the data is stored in the HDF file.\n"
+           "\t\tFULL_RES_DATA is stored with the same number of scans and pixels "
+           "as the geolocation data.\n"
+           "\t\tLOW_RES_DATA is stored with the same number of scans, but half "
+           "the pixels of the geolocation data. "
+           "The data is assumed to occupy every other pixel in each scan.\n"
+           "\tnum_fields - Number of fields in the TRMM SDS data array. "
+           "All of the fields in a requested SDS data array must be "
+           "processed.\n"
+           "\tscales - List of scale values to apply to the data in the "
+           "TRMM file. "
+           "There must either be num_fields scales specified or this string "
+           "must be empty. "
+           "The scales are delimited by commas. "
+           "If the string is empty, no scale value will be applied (same as "
+           "setting scale to 1.0).\n"
+           "\tbiases - List of bias values to apply to the data in the "
+           "TRMM file. "
+           "There must be either num_fields biases specified or this string "
+           "must be empty. "
+           "The biases are delimited by commas. "
+           "If the string is empty, no bias will be applied (same as setting "
+           "bias to 0.0).\n"
+           "The final data value is calculated as:\n"
+           "\t\t data_value = (trmm_file_value / scale) - bias\n"
+           "\tmissing_values1, missing_values2, missing_values3 - List of "
+           "missing data values to apply to the "
+           "data in the TRMM file. "
+           "There must either be num_fields missing values specified or this "
+           "string must be empty. "
+           "The missing values are delimited by commas. "
+           "If this string is empty, no missing data value is applied to the "
+           "input data.\n"
+           "\tbad_values1, bad_values2, bad_values3 - List of "
+           "bad data values to apply to the "
+           "data in the TRMM file. "
+           "There must either be num_fields bad values specified or this "
+           "string must be empty. "
+           "The bad values are delimited by commas. "
+           "If this string is empty, no bad data value is applied to the "
+           "input data.\n"
+           "\tmdv_field_names - The field names to use for the fields in "
+           "the output MDV file. "
+           "There must be num_fields names specified. "
+           "The names are delimited by commas.\n"
+           "\tmdv_field_units - The units for each of the MDV output fields. "
+           "There must be num_fields of these. "
+           "The names are delimited by commas.\n"
+           "\tinput_level_type - Flag indicating how the vertical levels are "
+           "specified in this parameter file.\n"
+           "\t\tLEVELS_LISTED - The actual vertical level values are listed "
+           "in the vert_levels paramter.\n"
+           "\t\tLEVELS_CONST_DZ - The levels are calculated using "
+           "num_vert_levels, min_vert_level and vert_level_delta.\n"
+           "Note that this description of the vertical levels must match the "
+           "data as it appears in the HDF file.\n"
+           "\tvert_level_type - The type of vertical levels in the data.\n"
+           "\tnum_vert_levels - The number of vertical levels in this field.\n"
+           "\tvert_levels - The vertical levels for this field. "
+           "There must be num_vert_levels vertical levels specified. "
+           "The vertical levels are delimited by commas. "
+           "Only used if level_spec_type is LEVELS_LISTED.\n"
+           "\tmin_vert_level - Minimum vertical level value. "
+           "Only used if level_spec_type is LEVELS_CONST_DZ.\n"
+           "\tdelta_vert_level - Delta vertical level value. "
+           "Only used if level_spec_type is LEVELS_CONST_DZ.\n"
+           "\tradiance_convert - String indicating what type of radiance to "
+           "brightness temperature conversion to use for each output field. "
+           "The must either be num_fields conversions specified (delimited "
+           "by commas) or this string must be empty. "
+           "The valid conversions are:\n"
+           "\t\tCONVERT_RAD_NONE - don't do a radiance conversion\n"
+           "\t\tCONVERT_RAD_VIS\n"
+           "\t\tCONVERT_RAD_CH3\n"
+           "\t\tCONVERT_RAD_CH4\n"
+           "\t\tCONVERT_RAD_CH5\n\n"
+           "Note that if any of the fields uses CONVERT_RAD_VIS radiance "
+           "conversion, then the TRMM file must contain the solar "
+           "calibration and local direction information. "
+           "This was only tested on the 1B01 files.\n"
+           "\tinvert_vert_levels - Flag indicating whether to invert the "
+           "vertical levels when writing the data to the MDV file. "
+           "If set to false, the order of the vertical levels in the MDV file "
+           "will match the order of the vertical levels in the HDF file. "
+           "If set to true, the order of the vertical levels in the MDV file "
+           "will be reversed.\n";
+  p_default = { { "highResCh", FULL_RES_DATA, 2, "100.0,100.0",
+                  "-100.0,-100.0", "-99999.0,-99999.0", "", "", "", "", "",
+                  "highResCh1,highResCh2", "K,K",
+                  LEVELS_LISTED, VERT_TYPE_SATELLITE_IMAGE,
+                  1, "0.0", 0.0, 0.0,
+                  "", false } };
+} output_fields[];
+
+paramdef string
+{
+  p_descr = "Path for the brightness temperature table.";
+  p_help = "Used only if one or more of the fields in output_fields "
+           "uses CONVERT_RAD_CH3, CONVERT_RAD_CH4 or CONVERT_RAD_CH5 "
+           "radiance conversion.";
+  p_default = "bttable";
+} brightness_temp_table;
