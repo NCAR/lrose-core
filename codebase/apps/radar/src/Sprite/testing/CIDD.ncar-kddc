@@ -139,6 +139,7 @@ LONGPRT_CSR LONGPRT_CSR  $(HOME)/data/sprite/cfradial/kddc.longprt&CSR  snr.colo
 LONGPRT_WFARM_FLAG    LONGPRT_WFARM_FLAG  $(HOME)/data/sprite/cfradial/kddc.longprt&WFARM_FLAG    cmd_flag.colors  none -5 80 5 radial 1 0
 LONGPRT_WFARM_CLUT LONGPRT_WFARM_CLUT  $(HOME)/data/sprite/cfradial/kddc.longprt&CLUT        dbz.colors dB -5 80 5 radial 1 0
 LONGPRT_DBZ_WFARM  LONGPRT_DBZ_WFARM $(HOME)/data/sprite/cfradial/kddc.longprt&DBZ_WFARM      dbz.colors   dBZ -5 80 5 radial 1 0
+LONGPRT_SNR2       LONGPRT_SNR2      $(HOME)/data/sprite/cfradial/kddc.longprt&DBZ_WFARM      snr.colors   dB -5 80 5 radial 1 0
 
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
 ======== ========  mdvp::static//localhost:0:/spacer&Elevation  none.colors   m   -5   80  7  dcont   1 0
