@@ -2679,11 +2679,58 @@ void Beam::_filterDpSimHvFixedPrt()
     }
 
     fields.test3 = fields.spectral_snr + fields.clut_2_wx_ratio;
-    if (fields.test2 == 1.0) {
-      fields.test4 = fieldsF.dbz - fields.spectral_snr;
+    
+    // if (fields.spectral_snr >= 25.0 &&
+    //     fields.cmd >= 0.5) {
+    //   fields.test4 = fieldsF.dbz - fields.spectral_snr;
+    // } else {
+    //   fields.test4 = fieldsF.dbz;
+    // }
+    
+    if (fields.spectral_snr >= 25.0 &&
+        fields.cmd >= 0.5 &&
+        fieldsF.dbz > -99) {
+      double rangeKm = _startRangeKm + igate * _gateSpacingKm;
+      double snrF = fieldsF.dbz - _calib.getBaseDbz1kmHc() - 20.0 * log10(rangeKm);
+      double snrLinear = pow(10.0, snrF / 10.0);
+      double pwrLinear = (snrLinear + 1.0) * calibNoise;
+      double specSnrLinear = pow(10.0, fields.spectral_snr / 10.0);
+      double specPwrLinear = (specSnrLinear + 1.0) * calibNoise * 2.0;
+      double pwrCorrLinear = pwrLinear - specPwrLinear;
+      if (pwrCorrLinear > calibNoise) {
+        fields.test4 = fieldsF.dbz - fields.spectral_snr;
+      }
     } else {
       fields.test4 = fieldsF.dbz;
     }
+    
+    // if (fields.spectral_snr >= 25.0 &&
+    //     fields.clut_2_wx_ratio >= 5.0 &&
+    //     fields.cmd >= 0.5) {
+    //   fields.test4 = 75;
+    // }
+
+    // if (fields.spectral_snr >= 25.0 &&
+    //     fields.cmd >= 0.5 &&
+    //     fieldsF.dbz > -99) {
+      
+    //   double rangeKm = _startRangeKm + igate * _gateSpacingKm;
+    //   double snrF = fieldsF.dbz - _calib.getBaseDbz1kmHc() - 20.0 * log10(rangeKm);
+    //   double snrLinear = pow(10.0, snrF / 10.0);
+    //   double pwrLinear = (snrLinear + 1.0) * calibNoise;
+    //   double specSnrLinear = pow(10.0, fields.spectral_snr / 10.0);
+    //   double specPwrLinear = (specSnrLinear + 1.0) * calibNoise * 2.0;
+    //   double pwrCorrLinear = pwrLinear - specPwrLinear;
+    //   if (pwrCorrLinear < calibNoise) {
+    //     pwrCorrLinear = calibNoise * 1.1;
+    //   }
+    //   double snrCorrLinear = (pwrCorrLinear - calibNoise) / calibNoise;
+    //   double snrCorrDb = 10.0 * log10(snrCorrLinear);
+    //   double dbzCorr = _calib.getBaseDbz1kmHc() + snrCorrDb + 20.0 * log10(rangeKm);
+      
+    //   fields.test4 = dbzCorr;
+
+    // }
     
     // testing csr from 3-order regression filter
 
