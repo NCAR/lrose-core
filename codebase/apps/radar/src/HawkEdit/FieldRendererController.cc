@@ -442,19 +442,21 @@ void FieldRendererController::refreshImages(int width, int height, QSize image_s
     FieldRendererView *field = *it; // _fieldRenderers[ifield];
       // If needed, create new image for this field                                          
       QImage *image = field->getImage();
-      if (image != NULL) {
-        if (image_size != image->size()) {
+      // Always refresh image corrects zoom refresh.
+      //if (image != NULL) {
+      //  if (image_size != image->size()) {
           field->createImage(width, height); // fieldRendererView is locked procede with changes
           LOG(DEBUG) << "lock obtained";
-          QBrush *background_brush = new QBrush("purple");
+          QBrush *background_brush = new QBrush("purple"); // TODO: fix up; free this
+          *background_brush = backgroundColor;
           field->fillBackground(background_brush); // background_brush_color_rgb);                                  
           field->setTransform(zoomTransform);
           field->runIt(); 
           // fieldRendererView is unlocked
           LOG(DEBUG) << "lock released";
           //delete background_brush;
-        }
-      }
+       // }
+      //}
   } // ifield                                                                                
   LOG(DEBUG) << "exit";
 }

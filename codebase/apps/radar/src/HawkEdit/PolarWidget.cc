@@ -186,11 +186,15 @@ void PolarWidget::setArchiveMode(bool archive_mode)
 
 void PolarWidget::unzoomView()
 {
+  LOG(DEBUG) << "enter";
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
+  _dirty = true;
   _refreshImages();
+  update();
+  LOG(DEBUG) << "exit";
 }
 
 
@@ -363,6 +367,7 @@ void PolarWidget::backgroundColor(const QColor &color)
   QPalette new_palette = palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
+  _dirty = true;
   _refreshImages();
 }
 
@@ -584,6 +589,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     
     // Update the window in the renderers
     
+    _dirty = true;
     _refreshImages();
 
   }
@@ -743,7 +749,7 @@ void PolarWidget::_resetWorld(int width, int height)
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
   _setGridSpacing();
-
+  _dirty = true;
 }
 
 

@@ -279,6 +279,7 @@ class DLL_EXPORT PpiWidget : public PolarWidget
   void _accumulateStats(const RadxRay *ray);
 
   RadxVol *_vol;
+
 };
 
 

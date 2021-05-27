@@ -82,6 +82,7 @@ PpiWidget::PpiWidget(QWidget* parent,
 
   spreadSheetControl = NULL;
   sheetView = NULL;
+  _dirty = false;
 
 }
 
@@ -893,7 +894,7 @@ void PpiWidget::configureRange(double max_range)
   // Initialize the images used for double-buffering.  For some reason,
   // the window size is incorrect at this point, but that will be corrected
   // by the system with a call to resize().
-
+  _dirty = true;
   _refreshImages();
   
 }
@@ -1000,7 +1001,7 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
     _manager.enableZoomButton();
     
     // Update the window in the renderers
-    
+    _dirty = true;
     _refreshImages();
     showSelectedField();
 
@@ -1668,13 +1669,17 @@ void PpiWidget::_refreshImages()
   //            QTransform zoomTransform,
   //            size_t selectedField,
   //            vector< PpiBeam* > &Beams);
-
-  _fieldRendererController->refreshImages(width(), height(), size(),
+  LOG(DEBUG) << "enter " << "image dirty? = " << (_dirty ? "true" : "false");
+  if (_dirty) {
+    _fieldRendererController->refreshImages(width(), height(), size(),
             _backgroundBrush, // .color().rgb(),
             _zoomTransform); 
             //selectedField);
             // _ppiBeams);
+    _dirty = false;
+  }
 
+  LOG(DEBUG) << "exit";
   /*
   for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     

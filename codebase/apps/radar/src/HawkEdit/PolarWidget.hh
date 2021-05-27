@@ -550,6 +550,8 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   virtual const RadxRay *_getClosestRay(double x_km, double y_km) = 0;
 
+  bool _dirty;
+
  public:
 
   
