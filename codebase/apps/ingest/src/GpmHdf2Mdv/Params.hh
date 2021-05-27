@@ -1,3 +1,26 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -45,17 +68,46 @@ public:
   // enum typedefs
 
   typedef enum {
-    FILE_LIST = 0,
-    INPUT_DIR = 1,
-    INPUT_DIR_RECURSE = 2,
-    LATEST_DATA = 3
-  } trigger_mode_t;
+    DEBUG_OFF = 0,
+    DEBUG_NORM = 1,
+    DEBUG_VERBOSE = 2,
+    DEBUG_EXTRA = 3
+  } debug_t;
 
   typedef enum {
-    PROJ_FLAT = 0,
-    PROJ_LATLON = 1,
-    PROJ_LC2 = 2
-  } proj_type_t;
+    ARCHIVE = 0,
+    REALTIME = 1,
+    FILELIST = 2
+  } mode_t;
+
+  typedef enum {
+    PROJ_LATLON = 0,
+    PROJ_LAMBERT_CONF = 3,
+    PROJ_MERCATOR = 4,
+    PROJ_POLAR_STEREO = 5,
+    PROJ_FLAT = 8,
+    PROJ_OBLIQUE_STEREO = 12,
+    PROJ_TRANS_MERCATOR = 15,
+    PROJ_ALBERS = 16,
+    PROJ_LAMBERT_AZIM = 17,
+    PROJ_VERT_PERSP = 18
+  } projection_t;
+
+  typedef enum {
+    ENCODING_INT8 = 1,
+    ENCODING_INT16 = 2,
+    ENCODING_FLOAT32 = 5
+  } encoding_type_t;
+
+  typedef enum {
+    COMPRESSION_NONE = 0,
+    COMPRESSION_RLE = 1,
+    COMPRESSION_LZO = 2,
+    COMPRESSION_ZLIB = 3,
+    COMPRESSION_BZIP = 4,
+    COMPRESSION_GZIP = 5,
+    COMPRESSION_GZIP_VOL = 6
+  } compression_type_t;
 
   typedef enum {
     FULL_RES_DATA = 0,
@@ -75,19 +127,13 @@ public:
   // struct typedefs
 
   typedef struct {
-    proj_type_t proj_type;
-    double minx;
-    double miny;
     int nx;
     int ny;
+    double minx;
+    double miny;
     double dx;
     double dy;
-    double origin_lat;
-    double origin_lon;
-    double rotation;
-    double lat1;
-    double lat2;
-  } proj_t;
+  } grid_params_t;
 
   typedef struct {
     char* sds_field_name;
@@ -407,30 +453,128 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  tdrp_bool_t debug;
-
-  tdrp_bool_t verbose;
+  debug_t debug;
 
   char* instance;
 
-  trigger_mode_t trigger_mode;
+  tdrp_bool_t register_with_procmap;
+
+  int reg_interval;
+
+  mode_t mode;
 
   char* input_dir;
 
-  char* input_substring;
+  tdrp_bool_t use_ldata_info_file;
 
-  char* exclude_substring;
+  int max_realtime_age;
 
-  long max_valid_secs;
+  tdrp_bool_t process_latest_file_only;
+
+  char* file_name_ext;
+
+  char* file_name_substr;
+
+  tdrp_bool_t remap_output_projection;
+
+  tdrp_bool_t auto_remap_to_latlon;
+
+  projection_t remap_projection;
+
+  grid_params_t remap_grid;
+
+  double remap_rotation;
+
+  double remap_origin_lat;
+
+  double remap_origin_lon;
+
+  double remap_lat1;
+
+  double remap_lat2;
+
+  double remap_central_scale;
+
+  double remap_tangent_lat;
+
+  double remap_tangent_lon;
+
+  tdrp_bool_t remap_pole_is_north;
+
+  double remap_persp_radius;
+
+  double remap_false_northing;
+
+  double remap_false_easting;
+
+  tdrp_bool_t remap_set_offset_origin;
+
+  double remap_offset_origin_latitude;
+
+  double remap_offset_origin_longitude;
 
   char* output_url;
 
-  proj_t output_proj;
+  encoding_type_t output_encoding_type;
+
+  compression_type_t output_compression_type;
+
+  char* data_set_name;
+
+  char* data_set_source;
+
+  char* data_set_info;
 
   output_field_t *_output_fields;
   int output_fields_n;
 
-  char* brightness_temp_table;
+  projection_t input_projection;
+
+  double input_proj_rotation;
+
+  double input_proj_origin_lat;
+
+  double input_proj_origin_lon;
+
+  double input_proj_lat1;
+
+  double input_proj_lat2;
+
+  double input_proj_central_scale;
+
+  double input_proj_tangent_lat;
+
+  double input_proj_tangent_lon;
+
+  tdrp_bool_t input_proj_pole_is_north;
+
+  double input_proj_persp_radius;
+
+  tdrp_bool_t input_xy_is_latlon;
+
+  tdrp_bool_t resample_latlon_onto_regular_grid;
+
+  char* netcdf_dim_time;
+
+  char* netcdf_dim_x;
+
+  char* netcdf_dim_y;
+
+  char* netcdf_dim_z;
+
+  char* netcdf_var_base_time;
+
+  char* base_time_string;
+
+  char* netcdf_var_time_offset;
+
+  char* netcdf_var_z;
+
+  char* netcdf_var_y;
+
+  char* netcdf_var_x;
+
+  tdrp_bool_t treat_ncbyte_as_unsigned;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -439,7 +583,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[17];
+  mutable TDRPtable _table[73];
 
   const char *_className;
 

@@ -21,407 +21,174 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/**
- *
- * @file GpmHdf2Mdv.hh
- *
- * @class GpmHdf2Mdv
- *
- * GpmHdf2Mdv program object.
- *  
- * @date 10/30/2008
- *
- */
+/////////////////////////////////////////////////////////////
+// GpmHdf2Mdv.hh
+//
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// May 2021
+//
+///////////////////////////////////////////////////////////////
+//
+// GpmHdf2Mdv reads GPM data in HDF5 format, and
+// converts to MDV
+//
+////////////////////////////////////////////////////////////////
 
-#ifndef GpmHdf2Mdv_HH
-#define GpmHdf2Mdv_HH
-
-#include "SdsDataField.hh"
+#ifndef GpmHdf2Mdv_H
+#define GpmHdf2Mdv_H
 
 #include <string>
-#include <sys/time.h>
-#include <vector>
-
-#include <dsdata/DsTrigger.hh>
+#include <toolsa/TaArray.hh>
+#include <didss/DsInputPath.hh>
 #include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxPjg.hh>
-#include <toolsa/DateTime.hh>
-
+#include <Mdv/MdvxProj.hh>
+#include <Mdv/MdvxRemapLut.hh>
+#include <Ncxx/Nc3File.hh>
+#include <Ncxx/Nc3File.hh>
+#include <Ncxx/Hdf5xx.hh>
 #include "Args.hh"
 #include "Params.hh"
-#include "RadConvert.hh"
-
 using namespace std;
 
-/** 
- * @class GpmHdf2Mdv
- */
+////////////////////////
+// This class
 
-class GpmHdf2Mdv
-{
- public:
-
-  ////////////////////
-  // Public members //
-  ////////////////////
-
-  /**
-   * @brief Flag indicating whether the program status is currently okay.
-   */
-
-  bool okay;
-
-
-  ////////////////////
-  // Public methods //
-  ////////////////////
-
-  //////////////////////////////
-  // Constructors/Destructors //
-  //////////////////////////////
-
-  /**
-   * @brief Destructor
-   */
-
-  ~GpmHdf2Mdv(void);
+class GpmHdf2Mdv {
   
+public:
 
-  /**
-   * @brief Retrieve the singleton instance of this class.
-   *
-   * @param[in] argc Number of command line arguments.
-   * @param[in] argv List of command line arguments.
-   *
-   * @return Returns a pointer to the GpmHdf2Mdv instance.
-   */
+  // constructor
 
-  static GpmHdf2Mdv *Inst(int argc, char **argv);
+  GpmHdf2Mdv (int argc, char **argv);
 
-
-  /**
-   * @brief Retrieve the singleton instance of this class.
-   *
-   * @return Returns a pointer to the GpmHdf2Mdv instance.
-   */
-
-  static GpmHdf2Mdv *Inst();
+  // destructor
   
+  ~GpmHdf2Mdv();
 
-  /**
-   * @brief Initialize the local data.
-   *
-   * @return Returns true if the initialization was successful,
-   *         false otherwise.
-   */
+  // run 
 
-  bool init();
+  int Run();
+
+  // data members
+
+  bool isOK;
+
+protected:
   
+private:
 
-  /////////////////////
-  // Running methods //
-  /////////////////////
+  static const fl32 _missingFloat;
 
-  /**
-   * @brief Run the program.
-   */
+  string _progName;
+  char *_paramsPath;
+  Args _args;
+  Params _params;
+  DsInputPath *_input;
 
-  void run();
+  // NetCDF file
+
+  Nc3File *_ncFile;
+  Nc3Error *_ncErr;
   
+  // NetCDF dimensions
 
- private:
+  Nc3Dim *_timeDim;
+  Nc3Dim *_zDim;
+  Nc3Dim *_yDim;
+  Nc3Dim *_xDim;
 
-  /////////////////////
-  // Private members //
-  /////////////////////
+  // NetCDF coordinate variables
 
-  /**
-   * @brief Singleton instance pointer.
-   */
+  Nc3Var *_baseTimeVar;
+  Nc3Var *_timeOffsetVar;
+  Nc3Var *_zVar;
+  Nc3Var *_yVar;
+  Nc3Var *_xVar;
 
-  static GpmHdf2Mdv *_instance;
+  TaArray<float> _zArray_, _yArray_, _xArray_;
+  float *_zArray, *_yArray, *_xArray;
+
+  // NetCDF attributes
+
+  string _source;
+  string _history;
+
+  // data set members
   
-  /**
-   * @brief Program name.
-   */
+  MdvxProj _inputProj;
+  MdvxRemapLut _remapLut;
+  int _nTimes;
+  time_t _validTime;
+  int _nx, _ny, _nz;
+  double _minx, _miny, _minz;
+  double _maxx, _maxy, _maxz;
+  double _dx, _dy, _dz;
+  bool _yIsReversed;
+  bool _dxIsConstant, _dyIsConstant;
 
-  char *_progName;
+  int _nxValid, _nyValid;
+  int _ixValidStart, _ixValidEnd;
+  int _iyValidStart, _iyValidEnd;
 
-  /**
-   * @brief Command line arguments.
-   */
+  // private methods
 
-  Args *_args;
+  int _processFile(const char *input_path);
+  void _initInputProjection();
 
-  /**
-   * @brief Parameter file parameters.
-   */
+  /// open netcdf file
+  /// create error object so we can handle errors
+  /// Returns 0 on success, -1 on failure
 
-  Params *_params;
+  int _openNc3File(const string &path);
+
+  /// close netcdf file if open
+  /// remove error object if it exists
   
-  /**
-   * @brief Data triggering object.
-   */
+  void _closeNc3File();
 
-  DsTrigger *_dataTrigger;
+  // load up dimensions and variables
+
+  int _loadMetaData();
+
+  /// set MDV headers
+
+  int _setMasterHeader(DsMdvx &mdvx, int itime);
+  int _addDataFields(DsMdvx &mdvx, int itime);
+  int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime, bool xySwapped);
   
-  /**
-   * @brief Projection to use for output MDV file.
-   */
+  MdvxField *_createMdvxField(const string &fieldName,
+                              const string &longName,
+                              const string &units,
+                              int nx, int ny, int nz,
+                              double minx, double miny, double minz,
+                              double dx, double dy, double dz,
+                              const float *vals);
 
-  MdvxPjg _outputProj;
-  
-  /**
-   * @brief The object used to convert radiance values to brightness
-   *        temperature values.
-   */
+  MdvxField *_createRegularLatlonField(const string &fieldName,
+                                       const string &longName,
+                                       const string &units,
+                                       const float *vals);
 
-  RadConvert _radConvert;
-  
-  /**
-   * @brief List of Input SDS data field handlers.
-   */
+  void _printFile(Nc3File &ncf);
+  void _printAtt(Nc3Att *att);
+  void _printVarVals(Nc3Var *var);
 
-  vector< SdsDataField* > _dataHandlers;
-  
+  void _correctForSunAngle(MdvxField *field);
 
-  /**
-   * @brief Flag indicating whether the solar calibration data needs to
-   *        be loaded in the Geolocation object.
-   */
+  void _remapOutput(DsMdvx &mdvx);
+  void _autoRemapToLatLon(DsMdvx &mdvx);
 
-  bool _loadSolarCalibData;
-  
+  bool _checkDxIsConstant();
+  bool _checkDyIsConstant();
+  void _initMercatorFromInputCoords();
+  int _findValidLatLonLimits();
 
-  /**
-   * @brief Flag indicating whether the brightness temperature table needs
-   *        to be loaded in the radiance conversion object.
-   */
-
-  bool _loadBtTable;
-  
-
-  /////////////////////
-  // Private methods //
-  /////////////////////
-
-  /**
-   * @brief Constructor
-   *
-   * @param[in] argc Number of command line arguments.
-   * @param[in] argv List of command line arguments.
-   *
-   * @note Private because this is a singleton object.
-   */
-
-  GpmHdf2Mdv(int argc, char **argv);
-  
-
-  /**
-   * @brief Add the scan delta time field to the MDV file.
-   *
-   * @param[in,out] mdvx The MDV file.
-   * @param[in] geolocation The geolocation and scan time information from
-   *                        the HDF file.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _addMdvDeltaTimeField(DsMdvx &mdvx,
-			     const HdfFile &hdf_file) const;
-  
-
-  /**
-   * @brief Add the scan time field to the MDV file.
-   *
-   * @param[in,out] mdvx The MDV file.
-   * @param[in] geolocation The geolocation and scan time information from
-   *                        the HDF file.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _addMdvScanTimeField(DsMdvx &mdvx,
-			    const HdfFile &hdf_file) const;
-  
-
-  /**
-   * @brief Add the solar magnitude field to the MDV file.
-   *
-   * @param[in,out] mdvx The MDV file.
-   * @param[in] geolocation The geolocation information from
-   *                        the HDF file.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _addMdvSolarMagField(DsMdvx &mdvx,
-			    const HdfFile &hdf_file) const;
-  
-
-  /**
-   * @brief Add the solar zenith field to the MDV file.
-   *
-   * @param[in,out] mdvx The MDV file.
-   * @param[in] geolocation The geolocation information from
-   *                        the HDF file.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _addMdvSolarZenithField(DsMdvx &mdvx,
-			       const HdfFile &hdf_file) const;
-  
-
-  /**
-   * @brief Add the geolocation fields to the given MDV file.
-   *
-   * @param[in,out] mdvx The MDV file.
-   * @param[in] geolocation The geolocation information for each
-   *                        point in the HDF file.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _addMdvGeolocationFields(DsMdvx &mdvx,
-				const HdfFile &hdf_file) const;
-  
-
-  /**
-   * @brief Create the indicated blank MDV field.
-   *
-   * @param[in] field_name Field name.
-   * @param[in] field_units Field units.
-   *
-   * @return Returns a pointer to the blank MDV field on success, 0 on failure.
-   */
-
-  MdvxField *_createBlankMdvField(const string &field_name,
-				  const string &field_units) const;
-  
-
-  /**
-   * @brief Create the indicated blank MDV time field.
-   *
-   * @param[in] field_name Field name.
-   * @param[in] field_units Field units.
-   *
-   * @return Returns a pointer to the blank MDV field on success, 0 on failure.
-   */
-
-  MdvxField *_createBlankMdvTimeField(const string &field_name,
-				      const string &field_units) const;
-  
-
-  /**
-   * @brief Create the field-related vectors for the given output field.
-   *
-   * @param[in] output_field Output field information from the parameter file.
-   * @param[out] field_info List of output fields for this SDS field.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _createFieldVector(Params::output_field_t output_field,
-			  vector< FieldInfo > &field_info);
-  
-
-  /**
-   * @brief Create the vertical levels vector for the given output field.
-   *
-   * @param[in] output_field Output field information from the parameter file.
-   * @param[out] vert_levels List of vertical levels for this field.
-   * @param[out] dz_constant Flag indicating whether dz is constant.
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _createVertLevelsVector(Params::output_field_t output_field,
-			       vector< double > &vert_levels,
-			       bool &dz_constant) const;
-  
-
-  /**
-   * @brief Initialize the data handler objects.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _initDataHandlers();
-  
-
-  /**
-   * @brief Initialize the output projection.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _initOutputProjection();
-  
-
-  /**
-   * @brief Initialize the data trigger.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _initTrigger();
-  
-
-  /**
-   * @brief Parse a string containing a list of doubles into a vector.
-   *
-   * @param[in] double_list_string String containing list of double values,
-   *                               comma-delimited.
-   * @param[out] double_list Vector of corresponding double values.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  static bool _parseDoubleList(const char *double_list_string,
-			       vector< double > &double_list);
-
-
-  /**
-   * @brief Parse a string containing a list of strings into a vector.
-   *
-   * @param[in] string_list_string String containint list of strings,
-   *                               comma-delimited.
-   * @param[out] string_list Vector of corresponding string values.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  static bool _parseStringList(const char *string_list_string,
-			       vector< string > &string_list);
-  
-
-  /**
-   * @brief Process the given file.
-   *
-   * @param[in] file_path Path for the input file to process.
-   *
-   * @return Returns true on success, false on failure.
-   */
-
-  bool _processFile(const string &file_path);
-  
-
-  /**
-   * @brief Set the master header information in the given MDV file.
-   *
-   * @param[in,out] mdvx MDV file.
-   * @param[in] begin_time Scan begin time.
-   * @param[in] end_time Scan end time.
-   * @param[in] input_path Input file path.
-   */
-
-  void _setMasterHeader(DsMdvx &mdvx,
-			const DateTime &begin_time,
-			const DateTime &end_time,
-			const string &input_path) const;
-  
+  int _getClosestLatIndex(double latitude, double tolerance);
+  int _getClosestLonIndex(double longitude, double tolerance);
 
 };
 
-
 #endif
+

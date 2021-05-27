@@ -21,165 +21,177 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/**
- *
- * @file Args.cc
- *
- * @class Args
- *
- * Class controlling the command line arguments for this program.
- *  
- * @date 10/31/2008
- *
- */
-
-#include <fstream>
-#include <iostream>
-#include <string>
-
-#include <string.h>
-
-#include <toolsa/os_config.h>
-#include <tdrp/tdrp.h>
-#include <toolsa/DateTime.hh>
-#include <toolsa/str.h>
-#include <toolsa/umisc.h>
+//////////////////////////////////////////////////////////
+// Args.cc : command line args
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// May 2021
+//
+//////////////////////////////////////////////////////////
 
 #include "Args.hh"
-
+#include "Params.hh"
+#include <cstring>
+#include <iostream>
+#include <toolsa/DateTime.hh>
+#include <toolsa/umisc.h>
 using namespace std;
 
-/**********************************************************************
- * Constructor
- */
+// parse
 
-Args::Args (int argc, char **argv, char *prog_name) :
-  _progName(prog_name)
+int Args::parse(int argc, char **argv, string &prog_name)
+
 {
-  string tmp_str;
 
-  // Intialize
+  int iret = 0;
+  char tmp_str[256];
 
-  bool okay = true;
+  // intialize
 
   TDRP_init_override(&override);
+  startTime = 0;
+  endTime = 0;
+
+  // loop through args
   
-  // search for command options
-  
-  for (int i =  1; i < argc; i++)
-  {
-    if (STRequal_exact(argv[i], "--") ||
-	STRequal_exact(argv[i], "-help") ||
-	STRequal_exact(argv[i], "-man"))
-    {
-      _usage(stdout);
-      exit(0);
-    }
-    else if (STRequal_exact(argv[i], "-debug"))
-    {
-      tmp_str = "debug = true;";
-      TDRP_add_override(&override, tmp_str.c_str());
-    }
-    else if (STRequal_exact(argv[i], "-verbose"))
-    {
-      tmp_str = "verbose = true;";
-      TDRP_add_override(&override, tmp_str.c_str());
-    }
-    else if (STRequal_exact(argv[i], "-i"))
-    {
-      while (argc > i+1 &&
-	     argv[i+1][0] != '-')
-	_inputFileList.push_back(argv[++i]);
+  for (int i =  1; i < argc; i++) {
 
-      TDRP_add_override(&override, "trigger_mode = FILE_LIST;");
-    }
-    else if (STRequal_exact(argv[i], "-fl") ||
-	     STRequal_exact(argv[i], "-file_list"))
-    {
-      string input_file = argv[++i];
+    if (!strcmp(argv[i], "--") ||
+	!strcmp(argv[i], "-h") ||
+	!strcmp(argv[i], "-help") ||
+	!strcmp(argv[i], "-man")) {
+      
+      usage(prog_name, cout);
+      exit (0);
+      
+    } else if (!strcmp(argv[i], "-debug") ||
+	       !strcmp(argv[i], "-d")) {
+      
+      sprintf(tmp_str, "debug = DEBUG_NORM;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-verbose") ||
+	       !strcmp(argv[i], "-v")) {
+      
+      sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-extra") ||
+	       !strcmp(argv[i], "-vv")) {
+      
+      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-i")) {
+      if (i < argc - 1) {
+	sprintf(tmp_str, "instance = \"%s\";", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+    } else if (!strcmp(argv[i], "-in_dir")) {
+      if(i < argc - 1) {
+	sprintf(tmp_str, "input_dir = \"%s\";", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+    } else if (!strcmp(argv[i], "-out_url")) {
+      if(i < argc - 1) {
+	sprintf(tmp_str, "output_url = \"%s\";", argv[i+1]);
+	TDRP_add_override(&override, tmp_str);
+      }
+      else {
+	iret = -1;
+      }
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+	startTime = DateTime::parseDateTime(argv[++i]);
+	if (startTime == DateTime::NEVER)
+	{
+	  iret = -1;
+	}
+	else
+	{
+	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	iret = -1;
+      }
+	
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+	endTime = DateTime::parseDateTime(argv[++i]);
+	if (endTime == DateTime::NEVER)
+	{
+	  iret = -1;
+	}
+	else
+	{
+	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	iret = -1;
+      }
+	
+    } else if (!strcmp(argv[i], "-if") ||
+               !strcmp(argv[i], "-f")) {
+	
+      if (i < argc - 1) {
+	// load up file list vector. Break at next arg which
+	// start with -
+	for (int j = i + 1; j < argc; j++) {
+	  if (argv[j][0] == '-') {
+	    break;
+	  } else {
+	    inputFileList.push_back(argv[j]);
+	  }
+	}
+	sprintf(tmp_str, "mode = FILELIST;");
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+      
+    } // if
+    
+  } // i
 
-      if (!_readFileListFile(input_file))
-	okay = false;
-
-      TDRP_add_override(&override, "trigger_mode = FILE_LIST;");
-    }
-  } /* i */
-
-  if (!okay)
-  {
-    _usage(stderr);
-    exit(-1);
+  if (iret) {
+    usage(prog_name, cerr);
   }
+
+  return (iret);
+    
 }
 
-
-/**********************************************************************
- * Destructor
- */
-
-Args::~Args(void)
+void Args::usage(string &prog_name, ostream &out)
 {
-  TDRP_free_override(&override);
-}
+
+  out << "Usage: " << prog_name << " [options as below]\n"
+      << "options:\n"
+      << "       [ --, -h, -help, -man ] produce this list.\n"
+      << "       [ -debug, -d ] print debug messages\n"
+      << "       [ -extra, -vv ] print extra verbose debug messages\n"
+      << "       [ -end \"yyyy mm dd hh mm ss\"] end time\n"
+      << "         Sets mode to ARCHIVE\n"
+      << "       [ -in_dir ?] Input direcetory - REALTIME and ARCHIVE\n"
+      << "       [ -out_url ?] Output URL\n"
+      << "       [ -if ?, -f ?] input file list\n"
+      << "         Sets mode to FILELIST\n"
+      << "       [ -mode ?] ARCHIVE, REALTIME  or FILELIST\n"
+      << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
+      << "         Sets mode to ARCHIVE\n"
+      << "       [ -verbose, -v ] print verbose debug messages\n"
+      << endl;
+
+  out << "Note: you must specify start and end dates." << endl << endl;
   
+  Params::usage(out);
 
-/**********************************************************************
- *              Private Member Functions                              *
- **********************************************************************/
-
-/**********************************************************************
- * _readFileListFile()
- */
-
-bool Args::_readFileListFile(const string &file_name)
-{
-  static const string method_name = "Args::_readFileListFile()";
-
-  // Open the file list file
-
-  ifstream infile(file_name.c_str());
-  if (!infile.is_open())
-  {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Error opening file list file: " << file_name << endl;
-
-    return false;
-  }
-
-  // Read and save the input file paths
-
-  char buffer[1024];
-
-  while (infile.getline(buffer, sizeof(buffer)))
-    _inputFileList.push_back(buffer);
-  
-  infile.close();
-
-  return true;
-}
-
-
-/**********************************************************************
- * _usage()
- */
-
-void Args::_usage(FILE *stream)
-{
-  fprintf(stream, "%s%s%s",
-	  "This program converts TRMM HDF4 files into MDV format.\n"
-	  "\n"
-	  "Usage:\n\n", _progName.c_str(), " [options] as below:\n\n"
-	  "       [ --, -help, -man ]\n"
-	  "           produce this list.\n"
-	  "       [ -debug ]\n"
-	  "           turn debugging on\n"
-	  "       [ -fl <file list file> ]\n"
-	  "           file which contains list of files to process\n"
-	  "       [ -i <input file list> ]\n"
-	  "           list of netCDF sweep files to process\n"
-	  "\n"
-    );
-
-
-  TDRP_usage(stream);
 }

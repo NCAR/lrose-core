@@ -21,78 +21,97 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/**
- *
- * @file Main.cc
- *
- * Main function.
- *  
- * @date 10/30/2008
- *
- */
-
-#include <stdio.h>
-
-#include <toolsa/port.h>
-#include <toolsa/umisc.h>
+///////////////////////////////////////////////////////////////
+//
+// main for GpmHdf2Mdv
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// May 2021
+//
+///////////////////////////////////////////////////////////////
+//
+// GpmHdf2Mdv reads GPM data in HDF5 format, and
+// converts to MDV
+//
+////////////////////////////////////////////////////////////////
 
 #include "GpmHdf2Mdv.hh"
-
+#include <toolsa/str.h>
+#include <toolsa/port.h>
+#include <signal.h>
+#include <new>
 using namespace std;
 
-// Prototypes for static functions
+// file scope
 
-static void tidy_and_exit(int sig);
+static void tidy_and_exit (int sig);
+static void out_of_store();
+static GpmHdf2Mdv *_prog;
+static int _argc;
+static char **_argv;
 
-
-// Global variables
-
-GpmHdf2Mdv *Prog = (GpmHdf2Mdv *)NULL;
-
-
-/*********************************************************************
- * main()
- */
+// main
 
 int main(int argc, char **argv)
+
 {
-  // Create program object.
 
-  Prog = GpmHdf2Mdv::Inst(argc, argv);
-  if (!Prog->okay)
-    return -1;
+  _argc = argc;
+  _argv = argv;
 
-  if (!Prog->init())
-    return -1;
+  // create program object
+
+  _prog = new GpmHdf2Mdv(argc, argv);
+  if (!_prog->isOK) {
+    return(-1);
+  }
+
+  // set signal handling
   
-  // Register function to trap termination and interrupts.
-
-  PORTsignal(SIGQUIT, tidy_and_exit);
-  PORTsignal(SIGTERM, tidy_and_exit);
   PORTsignal(SIGINT, tidy_and_exit);
+  PORTsignal(SIGHUP, tidy_and_exit);
+  PORTsignal(SIGTERM, tidy_and_exit);
+  PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
 
-  // Run the program.
+  // set new() memory failure handler function
 
-  Prog->run();
+  set_new_handler(out_of_store);
+
+  // run it
+
+  int iret = _prog->Run();
 
   // clean up
 
-  tidy_and_exit(0);
-  return 0;
+  tidy_and_exit(iret);
+  return (iret);
+  
 }
 
-/*********************************************************************
- * tidy_and_exit()
- */
+///////////////////
+// tidy up on exit
 
-static void tidy_and_exit(int sig)
+static void tidy_and_exit (int sig)
+
 {
-  // Delete the program object.
 
-  if (Prog != (GpmHdf2Mdv *)NULL)
-    delete Prog;
-
-  // Now exit the program.
-
+  delete(_prog);
   exit(sig);
+
+}
+////////////////////////////////////
+// out_of_store()
+//
+// Handle out-of-memory conditions
+//
+
+static void out_of_store()
+
+{
+
+  fprintf(stderr, "FATAL ERROR - program GpmHdf2Mdv\n");
+  fprintf(stderr, "  Operator new failed - out of store\n");
+  exit(-1);
+
 }

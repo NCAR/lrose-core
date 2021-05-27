@@ -21,161 +21,323 @@
 /* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
-/**********************************************************
- * paramdef.GpmHdf2Mdv
- *
- * This file contains the TDRP parameter definitions for
- * GpmHdf2Mdv
- */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for GpmHdf2Mdv
+//
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2021
+//
 
-commentdef
-{
+commentdef {
   p_header = "GpmHdf2Mdv";
-  p_text = "This program converts TRMM Version 7 HDF4 files into MDV format.";
+  p_text = "This program converts GPM swath data, in HDF5, to MDV/NetCDF.";
 };
 
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
 
-/***********************************************************************
- * Debugging
- */
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
 
-commentdef
+paramdef enum debug_t
 {
-  p_header = "DEBUGGING PARAMETERS";
-  p_text = "Parameters controlling debug outputs.";
-};
-
-paramdef boolean
-{
-  p_descr = "debug flag";
-  p_default = false;
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
-paramdef boolean
-{
-  p_descr = "verbose debug flag";
-  p_default = false;
-} verbose;
-
-
-/***********************************************************************
- * Process parameters
- */
-
-commentdef
-{
-  p_header = "PROCESS PARAMETERS";
-};
-
-paramdef string
-{
+paramdef string {
+  p_default = "test";
   p_descr = "Process instance";
   p_help = "Used for registration with procmap.";
-  p_default = "Test";
 } instance;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with procmap while running.";
+  p_help = "See 'instance'.";
+} register_with_procmap;
 
-/***********************************************************************
- * Process I/O.
- */
+paramdef int {
+  p_default = 60;
+  p_descr = "Registration interval.";
+  p_help = "The number of seconds between expected procmap registrations.";
+} reg_interval;
 
-commentdef
-{
-  p_header = "PROCESS I/O PARAMETERS";
-  p_text = "Parameters describing the input and output locations.";
-};
+commentdef {
+  p_header = "DATA INPUT";
+}
 
-typedef enum
-{
-  FILE_LIST,
-  INPUT_DIR,
-  INPUT_DIR_RECURSE,
-  LATEST_DATA
-} trigger_mode_t;
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
 
-paramdef enum trigger_mode_t
-{
-  p_descr = "Input triggering mode";
-  p_help = "\tIn FILE_LIST mode, the program operates on the files specified "
-           "on the command line.\n"
-           "\tIn INPUT_DIR mode, the program will process new files as they "
-           "appear in the input_dir directory.\n"
-           "\tIn INPUT_DIR_RECURSE mode, the program will process new files "
-           "as they appear in the input_dir directory or in any "
-           "subdirectory.\n"
-           "\tIn LATEST_DATA mode, the program will process new files as they "
-           "appear in the _latest_data_info file in the input_dir directory.\n";
-  p_default = "FILE_LIST";
-} trigger_mode;
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in FILELIST mode, at least) MUST contain a "
+           "day-directory below the data file -- ./data_file.mdv will not "
+           "work as a file path";
+} mode;
 
-paramdef string
-{
-  p_descr = "Input directory";
-  p_default = "$(RAP_DATA_DIR)/raw/TRMM";
+paramdef string {
+  p_default = "raw/input";
+  p_descr = "Directory for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
 } input_dir;
 
-paramdef string
-{
-  p_descr = "Input filename substring";
-  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
-           "The program will only process files whose name contains "
-           "this substring. "
-           "Set to \"\" to process all files in the input directory.\n";
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_age;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use only the latest file to have arrived.";
+  p_help = "REALTIME mode only. If true, will process only the latest file on startup, if the file has an age less than max_realtime_age. If false, on startup will process all files with age less than max_realtime_age.";
+} process_latest_file_only;
+
+paramdef string {
   p_default = "";
-} input_substring;
+  p_descr = "Specify the extension of the files to be read.";
+  p_help = "If blank, all extensions will be used.";
+} file_name_ext;
 
-paramdef string
-{
-  p_descr = "Input filename exclude substring";
-  p_help = "Used only if trigger_mode is set to INPUT_DIR or INPUT_DIR_RECURSE. "
-           "The program will not process files whose name contains "
-           "this substring. "
-           "Set to \"\" to process all files in the input directory.\n";
+paramdef string {
   p_default = "";
-} exclude_substring;
+  p_descr = "Specify a seach string for the names of the files to be read.";
+  p_help = "If blank, no check will be performed.";
+} file_name_substr;
 
-paramdef long
-{
-  p_descr = "Maximum number of seconds input files are valid.";
-  p_help = "Used only if trigger_mode is set to LATEST_DATA.";
-  p_default = 600;
-} max_valid_secs;
+commentdef {
+  p_header = "REMAP PROJECTION/GRID ON OUTPUT";
+}
 
-paramdef string
-{
-  p_descr = "Output URL";
-  p_default = "mdvp:://localhost::mdv/TRMM";
-} output_url;
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remap grid in x,y.";
+  p_help = "If true, set the remap parameters below.";
+} remap_output_projection;
 
-typedef enum
-{
-  PROJ_FLAT,
-  PROJ_LATLON,
-  PROJ_LC2
-} proj_type_t;
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to automatically remap the grid to a lat-lon projection.";
+  p_help = "If true, the data in the file will be remapped to a latlon grid which matches the existing grid in resolution and extent. Other remap parameters will be ignored.";
+} auto_remap_to_latlon;
 
-typedef struct
-{
-  proj_type_t proj_type;
-  double minx;
-  double miny;
+typedef enum {
+  PROJ_LATLON = 0,
+  PROJ_LAMBERT_CONF = 3,
+  PROJ_MERCATOR =  4,
+  PROJ_POLAR_STEREO = 5,
+  PROJ_FLAT = 8,
+  PROJ_OBLIQUE_STEREO = 12,
+  PROJ_TRANS_MERCATOR = 15,
+  PROJ_ALBERS = 16,
+  PROJ_LAMBERT_AZIM = 17,
+  PROJ_VERT_PERSP = 18
+} projection_t;
+
+paramdef enum projection_t {
+  p_default = PROJ_LATLON;
+  p_descr = "Projection for remapping in x,y. See projection param below.";
+  p_help =
+  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
+  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
+  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
+  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
+  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
+  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
+  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
+  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
+  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
+  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
+} remap_projection;
+
+typedef struct {
   int nx;
   int ny;
+  double minx;
+  double miny;
   double dx;
   double dy;
-  double origin_lat;
-  double origin_lon;
-  double rotation;
-  double lat1;
-  double lat2;
-} proj_t;
+} grid_params_t;
 
-paramdef struct proj_t
-{
-  p_descr = "Output projection";
-  p_default = { PROJ_FLAT, 0.0, 0.0, 0, 0, 0.0, 0.0, 
-                0.0, 0.0, 0.0, 0.0, 0.0 };
-} output_proj;
+paramdef struct grid_params_t {
+  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
+  p_descr = "Grid parameters for remapping in x,y.";
+  p_help = "Units in km, except for LATLON, which is in degrees.";
+} remap_grid;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} remap_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin latitude.";
+  p_help = "This applies to all projections except LATLON.";
+} remap_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid origin longitude.";
+  p_help = "This applies to all projections except LATLON.";
+} remap_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 1.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} remap_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped grid reference latitude 2.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} remap_lat2;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Central scale for remapped projections.";
+  p_help = "This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.";
+} remap_central_scale;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped tangent latitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO only.";
+} remap_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped tangent longitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
+} remap_tangent_lon;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
+  p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
+} remap_pole_is_north;
+
+paramdef double {
+  p_default = 35786;
+  p_descr = "Radius of perspective point (km).";
+  p_help = "This applies to VERT_PERSP.";
+} remap_persp_radius;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped false northing correction.";
+  p_help = "Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude";
+} remap_false_northing;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Remapped false easting correction.";
+  p_help = "Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.";
+} remap_false_easting;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?";
+  p_help = "If true, set remap_offset_origin_latitude and remap_offset_origin_longitude.";
+} remap_set_offset_origin;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Latitude of offset origin.";
+  p_help = "See remap_set_offset_origin.";
+} remap_offset_origin_latitude;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Longitude of offset origin.";
+  p_help = "See remap_set_offset_origin.";
+} remap_offset_origin_longitude;
+
+commentdef {
+  p_header = "OUTPUT LOCATION";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::/tmp/mdv/from_netcdf";
+  p_descr = "URL for writing output files.";
+} output_url;
+
+commentdef {
+  p_header = "OUTPUT ENCODING AND COMPRESSION";
+}
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Set output encoding type.";
+} output_encoding_type;
+
+typedef enum {
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4,
+  COMPRESSION_GZIP =  5,
+  COMPRESSION_GZIP_VOL = 6
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_GZIP;
+  p_descr = "Set output compression type.";
+  p_help = "See <toolsa/compress> for details on the compression types.";
+} output_compression_type;
+
+commentdef {
+  p_header = "OUTPUT METADATA STRINGS";
+  p_text = "These will be used if the file does not contain suitable information.";
+}
+
+paramdef string {
+  p_default = "TRMM";
+  p_descr = "Name of data set.";
+  p_help = "Appears in Mdv master header.";
+} data_set_name;
+
+paramdef string {
+  p_default = "Texas Tech University";
+  p_descr = "Source of data.";
+  p_help = "Appears in Mdv master header.";
+} data_set_source;
+
+paramdef string {
+  p_default = "Created by NcGeneric2Mdv";
+  p_descr = "Info for data set.";
+  p_help = "Appears in Mdv master header.";
+} data_set_info;
 
 typedef enum
 {
@@ -320,11 +482,170 @@ paramdef struct output_field_t
                   "", false } };
 } output_fields[];
 
-paramdef string
-{
-  p_descr = "Path for the brightness temperature table.";
-  p_help = "Used only if one or more of the fields in output_fields "
-           "uses CONVERT_RAD_CH3, CONVERT_RAD_CH4 or CONVERT_RAD_CH5 "
-           "radiance conversion.";
-  p_default = "bttable";
-} brightness_temp_table;
+commentdef {
+  p_header = "INPUT PROJECTION";
+}
+
+paramdef enum projection_t {
+  p_default = PROJ_LATLON;
+  p_descr = "Projection of grid in x,y.";
+  p_help =
+  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
+  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
+  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
+  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
+  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
+  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
+  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
+  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
+  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
+  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
+} input_projection;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid rotation.";
+  p_help = "This applies only to PROJ_FLAT projections.";
+} input_proj_rotation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid origin latitude.";
+  p_help = "This applies to all projections except LATLON.";
+} input_proj_origin_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid origin longitude.";
+  p_help = "This applies to all projections except LATLON.";
+} input_proj_origin_lon;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid reference latitude 1.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} input_proj_lat1;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection grid reference latitude 2.";
+  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
+} input_proj_lat2;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Central scale for remapped projections.";
+  p_help = "This applies to POLAR_STEREO and TRANSVERSE_MERCATOR projections.";
+} input_proj_central_scale;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection tangent latitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO only.";
+} input_proj_tangent_lat;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Projection tangent longitude (deg).";
+  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
+} input_proj_tangent_lon;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
+  p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
+} input_proj_pole_is_north;
+
+paramdef double {
+  p_default = 35786;
+  p_descr = "Radius of perspective point (km).";
+  p_help = "This applies to VERT_PERSP.";
+} input_proj_persp_radius;
+
+commentdef {
+  p_header = "RESAMPLE LAT/LON-based DATA ONTO REGULAR LATLON PROJECTION";
+  p_text = "Sometimes data in the netcdf file has its extent described by lat/lon arrays, but the projection is not known exactly. In that case we have the option of resampling this type of data onto the output projection.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Indicates that the (x,y) variables indicated by netcdf_dim_x and netcdf_dim_y contain (lat/lon) pairs.";
+  p_help = "For some data sets, the (x,y) grid may be specified in lat/lon instead of km. In this case, if the input projection is not known, you can resample the data onto a regular latlon grid.";
+} input_xy_is_latlon;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Resample the geometry from the lat/lon grid in the input file, onto a regular latlon grid.";
+  p_help = "The output grid details will be deduced from the lat/lon arrays in the input file.";
+} resample_latlon_onto_regular_grid;
+
+commentdef {
+  p_header = "NETCDF dimensions";
+  p_text = "Specify the names used in the netCDF file for dimensions, since they can vary depending on the application used to create the file.";
+}
+
+paramdef string {
+  p_default = "time";
+  p_descr = "name for netCDF dimension for time.";
+} netcdf_dim_time;
+
+paramdef string {
+  p_default = "longitude";
+  p_descr = "netCDF dimension name for grid points in longitude.";
+} netcdf_dim_x;
+
+paramdef string {
+  p_default = "latitude";
+  p_descr = "netCDF dimension name for grid points in latitude.";
+} netcdf_dim_y;
+
+paramdef string {
+  p_default = "altitude";
+  p_descr = "netCDF dimension name for grid points in altitude.";
+  p_descr = "Specify 'none' if there is no Z dimension.";
+} netcdf_dim_z;
+
+commentdef {
+  p_header = "NETCDF variables";
+  p_text = "Specify the names used in the netCDF file for variables, since they can vary depending on the application used to create the file.";
+}
+
+paramdef string {
+  p_default = "base_time";
+  p_descr = "Data set times are relative to this base time";
+  p_help = "Specify 'none' if there is no base time variable. In the units of the time variable will be used.";
+} netcdf_var_base_time;
+
+paramdef string {
+  p_default = "1970-01-01T00:00:00Z";
+  p_descr = "Base time string - used if netcdf_var_base_time is set to 'none'.";
+  p_help = "Set this to a W3C ISO 8601 time - see http://www.w3.org/TR/NOTE-datetime";
+} base_time_string;
+
+paramdef string {
+  p_default = "time_offset";
+  p_descr = "Time offset relative to base_time, or unix_time if base_time is 'none'.";
+} netcdf_var_time_offset;
+
+paramdef string {
+  p_default = "altitude";
+  p_descr = "Z variable name";
+  p_descr = "Specify 'none' if there is no Z dimension.";
+} netcdf_var_z;
+
+paramdef string {
+  p_default = "latitude";
+  p_descr = "Y variable name";
+} netcdf_var_y;
+
+paramdef string {
+  p_default = "longitude";
+  p_descr = "X variable name";
+} netcdf_var_x;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to consider ncbyte fields as unsigned.";
+  p_help = "Normally ncbyte fields are signed. If this field is set to TRUE, they are treated as unsigned instead.";
+} treat_ncbyte_as_unsigned;
+
