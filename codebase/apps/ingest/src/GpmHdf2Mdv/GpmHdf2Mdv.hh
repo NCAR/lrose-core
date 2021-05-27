@@ -132,6 +132,11 @@ private:
   int _ixValidStart, _ixValidEnd;
   int _iyValidStart, _iyValidEnd;
 
+  // hdf5 utilities
+
+  Hdf5xx _utils;
+  string _conventions;
+
   // private methods
 
   int _processFile(const char *input_path);

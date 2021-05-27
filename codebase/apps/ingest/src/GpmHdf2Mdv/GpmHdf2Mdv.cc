@@ -195,6 +195,77 @@ int GpmHdf2Mdv::_processFile(const char *input_path)
     cerr << "Processing file: " << input_path << endl;
   }
 
+  // use try block to catch any exceptions
+  
+  try {
+    
+    // open file
+    
+    H5File file(input_path, H5F_ACC_RDONLY);
+    if (_params.debug) {
+      cerr << "  file size: " << file.getFileSize() << endl;
+    }
+    
+    // get the root group
+    
+    Group root(file.openGroup("/"));
+
+    // root attributes
+
+    Hdf5xx::DecodedAttr decodedAttr;
+    _utils.loadAttribute(root, "Conventions", "root-attr", decodedAttr);
+    _conventions = decodedAttr.getAsString();
+    
+    // set the number of sweeps
+
+    // if (_getNSweeps(root)) {
+    //   _addErrStr("ERROR - OdimHdf5RadxFile::readFromPath");
+    //   _addErrStr("  path: ", path);
+    //   return -1;
+    // }
+
+    // read the root how, what and where groups
+    
+    // if (_readRootSubGroups(root)) {
+    //   _addErrStr("ERROR - OdimHdf5RadxFile::readFromPath");
+    //   _addErrStr("  path: ", path);
+    //   return -1;
+    // }
+
+    // read the sweeps
+    
+    // for (int isweep = 0; isweep < _nSweeps; isweep++) {
+    //   if (_readSweep(root, isweep)) {
+    //     return -1;
+    //   }
+    //   _statusXml += _sweepStatusXml;
+    // }
+
+  } // try
+  
+  catch (H5x::Exception &e) {
+    // _addErrStr("ERROR - reading GPM HDF5 file");
+    // _addErrStr(e.getDetailMsg());
+    return -1;
+  }
+
+  // finalize status xml
+
+  // _setStatusXml();
+  // _statusXml += RadxXml::writeEndTag("Status", 0);
+
+  // load the data into the read volume
+  
+  // if (_finalizeReadVolume()) {
+  //   return -1;
+  // }
+  
+  // set format as read
+
+  // _fileFormat = FILE_FORMAT_ODIM_HDF5;
+
+#ifdef JUNK
+
   // open file
   
   if (_openNc3File(input_path)) {
@@ -263,6 +334,8 @@ int GpmHdf2Mdv::_processFile(const char *input_path)
     }
 
   } // itime
+
+#endif
 
   return 0;
 
