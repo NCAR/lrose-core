@@ -12,7 +12,7 @@ CONFIG += qt
 CONFIG += debug
 
 RESOURCES = resources.qrc 
-# RESOURCES = customcompleter.qrc
+RESOURCES = customcompleter.qrc
 
 HEADERS += AllocCheck.hh
 HEADERS += Args.hh
