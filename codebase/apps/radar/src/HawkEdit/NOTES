@@ -1,3 +1,10 @@
+To build translator app:
+
+ g++ -g -o xlate  script_xlator.cc SoloScriptTranslator.cc
+
+then, to run ...
+ ./xlate ~/data/solo_scripts/QC_ground_based_doppler_velocity_data.txt 
+
 eol-albireo:LUCID brenda$ git stash
 Saved working directory and index state WIP on BoundaryEditorIntegrate: 9dade4053 HawkEye + Solo: changes when upgrading to Catalina MacOS 10.15, XCode ?latest?  and Qt5.15
 

@@ -32,6 +32,7 @@ public:
 
   bool process_bool(string line, std::iostream& javascript, unfold_alg *BB_use);
   bool process_action_unfold(string line, std::iostream& javascript, unfold_alg BB_use);
+  bool process_solo_comment(string line, std::iostream& javascript);
 
   void translate(ifstream& solo_script, std::iostream& javascript);
 

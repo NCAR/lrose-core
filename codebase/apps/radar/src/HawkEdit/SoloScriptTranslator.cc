@@ -120,6 +120,23 @@ void SoloScriptTranslator::format_field_by_reference(string &field) {
 }
 */
 
+bool SoloScriptTranslator::process_solo_comment(string line, std::iostream& javascript) {
+	bool recognized = false;
+    // ! solo comment
+    if (line.length() < 1) {
+    	javascript << endl;
+    	recognized = true;
+    } else if (line[0] == '!') {
+	    string the_rest = line.substr(1, line.length() - 1);
+	    cout << "// " << the_rest << endl;
+	    javascript << "// " << the_rest << endl;
+	    recognized = true;   
+	} else {
+	    std::cout << "regex_match returned false\n";
+	} 
+	return recognized;
+}
+
 bool SoloScriptTranslator::process_from_to(string line, std::iostream& javascript) {
 	bool recognized = false;
 		        // from x to y 
@@ -460,6 +477,7 @@ void SoloScriptTranslator::translate(ifstream& solo_script, std::iostream& javas
        if (!recognized) recognized = process_assignment(line, javascript);
        if (!recognized) recognized = process_bool(line, javascript, &BB_use);
        if (!recognized) recognized = process_action_unfold(line, javascript, BB_use);
+       if (!recognized) recognized = process_solo_comment(line, javascript);
        if (!recognized) {
        	  cout << "ERROR not recognized " << line << endl;
        	  javascript << "// ERROR, not recognized: " << line << endl;
