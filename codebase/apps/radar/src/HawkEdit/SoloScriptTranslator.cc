@@ -67,7 +67,7 @@ void SoloScriptTranslator::reference_as_source(string &field) {
            next_source.append("_");
            next_source.append(to_string(x));
         } else {
-        	next_source.append("_V");
+        	//next_source.append("_V");
         }
         //next_source.append("_");
         //next_source.append(to_string(x));
@@ -88,7 +88,7 @@ void SoloScriptTranslator::reference_as_source(string &field) {
     	// because derived fields can only be added as assignment      
     	field_map_raw[field] = 1;
         next_source = field;
-        next_source.append("_V");
+        //next_source.append("_V");
     }
     cout << "reference_as_source: field " << field << " next_source = " << next_source << endl;
     field = next_source;

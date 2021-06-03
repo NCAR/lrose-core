@@ -217,7 +217,7 @@ void ScriptEditorController::setupFieldArrays() {
         const vector<float> *fieldData = _soloFunctionsController->getData(*it);  
 
         QJSValue fieldArray = engine.newArray(fieldData->size());
-        QString vectorName = fieldName; //  + "_v";    
+        QString vectorName = fieldName + "_V";    
 
 
         //std::vector<float> fieldData = getData(fieldName);
@@ -778,7 +778,8 @@ void ScriptEditorController::fieldNamesProvided(vector<string> *fieldNames) {
       ////engine.globalObject().setProperty(fieldName, objectValue.property("name"));    
 
       QString originalName = fieldName;
-      engine.globalObject().setProperty(fieldName.append("_V"), originalName); // fieldName);                                           
+      engine.globalObject().setProperty(fieldName, originalName); // fieldName);                                           
+      //engine.globalObject().setProperty(fieldName.append("_V"), originalName); // fieldName);                                           
 
       //someValue += 1;                                                                                    
 
