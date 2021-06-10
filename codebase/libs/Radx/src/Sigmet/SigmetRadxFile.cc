@@ -1047,6 +1047,14 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
       memcpy(&rayHdr, rayPtr, sizeof(rayHdr));
       _swap(rayHdr);
 
+      // sanity check
+
+      if (rayHdr.n_gates <= 0 ||
+          rayHdr.seconds < 0 ||
+          rayHdr.seconds > 60) {
+        continue;
+      }
+
       if (doPrint || _verbose) {
         out << "====== rayHdr ======" << endl;
         _print(rayHdr, out);
