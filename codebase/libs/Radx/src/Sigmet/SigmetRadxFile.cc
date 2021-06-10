@@ -1220,9 +1220,13 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
       ray->print(out);
     }
 
-    // add to vector
+    // add to vector if time is good
 
-    _readVol->addRay(ray);
+    if (ray->getTimeDouble() != 0) {
+      _readVol->addRay(ray);
+    } else {
+      delete ray;
+    }
 
   } // iray
   
@@ -1885,6 +1889,10 @@ void SigmetRadxFile::_setRayMetadata(RadxRay &ray,
   } 
   _endTimeSecs = raySecs;
   _endNanoSecs = rayNanoSecs;
+  if (_startTimeSecs == 0 && _endTimeSecs != 0) {
+    _startTimeSecs = _endTimeSecs;
+    _startNanoSecs = _endNanoSecs;
+  } 
 
   ray.setTime(raySecs, rayNanoSecs);
   ray.setVolumeNumber(_volumeNumber);
