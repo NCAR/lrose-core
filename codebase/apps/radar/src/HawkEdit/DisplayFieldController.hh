@@ -106,6 +106,7 @@ private:
   DisplayFieldModel *_model; // edit version 
  
   //DisplayFieldView *_displayFieldView;
+  bool _endWithV(string &fieldName); 
 
 };
 

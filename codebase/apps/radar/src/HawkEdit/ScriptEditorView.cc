@@ -154,18 +154,21 @@ Q_DECLARE_METATYPE(QVector<double>)
       //-------
     //helpView = NULL;
     //if (helpView == NULL) {
-    Q_INIT_RESOURCE(resources);
+    // Q_INIT_RESOURCE(resources);
 
     // ----
     QString fileName(":/resources/script_help.txt");
 
     QFile file(fileName);
     // ---
-
+      ScriptEditorHelpModel *model;
       // QFile file(":/script_help.txt");
-      file.open(QIODevice::ReadOnly);
-      ScriptEditorHelpModel *model = new ScriptEditorHelpModel(file.readAll());
-      file.close();
+      if (file.open(QIODevice::ReadOnly)) {
+        model = new ScriptEditorHelpModel(file.readAll());
+        file.close();
+      } else {
+        model = new ScriptEditorHelpModel("No help available");
+      }
       helpView = new QTreeView(this);
       helpView->setModel(model);
       //helpView->setWindowTitle(QObject::tr("Script Help"));

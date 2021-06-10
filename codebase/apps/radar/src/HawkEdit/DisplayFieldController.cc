@@ -33,19 +33,41 @@ bool DisplayFieldController::contains(string fieldName) {
 }
 
 void DisplayFieldController::addField(DisplayField *newField) {
-  _model->addField(newField);
+  string fieldName = newField->getName();
+
+  DisplayField *displayField = _model->getField(fieldName);
+  if (displayField == NULL) { // field is not already in list
+    if (!_endWithV(fieldName)) {
+      _model->addField(newField);
+    }
+  } else {
+    LOG(DEBUG) << "field already in list: " << fieldName; 
+  }
+
 }
 
+bool DisplayFieldController::_endWithV(string &fieldName) {
+  size_t length = fieldName.length();
+  if (length < 2) return false;
+  if ((fieldName[length-1] == 'V') && (fieldName[length-2] == '_')) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 void DisplayFieldController::addField(string &fieldName) {
-  DisplayField *displayField = _model->getField(fieldName);
-  if (displayField == NULL) {
-    DisplayField *newDisplayField = new DisplayField(fieldName);
-    addField(newDisplayField);
-    // this is done by the PolarManager ...
-    //_displayFieldView->updateFieldPanel(newFieldName, newFieldName, newFieldName);
-  } else {
-    //updateFieldPanel(newFieldName);
+  // ignore the _V fields
+  if (!_endWithV(fieldName)) {
+    DisplayField *displayField = _model->getField(fieldName);
+    if (displayField == NULL) {
+      DisplayField *newDisplayField = new DisplayField(fieldName);
+      addField(newDisplayField);
+      // this is done by the PolarManager ...
+      //_displayFieldView->updateFieldPanel(newFieldName, newFieldName, newFieldName);
+    } else {
+      //updateFieldPanel(newFieldName);
+    }
   }
 }
 
