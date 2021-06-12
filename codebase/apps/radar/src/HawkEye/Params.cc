@@ -1349,6 +1349,18 @@
     tt->single_val.s = tdrpStrDup("black");
     tt++;
     
+    // Parameter 'text_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("text_color");
+    tt->descr = tdrpStrDup("Color of text annotation in main display.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &text_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
     // Parameter 'grid_and_range_ring_color'
     // ctype is 'char*'
     

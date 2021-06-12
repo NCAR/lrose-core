@@ -787,7 +787,8 @@ void PpiWidget::_drawOverlays(QPainter &painter)
 
   const DisplayField &field = _manager.getSelectedField();
   _zoomWorld.drawColorScale(field.getColorMap(), painter,
-                            _params.label_font_size);
+                            _params.label_font_size,
+                            _params.text_color);
 
   if (_archiveMode) {
 
@@ -835,7 +836,7 @@ void PpiWidget::_drawOverlays(QPainter &painter)
     legends.push_back(text);
     
     painter.save();
-    painter.setPen(Qt::yellow);
+    painter.setPen(QColor(_params.text_color)); // Qt::darkMagenta); // Qt::yellow);
     painter.setBrush(Qt::black);
     painter.setBackgroundMode(Qt::OpaqueMode);
 

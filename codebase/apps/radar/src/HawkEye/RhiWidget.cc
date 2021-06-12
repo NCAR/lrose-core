@@ -525,7 +525,8 @@ void RhiWidget::_drawOverlays(QPainter &painter)
 
   const DisplayField &field = _manager.getSelectedField();
   _zoomWorld.drawColorScale(field.getColorMap(), painter,
-                            _params.label_font_size);
+                            _params.label_font_size,
+                            _params.text_color);
   
   // add legends with time, field name and elevation angle
 

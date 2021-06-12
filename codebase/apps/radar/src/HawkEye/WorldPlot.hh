@@ -385,7 +385,8 @@ public:
 
   void drawColorScale(const ColorMap &colorMap,
                       QPainter &painter,
-                      int unitsFontSize);
+                      int unitsFontSize,
+                      char *textColor);
 
 protected:
 private:
