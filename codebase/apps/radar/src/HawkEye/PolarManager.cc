@@ -3008,6 +3008,25 @@ string PolarManager::_getOutputPath(bool interactive, string &outputDir, string 
 	    fileName += _params.images_file_name_delimiter;
 	    fileName += getSelectedFieldLabel();
 	  }
+    
+    // scan Id
+
+    if (_params.images_include_scan_id_in_file_name) {
+      fileName += _params.images_file_name_delimiter;
+      fileName += std::to_string(_vol.getScanId());
+    }
+
+    // scan type
+
+    if (_params.images_include_scan_type_in_file_name) {
+      fileName += _params.images_file_name_delimiter;
+      string scanType = "SUR";
+      if (_vol.getSweeps().size() > 0) {
+        Radx::SweepMode_t predomSweepMode = _vol.getPredomSweepMode();
+        scanType = Radx::sweepModeToShortStr(predomSweepMode);
+      }
+      fileName += scanType;
+    }
 
 	  // extension
 

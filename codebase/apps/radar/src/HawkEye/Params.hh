@@ -717,6 +717,10 @@ public:
 
   tdrp_bool_t images_include_field_label_in_file_name;
 
+  tdrp_bool_t images_include_scan_type_in_file_name;
+
+  tdrp_bool_t images_include_scan_id_in_file_name;
+
   tdrp_bool_t images_write_latest_data_info;
 
   tdrp_bool_t images_auto_create;
@@ -755,7 +759,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[173];
+  mutable TDRPtable _table[175];
 
   const char *_className;
 

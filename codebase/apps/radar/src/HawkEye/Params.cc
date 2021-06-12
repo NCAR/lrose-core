@@ -2714,6 +2714,30 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'images_include_scan_type_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_include_scan_type_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan type in the image file name.");
+    tt->help = tdrpStrDup("If TRUE, the scan type will be added to the image file name.");
+    tt->val_offset = (char *) &images_include_scan_type_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'images_include_scan_id_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_include_scan_id_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan Id in the image file name.");
+    tt->help = tdrpStrDup("If TRUE, the scan Id will be added to the image file name.");
+    tt->val_offset = (char *) &images_include_scan_id_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'images_write_latest_data_info'
     // ctype is 'tdrp_bool_t'
     

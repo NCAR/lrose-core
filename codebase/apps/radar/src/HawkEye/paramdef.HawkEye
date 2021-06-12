@@ -1049,6 +1049,17 @@ paramdef boolean {
 } images_include_field_label_in_file_name;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan type in the image file name.";
+  p_help = "If TRUE, the scan type will be added to the image file name.";
+} images_include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan Id in the image file name.";
+  p_help = "If TRUE, the scan Id will be added to the image file name.";} images_include_scan_id_in_file_name;
+
+paramdef boolean {
   p_default = true;
   p_descr = "Option to write latest_data_info files when an image is created.";
   p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
