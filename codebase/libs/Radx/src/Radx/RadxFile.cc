@@ -445,6 +445,7 @@ void RadxFile::clearWrite()
   _writeSubsecsInFileName = true; 
   _writeScanTypeInFileName = true;
   _writeScanIdInFileName = false;
+  _writeScanNameInFileName = false;
   _writeRangeResolutionInFileName = false;
   _writeVolNumInFileName = false;
   _writeHyphenInDateTime = false; 
@@ -471,6 +472,7 @@ void RadxFile::copyWriteDirectives(const RadxFile &other)
   _writeSubsecsInFileName = other._writeSubsecsInFileName; 
   _writeScanTypeInFileName = other._writeScanTypeInFileName; 
   _writeScanIdInFileName = other._writeScanIdInFileName; 
+  _writeScanNameInFileName = other._writeScanNameInFileName; 
   _writeRangeResolutionInFileName = other._writeRangeResolutionInFileName; 
   _writeVolNumInFileName = other._writeVolNumInFileName; 
   _writeHyphenInDateTime = other._writeHyphenInDateTime; 
@@ -2589,6 +2591,8 @@ void RadxFile::printWriteRequest(ostream &out) const
       << (_writeScanTypeInFileName?"Y":"N") << endl;
   out << "  writeScanIdInFileName: "
       << (_writeScanIdInFileName?"Y":"N") << endl;
+  out << "  writeScanNameInFileName: "
+      << (_writeScanNameInFileName?"Y":"N") << endl;
   out << "  writeRangeResolutionInFileName: "
       << (_writeRangeResolutionInFileName?"Y":"N") << endl;
   out << "  writeVolNumInFileName: "

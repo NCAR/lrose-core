@@ -752,6 +752,8 @@ public:
 
   tdrp_bool_t include_scan_name_in_file_name;
 
+  tdrp_bool_t include_scan_id_in_file_name;
+
   tdrp_bool_t include_range_resolution_in_file_name;
 
   tdrp_bool_t include_vol_num_in_file_name;
@@ -811,7 +813,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[179];
+  mutable TDRPtable _table[180];
 
   const char *_className;
 

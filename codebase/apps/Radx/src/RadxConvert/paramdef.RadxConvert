@@ -1073,6 +1073,12 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "Option to include the scan Id in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan Id will be included in the file name.";
+} include_scan_id_in_file_name;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "Option to include the range resolution in the file name.";
   p_help = "Default is false. Only applies to CfRadial files. If true, the range resolution (50m) will be included in the file name.";
 } include_range_resolution_in_file_name;

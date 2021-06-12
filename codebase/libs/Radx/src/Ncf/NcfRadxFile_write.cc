@@ -3782,8 +3782,18 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
     }
   }
 
-  string scanName;
+  string scanId;
   if (_writeScanIdInFileName) {
+    //if (vol.getScanId().size() > 0) {
+    //  if (strcasestr(vol.getScanId().c_str(), "default") == NULL) {
+        scanId += "_";
+        scanId += to_string(vol.getScanId());
+    //  }
+    //}
+  }
+
+  string scanName;
+  if (_writeScanNameInFileName) {
     if (vol.getScanName().size() > 0) {
       if (strcasestr(vol.getScanName().c_str(), "default") == NULL) {
         scanName += "_";
@@ -3858,7 +3868,7 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
             endTime.getHour(), endTime.getMin(), endTime.getSec(),
             endSubsecsStr,
             instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanType.c_str(),  
+            scanName.c_str(), scanId.c_str(), scanType.c_str(),  
             rangeResolution.c_str(), suffix.c_str());
     break;
   case FILENAME_WITH_START_TIME_ONLY:
@@ -3878,7 +3888,7 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
             startTime.getHour(), startTime.getMin(), startTime.getSec(),
             startSubsecsStr,
             instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanType.c_str(),  
+            scanName.c_str(), scanId.c_str(), scanType.c_str(),  
             rangeResolution.c_str(), suffix.c_str());
     break;
   case FILENAME_WITH_END_TIME_ONLY:
@@ -3898,7 +3908,7 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
             endTime.getHour(), endTime.getMin(), endTime.getSec(),
             endSubsecsStr,
             instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanType.c_str(),  
+            scanName.c_str(), scanId.c_str(), scanType.c_str(),  
             rangeResolution.c_str(), suffix.c_str());
     break;
   default:
@@ -3919,7 +3929,7 @@ string NcfRadxFile::_computeWritePath(const RadxVol &vol,
             fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
             fileSubsecsStr,
             instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanType.c_str(), suffix.c_str());
+            scanName.c_str(), scanId.c_str(), scanType.c_str(), suffix.c_str());
   }
 
   // make sure the file name is valid - i.e. no / or whitespace

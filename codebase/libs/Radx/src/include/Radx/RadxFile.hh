@@ -344,6 +344,13 @@ public:
     _writeScanIdInFileName = val; 
   }
 
+  /// Add scan name  to output file name
+  /// Default is false
+  
+  void setWriteScanNameInFileName(bool val) {
+    _writeScanNameInFileName = val; 
+  }
+
   /// Add range resolution  to output file name
   /// Default is false
   
@@ -942,6 +949,7 @@ protected:
   bool _writeSubsecsInFileName; ///< include subseconds in file name
   bool _writeScanTypeInFileName; ///< include scan type in file name
   bool _writeScanIdInFileName; ///< include scan Id in file name
+  bool _writeScanNameInFileName; ///< include scan name in file name
   bool _writeRangeResolutionInFileName; ///< include range resoluition in file name
   bool _writeVolNumInFileName; ///< include volume number in file name
   bool _writeHyphenInDateTime; ///< use a hyphen instead of underscore in datetime part of file names
