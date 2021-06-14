@@ -209,7 +209,8 @@ def main():
     logPath = prepareLogFile("create-qt-moc-files");
     mocDirs = ["apps/radar/src/HawkEye",
                "apps/radar/src/HawkEdit",
-               "apps/radar/src/IpsEye"]
+               "apps/radar/src/IpsEye",
+               "apps/radar/src/Sprite"]
 
     for dir in mocDirs:
         mocPath = os.path.join(codebaseDir, dir)
