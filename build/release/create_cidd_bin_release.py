@@ -44,7 +44,7 @@ def main():
     thisScriptDir = os.getcwd()
 
     homeDir = os.environ['HOME']
-    releaseDirDefault = os.path.join(homeDir, 'releases')
+    releaseDirDefault = os.path.join(homeDir, 'releases/binary')
     
     global options
 

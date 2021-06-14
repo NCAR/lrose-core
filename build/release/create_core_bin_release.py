@@ -44,8 +44,7 @@ def main():
     thisScriptDir = os.getcwd()
 
     homeDir = os.environ['HOME']
-    global releaseDirDefault
-    releaseDirDefault = os.path.join(homeDir, 'bin_releases')
+    releaseDirDefault = os.path.join(homeDir, 'releases/binary')
     
     global options
 
@@ -144,6 +143,7 @@ def main():
     cmd += " --releaseDir " + options.releaseDir
     cmd += " --force"
     cmd += " --scripts"
+    cmd += " --automake"
     shellCmd(cmd)
 
     # exit
