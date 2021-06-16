@@ -901,6 +901,32 @@ void PpiWidget::configureRange(double max_range)
 
 void PpiWidget::timerEvent(QTimerEvent *event)
 {
+  bool doUpdate = false;
+  bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
+  if (isBoundaryEditorVisible) {
+    double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
+    // user may have zoomed in or out, so update the polygon point boxes
+    // so they are the right size on screen
+    doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
+  }
+  bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
+  bool isShiftKeyDown =
+    (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+  if ((isBoundaryEditorVisible && !isBoundaryFinished) ||
+      (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown)){
+    this->setCursor(Qt::CrossCursor);
+  } else {
+    this->setCursor(Qt::ArrowCursor);
+  }
+  
+  if (doUpdate) {  //only update if something has changed
+    update();
+  }
+}
+
+/*
+void PpiWidget::timerEvent(QTimerEvent *event)
+{
 	bool doUpdate = false;
 	bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
 	if (isBoundaryEditorVisible)
@@ -918,6 +944,7 @@ void PpiWidget::timerEvent(QTimerEvent *event)
   if (doUpdate)
   	update();
 }
+*/
 
 
 /*************************************************************************
@@ -947,6 +974,34 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
 
+  // --- insert here ---
+
+    // If boundary editor active, then interpret boundary mouse release event
+    BoundaryPointEditor *editor = BoundaryPointEditor::Instance(); 
+    if (_manager._boundaryEditorDialog->isVisible()) {
+      if (editor->getCurrentTool() == BoundaryToolType::polygon) {
+        if (!editor->isAClosedPolygon()) {
+          editor->addPoint(_worldReleaseX, _worldReleaseY);
+        } else { //polygon finished, user may want to insert/delete a point
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
+        }
+      } else if (editor->getCurrentTool() == BoundaryToolType::circle) {
+        if (editor->isAClosedPolygon()) {
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
+        } else {
+          editor->makeCircle(_worldReleaseX,
+                             _worldReleaseY,
+                             editor->getCircleRadius());
+        }
+      }
+      //_dirty = true;
+    }
+
+
+  /* ---- cut here ----
+
     if (_manager._boundaryEditorDialog->isVisible())
     {
     	if (!BoundaryPointEditor::Instance()->isPolygonFinished())
@@ -964,6 +1019,9 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
     		}
     	}
     }
+
+   // ---- cut here --- 
+   */
 
     double x_km = _worldReleaseX;
     double y_km = _worldReleaseY;

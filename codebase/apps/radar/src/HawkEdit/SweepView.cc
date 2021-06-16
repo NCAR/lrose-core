@@ -278,6 +278,10 @@ void SweepView::setGuiIndex(int index)
 
 }
 
+int SweepView::getGuiIndex() 
+{
+  return _guiIndex;
+}
 
 /////////////////////////////////////////////////////////////
 /* set selected file index

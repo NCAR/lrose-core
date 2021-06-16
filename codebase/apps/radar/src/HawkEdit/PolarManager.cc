@@ -548,6 +548,7 @@ void PolarManager::_setupWindows()
   // set up field status dialog
 
   _createClickReportDialog();
+
   _createBoundaryEditorDialog();
 
   if (_archiveMode) {
@@ -593,7 +594,7 @@ void PolarManager::_createActions()
   // show boundary editor dialog
   _showBoundaryEditorAct = new QAction(tr("Boundary Editor"), this);
   _showBoundaryEditorAct->setStatusTip(tr("Show boundary editor dialog"));
-  connect(_showBoundaryEditorAct, SIGNAL(triggered()), this, SLOT(_showBoundaryEditor()));
+  connect(_showBoundaryEditorAct, SIGNAL(triggered()), this, SLOT(showBoundaryEditor()));
   
   // set time controller settings
   _timeControllerAct = new QAction(tr("Time-Config"), this);
@@ -1575,8 +1576,16 @@ void PolarManager::selectedFieldChanged(QString newFieldName) {
   string fieldName = newFieldName.toStdString();
   _displayFieldController->setSelectedField(fieldName);
   _plotArchiveData();
+  refreshBoundaries();
 }
 
+
+void PolarManager::selectedSweepChanged(double) {
+  //string fieldName = newFieldName.toStdString();
+  //_displayFieldController->setSelectedField(fieldName);
+  _plotArchiveData();
+  refreshBoundaries();
+}
 
 /*
 RadxVol PolarManager::getDataVolume() {
@@ -3103,9 +3112,15 @@ void PolarManager::_openFile()
   QByteArray qb = filename.toUtf8();
   const char *name = qb.constData();
 
-    LOG(DEBUG) << "selected file path : " << name;
-// TODO: HERE!  somehow, ALL fields are listed as selected ACK!
-  //fieldsSelected(selectedFields);
+  LOG(DEBUG) << "selected file path : " << name;
+
+  //since we are opening a new radar file, close any boundaries currently being displayed
+
+  if (boundaryPointEditorView != NULL) {
+    boundaryPointEditorControl->clear();
+    boundaryPointEditorView->setVisible(false);
+  }
+
   LOG(DEBUG) << "exit";
 }
 
@@ -3862,6 +3877,10 @@ void PolarManager::_howto()
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
+
+
+
+/* TODO: grab new code from HawkEye ... 
 void PolarManager::_createBoundaryEditorDialog()
 {
 	_boundaryEditorDialog = new QDialog(this);
@@ -3931,25 +3950,128 @@ void PolarManager::_clearBoundaryEditorClick()
 	BoundaryPointEditor::Instance()->clear();
 	_ppi->update();   //forces repaint which clears existing polygon
 }
+*/
 
-void PolarManager::_saveBoundaryEditorClick()
+void PolarManager::saveBoundaryEvent(int boundaryIndex)
 {
-	cout << "PolarManager, _saveBoundaryEditorClick" << endl;
+	LOG(DEBUG) << "enter";
 
-	string text = "Boundary" + to_string(_boundaryEditorList->currentRow()+1);
-//	QString qtext = text.c_str();
-	_boundaryEditorList->currentItem()->setText(text.c_str());
+  // get selected field name
+  string currentFieldName = _displayFieldController->getSelectedFieldName();
+  int currentSweepIndex = _sweepController->getSelectedIndex();
+  if (_archiveFileList.size() > 0) {
+    string radarFilePath = _archiveFileList.at(0);
+  
+	//string text = "Boundary" + to_string(boundaryIndex);
+	//string outputDir;
+	//string fileExt = _boundaryEditorList->currentItem()->text().toUtf8().constData();
+	//string path = _getOutputPath(false, outputDir, fileExt);
+	//boundaryPointEditorControl->save(path);
+    boundaryPointEditorControl->save(boundaryIndex, currentFieldName, currentSweepIndex,
+      radarFilePath);
+  } else {
+    errorMessage("Save Boundary Error", "no File Path found");
+  }
+  LOG(DEBUG) << "exit";
+}
 
-	string outputDir;
-	string fileExt = _boundaryEditorList->currentItem()->text().toUtf8().constData();
-	string path = _getOutputPath(false, outputDir, fileExt);
-	BoundaryPointEditor::Instance()->save(path);
+void PolarManager::loadBoundaryEvent(int boundaryIndex)
+{
+  LOG(DEBUG) << "enter";
+
+  // get selected field name
+  string currentFieldName = _displayFieldController->getSelectedFieldName();
+  int currentSweepIndex = _sweepController->getSelectedIndex();
+  if (_archiveFileList.size() > 0) {
+    string radarFilePath = _archiveFileList.at(0);
+  
+  //string text = "Boundary" + to_string(boundaryIndex);
+  //string outputDir;
+  //string fileExt = _boundaryEditorList->currentItem()->text().toUtf8().constData();
+  //string path = _getOutputPath(false, outputDir, fileExt);
+  //boundaryPointEditorControl->save(path);
+    bool successful = boundaryPointEditorControl->load(boundaryIndex, 
+      currentFieldName, currentSweepIndex, radarFilePath);
+    if (!successful) {
+      string msg = "could not load boundary for " + currentFieldName;
+      errorMessage("Load Boundary Error", msg.c_str());
+    } else {
+      // TODO: update / draw Boundary on image??
+    }
+  } else {
+    errorMessage("Save Boundary Error", "no File Path found");
+  }
+  LOG(DEBUG) << "exit";
+}
+
+void PolarManager::refreshBoundaries()
+{
+  LOG(DEBUG) << "enter";
+
+  // get selected field name
+  string currentFieldName = _displayFieldController->getSelectedFieldName();
+  int currentSweepIndex = _sweepController->getSelectedIndex();
+  if (_archiveFileList.size() > 0) {
+    string radarFilePath = _archiveFileList.at(0);
+  
+    bool successful = boundaryPointEditorControl->refreshBoundary(
+      radarFilePath, 
+      currentFieldName,
+      currentSweepIndex);
+  }
+
+  LOG(DEBUG) << "exit";
 }
 
 /////////////////////////////
 // show boundary editor
-void PolarManager::_showBoundaryEditor()
+void PolarManager::showBoundaryEditor()
 {
+
+
+// ----
+ 
+  // create the view
+
+  if (boundaryPointEditorView == NULL) {
+    boundaryPointEditorView = new boundaryPointEditorView(this, closestRayToEdit->getAzimuthDeg());
+
+    // install event filter to catch when the spreadsheet is closed
+    CloseEventFilter *closeFilter = new CloseEventFilter(boundaryPointEditorView);
+    boundaryPointEditorView->installEventFilter(closeFilter);
+
+    // create the model
+
+    //SpreadSheetModel *model = new SpreadSheetModel(const_cast<RadxRay *> (closestRayToEdit));
+    
+    // create the controller
+    boundaryPointEditorControl = new BoundaryPointEditor(boundaryPointEditorView); //, model);
+
+    // connect some signals and slots in order to retrieve information
+    // and send changes back to display
+                                         
+    connect(boundaryPointEditorView, SIGNAL(boundaryPointEditorClosed()), this, SLOT(boundaryEditorClosed()));
+
+    connect(boundaryPointEditorControl, SIGNAL(saveBoundary(int )), 
+      this, SLOT(saveBoundaryEvent(int)));
+    connect(boundaryPointEditorControl, SIGNAL(loadBoundary(int )), 
+      this, SLOT(loadBoundaryEvent(int)));
+    
+    //sheetView->init();
+    //sheetView->show();
+  } else {
+
+    //string currentFieldName = _displayFieldController->getSelectedFieldName();
+    //sheetView->highlightClickedData(currentFieldName, azimuth, (float) range);
+  }
+  
+  //BoundaryPointEditor::Instance()->setManager(this);
+  BoundaryPointEditorControl->showBoundaryEditor();
+// ----
+
+
+
+  /*
   if (_boundaryEditorDialog)
   {
     if (_boundaryEditorDialog->isVisible())
@@ -3987,7 +4109,10 @@ void PolarManager::_showBoundaryEditor()
 	  onBoundaryEditorListItemClicked(_boundaryEditorList->currentItem());
     }
   }
+  */
 }
+
+
 
 // from DisplayManager ...
 
@@ -4512,6 +4637,7 @@ void PolarManager::_updateFieldPanel(string newFieldName)
   LOG(DEBUG) << "exit";
 }
 */
+
 void PolarManager::contextMenuParameterColors()
 {
   
@@ -5623,8 +5749,13 @@ void PolarManager::spreadSheetClosed() {
 }
 
 void PolarManager::scriptEditorClosed() {
-  //delete sheetView;  this is handled by the close event
+  //delete View;  this is handled by the close event
   scriptEditorView = NULL;
+}
+
+void PolarManager::boundaryEditorClosed() {
+  //delete View;  this is handled by the close event
+  boundaryEditorView = NULL;
 }
 
 /////////////////////////////////////////////////////

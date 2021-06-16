@@ -60,6 +60,8 @@
 #include "SpreadSheetView.hh"
 #include "ScriptEditorController.hh"
 #include "ScriptEditorView.hh"
+#include "BoundaryPointEditor.hh"
+#include "BoundaryPointEditorView.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -200,9 +202,12 @@ public slots:
   void selectedFieldChanged(QString newFieldName);
   //void _updateField(size_t fieldId);
 
+  void selectedSweepChanged(double);
+
   void spreadSheetClosed();
   void scriptEditorClosed();
-
+  void boundaryEditorClosed();
+  
   void errorMessage(string title, string message);
 
 signals:
@@ -229,6 +234,10 @@ signals:
 private:
 
   static PolarManager* m_pInstance;
+
+  string _boundaryDir;
+  void setBoundaryDir();
+  string getBoundaryFilePath(string boundaryFileName);
 
   // from DisplayManager ...
   ParamFile *_params;
@@ -260,6 +269,10 @@ private:
 
   ScriptEditorController *scriptEditorControl;
   ScriptEditorView *scriptEditorView;
+
+  BoundaryPointEditor *boundaryPointEditorControl;
+  BoundaryPointEditorView *boundaryPointEditorView;
+
 
   // windows
 
@@ -510,9 +523,23 @@ private:
   QPushButton *_fwd1;
   QPushButton *_backPeriod;
   QPushButton *_fwdPeriod;
+  /*
+  QPushButton *_boundaryEditorClearBtn;
+  QPushButton *_boundaryEditorHelpBtn;
+  QPushButton *_boundaryEditorSaveBtn;
+  QPushButton *_boundaryEditorPolygonBtn;
+  QPushButton *_boundaryEditorCircleBtn;
+  QPushButton *_boundaryEditorBrushBtn;
+  QListWidget *_boundaryEditorList;
+  QLabel *_boundaryEditorInfoLabel;
+  bool forceHide = true;
+  QSlider *_circleRadiusSlider;
+  QSlider *_brushRadiusSlider;
+
   QPushButton *_boundaryEditorClearBtn;
   QPushButton *_boundaryEditorSaveBtn;
   QListWidget *_boundaryEditorList;
+  */
 
   // time controller settings dialog
   
@@ -719,6 +746,10 @@ private slots:
   void _timeSliderValueChanged(int value);
   void _timeSliderReleased();
   void _timeSliderPressed();
+
+  //circle radius slider for BoundaryPointEditor
+  void _circleRadiusSliderValueChanged(int value);
+  void _brushRadiusSliderValueChanged(int value);
   
   // images
 
@@ -739,10 +770,21 @@ private slots:
 
   // boundary editor
   void _createBoundaryEditorDialog();
-  void _showBoundaryEditor();
-  void _clearBoundaryEditorClick();
-  void onBoundaryEditorListItemClicked(QListWidgetItem* item);
-  void _saveBoundaryEditorClick();
+  void showBoundaryEditor();
+  void refreshBoundaries();
+//  void clearBoundaryEditorClick();
+//  void helpBoundaryEditorClick();
+//  void polygonBtnBoundaryEditorClick();
+//  void circleBtnBoundaryEditorClick();
+//  void brushBtnBoundaryEditorClick();
+//  void onBoundaryEditorListItemClicked(QListWidgetItem* item);
+  void saveBoundaryEvent(int boundaryIndex);
+  void loadBoundaryEvent(int boundaryIndex);  
+  void selectBoundaryTool(BoundaryToolType tool);
+
+  //void _clearBoundaryEditorClick();
+  //void onBoundaryEditorListItemClicked(QListWidgetItem* item);
+  //void _saveBoundaryEditorClick();
 
   void _examineSpreadSheetSetup(double  closestAz = 30.0, double range = 0.0);
   void ExamineEdit(double azimuth, double elevation, size_t fieldIndex,

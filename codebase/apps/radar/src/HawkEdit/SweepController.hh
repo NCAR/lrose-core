@@ -90,6 +90,7 @@ public:
   // set the index for the GUI
 
   void setGuiIndex(int index);
+  int getGuiIndex();
 
   // set the index for the file
 

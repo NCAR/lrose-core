@@ -263,6 +263,11 @@ void SweepController::setGuiIndex(int index)
 
 }
 
+int SweepController::getGuiIndex() 
+{
+  return _view->getGuiIndex();
+}
+
 
 /////////////////////////////////////////////////////////////
 /* set selected file index

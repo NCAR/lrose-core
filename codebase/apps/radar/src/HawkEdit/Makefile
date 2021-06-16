@@ -56,6 +56,10 @@ HDRS = \
 	Args.hh \
 	Beam.hh \
 	BoundaryPointEditor.hh \
+	BoundaryPointEditorView.hh \
+	BoundaryPointEditorModel.hh \
+	BoundaryPointTool.hh \
+	BoundaryView.hh \
 	CloseEventFilter.hh \
 	ColorBar.hh \
 	ColorMap.hh \
@@ -68,6 +72,8 @@ HDRS = \
 	HawkEyeLogger.hh \
 	PaletteManager.hh \
         ParameterColorView.hh \
+	Point.hh \
+	PolygonUtils.hh \
         FieldColorController.hh \
 	DataModel.hh \
         DisplayFieldModel.hh \
@@ -109,7 +115,8 @@ NORM_SRCS = \
 	AllocCheck.cc \
 	Args.cc \
 	Beam.cc \
-	BoundaryPointEditor.cc \
+	BoundaryPointEditorModel.cc \
+	BoundaryView.cc \
 	ColorMap.cc \
 	ColorTableManager.cc \
 	DataModel.cc \
@@ -149,6 +156,8 @@ MOC_SRCS = \
 	TimeScaleWidget.cc \
 	ParameterColorView.cc \
         FieldColorController.cc \
+	BoundaryPointEditor.cc \
+	BoundaryPointEditorView.cc \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
@@ -166,6 +175,8 @@ MOC_SRCS = \
 	FunctionEditor.cc 
 
 MOC_OUTPUT = \
+	moc_BoundaryPointEditorView.cpp \
+	moc_BoundaryPointEditor.cpp \
 	moc_CloseEventFilter.cpp \
 	moc_FieldListView.cpp \
 	moc_FieldRendererView.cpp \

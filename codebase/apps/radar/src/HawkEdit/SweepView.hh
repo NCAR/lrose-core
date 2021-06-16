@@ -68,6 +68,7 @@ public:
   // set the index for the GUI
 
   void setGuiIndex(int index);
+  int getGuiIndex();
 
   // change selected index by the specified increment
 
