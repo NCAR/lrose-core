@@ -389,14 +389,15 @@ void ConvStrat::_addFields()
                                  "EchoTops", longName, "km"));
   }
   
-  if (_params.write_height_grids) {
+  if (_params.write_height_grids &&
+      _params.vert_levels_type == Params::VERT_LEVELS_BY_TEMP) {
     _shallowHtField.convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
     _outMdvx.addField(new MdvxField(_shallowHtField));
     _deepHtField.convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
     _outMdvx.addField(new MdvxField(_deepHtField));
   }
   
-  if (_params.write_temperature) {
+  if (_params.write_temperature && _tempField != NULL) {
     _tempField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
     _outMdvx.addField(new MdvxField(*_tempField));
   }
