@@ -51,6 +51,7 @@ ConvStrat::ConvStrat(int argc, char **argv)
 {
 
   isOK = true;
+  _tempField = NULL;
 
   // set programe name
 
@@ -87,7 +88,7 @@ ConvStrat::ConvStrat(int argc, char **argv)
       return;
     }
   }
-
+  
   // init process mapper registration
 
   PMU_auto_init((char *) _progName.c_str(),
@@ -398,8 +399,9 @@ void ConvStrat::_addFields()
   }
   
   if (_params.write_temperature && _tempField != NULL) {
-    _tempField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-    _outMdvx.addField(new MdvxField(*_tempField));
+    MdvxField * tempField = new MdvxField(*_tempField);
+    tempField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+    _outMdvx.addField(tempField);
   }
 
   // the following 2d fields are unsigned bytes
@@ -596,6 +598,7 @@ void ConvStrat::_computeHts(double tempC,
 
   // get temp array
 
+  _tempField->convertType(Mdvx::ENCODING_FLOAT32);
   fl32 *temp = (fl32 *) _tempField->getVol();
   const Mdvx::field_header_t tempFhdr = _tempField->getFieldHeader();
   
@@ -614,7 +617,7 @@ void ConvStrat::_computeHts(double tempC,
   for (si64 iy = 0; iy < tempFhdr.ny; iy++) {
     for (si64 ix = 0; ix < tempFhdr.nx; ix++, xyIndex++) {
 
-      // initialize with lowest plane height
+      // initialize with lowest and highest plane heights
 
       si64 bottomXyIndex = xyIndex;
       double bottomTemp = temp[bottomXyIndex]; // plane below starts at plane 0
