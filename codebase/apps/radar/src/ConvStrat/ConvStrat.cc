@@ -599,8 +599,9 @@ void ConvStrat::_computeHts(double tempC,
   // get temp array
 
   _tempField->convertType(Mdvx::ENCODING_FLOAT32);
-  fl32 *temp = (fl32 *) _tempField->getVol();
   const Mdvx::field_header_t tempFhdr = _tempField->getFieldHeader();
+  fl32 *temp = (fl32 *) _tempField->getVol();
+  fl32 tempMiss = tempFhdr.missing_data_value;
   
   // get Z profile for temperatures
   
@@ -617,41 +618,56 @@ void ConvStrat::_computeHts(double tempC,
   for (si64 iy = 0; iy < tempFhdr.ny; iy++) {
     for (si64 ix = 0; ix < tempFhdr.nx; ix++, xyIndex++) {
 
-      // initialize with lowest and highest plane heights
+      // initialize
 
-      si64 bottomXyIndex = xyIndex;
-      double bottomTemp = temp[bottomXyIndex]; // plane below starts at plane 0
-      double bottomHt = tempVhdr.level[0]; // if temp level is below grid
+      fl32 bottomTemp = tempMiss;
+      double bottomHt = tempVhdr.level[0]; // if temp is below grid
       
-      si64 topXyIndex = xyIndex + nxy * (tempFhdr.nz - 1);
-      double topTemp = temp[topXyIndex]; // plane below starts at plane 0
-      double topHt = tempVhdr.level[tempFhdr.nz - 1]; // if temp level is below grid
+      fl32 topTemp = tempMiss;
+      double topHt = tempVhdr.level[tempFhdr.nz - 1]; // if temp is above grid
       
-      if (tempC >= bottomTemp) {
-        // required temp is below grid
-        hts[xyIndex] = bottomHt;
-      } else if (tempC <= topTemp) {
-        // required temp is above grid
-        hts[xyIndex] = topHt;
-      } else {
-        // required temp is within grid vert limits
-        // interpolate to find the height for tempC
-        hts[xyIndex] = bottomHt;
-        double tempBelow = bottomTemp;
-        si64 index3D = xyIndex + nxy; // index starts at plane 1
-        for (si64 iz = 1; iz < tempFhdr.nz; iz++, index3D += nxy) {
-          double tempAbove = temp[index3D]; // plane above starts at plane 1
-          if ((tempC <= tempBelow && tempC >= tempAbove) ||
-              (tempC >= tempBelow && tempC <= tempAbove)) {
+      hts[xyIndex] = bottomHt;
+      
+      // loop through heights, looking for temps that straddle
+      // the required temp
+
+      bool htFound = false;
+      for (si64 iz = 1; iz < tempFhdr.nz; iz++) {
+        si64 zIndexBelow = xyIndex + (iz - 1) * nxy; 
+        si64 zIndexAbove = zIndexBelow + nxy; 
+        double tempBelow = temp[zIndexBelow];
+        double tempAbove = temp[zIndexAbove];
+        // set bottom temp
+        if (tempBelow != tempMiss && bottomTemp == tempMiss) {
+          bottomTemp = tempBelow;
+        }
+        // set top temp
+        if (tempAbove != tempMiss) {
+          topTemp = tempAbove;
+        }
+        if (!htFound && (tempBelow != tempMiss) && (tempAbove != tempMiss)) {
+          // check for normal profile and inversion
+          if ((tempBelow >= tempC && tempAbove <= tempC) ||
+              (tempBelow <= tempC && tempAbove >= tempC)) {
             double deltaTemp = tempAbove - tempBelow;
             double deltaHt = zProfile[iz] - zProfile[iz-1];
-            double interpHt = zProfile[iz] + ((tempC - tempBelow) / deltaTemp) * deltaHt;
+            double interpHt =
+              zProfile[iz] + ((tempC - tempBelow) / deltaTemp) * deltaHt;
             hts[xyIndex] = interpHt;
-            break;
+            htFound = true;
           }
-          tempBelow = tempAbove;
-        } // iz
-      } // if (tempC >= bottomTemp)
+        }
+      } // iz
+      
+      if (!htFound) {
+        if (tempC >= bottomTemp) {
+          // required temp is below grid
+          hts[xyIndex] = bottomHt;
+        } else if (tempC <= topTemp) {
+          // required temp is above grid
+          hts[xyIndex] = topHt;
+        }
+      }
 
     } // ix
   } // iy
