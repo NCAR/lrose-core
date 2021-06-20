@@ -48,19 +48,21 @@
 */
 
 // Global static pointer used to ensure a single instance of the class.
-BoundaryPointEditor* BoundaryPointEditor::m_pInstance = NULL;
+//BoundaryPointEditor* BoundaryPointEditor::m_pInstance = NULL;
 
-
+/*
 BoundaryPointEditor* BoundaryPointEditor::Instance()
 {
    if (!m_pInstance)   // Only allow one instance of class to be generated.
       m_pInstance = new BoundaryPointEditor;
    return m_pInstance;
 }
+*/
 
-BoundaryPointEditor::BoundaryPointEditor() {
-	_boundaryEditorView = new BoundaryPointEditorView();
-	_boundaryView = new BoundaryView();
+BoundaryPointEditor::BoundaryPointEditor(BoundaryPointEditorView *bpeView,
+	BoundaryView *boundaryView) {
+	_boundaryEditorView = bpeView;
+	_boundaryView = boundaryView;
 }
 
 void BoundaryPointEditor::createBoundaryEditorDialog() {
@@ -73,6 +75,8 @@ void BoundaryPointEditor::createBoundaryEditorDialog() {
 		this, SLOT(userClickedCircleButton));
 	connect(_boundaryEditorView, SIGNAL(userClickedBrushButton),
 		this, SLOT(userClickedBrushButton));	
+
+
 }
 
 void BoundaryPointEditor::userClickedPolygonButton() {
@@ -275,10 +279,18 @@ void BoundaryPointEditor::coutPoints(vector<Point> &pts)
 */
 
 // draws the boundary
-void BoundaryPointEditor::draw(WorldPlot worldPlot, QPainter &painter)
+void BoundaryPointEditor::drawBoundary(WorldPlot worldPlot, QPainter &painter)
 {
 	LOG(DEBUG) << "enter";
-	_boundaryView->draw(worldPlot, painter);
+	vector<Point> points = _boundaryPointEditorModel->getWorldPoints();
+	float pointBoxScale = _boundaryPointEditorModel->getPointBoxScale();
+	bool isFinished = _boundaryPointEditorModel->isAClosedPolygon();
+	BoundaryToolType currentTool = _boundaryPointEditorModel->getCurrentTool();
+	string color = _boundaryPointEditorModel->getYellowBrush();
+
+	_boundaryView->draw(worldPlot, painter,
+	  points,  pointBoxScale,  isFinished,
+	   currentTool, color);
 	/*
 	painter.setPen(Qt::yellow);
 	bool isFinished = isAClosedPolygon();
@@ -294,11 +306,50 @@ void BoundaryPointEditor::draw(WorldPlot worldPlot, QPainter &painter)
 	LOG(DEBUG) << "exit";
 }
 
+bool BoundaryPointEditor::evaluateCursor(bool isShiftKeyDown) {
+	bool changeCursor = false;
+  //if ((isBoundaryEditorVisible && !isBoundaryFinished) ||
+  //    (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown)) {
+	bool isBoundaryFinished = _boundaryPointEditorModel->isAClosedPolygon();
+  if ((!isBoundaryFinished) ||
+      (isBoundaryFinished && isShiftKeyDown)) {
+  	changeCursor = true;
+  }
+  return changeCursor;
+}
+
+void BoundaryPointEditor::evaluateMouseRelease(int worldReleaseX, int worldReleaseY)
+{
+	_boundaryPointEditorModel->evaluateMouseRelease(worldReleaseX, worldReleaseY);
+
+	/*
+        if (!isAClosedPolygon()) {
+          addPoint(worldReleaseX, worldReleaseY);
+        } else { //polygon finished, user may want to insert/delete a point
+          checkToAddOrDelPoint(worldReleaseX,
+                                       worldReleaseY);
+        }
+      } else if (editor->getCurrentTool() == BoundaryToolType::circle) {
+        if (editor->isAClosedPolygon()) {
+          editor->checkToAddOrDelPoint(worldReleaseX,
+                                       worldReleaseY);
+        } else {
+          editor->makeCircle(worldReleaseX,
+                             worldReleaseY,
+                             editor->getCircleRadius());
+        }
+        */
+}
+
+/*
 // draws a yellow square over a point
 // (relevant with the Polygon Tool)
 void BoundaryPointEditor::drawPointBox(WorldPlot worldPlot, QPainter &painter, Point point)
 {
-	_boundaryView->drawPointBox(worldPlot, painter, point);
+	float pointBoxScale = _boundaryPointEditorModel->getPointBoxScale();
+	string color = _boundaryPointEditorModel->getYellowBrush();
+	_boundaryView->drawPointBox( worldPlot, painter, point,
+	   pointBoxScale, color);
 
 	//double x = point.x;
 	//double y = point.y;
@@ -306,6 +357,7 @@ void BoundaryPointEditor::drawPointBox(WorldPlot worldPlot, QPainter &painter, P
 	//int size = 6 * pointBoxScale;
 	//worldPlot.fillRectangle(painter, *yellowBrush, x-(size/2), y-(size/2), size, size);
 }
+*/
 
 // updates the scale of the boundary (in case the user zoomed in/out)
 bool BoundaryPointEditor::updateScale(double xRange)
@@ -325,14 +377,9 @@ void BoundaryPointEditor::clear()
 // user has dragged circle slider and reset the circle radius
 bool BoundaryPointEditor::setCircleRadius(int value)
 {
-	return _boundaryPointEditorModel->setCircleRadius(value); 
-	/*
-	circleRadius = value;
-	bool resizeExistingCircle = (getCurrentTool() == BoundaryToolType::circle && points.size() > 1);
-	if (resizeExistingCircle)  //resize existing circle
-		makeCircle(circleOrigin.x, circleOrigin.y, circleRadius);
+	int circleRadius = value;
+	bool resizeExistingCircle = _boundaryPointEditorModel->setCircleRadius(value); 
 	return(resizeExistingCircle);
-  */
 }
 
 // user has dragged the brush slider and reset its size
@@ -669,6 +716,12 @@ int BoundaryPointEditor::getBrushRadius()
 }
 */
 
+bool BoundaryPointEditor::evaluatePoint(int worldX, int worldY)
+{
+  bool redraw = _boundaryPointEditorModel->evaluatePoint(worldX, worldY);
+  return redraw;
+}
+
 // returns the file path for the boundary file, given the currently selected field and sweep
 // boundaryFileName will be one of 5 values: "Boundary1", "Boundary2"..."Boundary5"
 //string BoundaryPointEditor::getBoundaryFilePath(string boundaryFileName)
@@ -681,7 +734,7 @@ void BoundaryPointEditor::save(int boundaryIndex, string &selectedFieldName,
 {
 	LOG(DEBUG) << "enter ";
 
- 	_boundaryPointEditorModel->save(boundaryIndex, fieldName, sweepIndex, radarFilePath);
+ 	_boundaryPointEditorModel->save(boundaryIndex, selectedFieldName, sweepIndex, radarFilePath);
 
 	LOG(DEBUG) << "exit";
 
@@ -692,7 +745,7 @@ void BoundaryPointEditor::save(int boundaryIndex, string &selectedFieldName,
 bool BoundaryPointEditor::load(int boundaryIndex, string &selectedFieldName,
  int sweepIndex, string &radarFilePath)
 {
-	bool successful = _boundaryPointEditorModel->load(boundaryIndex, fieldName, sweepIndex, radarFilePath);
+	bool successful = _boundaryPointEditorModel->load(boundaryIndex, selectedFieldName, sweepIndex, radarFilePath);
 
 	if (successful) {
 		BoundaryToolType currentTool = getCurrentTool();
@@ -793,12 +846,12 @@ vector<Point> BoundaryPointEditor::getPoints(string boundaryFilePath)
   */
 }
 
-
+/*
 string BoundaryPointEditor::getRootBoundaryDir()
 {
 	return(rootBoundaryDir);
 }
-
+*/
 /*
   radarFilePath will be something like "/media/sf_lrose/ncswp_SPOL_RHI_.nc"
   fieldIndex is zero based. E.g., "DBZ" is usually fieldIndex 0, "REF" is fieldIndex 1
@@ -972,14 +1025,39 @@ void BoundaryPointEditor::showBoundaryEditor()
     */
   }
 }
+/*
+void BoundaryPointEditor::boundaryCircleRadiusChanged(int value)
+{
+	// model needs to know
+	// redraw boundary in world plot
+		BoundaryToolType currentTool = BoundaryPointEditor::Instance()->getCurrentTool();
+	circleRadius = value;
+	bool resizeExistingCircle = (currentTool == BoundaryToolType::circle && points.size() > 1);
+	if (resizeExistingCircle)  //resize existing circle
+		makeCircle(circleOrigin.x, circleOrigin.y, circleRadius);
+	return(resizeExistingCircle);
+}
 
+void BoundaryPointEditor::boundaryBrushRadiusChanged(int value)
+{
+
+	// model needs to know
+	// redraw boundary in world plot
+		BoundaryToolType currentTool = BoundaryPointEditor::Instance()->getCurrentTool();
+	circleRadius = value;
+	bool resizeExistingCircle = (currentTool == BoundaryToolType::circle && points.size() > 1);
+	if (resizeExistingCircle)  //resize existing circle
+		makeCircle(circleOrigin.x, circleOrigin.y, circleRadius);
+	return(resizeExistingCircle);
+}
+*/
 
 void BoundaryPointEditor::refreshBoundaries(string &openFilePath,
- string &currentFieldName, currentSweepIndex) {
- 	for (int i=_boundaryView->firstBoundary; i < _boundaryView->lastBoundary; i++) {
+ string &currentFieldName, int currentSweepIndex) {
+ 	for (int i=_boundaryEditorView->firstBoundaryIndex(); i < _boundaryEditorView->lastBoundaryIndex(); i++) {
  		string boundaryPath = _boundaryPointEditorModel->refreshBoundary(
  			openFilePath, currentFieldName,  currentSweepIndex, i);
- 		_boundaryEditorView->setBoundaryFile(i, boundaryPath) 
+ 		_boundaryEditorView->setBoundaryFile(i, boundaryPath);
  	}
 	
 }

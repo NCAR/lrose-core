@@ -43,7 +43,7 @@ class BoundaryView
 	*/
 	void draw(WorldPlot worldPlot, QPainter &painter,
 	  vector<Point> &points, float pointBoxScale,
-	  bool isFinished, BoundaryToolType currentTool, QBrush *yellowBrush);
+	  bool isFinished, BoundaryToolType currentTool, string &color);
 	/*
 	bool isOverAnyPoint(float worldX, float worldY);
 	void moveNearestPointTo(float worldX, float worldY);
@@ -63,7 +63,7 @@ class BoundaryView
 */
 
 	void drawPointBox(WorldPlot worldPlot, QPainter &painter, Point point,
-		float pointBoxScale, QBrush *yellowBrush);
+	  float pointBoxScale, string &color);
 
   private:
 

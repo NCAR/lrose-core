@@ -42,31 +42,39 @@ class BoundaryPointEditorView : public QDialog
 	//string getRootBoundaryDir();
 	//void setBoundaryDir(string &openFilePath);
 
-	void makeCircle(int x, int y, float radius);
-	void addToBrushShape(float x, float y);
-	void addPoint(float x, float y);
-	void insertPoint(float x, float y);
-	void delNearestPoint(float x, float y);
-	void draw(WorldPlot worldPlot, QPainter &painter);
-	bool isOverAnyPoint(float worldX, float worldY);
-	void moveNearestPointTo(float worldX, float worldY);
-	bool isAClosedPolygon();
-	void checkToAddOrDelPoint(float x, float y);
+	//void makeCircle(int x, int y, float radius);
+	//void addToBrushShape(float x, float y);
+	//void addPoint(float x, float y);  
+	//void insertPoint(float x, float y);
+	//void delNearestPoint(float x, float y);
+	//void draw(WorldPlot worldPlot, QPainter &painter);
+	//bool isOverAnyPoint(float worldX, float worldY);
+	//void moveNearestPointTo(float worldX, float worldY);
+	//bool isAClosedPolygon();
+	//void checkToAddOrDelPoint(float x, float y);
+	void closeEvent();
 	void clear();
 	void save(string path);
 	void load(string path);
 	void setTool(BoundaryToolType tool, int radius = 0);
 	BoundaryToolType getCurrentTool();
-	bool updateScale(double xRange);
-	vector<Point> getWorldPoints();
+	//bool updateScale(double xRange);
+	//vector<Point> getWorldPoints();
 	bool setCircleRadius(int value);
 	void setBrushRadius(int value);
-	void setWorldScale(float value);
+	//void setWorldScale(float value);
 	bool getIsCircle();
 	int getCircleRadius();
 	int getBrushRadius();
 
+	void setBoundaryFile(int boundaryIndex, string  &fileName);
+
  // signals:
+
+	void saveBoundary(int boundaryIndex);
+	void loadBoundary(int boundaryIndex);
+  bool boundaryCircleRadiusChanged(int newRadius);
+  bool boundaryBrushRadiusChanged(int newRadius);
 
 	void userClickedPolygonButton();
 	void userClickedCircleButton();
@@ -78,6 +86,11 @@ class BoundaryPointEditorView : public QDialog
   void refreshBoundaries();
 
   void boundaryPointEditorClosed();
+
+  void selectBoundaryTool(BoundaryToolType tool, int radius = 0);
+
+  int firstBoundaryIndex();
+  int lastBoundaryIndex();
 
   private:
 
@@ -116,7 +129,7 @@ class BoundaryPointEditorView : public QDialog
 	int circleRadius = 50;
 	int brushRadius = 20;
 	int brushToolNextPtDistance = 10;
-	Point brushLastOrigin;
+	//Point brushLastOrigin;
 	QBrush *yellowBrush = new QBrush(QColor(255,255,0));
 
 	//BoundaryToolType currentTool = BoundaryToolType::brush;
@@ -132,6 +145,8 @@ class BoundaryPointEditorView : public QDialog
   bool forceHide = true;
   QSlider *_circleRadiusSlider;
   QSlider *_brushRadiusSlider;
+
+  const int nBoundaries = 5;
 
   /*
 +  QPushButton *_boundaryEditorClearBtn;
@@ -157,7 +172,7 @@ class BoundaryPointEditorView : public QDialog
    void onBoundaryEditorListItemClicked(QListWidgetItem* item);
 //-  void _saveBoundaryEditorClick();
   void saveBoundaryEditorClick();
-  void selectBoundaryTool(BoundaryToolType tool);
+
 
   //void _clearBoundaryEditorClick();
   //void onBoundaryEditorListItemClicked(QListWidgetItem* item);

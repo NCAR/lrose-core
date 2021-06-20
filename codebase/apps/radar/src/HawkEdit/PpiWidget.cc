@@ -47,7 +47,7 @@ using namespace std;
 
 
 PpiWidget::PpiWidget(QWidget* parent,
-                     const PolarManager &manager,
+                    PolarManager *manager,
                      const RadxPlatform &platform,
                      //const vector<DisplayField *> &fields,
 		     DisplayFieldController *displayFieldController,
@@ -902,18 +902,22 @@ void PpiWidget::configureRange(double max_range)
 void PpiWidget::timerEvent(QTimerEvent *event)
 {
   bool doUpdate = false;
-  bool isBoundaryEditorVisible = _manager._boundaryEditorDialog->isVisible();
-  if (isBoundaryEditorVisible) {
+
+
+  //bool isBoundaryEditorVisible = _manager->_boundaryEditorDialog->isVisible();
+  //if (isBoundaryEditorVisible) {
     double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
     // user may have zoomed in or out, so update the polygon point boxes
     // so they are the right size on screen
-    doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
-  }
-  bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
+    //doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
+    doUpdate = _manager->evaluateRange(xRange);
+  //}
+  //bool isBoundaryFinished = BoundaryPointEditor::Instance()->isAClosedPolygon();
   bool isShiftKeyDown =
     (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
-  if ((isBoundaryEditorVisible && !isBoundaryFinished) ||
-      (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown)){
+  //if ((isBoundaryEditorVisible && !isBoundaryFinished) ||
+  //    (isBoundaryEditorVisible && isBoundaryFinished && isShiftKeyDown)){
+  if (_manager->evaluateCursor(isShiftKeyDown)) {
     this->setCursor(Qt::CrossCursor);
   } else {
     this->setCursor(Qt::ArrowCursor);
@@ -976,9 +980,11 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
 
   // --- insert here ---
 
+    _manager->evaluateMouseRelease(_worldReleaseX, _worldReleaseY);
+    /*
     // If boundary editor active, then interpret boundary mouse release event
     BoundaryPointEditor *editor = BoundaryPointEditor::Instance(); 
-    if (_manager._boundaryEditorDialog->isVisible()) {
+    if (_manager->_boundaryEditorDialog->isVisible()) {
       if (editor->getCurrentTool() == BoundaryToolType::polygon) {
         if (!editor->isAClosedPolygon()) {
           editor->addPoint(_worldReleaseX, _worldReleaseY);
@@ -998,7 +1004,7 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
       }
       //_dirty = true;
     }
-
+    */
 
   /* ---- cut here ----
 
@@ -1056,7 +1062,7 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
 
     // enable unzoom button
     
-    _manager.enableZoomButton();
+    _manager->enableZoomButton();
     
     // Update the window in the renderers
     _dirty = true;
@@ -1813,7 +1819,7 @@ void PpiWidget::contextMenuParameterColors()
                                                                          
   //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
   connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
-  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
+  	  _manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
   //  PolarManager::colorMapRedefineReceived(string, ColorMap)
   //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
   //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!

@@ -62,7 +62,7 @@ const double PolarWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
 const double PolarWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 PolarWidget::PolarWidget(QWidget* parent,
-                         const PolarManager &manager,
+                        PolarManager *manager,
                          const RadxPlatform &platform,
 			 DisplayFieldController *displayFieldController,
 			 //                         const vector<DisplayField *> &fields,
@@ -83,7 +83,6 @@ PolarWidget::PolarWidget(QWidget* parent,
         _ringSpacing(10.0)
 
 {
-
   _params = ParamFile::Instance();
   string color = _params->backgroundColor;
   _backgroundBrush = QColor(color.c_str());
@@ -471,6 +470,8 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 
   // ---- insert here ---
 
+  _manager->mouseMoveEvent(worldX, worldY);
+  /*
   if (_manager._boundaryEditorDialog->isVisible()) {
 
     BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
@@ -486,6 +487,7 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
     update();
     return;
   }
+   */
 
   /* ---- cut here --- 
   if (_manager._boundaryEditorDialog->isVisible() && BoundaryPointEditor::Instance()->isPolygonFinished() && BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY))
@@ -571,15 +573,6 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     double y_km = _worldReleaseY;
     _pointClicked = true;
 
-
-    /***** testing ******
-    // QToolTip::showText(mapToGlobal(QPoint(_mouseReleaseX, _mouseReleaseY)), "louigi")  
-    QToolTip::showText(QPoint(0,0), "louigi");
-
-    smartBrush(_mouseReleaseX, _mouseReleaseY);
-
-    // ***** end testing ****/
-
     // get ray closest to click point
 
     const RadxRay *closestRay = _getClosestRay(x_km, y_km);
@@ -606,7 +599,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 
     // enable unzoom button
     
-    _manager.enableZoomButton();
+    _manager->enableZoomButton();
     
     // Update the window in the renderers
     
@@ -621,24 +614,6 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   update();
   }
 }
-
-/**************   testing *****
-void PolarWidget::smartBrush(int xPixel, int yPixel) {
-  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
-  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
-
-  QImage qImage;
-  qImage.load("/h/eol/brenda/octopus.jpg");
-  // get the Image from somewhere ...   
-  //qImage->convertToFormat(QImage::Format_RGB32);
-  //qImage->invertPixels();
-  QPainter painter(this);
-  painter.drawImage(0, 0, qImage);
-  _drawOverlays(painter);
-
-}
-
-*/
 
 void PolarWidget::imageReady(QImage *image) {
 //  _image = image;  // TODO: make sure this isn't a copy!  just assign a pointer
@@ -713,7 +688,13 @@ void PolarWidget::showSelectedField()
 
   _drawOverlays(painter);
 
-  BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
+  // keep pointer to BoundaryPointEditorControl ???
+
+    //QImage _boundaryImage = 
+    _manager->drawBoundary(_zoomWorld, painter);  
+          //if there are no points, this does nothing
+    // todo overlay boundary image
+
   } catch (const std::out_of_range& ex) {
     LOG(DEBUG) << ex.what();
   } catch (std::range_error &ex) {

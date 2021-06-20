@@ -1,12 +1,16 @@
 #include "BoundaryPointEditorView.hh"
-#include "PolarManager.hh"
+//#include "PolarManager.hh"
 
 #include <toolsa/LogStream.hh>
 
-#include <iostream>
-#include <fstream>
+//#include <iostream>
+//#include <fstream>
 #include <iterator>
 #include <QApplication>
+#include <QGridLayout>
+#include <QDesktopServices>
+#include <QUrl>
+
 
 /*
  BoundaryPointEditorView.cc 
@@ -49,7 +53,7 @@
 
 */
 
-BoundaryPointEditorView::BoundaryPointEditorView() {
+BoundaryPointEditorView::BoundaryPointEditorView() 
 // Creates the boundary editor dialog and associated event slots
 //void BoundaryPointEditorView::createBoundaryEditorDialog()
 {
@@ -60,14 +64,14 @@ BoundaryPointEditorView::BoundaryPointEditorView() {
   Qt::Alignment alignCenter(Qt::AlignCenter);
   // Qt::Alignment alignRight(Qt::AlignRight);
 
-  _boundaryEditorDialogLayout = new QGridLayout(this); // _boundaryEditorDialog);
+  QGridLayout *_boundaryEditorDialogLayout = new QGridLayout(this); // _boundaryEditorDialog);
   _boundaryEditorDialogLayout->setVerticalSpacing(4);
 
   int row = 0;
   _boundaryEditorInfoLabel = new QLabel("Boundary Editor allows you to select\nan area of your radar image", this); // _boundaryEditorDialog);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorInfoLabel, row, 0, 1, 2, alignCenter);
 
-  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", this); // _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
+  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", this)); // _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
 
   QLabel *toolsCaption = new QLabel("Editor Tools:", this); // _boundaryEditorDialog);
   _boundaryEditorDialogLayout->addWidget(toolsCaption, ++row, 0, 1, 2, alignCenter);
@@ -76,19 +80,21 @@ BoundaryPointEditorView::BoundaryPointEditorView() {
   _boundaryEditorPolygonBtn->setMaximumWidth(130);
   _boundaryEditorPolygonBtn->setText(" Polygon");
   _boundaryEditorPolygonBtn->setIcon(QIcon("images/polygon.png"));
-  _boundaryEditorPolygonBtn->setCheckable(TRUE);
+  _boundaryEditorPolygonBtn->setCheckable(true);
   _boundaryEditorPolygonBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorPolygonBtn, ++row, 0);
-  connect(_boundaryEditorPolygonBtn, SIGNAL(clicked()), this, SLOT(polygonBtnBoundaryEditorClick()));
+  connect(_boundaryEditorPolygonBtn, SIGNAL(clicked()),
+   this, SLOT(polygonBtnBoundaryEditorClick()));
 
   _boundaryEditorCircleBtn = new QPushButton(this); // _boundaryEditorDialog);
   _boundaryEditorCircleBtn->setMaximumWidth(130);
   _boundaryEditorCircleBtn->setText(" Circle  ");
   _boundaryEditorCircleBtn->setIcon(QIcon("images/circle.png"));
-  _boundaryEditorCircleBtn->setCheckable(TRUE);
+  _boundaryEditorCircleBtn->setCheckable(true);
   _boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
-  connect(_boundaryEditorCircleBtn, SIGNAL(clicked()), this, SLOT(circleBtnBoundaryEditorClick()));
+  connect(_boundaryEditorCircleBtn, SIGNAL(clicked()),
+   this, SLOT(circleBtnBoundaryEditorClick()));
 
   _circleRadiusSlider = new QSlider(Qt::Horizontal);
   _circleRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -102,16 +108,18 @@ BoundaryPointEditorView::BoundaryPointEditorView() {
   _circleRadiusSlider->setMinimum(8);
   _circleRadiusSlider->setMaximum(200);
   _boundaryEditorDialogLayout->addWidget(_circleRadiusSlider, row, 1);
-  connect(_circleRadiusSlider, SIGNAL(valueChanged(int)), this, SLOT(_circleRadiusSliderValueChanged(int)));
+  connect(_circleRadiusSlider, SIGNAL(valueChanged(int)),
+   this, SLOT(_circleRadiusSliderValueChanged(int)));
 
   _boundaryEditorBrushBtn = new QPushButton(this); // _boundaryEditorDialog);
   _boundaryEditorBrushBtn->setMaximumWidth(130);
   _boundaryEditorBrushBtn->setText(" Brush ");
   _boundaryEditorBrushBtn->setIcon(QIcon("images/brush.png"));
-  _boundaryEditorBrushBtn->setCheckable(TRUE);
+  _boundaryEditorBrushBtn->setCheckable(true);
   _boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
-  connect(_boundaryEditorBrushBtn, SIGNAL(clicked()), this, SLOT(brushBtnBoundaryEditorClick()));
+  connect(_boundaryEditorBrushBtn, SIGNAL(clicked()),
+   this, SLOT(brushBtnBoundaryEditorClick()));
 
   _brushRadiusSlider = new QSlider(Qt::Horizontal);
   _brushRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -125,10 +133,11 @@ BoundaryPointEditorView::BoundaryPointEditorView() {
   _brushRadiusSlider->setMinimum(12);
   _brushRadiusSlider->setMaximum(75);
   _boundaryEditorDialogLayout->addWidget(_brushRadiusSlider, row, 1);
-  connect(_brushRadiusSlider, SIGNAL(valueChanged(int)), this, SLOT(_brushRadiusSliderValueChanged(int)));
+  connect(_brushRadiusSlider, SIGNAL(valueChanged(int)),
+   this, SLOT(_brushRadiusSliderValueChanged(int)));
 
-  _boundaryEditorBrushBtn->setChecked(TRUE);
-  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", this); // _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
+  _boundaryEditorBrushBtn->setChecked(true);
+  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", this)); // _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
 
   _boundaryEditorList = new QListWidget(this); // _boundaryEditorDialog);
   QListWidgetItem *newItem5 = new QListWidgetItem;
@@ -147,7 +156,8 @@ BoundaryPointEditorView::BoundaryPointEditorView() {
   newItem1->setText("Boundary1");
   _boundaryEditorList->insertItem(0, newItem1);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
-  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onBoundaryEditorListItemClicked(QListWidgetItem*)));
+  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)),
+   this, SLOT(onBoundaryEditorListItemClicked(QListWidgetItem*)));
 
   // horizontal layout contains the "Clear", "Help", and "Save" buttons
   QHBoxLayout *hLayout = new QHBoxLayout;
@@ -156,17 +166,20 @@ BoundaryPointEditorView::BoundaryPointEditorView() {
   _boundaryEditorClearBtn = new QPushButton(this); // _boundaryEditorDialog);
   _boundaryEditorClearBtn->setText("Clear");
   hLayout->addWidget(_boundaryEditorClearBtn);
-  connect(_boundaryEditorClearBtn, SIGNAL(clicked()), this, SLOT(clearBoundaryEditorClick()));
+  connect(_boundaryEditorClearBtn, SIGNAL(clicked()),
+   this, SLOT(clearBoundaryEditorClick()));
 
   _boundaryEditorHelpBtn = new QPushButton(this); // _boundaryEditorDialog);
   _boundaryEditorHelpBtn->setText("Help");
   hLayout->addWidget(_boundaryEditorHelpBtn);
-  connect(_boundaryEditorHelpBtn, SIGNAL(clicked()), this, SLOT(helpBoundaryEditorClick()));
+  connect(_boundaryEditorHelpBtn, SIGNAL(clicked()),
+   this, SLOT(helpBoundaryEditorClick()));
 
   _boundaryEditorSaveBtn = new QPushButton(this); // _boundaryEditorDialog);
   _boundaryEditorSaveBtn->setText("Save");
   hLayout->addWidget(_boundaryEditorSaveBtn);
-  connect(_boundaryEditorSaveBtn, SIGNAL(clicked()), this, SLOT(saveBoundaryEditorClick()));
+  connect(_boundaryEditorSaveBtn, SIGNAL(clicked()),
+   this, SLOT(saveBoundaryEditorClick()));
 
 }
 
@@ -179,7 +192,7 @@ void BoundaryPointEditorView::saveBoundaryEditorClick()
   //ta_makedir_recurse(_boundaryDir.c_str());
   //TODO: should this be in BoundaryPointEditor ?? 
 
-  int boundaryIndex = _boundaryEditorList->currentRow()+1);
+  int boundaryIndex = _boundaryEditorList->currentRow()+1;
   string boundaryName = "Boundary" + to_string(boundaryIndex);
   _boundaryEditorList->currentItem()->setText(boundaryName.c_str());
 
@@ -215,13 +228,28 @@ void BoundaryPointEditorView::showBoundaryEditor()
 }
 
 // Set the current tool
-void BoundaryPointEditorView::setTool(BoundaryToolType tool)
+void BoundaryPointEditorView::setTool(BoundaryToolType tool, int radius)
 {
-	if (tool != currentTool)
+  selectBoundaryTool(tool, radius);
+  /*
+	//if (tool != currentTool)
 		clear();
-	currentTool = tool;
+	//currentTool = tool;
+  switch (tool) {
+    case BoundaryToolType::circle: {
+      setCircleRadius(radius);
+      break;
+      }
+    case BoundaryToolType::brush: {
+      setBrushRadius(radius);
+      break;
+    }  default:
+      ; 
+  }
+  */
 }
 
+/*
 // Boundary Editor needs to know the world scale so it sizes boundaries correctly on screen
 void BoundaryPointEditorView::setWorldScale(float value)
 {
@@ -233,6 +261,8 @@ BoundaryToolType BoundaryPointEditorView::getCurrentTool()
 {
 	return(currentTool);
 }
+*/
+
 /*
 // returns the points (which are stored in world coordinates, not pixel locations)
 vector<Point> BoundaryPointEditorView::getWorldPoints()
@@ -426,34 +456,7 @@ void BoundaryPointEditorView::coutPoints(vector<Point> &pts)
 }
 */
 
-// draws the boundary - move to BoundaryView class
 /*
-void BoundaryPointEditorView::draw(WorldPlot worldPlot, QPainter &painter)
-{
-	LOG(DEBUG) << "enter";
-	painter.setPen(Qt::yellow);
-	bool isFinished = isAClosedPolygon();
-
-	for (int i=1; i < (int) points.size(); i++)
-	{
-		LOG(DEBUG) << "drawing point " << i;
-		worldPlot.drawLine(painter, points[i-1].x, points[i-1].y, points[i].x, points[i].y);
-		if (isFinished && currentTool == BoundaryToolType::polygon)
-		  drawPointBox(worldPlot, painter, points[i]);
-	}
-	LOG(DEBUG) << "exit";
-}
-
-// draws a yellow square over a point
-// (relevant with the Polygon Tool)
-void BoundaryPointEditorView::drawPointBox(WorldPlot worldPlot, QPainter &painter, Point point)
-{
-	double x = point.x;
-	double y = point.y;
-
-	int size = 6 * pointBoxScale;
-	worldPlot.fillRectangle(painter, *yellowBrush, x-(size/2), y-(size/2), size, size);
-}
 
 // updates the scale of the boundary (in case the user zoomed in/out)
 bool BoundaryPointEditorView::updateScale(double xRange)
@@ -481,7 +484,7 @@ void BoundaryPointEditorView::onBoundaryEditorListItemClicked(QListWidgetItem* i
   bool found = (fileName.find("<none>") != string::npos);
   if (!found)
   {
-    int boundaryIndex = _boundaryEditorList->currentRow()+1);
+    int boundaryIndex = _boundaryEditorList->currentRow()+1;
     emit loadBoundary(boundaryIndex);
     /*
     //if (_boundaryDir.empty())
@@ -510,24 +513,43 @@ void BoundaryPointEditorView::onBoundaryEditorListItemClicked(QListWidgetItem* i
   
 }
 
-
-// user has dragged circle slider and reset the circle radius
+/*
+// loaded a boundary from storage; update the GUI
+// from Model to GUI
 bool BoundaryPointEditorView::setCircleRadius(int value)
 {
+
+  
 	BoundaryToolType currentTool = BoundaryPointEditor::Instance()->getCurrentTool();
 	circleRadius = value;
 	bool resizeExistingCircle = (currentTool == BoundaryToolType::circle && points.size() > 1);
 	if (resizeExistingCircle)  //resize existing circle
 		makeCircle(circleOrigin.x, circleOrigin.y, circleRadius);
 	return(resizeExistingCircle);
+  
 }
 
-// user has dragged the brush slider and reset its size
 void BoundaryPointEditorView::setBrushRadius(int value)
 {
-	brushRadius = value;
+  //emit boundaryBrushRadiusChanged(value);
+	//brushRadius = value;
+}
+*/
+
+// slots for signals coming from the BoundaryPointEditor Dialog ...
+// from GUI to Model
+// user has dragged circle slider and reset the circle radius
+void BoundaryPointEditorView::_circleRadiusSliderValueChanged(int value) 
+{
+  emit boundaryCircleRadiusChanged(value);
+}
+// user has dragged the brush slider and reset its size
+void BoundaryPointEditorView::_brushRadiusSliderValueChanged(int value) 
+{
+  emit boundaryBrushRadiusChanged(value);
 }
 
+/*
 // add (x,y) to the current brush shape
 void BoundaryPointEditorView::addToBrushShape(float x, float y)
 {
@@ -744,11 +766,12 @@ void BoundaryPointEditorView::reorderPointsSoStartingPointIsOppositeOfXY(int x, 
 	vector<Point> tempVector;
 	tempPoints.swap(tempVector);
 }
-
+*/
 /* erase any points closer than thresholdDistance to (x,y), and return
    the index of the first point erased. Used to merge brush "circles" into each other
    (relevant with the Brush Tool)
 */
+/*
 int BoundaryPointEditorView::erasePointsCloseToXYandReturnFirstIndexErased(int x, int y, int thresholdDistance)
 {
 	bool isDone = false;
@@ -848,7 +871,7 @@ int BoundaryPointEditorView::getBrushRadius()
 	return(brushRadius);
 }
 
-
+*/
 /*
   boundaryFilePath will be something like "/home/jeff/HawkEyeBoundaries/7996122556911878505/field0-sweep0-Boundary1"
   Method reads the binary file and returns the points within it as a vector<Point>
@@ -967,7 +990,7 @@ void BoundaryPointEditorView::selectBoundaryTool(BoundaryToolType tool, int radi
   {
     _boundaryEditorCircleBtn->setChecked(true);
     _boundaryEditorInfoLabel->setText("Circle: click on the main window to\ncreate your circle. You can then adjust\nthe radius slider to rescale it to the\ndesired size.");
-    _circleRadiusSlider->setValue(radius;
+    _circleRadiusSlider->setValue(radius);
   }
   else
   {
@@ -977,13 +1000,21 @@ void BoundaryPointEditorView::selectBoundaryTool(BoundaryToolType tool, int radi
   }
 }
 
+int BoundaryPointEditorView::firstBoundaryIndex() {
+  return 1;
+}
+
+int BoundaryPointEditorView::lastBoundaryIndex() {
+  return nBoundaries;
+}
+
 // User clicked on the polygonBtn
 void BoundaryPointEditorView::polygonBtnBoundaryEditorClick()
 {
   selectBoundaryTool(BoundaryToolType::polygon);
   //BoundaryPointEditor::Instance()->setTool(BoundaryToolType::polygon);
   //emit ppi_update();
-  emit userClickedPolygonButton;
+  emit userClickedPolygonButton();
 }
 
 // User clicked on the circleBtn

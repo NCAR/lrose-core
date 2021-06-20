@@ -112,7 +112,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   PolarWidget(QWidget* parent, 
-              const PolarManager &manager,
+              PolarManager *manager,
               const RadxPlatform &platform,
               //const vector<DisplayField *> &fields,
 	      DisplayFieldController *displayFieldController,
@@ -269,6 +269,9 @@ class DLL_EXPORT PolarWidget : public QWidget
   void addNewFields(vector<DisplayField *> &newFields);
   //void addField(QString fieldName);
 
+
+  void showSelectedField();
+
  protected:
 
   /////////////////////////
@@ -306,7 +309,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   QWidget *_parent;
-  const PolarManager &_manager;
+  PolarManager *_manager;
 
   /**
    * @brief TDRP params.
@@ -532,9 +535,9 @@ class DLL_EXPORT PolarWidget : public QWidget
    * @brief event   The resize event.
    */
 
-  void showSelectedField();
+
   
-  void smartBrush(int xPixel, int yPixel);
+  //void smartBrush(int xPixel, int yPixel);
 
   virtual void resizeEvent(QResizeEvent * event);
 
