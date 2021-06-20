@@ -212,9 +212,24 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
 
     // root attributes
 
-    Hdf5xx::DecodedAttr decodedAttr;
-    _utils.loadAttribute(root, "Conventions", "root-attr", decodedAttr);
-    _conventions = decodedAttr.getAsString();
+    string fileHeader = _readStringAttribute(root, "FileHeader", "RootAttr");
+    string fileInfo = _readStringAttribute(root, "FileInfo", "RootAttr");
+    string inputRecord = _readStringAttribute(root, "InputRecord", "RootAttr");
+    string jaxaInfo = _readStringAttribute(root, "JAXAInfo", "RootAttr");
+    string navigationRecord = _readStringAttribute(root, "NavigationRecord", "RootAttr");
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "FileHeader: " << endl << "===================" << endl
+           << fileHeader << "===================" << endl;
+      cerr << "FileInfo: " << endl << "===================" << endl
+           << fileInfo << "===================" << endl;
+      cerr << "InputRecord: " << endl << "===================" << endl
+           << inputRecord << "===================" << endl;
+      cerr << "JAXAInfo: " << endl << "===================" << endl
+           << jaxaInfo << "===================" << endl;
+      cerr << "NavigationRecord: " << endl << "===================" << endl
+           << navigationRecord << "===================" << endl;
+    }
     
     // set the number of sweeps
 
@@ -339,6 +354,20 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
 
   return 0;
 
+}
+
+/////////////////////////////////////////////
+// read string attribute
+
+string GpmHdf5ToMdv::_readStringAttribute(Group &group,
+                                          const string &attrName,
+                                          const string &context)
+  
+{
+  Hdf5xx::DecodedAttr decodedAttr;
+  _utils.loadAttribute(group, attrName, context, decodedAttr);
+  string attr(decodedAttr.getAsString());
+  return attr;
 }
 
 /////////////////////////////////////////////

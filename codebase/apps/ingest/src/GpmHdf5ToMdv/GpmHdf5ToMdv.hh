@@ -153,6 +153,10 @@ private:
   
   void _closeNc3File();
 
+  string _readStringAttribute(Group &group,
+                              const string &attrName,
+                              const string &context);
+  
   // load up dimensions and variables
 
   int _loadMetaData();
