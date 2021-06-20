@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// GpmHdf2Mdv.cc
+// GpmHdf5ToMdv.cc
 //
-// GpmHdf2Mdv object
+// GpmHdf5ToMdv object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// GpmHdf2Mdv reads McIdas data in NetCDF format, and
+// GpmHdf5ToMdv reads McIdas data in NetCDF format, and
 // converts to MDV
 //
 ////////////////////////////////////////////////////////////////
@@ -45,14 +45,14 @@
 #include <toolsa/TaArray.hh>
 #include <Mdv/MdvxField.hh>
 #include <dsserver/DsLdataInfo.hh>
-#include "GpmHdf2Mdv.hh"
+#include "GpmHdf5ToMdv.hh"
 using namespace std;
 
-const fl32 GpmHdf2Mdv::_missingFloat = -9999.0;
+const fl32 GpmHdf5ToMdv::_missingFloat = -9999.0;
 
 // Constructor
 
-GpmHdf2Mdv::GpmHdf2Mdv(int argc, char **argv)
+GpmHdf5ToMdv::GpmHdf5ToMdv(int argc, char **argv)
 
 {
 
@@ -61,7 +61,7 @@ GpmHdf2Mdv::GpmHdf2Mdv(int argc, char **argv)
 
   // set programe name
 
-  _progName = "GpmHdf2Mdv";
+  _progName = "GpmHdf5ToMdv";
   ucopyright((char *) _progName.c_str());
 
   // get command line args
@@ -86,7 +86,7 @@ GpmHdf2Mdv::GpmHdf2Mdv(int argc, char **argv)
   // check that file list set in archive mode
   
   if (_params.mode == Params::FILELIST && _args.inputFileList.size() == 0) {
-    cerr << "ERROR: GpmHdf2Mdv" << endl;
+    cerr << "ERROR: GpmHdf5ToMdv" << endl;
     cerr << "  Mode is ARCHIVE."; 
     cerr << "  You must use -f to specify files on the command line."
 	 << endl;
@@ -138,7 +138,7 @@ GpmHdf2Mdv::GpmHdf2Mdv(int argc, char **argv)
 
 // destructor
 
-GpmHdf2Mdv::~GpmHdf2Mdv()
+GpmHdf5ToMdv::~GpmHdf5ToMdv()
 
 {
 
@@ -157,7 +157,7 @@ GpmHdf2Mdv::~GpmHdf2Mdv()
 //////////////////////////////////////////////////
 // Run
 
-int GpmHdf2Mdv::Run ()
+int GpmHdf5ToMdv::Run ()
 {
   
   int iret = 0;
@@ -171,7 +171,7 @@ int GpmHdf2Mdv::Run ()
     PMU_auto_register("Reading file");
     ta_file_uncompress(inputPath);
     if (_processFile(inputPath)) {
-      cerr << "ERROR = GpmHdf2Mdv::Run" << endl;
+      cerr << "ERROR = GpmHdf5ToMdv::Run" << endl;
       cerr << "  Processing file: " << inputPath << endl;
       iret = -1;
     }
@@ -185,7 +185,7 @@ int GpmHdf2Mdv::Run ()
 ///////////////////////////////
 // process file
 
-int GpmHdf2Mdv::_processFile(const char *input_path)
+int GpmHdf5ToMdv::_processFile(const char *input_path)
 
 {
 
@@ -269,7 +269,7 @@ int GpmHdf2Mdv::_processFile(const char *input_path)
   // open file
   
   if (_openNc3File(input_path)) {
-    cerr << "ERROR - GpmHdf2Mdv::_processFile" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_processFile" << endl;
     cerr << "  File path: " << input_path << endl;
     return -1;
   }
@@ -281,7 +281,7 @@ int GpmHdf2Mdv::_processFile(const char *input_path)
   // check that this is a valid file
 
   if (_loadMetaData()) {
-    cerr << "ERROR - GpmHdf2Mdv::_processFile" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_processFile" << endl;
     cerr << "  File has invalid data" << endl;
     cerr << "  File: " << input_path << endl;
     return -1;
@@ -323,7 +323,7 @@ int GpmHdf2Mdv::_processFile(const char *input_path)
     }
 
     if (mdvx.writeToDir(_params.output_url)) {
-      cerr << "ERROR - GpmHdf2Mdv" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv" << endl;
       cerr << "  Cannot write file to url: " << _params.output_url << endl;
       cerr << mdvx.getErrStr() << endl;
       return -1;
@@ -344,7 +344,7 @@ int GpmHdf2Mdv::_processFile(const char *input_path)
 /////////////////////////////////////////////
 // initialize the input projection
 
-void GpmHdf2Mdv::_initInputProjection()
+void GpmHdf5ToMdv::_initInputProjection()
 
 {
   
@@ -410,7 +410,7 @@ void GpmHdf2Mdv::_initInputProjection()
 //
 // Returns 0 on success, -1 on failure
 
-int GpmHdf2Mdv::_openNc3File(const string &path)
+int GpmHdf5ToMdv::_openNc3File(const string &path)
   
 {
   
@@ -424,7 +424,7 @@ int GpmHdf2Mdv::_openNc3File(const string &path)
   // Check that constructor succeeded
 
   if (!_ncFile->is_valid()) {
-    cerr << "ERROR - GpmHdf2Mdv::_openNc3File" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_openNc3File" << endl;
     cerr << "  Opening file, path: " << path << endl;
     return 1;
   }
@@ -450,7 +450,7 @@ int GpmHdf2Mdv::_openNc3File(const string &path)
 // close netcdf file if open
 // remove error object if it exists
 
-void GpmHdf2Mdv::_closeNc3File()
+void GpmHdf5ToMdv::_closeNc3File()
   
 {
   
@@ -474,7 +474,7 @@ void GpmHdf2Mdv::_closeNc3File()
 //
 // Returns 0 on success, -1 on failure
 
-int GpmHdf2Mdv::_loadMetaData()
+int GpmHdf5ToMdv::_loadMetaData()
 
 {
 
@@ -482,7 +482,7 @@ int GpmHdf2Mdv::_loadMetaData()
 
   _timeDim = _ncFile->get_dim(_params.netcdf_dim_time);
   if (_timeDim == NULL) {
-    cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
     cerr << "  time dimension missing: " << _params.netcdf_dim_time << endl;
     return -1;
   }
@@ -494,7 +494,7 @@ int GpmHdf2Mdv::_loadMetaData()
   } else {
     _zDim = _ncFile->get_dim(_params.netcdf_dim_z);
     if (_zDim == NULL) {
-      cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
       cerr << "  Z dimension missing: " << _params.netcdf_dim_z << endl;
       return -1;
     }
@@ -503,7 +503,7 @@ int GpmHdf2Mdv::_loadMetaData()
   
   _yDim = _ncFile->get_dim(_params.netcdf_dim_y);
   if (_yDim == NULL) {
-    cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
     cerr << "  Y dimension missing: " << _params.netcdf_dim_y << endl;
     return -1;
   }
@@ -511,7 +511,7 @@ int GpmHdf2Mdv::_loadMetaData()
   
   _xDim = _ncFile->get_dim(_params.netcdf_dim_x);
   if (_xDim == NULL) {
-    cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
     cerr << "  Z dimension missing: " << _params.netcdf_dim_x << endl;
     return -1;
   }
@@ -524,7 +524,7 @@ int GpmHdf2Mdv::_loadMetaData()
   } else {
     _baseTimeVar = _ncFile->get_var(_params.netcdf_var_base_time);
     if (_baseTimeVar == NULL) {
-      cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
       cerr << "  base time var variable missing: " << _params.netcdf_var_base_time << endl;
       return -1;
     }
@@ -532,7 +532,7 @@ int GpmHdf2Mdv::_loadMetaData()
   
   _timeOffsetVar = _ncFile->get_var(_params.netcdf_var_time_offset);
   if (_timeOffsetVar == NULL) {
-    cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
     cerr << "  time offset variable missing: " << _params.netcdf_var_time_offset << endl;
     return -1;
   }
@@ -542,7 +542,7 @@ int GpmHdf2Mdv::_loadMetaData()
   } else {
     _zVar = _ncFile->get_var(_params.netcdf_var_z);
     if (_zVar == NULL) {
-      cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
       cerr << "  z variable missing: " << _params.netcdf_var_z << endl;
     return -1;
     }
@@ -550,14 +550,14 @@ int GpmHdf2Mdv::_loadMetaData()
 
   _yVar = _ncFile->get_var(_params.netcdf_var_y);
   if (_yVar == NULL) {
-    cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
     cerr << "  y variable missing: " << _params.netcdf_var_y << endl;
     return -1;
   }
 
   _xVar = _ncFile->get_var(_params.netcdf_var_x);
   if (_xVar == NULL) {
-    cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
     cerr << "  x variable missing: " << _params.netcdf_var_x << endl;
     return -1;
   }
@@ -572,7 +572,7 @@ int GpmHdf2Mdv::_loadMetaData()
   } else {
     
     if (_zVar->get(_zArray, _nz) == 0) {
-      cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
       cerr << "  Cannot get z coords from var: " << _params.netcdf_var_z << endl;
       return -1;
     }
@@ -600,7 +600,7 @@ int GpmHdf2Mdv::_loadMetaData()
 
   _yArray = (float *) _yArray_.alloc(_yDim->size());
   if (_yVar->get(_yArray, _yDim->size()) == 0) {
-    cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
     cerr << "  Cannot get y coords from var: " << _params.netcdf_var_y << endl;
     return -1;
   }
@@ -626,7 +626,7 @@ int GpmHdf2Mdv::_loadMetaData()
 
   _xArray = (float *) _xArray_.alloc(_xDim->size());
   if (_xVar->get(_xArray, _xDim->size()) == 0) {
-    cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
     cerr << "  Cannot get x coords from var: " << _params.netcdf_var_x << endl;
     return -1;
   }
@@ -732,7 +732,7 @@ int GpmHdf2Mdv::_loadMetaData()
   
   if (_params.input_xy_is_latlon) {
     if (_findValidLatLonLimits()) {
-      cerr << "ERROR - GpmHdf2Mdv::_loadMetaData" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
       cerr << "  Bad lat/lon values, cannot process" << endl;
       return -1;
     }
@@ -765,7 +765,7 @@ int GpmHdf2Mdv::_loadMetaData()
 //
 // Returns 0 on success, -1 on failure
 
-int GpmHdf2Mdv::_setMasterHeader(DsMdvx &mdvx, int itime)
+int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx, int itime)
 
 {
 
@@ -835,7 +835,7 @@ int GpmHdf2Mdv::_setMasterHeader(DsMdvx &mdvx, int itime)
 //
 // Returns 0 on success, -1 on failure
 
-int GpmHdf2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
+int GpmHdf5ToMdv::_addDataFields(DsMdvx &mdvx, int itime)
 
 {
   
@@ -895,7 +895,7 @@ int GpmHdf2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
 //
 // Returns 0 on success, -1 on failure
 
-int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
+int GpmHdf5ToMdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
                                  int itime, bool xySwapped)
 
 {
@@ -904,7 +904,7 @@ int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
   if (missingAtt == NULL) {
     missingAtt = var->get_att("_FillValue");
     if (missingAtt == NULL) {
-      cerr << "ERROR - GpmHdf2Mdv::_addDataField" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
       cerr << "  Cannot find missing_value of _FillValue attribute" << endl;
       cerr << "  field name: " << var->name() << endl;
       return -1;
@@ -949,7 +949,7 @@ int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
     }
 
     if (iret == 0) {
-      cerr << "ERROR - GpmHdf2Mdv::_addDataField" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
       cerr << "  Cannot get data from input netcdf variable" << endl;
       cerr << "  field name: " << var->name() << endl;
       cerr << _ncErr->get_errmsg() << endl;
@@ -989,7 +989,7 @@ int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
       }
     }
     if (iret == 0) {
-      cerr << "ERROR - GpmHdf2Mdv::_addDataField" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
       cerr << "  Cannot get data from input netcdf variable" << endl;
       cerr << "  field name: " << var->name() << endl;
       cerr << _ncErr->get_errmsg() << endl;
@@ -1017,7 +1017,7 @@ int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
       scaleAtt = var->get_att("scale_factor");
     }
     if (scaleAtt == NULL) {
-      cerr << "WARNING - GpmHdf2Mdv::_addDataField" << endl;
+      cerr << "WARNING - GpmHdf5ToMdv::_addDataField" << endl;
       cerr << "  Cannot get scale for integer variable" << endl;
       cerr << "  field name: " << var->name() << endl;
       cerr << "  Setting scale to 1.0" << endl;
@@ -1030,7 +1030,7 @@ int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
     Nc3Att *offsetAtt = var->get_att("offset");
     if (offsetAtt == NULL) {
       if (_params.debug) {
-        cerr << "WARNING - GpmHdf2Mdv::_addDataField" << endl;
+        cerr << "WARNING - GpmHdf5ToMdv::_addDataField" << endl;
         cerr << "  Cannot get offset for integer variable" << endl;
         cerr << "  field name: " << var->name() << endl;
         cerr << "  setting to 0" << endl;
@@ -1062,7 +1062,7 @@ int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
         }
       }
       if (iret == 0) {
-        cerr << "ERROR - GpmHdf2Mdv::_addDataField" << endl;
+        cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
         cerr << "  Cannot get data from input netcdf variable" << endl;
         cerr << "  field name: " << var->name() << endl;
         cerr << _ncErr->get_errmsg() << endl;
@@ -1102,7 +1102,7 @@ int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
         }
       }
       if (iret == 0) {
-        cerr << "ERROR - GpmHdf2Mdv::_addDataField" << endl;
+        cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
         cerr << "  Cannot get data from input netcdf variable" << endl;
         cerr << "  field name: " << var->name() << endl;
         cerr << _ncErr->get_errmsg() << endl;
@@ -1145,7 +1145,7 @@ int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
         }
       }
       if (iret == 0) {
-        cerr << "ERROR - GpmHdf2Mdv::_addDataField" << endl;
+        cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
         cerr << "  Cannot get data from input netcdf variable" << endl;
         cerr << "  field name: " << var->name() << endl;
         cerr << _ncErr->get_errmsg() << endl;
@@ -1273,7 +1273,7 @@ int GpmHdf2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 ///////////////////////////////
 // Create an Mdvx field
 
-MdvxField *GpmHdf2Mdv::_createMdvxField
+MdvxField *GpmHdf5ToMdv::_createMdvxField
   (const string &fieldName,
    const string &longName,
    const string &units,
@@ -1355,7 +1355,7 @@ MdvxField *GpmHdf2Mdv::_createMdvxField
 ////////////////////////////////////////////////////////////////
 // Create a field remapped from lat/lon onto regular grid
 
-MdvxField *GpmHdf2Mdv::_createRegularLatlonField
+MdvxField *GpmHdf5ToMdv::_createRegularLatlonField
   (const string &fieldName,
    const string &longName,
    const string &units,
@@ -1512,7 +1512,7 @@ MdvxField *GpmHdf2Mdv::_createRegularLatlonField
 ///////////////////////////////
 // print data in file
 
-void GpmHdf2Mdv::_printFile(Nc3File &ncf)
+void GpmHdf5ToMdv::_printFile(Nc3File &ncf)
 
 {
 
@@ -1600,7 +1600,7 @@ void GpmHdf2Mdv::_printFile(Nc3File &ncf)
 /////////////////////
 // print an attribute
 
-void GpmHdf2Mdv::_printAtt(Nc3Att *att)
+void GpmHdf5ToMdv::_printAtt(Nc3Att *att)
 
 {
 
@@ -1686,7 +1686,7 @@ void GpmHdf2Mdv::_printAtt(Nc3Att *att)
 ///////////////////////////////
 // print variable values
 
-void GpmHdf2Mdv::_printVarVals(Nc3Var *var)
+void GpmHdf5ToMdv::_printVarVals(Nc3Var *var)
 
 {
 
@@ -1773,7 +1773,7 @@ void GpmHdf2Mdv::_printVarVals(Nc3Var *var)
 ////////////////////////////////////////////
 // correct a field for sun angle
 
-void GpmHdf2Mdv::_correctForSunAngle(MdvxField *field)
+void GpmHdf5ToMdv::_correctForSunAngle(MdvxField *field)
 
 {
 
@@ -1786,7 +1786,7 @@ void GpmHdf2Mdv::_correctForSunAngle(MdvxField *field)
   Mdvx::compression_type_t compression = (Mdvx::compression_type_t) fhdr.compression_type;
 
   if (fhdr.nz != 1) {
-    cerr << "GpmHdf2Mdv::_correctForSunAngle()" << endl;
+    cerr << "GpmHdf5ToMdv::_correctForSunAngle()" << endl;
     cerr << "  Field name: " << field->getFieldName() << endl;
     cerr << "  Is not a 2D field, nz: " << fhdr.nz << endl;
     cerr << "  Sun angle correction will not be applied" << endl;
@@ -1843,7 +1843,7 @@ void GpmHdf2Mdv::_correctForSunAngle(MdvxField *field)
 ////////////////////////////////////////////
 // remap output data
 
-void GpmHdf2Mdv::_remapOutput(DsMdvx &mdvx)
+void GpmHdf5ToMdv::_remapOutput(DsMdvx &mdvx)
 
 {
 
@@ -2005,7 +2005,7 @@ void GpmHdf2Mdv::_remapOutput(DsMdvx &mdvx)
 // Automatically picks the grid resolution and extent
 // from the existing data.
 
-void GpmHdf2Mdv::_autoRemapToLatLon(DsMdvx &mdvx)
+void GpmHdf5ToMdv::_autoRemapToLatLon(DsMdvx &mdvx)
 
 {
   
@@ -2014,7 +2014,7 @@ void GpmHdf2Mdv::_autoRemapToLatLon(DsMdvx &mdvx)
     MdvxField *field = mdvx.getField(ifld);
     
     if (field == NULL) {
-      cerr << "ERROR - GpmHdf2Mdv::_autoRemapToLatLon()" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_autoRemapToLatLon()" << endl;
       cerr << "  Error remapping field #" << ifld <<
 	" in output file" << endl;
       return;
@@ -2028,7 +2028,7 @@ void GpmHdf2Mdv::_autoRemapToLatLon(DsMdvx &mdvx)
 ///////////////////////////////////////////
 // Check if dx is constant
 
-bool GpmHdf2Mdv::_checkDxIsConstant()
+bool GpmHdf5ToMdv::_checkDxIsConstant()
 
 {
 
@@ -2052,7 +2052,7 @@ bool GpmHdf2Mdv::_checkDxIsConstant()
 ////////////////////////////////////////////
 // Check if dy is constant
 
-bool GpmHdf2Mdv::_checkDyIsConstant()
+bool GpmHdf5ToMdv::_checkDyIsConstant()
 
 {
 
@@ -2076,14 +2076,14 @@ bool GpmHdf2Mdv::_checkDyIsConstant()
 //////////////////////////////////////////////////////////////////////////
 // Initialize the mercator projection from the input file coord variables
 
-void GpmHdf2Mdv::_initMercatorFromInputCoords()
+void GpmHdf5ToMdv::_initMercatorFromInputCoords()
 
 {
 
   // sanity check
 
   if (_nx < 5 || _ny < 5) {
-    cerr << "WARNING - GpmHdf2Mdv::_initMercatorFromInputCoords()" << endl;
+    cerr << "WARNING - GpmHdf5ToMdv::_initMercatorFromInputCoords()" << endl;
     cerr << "  Grid too small to deduce Mercator properties accurately" << endl;
     cerr << "  nx: " << _nx << endl;
     cerr << "  ny: " << _ny << endl;
@@ -2116,14 +2116,14 @@ void GpmHdf2Mdv::_initMercatorFromInputCoords()
 //
 // Returns 0 on success, -1 on failure
 
-int GpmHdf2Mdv::_findValidLatLonLimits()
+int GpmHdf5ToMdv::_findValidLatLonLimits()
 
 {
   
   // sanity check
 
   if (_nx < 5 || _ny < 5) {
-    cerr << "ERROR - GpmHdf2Mdv::_findValidLatLonLimits()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
     cerr << "  Grid too small to deduce limits accurately" << endl;
     cerr << "  nx: " << _nx << endl;
     cerr << "  ny: " << _ny << endl;
@@ -2169,7 +2169,7 @@ int GpmHdf2Mdv::_findValidLatLonLimits()
     if (fabs(lon0) > 180.0 || lon0 == 0.0 || ddFrac > 1.0) {
       // bad jump, stop here
       _ixValidStart = ix;
-      cerr << "ERROR - GpmHdf2Mdv::_findValidLatLonLimits()" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
       cerr << "   Bad longitude jump, ix, lon0, lon1: "
            << ix << ", " << lon0 << ", " << lon1 << endl;
       break;
@@ -2188,7 +2188,7 @@ int GpmHdf2Mdv::_findValidLatLonLimits()
     if (fabs(lon0) > 360.0 || lon0 == 0.0 || ddFrac > 1.0) {
       // bad jump, stop here
       _ixValidEnd = ix;
-      cerr << "ERROR - GpmHdf2Mdv::_findValidLatLonLimits()" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
       cerr << "   Bad longitude jump, ix, lon0, lon1: "
            << ix << ", " << lon0 << ", " << lon1 << endl;
       break;
@@ -2207,7 +2207,7 @@ int GpmHdf2Mdv::_findValidLatLonLimits()
     if (fabs(lat0) > 90.0 || lat0 == 0.0 || ddFrac > 1.0) {
       // big jump, stop here
       _iyValidStart = iy;
-      cerr << "ERROR - GpmHdf2Mdv::_findValidLatLonLimits()" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
       cerr << "   Bad latitude jump, iy, lat0, lat1: " 
            << iy << ", " << lat0 << ", " << lat1 << endl;
       break;
@@ -2226,7 +2226,7 @@ int GpmHdf2Mdv::_findValidLatLonLimits()
     if (fabs(lat0) > 90.0 || lat0 == 0.0 || ddFrac > 1.0) {
       // big jump, stop here
       _iyValidEnd = iy;
-      cerr << "ERROR - GpmHdf2Mdv::_findValidLatLonLimits()" << endl;
+      cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
       cerr << "   Bad latitude jump, iy, lat0, lat1: " 
            << iy << ", " << lat0 << ", " << lat1 << endl;
       break;
@@ -2238,7 +2238,7 @@ int GpmHdf2Mdv::_findValidLatLonLimits()
   _nyValid = _iyValidEnd - _iyValidStart + 1;
 
   if (_nxValid < 5 || _nyValid < 5) {
-    cerr << "ERROR - GpmHdf2Mdv::_findValidLatLonLimits()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
     cerr << "  Valid grid too small to process" << endl;
     cerr << "  nxValid: " << _nxValid << endl;
     cerr << "  nyValid: " << _nyValid << endl;
@@ -2254,7 +2254,7 @@ int GpmHdf2Mdv::_findValidLatLonLimits()
 // within the tolerance
 // return -1 if outside grid by more than tolerance
 
-int GpmHdf2Mdv::_getClosestLatIndex(double latitude, double tolerance)
+int GpmHdf5ToMdv::_getClosestLatIndex(double latitude, double tolerance)
 
 {
 
@@ -2294,7 +2294,7 @@ int GpmHdf2Mdv::_getClosestLatIndex(double latitude, double tolerance)
 // within the tolerance
 // return -1 if outside grid by more than tolerance
 
-int GpmHdf2Mdv::_getClosestLonIndex(double longitude, double tolerance)
+int GpmHdf5ToMdv::_getClosestLonIndex(double longitude, double tolerance)
 
 {
 

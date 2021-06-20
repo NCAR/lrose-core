@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// GpmHdf2Mdv.hh
+// GpmHdf5ToMdv.hh
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -31,13 +31,13 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// GpmHdf2Mdv reads GPM data in HDF5 format, and
+// GpmHdf5ToMdv reads GPM data in HDF5 format, and
 // converts to MDV
 //
 ////////////////////////////////////////////////////////////////
 
-#ifndef GpmHdf2Mdv_H
-#define GpmHdf2Mdv_H
+#ifndef GpmHdf5ToMdv_H
+#define GpmHdf5ToMdv_H
 
 #include <string>
 #include <toolsa/TaArray.hh>
@@ -55,17 +55,17 @@ using namespace std;
 ////////////////////////
 // This class
 
-class GpmHdf2Mdv {
+class GpmHdf5ToMdv {
   
 public:
 
   // constructor
 
-  GpmHdf2Mdv (int argc, char **argv);
+  GpmHdf5ToMdv (int argc, char **argv);
 
   // destructor
   
-  ~GpmHdf2Mdv();
+  ~GpmHdf5ToMdv();
 
   // run 
 

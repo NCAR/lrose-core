@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for GpmHdf2Mdv
+# Makefile for GpmHdf5ToMdv
 #
 # Nancy Rehak, RAP, NCAR, Boulder, CO, 80307, USA
 #
@@ -33,7 +33,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = GpmHdf2Mdv
+TARGET_FILE = GpmHdf5ToMdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -53,7 +53,7 @@ HDRS = \
 	HdfFile.hh \
 	LowResSdsField.hh \
 	SdsDataField.hh \
-	GpmHdf2Mdv.hh
+	GpmHdf5ToMdv.hh
 
 CPPC_SRCS = \
 	Params.cc \
@@ -65,7 +65,7 @@ CPPC_SRCS = \
 	HdfFile.cc \
 	LowResSdsField.cc \
 	SdsDataField.cc \
-	GpmHdf2Mdv.cc
+	GpmHdf5ToMdv.cc
 
 #
 # tdrp macros

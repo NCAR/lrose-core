@@ -237,7 +237,7 @@ codebase/apps/ingest/src/GemVolXml2Dsr/GemVolXml2Dsr
 codebase/apps/ingest/src/Gini2Mdv/Gini2Mdv
 codebase/apps/ingest/src/GoesRGLM2Spdb/GoesRGLM2Spdb
 codebase/apps/ingest/src/GoesRnetCDF2Mdv/GoesRnetCDF2Mdv
-codebase/apps/ingest/src/GpmHdf2Mdv/GpmHdf2Mdv
+codebase/apps/ingest/src/GpmHdf5ToMdv/GpmHdf5ToMdv
 codebase/apps/ingest/src/Grib2Mdv/Grib2Mdv
 codebase/apps/ingest/src/Grib2toMdv/Grib2toMdv
 codebase/apps/ingest/src/Grib2toNc/Grib2toNc

@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// main for GpmHdf2Mdv
+// main for GpmHdf5ToMdv
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -31,12 +31,12 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// GpmHdf2Mdv reads GPM data in HDF5 format, and
+// GpmHdf5ToMdv reads GPM data in HDF5 format, and
 // converts to MDV
 //
 ////////////////////////////////////////////////////////////////
 
-#include "GpmHdf2Mdv.hh"
+#include "GpmHdf5ToMdv.hh"
 #include <toolsa/str.h>
 #include <toolsa/port.h>
 #include <signal.h>
@@ -47,7 +47,7 @@ using namespace std;
 
 static void tidy_and_exit (int sig);
 static void out_of_store();
-static GpmHdf2Mdv *_prog;
+static GpmHdf5ToMdv *_prog;
 static int _argc;
 static char **_argv;
 
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
   // create program object
 
-  _prog = new GpmHdf2Mdv(argc, argv);
+  _prog = new GpmHdf5ToMdv(argc, argv);
   if (!_prog->isOK) {
     return(-1);
   }
@@ -110,7 +110,7 @@ static void out_of_store()
 
 {
 
-  fprintf(stderr, "FATAL ERROR - program GpmHdf2Mdv\n");
+  fprintf(stderr, "FATAL ERROR - program GpmHdf5ToMdv\n");
   fprintf(stderr, "  Operator new failed - out of store\n");
   exit(-1);
 
