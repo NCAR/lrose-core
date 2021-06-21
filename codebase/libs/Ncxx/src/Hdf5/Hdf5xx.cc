@@ -873,6 +873,10 @@ int Hdf5xx::readSi32Array(Group &group,
   
 {
 
+  if (!group.nameExists(dsName)) {
+    return -1;
+  }
+
   // get data space for this data set
   
   DataSet dset = group.openDataSet(dsName);
@@ -1136,6 +1140,10 @@ int Hdf5xx::readFl32Array(Group &group,
   
 {
 
+  if (!group.nameExists(dsName)) {
+    return -1;
+  }
+
   // get data space for this data set
   
   DataSet dset = group.openDataSet(dsName);
@@ -1144,19 +1152,25 @@ int Hdf5xx::readFl32Array(Group &group,
   // set the missing value (_fillValue)
 
   missingVal = -9999.0;
-  DecodedAttr fillValueAtt;
-  if (loadAttribute(dset, "_fillValue", context, fillValueAtt) == 0) {
-    missingVal = fillValueAtt.getAsDouble();
+  if (dset.attrExists("_fillValue")) {
+    DecodedAttr fillValueAtt;
+    if (loadAttribute(dset, "_fillValue", context, fillValueAtt) == 0) {
+      missingVal = fillValueAtt.getAsDouble();
+    }
   }
   
   // set the units
   
   units = "";
   DecodedAttr unitsAtt;
-  if (loadAttribute(dset, "Units", context, unitsAtt) == 0) {
-    units = unitsAtt.getAsString();
-  } else if (loadAttribute(dset, "units", context, unitsAtt) == 0) {
-    units = unitsAtt.getAsString();
+  if (dset.attrExists("Units")) {
+    if (loadAttribute(dset, "Units", context, unitsAtt) == 0) {
+      units = unitsAtt.getAsString();
+    }
+  } else if (dset.attrExists("units")) {
+    if (loadAttribute(dset, "units", context, unitsAtt) == 0) {
+      units = unitsAtt.getAsString();
+    }
   }
 
   // determine the dimensions
@@ -1393,6 +1407,10 @@ int Hdf5xx::readFl64Array(Group &group,
   
 {
 
+  if (!group.nameExists(dsName)) {
+    return -1;
+  }
+
   // get data space for this data set
   
   DataSet dset = group.openDataSet(dsName);
@@ -1401,19 +1419,25 @@ int Hdf5xx::readFl64Array(Group &group,
   // set the missing value (_fillValue)
 
   missingVal = -9999.0;
-  DecodedAttr fillValueAtt;
-  if (loadAttribute(dset, "_fillValue", context, fillValueAtt) == 0) {
-    missingVal = fillValueAtt.getAsDouble();
+  if (dset.attrExists("_fillValue")) {
+    DecodedAttr fillValueAtt;
+    if (loadAttribute(dset, "_fillValue", context, fillValueAtt) == 0) {
+      missingVal = fillValueAtt.getAsDouble();
+    }
   }
   
   // set the units
   
   units = "";
   DecodedAttr unitsAtt;
-  if (loadAttribute(dset, "Units", context, unitsAtt) == 0) {
-    units = unitsAtt.getAsString();
-  } else if (loadAttribute(dset, "units", context, unitsAtt) == 0) {
-    units = unitsAtt.getAsString();
+  if (dset.attrExists("Units")) {
+    if (loadAttribute(dset, "Units", context, unitsAtt) == 0) {
+      units = unitsAtt.getAsString();
+    }
+  } else if (dset.attrExists("units")) {
+    if (loadAttribute(dset, "units", context, unitsAtt) == 0) {
+      units = unitsAtt.getAsString();
+    }
   }
 
   // determine the dimensions

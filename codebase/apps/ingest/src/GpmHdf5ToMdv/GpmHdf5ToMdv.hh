@@ -120,6 +120,10 @@ private:
 
   vector<DateTime> _times;
   int _nCols, _nRows;
+
+  vector<NcxxPort::si32> _dataQuality, _dataWarning;
+  vector<NcxxPort::si32> _geoError, _geoWarning;
+  vector<NcxxPort::si32> _limitErrorFlag, _missingScan;
   
   MdvxProj _inputProj;
   MdvxRemapLut _remapLut;
@@ -164,6 +168,7 @@ private:
   int _readGroupNs(Group &ns);
   int _readTimes(Group &ns);
   int _readLatLon(Group &ns);
+  int _readQcFlags(Group &ns);
 
   // load up dimensions and variables
 

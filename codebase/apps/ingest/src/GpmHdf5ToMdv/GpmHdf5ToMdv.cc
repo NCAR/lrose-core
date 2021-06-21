@@ -401,6 +401,10 @@ int GpmHdf5ToMdv::_readGroupNs(Group &ns)
     return -1;
   }
   
+  if (_readQcFlags(ns)) {
+    return -1;
+  }
+  
   return 0;
 
 #ifdef JUNK
@@ -512,8 +516,80 @@ int GpmHdf5ToMdv::_readTimes(Group &ns)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Reading scan times <<====" << endl;
     cerr << "nTimes: " << _times.size() << endl;
-    for (size_t ii = 0; ii < days.size(); ii++) {
+    for (size_t ii = 0; ii < _times.size(); ii++) {
       cerr << "  ii, time: " << ii << ", " << _times[ii].asString(3) << endl;
+    }
+  }
+  
+  return 0;
+
+}
+
+//////////////////////////////////////////////
+// read the quality flags
+
+int GpmHdf5ToMdv::_readQcFlags(Group &ns)
+  
+{
+
+  Group scanStatus(ns.openGroup("scanStatus"));
+  vector<size_t> dims;
+  string units;
+  NcxxPort::si32 missingVal;
+
+  _dataQuality.resize(_times.size());
+  _dataWarning.resize(_times.size());
+  _geoError.resize(_times.size());
+  _geoWarning.resize(_times.size());
+  _limitErrorFlag.resize(_times.size());
+  _missingScan.resize(_times.size());
+  
+  Hdf5xx hdf5;
+  if (hdf5.readSi32Array(scanStatus, "dataQuality", "scanStatus",
+                         dims, missingVal, _dataQuality, units)) {
+    cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
+    cerr << "  Cannot read dataQuality flag variable" << endl;
+  }
+  if (hdf5.readSi32Array(scanStatus, "dataWarning", "scanStatus",
+                         dims, missingVal, _dataWarning, units)) {
+    cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
+    cerr << "  Cannot read dataWarning flag variable" << endl;
+  }
+  if (hdf5.readSi32Array(scanStatus, "geoError", "scanStatus",
+                         dims, missingVal, _geoError, units)) {
+    cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
+    cerr << "  Cannot read geoError flag variable" << endl;
+  }
+  if (hdf5.readSi32Array(scanStatus, "geoWarning", "scanStatus",
+                         dims, missingVal, _geoWarning, units)) {
+    cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
+    cerr << "  Cannot read geoWarning flag variable" << endl;
+  }
+  if (hdf5.readSi32Array(scanStatus, "limitErrorFlag", "scanStatus",
+                         dims, missingVal, _limitErrorFlag, units)) {
+    cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
+    cerr << "  Cannot read limitErrorFlag variable" << endl;
+    return -1;
+  }
+  if (hdf5.readSi32Array(scanStatus, "missing", "scanStatus",
+                         dims, missingVal, _missingScan, units)) {
+    cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
+    cerr << "  Cannot read missing flag variable" << endl;
+    return -1;
+  }
+
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> Reading QC flags <<====" << endl;
+    for (size_t ii = 0; ii < _times.size(); ii++) {
+      cerr << "  ii, dQ, dW, geoE, geoW, limE, miss: "
+           << ii << ", "
+           << _dataQuality[ii] << ", "
+           << _dataWarning[ii] << ", "
+           << _geoError[ii] << ", "
+           << _geoWarning[ii] << ", "
+           << _limitErrorFlag[ii] << ", "
+           << _missingScan[ii] << endl;
     }
   }
   
