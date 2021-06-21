@@ -125,6 +125,15 @@ private:
   vector<NcxxPort::si32> _geoError, _geoWarning;
   vector<NcxxPort::si32> _limitErrorFlag, _missingScan;
   
+  vector<NcxxPort::fl64> _lats;
+  vector<NcxxPort::fl64> _lons;
+  NcxxPort::fl64 _missingLat;
+  NcxxPort::fl64 _missingLon;
+  
+  vector<NcxxPort::fl32> _dbzVals;
+  NcxxPort::fl32 _missingDbz;
+  string _dbzUnits;
+
   MdvxProj _inputProj;
   MdvxRemapLut _remapLut;
   int _nTimes;

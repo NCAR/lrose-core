@@ -612,12 +612,10 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
 
   // read Latitude
   
-  vector<NcxxPort::fl64> lats;
-  NcxxPort::fl64 missingLat;
   vector<size_t> latDims;
   string latUnits;
   if (hdf5.readFl64Array(ns, "Latitude", "NS",
-                         latDims, missingLat, lats, latUnits)) {
+                         latDims, _missingLat, _lats, latUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
     cerr << "  Cannot read Latitude variable" << endl;
     return -1;
@@ -625,12 +623,10 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
 
   // read Longitude
   
-  vector<NcxxPort::fl64> lons;
-  NcxxPort::fl64 missingLon;
   vector<size_t> lonDims;
   string lonUnits;
   if (hdf5.readFl64Array(ns, "Longitude", "NS",
-                         lonDims, missingLon, lons, lonUnits)) {
+                         lonDims, _missingLon, _lons, lonUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
     cerr << "  Cannot read Longitude variable" << endl;
     return -1;
@@ -667,8 +663,8 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
              << iscan << ", "
              << iray << ", "
              << ipt << ", "
-             << lats[ipt] << ", "
-             << lons[ipt] << endl;
+             << _lats[ipt] << ", "
+             << _lons[ipt] << endl;
       } // iray
     } // iscan
   }
@@ -688,14 +684,11 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
 
   // read Latitude
   
-  vector<NcxxPort::fl32> dbzVals;
-  NcxxPort::fl32 missingDbz;
   vector<size_t> dbzDims;
-  string dbzUnits;
-
+  
   Group slv(ns.openGroup("SLV"));
   if (hdf5.readFl32Array(slv, "zFactorCorrected", "NS/SLV",
-                         dbzDims, missingDbz, dbzVals, dbzUnits)) {
+                         dbzDims, _missingDbz, _dbzVals, _dbzUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readReflectivity()" << endl;
     cerr << "  Cannot read zFactorCorrected variable" << endl;
     return -1;
@@ -725,17 +718,17 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
     cerr << "====>> Read DBZ <<====" << endl;
     cerr << "nScans, nRays, nGates: " 
          << _nScans << ", " << _nRays << ", " << _nGates << endl;
-    cerr << "missingDbz: " << missingDbz << endl;
+    cerr << "missingDbz: " << _missingDbz << endl;
     for (size_t iscan = 0; iscan < _nScans; iscan++) {
       for (size_t iray = 0; iray < _nRays; iray++) {
         for (size_t igate = 0; igate < _nGates; igate++) {
           size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
-          if (dbzVals[ipt] != missingDbz) {
+          if (_dbzVals[ipt] != _missingDbz) {
             cerr << "iscan, iray, igate, dbz: "
                  << iscan << ", "
                  << iray << ", "
                  << igate << ", "
-                 << dbzVals[ipt] << endl;
+                 << _dbzVals[ipt] << endl;
           }
         } // igate
       } // iray

@@ -479,6 +479,10 @@ public:
 
   double delta_z_km;
 
+  double output_delta_lat_deg;
+
+  double output_delta_lon_deg;
+
   tdrp_bool_t remap_output_projection;
 
   tdrp_bool_t auto_remap_to_latlon;
@@ -587,7 +591,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[76];
+  mutable TDRPtable _table[79];
 
   const char *_className;
 

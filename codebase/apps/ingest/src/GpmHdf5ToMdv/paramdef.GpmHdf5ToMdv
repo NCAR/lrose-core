@@ -141,6 +141,20 @@ paramdef double {
 } delta_z_km;
 
 commentdef {
+  p_header = "REMAP ONTO REGULAR LAT/LON GRID";
+}
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Delta latitude for output grid (deg)";
+} output_delta_lat_deg;
+
+paramdef double {
+  p_default = 0.01;
+  p_descr = "Delta longitude for output grid (deg)";
+} output_delta_lon_deg;
+
+commentdef {
   p_header = "REMAP PROJECTION/GRID ON OUTPUT";
 }
 
