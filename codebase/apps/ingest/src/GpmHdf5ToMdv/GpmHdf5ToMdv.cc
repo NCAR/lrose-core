@@ -574,8 +574,8 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
     cerr << "  lonDims[1]: " << lonDims[1] << endl;
     return -1;
   }
-  _nCols = latDims[0];
-  _nRows = latDims[1];
+  _nRows = latDims[0];
+  _nCols = latDims[1];
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Reading lat/lon <<====" << endl;
