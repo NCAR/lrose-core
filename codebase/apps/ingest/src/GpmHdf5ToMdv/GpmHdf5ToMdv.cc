@@ -217,6 +217,7 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
     string inputRecord = _readStringAttribute(root, "InputRecord", "RootAttr");
     string jaxaInfo = _readStringAttribute(root, "JAXAInfo", "RootAttr");
     string navigationRecord = _readStringAttribute(root, "NavigationRecord", "RootAttr");
+    string history = _readStringAttribute(root, "history", "RootAttr");
     
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "FileHeader: " << endl << "===================" << endl
@@ -229,8 +230,17 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
            << jaxaInfo << "===================" << endl;
       cerr << "NavigationRecord: " << endl << "===================" << endl
            << navigationRecord << "===================" << endl;
+      cerr << "history: " << endl << "===================" << endl
+           << history << "===================" << endl;
     }
+
+    // open the NS group
     
+    Group ns(root.openGroup("NS"));
+    if (_readGroupNs(ns)) {
+      return -1;
+    }
+
     // set the number of sweeps
 
     // if (_getNSweeps(root)) {
@@ -368,6 +378,143 @@ string GpmHdf5ToMdv::_readStringAttribute(Group &group,
   _utils.loadAttribute(group, attrName, context, decodedAttr);
   string attr(decodedAttr.getAsString());
   return attr;
+}
+
+//////////////////////////////////////////////
+// read the NS group
+
+int GpmHdf5ToMdv::_readGroupNs(Group &ns)
+  
+{
+
+  string swathHeader = _readStringAttribute(ns, "SwathHeader", "ns-attr");
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "SwathHeader: " << endl << "===================" << endl
+         << swathHeader << "===================" << endl;
+  }
+
+  if (_readTime(ns)) {
+    return -1;
+  }
+  
+  return 0;
+
+#ifdef JUNK
+  Hdf5xx::DecodedAttr decodedAttr;
+
+  if (_utils.loadAttribute(what, "object", "root-what", decodedAttr)) {
+    _addErrStr(_utils.getErrStr());
+    return -1;
+  }
+  _objectStr = decodedAttr.getAsString();
+
+  if (_objectStr != "PVOL" && _objectStr != "SCAN" &&
+      _objectStr != "AZIM" && _objectStr != "ELEV") {
+    _addErrStr("Bad object type: ", _objectStr);
+    _addErrStr("  Must be 'PVOL','SCAN','AZIM'or'ELEV'");
+    return -1;
+  }
+
+  _utils.loadAttribute(what, "version", "root-what", decodedAttr);
+  _version = decodedAttr.getAsString();
+  
+  _utils.loadAttribute(what, "date", "root-what", decodedAttr);
+  _dateStr = decodedAttr.getAsString();
+  
+  _utils.loadAttribute(what, "time", "root-what", decodedAttr);
+  _timeStr = decodedAttr.getAsString();
+  
+  _utils.loadAttribute(what, "source", "root-what", decodedAttr);
+  _source = decodedAttr.getAsString();
+  
+  if (_debug) {
+    cerr  << "  root what _objectStr: " << _objectStr << endl;
+    cerr  << "  root what _version: " << _version << endl;
+    cerr  << "  root what _dateStr: " << _dateStr << endl;
+    cerr  << "  root what _timeStr: " << _timeStr << endl;
+    cerr  << "  root what _source: " << _source << endl;
+  }
+
+  return 0;
+
+#endif
+
+}
+
+//////////////////////////////////////////////
+// read the scan time
+
+int GpmHdf5ToMdv::_readTime(Group &ns)
+  
+{
+
+  Group scanTime(ns.openGroup("ScanTime"));
+  vector<size_t> dims;
+  string units;
+  NcxxPort::si32 missingVal;
+  
+  vector<NcxxPort::si32> years, months, days, hours, mins, secs, msecs;
+  Hdf5xx hdf5;
+  if (hdf5.readSi32Array(scanTime, "Year", "ScanTime",
+                         dims, missingVal, years, units)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "  Cannot read Year variable" << endl;
+    return -1;
+  }
+  if (hdf5.readSi32Array(scanTime, "Month", "ScanTime",
+                         dims, missingVal, months, units)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "  Cannot read Month variable" << endl;
+    return -1;
+  }
+  if (hdf5.readSi32Array(scanTime, "DayOfMonth", "ScanTime",
+                         dims, missingVal, days, units)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "  Cannot read DayOfMonth variable" << endl;
+    return -1;
+  }
+  if (hdf5.readSi32Array(scanTime, "Hour", "ScanTime",
+                         dims, missingVal, hours, units)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "  Cannot read Hour variable" << endl;
+    return -1;
+  }
+  if (hdf5.readSi32Array(scanTime, "Minute", "ScanTime",
+                         dims, missingVal, mins, units)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "  Cannot read Minute variable" << endl;
+    return -1;
+  }
+  if (hdf5.readSi32Array(scanTime, "Second", "ScanTime",
+                         dims, missingVal, secs, units)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "  Cannot read Second variable" << endl;
+    return -1;
+  }
+  if (hdf5.readSi32Array(scanTime, "MilliSecond", "ScanTime",
+                         dims, missingVal, msecs, units)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "  Cannot read MilliSecond variable" << endl;
+    return -1;
+  }
+
+  _times.clear();
+  for (size_t ii = 0; ii < years.size(); ii++) {
+    DateTime dtime(years[ii], months[ii], days[ii],
+                   hours[ii], mins[ii], secs[ii], msecs[ii] / 1000.0);
+    _times.push_back(dtime);
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> Reading scan times <<====" << endl;
+    cerr << "nTimes: " << _times.size() << endl;
+    for (size_t ii = 0; ii < days.size(); ii++) {
+      cerr << "  ii, time: " << ii << ", " << _times[ii].asString(3) << endl;
+    }
+  }
+  
+  return 0;
+
 }
 
 /////////////////////////////////////////////

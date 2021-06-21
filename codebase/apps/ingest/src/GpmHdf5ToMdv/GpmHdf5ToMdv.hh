@@ -41,6 +41,7 @@
 
 #include <string>
 #include <toolsa/TaArray.hh>
+#include <toolsa/DateTime.hh>
 #include <didss/DsInputPath.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
@@ -116,7 +117,8 @@ private:
   string _history;
 
   // data set members
-  
+
+  vector<DateTime> _times;
   MdvxProj _inputProj;
   MdvxRemapLut _remapLut;
   int _nTimes;
@@ -157,7 +159,10 @@ private:
                               const string &attrName,
                               const string &context);
   
-  // load up dimensions and variables
+  int _readGroupNs(Group &ns);
+  int _readTime(Group &ns);
+
+// load up dimensions and variables
 
   int _loadMetaData();
 

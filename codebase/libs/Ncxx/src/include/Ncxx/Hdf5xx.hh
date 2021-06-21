@@ -154,7 +154,7 @@ public:
   // Read data set into arrays of various types
   // Fills in dims, msssingVal, vals, units (if available)
   
-  int readSi32Array(DataSet &dset,
+  int readSi32Array(Group &group,
                     const string &dsname,
                     const string &context,
                     vector<size_t> &dims,
@@ -162,7 +162,7 @@ public:
                     vector<NcxxPort::si32> &vals,
                     string &units);
   
-  int readFl32Array(DataSet &dset,
+  int readFl32Array(Group &group,
                     const string &dsname,
                     const string &context,
                     vector<size_t> &dims,
@@ -170,7 +170,7 @@ public:
                     vector<NcxxPort::fl32> &vals,
                     string &units);
   
-  int readFl64Array(DataSet &dset,
+  int readFl64Array(Group &group,
                     const string &dsname,
                     const string &context,
                     vector<size_t> &dims,

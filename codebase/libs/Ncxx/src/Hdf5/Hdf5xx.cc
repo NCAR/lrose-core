@@ -863,8 +863,8 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
 // Read data set into 32-bit int array
 // Fills in dims, msssingVal, vals, units (if available)
 
-int Hdf5xx::readSi32Array(DataSet &dset,
-                          const string &dsname,
+int Hdf5xx::readSi32Array(Group &group,
+                          const string &dsName,
                           const string &context,
                           vector<size_t> &dims,
                           NcxxPort::si32 &missingVal,
@@ -875,6 +875,7 @@ int Hdf5xx::readSi32Array(DataSet &dset,
 
   // get data space for this data set
   
+  DataSet dset = group.openDataSet(dsName);
   DataSpace dspace = dset.getSpace();
 
   // set the missing value (_fillValue)
@@ -1119,8 +1120,8 @@ int Hdf5xx::readSi32Array(DataSet &dset,
 // Read data set into 32-bit float array
 // Fills in dims, msssingVal, vals, units (if available)
 
-int Hdf5xx::readFl32Array(DataSet &dset,
-                          const string &dsname,
+int Hdf5xx::readFl32Array(Group &group,
+                          const string &dsName,
                           const string &context,
                           vector<size_t> &dims,
                           NcxxPort::fl32 &missingVal,
@@ -1131,6 +1132,7 @@ int Hdf5xx::readFl32Array(DataSet &dset,
 
   // get data space for this data set
   
+  DataSet dset = group.openDataSet(dsName);
   DataSpace dspace = dset.getSpace();
 
   // set the missing value (_fillValue)
@@ -1375,8 +1377,8 @@ int Hdf5xx::readFl32Array(DataSet &dset,
 // Read data set into 64-bit float array
 // Fills in dims, msssingVal, vals, units (if available)
 
-int Hdf5xx::readFl64Array(DataSet &dset,
-                          const string &dsname,
+int Hdf5xx::readFl64Array(Group &group,
+                          const string &dsName,
                           const string &context,
                           vector<size_t> &dims,
                           NcxxPort::fl64 &missingVal,
@@ -1387,6 +1389,7 @@ int Hdf5xx::readFl64Array(DataSet &dset,
 
   // get data space for this data set
   
+  DataSet dset = group.openDataSet(dsName);
   DataSpace dspace = dset.getSpace();
 
   // set the missing value (_fillValue)
