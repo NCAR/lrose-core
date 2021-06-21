@@ -119,6 +119,8 @@ private:
   // data set members
 
   vector<DateTime> _times;
+  int _nCols, _nRows;
+  
   MdvxProj _inputProj;
   MdvxRemapLut _remapLut;
   int _nTimes;
@@ -160,9 +162,10 @@ private:
                               const string &context);
   
   int _readGroupNs(Group &ns);
-  int _readTime(Group &ns);
+  int _readTimes(Group &ns);
+  int _readLatLon(Group &ns);
 
-// load up dimensions and variables
+  // load up dimensions and variables
 
   int _loadMetaData();
 

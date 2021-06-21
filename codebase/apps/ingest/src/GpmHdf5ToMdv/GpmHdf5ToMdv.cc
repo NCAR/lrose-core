@@ -393,7 +393,11 @@ int GpmHdf5ToMdv::_readGroupNs(Group &ns)
          << swathHeader << "===================" << endl;
   }
 
-  if (_readTime(ns)) {
+  if (_readTimes(ns)) {
+    return -1;
+  }
+
+  if (_readLatLon(ns)) {
     return -1;
   }
   
@@ -442,9 +446,9 @@ int GpmHdf5ToMdv::_readGroupNs(Group &ns)
 }
 
 //////////////////////////////////////////////
-// read the scan time
+// read the scan times
 
-int GpmHdf5ToMdv::_readTime(Group &ns)
+int GpmHdf5ToMdv::_readTimes(Group &ns)
   
 {
 
@@ -457,43 +461,43 @@ int GpmHdf5ToMdv::_readTime(Group &ns)
   Hdf5xx hdf5;
   if (hdf5.readSi32Array(scanTime, "Year", "ScanTime",
                          dims, missingVal, years, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Year variable" << endl;
     return -1;
   }
   if (hdf5.readSi32Array(scanTime, "Month", "ScanTime",
                          dims, missingVal, months, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Month variable" << endl;
     return -1;
   }
   if (hdf5.readSi32Array(scanTime, "DayOfMonth", "ScanTime",
                          dims, missingVal, days, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read DayOfMonth variable" << endl;
     return -1;
   }
   if (hdf5.readSi32Array(scanTime, "Hour", "ScanTime",
                          dims, missingVal, hours, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Hour variable" << endl;
     return -1;
   }
   if (hdf5.readSi32Array(scanTime, "Minute", "ScanTime",
                          dims, missingVal, mins, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Minute variable" << endl;
     return -1;
   }
   if (hdf5.readSi32Array(scanTime, "Second", "ScanTime",
                          dims, missingVal, secs, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Second variable" << endl;
     return -1;
   }
   if (hdf5.readSi32Array(scanTime, "MilliSecond", "ScanTime",
                          dims, missingVal, msecs, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readTime()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read MilliSecond variable" << endl;
     return -1;
   }
@@ -511,6 +515,82 @@ int GpmHdf5ToMdv::_readTime(Group &ns)
     for (size_t ii = 0; ii < days.size(); ii++) {
       cerr << "  ii, time: " << ii << ", " << _times[ii].asString(3) << endl;
     }
+  }
+  
+  return 0;
+
+}
+
+//////////////////////////////////////////////
+// read the lat/lon arrays
+
+int GpmHdf5ToMdv::_readLatLon(Group &ns)
+  
+{
+  
+  Hdf5xx hdf5;
+
+  // read Latitude
+  
+  vector<NcxxPort::fl64> lats;
+  NcxxPort::fl64 missingLat;
+  vector<size_t> latDims;
+  string latUnits;
+  if (hdf5.readFl64Array(ns, "Latitude", "NS",
+                         latDims, missingLat, lats, latUnits)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
+    cerr << "  Cannot read Latitude variable" << endl;
+    return -1;
+  }
+
+  // read Longitude
+  
+  vector<NcxxPort::fl64> lons;
+  NcxxPort::fl64 missingLon;
+  vector<size_t> lonDims;
+  string lonUnits;
+  if (hdf5.readFl64Array(ns, "Longitude", "NS",
+                         lonDims, missingLon, lons, lonUnits)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
+    cerr << "  Cannot read Longitude variable" << endl;
+    return -1;
+  }
+
+  // check dimensions for consistency
+  
+  if (latDims.size() != 2 || lonDims.size() != 2) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
+    cerr << "  Latitude/Longitude must have 2 dimensions" << endl;
+    cerr << "  latDims.size(): " << latDims.size() << endl;
+    cerr << "  lonDims.size(): " << lonDims.size() << endl;
+    return -1;
+  }
+  if (latDims[0] != lonDims[0] || latDims[1] != lonDims[1]) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
+    cerr << "  Latitude/Longitude must have same dimensions" << endl;
+    cerr << "  latDims[0]: " << latDims[0] << endl;
+    cerr << "  lonDims[0]: " << lonDims[0] << endl;
+    cerr << "  latDims[1]: " << latDims[1] << endl;
+    cerr << "  lonDims[1]: " << lonDims[1] << endl;
+    return -1;
+  }
+  _nCols = latDims[0];
+  _nRows = latDims[1];
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> Reading lat/lon <<====" << endl;
+    cerr << "nCols, nRows: " << _nCols << ", " << _nRows << endl;
+    for (int irow = 0; irow < _nRows; irow++) {
+      for (int icol = 0; icol < _nCols; icol++) {
+        int ipt = irow * _nCols + icol;
+        cerr << "irow, icol, ipt, lat, lon: "
+             << irow << ", "
+             << icol << ", "
+             << ipt << ", "
+             << lats[ipt] << ", "
+             << lons[ipt] << endl;
+      } // icol
+    } // irow
   }
   
   return 0;
