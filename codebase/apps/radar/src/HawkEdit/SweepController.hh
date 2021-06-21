@@ -114,6 +114,8 @@ public:
     return _view->getSelectedAngle(); 
   }
 
+  int getSelectedIndex();
+
   //double getFixedAngleDeg(ssize_t sweepIndex = -1) const;
   //bool getReversedInGui() const { return _reversedInGui; }
 

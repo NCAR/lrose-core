@@ -58,7 +58,8 @@ SweepModel::SweepModel()
 //        _params(params)
         
 {
-
+  _selectedSweepIndex = 0;
+  _selectedSweepAngle = 0.0;
 
 }
 
@@ -233,6 +234,9 @@ vector<double> *SweepModel::getSweepAngles() {
   return sweepAngles;
 }
 
+int SweepModel::getSelectedIndex() {
+  return _selectedSweepIndex;
+}
 
 
 

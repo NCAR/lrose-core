@@ -28,10 +28,13 @@ BoundaryView::BoundaryView()
 // draws the boundary
 void BoundaryView::draw(WorldPlot worldPlot, QPainter &painter,
 	vector<Point> &points, float pointBoxScale, bool isFinished,
-	BoundaryToolType currentTool, QBrush *yellowBrush)
+	BoundaryToolType currentTool, string &color)
 {
 	LOG(DEBUG) << "enter";
-	painter.setPen(Qt::yellow);
+
+	QColor boundaryColor(color.c_str());
+  // QBrush *yellowBrush = new QBrush(boundaryColor);
+	painter.setPen(boundaryColor); // Qt::yellow);
 	// bool isFinished = isAClosedPolygon();
 
 	for (int i=1; i < (int) points.size(); i++)
@@ -39,21 +42,24 @@ void BoundaryView::draw(WorldPlot worldPlot, QPainter &painter,
 		LOG(DEBUG) << "drawing point " << i;
 		worldPlot.drawLine(painter, points[i-1].x, points[i-1].y, points[i].x, points[i].y);
 		if (isFinished && currentTool == BoundaryToolType::polygon)
-		  drawPointBox(worldPlot, painter, points[i], pointBoxScale, yellowBrush);
+		  drawPointBox(worldPlot, painter, points[i], pointBoxScale, color);
 	}
+
 	LOG(DEBUG) << "exit";
 }
 
 // draws a yellow square over a point
 // (relevant with the Polygon Tool)
 void BoundaryView::drawPointBox(WorldPlot worldPlot, QPainter &painter, Point point,
-	float pointBoxScale, QBrush *yellowBrush)
+	float pointBoxScale, string &color)
 {
 	double x = point.x;
 	double y = point.y;
 
+	QColor boundaryColor(color.c_str());
+  QBrush yellowBrush(boundaryColor);
 	int size = 6 * pointBoxScale;
-	worldPlot.fillRectangle(painter, *yellowBrush, x-(size/2), y-(size/2), size, size);
+	worldPlot.fillRectangle(painter, yellowBrush, x-(size/2), y-(size/2), size, size);
 }
 
 /*

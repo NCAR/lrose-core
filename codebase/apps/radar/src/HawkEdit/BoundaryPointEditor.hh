@@ -293,6 +293,9 @@ class BoundaryPointEditor : public QObject
 
   public:
 
+  BoundaryPointEditor(BoundaryPointEditorView *bpeView,
+	  BoundaryView *boundaryView);
+
   void createBoundaryEditorDialog();	
 
 	string getBoundaryFilePath(string &fieldName, int sweepIndex, string boundaryFileName);
@@ -301,20 +304,25 @@ class BoundaryPointEditor : public QObject
 	string getRootBoundaryDir();
 	void setBoundaryDir(string &openFilePath);
 
+  bool evaluatePoint(int worldX, int worldY);
+  bool evaluateCursor(bool isShiftKeyDown);
+  void evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY);
 	static BoundaryPointEditor* Instance();
 	void makeCircle(int x, int y, float radius);
 	void addToBrushShape(float x, float y);
 	void addPoint(float x, float y);
 	void insertPoint(float x, float y);
 	void delNearestPoint(float x, float y);
-	void draw(WorldPlot worldPlot, QPainter &painter);
+	void drawBoundary(WorldPlot worldPlot, QPainter &painter);
 	bool isOverAnyPoint(float worldX, float worldY);
 	void moveNearestPointTo(float worldX, float worldY);
 	bool isAClosedPolygon();
 	void checkToAddOrDelPoint(float x, float y);
 	void clear();
-	void save(int boundaryIndex);
-	void load(string path);
+	void save(int boundaryIndex, string &selectedFieldName,
+    int sweepIndex, string &radarFilePath);
+	bool load(int boundaryIndex, string &selectedFieldName,
+    int sweepIndex, string &radarFilePath);
 	void setTool(BoundaryToolType tool);
 	BoundaryToolType getCurrentTool();
 	bool updateScale(double xRange);
@@ -327,7 +335,9 @@ class BoundaryPointEditor : public QObject
 	int getBrushRadius();
 	void showBoundaryEditor();
 	//void refreshBoundaries();
-	const char *refreshBoundary(int i);
+	//const char *refreshBoundary(int i);
+	void refreshBoundaries(string &openFilePath,
+    string &currentFieldName, int currentSweepIndex);
 
 
 	void userClickedPolygonButton();
@@ -345,11 +355,11 @@ class BoundaryPointEditor : public QObject
 
 	vector<Point> getPoints(string boundaryFilePath);
 
-	BoundaryPointEditor();
+
 	//int getNearestPointIndex(float x, float y, vector<Point> &pts);
 	//float getNearestDistToLineSegment(int x, int y, int segmentPtIndex1, int segmentPtIndex2);
 	void coutPoints(vector<Point> &pts);
-	void drawPointBox(WorldPlot worldPlot, QPainter &painter, Point point);
+	//void drawPointBox(WorldPlot worldPlot, QPainter &painter, Point point);
 	//void checkToMovePointToOriginIfVeryClose(Point &pt);
 	//int getClosestPtIndex(int x, int y);
 	//int getFurthestPtIndex(int x, int y);
@@ -379,7 +389,7 @@ class BoundaryPointEditor : public QObject
 	void coutMemUsage();
 	//vector<Point> points;
 	//vector<Point> mergePoints;
-	static BoundaryPointEditor* m_pInstance;
+	//static BoundaryPointEditor* m_pInstance;
 	//BoundaryToolType currentTool = BoundaryToolType::brush;
 
 	//void ReadFromFile(const string &file_name);

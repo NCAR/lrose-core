@@ -452,7 +452,7 @@ void PolarManager::_setupWindows()
 
   // configure the PPI
 
-  _ppi = new PpiWidget(_ppiFrame, *this, _platform, _displayFieldController, _haveFilteredFields);
+  _ppi = new PpiWidget(_ppiFrame, this, _platform, _displayFieldController, _haveFilteredFields);
 
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _ppi, SLOT(resize(const int, const int)));
@@ -3878,7 +3878,72 @@ void PolarManager::_howto()
 }
 
 
+void PolarManager::boundaryCircleRadiusChanged(int value) 
+{
+  bool resizeExistingCircle = boundaryPointEditorControl->setCircleRadius(value);
+  if (resizeExistingCircle) { //resize existing circle
+    // TODO: somehow get the worldPlot and painter from ppiWidget
+    _ppi->showSelectedField(); // refresh/replot->BoundaryPointEditor::Instance()->draw(_zoomWorld, painter); 
+    //boundaryPointEditorControl->draw(worldPlot, painter);
+    //WorldPlot zoomWorld = _ppi->getZoomWorld();
+    //QPainter painter = _ppi->getPainter();
+  }
+}
 
+void PolarManager::drawBoundary(WorldPlot &zoomWorld, QPainter &painter) {
+    boundaryPointEditorControl->drawBoundary(zoomWorld, painter);
+}
+
+void PolarManager::mouseMoveEvent(int worldX, int worldY)
+{  
+  if (boundaryPointEditorControl != NULL) {
+
+    bool redraw = boundaryPointEditorControl->evaluatePoint(worldX, worldY);
+    if (redraw) { 
+      _ppi->showSelectedField(); 
+    }
+  }
+}
+
+bool PolarManager::evaluateCursor(bool isShiftKeyDown) {
+  bool changeCursor = false;
+  if (boundaryPointEditorControl != NULL) {
+    changeCursor = boundaryPointEditorControl->evaluateCursor(isShiftKeyDown);
+  }
+  return changeCursor;
+}
+
+bool PolarManager::evaluateRange(double xRange) {
+    //doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
+    return boundaryPointEditorControl->updateScale(xRange);
+}
+
+void PolarManager::evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY)
+{    
+    // If boundary editor active, then interpret boundary mouse release event
+  if (boundaryPointEditorControl != NULL) {
+    boundaryPointEditorControl->evaluateMouseRelease(mouseReleaseX, mouseReleaseY);
+/*
+      if (editor->getCurrentTool() == BoundaryToolType::polygon) {
+        if (!editor->isAClosedPolygon()) {
+          editor->addPoint(_worldReleaseX, _worldReleaseY);
+        } else { //polygon finished, user may want to insert/delete a point
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
+        }
+      } else if (editor->getCurrentTool() == BoundaryToolType::circle) {
+        if (editor->isAClosedPolygon()) {
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
+        } else {
+          editor->makeCircle(_worldReleaseX,
+                             _worldReleaseY,
+                             editor->getCircleRadius());
+        }
+      }  
+      */  
+  }
+} 
 
 /* TODO: grab new code from HawkEye ... 
 void PolarManager::_createBoundaryEditorDialog()
@@ -4014,7 +4079,7 @@ void PolarManager::refreshBoundaries()
   if (_archiveFileList.size() > 0) {
     string radarFilePath = _archiveFileList.at(0);
   
-    bool successful = boundaryPointEditorControl->refreshBoundary(
+    boundaryPointEditorControl->refreshBoundaries(
       radarFilePath, 
       currentFieldName,
       currentSweepIndex);
@@ -4034,23 +4099,31 @@ void PolarManager::showBoundaryEditor()
   // create the view
 
   if (boundaryPointEditorView == NULL) {
-    boundaryPointEditorView = new boundaryPointEditorView(this, closestRayToEdit->getAzimuthDeg());
+    boundaryPointEditorView = new BoundaryPointEditorView();
 
     // install event filter to catch when the spreadsheet is closed
     CloseEventFilter *closeFilter = new CloseEventFilter(boundaryPointEditorView);
     boundaryPointEditorView->installEventFilter(closeFilter);
 
+    boundaryView = new BoundaryView();
     // create the model
 
     //SpreadSheetModel *model = new SpreadSheetModel(const_cast<RadxRay *> (closestRayToEdit));
     
     // create the controller
-    boundaryPointEditorControl = new BoundaryPointEditor(boundaryPointEditorView); //, model);
+    boundaryPointEditorControl = 
+      new BoundaryPointEditor(boundaryPointEditorView,
+        boundaryView);
 
     // connect some signals and slots in order to retrieve information
     // and send changes back to display
                                          
     connect(boundaryPointEditorView, SIGNAL(boundaryPointEditorClosed()), this, SLOT(boundaryEditorClosed()));
+
+    connect(boundaryPointEditorView, SIGNAL(boundaryCircleRadiusChanged(int)),
+      this, SLOT(boundaryCircleRadiusChanged(int)));  
+    connect(boundaryPointEditorView, SIGNAL(boundaryBrushRadiusChanged(int)),
+      this, SLOT(boundaryBrushRadiusChanged));  
 
     connect(boundaryPointEditorControl, SIGNAL(saveBoundary(int )), 
       this, SLOT(saveBoundaryEvent(int)));
@@ -4066,7 +4139,7 @@ void PolarManager::showBoundaryEditor()
   }
   
   //BoundaryPointEditor::Instance()->setManager(this);
-  BoundaryPointEditorControl->showBoundaryEditor();
+  boundaryPointEditorControl->showBoundaryEditor();
 // ----
 
 
@@ -5755,7 +5828,7 @@ void PolarManager::scriptEditorClosed() {
 
 void PolarManager::boundaryEditorClosed() {
   //delete View;  this is handled by the close event
-  boundaryEditorView = NULL;
+  boundaryPointEditorView = NULL;
 }
 
 /////////////////////////////////////////////////////

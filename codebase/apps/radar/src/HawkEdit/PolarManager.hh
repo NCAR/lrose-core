@@ -180,6 +180,24 @@ public:
 
 // end from DisplayManager
 
+  void showBoundaryEditor();
+  void refreshBoundaries();
+//  void clearBoundaryEditorClick();
+//  void helpBoundaryEditorClick();
+//  void polygonBtnBoundaryEditorClick();
+//  void circleBtnBoundaryEditorClick();
+//  void brushBtnBoundaryEditorClick();
+//  void onBoundaryEditorListItemClicked(QListWidgetItem* item);
+  void saveBoundaryEvent(int boundaryIndex);
+  void loadBoundaryEvent(int boundaryIndex);  
+  void selectBoundaryTool(BoundaryToolType tool);
+  void drawBoundary(WorldPlot &_zoomWorld, QPainter &painter);
+  void boundaryCircleRadiusChanged(int value);
+  void mouseMoveEvent(int worldX, int worldY);  
+  bool evaluateCursor(bool isShiftKeyDown);
+  void evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY);
+  bool evaluateRange(double xRange);
+
 public slots:
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
@@ -207,7 +225,7 @@ public slots:
   void spreadSheetClosed();
   void scriptEditorClosed();
   void boundaryEditorClosed();
-  
+
   void errorMessage(string title, string message);
 
 signals:
@@ -272,6 +290,7 @@ private:
 
   BoundaryPointEditor *boundaryPointEditorControl;
   BoundaryPointEditorView *boundaryPointEditorView;
+  BoundaryView *boundaryView;
 
 
   // windows
@@ -668,7 +687,7 @@ private:
 
   // override howto and boundaryEditor
 
-  void _howto();
+  void _howto();  
 
 private slots:
 
@@ -770,17 +789,7 @@ private slots:
 
   // boundary editor
   void _createBoundaryEditorDialog();
-  void showBoundaryEditor();
-  void refreshBoundaries();
-//  void clearBoundaryEditorClick();
-//  void helpBoundaryEditorClick();
-//  void polygonBtnBoundaryEditorClick();
-//  void circleBtnBoundaryEditorClick();
-//  void brushBtnBoundaryEditorClick();
-//  void onBoundaryEditorListItemClicked(QListWidgetItem* item);
-  void saveBoundaryEvent(int boundaryIndex);
-  void loadBoundaryEvent(int boundaryIndex);  
-  void selectBoundaryTool(BoundaryToolType tool);
+
 
   //void _clearBoundaryEditorClick();
   //void onBoundaryEditorListItemClicked(QListWidgetItem* item);

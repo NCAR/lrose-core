@@ -313,6 +313,19 @@ void SweepController::changeSelectedIndex(int increment)
 */
 }
 
+int SweepController::getSelectedIndex() 
+{
+  return _model->getSelectedIndex();
+/*
+  _guiIndex += increment;
+  if (_guiIndex < 0) {
+    _guiIndex = 0;
+  } else if (_guiIndex > (int) _sweeps.size() - 1) {
+    _guiIndex = _sweeps.size() - 1;
+  }
+  _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
+*/
+}
 
 /////////////////////////////////////////////////////////////
 // get the fixed angle, optionally specifying an index

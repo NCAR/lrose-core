@@ -640,10 +640,23 @@ void BoundaryPointEditorModel::save(string &path)
 	fclose(file);
 }
 
+bool BoundaryPointEditorModel::load(int boundaryIndex, string &selectedFieldName,
+ int sweepIndex, string &radarFilePath) 
+{
+	LOG(DEBUG) << "enter";
+  string path = getBoundaryFilePath(radarFilePath,
+    selectedFieldName, sweepIndex, boundaryIndex);
+  LOG(DEBUG) << "loading from path: " << path;
+	bool successful = load(path);
+	LOG(DEBUG) << "exit";
+	return successful;
+} 
+
 // Loads the boundary file given by path
 // It also sets the correct editor tool (polygon, circle, or brush) based on what is in the file
-void BoundaryPointEditorModel::load(string path)
+bool BoundaryPointEditorModel::load(string path)
 {
+	bool successful = false;
 	ifstream infile(path);
 	if (infile.good())
 	{
@@ -684,7 +697,9 @@ void BoundaryPointEditorModel::load(string path)
 			currentTool = BoundaryToolType::polygon;
 		else
 			currentTool = BoundaryToolType::brush;
+		successful = true;
 	}
+	return successful;
 }
 
 /*
@@ -825,6 +840,41 @@ const char *BoundaryPointEditorModel::refreshBoundary(
 }
 
 
+bool BoundaryPointEditorModel::evaluatePoint(int worldX, int worldY)
+{
+  bool redraw = false;
+
+    //BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
+    
+    if (currentTool == BoundaryToolType::polygon && 
+        isAClosedPolygon() && 
+        isOverAnyPoint(worldX, worldY)) {
+      moveNearestPointTo(worldX, worldY);
+      redraw = true;
+    } else if (currentTool == BoundaryToolType::brush) {
+      addToBrushShape(worldX, worldY);
+      redraw = true;
+    }
+
+  return redraw;
+}
+
+void BoundaryPointEditorModel::evaluateMouseRelease(int worldReleaseX, int worldReleaseY)
+{	
+	if (currentTool == BoundaryToolType::polygon) {
+    if (!isAClosedPolygon()) {
+      addPoint(worldReleaseX, worldReleaseY);
+    } else { //polygon finished, user may want to insert/delete a point
+      checkToAddOrDelPoint(worldReleaseX, worldReleaseY);
+    }
+  } else if (currentTool == BoundaryToolType::circle) {
+    if (isAClosedPolygon()) {
+      checkToAddOrDelPoint(worldReleaseX, worldReleaseY);
+    } else {
+      makeCircle(worldReleaseX, worldReleaseY, circleRadius);
+    }
+  }
+}
 
 /*
 void BoundaryPointEditor::coutMemUsage()

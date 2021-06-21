@@ -32,6 +32,8 @@ class BoundaryPointEditorModel
   vector<Point> getBoundaryPoints(string radarFilePath,
     string &fieldName, int sweepIndex, int boundaryIndex);	
 
+  void evaluateMouseRelease(int worldReleaseX, int worldReleaseY);
+  bool evaluatePoint(int worldX, int worldY);
 	void makeCircle(int x, int y, float radius);
 	void addToBrushShape(float x, float y);
 	void addPoint(float x, float y);
@@ -45,7 +47,9 @@ class BoundaryPointEditorModel
 	void clear();
 	void save(int boundaryIndex, string &fieldName, int sweepNumber, 
 		string &radarFilePath);
-	void load(string path);
+	bool load(int boundaryIndex, string &selectedFieldName,
+    int sweepIndex, string &radarFilePath);
+	bool load(string path);
 	void setTool(BoundaryToolType tool);  // TODO: maybe move to View?
 	BoundaryToolType getCurrentTool();
 	bool updateScale(double xRange);
@@ -56,6 +60,8 @@ class BoundaryPointEditorModel
 	bool getIsCircle();
 	int getCircleRadius();
 	int getBrushRadius();
+	string &getYellowBrush() { return yellowBrush; };
+	float getPointBoxScale() { return pointBoxScale; };
 
 	const char *refreshBoundary(string &radarFilePath,
     string &fieldName, int sweepIndex, int boundaryIndex);
@@ -101,6 +107,8 @@ class BoundaryPointEditorModel
 	int brushRadius = 20;
 	int brushToolNextPtDistance = 10;
 	Point brushLastOrigin;
+
+	string yellowBrush = "yellow";
 
 	void coutMemUsage();
 	vector<Point> points;

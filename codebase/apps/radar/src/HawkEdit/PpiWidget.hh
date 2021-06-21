@@ -51,7 +51,7 @@ class DLL_EXPORT PpiWidget : public PolarWidget
    */
 
   PpiWidget(QWidget* parent,
-            const PolarManager &manager,
+            PolarManager *manager,
             const RadxPlatform &platform,
 	    DisplayFieldController *displayFieldController,
 	    //            const vector<DisplayField *> &fields,

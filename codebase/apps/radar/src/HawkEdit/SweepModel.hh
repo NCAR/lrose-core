@@ -75,10 +75,14 @@ public:
   size_t getNSweeps(); //  const  // _sweeps.size(); }
 
   //double getSelectedAngle() const { return _selectedAngle; }
+
+  int getSelectedIndex();
   
 private:
    // vector<double> somevalues = {100, 200, 300};
 
+   float _selectedSweepAngle;
+   int _selectedSweepIndex;  
 
 };
 
