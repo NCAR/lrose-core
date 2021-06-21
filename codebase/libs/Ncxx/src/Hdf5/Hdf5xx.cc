@@ -859,6 +859,774 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
 
 }
 
+///////////////////////////////////////////////////////////////////
+// Read data set into 32-bit int array
+// Fills in dims, msssingVal, vals, units (if available)
+
+int Hdf5xx::readSi32Array(DataSet &dset,
+                          const string &dsname,
+                          const string &context,
+                          vector<size_t> &dims,
+                          NcxxPort::si32 &missingVal,
+                          vector<NcxxPort::si32> &vals,
+                          string &units)
+  
+{
+
+  // get data space for this data set
+  
+  DataSpace dspace = dset.getSpace();
+
+  // set the missing value (_fillValue)
+
+  missingVal = -9999.0;
+  DecodedAttr fillValueAtt;
+  if (loadAttribute(dset, "_fillValue", context, fillValueAtt) == 0) {
+    missingVal = fillValueAtt.getAsDouble();
+  }
+  
+  // set the units
+  
+  units = "";
+  DecodedAttr unitsAtt;
+  if (loadAttribute(dset, "Units", context, unitsAtt) == 0) {
+    units = unitsAtt.getAsString();
+  } else if (loadAttribute(dset, "units", context, unitsAtt) == 0) {
+    units = unitsAtt.getAsString();
+  }
+
+  // determine the dimensions
+  
+  int nDims = dspace.getSimpleExtentNdims();
+  vector<hsize_t> hdims;
+  hdims.resize(nDims);
+  dspace.getSimpleExtentDims(hdims.data());
+  dims.clear();
+  for (size_t ii = 0; ii < hdims.size(); ii++) {
+    dims.push_back(hdims[ii]);
+  }
+
+  // allocate space for the data values
+  
+  hssize_t nPoints = dspace.getSimpleExtentNpoints();
+  vals.resize(nPoints);
+
+  // read in the data depending on the type
+  
+  DataType dtype = dset.getDataType();
+  H5T_class_t aclass = dtype.getClass();
+  
+  if (aclass == H5T_INTEGER) {
+    
+    IntType intType = dset.getIntType();
+    H5T_order_t order = intType.getOrder();
+    H5T_sign_t sign = intType.getSign();
+    size_t tsize = intType.getSize();
+    
+    if (sign == H5T_SGN_NONE) {
+      
+      // unsigned
+      
+      if (tsize == 1) {
+        
+        vector<NcxxPort::ui08> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+        
+      } else if (tsize == 2) {
+        
+        vector<NcxxPort::ui16> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::ui16), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::ui16), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 4) {
+        
+        vector<NcxxPort::ui32> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::ui32), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::ui32), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 8) {
+
+        vector<NcxxPort::ui64> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::ui64), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::ui64), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+      }
+
+    } else {
+
+      // signed
+
+      if (tsize == 1) {
+
+        vector<NcxxPort::si08> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 2) {
+
+        vector<NcxxPort::si16> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::si16), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::si16), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 4) {
+
+        vector<NcxxPort::si32> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::si32), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::si32), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 8) {
+
+        vector<NcxxPort::si64> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::si64), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::si64), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+      }
+
+    }
+
+  } else if (aclass == H5T_FLOAT) {
+
+    FloatType flType = dset.getFloatType();
+    H5T_order_t order = flType.getOrder();
+    size_t tsize = flType.getSize();
+    
+    if (tsize == 4) {
+
+      vector<NcxxPort::fl32> fvals;
+      fvals.resize(nPoints);
+      dset.read(fvals.data(), dtype);
+      if (ByteOrder::hostIsBigEndian()) {
+        if (order == H5T_ORDER_LE) {
+          ByteOrder::swap32(fvals.data(), nPoints * sizeof(NcxxPort::fl32), true);
+        }
+      } else {
+        if (order == H5T_ORDER_BE) {
+          ByteOrder::swap32(fvals.data(), nPoints * sizeof(NcxxPort::fl32), true);
+        }
+      }
+      for (int ii = 0; ii < nPoints; ii++) {
+        vals[ii] = (int) (fvals[ii] + 0.5);
+      }
+
+    } else if (tsize == 8) {
+      
+      vector<NcxxPort::fl64> fvals;
+      fvals.resize(nPoints);
+      dset.read(fvals.data(), dtype);
+      if (ByteOrder::hostIsBigEndian()) {
+        if (order == H5T_ORDER_LE) {
+          ByteOrder::swap64(fvals.data(), nPoints * sizeof(NcxxPort::fl64), true);
+        }
+      } else {
+        if (order == H5T_ORDER_BE) {
+          ByteOrder::swap64(fvals.data(), nPoints * sizeof(NcxxPort::fl64), true);
+        }
+      }
+      for (int ii = 0; ii < nPoints; ii++) {
+        vals[ii] = (int) (fvals[ii] + 0.5);
+      }
+
+    }
+
+  } else {
+
+    return -1;
+
+  }
+  
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////////
+// Read data set into 32-bit float array
+// Fills in dims, msssingVal, vals, units (if available)
+
+int Hdf5xx::readFl32Array(DataSet &dset,
+                          const string &dsname,
+                          const string &context,
+                          vector<size_t> &dims,
+                          NcxxPort::fl32 &missingVal,
+                          vector<NcxxPort::fl32> &vals,
+                          string &units)
+  
+{
+
+  // get data space for this data set
+  
+  DataSpace dspace = dset.getSpace();
+
+  // set the missing value (_fillValue)
+
+  missingVal = -9999.0;
+  DecodedAttr fillValueAtt;
+  if (loadAttribute(dset, "_fillValue", context, fillValueAtt) == 0) {
+    missingVal = fillValueAtt.getAsDouble();
+  }
+  
+  // set the units
+  
+  units = "";
+  DecodedAttr unitsAtt;
+  if (loadAttribute(dset, "Units", context, unitsAtt) == 0) {
+    units = unitsAtt.getAsString();
+  } else if (loadAttribute(dset, "units", context, unitsAtt) == 0) {
+    units = unitsAtt.getAsString();
+  }
+
+  // determine the dimensions
+  
+  int nDims = dspace.getSimpleExtentNdims();
+  vector<hsize_t> hdims;
+  hdims.resize(nDims);
+  dspace.getSimpleExtentDims(hdims.data());
+  dims.clear();
+  for (size_t ii = 0; ii < hdims.size(); ii++) {
+    dims.push_back(hdims[ii]);
+  }
+
+  // allocate space for the data values
+  
+  hssize_t nPoints = dspace.getSimpleExtentNpoints();
+  vals.resize(nPoints);
+
+  // read in the data depending on the type
+  
+  DataType dtype = dset.getDataType();
+  H5T_class_t aclass = dtype.getClass();
+  
+  if (aclass == H5T_INTEGER) {
+    
+    IntType intType = dset.getIntType();
+    H5T_order_t order = intType.getOrder();
+    H5T_sign_t sign = intType.getSign();
+    size_t tsize = intType.getSize();
+    
+    if (sign == H5T_SGN_NONE) {
+      
+      // unsigned
+      
+      if (tsize == 1) {
+        
+        vector<NcxxPort::ui08> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+        
+      } else if (tsize == 2) {
+        
+        vector<NcxxPort::ui16> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::ui16), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::ui16), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 4) {
+        
+        vector<NcxxPort::ui32> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::ui32), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::ui32), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 8) {
+
+        vector<NcxxPort::ui64> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::ui64), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::ui64), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+      }
+
+    } else {
+
+      // signed
+
+      if (tsize == 1) {
+
+        vector<NcxxPort::si08> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 2) {
+
+        vector<NcxxPort::si16> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::si16), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::si16), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 4) {
+
+        vector<NcxxPort::si32> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::si32), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::si32), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 8) {
+
+        vector<NcxxPort::si64> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::si64), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::si64), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+      }
+
+    }
+
+  } else if (aclass == H5T_FLOAT) {
+
+    FloatType flType = dset.getFloatType();
+    H5T_order_t order = flType.getOrder();
+    size_t tsize = flType.getSize();
+    
+    if (tsize == 4) {
+
+      vector<NcxxPort::fl32> fvals;
+      fvals.resize(nPoints);
+      dset.read(fvals.data(), dtype);
+      if (ByteOrder::hostIsBigEndian()) {
+        if (order == H5T_ORDER_LE) {
+          ByteOrder::swap32(fvals.data(), nPoints * sizeof(NcxxPort::fl32), true);
+        }
+      } else {
+        if (order == H5T_ORDER_BE) {
+          ByteOrder::swap32(fvals.data(), nPoints * sizeof(NcxxPort::fl32), true);
+        }
+      }
+      for (int ii = 0; ii < nPoints; ii++) {
+        vals[ii] = fvals[ii];
+      }
+
+    } else if (tsize == 8) {
+      
+      vector<NcxxPort::fl64> fvals;
+      fvals.resize(nPoints);
+      dset.read(fvals.data(), dtype);
+      if (ByteOrder::hostIsBigEndian()) {
+        if (order == H5T_ORDER_LE) {
+          ByteOrder::swap64(fvals.data(), nPoints * sizeof(NcxxPort::fl64), true);
+        }
+      } else {
+        if (order == H5T_ORDER_BE) {
+          ByteOrder::swap64(fvals.data(), nPoints * sizeof(NcxxPort::fl64), true);
+        }
+      }
+      for (int ii = 0; ii < nPoints; ii++) {
+        vals[ii] = fvals[ii];
+      }
+
+    }
+
+  } else {
+
+    return -1;
+
+  }
+  
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////////
+// Read data set into 64-bit float array
+// Fills in dims, msssingVal, vals, units (if available)
+
+int Hdf5xx::readFl64Array(DataSet &dset,
+                          const string &dsname,
+                          const string &context,
+                          vector<size_t> &dims,
+                          NcxxPort::fl64 &missingVal,
+                          vector<NcxxPort::fl64> &vals,
+                          string &units)
+  
+{
+
+  // get data space for this data set
+  
+  DataSpace dspace = dset.getSpace();
+
+  // set the missing value (_fillValue)
+
+  missingVal = -9999.0;
+  DecodedAttr fillValueAtt;
+  if (loadAttribute(dset, "_fillValue", context, fillValueAtt) == 0) {
+    missingVal = fillValueAtt.getAsDouble();
+  }
+  
+  // set the units
+  
+  units = "";
+  DecodedAttr unitsAtt;
+  if (loadAttribute(dset, "Units", context, unitsAtt) == 0) {
+    units = unitsAtt.getAsString();
+  } else if (loadAttribute(dset, "units", context, unitsAtt) == 0) {
+    units = unitsAtt.getAsString();
+  }
+
+  // determine the dimensions
+  
+  int nDims = dspace.getSimpleExtentNdims();
+  vector<hsize_t> hdims;
+  hdims.resize(nDims);
+  dspace.getSimpleExtentDims(hdims.data());
+  dims.clear();
+  for (size_t ii = 0; ii < hdims.size(); ii++) {
+    dims.push_back(hdims[ii]);
+  }
+
+  // allocate space for the data values
+  
+  hssize_t nPoints = dspace.getSimpleExtentNpoints();
+  vals.resize(nPoints);
+
+  // read in the data depending on the type
+  
+  DataType dtype = dset.getDataType();
+  H5T_class_t aclass = dtype.getClass();
+  
+  if (aclass == H5T_INTEGER) {
+    
+    IntType intType = dset.getIntType();
+    H5T_order_t order = intType.getOrder();
+    H5T_sign_t sign = intType.getSign();
+    size_t tsize = intType.getSize();
+    
+    if (sign == H5T_SGN_NONE) {
+      
+      // unsigned
+      
+      if (tsize == 1) {
+        
+        vector<NcxxPort::ui08> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+        
+      } else if (tsize == 2) {
+        
+        vector<NcxxPort::ui16> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::ui16), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::ui16), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 4) {
+        
+        vector<NcxxPort::ui32> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::ui32), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::ui32), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 8) {
+
+        vector<NcxxPort::ui64> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::ui64), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::ui64), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+      }
+
+    } else {
+
+      // signed
+
+      if (tsize == 1) {
+
+        vector<NcxxPort::si08> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 2) {
+
+        vector<NcxxPort::si16> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::si16), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap16(ivals.data(), nPoints * sizeof(NcxxPort::si16), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 4) {
+
+        vector<NcxxPort::si32> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::si32), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap32(ivals.data(), nPoints * sizeof(NcxxPort::si32), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+
+      } else if (tsize == 8) {
+
+        vector<NcxxPort::si64> ivals;
+        ivals.resize(nPoints);
+        dset.read(ivals.data(), dtype);
+        if (ByteOrder::hostIsBigEndian()) {
+          if (order == H5T_ORDER_LE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::si64), true);
+          }
+        } else {
+          if (order == H5T_ORDER_BE) {
+            ByteOrder::swap64(ivals.data(), nPoints * sizeof(NcxxPort::si64), true);
+          }
+        }
+        for (int ii = 0; ii < nPoints; ii++) {
+          vals[ii] = ivals[ii];
+        }
+      }
+
+    }
+
+  } else if (aclass == H5T_FLOAT) {
+
+    FloatType flType = dset.getFloatType();
+    H5T_order_t order = flType.getOrder();
+    size_t tsize = flType.getSize();
+    
+    if (tsize == 4) {
+
+      vector<NcxxPort::fl32> fvals;
+      fvals.resize(nPoints);
+      dset.read(fvals.data(), dtype);
+      if (ByteOrder::hostIsBigEndian()) {
+        if (order == H5T_ORDER_LE) {
+          ByteOrder::swap32(fvals.data(), nPoints * sizeof(NcxxPort::fl32), true);
+        }
+      } else {
+        if (order == H5T_ORDER_BE) {
+          ByteOrder::swap32(fvals.data(), nPoints * sizeof(NcxxPort::fl32), true);
+        }
+      }
+      for (int ii = 0; ii < nPoints; ii++) {
+        vals[ii] = fvals[ii];
+      }
+
+    } else if (tsize == 8) {
+      
+      vector<NcxxPort::fl64> fvals;
+      fvals.resize(nPoints);
+      dset.read(fvals.data(), dtype);
+      if (ByteOrder::hostIsBigEndian()) {
+        if (order == H5T_ORDER_LE) {
+          ByteOrder::swap64(fvals.data(), nPoints * sizeof(NcxxPort::fl64), true);
+        }
+      } else {
+        if (order == H5T_ORDER_BE) {
+          ByteOrder::swap64(fvals.data(), nPoints * sizeof(NcxxPort::fl64), true);
+        }
+      }
+      for (int ii = 0; ii < nPoints; ii++) {
+        vals[ii] = fvals[ii];
+      }
+
+    }
+
+  } else {
+
+    return -1;
+
+  }
+  
+  return 0;
+
+}
+
 /////////////////////////////////////////
 // add a string attribute to an object
 // returns the attribute

@@ -115,16 +115,6 @@ public:
 
   // HDF5 access
   
-  int loadAttribute(H5Object &obj,
-                    const string &name,
-                    const string &context,
-                    DecodedAttr &decodedAttr);
-  
-  int loadArrayAttribute(H5Object &obj,
-                         const string &name,
-                         const string &context,
-                         ArrayAttr &arrayAttr);
-  
   int loadFloatVar(CompType compType,
                    char *buf,
                    const string &varName,
@@ -149,6 +139,44 @@ public:
                   NcxxPort::si64 &intVal,
                   NcxxPort::fl64 &floatVal,
                   string &stringVal);
+  
+  int loadAttribute(H5Object &obj,
+                    const string &name,
+                    const string &context,
+                    DecodedAttr &decodedAttr);
+  
+  int loadArrayAttribute(H5Object &obj,
+                         const string &name,
+                         const string &context,
+                         ArrayAttr &arrayAttr);
+  
+  ///////////////////////////////////////////////////////////////////
+  // Read data set into arrays of various types
+  // Fills in dims, msssingVal, vals, units (if available)
+  
+  int readSi32Array(DataSet &dset,
+                    const string &dsname,
+                    const string &context,
+                    vector<size_t> &dims,
+                    NcxxPort::si32 &missingVal,
+                    vector<NcxxPort::si32> &vals,
+                    string &units);
+  
+  int readFl32Array(DataSet &dset,
+                    const string &dsname,
+                    const string &context,
+                    vector<size_t> &dims,
+                    NcxxPort::fl32 &missingVal,
+                    vector<NcxxPort::fl32> &vals,
+                    string &units);
+  
+  int readFl64Array(DataSet &dset,
+                    const string &dsname,
+                    const string &context,
+                    vector<size_t> &dims,
+                    NcxxPort::fl64 &missingVal,
+                    vector<NcxxPort::fl64> &vals,
+                    string &units);
   
   /////////////////////////////////////////////////
   // add a string attribute to an object on write
