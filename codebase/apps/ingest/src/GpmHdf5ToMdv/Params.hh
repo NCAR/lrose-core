@@ -475,6 +475,10 @@ public:
 
   char* file_name_substr;
 
+  double min_z_km;
+
+  double delta_z_km;
+
   tdrp_bool_t remap_output_projection;
 
   tdrp_bool_t auto_remap_to_latlon;
@@ -583,7 +587,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[73];
+  mutable TDRPtable _table[76];
 
   const char *_className;
 

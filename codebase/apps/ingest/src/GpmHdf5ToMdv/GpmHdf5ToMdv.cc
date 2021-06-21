@@ -405,6 +405,10 @@ int GpmHdf5ToMdv::_readGroupNs(Group &ns)
     return -1;
   }
   
+  if (_readReflectivity(ns)) {
+    return -1;
+  }
+  
   return 0;
 
 #ifdef JUNK
@@ -650,23 +654,92 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
     cerr << "  lonDims[1]: " << lonDims[1] << endl;
     return -1;
   }
-  _nRows = latDims[0];
-  _nCols = latDims[1];
+  _nScans = latDims[0];
+  _nRays = latDims[1];
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Reading lat/lon <<====" << endl;
-    cerr << "nCols, nRows: " << _nCols << ", " << _nRows << endl;
-    for (int irow = 0; irow < _nRows; irow++) {
-      for (int icol = 0; icol < _nCols; icol++) {
-        int ipt = irow * _nCols + icol;
-        cerr << "irow, icol, ipt, lat, lon: "
-             << irow << ", "
-             << icol << ", "
+    cerr << "nScans, nRays: " << _nScans << ", " << _nRays << endl;
+    for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      for (size_t iray = 0; iray < _nRays; iray++) {
+        size_t ipt = iscan * _nRays + iray;
+        cerr << "iscan, iray, ipt, lat, lon: "
+             << iscan << ", "
+             << iray << ", "
              << ipt << ", "
              << lats[ipt] << ", "
              << lons[ipt] << endl;
-      } // icol
-    } // irow
+      } // iray
+    } // iscan
+  }
+  
+  return 0;
+
+}
+
+//////////////////////////////////////////////
+// read the refectivity
+
+int GpmHdf5ToMdv::_readReflectivity(Group &ns)
+  
+{
+  
+  Hdf5xx hdf5;
+
+  // read Latitude
+  
+  vector<NcxxPort::fl32> dbzVals;
+  NcxxPort::fl32 missingDbz;
+  vector<size_t> dbzDims;
+  string dbzUnits;
+
+  Group slv(ns.openGroup("SLV"));
+  if (hdf5.readFl32Array(slv, "zFactorCorrected", "NS/SLV",
+                         dbzDims, missingDbz, dbzVals, dbzUnits)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readReflectivity()" << endl;
+    cerr << "  Cannot read zFactorCorrected variable" << endl;
+    return -1;
+  }
+
+  // check dimensions for consistency
+  
+  if (dbzDims.size() != 3) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readReflectivity()" << endl;
+    cerr << "  zFactorCorrected must have 3 dimensions" << endl;
+    cerr << "  dbzDims.size(): " << dbzDims.size() << endl;
+    return -1;
+  }
+  if (dbzDims[0] != _nScans || dbzDims[1] != _nRays) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readReflectivity()" << endl;
+    cerr << "  DBZ dimensions must match nScans and nRays" << endl;
+    cerr << "  dbzDims[0]: " << dbzDims[0] << endl;
+    cerr << "  dbzDims[1]: " << dbzDims[1] << endl;
+    cerr << "  _nScans: " << _nScans << endl;
+    cerr << "  _nRays: " << _nRays << endl;
+    return -1;
+  }
+
+  _nGates = dbzDims[2];
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> Read DBZ <<====" << endl;
+    cerr << "nScans, nRays, nGates: " 
+         << _nScans << ", " << _nRays << ", " << _nGates << endl;
+    cerr << "missingDbz: " << missingDbz << endl;
+    for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      for (size_t iray = 0; iray < _nRays; iray++) {
+        for (size_t igate = 0; igate < _nGates; igate++) {
+          size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
+          if (dbzVals[ipt] != missingDbz) {
+            cerr << "iscan, iray, igate, dbz: "
+                 << iscan << ", "
+                 << iray << ", "
+                 << igate << ", "
+                 << dbzVals[ipt] << endl;
+          }
+        } // igate
+      } // iray
+    } // iscan
   }
   
   return 0;

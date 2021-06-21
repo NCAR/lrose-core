@@ -742,6 +742,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("Z dimension details");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'min_z_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_z_km");
+    tt->descr = tdrpStrDup("Height of lowest level (km)");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &min_z_km - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'delta_z_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("delta_z_km");
+    tt->descr = tdrpStrDup("Delta height between levels (km)");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &delta_z_km - &_start_;
+    tt->single_val.d = 0.125;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("REMAP PROJECTION/GRID ON OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1040,11 +1073,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT LOCATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1061,11 +1094,11 @@
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/from_netcdf");
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT ENCODING AND COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1122,11 +1155,11 @@
     tt->single_val.e = COMPRESSION_GZIP;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT METADATA STRINGS");
     tt->comment_text = tdrpStrDup("These will be used if the file does not contain suitable information.");
     tt++;
@@ -1340,11 +1373,11 @@
       tt->struct_vals[20].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("INPUT PROJECTION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1505,11 +1538,11 @@
     tt->single_val.d = 35786;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("RESAMPLE LAT/LON-based DATA ONTO REGULAR LATLON PROJECTION");
     tt->comment_text = tdrpStrDup("Sometimes data in the netcdf file has its extent described by lat/lon arrays, but the projection is not known exactly. In that case we have the option of resampling this type of data onto the output projection.");
     tt++;
@@ -1538,11 +1571,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("NETCDF dimensions");
     tt->comment_text = tdrpStrDup("Specify the names used in the netCDF file for dimensions, since they can vary depending on the application used to create the file.");
     tt++;
@@ -1595,11 +1628,11 @@
     tt->single_val.s = tdrpStrDup("altitude");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("NETCDF variables");
     tt->comment_text = tdrpStrDup("Specify the names used in the netCDF file for variables, since they can vary depending on the application used to create the file.");
     tt++;

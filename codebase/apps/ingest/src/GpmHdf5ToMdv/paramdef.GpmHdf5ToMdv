@@ -127,6 +127,20 @@ paramdef string {
 } file_name_substr;
 
 commentdef {
+  p_header = "Z dimension details";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Height of lowest level (km)";
+} min_z_km;
+
+paramdef double {
+  p_default = 0.125;
+  p_descr = "Delta height between levels (km)";
+} delta_z_km;
+
+commentdef {
   p_header = "REMAP PROJECTION/GRID ON OUTPUT";
 }
 

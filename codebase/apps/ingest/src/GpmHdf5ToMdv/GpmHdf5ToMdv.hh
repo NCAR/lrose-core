@@ -119,7 +119,7 @@ private:
   // data set members
 
   vector<DateTime> _times;
-  int _nCols, _nRows;
+  size_t _nScans, _nRays, _nGates;
 
   vector<NcxxPort::si32> _dataQuality, _dataWarning;
   vector<NcxxPort::si32> _geoError, _geoWarning;
@@ -169,6 +169,7 @@ private:
   int _readTimes(Group &ns);
   int _readLatLon(Group &ns);
   int _readQcFlags(Group &ns);
+  int _readReflectivity(Group &ns);
 
   // load up dimensions and variables
 
