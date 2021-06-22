@@ -32,7 +32,8 @@
 ///////////////////////////////////////////////////////////////
 //
 // GpmHdf5ToMdv reads GPM data in HDF5 format, and
-// converts to MDV
+// converts to MDV.
+// Originally based on NcGeneric2Mdv.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -46,8 +47,6 @@
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <Mdv/MdvxRemapLut.hh>
-#include <Ncxx/Nc3File.hh>
-#include <Ncxx/Nc3File.hh>
 #include <Ncxx/Hdf5xx.hh>
 #include "Args.hh"
 #include "Params.hh"
@@ -88,38 +87,15 @@ private:
   Params _params;
   DsInputPath *_input;
 
-  // NetCDF file
-
-  Nc3File *_ncFile;
-  Nc3Error *_ncErr;
-  
-  // NetCDF dimensions
-
-  Nc3Dim *_timeDim;
-  Nc3Dim *_zDim;
-  Nc3Dim *_yDim;
-  Nc3Dim *_xDim;
-
-  // NetCDF coordinate variables
-
-  Nc3Var *_baseTimeVar;
-  Nc3Var *_timeOffsetVar;
-  Nc3Var *_zVar;
-  Nc3Var *_yVar;
-  Nc3Var *_xVar;
-
-  TaArray<float> _zArray_, _yArray_, _xArray_;
-  float *_zArray, *_yArray, *_xArray;
-
-  // NetCDF attributes
-
-  string _source;
-  string _history;
-
   // data set members
 
   vector<DateTime> _times;
+  DateTime _startTime, _endTime;
   size_t _nScans, _nRays, _nGates;
+
+  string _fileHeader, _fileInfo;
+  string _inputRecord, _jaxaInfo;
+  string _navigationRecord, _history;
 
   vector<NcxxPort::si32> _dataQuality, _dataWarning;
   vector<NcxxPort::si32> _geoError, _geoWarning;
@@ -149,6 +125,9 @@ private:
   int _ixValidStart, _ixValidEnd;
   int _iyValidStart, _iyValidEnd;
 
+  TaArray<float> _zArray_, _yArray_, _xArray_;
+  float *_zArray, *_yArray, *_xArray;
+
   // hdf5 utilities
 
   Hdf5xx _utils;
@@ -158,17 +137,6 @@ private:
 
   int _processFile(const char *input_path);
   void _initInputProjection();
-
-  /// open netcdf file
-  /// create error object so we can handle errors
-  /// Returns 0 on success, -1 on failure
-
-  int _openNc3File(const string &path);
-
-  /// close netcdf file if open
-  /// remove error object if it exists
-  
-  void _closeNc3File();
 
   string _readStringAttribute(Group &group,
                               const string &attrName,
@@ -188,7 +156,7 @@ private:
 
   int _setMasterHeader(DsMdvx &mdvx, int itime);
   int _addDataFields(DsMdvx &mdvx, int itime);
-  int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime, bool xySwapped);
+  // int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime, bool xySwapped);
   
   MdvxField *_createMdvxField(const string &fieldName,
                               const string &longName,
@@ -203,9 +171,9 @@ private:
                                        const string &units,
                                        const float *vals);
 
-  void _printFile(Nc3File &ncf);
-  void _printAtt(Nc3Att *att);
-  void _printVarVals(Nc3Var *var);
+  // void _printFile(Nc3File &ncf);
+  // void _printAtt(Nc3Att *att);
+  // void _printVarVals(Nc3Var *var);
 
   void _correctForSunAngle(MdvxField *field);
 

@@ -212,26 +212,26 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
 
     // root attributes
 
-    string fileHeader = _readStringAttribute(root, "FileHeader", "RootAttr");
-    string fileInfo = _readStringAttribute(root, "FileInfo", "RootAttr");
-    string inputRecord = _readStringAttribute(root, "InputRecord", "RootAttr");
-    string jaxaInfo = _readStringAttribute(root, "JAXAInfo", "RootAttr");
-    string navigationRecord = _readStringAttribute(root, "NavigationRecord", "RootAttr");
-    string history = _readStringAttribute(root, "history", "RootAttr");
+    _fileHeader = _readStringAttribute(root, "FileHeader", "RootAttr");
+    _fileInfo = _readStringAttribute(root, "FileInfo", "RootAttr");
+    _inputRecord = _readStringAttribute(root, "InputRecord", "RootAttr");
+    _jaxaInfo = _readStringAttribute(root, "JAXAInfo", "RootAttr");
+    _navigationRecord = _readStringAttribute(root, "NavigationRecord", "RootAttr");
+    _history = _readStringAttribute(root, "history", "RootAttr");
     
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "FileHeader: " << endl << "===================" << endl
-           << fileHeader << "===================" << endl;
+           << _fileHeader << "===================" << endl;
       cerr << "FileInfo: " << endl << "===================" << endl
-           << fileInfo << "===================" << endl;
+           << _fileInfo << "===================" << endl;
       cerr << "InputRecord: " << endl << "===================" << endl
-           << inputRecord << "===================" << endl;
+           << _inputRecord << "===================" << endl;
       cerr << "JAXAInfo: " << endl << "===================" << endl
-           << jaxaInfo << "===================" << endl;
+           << _jaxaInfo << "===================" << endl;
       cerr << "NavigationRecord: " << endl << "===================" << endl
-           << navigationRecord << "===================" << endl;
+           << _navigationRecord << "===================" << endl;
       cerr << "history: " << endl << "===================" << endl
-           << history << "===================" << endl;
+           << _history << "===================" << endl;
     }
 
     // open the NS group
@@ -241,31 +241,6 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
       return -1;
     }
 
-    // set the number of sweeps
-
-    // if (_getNSweeps(root)) {
-    //   _addErrStr("ERROR - OdimHdf5RadxFile::readFromPath");
-    //   _addErrStr("  path: ", path);
-    //   return -1;
-    // }
-
-    // read the root how, what and where groups
-    
-    // if (_readRootSubGroups(root)) {
-    //   _addErrStr("ERROR - OdimHdf5RadxFile::readFromPath");
-    //   _addErrStr("  path: ", path);
-    //   return -1;
-    // }
-
-    // read the sweeps
-    
-    // for (int isweep = 0; isweep < _nSweeps; isweep++) {
-    //   if (_readSweep(root, isweep)) {
-    //     return -1;
-    //   }
-    //   _statusXml += _sweepStatusXml;
-    // }
-
   } // try
   
   catch (H5x::Exception &e) {
@@ -273,21 +248,6 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
     // _addErrStr(e.getDetailMsg());
     return -1;
   }
-
-  // finalize status xml
-
-  // _setStatusXml();
-  // _statusXml += RadxXml::writeEndTag("Status", 0);
-
-  // load the data into the read volume
-  
-  // if (_finalizeReadVolume()) {
-  //   return -1;
-  // }
-  
-  // set format as read
-
-  // _fileFormat = FILE_FORMAT_ODIM_HDF5;
 
 #ifdef JUNK
 
@@ -516,13 +476,23 @@ int GpmHdf5ToMdv::_readTimes(Group &ns)
                    hours[ii], mins[ii], secs[ii], msecs[ii] / 1000.0);
     _times.push_back(dtime);
   }
+  if (_times.size() < 1) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
+    cerr << "  No scan times found" << endl;
+    return -1;
+  }
+  
+  _startTime = _times[0];
+  _endTime = _times[_times.size()-1];
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Reading scan times <<====" << endl;
     cerr << "nTimes: " << _times.size() << endl;
-    for (size_t ii = 0; ii < _times.size(); ii++) {
-      cerr << "  ii, time: " << ii << ", " << _times[ii].asString(3) << endl;
-    }
+    cerr << "startTime: " << _startTime.asString(3) << endl;
+    cerr << "endTime: " << _endTime.asString(3) << endl;
+    // for (size_t ii = 0; ii < _times.size(); ii++) {
+    //   cerr << "  ii, time: " << ii << ", " << _times[ii].asString(3) << endl;
+    // }
   }
   
   return 0;
@@ -655,6 +625,8 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Reading lat/lon <<====" << endl;
+    cerr << "missingLat: " << _missingLat << endl;
+    cerr << "missingLon: " << _missingLon << endl;
     cerr << "nScans, nRays: " << _nScans << ", " << _nRays << endl;
     for (size_t iscan = 0; iscan < _nScans; iscan++) {
       for (size_t iray = 0; iray < _nRays; iray++) {
@@ -803,361 +775,6 @@ void GpmHdf5ToMdv::_initInputProjection()
 
 }
 
-//////////////////////////////////////
-// open netcdf file
-//
-// Returns 0 on success, -1 on failure
-
-int GpmHdf5ToMdv::_openNc3File(const string &path)
-  
-{
-  
-  if (_ncFile) {
-    _ncFile->close();
-    delete _ncFile;
-  }
-
-  _ncFile = new Nc3File(path.c_str(), Nc3File::ReadOnly);
-
-  // Check that constructor succeeded
-
-  if (!_ncFile->is_valid()) {
-    cerr << "ERROR - GpmHdf5ToMdv::_openNc3File" << endl;
-    cerr << "  Opening file, path: " << path << endl;
-    return 1;
-  }
-  
-  // Change the error behavior of the netCDF C++ API by creating an
-  // Nc3Error object. Until it is destroyed, this Nc3Error object will
-  // ensure that the netCDF C++ API silently returns error codes
-  // on any failure, and leaves any other error handling to the
-  // calling program.
-  
-  _ncErr = new Nc3Error(Nc3Error::silent_nonfatal);
-
-  if (_params.debug) {
-    cerr << "Opened input file: " << path << endl;
-  }
- 
-  return 0;
-
-
-}
-
-//////////////////////////////////////
-// close netcdf file if open
-// remove error object if it exists
-
-void GpmHdf5ToMdv::_closeNc3File()
-  
-{
-  
-  // close file if open, delete ncFile
-  
-  if (_ncFile) {
-    _ncFile->close();
-    delete _ncFile;
-    _ncFile = NULL;
-  }
-
-  if (_ncErr) {
-    delete _ncErr;
-    _ncErr = NULL;
-  }
-
-}
-
-//////////////////////////////////
-// Check that this is a valid file
-//
-// Returns 0 on success, -1 on failure
-
-int GpmHdf5ToMdv::_loadMetaData()
-
-{
-
-  // dimensions
-
-  _timeDim = _ncFile->get_dim(_params.netcdf_dim_time);
-  if (_timeDim == NULL) {
-    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-    cerr << "  time dimension missing: " << _params.netcdf_dim_time << endl;
-    return -1;
-  }
-  _nTimes = _timeDim->size();
-
-  if (strcmp(_params.netcdf_dim_z, "none") == 0) {
-    _zDim = NULL;
-    _nz = 1;
-  } else {
-    _zDim = _ncFile->get_dim(_params.netcdf_dim_z);
-    if (_zDim == NULL) {
-      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-      cerr << "  Z dimension missing: " << _params.netcdf_dim_z << endl;
-      return -1;
-    }
-    _nz = _zDim->size();
-  }
-  
-  _yDim = _ncFile->get_dim(_params.netcdf_dim_y);
-  if (_yDim == NULL) {
-    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-    cerr << "  Y dimension missing: " << _params.netcdf_dim_y << endl;
-    return -1;
-  }
-  _ny = _yDim->size();
-  
-  _xDim = _ncFile->get_dim(_params.netcdf_dim_x);
-  if (_xDim == NULL) {
-    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-    cerr << "  Z dimension missing: " << _params.netcdf_dim_x << endl;
-    return -1;
-  }
-  _nx = _xDim->size();
-
-  // variables
-  
-  if (strcmp(_params.netcdf_var_base_time, "none") == 0) {
-    _baseTimeVar = NULL;
-  } else {
-    _baseTimeVar = _ncFile->get_var(_params.netcdf_var_base_time);
-    if (_baseTimeVar == NULL) {
-      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-      cerr << "  base time var variable missing: " << _params.netcdf_var_base_time << endl;
-      return -1;
-    }
-  }
-  
-  _timeOffsetVar = _ncFile->get_var(_params.netcdf_var_time_offset);
-  if (_timeOffsetVar == NULL) {
-    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-    cerr << "  time offset variable missing: " << _params.netcdf_var_time_offset << endl;
-    return -1;
-  }
-
-  if (_zDim == NULL) {
-    _zVar = NULL;
-  } else {
-    _zVar = _ncFile->get_var(_params.netcdf_var_z);
-    if (_zVar == NULL) {
-      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-      cerr << "  z variable missing: " << _params.netcdf_var_z << endl;
-    return -1;
-    }
-  }
-
-  _yVar = _ncFile->get_var(_params.netcdf_var_y);
-  if (_yVar == NULL) {
-    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-    cerr << "  y variable missing: " << _params.netcdf_var_y << endl;
-    return -1;
-  }
-
-  _xVar = _ncFile->get_var(_params.netcdf_var_x);
-  if (_xVar == NULL) {
-    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-    cerr << "  x variable missing: " << _params.netcdf_var_x << endl;
-    return -1;
-  }
-
-  // Z coord values
-
-  _zArray = (float *) _zArray_.alloc(_nz);
-  if (_zVar == NULL) {
-    
-    _zArray[0] = 0.0;
-    
-  } else {
-    
-    if (_zVar->get(_zArray, _nz) == 0) {
-      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-      cerr << "  Cannot get z coords from var: " << _params.netcdf_var_z << endl;
-      return -1;
-    }
-  
-    // convert to km
-    
-    double zScale = 1.0;
-    Nc3Att *zUnits = _zVar->get_att("units");
-    if (zUnits != NULL) {
-      string units = zUnits->as_string(0);
-      if (units == "m" || units == "meters") {
-        zScale = 0.001;
-      }
-      delete zUnits;
-    }
-    if (zScale != 1.0) {
-      for (int ii = 0; ii < _zDim->size(); ii++) {
-        _zArray[ii] *= zScale;
-      }
-    }
-
-  }
-
-  // Y coord values
-
-  _yArray = (float *) _yArray_.alloc(_yDim->size());
-  if (_yVar->get(_yArray, _yDim->size()) == 0) {
-    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-    cerr << "  Cannot get y coords from var: " << _params.netcdf_var_y << endl;
-    return -1;
-  }
-
-  // convert to km
-
-  double yScale = 1.0;
-  Nc3Att *yUnits = _yVar->get_att("units");
-  if (yUnits != NULL) {
-    string units = yUnits->as_string(0);
-    if (units == "m" || units == "meters") {
-      yScale = 0.001;
-    }
-    delete yUnits;
-  }
-  if (yScale != 1.0) {
-    for (int ii = 0; ii < _yDim->size(); ii++) {
-      _yArray[ii] *= yScale;
-    }
-  }
-
-  // X coord values
-
-  _xArray = (float *) _xArray_.alloc(_xDim->size());
-  if (_xVar->get(_xArray, _xDim->size()) == 0) {
-    cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-    cerr << "  Cannot get x coords from var: " << _params.netcdf_var_x << endl;
-    return -1;
-  }
-
-  // convert to km
-
-  double xScale = 1.0;
-  Nc3Att *xUnits = _xVar->get_att("units");
-  if (xUnits != NULL) {
-    string units = xUnits->as_string(0);
-    if (units == "m" || units == "meters") {
-      xScale = 0.001;
-    }
-    delete xUnits;
-  }
-  if (xScale != 1.0) {
-    for (int ii = 0; ii < _xDim->size(); ii++) {
-      _xArray[ii] *= xScale;
-    }
-  }
-  
-  // attributes
-  
-  Nc3Att *source = _ncFile->get_att("source");
-  if (source != NULL) {
-    _source = source->as_string(0);
-    delete source;
-  } else {
-    _source = _params.data_set_source;
-  }
-
-  // data set info
-
-  Nc3Att *history = _ncFile->get_att("history");
-  if (history != NULL) {
-    _history = history->as_string(0);
-    delete history;
-  } else {
-    _history = _params.data_set_info;
-  }
-
-  // reverse the Y array?
-
-  _yIsReversed = false;
-  if (_ny >= 2) {
-    int midNy = _ny / 2;
-    double dyOrig = (_yArray[midNy+1] - _yArray[midNy]);
-    if (dyOrig < 0) {
-      _yIsReversed = true;
-    }
-  }
-
-  if (_yIsReversed) {
-    TaArray<float> tmpArray_;
-    float *tmpArray = tmpArray_.alloc(_ny);
-    memcpy(tmpArray, _yArray, _ny * sizeof(float));
-    for (int ii = 0, jj = _ny - 1; ii < _ny; ii++, jj--) {
-      _yArray[ii] = tmpArray[jj];
-    }
-  }
-
-  // set up geometry, for now assuming constant dx and dy
-
-  _minz = _zArray[0];
-  _miny = _yArray[0];
-  _minx = _xArray[0];
-
-  _maxz = _zArray[_nz-1];
-  _maxy = _yArray[_ny-1];
-  _maxx = _xArray[_nx-1];
-
-  if (_nz < 2) {
-    _dz = 1.0;
-  } else {
-    _dz = (_zArray[_nz - 1] - _zArray[0]) / (_nz - 1.0);
-  }
-  
-  if (_ny < 2) {
-    _dy = 1.0;
-  } else {
-    _dy = (_yArray[_ny - 1] - _yArray[0]) / (_ny - 1.0);
-  }
-  
-  if (_nx < 2) {
-    _dx = 1.0;
-  } else {
-    _dx = (_xArray[_nx - 1] - _xArray[0]) / (_nx - 1.0);
-  }
-
-  _nxValid = _nx;
-  _nyValid = _ny;
-  _ixValidStart = 0;
-  _ixValidEnd = _nx - 1;
-  _iyValidStart = 0;
-  _iyValidEnd = _ny - 1;
-
-  // check we have a constant deltax and y
-
-  _dxIsConstant = _checkDxIsConstant();
-  _dyIsConstant = _checkDyIsConstant();
-  
-  // for file with latlon coords, find the valid end indices for the lat/lon coords
-  
-  if (_params.input_xy_is_latlon) {
-    if (_findValidLatLonLimits()) {
-      cerr << "ERROR - GpmHdf5ToMdv::_loadMetaData" << endl;
-      cerr << "  Bad lat/lon values, cannot process" << endl;
-      return -1;
-    }
-  }
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Input geometry:" << endl;
-    cerr << "  nz: " << _nz << endl;
-    cerr << "  ny: " << _ny << endl;
-    cerr << "  nx: " << _nx << endl;
-    cerr << "  minz: " << _minz << endl;
-    cerr << "  miny: " << _miny << endl;
-    cerr << "  minx: " << _minx << endl;
-    cerr << "  dz: " << _dz << endl;
-    cerr << "  dy: " << _dy << endl;
-    cerr << "  yIsReversed: " << _yIsReversed << endl;
-    cerr << "  dx: " << _dx << endl;
-    cerr << "  dxIsConstant: " << (_dxIsConstant?"Y":"N") << endl;
-    cerr << "  dyIsConstant: " << (_dyIsConstant?"Y":"N") << endl;
-  }
-  
-  _initInputProjection();
-
-  return 0;
-
-}
-
 /////////////////////////////////////////////////
 // Set the master header from the NCF file
 //
@@ -1171,48 +788,13 @@ int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx, int itime)
 
   // time
 
-  time_t baseTimeUtc = 0;
-  if (_baseTimeVar) {
-    baseTimeUtc = _baseTimeVar->as_int(0);
-  } else {
-    DateTime btime(_params.base_time_string);
-    baseTimeUtc = btime.utime();
-  }
-
-  // check time units
-  
-  double offsetMult = 1.0; // secs
-  Nc3Att *timeUnits = _timeOffsetVar->get_att("units");
-  if (timeUnits != NULL) {
-    string unitsStr = timeUnits->as_string(0);
-    if (unitsStr.find("day") != string::npos) {
-      offsetMult = 86400.0;
-    } else if (unitsStr.find("hour") != string::npos) {
-      offsetMult = 3600.0;
-    } else if (unitsStr.find("min") != string::npos) {
-      offsetMult = 60.0;
-    }
-    DateTime refTime;
-    if (refTime.setFromW3c(unitsStr.c_str()) == 0) {
-      baseTimeUtc = refTime.utime();
-    }
-    delete timeUnits;
-  }
-  
-  double timeOffsetSecs = 0;
-  if (offsetMult == 1.0) {
-    timeOffsetSecs = _timeOffsetVar->as_double(itime);
-  } else {
-    double timeOffsetDays = _timeOffsetVar->as_double(itime);
-    timeOffsetSecs = timeOffsetDays * offsetMult;
-  }
-  _validTime = baseTimeUtc + (time_t) (timeOffsetSecs + 0.5);
-  mdvx.setValidTime(_validTime);
-
   if (_params.debug) {
     cerr << "===========================================" << endl;
-    cerr << "Found data set at time: " << DateTime::strm(_validTime) << endl;
+    cerr << "Found data set at start time: " << _startTime.asString(3) << endl;
   }
+
+  mdvx.setBeginTime(_startTime.utime());
+  mdvx.setEndTime(_endTime.utime());
   
   // data collection type
   
@@ -1221,7 +803,7 @@ int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx, int itime)
   // data set name, source and info
 
   mdvx.setDataSetName(_params.data_set_name);
-  mdvx.setDataSetSource(_source.c_str());
+  mdvx.setDataSetSource("NASA-GPM");
   mdvx.setDataSetInfo(_history.c_str());
 
   return 0;
@@ -1236,6 +818,8 @@ int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx, int itime)
 int GpmHdf5ToMdv::_addDataFields(DsMdvx &mdvx, int itime)
 
 {
+
+#ifdef JUNK
   
   for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
 
@@ -1283,6 +867,8 @@ int GpmHdf5ToMdv::_addDataFields(DsMdvx &mdvx, int itime)
     _addDataField(var, mdvx, itime, xySwapped);
 
   } // ivar
+
+#endif
   
   return 0;
 
@@ -1293,8 +879,10 @@ int GpmHdf5ToMdv::_addDataFields(DsMdvx &mdvx, int itime)
 //
 // Returns 0 on success, -1 on failure
 
+#ifdef JUNK
+
 int GpmHdf5ToMdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
-                                 int itime, bool xySwapped)
+                                int itime, bool xySwapped)
 
 {
 
@@ -1576,7 +1164,6 @@ int GpmHdf5ToMdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 
   // swap (x,y) if required
 
-#ifdef JUNK
   if (xySwapped) {
 
     TaArray<float> tmpVals_;
@@ -1597,7 +1184,6 @@ int GpmHdf5ToMdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
     } // iz
     
   } // if (xySwapped) 
-#endif
 
   // reverse y order if it was in reverse order in the file
 
@@ -1667,6 +1253,8 @@ int GpmHdf5ToMdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
   return 0;
 
 }
+
+#endif
 
 ///////////////////////////////
 // Create an Mdvx field
@@ -1907,746 +1495,6 @@ MdvxField *GpmHdf5ToMdv::_createRegularLatlonField
 
 }
   
-///////////////////////////////
-// print data in file
-
-void GpmHdf5ToMdv::_printFile(Nc3File &ncf)
-
-{
-
-  cout << "ndims: " << ncf.num_dims() << endl;
-  cout << "nvars: " << ncf.num_vars() << endl;
-  cout << "ngatts: " << ncf.num_atts() << endl;
-  Nc3Dim *unlimd = ncf.rec_dim();
-  if (unlimd != NULL) {
-    cout << "unlimd: " << unlimd->size() << endl;
-  }
-  
-  // dimensions
-
-  TaArray<Nc3Dim *> dims_;
-  Nc3Dim **dims = dims_.alloc(ncf.num_dims());
-  for (int idim = 0; idim < ncf.num_dims(); idim++) {
-    dims[idim] = ncf.get_dim(idim);
-
-    cout << endl;
-    cout << "Dim #: " << idim << endl;
-    cout << "  Name: " << dims[idim]->name() << endl;
-    cout << "  Length: " << dims[idim]->size() << endl;
-    cout << "  Is valid: " << dims[idim]->is_valid() << endl;
-    cout << "  Is unlimited: " << dims[idim]->is_unlimited() << endl;
-    
-  } // idim
-  
-  cout << endl;
-
-  // global attributes
-
-  cout << "Global attributes:" << endl;
-
-  for (int iatt = 0; iatt < ncf.num_atts(); iatt++) {
-    cout << "  Att num: " << iatt << endl;
-    Nc3Att *att = ncf.get_att(iatt);
-    _printAtt(att);
-    delete att;
-  }
-
-  // loop through variables
-
-  TaArray<Nc3Var *> vars_;
-  Nc3Var **vars = vars_.alloc(ncf.num_vars());
-  for (int ivar = 0; ivar < ncf.num_vars(); ivar++) {
-
-    vars[ivar] = ncf.get_var(ivar);
-    cout << endl;
-    cout << "Var #: " << ivar << endl;
-    cout << "  Name: " << vars[ivar]->name() << endl;
-    cout << "  Is valid: " << vars[ivar]->is_valid() << endl;
-    cout << "  N dims: " << vars[ivar]->num_dims();
-    TaArray<Nc3Dim *> vdims_;
-    Nc3Dim **vdims = vdims_.alloc(vars[ivar]->num_dims());
-    if (vars[ivar]->num_dims() > 0) {
-      cout << ": (";
-      for (int ii = 0; ii < vars[ivar]->num_dims(); ii++) {
-	vdims[ii] = vars[ivar]->get_dim(ii);
-	cout << " " << vdims[ii]->name();
-	if (ii != vars[ivar]->num_dims() - 1) {
-	  cout << ", ";
-	}
-      }
-      cout << " )";
-    }
-    cout << endl;
-    cout << "  N atts: " << vars[ivar]->num_atts() << endl;
-    
-    for (int iatt = 0; iatt < vars[ivar]->num_atts(); iatt++) {
-
-      cout << "  Att num: " << iatt << endl;
-      Nc3Att *att = vars[ivar]->get_att(iatt);
-      _printAtt(att);
-      delete att;
-
-    } // iatt
-
-    cout << endl;
-    _printVarVals(vars[ivar]);
-    
-  } // ivar
-  
-}
-
-/////////////////////
-// print an attribute
-
-void GpmHdf5ToMdv::_printAtt(Nc3Att *att)
-
-{
-
-  cout << "    Name: " << att->name() << endl;
-  cout << "    Num vals: " << att->num_vals() << endl;
-  cout << "    Type: ";
-  
-  Nc3Values *values = att->values();
-
-  switch(att->type()) {
-    
-  case nc3NoType: {
-    cout << "No type: ";
-  }
-  break;
-  
-  case nc3Byte: {
-    cout << "BYTE: ";
-    unsigned char *vals = (unsigned char *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-  
-  case nc3Char: {
-    cout << "CHAR: ";
-    TaArray<char> vals_;
-    char *vals = vals_.alloc(att->num_vals() + 1);
-    memset(vals, 0, att->num_vals() + 1);
-    memcpy(vals, values->base(), att->num_vals());
-    cout << vals;
-  }
-  break;
-  
-  case nc3Short: {
-    cout << "SHORT: ";
-    short *vals = (short *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-  
-  case nc3Int: {
-    cout << "INT: ";
-    int *vals = (int *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-  
-  case nc3Float: {
-    cout << "FLOAT: ";
-    float *vals = (float *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-  
-  case nc3Double: {
-    cout << "DOUBLE: ";
-    double *vals = (double *) values->base();
-    for (long ii = 0; ii < att->num_vals(); ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-
-    default: {}
-  
-  }
-  
-  cout << endl;
-
-  delete values;
-
-}
-
-    
-///////////////////////////////
-// print variable values
-
-void GpmHdf5ToMdv::_printVarVals(Nc3Var *var)
-
-{
-
-  int nprint = var->num_vals();
-  if (nprint > 100) {
-    nprint = 100;
-  }
-
-  Nc3Values *values = var->values();
-
-  cout << "  Variable vals:";
-  
-  switch(var->type()) {
-    
-  case nc3NoType: {
-  }
-  break;
-  
-  case nc3Byte: {
-    cout << "(byte)";
-    unsigned char *vals = (unsigned char *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-  
-  case nc3Char: {
-    cout << "(char)";
-    TaArray<char> str_;
-    char *str = str_.alloc(nprint + 1);
-    memset(str, 0, nprint + 1);
-    memcpy(str, values->base(), nprint);
-    cout << " " << str;
-  }
-  break;
-  
-  case nc3Short: {
-    cout << "(short)";
-    short *vals = (short *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-  
-  case nc3Int: {
-    cout << "(int)";
-    int *vals = (int *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-  
-  case nc3Float: {
-    cout << "(float)";
-    float *vals = (float *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-  
-  case nc3Double: {
-    cout << "(double)";
-    double *vals = (double *) values->base();
-    for (long ii = 0; ii < nprint; ii++) {
-      cout << " " << vals[ii];
-    }
-  }
-  break;
-
-    default: {}
-  
-  }
-  
-  cout << endl;
-
-  delete values;
-
-}
-
-////////////////////////////////////////////
-// correct a field for sun angle
-
-void GpmHdf5ToMdv::_correctForSunAngle(MdvxField *field)
-
-{
-
-  if (_params.debug) {
-    cerr << "Correcting field for sun angle: " << field->getFieldName() << endl;
-  }
-
-  Mdvx::field_header_t fhdr = field->getFieldHeader();
-  Mdvx::encoding_type_t encoding = (Mdvx::encoding_type_t) fhdr.encoding_type;
-  Mdvx::compression_type_t compression = (Mdvx::compression_type_t) fhdr.compression_type;
-
-  if (fhdr.nz != 1) {
-    cerr << "GpmHdf5ToMdv::_correctForSunAngle()" << endl;
-    cerr << "  Field name: " << field->getFieldName() << endl;
-    cerr << "  Is not a 2D field, nz: " << fhdr.nz << endl;
-    cerr << "  Sun angle correction will not be applied" << endl;
-    return;
-  }
-
-  // convert to uncompressed floats
-
-  field->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
-
-  // get the projection object
-
-  MdvxProj proj(fhdr);
-
-  // get the data
-
-  fl32 *data = (fl32 *) field->getVol();
-
-  // correct for each location
-
-  double minVal = 0.0;
-  double maxVal = 1.0;
-  // double minVal = _params.corrected_field_min_value;
-  // double maxVal = _params.corrected_field_max_value;
-
-  int pos = 0;
-  for (int iy = 0; iy < fhdr.ny; iy++) {
-    for (int ix = 0; ix < fhdr.nx; ix++, pos++) {
-      fl32 val = data[pos];
-      if (val != fhdr.missing_data_value) {
-        // not missing
-        double lat, lon;
-        proj.xyIndex2latlon(ix, iy, lat, lon);
-        // double sinAlt = _sunAngle.computeSinAlt(lat, lon);
-        double sinAlt = 1.0;
-        double correctedVal = val / sinAlt;
-        if (correctedVal < minVal) {
-          correctedVal = minVal;
-        } else if (correctedVal > maxVal) {
-          correctedVal = maxVal;
-        }
-        data[pos] = correctedVal;
-      }
-    } // ix
-  } // iy
-
-
-  // convert back to original encoding and compression
-
-  field->convertType(encoding, compression);
-
-}
-
-////////////////////////////////////////////
-// remap output data
-
-void GpmHdf5ToMdv::_remapOutput(DsMdvx &mdvx)
-
-{
-
-  if (!_params.remap_output_projection) {
-    return;
-  }
-
-  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
-    
-    MdvxField *field = mdvx.getField(ifld);
-    
-    if (field == NULL) {
-      cerr << "ERROR - MdvxConvert::_remap" << endl;
-      cerr << "  Error remapping field #" << ifld <<
-	" in output file" << endl;
-      return;
-    }
-    
-    if (_params.remap_projection == Params::PROJ_LATLON) {
-      field->remap2Latlon(_remapLut,
-			  _params.remap_grid.nx,
-			  _params.remap_grid.ny,
-			  _params.remap_grid.minx,
-			  _params.remap_grid.miny,
-			  _params.remap_grid.dx,
-			  _params.remap_grid.dy);
-    } else if (_params.remap_projection == Params::PROJ_FLAT) {
-      field->remap2Flat(_remapLut,
-			_params.remap_grid.nx,
-			_params.remap_grid.ny,
-			_params.remap_grid.minx,
-			_params.remap_grid.miny,
-			_params.remap_grid.dx,
-			_params.remap_grid.dy,
-			_params.remap_origin_lat,
-			_params.remap_origin_lon,
-			_params.remap_rotation,
-                        _params.remap_false_northing,
-                        _params.remap_false_easting);
-    } else if (_params.remap_projection == Params::PROJ_LAMBERT_CONF)	{
-      field->remap2LambertConf(_remapLut,
-			       _params.remap_grid.nx,
-			       _params.remap_grid.ny,
-			       _params.remap_grid.minx,
-			       _params.remap_grid.miny,
-			       _params.remap_grid.dx,
-			       _params.remap_grid.dy,
-			       _params.remap_origin_lat,
-			       _params.remap_origin_lon,
-			       _params.remap_lat1,
-			       _params.remap_lat2,
-                               _params.remap_false_northing,
-                               _params.remap_false_easting);
-    } else if (_params.remap_projection == Params::PROJ_POLAR_STEREO) {
-      Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH;
-      if (!_params.remap_pole_is_north) {
-	poleType = Mdvx::POLE_SOUTH;
-      }
-      field->remap2PolarStereo(_remapLut,
-			       _params.remap_grid.nx,
-			       _params.remap_grid.ny,
-			       _params.remap_grid.minx,
-			       _params.remap_grid.miny,
-			       _params.remap_grid.dx,
-			       _params.remap_grid.dy,
-			       _params.remap_origin_lat,
-			       _params.remap_origin_lon,
-			       _params.remap_tangent_lon,
-			       poleType,
-			       _params.remap_central_scale,
-                               _params.remap_false_northing,
-                               _params.remap_false_easting);
-    } else if (_params.remap_projection == Params::PROJ_OBLIQUE_STEREO) {
-      field->remap2ObliqueStereo(_remapLut,
-				 _params.remap_grid.nx,
-				 _params.remap_grid.ny,
-				 _params.remap_grid.minx,
-				 _params.remap_grid.miny,
-				 _params.remap_grid.dx,
-				 _params.remap_grid.dy,
-				 _params.remap_origin_lat,
-				 _params.remap_origin_lon,
-				 _params.remap_tangent_lat,
-				 _params.remap_tangent_lon,
-                                 _params.remap_false_northing,
-                                 _params.remap_false_easting);
-    } else if (_params.remap_projection == Params::PROJ_MERCATOR) {
-      field->remap2Mercator(_remapLut,
-			    _params.remap_grid.nx,
-			    _params.remap_grid.ny,
-			    _params.remap_grid.minx,
-			    _params.remap_grid.miny,
-			    _params.remap_grid.dx,
-			    _params.remap_grid.dy,
-			    _params.remap_origin_lat,
-			    _params.remap_origin_lon,
-                            _params.remap_false_northing,
-                            _params.remap_false_easting);
-    } else if (_params.remap_projection == Params::PROJ_TRANS_MERCATOR) {
-      field->remap2TransverseMercator(_remapLut,
-				      _params.remap_grid.nx,
-				      _params.remap_grid.ny,
-				      _params.remap_grid.minx,
-				      _params.remap_grid.miny,
-				      _params.remap_grid.dx,
-				      _params.remap_grid.dy,
-				      _params.remap_origin_lat,
-				      _params.remap_origin_lon,
-				      _params.remap_central_scale,
-                                      _params.remap_false_northing,
-                                      _params.remap_false_easting);
-    } else if (_params.remap_projection == Params::PROJ_ALBERS) {
-      field->remap2Albers(_remapLut,
-			  _params.remap_grid.nx,
-			  _params.remap_grid.ny,
-			  _params.remap_grid.minx,
-			  _params.remap_grid.miny,
-			  _params.remap_grid.dx,
-			  _params.remap_grid.dy,
-			  _params.remap_origin_lat,
-			  _params.remap_origin_lon,
-			  _params.remap_lat1,
-			  _params.remap_lat2,
-                          _params.remap_false_northing,
-                          _params.remap_false_easting);
-    } else if (_params.remap_projection == Params::PROJ_LAMBERT_AZIM) {
-      field->remap2LambertAzimuthal(_remapLut,
-				    _params.remap_grid.nx,
-				    _params.remap_grid.ny,
-				    _params.remap_grid.minx,
-				    _params.remap_grid.miny,
-				    _params.remap_grid.dx,
-				    _params.remap_grid.dy,
-				    _params.remap_origin_lat,
-				    _params.remap_origin_lon,
-                                    _params.remap_false_northing,
-                                    _params.remap_false_easting);
-    } else if (_params.remap_projection == Params::PROJ_VERT_PERSP) {
-      field->remap2VertPersp(_remapLut,
-                             _params.remap_grid.nx,
-                             _params.remap_grid.ny,
-                             _params.remap_grid.minx,
-                             _params.remap_grid.miny,
-                             _params.remap_grid.dx,
-                             _params.remap_grid.dy,
-                             _params.remap_origin_lat,
-                             _params.remap_origin_lon,
-                             _params.remap_persp_radius,
-                             _params.remap_false_northing,
-                             _params.remap_false_easting);
-     }
-  }
-  
-}
-
-////////////////////////////////////////////
-// auto remap to latlon grid
-//
-// Automatically picks the grid resolution and extent
-// from the existing data.
-
-void GpmHdf5ToMdv::_autoRemapToLatLon(DsMdvx &mdvx)
-
-{
-  
-  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
-    
-    MdvxField *field = mdvx.getField(ifld);
-    
-    if (field == NULL) {
-      cerr << "ERROR - GpmHdf5ToMdv::_autoRemapToLatLon()" << endl;
-      cerr << "  Error remapping field #" << ifld <<
-	" in output file" << endl;
-      return;
-    }
-    
-    field->autoRemap2Latlon(_remapLut);
-  }
-  
-}
-
-///////////////////////////////////////////
-// Check if dx is constant
-
-bool GpmHdf5ToMdv::_checkDxIsConstant()
-
-{
-
-  if (_nx < 3) {
-    return true;
-  }
-
-  for (int ix = 0; ix < _nx - 1; ix++) {
-    double dx = _xArray[ix+1] - _xArray[ix];
-    double diff = fabs(dx - _dx);
-    double diffFraction = diff / fabs(_dx);
-    if (diffFraction > 0.001) {
-      return false;
-    }
-  }
-
-  return true;
-
-}
-
-////////////////////////////////////////////
-// Check if dy is constant
-
-bool GpmHdf5ToMdv::_checkDyIsConstant()
-
-{
-
-  if (_ny < 3) {
-    return true;
-  }
-
-  for (int iy = 0; iy < _ny - 1; iy++) {
-    double dy = _yArray[iy+1] - _yArray[iy];
-    double diff = fabs(dy - _dy);
-    double diffFraction = diff / fabs(_dy);
-    if (diffFraction > 0.001) {
-      return false;
-    }
-  }
-  
-  return true;
-
-}
-
-//////////////////////////////////////////////////////////////////////////
-// Initialize the mercator projection from the input file coord variables
-
-void GpmHdf5ToMdv::_initMercatorFromInputCoords()
-
-{
-
-  // sanity check
-
-  if (_nx < 5 || _ny < 5) {
-    cerr << "WARNING - GpmHdf5ToMdv::_initMercatorFromInputCoords()" << endl;
-    cerr << "  Grid too small to deduce Mercator properties accurately" << endl;
-    cerr << "  nx: " << _nx << endl;
-    cerr << "  ny: " << _ny << endl;
-    return;
-  }
-
-  // find mid pt
-
-  int midIx = _nx / 2;
-  int midIy = _ny / 2;
-
-  // set origin
-
-  double originLon = _xArray[midIx];
-  double originLat = _yArray[midIy];
-
-  if (_params.debug) {
-    cerr << "Setting Mercator from input data" << endl;
-    cerr << "  Origin lon: " << originLon << endl;
-    cerr << "  Origin lat: " << originLat << endl;
-  }
-
-  _inputProj.initMercator(originLat, originLon);
-
-}
-
-//////////////////////////////////////////////////////////////////////////
-// FInd the limits of valid lat/lon values if the x,y locations are
-// supplied in latitude/longitude coords
-//
-// Returns 0 on success, -1 on failure
-
-int GpmHdf5ToMdv::_findValidLatLonLimits()
-
-{
-  
-  // sanity check
-
-  if (_nx < 5 || _ny < 5) {
-    cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
-    cerr << "  Grid too small to deduce limits accurately" << endl;
-    cerr << "  nx: " << _nx << endl;
-    cerr << "  ny: " << _ny << endl;
-    _ixValidStart = 0;
-    _ixValidEnd = _nx - 1;
-    _iyValidStart = 0;
-    _iyValidEnd = _ny - 1;
-    return -1;
-  }
-  
-  // find mid pt
-
-  int midIx = _nx / 2;
-  int midIy = _ny / 2;
-
-  // set origin
-
-  double centerLon = _xArray[midIx];
-  double centerLat = _yArray[midIy];
-
-  if (_params.debug) {
-    cerr << "DEBUG - findValidLatLonLimits()" << endl;
-    cerr << "  data center lon: " << centerLon << endl;
-    cerr << "  data center lat: " << centerLat << endl;
-  }
-
-  // get starting deltas at center of grid
-
-  double dLon0 =  fabs(_xArray[midIx+1] - _xArray[midIx-1]) / 2.0;
-  double dLat0 =  fabs(_yArray[midIy+1] - _yArray[midIy-1]) / 2.0;
-
-  // move out from the grid center, looking for big jumps in the delta
-  // and stop there
-
-  _ixValidStart = 0;
-  double dLonPrev = dLon0;
-  for (int ix = midIx; ix > 0; ix--) {
-    double lon0 =  _xArray[ix];
-    double lon1 =  _xArray[ix-1];
-    double dLon =  fabs(lon0 - lon1);
-    double dd = fabs(dLon - dLonPrev);
-    double ddFrac = dd / dLonPrev;
-    if (fabs(lon0) > 180.0 || lon0 == 0.0 || ddFrac > 1.0) {
-      // bad jump, stop here
-      _ixValidStart = ix;
-      cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
-      cerr << "   Bad longitude jump, ix, lon0, lon1: "
-           << ix << ", " << lon0 << ", " << lon1 << endl;
-      break;
-    }
-    dLonPrev = dLon;
-  } // ix
-
-  _ixValidEnd = _nx - 1;
-  dLonPrev = dLon0;
-  for (int ix = midIx; ix < _nx - 1; ix++) {
-    double lon0 =  _xArray[ix];
-    double lon1 =  _xArray[ix+1];
-    double dLon =  fabs(_xArray[ix+1] - _xArray[ix]);
-    double dd = fabs(dLon - dLonPrev);
-    double ddFrac = dd / dLonPrev;
-    if (fabs(lon0) > 360.0 || lon0 == 0.0 || ddFrac > 1.0) {
-      // bad jump, stop here
-      _ixValidEnd = ix;
-      cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
-      cerr << "   Bad longitude jump, ix, lon0, lon1: "
-           << ix << ", " << lon0 << ", " << lon1 << endl;
-      break;
-    }
-    dLonPrev = dLon;
-  } // ix
-
-  _iyValidStart = 0;
-  double dLatPrev = dLat0;
-  for (int iy = midIy; iy > 0; iy--) {
-    double lat0 =  _yArray[iy];
-    double lat1 =  _yArray[iy-1];
-    double dLat =  fabs(_yArray[iy] - _yArray[iy-1]);
-    double dd = fabs(dLat - dLatPrev);
-    double ddFrac = dd / dLatPrev;
-    if (fabs(lat0) > 90.0 || lat0 == 0.0 || ddFrac > 1.0) {
-      // big jump, stop here
-      _iyValidStart = iy;
-      cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
-      cerr << "   Bad latitude jump, iy, lat0, lat1: " 
-           << iy << ", " << lat0 << ", " << lat1 << endl;
-      break;
-    }
-    dLatPrev = dLat;
-  } // iy
-
-  _iyValidEnd = _ny - 1;
-  dLatPrev = dLat0;
-  for (int iy = midIy; iy < _ny - 1; iy++) {
-    double lat0 =  _yArray[iy];
-    double lat1 =  _yArray[iy+1];
-    double dLat =  fabs(_yArray[iy+1] - _yArray[iy]);
-    double dd = fabs(dLat - dLatPrev);
-    double ddFrac = dd / dLatPrev;
-    if (fabs(lat0) > 90.0 || lat0 == 0.0 || ddFrac > 1.0) {
-      // big jump, stop here
-      _iyValidEnd = iy;
-      cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
-      cerr << "   Bad latitude jump, iy, lat0, lat1: " 
-           << iy << ", " << lat0 << ", " << lat1 << endl;
-      break;
-    }
-    dLatPrev = dLat;
-  } // iy
-
-  _nxValid = _ixValidEnd - _ixValidStart + 1;
-  _nyValid = _iyValidEnd - _iyValidStart + 1;
-
-  if (_nxValid < 5 || _nyValid < 5) {
-    cerr << "ERROR - GpmHdf5ToMdv::_findValidLatLonLimits()" << endl;
-    cerr << "  Valid grid too small to process" << endl;
-    cerr << "  nxValid: " << _nxValid << endl;
-    cerr << "  nyValid: " << _nyValid << endl;
-    return -1;
-  }
-
-  return 0;
-  
-}
-
 //////////////////////////////////////////////////
 // get the closest lat index to a given latitude
 // within the tolerance

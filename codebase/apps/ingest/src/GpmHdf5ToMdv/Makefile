@@ -47,24 +47,12 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 HDRS = \
 	Params.hh \
 	Args.hh \
-	RadConvert.hh \
-	FieldInfo.hh \
-	FullResSdsField.hh \
-	HdfFile.hh \
-	LowResSdsField.hh \
-	SdsDataField.hh \
 	GpmHdf5ToMdv.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	Main.cc \
-	RadConvert.cc \
-	FieldInfo.cc \
-	FullResSdsField.cc \
-	HdfFile.cc \
-	LowResSdsField.cc \
-	SdsDataField.cc \
 	GpmHdf5ToMdv.cc
 
 #
