@@ -250,6 +250,10 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
     return -1;
   }
 
+  // interpolate dbz field onto latlon grid
+
+  _interpDbz();
+
 #ifdef JUNK
 
   // open file
@@ -718,7 +722,7 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
   
   Group slv(ns.openGroup("SLV"));
   if (hdf5.readFl32Array(slv, "zFactorCorrected", "NS/SLV",
-                         dbzDims, _missingDbz, _dbzVals, _dbzUnits)) {
+                         dbzDims, _missingDbz, _dbzInput, _dbzUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readReflectivity()" << endl;
     cerr << "  Cannot read zFactorCorrected variable" << endl;
     return -1;
@@ -754,12 +758,12 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
         for (size_t iray = 0; iray < _nRays; iray++) {
           for (size_t igate = 0; igate < _nGates; igate++) {
             size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
-            if (_dbzVals[ipt] != _missingDbz) {
+            if (_dbzInput[ipt] != _missingDbz) {
               cerr << "  iscan, iray, igate, dbz: "
                    << iscan << ", "
                    << iray << ", "
                    << igate << ", "
-                   << _dbzVals[ipt] << endl;
+                   << _dbzInput[ipt] << endl;
             }
           } // igate
         } // iray
@@ -771,6 +775,86 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
 
 }
 
+//////////////////////////////////////////////
+// interpolate the reflectivity
+
+void GpmHdf5ToMdv::_interpDbz()
+  
+{
+
+  // initialize dbz grid
+
+  size_t nOutput = _nx * _ny * _nz;
+  _dbzOutput.resize(nOutput);
+
+  // loop through the vertical levels
+
+  for (size_t iz = 0; iz < _nz; iz++) {
+
+    // load dbz input vals for this level
+
+    vector<vector<double> > dbzIn;
+    for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      vector<double> dbzScan;
+      for (size_t iray = 0; iray < _nRays; iray++) {
+        size_t ipt = iscan * _nRays * _nGates + iray * _nGates + iz;
+        dbzScan.push_back(_dbzInput[ipt]);
+      } // iray
+      dbzIn.push_back(dbzScan);
+    } // iscan
+    
+    // loop through the input (scan, ray) grid
+
+    for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
+      for (size_t iray = 0; iray < _nRays - 1; iray++) {
+
+        // corner locations
+        LatLonPt_t corners[4];
+        corners[0] = _latLons[iscan][iray];
+        corners[1] = _latLons[iscan][iray + 1];
+        corners[2] = _latLons[iscan + 1][iray + 1];
+        corners[3] = _latLons[iscan + 1][iray];
+
+        // dbz vals at corners
+        double dbz[4];
+        dbz[0] = dbzIn[iscan][iray];
+        dbz[1] = dbzIn[iscan][iray + 1];
+        dbz[2] = dbzIn[iscan + 1][iray + 1];
+        dbz[3] = dbzIn[iscan + 1][iray];
+
+        // check for valid DBZ
+        bool allValid = true;
+        for (int ii = 0; ii < 4; ii++) {
+          if (dbz[ii] == _missingDbz) {
+            allValid = false;
+            break;
+          }
+        }
+        if (!allValid) {
+          continue;
+        }
+
+        // compute bounding box
+
+        double minLat = corners[0].lat;
+        double maxLat = corners[0].lat;
+        double minLon = corners[0].lon;
+        double maxLon = corners[0].lon;
+        for (int ii = 1; ii < 4; ii++) {
+          minLat = min(minLat, corners[ii].lat);
+          maxLat = max(maxLat, corners[ii].lat);
+          minLon = min(minLon, corners[ii].lon);
+          maxLon = max(maxLon, corners[ii].lon);
+        }
+      
+      } // iray
+    } // iscan
+
+  } // iz
+
+}
+
+  
 /////////////////////////////////////////////////
 // Set the master header from the NCF file
 //
@@ -1466,7 +1550,7 @@ MdvxField *GpmHdf5ToMdv::_createRegularLatlonField
   Mdvx::vlevel_header_t vhdr;
   MEM_zero(vhdr);
   
-  for (int ii = 0; ii < _nz; ii++) {
+  for (size_t ii = 0; ii < _nz; ii++) {
     vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
     vhdr.level[ii] = _zArray[ii];
   }

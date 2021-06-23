@@ -115,11 +115,12 @@ private:
   double _minLon, _maxLon;
   vector<vector<LatLonPt_t> > _latLons;
   
-  vector<NcxxPort::fl32> _dbzVals;
+  vector<NcxxPort::fl32> _dbzInput;
+  vector<NcxxPort::fl32> _dbzOutput;
   NcxxPort::fl32 _missingDbz;
   string _dbzUnits;
 
-  int _nx, _ny, _nz;
+  size_t _nx, _ny, _nz;
   double _minx, _miny, _minz;
   double _maxx, _maxy, _maxz;
   double _dx, _dy, _dz;
@@ -149,6 +150,10 @@ private:
   int _readLatLon(Group &ns);
   int _readQcFlags(Group &ns);
   int _readReflectivity(Group &ns);
+
+  // interpolation
+
+  void _interpDbz();
 
   // load up dimensions and variables
 
