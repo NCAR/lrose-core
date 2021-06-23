@@ -549,7 +549,7 @@ void PolarManager::_setupWindows()
 
   _createClickReportDialog();
 
-  _createBoundaryEditorDialog();
+  //_createBoundaryEditorDialog();
 
   if (_archiveMode) {
     _showTimeControl();
@@ -3918,11 +3918,13 @@ bool PolarManager::evaluateRange(double xRange) {
     return boundaryPointEditorControl->updateScale(xRange);
 }
 
-void PolarManager::evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY)
+void PolarManager::evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY,
+  bool isShiftKeyDown)
 {    
     // If boundary editor active, then interpret boundary mouse release event
   if (boundaryPointEditorControl != NULL) {
-    boundaryPointEditorControl->evaluateMouseRelease(mouseReleaseX, mouseReleaseY);
+    boundaryPointEditorControl->evaluateMouseRelease(mouseReleaseX, mouseReleaseY,
+      isShiftKeyDown);
 /*
       if (editor->getCurrentTool() == BoundaryToolType::polygon) {
         if (!editor->isAClosedPolygon()) {
@@ -4123,7 +4125,10 @@ void PolarManager::showBoundaryEditor()
     connect(boundaryPointEditorView, SIGNAL(boundaryCircleRadiusChanged(int)),
       this, SLOT(boundaryCircleRadiusChanged(int)));  
     connect(boundaryPointEditorView, SIGNAL(boundaryBrushRadiusChanged(int)),
-      this, SLOT(boundaryBrushRadiusChanged));  
+      this, SLOT(boundaryBrushRadiusChanged(int)));  
+
+    connect(boundaryPointEditorView, SIGNAL(refreshBoundaries()),
+      this, SLOT(refreshBoundaries()));  
 
     connect(boundaryPointEditorControl, SIGNAL(saveBoundary(int )), 
       this, SLOT(saveBoundaryEvent(int)));
@@ -5688,13 +5693,22 @@ void PolarManager::EditRunScript() {
     connect(scriptEditorControl, SIGNAL(scriptChangedVolume(QStringList)),
         this, SLOT(updateVolume(QStringList)));
     connect(scriptEditorView, SIGNAL(scriptEditorClosed()), this, SLOT(scriptEditorClosed()));
-
+    //connect scriptEditorView, SIGNAL(runForEachRayScript(), 
+    //  this, SLOT(runForEachRayScript()));
     
     scriptEditorView->init();
   }
   scriptEditorView->show();
   // scriptEditorView->layout()->setSizeConstraint(QLayout::SetFixedSize);
   LOG(DEBUG) << "exit";
+}
+
+void PolarManager::runForEachRayScript(QString script, bool useBoundary) {
+  vector<Point> boundaryPoints;
+  if (boundaryPointEditorView != NULL) {
+    vector<Point> boundaryPoints = boundaryPointEditorControl->getWorldPoints();
+  }
+  scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
 }
 
 void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)

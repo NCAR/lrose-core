@@ -202,6 +202,19 @@ void BoundaryPointEditorView::saveBoundaryEditorClick()
   LOG(DEBUG) << "exit";
 }
 
+void BoundaryPointEditorView::clearBoundaryEditorClick()
+{
+  LOG(DEBUG) << "enter";
+
+  int boundaryIndex = _boundaryEditorList->currentRow()+1;
+  string boundaryName = "Boundary" + to_string(boundaryIndex);
+  _boundaryEditorList->currentItem()->setText(boundaryName.c_str());
+
+  emit clearBoundary(boundaryIndex);
+
+  LOG(DEBUG) << "exit";
+}
+
 // user clicked on the main menu item "Boundary Editor", so toggle it visible or invisible
 void BoundaryPointEditorView::showBoundaryEditor()
 {
@@ -1033,25 +1046,25 @@ void BoundaryPointEditorView::brushBtnBoundaryEditorClick()
   emit userClickedBrushButton();
 }
 
+
 // check which (if any) of the 5 boundary files exist, and populate the list accordingly
 void BoundaryPointEditorView::refreshBoundaries()
 {
-  clear();
-  //setBoundaryDir();
 
   //rename any items that have corresponding file on disk
-  for (int i=1; i <= 5; i++)
-  {
-    emit refreshBoundary(i);
+  //for (int i=1; i <= 5; i++)
+  //{
+    emit refreshBoundaries();
     //const char *fileName = BoundaryPointEditor::Instance()->refreshBoundary(i);
     //_boundaryEditorList->item(i-1)->setText(fileName.c_str());
-  }
+  //}
 
   _boundaryEditorList->setCurrentRow(0);
 
   if (isVisible())
     onBoundaryEditorListItemClicked(_boundaryEditorList->currentItem());
 }
+
 
 void BoundaryPointEditorView::setBoundaryFile(int boundaryIndex, string &fileName) 
 {

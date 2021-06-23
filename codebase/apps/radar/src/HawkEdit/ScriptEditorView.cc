@@ -19,6 +19,7 @@
 #include "SoloFunctionsController.hh"
 #include "SoloScriptTranslator.hh"
 #include "DataField.hh"
+#include "PolarManager.hh"
 
 
 using namespace std;
@@ -37,6 +38,9 @@ Q_DECLARE_METATYPE(QVector<double>)
 {
   LOG(DEBUG) << "in ScriptEditorView constructor";
   //  initScriptEditor();
+
+  //_polarManager = (PolarManager *) parent;
+
   int rows;
   int cols;
 
@@ -445,8 +449,10 @@ void ScriptEditorView::acceptFormulaInput()
 
     // Send the scripts to the controller for processing
     try {
-      emit runOneTimeOnlyScript(oneTimeOnlyScript);
-      emit runForEachRayScript(forEachRayScript, useBoundary);
+      //emit runOneTimeOnlyScript(oneTimeOnlyScript);
+      //emit runForEachRayScript(forEachRayScript, useBoundary);
+      PolarManager *polarManager = (PolarManager *) parent();
+      polarManager->runForEachRayScript(forEachRayScript, useBoundary);
     /*
     // Grab the context before evaluating the formula
     //  YES! This works.  The new global variables are listed here;

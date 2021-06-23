@@ -979,8 +979,8 @@ void PpiWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
 
   // --- insert here ---
-
-    _manager->evaluateMouseRelease(_worldReleaseX, _worldReleaseY);
+    bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+    _manager->evaluateMouseRelease(_worldReleaseX, _worldReleaseY, isShiftKeyDown);
     /*
     // If boundary editor active, then interpret boundary mouse release event
     BoundaryPointEditor *editor = BoundaryPointEditor::Instance(); 

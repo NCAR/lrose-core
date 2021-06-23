@@ -195,8 +195,11 @@ public:
   void boundaryCircleRadiusChanged(int value);
   void mouseMoveEvent(int worldX, int worldY);  
   bool evaluateCursor(bool isShiftKeyDown);
-  void evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY);
+  void evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY, 
+    bool isShiftKeyDown);
   bool evaluateRange(double xRange);
+
+  void runForEachRayScript(QString script, bool useBoundary);
 
 public slots:
   void fieldsSelected(vector<string> *selectedFields);
@@ -767,8 +770,8 @@ private slots:
   void _timeSliderPressed();
 
   //circle radius slider for BoundaryPointEditor
-  void _circleRadiusSliderValueChanged(int value);
-  void _brushRadiusSliderValueChanged(int value);
+  //void _circleRadiusSliderValueChanged(int value);
+  //void _brushRadiusSliderValueChanged(int value);
   
   // images
 
@@ -788,7 +791,7 @@ private slots:
   void ShowContextMenu(const QPoint &pos);
 
   // boundary editor
-  void _createBoundaryEditorDialog();
+  //void _createBoundaryEditorDialog();
 
 
   //void _clearBoundaryEditorClick();

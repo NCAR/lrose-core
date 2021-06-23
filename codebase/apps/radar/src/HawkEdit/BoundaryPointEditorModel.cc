@@ -859,17 +859,35 @@ bool BoundaryPointEditorModel::evaluatePoint(int worldX, int worldY)
   return redraw;
 }
 
-void BoundaryPointEditorModel::evaluateMouseRelease(int worldReleaseX, int worldReleaseY)
+// for safe keeping ...
+// User has Shift key down and has clicked mouse, so either insert or delete a point
+// (relevant with the Polygon Tool)
+void BoundaryPointEditorModel::checkToAddOrDelPoint(float x, float y, bool isShiftKeyDown)
+{
+	bool isOverExistingPt = isOverAnyPoint(x, y);
+	//bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+	if (isShiftKeyDown)
+	{
+		if (isOverExistingPt)
+				delNearestPoint(x, y);
+			else
+				insertPoint(x, y);
+	}
+}
+// end for safe keeping 
+
+void BoundaryPointEditorModel::evaluateMouseRelease(int worldReleaseX, int worldReleaseY,
+	bool isShiftKeyDown)
 {	
 	if (currentTool == BoundaryToolType::polygon) {
     if (!isAClosedPolygon()) {
       addPoint(worldReleaseX, worldReleaseY);
     } else { //polygon finished, user may want to insert/delete a point
-      checkToAddOrDelPoint(worldReleaseX, worldReleaseY);
+      checkToAddOrDelPoint((float) worldReleaseX, (float) worldReleaseY, isShiftKeyDown);
     }
   } else if (currentTool == BoundaryToolType::circle) {
     if (isAClosedPolygon()) {
-      checkToAddOrDelPoint(worldReleaseX, worldReleaseY);
+      checkToAddOrDelPoint((float) worldReleaseX, (float) worldReleaseY, isShiftKeyDown);
     } else {
       makeCircle(worldReleaseX, worldReleaseY, circleRadius);
     }

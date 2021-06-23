@@ -29,7 +29,8 @@ SoloFunctionsModel::SoloFunctionsModel() {
 
 // call this for each new ray, since the azimuth changes each time the ray changes
 void SoloFunctionsModel::SetBoundaryMask(//RadxVol *vol,
-					 int rayIdx, int sweepIdx, bool useBoundaryMask) {
+					 int rayIdx, int sweepIdx, bool useBoundaryMask,
+           vector<Point> &boundaryPoints) {
 
   _boundaryMaskSet = true;
 
@@ -37,7 +38,7 @@ void SoloFunctionsModel::SetBoundaryMask(//RadxVol *vol,
   if (useBoundaryMask)
     determineMask = true;
 
-  CheckForDefaultMask(rayIdx, sweepIdx, determineMask);
+  CheckForDefaultMask(rayIdx, sweepIdx, determineMask, boundaryPoints);
   //  SetBoundaryMaskOriginal(vol, rayIdx, sweepIdx);
 }
 
@@ -48,7 +49,8 @@ const vector<bool> *SoloFunctionsModel::GetBoundaryMask() {
 }
 
 
-void SoloFunctionsModel::CheckForDefaultMask(int rayIdx, int sweepIdx, bool determineMask) {
+void SoloFunctionsModel::CheckForDefaultMask(int rayIdx, int sweepIdx, bool determineMask,
+  vector<Point> &boundaryPoints) {
 
   
   LOG(DEBUG) << "enter";
@@ -58,8 +60,8 @@ void SoloFunctionsModel::CheckForDefaultMask(int rayIdx, int sweepIdx, bool dete
   short *boundary;
 
   // TODO: make this a call to BoundaryPointModel?
-  BoundaryPointEditor *bpe = BoundaryPointEditor::Instance();
-  vector<Point> boundaryPoints = bpe->getWorldPoints();
+  //BoundaryPointEditor *bpe = BoundaryPointEditor::Instance();
+  //vector<Point> boundaryPoints = bpe->getWorldPoints();
   // vector<Point> myPoints = BoundaryPointEditor::Instance()->getBoundaryPoints("/media/sf_lrose/ncswp_SPOL_RHI_.nc", 0, 4, "Boundary1");  TODO
   
   //map boundaryPoints to a list of short/boolean the same size as the ray->datafield->ngates
@@ -75,7 +77,7 @@ void SoloFunctionsModel::CheckForDefaultMask(int rayIdx, int sweepIdx, bool dete
     // set default (all true) boundary mask; 
     SetDefaultMask(rayIdx, sweepIdx);
   } else {
-    DetermineBoundaryMask(rayIdx, sweepIdx);
+    DetermineBoundaryMask(rayIdx, sweepIdx, boundaryPoints);
   } 
 
 }
@@ -120,13 +122,15 @@ void SoloFunctionsModel::SetDefaultMask(int rayIdx, int sweepIdx) {
 }
 
 
-void SoloFunctionsModel::DetermineBoundaryMask(int rayIdx, int sweepIdx) {
-  SetBoundaryMaskOriginal(rayIdx, sweepIdx);
+void SoloFunctionsModel::DetermineBoundaryMask(int rayIdx, int sweepIdx,
+  vector<Point> &boundaryPoints) {
+  SetBoundaryMaskOriginal(rayIdx, sweepIdx, boundaryPoints);
 }
 
 
 // call this for each new ray, since the azimuth changes each time the ray changes
-void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx) {
+void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
+  vector<Point> &boundaryPoints) {
   
   LOG(DEBUG) << "enter";
   LOG(DEBUG) << " radIdx=" << rayIdx
@@ -135,8 +139,8 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx) {
   short *boundary;
 
   // TODO: make this a call to BoundaryPointModel?
-  BoundaryPointEditor *bpe = BoundaryPointEditor::Instance();
-  vector<Point> boundaryPoints = bpe->getWorldPoints();
+  //BoundaryPointEditor *bpe = BoundaryPointEditor::Instance();
+  //vector<Point> boundaryPoints = bpe->getWorldPoints();
   // vector<Point> myPoints = BoundaryPointEditor::Instance()->getBoundaryPoints("/media/sf_lrose/ncswp_SPOL_RHI_.nc", 0, 4, "Boundary1");  TODO
   
   //map boundaryPoints to a list of short/boolean the same size as the ray->datafield->ngates

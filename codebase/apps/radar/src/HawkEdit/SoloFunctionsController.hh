@@ -172,7 +172,7 @@ public:
   bool moreSweeps();
   void nextSweep();
 
-  void applyBoundary(bool useBoundaryMask);
+  void applyBoundary(bool useBoundaryMask, vector<Point> &boundaryPoints);
   const vector<bool> *GetBoundaryMask();
   void assign(string tempName, string userDefinedName);
   const vector<float> *getData(string &fieldName);

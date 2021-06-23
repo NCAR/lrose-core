@@ -8,6 +8,8 @@
 //#include "ScriptEditorDelegate.hh"
 #include "SoloFunctionsController.hh"
 
+//#include "PolarManager.hh"
+
 #include <QWidget>
 #include <QAction>
 #include <QLabel>
@@ -110,6 +112,8 @@ private:
     QHBoxLayout *scriptEditLayout;
     //QTextEdit *formulaInput;
   // ScriptEditorDelegate *formulaInput;
+
+    //PolarManager *_polarManager;
 };
 
 #endif // SCRIPTEDITORVIEW_H

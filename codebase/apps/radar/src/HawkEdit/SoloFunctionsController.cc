@@ -594,11 +594,12 @@ const vector<bool> *SoloFunctionsController::GetBoundaryMask() {
 }
 
 
-void SoloFunctionsController::applyBoundary(bool useBoundaryMask) {
+void SoloFunctionsController::applyBoundary(bool useBoundaryMask, 
+  vector<Point> &boundaryPoints) {
 
   //SoloFunctionsModel soloFunctionsModel;
   soloFunctionsModel.SetBoundaryMask(_currentRayIdx, _currentSweepIdx,
-				     useBoundaryMask);
+				     useBoundaryMask, boundaryPoints);
 }
 
 void SoloFunctionsController::setCurrentSweepToFirst() {

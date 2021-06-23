@@ -32,7 +32,7 @@ class BoundaryPointEditorModel
   vector<Point> getBoundaryPoints(string radarFilePath,
     string &fieldName, int sweepIndex, int boundaryIndex);	
 
-  void evaluateMouseRelease(int worldReleaseX, int worldReleaseY);
+  void evaluateMouseRelease(int worldX, int worldY, bool isShiftKeyDown);
   bool evaluatePoint(int worldX, int worldY);
 	void makeCircle(int x, int y, float radius);
 	void addToBrushShape(float x, float y);
@@ -43,7 +43,7 @@ class BoundaryPointEditorModel
 	bool isOverAnyPoint(float worldX, float worldY);
 	void moveNearestPointTo(float worldX, float worldY);
 	bool isAClosedPolygon();
-	void checkToAddOrDelPoint(float x, float y);
+	void checkToAddOrDelPoint(float x, float y, bool isShiftKeyDown);
 	void clear();
 	void save(int boundaryIndex, string &fieldName, int sweepNumber, 
 		string &radarFilePath);

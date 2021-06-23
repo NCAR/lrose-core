@@ -69,7 +69,7 @@ class BoundaryPointEditorView : public QDialog
 
 	void setBoundaryFile(int boundaryIndex, string  &fileName);
 
- // signals:
+ signals:
 
 	void saveBoundary(int boundaryIndex);
 	void loadBoundary(int boundaryIndex);
@@ -86,6 +86,8 @@ class BoundaryPointEditorView : public QDialog
   void refreshBoundaries();
 
   void boundaryPointEditorClosed();
+  void clearBoundary(int boundaryIndex);  // TODO: still needs connection
+
 
   void selectBoundaryTool(BoundaryToolType tool, int radius = 0);
 

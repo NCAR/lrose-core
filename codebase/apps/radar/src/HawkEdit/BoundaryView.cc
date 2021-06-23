@@ -390,11 +390,12 @@ void BoundaryView::makeCircle(int x, int y, float radius)
 	points.push_back(points[0]);
 }
 
+
 // User has Shift key down and has clicked mouse, so either insert or delete a point
 // (relevant with the Polygon Tool)
 void BoundaryView::checkToAddOrDelPoint(float x, float y)
 {
-	bool isOverExistingPt = isOverAnyPoint(x, y);
+	bool isOverExistingPt = isOverAnyPoint(x, y); // Model
 	bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
 	if (isShiftKeyDown)
 	{
@@ -404,7 +405,8 @@ void BoundaryView::checkToAddOrDelPoint(float x, float y)
 				BoundaryPointEditor::Instance()->insertPoint(x, y);
 	}
 }
-
+*/
+/*
 int BoundaryView::getCircleRadius()
 {
 	return(circleRadius);

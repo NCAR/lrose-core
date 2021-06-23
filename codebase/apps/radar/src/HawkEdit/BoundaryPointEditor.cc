@@ -318,9 +318,12 @@ bool BoundaryPointEditor::evaluateCursor(bool isShiftKeyDown) {
   return changeCursor;
 }
 
-void BoundaryPointEditor::evaluateMouseRelease(int worldReleaseX, int worldReleaseY)
+void BoundaryPointEditor::evaluateMouseRelease(int worldReleaseX, int worldReleaseY,
+	bool isShiftKeyDown)
 {
-	_boundaryPointEditorModel->evaluateMouseRelease(worldReleaseX, worldReleaseY);
+
+	_boundaryPointEditorModel->evaluateMouseRelease(worldReleaseX, worldReleaseY,
+		isShiftKeyDown);
 
 	/*
         if (!isAClosedPolygon()) {
@@ -370,8 +373,8 @@ bool BoundaryPointEditor::updateScale(double xRange)
 
 void BoundaryPointEditor::clear()
 {
-	_boundaryEditorView->clear();
-	//points.clear();
+	_boundaryPointEditorModel->clear();
+	// TODO: redraw boundary(current Boundary Index)
 }
 
 // user has dragged circle slider and reset the circle radius
@@ -725,9 +728,7 @@ bool BoundaryPointEditor::evaluatePoint(int worldX, int worldY)
 // returns the file path for the boundary file, given the currently selected field and sweep
 // boundaryFileName will be one of 5 values: "Boundary1", "Boundary2"..."Boundary5"
 //string BoundaryPointEditor::getBoundaryFilePath(string boundaryFileName)
-//{ 
-//	emit needSelectedFieldNameSweepIndex;
-//}
+
 
 void BoundaryPointEditor::save(int boundaryIndex, string &selectedFieldName,
  int sweepIndex, string &radarFilePath) 
@@ -752,11 +753,11 @@ bool BoundaryPointEditor::load(int boundaryIndex, string &selectedFieldName,
     int radius = 0;
     if (currentTool == BoundaryToolType::circle)
     {
-      radius = getCircleRadius();
+      radius = _boundaryPointEditorModel->getCircleRadius();
     }
     else if (currentTool == BoundaryToolType::brush)
     {
-      radius = getBrushRadius();
+      radius = _boundaryPointEditorModel->getBrushRadius();
     }
     else
     {
@@ -873,6 +874,7 @@ vector<Point> BoundaryPointEditor::getBoundaryPoints(string radarFilePath, strin
   radarFilePath will be something like "/media/sf_lrose/ncswp_SPOL_RHI_.nc"
   returns the boundary dir for this radar file (e.g. "/home/jeff/HawkEyeBoundaries/1736437357943458505")
  */
+/*
 string BoundaryPointEditor::getBoundaryDirFromRadarFilePath(string rootBoundaryDir, string radarFilePath)
 {
 	hash<string> str_hash;
@@ -881,7 +883,8 @@ string BoundaryPointEditor::getBoundaryDirFromRadarFilePath(string rootBoundaryD
 	ss << hash;
 	return(rootBoundaryDir + "/" + ss.str());
 }
-
+*/
+/*
 void BoundaryPointEditor::setBoundaryDir(string &openFilePath)
 {
   if (!openFilePath.empty()) {
@@ -890,7 +893,7 @@ void BoundaryPointEditor::setBoundaryDir(string &openFilePath)
     _boundaryDir = getRootBoundaryDir();
   }
 }
-
+*/
 /*
   boundaryDir will be something like "/home/jeff/HawkEyeBoundaries/1736437357943458505" (where "1736437357943458505" is the hash code of the radar source filepath)
   fieldIndex is zero based. E.g., "DBZ" is usually fieldIndex 0, "REF" is fieldIndex 1
@@ -963,15 +966,13 @@ void BoundaryPointEditor::onBoundaryEditorListItemClicked(string &fileName)
     // TODO: this becomes a signal ... 
   }
 }
-
+*/
 // user clicked the boundary editor Clear button
 void BoundaryPointEditor::clearBoundaryEditorClick()
 {
-  clear();
-  _ppi->update();   //forces repaint which clears existing polygon
+  _boundaryPointEditorModel->clear();
+  // _ppi->update();   //forces repaint which clears existing polygon
 }
-
-*/
 
 // TODO: make BoundaryEditor into a MVC architecture.  
 // user clicked the boundary editor Save button

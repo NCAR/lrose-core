@@ -8,7 +8,9 @@
 #include <string>
 
 #include "Radx/RadxVol.hh"
+#include "Point.hh"
 #include "Solo/SoloFunctionsApi.hh"
+
 using namespace std;
 
 
@@ -270,13 +272,15 @@ const float *data, float *newData, size_t nGates,
   */
 
 
-  void SetBoundaryMask(int rayIdx, int sweepIdx, bool useBoundaryMask);
-  void SetBoundaryMaskOriginal(int rayIdx, int sweepIdx);
-  void CheckForDefaultMask(int rayIdx, int sweepIdx, bool determineMask);
+  void SetBoundaryMask(int rayIdx, int sweepIdx, bool useBoundaryMask,
+  	vector<Point> &boundaryPoints);
+  void SetBoundaryMaskOriginal(int rayIdx, int sweepIdx, vector<Point> &boundaryPoints);
+  void CheckForDefaultMask(int rayIdx, int sweepIdx, bool determineMask,
+  	vector<Point> &boundaryPoints);
   void SetDefaultMask(int rayIdx, int sweepIdx);
   const vector<bool> *GetBoundaryMask();
 
-  void DetermineBoundaryMask(int rayIdx, int sweepIdx); 
+  void DetermineBoundaryMask(int rayIdx, int sweepIdx, vector<Point> &boundaryPoints); 
   void printBoundaryMask();
   RadxField *fetchDataField(RadxRay *ray, string &fieldName);
   const float *fetchData(RadxRay *ray, string &fieldName);

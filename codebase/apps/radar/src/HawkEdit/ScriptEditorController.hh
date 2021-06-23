@@ -51,7 +51,7 @@ public slots:
   void getVolumeChanges();
   bool notDefined(QString &fieldName, std::map<QString, QString> &previousVariableContext);
   void runOneTimeOnlyScript(QString script);
-  void runForEachRayScript(QString script, bool useBoundary);
+  void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints);
 private:
 
 

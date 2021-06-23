@@ -558,7 +558,8 @@ uncate(100);
 }
 
 
-void ScriptEditorController::runForEachRayScript(QString script, bool useBoundary)
+void ScriptEditorController::runForEachRayScript(QString script, bool useBoundary,
+  vector<Point> &boundaryPoints)
 {
   LOG(DEBUG) << "enter";
   try {
@@ -613,7 +614,7 @@ uncate(100);
       // calculate boundary mask for each ray? 
       // Yes, when the ray index changes a new boundary mask is calculated 
       // in the SoloFunctionsController
-      _soloFunctionsController->applyBoundary(useBoundary);
+      _soloFunctionsController->applyBoundary(useBoundary, boundaryPoints);
 
       // TODO: set field values in javascript array? by (sweep, ray) would we apply boundary?
       
