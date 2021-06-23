@@ -81,83 +81,21 @@ public:
   } mode_t;
 
   typedef enum {
-    PROJ_LATLON = 0,
-    PROJ_LAMBERT_CONF = 3,
-    PROJ_MERCATOR = 4,
-    PROJ_POLAR_STEREO = 5,
-    PROJ_FLAT = 8,
-    PROJ_OBLIQUE_STEREO = 12,
-    PROJ_TRANS_MERCATOR = 15,
-    PROJ_ALBERS = 16,
-    PROJ_LAMBERT_AZIM = 17,
-    PROJ_VERT_PERSP = 18
-  } projection_t;
-
-  typedef enum {
     ENCODING_INT8 = 1,
     ENCODING_INT16 = 2,
     ENCODING_FLOAT32 = 5
   } encoding_type_t;
 
-  typedef enum {
-    COMPRESSION_NONE = 0,
-    COMPRESSION_RLE = 1,
-    COMPRESSION_LZO = 2,
-    COMPRESSION_ZLIB = 3,
-    COMPRESSION_BZIP = 4,
-    COMPRESSION_GZIP = 5,
-    COMPRESSION_GZIP_VOL = 6
-  } compression_type_t;
-
-  typedef enum {
-    FULL_RES_DATA = 0,
-    LOW_RES_DATA = 1
-  } data_type_t;
-
-  typedef enum {
-    LEVELS_LISTED = 0,
-    LEVELS_CONST_DZ = 1
-  } level_spec_type_t;
-
-  typedef enum {
-    VERT_TYPE_SATELLITE_IMAGE = 0,
-    VERT_TYPE_Z = 1
-  } vert_type_t;
-
   // struct typedefs
 
   typedef struct {
-    int nx;
-    int ny;
-    double minx;
-    double miny;
-    double dx;
-    double dy;
+    int nLon;
+    int nLat;
+    double minLon;
+    double minLat;
+    double dLon;
+    double dLat;
   } grid_params_t;
-
-  typedef struct {
-    char* sds_field_name;
-    data_type_t data_type;
-    long num_fields;
-    char* scales;
-    char* biases;
-    char* missing_values1;
-    char* missing_values2;
-    char* missing_values3;
-    char* bad_values1;
-    char* bad_values2;
-    char* bad_values3;
-    char* mdv_field_names;
-    char* mdv_field_units;
-    level_spec_type_t level_spec_type;
-    vert_type_t vert_level_type;
-    long num_vert_levels;
-    char* vert_levels;
-    double min_vert_level;
-    double delta_vert_level;
-    char* radiance_convert;
-    tdrp_bool_t invert_vert_levels;
-  } output_field_t;
 
   ///////////////////////////
   // Member functions
@@ -479,110 +417,19 @@ public:
 
   double delta_z_km;
 
-  double output_delta_lat_deg;
+  grid_params_t output_grid;
 
-  double output_delta_lon_deg;
-
-  tdrp_bool_t remap_output_projection;
-
-  tdrp_bool_t auto_remap_to_latlon;
-
-  projection_t remap_projection;
-
-  grid_params_t remap_grid;
-
-  double remap_rotation;
-
-  double remap_origin_lat;
-
-  double remap_origin_lon;
-
-  double remap_lat1;
-
-  double remap_lat2;
-
-  double remap_central_scale;
-
-  double remap_tangent_lat;
-
-  double remap_tangent_lon;
-
-  tdrp_bool_t remap_pole_is_north;
-
-  double remap_persp_radius;
-
-  double remap_false_northing;
-
-  double remap_false_easting;
-
-  tdrp_bool_t remap_set_offset_origin;
-
-  double remap_offset_origin_latitude;
-
-  double remap_offset_origin_longitude;
+  tdrp_bool_t set_output_grid_limits_from_data;
 
   char* output_url;
 
   encoding_type_t output_encoding_type;
-
-  compression_type_t output_compression_type;
 
   char* data_set_name;
 
   char* data_set_source;
 
   char* data_set_info;
-
-  output_field_t *_output_fields;
-  int output_fields_n;
-
-  projection_t input_projection;
-
-  double input_proj_rotation;
-
-  double input_proj_origin_lat;
-
-  double input_proj_origin_lon;
-
-  double input_proj_lat1;
-
-  double input_proj_lat2;
-
-  double input_proj_central_scale;
-
-  double input_proj_tangent_lat;
-
-  double input_proj_tangent_lon;
-
-  tdrp_bool_t input_proj_pole_is_north;
-
-  double input_proj_persp_radius;
-
-  tdrp_bool_t input_xy_is_latlon;
-
-  tdrp_bool_t resample_latlon_onto_regular_grid;
-
-  char* netcdf_dim_time;
-
-  char* netcdf_dim_x;
-
-  char* netcdf_dim_y;
-
-  char* netcdf_dim_z;
-
-  char* netcdf_var_base_time;
-
-  char* base_time_string;
-
-  char* netcdf_var_time_offset;
-
-  char* netcdf_var_z;
-
-  char* netcdf_var_y;
-
-  char* netcdf_var_x;
-
-  tdrp_bool_t treat_ncbyte_as_unsigned;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -591,7 +438,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[79];
+  mutable TDRPtable _table[29];
 
   const char *_className;
 

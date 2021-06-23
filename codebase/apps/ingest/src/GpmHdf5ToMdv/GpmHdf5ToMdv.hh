@@ -52,6 +52,11 @@
 #include "Params.hh"
 using namespace std;
 
+typedef struct {
+  double lat;
+  double lon;
+} LatLonPt_t;
+
 ////////////////////////
 // This class
 
@@ -105,21 +110,19 @@ private:
   vector<NcxxPort::fl64> _lons;
   NcxxPort::fl64 _missingLat;
   NcxxPort::fl64 _missingLon;
+
+  double _minLat, _maxLat;
+  double _minLon, _maxLon;
+  vector<vector<LatLonPt_t> > _latLons;
   
   vector<NcxxPort::fl32> _dbzVals;
   NcxxPort::fl32 _missingDbz;
   string _dbzUnits;
 
-  MdvxProj _inputProj;
-  MdvxRemapLut _remapLut;
-  int _nTimes;
-  time_t _validTime;
   int _nx, _ny, _nz;
   double _minx, _miny, _minz;
   double _maxx, _maxy, _maxz;
   double _dx, _dy, _dz;
-  bool _yIsReversed;
-  bool _dxIsConstant, _dyIsConstant;
 
   int _nxValid, _nyValid;
   int _ixValidStart, _ixValidEnd;
@@ -136,7 +139,6 @@ private:
   // private methods
 
   int _processFile(const char *input_path);
-  void _initInputProjection();
 
   string _readStringAttribute(Group &group,
                               const string &attrName,

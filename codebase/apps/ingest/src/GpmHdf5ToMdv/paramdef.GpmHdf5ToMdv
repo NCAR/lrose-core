@@ -141,171 +141,32 @@ paramdef double {
 } delta_z_km;
 
 commentdef {
-  p_header = "REMAP ONTO REGULAR LAT/LON GRID";
+  p_header = "OUTPUT REGULAR LAT/LON GRID";
 }
-
-paramdef double {
-  p_default = 0.01;
-  p_descr = "Delta latitude for output grid (deg)";
-} output_delta_lat_deg;
-
-paramdef double {
-  p_default = 0.01;
-  p_descr = "Delta longitude for output grid (deg)";
-} output_delta_lon_deg;
-
-commentdef {
-  p_header = "REMAP PROJECTION/GRID ON OUTPUT";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to remap grid in x,y.";
-  p_help = "If true, set the remap parameters below.";
-} remap_output_projection;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to automatically remap the grid to a lat-lon projection.";
-  p_help = "If true, the data in the file will be remapped to a latlon grid which matches the existing grid in resolution and extent. Other remap parameters will be ignored.";
-} auto_remap_to_latlon;
-
-typedef enum {
-  PROJ_LATLON = 0,
-  PROJ_LAMBERT_CONF = 3,
-  PROJ_MERCATOR =  4,
-  PROJ_POLAR_STEREO = 5,
-  PROJ_FLAT = 8,
-  PROJ_OBLIQUE_STEREO = 12,
-  PROJ_TRANS_MERCATOR = 15,
-  PROJ_ALBERS = 16,
-  PROJ_LAMBERT_AZIM = 17,
-  PROJ_VERT_PERSP = 18
-} projection_t;
-
-paramdef enum projection_t {
-  p_default = PROJ_LATLON;
-  p_descr = "Projection for remapping in x,y. See projection param below.";
-  p_help =
-  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
-  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
-  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
-  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
-  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
-  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
-  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
-  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
-  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
-  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
-} remap_projection;
 
 typedef struct {
-  int nx;
-  int ny;
-  double minx;
-  double miny;
-  double dx;
-  double dy;
+  int nLon;
+  int nLat;
+  double minLon;
+  double minLat;
+  double dLon;
+  double dLat;
 } grid_params_t;
 
 paramdef struct grid_params_t {
-  p_default = {1, 1, 0.0, 0.0, 1.0, 1.0};
-  p_descr = "Grid parameters for remapping in x,y.";
-  p_help = "Units in km, except for LATLON, which is in degrees.";
-} remap_grid;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Remapped grid rotation.";
-  p_help = "This applies only to PROJ_FLAT projections.";
-} remap_rotation;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Remapped grid origin latitude.";
-  p_help = "This applies to all projections except LATLON.";
-} remap_origin_lat;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Remapped grid origin longitude.";
-  p_help = "This applies to all projections except LATLON.";
-} remap_origin_lon;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Remapped grid reference latitude 1.";
-  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
-} remap_lat1;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Remapped grid reference latitude 2.";
-  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
-} remap_lat2;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Central scale for remapped projections.";
-  p_help = "This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.";
-} remap_central_scale;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Remapped tangent latitude (deg).";
-  p_help = "This applies to OBLIQUE_STEREO only.";
-} remap_tangent_lat;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Remapped tangent longitude (deg).";
-  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
-} remap_tangent_lon;
+  p_default = {500, 500, -104.0, 35.0, 0.01, 0.01};
+  p_descr = "Parameters for output grid.";
+  p_help = "Units in deg.";
+} output_grid;
 
 paramdef boolean {
   p_default = true;
-  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
-  p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
-} remap_pole_is_north;
-
-paramdef double {
-  p_default = 35786;
-  p_descr = "Radius of perspective point (km).";
-  p_help = "This applies to VERT_PERSP.";
-} remap_persp_radius;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Remapped false northing correction.";
-  p_help = "Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude";
-} remap_false_northing;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Remapped false easting correction.";
-  p_help = "Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.";
-} remap_false_easting;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?";
-  p_help = "If true, set remap_offset_origin_latitude and remap_offset_origin_longitude.";
-} remap_set_offset_origin;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Latitude of offset origin.";
-  p_help = "See remap_set_offset_origin.";
-} remap_offset_origin_latitude;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Longitude of offset origin.";
-  p_help = "See remap_set_offset_origin.";
-} remap_offset_origin_longitude;
+  p_descr = "Option to compute grid limits from input data.";
+  p_help = "If true, nLon, nLat, minLon and minLat will be computed from the data. dLon and dLat will be used as set.";
+} set_output_grid_limits_from_data;
 
 commentdef {
-  p_header = "OUTPUT LOCATION";
+  p_header = "OUTPUT URL";
 }
 
 paramdef string {
@@ -328,352 +189,26 @@ paramdef enum encoding_type_t {
   p_descr = "Set output encoding type.";
 } output_encoding_type;
 
-typedef enum {
-  COMPRESSION_NONE =  0,
-  COMPRESSION_RLE =   1,
-  COMPRESSION_LZO =   2,
-  COMPRESSION_ZLIB =  3,
-  COMPRESSION_BZIP =  4,
-  COMPRESSION_GZIP =  5,
-  COMPRESSION_GZIP_VOL = 6
-} compression_type_t;
-
-paramdef enum compression_type_t {
-  p_default = COMPRESSION_GZIP;
-  p_descr = "Set output compression type.";
-  p_help = "See <toolsa/compress> for details on the compression types.";
-} output_compression_type;
-
 commentdef {
   p_header = "OUTPUT METADATA STRINGS";
   p_text = "These will be used if the file does not contain suitable information.";
 }
 
 paramdef string {
-  p_default = "TRMM";
+  p_default = "GPM";
   p_descr = "Name of data set.";
   p_help = "Appears in Mdv master header.";
 } data_set_name;
 
 paramdef string {
-  p_default = "Texas Tech University";
+  p_default = "NASA";
   p_descr = "Source of data.";
   p_help = "Appears in Mdv master header.";
 } data_set_source;
 
 paramdef string {
-  p_default = "Created by NcGeneric2Mdv";
+  p_default = "Created by GpmHdf5ToMdv";
   p_descr = "Info for data set.";
   p_help = "Appears in Mdv master header.";
 } data_set_info;
-
-typedef enum
-{
-  FULL_RES_DATA,
-  LOW_RES_DATA
-} data_type_t;
-
-typedef enum
-{
-  LEVELS_LISTED,
-  LEVELS_CONST_DZ
-} level_spec_type_t;
-
-typedef enum
-{
-  VERT_TYPE_SATELLITE_IMAGE,
-  VERT_TYPE_Z
-} vert_type_t;
-
-typedef struct
-{
-  string sds_field_name;
-  data_type_t data_type;
-  long num_fields;
-  string scales;
-  string biases;
-  string missing_values1;
-  string missing_values2;
-  string missing_values3;
-  string bad_values1;
-  string bad_values2;
-  string bad_values3;
-  string mdv_field_names;
-  string mdv_field_units;
-  level_spec_type_t level_spec_type;
-  vert_type_t vert_level_type;
-  long num_vert_levels;
-  string vert_levels;
-  double min_vert_level;
-  double delta_vert_level;
-  string radiance_convert;
-  boolean invert_vert_levels;
-} output_field_t;
-
-paramdef struct output_field_t
-{
-  p_descr = "Information about the TRMM data fields to be included in "
-            "the output file.";
-  p_help = "\tsds_field_name - The name of the field in the SDS section of "
-           "the HDF file.\n"
-           "\tdata_type - How the data is stored in the HDF file.\n"
-           "\t\tFULL_RES_DATA is stored with the same number of scans and pixels "
-           "as the geolocation data.\n"
-           "\t\tLOW_RES_DATA is stored with the same number of scans, but half "
-           "the pixels of the geolocation data. "
-           "The data is assumed to occupy every other pixel in each scan.\n"
-           "\tnum_fields - Number of fields in the TRMM SDS data array. "
-           "All of the fields in a requested SDS data array must be "
-           "processed.\n"
-           "\tscales - List of scale values to apply to the data in the "
-           "TRMM file. "
-           "There must either be num_fields scales specified or this string "
-           "must be empty. "
-           "The scales are delimited by commas. "
-           "If the string is empty, no scale value will be applied (same as "
-           "setting scale to 1.0).\n"
-           "\tbiases - List of bias values to apply to the data in the "
-           "TRMM file. "
-           "There must be either num_fields biases specified or this string "
-           "must be empty. "
-           "The biases are delimited by commas. "
-           "If the string is empty, no bias will be applied (same as setting "
-           "bias to 0.0).\n"
-           "The final data value is calculated as:\n"
-           "\t\t data_value = (trmm_file_value / scale) - bias\n"
-           "\tmissing_values1, missing_values2, missing_values3 - List of "
-           "missing data values to apply to the "
-           "data in the TRMM file. "
-           "There must either be num_fields missing values specified or this "
-           "string must be empty. "
-           "The missing values are delimited by commas. "
-           "If this string is empty, no missing data value is applied to the "
-           "input data.\n"
-           "\tbad_values1, bad_values2, bad_values3 - List of "
-           "bad data values to apply to the "
-           "data in the TRMM file. "
-           "There must either be num_fields bad values specified or this "
-           "string must be empty. "
-           "The bad values are delimited by commas. "
-           "If this string is empty, no bad data value is applied to the "
-           "input data.\n"
-           "\tmdv_field_names - The field names to use for the fields in "
-           "the output MDV file. "
-           "There must be num_fields names specified. "
-           "The names are delimited by commas.\n"
-           "\tmdv_field_units - The units for each of the MDV output fields. "
-           "There must be num_fields of these. "
-           "The names are delimited by commas.\n"
-           "\tinput_level_type - Flag indicating how the vertical levels are "
-           "specified in this parameter file.\n"
-           "\t\tLEVELS_LISTED - The actual vertical level values are listed "
-           "in the vert_levels paramter.\n"
-           "\t\tLEVELS_CONST_DZ - The levels are calculated using "
-           "num_vert_levels, min_vert_level and vert_level_delta.\n"
-           "Note that this description of the vertical levels must match the "
-           "data as it appears in the HDF file.\n"
-           "\tvert_level_type - The type of vertical levels in the data.\n"
-           "\tnum_vert_levels - The number of vertical levels in this field.\n"
-           "\tvert_levels - The vertical levels for this field. "
-           "There must be num_vert_levels vertical levels specified. "
-           "The vertical levels are delimited by commas. "
-           "Only used if level_spec_type is LEVELS_LISTED.\n"
-           "\tmin_vert_level - Minimum vertical level value. "
-           "Only used if level_spec_type is LEVELS_CONST_DZ.\n"
-           "\tdelta_vert_level - Delta vertical level value. "
-           "Only used if level_spec_type is LEVELS_CONST_DZ.\n"
-           "\tradiance_convert - String indicating what type of radiance to "
-           "brightness temperature conversion to use for each output field. "
-           "The must either be num_fields conversions specified (delimited "
-           "by commas) or this string must be empty. "
-           "The valid conversions are:\n"
-           "\t\tCONVERT_RAD_NONE - don't do a radiance conversion\n"
-           "\t\tCONVERT_RAD_VIS\n"
-           "\t\tCONVERT_RAD_CH3\n"
-           "\t\tCONVERT_RAD_CH4\n"
-           "\t\tCONVERT_RAD_CH5\n\n"
-           "Note that if any of the fields uses CONVERT_RAD_VIS radiance "
-           "conversion, then the TRMM file must contain the solar "
-           "calibration and local direction information. "
-           "This was only tested on the 1B01 files.\n"
-           "\tinvert_vert_levels - Flag indicating whether to invert the "
-           "vertical levels when writing the data to the MDV file. "
-           "If set to false, the order of the vertical levels in the MDV file "
-           "will match the order of the vertical levels in the HDF file. "
-           "If set to true, the order of the vertical levels in the MDV file "
-           "will be reversed.\n";
-  p_default = { { "highResCh", FULL_RES_DATA, 2, "100.0,100.0",
-                  "-100.0,-100.0", "-99999.0,-99999.0", "", "", "", "", "",
-                  "highResCh1,highResCh2", "K,K",
-                  LEVELS_LISTED, VERT_TYPE_SATELLITE_IMAGE,
-                  1, "0.0", 0.0, 0.0,
-                  "", false } };
-} output_fields[];
-
-commentdef {
-  p_header = "INPUT PROJECTION";
-}
-
-paramdef enum projection_t {
-  p_default = PROJ_LATLON;
-  p_descr = "Projection of grid in x,y.";
-  p_help =
-  "\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n"
-  "\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n"
-  "\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n"
-  "\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n"
-  "\tPROJ_MERCATOR: Mercator - EW orientation\n"
-  "\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n"
-  "\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n"
-  "\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n"
-  "\tPROJ_ALBERS: Albers Equal Area Conic\n"
-  "\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n";
-} input_projection;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Projection grid rotation.";
-  p_help = "This applies only to PROJ_FLAT projections.";
-} input_proj_rotation;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Projection grid origin latitude.";
-  p_help = "This applies to all projections except LATLON.";
-} input_proj_origin_lat;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Projection grid origin longitude.";
-  p_help = "This applies to all projections except LATLON.";
-} input_proj_origin_lon;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Projection grid reference latitude 1.";
-  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
-} input_proj_lat1;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Projection grid reference latitude 2.";
-  p_help = "This applies to LAMBERT_CONF and ALBERS projections.";
-} input_proj_lat2;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Central scale for remapped projections.";
-  p_help = "This applies to POLAR_STEREO and TRANSVERSE_MERCATOR projections.";
-} input_proj_central_scale;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Projection tangent latitude (deg).";
-  p_help = "This applies to OBLIQUE_STEREO only.";
-} input_proj_tangent_lat;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Projection tangent longitude (deg).";
-  p_help = "This applies to OBLIQUE_STEREO and POLAR_STEREO.";
-} input_proj_tangent_lon;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
-  p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
-} input_proj_pole_is_north;
-
-paramdef double {
-  p_default = 35786;
-  p_descr = "Radius of perspective point (km).";
-  p_help = "This applies to VERT_PERSP.";
-} input_proj_persp_radius;
-
-commentdef {
-  p_header = "RESAMPLE LAT/LON-based DATA ONTO REGULAR LATLON PROJECTION";
-  p_text = "Sometimes data in the netcdf file has its extent described by lat/lon arrays, but the projection is not known exactly. In that case we have the option of resampling this type of data onto the output projection.";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Indicates that the (x,y) variables indicated by netcdf_dim_x and netcdf_dim_y contain (lat/lon) pairs.";
-  p_help = "For some data sets, the (x,y) grid may be specified in lat/lon instead of km. In this case, if the input projection is not known, you can resample the data onto a regular latlon grid.";
-} input_xy_is_latlon;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Resample the geometry from the lat/lon grid in the input file, onto a regular latlon grid.";
-  p_help = "The output grid details will be deduced from the lat/lon arrays in the input file.";
-} resample_latlon_onto_regular_grid;
-
-commentdef {
-  p_header = "NETCDF dimensions";
-  p_text = "Specify the names used in the netCDF file for dimensions, since they can vary depending on the application used to create the file.";
-}
-
-paramdef string {
-  p_default = "time";
-  p_descr = "name for netCDF dimension for time.";
-} netcdf_dim_time;
-
-paramdef string {
-  p_default = "longitude";
-  p_descr = "netCDF dimension name for grid points in longitude.";
-} netcdf_dim_x;
-
-paramdef string {
-  p_default = "latitude";
-  p_descr = "netCDF dimension name for grid points in latitude.";
-} netcdf_dim_y;
-
-paramdef string {
-  p_default = "altitude";
-  p_descr = "netCDF dimension name for grid points in altitude.";
-  p_descr = "Specify 'none' if there is no Z dimension.";
-} netcdf_dim_z;
-
-commentdef {
-  p_header = "NETCDF variables";
-  p_text = "Specify the names used in the netCDF file for variables, since they can vary depending on the application used to create the file.";
-}
-
-paramdef string {
-  p_default = "base_time";
-  p_descr = "Data set times are relative to this base time";
-  p_help = "Specify 'none' if there is no base time variable. In the units of the time variable will be used.";
-} netcdf_var_base_time;
-
-paramdef string {
-  p_default = "1970-01-01T00:00:00Z";
-  p_descr = "Base time string - used if netcdf_var_base_time is set to 'none'.";
-  p_help = "Set this to a W3C ISO 8601 time - see http://www.w3.org/TR/NOTE-datetime";
-} base_time_string;
-
-paramdef string {
-  p_default = "time_offset";
-  p_descr = "Time offset relative to base_time, or unix_time if base_time is 'none'.";
-} netcdf_var_time_offset;
-
-paramdef string {
-  p_default = "altitude";
-  p_descr = "Z variable name";
-  p_descr = "Specify 'none' if there is no Z dimension.";
-} netcdf_var_z;
-
-paramdef string {
-  p_default = "latitude";
-  p_descr = "Y variable name";
-} netcdf_var_y;
-
-paramdef string {
-  p_default = "longitude";
-  p_descr = "X variable name";
-} netcdf_var_x;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to consider ncbyte fields as unsigned.";
-  p_help = "Normally ncbyte fields are signed. If this field is set to TRUE, they are treated as unsigned instead.";
-} treat_ncbyte_as_unsigned;
 

@@ -775,32 +775,74 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("REMAP ONTO REGULAR LAT/LON GRID");
+    tt->comment_hdr = tdrpStrDup("OUTPUT REGULAR LAT/LON GRID");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_delta_lat_deg'
-    // ctype is 'double'
+    // Parameter 'output_grid'
+    // ctype is '_grid_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("output_delta_lat_deg");
-    tt->descr = tdrpStrDup("Delta latitude for output grid (deg)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_delta_lat_deg - &_start_;
-    tt->single_val.d = 0.01;
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("output_grid");
+    tt->descr = tdrpStrDup("Parameters for output grid.");
+    tt->help = tdrpStrDup("Units in deg.");
+    tt->val_offset = (char *) &output_grid - &_start_;
+    tt->struct_def.name = tdrpStrDup("grid_params_t");
+    tt->struct_def.nfields = 6;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("nLon");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &output_grid.nLon - (char *) &output_grid;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("nLat");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &output_grid.nLat - (char *) &output_grid;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("minLon");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &output_grid.minLon - (char *) &output_grid;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("minLat");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &output_grid.minLat - (char *) &output_grid;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("dLon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &output_grid.dLon - (char *) &output_grid;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("dLat");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &output_grid.dLat - (char *) &output_grid;
+    tt->n_struct_vals = 6;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].i = 500;
+      tt->struct_vals[1].i = 500;
+      tt->struct_vals[2].d = -104;
+      tt->struct_vals[3].d = 35;
+      tt->struct_vals[4].d = 0.01;
+      tt->struct_vals[5].d = 0.01;
     tt++;
     
-    // Parameter 'output_delta_lon_deg'
-    // ctype is 'double'
+    // Parameter 'set_output_grid_limits_from_data'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("output_delta_lon_deg");
-    tt->descr = tdrpStrDup("Delta longitude for output grid (deg)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_delta_lon_deg - &_start_;
-    tt->single_val.d = 0.01;
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_output_grid_limits_from_data");
+    tt->descr = tdrpStrDup("Option to compute grid limits from input data.");
+    tt->help = tdrpStrDup("If true, nLon, nLat, minLon and minLat will be computed from the data. dLon and dLat will be used as set.");
+    tt->val_offset = (char *) &set_output_grid_limits_from_data - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'Comment 5'
@@ -808,310 +850,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("REMAP PROJECTION/GRID ON OUTPUT");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'remap_output_projection'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remap_output_projection");
-    tt->descr = tdrpStrDup("Option to remap grid in x,y.");
-    tt->help = tdrpStrDup("If true, set the remap parameters below.");
-    tt->val_offset = (char *) &remap_output_projection - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'auto_remap_to_latlon'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("auto_remap_to_latlon");
-    tt->descr = tdrpStrDup("Option to automatically remap the grid to a lat-lon projection.");
-    tt->help = tdrpStrDup("If true, the data in the file will be remapped to a latlon grid which matches the existing grid in resolution and extent. Other remap parameters will be ignored.");
-    tt->val_offset = (char *) &auto_remap_to_latlon - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'remap_projection'
-    // ctype is '_projection_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("remap_projection");
-    tt->descr = tdrpStrDup("Projection for remapping in x,y. See projection param below.");
-    tt->help = tdrpStrDup("\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n\tPROJ_MERCATOR: Mercator - EW orientation\n\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n\tPROJ_ALBERS: Albers Equal Area Conic\n\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n");
-    tt->val_offset = (char *) &remap_projection - &_start_;
-    tt->enum_def.name = tdrpStrDup("projection_t");
-    tt->enum_def.nfields = 10;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PROJ_LATLON");
-      tt->enum_def.fields[0].val = PROJ_LATLON;
-      tt->enum_def.fields[1].name = tdrpStrDup("PROJ_LAMBERT_CONF");
-      tt->enum_def.fields[1].val = PROJ_LAMBERT_CONF;
-      tt->enum_def.fields[2].name = tdrpStrDup("PROJ_MERCATOR");
-      tt->enum_def.fields[2].val = PROJ_MERCATOR;
-      tt->enum_def.fields[3].name = tdrpStrDup("PROJ_POLAR_STEREO");
-      tt->enum_def.fields[3].val = PROJ_POLAR_STEREO;
-      tt->enum_def.fields[4].name = tdrpStrDup("PROJ_FLAT");
-      tt->enum_def.fields[4].val = PROJ_FLAT;
-      tt->enum_def.fields[5].name = tdrpStrDup("PROJ_OBLIQUE_STEREO");
-      tt->enum_def.fields[5].val = PROJ_OBLIQUE_STEREO;
-      tt->enum_def.fields[6].name = tdrpStrDup("PROJ_TRANS_MERCATOR");
-      tt->enum_def.fields[6].val = PROJ_TRANS_MERCATOR;
-      tt->enum_def.fields[7].name = tdrpStrDup("PROJ_ALBERS");
-      tt->enum_def.fields[7].val = PROJ_ALBERS;
-      tt->enum_def.fields[8].name = tdrpStrDup("PROJ_LAMBERT_AZIM");
-      tt->enum_def.fields[8].val = PROJ_LAMBERT_AZIM;
-      tt->enum_def.fields[9].name = tdrpStrDup("PROJ_VERT_PERSP");
-      tt->enum_def.fields[9].val = PROJ_VERT_PERSP;
-    tt->single_val.e = PROJ_LATLON;
-    tt++;
-    
-    // Parameter 'remap_grid'
-    // ctype is '_grid_params_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("remap_grid");
-    tt->descr = tdrpStrDup("Grid parameters for remapping in x,y.");
-    tt->help = tdrpStrDup("Units in km, except for LATLON, which is in degrees.");
-    tt->val_offset = (char *) &remap_grid - &_start_;
-    tt->struct_def.name = tdrpStrDup("grid_params_t");
-    tt->struct_def.nfields = 6;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[0].fname = tdrpStrDup("nx");
-      tt->struct_def.fields[0].ptype = INT_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &remap_grid.nx - (char *) &remap_grid;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[1].fname = tdrpStrDup("ny");
-      tt->struct_def.fields[1].ptype = INT_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &remap_grid.ny - (char *) &remap_grid;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("minx");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &remap_grid.minx - (char *) &remap_grid;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("miny");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &remap_grid.miny - (char *) &remap_grid;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("dx");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &remap_grid.dx - (char *) &remap_grid;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("dy");
-      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &remap_grid.dy - (char *) &remap_grid;
-    tt->n_struct_vals = 6;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].i = 1;
-      tt->struct_vals[1].i = 1;
-      tt->struct_vals[2].d = 0;
-      tt->struct_vals[3].d = 0;
-      tt->struct_vals[4].d = 1;
-      tt->struct_vals[5].d = 1;
-    tt++;
-    
-    // Parameter 'remap_rotation'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_rotation");
-    tt->descr = tdrpStrDup("Remapped grid rotation.");
-    tt->help = tdrpStrDup("This applies only to PROJ_FLAT projections.");
-    tt->val_offset = (char *) &remap_rotation - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_origin_lat'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_origin_lat");
-    tt->descr = tdrpStrDup("Remapped grid origin latitude.");
-    tt->help = tdrpStrDup("This applies to all projections except LATLON.");
-    tt->val_offset = (char *) &remap_origin_lat - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_origin_lon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_origin_lon");
-    tt->descr = tdrpStrDup("Remapped grid origin longitude.");
-    tt->help = tdrpStrDup("This applies to all projections except LATLON.");
-    tt->val_offset = (char *) &remap_origin_lon - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_lat1'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_lat1");
-    tt->descr = tdrpStrDup("Remapped grid reference latitude 1.");
-    tt->help = tdrpStrDup("This applies to LAMBERT_CONF and ALBERS projections.");
-    tt->val_offset = (char *) &remap_lat1 - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_lat2'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_lat2");
-    tt->descr = tdrpStrDup("Remapped grid reference latitude 2.");
-    tt->help = tdrpStrDup("This applies to LAMBERT_CONF and ALBERS projections.");
-    tt->val_offset = (char *) &remap_lat2 - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_central_scale'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_central_scale");
-    tt->descr = tdrpStrDup("Central scale for remapped projections.");
-    tt->help = tdrpStrDup("This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR projections.");
-    tt->val_offset = (char *) &remap_central_scale - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'remap_tangent_lat'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_tangent_lat");
-    tt->descr = tdrpStrDup("Remapped tangent latitude (deg).");
-    tt->help = tdrpStrDup("This applies to OBLIQUE_STEREO only.");
-    tt->val_offset = (char *) &remap_tangent_lat - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_tangent_lon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_tangent_lon");
-    tt->descr = tdrpStrDup("Remapped tangent longitude (deg).");
-    tt->help = tdrpStrDup("This applies to OBLIQUE_STEREO and POLAR_STEREO.");
-    tt->val_offset = (char *) &remap_tangent_lon - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_pole_is_north'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remap_pole_is_north");
-    tt->descr = tdrpStrDup("Flag indicating stereogtraphic is over the NORTH pole.");
-    tt->help = tdrpStrDup("This applies to POLAR_STEREO. If false, the projection is over the south pole.");
-    tt->val_offset = (char *) &remap_pole_is_north - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'remap_persp_radius'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_persp_radius");
-    tt->descr = tdrpStrDup("Radius of perspective point (km).");
-    tt->help = tdrpStrDup("This applies to VERT_PERSP.");
-    tt->val_offset = (char *) &remap_persp_radius - &_start_;
-    tt->single_val.d = 35786;
-    tt++;
-    
-    // Parameter 'remap_false_northing'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_false_northing");
-    tt->descr = tdrpStrDup("Remapped false northing correction.");
-    tt->help = tdrpStrDup("Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude");
-    tt->val_offset = (char *) &remap_false_northing - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_false_easting'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_false_easting");
-    tt->descr = tdrpStrDup("Remapped false easting correction.");
-    tt->help = tdrpStrDup("Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.");
-    tt->val_offset = (char *) &remap_false_easting - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_set_offset_origin'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remap_set_offset_origin");
-    tt->descr = tdrpStrDup("Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?");
-    tt->help = tdrpStrDup("If true, set remap_offset_origin_latitude and remap_offset_origin_longitude.");
-    tt->val_offset = (char *) &remap_set_offset_origin - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'remap_offset_origin_latitude'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_offset_origin_latitude");
-    tt->descr = tdrpStrDup("Latitude of offset origin.");
-    tt->help = tdrpStrDup("See remap_set_offset_origin.");
-    tt->val_offset = (char *) &remap_offset_origin_latitude - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'remap_offset_origin_longitude'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("remap_offset_origin_longitude");
-    tt->descr = tdrpStrDup("Longitude of offset origin.");
-    tt->help = tdrpStrDup("See remap_set_offset_origin.");
-    tt->val_offset = (char *) &remap_offset_origin_longitude - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OUTPUT LOCATION");
+    tt->comment_hdr = tdrpStrDup("OUTPUT URL");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1127,11 +866,11 @@
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/from_netcdf");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT ENCODING AND COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1158,41 +897,11 @@
     tt->single_val.e = ENCODING_INT16;
     tt++;
     
-    // Parameter 'output_compression_type'
-    // ctype is '_compression_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_compression_type");
-    tt->descr = tdrpStrDup("Set output compression type.");
-    tt->help = tdrpStrDup("See <toolsa/compress> for details on the compression types.");
-    tt->val_offset = (char *) &output_compression_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("compression_type_t");
-    tt->enum_def.nfields = 7;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("COMPRESSION_NONE");
-      tt->enum_def.fields[0].val = COMPRESSION_NONE;
-      tt->enum_def.fields[1].name = tdrpStrDup("COMPRESSION_RLE");
-      tt->enum_def.fields[1].val = COMPRESSION_RLE;
-      tt->enum_def.fields[2].name = tdrpStrDup("COMPRESSION_LZO");
-      tt->enum_def.fields[2].val = COMPRESSION_LZO;
-      tt->enum_def.fields[3].name = tdrpStrDup("COMPRESSION_ZLIB");
-      tt->enum_def.fields[3].val = COMPRESSION_ZLIB;
-      tt->enum_def.fields[4].name = tdrpStrDup("COMPRESSION_BZIP");
-      tt->enum_def.fields[4].val = COMPRESSION_BZIP;
-      tt->enum_def.fields[5].name = tdrpStrDup("COMPRESSION_GZIP");
-      tt->enum_def.fields[5].val = COMPRESSION_GZIP;
-      tt->enum_def.fields[6].name = tdrpStrDup("COMPRESSION_GZIP_VOL");
-      tt->enum_def.fields[6].val = COMPRESSION_GZIP_VOL;
-    tt->single_val.e = COMPRESSION_GZIP;
-    tt++;
-    
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT METADATA STRINGS");
     tt->comment_text = tdrpStrDup("These will be used if the file does not contain suitable information.");
     tt++;
@@ -1206,7 +915,7 @@
     tt->descr = tdrpStrDup("Name of data set.");
     tt->help = tdrpStrDup("Appears in Mdv master header.");
     tt->val_offset = (char *) &data_set_name - &_start_;
-    tt->single_val.s = tdrpStrDup("TRMM");
+    tt->single_val.s = tdrpStrDup("GPM");
     tt++;
     
     // Parameter 'data_set_source'
@@ -1218,7 +927,7 @@
     tt->descr = tdrpStrDup("Source of data.");
     tt->help = tdrpStrDup("Appears in Mdv master header.");
     tt->val_offset = (char *) &data_set_source - &_start_;
-    tt->single_val.s = tdrpStrDup("Texas Tech University");
+    tt->single_val.s = tdrpStrDup("NASA");
     tt++;
     
     // Parameter 'data_set_info'
@@ -1230,528 +939,7 @@
     tt->descr = tdrpStrDup("Info for data set.");
     tt->help = tdrpStrDup("Appears in Mdv master header.");
     tt->val_offset = (char *) &data_set_info - &_start_;
-    tt->single_val.s = tdrpStrDup("Created by NcGeneric2Mdv");
-    tt++;
-    
-    // Parameter 'output_fields'
-    // ctype is '_output_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("Information about the TRMM data fields to be included in the output file.");
-    tt->help = tdrpStrDup("\tsds_field_name - The name of the field in the SDS section of the HDF file.\n\tdata_type - How the data is stored in the HDF file.\n\t\tFULL_RES_DATA is stored with the same number of scans and pixels as the geolocation data.\n\t\tLOW_RES_DATA is stored with the same number of scans, but half the pixels of the geolocation data. The data is assumed to occupy every other pixel in each scan.\n\tnum_fields - Number of fields in the TRMM SDS data array. All of the fields in a requested SDS data array must be processed.\n\tscales - List of scale values to apply to the data in the TRMM file. There must either be num_fields scales specified or this string must be empty. The scales are delimited by commas. If the string is empty, no scale value will be applied (same as setting scale to 1.0).\n\tbiases - List of bias values to apply to the data in the TRMM file. There must be either num_fields biases specified or this string must be empty. The biases are delimited by commas. If the string is empty, no bias will be applied (same as setting bias to 0.0).\nThe final data value is calculated as:\n\t\t data_value = (trmm_file_value / scale) - bias\n\tmissing_values1, missing_values2, missing_values3 - List of missing data values to apply to the data in the TRMM file. There must either be num_fields missing values specified or this string must be empty. The missing values are delimited by commas. If this string is empty, no missing data value is applied to the input data.\n\tbad_values1, bad_values2, bad_values3 - List of bad data values to apply to the data in the TRMM file. There must either be num_fields bad values specified or this string must be empty. The bad values are delimited by commas. If this string is empty, no bad data value is applied to the input data.\n\tmdv_field_names - The field names to use for the fields in the output MDV file. There must be num_fields names specified. The names are delimited by commas.\n\tmdv_field_units - The units for each of the MDV output fields. There must be num_fields of these. The names are delimited by commas.\n\tinput_level_type - Flag indicating how the vertical levels are specified in this parameter file.\n\t\tLEVELS_LISTED - The actual vertical level values are listed in the vert_levels paramter.\n\t\tLEVELS_CONST_DZ - The levels are calculated using num_vert_levels, min_vert_level and vert_level_delta.\nNote that this description of the vertical levels must match the data as it appears in the HDF file.\n\tvert_level_type - The type of vertical levels in the data.\n\tnum_vert_levels - The number of vertical levels in this field.\n\tvert_levels - The vertical levels for this field. There must be num_vert_levels vertical levels specified. The vertical levels are delimited by commas. Only used if level_spec_type is LEVELS_LISTED.\n\tmin_vert_level - Minimum vertical level value. Only used if level_spec_type is LEVELS_CONST_DZ.\n\tdelta_vert_level - Delta vertical level value. Only used if level_spec_type is LEVELS_CONST_DZ.\n\tradiance_convert - String indicating what type of radiance to brightness temperature conversion to use for each output field. The must either be num_fields conversions specified (delimited by commas) or this string must be empty. The valid conversions are:\n\t\tCONVERT_RAD_NONE - don't do a radiance conversion\n\t\tCONVERT_RAD_VIS\n\t\tCONVERT_RAD_CH3\n\t\tCONVERT_RAD_CH4\n\t\tCONVERT_RAD_CH5\n\nNote that if any of the fields uses CONVERT_RAD_VIS radiance conversion, then the TRMM file must contain the solar calibration and local direction information. This was only tested on the 1B01 files.\n\tinvert_vert_levels - Flag indicating whether to invert the vertical levels when writing the data to the MDV file. If set to false, the order of the vertical levels in the MDV file will match the order of the vertical levels in the HDF file. If set to true, the order of the vertical levels in the MDV file will be reversed.\n");
-    tt->array_offset = (char *) &_output_fields - &_start_;
-    tt->array_n_offset = (char *) &output_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 1;
-    tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 21;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("sds_field_name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->sds_field_name - (char *) _output_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("data_type_t");
-      tt->struct_def.fields[1].fname = tdrpStrDup("data_type");
-      tt->struct_def.fields[1].ptype = ENUM_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->data_type - (char *) _output_fields;
-        tt->struct_def.fields[1].enum_def.name = tdrpStrDup("data_type_t");
-        tt->struct_def.fields[1].enum_def.nfields = 2;
-        tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("FULL_RES_DATA");
-        tt->struct_def.fields[1].enum_def.fields[0].val = FULL_RES_DATA;
-        tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("LOW_RES_DATA");
-        tt->struct_def.fields[1].enum_def.fields[1].val = LOW_RES_DATA;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("long");
-      tt->struct_def.fields[2].fname = tdrpStrDup("num_fields");
-      tt->struct_def.fields[2].ptype = LONG_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_output_fields->num_fields - (char *) _output_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("scales");
-      tt->struct_def.fields[3].ptype = STRING_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_output_fields->scales - (char *) _output_fields;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[4].fname = tdrpStrDup("biases");
-      tt->struct_def.fields[4].ptype = STRING_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_output_fields->biases - (char *) _output_fields;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[5].fname = tdrpStrDup("missing_values1");
-      tt->struct_def.fields[5].ptype = STRING_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_output_fields->missing_values1 - (char *) _output_fields;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[6].fname = tdrpStrDup("missing_values2");
-      tt->struct_def.fields[6].ptype = STRING_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
-        (char *) &_output_fields->missing_values2 - (char *) _output_fields;
-      tt->struct_def.fields[7].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[7].fname = tdrpStrDup("missing_values3");
-      tt->struct_def.fields[7].ptype = STRING_TYPE;
-      tt->struct_def.fields[7].rel_offset = 
-        (char *) &_output_fields->missing_values3 - (char *) _output_fields;
-      tt->struct_def.fields[8].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[8].fname = tdrpStrDup("bad_values1");
-      tt->struct_def.fields[8].ptype = STRING_TYPE;
-      tt->struct_def.fields[8].rel_offset = 
-        (char *) &_output_fields->bad_values1 - (char *) _output_fields;
-      tt->struct_def.fields[9].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[9].fname = tdrpStrDup("bad_values2");
-      tt->struct_def.fields[9].ptype = STRING_TYPE;
-      tt->struct_def.fields[9].rel_offset = 
-        (char *) &_output_fields->bad_values2 - (char *) _output_fields;
-      tt->struct_def.fields[10].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[10].fname = tdrpStrDup("bad_values3");
-      tt->struct_def.fields[10].ptype = STRING_TYPE;
-      tt->struct_def.fields[10].rel_offset = 
-        (char *) &_output_fields->bad_values3 - (char *) _output_fields;
-      tt->struct_def.fields[11].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[11].fname = tdrpStrDup("mdv_field_names");
-      tt->struct_def.fields[11].ptype = STRING_TYPE;
-      tt->struct_def.fields[11].rel_offset = 
-        (char *) &_output_fields->mdv_field_names - (char *) _output_fields;
-      tt->struct_def.fields[12].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[12].fname = tdrpStrDup("mdv_field_units");
-      tt->struct_def.fields[12].ptype = STRING_TYPE;
-      tt->struct_def.fields[12].rel_offset = 
-        (char *) &_output_fields->mdv_field_units - (char *) _output_fields;
-      tt->struct_def.fields[13].ftype = tdrpStrDup("level_spec_type_t");
-      tt->struct_def.fields[13].fname = tdrpStrDup("level_spec_type");
-      tt->struct_def.fields[13].ptype = ENUM_TYPE;
-      tt->struct_def.fields[13].rel_offset = 
-        (char *) &_output_fields->level_spec_type - (char *) _output_fields;
-        tt->struct_def.fields[13].enum_def.name = tdrpStrDup("level_spec_type_t");
-        tt->struct_def.fields[13].enum_def.nfields = 2;
-        tt->struct_def.fields[13].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[13].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[13].enum_def.fields[0].name = tdrpStrDup("LEVELS_LISTED");
-        tt->struct_def.fields[13].enum_def.fields[0].val = LEVELS_LISTED;
-        tt->struct_def.fields[13].enum_def.fields[1].name = tdrpStrDup("LEVELS_CONST_DZ");
-        tt->struct_def.fields[13].enum_def.fields[1].val = LEVELS_CONST_DZ;
-      tt->struct_def.fields[14].ftype = tdrpStrDup("vert_type_t");
-      tt->struct_def.fields[14].fname = tdrpStrDup("vert_level_type");
-      tt->struct_def.fields[14].ptype = ENUM_TYPE;
-      tt->struct_def.fields[14].rel_offset = 
-        (char *) &_output_fields->vert_level_type - (char *) _output_fields;
-        tt->struct_def.fields[14].enum_def.name = tdrpStrDup("vert_type_t");
-        tt->struct_def.fields[14].enum_def.nfields = 2;
-        tt->struct_def.fields[14].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[14].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[14].enum_def.fields[0].name = tdrpStrDup("VERT_TYPE_SATELLITE_IMAGE");
-        tt->struct_def.fields[14].enum_def.fields[0].val = VERT_TYPE_SATELLITE_IMAGE;
-        tt->struct_def.fields[14].enum_def.fields[1].name = tdrpStrDup("VERT_TYPE_Z");
-        tt->struct_def.fields[14].enum_def.fields[1].val = VERT_TYPE_Z;
-      tt->struct_def.fields[15].ftype = tdrpStrDup("long");
-      tt->struct_def.fields[15].fname = tdrpStrDup("num_vert_levels");
-      tt->struct_def.fields[15].ptype = LONG_TYPE;
-      tt->struct_def.fields[15].rel_offset = 
-        (char *) &_output_fields->num_vert_levels - (char *) _output_fields;
-      tt->struct_def.fields[16].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[16].fname = tdrpStrDup("vert_levels");
-      tt->struct_def.fields[16].ptype = STRING_TYPE;
-      tt->struct_def.fields[16].rel_offset = 
-        (char *) &_output_fields->vert_levels - (char *) _output_fields;
-      tt->struct_def.fields[17].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[17].fname = tdrpStrDup("min_vert_level");
-      tt->struct_def.fields[17].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[17].rel_offset = 
-        (char *) &_output_fields->min_vert_level - (char *) _output_fields;
-      tt->struct_def.fields[18].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[18].fname = tdrpStrDup("delta_vert_level");
-      tt->struct_def.fields[18].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[18].rel_offset = 
-        (char *) &_output_fields->delta_vert_level - (char *) _output_fields;
-      tt->struct_def.fields[19].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[19].fname = tdrpStrDup("radiance_convert");
-      tt->struct_def.fields[19].ptype = STRING_TYPE;
-      tt->struct_def.fields[19].rel_offset = 
-        (char *) &_output_fields->radiance_convert - (char *) _output_fields;
-      tt->struct_def.fields[20].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[20].fname = tdrpStrDup("invert_vert_levels");
-      tt->struct_def.fields[20].ptype = BOOL_TYPE;
-      tt->struct_def.fields[20].rel_offset = 
-        (char *) &_output_fields->invert_vert_levels - (char *) _output_fields;
-    tt->n_struct_vals = 21;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("highResCh");
-      tt->struct_vals[1].e = FULL_RES_DATA;
-      tt->struct_vals[2].l = 2;
-      tt->struct_vals[3].s = tdrpStrDup("100.0,100.0");
-      tt->struct_vals[4].s = tdrpStrDup("-100.0,-100.0");
-      tt->struct_vals[5].s = tdrpStrDup("-99999.0,-99999.0");
-      tt->struct_vals[6].s = tdrpStrDup("");
-      tt->struct_vals[7].s = tdrpStrDup("");
-      tt->struct_vals[8].s = tdrpStrDup("");
-      tt->struct_vals[9].s = tdrpStrDup("");
-      tt->struct_vals[10].s = tdrpStrDup("");
-      tt->struct_vals[11].s = tdrpStrDup("highResCh1,highResCh2");
-      tt->struct_vals[12].s = tdrpStrDup("K,K");
-      tt->struct_vals[13].e = LEVELS_LISTED;
-      tt->struct_vals[14].e = VERT_TYPE_SATELLITE_IMAGE;
-      tt->struct_vals[15].l = 1;
-      tt->struct_vals[16].s = tdrpStrDup("0.0");
-      tt->struct_vals[17].d = 0;
-      tt->struct_vals[18].d = 0;
-      tt->struct_vals[19].s = tdrpStrDup("");
-      tt->struct_vals[20].b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("INPUT PROJECTION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'input_projection'
-    // ctype is '_projection_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("input_projection");
-    tt->descr = tdrpStrDup("Projection of grid in x,y.");
-    tt->help = tdrpStrDup("\tPROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)\n\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n\tPROJ_MERCATOR: Mercator - EW orientation\n\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n\tPROJ_ALBERS: Albers Equal Area Conic\n\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n");
-    tt->val_offset = (char *) &input_projection - &_start_;
-    tt->enum_def.name = tdrpStrDup("projection_t");
-    tt->enum_def.nfields = 10;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PROJ_LATLON");
-      tt->enum_def.fields[0].val = PROJ_LATLON;
-      tt->enum_def.fields[1].name = tdrpStrDup("PROJ_LAMBERT_CONF");
-      tt->enum_def.fields[1].val = PROJ_LAMBERT_CONF;
-      tt->enum_def.fields[2].name = tdrpStrDup("PROJ_MERCATOR");
-      tt->enum_def.fields[2].val = PROJ_MERCATOR;
-      tt->enum_def.fields[3].name = tdrpStrDup("PROJ_POLAR_STEREO");
-      tt->enum_def.fields[3].val = PROJ_POLAR_STEREO;
-      tt->enum_def.fields[4].name = tdrpStrDup("PROJ_FLAT");
-      tt->enum_def.fields[4].val = PROJ_FLAT;
-      tt->enum_def.fields[5].name = tdrpStrDup("PROJ_OBLIQUE_STEREO");
-      tt->enum_def.fields[5].val = PROJ_OBLIQUE_STEREO;
-      tt->enum_def.fields[6].name = tdrpStrDup("PROJ_TRANS_MERCATOR");
-      tt->enum_def.fields[6].val = PROJ_TRANS_MERCATOR;
-      tt->enum_def.fields[7].name = tdrpStrDup("PROJ_ALBERS");
-      tt->enum_def.fields[7].val = PROJ_ALBERS;
-      tt->enum_def.fields[8].name = tdrpStrDup("PROJ_LAMBERT_AZIM");
-      tt->enum_def.fields[8].val = PROJ_LAMBERT_AZIM;
-      tt->enum_def.fields[9].name = tdrpStrDup("PROJ_VERT_PERSP");
-      tt->enum_def.fields[9].val = PROJ_VERT_PERSP;
-    tt->single_val.e = PROJ_LATLON;
-    tt++;
-    
-    // Parameter 'input_proj_rotation'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_rotation");
-    tt->descr = tdrpStrDup("Projection grid rotation.");
-    tt->help = tdrpStrDup("This applies only to PROJ_FLAT projections.");
-    tt->val_offset = (char *) &input_proj_rotation - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'input_proj_origin_lat'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_origin_lat");
-    tt->descr = tdrpStrDup("Projection grid origin latitude.");
-    tt->help = tdrpStrDup("This applies to all projections except LATLON.");
-    tt->val_offset = (char *) &input_proj_origin_lat - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'input_proj_origin_lon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_origin_lon");
-    tt->descr = tdrpStrDup("Projection grid origin longitude.");
-    tt->help = tdrpStrDup("This applies to all projections except LATLON.");
-    tt->val_offset = (char *) &input_proj_origin_lon - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'input_proj_lat1'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_lat1");
-    tt->descr = tdrpStrDup("Projection grid reference latitude 1.");
-    tt->help = tdrpStrDup("This applies to LAMBERT_CONF and ALBERS projections.");
-    tt->val_offset = (char *) &input_proj_lat1 - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'input_proj_lat2'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_lat2");
-    tt->descr = tdrpStrDup("Projection grid reference latitude 2.");
-    tt->help = tdrpStrDup("This applies to LAMBERT_CONF and ALBERS projections.");
-    tt->val_offset = (char *) &input_proj_lat2 - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'input_proj_central_scale'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_central_scale");
-    tt->descr = tdrpStrDup("Central scale for remapped projections.");
-    tt->help = tdrpStrDup("This applies to POLAR_STEREO and TRANSVERSE_MERCATOR projections.");
-    tt->val_offset = (char *) &input_proj_central_scale - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'input_proj_tangent_lat'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_tangent_lat");
-    tt->descr = tdrpStrDup("Projection tangent latitude (deg).");
-    tt->help = tdrpStrDup("This applies to OBLIQUE_STEREO only.");
-    tt->val_offset = (char *) &input_proj_tangent_lat - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'input_proj_tangent_lon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_tangent_lon");
-    tt->descr = tdrpStrDup("Projection tangent longitude (deg).");
-    tt->help = tdrpStrDup("This applies to OBLIQUE_STEREO and POLAR_STEREO.");
-    tt->val_offset = (char *) &input_proj_tangent_lon - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'input_proj_pole_is_north'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_pole_is_north");
-    tt->descr = tdrpStrDup("Flag indicating stereogtraphic is over the NORTH pole.");
-    tt->help = tdrpStrDup("This applies to POLAR_STEREO. If false, the projection is over the south pole.");
-    tt->val_offset = (char *) &input_proj_pole_is_north - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'input_proj_persp_radius'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("input_proj_persp_radius");
-    tt->descr = tdrpStrDup("Radius of perspective point (km).");
-    tt->help = tdrpStrDup("This applies to VERT_PERSP.");
-    tt->val_offset = (char *) &input_proj_persp_radius - &_start_;
-    tt->single_val.d = 35786;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("RESAMPLE LAT/LON-based DATA ONTO REGULAR LATLON PROJECTION");
-    tt->comment_text = tdrpStrDup("Sometimes data in the netcdf file has its extent described by lat/lon arrays, but the projection is not known exactly. In that case we have the option of resampling this type of data onto the output projection.");
-    tt++;
-    
-    // Parameter 'input_xy_is_latlon'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("input_xy_is_latlon");
-    tt->descr = tdrpStrDup("Indicates that the (x,y) variables indicated by netcdf_dim_x and netcdf_dim_y contain (lat/lon) pairs.");
-    tt->help = tdrpStrDup("For some data sets, the (x,y) grid may be specified in lat/lon instead of km. In this case, if the input projection is not known, you can resample the data onto a regular latlon grid.");
-    tt->val_offset = (char *) &input_xy_is_latlon - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'resample_latlon_onto_regular_grid'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("resample_latlon_onto_regular_grid");
-    tt->descr = tdrpStrDup("Resample the geometry from the lat/lon grid in the input file, onto a regular latlon grid.");
-    tt->help = tdrpStrDup("The output grid details will be deduced from the lat/lon arrays in the input file.");
-    tt->val_offset = (char *) &resample_latlon_onto_regular_grid - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("NETCDF dimensions");
-    tt->comment_text = tdrpStrDup("Specify the names used in the netCDF file for dimensions, since they can vary depending on the application used to create the file.");
-    tt++;
-    
-    // Parameter 'netcdf_dim_time'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_dim_time");
-    tt->descr = tdrpStrDup("name for netCDF dimension for time.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_dim_time - &_start_;
-    tt->single_val.s = tdrpStrDup("time");
-    tt++;
-    
-    // Parameter 'netcdf_dim_x'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_dim_x");
-    tt->descr = tdrpStrDup("netCDF dimension name for grid points in longitude.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_dim_x - &_start_;
-    tt->single_val.s = tdrpStrDup("longitude");
-    tt++;
-    
-    // Parameter 'netcdf_dim_y'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_dim_y");
-    tt->descr = tdrpStrDup("netCDF dimension name for grid points in latitude.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_dim_y - &_start_;
-    tt->single_val.s = tdrpStrDup("latitude");
-    tt++;
-    
-    // Parameter 'netcdf_dim_z'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_dim_z");
-    tt->descr = tdrpStrDup("netCDF dimension name for grid points in altitude.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_dim_z - &_start_;
-    tt->single_val.s = tdrpStrDup("altitude");
-    tt++;
-    
-    // Parameter 'Comment 12'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
-    tt->comment_hdr = tdrpStrDup("NETCDF variables");
-    tt->comment_text = tdrpStrDup("Specify the names used in the netCDF file for variables, since they can vary depending on the application used to create the file.");
-    tt++;
-    
-    // Parameter 'netcdf_var_base_time'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_var_base_time");
-    tt->descr = tdrpStrDup("Data set times are relative to this base time");
-    tt->help = tdrpStrDup("Specify 'none' if there is no base time variable. In the units of the time variable will be used.");
-    tt->val_offset = (char *) &netcdf_var_base_time - &_start_;
-    tt->single_val.s = tdrpStrDup("base_time");
-    tt++;
-    
-    // Parameter 'base_time_string'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("base_time_string");
-    tt->descr = tdrpStrDup("Base time string - used if netcdf_var_base_time is set to 'none'.");
-    tt->help = tdrpStrDup("Set this to a W3C ISO 8601 time - see http://www.w3.org/TR/NOTE-datetime");
-    tt->val_offset = (char *) &base_time_string - &_start_;
-    tt->single_val.s = tdrpStrDup("1970-01-01T00:00:00Z");
-    tt++;
-    
-    // Parameter 'netcdf_var_time_offset'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_var_time_offset");
-    tt->descr = tdrpStrDup("Time offset relative to base_time, or unix_time if base_time is 'none'.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_var_time_offset - &_start_;
-    tt->single_val.s = tdrpStrDup("time_offset");
-    tt++;
-    
-    // Parameter 'netcdf_var_z'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_var_z");
-    tt->descr = tdrpStrDup("Z variable name");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_var_z - &_start_;
-    tt->single_val.s = tdrpStrDup("altitude");
-    tt++;
-    
-    // Parameter 'netcdf_var_y'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_var_y");
-    tt->descr = tdrpStrDup("Y variable name");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_var_y - &_start_;
-    tt->single_val.s = tdrpStrDup("latitude");
-    tt++;
-    
-    // Parameter 'netcdf_var_x'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_var_x");
-    tt->descr = tdrpStrDup("X variable name");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_var_x - &_start_;
-    tt->single_val.s = tdrpStrDup("longitude");
-    tt++;
-    
-    // Parameter 'treat_ncbyte_as_unsigned'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("treat_ncbyte_as_unsigned");
-    tt->descr = tdrpStrDup("Option to consider ncbyte fields as unsigned.");
-    tt->help = tdrpStrDup("Normally ncbyte fields are signed. If this field is set to TRUE, they are treated as unsigned instead.");
-    tt->val_offset = (char *) &treat_ncbyte_as_unsigned - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.s = tdrpStrDup("Created by GpmHdf5ToMdv");
     tt++;
     
     // trailing entry has param_name set to NULL

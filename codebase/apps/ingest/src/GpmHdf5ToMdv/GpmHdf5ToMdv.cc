@@ -37,6 +37,7 @@
 //
 ////////////////////////////////////////////////////////////////
 
+#include <algorithm>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
@@ -490,9 +491,11 @@ int GpmHdf5ToMdv::_readTimes(Group &ns)
     cerr << "nTimes: " << _times.size() << endl;
     cerr << "startTime: " << _startTime.asString(3) << endl;
     cerr << "endTime: " << _endTime.asString(3) << endl;
-    // for (size_t ii = 0; ii < _times.size(); ii++) {
-    //   cerr << "  ii, time: " << ii << ", " << _times[ii].asString(3) << endl;
-    // }
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      for (size_t ii = 0; ii < _times.size(); ii++) {
+        cerr << "  ii, time: " << ii << ", " << _times[ii].asString(3) << endl;
+      }
+    }
   }
   
   return 0;
@@ -553,7 +556,7 @@ int GpmHdf5ToMdv::_readQcFlags(Group &ns)
   }
 
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "====>> Reading QC flags <<====" << endl;
     for (size_t ii = 0; ii < _times.size(); ii++) {
       cerr << "  ii, dQ, dW, geoE, geoW, limE, miss: "
@@ -623,24 +626,79 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
   _nScans = latDims[0];
   _nRays = latDims[1];
 
+  _latLons.clear();
+  _minLat = 90.0;
+  _maxLat = -90.0;
+  _minLon = 360.0;
+  _maxLon = -360.0;
+  for (size_t iscan = 0; iscan < _nScans; iscan++) {
+    vector<LatLonPt_t> pts;
+    for (size_t iray = 0; iray < _nRays; iray++) {
+      size_t ipt = iscan * _nRays + iray;
+      LatLonPt_t pt;
+      pt.lat = _lats[ipt];
+      pt.lon = _lons[ipt];
+      pts.push_back(pt);
+      if (pt.lat != _missingLat) {
+        _minLat = min(_minLat, pt.lat);
+        _maxLat = max(_maxLat, pt.lat);
+      }
+      if (pt.lon != _missingLon) {
+        _minLon = min(_minLon, pt.lon);
+        _maxLon = max(_maxLon, pt.lon);
+      }
+    } // iray
+    _latLons.push_back(pts);
+  } // iscan
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Reading lat/lon <<====" << endl;
     cerr << "missingLat: " << _missingLat << endl;
     cerr << "missingLon: " << _missingLon << endl;
+    cerr << "minLat, maxLat: " << _minLat << ", " << _maxLat << endl;
+    cerr << "minLon, maxLon: " << _minLon << ", " << _maxLon << endl;
     cerr << "nScans, nRays: " << _nScans << ", " << _nRays << endl;
-    for (size_t iscan = 0; iscan < _nScans; iscan++) {
-      for (size_t iray = 0; iray < _nRays; iray++) {
-        size_t ipt = iscan * _nRays + iray;
-        cerr << "iscan, iray, ipt, lat, lon: "
-             << iscan << ", "
-             << iray << ", "
-             << ipt << ", "
-             << _lats[ipt] << ", "
-             << _lons[ipt] << endl;
-      } // iray
-    } // iscan
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      for (size_t iscan = 0; iscan < _nScans; iscan++) {
+        for (size_t iray = 0; iray < _nRays; iray++) {
+          cerr << "iscan, iray, lat, lon: "
+               << iscan << ", "
+               << iray << ", "
+               << _latLons[iscan][iray].lat << ", "
+               << _latLons[iscan][iray].lon << endl;
+        } // iray
+      } // iscan
+    }
   }
+
+  // set up (x, y) grid details
+
+  _dx = _params.output_grid.dLon;
+  _dy = _params.output_grid.dLat;
+
+  if (_params.set_output_grid_limits_from_data) {
+    _minx = ((int) floor(_minLon / _dx) - 5) * _dx;
+    _miny = ((int) floor(_minLat / _dy) - 5) * _dy;
+    _nx = (_maxLon - _minLon) / _dx + 10;
+    _ny = (_maxLat - _minLat) / _dy + 10;
+  } else {
+    _nx = _params.output_grid.nLon;
+    _ny = _params.output_grid.nLat;
+    _minx = _params.output_grid.minLon;
+    _miny = _params.output_grid.minLat;
+  }
+
+  _maxx = _minx + _nx * _dx;
+  _maxy = _miny + _ny * _dy;
   
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> Output grid details <<====" << endl;
+    cerr << "_nx, _ny: " << _nx << ", " << _ny << endl;
+    cerr << "_dx, _dy: " << _dx << ", " << _dy << endl;
+    cerr << "_minx, _miny: " << _minx << ", " << _miny << endl;
+    cerr << "_maxx, _maxy: " << _maxx << ", " << _maxy << endl;
+  }
+
   return 0;
 
 }
@@ -691,87 +749,25 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
     cerr << "nScans, nRays, nGates: " 
          << _nScans << ", " << _nRays << ", " << _nGates << endl;
     cerr << "missingDbz: " << _missingDbz << endl;
-    for (size_t iscan = 0; iscan < _nScans; iscan++) {
-      for (size_t iray = 0; iray < _nRays; iray++) {
-        for (size_t igate = 0; igate < _nGates; igate++) {
-          size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
-          if (_dbzVals[ipt] != _missingDbz) {
-            cerr << "iscan, iray, igate, dbz: "
-                 << iscan << ", "
-                 << iray << ", "
-                 << igate << ", "
-                 << _dbzVals[ipt] << endl;
-          }
-        } // igate
-      } // iray
-    } // iscan
-  }
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      for (size_t iscan = 0; iscan < _nScans; iscan++) {
+        for (size_t iray = 0; iray < _nRays; iray++) {
+          for (size_t igate = 0; igate < _nGates; igate++) {
+            size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
+            if (_dbzVals[ipt] != _missingDbz) {
+              cerr << "iscan, iray, igate, dbz: "
+                   << iscan << ", "
+                   << iray << ", "
+                   << igate << ", "
+                   << _dbzVals[ipt] << endl;
+            }
+          } // igate
+        } // iray
+      } // iscan
+    } // extra
+  } // verbose
   
   return 0;
-
-}
-
-/////////////////////////////////////////////
-// initialize the input projection
-
-void GpmHdf5ToMdv::_initInputProjection()
-
-{
-  
-  if (_params.input_projection == Params::PROJ_LATLON) {
-    double midLon = _minx + _nx * _dx / 2.0;
-    _inputProj.initLatlon(midLon);
-  } else if (_params.input_projection == Params::PROJ_FLAT) {
-    _inputProj.initFlat(_params.input_proj_origin_lat,
-                        _params.input_proj_origin_lon,
-                        _params.input_proj_rotation);
-  } else if (_params.input_projection == Params::PROJ_LAMBERT_CONF) {
-    _inputProj.initLambertConf(_params.input_proj_origin_lat,
-                               _params.input_proj_origin_lon,
-                               _params.input_proj_lat1,
-                               _params.input_proj_lat2);
-  } else if (_params.input_projection == Params::PROJ_POLAR_STEREO) {
-    Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH;
-    if (!_params.input_proj_pole_is_north) {
-      poleType = Mdvx::POLE_SOUTH;
-    }
-    _inputProj.initPolarStereo(_params.input_proj_origin_lat,
-                               _params.input_proj_origin_lon,
-                               _params.input_proj_tangent_lon,
-                               poleType,
-                               _params.input_proj_central_scale);
-  } else if (_params.input_projection == Params::PROJ_OBLIQUE_STEREO) {
-    _inputProj.initObliqueStereo(_params.input_proj_origin_lat,
-                                 _params.input_proj_origin_lon,
-                                 _params.input_proj_tangent_lat,
-                                 _params.input_proj_tangent_lon);
-  } else if (_params.input_projection == Params::PROJ_MERCATOR) {
-    _inputProj.initMercator(_params.input_proj_origin_lat,
-                            _params.input_proj_origin_lon);
-  } else if (_params.input_projection == Params::PROJ_TRANS_MERCATOR) {
-    _inputProj.initTransMercator(_params.input_proj_origin_lat,
-                                 _params.input_proj_origin_lon,
-                                 _params.input_proj_central_scale);
-  } else if (_params.input_projection == Params::PROJ_ALBERS) {
-    _inputProj.initAlbers(_params.input_proj_origin_lat,
-                          _params.input_proj_origin_lon,
-                          _params.input_proj_lat1,
-                          _params.input_proj_lat2);
-  } else if (_params.input_projection == Params::PROJ_LAMBERT_AZIM) {
-    _inputProj.initLambertAzim(_params.input_proj_origin_lat,
-                               _params.input_proj_origin_lon);
-  } else if (_params.input_projection == Params::PROJ_VERT_PERSP) {
-    _inputProj.initVertPersp(_params.input_proj_origin_lat,
-                             _params.input_proj_origin_lon,
-                             _params.input_proj_persp_radius);
-  }
-
-  if (_params.debug) {
-    cerr << "Input projection:" << endl;
-    _inputProj.print(cerr);
-  }
-  
-  return;
 
 }
 
@@ -1281,7 +1277,7 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField
   Mdvx::field_header_t fhdr;
   MEM_zero(fhdr);
   
-  _inputProj.syncToFieldHdr(fhdr);
+  // _inputProj.syncToFieldHdr(fhdr);
 
   fhdr.compression_type = Mdvx::COMPRESSION_NONE;
   fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
@@ -1324,8 +1320,7 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField
 
   MdvxField *field = new MdvxField(fhdr, vhdr, vals);
   field->convertType
-    ((Mdvx::encoding_type_t) _params.output_encoding_type,
-     (Mdvx::compression_type_t) _params.output_compression_type);
+    ((Mdvx::encoding_type_t) _params.output_encoding_type, Mdvx::COMPRESSION_GZIP);
 
   // set names etc
   
@@ -1481,8 +1476,7 @@ MdvxField *GpmHdf5ToMdv::_createRegularLatlonField
   
   MdvxField *field = new MdvxField(fhdr, vhdr, resampled);
   field->convertType
-    ((Mdvx::encoding_type_t) _params.output_encoding_type,
-     (Mdvx::compression_type_t) _params.output_compression_type);
+    ((Mdvx::encoding_type_t) _params.output_encoding_type, Mdvx::COMPRESSION_GZIP);
 
   // set names etc
   
