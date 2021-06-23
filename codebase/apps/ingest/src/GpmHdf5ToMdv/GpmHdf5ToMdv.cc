@@ -488,9 +488,9 @@ int GpmHdf5ToMdv::_readTimes(Group &ns)
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Reading scan times <<====" << endl;
-    cerr << "nTimes: " << _times.size() << endl;
-    cerr << "startTime: " << _startTime.asString(3) << endl;
-    cerr << "endTime: " << _endTime.asString(3) << endl;
+    cerr << "  nTimes: " << _times.size() << endl;
+    cerr << "  startTime: " << _startTime.asString(3) << endl;
+    cerr << "  endTime: " << _endTime.asString(3) << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
       for (size_t ii = 0; ii < _times.size(); ii++) {
         cerr << "  ii, time: " << ii << ", " << _times[ii].asString(3) << endl;
@@ -653,15 +653,15 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Reading lat/lon <<====" << endl;
-    cerr << "missingLat: " << _missingLat << endl;
-    cerr << "missingLon: " << _missingLon << endl;
-    cerr << "minLat, maxLat: " << _minLat << ", " << _maxLat << endl;
-    cerr << "minLon, maxLon: " << _minLon << ", " << _maxLon << endl;
-    cerr << "nScans, nRays: " << _nScans << ", " << _nRays << endl;
+    cerr << "  missingLat: " << _missingLat << endl;
+    cerr << "  missingLon: " << _missingLon << endl;
+    cerr << "  minLat, maxLat: " << _minLat << ", " << _maxLat << endl;
+    cerr << "  minLon, maxLon: " << _minLon << ", " << _maxLon << endl;
+    cerr << "  nScans, nRays: " << _nScans << ", " << _nRays << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
       for (size_t iscan = 0; iscan < _nScans; iscan++) {
         for (size_t iray = 0; iray < _nRays; iray++) {
-          cerr << "iscan, iray, lat, lon: "
+          cerr << "  iscan, iray, lat, lon: "
                << iscan << ", "
                << iray << ", "
                << _latLons[iscan][iray].lat << ", "
@@ -693,10 +693,10 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Output grid details <<====" << endl;
-    cerr << "_nx, _ny: " << _nx << ", " << _ny << endl;
-    cerr << "_dx, _dy: " << _dx << ", " << _dy << endl;
-    cerr << "_minx, _miny: " << _minx << ", " << _miny << endl;
-    cerr << "_maxx, _maxy: " << _maxx << ", " << _maxy << endl;
+    cerr << "  _nx, _ny: " << _nx << ", " << _ny << endl;
+    cerr << "  _dx, _dy: " << _dx << ", " << _dy << endl;
+    cerr << "  _minx, _miny: " << _minx << ", " << _miny << endl;
+    cerr << "  _maxx, _maxy: " << _maxx << ", " << _maxy << endl;
   }
 
   return 0;
@@ -746,16 +746,16 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Read DBZ <<====" << endl;
-    cerr << "nScans, nRays, nGates: " 
+    cerr << "  nScans, nRays, nGates: " 
          << _nScans << ", " << _nRays << ", " << _nGates << endl;
-    cerr << "missingDbz: " << _missingDbz << endl;
+    cerr << "  missingDbz: " << _missingDbz << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
       for (size_t iscan = 0; iscan < _nScans; iscan++) {
         for (size_t iray = 0; iray < _nRays; iray++) {
           for (size_t igate = 0; igate < _nGates; igate++) {
             size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
             if (_dbzVals[ipt] != _missingDbz) {
-              cerr << "iscan, iray, igate, dbz: "
+              cerr << "  iscan, iray, igate, dbz: "
                    << iscan << ", "
                    << iray << ", "
                    << igate << ", "
