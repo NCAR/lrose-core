@@ -111,6 +111,8 @@ private:
   double _minLon, _maxLon;
   vector<vector<Point_d> > _latLons;
   
+  vector<NcxxPort::fl64> _scLat, _scLon, _scAlt;
+
   vector<NcxxPort::fl32> _dbzInput;
   vector<NcxxPort::fl32> _dbzOutput;
   NcxxPort::fl32 _missingDbz;
@@ -144,6 +146,7 @@ private:
   int _readGroupNs(Group &ns);
   int _readTimes(Group &ns);
   int _readLatLon(Group &ns);
+  int _readSpaceCraftPos(Group &ns);
   int _readQcFlags(Group &ns);
   int _readReflectivity(Group &ns);
 

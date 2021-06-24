@@ -367,6 +367,10 @@ int GpmHdf5ToMdv::_readGroupNs(Group &ns)
     return -1;
   }
   
+  if (_readSpaceCraftPos(ns)) {
+    return -1;
+  }
+
   if (_readQcFlags(ns)) {
     return -1;
   }
@@ -702,6 +706,81 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
     cerr << "  _dx, _dy: " << _dx << ", " << _dy << endl;
     cerr << "  _minx, _miny: " << _minx << ", " << _miny << endl;
     cerr << "  _maxx, _maxy: " << _maxx << ", " << _maxy << endl;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////
+// read the spacecraft lat/lon/alt
+
+int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
+  
+{
+  
+  Hdf5xx hdf5;
+  Group nav(ns.openGroup("navigation"));
+
+  // read spacecraft longitude
+  
+  vector<size_t> lonDims;
+  NcxxPort::fl64 missingLon;
+  string lonUnits;
+  if (hdf5.readFl64Array(nav, "scLon", "NS/navigation",
+                         lonDims, missingLon, _scLon, lonUnits)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readSpaceCraftPos()" << endl;
+    cerr << "  Cannot read scLon variable" << endl;
+    return -1;
+  }
+
+  // read spacecraft latitude
+  
+  vector<size_t> latDims;
+  NcxxPort::fl64 missingLat;
+  string latUnits;
+  if (hdf5.readFl64Array(nav, "scLat", "NS/navigation",
+                         latDims, missingLat, _scLat, latUnits)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readSpaceCraftPos()" << endl;
+    cerr << "  Cannot read scLat variable" << endl;
+    return -1;
+  }
+
+  // read spacecraft altitude
+  
+  vector<size_t> altDims;
+  NcxxPort::fl64 missingAlt;
+  string altUnits;
+  if (hdf5.readFl64Array(nav, "scAlt", "NS/navigation",
+                         altDims, missingAlt, _scAlt, altUnits)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readSpaceCraftPos()" << endl;
+    cerr << "  Cannot read scAlt variable" << endl;
+    return -1;
+  }
+
+  // check dimensions for consistency
+  
+  if (lonDims[0] != _nScans || latDims[0] != _nScans || altDims[0] != _nScans) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readSpaceCraftPos()" << endl;
+    cerr << "  Lat/Lon/Alt dims must match _nScans" << endl;
+    cerr << "  nScans: " << _nScans << endl;
+    cerr << "  latDims[0]: " << latDims[0] << endl;
+    cerr << "  lonDims[0]: " << lonDims[0] << endl;
+    cerr << "  altDims[0]: " << altDims[0] << endl;
+    return -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> Reading spacecraft position <<====" << endl;
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      for (size_t iscan = 0; iscan < _nScans; iscan++) {
+        cerr << "  iscan, scLat, scLon, scAlt: "
+             << iscan << ", "
+             << _scLat[iscan] << ", "
+             << _scLon[iscan] << ", "
+             << _scAlt[iscan] << endl;
+      } // iray
+    } // iscan
   }
 
   return 0;
