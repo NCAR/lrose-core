@@ -46,6 +46,7 @@
 #include <toolsa/TaArray.hh>
 #include <Mdv/MdvxField.hh>
 #include <dsserver/DsLdataInfo.hh>
+#include <euclid/search.h>
 #include "GpmHdf5ToMdv.hh"
 using namespace std;
 
@@ -636,20 +637,20 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
   _minLon = 360.0;
   _maxLon = -360.0;
   for (size_t iscan = 0; iscan < _nScans; iscan++) {
-    vector<LatLonPt_t> pts;
+    vector<Point_d> pts;
     for (size_t iray = 0; iray < _nRays; iray++) {
       size_t ipt = iscan * _nRays + iray;
-      LatLonPt_t pt;
-      pt.lat = _lats[ipt];
-      pt.lon = _lons[ipt];
+      Point_d pt;
+      pt.y = _lats[ipt];
+      pt.x = _lons[ipt];
       pts.push_back(pt);
-      if (pt.lat != _missingLat) {
-        _minLat = min(_minLat, pt.lat);
-        _maxLat = max(_maxLat, pt.lat);
+      if (pt.y != _missingLat) {
+        _minLat = min(_minLat, pt.y);
+        _maxLat = max(_maxLat, pt.y);
       }
-      if (pt.lon != _missingLon) {
-        _minLon = min(_minLon, pt.lon);
-        _maxLon = max(_maxLon, pt.lon);
+      if (pt.x != _missingLon) {
+        _minLon = min(_minLon, pt.x);
+        _maxLon = max(_maxLon, pt.x);
       }
     } // iray
     _latLons.push_back(pts);
@@ -668,8 +669,8 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
           cerr << "  iscan, iray, lat, lon: "
                << iscan << ", "
                << iray << ", "
-               << _latLons[iscan][iray].lat << ", "
-               << _latLons[iscan][iray].lon << endl;
+               << _latLons[iscan][iray].y << ", "
+               << _latLons[iscan][iray].x << endl;
         } // iray
       } // iscan
     }
@@ -747,6 +748,7 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
   }
 
   _nGates = dbzDims[2];
+  _nz = _nGates;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Read DBZ <<====" << endl;
@@ -785,7 +787,7 @@ void GpmHdf5ToMdv::_interpDbz()
   // initialize dbz grid
 
   size_t nOutput = _nx * _ny * _nz;
-  _dbzOutput.resize(nOutput);
+  _dbzOutput.resize(nOutput, _missingDbz);
 
   // loop through the vertical levels
 
@@ -809,7 +811,7 @@ void GpmHdf5ToMdv::_interpDbz()
       for (size_t iray = 0; iray < _nRays - 1; iray++) {
 
         // corner locations
-        LatLonPt_t corners[4];
+        Point_d corners[4];
         corners[0] = _latLons[iscan][iray];
         corners[1] = _latLons[iscan][iray + 1];
         corners[2] = _latLons[iscan + 1][iray + 1];
@@ -834,19 +836,10 @@ void GpmHdf5ToMdv::_interpDbz()
           continue;
         }
 
-        // compute bounding box
-
-        double minLat = corners[0].lat;
-        double maxLat = corners[0].lat;
-        double minLon = corners[0].lon;
-        double maxLon = corners[0].lon;
-        for (int ii = 1; ii < 4; ii++) {
-          minLat = min(minLat, corners[ii].lat);
-          maxLat = max(maxLat, corners[ii].lat);
-          minLon = min(minLon, corners[ii].lon);
-          maxLon = max(maxLon, corners[ii].lon);
-        }
-      
+        // interp for the output grid points inside the polygon
+        
+        _interpInsidePolygon(corners, dbz, iz);
+        
       } // iray
     } // iscan
 
@@ -854,6 +847,118 @@ void GpmHdf5ToMdv::_interpDbz()
 
 }
 
+//////////////////////////////////////////////
+// interpolate points within polygon
+
+void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
+                                        const double *dbz,
+                                        size_t iz)
+  
+{
+
+  // compute lat/lon bounding box
+  
+  double minLat = corners[0].y;
+  double maxLat = corners[0].y;
+  double minLon = corners[0].x;
+  double maxLon = corners[0].x;
+  
+  for (int ii = 1; ii < 4; ii++) {
+    minLat = min(minLat, corners[ii].y);
+    maxLat = max(maxLat, corners[ii].y);
+    minLon = min(minLon, corners[ii].x);
+    maxLon = max(maxLon, corners[ii].x);
+  }
+  
+  // compute the output grid limits for the bounding box
+  
+  int minIx = (int) ((minLon - _minx) / _dx);
+  int maxIx = (int) ((maxLon - _minx) / _dx + 1.0);
+  
+  int minIy = (int) ((minLat - _miny) / _dy);
+  int maxIy = (int) ((maxLat - _miny) / _dy + 1.0);
+  
+  minIx = max(minIx, 0);
+  minIy = max(minIy, 0);
+  maxIx = min(maxIx, (int) _nx - 1);
+  maxIy = min(maxIy, (int) _ny - 1);
+  
+  double minLon1 = _minx + minIx * _dx;
+  double maxLon1 = _minx + maxIx * _dx;
+  double minLat1 = _miny + minIy * _dy;
+  double maxLat1 = _miny + maxIy * _dy;
+  
+  cerr << "11111111111111111111111111111111111111111111111" << endl;
+  cerr << "11111 minLon, minIx, minLon1: " << minLon << ", " << minIx << ", " << minLon1 << endl; 
+  cerr << "11111 maxLon, maxIx, maxLon1: " << maxLon << ", " << maxIx << ", " << maxLon1 << endl; 
+  cerr << "11111 minLat, minIy, minLat1: " << minLat << ", " << minIy << ", " << minLat1 << endl; 
+  cerr << "11111 maxLat, maxIy, maxLat1: " << maxLat << ", " << maxIy << ", " << maxLat1 << endl; 
+  
+  // loop through the output grid points, finding if they are inside the polygon
+
+  for (int iy = minIy; iy <= maxIy; iy++) {
+    for (int ix = minIx; ix <= maxIx; ix++) {
+      Point_d pt;
+      pt.x = _minx + ix * _dx;
+      pt.y = _miny + iy * _dy;
+      if (EGS_point_in_polygon(pt, (Point_d *) corners, 4)) {
+        double interpVal = _interpPt(pt, corners, dbz, iz);
+        size_t outputIndex = iz * _nx * _ny + iy * _nx + ix;
+        _dbzOutput[outputIndex] = interpVal;
+      }
+    } // ix
+  } // iy
+
+}
+
+//////////////////////////////////////////////
+// interpolate point within polygon
+
+double GpmHdf5ToMdv::_interpPt(const Point_d &pt,
+                               const Point_d *corners,
+                               const double *dbz,
+                               size_t iz)
+  
+{
+  
+  // cerr << "222222 is inside lon, lat: " << pt.x << ", " << pt.y << endl;
+
+  // compute the distances from the pt to the corners
+
+  double dist[4];
+  for (int ii = 0; ii < 3; ii++) {
+    double dx = pt.x - corners[ii].x;
+    double dy = pt.y - corners[ii].y;
+    dist[ii] = sqrt(dx * dx + dy * dy);
+  }
+
+  // nearest neighbor?
+
+  if (_params.interp_using_nearest_neighbor) {
+    double minDist = 1.0e99;
+    int minIndex = -1;
+    for (int ii = 0; ii < 3; ii++) {
+      if (dist[ii] < minDist) {
+        minDist = dist[ii];
+        minIndex = ii;
+      }
+    }
+    return dbz[minIndex];
+  }
+  
+  double weight[4];
+  double sumWt = 0.0;
+  double sumInterp = 0.0;
+  for (int ii = 0; ii < 3; ii++) {
+    weight[ii] = pow(1.0 / dist[ii], _params.interp_power_parameter);
+    sumWt += weight[ii];
+    sumInterp += weight[ii] * dbz[ii];
+  }
+  double interpDbz = sumInterp / sumWt;
+
+  return interpDbz;
+
+}
   
 /////////////////////////////////////////////////
 // Set the master header from the NCF file

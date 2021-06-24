@@ -48,14 +48,10 @@
 #include <Mdv/MdvxProj.hh>
 #include <Mdv/MdvxRemapLut.hh>
 #include <Ncxx/Hdf5xx.hh>
+#include <euclid/point.h>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;
-
-typedef struct {
-  double lat;
-  double lon;
-} LatLonPt_t;
 
 ////////////////////////
 // This class
@@ -113,7 +109,7 @@ private:
 
   double _minLat, _maxLat;
   double _minLon, _maxLon;
-  vector<vector<LatLonPt_t> > _latLons;
+  vector<vector<Point_d> > _latLons;
   
   vector<NcxxPort::fl32> _dbzInput;
   vector<NcxxPort::fl32> _dbzOutput;
@@ -154,6 +150,13 @@ private:
   // interpolation
 
   void _interpDbz();
+  void _interpInsidePolygon(const Point_d *corners,
+                            const double *dbz,
+                            size_t iz);
+  double _interpPt(const Point_d &pt,
+                   const Point_d *corners,
+                   const double *dbz,
+                   size_t iz);
 
   // load up dimensions and variables
 

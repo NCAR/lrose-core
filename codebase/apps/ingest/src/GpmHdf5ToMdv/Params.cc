@@ -845,6 +845,30 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'interp_using_nearest_neighbor'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("interp_using_nearest_neighbor");
+    tt->descr = tdrpStrDup("Option to use nearest-neighbor interpolation for loading output grid.");
+    tt->help = tdrpStrDup("When we interpolate from the input grid to the output grid, the default method is inverse-distance weighting. If this is set to TRUE, nearest neighbor is used instead.");
+    tt->val_offset = (char *) &interp_using_nearest_neighbor - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'interp_power_parameter'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("interp_power_parameter");
+    tt->descr = tdrpStrDup("Power parameter for inverse-distance wieghted interpolation");
+    tt->help = tdrpStrDup("See 'https://en.wikipedia.org/wiki/Inverse_distance_weighting'");
+    tt->val_offset = (char *) &interp_power_parameter - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));

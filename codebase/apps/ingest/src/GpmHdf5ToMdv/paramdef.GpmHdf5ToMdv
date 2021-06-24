@@ -165,6 +165,18 @@ paramdef boolean {
   p_help = "If true, nLon, nLat, minLon and minLat will be computed from the data. dLon and dLat will be used as set.";
 } set_output_grid_limits_from_data;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use nearest-neighbor interpolation for loading output grid.";
+  p_help = "When we interpolate from the input grid to the output grid, the default method is inverse-distance weighting. If this is set to TRUE, nearest neighbor is used instead.";
+} interp_using_nearest_neighbor;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Power parameter for inverse-distance wieghted interpolation";
+  p_help = "See 'https://en.wikipedia.org/wiki/Inverse_distance_weighting'";
+} interp_power_parameter;
+
 commentdef {
   p_header = "OUTPUT URL";
 }

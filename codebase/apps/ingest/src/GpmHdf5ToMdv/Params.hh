@@ -421,6 +421,10 @@ public:
 
   tdrp_bool_t set_output_grid_limits_from_data;
 
+  tdrp_bool_t interp_using_nearest_neighbor;
+
+  double interp_power_parameter;
+
   char* output_url;
 
   encoding_type_t output_encoding_type;
@@ -438,7 +442,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[29];
+  mutable TDRPtable _table[31];
 
   const char *_className;
 
