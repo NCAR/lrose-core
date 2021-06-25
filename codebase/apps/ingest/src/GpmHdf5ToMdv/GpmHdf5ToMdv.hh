@@ -123,17 +123,9 @@ private:
   double _maxxDeg, _maxyDeg, _maxzKm;
   double _dxDeg, _dyDeg, _dzKm;
 
-  int _nxValid, _nyValid;
-  int _ixValidStart, _ixValidEnd;
-  int _iyValidStart, _iyValidEnd;
-
-  TaArray<float> _zArray_, _yArray_, _xArray_;
-  float *_zArray, *_yArray, *_xArray;
-
   // hdf5 utilities
 
   Hdf5xx _utils;
-  string _conventions;
 
   // private methods
 

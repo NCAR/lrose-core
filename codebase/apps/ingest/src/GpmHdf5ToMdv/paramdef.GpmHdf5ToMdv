@@ -182,7 +182,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "mdvp:://localhost::/tmp/mdv/from_netcdf";
+  p_default = "mdvp:://localhost::/tmp/mdv/gpm";
   p_descr = "URL for writing output files.";
 } output_url;
 

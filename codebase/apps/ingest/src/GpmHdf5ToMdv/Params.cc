@@ -887,7 +887,7 @@
     tt->descr = tdrpStrDup("URL for writing output files.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/from_netcdf");
+    tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/gpm");
     tt++;
     
     // Parameter 'Comment 6'

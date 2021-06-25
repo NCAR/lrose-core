@@ -1070,6 +1070,7 @@ int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx)
 
   mdvx.setBeginTime(_startTime.utime());
   mdvx.setEndTime(_endTime.utime());
+  mdvx.setValidTime(_endTime.utime());
   
   // data collection type
   
@@ -1148,7 +1149,7 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
   
   for (size_t ii = 0; ii < nz; ii++) {
     vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
-    vhdr.level[ii] = _zArray[ii];
+    vhdr.level[ii] = _minzKm + ii * _dzKm;
   }
 
   // reverse y order of data if it was in reverse order in the file

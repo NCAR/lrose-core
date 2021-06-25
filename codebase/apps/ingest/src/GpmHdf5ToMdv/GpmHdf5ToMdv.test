@@ -1,0 +1,356 @@
+/**********************************************************************
+ * TDRP params for GpmHdf5ToMdv
+ **********************************************************************/
+
+//======================================================================
+//
+// GpmHdf5ToMdv.
+//
+// This program converts GPM swath data, in HDF5, to MDV/NetCDF.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with procmap while running.
+//
+// See 'instance'.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// reg_interval ////////////////////////////
+//
+// Registration interval.
+//
+// The number of seconds between expected procmap registrations.
+//
+//
+// Type: int
+//
+
+reg_interval = 60;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in FILELIST mode, at 
+//   least) MUST contain a day-directory below the data file -- 
+//   ./data_file.mdv will not work as a file path.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+//
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+//
+//
+// Type: string
+//
+
+input_dir = "raw/input";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+//
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+//
+//
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_age ////////////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+//
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+max_realtime_age = 3600;
+
+///////////// process_latest_file_only ////////////////
+//
+// Option to use only the latest file to have arrived.
+//
+// REALTIME mode only. If true, will process only the latest file on 
+//   startup, if the file has an age less than max_realtime_age. If false, 
+//   on startup will process all files with age less than 
+//   max_realtime_age.
+//
+//
+// Type: boolean
+//
+
+process_latest_file_only = TRUE;
+
+///////////// file_name_ext ///////////////////////////
+//
+// Specify the extension of the files to be read.
+//
+// If blank, all extensions will be used.
+//
+//
+// Type: string
+//
+
+file_name_ext = "";
+
+///////////// file_name_substr ////////////////////////
+//
+// Specify a seach string for the names of the files to be read.
+//
+// If blank, no check will be performed.
+//
+//
+// Type: string
+//
+
+file_name_substr = "";
+
+//======================================================================
+//
+// Z dimension details.
+//
+//======================================================================
+ 
+///////////// radar_min_z_km //////////////////////////
+//
+// Height of lowest level (km).
+//
+//
+// Type: double
+//
+
+radar_min_z_km = 0;
+
+///////////// radar_delta_z_km ////////////////////////
+//
+// Delta height between levels (km).
+//
+//
+// Type: double
+//
+
+radar_delta_z_km = 0.125;
+
+//======================================================================
+//
+// OUTPUT REGULAR LAT/LON GRID.
+//
+//======================================================================
+ 
+///////////// output_grid /////////////////////////////
+//
+// Parameters for output grid.
+//
+// Units in deg.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int nLon;
+//      int nLat;
+//      double minLon;
+//      double minLat;
+//      double dLon;
+//      double dLat;
+//   }
+//
+//
+
+output_grid = {
+    nLon = 500,
+    nLat = 500,
+    minLon = -104,
+    minLat = 35,
+    dLon = 0.025,
+    dLat = 0.025
+};
+
+///////////// set_output_grid_limits_from_data ////////
+//
+// Option to compute grid limits from input data.
+//
+// If true, nLon, nLat, minLon and minLat will be computed from the 
+//   data. dLon and dLat will be used as set.
+//
+//
+// Type: boolean
+//
+
+set_output_grid_limits_from_data = TRUE;
+
+///////////// interp_using_nearest_neighbor ///////////
+//
+// Option to use nearest-neighbor interpolation for loading output grid.
+//
+// When we interpolate from the input grid to the output grid, the 
+//   default method is inverse-distance weighting. If this is set to TRUE, 
+//   nearest neighbor is used instead.
+//
+//
+// Type: boolean
+//
+
+interp_using_nearest_neighbor = FALSE;
+
+///////////// interp_power_parameter //////////////////
+//
+// Power parameter for inverse-distance wieghted interpolation.
+//
+// See 'https://en.wikipedia.org/wiki/Inverse_distance_weighting'.
+//
+//
+// Type: double
+//
+
+interp_power_parameter = 1;
+
+//======================================================================
+//
+// OUTPUT URL.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for writing output files.
+//
+//
+// Type: string
+//
+
+output_url = "mdvp:://localhost::/tmp/mdv/gpm";
+
+//======================================================================
+//
+// OUTPUT ENCODING AND COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_encoding_type ////////////////////
+//
+// Set output encoding type.
+//
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_INT16;
+
+//======================================================================
+//
+// OUTPUT METADATA STRINGS.
+//
+// These will be used if the file does not contain suitable information.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Name of data set.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_name = "GPM";
+
+///////////// data_set_source /////////////////////////
+//
+// Source of data.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_source = "NASA";
+
+///////////// data_set_info ///////////////////////////
+//
+// Info for data set.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_info = "Created by GpmHdf5ToMdv";
+
