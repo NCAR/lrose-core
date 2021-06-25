@@ -746,27 +746,27 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'min_z_km'
+    // Parameter 'radar_min_z_km'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_z_km");
+    tt->param_name = tdrpStrDup("radar_min_z_km");
     tt->descr = tdrpStrDup("Height of lowest level (km)");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &min_z_km - &_start_;
+    tt->val_offset = (char *) &radar_min_z_km - &_start_;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'delta_z_km'
+    // Parameter 'radar_delta_z_km'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("delta_z_km");
+    tt->param_name = tdrpStrDup("radar_delta_z_km");
     tt->descr = tdrpStrDup("Delta height between levels (km)");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &delta_z_km - &_start_;
+    tt->val_offset = (char *) &radar_delta_z_km - &_start_;
     tt->single_val.d = 0.125;
     tt++;
     

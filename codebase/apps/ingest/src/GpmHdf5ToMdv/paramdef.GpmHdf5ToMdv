@@ -133,12 +133,12 @@ commentdef {
 paramdef double {
   p_default = 0.0;
   p_descr = "Height of lowest level (km)";
-} min_z_km;
+} radar_min_z_km;
 
 paramdef double {
   p_default = 0.125;
   p_descr = "Delta height between levels (km)";
-} delta_z_km;
+} radar_delta_z_km;
 
 commentdef {
   p_header = "OUTPUT REGULAR LAT/LON GRID";

@@ -119,9 +119,9 @@ private:
   string _dbzUnits;
 
   size_t _nx, _ny, _nz;
-  double _minx, _miny, _minz;
-  double _maxx, _maxy, _maxz;
-  double _dx, _dy, _dz;
+  double _minxDeg, _minyDeg, _minzKm;
+  double _maxxDeg, _maxyDeg, _maxzKm;
+  double _dxDeg, _dyDeg, _dzKm;
 
   int _nxValid, _nyValid;
   int _ixValidStart, _ixValidEnd;
@@ -153,6 +153,9 @@ private:
   // interpolation
 
   void _interpDbz();
+  Point_d _getCornerLatLon(int iscan,
+                           int iray,
+                           double zM);
   void _interpInsidePolygon(const Point_d *corners,
                             const double *dbz,
                             size_t iz);
@@ -165,41 +168,20 @@ private:
 
   int _loadMetaData();
 
-  /// set MDV headers
+  /// set MDV headers and data
 
-  int _setMasterHeader(DsMdvx &mdvx, int itime);
-  int _addDataFields(DsMdvx &mdvx, int itime);
-  // int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime, bool xySwapped);
+  int _setMasterHeader(DsMdvx &mdvx);
   
   MdvxField *_createMdvxField(const string &fieldName,
                               const string &longName,
                               const string &units,
-                              int nx, int ny, int nz,
+                              size_t nx, size_t ny, size_t nz,
                               double minx, double miny, double minz,
                               double dx, double dy, double dz,
-                              const float *vals);
+                              NcxxPort::fl32 missingVal,
+                              NcxxPort::fl32 *vals,
+                              bool yIsReversed);
 
-  MdvxField *_createRegularLatlonField(const string &fieldName,
-                                       const string &longName,
-                                       const string &units,
-                                       const float *vals);
-
-  // void _printFile(Nc3File &ncf);
-  // void _printAtt(Nc3Att *att);
-  // void _printVarVals(Nc3Var *var);
-
-  void _correctForSunAngle(MdvxField *field);
-
-  void _remapOutput(DsMdvx &mdvx);
-  void _autoRemapToLatLon(DsMdvx &mdvx);
-
-  bool _checkDxIsConstant();
-  bool _checkDyIsConstant();
-  void _initMercatorFromInputCoords();
-  int _findValidLatLonLimits();
-
-  int _getClosestLatIndex(double latitude, double tolerance);
-  int _getClosestLonIndex(double longitude, double tolerance);
 
 };
 

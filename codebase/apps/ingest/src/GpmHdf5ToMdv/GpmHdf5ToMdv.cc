@@ -255,78 +255,49 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
 
   _interpDbz();
 
-#ifdef JUNK
-
-  // open file
+  // create output Mdvx file object
   
-  if (_openNc3File(input_path)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_processFile" << endl;
-    cerr << "  File path: " << input_path << endl;
+  DsMdvx mdvx;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    mdvx.setDebug(true);
+  }
+    
+  // set master header
+  
+  if (_setMasterHeader(mdvx)) {
     return -1;
   }
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    _printFile(*_ncFile);
+  // add the data fields
+  
+  MdvxField *dbzField = _createMdvxField("DBZ",
+                                         "reflectivity",
+                                         "dBZ",
+                                         _nx, _ny, _nz,
+                                         _minxDeg, _minyDeg, _minzKm,
+                                         _dxDeg, _dyDeg, _dzKm,
+                                         _missingDbz,
+                                         _dbzOutput.data(),
+                                         false);
+  
+  mdvx.addField(dbzField);
+
+  // write output file
+  
+  if (_params.debug) {
+    cerr << "Writing file to url: " << _params.output_url << endl;
   }
-
-  // check that this is a valid file
-
-  if (_loadMetaData()) {
-    cerr << "ERROR - GpmHdf5ToMdv::_processFile" << endl;
-    cerr << "  File has invalid data" << endl;
-    cerr << "  File: " << input_path << endl;
+  
+  if (mdvx.writeToDir(_params.output_url)) {
+    cerr << "ERROR - GpmHdf5ToMdv" << endl;
+    cerr << "  Cannot write file to url: " << _params.output_url << endl;
+    cerr << mdvx.getErrStr() << endl;
     return -1;
   }
-
-  // loop through times
-
-  for (int itime = 0; itime < _nTimes; itime++) {
-
-    // create output Mdvx file object
-    
-    DsMdvx mdvx;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      mdvx.setDebug(true);
-    }
-    
-    // set master header
-    
-    if (_setMasterHeader(mdvx, itime)) {
-      return -1;
-    }
-
-    // add the data fields
-
-    if (_addDataFields(mdvx, itime)) {
-      return -1;
-    }
-    
-    // remap if required
-    
-    if (_params.remap_output_projection) {
-      _remapOutput(mdvx);
-    }
-    
-    // write output file
-    
-    if (_params.debug) {
-      cerr << "Writing file to url: " << _params.output_url << endl;
-    }
-
-    if (mdvx.writeToDir(_params.output_url)) {
-      cerr << "ERROR - GpmHdf5ToMdv" << endl;
-      cerr << "  Cannot write file to url: " << _params.output_url << endl;
-      cerr << mdvx.getErrStr() << endl;
-      return -1;
-    }
-    
-    if (_params.debug) {
-      cerr << "  Wrote output file: " << mdvx.getPathInUse() << endl;
-    }
-
-  } // itime
-
-#endif
+  
+  if (_params.debug) {
+    cerr << "  Wrote output file: " << mdvx.getPathInUse() << endl;
+  }
 
   return 0;
 
@@ -682,30 +653,30 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
 
   // set up (x, y) grid details
 
-  _dx = _params.output_grid.dLon;
-  _dy = _params.output_grid.dLat;
+  _dxDeg = _params.output_grid.dLon;
+  _dyDeg = _params.output_grid.dLat;
 
   if (_params.set_output_grid_limits_from_data) {
-    _minx = ((int) floor(_minLon / _dx) - 5) * _dx;
-    _miny = ((int) floor(_minLat / _dy) - 5) * _dy;
-    _nx = (_maxLon - _minLon) / _dx + 10;
-    _ny = (_maxLat - _minLat) / _dy + 10;
+    _minxDeg = ((int) floor(_minLon / _dxDeg) - 5) * _dxDeg;
+    _minyDeg = ((int) floor(_minLat / _dyDeg) - 5) * _dyDeg;
+    _nx = (_maxLon - _minLon) / _dxDeg + 10;
+    _ny = (_maxLat - _minLat) / _dyDeg + 10;
   } else {
     _nx = _params.output_grid.nLon;
     _ny = _params.output_grid.nLat;
-    _minx = _params.output_grid.minLon;
-    _miny = _params.output_grid.minLat;
+    _minxDeg = _params.output_grid.minLon;
+    _minyDeg = _params.output_grid.minLat;
   }
 
-  _maxx = _minx + _nx * _dx;
-  _maxy = _miny + _ny * _dy;
+  _maxxDeg = _minxDeg + _nx * _dxDeg;
+  _maxyDeg = _minyDeg + _ny * _dyDeg;
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Output grid details <<====" << endl;
     cerr << "  _nx, _ny: " << _nx << ", " << _ny << endl;
-    cerr << "  _dx, _dy: " << _dx << ", " << _dy << endl;
-    cerr << "  _minx, _miny: " << _minx << ", " << _miny << endl;
-    cerr << "  _maxx, _maxy: " << _maxx << ", " << _maxy << endl;
+    cerr << "  _dxDeg, _dyDeg: " << _dxDeg << ", " << _dyDeg << endl;
+    cerr << "  _minxDeg, _minyDeg: " << _minxDeg << ", " << _minyDeg << endl;
+    cerr << "  _maxxDeg, _maxyDeg: " << _maxxDeg << ", " << _maxyDeg << endl;
   }
 
   return 0;
@@ -828,6 +799,8 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
 
   _nGates = dbzDims[2];
   _nz = _nGates;
+  _minzKm = _params.radar_min_z_km;
+  _dzKm = _params.radar_delta_z_km;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Read DBZ <<====" << endl;
@@ -872,6 +845,8 @@ void GpmHdf5ToMdv::_interpDbz()
 
   for (size_t iz = 0; iz < _nz; iz++) {
 
+    double zM = (_minzKm + iz * _dzKm) * 1000.0;
+
     // load dbz input vals for this level
 
     vector<vector<double> > dbzIn;
@@ -888,13 +863,13 @@ void GpmHdf5ToMdv::_interpDbz()
 
     for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
       for (size_t iray = 0; iray < _nRays - 1; iray++) {
-
-        // corner locations
+        
+        // corner locations adjusted for radar slant
         Point_d corners[4];
-        corners[0] = _latLons[iscan][iray];
-        corners[1] = _latLons[iscan][iray + 1];
-        corners[2] = _latLons[iscan + 1][iray + 1];
-        corners[3] = _latLons[iscan + 1][iray];
+        corners[0] = _getCornerLatLon(iscan, iray, zM);
+        corners[1] = _getCornerLatLon(iscan, iray + 1, zM);
+        corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
+        corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
         // dbz vals at corners
         double dbz[4];
@@ -926,6 +901,41 @@ void GpmHdf5ToMdv::_interpDbz()
 
 }
 
+/////////////////////////////////////////////////////////////////
+// get lat/lon of a grid corner,
+// adjusting the corner locations for slant from radar to this point
+
+Point_d GpmHdf5ToMdv::_getCornerLatLon(int iscan,
+                                       int iray,
+                                       double zM)
+
+{
+
+  // ht as a fraction of the spacecraft height
+  
+  double zFraction = zM / _scAlt[iscan];
+  
+  // get the point
+  
+  Point_d pt = _latLons[iscan][iray];
+  
+  double cornerLat = pt.y;
+  double slantDeltaLat = (_scLat[iscan] - cornerLat) * zFraction;
+  cornerLat += slantDeltaLat;
+  
+  double cornerLon = pt.x;
+  double slantDeltaLon = (_scLon[iscan] - cornerLon) * zFraction;
+  cornerLon += slantDeltaLon;
+
+  Point_d corner;
+  corner.y = cornerLat;
+  corner.x = cornerLon;
+  
+  return corner;
+
+}
+
+
 //////////////////////////////////////////////
 // interpolate points within polygon
 
@@ -951,35 +961,36 @@ void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
   
   // compute the output grid limits for the bounding box
   
-  int minIx = (int) ((minLon - _minx) / _dx);
-  int maxIx = (int) ((maxLon - _minx) / _dx + 1.0);
+  int minIx = (int) ((minLon - _minxDeg) / _dxDeg);
+  int maxIx = (int) ((maxLon - _minxDeg) / _dxDeg + 1.0);
   
-  int minIy = (int) ((minLat - _miny) / _dy);
-  int maxIy = (int) ((maxLat - _miny) / _dy + 1.0);
+  int minIy = (int) ((minLat - _minyDeg) / _dyDeg);
+  int maxIy = (int) ((maxLat - _minyDeg) / _dyDeg + 1.0);
   
   minIx = max(minIx, 0);
   minIy = max(minIy, 0);
   maxIx = min(maxIx, (int) _nx - 1);
   maxIy = min(maxIy, (int) _ny - 1);
   
-  double minLon1 = _minx + minIx * _dx;
-  double maxLon1 = _minx + maxIx * _dx;
-  double minLat1 = _miny + minIy * _dy;
-  double maxLat1 = _miny + maxIy * _dy;
+  // double minLon1 = _minxDeg + minIx * _dxDeg;
+  // double maxLon1 = _minxDeg + maxIx * _dxDeg;
+  // double minLat1 = _minyDeg + minIy * _dyDeg;
+  // double maxLat1 = _minyDeg + maxIy * _dyDeg;
   
-  cerr << "11111111111111111111111111111111111111111111111" << endl;
-  cerr << "11111 minLon, minIx, minLon1: " << minLon << ", " << minIx << ", " << minLon1 << endl; 
-  cerr << "11111 maxLon, maxIx, maxLon1: " << maxLon << ", " << maxIx << ", " << maxLon1 << endl; 
-  cerr << "11111 minLat, minIy, minLat1: " << minLat << ", " << minIy << ", " << minLat1 << endl; 
-  cerr << "11111 maxLat, maxIy, maxLat1: " << maxLat << ", " << maxIy << ", " << maxLat1 << endl; 
+  // cerr << "11111111111111111111111111111111111111111111111" << endl;
+  // cerr << "11111 minLon, minIx, minLon1: " << minLon << ", " << minIx << ", " << minLon1 << endl; 
+  // cerr << "11111 maxLon, maxIx, maxLon1: " << maxLon << ", " << maxIx << ", " << maxLon1 << endl; 
+  // cerr << "11111 minLat, minIy, minLat1: " << minLat << ", " << minIy << ", " << minLat1 << endl; 
+  // cerr << "11111 maxLat, maxIy, maxLat1: " << maxLat << ", " << maxIy << ", " << maxLat1 << endl;
+  
   
   // loop through the output grid points, finding if they are inside the polygon
 
   for (int iy = minIy; iy <= maxIy; iy++) {
     for (int ix = minIx; ix <= maxIx; ix++) {
       Point_d pt;
-      pt.x = _minx + ix * _dx;
-      pt.y = _miny + iy * _dy;
+      pt.x = _minxDeg + ix * _dxDeg;
+      pt.y = _minyDeg + iy * _dyDeg;
       if (EGS_point_in_polygon(pt, (Point_d *) corners, 4)) {
         double interpVal = _interpPt(pt, corners, dbz, iz);
         size_t outputIndex = iz * _nx * _ny + iy * _nx + ix;
@@ -1044,7 +1055,7 @@ double GpmHdf5ToMdv::_interpPt(const Point_d &pt,
 //
 // Returns 0 on success, -1 on failure
 
-int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx, int itime)
+int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx)
 
 {
 
@@ -1074,463 +1085,18 @@ int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx, int itime)
 
 }
 
-/////////////////////////////////////////////////
-// Add the data fields
-//
-// Returns 0 on success, -1 on failure
-
-int GpmHdf5ToMdv::_addDataFields(DsMdvx &mdvx, int itime)
-
-{
-
-#ifdef JUNK
-  
-  for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
-
-    Nc3Var *var = _ncFile->get_var(ivar);
-    
-    if (var->get_dim(0) != _timeDim) {
-      continue;
-    }
-
-    bool xySwapped = false;
-    if (_zDim) {
-      if (var->num_dims() < 4) {
-        continue;
-      }
-      if (var->get_dim(1) != _zDim) {
-        continue;
-      }
-      if (var->get_dim(2) == _yDim && var->get_dim(3) == _xDim) {
-        xySwapped = false;
-      } else if (var->get_dim(3) == _yDim && var->get_dim(2) == _xDim) {
-        xySwapped = true;
-      } else {
-        continue;
-      }
-    } else {
-      if (var->num_dims() < 3) {
-        continue;
-      }
-      if (var->get_dim(1) == _yDim && var->get_dim(2) == _xDim) {
-        xySwapped = false;
-      } else if (var->get_dim(2) == _yDim && var->get_dim(1) == _xDim) {
-        xySwapped = true;
-      } else {
-        continue;
-      }
-    }
-
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Found var:" << endl;
-      cerr << "  Name: " << var->name() << endl;
-      cerr << "  Is valid: " << var->is_valid() << endl;
-      cerr << "  N dims: " << var->num_dims() << endl;
-    }
-
-    _addDataField(var, mdvx, itime, xySwapped);
-
-  } // ivar
-
-#endif
-  
-  return 0;
-
-}
-
-/////////////////////////////////////////////////
-// Add the data field
-//
-// Returns 0 on success, -1 on failure
-
-#ifdef JUNK
-
-int GpmHdf5ToMdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
-                                int itime, bool xySwapped)
-
-{
-
-  Nc3Att *missingAtt = var->get_att("missing_value");
-  if (missingAtt == NULL) {
-    missingAtt = var->get_att("_FillValue");
-    if (missingAtt == NULL) {
-      cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
-      cerr << "  Cannot find missing_value of _FillValue attribute" << endl;
-      cerr << "  field name: " << var->name() << endl;
-      return -1;
-    }
-  }
-
-  // set npoints, allocate float values array
-
-  int npts = _nz * _ny * _nx;
-
-  TaArray<float> vals_;
-  float *vals = vals_.alloc(npts);
-
-  // set current location based on time
-
-  if (_zDim) {
-    var->set_cur(itime, 0, 0, 0);
-  } else {
-    var->set_cur(itime, 0, 0);
-  }
-
-  if (var->type() == NC_FLOAT) {
-
-    TaArray<float> fvals_;
-    float *fvals = fvals_.alloc(npts);
-    
-    // read data
-
-    int iret = 0;
-    if (_zDim) {
-      if (xySwapped) {
-        iret = var->get(fvals, 1, _nz, _nx, _ny);
-      } else {
-        iret = var->get(fvals, 1, _nz, _ny, _nx);
-      }
-    } else {
-      if (xySwapped) {
-        iret = var->get(fvals, 1, _nx, _ny);
-      } else {
-        iret = var->get(fvals, 1, _ny, _nx);
-      }
-    }
-
-    if (iret == 0) {
-      cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
-      cerr << "  Cannot get data from input netcdf variable" << endl;
-      cerr << "  field name: " << var->name() << endl;
-      cerr << _ncErr->get_errmsg() << endl;
-      return -1;
-    }
-
-    // save data
-    
-    float missing = missingAtt->as_float(0);
-    for (int ii = 0; ii < npts; ii++) {
-      if (isnan(fvals[ii]) || fvals[ii] == missing) {
-        vals[ii] = _missingFloat;
-      } else {
-        vals[ii] = fvals[ii];
-      }
-    }
-
-  } else if (var->type() == NC_DOUBLE) {
-    
-    TaArray<double> dvals_;
-    double *dvals = dvals_.alloc(npts);
-
-    // read data
-
-    int iret = 0;
-    if (_zDim) {
-      if (xySwapped) {
-        iret = var->get(dvals, 1, _nz, _nx, _ny);
-      } else {
-        iret = var->get(dvals, 1, _nz, _ny, _nx);
-      }
-    } else {
-      if (xySwapped) {
-        iret = var->get(dvals, 1, _nx, _ny);
-      } else {
-        iret = var->get(dvals, 1, _ny, _nx);
-      }
-    }
-    if (iret == 0) {
-      cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
-      cerr << "  Cannot get data from input netcdf variable" << endl;
-      cerr << "  field name: " << var->name() << endl;
-      cerr << _ncErr->get_errmsg() << endl;
-      return -1;
-    }
-
-    // save data
-    
-    double missing = missingAtt->as_double(0);
-    for (int ii = 0; ii < npts; ii++) {
-      if (isnan(dvals[ii]) || dvals[ii] == missing) {
-        vals[ii] = _missingFloat;
-      } else {
-        vals[ii] = dvals[ii];
-      }
-    }
-
-  } else {
-
-    // for int fields, we need scale and offset
-
-    double scale = 1.0;
-    Nc3Att *scaleAtt = var->get_att("scale");
-    if (scaleAtt == NULL) {
-      scaleAtt = var->get_att("scale_factor");
-    }
-    if (scaleAtt == NULL) {
-      cerr << "WARNING - GpmHdf5ToMdv::_addDataField" << endl;
-      cerr << "  Cannot get scale for integer variable" << endl;
-      cerr << "  field name: " << var->name() << endl;
-      cerr << "  Setting scale to 1.0" << endl;
-    } else {
-      scale = scaleAtt->as_double(0);
-      delete scaleAtt;
-    }
-      
-    double offset = 0.0;
-    Nc3Att *offsetAtt = var->get_att("offset");
-    if (offsetAtt == NULL) {
-      if (_params.debug) {
-        cerr << "WARNING - GpmHdf5ToMdv::_addDataField" << endl;
-        cerr << "  Cannot get offset for integer variable" << endl;
-        cerr << "  field name: " << var->name() << endl;
-        cerr << "  setting to 0" << endl;
-      }
-    } else {
-      offset = offsetAtt->as_double(0);
-      delete offsetAtt;
-    }
-    
-    if (var->type() == NC_INT) {
-      
-      TaArray<int> ivals_;
-      int *ivals = ivals_.alloc(npts);
-      
-      // read data
-      
-      int iret = 0;
-      if (_zDim) {
-        if (xySwapped) {
-          iret = var->get(ivals, 1, _nz, _nx, _ny);
-        } else {
-          iret = var->get(ivals, 1, _nz, _ny, _nx);
-        }
-      } else {
-        if (xySwapped) {
-          iret = var->get(ivals, 1, _nx, _ny);
-        } else {
-          iret = var->get(ivals, 1, _ny, _nx);
-        }
-      }
-      if (iret == 0) {
-        cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
-        cerr << "  Cannot get data from input netcdf variable" << endl;
-        cerr << "  field name: " << var->name() << endl;
-        cerr << _ncErr->get_errmsg() << endl;
-        return -1;
-      }
-
-      // save data
-
-      int missing = missingAtt->as_int(0);
-      for (int ii = 0; ii < npts; ii++) {
-        if (ivals[ii] == missing) {
-          vals[ii] = _missingFloat;
-        } else {
-          vals[ii] = ivals[ii] * scale + offset;
-        }
-      }
-
-    } else if (var->type() == NC_SHORT) {
-      
-      TaArray<short> svals_;
-      short *svals = svals_.alloc(npts);
-      
-      // read data
-      
-      int iret = 0;
-      if (_zDim) {
-        if (xySwapped) {
-          iret = var->get(svals, 1, _nz, _nx, _ny);
-        } else {
-          iret = var->get(svals, 1, _nz, _ny, _nx);
-        }
-      } else {
-        if (xySwapped) {
-          iret = var->get(svals, 1, _nx, _ny);
-        } else {
-          iret = var->get(svals, 1, _ny, _nx);
-        }
-      }
-      if (iret == 0) {
-        cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
-        cerr << "  Cannot get data from input netcdf variable" << endl;
-        cerr << "  field name: " << var->name() << endl;
-        cerr << _ncErr->get_errmsg() << endl;
-        return -1;
-      }
-
-      // save data
-
-      short missing = missingAtt->as_short(0);
-      for (int ii = 0; ii < npts; ii++) {
-        if (svals[ii] == missing) {
-          vals[ii] = _missingFloat;
-        } else {
-          vals[ii] = svals[ii] * scale + offset;
-        }
-      }
-
-    } else if (var->type() == NC_BYTE) {
-      
-
-      TaArray<ncbyte> bvals_;
-      ncbyte *bvals = bvals_.alloc(npts);
-      TaArray<unsigned char> uvals_;
-      unsigned char *uvals = uvals_.alloc(npts);
-      
-      // read data
-      
-      int iret = 0;
-      if (_zDim) {
-        if (xySwapped) {
-          iret = var->get(bvals, 1, _nz, _nx, _ny);
-        } else {
-          iret = var->get(bvals, 1, _nz, _ny, _nx);
-        }
-      } else {
-        if (xySwapped) {
-          iret = var->get(bvals, 1, _nx, _ny);
-        } else {
-          iret = var->get(bvals, 1, _ny, _nx);
-        }
-      }
-      if (iret == 0) {
-        cerr << "ERROR - GpmHdf5ToMdv::_addDataField" << endl;
-        cerr << "  Cannot get data from input netcdf variable" << endl;
-        cerr << "  field name: " << var->name() << endl;
-        cerr << _ncErr->get_errmsg() << endl;
-        return -1;
-      }
-      memcpy(uvals, bvals, npts);
-
-      // save data
-      
-      ncbyte missing = missingAtt->as_ncbyte(0);
-      for (int ii = 0; ii < npts; ii++) {
-        if (bvals[ii] == missing) {
-          vals[ii] = _missingFloat;
-        } else {
-          if (_params.treat_ncbyte_as_unsigned) {
-            vals[ii] = (int) uvals[ii] * scale + offset;
-          } else {
-            vals[ii] = (int) bvals[ii] * scale + offset;
-          }
-        }
-      }
-
-    } // if (var->type() == NC_INT)
-
-  } // if (var->type() == NC_FLOAT)
-
-  // free up attribute
-
-  delete missingAtt;
-
-  // swap (x,y) if required
-
-  if (xySwapped) {
-
-    TaArray<float> tmpVals_;
-    float *tmpVals = tmpVals_.alloc(npts);
-    memcpy(tmpVals, vals, npts * sizeof(float));
-
-    int nptsPlane = _ny * _nx;
-
-    for (int iz = 0; iz < _nz; iz ++) {
-      int planeOffset = iz * nptsPlane;
-      for (int iy = 0; iy < _ny; iy ++) {
-        for (int ix = 0; ix < _nx; ix ++) {
-          float *src = tmpVals + planeOffset + ix * _ny + iy;
-          float *dest = vals + planeOffset + iy * _nx + ix;
-          *dest = *src;
-        } // ix
-      } // iy
-    } // iz
-    
-  } // if (xySwapped) 
-
-  // reverse y order if it was in reverse order in the file
-
-  if (_yIsReversed) {
-
-    TaArray<float> tmpVals_;
-    float *tmpVals = tmpVals_.alloc(npts);
-    memcpy(tmpVals, vals, npts * sizeof(float));
-
-    int nptsPlane = _ny * _nx;
-
-    for (int iz = 0; iz < _nz; iz ++) {
-      int planeOffset = iz * nptsPlane;
-      for (int iy = 0; iy < _ny; iy ++) {
-        float *src = tmpVals + planeOffset + _nx * (_ny - 1 - iy);
-        float *dest = vals + planeOffset + _nx * iy;
-        memcpy(dest, src, _nx * sizeof(float));
-      } // iy
-    } // iz
-    
-  } // if (_yIsReversed) 
-  
-  // get field name and units
-
-  string fieldName(var->name());
-
-  string units;
-  Nc3Att *unitsAtt = var->get_att("units");
-  if (unitsAtt != NULL) {
-    units = unitsAtt->as_string(0);
-    delete unitsAtt;
-  }
-
-  string longName(fieldName);
-  Nc3Att *longNameAtt = var->get_att("long_name");
-  if (longNameAtt != NULL) {
-    longName = longNameAtt->as_string(0);
-    delete longNameAtt;
-  }
-
-  // create fields and add to mdvx object
-
-  if (_params.input_xy_is_latlon &&
-      _params.resample_latlon_onto_regular_grid &&
-      (!_dxIsConstant || !_dyIsConstant)) {
-    
-    // create the field from the remapped
-    
-    MdvxField *field =
-      _createRegularLatlonField(fieldName, longName, units, vals);
-    // add to Mdvx, which takes over ownership
-    mdvx.addField(field);
-    
-  } else {
-  
-    // create the field from the netcdf array
-    MdvxField *field = _createMdvxField(fieldName, longName, units,
-                                        _nx, _ny, _nz,
-                                        _minx, _miny, _minz,
-                                        _dx, _dy, _dz,
-                                        vals);
-    // add to Mdvx, which takes over ownership
-    mdvx.addField(field);
-    
-  }
-  
-  return 0;
-
-}
-
-#endif
-
 ///////////////////////////////
 // Create an Mdvx field
 
-MdvxField *GpmHdf5ToMdv::_createMdvxField
-  (const string &fieldName,
-   const string &longName,
-   const string &units,
-   int nx, int ny, int nz,
-   double minx, double miny, double minz,
-   double dx, double dy, double dz,
-   const float *vals)
+MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
+                                          const string &longName,
+                                          const string &units,
+                                          size_t nx, size_t ny, size_t nz,
+                                          double minx, double miny, double minz,
+                                          double dx, double dy, double dz,
+                                          NcxxPort::fl32 missingVal,
+                                          NcxxPort::fl32 *vals,
+                                          bool yIsReversed)
 
 {
 
@@ -1553,12 +1119,14 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField
   
   fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
   fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
-  fhdr.dz_constant = false;
+  fhdr.dz_constant = true;
   fhdr.data_dimension = 3;
-
-  fhdr.bad_data_value = _missingFloat;
-  fhdr.missing_data_value = _missingFloat;
   
+  fhdr.scale = 1.0;
+  fhdr.bad_data_value = missingVal;
+  fhdr.missing_data_value = missingVal;
+  
+  fhdr.proj_type = Mdvx::PROJ_LATLON;
   fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr.data_element_nbytes = sizeof(fl32);
   fhdr.volume_size = nx * ny * nz * sizeof(fl32);
@@ -1578,11 +1146,33 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField
   Mdvx::vlevel_header_t vhdr;
   MEM_zero(vhdr);
   
-  for (int ii = 0; ii < nz; ii++) {
+  for (size_t ii = 0; ii < nz; ii++) {
     vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
     vhdr.level[ii] = _zArray[ii];
   }
 
+  // reverse y order of data if it was in reverse order in the file
+  
+  if (yIsReversed) {
+
+    size_t nptsPlane = ny * nx;
+    size_t npts = nptsPlane * nz;
+
+    TaArray<NcxxPort::fl32> tmpVals_;
+    NcxxPort::fl32 *tmpVals = tmpVals_.alloc(npts);
+    memcpy(tmpVals, vals, npts * sizeof(NcxxPort::fl32));
+
+    for (size_t iz = 0; iz < nz; iz ++) {
+      size_t planeOffset = iz * nptsPlane;
+      for (size_t iy = 0; iy < ny; iy ++) {
+        NcxxPort::fl32 *src = tmpVals + planeOffset + nx * (ny - 1 - iy);
+        NcxxPort::fl32 *dest = vals + planeOffset + nx * iy;
+        memcpy(dest, src, _nx * sizeof(NcxxPort::fl32));
+      } // iy
+    } // iz
+    
+  } // if (yIsReversed) 
+  
   // create MdvxField object
   // converting data to encoding and compression types
 
@@ -1592,247 +1182,12 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField
 
   // set names etc
   
-  field->setFieldName(fieldName.c_str());
-  field->setFieldNameLong(longName.c_str());
-  field->setUnits(units.c_str());
+  field->setFieldName(fieldName);
+  field->setFieldNameLong(longName);
+  field->setUnits(units);
   field->setTransform("");
 
   return field;
 
 }
   
-////////////////////////////////////////////////////////////////
-// Create a field remapped from lat/lon onto regular grid
-
-MdvxField *GpmHdf5ToMdv::_createRegularLatlonField
-  (const string &fieldName,
-   const string &longName,
-   const string &units,
-   const float *vals)
-
-{
-
-  if (_params.debug) {
-    cerr << "==== Creating regular lat/lon grid ====" << endl;
-  }
-
-  // compute min dlat and dlon
-
-  double dLon = 1.0e6;
-  for (int ix = _ixValidStart; ix < _ixValidEnd; ix++) {
-    double lonVal = fabs(_xArray[ix+1] - _xArray[ix]);
-    if (lonVal < dLon) {
-      dLon = lonVal;
-    }
-  }
-
-  double dLat = 1.0e6;
-  for (int iy = _iyValidStart; iy < _iyValidEnd; iy++) {
-    double latVal = fabs(_yArray[iy+1] - _yArray[iy]);
-    if (latVal < dLat) {
-      dLat = latVal;
-    }
-  }
-
-  double minLon = _xArray[_ixValidStart];
-  double maxLon = _xArray[_ixValidEnd];
-  double rangeLon = maxLon - minLon;
-
-  double minLat = _yArray[_iyValidStart];
-  double maxLat = _yArray[_iyValidEnd];
-  double rangeLat = maxLat - minLat;
-
-  int nLon = (int) (rangeLon / dLon) + 1;
-  int nLat = (int) (rangeLat / dLat) + 1;
-
-  if (_params.debug) {
-    cerr << "==>> minLon, maxLon, rangeLon, dLon, nLon: "
-         << minLon << ", " << maxLon << ", "
-         << rangeLon << ", " << dLon << ", " << nLon << endl;
-    cerr << "==>> minLat, maxLat, rangeLat, dLat, nLat: "
-         << minLat << ", " << maxLat << ", "
-         << rangeLat << ", " << dLat << ", " << nLat << endl;
-  }
-
-  // create resampled grid
-
-  int nResamp = nLon * nLat;
-  TaArray<fl32> resampled_;
-  fl32 *resampled = resampled_.alloc(nResamp);
-
-  // compute resampling indices
-
-  vector<int> latIndex;
-  double latitude = minLat;
-  for (int ilat = 0; ilat < nLat; ilat++, latitude += dLat) {
-    int index = _getClosestLatIndex(latitude, dLat / 2.0);
-    latIndex.push_back(index);
-  }
-
-  vector<int> lonIndex;
-  double longitude = minLon;
-  for (int ilon = 0; ilon < nLon; ilon++, longitude += dLon) {
-    int index = _getClosestLonIndex(longitude, dLon / 2.0);
-    lonIndex.push_back(index);
-  }
-  
-  // load the resampled grid
-
-  fl32 *resamp = resampled;
-  for (int ilat = 0; ilat < nLat; ilat++) {
-    int latIx = latIndex[ilat];
-    for (int ilon = 0; ilon < nLon; ilon++, resamp++) {
-      int lonIx = lonIndex[ilon];
-      if (latIx < 0 || lonIx < 0) {
-        *resamp = _missingFloat;
-      } else {
-        int valIndex = latIx * _nx + lonIx;
-        *resamp = vals[valIndex];
-      }
-    } // ilon
-  } // ilat
-
-  // create the field
-
-  // set up MdvxField headers
-
-  Mdvx::field_header_t fhdr;
-  MEM_zero(fhdr);
-
-  fhdr.proj_type = Mdvx::PROJ_LATLON;
-  fhdr.proj_origin_lat = minLat + rangeLat / 2.0;
-  fhdr.proj_origin_lon = minLon + rangeLon / 2.0;
-
-  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
-  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
-  fhdr.scaling_type = Mdvx::SCALING_NONE;
-  
-  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
-  fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
-  fhdr.dz_constant = false;
-  fhdr.data_dimension = 3;
-
-  fhdr.bad_data_value = _missingFloat;
-  fhdr.missing_data_value = _missingFloat;
-  
-  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  fhdr.data_element_nbytes = sizeof(fl32);
-  fhdr.volume_size = nLon * nLat * _nz * sizeof(fl32);
-  
-  fhdr.nx = nLon;
-  fhdr.ny = nLat;
-  fhdr.nz = _nz;
-
-  fhdr.grid_minx = minLon;
-  fhdr.grid_miny = minLat;
-  fhdr.grid_minz = _minz;
-
-  fhdr.grid_dx = dLon;
-  fhdr.grid_dy = dLat;
-  fhdr.grid_dz = _dz;
-  
-  Mdvx::vlevel_header_t vhdr;
-  MEM_zero(vhdr);
-  
-  for (size_t ii = 0; ii < _nz; ii++) {
-    vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
-    vhdr.level[ii] = _zArray[ii];
-  }
-
-  // create MdvxField object
-  // converting data to encoding and compression types
-  
-  MdvxField *field = new MdvxField(fhdr, vhdr, resampled);
-  field->convertType
-    ((Mdvx::encoding_type_t) _params.output_encoding_type, Mdvx::COMPRESSION_GZIP);
-
-  // set names etc
-  
-  field->setFieldName(fieldName.c_str());
-  field->setFieldNameLong(longName.c_str());
-  field->setUnits(units.c_str());
-  field->setTransform("");
-
-  return field;
-
-}
-  
-//////////////////////////////////////////////////
-// get the closest lat index to a given latitude
-// within the tolerance
-// return -1 if outside grid by more than tolerance
-
-int GpmHdf5ToMdv::_getClosestLatIndex(double latitude, double tolerance)
-
-{
-
-  if (latitude < _yArray[_iyValidStart]) {
-    if (fabs(latitude - _yArray[_iyValidStart]) <= tolerance) {
-      return _iyValidStart;
-    } else {
-      return -1;
-    }
-  }
-
-  if (latitude > _yArray[_iyValidEnd]) {
-    if (fabs(latitude - _yArray[_iyValidEnd]) <= tolerance) {
-      return _iyValidEnd;
-    } else {
-      return -1;
-    }
-  }
-
-  for (int iy = _iyValidStart; iy < _iyValidEnd; iy++) {
-    if (latitude >= _yArray[iy] && latitude <= _yArray[iy+1]) {
-      if (fabs(latitude - _yArray[iy]) < fabs(latitude - _yArray[iy+1])) {
-        return iy;
-      } else {
-        return iy + 1;
-      }
-    }
-  }
-
-  return -1;
-
-}
-
-
-//////////////////////////////////////////////////
-// get the closest lon index to a given longitude
-// within the tolerance
-// return -1 if outside grid by more than tolerance
-
-int GpmHdf5ToMdv::_getClosestLonIndex(double longitude, double tolerance)
-
-{
-
-  if (longitude < _xArray[_ixValidStart]) {
-    if (fabs(longitude - _xArray[_ixValidStart]) <= tolerance) {
-      return _ixValidStart;
-    } else {
-      return -1;
-    }
-  }
-
-  if (longitude > _xArray[_ixValidEnd]) {
-    if (fabs(longitude - _xArray[_ixValidEnd]) <= tolerance) {
-      return _ixValidEnd;
-    } else {
-      return -1;
-    }
-  }
-
-  for (int ix = _ixValidStart; ix < _ixValidEnd; ix++) {
-    if (longitude >= _xArray[ix] && longitude <= _xArray[ix+1]) {
-      if (fabs(longitude - _xArray[ix]) < fabs(longitude - _xArray[ix+1])) {
-        return ix;
-      } else {
-        return ix + 1;
-      }
-    }
-  }
-
-  return -1;
-
-}
-

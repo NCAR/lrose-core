@@ -413,9 +413,9 @@ public:
 
   char* file_name_substr;
 
-  double min_z_km;
+  double radar_min_z_km;
 
-  double delta_z_km;
+  double radar_delta_z_km;
 
   grid_params_t output_grid;
 
