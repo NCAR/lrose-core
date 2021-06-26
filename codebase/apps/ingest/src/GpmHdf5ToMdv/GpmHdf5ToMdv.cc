@@ -889,17 +889,17 @@ void GpmHdf5ToMdv::_interpDbz()
         dbz[3] = dbzIn[iscan + 1][iray];
 
         // check for valid DBZ
-        bool allValid = true;
+        bool allMissing = true;
         for (int ii = 0; ii < 4; ii++) {
-          if (dbz[ii] == _missingDbz) {
-            allValid = false;
+          if (dbz[ii] != _missingDbz) {
+            allMissing = false;
             break;
           }
         }
-        if (!allValid) {
+        if (allMissing) {
           continue;
         }
-
+        
         // interp for the output grid points inside the polygon
         
         _interpInsidePolygon(corners, dbz, iz);
@@ -1026,7 +1026,9 @@ double GpmHdf5ToMdv::_interpPt(const Point_d &pt,
     for (int ii = 0; ii < 3; ii++) {
       if (dist[ii] < minDist) {
         minDist = dist[ii];
-        minIndex = ii;
+        if (dbz[ii] != _missingDbz) {
+          minIndex = ii;
+        }
       }
     }
     return dbz[minIndex];
@@ -1036,9 +1038,11 @@ double GpmHdf5ToMdv::_interpPt(const Point_d &pt,
   double sumWt = 0.0;
   double sumInterp = 0.0;
   for (int ii = 0; ii < 3; ii++) {
-    weight[ii] = pow(1.0 / dist[ii], _params.interp_power_parameter);
-    sumWt += weight[ii];
-    sumInterp += weight[ii] * dbz[ii];
+    if (dbz[ii] != _missingDbz) {
+      weight[ii] = pow(1.0 / dist[ii], _params.interp_power_parameter);
+      sumWt += weight[ii];
+      sumInterp += weight[ii] * dbz[ii];
+    }
   }
   double interpDbz = sumInterp / sumWt;
 
