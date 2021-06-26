@@ -770,6 +770,66 @@
     tt->single_val.d = 0.125;
     tt++;
     
+    // Parameter 'remap_gates_to_vert_levels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("remap_gates_to_vert_levels");
+    tt->descr = tdrpStrDup("Option to remap the radar gates onto specified output levels.");
+    tt->help = tdrpStrDup("The radar gate spacing is 125m. This is quite fine for a full 3-D grid. So often it makes sense to remap onto a specified vertical grid, with fewer levels.");
+    tt->val_offset = (char *) &remap_gates_to_vert_levels - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'output_z_levels_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("output_z_levels_km");
+    tt->descr = tdrpStrDup("Z levels to which radar data is remapped on output (km)");
+    tt->help = tdrpStrDup("For DBZ, we take the max to perform the remapping.");
+    tt->array_offset = (char *) &_output_z_levels_km - &_start_;
+    tt->array_n_offset = (char *) &output_z_levels_km_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 30;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0.5;
+      tt->array_vals[1].d = 1;
+      tt->array_vals[2].d = 1.5;
+      tt->array_vals[3].d = 2;
+      tt->array_vals[4].d = 2.5;
+      tt->array_vals[5].d = 3;
+      tt->array_vals[6].d = 3.5;
+      tt->array_vals[7].d = 4;
+      tt->array_vals[8].d = 4.5;
+      tt->array_vals[9].d = 5;
+      tt->array_vals[10].d = 5.5;
+      tt->array_vals[11].d = 6;
+      tt->array_vals[12].d = 6.5;
+      tt->array_vals[13].d = 7;
+      tt->array_vals[14].d = 7.5;
+      tt->array_vals[15].d = 8;
+      tt->array_vals[16].d = 8.5;
+      tt->array_vals[17].d = 9;
+      tt->array_vals[18].d = 10;
+      tt->array_vals[19].d = 11;
+      tt->array_vals[20].d = 12;
+      tt->array_vals[21].d = 13;
+      tt->array_vals[22].d = 14;
+      tt->array_vals[23].d = 15;
+      tt->array_vals[24].d = 16;
+      tt->array_vals[25].d = 17;
+      tt->array_vals[26].d = 18;
+      tt->array_vals[27].d = 19;
+      tt->array_vals[28].d = 20;
+      tt->array_vals[29].d = 21;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -829,8 +889,8 @@
       tt->struct_vals[1].i = 500;
       tt->struct_vals[2].d = -104;
       tt->struct_vals[3].d = 35;
-      tt->struct_vals[4].d = 0.01;
-      tt->struct_vals[5].d = 0.01;
+      tt->struct_vals[4].d = 0.025;
+      tt->struct_vals[5].d = 0.025;
     tt++;
     
     // Parameter 'set_output_grid_limits_from_data'

@@ -201,6 +201,64 @@ radar_min_z_km = 0;
 
 radar_delta_z_km = 0.125;
 
+///////////// remap_gates_to_vert_levels //////////////
+//
+// Option to remap the radar gates onto specified output levels.
+//
+// The radar gate spacing is 125m. This is quite fine for a full 3-D 
+//   grid. So often it makes sense to remap onto a specified vertical 
+//   grid, with fewer levels.
+//
+//
+// Type: boolean
+//
+
+remap_gates_to_vert_levels = TRUE;
+
+///////////// output_z_levels_km //////////////////////
+//
+// Z levels to which radar data is remapped on output (km).
+//
+// For DBZ, we take the max to perform the remapping.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+output_z_levels_km = {
+ 0.5,
+ 1,
+ 1.5,
+ 2,
+ 2.5,
+ 3,
+ 3.5,
+ 4,
+ 4.5,
+ 5,
+ 5.5,
+ 6,
+ 6.5,
+ 7,
+ 7.5,
+ 8,
+ 8.5,
+ 9,
+ 10,
+ 11,
+ 12,
+ 13,
+ 14,
+ 15,
+ 16,
+ 17,
+ 18,
+ 19,
+ 20,
+ 21
+};
+
 //======================================================================
 //
 // OUTPUT REGULAR LAT/LON GRID.

@@ -255,6 +255,17 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
 
   _interpDbz();
 
+  // invert the gate levels because the radar gate data is stored
+  // top-down instead of bottom-up
+
+  _invertGateLevels();
+  
+  // optionally remap onto specified output grid
+  
+  if (_params.remap_gates_to_vert_levels) {
+    _remapVertLevels();
+  }
+
   // create output Mdvx file object
   
   DsMdvx mdvx;
@@ -277,8 +288,7 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
                                          _minxDeg, _minyDeg, _minzKm,
                                          _dxDeg, _dyDeg, _dzKm,
                                          _missingDbz,
-                                         _dbzOutput.data(),
-                                         false);
+                                         _dbzOutput.data());
   
   mdvx.addField(dbzField);
 
@@ -839,7 +849,7 @@ void GpmHdf5ToMdv::_interpDbz()
   // initialize dbz grid
 
   size_t nOutput = _nx * _ny * _nz;
-  _dbzOutput.resize(nOutput, _missingDbz);
+  _dbzInterp.resize(nOutput, _missingDbz);
 
   // loop through the vertical levels
 
@@ -972,18 +982,6 @@ void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
   maxIx = min(maxIx, (int) _nx - 1);
   maxIy = min(maxIy, (int) _ny - 1);
   
-  // double minLon1 = _minxDeg + minIx * _dxDeg;
-  // double maxLon1 = _minxDeg + maxIx * _dxDeg;
-  // double minLat1 = _minyDeg + minIy * _dyDeg;
-  // double maxLat1 = _minyDeg + maxIy * _dyDeg;
-  
-  // cerr << "11111111111111111111111111111111111111111111111" << endl;
-  // cerr << "11111 minLon, minIx, minLon1: " << minLon << ", " << minIx << ", " << minLon1 << endl; 
-  // cerr << "11111 maxLon, maxIx, maxLon1: " << maxLon << ", " << maxIx << ", " << maxLon1 << endl; 
-  // cerr << "11111 minLat, minIy, minLat1: " << minLat << ", " << minIy << ", " << minLat1 << endl; 
-  // cerr << "11111 maxLat, maxIy, maxLat1: " << maxLat << ", " << maxIy << ", " << maxLat1 << endl;
-  
-  
   // loop through the output grid points, finding if they are inside the polygon
 
   for (int iy = minIy; iy <= maxIy; iy++) {
@@ -994,7 +992,7 @@ void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
       if (EGS_point_in_polygon(pt, (Point_d *) corners, 4)) {
         double interpVal = _interpPt(pt, corners, dbz, iz);
         size_t outputIndex = iz * _nx * _ny + iy * _nx + ix;
-        _dbzOutput[outputIndex] = interpVal;
+        _dbzInterp[outputIndex] = interpVal;
       }
     } // ix
   } // iy
@@ -1011,8 +1009,6 @@ double GpmHdf5ToMdv::_interpPt(const Point_d &pt,
   
 {
   
-  // cerr << "222222 is inside lon, lat: " << pt.x << ", " << pt.y << endl;
-
   // compute the distances from the pt to the corners
 
   double dist[4];
@@ -1047,6 +1043,96 @@ double GpmHdf5ToMdv::_interpPt(const Point_d &pt,
   double interpDbz = sumInterp / sumWt;
 
   return interpDbz;
+
+}
+  
+////////////////////////////////////////////////////////
+// invert the height levels because the data is stored
+// with the top first and decreasing in height 
+
+void GpmHdf5ToMdv::_invertGateLevels()
+{
+
+  // prepare output grid
+  
+  _dbzOutput.resize(_dbzInterp.size());
+  _zLevels.resize(_nz);
+  for (size_t iz = 0; iz < _nz; iz++) {
+    _zLevels[iz] = _minzKm + iz * _dzKm;
+  }
+
+  // invert vlevels
+
+  size_t nptsPlane = _nx * _ny;
+  for (size_t iz = 0; iz < _nz; iz++) {
+    for (size_t iy = 0; iy < _ny; iy++) {
+      for (size_t ix = 0; ix < _nx; ix++) {
+        size_t interpIndex = iz * nptsPlane + iy * _nx + ix;
+        size_t outputIndex = (_nz - iz - 1) * nptsPlane + iy * _nx + ix;
+        _dbzOutput[outputIndex] = _dbzInterp[interpIndex];
+      } // ix
+    } // iy
+  } // iz
+
+}
+  
+////////////////////////////////////////////////////////
+// remap the gates onto specified vertical levels
+// compute the max for the remapping
+
+void GpmHdf5ToMdv::_remapVertLevels()
+{
+
+  _dbzInterp = _dbzOutput;
+
+  // zlevels are specified
+
+  _zLevels.resize(_params.output_z_levels_km_n);
+  for (int iz = 0; iz < _params.output_z_levels_km_n; iz++) {
+    _zLevels[iz] = _params._output_z_levels_km[iz];
+  }
+
+  // prepare output grid
+
+  size_t nPtsOutput = _nx * _ny * _zLevels.size();
+  _dbzOutput.resize(nPtsOutput);
+
+  // compute heights of mid pt between specified levels
+
+  vector<double> zMid;
+  for (size_t ii = 0; ii < _zLevels.size() - 1; ii++) {
+    zMid.push_back((_zLevels[ii] + _zLevels[ii+1]) / 2.0);
+  }
+  vector<int> lowIndex, highIndex;
+  lowIndex.resize(_zLevels.size());
+  highIndex.resize(_zLevels.size());
+  lowIndex[0] = 0;
+  highIndex[_zLevels.size()-1] = _nz - 1;
+  for (size_t iz = 1; iz < _zLevels.size(); iz++) {
+    lowIndex[iz] = (int) ((zMid[iz-1] - _minzKm) / _dzKm) + 1;
+  }
+  for (size_t iz = 0; iz < _zLevels.size() - 1; iz++) {
+    highIndex[iz] = (int) ((zMid[iz] - _minzKm) / _dzKm);
+  }
+  
+  // compute max dbz for specified vlevels
+
+  size_t nptsPlane = _nx * _ny;
+  for (size_t iy = 0; iy < _ny; iy++) {
+    for (size_t ix = 0; ix < _nx; ix++) {
+      for (size_t iz = 0; iz < _zLevels.size(); iz++) {
+        NcxxPort::fl32 maxDbz = _missingDbz;
+        for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
+          size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
+          if (_dbzInterp[interpIndex] != _missingDbz) {
+            maxDbz = max(maxDbz, _dbzInterp[interpIndex]);
+          }
+        } // jz
+        size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
+        _dbzOutput[outputIndex] = maxDbz;
+      } // iz
+    } // ix
+  } // iy
 
 }
   
@@ -1096,8 +1182,7 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
                                           double minx, double miny, double minz,
                                           double dx, double dy, double dz,
                                           NcxxPort::fl32 missingVal,
-                                          NcxxPort::fl32 *vals,
-                                          bool yIsReversed)
+                                          NcxxPort::fl32 *vals)
 
 {
 
@@ -1130,11 +1215,12 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
   fhdr.proj_type = Mdvx::PROJ_LATLON;
   fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr.data_element_nbytes = sizeof(fl32);
-  fhdr.volume_size = nx * ny * nz * sizeof(fl32);
   
   fhdr.nx = nx;
   fhdr.ny = ny;
-  fhdr.nz = nz;
+  fhdr.nz = _zLevels.size();
+
+  fhdr.volume_size = fhdr.nx * fhdr.ny * fhdr.nz * sizeof(fl32);
 
   fhdr.grid_minx = minx;
   fhdr.grid_miny = miny;
@@ -1147,39 +1233,17 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
   Mdvx::vlevel_header_t vhdr;
   MEM_zero(vhdr);
   
-  for (size_t ii = 0; ii < nz; ii++) {
+  for (size_t ii = 0; ii < _zLevels.size(); ii++) {
     vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
-    vhdr.level[ii] = _minzKm + ii * _dzKm;
+    vhdr.level[ii] = _zLevels[ii];
   }
 
-  // reverse y order of data if it was in reverse order in the file
-  
-  if (yIsReversed) {
-
-    size_t nptsPlane = ny * nx;
-    size_t npts = nptsPlane * nz;
-
-    TaArray<NcxxPort::fl32> tmpVals_;
-    NcxxPort::fl32 *tmpVals = tmpVals_.alloc(npts);
-    memcpy(tmpVals, vals, npts * sizeof(NcxxPort::fl32));
-
-    for (size_t iz = 0; iz < nz; iz ++) {
-      size_t planeOffset = iz * nptsPlane;
-      for (size_t iy = 0; iy < ny; iy ++) {
-        NcxxPort::fl32 *src = tmpVals + planeOffset + nx * (ny - 1 - iy);
-        NcxxPort::fl32 *dest = vals + planeOffset + nx * iy;
-        memcpy(dest, src, _nx * sizeof(NcxxPort::fl32));
-      } // iy
-    } // iz
-    
-  } // if (yIsReversed) 
-  
   // create MdvxField object
   // converting data to encoding and compression types
-
+  
   MdvxField *field = new MdvxField(fhdr, vhdr, vals);
-  field->convertType
-    ((Mdvx::encoding_type_t) _params.output_encoding_type, Mdvx::COMPRESSION_GZIP);
+  field->convertType((Mdvx::encoding_type_t) _params.output_encoding_type,
+                     Mdvx::COMPRESSION_GZIP);
 
   // set names etc
   

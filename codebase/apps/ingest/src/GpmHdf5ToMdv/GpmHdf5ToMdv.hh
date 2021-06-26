@@ -114,6 +114,7 @@ private:
   vector<NcxxPort::fl64> _scLat, _scLon, _scAlt;
 
   vector<NcxxPort::fl32> _dbzInput;
+  vector<NcxxPort::fl32> _dbzInterp;
   vector<NcxxPort::fl32> _dbzOutput;
   NcxxPort::fl32 _missingDbz;
   string _dbzUnits;
@@ -122,6 +123,7 @@ private:
   double _minxDeg, _minyDeg, _minzKm;
   double _maxxDeg, _maxyDeg, _maxzKm;
   double _dxDeg, _dyDeg, _dzKm;
+  vector<double> _zLevels;
 
   // hdf5 utilities
 
@@ -156,9 +158,15 @@ private:
                    const double *dbz,
                    size_t iz);
 
-  // load up dimensions and variables
+  // invert the height levels because the data is stored
+  // with the top first and decreasing in height 
 
-  int _loadMetaData();
+  void _invertGateLevels();
+
+  // remap the gates onto specified vertical levels
+  // compute the max for the remapping
+
+  void _remapVertLevels();
 
   /// set MDV headers and data
 
@@ -171,8 +179,7 @@ private:
                               double minx, double miny, double minz,
                               double dx, double dy, double dz,
                               NcxxPort::fl32 missingVal,
-                              NcxxPort::fl32 *vals,
-                              bool yIsReversed);
+                              NcxxPort::fl32 *vals);
 
 
 };

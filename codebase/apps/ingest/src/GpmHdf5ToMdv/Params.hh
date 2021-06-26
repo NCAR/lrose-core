@@ -417,6 +417,11 @@ public:
 
   double radar_delta_z_km;
 
+  tdrp_bool_t remap_gates_to_vert_levels;
+
+  double *_output_z_levels_km;
+  int output_z_levels_km_n;
+
   grid_params_t output_grid;
 
   tdrp_bool_t set_output_grid_limits_from_data;
@@ -442,7 +447,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[33];
 
   const char *_className;
 

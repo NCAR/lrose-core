@@ -140,6 +140,21 @@ paramdef double {
   p_descr = "Delta height between levels (km)";
 } radar_delta_z_km;
 
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to remap the radar gates onto specified output levels.";
+  p_help = "The radar gate spacing is 125m. This is quite fine for a full 3-D grid. So often it makes sense to remap onto a specified vertical grid, with fewer levels.";
+} remap_gates_to_vert_levels;
+
+paramdef double {
+  p_default = {
+    0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0
+
+  };
+  p_descr = "Z levels to which radar data is remapped on output (km)";
+  p_help = "For DBZ, we take the max to perform the remapping.";
+} output_z_levels_km[];
+
 commentdef {
   p_header = "OUTPUT REGULAR LAT/LON GRID";
 }
@@ -154,7 +169,7 @@ typedef struct {
 } grid_params_t;
 
 paramdef struct grid_params_t {
-  p_default = {500, 500, -104.0, 35.0, 0.01, 0.01};
+  p_default = {500, 500, -104.0, 35.0, 0.025, 0.025};
   p_descr = "Parameters for output grid.";
   p_help = "Units in deg.";
 } output_grid;
