@@ -849,7 +849,10 @@ void GpmHdf5ToMdv::_interpDbz()
   // initialize dbz grid
 
   size_t nOutput = _nx * _ny * _nz;
-  _dbzInterp.resize(nOutput, _missingDbz);
+  _dbzInterp.resize(nOutput);
+  for (size_t ii = 0; ii < nOutput; ii++) {
+    _dbzInterp[ii] = _missingDbz;
+  }
 
   // loop through the vertical levels
 
@@ -889,14 +892,13 @@ void GpmHdf5ToMdv::_interpDbz()
         dbz[3] = dbzIn[iscan + 1][iray];
 
         // check for valid DBZ
-        bool allMissing = true;
+        int nGood = 0;
         for (int ii = 0; ii < 4; ii++) {
           if (dbz[ii] != _missingDbz) {
-            allMissing = false;
-            break;
+            nGood++;
           }
         }
-        if (allMissing) {
+        if (nGood < 1) {
           continue;
         }
         
