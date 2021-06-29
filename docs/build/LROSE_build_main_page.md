@@ -38,6 +38,7 @@ Use the following if you need to set up an environment suitable for code develop
 | [LROSE make system](./LROSE_manual_make_system.md) | Details of the manual make system |
 | [Manual build - LINUX](./LROSE_manual_build.linux.md) | Manual build for LROSE, for LINUX |
 | [Manual build - MAC OSC](./LROSE_manual_build.osx.md) | Manual build for LROSE, for MAC OSX |
+| [Manual build - Windows](https://github.com/NCAR/lrose-core/files/6736210/LROSE.Windows.Installation.Help.pdf) | Manual build for LROSE, for Windows, using WSL |
 
 ## Creating .rpm and .deb package files
 
