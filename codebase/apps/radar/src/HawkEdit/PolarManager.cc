@@ -5741,7 +5741,7 @@ void PolarManager::EditRunScript() {
 void PolarManager::runForEachRayScript(QString script, bool useBoundary) {
   vector<Point> boundaryPoints;
   if (boundaryPointEditorControl != NULL) {
-    vector<Point> boundaryPoints = boundaryPointEditorControl->getWorldPoints();
+    boundaryPoints = boundaryPointEditorControl->getWorldPoints();
   }
   scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
 }
