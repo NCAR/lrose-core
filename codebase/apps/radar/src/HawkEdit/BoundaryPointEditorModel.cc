@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
+#include <toolsa/Path.hh>
 
 
 /*
@@ -49,7 +50,7 @@
 */
 
 BoundaryPointEditorModel::BoundaryPointEditorModel() {
-	rootBoundaryDir = string(getenv("HOME")) + "/" + "HawkEyeBoundaries";
+	rootBoundaryDir = string(getenv("HOME")) + "/" + "HawkEditBoundaries";
 	LOG(DEBUG) << "rootBoundaryDir = " << rootBoundaryDir;
 }
 
@@ -604,9 +605,18 @@ void BoundaryPointEditorModel::save(int boundaryIndex, string &selectedFieldName
  int sweepIndex, string &radarFilePath) 
 {
 	LOG(DEBUG) << "enter";
+	//string directory = getBoundaryFilePathOnly(radarFilePath);
+
   string path = getBoundaryFilePath(radarFilePath,
     selectedFieldName, sweepIndex, boundaryIndex);
+  // take advantage of Path tools in library to create directories as needed.
+	Path fileName(path);
+	if (!fileName.pathExists()) {
+	  int result = fileName.makeDir();
+	  if (result < 0) throw std::runtime_error(std::strerror(errno));
+  }  
   LOG(DEBUG) << "saving to path: " << path;
+
 	save(path);
 	LOG(DEBUG) << "exit";
 }
@@ -619,6 +629,7 @@ void BoundaryPointEditorModel::save(string &path)
 
 	FILE *file;
 	file = fopen(path.c_str(), "wb");
+	if (file == NULL) throw std::runtime_error(std::strerror(errno));
 
 	int tool;
 	if (currentTool == BoundaryToolType::circle)
@@ -816,13 +827,30 @@ string BoundaryPointEditorModel::getBoundaryFilePath(string &radarFilePath,
  string &fieldName, int sweepIndex, int boundaryIndex)
 {
 	LOG(DEBUG) << "enter";
-	string boundaryDir = getBoundaryDirFromRadarFilePath(radarFilePath);
+	string boundaryDir = getBoundaryFilePathOnly(radarFilePath);
 	LOG(DEBUG) << "boundaryDir = " << boundaryDir;
+	string boundaryFileName = getBoundaryFileName(fieldName, sweepIndex, boundaryIndex);
+	LOG(DEBUG) << "boundaryFileName = " << boundaryFileName;
+	return(boundaryDir + "/" + boundaryFileName);
+}
+
+string BoundaryPointEditorModel::getBoundaryFileName(string &fieldName, 
+	int sweepIndex, int boundaryIndex)
+{
+	LOG(DEBUG) << "enter";
 	string boundaryFileName = getBoundaryName(boundaryIndex);
 	LOG(DEBUG) << "boundaryFileName = " << boundaryFileName;
-	LOG(DEBUG) << "rootBoundaryDir = " << rootBoundaryDir;
-	return(rootBoundaryDir + "/" + boundaryDir + "/field" + 
+	return("field" + 
 		fieldName + "-sweep" + to_string(sweepIndex) + "-" + boundaryFileName);
+}
+
+string BoundaryPointEditorModel::getBoundaryFilePathOnly(string &radarFilePath)
+{
+	LOG(DEBUG) << "enter";
+	string boundaryDir = getBoundaryDirFromRadarFilePath(radarFilePath);
+	LOG(DEBUG) << "boundaryDir = " << boundaryDir;
+	LOG(DEBUG) << "rootBoundaryDir = " << rootBoundaryDir;
+	return(rootBoundaryDir + "/" + boundaryDir);
 }
 
 // check if boundary files exist for boundary i, and 

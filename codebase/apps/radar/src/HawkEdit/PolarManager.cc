@@ -4061,8 +4061,12 @@ void PolarManager::saveBoundaryEvent(int boundaryIndex)
 	//string fileExt = _boundaryEditorList->currentItem()->text().toUtf8().constData();
 	//string path = _getOutputPath(false, outputDir, fileExt);
 	//boundaryPointEditorControl->save(path);
-    boundaryPointEditorControl->save(boundaryIndex, currentFieldName, currentSweepIndex,
-      radarFilePath);
+    try {
+      boundaryPointEditorControl->save(boundaryIndex, currentFieldName, 
+        currentSweepIndex, radarFilePath);
+    } catch (std::runtime_error &ex) {
+      errorMessage("Save Boundary Error", ex.what());
+    }
   } else {
     errorMessage("Save Boundary Error", "no File Path found");
   }
@@ -4157,7 +4161,7 @@ void PolarManager::showBoundaryEditor()
     connect(boundaryPointEditorView, SIGNAL(refreshBoundariesEvent()),
       this, SLOT(refreshBoundaries()));  
 
-    connect(boundaryPointEditorControl, SIGNAL(saveBoundary(int )), 
+    connect(boundaryPointEditorView, SIGNAL(saveBoundary(int )), 
       this, SLOT(saveBoundaryEvent(int)));
     connect(boundaryPointEditorControl, SIGNAL(loadBoundary(int )), 
       this, SLOT(loadBoundaryEvent(int)));

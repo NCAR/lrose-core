@@ -74,6 +74,9 @@ class BoundaryPointEditorModel
   void save(string &path);
   string getBoundaryFilePath(string &radarFilePath, string &fieldName,
    int sweepIndex, int boundaryIndex);
+  string getBoundaryFileName(string &fieldName, 
+	 int sweepIndex, int boundaryIndex);
+  string getBoundaryFilePathOnly(string &radarFilePath);
 	string getBoundaryDirFromRadarFilePath(string radarFilePath);
 	string getRootBoundaryDir();
 	//void setBoundaryDir(string &openFilePath); 	
