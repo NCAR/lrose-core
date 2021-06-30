@@ -223,6 +223,9 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
 
   sheetView = NULL;
   scriptEditorView = NULL;
+  boundaryPointEditorControl = NULL;
+  boundaryPointEditorView = NULL;
+  boundaryView = NULL;
 
   // set up windows
 
@@ -744,7 +747,10 @@ void PolarManager::_createMenus()
 
   menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
-  menuBar()->addAction(_showBoundaryEditorAct);
+
+  _boundaryMenu = menuBar()->addMenu(tr("&Boundary"));
+  _boundaryMenu->addAction(_showBoundaryEditorAct);
+  
   menuBar()->addAction(_unzoomAct);
   menuBar()->addAction(_clearAct);
 
@@ -3116,7 +3122,7 @@ void PolarManager::_openFile()
 
   //since we are opening a new radar file, close any boundaries currently being displayed
 
-  if (boundaryPointEditorView != NULL) {
+  if (boundaryPointEditorControl!= NULL) {
     boundaryPointEditorControl->clear();
     boundaryPointEditorView->setVisible(false);
   }
@@ -3880,18 +3886,37 @@ void PolarManager::_howto()
 
 void PolarManager::boundaryCircleRadiusChanged(int value) 
 {
-  bool resizeExistingCircle = boundaryPointEditorControl->setCircleRadius(value);
-  if (resizeExistingCircle) { //resize existing circle
-    // TODO: somehow get the worldPlot and painter from ppiWidget
-    _ppi->showSelectedField(); // refresh/replot->BoundaryPointEditor::Instance()->draw(_zoomWorld, painter); 
-    //boundaryPointEditorControl->draw(worldPlot, painter);
-    //WorldPlot zoomWorld = _ppi->getZoomWorld();
-    //QPainter painter = _ppi->getPainter();
+  if (boundaryPointEditorControl != NULL) {
+    bool resizeExistingCircle = boundaryPointEditorControl->setCircleRadius(value);
+    if (resizeExistingCircle) { //resize existing circle
+      // TODO: somehow get the worldPlot and painter from ppiWidget
+      _ppi->showSelectedField(); // refresh/replot->BoundaryPointEditor::Instance()->draw(_zoomWorld, painter); 
+      //boundaryPointEditorControl->draw(worldPlot, painter);
+      //WorldPlot zoomWorld = _ppi->getZoomWorld();
+      //QPainter painter = _ppi->getPainter();
+    }
+  }
+}
+
+void PolarManager::boundaryBrushRadiusChanged(int value) 
+{
+  if (boundaryPointEditorControl != NULL) {
+    //bool resizeExistingCircle = 
+    boundaryPointEditorControl->setBrushRadius(value);
+    //if (resizeExistingCircle) { //resize existing circle
+      // TODO: somehow get the worldPlot and painter from ppiWidget
+     // _ppi->showSelectedField(); // refresh/replot->BoundaryPointEditor::Instance()->draw(_zoomWorld, painter); 
+      //boundaryPointEditorControl->draw(worldPlot, painter);
+      //WorldPlot zoomWorld = _ppi->getZoomWorld();
+      //QPainter painter = _ppi->getPainter();
+    //}
   }
 }
 
 void PolarManager::drawBoundary(WorldPlot &zoomWorld, QPainter &painter) {
+  if (boundaryPointEditorControl != NULL) {
     boundaryPointEditorControl->drawBoundary(zoomWorld, painter);
+  }
 }
 
 void PolarManager::mouseMoveEvent(int worldX, int worldY)
@@ -3915,7 +3940,9 @@ bool PolarManager::evaluateCursor(bool isShiftKeyDown) {
 
 bool PolarManager::evaluateRange(double xRange) {
     //doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
+  if (boundaryPointEditorControl != NULL) {
     return boundaryPointEditorControl->updateScale(xRange);
+  }
 }
 
 void PolarManager::evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY,
@@ -4074,17 +4101,19 @@ void PolarManager::loadBoundaryEvent(int boundaryIndex)
 void PolarManager::refreshBoundaries()
 {
   LOG(DEBUG) << "enter";
+  if (boundaryPointEditorControl != NULL) {
 
-  // get selected field name
-  string currentFieldName = _displayFieldController->getSelectedFieldName();
-  int currentSweepIndex = _sweepController->getSelectedIndex();
-  if (_archiveFileList.size() > 0) {
-    string radarFilePath = _archiveFileList.at(0);
-  
-    boundaryPointEditorControl->refreshBoundaries(
-      radarFilePath, 
-      currentFieldName,
-      currentSweepIndex);
+    // get selected field name
+    string currentFieldName = _displayFieldController->getSelectedFieldName();
+    int currentSweepIndex = _sweepController->getSelectedIndex();
+    if (_archiveFileList.size() > 0) {
+      string radarFilePath = _archiveFileList.at(0);
+    
+      boundaryPointEditorControl->refreshBoundaries(
+        radarFilePath, 
+        currentFieldName,
+        currentSweepIndex);
+    }
   }
 
   LOG(DEBUG) << "exit";
@@ -4094,14 +4123,12 @@ void PolarManager::refreshBoundaries()
 // show boundary editor
 void PolarManager::showBoundaryEditor()
 {
-
-
-// ----
+  LOG(DEBUG) << "enter";
  
   // create the view
 
   if (boundaryPointEditorView == NULL) {
-    boundaryPointEditorView = new BoundaryPointEditorView();
+    boundaryPointEditorView = new BoundaryPointEditorView(this);
 
     // install event filter to catch when the spreadsheet is closed
     CloseEventFilter *closeFilter = new CloseEventFilter(boundaryPointEditorView);
@@ -4127,16 +4154,23 @@ void PolarManager::showBoundaryEditor()
     connect(boundaryPointEditorView, SIGNAL(boundaryBrushRadiusChanged(int)),
       this, SLOT(boundaryBrushRadiusChanged(int)));  
 
-    connect(boundaryPointEditorView, SIGNAL(refreshBoundaries()),
+    connect(boundaryPointEditorView, SIGNAL(refreshBoundariesEvent()),
       this, SLOT(refreshBoundaries()));  
 
     connect(boundaryPointEditorControl, SIGNAL(saveBoundary(int )), 
       this, SLOT(saveBoundaryEvent(int)));
     connect(boundaryPointEditorControl, SIGNAL(loadBoundary(int )), 
       this, SLOT(loadBoundaryEvent(int)));
+
+  connect(boundaryPointEditorView, SIGNAL(userClickedPolygonButton()),
+    boundaryPointEditorControl, SLOT(userClickedPolygonButton()));
+  connect(boundaryPointEditorView, SIGNAL(userClickedCircleButton()),
+    boundaryPointEditorControl, SLOT(userClickedCircleButton()));
+  connect(boundaryPointEditorView, SIGNAL(userClickedBrushButton()),
+    boundaryPointEditorControl, SLOT(userClickedBrushButton()));  
     
-    //sheetView->init();
-    //sheetView->show();
+    //boundaryPointEditorView->init();
+    //boundaryPointEditorView->show();
   } else {
 
     //string currentFieldName = _displayFieldController->getSelectedFieldName();
@@ -4188,6 +4222,7 @@ void PolarManager::showBoundaryEditor()
     }
   }
   */
+  LOG(DEBUG) << "exit";
 }
 
 
@@ -5705,7 +5740,7 @@ void PolarManager::EditRunScript() {
 
 void PolarManager::runForEachRayScript(QString script, bool useBoundary) {
   vector<Point> boundaryPoints;
-  if (boundaryPointEditorView != NULL) {
+  if (boundaryPointEditorControl != NULL) {
     vector<Point> boundaryPoints = boundaryPointEditorControl->getWorldPoints();
   }
   scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
@@ -5843,6 +5878,10 @@ void PolarManager::scriptEditorClosed() {
 void PolarManager::boundaryEditorClosed() {
   //delete View;  this is handled by the close event
   boundaryPointEditorView = NULL;
+  delete boundaryPointEditorControl;
+  boundaryPointEditorControl = NULL;
+  delete boundaryView;
+  boundaryView = NULL;
 }
 
 /////////////////////////////////////////////////////

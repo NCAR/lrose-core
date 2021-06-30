@@ -63,8 +63,14 @@ BoundaryPointEditor::BoundaryPointEditor(BoundaryPointEditorView *bpeView,
 	BoundaryView *boundaryView) {
 	_boundaryEditorView = bpeView;
 	_boundaryView = boundaryView;
+	_boundaryPointEditorModel = new BoundaryPointEditorModel();
 }
 
+BoundaryPointEditor::~BoundaryPointEditor() {
+	delete _boundaryPointEditorModel;
+}
+
+/*
 void BoundaryPointEditor::createBoundaryEditorDialog() {
 	_boundaryEditorView = new BoundaryPointEditorView();
 	// createBoundaryEditorDialog();
@@ -75,9 +81,8 @@ void BoundaryPointEditor::createBoundaryEditorDialog() {
 		this, SLOT(userClickedCircleButton));
 	connect(_boundaryEditorView, SIGNAL(userClickedBrushButton),
 		this, SLOT(userClickedBrushButton));	
-
-
 }
+*/
 
 void BoundaryPointEditor::userClickedPolygonButton() {
 	setTool(BoundaryToolType::polygon);
@@ -902,6 +907,8 @@ void BoundaryPointEditor::setBoundaryDir(string &openFilePath)
 */
 string BoundaryPointEditor::getBoundaryFilePath(string &fieldName, int sweepIndex, string boundaryFileName)
 {
+	LOG(DEBUG) << "enter";
+	LOG(DEBUG) << "_boundaryDir = " << _boundaryDir;
 	return(_boundaryDir + "/field" + fieldName + "-sweep" + to_string(sweepIndex) + "-" + boundaryFileName);
 }
 

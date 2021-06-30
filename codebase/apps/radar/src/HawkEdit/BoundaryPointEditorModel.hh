@@ -26,7 +26,7 @@ class BoundaryPointEditorModel
 {
   public:
 
-  BoundaryPointEditorModel(){};
+  BoundaryPointEditorModel();
 
   //vector<Point> getBoundaryPoints(string radarFilePath, string &fieldName, int sweepIndex, string boundaryFileName);
   vector<Point> getBoundaryPoints(string radarFilePath,
@@ -79,7 +79,7 @@ class BoundaryPointEditorModel
 	//void setBoundaryDir(string &openFilePath); 	
   string getBoundaryName(int i);	
 
-	string rootBoundaryDir = string(getenv("HOME")) + "/" + "HawkEyeBoundaries";
+	string rootBoundaryDir; //  = string(getenv("HOME")) + "/" + "HawkEyeBoundaries";
 	
 	int getNearestPointIndex(float x, float y, vector<Point> &pts);
 	float getNearestDistToLineSegment(int x, int y, int segmentPtIndex1, int segmentPtIndex2);

@@ -53,7 +53,8 @@
 
 */
 
-BoundaryPointEditorView::BoundaryPointEditorView() 
+BoundaryPointEditorView::BoundaryPointEditorView(QWidget *parent)
+  : QDialog(parent) 
 // Creates the boundary editor dialog and associated event slots
 //void BoundaryPointEditorView::createBoundaryEditorDialog()
 {
@@ -1054,7 +1055,7 @@ void BoundaryPointEditorView::refreshBoundaries()
   //rename any items that have corresponding file on disk
   //for (int i=1; i <= 5; i++)
   //{
-    emit refreshBoundaries();
+    emit refreshBoundariesEvent();
     //const char *fileName = BoundaryPointEditor::Instance()->refreshBoundary(i);
     //_boundaryEditorList->item(i-1)->setText(fileName.c_str());
   //}

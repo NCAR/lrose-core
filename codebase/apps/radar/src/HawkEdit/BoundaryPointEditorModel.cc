@@ -48,6 +48,10 @@
   for boundaries.  Read, Writes, I/O for boundary persistence.
 */
 
+BoundaryPointEditorModel::BoundaryPointEditorModel() {
+	rootBoundaryDir = string(getenv("HOME")) + "/" + "HawkEyeBoundaries";
+	LOG(DEBUG) << "rootBoundaryDir = " << rootBoundaryDir;
+}
 
 // Set the current tool
 void BoundaryPointEditorModel::setTool(BoundaryToolType tool)
@@ -781,6 +785,7 @@ string BoundaryPointEditorModel::getBoundaryDirFromRadarFilePath(string radarFil
 {
 	hash<string> str_hash;
 	long hash = str_hash(radarFilePath); //e.g., converts "/media/sf_lrose/ncswp_SPOL_RHI_.nc" to something like 1736437357943458505
+  if (hash < 0) hash = hash * -1;
 	stringstream ss;
 	ss << hash;
 	return ss.str();
@@ -810,8 +815,12 @@ void BoundaryPointEditorModel::setBoundaryDir(string &openFilePath)
 string BoundaryPointEditorModel::getBoundaryFilePath(string &radarFilePath,
  string &fieldName, int sweepIndex, int boundaryIndex)
 {
+	LOG(DEBUG) << "enter";
 	string boundaryDir = getBoundaryDirFromRadarFilePath(radarFilePath);
+	LOG(DEBUG) << "boundaryDir = " << boundaryDir;
 	string boundaryFileName = getBoundaryName(boundaryIndex);
+	LOG(DEBUG) << "boundaryFileName = " << boundaryFileName;
+	LOG(DEBUG) << "rootBoundaryDir = " << rootBoundaryDir;
 	return(rootBoundaryDir + "/" + boundaryDir + "/field" + 
 		fieldName + "-sweep" + to_string(sweepIndex) + "-" + boundaryFileName);
 }

@@ -180,19 +180,17 @@ public:
 
 // end from DisplayManager
 
-  void showBoundaryEditor();
-  void refreshBoundaries();
+
+
 //  void clearBoundaryEditorClick();
 //  void helpBoundaryEditorClick();
 //  void polygonBtnBoundaryEditorClick();
 //  void circleBtnBoundaryEditorClick();
 //  void brushBtnBoundaryEditorClick();
 //  void onBoundaryEditorListItemClicked(QListWidgetItem* item);
-  void saveBoundaryEvent(int boundaryIndex);
-  void loadBoundaryEvent(int boundaryIndex);  
+
   void selectBoundaryTool(BoundaryToolType tool);
   void drawBoundary(WorldPlot &_zoomWorld, QPainter &painter);
-  void boundaryCircleRadiusChanged(int value);
   void mouseMoveEvent(int worldX, int worldY);  
   bool evaluateCursor(bool isShiftKeyDown);
   void evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY, 
@@ -204,6 +202,10 @@ public:
 public slots:
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
+
+  void _openFile();
+  void _saveFile();
+  void _howto();   
 
   void contextMenuParameterColors();
   
@@ -228,6 +230,13 @@ public slots:
   void spreadSheetClosed();
   void scriptEditorClosed();
   void boundaryEditorClosed();
+  void showBoundaryEditor();
+  void refreshBoundaries();
+  void boundaryCircleRadiusChanged(int value);
+  void boundaryBrushRadiusChanged(int value);
+  void saveBoundaryEvent(int boundaryIndex);
+  void loadBoundaryEvent(int boundaryIndex);    
+
 
   void errorMessage(string title, string message);
 
@@ -507,6 +516,7 @@ private:
   QMenu *_overlaysMenu;
   QMenu *_helpMenu;
   QMenu *_editMenu;
+  QMenu *_boundaryMenu;
 
   // actions
 
@@ -600,8 +610,7 @@ private:
 
   // open File 
 
-  void _openFile();
-  void _saveFile();
+
   void _moveUpDown();
   string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
@@ -687,10 +696,6 @@ private:
   // time slider
 
   void _createTimeControl();
-
-  // override howto and boundaryEditor
-
-  void _howto();  
 
 private slots:
 

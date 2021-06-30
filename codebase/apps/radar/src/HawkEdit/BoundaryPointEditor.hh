@@ -35,8 +35,9 @@ class BoundaryPointEditor : public QObject
 
   BoundaryPointEditor(BoundaryPointEditorView *bpeView,
 	  BoundaryView *boundaryView);
+  ~BoundaryPointEditor();
 
-  void createBoundaryEditorDialog();	
+  //void createBoundaryEditorDialog();	
 
 	string getBoundaryFilePath(string &fieldName, int sweepIndex, string boundaryFileName);
 	string getBoundaryDirFromRadarFilePath(string rootBoundaryDir, string radarFilePath);
@@ -82,20 +83,20 @@ class BoundaryPointEditor : public QObject
 	void refreshBoundaries(string &openFilePath,
     string &currentFieldName, int currentSweepIndex);
 
-
-	void userClickedPolygonButton();
-	void userClickedCircleButton();
-	void userClickedBrushButton();
-
   signals:
   void needSelectedFieldNameSweepIndex(int boundaryIndex);
   void boundaryCircleRadiusChanged(int value);
   void boundaryBrushRadiusChanged(int value);
+  void saveBoundary(int boundaryIndex);
+  void loadBoundary(int boundaryIndex);
 
   public slots:
 
   //void selectedFieldNameSweepIndexSent(int boundaryIndex, QString &selectedFieldName, int sweepIndex);
   void clearBoundaryEditorClick();
+	void userClickedPolygonButton();
+	void userClickedCircleButton();
+	void userClickedBrushButton();
 
   private:
 

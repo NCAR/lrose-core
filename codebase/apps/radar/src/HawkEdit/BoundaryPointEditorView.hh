@@ -35,7 +35,7 @@ class BoundaryPointEditorView : public QDialog
 
   public:
 
-	BoundaryPointEditorView();
+	BoundaryPointEditorView(QWidget *parent = 0);
 	//string getBoundaryFilePath(string &fieldName, int sweepIndex, string boundaryFileName);
 	//string getBoundaryDirFromRadarFilePath(string rootBoundaryDir, string radarFilePath);
 	//vector<Point> getBoundaryPoints(string radarFilePath, string &fieldName, int sweepIndex, string boundaryFileName);
@@ -91,6 +91,7 @@ class BoundaryPointEditorView : public QDialog
 
   void boundaryPointEditorClosed();
   void clearBoundary(int boundaryIndex);  // TODO: still needs connection
+  void refreshBoundariesEvent();
 
   private:
 
@@ -154,6 +155,10 @@ class BoundaryPointEditorView : public QDialog
 +  QListWidget *_boundaryEditorList;
 +  */
 
+  void createBoundaryEditorDialog();
+
+public slots:
+
   //circle radius slider for BoundaryPointEditor
   void _circleRadiusSliderValueChanged(int value);
   void _brushRadiusSliderValueChanged(int value);
@@ -162,7 +167,7 @@ class BoundaryPointEditorView : public QDialog
 //void _createBoundaryEditorDialog();
 //-  void _showBoundaryEditor();
 //-  void _clearBoundaryEditorClick();
-  void createBoundaryEditorDialog();
+
 
   void clearBoundaryEditorClick();
   void helpBoundaryEditorClick();
