@@ -642,7 +642,7 @@ def buildPackage():
 
     # set the environment
 
-    os.environ["LDFLAGS"] = "-L" + prefixLibDir + \
+    os.environ["LDFLAGS"] = "-L" + prefixLibDir + " " + \
                             "-Wl,--enable-new-dtags," + \
                             "-rpath," + \
                             "'$$ORIGIN/" + runtimeLibRelDir + \

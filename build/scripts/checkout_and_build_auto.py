@@ -661,13 +661,15 @@ def buildPackage():
 
     # set the environment
 
-    os.environ["LDFLAGS"] = "-L" + prefixLibDir + \
-                            "-Wl,--enable-new-dtags," + \
-                            "-rpath," + \
-                            "'$$ORIGIN/" + runtimeLibRelDir + \
-                            ":$$ORIGIN/../lib" + \
-                            ":" + prefixLibDir + \
-                            ":" + prefixLibDir + "'"
+    LDFLAGS = "-L" + prefixLibDir + " " + \
+              "-Wl,--enable-new-dtags," + \
+              "-rpath," + \
+              "'$$ORIGIN/" + runtimeLibRelDir + \
+              ":$$ORIGIN/../lib" + \
+              ":" + prefixLibDir + \
+              ":" + prefixLibDir + "'"
+
+    os.environ["LDFLAGS"] = LDFLAGS
 
     os.environ["FC"] = "gfortran"
     os.environ["F77"] = "gfortran"
