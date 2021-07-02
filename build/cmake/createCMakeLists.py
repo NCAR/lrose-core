@@ -92,6 +92,10 @@ def main():
                       dest='withJasper', default=False,
                       action="store_true",
                       help='Set if jasper library is installed. This provides support for jpeg compression in grib files.')
+    parser.add_option('--iscray',
+                      dest='iscray', default=False,
+                      action="store_true",
+                      help='True if the Cray compiler is used')
 
     (options, args) = parser.parse_args()
 
@@ -608,7 +612,10 @@ def writeCMakeListsTop(dir):
     else:
         fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")\n')
 
-    fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
+    if (options.iscray):
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -hstd=c++11 ")\n')
+    else:
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
     if (options.m32):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 ")\n')
 
