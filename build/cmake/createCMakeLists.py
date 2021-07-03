@@ -515,8 +515,8 @@ def writeCMakeListsTop(dir):
 #    fo.write('set(CMAKE_C_COMPILER_NAMES clang fcc gcc icc cc)\n')
 #    fo.write('set(CMAKE_CXX_COMPILER_NAMES clang++ FCC CC g++ icpc c++ cxx)\n')
     
-    fo.write('set(CMAKE_C_COMPILER /opt/FJSVstclanga/cp-1.0.20.06/bin/fcc)\n')
-    fo.write('set(CMAKE_CXX_COMPILER /opt/FJSVstclanga/cp-1.0.20.06/bin/FCC)\n')
+    fo.write('set(CMAKE_C_COMPILER fcc)\n')
+    fo.write('set(CMAKE_CXX_COMPILER FCC)\n')
     fo.write('\n')
 
     if (options.verboseMake):
