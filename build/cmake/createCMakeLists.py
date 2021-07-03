@@ -485,9 +485,6 @@ def writeCMakeListsTop(dir):
         print("--->> Writing top level CMakeLists.txt, dir: ",
               dir, file=sys.stderr)
         print("     ", cmakePath, file=sys.stderr)
-
-    runCommand('export CC=/opt/FJSVstclanga/cp-1.0.20.06/bin/fcc')
-    runCommand('export CXX=/opt/FJSVstclanga/cp-1.0.20.06/bin/FCC')
     
     fo = open(cmakePath, 'w')
 
