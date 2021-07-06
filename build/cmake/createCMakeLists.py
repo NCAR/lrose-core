@@ -613,12 +613,12 @@ def writeCMakeListsTop(dir):
     if (options.m32):
         fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -m32 ")\n')
     else:
-        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -KPIC -std=c17 ")\n')
+        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=c14 ")\n')
 
     if (options.iscray):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -hstd=c++11 ")\n')
     else:
-        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -KPIC -std=c++17 ")\n')
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ")\n')
         
     if (options.m32):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 ")\n')
