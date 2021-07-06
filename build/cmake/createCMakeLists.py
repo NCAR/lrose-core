@@ -96,7 +96,11 @@ def main():
                       dest='iscray', default=False,
                       action="store_true",
                       help='True if the Cray compiler is used')
-
+    parser.add_option('--isfujitsu',
+                      dest='isfujitsu', default=False,
+                      action="store_true",
+                      help='True if the Fujitsu compiler is used')
+    
     (options, args) = parser.parse_args()
 
     if (options.verbose):
@@ -177,7 +181,10 @@ def main():
         print("==>>   nApps   : ", nApps, file=sys.stderr)
         print("==>>   nOther  : ", nOther, file=sys.stderr)
         print("==>>   nTotal  : ", nTotal, file=sys.stderr)
-
+        
+    # sanity check: we could not use Cray and Fujitsu compilers at the same time
+    expect (not (options.iscray and options.isfujitsu), "iscray and isfujitsu could not be both True)
+        
     sys.exit(0)
 
 ########################################################################
@@ -614,6 +621,8 @@ def writeCMakeListsTop(dir):
 
     if (options.iscray):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -hstd=c++11 ")\n')
+    elif (options.isfujitsu):
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++03 ")\n')        
     else:
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
         
