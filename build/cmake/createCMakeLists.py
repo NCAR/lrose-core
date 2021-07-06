@@ -512,11 +512,8 @@ def writeCMakeListsTop(dir):
     fo.write('endif()\n')
     fo.write('\n')
 
-#    fo.write('set(CMAKE_C_COMPILER_NAMES clang fcc gcc icc cc)\n')
-#    fo.write('set(CMAKE_CXX_COMPILER_NAMES clang++ FCC CC g++ icpc c++ cxx)\n')
-
-    fo.write('set(CMAKE_C_COMPILER /opt/FJSVstclanga/cp-1.0.20.06/bin/fcc)\n')
-    fo.write('set(CMAKE_CXX_COMPILER /opt/FJSVstclanga/cp-1.0.20.06/bin/FCC)\n')
+    fo.write('set(CMAKE_C_COMPILER_NAMES clang gcc icc cc fcc)\n')
+    fo.write('set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx FCC CC)\n')
     fo.write('\n')
 
     if (options.verboseMake):
@@ -618,7 +615,7 @@ def writeCMakeListsTop(dir):
     if (options.iscray):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -hstd=c++11 ")\n')
     else:
-        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ")\n')
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
         
     if (options.m32):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 ")\n')
