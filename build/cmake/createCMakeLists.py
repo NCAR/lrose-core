@@ -183,7 +183,7 @@ def main():
         print("==>>   nTotal  : ", nTotal, file=sys.stderr)
         
     # sanity check: we could not use Cray and Fujitsu compilers at the same time
-    expect (not (options.iscray and options.isfujitsu), "iscray and isfujitsu could not be both True")
+    assert not (options.iscray and options.isfujitsu), "iscray and isfujitsu could not be both True..."
         
     sys.exit(0)
 
