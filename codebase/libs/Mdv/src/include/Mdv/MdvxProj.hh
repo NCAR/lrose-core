@@ -355,7 +355,7 @@ public:
   // returns 0 on success, -1 on failure (data outside grid)
 
   int latlon2arrayIndex(double lat, double lon,
-			int &array_index,
+			int64_t &array_index,
 			bool wrap_lon = false,
                         double z = -9999.0) const;
 

@@ -902,7 +902,7 @@ int MdvxProj::latlon2xyIndex(double lat, double lon,
 // returns 0 on success, -1 on failure (data outside grid)
 
 int MdvxProj::latlon2arrayIndex(double lat, double lon,
-				int &array_index,
+				int64_t &array_index,
 				bool wrap_lon /* = false */,
                                 double zz /* = -9999.0*/) const
 
@@ -915,7 +915,7 @@ int MdvxProj::latlon2arrayIndex(double lat, double lon,
     return -1;
   }
 
-  array_index = (_coord.nx * y_index) + x_index;
+  array_index = (_coord.nx * (int64_t) y_index) + (int64_t) x_index;
   return 0;
 
 }

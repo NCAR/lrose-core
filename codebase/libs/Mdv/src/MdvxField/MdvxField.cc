@@ -2171,11 +2171,11 @@ void MdvxField::_computeVsection(MdvxVsectLut &lut,
 
     // no interpolation - nearest neighbor
     
-    const vector<int> &offsets = lut.getOffsets();
+    const vector<int64_t> &offsets = lut.getOffsets();
     
     for (int ii = 0; ii < nSamplePoints; ii++) {
       if (offsets[ii] >= 0) {
-	for (int iz = 0; iz < _fhdr.nz; iz++) {
+	for (int64_t iz = 0; iz < _fhdr.nz; iz++) {
 	  fl32 vv = in[iz * npointsPlane + offsets[ii]];
 	  out[iz * nSamplePoints + ii] = vv;
 	} // iz
@@ -2214,11 +2214,11 @@ void MdvxField::_computeVsectionRGBA(MdvxVsectLut &lut,
   
   // nearest neighbor
     
-  const vector<int> &offsets = lut.getOffsets();
+  const vector<int64_t> &offsets = lut.getOffsets();
     
   for (int64_t ii = 0; ii < nSamplePoints; ii++) {
     if (offsets[ii] >= 0) {
-      for (int iz = 0; iz < _fhdr.nz; iz++) {
+      for (int64_t iz = 0; iz < _fhdr.nz; iz++) {
 	ui32 vv = in[iz * npointsPlane + offsets[ii]];
 	out[iz * nSamplePoints + ii] = vv;
       } // iz
@@ -2260,7 +2260,7 @@ void MdvxField::_computeVsectionPolarRadar(const MdvxVsectLut &lut,
     if (proj.latlon2xyIndex(samplePts[ii].lat, samplePts[ii].lon,
 			    ix, iy) == 0) {
       
-      for (int iz = 0; iz < _fhdr.nz; iz++) {
+      for (int64_t iz = 0; iz < _fhdr.nz; iz++) {
 
 	// compute the gate number correction for the elevation angle
 	
@@ -2269,8 +2269,8 @@ void MdvxField::_computeVsectionPolarRadar(const MdvxVsectLut &lut,
           elevDeg = 89.0;
         }
 	double cosel = cos(elevDeg * DEG_TO_RAD);
-	int ixz = (int) ((double) ix / cosel + 0.5);
-	int offset = iy * _fhdr.nx + ixz;
+	int64_t ixz = (int) ((double) ix / cosel + 0.5);
+	int64_t offset = (int64_t) iy * _fhdr.nx + ixz;
         if (offset > npointsPlane - 1) {
           offset = npointsPlane - 1;
         }
@@ -3173,15 +3173,15 @@ int MdvxField::remap(MdvxRemapLut &lut,
   ui08 *target = (ui08 *) workBuf.getPtr();
 
   int64_t nOffsets = lut.getNOffsets();
-  const int *sourceOffsets = lut.getSourceOffsets();
-  const int *targetOffsets = lut.getTargetOffsets();
+  const int64_t *sourceOffsets = lut.getSourceOffsets();
+  const int64_t *targetOffsets = lut.getTargetOffsets();
   
   for (int64_t i = 0; i < nOffsets; i++, sourceOffsets++, targetOffsets++) {
-
-    int soff = *sourceOffsets * _fhdr.data_element_nbytes;
-    int toff = *targetOffsets * _fhdr.data_element_nbytes;
-
-    for (int iz = 0; iz < _fhdr.nz;
+    
+    int64_t soff = *sourceOffsets * _fhdr.data_element_nbytes;
+    int64_t toff = *targetOffsets * _fhdr.data_element_nbytes;
+    
+    for (int64_t iz = 0; iz < _fhdr.nz;
 	 iz++, soff += nBytesSourcePlane, toff += nBytesTargetPlane) {
       memcpy(target + toff, source + soff, _fhdr.data_element_nbytes);
     }
@@ -3802,7 +3802,7 @@ void MdvxField::setPlanePtrs() const
     return;
   }
   
-  int nz = _fhdr.nz;
+  int64_t nz = _fhdr.nz;
 
   _planeData.erase(_planeData.begin(), _planeData.end());
   _planeSizes.erase(_planeSizes.begin(), _planeSizes.end());
@@ -3817,7 +3817,7 @@ void MdvxField::setPlanePtrs() const
 
     int64_t size = _fhdr.nx * _fhdr.ny * _fhdr.data_element_nbytes;
 
-    for (int i = 0; i < nz; i++) {
+    for (int64_t i = 0; i < nz; i++) {
       int64_t offset = i * size;
       _planeSizes[i] = size;
       _planeOffsets[i] = offset;

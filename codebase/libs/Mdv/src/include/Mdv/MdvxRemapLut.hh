@@ -77,20 +77,20 @@ public:
   const MdvxProj &getProjSource() const { return (_projSource); }
   const MdvxProj &getProjTarget() const { return (_projTarget); }
   
-  int getNOffsets() const { return (_nOffsets); }
-  const int *getSourceOffsets() const { return (_sourceOffsets); }
-  const int *getTargetOffsets() const { return (_targetOffsets); }
+  int64_t getNOffsets() const { return (_nOffsets); }
+  const int64_t *getSourceOffsets() const { return (_sourceOffsets); }
+  const int64_t *getTargetOffsets() const { return (_targetOffsets); }
   
 protected:
   
   MdvxProj _projSource;
   MdvxProj _projTarget;
-
+  
   MemBuf _sourceOffsetBuf;
   MemBuf _targetOffsetBuf;
-  int *_sourceOffsets;
-  int *_targetOffsets;
-  int _nOffsets;
+  int64_t *_sourceOffsets;
+  int64_t *_targetOffsets;
+  int64_t _nOffsets;
 
   bool _offsetsComputed;
 

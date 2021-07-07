@@ -144,21 +144,21 @@ void MdvxRemapLut::computeOffsets(const MdvxProj &proj_source,
   // loop through the target
 
   double yy = inTarget.miny;
-  int targetIndex = 0;
-  for (int iy = 0; iy < inTarget.ny; iy++, yy += inTarget.dy) {
+  int64_t targetIndex = 0;
+  for (int64_t iy = 0; iy < inTarget.ny; iy++, yy += inTarget.dy) {
     
     double xx = inTarget.minx;
-    for (int ix = 0; ix < inTarget.nx;
+    for (int64_t ix = 0; ix < inTarget.nx;
 	 ix++, xx += inTarget.dx, targetIndex++) {
-
+      
       // get lat/lon of target point
-
+      
       double lat, lon;
       _projTarget.xy2latlon(xx, yy, lat, lon);
 
       // get index of source point
-
-      int sourceIndex;
+      
+      int64_t sourceIndex;
       if (_projSource.latlon2arrayIndex(lat, lon, sourceIndex) == 0) {
         // add mapping
 	_sourceOffsetBuf.add(&sourceIndex, sizeof(int));
@@ -170,8 +170,8 @@ void MdvxRemapLut::computeOffsets(const MdvxProj &proj_source,
 
   } // iy
 
-  _sourceOffsets = (int *) _sourceOffsetBuf.getPtr();
-  _targetOffsets = (int *) _targetOffsetBuf.getPtr();
+  _sourceOffsets = (int64_t *) _sourceOffsetBuf.getPtr();
+  _targetOffsets = (int64_t *) _targetOffsetBuf.getPtr();
   _offsetsComputed = true;
 
   return;
