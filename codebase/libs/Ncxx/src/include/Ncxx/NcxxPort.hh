@@ -47,6 +47,10 @@
 #include <sys/types.h>
 #endif
 
+#if defined __fujitsu__
+#include <sys/types.h>
+#endif
+
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
