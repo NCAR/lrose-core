@@ -616,6 +616,8 @@ def writeCMakeListsTop(dir):
 
     if (options.m32):
         fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -m32 ")\n')
+    elif (options.isfujitsu):
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -KPIC -D_DEFAULT_SOURCE ")\n')
     else:
         fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")\n')
 
