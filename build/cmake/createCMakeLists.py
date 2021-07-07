@@ -618,14 +618,14 @@ def writeCMakeListsTop(dir):
         fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -m32 ")\n')
  
     if (options.isfujitsu):
-        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=gnu17 ")\n')
+        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=gnu11 ")\n')
     else:
         fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")\n')
 
     if (options.iscray):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -hstd=c++11 ")\n')
     elif (options.isfujitsu):
-        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=gnu++17 ")\n')        
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=gnu++03 ")\n')        
     else:
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
         
