@@ -618,7 +618,7 @@ def writeCMakeListsTop(dir):
         fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -m32 ")\n')
  
     if (options.isfujitsu):
-        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=gnu11 ")\n')
+        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -std=gnu11 -D__linux__ ")\n')
     else:
         fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")\n')
 
