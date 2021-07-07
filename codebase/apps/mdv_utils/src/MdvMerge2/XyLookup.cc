@@ -614,14 +614,14 @@ void XyLookup::_computeLookup()
   
   double yyOut = outCoords.miny + minIyOut * outCoords.dy;
   
-  for (int iy = minIyOut; iy <= maxIyOut; iy++, yyOut += outCoords.dy) {
+  for (int64_t iy = minIyOut; iy <= maxIyOut; iy++, yyOut += outCoords.dy) {
     
     double xxOut = outCoords.minx + minIxOut * outCoords.dx;
 
-    for (int ix = minIxOut; ix <= maxIxOut; ix++, xxOut += outCoords.dx) {
+    for (int64_t ix = minIxOut; ix <= maxIxOut; ix++, xxOut += outCoords.dx) {
       
       output_proj.xy2latlon(xxOut, yyOut, lat, lon);
-      int sourceIndex;
+      int64_t sourceIndex;
       if (_inputProj.latlon2arrayIndex(lat, lon, sourceIndex) == 0) {
 	lutEntry.sourceIndex = sourceIndex;
 	lutEntry.destIndex = iy * outCoords.nx + ix;
