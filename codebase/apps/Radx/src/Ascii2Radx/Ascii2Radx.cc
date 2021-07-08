@@ -1716,7 +1716,7 @@ int Ascii2Radx::_printRos2ToFile(const string &readPath,
   strcpy(date, ctime(&dtime));
   date[strlen(date)-1]=0;
   fprintf(out,
-          "\nVOLUME: time=%.lld (%s)   rad_lat=%.4f deg   rad_lon=%.4f deg   rad_alt=%.0f m"
+          "\nVOLUME: time=%.ld (%s)   rad_lat=%.4f deg   rad_lon=%.4f deg   rad_alt=%.0f m"
           "   range_bin=%.1f m   nyquist_velocity=%.2f m/s",
           vh.date, date, vh.rad_lat, vh.rad_lon, vh.rad_alt, vh.l_bin, vh.nyquist_v); 
 

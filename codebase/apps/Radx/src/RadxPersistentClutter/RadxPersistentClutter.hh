@@ -94,7 +94,7 @@ public:
       {
 	return dynamic_cast<const RayClutterInfo *>(&store.at(ae));
       }
-      catch (std::out_of_range err)
+      catch (std::out_of_range &err)
       {
 	LOG(WARNING) << ae.sprint() << " is out of range of mappings";
 	return NULL;
@@ -123,7 +123,7 @@ public:
       {
 	return dynamic_cast<RayClutterInfo *>(&store.at(ae));
       }
-      catch (std::out_of_range err)
+      catch (std::out_of_range &err)
       {
 	LOG(WARNING) << ae.sprint() << " is out of range of mappings";
 	return NULL;

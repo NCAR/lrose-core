@@ -118,7 +118,7 @@ RayHisto *RadxTimeMedian::matchingRayHisto(const double az,
     {
       return &_store.at(ae);
     }
-    catch (std::out_of_range err)
+    catch (std::out_of_range &err)
     {
       printf("%s is out of range of mappings\n", ae.sprint().c_str());
       return NULL;
