@@ -92,7 +92,15 @@ def main():
                       dest='withJasper', default=False,
                       action="store_true",
                       help='Set if jasper library is installed. This provides support for jpeg compression in grib files.')
-
+    parser.add_option('--iscray',
+                      dest='iscray', default=False,
+                      action="store_true",
+                      help='True if the Cray compiler is used')
+    parser.add_option('--isfujitsu',
+                      dest='isfujitsu', default=False,
+                      action="store_true",
+                      help='True if the Fujitsu compiler is used')
+    
     (options, args) = parser.parse_args()
 
     if (options.verbose):
@@ -173,7 +181,10 @@ def main():
         print("==>>   nApps   : ", nApps, file=sys.stderr)
         print("==>>   nOther  : ", nOther, file=sys.stderr)
         print("==>>   nTotal  : ", nTotal, file=sys.stderr)
-
+        
+    # sanity check: we could not use Cray and Fujitsu compilers at the same time
+    assert not (options.iscray and options.isfujitsu), "iscray and isfujitsu could not be both True..."
+        
     sys.exit(0)
 
 ########################################################################
@@ -481,7 +492,7 @@ def writeCMakeListsTop(dir):
         print("--->> Writing top level CMakeLists.txt, dir: ",
               dir, file=sys.stderr)
         print("     ", cmakePath, file=sys.stderr)
-
+    
     fo = open(cmakePath, 'w')
 
     fo.write("###############################################################\n")
@@ -508,8 +519,8 @@ def writeCMakeListsTop(dir):
     fo.write('endif()\n')
     fo.write('\n')
 
-    fo.write('set(CMAKE_C_COMPILER_NAMES clang gcc icc cc)\n')
-    fo.write('set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)\n')
+    fo.write('set(CMAKE_C_COMPILER_NAMES clang gcc icc cc fcc)\n')
+    fo.write('set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx FCC CC)\n')
     fo.write('\n')
 
     if (options.verboseMake):
@@ -604,9 +615,17 @@ def writeCMakeListsTop(dir):
     fo.write('\n')
 
     if (options.m32):
-        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -m32 ")\n')
+        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -m32 ")\n') 
+    else:
+        fo.write('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")\n')
 
-    fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
+    if (options.iscray):
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -hstd=c++11 ")\n')
+    elif (options.isfujitsu):
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -D__fujitsu__ ")\n')        
+    else:
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
+        
     if (options.m32):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 ")\n')
 

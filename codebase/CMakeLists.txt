@@ -20,8 +20,8 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.10.0")
   cmake_policy(SET CMP0071 NEW)
 endif()
 
-set(CMAKE_C_COMPILER_NAMES clang gcc icc cc)
-set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
+set(CMAKE_C_COMPILER_NAMES clang fcc gcc icc cc)
+set(CMAKE_CXX_COMPILER_NAMES clang++ FCC CC g++ icpc c++ cxx)
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
