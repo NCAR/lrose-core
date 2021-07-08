@@ -20,8 +20,8 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.10.0")
   cmake_policy(SET CMP0071 NEW)
 endif()
 
-set(CMAKE_C_COMPILER_NAMES clang fcc gcc icc cc)
-set(CMAKE_CXX_COMPILER_NAMES clang++ FCC CC g++ icpc c++ cxx)
+set(CMAKE_C_COMPILER_NAMES clang gcc icc cc fcc)
+set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx FCC CC)
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
@@ -96,6 +96,7 @@ endFunction()
 
 enable_testing()
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB ")
 
