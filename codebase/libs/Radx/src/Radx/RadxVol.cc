@@ -5813,6 +5813,8 @@ void RadxVol::_addFieldsFromDopplerSweep(RadxSweep *sweepNonDop,
 
       // adjust the nyquist metadata
 
+      rayNonDop->setPrtSec(rayDoppler->getPrtSec());
+      rayNonDop->setPrtRatio(rayDoppler->getPrtRatio());
       rayNonDop->setNyquistMps(rayDoppler->getNyquistMps());
       
     } // if (rayDoppler != NULL)
