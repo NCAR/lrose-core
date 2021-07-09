@@ -850,6 +850,7 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
 ///////////////////////////////////////////////////////////////////
 // Read data set into 32-bit int array
 // Fills in dims, msssingVal, vals, units (if available)
+// returns 0 on success, -1 on failure
 
 int Hdf5xx::readSi32Array(Group &group,
                           const string &dsName,
@@ -1086,7 +1087,7 @@ int Hdf5xx::readSi32Array(Group &group,
         }
       }
       for (int ii = 0; ii < nPoints; ii++) {
-        vals[ii] = (int) (fvals[ii] + 0.5);
+        vals[ii] = (int) floor(fvals[ii] + 0.5);
       }
 
     } else if (tsize == 8) {
@@ -1104,7 +1105,7 @@ int Hdf5xx::readSi32Array(Group &group,
         }
       }
       for (int ii = 0; ii < nPoints; ii++) {
-        vals[ii] = (int) (fvals[ii] + 0.5);
+        vals[ii] = (int) floor(fvals[ii] + 0.5);
       }
 
     }
@@ -1122,6 +1123,7 @@ int Hdf5xx::readSi32Array(Group &group,
 ///////////////////////////////////////////////////////////////////
 // Read data set into 32-bit float array
 // Fills in dims, msssingVal, vals, units (if available)
+// returns 0 on success, -1 on failure
 
 int Hdf5xx::readFl32Array(Group &group,
                           const string &dsName,
