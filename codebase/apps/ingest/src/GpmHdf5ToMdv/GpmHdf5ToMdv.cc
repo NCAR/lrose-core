@@ -258,7 +258,7 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
   // invert the gate levels because the radar gate data is stored
   // top-down instead of bottom-up
 
-  _invertGateLevels();
+  _invertDbzGateLevels();
   
   // optionally remap onto specified output grid
   
@@ -356,7 +356,7 @@ int GpmHdf5ToMdv::_readGroupNs(Group &ns)
     return -1;
   }
   
-  if (_readReflectivity(ns)) {
+  if (_readDbz(ns)) {
     return -1;
   }
   
@@ -771,7 +771,7 @@ int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
 //////////////////////////////////////////////
 // read the refectivity
 
-int GpmHdf5ToMdv::_readReflectivity(Group &ns)
+int GpmHdf5ToMdv::_readDbz(Group &ns)
   
 {
   
@@ -784,7 +784,7 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
   Group slv(ns.openGroup("SLV"));
   if (hdf5.readFl32Array(slv, "zFactorCorrected", "NS/SLV",
                          dbzDims, _missingDbz, _dbzInput, _dbzUnits)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readReflectivity()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readDbz()" << endl;
     cerr << "  Cannot read zFactorCorrected variable" << endl;
     return -1;
   }
@@ -792,13 +792,13 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
   // check dimensions for consistency
   
   if (dbzDims.size() != 3) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readReflectivity()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readDbz()" << endl;
     cerr << "  zFactorCorrected must have 3 dimensions" << endl;
     cerr << "  dbzDims.size(): " << dbzDims.size() << endl;
     return -1;
   }
   if (dbzDims[0] != _nScans || dbzDims[1] != _nRays) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readReflectivity()" << endl;
+    cerr << "ERROR - GpmHdf5ToMdv::_readDbz()" << endl;
     cerr << "  DBZ dimensions must match nScans and nRays" << endl;
     cerr << "  dbzDims[0]: " << dbzDims[0] << endl;
     cerr << "  dbzDims[1]: " << dbzDims[1] << endl;
@@ -830,6 +830,78 @@ int GpmHdf5ToMdv::_readReflectivity(Group &ns)
                    << _dbzInput[ipt] << endl;
             }
           } // igate
+        } // iray
+      } // iscan
+    } // extra
+  } // verbose
+  
+  return 0;
+
+}
+
+//////////////////////////////////////////////
+// read a 2D field
+
+int GpmHdf5ToMdv::_readField2D(Group &ns,
+                               const string &groupName,
+                               const string &fieldName,
+                               vector<NcxxPort::si32> &vals,
+                               NcxxPort::si32 &missingVal,
+                               string &units)
+  
+{
+  
+  Hdf5xx hdf5;
+
+  // read Latitude
+  
+  vector<size_t> dims;
+  
+  string context("NS/");
+  context += groupName;
+  Group grp(ns.openGroup(groupName));
+  if (hdf5.readSi32Array(grp, fieldName, context,
+                         dims, missingVal, vals, units)) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
+    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    return -1;
+  }
+
+  // check dimensions for consistency
+  
+  if (dims.size() != 2) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
+    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  2D fields must have 2 dimensions" << endl;
+    cerr << "  dims.size(): " << dims.size() << endl;
+    return -1;
+  }
+  if (dims[0] != _nScans || dims[1] != _nRays) {
+    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
+    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  dimensions must match nScans and nRays" << endl;
+    cerr << "  dims[0]: " << dims[0] << endl;
+    cerr << "  dims[1]: " << dims[1] << endl;
+    cerr << "  _nScans: " << _nScans << endl;
+    cerr << "  _nRays: " << _nRays << endl;
+    return -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> Read field: " << groupName << "/" << fieldName << " <<====" << endl;
+    cerr << "  nScans, nRays: " 
+         << _nScans << ", " << _nRays << endl;
+    cerr << "  missingVal: " << missingVal << endl;
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      for (size_t iscan = 0; iscan < _nScans; iscan++) {
+        for (size_t iray = 0; iray < _nRays; iray++) {
+          size_t ipt = iscan * _nRays + iray;
+          if (vals[ipt] != missingVal) {
+            cerr << "  iscan, iray, val: "
+                 << iscan << ", "
+                 << iray << ", "
+                 << vals[ipt] << endl;
+          }
         } // iray
       } // iscan
     } // extra
@@ -904,7 +976,9 @@ void GpmHdf5ToMdv::_interpDbz()
         
         // interp for the output grid points inside the polygon
         
-        _interpInsidePolygon(corners, dbz, iz);
+        _interpInsidePolygon(corners, dbz, _missingDbz, 
+                             iz, _dbzInterp,
+                             _params.interp_using_nearest_neighbor);
         
       } // iray
     } // iscan
@@ -913,48 +987,251 @@ void GpmHdf5ToMdv::_interpDbz()
 
 }
 
-/////////////////////////////////////////////////////////////////
-// get lat/lon of a grid corner,
-// adjusting the corner locations for slant from radar to this point
+//////////////////////////////////////////////
+// interpolate float field
 
-Point_d GpmHdf5ToMdv::_getCornerLatLon(int iscan,
-                                       int iray,
-                                       double zM)
-
+void GpmHdf5ToMdv::_interpFloatField(vector<NcxxPort::fl32> &valsInput,
+                                     NcxxPort::fl32 missingVal,
+                                     vector<NcxxPort::fl32> &valsInterp,
+                                     bool nearestNeighbor)
+  
 {
 
-  // ht as a fraction of the spacecraft height
-  
-  double zFraction = zM / _scAlt[iscan];
-  
-  // get the point
-  
-  Point_d pt = _latLons[iscan][iray];
-  
-  double cornerLat = pt.y;
-  double slantDeltaLat = (_scLat[iscan] - cornerLat) * zFraction;
-  cornerLat += slantDeltaLat;
-  
-  double cornerLon = pt.x;
-  double slantDeltaLon = (_scLon[iscan] - cornerLon) * zFraction;
-  cornerLon += slantDeltaLon;
+  // initialize dbz grid
 
-  Point_d corner;
-  corner.y = cornerLat;
-  corner.x = cornerLon;
-  
-  return corner;
+  size_t nOutput = _nx * _ny * _nz;
+  valsInterp.resize(nOutput);
+  for (size_t ii = 0; ii < nOutput; ii++) {
+    valsInterp[ii] = missingVal;
+  }
+
+  // loop through the vertical levels
+
+  for (size_t iz = 0; iz < _nz; iz++) {
+
+    double zM = (_minzKm + iz * _dzKm) * 1000.0;
+    
+    // load input vals for this level
+    
+    vector<vector<double> > valsIn;
+    for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      vector<double> valsScan;
+      for (size_t iray = 0; iray < _nRays; iray++) {
+        size_t ipt = iscan * _nRays * _nGates + iray * _nGates + iz;
+        valsScan.push_back(valsInput[ipt]);
+      } // iray
+      valsIn.push_back(valsScan);
+    } // iscan
+    
+    // loop through the input (scan, ray) grid
+
+    for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
+      for (size_t iray = 0; iray < _nRays - 1; iray++) {
+        
+        // corner locations adjusted for radar slant
+        Point_d corners[4];
+        corners[0] = _getCornerLatLon(iscan, iray, zM);
+        corners[1] = _getCornerLatLon(iscan, iray + 1, zM);
+        corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
+        corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
+
+        // dbz vals at corners
+        double vals[4];
+        vals[0] = valsIn[iscan][iray];
+        vals[1] = valsIn[iscan][iray + 1];
+        vals[2] = valsIn[iscan + 1][iray + 1];
+        vals[3] = valsIn[iscan + 1][iray];
+
+        // check for valid VAL
+        int nGood = 0;
+        for (int ii = 0; ii < 4; ii++) {
+          if (vals[ii] != missingVal) {
+            nGood++;
+          }
+        }
+        if (nGood < 1) {
+          continue;
+        }
+        
+        // interp for the output grid points inside the polygon
+        
+        _interpInsidePolygon(corners, vals, missingVal, 
+                             iz, valsInterp, nearestNeighbor);
+        
+      } // iray
+    } // iscan
+
+  } // iz
 
 }
 
+//////////////////////////////////////////////
+// interpolate int field
+
+void GpmHdf5ToMdv::_interpIntField(vector<NcxxPort::si32> &valsInput,
+                                   NcxxPort::si32 missingVal,
+                                   vector<NcxxPort::si32> &valsInterp,
+                                   bool nearestNeighbor)
+  
+{
+
+  // initialize dbz grid
+
+  size_t nOutput = _nx * _ny * _nz;
+  valsInterp.resize(nOutput);
+  for (size_t ii = 0; ii < nOutput; ii++) {
+    valsInterp[ii] = missingVal;
+  }
+
+  // loop through the vertical levels
+
+  for (size_t iz = 0; iz < _nz; iz++) {
+
+    double zM = (_minzKm + iz * _dzKm) * 1000.0;
+    
+    // load input vals for this level
+    
+    vector<vector<double> > valsIn;
+    for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      vector<double> valsScan;
+      for (size_t iray = 0; iray < _nRays; iray++) {
+        size_t ipt = iscan * _nRays * _nGates + iray * _nGates + iz;
+        valsScan.push_back(valsInput[ipt]);
+      } // iray
+      valsIn.push_back(valsScan);
+    } // iscan
+    
+    // loop through the input (scan, ray) grid
+
+    for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
+      for (size_t iray = 0; iray < _nRays - 1; iray++) {
+        
+        // corner locations adjusted for radar slant
+        Point_d corners[4];
+        corners[0] = _getCornerLatLon(iscan, iray, zM);
+        corners[1] = _getCornerLatLon(iscan, iray + 1, zM);
+        corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
+        corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
+
+        // dbz vals at corners
+        double vals[4];
+        vals[0] = valsIn[iscan][iray];
+        vals[1] = valsIn[iscan][iray + 1];
+        vals[2] = valsIn[iscan + 1][iray + 1];
+        vals[3] = valsIn[iscan + 1][iray];
+
+        // check for valid VAL
+        int nGood = 0;
+        for (int ii = 0; ii < 4; ii++) {
+          if (vals[ii] != missingVal) {
+            nGood++;
+          }
+        }
+        if (nGood < 1) {
+          continue;
+        }
+        
+        // interp for the output grid points inside the polygon
+        
+        _interpInsidePolygon(corners, vals, missingVal, 
+                             iz, valsInterp, nearestNeighbor);
+        
+      } // iray
+    } // iscan
+
+  } // iz
+
+}
+
+//////////////////////////////////////////////
+// interpolate 2D field
+
+void GpmHdf5ToMdv::_interpIntField(const string &groupName,
+                                   const string &fieldName,
+                                   vector<NcxxPort::si32> &valsInput,
+                                   NcxxPort::si32 missingVal,
+                                   bool nearestNeighbor,
+                                   vector<NcxxPort::si32> &valsInterp)
+  
+{
+
+  // initialize grid
+
+  size_t nOutput = _nx * _ny;
+  valsInterp.resize(nOutput);
+  for (size_t ii = 0; ii < nOutput; ii++) {
+    valsInterp[ii] = missingVal;
+  }
+
+  // loop through the vertical levels
+
+  for (size_t iz = 0; iz < _nz; iz++) {
+
+    double zM = (_minzKm + iz * _dzKm) * 1000.0;
+
+    // load vals input vals for this level
+
+    vector<vector<double> > valsIn;
+    for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      vector<double> valsScan;
+      for (size_t iray = 0; iray < _nRays; iray++) {
+        size_t ipt = iscan * _nRays * _nGates + iray * _nGates + iz;
+        valsScan.push_back(valsInput[ipt]);
+      } // iray
+      valsIn.push_back(valsScan);
+    } // iscan
+    
+    // loop through the input (scan, ray) grid
+
+    for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
+      for (size_t iray = 0; iray < _nRays - 1; iray++) {
+        
+        // corner locations adjusted for radar slant
+        Point_d corners[4];
+        corners[0] = _getCornerLatLon(iscan, iray, zM);
+        corners[1] = _getCornerLatLon(iscan, iray + 1, zM);
+        corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
+        corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
+
+        // vals vals at corners
+        double vals[4];
+        vals[0] = valsIn[iscan][iray];
+        vals[1] = valsIn[iscan][iray + 1];
+        vals[2] = valsIn[iscan + 1][iray + 1];
+        vals[3] = valsIn[iscan + 1][iray];
+
+        // check for valid VALS
+        int nGood = 0;
+        for (int ii = 0; ii < 4; ii++) {
+          if (vals[ii] != missingVal) {
+            nGood++;
+          }
+        }
+        if (nGood < 1) {
+          continue;
+        }
+        
+        // interp for the output grid points inside the polygon
+        
+        _interpInsidePolygon(corners, vals, missingVal, 0, valsInterp);
+        
+      } // iray
+    } // iscan
+
+  } // iz
+
+}
 
 //////////////////////////////////////////////
 // interpolate points within polygon
 
 void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
-                                        const double *dbz,
-                                        size_t iz)
-  
+                                        const double *vals,
+                                        double missingVal,
+                                        size_t iz,
+                                        vector<NcxxPort::fl32> &valsInterp,
+                                        bool nearestNeighbor)
+ 
 {
 
   // compute lat/lon bounding box
@@ -992,9 +1269,9 @@ void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
       pt.x = _minxDeg + ix * _dxDeg;
       pt.y = _minyDeg + iy * _dyDeg;
       if (EGS_point_in_polygon(pt, (Point_d *) corners, 4)) {
-        double interpVal = _interpPt(pt, corners, dbz, iz);
+        double interpVal = _interpPt(pt, corners, vals, missingVal, nearestNeighbor);
         size_t outputIndex = iz * _nx * _ny + iy * _nx + ix;
-        _dbzInterp[outputIndex] = interpVal;
+        valsInterp[outputIndex] = interpVal;
       }
     } // ix
   } // iy
@@ -1006,57 +1283,104 @@ void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
 
 double GpmHdf5ToMdv::_interpPt(const Point_d &pt,
                                const Point_d *corners,
-                               const double *dbz,
-                               size_t iz)
+                               const double *vals,
+                               double missingVal,
+                               bool nearestNeighbor)
   
 {
   
   // compute the distances from the pt to the corners
-
+  
   double dist[4];
   for (int ii = 0; ii < 3; ii++) {
     double dx = pt.x - corners[ii].x;
     double dy = pt.y - corners[ii].y;
     dist[ii] = sqrt(dx * dx + dy * dy);
   }
-
+  
   // nearest neighbor?
 
-  if (_params.interp_using_nearest_neighbor) {
+  if (nearestNeighbor) {
     double minDist = 1.0e99;
     int minIndex = -1;
     for (int ii = 0; ii < 3; ii++) {
       if (dist[ii] < minDist) {
         minDist = dist[ii];
-        if (dbz[ii] != _missingDbz) {
+        if (vals[ii] != missingVal) {
           minIndex = ii;
         }
       }
     }
-    return dbz[minIndex];
+    return vals[minIndex];
   }
+  
+  // inverse distance weighted interpolation
   
   double weight[4];
   double sumWt = 0.0;
   double sumInterp = 0.0;
   for (int ii = 0; ii < 3; ii++) {
-    if (dbz[ii] != _missingDbz) {
+    if (vals[ii] != missingVal) {
       weight[ii] = pow(1.0 / dist[ii], _params.interp_power_parameter);
       sumWt += weight[ii];
-      sumInterp += weight[ii] * dbz[ii];
+      sumInterp += weight[ii] * vals[ii];
     }
   }
-  double interpDbz = sumInterp / sumWt;
+  double interpVal = sumInterp / sumWt;
 
-  return interpDbz;
+  return interpVal;
 
 }
   
+/////////////////////////////////////////////////////////////////
+// get lat/lon of a grid corner, for given height (zM)
+// adjusting the corner locations for slant from radar to this point
+
+Point_d GpmHdf5ToMdv::_getCornerLatLon(int iscan,
+                                       int iray,
+                                       double zM)
+
+{
+
+  // ht as a fraction of the spacecraft height
+  
+  double zFraction = zM / _scAlt[iscan];
+  
+  // get the point
+  
+  Point_d pt = _latLons[iscan][iray];
+  
+  double cornerLat = pt.y;
+  double slantDeltaLat = (_scLat[iscan] - cornerLat) * zFraction;
+  cornerLat += slantDeltaLat;
+  
+  double cornerLon = pt.x;
+  double slantDeltaLon = (_scLon[iscan] - cornerLon) * zFraction;
+  cornerLon += slantDeltaLon;
+
+  Point_d corner;
+  corner.y = cornerLat;
+  corner.x = cornerLon;
+  
+  return corner;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// get lat/lon of a grid corner, at surface
+
+Point_d GpmHdf5ToMdv::_getCornerLatLon(int iscan,
+                                       int iray)
+
+{
+  return _latLons[iscan][iray];
+}
+
 ////////////////////////////////////////////////////////
 // invert the height levels because the data is stored
 // with the top first and decreasing in height 
 
-void GpmHdf5ToMdv::_invertGateLevels()
+void GpmHdf5ToMdv::_invertDbzGateLevels()
 {
 
   // prepare output grid

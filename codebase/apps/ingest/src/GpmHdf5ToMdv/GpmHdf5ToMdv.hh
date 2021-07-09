@@ -142,26 +142,53 @@ private:
   int _readLatLon(Group &ns);
   int _readSpaceCraftPos(Group &ns);
   int _readQcFlags(Group &ns);
-  int _readReflectivity(Group &ns);
+  int _readDbz(Group &ns);
 
+  int _readField2D(Group &ns,
+                   const string &groupName,
+                   const string &fieldName,
+                   vector<NcxxPort::si32> &vals,
+                   NcxxPort::si32 &missingVal,
+                   string &units);
+  
   // interpolation
 
   void _interpDbz();
+
+  void _interpFloatField(vector<NcxxPort::fl32> &valsInput,
+                         NcxxPort::fl32 missingVal,
+                         vector<NcxxPort::fl32> &valsInterp,
+                         bool nearestNeighbor);
+  
+  void _interpIntField(vector<NcxxPort::si32> &valsInput,
+                       NcxxPort::si32 missingVal,
+                       vector<NcxxPort::si32> &valsInterp,
+                       bool nearestNeighbor);
+  
+  void _interpInsidePolygon(const Point_d *corners,
+                            const double *vals,
+                            double missingVal,
+                            size_t iz,
+                            vector<NcxxPort::fl32> &valsInterp,
+                            bool nearestNeighbor);
+
+  double _interpPt(const Point_d &pt,
+                   const Point_d *corners,
+                   const double *vals,
+                   double missingVal,
+                   bool nearestNeighbor);
+
   Point_d _getCornerLatLon(int iscan,
                            int iray,
                            double zM);
-  void _interpInsidePolygon(const Point_d *corners,
-                            const double *dbz,
-                            size_t iz);
-  double _interpPt(const Point_d &pt,
-                   const Point_d *corners,
-                   const double *dbz,
-                   size_t iz);
 
-  // invert the height levels because the data is stored
+  Point_d _getCornerLatLon(int iscan,
+                           int iray);
+
+  // invert the height levels for DBZ because the data is stored
   // with the top first and decreasing in height 
 
-  void _invertGateLevels();
+  void _invertDbzGateLevels();
 
   // remap the gates onto specified vertical levels
   // compute the max for the remapping
