@@ -153,6 +153,15 @@ public:
   ///////////////////////////////////////////////////////////////////
   // Read data set into arrays of various types
   // Fills in dims, msssingVal, vals, units (if available)
+  // return 0 on success, -1 on failure
+
+  int readSi16Array(Group &group,
+                    const string &dsname,
+                    const string &context,
+                    vector<size_t> &dims,
+                    NcxxPort::si16 &missingVal,
+                    vector<NcxxPort::si16> &vals,
+                    string &units);
   
   int readSi32Array(Group &group,
                     const string &dsname,
