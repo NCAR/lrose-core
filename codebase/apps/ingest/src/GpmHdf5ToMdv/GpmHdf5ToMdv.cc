@@ -296,7 +296,7 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
   MdvxField *dbzField = _createMdvxField("DBZ",
                                          "reflectivity",
                                          _dbzUnits,
-                                         _nx, _ny, _nz,
+                                         _nx, _ny, _zLevels.size(),
                                          _minxDeg, _minyDeg, _minzKm,
                                          _dxDeg, _dyDeg, _dzKm,
                                          _missingDbz,
@@ -307,7 +307,7 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
   MdvxField *dbzField2 = _createMdvxField("DBZ2",
                                           "reflectivity2",
                                           _dbzUnits,
-                                          _nx, _ny, _nz,
+                                          _nx, _ny, _zLevels.size(),
                                           _minxDeg, _minyDeg, _minzKm,
                                           _dxDeg, _dyDeg, _dzKm,
                                           _missingDbz,
@@ -1184,7 +1184,7 @@ void GpmHdf5ToMdv::_copyField(vector<NcxxPort::fl32> &valsInput,
   if (valsInput.size() == _nRays * _nScans) {
     is2D = true;
   }
-  size_t nz = _nz;
+  size_t nz = _nGates;
   size_t nGates = _nGates;
   if (is2D) {
     nz = 1;
@@ -1867,7 +1867,8 @@ void GpmHdf5ToMdv::_invertDbzGateLevels()
 void GpmHdf5ToMdv::_remapVertLevels()
 {
 
-  _dbzInterp = _dbzOutput;
+  vector<NcxxPort::fl32> outputOrig = _dbzOutput;
+  vector<NcxxPort::fl32> outputOrig2 = _dbzOutput2;
 
   // zlevels are specified
 
@@ -1877,13 +1878,13 @@ void GpmHdf5ToMdv::_remapVertLevels()
   }
 
   // prepare output grid
-
+  
   size_t nPtsOutput = _nx * _ny * _zLevels.size();
   _dbzOutput.resize(nPtsOutput);
   _dbzOutput2.resize(nPtsOutput);
 
   // compute heights of mid pt between specified levels
-
+  
   vector<double> zMid;
   for (size_t ii = 0; ii < _zLevels.size() - 1; ii++) {
     zMid.push_back((_zLevels[ii] + _zLevels[ii+1]) / 2.0);
@@ -1911,10 +1912,10 @@ void GpmHdf5ToMdv::_remapVertLevels()
         for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
           size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
           if (_dbzInterp[interpIndex] != _missingDbz) {
-            maxDbz = max(maxDbz, _dbzInterp[interpIndex]);
+            maxDbz = max(maxDbz, outputOrig[interpIndex]);
           }
           if (_dbzInterp2[interpIndex] != _missingDbz) {
-            maxDbz2 = max(maxDbz2, _dbzInterp2[interpIndex]);
+            maxDbz2 = max(maxDbz2, outputOrig2[interpIndex]);
           }
         } // jz
         size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
@@ -1996,7 +1997,11 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
   fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
   fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
   fhdr.dz_constant = true;
-  fhdr.data_dimension = 3;
+  if (nz == 1) {
+    fhdr.data_dimension = 2;
+  } else {
+    fhdr.data_dimension = 3;
+  }
   
   fhdr.scale = 1.0;
   fhdr.bad_data_value = missingVal;
@@ -2080,7 +2085,11 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
   fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
   fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
   fhdr.dz_constant = true;
-  fhdr.data_dimension = 3;
+  if (nz == 1) {
+    fhdr.data_dimension = 2;
+  } else {
+    fhdr.data_dimension = 3;
+  }
   
   fhdr.scale = 1.0;
   fhdr.bad_data_value = missingVal;
