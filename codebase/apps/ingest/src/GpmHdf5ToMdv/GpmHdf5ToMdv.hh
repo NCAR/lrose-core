@@ -122,7 +122,6 @@ private:
   bool _qualAvailable;
   vector<NcxxPort::si16> _qualInput;
   vector<NcxxPort::si16> _qualInterp;
-  vector<NcxxPort::si16> _qualOutput;
   NcxxPort::si16 _missingQual;
   string _qualUnits;
 
@@ -149,13 +148,33 @@ private:
   int _readLatLon(Group &ns);
   int _readSpaceCraftPos(Group &ns);
   int _readQcFlags(Group &ns);
-  int _readDbz(Group &ns);
 
+  int _readField3D(Group &ns,
+                   const string &groupName,
+                   const string &fieldName,
+                   vector<NcxxPort::fl32> &vals,
+                   NcxxPort::fl32 &missingVal,
+                   string &units);
+  
+  int _readField3D(Group &ns,
+                   const string &groupName,
+                   const string &fieldName,
+                   vector<NcxxPort::si32> &vals,
+                   NcxxPort::si32 &missingVal,
+                   string &units);
+  
   int _readField2D(Group &ns,
                    const string &groupName,
                    const string &fieldName,
                    vector<NcxxPort::fl32> &vals,
                    NcxxPort::fl32 &missingVal,
+                   string &units);
+  
+  int _readField2D(Group &ns,
+                   const string &groupName,
+                   const string &fieldName,
+                   vector<NcxxPort::si32> &vals,
+                   NcxxPort::si32 &missingVal,
                    string &units);
   
   int _readField2D(Group &ns,
@@ -167,8 +186,6 @@ private:
   
   // interpolation
 
-  void _interpDbz();
-
   void _interpField(vector<NcxxPort::fl32> &valsInput,
                     NcxxPort::fl32 missingVal,
                     vector<NcxxPort::fl32> &valsInterp,
@@ -177,6 +194,10 @@ private:
   void _interpField(vector<NcxxPort::si32> &valsInput,
                     NcxxPort::si32 missingVal,
                     vector<NcxxPort::si32> &valsInterp);
+  
+  void _interpField(vector<NcxxPort::si16> &valsInput,
+                    NcxxPort::si16 missingVal,
+                    vector<NcxxPort::si16> &valsInterp);
   
   void _interpInsidePolygon(const Point_d *corners,
                             const NcxxPort::fl32 *vals,
@@ -191,6 +212,12 @@ private:
                             size_t iz,
                             vector<NcxxPort::si32> &valsInterp);
 
+  void _interpInsidePolygon(const Point_d *corners,
+                            const NcxxPort::si16 *vals,
+                            NcxxPort::si16 missingVal,
+                            size_t iz,
+                            vector<NcxxPort::si16> &valsInterp);
+
   NcxxPort::fl32 _interpPt(const Point_d &pt,
                            const Point_d *corners,
                            const NcxxPort::fl32 *vals,
@@ -200,6 +227,11 @@ private:
   NcxxPort::si32 _interpPt(const Point_d &pt,
                            const Point_d *corners,
                            const NcxxPort::si32 *vals,
+                           NcxxPort::si32 missingVal);
+
+  NcxxPort::si32 _interpPt(const Point_d &pt,
+                           const Point_d *corners,
+                           const NcxxPort::si16 *vals,
                            NcxxPort::si32 missingVal);
 
   Point_d _getCornerLatLon(int iscan,

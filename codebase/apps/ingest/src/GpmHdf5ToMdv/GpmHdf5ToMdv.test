@@ -352,7 +352,7 @@ interp_power_parameter = 1;
 // Type: string
 //
 
-output_url = "mdvp:://localhost::/tmp/mdv/gpm";
+output_url = "mdvp:://localhost::$(HOME)/data/convstrat/mdv/gpm";
 
 //======================================================================
 //
