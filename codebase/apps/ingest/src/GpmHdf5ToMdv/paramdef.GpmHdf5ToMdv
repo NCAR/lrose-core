@@ -156,7 +156,39 @@ paramdef double {
 } output_z_levels_km[];
 
 commentdef {
-  p_header = "OUTPUT REGULAR LAT/LON GRID";
+  p_header = "OUTPUT FIELDS";
+}
+
+typedef struct {
+  string groupName;
+  string gpmName;
+  string outputName;
+  string longName;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default =
+    {
+     {
+      groupName = "SLV",
+      gpmName = "zFactorCorrected",
+      outputName = "DBZ",
+      longName = "reflectivity"
+     }
+     ,
+     {
+      groupName = "FLG",
+      gpmName = "qualityFlag",
+      outputName = "Qual",
+      longName = "qualityFlag"
+     }
+    };
+  p_descr = "Output fields details.";
+  p_help = "These are the fields that will be written to the output files.";
+} output_fields[];
+
+commentdef {
+  p_header = "OUTPUT GRID - LAT/LON";
 }
 
 typedef struct {

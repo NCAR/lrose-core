@@ -89,6 +89,13 @@ public:
   // struct typedefs
 
   typedef struct {
+    char* groupName;
+    char* gpmName;
+    char* outputName;
+    char* longName;
+  } output_field_t;
+
+  typedef struct {
     int nLon;
     int nLat;
     double minLon;
@@ -422,6 +429,9 @@ public:
   double *_output_z_levels_km;
   int output_z_levels_km_n;
 
+  output_field_t *_output_fields;
+  int output_fields_n;
+
   grid_params_t output_grid;
 
   tdrp_bool_t set_output_grid_limits_from_data;
@@ -447,7 +457,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[33];
+  mutable TDRPtable _table[35];
 
   const char *_className;
 

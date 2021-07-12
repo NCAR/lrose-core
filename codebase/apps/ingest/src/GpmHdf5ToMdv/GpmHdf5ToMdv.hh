@@ -116,6 +116,8 @@ private:
   vector<NcxxPort::fl32> _dbzInput;
   vector<NcxxPort::fl32> _dbzInterp;
   vector<NcxxPort::fl32> _dbzOutput;
+  vector<NcxxPort::fl32> _dbzInterp2;
+  vector<NcxxPort::fl32> _dbzOutput2;
   NcxxPort::fl32 _missingDbz;
   string _dbzUnits;
 
@@ -143,11 +145,13 @@ private:
                               const string &attrName,
                               const string &context);
   
-  int _readGroupNs(Group &ns);
+  int _readMetadata(Group &ns);
   int _readTimes(Group &ns);
   int _readLatLon(Group &ns);
   int _readSpaceCraftPos(Group &ns);
   int _readQcFlags(Group &ns);
+
+  int _readFields(Group &ns);
 
   int _readField3D(Group &ns,
                    const string &groupName,
@@ -186,6 +190,10 @@ private:
   
   // interpolation
 
+  void _copyField(vector<NcxxPort::fl32> &valsInput,
+                  NcxxPort::fl32 missingVal,
+                  vector<NcxxPort::fl32> &valsInterp);
+  
   void _interpField(vector<NcxxPort::fl32> &valsInput,
                     NcxxPort::fl32 missingVal,
                     vector<NcxxPort::fl32> &valsInterp,

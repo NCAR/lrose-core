@@ -1,0 +1,242 @@
+GROUP "/" {
+   DATASET "AlgorithmRuntimeInfo" {
+   GROUP "NS" {
+      GROUP "CSF" {
+         DATASET "binBBBottom" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "binBBPeak" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "binBBTop" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "flagAnvil" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "flagBB" {
+            DATATYPE  H5T_STD_I32LE
+         DATASET "flagHeavyIcePrecip" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "flagShallowRain" {
+            DATATYPE  H5T_STD_I32LE
+         DATASET "heightBB" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "qualityBB" {
+            DATATYPE  H5T_STD_I32LE
+         DATASET "qualityTypePrecip" {
+            DATATYPE  H5T_STD_I32LE
+         DATASET "typePrecip" {
+            DATATYPE  H5T_STD_I32LE
+         DATASET "widthBB" {
+            DATATYPE  H5T_IEEE_F32LE
+      GROUP "DSD" {
+         DATASET "binNode" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "phase" {
+            DATATYPE  H5T_STD_U8LE
+      GROUP "Experimental" {
+         DATASET "binDEML2" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "precipRateESurface2" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "precipRateESurface2Status" {
+            DATATYPE  H5T_STD_U8LE
+         DATASET "seaIceConcentration" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "sigmaZeroProfile" {
+            DATATYPE  H5T_IEEE_F32LE
+      GROUP "FLG" {
+         DATASET "flagEcho" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "flagScanPattern" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "flagSensor" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "qualityData" {
+            DATATYPE  H5T_STD_I32LE
+         DATASET "qualityFlag" {
+            DATATYPE  H5T_STD_I8LE
+      DATASET "Latitude" {
+         DATATYPE  H5T_IEEE_F32LE
+      DATASET "Longitude" {
+         DATATYPE  H5T_IEEE_F32LE
+      GROUP "PRE" {
+         DATASET "adjustFactor" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "binClutterFreeBottom" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "binRealSurface" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "binStormTop" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "elevation" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "ellipsoidBinOffset" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "flagPrecip" {
+            DATATYPE  H5T_STD_I32LE
+         DATASET "flagSigmaZeroSaturation" {
+            DATATYPE  H5T_STD_U8LE
+         DATASET "heightStormTop" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "landSurfaceType" {
+            DATATYPE  H5T_STD_I32LE
+         DATASET "localZenithAngle" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "sigmaZeroMeasured" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "snRatioAtRealSurface" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "snowIceCover" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "zFactorMeasured" {
+            DATATYPE  H5T_IEEE_F32LE
+      GROUP "SLV" {
+         DATASET "binEchoBottom" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "epsilon" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "flagSLV" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "paramDSD" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "paramNUBF" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "phaseNearSurface" {
+            DATATYPE  H5T_STD_U8LE
+         DATASET "piaFinal" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "precipRate" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "precipRateAve24" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "precipRateESurface" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "precipRateNearSurface" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "precipWaterIntegrated" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "qualitySLV" {
+            DATATYPE  H5T_STD_I32LE
+         DATASET "sigmaZeroCorrected" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "zFactorCorrected" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "zFactorCorrectedESurface" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "zFactorCorrectedNearSurface" {
+            DATATYPE  H5T_IEEE_F32LE
+      GROUP "SRT" {
+         DATASET "PIAalt" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "PIAhb" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "PIAhybrid" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "PIAweight" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "RFactorAlt" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "pathAtten" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "refScanID" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "reliabFactor" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "reliabFactorHY" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "reliabFlag" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "reliabFlagHY" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "stddevEff" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "stddevHY" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "zeta" {
+            DATATYPE  H5T_IEEE_F32LE
+      GROUP "ScanTime" {
+         DATASET "DayOfMonth" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "DayOfYear" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "Hour" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "MilliSecond" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "Minute" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "Month" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "Second" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "SecondOfDay" {
+            DATATYPE  H5T_IEEE_F64LE
+         DATASET "Year" {
+            DATATYPE  H5T_STD_I16LE
+      GROUP "VER" {
+         DATASET "attenuationNP" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "binZeroDeg" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "heightZeroDeg" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "piaNP" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "sigmaZeroNPCorrected" {
+            DATATYPE  H5T_IEEE_F32LE
+      GROUP "navigation" {
+         DATASET "dprAlt" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "greenHourAng" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scAlt" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scAttPitchGeoc" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scAttPitchGeod" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scAttRollGeoc" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scAttRollGeod" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scAttYawGeoc" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scAttYawGeod" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scLat" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scLon" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scPos" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "scVel" {
+            DATATYPE  H5T_IEEE_F32LE
+         DATASET "timeMidScan" {
+            DATATYPE  H5T_IEEE_F64LE
+         DATASET "timeMidScanOffset" {
+            DATATYPE  H5T_IEEE_F64LE
+      GROUP "scanStatus" {
+         DATASET "FractionalGranuleNumber" {
+            DATATYPE  H5T_IEEE_F64LE
+         DATASET "SCorientation" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "acsModeMidScan" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "dataQuality" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "dataWarning" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "geoError" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "geoWarning" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "limitErrorFlag" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "missing" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "modeStatus" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "operationalMode" {
+            DATATYPE  H5T_STD_I8LE
+         DATASET "pointingStatus" {
+            DATATYPE  H5T_STD_I16LE
+         DATASET "targetSelectionMidScan" {
+            DATATYPE  H5T_STD_I8LE
