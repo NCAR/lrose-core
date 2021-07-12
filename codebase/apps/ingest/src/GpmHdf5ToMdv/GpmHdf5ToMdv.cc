@@ -1220,17 +1220,6 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
         corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
         corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
-        // check for valid location
-        int nGoodCorners = 0;
-        for (int ii = 0; ii < 4; ii++) {
-          if (corners[ii].x != _missingLon && corners[ii].y != _missingLat) {
-            nGoodCorners++;
-          }
-        }
-        if (nGoodCorners < 4) {
-          continue;
-        }
-
         // vals at corners
         NcxxPort::fl32 vals[4];
         vals[0] = valsThisZ[iscan][iray];
@@ -1238,17 +1227,6 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
         vals[2] = valsThisZ[iscan + 1][iray + 1];
         vals[3] = valsThisZ[iscan + 1][iray];
 
-        // check for valid val
-        int nGoodVals = 0;
-        for (int ii = 0; ii < 4; ii++) {
-          if (vals[ii] != missingVal) {
-            nGoodVals++;
-          }
-        }
-        if (nGoodVals < 1) {
-          continue;
-        }
-        
         // interp for the output grid points inside the polygon
         
         _interpInsidePolygon(corners, vals, missingVal, 
@@ -1321,17 +1299,6 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si32> &valsInput,
         corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
         corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
-        // check for valid location
-        int nGoodCorners = 0;
-        for (int ii = 0; ii < 4; ii++) {
-          if (corners[ii].x != _missingLon && corners[ii].y != _missingLat) {
-            nGoodCorners++;
-          }
-        }
-        if (nGoodCorners < 4) {
-          continue;
-        }
-
         // dbz vals at corners
         NcxxPort::si32 vals[4];
         vals[0] = valsIn[iscan][iray];
@@ -1339,17 +1306,6 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si32> &valsInput,
         vals[2] = valsIn[iscan + 1][iray + 1];
         vals[3] = valsIn[iscan + 1][iray];
 
-        // check for valid val
-        int nGoodVals = 0;
-        for (int ii = 0; ii < 4; ii++) {
-          if (vals[ii] != missingVal) {
-            nGoodVals++;
-          }
-        }
-        if (nGoodVals < 1) {
-          continue;
-        }
-        
         // interp for the output grid points inside the polygon
         
         _interpInsidePolygon(corners, vals, missingVal, iz, valsInterp);
@@ -1421,17 +1377,6 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
         corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
         corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
-        // check for valid location
-        int nGoodCorners = 0;
-        for (int ii = 0; ii < 4; ii++) {
-          if (corners[ii].x != _missingLon && corners[ii].y != _missingLat) {
-            nGoodCorners++;
-          }
-        }
-        if (nGoodCorners < 4) {
-          continue;
-        }
-
         // dbz vals at corners
         NcxxPort::si16 vals[4];
         vals[0] = valsIn[iscan][iray];
@@ -1439,17 +1384,6 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
         vals[2] = valsIn[iscan + 1][iray + 1];
         vals[3] = valsIn[iscan + 1][iray];
 
-        // check for valid val
-        int nGoodVals = 0;
-        for (int ii = 0; ii < 4; ii++) {
-          if (vals[ii] != missingVal) {
-            nGoodVals++;
-          }
-        }
-        if (nGoodVals < 1) {
-          continue;
-        }
-        
         // interp for the output grid points inside the polygon
         
         _interpInsidePolygon(corners, vals, missingVal, iz, valsInterp);
@@ -1473,33 +1407,32 @@ void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
  
 {
 
-  // compute lat/lon bounding box
+  // check we have 4 valid corners
   
-  double minLat = corners[0].y;
-  double maxLat = corners[0].y;
-  double minLon = corners[0].x;
-  double maxLon = corners[0].x;
-  
-  for (int ii = 1; ii < 4; ii++) {
-    minLat = min(minLat, corners[ii].y);
-    maxLat = max(maxLat, corners[ii].y);
-    minLon = min(minLon, corners[ii].x);
-    maxLon = max(maxLon, corners[ii].x);
+  for (int ii = 0; ii < 4; ii++) {
+    if (corners[ii].x == _missingLon ||
+        corners[ii].y == _missingLat) {
+      return;
+    }
   }
+
+  // check we have valid data
   
-  // compute the output grid limits for the bounding box
-  
-  int minIx = (int) ((minLon - _minxDeg) / _dxDeg);
-  int maxIx = (int) ((maxLon - _minxDeg) / _dxDeg + 1.0);
-  
-  int minIy = (int) ((minLat - _minyDeg) / _dyDeg);
-  int maxIy = (int) ((maxLat - _minyDeg) / _dyDeg + 1.0);
-  
-  minIx = max(minIx, 0);
-  minIy = max(minIy, 0);
-  maxIx = min(maxIx, (int) _nx - 1);
-  maxIy = min(maxIy, (int) _ny - 1);
-  
+  int nGood = 0;
+  for (int ii = 0; ii < 4; ii++) {
+    if (vals[ii] != missingVal) {
+      nGood++;
+    }
+  }
+  if (nGood == 0) {
+    return;
+  }
+
+  // compute the min/max grid indices
+
+  int minIx, maxIx, minIy, maxIy;
+  _computeMinMaxIndices(corners, minIx, maxIx, minIy, maxIy);
+
   // loop through the output grid points, finding if they are inside the polygon
 
   for (int iy = minIy; iy <= maxIy; iy++) {
@@ -1529,33 +1462,32 @@ void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
  
 {
 
-  // compute lat/lon bounding box
+  // check we have 4 valid corners
   
-  double minLat = corners[0].y;
-  double maxLat = corners[0].y;
-  double minLon = corners[0].x;
-  double maxLon = corners[0].x;
+  for (int ii = 0; ii < 4; ii++) {
+    if (corners[ii].x == _missingLon ||
+        corners[ii].y == _missingLat) {
+      return;
+    }
+  }
+
+  // check we have valid data
   
-  for (int ii = 1; ii < 4; ii++) {
-    minLat = min(minLat, corners[ii].y);
-    maxLat = max(maxLat, corners[ii].y);
-    minLon = min(minLon, corners[ii].x);
-    maxLon = max(maxLon, corners[ii].x);
+  int nGood = 0;
+  for (int ii = 0; ii < 4; ii++) {
+    if (vals[ii] != missingVal) {
+      nGood++;
+    }
+  }
+  if (nGood == 0) {
+    return;
   }
   
-  // compute the output grid limits for the bounding box
-  
-  int minIx = (int) ((minLon - _minxDeg) / _dxDeg);
-  int maxIx = (int) ((maxLon - _minxDeg) / _dxDeg + 1.0);
-  
-  int minIy = (int) ((minLat - _minyDeg) / _dyDeg);
-  int maxIy = (int) ((maxLat - _minyDeg) / _dyDeg + 1.0);
-  
-  minIx = max(minIx, 0);
-  minIy = max(minIy, 0);
-  maxIx = min(maxIx, (int) _nx - 1);
-  maxIy = min(maxIy, (int) _ny - 1);
-  
+  // compute the min/max grid indices
+
+  int minIx, maxIx, minIy, maxIy;
+  _computeMinMaxIndices(corners, minIx, maxIx, minIy, maxIy);
+
   // loop through the output grid points,
   // finding if they are inside the polygon
 
@@ -1585,33 +1517,32 @@ void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
  
 {
 
-  // compute lat/lon bounding box
+  // check we have 4 valid corners
   
-  double minLat = corners[0].y;
-  double maxLat = corners[0].y;
-  double minLon = corners[0].x;
-  double maxLon = corners[0].x;
+  for (int ii = 0; ii < 4; ii++) {
+    if (corners[ii].x == _missingLon ||
+        corners[ii].y == _missingLat) {
+      return;
+    }
+  }
+
+  // check we have valid data
   
-  for (int ii = 1; ii < 4; ii++) {
-    minLat = min(minLat, corners[ii].y);
-    maxLat = max(maxLat, corners[ii].y);
-    minLon = min(minLon, corners[ii].x);
-    maxLon = max(maxLon, corners[ii].x);
+  int nGood = 0;
+  for (int ii = 0; ii < 4; ii++) {
+    if (vals[ii] != missingVal) {
+      nGood++;
+    }
+  }
+  if (nGood == 0) {
+    return;
   }
   
-  // compute the output grid limits for the bounding box
-  
-  int minIx = (int) ((minLon - _minxDeg) / _dxDeg);
-  int maxIx = (int) ((maxLon - _minxDeg) / _dxDeg + 1.0);
-  
-  int minIy = (int) ((minLat - _minyDeg) / _dyDeg);
-  int maxIy = (int) ((maxLat - _minyDeg) / _dyDeg + 1.0);
-  
-  minIx = max(minIx, 0);
-  minIy = max(minIy, 0);
-  maxIx = min(maxIx, (int) _nx - 1);
-  maxIy = min(maxIy, (int) _ny - 1);
-  
+  // compute the min/max grid indices
+
+  int minIx, maxIx, minIy, maxIy;
+  _computeMinMaxIndices(corners, minIx, maxIx, minIy, maxIy);
+
   // loop through the output grid points, finding if they are inside the polygon
 
   for (int iy = minIy; iy <= maxIy; iy++) {
@@ -1629,6 +1560,45 @@ void GpmHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
 
 }
 
+//////////////////////////////////////////////
+// compute the min/max indices in the grid
+// for the lat/lon corners
+
+void GpmHdf5ToMdv::_computeMinMaxIndices(const Point_d *corners,
+                                         int &minIx, int &maxIx,
+                                         int &minIy, int &maxIy) 
+
+{
+  
+  // compute lat/lon bounding box
+  
+  double minLat = corners[0].y;
+  double maxLat = corners[0].y;
+  double minLon = corners[0].x;
+  double maxLon = corners[0].x;
+  
+  for (int ii = 1; ii < 4; ii++) {
+    minLat = min(minLat, corners[ii].y);
+    maxLat = max(maxLat, corners[ii].y);
+    minLon = min(minLon, corners[ii].x);
+    maxLon = max(maxLon, corners[ii].x);
+  }
+  
+  // compute the output grid limits for the bounding box
+  
+  minIx = (int) ((minLon - _minxDeg) / _dxDeg);
+  maxIx = (int) ((maxLon - _minxDeg) / _dxDeg + 1.0);
+  
+  minIy = (int) ((minLat - _minyDeg) / _dyDeg);
+  maxIy = (int) ((maxLat - _minyDeg) / _dyDeg + 1.0);
+  
+  minIx = max(minIx, 0);
+  minIy = max(minIy, 0);
+  maxIx = min(maxIx, (int) _nx - 1);
+  maxIy = min(maxIy, (int) _ny - 1);
+
+}
+  
 //////////////////////////////////////////////
 // interpolate point within polygon - double
 

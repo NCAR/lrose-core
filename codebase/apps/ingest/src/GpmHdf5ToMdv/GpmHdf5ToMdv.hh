@@ -220,6 +220,10 @@ private:
                             size_t iz,
                             vector<NcxxPort::si16> &valsInterp);
 
+  void _computeMinMaxIndices(const Point_d *corners,
+                             int &minIx, int &maxIx,
+                             int &minIy, int &maxIy);
+
   NcxxPort::fl32 _interpPt(const Point_d &pt,
                            const Point_d *corners,
                            const NcxxPort::fl32 *vals,
