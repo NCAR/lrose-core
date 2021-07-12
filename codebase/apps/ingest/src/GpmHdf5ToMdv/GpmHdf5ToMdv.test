@@ -324,7 +324,7 @@ set_output_grid_limits_from_data = TRUE;
 // Type: boolean
 //
 
-interp_using_nearest_neighbor = TRUE;
+interp_using_nearest_neighbor = FALSE;
 
 ///////////// interp_power_parameter //////////////////
 //

@@ -263,8 +263,6 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
   _interpField(_dbzInput, _missingDbz, _dbzInterp,
                _params.interp_using_nearest_neighbor);
   
-  _copyField(_dbzInput, _missingDbz, _dbzInterp2);
-  
   _interpField(_qualInput, _missingQual, _qualInterp);
 
   // for DBZ invert the gate levels because the radar gate data is stored
@@ -303,17 +301,6 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
                                          _dbzOutput.data());
   
   mdvx.addField(dbzField);
-
-  MdvxField *dbzField2 = _createMdvxField("DBZ2",
-                                          "reflectivity2",
-                                          _dbzUnits,
-                                          _nx, _ny, _zLevels.size(),
-                                          _minxDeg, _minyDeg, _minzKm,
-                                          _dxDeg, _dyDeg, _dzKm,
-                                          _missingDbz,
-                                          _dbzOutput2.data());
-  
-  mdvx.addField(dbzField2);
 
   MdvxField *qualField = _createMdvxField("qual",
                                           "qualityFlag",
@@ -838,7 +825,8 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   _dzKm = _params.radar_delta_z_km;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read group/field: " << groupName << " <<====" << endl;
+    cerr << "====>> Read 3D fl32 group/field: " 
+         << groupName << "/" << fieldName << " <<====" << endl;
     cerr << "  nScans, nRays, nGates: " 
          << _nScans << ", " << _nRays << ", " << _nGates << endl;
     cerr << "  missingVal: " << missingVal << endl;
@@ -917,7 +905,8 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   _dzKm = _params.radar_delta_z_km;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read group/field: " << groupName << " <<====" << endl;
+    cerr << "====>> Read 3D int 32 group/field: " 
+         << groupName << "/" << fieldName << " <<====" << endl;
     cerr << "  nScans, nRays, nGates: " 
          << _nScans << ", " << _nRays << ", " << _nGates << endl;
     cerr << "  missingVal: " << missingVal << endl;
@@ -992,7 +981,8 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read field: " << groupName << "/" << fieldName << " <<====" << endl;
+    cerr << "====>> Read 2D fl32 group/field: "
+         << groupName << "/" << fieldName << " <<====" << endl;
     cerr << "  nScans, nRays: " 
          << _nScans << ", " << _nRays << endl;
     cerr << "  missingVal: " << missingVal << endl;
@@ -1068,7 +1058,7 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read field: "
+    cerr << "====>> Read 2D int32 group/field: "
          << groupName << "/" << fieldName << " <<====" << endl;
     cerr << "  nScans, nRays: " 
          << _nScans << ", " << _nRays << endl;
@@ -1145,7 +1135,7 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read field: "
+    cerr << "====>> Read 2D int16 group/field: "
          << groupName << "/" << fieldName << " <<====" << endl;
     cerr << "  nScans, nRays: " 
          << _nScans << ", " << _nRays << endl;
@@ -1166,56 +1156,6 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
   } // verbose
   
   return 0;
-
-}
-
-//////////////////////////////////////////////
-// interpolate float field
-
-void GpmHdf5ToMdv::_copyField(vector<NcxxPort::fl32> &valsInput,
-                              NcxxPort::fl32 missingVal,
-                              vector<NcxxPort::fl32> &valsCopy)
-  
-{
-
-  // check for 2D field
-
-  bool is2D = false;
-  if (valsInput.size() == _nRays * _nScans) {
-    is2D = true;
-  }
-  size_t nz = _nGates;
-  size_t nGates = _nGates;
-  if (is2D) {
-    nz = 1;
-    nGates = 1;
-  }
-  
-  // initialize output grid
-  
-  size_t nOutput = _nx * _ny * nz;
-  valsCopy.resize(nOutput);
-  for (size_t ii = 0; ii < nOutput; ii++) {
-    valsCopy[ii] = missingVal;
-  }
-
-  // loop through the vertical levels
-  
-  for (size_t iz = 0; iz < nz; iz++) {
-    
-    // loop through the input (scan, ray) grid
-    
-    for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
-      for (size_t iray = 0; iray < _nRays - 1; iray++) {
-
-        size_t inputIndex = iscan * _nRays * nGates + iray * nGates + iz;
-        size_t outputIndex = iz * _nx * _ny + iscan * _nx + iray;
-        valsCopy[outputIndex] = valsInput[inputIndex];
-
-      } // iray
-    } // iscan
-
-  } // iz
 
 }
 
@@ -1257,15 +1197,15 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
     double zM = (_minzKm + iz * _dzKm) * 1000.0;
     
     // load input vals for this level
-    
-    vector<vector<NcxxPort::fl32> > valsIn;
+    size_t nPtsScan = _nRays * nGates;
+    vector<vector<NcxxPort::fl32> > valsThisZ;
     for (size_t iscan = 0; iscan < _nScans; iscan++) {
       vector<NcxxPort::fl32> valsScan;
       for (size_t iray = 0; iray < _nRays; iray++) {
-        size_t ipt = iscan * _nRays * nGates + iray * nGates + iz;
+        size_t ipt = iscan * nPtsScan + iray * nGates + iz;
         valsScan.push_back(valsInput[ipt]);
       } // iray
-      valsIn.push_back(valsScan);
+      valsThisZ.push_back(valsScan);
     } // iscan
     
     // loop through the input (scan, ray) grid
@@ -1280,21 +1220,32 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
         corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
         corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
-        // dbz vals at corners
-        NcxxPort::fl32 vals[4];
-        vals[0] = valsIn[iscan][iray];
-        vals[1] = valsIn[iscan][iray + 1];
-        vals[2] = valsIn[iscan + 1][iray + 1];
-        vals[3] = valsIn[iscan + 1][iray];
-
-        // check for valid VAL
-        int nGood = 0;
+        // check for valid location
+        int nGoodCorners = 0;
         for (int ii = 0; ii < 4; ii++) {
-          if (vals[ii] != missingVal) {
-            nGood++;
+          if (corners[ii].x != _missingLon && corners[ii].y != _missingLat) {
+            nGoodCorners++;
           }
         }
-        if (nGood < 1) {
+        if (nGoodCorners < 4) {
+          continue;
+        }
+
+        // vals at corners
+        NcxxPort::fl32 vals[4];
+        vals[0] = valsThisZ[iscan][iray];
+        vals[1] = valsThisZ[iscan][iray + 1];
+        vals[2] = valsThisZ[iscan + 1][iray + 1];
+        vals[3] = valsThisZ[iscan + 1][iray];
+
+        // check for valid val
+        int nGoodVals = 0;
+        for (int ii = 0; ii < 4; ii++) {
+          if (vals[ii] != missingVal) {
+            nGoodVals++;
+          }
+        }
+        if (nGoodVals < 1) {
           continue;
         }
         
@@ -1370,6 +1321,17 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si32> &valsInput,
         corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
         corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
+        // check for valid location
+        int nGoodCorners = 0;
+        for (int ii = 0; ii < 4; ii++) {
+          if (corners[ii].x != _missingLon && corners[ii].y != _missingLat) {
+            nGoodCorners++;
+          }
+        }
+        if (nGoodCorners < 4) {
+          continue;
+        }
+
         // dbz vals at corners
         NcxxPort::si32 vals[4];
         vals[0] = valsIn[iscan][iray];
@@ -1377,14 +1339,14 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si32> &valsInput,
         vals[2] = valsIn[iscan + 1][iray + 1];
         vals[3] = valsIn[iscan + 1][iray];
 
-        // check for valid VAL
-        int nGood = 0;
+        // check for valid val
+        int nGoodVals = 0;
         for (int ii = 0; ii < 4; ii++) {
           if (vals[ii] != missingVal) {
-            nGood++;
+            nGoodVals++;
           }
         }
-        if (nGood < 1) {
+        if (nGoodVals < 1) {
           continue;
         }
         
@@ -1459,6 +1421,17 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
         corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
         corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
+        // check for valid location
+        int nGoodCorners = 0;
+        for (int ii = 0; ii < 4; ii++) {
+          if (corners[ii].x != _missingLon && corners[ii].y != _missingLat) {
+            nGoodCorners++;
+          }
+        }
+        if (nGoodCorners < 4) {
+          continue;
+        }
+
         // dbz vals at corners
         NcxxPort::si16 vals[4];
         vals[0] = valsIn[iscan][iray];
@@ -1466,14 +1439,14 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
         vals[2] = valsIn[iscan + 1][iray + 1];
         vals[3] = valsIn[iscan + 1][iray];
 
-        // check for valid VAL
-        int nGood = 0;
+        // check for valid val
+        int nGoodVals = 0;
         for (int ii = 0; ii < 4; ii++) {
           if (vals[ii] != missingVal) {
-            nGood++;
+            nGoodVals++;
           }
         }
-        if (nGood < 1) {
+        if (nGoodVals < 1) {
           continue;
         }
         
@@ -1801,6 +1774,9 @@ Point_d GpmHdf5ToMdv::_getCornerLatLon(int iscan,
   // get the point
   
   Point_d pt = _latLons[iscan][iray];
+  if (pt.x == _missingLon || pt.y == _missingLat) {
+    return pt;
+  }
   
   double cornerLat = pt.y;
   double slantDeltaLat = (_scLat[iscan] - cornerLat) * zFraction;
@@ -1838,7 +1814,6 @@ void GpmHdf5ToMdv::_invertDbzGateLevels()
   // prepare output grid
   
   _dbzOutput.resize(_dbzInterp.size());
-  _dbzOutput2.resize(_dbzInterp.size());
   _zLevels.resize(_nz);
   for (size_t iz = 0; iz < _nz; iz++) {
     _zLevels[iz] = _minzKm + iz * _dzKm;
@@ -1853,7 +1828,6 @@ void GpmHdf5ToMdv::_invertDbzGateLevels()
         size_t interpIndex = iz * nptsPlane + iy * _nx + ix;
         size_t outputIndex = (_nz - iz - 1) * nptsPlane + iy * _nx + ix;
         _dbzOutput[outputIndex] = _dbzInterp[interpIndex];
-        _dbzOutput2[outputIndex] = _dbzInterp2[interpIndex];
       } // ix
     } // iy
   } // iz
@@ -1868,7 +1842,6 @@ void GpmHdf5ToMdv::_remapVertLevels()
 {
 
   vector<NcxxPort::fl32> outputOrig = _dbzOutput;
-  vector<NcxxPort::fl32> outputOrig2 = _dbzOutput2;
 
   // zlevels are specified
 
@@ -1881,7 +1854,6 @@ void GpmHdf5ToMdv::_remapVertLevels()
   
   size_t nPtsOutput = _nx * _ny * _zLevels.size();
   _dbzOutput.resize(nPtsOutput);
-  _dbzOutput2.resize(nPtsOutput);
 
   // compute heights of mid pt between specified levels
   
@@ -1908,19 +1880,14 @@ void GpmHdf5ToMdv::_remapVertLevels()
     for (size_t ix = 0; ix < _nx; ix++) {
       for (size_t iz = 0; iz < _zLevels.size(); iz++) {
         NcxxPort::fl32 maxDbz = _missingDbz;
-        NcxxPort::fl32 maxDbz2 = _missingDbz;
         for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
           size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
-          if (_dbzInterp[interpIndex] != _missingDbz) {
+          if (outputOrig[interpIndex] != _missingDbz) {
             maxDbz = max(maxDbz, outputOrig[interpIndex]);
-          }
-          if (_dbzInterp2[interpIndex] != _missingDbz) {
-            maxDbz2 = max(maxDbz2, outputOrig2[interpIndex]);
           }
         } // jz
         size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
         _dbzOutput[outputIndex] = maxDbz;
-        _dbzOutput2[outputIndex] = maxDbz2;
       } // iz
     } // ix
   } // iy

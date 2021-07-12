@@ -116,8 +116,6 @@ private:
   vector<NcxxPort::fl32> _dbzInput;
   vector<NcxxPort::fl32> _dbzInterp;
   vector<NcxxPort::fl32> _dbzOutput;
-  vector<NcxxPort::fl32> _dbzInterp2;
-  vector<NcxxPort::fl32> _dbzOutput2;
   NcxxPort::fl32 _missingDbz;
   string _dbzUnits;
 
@@ -190,10 +188,6 @@ private:
   
   // interpolation
 
-  void _copyField(vector<NcxxPort::fl32> &valsInput,
-                  NcxxPort::fl32 missingVal,
-                  vector<NcxxPort::fl32> &valsInterp);
-  
   void _interpField(vector<NcxxPort::fl32> &valsInput,
                     NcxxPort::fl32 missingVal,
                     vector<NcxxPort::fl32> &valsInterp,
