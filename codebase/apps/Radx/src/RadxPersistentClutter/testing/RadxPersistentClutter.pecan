@@ -1,0 +1,787 @@
+/**********************************************************************
+ * TDRP params for Params
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxPersistentClutter - parameters for setting clutter locations of 
+//   one input field.
+//
+// Based on paper: Lakshmanan V., J. Zhang, K. Hondl and C. Langston: A 
+//   Statistical Approach to Mitigating Persistent Clutter in Radar 
+//   Reflectivity Data. IEEE Journal of Selected Topics in Applied Earth 
+//   Observations and Remote Sensing, Vol. 5, No. 2, April 2012.
+//
+//======================================================================
+ 
+///////////// fixed_const /////////////////////////////
+//
+// Fixed constant strings that are interpreted by user functions.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+fixed_const = {
+};
+
+///////////// user_data ///////////////////////////////
+//
+// Non gridded data names.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+user_data = {
+};
+
+///////////// volume_before_filter ////////////////////
+//
+// Volume Filters to apply before doing ray filters.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+volume_before_filter = {
+};
+
+///////////// sweep_filter ////////////////////////////
+//
+// Sweep filters to apply.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+sweep_filter = {
+};
+
+///////////// ray_filter //////////////////////////////
+//
+// Single ray Filters to apply.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+ray_filter = {
+};
+
+///////////// volume_after_filter /////////////////////
+//
+// Volume Filters to apply after doing ray filters.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+volume_after_filter = {
+};
+
+///////////// input_field /////////////////////////////
+//
+// input field name.
+//
+// name of field to find clutter in.
+//
+//
+// Type: string
+//
+
+input_field = "DBMVC";
+
+///////////// output_field ////////////////////////////
+//
+// output field name.
+//
+// name to give final output clutter field.
+//
+//
+// Type: string
+//
+
+output_field = "DBMVC";
+
+///////////// threshold ///////////////////////////////
+//
+// threshold.
+//
+// If data is always above this value it is a clutter location.
+//
+//
+// Type: double
+//
+
+threshold = -95;
+
+///////////// clutter_percentile //////////////////////
+//
+// Clutter percentile.
+//
+// percentile to use in clutter value determination (see the paper, 
+//   section III. Correction of Radar Reflectivity.
+//
+//
+// Type: double
+//
+
+clutter_percentile = 0.5;
+
+///////////// fixedElevations /////////////////////////
+//
+// Fixed storage elevation values.
+//
+// List of target elevation angles (the angles seem to wobble a lot). 
+//   Inputs are mapped to one of these using tolerance params.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+fixedElevations = {
+ 0.5
+};
+
+///////////// azToleranceDegrees //////////////////////
+//
+// azimumth tolerance.
+//
+// allowed degrees difference between azimuth values from different 
+//   volumes to be considered part of the same ray.
+//
+//
+// Type: double
+//
+
+azToleranceDegrees = 0.1;
+
+///////////// elevToleranceDegrees ////////////////////
+//
+// elevation tolerance.
+//
+// allowed degrees difference between elevation values from different 
+//   volumes to be considered part of the same ray.
+//
+//
+// Type: double
+//
+
+elevToleranceDegrees = 0.1;
+
+///////////// diagnostic_output ///////////////////////
+//
+// diagnostic_output.
+//
+// If true, output from each volume is done, to show the build up of 
+//   skill through time, to the output location. Typically this is a 
+//   diagnostic mode.  If false, output is only at the end of a processing 
+//   phase, with output time equal to the time of the first volume 
+//   processed, and output written to the final_output_url.
+//
+//
+// Type: boolean
+//
+
+diagnostic_output = TRUE;
+
+///////////// final_output_url ////////////////////////
+//
+// location for main output.
+//
+// see diagnostic_output description.
+//
+//
+// Type: string
+//
+
+final_output_url = "$(HOME)/data/pecan/cfradial/spol/clutter/sur";
+
+///////////// output_ascii_path ///////////////////////
+//
+// Output ascii file path in which to write plottables.
+//
+//
+// Type: string
+//
+
+output_ascii_path = "$(HOME)/data/pecan/cal/clutter";
+
+///////////// missing_clutter_value ///////////////////
+//
+// missing clutter value.
+//
+// value to give clutter estimates when the wanted percentile is the 
+//   missing data value.
+//
+//
+// Type: double
+//
+
+missing_clutter_value = -115;
+
+///////////// threshold_tolerance /////////////////////
+//
+// variation in threshold for convergence.
+//
+// The threshold as percent of total volumes to identify a point as 
+//   clutter should converge to a stable value.  This value is the allowed 
+//   tolerance (change) to be considered stable.
+//
+//
+// Type: double
+//
+
+threshold_tolerance = 0.025;
+
+///////////// maximum_percent_change //////////////////
+//
+// Maximum percent of pixels that can change for convergence.
+//
+// The percentage of pixels that change from clutter to nonclutter or 
+//   back should decrease to a minimum for convergence.
+//
+//
+// Type: double
+//
+
+maximum_percent_change = 0.005;
+
+///////////// minimum_stable_volumes //////////////////
+//
+// Number of volumes that show stablity prior to considering the 
+//   situation stable.
+//
+// The threshold converges, and needs to stay converged for this many 
+//   volumes before giving the thumbs up.
+//
+//
+// Type: double
+//
+
+minimum_stable_volumes = 10;
+
+///////////// histogram_resolution ////////////////////
+//
+// histogram resolution.
+//
+// Histograms are used to set clutter value. This is the resolution.
+//
+//
+// Type: double
+//
+
+histogram_resolution = 0.2;
+
+///////////// histogram_max ///////////////////////////
+//
+// histogram max.
+//
+// Histograms are used to set clutter value. This is the maximum bin.
+//
+//
+// Type: double
+//
+
+histogram_max = 50;
+
+/**********************************************************************
+ * TDRP params for RadxAppParams
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxApp.
+//
+// Parameters for general algorithm data filtering for Radx format input 
+//   data.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// instance.
+//
+// for PMU.
+//
+//
+// Type: string
+//
+
+instance = "pecan";
+
+///////////// debug_mode //////////////////////////////
+//
+// debugging mode.
+//
+// NONE=as quiet as possible, DEBUG = minimal debug output, 
+//   DEBUG_VERBOSE=more.
+//
+//
+// Type: enum
+// Options:
+//     NONE
+//     DEBUG
+//     DEBUG_VERBOSE
+//
+
+debug_mode = DEBUG;
+
+///////////// debug_triggering ////////////////////////
+//
+// triggering debug.
+//
+// set to TRUE to debug triggering.
+//
+//
+// Type: boolean
+//
+
+debug_triggering = FALSE;
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// ymd_subdirectories //////////////////////
+//
+// Are yyyymmdd directories expected?.
+//
+// If TRUE, expect data at trigger_url and all input urls to have data 
+//   organized into yyyymmdd subdirectories.
+//
+//
+// Type: boolean
+//
+
+ymd_subdirectories = TRUE;
+
+///////////// trigger_url /////////////////////////////
+//
+// trigger url.
+//
+// URL to trigger off.
+//
+//
+// Type: string
+//
+
+trigger_url = "$(HOME)/data/pecan/cfradial/spol/moments/sband/sur";
+
+///////////// output_url //////////////////////////////
+//
+// output for Algorithm results.
+//
+//
+// Type: string
+//
+
+output_url = "$(HOME)/data/pecan/cfradial/spol/clutter/sband/sur";
+
+//======================================================================
+//
+// Threading.
+//
+// Optional threading of beams, depends on app whether params are used 
+//   or not.
+//
+//======================================================================
+ 
+///////////// num_threads /////////////////////////////
+//
+// Number of threads.
+//
+// set to 1 or 0 for no threading.
+//
+//
+// Type: int
+//
+
+num_threads = 16;
+
+///////////// thread_debug ////////////////////////////
+//
+// Thread debugging.
+//
+// TRUE to see thread related debugging.
+//
+//
+// Type: boolean
+//
+
+thread_debug = FALSE;
+
+//======================================================================
+//
+// Input paths.
+//
+// Inputs can come from one or more location, a primary source, and any 
+//   number of secondary sources.
+//
+//======================================================================
+ 
+///////////// input ///////////////////////////////////
+//
+// inputs.
+//
+// index = numerical value to refer to this elsewhere
+// path = where the data is
+// The first thing on this list is the primary data source. The geometry 
+//   of non-primary files will be converted to match the primary files. 
+//   The file_match_time_offset_sec and file_match_time_tolerance_sec are 
+//   used to search for the best secondary file to merge. The offset is 
+//   ignored for the primary field. The ray tolerances are used to match 
+//   rays in the secondary file with those in the primary file.  If 
+//   is_climo=true, a fixed file is used no matter what the request, 
+//   specified by path/climo_file.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int index;
+//      string path;
+//      double file_match_time_offset_sec;
+//      double file_match_time_tolerance_sec;
+//      double ray_match_elevation_tolerance_deg;
+//      double ray_match_azimuth_tolerance_deg;
+//      double ray_match_time_tolerance_sec;
+//      boolean is_climo;
+//      string climo_file;
+//   }
+//
+// 1D array - variable length.
+//
+
+input = {
+  {
+    index = 1,
+    path = "$(HOME)/data/pecan/cfradial/spol/moments/sband/sur",
+    file_match_time_offset_sec = 60,
+    file_match_time_tolerance_sec = 60,
+    ray_match_elevation_tolerance_deg = 0.2,
+    ray_match_azimuth_tolerance_deg = 0.2,
+    ray_match_time_tolerance_sec = 10,
+    is_climo = FALSE,
+    climo_file = ""
+  }
+};
+
+//======================================================================
+//
+// Mapping from input field to path.
+//
+// For each field that is an input to the app, it is associated with an 
+//   input path using this mapping (index/field name).
+//
+//======================================================================
+ 
+///////////// field_mapping ///////////////////////////
+//
+// mapping from field to url.
+//
+// for each input field, the index to the path of that data.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string field;
+//      int index;
+//   }
+//
+// 1D array - variable length.
+//
+
+field_mapping = {
+  {
+    field = "DBMVC",
+    index = 1
+  }
+};
+
+//======================================================================
+//
+// Data Read Parameters.
+//
+//  Parameters that control the reading of input data .
+//
+//======================================================================
+ 
+///////////// max_wait_minutes ////////////////////////
+//
+// max wait.
+//
+// maximum wait time (minutes) for realtime=TRUE and multiple input 
+//   URLs. Not used in archive mode.
+//
+//
+// Type: double
+//
+
+max_wait_minutes = 1;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// max_realtime_data_age_secs.
+//
+// maximum allowed difference (seconds) between read request time and 
+//   data time.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 120;
+
+///////////// read_set_fixed_angle_limits /////////////
+//
+// Option to set fixed angle limits.
+//
+// Only read sweeps within the specified fixed angle limits. Fixed 
+//   angles are elevation in PPI mode and azimuth in RHI mode.
+//
+//
+// Type: boolean
+//
+
+read_set_fixed_angle_limits = TRUE;
+
+///////////// read_lower_fixed_angle //////////////////
+//
+// Lower fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+read_lower_fixed_angle = 0.3;
+
+///////////// read_upper_fixed_angle //////////////////
+//
+// Upper fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+read_upper_fixed_angle = 0.7;
+
+///////////// ignore_antenna_transitions //////////////
+//
+// Option to ignore rays with antenna transition flag set.
+//
+// The transition flag is set when the antenna is moving between sweeps. 
+//   If this parameter is true, rays containing the transition flag will 
+//   not be read in.
+//
+//
+// Type: boolean
+//
+
+ignore_antenna_transitions = TRUE;
+
+///////////// ignore_idle_scan_mode_on_read ///////////
+//
+// Option to ignore data taken in IDLE mode.
+//
+// If true, on read will ignore files with an IDLE scan mode.
+//
+//
+// Type: boolean
+//
+
+ignore_idle_scan_mode_on_read = TRUE;
+
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+//
+// Type: boolean
+//
+
+set_max_range = TRUE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 60;
+
+//======================================================================
+//
+// Data Write Parameters.
+//
+//  Parameters that control the writing of output data .
+//
+//======================================================================
+ 
+///////////// output_all_fields ///////////////////////
+//
+// True to output all fields, false to use list.
+//
+//
+// Type: boolean
+//
+
+output_all_fields = TRUE;
+
+///////////// output_fields ///////////////////////////
+//
+// fields to output.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+output_fields = {
+};
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+//
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+//
+// If false, data will be byte-swapped as appropriate on output.
+//
+//
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+//
+// Applies to netCDF and Dorade. UF does not support compression.
+//
+//
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+//
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+//
+//
+// Type: int
+//
+
+compression_level = 5;
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
