@@ -861,7 +861,6 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
 
 int Hdf5xx::getVarProps(Group &group,
                         const string &dsName,
-                        const string &context,
                         vector<size_t> &dims,
                         string &units,
                         H5T_class_t &h5class,
@@ -871,6 +870,11 @@ int Hdf5xx::getVarProps(Group &group,
   
 {
   
+  string groupName = group.getObjName();
+  string context(groupName);
+  context += "-";
+  context += dsName;
+
   if (!group.nameExists(dsName)) {
     return -1;
   }
@@ -879,7 +883,7 @@ int Hdf5xx::getVarProps(Group &group,
   
   DataSet dset = group.openDataSet(dsName);
   DataSpace dspace = dset.getSpace();
-
+  
   // set the units
   
   units = "";

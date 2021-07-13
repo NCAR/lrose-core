@@ -164,7 +164,6 @@ public:
   
   int getVarProps(Group &group,
                   const string &dsName,
-                  const string &context,
                   vector<size_t> &dims,
                   string &units,
                   H5T_class_t &h5class,
