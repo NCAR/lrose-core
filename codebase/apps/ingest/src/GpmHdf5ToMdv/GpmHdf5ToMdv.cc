@@ -751,6 +751,64 @@ int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
 int GpmHdf5ToMdv::_readFields(Group &ns)
   
 {
+
+  // check the data sets
+
+  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
+
+    Params::output_field_t &fld = _params._output_fields[ifield];
+
+    Hdf5xx hdf5;
+    vector<size_t> dims;
+    string units;
+    H5T_class_t h5class;
+    H5T_sign_t h5sign;
+    H5T_order_t h5order;
+    size_t h5size;
+    
+    Group grp(ns.openGroup(fld.groupName));
+    if (hdf5.getVarProps(grp, fld.gpmName,
+                         dims, units, 
+                         h5class, h5sign, h5order, h5size)) {
+      cerr << hdf5.getErrStr() << endl;
+      continue;
+    }
+
+    if (_params.debug) {
+      cerr << "Reading fields" << endl;
+      cerr << "  groupName: " << fld.groupName << endl;
+      cerr << "  gpmName: " << fld.gpmName << endl;
+      cerr << "  dims: ";
+      for (size_t ii = 0; ii < dims.size(); ii++) {
+        cerr << dims[ii];
+        if (ii == dims.size() - 1) {
+          cerr << endl;
+        } else {
+          cerr << ", ";
+        }
+      }
+      if (units.size() > 0) {
+        cerr << "  units: " << units << endl;
+      }
+      if (h5class == H5T_INTEGER) {
+        if (h5sign == H5T_SGN_NONE) {
+          cerr << "  Is unsigned integer" << endl;
+        } else {
+          cerr << "  Is signed integer" << endl;
+        }
+      } else {
+        cerr << "  Is float" << endl;
+      }
+      if (h5order == H5T_ORDER_LE) {
+        cerr << "  Byte order: little-endian" << endl;
+      } else {
+        cerr << "  Byte order: big-endian" << endl;
+      }
+      cerr << "  Byte len: " << h5size << endl;
+    }
+
+  } // ifield
+
   
   _qualAvailable = false;
 
