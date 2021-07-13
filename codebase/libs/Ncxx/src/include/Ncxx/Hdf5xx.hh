@@ -151,6 +151,28 @@ public:
                          ArrayAttr &arrayAttr);
   
   ///////////////////////////////////////////////////////////////////
+  // Enquire about the properties of a variable
+  // Returns 0 on success, -1 on failure
+  // On success, sets the following:
+  //    dims     - dimensions
+  //    units    - string
+  //    h5class  - H5T_INTEGER or H5T_FLOAT
+  //    h5sign   - H5T_SGN_NONE if unsigned integer, otherwise signed
+  //               does not apply to floats of course
+  //    h5order  - H5T_ORDER_LE or H5T_ORDER_BE
+  //    h5size   - length of data type in bytes
+  
+  int getVarProps(Group &group,
+                  const string &dsName,
+                  const string &context,
+                  vector<size_t> &dims,
+                  string &units,
+                  H5T_class_t &h5class,
+                  H5T_sign_t &h5sign,
+                  H5T_order_t &h5order,
+                  size_t &h5size);
+  
+  ///////////////////////////////////////////////////////////////////
   // Read data set into arrays of various types
   // Fills in dims, msssingVal, vals, units (if available)
   // return 0 on success, -1 on failure

@@ -848,8 +848,98 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
 }
 
 ///////////////////////////////////////////////////////////////////
+// Enquire about the properties of a variable
+// Returns 0 on success, -1 on failure
+// On success, sets the following:
+//    dims     - dimensions
+//    units    - string
+//    h5class  - H5T_INTEGER or H5T_FLOAT
+//    h5sign   - H5T_SGN_NONE if unsigned integer, otherwise signed
+//               does not apply to floats of course
+//    h5order  - H5T_ORDER_LE or H5T_ORDER_BE
+//    h5size   - length of data type in bytes
+
+int Hdf5xx::getVarProps(Group &group,
+                        const string &dsName,
+                        const string &context,
+                        vector<size_t> &dims,
+                        string &units,
+                        H5T_class_t &h5class,
+                        H5T_sign_t &h5sign,
+                        H5T_order_t &h5order,
+                        size_t &h5size)
+  
+{
+  
+  if (!group.nameExists(dsName)) {
+    return -1;
+  }
+
+  // get data space for this data set
+  
+  DataSet dset = group.openDataSet(dsName);
+  DataSpace dspace = dset.getSpace();
+
+  // set the units
+  
+  units = "";
+  DecodedAttr unitsAtt;
+  if (dset.attrExists("Units")) {
+    if (loadAttribute(dset, "Units", context, unitsAtt) == 0) {
+      units = unitsAtt.getAsString();
+    }
+  } else if (dset.attrExists("units")) {
+    if (loadAttribute(dset, "units", context, unitsAtt) == 0) {
+      units = unitsAtt.getAsString();
+    }
+  }
+
+  // determine the dimensions
+
+  dims.clear();
+  int nDims = dspace.getSimpleExtentNdims();
+  vector<hsize_t> hdims;
+  hdims.resize(nDims);
+  dspace.getSimpleExtentDims(hdims.data());
+  dims.clear();
+  for (size_t ii = 0; ii < hdims.size(); ii++) {
+    dims.push_back(hdims[ii]);
+  }
+
+  // class, sign, order and size
+  
+  DataType dtype = dset.getDataType();
+  h5class = dtype.getClass();
+  
+  if (h5class == H5T_INTEGER) {
+    
+    IntType intType = dset.getIntType();
+    h5order = intType.getOrder();
+    h5sign = intType.getSign();
+    h5size = intType.getSize();
+    
+  } else if (h5class == H5T_FLOAT) {
+    
+    FloatType flType = dset.getFloatType();
+    h5order = flType.getOrder();
+    h5size = flType.getSize();
+
+  } else {
+
+    _addErrStr("Hdf5xx::getVarProps()");
+    _addErrStr("  Data is not integer of float", dsName);
+    _addErrStr("  Context: ", context);
+    return -1;
+
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////////
 // Read data set into 32-bit int array
-// Fills in dims, msssingVal, vals, units (if available)
+// Fills in dims, missingVal, vals, units (if available)
 // returns 0 on success, -1 on failure
 
 int Hdf5xx::readSi32Array(Group &group,
@@ -1076,7 +1166,7 @@ int Hdf5xx::readSi32Array(Group &group,
 
 ///////////////////////////////////////////////////////////////////
 // Read data set into 16-bit int array
-// Fills in dims, msssingVal, vals, units (if available)
+// Fills in dims, missingVal, vals, units (if available)
 // returns 0 on success, -1 on failure
 
 int Hdf5xx::readSi16Array(Group &group,
@@ -1303,7 +1393,7 @@ int Hdf5xx::readSi16Array(Group &group,
 
 ///////////////////////////////////////////////////////////////////
 // Read data set into 32-bit float array
-// Fills in dims, msssingVal, vals, units (if available)
+// Fills in dims, missingVal, vals, units (if available)
 // returns 0 on success, -1 on failure
 
 int Hdf5xx::readFl32Array(Group &group,
@@ -1576,7 +1666,7 @@ int Hdf5xx::readFl32Array(Group &group,
 
 ///////////////////////////////////////////////////////////////////
 // Read data set into 64-bit float array
-// Fills in dims, msssingVal, vals, units (if available)
+// Fills in dims, missingVal, vals, units (if available)
 
 int Hdf5xx::readFl64Array(Group &group,
                           const string &dsName,
