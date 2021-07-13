@@ -178,7 +178,6 @@ public:
 
   int readSi16Array(Group &group,
                     const string &dsname,
-                    const string &context,
                     vector<size_t> &dims,
                     NcxxPort::si16 &missingVal,
                     vector<NcxxPort::si16> &vals,
@@ -186,7 +185,6 @@ public:
   
   int readSi32Array(Group &group,
                     const string &dsname,
-                    const string &context,
                     vector<size_t> &dims,
                     NcxxPort::si32 &missingVal,
                     vector<NcxxPort::si32> &vals,
@@ -194,7 +192,6 @@ public:
   
   int readFl32Array(Group &group,
                     const string &dsname,
-                    const string &context,
                     vector<size_t> &dims,
                     NcxxPort::fl32 &missingVal,
                     vector<NcxxPort::fl32> &vals,
@@ -202,7 +199,6 @@ public:
   
   int readFl64Array(Group &group,
                     const string &dsname,
-                    const string &context,
                     vector<size_t> &dims,
                     NcxxPort::fl64 &missingVal,
                     vector<NcxxPort::fl64> &vals,

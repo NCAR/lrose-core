@@ -395,43 +395,43 @@ int GpmHdf5ToMdv::_readTimes(Group &ns)
   
   vector<NcxxPort::si32> years, months, days, hours, mins, secs, msecs;
   Hdf5xx hdf5;
-  if (hdf5.readSi32Array(scanTime, "Year", "ScanTime",
+  if (hdf5.readSi32Array(scanTime, "Year",
                          dims, missingVal, years, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Year variable" << endl;
     return -1;
   }
-  if (hdf5.readSi32Array(scanTime, "Month", "ScanTime",
+  if (hdf5.readSi32Array(scanTime, "Month",
                          dims, missingVal, months, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Month variable" << endl;
     return -1;
   }
-  if (hdf5.readSi32Array(scanTime, "DayOfMonth", "ScanTime",
+  if (hdf5.readSi32Array(scanTime, "DayOfMonth",
                          dims, missingVal, days, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read DayOfMonth variable" << endl;
     return -1;
   }
-  if (hdf5.readSi32Array(scanTime, "Hour", "ScanTime",
+  if (hdf5.readSi32Array(scanTime, "Hour",
                          dims, missingVal, hours, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Hour variable" << endl;
     return -1;
   }
-  if (hdf5.readSi32Array(scanTime, "Minute", "ScanTime",
+  if (hdf5.readSi32Array(scanTime, "Minute",
                          dims, missingVal, mins, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Minute variable" << endl;
     return -1;
   }
-  if (hdf5.readSi32Array(scanTime, "Second", "ScanTime",
+  if (hdf5.readSi32Array(scanTime, "Second",
                          dims, missingVal, secs, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read Second variable" << endl;
     return -1;
   }
-  if (hdf5.readSi32Array(scanTime, "MilliSecond", "ScanTime",
+  if (hdf5.readSi32Array(scanTime, "MilliSecond",
                          dims, missingVal, msecs, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readTimes()" << endl;
     cerr << "  Cannot read MilliSecond variable" << endl;
@@ -489,33 +489,33 @@ int GpmHdf5ToMdv::_readQcFlags(Group &ns)
   _missingScan.resize(_times.size());
   
   Hdf5xx hdf5;
-  if (hdf5.readSi32Array(scanStatus, "dataQuality", "scanStatus",
+  if (hdf5.readSi32Array(scanStatus, "dataQuality",
                          dims, missingVal, _dataQuality, units)) {
     cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
     cerr << "  Cannot read dataQuality flag variable" << endl;
   }
-  if (hdf5.readSi32Array(scanStatus, "dataWarning", "scanStatus",
+  if (hdf5.readSi32Array(scanStatus, "dataWarning",
                          dims, missingVal, _dataWarning, units)) {
     cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
     cerr << "  Cannot read dataWarning flag variable" << endl;
   }
-  if (hdf5.readSi32Array(scanStatus, "geoError", "scanStatus",
+  if (hdf5.readSi32Array(scanStatus, "geoError",
                          dims, missingVal, _geoError, units)) {
     cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
     cerr << "  Cannot read geoError flag variable" << endl;
   }
-  if (hdf5.readSi32Array(scanStatus, "geoWarning", "scanStatus",
+  if (hdf5.readSi32Array(scanStatus, "geoWarning",
                          dims, missingVal, _geoWarning, units)) {
     cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
     cerr << "  Cannot read geoWarning flag variable" << endl;
   }
-  if (hdf5.readSi32Array(scanStatus, "limitErrorFlag", "scanStatus",
+  if (hdf5.readSi32Array(scanStatus, "limitErrorFlag",
                          dims, missingVal, _limitErrorFlag, units)) {
     cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
     cerr << "  Cannot read limitErrorFlag variable" << endl;
     return -1;
   }
-  if (hdf5.readSi32Array(scanStatus, "missing", "scanStatus",
+  if (hdf5.readSi32Array(scanStatus, "missing",
                          dims, missingVal, _missingScan, units)) {
     cerr << "WARNING - GpmHdf5ToMdv::_readQcFlags()" << endl;
     cerr << "  Cannot read missing flag variable" << endl;
@@ -554,7 +554,7 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
   
   vector<size_t> latDims;
   string latUnits;
-  if (hdf5.readFl64Array(ns, "Latitude", "NS",
+  if (hdf5.readFl64Array(ns, "Latitude",
                          latDims, _missingLat, _lats, latUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
     cerr << "  Cannot read Latitude variable" << endl;
@@ -565,7 +565,7 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
   
   vector<size_t> lonDims;
   string lonUnits;
-  if (hdf5.readFl64Array(ns, "Longitude", "NS",
+  if (hdf5.readFl64Array(ns, "Longitude",
                          lonDims, _missingLon, _lons, lonUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
     cerr << "  Cannot read Longitude variable" << endl;
@@ -685,7 +685,7 @@ int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
   vector<size_t> lonDims;
   NcxxPort::fl64 missingLon;
   string lonUnits;
-  if (hdf5.readFl64Array(nav, "scLon", "NS/navigation",
+  if (hdf5.readFl64Array(nav, "scLon",
                          lonDims, missingLon, _scLon, lonUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readSpaceCraftPos()" << endl;
     cerr << "  Cannot read scLon variable" << endl;
@@ -697,7 +697,7 @@ int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
   vector<size_t> latDims;
   NcxxPort::fl64 missingLat;
   string latUnits;
-  if (hdf5.readFl64Array(nav, "scLat", "NS/navigation",
+  if (hdf5.readFl64Array(nav, "scLat",
                          latDims, missingLat, _scLat, latUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readSpaceCraftPos()" << endl;
     cerr << "  Cannot read scLat variable" << endl;
@@ -709,7 +709,7 @@ int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
   vector<size_t> altDims;
   NcxxPort::fl64 missingAlt;
   string altUnits;
-  if (hdf5.readFl64Array(nav, "scAlt", "NS/navigation",
+  if (hdf5.readFl64Array(nav, "scAlt",
                          altDims, missingAlt, _scAlt, altUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readSpaceCraftPos()" << endl;
     cerr << "  Cannot read scAlt variable" << endl;
@@ -847,10 +847,8 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   // read Latitude
   
   vector<size_t> dims;
-  string context("NS/");
-  context += groupName;
   Group grp(ns.openGroup(groupName));
-  if (hdf5.readFl32Array(grp, fieldName, context,
+  if (hdf5.readFl32Array(grp, fieldName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
@@ -927,10 +925,8 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   // read Latitude
   
   vector<size_t> dims;
-  string context("NS/");
-  context += groupName;
   Group grp(ns.openGroup(groupName));
-  if (hdf5.readSi32Array(grp, fieldName, context,
+  if (hdf5.readSi32Array(grp, fieldName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
@@ -1008,10 +1004,8 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
   
   vector<size_t> dims;
   
-  string context("NS/");
-  context += groupName;
   Group grp(ns.openGroup(groupName));
-  if (hdf5.readFl32Array(grp, fieldName, context,
+  if (hdf5.readFl32Array(grp, fieldName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
@@ -1081,11 +1075,9 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
   
   vector<size_t> dims;
   
-  string context("NS/");
-  context += groupName;
   Group grp(ns.openGroup(groupName));
   
-  if (hdf5.readSi32Array(grp, fieldName, context,
+  if (hdf5.readSi32Array(grp, fieldName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
     cerr << "  Cannot read group/field: "
@@ -1158,11 +1150,9 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
   
   vector<size_t> dims;
   
-  string context("NS/");
-  context += groupName;
   Group grp(ns.openGroup(groupName));
   
-  if (hdf5.readSi16Array(grp, fieldName, context,
+  if (hdf5.readSi16Array(grp, fieldName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
     cerr << "  Cannot read group/field: "

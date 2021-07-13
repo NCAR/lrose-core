@@ -948,13 +948,17 @@ int Hdf5xx::getVarProps(Group &group,
 
 int Hdf5xx::readSi32Array(Group &group,
                           const string &dsName,
-                          const string &context,
                           vector<size_t> &dims,
                           NcxxPort::si32 &missingVal,
                           vector<NcxxPort::si32> &vals,
                           string &units)
   
 {
+
+  string groupName = group.getObjName();
+  string context(groupName);
+  context += "-";
+  context += dsName;
 
   if (!group.nameExists(dsName)) {
     return -1;
@@ -1175,13 +1179,17 @@ int Hdf5xx::readSi32Array(Group &group,
 
 int Hdf5xx::readSi16Array(Group &group,
                           const string &dsName,
-                          const string &context,
                           vector<size_t> &dims,
                           NcxxPort::si16 &missingVal,
                           vector<NcxxPort::si16> &vals,
                           string &units)
   
 {
+
+  string groupName = group.getObjName();
+  string context(groupName);
+  context += "-";
+  context += dsName;
 
   if (!group.nameExists(dsName)) {
     return -1;
@@ -1402,13 +1410,17 @@ int Hdf5xx::readSi16Array(Group &group,
 
 int Hdf5xx::readFl32Array(Group &group,
                           const string &dsName,
-                          const string &context,
                           vector<size_t> &dims,
                           NcxxPort::fl32 &missingVal,
                           vector<NcxxPort::fl32> &vals,
                           string &units)
   
 {
+
+  string groupName = group.getObjName();
+  string context(groupName);
+  context += "-";
+  context += dsName;
 
   if (!group.nameExists(dsName)) {
     return -1;
@@ -1674,13 +1686,17 @@ int Hdf5xx::readFl32Array(Group &group,
 
 int Hdf5xx::readFl64Array(Group &group,
                           const string &dsName,
-                          const string &context,
                           vector<size_t> &dims,
                           NcxxPort::fl64 &missingVal,
                           vector<NcxxPort::fl64> &vals,
                           string &units)
   
 {
+
+  string groupName = group.getObjName();
+  string context(groupName);
+  context += "-";
+  context += dsName;
 
   if (!group.nameExists(dsName)) {
     return -1;
