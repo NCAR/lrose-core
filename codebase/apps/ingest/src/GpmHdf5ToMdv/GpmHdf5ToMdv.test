@@ -270,6 +270,12 @@ output_z_levels_km = {
 //
 //======================================================================
  
+//======================================================================
+//
+// OUTPUT ENCODING AND COMPRESSION.
+//
+//======================================================================
+ 
 ///////////// output_fields ///////////////////////////
 //
 // Output fields details.
@@ -283,6 +289,11 @@ output_z_levels_km = {
 //      string gpmName;
 //      string outputName;
 //      string longName;
+//      encoding_type_t encoding;
+//        Options:
+//          ENCODING_INT8
+//          ENCODING_INT16
+//          ENCODING_FLOAT32
 //   }
 //
 // 1D array - variable length.
@@ -293,84 +304,96 @@ output_fields = {
     groupName = "SLV",
     gpmName = "zFactorCorrected",
     outputName = "DBZ",
-    longName = "reflectivity"
+    longName = "reflectivity",
+    encoding = ENCODING_INT16
   }
   ,
   {
     groupName = "CSF",
     gpmName = "flagAnvil",
     outputName = "Anvil",
-    longName = "flagForAnvil"
+    longName = "flagForAnvil",
+    encoding = ENCODING_INT8
   }
   ,
   {
     groupName = "CSF",
     gpmName = "flagBB",
     outputName = "BB",
-    longName = "flagForBrightBand"
+    longName = "flagForBrightBand",
+    encoding = ENCODING_FLOAT32
   }
   ,
   {
     groupName = "CSF",
     gpmName = "flagHeavyIcePrecip",
     outputName = "HvyIcePrecip",
-    longName = "flagHeavyIcePrecip"
+    longName = "flagHeavyIcePrecip",
+    encoding = ENCODING_FLOAT32
   }
   ,
   {
     groupName = "CSF",
     gpmName = "flagShallowRain",
     outputName = "ShallowRain",
-    longName = "flagShallowRain"
+    longName = "flagShallowRain",
+    encoding = ENCODING_FLOAT32
   }
   ,
   {
     groupName = "CSF",
     gpmName = "heightBB",
     outputName = "BBHt",
-    longName = "heightBB"
+    longName = "heightBB",
+    encoding = ENCODING_FLOAT32
   }
   ,
   {
     groupName = "CSF",
     gpmName = "widthBB",
     outputName = "BBWidth",
-    longName = "widthtBB"
+    longName = "widthtBB",
+    encoding = ENCODING_FLOAT32
   }
   ,
   {
     groupName = "CSF",
     gpmName = "typePrecip",
     outputName = "PID",
-    longName = "typePrecip"
+    longName = "typePrecip",
+    encoding = ENCODING_FLOAT32
   }
   ,
   {
     groupName = "FLG",
     gpmName = "qualityFlag",
     outputName = "Qual",
-    longName = "qualityFlag"
+    longName = "qualityFlag",
+    encoding = ENCODING_INT8
   }
   ,
   {
     groupName = "PRE",
     gpmName = "heightStormTop",
     outputName = "Tops",
-    longName = "heightStormTop"
+    longName = "heightStormTop",
+    encoding = ENCODING_FLOAT32
   }
   ,
   {
     groupName = "SLV",
     gpmName = "precipRate",
     outputName = "PrecipRate",
-    longName = "precipRate"
+    longName = "precipRate",
+    encoding = ENCODING_FLOAT32
   }
   ,
   {
     groupName = "Experimental",
     gpmName = "precipRateESurface2",
     outputName = "PrecipRate2",
-    longName = "precipRateESurface2"
+    longName = "precipRateESurface2",
+    encoding = ENCODING_FLOAT32
   }
 };
 
@@ -462,26 +485,6 @@ interp_power_parameter = 1;
 //
 
 output_url = "mdvp:://localhost::$(HOME)/data/convstrat/mdv/gpm";
-
-//======================================================================
-//
-// OUTPUT ENCODING AND COMPRESSION.
-//
-//======================================================================
- 
-///////////// output_encoding_type ////////////////////
-//
-// Set output encoding type.
-//
-//
-// Type: enum
-// Options:
-//     ENCODING_INT8
-//     ENCODING_INT16
-//     ENCODING_FLOAT32
-//
-
-output_encoding_type = ENCODING_INT16;
 
 //======================================================================
 //

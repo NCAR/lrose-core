@@ -1977,19 +1977,23 @@ void GpmHdf5ToMdv::_addMdvxFields(DsMdvx &mdvx)
 
     if (fld->si16Output.size() > 0) {
       
-      MdvxField *mdvxField = _createMdvxField(fld->params.outputName,
-                                              fld->params.longName,
-                                              fld->units,
-                                              _nx, _ny, nz,
-                                              _minxDeg, _minyDeg, minzKm,
-                                              _dxDeg, _dyDeg, _dzKm,
-                                              fld->si16Missing,
-                                              fld->si16Output.data());
-      mdvx.addField(mdvxField);
+      MdvxField *field = _createMdvxField(fld->params.outputName,
+                                          fld->params.longName,
+                                          fld->units,
+                                          _nx, _ny, nz,
+                                          _minxDeg, _minyDeg, minzKm,
+                                          _dxDeg, _dyDeg, _dzKm,
+                                          fld->si16Missing,
+                                          fld->si16Output.data());
+
+      field->convertType((Mdvx::encoding_type_t) fld->params.encoding,
+                         Mdvx::COMPRESSION_GZIP);
+      
+      mdvx.addField(field);
 
     } else if (fld->fl32Output.size() > 0) {
       
-      MdvxField *mdvxField = _createMdvxField(fld->params.outputName,
+      MdvxField *field = _createMdvxField(fld->params.outputName,
                                               fld->params.longName,
                                               fld->units,
                                               _nx, _ny, nz,
@@ -1997,7 +2001,11 @@ void GpmHdf5ToMdv::_addMdvxFields(DsMdvx &mdvx)
                                               _dxDeg, _dyDeg, _dzKm,
                                               fld->fl32Missing,
                                               fld->fl32Output.data());
-      mdvx.addField(mdvxField);
+
+      field->convertType((Mdvx::encoding_type_t) fld->params.encoding,
+                         Mdvx::COMPRESSION_GZIP);
+      
+      mdvx.addField(field);
       
     }
   
@@ -2079,8 +2087,6 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
   // converting data to encoding and compression types
   
   MdvxField *field = new MdvxField(fhdr, vhdr, vals);
-  field->convertType((Mdvx::encoding_type_t) _params.output_encoding_type,
-                     Mdvx::COMPRESSION_GZIP);
 
   // set names etc
   
@@ -2167,8 +2173,6 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
   // converting data to encoding and compression types
   
   MdvxField *field = new MdvxField(fhdr, vhdr, vals);
-  field->convertType((Mdvx::encoding_type_t) _params.output_encoding_type,
-                     Mdvx::COMPRESSION_GZIP);
 
   // set names etc
   
