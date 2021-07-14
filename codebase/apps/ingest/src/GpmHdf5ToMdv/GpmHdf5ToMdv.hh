@@ -302,8 +302,12 @@ private:
 
   /// set MDV headers and data
 
-  int _setMasterHeader(DsMdvx &mdvx);
+  void _setMasterHeader(DsMdvx &mdvx);
+
+  // add the mdvx fields
   
+  void _addMdvxFields(DsMdvx &mdvx);
+
   MdvxField *_createMdvxField(const string &fieldName,
                               const string &longName,
                               const string &units,

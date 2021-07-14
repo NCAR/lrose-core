@@ -282,33 +282,11 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
     
   // set master header
   
-  if (_setMasterHeader(mdvx)) {
-    return -1;
-  }
+  _setMasterHeader(mdvx);
   
   // add the data fields
-  
-  MdvxField *dbzField = _createMdvxField("DBZ",
-                                         "reflectivity",
-                                         _dbzUnits,
-                                         _nx, _ny, _zLevels.size(),
-                                         _minxDeg, _minyDeg, _minzKm,
-                                         _dxDeg, _dyDeg, _dzKm,
-                                         _missingDbz,
-                                         _dbzOutput.data());
-  
-  mdvx.addField(dbzField);
 
-  MdvxField *qualField = _createMdvxField("qual",
-                                          "qualityFlag",
-                                          "",
-                                          _nx, _ny, 1,
-                                          _minxDeg, _minyDeg, _zLevels[0],
-                                          _dxDeg, _dyDeg, 1,
-                                          _missingQual,
-                                          _qualInterp.data());
-  
-  mdvx.addField(qualField);
+  _addMdvxFields(mdvx);
 
   // write output file
   
@@ -817,6 +795,10 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
     
     if (fld->dims.size() == 3) {
       _nGates = fld->dims[2];
+      _zLevels.resize(_nGates);
+      for (size_t iz = 0; iz < _nGates; iz++) {
+        _zLevels[iz] = _minzKm + iz * _dzKm;
+      }
     }
     
   } // ifield
@@ -1771,43 +1753,63 @@ Point_d GpmHdf5ToMdv::_getCornerLatLon(int iscan,
 }
 
 ////////////////////////////////////////////////////////
+// for DBZ 3D fields,
 // invert the height levels because the data is stored
 // with the top first and decreasing in height 
 
 void GpmHdf5ToMdv::_invertDbzGateLevels()
 {
-
-  // prepare output grid
   
-  _dbzOutput.resize(_dbzInterp.size());
-  _zLevels.resize(_nz);
-  for (size_t iz = 0; iz < _nz; iz++) {
-    _zLevels[iz] = _minzKm + iz * _dzKm;
-  }
+  for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+    
+    OutputField *fld = _outputFields[ifield];
+    if (!fld->valid) {
+      continue;
+    }
 
-  // invert vlevels
+    // check for reflectivity
 
-  size_t nptsPlane = _nx * _ny;
-  for (size_t iz = 0; iz < _nz; iz++) {
-    for (size_t iy = 0; iy < _ny; iy++) {
-      for (size_t ix = 0; ix < _nx; ix++) {
-        size_t interpIndex = iz * nptsPlane + iy * _nx + ix;
-        size_t outputIndex = (_nz - iz - 1) * nptsPlane + iy * _nx + ix;
-        _dbzOutput[outputIndex] = _dbzInterp[interpIndex];
-      } // ix
-    } // iy
-  } // iz
+    if (fld->units != "dBZ") {
+      continue;
+    }
+
+    // check for 3D float field
+    
+    if (fld->dims.size() != 3) {
+      continue;
+    }
+    if (fld->fl32Input.size() == 0) {
+      continue;
+    }
+    
+    // prepare output grid
+    
+    fld->fl32Output.resize(fld->fl32Interp.size());
+    
+    // invert vlevels
+    
+    size_t nptsPlane = _nx * _ny;
+    for (size_t iz = 0; iz < _nz; iz++) {
+      for (size_t iy = 0; iy < _ny; iy++) {
+        for (size_t ix = 0; ix < _nx; ix++) {
+          size_t interpIndex = iz * nptsPlane + iy * _nx + ix;
+          size_t outputIndex = (_nz - iz - 1) * nptsPlane + iy * _nx + ix;
+          fld->fl32Output[outputIndex] = fld->fl32Interp[interpIndex];
+        } // ix
+      } // iy
+    } // iz
+
+  } // ifield
 
 }
   
 ////////////////////////////////////////////////////////
+// for 3D fields,
 // remap the gates onto specified vertical levels
 // compute the max for the remapping
 
 void GpmHdf5ToMdv::_remapVertLevels()
 {
-
-  vector<NcxxPort::fl32> outputOrig = _dbzOutput;
 
   // zlevels are specified
 
@@ -1815,11 +1817,6 @@ void GpmHdf5ToMdv::_remapVertLevels()
   for (int iz = 0; iz < _params.output_z_levels_km_n; iz++) {
     _zLevels[iz] = _params._output_z_levels_km[iz];
   }
-
-  // prepare output grid
-  
-  size_t nPtsOutput = _nx * _ny * _zLevels.size();
-  _dbzOutput.resize(nPtsOutput);
 
   // compute heights of mid pt between specified levels
   
@@ -1838,25 +1835,87 @@ void GpmHdf5ToMdv::_remapVertLevels()
   for (size_t iz = 0; iz < _zLevels.size() - 1; iz++) {
     highIndex[iz] = (int) ((zMid[iz] - _minzKm) / _dzKm);
   }
-  
-  // compute max dbz for specified vlevels
 
-  size_t nptsPlane = _nx * _ny;
-  for (size_t iy = 0; iy < _ny; iy++) {
-    for (size_t ix = 0; ix < _nx; ix++) {
-      for (size_t iz = 0; iz < _zLevels.size(); iz++) {
-        NcxxPort::fl32 maxDbz = _missingDbz;
-        for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
-          size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
-          if (outputOrig[interpIndex] != _missingDbz) {
-            maxDbz = max(maxDbz, outputOrig[interpIndex]);
-          }
-        } // jz
-        size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
-        _dbzOutput[outputIndex] = maxDbz;
-      } // iz
-    } // ix
-  } // iy
+  for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+    
+    OutputField *fld = _outputFields[ifield];
+    if (!fld->valid) {
+      continue;
+    }
+
+    // check for 3D field
+    
+    if (fld->dims.size() != 3) {
+      continue;
+    }
+    
+    if (fld->fl32Input.size() > 0) {
+
+      // floats
+
+      // save existing output in temp array
+      
+      vector<NcxxPort::fl32> outputOrig = fld->fl32Output;
+      
+      // prepare output grid
+      
+      size_t nPtsOutput = _nx * _ny * _zLevels.size();
+      fld->fl32Output.resize(nPtsOutput);
+      
+      // compute max val for specified vlevels
+
+      size_t nptsPlane = _nx * _ny;
+      for (size_t iy = 0; iy < _ny; iy++) {
+        for (size_t ix = 0; ix < _nx; ix++) {
+          for (size_t iz = 0; iz < _zLevels.size(); iz++) {
+            NcxxPort::fl32 maxVal = fld->fl32Missing;
+            for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
+              size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
+              if (outputOrig[interpIndex] != fld->fl32Missing) {
+                maxVal = max(maxVal, outputOrig[interpIndex]);
+              }
+            } // jz
+            size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
+            fld->fl32Output[outputIndex] = maxVal;
+          } // iz
+        } // ix
+      } // iy
+
+    } else if (fld->si16Input.size() > 0) {
+
+      // ints
+      
+      // save existing output in temp array
+      
+      vector<NcxxPort::si16> outputOrig = fld->si16Output;
+      
+      // prepare output grid
+      
+      size_t nPtsOutput = _nx * _ny * _zLevels.size();
+      fld->si16Output.resize(nPtsOutput);
+      
+      // compute max val for specified vlevels
+
+      size_t nptsPlane = _nx * _ny;
+      for (size_t iy = 0; iy < _ny; iy++) {
+        for (size_t ix = 0; ix < _nx; ix++) {
+          for (size_t iz = 0; iz < _zLevels.size(); iz++) {
+            NcxxPort::si16 maxVal = fld->si16Missing;
+            for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
+              size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
+              if (outputOrig[interpIndex] != fld->si16Missing) {
+                maxVal = max(maxVal, outputOrig[interpIndex]);
+              }
+            } // jz
+            size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
+            fld->si16Output[outputIndex] = maxVal;
+          } // iz
+        } // ix
+      } // iy
+
+    } // else if (fld->si16Input.size() > 0)
+
+  } // ifield
 
 }
   
@@ -1865,7 +1924,7 @@ void GpmHdf5ToMdv::_remapVertLevels()
 //
 // Returns 0 on success, -1 on failure
 
-int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx)
+void GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx)
 
 {
 
@@ -1892,10 +1951,58 @@ int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx)
   mdvx.setDataSetSource("NASA-GPM");
   mdvx.setDataSetInfo(_history.c_str());
 
-  return 0;
-
 }
 
+///////////////////////////////////
+// Add the Mdvx fields
+
+void GpmHdf5ToMdv::_addMdvxFields(DsMdvx &mdvx)
+
+{
+
+  for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+    
+    OutputField *fld = _outputFields[ifield];
+    if (!fld->valid) {
+      continue;
+    }
+
+    int nz = _zLevels.size();
+    double minzKm = _zLevels[0];
+    if (fld->dims.size() == 2) {
+      nz = 1;
+    }
+    
+    if (fld->si16Output.size() > 0) {
+      
+      MdvxField *mdvxField = _createMdvxField(fld->params.outputName,
+                                              fld->params.longName,
+                                              fld->units,
+                                              _nx, _ny, nz,
+                                              _minxDeg, _minyDeg, minzKm,
+                                              _dxDeg, _dyDeg, _dzKm,
+                                              fld->si16Missing,
+                                              fld->si16Output.data());
+      mdvx.addField(mdvxField);
+
+    } else if (fld->fl32Output.size() > 0) {
+      
+      MdvxField *mdvxField = _createMdvxField(fld->params.outputName,
+                                              fld->params.longName,
+                                              fld->units,
+                                              _nx, _ny, nz,
+                                              _minxDeg, _minyDeg, minzKm,
+                                              _dxDeg, _dyDeg, _dzKm,
+                                              fld->fl32Missing,
+                                              fld->fl32Output.data());
+      mdvx.addField(mdvxField);
+      
+    }
+  
+  } // ifield
+
+}
+      
 ///////////////////////////////////
 // Create an Mdvx field - floats
 
