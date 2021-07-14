@@ -233,7 +233,7 @@ private:
   
   // interpolation
 
-  void _interpFields();
+  void _interpField(OutputField *fld);
   
   void _interpField(vector<NcxxPort::fl32> &valsInput,
                     NcxxPort::fl32 missingVal,
@@ -293,12 +293,12 @@ private:
   // invert the height levels for DBZ because the data is stored
   // with the top first and decreasing in height 
 
-  void _invertDbzGateLevels();
+  void _invertDbzGateLevels(OutputField *fld);
 
   // remap the gates onto specified vertical levels
   // compute the max for the remapping
 
-  void _remapVertLevels();
+  void _remapVertLevels(OutputField *fld);
 
   /// set MDV headers and data
 
@@ -306,7 +306,7 @@ private:
 
   // add the mdvx fields
   
-  void _addMdvxFields(DsMdvx &mdvx);
+  void _addFieldToMdvx(DsMdvx &mdvx, OutputField *fld);
 
   MdvxField *_createMdvxField(const string &fieldName,
                               const string &longName,
