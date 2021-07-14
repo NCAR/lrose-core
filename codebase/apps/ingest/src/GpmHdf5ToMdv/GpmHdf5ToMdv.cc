@@ -1771,7 +1771,7 @@ void GpmHdf5ToMdv::_invertDbzGateLevels()
 
     // check for reflectivity
 
-    if (fld->units != "dBZ") {
+    if (fld->units != "dBZ" && fld->units != "mm/hr") {
       continue;
     }
 
