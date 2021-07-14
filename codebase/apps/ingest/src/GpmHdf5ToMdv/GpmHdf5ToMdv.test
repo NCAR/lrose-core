@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for GpmHdf5ToMdv
+ * TDRP params for ./GpmHdf5ToMdv
  **********************************************************************/
 
 //======================================================================
@@ -226,48 +226,157 @@ remap_gates_to_vert_levels = TRUE;
 // 1D array - variable length.
 //
 
-output_z_levels_km =
-  {
-   0.5,
-   0.75,                     
-   1,
-   1.25,
-   1.5,
-   1.75,
-   2,
-   2.25,
-   2.5,
-   2.75,
-   3,
-   3.5,
-   4,
-   4.5,
-   5,
-   5.5,
-   6,
-   6.5,
-   7,
-   7.5,
-   8,
-   8.5,
-   9,
-   10,
-   11,
-   12,
-   13,
-   14,
-   15,
-   16,
-   17,
-   18,
-   19,
-   20,
-   21
-  };
+output_z_levels_km = {
+ 0.5,
+ 0.75,
+ 1,
+ 1.25,
+ 1.5,
+ 1.75,
+ 2,
+ 2.25,
+ 2.5,
+ 2.75,
+ 3,
+ 3.5,
+ 4,
+ 4.5,
+ 5,
+ 5.5,
+ 6,
+ 6.5,
+ 7,
+ 7.5,
+ 8,
+ 8.5,
+ 9,
+ 10,
+ 11,
+ 12,
+ 13,
+ 14,
+ 15,
+ 16,
+ 17,
+ 18,
+ 19,
+ 20,
+ 21
+};
 
 //======================================================================
 //
-// OUTPUT REGULAR LAT/LON GRID.
+// OUTPUT FIELDS.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Output fields details.
+//
+// These are the fields that will be written to the output files.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string groupName;
+//      string gpmName;
+//      string outputName;
+//      string longName;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    groupName = "SLV",
+    gpmName = "zFactorCorrected",
+    outputName = "DBZ",
+    longName = "reflectivity"
+  }
+  ,
+  {
+    groupName = "CSF",
+    gpmName = "flagAnvil",
+    outputName = "Anvil",
+    longName = "flagForAnvil"
+  }
+  ,
+  {
+    groupName = "CSF",
+    gpmName = "flagBB",
+    outputName = "BB",
+    longName = "flagForBrightBand"
+  }
+  ,
+  {
+    groupName = "CSF",
+    gpmName = "flagHeavyIcePrecip",
+    outputName = "HvyIcePrecip",
+    longName = "flagHeavyIcePrecip"
+  }
+  ,
+  {
+    groupName = "CSF",
+    gpmName = "flagShallowRain",
+    outputName = "ShallowRain",
+    longName = "flagShallowRain"
+  }
+  ,
+  {
+    groupName = "CSF",
+    gpmName = "heightBB",
+    outputName = "BBHt",
+    longName = "heightBB"
+  }
+  ,
+  {
+    groupName = "CSF",
+    gpmName = "widthBB",
+    outputName = "BBWidth",
+    longName = "widthtBB"
+  }
+  ,
+  {
+    groupName = "CSF",
+    gpmName = "typePrecip",
+    outputName = "PID",
+    longName = "typePrecip"
+  }
+  ,
+  {
+    groupName = "FLG",
+    gpmName = "qualityFlag",
+    outputName = "Qual",
+    longName = "qualityFlag"
+  }
+  ,
+  {
+    groupName = "PRE",
+    gpmName = "heightStormTop",
+    outputName = "Tops",
+    longName = "heightStormTop"
+  }
+  ,
+  {
+    groupName = "SLV",
+    gpmName = "precipRate",
+    outputName = "PrecipRate",
+    longName = "precipRate"
+  }
+  ,
+  {
+    groupName = "Experimental",
+    gpmName = "precipRateESurface2",
+    outputName = "PrecipRate2",
+    longName = "precipRateESurface2"
+  }
+};
+
+//======================================================================
+//
+// OUTPUT GRID - LAT/LON.
 //
 //======================================================================
  

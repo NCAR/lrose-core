@@ -756,7 +756,7 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
 
     // debug print
 
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Reading fields" << endl;
       cerr << "  groupName: " << fld->params.groupName << endl;
       cerr << "  gpmName: " << fld->params.gpmName << endl;
@@ -1204,15 +1204,17 @@ void GpmHdf5ToMdv::_interpFields()
       _interpField(fld->si16Input,
                    fld->si16Missing,
                    fld->si16Interp);
+      fld->si16Output = fld->si16Interp;
     } else if (fld->fl32Input.size() > 0) {
       _interpField(fld->fl32Input,
                    fld->fl32Missing,
                    fld->fl32Interp,
                    fld->nearestNeighbor);
+      fld->fl32Output = fld->fl32Interp;
     }
 
   } // ifield
-      
+  
 }
 
 //////////////////////////////////////////////
@@ -1972,7 +1974,7 @@ void GpmHdf5ToMdv::_addMdvxFields(DsMdvx &mdvx)
     if (fld->dims.size() == 2) {
       nz = 1;
     }
-    
+
     if (fld->si16Output.size() > 0) {
       
       MdvxField *mdvxField = _createMdvxField(fld->params.outputName,
