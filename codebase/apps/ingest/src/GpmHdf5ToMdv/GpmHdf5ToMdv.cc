@@ -260,10 +260,7 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
 
   // interpolate fields onto latlon grid
 
-  _interpField(_dbzInput, _missingDbz, _dbzInterp,
-               _params.interp_using_nearest_neighbor);
-  
-  _interpField(_qualInput, _missingQual, _qualInterp);
+  _interpFields();
 
   // for DBZ invert the gate levels because the radar gate data is stored
   // top-down instead of bottom-up
@@ -751,47 +748,54 @@ int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
 int GpmHdf5ToMdv::_readFields(Group &ns)
   
 {
+  
+  // create the field objects
 
-  // check the data sets
+  _outputFields.clear();
 
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
-
-    Params::output_field_t &fld = _params._output_fields[ifield];
-
-    Hdf5xx hdf5;
-    vector<size_t> dims;
-    string units;
-    H5T_class_t h5class;
-    H5T_sign_t h5sign;
-    H5T_order_t h5order;
-    size_t h5size;
     
-    Group grp(ns.openGroup(fld.groupName));
-    if (hdf5.getVarProps(grp, fld.gpmName,
-                         dims, units, 
-                         h5class, h5sign, h5order, h5size)) {
-      cerr << hdf5.getErrStr() << endl;
+    Params::output_field_t &fldParams = _params._output_fields[ifield];
+
+    OutputField *fld = new OutputField(fldParams);
+
+    Group grp(ns.openGroup(fld->params.groupName));
+    if (fld->hdf5.getVarProps(grp, fld->params.gpmName,
+                              fld->dims, fld->units, 
+                              fld->h5class, fld->h5sign, fld->h5order, fld->h5size)) {
+      cerr << fld->hdf5.getErrStr() << endl;
+      delete fld;
       continue;
     }
 
+    // set interp type
+    
+    if (fld->h5class == H5T_INTEGER) {
+      fld->nearestNeighbor = true;
+    } else {
+      fld->nearestNeighbor = _params.interp_using_nearest_neighbor;
+    }
+
+    // debug print
+
     if (_params.debug) {
       cerr << "Reading fields" << endl;
-      cerr << "  groupName: " << fld.groupName << endl;
-      cerr << "  gpmName: " << fld.gpmName << endl;
+      cerr << "  groupName: " << fld->params.groupName << endl;
+      cerr << "  gpmName: " << fld->params.gpmName << endl;
       cerr << "  dims: ";
-      for (size_t ii = 0; ii < dims.size(); ii++) {
-        cerr << dims[ii];
-        if (ii == dims.size() - 1) {
+      for (size_t ii = 0; ii < fld->dims.size(); ii++) {
+        cerr << fld->dims[ii];
+        if (ii == fld->dims.size() - 1) {
           cerr << endl;
         } else {
           cerr << ", ";
         }
       }
-      if (units.size() > 0) {
-        cerr << "  units: " << units << endl;
+      if (fld->units.size() > 0) {
+        cerr << "  units: " << fld->units << endl;
       }
-      if (h5class == H5T_INTEGER) {
-        if (h5sign == H5T_SGN_NONE) {
+      if (fld->h5class == H5T_INTEGER) {
+        if (fld->h5sign == H5T_SGN_NONE) {
           cerr << "  Is unsigned integer" << endl;
         } else {
           cerr << "  Is signed integer" << endl;
@@ -799,16 +803,84 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
       } else {
         cerr << "  Is float" << endl;
       }
-      if (h5order == H5T_ORDER_LE) {
+      if (fld->h5order == H5T_ORDER_LE) {
         cerr << "  Byte order: little-endian" << endl;
       } else {
         cerr << "  Byte order: big-endian" << endl;
       }
-      cerr << "  Byte len: " << h5size << endl;
+      cerr << "  Byte len: " << fld->h5size << endl;
     }
 
+    _outputFields.push_back(fld);
+    
+    // set number of gates
+    
+    if (fld->dims.size() == 3) {
+      _nGates = fld->dims[2];
+    }
+    
   } // ifield
 
+  // read in the fields
+  
+  for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+    
+    OutputField *fld = _outputFields[ifield];
+    if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
+
+      // 16-bit integer
+
+      if (fld->dims.size() == 2) {
+        // 2D field
+        if (_readField2D(ns,
+                         fld->params.groupName,
+                         fld->params.gpmName,
+                         fld->si16Input,
+                         fld->si16Missing,
+                         fld->units) == 0) {
+          fld->valid = true;
+        }
+      } else {
+        // 3D field
+        if (_readField3D(ns,
+                         fld->params.groupName,
+                         fld->params.gpmName,
+                         fld->si16Input,
+                         fld->si16Missing,
+                         fld->units) == 0) {
+          fld->valid = true;
+        }
+      } // if (fld->dims.size() == 2)
+      
+    } else { // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
+
+      // read as floats
+
+      if (fld->dims.size() == 2) {
+        // 2D field
+        if (_readField2D(ns,
+                         fld->params.groupName,
+                         fld->params.gpmName,
+                         fld->fl32Input,
+                         fld->fl32Missing,
+                         fld->units) == 0) {
+          fld->valid = true;
+        }
+      } else {
+        // 3D field
+        if (_readField3D(ns,
+                         fld->params.groupName,
+                         fld->params.gpmName,
+                         fld->fl32Input,
+                         fld->fl32Missing,
+                         fld->units) == 0) {
+          fld->valid = true;
+        }
+      } // if (fld->dims.size() == 2)
+      
+    } // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
+    
+  } // ifield
   
   _qualAvailable = false;
 
@@ -914,8 +986,8 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
 int GpmHdf5ToMdv::_readField3D(Group &ns,
                                const string &groupName,
                                const string &fieldName,
-                               vector<NcxxPort::si32> &vals,
-                               NcxxPort::si32 &missingVal,
+                               vector<NcxxPort::si16> &vals,
+                               NcxxPort::si16 &missingVal,
                                string &units)
   
 {
@@ -926,7 +998,7 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   
   vector<size_t> dims;
   Group grp(ns.openGroup(groupName));
-  if (hdf5.readSi32Array(grp, fieldName,
+  if (hdf5.readSi16Array(grp, fieldName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
@@ -1058,81 +1130,6 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
 }
 
 //////////////////////////////////////////////
-// read a 2D field - int32s
-
-int GpmHdf5ToMdv::_readField2D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
-                               vector<NcxxPort::si32> &vals,
-                               NcxxPort::si32 &missingVal,
-                               string &units)
-  
-{
-  
-  Hdf5xx hdf5;
-
-  // read Latitude
-  
-  vector<size_t> dims;
-  
-  Group grp(ns.openGroup(groupName));
-  
-  if (hdf5.readSi32Array(grp, fieldName,
-                         dims, missingVal, vals, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
-    return -1;
-  }
-
-  // check dimensions for consistency
-  
-  if (dims.size() != 2) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
-    cerr << "  2D fields must have 2 dimensions" << endl;
-    cerr << "  dims.size(): " << dims.size() << endl;
-    return -1;
-  }
-  if (dims[0] != _nScans || dims[1] != _nRays) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
-    cerr << "  dimensions must match nScans and nRays" << endl;
-    cerr << "  dims[0]: " << dims[0] << endl;
-    cerr << "  dims[1]: " << dims[1] << endl;
-    cerr << "  _nScans: " << _nScans << endl;
-    cerr << "  _nRays: " << _nRays << endl;
-    return -1;
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read 2D int32 group/field: "
-         << groupName << "/" << fieldName << " <<====" << endl;
-    cerr << "  nScans, nRays: " 
-         << _nScans << ", " << _nRays << endl;
-    cerr << "  missingVal: " << missingVal << endl;
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _nScans; iscan++) {
-        for (size_t iray = 0; iray < _nRays; iray++) {
-          size_t ipt = iscan * _nRays + iray;
-          if (vals[ipt] != missingVal) {
-            cerr << "  iscan, iray, val: "
-                 << iscan << ", "
-                 << iray << ", "
-                 << vals[ipt] << endl;
-          }
-        } // iray
-      } // iscan
-    } // extra
-  } // verbose
-  
-  return 0;
-
-}
-
-//////////////////////////////////////////////
 // read a 2D field - int16s
 
 int GpmHdf5ToMdv::_readField2D(Group &ns,
@@ -1208,6 +1205,35 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
 }
 
 //////////////////////////////////////////////
+// interpolate the fields
+
+void GpmHdf5ToMdv::_interpFields()
+
+{
+
+  for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+    
+    OutputField *fld = _outputFields[ifield];
+    if (!fld->valid) {
+      continue;
+    }
+    
+    if (fld->si16Input.size() > 0) {
+      _interpField(fld->si16Input,
+                   fld->si16Missing,
+                   fld->si16Interp);
+    } else if (fld->fl32Input.size() > 0) {
+      _interpField(fld->fl32Input,
+                   fld->fl32Missing,
+                   fld->fl32Interp,
+                   fld->nearestNeighbor);
+    }
+
+  } // ifield
+      
+}
+
+//////////////////////////////////////////////
 // interpolate float field
 
 void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
@@ -1279,84 +1305,6 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
         
         _interpInsidePolygon(corners, vals, missingVal, 
                              iz, valsInterp, nearestNeighbor);
-        
-      } // iray
-    } // iscan
-
-  } // iz
-
-}
-
-//////////////////////////////////////////////
-// interpolate int 32 field
-
-void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si32> &valsInput,
-                                NcxxPort::si32 missingVal,
-                                vector<NcxxPort::si32> &valsInterp)
-  
-{
-
-  // check for 2D field
-
-  bool is2D = false;
-  if (valsInput.size() == _nRays * _nScans) {
-    is2D = true;
-  }
-  size_t nz = _nz;
-  size_t nGates = _nGates;
-  if (is2D) {
-    nz = 1;
-    nGates = 1;
-  }
-  
-  // initialize interp grid
-
-  size_t nOutput = _nx * _ny * nz;
-  valsInterp.resize(nOutput);
-  for (size_t ii = 0; ii < nOutput; ii++) {
-    valsInterp[ii] = missingVal;
-  }
-
-  // loop through the vertical levels
-
-  for (size_t iz = 0; iz < nz; iz++) {
-    
-    double zM = (_minzKm + iz * _dzKm) * 1000.0;
-    
-    // load input vals for this level
-    
-    vector<vector<NcxxPort::si32> > valsIn;
-    for (size_t iscan = 0; iscan < _nScans; iscan++) {
-      vector<NcxxPort::si32> valsScan;
-      for (size_t iray = 0; iray < _nRays; iray++) {
-        size_t ipt = iscan * _nRays * nGates + iray * nGates + iz;
-        valsScan.push_back(valsInput[ipt]);
-      } // iray
-      valsIn.push_back(valsScan);
-    } // iscan
-    
-    // loop through the input (scan, ray) grid
-
-    for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
-      for (size_t iray = 0; iray < _nRays - 1; iray++) {
-        
-        // corner locations adjusted for radar slant
-        Point_d corners[4];
-        corners[0] = _getCornerLatLon(iscan, iray, zM);
-        corners[1] = _getCornerLatLon(iscan, iray + 1, zM);
-        corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
-        corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
-
-        // dbz vals at corners
-        NcxxPort::si32 vals[4];
-        vals[0] = valsIn[iscan][iray];
-        vals[1] = valsIn[iscan][iray + 1];
-        vals[2] = valsIn[iscan + 1][iray + 1];
-        vals[3] = valsIn[iscan + 1][iray];
-
-        // interp for the output grid points inside the polygon
-        
-        _interpInsidePolygon(corners, vals, missingVal, iz, valsInterp);
         
       } // iray
     } // iscan
