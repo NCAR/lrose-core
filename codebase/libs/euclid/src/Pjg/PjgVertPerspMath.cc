@@ -103,11 +103,11 @@ void PjgVertPerspMath::printDetails(ostream &out) const
 ///////////////////////////////
 /// get proj string
   
-string PjgLatlonMath::getProjStr() const
+string PjgVertPerspMath::getProjStr() const
 
 {
 
-  return "+proj=pconic";
+  return "+proj=pconic" + _getProjStrExtra();
 
 }
   

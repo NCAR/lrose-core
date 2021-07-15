@@ -181,11 +181,11 @@ void PjgLambertConfMath::printDetails(ostream &out) const
 ///////////////////////////////
 /// get proj string
   
-string PjgLatlonMath::getProjStr() const
+string PjgLambertConfMath::getProjStr() const
 
 {
 
-  return "+proj=lcc";
+  return "+proj=lcc" + _getProjStrExtra();
 
 }
   

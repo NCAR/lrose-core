@@ -96,11 +96,11 @@ void PjgLambertAzimMath::printDetails(ostream &out) const
 ///////////////////////////////
 /// get proj string
   
-string PjgLatlonMath::getProjStr() const
+string PjgLambertAzimMath::getProjStr() const
 
 {
 
-  return "+proj=laea";
+  return "+proj=laea" + _getProjStrExtra();
 
 }
   

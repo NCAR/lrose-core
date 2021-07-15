@@ -111,11 +111,11 @@ void PjgObliqueStereoMath::printDetails(ostream &out) const
 ///////////////////////////////
 /// get proj string
   
-string PjgLatlonMath::getProjStr() const
+string PjgObliqueStereoMath::getProjStr() const
 
 {
 
-  return "+proj=sterea";
+  return "+proj=sterea" + _getProjStrExtra();
 
 }
   

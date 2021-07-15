@@ -113,11 +113,11 @@ void PjgAzimEquidistMath::printDetails(ostream &out) const
 ///////////////////////////////
 /// get proj string
   
-string PjgLatlonMath::getProjStr() const
+string PjgAzimEquidistMath::getProjStr() const
 
 {
 
-  return "+proj=aeqd";
+  return "+proj=aeqd" + _getProjStrExtra();
 
 }
   

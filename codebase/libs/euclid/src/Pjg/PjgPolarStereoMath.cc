@@ -133,11 +133,11 @@ void PjgPolarStereoMath::printDetails(ostream &out) const
 ///////////////////////////////
 /// get proj string
   
-string PjgLatlonMath::getProjStr() const
+string PjgPolarStereoMath::getProjStr() const
 
 {
 
-  return "+proj=ups";
+  return "+proj=ups" + _getProjStrExtra();
 
 }
   

@@ -97,11 +97,11 @@ void PjgTransMercatorMath::printDetails(ostream &out) const
 ///////////////////////////////
 /// get proj string
   
-string PjgLatlonMath::getProjStr() const
+string PjgTransMercatorMath::getProjStr() const
 
 {
 
-  return "+proj=tmerc";
+  return "+proj=tmerc" + _getProjStrExtra();
 
 }
   

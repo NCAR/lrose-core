@@ -117,11 +117,11 @@ void PjgAlbersMath::printDetails(ostream &out) const
 ///////////////////////////////
 /// get proj string
   
-string PjgLatlonMath::getProjStr() const
+string PjgAlbersMath::getProjStr() const
 
 {
 
-  return "+proj=aea";
+  return "+proj=aea" + _getProjStrExtra();
 
 }
   
