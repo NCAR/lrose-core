@@ -108,6 +108,17 @@ void PjgObliqueStereoMath::printDetails(ostream &out) const
 
 }
 
+///////////////////////////////
+/// get proj string
+  
+string PjgLatlonMath::getProjStr() const
+
+{
+
+  return "+proj=sterea";
+
+}
+  
 ///////////////////////
 // LatLon conversions
 

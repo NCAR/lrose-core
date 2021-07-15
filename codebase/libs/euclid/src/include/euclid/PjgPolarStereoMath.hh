@@ -97,6 +97,10 @@ public:
 
   static double computeCentralScale(double standard_lat);
 
+  /// get proj string
+  
+  virtual string getProjStr() const;
+  
 protected:
   
   double _tangent_lon_rad;

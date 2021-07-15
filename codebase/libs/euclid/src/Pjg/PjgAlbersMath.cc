@@ -114,6 +114,17 @@ void PjgAlbersMath::printDetails(ostream &out) const
 
 }
 
+///////////////////////////////
+/// get proj string
+  
+string PjgLatlonMath::getProjStr() const
+
+{
+
+  return "+proj=aea";
+
+}
+  
 ///////////////////////
 // LatLon conversions
 

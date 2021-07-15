@@ -95,6 +95,17 @@ void PjgMercatorMath::printDetails(ostream &out) const
 
 }
 
+///////////////////////////////
+/// get proj string
+  
+string PjgLatlonMath::getProjStr() const
+
+{
+
+  return "+proj=merc";
+
+}
+  
 ///////////////////////
 // LatLon conversions
 

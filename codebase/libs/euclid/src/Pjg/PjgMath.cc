@@ -285,6 +285,17 @@ void PjgMath::printDetails(ostream &out) const
   
 }
 
+///////////////////////////////
+/// get proj string
+  
+string PjgMath::getProjStr() const
+
+{
+
+  return "+proj=lonlat";
+
+}
+  
 ///////////////////////
 // print offset origin
 

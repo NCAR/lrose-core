@@ -142,6 +142,10 @@ public:
   //////////////
   // get methods
   
+  /// get proj string
+  
+  virtual string getProjStr() const;
+
   /// get latitude of projection origin
   
   inline double getOriginLat() const { return _origin_lat; }
