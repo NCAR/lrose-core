@@ -161,8 +161,8 @@ void MdvxRemapLut::computeOffsets(const MdvxProj &proj_source,
       int64_t sourceIndex;
       if (_projSource.latlon2arrayIndex(lat, lon, sourceIndex) == 0) {
         // add mapping
-	_sourceOffsetBuf.add(&sourceIndex, sizeof(int));
-	_targetOffsetBuf.add(&targetIndex, sizeof(int));
+	_sourceOffsetBuf.add(&sourceIndex, sizeof(int64_t));
+	_targetOffsetBuf.add(&targetIndex, sizeof(int64_t));
 	_nOffsets++;
       }
       
