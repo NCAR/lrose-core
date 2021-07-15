@@ -133,6 +133,8 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setMinValidFractionForFit
     (_params.min_valid_fraction_for_fit);
   _finder.setMinVolForConvectiveKm3(_params.min_valid_volume_for_convective);
+  _finder.setTextureLimitLow(_params.texture_limit_low);
+  _finder.setTextureLimitHigh(_params.texture_limit_high);
   _finder.setMinVertExtentForConvectiveKm(_params.min_vert_extent_for_convective);
   _finder.setDbzForEchoTops(_params.dbz_for_echo_tops);
 

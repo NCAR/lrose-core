@@ -113,6 +113,16 @@ public:
 
   void setMinValidDbz(double val) { _minValidDbz = val; }
 
+  // converting texture to convectivity convectivity
+  // these are the limits for mapping texture to convectivity from 0 and 1
+
+  void setTextureLimitLow(double val) {
+    _textureLimitLow = val;
+  }
+  void setTextureLimitHigh(double val) {
+    _textureLimitHigh = val;
+  }
+
   // set convectivity threshold for convective regions
   // convectivity values above this indicate convective
   

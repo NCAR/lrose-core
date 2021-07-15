@@ -177,6 +177,23 @@ paramdef double {
 } min_valid_fraction_for_fit;
 
 commentdef {
+  p_header = "CONVERTING REFLECTIVITY TEXTURE TO CONVECTIVITY";
+  p_text = "Convectivity ranges from 0 to 1. To convert texture to convectivity, we apply a piece-wise linear transfer function. This section defines the lower texture limit and the upper texture limit. At or below the lower limit convectivity is set to 0. At or above the upper limit convectivity is set to 1. Between these two limits convectivity varies linearly with texture.";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Lower limit for texture.";
+  p_help = "Below this texture the convectivity is set to 0.";
+} texture_limit_low;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Upper limit for texture.";
+  p_help = "Above this texture the convectivity is set to 1. Between the limits convectivity varies linearly with texture.";
+} texture_limit_high;
+
+commentdef {
   p_header = "SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY";
   p_text = "If neither is set, we flag the point as MIXED.";
 }
