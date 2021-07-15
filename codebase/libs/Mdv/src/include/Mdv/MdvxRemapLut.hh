@@ -39,7 +39,7 @@
 
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxProj.hh>
-#include <toolsa/MemBuf.hh>
+#include <vector>
 using namespace std;
 
 class MdvxRemapLut
@@ -74,23 +74,20 @@ public:
   
   // access to members
 
-  const MdvxProj &getProjSource() const { return (_projSource); }
-  const MdvxProj &getProjTarget() const { return (_projTarget); }
+  const MdvxProj &getProjSource() const { return _projSource; }
+  const MdvxProj &getProjTarget() const { return _projTarget; }
   
-  int64_t getNOffsets() const { return (_nOffsets); }
-  const int64_t *getSourceOffsets() const { return (_sourceOffsets); }
-  const int64_t *getTargetOffsets() const { return (_targetOffsets); }
+  size_t getNOffsets() const { return _sourceOffsets.size(); }
+  const int64_t *getSourceOffsets() const { return _sourceOffsets.data(); }
+  const int64_t *getTargetOffsets() const { return _targetOffsets.data(); }
   
 protected:
   
   MdvxProj _projSource;
   MdvxProj _projTarget;
   
-  MemBuf _sourceOffsetBuf;
-  MemBuf _targetOffsetBuf;
-  int64_t *_sourceOffsets;
-  int64_t *_targetOffsets;
-  int64_t _nOffsets;
+  vector<int64_t> _sourceOffsets;
+  vector<int64_t> _targetOffsets;
 
   bool _offsetsComputed;
 
