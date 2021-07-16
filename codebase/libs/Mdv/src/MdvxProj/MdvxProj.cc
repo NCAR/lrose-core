@@ -42,6 +42,7 @@
 #include <Mdv/MdvxRadar.hh>
 #include <toolsa/mem.h>
 #include <toolsa/pjg.h>
+#include <toolsa/TaStr.hh>
 #include <toolsa/toolsa_macros.h>
 #include <math.h>
 using namespace std;
@@ -350,6 +351,131 @@ void MdvxProj::init(const Mdvx::coord_t &coord)
   // now initialize from the _coord struct
 
   _initFromCoords();
+
+}
+
+/////////////////////////////////
+// initialize from proj string
+// i.e. proj 4 etc.
+//
+
+void MdvxProj::init(const string &projStr)
+
+{
+  
+  _clear();
+
+  // tokenize the string
+
+  vector<string> toks;
+  TaStr::tokenize(projStr, " ", toks);
+
+  // determine the projection type
+
+  Mdvx::projection_type_t ptype = Mdvx::PROJ_UNKNOWN;
+  for (size_t itok = 0; itok < toks.size(); itok++) {
+    string tok = toks[itok];
+    if (tok.find("+proj") == string::npos) {
+      continue;
+    }
+    if (tok.find("=aea") != string::npos) {
+      ptype = Mdvx::PROJ_ALBERS;
+    } else if (tok.find("=aeqd") != string::npos) {
+      ptype = Mdvx::PROJ_FLAT;
+    } else if (tok.find("=lcc") != string::npos) {
+      ptype = Mdvx::PROJ_LAMBERT_CONF;
+    } else if (tok.find("=laea") != string::npos) {
+      ptype = Mdvx::PROJ_LAMBERT_AZIM;
+    } else if (tok.find("=merc") != string::npos) {
+      ptype = Mdvx::PROJ_MERCATOR;
+    } else if (tok.find("=tmerc") != string::npos) {
+      ptype = Mdvx::PROJ_TRANS_MERCATOR;
+    } else if (tok.find("=ups") != string::npos) {
+      ptype = Mdvx::PROJ_POLAR_STEREO;
+    } else if (tok.find("=stere") != string::npos) {
+      ptype = Mdvx::PROJ_OBLIQUE_STEREO;
+    } else if (tok.find("=pconic") != string::npos) {
+      ptype = Mdvx::PROJ_VERT_PERSP;
+    } else if ((tok.find("=latlon") != string::npos) ||
+               (tok.find("=lonlat") != string::npos) ||
+               (tok.find("=latlong") != string::npos)) {
+      ptype = Mdvx::PROJ_LATLON;
+    } 
+  } // itok
+
+  if (ptype == Mdvx::PROJ_UNKNOWN) {
+    cerr << "WARNING - MdvzProj::init from proj string" << endl;
+    cerr << "  projStr: " << projStr << endl;
+    cerr << "  proj type not supported" << endl;
+    cerr << "  assuming LATLON projection" << endl;
+    ptype = Mdvx::PROJ_LATLON;
+  }
+
+  // determine the projection parameters
+
+  double lon_0 = 0.0;
+  double lat_0 = 0.0;
+  double lat_1 = 0.0;
+  double lat_2 = 0.0;
+  double x_0 = 0.0;
+  double y_0 = 0.0;
+  double k_0 = 1.0;
+  bool isSouth = false;
+  double perspRadius = 6.0 * Pjg::EradKm;
+
+  for (size_t itok = 0; itok < toks.size(); itok++) {
+    string tok = toks[itok];
+    if (tok.find("+lon_0") != string::npos) {
+      sscanf(tok.c_str(), "+lon_0=%lg", &lon_0);
+    }
+    if (tok.find("+lat_0") != string::npos) {
+      sscanf(tok.c_str(), "+lat_0=%lg", &lat_0);
+    }
+    if (tok.find("+lat_1") != string::npos) {
+      sscanf(tok.c_str(), "+lat_1=%lg", &lat_1);
+    }
+    if (tok.find("+lat_2") != string::npos) {
+      sscanf(tok.c_str(), "+lat_2=%lg", &lat_2);
+    }
+    if (tok.find("+x_0") != string::npos) {
+      sscanf(tok.c_str(), "+x_0=%lg", &x_0);
+    }
+    if (tok.find("+y_0") != string::npos) {
+      sscanf(tok.c_str(), "+y_0=%lg", &y_0);
+    }
+    if (tok.find("+k_0") != string::npos) {
+      sscanf(tok.c_str(), "+k_0=%lg", &k_0);
+    }
+    if (tok.find("+south") != string::npos) {
+      isSouth = true;
+    }
+  }
+
+  if (ptype == Mdvx::PROJ_LATLON) {
+    initLatlon(lon_0);
+  } else if (ptype == Mdvx::PROJ_ALBERS) {
+    initAlbers(lat_0, lon_0, lat_1, lat_2);
+  } else if (ptype == Mdvx::PROJ_FLAT) {
+    initAzimEquiDist(lat_0, lon_0, 0.0);
+  } else if (ptype == Mdvx::PROJ_LAMBERT_CONF) {
+    initLambertConf(lat_0, lon_0, lat_1, lat_2);
+  } else if (ptype == Mdvx::PROJ_LAMBERT_AZIM) {
+    initLambertAzim(lat_0, lon_0);
+  } else if (ptype == Mdvx::PROJ_MERCATOR) {
+    initMercator(lat_0, lon_0);
+  } else if (ptype == Mdvx::PROJ_TRANS_MERCATOR) {
+    initTransMercator(lat_0, lon_0, k_0);
+  } else if (ptype == Mdvx::PROJ_POLAR_STEREO) {
+    if (isSouth) {
+      initStereographic(lon_0, Mdvx::POLE_SOUTH, k_0);
+    } else {
+      initStereographic(lon_0, Mdvx::POLE_NORTH, k_0);
+    }
+  } else if (ptype == Mdvx::PROJ_OBLIQUE_STEREO) {
+    initStereographic(lat_0, lon_0, k_0);
+  } else if (ptype == Mdvx::PROJ_VERT_PERSP) {
+    initVertPersp(lat_0, lon_0, perspRadius);
+  }
 
 }
 

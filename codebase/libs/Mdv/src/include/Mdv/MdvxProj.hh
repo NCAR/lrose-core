@@ -137,6 +137,12 @@ public:
   void init(const Mdvx::coord_t &coord);
   
   ///////////////////////////////
+  // initialize from proj string
+  // i.e. proj 4 etc.
+
+  void init(const string &projStr);
+
+  ///////////////////////////////
   // initialize projections
   
   // initialize latlon projection
