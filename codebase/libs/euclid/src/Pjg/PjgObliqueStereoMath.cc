@@ -115,7 +115,13 @@ string PjgObliqueStereoMath::getProjStr() const
 
 {
 
-  return "+proj=sterea" + _getProjStrExtra();
+  char text[1024];
+  snprintf(text, 1024,
+           "+proj=sterea +lon_0=%g +lat_0=%g",
+           _origin_lon, _origin_lat);
+  string str(text);
+  str += _getProjStrFalseOrigin();
+  return str;
 
 }
   

@@ -102,7 +102,13 @@ string PjgMercatorMath::getProjStr() const
 
 {
 
-  return "+proj=merc" + _getProjStrExtra();
+  char text[1024];
+  snprintf(text, 1024,
+           "+proj=merc +lon_0=%g +k_0=%g",
+           _origin_lon, _central_scale);
+  string str(text);
+  str += _getProjStrFalseOrigin();
+  return str;
 
 }
   

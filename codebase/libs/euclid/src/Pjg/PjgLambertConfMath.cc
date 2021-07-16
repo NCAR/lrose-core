@@ -185,7 +185,13 @@ string PjgLambertConfMath::getProjStr() const
 
 {
 
-  return "+proj=lcc" + _getProjStrExtra();
+  char text[1024];
+  snprintf(text, 1024,
+           "+proj=lcc +lon_0=%g +lat_1=%g +lat_2=%g",
+           _origin_lon, _lat1, _lat2);
+  string str(text);
+  str += _getProjStrFalseOrigin();
+  return str;
 
 }
   

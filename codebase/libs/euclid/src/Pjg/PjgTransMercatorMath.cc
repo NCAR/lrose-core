@@ -101,7 +101,13 @@ string PjgTransMercatorMath::getProjStr() const
 
 {
 
-  return "+proj=tmerc" + _getProjStrExtra();
+  char text[1024];
+  snprintf(text, 1024,
+           "+proj=tmerc +lon_0=%g _lat_0=%g +k_0=%g",
+           _origin_lon, _origin_lat, _central_scale);
+  string str(text);
+  str += _getProjStrFalseOrigin();
+  return str;
 
 }
   

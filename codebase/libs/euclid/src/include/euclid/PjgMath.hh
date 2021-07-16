@@ -247,7 +247,7 @@ protected:
   double _false_northing; // added to y coord computed from proj origin
   double _false_easting;  // added to x coord computed from proj origin
 
-  string _getProjStrExtra() const;
+  string _getProjStrFalseOrigin() const;
 
 private:
 

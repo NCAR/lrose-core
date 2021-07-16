@@ -100,7 +100,13 @@ string PjgLambertAzimMath::getProjStr() const
 
 {
 
-  return "+proj=laea" + _getProjStrExtra();
+  char text[1024];
+  snprintf(text, 1024,
+           "+proj=laea +lon_0=%g +lat_0=%g",
+           _origin_lon, _origin_lat);
+  string str(text);
+  str += _getProjStrFalseOrigin();
+  return str;
 
 }
   

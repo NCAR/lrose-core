@@ -137,7 +137,17 @@ string PjgPolarStereoMath::getProjStr() const
 
 {
 
-  return "+proj=ups" + _getProjStrExtra();
+  char text[1024];
+  if (_origin_lat < 0) {
+    snprintf(text, 1024,
+             "+proj=ups +lon_0=%g +south", _origin_lon);
+  } else {
+    snprintf(text, 1024,
+             "+proj=ups +lon_0=%g", _origin_lon);
+  }
+  string str(text);
+  str += _getProjStrFalseOrigin();
+  return str;
 
 }
   
