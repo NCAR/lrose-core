@@ -216,7 +216,7 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
     // root attributes
 
     _conventions = _readStringAttribute(root, "Conventions", "RootAttr");
-    
+
     // _fileHeader = _readStringAttribute(root, "FileHeader", "RootAttr");
     // _fileInfo = _readStringAttribute(root, "FileInfo", "RootAttr");
     // _inputRecord = _readStringAttribute(root, "InputRecord", "RootAttr");
@@ -240,6 +240,14 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
       //      << _navigationRecord << "===================" << endl;
       // cerr << "history: " << endl << "===================" << endl
       //      << _history << "===================" << endl;
+    }
+
+    size_t numRootObjs = root.getNumObjs();
+    cerr << "1111111111 numRootObjs: " << numRootObjs << endl;
+
+    for (size_t ii = 0; ii < numRootObjs; ii++) {
+      string objName = root.getObjnameByIdx(ii);
+      cerr << "111111111 ii, objName: " << ii << ", " << objName << endl;
     }
 
     return 0;
