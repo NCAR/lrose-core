@@ -560,7 +560,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("OdimHdf5ToMdv");
-    tt->comment_text = tdrpStrDup("This program converts GPM swath data, in HDF5, to MDV/NetCDF.");
+    tt->comment_text = tdrpStrDup("This program converts ODIM OPERA grids, in HDF5, to MDV/NetCDF.");
     tt++;
     
     // Parameter 'Comment 1'
@@ -742,92 +742,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("Z dimension details");
+    tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'radar_min_z_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_min_z_km");
-    tt->descr = tdrpStrDup("Height of lowest level (km)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &radar_min_z_km - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'radar_delta_z_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_delta_z_km");
-    tt->descr = tdrpStrDup("Delta height between levels (km)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &radar_delta_z_km - &_start_;
-    tt->single_val.d = 0.125;
-    tt++;
-    
-    // Parameter 'remap_gates_to_vert_levels'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remap_gates_to_vert_levels");
-    tt->descr = tdrpStrDup("Option to remap the radar gates onto specified output levels.");
-    tt->help = tdrpStrDup("The radar gate spacing is 125m. This is quite fine for a full 3-D grid. So often it makes sense to remap onto a specified vertical grid, with fewer levels.");
-    tt->val_offset = (char *) &remap_gates_to_vert_levels - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'output_z_levels_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("output_z_levels_km");
-    tt->descr = tdrpStrDup("Z levels to which radar data is remapped on output (km)");
-    tt->help = tdrpStrDup("For DBZ, we take the max to perform the remapping.");
-    tt->array_offset = (char *) &_output_z_levels_km - &_start_;
-    tt->array_n_offset = (char *) &output_z_levels_km_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(double);
-    tt->array_n = 30;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].d = 0.5;
-      tt->array_vals[1].d = 1;
-      tt->array_vals[2].d = 1.5;
-      tt->array_vals[3].d = 2;
-      tt->array_vals[4].d = 2.5;
-      tt->array_vals[5].d = 3;
-      tt->array_vals[6].d = 3.5;
-      tt->array_vals[7].d = 4;
-      tt->array_vals[8].d = 4.5;
-      tt->array_vals[9].d = 5;
-      tt->array_vals[10].d = 5.5;
-      tt->array_vals[11].d = 6;
-      tt->array_vals[12].d = 6.5;
-      tt->array_vals[13].d = 7;
-      tt->array_vals[14].d = 7.5;
-      tt->array_vals[15].d = 8;
-      tt->array_vals[16].d = 8.5;
-      tt->array_vals[17].d = 9;
-      tt->array_vals[18].d = 10;
-      tt->array_vals[19].d = 11;
-      tt->array_vals[20].d = 12;
-      tt->array_vals[21].d = 13;
-      tt->array_vals[22].d = 14;
-      tt->array_vals[23].d = 15;
-      tt->array_vals[24].d = 16;
-      tt->array_vals[25].d = 17;
-      tt->array_vals[26].d = 18;
-      tt->array_vals[27].d = 19;
-      tt->array_vals[28].d = 20;
-      tt->array_vals[29].d = 21;
     tt++;
     
     // Parameter 'Comment 4'
@@ -835,15 +751,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT ENCODING AND COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -855,7 +762,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("output_fields");
     tt->descr = tdrpStrDup("Output fields details.");
-    tt->help = tdrpStrDup("These are the fields that will be written to the output files.");
+    tt->help = tdrpStrDup("These are the fields that will be written to the output files. The quantity strings are found under GROUP 'dataset1/2/3' etc, GROUP 'data1', DATASET 'data'.");
     tt->array_offset = (char *) &_output_fields - &_start_;
     tt->array_n_offset = (char *) &output_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -872,10 +779,10 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->groupName - (char *) _output_fields;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("gpmName");
+      tt->struct_def.fields[1].fname = tdrpStrDup("hdf5Quantity");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->gpmName - (char *) _output_fields;
+        (char *) &_output_fields->hdf5Quantity - (char *) _output_fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
       tt->struct_def.fields[2].fname = tdrpStrDup("outputName");
       tt->struct_def.fields[2].ptype = STRING_TYPE;
@@ -904,23 +811,23 @@
     tt->n_struct_vals = 10;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("SLV");
-      tt->struct_vals[1].s = tdrpStrDup("zFactorCorrected");
+      tt->struct_vals[0].s = tdrpStrDup("dataset1");
+      tt->struct_vals[1].s = tdrpStrDup("DBZH");
       tt->struct_vals[2].s = tdrpStrDup("DBZ");
       tt->struct_vals[3].s = tdrpStrDup("reflectivity");
       tt->struct_vals[4].e = ENCODING_FLOAT32;
-      tt->struct_vals[5].s = tdrpStrDup("FLG");
-      tt->struct_vals[6].s = tdrpStrDup("qualityFlag");
-      tt->struct_vals[7].s = tdrpStrDup("Qual");
-      tt->struct_vals[8].s = tdrpStrDup("qualityFlag");
+      tt->struct_vals[5].s = tdrpStrDup("dataset2");
+      tt->struct_vals[6].s = tdrpStrDup("QIND");
+      tt->struct_vals[7].s = tdrpStrDup("QUALITY");
+      tt->struct_vals[8].s = tdrpStrDup("Quality-control");
       tt->struct_vals[9].e = ENCODING_FLOAT32;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT GRID - LAT/LON");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1015,11 +922,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT URL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1033,14 +940,14 @@
     tt->descr = tdrpStrDup("URL for writing output files.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/gpm");
+    tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/odim");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT METADATA STRINGS");
     tt->comment_text = tdrpStrDup("These will be used if the file does not contain suitable information.");
     tt++;
@@ -1054,7 +961,7 @@
     tt->descr = tdrpStrDup("Name of data set.");
     tt->help = tdrpStrDup("Appears in Mdv master header.");
     tt->val_offset = (char *) &data_set_name - &_start_;
-    tt->single_val.s = tdrpStrDup("GPM");
+    tt->single_val.s = tdrpStrDup("OPERA ODIM");
     tt++;
     
     // Parameter 'data_set_source'
@@ -1066,7 +973,7 @@
     tt->descr = tdrpStrDup("Source of data.");
     tt->help = tdrpStrDup("Appears in Mdv master header.");
     tt->val_offset = (char *) &data_set_source - &_start_;
-    tt->single_val.s = tdrpStrDup("NASA");
+    tt->single_val.s = tdrpStrDup("OPERA");
     tt++;
     
     // Parameter 'data_set_info'

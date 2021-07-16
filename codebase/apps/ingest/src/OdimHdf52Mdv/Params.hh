@@ -90,7 +90,7 @@ public:
 
   typedef struct {
     char* groupName;
-    char* gpmName;
+    char* hdf5Quantity;
     char* outputName;
     char* longName;
     encoding_type_t encoding;
@@ -421,15 +421,6 @@ public:
 
   char* file_name_substr;
 
-  double radar_min_z_km;
-
-  double radar_delta_z_km;
-
-  tdrp_bool_t remap_gates_to_vert_levels;
-
-  double *_output_z_levels_km;
-  int output_z_levels_km_n;
-
   output_field_t *_output_fields;
   int output_fields_n;
 
@@ -456,7 +447,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[34];
+  mutable TDRPtable _table[29];
 
   const char *_className;
 

@@ -99,6 +99,7 @@ private:
 
   // metadata
 
+  string _conventions;
   string _fileHeader, _fileInfo;
   string _inputRecord, _jaxaInfo;
   string _navigationRecord, _history;

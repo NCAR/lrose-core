@@ -32,7 +32,7 @@
 
 commentdef {
   p_header = "OdimHdf5ToMdv";
-  p_text = "This program converts GPM swath data, in HDF5, to MDV/NetCDF.";
+  p_text = "This program converts ODIM OPERA grids, in HDF5, to MDV/NetCDF.";
 };
 
 commentdef {
@@ -127,35 +127,6 @@ paramdef string {
 } file_name_substr;
 
 commentdef {
-  p_header = "Z dimension details";
-}
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Height of lowest level (km)";
-} radar_min_z_km;
-
-paramdef double {
-  p_default = 0.125;
-  p_descr = "Delta height between levels (km)";
-} radar_delta_z_km;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to remap the radar gates onto specified output levels.";
-  p_help = "The radar gate spacing is 125m. This is quite fine for a full 3-D grid. So often it makes sense to remap onto a specified vertical grid, with fewer levels.";
-} remap_gates_to_vert_levels;
-
-paramdef double {
-  p_default = {
-    0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0
-
-  };
-  p_descr = "Z levels to which radar data is remapped on output (km)";
-  p_help = "For DBZ, we take the max to perform the remapping.";
-} output_z_levels_km[];
-
-commentdef {
   p_header = "OUTPUT FIELDS";
 }
 
@@ -171,7 +142,7 @@ typedef enum {
 
 typedef struct {
   string groupName;
-  string gpmName;
+  string hdf5Quantity;
   string outputName;
   string longName;
   encoding_type_t encoding;
@@ -181,23 +152,23 @@ paramdef struct output_field_t {
   p_default =
     {
      {
-      groupName = "SLV",
-      gpmName = "zFactorCorrected",
-      outputName = "DBZ",
-      longName = "reflectivity",
-      encoding = ENCODING_FLOAT32
+       groupName = "dataset1",
+       hdf5Quantity = "DBZH",
+       outputName = "DBZ",
+       longName = "reflectivity",
+       encoding = ENCODING_FLOAT32
      }
      ,
      {
-      groupName = "FLG",
-      gpmName = "qualityFlag",
-      outputName = "Qual",
-      longName = "qualityFlag",
-      encoding = ENCODING_FLOAT32
+       groupName = "dataset2",
+       hdf5Quantity = "QIND",
+       outputName = "QUALITY",
+       longName = "Quality-control",
+       encoding = ENCODING_FLOAT32
      }
     };
   p_descr = "Output fields details.";
-  p_help = "These are the fields that will be written to the output files.";
+  p_help = "These are the fields that will be written to the output files. The quantity strings are found under GROUP 'dataset1/2/3' etc, GROUP 'data1', DATASET 'data'.";
 } output_fields[];
 
 commentdef {
@@ -242,7 +213,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "mdvp:://localhost::/tmp/mdv/gpm";
+  p_default = "mdvp:://localhost::/tmp/mdv/odim";
   p_descr = "URL for writing output files.";
 } output_url;
 
@@ -252,13 +223,13 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "GPM";
+  p_default = "OPERA ODIM";
   p_descr = "Name of data set.";
   p_help = "Appears in Mdv master header.";
 } data_set_name;
 
 paramdef string {
-  p_default = "NASA";
+  p_default = "OPERA";
   p_descr = "Source of data.";
   p_help = "Appears in Mdv master header.";
 } data_set_source;

@@ -215,28 +215,34 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
 
     // root attributes
 
-    _fileHeader = _readStringAttribute(root, "FileHeader", "RootAttr");
-    _fileInfo = _readStringAttribute(root, "FileInfo", "RootAttr");
-    _inputRecord = _readStringAttribute(root, "InputRecord", "RootAttr");
-    _jaxaInfo = _readStringAttribute(root, "JAXAInfo", "RootAttr");
-    _navigationRecord = _readStringAttribute(root, "NavigationRecord",
-                                             "RootAttr");
-    _history = _readStringAttribute(root, "history", "RootAttr");
+    _conventions = _readStringAttribute(root, "Conventions", "RootAttr");
+    
+    // _fileHeader = _readStringAttribute(root, "FileHeader", "RootAttr");
+    // _fileInfo = _readStringAttribute(root, "FileInfo", "RootAttr");
+    // _inputRecord = _readStringAttribute(root, "InputRecord", "RootAttr");
+    // _jaxaInfo = _readStringAttribute(root, "JAXAInfo", "RootAttr");
+    // _navigationRecord = _readStringAttribute(root, "NavigationRecord",
+    //                                          "RootAttr");
+    // _history = _readStringAttribute(root, "history", "RootAttr");
     
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "FileHeader: " << endl << "===================" << endl
-           << _fileHeader << "===================" << endl;
-      cerr << "FileInfo: " << endl << "===================" << endl
-           << _fileInfo << "===================" << endl;
-      cerr << "InputRecord: " << endl << "===================" << endl
-           << _inputRecord << "===================" << endl;
-      cerr << "JAXAInfo: " << endl << "===================" << endl
-           << _jaxaInfo << "===================" << endl;
-      cerr << "NavigationRecord: " << endl << "===================" << endl
-           << _navigationRecord << "===================" << endl;
-      cerr << "history: " << endl << "===================" << endl
-           << _history << "===================" << endl;
+      cerr << "Conventions: " << _conventions << endl;
+
+      // cerr << "FileHeader: " << endl << "===================" << endl
+      //      << _fileHeader << "===================" << endl;
+      // cerr << "FileInfo: " << endl << "===================" << endl
+      //      << _fileInfo << "===================" << endl;
+      // cerr << "InputRecord: " << endl << "===================" << endl
+      //      << _inputRecord << "===================" << endl;
+      // cerr << "JAXAInfo: " << endl << "===================" << endl
+      //      << _jaxaInfo << "===================" << endl;
+      // cerr << "NavigationRecord: " << endl << "===================" << endl
+      //      << _navigationRecord << "===================" << endl;
+      // cerr << "history: " << endl << "===================" << endl
+      //      << _history << "===================" << endl;
     }
+
+    return 0;
 
     // open the NS group
     
@@ -293,18 +299,18 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
   
     // optionally remap onto specified output grid vlevels
     
-    if (_params.remap_gates_to_vert_levels) {
+    // if (_params.remap_gates_to_vert_levels) {
 
-      // zlevels are specified
+    //   // zlevels are specified
       
-      _zLevels.resize(_params.output_z_levels_km_n);
-      for (int iz = 0; iz < _params.output_z_levels_km_n; iz++) {
-        _zLevels[iz] = _params._output_z_levels_km[iz];
-      }
+    //   _zLevels.resize(_params.output_z_levels_km_n);
+    //   for (int iz = 0; iz < _params.output_z_levels_km_n; iz++) {
+    //     _zLevels[iz] = _params._output_z_levels_km[iz];
+    //   }
 
-      _remapVertLevels(fld);
+    //   _remapVertLevels(fld);
 
-    }
+    // }
 
     // add to mdvx object
     
@@ -770,7 +776,7 @@ int OdimHdf5ToMdv::_readFields(Group &ns)
     OutputField *fld = new OutputField(fldParams);
 
     Group grp(ns.openGroup(fld->params.groupName));
-    if (fld->hdf5.getVarProps(grp, fld->params.gpmName,
+    if (fld->hdf5.getVarProps(grp, fld->params.hdf5Quantity,
                               fld->dims, fld->units, 
                               fld->h5class, fld->h5sign, fld->h5order, fld->h5size)) {
       cerr << fld->hdf5.getErrStr() << endl;
@@ -791,7 +797,7 @@ int OdimHdf5ToMdv::_readFields(Group &ns)
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Reading fields" << endl;
       cerr << "  groupName: " << fld->params.groupName << endl;
-      cerr << "  gpmName: " << fld->params.gpmName << endl;
+      cerr << "  hdf5Quantity: " << fld->params.hdf5Quantity << endl;
       cerr << "  dims: ";
       for (size_t ii = 0; ii < fld->dims.size(); ii++) {
         cerr << fld->dims[ii];
@@ -848,7 +854,7 @@ int OdimHdf5ToMdv::_readFields(Group &ns)
         // 2D field
         if (_readField2D(ns,
                          fld->params.groupName,
-                         fld->params.gpmName,
+                         fld->params.hdf5Quantity,
                          fld->si16Input,
                          fld->si16Missing,
                          fld->units) == 0) {
@@ -858,7 +864,7 @@ int OdimHdf5ToMdv::_readFields(Group &ns)
         // 3D field
         if (_readField3D(ns,
                          fld->params.groupName,
-                         fld->params.gpmName,
+                         fld->params.hdf5Quantity,
                          fld->si16Input,
                          fld->si16Missing,
                          fld->units) == 0) {
@@ -874,7 +880,7 @@ int OdimHdf5ToMdv::_readFields(Group &ns)
         // 2D field
         if (_readField2D(ns,
                          fld->params.groupName,
-                         fld->params.gpmName,
+                         fld->params.hdf5Quantity,
                          fld->fl32Input,
                          fld->fl32Missing,
                          fld->units) == 0) {
@@ -884,7 +890,7 @@ int OdimHdf5ToMdv::_readFields(Group &ns)
         // 3D field
         if (_readField3D(ns,
                          fld->params.groupName,
-                         fld->params.gpmName,
+                         fld->params.hdf5Quantity,
                          fld->fl32Input,
                          fld->fl32Missing,
                          fld->units) == 0) {
@@ -963,8 +969,8 @@ int OdimHdf5ToMdv::_readField3D(Group &ns,
 
   _nGates = dims[2];
   _nz = _nGates;
-  _minzKm = _params.radar_min_z_km;
-  _dzKm = _params.radar_delta_z_km;
+  // _minzKm = _params.radar_min_z_km;
+  // _dzKm = _params.radar_delta_z_km;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Read 3D fl32 group/field: " 
@@ -1041,8 +1047,8 @@ int OdimHdf5ToMdv::_readField3D(Group &ns,
 
   _nGates = dims[2];
   _nz = _nGates;
-  _minzKm = _params.radar_min_z_km;
-  _dzKm = _params.radar_delta_z_km;
+  // _minzKm = _params.radar_min_z_km;
+  // _dzKm = _params.radar_delta_z_km;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Read 3D int 32 group/field: " 
