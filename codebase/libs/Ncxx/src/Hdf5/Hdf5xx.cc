@@ -847,6 +847,43 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
 
 }
 
+/////////////////////////////////////////////////
+// get object type, by index
+
+Hdf5xx::hdf5_object_t Hdf5xx::getObjTypeByIdx(Group &grp, size_t index)
+
+{
+
+#ifdef HDF5_V10
+
+  string objName = grp.getObjnameByIdx(index);
+  H5O_type_t objType = root.childObjType(objName);
+  if (objType == H5O_TYPE_GROUP) {
+    return OBJECT_GROUP;
+  } else if (objType == H5O_TYPE_DATASET) {
+    return OBJECT_DATASET;
+  } else if (objType == H5O_TYPE_NAMED_DATATYPE) {
+    return OBJECT_NAMED_DATATYPE;
+  }
+
+#endif
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+  H5G_obj_t objType = grp.getObjTypeByIdx(index);
+  if (objType == H5G_GROUP) {
+    return OBJECT_GROUP;
+  } else if (objType == H5G_DATASET) {
+    return OBJECT_DATASET;
+  } else if (objType == H5G_TYPE) {
+    return OBJECT_NAMED_DATATYPE;
+  }
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+  return OBJECT_UNKNOWN;
+
+}
 ///////////////////////////////////////////////////////////////////
 // Enquire about the properties of a variable
 // Returns 0 on success, -1 on failure
@@ -3267,3 +3304,5 @@ const NcxxPort::si64 *Hdf5xx::ArrayAttr::getAsInts()
   return _intVals;
 }
 
+
+      

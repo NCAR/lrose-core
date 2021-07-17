@@ -64,6 +64,16 @@ class Hdf5xx
   
 public:
 
+  // object type
+
+  typedef enum
+    {
+     OBJECT_GROUP,
+     OBJECT_DATASET,
+     OBJECT_NAMED_DATATYPE,
+     OBJECT_UNKNOWN
+    } hdf5_object_t;
+                           
   // class for decoding attributes
   
   class DecodedAttr {
@@ -149,6 +159,10 @@ public:
                          const string &name,
                          const string &context,
                          ArrayAttr &arrayAttr);
+  
+  // get object type, by index
+  
+  static hdf5_object_t getObjTypeByIdx(Group &group, size_t index);
   
   ///////////////////////////////////////////////////////////////////
   // Enquire about the properties of a variable
