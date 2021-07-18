@@ -24,16 +24,16 @@
 ///////////////////////////////////////////////////////////////
 // GpmHdf5ToMdv.cc
 //
-// GpmHdf5ToMdv object
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Oct 2008
+// May 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// GpmHdf5ToMdv reads McIdas data in NetCDF format, and
-// converts to MDV
+// GpmHdf5ToMdv reads GPM data in HDF5 format, and
+// converts to MDV.
+// Originally based on NcGeneric2Mdv.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -895,22 +895,6 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
     } // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
     
   } // ifield
-  
-  _qualAvailable = false;
-
-  // read reflectivity, to ensure we have the dimensions read in
-
-  if (_readField3D(ns, "SLV", "zFactorCorrected",
-                   _dbzInput, _missingDbz, _dbzUnits)) {
-    return -1;
-  }
-
-  // read quality flag
-
-  if (_readField2D(ns, "FLG", "qualityFlag",
-                   _qualInput, _missingQual, _qualUnits) == 0) {
-    _qualAvailable = true;
-  }
   
   return 0;
 
