@@ -203,11 +203,12 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
   try {
     
     // open file
-    
+
     H5File file(input_path, H5F_ACC_RDONLY);
     if (_params.debug) {
       cerr << "  file size: " << file.getFileSize() << endl;
     }
+    H5x::Exception::dontPrint();
     
     // get the root group
     
@@ -224,6 +225,14 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       Hdf5xx::printFileStructure(root, 0, cerr);
     }
+
+    // find the fields
+
+    if (_findFields(root)) {
+      cerr << "ERROR processing file: " << input_path << endl;
+      cerr << "  Cannot find the fields" << endl;
+    }
+    cerr << "2222222222222222222222" << endl;
   
     return 0;
 
@@ -330,6 +339,75 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
 
 }
 
+/////////////////////////////////////////////
+// Find the data fields
+
+int OdimHdf5ToMdv::_findFields(Group &root)
+  
+{
+
+  for (int ii = 1; ii < 999; ii++) {
+
+    char dataGrpName[1024];
+    snprintf(dataGrpName, 1024, "dataset%d", ii);
+    cerr << "111111111 searching for group: " << dataGrpName << endl;
+    try {
+      if (root.nameExists(dataGrpName)) {
+        Group data1Grp(root.openGroup(dataGrpName));
+        cerr << "111111111 group exists: " << dataGrpName << endl;
+        _readField(data1Grp);
+      } else {
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "Dataset group does not exist: " << dataGrpName << endl;
+          cerr << "  End of data" << endl;
+        }
+        return -1;
+      }
+    } catch (H5x::Exception &e) {
+      return -1;
+    }
+
+  } // ii
+
+  return 0;
+
+#ifdef JUNK
+  size_t numObjs = grp.getNumObjs();
+  
+  string spacer;
+  for (int jj = 0; jj < level; jj++) {
+    spacer += "  ";
+  }
+
+  cerr << spacer << "======>> Group: "
+      << grp.getObjName() << " <<======" << endl;
+  Hdf5xx::printAttributes(grp, cerr, level);
+  
+  for (size_t ii = 0; ii < numObjs; ii++) {
+
+    string objName = grp.getObjnameByIdx(ii);
+    Hdf5xx::hdf5_object_t objType = Hdf5xx::getObjTypeByIdx(grp, ii);
+    if (objType == Hdf5xx::OBJECT_GROUP) {
+      Group nextGrp(grp.openGroup(objName));
+      _findFields(nextGrp, level + 1);
+    } else if (objType == Hdf5xx::OBJECT_DATASET) {
+      cerr << spacer << "  ======>> DataSet: "
+           << objName << " <<======" << endl;
+      DataSet dset = grp.openDataSet(objName);
+      Hdf5xx::printAttributes(dset, cerr, level + 1);
+      if (dsetint loadAttribute(H5Object &obj,
+                        const string &name,
+                        const string &context,
+                        DecodedAttr &decodedAttr);
+    } else if (objType == Hdf5xx::OBJECT_NAMED_DATATYPE) {
+      cerr << spacer << "  ======>> NAMED_DATATYPE-objName: "
+          << objName << " <<======" << endl;
+    }
+  }  // ii
+#endif
+
+}
+    
 /////////////////////////////////////////////
 // read string attribute
 
@@ -741,6 +819,48 @@ int OdimHdf5ToMdv::_readSpaceCraftPos(Group &ns)
 
 }
 
+//////////////////////////////////////////////
+// read in a field, if required
+
+int OdimHdf5ToMdv::_readField(Group &dataGrp)
+  
+{
+
+  // get field attributes from the what group
+
+  try {
+    
+    Group what(dataGrp.openGroup("what"));
+    cerr << "00000000000000000000" << endl;
+
+    Hdf5xx::DecodedAttr quant;
+    _utils.loadAttribute(what, "quantity",
+                         dataGrp.getObjName(), quant);
+    string fieldName(quant.getAsString());
+
+    bool fieldWanted = false;
+    for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
+      Params::output_field_t &fldParams = _params._output_fields[ifield];
+      if (fieldName == string(fldParams.hdf5Quantity)) {
+        fieldWanted = true;
+        break;
+      }
+    }
+    if (fieldWanted) {
+      cerr << "eeeeeeeeeeeeee field wanted: " << fieldName << endl;
+    }
+    
+    
+  } catch (H5x::Exception &e) {
+    cerr << "WARNING - 'what' subgroup is not found in data group: "
+         << dataGrp.getObjName() << endl;
+    return -1;
+  }
+  
+  return 0;
+  
+}
+  
 //////////////////////////////////////////////
 // read the fields
 

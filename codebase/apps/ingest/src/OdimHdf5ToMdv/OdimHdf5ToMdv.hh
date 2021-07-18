@@ -192,6 +192,8 @@ private:
 
   int _processFile(const char *input_path);
 
+  int _findFields(Group &root);
+
   string _readStringAttribute(Group &group,
                               const string &attrName,
                               const string &context);
@@ -202,6 +204,7 @@ private:
   int _readSpaceCraftPos(Group &ns);
   int _readQcFlags(Group &ns);
 
+  int _readField(Group &dataGrp);
   int _readFields(Group &ns);
 
   int _readField3D(Group &ns,
