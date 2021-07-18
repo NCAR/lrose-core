@@ -340,7 +340,10 @@ void OdimHdf5ToMdv::_printFileStructure(Group &grp,
 {
 
   size_t numObjs = grp.getNumObjs();
-    
+
+  out << "======>> Group: " << grp.getObjName() << " <<======" << endl;
+  Hdf5xx::printAttributes(grp, out, level);
+  
   for (size_t ii = 0; ii < numObjs; ii++) {
     string objName = grp.getObjnameByIdx(ii);
     for (int jj = 0; jj < level; jj++) {
@@ -348,13 +351,14 @@ void OdimHdf5ToMdv::_printFileStructure(Group &grp,
     }
     Hdf5xx::hdf5_object_t objType = Hdf5xx::getObjTypeByIdx(grp, ii);
     if (objType == Hdf5xx::OBJECT_GROUP) {
-      out << "index, GROUP-objName: " << ii << ", " << objName << endl;
       Group nextGrp(grp.openGroup(objName));
       _printFileStructure(nextGrp, level + 1, out);
     } else if (objType == Hdf5xx::OBJECT_DATASET) {
-      out << "index, DATASET-objName: " << ii << ", " << objName << endl;
+      out << "  ======>> DataSet: " << objName << " <<======" << endl;
+      DataSet dset = grp.openDataSet(objName);
+      Hdf5xx::printAttributes(dset, out, level + 1);
     } else if (objType == Hdf5xx::OBJECT_NAMED_DATATYPE) {
-      out << "index, NAMED_DATATYPE-objName: " << ii << ", " << objName << endl;
+      out << "======>> NAMED_DATATYPE-objName: " << objName << " <<======" << endl;
     }
   }  // ii
 

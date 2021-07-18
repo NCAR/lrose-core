@@ -249,25 +249,25 @@ public:
   
   ////////////////////////////////////////////
   /// printing
-
-  void printGroup(Group &group, const string grname,
-                  ostream &out,
-                  bool printRays, bool printData);
   
-  void printDataSet(DataSet &ds, const string dsname,
-                    ostream &out,
-                    bool printRays, bool printData);
+  static void printGroup(Group &group, const string grname,
+                         ostream &out,
+                         bool printRays, bool printData);
   
-  void printCompoundType(CompType &compType,
-                         int ipoint,
-                         char *buf,
-                         ostream &out);
+  static void printDataSet(DataSet &ds, const string dsname,
+                           ostream &out,
+                           bool printRays, bool printData);
   
-  void printAttributes(H5Object &obj, ostream &out);
+  static void printCompoundType(CompType &compType,
+                                int ipoint,
+                                char *buf,
+                                ostream &out);
   
-  void printAttribute(Attribute &attr, ostream &out);
+  static void printAttributes(H5Object &obj, ostream &out, int level = 0);
   
-  void printDataSet(DataSet &ds, ostream &out);
+  static void printAttribute(Attribute &attr, ostream &out, int level = 0);
+  
+  static void printDataSet(DataSet &ds, ostream &out);
 
   ////////////////////////
   /// \name Error string:
@@ -297,15 +297,15 @@ private:
   bool _debug; ///< normal debug flag
   bool _verbose; ///< verbose debug flag
 
-  void _printDataVals(ostream &out, int nPoints,
-                      NcxxPort::fl64 *vals) const;
+  static void _printDataVals(ostream &out, int nPoints,
+                             NcxxPort::fl64 *vals);
   
-  void _printDataVals(ostream &out, int nPoints,
-                      NcxxPort::si64 *vals) const;
+  static void _printDataVals(ostream &out, int nPoints,
+                             NcxxPort::si64 *vals);
   
-  void _printPacked(NcxxPort::fl64 val, int count, string &outStr) const;
+  static void _printPacked(NcxxPort::fl64 val, int count, string &outStr);
   
-  void _printPacked(NcxxPort::si64 val, int count, string &outStr) const;
+  static void _printPacked(NcxxPort::si64 val, int count, string &outStr);
   
   /// add integer value to error string, with label
   

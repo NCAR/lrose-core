@@ -2713,7 +2713,7 @@ void Hdf5xx::printCompoundType(CompType &compType,
 
 void Hdf5xx::_printDataVals(ostream &out,
                             int nPoints,
-                            NcxxPort::fl64 *vals) const
+                            NcxxPort::fl64 *vals)
   
 {
 
@@ -2743,7 +2743,7 @@ void Hdf5xx::_printDataVals(ostream &out,
 
 void Hdf5xx::_printDataVals(ostream &out,
                             int nPoints,
-                            NcxxPort::si64 *vals) const
+                            NcxxPort::si64 *vals)
   
 {
 
@@ -2776,7 +2776,7 @@ void Hdf5xx::_printDataVals(ostream &out,
 
 void Hdf5xx::_printPacked(NcxxPort::fl64 val,
                           int count,
-                          string &outStr) const
+                          string &outStr)
 
 {
   
@@ -2803,7 +2803,7 @@ void Hdf5xx::_printPacked(NcxxPort::fl64 val,
 
 void Hdf5xx::_printPacked(NcxxPort::si64 val,
                           int count,
-                          string &outStr) const
+                          string &outStr)
 
 {
   
@@ -2824,14 +2824,15 @@ void Hdf5xx::_printPacked(NcxxPort::si64 val,
 ///////////////////////////////////////////////////////////////////
 // print all attributes in an object
 
-void Hdf5xx::printAttributes(H5Object &obj, ostream &out)
+void Hdf5xx::printAttributes(H5Object &obj, ostream &out,
+                             int level /* = 0 */)
 
 {
 
   for (int ii = 0; ii < obj.getNumAttrs(); ii++) {
     hid_t attrId = H5Aopen_idx(obj.getId(), ii);
     Attribute attr(attrId);
-    printAttribute(attr, out);
+    printAttribute(attr, out, level);
   } // ii
 
 }
@@ -2839,49 +2840,54 @@ void Hdf5xx::printAttributes(H5Object &obj, ostream &out)
 ///////////////////////////////////////////////////////////////////
 // print details of one attribute
 
-void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
+void Hdf5xx::printAttribute(Attribute &attr, ostream &out,
+                            int level /* = 0 */)
 
 {
 
-  out << "------------ Attribute -------------" << endl;
-  out << "  name: " << attr.getName() << endl;
+  string spacer;
+  for (int ii = 0; ii < level; ii++) {
+    spacer += "  ";
+  }
+  out << spacer << "------------ Attribute -------------" << endl;
+  out << spacer << "  name: " << attr.getName() << endl;
   DataType dtype = attr.getDataType();
   H5T_class_t aclass = dtype.getClass();
   DataSpace dataspace = attr.getSpace();
   int ndims = dataspace.getSimpleExtentNdims();
   int npoints = dataspace.getSimpleExtentNpoints();
-  out << "    ndims: " << ndims << endl;
-  out << "    npoints: " << npoints << endl;
+  out << spacer << "    ndims: " << ndims << endl;
+  out << spacer << "    npoints: " << npoints << endl;
   if (ndims == 0 && npoints == 1) {
-    out << "    attr is scalar" << endl;
+    out << spacer << "    attr is scalar" << endl;
   }
   if (ndims > 0) {
     vector<hsize_t> dims;
     dims.resize(ndims);
     dataspace.getSimpleExtentDims(dims.data());
     for (int ii = 0; ii < ndims; ii++) {
-      out << "        dim[" << ii << "]: " << dims[ii] << endl;
+      out << spacer << "        dim[" << ii << "]: " << dims[ii] << endl;
     }
   }
 
   if (aclass == H5T_INTEGER) {
 
-    out << "    attr type: INTEGER" << endl;
+    out << spacer << "    attr type: INTEGER" << endl;
     IntType intType = attr.getIntType();
     H5T_order_t order = intType.getOrder();
     if (order == H5T_ORDER_BE) {
-      out << "    order: BE" << endl;
+      out << spacer << "    order: BE" << endl;
     } else {
-      out << "    order: LE" << endl;
+      out << spacer << "    order: LE" << endl;
     }
     H5T_sign_t sign = intType.getSign();
     if (sign == H5T_SGN_NONE) {
-      out << "    type: unsigned" << endl;
+      out << spacer << "    type: unsigned" << endl;
     } else {
-      out << "    type: signed" << endl;
+      out << spacer << "    type: signed" << endl;
     }
     size_t tsize = intType.getSize();
-    out << "    data elem size: " << tsize << endl;
+    out << spacer << "    data elem size: " << tsize << endl;
 
     if (sign == H5T_SGN_NONE) {
 
@@ -2893,7 +2899,7 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
         ivals.resize(npoints);
         attr.read(dtype, ivals.data());
         for (int ii = 0; ii < npoints; ii++) {
-          out << "      ival[" << ii << "]: " << (int) ivals[ii] << endl;
+          out << spacer << "      ival[" << ii << "]: " << (int) ivals[ii] << endl;
         }
 
       } else if (tsize == 2) {
@@ -2911,7 +2917,7 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
           }
         }
         for (int ii = 0; ii < npoints; ii++) {
-          out << "        ival[" << ii << "]: " << ivals[ii] << endl;
+          out << spacer << "        ival[" << ii << "]: " << ivals[ii] << endl;
         }
 
       } else if (tsize == 4) {
@@ -2929,7 +2935,7 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
           }
         }
         for (int ii = 0; ii < npoints; ii++) {
-          out << "        ival[" << ii << "]: " << ivals[ii] << endl;
+          out << spacer << "        ival[" << ii << "]: " << ivals[ii] << endl;
         }
 
       } else if (tsize == 8) {
@@ -2947,7 +2953,7 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
           }
         }
         for (int ii = 0; ii < npoints; ii++) {
-          out << "        ival[" << ii << "]: " << ivals[ii] << endl;
+          out << spacer << "        ival[" << ii << "]: " << ivals[ii] << endl;
         }
       }
 
@@ -2961,7 +2967,7 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
         ivals.resize(npoints);
         attr.read(dtype, ivals.data());
         for (int ii = 0; ii < npoints; ii++) {
-          out << "        ival[" << ii << "]: " << (int) ivals[ii] << endl;
+          out << spacer << "        ival[" << ii << "]: " << (int) ivals[ii] << endl;
         }
 
       } else if (tsize == 2) {
@@ -2979,7 +2985,7 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
           }
         }
         for (int ii = 0; ii < npoints; ii++) {
-          out << "        ival[" << ii << "]: " << ivals[ii] << endl;
+          out << spacer << "        ival[" << ii << "]: " << ivals[ii] << endl;
         }
         
       } else if (tsize == 4) {
@@ -2997,7 +3003,7 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
           }
         }
         for (int ii = 0; ii < npoints; ii++) {
-          out << "        ival[" << ii << "]: " << ivals[ii] << endl;
+          out << spacer << "        ival[" << ii << "]: " << ivals[ii] << endl;
         }
 
       } else if (tsize == 8) {
@@ -3015,7 +3021,7 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
           }
         }
         for (int ii = 0; ii < npoints; ii++) {
-          out << "        ival[" << ii << "]: " << ivals[ii] << endl;
+          out << spacer << "        ival[" << ii << "]: " << ivals[ii] << endl;
         }
 
       }
@@ -3024,16 +3030,16 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
 
   } else if (aclass == H5T_FLOAT) {
 
-    out << "    Attr type: FLOAT" << endl;
+    out << spacer << "    Attr type: FLOAT" << endl;
     FloatType flType = attr.getFloatType();
     H5T_order_t order = flType.getOrder();
     if (order == H5T_ORDER_BE) {
-      out << "    order: BE" << endl;
+      out << spacer << "    order: BE" << endl;
     } else {
-      out << "    order: LE" << endl;
+      out << spacer << "    order: LE" << endl;
     }
     size_t tsize = flType.getSize();
-    out << "    data elem size: " << tsize << endl;
+    out << spacer << "    data elem size: " << tsize << endl;
 
     if (tsize == 4) {
 
@@ -3050,7 +3056,7 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
         }
       }
       for (int ii = 0; ii < npoints; ii++) {
-        out << "      fval[" << ii << "]: " << fvals[ii] << endl;
+        out << spacer << "      fval[" << ii << "]: " << fvals[ii] << endl;
       }
 
     } else if (tsize == 8) {
@@ -3068,38 +3074,38 @@ void Hdf5xx::printAttribute(Attribute &attr, ostream &out)
         }
       }
       for (int ii = 0; ii < npoints; ii++) {
-        out << "      fval[" << ii << "]: " << fvals[ii] << endl;
+        out << spacer << "      fval[" << ii << "]: " << fvals[ii] << endl;
       }
 
     }
 
   } else if (aclass == H5T_STRING) {
 
-    out << "    Attr type: STRING" << endl;
+    out << spacer << "    Attr type: STRING" << endl;
     StrType strType = attr.getStrType();
     H5std_string sval;
     attr.read(dtype, sval);
-    out << "      sval: " << sval << endl;
+    out << spacer << "      sval: " << sval << endl;
 
   } else if (aclass == H5T_TIME) {
-    out << "    Attr type: TIME" << endl;
+    out << spacer << "    Attr type: TIME" << endl;
   } else if (aclass == H5T_BITFIELD) {
-    out << "    Attr type: BITFIELD" << endl;
+    out << spacer << "    Attr type: BITFIELD" << endl;
   } else if (aclass == H5T_OPAQUE) {
-    out << "    Attr type: OPAQUE" << endl;
+    out << spacer << "    Attr type: OPAQUE" << endl;
   } else if (aclass == H5T_COMPOUND) {
-    out << "    Attr type: COMPOUND" << endl;
+    out << spacer << "    Attr type: COMPOUND" << endl;
   } else if (aclass == H5T_REFERENCE) {
-    out << "    Attr type: REFERENCE" << endl;
+    out << spacer << "    Attr type: REFERENCE" << endl;
   } else if (aclass == H5T_ENUM) {
-    out << "    Attr type: ENUM" << endl;
+    out << spacer << "    Attr type: ENUM" << endl;
   } else if (aclass == H5T_VLEN) {
-    out << "    Attr type: VLEN" << endl;
+    out << spacer << "    Attr type: VLEN" << endl;
   } else if (aclass == H5T_ARRAY) {
-    out << "    Attr type: ARRAY" << endl;
+    out << spacer << "    Attr type: ARRAY" << endl;
   }
 
-  out << "------------------------------------" << endl;
+  out << spacer << "------------------------------------" << endl;
 
 }
 
