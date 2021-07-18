@@ -847,6 +847,54 @@ int Hdf5xx::loadArrayAttribute(H5Object &obj,
 
 }
 
+///////////////////////////////////////////////////////////////////
+// get string attribute
+
+string Hdf5xx::getStringAttribute(H5Object &obj,
+                                  const string &name)
+  
+{
+
+  Hdf5xx::DecodedAttr attr;
+  Hdf5xx util;
+  util.loadAttribute(obj, name,
+                     obj.getObjName(), attr);
+  return attr.getAsString();
+
+}
+
+///////////////////////////////////////////////////////////////////
+// get integer attribute
+
+int Hdf5xx::getIntAttribute(H5Object &obj,
+                            const string &name)
+  
+{
+
+  Hdf5xx::DecodedAttr attr;
+  Hdf5xx util;
+  util.loadAttribute(obj, name,
+                     obj.getObjName(), attr);
+  return attr.getAsInt();
+
+}
+
+///////////////////////////////////////////////////////////////////
+// get double attribute
+
+double Hdf5xx::getDoubleAttribute(H5Object &obj,
+                                  const string &name)
+  
+{
+
+  Hdf5xx::DecodedAttr attr;
+  Hdf5xx util;
+  util.loadAttribute(obj, name,
+                     obj.getObjName(), attr);
+  return attr.getAsDouble();
+
+}
+
 /////////////////////////////////////////////////
 // get object type, by index
 

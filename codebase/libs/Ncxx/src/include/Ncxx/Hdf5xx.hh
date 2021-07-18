@@ -160,6 +160,17 @@ public:
                          const string &context,
                          ArrayAttr &arrayAttr);
   
+  // get attributes of various types
+  
+  static string getStringAttribute(H5Object &obj,
+                                   const string &name);
+  
+  static int getIntAttribute(H5Object &obj,
+                             const string &name);
+  
+  static double getDoubleAttribute(H5Object &obj,
+                                   const string &name);
+  
   // get object type, by index
   
   static hdf5_object_t getObjTypeByIdx(Group &group, size_t index);

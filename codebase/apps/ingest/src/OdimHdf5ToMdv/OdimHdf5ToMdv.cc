@@ -166,6 +166,13 @@ int OdimHdf5ToMdv::Run ()
   int iret = 0;
   PMU_auto_register("Run");
   
+  // create the output fields
+  
+  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
+    OutputField *fld = new OutputField(_params._output_fields[ifield]);
+    _outputFields.push_back(fld);
+  }
+
   // loop until end of data
   
   char *inputPath;
@@ -173,10 +180,17 @@ int OdimHdf5ToMdv::Run ()
     
     PMU_auto_register("Reading file");
     ta_file_uncompress(inputPath);
+
     if (_processFile(inputPath)) {
       cerr << "ERROR = OdimHdf5ToMdv::Run" << endl;
       cerr << "  Processing file: " << inputPath << endl;
       iret = -1;
+    }
+    
+    // clear the output fields
+    
+    for (size_t ii = 0; ii < _outputFields.size(); ii++) {
+      _outputFields[ii]->clear();
     }
     
   }
@@ -206,7 +220,7 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
 
     H5File file(input_path, H5F_ACC_RDONLY);
     if (_params.debug) {
-      cerr << "  file size: " << file.getFileSize() << endl;
+      cerr << "==>> File size: " << file.getFileSize() << endl;
     }
     H5x::Exception::dontPrint();
     
@@ -222,32 +236,28 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
       cerr << "Conventions: " << _conventions << endl;
     }
 
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       Hdf5xx::printFileStructure(root, 0, cerr);
     }
 
-    // find the fields
-
-    if (_findFields(root)) {
-      cerr << "ERROR processing file: " << input_path << endl;
-      cerr << "  Cannot find the fields" << endl;
-    }
-    cerr << "2222222222222222222222" << endl;
-  
-    return 0;
-
-    // open the NS group
+    // read the metadata from the main what and how groups
     
-    Group ns(root.openGroup("NS"));
-    if (_readMetadata(ns)) {
+    if (_readMetadata(root)) {
       return -1;
     }
+    // read the where group - grid location etc.
+    
+    _readWhere(root);
 
     // read in the fields
-    
-    if (_readFields(ns)) {
-      return -1;
+
+    if (_readFields(root)) {
+      cerr << "ERROR processing file: " << input_path << endl;
+      cerr << "  Cannot read in the fields" << endl;
     }
+    
+    return 0;
+
 
   } // try
   
@@ -340,28 +350,26 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
 }
 
 /////////////////////////////////////////////
-// Find the data fields
+// Read in the data fields
 
-int OdimHdf5ToMdv::_findFields(Group &root)
+int OdimHdf5ToMdv::_readFields(Group &root)
   
 {
-
+  
   for (int ii = 1; ii < 999; ii++) {
 
-    char dataGrpName[1024];
-    snprintf(dataGrpName, 1024, "dataset%d", ii);
-    cerr << "111111111 searching for group: " << dataGrpName << endl;
+    char datasetGrpName[1024];
+    snprintf(datasetGrpName, 1024, "dataset%d", ii);
     try {
-      if (root.nameExists(dataGrpName)) {
-        Group data1Grp(root.openGroup(dataGrpName));
-        cerr << "111111111 group exists: " << dataGrpName << endl;
-        _readField(data1Grp);
+      if (root.nameExists(datasetGrpName)) {
+        Group datasetGrp(root.openGroup(datasetGrpName));
+        _readField(datasetGrp);
       } else {
         if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "Dataset group does not exist: " << dataGrpName << endl;
+          cerr << "N dataset groups found: " << ii - 1 << endl;
           cerr << "  End of data" << endl;
         }
-        return -1;
+        return 0;
       }
     } catch (H5x::Exception &e) {
       return -1;
@@ -420,39 +428,6 @@ string OdimHdf5ToMdv::_readStringAttribute(Group &group,
   _utils.loadAttribute(group, attrName, context, decodedAttr);
   string attr(decodedAttr.getAsString());
   return attr;
-}
-
-//////////////////////////////////////////////
-// read the NS group metadata
-
-int OdimHdf5ToMdv::_readMetadata(Group &ns)
-  
-{
-
-  string swathHeader = _readStringAttribute(ns, "SwathHeader", "ns-attr");
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "SwathHeader: " << endl << "===================" << endl
-         << swathHeader << "===================" << endl;
-  }
-
-  if (_readTimes(ns)) {
-    return -1;
-  }
-
-  if (_readLatLon(ns)) {
-    return -1;
-  }
-  
-  if (_readSpaceCraftPos(ns)) {
-    return -1;
-  }
-
-  if (_readQcFlags(ns)) {
-    return -1;
-  }
-
-  return 0;
-
 }
 
 //////////////////////////////////////////////
@@ -831,36 +806,159 @@ int OdimHdf5ToMdv::_readField(Group &dataGrp)
   try {
     
     Group what(dataGrp.openGroup("what"));
-    cerr << "00000000000000000000" << endl;
+    string fieldName = Hdf5xx::getStringAttribute(what, "quantity");
 
-    Hdf5xx::DecodedAttr quant;
-    _utils.loadAttribute(what, "quantity",
-                         dataGrp.getObjName(), quant);
-    string fieldName(quant.getAsString());
-
+    // do we want this field
+    
+    OutputField *fld = NULL;
     bool fieldWanted = false;
-    for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
-      Params::output_field_t &fldParams = _params._output_fields[ifield];
-      if (fieldName == string(fldParams.hdf5Quantity)) {
+    for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+      fld = _outputFields[ifield];
+      if (fieldName == string(fld->params.hdf5Quantity)) {
         fieldWanted = true;
         break;
       }
     }
+
     if (fieldWanted) {
-      cerr << "eeeeeeeeeeeeee field wanted: " << fieldName << endl;
+
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "Found field: " << fieldName << endl;
+      }
+
+      _readFieldAttributes(what, fieldName, fld);
+      
     }
     
     
   } catch (H5x::Exception &e) {
-    cerr << "WARNING - 'what' subgroup is not found in data group: "
+
+    cerr << "WARNING - cannot read 'what' subgroup in data group: "
          << dataGrp.getObjName() << endl;
     return -1;
+
   }
   
   return 0;
   
 }
+
+//////////////////////////////////////////////
+// read in field attributes
+
+int OdimHdf5ToMdv::_readFieldAttributes(Group &what,
+                                        const string &fieldName,
+                                        OutputField *fld)
   
+{
+
+  string startDateStr = Hdf5xx::getStringAttribute(what, "startdate");
+  string startTimeStr = Hdf5xx::getStringAttribute(what, "starttime");
+  string endDateStr = Hdf5xx::getStringAttribute(what, "enddate");
+  string endTimeStr = Hdf5xx::getStringAttribute(what, "endtime");
+
+  fld->startTime.set(startDateStr + startTimeStr);
+  fld->endTime.set(endDateStr + endTimeStr);
+
+  fld->gain = Hdf5xx::getDoubleAttribute(what, "gain");
+  fld->offset = Hdf5xx::getDoubleAttribute(what, "offset");
+  fld->nodata = Hdf5xx::getDoubleAttribute(what, "nodata");
+  fld->undetect = Hdf5xx::getDoubleAttribute(what, "undetect");
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading attributes, field: " << fieldName << endl;
+    cerr << "  start time: " << fld->startTime.asString() << endl;
+    cerr << "  end time: " << fld->endTime.asString() << endl;
+    cerr << "  gain: " << fld->gain << endl;
+    cerr << "  offset: " << fld->offset << endl;
+    cerr << "  nodata: " << fld->nodata << endl;
+    cerr << "  undetect: " << fld->undetect << endl;
+  }
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////
+// read the main what and how group
+
+int OdimHdf5ToMdv::_readMetadata(Group &root)
+  
+{
+
+  Group what(root.openGroup("what"));
+
+  string dateStr = Hdf5xx::getStringAttribute(what, "date");
+  string timeStr = Hdf5xx::getStringAttribute(what, "time");
+  _midTime.set(dateStr + timeStr);
+  _version = Hdf5xx::getStringAttribute(what, "version");
+  _source = Hdf5xx::getStringAttribute(what, "source");
+  
+  Group how(root.openGroup("how"));
+
+  _history = Hdf5xx::getStringAttribute(how, "nodes");
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading main what and how groups" << endl;
+    cerr << "  midTime: " << _midTime.asString() << endl;
+    cerr << "  version: " << _version << endl;
+    cerr << "  source: " << _source << endl;
+    cerr << "  history: " << _history << endl;
+  }
+
+  return 0;
+  
+}
+
+//////////////////////////////////////////////
+// read the where group - grid location etc.
+
+int OdimHdf5ToMdv::_readWhere(Group &root)
+  
+{
+
+  Group where(root.openGroup("where"));
+
+  _projStr = Hdf5xx::getStringAttribute(where, "projdef");
+
+  _nx = Hdf5xx::getIntAttribute(where, "xsize");
+  _ny = Hdf5xx::getIntAttribute(where, "ysize");
+  
+  _dxM = Hdf5xx::getDoubleAttribute(where, "xscale");
+  _dyM = Hdf5xx::getDoubleAttribute(where, "yscale");
+
+  _llLon = Hdf5xx::getDoubleAttribute(where, "LL_lon");
+  _llLat = Hdf5xx::getDoubleAttribute(where, "LL_lat");
+  _ulLon = Hdf5xx::getDoubleAttribute(where, "UL_lon");
+  _ulLat = Hdf5xx::getDoubleAttribute(where, "UL_lat");
+  _urLon = Hdf5xx::getDoubleAttribute(where, "UR_lon");
+  _urLat = Hdf5xx::getDoubleAttribute(where, "UR_lat");
+  _lrLon = Hdf5xx::getDoubleAttribute(where, "LR_lon");
+  _lrLat = Hdf5xx::getDoubleAttribute(where, "LR_lat");
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading where group" << endl;
+    cerr << "  projStr: " << _projStr << endl;
+    cerr << "  nx: " << _nx << endl;
+    cerr << "  ny: " << _ny << endl;
+    cerr << "  dxM: " << _dxM << endl;
+    cerr << "  dyM: " << _dyM << endl;
+    cerr << "  llLon: " << _llLon << endl;
+    cerr << "  llLat: " << _llLat << endl;
+    cerr << "  ulLon: " << _ulLon << endl;
+    cerr << "  ulLat: " << _ulLat << endl;
+    cerr << "  urLon: " << _urLon << endl;
+    cerr << "  urLat: " << _urLat << endl;
+    cerr << "  lrLon: " << _lrLon << endl;
+    cerr << "  lrLat: " << _lrLat << endl;
+  }
+  
+  return 0;
+  
+}
+
+
+#ifdef NOLONGER
 //////////////////////////////////////////////
 // read the fields
 
@@ -1024,6 +1122,8 @@ int OdimHdf5ToMdv::_readFields(Group &ns)
   return 0;
 
 }
+
+#endif
 
 //////////////////////////////////////////////
 // read 3D float field

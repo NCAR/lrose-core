@@ -96,10 +96,13 @@ private:
 
   vector<DateTime> _times;
   DateTime _startTime, _endTime;
+  DateTime _midTime;
 
   // metadata
 
   string _conventions;
+  string _version;
+  string _source;
   string _fileHeader, _fileInfo;
   string _inputRecord, _jaxaInfo;
   string _navigationRecord, _history;
@@ -125,7 +128,15 @@ private:
 
   // output geometry
 
+  string _projStr;
+
   size_t _nx, _ny, _nz;
+  double _dxM, _dyM;
+  double _llLon, _llLat;
+  double _ulLon, _ulLat;
+  double _lrLon, _lrLat;
+  double _urLon, _urLat;
+  
   double _minxDeg, _minyDeg, _minzKm;
   double _maxxDeg, _maxyDeg, _maxzKm;
   double _dxDeg, _dyDeg, _dzKm;
@@ -140,6 +151,16 @@ private:
     OutputField(const Params::output_field_t &p) :
             params(p)
     {
+      valid = false;
+    }
+
+    void clear() {
+      fl32Input.clear();
+      fl32Interp.clear();
+      fl32Output.clear();
+      si16Input.clear();
+      si16Interp.clear();
+      si16Output.clear();
       valid = false;
     }
     
@@ -165,6 +186,14 @@ private:
 
     NcxxPort::fl32 fl32Missing;
     NcxxPort::si16 si16Missing;
+
+    DateTime startTime;
+    DateTime endTime;
+    
+    double gain;
+    double offset;
+    double nodata;
+    double undetect;
     
   private:
     
@@ -192,20 +221,23 @@ private:
 
   int _processFile(const char *input_path);
 
-  int _findFields(Group &root);
-
   string _readStringAttribute(Group &group,
                               const string &attrName,
                               const string &context);
   
-  int _readMetadata(Group &ns);
   int _readTimes(Group &ns);
   int _readLatLon(Group &ns);
   int _readSpaceCraftPos(Group &ns);
   int _readQcFlags(Group &ns);
 
+  int _readFields(Group &root);
   int _readField(Group &dataGrp);
-  int _readFields(Group &ns);
+  int _readFieldAttributes(Group &what,
+                           const string &fieldName,
+                           OutputField *fld);
+  int _readMetadata(Group &ns);
+  int _readWhere(Group &root);
+  
 
   int _readField3D(Group &ns,
                    const string &groupName,
