@@ -24,16 +24,15 @@
 ///////////////////////////////////////////////////////////////
 // OdimHdf5ToMdv.cc
 //
-// OdimHdf5ToMdv object
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Oct 2008
+// July 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// OdimHdf5ToMdv reads McIdas data in NetCDF format, and
-// converts to MDV
+// OdimHdf5ToMdv reads ODIM OPERA data in HDF5 format, and
+// converts to MDV.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -222,22 +221,23 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
     if (_params.debug) {
       cerr << "==>> File size: " << file.getFileSize() << endl;
     }
-    H5x::Exception::dontPrint();
+    if (_params.debug < Params::DEBUG_VERBOSE) {
+      H5x::Exception::dontPrint();
+    }
     
     // get the root group
     
     Group root(file.openGroup("/"));
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      Hdf5xx::printFileStructure(root, 0, cerr);
+    }
 
     // root attributes
 
-    _conventions = _readStringAttribute(root, "Conventions", "RootAttr");
+    _conventions = Hdf5xx::getStringAttribute(root, "Conventions");
 
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Conventions: " << _conventions << endl;
-    }
-
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      Hdf5xx::printFileStructure(root, 0, cerr);
     }
 
     // read the metadata from the main what and how groups
@@ -349,536 +349,6 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
 
 }
 
-/////////////////////////////////////////////
-// Read in the data fields
-
-int OdimHdf5ToMdv::_readFields(Group &root)
-  
-{
-  
-  for (int ii = 1; ii < 999; ii++) {
-
-    char datasetGrpName[1024];
-    snprintf(datasetGrpName, 1024, "dataset%d", ii);
-    try {
-      if (root.nameExists(datasetGrpName)) {
-        Group datasetGrp(root.openGroup(datasetGrpName));
-        _readField(datasetGrp);
-      } else {
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "N dataset groups found: " << ii - 1 << endl;
-          cerr << "  End of data" << endl;
-        }
-        return 0;
-      }
-    } catch (H5x::Exception &e) {
-      return -1;
-    }
-
-  } // ii
-
-  return 0;
-
-#ifdef JUNK
-  size_t numObjs = grp.getNumObjs();
-  
-  string spacer;
-  for (int jj = 0; jj < level; jj++) {
-    spacer += "  ";
-  }
-
-  cerr << spacer << "======>> Group: "
-      << grp.getObjName() << " <<======" << endl;
-  Hdf5xx::printAttributes(grp, cerr, level);
-  
-  for (size_t ii = 0; ii < numObjs; ii++) {
-
-    string objName = grp.getObjnameByIdx(ii);
-    Hdf5xx::hdf5_object_t objType = Hdf5xx::getObjTypeByIdx(grp, ii);
-    if (objType == Hdf5xx::OBJECT_GROUP) {
-      Group nextGrp(grp.openGroup(objName));
-      _findFields(nextGrp, level + 1);
-    } else if (objType == Hdf5xx::OBJECT_DATASET) {
-      cerr << spacer << "  ======>> DataSet: "
-           << objName << " <<======" << endl;
-      DataSet dset = grp.openDataSet(objName);
-      Hdf5xx::printAttributes(dset, cerr, level + 1);
-      if (dsetint loadAttribute(H5Object &obj,
-                        const string &name,
-                        const string &context,
-                        DecodedAttr &decodedAttr);
-    } else if (objType == Hdf5xx::OBJECT_NAMED_DATATYPE) {
-      cerr << spacer << "  ======>> NAMED_DATATYPE-objName: "
-          << objName << " <<======" << endl;
-    }
-  }  // ii
-#endif
-
-}
-    
-/////////////////////////////////////////////
-// read string attribute
-
-string OdimHdf5ToMdv::_readStringAttribute(Group &group,
-                                          const string &attrName,
-                                          const string &context)
-  
-{
-  Hdf5xx::DecodedAttr decodedAttr;
-  _utils.loadAttribute(group, attrName, context, decodedAttr);
-  string attr(decodedAttr.getAsString());
-  return attr;
-}
-
-//////////////////////////////////////////////
-// read the scan times
-
-int OdimHdf5ToMdv::_readTimes(Group &ns)
-  
-{
-
-  Group scanTime(ns.openGroup("ScanTime"));
-  vector<size_t> dims;
-  string units;
-  NcxxPort::si32 missingVal;
-  
-  vector<NcxxPort::si32> years, months, days, hours, mins, secs, msecs;
-  Hdf5xx hdf5;
-  if (hdf5.readSi32Array(scanTime, "Year",
-                         dims, missingVal, years, units)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readTimes()" << endl;
-    cerr << "  Cannot read Year variable" << endl;
-    return -1;
-  }
-  if (hdf5.readSi32Array(scanTime, "Month",
-                         dims, missingVal, months, units)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readTimes()" << endl;
-    cerr << "  Cannot read Month variable" << endl;
-    return -1;
-  }
-  if (hdf5.readSi32Array(scanTime, "DayOfMonth",
-                         dims, missingVal, days, units)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readTimes()" << endl;
-    cerr << "  Cannot read DayOfMonth variable" << endl;
-    return -1;
-  }
-  if (hdf5.readSi32Array(scanTime, "Hour",
-                         dims, missingVal, hours, units)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readTimes()" << endl;
-    cerr << "  Cannot read Hour variable" << endl;
-    return -1;
-  }
-  if (hdf5.readSi32Array(scanTime, "Minute",
-                         dims, missingVal, mins, units)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readTimes()" << endl;
-    cerr << "  Cannot read Minute variable" << endl;
-    return -1;
-  }
-  if (hdf5.readSi32Array(scanTime, "Second",
-                         dims, missingVal, secs, units)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readTimes()" << endl;
-    cerr << "  Cannot read Second variable" << endl;
-    return -1;
-  }
-  if (hdf5.readSi32Array(scanTime, "MilliSecond",
-                         dims, missingVal, msecs, units)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readTimes()" << endl;
-    cerr << "  Cannot read MilliSecond variable" << endl;
-    return -1;
-  }
-
-  _times.clear();
-  for (size_t ii = 0; ii < years.size(); ii++) {
-    DateTime dtime(years[ii], months[ii], days[ii],
-                   hours[ii], mins[ii], secs[ii], msecs[ii] / 1000.0);
-    _times.push_back(dtime);
-  }
-  if (_times.size() < 1) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readTimes()" << endl;
-    cerr << "  No scan times found" << endl;
-    return -1;
-  }
-  
-  _startTime = _times[0];
-  _endTime = _times[_times.size()-1];
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Reading scan times <<====" << endl;
-    cerr << "  nTimes: " << _times.size() << endl;
-    cerr << "  startTime: " << _startTime.asString(3) << endl;
-    cerr << "  endTime: " << _endTime.asString(3) << endl;
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t ii = 0; ii < _times.size(); ii++) {
-        cerr << "  ii, time: " << ii << ", " << _times[ii].asString(3) << endl;
-      }
-    }
-  }
-  
-  return 0;
-
-}
-
-//////////////////////////////////////////////
-// read the quality flags
-
-int OdimHdf5ToMdv::_readQcFlags(Group &ns)
-  
-{
-
-  Group scanStatus(ns.openGroup("scanStatus"));
-  vector<size_t> dims;
-  string units;
-  NcxxPort::si32 missingVal;
-
-  _dataQuality.resize(_times.size());
-  _dataWarning.resize(_times.size());
-  _geoError.resize(_times.size());
-  _geoWarning.resize(_times.size());
-  _limitErrorFlag.resize(_times.size());
-  _missingScan.resize(_times.size());
-  
-  Hdf5xx hdf5;
-  if (hdf5.readSi32Array(scanStatus, "dataQuality",
-                         dims, missingVal, _dataQuality, units)) {
-    cerr << "WARNING - OdimHdf5ToMdv::_readQcFlags()" << endl;
-    cerr << "  Cannot read dataQuality flag variable" << endl;
-  }
-  if (hdf5.readSi32Array(scanStatus, "dataWarning",
-                         dims, missingVal, _dataWarning, units)) {
-    cerr << "WARNING - OdimHdf5ToMdv::_readQcFlags()" << endl;
-    cerr << "  Cannot read dataWarning flag variable" << endl;
-  }
-  if (hdf5.readSi32Array(scanStatus, "geoError",
-                         dims, missingVal, _geoError, units)) {
-    cerr << "WARNING - OdimHdf5ToMdv::_readQcFlags()" << endl;
-    cerr << "  Cannot read geoError flag variable" << endl;
-  }
-  if (hdf5.readSi32Array(scanStatus, "geoWarning",
-                         dims, missingVal, _geoWarning, units)) {
-    cerr << "WARNING - OdimHdf5ToMdv::_readQcFlags()" << endl;
-    cerr << "  Cannot read geoWarning flag variable" << endl;
-  }
-  if (hdf5.readSi32Array(scanStatus, "limitErrorFlag",
-                         dims, missingVal, _limitErrorFlag, units)) {
-    cerr << "WARNING - OdimHdf5ToMdv::_readQcFlags()" << endl;
-    cerr << "  Cannot read limitErrorFlag variable" << endl;
-    return -1;
-  }
-  if (hdf5.readSi32Array(scanStatus, "missing",
-                         dims, missingVal, _missingScan, units)) {
-    cerr << "WARNING - OdimHdf5ToMdv::_readQcFlags()" << endl;
-    cerr << "  Cannot read missing flag variable" << endl;
-    return -1;
-  }
-
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "====>> Reading QC flags <<====" << endl;
-    for (size_t ii = 0; ii < _times.size(); ii++) {
-      cerr << "  ii, dQ, dW, geoE, geoW, limE, miss: "
-           << ii << ", "
-           << _dataQuality[ii] << ", "
-           << _dataWarning[ii] << ", "
-           << _geoError[ii] << ", "
-           << _geoWarning[ii] << ", "
-           << _limitErrorFlag[ii] << ", "
-           << _missingScan[ii] << endl;
-    }
-  }
-  
-  return 0;
-
-}
-
-//////////////////////////////////////////////
-// read the lat/lon arrays
-
-int OdimHdf5ToMdv::_readLatLon(Group &ns)
-  
-{
-  
-  Hdf5xx hdf5;
-
-  // read Latitude
-  
-  vector<size_t> latDims;
-  string latUnits;
-  if (hdf5.readFl64Array(ns, "Latitude",
-                         latDims, _missingLat, _lats, latUnits)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readLatLon()" << endl;
-    cerr << "  Cannot read Latitude variable" << endl;
-    return -1;
-  }
-
-  // read Longitude
-  
-  vector<size_t> lonDims;
-  string lonUnits;
-  if (hdf5.readFl64Array(ns, "Longitude",
-                         lonDims, _missingLon, _lons, lonUnits)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readLatLon()" << endl;
-    cerr << "  Cannot read Longitude variable" << endl;
-    return -1;
-  }
-
-  // check dimensions for consistency
-  
-  if (latDims.size() != 2 || lonDims.size() != 2) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readLatLon()" << endl;
-    cerr << "  Latitude/Longitude must have 2 dimensions" << endl;
-    cerr << "  latDims.size(): " << latDims.size() << endl;
-    cerr << "  lonDims.size(): " << lonDims.size() << endl;
-    return -1;
-  }
-  if (latDims[0] != lonDims[0] || latDims[1] != lonDims[1]) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readLatLon()" << endl;
-    cerr << "  Latitude/Longitude must have same dimensions" << endl;
-    cerr << "  latDims[0]: " << latDims[0] << endl;
-    cerr << "  lonDims[0]: " << lonDims[0] << endl;
-    cerr << "  latDims[1]: " << latDims[1] << endl;
-    cerr << "  lonDims[1]: " << lonDims[1] << endl;
-    return -1;
-  }
-  _nScans = latDims[0];
-  _nRays = latDims[1];
-
-  _latLons.clear();
-  _minLat = 90.0;
-  _maxLat = -90.0;
-  _minLon = 360.0;
-  _maxLon = -360.0;
-  for (size_t iscan = 0; iscan < _nScans; iscan++) {
-    vector<Point_d> pts;
-    for (size_t iray = 0; iray < _nRays; iray++) {
-      size_t ipt = iscan * _nRays + iray;
-      Point_d pt;
-      pt.y = _lats[ipt];
-      pt.x = _lons[ipt];
-      pts.push_back(pt);
-      if (pt.y != _missingLat) {
-        _minLat = min(_minLat, pt.y);
-        _maxLat = max(_maxLat, pt.y);
-      }
-      if (pt.x != _missingLon) {
-        _minLon = min(_minLon, pt.x);
-        _maxLon = max(_maxLon, pt.x);
-      }
-    } // iray
-    _latLons.push_back(pts);
-  } // iscan
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Reading lat/lon <<====" << endl;
-    cerr << "  missingLat: " << _missingLat << endl;
-    cerr << "  missingLon: " << _missingLon << endl;
-    cerr << "  minLat, maxLat: " << _minLat << ", " << _maxLat << endl;
-    cerr << "  minLon, maxLon: " << _minLon << ", " << _maxLon << endl;
-    cerr << "  nScans, nRays: " << _nScans << ", " << _nRays << endl;
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _nScans; iscan++) {
-        for (size_t iray = 0; iray < _nRays; iray++) {
-          cerr << "  iscan, iray, lat, lon: "
-               << iscan << ", "
-               << iray << ", "
-               << _latLons[iscan][iray].y << ", "
-               << _latLons[iscan][iray].x << endl;
-        } // iray
-      } // iscan
-    }
-  }
-
-  // set up (x, y) grid details
-
-  _dxDeg = _params.output_grid.dLon;
-  _dyDeg = _params.output_grid.dLat;
-
-  if (_params.set_output_grid_limits_from_data) {
-    _minxDeg = ((int) floor(_minLon / _dxDeg) - 5) * _dxDeg;
-    _minyDeg = ((int) floor(_minLat / _dyDeg) - 5) * _dyDeg;
-    _nx = (_maxLon - _minLon) / _dxDeg + 10;
-    _ny = (_maxLat - _minLat) / _dyDeg + 10;
-  } else {
-    _nx = _params.output_grid.nLon;
-    _ny = _params.output_grid.nLat;
-    _minxDeg = _params.output_grid.minLon;
-    _minyDeg = _params.output_grid.minLat;
-  }
-
-  _maxxDeg = _minxDeg + _nx * _dxDeg;
-  _maxyDeg = _minyDeg + _ny * _dyDeg;
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Output grid details <<====" << endl;
-    cerr << "  _nx, _ny: " << _nx << ", " << _ny << endl;
-    cerr << "  _dxDeg, _dyDeg: " << _dxDeg << ", " << _dyDeg << endl;
-    cerr << "  _minxDeg, _minyDeg: " << _minxDeg << ", " << _minyDeg << endl;
-    cerr << "  _maxxDeg, _maxyDeg: " << _maxxDeg << ", " << _maxyDeg << endl;
-  }
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////
-// read the spacecraft lat/lon/alt
-
-int OdimHdf5ToMdv::_readSpaceCraftPos(Group &ns)
-  
-{
-  
-  Hdf5xx hdf5;
-  Group nav(ns.openGroup("navigation"));
-
-  // read spacecraft longitude
-  
-  vector<size_t> lonDims;
-  NcxxPort::fl64 missingLon;
-  string lonUnits;
-  if (hdf5.readFl64Array(nav, "scLon",
-                         lonDims, missingLon, _scLon, lonUnits)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readSpaceCraftPos()" << endl;
-    cerr << "  Cannot read scLon variable" << endl;
-    return -1;
-  }
-
-  // read spacecraft latitude
-  
-  vector<size_t> latDims;
-  NcxxPort::fl64 missingLat;
-  string latUnits;
-  if (hdf5.readFl64Array(nav, "scLat",
-                         latDims, missingLat, _scLat, latUnits)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readSpaceCraftPos()" << endl;
-    cerr << "  Cannot read scLat variable" << endl;
-    return -1;
-  }
-
-  // read spacecraft altitude
-  
-  vector<size_t> altDims;
-  NcxxPort::fl64 missingAlt;
-  string altUnits;
-  if (hdf5.readFl64Array(nav, "scAlt",
-                         altDims, missingAlt, _scAlt, altUnits)) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readSpaceCraftPos()" << endl;
-    cerr << "  Cannot read scAlt variable" << endl;
-    return -1;
-  }
-
-  // check dimensions for consistency
-  
-  if (lonDims[0] != _nScans || latDims[0] != _nScans || altDims[0] != _nScans) {
-    cerr << "ERROR - OdimHdf5ToMdv::_readSpaceCraftPos()" << endl;
-    cerr << "  Lat/Lon/Alt dims must match _nScans" << endl;
-    cerr << "  nScans: " << _nScans << endl;
-    cerr << "  latDims[0]: " << latDims[0] << endl;
-    cerr << "  lonDims[0]: " << lonDims[0] << endl;
-    cerr << "  altDims[0]: " << altDims[0] << endl;
-    return -1;
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Reading spacecraft position <<====" << endl;
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _nScans; iscan++) {
-        cerr << "  iscan, scLat, scLon, scAlt: "
-             << iscan << ", "
-             << _scLat[iscan] << ", "
-             << _scLon[iscan] << ", "
-             << _scAlt[iscan] << endl;
-      } // iray
-    } // iscan
-  }
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////
-// read in a field, if required
-
-int OdimHdf5ToMdv::_readField(Group &dataGrp)
-  
-{
-
-  // get field attributes from the what group
-
-  try {
-    
-    Group what(dataGrp.openGroup("what"));
-    string fieldName = Hdf5xx::getStringAttribute(what, "quantity");
-
-    // do we want this field
-    
-    OutputField *fld = NULL;
-    bool fieldWanted = false;
-    for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
-      fld = _outputFields[ifield];
-      if (fieldName == string(fld->params.hdf5Quantity)) {
-        fieldWanted = true;
-        break;
-      }
-    }
-
-    if (fieldWanted) {
-
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Found field: " << fieldName << endl;
-      }
-
-      _readFieldAttributes(what, fieldName, fld);
-      
-    }
-    
-    
-  } catch (H5x::Exception &e) {
-
-    cerr << "WARNING - cannot read 'what' subgroup in data group: "
-         << dataGrp.getObjName() << endl;
-    return -1;
-
-  }
-  
-  return 0;
-  
-}
-
-//////////////////////////////////////////////
-// read in field attributes
-
-int OdimHdf5ToMdv::_readFieldAttributes(Group &what,
-                                        const string &fieldName,
-                                        OutputField *fld)
-  
-{
-
-  string startDateStr = Hdf5xx::getStringAttribute(what, "startdate");
-  string startTimeStr = Hdf5xx::getStringAttribute(what, "starttime");
-  string endDateStr = Hdf5xx::getStringAttribute(what, "enddate");
-  string endTimeStr = Hdf5xx::getStringAttribute(what, "endtime");
-
-  fld->startTime.set(startDateStr + startTimeStr);
-  fld->endTime.set(endDateStr + endTimeStr);
-
-  fld->gain = Hdf5xx::getDoubleAttribute(what, "gain");
-  fld->offset = Hdf5xx::getDoubleAttribute(what, "offset");
-  fld->nodata = Hdf5xx::getDoubleAttribute(what, "nodata");
-  fld->undetect = Hdf5xx::getDoubleAttribute(what, "undetect");
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Reading attributes, field: " << fieldName << endl;
-    cerr << "  start time: " << fld->startTime.asString() << endl;
-    cerr << "  end time: " << fld->endTime.asString() << endl;
-    cerr << "  gain: " << fld->gain << endl;
-    cerr << "  offset: " << fld->offset << endl;
-    cerr << "  nodata: " << fld->nodata << endl;
-    cerr << "  undetect: " << fld->undetect << endl;
-  }
-  
-  return 0;
-  
-}
-
 //////////////////////////////////////////////
 // read the main what and how group
 
@@ -957,183 +427,270 @@ int OdimHdf5ToMdv::_readWhere(Group &root)
   
 }
 
+/////////////////////////////////////////////
+// Read in the data fields
 
-#ifdef NOLONGER
-//////////////////////////////////////////////
-// read the fields
-
-int OdimHdf5ToMdv::_readFields(Group &ns)
+int OdimHdf5ToMdv::_readFields(Group &root)
   
 {
   
-  // create the field objects
+  for (int ii = 1; ii < 999; ii++) {
 
-  _outputFields.clear();
-
-  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
-    
-    Params::output_field_t &fldParams = _params._output_fields[ifield];
-
-    OutputField *fld = new OutputField(fldParams);
-
-    Group grp(ns.openGroup(fld->params.groupName));
-    if (fld->hdf5.getVarProps(grp, fld->params.hdf5Quantity,
-                              fld->dims, fld->units, 
-                              fld->h5class, fld->h5sign, fld->h5order, fld->h5size)) {
-      cerr << fld->hdf5.getErrStr() << endl;
-      delete fld;
-      continue;
-    }
-
-    // set interp type
-    
-    if (fld->h5class == H5T_INTEGER) {
-      fld->nearestNeighbor = true;
-    } else {
-      fld->nearestNeighbor = _params.interp_using_nearest_neighbor;
-    }
-
-    // debug print
-
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Reading fields" << endl;
-      cerr << "  groupName: " << fld->params.groupName << endl;
-      cerr << "  hdf5Quantity: " << fld->params.hdf5Quantity << endl;
-      cerr << "  dims: ";
-      for (size_t ii = 0; ii < fld->dims.size(); ii++) {
-        cerr << fld->dims[ii];
-        if (ii == fld->dims.size() - 1) {
-          cerr << endl;
-        } else {
-          cerr << ", ";
-        }
-      }
-      if (fld->units.size() > 0) {
-        cerr << "  units: " << fld->units << endl;
-      }
-      if (fld->h5class == H5T_INTEGER) {
-        if (fld->h5sign == H5T_SGN_NONE) {
-          cerr << "  Is unsigned integer" << endl;
-        } else {
-          cerr << "  Is signed integer" << endl;
-        }
+    char datasetGrpName[1024];
+    snprintf(datasetGrpName, 1024, "dataset%d", ii);
+    try {
+      if (root.nameExists(datasetGrpName)) {
+        Group datasetGrp(root.openGroup(datasetGrpName));
+        _readField(datasetGrp);
       } else {
-        cerr << "  Is float" << endl;
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "N dataset groups found: " << ii - 1 << endl;
+          cerr << "  End of data" << endl;
+        }
+        return 0;
       }
-      if (fld->h5order == H5T_ORDER_LE) {
-        cerr << "  Byte order: little-endian" << endl;
-      } else {
-        cerr << "  Byte order: big-endian" << endl;
-      }
-      cerr << "  Byte len: " << fld->h5size << endl;
+    } catch (H5x::Exception &e) {
+      return -1;
     }
 
-    _outputFields.push_back(fld);
-    
-    // set number of gates
-    
-    if (fld->dims.size() == 3) {
-      _nGates = fld->dims[2];
-      _zLevels.resize(_nGates);
-      for (size_t iz = 0; iz < _nGates; iz++) {
-        _zLevels[iz] = _minzKm + iz * _dzKm;
-      }
-    }
-    
-  } // ifield
+  } // ii
 
-  // read in the fields
+  return 0;
+
+}
+    
+//////////////////////////////////////////////
+// read in a field, if required
+
+int OdimHdf5ToMdv::_readField(Group &dataGrp)
   
-  for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+{
+
+  // get field attributes from the what group
+
+  try {
     
-    OutputField *fld = _outputFields[ifield];
-    if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
+    Group what(dataGrp.openGroup("what"));
+    string fieldName = Hdf5xx::getStringAttribute(what, "quantity");
 
-      // 16-bit integer
-
-      if (fld->dims.size() == 2) {
-        // 2D field
-        if (_readField2D(ns,
-                         fld->params.groupName,
-                         fld->params.hdf5Quantity,
-                         fld->si16Input,
-                         fld->si16Missing,
-                         fld->units) == 0) {
-          fld->valid = true;
-        }
-      } else {
-        // 3D field
-        if (_readField3D(ns,
-                         fld->params.groupName,
-                         fld->params.hdf5Quantity,
-                         fld->si16Input,
-                         fld->si16Missing,
-                         fld->units) == 0) {
-          fld->valid = true;
-        }
-      } // if (fld->dims.size() == 2)
-      
-    } else { // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
-
-      // read as floats
-
-      if (fld->dims.size() == 2) {
-        // 2D field
-        if (_readField2D(ns,
-                         fld->params.groupName,
-                         fld->params.hdf5Quantity,
-                         fld->fl32Input,
-                         fld->fl32Missing,
-                         fld->units) == 0) {
-          fld->valid = true;
-        }
-      } else {
-        // 3D field
-        if (_readField3D(ns,
-                         fld->params.groupName,
-                         fld->params.hdf5Quantity,
-                         fld->fl32Input,
-                         fld->fl32Missing,
-                         fld->units) == 0) {
-          fld->valid = true;
-        }
-      } // if (fld->dims.size() == 2)
-      
-    } // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
+    // do we want this field
     
-  } // ifield
+    OutputField *fld = NULL;
+    bool fieldWanted = false;
+    for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+      fld = _outputFields[ifield];
+      if (fieldName == string(fld->params.hdf5Quantity)) {
+        fieldWanted = true;
+        break;
+      }
+    }
+
+    if (fieldWanted) {
+      
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "Found field: " << fieldName << endl;
+      }
+
+      // read attributes
+      
+      _readFieldAttributes(what, fieldName, fld);
+
+      // read data
+      
+      _readFieldData(dataGrp, fieldName, fld);
+
+    }
+    
+    
+  } catch (H5x::Exception &e) {
+
+    cerr << "WARNING - cannot read metadata and data in data group: "
+         << dataGrp.getObjName() << endl;
+    return -1;
+
+  }
   
-  _qualAvailable = false;
+  return 0;
+  
+}
 
-  // read reflectivity, to ensure we have the dimensions read in
+//////////////////////////////////////////////
+// read in field attributes
 
-  if (_readField3D(ns, "SLV", "zFactorCorrected",
-                   _dbzInput, _missingDbz, _dbzUnits)) {
+int OdimHdf5ToMdv::_readFieldAttributes(Group &what,
+                                        const string &fieldName,
+                                        OutputField *fld)
+  
+{
+
+  string startDateStr = Hdf5xx::getStringAttribute(what, "startdate");
+  string startTimeStr = Hdf5xx::getStringAttribute(what, "starttime");
+  string endDateStr = Hdf5xx::getStringAttribute(what, "enddate");
+  string endTimeStr = Hdf5xx::getStringAttribute(what, "endtime");
+
+  fld->startTime.set(startDateStr + startTimeStr);
+  fld->endTime.set(endDateStr + endTimeStr);
+
+  fld->gain = Hdf5xx::getDoubleAttribute(what, "gain");
+  fld->offset = Hdf5xx::getDoubleAttribute(what, "offset");
+  fld->nodata = Hdf5xx::getDoubleAttribute(what, "nodata");
+  fld->undetect = Hdf5xx::getDoubleAttribute(what, "undetect");
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading attributes, field: " << fieldName << endl;
+    cerr << "  start time: " << fld->startTime.asString() << endl;
+    cerr << "  end time: " << fld->endTime.asString() << endl;
+    cerr << "  gain: " << fld->gain << endl;
+    cerr << "  offset: " << fld->offset << endl;
+    cerr << "  nodata: " << fld->nodata << endl;
+    cerr << "  undetect: " << fld->undetect << endl;
+  }
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////
+// read in field data
+
+int OdimHdf5ToMdv::_readFieldData(Group &dataGrp,
+                                  const string &fieldName,
+                                  OutputField *fld)
+  
+{
+
+  // open the data set subgroup
+
+  Group data1Grp(dataGrp.openGroup("data1"));
+
+  // get the field properties
+  
+  if (fld->hdf5.getVarProps(data1Grp, "data",
+                            fld->dims, fld->units, 
+                            fld->h5class, fld->h5sign, fld->h5order, fld->h5size)) {
+    cerr << fld->hdf5.getErrStr() << endl;
+    fld->valid = false;
     return -1;
   }
-
-  // read quality flag
-
-  if (_readField2D(ns, "FLG", "qualityFlag",
-                   _qualInput, _missingQual, _qualUnits) == 0) {
-    _qualAvailable = true;
+  
+  // set interp type
+  
+  if (fld->h5class == H5T_INTEGER) {
+    fld->nearestNeighbor = true;
+  } else {
+    fld->nearestNeighbor = _params.interp_using_nearest_neighbor;
   }
   
+  cerr << "DDDDDDDDDDDDDDDDDDDDD" << endl;
+  
+  // debug print
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Reading fields" << endl;
+    cerr << "  groupName: " << fld->params.groupName << endl;
+    cerr << "  hdf5Quantity: " << fld->params.hdf5Quantity << endl;
+    cerr << "  dims: ";
+    for (size_t ii = 0; ii < fld->dims.size(); ii++) {
+      cerr << fld->dims[ii];
+      if (ii == fld->dims.size() - 1) {
+        cerr << endl;
+      } else {
+        cerr << ", ";
+      }
+    }
+    if (fld->units.size() > 0) {
+      cerr << "  units: " << fld->units << endl;
+    }
+    if (fld->h5class == H5T_INTEGER) {
+      if (fld->h5sign == H5T_SGN_NONE) {
+        cerr << "  Is unsigned integer" << endl;
+      } else {
+        cerr << "  Is signed integer" << endl;
+      }
+    } else {
+      cerr << "  Is float" << endl;
+    }
+    if (fld->h5order == H5T_ORDER_LE) {
+      cerr << "  Byte order: little-endian" << endl;
+    } else {
+      cerr << "  Byte order: big-endian" << endl;
+    }
+    cerr << "  Byte len: " << fld->h5size << endl;
+  }
+  
+  // set number of levels
+    
+  if (fld->dims.size() == 3) {
+    _nz = fld->dims[2];
+    _zLevels.resize(_nz);
+    for (size_t iz = 0; iz < _nGates; iz++) {
+      _zLevels[iz] = _minzKm + iz * _dzKm;
+    }
+  }
+
+  // read in the field data 
+  
+  if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
+    
+    // 16-bit integer
+    
+    if (fld->dims.size() == 2) {
+      // 2D field
+      if (_readField2D(data1Grp, "data",
+                       fld->si16Input,
+                       fld->si16Missing,
+                       fld->units) == 0) {
+        fld->valid = true;
+      }
+    } else {
+      // 3D field
+      if (_readField3D(data1Grp, "data",
+                       fld->si16Input,
+                       fld->si16Missing,
+                       fld->units) == 0) {
+        fld->valid = true;
+      }
+    } // if (fld->dims.size() == 2)
+    
+  } else { // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
+    
+    // read as floats
+    
+    if (fld->dims.size() == 2) {
+      // 2D field
+      if (_readField2D(data1Grp, "data",
+                       fld->fl32Input,
+                       fld->fl32Missing,
+                       fld->units) == 0) {
+        fld->valid = true;
+      }
+    } else {
+      // 3D field
+      if (_readField3D(data1Grp, "data",
+                       fld->fl32Input,
+                       fld->fl32Missing,
+                       fld->units) == 0) {
+        fld->valid = true;
+      }
+    } // if (fld->dims.size() == 2)
+    
+    cerr << "111111111 fl32Input.size(): " << fld->fl32Input.size() << endl;
+    cerr << "111111111 si16Input.size(): " << fld->si16Input.size() << endl;
+
+  } // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
+    
   return 0;
 
 }
 
-#endif
-
 //////////////////////////////////////////////
 // read 3D float field
 
-int OdimHdf5ToMdv::_readField3D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
-                               vector<NcxxPort::fl32> &vals,
-                               NcxxPort::fl32 &missingVal,
-                               string &units)
+int OdimHdf5ToMdv::_readField3D(Group &grp,
+                                const string &dsetName,
+                                vector<NcxxPort::fl32> &vals,
+                                NcxxPort::fl32 &missingVal,
+                                string &units)
   
 {
   
@@ -1142,11 +699,10 @@ int OdimHdf5ToMdv::_readField3D(Group &ns,
   // read Latitude
   
   vector<size_t> dims;
-  Group grp(ns.openGroup(groupName));
-  if (hdf5.readFl32Array(grp, fieldName,
+  if (hdf5.readFl32Array(grp, dsetName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField3D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
     return -1;
   }
 
@@ -1154,35 +710,34 @@ int OdimHdf5ToMdv::_readField3D(Group &ns,
   
   if (dims.size() != 3) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField3D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
     cerr << "  zFactorCorrected must have 3 dimensions" << endl;
     cerr << "  dims.size(): " << dims.size() << endl;
     return -1;
   }
-  if (dims[0] != _nScans || dims[1] != _nRays) {
+  if (dims[0] != _ny || dims[1] != _nx) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField3D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    cerr << "  DBZ dimensions must match nScans and nRays" << endl;
+    cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
+    cerr << "  DBZ dimensions must match ny and nx" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
-    cerr << "  _nScans: " << _nScans << endl;
+    cerr << "  _ny: " << _ny << endl;
     cerr << "  _nRays: " << _nRays << endl;
     return -1;
   }
 
-  _nGates = dims[2];
-  _nz = _nGates;
+  _nz = dims[2];
   // _minzKm = _params.radar_min_z_km;
   // _dzKm = _params.radar_delta_z_km;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read 3D fl32 group/field: " 
-         << groupName << "/" << fieldName << " <<====" << endl;
+    cerr << "====>> Read 3D fl32 group/dataset: " 
+         << grp.getObjName() << "/" << dsetName << " <<====" << endl;
     cerr << "  nScans, nRays, nGates: " 
-         << _nScans << ", " << _nRays << ", " << _nGates << endl;
+         << _ny << ", " << _nRays << ", " << _nGates << endl;
     cerr << "  missingVal: " << missingVal << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      for (size_t iscan = 0; iscan < _ny; iscan++) {
         for (size_t iray = 0; iray < _nRays; iray++) {
           for (size_t igate = 0; igate < _nGates; igate++) {
             size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
@@ -1206,12 +761,11 @@ int OdimHdf5ToMdv::_readField3D(Group &ns,
 //////////////////////////////////////////////
 // read 3D int32 field
 
-int OdimHdf5ToMdv::_readField3D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
-                               vector<NcxxPort::si16> &vals,
-                               NcxxPort::si16 &missingVal,
-                               string &units)
+int OdimHdf5ToMdv::_readField3D(Group &grp,
+                                const string &dsetName,
+                                vector<NcxxPort::si16> &vals,
+                                NcxxPort::si16 &missingVal,
+                                string &units)
   
 {
   
@@ -1220,11 +774,10 @@ int OdimHdf5ToMdv::_readField3D(Group &ns,
   // read Latitude
   
   vector<size_t> dims;
-  Group grp(ns.openGroup(groupName));
-  if (hdf5.readSi16Array(grp, fieldName,
+  if (hdf5.readSi16Array(grp, dsetName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField3D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
     return -1;
   }
 
@@ -1232,35 +785,34 @@ int OdimHdf5ToMdv::_readField3D(Group &ns,
   
   if (dims.size() != 3) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField3D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
     cerr << "  zFactorCorrected must have 3 dimensions" << endl;
     cerr << "  dims.size(): " << dims.size() << endl;
     return -1;
   }
-  if (dims[0] != _nScans || dims[1] != _nRays) {
+  if (dims[0] != _ny || dims[1] != _nRays) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField3D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
     cerr << "  DBZ dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
-    cerr << "  _nScans: " << _nScans << endl;
+    cerr << "  _ny: " << _ny << endl;
     cerr << "  _nRays: " << _nRays << endl;
     return -1;
   }
 
-  _nGates = dims[2];
-  _nz = _nGates;
+  _nz = dims[2];
   // _minzKm = _params.radar_min_z_km;
   // _dzKm = _params.radar_delta_z_km;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read 3D int 32 group/field: " 
-         << groupName << "/" << fieldName << " <<====" << endl;
+    cerr << "====>> Read 3D int 32 group/dataset: " 
+         << grp.getObjName() << "/" << dsetName << " <<====" << endl;
     cerr << "  nScans, nRays, nGates: " 
-         << _nScans << ", " << _nRays << ", " << _nGates << endl;
+         << _ny << ", " << _nRays << ", " << _nGates << endl;
     cerr << "  missingVal: " << missingVal << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      for (size_t iscan = 0; iscan < _ny; iscan++) {
         for (size_t iray = 0; iray < _nRays; iray++) {
           for (size_t igate = 0; igate < _nGates; igate++) {
             size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
@@ -1284,14 +836,15 @@ int OdimHdf5ToMdv::_readField3D(Group &ns,
 //////////////////////////////////////////////
 // read a 2D field - floats
 
-int OdimHdf5ToMdv::_readField2D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
-                               vector<NcxxPort::fl32> &vals,
-                               NcxxPort::fl32 &missingVal,
-                               string &units)
+int OdimHdf5ToMdv::_readField2D(Group &grp,
+                                const string &dsetName,
+                                vector<NcxxPort::fl32> &vals,
+                                NcxxPort::fl32 &missingVal,
+                                string &units)
   
 {
+
+  cerr << "2D2D2D2D2D" << endl;
   
   Hdf5xx hdf5;
 
@@ -1299,11 +852,10 @@ int OdimHdf5ToMdv::_readField2D(Group &ns,
   
   vector<size_t> dims;
   
-  Group grp(ns.openGroup(groupName));
-  if (hdf5.readFl32Array(grp, fieldName,
+  if (hdf5.readFl32Array(grp, dsetName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
     return -1;
   }
 
@@ -1311,30 +863,30 @@ int OdimHdf5ToMdv::_readField2D(Group &ns,
   
   if (dims.size() != 2) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
     cerr << "  2D fields must have 2 dimensions" << endl;
     cerr << "  dims.size(): " << dims.size() << endl;
     return -1;
   }
-  if (dims[0] != _nScans || dims[1] != _nRays) {
+  if (dims[0] != _ny || dims[1] != _ny) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
     cerr << "  dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
-    cerr << "  _nScans: " << _nScans << endl;
-    cerr << "  _nRays: " << _nRays << endl;
+    cerr << "  _ny: " << _ny << endl;
+    cerr << "  _nx: " << _nx << endl;
     return -1;
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read 2D fl32 group/field: "
-         << groupName << "/" << fieldName << " <<====" << endl;
+    cerr << "====>> Read 2D fl32 group/dataset: "
+         << grp.getObjName() << "/" << dsetName << " <<====" << endl;
     cerr << "  nScans, nRays: " 
-         << _nScans << ", " << _nRays << endl;
+         << _ny << ", " << _nRays << endl;
     cerr << "  missingVal: " << missingVal << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      for (size_t iscan = 0; iscan < _ny; iscan++) {
         for (size_t iray = 0; iray < _nRays; iray++) {
           size_t ipt = iscan * _nRays + iray;
           if (vals[ipt] != missingVal) {
@@ -1355,12 +907,11 @@ int OdimHdf5ToMdv::_readField2D(Group &ns,
 //////////////////////////////////////////////
 // read a 2D field - int16s
 
-int OdimHdf5ToMdv::_readField2D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
-                               vector<NcxxPort::si16> &vals,
-                               NcxxPort::si16 &missingVal,
-                               string &units)
+int OdimHdf5ToMdv::_readField2D(Group &grp,
+                                const string &dsetName,
+                                vector<NcxxPort::si16> &vals,
+                                NcxxPort::si16 &missingVal,
+                                string &units)
   
 {
   
@@ -1370,13 +921,11 @@ int OdimHdf5ToMdv::_readField2D(Group &ns,
   
   vector<size_t> dims;
   
-  Group grp(ns.openGroup(groupName));
-  
-  if (hdf5.readSi16Array(grp, fieldName,
+  if (hdf5.readSi16Array(grp, dsetName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: "
+         << grp.getObjName() << "/" << dsetName << endl;
     return -1;
   }
 
@@ -1384,32 +933,32 @@ int OdimHdf5ToMdv::_readField2D(Group &ns,
   
   if (dims.size() != 2) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: "
+         << grp.getObjName() << "/" << dsetName << endl;
     cerr << "  2D fields must have 2 dimensions" << endl;
     cerr << "  dims.size(): " << dims.size() << endl;
     return -1;
   }
-  if (dims[0] != _nScans || dims[1] != _nRays) {
+  if (dims[0] != _ny || dims[1] != _nx) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
+    cerr << "  Cannot read group/dataset: "
+         << grp.getObjName() << "/" << dsetName << endl;
     cerr << "  dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
-    cerr << "  _nScans: " << _nScans << endl;
+    cerr << "  _ny: " << _ny << endl;
     cerr << "  _nRays: " << _nRays << endl;
     return -1;
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read 2D int16 group/field: "
-         << groupName << "/" << fieldName << " <<====" << endl;
+    cerr << "====>> Read 2D int16 group/dataset: "
+         << grp.getObjName() << "/" << dsetName << " <<====" << endl;
     cerr << "  nScans, nRays: " 
-         << _nScans << ", " << _nRays << endl;
+         << _ny << ", " << _nRays << endl;
     cerr << "  missingVal: " << missingVal << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _nScans; iscan++) {
+      for (size_t iscan = 0; iscan < _ny; iscan++) {
         for (size_t iray = 0; iray < _nRays; iray++) {
           size_t ipt = iscan * _nRays + iray;
           if (vals[ipt] != missingVal) {
@@ -1459,9 +1008,9 @@ void OdimHdf5ToMdv::_interpField(OutputField *fld)
 // interpolate float field
 
 void OdimHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
-                                NcxxPort::fl32 missingVal,
-                                vector<NcxxPort::fl32> &valsInterp,
-                                bool nearestNeighbor)
+                                 NcxxPort::fl32 missingVal,
+                                 vector<NcxxPort::fl32> &valsInterp,
+                                 bool nearestNeighbor)
   
 {
 
@@ -1539,8 +1088,8 @@ void OdimHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
 // interpolate int 16 field
 
 void OdimHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
-                                NcxxPort::si16 missingVal,
-                                vector<NcxxPort::si16> &valsInterp)
+                                 NcxxPort::si16 missingVal,
+                                 vector<NcxxPort::si16> &valsInterp)
   
 {
 
@@ -1617,11 +1166,11 @@ void OdimHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
 // interpolate points within polygon - floats
 
 void OdimHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
-                                        const NcxxPort::fl32 *vals,
-                                        NcxxPort::fl32 missingVal,
-                                        size_t iz,
-                                        vector<NcxxPort::fl32> &valsInterp,
-                                        bool nearestNeighbor)
+                                         const NcxxPort::fl32 *vals,
+                                         NcxxPort::fl32 missingVal,
+                                         size_t iz,
+                                         vector<NcxxPort::fl32> &valsInterp,
+                                         bool nearestNeighbor)
  
 {
 
@@ -1673,10 +1222,10 @@ void OdimHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
 // interpolate points within polygon - int 32
 
 void OdimHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
-                                        const NcxxPort::si32 *vals,
-                                        NcxxPort::si32 missingVal,
-                                        size_t iz,
-                                        vector<NcxxPort::si32> &valsInterp)
+                                         const NcxxPort::si32 *vals,
+                                         NcxxPort::si32 missingVal,
+                                         size_t iz,
+                                         vector<NcxxPort::si32> &valsInterp)
  
 {
 
@@ -1728,10 +1277,10 @@ void OdimHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
 // interpolate points within polygon - int 16
 
 void OdimHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
-                                        const NcxxPort::si16 *vals,
-                                        NcxxPort::si16 missingVal,
-                                        size_t iz,
-                                        vector<NcxxPort::si16> &valsInterp)
+                                         const NcxxPort::si16 *vals,
+                                         NcxxPort::si16 missingVal,
+                                         size_t iz,
+                                         vector<NcxxPort::si16> &valsInterp)
  
 {
 
@@ -1783,8 +1332,8 @@ void OdimHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
 // for the lat/lon corners
 
 void OdimHdf5ToMdv::_computeMinMaxIndices(const Point_d *corners,
-                                         int &minIx, int &maxIx,
-                                         int &minIy, int &maxIy) 
+                                          int &minIx, int &maxIx,
+                                          int &minIy, int &maxIy) 
 
 {
   
@@ -1821,10 +1370,10 @@ void OdimHdf5ToMdv::_computeMinMaxIndices(const Point_d *corners,
 // interpolate point within polygon - double
 
 NcxxPort::fl32 OdimHdf5ToMdv::_interpPt(const Point_d &pt,
-                                       const Point_d *corners,
-                                       const NcxxPort::fl32 *vals,
-                                       NcxxPort::fl32 missingVal,
-                                       bool nearestNeighbor)
+                                        const Point_d *corners,
+                                        const NcxxPort::fl32 *vals,
+                                        NcxxPort::fl32 missingVal,
+                                        bool nearestNeighbor)
   
 {
   
@@ -1876,9 +1425,9 @@ NcxxPort::fl32 OdimHdf5ToMdv::_interpPt(const Point_d &pt,
 // always uses nearest neighbor
 
 int OdimHdf5ToMdv::_interpPt(const Point_d &pt,
-                            const Point_d *corners,
-                            const NcxxPort::si32 *vals,
-                            int missingVal)
+                             const Point_d *corners,
+                             const NcxxPort::si32 *vals,
+                             int missingVal)
   
 {
   
@@ -1913,9 +1462,9 @@ int OdimHdf5ToMdv::_interpPt(const Point_d &pt,
 // always uses nearest neighbor
 
 int OdimHdf5ToMdv::_interpPt(const Point_d &pt,
-                            const Point_d *corners,
-                            const NcxxPort::si16 *vals,
-                            int missingVal)
+                             const Point_d *corners,
+                             const NcxxPort::si16 *vals,
+                             int missingVal)
   
 {
   
@@ -1950,8 +1499,8 @@ int OdimHdf5ToMdv::_interpPt(const Point_d &pt,
 // adjusting the corner locations for slant from radar to this point
 
 Point_d OdimHdf5ToMdv::_getCornerLatLon(int iscan,
-                                       int iray,
-                                       double zM)
+                                        int iray,
+                                        double zM)
 
 {
 
@@ -1986,7 +1535,7 @@ Point_d OdimHdf5ToMdv::_getCornerLatLon(int iscan,
 // get lat/lon of a grid corner, at surface
 
 Point_d OdimHdf5ToMdv::_getCornerLatLon(int iscan,
-                                       int iray)
+                                        int iray)
 
 {
   return _latLons[iscan][iray];
@@ -2172,7 +1721,7 @@ void OdimHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx)
 // Add the Mdvx fields
 
 void OdimHdf5ToMdv::_addFieldToMdvx(DsMdvx &mdvx,
-                                   OutputField *fld)
+                                    OutputField *fld)
 
 {
 
@@ -2222,13 +1771,13 @@ void OdimHdf5ToMdv::_addFieldToMdvx(DsMdvx &mdvx,
 // Create an Mdvx field - floats
 
 MdvxField *OdimHdf5ToMdv::_createMdvxField(const string &fieldName,
-                                          const string &longName,
-                                          const string &units,
-                                          size_t nx, size_t ny, size_t nz,
-                                          double minx, double miny, double minz,
-                                          double dx, double dy, double dz,
-                                          NcxxPort::fl32 missingVal,
-                                          NcxxPort::fl32 *vals)
+                                           const string &longName,
+                                           const string &units,
+                                           size_t nx, size_t ny, size_t nz,
+                                           double minx, double miny, double minz,
+                                           double dx, double dy, double dz,
+                                           NcxxPort::fl32 missingVal,
+                                           NcxxPort::fl32 *vals)
 
 {
 
@@ -2309,13 +1858,13 @@ MdvxField *OdimHdf5ToMdv::_createMdvxField(const string &fieldName,
 // Create an Mdvx field - ints
 
 MdvxField *OdimHdf5ToMdv::_createMdvxField(const string &fieldName,
-                                          const string &longName,
-                                          const string &units,
-                                          size_t nx, size_t ny, size_t nz,
-                                          double minx, double miny, double minz,
-                                          double dx, double dy, double dz,
-                                          NcxxPort::si16 missingVal,
-                                          NcxxPort::si16 *vals)
+                                           const string &longName,
+                                           const string &units,
+                                           size_t nx, size_t ny, size_t nz,
+                                           double minx, double miny, double minz,
+                                           double dx, double dy, double dz,
+                                           NcxxPort::si16 missingVal,
+                                           NcxxPort::si16 *vals)
 
 {
 

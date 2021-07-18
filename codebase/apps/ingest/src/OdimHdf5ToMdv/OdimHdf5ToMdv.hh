@@ -27,13 +27,12 @@
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2021
+// July 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// OdimHdf5ToMdv reads GPM data in HDF5 format, and
+// OdimHdf5ToMdv reads ODIM OPERA data in HDF5 format, and
 // converts to MDV.
-// Originally based on NcGeneric2Mdv.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -201,18 +200,6 @@ private:
   
   vector<OutputField *> _outputFields;
 
-  vector<NcxxPort::fl32> _dbzInput;
-  vector<NcxxPort::fl32> _dbzInterp;
-  vector<NcxxPort::fl32> _dbzOutput;
-  NcxxPort::fl32 _missingDbz;
-  string _dbzUnits;
-
-  bool _qualAvailable;
-  vector<NcxxPort::si16> _qualInput;
-  vector<NcxxPort::si16> _qualInterp;
-  NcxxPort::si16 _missingQual;
-  string _qualUnits;
-
   // hdf5 utilities
 
   Hdf5xx _utils;
@@ -221,48 +208,39 @@ private:
 
   int _processFile(const char *input_path);
 
-  string _readStringAttribute(Group &group,
-                              const string &attrName,
-                              const string &context);
-  
-  int _readTimes(Group &ns);
-  int _readLatLon(Group &ns);
-  int _readSpaceCraftPos(Group &ns);
-  int _readQcFlags(Group &ns);
+  int _readMetadata(Group &ns);
+  int _readWhere(Group &root);
 
   int _readFields(Group &root);
   int _readField(Group &dataGrp);
   int _readFieldAttributes(Group &what,
                            const string &fieldName,
                            OutputField *fld);
-  int _readMetadata(Group &ns);
-  int _readWhere(Group &root);
-  
 
-  int _readField3D(Group &ns,
-                   const string &groupName,
-                   const string &fieldName,
+  int _readFieldData(Group &dataGrp,
+                     const string &fieldName,
+                     OutputField *fld);
+
+  int _readField3D(Group &grp,
+                   const string &dsetName,
                    vector<NcxxPort::fl32> &vals,
                    NcxxPort::fl32 &missingVal,
                    string &units);
   
-  int _readField3D(Group &ns,
-                   const string &groupName,
-                   const string &fieldName,
+  int _readField3D(Group &grp,
+                   const string &dsetName,
                    vector<NcxxPort::si16> &vals,
                    NcxxPort::si16 &missingVal,
                    string &units);
   
-  int _readField2D(Group &ns,
-                   const string &groupName,
-                   const string &fieldName,
+  int _readField2D(Group &grp,
+                   const string &dsetName,
                    vector<NcxxPort::fl32> &vals,
                    NcxxPort::fl32 &missingVal,
                    string &units);
   
-  int _readField2D(Group &ns,
-                   const string &groupName,
-                   const string &fieldName,
+  int _readField2D(Group &grp,
+                   const string &dsetName,
                    vector<NcxxPort::si16> &vals,
                    NcxxPort::si16 &missingVal,
                    string &units);
