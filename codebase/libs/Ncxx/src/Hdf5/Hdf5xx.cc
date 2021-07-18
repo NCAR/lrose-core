@@ -2150,6 +2150,45 @@ void Hdf5xx::printGroup(Group &group, const string grname,
 }
 
 ///////////////////////////////////////////////////////////////////
+// recursively print the file structure
+
+void Hdf5xx::printFileStructure(Group &grp,
+                                int level,
+                                ostream &out)
+  
+{
+
+  size_t numObjs = grp.getNumObjs();
+  
+  string spacer;
+  for (int jj = 0; jj < level; jj++) {
+    spacer += "  ";
+  }
+  
+  out << spacer << "======>> Group: "
+      << grp.getObjName() << " <<======" << endl;
+  printAttributes(grp, out, level);
+  
+  for (size_t ii = 0; ii < numObjs; ii++) {
+    string objName = grp.getObjnameByIdx(ii);
+    hdf5_object_t objType = getObjTypeByIdx(grp, ii);
+    if (objType == OBJECT_GROUP) {
+      Group nextGrp(grp.openGroup(objName));
+      printFileStructure(nextGrp, level + 1, out);
+    } else if (objType == OBJECT_DATASET) {
+      out << spacer << "  ======>> DataSet: "
+          << objName << " <<======" << endl;
+      DataSet dset = grp.openDataSet(objName);
+      printAttributes(dset, out, level + 1);
+    } else if (objType == OBJECT_NAMED_DATATYPE) {
+      out << spacer << "  ======>> NAMED_DATATYPE-objName: "
+          << objName << " <<======" << endl;
+    }
+  }  // ii
+
+}
+    
+///////////////////////////////////////////////////////////////////
 // Print HDF5 data set
 
 void Hdf5xx::printDataSet(DataSet &ds, const string dsname,

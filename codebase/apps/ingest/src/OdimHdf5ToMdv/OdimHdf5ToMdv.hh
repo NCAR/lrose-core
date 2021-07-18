@@ -192,10 +192,6 @@ private:
 
   int _processFile(const char *input_path);
 
-  void _printFileStructure(Group &grp,
-                           int level,
-                           ostream &out);
-  
   string _readStringAttribute(Group &group,
                               const string &attrName,
                               const string &context);

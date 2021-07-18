@@ -222,7 +222,7 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
     }
 
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      _printFileStructure(root, 0, cerr);
+      Hdf5xx::printFileStructure(root, 0, cerr);
     }
   
     return 0;
@@ -330,40 +330,6 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
 
 }
 
-/////////////////////////////////////////////
-// recursively print the file structure
-
-void OdimHdf5ToMdv::_printFileStructure(Group &grp,
-                                        int level,
-                                        ostream &out)
-  
-{
-
-  size_t numObjs = grp.getNumObjs();
-
-  out << "======>> Group: " << grp.getObjName() << " <<======" << endl;
-  Hdf5xx::printAttributes(grp, out, level);
-  
-  for (size_t ii = 0; ii < numObjs; ii++) {
-    string objName = grp.getObjnameByIdx(ii);
-    for (int jj = 0; jj < level; jj++) {
-      out << "  ";
-    }
-    Hdf5xx::hdf5_object_t objType = Hdf5xx::getObjTypeByIdx(grp, ii);
-    if (objType == Hdf5xx::OBJECT_GROUP) {
-      Group nextGrp(grp.openGroup(objName));
-      _printFileStructure(nextGrp, level + 1, out);
-    } else if (objType == Hdf5xx::OBJECT_DATASET) {
-      out << "  ======>> DataSet: " << objName << " <<======" << endl;
-      DataSet dset = grp.openDataSet(objName);
-      Hdf5xx::printAttributes(dset, out, level + 1);
-    } else if (objType == Hdf5xx::OBJECT_NAMED_DATATYPE) {
-      out << "======>> NAMED_DATATYPE-objName: " << objName << " <<======" << endl;
-    }
-  }  // ii
-
-}
-    
 /////////////////////////////////////////////
 // read string attribute
 

@@ -249,10 +249,18 @@ public:
   
   ////////////////////////////////////////////
   /// printing
+
+  // print group details
   
   static void printGroup(Group &group, const string grname,
                          ostream &out,
                          bool printRays, bool printData);
+  
+  // recursively print the file structure
+
+  static void printFileStructure(Group &grp,
+                                 int level,
+                                 ostream &out);
   
   static void printDataSet(DataSet &ds, const string dsname,
                            ostream &out,
