@@ -359,7 +359,7 @@ void MdvxProj::init(const Mdvx::coord_t &coord)
 // i.e. proj 4 etc.
 //
 
-void MdvxProj::init(const string &projStr)
+void MdvxProj::initFromProjStr(const string &projStr)
 
 {
   

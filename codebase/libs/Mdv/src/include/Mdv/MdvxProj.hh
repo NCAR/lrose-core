@@ -140,7 +140,7 @@ public:
   // initialize from proj string
   // i.e. proj 4 etc.
 
-  void init(const string &projStr);
+  void initFromProjStr(const string &projStr);
 
   ///////////////////////////////
   // initialize projections
