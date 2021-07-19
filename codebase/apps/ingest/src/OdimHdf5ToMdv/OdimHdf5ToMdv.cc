@@ -50,8 +50,6 @@
 #include "OdimHdf5ToMdv.hh"
 using namespace std;
 
-const fl32 OdimHdf5ToMdv::_missingFloat = -9999.0;
-
 // Constructor
 
 OdimHdf5ToMdv::OdimHdf5ToMdv(int argc, char **argv)
@@ -500,7 +498,6 @@ int OdimHdf5ToMdv::_readFieldAttributes(Group &what,
   fld->gain = Hdf5xx::getDoubleAttribute(what, "gain");
   fld->offset = Hdf5xx::getDoubleAttribute(what, "offset");
   fld->nodata = Hdf5xx::getDoubleAttribute(what, "nodata");
-  fld->fl32Missing = fld->nodata;
   fld->undetect = Hdf5xx::getDoubleAttribute(what, "undetect");
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -616,6 +613,10 @@ int OdimHdf5ToMdv::_readFieldData(Group &dataGrp,
       fld->valid = true;
     }
   } // if (fld->dims.size() == 2)
+
+  // override the missing value, using 'nodata'
+
+  fld->fl32Missing = fld->nodata;
     
   return 0;
 

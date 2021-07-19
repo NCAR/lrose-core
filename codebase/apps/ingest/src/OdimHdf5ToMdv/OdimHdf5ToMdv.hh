@@ -79,8 +79,6 @@ protected:
   
 private:
 
-  static const fl32 _missingFloat;
-
   string _progName;
   char *_paramsPath;
   Args _args;
