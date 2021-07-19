@@ -108,6 +108,10 @@ namespace H5x {
   // Turns off the automatic error printing.
   static void dontPrint();
 
+  // Set the automatic error printing to the default.
+  // i.e. use H5Eprint2() to print to stderr.
+  static void defaultPrint();
+
   // Retrieves the current settings for the automatic error stack
   // traversal function and its data.
   static void getAutoPrint(H5E_auto2_t& func, void** client_data);
