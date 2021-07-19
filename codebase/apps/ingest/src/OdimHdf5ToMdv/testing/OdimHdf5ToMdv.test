@@ -181,12 +181,6 @@ file_name_substr = "";
 //
 //======================================================================
  
-//======================================================================
-//
-// OUTPUT ENCODING AND COMPRESSION.
-//
-//======================================================================
- 
 ///////////// output_fields ///////////////////////////
 //
 // Output fields details.
@@ -229,76 +223,22 @@ output_fields = {
 
 //======================================================================
 //
-// OUTPUT GRID - LAT/LON.
+// OPTION TO CONVERT OUTPUT GRID TO LAT/LON.
 //
 //======================================================================
  
-///////////// output_grid /////////////////////////////
+///////////// convert_output_grid_to_latlon ///////////
 //
-// Parameters for output grid.
+// Option to convert the output grid to lat/lon.
 //
-// Units in deg.
-//
-//
-// Type: struct
-//   typedef struct {
-//      int nLon;
-//      int nLat;
-//      double minLon;
-//      double minLat;
-//      double dLon;
-//      double dLat;
-//   }
-//
-//
-
-output_grid = {
-    nLon = 500,
-    nLat = 500,
-    minLon = -104,
-    minLat = 35,
-    dLon = 0.025,
-    dLat = 0.025
-};
-
-///////////// set_output_grid_limits_from_data ////////
-//
-// Option to compute grid limits from input data.
-//
-// If true, nLon, nLat, minLon and minLat will be computed from the 
-//   data. dLon and dLat will be used as set.
+// If true, the Mdvx class will auto-convert to a suitable lat/lon grid. 
+//   This is performed using a nearest neighbor transformation.
 //
 //
 // Type: boolean
 //
 
-set_output_grid_limits_from_data = TRUE;
-
-///////////// interp_using_nearest_neighbor ///////////
-//
-// Option to use nearest-neighbor interpolation for loading output grid.
-//
-// When we interpolate from the input grid to the output grid, the 
-//   default method is inverse-distance weighting. If this is set to TRUE, 
-//   nearest neighbor is used instead.
-//
-//
-// Type: boolean
-//
-
-interp_using_nearest_neighbor = FALSE;
-
-///////////// interp_power_parameter //////////////////
-//
-// Power parameter for inverse-distance wieghted interpolation.
-//
-// See 'https://en.wikipedia.org/wiki/Inverse_distance_weighting'.
-//
-//
-// Type: double
-//
-
-interp_power_parameter = 1;
+convert_output_grid_to_latlon = FALSE;
 
 //======================================================================
 //

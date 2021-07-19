@@ -110,6 +110,8 @@ private:
   double _lrLon, _lrLat;
   double _urLon, _urLat;
 
+  MdvxRemapLut _remapLut;
+
   // nz is forced to 1 for now
   
   size_t _nz;
@@ -135,7 +137,6 @@ private:
     
     Params::output_field_t params;
     bool valid;
-    bool nearestNeighbor;
 
     Hdf5xx hdf5;
     vector<size_t> dims;

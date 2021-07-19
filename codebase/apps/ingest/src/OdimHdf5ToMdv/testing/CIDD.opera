@@ -106,7 +106,7 @@ field_list = {
 #----------------------------------------------------------------------------------------------------------
 
 DBZ  DBZ   $(HOME)/data/conv_strat/mdv/opera&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
-QUAL QUAL  $(HOME)/data/conv_strat/mdv/opera&QUALITY  dbz.colors      dbz     0 0 0   cart  1 0
+QUAL QUAL  $(HOME)/data/conv_strat/mdv/opera&QUALITY  interest.colors  -      0 0 0   cart  1 0
 
 #
 </GRIDS>
@@ -172,7 +172,7 @@ QUAL QUAL  $(HOME)/data/conv_strat/mdv/opera&QUALITY  dbz.colors      dbz     0 
 # MAP_CODE Control_Label   Map_File_Name   On/OFF Detail__min Detail_max Color     
 #------------------------------------------------------------------------------------------
 
-World   World   world_states.map             1  0.0 10000.0  white
+World   World   world_states.map             1  0.0 100000.0  white
 
 </MAPS>
 
@@ -448,7 +448,7 @@ cidd.request_gzip_vol_compression: 0
 # Sets the projection for cidd's plan view - Current valid choices are:
 # CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR
 # Mercator is relative to the longitude origin.
-cidd.projection_type:    LAMBERT
+cidd.projection_type:   LAT_LON
 
 # These must be set if using a LAMBERT conformal projection - Ignored otherwise
 cidd.lambert_lat1: 55.0
@@ -534,15 +534,15 @@ cidd.reset_click_latitude:  26.0
 # to  -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0
 # and use -180 to 180 and -90 to 90.
 #
-cidd.domain_limit_min_x:        -3000
-cidd.domain_limit_max_x:         3000
-cidd.domain_limit_min_y:        -3000
-cidd.domain_limit_max_y:         3000
+cidd.domain_limit_min_x:        -360
+cidd.domain_limit_max_x:         360
+cidd.domain_limit_min_y:        -90
+cidd.domain_limit_max_y:         90
  
 # The Lat, Long of the center of the display. Internal range rings
 # are relative to this point.
-cidd.origin_longitude:       10
-cidd.origin_latitude:        55
+cidd.origin_longitude:       0
+cidd.origin_latitude:        45
 #
 #
 # Select the data fields/page to start on.
@@ -563,11 +563,11 @@ cidd.num_cache_zooms:       4
 # It's suggested that names without spaces be used when running
 # in HTML output mode.
 #
-cidd.level1_label:              FULL DOMAIN
-cidd.level1_min_xkm:                -3000.0
-cidd.level1_min_ykm:                -3000.0
-cidd.level1_max_xkm:                3000.0
-cidd.level1_max_ykm:                3000.0
+cidd.level1_label:              EUROPE
+cidd.level1_min_xkm:               -15
+cidd.level1_min_ykm:               30
+cidd.level1_max_xkm:               40
+cidd.level1_max_ykm:               70
 #
 cidd.level2_label:               FTG AREA
 cidd.level2_min_xkm:                -155.0

@@ -540,14 +540,6 @@ int OdimHdf5ToMdv::_readFieldData(Group &dataGrp,
     return -1;
   }
   
-  // set interp type
-  
-  if (fld->h5class == H5T_INTEGER) {
-    fld->nearestNeighbor = true;
-  } else {
-    fld->nearestNeighbor = _params.interp_using_nearest_neighbor;
-  }
-  
   // debug print
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -845,6 +837,10 @@ void OdimHdf5ToMdv::_addFieldToMdvx(DsMdvx &mdvx,
                                       fld->fl32Missing,
                                       fld->fl32Input.data());
 
+  if (_params.convert_output_grid_to_latlon) {
+    field->autoRemap2Latlon(_remapLut);
+  }
+
   // convert to output representation
 
   field->convertType((Mdvx::encoding_type_t) fld->params.encoding,
@@ -876,20 +872,12 @@ MdvxField *OdimHdf5ToMdv::_createMdvxField(const string &fieldName,
     nz = MDV_MAX_VLEVELS;
   }
 
-  // unitialize the projection
-
-  MdvxProj proj;
-  proj.initFromProjStr(_projStr);
-  proj.setGrid(nx, ny, dx, dy, minx, miny);
-
   // set up MdvxField headers
 
   Mdvx::field_header_t fhdr;
   MEM_zero(fhdr);
   STRncopy(fhdr.field_name, fieldName.c_str(), MDV_SHORT_FIELD_LEN);
   
-  // _inputProj.syncToFieldHdr(fhdr);
-
   fhdr.compression_type = Mdvx::COMPRESSION_NONE;
   fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
   fhdr.scaling_type = Mdvx::SCALING_NONE;
@@ -907,7 +895,6 @@ MdvxField *OdimHdf5ToMdv::_createMdvxField(const string &fieldName,
   fhdr.bad_data_value = missingVal;
   fhdr.missing_data_value = missingVal;
   
-  fhdr.proj_type = Mdvx::PROJ_LATLON;
   fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr.data_element_nbytes = sizeof(fl32);
   
@@ -931,6 +918,18 @@ MdvxField *OdimHdf5ToMdv::_createMdvxField(const string &fieldName,
   for (size_t ii = 0; ii < nz; ii++) {
     vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
     vhdr.level[ii] = _zLevels[ii];
+  }
+
+  // set the projection from projStr
+  
+  MdvxProj proj;
+  proj.initFromProjStr(_projStr);
+  proj.setGrid(nx, ny, dx, dy, minx, miny);
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==========================================" << endl;
+    proj.print(cerr);
+    cerr << "==========================================" << endl;
   }
 
   proj.syncXyToFieldHdr(fhdr);

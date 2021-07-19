@@ -95,15 +95,6 @@ public:
     encoding_type_t encoding;
   } output_field_t;
 
-  typedef struct {
-    int nLon;
-    int nLat;
-    double minLon;
-    double minLat;
-    double dLon;
-    double dLat;
-  } grid_params_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -423,13 +414,7 @@ public:
   output_field_t *_output_fields;
   int output_fields_n;
 
-  grid_params_t output_grid;
-
-  tdrp_bool_t set_output_grid_limits_from_data;
-
-  tdrp_bool_t interp_using_nearest_neighbor;
-
-  double interp_power_parameter;
+  tdrp_bool_t convert_output_grid_to_latlon;
 
   char* output_url;
 
@@ -448,7 +433,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[27];
 
   const char *_className;
 

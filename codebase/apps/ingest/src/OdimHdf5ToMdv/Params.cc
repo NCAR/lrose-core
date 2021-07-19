@@ -746,15 +746,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 4'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("OUTPUT ENCODING AND COMPRESSION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
     // Parameter 'output_fields'
     // ctype is '_output_field_t'
     
@@ -816,110 +807,32 @@
       tt->struct_vals[7].e = ENCODING_FLOAT32;
     tt++;
     
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("OPTION TO CONVERT OUTPUT GRID TO LAT/LON");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'convert_output_grid_to_latlon'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("convert_output_grid_to_latlon");
+    tt->descr = tdrpStrDup("Option to convert the output grid to lat/lon.");
+    tt->help = tdrpStrDup("If true, the Mdvx class will auto-convert to a suitable lat/lon grid. This is performed using a nearest neighbor transformation.");
+    tt->val_offset = (char *) &convert_output_grid_to_latlon - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("OUTPUT GRID - LAT/LON");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_grid'
-    // ctype is '_grid_params_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_grid");
-    tt->descr = tdrpStrDup("Parameters for output grid.");
-    tt->help = tdrpStrDup("Units in deg.");
-    tt->val_offset = (char *) &output_grid - &_start_;
-    tt->struct_def.name = tdrpStrDup("grid_params_t");
-    tt->struct_def.nfields = 6;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[0].fname = tdrpStrDup("nLon");
-      tt->struct_def.fields[0].ptype = INT_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &output_grid.nLon - (char *) &output_grid;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[1].fname = tdrpStrDup("nLat");
-      tt->struct_def.fields[1].ptype = INT_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &output_grid.nLat - (char *) &output_grid;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("minLon");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &output_grid.minLon - (char *) &output_grid;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("minLat");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &output_grid.minLat - (char *) &output_grid;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("dLon");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &output_grid.dLon - (char *) &output_grid;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("dLat");
-      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &output_grid.dLat - (char *) &output_grid;
-    tt->n_struct_vals = 6;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].i = 500;
-      tt->struct_vals[1].i = 500;
-      tt->struct_vals[2].d = -104;
-      tt->struct_vals[3].d = 35;
-      tt->struct_vals[4].d = 0.025;
-      tt->struct_vals[5].d = 0.025;
-    tt++;
-    
-    // Parameter 'set_output_grid_limits_from_data'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_output_grid_limits_from_data");
-    tt->descr = tdrpStrDup("Option to compute grid limits from input data.");
-    tt->help = tdrpStrDup("If true, nLon, nLat, minLon and minLat will be computed from the data. dLon and dLat will be used as set.");
-    tt->val_offset = (char *) &set_output_grid_limits_from_data - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'interp_using_nearest_neighbor'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("interp_using_nearest_neighbor");
-    tt->descr = tdrpStrDup("Option to use nearest-neighbor interpolation for loading output grid.");
-    tt->help = tdrpStrDup("When we interpolate from the input grid to the output grid, the default method is inverse-distance weighting. If this is set to TRUE, nearest neighbor is used instead.");
-    tt->val_offset = (char *) &interp_using_nearest_neighbor - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'interp_power_parameter'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("interp_power_parameter");
-    tt->descr = tdrpStrDup("Power parameter for inverse-distance wieghted interpolation");
-    tt->help = tdrpStrDup("See 'https://en.wikipedia.org/wiki/Inverse_distance_weighting'");
-    tt->val_offset = (char *) &interp_power_parameter - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT URL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -936,11 +849,11 @@
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/odim");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT METADATA STRINGS");
     tt->comment_text = tdrpStrDup("These will be used if the file does not contain suitable information.");
     tt++;
@@ -969,11 +882,11 @@
     tt->single_val.s = tdrpStrDup("OPERA");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("Z DIMENSION DETAILS");
     tt->comment_text = tdrpStrDup("Not currently used - waiting for 3-D grids");
     tt++;
