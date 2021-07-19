@@ -937,7 +937,7 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   if (dims[0] != _nScans || dims[1] != _nRays) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    cerr << "  DBZ dimensions must match nScans and nRays" << endl;
+    cerr << "  dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _nScans: " << _nScans << endl;
@@ -1015,7 +1015,7 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   if (dims[0] != _nScans || dims[1] != _nRays) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    cerr << "  DBZ dimensions must match nScans and nRays" << endl;
+    cerr << "  dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _nScans: " << _nScans << endl;
@@ -1253,7 +1253,7 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
     nGates = 1;
   }
   
-  // initialize dbz grid
+  // initialize grid
 
   size_t nOutput = _nx * _ny * nz;
   valsInterp.resize(nOutput);
@@ -1332,7 +1332,7 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
     nGates = 1;
   }
   
-  // initialize dbz grid
+  // initialize grid
 
   size_t nOutput = _nx * _ny * nz;
   valsInterp.resize(nOutput);
@@ -1370,7 +1370,7 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
         corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
         corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
-        // dbz vals at corners
+        // vals at corners
         NcxxPort::si16 vals[4];
         vals[0] = valsIn[iscan][iray];
         vals[1] = valsIn[iscan][iray + 1];
