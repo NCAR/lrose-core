@@ -742,32 +742,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("Z dimension details");
+    tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'radar_min_z_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_min_z_km");
-    tt->descr = tdrpStrDup("Height of lowest level (km)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &radar_min_z_km - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'radar_delta_z_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_delta_z_km");
-    tt->descr = tdrpStrDup("Delta height between levels (km)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &radar_delta_z_km - &_start_;
-    tt->single_val.d = 0.125;
     tt++;
     
     // Parameter 'Comment 4'
@@ -775,15 +751,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT ENCODING AND COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -803,64 +770,57 @@
     tt->array_elem_size = sizeof(output_field_t);
     tt->array_n = 2;
     tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 5;
+    tt->struct_def.nfields = 4;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("groupName");
+      tt->struct_def.fields[0].fname = tdrpStrDup("hdf5Quantity");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->groupName - (char *) _output_fields;
+        (char *) &_output_fields->hdf5Quantity - (char *) _output_fields;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("hdf5Quantity");
+      tt->struct_def.fields[1].fname = tdrpStrDup("outputName");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->hdf5Quantity - (char *) _output_fields;
+        (char *) &_output_fields->outputName - (char *) _output_fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("outputName");
+      tt->struct_def.fields[2].fname = tdrpStrDup("longName");
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_output_fields->outputName - (char *) _output_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("longName");
-      tt->struct_def.fields[3].ptype = STRING_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
         (char *) &_output_fields->longName - (char *) _output_fields;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("encoding_type_t");
-      tt->struct_def.fields[4].fname = tdrpStrDup("encoding");
-      tt->struct_def.fields[4].ptype = ENUM_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
+      tt->struct_def.fields[3].ftype = tdrpStrDup("encoding_type_t");
+      tt->struct_def.fields[3].fname = tdrpStrDup("encoding");
+      tt->struct_def.fields[3].ptype = ENUM_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
         (char *) &_output_fields->encoding - (char *) _output_fields;
-        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("encoding_type_t");
-        tt->struct_def.fields[4].enum_def.nfields = 3;
-        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("ENCODING_INT8");
-        tt->struct_def.fields[4].enum_def.fields[0].val = ENCODING_INT8;
-        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT16");
-        tt->struct_def.fields[4].enum_def.fields[1].val = ENCODING_INT16;
-        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("ENCODING_FLOAT32");
-        tt->struct_def.fields[4].enum_def.fields[2].val = ENCODING_FLOAT32;
-    tt->n_struct_vals = 10;
+        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("encoding_type_t");
+        tt->struct_def.fields[3].enum_def.nfields = 3;
+        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("ENCODING_INT8");
+        tt->struct_def.fields[3].enum_def.fields[0].val = ENCODING_INT8;
+        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("ENCODING_INT16");
+        tt->struct_def.fields[3].enum_def.fields[1].val = ENCODING_INT16;
+        tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("ENCODING_FLOAT32");
+        tt->struct_def.fields[3].enum_def.fields[2].val = ENCODING_FLOAT32;
+    tt->n_struct_vals = 8;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("dataset1");
-      tt->struct_vals[1].s = tdrpStrDup("DBZH");
-      tt->struct_vals[2].s = tdrpStrDup("DBZ");
-      tt->struct_vals[3].s = tdrpStrDup("reflectivity");
-      tt->struct_vals[4].e = ENCODING_FLOAT32;
-      tt->struct_vals[5].s = tdrpStrDup("dataset2");
-      tt->struct_vals[6].s = tdrpStrDup("QIND");
-      tt->struct_vals[7].s = tdrpStrDup("QUALITY");
-      tt->struct_vals[8].s = tdrpStrDup("Quality-control");
-      tt->struct_vals[9].e = ENCODING_FLOAT32;
+      tt->struct_vals[0].s = tdrpStrDup("DBZH");
+      tt->struct_vals[1].s = tdrpStrDup("DBZ");
+      tt->struct_vals[2].s = tdrpStrDup("reflectivity");
+      tt->struct_vals[3].e = ENCODING_FLOAT32;
+      tt->struct_vals[4].s = tdrpStrDup("QIND");
+      tt->struct_vals[5].s = tdrpStrDup("QUALITY");
+      tt->struct_vals[6].s = tdrpStrDup("Quality-control");
+      tt->struct_vals[7].e = ENCODING_FLOAT32;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT GRID - LAT/LON");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -955,11 +915,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT URL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -976,11 +936,11 @@
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/odim");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT METADATA STRINGS");
     tt->comment_text = tdrpStrDup("These will be used if the file does not contain suitable information.");
     tt++;
@@ -1009,16 +969,37 @@
     tt->single_val.s = tdrpStrDup("OPERA");
     tt++;
     
-    // Parameter 'data_set_info'
-    // ctype is 'char*'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("data_set_info");
-    tt->descr = tdrpStrDup("Info for data set.");
-    tt->help = tdrpStrDup("Appears in Mdv master header.");
-    tt->val_offset = (char *) &data_set_info - &_start_;
-    tt->single_val.s = tdrpStrDup("Created by OdimHdf5ToMdv");
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("Z DIMENSION DETAILS");
+    tt->comment_text = tdrpStrDup("Not currently used - waiting for 3-D grids");
+    tt++;
+    
+    // Parameter 'radar_min_z_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("radar_min_z_km");
+    tt->descr = tdrpStrDup("Height of lowest level (km)");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &radar_min_z_km - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'radar_delta_z_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("radar_delta_z_km");
+    tt->descr = tdrpStrDup("Delta height between levels (km)");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &radar_delta_z_km - &_start_;
+    tt->single_val.d = 0.125;
     tt++;
     
     // trailing entry has param_name set to NULL

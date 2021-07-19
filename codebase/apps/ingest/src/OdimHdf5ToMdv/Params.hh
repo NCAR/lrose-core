@@ -89,7 +89,6 @@ public:
   // struct typedefs
 
   typedef struct {
-    char* groupName;
     char* hdf5Quantity;
     char* outputName;
     char* longName;
@@ -421,10 +420,6 @@ public:
 
   char* file_name_substr;
 
-  double radar_min_z_km;
-
-  double radar_delta_z_km;
-
   output_field_t *_output_fields;
   int output_fields_n;
 
@@ -442,7 +437,9 @@ public:
 
   char* data_set_source;
 
-  char* data_set_info;
+  double radar_min_z_km;
+
+  double radar_delta_z_km;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -451,7 +448,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[32];
+  mutable TDRPtable _table[31];
 
   const char *_className;
 

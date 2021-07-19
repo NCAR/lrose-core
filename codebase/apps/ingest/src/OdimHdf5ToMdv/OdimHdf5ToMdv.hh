@@ -132,11 +132,6 @@ private:
 
     void clear() {
       fl32Input.clear();
-      fl32Interp.clear();
-      fl32Output.clear();
-      si16Input.clear();
-      si16Interp.clear();
-      si16Output.clear();
       valid = false;
     }
     
@@ -153,15 +148,7 @@ private:
     size_t h5size;
     
     vector<NcxxPort::fl32> fl32Input;
-    vector<NcxxPort::fl32> fl32Interp;
-    vector<NcxxPort::fl32> fl32Output;
-
-    vector<NcxxPort::si16> si16Input;
-    vector<NcxxPort::si16> si16Interp;
-    vector<NcxxPort::si16> si16Output;
-
     NcxxPort::fl32 fl32Missing;
-    NcxxPort::si16 si16Missing;
 
     DateTime startTime;
     DateTime endTime;
@@ -185,11 +172,11 @@ private:
 
   int _processFile(const char *input_path);
 
-  int _readMetadata(Group &ns);
-  int _readWhere(Group &root);
+  void _readMetadata(Group &ns);
+  void _readWhere(Group &root);
 
   int _readFields(Group &root);
-  int _readField(Group &dataGrp);
+  void _readField(Group &dataGrp);
   int _readFieldAttributes(Group &what,
                            const string &fieldName,
                            OutputField *fld);
@@ -204,22 +191,10 @@ private:
                    NcxxPort::fl32 &missingVal,
                    string &units);
   
-  int _readField3D(Group &grp,
-                   const string &dsetName,
-                   vector<NcxxPort::si16> &vals,
-                   NcxxPort::si16 &missingVal,
-                   string &units);
-  
   int _readField2D(Group &grp,
                    const string &dsetName,
                    vector<NcxxPort::fl32> &vals,
                    NcxxPort::fl32 &missingVal,
-                   string &units);
-  
-  int _readField2D(Group &grp,
-                   const string &dsetName,
-                   vector<NcxxPort::si16> &vals,
-                   NcxxPort::si16 &missingVal,
                    string &units);
   
   /// set MDV headers and data
@@ -238,18 +213,6 @@ private:
                               double dx, double dy, double dz,
                               NcxxPort::fl32 missingVal,
                               NcxxPort::fl32 *vals);
-
-
-  MdvxField *_createMdvxField(const string &fieldName,
-                              const string &longName,
-                              const string &units,
-                              size_t nx, size_t ny, size_t nz,
-                              double minx, double miny, double minz,
-                              double dx, double dy, double dz,
-                              NcxxPort::si16 missingVal,
-                              NcxxPort::si16 *vals);
-
-
 };
 
 #endif

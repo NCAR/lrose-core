@@ -127,20 +127,6 @@ paramdef string {
 } file_name_substr;
 
 commentdef {
-  p_header = "Z dimension details";
-}
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Height of lowest level (km)";
-} radar_min_z_km;
-
-paramdef double {
-  p_default = 0.125;
-  p_descr = "Delta height between levels (km)";
-} radar_delta_z_km;
-
-commentdef {
   p_header = "OUTPUT FIELDS";
 }
 
@@ -155,7 +141,6 @@ typedef enum {
 } encoding_type_t;
 
 typedef struct {
-  string groupName;
   string hdf5Quantity;
   string outputName;
   string longName;
@@ -166,7 +151,6 @@ paramdef struct output_field_t {
   p_default =
     {
      {
-       groupName = "dataset1",
        hdf5Quantity = "DBZH",
        outputName = "DBZ",
        longName = "reflectivity",
@@ -174,7 +158,6 @@ paramdef struct output_field_t {
      }
      ,
      {
-       groupName = "dataset2",
        hdf5Quantity = "QIND",
        outputName = "QUALITY",
        longName = "Quality-control",
@@ -248,9 +231,18 @@ paramdef string {
   p_help = "Appears in Mdv master header.";
 } data_set_source;
 
-paramdef string {
-  p_default = "Created by OdimHdf5ToMdv";
-  p_descr = "Info for data set.";
-  p_help = "Appears in Mdv master header.";
-} data_set_info;
+commentdef {
+  p_header = "Z DIMENSION DETAILS";
+  p_text = "Not currently used - waiting for 3-D grids";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Height of lowest level (km)";
+} radar_min_z_km;
+
+paramdef double {
+  p_default = 0.125;
+  p_descr = "Delta height between levels (km)";
+} radar_delta_z_km;
 
