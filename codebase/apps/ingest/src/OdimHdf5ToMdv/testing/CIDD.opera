@@ -105,8 +105,11 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-DBZ  DBZ   $(HOME)/data/conv_strat/mdv/opera&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
-QUAL QUAL  $(HOME)/data/conv_strat/mdv/opera&QUALITY  interest.colors  -      0 0 0   cart  1 0
+DBZorig   DBZorig   $(HOME)/data/conv_strat/mdv/opera/lambert&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
+QUALorig  QUALorig  $(HOME)/data/conv_strat/mdv/opera/lambert&QUALITY  interest.colors  -      0 0 0   cart  1 0
+
+DBZlatlon   DBZlatlon   $(HOME)/data/conv_strat/mdv/opera/latlon&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
+QUALlatlon  QUALlatlon  $(HOME)/data/conv_strat/mdv/opera/latlon&QUALITY  interest.colors  -      0 0 0   cart  1 0
 
 #
 </GRIDS>
@@ -203,7 +206,7 @@ cidd.debug2_flag:           0
 #  System will startup using field 0, requesting data closest to the
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
-cidd.demo_time:  23:50 05/02/2021
+cidd.demo_time:  03:00 05/02/2021
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    300
@@ -223,13 +226,13 @@ cidd.max_time_list_span: 365
 
 #  This determines how many movie frames are in the loop to start with
 #  Setting this high will cause the X server to hog memory.
-cidd.starting_movie_frames:     16
+cidd.starting_movie_frames:     60
 
 # Minutes per movie frame on startup
 # The display will automatically update every this interval, throwing away its
 # oldest movie frame and creating and drawing a new one.
 # 
-cidd.time_interval:  5.0
+cidd.time_interval:  15.0
 
 # Span in minutes a frame covers in Climo mode. - The time_interval will be
 # either "1 day" or "1 year" 

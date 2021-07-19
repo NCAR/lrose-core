@@ -238,7 +238,7 @@ output_fields = {
 // Type: boolean
 //
 
-convert_output_grid_to_latlon = FALSE;
+convert_output_grid_to_latlon = TRUE;
 
 //======================================================================
 //
@@ -254,7 +254,7 @@ convert_output_grid_to_latlon = FALSE;
 // Type: string
 //
 
-output_url = "$(HOME)/data/conv_strat/mdv/opera";
+output_url = "$(HOME)/data/conv_strat/mdv/opera/latlon";
 
 //======================================================================
 //

@@ -269,15 +269,14 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
   
   _setMasterHeader(mdvx);
   
-  // interpolate fields onto latlon grid, and add to the mdvx object
-
+  // add to the mdvx object
+  
   for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
     
     // get field as it was read in
     
     OutputField *fld = _outputFields[ifield];
     if (!fld->valid) {
-      delete fld;
       continue;
     }
     
@@ -285,16 +284,8 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
     
     _addFieldToMdvx(mdvx, fld);
 
-    // delete the field
-
-    delete fld;
-
   } // ifield
     
-  // clean up
-
-  _outputFields.clear();
-
   // write output file
   
   if (_params.debug) {
