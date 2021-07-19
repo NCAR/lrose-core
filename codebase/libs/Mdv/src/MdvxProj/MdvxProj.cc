@@ -488,9 +488,9 @@ void MdvxProj::initFromProjStr(const string &projStr)
     initVertPersp(lat_0, lon_0, perspRadius);
   }
 
-  if (x_0 != 0.0 || y_0 != 0.0) {
-    setOffsetCoords(y_0, x_0);
-  }
+  // if (x_0 != 0.0 || y_0 != 0.0) {
+  //   setOffsetCoords(y_0, x_0);
+  // }
 
 }
 
