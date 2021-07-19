@@ -422,33 +422,44 @@ void MdvxProj::initFromProjStr(const string &projStr)
   double k_0 = 1.0;
   bool isSouth = false;
   double perspRadius = 6.0 * Pjg::EradKm;
-
+  bool unitsAreM = false;
+  
+  char cc;
   for (size_t itok = 0; itok < toks.size(); itok++) {
     string tok = toks[itok];
     if (tok.find("+lon_0") != string::npos) {
-      sscanf(tok.c_str(), "+lon_0=%lg", &lon_0);
+      sscanf(tok.c_str(), "+lon_0%1c%lg", &cc, &lon_0);
     }
     if (tok.find("+lat_0") != string::npos) {
-      sscanf(tok.c_str(), "+lat_0=%lg", &lat_0);
+      sscanf(tok.c_str(), "+lat_0%1c%lg", &cc, &lat_0);
     }
     if (tok.find("+lat_1") != string::npos) {
-      sscanf(tok.c_str(), "+lat_1=%lg", &lat_1);
+      sscanf(tok.c_str(), "+lat_1%1c%lg", &cc, &lat_1);
     }
     if (tok.find("+lat_2") != string::npos) {
-      sscanf(tok.c_str(), "+lat_2=%lg", &lat_2);
+      sscanf(tok.c_str(), "+lat_2%1c%lg", &cc, &lat_2);
     }
     if (tok.find("+x_0") != string::npos) {
-      sscanf(tok.c_str(), "+x_0=%lg", &x_0);
+      sscanf(tok.c_str(), "+x_0%1c%lg", &cc, &x_0);
     }
     if (tok.find("+y_0") != string::npos) {
-      sscanf(tok.c_str(), "+y_0=%lg", &y_0);
+      sscanf(tok.c_str(), "+y_0%1c%lg", &cc, &y_0);
     }
     if (tok.find("+k_0") != string::npos) {
-      sscanf(tok.c_str(), "+k_0=%lg", &k_0);
+      sscanf(tok.c_str(), "+k_0%1c%lg", &cc, &k_0);
     }
     if (tok.find("+south") != string::npos) {
       isSouth = true;
     }
+    if ((tok.find("+units=m") != string::npos) ||
+        (tok.find("+units#m") != string::npos)) {
+      unitsAreM = true;
+    }
+  }
+
+  if (unitsAreM) {
+    x_0 /= 1000.0;
+    y_0 /= 1000.0;
   }
 
   if (ptype == Mdvx::PROJ_LATLON) {
@@ -475,6 +486,10 @@ void MdvxProj::initFromProjStr(const string &projStr)
     initStereographic(lat_0, lon_0, k_0);
   } else if (ptype == Mdvx::PROJ_VERT_PERSP) {
     initVertPersp(lat_0, lon_0, perspRadius);
+  }
+
+  if (x_0 != 0.0 || y_0 != 0.0) {
+    setOffsetCoords(y_0, x_0);
   }
 
 }
