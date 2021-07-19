@@ -421,6 +421,10 @@ public:
 
   char* file_name_substr;
 
+  double radar_min_z_km;
+
+  double radar_delta_z_km;
+
   output_field_t *_output_fields;
   int output_fields_n;
 
@@ -447,7 +451,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[29];
+  mutable TDRPtable _table[32];
 
   const char *_className;
 

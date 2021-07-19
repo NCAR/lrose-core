@@ -87,58 +87,35 @@ private:
   Params _params;
   DsInputPath *_input;
 
-  // input dimensions
-  
-  size_t _nScans, _nRays, _nGates;
-
   // times
 
   vector<DateTime> _times;
   DateTime _startTime, _endTime;
   DateTime _midTime;
-
+  
   // metadata
 
   string _conventions;
   string _version;
   string _source;
-  string _fileHeader, _fileInfo;
-  string _inputRecord, _jaxaInfo;
-  string _navigationRecord, _history;
+  string _history;
 
-  vector<NcxxPort::si32> _dataQuality, _dataWarning;
-  vector<NcxxPort::si32> _geoError, _geoWarning;
-  vector<NcxxPort::si32> _limitErrorFlag, _missingScan;
-
-  // input geometry
-
-  vector<NcxxPort::fl64> _lats;
-  vector<NcxxPort::fl64> _lons;
-  NcxxPort::fl64 _missingLat;
-  NcxxPort::fl64 _missingLon;
-
-  double _minLat, _maxLat;
-  double _minLon, _maxLon;
-  vector<vector<Point_d> > _latLons;
-
-  // sensor location
-
-  vector<NcxxPort::fl64> _scLat, _scLon, _scAlt;
-
-  // output geometry
+  // geometry and dimensions
 
   string _projStr;
 
-  size_t _nx, _ny, _nz;
-  double _dxM, _dyM;
+  size_t _nx, _ny;
+  double _dxM, _dyM, _dxKm, _dyKm;
+  double _minxM, _minxKm, _minyM, _minyKm;
   double _llLon, _llLat;
   double _ulLon, _ulLat;
   double _lrLon, _lrLat;
   double _urLon, _urLat;
+
+  // nz is forced to 1 for now
   
-  double _minxDeg, _minyDeg, _minzKm;
-  double _maxxDeg, _maxyDeg, _maxzKm;
-  double _dxDeg, _dyDeg, _dzKm;
+  size_t _nz;
+  double _minzKm, _dzKm;
   vector<double> _zLevels;
 
   // inner class for field data
@@ -245,75 +222,6 @@ private:
                    NcxxPort::si16 &missingVal,
                    string &units);
   
-  // interpolation
-
-  void _interpField(OutputField *fld);
-  
-  void _interpField(vector<NcxxPort::fl32> &valsInput,
-                    NcxxPort::fl32 missingVal,
-                    vector<NcxxPort::fl32> &valsInterp,
-                    bool nearestNeighbor);
-  
-  void _interpField(vector<NcxxPort::si16> &valsInput,
-                    NcxxPort::si16 missingVal,
-                    vector<NcxxPort::si16> &valsInterp);
-  
-  void _interpInsidePolygon(const Point_d *corners,
-                            const NcxxPort::fl32 *vals,
-                            NcxxPort::fl32 missingVal,
-                            size_t iz,
-                            vector<NcxxPort::fl32> &valsInterp,
-                            bool nearestNeighbor);
-
-  void _interpInsidePolygon(const Point_d *corners,
-                            const NcxxPort::si32 *vals,
-                            NcxxPort::si32 missingVal,
-                            size_t iz,
-                            vector<NcxxPort::si32> &valsInterp);
-
-  void _interpInsidePolygon(const Point_d *corners,
-                            const NcxxPort::si16 *vals,
-                            NcxxPort::si16 missingVal,
-                            size_t iz,
-                            vector<NcxxPort::si16> &valsInterp);
-
-  void _computeMinMaxIndices(const Point_d *corners,
-                             int &minIx, int &maxIx,
-                             int &minIy, int &maxIy);
-
-  NcxxPort::fl32 _interpPt(const Point_d &pt,
-                           const Point_d *corners,
-                           const NcxxPort::fl32 *vals,
-                           NcxxPort::fl32 missingVal,
-                           bool nearestNeighbor);
-  
-  NcxxPort::si32 _interpPt(const Point_d &pt,
-                           const Point_d *corners,
-                           const NcxxPort::si32 *vals,
-                           NcxxPort::si32 missingVal);
-
-  NcxxPort::si32 _interpPt(const Point_d &pt,
-                           const Point_d *corners,
-                           const NcxxPort::si16 *vals,
-                           NcxxPort::si32 missingVal);
-
-  Point_d _getCornerLatLon(int iscan,
-                           int iray,
-                           double zM);
-
-  Point_d _getCornerLatLon(int iscan,
-                           int iray);
-
-  // invert the height levels for DBZ because the data is stored
-  // with the top first and decreasing in height 
-
-  void _invertDbzGateLevels(OutputField *fld);
-
-  // remap the gates onto specified vertical levels
-  // compute the max for the remapping
-
-  void _remapVertLevels(OutputField *fld);
-
   /// set MDV headers and data
 
   void _setMasterHeader(DsMdvx &mdvx);

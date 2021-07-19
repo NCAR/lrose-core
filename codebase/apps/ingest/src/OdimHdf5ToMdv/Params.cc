@@ -742,8 +742,32 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
+    tt->comment_hdr = tdrpStrDup("Z dimension details");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'radar_min_z_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("radar_min_z_km");
+    tt->descr = tdrpStrDup("Height of lowest level (km)");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &radar_min_z_km - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'radar_delta_z_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("radar_delta_z_km");
+    tt->descr = tdrpStrDup("Delta height between levels (km)");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &radar_delta_z_km - &_start_;
+    tt->single_val.d = 0.125;
     tt++;
     
     // Parameter 'Comment 4'
@@ -751,6 +775,15 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT ENCODING AND COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -823,11 +856,11 @@
       tt->struct_vals[9].e = ENCODING_FLOAT32;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT GRID - LAT/LON");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -922,11 +955,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT URL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -943,11 +976,11 @@
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/odim");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OUTPUT METADATA STRINGS");
     tt->comment_text = tdrpStrDup("These will be used if the file does not contain suitable information.");
     tt++;

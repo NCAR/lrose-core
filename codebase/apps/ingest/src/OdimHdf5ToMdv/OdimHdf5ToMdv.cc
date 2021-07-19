@@ -292,12 +292,12 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
     
     // interpolate
     
-    _interpField(fld);
+    // _interpField(fld);
     
     // for DBZ invert the gate levels because the radar gate data is stored
     // top-down instead of bottom-up
     
-    _invertDbzGateLevels(fld);
+    // _invertDbzGateLevels(fld);
   
     // optionally remap onto specified output grid vlevels
     
@@ -393,10 +393,16 @@ int OdimHdf5ToMdv::_readWhere(Group &root)
 
   _nx = Hdf5xx::getIntAttribute(where, "xsize");
   _ny = Hdf5xx::getIntAttribute(where, "ysize");
-  
+
   _dxM = Hdf5xx::getDoubleAttribute(where, "xscale");
   _dyM = Hdf5xx::getDoubleAttribute(where, "yscale");
+  _dxKm = _dxM / 1000.0;
+  _dyKm = _dyM / 1000.0;
 
+  _nz = 1; // always 2D for now
+  _minzKm = _params.radar_min_z_km;
+  _dzKm = _params.radar_delta_z_km;
+  
   _llLon = Hdf5xx::getDoubleAttribute(where, "LL_lon");
   _llLat = Hdf5xx::getDoubleAttribute(where, "LL_lat");
   _ulLon = Hdf5xx::getDoubleAttribute(where, "UL_lon");
@@ -545,6 +551,9 @@ int OdimHdf5ToMdv::_readFieldAttributes(Group &what,
     cerr << "  nodata: " << fld->nodata << endl;
     cerr << "  undetect: " << fld->undetect << endl;
   }
+
+  _startTime = fld->startTime;
+  _endTime = fld->endTime;
   
   return 0;
   
@@ -580,8 +589,6 @@ int OdimHdf5ToMdv::_readFieldData(Group &dataGrp,
   } else {
     fld->nearestNeighbor = _params.interp_using_nearest_neighbor;
   }
-  
-  cerr << "DDDDDDDDDDDDDDDDDDDDD" << endl;
   
   // debug print
   
@@ -623,7 +630,7 @@ int OdimHdf5ToMdv::_readFieldData(Group &dataGrp,
   if (fld->dims.size() == 3) {
     _nz = fld->dims[2];
     _zLevels.resize(_nz);
-    for (size_t iz = 0; iz < _nGates; iz++) {
+    for (size_t iz = 0; iz < _nz; iz++) {
       _zLevels[iz] = _minzKm + iz * _dzKm;
     }
   }
@@ -674,9 +681,6 @@ int OdimHdf5ToMdv::_readFieldData(Group &dataGrp,
       }
     } // if (fld->dims.size() == 2)
     
-    cerr << "111111111 fl32Input.size(): " << fld->fl32Input.size() << endl;
-    cerr << "111111111 si16Input.size(): " << fld->si16Input.size() << endl;
-
   } // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
     
   return 0;
@@ -722,35 +726,33 @@ int OdimHdf5ToMdv::_readField3D(Group &grp,
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _ny: " << _ny << endl;
-    cerr << "  _nRays: " << _nRays << endl;
+    cerr << "  _nx: " << _nx << endl;
     return -1;
   }
 
   _nz = dims[2];
-  // _minzKm = _params.radar_min_z_km;
-  // _dzKm = _params.radar_delta_z_km;
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Read 3D fl32 group/dataset: " 
          << grp.getObjName() << "/" << dsetName << " <<====" << endl;
-    cerr << "  nScans, nRays, nGates: " 
-         << _ny << ", " << _nRays << ", " << _nGates << endl;
+    cerr << "  nz, ny, nx: " 
+         << _nz << ", " << _ny << ", " << _nx << endl;
     cerr << "  missingVal: " << missingVal << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _ny; iscan++) {
-        for (size_t iray = 0; iray < _nRays; iray++) {
-          for (size_t igate = 0; igate < _nGates; igate++) {
-            size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
+      for (size_t iy = 0; iy < _ny; iy++) {
+        for (size_t ix = 0; ix < _nx; ix++) {
+          for (size_t igate = 0; igate < _nz; igate++) {
+            size_t ipt = iy * _nx * _nz + ix * _nz + igate;
             if (vals[ipt] != missingVal) {
-              cerr << "  iscan, iray, igate, val: "
-                   << iscan << ", "
-                   << iray << ", "
+              cerr << "  iy, ix, igate, val: "
+                   << iy << ", "
+                   << ix << ", "
                    << igate << ", "
                    << vals[ipt] << endl;
             }
           } // igate
-        } // iray
-      } // iscan
+        } // ix
+      } // iy
     } // extra
   } // verbose
   
@@ -790,14 +792,14 @@ int OdimHdf5ToMdv::_readField3D(Group &grp,
     cerr << "  dims.size(): " << dims.size() << endl;
     return -1;
   }
-  if (dims[0] != _ny || dims[1] != _nRays) {
+  if (dims[0] != _ny || dims[1] != _nx) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
     cerr << "  DBZ dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _ny: " << _ny << endl;
-    cerr << "  _nRays: " << _nRays << endl;
+    cerr << "  _nx: " << _nx << endl;
     return -1;
   }
 
@@ -809,23 +811,23 @@ int OdimHdf5ToMdv::_readField3D(Group &grp,
     cerr << "====>> Read 3D int 32 group/dataset: " 
          << grp.getObjName() << "/" << dsetName << " <<====" << endl;
     cerr << "  nScans, nRays, nGates: " 
-         << _ny << ", " << _nRays << ", " << _nGates << endl;
+         << _ny << ", " << _nx << ", " << _nz << endl;
     cerr << "  missingVal: " << missingVal << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _ny; iscan++) {
-        for (size_t iray = 0; iray < _nRays; iray++) {
-          for (size_t igate = 0; igate < _nGates; igate++) {
-            size_t ipt = iscan * _nRays * _nGates + iray * _nGates + igate;
+      for (size_t iy = 0; iy < _ny; iy++) {
+        for (size_t ix = 0; ix < _nx; ix++) {
+          for (size_t igate = 0; igate < _nz; igate++) {
+            size_t ipt = iy * _nx * _nz + ix * _nz + igate;
             if (vals[ipt] != missingVal) {
-              cerr << "  iscan, iray, igate, val: "
-                   << iscan << ", "
-                   << iray << ", "
+              cerr << "  iy, ix, igate, val: "
+                   << iy << ", "
+                   << ix << ", "
                    << igate << ", "
                    << vals[ipt] << endl;
             }
           } // igate
-        } // iray
-      } // iscan
+        } // ix
+      } // iy
     } // extra
   } // verbose
   
@@ -844,8 +846,6 @@ int OdimHdf5ToMdv::_readField2D(Group &grp,
   
 {
 
-  cerr << "2D2D2D2D2D" << endl;
-  
   Hdf5xx hdf5;
 
   // read Latitude
@@ -868,10 +868,10 @@ int OdimHdf5ToMdv::_readField2D(Group &grp,
     cerr << "  dims.size(): " << dims.size() << endl;
     return -1;
   }
-  if (dims[0] != _ny || dims[1] != _ny) {
+  if (dims[0] != _ny || dims[1] != _nx) {
     cerr << "ERROR - OdimHdf5ToMdv::_readField2D()" << endl;
     cerr << "  Cannot read group/dataset: " << grp.getObjName() << "/" << dsetName << endl;
-    cerr << "  dimensions must match nScans and nRays" << endl;
+    cerr << "  dimensions must match ny and nx" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _ny: " << _ny << endl;
@@ -882,21 +882,20 @@ int OdimHdf5ToMdv::_readField2D(Group &grp,
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Read 2D fl32 group/dataset: "
          << grp.getObjName() << "/" << dsetName << " <<====" << endl;
-    cerr << "  nScans, nRays: " 
-         << _ny << ", " << _nRays << endl;
+    cerr << "  ny, nx: " << _ny << ", " << _nx << endl;
     cerr << "  missingVal: " << missingVal << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _ny; iscan++) {
-        for (size_t iray = 0; iray < _nRays; iray++) {
-          size_t ipt = iscan * _nRays + iray;
+      for (size_t iy = 0; iy < _ny; iy++) {
+        for (size_t ix = 0; ix < _nx; ix++) {
+          size_t ipt = iy * _nx + ix;
           if (vals[ipt] != missingVal) {
-            cerr << "  iscan, iray, val: "
-                 << iscan << ", "
-                 << iray << ", "
+            cerr << "  iy, ix, val: "
+                 << iy << ", "
+                 << ix << ", "
                  << vals[ipt] << endl;
           }
-        } // iray
-      } // iscan
+        } // ix
+      } // iy
     } // extra
   } // verbose
   
@@ -947,7 +946,7 @@ int OdimHdf5ToMdv::_readField2D(Group &grp,
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _ny: " << _ny << endl;
-    cerr << "  _nRays: " << _nRays << endl;
+    cerr << "  _nx: " << _nx << endl;
     return -1;
   }
 
@@ -955,20 +954,20 @@ int OdimHdf5ToMdv::_readField2D(Group &grp,
     cerr << "====>> Read 2D int16 group/dataset: "
          << grp.getObjName() << "/" << dsetName << " <<====" << endl;
     cerr << "  nScans, nRays: " 
-         << _ny << ", " << _nRays << endl;
+         << _ny << ", " << _nx << endl;
     cerr << "  missingVal: " << missingVal << endl;
     if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _ny; iscan++) {
-        for (size_t iray = 0; iray < _nRays; iray++) {
-          size_t ipt = iscan * _nRays + iray;
+      for (size_t iy = 0; iy < _ny; iy++) {
+        for (size_t ix = 0; ix < _nx; ix++) {
+          size_t ipt = iy * _nx + ix;
           if (vals[ipt] != missingVal) {
-            cerr << "  iscan, iray, val: "
-                 << iscan << ", "
-                 << iray << ", "
+            cerr << "  iy, ix, val: "
+                 << iy << ", "
+                 << ix << ", "
                  << vals[ipt] << endl;
           }
-        } // iray
-      } // iscan
+        } // ix
+      } // iy
     } // extra
   } // verbose
   
@@ -976,713 +975,6 @@ int OdimHdf5ToMdv::_readField2D(Group &grp,
 
 }
 
-//////////////////////////////////////////////
-// interpolate the fields
-
-void OdimHdf5ToMdv::_interpField(OutputField *fld)
-
-{
-
-  if (fld->si16Input.size() > 0) {
-
-    _interpField(fld->si16Input,
-                 fld->si16Missing,
-                 fld->si16Interp);
-
-    fld->si16Output = fld->si16Interp;
-
-  } else if (fld->fl32Input.size() > 0) {
-
-    _interpField(fld->fl32Input,
-                 fld->fl32Missing,
-                 fld->fl32Interp,
-                 fld->nearestNeighbor);
-
-    fld->fl32Output = fld->fl32Interp;
-
-  }
-  
-}
-
-//////////////////////////////////////////////
-// interpolate float field
-
-void OdimHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
-                                 NcxxPort::fl32 missingVal,
-                                 vector<NcxxPort::fl32> &valsInterp,
-                                 bool nearestNeighbor)
-  
-{
-
-  // check for 2D field
-
-  bool is2D = false;
-  if (valsInput.size() == _nRays * _nScans) {
-    is2D = true;
-  }
-  size_t nz = _nz;
-  size_t nGates = _nGates;
-  if (is2D) {
-    nz = 1;
-    nGates = 1;
-  }
-  
-  // initialize dbz grid
-
-  size_t nOutput = _nx * _ny * nz;
-  valsInterp.resize(nOutput);
-  for (size_t ii = 0; ii < nOutput; ii++) {
-    valsInterp[ii] = missingVal;
-  }
-
-  // loop through the vertical levels
-  
-  for (size_t iz = 0; iz < nz; iz++) {
-    
-    double zM = (_minzKm + iz * _dzKm) * 1000.0;
-    
-    // load input vals for this level
-    size_t nPtsScan = _nRays * nGates;
-    vector<vector<NcxxPort::fl32> > valsThisZ;
-    for (size_t iscan = 0; iscan < _nScans; iscan++) {
-      vector<NcxxPort::fl32> valsScan;
-      for (size_t iray = 0; iray < _nRays; iray++) {
-        size_t ipt = iscan * nPtsScan + iray * nGates + iz;
-        valsScan.push_back(valsInput[ipt]);
-      } // iray
-      valsThisZ.push_back(valsScan);
-    } // iscan
-    
-    // loop through the input (scan, ray) grid
-
-    for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
-      for (size_t iray = 0; iray < _nRays - 1; iray++) {
-        
-        // corner locations adjusted for radar slant
-        Point_d corners[4];
-        corners[0] = _getCornerLatLon(iscan, iray, zM);
-        corners[1] = _getCornerLatLon(iscan, iray + 1, zM);
-        corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
-        corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
-
-        // vals at corners
-        NcxxPort::fl32 vals[4];
-        vals[0] = valsThisZ[iscan][iray];
-        vals[1] = valsThisZ[iscan][iray + 1];
-        vals[2] = valsThisZ[iscan + 1][iray + 1];
-        vals[3] = valsThisZ[iscan + 1][iray];
-
-        // interp for the output grid points inside the polygon
-        
-        _interpInsidePolygon(corners, vals, missingVal, 
-                             iz, valsInterp, nearestNeighbor);
-        
-      } // iray
-    } // iscan
-
-  } // iz
-
-}
-
-//////////////////////////////////////////////
-// interpolate int 16 field
-
-void OdimHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
-                                 NcxxPort::si16 missingVal,
-                                 vector<NcxxPort::si16> &valsInterp)
-  
-{
-
-  // check for 2D field
-
-  bool is2D = false;
-  if (valsInput.size() == _nRays * _nScans) {
-    is2D = true;
-  }
-  size_t nz = _nz;
-  size_t nGates = _nGates;
-  if (is2D) {
-    nz = 1;
-    nGates = 1;
-  }
-  
-  // initialize dbz grid
-
-  size_t nOutput = _nx * _ny * nz;
-  valsInterp.resize(nOutput);
-  for (size_t ii = 0; ii < nOutput; ii++) {
-    valsInterp[ii] = missingVal;
-  }
-
-  // loop through the vertical levels
-
-  for (size_t iz = 0; iz < nz; iz++) {
-
-    double zM = (_minzKm + iz * _dzKm) * 1000.0;
-    
-    // load input vals for this level
-    
-    vector<vector<NcxxPort::si16> > valsIn;
-    for (size_t iscan = 0; iscan < _nScans; iscan++) {
-      vector<NcxxPort::si16> valsScan;
-      for (size_t iray = 0; iray < _nRays; iray++) {
-        size_t ipt = iscan * _nRays * nGates + iray * nGates + iz;
-        valsScan.push_back(valsInput[ipt]);
-      } // iray
-      valsIn.push_back(valsScan);
-    } // iscan
-    
-    // loop through the input (scan, ray) grid
-
-    for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
-      for (size_t iray = 0; iray < _nRays - 1; iray++) {
-        
-        // corner locations adjusted for radar slant
-        Point_d corners[4];
-        corners[0] = _getCornerLatLon(iscan, iray, zM);
-        corners[1] = _getCornerLatLon(iscan, iray + 1, zM);
-        corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
-        corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
-
-        // dbz vals at corners
-        NcxxPort::si16 vals[4];
-        vals[0] = valsIn[iscan][iray];
-        vals[1] = valsIn[iscan][iray + 1];
-        vals[2] = valsIn[iscan + 1][iray + 1];
-        vals[3] = valsIn[iscan + 1][iray];
-
-        // interp for the output grid points inside the polygon
-        
-        _interpInsidePolygon(corners, vals, missingVal, iz, valsInterp);
-        
-      } // iray
-    } // iscan
-
-  } // iz
-
-}
-
-//////////////////////////////////////////////
-// interpolate points within polygon - floats
-
-void OdimHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
-                                         const NcxxPort::fl32 *vals,
-                                         NcxxPort::fl32 missingVal,
-                                         size_t iz,
-                                         vector<NcxxPort::fl32> &valsInterp,
-                                         bool nearestNeighbor)
- 
-{
-
-  // check we have 4 valid corners
-  
-  for (int ii = 0; ii < 4; ii++) {
-    if (corners[ii].x == _missingLon ||
-        corners[ii].y == _missingLat) {
-      return;
-    }
-  }
-
-  // check we have valid data
-  
-  int nGood = 0;
-  for (int ii = 0; ii < 4; ii++) {
-    if (vals[ii] != missingVal) {
-      nGood++;
-    }
-  }
-  if (nGood == 0) {
-    return;
-  }
-
-  // compute the min/max grid indices
-
-  int minIx, maxIx, minIy, maxIy;
-  _computeMinMaxIndices(corners, minIx, maxIx, minIy, maxIy);
-
-  // loop through the output grid points, finding if they are inside the polygon
-
-  for (int iy = minIy; iy <= maxIy; iy++) {
-    for (int ix = minIx; ix <= maxIx; ix++) {
-      Point_d pt;
-      pt.x = _minxDeg + ix * _dxDeg;
-      pt.y = _minyDeg + iy * _dyDeg;
-      if (EGS_point_in_polygon(pt, (Point_d *) corners, 4)) {
-        double interpVal = _interpPt(pt, corners, vals,
-                                     missingVal, nearestNeighbor);
-        size_t outputIndex = iz * _nx * _ny + iy * _nx + ix;
-        valsInterp[outputIndex] = interpVal;
-      }
-    } // ix
-  } // iy
-
-}
-
-//////////////////////////////////////////////
-// interpolate points within polygon - int 32
-
-void OdimHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
-                                         const NcxxPort::si32 *vals,
-                                         NcxxPort::si32 missingVal,
-                                         size_t iz,
-                                         vector<NcxxPort::si32> &valsInterp)
- 
-{
-
-  // check we have 4 valid corners
-  
-  for (int ii = 0; ii < 4; ii++) {
-    if (corners[ii].x == _missingLon ||
-        corners[ii].y == _missingLat) {
-      return;
-    }
-  }
-
-  // check we have valid data
-  
-  int nGood = 0;
-  for (int ii = 0; ii < 4; ii++) {
-    if (vals[ii] != missingVal) {
-      nGood++;
-    }
-  }
-  if (nGood == 0) {
-    return;
-  }
-  
-  // compute the min/max grid indices
-
-  int minIx, maxIx, minIy, maxIy;
-  _computeMinMaxIndices(corners, minIx, maxIx, minIy, maxIy);
-
-  // loop through the output grid points,
-  // finding if they are inside the polygon
-
-  for (int iy = minIy; iy <= maxIy; iy++) {
-    for (int ix = minIx; ix <= maxIx; ix++) {
-      Point_d pt;
-      pt.x = _minxDeg + ix * _dxDeg;
-      pt.y = _minyDeg + iy * _dyDeg;
-      if (EGS_point_in_polygon(pt, (Point_d *) corners, 4)) {
-        NcxxPort::si32 interpVal = _interpPt(pt, corners, vals, missingVal);
-        size_t outputIndex = iz * _nx * _ny + iy * _nx + ix;
-        valsInterp[outputIndex] = interpVal;
-      }
-    } // ix
-  } // iy
-
-}
-
-//////////////////////////////////////////////
-// interpolate points within polygon - int 16
-
-void OdimHdf5ToMdv::_interpInsidePolygon(const Point_d *corners,
-                                         const NcxxPort::si16 *vals,
-                                         NcxxPort::si16 missingVal,
-                                         size_t iz,
-                                         vector<NcxxPort::si16> &valsInterp)
- 
-{
-
-  // check we have 4 valid corners
-  
-  for (int ii = 0; ii < 4; ii++) {
-    if (corners[ii].x == _missingLon ||
-        corners[ii].y == _missingLat) {
-      return;
-    }
-  }
-
-  // check we have valid data
-  
-  int nGood = 0;
-  for (int ii = 0; ii < 4; ii++) {
-    if (vals[ii] != missingVal) {
-      nGood++;
-    }
-  }
-  if (nGood == 0) {
-    return;
-  }
-  
-  // compute the min/max grid indices
-
-  int minIx, maxIx, minIy, maxIy;
-  _computeMinMaxIndices(corners, minIx, maxIx, minIy, maxIy);
-
-  // loop through the output grid points, finding if they are inside the polygon
-
-  for (int iy = minIy; iy <= maxIy; iy++) {
-    for (int ix = minIx; ix <= maxIx; ix++) {
-      Point_d pt;
-      pt.x = _minxDeg + ix * _dxDeg;
-      pt.y = _minyDeg + iy * _dyDeg;
-      if (EGS_point_in_polygon(pt, (Point_d *) corners, 4)) {
-        NcxxPort::si16 interpVal = _interpPt(pt, corners, vals, missingVal);
-        size_t outputIndex = iz * _nx * _ny + iy * _nx + ix;
-        valsInterp[outputIndex] = interpVal;
-      }
-    } // ix
-  } // iy
-
-}
-
-//////////////////////////////////////////////
-// compute the min/max indices in the grid
-// for the lat/lon corners
-
-void OdimHdf5ToMdv::_computeMinMaxIndices(const Point_d *corners,
-                                          int &minIx, int &maxIx,
-                                          int &minIy, int &maxIy) 
-
-{
-  
-  // compute lat/lon bounding box
-  
-  double minLat = corners[0].y;
-  double maxLat = corners[0].y;
-  double minLon = corners[0].x;
-  double maxLon = corners[0].x;
-  
-  for (int ii = 1; ii < 4; ii++) {
-    minLat = min(minLat, corners[ii].y);
-    maxLat = max(maxLat, corners[ii].y);
-    minLon = min(minLon, corners[ii].x);
-    maxLon = max(maxLon, corners[ii].x);
-  }
-  
-  // compute the output grid limits for the bounding box
-  
-  minIx = (int) ((minLon - _minxDeg) / _dxDeg);
-  maxIx = (int) ((maxLon - _minxDeg) / _dxDeg + 1.0);
-  
-  minIy = (int) ((minLat - _minyDeg) / _dyDeg);
-  maxIy = (int) ((maxLat - _minyDeg) / _dyDeg + 1.0);
-  
-  minIx = max(minIx, 0);
-  minIy = max(minIy, 0);
-  maxIx = min(maxIx, (int) _nx - 1);
-  maxIy = min(maxIy, (int) _ny - 1);
-
-}
-  
-//////////////////////////////////////////////
-// interpolate point within polygon - double
-
-NcxxPort::fl32 OdimHdf5ToMdv::_interpPt(const Point_d &pt,
-                                        const Point_d *corners,
-                                        const NcxxPort::fl32 *vals,
-                                        NcxxPort::fl32 missingVal,
-                                        bool nearestNeighbor)
-  
-{
-  
-  // compute the distances from the pt to the corners
-  
-  double dist[4];
-  for (int ii = 0; ii < 3; ii++) {
-    double dx = pt.x - corners[ii].x;
-    double dy = pt.y - corners[ii].y;
-    dist[ii] = sqrt(dx * dx + dy * dy);
-  }
-  
-  // nearest neighbor?
-
-  if (nearestNeighbor) {
-    double minDist = 1.0e99;
-    int minIndex = -1;
-    for (int ii = 0; ii < 3; ii++) {
-      if (dist[ii] < minDist) {
-        minDist = dist[ii];
-        if (vals[ii] != missingVal) {
-          minIndex = ii;
-        }
-      }
-    }
-    return vals[minIndex];
-  }
-  
-  // inverse distance weighted interpolation
-  
-  double weight[4];
-  double sumWt = 0.0;
-  double sumInterp = 0.0;
-  for (int ii = 0; ii < 3; ii++) {
-    if (vals[ii] != missingVal) {
-      weight[ii] = pow(1.0 / dist[ii], _params.interp_power_parameter);
-      sumWt += weight[ii];
-      sumInterp += weight[ii] * vals[ii];
-    }
-  }
-  double interpVal = sumInterp / sumWt;
-
-  return interpVal;
-
-}
-  
-//////////////////////////////////////////////
-// interpolate point within polygon - int 32
-// always uses nearest neighbor
-
-int OdimHdf5ToMdv::_interpPt(const Point_d &pt,
-                             const Point_d *corners,
-                             const NcxxPort::si32 *vals,
-                             int missingVal)
-  
-{
-  
-  // compute the distances from the pt to the corners
-  
-  double dist[4];
-  for (int ii = 0; ii < 3; ii++) {
-    double dx = pt.x - corners[ii].x;
-    double dy = pt.y - corners[ii].y;
-    dist[ii] = sqrt(dx * dx + dy * dy);
-  }
-
-  // find nearest
-
-  double minDist = 1.0e99;
-  int minIndex = -1;
-  for (int ii = 0; ii < 3; ii++) {
-    if (dist[ii] < minDist) {
-      minDist = dist[ii];
-      if (vals[ii] != missingVal) {
-        minIndex = ii;
-      }
-    }
-  }
-
-  return vals[minIndex];
-  
-}
-  
-//////////////////////////////////////////////
-// interpolate point within polygon - int 16
-// always uses nearest neighbor
-
-int OdimHdf5ToMdv::_interpPt(const Point_d &pt,
-                             const Point_d *corners,
-                             const NcxxPort::si16 *vals,
-                             int missingVal)
-  
-{
-  
-  // compute the distances from the pt to the corners
-  
-  double dist[4];
-  for (int ii = 0; ii < 3; ii++) {
-    double dx = pt.x - corners[ii].x;
-    double dy = pt.y - corners[ii].y;
-    dist[ii] = sqrt(dx * dx + dy * dy);
-  }
-
-  // find nearest
-
-  double minDist = 1.0e99;
-  int minIndex = -1;
-  for (int ii = 0; ii < 3; ii++) {
-    if (dist[ii] < minDist) {
-      minDist = dist[ii];
-      if (vals[ii] != missingVal) {
-        minIndex = ii;
-      }
-    }
-  }
-
-  return vals[minIndex];
-  
-}
-  
-/////////////////////////////////////////////////////////////////
-// get lat/lon of a grid corner, for given height (zM)
-// adjusting the corner locations for slant from radar to this point
-
-Point_d OdimHdf5ToMdv::_getCornerLatLon(int iscan,
-                                        int iray,
-                                        double zM)
-
-{
-
-  // ht as a fraction of the spacecraft height
-  
-  double zFraction = zM / _scAlt[iscan];
-  
-  // get the point
-  
-  Point_d pt = _latLons[iscan][iray];
-  if (pt.x == _missingLon || pt.y == _missingLat) {
-    return pt;
-  }
-  
-  double cornerLat = pt.y;
-  double slantDeltaLat = (_scLat[iscan] - cornerLat) * zFraction;
-  cornerLat += slantDeltaLat;
-  
-  double cornerLon = pt.x;
-  double slantDeltaLon = (_scLon[iscan] - cornerLon) * zFraction;
-  cornerLon += slantDeltaLon;
-
-  Point_d corner;
-  corner.y = cornerLat;
-  corner.x = cornerLon;
-  
-  return corner;
-
-}
-
-/////////////////////////////////////////////////////////////////
-// get lat/lon of a grid corner, at surface
-
-Point_d OdimHdf5ToMdv::_getCornerLatLon(int iscan,
-                                        int iray)
-
-{
-  return _latLons[iscan][iray];
-}
-
-////////////////////////////////////////////////////////
-// for DBZ 3D fields,
-// invert the height levels because the data is stored
-// with the top first and decreasing in height 
-
-void OdimHdf5ToMdv::_invertDbzGateLevels(OutputField *fld)
-{
-  
-  // check for reflectivity
-  
-  if (fld->units != "dBZ" && fld->units != "mm/hr") {
-    return;
-  }
-
-  // check for 3D float field
-  
-  if (fld->dims.size() != 3) {
-    return;
-  }
-  if (fld->fl32Input.size() == 0) {
-    return;
-  }
-    
-  // prepare output grid
-    
-  fld->fl32Output.resize(fld->fl32Interp.size());
-  
-  // invert vlevels
-  
-  size_t nptsPlane = _nx * _ny;
-  for (size_t iz = 0; iz < _nz; iz++) {
-    for (size_t iy = 0; iy < _ny; iy++) {
-      for (size_t ix = 0; ix < _nx; ix++) {
-        size_t interpIndex = iz * nptsPlane + iy * _nx + ix;
-        size_t outputIndex = (_nz - iz - 1) * nptsPlane + iy * _nx + ix;
-        fld->fl32Output[outputIndex] = fld->fl32Interp[interpIndex];
-      } // ix
-    } // iy
-  } // iz
-  
-}
-  
-////////////////////////////////////////////////////////
-// for 3D fields,
-// remap the gates onto specified vertical levels
-// compute the max for the remapping
-
-void OdimHdf5ToMdv::_remapVertLevels(OutputField *fld)
-{
-  
-  // check for 3D field
-  
-  if (fld->dims.size() != 3) {
-    return;
-  }
-  
-  // compute heights of mid pt between specified levels
-  
-  vector<double> zMid;
-  for (size_t ii = 0; ii < _zLevels.size() - 1; ii++) {
-    zMid.push_back((_zLevels[ii] + _zLevels[ii+1]) / 2.0);
-  }
-  vector<int> lowIndex, highIndex;
-  lowIndex.resize(_zLevels.size());
-  highIndex.resize(_zLevels.size());
-  lowIndex[0] = 0;
-  highIndex[_zLevels.size()-1] = _nz - 1;
-  for (size_t iz = 1; iz < _zLevels.size(); iz++) {
-    lowIndex[iz] = (int) ((zMid[iz-1] - _minzKm) / _dzKm) + 1;
-  }
-  for (size_t iz = 0; iz < _zLevels.size() - 1; iz++) {
-    highIndex[iz] = (int) ((zMid[iz] - _minzKm) / _dzKm);
-  }
-
-  if (fld->fl32Input.size() > 0) {
-    
-    // floats
-    
-    // save existing output in temp array
-    
-    vector<NcxxPort::fl32> outputOrig = fld->fl32Output;
-    
-    // prepare output grid
-    
-    size_t nPtsOutput = _nx * _ny * _zLevels.size();
-    fld->fl32Output.resize(nPtsOutput);
-    
-    // compute max val for specified vlevels
-    
-    size_t nptsPlane = _nx * _ny;
-    for (size_t iy = 0; iy < _ny; iy++) {
-      for (size_t ix = 0; ix < _nx; ix++) {
-        for (size_t iz = 0; iz < _zLevels.size(); iz++) {
-          NcxxPort::fl32 maxVal = fld->fl32Missing;
-          for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
-            size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
-            if (outputOrig[interpIndex] != fld->fl32Missing) {
-              maxVal = max(maxVal, outputOrig[interpIndex]);
-            }
-          } // jz
-          size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
-          fld->fl32Output[outputIndex] = maxVal;
-        } // iz
-      } // ix
-    } // iy
-    
-  } else if (fld->si16Input.size() > 0) {
-    
-    // ints
-    
-    // save existing output in temp array
-    
-    vector<NcxxPort::si16> outputOrig = fld->si16Output;
-    
-    // prepare output grid
-    
-    size_t nPtsOutput = _nx * _ny * _zLevels.size();
-    fld->si16Output.resize(nPtsOutput);
-    
-    // compute max val for specified vlevels
-    
-    size_t nptsPlane = _nx * _ny;
-    for (size_t iy = 0; iy < _ny; iy++) {
-      for (size_t ix = 0; ix < _nx; ix++) {
-        for (size_t iz = 0; iz < _zLevels.size(); iz++) {
-          NcxxPort::si16 maxVal = fld->si16Missing;
-          for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
-            size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
-            if (outputOrig[interpIndex] != fld->si16Missing) {
-              maxVal = max(maxVal, outputOrig[interpIndex]);
-            }
-          } // jz
-          size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
-          fld->si16Output[outputIndex] = maxVal;
-        } // iz
-      } // ix
-    } // iy
-    
-  } // else if (fld->si16Input.size() > 0)
-  
-}
-  
 /////////////////////////////////////////////////
 // Set the master header from the NCF file
 //
@@ -1737,8 +1029,8 @@ void OdimHdf5ToMdv::_addFieldToMdvx(DsMdvx &mdvx,
                                         fld->params.longName,
                                         fld->units,
                                         _nx, _ny, nz,
-                                        _minxDeg, _minyDeg, minzKm,
-                                        _dxDeg, _dyDeg, _dzKm,
+                                        _minxKm, _minyKm, _minzKm,
+                                        _dxKm, _dyKm, _dzKm,
                                         fld->si16Missing,
                                         fld->si16Output.data());
     
@@ -1753,8 +1045,8 @@ void OdimHdf5ToMdv::_addFieldToMdvx(DsMdvx &mdvx,
                                         fld->params.longName,
                                         fld->units,
                                         _nx, _ny, nz,
-                                        _minxDeg, _minyDeg, minzKm,
-                                        _dxDeg, _dyDeg, _dzKm,
+                                        _minxKm, _minyKm, minzKm,
+                                        _dxKm, _dyKm, _dzKm,
                                         fld->fl32Missing,
                                         fld->fl32Output.data());
     
