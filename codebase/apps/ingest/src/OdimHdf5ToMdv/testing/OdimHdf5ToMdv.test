@@ -254,7 +254,7 @@ convert_output_grid_to_latlon = TRUE;
 // Type: string
 //
 
-output_url = "$(HOME)/data/conv_strat/mdv/opera/latlon";
+output_url = "$(HOME)/data/convstrat/mdv/opera/latlon";
 
 //======================================================================
 //

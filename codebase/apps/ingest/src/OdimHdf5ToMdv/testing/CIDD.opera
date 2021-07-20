@@ -105,11 +105,20 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-DBZorig   DBZorig   $(HOME)/data/conv_strat/mdv/opera/lambert&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
-QUALorig  QUALorig  $(HOME)/data/conv_strat/mdv/opera/lambert&QUALITY  interest.colors  -      0 0 0   cart  1 0
+DBZlamb   DBZlamb   $(HOME)/data/convstrat/mdv/opera/lambert&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
+DBZlatlon   DBZlatlon   $(HOME)/data/convstrat/mdv/opera/latlon&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
 
-DBZlatlon   DBZlatlon   $(HOME)/data/conv_strat/mdv/opera/latlon&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
-QUALlatlon  QUALlatlon  $(HOME)/data/conv_strat/mdv/opera/latlon&QUALITY  interest.colors  -      0 0 0   cart  1 0
+QUALlamb  QUALlamb  $(HOME)/data/convstrat/mdv/opera/lambert&QUALITY  interest.colors  -      0 0 0   cart  1 0
+QUALlatlon  QUALlatlon  $(HOME)/data/convstrat/mdv/opera/latlon&QUALITY  interest.colors  -      0 0 0   cart  1 0
+
+FractionActivelamb  FractionActivelamb  $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&FractionActive  fraction.colors - -5 80 5 cart 1 0
+FractionActivelatlon  FractionActivelatlon  $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&FractionActive  fraction.colors - -5 80 5 cart 1 0
+DbzTexturelamb      DbzTexturelamb      $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&DbzTexture2D dbz.colors - -5 80 5 cart 1 0
+DbzTexturelatlon      DbzTexturelatlon      $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&DbzTexture2D dbz.colors - -5 80 5 cart 1 0
+Convectivitylamb    Convectivitylamb    $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Convectivity2D convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivitylatlon    Convectivitylatlon    $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Convectivity2D convectivity.colors - -5 80 5 cart,comp 1 0
+Partition2Dlamb     Partition2Dlamb     $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
+Partition2Dlatlon     Partition2Dlatlon     $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
 
 #
 </GRIDS>
@@ -1034,7 +1043,7 @@ cidd.use_local_timestamps: 0
 # Set this parameter to force the field menu pop-up to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 1
+cidd.num_field_menu_cols: 2
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.
