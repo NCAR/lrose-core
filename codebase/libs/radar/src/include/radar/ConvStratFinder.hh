@@ -395,6 +395,7 @@ private:
   void _performClumping();
   void _freeClumps();
   void _setPartition3D();
+  void _setPartition2D();
   void _set2DFields();
   void _computeKernels();
   void _printSettings(ostream &out);

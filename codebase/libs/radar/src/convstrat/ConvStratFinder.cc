@@ -247,11 +247,17 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
 
   // set the 3D version of the partition
 
-  _setPartition3D();
+  if (_zKm.size() > 1) {
+    _setPartition3D();
+  } else {
+    _setPartition2D();
+  }
 
   // compute the 2D fields from the 3D fields
 
-  _set2DFields();
+  if (_zKm.size() > 1) {
+    _set2DFields();
+  }
 
   return 0;
 
@@ -669,6 +675,61 @@ void ConvStratFinder::_setPartition3D()
     } // iy
   } // ix
   
+}
+
+/////////////////////////////////////////////////////////
+// set 2d partition array - for 2D data
+// set the stratiform categories
+// and copy 3D fields to 2D fields
+
+void ConvStratFinder::_setPartition2D()
+  
+{
+  
+  const fl32 *texture3D = _texture3D.dat();
+  fl32 *texture2D = _texture2D.dat();
+  const fl32 *convectivity3D = _convectivity3D.dat();
+  fl32 *convectivity2D = _convectivity2D.dat();
+  ui08 *partition3D = _partition3D.dat();
+  ui08 *partition2D = _partition2D.dat();
+  const fl32 *dbz3D = _dbz3D.dat();
+  fl32 *convDbz = _convDbz.dat();
+
+  // loop through (x,y)
+  
+  for (size_t ix = 0; ix < _nx; ix++) {
+    for (size_t iy = 0; iy < _ny; iy++) {
+      
+      int offset = iy * _nx + ix;
+  
+      texture2D[offset] = texture3D[offset];
+      convectivity2D[offset] = convectivity3D[offset];
+      convDbz[offset] = dbz3D[offset];
+      
+      // check if there no convectivity at this point
+      
+      if (convectivity3D[offset] == _missingFl32) {
+        continue;
+      }
+      if (convectivity3D[offset] == 0) {
+        continue;
+      }
+      
+      // is this mixed?
+      
+      if (convectivity3D[offset] <= _maxConvectivityForStratiform) {
+        partition3D[offset] = CATEGORY_STRATIFORM_MID;
+      } else if (convectivity3D[offset] >= _minConvectivityForConvective) {
+        partition3D[offset] = CATEGORY_CONVECTIVE_MID;
+      } else {
+        partition3D[offset] = CATEGORY_MIXED;
+      }
+      
+      partition2D[offset] = partition3D[offset];
+
+    } // iy
+  } // ix
+
 }
 
 /////////////////////////////////////////////////////////
