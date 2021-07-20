@@ -386,6 +386,7 @@ private:
 
   // methods
   
+  int _computePartition2D(const fl32 *dbz, fl32 dbzMissingVal);
   void _allocArrays();
   void _initToMissing();
   void _initToMissing(TaArray<fl32> &array, fl32 missingVal);

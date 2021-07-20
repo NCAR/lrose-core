@@ -195,6 +195,12 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
 
   assert(_gridSet);
 
+  // 2D case
+
+  if (_zKm.size() == 1) {
+    return _computePartition2D(dbz, dbzMissingVal);
+  }
+
   // compute min and max vert indices
 
   _minIz = 0;
@@ -258,6 +264,57 @@ int ConvStratFinder::computePartition(const fl32 *dbz,
   if (_zKm.size() > 1) {
     _set2DFields();
   }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Compute the partition in the 2D case
+
+int ConvStratFinder::_computePartition2D(const fl32 *dbz, 
+                                         fl32 dbzMissingVal)
+{
+
+  // z indices are 0
+
+  _minIz = 0;
+  _maxIz = 0;
+
+  // set dbz field to missing if below the min threshold
+  
+  fl32 *volDbz = _dbz3D.dat();
+  for (size_t ii = 0; ii < _nxyz; ii++) {
+    if (dbz[ii] == dbzMissingVal || dbz[ii] < _minValidDbz) {
+      volDbz[ii] = _missingFl32;
+    } else {
+      volDbz[ii] = dbz[ii];
+    }
+  }
+
+  // compute the circular kernel
+  
+  _computeKernels();
+  
+  if (_verbose) {
+    _printSettings(cerr);
+  }
+  
+  // compute column maxima and fraction covered
+  
+  _computeColMax();
+  
+  // compute spatial texture of reflectivity
+  
+  _computeTexture();
+
+  // compute convectivity convectivity
+  
+  _computeConvectivity();
+
+  // set the partition
+
+  _setPartition2D();
 
   return 0;
 
