@@ -117,8 +117,8 @@ DbzText_lamb      DbzText_lamb      $(HOME)/data/convstrat/mdv/conv_strat/opera/
 DbzText_latlon      DbzText_latlon      $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&DbzTexture2D dbz.colors - -5 80 5 cart 1 0
 Conv_lamb    Conv_lamb    $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Convectivity2D convectivity.colors - -5 80 5 cart,comp 1 0
 Conv_latlon    Conv_latlon    $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Convectivity2D convectivity.colors - -5 80 5 cart,comp 1 0
-Part2D_lamb     Part2D_lamb     $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
-Part2D_latlon     Part2D_latlon     $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
+Part2D_lamb     Part2D_lamb     $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Partition2D conv_strat_2d.colors - -5 80 5 cart 1 0
+Part2D_latlon     Part2D_latlon     $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Partition2D conv_strat_2d.colors - -5 80 5 cart 1 0
 
 StratFilt  StratFilt $(HOME)/data/convstrat/mdv/strat_filter/opera/lambert?use_http=true&ConvStrat strat_filter.colors - -5 80 5 cart 1 0
 #
