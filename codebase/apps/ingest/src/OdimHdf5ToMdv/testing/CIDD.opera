@@ -105,20 +105,20 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-DBZlamb   DBZlamb   $(HOME)/data/convstrat/mdv/opera/lambert&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
-DBZlatlon   DBZlatlon   $(HOME)/data/convstrat/mdv/opera/latlon&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
+DBZ_lamb   DBZ_lamb   $(HOME)/data/convstrat/mdv/opera/lambert&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
+DBZ_latlon   DBZ_latlon   $(HOME)/data/convstrat/mdv/opera/latlon&DBZ      dbz.colors      dbz     0 0 0   cart  1 0
 
-QUALlamb  QUALlamb  $(HOME)/data/convstrat/mdv/opera/lambert&QUALITY  interest.colors  -      0 0 0   cart  1 0
-QUALlatlon  QUALlatlon  $(HOME)/data/convstrat/mdv/opera/latlon&QUALITY  interest.colors  -      0 0 0   cart  1 0
+QUAL_lamb  QUAL_lamb  $(HOME)/data/convstrat/mdv/opera/lambert&QUALITY  fraction.colors  -      0 0 0   cart  1 0
+QUAL_latlon  QUAL_latlon  $(HOME)/data/convstrat/mdv/opera/latlon&QUALITY  fraction.colors  -      0 0 0   cart  1 0
 
-FractionActivelamb  FractionActivelamb  $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&FractionActive  fraction.colors - -5 80 5 cart 1 0
-FractionActivelatlon  FractionActivelatlon  $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&FractionActive  fraction.colors - -5 80 5 cart 1 0
-DbzTexturelamb      DbzTexturelamb      $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&DbzTexture2D dbz.colors - -5 80 5 cart 1 0
-DbzTexturelatlon      DbzTexturelatlon      $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&DbzTexture2D dbz.colors - -5 80 5 cart 1 0
-Convectivitylamb    Convectivitylamb    $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Convectivity2D convectivity.colors - -5 80 5 cart,comp 1 0
-Convectivitylatlon    Convectivitylatlon    $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Convectivity2D convectivity.colors - -5 80 5 cart,comp 1 0
-Partition2Dlamb     Partition2Dlamb     $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
-Partition2Dlatlon     Partition2Dlatlon     $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
+FracActive_lamb  FracActive_lamb  $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&FractionActive  fraction.colors - -5 80 5 cart 1 0
+FracActive_latlon  FracActive_latlon  $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&FractionActive  fraction.colors - -5 80 5 cart 1 0
+DbzText_lamb      DbzText_lamb      $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&DbzTexture2D dbz.colors - -5 80 5 cart 1 0
+DbzText_latlon      DbzText_latlon      $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&DbzTexture2D dbz.colors - -5 80 5 cart 1 0
+Conv_lamb    Conv_lamb    $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Convectivity2D convectivity.colors - -5 80 5 cart,comp 1 0
+Conv_latlon    Conv_latlon    $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Convectivity2D convectivity.colors - -5 80 5 cart,comp 1 0
+Part2D_lamb     Part2D_lamb     $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
+Part2D_latlon     Part2D_latlon     $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
 
 #
 </GRIDS>
