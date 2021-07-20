@@ -765,10 +765,10 @@
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("hdf5Quantity");
+      tt->struct_def.fields[0].fname = tdrpStrDup("hdf5Name");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->hdf5Quantity - (char *) _output_fields;
+        (char *) &_output_fields->hdf5Name - (char *) _output_fields;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("outputName");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -812,6 +812,74 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("CENSORING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'apply_censoring'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_censoring");
+    tt->descr = tdrpStrDup("Option to censor data fields based on quality values stored in a separate field.");
+    tt->help = tdrpStrDup("The quality field indicates the confidence that can be placed in the data field. A quallity value of 0 indicates a definite problem.");
+    tt->val_offset = (char *) &apply_censoring - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'censoring'
+    // ctype is '_censoring_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("censoring");
+    tt->descr = tdrpStrDup("Censoring data fields using a quality field.");
+    tt->help = tdrpStrDup("Specify the fields to be censored, and the name of the quality field to be used. The data field is censored if the quality field les less than the min value or greater than the max value. The names refer to the ");
+    tt->array_offset = (char *) &_censoring - &_start_;
+    tt->array_n_offset = (char *) &censoring_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(censoring_t);
+    tt->array_n = 1;
+    tt->struct_def.name = tdrpStrDup("censoring_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("dataHdf5Name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_censoring->dataHdf5Name - (char *) _censoring;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("qualHdf5Name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_censoring->qualHdf5Name - (char *) _censoring;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("minQuality");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_censoring->minQuality - (char *) _censoring;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("maxQuality");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_censoring->maxQuality - (char *) _censoring;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("DBZH");
+      tt->struct_vals[1].s = tdrpStrDup("QIND");
+      tt->struct_vals[2].d = 0.1;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OPTION TO CONVERT OUTPUT GRID TO LAT/LON");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -828,11 +896,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT URL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -849,11 +917,11 @@
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::/tmp/mdv/odim");
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT METADATA STRINGS");
     tt->comment_text = tdrpStrDup("These will be used if the file does not contain suitable information.");
     tt++;
@@ -882,11 +950,11 @@
     tt->single_val.s = tdrpStrDup("OPERA");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("Z DIMENSION DETAILS");
     tt->comment_text = tdrpStrDup("Not currently used - waiting for 3-D grids");
     tt++;

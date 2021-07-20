@@ -192,7 +192,7 @@ file_name_substr = "";
 //
 // Type: struct
 //   typedef struct {
-//      string hdf5Quantity;
+//      string hdf5Name;
 //      string outputName;
 //      string longName;
 //      encoding_type_t encoding;
@@ -207,17 +207,67 @@ file_name_substr = "";
 
 output_fields = {
   {
-    hdf5Quantity = "DBZH",
+    hdf5Name = "DBZH",
     outputName = "DBZ",
     longName = "reflectivity",
     encoding = ENCODING_FLOAT32
   }
   ,
   {
-    hdf5Quantity = "QIND",
+    hdf5Name = "QIND",
     outputName = "QUALITY",
     longName = "Quality-control",
     encoding = ENCODING_FLOAT32
+  }
+};
+
+//======================================================================
+//
+// CENSORING.
+//
+//======================================================================
+ 
+///////////// apply_censoring /////////////////////////
+//
+// Option to censor data fields based on quality values stored in a 
+//   separate field.
+//
+// The quality field indicates the confidence that can be placed in the 
+//   data field. A quallity value of 0 indicates a definite problem.
+//
+//
+// Type: boolean
+//
+
+apply_censoring = TRUE;
+
+///////////// censoring ///////////////////////////////
+//
+// Censoring data fields using a quality field.
+//
+// Specify the fields to be censored, and the name of the quality field 
+//   to be used. The data field is censored if the quality field les less 
+//   than the min value or greater than the max value. The names refer to 
+//   the .
+//
+//
+// Type: struct
+//   typedef struct {
+//      string dataHdf5Name;
+//      string qualHdf5Name;
+//      double minQuality;
+//      double maxQuality;
+//   }
+//
+// 1D array - variable length.
+//
+
+censoring = {
+  {
+    dataHdf5Name = "DBZH",
+    qualHdf5Name = "QIND",
+    minQuality = 0.1,
+    maxQuality = 1
   }
 };
 
@@ -238,7 +288,7 @@ output_fields = {
 // Type: boolean
 //
 
-convert_output_grid_to_latlon = TRUE;
+convert_output_grid_to_latlon = FALSE;
 
 //======================================================================
 //
@@ -254,7 +304,7 @@ convert_output_grid_to_latlon = TRUE;
 // Type: string
 //
 
-output_url = "$(HOME)/data/convstrat/mdv/opera/latlon";
+output_url = "$(HOME)/data/convstrat/mdv/opera/lambert";
 
 //======================================================================
 //

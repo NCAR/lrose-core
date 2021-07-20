@@ -120,6 +120,7 @@ Conv_latlon    Conv_latlon    $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon
 Part2D_lamb     Part2D_lamb     $(HOME)/data/convstrat/mdv/conv_strat/opera/lambert?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
 Part2D_latlon     Part2D_latlon     $(HOME)/data/convstrat/mdv/conv_strat/opera/latlon?use_http=true&Partition2D conv_strat4.colors - -5 80 5 cart 1 0
 
+StratFilt  StratFilt $(HOME)/data/convstrat/mdv/strat_filter/opera/lambert?use_http=true&ConvStrat strat_filter.colors - -5 80 5 cart 1 0
 #
 </GRIDS>
 

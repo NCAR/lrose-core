@@ -195,6 +195,10 @@ private:
                    vector<NcxxPort::fl32> &vals,
                    NcxxPort::fl32 &missingVal,
                    string &units);
+
+  // censoring
+  
+  void _applyCensoring();
   
   /// set MDV headers and data
 

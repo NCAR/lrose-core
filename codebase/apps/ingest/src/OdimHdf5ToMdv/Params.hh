@@ -89,11 +89,18 @@ public:
   // struct typedefs
 
   typedef struct {
-    char* hdf5Quantity;
+    char* hdf5Name;
     char* outputName;
     char* longName;
     encoding_type_t encoding;
   } output_field_t;
+
+  typedef struct {
+    char* dataHdf5Name;
+    char* qualHdf5Name;
+    double minQuality;
+    double maxQuality;
+  } censoring_t;
 
   ///////////////////////////
   // Member functions
@@ -414,6 +421,11 @@ public:
   output_field_t *_output_fields;
   int output_fields_n;
 
+  tdrp_bool_t apply_censoring;
+
+  censoring_t *_censoring;
+  int censoring_n;
+
   tdrp_bool_t convert_output_grid_to_latlon;
 
   char* output_url;
@@ -433,7 +445,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[27];
+  mutable TDRPtable _table[30];
 
   const char *_className;
 

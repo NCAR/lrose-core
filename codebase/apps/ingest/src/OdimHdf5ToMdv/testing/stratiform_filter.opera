@@ -1,0 +1,451 @@
+/**********************************************************************
+ * TDRP params for stratiform_filter
+ **********************************************************************/
+
+//======================================================================
+//
+// stratiform_filter attempts to filter the stratiform regions from 
+//   radar data stored in an MDV file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING PARAMETERS.
+//
+// Parameters helpful in debugging problems with the process.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// debug flag.
+//
+// Debug flag.
+//
+//
+// Type: boolean
+//
+
+debug = FALSE;
+
+//======================================================================
+//
+// PROCESS REGISTRATION PARAMETERS.
+//
+// Parameters for registering process information.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "opera";
+
+//======================================================================
+//
+// PROCESS OPERATIONS PARAMETERS.
+//
+// Parameters for controlling process operations (e.g. realtime vs. 
+//   archive mode).
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// process mode.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME_MODE
+//     ARCHIVE_MODE
+//     FILELIST_MODE
+//
+
+mode = ARCHIVE_MODE;
+
+//======================================================================
+//
+// PROCESS I/O PARAMETERS.
+//
+// Parameters describing the input and output locations.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// Input URL.
+//
+// RAP URL that describes the location of the input data.
+// For data on local disk, this can just be the directory containing the 
+//   input MDV files.  For data retrieved from a server, it is the URL for 
+//   the server.  A server URL looks like the following:
+// 	mdvp:://host:port:directory_path
+// This URL specifies a DsMdvServer process running on the specified 
+//   host and using the specified port.  The data would reside on the 
+//   specified host under $RAP_DATRA_DIR/directory_path.
+//
+//
+// Type: string
+//
+
+input_url = "$(HOME)/data/convstrat/mdv/opera/lambert";
+
+///////////// dbz_field_name //////////////////////////
+//
+// Field name for DBZ input data.
+//
+// If empty, the field_num will be used instead.
+//
+//
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+///////////// field_num ///////////////////////////////
+//
+// field number to use for algorithm.
+//
+// The algorithm will only be run on this field.
+//
+// Minimum val: 0
+//
+// Type: long
+//
+
+field_num = 0;
+
+///////////// max_valid_age ///////////////////////////
+//
+// maximum valid age for a realtime file.
+//
+// The maximum valid age, in seconds, for a realtime file. In 
+//   REALTIME_MODE, the process will only process files which are younger 
+//   than this age.  In ARCHIVE_MODE, this parameter is ignored.
+//
+// Minimum val: 0
+//
+// Type: long
+//
+
+max_valid_age = 3600;
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+//
+// RAP URL that describes the location where the output should be 
+//   written.
+// For data on local disk, this can just be the directory containing the 
+//   input MDV files.  For data retrieved from a server, it is the URL for 
+//   the server.  A server URL looks like the following:
+// 	mdvp:://host:port:directory_path
+// This URL specifies a DsMdvServer process running on the specified 
+//   host and using the specified port.  The data would reside on the 
+//   specified host under $RAP_DATRA_DIR/directory_path.
+//
+//
+// Type: string
+//
+
+output_url = "$(HOME)/data/convstrat/mdv/strat_filter/opera/lambert";
+
+///////////// field_name_for_convective_input_data ////
+//
+// Output field name for convective DBZ.
+//
+// The input DBZ field is filtered to only include the convective parts.
+//
+//
+// Type: string
+//
+
+field_name_for_convective_input_data = "DbzConv";
+
+///////////// field_name_for_partition_flag ///////////
+//
+// Field name for the partition flag.
+//
+// 0: missing; 1: stratiform; 2: convective.
+//
+//
+// Type: string
+//
+
+field_name_for_partition_flag = "ConvStrat";
+
+///////////// field_name_for_background_mean //////////
+//
+// Field name for the background mean.
+//
+// This is the mean reflectivity in the background template.
+//
+//
+// Type: string
+//
+
+field_name_for_background_mean = "DbzBackground";
+
+///////////// include_input_field /////////////////////
+//
+// Flag indicating whether to add the input field to the output file.
+//
+// If the input data is composited, the output field will be the 
+//   composited field.
+//
+//
+// Type: boolean
+//
+
+include_input_field = TRUE;
+
+///////////// include_debug_fields ////////////////////
+//
+// Write excess and threshold fields to output file.
+//
+// These may be useful for understanding what the algorithm is doing. 
+//   The excess field is (input_dbz - background_dbz). The threshold field 
+//   is computed using the value_diff_func (see below) with the input_dbz 
+//   as the argument.
+//
+//
+// Type: boolean
+//
+
+include_debug_fields = TRUE;
+
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+// Parameters defining how the algorithm will work.
+// This program is an implementation of the stratiform identification 
+//   algorithm described by Steiner, etal in "Climatological 
+//   Characterization of Three-Dimensional Storm Structure from Operation 
+//   Radar and Rain Guage Data" in the Journal of Applied Meteorology, 
+//   Sept. 1995, vol. 34, pp. 1983-1990.
+//
+//======================================================================
+ 
+///////////// do_composite ////////////////////////////
+//
+// To composite the input data or not.
+//
+// If TRUE a composite is done between lower_comp_vlevel and 
+//   upper_comp_vlevel - if FALSE then the level specified by level_num is 
+//   used.
+//
+//
+// Type: boolean
+//
+
+do_composite = FALSE;
+
+///////////// level_num ///////////////////////////////
+//
+// level number to use for algorithm if do_composite is FALSE.
+//
+// The algorithm will only be run on this level.  For reflectivity, this 
+//   level should be below the 0 degree C level.
+//
+// Minimum val: 0
+//
+// Type: long
+//
+
+level_num = 0;
+
+///////////// lower_comp_vlevel ///////////////////////
+//
+// lower vlevel for compositing if do_composite is TRUE.
+//
+// Use the right units.
+//
+//
+// Type: float
+//
+
+lower_comp_vlevel = -1;
+
+///////////// upper_comp_vlevel ///////////////////////
+//
+// upper vlevel for compositing if do_composite is TRUE.
+//
+// Use the right units.
+//
+//
+// Type: float
+//
+
+upper_comp_vlevel = 100000;
+
+///////////// data_increasing /////////////////////////
+//
+// Set to true for data such as Radar were convection is defined by 
+//   increasing data values. Choose false for data such as satellite IR 
+//   were convection is defined by decreasing data values.
+//
+//
+// Type: boolean
+//
+
+data_increasing = TRUE;
+
+///////////// conv_center_min /////////////////////////
+//
+// convective center min/max data value.
+//
+// Any grid point with a value greater than or equal to this value (less 
+//   than or equal to if data_increasing flag is set to false) will 
+//   automatically be considered a convective center.  This is used in 
+//   criteria 1 for determining convective centers in the algorithm.
+//
+//
+// Type: double
+//
+
+conv_center_min = 40;
+
+///////////// background_min_dbz //////////////////////
+//
+// Minimum dbz for analysis.
+//
+// Any values less than this are ignored when computing the background.
+//
+//
+// Type: double
+//
+
+background_min_dbz = 10;
+
+///////////// background_radius ///////////////////////
+//
+// background radius in grid units.
+//
+// The radius of the circle used to calculate the mean background value 
+//   at each point in the grid.
+//
+// Minimum val: 0
+//
+// Type: double
+//
+
+background_radius = 11;
+
+///////////// value_diff_func /////////////////////////
+//
+// value difference function definition.
+//
+// This parameter defines the function to be used to see if a possible 
+//   convective center satisfies the peakedness criteria. This function is 
+//   a continuous function.  Difference values for mean background values 
+//   not given in the function definition will be calculated by linearly 
+//   interpolating between the surrounding given points.  Value before the 
+//   minimum and after the maximum defined are considered to remain 
+//   constant.  In this array, the function must be defined with the 
+//   values for the mean_bkgnd_value field strictly increasing.  The 
+//   default values for this parameter mirror the function given in figure 
+//   7 in the above referenced paper.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double mean_bkgnd_value;
+//      double value_difference;
+//   }
+//
+// 1D array - variable length.
+//
+
+value_diff_func = {
+  {
+    mean_bkgnd_value = 0,
+    value_difference = 10
+  }
+  ,
+  {
+    mean_bkgnd_value = 10,
+    value_difference = 9.44
+  }
+  ,
+  {
+    mean_bkgnd_value = 20,
+    value_difference = 7.78
+  }
+  ,
+  {
+    mean_bkgnd_value = 30,
+    value_difference = 5
+  }
+  ,
+  {
+    mean_bkgnd_value = 40,
+    value_difference = 1.11
+  }
+  ,
+  {
+    mean_bkgnd_value = 42.43,
+    value_difference = 0
+  }
+};
+
+///////////// conv_area_radius_func ///////////////////
+//
+// convective area radius function definition.
+//
+// This parameter defines the function to be used to calculate the 
+//   convective area radius.  This function is taken as a step function 
+//   where mean_bkgnd_value gives the beginning of the step and 
+//   conv_radius gives the radius value, in grid squares, used at that 
+//   step.  conv_radius retains the first function value before the first 
+//   step and retains the last value forever on the last step. In this 
+//   array, the steps must be given in ascending order of the 
+//   mean_bkgnd_value.  The default values for this parameter mirror the 
+//   function given in figure 6(b) in the above referenced paper.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double mean_bkgnd_value;
+//      double conv_radius;
+//   }
+//
+// 1D array - variable length.
+//
+
+conv_area_radius_func = {
+  {
+    mean_bkgnd_value = 0,
+    conv_radius = 1
+  }
+  ,
+  {
+    mean_bkgnd_value = 25,
+    conv_radius = 2
+  }
+  ,
+  {
+    mean_bkgnd_value = 30,
+    conv_radius = 3
+  }
+  ,
+  {
+    mean_bkgnd_value = 35,
+    conv_radius = 4
+  }
+  ,
+  {
+    mean_bkgnd_value = 40,
+    conv_radius = 5
+  }
+};
+

@@ -258,6 +258,10 @@ int OdimHdf5ToMdv::_processFile(const char *input_path)
     return -1;
   }
 
+  if (_params.apply_censoring) {
+    _applyCensoring();
+  }
+
   // create output Mdvx file object
   
   DsMdvx mdvx;
@@ -445,7 +449,7 @@ void OdimHdf5ToMdv::_readField(Group &dataGrp)
   bool fieldWanted = false;
   for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
     fld = _outputFields[ifield];
-    if (fieldName == string(fld->params.hdf5Quantity)) {
+    if (fieldName == string(fld->params.hdf5Name)) {
       fieldWanted = true;
       break;
     }
@@ -535,7 +539,7 @@ int OdimHdf5ToMdv::_readFieldData(Group &dataGrp,
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Reading fields" << endl;
-    cerr << "  hdf5Quantity: " << fld->params.hdf5Quantity << endl;
+    cerr << "  hdf5Name: " << fld->params.hdf5Name << endl;
     cerr << "  dims: ";
     for (size_t ii = 0; ii < fld->dims.size(); ii++) {
       cerr << fld->dims[ii];
@@ -748,6 +752,70 @@ int OdimHdf5ToMdv::_readField2D(Group &grp,
 
 }
 
+/////////////////////////////////////////////////
+// Apply censoring to the data fields
+
+void OdimHdf5ToMdv::_applyCensoring()
+
+{
+
+  for (int icensor = 0; icensor < _params.censoring_n; icensor++) {
+
+    const Params::censoring_t &censoring = _params._censoring[icensor];
+
+    // find the data fields and quality fields
+
+    OutputField *dataFld = NULL;
+    OutputField *qualFld = NULL;
+
+    for (size_t ifld = 0; ifld < _outputFields.size(); ifld++) {
+
+      if (strcmp(_outputFields[ifld]->params.hdf5Name,
+                 censoring.dataHdf5Name) == 0) {
+        dataFld = _outputFields[ifld];
+      }
+
+      if (strcmp(_outputFields[ifld]->params.hdf5Name,
+                 censoring.qualHdf5Name) == 0) {
+        qualFld = _outputFields[ifld];
+      }
+
+    } // ifld
+
+    if (dataFld == NULL || qualFld == NULL) {
+      cerr << "WARNING - cannot perform requested censoring" << endl;
+      if (dataFld == NULL) {
+        cerr << "  Censoring data field missing: " << censoring.dataHdf5Name << endl;
+      }
+      if (qualFld == NULL) {
+        cerr << "  Censoring qual field missing: " << censoring.qualHdf5Name << endl;
+      }
+      continue;
+    }
+    
+    if (dataFld->fl32Input.size() != qualFld->fl32Input.size()) {
+      cerr << "WARNING - cannot perform censoring, field size mismatch" << endl;
+      cerr << "  Size of data field: " << dataFld->fl32Input.size() << endl;
+      cerr << "  Size of qual field: " << qualFld->fl32Input.size() << endl;
+      continue;
+    }
+
+    NcxxPort::fl32 *dataVals = dataFld->fl32Input.data();
+    NcxxPort::fl32 *qualVals = qualFld->fl32Input.data();
+
+    for (size_t ii = 0; ii < dataFld->fl32Input.size(); ii++) {
+      
+      if ((qualVals[ii] < censoring.minQuality) ||
+          (qualVals[ii] > censoring.maxQuality)) {
+        dataVals[ii] = dataFld->fl32Missing;
+      }
+      
+    } // ii
+
+  } // icensor
+  
+}
+  
 /////////////////////////////////////////////////
 // Set the master header from the NCF file
 //

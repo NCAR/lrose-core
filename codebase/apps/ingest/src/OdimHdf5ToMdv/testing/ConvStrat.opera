@@ -82,7 +82,7 @@ mode = ARCHIVE;
 // Type: string
 //
 
-input_url = "$(HOME)/data/conv_strat/mdv/opera/latlon";
+input_url = "$(HOME)/data/convstrat/mdv/opera/lambert";
 
 ///////////// dbz_field_name //////////////////////////
 //
@@ -382,7 +382,7 @@ texture_limit_low = 0;
 // Type: double
 //
 
-texture_limit_high = 30;
+texture_limit_high = 27;
 
 //======================================================================
 //
@@ -450,7 +450,7 @@ min_overlap_for_convective_clumps = 1;
 // Type: string
 //
 
-output_url = "$(HOME)/data/convstrat/mdv/conv_strat/opera/latlon";
+output_url = "$(HOME)/data/convstrat/mdv/conv_strat/opera/lambert";
 
 ///////////// write_partition /////////////////////////
 //

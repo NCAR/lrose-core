@@ -137,7 +137,7 @@ typedef enum {
 } encoding_type_t;
 
 typedef struct {
-  string hdf5Quantity;
+  string hdf5Name;
   string outputName;
   string longName;
   encoding_type_t encoding;
@@ -147,14 +147,14 @@ paramdef struct output_field_t {
   p_default =
     {
      {
-       hdf5Quantity = "DBZH",
+       hdf5Name = "DBZH",
        outputName = "DBZ",
        longName = "reflectivity",
        encoding = ENCODING_FLOAT32
      }
      ,
      {
-       hdf5Quantity = "QIND",
+       hdf5Name = "QIND",
        outputName = "QUALITY",
        longName = "Quality-control",
        encoding = ENCODING_FLOAT32
@@ -163,6 +163,37 @@ paramdef struct output_field_t {
   p_descr = "Output fields details.";
   p_help = "These are the fields that will be written to the output files. The quantity strings are found under GROUP 'dataset1/2/3' etc, GROUP 'data1', DATASET 'data'.";
 } output_fields[];
+
+commentdef {
+  p_header = "CENSORING";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to censor data fields based on quality values stored in a separate field.";
+  p_help = "The quality field indicates the confidence that can be placed in the data field. A quallity value of 0 indicates a definite problem.";
+} apply_censoring;
+
+typedef struct {
+  string dataHdf5Name;
+  string qualHdf5Name;
+  double minQuality;
+  double maxQuality;
+} censoring_t;
+
+paramdef struct censoring_t {
+  p_default =
+    {
+     {
+       dataHdf5Name = "DBZH",
+       qualHdf5Name = "QIND",
+       minQuality = 0.1,
+       maxQuality = 1.0
+     }
+    };
+  p_descr = "Censoring data fields using a quality field.";
+  p_help = "Specify the fields to be censored, and the name of the quality field to be used. The data field is censored if the quality field les less than the min value or greater than the max value. The names refer to the ";
+} censoring[];
 
 commentdef {
   p_header = "OPTION TO CONVERT OUTPUT GRID TO LAT/LON";
