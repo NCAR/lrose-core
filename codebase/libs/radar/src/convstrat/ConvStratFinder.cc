@@ -718,9 +718,9 @@ void ConvStratFinder::_setPartition2D()
       // is this mixed?
       
       if (convectivity3D[offset] <= _maxConvectivityForStratiform) {
-        partition3D[offset] = CATEGORY_STRATIFORM_MID;
+        partition3D[offset] = CATEGORY_STRATIFORM;
       } else if (convectivity3D[offset] >= _minConvectivityForConvective) {
-        partition3D[offset] = CATEGORY_CONVECTIVE_MID;
+        partition3D[offset] = CATEGORY_CONVECTIVE;
       } else {
         partition3D[offset] = CATEGORY_MIXED;
       }
