@@ -70,6 +70,7 @@ SRCS = \
 	zero_clump.c
 
 CPPC_SRCS = \
+	GridClump.cc \
 	GridClumping.cc
 
 #
