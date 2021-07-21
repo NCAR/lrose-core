@@ -65,7 +65,7 @@ GridClump::~GridClump()
 void GridClump::init(const Clump_order *clump_order,
                      int nx, int ny, int nz,
                      double dx, double dy, double dz,
-                     double minx, double miny,
+                     double minx, double miny, double minz,
                      bool isLatLon,
 		     int start_ix, int start_iy)
 
@@ -73,18 +73,19 @@ void GridClump::init(const Clump_order *clump_order,
 
   // set private grid geom
 
-  _nx = nx;
-  _ny = ny;
-  _nz = nz;
+  gridNx = nx;
+  gridNy = ny;
+  gridNz = nz;
 
-  _dx = dx;
-  _dy = dy;
-  _dz = dz;
+  gridDx = dx;
+  gridDy = dy;
+  gridDz = dz;
 
-  _minx = minx;
-  _miny = miny;
+  gridMinx = minx;
+  gridMiny = miny;
+  gridMinz = minz;
 
-  _isLatLon = isLatLon;
+  gridIsLatLon = isLatLon;
 
   // compute the bounding box for the clump, and create
   // an array of intervals relative to these bounds.
@@ -99,11 +100,11 @@ void GridClump::init(const Clump_order *clump_order,
   startIx = start_ix + _minIx;
   startIy = start_iy + _minIy;
 
-  offsetX = startIx * _dx;
-  offsetY = startIy * _dy;
+  offsetX = startIx * gridDx;
+  offsetY = startIy * gridDy;
   
-  startX = _minx + offsetX;
-  startY = _miny + offsetY;
+  startX = gridMinx + offsetX;
+  startY = gridMiny + offsetY;
 
   // compute the geometry
 
@@ -166,27 +167,25 @@ void GridClump::_computeGeometry()
 
 {
 
-  if (_isLatLon) {
+  if (gridIsLatLon) {
     
     // latlon grid
 
-    // latlon data has a lat/lon grid, so we need to multiply by
+    // we need to multiply by
     // a (111.12 squared) to get km2 for area. The delta_z is
     // set nominally to 1.0, so area and volume will be the same.
     // The volume and area computations are adjusted later for the
     // latitude of the storm.
     
-    _isLatLon = TRUE;
-
-    dX = _dx;
-    dY = _dy * KM_PER_DEG_AT_EQ;
-    _dXAtEquator = _dx * KM_PER_DEG_AT_EQ;
+    dX = gridDx;
+    dY = gridDy * KM_PER_DEG_AT_EQ;
+    _dXAtEquator = gridDx * KM_PER_DEG_AT_EQ;
 
     _dAreaAtEquator =
-      (_dx * _dy) *
+      (gridDx * gridDy) *
       (KM_PER_DEG_AT_EQ * KM_PER_DEG_AT_EQ);
     
-    _dVolAtEquator = _dAreaAtEquator * _dz;
+    _dVolAtEquator = _dAreaAtEquator * gridDz;
     
     // compute the volumetric y centroid
 
@@ -196,14 +195,14 @@ void GridClump::_computeGeometry()
       sumy += (double) intvl.row_in_plane * (double) intvl.len;
       n += (double) intvl.len;
     }
-    double vol_centroid_y = (sumy / n) * _dy + _miny;
+    double vol_centroid_y = (sumy / n) * gridDy + gridMiny;
     double latitude_factor = cos(vol_centroid_y * DEG_TO_RAD);
 
     dVolAtCentroid = _dVolAtEquator * latitude_factor;
     dAreaAtCentroid = _dAreaAtEquator * latitude_factor;
-    dAreaEllipse = _dx * _dy;
+    dAreaEllipse = gridDx * gridDy;
     
-    if (_nz <= 1) {
+    if (gridNz <= 1) {
       clumpSize = nPoints * dAreaAtCentroid;
     } else {
       clumpSize = nPoints * dVolAtCentroid;
@@ -215,16 +214,16 @@ void GridClump::_computeGeometry()
   
     // projection-based (km) grid
     
-    dX = _dx;
-    dY = _dy;
+    dX = gridDx;
+    dY = gridDy;
     _dAreaFlat = dX * dY;
-    _dVolFlat = _dAreaFlat * _dz;
+    _dVolFlat = _dAreaFlat * gridDz;
     dAreaEllipse = _dAreaFlat;
     
     dAreaAtCentroid = _dAreaFlat;
     dVolAtCentroid = _dVolFlat;
     
-    if (_nz <= 1) {
+    if (gridNz <= 1) {
       clumpSize = nPoints * _dAreaFlat;
     } else {
       clumpSize = nPoints * _dVolFlat;

@@ -56,7 +56,7 @@ public:
   void init(const Clump_order *clump,
             int nx, int ny, int nz,
             double dx, double dy, double dz,
-            double minx, double miny,
+            double minx, double miny, double minz,
             bool isLatLon,
 	    int start_ix, int start_iy);
 
@@ -64,8 +64,11 @@ public:
   
   virtual ~GridClump();
 
-  int OK;
-  
+  bool gridIsLatLon;
+  int gridNx, gridNy, gridNz;
+  double gridDx, gridDy, gridDz;
+  double gridMinx, gridMiny, gridMinz;
+
   vector<Interval> intervals;
   int nIntervals;
   int nPoints;
@@ -87,15 +90,10 @@ protected:
 private:
 
   int _initDone;
-  int _isLatLon;
 
   int _minIx, _minIy;
   int _maxIx, _maxIy;
 
-  int _nx, _ny, _nz;
-
-  double _dx, _dy, _dz;
-  double _minx, _miny;
   double _dXAtEquator;
   double _dVolFlat, _dVolAtEquator;
   double _dAreaFlat, _dAreaAtEquator;
