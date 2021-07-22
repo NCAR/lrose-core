@@ -21,89 +21,57 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// GridClump.hh
+//////////////////////////////////////////////////////////
+// PjgGridGeom.cc
 //
-// GridClump class - combines a clump with grid geometry so that
-// computations may be done on the clump using that grid geometry.
+// Class to represent grid geometry for PJG classes.
 //
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // July 2021
 //
-///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
-#ifndef GridClump_HH
-#define GridClump_HH
+#include <euclid/PjgGridGeom.hh>
 
-#include <euclid/clump.h>
-#include <vector>
-using namespace std;
+////////////////////////
+// Default constructor
+//
 
-////////////////////////////////
-// GridClump
+PjgGridGeom::PjgGridGeom()
 
-class GridClump {
-  
-public:
+{
+  _nx = _ny = _nz = 0;
+  _dx = _dy = _dz = 0.0;
+  _minx = _miny = _minz = 0.0;
+  _isLatLon = true;
+  _projType = PjgTypes::PROJ_LATLON;
+}
 
-  // constructor
+///////////////
+// Destructor
 
-  GridClump();
-  
-  // initializer
+PjgGridGeom::~PjgGridGeom()
 
-  void init(const Clump_order *clump,
-            int nx, int ny, int nz,
-            double dx, double dy, double dz,
-            double minx, double miny, double minz,
-            bool isLatLon,
-	    int start_ix, int start_iy);
+{
+}
 
-  // destructor
-  
-  virtual ~GridClump();
+////////////////////////
+// Print details of grid
 
-  bool gridIsLatLon;
-  int gridNx, gridNy, gridNz;
-  double gridDx, gridDy, gridDz;
-  double gridMinx, gridMiny, gridMinz;
+void PjgGridGeom::print(ostream &out)
 
-  vector<Interval> intervals;
-  int nIntervals;
-  int nPoints;
-  
-  int startIx, startIy;
-  double offsetX, offsetY;
-  double startX, startY;
-  int nX, nY;
-  double dX, dY;
-
-  double clumpSize;
-  double dVolAtCentroid;
-  double dAreaAtCentroid;
-  double dAreaEllipse;
-  double kmPerGridUnit;
-
-protected:
-  
-private:
-
-  int _initDone;
-
-  int _minIx, _minIy;
-  int _maxIx, _maxIy;
-
-  double _dXAtEquator;
-  double _dVolFlat, _dVolAtEquator;
-  double _dAreaFlat, _dAreaAtEquator;
-
-  void _shrinkWrap(const Clump_order *clump_order);
-  void _computeGeometry();
-  
-};
-
-#endif
-
-
+{
+  out << "============= PjgGridGeom =============" << endl;
+  out << "  nx, ny, nz: "
+      << _nx << ", " << _ny << ", " << _nz << endl;
+  out << "  dx, dy, dz: "
+      << _dx << ", " << _dy << ", " << _dz << endl;
+  out << "  minx, miny, minz: "
+      << _minx << ", " << _miny << ", " << _minz << endl;
+  out << "  isLatLon: " << (_isLatLon? "Y":"N") << endl;
+  out << "  projType: " << PjgTypes::proj2string(_projType) << endl;
+  out << "=======================================" << endl;
+}
 
