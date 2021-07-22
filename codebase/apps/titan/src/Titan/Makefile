@@ -56,7 +56,6 @@ HDRS = \
 	DataTimes.hh \
 	DualThresh.hh \
 	FileLock.hh \
-	GridClump.hh \
 	Identify.hh \
 	InputMdv.hh \
 	OutputMdv.hh \
@@ -82,7 +81,6 @@ CPPC_SRCS = \
 	DataTimes.cc \
 	DualThresh.cc \
 	FileLock.cc \
-	GridClump.cc \
 	Identify.cc \
 	InputMdv.cc \
 	Main.cc \

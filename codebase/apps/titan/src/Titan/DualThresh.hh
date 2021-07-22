@@ -40,7 +40,7 @@
 #include "Worker.hh"
 
 class InputMdv;
-class GridClump;
+class ClumpGrid;
 
 #include <dataport/port_types.h>
 #include <rapformats/titan_grid.h>
@@ -70,7 +70,7 @@ public:
   // Compute sub-clumps using the dual threshold.
   // Returns number of sub-clumps.
   
-  int compute(const GridClump &grid_clump);
+  int compute(const ClumpGrid &clump_grid);
 
   // write out MDV file for debugging
 
@@ -78,7 +78,7 @@ public:
 
   // sub clumps to be returned to calling class
 
-  const GridClump *subClumps() { return _subClumps; }
+  const ClumpGrid *subClumps() { return _subClumps; }
 
 protected:
   
@@ -100,7 +100,7 @@ private:
 
   int _nSubClumps;
   int _nSubClumpsAlloc;
-  GridClump *_subClumps;
+  ClumpGrid *_subClumps;
   GridClumping **_subClumping;
   
   int _nComp;
@@ -128,15 +128,15 @@ private:
 
   void _initWorkGrids();
   void _initFileGrids();
-  void _fillCompDbz(const GridClump &grid_clump);
-  void _updateFileGrids(const GridClump &grid_clump);
-  void _updateFileComp(const GridClump &grid_clump);
+  void _fillCompDbz(const ClumpGrid &clump_grid);
+  void _updateFileGrids(const ClumpGrid &clump_grid);
+  void _updateFileComp(const ClumpGrid &clump_grid);
   void _loadCompIndex();
   void _growSubAreas();
   void _allocSubClumps();
-  void _computeSubClump(const GridClump &grid_clump, int clump_id);
+  void _computeSubClump(const ClumpGrid &clump_grid, int clump_id);
   void _initGridMask();
-  void _loadGridMask(const GridClump &grid_clump, int clump_id);
+  void _loadGridMask(const ClumpGrid &clump_grid, int clump_id);
 
 };
 

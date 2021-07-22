@@ -44,7 +44,7 @@ using namespace std;
 class Verify;
 class Props;
 class DualThresh;
-class GridClump;
+class ClumpGrid;
 
 ////////////////////////////////
 // Identify
@@ -82,7 +82,7 @@ private:
   DualThresh *_dualT;
 
   int _processClumps(int scan_num);
-  int _processThisClump(const GridClump &grid_clump);
+  int _processThisClump(const ClumpGrid &clump_grid);
 
 };
 

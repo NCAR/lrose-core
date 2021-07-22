@@ -35,13 +35,14 @@
 #include "Identify.hh"
 #include "Props.hh"
 #include "Verify.hh"
-#include "GridClump.hh"
 #include "DualThresh.hh"
 #include "Sounding.hh"
 
+#include <iostream>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
+#include <euclid/ClumpGrid.hh>
 using namespace std;
 
 //////////////
@@ -133,7 +134,7 @@ int Identify::run(int scan_num)
                                        _params.min_grid_overlap,
                                        _params.low_dbz_threshold);
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     fprintf(stderr, "Number of clumps  =  %d\n", _nClumps);
   }
 
@@ -212,9 +213,18 @@ int Identify::_processClumps(int scan_num)
   const Clump_order *clump = _clumping.getClumps();
   
   for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
+
     
-    GridClump gridClump(clump, _inputMdv.grid, 0, 0);
-    
+    const titan_grid_t &grid = _inputMdv.grid;
+    bool isLatLon = (grid.proj_type == TITAN_PROJ_LATLON);
+    ClumpGrid gridClump;
+    gridClump.init(clump,
+                   grid.nx, grid.ny, grid.nz,
+                   grid.dx, grid.dy, grid.dz,
+                   grid.minx, grid.miny, grid.minz,
+                   isLatLon,
+                   0, 0);
+
     // dual threshold takes precedence over morphology
 
     if (_params.use_dual_threshold) {
@@ -320,14 +330,14 @@ int Identify::_processClumps(int scan_num)
 // _processThisClump()
 //
 
-int Identify::_processThisClump(const GridClump &grid_clump)
+int Identify::_processThisClump(const ClumpGrid &clump_grid)
 
 {
 
   // check size
 
-  if (grid_clump.stormSize < _params.min_storm_size ||
-      grid_clump.stormSize > _params.max_storm_size) {
+  if (clump_grid.clumpSize < _params.min_storm_size ||
+      clump_grid.clumpSize > _params.max_storm_size) {
     return(0);
   }
 
@@ -335,15 +345,15 @@ int Identify::_processThisClump(const GridClump &grid_clump)
     fprintf(stderr,
 	    "Clump: size, startIx, startIy, nx, ny, offsetx, offsety: "
 	    "%g, %d, %d, %d, %d, %g, %g\n",
-	    grid_clump.stormSize,
-	    grid_clump.startIx, grid_clump.startIy,
-	    grid_clump.nX, grid_clump.nY,
-	    grid_clump.offsetX, grid_clump.offsetY);
+	    clump_grid.clumpSize,
+	    clump_grid.startIx, clump_grid.startIy,
+	    clump_grid.nX, clump_grid.nY,
+	    clump_grid.offsetX, clump_grid.offsetY);
   }
   
   _sfile.AllocGprops(_nStorms + 1);
 
-  if (_props->compute(grid_clump, _nStorms) == 0) {
+  if (_props->compute(clump_grid, _nStorms) == 0) {
     
     // success - write the storm props to storm file
 
