@@ -44,29 +44,18 @@ using namespace std;
 // constructor - recursion level 0
 //
 
-ClumpDualThresh::ClumpDualThresh(bool debug,
-                                 PjgGridGeom &inputGeom,
-                                 const fl32 *inputVol,
-                                 int minValidLayer,
-                                 double primaryThreshold,
-                                 double secondaryThreshold,
-                                 double minFractionAllParts,
-                                 double minFractionEachPart,
-                                 double minAreaEachPart,
-                                 double minStormSize,
-                                 double maxStormSize) :
-  _debug(debug),
-  _clumping(),
-  _inputGeom(inputGeom),
-  _inputVol(inputVol),
-  _minValidLayer(minValidLayer),
-  _primaryThreshold(primaryThreshold),
-  _secondaryThreshold(secondaryThreshold),
-  _minFractionAllParts(minFractionAllParts),
-  _minFractionEachPart(minFractionEachPart),
-  _minAreaEachPart(minAreaEachPart),
-  _minStormSize(minStormSize),
-  _maxStormSize(maxStormSize)
+ClumpDualThresh::ClumpDualThresh() :
+        _debug(false),
+        _inputData(NULL),
+        _minValidLayer(0),
+        _primaryThreshold(35.0),
+        _secondaryThreshold(45.0),
+        _minFractionAllParts(0.5),
+        _minFractionEachPart(0.05),
+        _minAreaEachPart(20.0),
+        _minClumpVolume(30.0),
+        _maxClumpVolume(1.0e9),
+        _clumping()
 
 {
 
@@ -98,12 +87,6 @@ ClumpDualThresh::ClumpDualThresh(bool debug,
 
   _gridMask = NULL;
   _nPtsGridMaskAlloc = 0;
-
-  // prepare
-
-  _nxInput = _inputGeom.nx();
-  _nyInput = _inputGeom.ny();
-  _initFileGrids();
 
 }
 
@@ -169,6 +152,24 @@ ClumpDualThresh::~ClumpDualThresh()
 }
 
 ////////////////////////////////////////////
+// set the input data and grid details
+
+void ClumpDualThresh::setInputData(PjgGridGeom &inputGeom,
+                                   const fl32 *inputData)
+
+{
+
+  _inputGeom = inputGeom;
+  _inputData = inputData;
+
+  _nxInput = _inputGeom.nx();
+  _nyInput = _inputGeom.ny();
+  _initFileGrids();
+  
+}
+
+
+////////////////////////////////////////////
 // compute()
 //
 // Compute clumps based on dual threshold, set the sub-clumps
@@ -186,8 +187,8 @@ int ClumpDualThresh::compute(const ClumpGrid &clump_grid)
 
   // check size
   
-  if (clump_grid.clumpSize < _minStormSize ||
-      clump_grid.clumpSize > _maxStormSize) {
+  if (clump_grid.clumpSize < _minClumpVolume ||
+      clump_grid.clumpSize > _maxClumpVolume) {
     return (0);
   }
     
@@ -319,55 +320,6 @@ int ClumpDualThresh::compute(const ClumpGrid &clump_grid)
 
 }
 
-#ifdef NOTNOW
-////////////////////
-// writeOutputMdv()
-//
-
-int ClumpDualThresh::writeOutputMdv()
-  
-{
-  
-  // set info str
-
-  char info[256];
-  
-  sprintf(info,
-	  "\n"
-	  "  Dual threshold analysis: \n"
- 	  "    dbz_threshold: %g\n"
- 	  "    min_fraction_all_parts: %g\n"
- 	  "    min_fraction_each_part: %g\n",
-	  _params.dual_threshold.dbz_threshold,
-	  _params.dual_threshold.min_fraction_all_parts,
-	  _params.dual_threshold.min_fraction_each_part);
-
-  // create output MDV object
-  
-  OutputMdv out(_progName, _params,
-		_inputMdv, info,
-		"TITAN dual thresholds",
-		_params.dual_threshold_url);
-  
-  // Add the fields
-
-  out.addField("Composite reflectivity", "CompDbz", "dBZ", "dBZ", _compFileGrid);
-  out.addField("All clumps", "All", "count", "none", 1.0, 0.0, _allFileGrid);
-  out.addField("Valid clumps", "Valid", "count", "none", 1.0, 0.0, _validFileGrid);
-  out.addField("Grown clumps", "Grown", "count", "none", 1.0, 0.0, _grownFileGrid);
-
-  // write out file
-
-  if (out.writeVol()) {
-    cerr << "ERROR - ClumpDualThresh::writeOutputMdv" << endl;
-    return -1;
-  }
-
-  return 0;
-
-}
-#endif
-
 ///////////////////
 // _fillCompDbz()
 //
@@ -392,7 +344,7 @@ void ClumpDualThresh::_fillComposite(const ClumpGrid &clump_grid)
     int ix = intvl.begin + clump_grid.startIx;
     
     const fl32 *dbz =
-      _inputVol + (iplane * nPtsPlane) + (iy * _nxInput) + ix;
+      _inputData + (iplane * nPtsPlane) + (iy * _nxInput) + ix;
 
     fl32* comp =
       _compWorkGrid + (intvl.row_in_plane + 1) * _nxWork + intvl.begin + 1;

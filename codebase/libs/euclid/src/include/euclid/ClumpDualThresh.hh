@@ -54,22 +54,30 @@ public:
 
   // constructor
 
-  ClumpDualThresh(bool debug,
-                  PjgGridGeom &inputGeom,
-                  const fl32 *inputVol,
-                  int minValidLayer,
-                  double primaryThreshold,
-                  double secondaryThreshold,
-                  double minFractionAllParts,
-                  double minFractionEachPart,
-                  double minAreaEachPart,
-                  double minStormSize,
-                  double maxStormSize);
+  ClumpDualThresh();
   
   // destructor
   
   virtual ~ClumpDualThresh();
-  
+
+  // set parameters
+  // Primary and secondary thresholds are usually DBZ
+  // but can be other quantities.
+  // Clump volume is in km3
+
+  void setDebug(bool val) { _debug = val; }
+  void setPrimaryThreshold(double val) { _primaryThreshold = val; }
+  void setSecondaryThreshold(double val) { _secondaryThreshold = val; }
+  void setMinFractionAllParts(double val) { _minFractionAllParts = val; }
+  void setMinFractionEachPart(double val) { _minFractionEachPart = val; }
+  void setMinAreaEachPart(double val) { _minAreaEachPart = val; }
+  void setMinClumpVolume(double val) { _minClumpVolume = val; }
+  void setMaxClumpVolume(double val) { _maxClumpVolume = val; }
+
+  // set the input data and grid details
+
+  void setInputData(PjgGridGeom &inputGeom, const fl32 *inputData);
+
   // Compute sub-clumps using the dual threshold.
   // Returns number of sub-clumps.
   
@@ -82,36 +90,50 @@ public:
 
   const ClumpGrid *subClumps() { return _subClumps; }
 
+  // get grids for debug output
+
+  const PjgGridGeom &getGridGeom() const { return _inputGeom; }
+  const fl32* getCompFileGrid() const { return _compFileGrid; }
+  const ui08* getAllFileGrid() const { return _allFileGrid; }
+  const ui08* getValidFileGrid() const { return _validFileGrid; }
+  const ui08* getGrownFileGrid() const { return _grownFileGrid; }
+
 protected:
   
 private:
 
   bool _debug;
 
-  GridClumping _clumping;
-  PjgGridGeom _inputGeom;
+  // input data
 
-  const fl32 *_inputVol;
+  PjgGridGeom _inputGeom;
+  const fl32 *_inputData;
+  int _minValidLayer;
 
   size_t _nxInput;
   size_t _nyInput;
   fl32 _missing;
 
-  int _minValidLayer;
+  // parameters
+
   double _primaryThreshold;
   double _secondaryThreshold;
   double _minFractionAllParts;
   double _minFractionEachPart;
   double _minAreaEachPart;
+  double _minClumpVolume;
+  double _maxClumpVolume;
 
-  double _minStormSize;
-  double _maxStormSize;
+  // clumping
 
+  GridClumping _clumping;
   size_t _nSubClumps;
   size_t _nSubClumpsAlloc;
   ClumpGrid *_subClumps;
   GridClumping **_subClumping;
-  
+
+  // grids
+
   size_t _nComp;
 
   size_t _nxWork, _nyWork;

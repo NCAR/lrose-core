@@ -54,7 +54,6 @@ HDRS = \
 	Boundary.hh \
 	ConvectionFinder.hh \
 	DataTimes.hh \
-	DualThresh.hh \
 	FileLock.hh \
 	Identify.hh \
 	InputMdv.hh \
@@ -79,7 +78,6 @@ CPPC_SRCS = \
 	Boundary.cc \
 	ConvectionFinder.cc \
 	DataTimes.cc \
-	DualThresh.cc \
 	FileLock.cc \
 	Identify.cc \
 	InputMdv.cc \
