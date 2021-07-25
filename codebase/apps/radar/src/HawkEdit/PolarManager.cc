@@ -1586,9 +1586,11 @@ void PolarManager::selectedFieldChanged(QString newFieldName) {
 }
 
 
-void PolarManager::selectedSweepChanged(double) {
+void PolarManager::selectedSweepChanged(double angle) {
   //string fieldName = newFieldName.toStdString();
   //_displayFieldController->setSelectedField(fieldName);
+  _sweepController->setAngle(angle);
+  _setupRayLocation();
   _plotArchiveData();
   refreshBoundaries();
 }
@@ -1971,7 +1973,9 @@ void PolarManager::_setupRayLocation() {
   if (_params->ppi_override_rendering_beam_width) {
     ppi_rendering_beam_width = _params->ppi_rendering_beam_width;
   }
-  _rayLocationController->sortRaysIntoRayLocations(ppi_rendering_beam_width);
+  int currentSweepIndex = _sweepController->getSelectedIndex();
+  _rayLocationController->sortRaysIntoRayLocations(ppi_rendering_beam_width,
+    currentSweepIndex);
 }
 
 // We need to resize the arrays that are retained and look up the field Index by field name,

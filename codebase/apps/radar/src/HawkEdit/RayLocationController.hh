@@ -15,7 +15,8 @@ public:
 RayLocationController();
 ~RayLocationController();
 
-void sortRaysIntoRayLocations(float ppi_rendering_beam_width);
+void sortRaysIntoRayLocations(float ppi_rendering_beam_width,
+	int sweepNumber);
 
 size_t getNRayLocations();
 double getStartRangeKm(size_t rayIdx);

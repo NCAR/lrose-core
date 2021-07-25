@@ -200,11 +200,13 @@ public:
    */
 
   string getName() { return _name; };
+  double getSweepAngle() { return _sweepAngle; };
+  //void setSweepAngle(double sweepAngle);
 
   QImage *_image;
   bool _imageReady;
   string _name;
-  
+  double _sweepAngle;
   /**
    * @brief Flag indicating whether this field should be rendered in the
    *        background.

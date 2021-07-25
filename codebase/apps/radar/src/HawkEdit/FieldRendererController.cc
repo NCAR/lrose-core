@@ -306,21 +306,28 @@ QImage *FieldRendererController::renderImage(int width, int height,
   ColorMap &colorMap,
   QColor backgroundColor) {
 
+  // TODO: need to keep sweepAngle with FieldRendererView
+  // that way we can detect if the image is current for the
+  // selected sweep
+
   LOG(DEBUG) << "enter: ";
   LOG(DEBUG) << "requested width = " << width << " height " << height;
 
   FieldRendererView *fieldRenderer = get(fieldName);
   if (fieldRenderer == NULL) {
     fieldRenderer = new FieldRendererView(fieldName);
+    //fieldRenderer->setSweepAngle(sweepAngle); 
     fieldRenderer->createImage(width, height);
     _fieldRenderers.push_back(fieldRenderer);
   } else {
+    //fieldRenderer->setSweepAngle(sweepAngle); 
     fieldRenderer->createImage(width, height);
   }
   LOG(DEBUG) << "lock obtained";
   // fieldRenderView is locked, we can procede with changes ...
 
   fieldRenderer->setTransform(zoomTransform);
+
 
   if (!fieldRenderer->imageReady()) {
     // create a beam for each ray  

@@ -220,6 +220,7 @@ void SweepController::reset(const RadxVol &vol)
 void SweepController::setAngle(double angle)
   
 {
+  _model->setSelectedAngle(angle);
   /*
   _selectedAngle = angle;
   _guiIndex = 0;
@@ -315,7 +316,7 @@ void SweepController::changeSelectedIndex(int increment)
 
 int SweepController::getSelectedIndex() 
 {
-  return _model->getSelectedIndex();
+  return _model->getSelectedSweepNumber();
 /*
   _guiIndex += increment;
   if (_guiIndex < 0) {

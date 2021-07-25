@@ -314,6 +314,7 @@ void SweepView::changeSweep(bool value) {
     if (_sweepRButtons->at(ii)->isChecked()) {
       LOG(DEBUG) << "sweepRButton " << ii << " is checked; moving to sweep index " << ii;
       _selectedAngle = _sweepRButtons->at(ii)->text().toDouble();
+      emit selectedSweepChanged(_selectedAngle);
       //_sweepManager.setGuiIndex(ii);
       //_ppi->setStartOfSweep(true);
       //_rhi->setStartOfSweep(true);
