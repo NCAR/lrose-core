@@ -171,18 +171,6 @@ private:
   
   vector<OutputField *> _outputFields;
 
-  vector<NcxxPort::fl32> _dbzInput;
-  vector<NcxxPort::fl32> _dbzInterp;
-  vector<NcxxPort::fl32> _dbzOutput;
-  NcxxPort::fl32 _missingDbz;
-  string _dbzUnits;
-
-  bool _qualAvailable;
-  vector<NcxxPort::si16> _qualInput;
-  vector<NcxxPort::si16> _qualInterp;
-  NcxxPort::si16 _missingQual;
-  string _qualUnits;
-
   // hdf5 utilities
 
   Hdf5xx _utils;

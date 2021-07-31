@@ -58,7 +58,7 @@ SweepModel::SweepModel()
 //        _params(params)
         
 {
-  _selectedSweepIndex = 0;
+  _selectedSweepNumber = 1;
   _selectedSweepAngle = 0.0;
 
 }
@@ -234,10 +234,28 @@ vector<double> *SweepModel::getSweepAngles() {
   return sweepAngles;
 }
 
-int SweepModel::getSelectedIndex() {
-  return _selectedSweepIndex;
+int SweepModel::getSelectedSweepNumber() {
+  return _selectedSweepNumber;
 }
 
+void SweepModel::setSelectedAngle(double value) {
+  double delta = 0.01;
+  _selectedSweepAngle = value;
+  vector<double> *sweepAngles = getSweepAngles();
+  int i = 0;
+  bool done = false;
+  while ((i < sweepAngles->size()) && !done) { 
+    if (abs(sweepAngles->at(i) - value) < delta) {
+      _selectedSweepNumber = i+1;
+      done = true;
+    }
+    i += 1;
+  }
+  if (!done) {
+    LOG(DEBUG) << "invalid sweep angle " << value;
+    throw std::invalid_argument("invalid sweep angle");
+  }
+}
 
 
 /////////////////////////////////////////////////////////////

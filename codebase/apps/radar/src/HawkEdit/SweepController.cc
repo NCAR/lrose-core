@@ -76,6 +76,18 @@ SweepController::~SweepController()
 }
 
 
+void SweepController::dataFileChanged() {
+
+  clearSweepRadioButtons();
+  createSweepRadioButtons();
+
+}
+
+// TODO: this may not be needed
+void SweepController::sweepSelected() {
+}
+
+
 //double SweepController::getSelectedSweepAngle() {
 //  return _model->getSelectedSweepAngle();
 //}
@@ -220,6 +232,7 @@ void SweepController::reset(const RadxVol &vol)
 void SweepController::setAngle(double angle)
   
 {
+  _model->setSelectedAngle(angle);
   /*
   _selectedAngle = angle;
   _guiIndex = 0;
@@ -315,7 +328,7 @@ void SweepController::changeSelectedIndex(int increment)
 
 int SweepController::getSelectedIndex() 
 {
-  return _model->getSelectedIndex();
+  return _model->getSelectedSweepNumber();
 /*
   _guiIndex += increment;
   if (_guiIndex < 0) {

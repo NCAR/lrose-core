@@ -52,7 +52,7 @@
 //#include "DataModel.hh"
 
 class SweepController {
-  
+
 public:
 
 /*
@@ -121,6 +121,10 @@ public:
 
   void createSweepRadioButtons();
   void clearSweepRadioButtons();
+
+  void dataFileChanged();
+
+  void sweepSelected();
   
 private:
   

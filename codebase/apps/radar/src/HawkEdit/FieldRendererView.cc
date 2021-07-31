@@ -80,6 +80,14 @@ FieldRendererView::~FieldRendererView()
     delete _image;
 }
 
+// THIS IS NOT RIGHT!  WE NEED TO GET NEW BEAMS!  RayLocationController needs
+// to return the ray for the current sweep.  <===
+// Setting the sweepAngle here does no good!
+//void FieldRendererView::setSweepAngle(double sweepAngle) {
+//  if (_sweepAngle != sweepAngle) {
+//    _sweepAngle = sweepAngle;
+//  }
+//}
 
 //void FieldRendererView::renderImage(int width, int height, double sweepAngle) {
 
@@ -92,8 +100,8 @@ FieldRendererView::~FieldRendererView()
 void FieldRendererView::createImage(int width, int height)
 
 {
-  rendering.lock();
-  LOG(DEBUG) << "grabbed lock";
+  //rendering.lock();
+  //LOG(DEBUG) << "grabbed lock";
 
   if (_image != NULL)
     delete _image;

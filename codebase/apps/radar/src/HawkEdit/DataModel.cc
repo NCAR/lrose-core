@@ -31,6 +31,48 @@ const vector<float> *DataModel::GetData(string fieldName,
        << " sweepIdx=" << sweepIdx;
 
   _vol.loadRaysFromFields();
+
+  RadxSweep *sweep = _vol.getSweepByNumber(sweepIdx);
+  if (sweep == NULL)
+    throw std::invalid_argument("bad sweep index");
+
+  size_t startRayIndex = sweep->getStartRayIndex();
+
+  const RadxField *field;
+
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = _vol.getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(startRayIndex + rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  // cerr << "there arenGates " << nGates;
+  const float *data = field->getDataFl32();
+
+  vector<float> *dataVector = new vector<float>(nGates);
+  dataVector->assign(data, data+nGates);
+
+  return dataVector;
+}
+
+/*
+const vector<float> *DataModel::GetData(string fieldName,
+              int rayIdx, int sweepIdx)  {
+
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
+       << " sweepIdx=" << sweepIdx;
+
+  _vol.loadRaysFromFields();
   
   const RadxField *field;
 
@@ -58,6 +100,7 @@ const vector<float> *DataModel::GetData(string fieldName,
 
   return dataVector;
 }
+*/
 
 void DataModel::SetData(string &fieldName, 
             int rayIdx, int sweepIdx, vector<float> *fieldData) { 

@@ -8,4 +8,4 @@ namespace badvalue
   double INTEREST = -1.0;
   double ANGLE = -333.33;
   double ANGLE_INTERSECTION = -184.0;
-};
+}

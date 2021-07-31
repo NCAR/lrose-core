@@ -259,6 +259,7 @@ codebase/apps/ingest/src/Nids2Mdv/Nids2Mdv
 codebase/apps/ingest/src/NidsRadial2Mdv/NidsRadial2Mdv
 codebase/apps/ingest/src/NidsRaster2Mdv/NidsRaster2Mdv
 codebase/apps/ingest/src/NidsVad2Spdb/NidsVad2Spdb
+codebase/apps/ingest/src/OdimHdf5ToMdv/OdimHdf5ToMdv
 codebase/apps/ingest/src/PrintNids/PrintNids
 codebase/apps/ingest/src/Rdas2Dsr/Rdas2Dsr
 codebase/apps/ingest/src/SatOrbit2AcPosn/SatOrbit2AcPosn

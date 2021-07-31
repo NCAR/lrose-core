@@ -142,6 +142,10 @@ public:
   //////////////
   // get methods
   
+  /// get proj string
+  
+  virtual string getProjStr() const;
+
   /// get latitude of projection origin
   
   inline double getOriginLat() const { return _origin_lat; }
@@ -242,6 +246,8 @@ protected:
 
   double _false_northing; // added to y coord computed from proj origin
   double _false_easting;  // added to x coord computed from proj origin
+
+  string _getProjStrFalseOrigin() const;
 
 private:
 

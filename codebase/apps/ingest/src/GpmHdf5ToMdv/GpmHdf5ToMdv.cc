@@ -24,16 +24,16 @@
 ///////////////////////////////////////////////////////////////
 // GpmHdf5ToMdv.cc
 //
-// GpmHdf5ToMdv object
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Oct 2008
+// May 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// GpmHdf5ToMdv reads McIdas data in NetCDF format, and
-// converts to MDV
+// GpmHdf5ToMdv reads GPM data in HDF5 format, and
+// converts to MDV.
+// Originally based on NcGeneric2Mdv.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -896,22 +896,6 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
     
   } // ifield
   
-  _qualAvailable = false;
-
-  // read reflectivity, to ensure we have the dimensions read in
-
-  if (_readField3D(ns, "SLV", "zFactorCorrected",
-                   _dbzInput, _missingDbz, _dbzUnits)) {
-    return -1;
-  }
-
-  // read quality flag
-
-  if (_readField2D(ns, "FLG", "qualityFlag",
-                   _qualInput, _missingQual, _qualUnits) == 0) {
-    _qualAvailable = true;
-  }
-  
   return 0;
 
 }
@@ -953,7 +937,7 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   if (dims[0] != _nScans || dims[1] != _nRays) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    cerr << "  DBZ dimensions must match nScans and nRays" << endl;
+    cerr << "  dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _nScans: " << _nScans << endl;
@@ -1031,7 +1015,7 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   if (dims[0] != _nScans || dims[1] != _nRays) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    cerr << "  DBZ dimensions must match nScans and nRays" << endl;
+    cerr << "  dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _nScans: " << _nScans << endl;
@@ -1269,7 +1253,7 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
     nGates = 1;
   }
   
-  // initialize dbz grid
+  // initialize grid
 
   size_t nOutput = _nx * _ny * nz;
   valsInterp.resize(nOutput);
@@ -1348,7 +1332,7 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
     nGates = 1;
   }
   
-  // initialize dbz grid
+  // initialize grid
 
   size_t nOutput = _nx * _ny * nz;
   valsInterp.resize(nOutput);
@@ -1386,7 +1370,7 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
         corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
         corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
-        // dbz vals at corners
+        // vals at corners
         NcxxPort::si16 vals[4];
         vals[0] = valsIn[iscan][iray];
         vals[1] = valsIn[iscan][iray + 1];

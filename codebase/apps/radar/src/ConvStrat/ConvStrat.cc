@@ -338,6 +338,12 @@ void ConvStrat::_addFields()
                                  "DbzTexture2D",
                                  "reflectivity_texture_2D",
                                  "dBZ"));
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getTextureColMax(),
+                                 Mdvx::ENCODING_INT16,
+                                 "DbzTextureColMax",
+                                 "reflectivity_texture_column_max",
+                                 "dBZ"));
   }
   
   if (_params.write_convectivity) {
@@ -347,6 +353,12 @@ void ConvStrat::_addFields()
                                  Mdvx::ENCODING_INT16,
                                  "Convectivity2D",
                                  "likelihood_of_convection_2D",
+                                 ""));
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getConvectivityColMax(),
+                                 Mdvx::ENCODING_INT16,
+                                 "ConvectivityColMax",
+                                 "likelihood_of_convection_column_max",
                                  ""));
   }
 
@@ -423,6 +435,12 @@ void ConvStrat::_addFields()
                                  Mdvx::ENCODING_INT8,
                                  "Partition2D",
                                  "convective_stratiform_partition_2D",
+                                 ""));
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getPartitionColMax(),
+                                 Mdvx::ENCODING_INT8,
+                                 "PartitionColMax",
+                                 "convective_stratiform_partition_col_max",
                                  ""));
   }
   

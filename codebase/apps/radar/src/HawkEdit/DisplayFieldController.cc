@@ -20,6 +20,12 @@ DisplayFieldController::~DisplayFieldController() {
   //  delete _model;
 }
 
+// not used??
+void clearAllFields() {
+  //_view->clearAllFields();  ->> or just delete fields that are not needed???
+  //_model->clearAllFields(); 
+}
+
 bool DisplayFieldController::contains(string fieldName) {
   bool present = false;
   try {
@@ -91,6 +97,80 @@ void DisplayFieldController::updateFieldPanel(string fieldName) {
   LOG(DEBUG) << "exit";
 }
 
+void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
+  DisplayFieldView *fieldPanel) {
+
+  fieldPanel->clear();
+
+    // remove current fields that are no longer needed
+  vector<string> currentFieldsNames = getFieldNames();
+
+  for (vector<string>::iterator currentName = currentFieldsNames.begin(); 
+    currentName != currentFieldsNames.end(); ++currentName) {
+  
+    std::vector<string>::iterator it;
+
+    it = std::find(fieldNames->begin(), fieldNames->end(), *currentName);
+    if (it != fieldNames->end()) {
+      LOG(DEBUG) << "displayField found in list of new fields: " << *it << " keep it";
+    }
+    else {
+      LOG(DEBUG) << "displayField not found in list of new fields" << *currentName << " discarding";
+      deleteField(*currentName);
+      // TODO how is the field removed from the panel?
+      //fieldPanel->delete(*currentName);
+    }
+  }
+
+
+  //for (int ifield = 0; ifield < _params->fields_n; ifield++) {
+  int ifield = (int) getNFields() + 1;
+  for (vector<string>::iterator it = fieldNames->begin(); it != fieldNames->end(); ++it) {
+    string fieldName = *it;
+
+//HERE TODO:
+//distingquish between add and update on fieldName;
+//then set last field or first field as selected? or do something to render image
+
+    if (!contains(fieldName)) {
+
+      ColorMap map;
+      map = ColorMap(0.0, 1.0);
+      bool noColorMap = true; 
+      // unfiltered field
+      string shortcut = to_string(ifield);
+      DisplayField *field =
+        new DisplayField(fieldName, fieldName, "m/s", 
+                         shortcut, map, ifield, false);
+      if (noColorMap)
+        field->setNoColorMap();
+
+      addField(field);
+      //_updateFieldPanel(fieldName);
+      // TODO: causes a EXC_BAD_ACCESS if outside the loop
+      // somehow this is called when setting up the menus???
+      //fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
+      ifield += 1;
+    }
+    fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
+
+  } // ifield
+
+}
+
+void DisplayFieldController::deleteField(string fieldName) {
+  _model->deleteField(fieldName);
+}
+
+void DisplayFieldController::dataFileChanged() {
+
+  // reconcile the data fields with those already in the panel
+
+}
+
+void DisplayFieldController::fieldSelected(string fieldName) {
+
+}
 
 void DisplayFieldController::hideField(DisplayField *field) {
   //_model->hideField(field);
@@ -103,6 +183,10 @@ void DisplayFieldController::setFieldToMissing(DisplayField *field) {
 void DisplayFieldController::deleteFieldFromVolume(DisplayField *field) {
   //_model->deleteFieldFromVolume(field);
 }
+
+//void DisplayFieldController::delete(string fieldName) {
+//  _model->delete(fieldName);
+//}
 
 vector<string>  DisplayFieldController::getFieldNames() {
   return _model->getFieldNames();

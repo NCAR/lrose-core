@@ -82,6 +82,10 @@ public:
 
   virtual void printDetails(ostream &out) const; // includes derived params
   
+  /// get proj string
+  
+  virtual string getProjStr() const;
+  
 protected:
   
   double _origin_lat_rad;

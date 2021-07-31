@@ -245,17 +245,24 @@ int ClassIngest::readSoundingText()
       cerr << "  Error: file input object is NULL." << endl;
       return 0;
   }
+  bool noFilesRead = true;
   inputPath = _input->next();
-  //while (inputPath != NULL) {
+  while (inputPath != NULL) {
     
     if (_processFile(inputPath)) {
       cerr << "WARNING - ClassIngest::readSoundingText" << endl;
       cerr << "  Errors in processing file: " << inputPath << endl;
       iret = -1;
     } 
-    //inputPath = _input->next();
-  //} // while
-    
+    noFilesRead = false;
+    inputPath = _input->next();
+  } // while
+   
+  if (noFilesRead) {
+    cerr << "WARNING - ClassIngest::readSoundingText" << endl;
+    cerr << "  No sounding files read; try changing the look back time " << endl;
+    iret = -1;
+  } 
   return iret;
 
 }

@@ -13,6 +13,6 @@ namespace badvalue
   extern double INTEREST;
   extern double ANGLE;
   extern double ANGLE_INTERSECTION;
-};
+}
 
 #endif

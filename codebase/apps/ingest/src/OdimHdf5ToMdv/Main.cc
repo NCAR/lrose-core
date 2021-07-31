@@ -21,89 +21,97 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// GridClump.hh
+///////////////////////////////////////////////////////////////
 //
-// GridClump class - wraps a clump with an mdv grid so that
-// computations may be done on the clump with the grid geometry.
+// main for OdimHdf5ToMdv
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// November 1998
+// May 2021
 //
 ///////////////////////////////////////////////////////////////
+//
+// OdimHdf5ToMdv reads GPM data in HDF5 format, and
+// converts to MDV
+//
+////////////////////////////////////////////////////////////////
 
-#ifndef GridClump_HH
-#define GridClump_HH
-
-#include <euclid/clump.h>
-#include <rapformats/titan_grid.h>
-#include <vector>
+#include "OdimHdf5ToMdv.hh"
+#include <toolsa/str.h>
+#include <toolsa/port.h>
+#include <signal.h>
+#include <new>
 using namespace std;
 
-////////////////////////////////
-// GridClump
+// file scope
 
-class GridClump {
+static void tidy_and_exit (int sig);
+static void out_of_store();
+static OdimHdf5ToMdv *_prog;
+static int _argc;
+static char **_argv;
+
+// main
+
+int main(int argc, char **argv)
+
+{
+
+  _argc = argc;
+  _argv = argv;
+
+  // create program object
+
+  _prog = new OdimHdf5ToMdv(argc, argv);
+  if (!_prog->isOK) {
+    return(-1);
+  }
+
+  // set signal handling
   
-public:
+  PORTsignal(SIGINT, tidy_and_exit);
+  PORTsignal(SIGHUP, tidy_and_exit);
+  PORTsignal(SIGTERM, tidy_and_exit);
+  PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
 
-  // constructors
+  // set new() memory failure handler function
 
-  GridClump();
+  set_new_handler(out_of_store);
 
-  GridClump(const Clump_order *clump,
-	    const titan_grid_t &titan_grid,
-	    int start_ix, int start_iy);
+  // run it
 
-  // initializer
+  int iret = _prog->Run();
 
-  void init(const Clump_order *clump,
-	    const titan_grid_t &titan_grid,
-	    int start_ix, int start_iy);
+  // clean up
 
-  // destructor
+  tidy_and_exit(iret);
+  return (iret);
   
-  virtual ~GridClump();
+}
 
-  int OK;
-  
-  vector<Interval> intervals;
-  int nIntervals;
-  int nPoints;
-  
-  titan_grid_t grid;
-  int startIx, startIy;
-  double offsetX, offsetY;
-  double startX, startY;
-  int nX, nY;
+///////////////////
+// tidy up on exit
 
-  double stormSize;
-  double dVolAtCentroid;
-  double dAreaAtCentroid;
-  double dAreaEllipse;
-  double kmPerGridUnit;
+static void tidy_and_exit (int sig)
 
-protected:
-  
-private:
+{
 
-  int _initDone;
-  int _isLatLon;
+  delete(_prog);
+  exit(sig);
 
-  int _minIx, _minIy;
-  int _maxIx, _maxIy;
+}
+////////////////////////////////////
+// out_of_store()
+//
+// Handle out-of-memory conditions
+//
 
-  double _dX, _dY, _dXAtEquator;
-  double _dVolFlat, _dVolAtEquator;
-  double _dAreaFlat, _dAreaAtEquator;
+static void out_of_store()
 
-  void _shrinkWrap(const Clump_order *clump_order);
-  void _computeGeometry();
-  
-};
+{
 
-#endif
+  fprintf(stderr, "FATAL ERROR - program OdimHdf5ToMdv\n");
+  fprintf(stderr, "  Operator new failed - out of store\n");
+  exit(-1);
 
-
-
+}

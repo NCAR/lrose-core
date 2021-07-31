@@ -20,6 +20,7 @@ public:
   void hideField(DisplayField *field);
   void setFieldToMissing(DisplayField *field);
   void deleteFieldFromVolume(DisplayField *field);
+  void deleteField(string fieldName);
 
   vector<string> getFieldNames();
   size_t getNFields();

@@ -38,13 +38,13 @@
 #include "Worker.hh"
 #include "InputMdv.hh"
 #include <euclid/GridClumping.hh>
+#include <euclid/ClumpDualThresh.hh>
+#include <euclid/ClumpGrid.hh>
 #include <titan/TitanStormFile.hh>
 using namespace std;
 
 class Verify;
 class Props;
-class DualThresh;
-class GridClump;
 
 ////////////////////////////////
 // Identify
@@ -79,10 +79,11 @@ private:
 
   Props *_props;
   Verify *_verify;
-  DualThresh *_dualT;
+  ClumpDualThresh _dualT;
 
   int _processClumps(int scan_num);
-  int _processThisClump(const GridClump &grid_clump);
+  int _processThisClump(const ClumpGrid &clump_grid);
+  int _writeDualThreshMdv();
 
 };
 

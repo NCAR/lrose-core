@@ -1,0 +1,574 @@
+/**********************************************************************
+ * TDRP params for ConvStrat
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: ConvStrat.
+//
+// ConvStrat finds convective and stratiform regions within a Cartesian 
+//   radar volume.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "opera";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_url ///////////////////////////////
+//
+// URL for input data.
+//
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+//
+//
+// Type: string
+//
+
+input_url = "$(HOME)/data/convstrat/mdv/opera/lambert";
+
+///////////// dbz_field_name //////////////////////////
+//
+// dBZ field name in input MDV files.
+//
+//
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+//======================================================================
+//
+// SPECIFYING VERTICAL LEVELS - TEMPERAURE or HEIGHT?.
+//
+// We need to specify the vertical separation between shallow, mid-level 
+//   and high clouds. We use the freezing level to separate warm clouds 
+//   and cold clouds. And we use the divergence level to separate the 
+//   mid-level clouds from high-level clouds such as anvil. These vertical 
+//   limits can be specified as heights MSL (in km), or as temperatures. 
+//   If temperatures are used, we read in the temperature profile from a 
+//   model.
+//
+//======================================================================
+ 
+///////////// vert_levels_type ////////////////////////
+//
+// How we specify the vertical levels.
+//
+// If temperatures are used, we need to read in the temperature profile 
+//   from a model.
+//
+//
+// Type: enum
+// Options:
+//     VERT_LEVELS_BY_TEMP
+//     VERT_LEVELS_BY_HT
+//
+
+vert_levels_type = VERT_LEVELS_BY_HT;
+
+///////////// temp_profile_url ////////////////////////
+//
+// URL for temperature profile data, in MDV/Netcdf-CF format.
+//
+// We read in the model data that is closest in time to the reflectivity 
+//   data.
+//
+//
+// Type: string
+//
+
+temp_profile_url = "mdv/model";
+
+///////////// temp_profile_field_name /////////////////
+//
+// Name of temperature field in the model data. This should be in 
+//   degrees C.
+//
+//
+// Type: string
+//
+
+temp_profile_field_name = "Temp";
+
+///////////// temp_profile_search_margin //////////////
+//
+// Search margin for finding the temp profile data (secs).
+//
+// The temp profile must be within this number of seconds of the dbz 
+//   data.
+//
+//
+// Type: int
+//
+
+temp_profile_search_margin = 21600;
+
+///////////// shallow_threshold_ht ////////////////////
+//
+// Shallow cloud height threshold (km).
+//
+// Shallow cloud tops are below this height. Used if vert_levels_type = 
+//   VERT_LEVELS_BY_HT.
+//
+//
+// Type: double
+//
+
+shallow_threshold_ht = -1;
+
+///////////// shallow_threshold_temp //////////////////
+//
+// Shallow cloud temperature threshold (degC).
+//
+// Shallow cloud tops are below this temperature. Used if 
+//   vert_levels_type = VERT_LEVELS_BY_TEMP.
+//
+//
+// Type: double
+//
+
+shallow_threshold_temp = 0;
+
+///////////// deep_threshold_ht ///////////////////////
+//
+// Deep cloud height threshold (km).
+//
+// Deep clouds extend above this height. Used if vert_levels_type = 
+//   VERT_LEVELS_BY_HT.
+//
+//
+// Type: double
+//
+
+deep_threshold_ht = 1;
+
+///////////// deep_threshold_temp /////////////////////
+//
+// Deep cloud temperature threshold (degC).
+//
+// Deep clouds extend above this height. Used if vert_levels_type = 
+//   VERT_LEVELS_BY_TEMP.
+//
+//
+// Type: double
+//
+
+deep_threshold_temp = -12;
+
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+//======================================================================
+ 
+///////////// min_valid_height ////////////////////////
+//
+// Min height used in analysis (km).
+//
+// Only data at or above this altitude is used.
+//
+//
+// Type: double
+//
+
+min_valid_height = -1;
+
+///////////// max_valid_height ////////////////////////
+//
+// Max height used in analysis (km).
+//
+// Only data at or below this altitude is used.
+//
+//
+// Type: double
+//
+
+max_valid_height = 25;
+
+///////////// min_valid_dbz ///////////////////////////
+//
+// Minimum reflectivity threshold for this analysis (dBZ).
+//
+// Reflectivity below this threshold is set to missing.
+//
+//
+// Type: double
+//
+
+min_valid_dbz = 0;
+
+///////////// min_valid_volume_for_convective /////////
+//
+// Min volume of a convective region (km3).
+//
+// Regions of smaller volume will be labeled SMALL.
+//
+//
+// Type: double
+//
+
+min_valid_volume_for_convective = 30;
+
+///////////// min_vert_extent_for_convective //////////
+//
+// Min vertical echo extent of a convective region (km).
+//
+// The vertical extent is computed as the mid height of the top layer in 
+//   the echo minus the mid height of the bottom layer. For an echo that 
+//   exists in only one layer, the vertical extent would therefore be 
+//   zero. This parameter lets us require that a valid convective echo 
+//   exist in multiple layers, which is desirable and helps to remove 
+//   spurious echoes as candidates for convection.
+//
+//
+// Type: double
+//
+
+min_vert_extent_for_convective = 0;
+
+///////////// dbz_for_echo_tops ///////////////////////
+//
+// Reflectivity for determing echo tops.
+//
+// Echo tops are defined as the max ht with reflectivity at or above 
+//   this value.
+//
+//
+// Type: double
+//
+
+dbz_for_echo_tops = 18;
+
+//======================================================================
+//
+// COMPUTING REFLECTIVITY TEXTURE.
+//
+//======================================================================
+ 
+///////////// texture_radius_km ///////////////////////
+//
+// Radius for texture analysis (km).
+//
+// We determine the reflectivity 'texture' at a point by computing the 
+//   standard deviation of the square of the reflectivity, for all grid 
+//   points within this radius of the central point. We then compute the 
+//   square root of that sdev.
+//
+//
+// Type: double
+//
+
+texture_radius_km = 7;
+
+///////////// min_valid_fraction_for_texture //////////
+//
+// Minimum fraction of surrounding points for texture computations.
+//
+// For a valid computation of texture, we require at least this fraction 
+//   of points around the central point to have valid reflectivity.
+//
+//
+// Type: double
+//
+
+min_valid_fraction_for_texture = 0.25;
+
+///////////// min_valid_fraction_for_fit //////////////
+//
+// Minimum fraction of surrounding points for 2D fit to DBZ.
+//
+// We compute a 2D fit to the reflectivity around a grid point, to 
+//   remove any systematic gradient. For a valid fit, we require at least 
+//   this fraction of points around the central point to have valid 
+//   reflectivity.
+//
+//
+// Type: double
+//
+
+min_valid_fraction_for_fit = 0.67;
+
+//======================================================================
+//
+// CONVERTING REFLECTIVITY TEXTURE TO CONVECTIVITY.
+//
+// Convectivity ranges from 0 to 1. To convert texture to convectivity, 
+//   we apply a piece-wise linear transfer function. This section defines 
+//   the lower texture limit and the upper texture limit. At or below the 
+//   lower limit convectivity is set to 0. At or above the upper limit 
+//   convectivity is set to 1. Between these two limits convectivity 
+//   varies linearly with texture.
+//
+//======================================================================
+ 
+///////////// texture_limit_low ///////////////////////
+//
+// Lower limit for texture.
+//
+// Below this texture the convectivity is set to 0.
+//
+//
+// Type: double
+//
+
+texture_limit_low = 0;
+
+///////////// texture_limit_high //////////////////////
+//
+// Upper limit for texture.
+//
+// Above this texture the convectivity is set to 1. Between the limits 
+//   convectivity varies linearly with texture.
+//
+//
+// Type: double
+//
+
+texture_limit_high = 27;
+
+//======================================================================
+//
+// SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY.
+//
+// If neither is set, we flag the point as MIXED.
+//
+//======================================================================
+ 
+///////////// min_convectivity_for_convective /////////
+//
+// Minimum convectivity for convective at a point.
+//
+// If the convectivity at a point exceeds this value, we set the 
+//   convective flag at this point.
+//
+//
+// Type: double
+//
+
+min_convectivity_for_convective = 0.5;
+
+///////////// max_convectivity_for_stratiform /////////
+//
+// Maximum convectivity for stratiform at a point.
+//
+// If the convectivity at a point is less than this value, we set the 
+//   stratiform flag at this point. If it is above this but less than 
+//   min_convectivity_for_convective we flag the point as MIXED.
+//
+//
+// Type: double
+//
+
+max_convectivity_for_stratiform = 0.4;
+
+///////////// min_overlap_for_convective_clumps ///////
+//
+// Minimum grid overlap in convective regions.
+//
+// A convective region is identified as a series of adjacent 'runs' of 
+//   grid cells data in the EW direction. When testing for overlap, some 
+//   minimum number of overlap grids must be used. This is that minimum 
+//   overlap in grid units.
+//
+//
+// Type: int
+//
+
+min_overlap_for_convective_clumps = 1;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+//
+// Output files are written to this URL.
+//
+//
+// Type: string
+//
+
+output_url = "$(HOME)/data/convstrat/mdv/conv_strat/opera/lambert";
+
+///////////// write_partition /////////////////////////
+//
+// Write out partition fields.
+//
+// This will write out the 3D, 2D and column-max partition.
+//
+//
+// Type: boolean
+//
+
+write_partition = TRUE;
+
+///////////// write_texture ///////////////////////////
+//
+// Write out texture fields.
+//
+// This will write out the 3D and column-max texture.
+//
+//
+// Type: boolean
+//
+
+write_texture = TRUE;
+
+///////////// write_convectivity //////////////////////
+//
+// Write out convectivity fields.
+//
+// This will write out the 3D and column-max convectivity.
+//
+//
+// Type: boolean
+//
+
+write_convectivity = TRUE;
+
+///////////// write_3D_dbz ////////////////////////////
+//
+// Write out 3D dbz field.
+//
+// This will be an echo of the input field.
+//
+//
+// Type: boolean
+//
+
+write_3D_dbz = FALSE;
+
+///////////// write_convective_dbz ////////////////////
+//
+// Write out convective dbz field.
+//
+// This will write out the 3D convective DBZ field.
+//
+//
+// Type: boolean
+//
+
+write_convective_dbz = FALSE;
+
+///////////// write_col_max_dbz ///////////////////////
+//
+// Write out column maximum dbz field.
+//
+// This is the max reflectivity at any height.
+//
+//
+// Type: boolean
+//
+
+write_col_max_dbz = FALSE;
+
+///////////// write_tops //////////////////////////////
+//
+// Write out echo, convective and stratiform tops.
+//
+// These are 2D fields.
+//
+//
+// Type: boolean
+//
+
+write_tops = FALSE;
+
+///////////// write_fraction_active ///////////////////
+//
+// Write out 2D field showing fraction active.
+//
+// This the active fraction in the computational circle.
+//
+//
+// Type: boolean
+//
+
+write_fraction_active = TRUE;
+
+///////////// write_height_grids //////////////////////
+//
+// Write out 2D field showing shallow and deep heights.
+//
+// These are based on model temperature.
+//
+//
+// Type: boolean
+//
+
+write_height_grids = FALSE;
+
+///////////// write_temperature ///////////////////////
+//
+// Write out 3D temperature field.
+//
+// This comes from a model, remapped onto the reflectivity grid.
+//
+//
+// Type: boolean
+//
+
+write_temperature = FALSE;
+
