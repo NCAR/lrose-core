@@ -64,6 +64,12 @@ void DisplayFieldModel::deleteFieldFromVolume(DisplayField *field) {
   // _fields.delete(newField);
 }
 
+void DisplayFieldModel::deleteField(string fieldName) {
+
+  size_t index = _lookupFieldIndex(fieldName);
+  _fields.erase(_fields.begin() + (int) index);
+} 
+
 vector<string>  DisplayFieldModel::getFieldNames() {
   vector<string> fieldNames;
   for (vector<DisplayField *>::iterator fieldItr = _fields.begin(); fieldItr != _fields.end(); fieldItr++) {

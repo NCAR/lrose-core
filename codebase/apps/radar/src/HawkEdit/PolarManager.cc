@@ -58,6 +58,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
+#include <algorithm>    // std::find
 #include <Ncxx/H5x.hh>
 #include <QActionGroup>
 #include <QApplication>
@@ -235,6 +236,8 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
 
   //_changeField(0, false);
 
+  //connect(this, SIGNAL(newDataFile()), _displayFieldController, SLOT(dataFileChanged()));  
+  //connect(this, SIGNAL(fieldSelected(string)), _displayFieldController, SLOT(fieldSelected(string))); 
 }
 
 // destructor
@@ -490,7 +493,7 @@ void PolarManager::_setupWindows()
   // create fields panel
   
   //_createFieldPanel();
-  _fieldPanel = new DisplayFieldView(_displayFieldController);
+  _fieldPanel = new DisplayFieldView(); // _displayFieldController);
   //_displayFieldController->setView(_fieldPanel);
   _fieldPanel->createFieldPanel(_main);
  //TODO: can only connect QObjects with signals and slots...
@@ -523,7 +526,8 @@ void PolarManager::_setupWindows()
 
   connect(_sweepPanel, SIGNAL(selectedSweepChanged(double)),
           this, SLOT(selectedSweepChanged(double)));
-
+  connect(this, SIGNAL(newDataFile()), this, SLOT(dataFileChanged()));
+  //connect(this, SIGNAL(sweepSelected()), _sweepController, SLOT(sweepSelected()));
   // time panel
 
   _createTimeControl();
@@ -539,7 +543,7 @@ void PolarManager::_setupWindows()
 
   _setTitleBar(_params->radar_name);
   setMinimumSize(400, 300);
-  resize(400,300); // _params->main_window_width, _params->main_window_height);
+  resize(1100,635); // _params->main_window_width, _params->main_window_height);
   
   // set location on screen
 
@@ -736,7 +740,7 @@ void PolarManager::_createMenus()
   _timeMenu = menuBar()->addMenu(tr("&Time-control"));
   _timeMenu->addAction(_showTimeControlAct);
   _timeMenu->addSeparator();
-  _timeMenu->addAction(_realtimeAct);
+  //_timeMenu->addAction(_realtimeAct);
 
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
   _overlaysMenu->addAction(_ringsAct);
@@ -941,11 +945,6 @@ void PolarManager::_handleArchiveData()
     _timeControl->setCursor(Qt::ArrowCursor);
     return;
   }
-
-  // set up sweep GUI
-
-  _sweepController->clearSweepRadioButtons();
-  _sweepController->createSweepRadioButtons();
   
   //if (_vol.checkIsRhi()) {
   //  _rhiMode = true;
@@ -1152,6 +1151,7 @@ int PolarManager::_getArchiveData()
       vector<string> fieldNames = _displayFieldController->getFieldNames();
       dataModel->readData(inputPath, fieldNames,
         debug_verbose, debug_extra);
+      emit newDataFile();
     } catch (const string &errMsg) {
       if (!_params->images_auto_create)  {
         QErrorMessage errorDialog;
@@ -1160,26 +1160,6 @@ int PolarManager::_getArchiveData()
         errorDialog.exec();
       }
     }
- /*
-      LOG(DEBUG) << "  reading data file path: " << inputPath;
-      LOG(DEBUG) << "  archive file index: " << _archiveScanIndex;
-    
-    
-    if (file.readFromPath(inputPath, _vol)) {
-      string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "PolarManager::_getArchiveData\n";
-      errMsg += file.getErrStr() + "\n";
-      errMsg += "  path: " + inputPath + "\n";
-      cerr << errMsg;
-      if (!_params->images_auto_create)  {
-        QErrorMessage errorDialog;
-        errorDialog.setMinimumSize(400, 250);
-        errorDialog.showMessage(errMsg.c_str());
-        errorDialog.exec();
-      }
-      return -1;
-    } 
-*/
   }
 
   // set plot times
@@ -2240,6 +2220,13 @@ void PolarManager::_handleColorMapChangeOnRay(RadxPlatform &platform,
 }
 
 
+void PolarManager::dataFileChanged() {
+
+  _sweepController->clearSweepRadioButtons();
+  _sweepController->createSweepRadioButtons();
+
+}
+
 ///////////////////////////////////////////////////////////
 /* store ray location
 
@@ -3142,6 +3129,7 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
   } else {
     QMessageBox::information(this, "Status", "reading data ...");
 
+    //_displayFieldController->clearAllFields();
     _updateDisplayFields(selectedFields);
   //_setupDisplayFields(allFieldNames);
      // trying this ... to get the data from the file selected
@@ -3150,14 +3138,12 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
     try {
       _getArchiveData();
       _setupRayLocation();
-      //_displayFieldController->setSelectedField(selectedFields->at(0));
-      _sweepController->clearSweepRadioButtons();
-      _sweepController->createSweepRadioButtons();
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
       return;
     }
+
   
 /*
   // now update the time controller window
@@ -5634,8 +5620,14 @@ int PolarManager::_setupDisplayFields(
 //TODO: change model for displayFieldController
 //_displayFieldController->setModel(new DisplayFieldModel(...))
   
+// reset or sync the displayFields with those in the list
+// used for a read of new data file
+// TODO: shouldn't this go to DisplayFieldController?? just send the color map directory?
 int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
 
+  _displayFieldController->reconcileFields(fieldNames, _fieldPanel);
+
+  // TODO: not sure where this needs to happen ...
   // check for color map location
   
   string colorMapDir = _params->color_scale_dir;
@@ -5657,7 +5649,13 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
     }
   }
 
+/*
   //vector<DisplayField *> displayFields;
+
+  // There is the fieldPanel, which is a view of the DisplayFields, for selection
+  // then, there is the displayFieldController which manages the fields and all
+  // their attributes.  
+  // sometimes, we need to add a field, remove a field, and then sync the fields as in reset.
 
   //for (int ifield = 0; ifield < _params->fields_n; ifield++) {
   int ifield = (int) _displayFieldController->getNFields() + 1;
@@ -5693,13 +5691,14 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
 
 
   } // ifield
+*/
 
   if (fieldNames->size() < 1) {
     cerr << "ERROR - PolarManager::_setupDisplayFields()" << endl;
     cerr << "  No fields found" << endl;
     return -1;
   }
-  //selectedFieldChanged(QString().fromStdString(fieldNames->at(0)));
+
 
   return 0;
 

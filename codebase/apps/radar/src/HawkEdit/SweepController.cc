@@ -76,6 +76,18 @@ SweepController::~SweepController()
 }
 
 
+void SweepController::dataFileChanged() {
+
+  clearSweepRadioButtons();
+  createSweepRadioButtons();
+
+}
+
+// TODO: this may not be needed
+void SweepController::sweepSelected() {
+}
+
+
 //double SweepController::getSelectedSweepAngle() {
 //  return _model->getSelectedSweepAngle();
 //}

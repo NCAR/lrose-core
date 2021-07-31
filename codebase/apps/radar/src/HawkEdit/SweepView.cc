@@ -262,20 +262,19 @@ void SweepView::setAngle(double angle)
 
 void SweepView::setGuiIndex(int index) 
 {
-/*
+  _sweepRButtons->at(_guiIndex)->setChecked(false);
   _guiIndex = index;
   if (_guiIndex <= 0) {
     _guiIndex = 0;
-  } else if (_guiIndex > (int) _sweeps.size() - 1) {
-    _guiIndex = _sweeps.size() - 1;
+  } else if (_guiIndex > (int) _sweepRButtons->size() - 1) {
+    _guiIndex = _sweepRButtons->size() - 1;
   }
-  if (_sweeps.size() > 0) {
-    _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
+  if (_sweepRButtons->size() > 0) {
+    _selectedAngle = _sweepRButtons->at(_guiIndex)->text().toDouble();
+    _sweepRButtons->at(_guiIndex)->setChecked(true);
   } else {
     _selectedAngle = 0;
   }
-*/
-
 }
 
 int SweepView::getGuiIndex() 
@@ -314,6 +313,7 @@ void SweepView::changeSweep(bool value) {
     if (_sweepRButtons->at(ii)->isChecked()) {
       LOG(DEBUG) << "sweepRButton " << ii << " is checked; moving to sweep index " << ii;
       _selectedAngle = _sweepRButtons->at(ii)->text().toDouble();
+      _guiIndex = ii;
       emit selectedSweepChanged(_selectedAngle);
       //_sweepManager.setGuiIndex(ii);
       //_ppi->setStartOfSweep(true);
@@ -406,6 +406,7 @@ void SweepView::createSweepRadioButtons(vector<double> *sweepAngles)
     // connect slot for sweep change
 
     connect(radio1, SIGNAL(toggled(bool)), this, SLOT(changeSweep(bool)));
+    setGuiIndex(0);
 
   }
 

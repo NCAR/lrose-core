@@ -2,7 +2,7 @@
 #define DISPLAYFIELDCONTROLLER_H
 
 #include "DisplayFieldModel.hh"
-//#include "DisplayFieldView.hh"
+#include "DisplayFieldView.hh"
 //#include "ColorMap.hh"
 #include "ParamFile.hh"
 #include <QFrame>
@@ -24,6 +24,8 @@ public:
     string backgroundColor,
     Params::debug_t debug  
   );
+
+  void clearAllFields();
 
   //void createFieldPanel(QFrame *main);
   void updateFieldPanel(string fieldName);
@@ -85,6 +87,10 @@ public:
     void setVisible(size_t fieldIndex);
 
   DisplayFieldModel *getModel() {return _model;};
+  void reconcileFields(vector<string> *fieldNames,
+    DisplayFieldView *fieldPanel);
+
+  void deleteField(string fieldName);
 
     //void setView(DisplayFieldView *view);
 
@@ -97,8 +103,10 @@ public:
 
 //    void selectedFieldChanged();
 
-//slots:
+
 //  void setSelectedField(string fieldName);
+  void dataFileChanged();
+  void fieldSelected(string fieldName);;
 
 private:
  

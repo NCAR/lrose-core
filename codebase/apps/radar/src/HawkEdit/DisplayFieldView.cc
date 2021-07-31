@@ -1,9 +1,11 @@
 #include "DisplayFieldView.hh"
 #include <toolsa/LogStream.hh>
 
+#include <QMenu>
+#include <QMessageBox>
 
-DisplayFieldView::DisplayFieldView(DisplayFieldController *displayFieldController) {
-  _controller = displayFieldController;
+DisplayFieldView::DisplayFieldView() { // DisplayFieldController *displayFieldController) {
+  //_controller = displayFieldController;
   _haveFilteredFields = false;
   _label_font_size = 12;
   //createFieldPanel(parent);
@@ -43,8 +45,8 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
 
   //this = new QGroupBox(parent); // <=== here is the connection
   _fieldGroup = new QButtonGroup;
-  _fieldsLayout = new QGridLayout(this);
-  _fieldsLayout->setVerticalSpacing(5);
+  _fieldsLayout = new QVBoxLayout(this);
+  //_fieldsLayout->setVerticalSpacing(5);
 
   int row = 0;
   int nCols = 3;
@@ -83,29 +85,30 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
 
   _valueLabel = new QLabel("", this);
   _valueLabel->setFont(font);
-  _fieldsLayout->addWidget(_valueLabel, row, 0, 1, nCols, alignCenter);
-  row++;
+  _fieldsLayout->addWidget(_valueLabel); // , row, 0, 1, nCols, alignCenter);
+  //row++;
 
-  QLabel *fieldHeader = new QLabel("FIELD LIST", this);
+  QLabel *fieldHeader = new QLabel("FIELDS", this);
   fieldHeader->setFont(font);
-  _fieldsLayout->addWidget(fieldHeader, row, 0, 1, nCols, alignCenter);
-  row++;
+  _fieldsLayout->addWidget(fieldHeader); // , row, 0, 1, nCols, alignCenter);
+  _fieldsLayout->addStretch();
+  //row++;
 
-  QLabel *nameHeader = new QLabel("Name", this);
-  nameHeader->setFont(font);
-  _fieldsLayout->addWidget(nameHeader, row, 0, alignCenter);
-  QLabel *keyHeader = new QLabel("HotKey", this);
-  keyHeader->setFont(font);
-  _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
-  if (_haveFilteredFields) {
-    QLabel *rawHeader = new QLabel("Raw", this);
-    rawHeader->setFont(font);
-    _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
-    QLabel *filtHeader = new QLabel("Filt", this);
-    filtHeader->setFont(font);
-    _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
-  }
-  row++;
+  //QLabel *nameHeader = new QLabel("Name", this);
+  //nameHeader->setFont(font);
+  //_fieldsLayout->addWidget(nameHeader); // , row, 0, alignCenter);
+  //QLabel *keyHeader = new QLabel("HotKey", this);
+  //keyHeader->setFont(font);
+  //_fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
+  //if (_haveFilteredFields) {
+  //  QLabel *rawHeader = new QLabel("Raw", this);
+  //  rawHeader->setFont(font);
+  //  _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
+  //  QLabel *filtHeader = new QLabel("Filt", this);
+  //  filtHeader->setFont(font);
+  //  _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
+  //}
+  //row++;
   //_rowOffset = row;
 
 /* TODO: fix this up
@@ -215,11 +218,11 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
   int fsize4 = _label_font_size + 4;
   int fsize6 = _label_font_size + 6;
 
-  int row; //  = _rowOffset;
-  int nCols = 3;
-  if (_haveFilteredFields) {
-    nCols = 4;
-  }
+  //int row; //  = _rowOffset;
+  //int nCols = 3;
+  //if (_haveFilteredFields) {
+  //  nCols = 4;
+  //}
   //QFont font = _selectedLabelWidget->font();
   QLabel dummy;
   QFont font = dummy.font();
@@ -242,9 +245,9 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
     // TODO: these should probably be signals ...
  // DisplayField *rawField = _displayFieldController->getField(ifield); //_fields[ifield];
   //if (rawField->isHidden()) {  // TODO: move to controller
-    int lastButtonRowFixed = _fieldButtons.size(); // 1 - based index
-    int _rowOffset = 3;
-    row = lastButtonRowFixed + _rowOffset;
+  //  int lastButtonRowFixed = _fieldButtons.size(); // 1 - based index
+  //  int _rowOffset = 3;
+  //  row = lastButtonRowFixed + _rowOffset;
     //rawField->setButtonRow(row);  // TODO: why does the displayField need the button row?
     
     // get filt field - may not be present
@@ -257,41 +260,46 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
 
 //---
 
+    // TODO: get rid of the buttons, and use the clickable label,
+    // one click switches to that field for display
+    // two clicks brings up editing for the field, color map, etc. 
     //QLabel *label = new QLabel(this);
-    ClickableLabel *label = new ClickableLabel(this);
+    ClickableLabelNamed *label = new ClickableLabelNamed(this);
     // TODO: HERE ===> contextMenu is not here .... do we want DisplayField Dialog?
     // make a special dialog for this field only?
     //connect(label, SIGNAL(ClickableLabel::clicked), this, SLOT(contextMenuParameterColors));
     label->setFont(font);
     label->setText(rawFieldLabel.c_str()); // (rawField->getLabel().c_str());
-    QLabel *key = new QLabel(this);
-    key->setFont(font);
-    if (rawFieldShortCut.size() > 0) {
-      char text[4];
-      text[0] = rawFieldShortCut[0];
-      text[1] = '\0';
-      key->setText(text);
-      char text2[128];
-      sprintf(text2, "Hit %s for %s, ALT-%s for filtered",
-        text, newFieldName.c_str(), text);
-      label->setToolTip(text2);
-      key->setToolTip(text2);
-    }
+    //QLabel *key = new QLabel(this);
+    //key->setFont(font);
+    //if (rawFieldShortCut.size() > 0) {
+    //  char text[4];
+    //  text[0] = rawFieldShortCut[0];
+    //  text[1] = '\0';
+    //  key->setText(text);
+    //  char text2[128];
+    //  sprintf(text2, "Hit %s for %s, ALT-%s for filtered",
+    //    text, newFieldName.c_str(), text);
+    //  label->setToolTip(text2);
+    //  key->setToolTip(text2);
+    //}
 
-    QRadioButton *rawButton = new QRadioButton(newFieldName.c_str(), this);
-    rawButton->setToolTip(newFieldName.c_str());
+    //QRadioButton *rawButton = new QRadioButton(newFieldName.c_str(), this);
+    //rawButton->setToolTip(newFieldName.c_str());
     //if (ifield == 0) {
      // rawButton->click();
     //}
     //row = buttonRow + 4;
-    _fieldsLayout->addWidget(label, row, 0, alignCenter);
-    _fieldsLayout->addWidget(key, row, 1, alignCenter);
-    _fieldsLayout->addWidget(rawButton, row, 2, alignCenter);
-    _fieldGroup->addButton(rawButton,  lastButtonRowFixed);  //  ifield);
+    _fieldsLayout->addWidget(label); // , row, 0, alignCenter);
+    //_fieldsLayout->addWidget(key, row, 1, alignCenter);
+    //_fieldsLayout->addWidget(rawButton); // , row, 2, alignCenter);
+    //_fieldGroup->addButton(rawButton,  lastButtonRowFixed);  //  ifield);
     // connect slot for field change
-    connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
-
-    _fieldButtons.push_back(rawButton);
+    //connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+    connect(label, SIGNAL(clicked(QString)), this, SLOT(_changeFieldVariable(QString)));
+    connect(label, SIGNAL(doubleClicked(QString)), this, SLOT(_editFieldVariable(QString)));  
+    //TODO: how to determine which label was clicked???  
+    _fieldButtons.push_back(label);
     /* TODO: fix up ...
     if (filtField != NULL) {
       QRadioButton *filtButton = new QRadioButton(this);
@@ -310,7 +318,7 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
 
     //QLabel *spacerRow = new QLabel("", this);
     //_fieldsLayout->addWidget(spacerRow, row, 0);
-    _fieldsLayout->setRowStretch(row, 1);
+    //_fieldsLayout->setRowStretch(row, 1);
     
    // rawField->setStateVisible();  // TODO: move to controller
    // _displayFieldController->setSelectedField(ifield); // TODO: move to controller
@@ -321,6 +329,8 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
   
   //connect(_fieldGroup, SIGNAL(buttonClicked(int)),
   //        this, SLOT(_changeField(int)));
+
+  _fieldsLayout->addStretch();
   LOG(DEBUG) << "exit";
   
 }
@@ -330,6 +340,96 @@ void DisplayFieldView::_changeField(int fieldIdx) {
   LOG(DEBUG) << "exit";
 }
 
+void DisplayFieldView::_editFieldVariable(QString fieldName) {
+
+  LOG(DEBUG) << "enter fieldVariable = " << fieldName.toStdString();
+  ShowContextMenu(fieldName);
+  LOG(DEBUG) << "exit"; 
+}
+
+void DisplayFieldView::ShowContextMenu(QString fieldName)
+{
+  _workingWithField = fieldName;
+
+  QMenu contextMenu("Context menu", this);
+  
+  QAction action1("Cancel", this);
+  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
+  contextMenu.addAction(&action1);
+
+  QAction action3("Change Color Map", this);
+  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
+  contextMenu.addAction(&action3);
+
+  QAction action4("Delete", this);
+  action4.setToolTip(fieldName);
+  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuDelete()));
+  contextMenu.addAction(&action4);
+
+  QAction action5("Remove", this);
+
+  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuRemove()));
+  contextMenu.addAction(&action5);
+  QAction action6("Undo", this);
+  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuUndo()));
+  contextMenu.addAction(&action6);
+
+  contextMenu.exec(QCursor::pos());
+}
+
+void DisplayFieldView::informationMessage()
+{
+  QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
+}
+
+void DisplayFieldView::contextMenuCancel()
+{
+                                                                                                    
+}
+
+void DisplayFieldView::contextMenuParameterColors()
+{
+
+  informationMessage();
+   
+}
+
+
+// To remove a widget from a layout, call removeWidget(). 
+// Calling QWidget::hide() on a widget also effectively removes the widget 
+// from the layout until QWidget::show() is called.
+
+void DisplayFieldView::contextMenuDelete()
+{
+
+  // TODO: set field to missing value or bad data value
+  informationMessage();
+   
+}
+
+void DisplayFieldView::contextMenuRemove()
+{
+  LOG(DEBUG) << "enter" << _workingWithField.toStdString();
+  size_t idx = _findFieldIndex(_workingWithField); 
+  QLabel *label = _fieldButtons.at(idx);
+  _fieldButtons.erase(_fieldButtons.begin() + idx);
+  _fieldsLayout->removeWidget(label);
+
+  delete label;
+  show();
+
+  emit removeField(_workingWithField);
+  LOG(DEBUG) << "exit";
+}
+
+void DisplayFieldView::contextMenuUndo()
+{
+
+  informationMessage();
+   
+}
+
+/*
 void DisplayFieldView::_changeFieldVariable(bool value) {
 
   LOG(DEBUG) << "enter";
@@ -342,7 +442,7 @@ void DisplayFieldView::_changeFieldVariable(bool value) {
         << " is checked";
         QString fieldNameQ = _fieldButtons.at(i)->text();
         string fieldName = fieldNameQ.toStdString();
-        _controller->setSelectedField(fieldName);
+        //_controller->setSelectedField(fieldName);
         LOG(DEBUG) << "fieldname is " << fieldName;
         emit selectedFieldChanged(fieldNameQ);
       }
@@ -352,4 +452,69 @@ void DisplayFieldView::_changeFieldVariable(bool value) {
 
   LOG(DEBUG) << "exit";
 
+}
+*/
+
+size_t DisplayFieldView::_findFieldIndex(QString fieldName) {
+  size_t nFields = _fieldButtons.size();
+  size_t i = 0;
+  bool found = false;
+  while (i<nFields && !found) {
+    if (_fieldButtons.at(i)->text().compare(fieldName) != 0) {
+      i += 1;
+    } else {
+      found = true;
+    }
+  }
+  if (found)
+    return i;
+  else 
+    throw std::invalid_argument(fieldName.toStdString());
+}
+
+void DisplayFieldView::_changeFieldVariable(QString fieldName) {
+
+  LOG(DEBUG) << "enter";
+
+        //string fieldName = fieldNameQ.toStdString();
+
+        LOG(DEBUG) << "fieldname is " << fieldName.toStdString();
+        emit selectedFieldChanged(fieldName);
+
+
+  LOG(DEBUG) << "exit";
+
+}
+
+void DisplayFieldView::clear() {
+
+  LOG(DEBUG) << "enter";
+
+    //ClickableLabel *label = new ClickableLabel(this);
+    // TODO: HERE ===> contextMenu is not here .... do we want DisplayField Dialog?
+    // make a special dialog for this field only?
+    //connect(label, SIGNAL(ClickableLabel::clicked), this, SLOT(contextMenuParameterColors));
+    //label->setFont(font);
+    //label->setText(rawFieldLabel.c_str()); // (rawField->getLabel().c_str());
+    //QLabel *key = new QLabel(this);
+    //key->setFont(font);
+
+
+    //QRadioButton *rawButton = new QRadioButton(newFieldName.c_str(), this);
+    //_fieldsLayout->addWidget(label, row, 0, alignCenter);
+    //_fieldsLayout->addWidget(key, row, 1, alignCenter);
+    //_fieldsLayout->addWidget(rawButton, row, 2, alignCenter);
+    //_fieldGroup->addButton(rawButton,  lastButtonRowFixed);  //  ifield);
+    // connect slot for field change
+    //connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
+/*
+    for (vector<QRadioButton> *::iterator it=_fieldButtons.begin();
+      it != _fieldButtons.end(); ++it) {
+      _fieldsLayout->removeWidget(*it);
+    }
+    _fieldButtons.clear(); // push_back(rawButton);
+*/
+    
+  LOG(DEBUG) << "exit";
+  
 }

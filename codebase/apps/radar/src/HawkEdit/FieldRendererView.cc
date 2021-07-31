@@ -100,8 +100,8 @@ FieldRendererView::~FieldRendererView()
 void FieldRendererView::createImage(int width, int height)
 
 {
-  rendering.lock();
-  LOG(DEBUG) << "grabbed lock";
+  //rendering.lock();
+  //LOG(DEBUG) << "grabbed lock";
 
   if (_image != NULL)
     delete _image;
