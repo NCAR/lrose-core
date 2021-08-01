@@ -260,8 +260,8 @@ paramdef struct merge_field_t {
     "'output_encoding': determines the type for storing the merged "
     "data in the output file. "
     "This affects the size of the output file. "
-    "Use FLOAT32 for maximum precision, INT8 for smallest files.";
-    "If compute_composite is true, the field will be converted to a column max 2D grid."
+    "Use FLOAT32 for maximum precision, INT8 for smallest files.\n\n"
+    "If compute_composite is true, the field will be converted to a column-max 2D grid on output.";
 } merge_fields[];
 
 paramdef string
