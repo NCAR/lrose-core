@@ -936,6 +936,22 @@ void MdvxProj::setOffsetCoords(double false_northing,
   }
 }
 
+///////////////////////////////////////
+// set origin lat/lon
+// can be used to correct for errors
+
+void MdvxProj::setOriginLat(double origin_lat)
+{
+  _coord.proj_origin_lat = origin_lat;
+  _initFromCoords();
+}
+
+void MdvxProj::setOriginLon(double origin_lon)
+{
+  _coord.proj_origin_lon = origin_lon;
+  _initFromCoords();
+}
+
 //////////////////////////////////////
 // generic latlon-to-xy transformation
 // most projections: x, y in km, z ignored

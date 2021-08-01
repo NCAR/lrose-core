@@ -309,6 +309,13 @@ public:
   void setOffsetCoords(double false_northing,
                        double false_easting);
   
+  ///////////////////////////////////////
+  // set origin lat/lon
+  // can be used to correct for errors
+  
+  void setOriginLat(double origin_lat);
+  void setOriginLon(double origin_lon);
+
   ////////////////////////////////////////////////////////
   // Coordinate transformation functions.
   // Convert from XY to Lat/Lon and vice versa.
