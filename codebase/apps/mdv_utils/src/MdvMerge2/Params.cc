@@ -931,7 +931,7 @@
     tt->array_elem_size = sizeof(merge_field_t);
     tt->array_n = 1;
     tt->struct_def.name = tdrpStrDup("merge_field_t");
-    tt->struct_def.nfields = 6;
+    tt->struct_def.nfields = 7;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -1000,7 +1000,12 @@
         tt->struct_def.fields[5].enum_def.fields[1].val = INT16;
         tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("FLOAT32");
         tt->struct_def.fields[5].enum_def.fields[2].val = FLOAT32;
-    tt->n_struct_vals = 6;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[6].fname = tdrpStrDup("compute_composite");
+      tt->struct_def.fields[6].ptype = BOOL_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_merge_fields->compute_composite - (char *) _merge_fields;
+    tt->n_struct_vals = 7;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("DBZ");
@@ -1009,6 +1014,7 @@
       tt->struct_vals[3].d = 0.5;
       tt->struct_vals[4].d = -32;
       tt->struct_vals[5].e = INT8;
+      tt->struct_vals[6].b = pFALSE;
     tt++;
     
     // Parameter 'range_field_name'
@@ -1344,6 +1350,18 @@
       tt->enum_def.fields[3].name = tdrpStrDup("COMPRESSION_GZIP");
       tt->enum_def.fields[3].val = COMPRESSION_GZIP;
     tt->single_val.e = COMPRESSION_ZLIB;
+    tt++;
+    
+    // Parameter 'output_composite'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_composite");
+    tt->descr = tdrpStrDup("Option to compute composite on output.");
+    tt->help = tdrpStrDup("If TRUE, the output Created to handle meteorological data sets with denser vertical\nspacing near the surface. If TRUE, must set 'vlevel_array[] values'.");
+    tt->val_offset = (char *) &output_composite - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'output_data_set_name'
