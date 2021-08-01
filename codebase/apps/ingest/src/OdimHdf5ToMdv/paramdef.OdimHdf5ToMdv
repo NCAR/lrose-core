@@ -200,6 +200,22 @@ commentdef {
 }
 
 paramdef boolean {
+  p_default = true;
+  p_descr = "Option to adjust the projection origin.";
+  p_help = "If the standard projection origin is used, the echoes appear to be in the wrong location. This option allows you to adjust the origin to get the echoes in the correct place.";
+} adjust_projection_origin;
+
+paramdef double {
+  p_default = 54.0;
+  p_descr = "Adjusted latitude for the projection origin.";
+} adjusted_projection_origin_lat;
+
+paramdef double {
+  p_default = 9.5;
+  p_descr = "Adjusted longitude for the projection origin.";
+} adjusted_projection_origin_lon;
+
+paramdef boolean {
   p_default = false;
   p_descr = "Option to convert the output grid to lat/lon.";
   p_help = "If true, the Mdvx class will auto-convert to a suitable lat/lon grid. This is performed using a nearest neighbor transformation.";

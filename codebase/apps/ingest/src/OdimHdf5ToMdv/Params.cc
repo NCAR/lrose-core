@@ -884,6 +884,42 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'adjust_projection_origin'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("adjust_projection_origin");
+    tt->descr = tdrpStrDup("Option to adjust the projection origin.");
+    tt->help = tdrpStrDup("If the standard projection origin is used, the echoes appear to be in the wrong location. This option allows you to adjust the origin to get the echoes in the correct place.");
+    tt->val_offset = (char *) &adjust_projection_origin - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'adjusted_projection_origin_lat'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("adjusted_projection_origin_lat");
+    tt->descr = tdrpStrDup("Adjusted latitude for the projection origin.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &adjusted_projection_origin_lat - &_start_;
+    tt->single_val.d = 54;
+    tt++;
+    
+    // Parameter 'adjusted_projection_origin_lon'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("adjusted_projection_origin_lon");
+    tt->descr = tdrpStrDup("Adjusted longitude for the projection origin.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &adjusted_projection_origin_lon - &_start_;
+    tt->single_val.d = 9.5;
+    tt++;
+    
     // Parameter 'convert_output_grid_to_latlon'
     // ctype is 'tdrp_bool_t'
     

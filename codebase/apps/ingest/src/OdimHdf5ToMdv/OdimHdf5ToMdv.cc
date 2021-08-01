@@ -656,6 +656,19 @@ int OdimHdf5ToMdv::_readField3D(Group &grp,
 
   _nz = dims[0];
 
+  // invert along the Y axis
+
+  vector<NcxxPort::fl32> tmp = vals;
+  for (size_t iz = 0; iz < _nz; iz++) {
+    for (size_t iy = 0; iy < _ny; iy++) {
+      NcxxPort::fl32 *dest = vals.data() + iz * _nx * _ny + iy * _nx;
+      NcxxPort::fl32 *source = tmp.data() + iz * _nx * _ny + (_ny - iy - 1) * _nx;
+      memcpy(dest, source, _nx * sizeof(NcxxPort::fl32));
+    }
+  }
+
+  // debug print
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Read 3D fl32 group/dataset: " 
          << grp.getObjName() << "/" << dsetName << " <<====" << endl;
@@ -727,6 +740,17 @@ int OdimHdf5ToMdv::_readField2D(Group &grp,
     cerr << "  _nx: " << _nx << endl;
     return -1;
   }
+
+  // invert along the Y axis
+
+  vector<NcxxPort::fl32> tmp = vals;
+  for (size_t iy = 0; iy < _ny; iy++) {
+    NcxxPort::fl32 *dest = vals.data() + iy * _nx;
+    NcxxPort::fl32 *source = tmp.data() + (_ny - iy - 1) * _nx;
+    memcpy(dest, source, _nx * sizeof(NcxxPort::fl32));
+  }
+
+  // debug print
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "====>> Read 2D fl32 group/dataset: "
@@ -983,6 +1007,12 @@ MdvxField *OdimHdf5ToMdv::_createMdvxField(const string &fieldName,
   
   MdvxProj proj;
   proj.initFromProjStr(_projStr);
+
+  if (_params.adjust_projection_origin) {
+    proj.setOriginLat(_params.adjusted_projection_origin_lat);
+    proj.setOriginLon(_params.adjusted_projection_origin_lon);
+  }
+
   proj.setGrid(nx, ny, dx, dy, minx, miny);
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {

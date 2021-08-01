@@ -107,7 +107,7 @@ mode = ARCHIVE;
 // Type: string
 //
 
-input_dir = "raw/input";
+input_dir = "$(HOME)/data/convstrat/OPERA";
 
 ///////////// use_ldata_info_file /////////////////////
 //
@@ -277,6 +277,40 @@ censoring = {
 //
 //======================================================================
  
+///////////// adjust_projection_origin ////////////////
+//
+// Option to adjust the projection origin.
+//
+// If the standard projection origin is used, the echoes appear to be in 
+//   the wrong location. This option allows you to adjust the origin to 
+//   get the echoes in the correct place.
+//
+//
+// Type: boolean
+//
+
+adjust_projection_origin = TRUE;
+
+///////////// adjusted_projection_origin_lat //////////
+//
+// Adjusted latitude for the projection origin.
+//
+//
+// Type: double
+//
+
+adjusted_projection_origin_lat = 54;
+
+///////////// adjusted_projection_origin_lon //////////
+//
+// Adjusted longitude for the projection origin.
+//
+//
+// Type: double
+//
+
+adjusted_projection_origin_lon = 9.5;
+
 ///////////// convert_output_grid_to_latlon ///////////
 //
 // Option to convert the output grid to lat/lon.

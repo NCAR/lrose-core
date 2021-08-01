@@ -426,6 +426,12 @@ public:
   censoring_t *_censoring;
   int censoring_n;
 
+  tdrp_bool_t adjust_projection_origin;
+
+  double adjusted_projection_origin_lat;
+
+  double adjusted_projection_origin_lon;
+
   tdrp_bool_t convert_output_grid_to_latlon;
 
   char* output_url;
@@ -445,7 +451,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[30];
+  mutable TDRPtable _table[33];
 
   const char *_className;
 
