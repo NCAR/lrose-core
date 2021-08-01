@@ -46,10 +46,10 @@
 #include "ParamFile.hh"
 #include "RayLoc.hh"
 //#include "ContextEditingView.hh"
-#include "ClickableLabel.hh"
+#include "ClickableLabelNamed.hh"
 #include "ParameterColorView.hh"
 #include "FieldColorController.hh"
-#include "DisplayFieldController.hh"
+//#include "DisplayFieldController.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -57,7 +57,7 @@
 class QApplication;
 class QActionGroup;
 class QButtonGroup;
-class QRadioButton;
+//class QRadioButton;
 class QPushButton;
 class QListWidget;
 class QFrame;
@@ -70,7 +70,7 @@ class QDateTimeEdit;
 class QFileDialog;
 
 class DisplayField;
-class DisplayFieldController;
+//class DisplayFieldController;
 
 class DisplayFieldView : public QGroupBox {
   
@@ -78,12 +78,13 @@ class DisplayFieldView : public QGroupBox {
 
 public:
 
-  DisplayFieldView(DisplayFieldController *controller);
+  DisplayFieldView(); // DisplayFieldController *controller);
   ~DisplayFieldView();
 
   void createFieldPanel(QWidget *parent);
   void updateFieldPanel(string rawFieldLabel, string newFieldName,
     string rawFieldShortCut);
+  void clear();
 
   //QWidget *getViewWidget();
 
@@ -94,19 +95,36 @@ public:
   void changeToField(string fieldName, bool guiMode);
 
 public slots:
-  void _changeFieldVariable(bool value);
+  //void _changeFieldVariable(bool value);
+  void _changeFieldVariable(QString fieldName);
   void _changeField(int fieldIdx);
+  void _editFieldVariable(QString fieldName);
+
+private slots:
+  void contextMenuCancel();
+  void contextMenuDelete();
+  void contextMenuRemove();
+  void contextMenuUndo();
+  void contextMenuParameterColors();  
 
 signals:
   void selectedFieldChanged(QString newFieldName);
+  void removeField(QString fieldName);
 
 private:
+
+  void ShowContextMenu(QString fieldName);
+  void informationMessage();
+  size_t _findFieldIndex(QString fieldName);
+
+  QString _workingWithField;
   
   // QGroupBox *_fieldPanel;
-  QGridLayout *_fieldsLayout;
+  QVBoxLayout *_fieldsLayout;
   //QLabel *_selectedLabelWidget;
   QButtonGroup *_fieldGroup;
-  vector<QRadioButton *> _fieldButtons;
+  //vector<QRadioButton *> _fieldButtons;
+  vector<ClickableLabelNamed *> _fieldButtons;
   //DisplayField *_selectedField;
   //string _selectedName;
   //string _selectedLabel;
@@ -118,7 +136,7 @@ private:
   int _label_font_size;
   bool _haveFilteredFields;
 
-  DisplayFieldController *_controller;
+  //DisplayFieldController *_controller;
 
 };
 

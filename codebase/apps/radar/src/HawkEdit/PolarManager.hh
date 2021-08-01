@@ -226,6 +226,7 @@ public slots:
   //void _updateField(size_t fieldId);
 
   void selectedSweepChanged(double);
+  void dataFileChanged();
 
   void spreadSheetClosed();
   void scriptEditorClosed();
@@ -258,6 +259,8 @@ signals:
   //void setParamsFile();
 
   void addField(QString fieldName);
+
+  void newDataFile();
 
 // end from DisplayManager
 
