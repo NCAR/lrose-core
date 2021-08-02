@@ -90,7 +90,7 @@ int InputMdv::read(time_t data_time)
 		    _params.input_url,
 		    0, data_time);
 
-  bool useFieldNames;
+  bool useFieldNames = false;
   if (strlen(_params.dbz_field.name) > 0) {
     useFieldNames = true;
     mdvx.addReadField(_params.dbz_field.name);
@@ -103,6 +103,12 @@ int InputMdv::read(time_t data_time)
     if (_params.vel_available) {
       mdvx.addReadField(_params.vel_field.num);
     }
+  }
+
+  if (!useFieldNames) {
+    cerr << "WARNING - InputMdv::read()" << endl;
+    cerr << "  Use of field numbers is deprecated." << endl;
+    cerr << "  Use field names instead" << endl;
   }
 
   mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
@@ -125,9 +131,16 @@ int InputMdv::read(time_t data_time)
     return -1;
   }
 
+  if (_params.debug) {
+    cerr << "Read input file: " << mdvx.getPathInUse() << endl;
+  }
+
   // set headers, fields etc
   
   const Mdvx::master_header_t &mhdr = mdvx.getMasterHeader();
+
+  dbzField = NULL;
+  velField = NULL;
 
   if (useFieldNames) {
     dbzField = mdvx.getField(_params.dbz_field.name);
@@ -135,11 +148,26 @@ int InputMdv::read(time_t data_time)
       velField = mdvx.getField(_params.vel_field.name);
     }
   } else {
-    dbzField = mdvx.getField(0);
+    dbzField = mdvx.getField(_params.dbz_field.num);
     if (_params.vel_available) {
-      velField = mdvx.getField(1);
+      velField = mdvx.getField(_params.vel_field.num);
     }
   }
+
+  if (dbzField == NULL) {
+    cerr << "ERROR - InputMdv::read()" << endl;
+    cerr << "  Cannot find dbz field: " << _params.dbz_field.name << endl;
+    return -1;
+  }
+  if (_params.vel_available) {
+    if (velField == NULL) {
+      cerr << "ERROR - InputMdv::read()" << endl;
+      cerr << "  Cannot find vel field: " << _params.vel_field.name << endl;
+      return -1;
+    }
+  } else {
+  }
+
   if (_params.negate_dbz_field) {
     dbzField->negate();
   }
@@ -153,19 +181,12 @@ int InputMdv::read(time_t data_time)
 
   _computeComposite();
 
-  // if required, find the convective regions
-  
-  if (_params.identify_convective_regions) {
-    if (_convFinder.run(mdvx, *dbzField)) {
-      cerr << "WARNING - InputMdv" << endl;
-      cerr << "  Cannot identify convective regions - this will be disabled" << endl;
-    } else {
-      _removeStratiform();
-    }
-  }
-
   // check that the vertical levels are evenly spaced, since TITAN
   // requires that
+
+  if (!dbzField->isDzConstant()) {
+    _setDzConstant();
+  }
 
   if (_params.remap_z_to_constant_grid) {
     for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
@@ -185,6 +206,17 @@ int InputMdv::read(time_t data_time)
     cerr << "  File: " << mdvx.getPathInUse() << endl;
     cerr << "  Vertical levels will not be properly handled." << endl;
     cerr << "  Please set the 'remap_z_to_constant_grid' parameter" << endl;
+  }
+
+  // if required, find the convective regions
+  
+  if (_params.identify_convective_regions) {
+    if (_convFinder.run(mdvx, *dbzField)) {
+      cerr << "WARNING - InputMdv" << endl;
+      cerr << "  Cannot identify convective regions - this will be disabled" << endl;
+    } else {
+      _removeStratiform();
+    }
   }
 
   // set up the projection coordinate grid
@@ -272,6 +304,60 @@ int InputMdv::read(time_t data_time)
   
   return 0;
   
+}
+
+///////////////////////////////////////////////////////////
+// Ensure dz is constant between vert levels
+
+void InputMdv::_setDzConstant()
+
+{
+
+  if (_params.remap_z_to_constant_grid) {
+
+    // remap from parameters
+
+    if (_params.debug) {
+      cerr << "NOTE: InputMdv::_setDzConstant() - remapping to constant deltaZ" << endl;
+      cerr << "  Remapping to specified vert levels, nz, minz, dz: "
+           << _params.remap_z_grid.nz << ", "
+           << _params.remap_z_grid.minz << ", "
+           << _params.remap_z_grid.dz << endl;
+    }
+    
+    for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
+      MdvxField *field = mdvx.getField(ii);
+      field->remapVlevels(_params.remap_z_grid.nz,
+                          _params.remap_z_grid.minz,
+                          _params.remap_z_grid.dz);
+    } // ii
+
+  } else {
+    
+    // remap automatically
+    
+    dbzField->setDzConstant();
+    const Mdvx::field_header_t &dbzFhdr = dbzField->getFieldHeader();
+
+    if (_params.debug) {
+      cerr << "NOTE: InputMdv::_setDzConstant() - remapping to constant deltaZ" << endl;
+      cerr << "  Auto remapping to vert levels, nz, minz, dz: "
+           << dbzFhdr.nz << ", "
+           << dbzFhdr.grid_minz << ", "
+           << dbzFhdr.grid_dz << endl;
+    }
+
+    for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
+      MdvxField *field = mdvx.getField(ii);
+      if (field != dbzField) {
+        field->remapVlevels(dbzFhdr.nz,
+                            dbzFhdr.grid_minz,
+                            dbzFhdr.grid_dz);
+      }
+    } // ii
+    
+  } // if (_params.remap_z_to_constant_grid)
+
 }
 
 /////////////////////////////////
