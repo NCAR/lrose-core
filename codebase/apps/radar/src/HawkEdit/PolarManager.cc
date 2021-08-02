@@ -502,7 +502,12 @@ void PolarManager::_setupWindows()
 
   connect(_fieldPanel, SIGNAL(selectedFieldChanged(QString)),
           this, SLOT(selectedFieldChanged(QString)));
-       //SLOT(_plotArchiveData()));
+
+  connect(_fieldPanel, SIGNAL(ShowParameterColorDialog(QString)),
+    this, SLOT(ShowParameterColorDialog(QString)));  // call DisplayFieldController::deleteFieldFromVolume(DisplayField *field)
+ // connect(_fieldPanel, SIGNAL(setFieldToMissing(QString)),
+ //   this, SLOT(setFieldToMissing(QString)));
+
 
   //connect(this, SIGNAL(addField(QString)), 
   //  _displayFieldController, SLOT(addField(QString)));
@@ -816,6 +821,14 @@ void PolarManager::_changeSweepRadioButton(int increment)
    // _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
   }
 
+}
+
+void PolarManager::deleteFieldFromVolume(QString fieldName) {
+  _displayFieldController->deleteFieldFromVolume(fieldName.toStdString());
+}
+
+void PolarManager::setFieldToMissing(QString fieldName) {
+  _displayFieldController->setFieldToMissing(fieldName.toStdString());
 }
 
 ///////////////////////////////////////
@@ -1225,6 +1238,9 @@ size_t PolarManager::getSelectedFieldIndex() {
   }
   return selectedFieldIndex;
 }
+
+
+
 
 /////////////////////////////
 // apply new, edited  data in archive mode
@@ -3284,15 +3300,16 @@ void PolarManager::_saveFile()
     // TODO: hold it! the save message should
     // go to the Model (Data) level because
     // we'll be using Radx utilities.
-    // 
-    RadxFile outFile;
+    
     try {
       LOG(DEBUG) << "writing to file " << name;
-      outFile.writeToPath(_vol, name);
+      DataModel *dataModel = DataModel::Instance();
+      dataModel->writeData(name);
     } catch (FileIException &ex) {
       this->setCursor(Qt::ArrowCursor);
       return;
     }
+    
   }
 }
 
@@ -4745,7 +4762,7 @@ void PolarManager::_updateFieldPanel(string newFieldName)
 }
 */
 
-void PolarManager::contextMenuParameterColors()
+void PolarManager::ShowParameterColorDialog(QString fieldName)
 {
   
   LOG(DEBUG) << "enter";
@@ -4774,6 +4791,57 @@ void PolarManager::contextMenuParameterColors()
   LOG(DEBUG) << "exit ";
   
 }
+
+/*
+// needs PolarManager, DisplayFieldModel access, or DisplayFieldController access
+void PolarManager::contextMenuParameterColors()
+{
+  
+  LOG(DEBUG) << "enter";
+
+  // TODO: parent should be PolarManager ...
+  ParameterColorView *parameterColorView = new ParameterColorView(this);
+  // vector<DisplayField *> displayFields = displayFieldController->getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
+  DisplayField *selectedField = _displayFieldController->getSelectedField();
+  string emphasis_color = "white";
+  string annotation_color = "white";
+
+  DisplayFieldModel *displayFieldModel = _displayFieldController->getModel();
+
+  FieldColorController *fieldColorController = new FieldColorController(parameterColorView,
+    displayFieldModel);
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+              
+  // TODO: move to PolarManager ...                                                           
+  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
+  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
+      this, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
+  //  PolarManager::colorMapRedefineReceived(string, ColorMap)
+  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
+  //    this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
+
+  // TODO: combine with replot
+  //connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
+  //    this, SLOT(backgroundColor(QColor)));
+  //
+
+  fieldColorController->startUp(); 
+
+  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
+  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
+  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
+  // TODO: move this call to the controller?                                                                
+    // parameterColorView.exec();
+
+  //  if(parameterColorController.Changes()) {
+    // TODO: what are changes?  new displayField(s)?                                                        
+  //}
+ 
+  LOG(DEBUG) << "exit ";
+  
+}
+*/
 
 /* Moved to DisplayFieldView
 void PolarManager::_changeFieldVariable(bool value) {

@@ -207,8 +207,9 @@ public slots:
   void _saveFile();
   void _howto();   
 
-  void contextMenuParameterColors();
-  
+  //void contextMenuParameterColors();
+  void ShowParameterColorDialog(QString fieldName);
+
   //colorMapRedefineReceived(string, ColorMap)
   void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
 				QColor gridColor,
@@ -236,7 +237,10 @@ public slots:
   void boundaryCircleRadiusChanged(int value);
   void boundaryBrushRadiusChanged(int value);
   void saveBoundaryEvent(int boundaryIndex);
-  void loadBoundaryEvent(int boundaryIndex);    
+  void loadBoundaryEvent(int boundaryIndex);   
+
+  void setFieldToMissing(QString fieldName);
+  void deleteFieldFromVolume(QString fieldName);   
 
 
   void errorMessage(string title, string message);

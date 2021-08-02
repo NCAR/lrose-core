@@ -57,6 +57,11 @@ public:
   void SetData(string &fieldName, 
             int rayIdx, int sweepIdx, vector<float> *fieldData);
 
+  void SetData(string &fieldName, float value);
+
+  // remove field from volume
+  void RemoveField(string &fieldName); 
+
   void renameField(string currentName, string newName);
 
   void get();

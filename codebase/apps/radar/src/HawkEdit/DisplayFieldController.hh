@@ -33,9 +33,12 @@ public:
   bool contains(string fieldName);
   void addField(DisplayField *newField);
   void addField(string &fieldName);
+
   void hideField(DisplayField *field);
-  void setFieldToMissing(DisplayField *field);
-  void deleteFieldFromVolume(DisplayField *field);
+  void setFieldToMissing(const string &fieldName);
+  //void deleteFieldFromVolume(DisplayField *field);
+  void deleteFieldFromVolume(const string &fieldName);
+  void deleteField(string &fieldName);  
     
   size_t getNFields();
 
@@ -90,7 +93,7 @@ public:
   void reconcileFields(vector<string> *fieldNames,
     DisplayFieldView *fieldPanel);
 
-  void deleteField(string fieldName);
+
 
     //void setView(DisplayFieldView *view);
 

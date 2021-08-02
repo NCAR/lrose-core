@@ -109,7 +109,9 @@ private slots:
 
 signals:
   void selectedFieldChanged(QString newFieldName);
-  void removeField(QString fieldName);
+  //void removeField(QString fieldName);
+  //void setFieldToMissing(QString fieldName);
+  void ShowParameterColorDialog(QString fieldName);
 
 private:
 

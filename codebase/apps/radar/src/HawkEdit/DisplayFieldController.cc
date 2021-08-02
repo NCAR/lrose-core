@@ -158,7 +158,7 @@ void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
 
 }
 
-void DisplayFieldController::deleteField(string fieldName) {
+void DisplayFieldController::deleteField(string &fieldName) {
   _model->deleteField(fieldName);
 }
 
@@ -176,13 +176,17 @@ void DisplayFieldController::hideField(DisplayField *field) {
   //_model->hideField(field);
 }
 
-void DisplayFieldController::setFieldToMissing(DisplayField *field) {
-  //_model->setFieldToMissing(field);
+void DisplayFieldController::setFieldToMissing(const string &fieldName) {
+  //_model->setFieldToMissing(fieldName);
 }
 
-void DisplayFieldController::deleteFieldFromVolume(DisplayField *field) {
-  //_model->deleteFieldFromVolume(field);
+// Remove field from data volume
+void DisplayFieldController::deleteFieldFromVolume(const string &fieldName) {
+  //_model->deleteFieldFromVolume(fieldName);
 }
+
+
+
 
 //void DisplayFieldController::delete(string fieldName) {
 //  _model->delete(fieldName);

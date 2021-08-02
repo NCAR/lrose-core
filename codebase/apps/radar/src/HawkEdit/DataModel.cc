@@ -133,6 +133,27 @@ void DataModel::SetData(string &fieldName,
   LOG(DEBUG) << "exit ";
 }
 
+void DataModel::SetData(string &fieldName, float value) {
+  RadxField *field;
+  RadxRay *ray;
+
+  size_t nRays = getNRays();
+  for (size_t i = 0; i<nRays; i++) {
+    ray = getRay(i);
+    field = fetchDataField(ray, fieldName);
+    size_t startGate, endGate;
+    startGate = 0;
+    endGate = ray->getNGates();
+    field->setGatesToMissing(startGate, endGate);
+  }
+}
+
+// remove field from volume
+void DataModel::RemoveField(string &fieldName) {
+  int result = _vol.removeField(fieldName);
+  if (result != 0) throw std::invalid_argument("failed to remove field");
+}
+
 void DataModel::readData(string path, vector<string> &fieldNames,
 	bool debug_verbose, bool debug_extra) {
 
@@ -189,7 +210,10 @@ RadxTime DataModel::getEndTimeSecs() {
 }
 
 void DataModel::writeData(string path) {
+    RadxFile outFile;
 
+      LOG(DEBUG) << "writing to file " << path;
+      outFile.writeToPath(_vol, path);
 }
 
 void DataModel::update() {

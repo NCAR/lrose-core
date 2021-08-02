@@ -343,10 +343,13 @@ void DisplayFieldView::_changeField(int fieldIdx) {
 void DisplayFieldView::_editFieldVariable(QString fieldName) {
 
   LOG(DEBUG) << "enter fieldVariable = " << fieldName.toStdString();
-  ShowContextMenu(fieldName);
+  //emit contextMenuParameterColors(fieldName);
+  emit ShowParameterColorDialog(fieldName);
+  //ShowContextMenu(fieldName);
   LOG(DEBUG) << "exit"; 
 }
 
+// TODO: not using this now. Only bring up Parameter Color Editor
 void DisplayFieldView::ShowContextMenu(QString fieldName)
 {
   _workingWithField = fieldName;
@@ -403,7 +406,7 @@ void DisplayFieldView::contextMenuDelete()
 {
 
   // TODO: set field to missing value or bad data value
-  informationMessage();
+  //emit setFieldToMissing(_workingWithField);
    
 }
 
@@ -418,7 +421,7 @@ void DisplayFieldView::contextMenuRemove()
   delete label;
   show();
 
-  emit removeField(_workingWithField);
+  //emit removeField(_workingWithField);
   LOG(DEBUG) << "exit";
 }
 

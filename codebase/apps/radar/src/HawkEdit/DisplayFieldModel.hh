@@ -38,6 +38,8 @@ public:
 
   void setSelectedField(string fieldName);
   void setSelectedField(size_t fieldIndex);
+  void setFieldToMissing(const string &fieldName);
+  void deleteFieldFromVolume(const string &fieldName);
 
   DisplayField *getFiltered(size_t ifield, int buttonRow);
 

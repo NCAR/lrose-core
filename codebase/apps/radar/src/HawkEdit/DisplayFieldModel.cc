@@ -56,13 +56,20 @@ void DisplayFieldModel::hideField(DisplayField *field) {
   //_fields.delete(newField);
 }
 
-void DisplayFieldModel::setFieldToMissing(DisplayField *field) {
-  // _fields.delete(newField);
+/* should this go to SpreadSheetController->SpreadSheetModel???  YES
+void DisplayFieldModel::setFieldToMissing(const string &fieldName) {
+  DataModel *dataModel = DataModel::Instance();
+  float dummy = 0.0;
+  dataModel->SetData(_name, dummy);
 }
-
-void DisplayFieldModel::deleteFieldFromVolume(DisplayField *field) {
-  // _fields.delete(newField);
+// TODO: or should this go to SpreadSheetController->SpreadSheetModel???
+void DisplayFieldModel::deleteFieldFromVolume(const string &fieldName) {
+  // TODO: or just mark as "do not save" ???
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->RemoveField(_name);
+  deleteField(fieldName);
 }
+*/
 
 void DisplayFieldModel::deleteField(string fieldName) {
 
