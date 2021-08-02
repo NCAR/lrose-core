@@ -7957,7 +7957,7 @@ bool MdvxField::isDzConstant()
 // by copying from closest available vlevel.
 // dz is computed as the smallest suitable delta z.
 
-void MdvxField::setDzConstant(int nzMax /* = 64 */)
+void MdvxField::setDzConstant(int nzMax /* = MDV32_MAX_VLEVELS */)
 
 {
 
@@ -7987,7 +7987,7 @@ void MdvxField::setDzConstant(int nzMax /* = 64 */)
 // If not already constant, data is remapped onto constant vlevels
 // by copying from closest available vlevel.
 
-void MdvxField::setDzConstant(double dz, int nzMax /* = 64 */)
+void MdvxField::setDzConstant(double dz, int nzMax /* = MDV32_MAX_VLEVELS */)
 
 {
 
