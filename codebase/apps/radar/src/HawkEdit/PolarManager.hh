@@ -224,6 +224,7 @@ public slots:
   void _addNewFields(QStringList newFieldNames);
   void _addNewFields(vector<string> *newFieldNames);
   void selectedFieldChanged(QString newFieldName);
+  void selectedFieldChanged(string fieldName);
   //void _updateField(size_t fieldId);
 
   void selectedSweepChanged(double);

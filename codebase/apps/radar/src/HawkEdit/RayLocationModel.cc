@@ -93,8 +93,8 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
   }
 
   for (int i = 0; i< RayLoc::RAY_LOC_N; i++) {
-  	LOG(DEBUG) << "ray_loc[" << i << "].startIdx = " << ray_loc[i].startIndex;
-  	LOG(DEBUG) << "  ray_loc[" << i << "].endIdx = " << ray_loc[i].endIndex;
+  	//LOG(DEBUG) << "ray_loc[" << i << "].startIdx = " << ray_loc[i].startIndex;
+  	//LOG(DEBUG) << "  ray_loc[" << i << "].endIdx = " << ray_loc[i].endIndex;
   }
 
   LOG(DEBUG) << "exit";

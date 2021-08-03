@@ -92,7 +92,8 @@ void DisplayFieldController::updateFieldPanel(string fieldName) {
     }
     setSelectedField(index);
   } else {
-    LOG(DEBUG) << "unknown fieldName " << fieldName;
+    addField(fieldName);
+    LOG(DEBUG) << "adding fieldName " << fieldName;
   }
   LOG(DEBUG) << "exit";
 }

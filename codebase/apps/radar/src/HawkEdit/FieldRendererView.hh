@@ -249,6 +249,8 @@ public:
   void setNoColorMap() { _haveColorMap = false; }
   void changeColorMap() { _haveColorMap = true; }
   void replaceColorMap(ColorMap newColorMap);
+
+  void clearBeams();
     
   ///////////////////////
   // Protected methods //
@@ -264,6 +266,8 @@ public:
 private:
   ColorMap _colorMap;
   bool _haveColorMap;
+  bool _rendering; 
+  bool _changed;
   
 };
 

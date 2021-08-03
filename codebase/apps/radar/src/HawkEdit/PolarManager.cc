@@ -1575,7 +1575,10 @@ void PolarManager::_volumeDataChanged(QStringList newFieldNames)
 
 
 void PolarManager::selectedFieldChanged(QString newFieldName) {
-  string fieldName = newFieldName.toStdString();
+  selectedFieldChanged(newFieldName.toStdString());
+}
+
+void PolarManager::selectedFieldChanged(string fieldName) {
   _displayFieldController->setSelectedField(fieldName);
   _plotArchiveData();
   refreshBoundaries();
@@ -1745,7 +1748,7 @@ void PolarManager::_updateColorMap(string fieldName)
 {
 
   
-    LOG(DEBUG) << "Updating color map";
+  //  LOG(DEBUG) << "Updating color map";
   
   /*
   // handle the rays
@@ -1778,7 +1781,7 @@ void PolarManager::_updateColorMap(string fieldName)
   //       ii <= gsweep.radx->getEndRayIndex(); ii++) {
   //    RadxRay *ray = rays[ii];
   */
-    _handleColorMapChangeOnRay(_platform, fieldName); 
+  //  _handleColorMapChangeOnRay(_platform, fieldName); 
     //}
   
 }
@@ -2220,7 +2223,7 @@ void PolarManager::_handleColorMapChangeOnRay(RadxPlatform &platform,
     try {
       size_t nFields = _displayFieldController->getNFields();
       if (_nGates < 0) throw "Error, cannot convert _nGates < 0 to type size_t";
-      _ppi->updateBeamColors(nFields, fieldName, (size_t) _nGates); //ray, _startAz, _endAz, data, nFields, fieldName);
+      //_ppi->updateBeamColors(nFields, fieldName, (size_t) _nGates); //ray, _startAz, _endAz, data, nFields, fieldName);
     } catch (std::range_error &ex) {
       LOG(ERROR) << fieldName;
       LOG(ERROR) << ex.what();
@@ -2518,16 +2521,18 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
     //vector<string> fieldNames;
     //fieldNames.push_back(fieldName);
     //_updateArchiveData(fieldNames);  // ?? or  _updateField(fieldId);
-    _updateColorMap(fieldName);
-    _fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
+    //_updateColorMap(fieldName);
+    //_fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
   } catch (std::invalid_argument &ex) {
     LOG(ERROR) << fieldName;
     LOG(ERROR) << ex.what(); // "ERROR - field not found; no color map change";
     QMessageBox::warning(NULL, "Error changing color map", ex.what());
   } 
-  _ppi->backgroundColor(backgroundColor);
-  _ppi->gridRingsColor(gridColor);
-  _ppi->colorScaleLegend(); // TODO: may not need this??
+  //_ppi->backgroundColor(backgroundColor);
+  //_ppi->gridRingsColor(gridColor);
+
+  selectedFieldChanged(fieldName);
+  //_ppi->colorScaleLegend(); // TODO: may not need this??
   //_ppi->drawOverlays();
 
   // ??   _ppi->selectVar(fieldId);

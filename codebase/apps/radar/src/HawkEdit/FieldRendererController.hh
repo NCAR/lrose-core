@@ -66,7 +66,7 @@ public:
     ColorMap &colorMap,
     QColor backgroundColor);
   
-  void performRendering(size_t selectedField);
+  //void performRendering(size_t selectedField);
   //bool isBackgroundRendered(size_t index);
   //void setBackgroundRenderingOn(size_t index) {_fieldRenderers[index]->setBackgroundRenderingOn();;};
   void refreshImages(int width, int height, QSize image_size,
