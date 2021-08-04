@@ -2517,12 +2517,7 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
     //  This should save/perpetuate the color map in the DisplayField object
     _displayFieldController->saveColorMap(fieldName, &newColorMap);
     _displayFieldController->updateFieldPanel(fieldName);
-    //size_t fieldId = _displayFieldController->getFieldIndex(fieldName);
-    //vector<string> fieldNames;
-    //fieldNames.push_back(fieldName);
-    //_updateArchiveData(fieldNames);  // ?? or  _updateField(fieldId);
-    //_updateColorMap(fieldName);
-    //_fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
+
   } catch (std::invalid_argument &ex) {
     LOG(ERROR) << fieldName;
     LOG(ERROR) << ex.what(); // "ERROR - field not found; no color map change";
@@ -2532,41 +2527,7 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
   //_ppi->gridRingsColor(gridColor);
 
   selectedFieldChanged(fieldName);
-  //_ppi->colorScaleLegend(); // TODO: may not need this??
-  //_ppi->drawOverlays();
 
-  // ??   _ppi->selectVar(fieldId);
-
-  /*
-  // find the fieldName in the list of FieldDisplays                                                
-  bool found = false;
-  vector<DisplayField *>::iterator it;
-  int fieldId = -1;
-
-  it = _fields.begin();
-  while ( it != _fields.end() && !found ) {
-    DisplayField *field = *it;
-
-    string name = field->getName();
-    if (name.compare(fieldName) == 0) {
-      found = true;
-      field->replaceColorMap(newColorMap);
-    }
-    fieldId++;
-    it++;
-  }
-  if (!found) {
-    LOG(ERROR) << fieldName;
-    LOG(ERROR) << "ERROR - field not found; no color map change";
-    // TODO: present error message box                                                              
-  } else {
-    // look up the fieldId from the fieldName                                                       
-    // change the field variable                                                                    
-    _ppi->backgroundColor(backgroundColor);
-    _ppi->gridRingsColor(gridColor);
-    _changeField(fieldId, false);
-  }
-  */
   LOG(DEBUG) << "exit";
 }
 
@@ -3159,6 +3120,7 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
     try {
       _getArchiveData();
       _setupRayLocation();
+
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
@@ -5932,7 +5894,8 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     connect(spreadSheetControl, SIGNAL(volumeChanged()),
         this, SLOT(setVolume()));
     connect(sheetView, SIGNAL(spreadSheetClosed()), this, SLOT(spreadSheetClosed()));
-    
+    connect(sheetView, SIGNAL(setDataMissing(string, float)), 
+      this, SLOT(setDataMissing(string, float)));    
     sheetView->init();
     sheetView->show();
   } else {
@@ -5943,6 +5906,11 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     sheetView->highlightClickedData(currentFieldName, azimuth, (float) range);
   }
   
+}
+
+void PolarManager::setDataMissing(string fieldName, float missingValue) {
+  spreadSheetControl->setDataMissing(fieldName, missingValue);
+  _applyDataEdits();
 }
 
 void PolarManager::spreadSheetClosed() {

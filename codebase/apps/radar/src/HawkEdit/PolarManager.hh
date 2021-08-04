@@ -217,6 +217,7 @@ public slots:
 				QColor annotationColor,
 				QColor backgroundColor);
   void setVolume(); // const RadxVol &radarDataVolume);
+  void setDataMissing(string fieldName, float missingValue);
   // TODO:
   // Good. Now go and read about Q_DECLARE_METATYPE(). Or better yet, use QStringList instead of std::vector<std::string>.
   void updateVolume(QStringList newFieldNames);

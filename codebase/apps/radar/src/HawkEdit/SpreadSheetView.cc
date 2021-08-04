@@ -340,8 +340,8 @@ void SpreadSheetView::init()
 
 void SpreadSheetView::createActions()
 {
-    cell_deleteAction = new QAction(tr("Delete Field"), this);
-    connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::deleteField);
+    cell_deleteAction = new QAction(tr("Delete"), this);
+    connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::deleteSelection);
 
     cell_negFoldAction = new QAction(tr("&- Fold"), this);
     //cell_addAction->setShortcut(Qt::CTRL | Qt::Key_Plus);
@@ -353,7 +353,7 @@ void SpreadSheetView::createActions()
 
     cell_deleteRayAction = new QAction(tr("&Delete Ray"), this);
     //cell_subAction->setShortcut(Qt::CTRL | Qt::Key_Minus);
-    connect(cell_deleteRayAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+    connect(cell_deleteRayAction, &QAction::triggered, this, &SpreadSheetView::deleteRay);
 
     cell_negFoldRayAction = new QAction(tr("&- Fold Ray"), this);
     //cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
@@ -1228,13 +1228,32 @@ void SpreadSheetView::fieldNamesProvided(vector<string> *fieldNames) {
     LOG(DEBUG) << "exit";
 }
 
-void SpreadSheetView::deleteField() {
+void SpreadSheetView::deleteRay() {
     int currentColumn = table->currentColumn();
     QTableWidgetItem *currentHeader = table->horizontalHeaderItem(table->currentColumn());
     if (currentHeader != NULL) {
-        setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
+        //float az = getAzimuth(currentHeader);
+        //string fieldName = getFieldName(currentHeader);
+        // TODO: keep in view until save or apply? Add an Undo? In configuration dock?
+        // TODO: working here ...
+        //emit setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
     }
 
+}
+
+void SpreadSheetView::deleteSelection() {
+    QString missingValue;
+    missingValue.setNum(_missingDataValue);
+    int currentColumn = table->currentColumn();
+    QList<QTableWidgetItem *> selectedGates = table->selectedItems();
+    QList<QTableWidgetItem *>::iterator i;
+    for (i = selectedGates.begin(); i != selectedGates.end(); ++i) {
+        QTableWidgetItem *gate = *i;
+        gate->setText(missingValue);
+       // TODO: send signal with QList to controller?  NO. how to set these cells to missing?
+        //   persist to the model? only when Apply or Save is clicked.
+        //emit setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
+    }
 }
 
 void SpreadSheetView::criticalMessage(std::string message)

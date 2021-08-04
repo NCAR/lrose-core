@@ -69,7 +69,8 @@ public slots:
   void actionDisplayRayInfo();
   void actionDisplayMetadata();
   void actionDisplayEditHist();
-  void deleteField();
+  void deleteRay();
+  void deleteSelection();
 
   void notImplementedMessage();
 

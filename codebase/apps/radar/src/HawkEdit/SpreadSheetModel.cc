@@ -186,12 +186,17 @@ void SpreadSheetModel::setData(string fieldName, vector<float> *data)
   //outfile << "_vol = " << _vol << endl;
 }
 
-/* TODO ...
+
 // set data values for the field in the Volume (for all rays? for all sweeps?)
 void SpreadSheetModel::setDataMissing(string fieldName, float missingDataValue)
 {
   LOG(DEBUG) << "fieldName=" << fieldName << " setting to missing value " << missingDataValue;
 
+
+  DataModel *dataModel = DataModel::Instance();
+  float dummy = 0.0;
+  dataModel->SetData(fieldName, dummy);
+/*
   //const RadxField *field;
   //  field = _vol.getFieldFromRay(fieldName);  // <--- Why is this returning NULL
   // because the type is 
@@ -235,8 +240,9 @@ void SpreadSheetModel::setDataMissing(string fieldName, float missingDataValue)
     _vol->printWithFieldData(outfile);
 
     outfile << "_vol = " << _vol << endl;
-}
 */
+}
+
 
 // find the closest ray in the volume and set the internal variable _closestRay
 // and the internal variable _closestRayIdx

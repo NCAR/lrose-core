@@ -26,6 +26,7 @@ public:
   //  RadxVol getVolume(); 
 
   void setData(string fieldName, vector<float> *data);
+  void setDataMissing(string fieldName, float missingDataValue);
   void findClosestRay(float azimuth, float elevation);
 
   //RadxVol *_vol;
