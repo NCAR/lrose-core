@@ -558,7 +558,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("VirtVol URL Parameters");
-    tt->comment_text = tdrpStrDup("All the data written to a URL, or read from a URL");
+    tt->comment_text = tdrpStrDup("A full description of data written to a particular URL, or read from a particular URL");
     tt++;
     
     // Parameter 'is_netCDF_output'
@@ -580,7 +580,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("url");
     tt->descr = tdrpStrDup("The URL");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("For gridded data this might be mdvp:://host::path, for non gridded data might be a path");
     tt->val_offset = (char *) &url - &_start_;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;

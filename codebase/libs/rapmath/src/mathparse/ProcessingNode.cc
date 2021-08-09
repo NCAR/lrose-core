@@ -292,19 +292,19 @@ std::string ProcessingNode::sprintOpDescr(const Operator_t &op)
   switch (op)
   {
   case ADD:
-    s = "A+B";
+    s = "Binary operator for simple addition  A+B";
     break;
   case SUB:
-    s = "A-B";
+    s = "Binary operator for simple subtraction A-B";
     break;
   case MULT:
-    s = "A*B";
+    s = "Binary operator for simple multiplication A*B";
     break;
   case DIV:
-    s = "A/B";
+    s = "Binary operator for simple divisoin  A/B";
     break;
   case POW:
-    s = "A^B = A raised to the power B";
+    s = "Binary operator for exponents, A^B = A raised to the power B";
     break;
   case USER:
     s = "";
@@ -407,40 +407,38 @@ std::string ProcessingNode::sprintUOpDescr(const UnaryOperator_t &op)
     s = "log10(x) = log base 10 of input argument x";
     break;
   case EXP:
-    s = "exp(x) = e to the x";
+    s = "exp(x) = exponential function, e to the x";
     break;
   case SMOOTH:
     s = "smooth(field, nx, ny) = nx by ny average of input field";
     break;
   case SMOOTHDBZ:
-    s = "smoothDBZ(field, nx, ny) = 10*log10(nx by ny average "
-      "of 10^(field/10))";
+    s = "smoothDBZ(field, nx, ny) = 10*log10(nx by ny average of 10^(field/10))";
     break;
   case STDDEV:
-    s = "stddev(field, nx, ny) = nx by ny standard dev. of field";
+    s = "stddev(field, nx, ny) = nx by ny standard deviation of field";
     break;
   case FUZZY:
-    s = "fuzzy(field, x,y,x,y,x,y..) = fuzzy remapping of field,"
-      " fuzzy function defined by the x,y pairs";
+    s = "fuzzy(field, x0,y0,x1,y1,x2,y2..) = fuzzy remapping of input field, mapping defined by the x,y pairs";
     break;
   case AVERAGE:
     s = "average(nptX, field0, field1, .. fieldn) = average of data from "
-      "all the input fields, with data from 0 to nptX set to missing at all y";
+      "all the input fields at each point, with the data from 0 to nptX set to missing at all y";
     break;
   case MAX:
-    s = "maximum(field0, field1, .. fieldn) = max of data from all the input fields";
+    s = "maximum(field0, field1, .. fieldn) = maximum of data from all the input fields";
     break;
   case MAX_EXPAND:
-    s = "max_expand(field, nx, ny) = set output at each point to the maximum of field values in an nx by ny box centered at the point";
+    s = "max_expand(field, nx, ny) = s(x,y) = maximum field value in a box nx,ny centered at x,y";
     break;
   case EXPAND_ANGLES_LATERALLY:
-    s = "expand_angles_laterally(field, npt) = assumes field contains angle data (degrees).  Expands along the orientation into areas of missing data by npt at each point";
+    s = "expand_angles_laterally(field, npt) = assumes field contains polar data with y=degrees.  Expands along the orientation into areas of missing data by npt at each point";
     break;
   case CLUMP:
-    s = "clump(field, npt) = clumps non-missing data, removing clumps that are smaller than npt in size";
+    s = "clump(field, npt) = produce disjoint clumps of non-missing data, each with a different value, removing clumps that are smaller than npt in size";
     break;
   case MEDIAN:
-    s = "median(field0, nx, ny, binMin, binMax, binDelta) = median of field data over an nx by ny region, with histogram bins as indicated";
+    s = "median(field0, nx, ny, binMin, binMax, binDelta) = median of field data over an nx by ny region, with histogram bins as indicated, each bin binDelta in width";
     break;
   case WEIGHTED_ANGLE_AVERAGE:
     s = "weighted_angle_average(zero_to_360, field0,weight0, field1,weight1,...) = "
@@ -452,20 +450,20 @@ std::string ProcessingNode::sprintUOpDescr(const UnaryOperator_t &op)
       " data from 0 to nptX set to missing at all y";
     break;
   case MASK:
-    s = "mask(field, low0,high0, low1,high1, ...) = set data from field to "
+    s = "mask(field, low0,high0, low1,high1, ...) = filter out data from field to "
       "missing if the data value is in the range [low0,high0] or "
       "[low1,high1], .. etc";
     break;
   case MASK_MISSING_TO_MISSING:
     s = "mask_missing_to_missing(data, mask) = set data to missing "
-      "whereever mask is missing";
+      "whereever the mask is missing";
     break;
   case TRAPEZOID:
     s = "trapezoid(field, a,b,c,d) = max(min((x-a)/(b-a), 1, (d-x)/(d-c)),0)"
       " It must be true that a < b < c < d";
     break;
   case S_REMAP:
-    s = "s_remap(field, a, b) = 0 \n"
+    s = "s_remap(field, a, b) = 0 n"
       "0 for x<= a\n"
       "2*((x-a)/(b-a))^2  for a <= x and x <= (a+b)/2\n"
       "1 - 2*((x-b)/(b-a))^2  for (a+b)/2 <= x and x <= b\n"

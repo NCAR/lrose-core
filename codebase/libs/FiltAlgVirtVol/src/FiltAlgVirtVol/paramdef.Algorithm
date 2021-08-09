@@ -7,8 +7,8 @@
 
 commentdef
 {
-  p_header = "Algorithm Parameters";
-  p_text = "Parameters used to run the Algorithm class";
+  p_header = "Common Algorithm Parameters";
+  p_text = "Parameters that are common to many radar apps";
 };
 
 paramdef string

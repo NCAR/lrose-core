@@ -9,7 +9,7 @@
 commentdef
 {
   p_header = "VirtVol URL Parameters";
-  p_text = "All the data written to a URL, or read from a URL";
+  p_text = "A full description of data written to a particular URL, or read from a particular URL";
 };
 
 typedef enum {VOLUME, DATABASE, ASCII} Url_t;
@@ -25,6 +25,7 @@ paramdef boolean
 paramdef string
 {
   p_descr = "The URL";
+  p_help = "For gridded data this might be mdvp:://host::path, for non gridded data might be a path";
   p_default = "unknown";
 } url;
 

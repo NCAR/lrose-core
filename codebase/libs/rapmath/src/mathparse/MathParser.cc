@@ -758,6 +758,26 @@ bool MathParser::parse(const std::string &s, Filter_t filterType,
 }
 
 //-------------------------------------------------------------------
+std::vector<FunctionDef> MathParser::allFunctionDefs(void) const
+{
+  vector<FunctionDef> ret = _binaryOperators;
+  for (size_t i=0; i<_unaryOperators.size(); ++i)
+  {
+    ret.push_back(_unaryOperators[i]);
+  }
+  for (size_t i=0; i<_userUnaryOperators.size(); ++i)
+  {
+    ret.push_back(_userUnaryOperators[i]);
+  }
+  for (size_t i=0; i<_userBinaryOperators.size(); ++i)
+  {
+    ret.push_back(_userBinaryOperators[i]);
+  }
+  sort(ret.begin(), ret.end());
+  return ret;
+}
+
+//-------------------------------------------------------------------
 void MathParser::cleanup(void)
 {
   for (size_t i=0; i<_filters2d.size(); ++i)

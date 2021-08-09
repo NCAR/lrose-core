@@ -65,13 +65,13 @@ paramdef string
 {
   p_descr = "trigger url";
   p_help = "URL to trigger off";
-  p_default = "";
+  p_default = "mdvp:://localhost::radarDataPath";
 } trigger_url;
 
 paramdef string
 {
   p_descr = "output for Algorithm results";
-  p_default = "";
+  p_default = "mdvp:://localhost::outputDataPath";
 } output_url;
   
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ commentdef {
   p_header =
     "Threading";
   p_text =
-    "Optional threading of beams, depends on app whether params are used or not";
+    "Optional threading of beams, depends on app whether these params are used or not";
 }
 
 paramdef int
@@ -125,15 +125,15 @@ paramdef struct input_t
   p_help =
     "index = numerical value to refer to this elsewhere\n"
     "path = where the data is\n"
-    "The first thing on this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.  If is_climo=true, a fixed file is used no matter what the request, specified by path/climo_file";
-  p_default = {};
+    "The first element in this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.  If is_climo=true, a fixed file is used no matter what the request, specified by path/climo_file";
+  p_default = { {0, "mdvp:://localhost::radarDataPath", 60, 60, 0.2, 0.2, 10, FALSE, ""}};
 } input[];
 
 commentdef {
   p_header =
     "Mapping from input field to path";
   p_text =
-    "For each field that is an input to the app, it is associated with an input path using this mapping (index/field name).";
+    "For each field that is an input to the app, it is associated with an input[] above  using this mapping (index/field name).";
 }
 
 typedef struct
@@ -145,8 +145,8 @@ typedef struct
 paramdef struct field_map_t
 {
   p_descr = "mapping from field to url";
-  p_help = "for each input field, the index to the path of that data";
-  p_default = {};
+  p_help = "for each input field, the index to the path of that data (in input[] above)";
+  p_default = {{"MyField", 0}};
 } field_mapping[];
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,13 +224,13 @@ commentdef {
 
 paramdef boolean
 {
-  p_descr = "True to output all fields, false to use list";
-  p_default = true;
+  p_descr = "True to output all fields, false to use output_fields[] below";
+  p_default = TRUE;
 } output_all_fields;
 
 paramdef string
 {
-  p_descr = "fields to output";
+  p_descr = "fields to output, when output_all_fields is FALSE";
   p_default = {};
 } output_fields[];
 
@@ -250,13 +250,13 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = false;
+  p_default = FALSE;
   p_descr = "Option to leave data in native byte order.";
-  p_help = "If false, data will be byte-swapped as appropriate on output.";
+  p_help = "If FALSE, data will be byte-swapped as appropriate on output.";
 } output_native_byte_order;
 
 paramdef boolean {
-  p_default = true;
+  p_default = TRUE;
   p_descr = "Option to compress data fields on output.";
   p_help = "Applies to netCDF and Dorade. UF does not support compression.";
 } output_compressed;
@@ -280,19 +280,19 @@ paramdef enum filename_mode_t {
 } output_filename_mode;
 
 paramdef boolean {
-  p_default = true;
+  p_default = TRUE;
   p_descr = "Add the day directory to the output directory.";
   p_help = "Path will be output_dir/yyyymmdd/filename.";
 } append_day_dir_to_output_dir;
 
 paramdef boolean {
-  p_default = false;
+  p_default = FALSE;
   p_descr = "Add the year directory to the output directory.";
   p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
 } append_year_dir_to_output_dir;
 
 paramdef boolean {
-  p_default = false;
+  p_default = FALSE;
   p_descr = "Option to write out _latest_data_info files.";
   p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
 } write_latest_data_info;
