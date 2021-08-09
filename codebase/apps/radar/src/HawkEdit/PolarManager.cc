@@ -58,6 +58,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
+#include <algorithm>    // std::find
 #include <Ncxx/H5x.hh>
 #include <QActionGroup>
 #include <QApplication>
@@ -235,6 +236,8 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
 
   //_changeField(0, false);
 
+  //connect(this, SIGNAL(newDataFile()), _displayFieldController, SLOT(dataFileChanged()));  
+  //connect(this, SIGNAL(fieldSelected(string)), _displayFieldController, SLOT(fieldSelected(string))); 
 }
 
 // destructor
@@ -490,7 +493,7 @@ void PolarManager::_setupWindows()
   // create fields panel
   
   //_createFieldPanel();
-  _fieldPanel = new DisplayFieldView(_displayFieldController);
+  _fieldPanel = new DisplayFieldView(); // _displayFieldController);
   //_displayFieldController->setView(_fieldPanel);
   _fieldPanel->createFieldPanel(_main);
  //TODO: can only connect QObjects with signals and slots...
@@ -499,7 +502,12 @@ void PolarManager::_setupWindows()
 
   connect(_fieldPanel, SIGNAL(selectedFieldChanged(QString)),
           this, SLOT(selectedFieldChanged(QString)));
-       //SLOT(_plotArchiveData()));
+
+  connect(_fieldPanel, SIGNAL(ShowParameterColorDialog(QString)),
+    this, SLOT(ShowParameterColorDialog(QString)));  // call DisplayFieldController::deleteFieldFromVolume(DisplayField *field)
+ // connect(_fieldPanel, SIGNAL(setFieldToMissing(QString)),
+ //   this, SLOT(setFieldToMissing(QString)));
+
 
   //connect(this, SIGNAL(addField(QString)), 
   //  _displayFieldController, SLOT(addField(QString)));
@@ -523,7 +531,8 @@ void PolarManager::_setupWindows()
 
   connect(_sweepPanel, SIGNAL(selectedSweepChanged(double)),
           this, SLOT(selectedSweepChanged(double)));
-
+  connect(this, SIGNAL(newDataFile()), this, SLOT(dataFileChanged()));
+  //connect(this, SIGNAL(sweepSelected()), _sweepController, SLOT(sweepSelected()));
   // time panel
 
   _createTimeControl();
@@ -539,7 +548,7 @@ void PolarManager::_setupWindows()
 
   _setTitleBar(_params->radar_name);
   setMinimumSize(400, 300);
-  resize(400,300); // _params->main_window_width, _params->main_window_height);
+  resize(1100,635); // _params->main_window_width, _params->main_window_height);
   
   // set location on screen
 
@@ -736,7 +745,7 @@ void PolarManager::_createMenus()
   _timeMenu = menuBar()->addMenu(tr("&Time-control"));
   _timeMenu->addAction(_showTimeControlAct);
   _timeMenu->addSeparator();
-  _timeMenu->addAction(_realtimeAct);
+  //_timeMenu->addAction(_realtimeAct);
 
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
   _overlaysMenu->addAction(_ringsAct);
@@ -812,6 +821,14 @@ void PolarManager::_changeSweepRadioButton(int increment)
    // _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
   }
 
+}
+
+void PolarManager::deleteFieldFromVolume(QString fieldName) {
+  _displayFieldController->deleteFieldFromVolume(fieldName.toStdString());
+}
+
+void PolarManager::setFieldToMissing(QString fieldName) {
+  _displayFieldController->setFieldToMissing(fieldName.toStdString());
 }
 
 ///////////////////////////////////////
@@ -941,11 +958,6 @@ void PolarManager::_handleArchiveData()
     _timeControl->setCursor(Qt::ArrowCursor);
     return;
   }
-
-  // set up sweep GUI
-
-  _sweepController->clearSweepRadioButtons();
-  _sweepController->createSweepRadioButtons();
   
   //if (_vol.checkIsRhi()) {
   //  _rhiMode = true;
@@ -1152,6 +1164,7 @@ int PolarManager::_getArchiveData()
       vector<string> fieldNames = _displayFieldController->getFieldNames();
       dataModel->readData(inputPath, fieldNames,
         debug_verbose, debug_extra);
+      emit newDataFile();
     } catch (const string &errMsg) {
       if (!_params->images_auto_create)  {
         QErrorMessage errorDialog;
@@ -1160,26 +1173,6 @@ int PolarManager::_getArchiveData()
         errorDialog.exec();
       }
     }
- /*
-      LOG(DEBUG) << "  reading data file path: " << inputPath;
-      LOG(DEBUG) << "  archive file index: " << _archiveScanIndex;
-    
-    
-    if (file.readFromPath(inputPath, _vol)) {
-      string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "PolarManager::_getArchiveData\n";
-      errMsg += file.getErrStr() + "\n";
-      errMsg += "  path: " + inputPath + "\n";
-      cerr << errMsg;
-      if (!_params->images_auto_create)  {
-        QErrorMessage errorDialog;
-        errorDialog.setMinimumSize(400, 250);
-        errorDialog.showMessage(errMsg.c_str());
-        errorDialog.exec();
-      }
-      return -1;
-    } 
-*/
   }
 
   // set plot times
@@ -1245,6 +1238,9 @@ size_t PolarManager::getSelectedFieldIndex() {
   }
   return selectedFieldIndex;
 }
+
+
+
 
 /////////////////////////////
 // apply new, edited  data in archive mode
@@ -1579,16 +1575,21 @@ void PolarManager::_volumeDataChanged(QStringList newFieldNames)
 
 
 void PolarManager::selectedFieldChanged(QString newFieldName) {
-  string fieldName = newFieldName.toStdString();
+  selectedFieldChanged(newFieldName.toStdString());
+}
+
+void PolarManager::selectedFieldChanged(string fieldName) {
   _displayFieldController->setSelectedField(fieldName);
   _plotArchiveData();
   refreshBoundaries();
 }
 
 
-void PolarManager::selectedSweepChanged(double) {
+void PolarManager::selectedSweepChanged(double angle) {
   //string fieldName = newFieldName.toStdString();
   //_displayFieldController->setSelectedField(fieldName);
+  _sweepController->setAngle(angle);
+  _setupRayLocation();
   _plotArchiveData();
   refreshBoundaries();
 }
@@ -1747,7 +1748,7 @@ void PolarManager::_updateColorMap(string fieldName)
 {
 
   
-    LOG(DEBUG) << "Updating color map";
+  //  LOG(DEBUG) << "Updating color map";
   
   /*
   // handle the rays
@@ -1780,7 +1781,7 @@ void PolarManager::_updateColorMap(string fieldName)
   //       ii <= gsweep.radx->getEndRayIndex(); ii++) {
   //    RadxRay *ray = rays[ii];
   */
-    _handleColorMapChangeOnRay(_platform, fieldName); 
+  //  _handleColorMapChangeOnRay(_platform, fieldName); 
     //}
   
 }
@@ -1971,7 +1972,9 @@ void PolarManager::_setupRayLocation() {
   if (_params->ppi_override_rendering_beam_width) {
     ppi_rendering_beam_width = _params->ppi_rendering_beam_width;
   }
-  _rayLocationController->sortRaysIntoRayLocations(ppi_rendering_beam_width);
+  int currentSweepIndex = _sweepController->getSelectedIndex();
+  _rayLocationController->sortRaysIntoRayLocations(ppi_rendering_beam_width,
+    currentSweepIndex);
 }
 
 // We need to resize the arrays that are retained and look up the field Index by field name,
@@ -2220,7 +2223,7 @@ void PolarManager::_handleColorMapChangeOnRay(RadxPlatform &platform,
     try {
       size_t nFields = _displayFieldController->getNFields();
       if (_nGates < 0) throw "Error, cannot convert _nGates < 0 to type size_t";
-      _ppi->updateBeamColors(nFields, fieldName, (size_t) _nGates); //ray, _startAz, _endAz, data, nFields, fieldName);
+      //_ppi->updateBeamColors(nFields, fieldName, (size_t) _nGates); //ray, _startAz, _endAz, data, nFields, fieldName);
     } catch (std::range_error &ex) {
       LOG(ERROR) << fieldName;
       LOG(ERROR) << ex.what();
@@ -2235,6 +2238,13 @@ void PolarManager::_handleColorMapChangeOnRay(RadxPlatform &platform,
   
 }
 
+
+void PolarManager::dataFileChanged() {
+
+  _sweepController->clearSweepRadioButtons();
+  _sweepController->createSweepRadioButtons();
+
+}
 
 ///////////////////////////////////////////////////////////
 /* store ray location
@@ -2507,54 +2517,17 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
     //  This should save/perpetuate the color map in the DisplayField object
     _displayFieldController->saveColorMap(fieldName, &newColorMap);
     _displayFieldController->updateFieldPanel(fieldName);
-    //size_t fieldId = _displayFieldController->getFieldIndex(fieldName);
-    //vector<string> fieldNames;
-    //fieldNames.push_back(fieldName);
-    //_updateArchiveData(fieldNames);  // ?? or  _updateField(fieldId);
-    _updateColorMap(fieldName);
-    _fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
+
   } catch (std::invalid_argument &ex) {
     LOG(ERROR) << fieldName;
     LOG(ERROR) << ex.what(); // "ERROR - field not found; no color map change";
     QMessageBox::warning(NULL, "Error changing color map", ex.what());
   } 
-  _ppi->backgroundColor(backgroundColor);
-  _ppi->gridRingsColor(gridColor);
-  _ppi->colorScaleLegend(); // TODO: may not need this??
-  //_ppi->drawOverlays();
+  //_ppi->backgroundColor(backgroundColor);
+  //_ppi->gridRingsColor(gridColor);
 
-  // ??   _ppi->selectVar(fieldId);
+  selectedFieldChanged(fieldName);
 
-  /*
-  // find the fieldName in the list of FieldDisplays                                                
-  bool found = false;
-  vector<DisplayField *>::iterator it;
-  int fieldId = -1;
-
-  it = _fields.begin();
-  while ( it != _fields.end() && !found ) {
-    DisplayField *field = *it;
-
-    string name = field->getName();
-    if (name.compare(fieldName) == 0) {
-      found = true;
-      field->replaceColorMap(newColorMap);
-    }
-    fieldId++;
-    it++;
-  }
-  if (!found) {
-    LOG(ERROR) << fieldName;
-    LOG(ERROR) << "ERROR - field not found; no color map change";
-    // TODO: present error message box                                                              
-  } else {
-    // look up the fieldId from the fieldName                                                       
-    // change the field variable                                                                    
-    _ppi->backgroundColor(backgroundColor);
-    _ppi->gridRingsColor(gridColor);
-    _changeField(fieldId, false);
-  }
-  */
   LOG(DEBUG) << "exit";
 }
 
@@ -3138,6 +3111,7 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
   } else {
     QMessageBox::information(this, "Status", "reading data ...");
 
+    //_displayFieldController->clearAllFields();
     _updateDisplayFields(selectedFields);
   //_setupDisplayFields(allFieldNames);
      // trying this ... to get the data from the file selected
@@ -3146,14 +3120,13 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
     try {
       _getArchiveData();
       _setupRayLocation();
-      //_displayFieldController->setSelectedField(selectedFields->at(0));
-      _sweepController->clearSweepRadioButtons();
-      _sweepController->createSweepRadioButtons();
+
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
       return;
     }
+
   
 /*
   // now update the time controller window
@@ -3294,15 +3267,16 @@ void PolarManager::_saveFile()
     // TODO: hold it! the save message should
     // go to the Model (Data) level because
     // we'll be using Radx utilities.
-    // 
-    RadxFile outFile;
+    
     try {
       LOG(DEBUG) << "writing to file " << name;
-      outFile.writeToPath(_vol, name);
+      DataModel *dataModel = DataModel::Instance();
+      dataModel->writeData(name);
     } catch (FileIException &ex) {
       this->setCursor(Qt::ArrowCursor);
       return;
     }
+    
   }
 }
 
@@ -4755,7 +4729,7 @@ void PolarManager::_updateFieldPanel(string newFieldName)
 }
 */
 
-void PolarManager::contextMenuParameterColors()
+void PolarManager::ShowParameterColorDialog(QString fieldName)
 {
   
   LOG(DEBUG) << "enter";
@@ -4784,6 +4758,57 @@ void PolarManager::contextMenuParameterColors()
   LOG(DEBUG) << "exit ";
   
 }
+
+/*
+// needs PolarManager, DisplayFieldModel access, or DisplayFieldController access
+void PolarManager::contextMenuParameterColors()
+{
+  
+  LOG(DEBUG) << "enter";
+
+  // TODO: parent should be PolarManager ...
+  ParameterColorView *parameterColorView = new ParameterColorView(this);
+  // vector<DisplayField *> displayFields = displayFieldController->getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
+  DisplayField *selectedField = _displayFieldController->getSelectedField();
+  string emphasis_color = "white";
+  string annotation_color = "white";
+
+  DisplayFieldModel *displayFieldModel = _displayFieldController->getModel();
+
+  FieldColorController *fieldColorController = new FieldColorController(parameterColorView,
+    displayFieldModel);
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+              
+  // TODO: move to PolarManager ...                                                           
+  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
+  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
+      this, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
+  //  PolarManager::colorMapRedefineReceived(string, ColorMap)
+  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
+  //    this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
+
+  // TODO: combine with replot
+  //connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
+  //    this, SLOT(backgroundColor(QColor)));
+  //
+
+  fieldColorController->startUp(); 
+
+  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
+  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
+  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
+  // TODO: move this call to the controller?                                                                
+    // parameterColorView.exec();
+
+  //  if(parameterColorController.Changes()) {
+    // TODO: what are changes?  new displayField(s)?                                                        
+  //}
+ 
+  LOG(DEBUG) << "exit ";
+  
+}
+*/
 
 /* Moved to DisplayFieldView
 void PolarManager::_changeFieldVariable(bool value) {
@@ -5630,8 +5655,14 @@ int PolarManager::_setupDisplayFields(
 //TODO: change model for displayFieldController
 //_displayFieldController->setModel(new DisplayFieldModel(...))
   
+// reset or sync the displayFields with those in the list
+// used for a read of new data file
+// TODO: shouldn't this go to DisplayFieldController?? just send the color map directory?
 int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
 
+  _displayFieldController->reconcileFields(fieldNames, _fieldPanel);
+
+  // TODO: not sure where this needs to happen ...
   // check for color map location
   
   string colorMapDir = _params->color_scale_dir;
@@ -5653,7 +5684,13 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
     }
   }
 
+/*
   //vector<DisplayField *> displayFields;
+
+  // There is the fieldPanel, which is a view of the DisplayFields, for selection
+  // then, there is the displayFieldController which manages the fields and all
+  // their attributes.  
+  // sometimes, we need to add a field, remove a field, and then sync the fields as in reset.
 
   //for (int ifield = 0; ifield < _params->fields_n; ifield++) {
   int ifield = (int) _displayFieldController->getNFields() + 1;
@@ -5689,13 +5726,14 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
 
 
   } // ifield
+*/
 
   if (fieldNames->size() < 1) {
     cerr << "ERROR - PolarManager::_setupDisplayFields()" << endl;
     cerr << "  No fields found" << endl;
     return -1;
   }
-  //selectedFieldChanged(QString().fromStdString(fieldNames->at(0)));
+
 
   return 0;
 
@@ -5856,7 +5894,8 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     connect(spreadSheetControl, SIGNAL(volumeChanged()),
         this, SLOT(setVolume()));
     connect(sheetView, SIGNAL(spreadSheetClosed()), this, SLOT(spreadSheetClosed()));
-    
+    connect(sheetView, SIGNAL(setDataMissing(string, float)), 
+      this, SLOT(setDataMissing(string, float)));    
     sheetView->init();
     sheetView->show();
   } else {
@@ -5867,6 +5906,11 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     sheetView->highlightClickedData(currentFieldName, azimuth, (float) range);
   }
   
+}
+
+void PolarManager::setDataMissing(string fieldName, float missingValue) {
+  spreadSheetControl->setDataMissing(fieldName, missingValue);
+  _applyDataEdits();
 }
 
 void PolarManager::spreadSheetClosed() {

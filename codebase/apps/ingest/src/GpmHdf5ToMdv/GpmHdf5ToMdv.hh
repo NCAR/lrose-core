@@ -88,11 +88,16 @@ private:
   Params _params;
   DsInputPath *_input;
 
-  // data set members
+  // input dimensions
+  
+  size_t _nScans, _nRays, _nGates;
+
+  // times
 
   vector<DateTime> _times;
   DateTime _startTime, _endTime;
-  size_t _nScans, _nRays, _nGates;
+
+  // metadata
 
   string _fileHeader, _fileInfo;
   string _inputRecord, _jaxaInfo;
@@ -101,7 +106,9 @@ private:
   vector<NcxxPort::si32> _dataQuality, _dataWarning;
   vector<NcxxPort::si32> _geoError, _geoWarning;
   vector<NcxxPort::si32> _limitErrorFlag, _missingScan;
-  
+
+  // input geometry
+
   vector<NcxxPort::fl64> _lats;
   vector<NcxxPort::fl64> _lons;
   NcxxPort::fl64 _missingLat;
@@ -110,26 +117,59 @@ private:
   double _minLat, _maxLat;
   double _minLon, _maxLon;
   vector<vector<Point_d> > _latLons;
-  
+
+  // sensor location
+
   vector<NcxxPort::fl64> _scLat, _scLon, _scAlt;
 
-  vector<NcxxPort::fl32> _dbzInput;
-  vector<NcxxPort::fl32> _dbzInterp;
-  vector<NcxxPort::fl32> _dbzOutput;
-  NcxxPort::fl32 _missingDbz;
-  string _dbzUnits;
-
-  bool _qualAvailable;
-  vector<NcxxPort::si16> _qualInput;
-  vector<NcxxPort::si16> _qualInterp;
-  NcxxPort::si16 _missingQual;
-  string _qualUnits;
+  // output geometry
 
   size_t _nx, _ny, _nz;
   double _minxDeg, _minyDeg, _minzKm;
   double _maxxDeg, _maxyDeg, _maxzKm;
   double _dxDeg, _dyDeg, _dzKm;
   vector<double> _zLevels;
+
+  // inner class for field data
+
+  class OutputField
+  {
+  public:
+
+    OutputField(const Params::output_field_t &p) :
+            params(p)
+    {
+      valid = false;
+    }
+    
+    Params::output_field_t params;
+    bool valid;
+    bool nearestNeighbor;
+
+    Hdf5xx hdf5;
+    vector<size_t> dims;
+    string units;
+    H5T_class_t h5class;
+    H5T_sign_t h5sign;
+    H5T_order_t h5order;
+    size_t h5size;
+    
+    vector<NcxxPort::fl32> fl32Input;
+    vector<NcxxPort::fl32> fl32Interp;
+    vector<NcxxPort::fl32> fl32Output;
+
+    vector<NcxxPort::si16> si16Input;
+    vector<NcxxPort::si16> si16Interp;
+    vector<NcxxPort::si16> si16Output;
+
+    NcxxPort::fl32 fl32Missing;
+    NcxxPort::si16 si16Missing;
+    
+  private:
+    
+  };
+  
+  vector<OutputField *> _outputFields;
 
   // hdf5 utilities
 
@@ -161,8 +201,8 @@ private:
   int _readField3D(Group &ns,
                    const string &groupName,
                    const string &fieldName,
-                   vector<NcxxPort::si32> &vals,
-                   NcxxPort::si32 &missingVal,
+                   vector<NcxxPort::si16> &vals,
+                   NcxxPort::si16 &missingVal,
                    string &units);
   
   int _readField2D(Group &ns,
@@ -175,27 +215,18 @@ private:
   int _readField2D(Group &ns,
                    const string &groupName,
                    const string &fieldName,
-                   vector<NcxxPort::si32> &vals,
-                   NcxxPort::si32 &missingVal,
-                   string &units);
-  
-  int _readField2D(Group &ns,
-                   const string &groupName,
-                   const string &fieldName,
                    vector<NcxxPort::si16> &vals,
                    NcxxPort::si16 &missingVal,
                    string &units);
   
   // interpolation
 
+  void _interpField(OutputField *fld);
+  
   void _interpField(vector<NcxxPort::fl32> &valsInput,
                     NcxxPort::fl32 missingVal,
                     vector<NcxxPort::fl32> &valsInterp,
                     bool nearestNeighbor);
-  
-  void _interpField(vector<NcxxPort::si32> &valsInput,
-                    NcxxPort::si32 missingVal,
-                    vector<NcxxPort::si32> &valsInterp);
   
   void _interpField(vector<NcxxPort::si16> &valsInput,
                     NcxxPort::si16 missingVal,
@@ -250,17 +281,21 @@ private:
   // invert the height levels for DBZ because the data is stored
   // with the top first and decreasing in height 
 
-  void _invertDbzGateLevels();
+  void _invertDbzGateLevels(OutputField *fld);
 
   // remap the gates onto specified vertical levels
   // compute the max for the remapping
 
-  void _remapVertLevels();
+  void _remapVertLevels(OutputField *fld);
 
   /// set MDV headers and data
 
-  int _setMasterHeader(DsMdvx &mdvx);
+  void _setMasterHeader(DsMdvx &mdvx);
+
+  // add the mdvx fields
   
+  void _addFieldToMdvx(DsMdvx &mdvx, OutputField *fld);
+
   MdvxField *_createMdvxField(const string &fieldName,
                               const string &longName,
                               const string &units,

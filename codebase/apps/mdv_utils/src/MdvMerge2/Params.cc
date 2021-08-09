@@ -923,7 +923,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("merge_fields");
     tt->descr = tdrpStrDup("Specifications for merged output field.");
-    tt->help = tdrpStrDup("\n'name': specify the name of this field in the output MDV file. This is also probably the name of the fields in the input files. However, you may specify a different field name for the input - see input_url for details.\n\n'merge_method': MERGE_MIN - take the minimum value at a grid point; MERGE_MAX - take the maximum value at a grid point; MERGE_MEAN - take the mean value at a point; MERGE_SUM - sum all values at a point; MERGE_LATEST - take the latest valid data value at a grid point\n\nMERGE_CLOSEST - use the data with the closet origin to the grid point. CLOSEST requires a range field in the data so that for overlapping points we can determine which data set is closest to the grid point\n\n'merge_encoding': the type of data used to perform the merge. For best results FLOAT32 is recommended, especially for MERGE_SUM. However, this uses more memory. To conserve memory, use INT8 or INT16. If you select INT8 or INT16 you must also specify 'merge_scale' and 'merge_bias' to be used to represent the data in the merge.\n\n'output_encoding': determines the type for storing the merged data in the output file. This affects the size of the output file. Use FLOAT32 for maximum precision, INT8 for smallest files.");
+    tt->help = tdrpStrDup("\n'name': specify the name of this field in the output MDV file. This is also probably the name of the fields in the input files. However, you may specify a different field name for the input - see input_url for details.\n\n'merge_method': MERGE_MIN - take the minimum value at a grid point; MERGE_MAX - take the maximum value at a grid point; MERGE_MEAN - take the mean value at a point; MERGE_SUM - sum all values at a point; MERGE_LATEST - take the latest valid data value at a grid point\n\nMERGE_CLOSEST - use the data with the closet origin to the grid point. CLOSEST requires a range field in the data so that for overlapping points we can determine which data set is closest to the grid point\n\n'merge_encoding': the type of data used to perform the merge. For best results FLOAT32 is recommended, especially for MERGE_SUM. However, this uses more memory. To conserve memory, use INT8 or INT16. If you select INT8 or INT16 you must also specify 'merge_scale' and 'merge_bias' to be used to represent the data in the merge.\n\n'output_encoding': determines the type for storing the merged data in the output file. This affects the size of the output file. Use FLOAT32 for maximum precision, INT8 for smallest files.\n\nIf compute_composite is true, the field will be converted to a column-max 2D grid on output.");
     tt->array_offset = (char *) &_merge_fields - &_start_;
     tt->array_n_offset = (char *) &merge_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -931,7 +931,7 @@
     tt->array_elem_size = sizeof(merge_field_t);
     tt->array_n = 1;
     tt->struct_def.name = tdrpStrDup("merge_field_t");
-    tt->struct_def.nfields = 6;
+    tt->struct_def.nfields = 7;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -1000,7 +1000,12 @@
         tt->struct_def.fields[5].enum_def.fields[1].val = INT16;
         tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("FLOAT32");
         tt->struct_def.fields[5].enum_def.fields[2].val = FLOAT32;
-    tt->n_struct_vals = 6;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[6].fname = tdrpStrDup("compute_composite");
+      tt->struct_def.fields[6].ptype = BOOL_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_merge_fields->compute_composite - (char *) _merge_fields;
+    tt->n_struct_vals = 7;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("DBZ");
@@ -1009,6 +1014,7 @@
       tt->struct_vals[3].d = 0.5;
       tt->struct_vals[4].d = -32;
       tt->struct_vals[5].e = INT8;
+      tt->struct_vals[6].b = pFALSE;
     tt++;
     
     // Parameter 'range_field_name'
@@ -1344,6 +1350,18 @@
       tt->enum_def.fields[3].name = tdrpStrDup("COMPRESSION_GZIP");
       tt->enum_def.fields[3].val = COMPRESSION_GZIP;
     tt->single_val.e = COMPRESSION_ZLIB;
+    tt++;
+    
+    // Parameter 'output_composite'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_composite");
+    tt->descr = tdrpStrDup("Option to compute composite on output.");
+    tt->help = tdrpStrDup("If TRUE, the output Created to handle meteorological data sets with denser vertical\nspacing near the surface. If TRUE, must set 'vlevel_array[] values'.");
+    tt->val_offset = (char *) &output_composite - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'output_data_set_name'

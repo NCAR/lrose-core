@@ -86,6 +86,9 @@ public:
 
   void clearSweepRadioButtons();
 
+signals:
+  void selectedSweepChanged(double selectedAngle);
+
 public slots:
 
   void changeSweep(bool value);

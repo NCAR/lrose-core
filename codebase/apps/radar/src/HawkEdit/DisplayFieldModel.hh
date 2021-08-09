@@ -20,6 +20,7 @@ public:
   void hideField(DisplayField *field);
   void setFieldToMissing(DisplayField *field);
   void deleteFieldFromVolume(DisplayField *field);
+  void deleteField(string fieldName);
 
   vector<string> getFieldNames();
   size_t getNFields();
@@ -37,6 +38,8 @@ public:
 
   void setSelectedField(string fieldName);
   void setSelectedField(size_t fieldIndex);
+  void setFieldToMissing(const string &fieldName);
+  void deleteFieldFromVolume(const string &fieldName);
 
   DisplayField *getFiltered(size_t ifield, int buttonRow);
 

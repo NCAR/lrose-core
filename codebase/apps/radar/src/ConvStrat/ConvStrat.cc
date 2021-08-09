@@ -133,6 +133,8 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setMinValidFractionForFit
     (_params.min_valid_fraction_for_fit);
   _finder.setMinVolForConvectiveKm3(_params.min_valid_volume_for_convective);
+  _finder.setTextureLimitLow(_params.texture_limit_low);
+  _finder.setTextureLimitHigh(_params.texture_limit_high);
   _finder.setMinVertExtentForConvectiveKm(_params.min_vert_extent_for_convective);
   _finder.setDbzForEchoTops(_params.dbz_for_echo_tops);
 
@@ -336,6 +338,12 @@ void ConvStrat::_addFields()
                                  "DbzTexture2D",
                                  "reflectivity_texture_2D",
                                  "dBZ"));
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getTextureColMax(),
+                                 Mdvx::ENCODING_INT16,
+                                 "DbzTextureColMax",
+                                 "reflectivity_texture_column_max",
+                                 "dBZ"));
   }
   
   if (_params.write_convectivity) {
@@ -345,6 +353,12 @@ void ConvStrat::_addFields()
                                  Mdvx::ENCODING_INT16,
                                  "Convectivity2D",
                                  "likelihood_of_convection_2D",
+                                 ""));
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getConvectivityColMax(),
+                                 Mdvx::ENCODING_INT16,
+                                 "ConvectivityColMax",
+                                 "likelihood_of_convection_column_max",
                                  ""));
   }
 
@@ -421,6 +435,12 @@ void ConvStrat::_addFields()
                                  Mdvx::ENCODING_INT8,
                                  "Partition2D",
                                  "convective_stratiform_partition_2D",
+                                 ""));
+    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                                 _finder.getPartitionColMax(),
+                                 Mdvx::ENCODING_INT8,
+                                 "PartitionColMax",
+                                 "convective_stratiform_partition_col_max",
                                  ""));
   }
   

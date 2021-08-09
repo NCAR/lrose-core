@@ -25,9 +25,11 @@
 #include <toolsa/LogStream.hh>
 #include <thread>  
 #include <mutex>
+#include <chrono>
 
 
 using namespace std;
+//using namespace std::chrono_literals;
 
 std::mutex rendering;
 
@@ -47,7 +49,8 @@ FieldRendererView::FieldRendererView(string fieldName) : //const Params &params,
         _imageReady(false),
         //_backgroundRenderTimer(NULL),
         _useHeight(false),
-        _drawInstHt(false)
+        _drawInstHt(false),
+        _rendering(false)
 {
 
 
@@ -80,6 +83,14 @@ FieldRendererView::~FieldRendererView()
     delete _image;
 }
 
+// THIS IS NOT RIGHT!  WE NEED TO GET NEW BEAMS!  RayLocationController needs
+// to return the ray for the current sweep.  <===
+// Setting the sweepAngle here does no good!
+//void FieldRendererView::setSweepAngle(double sweepAngle) {
+//  if (_sweepAngle != sweepAngle) {
+//    _sweepAngle = sweepAngle;
+//  }
+//}
 
 //void FieldRendererView::renderImage(int width, int height, double sweepAngle) {
 
@@ -92,8 +103,8 @@ FieldRendererView::~FieldRendererView()
 void FieldRendererView::createImage(int width, int height)
 
 {
-  rendering.lock();
-  LOG(DEBUG) << "grabbed lock";
+  //while (_rendering) this_thread::sleep_for(std::chrono::milliseconds(2000));
+  //LOG(DEBUG) << "grabbed lock";
 
   if (_image != NULL)
     delete _image;
@@ -103,6 +114,7 @@ void FieldRendererView::createImage(int width, int height)
 }
 
 void FieldRendererView::fillBackground(QBrush *backgroundBrush) {
+  //while (_rendering) this_thread::sleep_for(std::chrono::milliseconds(2000));
   if (_image != NULL)
     _image->fill(backgroundBrush->color().rgb());
 }
@@ -114,7 +126,7 @@ void FieldRendererView::addBeam(Beam *beam)
 {
 
   //TaThread::LockForScope locker;
-  
+ // while (_rendering) this_thread::sleep_for(std::chrono::milliseconds(2000));
   _beams.push_back(beam);
   //beam->addClient();
 
@@ -215,6 +227,10 @@ void FieldRendererView::runIt()
 
   LOG(DEBUG) << "enter: " << _name;
 
+  //rendering.lock();
+  //_rendering = true;
+  //rendering.unlock();
+
   if (_beams.size() == 0) {
     LOG(DEBUG) << "_beams.size() == 0, returning";
     return;
@@ -225,9 +241,6 @@ void FieldRendererView::runIt()
   }
   
   //TaThread::LockForScope locker;
-
-
-
 
   vector< Beam* >::iterator beam;
   for (beam = _beams.begin(); beam != _beams.end(); ++beam)
@@ -247,11 +260,23 @@ void FieldRendererView::runIt()
   }
   
   _imageReady = true;
-  rendering.unlock();
+
+  //rendering.lock();
+  //_rendering = false;
+  //rendering.unlock();  
   //for (beam = _beams.begin(); beam != _beams.end(); ++beam)
   //{
   //  Beam::deleteIfUnused(*beam);
   //}
+
+  //LOG(DEBUG) << "clearing beams " << _name;
   //_beams.clear();
+  LOG(DEBUG) << "exit";
+}
+
+
+void FieldRendererView::clearBeams() {
+  LOG(DEBUG) << "enter " << _name;
+  _beams.clear();
   LOG(DEBUG) << "exit";
 }

@@ -907,6 +907,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("CONVERTING REFLECTIVITY TEXTURE TO CONVECTIVITY");
+    tt->comment_text = tdrpStrDup("Convectivity ranges from 0 to 1. To convert texture to convectivity, we apply a piece-wise linear transfer function. This section defines the lower texture limit and the upper texture limit. At or below the lower limit convectivity is set to 0. At or above the upper limit convectivity is set to 1. Between these two limits convectivity varies linearly with texture.");
+    tt++;
+    
+    // Parameter 'texture_limit_low'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("texture_limit_low");
+    tt->descr = tdrpStrDup("Lower limit for texture.");
+    tt->help = tdrpStrDup("Below this texture the convectivity is set to 0.");
+    tt->val_offset = (char *) &texture_limit_low - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'texture_limit_high'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("texture_limit_high");
+    tt->descr = tdrpStrDup("Upper limit for texture.");
+    tt->help = tdrpStrDup("Above this texture the convectivity is set to 1. Between the limits convectivity varies linearly with texture.");
+    tt->val_offset = (char *) &texture_limit_high - &_start_;
+    tt->single_val.d = 30;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY");
     tt->comment_text = tdrpStrDup("If neither is set, we flag the point as MIXED.");
     tt++;
@@ -947,11 +980,11 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;

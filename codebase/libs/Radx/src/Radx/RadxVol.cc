@@ -5283,6 +5283,10 @@ RadxRay *RadxVol::computeFieldStats
     // assemble vector of this field on the ray
 
     RadxField *field = _rays[0]->getField(fieldName);
+    if (field == NULL) {
+      // field missing, so don't add this field
+      continue;
+    }
 
     vector<const RadxField *> rayFields;
     for (size_t iray = 0; iray < _rays.size(); iray++) {

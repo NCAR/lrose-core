@@ -22,45 +22,38 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// GridClump.cc
+// ClumpGrid.cc
 //
-// GridClump class - wraps a clump with an mdv grid so that
-// computations may be done on the clump with the grid geometry.
+// ClumpGrid class - combines a clump with grid geometry so that
+// computations may be done on the clump using that grid geometry.
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// November 1998
+// July 2021
 //
 ///////////////////////////////////////////////////////////////
 
-#include "GridClump.hh"
+#include <euclid/ClumpGrid.hh>
 #include <toolsa/umisc.h>
 #include <rapmath/math_macros.h>
 #include <cassert>
+#include <iostream>
 using namespace std;
 
 ///////////////
 // constructors
 //
 
-GridClump::GridClump()
+ClumpGrid::ClumpGrid()
 {
   _initDone = FALSE;
-}
-
-GridClump::GridClump(const Clump_order *clump,
-		     const titan_grid_t &titan_grid,
-		     int start_ix, int start_iy)
-
-{
-  init(clump, titan_grid, start_ix, start_iy);
 }
 
 /////////////
 // destructor
 //
 
-GridClump::~GridClump()
+ClumpGrid::~ClumpGrid()
 
 {
   assert (_initDone);
@@ -70,20 +63,37 @@ GridClump::~GridClump()
 // initializer
 //
 
-void GridClump::init(const Clump_order *clump_order,
-		     const titan_grid_t &titan_grid,
+void ClumpGrid::init(const Clump_order *clump_order,
+                     int nx, int ny, int nz,
+                     double dx, double dy, double dz,
+                     double minx, double miny, double minz,
+                     bool isLatLon,
 		     int start_ix, int start_iy)
 
 {
 
-  grid = titan_grid;
+  // set private grid geom
+
+  grid.setNx(nx);
+  grid.setNy(ny);
+  grid.setNz(nz);
+
+  grid.setDx(dx);
+  grid.setDy(dy);
+  grid.setDz(dz);
+
+  grid.setMinx(minx);
+  grid.setMiny(miny);
+  grid.setMinz(minz);
+
+  grid.setIsLatLon(isLatLon);
 
   // compute the bounding box for the clump, and create
   // an array of intervals relative to these bounds.
 
   _shrinkWrap(clump_order);
 
-  // set the various measures of clump position and bounding size
+  // set the various public measures of clump position and bounding size
 
   nX = _maxIx - _minIx + 1;
   nY = _maxIy - _minIy + 1;
@@ -91,11 +101,11 @@ void GridClump::init(const Clump_order *clump_order,
   startIx = start_ix + _minIx;
   startIy = start_iy + _minIy;
 
-  offsetX = startIx * grid.dx;
-  offsetY = startIy * grid.dy;
-
-  startX = grid.minx + offsetX;
-  startY = grid.miny + offsetY;
+  offsetX = startIx * grid.dx();
+  offsetY = startIy * grid.dy();
+  
+  startX = grid.minx() + offsetX;
+  startY = grid.miny() + offsetY;
 
   // compute the geometry
 
@@ -112,7 +122,7 @@ void GridClump::init(const Clump_order *clump_order,
 // Create a set of intervals relative to the bounding box.
 //
 
-void GridClump::_shrinkWrap(const Clump_order *clump)
+void ClumpGrid::_shrinkWrap(const Clump_order *clump)
 
 {
 
@@ -154,54 +164,29 @@ void GridClump::_shrinkWrap(const Clump_order *clump)
 // Compute the geometry related to the clump.
 //
 
-void GridClump::_computeGeometry()
+void ClumpGrid::_computeGeometry()
 
 {
 
-  if (grid.proj_type == TITAN_PROJ_FLAT) {
-    
-    // flat grid
-    
-    _isLatLon = FALSE;
-
-    _dX = grid.dx;
-    _dY = grid.dy;
-    _dAreaFlat = _dX * _dY;
-    _dVolFlat = _dAreaFlat * grid.dz;
-    dAreaEllipse = _dAreaFlat;
-    
-    dAreaAtCentroid = _dAreaFlat;
-    dVolAtCentroid = _dVolFlat;
-
-    if (grid.nz <= 1) {
-      stormSize = nPoints * _dAreaFlat;
-    } else {
-      stormSize = nPoints * _dVolFlat;
-    }
-
-    kmPerGridUnit = (_dX + _dY) / 2.0;
-
-  } else {
+  if (grid.isLatLon()) {
     
     // latlon grid
 
-    // latlon data has a lat/lon grid, so we need to multiply by
+    // we need to multiply by
     // a (111.12 squared) to get km2 for area. The delta_z is
     // set nominally to 1.0, so area and volume will be the same.
     // The volume and area computations are adjusted later for the
     // latitude of the storm.
     
-    _isLatLon = TRUE;
-
-    _dX = grid.dx;
-    _dY = grid.dy * KM_PER_DEG_AT_EQ;
-    _dXAtEquator = grid.dx * KM_PER_DEG_AT_EQ;
+    dX = grid.dx();
+    dY = grid.dy() * KM_PER_DEG_AT_EQ;
+    _dXAtEquator = grid.dx() * KM_PER_DEG_AT_EQ;
 
     _dAreaAtEquator =
-      (grid.dx * grid.dy) *
+      (grid.dx() * grid.dy()) *
       (KM_PER_DEG_AT_EQ * KM_PER_DEG_AT_EQ);
     
-    _dVolAtEquator = _dAreaAtEquator * grid.dz;
+    _dVolAtEquator = _dAreaAtEquator * grid.dz();
     
     // compute the volumetric y centroid
 
@@ -211,23 +196,44 @@ void GridClump::_computeGeometry()
       sumy += (double) intvl.row_in_plane * (double) intvl.len;
       n += (double) intvl.len;
     }
-    double vol_centroid_y = (sumy / n) * grid.dy + grid.miny;
+    double vol_centroid_y = (sumy / n) * grid.dy() + grid.miny();
     double latitude_factor = cos(vol_centroid_y * DEG_TO_RAD);
 
     dVolAtCentroid = _dVolAtEquator * latitude_factor;
     dAreaAtCentroid = _dAreaAtEquator * latitude_factor;
-    dAreaEllipse = grid.dx * grid.dy;
+    dAreaEllipse = grid.dx() * grid.dy();
     
-    if (grid.nz <= 1) {
-      stormSize = nPoints * dAreaAtCentroid;
+    if (grid.nz() <= 1) {
+      clumpSize = nPoints * dAreaAtCentroid;
     } else {
-      stormSize = nPoints * dVolAtCentroid;
+      clumpSize = nPoints * dVolAtCentroid;
     }
 
-    kmPerGridUnit =  (_dXAtEquator * latitude_factor + _dY) / 2.0;
+    kmPerGridUnit =  (_dXAtEquator * latitude_factor + dY) / 2.0;
+
+  } else {
+  
+    // projection-based (km) grid
+    
+    dX = grid.dx();
+    dY = grid.dy();
+    _dAreaFlat = dX * dY;
+    _dVolFlat = _dAreaFlat * grid.dz();
+    dAreaEllipse = _dAreaFlat;
+    
+    dAreaAtCentroid = _dAreaFlat;
+    dVolAtCentroid = _dVolFlat;
+    
+    if (grid.nz() <= 1) {
+      clumpSize = nPoints * _dAreaFlat;
+    } else {
+      clumpSize = nPoints * _dVolFlat;
+    }
+    
+    kmPerGridUnit = (dX + dY) / 2.0;
 
   }
-  
+    
 }
 
 

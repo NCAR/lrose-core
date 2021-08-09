@@ -69,7 +69,8 @@ public slots:
   void actionDisplayRayInfo();
   void actionDisplayMetadata();
   void actionDisplayEditHist();
-  void deleteField();
+  void deleteRay();
+  void deleteSelection();
 
   void notImplementedMessage();
 
@@ -94,7 +95,7 @@ public slots:
 
   void rangeDataSent(size_t nGates, float startingKm, float gateSize);
 
-  void printQJSEngineContext();
+  void columnHeaderClicked(int index);
 
 signals:
 
@@ -127,6 +128,9 @@ protected:
                         QString *cell1, QString *cell2, QString *outCell);
 
   void criticalMessage(std::string message);
+
+  string getFieldName(QString text);
+  float getAzimuth(QString text);
 
 private:
 

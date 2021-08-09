@@ -12,8 +12,9 @@ RayLocationController::RayLocationController() {
 RayLocationController::~RayLocationController() {}
 
 // call when new data file is read, or when switching to new sweep?
-void RayLocationController::sortRaysIntoRayLocations(float ppi_rendering_beam_width) {
-  _model->sortRaysIntoRayLocations(ppi_rendering_beam_width);	
+void RayLocationController::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
+  int sweepNumber) {
+  _model->sortRaysIntoRayLocations(ppi_rendering_beam_width, sweepNumber);	
 }
 
 size_t RayLocationController::getNRayLocations() {

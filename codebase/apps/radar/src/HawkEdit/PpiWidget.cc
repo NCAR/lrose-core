@@ -588,7 +588,7 @@ void PpiWidget::movingDownTheLine(PpiBeam *beam, vector<string> fieldNames,
   LOG(DEBUG) << "exit";
 }
 
-
+/*
 void PpiWidget::updateBeamColors(//const RadxRay *ray,
 				 //const float start_angle,
 				 //const float stop_angle,
@@ -597,7 +597,7 @@ void PpiWidget::updateBeamColors(//const RadxRay *ray,
 				 const string fieldName,
 				 size_t nGates)
 {
-/*
+
   //LOG(DEBUG) << "enter";
 
   //LOG(DEBUG) << "_ppiBeams.size() = " << _ppiBeams.size();  
@@ -623,9 +623,9 @@ void PpiWidget::updateBeamColors(//const RadxRay *ray,
     //    const std::vector<double> &beam_data = ray->getFieldFl32();
     updateColorsOnFields(b, fieldName, nFields, fdata, nGates, map, displayFieldIdx);
   }
-*/
-}
 
+}
+*/
 
 // nFields = total number of Fields (old + new)
 // fill brushes and queue this beam with the renderers

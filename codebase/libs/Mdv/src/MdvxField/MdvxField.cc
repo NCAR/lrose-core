@@ -7957,7 +7957,7 @@ bool MdvxField::isDzConstant()
 // by copying from closest available vlevel.
 // dz is computed as the smallest suitable delta z.
 
-void MdvxField::setDzConstant(int nzMax /* = 64 */)
+void MdvxField::setDzConstant(int nzMax /* = MDV32_MAX_VLEVELS */)
 
 {
 
@@ -7969,8 +7969,8 @@ void MdvxField::setDzConstant(int nzMax /* = 64 */)
   // find the smallest dz
 
   double dzMin = fabs(_vhdr.level[1] - _vhdr.level[0]);
-  for (int iz = 2; iz < _fhdr.nz; iz++) {
-    double dz = _vhdr.level[iz+1] - _vhdr.level[iz];
+  for (int iz = 0; iz < _fhdr.nz - 1; iz++) {
+    double dz = fabs(_vhdr.level[iz+1] - _vhdr.level[iz]);
     if (dz < dzMin) {
       dzMin = dz;
     }
@@ -7978,7 +7978,7 @@ void MdvxField::setDzConstant(int nzMax /* = 64 */)
 
   // use dzMin as delta Z
 
-  setDzConstant(dzMin);
+  setDzConstant(dzMin, nzMax);
 
 }
 
@@ -7987,7 +7987,7 @@ void MdvxField::setDzConstant(int nzMax /* = 64 */)
 // If not already constant, data is remapped onto constant vlevels
 // by copying from closest available vlevel.
 
-void MdvxField::setDzConstant(double dz, int nzMax /* = 64 */)
+void MdvxField::setDzConstant(double dz, int nzMax /* = MDV32_MAX_VLEVELS */)
 
 {
 
@@ -8004,23 +8004,23 @@ void MdvxField::setDzConstant(double dz, int nzMax /* = 64 */)
   
   double minz = _vhdr.level[0];
   double maxz = minz;
-  for (int iz = 1; iz < _fhdr.nz; iz++) {
-    double z = _vhdr.level[iz+1] - _vhdr.level[iz];
-    if (z < minz) {
-      minz = z;
+  for (int iz = 0; iz < _fhdr.nz; iz++) {
+    double zz = _vhdr.level[iz];
+    if (zz < minz) {
+      minz = zz;
     }
-    if (z > maxz) {
-      minz = z;
+    if (zz > maxz) {
+      maxz = zz;
     }
   }
   double zRange = maxz - minz;
   
   // compute the number of vlevels
   
-  int nz = (int) floor((zRange / dz) + 1.5);
+  int nz = (int) floor((zRange / dz) + 0.5);
   if (nz > nzMax) {
     nz = nzMax;
-    dz = zRange / (nzMax - 1.0);
+    dz = zRange / (nz - 1.0);
   }
 
   // remap the vlevels

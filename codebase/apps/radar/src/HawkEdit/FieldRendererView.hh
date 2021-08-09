@@ -200,11 +200,13 @@ public:
    */
 
   string getName() { return _name; };
+  double getSweepAngle() { return _sweepAngle; };
+  //void setSweepAngle(double sweepAngle);
 
   QImage *_image;
   bool _imageReady;
   string _name;
-  
+  double _sweepAngle;
   /**
    * @brief Flag indicating whether this field should be rendered in the
    *        background.
@@ -247,6 +249,8 @@ public:
   void setNoColorMap() { _haveColorMap = false; }
   void changeColorMap() { _haveColorMap = true; }
   void replaceColorMap(ColorMap newColorMap);
+
+  void clearBeams();
     
   ///////////////////////
   // Protected methods //
@@ -262,6 +266,8 @@ public:
 private:
   ColorMap _colorMap;
   bool _haveColorMap;
+  bool _rendering; 
+  bool _changed;
   
 };
 

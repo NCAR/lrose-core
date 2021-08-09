@@ -142,8 +142,8 @@ NORM_SRCS = \
 	SpreadSheetItem.cc \
 	SpreadSheetModel.cc \
 	SpreadSheetUtils.cc \
-	SweepController.cc \
 	SweepModel.cc \
+	SweepController.cc \
 	WorldPlot.cc 
 
 MOC_SRCS = \
@@ -161,6 +161,7 @@ MOC_SRCS = \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
+	ClickableLabelNamed.cc \
 	DisplayFieldView.cc \
 	ScriptEditorView.cc \
 	ScriptEditorController.cc \
@@ -189,6 +190,7 @@ MOC_OUTPUT = \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \
+	moc_ClickableLabelNamed.cpp \
 	moc_DisplayFieldView.cpp \
 	moc_ScriptEditorView.cpp \
 	moc_ScriptEditorController.cpp \

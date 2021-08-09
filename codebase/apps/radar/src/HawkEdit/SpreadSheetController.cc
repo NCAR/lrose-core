@@ -40,6 +40,8 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view)
     connect(table, &QTableWidget::itemChanged,
             this, &SpreadSheetController::updateLineEdit);
   */
+
+
 }
 
 
@@ -153,7 +155,7 @@ void SpreadSheetController::setData(string fieldName, vector<float> *data)
 }
 
 void SpreadSheetController::setDataMissing(string fieldName, float missingDataValue) {
-  // _currentModel->setDataMissing(fieldName, missingDataValue);
+  _currentModel->setDataMissing(fieldName, missingDataValue);
 }
 
 void  SpreadSheetController::needFieldNames() {
@@ -181,6 +183,7 @@ void  SpreadSheetController::needRangeData(size_t nGates) {
   _currentView->rangeDataSent(nGates, startingKm, gateSpacingKm);
 }
 
+// persist the changes in the spreadsheet to the model, which is the data volume
 void SpreadSheetController::getVolumeChanges() {
 
   LOG(DEBUG) << "enter";

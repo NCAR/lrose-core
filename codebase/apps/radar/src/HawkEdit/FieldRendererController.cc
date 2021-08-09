@@ -306,21 +306,28 @@ QImage *FieldRendererController::renderImage(int width, int height,
   ColorMap &colorMap,
   QColor backgroundColor) {
 
+  // TODO: need to keep sweepAngle with FieldRendererView
+  // that way we can detect if the image is current for the
+  // selected sweep
+
   LOG(DEBUG) << "enter: ";
   LOG(DEBUG) << "requested width = " << width << " height " << height;
 
   FieldRendererView *fieldRenderer = get(fieldName);
   if (fieldRenderer == NULL) {
     fieldRenderer = new FieldRendererView(fieldName);
+    //fieldRenderer->setSweepAngle(sweepAngle); 
     fieldRenderer->createImage(width, height);
     _fieldRenderers.push_back(fieldRenderer);
   } else {
+    //fieldRenderer->setSweepAngle(sweepAngle); 
     fieldRenderer->createImage(width, height);
   }
   LOG(DEBUG) << "lock obtained";
   // fieldRenderView is locked, we can procede with changes ...
 
   fieldRenderer->setTransform(zoomTransform);
+
 
   if (!fieldRenderer->imageReady()) {
     // create a beam for each ray  
@@ -329,7 +336,7 @@ QImage *FieldRendererController::renderImage(int width, int height,
     // get the Data
     DataModel *dataModel = DataModel::Instance();
     float missingVal = dataModel->getMissingFl32(fieldName);
-    //or send a vector?
+    fieldRenderer->clearBeams();
     size_t nRayLocations = rayLocationController->getNRayLocations();
     // get rays in sorted order from RayLocationController
     LOG(DEBUG) << "nRayLocations " << nRayLocations;
@@ -379,6 +386,7 @@ QImage *FieldRendererController::renderImage(int width, int height,
 }
 
 
+/*
 // HERE is where the action happens
 void FieldRendererController::performRendering(size_t selectedField) {
                                                                                          
@@ -403,6 +411,7 @@ void FieldRendererController::performRendering(size_t selectedField) {
   //} // ifield                                                                              
   LOG(DEBUG) << "exit";
 }
+*/
 
 /*
 bool FieldRendererController::isBackgroundRendered(size_t index) {
@@ -422,91 +431,31 @@ void FieldRendererController::colorMapChanged(size_t ifield)
 
 
 void FieldRendererController::refreshImages(int width, int height, QSize image_size,
-					    QBrush backgroundColor, // QRgb background_brush_color_rgb,
+					    QBrush backgroundColor, 
 					    QTransform zoomTransform)
-					    //size_t selectedField) 
-//					    vector< PpiBeam* > &Beams)
 {
-  // 
-  // for each field
-  //    for each beam
-  //       add beam to field
-  //
+
   LOG(DEBUG) << "enter";
   LOG(DEBUG) << "there are " << _fieldRenderers.size() << " fieldRenderers";
 
+
+  QBrush *background_brush = new QBrush("purple");
+  *background_brush = backgroundColor;
   vector<FieldRendererView *>::iterator it;
-  //for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+
   for (it = _fieldRenderers.begin(); it != _fieldRenderers.end(); ++it) {
 
-    FieldRendererView *field = *it; // _fieldRenderers[ifield];
-      // If needed, create new image for this field                                          
-      QImage *image = field->getImage();
-      // Always refresh image corrects zoom refresh.
-      //if (image != NULL) {
-      //  if (image_size != image->size()) {
-          field->createImage(width, height); // fieldRendererView is locked procede with changes
-          LOG(DEBUG) << "lock obtained";
-          QBrush *background_brush = new QBrush("purple"); // TODO: fix up; free this
-          *background_brush = backgroundColor;
-          field->fillBackground(background_brush); // background_brush_color_rgb);                                  
-          field->setTransform(zoomTransform);
-          field->runIt(); 
-          // fieldRendererView is unlocked
-          LOG(DEBUG) << "lock released";
-          //delete background_brush;
-       // }
-      //}
-  } // ifield                                                                                
+    FieldRendererView *field = *it;
+
+    field->fillBackground(background_brush); // background_brush_color_rgb);                                  
+    field->setTransform(zoomTransform);
+    field->runIt(); 
+
+  } // ifield   
+
+  delete background_brush;   
+
   LOG(DEBUG) << "exit";
 }
 
 
-/*
-void FieldRendererController::refreshImagesAsDeque(int width, int height, QSize image_size,
-					    QRgb background_brush_color_rgb,
-					    QTransform zoomTransform,
-					    size_t selectedField,
-					    deque< RhiBeam* > &Beams)
-{
-  // 
-  // for each field
-  //    for each beam
-  //       add beam to field
-  //
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-
-    FieldRenderer *field = _fieldRenderers[ifield];
-
-    // If needed, create new image for this field                                          
-
-    if (image_size != field->getImage()->size()) {
-      field->createImage(width, height);
-    }
-
-    // clear image                                                                         
-
-    field->getImage()->fill(background_brush_color_rgb);
-
-    // set up rendering details                                                            
-
-    field->setTransform(zoomTransform);
-
-    // Add pointers to the beams to be rendered                                            
-
-    if (ifield == selectedField || field->isBackgroundRendered()) {
-      std::deque< RhiBeam* >::iterator beam;
-      for (beam = Beams.begin(); beam != Beams.end(); ++beam) {
-	(*beam)->setBeingRendered(ifield, true);
-	field->addBeam(*beam);
-      }
-    }
-
-  } // ifield                                                                              
-
-  // do the rendering                                                                      
-
-  performRendering(selectedField);
-
-}
-*/

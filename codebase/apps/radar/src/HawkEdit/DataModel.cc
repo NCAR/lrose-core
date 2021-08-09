@@ -31,6 +31,48 @@ const vector<float> *DataModel::GetData(string fieldName,
        << " sweepIdx=" << sweepIdx;
 
   _vol.loadRaysFromFields();
+
+  RadxSweep *sweep = _vol.getSweepByNumber(sweepIdx);
+  if (sweep == NULL)
+    throw std::invalid_argument("bad sweep index");
+
+  size_t startRayIndex = sweep->getStartRayIndex();
+
+  const RadxField *field;
+
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = _vol.getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(startRayIndex + rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  // cerr << "there arenGates " << nGates;
+  const float *data = field->getDataFl32();
+
+  vector<float> *dataVector = new vector<float>(nGates);
+  dataVector->assign(data, data+nGates);
+
+  return dataVector;
+}
+
+/*
+const vector<float> *DataModel::GetData(string fieldName,
+              int rayIdx, int sweepIdx)  {
+
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
+       << " sweepIdx=" << sweepIdx;
+
+  _vol.loadRaysFromFields();
   
   const RadxField *field;
 
@@ -58,6 +100,7 @@ const vector<float> *DataModel::GetData(string fieldName,
 
   return dataVector;
 }
+*/
 
 void DataModel::SetData(string &fieldName, 
             int rayIdx, int sweepIdx, vector<float> *fieldData) { 
@@ -88,6 +131,27 @@ void DataModel::SetData(string &fieldName,
   const float *flatData = fieldData->data();
   RadxField *field1 = ray->addField(fieldName, "m/s", nGates, missingValue, flatData, isLocal);
   LOG(DEBUG) << "exit ";
+}
+
+void DataModel::SetData(string &fieldName, float value) {
+  RadxField *field;
+  RadxRay *ray;
+
+  size_t nRays = getNRays();
+  for (size_t i = 0; i<nRays; i++) {
+    ray = getRay(i);
+    field = fetchDataField(ray, fieldName);
+    size_t startGate, endGate;
+    startGate = 0;
+    endGate = ray->getNGates();
+    field->setGatesToMissing(startGate, endGate);
+  }
+}
+
+// remove field from volume
+void DataModel::RemoveField(string &fieldName) {
+  int result = _vol.removeField(fieldName);
+  if (result != 0) throw std::invalid_argument("failed to remove field");
 }
 
 void DataModel::readData(string path, vector<string> &fieldNames,
@@ -146,7 +210,10 @@ RadxTime DataModel::getEndTimeSecs() {
 }
 
 void DataModel::writeData(string path) {
+    RadxFile outFile;
 
+      LOG(DEBUG) << "writing to file " << path;
+      outFile.writeToPath(_vol, path);
 }
 
 void DataModel::update() {

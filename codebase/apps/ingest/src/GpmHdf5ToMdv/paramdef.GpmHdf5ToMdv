@@ -159,11 +159,22 @@ commentdef {
   p_header = "OUTPUT FIELDS";
 }
 
+commentdef {
+  p_header = "OUTPUT ENCODING AND COMPRESSION";
+}
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
 typedef struct {
   string groupName;
   string gpmName;
   string outputName;
   string longName;
+  encoding_type_t encoding;
 } output_field_t;
 
 paramdef struct output_field_t {
@@ -173,14 +184,16 @@ paramdef struct output_field_t {
       groupName = "SLV",
       gpmName = "zFactorCorrected",
       outputName = "DBZ",
-      longName = "reflectivity"
+      longName = "reflectivity",
+      encoding = ENCODING_FLOAT32
      }
      ,
      {
       groupName = "FLG",
       gpmName = "qualityFlag",
       outputName = "Qual",
-      longName = "qualityFlag"
+      longName = "qualityFlag",
+      encoding = ENCODING_FLOAT32
      }
     };
   p_descr = "Output fields details.";
@@ -232,21 +245,6 @@ paramdef string {
   p_default = "mdvp:://localhost::/tmp/mdv/gpm";
   p_descr = "URL for writing output files.";
 } output_url;
-
-commentdef {
-  p_header = "OUTPUT ENCODING AND COMPRESSION";
-}
-
-typedef enum {
-  ENCODING_INT8 =      1,
-  ENCODING_INT16 =     2,
-  ENCODING_FLOAT32 =   5
-} encoding_type_t;
-
-paramdef enum encoding_type_t {
-  p_default = ENCODING_INT16;
-  p_descr = "Set output encoding type.";
-} output_encoding_type;
 
 commentdef {
   p_header = "OUTPUT METADATA STRINGS";

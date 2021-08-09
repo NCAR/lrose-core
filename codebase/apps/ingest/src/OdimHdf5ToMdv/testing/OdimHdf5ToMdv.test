@@ -1,0 +1,402 @@
+/**********************************************************************
+ * TDRP params for OdimHdf5ToMdv
+ **********************************************************************/
+
+//======================================================================
+//
+// OdimHdf5ToMdv.
+//
+// This program converts ODIM OPERA grids, in HDF5, to MDV/NetCDF.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with procmap while running.
+//
+// See 'instance'.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// reg_interval ////////////////////////////
+//
+// Registration interval.
+//
+// The number of seconds between expected procmap registrations.
+//
+//
+// Type: int
+//
+
+reg_interval = 60;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in FILELIST mode, at 
+//   least) MUST contain a day-directory below the data file -- 
+//   ./data_file.mdv will not work as a file path.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+//
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+//
+//
+// Type: string
+//
+
+input_dir = "$(HOME)/data/convstrat/OPERA";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+//
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+//
+//
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_age ////////////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+//
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+max_realtime_age = 3600;
+
+///////////// process_latest_file_only ////////////////
+//
+// Option to use only the latest file to have arrived.
+//
+// REALTIME mode only. If true, will process only the latest file on 
+//   startup, if the file has an age less than max_realtime_age. If false, 
+//   on startup will process all files with age less than 
+//   max_realtime_age.
+//
+//
+// Type: boolean
+//
+
+process_latest_file_only = TRUE;
+
+///////////// file_name_ext ///////////////////////////
+//
+// Specify the extension of the files to be read.
+//
+// If blank, all extensions will be used.
+//
+//
+// Type: string
+//
+
+file_name_ext = "";
+
+///////////// file_name_substr ////////////////////////
+//
+// Specify a seach string for the names of the files to be read.
+//
+// If blank, no check will be performed.
+//
+//
+// Type: string
+//
+
+file_name_substr = "";
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Output fields details.
+//
+// These are the fields that will be written to the output files. The 
+//   quantity strings are found under GROUP 'dataset1/2/3' etc, GROUP 
+//   'data1', DATASET 'data'.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string hdf5Name;
+//      string outputName;
+//      string longName;
+//      encoding_type_t encoding;
+//        Options:
+//          ENCODING_INT8
+//          ENCODING_INT16
+//          ENCODING_FLOAT32
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    hdf5Name = "DBZH",
+    outputName = "DBZ",
+    longName = "reflectivity",
+    encoding = ENCODING_FLOAT32
+  }
+  ,
+  {
+    hdf5Name = "QIND",
+    outputName = "QUALITY",
+    longName = "Quality-control",
+    encoding = ENCODING_FLOAT32
+  }
+};
+
+//======================================================================
+//
+// CENSORING.
+//
+//======================================================================
+ 
+///////////// apply_censoring /////////////////////////
+//
+// Option to censor data fields based on quality values stored in a 
+//   separate field.
+//
+// The quality field indicates the confidence that can be placed in the 
+//   data field. A quallity value of 0 indicates a definite problem.
+//
+//
+// Type: boolean
+//
+
+apply_censoring = TRUE;
+
+///////////// censoring ///////////////////////////////
+//
+// Censoring data fields using a quality field.
+//
+// Specify the fields to be censored, and the name of the quality field 
+//   to be used. The data field is censored if the quality field les less 
+//   than the min value or greater than the max value. The names refer to 
+//   the .
+//
+//
+// Type: struct
+//   typedef struct {
+//      string dataHdf5Name;
+//      string qualHdf5Name;
+//      double minQuality;
+//      double maxQuality;
+//   }
+//
+// 1D array - variable length.
+//
+
+censoring = {
+  {
+    dataHdf5Name = "DBZH",
+    qualHdf5Name = "QIND",
+    minQuality = 0.1,
+    maxQuality = 1
+  }
+};
+
+//======================================================================
+//
+// OPTION TO CONVERT OUTPUT GRID TO LAT/LON.
+//
+//======================================================================
+ 
+///////////// adjust_projection_origin ////////////////
+//
+// Option to adjust the projection origin.
+//
+// If the standard projection origin is used, the echoes appear to be in 
+//   the wrong location. This option allows you to adjust the origin to 
+//   get the echoes in the correct place.
+//
+//
+// Type: boolean
+//
+
+adjust_projection_origin = TRUE;
+
+///////////// adjusted_projection_origin_lat //////////
+//
+// Adjusted latitude for the projection origin.
+//
+//
+// Type: double
+//
+
+adjusted_projection_origin_lat = 54;
+
+///////////// adjusted_projection_origin_lon //////////
+//
+// Adjusted longitude for the projection origin.
+//
+//
+// Type: double
+//
+
+adjusted_projection_origin_lon = 9.5;
+
+///////////// convert_output_grid_to_latlon ///////////
+//
+// Option to convert the output grid to lat/lon.
+//
+// If true, the Mdvx class will auto-convert to a suitable lat/lon grid. 
+//   This is performed using a nearest neighbor transformation.
+//
+//
+// Type: boolean
+//
+
+convert_output_grid_to_latlon = FALSE;
+
+//======================================================================
+//
+// OUTPUT URL.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for writing output files.
+//
+//
+// Type: string
+//
+
+output_url = "$(HOME)/data/convstrat/mdv/opera/lambert";
+
+//======================================================================
+//
+// OUTPUT METADATA STRINGS.
+//
+// These will be used if the file does not contain suitable information.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Name of data set.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_name = "OPERA ODIM";
+
+///////////// data_set_source /////////////////////////
+//
+// Source of data.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_source = "Created by OdimHdf5ToMdv";
+
+//======================================================================
+//
+// Z DIMENSION DETAILS.
+//
+// Not currently used - waiting for 3-D grids.
+//
+//======================================================================
+ 
+///////////// radar_min_z_km //////////////////////////
+//
+// Height of lowest level (km).
+//
+//
+// Type: double
+//
+
+radar_min_z_km = 0;
+
+///////////// radar_delta_z_km ////////////////////////
+//
+// Delta height between levels (km).
+//
+//
+// Type: double
+//
+
+radar_delta_z_km = 0.125;
+

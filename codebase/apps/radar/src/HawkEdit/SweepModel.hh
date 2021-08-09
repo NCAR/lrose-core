@@ -76,13 +76,14 @@ public:
 
   //double getSelectedAngle() const { return _selectedAngle; }
 
-  int getSelectedIndex();
+  int getSelectedSweepNumber();
+  void setSelectedAngle(double value);
   
 private:
    // vector<double> somevalues = {100, 200, 300};
 
    float _selectedSweepAngle;
-   int _selectedSweepIndex;  
+   int _selectedSweepNumber;  
 
 };
 

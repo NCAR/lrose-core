@@ -110,7 +110,7 @@ typedef struct {
 paramdef struct field_t {
   p_default = { "DBZ", 0 };
   p_descr = "Reflectivity field details.";
-  p_help = "If the field name is specified, that is used. If the field name is empty, the field number is used.";
+  p_help = "Specify the field name. The use of the field num is deprecated.";
 } dbz_field;
 
 paramdef boolean {
@@ -146,7 +146,7 @@ paramdef boolean {
 paramdef struct field_t {
   p_default = { "VEL", 0 };
   p_descr = "Velocity field details.";
-  p_help = "If the field name is specified, that is used. If the field name is empty, the field number is used. Note that the usage must be consistent with the dbz_field parameter, i.e. if you specify the name for reflectivity you must also specify the name for velocity, and vice versa.";
+  p_help = "Specify the field name. The use of the field num is deprecated.";
 } vel_field;
 
 paramdef double {
@@ -157,13 +157,13 @@ paramdef double {
 
 commentdef {
   p_header = "REMAPPING THE VERTICAL LEVELS TO CONSTANT SPACING.";
-  p_text = "If the input files do not have constant vertical levels, you will need to remap the vertical levels appropriately. See the following parameters.";
+  p_text = "If the input files do not have constant spacing between the vertical levels, they need to be remapped to a constant delta heights. Titan can do this automatically, using the smallest delta Z in the data grid. But you have the option to specify the remapping manually. In that case, use this section to set the following parameters.";
 }
 
 paramdef boolean {
   p_default = false;
   p_descr = "Option to remap the Z levels onto a grid with constant dz.";
-  p_help = "Field data will be remapped onto the specified Z levels using the nearest neighbor method. See 'remap_z_grid'. Note that this actually changes the data. Whereas 'override_vlevels' only changes the vlevels in the headers, and does not change the data.";
+  p_help = "Field data will be remapped onto the specified Z levels using the nearest neighbor method. See 'remap_z_grid'.";
 } remap_z_to_constant_grid;
 
 typedef struct {
@@ -173,8 +173,8 @@ typedef struct {
 } remap_z_grid_t;
 
 paramdef struct remap_z_grid_t {
-  p_default = { 10, 0, 1 };
-  p_descr = "Specified Z levels for remapping.";
+  p_default = { 40, 0.5, 0.5 };
+  p_descr = "Specified Z levels for remapping the vertical levels.";
 } remap_z_grid;
 
 commentdef {

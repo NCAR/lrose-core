@@ -24,16 +24,16 @@
 ///////////////////////////////////////////////////////////////
 // GpmHdf5ToMdv.cc
 //
-// GpmHdf5ToMdv object
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// Oct 2008
+// May 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// GpmHdf5ToMdv reads McIdas data in NetCDF format, and
-// converts to MDV
+// GpmHdf5ToMdv reads GPM data in HDF5 format, and
+// converts to MDV.
+// Originally based on NcGeneric2Mdv.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -41,6 +41,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
+#include <toolsa/str.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
 #include <toolsa/TaArray.hh>
@@ -258,24 +259,6 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
     return -1;
   }
 
-  // interpolate fields onto latlon grid
-
-  _interpField(_dbzInput, _missingDbz, _dbzInterp,
-               _params.interp_using_nearest_neighbor);
-  
-  _interpField(_qualInput, _missingQual, _qualInterp);
-
-  // for DBZ invert the gate levels because the radar gate data is stored
-  // top-down instead of bottom-up
-
-  _invertDbzGateLevels();
-  
-  // optionally remap onto specified output grid vlevels
-  
-  if (_params.remap_gates_to_vert_levels) {
-    _remapVertLevels();
-  }
-
   // create output Mdvx file object
   
   DsMdvx mdvx;
@@ -285,33 +268,57 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
     
   // set master header
   
-  if (_setMasterHeader(mdvx)) {
-    return -1;
-  }
+  _setMasterHeader(mdvx);
   
-  // add the data fields
-  
-  MdvxField *dbzField = _createMdvxField("DBZ",
-                                         "reflectivity",
-                                         _dbzUnits,
-                                         _nx, _ny, _zLevels.size(),
-                                         _minxDeg, _minyDeg, _minzKm,
-                                         _dxDeg, _dyDeg, _dzKm,
-                                         _missingDbz,
-                                         _dbzOutput.data());
-  
-  mdvx.addField(dbzField);
+  // interpolate fields onto latlon grid, and add to the mdvx object
 
-  MdvxField *qualField = _createMdvxField("qual",
-                                          "qualityFlag",
-                                          "",
-                                          _nx, _ny, 1,
-                                          _minxDeg, _minyDeg, _zLevels[0],
-                                          _dxDeg, _dyDeg, 1,
-                                          _missingQual,
-                                          _qualInterp.data());
+  for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+    
+    // get field as it was read in
+    
+    OutputField *fld = _outputFields[ifield];
+    if (!fld->valid) {
+      delete fld;
+      continue;
+    }
+    
+    // interpolate
+    
+    _interpField(fld);
+    
+    // for DBZ invert the gate levels because the radar gate data is stored
+    // top-down instead of bottom-up
+    
+    _invertDbzGateLevels(fld);
   
-  mdvx.addField(qualField);
+    // optionally remap onto specified output grid vlevels
+    
+    if (_params.remap_gates_to_vert_levels) {
+
+      // zlevels are specified
+      
+      _zLevels.resize(_params.output_z_levels_km_n);
+      for (int iz = 0; iz < _params.output_z_levels_km_n; iz++) {
+        _zLevels[iz] = _params._output_z_levels_km[iz];
+      }
+
+      _remapVertLevels(fld);
+
+    }
+
+    // add to mdvx object
+    
+    _addFieldToMdvx(mdvx, fld);
+
+    // delete the field
+
+    delete fld;
+
+  } // ifield
+    
+  // clean up
+
+  _outputFields.clear();
 
   // write output file
   
@@ -751,47 +758,54 @@ int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
 int GpmHdf5ToMdv::_readFields(Group &ns)
   
 {
+  
+  // create the field objects
 
-  // check the data sets
+  _outputFields.clear();
 
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
-
-    Params::output_field_t &fld = _params._output_fields[ifield];
-
-    Hdf5xx hdf5;
-    vector<size_t> dims;
-    string units;
-    H5T_class_t h5class;
-    H5T_sign_t h5sign;
-    H5T_order_t h5order;
-    size_t h5size;
     
-    Group grp(ns.openGroup(fld.groupName));
-    if (hdf5.getVarProps(grp, fld.gpmName,
-                         dims, units, 
-                         h5class, h5sign, h5order, h5size)) {
-      cerr << hdf5.getErrStr() << endl;
+    Params::output_field_t &fldParams = _params._output_fields[ifield];
+
+    OutputField *fld = new OutputField(fldParams);
+
+    Group grp(ns.openGroup(fld->params.groupName));
+    if (fld->hdf5.getVarProps(grp, fld->params.gpmName,
+                              fld->dims, fld->units, 
+                              fld->h5class, fld->h5sign, fld->h5order, fld->h5size)) {
+      cerr << fld->hdf5.getErrStr() << endl;
+      delete fld;
       continue;
     }
 
-    if (_params.debug) {
+    // set interp type
+    
+    if (fld->h5class == H5T_INTEGER) {
+      fld->nearestNeighbor = true;
+    } else {
+      fld->nearestNeighbor = _params.interp_using_nearest_neighbor;
+    }
+
+    // debug print
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Reading fields" << endl;
-      cerr << "  groupName: " << fld.groupName << endl;
-      cerr << "  gpmName: " << fld.gpmName << endl;
+      cerr << "  groupName: " << fld->params.groupName << endl;
+      cerr << "  gpmName: " << fld->params.gpmName << endl;
       cerr << "  dims: ";
-      for (size_t ii = 0; ii < dims.size(); ii++) {
-        cerr << dims[ii];
-        if (ii == dims.size() - 1) {
+      for (size_t ii = 0; ii < fld->dims.size(); ii++) {
+        cerr << fld->dims[ii];
+        if (ii == fld->dims.size() - 1) {
           cerr << endl;
         } else {
           cerr << ", ";
         }
       }
-      if (units.size() > 0) {
-        cerr << "  units: " << units << endl;
+      if (fld->units.size() > 0) {
+        cerr << "  units: " << fld->units << endl;
       }
-      if (h5class == H5T_INTEGER) {
-        if (h5sign == H5T_SGN_NONE) {
+      if (fld->h5class == H5T_INTEGER) {
+        if (fld->h5sign == H5T_SGN_NONE) {
           cerr << "  Is unsigned integer" << endl;
         } else {
           cerr << "  Is signed integer" << endl;
@@ -799,32 +813,88 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
       } else {
         cerr << "  Is float" << endl;
       }
-      if (h5order == H5T_ORDER_LE) {
+      if (fld->h5order == H5T_ORDER_LE) {
         cerr << "  Byte order: little-endian" << endl;
       } else {
         cerr << "  Byte order: big-endian" << endl;
       }
-      cerr << "  Byte len: " << h5size << endl;
+      cerr << "  Byte len: " << fld->h5size << endl;
     }
 
+    _outputFields.push_back(fld);
+    
+    // set number of gates
+    
+    if (fld->dims.size() == 3) {
+      _nGates = fld->dims[2];
+      _zLevels.resize(_nGates);
+      for (size_t iz = 0; iz < _nGates; iz++) {
+        _zLevels[iz] = _minzKm + iz * _dzKm;
+      }
+    }
+    
   } // ifield
 
+  // read in the fields
   
-  _qualAvailable = false;
+  for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
+    
+    OutputField *fld = _outputFields[ifield];
+    if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
 
-  // read reflectivity, to ensure we have the dimensions read in
+      // 16-bit integer
 
-  if (_readField3D(ns, "SLV", "zFactorCorrected",
-                   _dbzInput, _missingDbz, _dbzUnits)) {
-    return -1;
-  }
+      if (fld->dims.size() == 2) {
+        // 2D field
+        if (_readField2D(ns,
+                         fld->params.groupName,
+                         fld->params.gpmName,
+                         fld->si16Input,
+                         fld->si16Missing,
+                         fld->units) == 0) {
+          fld->valid = true;
+        }
+      } else {
+        // 3D field
+        if (_readField3D(ns,
+                         fld->params.groupName,
+                         fld->params.gpmName,
+                         fld->si16Input,
+                         fld->si16Missing,
+                         fld->units) == 0) {
+          fld->valid = true;
+        }
+      } // if (fld->dims.size() == 2)
+      
+    } else { // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
 
-  // read quality flag
+      // read as floats
 
-  if (_readField2D(ns, "FLG", "qualityFlag",
-                   _qualInput, _missingQual, _qualUnits) == 0) {
-    _qualAvailable = true;
-  }
+      if (fld->dims.size() == 2) {
+        // 2D field
+        if (_readField2D(ns,
+                         fld->params.groupName,
+                         fld->params.gpmName,
+                         fld->fl32Input,
+                         fld->fl32Missing,
+                         fld->units) == 0) {
+          fld->valid = true;
+        }
+      } else {
+        // 3D field
+        if (_readField3D(ns,
+                         fld->params.groupName,
+                         fld->params.gpmName,
+                         fld->fl32Input,
+                         fld->fl32Missing,
+                         fld->units) == 0) {
+          fld->valid = true;
+        }
+      } // if (fld->dims.size() == 2)
+      
+    } // if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
+    
+  } // ifield
   
   return 0;
 
@@ -867,7 +937,7 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   if (dims[0] != _nScans || dims[1] != _nRays) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    cerr << "  DBZ dimensions must match nScans and nRays" << endl;
+    cerr << "  dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _nScans: " << _nScans << endl;
@@ -914,8 +984,8 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
 int GpmHdf5ToMdv::_readField3D(Group &ns,
                                const string &groupName,
                                const string &fieldName,
-                               vector<NcxxPort::si32> &vals,
-                               NcxxPort::si32 &missingVal,
+                               vector<NcxxPort::si16> &vals,
+                               NcxxPort::si16 &missingVal,
                                string &units)
   
 {
@@ -926,7 +996,7 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   
   vector<size_t> dims;
   Group grp(ns.openGroup(groupName));
-  if (hdf5.readSi32Array(grp, fieldName,
+  if (hdf5.readSi16Array(grp, fieldName,
                          dims, missingVal, vals, units)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
@@ -945,7 +1015,7 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
   if (dims[0] != _nScans || dims[1] != _nRays) {
     cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
     cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    cerr << "  DBZ dimensions must match nScans and nRays" << endl;
+    cerr << "  dimensions must match nScans and nRays" << endl;
     cerr << "  dims[0]: " << dims[0] << endl;
     cerr << "  dims[1]: " << dims[1] << endl;
     cerr << "  _nScans: " << _nScans << endl;
@@ -1058,81 +1128,6 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
 }
 
 //////////////////////////////////////////////
-// read a 2D field - int32s
-
-int GpmHdf5ToMdv::_readField2D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
-                               vector<NcxxPort::si32> &vals,
-                               NcxxPort::si32 &missingVal,
-                               string &units)
-  
-{
-  
-  Hdf5xx hdf5;
-
-  // read Latitude
-  
-  vector<size_t> dims;
-  
-  Group grp(ns.openGroup(groupName));
-  
-  if (hdf5.readSi32Array(grp, fieldName,
-                         dims, missingVal, vals, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
-    return -1;
-  }
-
-  // check dimensions for consistency
-  
-  if (dims.size() != 2) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
-    cerr << "  2D fields must have 2 dimensions" << endl;
-    cerr << "  dims.size(): " << dims.size() << endl;
-    return -1;
-  }
-  if (dims[0] != _nScans || dims[1] != _nRays) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
-    cerr << "  dimensions must match nScans and nRays" << endl;
-    cerr << "  dims[0]: " << dims[0] << endl;
-    cerr << "  dims[1]: " << dims[1] << endl;
-    cerr << "  _nScans: " << _nScans << endl;
-    cerr << "  _nRays: " << _nRays << endl;
-    return -1;
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> Read 2D int32 group/field: "
-         << groupName << "/" << fieldName << " <<====" << endl;
-    cerr << "  nScans, nRays: " 
-         << _nScans << ", " << _nRays << endl;
-    cerr << "  missingVal: " << missingVal << endl;
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      for (size_t iscan = 0; iscan < _nScans; iscan++) {
-        for (size_t iray = 0; iray < _nRays; iray++) {
-          size_t ipt = iscan * _nRays + iray;
-          if (vals[ipt] != missingVal) {
-            cerr << "  iscan, iray, val: "
-                 << iscan << ", "
-                 << iray << ", "
-                 << vals[ipt] << endl;
-          }
-        } // iray
-      } // iscan
-    } // extra
-  } // verbose
-  
-  return 0;
-
-}
-
-//////////////////////////////////////////////
 // read a 2D field - int16s
 
 int GpmHdf5ToMdv::_readField2D(Group &ns,
@@ -1208,6 +1203,34 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
 }
 
 //////////////////////////////////////////////
+// interpolate the fields
+
+void GpmHdf5ToMdv::_interpField(OutputField *fld)
+
+{
+
+  if (fld->si16Input.size() > 0) {
+
+    _interpField(fld->si16Input,
+                 fld->si16Missing,
+                 fld->si16Interp);
+
+    fld->si16Output = fld->si16Interp;
+
+  } else if (fld->fl32Input.size() > 0) {
+
+    _interpField(fld->fl32Input,
+                 fld->fl32Missing,
+                 fld->fl32Interp,
+                 fld->nearestNeighbor);
+
+    fld->fl32Output = fld->fl32Interp;
+
+  }
+  
+}
+
+//////////////////////////////////////////////
 // interpolate float field
 
 void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
@@ -1230,7 +1253,7 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
     nGates = 1;
   }
   
-  // initialize dbz grid
+  // initialize grid
 
   size_t nOutput = _nx * _ny * nz;
   valsInterp.resize(nOutput);
@@ -1288,84 +1311,6 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::fl32> &valsInput,
 }
 
 //////////////////////////////////////////////
-// interpolate int 32 field
-
-void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si32> &valsInput,
-                                NcxxPort::si32 missingVal,
-                                vector<NcxxPort::si32> &valsInterp)
-  
-{
-
-  // check for 2D field
-
-  bool is2D = false;
-  if (valsInput.size() == _nRays * _nScans) {
-    is2D = true;
-  }
-  size_t nz = _nz;
-  size_t nGates = _nGates;
-  if (is2D) {
-    nz = 1;
-    nGates = 1;
-  }
-  
-  // initialize interp grid
-
-  size_t nOutput = _nx * _ny * nz;
-  valsInterp.resize(nOutput);
-  for (size_t ii = 0; ii < nOutput; ii++) {
-    valsInterp[ii] = missingVal;
-  }
-
-  // loop through the vertical levels
-
-  for (size_t iz = 0; iz < nz; iz++) {
-    
-    double zM = (_minzKm + iz * _dzKm) * 1000.0;
-    
-    // load input vals for this level
-    
-    vector<vector<NcxxPort::si32> > valsIn;
-    for (size_t iscan = 0; iscan < _nScans; iscan++) {
-      vector<NcxxPort::si32> valsScan;
-      for (size_t iray = 0; iray < _nRays; iray++) {
-        size_t ipt = iscan * _nRays * nGates + iray * nGates + iz;
-        valsScan.push_back(valsInput[ipt]);
-      } // iray
-      valsIn.push_back(valsScan);
-    } // iscan
-    
-    // loop through the input (scan, ray) grid
-
-    for (size_t iscan = 0; iscan < _nScans - 1; iscan++) {
-      for (size_t iray = 0; iray < _nRays - 1; iray++) {
-        
-        // corner locations adjusted for radar slant
-        Point_d corners[4];
-        corners[0] = _getCornerLatLon(iscan, iray, zM);
-        corners[1] = _getCornerLatLon(iscan, iray + 1, zM);
-        corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
-        corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
-
-        // dbz vals at corners
-        NcxxPort::si32 vals[4];
-        vals[0] = valsIn[iscan][iray];
-        vals[1] = valsIn[iscan][iray + 1];
-        vals[2] = valsIn[iscan + 1][iray + 1];
-        vals[3] = valsIn[iscan + 1][iray];
-
-        // interp for the output grid points inside the polygon
-        
-        _interpInsidePolygon(corners, vals, missingVal, iz, valsInterp);
-        
-      } // iray
-    } // iscan
-
-  } // iz
-
-}
-
-//////////////////////////////////////////////
 // interpolate int 16 field
 
 void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
@@ -1387,7 +1332,7 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
     nGates = 1;
   }
   
-  // initialize dbz grid
+  // initialize grid
 
   size_t nOutput = _nx * _ny * nz;
   valsInterp.resize(nOutput);
@@ -1425,7 +1370,7 @@ void GpmHdf5ToMdv::_interpField(vector<NcxxPort::si16> &valsInput,
         corners[2] = _getCornerLatLon(iscan + 1, iray + 1, zM);
         corners[3] = _getCornerLatLon(iscan + 1, iray, zM);
 
-        // dbz vals at corners
+        // vals at corners
         NcxxPort::si16 vals[4];
         vals[0] = valsIn[iscan][iray];
         vals[1] = valsIn[iscan][iray + 1];
@@ -1823,56 +1768,61 @@ Point_d GpmHdf5ToMdv::_getCornerLatLon(int iscan,
 }
 
 ////////////////////////////////////////////////////////
+// for DBZ 3D fields,
 // invert the height levels because the data is stored
 // with the top first and decreasing in height 
 
-void GpmHdf5ToMdv::_invertDbzGateLevels()
+void GpmHdf5ToMdv::_invertDbzGateLevels(OutputField *fld)
 {
-
-  // prepare output grid
   
-  _dbzOutput.resize(_dbzInterp.size());
-  _zLevels.resize(_nz);
-  for (size_t iz = 0; iz < _nz; iz++) {
-    _zLevels[iz] = _minzKm + iz * _dzKm;
+  // check for reflectivity
+  
+  if (fld->units != "dBZ" && fld->units != "mm/hr") {
+    return;
   }
 
+  // check for 3D float field
+  
+  if (fld->dims.size() != 3) {
+    return;
+  }
+  if (fld->fl32Input.size() == 0) {
+    return;
+  }
+    
+  // prepare output grid
+    
+  fld->fl32Output.resize(fld->fl32Interp.size());
+  
   // invert vlevels
-
+  
   size_t nptsPlane = _nx * _ny;
   for (size_t iz = 0; iz < _nz; iz++) {
     for (size_t iy = 0; iy < _ny; iy++) {
       for (size_t ix = 0; ix < _nx; ix++) {
         size_t interpIndex = iz * nptsPlane + iy * _nx + ix;
         size_t outputIndex = (_nz - iz - 1) * nptsPlane + iy * _nx + ix;
-        _dbzOutput[outputIndex] = _dbzInterp[interpIndex];
+        fld->fl32Output[outputIndex] = fld->fl32Interp[interpIndex];
       } // ix
     } // iy
   } // iz
-
+  
 }
   
 ////////////////////////////////////////////////////////
+// for 3D fields,
 // remap the gates onto specified vertical levels
 // compute the max for the remapping
 
-void GpmHdf5ToMdv::_remapVertLevels()
+void GpmHdf5ToMdv::_remapVertLevels(OutputField *fld)
 {
-
-  vector<NcxxPort::fl32> outputOrig = _dbzOutput;
-
-  // zlevels are specified
-
-  _zLevels.resize(_params.output_z_levels_km_n);
-  for (int iz = 0; iz < _params.output_z_levels_km_n; iz++) {
-    _zLevels[iz] = _params._output_z_levels_km[iz];
-  }
-
-  // prepare output grid
   
-  size_t nPtsOutput = _nx * _ny * _zLevels.size();
-  _dbzOutput.resize(nPtsOutput);
-
+  // check for 3D field
+  
+  if (fld->dims.size() != 3) {
+    return;
+  }
+  
   // compute heights of mid pt between specified levels
   
   vector<double> zMid;
@@ -1890,26 +1840,73 @@ void GpmHdf5ToMdv::_remapVertLevels()
   for (size_t iz = 0; iz < _zLevels.size() - 1; iz++) {
     highIndex[iz] = (int) ((zMid[iz] - _minzKm) / _dzKm);
   }
+
+  if (fld->fl32Input.size() > 0) {
+    
+    // floats
+    
+    // save existing output in temp array
+    
+    vector<NcxxPort::fl32> outputOrig = fld->fl32Output;
+    
+    // prepare output grid
+    
+    size_t nPtsOutput = _nx * _ny * _zLevels.size();
+    fld->fl32Output.resize(nPtsOutput);
+    
+    // compute max val for specified vlevels
+    
+    size_t nptsPlane = _nx * _ny;
+    for (size_t iy = 0; iy < _ny; iy++) {
+      for (size_t ix = 0; ix < _nx; ix++) {
+        for (size_t iz = 0; iz < _zLevels.size(); iz++) {
+          NcxxPort::fl32 maxVal = fld->fl32Missing;
+          for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
+            size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
+            if (outputOrig[interpIndex] != fld->fl32Missing) {
+              maxVal = max(maxVal, outputOrig[interpIndex]);
+            }
+          } // jz
+          size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
+          fld->fl32Output[outputIndex] = maxVal;
+        } // iz
+      } // ix
+    } // iy
+    
+  } else if (fld->si16Input.size() > 0) {
+    
+    // ints
+    
+    // save existing output in temp array
+    
+    vector<NcxxPort::si16> outputOrig = fld->si16Output;
+    
+    // prepare output grid
+    
+    size_t nPtsOutput = _nx * _ny * _zLevels.size();
+    fld->si16Output.resize(nPtsOutput);
+    
+    // compute max val for specified vlevels
+    
+    size_t nptsPlane = _nx * _ny;
+    for (size_t iy = 0; iy < _ny; iy++) {
+      for (size_t ix = 0; ix < _nx; ix++) {
+        for (size_t iz = 0; iz < _zLevels.size(); iz++) {
+          NcxxPort::si16 maxVal = fld->si16Missing;
+          for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
+            size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
+            if (outputOrig[interpIndex] != fld->si16Missing) {
+              maxVal = max(maxVal, outputOrig[interpIndex]);
+            }
+          } // jz
+          size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
+          fld->si16Output[outputIndex] = maxVal;
+        } // iz
+      } // ix
+    } // iy
+    
+  } // else if (fld->si16Input.size() > 0)
   
-  // compute max dbz for specified vlevels
-
-  size_t nptsPlane = _nx * _ny;
-  for (size_t iy = 0; iy < _ny; iy++) {
-    for (size_t ix = 0; ix < _nx; ix++) {
-      for (size_t iz = 0; iz < _zLevels.size(); iz++) {
-        NcxxPort::fl32 maxDbz = _missingDbz;
-        for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
-          size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
-          if (outputOrig[interpIndex] != _missingDbz) {
-            maxDbz = max(maxDbz, outputOrig[interpIndex]);
-          }
-        } // jz
-        size_t outputIndex = iz * nptsPlane + iy * _nx + ix;
-        _dbzOutput[outputIndex] = maxDbz;
-      } // iz
-    } // ix
-  } // iy
-
 }
   
 /////////////////////////////////////////////////
@@ -1917,7 +1914,7 @@ void GpmHdf5ToMdv::_remapVertLevels()
 //
 // Returns 0 on success, -1 on failure
 
-int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx)
+void GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx)
 
 {
 
@@ -1944,10 +1941,58 @@ int GpmHdf5ToMdv::_setMasterHeader(DsMdvx &mdvx)
   mdvx.setDataSetSource("NASA-GPM");
   mdvx.setDataSetInfo(_history.c_str());
 
-  return 0;
-
 }
 
+///////////////////////////////////
+// Add the Mdvx fields
+
+void GpmHdf5ToMdv::_addFieldToMdvx(DsMdvx &mdvx,
+                                   OutputField *fld)
+
+{
+
+  int nz = _zLevels.size();
+  double minzKm = _zLevels[0];
+  if (fld->dims.size() == 2) {
+    nz = 1;
+  }
+  
+  if (fld->si16Output.size() > 0) {
+    
+    MdvxField *field = _createMdvxField(fld->params.outputName,
+                                        fld->params.longName,
+                                        fld->units,
+                                        _nx, _ny, nz,
+                                        _minxDeg, _minyDeg, minzKm,
+                                        _dxDeg, _dyDeg, _dzKm,
+                                        fld->si16Missing,
+                                        fld->si16Output.data());
+    
+    field->convertType((Mdvx::encoding_type_t) fld->params.encoding,
+                       Mdvx::COMPRESSION_GZIP);
+    
+    mdvx.addField(field);
+    
+  } else if (fld->fl32Output.size() > 0) {
+      
+    MdvxField *field = _createMdvxField(fld->params.outputName,
+                                        fld->params.longName,
+                                        fld->units,
+                                        _nx, _ny, nz,
+                                        _minxDeg, _minyDeg, minzKm,
+                                        _dxDeg, _dyDeg, _dzKm,
+                                        fld->fl32Missing,
+                                        fld->fl32Output.data());
+    
+    field->convertType((Mdvx::encoding_type_t) fld->params.encoding,
+                       Mdvx::COMPRESSION_GZIP);
+    
+    mdvx.addField(field);
+    
+  }
+  
+}
+      
 ///////////////////////////////////
 // Create an Mdvx field - floats
 
@@ -1972,6 +2017,7 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
 
   Mdvx::field_header_t fhdr;
   MEM_zero(fhdr);
+  STRncopy(fhdr.field_name, fieldName.c_str(), MDV_SHORT_FIELD_LEN);
   
   // _inputProj.syncToFieldHdr(fhdr);
 
@@ -2022,8 +2068,6 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
   // converting data to encoding and compression types
   
   MdvxField *field = new MdvxField(fhdr, vhdr, vals);
-  field->convertType((Mdvx::encoding_type_t) _params.output_encoding_type,
-                     Mdvx::COMPRESSION_GZIP);
 
   // set names etc
   
@@ -2060,6 +2104,7 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
 
   Mdvx::field_header_t fhdr;
   MEM_zero(fhdr);
+  STRncopy(fhdr.field_name, fieldName.c_str(), MDV_SHORT_FIELD_LEN);
   
   // _inputProj.syncToFieldHdr(fhdr);
 
@@ -2110,8 +2155,6 @@ MdvxField *GpmHdf5ToMdv::_createMdvxField(const string &fieldName,
   // converting data to encoding and compression types
   
   MdvxField *field = new MdvxField(fhdr, vhdr, vals);
-  field->convertType((Mdvx::encoding_type_t) _params.output_encoding_type,
-                     Mdvx::COMPRESSION_GZIP);
 
   // set names etc
   

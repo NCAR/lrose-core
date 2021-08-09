@@ -290,7 +290,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     table->setItemPrototype(table->item(rows - 1, cols - 1));
     table->setItemDelegate(new SpreadSheetDelegate());
 
-    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionBehavior(QAbstractItemView::SelectItems); // SelectColumns);
 
     createActions();
     LOG(DEBUG) << "Action created\n";
@@ -308,6 +308,9 @@ Q_DECLARE_METATYPE(QVector<double>)
     statusBar();
     connect(table, &QTableWidget::currentItemChanged,
             this, &SpreadSheetView::updateStatus);
+
+   // connect(table, SIGNAL(QTableWidget::horizontalHeader().sectionClicked(int)),
+   //     this, SLOT(SpreadSheetView::columnHeaderClicked(int)));
     //connect(table, &QTableWidget::currentItemChanged,
     //        this, &SpreadSheetView::updateColor);
     //connect(table, &QTableWidget::currentItemChanged,
@@ -340,8 +343,8 @@ void SpreadSheetView::init()
 
 void SpreadSheetView::createActions()
 {
-    cell_deleteAction = new QAction(tr("Delete Field"), this);
-    connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::deleteField);
+    cell_deleteAction = new QAction(tr("Delete"), this);
+    connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::deleteSelection);
 
     cell_negFoldAction = new QAction(tr("&- Fold"), this);
     //cell_addAction->setShortcut(Qt::CTRL | Qt::Key_Plus);
@@ -353,7 +356,7 @@ void SpreadSheetView::createActions()
 
     cell_deleteRayAction = new QAction(tr("&Delete Ray"), this);
     //cell_subAction->setShortcut(Qt::CTRL | Qt::Key_Minus);
-    connect(cell_deleteRayAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+    connect(cell_deleteRayAction, &QAction::triggered, this, &SpreadSheetView::deleteRay);
 
     cell_negFoldRayAction = new QAction(tr("&- Fold Ray"), this);
     //cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
@@ -1228,13 +1231,76 @@ void SpreadSheetView::fieldNamesProvided(vector<string> *fieldNames) {
     LOG(DEBUG) << "exit";
 }
 
-void SpreadSheetView::deleteField() {
-    int currentColumn = table->currentColumn();
-    QTableWidgetItem *currentHeader = table->horizontalHeaderItem(table->currentColumn());
-    if (currentHeader != NULL) {
-        setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
-    }
+// not used 
+void SpreadSheetView::columnHeaderClicked(int index) {
 
+  criticalMessage(to_string(index));
+}
+
+void SpreadSheetView::deleteRay() {
+    LOG(DEBUG) << "enter";
+    // TODO: set the Range to the column
+    int currentColumn = table->currentColumn();
+    //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
+    int top = 1;
+    int left = currentColumn;
+    int bottom = table->rowCount();
+    int right = currentColumn;
+     
+    QTableWidgetSelectionRange range(top, left, bottom, right);
+    bool select = true;
+    table->setRangeSelected(range, select);
+    QString missingValue;
+    missingValue.setNum(_missingDataValue);
+    setSelectionToValue(missingValue);
+
+
+    LOG(DEBUG) << "exit";
+    // select the range, then set the selection to missing value, using setSelection ...
+    //int currentColumn = table->currentColumn();
+    //QTableWidgetItem *currentHeader = table->horizontalHeaderItem(table->currentColumn());
+    //if (currentHeader != NULL) {
+    //    QString label = currentHeader->text();
+    //    float az = getAzimuth(label);
+    //    string fieldName = getFieldName(label);
+        // TODO: keep in view until save or apply? Add an Undo? In configuration dock?
+        // TODO: working here ...
+        //emit setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
+    //}
+
+}
+
+float SpreadSheetView::getAzimuth(QString text) {
+    float azimuth = 0.0;
+    sscanf(text.toStdString().c_str(), "%6.2f", &azimuth); 
+    LOG(DEBUG) << azimuth;
+    return azimuth; 
+}
+
+string SpreadSheetView::getFieldName(QString text) {
+   //QString fieldName("no name");
+   QStringList list1 = text.split('\n');
+   if (list1.size() == 2) {
+      return list1.at(1).toStdString();
+   } else {
+      criticalMessage(text.toStdString().append(" no field name found"));
+      return "";
+   }
+}
+
+void SpreadSheetView::deleteSelection() {
+    QString missingValue;
+    missingValue.setNum(_missingDataValue);
+    int currentColumn = table->currentColumn();
+    QList<QTableWidgetItem *> selectedGates = table->selectedItems();
+    QList<QTableWidgetItem *>::iterator i;
+    for (i = selectedGates.begin(); i != selectedGates.end(); ++i) {
+        QTableWidgetItem *gate = *i;
+        gate->setText(missingValue);
+       // TODO: send signal with QList to controller?  NO. how to set these cells to missing?
+        //   persist to the model? only when Apply or Save is clicked.
+        //emit setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
+    }
 }
 
 void SpreadSheetView::criticalMessage(std::string message)
@@ -1293,29 +1359,6 @@ void  SpreadSheetView::newDataReady()
   setupContents();
 }
 
-void SpreadSheetView::printQJSEngineContext() {
-
-    // print the context ...                                                                                                   
-    LOG(DEBUG) << "current QJSEngine context ...";
-
-    LOG(DEBUG) << "pepsi cola";
-    /*
-    std::map<QString, QString> currentVariableContext;
-    QJSValue theGlobalObject = engine.globalObject();
-
-    QJSValueIterator it2(theGlobalObject);
-    while (it2.hasNext()) {
-      it2.next();
-      QString theValue = it2.value().toString();
-      theValue.truncate(100);
-
-      LOG(DEBUG) << it2.name() << ": " << theValue;
-      currentVariableContext[it2.name()] = it2.value().toString();
-    }
-    */
-    LOG(DEBUG) << "end current QJSEngine context";
-
-}
 
 void SpreadSheetView::closeEvent() {
     emit spreadSheetClosed();

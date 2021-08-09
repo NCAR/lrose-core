@@ -22,11 +22,12 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// DualThresh.hh
+// ClumpDualThresh.hh
 //
-// DualThresh class
-// 
-// This class performs multiple stage threshold identification.
+// This class performs the second stage in
+// multiple threshold identification.
+//
+// Copied over from apps/Titan/DualThresh.cc, and modified for lib use.
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -34,109 +35,139 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef DualThresh_HH
-#define DualThresh_HH
-
-#include "Worker.hh"
-
-class InputMdv;
-class GridClump;
+#ifndef ClumpDualThresh_HH
+#define ClumpDualThresh_HH
 
 #include <dataport/port_types.h>
 #include <rapformats/titan_grid.h>
 #include <euclid/GridClumping.hh>
+#include <euclid/ClumpGrid.hh>
+#include <euclid/PjgGridGeom.hh>
 using namespace std;
 
 ////////////////////////////////
-// DualThresh
+// ClumpDualThresh
 
-class DualThresh : public Worker {
+class ClumpDualThresh {
   
 public:
 
   // constructor
 
-  DualThresh(const string &prog_name, const Params &params,
-	     const InputMdv &input_mdv);
-
+  ClumpDualThresh();
+  
   // destructor
   
-  virtual ~DualThresh();
+  virtual ~ClumpDualThresh();
 
-  // Prepare based on input MDV file
+  // set parameters
+  // Primary and secondary thresholds are usually DBZ
+  // but can be other quantities.
+  // Clump volume is in km3
 
-  void prepare();
+  void setDebug(bool val) { _debug = val; }
+  void setPrimaryThreshold(double val) { _primaryThreshold = val; }
+  void setSecondaryThreshold(double val) { _secondaryThreshold = val; }
+  void setMinFractionAllParts(double val) { _minFractionAllParts = val; }
+  void setMinFractionEachPart(double val) { _minFractionEachPart = val; }
+  void setMinAreaEachPart(double val) { _minAreaEachPart = val; }
+  void setMinClumpVolume(double val) { _minClumpVolume = val; }
+  void setMaxClumpVolume(double val) { _maxClumpVolume = val; }
+
+  // set the input data and grid details
+
+  void setInputData(PjgGridGeom &inputGeom, const fl32 *inputData);
 
   // Compute sub-clumps using the dual threshold.
   // Returns number of sub-clumps.
   
-  int compute(const GridClump &grid_clump);
+  int compute(const ClumpGrid &clump_grid);
 
   // write out MDV file for debugging
-
-  int writeOutputMdv();
+  // int writeOutputMdv();
 
   // sub clumps to be returned to calling class
 
-  const GridClump *subClumps() { return _subClumps; }
+  const ClumpGrid *subClumps() { return _subClumps; }
+
+  // get grids for debug output
+
+  const PjgGridGeom &getGridGeom() const { return _inputGeom; }
+  const fl32* getCompFileGrid() const { return _compFileGrid; }
+  const ui08* getAllFileGrid() const { return _allFileGrid; }
+  const ui08* getValidFileGrid() const { return _validFileGrid; }
+  const ui08* getGrownFileGrid() const { return _grownFileGrid; }
 
 protected:
   
 private:
 
-  const InputMdv &_inputMdv;
-  const titan_grid_t &_inputGrid;
-  GridClumping _clumping;
+  bool _debug;
 
-  int _nxInput;
-  int _nyInput;
+  // input data
+
+  PjgGridGeom _inputGeom;
+  const fl32 *_inputData;
+  int _minValidLayer;
+
+  size_t _nxInput;
+  size_t _nyInput;
   fl32 _missing;
 
-  double _primaryDbzThreshold;
-  double _secondaryDbzThreshold;
+  // parameters
+
+  double _primaryThreshold;
+  double _secondaryThreshold;
   double _minFractionAllParts;
   double _minFractionEachPart;
   double _minAreaEachPart;
+  double _minClumpVolume;
+  double _maxClumpVolume;
 
-  int _nSubClumps;
-  int _nSubClumpsAlloc;
-  GridClump *_subClumps;
+  // clumping
+
+  GridClumping _clumping;
+  size_t _nSubClumps;
+  size_t _nSubClumpsAlloc;
+  ClumpGrid *_subClumps;
   GridClumping **_subClumping;
-  
-  int _nComp;
 
-  int _nxWork, _nyWork;
-  int _nPtsWorkGrid;
+  // grids
+
+  size_t _nComp;
+
+  size_t _nxWork, _nyWork;
+  size_t _nPtsWorkGrid;
 
   fl32* _compWorkGrid;
   ui08* _allWorkGrid;
   ui08* _validWorkGrid;
   ui08* _grownWorkGrid;
-  int _nPtsWorkGridAlloc;
+  size_t _nPtsWorkGridAlloc;
 
   fl32* _compFileGrid;
   ui08* _allFileGrid;
   ui08* _validFileGrid;
   ui08* _grownFileGrid;
-  int _nPtsFileGridAlloc;
+  size_t _nPtsFileGridAlloc;
 
   int *_cIndex;
-  int _cIndexAlloc;
+  size_t _cIndexAlloc;
 
   ui08 *_gridMask;
-  int _nPtsGridMaskAlloc;
+  size_t _nPtsGridMaskAlloc;
 
   void _initWorkGrids();
   void _initFileGrids();
-  void _fillCompDbz(const GridClump &grid_clump);
-  void _updateFileGrids(const GridClump &grid_clump);
-  void _updateFileComp(const GridClump &grid_clump);
+  void _fillComposite(const ClumpGrid &clump_grid);
+  void _updateFileGrids(const ClumpGrid &clump_grid);
+  void _updateFileComp(const ClumpGrid &clump_grid);
   void _loadCompIndex();
   void _growSubAreas();
   void _allocSubClumps();
-  void _computeSubClump(const GridClump &grid_clump, int clump_id);
+  void _computeSubClump(const ClumpGrid &clump_grid, int clump_id);
   void _initGridMask();
-  void _loadGridMask(const GridClump &grid_clump, int clump_id);
+  void _loadGridMask(const ClumpGrid &clump_grid, int clump_id);
 
 };
 

@@ -34,11 +34,11 @@
 
 #include "Props.hh"
 #include "Area.hh"
-#include "GridClump.hh"
 #include "InputMdv.hh"
 
 #include <toolsa/umisc.h>
 #include <rapmath/umath.h>
+#include <euclid/ClumpGrid.hh>
 using namespace std;
 
 #define MAX_EIG_DIM 3
@@ -129,22 +129,22 @@ Area::~Area()
 // compute()
 //
 
-void Area::compute(const GridClump &grid_clump,
+void Area::compute(const ClumpGrid &clump_grid,
 		   storm_file_global_props_t *gprops,
 		   dbz_hist_entry_t *dbz_hist)
 
 {
 
   _gProps = gprops;
-  _gProps->bounding_min_ix = grid_clump.startIx;
-  _gProps->bounding_min_iy = grid_clump.startIy;
-  _gProps->bounding_max_ix = grid_clump.startIx + grid_clump.nX - 1;
-  _gProps->bounding_max_iy = grid_clump.startIy + grid_clump.nY - 1;
+  _gProps->bounding_min_ix = clump_grid.startIx;
+  _gProps->bounding_min_iy = clump_grid.startIy;
+  _gProps->bounding_max_ix = clump_grid.startIx + clump_grid.nX - 1;
+  _gProps->bounding_max_iy = clump_grid.startIy + clump_grid.nY - 1;
 
   // compute grid sizes, and set grid params
 
-  _nX = grid_clump.nX;
-  _nY = grid_clump.nY;
+  _nX = clump_grid.nX;
+  _nY = clump_grid.nY;
   _nPoints = _nX * _nY;
 
   // check memory allocation and zero out grids
@@ -153,15 +153,15 @@ void Area::compute(const GridClump &grid_clump,
 
   // load up composite grid with 1's to indicate projected area
 
-  for (int intv = 0; intv < grid_clump.nIntervals; intv++) {
-    const Interval &intvl = grid_clump.intervals[intv];
+  for (int intv = 0; intv < clump_grid.nIntervals; intv++) {
+    const Interval &intvl = clump_grid.intervals[intv];
     int offset = (intvl.row_in_plane * _nX) + intvl.begin;
     memset((_compGrid + offset), 1, intvl.len);
   }
   
   // projected area comps
   
-  _ellipseCompute(grid_clump,
+  _ellipseCompute(clump_grid,
 		  _compGrid,
 		  &_gProps->proj_area,
 		  &_gProps->proj_area_centroid_x,
@@ -172,7 +172,7 @@ void Area::compute(const GridClump &grid_clump,
 
   // compute polygon for projected area
   
-  _computeProjPolygon(grid_clump);
+  _computeProjPolygon(clump_grid);
 
   // precip
 
@@ -180,8 +180,8 @@ void Area::compute(const GridClump &grid_clump,
   
   Params::precip_mode_t precipMode = _params.precip_computation_mode;
   
-  for (int intv = 0; intv < grid_clump.nIntervals; intv++) {
-    const Interval &intvl = grid_clump.intervals[intv];
+  for (int intv = 0; intv < clump_grid.nIntervals; intv++) {
+    const Interval &intvl = clump_grid.intervals[intv];
     int izPlane = intvl.plane + _inputMdv.minValidLayer;
     if (precipMode == Params::PRECIP_FROM_COLUMN_MAX ||
         precipMode == Params::PRECIP_FROM_LOWEST_AVAILABLE_REFL) {
@@ -202,7 +202,7 @@ void Area::compute(const GridClump &grid_clump,
   
   // precip area comps
   
-  _ellipseCompute(grid_clump,
+  _ellipseCompute(clump_grid,
                   _precipGrid,
                   &_gProps->precip_area,
                   &_gProps->precip_area_centroid_x,
@@ -213,13 +213,13 @@ void Area::compute(const GridClump &grid_clump,
   
   // compute precip and 2D reflectivity histogram
   
-  _computePrecip(grid_clump);
+  _computePrecip(clump_grid);
   _compute2dDbzHist(dbz_hist);
 
   // compute tops
 
   if (_params.set_dbz_threshold_for_tops) {
-    _computeTops(grid_clump);
+    _computeTops(clump_grid);
   }
 
 }
@@ -229,7 +229,7 @@ void Area::compute(const GridClump &grid_clump,
 //
 // Store the projected area runs in the storm file handle
 
-int Area::storeProjRuns(const GridClump &grid_clump)
+int Area::storeProjRuns(const ClumpGrid &clump_grid)
 
 {
 
@@ -239,8 +239,8 @@ int Area::storeProjRuns(const GridClump &grid_clump)
   _sfile.AllocHist(_nDbzHistIntervals);
   _sfile.AllocProjRuns(nIntervals);
   
-  int start_ix = grid_clump.startIx;
-  int start_iy = grid_clump.startIy;
+  int start_ix = clump_grid.startIx;
+  int start_iy = clump_grid.startIy;
   
   Interval *intvl = _boundary.intervals();
   storm_file_run_t *run = _sfile._proj_runs;
@@ -283,7 +283,7 @@ void Area::_allocGrids()
 //       ellipse_area is in sq grid_units.
 //
 
-void Area::_ellipseCompute(const GridClump &grid_clump,
+void Area::_ellipseCompute(const ClumpGrid &clump_grid,
 			   ui08 *grid,
 			   fl32 *area,
 			   fl32 *area_centroid_x,
@@ -299,17 +299,17 @@ void Area::_ellipseCompute(const GridClump &grid_clump,
    * check coords allocation
    */
 
-  int max_coords = grid_clump.grid.nx * grid_clump.grid.ny;
+  int max_coords = clump_grid.grid.nx() * clump_grid.grid.ny();
   _allocCoords(max_coords);
 
   // load up coords
 
   int n_coords = 0;
-  double dy = grid_clump.grid.dy;
-  double dx = grid_clump.grid.dx;
-  double yy = grid_clump.grid.miny + grid_clump.startIy * dy;
+  double dy = clump_grid.grid.dy();
+  double dx = clump_grid.grid.dx();
+  double yy = clump_grid.grid.miny() + clump_grid.startIy * dy;
   for (int iy = 0; iy < _nY; iy++, yy += dy) {
-    double xx = grid_clump.grid.minx + grid_clump.startIx * dx;
+    double xx = clump_grid.grid.minx() + clump_grid.startIx * dx;
     for (int ix = 0; ix < _nX; ix++, xx += dx) {
       if (*grid) {
 	_areaCoords[n_coords][0] = xx;
@@ -331,8 +331,8 @@ void Area::_ellipseCompute(const GridClump &grid_clump,
     
   } else {
     
-    *area = (double) n_coords * grid_clump.dAreaAtCentroid;  
-    double area_ellipse = (double) n_coords * grid_clump.dAreaEllipse;
+    *area = (double) n_coords * clump_grid.dAreaAtCentroid;  
+    double area_ellipse = (double) n_coords * clump_grid.dAreaEllipse;
     
     // obtain the principal component transformation for the coord data
     // The technique is applicable here because the first principal
@@ -432,7 +432,7 @@ void Area::_allocCoords(const int n_coords)
 // _computeProjPolygon
 //
 
-void Area::_computeProjPolygon(const GridClump &grid_clump)
+void Area::_computeProjPolygon(const ClumpGrid &clump_grid)
 
 {
   
@@ -442,16 +442,16 @@ void Area::_computeProjPolygon(const GridClump &grid_clump)
   // other computations are relative to the center of the
   // grid rectangles.
   
-  double dx = grid_clump.grid.dx;
-  double dy = grid_clump.grid.dy;
+  double dx = clump_grid.grid.dx();
+  double dy = clump_grid.grid.dy();
 
   double ref_x =
-    (0.5 + ((_gProps->proj_area_centroid_x - grid_clump.grid.minx) / dx) - 
-     grid_clump.startIx);
+    (0.5 + ((_gProps->proj_area_centroid_x - clump_grid.grid.minx()) / dx) - 
+     clump_grid.startIx);
   
   double ref_y =
-    (0.5 + ((_gProps->proj_area_centroid_y - grid_clump.grid.miny) / dy) - 
-     grid_clump.startIy);
+    (0.5 + ((_gProps->proj_area_centroid_y - clump_grid.grid.miny()) / dy) - 
+     clump_grid.startIy);
   
   // compute the boundary
 
@@ -468,7 +468,7 @@ void Area::_computeProjPolygon(const GridClump &grid_clump)
 ///////////////////////////////
 // compute precip
 
-void Area::_computePrecip(const GridClump &grid_clump)
+void Area::_computePrecip(const ClumpGrid &clump_grid)
      
 {
 
@@ -491,8 +491,8 @@ void Area::_computePrecip(const GridClump &grid_clump)
   ii = 0;
   for (int iy = 0; iy < _nY; iy++) {
     
-    int mm = (iy + grid_clump.startIy) * _inputMdv.grid.nx +
-      + grid_clump.startIx;
+    int mm = (iy + clump_grid.startIy) * _inputMdv.grid.nx +
+      + clump_grid.startIx;
     
     for (int ix = 0; ix < _nX; ix++, ii++, mm++) {
 
@@ -556,7 +556,7 @@ void Area::_computePrecip(const GridClump &grid_clump)
   // compute precip flux in m/s
   
   _gProps->precip_flux =
-    ((sum_factor * grid_clump.dAreaAtCentroid * _zFactor) / 3.6);
+    ((sum_factor * clump_grid.dAreaAtCentroid * _zFactor) / 3.6);
 
 }
 
@@ -604,7 +604,7 @@ void Area::_compute2dDbzHist(dbz_hist_entry_t *dbz_hist)
 // compute storm tops based on 'tops_dbz_threshold'
 //
 
-void Area::_computeTops(const GridClump &grid_clump)
+void Area::_computeTops(const ClumpGrid &clump_grid)
      
 {
 
@@ -623,7 +623,7 @@ void Area::_computeTops(const GridClump &grid_clump)
     for (int iy = 0; iy < _nY; iy++) {
 
       int index =
-        (iy + grid_clump.startIy) * _inputMdv.grid.nx + grid_clump.startIx;
+        (iy + clump_grid.startIy) * _inputMdv.grid.nx + clump_grid.startIx;
 
       const fl32 *dbz = dbzPlane + index;
       for (int ix = 0; ix < _nX; ix++, flag++, dbz++) {

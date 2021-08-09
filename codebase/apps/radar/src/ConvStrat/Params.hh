@@ -423,6 +423,10 @@ public:
 
   double min_valid_fraction_for_fit;
 
+  double texture_limit_low;
+
+  double texture_limit_high;
+
   double min_convectivity_for_convective;
 
   double max_convectivity_for_stratiform;
@@ -458,7 +462,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[45];
+  mutable TDRPtable _table[48];
 
   const char *_className;
 
