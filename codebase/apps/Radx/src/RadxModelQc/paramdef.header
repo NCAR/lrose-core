@@ -1,0 +1,6 @@
+commentdef
+{
+  p_header = "RadxModelQc";
+  p_text = "Parameters for data filtering of Radx format input data to produce quality control measures";
+};
+

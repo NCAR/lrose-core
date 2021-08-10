@@ -17,49 +17,9 @@ commentdef
 
 paramdef string
 {
-  p_descr = "Fixed constant strings that are interpreted by user functions";
-  p_default = {};
-} fixed_const[];
-
-paramdef string
-{
-  p_descr = "Non gridded data names";
-  p_default = { };
-} user_data[];
-
-paramdef string
-{
-  p_descr = "Volume Filters to apply before doing ray filters";
-  p_default = {
-  };
-} volume_before_filter[];  
-
-paramdef string
-{
-  p_descr = "Sweep filters to apply";
-  p_default = {
-  };
-} sweep_filter[];  
-
-paramdef string
-{
-  p_descr = "Single ray Filters to apply";
-  p_default = {
-  };
-} ray_filter[];  
-
-paramdef string
-{
-  p_descr = "Volume Filters to apply after doing ray filters";
-  p_default = {};
-} volume_after_filter[];  
-
-
-paramdef string
-{
   p_descr = "input field name";
   p_help = "name of field to take median of from input";
-  p_default = "unknown";
+  p_default = "DBZ_F";
 } input_field;
 
 paramdef string
@@ -73,40 +33,40 @@ paramdef double
 {
   p_descr = "minimum bin value";
   p_help = "The median is in bins from min to max in increments of delta";
-  p_default = -100;
+  p_default = -50;
 } min_bin;
 
 paramdef double
 {
   p_descr = "maximum bin value";
   p_help = "The median is in bins from min to max in increments of delta";
-  p_default = 100;
+  p_default = 75;
 } max_bin;
 
 paramdef double
 {
   p_descr = "delta bin value";
   p_help = "The median is in bins from min to max in increments of delta";
-  p_default = 100;
+  p_default = 1;
 } delta_bin;
 
 paramdef double
 {
   p_descr = "Fixed storage elevation values";
   p_help = "List of target elevation angles (the angles seem to wobble a lot). Inputs are mapped to one of these using tolerance params";
-  p_default = {};
+  p_default = {  0.0, 0.5, 1.4, 2.5, 3.7, 5, 20 };
 } fixedElevations[];
 
 paramdef double
 {
   p_descr = "azimumth tolerance";
   p_help = "allowed degrees difference between azimuth values from different volumese to be considered part of the same ray";
-  p_default = 0.1;
+  p_default = 0.2;
 } azToleranceDegrees;
 
 paramdef double
 {
   p_descr = "elevation tolerance";
   p_help = "allowed degrees difference between elevation values from different volumese to be considered part of the same ray";
-  p_default = 0.1;
+  p_default = 0.25;
 } elevToleranceDegrees;

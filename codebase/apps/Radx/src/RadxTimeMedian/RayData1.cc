@@ -3,12 +3,12 @@
  */
 #include "RayData1.hh"
 #include "Volume.hh"
+#include "Parms.hh"
 #include "RayHisto.hh"
 #include "RadxTimeMedian.hh"
 #include <rapmath/ProcessingNode.hh>
 #include <toolsa/LogStream.hh>
 
-const std::string RayData1::_accumHistoStr = "AccumulateHisto";
 
 //------------------------------------------------------------------
 RayData1::RayData1(void) : RadxAppRayData()
@@ -30,7 +30,7 @@ RayData1::~RayData1(void)
 //------------------------------------------------------------------
 void RayData1::radxappAppendUnaryOperators(std::vector<FunctionDef> &ret) const
 {
-  ret.push_back(FunctionDef(_accumHistoStr, "v", "field", 
+  ret.push_back(FunctionDef(Parms::_histoAccumStr, "v", "field", 
 			    "update histogram info for this field"));
 }
 
@@ -38,7 +38,7 @@ void RayData1::radxappAppendUnaryOperators(std::vector<FunctionDef> &ret) const
 bool RayData1::radxappUserLoopFunction(const std::string &keyword,
 				       ProcessingNode &p)
 {
-  if (keyword == _accumHistoStr)
+  if (keyword == Parms::_histoAccumStr)
   {
     return _processAccumHisto(*(p.unaryOpArgs()));
   }

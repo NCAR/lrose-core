@@ -15,41 +15,98 @@ commentdef
 
 paramdef string
 {
-  p_descr = "Fixed constant strings that are interpreted by user functions";
-  p_default = {};
+  p_descr = "Fixed constant strings that are used in user functions";
+  p_default = {
+    "NyquistFloor=25.0",
+    "MinRangeKm=2.0",
+    "ShapeComputeModeDiamonds=0",
+    "ShapeComputeModePerimeter=1",
+    "ShapeSizeKm=6"
+  };
 } fixed_const[];
 
 paramdef string
 {
-  p_descr = "Non gridded data names";
-  p_default = {};
+  p_descr = "Non gridded data names. These names refer to objects specific to the app";
+  p_default = {"Template0", "Template1", "Template2"};
 } user_data[];
 
 paramdef string
 {
-  p_descr = "Volume Filters to apply before the sweep filters";
-  p_default = {};
+  p_descr = "Filters to apply before the sweep filters";
+  p_help = "-print_operators to see explanations of the filters used";
+  p_default = {
+    "Template0 = ParmsTemplate(10, 8, 2)",
+    "Template1 = ParmsTemplate(10, 5, 5)",
+    "Template2 = ParmsTemplate(5, 2, 4)",
+    "MesoFuzzy = ParmsFuzzy(0, 0, 8, 0.25, 15, 0.5, NyquistFloor, 1)",
+    "PcntLessThanNyquistFuzzy = ParmsFuzzy(0.0, 1.0, 0.5, 0.8, 0.7, 0.2, 1.0, 0.0)",
+    "LargePosNegFuzzy = ParmsFuzzy(0.0, 1.0, 0.1, 0.8, 0.5, 0.5, 1.0, 0.0)",
+    "InvertInterestFuzzy0 = ParmsFuzzy(0.0, 1.0, 0.2, 0.8, 0.3, 0.1, 0.4, 0.0)",
+    "CTemplate = ParmsCircularTemplate(5, MinRangeKm)"
+  };
 } volume_before_filter[];  
 
 paramdef string
 {
-  p_descr = "Filters (sweep) to apply";
+  p_descr = "Filters to apply to each sweep";
+  p_help = "-print_operators to see explanations of the filters used";
   p_default = {
-   "Meso1 = MesoTemplate(VEL, 20, 20, 10, 20)",
-   "Meso2 = MesoTemplate(VEL, 20, 20, 10, -20)"};
+    "PcntNyquist = PercentOfAbsMax($(VEL_NAME), NyquistFloor)",
+    "LessThanNy = PercentLessThan(PcntNyquist, CTemplate, 0.9)",
+    "PosNegNy = LargePositiveNegative(PcntNyquist, CTemplate, 0.9)",
+    "FLessThanNy = VirtVolFuzzy(LessThanNy, PcntLessThanNyquistFuzzy)",
+    "FPosNegNy = VirtVolFuzzy(PosNegNy, LargePosNegFuzzy)",
+    "AbsNyq = abs(PcntNyquist)",
+    "NyqAve = SmoothPolar(AbsNyq, CTemplate)",
+    "NyqCalib = FLessThanNy*FPosNegNy",
+    "IsNyquist0 = NyqCalib*NyqAve",
+    "IsNyquist = DilatePolar(IsNyquist0, CTemplate)",
+    "IsNotNyquist = VirtVolFuzzy(IsNyquist, InvertInterestFuzzy0)",
+
+    "Meso100 = MesoTemplate($(VEL_NAME), Template0, 0.6, 10, 0.5, MesoFuzzy)",
+    "Meso10 = mask(Meso100, -1, 0)",  // maybe don't need these masks
+    "Nyq10 = IsNotNyquist*Meso10",
+    "Clump10 = ClumpFilt(Nyq10, 0.2, 0.5)",
+    "Final10 = mask(Clump10, 0.0, 0.2)",
+    "Meso200 = MesoTemplate($(VEL_NAME), Template1, 0.6, 10, 0.5, MesoFuzzy)",
+    "Meso20 = mask(Meso200, -1, 0)",  // maybe don't need these masks
+    "Nyq20 = IsNotNyquist*Meso20",
+    "Clump20 = ClumpFilt(Nyq20, 0.2, 0.5)",
+    "Final20 = mask(Clump20, 0.0, 0.2)",
+
+    "Meso300 = MesoTemplate($(VEL_NAME), Template2, 0.6, 10, 0.5, MesoFuzzy)",
+    "Meso30 = mask(Meso300, -1, 0)",  // maybe don't need these masks
+    "Nyq30 = IsNotNyquist*Meso30",
+    "Clump30 = ClumpFilt(Nyq30, 0.2, 0.5)",
+    "Final30 = mask(Clump30, 0.0, 0.2)",
+    "Final = maximum(Final10, Final20, Final30)",
+
+    "Shear10 = AzShearPolar($(VEL_NAME), 12, 1)",
+    "Shear20 = AzShearPolar($(VEL_NAME), 10, 1)",
+    "Shear11 = AzShearPolar($(VEL_NAME), 12, 0)",
+    "Shear21 = AzShearPolar($(VEL_NAME), 10, 0)"
+  };
 } filter[];  
 
 
 paramdef string
 {
   p_descr = "Volume Filters to apply after the sweep filters";
-  p_default = {};
+  p_help = "-print_operators to see explanations of the filters used";
+  p_default = {
+    "Vertical =  VerticalConsistency(Final, IsNyquist, CTemplate)",
+    "Vclumps = VerticalDataClumpFilt(Vertical, 0.3, 0.4)",
+    "shapes = ComputeFixedSizeShapes(Vclumps, ShapeSizeKm)"
+  };
 } volume_after_filter[];  
 
 paramdef string
 {
-  p_descr = "Parameter file with 2d output fields";
-  p_default = "";
+  p_descr = "URL Parameter file with 2d output fields. The other output URL param files (output_url array)) have full volume fields";
+  p_help = "This param file is read and parsed.  The names should match filter descriptions\n"
+    "Each file contains information as to the URL name, type, and data content, as well as named data fields";
+  p_default = "UrlOutput2d.parms";
 } output_url_2d;
 
 paramdef string
@@ -61,12 +118,12 @@ paramdef string
 
 paramdef string
 {
-  p_descr = "URL to output shapes";
-  p_default = "";
+  p_descr = "URL where output shapes are written (SPDB)";
+  p_default = "spdbp:://localhost::spdbPath";
 } shapes_url;
 
 paramdef int
 {
-  p_descr = "Shape expiration seconds";
+  p_descr = "Shape expiration seconds. To put into the SPDB data";
   p_default = 60;
 } shapes_expire_seconds;

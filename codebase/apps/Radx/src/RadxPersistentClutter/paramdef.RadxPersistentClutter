@@ -7,71 +7,38 @@
  * 
  */
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+// commentdef
+// {
+//   p_header = "RadxPersistentClutter - parameters for setting clutter locations of one input field.";
+//   p_text = "Based on paper: Lakshmanan V., J. Zhang, K. Hondl and C. Langston: A Statistical Approach to Mitigating Persistent Clutter in Radar Reflectivity Data. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, Vol. 5, No. 2, April 2012.\n";
+// };
+
 commentdef
 {
-  p_header = "RadxPersistentClutter - parameters for setting clutter locations of one input field.";
-  p_text = "Based on paper: Lakshmanan V., J. Zhang, K. Hondl and C. Langston: A Statistical Approach to Mitigating Persistent Clutter in Radar Reflectivity Data. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, Vol. 5, No. 2, April 2012.\n";
+  p_header = "RadxPersistentClutter Algorithm Specific paramters";
+  p_text = "tbd";
 };
-
-paramdef string
-{
-  p_descr = "Fixed constant strings that are interpreted by user functions";
-  p_default = {};
-} fixed_const[];
-
-paramdef string
-{
-  p_descr = "Non gridded data names";
-  p_default = { };
-} user_data[];
-
-paramdef string
-{
-  p_descr = "Volume Filters to apply before doing ray filters";
-  p_default = {
-  };
-} volume_before_filter[];  
-
-paramdef string
-{
-  p_descr = "Sweep filters to apply";
-  p_default = {
-  };
-} sweep_filter[];  
-
-paramdef string
-{
-  p_descr = "Single ray Filters to apply";
-  p_default = {
-  };
-} ray_filter[];  
-
-paramdef string
-{
-  p_descr = "Volume Filters to apply after doing ray filters";
-  p_default = {};
-} volume_after_filter[];  
 
 paramdef string
 {
   p_descr = "input field name";
   p_help = "name of field to find clutter in";
-  p_default = "unknown";
+  p_default = "DBMVC";
 } input_field;
 
 paramdef string
 {
   p_descr = "output field name";
   p_help = "name to give final output clutter field";
-  p_default = "clutter";
+  p_default = "DBMVC";
 } output_field;
 
 paramdef double
 {
   p_descr = "threshold";
   p_help = "If data is always above this value it is a clutter location";
-  p_default = 0.0;
+  p_default = -95.0;
 } threshold;
 
 paramdef double
@@ -85,7 +52,7 @@ paramdef double
 {
   p_descr = "Fixed storage elevation values";
   p_help = "List of target elevation angles (the angles seem to wobble a lot). Inputs are mapped to one of these using tolerance params";
-  p_default = {};
+  p_default = {0.5};
 } fixedElevations[];
 
 paramdef double
@@ -113,21 +80,20 @@ paramdef string
 {
   p_descr = "location for main output";
   p_help = "see diagnostic_output description";
-  p_default = "unknown";
+  p_default = "/d1/fieldData/rsfdata/clutter_final/sband/sur";
 } final_output_url;
 
 paramdef string
 {
   p_descr = "Output ascii file path in which to write plottables";
-  p_help = "";
-  p_default = ".";
+  p_default = "/d1/fieldData/rsfdata/projects/clutter";
 } output_ascii_path;
 
 paramdef double
 {
   p_descr = "missing clutter value";
   p_help = "value to give clutter estimates when the wanted percentile is the missing data value";
-  p_default = -25.0;
+  p_default = -115.0;
 } missing_clutter_value;
 
 paramdef double
@@ -141,7 +107,7 @@ paramdef double
 {
   p_descr = "Maximum percent of pixels that can change for convergence";
   p_help = "The percentage of pixels that change from clutter to nonclutter or back should decrease to a minimum for convergence";
-  p_default = 0.001;
+  p_default = 0.02;
 } maximum_percent_change;
 
 paramdef double

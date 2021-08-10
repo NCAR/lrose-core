@@ -28,6 +28,7 @@ HDRS =
 CPPC_SRCS = \
 	Params.cc \
 	Parms.cc \
+	HeaderParams.cc \
 	Main.cc \
 	MesoTemplate.cc \
 	RadxMesoCyclone.cc \
@@ -53,6 +54,10 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
+
+HeaderParams.cc: paramdef.header
+	tdrp_gen -f paramdef.header -c++ -class HeaderParams
+
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

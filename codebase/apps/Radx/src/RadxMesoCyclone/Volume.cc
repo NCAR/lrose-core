@@ -44,8 +44,7 @@ std::vector<FunctionDef> Volume::userUnaryOperators(void) const
 {
   std::vector<FunctionDef> ret;
   ret.push_back(FunctionDef(_parmsTemplateStr, "M", "x, y, offset",
-			    "At each point Two boxes of dimension x by y km centered offset\n"
-			    " km on either side of the point (in y)"));
+			    "Create templates, each of which is two boxes of dimension x by y km centered offset km on either side of a point.  At each x the template has different content due to azimuthal (y) spacing getting bigger further away so less point are in the template"));
   return ret;
 }
 

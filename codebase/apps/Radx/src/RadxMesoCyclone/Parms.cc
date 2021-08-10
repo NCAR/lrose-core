@@ -4,6 +4,7 @@
 
 //------------------------------------------------------------------
 #include "Parms.hh"
+#include "HeaderParams.hh"
 #include "RadxMesoCyclone.hh"
 #include <toolsa/LogStream.hh>
 #include <vector>
@@ -92,8 +93,10 @@ void Parms::setFiltersFromParms(void)
 //------------------------------------------------------------------
 void Parms::printParams(tdrp_print_mode_t printMode)
 {
-  Params::print(stdout, printMode);
+  HeaderParams h;
+  h.print(stdout, printMode);
   FiltAlgParms::printParams(printMode);
+  Params::print(stdout, printMode);
 }
 
 //------------------------------------------------------------------
