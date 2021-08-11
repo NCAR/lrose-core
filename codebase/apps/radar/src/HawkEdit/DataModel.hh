@@ -56,6 +56,10 @@ public:
   void update();
   void SetData(string &fieldName, 
             int rayIdx, int sweepIdx, vector<float> *fieldData);
+  void SetData(string &fieldName, 
+            float azimuth, float sweepAngle, vector<float> *fieldData);
+  void SetData(string &fieldName, 
+            int rayIdx, RadxSweep *sweep, vector<float> *fieldData);
 
   void SetData(string &fieldName, float value);
 
@@ -74,14 +78,17 @@ public:
   RadxField *fetchDataField(RadxRay *ray, string &fieldName);
   const float *fetchData(RadxRay *ray, string &fieldName);
   size_t getNRays(); // string fieldName, double sweepAngle);
+  size_t getNRays(int sweepNumber);
   const vector<RadxRay *> &getRays();
   RadxRay *getRay(size_t rayIdx);
-  vector<float> *getRayData(size_t rayIdx, string fieldName, double sweepHeight);
+  vector<float> *getRayData(size_t rayIdx, string fieldName); // , double sweepHeight);
   float getMissingFl32(string fieldName);
   double getRayAzimuthDeg(size_t rayIdx);
 
   int getNSweeps();
   vector<double> *getSweepAngles();
+  int getSweepNumber(float elevation);
+
   const string &getPathInUse();
   const RadxPlatform &getPlatform();
 
@@ -95,7 +102,12 @@ public:
 
   int getNGates(size_t rayIdx, string fieldName = "", double sweepHeight = 0.0);
 
+  size_t findClosestRay(float azimuth, int sweepNumber); // float elevation);
+  size_t getRayIndex(size_t baseIndex, int offset, int sweepNumber);
 
+  void printAzimuthInRayOrder();
+
+  
 private:
   
   DataModel();
@@ -103,6 +115,8 @@ private:
   void init();
   void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
+
+  size_t calculateRayIndex_f(size_t idx, size_t start, size_t end, int offset);
 
 //DataModel *DataModel::_instance = NULL;  
   static DataModel *_instance;

@@ -1891,78 +1891,7 @@ void PpiWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMa
 
  
 void PpiWidget::ExamineEdit(double azimuth, double elevation, size_t fieldIndex) {   
-/* moved to PolarManager ...
-  // get an version of the ray that we can edit
-  // we'll need the az, and sweep number to get a list from
-  // the volume
 
-  LOG(DEBUG) << "azimuth=" << azimuth << ", elevation=" << elevation << ", fieldIndex=" << fieldIndex;
-  vector<RadxRay *> rays = _vol->getRays();
-  // find that ray
-  bool foundIt = false;
-  double minDiff = 1.0e99;
-  double delta = 0.01;
-  RadxRay *closestRayToEdit = NULL;
-  vector<RadxRay *>::iterator r;
-  r=rays.begin();
-  int idx = 0;
-  while(r<rays.end()) {
-    RadxRay *rayr = *r;
-    double diff = fabs(azimuth - rayr->getAzimuthDeg());
-    if (diff > 180.0) {
-      diff = fabs(diff - 360.0);
-    }
-    if (diff < minDiff) {
-      if (abs(elevation - rayr->getElevationDeg()) <= delta) {
-        foundIt = true;
-        closestRayToEdit = *r;
-        minDiff = diff;
-      }
-    }
-    r += 1;
-    idx += 1;
-  }  
-  if (!foundIt || closestRayToEdit == NULL) {
-    //throw "couldn't find closest ray";
-    errorMessage("ExamineEdit Error", "couldn't find closest ray");
-    return;
-  }
-
-  LOG(DEBUG) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
-  closestRayToEdit->print(cout); 
-
-
-  // create the view
-  //SpreadSheetView *sheetView;
-  if (sheetView == NULL) {
-    sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
-    sheetView->newElevation(elevation);
-    // create the model
-
-    // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
-    SpreadSheetModel *model = new SpreadSheetModel(closestRayToEdit, _vol);
-    //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
-    
-    // create the controller
-    spreadSheetControl = new SpreadSheetController(sheetView, model);
-
-    // finish the other connections ..
-    //sheetView->addController(sheetController);
-    // model->setController(sheetController);
-
-    // connect some signals and slots in order to retrieve information
-    // and send changes back to display
-                                                                           
-    connect(spreadSheetControl, SIGNAL(volumeChanged()),
-    	  &_manager, SLOT(setVolume()));
-    
-    sheetView->init();
-    sheetView->show();
-  } else {
-    //spreadSheetControl->switchRay(closestRayToEdit->getAzimuthDeg(), elevation);
-    sheetView->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);
-  }
- */ 
 }
 
 void PpiWidget::contextMenuEditor()

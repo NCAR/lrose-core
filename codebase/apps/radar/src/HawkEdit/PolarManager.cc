@@ -5828,39 +5828,6 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
   // TODO: replace with ...
   const RadxRay *closestRayToEdit = _rayLocationController->getClosestRay(azimuth);
 
-/*
-  vector<RadxRay *> rays = _vol->getRays();
-  // find that ray
-  bool foundIt = false;
-  double minDiff = 1.0e99;
-  double delta = 0.01;
-  RadxRay *closestRayToEdit = NULL;
-  vector<RadxRay *>::iterator r;
-  r=rays.begin();
-  int idx = 0;
-  while(r<rays.end()) {
-    RadxRay *rayr = *r;
-    double diff = fabs(azimuth - rayr->getAzimuthDeg());
-    if (diff > 180.0) {
-      diff = fabs(diff - 360.0);
-    }
-    if (diff < minDiff) {
-      if (abs(elevation - rayr->getElevationDeg()) <= delta) {
-        foundIt = true;
-        closestRayToEdit = *r;
-        minDiff = diff;
-      }
-    }
-    r += 1;
-    idx += 1;
-  }  
-  if (!foundIt || closestRayToEdit == NULL) {
-    //throw "couldn't find closest ray";
-    errorMessage("ExamineEdit Error", "couldn't find closest ray");
-    return;
-  }
-  */
-
   LOG(DEBUG) << "Found closest ray: pointer = " << closestRayToEdit;
   closestRayToEdit->print(cout); 
 
@@ -5868,13 +5835,14 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
   // create the view
   //SpreadSheetView *sheetView;
   if (sheetView == NULL) {
-    sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg());
+    sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg(),
+      _sweepController->getSelectedAngle());
 
     // install event filter to catch when the spreadsheet is closed
     CloseEventFilter *closeFilter = new CloseEventFilter(sheetView);
     sheetView->installEventFilter(closeFilter);
 
-    sheetView->newElevation(elevation);
+
     // create the model
 
     // SpreadSheetModel *model = new SpreadSheetModel(closestRayCopy);
@@ -5891,19 +5859,28 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     // connect some signals and slots in order to retrieve information
     // and send changes back to display
                                                                            
-    connect(spreadSheetControl, SIGNAL(volumeChanged()),
+    connect(sheetView, SIGNAL(replotRequested()),
         this, SLOT(setVolume()));
     connect(sheetView, SIGNAL(spreadSheetClosed()), this, SLOT(spreadSheetClosed()));
     connect(sheetView, SIGNAL(setDataMissing(string, float)), 
       this, SLOT(setDataMissing(string, float)));    
+//HERE ==> do i update the controller, which will update the model, then the view?
+//Yes, always go through the controller, never directly to the view!!
+//    spreadSheetControl->newElevation(elevation);
+
     sheetView->init();
     sheetView->show();
   } else {
+    string currentFieldName = _displayFieldController->getSelectedFieldName();
     //spreadSheetControl->switchRay(closestRayToEdit->getAzimuthDeg(), elevation);
     float azimuth = closestRayToEdit->getAzimuthDeg();
-    sheetView->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);
-    string currentFieldName = _displayFieldController->getSelectedFieldName();
-    sheetView->highlightClickedData(currentFieldName, azimuth, (float) range);
+    float elevation = _sweepController->getSelectedAngle();
+    spreadSheetControl->moveToLocation(currentFieldName, elevation,
+      azimuth, range);
+    //spreadSheetControl->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);   
+    // should be called withing Controller ... 
+
+    //spreadSheetControl->highlightClickedData(currentFieldName, azimuth, (float) range);
   }
   
 }

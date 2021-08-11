@@ -25,13 +25,22 @@ public:
   float getAzimuthForRay(int offsetFromClosest);
   //  RadxVol getVolume(); 
 
-  void setData(string fieldName, vector<float> *data);
+
+
+  void setData(string fieldName, float azimuth, vector<float> *data);
   void setDataMissing(string fieldName, float missingDataValue);
-  void findClosestRay(float azimuth, float elevation);
+  void setClosestRay(float azimuth, float elevation);
+
+
+private:
+
+  //void _getSweepNumber(float elevation);
+  void _setSweepNumber(int sweepNumber);
 
   //RadxVol *_vol;
   RadxRay *_closestRay;
   size_t _closestRayIdx;
+  float _currentSweepNumber;  
 
   /*
   void _setupVolRead(RadxFile *file);

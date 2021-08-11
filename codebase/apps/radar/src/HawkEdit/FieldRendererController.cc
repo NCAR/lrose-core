@@ -323,13 +323,14 @@ QImage *FieldRendererController::renderImage(int width, int height,
     //fieldRenderer->setSweepAngle(sweepAngle); 
     fieldRenderer->createImage(width, height);
   }
-  LOG(DEBUG) << "lock obtained";
+  //LOG(DEBUG) << "lock obtained";
   // fieldRenderView is locked, we can procede with changes ...
 
   fieldRenderer->setTransform(zoomTransform);
 
 
   if (!fieldRenderer->imageReady()) {
+    LOG(DEBUG) << "image NOT READY, recreating beams";
     // create a beam for each ray  
     //ColorMap colorMap;
     QBrush *background_brush = new QBrush(backgroundColor); // QColor("orange"));

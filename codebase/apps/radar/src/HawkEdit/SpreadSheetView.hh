@@ -20,6 +20,8 @@
 #include <QTableWidgetItem>
 #include <QTableWidget>
 #include <QString>
+#include <QUndoStack>
+#include <QUndoView>
 #include <QJSEngine>
 
 using namespace std;
@@ -31,7 +33,8 @@ class SpreadSheetView : public QMainWindow
 public:
 
   //  SpreadSheetView(std::string fileName, QWidget *parent = 0);
-  SpreadSheetView(QWidget *parent = 0, float rayAzimuth = 0.0);
+  SpreadSheetView(QWidget *parent = 0, float rayAzimuth = 0.0,
+    float elevation = 0.0);
 
   //  void setController(SpreadSheetController *controller);
 
@@ -43,7 +46,7 @@ public:
   float myPow();
 
   vector<string> *getVariablesFromSpreadSheet();
-  vector<float> *getDataForVariableFromSpreadSheet(int column, string fieldName);
+  vector<float> *getDataForVariableFromSpreadSheet(int column); // , string fieldName);
 
   void setSelectionToValue(QString value);
 
@@ -89,9 +92,8 @@ public slots:
   void applyEdits();
   void changeAzEl(float azimuth, float elevation);
   void changeMissingValue(float currentMissingValue);
-  void newElevation(float elevation);
-  void newAzimuth(float azimuth);
-  void setTheWindowTitle(float rayAzimuth);
+  void updateLocationInVolume(float azimuth, float elevation);
+  void setTheWindowTitle(float rayAzimuth, float elevation);
 
   void rangeDataSent(size_t nGates, float startingKm, float gateSize);
 
@@ -102,10 +104,11 @@ signals:
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
   void needAzimuthForRay(int offsetFromClosestRay, int fieldIdx, string fieldName);
-  void applyVolumeEdits();
+  void applyVolumeEdits(string fieldName, float rayAzimuth, vector<float> *data);
   void signalRayAzimuthChange(float rayAzimuth, float elevation);
   void needRangeData(size_t nPoints);
   void setDataMissing(string fieldName, float missingDataValue);
+  void replotRequested();
   void spreadSheetClosed();
 
 protected:
@@ -131,18 +134,20 @@ protected:
 
   string getFieldName(QString text);
   float getAzimuth(QString text);
+  void replot();
 
 private:
 
   //SpreadSheetController *_controller;
     vector<std::string> _fieldNames;
     //float _currentAzimuth;
-    float _currentElevation;
+    //float _currentElevation;
 
     int _nFieldsToDisplay;
     int _nRays;
     string data_format = "%g";
     float _missingDataValue;
+    string _missingDataString = "--";
 
 
     QToolBar *toolBar;
@@ -164,6 +169,8 @@ private:
     QAction *aboutSpreadSheet;
     QAction *exitAction;
     QAction *openAction;
+    QAction *undoAction = nullptr;
+    QAction *redoAction = nullptr;
 
   QAction *display_cellValuesAction;
   QAction *display_rayInfoAction;
@@ -172,10 +179,14 @@ private:
 
   QPushButton *applyEditsButton;
   QLineEdit *rayLineEdit;
+  QLineEdit *sweepLineEdit;
   QLineEdit *raysLineEdit;
   QLineEdit *missingDataValueLineEdit;
 
     QAction *printAction;
+    QAction *replotAction;
+    QAction *applyEditsAction;
+    QAction *clearEditsAction;
 
     QLabel *cellLabel;
     QTableWidget *table;
@@ -186,8 +197,10 @@ private:
   // SpreadSheetDelegate *formulaInput;
 
     QListWidget *fieldListWidget;
+    QUndoStack *undoStack = nullptr;
+    QUndoView *undoView = nullptr;
 
-  QJSEngine engine;
+    QJSEngine engine;
 
   
   //  const char *LogFileName = "/tmp/HawkEye_log.txt";

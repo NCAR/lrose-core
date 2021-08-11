@@ -34,9 +34,16 @@ public:
   float getAzimuthForRay(int offsetFromClosest);
   void getRangeData(float *startingRangeKm, float *gateSpacingKm);
 
-  void setData(string fieldName, vector<float> *data);
+  void setData(string fieldName, float azimuth, vector<float> *data);
 
   void open(string fileName);
+
+  //void newElevation(float elevation);
+  //void changeAzEl(float azimuth, float elevation);
+  void moveToLocation(string fieldName, float elevation,
+    float azimuth);
+  void moveToLocation(string fieldName, float elevation,
+    float azimuth, float range);  
 
   SpreadSheetModel *getDataModel() {return _currentModel;};
   void volumeUpdated();
@@ -50,7 +57,7 @@ public slots:
   void needDataForField(string fieldName, int r, int c);
   void needAzimuthForRay(int offsetFromClosest, int fieldIdx, string fieldName);
   void needRangeData(size_t nGates);
-  void getVolumeChanges();
+  void getVolumeChanges(string fieldName, float azimuth, vector<float> *data);
   void switchRay(float azimuth, float elevation);
   
 private:
