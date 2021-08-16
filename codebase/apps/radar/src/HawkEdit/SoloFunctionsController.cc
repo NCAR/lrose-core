@@ -712,7 +712,7 @@ const vector<float> *SoloFunctionsController::getData(string &fieldName) {
 void SoloFunctionsController::setData(string &fieldName, vector<float> *fieldData) {
         //soloFunctionsModel.SetData(fieldName, _data, _currentRayIdx, _currentSweepIdx, fieldData); 
   DataModel *dataModel = DataModel::Instance();
-  dataModel->SetData(fieldName, _currentRayIdx, _currentSweepIdx, fieldData); 
+  dataModel->SetDataByIndex(fieldName, _currentRayIdx, _currentSweepIdx, fieldData); 
 }
 
 /*

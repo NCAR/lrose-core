@@ -115,7 +115,7 @@ void PpiWidget::clear()
 {
   LOG(DEBUG) << "enter";
   // Clear out the beam array
-  LOG(DEBUG) << "NOT CLEARING BEAMS";
+  //LOG(DEBUG) << "NOT CLEARING BEAMS";
   //  for (size_t i = 0; i < _ppiBeams.size(); i++) {
   //    Beam::deleteIfUnused(_ppiBeams[i]);
   //  }

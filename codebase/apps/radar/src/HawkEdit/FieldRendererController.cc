@@ -300,7 +300,7 @@ void FieldRendererController::takeCareOfMissingValues(vector<float> *rayData,
 
 
 
-QImage *FieldRendererController::renderImage(int width, int height,
+QImage *FieldRendererController::renderImage(QPainter *painter, int width, int height,
   string fieldName, QTransform zoomTransform, double sweepAngle, 
   RayLocationController *rayLocationController,
   ColorMap &colorMap,
@@ -370,20 +370,20 @@ QImage *FieldRendererController::renderImage(int width, int height,
       }
     }
     // add Beam to FieldRenderer
-
-    fieldRenderer->fillBackground(background_brush);
-    fieldRenderer->runIt();  // calls paint method on each beam
+    LOG(DEBUG) << " added all beams to fieldRenderer; before fillBackground";
+    //fieldRenderer->fillBackground(painter, background_brush);
+    fieldRenderer->runIt(painter);  // calls paint method on each beam
     // fieldRendererView is unlocked
     LOG(DEBUG) << "lock released";
     //delete background_brush;
   }
   
-  QImage *image = fieldRenderer->getImage();
-  LOG(DEBUG) << "image width = " << image->width() << " height " << image->height();
+  //QImage *image = fieldRenderer->getImage();
+  //LOG(DEBUG) << "image width = " << image->width() << " height " << image->height();
 
   LOG(DEBUG) << "exit: ";
-
-  return image;
+  return NULL;
+  //return image;
 }
 
 
@@ -450,7 +450,7 @@ void FieldRendererController::refreshImages(int width, int height, QSize image_s
 
     field->fillBackground(background_brush); // background_brush_color_rgb);                                  
     field->setTransform(zoomTransform);
-    field->runIt(); 
+    //field->runIt(); 
 
   } // ifield   
 

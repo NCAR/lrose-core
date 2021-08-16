@@ -108,7 +108,7 @@ PpiBeam::~PpiBeam()
 }
 
 ////////////////////////////////////////////////////////////////
-void PpiBeam::paint(QImage *image,
+void PpiBeam::paint(QPainter *painter, QImage *image,
                     const QTransform &transform,
                     bool useHeight,
                     bool drawInstHt)
@@ -123,10 +123,10 @@ void PpiBeam::paint(QImage *image,
     return;
   }
   */
-  QPainter painter(image);
+  //QPainter painter(image);
   
-  painter.setTransform(transform);
-  painter.setPen(Qt::NoPen);
+  painter->setTransform(transform);
+  painter->setPen(Qt::NoPen);
   
   QPolygonF polygon(4);
 
@@ -167,8 +167,8 @@ void PpiBeam::paint(QImage *image,
         polygon[2] = QPointF(_polygons[igate].pts[1].x, _polygons[igate].pts[1].y);
         polygon[3] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);
       
-        painter.setBrush(*prev_brush);
-        painter.drawPolygon(polygon);
+        painter->setBrush(*prev_brush);
+        painter->drawPolygon(polygon);
 
         prev_brush = curr_brush;
         polygon[0] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);
@@ -186,8 +186,8 @@ void PpiBeam::paint(QImage *image,
       polygon[3] = QPointF(_polygons[_nGates-1].pts[3].x,
   			 _polygons[_nGates-1].pts[3].y);
     
-      painter.setBrush(*curr_brush);
-      painter.drawPolygon(polygon);
+      painter->setBrush(*curr_brush);
+      painter->drawPolygon(polygon);
     }
   } catch  (const std::out_of_range& oor) {
     LOG(DEBUG) << "Out of Range error: " << oor.what();

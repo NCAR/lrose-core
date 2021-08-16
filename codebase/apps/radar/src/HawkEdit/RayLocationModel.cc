@@ -54,10 +54,8 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
   }
  */
     const RadxRay *ray = *rayItr;
-
-    // Sweep numbers start at 1 not Zero, so offset ...
          
-    if (ray->getSweepNumber() == sweepNumber+1) {   
+    if (ray->getSweepNumber() == sweepNumber) {   
 
 
       double az = ray->getAzimuthDeg();

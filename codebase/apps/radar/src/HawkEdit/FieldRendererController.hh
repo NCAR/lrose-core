@@ -60,7 +60,7 @@ public:
   QImage *getImage(string fieldName);
   //void activateArchiveRendering();
   //void activateRealtimeRendering(size_t selectedField);
-  QImage *renderImage(int width, int height,
+  QImage *renderImage(QPainter *painter, int width, int height,
     string fieldName, QTransform zoomTransform, double sweepAngle,
     RayLocationController *rayLocationController,
     ColorMap &colorMap,

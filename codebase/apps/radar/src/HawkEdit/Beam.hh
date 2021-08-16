@@ -145,7 +145,7 @@ public:
    * @brief Paint the given field in the given painter.
    */
   
-  virtual void paint(QImage *image,
+  virtual void paint(QPainter *painter, QImage *image,
                      const QTransform &transform,
                      bool useHeight = false,
                      bool drawInstHt = false) = 0;

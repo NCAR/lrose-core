@@ -30,6 +30,9 @@ const vector<float> *DataModel::GetData(string fieldName,
   LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
        << " sweepIdx=" << sweepIdx;
 
+  // sweep numbers are 1-based in RadxVol, not zero based, so, add one to the index.
+  sweepIdx += 1;
+
   _vol.loadRaysFromFields();
 
   RadxSweep *sweep = _vol.getSweepByNumber(sweepIdx);
@@ -102,7 +105,7 @@ const vector<float> *DataModel::GetData(string fieldName,
 }
 */
 
-void DataModel::SetData(string &fieldName, 
+void DataModel::SetDataByIndex(string &fieldName, 
             int rayIdx, int sweepIdx, vector<float> *fieldData) { 
 
   // What is being returned? the name of the new field in the model that
@@ -118,6 +121,9 @@ void DataModel::SetData(string &fieldName,
 
     LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
        << " sweepIdx=" << sweepIdx;
+
+  // sweep numbers are 1-based in RadxVol, not zero based, so, add one to the index.
+  sweepIdx += 1;
 
   RadxSweep *sweep = _vol.getSweepByNumber(sweepIdx);
 
@@ -438,9 +444,10 @@ void DataModel::printAzimuthInRayOrder() {
   }
 }
 
+
 int DataModel::getSweepNumber(float elevation) {
-  DataModel *dataModel = DataModel::Instance();
-  vector<double> *sweepAngles = dataModel->getSweepAngles();
+  //DataModel *dataModel = DataModel::Instance();
+  vector<double> *sweepAngles = getSweepAngles();
   int i = 0;
   float delta = 0.01;
   bool found = false;  
@@ -452,9 +459,17 @@ int DataModel::getSweepNumber(float elevation) {
     }
   }
   if (!found) throw std::invalid_argument("no sweep found for elevation");
-  // sweep numbers are 1-based, not zero based, so, add one to the index.
-  return i+1;
+
+  // use the index, i, to find the sweep number, because
+  // the index may be different than the number, which is a label for a sweep.
+  vector<RadxSweep *> sweeps = _vol.getSweeps();
+  RadxSweep *sweep = sweeps.at(i);
+  int sweepNumber = sweep->getSweepNumber();
+  return sweepNumber;
 }
+
+
+
 
 vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName) { // , int sweepHeight) {
 // TODO: which sweep? the rayIdx considers which sweep.
@@ -638,6 +653,9 @@ size_t DataModel::findClosestRay(float azimuth, int sweepNumber) { // float elev
   DataModel *dataModel = DataModel::Instance();
 
   _vol.loadRaysFromFields();
+
+  // NOTE! Sweep Number, NOT Sweep Index!!!
+
   RadxSweep *sweep = _vol.getSweepByNumber(sweepNumber);
   if (sweep == NULL) {
     //string msg = "no sweep found"

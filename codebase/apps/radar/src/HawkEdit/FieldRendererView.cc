@@ -114,9 +114,11 @@ void FieldRendererView::createImage(int width, int height)
 }
 
 void FieldRendererView::fillBackground(QBrush *backgroundBrush) {
+  LOG(DEBUG) << "enter";
   //while (_rendering) this_thread::sleep_for(std::chrono::milliseconds(2000));
   if (_image != NULL)
     _image->fill(backgroundBrush->color().rgb());
+  LOG(DEBUG) << "exit";
 }
 
 //////////////////////////////////////////////////
@@ -220,7 +222,7 @@ void FieldRendererView::setBackgroundRenderingOn()
 // Thread run method
 // Actually performs the rendering
 
-void FieldRendererView::runIt()
+void FieldRendererView::runIt(QPainter *painter)
 {
   //LOG(DEBUG) << "Start of run() for field: " 
   //       << _field.getLabel() << " there are " << _beams.size() << " beams to render";
@@ -255,7 +257,7 @@ void FieldRendererView::runIt()
       (*beam)->print(cerr);
     }
     */
-    (*beam)->paint(_image, _transform, _useHeight, _drawInstHt);
+    (*beam)->paint(painter, _image, _transform, _useHeight, _drawInstHt);
     //(*beam)->setBeingRendered(_fieldIndex, false);
   }
   

@@ -54,7 +54,7 @@ public:
   void writeData(string path);
 
   void update();
-  void SetData(string &fieldName, 
+  void SetDataByIndex(string &fieldName, 
             int rayIdx, int sweepIdx, vector<float> *fieldData);
   void SetData(string &fieldName, 
             float azimuth, float sweepAngle, vector<float> *fieldData);

@@ -498,7 +498,7 @@ private:
   // windows
 
   QFrame *_ppiFrame;
-  PpiWidget *_ppi;
+  PolarWidget *_ppi;
 
   RhiWindow *_rhiWindow;
   RhiWidget *_rhi;

@@ -380,7 +380,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
     LOG(DEBUG) << "Clicked left arrow, go back in time";
 
-    _ppi->setStartOfSweep(true);
+    //_ppi->setStartOfSweep(true);
     //_rhi->setStartOfSweep(true);
     _goBack1();
 
@@ -388,7 +388,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
     LOG(DEBUG) << "Clicked right arrow, go forward in time";
     
-    _ppi->setStartOfSweep(true);
+    //_ppi->setStartOfSweep(true);
     //_rhi->setStartOfSweep(true);
     _goFwd1();
     
@@ -397,7 +397,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     //if (_sweepManager.getGuiIndex() > 0) {
 
       LOG(DEBUG) << "Clicked up arrow, go up a sweep";
-      _ppi->setStartOfSweep(true);
+      //_ppi->setStartOfSweep(true);
       //_rhi->setStartOfSweep(true);
       _changeSweepRadioButton(-1);
 
@@ -409,7 +409,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
       LOG(DEBUG) << "Clicked down arrow, go down a sweep";
       
-      _ppi->setStartOfSweep(true);
+      //_ppi->setStartOfSweep(true);
       //_rhi->setStartOfSweep(true);
       _changeSweepRadioButton(+1);
 
@@ -431,7 +431,7 @@ void PolarManager::_moveUpDown()
 
 void PolarManager::_setTitleBar(const string &radarName)
 {
-  string windowTitle = "HAWK_EYE -- " + radarName;
+  string windowTitle = "HAWK_EDIT -- " + radarName;
   setWindowTitle(tr(windowTitle.c_str()));
 }
   
@@ -458,7 +458,10 @@ void PolarManager::_setupWindows()
 
   // configure the PPI
 
-  _ppi = new PpiWidget(_ppiFrame, this, _platform, _displayFieldController, _haveFilteredFields);
+ // _ppi = new PpiWidget(_ppiFrame, this, _platform, _displayFieldController, _haveFilteredFields);
+
+  _ppi = new PolarWidget(_ppiFrame, this, _platform, _displayFieldController, _haveFilteredFields);
+  _ppi->setMinimumSize(400,400);
 
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _ppi, SLOT(resize(const int, const int)));
@@ -519,6 +522,7 @@ void PolarManager::_setupWindows()
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_fieldPanel); // <=== here 
   mainLayout->addWidget(_ppiFrame);
+  _ppiFrame->show();
   _ppi->show();
 
   // sweep panel
@@ -939,7 +943,7 @@ void PolarManager::_handleArchiveData()
     LOG(DEBUG) << "enter";
 
   _ppi->setArchiveMode(true);
-  _ppi->setStartOfSweep(true);
+  //_ppi->setStartOfSweep(true);
 
   //_rhi->setArchiveMode(true);
   //_rhi->setStartOfSweep(true);
@@ -1250,14 +1254,15 @@ size_t PolarManager::getSelectedFieldIndex() {
 
 void PolarManager::_applyDataEdits()
 {
-
+  LOG(DEBUG) << "enter";
   if (0) { // _params->debug) {
     std::ofstream outfile("/tmp/voldebug_PolarManager_applyDataEdits.txt");
     _vol.printWithFieldData(outfile);  
     outfile << "_vol = " << &_vol << endl;
   }
-
+  _setupRayLocation();
   _plotArchiveData();
+  LOG(DEBUG) << "exit";
 }
 
 
@@ -1660,6 +1665,7 @@ void PolarManager::_plotArchiveData()
 
   _ppi->displayImage(currentFieldName, currentSweepAngle,
     _rayLocationController, *colorMap, backgroundColor); 
+
   // _sweepController->getSelectedAngle(),
   // _displayFieldController->getSelectedFieldName());
   //_updateStatusPanel(???);
@@ -1972,9 +1978,9 @@ void PolarManager::_setupRayLocation() {
   if (_params->ppi_override_rendering_beam_width) {
     ppi_rendering_beam_width = _params->ppi_rendering_beam_width;
   }
-  int currentSweepIndex = _sweepController->getSelectedIndex();
+  int currentSweepNumber = _sweepController->getSelectedNumber();
   _rayLocationController->sortRaysIntoRayLocations(ppi_rendering_beam_width,
-    currentSweepIndex);
+    currentSweepNumber);
 }
 
 // We need to resize the arrays that are retained and look up the field Index by field name,
@@ -3477,9 +3483,9 @@ void PolarManager::_setArchiveRetrievalPending()
 
 void PolarManager::_clear()
 {
-  if (_ppi) {
-    _ppi->clear();
-  }
+  //if (_ppi) {
+  //  _ppi->clear();
+  //}
   //if (_rhi) {
   //  _rhi->clear();
   //}
@@ -3828,7 +3834,7 @@ void PolarManager::_saveImageToFile(bool interactive)
 
 
 void PolarManager::ShowContextMenu(const QPoint &pos) {
-  _ppi->ShowContextMenu(pos, &_vol);
+  //_ppi->ShowContextMenu(pos, &_vol);
 }
 
 
@@ -3879,7 +3885,7 @@ void PolarManager::boundaryBrushRadiusChanged(int value)
     boundaryPointEditorControl->setBrushRadius(value);
     //if (resizeExistingCircle) { //resize existing circle
       // TODO: somehow get the worldPlot and painter from ppiWidget
-     // _ppi->showSelectedField(); // refresh/replot->BoundaryPointEditor::Instance()->draw(_zoomWorld, painter); 
+      _ppi->showSelectedField(); // refresh/replot->BoundaryPointEditor::Instance()->draw(_zoomWorld, painter); 
       //boundaryPointEditorControl->draw(worldPlot, painter);
       //WorldPlot zoomWorld = _ppi->getZoomWorld();
       //QPainter painter = _ppi->getPainter();
@@ -4026,7 +4032,7 @@ void PolarManager::saveBoundaryEvent(int boundaryIndex)
 
   // get selected field name
   string currentFieldName = _displayFieldController->getSelectedFieldName();
-  int currentSweepIndex = _sweepController->getSelectedIndex();
+  int currentSweepIndex = _sweepController->getSelectedNumber();
   if (_archiveFileList.size() > 0) {
     string radarFilePath = _archiveFileList.at(0);
   
@@ -4053,7 +4059,7 @@ void PolarManager::loadBoundaryEvent(int boundaryIndex)
 
   // get selected field name
   string currentFieldName = _displayFieldController->getSelectedFieldName();
-  int currentSweepIndex = _sweepController->getSelectedIndex();
+  int currentSweepIndex = _sweepController->getSelectedNumber();
   if (_archiveFileList.size() > 0) {
     string radarFilePath = _archiveFileList.at(0);
   
@@ -4083,7 +4089,7 @@ void PolarManager::refreshBoundaries()
 
     // get selected field name
     string currentFieldName = _displayFieldController->getSelectedFieldName();
-    int currentSweepIndex = _sweepController->getSelectedIndex();
+    int currentSweepIndex = _sweepController->getSelectedNumber();
     if (_archiveFileList.size() > 0) {
       string radarFilePath = _archiveFileList.at(0);
     

@@ -261,7 +261,7 @@ public:
    * This is where the rendering actually gets done
    */
 
-  void runIt();
+  void runIt(QPainter *painter);
 
 private:
   ColorMap _colorMap;

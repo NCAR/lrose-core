@@ -239,13 +239,17 @@ int SweepModel::getSelectedSweepNumber() {
 }
 
 void SweepModel::setSelectedAngle(double value) {
-  double delta = 0.01;
+  LOG(DEBUG) << "enter angle = " << value;
+  // double delta = 0.01;
   _selectedSweepAngle = value;
+  // translate the angle to the Sweep Number
+  /*
   vector<double> *sweepAngles = getSweepAngles();
   int i = 0;
   bool done = false;
   while ((i < sweepAngles->size()) && !done) { 
     if (abs(sweepAngles->at(i) - value) < delta) {
+      // i is the sweep index, we need the Sweep Number
       _selectedSweepNumber = i+1;
       done = true;
     }
@@ -255,6 +259,11 @@ void SweepModel::setSelectedAngle(double value) {
     LOG(DEBUG) << "invalid sweep angle " << value;
     throw std::invalid_argument("invalid sweep angle");
   }
+  */
+
+  DataModel *dataModel = DataModel::Instance();
+  _selectedSweepNumber = dataModel->getSweepNumber(value);
+  LOG(DEBUG) << "exit _selectedSweepNumber = " << _selectedSweepNumber;
 }
 
 

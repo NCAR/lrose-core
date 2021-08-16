@@ -280,6 +280,8 @@ class DLL_EXPORT PpiWidget : public PolarWidget
 
   RadxVol *_vol;
 
+  
+
 };
 
 
