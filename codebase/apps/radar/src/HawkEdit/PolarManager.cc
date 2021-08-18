@@ -303,7 +303,9 @@ void PolarManager::enableZoomButton() const
 
 void PolarManager::resizeEvent(QResizeEvent *event)
 {
-  LOG(DEBUG) << "resizeEvent: " << event;
+  LOG(DEBUG) << "resizeEvent: _ppiFrame width = " << 
+  _ppiFrame->width() << 
+  ", height = " << _ppiFrame->height(); //  << event;
   emit frameResized(_ppiFrame->width(), _ppiFrame->height());
 }
 
@@ -455,13 +457,17 @@ void PolarManager::_setupWindows()
 
   _ppiFrame = new QFrame(_main);
   _ppiFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
+  _ppiFrame->setLineWidth(3);
+  _ppiFrame->setMidLineWidth(3);  
+  _ppiFrame->setFrameStyle(QFrame::Box);
   // configure the PPI
 
  // _ppi = new PpiWidget(_ppiFrame, this, _platform, _displayFieldController, _haveFilteredFields);
 
   _ppi = new PolarWidget(_ppiFrame, this, _platform, _displayFieldController, _haveFilteredFields);
+  _ppiFrame->setMinimumSize(400,400);
   _ppi->setMinimumSize(400,400);
+
 
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _ppi, SLOT(resize(const int, const int)));

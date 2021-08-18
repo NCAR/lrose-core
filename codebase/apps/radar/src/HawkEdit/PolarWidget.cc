@@ -88,6 +88,9 @@ PolarWidget::PolarWidget(QWidget* parent,
   _backgroundBrush = QColor(color.c_str());
   _gridRingsColor = _params->gridColor.c_str();
 
+  _aspectRatio = _params->ppi_aspect_ratio;
+  _colorScaleWidth = _params->color_scale_width;
+
   // mode
 
   _archiveMode = _params->begin_in_archive_mode;
@@ -214,8 +217,8 @@ void PolarWidget::configureRange(double max_range)
   // Initialize the images used for double-buffering.  For some reason,
   // the window size is incorrect at this point, but that will be corrected
   // by the system with a call to resize().
-  _dirty = true;
-  _refreshImages();
+  //_dirty = true;
+  //_refreshImages();
   
 }
 
@@ -243,8 +246,8 @@ void PolarWidget::unzoomView()
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
-  _dirty = true;
-  _refreshImages();
+  //_dirty = true;
+  //_refreshImages();
   update();
   LOG(DEBUG) << "exit";
 }
@@ -426,8 +429,8 @@ void PolarWidget::backgroundColor(const QColor &color)
   QPalette new_palette = palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
-  _dirty = true;
-  _refreshImages();
+  //_dirty = true;
+  //_refreshImages();
 }
 
 
@@ -663,8 +666,8 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     
     // Update the window in the renderers
     
-    _dirty = true;
-    _refreshImages();
+    //_dirty = true;
+    //_refreshImages();
 
   }
     
@@ -689,7 +692,7 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   static int trial= 0;
   LOG(DEBUG) << "enter";
   try {
-    _refreshImages();
+    //_refreshImages();
     
     QPainter painter(this);
     //painter.save();
@@ -719,9 +722,17 @@ void PolarWidget::paintEvent(QPaintEvent *event)
     if (selectedField.length() > 0) {
       //_fieldRendererController->renderImage(&painter, selectedField);
 
-      _fieldRendererController->renderImage(&painter, width(), height(), 
-      selectedField, _zoomTransform, _currentSweepAngle,
+      //_resetWorld(800, 800); // width(), height());
+      painter.setTransform(_zoomTransform);
+      
+      // TODO: need to send width and height? and transform??
+      // NO! remove them as arguments
+
+      _fieldRendererController->renderImage(&painter, 0, 0, // width(), height(), 
+      selectedField, _zoomTransform, 
+      _currentSweepAngle,
       _rayLocationController, _currentColorMap, "purple"); // backgroundColor);
+
     }
     
       /*
@@ -733,7 +744,7 @@ void PolarWidget::paintEvent(QPaintEvent *event)
             //painter.drawImage(100, 300, *_image);
       }
       */
-     // _drawOverlays(painter);
+      //_drawOverlays(&painter);
 /*
       // keep pointer to BoundaryPointEditorControl ???
 
@@ -788,7 +799,7 @@ void PolarWidget::showSelectedField()
     string selectedField = displayFieldController->getSelectedFieldName();
     if (selectedField.length() > 0) {
 
-      setImage(_fieldRendererController->getImage(selectedField));
+      //setImage(_fieldRendererController->getImage(selectedField));
 
       //update(); 
       //QPainter painter(this);
@@ -859,10 +870,12 @@ void PolarWidget::resize(const int width, const int height)
   if (height < sizeNeeded) {
     sizeNeeded = height;
   }
-  // setGeometry triggers a resizeEvent
-  setGeometry(0, 0, 
-              (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth,
-              sizeNeeded);
+  // setGeometry triggers a resizeEvent -- No, it does not trigger the event
+  int new_width = (int) (sizeNeeded * _aspectRatio + 0.5) + _colorScaleWidth;
+  int new_height = sizeNeeded;
+  setGeometry(0, 0, new_width, new_height);
+
+  //_resetWorld(new_width, new_height);
   LOG(DEBUG) << "exit";
 }
 
@@ -872,12 +885,13 @@ void PolarWidget::resize(const int width, const int height)
 void PolarWidget::_resetWorld(int width, int height)
 
 {
-
+  LOG(DEBUG) << "enter";
   _fullWorld.resize(width, height);
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
   _setGridSpacing();
   _dirty = true;
+  LOG(DEBUG) << "exit";
 }
 
 
@@ -1351,6 +1365,7 @@ void PolarWidget::_drawScreenText(QPainter &painter, const string &text,
     
 }
 
+/*
 void PolarWidget::_refreshImages()
 {
 
@@ -1360,18 +1375,18 @@ void PolarWidget::_refreshImages()
   //            size_t selectedField,
   //            vector< PpiBeam* > &Beams);
   LOG(DEBUG) << "enter " << "image dirty? = " << (_dirty ? "true" : "false");
-  if (_dirty) {
+  //if (_dirty) {
     _fieldRendererController->refreshImages(width(), height(), size(),
             _backgroundBrush, // .color().rgb(),
             _zoomTransform); 
             //selectedField);
             // _ppiBeams);
-    _dirty = false;
+  //  _dirty = false;
   }
 
   LOG(DEBUG) << "exit";
 }
-
+*/
 
 /* slots for context editing; create and show the associated modeless dialog and return                                   
 

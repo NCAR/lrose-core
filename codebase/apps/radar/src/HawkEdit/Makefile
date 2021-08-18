@@ -84,7 +84,6 @@ HDRS = \
 	PpiBeam.hh \
 	PolarManager.hh \
 	PolarWidget.hh \
-	PpiWidget.hh \
 	RayLoc.hh \
 	RayLocationController.hh \
 	RayLocationModel.hh \
@@ -152,7 +151,6 @@ MOC_SRCS = \
 	FieldRendererController.cc \
 	PolarManager.cc \
 	PolarWidget.cc \
-	PpiWidget.cc \
 	TimeScaleWidget.cc \
 	ParameterColorView.cc \
         FieldColorController.cc \
@@ -183,7 +181,6 @@ MOC_OUTPUT = \
 	moc_FieldRendererView.cpp \
 	moc_PolarManager.cpp \
 	moc_PolarWidget.cpp \
-	moc_PpiWidget.cpp \
 	moc_TimeScaleWidget.cpp \
 	moc_ParameterColorView.cpp \
         moc_FieldColorController.cpp \

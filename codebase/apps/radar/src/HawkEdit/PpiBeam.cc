@@ -124,8 +124,9 @@ void PpiBeam::paint(QPainter *painter, QImage *image,
   }
   */
   //QPainter painter(image);
+  //painter->drawImage(0,0, *image);
   
-  painter->setTransform(transform);
+  //painter->setTransform(transform);
   painter->setPen(Qt::NoPen);
   
   QPolygonF polygon(4);

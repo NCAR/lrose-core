@@ -210,6 +210,7 @@ FieldRendererView *FieldRendererController::get(string fieldName)
 }
 
 
+/*
 QImage *FieldRendererController::getImage(string fieldName) {
   LOG(DEBUG) << "enter" << "fieldName = " << fieldName;
   QImage *image = NULL;
@@ -221,6 +222,7 @@ QImage *FieldRendererController::getImage(string fieldName) {
 
   return image;
 }
+*/
 
 /*
 void FieldRendererController::activateArchiveRendering()
@@ -326,7 +328,7 @@ QImage *FieldRendererController::renderImage(QPainter *painter, int width, int h
   //LOG(DEBUG) << "lock obtained";
   // fieldRenderView is locked, we can procede with changes ...
 
-  fieldRenderer->setTransform(zoomTransform);
+  //fieldRenderer->setTransform(zoomTransform);
 
 
   if (!fieldRenderer->imageReady()) {
@@ -430,7 +432,7 @@ void FieldRendererController::colorMapChanged(size_t ifield)
 }
 */
 
-
+/*
 void FieldRendererController::refreshImages(int width, int height, QSize image_size,
 					    QBrush backgroundColor, 
 					    QTransform zoomTransform)
@@ -450,7 +452,7 @@ void FieldRendererController::refreshImages(int width, int height, QSize image_s
 
     field->fillBackground(background_brush); // background_brush_color_rgb);                                  
     field->setTransform(zoomTransform);
-    //field->runIt(); 
+    field->runIt(); 
 
   } // ifield   
 
@@ -458,5 +460,5 @@ void FieldRendererController::refreshImages(int width, int height, QSize image_s
 
   LOG(DEBUG) << "exit";
 }
-
+*/
 

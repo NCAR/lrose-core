@@ -125,7 +125,7 @@ public:
    * @brief Get the current background rendering image for this field.
    */
 
-  inline QImage *getImage() const { return _image; }
+  //inline QImage *getImage() const { return _image; }
 
   bool imageReady() { return _imageReady; }
   
@@ -203,7 +203,7 @@ public:
   double getSweepAngle() { return _sweepAngle; };
   //void setSweepAngle(double sweepAngle);
 
-  QImage *_image;
+  QImage _image;
   bool _imageReady;
   string _name;
   double _sweepAngle;

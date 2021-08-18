@@ -337,7 +337,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   // overide refresh images
 
-  void _refreshImages();
+ // void _refreshImages();
 
   /**
    * @brief The index of the field selected for display.

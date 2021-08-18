@@ -45,7 +45,7 @@ FieldRendererView::FieldRendererView(string fieldName) : //const Params &params,
         //_params(params),
         //_fieldIndex(field_index),
         _name(fieldName),
-        _image(NULL),
+        //_image(NULL),
         _imageReady(false),
         //_backgroundRenderTimer(NULL),
         _useHeight(false),
@@ -79,8 +79,8 @@ FieldRendererView::FieldRendererView(string fieldName) : //const Params &params,
 
 FieldRendererView::~FieldRendererView()
 {
-  if (_image != NULL)
-    delete _image;
+  //if (_image != NULL)
+  // delete _image;
 }
 
 // THIS IS NOT RIGHT!  WE NEED TO GET NEW BEAMS!  RayLocationController needs
@@ -103,12 +103,13 @@ FieldRendererView::~FieldRendererView()
 void FieldRendererView::createImage(int width, int height)
 
 {
+  //_image = _image.scaled(width, height);
   //while (_rendering) this_thread::sleep_for(std::chrono::milliseconds(2000));
   //LOG(DEBUG) << "grabbed lock";
 
-  if (_image != NULL)
-    delete _image;
-  _image = new QImage(width, height, QImage::Format_RGB32);
+  //if (_image != NULL)
+  //  delete _image;
+  //_image = new QImage(width, height, QImage::Format_RGB32);
   //_image->fill(backgroundBrush->color().rgb());
   _imageReady = false;
 }
@@ -116,8 +117,8 @@ void FieldRendererView::createImage(int width, int height)
 void FieldRendererView::fillBackground(QBrush *backgroundBrush) {
   LOG(DEBUG) << "enter";
   //while (_rendering) this_thread::sleep_for(std::chrono::milliseconds(2000));
-  if (_image != NULL)
-    _image->fill(backgroundBrush->color().rgb());
+  //if (_image != NULL)
+   // _image.fill(backgroundBrush->color().rgb());
   LOG(DEBUG) << "exit";
 }
 
@@ -237,10 +238,10 @@ void FieldRendererView::runIt(QPainter *painter)
     LOG(DEBUG) << "_beams.size() == 0, returning";
     return;
   }
-  if (_image == NULL) {
-    LOG(DEBUG) << "_image == NULL, returning";
-    return;
-  }
+  //if (_image == NULL) {
+  //  LOG(DEBUG) << "_image == NULL, returning";
+  //  return;
+  //}
   
   //TaThread::LockForScope locker;
 
@@ -257,11 +258,13 @@ void FieldRendererView::runIt(QPainter *painter)
       (*beam)->print(cerr);
     }
     */
-    (*beam)->paint(painter, _image, _transform, _useHeight, _drawInstHt);
+    (*beam)->paint(painter, &_image, _transform, _useHeight, _drawInstHt);
     //(*beam)->setBeingRendered(_fieldIndex, false);
   }
   
   _imageReady = true;
+
+  //painter->drawImage(0,0, _image);
 
   //rendering.lock();
   //_rendering = false;
