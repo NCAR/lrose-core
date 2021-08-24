@@ -688,6 +688,7 @@ private:
 			RayLoc *ray_loc);
 
   void _setupRayLocation();
+  void _setMaxRangeKm();
 
   // modes
 

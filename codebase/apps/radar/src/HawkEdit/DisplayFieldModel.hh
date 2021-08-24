@@ -36,6 +36,8 @@ public:
   DisplayField *getSelectedField();
   size_t getSelectedFieldNum();
 
+  double getMaxRangeKm();
+
   void setSelectedField(string fieldName);
   void setSelectedField(size_t fieldIndex);
   void setFieldToMissing(const string &fieldName);

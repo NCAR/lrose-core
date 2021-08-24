@@ -29,6 +29,10 @@ double RayLocationController::getGateSpacingKm(size_t rayIdx) {
 	return _model->getGateSpacingKm(rayIdx);
 }
 
+double RayLocationController::getMaxRangeKm() {
+  return _model->getMaxRangeKm();
+}
+
 size_t RayLocationController::getEndIndex(size_t rayIdx) {
 	return _model->getEndIndex(rayIdx);
 }

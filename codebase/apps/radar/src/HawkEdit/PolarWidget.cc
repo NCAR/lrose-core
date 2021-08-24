@@ -91,6 +91,10 @@ PolarWidget::PolarWidget(QWidget* parent,
   _aspectRatio = _params->ppi_aspect_ratio;
   _colorScaleWidth = _params->color_scale_width;
 
+  setRings(_params->ppi_range_rings_on_at_startup);
+  setGrids(_params->ppi_grids_on_at_startup);
+  setAngleLines(_params->ppi_azimuth_lines_on_at_startup);
+
   // mode
 
   _archiveMode = _params->begin_in_archive_mode;
@@ -102,7 +106,7 @@ PolarWidget::PolarWidget(QWidget* parent,
   setPalette(new_palette);
   
   setBackgroundRole(QPalette::Dark);
-  setAutoFillBackground(true);
+  setAutoFillBackground(false); // true);
   setAttribute(Qt::WA_OpaquePaintEvent);
 
   // Allow the widget to get focus
@@ -171,7 +175,7 @@ PolarWidget::~PolarWidget()
 
 void PolarWidget::configureRange(double max_range)
 {
-
+  LOG(DEBUG) << "enter max_range = " << max_range;
   // Save the specified values
 
   _maxRangeKm = max_range;
@@ -195,7 +199,9 @@ void PolarWidget::configureRange(double max_range)
 
     _fullWorld.set(width(), height(),
                    leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
+                   // xMinWorld, yMinWorld
                    -_maxRangeKm, 0.0,
+                   // xMaxWorld, yMaxWorld
                    _maxRangeKm, _maxRangeKm,
                    axisTickLen, nTicksIdeal, textMargin);
     
@@ -203,7 +209,9 @@ void PolarWidget::configureRange(double max_range)
     
     _fullWorld.set(width(), height(),
                    leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
+                   // xMinWorld, yMinWorld
                    -_maxRangeKm, -_maxRangeKm,
+                   // xMaxWorld, yMaxWorld
                    _maxRangeKm, _maxRangeKm,
                    axisTickLen, nTicksIdeal, textMargin);
 
@@ -219,7 +227,7 @@ void PolarWidget::configureRange(double max_range)
   // by the system with a call to resize().
   //_dirty = true;
   //_refreshImages();
-  
+  LOG(DEBUG) << "exit";
 }
 
 /*************************************************************************
@@ -691,22 +699,20 @@ void PolarWidget::paintEvent(QPaintEvent *event)
 {
   static int trial= 0;
   LOG(DEBUG) << "enter";
+
+  QImage m_image;
+  QImage m_buffer;
+  QImage m_base_buffer;
+
   try {
     //_refreshImages();
-    
-    QPainter painter(this);
+    //QImage image;
+    QPainter painter(this); //
+    // QPainter painter(this);  If you paint to a Widget, can only be done inside paintEvent
+
     //painter.save();
     //painter.setCompositionMode(QPainter::CompositionMode_Source);
-    /*
-    painter.setPen(Qt::blue);
-    painter.setFont(QFont("Arial", 30));
-    trial += 1;
-    QString theText;
-    theText.append("Qt ");
-    QString junk; junk.setNum(trial);
-    theText.append(junk);
-    painter.drawText(rect(), Qt::AlignCenter, theText);
-    */
+
     
     /*
     if (_image != NULL) {
@@ -722,30 +728,68 @@ void PolarWidget::paintEvent(QPaintEvent *event)
     if (selectedField.length() > 0) {
       //_fieldRendererController->renderImage(&painter, selectedField);
 
-      //_resetWorld(800, 800); // width(), height());
-      painter.setTransform(_zoomTransform);
-      
-      // TODO: need to send width and height? and transform??
-      // NO! remove them as arguments
 
-      _fieldRendererController->renderImage(&painter, 0, 0, // width(), height(), 
-      selectedField, _zoomTransform, 
-      _currentSweepAngle,
-      _rayLocationController, _currentColorMap, "purple"); // backgroundColor);
+      
+//-----
+        // using a QImage
+        if (1){ // m_buffer.size() != size()) {
+            LOG(DEBUG) << " inside first QImage size = " << width() << " x " << height();
+            m_buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
+            m_base_buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
+
+            m_base_buffer.fill(0);
+
+            QPainter p(&m_base_buffer);
+            p.setTransform(_zoomTransform);
+            //drawBase(p);
+            // draw into the QImage
+  
+            _fieldRendererController->renderImage(p, 0, 0, // 0 means they aren't used; width(), height(), 
+              selectedField, _zoomTransform, 
+              _currentSweepAngle,
+              _rayLocationController, _currentColorMap, "purple"); // backgroundColor);
+        }
+
+        memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.sizeInBytes());
+
+        {
+            QPainter p(&m_buffer);
+            p.setTransform(_zoomTransform);
+            //drawSource(p);
+            // draw overlays
+            //p.setPen(Qt::blue);
+            //p.setFont(QFont("Arial", 30));
+            //trial += 1;
+            //QString theText;
+            //theText.append("Qt ");
+            //QString junk; junk.setNum(trial);
+            //theText.append(junk);
+            //painter.drawText(rect(), Qt::AlignCenter, theText);
+            //p.drawText(50, 50, "50, 50"); // theText);
+            //p.drawText(-50, 50, "-50, 50");
+            //p.drawText(-50, -50, "-50, -50");
+            
+            _drawOverlays(p);
+        }
+
+        //painter.setTransform(_zoomTransform);
+        bool horizontal = false;
+        bool vertical = true;
+        painter.drawImage(0, 0, m_buffer); // .mirrored(horizontal, vertical));
+//----  
+
+
+
+
+// need to plot data in a QImage, so that the overlays don't wipe out the data
+
+      //QImage myimage("/Users/brenda/Desktop/LROSE-Gateway-Banner.png");
+      //painter.drawImage(0,0, *image);
+
+   
 
     }
-    
-      /*
-      _image = _fieldRendererController->getImage(selectedField);
-
-      if (_image != NULL) {
-        LOG(DEBUG) << "image is NOT NULL";
-        painter.drawImage(0, 0, *_image);
-            //painter.drawImage(100, 300, *_image);
-      }
-      */
-      //_drawOverlays(&painter);
-/*
+/*  }
       // keep pointer to BoundaryPointEditorControl ???
 
       //QImage _boundaryImage = 
@@ -913,11 +957,11 @@ void PolarWidget::_setTransform(const QTransform &transform)
 /*************************************************************************
  * perform the rendering
  */
-
+/*
 void PolarWidget::_performRendering()
 {
   LOG(DEBUG) << "enter";
-  /*
+  
   try {
     size_t selectedField = displayFieldController->getSelectedFieldNum();
     _fieldRendererController->performRendering(selectedField);
@@ -926,14 +970,17 @@ void PolarWidget::_performRendering()
       LOG(ERROR) << ex.what();
       // QMessageBox::warning(NULL, "Error changing color map", ex.what());
   }
-  */
+  
   LOG(DEBUG) << "exit";
 }
+*/
 
+/*
 void PolarWidget::setImage(QImage *image) {
-  _image = image;
-  LOG(DEBUG) << "\n\n IMAGE = " <<  _image;
+  //_image = image;
+  //LOG(DEBUG) << "\n\n IMAGE = " <<  _image;
 }
+*/
 
 void PolarWidget::informationMessage()
 {
@@ -1011,10 +1058,11 @@ const RadxRay *PolarWidget::_getClosestRay(double x_km, double y_km)
   else
     LOG(DEBUG) << "Error: No ray found";
   return closestRay;
-  */
+*/
   return NULL;
 
 }
+
 
 /*
 ////////////////////////////////////////////////////////////////////////////
@@ -1086,6 +1134,19 @@ void PolarWidget::_drawOverlays(QPainter &painter)
 {
 
   LOG(DEBUG) << "enter";
+      painter.drawText(10, 10, "theText");
+  drawRings(painter);
+  //drawGrid(painter);
+  //drawAzimuthLines(painter);
+  //drawColorScale(painter);
+  LOG(DEBUG) << "exit";
+
+}
+
+void PolarWidget::drawRings(QPainter &painter)
+{
+
+  LOG(DEBUG) << "enter";
 
   // Don't try to draw rings if we haven't been configured yet or if the
   // rings or grids aren't enabled.
@@ -1093,8 +1154,11 @@ void PolarWidget::_drawOverlays(QPainter &painter)
   if (!_ringsEnabled && !_gridsEnabled && !_angleLinesEnabled) {
     return;
   }
-
+  LOG(DEBUG) << "before annoying thing";
+      painter.drawText(30, 30, "annoying thing!");
   // save painter state
+
+  //QPainter painter(this);
 
   painter.save();
 
@@ -1107,15 +1171,18 @@ void PolarWidget::_drawOverlays(QPainter &painter)
   if (_ringSpacing > 0.0 && _ringsEnabled) {
 
     // Set up the painter
-    
+  
     painter.save();
-    painter.setTransform(_zoomTransform);
-    painter.setPen(_gridRingsColor);
+    //painter.setTransform(_zoomTransform);
+    painter.setPen("black"); // _gridRingsColor);
   
     // set narrow line width
     QPen pen = painter.pen();
     pen.setWidth(0);
+    //QBrush brush("black", Qt::CrossPattern);
+    //pen.setBrush(brush);
     painter.setPen(pen);
+    //painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
@@ -1124,7 +1191,7 @@ void PolarWidget::_drawOverlays(QPainter &painter)
       ringRange += _ringSpacing;
     }
     painter.restore();
-
+  
     // Draw the labels
     
     QFont font = painter.font();
@@ -1142,8 +1209,16 @@ void PolarWidget::_drawOverlays(QPainter &painter)
       _zoomWorld.drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
       ringRange += _ringSpacing;
     }
+    
+  painter.restore();
 
   } /* endif - draw rings */
+
+  LOG(DEBUG) << "exit";
+
+}  
+
+void PolarWidget::drawGrid(QPainter &painter) {
   
   // Draw the grid
 
@@ -1152,7 +1227,7 @@ void PolarWidget::_drawOverlays(QPainter &painter)
     // Set up the painter
     
     painter.save();
-    painter.setTransform(_zoomTransform);
+    //painter.setTransform(_zoomTransform);
     painter.setPen(_gridRingsColor);
   
     double ringRange = _ringSpacing;
@@ -1180,6 +1255,11 @@ void PolarWidget::_drawOverlays(QPainter &painter)
 
   }
   
+  LOG(DEBUG) << "exit";
+
+}  
+
+void PolarWidget::drawAzimuthLines(QPainter &painter) { 
   // Draw the azimuth lines
 
   if (_angleLinesEnabled) {
@@ -1226,6 +1306,12 @@ void PolarWidget::_drawOverlays(QPainter &painter)
   
   painter.restore();
 
+  LOG(DEBUG) << "exit";
+
+}  
+
+
+void PolarWidget::drawColorScale(QPainter &painter) {
   // draw the color scale
 
   DisplayField *field = displayFieldController->getSelectedField();
@@ -1316,9 +1402,9 @@ void PolarWidget::_drawOverlays(QPainter &painter)
 
 }
 
-void PolarWidget::drawColorScaleLegend() {
+void PolarWidget::drawColorScaleLegend(QPainter &painter) {
 
-  QPainter painter(this);
+
   // draw the color scale
 
   DisplayField *field = displayFieldController->getSelectedField();
@@ -1346,7 +1432,8 @@ void PolarWidget::drawColorScaleLegend() {
 
 // draw text in world coords
 
-void PolarWidget::_drawScreenText(QPainter &painter, const string &text,
+void PolarWidget::_drawScreenText(QPainter &painter, 
+  const string &text,
                                 int text_x, int text_y,
                                 int flags)
   

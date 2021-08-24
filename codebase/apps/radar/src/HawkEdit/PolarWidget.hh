@@ -458,7 +458,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   QTransform _zoomTransform;
   WorldPlot _zoomWorld;
 
-  QImage *_image;
+  // QImage *_image;
   
 
   double _currentSweepAngle;
@@ -478,6 +478,14 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   void _drawOverlays(QPainter &painter);
+
+  void drawColorScale(QPainter &painter);
+
+  void drawAzimuthLines(QPainter &painter);
+
+  void drawGrid(QPainter &painter);
+
+  void drawRings(QPainter &painter);
 
   /**
    * @brief Determine a ring spacing which will give even distances, and
@@ -534,7 +542,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   void paintEvent(QPaintEvent *event) override;
 
-  void setImage(QImage *image);
+  //void setImage(QImage *image);
   //Qimage *getImage();
 
   /**
@@ -556,14 +564,15 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   // rendering
 
-  void _performRendering();
+  //void _performRendering();
 
   // get ray closest to click point
 
   const RadxRay *_getClosestRay(double x_km, double y_km);
 
-  void drawColorScaleLegend();
-  void _drawScreenText(QPainter &painter, const string &text,
+  void drawColorScaleLegend(QPainter &painter);
+  void _drawScreenText(QPainter &painter, 
+    const string &text,
                                 int text_x, int text_y,
                                 int flags);
 

@@ -27,6 +27,8 @@
 #include <mutex>
 #include <chrono>
 
+#include <QPainter>
+
 
 using namespace std;
 //using namespace std::chrono_literals;
@@ -45,7 +47,7 @@ FieldRendererView::FieldRendererView(string fieldName) : //const Params &params,
         //_params(params),
         //_fieldIndex(field_index),
         _name(fieldName),
-        //_image(NULL),
+        image(NULL),
         _imageReady(false),
         //_backgroundRenderTimer(NULL),
         _useHeight(false),
@@ -79,8 +81,8 @@ FieldRendererView::FieldRendererView(string fieldName) : //const Params &params,
 
 FieldRendererView::~FieldRendererView()
 {
-  //if (_image != NULL)
-  // delete _image;
+  if (image != NULL)
+    delete image;
 }
 
 // THIS IS NOT RIGHT!  WE NEED TO GET NEW BEAMS!  RayLocationController needs
@@ -100,17 +102,18 @@ FieldRendererView::~FieldRendererView()
 /////////////////////////////////////
 // create image into which we render
 
-void FieldRendererView::createImage(int width, int height)
+void FieldRendererView::createImage(QPainter *painter, int width, int height)
 
 {
   //_image = _image.scaled(width, height);
   //while (_rendering) this_thread::sleep_for(std::chrono::milliseconds(2000));
   //LOG(DEBUG) << "grabbed lock";
 
-  //if (_image != NULL)
-  //  delete _image;
-  //_image = new QImage(width, height, QImage::Format_RGB32);
-  //_image->fill(backgroundBrush->color().rgb());
+  if (image != NULL)
+    delete image;
+  //_image = (QImage *) painter->device();
+  image = new QImage(width, height, QImage::Format_RGB32); // _image.scaled(width, height); //  QImage::Format_RGB32);
+  image->fill("orange"); // backgroundBrush->color().rgb());
   _imageReady = false;
 }
 
@@ -118,7 +121,8 @@ void FieldRendererView::fillBackground(QBrush *backgroundBrush) {
   LOG(DEBUG) << "enter";
   //while (_rendering) this_thread::sleep_for(std::chrono::milliseconds(2000));
   //if (_image != NULL)
-   // _image.fill(backgroundBrush->color().rgb());
+  //_image->fill(backgroundBrush->color().rgb());
+  _imageReady = false;
   LOG(DEBUG) << "exit";
 }
 
@@ -219,21 +223,39 @@ void FieldRendererView::setBackgroundRenderingOn()
   
 }
 */  
+
+
+
+
 ////////////////////////////////////////////////////////////////
 // Thread run method
 // Actually performs the rendering
 
-void FieldRendererView::runIt(QPainter *painter)
+void FieldRendererView::runIt(QPainter &painter)
 {
   //LOG(DEBUG) << "Start of run() for field: " 
   //       << _field.getLabel() << " there are " << _beams.size() << " beams to render";
 
   LOG(DEBUG) << "enter: " << _name;
 
+
+  //QImage image("/Users/brenda/Desktop/LROSE-Gateway-Banner.png");
+  //_image = image;
+
+  //QPainter myPainter;
+  //myPainter.begin(&_image);
   //rendering.lock();
   //_rendering = true;
   //rendering.unlock();
+  //painter->save();
+  //painter->end();
+  //painter->begin(image);
 
+
+  if (!painter.isActive()) {
+    LOG(DEBUG) << "ERROR!!! painter is not active";
+    return;
+  } 
   if (_beams.size() == 0) {
     LOG(DEBUG) << "_beams.size() == 0, returning";
     return;
@@ -251,17 +273,13 @@ void FieldRendererView::runIt(QPainter *painter)
     if (*beam == NULL) {
       continue;
     }
-    /*
-    if (_params.debug >= Params::DEBUG_EXTRA) {
-      cerr << "Rendering beam field:" 
-           << _field.getLabel() << endl;
-      (*beam)->print(cerr);
-    }
-    */
-    (*beam)->paint(painter, &_image, _transform, _useHeight, _drawInstHt);
+    (*beam)->paint(painter, _transform, _useHeight, _drawInstHt);
     //(*beam)->setBeingRendered(_fieldIndex, false);
   }
   
+  //painter.end();
+  //painter->restore();
+
   _imageReady = true;
 
   //painter->drawImage(0,0, _image);

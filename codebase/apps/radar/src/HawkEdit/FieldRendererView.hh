@@ -51,7 +51,7 @@
 
 // Really, this is a View 
 
-class DLL_EXPORT FieldRendererView : public QObject  // , public TaThread
+class DLL_EXPORT FieldRendererView : public QObject // , public TaThread
 {
 
   Q_OBJECT
@@ -192,7 +192,7 @@ public:
   
   void addBeam(Beam *beam);
 
-  void createImage(int width, int height);  
+  void createImage(QPainter *painter, int width, int height);  
 
   void fillBackground(QBrush *backgroundBrush);
   /**
@@ -203,7 +203,7 @@ public:
   double getSweepAngle() { return _sweepAngle; };
   //void setSweepAngle(double sweepAngle);
 
-  QImage _image;
+  QImage *image;
   bool _imageReady;
   string _name;
   double _sweepAngle;
@@ -261,7 +261,7 @@ public:
    * This is where the rendering actually gets done
    */
 
-  void runIt(QPainter *painter);
+  void runIt(QPainter &painter);
 
 private:
   ColorMap _colorMap;

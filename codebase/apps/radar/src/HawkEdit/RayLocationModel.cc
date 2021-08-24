@@ -112,6 +112,26 @@ double RayLocationModel::getGateSpacingKm(size_t rayIdx) {
 	return ray->getGateSpacingKm();
 }
 
+// over all the rays, find the maximum range
+double RayLocationModel::getMaxRangeKm() {
+
+  double max = 0.0;
+
+  DataModel *dataModel = DataModel::Instance();
+  const vector<RadxRay *> &listOfRays = dataModel->getRays();
+  vector<RadxRay *>::const_iterator rayItr;
+  for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
+    const RadxRay *ray = *rayItr;
+
+    double fieldRange = ray->getStartRangeKm() + 
+      (double) ray->getNGates() * ray->getGateSpacingKm();
+    if (fieldRange > max) {
+      max = fieldRange;
+    }
+  }
+  return max;
+}
+
 size_t RayLocationModel::getEndIndex(size_t rayIdx) {
 	return ray_loc.at(rayIdx).endIndex;
 }

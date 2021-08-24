@@ -1987,7 +1987,20 @@ void PolarManager::_setupRayLocation() {
   int currentSweepNumber = _sweepController->getSelectedNumber();
   _rayLocationController->sortRaysIntoRayLocations(ppi_rendering_beam_width,
     currentSweepNumber);
+
+  _setMaxRangeKm();
 }
+
+// find and set the max range for the Ppi display
+void PolarManager::_setMaxRangeKm() {
+   double maxRangeKm = _rayLocationController->getMaxRangeKm();
+
+  // configure the max range for display
+  _ppi->configureRange(maxRangeKm);
+
+}
+
+
 
 // We need to resize the arrays that are retained and look up the field Index by field name,
 // because we are only redrawing the new fields and these stores have a field index
@@ -3139,6 +3152,7 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
       return;
     }
 
+    
   
 /*
   // now update the time controller window

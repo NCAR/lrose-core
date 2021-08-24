@@ -25,6 +25,7 @@
 #include "FieldRendererController.hh"
 #include "RayLocationController.hh"
 #include <toolsa/LogStream.hh>
+#include <QPainter>
 
 using namespace std;
 
@@ -302,7 +303,7 @@ void FieldRendererController::takeCareOfMissingValues(vector<float> *rayData,
 
 
 
-QImage *FieldRendererController::renderImage(QPainter *painter, int width, int height,
+QImage *FieldRendererController::renderImage(QPainter &painter, int width, int height,
   string fieldName, QTransform zoomTransform, double sweepAngle, 
   RayLocationController *rayLocationController,
   ColorMap &colorMap,
@@ -319,19 +320,21 @@ QImage *FieldRendererController::renderImage(QPainter *painter, int width, int h
   if (fieldRenderer == NULL) {
     fieldRenderer = new FieldRendererView(fieldName);
     //fieldRenderer->setSweepAngle(sweepAngle); 
-    fieldRenderer->createImage(width, height);
+    //fieldRenderer->createImage(painter, width, height);
     _fieldRenderers.push_back(fieldRenderer);
   } else {
     //fieldRenderer->setSweepAngle(sweepAngle); 
-    fieldRenderer->createImage(width, height);
+    //fieldRenderer->createImage(painter, width, height);
   }
   //LOG(DEBUG) << "lock obtained";
   // fieldRenderView is locked, we can procede with changes ...
 
   //fieldRenderer->setTransform(zoomTransform);
 
+        
 
-  if (!fieldRenderer->imageReady()) {
+
+  //if (!fieldRenderer->imageReady()) {
     LOG(DEBUG) << "image NOT READY, recreating beams";
     // create a beam for each ray  
     //ColorMap colorMap;
@@ -376,16 +379,19 @@ QImage *FieldRendererController::renderImage(QPainter *painter, int width, int h
     //fieldRenderer->fillBackground(painter, background_brush);
     fieldRenderer->runIt(painter);  // calls paint method on each beam
     // fieldRendererView is unlocked
-    LOG(DEBUG) << "lock released";
+    //LOG(DEBUG) << "lock released";
     //delete background_brush;
-  }
+ // }
   
-  //QImage *image = fieldRenderer->getImage();
+  //painter->drawImage(0,0, fieldRenderer->_image);
+  //QImage image = fieldRenderer->_image;
   //LOG(DEBUG) << "image width = " << image->width() << " height " << image->height();
 
-  LOG(DEBUG) << "exit: ";
+
+  //QImage image("/Users/brenda/Desktop/LROSE-Gateway-Banner.png");
+  //painter->drawImage(0, 0, image);
+  LOG(DEBUG) << "exit";  
   return NULL;
-  //return image;
 }
 
 

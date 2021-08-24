@@ -20,6 +20,7 @@ void sortRaysIntoRayLocations(float ppi_rendering_beam_width,
 size_t getNRayLocations();
 double getStartRangeKm(size_t rayIdx);
 double getGateSpacingKm(size_t rayIdx);
+double getMaxRangeKm();
 size_t getEndIndex(size_t rayIdx);
 double getStartAngle(size_t rayIdx);
 double getStopAngle(size_t rayIdx);
