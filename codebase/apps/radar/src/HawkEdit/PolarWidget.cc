@@ -1136,9 +1136,9 @@ void PolarWidget::_drawOverlays(QPainter &painter)
   LOG(DEBUG) << "enter";
       painter.drawText(10, 10, "theText");
   drawRings(painter);
-  //drawGrid(painter);
-  //drawAzimuthLines(painter);
-  //drawColorScale(painter);
+  drawGrid(painter);
+  drawAzimuthLines(painter);
+  drawColorScale(painter);
   LOG(DEBUG) << "exit";
 
 }
@@ -1158,8 +1158,6 @@ void PolarWidget::drawRings(QPainter &painter)
       painter.drawText(30, 30, "annoying thing!");
   // save painter state
 
-  //QPainter painter(this);
-
   painter.save();
 
   // store font
@@ -1174,7 +1172,7 @@ void PolarWidget::drawRings(QPainter &painter)
   
     painter.save();
     //painter.setTransform(_zoomTransform);
-    painter.setPen("black"); // _gridRingsColor);
+    painter.setPen(_gridRingsColor);
   
     // set narrow line width
     QPen pen = painter.pen();
@@ -1203,6 +1201,7 @@ void PolarWidget::drawRings(QPainter &painter)
     while (ringRange <= _maxRangeKm) {
       double labelPos = ringRange * SIN_45;
       const string &labelStr = _scaledLabel.scale(ringRange);
+
       _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
       _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
       _zoomWorld.drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
@@ -1234,10 +1233,10 @@ void PolarWidget::drawGrid(QPainter &painter) {
     double maxRingRange = ringRange;
     while (ringRange <= _maxRangeKm) {
 
-      _zoomWorld.drawLine(painter, ringRange, -_maxRangeKm, ringRange, _maxRangeKm);
-      _zoomWorld.drawLine(painter, -ringRange, -_maxRangeKm, -ringRange, _maxRangeKm);
-      _zoomWorld.drawLine(painter, -_maxRangeKm, ringRange, _maxRangeKm, ringRange);
-      _zoomWorld.drawLine(painter, -_maxRangeKm, -ringRange, _maxRangeKm, -ringRange);
+      painter.drawLine( ringRange, -_maxRangeKm, ringRange, _maxRangeKm);
+      painter.drawLine( -ringRange, -_maxRangeKm, -ringRange, _maxRangeKm);
+      painter.drawLine( -_maxRangeKm, ringRange, _maxRangeKm, ringRange);
+      painter.drawLine( -_maxRangeKm, -ringRange, _maxRangeKm, -ringRange);
       
       maxRingRange = ringRange;
       ringRange += _ringSpacing;
@@ -1266,25 +1265,28 @@ void PolarWidget::drawAzimuthLines(QPainter &painter) {
 
     // Set up the painter
     
-    painter.save();
+    //painter.save();
     painter.setPen(_gridRingsColor);
   
     // Draw the lines along the X and Y axes
 
-    _zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
-    _zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
+    //_zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
+    //_zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
+
+    painter.drawLine(0, -_maxRangeKm, 0, _maxRangeKm);
+    painter.drawLine(-_maxRangeKm, 0, _maxRangeKm, 0);
 
     // Draw the lines along the 30 degree lines
 
     double end_pos1 = SIN_30 * _maxRangeKm;
     double end_pos2 = COS_30 * _maxRangeKm;
     
-    _zoomWorld.drawLine(painter, end_pos1, end_pos2, -end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, end_pos1, -end_pos2, -end_pos1);
-    _zoomWorld.drawLine(painter, -end_pos1, end_pos2, end_pos1, -end_pos2);
-    _zoomWorld.drawLine(painter, end_pos2, -end_pos1, -end_pos2, end_pos1);
+    painter.drawLine( end_pos1, end_pos2, -end_pos1, -end_pos2);
+    painter.drawLine( end_pos2, end_pos1, -end_pos2, -end_pos1);
+    painter.drawLine( -end_pos1, end_pos2, end_pos1, -end_pos2);
+    painter.drawLine( end_pos2, -end_pos1, -end_pos2, end_pos1);
 
-    painter.restore();
+    //painter.restore();
 
   }
   
