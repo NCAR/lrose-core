@@ -130,6 +130,24 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   void configureRange(double max_range);
 
+  QTransform *configureTextTransform();
+  QTransform *computeTextTransform(
+                    int widthPixels,
+                    int heightPixels,
+                    int leftMargin,
+                    int rightMargin,
+                    int topMargin,
+                    int bottomMargin,
+                    int colorScaleWidth,
+                    double xMinWorld,
+                    double yMinWorld,
+                    double xMaxWorld,
+                    double yMaxWorld,
+                    int axisTickLen,
+                    int nTicksIdeal,
+                    int textMargin);
+
+
   /**********************************************
    * turn on archive-style rendering - all fields
    */
@@ -480,12 +498,17 @@ class DLL_EXPORT PolarWidget : public QWidget
   void _drawOverlays(QPainter &painter);
 
   void drawColorScale(QPainter &painter);
+  void drawColorScaleFromWorldPlot(const ColorMap &colorMap,
+                               QPainter &painter,
+                               int unitsFontSize);
 
   void drawAzimuthLines(QPainter &painter);
 
   void drawGrid(QPainter &painter);
 
   void drawRings(QPainter &painter);
+
+  void drawLegend(QPainter &painter);
 
   /**
    * @brief Determine a ring spacing which will give even distances, and
@@ -570,7 +593,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   const RadxRay *_getClosestRay(double x_km, double y_km);
 
-  void drawColorScaleLegend(QPainter &painter);
+  //void drawColorScaleLegend(QPainter &painter);
   void _drawScreenText(QPainter &painter, 
     const string &text,
                                 int text_x, int text_y,

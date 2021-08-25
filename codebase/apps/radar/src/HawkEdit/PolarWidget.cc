@@ -106,7 +106,7 @@ PolarWidget::PolarWidget(QWidget* parent,
   setPalette(new_palette);
   
   setBackgroundRole(QPalette::Dark);
-  setAutoFillBackground(false); // true);
+  setAutoFillBackground(true);
   setAttribute(Qt::WA_OpaquePaintEvent);
 
   // Allow the widget to get focus
@@ -229,6 +229,81 @@ void PolarWidget::configureRange(double max_range)
   //_refreshImages();
   LOG(DEBUG) << "exit";
 }
+
+
+// setup tranform for coordinates x: 0 - 100; y: 0 - 100; 
+//  (0,0) is the bottom left corner
+QTransform *PolarWidget::configureTextTransform()
+{
+  LOG(DEBUG) << "enter";
+  
+  // set world view
+
+  int leftMargin = 0;
+  int rightMargin = 0;
+  int topMargin = 0;
+  int bottomMargin = 0;
+  int colorScaleWidth = _params->color_scale_width;
+  int axisTickLen = 7;
+  int nTicksIdeal = 7;
+  int textMargin = 5;
+
+
+  return computeTextTransform(width(), height(),
+                   leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
+                   // xMinWorld, yMinWorld
+                   0, 0,
+                   // xMaxWorld, yMaxWorld
+                   100, 100,
+                   axisTickLen, nTicksIdeal, textMargin);
+
+  LOG(DEBUG) << "exit";
+
+}
+
+QTransform *PolarWidget::computeTextTransform(
+                    int widthPixels,
+                    int heightPixels,
+                    int leftMargin,
+                    int rightMargin,
+                    int topMargin,
+                    int bottomMargin,
+                    int colorScaleWidth,
+                    double xMinWorld,
+                    double yMinWorld,
+                    double xMaxWorld,
+                    double yMaxWorld,
+                    int axisTickLen,
+                    int nTicksIdeal,
+                    int textMargin) {
+
+  QTransform *transform = new QTransform();
+  int plotWidth = widthPixels - leftMargin - rightMargin - colorScaleWidth;
+  int plotHeight = heightPixels - topMargin - bottomMargin;
+    
+  int xMinPixel = leftMargin;
+  int xMaxPixel = xMinPixel + plotWidth - 1;
+  // OR ...
+  //_yMinPixel = _topMargin + _plotHeight - 1;
+  //_yMaxPixel = _topMargin;
+
+  int yMinPixel = topMargin; 
+  int yMaxPixel = yMinPixel + plotHeight - 1;
+ 
+    
+  double xPixelsPerWorld =
+    abs((xMaxPixel - xMinPixel) / (xMaxWorld - xMinWorld));
+  double yPixelsPerWorld =
+    abs((yMaxPixel - yMinPixel) / (yMaxWorld - yMinWorld));
+    
+  transform->reset();
+  transform->scale(xPixelsPerWorld, yPixelsPerWorld);
+  //_transform.rotateRadians(M_PI, Qt::XAxis);
+
+  return transform;
+}
+
+
 
 /*************************************************************************
  * configure the axes
@@ -737,7 +812,7 @@ void PolarWidget::paintEvent(QPaintEvent *event)
             m_buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
             m_base_buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
 
-            m_base_buffer.fill(0);
+            m_base_buffer.fill(_backgroundBrush.color());
 
             QPainter p(&m_base_buffer);
             p.setTransform(_zoomTransform);
@@ -747,7 +822,7 @@ void PolarWidget::paintEvent(QPaintEvent *event)
             _fieldRendererController->renderImage(p, 0, 0, // 0 means they aren't used; width(), height(), 
               selectedField, _zoomTransform, 
               _currentSweepAngle,
-              _rayLocationController, _currentColorMap, "purple"); // backgroundColor);
+              _rayLocationController, _currentColorMap, _backgroundBrush.color()); // "purple"); // backgroundColor);
         }
 
         memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.sizeInBytes());
@@ -1134,11 +1209,12 @@ void PolarWidget::_drawOverlays(QPainter &painter)
 {
 
   LOG(DEBUG) << "enter";
-      painter.drawText(10, 10, "theText");
+      //painter.drawText(10, 10, "theText");
   drawRings(painter);
   drawGrid(painter);
   drawAzimuthLines(painter);
   drawColorScale(painter);
+  drawLegend(painter);
   LOG(DEBUG) << "exit";
 
 }
@@ -1220,7 +1296,7 @@ void PolarWidget::drawRings(QPainter &painter)
   } /* endif - draw rings */
 
   painter.restore();
-  
+
   LOG(DEBUG) << "exit";
 
 }  
@@ -1321,14 +1397,189 @@ void PolarWidget::drawAzimuthLines(QPainter &painter) {
 }  
 
 
+/////////////////////////////////////////////////////
+// draw the color scale
+
+void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
+                               QPainter &painter,
+                               int unitsFontSize)
+  
+{
+  LOG(DEBUG) << "enter";
+
+  const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
+
+  int _topMargin = 0;
+  int _plotHeight = height();
+  int _widthPixels = width();
+
+
+  int pltHt = _plotHeight;
+  int width = _colorScaleWidth;
+  int xStart = 50; // _widthPixels - width;
+  size_t nHts = cmap.size() + 1; // leave some space at top and bottom
+  double patchHt = (double)(pltHt) / nHts;
+  int iPatchHt = (int) patchHt;
+
+  // fill the swatches with the color
+  
+  painter.save();
+  painter.setPen(Qt::SolidLine);
+  int scaleYTop = 0, scaleYBot = 0;
+  for (size_t ii = 0; ii < cmap.size(); ii++) {
+    const ColorMap::CmapEntry &entry = cmap[ii];
+    QColor color(entry.red, entry.green, entry.blue);
+    painter.setBrush(color);
+    double topY = pltHt - (int) (ii + 2) * patchHt + (patchHt / 2) + _topMargin;
+    QRectF r(xStart, topY, width, patchHt);
+    painter.fillRect(r, color);
+    if (ii == 0) {
+      scaleYBot = topY + patchHt;
+    } else if (ii == cmap.size() - 1) {
+      scaleYTop = topY;
+    }
+  }
+  painter.restore();
+  
+  // get precision based on data
+  
+  double minDelta = 1.0e99;
+  for (size_t ii = 0; ii < cmap.size(); ii++) {
+    const ColorMap::CmapEntry &entry = cmap[ii];
+    double delta = fabs(entry.maxVal - entry.minVal);
+    if (delta < minDelta) minDelta = delta;
+  }
+  int ndecimals = 0;
+  char format = 'f';
+  if (minDelta <= 0.025) {
+    ndecimals = 3;
+    format = 'g';
+  } else if (minDelta <= 0.05) {
+    ndecimals = 3;
+  } else if (minDelta <= 0.25) {
+    ndecimals = 2;
+  } else if (minDelta <= 25) {
+    ndecimals = 1;
+  }
+
+  // save state
+
+  painter.save();
+
+  // scale the font
+  
+  QFont defaultFont = painter.font();
+  if (defaultFont.pointSize() > patchHt / 3) {
+    int pointSize = patchHt / 3;
+    if (pointSize < 7) {
+      pointSize = 7;
+    }
+    QFont scaledFont(defaultFont);
+    scaledFont.setPointSizeF(pointSize);
+    painter.setFont(scaledFont);
+  }
+  
+  // add labels
+
+  painter.setBrush(Qt::black);
+  painter.setBackgroundMode(Qt::OpaqueMode);
+  QRect tRect(painter.fontMetrics().tightBoundingRect("1.0"));
+  int textHt = tRect.height();
+  
+  if (colorMap.labelsSetByValue()) {
+  
+    // label values specified in the color scale file
+
+    const vector<ColorMap::CmapLabel> &labels = colorMap.getSpecifiedLabels();
+    double scaleHeight = scaleYBot - scaleYTop;
+    for (size_t ii = 0; ii < labels.size(); ii++) {
+      const ColorMap::CmapLabel &label = labels[ii];
+      double yy = scaleYBot - scaleHeight * label.position;
+      painter.drawText(xStart, (int) yy - textHt / 2, 
+                       width + 4, textHt + 4, 
+                       Qt::AlignCenter | Qt::AlignHCenter, 
+                       label.text.c_str());
+    } // ii
+
+  } else {
+
+    // label the color transitions
+    // we space the labels vertically by at least 2 * text height
+    
+    double yy = pltHt - (patchHt * 1.0) + _topMargin;
+    double prevIyy = -1;
+    for (size_t ii = 0; ii < cmap.size(); ii++) {
+      const ColorMap::CmapEntry &entry = cmap[ii];
+      QString label = QString("%1").arg(entry.minVal,0,format,ndecimals);
+      int iyy = (int) yy;
+      bool doText = false;
+      if (prevIyy < 0) {
+        doText = true;
+      } else if ((prevIyy - iyy) > textHt * 2) {
+        doText = true;
+      }
+      if (doText) {
+        painter.drawText(xStart, iyy, width, iPatchHt, 
+                         Qt::AlignCenter | Qt::AlignHCenter, 
+                         label);
+        prevIyy = iyy;
+      }
+      yy -= patchHt;
+    }
+    
+    // last label at top
+    
+    const ColorMap::CmapEntry &entry = cmap[cmap.size()-1];
+    QString label = QString("%1").arg(entry.maxVal,0,format,ndecimals);
+    int iyy = (int) yy;
+    if ((prevIyy - iyy) > textHt * 2) {
+      painter.drawText(xStart, iyy, width, iPatchHt, 
+                       Qt::AlignVCenter | Qt::AlignHCenter, 
+                       label);
+    }
+    yy -= patchHt;
+
+  }
+
+  // add Units label
+
+  string units(colorMap.getUnits());
+  if (units.size() > 0) {
+    
+    QFont ufont(painter.font());
+    ufont.setPointSizeF(unitsFontSize);
+    painter.setFont(ufont);
+
+    QRect tRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
+    int iyy = _topMargin / 2;
+    int ixx = _widthPixels - width;
+    QString qunits(units.c_str());
+    painter.drawText(ixx, iyy, width, tRect.height() + 4, 
+                     Qt::AlignTop | Qt::AlignHCenter, qunits);
+
+  }
+
+  // restore state
+
+  painter.restore();
+
+  LOG(DEBUG) << "exit";
+
+}
+
+
+
+
 void PolarWidget::drawColorScale(QPainter &painter) {
   // draw the color scale
 
   DisplayField *field = displayFieldController->getSelectedField();
-  _zoomWorld.drawColorScale(field->getColorMap(), painter,
+  drawColorScaleFromWorldPlot(field->getColorMap(), painter,
                             _params->label_font_size);
 
-  if (_archiveMode) {
+}
+
+void PolarWidget::drawLegend(QPainter &painter) {
 
     // add legends with time, field name and elevation angle
 
@@ -1380,48 +1631,95 @@ void PolarWidget::drawColorScale(QPainter &painter) {
 
     //sprintf(text, "NRays: %g", _nRays);
     //legends.push_back(text);
+
+
+  int leftMargin = 0;
+  int rightMargin = 0;
+  int topMargin = 0;
+  int bottomMargin = 0;
+  int colorScaleWidth = _params->color_scale_width;
+  int axisTickLen = 7;
+  int nTicksIdeal = 7;
+  int textMargin = 5;    
     
     painter.save();
     painter.setPen(Qt::yellow);
-    painter.setBrush(Qt::black);
+    //painter.setBrush(Qt::black);
     painter.setBackgroundMode(Qt::OpaqueMode);
 
-    switch (_params->ppi_main_legend_pos) {
-      case Params::LEGEND_TOP_LEFT:
-        _zoomWorld.drawLegendsTopLeft(painter, legends);
+    //painter.setBrush(Qt::white);
+    painter.setBackgroundMode(Qt::TransparentMode);
+
+
+    // plot using x:0 - 100, y: 0 - 100; (0,0) bottom left corner
+    QTransform *textTransform = configureTextTransform();
+    painter.setWorldTransform(*textTransform); 
+
+    QFont font = painter.font();
+    font.setPointSize(3);
+    painter.setFont(font);    
+
+    qreal xx, yy;
+
+    //switch (_params->ppi_main_legend_pos) {
+      //case Params::LEGEND_TOP_LEFT:
+        xx = 0;  // (qreal) (_xMinPixel + _axisTickLen + _textMargin);
+        yy = 0; //_yMaxPixel + _axisTickLen;
+        //_zoomWorld.drawLegendsTopLeft(painter, legends);
+        /*
         break;
       case Params::LEGEND_TOP_RIGHT:
-        _zoomWorld.drawLegendsTopRight(painter, legends);
+        //_zoomWorld.drawLegendsTopRight(painter, legends);
+        qreal yy = _yMaxPixel + _axisTickLen;
         break;
       case Params::LEGEND_BOTTOM_LEFT:
-        _zoomWorld.drawLegendsBottomLeft(painter, legends);
+        //_zoomWorld.drawLegendsBottomLeft(painter, legends);
         break;
       case Params::LEGEND_BOTTOM_RIGHT:
-        _zoomWorld.drawLegendsBottomRight(painter, legends);
+        //_zoomWorld.drawLegendsBottomRight(painter, legends);
         break;
       default: {}
     }
+    */
 
-    // painter.setBrush(Qt::white);
-    // painter.setBackgroundMode(Qt::TransparentMode);
-    painter.restore();
+  for (size_t i = 0; i < legends.size(); i++) {
+    string legend(legends[i]);
+    QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
+    QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
+    painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy += (textMargin + tRect.height());
+  }
 
-  } // if (_archiveMode) {
+/* for top right ...
+  for (size_t i = 0; i < legends.size(); i++) {
+    string legend(legends[i]);
+    QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
+    qreal xx = (qreal) (_xMaxPixel - _axisTickLen -
+                        _textMargin - tRect.width());
+    QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
+    painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
+    yy += (_textMargin + tRect.height());
+  }   
+  */ 
+
+
+  painter.restore();
+  delete textTransform;
 
   LOG(DEBUG) << "exit";
 
 }
 
-void PolarWidget::drawColorScaleLegend(QPainter &painter) {
+//void PolarWidget::drawColorScaleLegend(QPainter &painter) {
 
-
+/*
   // draw the color scale
 
   DisplayField *field = displayFieldController->getSelectedField();
-  _zoomWorld.drawColorScale(field->getColorMap(), painter,
+  drawColorScale(field->getColorMap(), painter,
                             _params->label_font_size);
-
-}
+*/
+//}
 
 ///////////////////////////////////////////////////////////////////////////
 // Draw text, with (X, Y) in screen space
