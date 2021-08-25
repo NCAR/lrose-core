@@ -1170,7 +1170,7 @@ void PolarWidget::drawRings(QPainter &painter)
 
     // Set up the painter
   
-    painter.save();
+    //painter.save();
     //painter.setTransform(_zoomTransform);
     painter.setPen(_gridRingsColor);
   
@@ -1188,31 +1188,39 @@ void PolarWidget::drawRings(QPainter &painter)
       painter.drawEllipse(rect);
       ringRange += _ringSpacing;
     }
-    painter.restore();
+
   
     // Draw the labels
-    
+    painter.save();
+
+    QTransform flipTransform;
+    flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
+    bool combine = true;
+    painter.setWorldTransform(flipTransform, combine);
     QFont font = painter.font();
     font.setPointSizeF(_params->range_ring_label_font_size);
     painter.setFont(font);
-    // painter.setWindow(0, 0, width(), height());
+
     
     ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
-      double labelPos = ringRange * SIN_45;
-      const string &labelStr = _scaledLabel.scale(ringRange);
-
-      _zoomWorld.drawText(painter, labelStr, labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, labelPos, -labelPos, Qt::AlignCenter);
-      _zoomWorld.drawText(painter, labelStr, -labelPos, -labelPos, Qt::AlignCenter);
+      double labelPosD = ringRange * SIN_45;
+      const string &labelStrS = _scaledLabel.scale(ringRange);
+      int labelPos = (int) labelPosD;
+      QString labelStr(labelStrS.c_str());
+      painter.drawText(  labelPos, labelPos, labelStr); // Qt::AlignCenter);
+      painter.drawText(  -labelPos, labelPos, labelStr); // Qt::AlignCenter);
+      painter.drawText(  labelPos, -labelPos, labelStr); // Qt::AlignCenter);
+      painter.drawText(  -labelPos, -labelPos, labelStr); // Qt::AlignCenter);
       ringRange += _ringSpacing;
     }
     
-  painter.restore();
+    painter.restore();
 
   } /* endif - draw rings */
 
+  painter.restore();
+  
   LOG(DEBUG) << "exit";
 
 }  
@@ -1306,7 +1314,7 @@ void PolarWidget::drawAzimuthLines(QPainter &painter) {
 
   // reset painter state
   
-  painter.restore();
+  //painter.restore();
 
   LOG(DEBUG) << "exit";
 
