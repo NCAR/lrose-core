@@ -51,7 +51,7 @@
 
 // Really, this is a View 
 
-class DLL_EXPORT FieldRendererView : public QObject  // , public TaThread
+class DLL_EXPORT FieldRendererView : public QObject // , public TaThread
 {
 
   Q_OBJECT
@@ -125,7 +125,7 @@ public:
    * @brief Get the current background rendering image for this field.
    */
 
-  inline QImage *getImage() const { return _image; }
+  //inline QImage *getImage() const { return _image; }
 
   bool imageReady() { return _imageReady; }
   
@@ -192,7 +192,7 @@ public:
   
   void addBeam(Beam *beam);
 
-  void createImage(int width, int height);  
+  void createImage(QPainter *painter, int width, int height);  
 
   void fillBackground(QBrush *backgroundBrush);
   /**
@@ -200,11 +200,13 @@ public:
    */
 
   string getName() { return _name; };
+  double getSweepAngle() { return _sweepAngle; };
+  //void setSweepAngle(double sweepAngle);
 
-  QImage *_image;
+  QImage *image;
   bool _imageReady;
   string _name;
-  
+  double _sweepAngle;
   /**
    * @brief Flag indicating whether this field should be rendered in the
    *        background.
@@ -247,6 +249,8 @@ public:
   void setNoColorMap() { _haveColorMap = false; }
   void changeColorMap() { _haveColorMap = true; }
   void replaceColorMap(ColorMap newColorMap);
+
+  void clearBeams();
     
   ///////////////////////
   // Protected methods //
@@ -257,11 +261,13 @@ public:
    * This is where the rendering actually gets done
    */
 
-  void runIt();
+  void runIt(QPainter &painter);
 
 private:
   ColorMap _colorMap;
   bool _haveColorMap;
+  bool _rendering; 
+  bool _changed;
   
 };
 

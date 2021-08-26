@@ -771,7 +771,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("dbz_field");
     tt->descr = tdrpStrDup("Reflectivity field details.");
-    tt->help = tdrpStrDup("If the field name is specified, that is used. If the field name is empty, the field number is used.");
+    tt->help = tdrpStrDup("Specify the field name. The use of the field num is deprecated.");
     tt->val_offset = (char *) &dbz_field - &_start_;
     tt->struct_def.name = tdrpStrDup("field_t");
     tt->struct_def.nfields = 2;
@@ -861,7 +861,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("vel_field");
     tt->descr = tdrpStrDup("Velocity field details.");
-    tt->help = tdrpStrDup("If the field name is specified, that is used. If the field name is empty, the field number is used. Note that the usage must be consistent with the dbz_field parameter, i.e. if you specify the name for reflectivity you must also specify the name for velocity, and vice versa.");
+    tt->help = tdrpStrDup("Specify the field name. The use of the field num is deprecated.");
     tt->val_offset = (char *) &vel_field - &_start_;
     tt->struct_def.name = tdrpStrDup("field_t");
     tt->struct_def.nfields = 2;
@@ -902,7 +902,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("REMAPPING THE VERTICAL LEVELS TO CONSTANT SPACING.");
-    tt->comment_text = tdrpStrDup("If the input files do not have constant vertical levels, you will need to remap the vertical levels appropriately. See the following parameters.");
+    tt->comment_text = tdrpStrDup("If the input files do not have constant spacing between the vertical levels, they need to be remapped to a constant delta heights. Titan can do this automatically, using the smallest delta Z in the data grid. But you have the option to specify the remapping manually. In that case, use this section to set the following parameters.");
     tt++;
     
     // Parameter 'remap_z_to_constant_grid'
@@ -912,7 +912,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("remap_z_to_constant_grid");
     tt->descr = tdrpStrDup("Option to remap the Z levels onto a grid with constant dz.");
-    tt->help = tdrpStrDup("Field data will be remapped onto the specified Z levels using the nearest neighbor method. See 'remap_z_grid'. Note that this actually changes the data. Whereas 'override_vlevels' only changes the vlevels in the headers, and does not change the data.");
+    tt->help = tdrpStrDup("Field data will be remapped onto the specified Z levels using the nearest neighbor method. See 'remap_z_grid'.");
     tt->val_offset = (char *) &remap_z_to_constant_grid - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -923,7 +923,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("remap_z_grid");
-    tt->descr = tdrpStrDup("Specified Z levels for remapping.");
+    tt->descr = tdrpStrDup("Specified Z levels for remapping the vertical levels.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &remap_z_grid - &_start_;
     tt->struct_def.name = tdrpStrDup("remap_z_grid_t");
@@ -948,9 +948,9 @@
     tt->n_struct_vals = 3;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].i = 10;
-      tt->struct_vals[1].d = 0;
-      tt->struct_vals[2].d = 1;
+      tt->struct_vals[0].i = 40;
+      tt->struct_vals[1].d = 0.5;
+      tt->struct_vals[2].d = 0.5;
     tt++;
     
     // Parameter 'Comment 7'

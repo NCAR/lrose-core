@@ -16,11 +16,13 @@ public:
 
 signals:
   void clicked();
+  void doubleClicked(QString text);
 
 protected:
   void mousePressEvent(QMouseEvent* event);
   //  void paintEvent(QPaintEvent *e);
 
+  void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
   //  ColorBar *_colorBar;

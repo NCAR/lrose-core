@@ -4,6 +4,7 @@
 
 //------------------------------------------------------------------
 #include "Parms.hh"
+#include "HeaderParams.hh"
 #include "RadxModelQc.hh"
 #include <toolsa/LogStream.hh>
 #include <vector>
@@ -83,8 +84,10 @@ Parms::~Parms()
 //------------------------------------------------------------------
 void Parms::printParams(tdrp_print_mode_t printMode)
 {
-  Params::print(stdout, printMode);
+  HeaderParams h;
+  h.print(stdout, printMode);
   RadxAppParms::printParams(printMode);
+  Params::print(stdout, printMode);
 }
 
 //------------------------------------------------------------------
@@ -134,8 +137,8 @@ void Parms::setFiltersFromParms(void)
   }
   
   _volumeAfterFilters.clear();
-  for (int i=0; i<volume_after_filter_n; ++i)
-  {
-    _volumeAfterFilters.push_back(_volume_after_filter[i]);
-  }
+  // for (int i=0; i<volume_after_filter_n; ++i)
+  // {
+  //   _volumeAfterFilters.push_back(_volume_after_filter[i]);
+  // }
 }

@@ -117,29 +117,28 @@ MathUserData *RayData1::radxappUserLoopFunctionToUserData(const UnaryNode &p)
 void RayData1::radxappAppendUnaryOperators(std::vector<FunctionDef> &ret) const
 {
   ret.push_back(FunctionDef(_azGradientStr, "v", "field, azGradientState, bias",
-			    "Azimuthal Gradient\n"
-			    "azgradstate = 2d state object\n"
-			    "bias = added to results\n"
-			    "NOTE this only works for input radar fields,"
-			    " not derived fields"));
+			    "Azimuthal Gradient of input field, where "
+			    "azGradientState = 2d state object produced by VolAzGradientState filter\n"
+			    "bias = number added to output values\n"
+			    "NOTE this only works for input radar fields not derived fields"));
   ret.push_back(FunctionDef(_qscaleStr, "v", "field, scale, top, low",
-			    "exp(-scale*(field/topv-lowv/topv)^2)"));
+			    "QScale filter on a field, which is exp(-scale*(field/topv-lowv/topv)^2)"));
   ret.push_back(FunctionDef(_oneMinusQscaleStr, "v", "field, scale, top, low",
-			    "1 - exp(-scale*(field/topv-lowv/topv)^2)"));
+			    "1 - Qscale of a field, i.e.:  1 - exp(-scale*(field/topv-lowv/topv)^2)"));
   ret.push_back(FunctionDef(_clutter2dQualStr, "v",
-		    "scr,vel,width,scale,vr_shape,sw_shape",
-		    "1 - exp(-scale*(|vel|*vr_shape + width*sw_shape)"));
+			    "scr,vel,width,scale,vr_shape,sw_shape",
+			    "Quality from fields scr, vel, width, with params scAle, vr_shape and sw_shape,  defined as "
+			    "1 - exp(-scale*(|vel|*vr_shape + width*sw_shape).   Note that scr and scale are not used right now"));
+  
   ret.push_back(FunctionDef(_special0Str, "v", "width,meanPrt,meanNSamples",
-	  "10*log10(1+sqrt(1/(width*(4*sqrt(PI)*meanPrt*meanNsamples/0.1))))"));
+	  " A particular function:   10*log10(1+sqrt(1/(width*(4*sqrt(PI)*meanPrt*meanNsamples/0.1))))"));
 
   ret.push_back(FunctionDef(_special1Str, "v", "width,meanPrt,meanNSamples",
-			    "0.107/(8*meanPrt*meanNsamples*sqrt(PI)*width)"));
+			    " A particular function:  0.107/(8*meanPrt*meanNsamples*sqrt(PI)*width)"));
   ret.push_back(FunctionDef(_FIRStr, "v", "field",
-		    "FIR filter with hardwired coefficients, interpolation"));
+		    "FIR filter with hardwired coefficients that are in the source code, interpolation"));
   ret.push_back(FunctionDef(_variance1dStr, "v", "field,npt,maxPercentMissing",
-			    "1d Variance of input field\n"
-			    "variance over npt points, with output set missing "
-			    "if too many missing"));
+			    "1 dimensional Variance of input field.  variance over npt points, with output set missing if more than maxPercentMissing values are missing"));
 }
 
 //------------------------------------------------------------------
@@ -264,8 +263,6 @@ bool RayData1::_processQscale(std::vector<ProcessingNode *> &args,
 }
 
 //------------------------------------------------------------------
-// clutter2dqual(scr, vel, width, 0.69, 1.5, 0.5)
-// clutter2dqual(scr, vel, width, scale, vr_shape, sw_shape)
 bool RayData1::_processClutter2dQual(std::vector<ProcessingNode *> &args) const
 {
   vector<const MathLoopData *> data;

@@ -201,7 +201,6 @@ paramdef struct planeNumLimits_t {
   p_default = { FALSE, 0, 0 };
 } planeNumLimits;
 
-
 paramdef boolean {
   p_default = false;
   p_descr = "Option to output unevenly-spaced vertical levels.";
@@ -222,6 +221,7 @@ typedef struct {
   double merge_scale;
   double merge_bias;
   encoding_t output_encoding;
+  boolean compute_composite;
 } merge_field_t;
 
 paramdef struct merge_field_t {
@@ -233,7 +233,8 @@ paramdef struct merge_field_t {
       merge_encoding = FLOAT32,
       merge_scale = 0.5,
       merge_bias = -32.0,
-      output_encoding = INT8
+      output_encoding = INT8,
+      compute_composite = FALSE
     }
   };
 
@@ -259,7 +260,8 @@ paramdef struct merge_field_t {
     "'output_encoding': determines the type for storing the merged "
     "data in the output file. "
     "This affects the size of the output file. "
-    "Use FLOAT32 for maximum precision, INT8 for smallest files.";
+    "Use FLOAT32 for maximum precision, INT8 for smallest files.\n\n"
+    "If compute_composite is true, the field will be converted to a column-max 2D grid on output.";
 } merge_fields[];
 
 paramdef string
@@ -411,6 +413,13 @@ paramdef enum output_compression_t {
   p_default = COMPRESSION_ZLIB;
   p_descr = "Compression method for output fields.";
 } output_compression;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute composite on output.";
+  p_help  = "If TRUE, the output Created to handle meteorological data sets with denser vertical\n"
+    "spacing near the surface. If TRUE, must set 'vlevel_array[] values'.";
+} output_composite;
 
 paramdef string {
   p_default = "Unknown";

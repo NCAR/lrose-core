@@ -60,6 +60,7 @@ CPPC_SRCS = \
 	Parms.cc \
 	Alg.cc \
 	FrequencyCount.cc \
+	HeaderParams.cc \
 	Histo.cc \
 	Info.cc \
 	RadxPersistentClutter.cc \
@@ -90,6 +91,9 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
+
+HeaderParams.cc: paramdef.header
+	tdrp_gen -f paramdef.header -c++ -class HeaderParams
 
 #
 # local targets

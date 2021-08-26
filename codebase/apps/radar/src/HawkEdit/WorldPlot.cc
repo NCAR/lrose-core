@@ -38,7 +38,7 @@
 #include <iostream>
 #include <cstdio>
 #include <QtCore/QLineF>
-
+#include <toolsa/LogStream.hh>
 #include <toolsa/toolsa_macros.h>
 #include "WorldPlot.hh"
 #include "ColorMap.hh"
@@ -1504,18 +1504,37 @@ void WorldPlot::_computeTransform()
     
   _xMinPixel = _leftMargin;
   _xMaxPixel = _xMinPixel + _plotWidth - 1;
-  _yMinPixel = _topMargin + _plotHeight - 1;
-  _yMaxPixel = _topMargin;
+  // OR ...
+  //_yMinPixel = _topMargin + _plotHeight - 1;
+  //_yMaxPixel = _topMargin;
+
+  _yMinPixel = _topMargin; 
+  _yMaxPixel = _yMinPixel + _plotHeight - 1;
+ 
     
   _xPixelsPerWorld =
-    (_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld);
+    abs((_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld));
   _yPixelsPerWorld =
-    (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
+    abs((_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld));
     
   _transform.reset();
-  _transform.translate(_xMinPixel, _yMinPixel);
+  int centerXPixelSpace = _xMinPixel + _plotWidth/2;
+  //int centerYPixelSpace = _yMinPixel - _plotHeight/2;
+  // OR ...
+  int centerYPixelSpace = _yMinPixel + _plotHeight/2;  
+
+  _transform.translate(centerXPixelSpace, centerYPixelSpace);
+  LOG(DEBUG) << "translating to x,y in pixel space " << 
+    centerXPixelSpace << ", " << centerYPixelSpace;
+  //_transform.translate(_xMinPixel, _yMinPixel);
+  //_transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
+  // 
+  // OR ...
+
+  //_transform.translate(-_xMinWorld, -_yMinWorld); 
   _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
-  _transform.translate(-_xMinWorld, -_yMinWorld);
+  _transform.rotateRadians(M_PI, Qt::XAxis);
+
     
   _xMinWindow = getXWorld(0);
   _yMinWindow = getYWorld(0);

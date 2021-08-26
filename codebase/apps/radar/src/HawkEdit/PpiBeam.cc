@@ -108,7 +108,7 @@ PpiBeam::~PpiBeam()
 }
 
 ////////////////////////////////////////////////////////////////
-void PpiBeam::paint(QImage *image,
+void PpiBeam::paint(QPainter &painter, // QImage *image,
                     const QTransform &transform,
                     bool useHeight,
                     bool drawInstHt)
@@ -123,9 +123,12 @@ void PpiBeam::paint(QImage *image,
     return;
   }
   */
-  QPainter painter(image);
+  // construct a painter which will paint into the image
+  //QPainter painter(image);
+  //painter.begin(image);
+  //painter->drawImage(0,0, *image);
   
-  painter.setTransform(transform);
+  //painter.setTransform(transform);
   painter.setPen(Qt::NoPen);
   
   QPolygonF polygon(4);
@@ -137,52 +140,62 @@ void PpiBeam::paint(QImage *image,
   polygon[2] = QPointF(_polygons[0].pts[2].x, _polygons[0].pts[2].y);
   polygon[3] = QPointF(_polygons[0].pts[3].x, _polygons[0].pts[3].y);
   
-  const QBrush *prev_brush = _brushes[0];
-  const QBrush *curr_brush = 0;
-  
-  for (size_t igate = 0; igate < _nGates; ++igate) {
-
-    if (!_polygons[igate].doPaint) {
-      continue;
-    }
-
-    curr_brush = _brushes[igate];
-    /*
-    if ((field == 1) && (igate < 10)) {
-      QColor qcolor = curr_brush->color();
-      int r,g,b,a;
-      qcolor.getRgb(&r, &g, &b, &a);
-      LOG(DEBUG) << "rgb = " << r << "," << g << "," << b;
-    }
-    */
-
-    if (curr_brush != prev_brush) {
-
-      polygon[2] = QPointF(_polygons[igate].pts[1].x, _polygons[igate].pts[1].y);
-      polygon[3] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);
+  try {
+    const QBrush *prev_brush = _brushes.at(0);
+    const QBrush *curr_brush = 0;
     
-      painter.setBrush(*prev_brush);
+
+    for (size_t igate = 0; igate < _brushes.size(); ++igate) {
+
+      if (igate >= _polygons.size()) {
+        LOG(DEBUG) << "igate = " << igate << " is >= _polygons.size() = " << _polygons.size();
+        continue;
+      }
+      if (!_polygons[igate].doPaint) {
+        continue;
+      }
+
+      curr_brush = _brushes.at(igate);
+      /*
+      if ((field == 1) && (igate < 10)) {
+        QColor qcolor = curr_brush->color();
+        int r,g,b,a;
+        qcolor.getRgb(&r, &g, &b, &a);
+        LOG(DEBUG) << "rgb = " << r << "," << g << "," << b;
+      }
+      */
+
+      if (curr_brush != prev_brush) {
+
+        polygon[2] = QPointF(_polygons[igate].pts[1].x, _polygons[igate].pts[1].y);
+        polygon[3] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);
+      
+        painter.setBrush(*prev_brush);
+        painter.drawPolygon(polygon);
+
+        prev_brush = curr_brush;
+        polygon[0] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);
+        polygon[1] = QPointF(_polygons[igate].pts[1].x, _polygons[igate].pts[1].y);
+
+      }
+      
+    } /* endfor - gate */
+
+    // Draw the last polygon left in the queue
+
+    if (curr_brush != 0 && _polygons[_nGates-1].doPaint) {
+      polygon[2] = QPointF(_polygons[_nGates-1].pts[2].x,
+  			 _polygons[_nGates-1].pts[2].y);
+      polygon[3] = QPointF(_polygons[_nGates-1].pts[3].x,
+  			 _polygons[_nGates-1].pts[3].y);
+    
+      painter.setBrush(*curr_brush);
       painter.drawPolygon(polygon);
-
-      prev_brush = curr_brush;
-      polygon[0] = QPointF(_polygons[igate].pts[0].x, _polygons[igate].pts[0].y);
-      polygon[1] = QPointF(_polygons[igate].pts[1].x, _polygons[igate].pts[1].y);
-
     }
-    
-  } /* endfor - gate */
-
-  // Draw the last polygon left in the queue
-
-  if (curr_brush != 0 && _polygons[_nGates-1].doPaint) {
-    polygon[2] = QPointF(_polygons[_nGates-1].pts[2].x,
-			 _polygons[_nGates-1].pts[2].y);
-    polygon[3] = QPointF(_polygons[_nGates-1].pts[3].x,
-			 _polygons[_nGates-1].pts[3].y);
-  
-    painter.setBrush(*curr_brush);
-    painter.drawPolygon(polygon);
+  } catch  (const std::out_of_range& oor) {
+    LOG(DEBUG) << "Out of Range error: " << oor.what();
   }
+  
 
 }
 

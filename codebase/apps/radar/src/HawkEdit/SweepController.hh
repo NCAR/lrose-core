@@ -52,7 +52,7 @@
 //#include "DataModel.hh"
 
 class SweepController {
-  
+
 public:
 
 /*
@@ -114,13 +114,17 @@ public:
     return _view->getSelectedAngle(); 
   }
 
-  int getSelectedIndex();
+  int getSelectedNumber();
 
   //double getFixedAngleDeg(ssize_t sweepIndex = -1) const;
   //bool getReversedInGui() const { return _reversedInGui; }
 
   void createSweepRadioButtons();
   void clearSweepRadioButtons();
+
+  void dataFileChanged();
+
+  void sweepSelected();
   
 private:
   

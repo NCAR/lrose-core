@@ -569,16 +569,21 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("fixed_const");
-    tt->descr = tdrpStrDup("Fixed constant strings that are interpreted by user functions");
+    tt->descr = tdrpStrDup("Fixed constant strings that are used in user functions");
     tt->help = tdrpStrDup("");
     tt->array_offset = (char *) &_fixed_const - &_start_;
     tt->array_n_offset = (char *) &fixed_const_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
+    tt->array_n = 5;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("NyquistFloor=25.0");
+      tt->array_vals[1].s = tdrpStrDup("MinRangeKm=2.0");
+      tt->array_vals[2].s = tdrpStrDup("ShapeComputeModeDiamonds=0");
+      tt->array_vals[3].s = tdrpStrDup("ShapeComputeModePerimeter=1");
+      tt->array_vals[4].s = tdrpStrDup("ShapeSizeKm=6");
     tt++;
     
     // Parameter 'user_data'
@@ -587,16 +592,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("user_data");
-    tt->descr = tdrpStrDup("Non gridded data names");
+    tt->descr = tdrpStrDup("Non gridded data names. These names refer to objects specific to the app");
     tt->help = tdrpStrDup("");
     tt->array_offset = (char *) &_user_data - &_start_;
     tt->array_n_offset = (char *) &user_data_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
+    tt->array_n = 3;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("Template0");
+      tt->array_vals[1].s = tdrpStrDup("Template1");
+      tt->array_vals[2].s = tdrpStrDup("Template2");
     tt++;
     
     // Parameter 'volume_before_filter'
@@ -605,16 +613,24 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("volume_before_filter");
-    tt->descr = tdrpStrDup("Volume Filters to apply before the sweep filters");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Filters to apply before the sweep filters");
+    tt->help = tdrpStrDup("-print_operators to see explanations of the filters used");
     tt->array_offset = (char *) &_volume_before_filter - &_start_;
     tt->array_n_offset = (char *) &volume_before_filter_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
+    tt->array_n = 8;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("Template0 = ParmsTemplate(10, 8, 2)");
+      tt->array_vals[1].s = tdrpStrDup("Template1 = ParmsTemplate(10, 5, 5)");
+      tt->array_vals[2].s = tdrpStrDup("Template2 = ParmsTemplate(5, 2, 4)");
+      tt->array_vals[3].s = tdrpStrDup("MesoFuzzy = ParmsFuzzy(0, 0, 8, 0.25, 15, 0.5, NyquistFloor, 1)");
+      tt->array_vals[4].s = tdrpStrDup("PcntLessThanNyquistFuzzy = ParmsFuzzy(0.0, 1.0, 0.5, 0.8, 0.7, 0.2, 1.0, 0.0)");
+      tt->array_vals[5].s = tdrpStrDup("LargePosNegFuzzy = ParmsFuzzy(0.0, 1.0, 0.1, 0.8, 0.5, 0.5, 1.0, 0.0)");
+      tt->array_vals[6].s = tdrpStrDup("InvertInterestFuzzy0 = ParmsFuzzy(0.0, 1.0, 0.2, 0.8, 0.3, 0.1, 0.4, 0.0)");
+      tt->array_vals[7].s = tdrpStrDup("CTemplate = ParmsCircularTemplate(5, MinRangeKm)");
     tt++;
     
     // Parameter 'filter'
@@ -623,18 +639,47 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("filter");
-    tt->descr = tdrpStrDup("Filters (sweep) to apply");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Filters to apply to each sweep");
+    tt->help = tdrpStrDup("-print_operators to see explanations of the filters used");
     tt->array_offset = (char *) &_filter - &_start_;
     tt->array_n_offset = (char *) &filter_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(char*);
-    tt->array_n = 2;
+    tt->array_n = 31;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("Meso1 = MesoTemplate(VEL, 20, 20, 10, 20)");
-      tt->array_vals[1].s = tdrpStrDup("Meso2 = MesoTemplate(VEL, 20, 20, 10, -20)");
+      tt->array_vals[0].s = tdrpStrDup("PcntNyquist = PercentOfAbsMax($(VEL_NAME), NyquistFloor)");
+      tt->array_vals[1].s = tdrpStrDup("LessThanNy = PercentLessThan(PcntNyquist, CTemplate, 0.9)");
+      tt->array_vals[2].s = tdrpStrDup("PosNegNy = LargePositiveNegative(PcntNyquist, CTemplate, 0.9)");
+      tt->array_vals[3].s = tdrpStrDup("FLessThanNy = VirtVolFuzzy(LessThanNy, PcntLessThanNyquistFuzzy)");
+      tt->array_vals[4].s = tdrpStrDup("FPosNegNy = VirtVolFuzzy(PosNegNy, LargePosNegFuzzy)");
+      tt->array_vals[5].s = tdrpStrDup("AbsNyq = abs(PcntNyquist)");
+      tt->array_vals[6].s = tdrpStrDup("NyqAve = SmoothPolar(AbsNyq, CTemplate)");
+      tt->array_vals[7].s = tdrpStrDup("NyqCalib = FLessThanNy*FPosNegNy");
+      tt->array_vals[8].s = tdrpStrDup("IsNyquist0 = NyqCalib*NyqAve");
+      tt->array_vals[9].s = tdrpStrDup("IsNyquist = DilatePolar(IsNyquist0, CTemplate)");
+      tt->array_vals[10].s = tdrpStrDup("IsNotNyquist = VirtVolFuzzy(IsNyquist, InvertInterestFuzzy0)");
+      tt->array_vals[11].s = tdrpStrDup("Meso100 = MesoTemplate($(VEL_NAME), Template0, 0.6, 10, 0.5, MesoFuzzy)");
+      tt->array_vals[12].s = tdrpStrDup("Meso10 = mask(Meso100, -1, 0)");
+      tt->array_vals[13].s = tdrpStrDup("Nyq10 = IsNotNyquist*Meso10");
+      tt->array_vals[14].s = tdrpStrDup("Clump10 = ClumpFilt(Nyq10, 0.2, 0.5)");
+      tt->array_vals[15].s = tdrpStrDup("Final10 = mask(Clump10, 0.0, 0.2)");
+      tt->array_vals[16].s = tdrpStrDup("Meso200 = MesoTemplate($(VEL_NAME), Template1, 0.6, 10, 0.5, MesoFuzzy)");
+      tt->array_vals[17].s = tdrpStrDup("Meso20 = mask(Meso200, -1, 0)");
+      tt->array_vals[18].s = tdrpStrDup("Nyq20 = IsNotNyquist*Meso20");
+      tt->array_vals[19].s = tdrpStrDup("Clump20 = ClumpFilt(Nyq20, 0.2, 0.5)");
+      tt->array_vals[20].s = tdrpStrDup("Final20 = mask(Clump20, 0.0, 0.2)");
+      tt->array_vals[21].s = tdrpStrDup("Meso300 = MesoTemplate($(VEL_NAME), Template2, 0.6, 10, 0.5, MesoFuzzy)");
+      tt->array_vals[22].s = tdrpStrDup("Meso30 = mask(Meso300, -1, 0)");
+      tt->array_vals[23].s = tdrpStrDup("Nyq30 = IsNotNyquist*Meso30");
+      tt->array_vals[24].s = tdrpStrDup("Clump30 = ClumpFilt(Nyq30, 0.2, 0.5)");
+      tt->array_vals[25].s = tdrpStrDup("Final30 = mask(Clump30, 0.0, 0.2)");
+      tt->array_vals[26].s = tdrpStrDup("Final = maximum(Final10, Final20, Final30)");
+      tt->array_vals[27].s = tdrpStrDup("Shear10 = AzShearPolar($(VEL_NAME), 12, 1)");
+      tt->array_vals[28].s = tdrpStrDup("Shear20 = AzShearPolar($(VEL_NAME), 10, 1)");
+      tt->array_vals[29].s = tdrpStrDup("Shear11 = AzShearPolar($(VEL_NAME), 12, 0)");
+      tt->array_vals[30].s = tdrpStrDup("Shear21 = AzShearPolar($(VEL_NAME), 10, 0)");
     tt++;
     
     // Parameter 'volume_after_filter'
@@ -644,15 +689,18 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("volume_after_filter");
     tt->descr = tdrpStrDup("Volume Filters to apply after the sweep filters");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("-print_operators to see explanations of the filters used");
     tt->array_offset = (char *) &_volume_after_filter - &_start_;
     tt->array_n_offset = (char *) &volume_after_filter_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
+    tt->array_n = 3;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("Vertical =  VerticalConsistency(Final, IsNyquist, CTemplate)");
+      tt->array_vals[1].s = tdrpStrDup("Vclumps = VerticalDataClumpFilt(Vertical, 0.3, 0.4)");
+      tt->array_vals[2].s = tdrpStrDup("shapes = ComputeFixedSizeShapes(Vclumps, ShapeSizeKm)");
     tt++;
     
     // Parameter 'output_url_2d'
@@ -661,10 +709,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_url_2d");
-    tt->descr = tdrpStrDup("Parameter file with 2d output fields");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("URL Parameter file with 2d output fields. The other output URL param files (output_url array)) have full volume fields");
+    tt->help = tdrpStrDup("This param file is read and parsed.  The names should match filter descriptions\nEach file contains information as to the URL name, type, and data content, as well as named data fields");
     tt->val_offset = (char *) &output_url_2d - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("UrlOutput2d.parms");
     tt++;
     
     // Parameter 'shapes_name'
@@ -685,10 +733,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("shapes_url");
-    tt->descr = tdrpStrDup("URL to output shapes");
+    tt->descr = tdrpStrDup("URL where output shapes are written (SPDB)");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &shapes_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("spdbp:://localhost::spdbPath");
     tt++;
     
     // Parameter 'shapes_expire_seconds'
@@ -697,7 +745,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("shapes_expire_seconds");
-    tt->descr = tdrpStrDup("Shape expiration seconds");
+    tt->descr = tdrpStrDup("Shape expiration seconds. To put into the SPDB data");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &shapes_expire_seconds - &_start_;
     tt->single_val.i = 60;

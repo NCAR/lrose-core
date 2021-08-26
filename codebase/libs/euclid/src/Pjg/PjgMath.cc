@@ -285,6 +285,29 @@ void PjgMath::printDetails(ostream &out) const
   
 }
 
+///////////////////////////////
+/// get proj string
+  
+string PjgMath::getProjStr() const
+{
+
+  return "+proj=lonlat";
+
+}
+  
+string PjgMath::_getProjStrFalseOrigin() const
+{
+  string str;
+  if (_false_northing != 0.0 || _false_easting != 0.0) {
+    char text[1024];
+    snprintf(text, 1024,
+             " +x_0=%g +y_0=%g",
+             _false_easting, _false_northing);
+    str += text;
+  }
+  return str;
+}
+
 ///////////////////////
 // print offset origin
 

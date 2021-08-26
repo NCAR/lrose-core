@@ -142,6 +142,7 @@ int OutputFile::write(const time_t& mergeTime,
   
   for (int ifld = 0; ifld < _params.merge_fields_n; ifld++) {
     
+    Params::merge_field_t &mfld = _params._merge_fields[ifld];
     const Mdvx::field_header_t &inFhdr = _exampleFhdrs[ifld];
     
     Mdvx::field_header_t fhdr;
@@ -154,18 +155,18 @@ int OutputFile::write(const time_t& mergeTime,
     fhdr.ny = coords.ny;
     fhdr.nz = coords.nz;
     fhdr.proj_type = coords.proj_type;
-    if (_params._merge_fields[ifld].merge_encoding == Params::INT8) {
+    if (mfld.merge_encoding == Params::INT8) {
       fhdr.encoding_type = Mdvx::ENCODING_INT8;
       fhdr.data_element_nbytes = sizeof(ui08);
-      fhdr.scale = _params._merge_fields[ifld].merge_scale;
-      fhdr.bias = _params._merge_fields[ifld].merge_bias;
+      fhdr.scale = mfld.merge_scale;
+      fhdr.bias = mfld.merge_bias;
       fhdr.bad_data_value = missingInt;
       fhdr.missing_data_value = missingInt;
-    } else if (_params._merge_fields[ifld].merge_encoding == Params::INT16) {
+    } else if (mfld.merge_encoding == Params::INT16) {
       fhdr.encoding_type = Mdvx::ENCODING_INT16;
       fhdr.data_element_nbytes = sizeof(ui16);
-      fhdr.scale = _params._merge_fields[ifld].merge_scale;
-      fhdr.bias = _params._merge_fields[ifld].merge_bias;
+      fhdr.scale = mfld.merge_scale;
+      fhdr.bias = mfld.merge_bias;
       fhdr.bad_data_value = missingInt;
       fhdr.missing_data_value = missingInt;
     } else {
@@ -225,13 +226,17 @@ int OutputFile::write(const time_t& mergeTime,
     } // End of iz loop through vertical levels
     
     MdvxField *outField = new MdvxField(fhdr, vhdr, fieldData[ifld]);
-    outField->setFieldName(_params._merge_fields[ifld].name);
+    outField->setFieldName(mfld.name);
     outField->setFieldNameLong(inFhdr.field_name_long);
     outField->setUnits(inFhdr.units);
     outField->setTransform(inFhdr.transform);
 
+    if (mfld.compute_composite) {
+      outField->convert2Composite();
+    }
+    
     outField->convertType
-      ((Mdvx::encoding_type_t) _params._merge_fields[ifld].output_encoding,
+      ((Mdvx::encoding_type_t) mfld.output_encoding,
        (Mdvx::compression_type_t) _params.output_compression);
     
     out.addField(outField);

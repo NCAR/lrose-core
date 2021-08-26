@@ -162,6 +162,19 @@ void Exception::dontPrint()
 }
 
 //--------------------------------------------------------------------------
+// Function:    Exception::defaultPrint
+///\brief       Set the automatic error printing to the default.
+//              i.e. use H5Eprint2() to print to stderr.
+//--------------------------------------------------------------------------
+void Exception::defaultPrint()
+{
+  herr_t ret_value = H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t) H5Eprint2, 
+                                  (void *) stderr);
+    if (ret_value < 0)
+        throw Exception("Exception::dontPrint", "H5Eset_auto failed");
+}
+
+//--------------------------------------------------------------------------
 // Function:    Exception::getAutoPrint
 ///\brief       Retrieves the current settings for the automatic error
 ///             stack traversal function and its data.

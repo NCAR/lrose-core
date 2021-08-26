@@ -563,15 +563,6 @@
     tt->comment_text = tdrpStrDup("Parameters for data filtering for Radx format input data to produce quality control measures");
     tt++;
     
-    // Parameter 'Comment 1'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 1");
-    tt->comment_hdr = tdrpStrDup("Filters to apply");
-    tt->comment_text = tdrpStrDup("new");
-    tt++;
-    
     // Parameter 'fixed_const'
     // ctype is 'char*'
     
@@ -579,7 +570,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("fixed_const");
     tt->descr = tdrpStrDup("Fixed constant strings that are interpreted by user functions");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("Prt - each ray has a prt (seconds) so this is an enumeration for that\nNSamples - each ray has a number of samples (hits/pulses) so this is an enumeration for that");
     tt->array_offset = (char *) &_fixed_const - &_start_;
     tt->array_n_offset = (char *) &fixed_const_n - &_start_;
     tt->is_array = TRUE;
@@ -599,7 +590,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("user_data");
     tt->descr = tdrpStrDup("Non gridded data names");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("MeanPrt = the mean over the volume of ray prt values (this is a number)\nMeanNSamples = the mean over the volume of ray number of samples (this is a number)\nAzGradState = an internal state which stores azimuthal gradients.");
     tt->array_offset = (char *) &_user_data - &_start_;
     tt->array_n_offset = (char *) &user_data_n - &_start_;
     tt->is_array = TRUE;
@@ -620,7 +611,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("volume_before_filter");
     tt->descr = tdrpStrDup("Volume Filters to apply before doing ray filters");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("These filters produce the user_data outputs described above (-print_operators to describe the filters)");
     tt->array_offset = (char *) &_volume_before_filter - &_start_;
     tt->array_n_offset = (char *) &volume_before_filter_n - &_start_;
     tt->is_array = TRUE;
@@ -640,8 +631,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("sweep_filter");
-    tt->descr = tdrpStrDup("Sweep filters to apply");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sweep filters to apply (computations over entire sweeps)");
+    tt->help = tdrpStrDup("2 dimensional variance computations, described in -print_operators");
     tt->array_offset = (char *) &_sweep_filter - &_start_;
     tt->array_n_offset = (char *) &sweep_filter_n - &_start_;
     tt->is_array = TRUE;
@@ -683,9 +674,9 @@
       tt->array_vals[10].s = tdrpStrDup("PHIDP = PHIDP_F");
       tt->array_vals[11].s = tdrpStrDup("ZDR = ZDR_F");
       tt->array_vals[12].s = tdrpStrDup("DBZ = DBZ_F");
-      tt->array_vals[13].s = tdrpStrDup("Dphidp_daz = AzGradient(PHIDP, AzGradState, 70)");
-      tt->array_vals[14].s = tdrpStrDup("Dzdr_daz = AzGradient(ZDR, AzGradState, 0)");
-      tt->array_vals[15].s = tdrpStrDup("Ddbz_daz = AzGradient(DBZ, AzGradState, 0)");
+      tt->array_vals[13].s = tdrpStrDup("Dphidp_daz = AzGradient(PHIDP_F, AzGradState, 70)");
+      tt->array_vals[14].s = tdrpStrDup("Dzdr_daz = AzGradient(ZDR_F, AzGradState, 0)");
+      tt->array_vals[15].s = tdrpStrDup("Ddbz_daz = AzGradient(DBZ_F, AzGradState, 0)");
       tt->array_vals[16].s = tdrpStrDup("F_snr_dbz = OneMinusQscale(SNRHC_F, 0.69, 1.5, -1)");
       tt->array_vals[17].s = tdrpStrDup("if (F_snr_dbz < -1) then (F_snr_dbz = 0)");
       tt->array_vals[18].s = tdrpStrDup("OneMinusNCP = 1 - NCP_F");
@@ -703,7 +694,7 @@
       tt->array_vals[30].s = tdrpStrDup("SCR = DBZ_F - CLUT0");
       tt->array_vals[31].s = tdrpStrDup("F_scr = OneMinusQscale(SCR, 0.69, 8, 25)");
       tt->array_vals[32].s = tdrpStrDup("if (SCR < -25) then (F_scr = 0)");
-      tt->array_vals[33].s = tdrpStrDup("F_clut = CLUTTER_2D_QUAL(F_scr, 0.69, VEL_F, 1.5, WIDTH_F, 0.5)");
+      tt->array_vals[33].s = tdrpStrDup("F_clut = CLUTTER_2D_QUAL(F_scr, VEL_F, WIDTH_F, 0.69, 1.5, 0.5)");
       tt->array_vals[34].s = tdrpStrDup("if (CMD_FLAG < 0.5) then (F_clut = 1.0)");
       tt->array_vals[35].s = tdrpStrDup("del_dbz = Ddbz_daz*Ddbz_daz*0.0086");
       tt->array_vals[36].s = tdrpStrDup("del_zdr = Dzdr_daz*Dzdr_daz*0.0173");
@@ -721,24 +712,6 @@
       tt->array_vals[48].s = tdrpStrDup("if (F_total_dbz < 0.5) then dbz_thresh = missing");
       tt->array_vals[49].s = tdrpStrDup("if (vr_thresh = missing) then (VEL_FIR_DIFF = missing)");
       tt->array_vals[50].s = tdrpStrDup("if (dbz_thresh = missing) then (DBZ_FIR_DIFF = missing)");
-    tt++;
-    
-    // Parameter 'volume_after_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("volume_after_filter");
-    tt->descr = tdrpStrDup("Volume Filters to apply after doing ray filters");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_volume_after_filter - &_start_;
-    tt->array_n_offset = (char *) &volume_after_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
     tt++;
     
     // Parameter 'variance_radius_km'

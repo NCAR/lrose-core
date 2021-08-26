@@ -377,6 +377,19 @@ int DataFileNames::getDataTime(const string& file_path,
       }
     } // ii
   } // if (fname.size() >= 15)
+
+  if (fname.size() >= 14) {
+    for (size_t ii = 0; ii < fname.size() - 14; ii++) {
+      const char *ptr = fname.c_str() + ii;
+      if (sscanf(ptr, "%4d%2d%2d%2d%2d%2d",
+                 &ftime.year, &ftime.month, &ftime.day,
+                 &ftime.hour, &ftime.min, &ftime.sec) == 6) {
+        uconvert_to_utime(&ftime);
+        data_time = ftime.unix_time;
+        return 0;
+      }
+    } // ii
+  } // if (fname.size() >= 14)
     
   // find the last 3 path delimiters in the path
 

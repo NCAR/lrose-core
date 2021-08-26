@@ -56,11 +56,13 @@ public:
   typedef enum {
     CATEGORY_MISSING = 0,
     CATEGORY_STRATIFORM_LOW = 14,
+    CATEGORY_STRATIFORM = 15,
     CATEGORY_STRATIFORM_MID = 16,
     CATEGORY_STRATIFORM_HIGH = 18,
     CATEGORY_MIXED = 25,
     CATEGORY_CONVECTIVE_ELEVATED = 32,
     CATEGORY_CONVECTIVE_SHALLOW = 34,
+    CATEGORY_CONVECTIVE = 35,
     CATEGORY_CONVECTIVE_MID = 36,
     CATEGORY_CONVECTIVE_DEEP = 38,
     CATEGORY_UNKNOWN
@@ -112,6 +114,16 @@ public:
   // Reflectivity below this threshold is set to missing.
 
   void setMinValidDbz(double val) { _minValidDbz = val; }
+
+  // converting texture to convectivity convectivity
+  // these are the limits for mapping texture to convectivity from 0 and 1
+
+  void setTextureLimitLow(double val) {
+    _textureLimitLow = val;
+  }
+  void setTextureLimitHigh(double val) {
+    _textureLimitHigh = val;
+  }
 
   // set convectivity threshold for convective regions
   // convectivity values above this indicate convective
@@ -238,6 +250,7 @@ public:
   // will be set to the relevant category
 
   const ui08 *getPartition3D() const { return _partition3D.dat(); }
+  const ui08 *getPartitionColMax() const { return _partitionColMax.dat(); }
   const ui08 *getPartition2D() const { return _partition2D.dat(); }
   const fl32 *getConvectiveDbz() const { return _convDbz.dat(); }
 
@@ -245,8 +258,11 @@ public:
   // get derived fields
   
   const fl32 *getTexture3D() const { return _texture3D.dat(); }
+  const fl32 *getTextureColMax() const { return _textureColMax.dat(); }
   const fl32 *getTexture2D() const { return _texture2D.dat(); }
+
   const fl32 *getConvectivity3D() const { return _convectivity3D.dat(); }
+  const fl32 *getConvectivityColMax() const { return _convectivityColMax.dat(); }
   const fl32 *getConvectivity2D() const { return _convectivity2D.dat(); }
 
   const fl32 *getConvTopKm() const { return _convTopKm.dat(); }
@@ -353,27 +369,32 @@ private:
   TaArray<fl32> _colMaxDbz;
   TaArray<fl32> _fractionActive;
   
-  // primary outputs
-  
-  TaArray<ui08> _partition3D;
-  TaArray<ui08> _partition2D;
-  TaArray<fl32> _convDbz;
-
   // intermediate fields
   
   TaArray<fl32> _texture3D;
+  TaArray<fl32> _textureColMax;
   TaArray<fl32> _texture2D;
+
   TaArray<fl32> _convectivity3D;
+  TaArray<fl32> _convectivityColMax;
   TaArray<fl32> _convectivity2D;
 
-  // tops
+  // partition
+  
+  TaArray<ui08> _partition3D;
+  TaArray<ui08> _partitionColMax;
+  TaArray<ui08> _partition2D;
+
+  // tops etc
 
   TaArray<fl32> _convTopKm;
   TaArray<fl32> _stratTopKm;
   TaArray<fl32> _echoTopKm;
+  TaArray<fl32> _convDbz;
 
   // methods
   
+  int _computePartition2D(const fl32 *dbz, fl32 dbzMissingVal);
   void _allocArrays();
   void _initToMissing();
   void _initToMissing(TaArray<fl32> &array, fl32 missingVal);
@@ -381,10 +402,13 @@ private:
   void _computeColMax();
   void _finalizePartition();
   void _computeTexture();
+  void _computeTextureColMax();
   void _computeConvectivity();
   void _performClumping();
   void _freeClumps();
   void _setPartition3D();
+  void _setPartitionColMax();
+  void _setPartition2D();
   void _set2DFields();
   void _computeKernels();
   void _printSettings(ostream &out);
@@ -430,11 +454,9 @@ private:
     }
     
     void setDbz(const fl32 *dbz,
-                const fl32 *dbzColMax,
                 fl32 missingVal)
     {
       _dbz = dbz;
-      _dbzColMax = dbzColMax;
       _missingVal = missingVal;
     }
     
@@ -466,7 +488,6 @@ private:
     double _minValidFractionForFit;
     fl32 _missingVal;
     const fl32 *_dbz;
-    const fl32 *_dbzColMax;
     const fl32 *_fractionCovered;
     fl32 *_texture;
     vector<kernel_t> _kernelOffsets;

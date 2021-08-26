@@ -49,6 +49,7 @@ CPPC_SRCS = \
 	PjgCalc.cc \
 	PjgFlatCalc.cc \
 	PjgGrib.cc \
+	PjgGridGeom.cc \
 	PjgLambertAzimMath.cc \
 	PjgLambertConfMath.cc \
 	PjgLatlonCalc.cc \

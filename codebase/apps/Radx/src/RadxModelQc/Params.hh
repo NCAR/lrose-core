@@ -374,9 +374,6 @@ public:
   char* *_ray_filter;
   int ray_filter_n;
 
-  char* *_volume_after_filter;
-  int volume_after_filter_n;
-
   double variance_radius_km;
 
   char _end_; // end of data region
@@ -386,7 +383,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[10];
+  mutable TDRPtable _table[8];
 
   const char *_className;
 

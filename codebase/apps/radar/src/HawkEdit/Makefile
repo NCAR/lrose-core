@@ -84,7 +84,6 @@ HDRS = \
 	PpiBeam.hh \
 	PolarManager.hh \
 	PolarWidget.hh \
-	PpiWidget.hh \
 	RayLoc.hh \
 	RayLocationController.hh \
 	RayLocationModel.hh \
@@ -142,8 +141,8 @@ NORM_SRCS = \
 	SpreadSheetItem.cc \
 	SpreadSheetModel.cc \
 	SpreadSheetUtils.cc \
-	SweepController.cc \
 	SweepModel.cc \
+	SweepController.cc \
 	WorldPlot.cc 
 
 MOC_SRCS = \
@@ -152,7 +151,6 @@ MOC_SRCS = \
 	FieldRendererController.cc \
 	PolarManager.cc \
 	PolarWidget.cc \
-	PpiWidget.cc \
 	TimeScaleWidget.cc \
 	ParameterColorView.cc \
         FieldColorController.cc \
@@ -161,6 +159,7 @@ MOC_SRCS = \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
+	ClickableLabelNamed.cc \
 	DisplayFieldView.cc \
 	ScriptEditorView.cc \
 	ScriptEditorController.cc \
@@ -182,13 +181,13 @@ MOC_OUTPUT = \
 	moc_FieldRendererView.cpp \
 	moc_PolarManager.cpp \
 	moc_PolarWidget.cpp \
-	moc_PpiWidget.cpp \
 	moc_TimeScaleWidget.cpp \
 	moc_ParameterColorView.cpp \
         moc_FieldColorController.cpp \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \
+	moc_ClickableLabelNamed.cpp \
 	moc_DisplayFieldView.cpp \
 	moc_ScriptEditorView.cpp \
 	moc_ScriptEditorController.cpp \

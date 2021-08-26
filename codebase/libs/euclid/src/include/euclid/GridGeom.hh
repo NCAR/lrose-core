@@ -37,8 +37,6 @@
 #include <cstdlib>
 #include <euclid/Projection.hh>
 
-// #include <euclid/TypeGrid.hh>
-
 //
 // Forward class declarations
 //

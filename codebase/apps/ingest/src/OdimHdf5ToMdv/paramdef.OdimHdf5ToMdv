@@ -1,0 +1,264 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for OdimHdf5ToMdv
+//
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// May 2021
+//
+
+commentdef {
+  p_header = "OdimHdf5ToMdv";
+  p_text = "This program converts ODIM OPERA grids, in HDF5, to MDV/NetCDF.";
+};
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with procmap while running.";
+  p_help = "See 'instance'.";
+} register_with_procmap;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Registration interval.";
+  p_help = "The number of seconds between expected procmap registrations.";
+} reg_interval;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  ARCHIVE, REALTIME, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file. "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in FILELIST mode, at least) MUST contain a "
+           "day-directory below the data file -- ./data_file.mdv will not "
+           "work as a file path";
+} mode;
+
+paramdef string {
+  p_default = "raw/input";
+  p_descr = "Directory for input data.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use _latest_data_info file as input trigger.";
+  p_help = "REALTIME mode only. If true, waits on _latest_data_info file. If false, scans the directory for new file.";
+} use_ldata_info_file;
+
+paramdef int {
+  p_default = 3600;
+  p_min = 1;
+  p_descr = "Max valid age of rdata input files in realtime mode (secs)";
+  p_help = "This the max valid age for an incoming file. The program will wait for a data file more recent than this age.";
+} max_realtime_age;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to use only the latest file to have arrived.";
+  p_help = "REALTIME mode only. If true, will process only the latest file on startup, if the file has an age less than max_realtime_age. If false, on startup will process all files with age less than max_realtime_age.";
+} process_latest_file_only;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Specify the extension of the files to be read.";
+  p_help = "If blank, all extensions will be used.";
+} file_name_ext;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Specify a seach string for the names of the files to be read.";
+  p_help = "If blank, no check will be performed.";
+} file_name_substr;
+
+commentdef {
+  p_header = "OUTPUT FIELDS";
+}
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+typedef struct {
+  string hdf5Name;
+  string outputName;
+  string longName;
+  encoding_type_t encoding;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default =
+    {
+     {
+       hdf5Name = "DBZH",
+       outputName = "DBZ",
+       longName = "reflectivity",
+       encoding = ENCODING_FLOAT32
+     }
+     ,
+     {
+       hdf5Name = "QIND",
+       outputName = "QUALITY",
+       longName = "Quality-control",
+       encoding = ENCODING_FLOAT32
+     }
+    };
+  p_descr = "Output fields details.";
+  p_help = "These are the fields that will be written to the output files. The quantity strings are found under GROUP 'dataset1/2/3' etc, GROUP 'data1', DATASET 'data'.";
+} output_fields[];
+
+commentdef {
+  p_header = "CENSORING";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to censor data fields based on quality values stored in a separate field.";
+  p_help = "The quality field indicates the confidence that can be placed in the data field. A quallity value of 0 indicates a definite problem.";
+} apply_censoring;
+
+typedef struct {
+  string dataHdf5Name;
+  string qualHdf5Name;
+  double minQuality;
+  double maxQuality;
+} censoring_t;
+
+paramdef struct censoring_t {
+  p_default =
+    {
+     {
+       dataHdf5Name = "DBZH",
+       qualHdf5Name = "QIND",
+       minQuality = 0.1,
+       maxQuality = 1.0
+     }
+    };
+  p_descr = "Censoring data fields using a quality field.";
+  p_help = "Specify the fields to be censored, and the name of the quality field to be used. The data field is censored if the quality field les less than the min value or greater than the max value. The names refer to the ";
+} censoring[];
+
+commentdef {
+  p_header = "OPTION TO CONVERT OUTPUT GRID TO LAT/LON";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to adjust the projection origin.";
+  p_help = "If the standard projection origin is used, the echoes appear to be in the wrong location. This option allows you to adjust the origin to get the echoes in the correct place.";
+} adjust_projection_origin;
+
+paramdef double {
+  p_default = 54.0;
+  p_descr = "Adjusted latitude for the projection origin.";
+} adjusted_projection_origin_lat;
+
+paramdef double {
+  p_default = 9.5;
+  p_descr = "Adjusted longitude for the projection origin.";
+} adjusted_projection_origin_lon;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to convert the output grid to lat/lon.";
+  p_help = "If true, the Mdvx class will auto-convert to a suitable lat/lon grid. This is performed using a nearest neighbor transformation.";
+} convert_output_grid_to_latlon;
+
+commentdef {
+  p_header = "OUTPUT URL";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::/tmp/mdv/odim";
+  p_descr = "URL for writing output files.";
+} output_url;
+
+commentdef {
+  p_header = "OUTPUT METADATA STRINGS";
+  p_text = "These will be used if the file does not contain suitable information.";
+}
+
+paramdef string {
+  p_default = "OPERA ODIM";
+  p_descr = "Name of data set.";
+  p_help = "Appears in Mdv master header.";
+} data_set_name;
+
+paramdef string {
+  p_default = "OPERA";
+  p_descr = "Source of data.";
+  p_help = "Appears in Mdv master header.";
+} data_set_source;
+
+commentdef {
+  p_header = "Z DIMENSION DETAILS";
+  p_text = "Not currently used - waiting for 3-D grids";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Height of lowest level (km)";
+} radar_min_z_km;
+
+paramdef double {
+  p_default = 0.125;
+  p_descr = "Delta height between levels (km)";
+} radar_delta_z_km;
+

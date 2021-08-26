@@ -96,6 +96,7 @@ private:
 
   ConvectionFinder _convFinder;
 
+  void _setDzConstant();
   void _copyCoord2Grid(const Mdvx::coord_t &coord,
 		       titan_grid_t &grid);
 

@@ -12,7 +12,8 @@ RayLocationModel::RayLocationModel() {
 RayLocationModel::~RayLocationModel() {}
 
 // call when new data file is read, or when switching to new sweep?
-void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width) {
+void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
+  int sweepNumber) {
   LOG(DEBUG) << "enter";
 //	_storeRayLoc(const RadxRay *ray, const double az,
 //                                const double beam_width, RayLoc *ray_loc)
@@ -52,43 +53,46 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width) 
     _endAz = az + max_half_angle + 0.1;
   }
  */
-  	const RadxRay *ray = *rayItr;
-    double az = ray->getAzimuthDeg();
-    double startAz = az - half_angle - 0.1;
-    double endAz = az + half_angle + 0.1;
+    const RadxRay *ray = *rayItr;
+         
+    if (ray->getSweepNumber() == sweepNumber) {   
 
 
+      double az = ray->getAzimuthDeg();
+      double startAz = az - half_angle - 0.1;
+      double endAz = az + half_angle + 0.1;
 
-  // store
-    
-    int startIndex = (int) (startAz * RayLoc::RAY_LOC_RES);
-    int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES + 1);
+    // store
+      
+      int startIndex = (int) (startAz * RayLoc::RAY_LOC_RES);
+      int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES + 1);
 
-    if (startIndex < 0) startIndex = 0;
-    if (endIndex >= RayLoc::RAY_LOC_N) endIndex = RayLoc::RAY_LOC_N - 1;   
+      if (startIndex < 0) startIndex = 0;
+      if (endIndex >= RayLoc::RAY_LOC_N) endIndex = RayLoc::RAY_LOC_N - 1;   
 
-  // Clear out any rays in the locations list that are overlapped by the
-  // new ray
-    
-  //_clearRayOverlap(startIndex, endIndex, ray_loc);
+    // Clear out any rays in the locations list that are overlapped by the
+    // new ray
+      
+    //_clearRayOverlap(startIndex, endIndex, ray_loc);
 
-  // Set the locations associated with this ray
+    // Set the locations associated with this ray
 
-    if (endIndex < startIndex) {
-    	LOG(DEBUG) << "ERROR endIndex: " << endIndex << " < startIndex: " << startIndex;
-    } else {
-	    for (int ii = startIndex; ii < endIndex; ii++) {
-	      ray_loc[ii].ray = ray;
-	      ray_loc[ii].active = true;
-	      ray_loc[ii].startIndex = startIndex;
-	      ray_loc[ii].endIndex = endIndex;
-	    }
+      if (endIndex < startIndex) {
+      	LOG(DEBUG) << "ERROR endIndex: " << endIndex << " < startIndex: " << startIndex;
+      } else {
+  	    for (int ii = startIndex; ii < endIndex; ii++) {
+  	      ray_loc[ii].ray = ray;
+  	      ray_loc[ii].active = true;
+  	      ray_loc[ii].startIndex = startIndex;
+  	      ray_loc[ii].endIndex = endIndex;
+  	    }
+      }
     }
   }
 
   for (int i = 0; i< RayLoc::RAY_LOC_N; i++) {
-  	LOG(DEBUG) << "ray_loc[" << i << "].startIdx = " << ray_loc[i].startIndex;
-  	LOG(DEBUG) << "  ray_loc[" << i << "].endIdx = " << ray_loc[i].endIndex;
+  	//LOG(DEBUG) << "ray_loc[" << i << "].startIdx = " << ray_loc[i].startIndex;
+  	//LOG(DEBUG) << "  ray_loc[" << i << "].endIdx = " << ray_loc[i].endIndex;
   }
 
   LOG(DEBUG) << "exit";
@@ -106,6 +110,26 @@ double RayLocationModel::getStartRangeKm(size_t rayIdx) {
 double RayLocationModel::getGateSpacingKm(size_t rayIdx) {
 	const RadxRay *ray = ray_loc.at(rayIdx).ray;
 	return ray->getGateSpacingKm();
+}
+
+// over all the rays, find the maximum range
+double RayLocationModel::getMaxRangeKm() {
+
+  double max = 0.0;
+
+  DataModel *dataModel = DataModel::Instance();
+  const vector<RadxRay *> &listOfRays = dataModel->getRays();
+  vector<RadxRay *>::const_iterator rayItr;
+  for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
+    const RadxRay *ray = *rayItr;
+
+    double fieldRange = ray->getStartRangeKm() + 
+      (double) ray->getNGates() * ray->getGateSpacingKm();
+    if (fieldRange > max) {
+      max = fieldRange;
+    }
+  }
+  return max;
 }
 
 size_t RayLocationModel::getEndIndex(size_t rayIdx) {

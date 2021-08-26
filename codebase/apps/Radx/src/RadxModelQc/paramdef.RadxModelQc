@@ -14,27 +14,29 @@ commentdef
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-commentdef {
-  p_header =
-    "Filters to apply";
-  p_text =
-    "new";
-}
 paramdef string
 {
   p_descr = "Fixed constant strings that are interpreted by user functions";
+  p_help =
+    "Prt - each ray has a prt (seconds) so this is an enumeration for that\n"
+    "NSamples - each ray has a number of samples (hits/pulses) so this is an enumeration for that";
   p_default = {"Prt", "NSamples"};
 } fixed_const[];
 
 paramdef string
 {
   p_descr = "Non gridded data names";
+  p_help =
+    "MeanPrt = the mean over the volume of ray prt values (this is a number)\n"
+    "MeanNSamples = the mean over the volume of ray number of samples (this is a number)\n"
+    "AzGradState = an internal state which stores azimuthal gradients.";
   p_default = { "MeanPrt", "MeanNSamples", "AzGradState"};
 } user_data[];
 
 paramdef string
 {
   p_descr = "Volume Filters to apply before doing ray filters";
+  p_help = "These filters produce the user_data outputs described above (-print_operators to describe the filters)";
   p_default = {
     "MeanPrt = VolAverage(Prt)",
     "MeanNSamples = VolAverage(NSamples)",
@@ -44,7 +46,8 @@ paramdef string
 
 paramdef string
 {
-  p_descr = "Sweep filters to apply";
+  p_descr = "Sweep filters to apply (computations over entire sweeps)";
+  p_help = "2 dimensional variance computations, described in -print_operators";
   p_default = {
     "VEL_Var_2d = Variance2d(VEL_FIR_DIFF)",
     "DBZ_Var_2d = Variance2d(DBZ_FIR_DIFF)"
@@ -54,6 +57,7 @@ paramdef string
 paramdef string
 {
   p_descr = "Single ray Filters to apply";
+  p_descr = "-print_operators to see what eaCh of these filters does";
   p_default = {
     "DBZ_FIR = FIR(DBZ_F)",
     "DBZ_FIR_DIFF = DBZ_FIR - DBZ_F",
@@ -68,9 +72,9 @@ paramdef string
     "PHIDP = PHIDP_F",
     "ZDR = ZDR_F",
     "DBZ = DBZ_F",
-    "Dphidp_daz = AzGradient(PHIDP, AzGradState, 70)",
-    "Dzdr_daz = AzGradient(ZDR, AzGradState, 0)",
-    "Ddbz_daz = AzGradient(DBZ, AzGradState, 0)",
+    "Dphidp_daz = AzGradient(PHIDP_F, AzGradState, 70)",
+    "Dzdr_daz = AzGradient(ZDR_F, AzGradState, 0)",
+    "Ddbz_daz = AzGradient(DBZ_F, AzGradState, 0)",
     "F_snr_dbz = OneMinusQscale(SNRHC_F, 0.69, 1.5, -1)",
     "if (F_snr_dbz < -1) then (F_snr_dbz = 0)",
     "OneMinusNCP = 1 - NCP_F",
@@ -88,7 +92,7 @@ paramdef string
     "SCR = DBZ_F - CLUT0",
     "F_scr = OneMinusQscale(SCR, 0.69, 8, 25)",
     "if (SCR < -25) then (F_scr = 0)",
-    "F_clut = CLUTTER_2D_QUAL(F_scr, 0.69, VEL_F, 1.5, WIDTH_F, 0.5)",
+    "F_clut = CLUTTER_2D_QUAL(F_scr, VEL_F, WIDTH_F, 0.69, 1.5, 0.5)",
     "if (CMD_FLAG < 0.5) then (F_clut = 1.0)",
     "del_dbz = Ddbz_daz*Ddbz_daz*0.0086",
     "del_zdr = Dzdr_daz*Dzdr_daz*0.0173",
@@ -108,12 +112,6 @@ paramdef string
     "if (dbz_thresh = missing) then (DBZ_FIR_DIFF = missing)"
   };
 } ray_filter[];  
-
-paramdef string
-{
-  p_descr = "Volume Filters to apply after doing ray filters";
-  p_default = {};
-} volume_after_filter[];  
 
 paramdef double
 {

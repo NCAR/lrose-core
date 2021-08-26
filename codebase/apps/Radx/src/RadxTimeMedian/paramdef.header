@@ -10,7 +10,7 @@
 commentdef
 {
   p_header = "RadxTimeMedian";
-  p_text = "Parameters for setting time median of one input field.\n"
+  p_text = "Parameters for setting time median of one input field.  Produces median values through time at each gridpoint of an input dataset\n"
     "Note that this works only in ARCHIVE or FILELIST modes, with one input field, and gives its output only after the"
     " last input is processed.";
 };

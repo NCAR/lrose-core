@@ -38,7 +38,8 @@ CPPC_SRCS = \
 	VirtVolParms.cc \
 	VirtVolSweep.cc \
 	VirtVolVolume.cc \
-	VolumeInfo.cc
+	VolumeInfo.cc \
+	VolumeTime.cc
 
 #	UrlSpec.cc \
 

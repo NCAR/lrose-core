@@ -207,8 +207,9 @@ public slots:
   void _saveFile();
   void _howto();   
 
-  void contextMenuParameterColors();
-  
+  //void contextMenuParameterColors();
+  void ShowParameterColorDialog(QString fieldName);
+
   //colorMapRedefineReceived(string, ColorMap)
   void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
 				QColor gridColor,
@@ -216,6 +217,7 @@ public slots:
 				QColor annotationColor,
 				QColor backgroundColor);
   void setVolume(); // const RadxVol &radarDataVolume);
+  void setDataMissing(string fieldName, float missingValue);
   // TODO:
   // Good. Now go and read about Q_DECLARE_METATYPE(). Or better yet, use QStringList instead of std::vector<std::string>.
   void updateVolume(QStringList newFieldNames);
@@ -223,9 +225,11 @@ public slots:
   void _addNewFields(QStringList newFieldNames);
   void _addNewFields(vector<string> *newFieldNames);
   void selectedFieldChanged(QString newFieldName);
+  void selectedFieldChanged(string fieldName);
   //void _updateField(size_t fieldId);
 
   void selectedSweepChanged(double);
+  void dataFileChanged();
 
   void spreadSheetClosed();
   void scriptEditorClosed();
@@ -235,7 +239,10 @@ public slots:
   void boundaryCircleRadiusChanged(int value);
   void boundaryBrushRadiusChanged(int value);
   void saveBoundaryEvent(int boundaryIndex);
-  void loadBoundaryEvent(int boundaryIndex);    
+  void loadBoundaryEvent(int boundaryIndex);   
+
+  void setFieldToMissing(QString fieldName);
+  void deleteFieldFromVolume(QString fieldName);   
 
 
   void errorMessage(string title, string message);
@@ -258,6 +265,8 @@ signals:
   //void setParamsFile();
 
   void addField(QString fieldName);
+
+  void newDataFile();
 
 // end from DisplayManager
 
@@ -489,7 +498,7 @@ private:
   // windows
 
   QFrame *_ppiFrame;
-  PpiWidget *_ppi;
+  PolarWidget *_ppi;
 
   RhiWindow *_rhiWindow;
   RhiWidget *_rhi;
@@ -679,6 +688,7 @@ private:
 			RayLoc *ray_loc);
 
   void _setupRayLocation();
+  void _setMaxRangeKm();
 
   // modes
 

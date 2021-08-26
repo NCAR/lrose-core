@@ -35,7 +35,8 @@ Q_DECLARE_METATYPE(QVector<double>)
 // Create a Dialog for the spreadsheet settings
 // Create a separate window that contains the spreadsheet 
 
-  SpreadSheetView::SpreadSheetView(QWidget *parent, float rayAzimuth)
+  SpreadSheetView::SpreadSheetView(QWidget *parent, 
+    float rayAzimuth, float elevation)
   : QMainWindow(parent)
 {
   LOG(DEBUG) << "in SpreadSheetView constructor";
@@ -75,8 +76,10 @@ Q_DECLARE_METATYPE(QVector<double>)
     //toolBar->addWidget(cellLabel);
     //toolBar->addWidget(formulaInput);
 
+    //createActions();
 
-    QDockWidget *dock = new QDockWidget(tr("Spreadsheet Configuration"), this);
+
+    QDockWidget *dock = new QDockWidget(tr("Spreadsheet Navigation"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
     QGroupBox *echoGroup = new QGroupBox(tr(""));
@@ -121,6 +124,11 @@ Q_DECLARE_METATYPE(QVector<double>)
     echoLayout->addWidget(new QLabel(tr("Log Dir")), 6, 0);
     //echoLayout->addWidget(logDirDialog, 5, 1);
 
+    sweepLineEdit = new QLineEdit;
+    QString sweepString = QString::number(elevation);
+    echoLayout->addWidget(new QLabel(tr("Sweep")), 0, 2);
+    echoLayout->addWidget(sweepLineEdit, 0, 3);
+
     rayLineEdit = new QLineEdit;
     QString azString = QString::number(rayAzimuth);
     //rayLineEdit->setPlaceholderText(azString);
@@ -128,6 +136,20 @@ Q_DECLARE_METATYPE(QVector<double>)
     //rayLineEdit->setValidator(new QDoubleValidator(0.0,
     //        360.0, 2, rayLineEdit));
     //rayLineEdit->insert(azString);
+
+
+    
+    undoStack = new QUndoStack(this);
+    QLabel *undoLabel = new QLabel(tr("Command List \n Undo/Redo"));
+    QUndoView *undoView = new QUndoView(undoStack);
+
+/*
+    echoLayout->addWidget(undoLabel, 0, 2);
+    echoLayout->addWidget(undoView, 0, 3);
+//---
+*/
+
+
     echoLayout->addWidget(new QLabel(tr("Ray")), 1, 2);
     echoLayout->addWidget(rayLineEdit, 1, 3);
 
@@ -141,20 +163,21 @@ Q_DECLARE_METATYPE(QVector<double>)
     echoLayout->addWidget(new QLabel(tr("Cell")), 3, 2);
     echoLayout->addWidget(cellLineEdit, 3, 3);
 
-    QPushButton *clearEditsButton = new QPushButton("Clear Edits", this);
-    echoLayout->addWidget(clearEditsButton, 6, 0);
+    //QPushButton *clearEditsButton = new QPushButton("Clear Edits", this);
+    //echoLayout->addWidget(clearEditsButton, 6, 0);
 
-    QPushButton *undoButton = new QPushButton("Undo", this);
-    undoButton->setDisabled(true); 
-    echoLayout->addWidget(undoButton, 6, 1);
+    //QPushButton *undoButton = new QPushButton("Undo", this);
+    //undoButton->setDisabled(true); 
+    //echoLayout->addWidget(undoButton, 6, 1);
 
-    applyEditsButton = new QPushButton("Apply Edits", this);
-    echoLayout->addWidget(applyEditsButton, 6, 2);
-    connect(applyEditsButton, SIGNAL (released()), this, SLOT (applyEdits())); 
+    //applyEditsButton = new QPushButton("Apply Edits", this);
+    //echoLayout->addWidget(applyEditsButton, 6, 2);
+    //connect(applyEditsButton, SIGNAL (released()), this, SLOT (applyEdits())); 
 
     QPushButton *refreshButton = new QPushButton("Refresh", this);
-    refreshButton->setDisabled(true);
+    refreshButton->setDisabled(false);
     echoLayout->addWidget(refreshButton, 6, 3);
+    connect(refreshButton, SIGNAL (released()), this, SLOT (applyEdits()));     
 
     echoGroup->setLayout(echoLayout);
 
@@ -290,7 +313,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     table->setItemPrototype(table->item(rows - 1, cols - 1));
     table->setItemDelegate(new SpreadSheetDelegate());
 
-    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionBehavior(QAbstractItemView::SelectItems); // SelectColumns);
 
     createActions();
     LOG(DEBUG) << "Action created\n";
@@ -308,6 +331,9 @@ Q_DECLARE_METATYPE(QVector<double>)
     statusBar();
     connect(table, &QTableWidget::currentItemChanged,
             this, &SpreadSheetView::updateStatus);
+
+   // connect(table, SIGNAL(QTableWidget::horizontalHeader().sectionClicked(int)),
+   //     this, SLOT(SpreadSheetView::columnHeaderClicked(int)));
     //connect(table, &QTableWidget::currentItemChanged,
     //        this, &SpreadSheetView::updateColor);
     //connect(table, &QTableWidget::currentItemChanged,
@@ -320,13 +346,17 @@ Q_DECLARE_METATYPE(QVector<double>)
     //        this, &SpreadSheetView::updateTextEdit);
 
     // setTheWindowTitle(rayAzimuth);
-    newAzimuth(rayAzimuth);
+    updateLocationInVolume(rayAzimuth, elevation);
 }
 
-void SpreadSheetView::setTheWindowTitle(float rayAzimuth) {
+
+
+void SpreadSheetView::setTheWindowTitle(float rayAzimuth, float elevation) {
     QString title("Spreadsheet Editor for Ray ");
     title.append(QString::number(rayAzimuth, 'f', 2));
     title.append(" degrees");
+    title.append(" sweep ");
+    title.append(QString::number(elevation, 'f', 2));
     setWindowTitle(title);
 }
 
@@ -340,8 +370,15 @@ void SpreadSheetView::init()
 
 void SpreadSheetView::createActions()
 {
-    cell_deleteAction = new QAction(tr("Delete Field"), this);
-    connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::deleteField);
+
+    undoAction = undoStack->createUndoAction(this, tr("&Undo"));
+    undoAction->setShortcuts(QKeySequence::Undo);
+
+    redoAction = undoStack->createRedoAction(this, tr("&Redo"));
+    redoAction->setShortcuts(QKeySequence::Redo);
+
+    cell_deleteAction = new QAction(tr("Delete"), this);
+    connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::deleteSelection);
 
     cell_negFoldAction = new QAction(tr("&- Fold"), this);
     //cell_addAction->setShortcut(Qt::CTRL | Qt::Key_Plus);
@@ -353,7 +390,7 @@ void SpreadSheetView::createActions()
 
     cell_deleteRayAction = new QAction(tr("&Delete Ray"), this);
     //cell_subAction->setShortcut(Qt::CTRL | Qt::Key_Minus);
-    connect(cell_deleteRayAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+    connect(cell_deleteRayAction, &QAction::triggered, this, &SpreadSheetView::deleteRay);
 
     cell_negFoldRayAction = new QAction(tr("&- Fold Ray"), this);
     //cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
@@ -432,6 +469,17 @@ void SpreadSheetView::createActions()
 
     secondSeparator = new QAction(this);
     secondSeparator->setSeparator(true);
+
+
+    replotAction = new QAction(tr("&Replot All"), this);
+    connect(replotAction, &QAction::triggered, this, &SpreadSheetView::replot);
+
+    applyEditsAction = new QAction(tr("&Apply Edits"), this);
+    connect(applyEditsAction, &QAction::triggered, this, &SpreadSheetView::applyChanges);
+
+    clearEditsAction = new QAction(tr("&Clear Edits"), this);
+    //connect(replotAction, &QAction::triggered, this, &SpreadSheetView::replot);
+
 }
 
 void SpreadSheetView::setupMenuBar()
@@ -444,17 +492,21 @@ void SpreadSheetView::setupMenuBar()
     displayMenu->addAction(display_editHistAction);
     
 
-    QMenu *cellMenu = menuBar()->addMenu(tr("&Edit"));
-    cellMenu->addAction(cell_deleteAction);
-    cellMenu->addAction(cell_negFoldAction);
-    cellMenu->addAction(cell_plusFoldAction);
-    cellMenu->addAction(cell_deleteRayAction);
-    cellMenu->addAction(cell_negFoldRayAction);
-    cellMenu->addAction(cell_plusFoldRayAction);
-    cellMenu->addAction(cell_negFoldRayGreaterAction);
-    cellMenu->addAction(cell_plusFoldRayGreaterAction);
-    cellMenu->addAction(cell_zapGndSpdAction);
-    //cellMenu->addSeparator();
+    QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
+    editMenu->addAction(undoAction);
+    editMenu->addAction(redoAction);
+    editMenu->addSeparator();
+    editMenu->addAction(cell_deleteAction);
+    editMenu->addAction(cell_negFoldAction);
+    editMenu->addAction(cell_plusFoldAction);
+    editMenu->addAction(cell_deleteRayAction);
+    editMenu->addAction(cell_negFoldRayAction);
+    editMenu->addAction(cell_plusFoldRayAction);
+    editMenu->addAction(cell_negFoldRayGreaterAction);
+    editMenu->addAction(cell_plusFoldRayGreaterAction);
+    editMenu->addAction(cell_zapGndSpdAction);
+
+    //editMenu->addSeparator();
 
     menuBar()->addSeparator();
 
@@ -464,6 +516,10 @@ void SpreadSheetView::setupMenuBar()
     OptionsMenu->addAction(exitAction);
 
     QMenu *ReplotMenu = menuBar()->addMenu(tr("&Replot"));
+    ReplotMenu->addAction(replotAction);
+    ReplotMenu->addAction(applyEditsAction);
+    ReplotMenu->addAction(clearEditsAction);
+
     //OptionsMenu->addAction(openAction);
     //OptionsMenu->addAction(printAction);
     //OptionsMenu->addAction(exitAction);
@@ -541,11 +597,39 @@ float  SpreadSheetView::myPow()
   return(999.9);
 }
 
+void SpreadSheetView::replot() {
+  LOG(DEBUG) << "enter";
+  // ??? applyChanges();
+  // send signal to replot data ...
+  emit replotRequested();
+
+  LOG(DEBUG) << "exit";  
+}
+
 void SpreadSheetView::applyChanges()
 {
   // TODO: send a list of the variables in the GlobalObject of the
   // QJSEngine to the model (via the controller?)
-  emit applyVolumeEdits();
+  LOG(DEBUG) << "enter";
+
+
+  int column = 0;
+  for(int column = 0; column < table->columnCount(); column++) {
+    vector<float> *data = getDataForVariableFromSpreadSheet(column);
+
+    QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(column);
+    QString label = tableWidgetItem->text();
+    string fieldName = getFieldName(label); 
+
+    float rayAzimuth = getAzimuth(label);
+    LOG(DEBUG) << "column " << label.toStdString() << ": extracted field " << fieldName
+      << ", azimuth " << rayAzimuth; ; 
+    emit applyVolumeEdits(fieldName, rayAzimuth, data);
+  }
+
+
+  // emit applyVolumeEdits();
+  LOG(DEBUG) << "exit";
 }
 
 void SpreadSheetView::cancelFormulaInput()
@@ -584,19 +668,9 @@ vector<string> *SpreadSheetView::getVariablesFromSpreadSheet() {
 
   vector<string> *names = new vector<string>;
 
-  
-  // try iterating over the properties of the globalObject to find new variables
-  //QJSValue newGlobalObject = engine.globalObject();
-
-  //QJSValueIterator it2(newGlobalObject);
-  //while (it2.hasNext()) {
-  //  it2.next();
-    //QString theValue = it2.value().toString(); // TODO: this could be the bottle neck; try sending list of double?
-    //theValue.truncate(100);
-
   for (int c=0; c < table->columnCount(); c++) {
     QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(c);
-    string fieldName = tableWidgetItem->text().toStdString(); 
+    string fieldName = getFieldName(tableWidgetItem->text()); 
     LOG(DEBUG) << fieldName; 
     //if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
     //  // we have a newly defined variable
@@ -612,28 +686,39 @@ vector<string> *SpreadSheetView::getVariablesFromSpreadSheet() {
 //
 // Get data from spreadsheet/table because we need to capture individual cell edits
 //
-vector<float> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column, string fieldName) {
+vector<float> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column) { // , string fieldName) {
 
   vector<float> *data = new vector<float>;
 
   //int c = 0;
   // QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(c);
   // TODO; verify fieldName and matches expected name
-  LOG(DEBUG) << "getting data for column " << column << ", " << fieldName;;
+  LOG(DEBUG) << "getting data for column " << column; // << ", " << fieldName;;
   // go through the rows and put the data into a vector
+
+  float value;
+  QString missingQ(_missingDataString.c_str());
+
   for (int r = 0; r < table->rowCount(); r++) {
     QTableWidgetItem *tableWidgetItem = table->item(r, column);
-    bool ok;
-    float value = tableWidgetItem->text().toFloat(&ok);
-    if (ok) {
-      data->push_back(value);
-      LOG(DEBUG) << value;
+    QString content = tableWidgetItem->text();
+    if (content.contains(missingQ)) {
+      value = _missingDataValue;
     } else {
-      QMessageBox::warning(this, tr("HawkEye"),
-                           tr("Could not convert to number.\n"),
-                           QMessageBox::Abort);
+        bool ok;
+        value = content.toFloat(&ok);
+        if (ok) {
+          LOG(DEBUG) << value;
+        } else {
+          value = _missingDataValue;
+          LOG(DEBUG) << "Could not convert to number " << 
+          tableWidgetItem->text().toStdString() << " at r,c " << r << "," << column;
+          //QMessageBox::warning(this, tr(tableWidgetItem->text().toStdString().c_str()),
+          //                     tr("Could not convert to number.\n"),
+          //                     QMessageBox::Abort);
+        }
     }
-    
+    data->push_back(value);
   }
   /*
     for (int r=0; r<value.property("length").toInt(); r++) {
@@ -936,7 +1021,7 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, 
 
       string format = "%g";
       char formattedData[250];
-      char dashes[] = " -- ";
+      // char dashes[] = _missingDataString.c_str(); // " -- ";
       float MISSING = _missingDataValue;
 
       int startingColumn = 0; // leave room for the range/gate values
@@ -962,7 +1047,7 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, 
       // 752019 for (std::size_t r=0; r<data.size(); r++) {
         //    sprintf(formattedData, format, data[0]);
         if (*dp == MISSING) {
-            sprintf(formattedData, "%10s", dashes);
+            sprintf(formattedData, "%10s",  _missingDataString.c_str()); // dashes);
         } else {
           sprintf(formattedData, "%g", *dp); // data->at(r));
         }
@@ -1013,6 +1098,7 @@ void SpreadSheetView::azimuthForRaySent(float azimuth, int offsetFromClosestRay,
 
 void SpreadSheetView::applyEdits() {
   bool ok;
+  bool carryOn = true;
 
   QString nRaysToDisplay = raysLineEdit->text();
   int newNRays = nRaysToDisplay.toInt(&ok);
@@ -1035,6 +1121,7 @@ void SpreadSheetView::applyEdits() {
     changeMissingValue(currentMissingValue);  
   } else {
     criticalMessage("missing data must be numeric");
+    carryOn = false;
   }
 
   // get a new azimuth if needed
@@ -1043,14 +1130,28 @@ void SpreadSheetView::applyEdits() {
 
   float currentRayAzimuth = rayAz.toFloat(&ok);
 
-  if (ok) {
-    // signal the controller to update the model
-    changeAzEl(currentRayAzimuth, _currentElevation);  
-  } else {
+  if (!ok) {
     criticalMessage("ray azimuth must be between 0.0 and 360.0");
+    carryOn = false;
   }
 
+  // get a new elevation if needed
+  QString elevation = sweepLineEdit->text();
+  LOG(DEBUG) << "sweep entered " << elevation.toStdString();
 
+  float currentElevation = elevation.toFloat(&ok);
+
+  if (!ok) {
+    criticalMessage("sweep must be greater than 0.0");
+    carryOn = false;
+  }
+
+  if (carryOn) {
+    // signal the controller to update the model
+    changeAzEl(currentRayAzimuth, currentElevation);  
+  } else {
+    criticalMessage("no changes made");
+  }
 }
 
 void SpreadSheetView::changeMissingValue(float currentMissingValue) {
@@ -1077,25 +1178,29 @@ void SpreadSheetView::changeAzEl(float azimuth, float elevation) {
       selectedNames.push_back(theText.toStdString());
     }
     fieldNamesSelected(selectedNames);
-    newAzimuth(azimuth);
-    newElevation(elevation);
+    updateLocationInVolume(azimuth, elevation);
     //needRangeData();
   } catch (std::invalid_argument &ex) {
     criticalMessage(ex.what());
   }
 }
 
-void SpreadSheetView::newElevation(float elevation) {
-    _currentElevation = elevation;
-}
-
-void SpreadSheetView::newAzimuth(float azimuth) {
+//void SpreadSheetView::newElevation(float elevation) {
+//    _currentElevation = elevation;
+//}
+// update spreadsheet location in volume
+void SpreadSheetView::updateLocationInVolume(float azimuth, float elevation) {
+//void SpreadSheetView::updateLocationInVolume(float azimuth, float elevation) {
     QString n;
     n.setNum(azimuth);
     rayLineEdit->clear();
     rayLineEdit->insert(n);
 
-    setTheWindowTitle(azimuth);
+    n.setNum(elevation);
+    sweepLineEdit->clear();
+    sweepLineEdit->insert(n);
+
+    setTheWindowTitle(azimuth, elevation);    
 }
 
 void SpreadSheetView::highlightClickedData(string fieldName, float azimuth, float range) {
@@ -1228,13 +1333,77 @@ void SpreadSheetView::fieldNamesProvided(vector<string> *fieldNames) {
     LOG(DEBUG) << "exit";
 }
 
-void SpreadSheetView::deleteField() {
-    int currentColumn = table->currentColumn();
-    QTableWidgetItem *currentHeader = table->horizontalHeaderItem(table->currentColumn());
-    if (currentHeader != NULL) {
-        setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
-    }
+// not used 
+void SpreadSheetView::columnHeaderClicked(int index) {
 
+  criticalMessage(to_string(index));
+}
+
+void SpreadSheetView::deleteRay() {
+    LOG(DEBUG) << "enter";
+    // TODO: set the Range to the column
+    int currentColumn = table->currentColumn();
+    //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
+    int top = 1;
+    int left = currentColumn;
+    int bottom = table->rowCount();
+    int right = currentColumn;
+     
+    QTableWidgetSelectionRange range(top, left, bottom, right);
+    bool select = true;
+    table->setRangeSelected(range, select);
+    //QString missingValue;
+    //missingValue.setNum(_missingDataValue);
+    setSelectionToValue(QString(_missingDataString.c_str()));
+
+
+    LOG(DEBUG) << "exit";
+    // select the range, then set the selection to missing value, using setSelection ...
+    //int currentColumn = table->currentColumn();
+    //QTableWidgetItem *currentHeader = table->horizontalHeaderItem(table->currentColumn());
+    //if (currentHeader != NULL) {
+    //    QString label = currentHeader->text();
+    //    float az = getAzimuth(label);
+    //    string fieldName = getFieldName(label);
+        // TODO: keep in view until save or apply? Add an Undo? In configuration dock?
+        // TODO: working here ...
+        //emit setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
+    //}
+
+}
+
+float SpreadSheetView::getAzimuth(QString text) {
+    float azimuth = 0.0;
+    text.truncate(6);  // remove the field name
+    sscanf(text.toStdString().c_str(), "%f", &azimuth); 
+    LOG(DEBUG) << azimuth;
+    return azimuth; 
+}
+
+string SpreadSheetView::getFieldName(QString text) {
+   //QString fieldName("no name");
+   QStringList list1 = text.split('\n');
+   if (list1.size() == 2) {
+      return list1.at(1).toStdString();
+   } else {
+      criticalMessage(text.toStdString().append(" no field name found"));
+      return "";
+   }
+}
+
+void SpreadSheetView::deleteSelection() {
+    QString missingValue(QString(_missingDataString.c_str()));
+    //missingValue.setNum(_missingDataValue);
+    int currentColumn = table->currentColumn();
+    QList<QTableWidgetItem *> selectedGates = table->selectedItems();
+    QList<QTableWidgetItem *>::iterator i;
+    for (i = selectedGates.begin(); i != selectedGates.end(); ++i) {
+        QTableWidgetItem *gate = *i;
+        gate->setText(missingValue);
+       // TODO: send signal with QList to controller?  NO. how to set these cells to missing?
+        //   persist to the model? only when Apply or Save is clicked.
+        //emit setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
+    }
 }
 
 void SpreadSheetView::criticalMessage(std::string message)
@@ -1293,29 +1462,6 @@ void  SpreadSheetView::newDataReady()
   setupContents();
 }
 
-void SpreadSheetView::printQJSEngineContext() {
-
-    // print the context ...                                                                                                   
-    LOG(DEBUG) << "current QJSEngine context ...";
-
-    LOG(DEBUG) << "pepsi cola";
-    /*
-    std::map<QString, QString> currentVariableContext;
-    QJSValue theGlobalObject = engine.globalObject();
-
-    QJSValueIterator it2(theGlobalObject);
-    while (it2.hasNext()) {
-      it2.next();
-      QString theValue = it2.value().toString();
-      theValue.truncate(100);
-
-      LOG(DEBUG) << it2.name() << ": " << theValue;
-      currentVariableContext[it2.name()] = it2.value().toString();
-    }
-    */
-    LOG(DEBUG) << "end current QJSEngine context";
-
-}
 
 void SpreadSheetView::closeEvent() {
     emit spreadSheetClosed();

@@ -48,13 +48,8 @@ std::vector<FunctionDef> Sweep::userUnaryOperators(void) const
 {
   std::vector<FunctionDef> ret;
   ret.push_back(FunctionDef(_mesoTemplateStr, "M", "VEL,template, minPctGood, minDiff, minPctLarge,fuzzyF",
-			    "At each point use template to get two sets of data, one on \n"
-			    "each side of point. If less than minPctGood point have valid data, set missing, otherwise\n"
-			    "ave1 = average of one side, ave2 = average of other side.\n"
-			    "if |ave1-ave2| > minDiff, and if\n"
-			    "percent of data from one side that is greater than ave1 and\n"
-			    "percent of data from other side that is greater than ave2 are both\n"
-			    "greater than minPctLarge, apply the fuzzy function to |ave1-ave2|"));
+			    "A complex app filter.  At each point use the template to get two sets of data, one on each side of the point. If less than minPctGood points have valid data, set output to missing, otherwise ave1 = average of data on one side, ave2 = average of data on the other side. "
+			    "if |ave1-ave2| > minDiff, and if percent of data from one side that is greater than ave1 and percent of data from the other side that is greater than ave2 are both greater than minPctLarge, then set the output to the result of applying the fuzzy function to |ave1-ave2|. Otherwise set the output to missing"));
   return ret;
 }
 

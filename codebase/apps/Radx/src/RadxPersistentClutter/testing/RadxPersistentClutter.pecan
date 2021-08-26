@@ -1,6 +1,3 @@
-19:34:03 DEBUG   Parms.cc[149]:setFiltersFromParms()::Volume before:    statusInit = VolInit()
-19:34:03 DEBUG   Parms.cc[150]:setFiltersFromParms()::Ray filter   :    HistoData = AccumulateHisto(DBMVC)
-19:34:03 DEBUG   Parms.cc[151]:setFiltersFromParms()::Volume after:     statusFinish = VolFinish()
 /**********************************************************************
  * TDRP params for HeaderParams
  **********************************************************************/
@@ -132,8 +129,8 @@ output_url = "$(HOME)/data/pecan/cfradial/spol/clutter/sband/sur";
 //
 // Threading.
 //
-// Optional threading of beams, depends on app whether params are used 
-//   or not.
+// Optional threading of beams, depends on app whether these params are 
+//   used or not.
 //
 //======================================================================
  
@@ -176,14 +173,14 @@ thread_debug = FALSE;
 //
 // index = numerical value to refer to this elsewhere
 // path = where the data is
-// The first thing on this list is the primary data source. The geometry 
-//   of non-primary files will be converted to match the primary files. 
-//   The file_match_time_offset_sec and file_match_time_tolerance_sec are 
-//   used to search for the best secondary file to merge. The offset is 
-//   ignored for the primary field. The ray tolerances are used to match 
-//   rays in the secondary file with those in the primary file.  If 
-//   is_climo=true, a fixed file is used no matter what the request, 
-//   specified by path/climo_file.
+// The first element in this list is the primary data source. The 
+//   geometry of non-primary files will be converted to match the primary 
+//   files. The file_match_time_offset_sec and 
+//   file_match_time_tolerance_sec are used to search for the best 
+//   secondary file to merge. The offset is ignored for the primary field. 
+//   The ray tolerances are used to match rays in the secondary file with 
+//   those in the primary file.  If is_climo=true, a fixed file is used no 
+//   matter what the request, specified by path/climo_file.
 //
 //
 // Type: struct
@@ -221,7 +218,7 @@ input = {
 // Mapping from input field to path.
 //
 // For each field that is an input to the app, it is associated with an 
-//   input path using this mapping (index/field name).
+//   input[] above  using this mapping (index/field name).
 //
 //======================================================================
  
@@ -229,7 +226,8 @@ input = {
 //
 // mapping from field to url.
 //
-// for each input field, the index to the path of that data.
+// for each input field, the index to the path of that data (in input[] 
+//   above).
 //
 //
 // Type: struct
@@ -373,7 +371,7 @@ max_range_km = 60;
  
 ///////////// output_all_fields ///////////////////////
 //
-// True to output all fields, false to use list.
+// True to output all fields, false to use output_fields[] below.
 //
 //
 // Type: boolean
@@ -383,7 +381,7 @@ output_all_fields = TRUE;
 
 ///////////// output_fields ///////////////////////////
 //
-// fields to output.
+// fields to output, when output_all_fields is FALSE.
 //
 //
 // Type: string
@@ -421,7 +419,7 @@ netcdf_style = NETCDF4;
 //
 // Option to leave data in native byte order.
 //
-// If false, data will be byte-swapped as appropriate on output.
+// If FALSE, data will be byte-swapped as appropriate on output.
 //
 //
 // Type: boolean

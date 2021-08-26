@@ -30,6 +30,51 @@ const vector<float> *DataModel::GetData(string fieldName,
   LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
        << " sweepIdx=" << sweepIdx;
 
+  // sweep numbers are 1-based in RadxVol, not zero based, so, add one to the index.
+  sweepIdx += 1;
+
+  _vol.loadRaysFromFields();
+
+  RadxSweep *sweep = _vol.getSweepByNumber(sweepIdx);
+  if (sweep == NULL)
+    throw std::invalid_argument("bad sweep index");
+
+  size_t startRayIndex = sweep->getStartRayIndex();
+
+  const RadxField *field;
+
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = _vol.getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(startRayIndex + rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  // cerr << "there arenGates " << nGates;
+  const float *data = field->getDataFl32();
+
+  vector<float> *dataVector = new vector<float>(nGates);
+  dataVector->assign(data, data+nGates);
+
+  return dataVector;
+}
+
+/*
+const vector<float> *DataModel::GetData(string fieldName,
+              int rayIdx, int sweepIdx)  {
+
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
+       << " sweepIdx=" << sweepIdx;
+
   _vol.loadRaysFromFields();
   
   const RadxField *field;
@@ -58,9 +103,72 @@ const vector<float> *DataModel::GetData(string fieldName,
 
   return dataVector;
 }
+*/
+
+void DataModel::SetDataByIndex(string &fieldName, 
+            int rayIdx, int sweepIdx, vector<float> *fieldData) { 
+
+  // What is being returned? the name of the new field in the model that
+  // contains the results.
+
+  LOG(DEBUG) << "entry with fieldName ... ";
+  LOG(DEBUG) << fieldName;
+
+
+
+  _vol.loadRaysFromFields(); // loadFieldsFromRays();
+
+
+    LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
+       << " sweepIdx=" << sweepIdx;
+
+  // sweep numbers are 1-based in RadxVol, not zero based, so, add one to the index.
+  sweepIdx += 1;
+
+  RadxSweep *sweep = _vol.getSweepByNumber(sweepIdx);
+
+
+  SetData(fieldName, rayIdx, sweep, fieldData);
+  /* 
+  if (sweep == NULL)
+    throw std::invalid_argument("bad sweep index");
+
+  size_t startRayIndex = sweep->getStartRayIndex();
+
+  const RadxField *field;
+
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = _vol.getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(startRayIndex + rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  int nGates = fieldData->size();
+
+  Radx::fl32 missingValue = Radx::missingFl32; 
+  bool isLocal = false;
+  const string units = field->getUnits();
+
+  ray->removeField(fieldName);
+
+  const float *flatData = fieldData->data();
+  RadxField *field1 = ray->addField(fieldName, units, nGates, missingValue, flatData, isLocal);
+*/
+  LOG(DEBUG) << "exit ";
+}
 
 void DataModel::SetData(string &fieldName, 
-            int rayIdx, int sweepIdx, vector<float> *fieldData) { 
+            int rayIdx, RadxSweep *sweep, vector<float> *fieldData) { 
 
   // What is being returned? the name of the new field in the model that
   // contains the results.
@@ -70,24 +178,115 @@ void DataModel::SetData(string &fieldName,
 
   _vol.loadRaysFromFields(); // loadFieldsFromRays();
 
-  const RadxField *field;
-  
+    LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+
+  //if (sweep == NULL)
+  //  throw std::invalid_argument("bad sweep index");
+
+  //size_t startRayIndex = sweep->getStartRayIndex();
+
+  //const 
+  RadxField *field;
+
   //  get the ray for this field 
   const vector<RadxRay *>  &rays = _vol.getRays();
-
-  RadxRay *ray = rays.at(rayIdx);
+  if (rays.size() <= 0) {
+    LOG(DEBUG) <<  "ERROR - no rays found";
+  }
+  RadxRay *ray = rays.at(rayIdx); // startRayIndex + rayIdx);
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
-    throw "Ray is null";
+    throw "no ray found";
   } 
 
-  int nGates = fieldData->size();
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
 
-  Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
-  const float *flatData = fieldData->data();
-  RadxField *field1 = ray->addField(fieldName, "m/s", nGates, missingValue, flatData, isLocal);
+  //int nGates = fieldData->size();
+
+//  Radx::fl32 missingValue = Radx::missingFl32; 
+//  bool isLocal = false;
+//  const string units = field->getUnits();
+
+//  ray->removeField(fieldName);
+
+//  const float *flatData = fieldData->data();
+//  RadxField *field1 = ray->addField(fieldName, units, nGates, missingValue, flatData, isLocal);
+
+//  LOG(DEBUG) << "ray after change ...";
+//  ray->print(cerr);
+
+//--- here ...
+    // TODO: get the correct azimuth, and sweep number from  elevation
+//  RadxField *field = _closestRay->getField(fieldName);
+
+  if (field == NULL) {
+    throw std::invalid_argument("no RadxField found ");
+  } 
+
+  vector<float> deref = *fieldData;
+  const Radx::fl32 *radxData = &deref[0];
+  bool isLocal = true;  //?? not sure about this 
+  field->setDataFl32(nGates, radxData, isLocal);
+  
+  // make sure the new data are there ...
+  field->printWithData(cout);
+  
+  // data should be copied, so free the memory
+  // delete data;
+  
+  // again, make sure the data are there
+//  _closestRay->printWithFieldData(cout);
+  
+  //_vol->loadRaysFromFields();
+  
+  //std::ofstream outfile("/tmp/voldebug.txt");
+  // finally, make sure the data are there
+  //_vol->printWithFieldData(outfile);
+
+  // end here 
+
   LOG(DEBUG) << "exit ";
+}
+
+void DataModel::SetData(string &fieldName, 
+            float azimuth, float sweepAngle, vector<float> *fieldData) {
+
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " ray =" << azimuth
+       << " sweep =" << sweepAngle;
+
+  // this is the closest ray for the sweep angle
+  int rayIdx = (int) findClosestRay(azimuth, sweepAngle);
+  //_vol.loadRaysFromFields();
+
+  //RadxSweep *sweep = _vol.getSweepByFixedAngle(sweepAngle);
+  RadxSweep *dummyValue = nullptr;
+
+  SetData(fieldName, rayIdx, dummyValue, fieldData);
+  LOG(DEBUG) << "exit";
+}
+
+void DataModel::SetData(string &fieldName, float value) {
+  RadxField *field;
+  RadxRay *ray;
+
+  size_t nRays = getNRays();
+  for (size_t i = 0; i<nRays; i++) {
+    ray = getRay(i);
+    field = fetchDataField(ray, fieldName);
+    size_t startGate, endGate;
+    startGate = 0;
+    endGate = ray->getNGates();
+    field->setGatesToMissing(startGate, endGate);
+  }
+}
+
+// remove field from volume
+void DataModel::RemoveField(string &fieldName) {
+  int result = _vol.removeField(fieldName);
+  if (result != 0) throw std::invalid_argument("failed to remove field");
 }
 
 void DataModel::readData(string path, vector<string> &fieldNames,
@@ -130,6 +329,9 @@ void DataModel::readData(string path, vector<string> &fieldNames,
    //      << _sweepManager.getGuiIndex() << ", "
    //      << _sweepManager.getSelectedAngle();
     LOG(DEBUG) << "----------------------------------------------------";
+
+  printAzimuthInRayOrder();
+
   LOG(DEBUG) << "exit";
 }
 
@@ -146,7 +348,10 @@ RadxTime DataModel::getEndTimeSecs() {
 }
 
 void DataModel::writeData(string path) {
+    RadxFile outFile;
 
+      LOG(DEBUG) << "writing to file " << path;
+      outFile.writeToPath(_vol, path);
 }
 
 void DataModel::update() {
@@ -180,11 +385,23 @@ const float *DataModel::fetchData(RadxRay *ray, string &fieldName) {
       return NULL;
 }
 
+// total number of rays in volume, for all sweeps
 size_t DataModel::getNRays() { // string fieldName, double sweepAngle) {
   _vol.loadRaysFromFields();
   const RadxField *field;
   const vector<RadxRay *>  &rays = _vol.getRays();
   size_t nRays = rays.size();
+  return nRays;
+}
+
+// get the number of rays for a sweep
+size_t DataModel::getNRays(int sweepNumber) {
+  _vol.loadRaysFromFields();
+  RadxSweep *sweep = _vol.getSweepByNumber(sweepNumber);
+  if (sweep == NULL) {
+    throw std::invalid_argument("no sweep found");
+  }
+  size_t nRays = sweep->getNRays();
   return nRays;
 }
 
@@ -215,8 +432,51 @@ RadxRay *DataModel::getRay(size_t rayIdx) {
   }
 }
 
-vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName, double sweepHeight) {
-// TODO: which sweep? 
+void DataModel::printAzimuthInRayOrder() {
+  _vol.loadRaysFromFields();
+  
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = _vol.getRays(); 
+  LOG(DEBUG) << "first 20 rays in order ...";
+  for (int i=0; i<20; i++) {
+    RadxRay *ray = rays.at(i);
+    LOG(DEBUG) << "ray Az = " << ray->getAzimuthDeg();
+  }
+}
+
+
+int DataModel::getSweepNumber(float elevation) {
+  //DataModel *dataModel = DataModel::Instance();
+  vector<double> *sweepAngles = getSweepAngles();
+  int i = 0;
+  float delta = 0.01;
+  bool found = false;  
+  while ((i < sweepAngles->size()) && !found) {
+    if (fabs(sweepAngles->at(i) - elevation) < delta) {
+      found = true;
+    } else {
+      i += 1;
+    }
+  }
+  if (!found) throw std::invalid_argument("no sweep found for elevation");
+
+  // use the index, i, to find the sweep number, because
+  // the index may be different than the number, which is a label for a sweep.
+  vector<RadxSweep *> sweeps = _vol.getSweeps();
+  RadxSweep *sweep = sweeps.at(i);
+  int sweepNumber = sweep->getSweepNumber();
+  return sweepNumber;
+}
+
+
+
+
+vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName) { // , int sweepHeight) {
+// TODO: which sweep? the rayIdx considers which sweep.
+
+  LOG(DEBUG) << "enter" << " rayIdx = " << rayIdx 
+    << " fieldName = " << fieldName;
+
   _vol.loadRaysFromFields();
   
   //  get the ray for this field 
@@ -240,6 +500,9 @@ vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName, double swe
 
   vector<float> *dataVector = new vector<float>(nGates);
   dataVector->assign(data, data+nGates);
+
+  LOG(DEBUG) << "ray Az = " << ray->getAzimuthDeg()
+    << "data[0-5] = " << data[0] << ", "  << data[1] << ", "  << data[2] << ", "  << data[3] << ", "  << data[4];
 
   return dataVector;
 }
@@ -384,4 +647,108 @@ void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
 
 }
 
+size_t DataModel::findClosestRay(float azimuth, int sweepNumber) { // float elevation) {
+  LOG(DEBUG) << "enter azimuth = " << azimuth << " sweepNumber = " << sweepNumber;
+
+  DataModel *dataModel = DataModel::Instance();
+
+  _vol.loadRaysFromFields();
+
+  // NOTE! Sweep Number, NOT Sweep Index!!!
+
+  RadxSweep *sweep = _vol.getSweepByNumber(sweepNumber);
+  if (sweep == NULL) {
+    //string msg = "no sweep found"
+    throw std::invalid_argument("no sweep found");
+  }
+
+  // RadxSweep *sweep = _vol.getSweepByFixedAngle(elevation); DOESN'T WORK
+  //if (sweep == NULL) 
+  //  throw std::invalid_argument("unknown sweep elevation");
+  //int requestedSweepNumber = sweep->getSweepNumber();
+
+  const vector<RadxRay *> rays = dataModel->getRays();
+  // find that ray
+  bool foundIt = false;
+  double minDiff = 1.0e99;
+  size_t minIdx = 0;
+  double delta = 0.1;  // TODO set this to the min diff between elevations/sweeps
+  RadxRay *closestRayToEdit = NULL;
+  //vector<RadxRay *>::const_iterator r;
+  //r=rays.begin();
+  size_t startIdx = sweep->getStartRayIndex();
+  size_t endIdx = sweep->getEndRayIndex();
+  //size_t idx = 0;
+  size_t r = startIdx;
+  while(r<=endIdx) {
+    RadxRay *rayr = rays.at(r);
+    double diff = fabs(azimuth - rayr->getAzimuthDeg());
+    if (diff > 180.0) {
+      diff = fabs(diff - 360.0);
+    }
+    if (diff < minDiff) {
+      if (sweepNumber == rayr->getSweepNumber()) {
+        foundIt = true;
+        closestRayToEdit = rayr;
+        minDiff = diff;
+        minIdx = r; //idx;
+      }
+    }
+    r += 1;
+    //idx += 1;
+  }  
+  if (!foundIt || closestRayToEdit == NULL) {
+    throw std::invalid_argument("could not find closest ray");
+    // errorMessage("ExamineEdit Error", "couldn't find closest ray");
+  }
+
+  LOG(DEBUG) << "Found closest ray: index = " << minIdx << " min diff = " << minDiff;
+   // << " elevation found = " << closestRayToEdit->getElevationDeg()
+   // << " vs. requested = " << elevation; // " pointer = " << closestRayToEdit;
+  //closestRayToEdit->print(cout); 
+  //_closestRay = const_cast <RadxRay *> (closestRayToEdit);
+  size_t closestRayIdx = minIdx;
+  return closestRayIdx;
+}
+
+size_t DataModel::getRayIndex(size_t baseIndex, int offset, int sweepNumber) {
+  RadxSweep *sweep = _vol.getSweepByNumber(sweepNumber);
+  size_t startRayIndex = sweep->getStartRayIndex();
+  size_t endRayIndex = sweep->getEndRayIndex();
+  size_t idx = calculateRayIndex_f(baseIndex, startRayIndex, endRayIndex, offset);
+  // swim around a bit to make sure we have the right ray index, 
+  // just in case the end or start index is slightly off.
+  // verify the sweep number 
+
+  const vector<RadxRay *>  &rays = _vol.getRays();
+  RadxRay *ray = rays.at(idx);
+  //size_t forSureIdx;
+  //forSureIdx = idx;
+  while (ray->getSweepNumber() > sweepNumber) {
+    idx -= 1;
+    ray = rays.at(idx);
+  }
+  while (ray->getSweepNumber() < sweepNumber) {
+    idx += 1;
+    ray = rays.at(idx);
+  }
+  
+
+  return idx;
+}
+
+size_t DataModel::calculateRayIndex_f(size_t idx, size_t start, size_t end, int offset) {
+
+  size_t new_idx;
+
+  float raw = (float) idx + offset;
+  if (raw > end) {
+    new_idx = start + (raw - end) - 1;
+  } else if (raw < start) {
+    new_idx = end - (start - raw) + 1;
+  } else {
+    new_idx = raw;
+  }
+  return new_idx;
+}
 

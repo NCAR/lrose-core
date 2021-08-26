@@ -93,6 +93,7 @@ public:
     char* gpmName;
     char* outputName;
     char* longName;
+    encoding_type_t encoding;
   } output_field_t;
 
   typedef struct {
@@ -442,8 +443,6 @@ public:
 
   char* output_url;
 
-  encoding_type_t output_encoding_type;
-
   char* data_set_name;
 
   char* data_set_source;
@@ -457,7 +456,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[35];
+  mutable TDRPtable _table[34];
 
   const char *_className;
 

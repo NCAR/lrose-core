@@ -55,6 +55,7 @@ HDRS = \
 
 CPPC_SRCS = \
 	Params.cc \
+	HeaderParams.cc \
 	Alg.cc \
 	HeaderParams.cc \
 	Histo.cc \
@@ -82,6 +83,9 @@ include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
 #
 
 include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+
+HeaderParams.cc: paramdef.header
+	tdrp_gen -f paramdef.header -c++ -class HeaderParams
 
 HeaderParams.cc: paramdef.header
 	tdrp_gen -f paramdef.header -c++ -class HeaderParams
