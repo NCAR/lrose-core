@@ -1230,8 +1230,8 @@ void PolarWidget::drawRings(QPainter &painter)
   if (!_ringsEnabled && !_gridsEnabled && !_angleLinesEnabled) {
     return;
   }
-  LOG(DEBUG) << "before annoying thing";
-      painter.drawText(30, 30, "annoying thing!");
+  //LOG(DEBUG) << "before annoying thing";
+  //    painter.drawText(30, 30, "annoying thing!");
   // save painter state
 
   painter.save();
@@ -1409,28 +1409,42 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
 
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
 
-  int _topMargin = 0;
-  int _plotHeight = height();
+
+  //QTransform transform = painter.transform. getXPixelsPerWorld
+      // plot using x:0 - 100, y: 0 - 100; (0,0) upper left corner
+  QTransform *textTransform = configureTextTransform();
+  painter.setWorldTransform(*textTransform); 
+
+  //textTransform.getXPixelsPerWorld() ???? // This is from WorldPlot, we aren't doing this.
+
+
+  //int _plotHeight = height();
   int _widthPixels = width();
 
 
-  int pltHt = _plotHeight;
+  int pltHt = 100; // _plotHeight;
   int width = _colorScaleWidth;
-  int xStart = 50; // _widthPixels - width;
+  //double widthInPixels = width();
+  double widthInWorld = 100;
+
+  double colorScaleWidthScaled = _colorScaleWidth * widthInWorld / _widthPixels; // widthInPixels;;
+  int xStart = 100; // _widthPixels - width;
   size_t nHts = cmap.size() + 1; // leave some space at top and bottom
   double patchHt = (double)(pltHt) / nHts;
   int iPatchHt = (int) patchHt;
+  int bottomMargin = (int) patchHt/2.0;
 
   // fill the swatches with the color
   
-  painter.save();
+  //painter.save();
   painter.setPen(Qt::SolidLine);
   int scaleYTop = 0, scaleYBot = 0;
   for (size_t ii = 0; ii < cmap.size(); ii++) {
     const ColorMap::CmapEntry &entry = cmap[ii];
     QColor color(entry.red, entry.green, entry.blue);
     painter.setBrush(color);
-    double topY = pltHt - (int) (ii + 2) * patchHt + (patchHt / 2) + _topMargin;
+    //double topY = pltHt - (int) (ii + 2) * patchHt + (patchHt / 2) + _topMargin;
+    double topY = (100-bottomMargin) - (ii+1)*patchHt;
     QRectF r(xStart, topY, width, patchHt);
     painter.fillRect(r, color);
     if (ii == 0) {
@@ -1439,8 +1453,8 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
       scaleYTop = topY;
     }
   }
-  painter.restore();
-  
+  //painter.restore();
+
   // get precision based on data
   
   double minDelta = 1.0e99;
@@ -1464,11 +1478,12 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
 
   // save state
 
-  painter.save();
+  //painter.save();
 
   // scale the font
   
-  QFont defaultFont = painter.font();
+  QFont font = painter.font();
+  /*
   if (defaultFont.pointSize() > patchHt / 3) {
     int pointSize = patchHt / 3;
     if (pointSize < 7) {
@@ -1476,8 +1491,10 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
     }
     QFont scaledFont(defaultFont);
     scaledFont.setPointSizeF(pointSize);
-    painter.setFont(scaledFont);
-  }
+    */
+    font.setPointSize(2);
+    painter.setFont(font);
+  //}
   
   // add labels
 
@@ -1485,8 +1502,12 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
   painter.setBackgroundMode(Qt::OpaqueMode);
   QRect tRect(painter.fontMetrics().tightBoundingRect("1.0"));
   int textHt = tRect.height();
+
+  int xStartPlusABit = xStart + colorScaleWidthScaled/4;  
   
   if (colorMap.labelsSetByValue()) {
+
+    LOG(DEBUG) << "colorMap.labelsSetByValue";
   
     // label values specified in the color scale file
 
@@ -1495,53 +1516,69 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
     for (size_t ii = 0; ii < labels.size(); ii++) {
       const ColorMap::CmapLabel &label = labels[ii];
       double yy = scaleYBot - scaleHeight * label.position;
-      painter.drawText(xStart, (int) yy - textHt / 2, 
+      double yPos = 100 - (ii+1)*patchHt;
+      painter.drawText(xStart, (int) yPos, // yy - textHt / 2, 
                        width + 4, textHt + 4, 
-                       Qt::AlignCenter | Qt::AlignHCenter, 
+                       Qt::AlignLeft | Qt::AlignVCenter, // Qt::AlignCenter | Qt::AlignHCenter, 
                        label.text.c_str());
     } // ii
 
   } else {
+    LOG(DEBUG) << "label the color transitions";
 
     // label the color transitions
     // we space the labels vertically by at least 2 * text height
     
-    double yy = pltHt - (patchHt * 1.0) + _topMargin;
+    //double yy = pltHt - (patchHt * 1.0) + _topMargin;
     double prevIyy = -1;
+
     for (size_t ii = 0; ii < cmap.size(); ii++) {
       const ColorMap::CmapEntry &entry = cmap[ii];
       QString label = QString("%1").arg(entry.minVal,0,format,ndecimals);
-      int iyy = (int) yy;
-      bool doText = false;
-      if (prevIyy < 0) {
-        doText = true;
-      } else if ((prevIyy - iyy) > textHt * 2) {
-        doText = true;
-      }
-      if (doText) {
-        painter.drawText(xStart, iyy, width, iPatchHt, 
-                         Qt::AlignCenter | Qt::AlignHCenter, 
+      //int iyy = (int) yy;
+      //bool doText = false;
+      //if (prevIyy < 0) {
+      //  doText = true;
+      //} else if ((prevIyy - iyy) > textHt * 2) {
+      //  doText = true;
+      //}
+      //if (doText) {
+        double yPos = 100 - bottomMargin - ii*patchHt - (textHt+4)/2; // /2;
+        painter.drawText(xStartPlusABit, //  xStart+5, 
+                         (int) yPos, // iyy, 
+                         //width, iPatchHt, 
+                         width + 4, textHt + 4, 
+                         Qt::AlignLeft | Qt::AlignVCenter, // Qt::AlignCenter | Qt::AlignHCenter, 
                          label);
-        prevIyy = iyy;
-      }
-      yy -= patchHt;
+      //  prevIyy = iyy;
+      //}
+      //yy -= patchHt;
     }
     
     // last label at top
     
     const ColorMap::CmapEntry &entry = cmap[cmap.size()-1];
     QString label = QString("%1").arg(entry.maxVal,0,format,ndecimals);
-    int iyy = (int) yy;
-    if ((prevIyy - iyy) > textHt * 2) {
-      painter.drawText(xStart, iyy, width, iPatchHt, 
-                       Qt::AlignVCenter | Qt::AlignHCenter, 
-                       label);
-    }
-    yy -= patchHt;
+    int ii = cmap.size();
+    double yPos = 100 - bottomMargin - ii*patchHt - (textHt+4)/2; // /2;
+    painter.drawText(xStartPlusABit,
+                         (int) yPos, // iyy, 
+                         //width, iPatchHt, 
+                         width + 4, textHt + 4, 
+                         Qt::AlignLeft | Qt::AlignVCenter, // Qt::AlignCenter | Qt::AlignHCenter, 
+                         label);
 
+    //int iyy = (int) yy;
+    //if ((prevIyy - iyy) > textHt * 2) {
+    //  painter.drawText(xStart, iyy, width, iPatchHt, 
+    //                   Qt::AlignVCenter | Qt::AlignHCenter, 
+    //                   label);
+    //}
+    //yy -= patchHt;
+    
   }
 
-  // add Units label
+/*  // add Units label
 
   string units(colorMap.getUnits());
   if (units.size() > 0) {
@@ -1558,7 +1595,7 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
                      Qt::AlignTop | Qt::AlignHCenter, qunits);
 
   }
-
+*/
   // restore state
 
   painter.restore();
@@ -1572,10 +1609,33 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
 
 void PolarWidget::drawColorScale(QPainter &painter) {
   // draw the color scale
+  LOG(DEBUG) << "enter";
+
+    painter.save();
+    //painter.setPen(Qt::yellow);
+    //painter.setBrush(Qt::black);
+    //painter.setBackgroundMode(Qt::OpaqueMode);
+
+    //painter.setBrush(Qt::white);
+    painter.setBackgroundMode(Qt::TransparentMode);
+
+
+    // plot using x:0 - 100, y: 0 - 100; (0,0) bottom left corner
+    QTransform *textTransform = configureTextTransform();
+    painter.setWorldTransform(*textTransform); 
+
+    //QFont font = painter.font();
+    //font.setPointSize(3);
+    //painter.setFont(font);  
 
   DisplayField *field = displayFieldController->getSelectedField();
   drawColorScaleFromWorldPlot(field->getColorMap(), painter,
                             _params->label_font_size);
+
+  painter.restore();
+  delete textTransform;
+
+  LOG(DEBUG) << "exit";
 
 }
 
@@ -1645,7 +1705,7 @@ void PolarWidget::drawLegend(QPainter &painter) {
     painter.save();
     painter.setPen(Qt::yellow);
     //painter.setBrush(Qt::black);
-    painter.setBackgroundMode(Qt::OpaqueMode);
+    //painter.setBackgroundMode(Qt::OpaqueMode);
 
     //painter.setBrush(Qt::white);
     painter.setBackgroundMode(Qt::TransparentMode);
