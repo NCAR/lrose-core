@@ -10,24 +10,11 @@ commentdef
   p_text = "Radar Estimated Profiles of Humidity. Input is PID and radar data, output is humidity and attenutation grids, and ascii data";
 }
 
-
-paramdef string
-{
-  p_descr = "Fixed constant strings that are interpreted by user functions";
-  p_default = {};
-} fixed_const[];
-
 paramdef string
 {
   p_descr = "Non gridded data names";
   p_default = {};
 } user_data[];
-
-paramdef string
-{
-  p_descr = "Volume Filters to apply before the sweep filters";
-  p_default = {};
-} volume_before_filter[];  
 
 paramdef string
 {
@@ -37,161 +24,12 @@ paramdef string
    "Meso2 = MesoTemplate(VEL, 20, 20, 10, -20)"};
 } filter[];  
 
-
-paramdef string
-{
-  p_descr = "Volume Filters to apply after the sweep filters";
-  p_default = {};
-} volume_after_filter[];  
-
-
-
-// paramdef string
-// {
-//   p_descr = "s_noise_name";
-//   p_help = "S band radar noise field name in incoming data";
-//   p_default = "";
-// } s_noise_name;
-
-// paramdef string
-// {
-//   p_descr = "k_noise_name";
-//   p_help = "K band radar noise field name in incoming data";
-//   p_default = "";
-// } k_noise_name;
-
-// paramdef string
-// {
-//   p_descr = "s_dbz_name";
-//   p_help = "S band DBZ field name in incoming data";
-//   p_default = "";
-// } s_dbz_name;
-
-// paramdef string
-// {
-//   p_descr = "k_dbz_name";
-//   p_help = "K band DBZ field name in incoming data";
-//   p_default = "";
-// } k_dbz_name;
-
-// paramdef string
-// {
-//   p_descr = "s_zdr_name";
-//   p_help = "S band ZDR field name";
-//   p_default = "";
-// } s_zdr_name;
-
-// paramdef string
-// {
-//   p_descr = "s_rhohv_name";
-//   p_help = "S band RHOHV field name";
-//   p_default = "";
-// } s_rhohv_name;
-
-// paramdef string
-// {
-//   p_descr = "location for output ascii unfilterd kernel files";
-//   p_help = "empty for none";
-//   p_default = "";
-// } unfiltered_kernel_ascii_path;
-
-// paramdef string
-// {
-//   p_descr = "location for output ascii filterd kernel files";
-//   p_help = "empty for none";
-//   p_default = "";
-// } filtered_kernel_ascii_path;
-
-// paramdef string
-// {
-//   p_descr = "kernel_spdb_url";
-//   p_help = "url name to which unfiltered (all) kernel spdb GenPoly data is written. Each vertical level index gets a subdirectory, so the 5th vertical level is writen to kernel_url/vlevel_5  for example. Leave this URL string empty for no SPDB output";
-//   p_default = "";
-// } kernel_spdb_url;
-
-// paramdef string
-// {
-//   p_descr = "kernel_outside_spdb_url";
-//   p_help = "url name to which unfiltered 'outside kernel' spdb GenPoly data is written, subdirectories same as for kernel_url. Also, set to empty string for no output";
-//   p_default = "";
-// } kernel_outside_spdb_url;
-
-// paramdef string
-// {
-//   p_descr = "filtered_kernel_spdb_url";
-//   p_help = "url to which filtered kernel spdb GenPoly data is written, with subdirs the same as other for other products. Empty for none";
-//   p_default = "";
-// } filtered_kernel_spdb_url;
-
-// paramdef string
-// {
-//   p_descr = "filtered_kernel_outside_spdb_url";
-//   p_help = "url name to which filtered 'outside kernel' spdb GenPoly data is written, subdirs same as others. Set to empty string for no output";
-//   p_default = "";
-// } filtered_kernel_outside_spdb_url;
-
-// paramdef double
-// {
-//   p_descr = "s_noise_thresh";
-//   p_help = "S band noise threshold";
-//   p_default = -112;
-// } s_noise_thresh;
-
-// paramdef double
-// {
-//   p_descr = "k_noise_thresh";
-//   p_help = "K band noise threshold";
-//   p_default = -105;
-// } k_noise_thresh;
-
-// paramdef double
-// {
-//   p_descr ="min_km";
-//   p_help = "minimium length (km) of the attenuation region along a beam";
-//   p_default = 15;
-// } min_km;
-
-// paramdef double
-// {
-//   p_descr ="max_km_penetration";
-//   p_help = "maximum (km) penetration into a (clump) cloud to reach the kernel compared to the (pid clump) edge before rejecting a kernel";
-//   p_default = 1;
-// } max_km_penetration;
-
-// paramdef double
-// {
-//   p_descr = "k_dbz_offset";
-//   p_help = "systematic bias in K band DBZ, added to data";
-//   p_default = -7.2;
-// } k_dbz_offset;
-
-// paramdef int
-// {
-//   p_descr = "pid_non_weather";
-//   p_help = "PID values that are not interesting weather. As many as you want";
-//   p_default = {};
-// } pid_non_weather[];
-
 paramdef int
 {
   p_descr = "pid_weather";
   p_help = "PID values for interesting weather, as many as you want";
   p_default = {};
 } pid_weather[];
-
-// paramdef int
-// {
-//   p_descr = "pid_clump";
-//   p_help = "PID values for clumping";
-//   p_default = {};
-// } pid_clump[];
-
-// paramdef int
-// {
-//   p_descr = "clump_min_npt";
-//   p_help = "Minimum number of gridpts in a clump, smaller clumps are ignored";
-//   p_default = 10;
-// } clump_min_npt;
 
 paramdef int
 {
@@ -248,13 +86,6 @@ paramdef double
   p_help = "minimum correlation between the S band and Kband reflectivities within the kernel";
   p_default = 0.7;
 } min_S_K_dbz_correlation;
-
-// paramdef int
-// {
-//   p_descr = "depth of leading edge";
-//   p_help = "# of gates in the leading edge data";
-//   p_default = 3;
-// } leading_edge_depth;
 
 typedef struct
 {

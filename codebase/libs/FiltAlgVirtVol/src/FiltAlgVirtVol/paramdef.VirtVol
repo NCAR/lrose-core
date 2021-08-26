@@ -2,14 +2,14 @@
  * paramdef.VirtVol
  *
  * This file contains the TDRP parameter definitions for data handling of
- * for virtual volumes
+ * for so called virtual volumes
  * 
  */
 
 commentdef
 {
-  p_header = "VirtVol Parameters";
-  p_text = "Triggering new data, reading in new data, writing data";
+  p_header = "VirtVol data handling parameters";
+  p_text = "Params for triggering new data, reading in new data, writing data";
 };
 
 paramdef boolean
@@ -23,7 +23,7 @@ paramdef string
 {
   p_descr = "trigger url";
   p_help = "URL to trigger off";
-  p_default = "";
+  p_default = "mdvp:://localhost::myDataPath";
 } trigger_url;
 
 paramdef boolean
@@ -34,8 +34,8 @@ paramdef boolean
 
 paramdef double
 {
-  p_descr = "If restrict_vertical_levels = TRUE, this is the range of vlevels";
-  p_help = "If set to -1, -1 it is not used, and there is no restriction";
+  p_descr = "If restrict_vertical_levels = TRUE, this is the range of vertical levels";
+  p_help = "Units are degrees.  If set to -1, -1 it is not used, and there is no restriction";
   p_default = {-1, -1};
 } vertical_level_range[2];
 
@@ -48,21 +48,25 @@ paramdef boolean
 paramdef double
 {
   p_descr = "If restrict_max_range = TRUE, this is the max range index";
-  p_help = "Not used when restrict_max_range = FALSE, or if the value is >=0";
+  p_help = "Units are range index (not distance).  Not used when restrict_max_range = FALSE, or if the value is <0";
   p_default = -1;
 } max_range;
 
 paramdef string
 {
-  p_descr = "names of param files for input URLS, one per URL";
-  p_help = "The param files are read and parsed.  The names should match filter descriptions";
+  p_descr = "Names of param files for input URLS, one per URL";
+  p_help = "These param files are read and parsed.  The names should match filter descriptions.\n"
+    "Each file contains information as to the URL name, type, and data content, as well as named data fields\n"
+    "To produce an example file, enter the command line option -print_url_params";
   p_default = {};
 } input_url[];
 
 paramdef string
 {
-  p_descr = "names of param files for output URLS, one per URL";
-  p_help = "The param files are read and parsed.  The names should match filter descriptions";
+  p_descr = "Names of param files for output URLS, one per URL";
+  p_help = "These param files are read and parsed.  The names should match filter descriptions\n"
+    "Each file contains information as to the URL name, type, and data content, as well as named data fields\n"
+    "To produce an example file, enter the command line option -print_url_params";
   p_default = {};
 } output_url[];
 

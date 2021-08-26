@@ -83,7 +83,7 @@ public:
   // Destructor
   //
 
-  ~RepohParams ();
+  virtual ~RepohParams ();
 
   ////////////////////////////////////////////
   // Assignment
@@ -357,20 +357,11 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  char* *_fixed_const;
-  int fixed_const_n;
-
   char* *_user_data;
   int user_data_n;
 
-  char* *_volume_before_filter;
-  int volume_before_filter_n;
-
   char* *_filter;
   int filter_n;
-
-  char* *_volume_after_filter;
-  int volume_after_filter_n;
 
   int *_pid_weather;
   int pid_weather_n;
@@ -415,7 +406,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[22];
+  mutable TDRPtable _table[19];
 
   const char *_className;
 

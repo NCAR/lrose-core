@@ -4,6 +4,7 @@
 
 //------------------------------------------------------------------
 #include "Parms.hh"
+#include "HeaderParams.hh"
 #include "Colide.hh"
 #include <toolsa/LogStream.hh>
 #include <vector>
@@ -121,8 +122,10 @@ void Parms::printHelp(void)
 //------------------------------------------------------------------
 void Parms::printParams(tdrp_print_mode_t printMode)
 {
-  Params::print(stdout, printMode);
+  HeaderParams h;
+  h.print(stdout, printMode);
   FiltAlgParms::printParams(printMode);
+  Params::print(stdout, printMode);
 }
 
 //------------------------------------------------------------------
@@ -130,32 +133,11 @@ void Parms::setFiltersFromParms(void)
 {
   _fixedConstants.clear();
   _fixedConstantNames.clear();
-  for (int i=0; i<fixed_const_n; ++i)
-  {
-    addFixedConstant(_fixed_const[i]);
-  }
-  
   _userData.clear();
-  for (int i=0; i<user_data_n; ++i)
-  {
-    _userData.push_back(_user_data[i]);
-  }
-  
   _volumeBeforeFilters.clear();
-  for (int i=0; i<volume_before_filter_n; ++i)
-  {
-    _volumeBeforeFilters.push_back(_volume_before_filter[i]);
-  }
-  
   _sweepFilters.clear();
   for (int i=0; i<filter_n; ++i)
   {
     _sweepFilters.push_back(_filter[i]);
-  }
-  
-  _volumeAfterFilters.clear();
-  for (int i=0; i<volume_after_filter_n; ++i)
-  {
-    _volumeAfterFilters.push_back(_volume_after_filter[i]);
   }
 }

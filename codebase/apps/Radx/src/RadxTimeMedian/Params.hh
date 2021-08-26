@@ -85,7 +85,7 @@ public:
   // Destructor
   //
 
-  virtual ~Params ();
+  ~Params ();
 
   ////////////////////////////////////////////
   // Assignment
@@ -167,15 +167,6 @@ public:
   //
 
   static bool isArgValid(const char *arg);
-
-  ////////////////////////////////////////////
-  // isArgValid()
-  // 
-  // Check if a command line arg is a valid TDRP arg.
-  // return number of args consumed.
-  //
-
-  static int isArgValidN(const char *arg);
 
   ////////////////////////////////////////////
   // load()
@@ -359,24 +350,6 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  char* *_fixed_const;
-  int fixed_const_n;
-
-  char* *_user_data;
-  int user_data_n;
-
-  char* *_volume_before_filter;
-  int volume_before_filter_n;
-
-  char* *_sweep_filter;
-  int sweep_filter_n;
-
-  char* *_ray_filter;
-  int ray_filter_n;
-
-  char* *_volume_after_filter;
-  int volume_after_filter_n;
-
   char* input_field;
 
   char* output_field;
@@ -401,7 +374,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[16];
+  mutable TDRPtable _table[10];
 
   const char *_className;
 

@@ -48,7 +48,7 @@
  * @author Automatically generated
  *
  */
-#include <radar/RadxAppParams.hh>
+#include "RadxAppParams.hh"
 #include <cstring>
 
   ////////////////////////////////////////////
@@ -650,7 +650,7 @@
     tt->descr = tdrpStrDup("trigger url");
     tt->help = tdrpStrDup("URL to trigger off");
     tt->val_offset = (char *) &trigger_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("mdvp:://localhost::radarDataPath");
     tt++;
     
     // Parameter 'output_url'
@@ -662,7 +662,7 @@
     tt->descr = tdrpStrDup("output for Algorithm results");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("mdvp:://localhost::outputDataPath");
     tt++;
     
     // Parameter 'Comment 1'
@@ -671,7 +671,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 1");
     tt->comment_hdr = tdrpStrDup("Threading");
-    tt->comment_text = tdrpStrDup("Optional threading of beams, depends on app whether params are used or not");
+    tt->comment_text = tdrpStrDup("Optional threading of beams, depends on app whether these params are used or not");
     tt++;
     
     // Parameter 'num_threads'
@@ -714,13 +714,13 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("input");
     tt->descr = tdrpStrDup("inputs");
-    tt->help = tdrpStrDup("index = numerical value to refer to this elsewhere\npath = where the data is\nThe first thing on this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.  If is_climo=true, a fixed file is used no matter what the request, specified by path/climo_file");
+    tt->help = tdrpStrDup("index = numerical value to refer to this elsewhere\npath = where the data is\nThe first element in this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.  If is_climo=true, a fixed file is used no matter what the request, specified by path/climo_file");
     tt->array_offset = (char *) &_input - &_start_;
     tt->array_n_offset = (char *) &input_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(input_t);
-    tt->array_n = 0;
+    tt->array_n = 1;
     tt->struct_def.name = tdrpStrDup("input_t");
     tt->struct_def.nfields = 9;
     tt->struct_def.fields = (struct_field_t *)
@@ -770,9 +770,18 @@
       tt->struct_def.fields[8].ptype = STRING_TYPE;
       tt->struct_def.fields[8].rel_offset = 
         (char *) &_input->climo_file - (char *) _input;
-    tt->n_struct_vals = 0;
+    tt->n_struct_vals = 9;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].i = 0;
+      tt->struct_vals[1].s = tdrpStrDup("mdvp:://localhost::radarDataPath");
+      tt->struct_vals[2].d = 60;
+      tt->struct_vals[3].d = 60;
+      tt->struct_vals[4].d = 0.2;
+      tt->struct_vals[5].d = 0.2;
+      tt->struct_vals[6].d = 10;
+      tt->struct_vals[7].b = pFALSE;
+      tt->struct_vals[8].s = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 3'
@@ -781,7 +790,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("Mapping from input field to path");
-    tt->comment_text = tdrpStrDup("For each field that is an input to the app, it is associated with an input path using this mapping (index/field name).");
+    tt->comment_text = tdrpStrDup("For each field that is an input to the app, it is associated with an input[] above  using this mapping (index/field name).");
     tt++;
     
     // Parameter 'field_mapping'
@@ -791,13 +800,13 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("field_mapping");
     tt->descr = tdrpStrDup("mapping from field to url");
-    tt->help = tdrpStrDup("for each input field, the index to the path of that data");
+    tt->help = tdrpStrDup("for each input field, the index to the path of that data (in input[] above)");
     tt->array_offset = (char *) &_field_mapping - &_start_;
     tt->array_n_offset = (char *) &field_mapping_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(field_map_t);
-    tt->array_n = 0;
+    tt->array_n = 1;
     tt->struct_def.name = tdrpStrDup("field_map_t");
     tt->struct_def.nfields = 2;
     tt->struct_def.fields = (struct_field_t *)
@@ -812,9 +821,11 @@
       tt->struct_def.fields[1].ptype = INT_TYPE;
       tt->struct_def.fields[1].rel_offset = 
         (char *) &_field_mapping->index - (char *) _field_mapping;
-    tt->n_struct_vals = 0;
+    tt->n_struct_vals = 2;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("MyField");
+      tt->struct_vals[1].i = 0;
     tt++;
     
     // Parameter 'Comment 4'
@@ -949,7 +960,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("output_all_fields");
-    tt->descr = tdrpStrDup("True to output all fields, false to use list");
+    tt->descr = tdrpStrDup("True to output all fields, false to use output_fields[] below");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_all_fields - &_start_;
     tt->single_val.b = pTRUE;
@@ -961,7 +972,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("fields to output");
+    tt->descr = tdrpStrDup("fields to output, when output_all_fields is FALSE");
     tt->help = tdrpStrDup("");
     tt->array_offset = (char *) &_output_fields - &_start_;
     tt->array_n_offset = (char *) &output_fields_n - &_start_;
@@ -1013,7 +1024,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("output_native_byte_order");
     tt->descr = tdrpStrDup("Option to leave data in native byte order.");
-    tt->help = tdrpStrDup("If false, data will be byte-swapped as appropriate on output.");
+    tt->help = tdrpStrDup("If FALSE, data will be byte-swapped as appropriate on output.");
     tt->val_offset = (char *) &output_native_byte_order - &_start_;
     tt->single_val.b = pFALSE;
     tt++;

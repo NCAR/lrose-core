@@ -9,9 +9,6 @@
 #include <rapmath/ProcessingNode.hh>
 #include <toolsa/LogStream.hh>
 
-const std::string RayData1::_histoAccumStr = "AccumulateHisto";
-
-
 //------------------------------------------------------------------
 RayData1::RayData1(void) : RadxAppRayData()
 {
@@ -32,15 +29,15 @@ RayData1::~RayData1(void)
 //------------------------------------------------------------------
 void RayData1::radxappAppendUnaryOperators(std::vector<FunctionDef> &ret) const
 {
-  ret.push_back(FunctionDef(_histoAccumStr, "v", "field",
-			    "update histogram state for this field"));
+   ret.push_back(FunctionDef(Parms::_histoAccumStr, "v", "field",
+   			    "Update histogram internal state for this field on the ray"));
 }
 
 //------------------------------------------------------------------
 bool RayData1::radxappUserLoopFunction(const std::string &keyword,
 				       ProcessingNode &p)
 {
-  if (keyword == _histoAccumStr)
+  if (keyword == Parms::_histoAccumStr)
   {
     return _processAccumHisto(*(p.unaryOpArgs()));
   }
@@ -69,7 +66,7 @@ bool RayData1::_processAccumHisto(std::vector<ProcessingNode *> &args) const
   }
   else
   {
-    LOG(ERROR) << "No init for this ray";
+    // LOG(ERROR) << "No init for this ray";
     return false;
   }
 }

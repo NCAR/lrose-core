@@ -121,33 +121,28 @@ std::vector<FunctionDef> VirtVolSweep::virtVolUserUnaryOperators(void)
 {
   std::vector<FunctionDef> ret;
   ret.push_back(FunctionDef(_percentLessThanStr, "P", "data, template, min",
-			    "at each point output the percent of data < min within the circular template"));
+			    "At each point output the percent of data < min within the circular template"));
   ret.push_back(FunctionDef(_largePositiveNegativeStr, "P", "data, template, minvalue",
-			    "at each point output = (np-nn)/(np+nn) where np = number of points > minvalue\n"
-			    "and nn = number of points < -minvalue, within the circular template"));
+			    "At each point output = (np-nn)/(np+nn) where np = number of points > minvalue and nn = number of points < -minvalue, within the circular template"));
   ret.push_back(FunctionDef(_smoothPolarStr, "M", "data,template",
-			    "at each point output = average of data values within circular template"));
-  ret.push_back(FunctionDef(_smoothWithThreshPolarStr, "M", "data,template,thresh,uninteresting",
-			    "at each point output = average of data values within circular template. If no data within the circle at a point exceeds thresh, the output is set to uninteresting"));
+			    "At each point output = average of data values within the circular template"));
+  ret.push_back(FunctionDef(_smoothWithThreshPolarStr, "M", "data,template,minthresh,uninteresting",
+			    "At each point output = average of data values within circular template. If all data within the circle at a point is < minthresh, the output is set to uninteresting"));
   ret.push_back(FunctionDef(_dilatePolarStr, "M", "data,template",
-			    "at each point output = max of data values within circular template"));
+			    "At each point output = max of data values within circular template"));
   ret.push_back(FunctionDef(_medianPolarStr, "M", "data,template, binmin, binmax, bindelta",
-			    "at each point output = median of data values within circular template"));
+			    "At each point output = median of data values within circular template, where median is computed using histogram bins as specified"));
   ret.push_back(FunctionDef(_percentOfAbsMaxStr, "M", "data, floorMax",
-			    "let max = maximum absvalue of all data, or floorMax if max < floorMax.\n"
-			    "  output = data/max, ranging from -1 to 1"));
+			    "let max = the maximum absolute value of all data, or floorMax if this maximum < floorMax.  At each point output = data/max, ranging from -1 to 1"));
   ret.push_back(FunctionDef(_azimuthalPolarShearStr, "M", "data, widthKm, clockwise",
-			    " output at point = difference in value at the points widthKm azimuthally away from the point\n"
-			    " If clockwise=1 take diff in clockwise direction, otherwise counterclockwise"));
+			    " At each point output = difference in value at the points widthKm azimuthally away from the point.  If clockwise=1 take diff in clockwise direction, otherwise counterclockwise"));
   ret.push_back(FunctionDef(_clumpFiltStr, "M", "shapes, minv, minpctaboveminv",
-			    "Build clumps then within each clump count percent above minv,\n"
-			    "removing clumps where that pecent is less than minpctaboveminv.\n"
-			    "For kept clumps data is a passthrough value"));
+			    "Build disjoint clumps then within each clump count the percent of data above minv,removing clumps where that pecent is less than minpctaboveminv.\n"
+			    "For the kept clumps output data is a passthrough value"));
   ret.push_back(FunctionDef(_virtVolFuzzyStr, "M", "data, fuzzyParms",
-			    "Apply the fuzzy function specified by fuzzyParms to the data"));
+			    "At each point, output is the result of Applying the fuzzy function specified by fuzzyParms to the data at that point"));
   ret.push_back(FunctionDef(_expandInMaskStr, "M", "data, mask",
-			    "At all points where data is missing and mask data is not missing,\n"
-			    "set local value to the nearest local non-missing value."));
+			    "At each point if data is not missing output is set to input.  If data is missing and mask is not missing, output is set to the nearest local non-missing value."));
   return ret;
 }
 
@@ -1070,22 +1065,21 @@ bool VirtVolSweep::_processSmoothWithThreshPolar(std::vector<ProcessingNode *> &
   double thresh, uninteresting;
 
   if (!args[2]->getValue(thresh))
-    {
-      LOG(ERROR) << "No value in arg position 2";
-      return false;
-    }
-  return true;
+  {
+    LOG(ERROR) << "No value in arg position 2";
+    return false;
+  }
   
   if (!args[3]->getValue(uninteresting))
-    {
-      LOG(ERROR) << "No value in arg position 3";
-      return false;
-    }
+  {
+    LOG(ERROR) << "No value in arg position 3";
+    return false;
+  }
 
   const PolarCircularTemplate *pt = (const PolarCircularTemplate *)udata;
   const GriddedData *input = (const GriddedData *)data;
   Grid2d g(*input);
-  g.changeMissingAndData(-99);
+  //g.changeMissingAndData(-99);
   PolarCircularFilter::smoothWithThresh(g, *pt, thresh, uninteresting);
   _outputSweep->dataCopy(g);
   return true;
@@ -1254,7 +1248,7 @@ bool VirtVolSweep::_processPercentOfAbsMax(std::vector<ProcessingNode *> &args)
   
   const GriddedData *input = (const GriddedData *)data;
   // loop through data to get max abs value, which we might use as nyquist
-  double max = -1.0e99;
+  double max;
   bool first;
   
   for (int i=0; i<input->getNdata(); ++i)

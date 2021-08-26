@@ -10,13 +10,9 @@
 #include <FiltAlgVirtVol/VertData2d.hh>
 #include <FiltAlgVirtVol/VirtVolFuzzy.hh>
 #include <FiltAlgVirtVol/ShapePolygons.hh>
+#include <FiltAlgVirtVol/VolumeTime.hh>
 #include <rapmath/UnaryNode.hh>
 #include <rapmath/FunctionDef.hh>
-// #include <Mdv/DsMdvx.hh>
-// #include <Mdv/Mdvx.hh>
-// #include <Mdv/MdvxField.hh>
-// #include <Mdv/MdvxChunk.hh>
-// #include <Mdv/Mdv2NcfTrans.hh>
 #include <dsdata/DsUrlTrigger.hh>
 
 #include <dsdata/DsTimeListTrigger.hh>
@@ -36,6 +32,7 @@ const std::string VirtVolVolume::_verticalConsistencyStr = "VerticalConsistency"
 const std::string VirtVolVolume::_verticalClumpFiltStr = "VerticalDataClumpFilt";
 const std::string VirtVolVolume::_shapeFiltStr = "ComputeShapes";
 const std::string VirtVolVolume::_shapeFixedFiltStr = "ComputeFixedSizeShapes";
+const std::string VirtVolVolume::_volumeTimeStr = "VolumeTime";
 
 					      
 //------------------------------------------------------------------
@@ -121,16 +118,15 @@ std::vector<FunctionDef> VirtVolVolume::virtVolUserUnaryOperators(void)
   ret.push_back(FunctionDef(_parmsCircularTemplateStr, "M", "r, minr",
 			    "This should be a volume_before filter, r=radius Km of the template, minr = min radius Km to create a template"));
   ret.push_back(FunctionDef(_verticalConsistencyStr, "M", "data, isNyquist, template",
-			    "This should be a volume_after filter, template is a circular template.  Data is maximized using this template at each point, then this filter looks at values at each heights and counts heights with data vs. without to get percent with data, then multiplies by average to get final output\n"
-			    "Currently nyquist inpt is not used"));
+			    "This should be a volume_after filter, template is a circular template.  Data is maximized using this template at each point, then this filter looks at values at each heights and counts heights with data vs. without to get percent with data, then multiplies by average to get final output.  Currently nyquist input is not used"));
   ret.push_back(FunctionDef(_verticalClumpFiltStr, "M", "data, threshold, minpct",
 			    "Take 2d vertical consistency, clump, and keep only clumps with minpct of the points >= threshold"));
   ret.push_back(FunctionDef(_shapeFiltStr, "M", "data, mode",
-			    "Take 2d data, clump, and generate polygons around each clump, which are returned as special data\n"
-			    "mode=0 means diamonds the size of the region, model=1 means shapes that hug the clumps"));
+			    "Take 2d data, clump, and generate polygons around each clump, which are returned as special data. mode=0 means diamonds the size of the region, model=1 means shapes that hug the clumps"));
   ret.push_back(FunctionDef(_shapeFixedFiltStr, "M", "data, sizeKm",
-			    "Take 2d data, clump, and generate polygons around each clump, which are returned as special data\n"
-			    "The shapes are fixed size diamonds of sizeKm on  side"));
+			    "Take 2d data, clump, and generate polygons around each clump, which are returned as special data.  The shapes are fixed size diamonds of sizeKm on  side"));
+  ret.push_back(FunctionDef(_volumeTimeStr, "T", "",
+			    "volume_before filter, returns volume time as a user data type"));
   return ret;
 }
 
@@ -350,6 +346,12 @@ MathUserData *VirtVolVolume::processVirtVolUserVolumeFunction(const UnaryNode &p
     }
     return _computeFixedShapes(args[0], args[1]);
   }
+  else if (keyword == _volumeTimeStr)
+  {
+    // so simple put it here
+    VolumeTime *vt = new VolumeTime(_time);
+    return (MathUserData *)vt;
+  }
   else
   {
     return NULL;
@@ -463,6 +465,10 @@ synchUserDefinedInputs(const std::string &userKey,
     return true;
   }
   else if (userKey == _shapeFixedFiltStr)
+  {
+    return true;
+  }
+  else if (userKey == _volumeTimeStr)
   {
     return true;
   }

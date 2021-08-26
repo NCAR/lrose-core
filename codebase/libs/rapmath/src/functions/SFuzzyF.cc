@@ -89,7 +89,7 @@ double SFuzzyF::apply(double x) const
   }
   else if (x >= _b)
   {
-    return 0.0;
+    return 1.0;
   }
   else
   {

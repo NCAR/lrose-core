@@ -61,12 +61,6 @@ void Volume::addNew(int zIndex, const MathData *s)
 //------------------------------------------------------------------
 void Volume::repohOutput(const time_t &t)
 {
-  // // for each output url
-  // for (size_t i=0; i<_parms._outputs.size(); ++i)
-  // {
-  //   _mdvInfo.outputToUrl(t, _parms._outputs[i], _data);
-  // }
-
   VirtVolVolume::output(t);
   _kernelOutputs.output(t, proj());
 }

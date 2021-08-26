@@ -1,0 +1,17 @@
+/**********************************************************
+ * paramdef.RadxTimeMedian
+ *
+ * This file contains the TDRP parameter definitions for setting the median through time
+ * of input dataset. 
+ * 
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+commentdef
+{
+  p_header = "RadxTimeMedian";
+  p_text = "Parameters for setting time median of one input field.\n"
+    "Note that this works only in ARCHIVE or FILELIST modes, with one input field, and gives its output only after the"
+    " last input is processed.";
+};
+

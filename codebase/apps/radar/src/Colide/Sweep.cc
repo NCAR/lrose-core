@@ -60,57 +60,33 @@ std::vector<FunctionDef> Sweep::userUnaryOperators(void) const
   std::vector<FunctionDef> ret;
 
   ret.push_back(FunctionDef(_lineDirStr, "d", "field,nx,ny,nthread",
-			    "Thin line best rotation degrees\n"
-			    "  nx = box length, ny=box width, "
-			    "nthread = number of threads"));
+			    "Thin line best rotation degrees. nx = box length, ny=box width, nthread = number of threads"));
   ret.push_back(FunctionDef(_lineDetStr, "d", "field,dir,nx,ny,nthread",
-			    "Thin line detection interest\n"
-			    "dir=bestdirection, nx=box length, ny=box width, "
-			    "nthread = number of threads"));
+			    "Thin line detection interest.  dir=bestdirection, nx=box length, ny=box width, nthread = number of threads"));
     
   ret.push_back(FunctionDef(_shearDirStr, "d", "field,nx,ny,nthread",
-			    "Radial shear best rotation degrees\n"
-			    "  nx = box length, ny=box width, "
-			    "nthread = number of threads"));
+			    "Radial shear best rotation degrees.  nx = box length, ny=box width, nthread = number of threads"));
   ret.push_back(FunctionDef(_shearDetStr, "d",
 			    "field,shear_dir,line_dir,nx,ny,nthread",
-			    "Radial shear detction interest\n"
-			    "shear_dir=best direction shear,"
-			    "line_dir=bestdirection line"
-			    "  nx = box length, ny=box width, "
-			    "nthread = number of threads"));
+			    "Radial shear detction interest.  shear_dir=best direction shear, line_dir=bestdirection line, nx = box length, ny=box width, nthread = number of threads"));
     
   ret.push_back(FunctionDef(_ellipOrientStr, "o", "field, nx, ny, nthread",
-			    "Elliptical best rotation degrees\n"
-			    "nx=length, ny=width, nthread "
-			    "= number of threads"));
+			    "Elliptical best rotation degrees.  nx=length, ny=width, nthread = number of threads"));
 
   ret.push_back(FunctionDef(_ellipStr, "e", "field, orient, nx, ny, nthread",
-			    "Elliptical interest\n"
-			    "orient=best ellip orientation,"
-			    "nx=length, ny=width, nthread "
-			    "= number of threads"));
+			    "Elliptical interest. orient=best ellip orientation, nx=length, ny=width, nthread=number of threads"));
 
   ret.push_back(FunctionDef(_ellipConfStr, "c", "field,dir,nx, ny, nthread",
-			    "Elliptical confidence\n"
-			    "dir=best ellip orientation,"
-			    "nx=length, ny=width, nthread "
-			    "= number of threads"));
+			    "Elliptical confidence. dir=best ellip orientation, nx=length, ny=width, nthread=number of threads"));
   ret.push_back(FunctionDef(_enhanceDirStr, "d", 
 			    "field,len,wid,nangles,nthread",
-			    "Enhance rotation degrees\n"
-			    "  len=length,width=width, nangles=#ofangles,"
-			    " nthread=number of threads"));
+			    "Enhance rotation degrees. len=length,width=width, nangles=#ofangles, nthread=number of threads"));
   ret.push_back(FunctionDef(_enhanceStr, "e","field,len,wid,nangles,nthread",
-			    "Enhance interest\n"
-			    "len=length,width=width, nangles=#ofangles,"
-			    " nthread=number of threads"));
+			    "Enhance interest. len=length,width=width, nangles=#ofangles, nthread=number of threads"));
   ret.push_back(FunctionDef(_regionStr, "r",  
 			    "hot,reg,full,min_mean,min_max,min_min,min_area,min_hot_area",
-			    "  hot = interest is high, reg=clumps, full=largerclumps\n"
-			    "  min_min=Minimum mean length, min_max=minimum max length"
-			    "  min_min=minimum min length, min_area=minimum clump area (pixsq)\n"
-			    "  min_hot_area=minimum 'hotspot' area (pixsq)"));
+			    "hot = interest is high, reg=clumps, full=largerclumps, min_min=Minimum mean length, min_max=minimum max length, min_min=minimum min length, min_area=minimum clump area (pixsq) "
+			    " min_hot_area=minimum 'hotspot' area (pixsq)"));
 
   ret.push_back(FunctionDef(_regCombStr, "r",
 			    "reg, dir, extension, angleDiff, minHit",
@@ -119,8 +95,7 @@ std::vector<FunctionDef> Sweep::userUnaryOperators(void) const
 			    "field, dt0, w0, dt1, w1, ....", ""));
 
   ret.push_back(FunctionDef(_maxAgeMinutesStr, "s", "field",
-			    "minutes back with maximum data value of "
-			    "input field"));
+			    "minutes back with maximum data value of input field"));
   return ret;
 }
 

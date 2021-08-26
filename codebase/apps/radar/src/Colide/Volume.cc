@@ -96,14 +96,6 @@ Volume::virtVolSynchUserInputs(const std::string &userKey,
 //------------------------------------------------------------------
 MathUserData *Volume::processUserVolumeFunction(const UnaryNode &p)
 {
-    // pull out the keyword
-  // string keyword;
-  // if (!p.getUserUnaryKeyword(keyword))
-  // {
-  //   return NULL;
-  // }
-  // vector<string> args = p.getUnaryNodeArgStrings();
-
   return processVirtVolUserVolumeFunction(p);
 }
 

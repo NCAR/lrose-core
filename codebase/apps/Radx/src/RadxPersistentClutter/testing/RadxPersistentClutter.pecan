@@ -1,5 +1,8 @@
+19:34:03 DEBUG   Parms.cc[149]:setFiltersFromParms()::Volume before:    statusInit = VolInit()
+19:34:03 DEBUG   Parms.cc[150]:setFiltersFromParms()::Ray filter   :    HistoData = AccumulateHisto(DBMVC)
+19:34:03 DEBUG   Parms.cc[151]:setFiltersFromParms()::Volume after:     statusFinish = VolFinish()
 /**********************************************************************
- * TDRP params for Params
+ * TDRP params for HeaderParams
  **********************************************************************/
 
 //======================================================================
@@ -14,285 +17,6 @@
 //
 //======================================================================
  
-///////////// fixed_const /////////////////////////////
-//
-// Fixed constant strings that are interpreted by user functions.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-fixed_const = {
-};
-
-///////////// user_data ///////////////////////////////
-//
-// Non gridded data names.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-user_data = {
-};
-
-///////////// volume_before_filter ////////////////////
-//
-// Volume Filters to apply before doing ray filters.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-volume_before_filter = {
-};
-
-///////////// sweep_filter ////////////////////////////
-//
-// Sweep filters to apply.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-sweep_filter = {
-};
-
-///////////// ray_filter //////////////////////////////
-//
-// Single ray Filters to apply.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-ray_filter = {
-};
-
-///////////// volume_after_filter /////////////////////
-//
-// Volume Filters to apply after doing ray filters.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-volume_after_filter = {
-};
-
-///////////// input_field /////////////////////////////
-//
-// input field name.
-//
-// name of field to find clutter in.
-//
-//
-// Type: string
-//
-
-input_field = "DBMVC";
-
-///////////// output_field ////////////////////////////
-//
-// output field name.
-//
-// name to give final output clutter field.
-//
-//
-// Type: string
-//
-
-output_field = "DBMVC";
-
-///////////// threshold ///////////////////////////////
-//
-// threshold.
-//
-// If data is always above this value it is a clutter location.
-//
-//
-// Type: double
-//
-
-threshold = -95;
-
-///////////// clutter_percentile //////////////////////
-//
-// Clutter percentile.
-//
-// percentile to use in clutter value determination (see the paper, 
-//   section III. Correction of Radar Reflectivity.
-//
-//
-// Type: double
-//
-
-clutter_percentile = 0.5;
-
-///////////// fixedElevations /////////////////////////
-//
-// Fixed storage elevation values.
-//
-// List of target elevation angles (the angles seem to wobble a lot). 
-//   Inputs are mapped to one of these using tolerance params.
-//
-//
-// Type: double
-// 1D array - variable length.
-//
-
-fixedElevations = {
- 0.5
-};
-
-///////////// azToleranceDegrees //////////////////////
-//
-// azimumth tolerance.
-//
-// allowed degrees difference between azimuth values from different 
-//   volumes to be considered part of the same ray.
-//
-//
-// Type: double
-//
-
-azToleranceDegrees = 0.1;
-
-///////////// elevToleranceDegrees ////////////////////
-//
-// elevation tolerance.
-//
-// allowed degrees difference between elevation values from different 
-//   volumes to be considered part of the same ray.
-//
-//
-// Type: double
-//
-
-elevToleranceDegrees = 0.1;
-
-///////////// diagnostic_output ///////////////////////
-//
-// diagnostic_output.
-//
-// If true, output from each volume is done, to show the build up of 
-//   skill through time, to the output location. Typically this is a 
-//   diagnostic mode.  If false, output is only at the end of a processing 
-//   phase, with output time equal to the time of the first volume 
-//   processed, and output written to the final_output_url.
-//
-//
-// Type: boolean
-//
-
-diagnostic_output = TRUE;
-
-///////////// final_output_url ////////////////////////
-//
-// location for main output.
-//
-// see diagnostic_output description.
-//
-//
-// Type: string
-//
-
-final_output_url = "$(HOME)/data/pecan/cfradial/spol/clutter/sur";
-
-///////////// output_ascii_path ///////////////////////
-//
-// Output ascii file path in which to write plottables.
-//
-//
-// Type: string
-//
-
-output_ascii_path = "$(HOME)/data/pecan/cal/clutter";
-
-///////////// missing_clutter_value ///////////////////
-//
-// missing clutter value.
-//
-// value to give clutter estimates when the wanted percentile is the 
-//   missing data value.
-//
-//
-// Type: double
-//
-
-missing_clutter_value = -115;
-
-///////////// threshold_tolerance /////////////////////
-//
-// variation in threshold for convergence.
-//
-// The threshold as percent of total volumes to identify a point as 
-//   clutter should converge to a stable value.  This value is the allowed 
-//   tolerance (change) to be considered stable.
-//
-//
-// Type: double
-//
-
-threshold_tolerance = 0.025;
-
-///////////// maximum_percent_change //////////////////
-//
-// Maximum percent of pixels that can change for convergence.
-//
-// The percentage of pixels that change from clutter to nonclutter or 
-//   back should decrease to a minimum for convergence.
-//
-//
-// Type: double
-//
-
-maximum_percent_change = 0.005;
-
-///////////// minimum_stable_volumes //////////////////
-//
-// Number of volumes that show stablity prior to considering the 
-//   situation stable.
-//
-// The threshold converges, and needs to stay converged for this many 
-//   volumes before giving the thumbs up.
-//
-//
-// Type: double
-//
-
-minimum_stable_volumes = 10;
-
-///////////// histogram_resolution ////////////////////
-//
-// histogram resolution.
-//
-// Histograms are used to set clutter value. This is the resolution.
-//
-//
-// Type: double
-//
-
-histogram_resolution = 0.2;
-
-///////////// histogram_max ///////////////////////////
-//
-// histogram max.
-//
-// Histograms are used to set clutter value. This is the maximum bin.
-//
-//
-// Type: double
-//
-
-histogram_max = 50;
-
 /**********************************************************************
  * TDRP params for RadxAppParams
  **********************************************************************/
@@ -784,4 +508,223 @@ append_year_dir_to_output_dir = FALSE;
 //
 
 write_latest_data_info = FALSE;
+
+/**********************************************************************
+ * TDRP params for Params
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxPersistentClutter Algorithm Specific paramters.
+//
+// tbd.
+//
+//======================================================================
+ 
+///////////// input_field /////////////////////////////
+//
+// input field name.
+//
+// name of field to find clutter in.
+//
+//
+// Type: string
+//
+
+input_field = "DBMVC";
+
+///////////// output_field ////////////////////////////
+//
+// output field name.
+//
+// name to give final output clutter field.
+//
+//
+// Type: string
+//
+
+output_field = "DBMVC";
+
+///////////// threshold ///////////////////////////////
+//
+// threshold.
+//
+// If data is always above this value it is a clutter location.
+//
+//
+// Type: double
+//
+
+threshold = -95;
+
+///////////// clutter_percentile //////////////////////
+//
+// Clutter percentile.
+//
+// percentile to use in clutter value determination (see the paper, 
+//   section III. Correction of Radar Reflectivity.
+//
+//
+// Type: double
+//
+
+clutter_percentile = 0.5;
+
+///////////// fixedElevations /////////////////////////
+//
+// Fixed storage elevation values.
+//
+// List of target elevation angles (the angles seem to wobble a lot). 
+//   Inputs are mapped to one of these using tolerance params.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+fixedElevations = {
+ 0.5
+};
+
+///////////// azToleranceDegrees //////////////////////
+//
+// azimumth tolerance.
+//
+// allowed degrees difference between azimuth values from different 
+//   volumes to be considered part of the same ray.
+//
+//
+// Type: double
+//
+
+azToleranceDegrees = 0.1;
+
+///////////// elevToleranceDegrees ////////////////////
+//
+// elevation tolerance.
+//
+// allowed degrees difference between elevation values from different 
+//   volumes to be considered part of the same ray.
+//
+//
+// Type: double
+//
+
+elevToleranceDegrees = 0.1;
+
+///////////// diagnostic_output ///////////////////////
+//
+// diagnostic_output.
+//
+// If true, output from each volume is done, to show the build up of 
+//   skill through time, to the output location. Typically this is a 
+//   diagnostic mode.  If false, output is only at the end of a processing 
+//   phase, with output time equal to the time of the first volume 
+//   processed, and output written to the final_output_url.
+//
+//
+// Type: boolean
+//
+
+diagnostic_output = TRUE;
+
+///////////// final_output_url ////////////////////////
+//
+// location for main output.
+//
+// see diagnostic_output description.
+//
+//
+// Type: string
+//
+
+final_output_url = "$(HOME)/data/pecan/cfradial/spol/clutter/sur";
+
+///////////// output_ascii_path ///////////////////////
+//
+// Output ascii file path in which to write plottables.
+//
+//
+// Type: string
+//
+
+output_ascii_path = "$(HOME)/data/pecan/cal/clutter";
+
+///////////// missing_clutter_value ///////////////////
+//
+// missing clutter value.
+//
+// value to give clutter estimates when the wanted percentile is the 
+//   missing data value.
+//
+//
+// Type: double
+//
+
+missing_clutter_value = -115;
+
+///////////// threshold_tolerance /////////////////////
+//
+// variation in threshold for convergence.
+//
+// The threshold as percent of total volumes to identify a point as 
+//   clutter should converge to a stable value.  This value is the allowed 
+//   tolerance (change) to be considered stable.
+//
+//
+// Type: double
+//
+
+threshold_tolerance = 0.025;
+
+///////////// maximum_percent_change //////////////////
+//
+// Maximum percent of pixels that can change for convergence.
+//
+// The percentage of pixels that change from clutter to nonclutter or 
+//   back should decrease to a minimum for convergence.
+//
+//
+// Type: double
+//
+
+maximum_percent_change = 0.005;
+
+///////////// minimum_stable_volumes //////////////////
+//
+// Number of volumes that show stablity prior to considering the 
+//   situation stable.
+//
+// The threshold converges, and needs to stay converged for this many 
+//   volumes before giving the thumbs up.
+//
+//
+// Type: double
+//
+
+minimum_stable_volumes = 10;
+
+///////////// histogram_resolution ////////////////////
+//
+// histogram resolution.
+//
+// Histograms are used to set clutter value. This is the resolution.
+//
+//
+// Type: double
+//
+
+histogram_resolution = 0.2;
+
+///////////// histogram_max ///////////////////////////
+//
+// histogram max.
+//
+// Histograms are used to set clutter value. This is the maximum bin.
+//
+//
+// Type: double
+//
+
+histogram_max = 50;
 

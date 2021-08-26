@@ -40,7 +40,7 @@ std::vector<FunctionDef> RadxAppSweepData::userUnaryOperators(void) const
   std::vector<FunctionDef> ret;
   ret.push_back(FunctionDef(_variance2dStr, "v", "field", 
 			    "2d Variance of input field, "
-			    "  uses variance_radius_km parameter"));
+			    "  uses variance_radius_km parameter which must be defined as a constant"));
   radxappAppendUnaryOperators(ret);
   return ret;
 }

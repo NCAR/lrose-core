@@ -97,9 +97,6 @@ public:
 protected:
 private:
 
-  static const std::string _volInitStr;   /**< User unary */
-  static const std::string _volFinishStr; /**< User unary */
-
   SpecialUserData _special;      /**< Special (non Radx) data */
   RadxTimeMedian *_p;            /**< Algorithm pointer */
 
