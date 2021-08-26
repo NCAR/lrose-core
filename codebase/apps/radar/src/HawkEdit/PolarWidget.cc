@@ -1516,8 +1516,9 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
     for (size_t ii = 0; ii < labels.size(); ii++) {
       const ColorMap::CmapLabel &label = labels[ii];
       double yy = scaleYBot - scaleHeight * label.position;
-      double yPos = 100 - (ii+1)*patchHt;
-      painter.drawText(xStart, (int) yPos, // yy - textHt / 2, 
+      double yPos = 100 - bottomMargin - ii*patchHt - (textHt+4)/2;
+      painter.drawText(xStartPlusABit, 
+                       (int) yPos, // yy - textHt / 2, 
                        width + 4, textHt + 4, 
                        Qt::AlignLeft | Qt::AlignVCenter, // Qt::AlignCenter | Qt::AlignHCenter, 
                        label.text.c_str());
