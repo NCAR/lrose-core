@@ -1028,12 +1028,14 @@ int ComputeEngine::_pidInit()
   if (_params.debug >= Params::DEBUG_EXTRA) {
     _pid.setVerbose(true);
   }
-  if (_pid.readThresholdsFromFile(_params.pid_thresholds_file_path)) {
-    cerr << "ERROR - RadxPartRain::ComputeEngine::_run" << endl;
-    cerr << "  Cannot read in pid thresholds from file: "
-         << _params.pid_thresholds_file_path << endl;
-    cerr << "  PID will not be computed" << endl;
-    return -1;
+  if (_params.compute_pid) {
+    if (_pid.readThresholdsFromFile(_params.pid_thresholds_file_path)) {
+      cerr << "ERROR - RadxPartRain::ComputeEngine::_run" << endl;
+      cerr << "  Cannot read in pid thresholds from file: "
+           << _params.pid_thresholds_file_path << endl;
+      cerr << "  PID will not be computed" << endl;
+      return -1;
+    }
   }
   
   return 0;

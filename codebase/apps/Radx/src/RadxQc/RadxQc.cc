@@ -1480,7 +1480,9 @@ RadxQc::ComputeThread::ComputeThread(RadxQc *obj,
   
   _engine = new ComputeEngine(params, threadNum);
   if (!_engine->OK) {
-    delete _engine;
+    if (_engine != NULL) {
+      delete _engine;
+    }
     OK = FALSE;
   }
 
