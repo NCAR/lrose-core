@@ -2750,6 +2750,10 @@ int NexradRadxFile::_writeMetaDataHdrs(const RadxVol &vol)
   // ADAPTATION DATA HEADER
   if(_adap.beamwidth == 0)
   {
+    const string site_name = vol.getSiteName();
+    for (int i=0; i<site_name.size(); i++) {
+      _adap.site_name[i] = site_name[i];
+    }
     _adap.antenna_gain = vol.getRadarAntennaGainDbH();
     _adap.beamwidth = vol.getRadarBeamWidthDegH();
     const vector<double> &freqHz = vol.getFrequencyHz();
