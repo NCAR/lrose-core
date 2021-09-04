@@ -685,17 +685,6 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 
   _pointClicked = false;
 
-  if (e->button() == Qt::RightButton) {
-
-      QPointF clickPos(e->pos());
-
-      _mousePressX = e->x();
-      _mousePressY = e->y();
-
-      //emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
-
-  } else {
-
   QRect rgeom = _rubberBand->geometry();
 
   // If the mouse hasn't moved much, assume we are clicking rather than
@@ -715,6 +704,28 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
 
+
+    QTransform flipTransform = _zoomTransform;
+    //flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
+    qreal mx = _mouseReleaseX;
+    qreal my = _mouseReleaseY;
+    qreal wx;
+    qreal wy;
+    flipTransform.map(mx, my, &wx, &wy);
+
+    _worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
+
+    LOG(DEBUG) << "_mouseReleaseX,Y= " << _mouseReleaseX << ", " << _mouseReleaseY;
+    LOG(DEBUG) << "_worldReleaseX,Y= " << _worldReleaseX << ", " << _worldReleaseY; 
+    LOG(DEBUG) << "         flipX,Y= " << wx << ", " << wy;    
+
+    // ---
+    // --- insert here ---
+    bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+    _manager->evaluateMouseRelease(_worldReleaseX, _worldReleaseY, isShiftKeyDown);
+    //_manager->evaluateMouseRelease(wx, wy, isShiftKeyDown);    
+
+    // ----
     double x_km = _worldReleaseX;
     double y_km = _worldReleaseY;
     _pointClicked = true;
@@ -758,7 +769,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 
   _rubberBand->hide();
   update();
-  }
+  
 }
 
 //void PolarWidget::imageReady(QImage *image) {
@@ -845,6 +856,10 @@ void PolarWidget::paintEvent(QPaintEvent *event)
             //p.drawText(-50, -50, "-50, -50");
             
             _drawOverlays(p);
+            //_drawBoundary(p);
+            _manager->drawBoundary(_zoomWorld, p);  
+            //if there are no points, this does nothing
+            // todo overlay boundary image
         }
 
         //painter.setTransform(_zoomTransform);
@@ -1274,7 +1289,8 @@ void PolarWidget::drawRings(QPainter &painter)
     bool combine = true;
     painter.setWorldTransform(flipTransform, combine);
     QFont font = painter.font();
-    font.setPointSizeF(_params->range_ring_label_font_size);
+    font.setPointSizeF(_params->range_ring_label_font_size / 
+      _zoomWorld.getXPixelsPerWorld());
     painter.setFont(font);
 
     

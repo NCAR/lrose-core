@@ -326,7 +326,7 @@ bool BoundaryPointEditor::evaluateCursor(bool isShiftKeyDown) {
 void BoundaryPointEditor::evaluateMouseRelease(int worldReleaseX, int worldReleaseY,
 	bool isShiftKeyDown)
 {
-
+  LOG(DEBUG) << "enter x,y = " << worldReleaseX << "," << worldReleaseY;
 	_boundaryPointEditorModel->evaluateMouseRelease(worldReleaseX, worldReleaseY,
 		isShiftKeyDown);
 
@@ -678,11 +678,14 @@ int BoundaryPointEditor::getFurthestPtIndex(int x, int y)
 
 	return(indexAtMaxDist);
 }
-
+*/
+/*
 // makes a circle of points at (x,y) with radius
 // (relevant with the Circle Tool)
 void BoundaryPointEditor::makeCircle(int x, int y, float radius)
 {
+	_boundaryPointEditorModel->makeCircle(x, y, radius);
+	
 	points.clear();
 	circleOrigin.x = x;
 	circleOrigin.y = y;
@@ -696,6 +699,7 @@ void BoundaryPointEditor::makeCircle(int x, int y, float radius)
 	}
 
 	points.push_back(points[0]);
+	
 }
 
 // User has Shift key down and has clicked mouse, so either insert or delete a point
@@ -712,17 +716,20 @@ void BoundaryPointEditor::checkToAddOrDelPoint(float x, float y)
 				insertPoint(x, y);
 	}
 }
+*/
 
 int BoundaryPointEditor::getCircleRadius()
 {
+	int circleRadius = _boundaryPointEditorModel->getCircleRadius();
 	return(circleRadius);
 }
 
 int BoundaryPointEditor::getBrushRadius()
 {
+	int brushRadius = _boundaryPointEditorModel->getBrushRadius();
 	return(brushRadius);
 }
-*/
+
 
 bool BoundaryPointEditor::evaluatePoint(int worldX, int worldY)
 {

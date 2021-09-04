@@ -3952,7 +3952,11 @@ void PolarManager::evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY,
   if (boundaryPointEditorControl != NULL) {
     boundaryPointEditorControl->evaluateMouseRelease(mouseReleaseX, mouseReleaseY,
       isShiftKeyDown);
-/*
+/*  moved to BPE
+    BoundaryPointEditor *editor = boundaryPointEditorControl;
+    int _worldReleaseX = mouseReleaseX;
+    int _worldReleaseY = mouseReleaseY;
+
       if (editor->getCurrentTool() == BoundaryToolType::polygon) {
         if (!editor->isAClosedPolygon()) {
           editor->addPoint(_worldReleaseX, _worldReleaseY);
@@ -3970,7 +3974,7 @@ void PolarManager::evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY,
                              editor->getCircleRadius());
         }
       }  
-      */  
+     */  
   }
 } 
 

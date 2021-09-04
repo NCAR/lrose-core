@@ -104,7 +104,7 @@ class BoundaryPointEditorModel
 	const float TwoPI = 6.283185;
 	float worldScale;
 	float CLOSE_DISTANCE = 10;
-	float pointBoxScale = 1;
+	float pointBoxScale = 3;
 	Point circleOrigin;
 	int circleRadius = 50;
 	int brushRadius = 20;

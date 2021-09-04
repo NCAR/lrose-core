@@ -269,7 +269,7 @@ bool BoundaryPointEditorModel::updateScale(double xRange)
 {
 	float newPointBoxScale = xRange / 450;  //450 is the default range/size if no radar data has been loaded
 	bool doUpdate = (newPointBoxScale != pointBoxScale);
-	pointBoxScale = newPointBoxScale;
+	//pointBoxScale = newPointBoxScale;
 	return(doUpdate);  //only do an update if this value has changed
 }
 

@@ -75,8 +75,8 @@ class BoundaryPointEditor : public QObject
 	void setBrushRadius(int value);
 	void setWorldScale(float value);
 	bool getIsCircle();
-	//int getCircleRadius();
-	//int getBrushRadius();
+	int getCircleRadius();
+	int getBrushRadius();
 	void showBoundaryEditor();
 	//void refreshBoundaries();
 	//const char *refreshBoundary(int i);
