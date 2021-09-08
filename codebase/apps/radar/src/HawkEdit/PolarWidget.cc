@@ -1254,6 +1254,16 @@ void PolarWidget::drawRings(QPainter &painter)
   // store font
   
   QFont origFont = painter.font();
+
+  QPen pen(_gridRingsColor);
+  qreal hscale = painter.combinedTransform().m11();
+  qreal vscale = painter.combinedTransform().m22();
+  qreal htranslate = painter.combinedTransform().m31();
+  qreal vtranslate = painter.combinedTransform().m32();
+
+
+  pen.setWidth(1.0/hscale * 2.0);
+  painter.setPen(pen);
   
   // Draw rings
 
@@ -1263,16 +1273,17 @@ void PolarWidget::drawRings(QPainter &painter)
   
     //painter.save();
     //painter.setTransform(_zoomTransform);
-    painter.setPen(_gridRingsColor);
+    //painter.setPen(_gridRingsColor);
   
     // set narrow line width
-    QPen pen = painter.pen();
-    pen.setWidth(0);
+    //QPen pen = painter.pen();
+    //pen.setWidth(0);
     //QBrush brush("black", Qt::CrossPattern);
     //pen.setBrush(brush);
-    painter.setPen(pen);
+    //painter.setPen(pen);
     //painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
+    cerr << "_ringSpacing = " << _ringSpacing << endl;
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);
@@ -1284,13 +1295,22 @@ void PolarWidget::drawRings(QPainter &painter)
     // Draw the labels
     painter.save();
 
-    QTransform flipTransform;
-    flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
-    bool combine = true;
-    painter.setWorldTransform(flipTransform, combine);
+    QTransform xform = painter.worldTransform();
+
+    //QTransform flipTransform;
+    //flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
+    //bool combine = true;
+    //painter.setWorldTransform(flipTransform, combine);
+    QTransform identity;
+    painter.setWorldTransform(identity, false);
     QFont font = painter.font();
-    font.setPointSizeF(_params->range_ring_label_font_size / 
-      _zoomWorld.getXPixelsPerWorld());
+    //qreal pointSize = _params->range_ring_label_font_size / hscale;
+    //if (pointSize < 0.5) pointSize = 0.5;
+    //cerr << "pointSize = " << pointSize << endl;
+
+    font.setPointSize(12); // pointSize);
+    //font.setPixelSize(10);
+      //_zoomWorld.getXPixelsPerWorld());
     painter.setFont(font);
 
     
@@ -1300,15 +1320,39 @@ void PolarWidget::drawRings(QPainter &painter)
       const string &labelStrS = _scaledLabel.scale(ringRange);
       int labelPos = (int) labelPosD;
       QString labelStr(labelStrS.c_str());
+
+      /* draws text with scale, inside zoom coordinates
       painter.drawText(  labelPos, labelPos, labelStr); // Qt::AlignCenter);
       painter.drawText(  -labelPos, labelPos, labelStr); // Qt::AlignCenter);
       painter.drawText(  labelPos, -labelPos, labelStr); // Qt::AlignCenter);
       painter.drawText(  -labelPos, -labelPos, labelStr); // Qt::AlignCenter);
+      */
+      // drawText without scaling; outsize zoom coordinates
+      //double vlabelPosD = labelPosD / vscale + vtranslate;
+      //double hlabelPosD = labelPosD / hscale + htranslate;  
+      //int vlabelPos = (int) vlabelPosD;
+      //int hlabelPos = (int) hlabelPosD;          
+      //cerr << "hlabelPos, vlabelPos = " << hlabelPos << ", " << vlabelPos << endl;
+      qreal x; 
+      qreal y;
+      qreal labelPosQR = (qreal) labelPosD; 
+      xform.map(labelPosQR, labelPosQR, &x, &y);
+      painter.drawText(  x, y, labelStr); // Qt::AlignCenter);
+
+      xform.map(-labelPosQR, labelPosQR, &x, &y);
+      painter.drawText(  x, y, labelStr); // Qt::AlignCenter);
+
+      xform.map(labelPosQR, -labelPosQR, &x, &y);
+      painter.drawText(  x, y, labelStr); // Qt::AlignCenter);
+
+      xform.map(-labelPosQR, -labelPosQR, &x, &y);
+      painter.drawText(  x, y, labelStr); // Qt::AlignCenter);
+
       ringRange += _ringSpacing;
     }
     
     painter.restore();
-
+    
   } /* endif - draw rings */
 
   painter.restore();
@@ -1365,8 +1409,13 @@ void PolarWidget::drawAzimuthLines(QPainter &painter) {
 
     // Set up the painter
     
-    //painter.save();
-    painter.setPen(_gridRingsColor);
+    painter.save();
+    QPen pen(_gridRingsColor);
+    qreal hscale = painter.combinedTransform().m11();
+    pen.setWidth(1.0/hscale * 2.0);
+    painter.setPen(pen);
+
+
   
     // Draw the lines along the X and Y axes
 
@@ -1386,7 +1435,7 @@ void PolarWidget::drawAzimuthLines(QPainter &painter) {
     painter.drawLine( -end_pos1, end_pos2, end_pos1, -end_pos2);
     painter.drawLine( end_pos2, -end_pos1, -end_pos2, end_pos1);
 
-    //painter.restore();
+    painter.restore();
 
   }
   
@@ -1615,7 +1664,7 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
 */
   // restore state
 
-  painter.restore();
+  // painter.restore();
 
   LOG(DEBUG) << "exit";
 
