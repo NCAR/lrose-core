@@ -217,7 +217,7 @@ void ScriptEditorController::setupFieldArrays() {
         const vector<float> *fieldData = _soloFunctionsController->getData(*it);  
 
         QJSValue fieldArray = engine.newArray(fieldData->size());
-        QString vectorName = fieldName + "_V";    
+        QString vectorName = fieldName; //  + "_V";    
 
 
         //std::vector<float> fieldData = getData(fieldName);
@@ -594,10 +594,15 @@ uncate(100);
     vector<string>::iterator nameItr;
     for (nameItr = initialFieldNames->begin(); nameItr != initialFieldNames->end(); ++nameItr) {
       QString vectorName(nameItr->c_str());
-      //vectorName.append("_v");
+      vectorName.append("_v");
       //QString originalName(nameItr->c_str());
       currentVariableContext[vectorName] = vectorName;
     }
+
+    LOG(DEBUG) << "Context completely set ...";
+    printQJSEngineContext();
+    LOG(DEBUG) << " ... end of Context";
+
     // TODO: free initialFieldNames they are a copy of the unique fieldNames
       // ======                                                                                            
     //    try {
@@ -608,6 +613,10 @@ uncate(100);
    //while (_soloFunctionsController->moreSweeps()) {
     // for each ray
     _soloFunctionsController->setCurrentRayToFirst();
+
+    // TODO: edit script to insert _V for all predefined Soloii functions.
+    // this allows the context of the field reference to determine if
+    // passed by value or passed by reference. _V is by reference. 
   
     while (_soloFunctionsController->moreRays()) {
       LOG(DEBUG) << "more rays ...";
@@ -621,6 +630,7 @@ uncate(100);
       setupFieldArrays(); 
 
       setupBoundaryArray();
+
       QJSValue result;
       try {
         result = engine.evaluate(script);
@@ -655,7 +665,8 @@ uncate(100);
           //setSelectionToValue(result.toString());                                                        
         }
 	
-        saveFieldArrays(currentVariableContext);
+        // TODO: fix up later 
+        //saveFieldArrays(currentVariableContext);
 	
       }
       _soloFunctionsController->nextRay();
@@ -779,8 +790,8 @@ void ScriptEditorController::fieldNamesProvided(vector<string> *fieldNames) {
       ////engine.globalObject().setProperty(fieldName, objectValue.property("name"));    
 
       QString originalName = fieldName;
-      engine.globalObject().setProperty(fieldName, originalName); // fieldName);                                           
-      //engine.globalObject().setProperty(fieldName.append("_V"), originalName); // fieldName);                                           
+      //engine.globalObject().setProperty(fieldName, originalName); // fieldName);                                           
+      engine.globalObject().setProperty(fieldName.append("_V"), originalName); // fieldName);                                           
 
       //someValue += 1;                                                                                    
 

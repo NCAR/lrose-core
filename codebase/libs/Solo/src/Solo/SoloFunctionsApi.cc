@@ -43,24 +43,7 @@ void SoloFunctionsApi::GetBoundaryMask(long *xpoints, long *ypoints, int npoints
 				       float rotation_angle,
 				       bool *boundary_mask_out) {
 
-  /*
-  //This test boundary works
-  for (int i=0; i<nGates; i++) {
-    boundary_mask_out[i] = 0;
-  }
-  boundary_mask_out[3] = 1;
-  boundary_mask_out[4] = 1;
-  return;
-  */
-
-  /* TODO: test
-  boundary_mask_out[0] = 3;
-  boundary_mask_out[1] = 2;
-  boundary_mask_out[3] = 1;
-  return;
-  // end test
-  */
-
+/*
   // map flat data to internal data structures ...
   PointInSpace *radar_origin = new PointInSpace;
   PointInSpace *boundary_origin = new PointInSpace;
@@ -108,17 +91,48 @@ void SoloFunctionsApi::GetBoundaryMask(long *xpoints, long *ypoints, int npoints
   rotation_angle,
   boundary_mask_out);
 
-  /*
+  //
   // copy boundary mask to output array
-  for (int i=0; i<nGates; i++)
-    boundary_mask_out[i] = boundary_mask[i];
-  */
+  //for (int i=0; i<nGates; i++)
+  //  boundary_mask_out[i] = boundary_mask[i];
+  //
 
   delete boundary;
   delete radar_origin;
   delete boundary_origin;
 
   //return boundary_mask;
+  */
+
+  try {
+    se_get_boundary_mask(xpoints, ypoints, npoints,
+           //float radar_origin_x,
+           //  float radar_origin_y,
+           //  float radar_origin_z,
+             radar_origin_latitude,
+             radar_origin_longitude,
+             radar_origin_altitude,
+             boundary_origin_tilt,
+             // float boundary_origin_x,
+             // float boundary_origin_y,
+             // float boundary_origin_z,
+             boundary_origin_latitude,
+             boundary_origin_longitude,
+             boundary_origin_altitude,
+             nGates,
+             gateSize,
+             distanceToCellNInMeters,
+             azimuth,
+             radar_scan_mode,
+             radar_type,
+             tilt_angle,
+             rotation_angle,
+             boundary_mask_out);
+  } catch(...) {
+    throw "Something bad happened during script evaluation";
+  }
+
+
 } 
 
 void SoloFunctionsApi::Despeckle(const float *data, float *newData, size_t nGates, float bad, int a_speckle,

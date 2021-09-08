@@ -29,7 +29,7 @@ void clearAllFields() {
 bool DisplayFieldController::contains(string fieldName) {
   bool present = false;
   try {
-    if (_model->getFieldIndex(fieldName) > 0) {
+    if (_model->getFieldIndex(fieldName) >= 0) {
       present = true;
     }
   } catch (std::invalid_argument &ex) {
@@ -78,23 +78,23 @@ void DisplayFieldController::addField(string &fieldName) {
 }
 
 
-void DisplayFieldController::updateFieldPanel(string fieldName) {
+void DisplayFieldController::updateFieldPanel(string fieldName,
+  DisplayFieldView *fieldPanel) {
   //_displayFieldView->updateFieldPanel(fieldName);
 
   LOG(DEBUG) << "enter";
-  if (contains(fieldName)) {
-    size_t index = getFieldIndex(fieldName);
-    DisplayField *rawField = getField(index);
-    if (rawField->isHidden()) { 
-      //_displayFieldView->updateFieldPanel(rawField->getLabel(), fieldName,
-      //  rawField->getShortcut());
-      rawField->setStateVisible();
-    }
-    setSelectedField(index);
-  } else {
+  if (!contains(fieldName)) {
     addField(fieldName);
     LOG(DEBUG) << "adding fieldName " << fieldName;
   }
+  size_t index = getFieldIndex(fieldName);
+  DisplayField *rawField = getField(index);
+  if (rawField->isHidden()) { 
+    rawField->setStateVisible();
+    fieldPanel->updateFieldPanel(fieldName, fieldName,
+      fieldName);
+  }
+  setSelectedField(index);
   LOG(DEBUG) << "exit";
 }
 
@@ -133,6 +133,7 @@ void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
 //distingquish between add and update on fieldName;
 //then set last field or first field as selected? or do something to render image
 
+    DisplayField *displayField;
     if (!contains(fieldName)) {
 
       ColorMap map;
@@ -140,19 +141,23 @@ void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
       bool noColorMap = true; 
       // unfiltered field
       string shortcut = to_string(ifield);
-      DisplayField *field =
-        new DisplayField(fieldName, fieldName, "m/s", 
+      displayField = new DisplayField(fieldName, fieldName, "m/s", 
                          shortcut, map, ifield, false);
       if (noColorMap)
-        field->setNoColorMap();
+        displayField->setNoColorMap();
 
-      addField(field);
+      addField(displayField);
+
       //_updateFieldPanel(fieldName);
       // TODO: causes a EXC_BAD_ACCESS if outside the loop
       // somehow this is called when setting up the menus???
       //fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
       ifield += 1;
-    }
+    } else {
+      size_t index = getFieldIndex(fieldName);
+      displayField = getField(index);
+    } 
+    displayField->setStateVisible();
     fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
 
   } // ifield

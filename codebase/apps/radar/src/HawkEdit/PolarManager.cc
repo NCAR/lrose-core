@@ -2541,8 +2541,7 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
   try {
     //  This should save/perpetuate the color map in the DisplayField object
     _displayFieldController->saveColorMap(fieldName, &newColorMap);
-    _displayFieldController->updateFieldPanel(fieldName);
-
+    _displayFieldController->updateFieldPanel(fieldName, _fieldPanel);
   } catch (std::invalid_argument &ex) {
     LOG(ERROR) << fieldName;
     LOG(ERROR) << ex.what(); // "ERROR - field not found; no color map change";

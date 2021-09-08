@@ -178,4 +178,32 @@ void se_remove_storm_motion(float wind, float speed, float dgi_dd_rotation_angle
 			    float bad, size_t dgi_clip_gate, bool *boundary_mask);
 
 
+// given a list of x, y points, an other geo data,
+// return a mask of booleans where 
+//   true is inside the boundary and 
+//   false is outside the boundary
+void se_get_boundary_mask(long *xpoints, long *ypoints, int npoints,
+             //float radar_origin_x,                                                      
+             //  float radar_origin_y,                                                    
+             //  float radar_origin_z,                                                    
+             float radar_origin_latitude,
+             float radar_origin_longitude,
+             float radar_origin_altitude,
+             float boundary_origin_tilt,
+             // float boundary_origin_x,                                                
+             // float boundary_origin_y,                                                
+             // float boundary_origin_z,                                                
+             float boundary_origin_latitude,
+             float boundary_origin_longitude,
+             float boundary_origin_altitude,
+             int nGates,
+             float gateSize,
+             float distanceToCellNInMeters,
+             float azimuth,
+             int radar_scan_mode,
+             int radar_type,
+             float tilt_angle,
+             float rotation_angle,
+             bool *boundary_mask);
+
 #endif

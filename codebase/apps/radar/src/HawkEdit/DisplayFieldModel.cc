@@ -468,7 +468,7 @@ void DisplayFieldModel::setForLocationClicked(string fieldName, double value, co
 						   &text) {
   // TODO: use _findFieldByName
   for (size_t ii = 0; ii < _fields.size(); ii++) {
-    if (fieldName == _fields[ii]->getName()) {
+    if (fieldName.compare(_fields[ii]->getName()) == 0) {
       _fields[ii]->setSelectValue(value);
       _fields[ii]->setDialogText(text);
     }
@@ -478,7 +478,7 @@ void DisplayFieldModel::setForLocationClicked(string fieldName, double value, co
 DisplayField *DisplayFieldModel::_findFieldByName(string fieldName) {
   DisplayField *theField = NULL;
   for (size_t ii = 0; ii < _fields.size(); ii++) {
-    if (fieldName == _fields[ii]->getName()) {
+    if (fieldName.compare(_fields[ii]->getName()) == 0)  {
       theField = _fields[ii];
     }
   }
@@ -487,7 +487,7 @@ DisplayField *DisplayFieldModel::_findFieldByName(string fieldName) {
 
 size_t DisplayFieldModel::_lookupFieldIndex(string fieldName) {
   for (size_t ii = 0; ii < _fields.size(); ii++) {
-    if (fieldName == _fields[ii]->getName()) {
+    if (fieldName.compare(_fields[ii]->getName()) == 0) {
       return ii;
     }
   }

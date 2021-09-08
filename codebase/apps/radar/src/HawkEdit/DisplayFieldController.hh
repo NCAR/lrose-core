@@ -28,7 +28,7 @@ public:
   void clearAllFields();
 
   //void createFieldPanel(QFrame *main);
-  void updateFieldPanel(string fieldName);
+  void updateFieldPanel(string fieldName, DisplayFieldView *fieldPanel);
 
   bool contains(string fieldName);
   void addField(DisplayField *newField);
