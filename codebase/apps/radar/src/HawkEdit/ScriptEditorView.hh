@@ -92,6 +92,7 @@ protected:
                         QString *cell1, QString *cell2, QString *outCell);
   */
   void criticalMessage(std::string message);
+  void scriptCompleteMessage();
 
   void openScriptFile();
   void importScriptFile();

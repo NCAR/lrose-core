@@ -84,6 +84,7 @@ public:
   vector<float> *getRayData(size_t rayIdx, string fieldName); // , double sweepHeight);
   float getMissingFl32(string fieldName);
   double getRayAzimuthDeg(size_t rayIdx);
+  double getRayNyquistVelocityMps(size_t rayIdx);
 
   int getNSweeps();
   vector<double> *getSweepAngles();

@@ -532,7 +532,7 @@ void ScriptEditorView::acceptFormulaInput()
 }
 
 void ScriptEditorView::scriptComplete() {
-    criticalMessage("Script evaluation complete. Results available in editor and color maps");
+    scriptCompleteMessage();
 }
 
 void ScriptEditorView::cancelFormulaInput()
@@ -604,6 +604,18 @@ vector<string> *ScriptEditorView::getVariablesFromScriptEditor() {
 
 void ScriptEditorView::notImplementedMessage() {
       QMessageBox::information(this, "Not Implemented", "Not Implemented");
+}
+
+void ScriptEditorView::scriptCompleteMessage() {
+
+  QMessageBox msgBox;
+  msgBox.setText("Script evaluation complete.");
+  msgBox.setInformativeText("Results available in editor and field color maps");
+  msgBox.setStandardButtons(QMessageBox::Ok);
+  int ret = msgBox.exec();
+  //    QMessageBox::information(this, "Script evaluation complete", 
+  //      "Script evaluation complete.\n.",
+  //      QMessageBox::NoIcon);
 }
 
 /*

@@ -31,11 +31,13 @@ const vector<float> *DataModel::GetData(string fieldName,
        << " sweepIdx=" << sweepIdx;
 
   // sweep numbers are 1-based in RadxVol, not zero based, so, add one to the index.
-  sweepIdx += 1;
+  //sweepIdx += 1;
 
   _vol.loadRaysFromFields();
 
-  RadxSweep *sweep = _vol.getSweepByNumber(sweepIdx);
+  //RadxSweep *sweep = _vol.getSweepByNumber(sweepIdx); // NOT by index!! Grrh!
+  vector<RadxSweep *> volSweeps = _vol.getSweeps();
+  RadxSweep *sweep = volSweeps.at(sweepIdx);
   if (sweep == NULL)
     throw std::invalid_argument("bad sweep index");
 
@@ -410,6 +412,13 @@ double DataModel::getRayAzimuthDeg(size_t rayIdx) {
   const vector<RadxRay *>  &rays = _vol.getRays();
   RadxRay *ray = rays.at(rayIdx);
   return ray->getAzimuthDeg();
+}
+
+double DataModel::getRayNyquistVelocityMps(size_t rayIdx) {
+  _vol.loadRaysFromFields();
+  const vector<RadxRay *>  &rays = _vol.getRays();
+  RadxRay *ray = rays.at(rayIdx);
+  return ray->getNyquistMps();
 }
 
 const vector<RadxRay *> &DataModel::getRays() {

@@ -74,6 +74,7 @@ public slots:
   void actionDisplayEditHist();
   void deleteRay();
   void deleteSelection();
+  void subtractNyquistFromRay();
 
   void notImplementedMessage();
 
@@ -85,6 +86,8 @@ public slots:
   void fieldDataSent(vector<float> *data, int useless, int c);
   void azimuthForRaySent(float azimuth, int offsetFromClosestRay,
     int fieldIdx, string fieldName);
+  void nyquistVelocitySent(float nyquistVelocity, int offsetFromClosestRay,
+    int fieldIdx, string fieldName); 
   void setHeader(int baseColumn, int fieldIdx, float azimuth,
     string fieldName);
 
@@ -104,6 +107,7 @@ signals:
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
   void needAzimuthForRay(int offsetFromClosestRay, int fieldIdx, string fieldName);
+  void needNyquistVelocityForRay(int rayIdx, int fieldIdx);
   void applyVolumeEdits(string fieldName, float rayAzimuth, vector<float> *data);
   void signalRayAzimuthChange(float rayAzimuth, float elevation);
   void needRangeData(size_t nPoints);
@@ -187,6 +191,8 @@ private:
     QAction *replotAction;
     QAction *applyEditsAction;
     QAction *clearEditsAction;
+
+    QLabel *nyquistVelocityLabel;
 
     QLabel *cellLabel;
     QTableWidget *table;

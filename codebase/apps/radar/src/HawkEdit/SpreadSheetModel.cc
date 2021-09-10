@@ -65,6 +65,56 @@ float SpreadSheetModel::getAzimuthForRay(int offsetFromClosest)
   if (offsetFromClosest == 0) {
     azimuth = _closestRay->getAzimuthDeg();
   } else {
+
+    DataModel *dataModel = DataModel::Instance();
+    /*
+    size_t nRays = dataModel->getNRays();
+    //vector<RadxRay *> rays = const_cast <vector<RadxRay *>> (dataModel->getRays());
+    // ( size_t = (size_t + int) % size_t)  ==> TROUBLE!!!
+    //int closestRay = (int) _closestRayIdx;
+
+    size_t rayIdx = dataModel->getRayIndex(_closestRayIdx,
+      offsetFromClosest, _currentSweepNumber); 
+
+    //if (idx < 0) throw std::invalid_argument("requested ray index < 0"); 
+    LOG(DEBUG) << "closestRayIdx=" << _closestRayIdx << " offsetFromClosest=" << offsetFromClosest 
+      << " rayIdx=" << rayIdx;
+      */
+    size_t rayIdx = _getRayIdx(offsetFromClosest);      
+    azimuth = dataModel->getRayAzimuthDeg(rayIdx);  
+    //RadxRay *ray = rays.at(idx);
+    //azimuth = ray->getAzimuthDeg(); 
+  }
+  return azimuth;
+}
+
+float SpreadSheetModel::getNyquistVelocityForRay(int offsetFromClosest) {
+  float nyquistVelocity = -1.0;  // negative value indicates no value found
+  if (offsetFromClosest == 0) {
+    nyquistVelocity = _closestRay->getAzimuthDeg();
+  } else {
+    
+    DataModel *dataModel = DataModel::Instance();
+    /*
+    size_t nRays = dataModel->getNRays();
+    //vector<RadxRay *> rays = const_cast <vector<RadxRay *>> (dataModel->getRays());
+    // ( size_t = (size_t + int) % size_t)  ==> TROUBLE!!!
+    //int closestRay = (int) _closestRayIdx;
+
+    size_t rayIdx = dataModel->getRayIndex(_closestRayIdx,
+      offsetFromClosest, _currentSweepNumber); 
+
+    //if (idx < 0) throw std::invalid_argument("requested ray index < 0"); 
+    LOG(DEBUG) << "closestRayIdx=" << _closestRayIdx << " offsetFromClosest=" << offsetFromClosest 
+      << " rayIdx=" << rayIdx;
+      */
+    size_t rayIdx = _getRayIdx(offsetFromClosest);
+    nyquistVelocity = dataModel->getRayNyquistVelocityMps(rayIdx);  
+  }
+  return nyquistVelocity;
+}
+
+size_t SpreadSheetModel::_getRayIdx(int offsetFromClosest) {
     DataModel *dataModel = DataModel::Instance();
     size_t nRays = dataModel->getNRays();
     //vector<RadxRay *> rays = const_cast <vector<RadxRay *>> (dataModel->getRays());
@@ -77,11 +127,7 @@ float SpreadSheetModel::getAzimuthForRay(int offsetFromClosest)
     //if (idx < 0) throw std::invalid_argument("requested ray index < 0"); 
     LOG(DEBUG) << "closestRayIdx=" << _closestRayIdx << " offsetFromClosest=" << offsetFromClosest 
       << " rayIdx=" << rayIdx;
-    azimuth = dataModel->getRayAzimuthDeg(rayIdx);  
-    //RadxRay *ray = rays.at(idx);
-    //azimuth = ray->getAzimuthDeg(); 
-  }
-  return azimuth;
+    return rayIdx;
 }
 
   void SpreadSheetModel::_setSweepNumber(int sweepNumber) {

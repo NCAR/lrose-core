@@ -447,10 +447,10 @@ string SoloFunctionsModel::ZeroMiddleThird(string fieldName,  // RadxVol *vol,
     newData[i] = data[i];   
 
   // insert new field into RadxVol                                                                             
-  cerr << "result = ";
+  LOG(DEBUG) << "result = ";
   for (int i=0; i<50; i++)
-    cerr << newData[i] << ", ";
-  cerr << endl;
+    LOG(DEBUG) << newData[i] << ", ";
+  
 
   // I have the ray, can't I just add a field to it?
 
@@ -595,10 +595,10 @@ string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
 
 
   // insert new field into RadxVol                                                                             
-  cerr << "result = ";
+  LOG(DEBUG) << "result = ";
   for (int i=0; i<50; i++)
-    cerr << newData[i] << ", ";
-  cerr << endl;
+    LOG(DEBUG) << newData[i] << ", ";
+  
 
   Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = false;
@@ -675,10 +675,10 @@ string SoloFunctionsModel::Despeckle(string fieldName,  //RadxVol *vol,
 			     clip_gate, _boundaryMask);
 
   // insert new field into RadxVol                                                                             
-  cerr << "result = ";
+  LOG(DEBUG) << "result = ";
   for (int i=0; i<50; i++)
-    cerr << newData[i] << ", ";
-  cerr << endl;
+    LOG(DEBUG) << newData[i] << ", ";
+
 
   Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = false;
@@ -2958,9 +2958,9 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data) { /
 
 
 void SoloFunctionsModel::printBoundaryMask() {
-  cout << "Boundary Mask ... Length = " << _boundaryMaskLength << endl;
+  LOG(DEBUG) << "Boundary Mask ... Length = " << _boundaryMaskLength;
   for (int i=0; i<_boundaryMaskLength; i++)
-    cout << _boundaryMask[i] << ", ";
+    LOG(DEBUG) << _boundaryMask[i] << ", ";
 }
 
 RadxField *SoloFunctionsModel::fetchDataField(RadxRay *ray, string &fieldName) {

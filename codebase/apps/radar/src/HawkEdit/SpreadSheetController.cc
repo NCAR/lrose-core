@@ -67,6 +67,8 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
 	  this, SLOT(needDataForField(string, int, int)));
   connect(_currentView, SIGNAL(needAzimuthForRay(int, int, string)), 
     this, SLOT(needAzimuthForRay(int, int, string)));
+  connect(_currentView, SIGNAL(needNyquistVelocityForRay(int, int, string)), 
+    this, SLOT(needNyquistVelocityForRay(int, int, string)));
   // TODO: need to know which sweep!!!
   connect(_currentView, SIGNAL(applyVolumeEdits(string, float, vector<float> *)), 
 	  this, SLOT(getVolumeChanges(string, float, vector<float> *)));
@@ -156,6 +158,19 @@ float SpreadSheetController::getAzimuthForRay(int offsetFromClosest)
  
 }
 
+float SpreadSheetController::getNyquistVelocity(int offsetFromClosest)
+{
+
+  LOG(DEBUG) << "getting nyquist velocity for ray: offset from closest =" << offsetFromClosest;
+  // TODO: fix this ... 
+  //float nyquistVelocity = _currentModel->getNyquistVelocityForRay(offsetFromClosest);
+
+  //LOG(DEBUG) << " found: nyq vel =" << nyquistVelocity;
+
+  return 0.0; // nyquistVelocity;
+ 
+}
+
 void SpreadSheetController::getRangeData(float *startingRangeKm, float *gateSpacingKm)
 {
   _currentModel->getRangeGeom(startingRangeKm, gateSpacingKm);
@@ -189,6 +204,12 @@ void  SpreadSheetController::needAzimuthForRay(int offsetFromClosest,
 //azimuthForRaySent(float azimuth, int offsetFromClosestRay, int fieldIdx, string fieldName)
   _currentView->azimuthForRaySent(getAzimuthForRay(offsetFromClosest), offsetFromClosest,
     fieldIdx, fieldName);
+}
+
+void  SpreadSheetController::needNyquistVelocityForRay(int offsetFromClosest, 
+  int fieldIdx, string fieldName) {
+  //_currentView->nyquistVelocitySent(getNyquistVelocityForRay(offsetFromClosest), offsetFromClosest,
+  //  fieldIdx, fieldName);
 }
 
 void  SpreadSheetController::needRangeData(size_t nGates) {

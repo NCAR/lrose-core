@@ -23,6 +23,7 @@ public:
   vector<float> *getData(string fieldName, int offsetFromClosest);
   vector<string> *getFields();
   float getAzimuthForRay(int offsetFromClosest);
+  float getNyquistVelocityForRay(int offsetFromClosest);
   //  RadxVol getVolume(); 
 
 
@@ -34,6 +35,8 @@ public:
 
 private:
 
+
+  size_t _getRayIdx(int offsetFromClosest);
   //void _getSweepNumber(float elevation);
   void _setSweepNumber(int sweepNumber);
 
