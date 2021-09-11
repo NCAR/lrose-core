@@ -1803,7 +1803,7 @@ void BoundaryPointMap::get_boundary_mask(
     xse_find_intxns(azimuth, range, ob);
     xse_num_segments(ob);
     
-    cout << "azimuth=" << azimuth << " r0 = " << ob->r0 << " r1 = " << ob->r1 << endl;
+    // cout << "azimuth=" << azimuth << " r0 = " << ob->r0 << " r1 = " << ob->r1 << endl;
     double range1;
     double range2;
 
