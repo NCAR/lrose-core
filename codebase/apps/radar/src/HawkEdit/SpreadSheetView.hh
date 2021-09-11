@@ -75,6 +75,8 @@ public slots:
   void deleteRay();
   void deleteSelection();
   void subtractNyquistFromRay();
+  void addNyquistFromRay();
+  void adjustNyquistFromRay(float factor);
 
   void notImplementedMessage();
 
@@ -107,7 +109,7 @@ signals:
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
   void needAzimuthForRay(int offsetFromClosestRay, int fieldIdx, string fieldName);
-  void needNyquistVelocityForRay(int rayIdx, int fieldIdx);
+  void needNyquistVelocityForRay(int rayIdx, int fieldIdx, string fieldName);
   void applyVolumeEdits(string fieldName, float rayAzimuth, vector<float> *data);
   void signalRayAzimuthChange(float rayAzimuth, float elevation);
   void needRangeData(size_t nPoints);
@@ -140,6 +142,8 @@ protected:
   float getAzimuth(QString text);
   void replot();
 
+  bool isMissing(QString textValue);
+
 private:
 
   //SpreadSheetController *_controller;
@@ -166,6 +170,7 @@ private:
     QAction *cell_plusFoldRayAction;
     QAction *cell_negFoldRayGreaterAction;
     QAction *cell_plusFoldRayGreaterAction;
+    QAction *cell_plusFoldRangeAction;
     QAction *cell_zapGndSpdAction;
 
     QAction *secondSeparator;

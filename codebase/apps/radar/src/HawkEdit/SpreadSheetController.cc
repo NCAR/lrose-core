@@ -162,12 +162,11 @@ float SpreadSheetController::getNyquistVelocity(int offsetFromClosest)
 {
 
   LOG(DEBUG) << "getting nyquist velocity for ray: offset from closest =" << offsetFromClosest;
-  // TODO: fix this ... 
-  //float nyquistVelocity = _currentModel->getNyquistVelocityForRay(offsetFromClosest);
+  float nyquistVelocity = _currentModel->getNyquistVelocityForRay(offsetFromClosest);
 
-  //LOG(DEBUG) << " found: nyq vel =" << nyquistVelocity;
+  LOG(DEBUG) << " found: nyq vel =" << nyquistVelocity;
 
-  return 0.0; // nyquistVelocity;
+  return nyquistVelocity;
  
 }
 
@@ -208,8 +207,8 @@ void  SpreadSheetController::needAzimuthForRay(int offsetFromClosest,
 
 void  SpreadSheetController::needNyquistVelocityForRay(int offsetFromClosest, 
   int fieldIdx, string fieldName) {
-  //_currentView->nyquistVelocitySent(getNyquistVelocityForRay(offsetFromClosest), offsetFromClosest,
-  //  fieldIdx, fieldName);
+  _currentView->nyquistVelocitySent(getNyquistVelocity(offsetFromClosest), offsetFromClosest,
+    fieldIdx, fieldName);
 }
 
 void  SpreadSheetController::needRangeData(size_t nGates) {

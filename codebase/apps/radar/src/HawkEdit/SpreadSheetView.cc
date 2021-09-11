@@ -114,7 +114,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     echoLayout->addWidget(new QLabel(tr("Nyq Vel")), 4, 0);
     //echoLayout->addWidget(nyqVelLineEdit, 4, 1);
     nyquistVelocityLabel = new QLabel(tr("N/A"));
-    echoLayout->addWidget(nyquistVelocityLabel, 4, 2);
+    echoLayout->addWidget(nyquistVelocityLabel, 4, 1);
 
     missingDataValueLineEdit = new QLineEdit;
     missingDataValueLineEdit->setText(QString::number(Radx::missingFl32));
@@ -399,7 +399,7 @@ void SpreadSheetView::createActions()
 
     cell_plusFoldRayAction = new QAction(tr("&+ Fold Ray"), this);
     //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
-    connect(cell_plusFoldRayAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+    connect(cell_plusFoldRayAction, &QAction::triggered, this, &SpreadSheetView::addNyquistFromRay);
 
     cell_negFoldRayGreaterAction = new QAction(tr("&- Fold Ray >"), this);
     //cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
@@ -408,6 +408,10 @@ void SpreadSheetView::createActions()
     cell_plusFoldRayGreaterAction = new QAction(tr("&+ Fold Ray >"), this);
     //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
     connect(cell_plusFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+
+    cell_plusFoldRangeAction = new QAction(tr("&+ Fold Range"), this);
+    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    connect(cell_plusFoldRangeAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
 
     cell_zapGndSpdAction = new QAction(tr("Zap Gnd Spd"), this);
     //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
@@ -549,47 +553,17 @@ void SpreadSheetView::updateStatus(QTableWidgetItem *item)
         statusBar()->showMessage(item->data(Qt::StatusTipRole).toString(), 1000);
         //cellLabel->setText(tr("Cell: (%1)").arg(SpreadSheetUtils::encode_pos(table->row(item), table->column(item))));
       int whichColumn = item->column();
-      // TODO: working here ...
+
       int rayIdx;
       int fieldIdx;
-      // TODO: fix this ...
+
       //decode(whichColumn, &rayIdx, &fieldIdx);
-      //int offsetFromClosest;
-      //string fieldName;
-      //emit needNyquistVelocityForRay(int offsetFromClosest, int fieldIdx, string fieldName);
+      rayIdx = 0;
+      int offsetFromClosest = rayIdx;
+      string fieldName;
+      emit needNyquistVelocityForRay(offsetFromClosest, fieldIdx, fieldName);
 
       //---  get the Nyquist Velocity for this ray; if not available, display N/A
-      
-/*
-  // fill everything that needs the fieldNames ...
-    _nFieldsToDisplay = fieldNames.size();
-    int somethingHideous = 0;
-    table->setColumnCount(_nFieldsToDisplay * _nRays + somethingHideous);
-    LOG(DEBUG) << "there are " << fieldNames.size() << " field namess";
-    // rayIdx goes from 0 to nRays; map to -nRays/2 ... 0 ... nRays/2
-    for (int rayIdx= - _nRays/2; rayIdx <= _nRays/2; rayIdx++) {
-        int fieldIdx = 0;
-
-        vector<string>::iterator it; 
-        for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
-          QString the_name(QString::fromStdString(*it));
-          LOG(DEBUG) << *it;
-          for (int i=0; i<_nRays; i++) {
-            // this ultimately calls setHeader; we need to send the info needed for setHeader
-            emit needAzimuthForRay(rayIdx, fieldIdx, *it);
-            // needAzimuthForRay(int offsetFromClosest, 
-
-            //table->setHorizontalHeaderItem(c + (i*_nFieldsToDisplay), 
-             //   new QTableWidgetItem(the_name));
-            // TODO: what about setHorizontalHeaderLabels(const QStringList &labels) instead? would it be faster?
-          }
-          emit needDataForField(*it, rayIdx, fieldIdx);
-          //emit needAzimuthForRay(rayIdx);     
-          fieldIdx += 1;
-        }
-    }
-    */
-      // ---
     }
 
 }
@@ -1428,11 +1402,25 @@ void SpreadSheetView::deleteRay() {
 }
 
 void SpreadSheetView::subtractNyquistFromRay() {
+  float factor = -1.0;
+  adjustNyquistFromRay(factor);
+}
+
+void SpreadSheetView::addNyquistFromRay() {
+  float factor = 1.0;
+  adjustNyquistFromRay(factor);
+}
+
+// factor = -1.0 to subtract
+// factor = 1.0 to add 
+void SpreadSheetView::adjustNyquistFromRay(float factor) {
     LOG(DEBUG) << "enter";
 
     bool ok;
     float nyquistVelocity = nyquistVelocityLabel->text().toFloat(&ok);
     if (!ok) throw std::invalid_argument("cannot determine nyquistVelocity from label");
+
+    nyquistVelocity *= factor;
 
     int currentColumn = table->currentColumn();
     //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
@@ -1457,15 +1445,17 @@ void SpreadSheetView::subtractNyquistFromRay() {
     foreach (QTableWidgetItem *i, selected) {
         if (i) {
           QString textValue = i->text();
-          /*if (!isMissing(textValue)) {
+          if (!isMissing(textValue)) {
             bool ok;
             float value = textValue.toFloat(&ok);
-            if (!ok) throw std::invalid_argument("unknow value in selected cell");
-            value = value - nyquistVelocity;
+            if (!ok) {
+                string msg = "unknown value in selected cell ";
+                msg.append(textValue.toStdString().c_str());
+                throw std::invalid_argument(msg);
+            }
+            value = value + nyquistVelocity;
             i->setText(QString::number(value));
           }
-          TODO: fix this!
-          */
         }
     }
 
@@ -1504,6 +1494,10 @@ void SpreadSheetView::deleteSelection() {
         //   persist to the model? only when Apply or Save is clicked.
         //emit setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
     }
+}
+
+bool SpreadSheetView::isMissing(QString textValue) {
+  return textValue.lastIndexOf(QString(_missingDataString.c_str())) > 0; 
 }
 
 void SpreadSheetView::criticalMessage(std::string message)

@@ -91,7 +91,7 @@ float SpreadSheetModel::getAzimuthForRay(int offsetFromClosest)
 float SpreadSheetModel::getNyquistVelocityForRay(int offsetFromClosest) {
   float nyquistVelocity = -1.0;  // negative value indicates no value found
   if (offsetFromClosest == 0) {
-    nyquistVelocity = _closestRay->getAzimuthDeg();
+    nyquistVelocity = _closestRay->getNyquistMps();
   } else {
     
     DataModel *dataModel = DataModel::Instance();
