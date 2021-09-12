@@ -50,7 +50,8 @@ public:
 
   void setSelectionToValue(QString value);
 
-  void highlightClickedData(string fieldName, float azimuth, float range);
+  void highlightClickedData(string fieldName, float azimuth,
+    float elevation, float range);
 
   void closeEvent();
 
@@ -76,7 +77,9 @@ public slots:
   void deleteSelection();
   void subtractNyquistFromRay();
   void addNyquistFromRay();
-  void adjustNyquistFromRay(float factor);
+  void subtractNyquistFromSelection();
+  void addNyquistFromSelection();
+  void adjustNyquistFromRay(float factor, int top);
 
   void notImplementedMessage();
 
@@ -103,6 +106,8 @@ public slots:
   void rangeDataSent(size_t nGates, float startingKm, float gateSize);
 
   void columnHeaderClicked(int index);
+
+  void updateNavigation(string fieldName, float azimuth, float elevation);
 
 signals:
 
@@ -187,10 +192,13 @@ private:
   QAction *display_editHistAction;
 
   QPushButton *applyEditsButton;
+  QPushButton *refreshButton;
+
   QLineEdit *rayLineEdit;
   QLineEdit *sweepLineEdit;
   QLineEdit *raysLineEdit;
   QLineEdit *missingDataValueLineEdit;
+  QLineEdit *rangeLineEdit;
 
     QAction *printAction;
     QAction *replotAction;
@@ -212,6 +220,8 @@ private:
     QUndoView *undoView = nullptr;
 
     QJSEngine engine;
+
+    float _startGateKm = 0.0;
 
   
   //  const char *LogFileName = "/tmp/HawkEye_log.txt";

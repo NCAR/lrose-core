@@ -104,7 +104,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     echoLayout->addWidget(new QLabel(tr("Changes")), 2, 0);
     echoLayout->addWidget(changesLineEdit, 2, 1);
 
-    QLineEdit *rangeLineEdit = new QLineEdit;
+    rangeLineEdit = new QLineEdit;
     rangeLineEdit->setPlaceholderText("0.15");
     echoLayout->addWidget(new QLabel(tr("Range")), 3, 0);
     echoLayout->addWidget(rangeLineEdit, 3, 1);
@@ -175,7 +175,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     //echoLayout->addWidget(applyEditsButton, 6, 2);
     //connect(applyEditsButton, SIGNAL (released()), this, SLOT (applyEdits())); 
 
-    QPushButton *refreshButton = new QPushButton("Refresh", this);
+    refreshButton = new QPushButton("Refresh", this);
     refreshButton->setDisabled(false);
     echoLayout->addWidget(refreshButton, 6, 3);
     connect(refreshButton, SIGNAL (released()), this, SLOT (applyEdits()));     
@@ -403,11 +403,11 @@ void SpreadSheetView::createActions()
 
     cell_negFoldRayGreaterAction = new QAction(tr("&- Fold Ray >"), this);
     //cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
-    connect(cell_negFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+    connect(cell_negFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::subtractNyquistFromSelection);
 
     cell_plusFoldRayGreaterAction = new QAction(tr("&+ Fold Ray >"), this);
     //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
-    connect(cell_plusFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+    connect(cell_plusFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::addNyquistFromSelection);
 
     cell_plusFoldRangeAction = new QAction(tr("&+ Fold Range"), this);
     //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
@@ -566,6 +566,37 @@ void SpreadSheetView::updateStatus(QTableWidgetItem *item)
       //---  get the Nyquist Velocity for this ray; if not available, display N/A
     }
 
+}
+
+// TODO: this is the same as updateLocation?? may not need this ... 
+// but updateLocation only changes az and el, not the selected field
+void SpreadSheetView::updateNavigation(string fieldName, float azimuth, float elevation) {
+
+    // set selected field
+    QList<QListWidgetItem *> matchingFields = 
+      fieldListWidget->findItems(QString(fieldName.c_str()),
+        Qt::MatchExactly);
+    if (matchingFields.size() < 0) {
+        string msg = "no field found matching ";
+        msg.append(fieldName);
+        throw std::invalid_argument(msg);
+    }
+    QListWidgetItem *item = matchingFields.at(0);
+    fieldListWidget->setCurrentItem(item);
+
+    int fieldIdx = 0; // unused
+    int offsetFromClosest = 0;
+    emit needNyquistVelocityForRay(offsetFromClosest, fieldIdx, fieldName);
+    
+
+    //emit refreshButton->released();
+
+    // set azimuth
+    //QString azString = QString::number(azimuth);
+    //rayLineEdit->setText(azString);
+
+    // set sweep
+    //sweepLineEdit->setText(QString.setNum(elevation));
 }
 
 void SpreadSheetView::updateColor(QTableWidgetItem *item)
@@ -897,69 +928,6 @@ bool SpreadSheetView::runInputDialog(const QString &title,
     return false;
 }
 
-/*
-void SpreadSheetView::actionSum()
-{
-    int row_first = 0;
-    int row_last = 0;
-    int row_cur = 0;
-
-    int col_first = 0;
-    int col_last = 0;
-    int col_cur = 0;
-
-    QList<QTableWidgetItem*> selected = table->selectedItems();
-
-    if (!selected.isEmpty()) {
-        QTableWidgetItem *first = selected.first();
-        QTableWidgetItem *last = selected.last();
-        row_first = table->row(first);
-        row_last = table->row(last);
-        col_first = table->column(first);
-        col_last = table->column(last);
-    }
-
-    QTableWidgetItem *current = table->currentItem();
-
-    if (current) {
-        row_cur = table->row(current);
-        col_cur = table->column(current);
-    }
-
-    QString cell1 = SpreadSheetUtils::encode_pos(row_first, col_first);
-    QString cell2 = SpreadSheetUtils::encode_pos(row_last, col_last);
-    QString out = SpreadSheetUtils::encode_pos(row_cur, col_cur);
-
-    if (runInputDialog(tr("Sum cells"), tr("First cell:"), tr("Last cell:"),
-                       QString("%1").arg(QChar(0x03a3)), tr("Output to:"),
-                       &cell1, &cell2, &out)) {
-        int row;
-        int col;
-        SpreadSheetUtils::decode_pos(out, &row, &col);
-        table->item(row, col)->setText(tr("sum %1 %2").arg(cell1, cell2));
-    }
-}
-
-void SpreadSheetView::actionDivide()
-{
-  //    actionMath_helper(tr("Division"), "/");
-    // TODO: get the selected cells
-  QItemSelectionModel *select = table->selectionModel();
-  
-  //  select->hasSelection() //check if has selection
-  //  select->selectedRows() // return selected row(s)
-  //  select->selectedColumns() // return selected column(s)
-
-  QList<QModelIndex> indexes = select->selectedIndexes();
-  // returns rows and columns from the table, zero-based
-  cout << "selected (row,column):" << endl;
-  for (QModelIndex index : indexes) {
-    cout << "(" << index.row() << ", " << index.column() << ")" << endl;
-  }    
-
-}
-*/
-
 void SpreadSheetView::notImplementedMessage() {
       QMessageBox::information(this, "Not Implemented", "Not Implemented");
 }
@@ -1036,6 +1004,12 @@ void SpreadSheetView::rangeDataSent(size_t nGates, float startingKm, float gateS
     sprintf(rangeFormatted, "%8.2f Km", gateSize*r + startingKm);
     table->setVerticalHeaderItem(r, new QTableWidgetItem(rangeFormatted));
   }
+
+  QString n;
+  n.setNum(gateSize);
+  rangeLineEdit->clear();
+  rangeLineEdit->insert(n);
+  _startGateKm = startingKm;
 }
 
 // TODO: addm missing value as an argument
@@ -1232,15 +1206,47 @@ void SpreadSheetView::updateLocationInVolume(float azimuth, float elevation) {
     setTheWindowTitle(azimuth, elevation);    
 }
 
-void SpreadSheetView::highlightClickedData(string fieldName, float azimuth, float range) {
+void SpreadSheetView::highlightClickedData(string fieldName, float azimuth,
+    float elevation, float range) {
     // map the fieldName, azimuth, and range to a cell in the table
     // get the column labels, find the fieldName, then the azimuth
     // get the row labels, find the closest range
+
+    // This method should get the number of rays from the navigation,
+    // change the navigation azimuth to the argument azimuth,
+    // update the rows and columns of the spreadsheet to the fieldName, azimuth, range, and # of rows
+    // highlight/select the fieldName in the list of fields
+    // only allow one field at a time?
+    // 
+    // call applyEdits()
+
     LOG(DEBUG) << "enter";
 
+    updateNavigation(fieldName, azimuth, elevation);
+    applyEdits();
+    //return; 
     // find the row
+    bool ok;
 
-    int row = 0;
+    float rangeSize = rangeLineEdit->text().toFloat(&ok);
+    if (!ok) {
+        throw std::invalid_argument("cannot determine range from line edit");
+    }
+    //needRayGeom???
+    float rowD = (range - _startGateKm) / rangeSize;
+    int row = (int) rowD;
+ 
+
+    int nRays = raysLineEdit->text().toInt(&ok);
+    if (!ok) {
+        throw std::invalid_argument("cannot determine number of rays from line edit");
+    }
+    int column = nRays / 2;
+
+    int left = column;
+    int top = row;
+
+    /*
     QString label1 = table->verticalHeaderItem(row)->text();
     QString label2 = table->verticalHeaderItem(row+1)->text();
 
@@ -1293,6 +1299,8 @@ void SpreadSheetView::highlightClickedData(string fieldName, float azimuth, floa
         column += 1;
     }
     LOG(DEBUG) << "left = " << left;
+    */
+
 
     bool selected = true;
     int bottom = top; int right = left;
@@ -1401,19 +1409,33 @@ void SpreadSheetView::deleteRay() {
 
 }
 
+void SpreadSheetView::subtractNyquistFromSelection() {
+  float factor = -1.0;
+  int top = table->currentRow();
+  adjustNyquistFromRay(factor, top);  
+}
+
+void SpreadSheetView::addNyquistFromSelection() {
+  float factor = 1.0;
+  int top = table->currentRow();
+  adjustNyquistFromRay(factor, top);  
+}
+
 void SpreadSheetView::subtractNyquistFromRay() {
   float factor = -1.0;
-  adjustNyquistFromRay(factor);
+  int top = 1;
+  adjustNyquistFromRay(factor, top);
 }
 
 void SpreadSheetView::addNyquistFromRay() {
   float factor = 1.0;
-  adjustNyquistFromRay(factor);
+  int top = 1;
+  adjustNyquistFromRay(factor, top);
 }
 
 // factor = -1.0 to subtract
 // factor = 1.0 to add 
-void SpreadSheetView::adjustNyquistFromRay(float factor) {
+void SpreadSheetView::adjustNyquistFromRay(float factor, int top) {
     LOG(DEBUG) << "enter";
 
     bool ok;
@@ -1424,9 +1446,9 @@ void SpreadSheetView::adjustNyquistFromRay(float factor) {
 
     int currentColumn = table->currentColumn();
     //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
-    int top = 1;
+    //int top = 1;
     int left = currentColumn;
-    int bottom = table->rowCount();
+    int bottom = table->rowCount() - 2;
     int right = currentColumn;
      
     QTableWidgetSelectionRange range(top, left, bottom, right);

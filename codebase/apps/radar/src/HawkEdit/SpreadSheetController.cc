@@ -104,7 +104,7 @@ void SpreadSheetController::moveToLocation(string fieldName, float elevation,
     float azimuth, float range) {
 
   moveToLocation(fieldName, elevation, azimuth);
-  _currentView->highlightClickedData(fieldName, azimuth, range);
+  _currentView->highlightClickedData(fieldName, azimuth, elevation, range);
 }
 
 void SpreadSheetController::switchRay(float azimuth, float elevation) {
