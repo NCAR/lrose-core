@@ -78,8 +78,11 @@ public slots:
   void subtractNyquistFromRay();
   void addNyquistFromRay();
   void subtractNyquistFromSelection();
-  void addNyquistFromSelection();
+  void addNyquistToSelection();
+  void subtractNyquistFromSelectionToEnd();
+  void addNyquistFromSelectionToEnd();
   void adjustNyquistFromRay(float factor, int top);
+  void adjustNyquistFromSelection(float factor);
 
   void notImplementedMessage();
 
@@ -198,7 +201,7 @@ private:
   QLineEdit *sweepLineEdit;
   QLineEdit *raysLineEdit;
   QLineEdit *missingDataValueLineEdit;
-  QLineEdit *rangeLineEdit;
+  QLabel *rangeLineEdit;
 
     QAction *printAction;
     QAction *replotAction;

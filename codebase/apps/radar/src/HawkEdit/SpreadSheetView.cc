@@ -104,8 +104,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     echoLayout->addWidget(new QLabel(tr("Changes")), 2, 0);
     echoLayout->addWidget(changesLineEdit, 2, 1);
 
-    rangeLineEdit = new QLineEdit;
-    rangeLineEdit->setPlaceholderText("0.15");
+    rangeLineEdit = new QLabel(tr("N/A"));;
+    //rangeLineEdit->setPlaceholderText("0.15");
     echoLayout->addWidget(new QLabel(tr("Range")), 3, 0);
     echoLayout->addWidget(rangeLineEdit, 3, 1);
 
@@ -379,42 +379,49 @@ void SpreadSheetView::createActions()
     redoAction->setShortcuts(QKeySequence::Redo);
 
     cell_deleteAction = new QAction(tr("Delete"), this);
+    cell_deleteAction->setToolTip(
+          QString("set selected gates to missing data value"));
     connect(cell_deleteAction, &QAction::triggered, this, &SpreadSheetView::deleteSelection);
 
     cell_negFoldAction = new QAction(tr("&- Fold"), this);
-    //cell_addAction->setShortcut(Qt::CTRL | Qt::Key_Plus);
-    connect(cell_negFoldAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+    cell_negFoldAction->setToolTip(
+          QString("subtract Nyquist velocity from selected gates"));
+    connect(cell_negFoldAction, &QAction::triggered, this, &SpreadSheetView::subtractNyquistFromSelection);
 
     cell_plusFoldAction = new QAction(tr("&+ Fold"), this);
-    //cell_addAction->setShortcut(Qt::CTRL | Qt::Key_Plus);
-    connect(cell_plusFoldAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
+    cell_plusFoldAction->setToolTip(
+          QString("add Nyquist velocity to selected gates"));
+    connect(cell_plusFoldAction, &QAction::triggered, this, &SpreadSheetView::addNyquistToSelection);
 
     cell_deleteRayAction = new QAction(tr("&Delete Ray"), this);
-    //cell_subAction->setShortcut(Qt::CTRL | Qt::Key_Minus);
+    cell_deleteRayAction->setToolTip(
+          QString("set entire ray to missing data value"));
     connect(cell_deleteRayAction, &QAction::triggered, this, &SpreadSheetView::deleteRay);
 
     cell_negFoldRayAction = new QAction(tr("&- Fold Ray"), this);
-    //cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
+    cell_negFoldRayAction->setToolTip(
+          QString("subtract Nyquist velocity from entire ray"));
     connect(cell_negFoldRayAction, &QAction::triggered, this, &SpreadSheetView::subtractNyquistFromRay);
 
     cell_plusFoldRayAction = new QAction(tr("&+ Fold Ray"), this);
-    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
+    cell_plusFoldRayAction->setToolTip(
+          QString("add Nyquist velocity to entire ray"));
     connect(cell_plusFoldRayAction, &QAction::triggered, this, &SpreadSheetView::addNyquistFromRay);
 
     cell_negFoldRayGreaterAction = new QAction(tr("&- Fold Ray >"), this);
-    //cell_mulAction->setShortcut(Qt::CTRL | Qt::Key_multiply);
-    connect(cell_negFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::subtractNyquistFromSelection);
+    cell_negFoldRayGreaterAction->setToolTip(
+          QString("subtract Nyquist velocity from selected gate to end gate"));
+    connect(cell_negFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::subtractNyquistFromSelectionToEnd);
 
     cell_plusFoldRayGreaterAction = new QAction(tr("&+ Fold Ray >"), this);
-    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
-    connect(cell_plusFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::addNyquistFromSelection);
+    cell_plusFoldRayGreaterAction->setToolTip(
+          QString("add Nyquist velocity starting at selected gate to end gate"));
+    connect(cell_plusFoldRayGreaterAction, &QAction::triggered, this, &SpreadSheetView::addNyquistFromSelectionToEnd);
 
     cell_plusFoldRangeAction = new QAction(tr("&+ Fold Range"), this);
-    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
     connect(cell_plusFoldRangeAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
 
     cell_zapGndSpdAction = new QAction(tr("Zap Gnd Spd"), this);
-    //cell_divAction->setShortcut(Qt::CTRL | Qt::Key_division);
     connect(cell_zapGndSpdAction, &QAction::triggered, this, &SpreadSheetView::notImplementedMessage);
 
     /* TODO:
@@ -1010,8 +1017,8 @@ void SpreadSheetView::rangeDataSent(size_t nGates, float startingKm, float gateS
 
   QString n;
   n.setNum(gateSize);
-  rangeLineEdit->clear();
-  rangeLineEdit->insert(n);
+  //rangeLineEdit->clear();
+  rangeLineEdit->setText(n);
   _startGateKm = startingKm;
 }
 
@@ -1416,11 +1423,21 @@ void SpreadSheetView::deleteRay() {
 
 void SpreadSheetView::subtractNyquistFromSelection() {
   float factor = -1.0;
+  adjustNyquistFromSelection(factor);
+}
+
+void SpreadSheetView::addNyquistToSelection() {
+  float factor = 1.0;
+  adjustNyquistFromSelection(factor); 
+}
+
+void SpreadSheetView::subtractNyquistFromSelectionToEnd() {
+  float factor = -1.0;
   int top = table->currentRow();
   adjustNyquistFromRay(factor, top);  
 }
 
-void SpreadSheetView::addNyquistFromSelection() {
+void SpreadSheetView::addNyquistFromSelectionToEnd() {
   float factor = 1.0;
   int top = table->currentRow();
   adjustNyquistFromRay(factor, top);  
@@ -1443,12 +1460,6 @@ void SpreadSheetView::addNyquistFromRay() {
 void SpreadSheetView::adjustNyquistFromRay(float factor, int top) {
     LOG(DEBUG) << "enter";
 
-    bool ok;
-    float nyquistVelocity = nyquistVelocityLabel->text().toFloat(&ok);
-    if (!ok) throw std::invalid_argument("cannot determine nyquistVelocity from label");
-
-    nyquistVelocity *= factor;
-
     int currentColumn = table->currentColumn();
     //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
     //int top = 1;
@@ -1464,6 +1475,16 @@ void SpreadSheetView::adjustNyquistFromRay(float factor, int top) {
     // for each selected cell
     // subtract Nyquist
     // set new value
+    adjustNyquistFromSelection(factor);
+}
+
+void SpreadSheetView::adjustNyquistFromSelection(float factor) {
+
+    bool ok;
+    float nyquistVelocity = nyquistVelocityLabel->text().toFloat(&ok);
+    if (!ok) throw std::invalid_argument("cannot determine nyquistVelocity from label");
+
+    nyquistVelocity *= factor;
 
     QList<QTableWidgetItem*> selected = table->selectedItems();
     if (selected.count() == 0)
