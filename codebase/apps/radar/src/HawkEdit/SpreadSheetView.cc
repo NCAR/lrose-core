@@ -999,6 +999,9 @@ void SpreadSheetView::setupContents()
 
 void SpreadSheetView::rangeDataSent(size_t nGates, float startingKm, float gateSize) {
   //table->setHorizontalHeaderItem(0, new QTableWidgetItem("Km"));   
+  if (table->rowCount() != nGates) {
+    table->setRowCount(nGates);
+  }
   char rangeFormatted[15];
   for (size_t r=0; r<nGates; r++) {
     sprintf(rangeFormatted, "%8.2f Km", gateSize*r + startingKm);
@@ -1040,8 +1043,9 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, 
       cout << "fieldName = " << fieldName.toStdString() << endl;
       QJSValue fieldArray = engine.newArray(nPoints);
       QString vectorName = fieldName;
-
-      table->setRowCount(nPoints);
+      if (table->rowCount() != nPoints) {
+        table->setRowCount(nPoints);
+      }
       vector<float> dataVector = *data;
       float *dp = &dataVector[0];
 
@@ -1243,8 +1247,8 @@ void SpreadSheetView::highlightClickedData(string fieldName, float azimuth,
     }
     int column = nRays / 2;
 
-    int left = column;
-    int top = row;
+    //int left = column;
+    //int top = row;
 
     /*
     QString label1 = table->verticalHeaderItem(row)->text();
@@ -1302,12 +1306,13 @@ void SpreadSheetView::highlightClickedData(string fieldName, float azimuth,
     */
 
 
-    bool selected = true;
-    int bottom = top; int right = left;
-    const QTableWidgetSelectionRange selectionRange(top, left, bottom, right);
-    table->setRangeSelected(selectionRange, selected);
-    QList<QTableWidgetItem *> selectedItems = table->selectedItems();
-    table->scrollToItem(selectedItems.at(0), QAbstractItemView::PositionAtCenter);
+    //bool selected = true;
+    //int bottom = top; int right = left;
+    table->setCurrentCell(row, column, QItemSelectionModel::SelectCurrent);
+    //const QTableWidgetSelectionRange selectionRange(top, left, bottom, right);
+    //table->setRangeSelected(selectionRange, selected);
+    QTableWidgetItem * selectedItem = table->item(row, column);
+    table->scrollToItem(selectedItem, QAbstractItemView::PositionAtCenter);
     LOG(DEBUG) << "exit";
 }
 
