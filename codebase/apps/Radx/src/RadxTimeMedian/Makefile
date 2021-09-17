@@ -31,7 +31,7 @@
 #
 ###########################################################################
 
-include $(RAP_MAKE_INC_DIR)/rap_make_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INC_DIR = .
 MY_CPPCHECKFLAGS = -E Params.cc -E Params.hh -AddStyleFAA -exclude-rules="4.16,4.09,4.14,4.12"
@@ -55,7 +55,6 @@ HDRS = \
 
 CPPC_SRCS = \
 	Params.cc \
-	HeaderParams.cc \
 	Alg.cc \
 	HeaderParams.cc \
 	Histo.cc \
@@ -70,19 +69,19 @@ CPPC_SRCS = \
 # tdrp macros
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_macros
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
 # C++ targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # tdrp targets
 #
 
-include $(RAP_MAKE_INC_DIR)/rap_make_tdrp_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 HeaderParams.cc: paramdef.header
 	tdrp_gen -f paramdef.header -c++ -class HeaderParams

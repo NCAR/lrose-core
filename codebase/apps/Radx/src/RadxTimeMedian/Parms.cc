@@ -11,7 +11,7 @@
 
 const std::string Parms::_volInitStr = "VolInit";
 const std::string Parms::_volFinishStr = "VolFinish";
-const std::string Parms::_histoAccumStr = "AccumulateHisto";;
+const std::string Parms::_histoAccumStr = "AccumulateHisto";
 const std::string Parms::_initStatus = "statusInit";
 const std::string Parms::_finishStatus = "statusFinish";
 

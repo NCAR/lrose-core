@@ -535,7 +535,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("RadxTimeMedian");
-    tt->comment_text = tdrpStrDup("Parameters for setting time median of one input field. Produces median values through time at each gridpoint of an input dataset.\nNote that this works only in ARCHIVE or FILELIST modes, with one input field, and gives its output only after the last input is processed.");
+    tt->comment_text = tdrpStrDup("Parameters for setting time median of one input field.  Produces median values through time at each gridpoint of an input dataset\nNote that this works only in ARCHIVE or FILELIST modes, with one input field, and gives its output only after the last input is processed.");
     tt++;
     
     // trailing entry has param_name set to NULL
