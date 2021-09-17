@@ -55,8 +55,8 @@ HDRS = \
 
 CPPC_SRCS = \
 	Params.cc \
-	Alg.cc \
 	HeaderParams.cc \
+	Alg.cc \
 	Histo.cc \
 	Main.cc \
 	Parms.cc \
@@ -82,9 +82,6 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
-
-HeaderParams.cc: paramdef.header
-	tdrp_gen -f paramdef.header -c++ -class HeaderParams
 
 HeaderParams.cc: paramdef.header
 	tdrp_gen -f paramdef.header -c++ -class HeaderParams
