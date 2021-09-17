@@ -188,26 +188,6 @@ int InputMdv::read(time_t data_time)
     _setDzConstant();
   }
 
-  if (_params.remap_z_to_constant_grid) {
-    for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
-      MdvxField *field = mdvx.getField(ii);
-      if (field) {
-        field->remapVlevels(_params.remap_z_grid.nz,
-                            _params.remap_z_grid.minz,
-                            _params.remap_z_grid.dz);
-      }
-    }
-  }
-
-
-  if (!dbzField->isDzConstant()) {
-    cerr << "WARNING - InputMdv::read()" << endl;
-    cerr << "  DBZ field does not have constant delta Z in height" << endl;
-    cerr << "  File: " << mdvx.getPathInUse() << endl;
-    cerr << "  Vertical levels will not be properly handled." << endl;
-    cerr << "  Please set the 'remap_z_to_constant_grid' parameter" << endl;
-  }
-
   // if required, find the convective regions
   
   if (_params.identify_convective_regions) {
