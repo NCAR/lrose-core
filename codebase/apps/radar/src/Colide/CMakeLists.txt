@@ -15,6 +15,7 @@ project (Colide)
 
 set (SRCS
       Params.cc
+      HeaderParams.cc
       Bad.cc
       Colide.cc
       EllipHandler.cc

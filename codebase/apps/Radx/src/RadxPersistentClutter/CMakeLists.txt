@@ -18,6 +18,7 @@ set (SRCS
       Parms.cc
       Alg.cc
       FrequencyCount.cc
+      HeaderParams.cc
       Histo.cc
       Info.cc
       RadxPersistentClutter.cc

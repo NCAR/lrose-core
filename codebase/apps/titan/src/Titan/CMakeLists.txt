@@ -20,9 +20,7 @@ set (SRCS
       Boundary.cc
       ConvectionFinder.cc
       DataTimes.cc
-      DualThresh.cc
       FileLock.cc
-      GridClump.cc
       Identify.cc
       InputMdv.cc
       Main.cc

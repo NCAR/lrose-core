@@ -16,6 +16,7 @@ project (RadxMesoCyclone)
 set (SRCS
       Params.cc
       Parms.cc
+      HeaderParams.cc
       Main.cc
       MesoTemplate.cc
       RadxMesoCyclone.cc

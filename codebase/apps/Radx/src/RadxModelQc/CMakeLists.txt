@@ -15,6 +15,7 @@ project (RadxModelQc)
 
 set (SRCS
       Params.cc
+      HeaderParams.cc
       Parms.cc
       Main.cc
       RadxModelQc.cc

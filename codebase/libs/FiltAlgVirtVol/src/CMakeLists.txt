@@ -85,6 +85,7 @@ set (SRCS
       ./FiltAlgVirtVol/VirtVolSweep.cc
       ./FiltAlgVirtVol/VirtVolVolume.cc
       ./FiltAlgVirtVol/VolumeInfo.cc
+      ./FiltAlgVirtVol/VolumeTime.cc
    )
 
 if(APPLE)

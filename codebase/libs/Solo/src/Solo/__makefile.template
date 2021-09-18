@@ -40,6 +40,7 @@ CPPC_SRCS = \
         OneBoundary.cc \
         BoundaryPointManagement.cc \
         BoundaryPointMap.cc \
+	Boundary.cc \
         SoloFunctionsApi.cc \
 	Despeckle.cc \
 	FlagOps.cc \

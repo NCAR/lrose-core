@@ -15,6 +15,7 @@ project (RadxTimeMedian)
 
 set (SRCS
       Params.cc
+      HeaderParams.cc
       Alg.cc
       Histo.cc
       Main.cc
@@ -127,12 +128,12 @@ link_libraries (dataport)
 link_libraries (tdrp)
 link_libraries (shapelib)
 link_libraries (cidd)
+link_libraries (fftw3)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
 link_libraries (hdf5)
 link_libraries (z)
 link_libraries (bz2)
-link_libraries (fftw3)
 link_libraries (pthread)
 link_libraries (Ncxx)
 link_libraries (netcdf)

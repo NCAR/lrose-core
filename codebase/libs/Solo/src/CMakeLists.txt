@@ -68,6 +68,7 @@ set (SRCS
       ./Solo/OneBoundary.cc
       ./Solo/BoundaryPointManagement.cc
       ./Solo/BoundaryPointMap.cc
+      ./Solo/Boundary.cc
       ./Solo/SoloFunctionsApi.cc
       ./Solo/Despeckle.cc
       ./Solo/FlagOps.cc
