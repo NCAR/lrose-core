@@ -90,7 +90,7 @@ public:
   // Destructor
   //
 
-  ~ParamsFuzzyFunction ();
+  virtual ~ParamsFuzzyFunction ();
 
   ////////////////////////////////////////////
   // Assignment
