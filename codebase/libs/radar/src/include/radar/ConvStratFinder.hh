@@ -43,7 +43,7 @@
 #include <toolsa/TaArray.hh>
 #include <toolsa/TaThread.hh>
 #include <dataport/port_types.h>
-#include <euclid/GridClumping.hh>
+#include <euclid/ClumpingMgr.hh>
 using namespace std;
 
 ////////////////////////
@@ -357,7 +357,7 @@ private:
 
   // clumping the convective regions
   
-  GridClumping _clumping;
+  ClumpingMgr _clumping;
   int _nClumps;
   vector<ClumpGeom *> _clumps;
   

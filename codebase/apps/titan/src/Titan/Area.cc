@@ -299,17 +299,17 @@ void Area::_ellipseCompute(const ClumpGrid &clump_grid,
    * check coords allocation
    */
 
-  int max_coords = clump_grid.grid.nx() * clump_grid.grid.ny();
+  int max_coords = clump_grid.gridGeom.nx() * clump_grid.gridGeom.ny();
   _allocCoords(max_coords);
 
   // load up coords
 
   int n_coords = 0;
-  double dy = clump_grid.grid.dy();
-  double dx = clump_grid.grid.dx();
-  double yy = clump_grid.grid.miny() + clump_grid.startIy * dy;
+  double dy = clump_grid.gridGeom.dy();
+  double dx = clump_grid.gridGeom.dx();
+  double yy = clump_grid.gridGeom.miny() + clump_grid.startIy * dy;
   for (int iy = 0; iy < _nY; iy++, yy += dy) {
-    double xx = clump_grid.grid.minx() + clump_grid.startIx * dx;
+    double xx = clump_grid.gridGeom.minx() + clump_grid.startIx * dx;
     for (int ix = 0; ix < _nX; ix++, xx += dx) {
       if (*grid) {
 	_areaCoords[n_coords][0] = xx;
@@ -442,15 +442,15 @@ void Area::_computeProjPolygon(const ClumpGrid &clump_grid)
   // other computations are relative to the center of the
   // grid rectangles.
   
-  double dx = clump_grid.grid.dx();
-  double dy = clump_grid.grid.dy();
+  double dx = clump_grid.gridGeom.dx();
+  double dy = clump_grid.gridGeom.dy();
 
   double ref_x =
-    (0.5 + ((_gProps->proj_area_centroid_x - clump_grid.grid.minx()) / dx) - 
+    (0.5 + ((_gProps->proj_area_centroid_x - clump_grid.gridGeom.minx()) / dx) - 
      clump_grid.startIx);
   
   double ref_y =
-    (0.5 + ((_gProps->proj_area_centroid_y - clump_grid.grid.miny()) / dy) - 
+    (0.5 + ((_gProps->proj_area_centroid_y - clump_grid.gridGeom.miny()) / dy) - 
      clump_grid.startIy);
   
   // compute the boundary
@@ -484,14 +484,14 @@ void Area::_computePrecip(const ClumpGrid &clump_grid)
 
   // load up dbz grid for precip, depending on mode
 
-  int nPointsPlane = _inputMdv.grid.nx * _inputMdv.grid.ny;
+  int nPointsPlane = clump_grid.gridGeom.nx() * clump_grid.gridGeom.ny();
   Params::precip_mode_t precipMode = _params.precip_computation_mode;
-  int nZ = _inputMdv.grid.nz;
+  int nZ = clump_grid.gridGeom.nz();
 
   ii = 0;
   for (int iy = 0; iy < _nY; iy++) {
     
-    int mm = (iy + clump_grid.startIy) * _inputMdv.grid.nx +
+    int mm = (iy + clump_grid.startIy) * clump_grid.gridGeom.nx() +
       + clump_grid.startIx;
     
     for (int ix = 0; ix < _nX; ix++, ii++, mm++) {
@@ -609,11 +609,11 @@ void Area::_computeTops(const ClumpGrid &clump_grid)
 {
 
   double top = 0.0;
-  int nPointsPlane = _inputMdv.grid.nx * _inputMdv.grid.ny;
+  int nPointsPlane = clump_grid.gridGeom.nx() * clump_grid.gridGeom.ny();
   
-  for (int iz = 0; iz < _inputMdv.grid.nz; iz++) {
+  for (size_t iz = 0; iz < clump_grid.gridGeom.nz(); iz++) {
     
-    double ht = _inputMdv.grid.minz + (iz + 0.5) * _inputMdv.grid.dz;
+    double ht = clump_grid.gridGeom.zKm()[iz];
     const fl32 *dbzPlane = _inputMdv.dbzVol + iz * nPointsPlane;
     ui08 *flag = _compGrid;
 
@@ -623,7 +623,7 @@ void Area::_computeTops(const ClumpGrid &clump_grid)
     for (int iy = 0; iy < _nY; iy++) {
 
       int index =
-        (iy + clump_grid.startIy) * _inputMdv.grid.nx + clump_grid.startIx;
+        (iy + clump_grid.startIy) * clump_grid.gridGeom.nx() + clump_grid.startIx;
 
       const fl32 *dbz = dbzPlane + index;
       for (int ix = 0; ix < _nX; ix++, flag++, dbz++) {

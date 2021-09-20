@@ -38,6 +38,7 @@
 
 #include <euclid/PjgTypes.hh>
 #include <ostream>
+#include <vector>
 
 class PjgGridGeom
 {
@@ -59,58 +60,47 @@ public:
 
   void setNx(size_t val) { _nx = val; }
   void setNy(size_t val) { _ny = val; }
-  void setNz(size_t val) { _nz = val; }
 
   void setDx(double val) { _dx = val; }
   void setDy(double val) { _dy = val; }
-  void setDz(double val) { _dz = val; }
-
+  
   void setMinx(double val) { _minx = val; }
   void setMiny(double val) { _miny = val; }
-  void setMinz(double val) { _minz = val; }
+  
+  void setZKm(const vector<double> &val) { _zKm = val; }
+  void addZKm(double val) { _zKm.push_back(val); }
+  void clearZKm() { _zKm.clear(); }
 
   void setIsLatLon(bool val) { _isLatLon = val; }
   void setProjType(PjgTypes::proj_type_t val) { _projType = val; }
-
-  void setXY(size_t nx, size_t ny,
-             double dx, double dy,
-             double minx, double miny) {
-    _nx = nx;
-    _ny = ny;
-    _dx = dx;
-    _dy = dy;
-    _minx = minx;
-    _miny = miny;
-  }
-
-  void setXYZ(size_t nx, size_t ny, size_t nz,
-              double dx, double dy, double dz,
-              double minx, double miny, double minz) {
-    _nx = nx;
-    _ny = ny;
-    _nz = nz;
-    _dx = dx;
-    _dy = dy;
-    _dz = dz;
-    _minx = minx;
-    _miny = miny;
-    _minz = minz;
-  }
-
+  
   /// get methods
   /// units are km
 
   size_t nx() const { return _nx; }
   size_t ny() const { return _ny; }
-  size_t nz() const { return _nz; }
-
+  size_t nz() const { return _zKm.size(); }
+  
   double dx() const { return _dx; }
   double dy() const { return _dy; }
-  double dz() const { return _dz; }
-
+  double meanDz() const {
+    if (_zKm.size() > 1) {
+      return (_zKm[_zKm.size()-1] - _zKm[0]) / (_zKm.size() - 1);
+    } else {
+      return 0;
+    }
+  }
+  
   double minx() const { return _minx; }
   double miny() const { return _miny; }
-  double minz() const { return _minz; }
+  double minz() const {
+    if (_zKm.size() > 0) {
+      return _zKm[0];
+    } else {
+      return 0;
+    }
+  }
+  const vector<double> &zKm() const { return _zKm; }
 
   bool isLatLon() const { return _isLatLon; }
   PjgTypes::proj_type_t projType() const { return _projType; }
@@ -124,9 +114,11 @@ protected:
   bool _isLatLon;
   PjgTypes::proj_type_t _projType;
   
-  size_t _nx, _ny, _nz;
-  double _dx, _dy, _dz;
-  double _minx, _miny, _minz;
+  size_t _nx, _ny;
+  double _dx, _dy;
+  double _minx, _miny;
+
+  vector<double> _zKm;
 
 private:
 

@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ClumpDualThresh.cc
+// ClumpingDualThresh.cc
 //
 // This class performs the second stage in
 // multiple threshold identification.
@@ -36,15 +36,16 @@
 ///////////////////////////////////////////////////////////////
 
 #include <toolsa/umisc.h>
-#include <euclid/ClumpDualThresh.hh>
+#include <euclid/ClumpingDualThresh.hh>
 #include <vector>
+#include <iostream>
 using namespace std;
 
 ///////////////////////////////////
 // constructor - recursion level 0
 //
 
-ClumpDualThresh::ClumpDualThresh() :
+ClumpingDualThresh::ClumpingDualThresh() :
         _debug(false),
         _inputData(NULL),
         _minValidLayer(0),
@@ -94,7 +95,7 @@ ClumpDualThresh::ClumpDualThresh() :
 // destructor
 //
 
-ClumpDualThresh::~ClumpDualThresh()
+ClumpingDualThresh::~ClumpingDualThresh()
 
 {
 
@@ -154,8 +155,8 @@ ClumpDualThresh::~ClumpDualThresh()
 ////////////////////////////////////////////
 // set the input data and grid details
 
-void ClumpDualThresh::setInputData(PjgGridGeom &inputGeom,
-                                   const fl32 *inputData)
+void ClumpingDualThresh::setInputData(PjgGridGeom &inputGeom,
+                                      const fl32 *inputData)
 
 {
 
@@ -177,7 +178,7 @@ void ClumpDualThresh::setInputData(PjgGridGeom &inputGeom,
 // Returns number of sub-clumps.
 //
 
-int ClumpDualThresh::compute(const ClumpGrid &clump_grid)
+int ClumpingDualThresh::compute(const ClumpGrid &clump_grid)
 
 {
 
@@ -189,6 +190,12 @@ int ClumpDualThresh::compute(const ClumpGrid &clump_grid)
   
   if (clump_grid.clumpSize < _minClumpVolume ||
       clump_grid.clumpSize > _maxClumpVolume) {
+     cerr << "222222222222 clump_grid.clumpSize, "
+          << "_minClumpVolume, _maxClumpVolume: "
+          << clump_grid.clumpSize << ", "
+          << _minClumpVolume << ", "
+          << _maxClumpVolume << endl;
+      
     return (0);
   }
     
@@ -240,10 +247,7 @@ int ClumpDualThresh::compute(const ClumpGrid &clump_grid)
     const Clump_order *clump =  _clumping.getClumps() + i;
     ClumpGrid gridClump;
     gridClump.init(clump,
-                   clump_grid.grid.nx(), clump_grid.grid.ny(), clump_grid.grid.nz(),
-                   clump_grid.grid.dx(), clump_grid.grid.dy(), clump_grid.grid.dz(),
-                   clump_grid.grid.minx(), clump_grid.grid.miny(), clump_grid.grid.minz(),
-                   clump_grid.grid.isLatLon(),
+                   clump_grid.gridGeom,
 		   clump_grid.startIx, clump_grid.startIy);
     double thisSize = gridClump.nPoints;
     sumSize += thisSize;
@@ -258,6 +262,13 @@ int ClumpDualThresh::compute(const ClumpGrid &clump_grid)
   }
   double fractionAllParts = sumSize / sizeOuter;
   
+  cerr << "333333 sumSize, sizeOuter, fractionAllParts, _minFractionAllParts, nLargeEnough: "
+       << sumSize << ", "
+       << sizeOuter << ", "
+       << fractionAllParts << ", "
+       << _minFractionAllParts << ", "
+       << nLargeEnough << endl;
+    
   if (fractionAllParts < _minFractionAllParts ||
       nLargeEnough < 2) {
 
@@ -316,6 +327,7 @@ int ClumpDualThresh::compute(const ClumpGrid &clump_grid)
     _computeSubClump(clump_grid, i+1);
   }
   
+  cerr << "1111111111111111111 nSubClumps: " << _nSubClumps << endl;
   return (_nSubClumps);
 
 }
@@ -326,7 +338,7 @@ int ClumpDualThresh::compute(const ClumpGrid &clump_grid)
 // Fill the composite dbz array from 3D array.
 //
 
-void ClumpDualThresh::_fillComposite(const ClumpGrid &clump_grid)
+void ClumpingDualThresh::_fillComposite(const ClumpGrid &clump_grid)
 
 {
 
@@ -377,7 +389,7 @@ void ClumpDualThresh::_fillComposite(const ClumpGrid &clump_grid)
 // Allocate and initialize work grids
 //
 
-void ClumpDualThresh::_initWorkGrids()
+void ClumpingDualThresh::_initWorkGrids()
   
 {
   
@@ -405,7 +417,7 @@ void ClumpDualThresh::_initWorkGrids()
 // Allocate and initialize grids for MDV output file
 //
 
-void ClumpDualThresh::_initFileGrids()
+void ClumpingDualThresh::_initFileGrids()
   
 {
 
@@ -441,7 +453,7 @@ void ClumpDualThresh::_initFileGrids()
 // Update the composite grid in the output file
 //
 
-void ClumpDualThresh::_updateFileComp(const ClumpGrid &clump_grid)
+void ClumpingDualThresh::_updateFileComp(const ClumpGrid &clump_grid)
   
 {
   
@@ -477,7 +489,7 @@ void ClumpDualThresh::_updateFileComp(const ClumpGrid &clump_grid)
 // Update the ident grids in the output file
 //
 
-void ClumpDualThresh::_updateFileGrids(const ClumpGrid &clump_grid)
+void ClumpingDualThresh::_updateFileGrids(const ClumpGrid &clump_grid)
   
 {
   
@@ -514,7 +526,7 @@ void ClumpDualThresh::_updateFileGrids(const ClumpGrid &clump_grid)
 // Loads up array of indices for points in the composite.
 //
 
-void ClumpDualThresh::_loadCompIndex()
+void ClumpingDualThresh::_loadCompIndex()
 
 {
 
@@ -566,7 +578,7 @@ void ClumpDualThresh::_loadCompIndex()
 // point.
 //
 
-void ClumpDualThresh::_growSubAreas()
+void ClumpingDualThresh::_growSubAreas()
 
 {
 
@@ -650,7 +662,7 @@ void ClumpDualThresh::_growSubAreas()
 ////////////////////
 // _allocSubClumps()
 
-void ClumpDualThresh::_allocSubClumps()
+void ClumpingDualThresh::_allocSubClumps()
   
 {
   
@@ -660,10 +672,10 @@ void ClumpDualThresh::_allocSubClumps()
   _subClumps = new ClumpGrid[_nSubClumps];
 
   if (_nSubClumps > _nSubClumpsAlloc) {
-    _subClumping = (GridClumping **)
-      urealloc(_subClumping, _nSubClumps * sizeof(GridClumping *));
+    _subClumping = (ClumpingMgr **)
+      urealloc(_subClumping, _nSubClumps * sizeof(ClumpingMgr *));
     for (size_t i = _nSubClumpsAlloc; i < _nSubClumps; i++) {
-      _subClumping[i] = new GridClumping();
+      _subClumping[i] = new ClumpingMgr();
     }
     _nSubClumpsAlloc = _nSubClumps;
   }
@@ -673,7 +685,7 @@ void ClumpDualThresh::_allocSubClumps()
 /////////////////////
 // _computeSubClump()
 
-void ClumpDualThresh::_computeSubClump(const ClumpGrid &clump_grid, int clump_id)
+void ClumpingDualThresh::_computeSubClump(const ClumpGrid &clump_grid, int clump_id)
   
 {
 
@@ -705,10 +717,7 @@ void ClumpDualThresh::_computeSubClump(const ClumpGrid &clump_grid, int clump_id
   // set up the grid clump object
 
   _subClumps[clump_id-1].init(_subClumping[clump_id-1]->getClumps() + clumpNum,
-			      _inputGeom.nx(), _inputGeom.ny(), _inputGeom.nz(),
-			      _inputGeom.dx(), _inputGeom.dy(), _inputGeom.dz(),
-			      _inputGeom.minx(), _inputGeom.miny(), _inputGeom.minz(),
-                              _inputGeom.isLatLon(),
+			      _inputGeom,
 			      clump_grid.startIx - 1,
 			      clump_grid.startIy - 1);
 
@@ -717,7 +726,7 @@ void ClumpDualThresh::_computeSubClump(const ClumpGrid &clump_grid, int clump_id
 ////////////////////
 // _initGridMask()
 
-void ClumpDualThresh::_initGridMask()
+void ClumpingDualThresh::_initGridMask()
 
 {
 
@@ -741,7 +750,7 @@ void ClumpDualThresh::_initGridMask()
 // do not have the given clump_id in the grown grid.
 //
 
-void ClumpDualThresh::_loadGridMask(const ClumpGrid &clump_grid, int clump_id)
+void ClumpingDualThresh::_loadGridMask(const ClumpGrid &clump_grid, int clump_id)
   
 {
 

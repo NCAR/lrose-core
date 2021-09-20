@@ -129,10 +129,11 @@ int EG_chull(double **P, double *start, int n, int *indices)
   P[n] = P[0];
 
   ret = u+make_chain(P+u, n-u+1, cmph);	/* make upper hull */
-  for (i=0; i<ret; i++) 
+  for (i=0; i<ret; i++) {
     indices[i] = (P[i]-start)/2;
-
-    return ret;
+  }
+  
+  return ret;
 }
 
 #ifdef TEST_MAIN

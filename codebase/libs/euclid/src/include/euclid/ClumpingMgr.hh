@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// GridClumping.hh
+// ClumpingMgr.hh
 //
-// GridClumping class
+// ClumpingMgr class
 //
 // Provides services for run identification and clumping.
 //
@@ -36,8 +36,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef GridClumping_HH
-#define GridClumping_HH
+#ifndef ClumpingMgr_HH
+#define ClumpingMgr_HH
 
 #include <string>
 #include <euclid/clump.h>
@@ -45,19 +45,19 @@
 using namespace std;
 
 ////////////////////////////////
-// GridClumping
+// ClumpingMgr
 
-class GridClumping {
+class ClumpingMgr {
   
 public:
 
   // constructor
 
-  GridClumping();
+  ClumpingMgr();
 
   // destructor
   
-  virtual ~GridClumping();
+  virtual ~ClumpingMgr();
 
   // Find the run intervals in a 2D data grid
   int findIntervals(int nx, int ny,

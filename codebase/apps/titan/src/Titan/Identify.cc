@@ -111,12 +111,74 @@ int Identify::run(int scan_num)
     _verify->prepareGrids();
   }
 
-  PjgGridGeom geom;
-  geom.setXYZ(tgrid.nx, tgrid.ny, tgrid.nz,
-              tgrid.dx, tgrid.dy, tgrid.dz,
-              tgrid.minx, tgrid.miny, tgrid.minz);
-  geom.setIsLatLon(tgrid.proj_type == TITAN_PROJ_LATLON);
-  _dualT.setInputData(geom, _inputMdv.dbzVol);
+  // initialize grid geometry
+  
+  _gridGeom.setNx(tgrid.nx);
+  _gridGeom.setNy(tgrid.ny);
+  _gridGeom.setDx(tgrid.dx);
+  _gridGeom.setDy(tgrid.dy);
+  _gridGeom.setMinx(tgrid.minx);
+  _gridGeom.setMiny(tgrid.miny);
+
+  _gridGeom.clearZKm();
+  for (int ii = 0; ii < tgrid.nz; ii++) {
+    _gridGeom.addZKm(tgrid.minz + ii * tgrid.dz);
+  }
+
+  _gridGeom.setIsLatLon(false);
+  switch (tgrid.proj_type) {
+    case TITAN_PROJ_LATLON:
+      _gridGeom.setProjType(PjgTypes::PROJ_LATLON);
+      _gridGeom.setIsLatLon(true);
+      break;
+    case TITAN_PROJ_FLAT:
+      _gridGeom.setProjType(PjgTypes::PROJ_FLAT);
+      break;
+    case TITAN_PROJ_STEREOGRAPHIC:
+      _gridGeom.setProjType(PjgTypes::PROJ_STEREOGRAPHIC);
+      break;
+    case TITAN_PROJ_LAMBERT_CONF:
+      _gridGeom.setProjType(PjgTypes::PROJ_LAMBERT_CONF);
+      break;
+    case TITAN_PROJ_MERCATOR:
+      _gridGeom.setProjType(PjgTypes::PROJ_MERCATOR);
+      break;
+    case TITAN_PROJ_POLAR_STEREO:
+      _gridGeom.setProjType(PjgTypes::PROJ_POLAR_STEREO);
+      break;
+    case TITAN_PROJ_POLAR_ST_ELLIP:
+      _gridGeom.setProjType(PjgTypes::PROJ_POLAR_ST_ELLIP);
+      break;
+    case TITAN_PROJ_CYL_EQUIDIST:
+      _gridGeom.setProjType(PjgTypes::PROJ_CYL_EQUIDIST);
+      break;
+    case TITAN_PROJ_OBLIQUE_STEREO:
+      _gridGeom.setProjType(PjgTypes::PROJ_OBLIQUE_STEREO);
+      break;
+    case TITAN_PROJ_TRANS_MERCATOR:
+      _gridGeom.setProjType(PjgTypes::PROJ_TRANS_MERCATOR);
+      break;
+    case TITAN_PROJ_ALBERS:
+      _gridGeom.setProjType(PjgTypes::PROJ_ALBERS);
+      break;
+    case TITAN_PROJ_LAMBERT_AZIM:
+      _gridGeom.setProjType(PjgTypes::PROJ_LAMBERT_AZIM);
+      break;
+  }
+  
+  // set the parameters and input data for dual threshold object
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _dualT.setDebug(true);
+  }
+  _dualT.setPrimaryThreshold(_params.low_dbz_threshold);
+  _dualT.setSecondaryThreshold(_params.dual_threshold.dbz_threshold);
+  _dualT.setMinFractionAllParts(_params.dual_threshold.min_fraction_all_parts);
+  _dualT.setMinFractionEachPart(_params.dual_threshold.min_fraction_each_part);
+  _dualT.setMinAreaEachPart(_params.dual_threshold.min_area_each_part);
+  _dualT.setMinClumpVolume(_params.min_storm_size);
+  _dualT.setMaxClumpVolume(_params.max_storm_size);
+  _dualT.setInputData(_gridGeom, _inputMdv.dbzVol);
 
   // perform clumping
 
@@ -205,27 +267,29 @@ int Identify::_processClumps(int scan_num)
   const Clump_order *clump = _clumping.getClumps();
   
   for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
-
     
-    const titan_grid_t &tgrid = _inputMdv.grid;
-    bool isLatLon = (tgrid.proj_type == TITAN_PROJ_LATLON);
-    ClumpGrid gridClump;
-    gridClump.init(clump,
-                   tgrid.nx, tgrid.ny, tgrid.nz,
-                   tgrid.dx, tgrid.dy, tgrid.dz,
-                   tgrid.minx, tgrid.miny, tgrid.minz,
-                   isLatLon,
-                   0, 0);
+    ClumpGrid gclump;
+    gclump.init(clump, _gridGeom, 0, 0);
 
     // dual threshold takes precedence over morphology
 
     if (_params.use_dual_threshold) {
       
-      int n_sub_clumps = _dualT.compute(gridClump);
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        fprintf(stderr,
+                "==>> processing clump: size, startIx, startIy, nx, ny, offsetx, offsety: "
+                "%g, %d, %d, %d, %d, %g, %g\n",
+                gclump.clumpSize,
+                gclump.startIx, gclump.startIy,
+                gclump.nX, gclump.nY,
+                gclump.offsetX, gclump.offsetY);
+      }
+      
+      int n_sub_clumps = _dualT.compute(gclump);
 
       if (n_sub_clumps == 1) {
 	
-	if (_processThisClump(gridClump)) {
+	if (_processThisClump(gclump)) {
 	  return (-1);
 	}
 
@@ -241,7 +305,7 @@ int Identify::_processClumps(int scan_num)
 
     } else {
       
-      if (_processThisClump(gridClump)) {
+      if (_processThisClump(gclump)) {
 	return (-1);
       }
       

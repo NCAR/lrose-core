@@ -187,8 +187,8 @@ private:
   int _computeFirstPass(const ClumpGrid &clump_grid);
   void _computeSecondPass(const ClumpGrid &clump_grid);
   int _storeRuns(const ClumpGrid &clump_grid);
-  void _tiltCompute();
-  void _dbzGradientCompute();
+  void _tiltCompute(const ClumpGrid &clump_grid);
+  void _dbzGradientCompute(const ClumpGrid &clump_grid);
   int _checkSecondTrip();
      
   void _loadGprops(storm_file_global_props_t *gprops,

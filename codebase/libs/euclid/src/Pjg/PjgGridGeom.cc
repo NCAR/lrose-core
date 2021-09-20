@@ -42,9 +42,9 @@
 PjgGridGeom::PjgGridGeom()
 
 {
-  _nx = _ny = _nz = 0;
-  _dx = _dy = _dz = 0.0;
-  _minx = _miny = _minz = 0.0;
+  _nx = _ny = 0;
+  _dx = _dy = 0.0;
+  _minx = _miny = 0.0;
   _isLatLon = true;
   _projType = PjgTypes::PROJ_LATLON;
 }
@@ -65,11 +65,19 @@ void PjgGridGeom::print(ostream &out)
 {
   out << "============= PjgGridGeom =============" << endl;
   out << "  nx, ny, nz: "
-      << _nx << ", " << _ny << ", " << _nz << endl;
-  out << "  dx, dy, dz: "
-      << _dx << ", " << _dy << ", " << _dz << endl;
+      << _nx << ", " << _ny << ", " << _zKm.size() << endl;
+  out << "  dx, dy, meanDz: "
+      << _dx << ", " << _dy << ", " << meanDz() << endl;
   out << "  minx, miny, minz: "
-      << _minx << ", " << _miny << ", " << _minz << endl;
+      << _minx << ", " << _miny << ", " << minz() << endl;
+  out << "  zKm: ";
+  for (size_t ii = 0; ii < _zKm.size(); ii++) {
+    out << _zKm[ii];
+    if (ii != _zKm.size() - 1) {
+      out << ", ";
+    }
+  }
+  out << endl;
   out << "  isLatLon: " << (_isLatLon? "Y":"N") << endl;
   out << "  projType: " << PjgTypes::proj2string(_projType) << endl;
   out << "=======================================" << endl;

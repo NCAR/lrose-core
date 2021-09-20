@@ -37,8 +37,8 @@
 
 #include "Worker.hh"
 #include "InputMdv.hh"
-#include <euclid/GridClumping.hh>
-#include <euclid/ClumpDualThresh.hh>
+#include <euclid/ClumpingMgr.hh>
+#include <euclid/ClumpingDualThresh.hh>
 #include <euclid/ClumpGrid.hh>
 #include <titan/TitanStormFile.hh>
 using namespace std;
@@ -72,14 +72,15 @@ private:
 
   const InputMdv &_inputMdv;
   TitanStormFile &_sfile;
-  GridClumping _clumping;
+  ClumpingMgr _clumping;
+  PjgGridGeom _gridGeom;
 
   int _nClumps;
   int _nStorms;
 
   Props *_props;
   Verify *_verify;
-  ClumpDualThresh _dualT;
+  ClumpingDualThresh _dualT;
 
   int _processClumps(int scan_num);
   int _processThisClump(const ClumpGrid &clump_grid);

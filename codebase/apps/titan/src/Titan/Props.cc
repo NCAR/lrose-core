@@ -284,11 +284,11 @@ int Props::compute(const ClumpGrid &clump_grid, int storm_num)
 
   // tilt angle computations
 
-  _tiltCompute();
+  _tiltCompute(clump_grid);
 
   // compute dbz gradient with height
 
-  _dbzGradientCompute();
+  _dbzGradientCompute(clump_grid);
 
   // decide whether this is a second trip echo
    
@@ -869,7 +869,7 @@ int Props::_storeRuns(const ClumpGrid &clump_grid)
   
   // make sure there is space for the runs
 
-  _sfile.AllocLayers(clump_grid.grid.nz());
+  _sfile.AllocLayers(clump_grid.gridGeom.nz());
   _sfile.AllocHist(_nDbzHistIntervals);
   _sfile.AllocRuns(clump_grid.nIntervals);
   
@@ -901,7 +901,7 @@ int Props::_storeRuns(const ClumpGrid &clump_grid)
 //       tilt_area is in sq grid_units.
 //
 
-void Props::_tiltCompute()
+void Props::_tiltCompute(const ClumpGrid &clump_grid)
      
 {
 
@@ -920,8 +920,7 @@ void Props::_tiltCompute()
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _tiltData[iz][0] = _layer[iz].vol_centroid_x;
     _tiltData[iz][1] = _layer[iz].vol_centroid_y;
-    _tiltData[iz][2] = _minValidZ +
-      (double) iz * _inputMdv.grid.dz * 10.0;
+    _tiltData[iz][2] = clump_grid.gridGeom.zKm()[iz] * 10.0;
   }
       
   // obtain the principal component transformation for this data - the
@@ -968,7 +967,7 @@ void Props::_tiltCompute()
 // Compute dbz_gradient from  principal component analysis
 //
 
-void Props::_dbzGradientCompute()
+void Props::_dbzGradientCompute(const ClumpGrid &clump_grid)
      
 {
   
@@ -984,8 +983,7 @@ void Props::_dbzGradientCompute()
       
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _dbzGradientData[iz][0] = _layer[iz].dbz_max;
-    _dbzGradientData[iz][1] = _minValidZ +
-      (double) iz * _inputMdv.grid.dz * 1000.0;
+    _dbzGradientData[iz][1] = clump_grid.gridGeom.zKm()[iz] * 1000.0;
   }
       
   // obtain the principal component transformation for this data - the
@@ -1009,8 +1007,7 @@ void Props::_dbzGradientCompute()
       
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _dbzGradientData[iz][0] = _layer[iz].dbz_mean;
-    _dbzGradientData[iz][1] = _minValidZ +
-      (double) iz * _inputMdv.grid.dz * 1000.0;
+    _dbzGradientData[iz][1] = clump_grid.gridGeom.zKm()[iz] * 1000.0;
   }
       
   if (upct( 2, _nLayers,

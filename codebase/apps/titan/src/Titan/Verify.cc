@@ -149,7 +149,7 @@ void Verify::updateValidStormsGrid(const ClumpGrid &clump_grid)
     
     int iy = intvl.row_in_plane + clump_grid.startIy;
     int ix = intvl.begin + clump_grid.startIx;
-    int offset = iy * clump_grid.grid.nx() + ix;
+    size_t offset = iy * clump_grid.gridGeom.nx() + ix;
     memcpy(validGrid + offset, compGrid + offset, intvl.len * sizeof(fl32));
     
   } // intv

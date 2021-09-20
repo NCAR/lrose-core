@@ -55,17 +55,14 @@ public:
   // initializer
 
   void init(const Clump_order *clump,
-            int nx, int ny, int nz,
-            double dx, double dy, double dz,
-            double minx, double miny, double minz,
-            bool isLatLon,
+            const PjgGridGeom &grid,
 	    int start_ix, int start_iy);
 
   // destructor
   
   virtual ~ClumpGrid();
 
-  PjgGridGeom grid;
+  PjgGridGeom gridGeom;
 
   vector<Interval> intervals;
   int nIntervals;

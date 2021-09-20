@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ClumpDualThresh.hh
+// ClumpingDualThresh.hh
 //
 // This class performs the second stage in
 // multiple threshold identification.
@@ -35,30 +35,30 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef ClumpDualThresh_HH
-#define ClumpDualThresh_HH
+#ifndef ClumpingDualThresh_HH
+#define ClumpingDualThresh_HH
 
 #include <dataport/port_types.h>
 #include <rapformats/titan_grid.h>
-#include <euclid/GridClumping.hh>
+#include <euclid/ClumpingMgr.hh>
 #include <euclid/ClumpGrid.hh>
 #include <euclid/PjgGridGeom.hh>
 using namespace std;
 
 ////////////////////////////////
-// ClumpDualThresh
+// ClumpingDualThresh
 
-class ClumpDualThresh {
+class ClumpingDualThresh {
   
 public:
 
   // constructor
 
-  ClumpDualThresh();
+  ClumpingDualThresh();
   
   // destructor
   
-  virtual ~ClumpDualThresh();
+  virtual ~ClumpingDualThresh();
 
   // set parameters
   // Primary and secondary thresholds are usually DBZ
@@ -126,11 +126,11 @@ private:
 
   // clumping
 
-  GridClumping _clumping;
+  ClumpingMgr _clumping;
   size_t _nSubClumps;
   size_t _nSubClumpsAlloc;
   ClumpGrid *_subClumps;
-  GridClumping **_subClumping;
+  ClumpingMgr **_subClumping;
 
   // grids
 
