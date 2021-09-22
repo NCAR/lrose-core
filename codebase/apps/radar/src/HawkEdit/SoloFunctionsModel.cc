@@ -2603,6 +2603,68 @@ string SoloFunctionsModel::ForceUnfolding(string fieldName,   int rayIdx, int sw
 
 }
 
+string SoloFunctionsModel::UnconditionalDelete(string fieldName,  int rayIdx, int sweepIdx,
+             size_t clip_gate, float bad_data_value) {
+
+   SoloFunctionsApi api;
+
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
+       << " sweepIdx=" << sweepIdx;
+
+  DataModel *dataModel = DataModel::Instance();
+  
+  const RadxField *field;
+
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = dataModel->getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  // get the data (in) and create space for new data (out)  
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  // create new data field for return 
+  float *newData = new float[nGates];
+
+  // data, _boundaryMask, and bad flag mask should have all the same dimensions = nGates
+  SoloFunctionsApi soloFunctionsApi;
+
+  if (_boundaryMaskSet) {
+    // verify dimensions on data in/out and boundary mask
+    if (nGates > _boundaryMaskLength)
+      throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
+  }
+
+  // cerr << "there arenGates " << nGates;
+  const float *data = field->getDataFl32();
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+
+  // perform the function ...
+  soloFunctionsApi.UnconditionalDelete(data, newData, nGates,
+          (float) missingValue, 
+          clip_gate, _boundaryMask);
+
+  bool isLocal = false;
+  string field_units = field->getUnits();
+
+  RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
+
+  // get the name that was actually inserted ...
+  string tempFieldName = field1->getName();
+  tempFieldName.append("#");
+
+  return tempFieldName;
+
+}
+
 
 // Private methods 
 

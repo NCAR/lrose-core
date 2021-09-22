@@ -139,6 +139,10 @@ public:
                   float threshold_bad_data_value = FLT_MIN,
                   size_t clip_gate = SIZE_MAX);
 
+  Q_INVOKABLE QString UNCONDITIONAL_DELETE(QString field, 
+                  float bad_data_value = FLT_MIN,
+                  size_t clip_gate = SIZE_MAX);
+
   Q_INVOKABLE double sqrt(double value) { return qSqrt(value); }
   Q_INVOKABLE QVector<double> add(QVector<double> v, QVector<double> v2) {
     int size = v.size();

@@ -574,6 +574,20 @@ QString SoloFunctionsController::THRESHOLD_BELOW(QString field,
 
                 return QString::fromStdString(tempFieldName);
 } 
+
+// return the name of the field in which the result is stored in the RadxVol
+QString SoloFunctionsController::UNCONDITIONAL_DELETE(QString field, 
+                  float bad_data_value,
+                  size_t clip_gate) {
+  // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
+  string tempFieldName = soloFunctionsModel.UnconditionalDelete(field.toStdString(),
+                     _currentRayIdx, _currentSweepIdx,
+                     clip_gate,
+                     bad_data_value);
+
+                return QString::fromStdString(tempFieldName);
+} 
+
 /*
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::FLAG_FRECKLES(QString field, float constant, float bad_data,

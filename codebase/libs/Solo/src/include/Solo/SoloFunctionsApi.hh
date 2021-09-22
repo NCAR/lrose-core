@@ -284,6 +284,8 @@ public:
 			 const float *data, float *new_data, size_t nGates,
 			 float bad, size_t dgi_clip_gate, bool *boundary_mask);
 
+  void UnconditionalDelete(const float *data, float *newData, size_t nGates,
+		  float bad, size_t dgi_clip_gate, bool *boundary_mask);
 
 private:
 
