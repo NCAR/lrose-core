@@ -42,6 +42,7 @@
 #include <string>
 #include <euclid/clump.h>
 #include <dataport/port_types.h>
+class ClumpingDualThresh;
 using namespace std;
 
 ////////////////////////////////
@@ -127,6 +128,8 @@ private:
   
   int _nIntOrderAlloc;
   Interval **_intervalOrder;
+
+  ClumpingDualThresh *_dualT;
 
   // allocate row headers
   void _allocRowh(int nrows_per_vol);

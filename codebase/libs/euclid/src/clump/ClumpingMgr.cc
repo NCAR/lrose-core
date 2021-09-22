@@ -37,6 +37,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <euclid/ClumpingMgr.hh>
+#include <euclid/ClumpingDualThresh.hh>
 #include <toolsa/umisc.h>
 using namespace std;
 
@@ -59,6 +60,8 @@ ClumpingMgr::ClumpingMgr()
   _clumps = NULL;
   _nClumps = 0;
 
+  _dualT = new ClumpingDualThresh;
+
 }
 
 /////////////
@@ -72,6 +75,8 @@ ClumpingMgr::~ClumpingMgr()
   EG_free_clumps(&_nIntOrderAlloc, &_clumps, &_intervalOrder);
   EG_free_rowh(&_nRowsAlloc, &_rowh);
   EG_free_intervals(&_intervals, &_nIntervalsAlloc);
+
+  delete _dualT;
 
 }
 

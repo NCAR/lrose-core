@@ -37,6 +37,8 @@
 
 #include <toolsa/umisc.h>
 #include <euclid/ClumpingDualThresh.hh>
+#include <euclid/ClumpingMgr.hh>
+#include <euclid/ClumpGrid.hh>
 #include <vector>
 #include <iostream>
 using namespace std;
@@ -56,7 +58,7 @@ ClumpingDualThresh::ClumpingDualThresh() :
         _minAreaEachPart(20.0),
         _minClumpVolume(30.0),
         _maxClumpVolume(1.0e9),
-        _clumping()
+        _clumping(NULL)
 
 {
 
@@ -79,6 +81,7 @@ ClumpingDualThresh::ClumpingDualThresh() :
 
   // sub-clumps
 
+  _clumping = new ClumpingMgr;
   _nSubClumps = 0;
   _nSubClumpsAlloc = 0;
   _subClumps = NULL;
@@ -150,6 +153,10 @@ ClumpingDualThresh::~ClumpingDualThresh()
     ufree(_gridMask);
   }
 
+  if (_clumping) {
+    delete _clumping;
+  }
+
 }
 
 ////////////////////////////////////////////
@@ -218,14 +225,14 @@ int ClumpingDualThresh::compute(const ClumpGrid &clump_grid)
   // clump composite grid at the dual threshold
   
   int nSecondary =
-    _clumping.performClumping(_nxWork, _nyWork, 1,
-			      _compWorkGrid, 1,
-			      _secondaryThreshold);
+    _clumping->performClumping(_nxWork, _nyWork, 1,
+                               _compWorkGrid, 1,
+                               _secondaryThreshold);
   
   // load up all clumps grid for debugging
 
   for (int i = 0; i < nSecondary; i++) {
-    const Clump_order *clump =  _clumping.getClumps() + i;
+    const Clump_order *clump =  _clumping->getClumps() + i;
     for (int j = 0; j < clump->size; j++) {
       Interval *intv = clump->ptr[j];
       int offset = intv->row_in_plane * _nxWork + intv->begin;
@@ -244,7 +251,7 @@ int ClumpingDualThresh::compute(const ClumpGrid &clump_grid)
   vector<int> valid;
 
   for (int i = 0; i < nSecondary; i++) {
-    const Clump_order *clump =  _clumping.getClumps() + i;
+    const Clump_order *clump =  _clumping->getClumps() + i;
     ClumpGrid gridClump;
     gridClump.init(clump,
                    clump_grid.gridGeom,
@@ -299,7 +306,7 @@ int ClumpingDualThresh::compute(const ClumpGrid &clump_grid)
   for (int i = 0; i < nSecondary; i++) {
     if (valid[i]) {
       n++;
-      const Clump_order *clump =  _clumping.getClumps() + i;
+      const Clump_order *clump =  _clumping->getClumps() + i;
       for (int j = 0; j < clump->size; j++) {
 	Interval *intv = clump->ptr[j];
 	int offset = intv->row_in_plane * _nxWork + intv->begin;

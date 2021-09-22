@@ -40,9 +40,9 @@
 
 #include <dataport/port_types.h>
 #include <rapformats/titan_grid.h>
-#include <euclid/ClumpingMgr.hh>
-#include <euclid/ClumpGrid.hh>
 #include <euclid/PjgGridGeom.hh>
+class ClumpingMgr;
+class ClumpGrid;
 using namespace std;
 
 ////////////////////////////////
@@ -126,7 +126,7 @@ private:
 
   // clumping
 
-  ClumpingMgr _clumping;
+  ClumpingMgr *_clumping;
   size_t _nSubClumps;
   size_t _nSubClumpsAlloc;
   ClumpGrid *_subClumps;
