@@ -106,4 +106,94 @@ void se_threshold_field(Where where, float scaled_thr1, float scaled_thr2,
     }
   }
 }
+
+/* c------------------------------------------------------------------------ */
+
+//int se_hard_zap(arg, cmds)              /* #unconditional-delete# */
+//  int arg;
+//  struct ui_command *cmds;
+
+ void se_hard_zap(
+      const float *data, size_t nGates,
+      float *newData,
+      float bad, size_t dgi_clip_gate,
+      bool *boundary_mask) 
+{
+    //int below;
+    //struct ui_command *cmdq=cmds+1; /* point to the first argument */
+    //struct solo_edit_stuff *seds, *return_sed_stuff();
+    //struct dd_general_info *dgi, *dd_window_dgi();
+    //struct dds_structs *dds;
+    //char *dst_name;
+
+    size_t nc;
+    //int nd, fn;
+    //float bad;
+    //int ii, nn, mark;
+    //const float  *ss;
+    float *zz;
+    float *tt;
+    bool *bnd;
+
+    if (dgi_clip_gate > nGates) {
+      nc = nGates;
+    } else {
+      nc = dgi_clip_gate;
+    }
+
+    //fgg = first_good_gate;
+    bnd = boundary_mask;    
+
+
+    //dst_name = (cmdq++)->uc_text;
+    //nd = strlen(dst_name);
+
+    //if(!seds->boundary_exists) {
+    //    return(1);
+    //}
+
+    //seds->modified = YES;
+    //dgi = dd_window_dgi(seds->se_frame); dds = dgi->dds;
+    //nc = dgi->clip_gate+1;
+    //bnd = seds->boundary_mask;
+    /*
+     * find the field to be thresholded
+     */
+//    if((fn = dd_find_field(dgi, dst_name)) < 0) {
+        /* field not found
+         */
+//      g_string_sprintfa
+//        (gs_complaints, "Field to be deleted: %s not found\n", dst_name);
+//        seds->punt = YES;
+//        return(-1);
+//    }
+//# ifdef NEW_ALLOC_SCHEME
+//    ss = (short *)dds->qdat_ptrs[fn];
+//# else
+//    ss = (short *)((char *)dds->rdat[fn] + sizeof(struct paramdata_d));
+//# endif
+    //ss = data;
+    //zz = ss +nc;
+    //bad = dds->parm[fn]->bad_data;
+    memcpy(newData, data, nGates*sizeof(float));
+    tt = newData;
+    zz = tt +nc;
+    /*
+     * loop through the data
+     */
+
+    for(; tt < zz; tt++, bnd++) {
+      if(*bnd)
+        *tt = bad;
+    }
+    //return(fn);
+} 
+
+void se_unconditional_delete(const float *data, float *newData, size_t nGates,
+         float bad, size_t dgi_clip_gate, bool *boundary_mask) {
+  se_hard_zap(data, nGates, newData, bad, dgi_clip_gate, boundary_mask);
+}
+
+/* c------------------------------------------------------------------------ */
+
   

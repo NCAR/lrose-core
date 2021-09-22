@@ -71,10 +71,10 @@ ScriptEditorController::ScriptEditorController(ScriptEditorView *view, ScriptEdi
 	  this, SLOT(getVolumeChanges()));
 
 
-  connect(_currentView, SIGNAL(runOneTimeOnlyScript(QString)),
-	  this, SLOT(runOneTimeOnlyScript(QString)));
-  connect(_currentView, SIGNAL(runForEachRayScript(QString, bool)),
-	  this, SLOT(runForEachRayScript(QString, bool)));
+  //connect(_currentView, SIGNAL(runOneTimeOnlyScript(QString)),
+	//  this, SLOT(runOneTimeOnlyScript(QString)));
+  //connect(_currentView, SIGNAL(runForEachRayScript(QString, bool)),
+	//  this, SLOT(runForEachRayScript(QString, bool)));
 
   connect(this, SIGNAL(scriptComplete()), 
     _currentView, SLOT(scriptComplete()));
@@ -102,7 +102,7 @@ ScriptEditorController::ScriptEditorController(ScriptEditorView *view, ScriptEdi
 vector<string> *ScriptEditorController::getFieldNames()
 {
   vector<string> *names = _currentModel->getFields();
-  cout << " In ScriptEditorController::getFieldNames, there are " << names->size() << " field names" << endl;
+  LOG(DEBUG) << " In ScriptEditorController::getFieldNames, there are " << names->size() << " field names";
   return names;
 }
 
@@ -217,7 +217,7 @@ void ScriptEditorController::setupFieldArrays() {
         const vector<float> *fieldData = _soloFunctionsController->getData(*it);  
 
         QJSValue fieldArray = engine.newArray(fieldData->size());
-        QString vectorName = fieldName; //  + "_V";    
+        QString vectorName = fieldName.append("_V");    
 
 
         //std::vector<float> fieldData = getData(fieldName);
@@ -242,17 +242,19 @@ void ScriptEditorController::setupFieldArrays() {
     } 
 }
 
+/* this function is not used; TODO: remove it
 void ScriptEditorController::_addFieldNameVectorsToContext(vector<string> &fieldNames, 
   std::map<QString, QString> *currentVariableContextPtr) {
   std::map<QString, QString> currentVariableContext = *currentVariableContextPtr;
   vector<string>::iterator nameItr;
   for (nameItr = fieldNames.begin(); nameItr != fieldNames.end(); ++nameItr) {
     QString vectorName(nameItr->c_str());
-    //vectorName.append("_v");
+    vectorName.append("_v");
     currentVariableContext[vectorName] = vectorName;
   }
 
 }
+*/
 
 bool ScriptEditorController::notDefined(QString &fieldName, std::map<QString, QString> &previousVariableContext) {
       return (previousVariableContext.find(fieldName) == previousVariableContext.end());
@@ -301,6 +303,141 @@ void ScriptEditorController::saveFieldArrays(std::map<QString, QString> &previou
   }
 
   LOG(DEBUG) << "end current QJSEngine context";
+}
+
+
+void ScriptEditorController::saveFieldVariableAssignments(std::map<QString, QString> &previousVariableContext) {
+
+  // ======                                                                                            
+  //  YES! This works.  The new global variables are listed here;                                      
+  // just find them and add them to the spreadsheet and to the Model??                                 
+  // HERE!!!                                                                                           
+  // try iterating over the properties of the globalObject to find new variables                       
+  QJSValue newGlobalObject = engine.globalObject();
+  //printQJSEngineContext();
+
+  QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext()) {
+    it2.next();
+
+    QJSValue value = it2.value();
+    if (value.isArray()) {
+
+      QString theValue = it2.value().toString();
+      theValue.truncate(100);
+      LOG(DEBUG) << it2.name().toStdString() << ": " << theValue.toStdString();
+      if (previousVariableContext.find(it2.name()) == previousVariableContext.end()) {
+        // we have a newly defined variable                                                            
+        LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
+        // COOL! at this point, we have the new field name AND the temporary field name in the RadxVol,
+        // so we can do an assignment now.
+        string tempName = it2.name().toStdString();
+        string userDefinedName = it2.name().toStdString();
+        // only assign the ray data if this is a Solo Function, f(x)
+        //size_t length = tempName.length();
+        //if (length > 0) {
+          //if (tempName[length-1] == '#') {
+            //tempName.resize(length-1);
+          tempName.append("#");
+          _assignByRay(tempName, userDefinedName);
+          // add Variable list ToScriptEditor(it2.name(), it2.value());
+          //newFieldNames << it2.name();
+          //}
+        //}
+      }
+    }
+    if (value.isString()) {
+
+      QString theValue = it2.value().toString();
+      //theValue.truncate(100);
+      //LOG(DEBUG) << it2.name().toStdString() << ": " << theValue.toStdString();
+      std::map<QString, QString>::iterator itv = previousVariableContext.find(it2.name());
+      if (itv == previousVariableContext.end()) {
+      //if (previousVariableContext.find(it2.name()) == previousVariableContext.end()) {
+        // we have a newly defined variable                                                            
+        LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
+        // COOL! at this point, we have the new field name AND the temporary field name in the RadxVol,
+        // so we can do an assignment now.
+        string tempName = theValue.toStdString();
+        string userDefinedName = it2.name().toStdString();
+        // only assign the ray data if this is a Solo Function, f(x)
+        // remove the ending # because it is not in the RadxVol
+        size_t length = tempName.length();
+        if (length > 0) {
+          if (tempName[length-1] == '#') {
+            tempName.resize(length-1);
+            //tempName.append("#");
+            _assignByRay(tempName, userDefinedName);
+            // add Variable list ToScriptEditor(it2.name(), it2.value());
+            //newFieldNames << it2.name();
+          }
+        }
+      } else {
+        string originalName = it2.name().toStdString();
+        LOG(DEBUG) << "OLD VARIABLE " << originalName;        
+        // previous variable, but check for new values
+        QString originalValueQ = itv->second;
+        QString currentValueQ = it2.value().toString(); 
+        if (currentValueQ.compare(originalValueQ) != 0) {
+          // new value; make assignment
+          // remove the ending # because it is not in the RadxVol
+          string currentValue = currentValueQ.toStdString();
+          size_t length = currentValue.length();
+          if (length > 0) {
+            if (currentValue[length-1] == '#') {
+              currentValue.resize(length-1);
+              //tempName.append("#");
+              _assignByRay(currentValue, originalName);
+              // add Variable list ToScriptEditor(it2.name(), it2.value());
+              //newFieldNames << it2.name();
+            }
+          }
+        }
+
+
+      }
+    }
+  }
+}
+
+QStringList *ScriptEditorController::findNewFieldNames(std::map<QString, QString> &previousVariableContext) {
+
+  QStringList *newFieldNames = new QStringList;
+
+  // ======                                                                                            
+  //  YES! This works.  The new global variables are listed here;                                      
+  // just find them and add them to the spreadsheet and to the Model??                                 
+  // HERE!!!                                                                                           
+  // try iterating over the properties of the globalObject to find new variables                       
+  QJSValue newGlobalObject = engine.globalObject();
+  //printQJSEngineContext();
+
+  QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext()) {
+    it2.next();
+    QJSValue value = it2.value();
+    QString theValue = it2.value().toString();
+    if (value.isArray()) {
+      theValue.truncate(100);
+      LOG(DEBUG) << it2.name().toStdString() << ": " << theValue.toStdString();
+      if (previousVariableContext.find(it2.name()) == previousVariableContext.end()) {
+        // we have a newly defined variable                                                            
+        LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
+        // COOL! at this point, we have the new field name 
+          *newFieldNames << it2.name();
+      }
+    }
+    if (value.isString()) {
+      std::map<QString, QString>::iterator itv = previousVariableContext.find(it2.name());
+      if (itv == previousVariableContext.end()) {
+        // we have a newly defined variable                                                            
+        LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
+        // COOL! at this point, we have the new field name 
+        *newFieldNames << it2.name();
+      } 
+    }
+  }
+  return newFieldNames;
 }
 
 /*
@@ -359,6 +496,7 @@ void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFun
 
   engine.globalObject().setProperty("FLAG_FRECKLES", myExt.property("FLAG_FRECKLES"));
   engine.globalObject().setProperty("FLAG_GLITCHES", myExt.property("FLAG_GLITCHES"));
+  engine.globalObject().setProperty("UNCONDITIONAL_DELETE", myExt.property("UNCONDITIONAL_DELETE"));
   engine.globalObject().setProperty("~+", myExt.property("FLAGGED_ADD"));
 
   // print the context ...
@@ -563,9 +701,6 @@ void ScriptEditorController::runForEachRayScript(QString script, bool useBoundar
 {
   LOG(DEBUG) << "enter";
   try {
-
-  QStringList newFieldNames; //  = {"VEL_xyz"}; // , "123", "CDE"};
-
   
     // Grab the context before evaluating the formula                                                      
     //  YES! This works.  The new global variables are listed here;                                        
@@ -594,7 +729,7 @@ uncate(100);
     vector<string>::iterator nameItr;
     for (nameItr = initialFieldNames->begin(); nameItr != initialFieldNames->end(); ++nameItr) {
       QString vectorName(nameItr->c_str());
-      vectorName.append("_v");
+      //vectorName.append("_v");  
       //QString originalName(nameItr->c_str());
       currentVariableContext[vectorName] = vectorName;
     }
@@ -620,6 +755,11 @@ uncate(100);
   
     while (_soloFunctionsController->moreRays()) {
       LOG(DEBUG) << "more rays ...";
+
+      // reset all field names defined in the global context
+      //needFieldNames();
+      fieldNamesProvided(initialFieldNames);
+
       // calculate boundary mask for each ray? 
       // Yes, when the ray index changes a new boundary mask is calculated 
       // in the SoloFunctionsController
@@ -667,10 +807,15 @@ uncate(100);
 	
         // TODO: fix up later 
         //saveFieldArrays(currentVariableContext);
+
+        // save any field variable assignments 
+        // TODO: need to speed this up; also, this is necessary for vector operations
+        //saveFieldVariableAssignments(currentVariableContext);
 	
       }
       _soloFunctionsController->nextRay();
-    }
+    } // end while more rays
+
     //_soloFunctionsController->nextSweep();
     
     //}
@@ -683,6 +828,9 @@ uncate(100);
       criticalMessage("Error occurred during evaluation");
     }
       */
+    QStringList newFieldNames;
+    //QStringList *newFieldNames;
+    //newFieldNames = findNewFieldNames(currentVariableContext);
 
 	// ======                                                                                            
 	//  YES! This works.  The new global variables are listed here;                                      
@@ -690,6 +838,7 @@ uncate(100);
 	// HERE!!!                                                                                           
 	// try iterating over the properties of the globalObject to find new variables                       
     QJSValue newGlobalObject = engine.globalObject();
+    printQJSEngineContext();
 
     QJSValueIterator it2(newGlobalObject);
     while (it2.hasNext()) {
@@ -726,7 +875,9 @@ uncate(100);
         QString theValue = it2.value().toString();
         //theValue.truncate(100);
         //LOG(DEBUG) << it2.name().toStdString() << ": " << theValue.toStdString();
-        if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
+        std::map<QString, QString>::iterator itv = currentVariableContext.find(it2.name());
+        if (itv == currentVariableContext.end()) {
+        //if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
           // we have a newly defined variable                                                            
           LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
           // COOL! at this point, we have the new field name AND the temporary field name in the RadxVol,
@@ -745,12 +896,36 @@ uncate(100);
               newFieldNames << it2.name();
             }
           }
+        } else {
+          string originalName = it2.name().toStdString();
+          LOG(DEBUG) << "OLD VARIABLE " << originalName;        
+          // previous variable, but check for new values
+          QString originalValueQ = itv->second;
+          QString currentValueQ = it2.value().toString(); 
+          if (currentValueQ.compare(originalValueQ) != 0) {
+            // new value; make assignment
+            // remove the ending # because it is not in the RadxVol
+            string currentValue = currentValueQ.toStdString();
+            size_t length = currentValue.length();
+            if (length > 0) {
+              if (currentValue[length-1] == '#') {
+                currentValue.resize(length-1);
+                //tempName.append("#");
+                _assign(currentValue, originalName);
+                // add Variable list ToScriptEditor(it2.name(), it2.value());
+                newFieldNames << it2.name();
+              }
+            }
+          }
+
+
         }
       }
     }
 
-
     volumeUpdated(newFieldNames);
+    //volumeUpdated(*newFieldNames);
+    //delete newFieldNames;
     emit scriptComplete();
   } catch (std::invalid_argument &ex) {
     LOG(DEBUG) << "ERROR running script: " << ex.what();
@@ -761,22 +936,25 @@ uncate(100);
 }
 
 
+void ScriptEditorController::_assignByRay(string tempName, string userDefinedName) {
+
+  // rename the field in the RadxVol
+  _soloFunctionsController->assignByRay(tempName, userDefinedName);
+}
+
+// may not be used 
 void ScriptEditorController::_assign(string tempName, string userDefinedName) {
 
   // rename the field in the RadxVol
   _soloFunctionsController->assign(tempName, userDefinedName);
 }
-
+//
 
 // request filled by Controller in response to needFieldNames signal                                       
 void ScriptEditorController::fieldNamesProvided(vector<string> *fieldNames) {
-
-  int useless = 0;
-
-  // fill everything that needs the fieldNames ...                                                         
-
+                                                    
     // This section of code makes every data field in volume a variable                                    
-    // When the variable name is referenced in the formula bar,                                            
+    // When the variable name is referenced in a script,                                            
     // the variable name as a string is substituted.                                                       
     //                                                                                                     
     // for each field in model (RadxVol)          
@@ -785,26 +963,14 @@ void ScriptEditorController::fieldNamesProvided(vector<string> *fieldNames) {
 
     for(it = fieldNames->begin(); it != fieldNames->end(); it++) {
       QString fieldName(QString::fromStdString(*it));
-      // //    try {                                                                                       
-      ////QJSValue objectValue = engine.newQObject(new DataField(*it));                                    
-      ////engine.globalObject().setProperty(fieldName, objectValue.property("name"));    
-
       QString originalName = fieldName;
-      //engine.globalObject().setProperty(fieldName, originalName); // fieldName);                                           
-      engine.globalObject().setProperty(fieldName.append("_V"), originalName); // fieldName);                                           
-
-      //someValue += 1;                                                                                    
-
-      // //} catch (Exception ex) {                                                                        
-      // // cerr << "ERROR - problem setting property on field " << *it << endl;                           
-      // //}                                                                                               
+      engine.globalObject().setProperty(fieldName, originalName); // fieldName);                            
+      //engine.globalObject().setProperty(fieldName.append("_V"), originalName); // fieldName);                                                                                      
     }
-    //if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG)) { // causes a segmentation fault                        
-    // print the context ...                                                                              \
-                                                                                                           
+                      
+    // print the context ...                                                                                               
       LOG(DEBUG) << "current QJSEngine context ... after fieldNamesProvided";
-
-      printQJSEngineContext();
+      //printQJSEngineContext();
 }
 
 // Not used? 

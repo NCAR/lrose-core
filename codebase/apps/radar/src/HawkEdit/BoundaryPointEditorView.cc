@@ -211,7 +211,7 @@ void BoundaryPointEditorView::clearBoundaryEditorClick()
   string boundaryName = "Boundary" + to_string(boundaryIndex);
   _boundaryEditorList->currentItem()->setText(boundaryName.c_str());
 
-  emit clearBoundary(boundaryIndex);
+  emit clearBoundary();
 
   LOG(DEBUG) << "exit";
 }
@@ -493,13 +493,14 @@ void BoundaryPointEditorView::clear()
 void BoundaryPointEditorView::onBoundaryEditorListItemClicked(QListWidgetItem* item)
 {
 
-  
+  int boundaryIndex = -1;  // indicates no saved boundary
   string fileName = item->text().toUtf8().constData();
   bool found = (fileName.find("<none>") != string::npos);
   if (!found)
   {
-    int boundaryIndex = _boundaryEditorList->currentRow()+1;
-    emit loadBoundary(boundaryIndex);
+    boundaryIndex = _boundaryEditorList->currentRow()+1;
+  }
+  emit loadBoundary(boundaryIndex);
     /*
     //if (_boundaryDir.empty())
     //  _boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
@@ -523,7 +524,7 @@ void BoundaryPointEditorView::onBoundaryEditorListItemClicked(QListWidgetItem* i
 
     _ppi->update();   //forces repaint which clears existing polygon
     */
-  }
+  //}
   
 }
 

@@ -177,6 +177,15 @@ void se_remove_storm_motion(float wind, float speed, float dgi_dd_rotation_angle
 			    const float *data, float *new_data, size_t nGates,
 			    float bad, size_t dgi_clip_gate, bool *boundary_mask);
 
+void se_unconditional_delete(const float *data, float *newData, size_t nGates,
+         float bad, size_t dgi_clip_gate, bool *boundary_mask);
+
+ void se_hard_zap(
+      const float *data, size_t nGates,
+      float *newData,
+      float bad, size_t dgi_clip_gate,
+      bool *boundary_mask);
+
 
 // given a list of x, y points, an other geo data,
 // return a mask of booleans where 

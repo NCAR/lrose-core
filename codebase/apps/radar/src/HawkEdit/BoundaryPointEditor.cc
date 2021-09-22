@@ -64,25 +64,27 @@ BoundaryPointEditor::BoundaryPointEditor(BoundaryPointEditorView *bpeView,
 	_boundaryEditorView = bpeView;
 	_boundaryView = boundaryView;
 	_boundaryPointEditorModel = new BoundaryPointEditorModel();
+	makeConnections();
 }
 
 BoundaryPointEditor::~BoundaryPointEditor() {
 	delete _boundaryPointEditorModel;
 }
 
-/*
-void BoundaryPointEditor::createBoundaryEditorDialog() {
-	_boundaryEditorView = new BoundaryPointEditorView();
-	// createBoundaryEditorDialog();
+
+void BoundaryPointEditor::makeConnections() {
+
 	// associate event slots
-	connect(_boundaryEditorView, SIGNAL(userClickedPolygonButton),
-		this, SLOT(userClickedPolygonButton));
-	connect(_boundaryEditorView, SIGNAL(userClickedCircleButton),
-		this, SLOT(userClickedCircleButton));
-	connect(_boundaryEditorView, SIGNAL(userClickedBrushButton),
-		this, SLOT(userClickedBrushButton));	
+	connect(_boundaryEditorView, SIGNAL(userClickedPolygonButton()),
+		this, SLOT(userClickedPolygonButton()));
+	connect(_boundaryEditorView, SIGNAL(userClickedCircleButton()),
+		this, SLOT(userClickedCircleButton()));
+	connect(_boundaryEditorView, SIGNAL(userClickedBrushButton()),
+		this, SLOT(userClickedBrushButton()));	
+	connect(_boundaryEditorView, SIGNAL(clearBoundary()),
+		this, SLOT(clearBoundaryEditorClick()));		
 }
-*/
+
 
 void BoundaryPointEditor::userClickedPolygonButton() {
 	setTool(BoundaryToolType::polygon);
@@ -755,6 +757,7 @@ void BoundaryPointEditor::save(int boundaryIndex, string &selectedFieldName,
 
 // Loads the boundary file given by path
 // It also sets the correct editor tool (polygon, circle, or brush) based on what is in the file
+// if boundaryIndex < 0, no saved boundary
 bool BoundaryPointEditor::load(int boundaryIndex, string &selectedFieldName,
  int sweepIndex, string &radarFilePath)
 {
@@ -985,6 +988,7 @@ void BoundaryPointEditor::onBoundaryEditorListItemClicked(string &fileName)
 void BoundaryPointEditor::clearBoundaryEditorClick()
 {
   _boundaryPointEditorModel->clear();
+  emit clearBoundaryClicked();
   // _ppi->update();   //forces repaint which clears existing polygon
 }
 

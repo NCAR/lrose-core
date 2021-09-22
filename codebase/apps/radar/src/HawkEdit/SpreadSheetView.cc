@@ -1501,7 +1501,7 @@ void SpreadSheetView::adjustNyquistFromSelection(float factor) {
                 msg.append(textValue.toStdString().c_str());
                 throw std::invalid_argument(msg);
             }
-            value = value + nyquistVelocity;
+            value = value + 2.0 * nyquistVelocity;
             i->setText(QString::number(value));
           }
         }

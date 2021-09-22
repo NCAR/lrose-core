@@ -4041,13 +4041,14 @@ void PolarManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
 		_ppi->update();   //forces repaint which clears existing polygon
 	}
 }
+*/
 
 void PolarManager::_clearBoundaryEditorClick()
 {
-	BoundaryPointEditor::Instance()->clear();
+	//BoundaryPointEditor::Instance()->clear();
 	_ppi->update();   //forces repaint which clears existing polygon
 }
-*/
+
 
 void PolarManager::saveBoundaryEvent(int boundaryIndex)
 {
@@ -4076,32 +4077,31 @@ void PolarManager::saveBoundaryEvent(int boundaryIndex)
   LOG(DEBUG) << "exit";
 }
 
+
 void PolarManager::loadBoundaryEvent(int boundaryIndex)
 {
   LOG(DEBUG) << "enter";
-
-  // get selected field name
-  string currentFieldName = _displayFieldController->getSelectedFieldName();
-  int currentSweepIndex = _sweepController->getSelectedNumber();
-  if (_archiveFileList.size() > 0) {
-    string radarFilePath = _archiveFileList.at(0);
-  
-  //string text = "Boundary" + to_string(boundaryIndex);
-  //string outputDir;
-  //string fileExt = _boundaryEditorList->currentItem()->text().toUtf8().constData();
-  //string path = _getOutputPath(false, outputDir, fileExt);
-  //boundaryPointEditorControl->save(path);
-    bool successful = boundaryPointEditorControl->load(boundaryIndex, 
-      currentFieldName, currentSweepIndex, radarFilePath);
-    if (!successful) {
-      string msg = "could not load boundary for " + currentFieldName;
-      errorMessage("Load Boundary Error", msg.c_str());
+  //if (boundaryIndex > 0) {
+    //  saved boundary
+    // get selected field name
+    string currentFieldName = _displayFieldController->getSelectedFieldName();
+    int currentSweepIndex = _sweepController->getSelectedNumber();
+    if (_archiveFileList.size() > 0) {
+      string radarFilePath = _archiveFileList.at(0);
+      bool successful = boundaryPointEditorControl->load(boundaryIndex, 
+        currentFieldName, currentSweepIndex, radarFilePath);
+      if (!successful) {
+        string msg = "could not load boundary for " + currentFieldName;
+        errorMessage("Load Boundary Error", msg.c_str());
+      }
     } else {
-      // TODO: update / draw Boundary on image??
+      errorMessage("Load Boundary Error", "no File Path found");
     }
-  } else {
-    errorMessage("Save Boundary Error", "no File Path found");
-  }
+  //}
+
+  // repaint which clears the existing boundary
+  _ppi->update(); // showSelectedField();   
+
   LOG(DEBUG) << "exit";
 }
 
@@ -4159,22 +4159,26 @@ void PolarManager::showBoundaryEditor()
     connect(boundaryPointEditorView, SIGNAL(boundaryCircleRadiusChanged(int)),
       this, SLOT(boundaryCircleRadiusChanged(int)));  
     connect(boundaryPointEditorView, SIGNAL(boundaryBrushRadiusChanged(int)),
-      this, SLOT(boundaryBrushRadiusChanged(int)));  
+      this, SLOT(boundaryBrushRadiusChanged(int))); 
+
+    connect(boundaryPointEditorControl, SIGNAL(clearBoundaryClicked()),
+      this, SLOT(_clearBoundaryEditorClick())); 
 
     connect(boundaryPointEditorView, SIGNAL(refreshBoundariesEvent()),
       this, SLOT(refreshBoundaries()));  
 
-    connect(boundaryPointEditorView, SIGNAL(saveBoundary(int )), 
+    connect(boundaryPointEditorView, SIGNAL(saveBoundary(int)), 
       this, SLOT(saveBoundaryEvent(int)));
-    connect(boundaryPointEditorControl, SIGNAL(loadBoundary(int )), 
+    connect(boundaryPointEditorView, SIGNAL(loadBoundary(int)), 
       this, SLOT(loadBoundaryEvent(int)));
 
-  connect(boundaryPointEditorView, SIGNAL(userClickedPolygonButton()),
-    boundaryPointEditorControl, SLOT(userClickedPolygonButton()));
-  connect(boundaryPointEditorView, SIGNAL(userClickedCircleButton()),
-    boundaryPointEditorControl, SLOT(userClickedCircleButton()));
-  connect(boundaryPointEditorView, SIGNAL(userClickedBrushButton()),
-    boundaryPointEditorControl, SLOT(userClickedBrushButton()));  
+// done in BoundaryPointEditor ...
+  //connect(boundaryPointEditorView, SIGNAL(userClickedPolygonButton()),
+  //  boundaryPointEditorControl, SLOT(userClickedPolygonButton()));
+  //connect(boundaryPointEditorView, SIGNAL(userClickedCircleButton()),
+  //  boundaryPointEditorControl, SLOT(userClickedCircleButton()));
+  //connect(boundaryPointEditorView, SIGNAL(userClickedBrushButton()),
+  //  boundaryPointEditorControl, SLOT(userClickedBrushButton()));  
     
     //boundaryPointEditorView->init();
     //boundaryPointEditorView->show();

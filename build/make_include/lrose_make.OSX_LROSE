@@ -59,8 +59,8 @@ SYS_LD_LIBRARY_PATH =
 CC = gcc
 SYS_CFLAGS = $(GCC_WARNINGS) -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_CFLAGS)
 PROFILE_FLAG = -pg
-DEBUG_FLAG = -g -O2
-OPT_FLAG = -O2
+DEBUG_FLAG = -g 
+OPT_FLAG = -g
 
 #
 # cc
@@ -172,7 +172,7 @@ NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2
 QJSENGINE = -F/usr/local/Cellar/qt/5.14.2/lib -framework QtQml
 PKG_CONFIG_PATH = /usr/local/opt/qt5/lib/pkgconfig
 QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
-#QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt5Gui)
+QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt5Gui)
 QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui)
 QT_CPPC_CFLAGS = -std=c++11
 QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)

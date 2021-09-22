@@ -239,7 +239,8 @@ public slots:
   void boundaryCircleRadiusChanged(int value);
   void boundaryBrushRadiusChanged(int value);
   void saveBoundaryEvent(int boundaryIndex);
-  void loadBoundaryEvent(int boundaryIndex);   
+  void loadBoundaryEvent(int boundaryIndex);  
+  void _clearBoundaryEditorClick(); 
 
   void setFieldToMissing(QString fieldName);
   void deleteFieldFromVolume(QString fieldName);   
@@ -809,7 +810,7 @@ private slots:
   //void _createBoundaryEditorDialog();
 
 
-  //void _clearBoundaryEditorClick();
+
   //void onBoundaryEditorListItemClicked(QListWidgetItem* item);
   //void _saveBoundaryEditorClick();
 

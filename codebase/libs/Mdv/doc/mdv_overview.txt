@@ -225,27 +225,13 @@ The easiest way to read or write an MDV file is using the Mdvx class
 within a C++ program.
 
 To read a file using the Mdvx class, you would use code like the
-following:
+following::q!
 
-        #include <Mdv/Mdvx.hh>
 
-        Mdvx mdv_file;
 
-	// Set up the read parameters
+?q
 
-        mdv_file.clearRead();
-        mdv_file.setReadPath("myfile.mdv");
-	mdv_file.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-        mdv_file.setReadCompressionType(Mdvx::COMPRESSION_NONE);
-        mdv_file.setReadScalingType(Mdvx::SCALING_NONE);
-
-	if (mdv_file.readVolume() != 0)
-	{
-	  cerr << "Error reading Mdv file myfile.mdv" << endl;
-          exit(-1);
-        }
-
-        // Process the data here
+Q:
 
 If you only want to read particular fields, vertical levels, etc.,
 there are more "setRead" methods to customize the read operation and

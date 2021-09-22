@@ -574,6 +574,20 @@ QString SoloFunctionsController::THRESHOLD_BELOW(QString field,
 
                 return QString::fromStdString(tempFieldName);
 } 
+
+// return the name of the field in which the result is stored in the RadxVol
+QString SoloFunctionsController::UNCONDITIONAL_DELETE(QString field, 
+                  float bad_data_value,
+                  size_t clip_gate) {
+  // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
+  string tempFieldName = soloFunctionsModel.UnconditionalDelete(field.toStdString(),
+                     _currentRayIdx, _currentSweepIdx,
+                     clip_gate,
+                     bad_data_value);
+
+                return QString::fromStdString(tempFieldName);
+} 
+
 /*
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::FLAG_FRECKLES(QString field, float constant, float bad_data,
@@ -624,8 +638,10 @@ void SoloFunctionsController::setCurrentRayToFirst() {
 
 void SoloFunctionsController::nextRay() {
   //LOG(DEBUG) << "entry";
-  //cerr << "entry nextRay" << endl;
   _currentRayIdx += 1;
+  if ((_currentRayIdx % 100) == 0) {
+    cerr << "   current ray " << _currentRayIdx << endl;
+  }
   //  applyBoundary();
   //cerr << "exit nextRay" << endl;
   //LOG(DEBUG) << "exit";
@@ -648,9 +664,9 @@ bool SoloFunctionsController::moreRays() {
 }
 
 void SoloFunctionsController::nextSweep() {
-  //LOG(DEBUG) << "entry";
-  //cerr << "entry nextSweep" << endl;
+  //LOG(DEBUG) << "entry" << " _currentSweepIdx = " << _currentSweepIdx;
   _currentSweepIdx += 1;
+  cerr << "current sweep " <<  _currentSweepIdx << endl;
   //cerr << "exit nextSweep" << endl;
   //LOG(DEBUG) << "exit";
 }
@@ -666,39 +682,41 @@ bool SoloFunctionsController::moreSweeps() {
   return (_currentSweepIdx < _nSweeps);
 }
 
-
-void SoloFunctionsController::assign(string tempName, string userDefinedName) {
+void SoloFunctionsController::assign(size_t rayIdx, string tempName, string userDefinedName) {
   //_data->loadFieldsFromRays(); // TODO: this is a costly function as it moves the data/or pointers
   // TODO: where are the field names kept? in the table map? can i just change that?
   // Because each RadxRay holds its own FieldNameMap,
   // TODO: maybe ... no longer relavant?
 
   // Let the DataModel handle the changes? the renaming?
+  // But, decide here if this is a rename or a copy 
   DataModel *dataModel = DataModel::Instance();
-  dataModel->renameField(tempName, userDefinedName);
-  /* moved to DataModel::renameField 
-  vector<RadxRay *> rays = dataModel->getRays();
-  // for each ray, 
-  vector<RadxRay *>::iterator it;
-  for (it=rays.begin(); it != rays.end(); ++it) {
-     // renameField(oldName, newName);
-    (*it)->renameField(tempName, userDefinedName);
-    // loadFieldNameMap
-    (*it)->loadFieldNameMap();
 
+  if (dataModel->fieldExists(rayIdx, userDefinedName)) {
+    // copy temp data into existing field data
+    // delete temp field and data
+    dataModel->copyField(rayIdx, tempName, userDefinedName);
+    dataModel->RemoveField(rayIdx, tempName);
+  } else {
+    // rename the temp field 
+    dataModel->renameField(rayIdx, tempName, userDefinedName);
   }
-  */
-  // end for each ray
-  //
-  /* 
-  RadxField *theField = _data->getField(tempName);
-  if (theField == NULL) throw "Error: no field " + tempName + " found for " + userDefinedName + "  in data volume (SoloFunctionsController)";
-  theField->setName(userDefinedName);
-  theField->setLongName(userDefinedName);
-  theField->setStandardName(userDefinedName);
-  _data->loadRaysFromFields();
-  */
 }
+
+void SoloFunctionsController::assignByRay(string tempName, string userDefinedName) {
+  assign(_currentRayIdx, tempName, userDefinedName);
+}
+
+void SoloFunctionsController::assign(string tempName, string userDefinedName) {
+
+  // for each ray ...
+  DataModel *dataModel = DataModel::Instance();
+  size_t nRays = dataModel->getNRays();
+  for (size_t rayIdx=0; rayIdx < nRays; rayIdx++) {
+    assign(rayIdx, tempName, userDefinedName);
+  }
+}
+
 
 // Return data for the field, at the current sweep and ray indexes.
 const vector<float> *SoloFunctionsController::getData(string &fieldName) {

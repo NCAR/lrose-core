@@ -655,14 +655,21 @@ void BoundaryPointEditorModel::save(string &path)
 	fclose(file);
 }
 
+// if boundaryIndex < 0, no saved boundary
 bool BoundaryPointEditorModel::load(int boundaryIndex, string &selectedFieldName,
  int sweepIndex, string &radarFilePath) 
 {
 	LOG(DEBUG) << "enter";
-  string path = getBoundaryFilePath(radarFilePath,
-    selectedFieldName, sweepIndex, boundaryIndex);
-  LOG(DEBUG) << "loading from path: " << path;
-	bool successful = load(path);
+	bool successful = true;
+	if (boundaryIndex > 0) {
+    string path = getBoundaryFilePath(radarFilePath,
+      selectedFieldName, sweepIndex, boundaryIndex);
+    LOG(DEBUG) << "loading from path: " << path;
+	  successful = load(path);
+  } else {
+  	// reset boundary to empty
+  	clear();
+  }
 	LOG(DEBUG) << "exit";
 	return successful;
 } 

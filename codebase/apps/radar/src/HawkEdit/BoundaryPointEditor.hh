@@ -37,6 +37,8 @@ class BoundaryPointEditor : public QObject
 	  BoundaryView *boundaryView);
   ~BoundaryPointEditor();
 
+  void makeConnections();
+
   //void createBoundaryEditorDialog();	
 
 	string getBoundaryFilePath(string &fieldName, int sweepIndex, string boundaryFileName);
@@ -89,7 +91,8 @@ class BoundaryPointEditor : public QObject
   void boundaryBrushRadiusChanged(int value);
   void saveBoundary(int boundaryIndex);
   void loadBoundary(int boundaryIndex);
-
+  void clearBoundaryClicked();
+  
   public slots:
 
   //void selectedFieldNameSweepIndexSent(int boundaryIndex, QString &selectedFieldName, int sweepIndex);

@@ -888,6 +888,16 @@ void SoloFunctionsApi::RemoveStormMotion(float wind, float speed, float dgi_dd_r
   }
 }
 
+void SoloFunctionsApi::UnconditionalDelete(const float *data, float *newData, size_t nGates,
+      float bad, size_t dgi_clip_gate, bool *boundary_mask) {
+  try {
+    se_unconditional_delete(data, newData, nGates,
+         bad, dgi_clip_gate, boundary_mask);
+  } catch(...) {
+    throw "Something bad happened during script evaluation";
+  }
+}
+
 /*
 void SoloFunctionsApi::se_flag_glitches(float deglitch_threshold, int deglitch_radius,
                       int deglitch_min_bins,  // aka deglitch_min_gates                                  

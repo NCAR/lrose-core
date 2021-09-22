@@ -66,11 +66,14 @@ private:
   void setupBoundaryArray();
   void setupFieldArrays();
   void saveFieldArrays(std::map<QString, QString> &previousVariableContext);
+  void saveFieldVariableAssignments(std::map<QString, QString> &previousVariableContext);
+  QStringList *findNewFieldNames(std::map<QString, QString> &previousVariableContext);
   void setupSoloFunctions(SoloFunctionsController *soloFunctions);
   void fieldNamesProvided(vector<string> *fieldNames);
   void _assign(string tempName, string userDefinedName);
-  void _addFieldNameVectorsToContext(vector<string> &fieldNames, 
-    std::map<QString, QString> *currentVariableContext);
+  void _assignByRay(string tempName, string userDefinedName);
+  //void _addFieldNameVectorsToContext(vector<string> &fieldNames, 
+  //  std::map<QString, QString> *currentVariableContext);
 };
 
 
