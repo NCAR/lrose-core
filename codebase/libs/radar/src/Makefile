@@ -20,7 +20,6 @@ SUB_DIRS = \
 	fmq \
 	geom \
 	hsrl \
-	ips \
 	iwrf \
 	kdp \
 	moments \

@@ -90,7 +90,7 @@ class BoundaryPointEditorView : public QDialog
 	//vector<Point> getPoints(string boundaryFilePath);
 
   void boundaryPointEditorClosed();
-  void clearBoundary(int boundaryIndex);  // TODO: still needs connection
+  void clearBoundary();
   void refreshBoundariesEvent();
 
   private:

@@ -666,7 +666,27 @@ bool SoloFunctionsController::moreSweeps() {
   return (_currentSweepIdx < _nSweeps);
 }
 
+void SoloFunctionsController::assignByRay(string tempName, string userDefinedName) {
+  //_data->loadFieldsFromRays(); // TODO: this is a costly function as it moves the data/or pointers
+  // TODO: where are the field names kept? in the table map? can i just change that?
+  // Because each RadxRay holds its own FieldNameMap,
+  // TODO: maybe ... no longer relavant?
 
+  // Let the DataModel handle the changes? the renaming?
+  // But, decide here if this is a rename or a copy 
+  DataModel *dataModel = DataModel::Instance();
+
+  if (dataModel->fieldExists(_currentRayIdx, userDefinedName)) {
+    // copy temp data into existing field data
+    // delete temp field and data
+    dataModel->copyField(_currentRayIdx, tempName, userDefinedName);
+    dataModel->RemoveField(_currentRayIdx, tempName);
+  } else {
+    // rename the temp field 
+    dataModel->renameField(_currentRayIdx, tempName, userDefinedName);
+  }
+}
+/*
 void SoloFunctionsController::assign(string tempName, string userDefinedName) {
   //_data->loadFieldsFromRays(); // TODO: this is a costly function as it moves the data/or pointers
   // TODO: where are the field names kept? in the table map? can i just change that?
@@ -674,31 +694,20 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName) {
   // TODO: maybe ... no longer relavant?
 
   // Let the DataModel handle the changes? the renaming?
+  // But, decide here if this is a rename or a copy 
   DataModel *dataModel = DataModel::Instance();
-  dataModel->renameField(tempName, userDefinedName);
-  /* moved to DataModel::renameField 
-  vector<RadxRay *> rays = dataModel->getRays();
-  // for each ray, 
-  vector<RadxRay *>::iterator it;
-  for (it=rays.begin(); it != rays.end(); ++it) {
-     // renameField(oldName, newName);
-    (*it)->renameField(tempName, userDefinedName);
-    // loadFieldNameMap
-    (*it)->loadFieldNameMap();
 
+  if (dataModel->fieldExists(userDefinedName)) {
+    // copy temp data into existing field data
+    // delete temp field and data
+    dataModel->copyField(tempName, userDefinedName);
+    dataModel->RemoveField(tempName);
+  } else {
+    // rename the temp field 
+    dataModel->renameField(tempName, userDefinedName);
   }
-  */
-  // end for each ray
-  //
-  /* 
-  RadxField *theField = _data->getField(tempName);
-  if (theField == NULL) throw "Error: no field " + tempName + " found for " + userDefinedName + "  in data volume (SoloFunctionsController)";
-  theField->setName(userDefinedName);
-  theField->setLongName(userDefinedName);
-  theField->setStandardName(userDefinedName);
-  _data->loadRaysFromFields();
-  */
 }
+*/
 
 // Return data for the field, at the current sweep and ray indexes.
 const vector<float> *SoloFunctionsController::getData(string &fieldName) {

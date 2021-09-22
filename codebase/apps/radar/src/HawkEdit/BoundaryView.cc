@@ -31,10 +31,15 @@ void BoundaryView::draw(WorldPlot worldPlot, QPainter &painter,
 	BoundaryToolType currentTool, string &color)
 {
 	LOG(DEBUG) << "enter";
+  painter.save();
 
 	QColor boundaryColor(color.c_str());
   // QBrush *yellowBrush = new QBrush(boundaryColor);
-	painter.setPen(boundaryColor); // Qt::yellow);
+  QPen pen = painter.pen();
+  pen.setWidth(3); // 3 pixels wide
+  pen.setColor(QColor(boundaryColor));
+	painter.setPen(pen); // Qt::yellow);
+
 	// bool isFinished = isAClosedPolygon();
 
   LOG(DEBUG) << "npoints = " << points.size();
@@ -47,6 +52,7 @@ void BoundaryView::draw(WorldPlot worldPlot, QPainter &painter,
 		  drawPointBox(worldPlot, painter, points[i], pointBoxScale, color);
 	}
 
+  painter.restore();
 	LOG(DEBUG) << "exit";
 }
 
@@ -60,7 +66,7 @@ void BoundaryView::drawPointBox(WorldPlot worldPlot, QPainter &painter, Point po
 
 	QColor boundaryColor(color.c_str());
   QBrush yellowBrush(boundaryColor);
-	int size = pointBoxScale / worldPlot.getXPixelsPerWorld();
+	int size = 5; // pointBoxScale / worldPlot.getXPixelsPerWorld();
 	//worldPlot.fillRectangle(painter, yellowBrush, x-(size/2), y-(size/2), size, size);
 	painter.fillRect(x-(size/2), y-(size/2), size, size, yellowBrush);
 

@@ -288,7 +288,22 @@ void DataModel::SetData(string &fieldName, float value) {
 // remove field from volume
 void DataModel::RemoveField(string &fieldName) {
   int result = _vol.removeField(fieldName);
-  if (result != 0) throw std::invalid_argument("failed to remove field");
+  if (result != 0) {
+    string msg = "failed to remove field: ";
+    msg.append(fieldName); 
+    throw std::invalid_argument(msg);
+  }
+}
+
+// remove field from ray
+void DataModel::RemoveField(size_t rayIdx, string &fieldName) {
+  RadxRay *ray = getRay(rayIdx);
+  int result = ray->removeField(fieldName);
+  if (result != 0) {
+    string msg = "failed to remove field from ray: ";
+    msg.append(fieldName); 
+    throw std::invalid_argument(msg);
+  }
 }
 
 void DataModel::readData(string path, vector<string> &fieldNames,
@@ -372,6 +387,46 @@ void DataModel::renameField(string currentName, string newName) {
   }
 }
 
+void DataModel::renameField(size_t rayIdx, string currentName, string newName) {
+  RadxRay *ray = getRay(rayIdx);
+
+  // renameField(oldName, newName);
+  ray->renameField(currentName, newName);
+  // loadFieldNameMap
+  ray->loadFieldNameMap();
+
+}
+
+// copy from one field to another field 
+void DataModel::copyField(size_t rayIdx, string fromFieldName, string toFieldName) {
+  RadxRay *ray = getRay(rayIdx);
+  //vector<RadxRay *> rays = _vol.getRays();  
+  // for each ray, 
+  //vector<RadxRay *>::iterator it;
+  //for (it=rays.begin(); it != rays.end(); ++it) {
+     // replaceField(RadxField *field);
+    //RadxField *srcField = fetchDataField(*it, fromFieldName);
+    RadxField *srcField = fetchDataField(ray, fromFieldName);
+    Radx::fl32 *src = srcField->getDataFl32();
+
+    //RadxField *dstField = fetchDataField(*it, toFieldName);
+    RadxField *dstField = fetchDataField(ray, toFieldName);
+    Radx::fl32 *dst = dstField->getDataFl32();
+
+    size_t nbytes = ray->getNGates();
+    //      #include <string.h>
+    // void *memcpy(void *restrict dst, const void *restrict src, size_t n);
+    memcpy(dst, src, nbytes);
+  //}
+}
+
+bool DataModel::fieldExists(size_t rayIdx, string fieldName) {
+  RadxRay *ray = getRay(rayIdx);
+  RadxField *field = fetchDataField(ray, fieldName);
+  if (field != NULL) return true;
+  else return false;
+}
+
 RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
 
   RadxField *dataField = ray->getField(fieldName);
@@ -435,7 +490,9 @@ RadxRay *DataModel::getRay(size_t rayIdx) {
   RadxRay *ray = rays.at(rayIdx);
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
-    throw "Ray is null";
+    string msg = "bad ray index ";
+    msg.append(to_string(rayIdx));
+    throw std::invalid_argument(msg);
   } else {
   	return ray;
   }

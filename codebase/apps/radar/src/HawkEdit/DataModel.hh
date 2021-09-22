@@ -65,8 +65,12 @@ public:
 
   // remove field from volume
   void RemoveField(string &fieldName); 
+  void RemoveField(size_t rayIdx, string &fieldName);
 
   void renameField(string currentName, string newName);
+  void renameField(size_t rayIdx, string currentName, string newName);
+  void copyField(size_t rayIdx, string fromFieldName, string toFieldName);
+  bool fieldExists(size_t rayIdx, string fieldName);
 
   void get();
   const vector<float> *GetData(string fieldName,
