@@ -836,7 +836,7 @@ void PolarWidget::paintEvent(QPaintEvent *event)
               _rayLocationController, _currentColorMap, _backgroundBrush.color()); // "purple"); // backgroundColor);
         }
 
-        memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.sizeInBytes());
+        memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.byteCount());
 
         {
             QPainter p(&m_buffer);
