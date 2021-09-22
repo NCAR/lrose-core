@@ -624,8 +624,10 @@ void SoloFunctionsController::setCurrentRayToFirst() {
 
 void SoloFunctionsController::nextRay() {
   //LOG(DEBUG) << "entry";
-  //cerr << "entry nextRay" << endl;
   _currentRayIdx += 1;
+  if ((_currentRayIdx % 100) == 0) {
+    cerr << "   current ray " << _currentRayIdx << endl;
+  }
   //  applyBoundary();
   //cerr << "exit nextRay" << endl;
   //LOG(DEBUG) << "exit";
@@ -648,9 +650,9 @@ bool SoloFunctionsController::moreRays() {
 }
 
 void SoloFunctionsController::nextSweep() {
-  //LOG(DEBUG) << "entry";
-  //cerr << "entry nextSweep" << endl;
+  //LOG(DEBUG) << "entry" << " _currentSweepIdx = " << _currentSweepIdx;
   _currentSweepIdx += 1;
+  cerr << "current sweep " <<  _currentSweepIdx << endl;
   //cerr << "exit nextSweep" << endl;
   //LOG(DEBUG) << "exit";
 }
@@ -666,48 +668,41 @@ bool SoloFunctionsController::moreSweeps() {
   return (_currentSweepIdx < _nSweeps);
 }
 
+void SoloFunctionsController::assign(size_t rayIdx, string tempName, string userDefinedName) {
+  //_data->loadFieldsFromRays(); // TODO: this is a costly function as it moves the data/or pointers
+  // TODO: where are the field names kept? in the table map? can i just change that?
+  // Because each RadxRay holds its own FieldNameMap,
+  // TODO: maybe ... no longer relavant?
+
+  // Let the DataModel handle the changes? the renaming?
+  // But, decide here if this is a rename or a copy 
+  DataModel *dataModel = DataModel::Instance();
+
+  if (dataModel->fieldExists(rayIdx, userDefinedName)) {
+    // copy temp data into existing field data
+    // delete temp field and data
+    dataModel->copyField(rayIdx, tempName, userDefinedName);
+    dataModel->RemoveField(rayIdx, tempName);
+  } else {
+    // rename the temp field 
+    dataModel->renameField(rayIdx, tempName, userDefinedName);
+  }
+}
+
 void SoloFunctionsController::assignByRay(string tempName, string userDefinedName) {
-  //_data->loadFieldsFromRays(); // TODO: this is a costly function as it moves the data/or pointers
-  // TODO: where are the field names kept? in the table map? can i just change that?
-  // Because each RadxRay holds its own FieldNameMap,
-  // TODO: maybe ... no longer relavant?
-
-  // Let the DataModel handle the changes? the renaming?
-  // But, decide here if this is a rename or a copy 
-  DataModel *dataModel = DataModel::Instance();
-
-  if (dataModel->fieldExists(_currentRayIdx, userDefinedName)) {
-    // copy temp data into existing field data
-    // delete temp field and data
-    dataModel->copyField(_currentRayIdx, tempName, userDefinedName);
-    dataModel->RemoveField(_currentRayIdx, tempName);
-  } else {
-    // rename the temp field 
-    dataModel->renameField(_currentRayIdx, tempName, userDefinedName);
-  }
+  assign(_currentRayIdx, tempName, userDefinedName);
 }
-/*
+
 void SoloFunctionsController::assign(string tempName, string userDefinedName) {
-  //_data->loadFieldsFromRays(); // TODO: this is a costly function as it moves the data/or pointers
-  // TODO: where are the field names kept? in the table map? can i just change that?
-  // Because each RadxRay holds its own FieldNameMap,
-  // TODO: maybe ... no longer relavant?
 
-  // Let the DataModel handle the changes? the renaming?
-  // But, decide here if this is a rename or a copy 
+  // for each ray ...
   DataModel *dataModel = DataModel::Instance();
-
-  if (dataModel->fieldExists(userDefinedName)) {
-    // copy temp data into existing field data
-    // delete temp field and data
-    dataModel->copyField(tempName, userDefinedName);
-    dataModel->RemoveField(tempName);
-  } else {
-    // rename the temp field 
-    dataModel->renameField(tempName, userDefinedName);
+  size_t nRays = dataModel->getNRays();
+  for (size_t rayIdx=0; rayIdx < nRays; rayIdx++) {
+    assign(rayIdx, tempName, userDefinedName);
   }
 }
-*/
+
 
 // Return data for the field, at the current sweep and ray indexes.
 const vector<float> *SoloFunctionsController::getData(string &fieldName) {

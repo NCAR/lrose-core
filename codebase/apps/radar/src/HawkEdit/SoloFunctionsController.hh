@@ -175,7 +175,8 @@ public:
   void applyBoundary(bool useBoundaryMask, vector<Point> &boundaryPoints);
   const vector<bool> *GetBoundaryMask();
   void assignByRay(string tempName, string userDefinedName);
-  //void assign(string tempName, string userDefinedName);
+  void assign(string tempName, string userDefinedName);
+  void assign(size_t rayIdx, string tempName, string userDefinedName);
   const vector<float> *getData(string &fieldName);
   void setData(string &fieldName, vector<float> *fieldData);
 

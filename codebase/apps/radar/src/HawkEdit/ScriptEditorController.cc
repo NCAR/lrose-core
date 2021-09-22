@@ -756,7 +756,8 @@ uncate(100);
       LOG(DEBUG) << "more rays ...";
 
       // reset all field names defined in the global context
-      needFieldNames();
+      //needFieldNames();
+      fieldNamesProvided(initialFieldNames);
 
       // calculate boundary mask for each ray? 
       // Yes, when the ray index changes a new boundary mask is calculated 
@@ -807,7 +808,8 @@ uncate(100);
         //saveFieldArrays(currentVariableContext);
 
         // save any field variable assignments 
-        saveFieldVariableAssignments(currentVariableContext);
+        // TODO: need to speed this up; also, this is necessary for vector operations
+        //saveFieldVariableAssignments(currentVariableContext);
 	
       }
       _soloFunctionsController->nextRay();
@@ -825,9 +827,10 @@ uncate(100);
       criticalMessage("Error occurred during evaluation");
     }
       */
-    QStringList *newFieldNames;
-    newFieldNames = findNewFieldNames(currentVariableContext);
-/*
+    QStringList newFieldNames;
+    //QStringList *newFieldNames;
+    //newFieldNames = findNewFieldNames(currentVariableContext);
+
 	// ======                                                                                            
 	//  YES! This works.  The new global variables are listed here;                                      
 	// just find them and add them to the spreadsheet and to the Model??                                 
@@ -918,10 +921,10 @@ uncate(100);
         }
       }
     }
-*/
 
-    volumeUpdated(*newFieldNames);
-    delete newFieldNames;
+    volumeUpdated(newFieldNames);
+    //volumeUpdated(*newFieldNames);
+    //delete newFieldNames;
     emit scriptComplete();
   } catch (std::invalid_argument &ex) {
     LOG(DEBUG) << "ERROR running script: " << ex.what();
@@ -938,13 +941,13 @@ void ScriptEditorController::_assignByRay(string tempName, string userDefinedNam
   _soloFunctionsController->assignByRay(tempName, userDefinedName);
 }
 
-/* may not be used 
+// may not be used 
 void ScriptEditorController::_assign(string tempName, string userDefinedName) {
 
   // rename the field in the RadxVol
   _soloFunctionsController->assign(tempName, userDefinedName);
 }
-*/
+//
 
 // request filled by Controller in response to needFieldNames signal                                       
 void ScriptEditorController::fieldNamesProvided(vector<string> *fieldNames) {
