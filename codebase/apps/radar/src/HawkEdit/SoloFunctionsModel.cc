@@ -1611,8 +1611,8 @@ string SoloFunctionsModel::SetBadFlagsBetween(string fieldName,  // RadxVol *vol
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::RemoveRing(string fieldName,  // RadxVol *vol,
                 int rayIdx, int sweepIdx,
-                float lower_threshold,
-                float upper_threshold,
+                float lower_threshold, // in km
+                float upper_threshold, // in km
                 size_t clip_gate,
                 float bad_data_value,
                 string newFieldName) {
@@ -1649,21 +1649,43 @@ string SoloFunctionsModel::RemoveRing(string fieldName,  // RadxVol *vol,
       throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
   }
 
+  // -- 
+  // translate upper and lower threshold from km to a gate index
+  double startRange;
+  double gateSpace;
+  dataModel->getPredomRayGeom(&startRange, &gateSpace);
+  size_t from_gate = (lower_threshold - startRange) / gateSpace;
+  if (from_gate > nGates) {
+    string msg = "RemoveRing: lower_threshold exceeds number of gates; setting to max number of gates";
+    cerr << msg << endl;
+    from_gate = nGates;
+    //throw std::invalid_argument(msg);
+  }
+  size_t to_gate = (upper_threshold - startRange) / gateSpace;
+  if (to_gate > nGates) {
+    string msg = "RemoveRing: upper_threshold exceeds number of gates; setting to max number of gates";
+    cerr << msg << endl;
+    to_gate = nGates;
+    //throw std::invalid_argument(msg);
+  }
+  //----
+
   // // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
-  
+  Radx::fl32 missingValue = field->getMissingFl32();
+
   // TODO: data, _boundaryMask, and newData should have all the same dimensions = nGates
   SoloFunctionsApi soloFunctionsApi;
   
   //---- end insert ...
 
   // perform the function ...
-  soloFunctionsApi.RemoveRing(lower_threshold, upper_threshold,  
+  soloFunctionsApi.RemoveRing(from_gate, to_gate,  
               data, newData, nGates,
-              bad_data_value, clip_gate,
+              missingValue, clip_gate,
               _boundaryMask);
 
-  Radx::fl32 missingValue = Radx::missingSi08; 
+  //Radx::fl32 missingValue = Radx::missingSi08; 
   bool isLocal = false;
 
   //RadxField *newField = new RadxField(newFieldName, "m/s");
