@@ -913,7 +913,7 @@ uncate(100);
                 //tempName.append("#");
                 _assign(currentValue, originalName);
                 // add Variable list ToScriptEditor(it2.name(), it2.value());
-                newFieldNames << it2.name();
+                //newFieldNames << it2.name();
               }
             }
           }

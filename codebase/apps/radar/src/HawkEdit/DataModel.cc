@@ -416,7 +416,7 @@ void DataModel::copyField(size_t rayIdx, string fromFieldName, string toFieldNam
     size_t nbytes = ray->getNGates();
     //      #include <string.h>
     // void *memcpy(void *restrict dst, const void *restrict src, size_t n);
-    memcpy(dst, src, nbytes);
+    memcpy(dst, src, nbytes*sizeof(Radx::fl32));
   //}
 }
 
