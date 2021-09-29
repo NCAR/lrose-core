@@ -152,6 +152,9 @@ bool LeoRadxFile::isLeosphere(const string &path)
   if ((strncmp(line, "HeaderSize", 10) == 0) || (strncmp(line, "HeaderLength", 10) == 0)) {
     return true;
   }
+  if (path.find("WLS100") != string::npos) {
+    return true;
+  }
 
   return false;
 
@@ -209,6 +212,9 @@ int LeoRadxFile::readFromPath(const string &path,
     _close();
     return -1;
   }
+
+  identifyModel(_modelStr, path);
+
   _configXml += RadxXml::writeEndTag("Header", 1);
 
   // end XML data
@@ -247,20 +253,9 @@ int LeoRadxFile::readFromPath(const string &path,
   
   // get column index for time, el and az
 
-  _timeStampIndex = -1;
-  _elevationIndex = -1;
-  _azimuthIndex = -1;
-
-  for (size_t ii = 0; ii < _columnLabels.size(); ii++) {
-    if ((_columnLabels[ii].find("Timestamp") != string::npos) || 
-     (_columnLabels[ii].find("Date") != string::npos)) {
-      _timeStampIndex = ii;
-    } else if (_columnLabels[ii].find("Azimuth Angle") != string::npos) {
-      _azimuthIndex = ii;
-    } else if (_columnLabels[ii].find("Elevation Angle") != string::npos) {
-      _elevationIndex = ii;
-    }
-  }
+  _timeStampIndex = findTimeStamp();
+  _elevationIndex = findElevationAngle();
+  _azimuthIndex = findAzimuthAngle();
 
   if (_timeStampIndex < 0) {
     _addErrStr("ERROR - LeoRadxFile::readFromPath");
@@ -270,7 +265,8 @@ int LeoRadxFile::readFromPath(const string &path,
     return -1;
   }
 
-  if (_modelStr.find("WLS200") != string::npos) {
+  //if (_modelStr.find("WLS200") != string::npos) {
+  if (_modelNum == 200) {
     if (_elevationIndex < 0 || _azimuthIndex < 0) {
       _addErrStr("ERROR - LeoRadxFile::readFromPath");
       _addErrStr("  Cannot find Elevation or Azimuth in column headers");
@@ -287,12 +283,25 @@ int LeoRadxFile::readFromPath(const string &path,
     cerr << "  _azimuthIndex: " << _azimuthIndex << endl;
   }
   
-  // set up field vector
 
-  if (_modelStr.find("WLS70") != string::npos) {
-    _findFieldsModel70();
-  } else {
-    _findFieldsModel200();
+  // set up field vector
+  switch(_modelNum) {
+    case 70:
+      _findFieldsModel70();
+      break;
+    case 7:
+      _findFieldsModel7();
+      break;
+    case 866:
+      _findFieldsModel866();
+      break;
+    default:
+      bool isWLS100 = _findFieldsModel100();
+      if (isWLS100) {
+        _modelNum = 100;
+      } else {
+        _findFieldsModel200();
+      }
   }
 
   // if the flag is set to aggregate sweeps into a volume on read,
@@ -301,11 +310,26 @@ int LeoRadxFile::readFromPath(const string &path,
   // read in ray data
 
   int iret = 0;
-  if (_modelStr.find("WLS70") != string::npos) {
-    iret = _readRayDataModel70();
-  } else {
-    iret = _readRayDataModel200();
+  switch(_modelNum) {
+    case 70:
+      iret = _readRayDataModel70();
+      break;
+    case 7:
+      _readRayDataModel7();
+      break;
+    case 866:
+      _readRayDataModel866();
+      break;
+    case 100:
+      iret = _readRayDataModel100();
+      break;
+    case 200:
+      iret = _readRayDataModel200();
+      break;
+    default:
+      _addErrStr("ERROR - unknown model number");
   }
+
   if (iret) {
     _addErrStr("ERROR - LeoRadxFile::readFromPath");
     _close();
@@ -367,6 +391,9 @@ int LeoRadxFile::_readHeaderData(string &xml)
     nLinesRead += 1;
 
     string ll(_stripLine(line));
+
+    // skip any comment lines ...
+    if (ll.find("*****") != string::npos) continue;
 
     // look for data column labels array - this is the last
     // entry in the header
@@ -673,6 +700,140 @@ void LeoRadxFile::_findFieldsModel200()
 
 }
 
+////////////////////////////////////////////////////////////
+// Set up the field names and units for model 866
+
+void LeoRadxFile::_findFieldsModel866()
+  
+{
+
+  _fields.clear();
+
+  // loop through the column labels
+
+  double firstRange = _ranges[0];
+  bool foundFirstRange = false;
+
+  for (size_t ii = 0; ii < _columnLabels.size(); ii++) {
+    
+    // read the range if possible
+
+    string colLabel = _columnLabels[ii];
+
+    double range;
+    if (sscanf(colLabel.c_str(), "%lg", &range) != 1) {
+      continue;
+    }
+
+    if (!foundFirstRange) {
+      // we are in the fields for the first range
+      foundFirstRange = true;
+    }
+    
+    if (foundFirstRange) {
+      if (fabs(range - firstRange) > 0.001) {
+        // done
+        break;
+      }
+      // we are in the fields for the first range
+
+      size_t nameStart = colLabel.find("m ");
+      if (nameStart == string::npos) {
+        // bad field
+        continue;
+      }
+      nameStart += 2;
+
+      size_t unitsStart = colLabel.find("(");
+      if (unitsStart == string::npos) {
+        // bad field
+        continue;
+      }
+      size_t nameEnd = unitsStart - 1;
+      unitsStart += 1;
+
+      size_t unitsEnd = colLabel.find(")");
+      if (unitsStart == string::npos) {
+        // bad field
+        continue;
+      }
+
+      string label = colLabel.substr(nameStart, colLabel.size() - nameStart);
+      string origName = colLabel.substr(nameStart, nameEnd - nameStart);
+      string units = colLabel.substr(unitsStart, unitsEnd - unitsStart);
+
+      Field field;
+      field.label = label;
+      field.origName = origName;
+      field.longName = _substituteChar(origName, ' ', '-');
+      field.units = units;
+      field.name = field.longName;
+      field.standardName = field.longName;
+
+      if (origName.find("Radial Wind Speed Dispersion") != string::npos) {
+        field.name = "DISP";
+      } else if (origName.find("Radial Wind Speed") != string::npos) {
+        field.name = "VEL";
+        field.standardName = "radial_velocity_of_scatterers_away_from_instrument";
+        field.folds = true;
+      } else if (origName.find("CNR") != string::npos) {
+        field.name = "CNR";
+        field.standardName = "carrier_to_noise_ratio";
+      } else if (origName.find("Wind Speed") != string::npos) {
+        field.name = "WSPD";
+      } else if (origName.find("Wind Direction") != string::npos) {
+        field.name = "WDIR";
+        field.units = "deg";
+      } else if (origName.find("X-Wind") != string::npos) {
+        field.standardName = "eastward_wind";
+      } else if (origName.find("Y-Wind") != string::npos) {
+        field.standardName = "northward_wind";
+      } else if (origName.find("Z-Wind") != string::npos) {
+        field.standardName = "upward_wind";
+      }
+
+      _fields.push_back(field);
+
+    }
+
+  } // ii
+
+  // add in the indexes into the ray data
+
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    Field &field = _fields[ii];
+    for (size_t jj = 0; jj < _columnLabels.size(); jj++) {
+      string search = "m ";
+      search += field.label;
+      if (_columnLabels[jj].find(search) != string::npos) {
+        field.index.push_back(jj);
+      } // jj
+    }
+  }
+
+  if (_debug) {
+    cerr << "Fields:" << endl;
+    for (size_t ii = 0; ii < _fields.size(); ii++) {
+      const Field &field = _fields[ii];
+      cerr << "  Field: " << field.name << endl;
+      cerr << "    label: " << field.label << endl;
+      cerr << "    orig name: " << field.origName << endl;
+      cerr << "    long name: " << field.longName << endl;
+      cerr << "    standard name: " << field.standardName << endl;
+      cerr << "    units: " << field.units << endl;
+      cerr << "    folds: " << string(field.folds?"Y":"N") << endl;
+      cerr << "    nRanges: " << field.index.size() << endl;
+      if (_verbose) {
+        cerr << "    indexes:";
+        for (size_t kk = 0; kk < field.index.size(); kk++) {
+          cerr << " " << field.index[kk];
+        }
+        cerr << endl;
+      }
+    } // ii
+  }
+
+}
 
 ////////////////////////////////////////////////////////////
 // Set up the field names and units for model 70
@@ -853,12 +1014,464 @@ void LeoRadxFile::_findFieldsModel70()
 
 }
 
+////////////////////////////////////////////////////////////
+// Set up the field names and units for model 70
+
+bool LeoRadxFile::_findFieldsModel100()
+  
+{
+  bool isModel100 = true;
+
+  _fields.clear();
+  _fieldNames.clear();
+  _fieldCols.clear();
+
+  // loop through the column labels, finding the fields and
+  // saving out their information
+
+  for (size_t icol = 0; icol < _columnLabels.size(); icol++) {
+
+    // read the range if possible
+
+    string colLabel = _columnLabels[icol];
+
+    // check for variable with name followed by range bin number
+
+    size_t firstDigitPos = 0;
+    for (size_t jj = 0; jj < colLabel.size(); jj++) {
+      if (isdigit(colLabel[jj])) {
+        firstDigitPos = jj;
+        break;
+      }
+    }
+    
+    size_t lastDigitPos = 0;
+    for (size_t jj = firstDigitPos; jj < colLabel.size(); jj++) {
+      if (isdigit(colLabel[jj])) {
+        lastDigitPos = jj;
+      }
+    }
+
+    if ((firstDigitPos > 0) && (lastDigitPos == colLabel.size() - 1)) {
+      // valid field
+      string fieldName = colLabel.substr(0, firstDigitPos);
+      _fieldNames.insert(fieldName); // adding to field set
+      _fieldCols[colLabel] = icol; // adding to column map
+    }
+
+  } // icol
+
+  if (_verbose) {
+    map<string, size_t>::iterator it;
+    for (it = _fieldCols.begin(); it != _fieldCols.end(); it++) {
+      cerr << "  ==>> fieldName, colIndex: " 
+           << it->first << ", " << it->second << endl;
+    }
+  }
+
+  // loop through the field names set, creating fields for each one
+
+  set<string>::iterator ifield;
+  for (ifield = _fieldNames.begin(); ifield != _fieldNames.end(); ifield++) {
+    
+    string fieldName = *ifield;
+
+    Field field;
+    field.name = fieldName;
+    
+    if (fieldName.find("CNR") != string::npos) {
+      field.standardName = "CNR";
+      field.longName = "Carrier to Noise Ratio";
+      field.units = "dB";
+    } else if (fieldName.find("DRWS") != string::npos) {
+      field.standardName = "Averaged Doppler Spectrum";
+      field.longName = "Averaged Dopper Spectrum width converted";
+      field.units = "m/s";
+    } else if (fieldName.find("RWS") != string::npos) {
+      field.standardName = "Radial Wind Speed";
+      field.longName = "Radial Wind Speed";
+      field.units = "m/s";
+    } else if (fieldName.find("Range") != string::npos) {
+      // This is our range column
+      // TODO: fix up!!
+      field.standardName = "Radial Wind Speed";
+      field.longName = "Radial Wind Speed";
+      field.units = "m/s";
+    }
+
+
+    _fields.push_back(field);
+
+  } // ifield
+
+  if (_fields.size() < 10) {
+    isModel100 = false;
+  } else {
+  
+    // add in the indexes into the ray data
+    
+    for (size_t ii = 0; ii < _fields.size(); ii++) {
+      Field &field = _fields[ii];
+      field.index.clear();
+      for (size_t kk = 0; kk < _ranges.size(); kk++) {
+        char searchName[1024];
+        sprintf(searchName, "%s%d", field.name.c_str(), (int) kk + 1);
+        for (size_t jj = 0; jj < _columnLabels.size(); jj++) {
+          if (_columnLabels[jj] == searchName) {
+            field.index.push_back(jj);
+            break;
+          }
+        } // jj
+      } // kk
+    } // ii
+
+    if (_debug) {
+      cerr << "Fields:" << endl;
+      for (size_t ii = 0; ii < _fields.size(); ii++) {
+        const Field &field = _fields[ii];
+        cerr << "  Field: " << field.name << endl;
+        cerr << "    label: " << field.label << endl;
+        cerr << "    name: " << field.name << endl;
+        cerr << "    long name: " << field.longName << endl;
+        cerr << "    standard name: " << field.standardName << endl;
+        cerr << "    units: " << field.units << endl;
+        cerr << "    folds: " << string(field.folds?"Y":"N") << endl;
+        cerr << "    nRanges: " << field.index.size() << endl;
+        if (_verbose) {
+          cerr << "    indexes:";
+          for (size_t kk = 0; kk < field.index.size(); kk++) {
+            cerr << " " << field.index[kk];
+          }
+          cerr << endl;
+        }
+      } // ii
+    }
+  }
+  return isModel100;
+}
+
+
+////////////////////////////////////////////////////////////
+// Set up the field names and units for model 7
+
+void LeoRadxFile::_findFieldsModel7()
+  
+{
+
+  _fields.clear();
+  _fieldNames.clear();
+  _fieldCols.clear();
+
+  // loop through the column labels, finding the fields and
+  // saving out their information
+
+  for (size_t icol = 0; icol < _columnLabels.size(); icol++) {
+
+    // read the range if possible
+
+    string colLabel = _columnLabels[icol];
+
+    // check for variable with name followed by range bin number
+
+    size_t firstDigitPos = 0;
+    for (size_t jj = 0; jj < colLabel.size(); jj++) {
+      if (isdigit(colLabel[jj])) {
+        firstDigitPos = jj;
+        break;
+      }
+    }
+    
+    size_t lastDigitPos = 0;
+    for (size_t jj = firstDigitPos; jj < colLabel.size(); jj++) {
+      if (isdigit(colLabel[jj])) {
+        lastDigitPos = jj;
+      }
+    }
+    
+    /*
+    size_t spaceDashPos = 0;
+    size_t jj = 0;
+    bool found = false;
+    while ( jj < colLabel.size() && !found) {
+      if ( (colLabel[jj] == ' ') || (colLabel[jj] == '-') ) {
+        spaceDashPos = jj;
+        found = true;
+      }
+      jj += 1;
+    }
+    */
+
+    if ((firstDigitPos > 0) && (lastDigitPos == colLabel.size() - 1)) {
+      // valid field
+      string fieldName = colLabel.substr(0, firstDigitPos);
+      _fieldNames.insert(fieldName); // adding to field set
+      _fieldCols[colLabel] = icol; // adding to column map
+    }
+
+  } // icol
+
+  if (_verbose) {
+    map<string, size_t>::iterator it;
+    for (it = _fieldCols.begin(); it != _fieldCols.end(); it++) {
+      cerr << "  ==>> fieldName, colIndex: " 
+           << it->first << ", " << it->second << endl;
+    }
+  }
+
+  // loop through the field names set, creating fields for each one
+
+  set<string>::iterator ifield;
+  for (ifield = _fieldNames.begin(); ifield != _fieldNames.end(); ifield++) {
+    
+    string fieldName = *ifield;
+
+    Field field;
+    field.name = fieldName;
+    
+    if (fieldName.find("Azi") != string::npos) {
+      field.standardName = "Azi";
+      field.longName = "averaged wind direction";
+      field.units = "rd";
+    } else if (fieldName.find("Vh") != string::npos) {
+      field.standardName = "Vh";
+      field.longName = "horizontal wind speed";
+      field.units = "m/s";
+    } else if (fieldName.find("u-") != string::npos) {
+      field.standardName = "u";
+      field.longName = "wind vector projection along x-axis";
+      field.units = "m/s";
+    } else if (fieldName.find("v-") != string::npos) {
+      field.standardName = "v";
+      field.longName = "wind vector projection along y-axis";
+      field.units = "m/s";
+    } else if (fieldName.find("w-") != string::npos) {
+      field.standardName = "w";
+      field.longName = "wind vector projection along z-axis";
+      field.units = "m/s";
+    } else if (fieldName.find("CNR") != string::npos) {
+      field.standardName = "CNR";
+      field.longName = "Carrier to Noise Ratio";
+      field.units = "dB";
+    } else if (fieldName.find("RWSD") != string::npos) {
+      field.standardName = "Averaged Doppler Spectrum";
+      field.longName = "Averaged Dopper Spectrum width converted";
+      field.units = "m/s";
+    } else if (fieldName.find("RWS") != string::npos) {
+      field.standardName = "Radial Wind Speed";
+      field.longName = "Radial Wind Speed";
+      field.units = "m/s";
+    }
+
+    _fields.push_back(field);
+
+  } // ifield
+  
+  // connect the field indexes into the ray data
+  /*
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    Field &field = _fields[ii];
+    field.index.clear();
+    for (size_t kk = 0; kk < _ranges.size(); kk++) {
+      char searchName[1024];
+      sprintf(searchName, "%s%d", field.name.c_str(), (int) kk + 1);
+      for (size_t jj = 0; jj < _columnLabels.size(); jj++) {
+        if (_columnLabels[jj] == searchName) {
+          field.index.push_back(jj);
+          break;
+        }
+      } // jj
+    } // kk
+  } // ii
+  */
+  
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    Field &field = _fields[ii];
+    field.index.clear();
+  }
+
+  for (size_t cli = 0; cli < _columnLabels.size(); cli++) {
+    size_t ii = 0;
+    bool found = false;
+    while (ii < _fields.size() && !found) {
+      // find the field in the column label
+      Field &field = _fields[ii];
+      if (_columnLabels[cli].find(field.name) != string::npos) {
+        found = true;
+        field.index.push_back(cli);
+      }
+      ii += 1;
+    } 
+  } // cli
+
+
+  if (_debug) {
+    cerr << "Fields:" << endl;
+    for (size_t ii = 0; ii < _fields.size(); ii++) {
+      const Field &field = _fields[ii];
+      cerr << "  Field: " << field.name << endl;
+      cerr << "    label: " << field.label << endl;
+      cerr << "    name: " << field.name << endl;
+      cerr << "    long name: " << field.longName << endl;
+      cerr << "    standard name: " << field.standardName << endl;
+      cerr << "    units: " << field.units << endl;
+      cerr << "    folds: " << string(field.folds?"Y":"N") << endl;
+      cerr << "    nRanges: " << field.index.size() << endl;
+      if (_verbose) {
+        cerr << "    indexes:";
+        for (size_t kk = 0; kk < field.index.size(); kk++) {
+          cerr << " " << field.index[kk];
+        }
+        cerr << endl;
+      }
+    } // ii
+  }
+
+}
 
 ////////////////////////////////////////////////////////////
 // Read in ray data for model 200
 // Returns 0 on success, -1 on failure
 
 int LeoRadxFile::_readRayDataModel200()
+  
+{
+
+  // read through the data records
+
+  char line[65536];
+  while (!feof(_file)) {
+    
+    // get next line
+    
+    if (fgets(line, 65536, _file) == NULL) {
+      break;
+    }
+    string ll(_stripLine(line));
+    
+    // data columns array
+    
+    vector<string> toks;
+    RadxStr::tokenize(ll, "\t", toks);
+    
+    // if (_verbose) {
+    //   cerr << "====>>>>> Data values:" << endl;
+    //   for (size_t ii = 0; ii < _columnLabels.size(); ii++) {
+    //     cerr << "  col num " << ii << ", " << _columnLabels[ii] 
+    //          << ": " << toks[ii] << endl;
+    //   }
+    //   cerr << "==================================" << endl;
+    // }
+
+    // new ray
+
+    RadxRay *ray = new RadxRay;
+
+    // time
+
+    RadxTime rtime(toks[_timeStampIndex]);
+    ray->setTime(rtime.utime(), (int) (rtime.getSubSec() * 1.0e9 + 0.5));
+
+    ray->setVolumeNumber(0);
+    ray->setSweepNumber(0);
+    
+    // elevation and azimuth
+
+    double el = 90.0;
+    if (_elevationIndex >= 0) {
+      el = atof(toks[_elevationIndex].c_str());
+      if (el > 180) {
+        el -= 360.0;
+      }
+    }
+    ray->setElevationDeg(el);
+
+    double az = 0.0;
+    if (_azimuthIndex >= 0) {
+      az = atof(toks[_azimuthIndex].c_str());
+    }
+    ray->setAzimuthDeg(az);
+    
+    // fixed angle
+
+    if (_fixedAngle > -9990) {
+      ray->setFixedAngleDeg(_fixedAngle);
+    } else {
+      if (_rhiMode) {
+        ray->setFixedAngleDeg(az);
+      } else {
+        ray->setFixedAngleDeg(el);
+      }
+    }
+
+    // range geometry
+
+    ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
+
+    // sweep mode
+
+    if (_rhiMode) {
+      ray->setSweepMode(Radx::SWEEP_MODE_RHI);
+    } else {
+      if (_azLimit1 == _azLimit2) {
+        ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+      } else {
+        ray->setSweepMode(Radx::SWEEP_MODE_SECTOR);
+      }
+    }
+    
+    // fields
+
+    for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+      
+      const Field &field = _fields[ifield];
+      
+      if (isFieldRequiredOnRead(field.name)) {
+        
+        RadxField *rfld = new RadxField(field.name, field.units);
+        rfld->setLongName(field.longName);
+        rfld->setStandardName(field.standardName);
+        if (field.folds) {
+          rfld->setFieldFolds(-_nyquist, _nyquist);
+        }
+        rfld->setMissingFl32(Radx::missingFl32);
+        rfld->setRangeGeom(_startRangeKm, _gateSpacingKm);
+        
+        size_t nGates = field.index.size();
+        RadxArray<Radx::fl32> data_;
+        Radx::fl32 *data = data_.alloc(nGates);
+
+        for (size_t jj = 0; jj < nGates; jj++) {
+          string tok = toks[field.index[jj]];
+          Radx::fl32 fval = Radx::missingFl32;
+          if (tok.find("NaN") == string::npos) {
+            fval = atof(tok.c_str());
+          }
+          data[jj] = fval;
+        }
+        
+        rfld->addDataFl32(nGates, data);
+
+        ray->addField(rfld);
+
+      } // if (isFieldRequiredOnRead(field.name) ...
+
+    } // ifield
+
+    // add ray to vector
+
+    _rays.push_back(ray);
+    
+  } // while
+  
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////
+// Read in ray data for model 866
+// Returns 0 on success, -1 on failure
+
+int LeoRadxFile::_readRayDataModel866()
   
 {
 
@@ -1045,6 +1658,334 @@ int LeoRadxFile::_readRayDataModel70()
     if (sscanf(toks[_timeStampIndex].c_str(), "%2d/%2d/%4d%c%2d:%2d",
                &day, &month, &year, &cc, &hour, &min) == 6) {
       RadxTime rtime(year, month, day, hour, min, 0);
+      ray->setTime(rtime.utime());
+    } else {
+      // cannot read date/time
+      cerr << "Cannot read date/time, skipping" << endl;
+      cerr << "  line: " << ll.substr(0, 60) << " ..... " << endl;
+      continue;
+    }
+
+    ray->setVolumeNumber(0);
+    ray->setSweepNumber(0);
+    
+    // elevation and azimuth
+
+    double el = 90.0;
+    if (_elevationIndex >= 0) {
+      el = atof(toks[_elevationIndex].c_str());
+      if (el > 180) {
+        el -= 360.0;
+      }
+    }
+    ray->setElevationDeg(el);
+
+    double az = 0.0;
+    if (_azimuthIndex >= 0) {
+      az = atof(toks[_azimuthIndex].c_str());
+    }
+    ray->setAzimuthDeg(az);
+    
+    // fixed angle
+
+    if (_fixedAngle > -9990) {
+      ray->setFixedAngleDeg(_fixedAngle);
+    } else {
+      if (_rhiMode) {
+        ray->setFixedAngleDeg(az);
+      } else {
+        ray->setFixedAngleDeg(el);
+      }
+    }
+
+    ray->setTrueScanRateDegPerSec(0);
+    ray->setTargetScanRateDegPerSec(0);
+
+    // range geometry
+
+    ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
+
+    // sweep mode
+
+    if (_rhiMode) {
+      ray->setSweepMode(Radx::SWEEP_MODE_RHI);
+    } else {
+      if (_azLimit1 == _azLimit2) {
+        ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+      } else {
+        ray->setSweepMode(Radx::SWEEP_MODE_SECTOR);
+      }
+    }
+    
+    // fields
+
+    for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+      
+      const Field &field = _fields[ifield];
+      
+      if (isFieldRequiredOnRead(field.name)) {
+        
+        RadxField *rfld = new RadxField(field.name, field.units);
+        rfld->setLongName(field.longName);
+        rfld->setStandardName(field.standardName);
+        if (field.folds) {
+          rfld->setFieldFolds(-_nyquist, _nyquist);
+        }
+        rfld->setMissingFl32(Radx::missingFl32);
+        rfld->setRangeGeom(_startRangeKm, _gateSpacingKm);
+        
+        size_t nGates = field.index.size();
+        RadxArray<Radx::fl32> data_;
+        Radx::fl32 *data = data_.alloc(nGates);
+
+        for (size_t jj = 0; jj < nGates; jj++) {
+          string tok = toks[field.index[jj]];
+          Radx::fl32 fval = Radx::missingFl32;
+          if (tok.find("NaN") == string::npos) {
+            fval = atof(tok.c_str());
+          }
+          data[jj] = fval;
+        }
+        
+        rfld->addDataFl32(nGates, data);
+
+        ray->addField(rfld);
+
+      } // if (isFieldRequiredOnRead(field.name) ...
+
+    } // ifield
+
+    // add ray to vector
+
+    _rays.push_back(ray);
+    
+  } // while
+  
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////
+// Read in ray data for model 100
+// Returns 0 on success, -1 on failure
+
+int LeoRadxFile::_readRayDataModel100()
+  
+{
+
+  // read through the data records
+  // there is one line for each gate. 
+  // We don't know how many Ranges/Gates until we hit a new timestamp
+  // while (!eof()) {
+  //    if (oldTimestamp != newTimestamp)
+  //       we are at the end of a ray,
+  //    else 
+  //       add another gate to the ray
+  // }
+
+
+
+  char line[65536];
+  while (!feof(_file)) {
+    
+    // get next line
+    
+    if (fgets(line, 65536, _file) == NULL) {
+      break;
+    }
+    string ll(_stripLine(line));
+
+    // substitute underscore in date string to make it a single token
+    for (size_t ii = 0; ii < 16; ii++) {
+      if (isspace(ll[ii])) {
+        ll[ii] = '_';
+      }
+    }
+    
+    // data columns array
+    
+    vector<string> toks;
+    RadxStr::tokenize(ll, " \t", toks);
+    
+    // if (_verbose) {
+    //   cerr << "====>>>>> Data values:" << endl;
+    //   for (size_t ii = 0; ii < _columnLabels.size(); ii++) {
+    //     cerr << "  col num " << ii << ", " << _columnLabels[ii] 
+    //          << ": " << toks[ii] << endl;
+    //   }
+    //   cerr << "==================================" << endl;
+    // }
+
+    // new ray
+
+    RadxRay *ray = new RadxRay;
+
+    // time
+    
+    int year, month, day, hour, min, sec, nsec;
+    char cc;
+    if (sscanf(toks[_timeStampIndex].c_str(), "%4d-%2d-%2d%c%2d:%2d:%2d.%6d",
+               &year, &month, &day, &cc, &hour, &min, &sec, &nsec) == 8) {
+      RadxTime rtime(year, month, day, hour, min, sec, nsec);
+      ray->setTime(rtime.utime());
+    } else {
+      // cannot read date/time
+      cerr << "Cannot read date/time, skipping" << endl;
+      cerr << "  line: " << ll.substr(0, 60) << " ..... " << endl;
+      continue;
+    }
+
+    ray->setVolumeNumber(0);
+    ray->setSweepNumber(0);
+    
+    // elevation and azimuth
+
+    double el = 90.0;
+    if (_elevationIndex >= 0) {
+      el = atof(toks[_elevationIndex].c_str());
+      if (el > 180) {
+        el -= 360.0;
+      }
+    }
+    ray->setElevationDeg(el);
+
+    double az = 0.0;
+    if (_azimuthIndex >= 0) {
+      az = atof(toks[_azimuthIndex].c_str());
+    }
+    ray->setAzimuthDeg(az);
+    
+    // fixed angle
+
+    if (_fixedAngle > -9990) {
+      ray->setFixedAngleDeg(_fixedAngle);
+    } else {
+      if (_rhiMode) {
+        ray->setFixedAngleDeg(az);
+      } else {
+        ray->setFixedAngleDeg(el);
+      }
+    }
+
+    ray->setTrueScanRateDegPerSec(0);
+    ray->setTargetScanRateDegPerSec(0);
+
+    // range geometry
+
+    ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
+
+    // sweep mode
+
+    if (_rhiMode) {
+      ray->setSweepMode(Radx::SWEEP_MODE_RHI);
+    } else {
+      if (_azLimit1 == _azLimit2) {
+        ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+      } else {
+        ray->setSweepMode(Radx::SWEEP_MODE_SECTOR);
+      }
+    }
+    
+    // fields
+
+    for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+      
+      const Field &field = _fields[ifield];
+      
+      if (isFieldRequiredOnRead(field.name)) {
+        
+        RadxField *rfld = new RadxField(field.name, field.units);
+        rfld->setLongName(field.longName);
+        rfld->setStandardName(field.standardName);
+        if (field.folds) {
+          rfld->setFieldFolds(-_nyquist, _nyquist);
+        }
+        rfld->setMissingFl32(Radx::missingFl32);
+        rfld->setRangeGeom(_startRangeKm, _gateSpacingKm);
+        
+        size_t nGates = field.index.size();
+        RadxArray<Radx::fl32> data_;
+        Radx::fl32 *data = data_.alloc(nGates);
+
+        for (size_t jj = 0; jj < nGates; jj++) {
+          string tok = toks[field.index[jj]];
+          Radx::fl32 fval = Radx::missingFl32;
+          if (tok.find("NaN") == string::npos) {
+            fval = atof(tok.c_str());
+          }
+          data[jj] = fval;
+        }
+        
+        rfld->addDataFl32(nGates, data);
+
+        ray->addField(rfld);
+
+      } // if (isFieldRequiredOnRead(field.name) ...
+
+    } // ifield
+
+    // add ray to vector
+
+    _rays.push_back(ray);
+    
+  } // while
+  
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////
+// Read in ray data for model 7
+// Returns 0 on success, -1 on failure
+
+int LeoRadxFile::_readRayDataModel7()
+  
+{
+
+  // read through the data records
+
+  char line[65536];
+  while (!feof(_file)) {
+    
+    // get next line
+    
+    if (fgets(line, 65536, _file) == NULL) {
+      break;
+    }
+    string ll(_stripLine(line));
+
+    // substitute underscore in date string to make it a single token
+    for (size_t ii = 0; ii < 16; ii++) {
+      if (isspace(ll[ii])) {
+        ll[ii] = '_';
+      }
+    }
+    
+    // data columns array
+    
+    vector<string> toks;
+    RadxStr::tokenize(ll, " \t", toks);
+    
+    // if (_verbose) {
+    //   cerr << "====>>>>> Data values:" << endl;
+    //   for (size_t ii = 0; ii < _columnLabels.size(); ii++) {
+    //     cerr << "  col num " << ii << ", " << _columnLabels[ii] 
+    //          << ": " << toks[ii] << endl;
+    //   }
+    //   cerr << "==================================" << endl;
+    // }
+
+    // new ray
+
+    RadxRay *ray = new RadxRay;
+
+    // time
+    
+    int year, month, day, hour, min, sec, nsec;
+    char cc;
+    if (sscanf(toks[_timeStampIndex].c_str(), "%2d/%2d/%4d%c%2d:%2d:%2d.%2d",
+               &day, &month, &year, &cc, &hour, &min, &sec, &nsec) == 8) {
+      RadxTime rtime(year, month, day, hour, min, sec);
       ray->setTime(rtime.utime());
     } else {
       // cannot read date/time
@@ -1664,6 +2605,93 @@ void LeoRadxFile::_setAnglesFromXml(const string &xml)
   }
   #endif
   
+}
+
+int LeoRadxFile::findTimeStamp() {
+  int index = -1;
+  size_t ii = 0;
+  bool done = false;
+
+  while ( (ii < _columnLabels.size()) && !done ) {
+    if ((_columnLabels[ii].find("Timestamp") != string::npos) || 
+     (_columnLabels[ii].find("Date") != string::npos)) {
+      index = ii;
+      done = true;
+    }
+    ii += 1;
+  }
+  return index;
+}
+
+
+int LeoRadxFile::findElevationAngle() {
+  int index = -1;
+  size_t ii = 0;
+  bool done = false;
+
+  while ( (ii < _columnLabels.size()) && !done ) {
+    if (findElevationAngle(_columnLabels[ii])) {
+      index = ii;
+      done = true;
+    }
+    ii += 1;
+  }
+  return index;
+}
+
+int LeoRadxFile::findAzimuthAngle() {
+  int index = -1;
+  size_t ii = 0;
+  bool done = false;
+
+  while ( (ii < _columnLabels.size()) && !done ) {
+    if (findAzimuthAngle(_columnLabels[ii])) {
+      index = ii;
+      done = true;
+    }
+    ii += 1;
+  }
+  return index;
+}
+
+bool LeoRadxFile::findElevationAngle(string &columnLabel) {
+  bool found = false;
+  if (_modelNum == 70 || _modelNum == 200) {
+    found = columnLabel.find("Elevation Angle") != string::npos;
+  } else if (_modelNum == 100) {
+    found = columnLabel.find("Elevation") != string::npos;
+  } else if (_modelNum == 7 || _modelNum == 866) {
+    found = columnLabel.find("Position") != string::npos;
+  } 
+  return found;  
+}
+
+bool LeoRadxFile::findAzimuthAngle(string &columnLabel) {
+  bool found = false;
+  if (_modelNum == 70 || _modelNum == 200) {
+    found = columnLabel.find("Azimuth Angle") != string::npos;
+  } else if (_modelNum == 100) {
+    found = columnLabel.find("Azimuth") != string::npos;
+  } //else if (_isModel7 || _isModel866) {
+  //  found =  columnLabel.find("Position") != string::npos;
+  //} 
+  return found;  
+}
+
+void LeoRadxFile::identifyModel(string &modelStr, const string &path) {
+
+  if (path.find("WLS100") != string::npos) {
+    _modelNum = 100;
+  } else {
+    _modelNum = 200;  // assume model 200; change to model 100 when finding fields, as needed
+    if (modelStr.find("WLS70") != string::npos) {
+      _modelNum = 70;
+    } else if (_modelStr.find("WLS7-") != string::npos) {
+      _modelNum = 7;
+    } else if (_modelStr.find("WLS866") != string::npos) {
+      _modelNum = 866;
+    } 
+  }
 }
 
 ////////////////////////////////////////

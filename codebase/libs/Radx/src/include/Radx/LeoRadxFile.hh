@@ -171,6 +171,7 @@ private:
   string _configFileName;
   string _configXml;
   string _modelStr;
+  int _modelNum;
 
   // objects to be set on read
   
@@ -232,8 +233,25 @@ private:
   int _readHeaderData(string &xml);
   void _findFieldsModel200();
   void _findFieldsModel70();
+  void _findFieldsModel7();
+  bool _findFieldsModel100();
+  void _findFieldsModel866();
+
+
   int _readRayDataModel200();
   int _readRayDataModel70();
+  int _readRayDataModel866();
+  int _readRayDataModel7();
+  int _readRayDataModel100();
+
+  bool findAzimuthAngle(string &columnLabel);
+  bool findElevationAngle(string &columnLabel);
+  int findTimeStamp();
+  int findAzimuthAngle();
+  int findElevationAngle();
+
+  void identifyModel(string &modelStr, const string &path);
+
   int _openRead(const string &path);
   void _close();
 
