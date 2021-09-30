@@ -196,6 +196,7 @@ private:
   int _timeStampIndex;
   int _elevationIndex;
   int _azimuthIndex;
+  int _rangeColumnIndex;
   
   double _azLimit1, _azLimit2;
   double _elLimit1, _elLimit2;
@@ -212,6 +213,7 @@ private:
     string units;
     bool folds;
     vector<int> index;
+    vector<Radx::fl32> data;    
     Field() {
       folds = false;
     }
