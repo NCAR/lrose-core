@@ -541,6 +541,114 @@ int Nc3xFile::addDim(Nc3Dim* &dim, const char *name, int size)
 }
 
 ///////////////////////////////////////////
+// add vector<ncbyte> attribute
+// Returns 0 on success, -1 on failure
+
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, const vector<ncbyte> &vals)
+{
+  if (!var->add_att(name.c_str(), (int) vals.size(), vals.data())) {
+    _addErrStr("ERROR - Nc3xFile::addAttr");
+    _addErrStr("  Cannot add vector<ncbyte> var attr, name: ", name);
+    _addErrInt("  nvals: ", vals.size());
+    _addErrStr("  var name: ", var->name());
+    _addErrStr("  file: ", _pathInUse);
+    _addErrStr(_err->get_errmsg());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add vector<short> attribute
+// Returns 0 on success, -1 on failure
+
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, const vector<short> &vals)
+{
+  if (!var->add_att(name.c_str(), (int) vals.size(), vals.data())) {
+    _addErrStr("ERROR - Nc3xFile::addAttr");
+    _addErrStr("  Cannot add vector<short> var attr, name: ", name);
+    _addErrInt("  nvals: ", vals.size());
+    _addErrStr("  var name: ", var->name());
+    _addErrStr("  file: ", _pathInUse);
+    _addErrStr(_err->get_errmsg());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add vector<int> attribute
+// Returns 0 on success, -1 on failure
+
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, const vector<int> &vals)
+{
+  if (!var->add_att(name.c_str(), (int) vals.size(), vals.data())) {
+    _addErrStr("ERROR - Nc3xFile::addAttr");
+    _addErrStr("  Cannot add vector<int> var attr, name: ", name);
+    _addErrInt("  nvals: ", vals.size());
+    _addErrStr("  var name: ", var->name());
+    _addErrStr("  file: ", _pathInUse);
+    _addErrStr(_err->get_errmsg());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add vector<long> attribute
+// Returns 0 on success, -1 on failure
+
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, const vector<long> &vals)
+{
+  if (!var->add_att(name.c_str(), (int) vals.size(), vals.data())) {
+    _addErrStr("ERROR - Nc3xFile::addAttr");
+    _addErrStr("  Cannot add vector<long> var attr, name: ", name);
+    _addErrInt("  nvals: ", vals.size());
+    _addErrStr("  var name: ", var->name());
+    _addErrStr("  file: ", _pathInUse);
+    _addErrStr(_err->get_errmsg());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add vector<float> attribute
+// Returns 0 on success, -1 on failure
+
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, const vector<float> &vals)
+{
+  if (!var->add_att(name.c_str(), (int) vals.size(), vals.data())) {
+    _addErrStr("ERROR - Nc3xFile::addAttr");
+    _addErrStr("  Cannot add vector<float> var attr, name: ", name);
+    _addErrInt("  nvals: ", vals.size());
+    _addErrStr("  var name: ", var->name());
+    _addErrStr("  file: ", _pathInUse);
+    _addErrStr(_err->get_errmsg());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
+// add vector<double> attribute
+// Returns 0 on success, -1 on failure
+
+int Nc3xFile::addAttr(Nc3Var *var, const string &name, const vector<double> &vals)
+{
+  if (!var->add_att(name.c_str(), (int) vals.size(), vals.data())) {
+    _addErrStr("ERROR - Nc3xFile::addAttr");
+    _addErrStr("  Cannot add vector<double> var attr, name: ", name);
+    _addErrInt("  nvals: ", vals.size());
+    _addErrStr("  var name: ", var->name());
+    _addErrStr("  file: ", _pathInUse);
+    _addErrStr(_err->get_errmsg());
+    return -1;
+  }
+  return 0;
+}
+
+///////////////////////////////////////////
 // read a dimension
 // Returns 0 on success, -1 on failure
 // Side effect: dim arg is set

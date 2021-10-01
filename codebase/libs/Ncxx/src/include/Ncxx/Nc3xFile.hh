@@ -127,6 +127,12 @@ public:
   int addAttr(Nc3Var *var, const string &name, long val);
   int addAttr(Nc3Var *var, const string &name, float val);
   int addAttr(Nc3Var *var, const string &name, double val);
+  int addAttr(Nc3Var *var, const string &name, const vector<ncbyte> &val);
+  int addAttr(Nc3Var *var, const string &name, const vector<short> &val);
+  int addAttr(Nc3Var *var, const string &name, const vector<int> &val);
+  int addAttr(Nc3Var *var, const string &name, const vector<long> &val);
+  int addAttr(Nc3Var *var, const string &name, const vector<float> &val);
+  int addAttr(Nc3Var *var, const string &name, const vector<double> &val);
 
   //@}
 
