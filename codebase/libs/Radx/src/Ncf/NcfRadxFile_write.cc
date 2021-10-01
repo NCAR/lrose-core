@@ -3409,7 +3409,7 @@ int NcfRadxFile::_writeFields()
 Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
 
 {
-  
+
   if (_verbose) {
     cerr << "NcfRadxFile::_createFieldVar()" << endl;
     cerr << "  Adding field: " << field.getName() << endl;
@@ -3522,6 +3522,42 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
   if (field.getIsDiscrete()) {
     iret |= _file.addAttr(var, IS_DISCRETE, "true");
   }
+  if (field.getFlagValues().size() > 0) {
+    const vector<int> &flagValues = field.getFlagValues();
+    switch (ncType) {
+      case NC_BYTE: {
+        vector<ncbyte> vals;
+        for (size_t ii = 0; ii < flagValues.size(); ii++) {
+          vals.push_back((ncbyte) flagValues[ii]);
+        }
+        iret |= _file.addAttr(var, FLAG_VALUES, vals);
+        break;
+      }
+      case NC_SHORT: {
+        vector<short> vals;
+        for (size_t ii = 0; ii < flagValues.size(); ii++) {
+          vals.push_back((short) flagValues[ii]);
+        }
+        iret |= _file.addAttr(var, FLAG_VALUES, vals);
+        break;
+      }
+      default: {
+        iret |= _file.addAttr(var, FLAG_VALUES, flagValues);
+      }
+    }
+  } // if (field.getFlagValues().size() > 0) 
+  if (field.getFlagMeanings().size() > 0) {
+    const vector<string> &flagMeanings = field.getFlagMeanings();
+    string flagMeaningsStr;
+    for (size_t ii = 0; ii < flagMeanings.size(); ii++) {
+      flagMeaningsStr += flagMeanings[ii];
+      if (ii != flagMeanings.size() - 1) {
+        flagMeaningsStr += " ";
+      }
+    }
+    iret |= _file.addAttr(var, FLAG_MEANINGS, flagMeaningsStr);
+  }
+  
 
   switch (ncType) {
     case nc3Double: {

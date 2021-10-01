@@ -207,6 +207,15 @@ public:
   
   void setIsDiscrete(bool val = true) { _isDiscrete = val; }
 
+  /// flags for discrete fields
+  
+  void clearFlagValues() { _flagValues.clear(); }
+  void clearFlagMeanings() { _flagMeanings.clear(); }
+  void addFlagValue(int val) { _flagValues.push_back(val); }
+  void addFlagMeaning(const string &val) { _flagMeanings.push_back(val); }
+  void setFlagValues(const vector<int> &vals) { _flagValues = vals; }
+  void setFlagMeanings(const vector<string> &vals) { _flagMeanings = vals; }
+  
   /// Set whether this is a RayQualifier field. RayQualifier fields have only one
   /// value per ray, instead of a gate-based array.
   
@@ -782,6 +791,11 @@ public:
   
   bool getIsDiscrete() const { return _isDiscrete; }
 
+  /// flags for discrete fields
+
+  const vector<int> &getFlagValues() const { return _flagValues; }
+  const vector<string> &getFlagMeanings() const { return _flagMeanings; }
+  
   /// Is this a RayQualifier field? In other words does it only have
   /// a single value per ray, rather than a gate-based array.
   
@@ -1101,6 +1115,11 @@ private:
   
   bool _isDiscrete;
 
+  // flags for discrete fields
+
+  vector<int> _flagValues;
+  vector<string> _flagMeanings;
+  
   // Is this a RayQualifier field? RayQualifiers store just a
   // single value per ray, instead of gate-based array.
   

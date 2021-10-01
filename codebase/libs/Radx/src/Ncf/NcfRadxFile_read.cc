@@ -43,6 +43,7 @@
 #include <Radx/RadxRcalib.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
+#include <Radx/RadxStr.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -2526,91 +2527,61 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
 
     // set attributes
     
-    string name, units, standardName, longName, commentStr, legendXml, thresholdingXml;
-    double samplingRatio, foldLimitLower, foldLimitUpper, offset, scale;
-    bool isDiscrete, fieldFolds;
     _readFieldAttributes(var,
-                         name, units, 
-                         standardName, longName, 
-                         commentStr, legendXml, thresholdingXml,
-                         samplingRatio, isDiscrete,
-                         fieldFolds, foldLimitLower, foldLimitUpper,
-                         offset, scale);
+                         _fieldName, _fieldUnits,
+                         _fieldStandardName, _fieldLongName,
+                         _fieldCommentStr,
+                         _fieldLegendXml, _fieldThresholdingXml,
+                         _fieldSamplingRatio,
+                         _fieldIsDiscrete,
+                         _fieldFlagValues,
+                         _fieldFlagMeanings,
+                         _fieldFolds,
+                         _fieldFoldLimitLower, _fieldFoldLimitUpper,
+                         _fieldOffset, _fieldScale);
     
     // if metadata only, don't read in fields
 
     if (metaOnly) {
-      if (!_readVol->fieldExists(name)) {
-        RadxField *field = new RadxField(name, units);
-        field->setLongName(longName);
-        field->setStandardName(standardName);
-        field->setSamplingRatio(samplingRatio);
-        field->setIsRayQualifier(false);
-        if (fieldFolds &&
-            foldLimitLower != Radx::missingMetaFloat &&
-            foldLimitUpper != Radx::missingMetaFloat) {
-          field->setFieldFolds(foldLimitLower, foldLimitUpper);
-        }
-        if (isDiscrete) {
-          field->setIsDiscrete(true);
-        }
-        if (legendXml.size() > 0) {
-          field->setLegendXml(legendXml);
-        }
-        if (thresholdingXml.size() > 0) {
-          field->setThresholdingXml(thresholdingXml);
-        }
-        if (commentStr.size() > 0) {
-          field->setComment(commentStr);
-        }
+      if (!_readVol->fieldExists(_fieldName)) {
+        RadxField *field = new RadxField(_fieldName, _fieldUnits);
+        _setFieldAttributes(field, false);
         _readVol->addField(field);
       }
       continue;
     }
 
     int iret = 0;
-    
     switch (var->type()) {
       case nc3Double: {
-        if (_addFl64FieldToRays(var, name, units, standardName, longName,
-                                false, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits, false)) {
           iret = -1;
         }
         break;
       }
       case nc3Float: {
-        if (_addFl32FieldToRays(var, name, units, standardName, longName,
-                                false, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits, false)) {
           iret = -1;
         }
         break;
       }
       case nc3Int: {
-        if (_addSi32FieldToRays(var, name, units, standardName, longName,
-                                scale, offset,
-                                false, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addSi32FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, false)) {
           iret = -1;
         }
         break;
       }
       case nc3Short: {
-        if (_addSi16FieldToRays(var, name, units, standardName, longName,
-                                scale, offset,
-                                false, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper,
-                                samplingRatio)) {
+        if (_addSi16FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, false)) {
           iret = -1;
         }
         break;
       }
       case nc3Byte: {
-        if (_addSi08FieldToRays(var, name, units, standardName, longName,
-                                scale, offset,
-                                false, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addSi08FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, false)) {
           iret = -1;
         }
         break;
@@ -2619,12 +2590,11 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
         iret = -1;
         // will not reach here because of earlier check on type
       }
-
     } // switch
     
     if (iret) {
       _addErrStr("ERROR - NcfRadxFile::_readNormalFields");
-      _addErrStr("  cannot read field name: ", name);
+      _addErrStr("  cannot read field name: ", _fieldName);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
@@ -2696,80 +2666,61 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
 
     // set attributes
     
-    string name, units, standardName, longName, commentStr, legendXml, thresholdingXml;
-    double samplingRatio, foldLimitLower, foldLimitUpper, offset, scale;
-    bool isDiscrete, fieldFolds;
     _readFieldAttributes(var,
-                         name, units, 
-                         standardName, longName, 
-                         commentStr, legendXml, thresholdingXml,
-                         samplingRatio, isDiscrete,
-                         fieldFolds, foldLimitLower, foldLimitUpper,
-                         offset, scale);
+                         _fieldName, _fieldUnits,
+                         _fieldStandardName, _fieldLongName,
+                         _fieldCommentStr,
+                         _fieldLegendXml, _fieldThresholdingXml,
+                         _fieldSamplingRatio,
+                         _fieldIsDiscrete,
+                         _fieldFlagValues,
+                         _fieldFlagMeanings,
+                         _fieldFolds,
+                         _fieldFoldLimitLower, _fieldFoldLimitUpper,
+                         _fieldOffset, _fieldScale);
     
     // if metadata only, don't read in fields
     
     if (metaOnly) {
-      if (!_readVol->fieldExists(name)) {
-        RadxField *field = new RadxField(name, units);
-        field->setLongName(longName);
-        field->setStandardName(standardName);
-        field->setIsRayQualifier(true);
-        field->setIsDiscrete(false);
-        if (isDiscrete) {
-          field->setIsDiscrete(true);
-        }
-        if (commentStr.size() > 0) {
-          field->setComment(commentStr);
-        }
+      if (!_readVol->fieldExists(_fieldName)) {
+        RadxField *field = new RadxField(_fieldName, _fieldUnits);
+        _setFieldAttributes(field, true);
         _readVol->addField(field);
       }
       continue;
     }
 
     int iret = 0;
-    
     switch (var->type()) {
       case nc3Double: {
-        if (_addFl64FieldToRays(var, name, units, standardName, longName,
-                                true, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits, true)) {
           iret = -1;
         }
         break;
       }
       case nc3Float: {
-        if (_addFl32FieldToRays(var, name, units, standardName, longName,
-                                true, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits, true)) {
           iret = -1;
         }
         break;
       }
       case nc3Int: {
-        if (_addSi32FieldToRays(var, name, units, standardName, longName,
-                                scale, offset,
-                                true, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addSi32FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, true)) {
           iret = -1;
         }
         break;
       }
       case nc3Short: {
-        if (_addSi16FieldToRays(var, name, units, standardName, longName,
-                                scale, offset,
-                                true, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper,
-                                samplingRatio)) {
+        if (_addSi16FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, true)) {
           iret = -1;
         }
         break;
       }
       case nc3Byte: {
-        if (_addSi08FieldToRays(var, name, units, standardName, longName,
-                                scale, offset,
-                                true, isDiscrete, fieldFolds,
-                                foldLimitLower, foldLimitUpper)) {
+        if (_addSi08FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, true)) {
           iret = -1;
         }
         break;
@@ -2778,12 +2729,11 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
         iret = -1;
         // will not reach here because of earlier check on type
       }
-
     } // switch
     
     if (iret) {
-      _addErrStr("ERROR - NcfRadxFile::_readScalarFields");
-      _addErrStr("  cannot read field name: ", name);
+      _addErrStr("ERROR - NcfRadxFile::_readQualifierFields");
+      _addErrStr("  cannot read field name: ", _fieldName);
       _addErrStr(_file.getNc3Error()->get_errmsg());
       return -1;
     }
@@ -2807,6 +2757,8 @@ void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
                                        string &thresholdingXml,
                                        double &samplingRatio,
                                        bool &isDiscrete,
+                                       vector<int> &flagValues,
+                                       vector<string> &flagMeanings,
                                        bool &fieldFolds,
                                        double &foldLimitLower,
                                        double &foldLimitUpper,
@@ -2880,7 +2832,7 @@ void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
   
   // sampling ratio
   
-  samplingRatio = Radx::missingMetaFloat;
+  samplingRatio = 1.0;
   Nc3Att *samplingRatioAtt = var->get_att(SAMPLING_RATIO);
   if (samplingRatioAtt != NULL) {
     samplingRatio = samplingRatioAtt->as_double(0);
@@ -2926,6 +2878,27 @@ void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
     }
     delete isDiscreteAtt;
   }
+
+  // flag values and meanings
+
+  flagValues.clear();
+  Nc3Att *flagValuesAtt = var->get_att(FLAG_VALUES);
+  if (flagValuesAtt != NULL) {
+    for (long ii = 0; ii < flagValuesAtt->num_vals(); ii++) {
+      int ival = flagValuesAtt->values()->as_int(ii);
+      flagValues.push_back(ival);
+    }
+    delete flagValuesAtt;
+    isDiscrete = true;
+  }
+  flagMeanings.clear();
+  Nc3Att *flagMeaningsAtt = var->get_att(FLAG_MEANINGS);
+  if (flagMeaningsAtt != NULL) {
+    string flagMeaningsStr = Nc3xFile::asString(flagMeaningsAtt);
+    RadxStr::tokenize(flagMeaningsStr, " ", flagMeanings);
+    delete flagMeaningsAtt;
+    isDiscrete = true;
+  }
   
   // get offset and scale
   
@@ -2943,6 +2916,40 @@ void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
     delete scaleAtt;
   }
   
+}
+
+//////////////////////////////////////////////////////////////
+// Set field attributes after the read
+
+void NcfRadxFile::_setFieldAttributes(RadxField *field,
+                                      bool isQualifier)
+
+{
+
+  field->setStandardName(_fieldStandardName);
+  field->setLongName(_fieldLongName);
+  if (_fieldCommentStr.size() > 0) {
+    field->setComment(_fieldCommentStr);
+  }
+  if (_fieldLegendXml.size() > 0) {
+    field->setLegendXml(_fieldLegendXml);
+  }
+  if (_fieldThresholdingXml.size() > 0) {
+    field->setThresholdingXml(_fieldThresholdingXml);
+  }
+  field->setSamplingRatio(_fieldSamplingRatio);
+  field->setIsRayQualifier(isQualifier);
+  if (_fieldIsDiscrete) {
+    field->setIsDiscrete(true);
+    field->setFlagValues(_fieldFlagValues);
+    field->setFlagMeanings(_fieldFlagMeanings);
+  }
+  if (_fieldFolds &&
+      _fieldFoldLimitLower != Radx::missingMetaFloat &&
+      _fieldFoldLimitUpper != Radx::missingMetaFloat) {
+    field->setFieldFolds(_fieldFoldLimitLower, _fieldFoldLimitUpper);
+  }
+
 }
 
 ///////////////////////////////////
@@ -3577,13 +3584,7 @@ int NcfRadxFile::_readCalVar(const string &name, Nc3Var* &var,
 int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                      const string &name,
                                      const string &units,
-                                     const string &standardName,
-                                     const string &longName,
-                                     bool isQualifier,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper)
+                                     bool isQualifier)
   
 {
 
@@ -3651,7 +3652,6 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                           missingVal,
                                           data + rayIndex,
                                           true, true);
-      field->setIsRayQualifier(true);
     } else {
       int nGates = _nRangeInFile;
       int startIndex = rayIndex * _nRangeInFile;
@@ -3664,20 +3664,10 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                           data + startIndex,
                                           true, false);
     }
-    
-    field->setStandardName(standardName);
-    field->setLongName(longName);
+
+    _setFieldAttributes(field, isQualifier);
     field->copyRangeGeom(_geom);
     
-    if (fieldFolds &&
-        foldLimitLower != Radx::missingMetaFloat &&
-        foldLimitUpper != Radx::missingMetaFloat) {
-      field->setFieldFolds(foldLimitLower, foldLimitUpper);
-    }
-    if (isDiscrete) {
-      field->setIsDiscrete(true);
-    }
-
   }
   
   delete[] data;
@@ -3693,13 +3683,7 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
 int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                      const string &name,
                                      const string &units,
-                                     const string &standardName,
-                                     const string &longName,
-                                     bool isQualifier,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper)
+                                     bool isQualifier)
   
 {
  
@@ -3767,7 +3751,6 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                           missingVal,
                                           data + rayIndex,
                                           true, true);
-      field->setIsRayQualifier(true);
     } else {
       int nGates = _nRangeInFile;
       int startIndex = rayIndex * _nRangeInFile;
@@ -3780,19 +3763,9 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                           data + startIndex,
                                           true, false);
     }
-    
-    field->setStandardName(standardName);
-    field->setLongName(longName);
-    field->copyRangeGeom(_geom);
 
-    if (fieldFolds &&
-        foldLimitLower != Radx::missingMetaFloat &&
-        foldLimitUpper != Radx::missingMetaFloat) {
-      field->setFieldFolds(foldLimitLower, foldLimitUpper);
-    }
-    if (isDiscrete) {
-      field->setIsDiscrete(true);
-    }
+    _setFieldAttributes(field, isQualifier);
+    field->copyRangeGeom(_geom);
 
   }
   
@@ -3809,14 +3782,8 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
 int NcfRadxFile::_addSi32FieldToRays(Nc3Var* var,
                                      const string &name,
                                      const string &units,
-                                     const string &standardName,
-                                     const string &longName,
                                      double scale, double offset,
-                                     bool isQualifier,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper)
+                                     bool isQualifier)
   
 {
 
@@ -3877,7 +3844,6 @@ int NcfRadxFile::_addSi32FieldToRays(Nc3Var* var,
                                           data + rayIndex,
                                           scale, offset,
                                           true, true);
-      field->setIsRayQualifier(true);
     } else {
       int nGates = _nRangeInFile;
       int startIndex = rayIndex * _nRangeInFile;
@@ -3892,18 +3858,9 @@ int NcfRadxFile::_addSi32FieldToRays(Nc3Var* var,
                                           true, false);
     }
 
-    field->setStandardName(standardName);
-    field->setLongName(longName);
+    
+    _setFieldAttributes(field, isQualifier);
     field->copyRangeGeom(_geom);
-
-    if (fieldFolds &&
-        foldLimitLower != Radx::missingMetaFloat &&
-        foldLimitUpper != Radx::missingMetaFloat) {
-      field->setFieldFolds(foldLimitLower, foldLimitUpper);
-    }
-    if (isDiscrete) {
-      field->setIsDiscrete(true);
-    }
 
   }
   
@@ -3920,15 +3877,8 @@ int NcfRadxFile::_addSi32FieldToRays(Nc3Var* var,
 int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
                                      const string &name,
                                      const string &units,
-                                     const string &standardName,
-                                     const string &longName,
                                      double scale, double offset,
-                                     bool isQualifier,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper,
-				     float samplingRatio)
+                                     bool isQualifier)
   
 {
 
@@ -3989,7 +3939,6 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
                                           data + rayIndex,
                                           scale, offset,
                                           true, true);
-      field->setIsRayQualifier(true);
     } else {
       int nGates = _nRangeInFile;
       int startIndex = rayIndex * _nRangeInFile;
@@ -4004,19 +3953,8 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
                                           true, false);
     }
 
-    field->setStandardName(standardName);
-    field->setLongName(longName);
+    _setFieldAttributes(field, isQualifier);
     field->copyRangeGeom(_geom);
-    field->setSamplingRatio(samplingRatio);
-
-    if (fieldFolds &&
-        foldLimitLower != Radx::missingMetaFloat &&
-        foldLimitUpper != Radx::missingMetaFloat) {
-      field->setFieldFolds(foldLimitLower, foldLimitUpper);
-    }
-    if (isDiscrete) {
-      field->setIsDiscrete(true);
-    }
 
   }
   
@@ -4033,14 +3971,8 @@ int NcfRadxFile::_addSi16FieldToRays(Nc3Var* var,
 int NcfRadxFile::_addSi08FieldToRays(Nc3Var* var,
                                      const string &name,
                                      const string &units,
-                                     const string &standardName,
-                                     const string &longName,
                                      double scale, double offset,
-                                     bool isQualifier,
-                                     bool isDiscrete,
-                                     bool fieldFolds,
-                                     float foldLimitLower,
-                                     float foldLimitUpper)
+                                     bool isQualifier)
   
 {
 
@@ -4101,7 +4033,6 @@ int NcfRadxFile::_addSi08FieldToRays(Nc3Var* var,
                                           data + rayIndex,
                                           scale, offset,
                                           true, true);
-      field->setIsRayQualifier(true);
     } else {
       int nGates = _nRangeInFile;
       int startIndex = rayIndex * _nRangeInFile;
@@ -4116,18 +4047,8 @@ int NcfRadxFile::_addSi08FieldToRays(Nc3Var* var,
                                           true, false);
     }
 
-    field->setStandardName(standardName);
-    field->setLongName(longName);
+    _setFieldAttributes(field, isQualifier);
     field->copyRangeGeom(_geom);
-
-    if (fieldFolds &&
-        foldLimitLower != Radx::missingMetaFloat &&
-        foldLimitUpper != Radx::missingMetaFloat) {
-      field->setFieldFolds(foldLimitLower, foldLimitUpper);
-    }
-    if (isDiscrete) {
-      field->setIsDiscrete(true);
-    }
 
   }
   

@@ -52,7 +52,23 @@ using namespace std;
 RadxField::RadxField(const string &name /*= "not-set" */,
                      const string &units /* = "" */) :
         _name(name),
-        _units(units)
+        _units(units),
+        _dataType(Radx::FL32),
+        _byteWidth(sizeof(Radx::fl32)),
+        _scale(1.0),
+        _offset(0.0),
+        _samplingRatio(1.0),
+        _fieldFolds(false),
+        _foldLimitLower(0.0),
+        _foldLimitUpper(0.0),
+        _foldRange(0.0),
+        _isDiscrete(false),
+        _isRayQualifier(false),
+        _minVal(Radx::missingMetaDouble),
+        _maxVal(Radx::missingMetaDouble),
+        _data(NULL),
+        _dataIsLocal(true),
+        _thresholdValue(Radx::missingMetaDouble)
   
 {
   _init();
@@ -62,7 +78,23 @@ RadxField::RadxField(const string &name /*= "not-set" */,
 // Copy constructor
 //
 
-RadxField::RadxField(const RadxField &rhs)
+RadxField::RadxField(const RadxField &rhs) :
+        _dataType(Radx::FL32),
+        _byteWidth(sizeof(Radx::fl32)),
+        _scale(1.0),
+        _offset(0.0),
+        _samplingRatio(1.0),
+        _fieldFolds(false),
+        _foldLimitLower(0.0),
+        _foldLimitUpper(0.0),
+        _foldRange(0.0),
+        _isDiscrete(false),
+        _isRayQualifier(false),
+        _minVal(Radx::missingMetaDouble),
+        _maxVal(Radx::missingMetaDouble),
+        _data(NULL),
+        _dataIsLocal(true),
+        _thresholdValue(Radx::missingMetaDouble)
      
 {
   _init();
@@ -179,6 +211,9 @@ RadxField &RadxField::copyMetaData(const RadxField &rhs)
   _foldRange = rhs._foldRange;
 
   _isDiscrete = rhs._isDiscrete;
+  _flagValues = rhs._flagValues;
+  _flagMeanings = rhs._flagMeanings;
+
   _isRayQualifier = rhs._isRayQualifier;
 
   _missingFl64 = rhs._missingFl64;
@@ -2826,6 +2861,20 @@ void RadxField::print(ostream &out) const
     out << "    foldRange: " << _foldRange << endl;
   }
   out << "  isDiscrete: " << (_isDiscrete? "Y":"N") << endl;
+  if (_flagValues.size() > 0) {
+    out << "  flagValues:";
+    for (size_t ii = 0; ii < _flagValues.size(); ii++) {
+      out << " " << _flagValues[ii];
+    }
+    out << endl;
+  }
+  if (_flagMeanings.size() > 0) {
+    out << "  flagMeanings:";
+    for (size_t ii = 0; ii < _flagMeanings.size(); ii++) {
+      out << " " << _flagMeanings[ii];
+    }
+    out << endl;
+  }
   out << "  isRayQualifier: " << (_isRayQualifier? "Y":"N") << endl;
   if (_minVal!= Radx::missingMetaDouble) {
     out << "  minVal: " << _minVal << endl;

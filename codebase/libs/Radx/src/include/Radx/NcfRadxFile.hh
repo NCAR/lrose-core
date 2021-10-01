@@ -552,7 +552,21 @@ private:
   vector<double> _geoRollRate;
   vector<double> _geoDriveAngle1;
   vector<double> _geoDriveAngle2;
+
+  // field meta-data
   
+  string _fieldName, _fieldUnits;
+  string _fieldStandardName, _fieldLongName;
+  string _fieldCommentStr;
+  string _fieldLegendXml, _fieldThresholdingXml;
+  double _fieldSamplingRatio;
+  bool _fieldIsDiscrete;
+  vector<int> _fieldFlagValues;
+  vector<string> _fieldFlagMeanings;
+  bool _fieldFolds;
+  double _fieldFoldLimitLower, _fieldFoldLimitUpper;
+  double _fieldOffset, _fieldScale;
+
   // private methods for NcfRadial.cc
   
   int _writeSweepsToDir(const RadxVol &vol, const string &dir,
@@ -613,11 +627,16 @@ private:
                             string &thresholdingXml,
                             double &samplingRatio,
                             bool &isDiscrete,
+                            vector<int> &flagValues,
+                            vector<string> &flagMeanings,
                             bool &fieldFolds,
                             double &foldLimitLower,
                             double &foldLimitUpper,
                             double &offset,
                             double &scale);
+
+  void _setFieldAttributes(RadxField *field,
+                           bool isQualifier);
 
   int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals, bool required = true);
@@ -647,49 +666,22 @@ private:
 
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          bool isQualifier = false,
-                          bool isDiscrete = false,
-                          bool fieldFolds = false,
-                          float foldLimitLower = 0.0,
-                          float foldLimitUpper = 0.0);
+                          bool isQualifier = false);
   int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          bool isQualifier = false,
-                          bool isDiscrete = false,
-                          bool fieldFolds = false,
-                          float foldLimitLower = 0.0,
-                          float foldLimitUpper = 0.0);
+                          bool isQualifier = false);
   int _addSi32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
-                          const string &standardName, const string &longName,
-                          double scale,
-                          double offset,
-                          bool isQualifier = false,
-                          bool isDiscrete = false,
-                          bool fieldFolds = false,
-                          float foldLimitLower = 0.0,
-                          float foldLimitUpper = 0.0);
+                          double scale, double offset,
+                          bool isQualifier = false);
   int _addSi16FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
-                          const string &standardName, const string &longName,
                           double scale, double offset,
-                          bool isQualifier = false,
-                          bool isDiscrete = false,
-                          bool fieldFolds = false,
-                          float foldLimitLower = 0.0,
-                          float foldLimitUpper = 0.0,
-			  float samplingRatio = 1.0);
+                          bool isQualifier = false);
   int _addSi08FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
-                          const string &standardName, const string &longName,
                           double scale, double offset,
-                          bool isQualifier = false,
-                          bool isDiscrete = false,
-                          bool fieldFolds = false,
-                          float foldLimitLower = 0.0,
-                          float foldLimitUpper = 0.0);
+                          bool isQualifier = false);
 
   void _loadReadVolume();
 
