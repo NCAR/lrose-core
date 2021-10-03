@@ -348,6 +348,20 @@ private:
   vector<double> _geoDriveAngle1;
   vector<double> _geoDriveAngle2;
 
+  // field meta-data
+  
+  string _fieldName, _fieldUnits;
+  string _fieldStandardName, _fieldLongName;
+  string _fieldCommentStr;
+  string _fieldLegendXml, _fieldThresholdingXml;
+  double _fieldSamplingRatio;
+  bool _fieldIsDiscrete;
+  vector<int> _fieldFlagValues;
+  vector<string> _fieldFlagMeanings;
+  bool _fieldFolds;
+  double _fieldFoldLimitLower, _fieldFoldLimitUpper;
+  double _fieldOffset, _fieldScale;
+
   // private methods for NcfRadial.cc
   
   int _writeSweepsToDir(const RadxVol &vol, const string &dir,
@@ -414,6 +428,9 @@ private:
   void _createSweepRays(const RadxSweep *sweep);
 
   void _readFieldVariables(bool metaOnly);
+  void _readQualifierVariables(bool metaOnly);
+  void _readFieldAttributes(const NcxxVar &var);
+  void _setFieldAttributes(RadxField *field, bool isQualifier = false);
   
   NcxxVar _readRayVar(NcxxGroup &group, NcxxDim &dim, const string &name, 
                       vector<double> &vals, bool required = true);
@@ -426,32 +443,19 @@ private:
   
   void _addFl64FieldToRays(NcxxVar &var,
                            const string &name, const string &units,
-                           const string &standardName, const string &longName,
-                           bool isDiscrete, bool fieldFolds,
-                           float foldLimitLower, float foldLimitUpper);
+                           bool isQualifier = false);
   void _addFl32FieldToRays(NcxxVar &var,
                            const string &name, const string &units,
-                           const string &standardName, const string &longName,
-                           bool isDiscrete, bool fieldFolds,
-                           float foldLimitLower, float foldLimitUpper);
+                           bool isQualifier = false);
   void _addSi32FieldToRays(NcxxVar &var,
                            const string &name, const string &units,
-                           const string &standardName, const string &longName,
-                           double scale, double offset,
-                           bool isDiscrete, bool fieldFolds,
-                           float foldLimitLower, float foldLimitUpper);
+                           bool isQualifier = false);
   void _addSi16FieldToRays(NcxxVar &var,
                            const string &name, const string &units,
-                           const string &standardName, const string &longName,
-                           double scale, double offset,
-                           bool isDiscrete, bool fieldFolds,
-                           float foldLimitLower, float foldLimitUpper);
+                           bool isQualifier = false);
   void _addSi08FieldToRays(NcxxVar &var,
                            const string &name, const string &units,
-                           const string &standardName, const string &longName,
-                           double scale, double offset,
-                           bool isDiscrete, bool fieldFolds,
-                           float foldLimitLower, float foldLimitUpper);
+                           bool isQualifier = false);
 
   void _loadReadVolume();
 
@@ -520,7 +524,7 @@ private:
   NcxxVar _createFieldVar(const RadxField &field,
                           NcxxGroup &sweepGroup,
                           NcxxDim &timeDim,
-                          NcxxDim &rangeDim);
+                          NcxxDim *rangeDim = NULL);
 
   void _writeFieldVar(NcxxVar &var, RadxField *field);
   

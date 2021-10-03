@@ -3359,6 +3359,11 @@ int NcfRadxFile::_writeFields()
       
     const string &name = _uniqueFieldNames[ifield];
 
+    if (isRayMetaName(name)) {
+      // metadata ray variable
+      continue;
+    }
+    
     // make copy of the field
     
     RadxField *copy = _writeVol->copyField(name);
@@ -3456,10 +3461,13 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
   Nc3Var *var = NULL;
 
   if (field.getIsRayQualifier()) {
+    // 1-D qualifier field
     var = _file.getNc3File()->add_var(fieldName.c_str(), ncType, _timeDim);
   } else if (_nGatesVary) {
+    // 1-D staggered array field
     var = _file.getNc3File()->add_var(fieldName.c_str(), ncType, _nPointsDim);
   } else {
+    // normal 2-D field
     var = _file.getNc3File()->add_var(fieldName.c_str(), ncType, _timeDim, _rangeDim);
   }
   
