@@ -36,7 +36,7 @@ void BoundaryView::draw(WorldPlot worldPlot, QPainter &painter,
 	QColor boundaryColor(color.c_str());
   // QBrush *yellowBrush = new QBrush(boundaryColor);
   QPen pen = painter.pen();
-  pen.setWidth(3); // 3 pixels wide
+  pen.setWidth(0); // 3 pixels wide
   pen.setColor(QColor(boundaryColor));
 	painter.setPen(pen); // Qt::yellow);
 
@@ -66,7 +66,7 @@ void BoundaryView::drawPointBox(WorldPlot worldPlot, QPainter &painter, Point po
 
 	QColor boundaryColor(color.c_str());
   QBrush yellowBrush(boundaryColor);
-	int size = 5; // pointBoxScale / worldPlot.getXPixelsPerWorld();
+	int size = 3; // pointBoxScale / worldPlot.getXPixelsPerWorld();
 	//worldPlot.fillRectangle(painter, yellowBrush, x-(size/2), y-(size/2), size, size);
 	painter.fillRect(x-(size/2), y-(size/2), size, size, yellowBrush);
 
