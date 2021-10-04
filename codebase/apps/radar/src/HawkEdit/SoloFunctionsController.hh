@@ -168,6 +168,7 @@ public:
   */
   Q_INVOKABLE QVector<int> addI(QVector<int> v, QVector<int> v2) { QVector<int> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
 
+  void reset();
   void setCurrentRayToFirst();
   bool moreRays();
   void nextRay();
@@ -177,6 +178,7 @@ public:
   void nextSweep();
 
   void applyBoundary(bool useBoundaryMask, vector<Point> &boundaryPoints);
+  void clearBoundary();
   const vector<bool> *GetBoundaryMask();
   void assignByRay(string tempName, string userDefinedName);
   void assign(string tempName, string userDefinedName);

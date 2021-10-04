@@ -373,6 +373,7 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
       } else {
         rayIdx += 1;
       }
+      delete rayData;
     }
     // add Beam to FieldRenderer
     LOG(DEBUG) << " added all beams to fieldRenderer; before fillBackground";

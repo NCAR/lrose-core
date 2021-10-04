@@ -27,6 +27,12 @@ SoloFunctionsModel::SoloFunctionsModel() {
   _boundaryMaskLength = 0;
 }
 
+void SoloFunctionsModel::ClearBoundaryMask() {
+  delete[] _boundaryMask;
+  _boundaryMask = NULL;
+  _boundaryMaskLength = 0;
+}
+
 // call this for each new ray, since the azimuth changes each time the ray changes
 void SoloFunctionsModel::SetBoundaryMask(//RadxVol *vol,
 					 int rayIdx, int sweepIdx, bool useBoundaryMask,
@@ -101,20 +107,24 @@ void SoloFunctionsModel::SetDefaultMask(int rayIdx, int sweepIdx) {
   //  throw "Ray is null";
   //} 
 
+  if (rayIdx == 5298) {
+    cerr << "HERE!!! " << endl;
+  }
+
   //field = ray->getField(fieldName);
   size_t nGates = dataModel->getNGates(rayIdx); 
   LOG(DEBUG) << "there are nGates " << nGates;
 
-  if (nGates != _boundaryMaskLength) {
-    // clear old mask
-    if (_boundaryMask != NULL) {
-      delete[] _boundaryMask;
-    }
-
+  //if (nGates != _boundaryMaskLength) {
+  //  // clear old mask
+  //  if (_boundaryMask != NULL) {
+  //    delete[] _boundaryMask;
+  //  }
+  
     // allocate new mask
     _boundaryMaskLength = nGates;
     _boundaryMask = new bool[_boundaryMaskLength];
-  }
+  //}
 
   for (size_t i=0; i<nGates; i++) {
     _boundaryMask[i] = true;
@@ -152,9 +162,9 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
 
   // can we reuse the boundary mask?  
 
-  if (_boundaryMask != NULL) {
-    delete[] _boundaryMask;
-  }
+  //if (_boundaryMask != NULL) {
+  //  delete[] _boundaryMask;
+  //}
  
   //--------- END HERE ----------
 

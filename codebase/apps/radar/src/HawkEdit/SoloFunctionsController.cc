@@ -16,6 +16,10 @@
 using namespace std;
 
 SoloFunctionsController::SoloFunctionsController(QObject *parent) : QObject(parent) {
+  reset();
+}
+
+void SoloFunctionsController::reset() {
   DataModel *dataModel = DataModel::Instance();
   _nRays = dataModel->getNRays();
   _nSweeps = dataModel->getNSweeps();
@@ -614,6 +618,11 @@ void SoloFunctionsController::applyBoundary(bool useBoundaryMask,
   //SoloFunctionsModel soloFunctionsModel;
   soloFunctionsModel.SetBoundaryMask(_currentRayIdx, _currentSweepIdx,
 				     useBoundaryMask, boundaryPoints);
+}
+
+
+void SoloFunctionsController::clearBoundary() {
+  soloFunctionsModel.ClearBoundaryMask();
 }
 
 void SoloFunctionsController::setCurrentSweepToFirst() {

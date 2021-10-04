@@ -59,6 +59,7 @@ ScriptEditorController::ScriptEditorController(ScriptEditorView *view, ScriptEdi
   //  functionsModel = new SoloFunctionsModel(_currentModel);
   _soloFunctionsController = new SoloFunctionsController(); // _currentModel->_vol);
 
+  engine = new QJSEngine();
   setupSoloFunctions(_soloFunctionsController);
   //setupFieldArrays();
 
@@ -97,7 +98,14 @@ ScriptEditorController::ScriptEditorController(ScriptEditorView *view, ScriptEdi
   */
 }
 
+void ScriptEditorController::reset() {
+  delete _soloFunctionsController;
+  _soloFunctionsController = new SoloFunctionsController(); // _currentModel->_vol);
 
+  delete engine;
+  engine = new QJSEngine();
+  setupSoloFunctions(_soloFunctionsController);
+}
 
 vector<string> *ScriptEditorController::getFieldNames()
 {
@@ -183,7 +191,7 @@ void ScriptEditorController::open(string fileName)
 void ScriptEditorController::setupBoundaryArray() {
   const vector<bool> *boundaryMaskForRay = _soloFunctionsController->GetBoundaryMask();
 
-  QJSValue fieldArray = engine.newArray(boundaryMaskForRay->size());
+  QJSValue fieldArray = engine->newArray(boundaryMaskForRay->size());
   QString vectorName("BOUNDARY");    
 
 
@@ -198,7 +206,7 @@ void ScriptEditorController::setupBoundaryArray() {
     idx += 1;
   }
 
-  engine.globalObject().setProperty(vectorName, fieldArray);
+  engine->globalObject().setProperty(vectorName, fieldArray);
   LOG(DEBUG) << "adding vector form " << vectorName.toStdString();
   //boundaryMaskForRay->clear();
   delete boundaryMaskForRay;
@@ -216,7 +224,7 @@ void ScriptEditorController::setupFieldArrays() {
       try {
         const vector<float> *fieldData = _soloFunctionsController->getData(*it);  
 
-        QJSValue fieldArray = engine.newArray(fieldData->size());
+        QJSValue fieldArray = engine->newArray(fieldData->size());
         QString vectorName = fieldName.append("_V");    
 
 
@@ -232,7 +240,7 @@ void ScriptEditorController::setupFieldArrays() {
         //  fieldArray.setProperty(i, fieldData.at(i));
         //}
         LOG(DEBUG) << "adding vector form " << vectorName.toStdString();
-        engine.globalObject().setProperty(vectorName, fieldArray);
+        engine->globalObject().setProperty(vectorName, fieldArray);
         LOG(DEBUG) << "end adding vector form " << vectorName.toStdString();
         // ===== set field to array of numbers; end ====
       } catch (char *msg) {
@@ -266,7 +274,7 @@ void ScriptEditorController::saveFieldArrays(std::map<QString, QString> &previou
   LOG(DEBUG) << "current QJSEngine context ...";
 
   std::map<QString, QString> currentVariableContext;
-  QJSValue theGlobalObject = engine.globalObject();
+  QJSValue theGlobalObject = engine->globalObject();
 
   QJSValueIterator it2(theGlobalObject);
   while (it2.hasNext()) {
@@ -313,7 +321,7 @@ void ScriptEditorController::saveFieldVariableAssignments(std::map<QString, QStr
   // just find them and add them to the spreadsheet and to the Model??                                 
   // HERE!!!                                                                                           
   // try iterating over the properties of the globalObject to find new variables                       
-  QJSValue newGlobalObject = engine.globalObject();
+  QJSValue newGlobalObject = engine->globalObject();
   //printQJSEngineContext();
 
   QJSValueIterator it2(newGlobalObject);
@@ -409,7 +417,7 @@ QStringList *ScriptEditorController::findNewFieldNames(std::map<QString, QString
   // just find them and add them to the spreadsheet and to the Model??                                 
   // HERE!!!                                                                                           
   // try iterating over the properties of the globalObject to find new variables                       
-  QJSValue newGlobalObject = engine.globalObject();
+  QJSValue newGlobalObject = engine->globalObject();
   //printQJSEngineContext();
 
   QJSValueIterator it2(newGlobalObject);
@@ -446,7 +454,7 @@ QStringList *ScriptEditorController::findNewFieldNames(std::map<QString, QString
   QString fworks1 = "function incr(val) { return val + 1 }; [8,9,10].map(incr)"; // works
   QString fworks2 = "function incr(val) { return val + 1 }; message.qilist.map(incr)";
   QString f = "function incr(val) { return val + 100 }; VEL.map(incr)";
-  QJSValue result = myEngine.evaluate(f);
+  QJSValue result = myengine->evaluate(f);
   std::cout << "result = " << result.toString().toStdString() << std::endl;
 
  */
@@ -455,49 +463,49 @@ QStringList *ScriptEditorController::findNewFieldNames(std::map<QString, QString
 void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFunctions)
 {
   
-  QJSValue myExt = engine.newQObject(soloFunctions); // new SoloFunctions());
+  QJSValue myExt = engine->newQObject(soloFunctions); // new SoloFunctions());
   
-  engine.globalObject().setProperty("sqrt", myExt.property("sqrt"));
-  engine.globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
-  engine.globalObject().setProperty("BB_UNFOLDING_FIRST_GOOD_GATE", myExt.property("BB_UNFOLDING_FIRST_GOOD_GATE"));
-  engine.globalObject().setProperty("BB_UNFOLDING_LOCAL_WIND", myExt.property("BB_UNFOLDING_LOCAL_WIND"));
-  engine.globalObject().setProperty("BB_UNFOLDING_AC_WIND", myExt.property("BB_UNFOLDING_AC_WIND"));
+  engine->globalObject().setProperty("sqrt", myExt.property("sqrt"));
+  engine->globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
+  engine->globalObject().setProperty("BB_UNFOLDING_FIRST_GOOD_GATE", myExt.property("BB_UNFOLDING_FIRST_GOOD_GATE"));
+  engine->globalObject().setProperty("BB_UNFOLDING_LOCAL_WIND", myExt.property("BB_UNFOLDING_LOCAL_WIND"));
+  engine->globalObject().setProperty("BB_UNFOLDING_AC_WIND", myExt.property("BB_UNFOLDING_AC_WIND"));
 
-  engine.globalObject().setProperty("ZERO_MIDDLE_THIRD", myExt.property("ZERO_MIDDLE_THIRD"));
-  engine.globalObject().setProperty("ZERO_INSIDE_BOUNDARY", myExt.property("ZERO_INSIDE_BOUNDARY"));
-  engine.globalObject().setProperty("add", myExt.property("add"));
-  engine.globalObject().setProperty("DESPECKLE", myExt.property("DESPECKLE"));
-  engine.globalObject().setProperty("SET_BAD_FLAGS_ABOVE", myExt.property("SET_BAD_FLAGS_ABOVE"));
-  engine.globalObject().setProperty("SET_BAD_FLAGS_BELOW", myExt.property("SET_BAD_FLAGS_BELOW"));
-  engine.globalObject().setProperty("SET_BAD_FLAGS_BETWEEN", myExt.property("SET_BAD_FLAGS_BETWEEN"));
-  engine.globalObject().setProperty("COMPLEMENT_BAD_FLAGS", myExt.property("COMPLEMENT_BAD_FLAGS"));
-  engine.globalObject().setProperty("CLEAR_BAD_FLAGS", myExt.property("CLEAR_BAD_FLAGS"));
-  engine.globalObject().setProperty("ASSERT_BAD_FLAGS", myExt.property("ASSERT_BAD_FLAGS"));
+  engine->globalObject().setProperty("ZERO_MIDDLE_THIRD", myExt.property("ZERO_MIDDLE_THIRD"));
+  engine->globalObject().setProperty("ZERO_INSIDE_BOUNDARY", myExt.property("ZERO_INSIDE_BOUNDARY"));
+  engine->globalObject().setProperty("add", myExt.property("add"));
+  engine->globalObject().setProperty("DESPECKLE", myExt.property("DESPECKLE"));
+  engine->globalObject().setProperty("SET_BAD_FLAGS_ABOVE", myExt.property("SET_BAD_FLAGS_ABOVE"));
+  engine->globalObject().setProperty("SET_BAD_FLAGS_BELOW", myExt.property("SET_BAD_FLAGS_BELOW"));
+  engine->globalObject().setProperty("SET_BAD_FLAGS_BETWEEN", myExt.property("SET_BAD_FLAGS_BETWEEN"));
+  engine->globalObject().setProperty("COMPLEMENT_BAD_FLAGS", myExt.property("COMPLEMENT_BAD_FLAGS"));
+  engine->globalObject().setProperty("CLEAR_BAD_FLAGS", myExt.property("CLEAR_BAD_FLAGS"));
+  engine->globalObject().setProperty("ASSERT_BAD_FLAGS", myExt.property("ASSERT_BAD_FLAGS"));
 
-  engine.globalObject().setProperty("AND_BAD_FLAGS_ABOVE", myExt.property("AND_BAD_FLAGS_ABOVE"));
-  engine.globalObject().setProperty("AND_BAD_FLAGS_BELOW", myExt.property("AND_BAD_FLAGS_BELOW"));
-  engine.globalObject().setProperty("AND_BAD_FLAGS_BETWEEN", myExt.property("AND_BAD_FLAGS_BETWEEN"));
+  engine->globalObject().setProperty("AND_BAD_FLAGS_ABOVE", myExt.property("AND_BAD_FLAGS_ABOVE"));
+  engine->globalObject().setProperty("AND_BAD_FLAGS_BELOW", myExt.property("AND_BAD_FLAGS_BELOW"));
+  engine->globalObject().setProperty("AND_BAD_FLAGS_BETWEEN", myExt.property("AND_BAD_FLAGS_BETWEEN"));
   
-  engine.globalObject().setProperty("OR_BAD_FLAGS_ABOVE", myExt.property("OR_BAD_FLAGS_ABOVE"));
-  engine.globalObject().setProperty("OR_BAD_FLAGS_BELOW", myExt.property("OR_BAD_FLAGS_BELOW"));
-  engine.globalObject().setProperty("OR_BAD_FLAGS_BETWEEN", myExt.property("OR_BAD_FLAGS_BETWEEN"));
+  engine->globalObject().setProperty("OR_BAD_FLAGS_ABOVE", myExt.property("OR_BAD_FLAGS_ABOVE"));
+  engine->globalObject().setProperty("OR_BAD_FLAGS_BELOW", myExt.property("OR_BAD_FLAGS_BELOW"));
+  engine->globalObject().setProperty("OR_BAD_FLAGS_BETWEEN", myExt.property("OR_BAD_FLAGS_BETWEEN"));
 
-  engine.globalObject().setProperty("XOR_BAD_FLAGS_ABOVE", myExt.property("XOR_BAD_FLAGS_ABOVE"));
-  engine.globalObject().setProperty("XOR_BAD_FLAGS_BELOW", myExt.property("XOR_BAD_FLAGS_BELOW"));
-  engine.globalObject().setProperty("XOR_BAD_FLAGS_BETWEEN", myExt.property("XOR_BAD_FLAGS_BETWEEN"));
-  engine.globalObject().setProperty("COPY_BAD_FLAGS", myExt.property("COPY_BAD_FLAGS"));
-  engine.globalObject().setProperty("FLAGGED_ADD", myExt.property("FLAGGED_ADD"));
-  engine.globalObject().setProperty("FLAGGED_MULTIPLY", myExt.property("FLAGGED_MULTIPLY"));
+  engine->globalObject().setProperty("XOR_BAD_FLAGS_ABOVE", myExt.property("XOR_BAD_FLAGS_ABOVE"));
+  engine->globalObject().setProperty("XOR_BAD_FLAGS_BELOW", myExt.property("XOR_BAD_FLAGS_BELOW"));
+  engine->globalObject().setProperty("XOR_BAD_FLAGS_BETWEEN", myExt.property("XOR_BAD_FLAGS_BETWEEN"));
+  engine->globalObject().setProperty("COPY_BAD_FLAGS", myExt.property("COPY_BAD_FLAGS"));
+  engine->globalObject().setProperty("FLAGGED_ADD", myExt.property("FLAGGED_ADD"));
+  engine->globalObject().setProperty("FLAGGED_MULTIPLY", myExt.property("FLAGGED_MULTIPLY"));
 
-  engine.globalObject().setProperty("REMOVE_RING", myExt.property("REMOVE_RING"));
+  engine->globalObject().setProperty("REMOVE_RING", myExt.property("REMOVE_RING"));
 
-  engine.globalObject().setProperty("THRESHOLD_ABOVE", myExt.property("THRESHOLD_ABOVE"));
-  engine.globalObject().setProperty("THRESHOLD_BELOW", myExt.property("THRESHOLD_BELOW"));
+  engine->globalObject().setProperty("THRESHOLD_ABOVE", myExt.property("THRESHOLD_ABOVE"));
+  engine->globalObject().setProperty("THRESHOLD_BELOW", myExt.property("THRESHOLD_BELOW"));
 
-  engine.globalObject().setProperty("FLAG_FRECKLES", myExt.property("FLAG_FRECKLES"));
-  engine.globalObject().setProperty("FLAG_GLITCHES", myExt.property("FLAG_GLITCHES"));
-  engine.globalObject().setProperty("UNCONDITIONAL_DELETE", myExt.property("UNCONDITIONAL_DELETE"));
-  engine.globalObject().setProperty("~+", myExt.property("FLAGGED_ADD"));
+  engine->globalObject().setProperty("FLAG_FRECKLES", myExt.property("FLAG_FRECKLES"));
+  engine->globalObject().setProperty("FLAG_GLITCHES", myExt.property("FLAG_GLITCHES"));
+  engine->globalObject().setProperty("UNCONDITIONAL_DELETE", myExt.property("UNCONDITIONAL_DELETE"));
+  engine->globalObject().setProperty("~+", myExt.property("FLAGGED_ADD"));
 
   // print the context ...
   // printQJSEngineContext();
@@ -507,7 +515,7 @@ void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFun
 /*
 this is interesting ...
 //! [1]
-QJSValue fun = myEngine.evaluate("(function(a, b) { return a + b; })");
+QJSValue fun = myengine->evaluate("(function(a, b) { return a + b; })");
 QJSValueList args;
 args << 1 << 2;
 QJSValue threeAgain = fun.call(QJSValue(), args);
@@ -520,7 +528,7 @@ void ScriptEditorController::printQJSEngineContext() {
   LOG(DEBUG) << "current QJSEngine context ...";
 
   std::map<QString, QString> currentVariableContext;
-  QJSValue theGlobalObject = engine.globalObject();
+  QJSValue theGlobalObject = engine->globalObject();
 
   QJSValueIterator it2(theGlobalObject);
   while (it2.hasNext()) {
@@ -550,7 +558,7 @@ void ScriptEditorController::processFormula(QString formula)
   // try iterating over the properties of the globalObject to find new variables
 
   std::map<QString, QString> currentVariableContext;
-  QJSValue theGlobalObject = engine.globalObject();
+  QJSValue theGlobalObject = engine->globalObject();
 
   QJSValueIterator it(theGlobalObject);
   while (it.hasNext()) {
@@ -560,11 +568,11 @@ void ScriptEditorController::processFormula(QString formula)
   }
   // ======                                                                                                                                    
 
-  QJSValue result = engine.evaluate(text);
+  QJSValue result = engine->evaluate(text);
   if (result.isArray()) {
     cerr << " the result is an array\n";
     //vector<int> myvector;                                                                                                                      
-    //myvector = engine.fromScriptValue(result);                                                                                                 
+    //myvector = engine->fromScriptValue(result);                                                                                                 
   }
   cerr << " the result is " << result.toString().toStdString() << endl;
 
@@ -573,7 +581,7 @@ void ScriptEditorController::processFormula(QString formula)
   // just find them and add them to the spreadsheet and to the Model?? 
   // HERE!!!
   // try iterating over the properties of the globalObject to find new variables                                                                 
-  QJSValue newGlobalObject = engine.globalObject();
+  QJSValue newGlobalObject = engine->globalObject();
 
   QJSValueIterator it2(newGlobalObject);
   while (it2.hasNext()) {
@@ -621,7 +629,7 @@ void ScriptEditorController::runOneTimeOnlyScript(QString script)
     // HERE!!!                                                                                             
     // try iterating over the properties of the globalObject to find new variables                         
     std::map<QString, QString> currentVariableContext;
-    QJSValue theGlobalObject = engine.globalObject();
+    QJSValue theGlobalObject = engine->globalObject();
 
     QJSValueIterator it(theGlobalObject);
     while (it.hasNext()) {
@@ -636,7 +644,7 @@ uncate(100);
   */
       // ======                                                                                            
     //    try {
-      QJSValue result = engine.evaluate(script);
+      QJSValue result = engine->evaluate(script);
       if (result.isError()) {
         QString message;
         message.append(result.toString());
@@ -655,7 +663,7 @@ uncate(100);
         if (result.isArray()) {
           cerr << " the result is an array\n";
         //vector<int> myvector;                                                                            
-        //myvector = engine.fromScriptValue(result);                                                       
+        //myvector = engine->fromScriptValue(result);                                                       
         }
         if (result.isNumber()) {
           cerr << " the result is a number " << result.toString().toStdString() << endl;
@@ -667,7 +675,7 @@ uncate(100);
       // just find them and add them to the spreadsheet and to the Model??                                 
       // HERE!!!                                                                                           
       // try iterating over the properties of the globalObject to find new variables                       
-        QJSValue newGlobalObject = engine.globalObject();
+        QJSValue newGlobalObject = engine->globalObject();
 
         QJSValueIterator it2(newGlobalObject);
         while (it2.hasNext()) {
@@ -700,6 +708,7 @@ void ScriptEditorController::runForEachRayScript(QString script, bool useBoundar
   vector<Point> &boundaryPoints)
 {
   LOG(DEBUG) << "enter";
+
   try {
   
     // Grab the context before evaluating the formula                                                      
@@ -708,7 +717,7 @@ void ScriptEditorController::runForEachRayScript(QString script, bool useBoundar
     // HERE!!!                                                                                             
     // try iterating over the properties of the globalObject to find new variables                         
     std::map<QString, QString> currentVariableContext;
-    QJSValue theGlobalObject = engine.globalObject();
+    QJSValue theGlobalObject = engine->globalObject();
 
     QJSValueIterator it(theGlobalObject);
     while (it.hasNext()) {
@@ -741,7 +750,7 @@ uncate(100);
     // TODO: free initialFieldNames they are a copy of the unique fieldNames
       // ======                                                                                            
     //    try {
-
+    _soloFunctionsController->reset();
     // for each sweep
    _soloFunctionsController->setCurrentSweepToFirst();
 
@@ -773,10 +782,13 @@ uncate(100);
 
       QJSValue result;
       try {
-        result = engine.evaluate(script);
+        result = engine->evaluate(script);
       } catch (const char *msg) {
-        LOG(DEBUG) << "ERROR from engine.evaluate: " << msg;
+        LOG(DEBUG) << "ERROR from engine->evaluate: " << msg;
         throw std::invalid_argument(msg);
+      } catch (const std::exception& ex) {
+        LOG(DEBUG) << "ERROR from engine->evaluate 2: " << ex.what();
+        throw ex;
       }
       if (result.isError()) {
         QString message;
@@ -792,13 +804,15 @@ uncate(100);
       } else {
         QString resultString = result.toString();
         resultString.truncate(25);
-
+        //if (resultString.toStdString().find("undefined") != string::npos) {
+        //  cerr << "HERE !!!<" << endl;
+        //}
         LOG(DEBUG) << " the result is " << resultString.toStdString();
 
         if (result.isArray()) {
           cerr << " the result is an array\n";
 	  //vector<int> myvector;                                                                            
-	  //myvector = engine.fromScriptValue(result);                                                       
+	  //myvector = engine->fromScriptValue(result);                                                       
         }
         if (result.isNumber()) {
           cerr << " the result is a number " << result.toString().toStdString() << endl;
@@ -813,6 +827,9 @@ uncate(100);
         //saveFieldVariableAssignments(currentVariableContext);
 	
       }
+
+      _soloFunctionsController->clearBoundary();
+
       _soloFunctionsController->nextRay();
     } // end while more rays
 
@@ -837,7 +854,7 @@ uncate(100);
 	// just find them and add them to the spreadsheet and to the Model??                                 
 	// HERE!!!                                                                                           
 	// try iterating over the properties of the globalObject to find new variables                       
-    QJSValue newGlobalObject = engine.globalObject();
+    QJSValue newGlobalObject = engine->globalObject();
     printQJSEngineContext();
 
     QJSValueIterator it2(newGlobalObject);
@@ -932,7 +949,10 @@ uncate(100);
     QMessageBox::warning(NULL, "Error running script", ex.what());
   }
 
-    LOG(DEBUG) << "exit";
+
+  reset(); 
+
+  LOG(DEBUG) << "exit";
 }
 
 
@@ -964,8 +984,8 @@ void ScriptEditorController::fieldNamesProvided(vector<string> *fieldNames) {
     for(it = fieldNames->begin(); it != fieldNames->end(); it++) {
       QString fieldName(QString::fromStdString(*it));
       QString originalName = fieldName;
-      engine.globalObject().setProperty(fieldName, originalName); // fieldName);                            
-      //engine.globalObject().setProperty(fieldName.append("_V"), originalName); // fieldName);                                                                                      
+      engine->globalObject().setProperty(fieldName, originalName); // fieldName);                            
+      //engine->globalObject().setProperty(fieldName.append("_V"), originalName); // fieldName);                                                                                      
     }
                       
     // print the context ...                                                                                               
@@ -985,13 +1005,13 @@ void ScriptEditorController::addVariableToScriptEditor(QString name, QJSValue va
   if ( variableLength > 1) {
     // this is a vector                                                                                    
     LOG(DEBUG) << "variable is a vector " << name.toStdString();
-      QJSValue fieldArray = engine.newArray(variableLength);
+      QJSValue fieldArray = engine->newArray(variableLength);
       QString vectorName = name;
       for (int i=0; i<variableLength; i++) {
         fieldArray.setProperty(i, value.property(i).toInt());
       }
       cout << "adding vector form " << vectorName.toStdString() << endl;
-      engine.globalObject().setProperty(vectorName, fieldArray);
+      engine->globalObject().setProperty(vectorName, fieldArray);
       cout << "end adding vector form " << vectorName.toStdString() << endl;
   }
   if (value.isArray()) {

@@ -580,7 +580,11 @@ int DataModel::getNGates(size_t rayIdx, string fieldName, double sweepHeight) {
   
   //  get the ray for this field 
   const vector<RadxRay *>  &rays = _vol.getRays();
-
+  if (rayIdx > rays.size()) {
+    string msg = "rayIdx is out of bounds: ";
+    msg.append(std::to_string(rayIdx));
+    throw std::invalid_argument(msg);
+  }
   RadxRay *ray = rays.at(rayIdx);
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";

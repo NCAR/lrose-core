@@ -59,9 +59,11 @@ private:
   ScriptEditorView *_currentView;
   SoloFunctionsController *_soloFunctionsController;
 
-  QJSEngine engine;
+  QJSEngine *engine;
 
   vector<string> *initialFieldNames;
+
+  void reset();
 
   void setupBoundaryArray();
   void setupFieldArrays();
