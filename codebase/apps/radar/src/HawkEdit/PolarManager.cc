@@ -2675,9 +2675,9 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     LOG(DEBUG) << "  az, el from ray: "
          << ray->getAzimuthDeg() << ", "
          << ray->getElevationDeg();
-    if (_params->debug >= Params::DEBUG_VERBOSE) {
-      ray->print(cerr);
-    }
+    //if (_params->debug >= Params::DEBUG_VERBOSE) {
+    //  ray->print(cerr);
+    //}
   }
 
   //**** testing ****
@@ -5862,7 +5862,7 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
   const RadxRay *closestRayToEdit = _rayLocationController->getClosestRay(azimuth);
 
   LOG(DEBUG) << "Found closest ray: pointer = " << closestRayToEdit;
-  closestRayToEdit->print(cout); 
+  //closestRayToEdit->print(cout); 
 
 
   // create the view

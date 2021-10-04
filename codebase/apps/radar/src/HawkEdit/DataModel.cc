@@ -234,7 +234,7 @@ void DataModel::SetData(string &fieldName,
   field->setDataFl32(nGates, radxData, isLocal);
   
   // make sure the new data are there ...
-  field->printWithData(cout);
+  // field->printWithData(cout);
   
   // data should be copied, so free the memory
   // delete data;
