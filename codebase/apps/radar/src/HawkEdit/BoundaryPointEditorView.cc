@@ -140,7 +140,7 @@ BoundaryPointEditorView::BoundaryPointEditorView(QWidget *parent)
   connect(_brushRadiusSlider, SIGNAL(valueChanged(int)),
    this, SLOT(_brushRadiusSliderValueChanged(int)));
 
-  _boundaryEditorPolygonBtn->setChecked(true);
+  //_boundaryEditorPolygonBtn->setChecked(true);
   _boundaryEditorDialogLayout->addWidget(new QLabel(" ", this)); // _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
 
   _boundaryEditorList = new QListWidget(this); // _boundaryEditorDialog);
@@ -184,6 +184,8 @@ BoundaryPointEditorView::BoundaryPointEditorView(QWidget *parent)
   hLayout->addWidget(_boundaryEditorSaveBtn);
   connect(_boundaryEditorSaveBtn, SIGNAL(clicked()),
    this, SLOT(saveBoundaryEditorClick()));
+
+  selectBoundaryTool(BoundaryToolType::polygon, 0);
 
 }
 

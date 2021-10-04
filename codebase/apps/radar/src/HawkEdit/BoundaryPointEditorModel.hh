@@ -117,7 +117,7 @@ class BoundaryPointEditorModel
 	vector<Point> points;
 	vector<Point> mergePoints;
 
-	BoundaryToolType currentTool = BoundaryToolType::brush;
+	BoundaryToolType currentTool; //  = BoundaryToolType::polygon;
 
 	void ReadFromFile(vector<Point> &x, const string &file_name);
 

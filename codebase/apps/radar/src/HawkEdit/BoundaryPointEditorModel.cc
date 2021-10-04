@@ -50,6 +50,7 @@
 */
 
 BoundaryPointEditorModel::BoundaryPointEditorModel() {
+	currentTool = BoundaryToolType::polygon;
 	rootBoundaryDir = string(getenv("HOME")) + "/" + "HawkEditBoundaries";
 	LOG(DEBUG) << "rootBoundaryDir = " << rootBoundaryDir;
 }

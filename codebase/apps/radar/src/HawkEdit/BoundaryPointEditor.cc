@@ -65,6 +65,7 @@ BoundaryPointEditor::BoundaryPointEditor(BoundaryPointEditorView *bpeView,
 	_boundaryView = boundaryView;
 	_boundaryPointEditorModel = new BoundaryPointEditorModel();
 	makeConnections();
+	_boundaryEditorView->selectBoundaryTool(BoundaryToolType::polygon, 0);
 }
 
 BoundaryPointEditor::~BoundaryPointEditor() {
