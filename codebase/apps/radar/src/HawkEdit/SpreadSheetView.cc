@@ -1433,14 +1433,47 @@ void SpreadSheetView::addNyquistToSelection() {
 
 void SpreadSheetView::subtractNyquistFromSelectionToEnd() {
   float factor = -1.0;
-  int top = table->currentRow();
-  adjustNyquistFromRay(factor, top);  
+  //int top = table->currentRow();
+  //adjustNyquistFromRay(factor, top);  
+  adjustNyquistFromSelectionToEnd(factor);
 }
 
 void SpreadSheetView::addNyquistFromSelectionToEnd() {
   float factor = 1.0;
-  int top = table->currentRow();
-  adjustNyquistFromRay(factor, top);  
+  //int top = table->currentRow();
+  //adjustNyquistFromRay(factor, top);
+  adjustNyquistFromSelectionToEnd(factor);
+  // --
+}
+
+void SpreadSheetView::adjustNyquistFromSelectionToEnd(float factor) {
+
+    //QModelIndexList indexList = table->selectedIndexes();
+    QList<QTableWidgetItem *> indexList = table->selectedItems();
+
+    QList<QTableWidgetItem *>::iterator i;
+    for (i = indexList.begin(); i != indexList.end(); ++i) {     
+        QTableWidgetItem *selection = *i;
+        int column = selection->column();
+        int row = selection->row();
+        int top = row;
+        int currentColumn = column; // table->currentColumn();
+        //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
+        //int top = 1;
+        int left = currentColumn;
+        int bottom = table->rowCount() - 1;
+        int right = currentColumn;
+         
+        QTableWidgetSelectionRange range(top, left, bottom, right);
+        bool select = true;
+        table->setRangeSelected(range, select);
+    }
+    // subtract the Nyquist value from the ray data 
+    // for each selected cell
+    // subtract Nyquist
+    // set new value
+    adjustNyquistFromSelection(factor);
+  // --  
 }
 
 void SpreadSheetView::subtractNyquistFromRay() {
@@ -1464,7 +1497,7 @@ void SpreadSheetView::adjustNyquistFromRay(float factor, int top) {
     //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
     //int top = 1;
     int left = currentColumn;
-    int bottom = table->rowCount() - 2;
+    int bottom = table->rowCount() - 1;
     int right = currentColumn;
      
     QTableWidgetSelectionRange range(top, left, bottom, right);

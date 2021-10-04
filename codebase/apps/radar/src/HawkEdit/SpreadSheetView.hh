@@ -83,6 +83,7 @@ public slots:
   void addNyquistFromSelectionToEnd();
   void adjustNyquistFromRay(float factor, int top);
   void adjustNyquistFromSelection(float factor);
+  void adjustNyquistFromSelectionToEnd(float factor);
 
   void notImplementedMessage();
 
