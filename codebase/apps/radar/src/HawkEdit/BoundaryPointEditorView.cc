@@ -10,6 +10,7 @@
 #include <QGridLayout>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QMessageBox>
 
 
 /*
@@ -95,7 +96,8 @@ BoundaryPointEditorView::BoundaryPointEditorView(QWidget *parent)
   _boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
   connect(_boundaryEditorCircleBtn, SIGNAL(clicked()),
-   this, SLOT(circleBtnBoundaryEditorClick()));
+   this, SLOT(notImplementedMessage()));
+   // this, SLOT(circleBtnBoundaryEditorClick()));
 
   _circleRadiusSlider = new QSlider(Qt::Horizontal);
   _circleRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -120,7 +122,8 @@ BoundaryPointEditorView::BoundaryPointEditorView(QWidget *parent)
   _boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
   _boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
   connect(_boundaryEditorBrushBtn, SIGNAL(clicked()),
-   this, SLOT(brushBtnBoundaryEditorClick()));
+   this, SLOT(notImplementedMessage()));
+   //this, SLOT(brushBtnBoundaryEditorClick()));
 
   _brushRadiusSlider = new QSlider(Qt::Horizontal);
   _brushRadiusSlider->setFocusPolicy(Qt::StrongFocus);
@@ -137,7 +140,7 @@ BoundaryPointEditorView::BoundaryPointEditorView(QWidget *parent)
   connect(_brushRadiusSlider, SIGNAL(valueChanged(int)),
    this, SLOT(_brushRadiusSliderValueChanged(int)));
 
-  _boundaryEditorBrushBtn->setChecked(true);
+  _boundaryEditorPolygonBtn->setChecked(true);
   _boundaryEditorDialogLayout->addWidget(new QLabel(" ", this)); // _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
 
   _boundaryEditorList = new QListWidget(this); // _boundaryEditorDialog);
@@ -1076,6 +1079,12 @@ void BoundaryPointEditorView::setBoundaryFile(int boundaryIndex, string &fileNam
 
 void BoundaryPointEditorView::closeEvent() {
     emit boundaryPointEditorClosed();
+}
+
+
+void BoundaryPointEditorView::notImplementedMessage() {
+      QMessageBox::information(this, "Not Implemented", "Not Implemented");
+      selectBoundaryTool(BoundaryToolType::polygon, 0);
 }
 
 /*

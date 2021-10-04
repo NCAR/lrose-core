@@ -178,7 +178,8 @@ public slots:
 //-  void _saveBoundaryEditorClick();
   void saveBoundaryEditorClick();
 
-
+  void notImplementedMessage();
+  
   //void _clearBoundaryEditorClick();
   //void onBoundaryEditorListItemClicked(QListWidgetItem* item);
   //void _saveBoundaryEditorClick();
