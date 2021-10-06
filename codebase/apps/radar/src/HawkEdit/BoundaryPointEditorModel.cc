@@ -614,7 +614,11 @@ void BoundaryPointEditorModel::save(int boundaryIndex, string &selectedFieldName
 	Path fileName(path);
 	if (!fileName.pathExists()) {
 	  int result = fileName.makeDir();
-	  if (result < 0) throw std::runtime_error(std::strerror(errno));
+	  if (result < 0) {
+	  	string msg = std::strerror(errno);
+	    msg.append("Make sure the folder HawkEditBoundaries exists in your home directory.");
+	    throw std::runtime_error(msg);
+	  }
   }  
   LOG(DEBUG) << "saving to path: " << path;
 
