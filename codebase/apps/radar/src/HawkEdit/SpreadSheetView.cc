@@ -692,6 +692,8 @@ void SpreadSheetView::applyChanges()
     LOG(DEBUG) << "column " << label.toStdString() << ": extracted field " << fieldName
       << ", azimuth " << rayAzimuth; ; 
     emit applyVolumeEdits(fieldName, rayAzimuth, data);
+    emit dataChanged();
+    _unAppliedEdits = false;
   }
 
 
@@ -1048,7 +1050,7 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, 
       QTableWidgetItem *headerItem = table->horizontalHeaderItem(c);
       QString fieldName = headerItem->text();
       cout << "fieldName = " << fieldName.toStdString() << endl;
-      QJSValue fieldArray = engine.newArray(nPoints);
+      //QJSValue fieldArray = engine.newArray(nPoints);
       QString vectorName = fieldName;
       if (table->rowCount() != nPoints) {
         table->setRowCount(nPoints);
@@ -1067,7 +1069,7 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, 
         }
         // LOG(DEBUG) << "setting " << r << "," << c2 << "= " << formattedData; 
         table->setItem(r, c2, new SpreadSheetItem(formattedData));
-        fieldArray.setProperty(r, *dp); // data.at(r));
+        //fieldArray.setProperty(r, *dp); // data.at(r));
         dp++;
       }
       //LOG(DEBUG) << "adding vector form " << vectorName.toStdString();
@@ -1540,6 +1542,8 @@ void SpreadSheetView::adjustNyquistFromSelection(float factor) {
         }
     }
 
+    _unAppliedEdits = true;
+
     LOG(DEBUG) << "exit";
 }
 
@@ -1575,6 +1579,7 @@ void SpreadSheetView::deleteSelection() {
         //   persist to the model? only when Apply or Save is clicked.
         //emit setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
     }
+    _unAppliedEdits = true;
 }
 
 bool SpreadSheetView::isMissing(QString textValue) {
@@ -1637,7 +1642,25 @@ void  SpreadSheetView::newDataReady()
   setupContents();
 }
 
-
 void SpreadSheetView::closeEvent() {
-    emit spreadSheetClosed();
+    if (_unAppliedEdits) {
+        string msg = "Unsaved changes to the data. \n";
+        msg.append("Use Replot->Apply Edits before closing to avoid this message. \n");
+        msg.append("Do you want to apply these changes?");
+
+        QMessageBox::StandardButton reply =
+            QMessageBox::warning(this, "QMessageBox::warning()",
+                          QString::fromStdString(msg),
+                          QMessageBox::Apply | QMessageBox::Discard);
+  
+        //  QMessageBox::Abort | QMessageBox::Retry | QMessageBox::Ignore);
+        if (reply == QMessageBox::Apply) {
+            LOG(DEBUG) << "Apply";
+            applyChanges();
+            _unAppliedEdits = false;
+        }
+
+    } 
+    emit spreadSheetClosed(); 
+    
 }

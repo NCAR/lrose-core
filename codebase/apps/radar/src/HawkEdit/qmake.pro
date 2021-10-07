@@ -96,6 +96,7 @@ HEADERS += BoundaryView.cc
 # SOURCES += BscanBeam.cc
 # SOURCES += BscanManager.cc
 # SOURCES += BscanWidget.cc
+SOURCES += CloseEventFilter.cc
 SOURCES += ColorBar.cc
 SOURCES += ColorMap.cc
 SOURCES += ColorTableManager.cc

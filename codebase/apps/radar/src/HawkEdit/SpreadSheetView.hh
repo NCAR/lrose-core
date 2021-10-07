@@ -125,6 +125,7 @@ signals:
   void setDataMissing(string fieldName, float missingDataValue);
   void replotRequested();
   void spreadSheetClosed();
+  void dataChanged();
 
 protected:
     void setupContextMenu();
@@ -223,7 +224,7 @@ private:
     QUndoStack *undoStack = nullptr;
     QUndoView *undoView = nullptr;
 
-    QJSEngine engine;
+    bool _unAppliedEdits = false;
 
     float _startGateKm = 0.0;
 
@@ -233,13 +234,10 @@ private:
 const char *htmlText =
 "<HTML>"
 "<p><b>"
-"Some useful info .."
+"Help info .."
 "<ul>"
-"<li>Adding two cells.</li>"
-"<li>Subtracting one cell from another.</li>"
-"<li>Multiplying two cells.</li>"
-"<li>Dividing one cell with another.</li>"
-"<li>Summing the contents of an arbitrary number of cells.</li>"
+"<li>Doing something.</li>"
+"<li>number of cells.</li>"
   "</HTML>";
 };
 

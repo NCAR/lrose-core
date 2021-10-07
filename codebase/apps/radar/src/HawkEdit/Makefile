@@ -156,6 +156,7 @@ MOC_SRCS = \
         FieldColorController.cc \
 	BoundaryPointEditor.cc \
 	BoundaryPointEditorView.cc \
+	CloseEventFilter.cc \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
@@ -176,7 +177,6 @@ MOC_SRCS = \
 MOC_OUTPUT = \
 	moc_BoundaryPointEditorView.cpp \
 	moc_BoundaryPointEditor.cpp \
-	moc_CloseEventFilter.cpp \
 	moc_FieldListView.cpp \
 	moc_FieldRendererView.cpp \
 	moc_PolarManager.cpp \
@@ -184,6 +184,7 @@ MOC_OUTPUT = \
 	moc_TimeScaleWidget.cpp \
 	moc_ParameterColorView.cpp \
         moc_FieldColorController.cpp \
+	moc_CloseEventFilter.cpp \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \

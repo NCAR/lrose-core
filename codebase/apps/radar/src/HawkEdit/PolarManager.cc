@@ -232,6 +232,10 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
 
   _setupWindows();
 
+  // install event filter to catch when the PolarManager is closed
+  CloseEventFilter *closeFilter = new CloseEventFilter(this);
+  installEventFilter(closeFilter);
+
   // set initial field to 0
 
   //_changeField(0, false);
@@ -2567,18 +2571,22 @@ void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
 
 }
 
-// TODO: make this a SLOT to a SIGNAL from  ScriptEditor 
+// this is a SLOT to a SIGNAL from  ScriptEditor 
 
 void PolarManager::updateVolume(QStringList newFieldNames) {
 
   LOG(DEBUG) << "enter";
   _volumeDataChanged(newFieldNames);
-
+  _unSavedEdits = true;
   vector<DisplayField *> newFields;
 
 
   LOG(DEBUG) << "exit";
 
+}
+
+void PolarManager::spreadsheetDataChanged() {
+  _unSavedEdits = true;
 }
 
 ///////////////////////////////////////////////////
@@ -3297,6 +3305,7 @@ void PolarManager::_saveFile()
       LOG(DEBUG) << "writing to file " << name;
       DataModel *dataModel = DataModel::Instance();
       dataModel->writeData(name);
+      _unSavedEdits = false;
     } catch (FileIException &ex) {
       this->setCursor(Qt::ArrowCursor);
       return;
@@ -4137,7 +4146,7 @@ void PolarManager::showBoundaryEditor()
   if (boundaryPointEditorView == NULL) {
     boundaryPointEditorView = new BoundaryPointEditorView(this);
 
-    // install event filter to catch when the spreadsheet is closed
+    // install event filter to catch when the boundary point enditor is closed
     CloseEventFilter *closeFilter = new CloseEventFilter(boundaryPointEditorView);
     boundaryPointEditorView->installEventFilter(closeFilter);
 
@@ -5901,6 +5910,9 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
 //Yes, always go through the controller, never directly to the view!!
 //    spreadSheetControl->newElevation(elevation);
 
+    connect(sheetView, SIGNAL(dataChanged()), 
+      this, SLOT(spreadsheetDataChanged()));
+
     sheetView->init();
     sheetView->show();
   } else {
@@ -5940,6 +5952,30 @@ void PolarManager::boundaryEditorClosed() {
   boundaryPointEditorControl = NULL;
   delete boundaryView;
   boundaryView = NULL;
+}
+
+void PolarManager::closeEvent(QEvent *event)
+{
+    if (_unSavedEdits) {
+        string msg = "Unsaved changes to the data. \n";
+        msg.append("Use File->Save before closing to avoid this message. \n");
+        msg.append("Do you want to save these changes?");
+
+        QMessageBox::StandardButton reply =
+            QMessageBox::warning(this, "QMessageBox::warning()",
+                          QString::fromStdString(msg),
+                          QMessageBox::Save | QMessageBox::Discard);
+  
+        //  QMessageBox::Abort | QMessageBox::Retry | QMessageBox::Ignore);
+        if (reply == QMessageBox::Save) {
+            LOG(DEBUG) << "Save";
+            _saveFile();
+            _unSavedEdits = false;
+        }
+
+    }  
+    emit close();
+    //QMainWindow::closeEvent(event);
 }
 
 /////////////////////////////////////////////////////

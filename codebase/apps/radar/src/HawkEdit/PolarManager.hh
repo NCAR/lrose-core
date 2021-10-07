@@ -199,6 +199,8 @@ public:
 
   void runForEachRayScript(QString script, bool useBoundary);
 
+  void closeEvent(QEvent *event);
+
 public slots:
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
@@ -245,6 +247,7 @@ public slots:
   void setFieldToMissing(QString fieldName);
   void deleteFieldFromVolume(QString fieldName);   
 
+  void spreadsheetDataChanged();
 
   void errorMessage(string title, string message);
 
@@ -708,6 +711,8 @@ private:
 
   void _createTimeControl();
 
+  bool _unSavedEdits = false;
+
 private slots:
 
   //////////////
@@ -724,6 +729,7 @@ private slots:
   //virtual void _changeField(int fieldId, bool guiMode) = 0;
   //virtual void _openFile();
   //virtual void _saveFile();
+
 
   //void _changeFieldVariable(bool value);
   int _updateDisplayFields(vector<string> *fieldNames);
