@@ -41,7 +41,7 @@
 #include "InputMdv.hh"
 #include "OutputMdv.hh"
 #include <toolsa/umisc.h>
-#include <euclid/ClumpGrid.hh>
+#include <euclid/ClumpGeom.hh>
 using namespace std;
 
 //////////////
@@ -136,20 +136,20 @@ void Verify::updateAllStormsGrid(const Clump_order &clump)
 //
 // update the valid storms grid with the given clump
 
-void Verify::updateValidStormsGrid(const ClumpGrid &clump_grid)
+void Verify::updateValidStormsGrid(const ClumpGeom &cgeom)
   
 {
 
   fl32 *validGrid = _validStormsGrid;
   fl32 *compGrid = _inputMdv.compDbz;
   
-  for (int intv = 0; intv < clump_grid.nIntervals; intv++) {
+  for (size_t intv = 0; intv < cgeom.nIntervals; intv++) {
     
-    const Interval &intvl = clump_grid.intervals[intv];
+    const Interval &intvl = cgeom.intervals[intv];
     
-    int iy = intvl.row_in_plane + clump_grid.startIy;
-    int ix = intvl.begin + clump_grid.startIx;
-    size_t offset = iy * clump_grid.gridGeom.nx() + ix;
+    int iy = intvl.row_in_plane + cgeom.startIy;
+    int ix = intvl.begin + cgeom.startIx;
+    size_t offset = iy * cgeom.gridGeom.nx() + ix;
     memcpy(validGrid + offset, compGrid + offset, intvl.len * sizeof(fl32));
     
   } // intv

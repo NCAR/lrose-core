@@ -43,7 +43,7 @@
 using namespace std;
 
 class InputMdv;
-class ClumpGrid;
+class ClumpGeom;
 class Verify;
 
 // layer statistics
@@ -115,7 +115,7 @@ public:
   void init();
 
   // compute properties for clump
-  int compute(const ClumpGrid &clump_grid, int storm_num);
+  int compute(const ClumpGeom &cgeom, int storm_num);
 
   // get methods
   double getMinValidZ() const { return _minValidZ; }
@@ -184,11 +184,11 @@ private:
   // methods
 
   void _alloc(int nz, int nhist);
-  int _computeFirstPass(const ClumpGrid &clump_grid);
-  void _computeSecondPass(const ClumpGrid &clump_grid);
-  int _storeRuns(const ClumpGrid &clump_grid);
-  void _tiltCompute(const ClumpGrid &clump_grid);
-  void _dbzGradientCompute(const ClumpGrid &clump_grid);
+  int _computeFirstPass(const ClumpGeom &cgeom);
+  void _computeSecondPass(const ClumpGeom &cgeom);
+  int _storeRuns(const ClumpGeom &cgeom);
+  void _tiltCompute(const ClumpGeom &cgeom);
+  void _dbzGradientCompute(const ClumpGeom &cgeom);
   int _checkSecondTrip();
      
   void _loadGprops(storm_file_global_props_t *gprops,
@@ -207,17 +207,17 @@ private:
   void _loadDbzHist(dbz_hist_entry_t *dbz_hist,
 		    storm_file_dbz_hist_t *hist);
 
-  double _topOfDbz(double dbz, const ClumpGrid &clump_grid);
+  double _topOfDbz(double dbz, const ClumpGeom &cgeom);
 
   // hail metrics
   
-  void  _computeHailMetrics(const ClumpGrid &clump_grid);
-  int  _getFokrCategory(const ClumpGrid &clump_grid);
-  double _getWaldvogelProbability(const ClumpGrid &clump_grid);
+  void  _computeHailMetrics(const ClumpGeom &cgeom);
+  int  _getFokrCategory(const ClumpGeom &cgeom);
+  double _getWaldvogelProbability(const ClumpGeom &cgeom);
 
   // nexrad hail detection algorithm
 
-  void _computeNexradHda(const ClumpGrid &clump_grid,
+  void _computeNexradHda(const ClumpGeom &cgeom,
                          double &poh, double &shi,
                          double &posh, double &mehs);
   

@@ -1229,7 +1229,7 @@ extern int EG_find_intervals_3d_float
  int nrows_in_vol,
  int nrows_in_plane,
  int ncols,
- float array[],
+ const float array[],
  Interval **intervals_p,
  int *n_intv_alloc_p,
  Row_hdr *row_hdr,
@@ -1265,7 +1265,7 @@ extern int EG_find_intervals_3d_float
  * 	the number of intervals found
  */
 
-extern int EG_find_intervals(int ydim, int xdim, unsigned char array[],
+extern int EG_find_intervals(int ydim, int xdim, const unsigned char array[],
 			     Interval **intervals, int *isize,
 			     Row_hdr *row_hdr, int threshold);
 
@@ -1299,7 +1299,7 @@ extern int EG_find_intervals(int ydim, int xdim, unsigned char array[],
 
 extern int EG_find_intervals_3d(int nplanes_in_vol, int nrows_in_vol,
 				int nrows_in_plane, int ncols,
-				unsigned char array[],
+				const unsigned char array[],
 				Interval **intervals, int *isize,
 				Row_hdr *row_hdr, int threshold);
 
@@ -1940,7 +1940,7 @@ extern void  EG_free_stack_3d();
  *  	the number of intervals found
  */
 
-extern int EG_get_intervals(unsigned char row[], int begin, int end,
+extern int EG_get_intervals(const unsigned char row[], int begin, int end,
 			    Interval interval_array[], int threshold);
 
 /*
@@ -1960,7 +1960,7 @@ extern int EG_get_intervals(unsigned char row[], int begin, int end,
  *  	the number of intervals found
  */
 
-extern int EG_get_intervals_below(unsigned char row[], int begin, int end,
+extern int EG_get_intervals_below(const unsigned char row[], int begin, int end,
 				  Interval interval_array[], int threshold);
 
 extern int EG_image_dim(

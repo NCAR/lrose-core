@@ -41,7 +41,7 @@
 #include "Worker.hh"
 using namespace std;
 class InputMdv;
-class ClumpGrid;
+class ClumpGeom;
 
 ////////////////////////////////
 // Verify
@@ -69,7 +69,7 @@ public:
 
   // update the valid storms grid with the given clump
   
-  void updateValidStormsGrid(const ClumpGrid &clump_grid);
+  void updateValidStormsGrid(const ClumpGeom &cgeom);
 
   // write out MDV file
 

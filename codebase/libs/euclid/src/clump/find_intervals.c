@@ -71,7 +71,7 @@ typedef enum intv_mode_2d {ABOVE_THRESH, BELOW_THRESH, WITHIN_AUX} intv_mode_2d_
  * 	the number of intervals found
  */
 
-static int find_intervals_2d(int nrows, int ncols, unsigned char array[],
+static int find_intervals_2d(int nrows, int ncols, const unsigned char array[],
 			     Interval **intervals_p, int *n_intv_alloc_p,
 			     Row_hdr *row_hdr, Row_hdr *aux_row_hdr,
 			     int threshold, int mode)
@@ -234,7 +234,7 @@ static int find_intervals_2d(int nrows, int ncols, unsigned char array[],
  * 	the number of intervals found
  */
 
-int EG_find_intervals(int nrows, int ncols, unsigned char array[],
+int EG_find_intervals(int nrows, int ncols, const unsigned char array[],
 		      Interval **intervals_p, int *n_intv_alloc_p,
 		      Row_hdr *row_hdr, int threshold)
 
@@ -276,7 +276,7 @@ int EG_find_intervals(int nrows, int ncols, unsigned char array[],
  * 	the number of intervals found
  */
 
-int EG_find_intervals_below_(int nrows, int ncols, unsigned char array[],
+int EG_find_intervals_below_(int nrows, int ncols, const unsigned char array[],
 			     Interval **intervals_p, int *n_intv_alloc_p,
 			     Row_hdr *row_hdr, int threshold)
 
@@ -318,7 +318,7 @@ int EG_find_intervals_below_(int nrows, int ncols, unsigned char array[],
  * 	the number of intervals found
  */
 
-int EG_find_intervals_aux(int nrows, int ncols, unsigned char array[],
+int EG_find_intervals_aux(int nrows, int ncols, const unsigned char array[],
 			  Row_hdr *aux_row_hdr,
 			  Interval **intervals_p, int *n_intv_alloc_p,
 			  Row_hdr *row_hdr, int threshold)
@@ -361,7 +361,7 @@ int EG_find_intervals_aux(int nrows, int ncols, unsigned char array[],
  */
 
 int EG_find_intervals_3d(int nplanes_in_vol, int nrows_in_vol, int nrows_in_plane,
-			 int ncols, unsigned char array[], Interval **intervals_p,
+			 int ncols, const unsigned char array[], Interval **intervals_p,
 			 int *n_intv_alloc_p, Row_hdr *row_hdr, int threshold)
 {
 

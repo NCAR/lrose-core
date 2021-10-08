@@ -72,7 +72,7 @@ SRCS = \
 CPPC_SRCS = \
 	ClumpingDualThresh.cc \
 	ClumpingMgr.cc \
-	ClumpGrid.cc
+	ClumpProps.cc
 
 #
 # general targets
