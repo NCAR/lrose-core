@@ -184,6 +184,34 @@ void ClumpProps::_compute2DGrid()
     }
   }
 
+  _nPoints2D = 0;
+  for (int iy = 0; iy < _nYLocal; iy++) {
+    for (int ix = 0; ix < _nXLocal; iy++) {
+      if (_grid2DVals[iy][ix] == 1) {
+        _nPoints2D++;
+      }
+    } 
+  } 
+
+  // compute centroid
+
+  double sumx = 0.0, sumy = 0.0, sumz = 0.0, nn = 0.0;
+  for (int intv = 0; intv < _clump->size; intv++) {
+    const Interval *intvl = _clump->ptr[intv];
+    int iz = intvl->plane;
+    int iy = intvl->row_in_plane;
+    double zz = _gridGeom.zKm()[iz];
+    double yy = _gridGeom.miny() + iy * _gridGeom.dy();
+    for (int ix = intvl->begin; ix <= intvl->end; ix++) {
+      double xx = _gridGeom.minx() + iy * _gridGeom.dx();
+      sumx += xx;
+      sumy += yy;
+      sumz += zz;
+      nn++;
+    }
+  }
+
+
 }
 
 ////////////////////////////////////////////////////////////////
@@ -283,9 +311,9 @@ void ClumpProps::_computeProps()
     // _dVolAtCentroid = _dVolFlat;
     
     if (_gridGeom.nz() <= 1) {
-      _clumpSize = _nPoints * _dAreaFlat;
+      _clumpSize = _projAreaKm2;
     } else {
-      _clumpSize = _nPoints * _dVolFlat;
+      _clumpSize = _volumeKm3;
     }
     
     _kmPerGridUnit = (_dXKmAtCentroid + _dYKmAtCentroid) / 2.0;
@@ -301,11 +329,13 @@ void ClumpProps::_computeProps()
     const Interval *intvl = _clump->ptr[intv];
 
     int iz = intvl->plane;
-    int iy = intvl->row_in_plane;
+    // int iy = intvl->row_in_plane;
 
     double zKm = _gridGeom.zKm()[iz];
     minZKm = min(zKm, minZKm);
     maxZKm = max(zKm, maxZKm);
+
+#ifdef JUNK
 
     double dxKm = _finder->_dxKm;
     double dyKm = _finder->_dyKm;
@@ -342,8 +372,10 @@ void ClumpProps::_computeProps()
       }
 
     } // ix
+
+#endif
     
-  } // irun
+  } // intv
 
   _vertExtentKm = maxZKm - minZKm;
 
