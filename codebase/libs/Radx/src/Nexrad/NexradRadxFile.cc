@@ -504,6 +504,9 @@ int NexradRadxFile::readFromPath(const string &path,
     _volumeNumber = volNum;
   }
 
+  // set site_id if possible
+  _siteName = Radx::makeString(title.site_id, 4);
+
   // if possible initialize position etc from file path
   
   NexradLoc loc;
@@ -2733,6 +2736,14 @@ int NexradRadxFile::_writeMetaDataHdrs(const RadxVol &vol)
   double msecsInDay = (secsInDay + vol.getEndNanoSecs() / 1.0e9) * 1.0e3;
   title.julian_date = julianDate + 1;
   title.millisecs_past_midnight = (int) (msecsInDay + 0.5);
+  const string site_name = vol.getSiteName();
+  if (site_name.length() >= 4) {
+    text[0] = site_name[0];
+    text[1] = site_name[1];
+    text[2] = site_name[2];
+    text[3] = site_name[3];
+    memcpy(title.site_id, text, 4);
+  }
 
   if (_verbose) {
     NexradData::print(title, cerr);
