@@ -67,47 +67,56 @@ public:
 
   // clump details
 
-  int id() const { return _id; }
-  const Clump_order *clumpOrder() const { return _clump; }
-  Interval **intervals() { return _clump->ptr; }
-  const vector<Interval> &intvLocal() const { return _intvLocal; }
-  size_t nIntervals() const { return _nIntervals; }
-  size_t nPoints3D() const { return _nPoints3D; }
-  size_t nPoints2D() const { return _nPoints2D; }
+  inline int id() const { return _id; }
+  inline const Clump_order *clumpOrder() const { return _clump; }
+  inline Interval **intervals() { return _clump->ptr; }
+  inline const vector<Interval> &intvLocal() const { return _intvLocal; }
+  inline size_t nIntervals() const { return _nIntervals; }
+  inline size_t nPoints3D() const { return _nPoints3D; }
+  inline size_t nPoints2D() const { return _nPoints2D; }
   
   // clump shrink-wrapped variables
 
-  int startIxLocal() const { return _startIxLocal; }
-  int startIyLocal() const { return _startIyLocal; }
+  inline int startIxLocal() const { return _startIxLocal; }
+  inline int startIyLocal() const { return _startIyLocal; }
 
-  double offsetX() const { return _offsetX; }
-  double offsetY() const { return _offsetY; }
-  double startXLocal() const { return _startXLocal; }
-  double startYLocal() const { return _startYLocal; }
+  inline double offsetX() const { return _offsetX; }
+  inline double offsetY() const { return _offsetY; }
+  inline double startXLocal() const { return _startXLocal; }
+  inline double startYLocal() const { return _startYLocal; }
 
-  int nXLocal() const { return _nXLocal; }
-  int nYLocal() const { return _nYLocal; }
+  inline int nXLocal() const { return _nXLocal; }
+  inline int nYLocal() const { return _nYLocal; }
 
-  double dXKmAtCentroid() const { return _dXKmAtCentroid; }
-  double dYKmAtCentroid() const { return _dYKmAtCentroid; }
+  inline double dXKmAtCentroid() const { return _dXKmAtCentroid; }
+  inline double dYKmAtCentroid() const { return _dYKmAtCentroid; }
 
   // grid Z properties
   
-  const vector<double> &zKm() const { return _gridGeom.zKm(); }
-  size_t nZ() const { return _gridGeom.nz(); }
-  double meanDz() const { return _gridGeom.meanDz(); }
-  double minZ() const { return _gridGeom.minz(); }
+  inline const vector<double> &zKm() const { return _gridGeom.zKm(); }
+  inline double zKm(int iz) const { return _gridGeom.zKm(iz); }
+  inline size_t nZ() const { return _gridGeom.nz(); }
+  inline double meanDz() const { return _gridGeom.meanDz(); }
+  inline double minZ() const { return _gridGeom.minz(); }
   
+  // clumpSize returns vol or area as appropriate
+  inline double clumpSize() const { return _clumpSize; }
+
   // clump properties
+  
+  inline double projAreaKm2() const { return _projAreaKm2; }
+  inline double volumeKm3() const { return _volumeKm3; }
 
-  double clumpSize() const { return _clumpSize; } // vol or area as appropriate
-  double projAreaKm2() const { return _projAreaKm2; }
-  double volumeKm3() const { return _volumeKm3; }
-  double vertExtentKm() const { return _vertExtentKm; }
+  inline double minZKm() const { return _minZKm; }
+  inline double maxZKm() const { return _maxZKm; }
+  inline double vertExtentKm() const { return _vertExtentKm; }
 
-  double dAreaAtCentroid() const { return _dAreaAtCentroid; }
-  const vector<double> &dVolAtCentroid() const { return _dVolAtCentroid; }
-  double kmPerGridUnit() const { return _kmPerGridUnit; }
+  inline double dAreaAtCentroid() const { return _dAreaAtCentroid; }
+  inline const vector<double> &dVolAtCentroid() const { return _dVolAtCentroid; }
+
+  inline double centroidX() const { return _centroidX; }
+  inline double centroidY() const { return _centroidY; }
+  inline double centroidZ() const { return _centroidZ; }
 
 protected:
   
@@ -139,12 +148,17 @@ private:
   
   double _dAreaAtCentroid;
   vector<double> _dVolAtCentroid;
-  double _kmPerGridUnit;
 
   double _clumpSize;
   double _projAreaKm2;
   double _volumeKm3;
+
+  double _minZKm, _maxZKm;
   double _vertExtentKm;
+
+  double _centroidX;
+  double _centroidY;
+  double _centroidZ;
 
   void _shrinkWrap();
   void _compute2DGrid();

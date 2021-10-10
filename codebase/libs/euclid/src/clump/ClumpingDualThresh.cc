@@ -38,7 +38,7 @@
 #include <toolsa/umisc.h>
 #include <euclid/ClumpingDualThresh.hh>
 #include <euclid/ClumpingMgr.hh>
-#include <euclid/ClumpGeom.hh>
+#include <euclid/ClumpProps.hh>
 #include <vector>
 #include <iostream>
 using namespace std;
@@ -184,7 +184,7 @@ void ClumpingDualThresh::setInputData(PjgGridGeom &inputGeom,
 // Returns number of sub-clumps.
 //
 
-int ClumpingDualThresh::compute(const ClumpGeom &clump_geom)
+int ClumpingDualThresh::compute(const ClumpProps &clump_props)
 
 {
 
@@ -194,13 +194,13 @@ int ClumpingDualThresh::compute(const ClumpGeom &clump_geom)
 
   // check size
   
-  if (clump_geom.clumpSize < _minClumpVolume ||
-      clump_geom.clumpSize > _maxClumpVolume) {
-     cerr << "222222222222 clump_geom.clumpSize, "
-          << "_minClumpVolume, _maxClumpVolume: "
-          << clump_geom.clumpSize << ", "
-          << _minClumpVolume << ", "
-          << _maxClumpVolume << endl;
+  if (clump_props.clumpSize() < _minClumpVolume ||
+      clump_props.clumpSize() > _maxClumpVolume) {
+    cerr << "222222222222 clump_props.clumpSize, "
+         << "_minClumpVolume, _maxClumpVolume: "
+         << clump_props.clumpSize() << ", "
+         << _minClumpVolume << ", "
+         << _maxClumpVolume << endl;
       
     return (0);
   }
@@ -209,8 +209,8 @@ int ClumpingDualThresh::compute(const ClumpGeom &clump_geom)
   // computations more efficient. This strategy means we do not
   // have to check for edge conditions
 
-  _nxWork = clump_geom.nX + 2;
-  _nyWork = clump_geom.nY + 2;
+  _nxWork = clump_props.nXLocal() + 2;
+  _nyWork = clump_props.nYLocal() + 2;
   _nPtsWorkGrid = _nxWork * _nyWork;
 
   // initialize the working grids
@@ -219,7 +219,7 @@ int ClumpingDualThresh::compute(const ClumpGeom &clump_geom)
 
   // fill out the composite reflectivity grid
 
-  _fillComposite(clump_geom);
+  _fillComposite(clump_props);
 
   // clump composite grid at the dual threshold
   
@@ -238,7 +238,7 @@ int ClumpingDualThresh::compute(const ClumpGeom &clump_geom)
       memset(_allWorkGrid + offset, i + 1, intv->len);
     } // j
   } // i
-  _updateFileComp(clump_geom);
+  _updateFileComp(clump_props);
 
   // loop through the clumps, determining if they are large
   // enough to be sub-clumps
@@ -251,15 +251,15 @@ int ClumpingDualThresh::compute(const ClumpGeom &clump_geom)
 
   for (int i = 0; i < nSecondary; i++) {
     const Clump_order *clump =  _clumping->getClumps() + i;
-    ClumpGeom gridClump;
+    ClumpProps gridClump;
     gridClump.init(clump,
-                   clump_geom.gridGeom,
-		   clump_geom.startIx, clump_geom.startIy);
-    double thisSize = gridClump.nPoints;
+                   clump_props.gridGeom(),
+		   clump_props.startIxLocal(), clump_props.startIyLocal());
+    double thisSize = gridClump.nPoints2D();
     sumSize += thisSize;
     double fractionThisPart = thisSize / sizeOuter;
     if (fractionThisPart >= _minFractionEachPart &&
-	gridClump.clumpSize >= _minAreaEachPart) {
+	gridClump.clumpSize() >= _minAreaEachPart) {
       nLargeEnough++;
       valid.push_back(TRUE);
     } else {
@@ -283,7 +283,7 @@ int ClumpingDualThresh::compute(const ClumpGeom &clump_geom)
     
     _nSubClumps = 1;
     _allocSubClumps();
-    _subClumps[0] = clump_geom;
+    _subClumps[0] = clump_props;
     return (1);
 
   }
@@ -325,12 +325,12 @@ int ClumpingDualThresh::compute(const ClumpGeom &clump_geom)
 
   // update the file grids for debugging
 
-  _updateFileGrids(clump_geom);
+  _updateFileGrids(clump_props);
 
   // compute each sub clump
 
   for (size_t i = 0; i < _nSubClumps; i++) {
-    _computeSubClump(clump_geom, i+1);
+    _computeSubClump(clump_props, i+1);
   }
   
   cerr << "1111111111111111111 nSubClumps: " << _nSubClumps << endl;
@@ -344,7 +344,7 @@ int ClumpingDualThresh::compute(const ClumpGeom &clump_geom)
 // Fill the composite dbz array from 3D array.
 //
 
-void ClumpingDualThresh::_fillComposite(const ClumpGeom &clump_geom)
+void ClumpingDualThresh::_fillComposite(const ClumpProps &clump_props)
 
 {
 
@@ -353,13 +353,13 @@ void ClumpingDualThresh::_fillComposite(const ClumpGeom &clump_geom)
 
   int nPtsPlane = _nxInput * _nyInput;
 
-  for (size_t intv = 0; intv < clump_geom.nIntervals; intv++) {
-
-    const Interval &intvl = clump_geom.intervals[intv];
+  for (size_t intv = 0; intv < clump_props.nIntervals(); intv++) {
+    
+    const Interval &intvl = clump_props.intvLocal()[intv];
 
     int iplane = intvl.plane;
-    int iy = intvl.row_in_plane + clump_geom.startIy;
-    int ix = intvl.begin + clump_geom.startIx;
+    int iy = intvl.row_in_plane + clump_props.startIyLocal();
+    int ix = intvl.begin + clump_props.startIxLocal();
     
     const fl32 *dbz =
       _inputData + (iplane * nPtsPlane) + (iy * _nxInput) + ix;
@@ -459,7 +459,7 @@ void ClumpingDualThresh::_initFileGrids()
 // Update the composite grid in the output file
 //
 
-void ClumpingDualThresh::_updateFileComp(const ClumpGeom &clump_geom)
+void ClumpingDualThresh::_updateFileComp(const ClumpProps &clump_props)
   
 {
   
@@ -467,7 +467,7 @@ void ClumpingDualThresh::_updateFileComp(const ClumpGeom &clump_geom)
   fl32 *comp = _compWorkGrid + _nxWork + 1;
   
   int offset =
-    clump_geom.startIy * _nxInput + clump_geom.startIx;
+    clump_props.startIyLocal() * _nxInput + clump_props.startIxLocal();
   int missed = _nxInput - (_nxWork - 2);
   
   for (size_t iy = 1; iy < _nyWork - 1;
@@ -495,7 +495,7 @@ void ClumpingDualThresh::_updateFileComp(const ClumpGeom &clump_geom)
 // Update the ident grids in the output file
 //
 
-void ClumpingDualThresh::_updateFileGrids(const ClumpGeom &clump_geom)
+void ClumpingDualThresh::_updateFileGrids(const ClumpProps &clump_props)
   
 {
   
@@ -503,7 +503,7 @@ void ClumpingDualThresh::_updateFileGrids(const ClumpGeom &clump_geom)
   ui08 *grown = _grownWorkGrid + _nxWork + 1;
   
   int offset =
-    clump_geom.startIy * _nxInput + clump_geom.startIx;
+    clump_props.startIyLocal() * _nxInput + clump_props.startIxLocal();
   int missed = _nxInput - (_nxWork - 2);
   
   for (size_t iy = 1; iy < _nyWork - 1;
@@ -675,7 +675,7 @@ void ClumpingDualThresh::_allocSubClumps()
   if (_subClumps) {
     delete[](_subClumps);
   }
-  _subClumps = new ClumpGeom[_nSubClumps];
+  _subClumps = new ClumpProps[_nSubClumps];
 
   if (_nSubClumps > _nSubClumpsAlloc) {
     _subClumping = (ClumpingMgr **)
@@ -691,7 +691,7 @@ void ClumpingDualThresh::_allocSubClumps()
 /////////////////////
 // _computeSubClump()
 
-void ClumpingDualThresh::_computeSubClump(const ClumpGeom &clump_geom, int clump_id)
+void ClumpingDualThresh::_computeSubClump(const ClumpProps &clump_props, int clump_id)
   
 {
 
@@ -699,7 +699,7 @@ void ClumpingDualThresh::_computeSubClump(const ClumpGeom &clump_geom, int clump
   // which have the given id the the grown grid
 
   _initGridMask();
-  _loadGridMask(clump_geom, clump_id);
+  _loadGridMask(clump_props, clump_id);
   
   // clump the masked grid
   
@@ -724,8 +724,8 @@ void ClumpingDualThresh::_computeSubClump(const ClumpGeom &clump_geom, int clump
 
   _subClumps[clump_id-1].init(_subClumping[clump_id-1]->getClumps() + clumpNum,
 			      _inputGeom,
-			      clump_geom.startIx - 1,
-			      clump_geom.startIy - 1);
+			      clump_props.startIxLocal() - 1,
+			      clump_props.startIyLocal() - 1);
 
 }
 
@@ -756,16 +756,16 @@ void ClumpingDualThresh::_initGridMask()
 // do not have the given clump_id in the grown grid.
 //
 
-void ClumpingDualThresh::_loadGridMask(const ClumpGeom &clump_geom, int clump_id)
+void ClumpingDualThresh::_loadGridMask(const ClumpProps &clump_props, int clump_id)
   
 {
 
   // take account of the fact that the working grids
   // have one extra row and col around the outside
   
-  for (size_t intv = 0; intv < clump_geom.nIntervals; intv++) {
+  for (size_t intv = 0; intv < clump_props.nIntervals(); intv++) {
 
-    const Interval &intvl = clump_geom.intervals[intv];
+    const Interval &intvl = clump_props.intvLocal()[intv];
 
     int iy = intvl.row_in_plane + 1;
     int plane_offset = iy * _nxWork + intvl.begin + 1;

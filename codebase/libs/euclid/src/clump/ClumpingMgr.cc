@@ -38,7 +38,7 @@
 
 #include <euclid/ClumpingMgr.hh>
 #include <euclid/ClumpingDualThresh.hh>
-#include <euclid/ClumpGeom.hh>
+#include <euclid/ClumpProps.hh>
 #include <toolsa/umisc.h>
 #include <iostream>
 using namespace std;
@@ -360,7 +360,7 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
                                   const fl32 *inputData,
                                   double primary_threshold,
                                   int min_grid_overlap,
-                                  vector<ClumpGeom> &clumpVec)
+                                  vector<ClumpProps> &clumpVec)
 
 {
 
@@ -387,12 +387,12 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
     
     const Clump_order *clump = getClumps();
     for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
-      ClumpGeom gclump;
-      gclump.init(clump, _gridGeom, 0, 0);
-      int n_sub_clumps = _dualT->compute(gclump);
+      ClumpProps cprops;
+      cprops.init(clump, _gridGeom, 0, 0);
+      int n_sub_clumps = _dualT->compute(cprops);
       cerr << "BBBBBB iclump, n_sub_clumps: " << iclump << ", " << n_sub_clumps << endl;
       if (n_sub_clumps == 1) {
-        clumpVec.push_back(gclump);
+        clumpVec.push_back(cprops);
       } else {
 	for (int i = 0; i < n_sub_clumps; i++) {
 	  clumpVec.push_back(_dualT->subClumps()[i]);
@@ -406,9 +406,9 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
 
     const Clump_order *clump = getClumps();
     for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
-      ClumpGeom gclump;
-      gclump.init(clump, _gridGeom, 0, 0);
-      clumpVec.push_back(gclump);
+      ClumpProps cprops;
+      cprops.init(clump, _gridGeom, 0, 0);
+      clumpVec.push_back(cprops);
     } // iclump
 
   } // if (_dualT != NULL)

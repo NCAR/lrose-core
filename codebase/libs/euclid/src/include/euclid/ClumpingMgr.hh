@@ -44,7 +44,7 @@
 #include <dataport/port_types.h>
 #include <euclid/PjgGridGeom.hh>
 class ClumpingDualThresh;
-class ClumpGeom;
+class ClumpProps;
 using namespace std;
 
 ////////////////////////////////
@@ -133,7 +133,7 @@ public:
                        const fl32 *inputData,
                        double primary_threshold,
                        int min_grid_overlap,
-                       vector<ClumpGeom> &clumps);
+                       vector<ClumpProps> &clumps);
 
   // get debug grids from using dual threshold
 

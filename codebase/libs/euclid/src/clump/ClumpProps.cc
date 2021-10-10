@@ -211,6 +211,43 @@ void ClumpProps::_compute2DGrid()
     }
   }
 
+  _centroidX = sumx / nn;
+  _centroidY = sumy / nn;
+  _centroidZ = sumz / nn;
+
+  // determine the scale in km
+  
+  if (_gridGeom.isLatLon()) {
+    
+    // latlon grid
+
+    // we need to multiply by
+    // a (111.12 squared) to get km2 for area. The delta_z is
+    // set nominally to 1.0, so area and volume will be the same.
+    // The volume and area computations are adjusted later for the
+    // latitude of the storm.
+    
+    _dXKmAtCentroid =
+      _gridGeom.dx() * KM_PER_DEG_AT_EQ * cos(_centroidY * DEG_TO_RAD);
+    _dYKmAtCentroid = _gridGeom.dy() * KM_PER_DEG_AT_EQ;
+
+  } else {
+  
+    // projection-based (km) grid
+    
+    _dXKmAtCentroid = _gridGeom.dx();
+    _dYKmAtCentroid = _gridGeom.dy();
+
+  }
+
+  // compute delta area and vol
+  
+  _dAreaAtCentroid = _dXKmAtCentroid * _dYKmAtCentroid;
+
+  _dVolAtCentroid.clear();
+  for (size_t iz = 0; iz < nZ(); iz++) {
+    _dVolAtCentroid.push_back(_dAreaAtCentroid * _gridGeom.zKm()[iz]);
+  }
 
 }
 
@@ -222,162 +259,53 @@ void ClumpProps::_computeProps()
 
 {
 
-  if (_gridGeom.isLatLon()) {
-    
-    // latlon grid
-
-    // we need to multiply by
-    // a (111.12 squared) to get km2 for area. The delta_z is
-    // set nominally to 1.0, so area and volume will be the same.
-    // The volume and area computations are adjusted later for the
-    // latitude of the storm.
-    
-    _dXKmAtCentroid = _gridGeom.dx();
-    _dYKmAtCentroid = _gridGeom.dy() * KM_PER_DEG_AT_EQ;
-    double dXAtEquator = _gridGeom.dx() * KM_PER_DEG_AT_EQ;
-
-    double dAreaAtEquator =
-      (_gridGeom.dx() * _gridGeom.dy()) *
-      (KM_PER_DEG_AT_EQ * KM_PER_DEG_AT_EQ);
-
-    vector<double> dVolAtEquator;
-    for (size_t iz = 0; iz < nZ(); iz++) {
-      dVolAtEquator.push_back(dAreaAtEquator * zKm()[iz]);
-    }
-    
-    // compute the volumetric y centroid
-
-    double sumy = 0.0, n = 0.0;
-    for (size_t intv = 0; intv < _nIntervals; intv++) {
-      const Interval &intvl = _intvLocal[intv];
-      sumy += (double) intvl.row_in_plane * (double) intvl.len;
-      n += (double) intvl.len;
-    }
-    double vol_centroid_y = (sumy / n) * _gridGeom.dy() + _gridGeom.miny();
-    double latitude_factor = cos(vol_centroid_y * DEG_TO_RAD);
-
-    _dVolAtCentroid.clear();
-    for (size_t iz = 0; iz < nZ(); iz++) {
-      _dVolAtCentroid.push_back(dVolAtEquator[iz] * latitude_factor);
-    }
-    
-    _dAreaAtCentroid = dAreaAtEquator * latitude_factor;
-    // _dAreaEllipse = _gridGeom.dx() * _gridGeom.dy();
-    
-    _volumeKm3 = 0.0;
-    for (int intv = 0; intv < _clump->size; intv++) {
-      const Interval *intvl = _clump->ptr[intv];
-      _volumeKm3 += intvl->len * _dVolAtCentroid[intvl->plane];
-    }
-    
-    _projAreaKm2 = 0.0;
-    _nPoints2D = 0;
-    for (int iy = 0; iy < _nYLocal; iy++) {
-      for (int ix = 0; ix < _nXLocal; ix++) {
-        if (_grid2DVals[iy][ix]) {
-          _nPoints2D++;
-          _projAreaKm2 += _dAreaAtCentroid;
-        }
-      } // ix
-    } // iy
-
-    if (_gridGeom.nz() <= 1) {
-      _clumpSize = _nPoints2D * _dAreaAtCentroid;
-    } else {
-      _clumpSize = _volumeKm3;
-      for (int intv = 0; intv < _clump->size; intv++) {
-        const Interval *intvl = _clump->ptr[intv];
-        _intvLocal[intv] = *intvl;
-        _intvLocal[intv].row_in_plane -= _minIyGlobal;
-        _intvLocal[intv].begin -= _minIxGlobal;
-        _intvLocal[intv].end -= _minIxGlobal;
-      }
-      _clumpSize = _nPoints3D * _dVolAtCentroid[0];
-    }
-
-    _kmPerGridUnit =  (dXAtEquator * latitude_factor + _dYKmAtCentroid) / 2.0;
-
-  } else {
+  // projected area
   
-    // projection-based (km) grid
-    
-    _dXKmAtCentroid = _gridGeom.dx();
-    _dYKmAtCentroid = _gridGeom.dy();
-    // _dAreaFlat = _dXKmAtCentroid * _dYKmAtCentroid;
-    // _dVolFlat = _dAreaFlat * _gridGeom.meanDz();
-    // _dAreaEllipse = _dAreaFlat;
-    
-    // _dAreaAtCentroid = _dAreaFlat;
-    // _dVolAtCentroid = _dVolFlat;
-    
-    if (_gridGeom.nz() <= 1) {
-      _clumpSize = _projAreaKm2;
-    } else {
-      _clumpSize = _volumeKm3;
-    }
-    
-    _kmPerGridUnit = (_dXKmAtCentroid + _dYKmAtCentroid) / 2.0;
+  _projAreaKm2 = 0.0;
+  _nPoints2D = 0;
+  for (int iy = 0; iy < _nYLocal; iy++) {
+    for (int ix = 0; ix < _nXLocal; ix++) {
+      if (_grid2DVals[iy][ix]) {
+        _nPoints2D++;
+        _projAreaKm2 += _dAreaAtCentroid;
+      }
+    } // ix
+  } // iy
 
-  }
-    
-  double minZKm = 9999.0;
-  double maxZKm = -9999.0;
+  // volume
+  
   _volumeKm3 = 0.0;
+  for (int intv = 0; intv < _clump->size; intv++) {
+    const Interval *intvl = _clump->ptr[intv];
+    _volumeKm3 += intvl->len * _dVolAtCentroid[intvl->plane];
+  }
+
+  // clump size - generic
+  // area for 2D, volume for 3D
+  
+  if (_gridGeom.nz() <= 1) {
+    _clumpSize = _projAreaKm2;
+  } else {
+    _clumpSize = _volumeKm3;
+  }
+
+  // vertical extent
+  
+  _minZKm = 9999.0;
+  _maxZKm = -9999.0;
 
   for (int intv = 0; intv < _clump->size; intv++) {
-
+    
     const Interval *intvl = _clump->ptr[intv];
-
+    
     int iz = intvl->plane;
-    // int iy = intvl->row_in_plane;
+    double zKm = _gridGeom.zKm(iz);
+    _minZKm = min(zKm, _minZKm);
+    _maxZKm = max(zKm, _maxZKm);
 
-    double zKm = _gridGeom.zKm()[iz];
-    minZKm = min(zKm, minZKm);
-    maxZKm = max(zKm, maxZKm);
+  }
 
-#ifdef JUNK
-
-    double dxKm = _finder->_dxKm;
-    double dyKm = _finder->_dyKm;
-    double dzKm = 0.0;
-    if (iz == 0) {
-      dzKm = _finder->_zKm[iz+1] - _finder->_zKm[iz];
-    } else if (iz == nz - 1) {
-      dzKm = _finder->_zKm[iz] - _finder->_zKm[iz-1];
-    } else {
-      dzKm = (_finder->_zKm[iz+1] - _finder->_zKm[iz-1]) / 2.0;
-    }
-    
-    if (_finder->_projIsLatLon) {
-      double latDeg = (_finder->_miny + _finder->_ny * _finder->_dy / 2.0);
-      double cosLat = cos(latDeg * DEG_TO_RAD);
-      dxKm = _finder->_dx * KM_PER_DEG_AT_EQ * cosLat;
-    }
-
-    double dVol = dxKm * dyKm * dzKm;
-    int offset2D = iy * nx + intvl->begin;
-
-    for (int ix = intvl->begin; ix <= intvl->end; ix++, offset2D++) {
-
-      fl32 shallowHtKm = shallowHtGrid[offset2D];
-      fl32 deepHtKm = deepHtGrid[offset2D];
-      _volumeKm3 += dVol;
-
-      if (zKm <= shallowHtKm) {
-        _nPtsShallow++;
-      } else if (zKm >= deepHtKm) {
-        _nPtsDeep++;
-      } else {
-        _nPtsMid++;
-      }
-
-    } // ix
-
-#endif
-    
-  } // intv
-
-  _vertExtentKm = maxZKm - minZKm;
+  _vertExtentKm = _maxZKm - _minZKm;
 
 }
 
