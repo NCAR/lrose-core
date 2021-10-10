@@ -44,7 +44,7 @@
 #include <toolsa/TaThread.hh>
 #include <dataport/port_types.h>
 #include <euclid/ClumpingMgr.hh>
-#include <euclid/ClumpGeom.hh>
+#include <euclid/ClumpProps.hh>
 using namespace std;
 
 ////////////////////////
@@ -505,7 +505,7 @@ private:
     // constructor
     
     StormClump(ConvStratFinder *finder,
-               const ClumpGeom &cgeom);
+               const ClumpProps &cprops);
     
     // destructor
     
@@ -534,7 +534,7 @@ private:
   private:
 
     ConvStratFinder *_finder;
-    ClumpGeom _cgeom;
+    ClumpProps _cprops;
     int _id;
     double _volumeKm3;
     double _vertExtentKm;

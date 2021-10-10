@@ -200,7 +200,7 @@ void ClumpProps::_compute2DGrid()
     const Interval *intvl = _clump->ptr[intv];
     int iz = intvl->plane;
     int iy = intvl->row_in_plane;
-    double zz = _gridGeom.zKm()[iz];
+    double zz = _gridGeom.zKm(iz);
     double yy = _gridGeom.miny() + iy * _gridGeom.dy();
     for (int ix = intvl->begin; ix <= intvl->end; ix++) {
       double xx = _gridGeom.minx() + iy * _gridGeom.dx();
@@ -246,7 +246,7 @@ void ClumpProps::_compute2DGrid()
 
   _dVolAtCentroid.clear();
   for (size_t iz = 0; iz < nZ(); iz++) {
-    _dVolAtCentroid.push_back(_dAreaAtCentroid * _gridGeom.zKm()[iz]);
+    _dVolAtCentroid.push_back(_dAreaAtCentroid * _gridGeom.zKm(iz));
   }
 
 }

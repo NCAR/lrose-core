@@ -71,6 +71,7 @@ public:
   inline const Clump_order *clumpOrder() const { return _clump; }
   inline Interval **intervals() { return _clump->ptr; }
   inline const vector<Interval> &intvLocal() const { return _intvLocal; }
+  inline const Interval &intvLocal(int n) const { return _intvLocal[n]; }
   inline size_t nIntervals() const { return _nIntervals; }
   inline size_t nPoints3D() const { return _nPoints3D; }
   inline size_t nPoints2D() const { return _nPoints2D; }

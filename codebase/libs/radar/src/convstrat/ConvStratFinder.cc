@@ -732,7 +732,7 @@ void ConvStratFinder::_performClumping()
     gridGeom.setProjType(PjgTypes::PROJ_FLAT);
   }
 
-  vector<ClumpGeom> clumpVec;
+  vector<ClumpProps> clumpVec;
   _clumping.loadClumpVector(gridGeom, _convectivity3D.dat(), 
                             _minConvectivityForConvective,
                             _minOverlapForClumping,
@@ -1293,9 +1293,9 @@ void ConvStratFinder::ComputeTexture::run()
 // Constructor
 
 ConvStratFinder::StormClump::StormClump(ConvStratFinder *finder,
-                                        const ClumpGeom &cgeom) :
+                                        const ClumpProps &cprops) :
         _finder(finder),
-        _cgeom(cgeom)
+        _cprops(cprops)
 {
   _id = 0;
   _volumeKm3 = 0.0;
@@ -1320,7 +1320,7 @@ void ConvStratFinder::StormClump::computeGeom()
 
   // init
   
-  _nPtsTotal = _cgeom.nPoints;
+  _nPtsTotal = _cprops.nPoints3D();
   _volumeKm3 = 0.0;
   _vertExtentKm = 0.0;
   _nPtsShallow = 0;
@@ -1339,9 +1339,9 @@ void ConvStratFinder::StormClump::computeGeom()
   double minZKm = 9999.0;
   double maxZKm = -9999.0;
 
-  for (size_t irun = 0; irun < _cgeom.intervals.size(); irun++) {
+  for (size_t irun = 0; irun < _cprops.intvLocal().size(); irun++) {
     
-    const Interval &intvl = _cgeom.intervals[irun];
+    const Interval &intvl = _cprops.intvLocal(irun);
     if (irun == 0) {
       _id = intvl.id;
     }
@@ -1434,9 +1434,9 @@ void ConvStratFinder::StormClump::setPartition()
   int nPtsPlane = _finder->_nx * _finder->_ny;
   int nx = _finder->_nx;
   
-  for (size_t irun = 0; irun < _cgeom.intervals.size(); irun++) {
+  for (size_t irun = 0; irun < _cprops.intvLocal().size(); irun++) {
     
-    const Interval &intvl = _cgeom.intervals[irun];
+    const Interval &intvl = _cprops.intvLocal(irun);
     
     int iy = intvl.row_in_plane;
     int iz = intvl.plane;
@@ -1473,9 +1473,9 @@ bool ConvStratFinder::StormClump::stratiformBelow()
   double nMiss = 0.0;
   double nStrat = 0.0;
   
-  for (size_t irun = 0; irun < _cgeom.intervals.size(); irun++) {
+  for (size_t irun = 0; irun < _cprops.intvLocal().size(); irun++) {
     
-    const Interval &intvl = _cgeom.intervals[irun];
+    const Interval &intvl = _cprops.intvLocal(irun);
     
     int iy = intvl.row_in_plane;
     int iz = intvl.plane;
