@@ -377,8 +377,6 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
   
   // load up clump vector
   
-  cerr << "AAAAAAAAAAAAAAAAAAAA _nClumps: " << _nClumps << endl;
-
   if (_dualT != NULL) {
 
     // use dual thresholds
@@ -390,7 +388,6 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
       ClumpProps cprops;
       cprops.init(clump, _gridGeom, 0, 0);
       int n_sub_clumps = _dualT->compute(cprops);
-      cerr << "BBBBBB iclump, n_sub_clumps: " << iclump << ", " << n_sub_clumps << endl;
       if (n_sub_clumps == 1) {
         clumpVec.push_back(cprops);
       } else {
@@ -412,8 +409,6 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
     } // iclump
 
   } // if (_dualT != NULL)
-
-  cerr << "AAAAAAAAAAAAAAAAAAAA clumpVec.size(): " << clumpVec.size() << endl;
 
 }
 

@@ -196,12 +196,6 @@ int ClumpingDualThresh::compute(const ClumpProps &clump_props)
   
   if (clump_props.clumpSize() < _minClumpVolume ||
       clump_props.clumpSize() > _maxClumpVolume) {
-    cerr << "222222222222 clump_props.clumpSize, "
-         << "_minClumpVolume, _maxClumpVolume: "
-         << clump_props.clumpSize() << ", "
-         << _minClumpVolume << ", "
-         << _maxClumpVolume << endl;
-      
     return (0);
   }
     
@@ -268,13 +262,6 @@ int ClumpingDualThresh::compute(const ClumpProps &clump_props)
   }
   double fractionAllParts = sumSize / sizeOuter;
   
-  cerr << "333333 sumSize, sizeOuter, fractionAllParts, _minFractionAllParts, nLargeEnough: "
-       << sumSize << ", "
-       << sizeOuter << ", "
-       << fractionAllParts << ", "
-       << _minFractionAllParts << ", "
-       << nLargeEnough << endl;
-    
   if (fractionAllParts < _minFractionAllParts ||
       nLargeEnough < 2) {
 
@@ -333,7 +320,6 @@ int ClumpingDualThresh::compute(const ClumpProps &clump_props)
     _computeSubClump(clump_props, i+1);
   }
   
-  cerr << "1111111111111111111 nSubClumps: " << _nSubClumps << endl;
   return (_nSubClumps);
 
 }
