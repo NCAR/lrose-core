@@ -185,7 +185,7 @@ void ClumpProps::_compute2DGrid()
 
   _nPoints2D = 0;
   for (int iy = 0; iy < _nYLocal; iy++) {
-    for (int ix = 0; ix < _nXLocal; iy++) {
+    for (int ix = 0; ix < _nXLocal; ix++) {
       if (_grid2DVals[iy][ix] == 1) {
         _nPoints2D++;
       }
