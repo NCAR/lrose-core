@@ -70,12 +70,13 @@ public:
   inline int id() const { return _id; }
   inline const Clump_order *clumpOrder() const { return _clump; }
   inline Interval **intervals() { return _clump->ptr; }
-  inline const vector<Interval> &intvLocal() const { return _intvLocal; }
-  inline const Interval &intvLocal(int n) const { return _intvLocal[n]; }
   inline size_t nIntervals() const { return _nIntervals; }
   inline size_t nPoints3D() const { return _nPoints3D; }
   inline size_t nPoints2D() const { return _nPoints2D; }
   
+  inline int startIxGlobal() const { return _startIxGlobal; }
+  inline int startIyGlobal() const { return _startIyGlobal; }
+
   // clump shrink-wrapped variables
 
   inline int startIxLocal() const { return _startIxLocal; }
@@ -91,6 +92,9 @@ public:
 
   inline double dXKmAtCentroid() const { return _dXKmAtCentroid; }
   inline double dYKmAtCentroid() const { return _dYKmAtCentroid; }
+
+  inline const vector<Interval> &intvLocal() const { return _intvLocal; }
+  inline const Interval &intvLocal(int n) const { return _intvLocal[n]; }
 
   // grid Z properties
   
@@ -114,6 +118,7 @@ public:
 
   inline double dAreaAtCentroid() const { return _dAreaAtCentroid; }
   inline const vector<double> &dVolAtCentroid() const { return _dVolAtCentroid; }
+  inline double dVolAtCentroid(int iz) const { return _dVolAtCentroid[iz]; }
 
   inline double centroidX() const { return _centroidX; }
   inline double centroidY() const { return _centroidY; }

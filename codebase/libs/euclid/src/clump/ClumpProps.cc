@@ -71,6 +71,7 @@ void ClumpProps::init(const Clump_order *clump,
 {
 
   _clump = clump;
+  _nIntervals = _clump->size;
 
   if(clump->size > 0) {
     Interval *intvl = clump->ptr[0];
@@ -129,9 +130,7 @@ void ClumpProps::_shrinkWrap()
 
   // load up intervals, adjusting for the limits
 
-  _nIntervals = _clump->size;
-  _nPoints3D = _clump->pts;
-  _intvLocal.reserve(_nIntervals);
+  _intvLocal.reserve(_clump->size);
   
   for (int intv = 0; intv < _clump->size; intv++) {
     const Interval *intvl = _clump->ptr[intv];
@@ -146,11 +145,11 @@ void ClumpProps::_shrinkWrap()
   _nXLocal = _maxIxGlobal - _minIxGlobal + 1;
   _nYLocal = _maxIyGlobal - _minIyGlobal + 1;
 
-  _startIxLocal = _startIxGlobal - _minIxGlobal;
-  _startIyLocal = _startIyGlobal - _minIyGlobal;
+  _startIxLocal = _startIxGlobal + _minIxGlobal;
+  _startIyLocal = _startIyGlobal + _minIyGlobal;
   
-  _offsetX = _startIxGlobal * _gridGeom.dx();
-  _offsetY = _startIyGlobal * _gridGeom.dy();
+  _offsetX = _startIxLocal * _gridGeom.dx();
+  _offsetY = _startIyLocal * _gridGeom.dy();
   
   _startXLocal = _gridGeom.minx() + _offsetX;
   _startYLocal = _gridGeom.miny() + _offsetY;
@@ -174,7 +173,7 @@ void ClumpProps::_compute2DGrid()
   memset(_grid2DArray.dat1D(), 0, _nYLocal * _nXLocal);
   _grid2DVals = _grid2DArray.dat2D();
 
-  // populate projected area grid
+  // populate projected area grid - local
 
   for (size_t intv = 0; intv < _intvLocal.size(); intv++) {
     const Interval &intvl = _intvLocal[intv];
@@ -193,7 +192,7 @@ void ClumpProps::_compute2DGrid()
     } 
   } 
 
-  // compute centroid
+  // compute centroid relative to global grid
 
   double sumx = 0.0, sumy = 0.0, sumz = 0.0, nn = 0.0;
   for (int intv = 0; intv < _clump->size; intv++) {
@@ -216,6 +215,7 @@ void ClumpProps::_compute2DGrid()
   _centroidZ = sumz / nn;
 
   // determine the scale in km
+  // based on whether this is a (lat,lon) or (km,km) grid
   
   if (_gridGeom.isLatLon()) {
     
@@ -274,6 +274,7 @@ void ClumpProps::_computeProps()
 
   // volume
   
+  _nPoints3D = _clump->pts;
   _volumeKm3 = 0.0;
   for (int intv = 0; intv < _clump->size; intv++) {
     const Interval *intvl = _clump->ptr[intv];

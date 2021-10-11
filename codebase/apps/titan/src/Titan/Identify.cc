@@ -38,7 +38,7 @@
 #include "Sounding.hh"
 #include "OutputMdv.hh"
 
-#include <euclid/ClumpGeom.hh>
+#include <euclid/ClumpProps.hh>
 
 #include <iostream>
 #include <toolsa/umisc.h>
@@ -182,7 +182,7 @@ int Identify::run(int scan_num)
   // perform clumping
   
   fl32 *startDbz = _inputMdv.dbzVol + _inputMdv.minValidLayer * nBytesPlane;
-  vector<ClumpGeom> clumpVec;
+  vector<ClumpProps> clumpVec;
   _clumping.loadClumpVector(_gridGeom, startDbz, 
                             _params.low_dbz_threshold,
                             _params.min_grid_overlap,
@@ -247,7 +247,7 @@ int Identify::run(int scan_num)
 //
 
 int Identify::_processClumps(int scan_num,
-                             vector<ClumpGeom> &clumpVec)
+                             vector<ClumpProps> &clumpVec)
      
 {
 
@@ -344,14 +344,14 @@ int Identify::_processClumps(int scan_num,
 // _processThisClump()
 //
 
-int Identify::_processThisClump(const ClumpGeom &cgeom)
+int Identify::_processThisClump(const ClumpProps &cprops)
 
 {
 
   // check size
 
-  if (cgeom.clumpSize < _params.min_storm_size ||
-      cgeom.clumpSize > _params.max_storm_size) {
+  if (cprops.clumpSize() < _params.min_storm_size ||
+      cprops.clumpSize() > _params.max_storm_size) {
     return(0);
   }
 
@@ -359,15 +359,15 @@ int Identify::_processThisClump(const ClumpGeom &cgeom)
     fprintf(stderr,
 	    "Clump: size, startIx, startIy, nx, ny, offsetx, offsety: "
 	    "%g, %d, %d, %d, %d, %g, %g\n",
-	    cgeom.clumpSize,
-	    cgeom.startIx, cgeom.startIy,
-	    cgeom.nX, cgeom.nY,
-	    cgeom.offsetX, cgeom.offsetY);
+	    cprops.clumpSize(),
+	    cprops.startIxLocal(), cprops.startIyLocal(),
+	    cprops.nXLocal(), cprops.nYLocal(),
+	    cprops.offsetX(), cprops.offsetY());
   }
   
   _sfile.AllocGprops(_nStorms + 1);
 
-  if (_props->compute(cgeom, _nStorms) == 0) {
+  if (_props->compute(cprops, _nStorms) == 0) {
     
     // success - write the storm props to storm file
 

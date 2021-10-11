@@ -43,7 +43,7 @@ using namespace std;
 
 class Verify;
 class Props;
-class ClumpGeom;
+class ClumpProps;
 
 ////////////////////////////////
 // Identify
@@ -81,8 +81,8 @@ private:
   Verify *_verify;
   
   int _processClumps(int scan_num,
-                     vector<ClumpGeom> &clumpVec);
-  int _processThisClump(const ClumpGeom &cgeom);
+                     vector<ClumpProps> &clumpVec);
+  int _processThisClump(const ClumpProps &cprops);
   int _writeDualThreshMdv();
 
 };

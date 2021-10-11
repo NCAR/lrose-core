@@ -40,7 +40,7 @@
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
-#include <euclid/ClumpGeom.hh>
+#include <euclid/ClumpProps.hh>
 #include <rapmath/math_macros.h>
 #include <rapmath/umath.h>
 #include <physics/vil.h>
@@ -227,7 +227,7 @@ void Props::init()
 //         -1 if failure
 //
 
-int Props::compute(const ClumpGeom &cgeom, int storm_num)
+int Props::compute(const ClumpProps &cprops, int storm_num)
 
       
 {
@@ -261,34 +261,34 @@ int Props::compute(const ClumpGeom &cgeom, int storm_num)
   // from which to compute the storm properties.
   // Also, count the number of data runs for this storm.
   
-  if (_computeFirstPass(cgeom)) {
+  if (_computeFirstPass(cprops)) {
     return (-1);
   }
 
   // get ht of 45 dBZ
   
-  _ht45AboveFreezing = _topOfDbz(45.0, cgeom) - _freezingLevel;
+  _ht45AboveFreezing = _topOfDbz(45.0, cprops) - _freezingLevel;
 
   // now that we have the necessary first pass info, compute hail metrics.
 
-  _computeHailMetrics(cgeom);
+  _computeHailMetrics(cprops);
 
   // perform the areal computations for precip and projected
   // areas, including dbz histogram for area
 
-  _area.compute(cgeom, &_gprops, _dbzHist);
+  _area.compute(cprops, &_gprops, _dbzHist);
 
   // compute other props during second pass through intervals
   
-  _computeSecondPass(cgeom);
+  _computeSecondPass(cprops);
 
   // tilt angle computations
 
-  _tiltCompute(cgeom);
+  _tiltCompute(cprops);
 
   // compute dbz gradient with height
 
-  _dbzGradientCompute(cgeom);
+  _dbzGradientCompute(cprops);
 
   // decide whether this is a second trip echo
    
@@ -299,7 +299,7 @@ int Props::compute(const ClumpGeom &cgeom, int storm_num)
   // write valid_storms verification file
   
   if (_verify) {
-    _verify->updateValidStormsGrid(cgeom);
+    _verify->updateValidStormsGrid(cprops);
   }
 
   // load up global storm properties
@@ -327,12 +327,12 @@ int Props::compute(const ClumpGeom &cgeom, int storm_num)
   // store runs
   
   if (_params.store_storm_runs) {
-    gprops->n_runs = _storeRuns(cgeom);
+    gprops->n_runs = _storeRuns(cprops);
   } else {
     gprops->n_runs = 0;
   }
 
-  gprops->n_proj_runs = _area.storeProjRuns(cgeom);
+  gprops->n_proj_runs = _area.storeProjRuns(cprops);
 
   return (0);
 
@@ -387,7 +387,7 @@ void Props::_alloc(int nz, int nhist)
 // computing arctan when the points are coincident
 #define FUDGE_X (0.1)
 
-int Props::_computeFirstPass(const ClumpGeom &cgeom)
+int Props::_computeFirstPass(const ClumpProps &cprops)
 
 {
 
@@ -401,17 +401,17 @@ int Props::_computeFirstPass(const ClumpGeom &cgeom)
   double lowDbzThreshold = _params.low_dbz_threshold;
   double histInterval = _params.dbz_hist_interval;
 
-  for (size_t intv = 0; intv < cgeom.nIntervals; intv++) {
+  for (size_t intv = 0; intv < cprops.nIntervals(); intv++) {
     
-    const Interval &intvl = cgeom.intervals[intv];
+    const Interval &intvl = cprops.intvLocal(intv);
 
     int iz = intvl.plane;
     int jz = iz + _inputMdv.minValidLayer;
     int iy = intvl.row_in_plane;
     _layer[iz].n += intvl.len;
 	
-    int index = ((iy + cgeom.startIy) * grid.nx +
-		 intvl.begin + cgeom.startIx);
+    int index = ((iy + cprops.startIyLocal()) * grid.nx +
+		 intvl.begin + cprops.startIxLocal());
     
     fl32 *dbz_ptr = _inputMdv.dbzVol + jz * nptsPlane + index;
     fl32 *vel_ptr = NULL;
@@ -481,7 +481,7 @@ int Props::_computeFirstPass(const ClumpGeom &cgeom)
       
       // precip mass
       
-      _layer[iz].sum_mass += mass_factor;
+      _layer[iz].sum_mass_factor += mass_factor;
       
       // velocity
       
@@ -517,7 +517,7 @@ int Props::_computeFirstPass(const ClumpGeom &cgeom)
 	dbz_max_layer = iz;
       }
 	
-      _sum.mass += _layer[iz].sum_mass;
+      _sum.mass_factor += _layer[iz].sum_mass_factor;
 	
       if (iz > _topLayer)
 	_topLayer = iz;
@@ -541,25 +541,25 @@ int Props::_computeFirstPass(const ClumpGeom &cgeom)
   double dn = (double) _sum.n;
 
   _gprops.vol_centroid_x =
-    cgeom.startX + ((double) _sum.x / dn) * grid.dx; // km
+    cprops.startXLocal() + ((double) _sum.x / dn) * grid.dx; // km
   _gprops.vol_centroid_y =
-    cgeom.startY + ((double) _sum.y / dn) * grid.dy; // km
+    cprops.startYLocal() + ((double) _sum.y / dn) * grid.dy; // km
   _gprops.vol_centroid_z =
     _minValidZ + ((double) _sum.z / dn) * grid.dz; // km
   
   _gprops.refl_centroid_x =
-    cgeom.startX + (_sum.refl_x / _sum.refl) * grid.dx; // km
+    cprops.startXLocal() + (_sum.refl_x / _sum.refl) * grid.dx; // km
     
   _gprops.refl_centroid_y =
-    cgeom.startY + (_sum.refl_y / _sum.refl) * grid.dy; // km
+    cprops.startYLocal() + (_sum.refl_y / _sum.refl) * grid.dy; // km
   
   _gprops.refl_centroid_z =
     _minValidZ + (_sum.refl_z / _sum.refl) * grid.dz; // km
   
-  _gprops.volume = cgeom.clumpSize; // km3 or km2
+  _gprops.volume = cprops.clumpSize(); // km3 or km2
   
   _gprops.area_mean =
-    (dn / (double) _nLayers) * cgeom.dAreaAtCentroid; // km2
+    (dn / (double) _nLayers) * cprops.dAreaAtCentroid(); // km2
   
   _gprops.top = _minValidZ +
     ((double) _topLayer + 0.5) * grid.dz; // km
@@ -576,35 +576,35 @@ int Props::_computeFirstPass(const ClumpGeom &cgeom)
   
   _gprops.rad_vel_sd = usdev(_sum.vel, _sum.vel2, dn);
 
-  _gprops.mass = (_sum.mass * cgeom.dVolAtCentroid *
-                  pow(_ZMInverseCoeff, _ZMInverseExpon)); // ktons
-    
+  _gprops.mass = 0.0;
+  
   // layer properties
 
   for (int iz = 0; iz < _nzValid; iz++) {
     
     _layer[iz].area =
-      (double) _layer[iz].n * cgeom.dAreaAtCentroid; // km2
+      (double) _layer[iz].n * cprops.dAreaAtCentroid(); // km2
     
     if (_layer[iz].n > 0) {
       
       double dnperlayer = (double) _layer[iz].n;
 	
-      _layer[iz].vol_centroid_x = cgeom.startX +
+      _layer[iz].vol_centroid_x = cprops.startXLocal() +
 	((double) _layer[iz].sum_x / dnperlayer) * grid.dx; // km
-      _layer[iz].vol_centroid_y = cgeom.startY +
+      _layer[iz].vol_centroid_y = cprops.startYLocal() +
 	((double) _layer[iz].sum_y / dnperlayer) * grid.dy; // km
 	
-      _layer[iz].refl_centroid_x = cgeom.startX +
+      _layer[iz].refl_centroid_x = cprops.startXLocal() +
 	(_layer[iz].sum_refl_x / _layer[iz].sum_refl) * grid.dx; // km
-      _layer[iz].refl_centroid_y = cgeom.startY +
+      _layer[iz].refl_centroid_y = cprops.startYLocal() +
 	(_layer[iz].sum_refl_y / _layer[iz].sum_refl) * grid.dy; // km
 	
       _layer[iz].dbz_mean = log10(_layer[iz].sum_refl / dnperlayer) * 10.0;
       
       _layer[iz].mass =
-	(_layer[iz].sum_mass * cgeom.dVolAtCentroid
+	(_layer[iz].sum_mass_factor * cprops.dVolAtCentroid(iz)
 	 * pow(_ZMInverseCoeff, _ZMInverseExpon)); // ktons
+      _gprops.mass += _layer[iz].mass;
       
       if (_params.vel_available) {
 	_layer[iz].vel_mean = _layer[iz].sum_vel / dnperlayer;
@@ -678,7 +678,7 @@ int Props::_computeFirstPass(const ClumpGeom &cgeom)
 // circular structure
 #define VORTICITY_MODEL_FACTOR 2.0
 
-void Props::_computeSecondPass(const ClumpGeom &cgeom)
+void Props::_computeSecondPass(const ClumpProps &cprops)
 
 {
 
@@ -687,22 +687,22 @@ void Props::_computeSecondPass(const ClumpGeom &cgeom)
 
   // initialize
 
-  for (size_t intv = 0; intv < cgeom.nIntervals; intv++) {
+  for (size_t intv = 0; intv < cprops.nIntervals(); intv++) {
 
-    const Interval intvl = cgeom.intervals[intv];
+    const Interval intvl = cprops.intvLocal(intv);
 
     int iz = intvl.plane;
     int jz = iz + _inputMdv.minValidLayer;
     int iy = intvl.row_in_plane;
     
-    double grid_x = (double) intvl.begin * grid.dx + cgeom.startX;
-    double grid_y = (double) iy * grid.dy + cgeom.startY;
+    double grid_x = (double) intvl.begin * grid.dx + cprops.startXLocal();
+    double grid_y = (double) iy * grid.dy + cprops.startYLocal();
     double grid_z = (double) jz * grid.dz + grid.minz;
     double rel_y = grid_y - grid.sensor_y;
     double rel_z = grid_z - grid.sensor_z;
 
-    int index = ((iy + cgeom.startIy) * grid.nx +
-		 intvl.begin + cgeom.startIx);
+    int index = ((iy + cprops.startIyLocal()) * grid.nx +
+		 intvl.begin + cprops.startIxLocal());
 
     fl32 *vel_ptr = NULL;
     if (_params.vel_available) {
@@ -863,23 +863,23 @@ void Props::_computeSecondPass(const ClumpGeom &cgeom)
 // Returns the number of runs in the clump.
 //
 
-int Props::_storeRuns(const ClumpGeom &cgeom)
+int Props::_storeRuns(const ClumpProps &cprops)
 
 {
   
   // make sure there is space for the runs
 
-  _sfile.AllocLayers(cgeom.gridGeom.nz());
+  _sfile.AllocLayers(cprops.gridGeom().nz());
   _sfile.AllocHist(_nDbzHistIntervals);
-  _sfile.AllocRuns(cgeom.nIntervals);
+  _sfile.AllocRuns(cprops.nIntervals());
   
   storm_file_run_t *run = _sfile._runs;
-  int start_ix = cgeom.startIx;
-  int start_iy = cgeom.startIy;
+  int start_ix = cprops.startIxLocal();
+  int start_iy = cprops.startIyLocal();
   
-  for (size_t intv = 0; intv < cgeom.nIntervals; intv++, run++) {
+  for (size_t intv = 0; intv < cprops.nIntervals(); intv++, run++) {
 
-    const Interval &intvl = cgeom.intervals[intv];
+    const Interval &intvl = cprops.intvLocal(intv);
   
     run->ix = intvl.begin + start_ix;
     run->iy = intvl.row_in_plane + start_iy;
@@ -888,7 +888,7 @@ int Props::_storeRuns(const ClumpGeom &cgeom)
 	
   } // intv
 
-  return (cgeom.nIntervals);
+  return (cprops.nIntervals());
 
 }
 
@@ -901,7 +901,7 @@ int Props::_storeRuns(const ClumpGeom &cgeom)
 //       tilt_area is in sq grid_units.
 //
 
-void Props::_tiltCompute(const ClumpGeom &cgeom)
+void Props::_tiltCompute(const ClumpProps &cprops)
      
 {
 
@@ -920,7 +920,7 @@ void Props::_tiltCompute(const ClumpGeom &cgeom)
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _tiltData[iz][0] = _layer[iz].vol_centroid_x;
     _tiltData[iz][1] = _layer[iz].vol_centroid_y;
-    _tiltData[iz][2] = cgeom.gridGeom.zKm()[iz] * 10.0;
+    _tiltData[iz][2] = cprops.gridGeom().zKm()[iz] * 10.0;
   }
       
   // obtain the principal component transformation for this data - the
@@ -967,7 +967,7 @@ void Props::_tiltCompute(const ClumpGeom &cgeom)
 // Compute dbz_gradient from  principal component analysis
 //
 
-void Props::_dbzGradientCompute(const ClumpGeom &cgeom)
+void Props::_dbzGradientCompute(const ClumpProps &cprops)
      
 {
   
@@ -983,7 +983,7 @@ void Props::_dbzGradientCompute(const ClumpGeom &cgeom)
       
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _dbzGradientData[iz][0] = _layer[iz].dbz_max;
-    _dbzGradientData[iz][1] = cgeom.gridGeom.zKm()[iz] * 1000.0;
+    _dbzGradientData[iz][1] = cprops.zKm(iz) * 1000.0;
   }
       
   // obtain the principal component transformation for this data - the
@@ -1007,7 +1007,7 @@ void Props::_dbzGradientCompute(const ClumpGeom &cgeom)
       
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _dbzGradientData[iz][0] = _layer[iz].dbz_mean;
-    _dbzGradientData[iz][1] = cgeom.gridGeom.zKm()[iz] * 1000.0;
+    _dbzGradientData[iz][1] = cprops.zKm(iz) * 1000.0;
   }
       
   if (upct( 2, _nLayers,
@@ -1199,7 +1199,7 @@ void Props::_loadDbzHist(dbz_hist_entry_t *dbz_hist,
 //////////////////////////////////////////////////////////////
 // get top of dbz contour in clump
 
-double Props::_topOfDbz(double dbz, const ClumpGeom &cgeom)
+double Props::_topOfDbz(double dbz, const ClumpProps &cprops)
 {
 
   // Returns the top, i.e. max height in km, of a dbz contour
@@ -1239,7 +1239,7 @@ double Props::_topOfDbz(double dbz, const ClumpGeom &cgeom)
 //////////////////////////////////////////////////////////////
 // compute hail metrics for the clump
 
-void Props::_computeHailMetrics(const ClumpGeom &cgeom)
+void Props::_computeHailMetrics(const ClumpProps &cprops)
 {
 
   // initialize
@@ -1264,15 +1264,15 @@ void Props::_computeHailMetrics(const ClumpGeom &cgeom)
   // sums up hail mass over clump
   
   _hailZM.initIntegration();
-  for (size_t intv = 0; intv < cgeom.nIntervals; intv++) {
-    const Interval &intvl = cgeom.intervals[intv];
+  for (size_t intv = 0; intv < cprops.nIntervals(); intv++) {
+    const Interval &intvl = cprops.intvLocal(intv);
     int iz = intvl.plane;
     double ht = _layer[iz].htKm;
     if (ht > _freezingLevel + 2.0) {
       int jz = iz + _inputMdv.minValidLayer;
       int iy = intvl.row_in_plane;
-      int index = ((iy + cgeom.startIy) * grid.nx +
-                   intvl.begin + cgeom.startIx);
+      int index = ((iy + cprops.startIyLocal()) * grid.nx +
+                   intvl.begin + cprops.startIxLocal());
       fl32 *dbz_ptr = _inputMdv.dbzVol + jz * nptsPlane + index;
       for (int ix = intvl.begin; ix <= intvl.end; ix++, dbz_ptr++) {
         double dbz = *dbz_ptr;
@@ -1280,7 +1280,7 @@ void Props::_computeHailMetrics(const ClumpGeom &cgeom)
       }
     } // if (ht ...
   } // intv
-  double hma = _hailZM.integralOfX(cgeom.dVolAtCentroid);
+  double hma = _hailZM.integralOfX(cprops.dVolAtCentroid(0));
 
   // VIHM - vertically integrated hail mass
   // uses the max dbz for each layer
@@ -1295,16 +1295,16 @@ void Props::_computeHailMetrics(const ClumpGeom &cgeom)
 
   // FOKR category
 
-  int fokr = _getFokrCategory(cgeom);
+  int fokr = _getFokrCategory(cprops);
   
   // waldvogel probability of hail
   
-  double wpoh = _getWaldvogelProbability(cgeom);
+  double wpoh = _getWaldvogelProbability(cprops);
 
   // nexrad hail detection algorithm
   
   double poh, shi, posh, mehs;
-  _computeNexradHda(cgeom, poh, shi, posh, mehs);
+  _computeNexradHda(cprops, poh, shi, posh, mehs);
 
   if ((_params.debug_hail_metrics >= Params::DEBUG_VERBOSE) ||
       (_params.debug_hail_metrics && poh > 0)) {
@@ -1338,7 +1338,7 @@ void Props::_computeHailMetrics(const ClumpGeom &cgeom)
 // non-hailstorms (Category 0 and 1) from potentially developing hailers 
 // (Cat. 2), likely hailstorms (Cat. 3) and severe hailstorms (Cat. 4)
 
-int Props::_getFokrCategory(const ClumpGeom &cgeom)
+int Props::_getFokrCategory(const ClumpProps &cprops)
 {
 
   // Check for degenerate case
@@ -1383,7 +1383,7 @@ const Props::heightProb_t Props::HEIGHT_PROB[] =
   { 1.65, 0.0 }
 };
 
-double Props::_getWaldvogelProbability(const ClumpGeom &cgeom)
+double Props::_getWaldvogelProbability(const ClumpProps &cprops)
 {
 
   // Check for degenerate case
@@ -1424,7 +1424,7 @@ double Props::_getWaldvogelProbability(const ClumpGeom &cgeom)
 // An Enhanced Hail Detection Algorithm for the WSR-88D.
 // Weather and Forecasting, Volume 13, June 1998
 
-void Props::_computeNexradHda(const ClumpGeom &cgeom,
+void Props::_computeNexradHda(const ClumpProps &cprops,
                               double &poh,
                               double &shi,
                               double &posh,
@@ -1436,7 +1436,7 @@ void Props::_computeNexradHda(const ClumpGeom &cgeom,
   // probability of hail (POH) is from Waldvogel et al
   // we comvert probability from fraction to percent
 
-  poh = _getWaldvogelProbability(cgeom) * 100.0;
+  poh = _getWaldvogelProbability(cprops) * 100.0;
 
   // compute Severe Hail Index (SHI)
   
