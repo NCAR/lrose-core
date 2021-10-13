@@ -103,6 +103,8 @@ public:
   inline size_t nZ() const { return _gridGeom.nz(); }
   inline double meanDz() const { return _gridGeom.meanDz(); }
   inline double minZ() const { return _gridGeom.minz(); }
+  inline double dzKm(int iz) const { return _gridGeom.dzKm(iz); }
+
   
   // clumpSize returns vol or area as appropriate
   inline double clumpSize() const { return _clumpSize; }

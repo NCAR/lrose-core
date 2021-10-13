@@ -130,7 +130,7 @@ void ClumpProps::_shrinkWrap()
 
   // load up intervals, adjusting for the limits
 
-  _intvLocal.reserve(_clump->size);
+  _intvLocal.resize(_clump->size);
   
   for (int intv = 0; intv < _clump->size; intv++) {
     const Interval *intvl = _clump->ptr[intv];
@@ -246,7 +246,7 @@ void ClumpProps::_compute2DGrid()
 
   _dVolAtCentroid.clear();
   for (size_t iz = 0; iz < nZ(); iz++) {
-    _dVolAtCentroid.push_back(_dAreaAtCentroid * _gridGeom.zKm(iz));
+    _dVolAtCentroid.push_back(_dAreaAtCentroid * _gridGeom.dzKm(iz));
   }
 
 }

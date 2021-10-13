@@ -613,7 +613,7 @@ void Area::_computeTops(const ClumpProps &cprops)
   
   for (size_t iz = 0; iz < cprops.gridGeom().nz(); iz++) {
     
-    double ht = cprops.gridGeom().zKm()[iz];
+    double ht = cprops.zKm(iz);
     const fl32 *dbzPlane = _inputMdv.dbzVol + iz * nPointsPlane;
     ui08 *flag = _compGrid;
 

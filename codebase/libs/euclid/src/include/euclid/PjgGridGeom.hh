@@ -102,6 +102,7 @@ public:
   }
   inline const vector<double> &zKm() const { return _zKm; }
   inline double zKm(int iz) const { return _zKm[iz]; }
+  double dzKm(int iz) const;
 
   inline bool isLatLon() const { return _isLatLon; }
   inline PjgTypes::proj_type_t projType() const { return _projType; }

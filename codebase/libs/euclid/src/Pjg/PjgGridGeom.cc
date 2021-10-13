@@ -83,3 +83,36 @@ void PjgGridGeom::print(ostream &out)
   out << "=======================================" << endl;
 }
 
+////////////////////////
+// Compute delta z in km
+
+double PjgGridGeom::dzKm(int iz) const
+
+{
+  
+  if (iz < 0 || iz > (int) _zKm.size() - 1) {
+    return 0;
+  }
+
+  if (iz == 0) {
+    if (_zKm.size() < 2) {
+      return 0;
+    } else {
+      return (_zKm[1] - _zKm[0]);
+    }
+  }
+
+  if (iz == (int) _zKm.size() - 1) {
+    if (_zKm.size() < 2) {
+      return 0;
+    } else {
+      return (_zKm[_zKm.size() - 1] - _zKm[_zKm.size() - 2]);
+    }
+  }
+
+  return (_zKm[iz + 1] - _zKm[iz - 1]) / 2.0;
+
+}
+
+
+

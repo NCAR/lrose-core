@@ -402,7 +402,7 @@ int Props::_computeFirstPass(const ClumpProps &cprops)
   double histInterval = _params.dbz_hist_interval;
 
   for (size_t intv = 0; intv < cprops.nIntervals(); intv++) {
-    
+
     const Interval &intvl = cprops.intvLocal(intv);
 
     int iz = intvl.plane;
@@ -920,7 +920,7 @@ void Props::_tiltCompute(const ClumpProps &cprops)
   for (int iz = _baseLayer; iz <= _topLayer; iz++) {
     _tiltData[iz][0] = _layer[iz].vol_centroid_x;
     _tiltData[iz][1] = _layer[iz].vol_centroid_y;
-    _tiltData[iz][2] = cprops.gridGeom().zKm()[iz] * 10.0;
+    _tiltData[iz][2] = cprops.gridGeom().zKm(iz) * 10.0;
   }
       
   // obtain the principal component transformation for this data - the
@@ -955,6 +955,10 @@ void Props::_tiltCompute(const ClumpProps &cprops)
 	_gprops.tilt_dirn += 360.0;
       }
       _gprops.tilt_angle = 90.0 - atan2(tilt_z, tilt_r) * RAD_TO_DEG;
+      if (fabs(_gprops.tilt_angle) < 0.01) {
+        _gprops.tilt_angle = 0.0;
+	_gprops.tilt_dirn = 0.0;
+      }
     }
     
   } // if (upct(3, _nLayers, _tiltData + _baseLayer, ...
