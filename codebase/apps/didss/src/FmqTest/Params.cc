@@ -672,15 +672,15 @@
     tt->single_val.s = tdrpStrDup("fmq_output");
     tt++;
     
-    // Parameter 'output_compression'
+    // Parameter 'output_compress'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_compression");
+    tt->param_name = tdrpStrDup("output_compress");
     tt->descr = tdrpStrDup("Compress on output.");
     tt->help = tdrpStrDup("If TRUE, GZIP compression will be used.");
-    tt->val_offset = (char *) &output_compression - &_start_;
+    tt->val_offset = (char *) &output_compress - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

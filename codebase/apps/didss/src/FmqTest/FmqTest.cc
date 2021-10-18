@@ -32,19 +32,17 @@
 //
 ///////////////////////////////////////////////////////////////////////
 //
-// FmqTest reads an input FMQ and copies the contents unchanged to an 
-// output FMQ. It is useful for reading data from a remote queue and 
-// copying it to a local queue. The clients can then read the local 
-// queue rather than all access the remote queue.
+// FmqTest reads data from an input file,
+// and writes the contents to an FMQ at a specified rate.
 //
 ///////////////////////////////////////////////////////////////////////
 
 #include <iomanip>
-#include <dataport/bigend.h>
+#include <cerrno>
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
-#include <toolsa/compress.h>
 #include <toolsa/MsgLog.hh>
+#include <toolsa/TaFile.hh>
 #include "FmqTest.hh"
 using namespace std;
 
@@ -82,7 +80,6 @@ FmqTest::FmqTest(int argc, char **argv)
 
   // allocate output FMQs
 
-  _outputFmqs = _outputFmqs_.alloc(_params.output_urls_n);
   _prevTimeForOpen = 0;
 
   // logging
@@ -121,195 +118,97 @@ int FmqTest::Run ()
   
   PMU_auto_register("Run");
 
-  while (true) {
-    _run();
-    sleep(10);
-    cerr << "FmqTest::Run:" << endl;
-    cerr << "  Trying to contact input server at url: "
-	 << _params.input_url << endl;
-  }
+  // open the input file
 
-  return (0);
-
-}
-
-//////////////////////////////////////////////////
-// _run
-
-int FmqTest::_run ()
-{
-
-  // register with procmap
-  
-  PMU_auto_register("_run");
-
-  // open input FMQ
-
-  if (_inputFmq.initReadBlocking(_params.input_url,
-                                 _progName.c_str(),
-                                 _params.debug >= Params::DEBUG_VERBOSE,
-                                 DsFmq::END,
-                                 _params.msecs_sleep_blocking,
-                                 _msgLog)) {
-    cerr << "ERROR - FmqTest::Run" << endl;
-    cerr << "  Cannot open input FMQ at url: " << _params.input_url << endl;
+  TaFile inFile;
+  FILE *in = inFile.fopen(_params.input_file_path, "r");
+  if (in == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - FmqTest::Run()" << endl;
+    cerr << "  Cannot open file path: " << _params.input_file_path << endl;
+    cerr << "  " << strerror(errNum) << endl;
     return -1;
   }
 
-  if (_params.debug) {
-    cerr << "Opened input from URL: " << _params.input_url << endl;
+  // stat the file to get the size
+
+  if (inFile.fstat()) {
+    int errNum = errno;
+    cerr << "ERROR - FmqTest::Run()" << endl;
+    cerr << "  Cannot stat file path: " << _params.input_file_path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
   }
-  PMU_auto_register("opened input");
+  struct stat &fstat = inFile.getStat();
+  
+  // read contents into buffer
 
-  // open output FMQ's
+  vector<char> fileContents;
+  fileContents.resize(fstat.st_size);
+  if (inFile.fread(fileContents.data(), 1, fstat.st_size)) {
+    int errNum = errno;
+    cerr << "ERROR - FmqTest::Run()" << endl;
+    cerr << "  Cannot read in file path: " << _params.input_file_path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+  inFile.fclose();
 
-  _openOutputFmqs();
-  PMU_auto_register("Initial open output FMQs");
+  // open the output fmq
 
-  // read / write
+  DsFmq fmq;
+  if (fmq.initReadWrite(_params.output_fmq_url,
+                        _progName.c_str(),
+                        (_params.debug >= Params::DEBUG_VERBOSE),
+                        DsFmq::END,
+                        _params.output_compress,
+                        _params.output_n_slots,
+                        _params.output_buf_size,
+                        -1, _msgLog)) {
+    cerr << "ERROR - FmqTest::Run" << endl;
+    cerr << "  Cannot open output FMQ at url: " << _params.output_fmq_url << endl;
+    return -1;
+  }
+  if (_params.data_mapper_reg_interval > 0) {
+    fmq.setRegisterWithDmap(true, _params.data_mapper_reg_interval);
+  }
+  if (_params.write_blocking) {
+    fmq.setBlockingWrite();
+    fmq.setSingleWriter();
+  }
+    
+  if (_params.debug) {
+    cerr << "Opened output fmq to URL: " << _params.output_fmq_url << endl;
+  }
+    
+  // write to the fmq
 
+  int count = 0;
+  
   while (true) {
     
-    PMU_auto_register("Run: read loop");
-    _openOutputFmqs();
-
-    // read 
-    
-    bool gotOne;
-    if (_inputFmq.readMsg(&gotOne)) {
+    PMU_auto_register("write to output");
+    if (fmq.writeMsg(0, 0, fileContents.data(), fileContents.size())) {
       cerr << "ERROR - FmqTest::Run" << endl;
-      cerr << "  Cannot read from FMQ at url: " << _params.input_url << endl;
-      _inputFmq.closeMsgQueue();
+      cerr << "  Writing message to url: " << _params.output_fmq_url << endl;
+      cerr << "  Message len: " << fileContents.size() << endl;
+      cerr << "  " << fmq.getErrStr() << endl;
+      fmq.closeMsgQueue();
       return -1;
     }
 
-    if (gotOne) {
+    count++;
 
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-	cerr << "    Read message, len: " << setw(8) << _inputFmq.getMsgLen()
-	     << ", type: " << setw(8) << _inputFmq.getMsgType()
-	     << ", subtype: " << setw(8) << _inputFmq.getMsgSubtype()
-	     << endl;
-      }
-
-      // add message to write cache
-      
-      for (size_t ii = 0; ii < _outputFmqs_.size(); ii++) {
-        DsFmq &fmq = _outputFmqs[ii];
-        if (fmq.isOpen()) {
-          PMU_auto_register("write to cache");
-          fmq.addToWriteCache(_inputFmq.getMsgType(), _inputFmq.getMsgSubtype(),
-                               _inputFmq.getMsg(), _inputFmq.getMsgLen());
-        }
-      }
-
+    if (_params.write_count > 0 && count >= _params.write_count) {
+      break;
     }
-    
-    // write
 
-    for (size_t ii = 0; ii < _outputFmqs_.size(); ii++) {
-      DsFmq &fmq = _outputFmqs[ii];
-      PMU_auto_register("write to output");
-      int cacheSize = fmq.getWriteCacheSize();
-      if (cacheSize > 0 && (!gotOne || cacheSize > _params.max_cache_size)) {
-	if (_params.debug >= Params::DEBUG_VERBOSE) {
-	  cerr << "FmqTest - writing cache, size: " << cacheSize << endl;
-	}
-	if (fmq.writeTheCache()) {
-	  cerr << "ERROR - FmqTest::Run" << endl;
-	  cerr << "  Cannot write to FMQ at url: "
-	       << _params._output_urls[ii] << endl;
-          fmq.closeMsgQueue();
-	}
-      }
-    } // ii
-    
-    // sleep if no data available
-    
-    if (!gotOne) {
-      umsleep(20);
-    }
-    
+    umsleep(_params.write_sleep_msecs);
+
   } // while
-  
-  return (0);
+
+  fmq.closeMsgQueue();
+  return 0;
 
 }
 
-//////////////////////////////////////////////////
-// open output FMQ's
-
-void FmqTest::_openOutputFmqs()
-
-{
-
-  // check if 60 secs has elapsed since last open
-
-  time_t now = time(NULL);
-  double timeSinceOpen = (double) now - (double) _prevTimeForOpen;
-  if (timeSinceOpen < 60) {
-    return;
-  }
-  _prevTimeForOpen = now;
-
-  for (size_t ii = 0; ii < _outputFmqs_.size(); ii++) {
-    
-    if (_params.debug) {
-      cerr << "Opening FMQ to URL: " << _params._output_urls[ii] << endl;
-    }
-    
-    DsFmq &fmq = _outputFmqs[ii];
-    if (fmq.isOpen()) {
-      continue;
-    }
-    
-    if (fmq.initReadWrite(_params._output_urls[ii],
-                           _progName.c_str(),
-                           (_params.debug >= Params::DEBUG_VERBOSE),
-                           DsFmq::END,
-                           (_params.output_compression !=
-                            Params::NO_COMPRESSION),
-                           _params.output_n_slots,
-                           _params.output_buf_size,
-                           _params.msecs_sleep_blocking,
-                           _msgLog)) {
-      cerr << "WARNING - FmqTest::Run" << endl;
-      cerr << "  Cannot open output FMQ at url: "
-	   << _params._output_urls[ii] << endl;
-      continue;
-    }
-
-    if (_params.data_mapper_report_interval > 0) {
-      fmq.setRegisterWithDmap(true, _params.data_mapper_report_interval);
-    }
-    
-    if (_params.debug) {
-      cerr << "Opened output to URL: " << _params._output_urls[ii] << endl;
-    }
-    
-    if (_params.output_compression != Params::NO_COMPRESSION) {
-      switch(_params.output_compression) {
-      case Params::RLE_COMPRESSION:
-	fmq.setCompressionMethod(TA_COMPRESSION_RLE);
-	break;
-      case Params::LZO_COMPRESSION:
-	fmq.setCompressionMethod(TA_COMPRESSION_LZO);
-	break;
-      case Params::ZLIB_COMPRESSION:
-	fmq.setCompressionMethod(TA_COMPRESSION_ZLIB);
-	break;
-      case Params::BZIP_COMPRESSION:
-	fmq.setCompressionMethod(TA_COMPRESSION_BZIP);
-	break;
-      default:
-	break;
-      }
-    } // if (_params.output_compression ...
-
-    if (_params.write_blocking) {
-      fmq.setBlockingWrite();
-    }
-
-  } // ii
-
-}

@@ -379,7 +379,7 @@ public:
 
   char* output_fmq_url;
 
-  tdrp_bool_t output_compression;
+  tdrp_bool_t output_compress;
 
   tdrp_bool_t write_blocking;
 

@@ -67,7 +67,7 @@ paramdef boolean {
   p_default = FALSE;
   p_descr = "Compress on output.";
   p_help = "If TRUE, GZIP compression will be used.";
-} output_compression;
+} output_compress;
 
 paramdef boolean {
   p_default = FALSE;

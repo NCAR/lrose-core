@@ -51,7 +51,6 @@
 #include "Params.hh"
 using namespace std;
 
-class Socket;
 class MsgLog;
 
 ////////////////////////
@@ -87,14 +86,12 @@ private:
   Params _params;
   MsgLog *_msgLog;
 
-  DsFmq _inputFmq;
-  TaArray<DsFmq> _outputFmqs_;
-  DsFmq *_outputFmqs;
+  DsFmq _outputFmq;
   time_t _prevTimeForOpen;
 
   int _run();
-  void _openOutputFmqs();
-
+  void _openOutputFmq();
+  
 };
 
 #endif

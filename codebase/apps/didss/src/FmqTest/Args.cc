@@ -126,7 +126,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-compress")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "output_compression = TRUE;");
+	sprintf(tmp_str, "output_compress = TRUE;");
 	TDRP_add_override(&override, tmp_str);
       }
       
