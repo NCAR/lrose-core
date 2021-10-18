@@ -145,7 +145,7 @@ int FmqTest::Run ()
 
   vector<char> fileContents;
   fileContents.resize(fstat.st_size);
-  if (inFile.fread(fileContents.data(), 1, fstat.st_size)) {
+  if (inFile.fread(fileContents.data(), 1, fstat.st_size) != (size_t) fstat.st_size) {
     int errNum = errno;
     cerr << "ERROR - FmqTest::Run()" << endl;
     cerr << "  Cannot read in file path: " << _params.input_file_path << endl;
@@ -196,8 +196,12 @@ int FmqTest::Run ()
       fmq.closeMsgQueue();
       return -1;
     }
-
     count++;
+
+    if (_params.debug) {
+      cerr << "Success writing message to fmq: " << _params.output_fmq_url << endl;
+      cerr << "Total count: " << count << endl;
+    }
 
     if (_params.write_count > 0 && count >= _params.write_count) {
       break;
