@@ -66,6 +66,8 @@ BoundaryPointEditor::BoundaryPointEditor(BoundaryPointEditorView *bpeView,
 	_boundaryPointEditorModel = new BoundaryPointEditorModel();
 	makeConnections();
 	_boundaryEditorView->selectBoundaryTool(BoundaryToolType::polygon, 0);
+	string color = _boundaryPointEditorModel->getBoundaryColor();
+	updateBoundaryColor(color);
 }
 
 BoundaryPointEditor::~BoundaryPointEditor() {
@@ -83,9 +85,27 @@ void BoundaryPointEditor::makeConnections() {
 	connect(_boundaryEditorView, SIGNAL(userClickedBrushButton()),
 		this, SLOT(userClickedBrushButton()));	
 	connect(_boundaryEditorView, SIGNAL(clearBoundary()),
-		this, SLOT(clearBoundaryEditorClick()));		
+		this, SLOT(clearBoundaryEditorClick()));	
+
+	connect(_boundaryEditorView, SIGNAL(boundaryColorChanged(QColor)),
+		this, SLOT(boundaryColorChanged(QColor)));
+
+		//  connect(_view, SIGNAL(boundaryColorChanged(QColor)), this, SLOT(newBoundaryColorSelected(QColor)));	
 }
 
+void BoundaryPointEditor::updateBoundaryColor(string colorName) 
+{
+  // get info from boundary point editor
+  //string colorName = _model->getBoundaryColor();
+  QString colorNameQ = QString::fromStdString(colorName);
+  if (QColor::isValidColor(colorNameQ)) {
+    QColor color(colorNameQ);
+    _boundaryEditorView->boundaryColorProvided(color);
+  }
+  else {
+    throw "Cannot recognize color";
+  }
+}
 
 void BoundaryPointEditor::userClickedPolygonButton() {
 	setTool(BoundaryToolType::polygon);
@@ -286,6 +306,20 @@ void BoundaryPointEditor::coutPoints(vector<Point> &pts)
 }
 */
 
+void BoundaryPointEditor::boundaryColorChanged(QColor newColor) {
+	string rgbName = newColor.name().toStdString(); //  "#RRGGBB";
+	setBoundaryColor(rgbName);
+	updateBoundaryColor(rgbName);
+}
+
+void BoundaryPointEditor::setBoundaryColor(string &newColor) {
+  _boundaryPointEditorModel->setBoundaryColor(newColor);
+}
+
+string BoundaryPointEditor::getBoundaryColor() {
+  return _boundaryPointEditorModel->getBoundaryColor();
+}
+
 // draws the boundary
 void BoundaryPointEditor::drawBoundary(WorldPlot worldPlot, QPainter &painter)
 {
@@ -294,7 +328,7 @@ void BoundaryPointEditor::drawBoundary(WorldPlot worldPlot, QPainter &painter)
 	float pointBoxScale = _boundaryPointEditorModel->getPointBoxScale();
 	bool isFinished = _boundaryPointEditorModel->isAClosedPolygon();
 	BoundaryToolType currentTool = _boundaryPointEditorModel->getCurrentTool();
-	string color = _boundaryPointEditorModel->getYellowBrush();
+	string color = _boundaryPointEditorModel->getBoundaryColor(); // getYellowBrush();
 
 	_boundaryView->draw(worldPlot, painter,
 	  points,  pointBoxScale,  isFinished,
@@ -751,7 +785,6 @@ void BoundaryPointEditor::save(int boundaryIndex, string &selectedFieldName,
 	LOG(DEBUG) << "enter ";
 
  	_boundaryPointEditorModel->save(boundaryIndex, selectedFieldName, sweepIndex, radarFilePath);
-
 	LOG(DEBUG) << "exit";
 
 }

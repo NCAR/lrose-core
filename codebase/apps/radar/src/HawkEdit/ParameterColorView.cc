@@ -188,7 +188,7 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     connect(cancelButton, &QAbstractButton::clicked, this, &ParameterColorView::cancelColorScale);
     //connect(cancelButton, &QAction::triggered, this, &ParameterColorView::cancelColorScale);
     //connect(saveButton, &QAbstractButton::clicked, this, &ParameterColorView::replotColorScale); // saveColorScale);
-    connect(replotButton, &QAbstractButton::clicked, this, &ParameterColorView::replotColorScale);
+    connect(replotButton, &QAbstractButton::clicked, this, &ParameterColorView::applyChanges); // replotColorScale);
    
     connect(gridColorButton, &QAbstractButton::clicked, this, &ParameterColorView::setGridColor);
     connect(boundaryColorButton, &QAbstractButton::clicked, this, &ParameterColorView::setBoundaryColor);
@@ -332,6 +332,10 @@ void ParameterColorView::backgroundColorProvided(QColor color) {
   setColorOnButton(backgroundColorButton, color);
 }
 
+void ParameterColorView::boundaryColorProvided(QColor color) {
+  setColorOnButton(boundaryColorButton, color);
+}
+
 void ParameterColorView::cancelColorScale() {
 
   close(); 
@@ -464,6 +468,14 @@ void ParameterColorView::saveColorScale() {
 }
 */
 
+void ParameterColorView::applyChanges() {
+  
+  QColor color = getColorOnButton(boundaryColorButton);
+  emit boundaryColorChanged(color);
+
+  replotColorScale();
+}
+
 void ParameterColorView::replotColorScale() {
 
   LOG(DEBUG) << "enter";
@@ -475,6 +487,7 @@ void ParameterColorView::replotColorScale() {
   LOG(DEBUG) << "emit replotFieldColorMapChanges";
 
   emit replotFieldColorMapChanges(); // _selectedField);
+
 /*
   QMessageBox msgBox;
   msgBox.setText("Replot ...");
@@ -504,18 +517,15 @@ void ParameterColorView::setBoundaryColor()
 {
   LOG(DEBUG) << "enter";
 
-  errorMessage("", "Not Implemented");
-    /*
+  // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
+  const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
 
-    // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
-    const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
+  if (color.isValid()) {
+    boundaryColorButton->setPalette(QPalette(color));
+    boundaryColorButton->setAutoFillBackground(true);
 
-    if (color.isValid()) {
-        boundaryColorButton->setPalette(QPalette(color));
-        boundaryColorButton->setAutoFillBackground(true);
-	//         emit boundaryColorChanged(color);
-    }
-    */
+  }
+    
   LOG(DEBUG) << "exit";
 
 }
@@ -600,6 +610,14 @@ void ParameterColorView::setColorOnButton(QPushButton *button, QColor color)
     }
   LOG(DEBUG) << "exit";
 
+}
+
+QColor ParameterColorView::getColorOnButton(QPushButton *button)
+{
+  LOG(DEBUG) << "enter";
+  const QColor color = button->palette().color(QPalette::Background);
+  return color;
+  LOG(DEBUG) << "exit";
 }
 
 void ParameterColorView::setEmphasisColor()

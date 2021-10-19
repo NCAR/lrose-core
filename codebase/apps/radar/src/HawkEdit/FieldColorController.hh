@@ -27,6 +27,8 @@ public:
 
   void startUp();
 
+  void updateBoundaryColor(string colorName);
+
 signals:
   void colorMapRedefineSent(string fieldName, ColorMap newColorMap,
 			    QColor gridColor, 
@@ -37,6 +39,7 @@ signals:
   void emphasisColorSet(QColor newColor);
   void annotationColorSet(QColor newColor);
   void backgroundColorSet(QColor newColor);
+  void boundaryColorSet(QColor newColor);
 
 public slots:
   void getColorMap(string fieldName);
@@ -53,6 +56,7 @@ public slots:
   void newEmphasisColorSelected(QColor newColor);
   void newAnnotationColorSelected(QColor newColor);
   void newBackgroundColorSelected(QColor newColor);
+  void newBoundaryColorSelected(QColor newColor);
 
 private slots:
 

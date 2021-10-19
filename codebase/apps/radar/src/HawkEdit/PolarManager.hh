@@ -243,6 +243,7 @@ public slots:
   void saveBoundaryEvent(int boundaryIndex);
   void loadBoundaryEvent(int boundaryIndex);  
   void _clearBoundaryEditorClick(); 
+  //void boundaryColorChanged(QColor newColor);
 
   void setFieldToMissing(QString fieldName);
   void deleteFieldFromVolume(QString fieldName);   

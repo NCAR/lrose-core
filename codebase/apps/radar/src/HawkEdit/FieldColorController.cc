@@ -21,6 +21,8 @@ FieldColorController::FieldColorController(ParameterColorView *parameterColorVie
   connect(_view, SIGNAL(pickColorPaletteRequest()), this, SLOT(pickColorPaletteRequest()));
   connect(_view, SIGNAL(gridColorChanged(QColor)), this, SLOT(newGridColorSelected(QColor)));
   connect(_view, SIGNAL(backgroundColorChanged(QColor)), this, SLOT(newBackgroundColorSelected(QColor)));
+  connect(_view, SIGNAL(boundaryColorChanged(QColor)), this, SLOT(newBoundaryColorSelected(QColor)));
+
   //connect(this, SIGNAL(updateEvent(vector<string>, string)),
   // _view, SLOT(updateEvent(vector<string>, string)));
 
@@ -163,6 +165,21 @@ void FieldColorController::getBackgroundColor()
   }
 }
 
+void FieldColorController::updateBoundaryColor(string colorName) 
+{
+  // get info from boundary point editor
+  //string colorName = _model->getBoundaryColor();
+  QString colorNameQ = QString::fromStdString(colorName);
+  if (QColor::isValidColor(colorNameQ)) {
+    QColor color(colorNameQ);
+    _view->boundaryColorProvided(color);
+  }
+  else {
+    throw "Cannot recognize color";
+  }
+}
+
+
 void FieldColorController::colorMapMaxChanged(double newValue) {
 
   string affectedFieldName = _view->getSelectedFieldName();
@@ -247,4 +264,12 @@ void FieldColorController::newBackgroundColorSelected(QColor newColor) {
   LOG(DEBUG) << "exit";
 }
 
+void FieldColorController::newBoundaryColorSelected(QColor newColor) {
+  LOG(DEBUG) << "enter ";
+  string color = newColor.name().toStdString();
+  LOG(DEBUG) << color;
+  //_model->setBoundaryColor(color);
+  emit boundaryColorSet(newColor);
+  LOG(DEBUG) << "exit";
+}
 

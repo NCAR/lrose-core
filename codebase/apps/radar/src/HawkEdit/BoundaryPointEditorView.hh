@@ -71,6 +71,8 @@ class BoundaryPointEditorView : public QDialog
 
 	void selectBoundaryTool(BoundaryToolType tool, int radius = 0);
 
+	void boundaryColorProvided(QColor color);
+
   int firstBoundaryIndex();
   int lastBoundaryIndex();
   void showBoundaryEditor();
@@ -87,6 +89,8 @@ class BoundaryPointEditorView : public QDialog
 	void userClickedCircleButton();
 	void userClickedBrushButton();
 
+	void boundaryColorChanged(QColor color);
+
 	//vector<Point> getPoints(string boundaryFilePath);
 
   void boundaryPointEditorClosed();
@@ -95,7 +99,7 @@ class BoundaryPointEditorView : public QDialog
 
   private:
 
-
+	void setColorOnButton(QPushButton *button, QColor color);
   	/*
 
 	vector<Point> getPoints(string boundaryFilePath);
@@ -134,6 +138,9 @@ class BoundaryPointEditorView : public QDialog
 	QBrush *yellowBrush = new QBrush(QColor(255,255,0));
 
 	//BoundaryToolType currentTool = BoundaryToolType::brush;
+
+  QLabel *boundaryColorLabel;
+  QPushButton *boundaryColorButton;
 
   QPushButton *_boundaryEditorClearBtn;
   QPushButton *_boundaryEditorHelpBtn;
@@ -174,7 +181,9 @@ public slots:
   void polygonBtnBoundaryEditorClick();
   void circleBtnBoundaryEditorClick();
   void brushBtnBoundaryEditorClick();
-   void onBoundaryEditorListItemClicked(QListWidgetItem* item);
+  void onBoundaryEditorListItemClicked(QListWidgetItem* item);
+  void setBoundaryColor();
+
 //-  void _saveBoundaryEditorClick();
   void saveBoundaryEditorClick();
 
@@ -183,7 +192,6 @@ public slots:
   //void _clearBoundaryEditorClick();
   //void onBoundaryEditorListItemClicked(QListWidgetItem* item);
   //void _saveBoundaryEditorClick();
-
 
 };
 

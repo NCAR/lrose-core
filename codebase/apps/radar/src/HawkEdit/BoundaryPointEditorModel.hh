@@ -60,7 +60,11 @@ class BoundaryPointEditorModel
 	bool getIsCircle();
 	int getCircleRadius();
 	int getBrushRadius();
+
 	string &getYellowBrush() { return yellowBrush; };
+	string &getBoundaryColor() { return currentBrushColor; };
+	void setBoundaryColor(string &newBrushColor) { currentBrushColor = newBrushColor; };
+  
 	float getPointBoxScale() { return pointBoxScale; };
 
 	const char *refreshBoundary(string &radarFilePath,
@@ -112,6 +116,7 @@ class BoundaryPointEditorModel
 	Point brushLastOrigin;
 
 	string yellowBrush = "yellow";
+	string currentBrushColor = "yellow";
 
 	void coutMemUsage();
 	vector<Point> points;

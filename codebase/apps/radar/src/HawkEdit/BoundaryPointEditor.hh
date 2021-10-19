@@ -76,6 +76,9 @@ class BoundaryPointEditor : public QObject
 	bool setCircleRadius(int value);
 	void setBrushRadius(int value);
 	void setWorldScale(float value);
+  void setBoundaryColor(string &newColor);
+  string getBoundaryColor();
+
 	bool getIsCircle();
 	int getCircleRadius();
 	int getBrushRadius();
@@ -100,10 +103,12 @@ class BoundaryPointEditor : public QObject
 	void userClickedPolygonButton();
 	void userClickedCircleButton();
 	void userClickedBrushButton();
+	void boundaryColorChanged(QColor newColor);
 
   private:
 
 	vector<Point> getPoints(string boundaryFilePath);
+	void updateBoundaryColor(string colorName);
 
 
 	//int getNearestPointIndex(float x, float y, vector<Point> &pts);

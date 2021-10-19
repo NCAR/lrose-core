@@ -3891,6 +3891,9 @@ void PolarManager::_howto()
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
+//void PolarManager::boundaryColorChanged(QColor newColor) {
+//  boundaryPointEditorControl->setBoundaryColor(newColor.toStdString());
+//}
 
 void PolarManager::boundaryCircleRadiusChanged(int value) 
 {
@@ -4151,14 +4154,11 @@ void PolarManager::showBoundaryEditor()
     boundaryPointEditorView->installEventFilter(closeFilter);
 
     boundaryView = new BoundaryView();
-    // create the model
-
-    //SpreadSheetModel *model = new SpreadSheetModel(const_cast<RadxRay *> (closestRayToEdit));
+    // create the model in the controller
     
     // create the controller
     boundaryPointEditorControl = 
-      new BoundaryPointEditor(boundaryPointEditorView,
-        boundaryView);
+      new BoundaryPointEditor(boundaryPointEditorView, boundaryView);
 
     // connect some signals and slots in order to retrieve information
     // and send changes back to display
@@ -4795,6 +4795,12 @@ void PolarManager::ShowParameterColorDialog(QString fieldName)
   connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
       this, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
 
+  if (boundaryPointEditorControl != NULL) {
+    connect(fieldColorController, SIGNAL(boundaryColorSet(QColor)),
+      boundaryPointEditorControl, SLOT(boundaryColorChanged(QColor)));
+    string boundaryColor = boundaryPointEditorControl->getBoundaryColor();
+    fieldColorController->updateBoundaryColor(boundaryColor);
+  }
   fieldColorController->startUp(); 
  
   LOG(DEBUG) << "exit ";
