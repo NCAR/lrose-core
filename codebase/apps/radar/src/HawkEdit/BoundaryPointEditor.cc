@@ -813,6 +813,8 @@ bool BoundaryPointEditor::load(int boundaryIndex, string &selectedFieldName,
       radius = 0;
     }
 		_boundaryEditorView->selectBoundaryTool(currentTool, radius);
+		string color = _boundaryPointEditorModel->getBoundaryColor();
+	  updateBoundaryColor(color);
 	} 
 	return successful;
 

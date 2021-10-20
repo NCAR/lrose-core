@@ -623,6 +623,7 @@ void BoundaryPointEditorModel::save(int boundaryIndex, string &selectedFieldName
   LOG(DEBUG) << "saving to path: " << path;
 
 	save(path);
+	saveBoundaryColor(path);
 	LOG(DEBUG) << "exit";
 }
 
@@ -660,6 +661,23 @@ void BoundaryPointEditorModel::save(string &path)
 	fclose(file);
 }
 
+// Saves the current boundary color to a file with a path described above (top of this file)
+void BoundaryPointEditorModel::saveBoundaryColor(string path)
+{
+	LOG(DEBUG) << "entry ";
+
+	LOG(DEBUG) << "original path " << path;
+	path.append(boundaryColorExtension);
+	LOG(DEBUG) << "color path " << path;
+
+	ofstream outfile(path);
+	if (outfile.good()) {
+    outfile << currentBrushColor;
+  }
+  outfile.close();
+
+}
+
 // if boundaryIndex < 0, no saved boundary
 bool BoundaryPointEditorModel::load(int boundaryIndex, string &selectedFieldName,
  int sweepIndex, string &radarFilePath) 
@@ -671,6 +689,7 @@ bool BoundaryPointEditorModel::load(int boundaryIndex, string &selectedFieldName
       selectedFieldName, sweepIndex, boundaryIndex);
     LOG(DEBUG) << "loading from path: " << path;
 	  successful = load(path);
+	  bool successfulColor = loadBoundaryColor(path);
   } else {
   	// reset boundary to empty
   	clear();
@@ -726,6 +745,29 @@ bool BoundaryPointEditorModel::load(string path)
 			currentTool = BoundaryToolType::brush;
 		successful = true;
 	}
+	return successful;
+}
+
+// Loads the boundary file given by path
+// It also sets the correct editor tool (polygon, circle, or brush) based on what is in the file
+bool BoundaryPointEditorModel::loadBoundaryColor(string path)
+{
+	bool successful = false;
+
+	path.append(boundaryColorExtension);
+
+	ifstream infile(path);
+	if (infile.good())
+	{
+    string color;
+		infile >> color; 
+		if (color.length() > 0) {
+			currentBrushColor = color;
+			successful = true;
+    }
+	}
+	infile.close();
+
 	return successful;
 }
 

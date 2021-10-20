@@ -76,6 +76,8 @@ class BoundaryPointEditorModel
 
 
   void save(string &path);
+  bool loadBoundaryColor(string path);
+  void saveBoundaryColor(string path);
   string getBoundaryFilePath(string &radarFilePath, string &fieldName,
    int sweepIndex, int boundaryIndex);
   string getBoundaryFileName(string &fieldName, 
@@ -87,6 +89,7 @@ class BoundaryPointEditorModel
   string getBoundaryName(int i);	
 
 	string rootBoundaryDir; //  = string(getenv("HOME")) + "/" + "HawkEyeBoundaries";
+	string boundaryColorExtension = string("_color.txt");
 	
 	int getNearestPointIndex(float x, float y, vector<Point> &pts);
 	float getNearestDistToLineSegment(int x, int y, int segmentPtIndex1, int segmentPtIndex2);
