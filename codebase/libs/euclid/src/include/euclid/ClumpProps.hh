@@ -40,6 +40,7 @@
 #include <euclid/PjgGridGeom.hh>
 #include <toolsa/TaArray2D.hh>
 #include <vector>
+#include <iostream>
 using namespace std;
 
 ////////////////////////////////
@@ -56,8 +57,7 @@ public:
   // initializer
 
   void init(const Clump_order *clump,
-            const PjgGridGeom &gridGeom,
-	    int startIx, int startIy);
+            const PjgGridGeom &gridGeom);
 
   // destructor
   
@@ -74,21 +74,19 @@ public:
   inline size_t nPoints3D() const { return _nPoints3D; }
   inline size_t nPoints2D() const { return _nPoints2D; }
   
-  inline int startIxGlobal() const { return _startIxGlobal; }
-  inline int startIyGlobal() const { return _startIyGlobal; }
-
   // clump shrink-wrapped variables
 
-  inline int startIxLocal() const { return _startIxLocal; }
-  inline int startIyLocal() const { return _startIyLocal; }
+  inline int minIx() const { return _minIx; }
+  inline int maxIx() const { return _maxIx; }
+  inline int minIy() const { return _minIy; }
+  inline int maxIy() const { return _maxIy; }
+  inline int nXLocal() const { return _nXLocal; }
+  inline int nYLocal() const { return _nYLocal; }
 
   inline double offsetX() const { return _offsetX; }
   inline double offsetY() const { return _offsetY; }
   inline double startXLocal() const { return _startXLocal; }
   inline double startYLocal() const { return _startYLocal; }
-
-  inline int nXLocal() const { return _nXLocal; }
-  inline int nYLocal() const { return _nYLocal; }
 
   inline double dXKmAtCentroid() const { return _dXKmAtCentroid; }
   inline double dYKmAtCentroid() const { return _dYKmAtCentroid; }
@@ -126,6 +124,9 @@ public:
   inline double centroidY() const { return _centroidY; }
   inline double centroidZ() const { return _centroidZ; }
 
+  void printMeta(ostream &out) const;
+  void printFull(ostream &out) const;
+
 protected:
   
 private:
@@ -136,9 +137,9 @@ private:
   int _id;
   PjgGridGeom _gridGeom;
 
-  int _startIxGlobal, _startIyGlobal;
-  int _minIxGlobal, _minIyGlobal;
-  int _maxIxGlobal, _maxIyGlobal;
+  int _minIx, _minIy;
+  int _maxIx, _maxIy;
+  int _nXLocal, _nYLocal;
 
   vector<Interval> _intvLocal;
   size_t _nIntervals;
@@ -148,10 +149,8 @@ private:
   unsigned char **_grid2DVals;
   size_t _nPoints2D;
 
-  int _startIxLocal, _startIyLocal;
   double _offsetX, _offsetY;
   double _startXLocal, _startYLocal;
-  int _nXLocal, _nYLocal;
   double _dXKmAtCentroid, _dYKmAtCentroid;
   
   double _dAreaAtCentroid;

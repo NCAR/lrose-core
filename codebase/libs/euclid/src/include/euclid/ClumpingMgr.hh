@@ -135,6 +135,12 @@ public:
                        int min_grid_overlap,
                        vector<ClumpProps> &clumps);
 
+  // Adjust the clumps for an (x, y) grid offset
+  // for example when performing dual thresholding
+  // The offsets will be added to the location of the interval
+  
+  void addXyOffsetToIntervals(int ixOffset, int iyOffset);
+
   // get debug grids from using dual threshold
 
   const fl32 *getDualThreshCompFileGrid() const;

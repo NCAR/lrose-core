@@ -109,7 +109,7 @@ public:
   
   // Print details of grid
   
-  void print(ostream &out);
+  void print(ostream &out) const;
 
 protected:
 

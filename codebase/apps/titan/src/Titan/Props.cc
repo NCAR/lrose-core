@@ -410,8 +410,8 @@ int Props::_computeFirstPass(const ClumpProps &cprops)
     int iy = intvl.row_in_plane;
     _layer[iz].n += intvl.len;
 	
-    int index = ((iy + cprops.startIyLocal()) * grid.nx +
-		 intvl.begin + cprops.startIxLocal());
+    int index = ((iy + cprops.minIy()) * grid.nx +
+		 intvl.begin + cprops.minIx());
     
     fl32 *dbz_ptr = _inputMdv.dbzVol + jz * nptsPlane + index;
     fl32 *vel_ptr = NULL;
@@ -701,8 +701,8 @@ void Props::_computeSecondPass(const ClumpProps &cprops)
     double rel_y = grid_y - grid.sensor_y;
     double rel_z = grid_z - grid.sensor_z;
 
-    int index = ((iy + cprops.startIyLocal()) * grid.nx +
-		 intvl.begin + cprops.startIxLocal());
+    int index = ((iy + cprops.minIy()) * grid.nx +
+		 intvl.begin + cprops.minIx());
 
     fl32 *vel_ptr = NULL;
     if (_params.vel_available) {
@@ -874,8 +874,8 @@ int Props::_storeRuns(const ClumpProps &cprops)
   _sfile.AllocRuns(cprops.nIntervals());
   
   storm_file_run_t *run = _sfile._runs;
-  int start_ix = cprops.startIxLocal();
-  int start_iy = cprops.startIyLocal();
+  int start_ix = cprops.minIx();
+  int start_iy = cprops.minIy();
   
   for (size_t intv = 0; intv < cprops.nIntervals(); intv++, run++) {
 
@@ -1275,8 +1275,8 @@ void Props::_computeHailMetrics(const ClumpProps &cprops)
     if (ht > _freezingLevel + 2.0) {
       int jz = iz + _inputMdv.minValidLayer;
       int iy = intvl.row_in_plane;
-      int index = ((iy + cprops.startIyLocal()) * grid.nx +
-                   intvl.begin + cprops.startIxLocal());
+      int index = ((iy + cprops.minIy()) * grid.nx +
+                   intvl.begin + cprops.minIx());
       fl32 *dbz_ptr = _inputMdv.dbzVol + jz * nptsPlane + index;
       for (int ix = intvl.begin; ix <= intvl.end; ix++, dbz_ptr++) {
         double dbz = *dbz_ptr;

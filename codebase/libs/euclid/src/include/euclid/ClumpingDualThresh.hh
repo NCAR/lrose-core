@@ -81,7 +81,7 @@ public:
   // Compute sub-clumps using the dual threshold.
   // Returns number of sub-clumps.
   
-  int compute(const ClumpProps &clump_props);
+  int compute(const ClumpProps &primaryClump);
 
   // write out MDV file for debugging
   // int writeOutputMdv();
@@ -107,6 +107,7 @@ private:
   // input data
 
   PjgGridGeom _inputGeom;
+  PjgGridGeom _workGeom;
   const fl32 *_inputData;
 
   size_t _nxInput;
@@ -156,17 +157,17 @@ private:
   ui08 *_gridMask;
   size_t _nPtsGridMaskAlloc;
 
-  void _initWorkGrids();
+  void _initWorkGrids(const ClumpProps &primaryClump);
   void _initFileGrids();
-  void _fillComposite(const ClumpProps &clump_props);
-  void _updateFileGrids(const ClumpProps &clump_props);
-  void _updateFileComp(const ClumpProps &clump_props);
+  void _fillComposite(const ClumpProps &primaryClump);
+  void _updateFileGrids(const ClumpProps &primaryClump);
+  void _updateFileComp(const ClumpProps &primaryClump);
   void _loadCompIndex();
   void _growSubAreas();
   void _allocSubClumps();
-  void _computeSubClump(const ClumpProps &clump_props, int clump_id);
+  void _computeSubClump(const ClumpProps &primaryClump, int clump_id);
   void _initGridMask();
-  void _loadGridMask(const ClumpProps &clump_props, int clump_id);
+  void _loadGridMask(const ClumpProps &cprops, int clump_id);
 
 };
 

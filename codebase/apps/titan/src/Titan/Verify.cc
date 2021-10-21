@@ -147,8 +147,8 @@ void Verify::updateValidStormsGrid(const ClumpProps &cprops)
     
     const Interval &intvl = cprops.intvLocal(intv);
     
-    int iy = intvl.row_in_plane + cprops.startIyLocal();
-    int ix = intvl.begin + cprops.startIxLocal();
+    int iy = intvl.row_in_plane + cprops.minIy();
+    int ix = intvl.begin + cprops.minIx();
     size_t offset = iy * cprops.gridGeom().nx() + ix;
     memcpy(validGrid + offset, compGrid + offset, intvl.len * sizeof(fl32));
     

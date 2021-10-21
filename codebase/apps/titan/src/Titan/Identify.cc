@@ -360,7 +360,7 @@ int Identify::_processThisClump(const ClumpProps &cprops)
 	    "Clump: size, startIx, startIy, nx, ny, offsetx, offsety: "
 	    "%g, %d, %d, %d, %d, %g, %g\n",
 	    cprops.clumpSize(),
-	    cprops.startIxLocal(), cprops.startIyLocal(),
+	    cprops.minIx(), cprops.minIy(),
 	    cprops.nXLocal(), cprops.nYLocal(),
 	    cprops.offsetX(), cprops.offsetY());
   }

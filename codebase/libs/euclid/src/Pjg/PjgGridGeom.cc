@@ -60,7 +60,7 @@ PjgGridGeom::~PjgGridGeom()
 ////////////////////////
 // Print details of grid
 
-void PjgGridGeom::print(ostream &out)
+void PjgGridGeom::print(ostream &out) const
 
 {
   out << "============= PjgGridGeom =============" << endl;

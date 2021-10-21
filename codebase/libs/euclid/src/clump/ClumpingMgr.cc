@@ -352,6 +352,7 @@ void ClumpingMgr::setUseDualThresholds(double secondary_threshold,
 
 }
 
+/////////////////////////////////////////////////////////////////////
 // Perform clumping specifying the input geom and input data array.
 // If needed, call setUseDualThresholds().
 // Return: fills out clumps vector.
@@ -386,7 +387,7 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
     const Clump_order *clump = getClumps();
     for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
       ClumpProps cprops;
-      cprops.init(clump, _gridGeom, 0, 0);
+      cprops.init(clump, _gridGeom);
       int n_sub_clumps = _dualT->compute(cprops);
       if (n_sub_clumps == 1) {
         clumpVec.push_back(cprops);
@@ -404,7 +405,7 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
     const Clump_order *clump = getClumps();
     for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
       ClumpProps cprops;
-      cprops.init(clump, _gridGeom, 0, 0);
+      cprops.init(clump, _gridGeom);
       clumpVec.push_back(cprops);
     } // iclump
 
@@ -443,3 +444,26 @@ const ui08 *ClumpingMgr::getDualThreshGrownFileGrid() const {
   return _dualT->getGrownFileGrid();
 }
 
+
+/////////////////////////////////////////////////////////////////////
+// Adjust the clumps for an (x, y) grid offset
+// for example when performing dual thresholding
+// The offsets will be added to the location of the interval
+
+void ClumpingMgr::addXyOffsetToIntervals(int ixOffset,
+                                         int iyOffset)
+
+{
+  
+  for (int ii = 0; ii < _nIntervalsAlloc; ii++) {
+    
+    Interval *intv = _intervals + ii;
+
+    intv->row_in_vol += iyOffset;
+    intv->row_in_plane += iyOffset;
+    intv->begin += ixOffset;
+    intv->end += ixOffset;
+
+  }
+
+}
