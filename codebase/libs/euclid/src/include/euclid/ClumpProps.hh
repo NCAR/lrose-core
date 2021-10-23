@@ -50,6 +50,11 @@ class ClumpProps {
   
 public:
 
+  class point {
+  public:
+    int ix, iy, iz;
+  };
+
   // constructor
 
   ClumpProps();
@@ -68,12 +73,18 @@ public:
   // clump details
 
   inline int id() const { return _id; }
-  inline const Clump_order *clumpOrder() const { return _clump; }
-  inline Interval **intervals() { return _clump->ptr; }
-  inline size_t nIntervals() const { return _nIntervals; }
-  inline size_t nPoints3D() const { return _nPoints3D; }
+
+  const vector<point> &getPoints() const { return _points; }
+  inline size_t nPoints3D() const { return _points.size(); }
   inline size_t nPoints2D() const { return _nPoints2D; }
   
+  inline const vector<Interval> &intvGlobal() const { return _intvGlobal; }
+  inline const Interval &intvGlobal(size_t index) const { return _intvGlobal[index]; }
+  inline size_t nIntervals() const { return _intvGlobal.size(); }
+  
+  inline const vector<Interval> &intvLocal() const { return _intvLocal; }
+  inline const Interval &intvLocal(size_t index) const { return _intvLocal[index]; }
+
   // clump shrink-wrapped variables
 
   inline int minIx() const { return _minIx; }
@@ -91,9 +102,6 @@ public:
   inline double dXKmAtCentroid() const { return _dXKmAtCentroid; }
   inline double dYKmAtCentroid() const { return _dYKmAtCentroid; }
 
-  inline const vector<Interval> &intvLocal() const { return _intvLocal; }
-  inline const Interval &intvLocal(int n) const { return _intvLocal[n]; }
-
   // grid Z properties
   
   inline const vector<double> &zKm() const { return _gridGeom.zKm(); }
@@ -102,10 +110,6 @@ public:
   inline double meanDz() const { return _gridGeom.meanDz(); }
   inline double minZ() const { return _gridGeom.minz(); }
   inline double dzKm(int iz) const { return _gridGeom.dzKm(iz); }
-
-  
-  // clumpSize returns vol or area as appropriate
-  inline double clumpSize() const { return _clumpSize; }
 
   // clump properties
   
@@ -124,6 +128,12 @@ public:
   inline double centroidY() const { return _centroidY; }
   inline double centroidZ() const { return _centroidZ; }
 
+  // clumpSize returns vol or area as appropriate
+
+  inline double clumpSize() const { return _clumpSize; }
+  
+  // printing
+
   void printMeta(ostream &out) const;
   void printFull(ostream &out) const;
 
@@ -133,7 +143,6 @@ private:
 
   int _initDone;
 
-  const Clump_order *_clump;
   int _id;
   PjgGridGeom _gridGeom;
 
@@ -141,9 +150,9 @@ private:
   int _maxIx, _maxIy;
   int _nXLocal, _nYLocal;
 
+  vector<point> _points;
+  vector<Interval> _intvGlobal;
   vector<Interval> _intvLocal;
-  size_t _nIntervals;
-  size_t _nPoints3D;
   
   TaArray2D<unsigned char> _grid2DArray;
   unsigned char **_grid2DVals;

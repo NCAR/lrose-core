@@ -60,7 +60,7 @@ ClumpProps::~ClumpProps()
   // assert (_initDone);
 }
 
-//////////////
+////////////////////////
 // initializer
 //
 
@@ -69,23 +69,53 @@ void ClumpProps::init(const Clump_order *clump,
 
 {
 
-  _clump = clump;
-  _nIntervals = _clump->size;
-
-  if(clump->size > 0) {
-    Interval *intvl = clump->ptr[0];
-    _id = intvl->id;
-  } else {
-    _initDone = FALSE;
+  _initDone = FALSE;
+  _gridGeom = gridGeom;
+  if(clump->size < 1) {
+    _id = 0;
     return;
   }
 
-  _gridGeom = gridGeom;
+  _id = clump->ptr[0]->id;
+
+  // set up the global intervals vector
+
+  _intvGlobal.clear();
+  for (int intv = 0; intv < clump->size; intv++) {
+    const Interval *intvl = clump->ptr[intv];
+    _intvGlobal.push_back(*intvl);
+  }
+
+  // set up the points vector
+  
+  _points.clear();
+  for (size_t intv = 0; intv < _intvGlobal.size(); intv++) {
+    const Interval &intvl = _intvGlobal[intv];
+    point pt;
+    pt.iz = intvl.plane;
+    pt.iy = intvl.row_in_plane;
+    for (int ix = intvl.begin; ix <= intvl.end; ix++) {
+      pt.ix = ix;
+      _points.push_back(pt);
+    } // ix
+  } // intv
+
   
   // compute the bounding box for the clump, and create
   // an array of intervals relative to these bounds.
 
   _shrinkWrap();
+
+  // load up local intervals, adjusting for the local limits
+
+  _intvLocal.clear();
+  for (size_t intv = 0; intv < _intvGlobal.size(); intv++) {
+    Interval intvl = _intvGlobal[intv];
+    intvl.row_in_plane -= _minIy;
+    intvl.begin -= _minIx;
+    intvl.end -= _minIx;
+    _intvLocal.push_back(intvl);
+  }
 
   // compute projected area grid
 
@@ -117,23 +147,12 @@ void ClumpProps::_shrinkWrap()
   _maxIx = 0;
   _maxIy = 0;
 
-  for (int intv = 0; intv < _clump->size; intv++) {
-    const Interval *intvl = _clump->ptr[intv];
-    _minIx = MIN(intvl->begin, _minIx);
-    _maxIx = MAX(intvl->end, _maxIx);
-    _minIy = MIN(intvl->row_in_plane, _minIy);
-    _maxIy = MAX(intvl->row_in_plane, _maxIy);
-  }
-
-  // load up local intervals, adjusting for the limits
-
-  _intvLocal.clear();
-  for (int intv = 0; intv < _clump->size; intv++) {
-    Interval intvl = *_clump->ptr[intv];
-    intvl.row_in_plane -= _minIy;
-    intvl.begin -= _minIx;
-    intvl.end -= _minIx;
-    _intvLocal.push_back(intvl);
+  for (size_t intv = 0; intv < _intvGlobal.size(); intv++) {
+    const Interval &intvl = _intvGlobal[intv];
+    _minIx = MIN(intvl.begin, _minIx);
+    _maxIx = MAX(intvl.end, _maxIx);
+    _minIy = MIN(intvl.row_in_plane, _minIy);
+    _maxIy = MAX(intvl.row_in_plane, _maxIy);
   }
 
   // set the various public measures of clump position and bounding size
@@ -188,61 +207,24 @@ void ClumpProps::_compute2DGrid()
   // compute centroid relative to global grid
 
   double sumx = 0.0, sumy = 0.0, sumz = 0.0, nn = 0.0;
-  for (int intv = 0; intv < _clump->size; intv++) {
-    const Interval *intvl = _clump->ptr[intv];
-    int iz = intvl->plane;
-    int iy = intvl->row_in_plane;
+  for (size_t intv = 0; intv < _intvGlobal.size(); intv++) {
+    const Interval &intvl = _intvGlobal[intv];
+    int iz = intvl.plane;
+    int iy = intvl.row_in_plane;
     double zz = _gridGeom.zKm(iz);
     double yy = _gridGeom.miny() + iy * _gridGeom.dy();
-    for (int ix = intvl->begin; ix <= intvl->end; ix++) {
+    for (int ix = intvl.begin; ix <= intvl.end; ix++) {
       double xx = _gridGeom.minx() + ix * _gridGeom.dx();
       sumx += xx;
       sumy += yy;
       sumz += zz;
       nn++;
-      // cerr << "1111111 ix, iy, xx, yy: " << ix << ", " << xx << ", " << iy << ", " << yy << endl;
     }
   }
 
   _centroidX = sumx / nn;
   _centroidY = sumy / nn;
   _centroidZ = sumz / nn;
-
-  {
-
-    double sumx = 0.0, sumy = 0.0, nn = 0.0;
-    for (size_t intv = 0; intv < _intvLocal.size(); intv++) {
-      const Interval *intvl = &_intvLocal[intv];
-      int iy = intvl->row_in_plane;
-      double yy = _startYLocal + iy * _gridGeom.dy();
-      for (int ix = intvl->begin; ix <= intvl->end; ix++) {
-        double xx = _startXLocal + ix * _gridGeom.dx();
-        sumx += xx;
-        sumy += yy;
-        // cerr << "2222222 ix, iy, xx, yy: " << ix << ", " << xx << ", " << iy << ", " << yy << endl;
-        nn++;
-      }
-    }
-    
-    double centroidX = sumx / nn;
-    double centroidY = sumy / nn;
-
-    if (fabs(centroidX - _centroidX) > 0.001) {
-      cerr << "VVVVVVVVVV centroidX, _centroidX: " << centroidX << ", " << _centroidX << endl;
-      cerr << "WWWWWWWWWW _clump->size, _intvLocal.size(), nn: " << _clump->size << ", " <<  _intvLocal.size() << ", " << nn << endl;
-
-      cerr << "AAAAAAAA _minIx, _minIy: " <<  _minIx << ", " << _minIy << endl;
-      cerr << "AAAAAAAA _maxIx, _maxIy: " <<  _maxIx << ", " << _maxIy << endl;
-      cerr << "AAAAAAAA _offsetX, _offsetY: " <<  _offsetX << ", " << _offsetY << endl;
-      cerr << "AAAAAAAA _startXLocal, _startYLocal: " <<  _startXLocal << ", " << _startYLocal << endl;
-      cerr << "AAAAAAAA minx, miny: " <<  _gridGeom.minx() << ", " << _gridGeom.miny() << endl;
-    }
-    if (fabs(centroidY - _centroidY) > 0.001) {
-      cerr << "VVVVVVVVVV centroidY, _centroidY: " << centroidY << ", " << _centroidY << endl;
-      cerr << "WWWWWWWWWW _clump->size, _intvLocal.size(): " << _clump->size << ", " <<  _intvLocal.size() << endl;
-    }
-    
-  }
 
   // determine the scale in km
   // based on whether this is a (lat,lon) or (km,km) grid
@@ -274,10 +256,6 @@ void ClumpProps::_compute2DGrid()
   
   _dAreaAtCentroid = _dXKmAtCentroid * _dYKmAtCentroid;
 
-  // cerr << "DDDDDDDDDDDD _dAreaAtCentroid: " << _dAreaAtCentroid << endl;
-  // cerr << "DDDDDDDDDDDD _centroidY: " << _centroidY << endl;
-  // cerr << "DDDDDDDDDDDD _minIY: " << _minIy << endl;
-
   _dVolAtCentroid.clear();
   for (size_t iz = 0; iz < nZ(); iz++) {
     _dVolAtCentroid.push_back(_dAreaAtCentroid * _gridGeom.dzKm(iz));
@@ -308,11 +286,10 @@ void ClumpProps::_computeProps()
 
   // volume
   
-  _nPoints3D = _clump->pts;
   _volumeKm3 = 0.0;
-  for (int intv = 0; intv < _clump->size; intv++) {
-    const Interval *intvl = _clump->ptr[intv];
-    _volumeKm3 += intvl->len * _dVolAtCentroid[intvl->plane];
+  for (size_t intv = 0; intv < _intvGlobal.size(); intv++) {
+    const Interval &intvl = _intvGlobal[intv];
+    _volumeKm3 += intvl.len * _dVolAtCentroid[intvl.plane];
   }
 
   // clump size - generic
@@ -328,18 +305,13 @@ void ClumpProps::_computeProps()
   
   _minZKm = 9999.0;
   _maxZKm = -9999.0;
-
-  for (int intv = 0; intv < _clump->size; intv++) {
-    
-    const Interval *intvl = _clump->ptr[intv];
-    
-    int iz = intvl->plane;
+  for (size_t intv = 0; intv < _intvGlobal.size(); intv++) {
+    const Interval &intvl = _intvGlobal[intv];
+    int iz = intvl.plane;
     double zKm = _gridGeom.zKm(iz);
     _minZKm = min(zKm, _minZKm);
     _maxZKm = max(zKm, _maxZKm);
-
   }
-
   _vertExtentKm = _maxZKm - _minZKm;
 
 }
@@ -355,8 +327,8 @@ void ClumpProps::printMeta(ostream &out) const
   out << "--------------ClumpProps--------------------" << endl;
 
   out << "  id: " << _id << endl;
-  out << "  nIntervals: " << _nIntervals << endl;
-  out << "  nPoints3D: " << _nPoints3D << endl;
+  out << "  nIntervals: " << nIntervals() << endl;
+  out << "  nPoints3D: " << nPoints3D() << endl;
   out << "  nPoints2D: " << _nPoints2D << endl;
 
   out << "  minIx, minIy: " << _minIx << ", " << _minIy << endl;
@@ -365,9 +337,14 @@ void ClumpProps::printMeta(ostream &out) const
 
   out << "  offsetX, offsetY: " << _offsetX << ", " << _offsetY << endl;
   out << "  startXLocal, startYLocal: " << _startXLocal << ", " << _startYLocal << endl;
+  
+  out << "  centroidX, centroidY, centroidZ: " 
+      << _centroidX << ", " << _centroidY << ", " << _centroidZ << endl;
 
-  out << "  dXKmAtCentroid, dYKmAtCentroid: " << _dXKmAtCentroid << ", " << _dYKmAtCentroid << endl;
+  out << "  dXKmAtCentroid: " << _dXKmAtCentroid << endl;
+  out << "  dYKmAtCentroid: " << _dYKmAtCentroid << endl;
   out << "  dAreaAtCentroid: " << _dAreaAtCentroid << endl;
+
   out << "  dVolAtCentroid: ";
   for (size_t ii = 0; ii < _dVolAtCentroid.size(); ii++) {
     out << _dVolAtCentroid[ii];
@@ -384,10 +361,7 @@ void ClumpProps::printMeta(ostream &out) const
 
   out << "  minZKm, maxZKm, vertExtentKm: " 
       << _minZKm << ", " << _maxZKm << ", " << _vertExtentKm << endl;
-
-  out << "  centroidX, centroidY, centroidZ: " 
-      << _centroidX << ", " << _centroidY << ", " << _centroidZ << endl;
-
+  
   _gridGeom.print(out);
 
   out << "--------------------------------------------" << endl;
@@ -407,15 +381,15 @@ void ClumpProps::printFull(ostream &out) const
 
   out << "------------- intervals --------------------" << endl;
 
-  for (size_t ii = 0; ii < _intvLocal.size(); ii++) {
+  for (size_t ii = 0; ii < _intvGlobal.size(); ii++) {
 
     out << "  ii, iz, iy, ix1, ix2, len: "
         << ii << ", "
-        << _intvLocal[ii].plane << ", "
-        << _intvLocal[ii].row_in_plane << ", "
-        << _intvLocal[ii].begin << ", "
-        << _intvLocal[ii].end << ", "
-        << _intvLocal[ii].len << endl;
+        << _intvGlobal[ii].plane << ", "
+        << _intvGlobal[ii].row_in_plane << ", "
+        << _intvGlobal[ii].begin << ", "
+        << _intvGlobal[ii].end << ", "
+        << _intvGlobal[ii].len << endl;
 
   } // ii
 
