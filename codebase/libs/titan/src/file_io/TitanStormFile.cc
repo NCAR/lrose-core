@@ -114,6 +114,7 @@ void TitanStormFile::AllocLayers(int n_layers)
     _max_layers = n_layers;
     _lprops = (storm_file_layer_props_t *)
       urealloc(_lprops, n_layers * sizeof(storm_file_layer_props_t));
+    memset(_lprops, 0, n_layers * sizeof(storm_file_layer_props_t));
   }
 }
 
@@ -141,6 +142,7 @@ void TitanStormFile::AllocHist(int n_dbz_intervals)
     _max_dbz_intervals = n_dbz_intervals;
     _hist = (storm_file_dbz_hist_t *)
       urealloc(_hist, n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
+    memset(_hist, 0, n_dbz_intervals * sizeof(storm_file_dbz_hist_t));
   }
 
 }
@@ -171,6 +173,7 @@ void TitanStormFile::AllocRuns(int n_runs)
     _max_runs = n_runs;
     _runs = (storm_file_run_t *)
       urealloc(_runs, n_runs * sizeof(storm_file_run_t));
+    memset(_runs, 0, n_runs * sizeof(storm_file_run_t));
   }
 
 }
