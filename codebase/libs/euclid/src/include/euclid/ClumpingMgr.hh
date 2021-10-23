@@ -42,7 +42,9 @@
 #include <string>
 #include <euclid/clump.h>
 #include <dataport/port_types.h>
+#include <euclid/PjgGridGeom.hh>
 class ClumpingDualThresh;
+class ClumpProps;
 using namespace std;
 
 ////////////////////////////////
@@ -62,22 +64,22 @@ public:
 
   // Find the run intervals in a 2D data grid
   int findIntervals(int nx, int ny,
-		    unsigned char *data_grid,
+		    const unsigned char *data_grid,
 		    int byte_threshold);
 
   // For float data
   int findIntervals(int nx, int ny,
-		    fl32 *data_grid,
+		    const fl32 *data_grid,
 		    fl32 threshold);
 
    // Find the run intervals in a 3D data grid
   int findIntervals3D(int nx, int ny, int nz,
-		      unsigned char *data_grid,
+		      const unsigned char *data_grid,
 		      int byte_threshold);
     
   // For float data
   int findIntervals3D(int nx, int ny, int nz,
-		      fl32 *data_grid,
+		      const fl32 *data_grid,
 		      fl32 byte_threshold);
 
   // Compute the EDM (Euclidean Distance Measure) of clumps,
@@ -86,21 +88,21 @@ public:
   void edm2D(int nx, int ny, unsigned char *edm_grid);
   
   // Erode clumps, put result in eroded grid
-
+  
   void erode(int nx, int ny, unsigned char *eroded_grid,
 	     int erosion_threshold);
 
   // perform clumping
 
   int performClumping(int nx, int ny, int nz,
-		      unsigned char *data_grid,
+		      const unsigned char *data_grid,
 		      int min_overlap,
 		      int byte_threshold);
 
   // For float data
 
   int performClumping(int nx, int ny, int nz,
-                      fl32 *data_grid,
+                      const fl32 *data_grid,
                       int min_overlap,
                       fl32 threshold);
 
@@ -112,6 +114,39 @@ public:
   // turn 1-based into 0-based
 
   const Clump_order *getClumps() const { return _clumps + 1; }
+
+  // set whether to use dual thresholds
+
+  void setUseDualThresholds(double secondary_threshold,
+                            double min_fraction_all_parts,
+                            double min_fraction_each_part,
+                            double min_area_each_part,
+                            double min_clump_volume,
+                            double max_clump_volume,
+                            bool debug = false);
+
+  // Perform clumping specifying the input geom and input data array.
+  // If using dual thresholds, call setUseDualThresholds().
+  // Return: fills out clumps vector.
+
+  void loadClumpVector(PjgGridGeom &inputGeom, 
+                       const fl32 *inputData,
+                       double primary_threshold,
+                       int min_grid_overlap,
+                       vector<ClumpProps> &clumps);
+
+  // Adjust the clumps for an (x, y) grid offset
+  // for example when performing dual thresholding
+  // The offsets will be added to the location of the interval
+  
+  void addXyOffsetToIntervals(int ixOffset, int iyOffset);
+
+  // get debug grids from using dual threshold
+
+  const fl32 *getDualThreshCompFileGrid() const;
+  const ui08 *getDualThreshAllFileGrid() const;
+  const ui08 *getDualThreshValidFileGrid() const;
+  const ui08 *getDualThreshGrownFileGrid() const;
 
 protected:
   
@@ -129,6 +164,7 @@ private:
   int _nIntOrderAlloc;
   Interval **_intervalOrder;
 
+  PjgGridGeom _gridGeom;
   ClumpingDualThresh *_dualT;
 
   // allocate row headers

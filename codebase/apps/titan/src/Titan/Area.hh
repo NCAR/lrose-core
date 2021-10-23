@@ -42,7 +42,7 @@
 using namespace std;
 
 class InputMdv;
-class ClumpGrid;
+class ClumpProps;
 
 // struct for the dbz histogram entries
 
@@ -70,13 +70,13 @@ public:
   virtual ~Area();
 
   // compute()
-  void compute(const ClumpGrid &clump_grid,
+  void compute(const ClumpProps &cprops,
 	       storm_file_global_props_t *gprops,
 	       dbz_hist_entry_t *dbz_hist);
 
   // Store the projected area runs in the storm file handle
 
-  int storeProjRuns(const ClumpGrid &clump_grid);
+  int storeProjRuns(const ClumpProps &cprops);
 
   int OK;
 
@@ -105,7 +105,7 @@ private:
   double **_areaCoords;
   int _nCoordsAlloc;
 
-  void _ellipseCompute(const ClumpGrid &clump_grid,
+  void _ellipseCompute(const ClumpProps &cprops,
 		       ui08 *grid,
 		       fl32 *area,
 		       fl32 *area_centroid_x,
@@ -118,13 +118,13 @@ private:
 
   void _allocCoords(const int n_coords);
 
-  void _computeProjPolygon(const ClumpGrid &clump_grid);
+  void _computeProjPolygon(const ClumpProps &cprops);
 
-  void _computePrecip(const ClumpGrid &clump_grid);
+  void _computePrecip(const ClumpProps &cprops);
  
   void _compute2dDbzHist(dbz_hist_entry_t *dbz_hist);
  
-  void _computeTops(const ClumpGrid &clump_grid);
+  void _computeTops(const ClumpProps &cprops);
  
 };
 

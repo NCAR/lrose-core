@@ -38,7 +38,9 @@
 
 #include <euclid/ClumpingMgr.hh>
 #include <euclid/ClumpingDualThresh.hh>
+#include <euclid/ClumpProps.hh>
 #include <toolsa/umisc.h>
+#include <iostream>
 using namespace std;
 
 //////////////
@@ -60,7 +62,7 @@ ClumpingMgr::ClumpingMgr()
   _clumps = NULL;
   _nClumps = 0;
 
-  _dualT = new ClumpingDualThresh;
+  _dualT = NULL;
 
 }
 
@@ -76,7 +78,9 @@ ClumpingMgr::~ClumpingMgr()
   EG_free_rowh(&_nRowsAlloc, &_rowh);
   EG_free_intervals(&_intervals, &_nIntervalsAlloc);
 
-  delete _dualT;
+  if (_dualT) {
+    delete _dualT;
+  }
 
 }
 
@@ -89,7 +93,7 @@ ClumpingMgr::~ClumpingMgr()
 //
 
 int ClumpingMgr::findIntervals(int nx, int ny,
-                               unsigned char *data_grid,
+                               const unsigned char *data_grid,
                                int byte_threshold)
 
 {
@@ -105,7 +109,7 @@ int ClumpingMgr::findIntervals(int nx, int ny,
 // for floats
 
 int ClumpingMgr::findIntervals(int nx, int ny,
-                               fl32 *data_grid,
+                               const fl32 *data_grid,
                                fl32 threshold)
 
 {
@@ -127,7 +131,7 @@ int ClumpingMgr::findIntervals(int nx, int ny,
 //
 
 int ClumpingMgr::findIntervals3D(int nx, int ny, int nz,
-                                 unsigned char *data_grid,
+                                 const unsigned char *data_grid,
                                  int byte_threshold)
 
 {
@@ -150,7 +154,7 @@ int ClumpingMgr::findIntervals3D(int nx, int ny, int nz,
 // for floats
 
 int ClumpingMgr::findIntervals3D(int nx, int ny, int nz,
-                                 fl32 *data_grid,
+                                 const fl32 *data_grid,
                                  fl32 threshold)
 
 {
@@ -216,7 +220,7 @@ void ClumpingMgr::erode(int nx, int ny, unsigned char *eroded_grid,
 //
 
 int ClumpingMgr::performClumping(int nx, int ny, int nz,
-                                 unsigned char *data_grid,
+                                 const unsigned char *data_grid,
                                  int min_overlap,
                                  int byte_threshold)
 
@@ -266,7 +270,7 @@ int ClumpingMgr::performClumping(int nx, int ny, int nz,
 //
 
 int ClumpingMgr::performClumping(int nx, int ny, int nz,
-                                 fl32 *data_grid,
+                                 const fl32 *data_grid,
                                  int min_overlap,
                                  fl32 threshold)
 
@@ -319,4 +323,147 @@ void ClumpingMgr::_allocRowh(int nrows_per_vol)
 
 {
   EG_alloc_rowh(nrows_per_vol, &_nRowsAlloc, &_rowh);
+}
+
+/////////////////////////////////////
+// set whether to use dual thresholds
+
+void ClumpingMgr::setUseDualThresholds(double secondary_threshold,
+                                       double min_fraction_all_parts,
+                                       double min_fraction_each_part,
+                                       double min_area_each_part,
+                                       double min_clump_volume,
+                                       double max_clump_volume,
+                                       bool debug /* = false */)
+
+{
+
+  if (_dualT == NULL) {
+    _dualT = new ClumpingDualThresh;
+  }
+
+  _dualT->setSecondaryThreshold(secondary_threshold);
+  _dualT->setMinFractionAllParts(min_fraction_all_parts);
+  _dualT->setMinFractionEachPart(min_fraction_each_part);
+  _dualT->setMinAreaEachPart(min_area_each_part);
+  _dualT->setMinClumpVolume(min_clump_volume);
+  _dualT->setMaxClumpVolume(max_clump_volume);
+  _dualT->setDebug(debug);
+
+}
+
+/////////////////////////////////////////////////////////////////////
+// Perform clumping specifying the input geom and input data array.
+// If needed, call setUseDualThresholds().
+// Return: fills out clumps vector.
+
+void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom, 
+                                  const fl32 *inputData,
+                                  double primary_threshold,
+                                  int min_grid_overlap,
+                                  vector<ClumpProps> &clumpVec)
+
+{
+
+  clumpVec.clear();
+
+  // set input geom
+  
+  _gridGeom = inputGeom;
+  
+  // perform clumping
+
+  _nClumps = performClumping(_gridGeom.nx(), _gridGeom.ny(), _gridGeom.nz(),
+                             inputData, min_grid_overlap, primary_threshold);
+  
+  // load up clump vector
+  
+  if (_dualT != NULL) {
+
+    // use dual thresholds
+    
+    _dualT->setInputData(inputGeom, inputData);
+    
+    const Clump_order *clump = getClumps();
+    for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
+      ClumpProps cprops;
+      cprops.init(clump, _gridGeom);
+      int n_sub_clumps = _dualT->compute(cprops);
+      if (n_sub_clumps == 1) {
+        clumpVec.push_back(cprops);
+      } else {
+	for (int i = 0; i < n_sub_clumps; i++) {
+	  clumpVec.push_back(_dualT->subClumps()[i]);
+	}
+      }
+    } // iclump
+
+  } else {
+
+    // only use primary threshold
+
+    const Clump_order *clump = getClumps();
+    for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
+      ClumpProps cprops;
+      cprops.init(clump, _gridGeom);
+      clumpVec.push_back(cprops);
+    } // iclump
+
+  } // if (_dualT != NULL)
+
+}
+
+/////////////////////////////////////////////
+// get debug grids from using dual threshold
+
+const fl32 *ClumpingMgr::getDualThreshCompFileGrid() const {
+  if (_dualT == NULL) {
+    return NULL;
+  }
+  return _dualT->getCompFileGrid();
+}
+
+const ui08 *ClumpingMgr::getDualThreshAllFileGrid() const {
+  if (_dualT == NULL) {
+    return NULL;
+  }
+  return _dualT->getAllFileGrid();
+}
+
+const ui08 *ClumpingMgr::getDualThreshValidFileGrid() const {
+  if (_dualT == NULL) {
+    return NULL;
+  }
+  return _dualT->getValidFileGrid();
+}
+
+const ui08 *ClumpingMgr::getDualThreshGrownFileGrid() const {
+  if (_dualT == NULL) {
+    return NULL;
+  }
+  return _dualT->getGrownFileGrid();
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// Adjust the clumps for an (x, y) grid offset
+// for example when performing dual thresholding
+// The offsets will be added to the location of the interval
+
+void ClumpingMgr::addXyOffsetToIntervals(int ixOffset,
+                                         int iyOffset)
+
+{
+  
+  for (int ii = 0; ii < _nIntervalsAlloc; ii++) {
+    
+    Interval *intv = _intervals + ii;
+
+    intv->row_in_vol += iyOffset;
+    intv->row_in_plane += iyOffset;
+    intv->begin += ixOffset;
+    intv->end += ixOffset;
+
+  }
+
 }

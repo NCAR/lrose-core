@@ -44,6 +44,7 @@
 #include <toolsa/TaThread.hh>
 #include <dataport/port_types.h>
 #include <euclid/ClumpingMgr.hh>
+#include <euclid/ClumpProps.hh>
 using namespace std;
 
 ////////////////////////
@@ -296,7 +297,7 @@ protected:
   
 private:
 
-  class ClumpGeom;
+  class StormClump;
   
   // private data
   
@@ -358,8 +359,7 @@ private:
   // clumping the convective regions
   
   ClumpingMgr _clumping;
-  int _nClumps;
-  vector<ClumpGeom *> _clumps;
+  vector<StormClump *> _clumps;
   
   // inputs
   
@@ -497,19 +497,19 @@ private:
   /////////////////////////////////////////////////////////
   // inner class for clump geometry
 
-  class ClumpGeom
+  class StormClump
   {  
     
   public:   
     
     // constructor
     
-    ClumpGeom(ConvStratFinder *finder,
-              const Clump_order *clump);
+    StormClump(ConvStratFinder *finder,
+               const ClumpProps &cprops);
     
     // destructor
     
-    virtual ~ClumpGeom();
+    virtual ~StormClump();
     
     // compute geom
     
@@ -534,7 +534,7 @@ private:
   private:
 
     ConvStratFinder *_finder;
-    const Clump_order *_clump;
+    ClumpProps _cprops;
     int _id;
     double _volumeKm3;
     double _vertExtentKm;

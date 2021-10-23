@@ -97,12 +97,12 @@ public:
   // Returns 0 on success, -1 on error
   
   virtual int initCreate(const char* fmqURL, 
-			  const char* procName, 
-			  bool debug = false,
-			  bool compression = false, 
-			  size_t numSlots = 1024, 
-			  size_t bufSize = 10000,
-			  MsgLog *msgLog = NULL);
+                         const char* procName, 
+                         bool debug = false,
+                         bool compression = false, 
+                         size_t numSlots = 1024, 
+                         size_t bufSize = 10000,
+                         MsgLog *msgLog = NULL);
 
   // initReadWrite()
   // If FMQ already exists, it is opened in mode "r+".
@@ -113,16 +113,16 @@ public:
   //  local disk access and 500 msecs for remote access.
   //
   // Returns 0 on success, -1 on error
- 
+  
   virtual int initReadWrite(const char* fmqURL, 
-			     const char* procName, 
-			     bool debug = false,
-			     openPosition position = END,
-			     bool compression = false, 
-			     size_t numSlots = 1024, 
-			     size_t bufSize = 10000,
-			     int msecSleep = -1,
-			     MsgLog *msgLog = NULL);
+                            const char* procName, 
+                            bool debug = false,
+                            openPosition position = END,
+                            bool compression = false, 
+                            size_t numSlots = 1024, 
+                            size_t bufSize = 10000,
+                            int msecSleep = -1,
+                            MsgLog *msgLog = NULL);
 
   // initReadOnly()
   // Open for reading, in mode "r".
@@ -135,11 +135,11 @@ public:
   // Returns 0 on success, -1 on error
   
   virtual int initReadOnly(const char* fmqURL, 
-			    const char* procName, 
-			    bool debug = false,
-			    openPosition position = END,
-			    int msecSleep = -1,
-			    MsgLog *msgLog = NULL);
+                           const char* procName, 
+                           bool debug = false,
+                           openPosition position = END,
+                           int msecSleep = -1,
+                           MsgLog *msgLog = NULL);
 
   // initReadBlocking()
   // If queue exists, opens for reading, in mode "r".
@@ -163,11 +163,11 @@ public:
   // first entry written to a queue may have been missed. Niles Oien.
   //
   virtual int initReadBlocking(const char* fmqURL, 
-				const char* procName, 
-				bool debug = false,
-				openPosition position = END,
-				int msecSleep = -1,
-				MsgLog *msgLog = NULL);
+                               const char* procName, 
+                               bool debug = false,
+                               openPosition position = END,
+                               int msecSleep = -1,
+                               MsgLog *msgLog = NULL);
 
   // initReadWriteBlocking()
   // If queue exists, opens for reading, in mode "r+".
@@ -186,25 +186,25 @@ public:
   // the open position - they apply to initReadWriteBlocking as well.
   //
   virtual int initReadWriteBlocking(const char* fmqURL, 
-				     const char* procName, 
-				     bool debug = false,
-				     openPosition position = END,
-				     int msecSleep = -1,
-				     MsgLog *msgLog = NULL);
+                                    const char* procName, 
+                                    bool debug = false,
+                                    openPosition position = END,
+                                    int msecSleep = -1,
+                                    MsgLog *msgLog = NULL);
 
   // generic init() - allows full control of the init
   // Returns 0 on success, -1 on error
 
   virtual int init(const char* fmqURL, 
-		    const char* procName, 
-		    bool debug = false,
-		    openMode mode = READ_WRITE, 
-		    openPosition position = END,
-		    bool compression = false, 
-		    size_t numSlots = 1024, 
-		    size_t bufSize = 10000,
-		    int msecSleep = -1,
-		    MsgLog *msgLog = NULL);
+                   const char* procName, 
+                   bool debug = false,
+                   openMode mode = READ_WRITE, 
+                   openPosition position = END,
+                   bool compression = false, 
+                   size_t numSlots = 1024, 
+                   size_t bufSize = 10000,
+                   int msecSleep = -1,
+                   MsgLog *msgLog = NULL);
 
   // Closing the queue
   // returns 0 on success, -1 on failure

@@ -130,6 +130,7 @@ codebase/apps/didss/src/File2Dsr/File2Dsr
 codebase/apps/didss/src/Fmq2Fmq/Fmq2Fmq
 codebase/apps/didss/src/Fmq2MultMsgFmq/Fmq2MultMsgFmq
 codebase/apps/didss/src/FmqMon/FmqMon
+codebase/apps/didss/src/FmqTest/FmqTest
 codebase/apps/didss/src/GenPt2Spdb/GenPt2Spdb
 codebase/apps/didss/src/Hiq2Dsr/Hiq2Dsr
 codebase/apps/didss/src/HiqDos2Dsr/HiqDos2Dsr

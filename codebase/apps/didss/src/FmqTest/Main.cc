@@ -21,96 +21,98 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////
-// PjgGridGeom.cc
+///////////////////////////////////////////////////////////////
 //
-// Class to represent grid geometry for PJG classes.
+// main for FmqTest
 //
-// Mike Dixon, EOL, NCAR,
-// P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2021
+// Oct 2021
 //
-//////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+//
+// FmqTest reads data from an input file,
+// and writes the contents to an FMQ at a specified rate.
+//
+////////////////////////////////////////////////////////////////
 
-#include <euclid/PjgGridGeom.hh>
+#include "FmqTest.hh"
+#include <toolsa/str.h>
+#include <toolsa/port.h>
+#include <signal.h>
+#include <new>
+using namespace std;
 
-////////////////////////
-// Default constructor
-//
+// file scope
 
-PjgGridGeom::PjgGridGeom()
+static void tidy_and_exit (int sig);
+static void out_of_store();
+static FmqTest *_prog;
+static int _argc;
+static char **_argv;
+
+// main
+
+int main(int argc, char **argv)
 
 {
-  _nx = _ny = 0;
-  _dx = _dy = 0.0;
-  _minx = _miny = 0.0;
-  _isLatLon = true;
-  _projType = PjgTypes::PROJ_LATLON;
-}
 
-///////////////
-// Destructor
+  _argc = argc;
+  _argv = argv;
 
-PjgGridGeom::~PjgGridGeom()
+  // create program object
 
-{
-}
-
-////////////////////////
-// Print details of grid
-
-void PjgGridGeom::print(ostream &out) const
-
-{
-  out << "============= PjgGridGeom =============" << endl;
-  out << "  nx, ny, nz: "
-      << _nx << ", " << _ny << ", " << _zKm.size() << endl;
-  out << "  dx, dy, meanDz: "
-      << _dx << ", " << _dy << ", " << meanDz() << endl;
-  out << "  minx, miny, minz: "
-      << _minx << ", " << _miny << ", " << minz() << endl;
-  out << "  zKm: ";
-  for (size_t ii = 0; ii < _zKm.size(); ii++) {
-    out << _zKm[ii];
-    if (ii != _zKm.size() - 1) {
-      out << ", ";
-    }
+  _prog = new FmqTest(argc, argv);
+  if (!_prog->isOK) {
+    return(-1);
   }
-  out << endl;
-  out << "  isLatLon: " << (_isLatLon? "Y":"N") << endl;
-  out << "  projType: " << PjgTypes::proj2string(_projType) << endl;
-  out << "=======================================" << endl;
-}
 
-////////////////////////
-// Compute delta z in km
-
-double PjgGridGeom::dzKm(int iz) const
-
-{
+  // set signal handling
   
-  if (iz < 0 || iz > (int) _zKm.size() - 1) {
-    return 0;
-  }
+  PORTsignal(SIGINT, tidy_and_exit);
+  PORTsignal(SIGHUP, tidy_and_exit);
+  PORTsignal(SIGTERM, tidy_and_exit);
+  PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
 
-  if (iz == 0) {
-    if (_zKm.size() < 2) {
-      return 0;
-    } else {
-      return (_zKm[1] - _zKm[0]);
-    }
-  }
+  // set new() memory failure handler function
 
-  if (iz == (int) _zKm.size() - 1) {
-    if (_zKm.size() < 2) {
-      return 0;
-    } else {
-      return (_zKm[_zKm.size() - 1] - _zKm[_zKm.size() - 2]);
-    }
-  }
+  set_new_handler(out_of_store);
 
-  return (_zKm[iz + 1] - _zKm[iz - 1]) / 2.0;
+  // run it
+
+  int iret = _prog->Run();
+
+  // clean up
+
+  tidy_and_exit(iret);
+  return (iret);
+  
+}
+
+///////////////////
+// tidy up on exit
+
+static void tidy_and_exit (int sig)
+
+{
+
+  delete(_prog);
+  exit(sig);
+
+}
+////////////////////////////////////
+// out_of_store()
+//
+// Handle out-of-memory conditions
+//
+
+static void out_of_store()
+
+{
+
+  fprintf(stderr, "FATAL ERROR - program FmqTest\n");
+  fprintf(stderr, "  Operator new failed - out of store\n");
+  exit(-1);
 
 }
 

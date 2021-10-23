@@ -715,21 +715,44 @@ void ConvStratFinder::_performClumping()
   
 {
 
-  _nClumps = _clumping.performClumping(_nx, _ny, _zKm.size(),
-                                       _convectivity3D.dat(),
-                                       _minOverlapForClumping,
-                                       _minConvectivityForConvective);
+  // set up grid geometry
+  
+  PjgGridGeom gridGeom;
+  gridGeom.setNx(_nx);
+  gridGeom.setNy(_ny);
+  gridGeom.setDx(_dx);
+  gridGeom.setDy(_dy);
+  gridGeom.setMinx(_minx);
+  gridGeom.setMiny(_miny);
+  gridGeom.setZKm(_zKm);
+  gridGeom.setIsLatLon(_projIsLatLon);
+  if (_projIsLatLon) {
+    gridGeom.setProjType(PjgTypes::PROJ_LATLON);
+  } else {
+    gridGeom.setProjType(PjgTypes::PROJ_FLAT);
+  }
+
+  vector<ClumpProps> clumpVec;
+  _clumping.loadClumpVector(gridGeom, _convectivity3D.dat(), 
+                            _minConvectivityForConvective,
+                            _minOverlapForClumping,
+                            clumpVec);
+
+  // _nClumps = _clumping.performClumping(_nx, _ny, _zKm.size(),
+  //                                      _convectivity3D.dat(),
+  //                                      _minOverlapForClumping,
+  //                                      _minConvectivityForConvective);
   
   if (_verbose) {
     cerr << "ConvStratFinder::_performClumping()" << endl;
-    cerr << "  N clumps: " << _nClumps << endl;
+    cerr << "  N clumps: " << clumpVec.size() << endl;
   }
 
   _freeClumps();
-  const Clump_order *clumpOrders = _clumping.getClumps();
-  for (int ii = 0; ii < _nClumps; ii++) {
-    const Clump_order *clumpOrder = clumpOrders + ii;
-    ClumpGeom *clump = new ClumpGeom(this, clumpOrder);
+  // const Clump_order *clumpOrders = _clumping.getClumps();
+  for (size_t ii = 0; ii < clumpVec.size(); ii++) {
+    // const Clump_order *clumpOrder = clumpOrders + ii;
+    StormClump *clump = new StormClump(this, clumpVec[ii]);
     clump->computeGeom();
     _clumps.push_back(clump);
   }
@@ -1263,16 +1286,16 @@ void ConvStratFinder::ComputeTexture::run()
 }
 
 ///////////////////////////////////////////////////////////////
-// ClumpGeom inner class
+// StormClump inner class
 //
 ///////////////////////////////////////////////////////////////
 
 // Constructor
 
-ConvStratFinder::ClumpGeom::ClumpGeom(ConvStratFinder *finder,
-                                      const Clump_order *clump) :
+ConvStratFinder::StormClump::StormClump(ConvStratFinder *finder,
+                                        const ClumpProps &cprops) :
         _finder(finder),
-        _clump(clump)
+        _cprops(cprops)
 {
   _id = 0;
   _volumeKm3 = 0.0;
@@ -1285,19 +1308,19 @@ ConvStratFinder::ClumpGeom::ClumpGeom(ConvStratFinder *finder,
 
 // destructor
 
-ConvStratFinder::ClumpGeom::~ClumpGeom() 
+ConvStratFinder::StormClump::~StormClump() 
 {
 }
 
 // compute clump geom
 
 
-void ConvStratFinder::ClumpGeom::computeGeom() 
+void ConvStratFinder::StormClump::computeGeom() 
 {
 
   // init
   
-  _nPtsTotal = _clump->pts;
+  _nPtsTotal = _cprops.nPoints3D();
   _volumeKm3 = 0.0;
   _vertExtentKm = 0.0;
   _nPtsShallow = 0;
@@ -1316,15 +1339,15 @@ void ConvStratFinder::ClumpGeom::computeGeom()
   double minZKm = 9999.0;
   double maxZKm = -9999.0;
 
-  for (int irun = 0; irun < _clump->size; irun++) {
+  for (size_t irun = 0; irun < _cprops.intvLocal().size(); irun++) {
     
-    Interval *intvl = _clump->ptr[irun];
+    const Interval &intvl = _cprops.intvLocal(irun);
     if (irun == 0) {
-      _id = intvl->id;
+      _id = intvl.id;
     }
     
-    int iz = intvl->plane;
-    int iy = intvl->row_in_plane;
+    int iz = intvl.plane;
+    int iy = intvl.row_in_plane;
 
     double zKm = _finder->_zKm[iz];
     minZKm = min(zKm, minZKm);
@@ -1348,9 +1371,9 @@ void ConvStratFinder::ClumpGeom::computeGeom()
     }
 
     double dVol = dxKm * dyKm * dzKm;
-    int offset2D = iy * nx + intvl->begin;
+    int offset2D = iy * nx + intvl.begin;
 
-    for (int ix = intvl->begin; ix <= intvl->end; ix++, offset2D++) {
+    for (int ix = intvl.begin; ix <= intvl.end; ix++, offset2D++) {
 
       fl32 shallowHtKm = shallowHtGrid[offset2D];
       fl32 deepHtKm = deepHtGrid[offset2D];
@@ -1374,7 +1397,7 @@ void ConvStratFinder::ClumpGeom::computeGeom()
 
 // Set the partition category based on clump properties
 
-void ConvStratFinder::ClumpGeom::setPartition() 
+void ConvStratFinder::StormClump::setPartition() 
 {
 
   // compute fraction in each height category
@@ -1411,17 +1434,17 @@ void ConvStratFinder::ClumpGeom::setPartition()
   int nPtsPlane = _finder->_nx * _finder->_ny;
   int nx = _finder->_nx;
   
-  for (int irun = 0; irun < _clump->size; irun++) {
+  for (size_t irun = 0; irun < _cprops.intvLocal().size(); irun++) {
     
-    Interval *intvl = _clump->ptr[irun];
+    const Interval &intvl = _cprops.intvLocal(irun);
     
-    int iy = intvl->row_in_plane;
-    int iz = intvl->plane;
+    int iy = intvl.row_in_plane;
+    int iz = intvl.plane;
     
-    int offset2D = iy * nx + intvl->begin;
+    int offset2D = iy * nx + intvl.begin;
     int offset3D = iz * nPtsPlane + offset2D;
     
-    for (int ix = intvl->begin; ix <= intvl->end; ix++, offset3D++) {
+    for (int ix = intvl.begin; ix <= intvl.end; ix++, offset3D++) {
       partition[offset3D] = category;
     } // ix
     
@@ -1432,7 +1455,7 @@ void ConvStratFinder::ClumpGeom::setPartition()
 ///////////////////////////////////////////////////////////
 // Check for stratiform echo below
 
-bool ConvStratFinder::ClumpGeom::stratiformBelow() 
+bool ConvStratFinder::StormClump::stratiformBelow() 
 {
 
   // we go through each point in the clump, and check the point
@@ -1450,12 +1473,12 @@ bool ConvStratFinder::ClumpGeom::stratiformBelow()
   double nMiss = 0.0;
   double nStrat = 0.0;
   
-  for (int irun = 0; irun < _clump->size; irun++) {
+  for (size_t irun = 0; irun < _cprops.intvLocal().size(); irun++) {
     
-    Interval *intvl = _clump->ptr[irun];
+    const Interval &intvl = _cprops.intvLocal(irun);
     
-    int iy = intvl->row_in_plane;
-    int iz = intvl->plane;
+    int iy = intvl.row_in_plane;
+    int iz = intvl.plane;
     if (iz == 0) {
       // clump is at lowest level
       // so no stratiform can be below
@@ -1463,10 +1486,10 @@ bool ConvStratFinder::ClumpGeom::stratiformBelow()
     }
     
     // check grid points on plane below this one
-    int offset2D = iy * nx + intvl->begin;
+    int offset2D = iy * nx + intvl.begin;
     int offset3D = (iz - 1) * nPtsPlane + offset2D;
     
-    for (int ix = intvl->begin; ix <= intvl->end; ix++, offset3D++) {
+    for (int ix = intvl.begin; ix <= intvl.end; ix++, offset3D++) {
       fl32 conv = convectivity3D[offset3D];
       if (conv == _missingFl32) {
         // point below convection is missing

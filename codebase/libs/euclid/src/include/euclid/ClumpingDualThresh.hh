@@ -42,7 +42,7 @@
 #include <rapformats/titan_grid.h>
 #include <euclid/PjgGridGeom.hh>
 class ClumpingMgr;
-class ClumpGrid;
+class ClumpProps;
 using namespace std;
 
 ////////////////////////////////
@@ -81,14 +81,14 @@ public:
   // Compute sub-clumps using the dual threshold.
   // Returns number of sub-clumps.
   
-  int compute(const ClumpGrid &clump_grid);
+  int compute(const ClumpProps &primaryClump);
 
   // write out MDV file for debugging
   // int writeOutputMdv();
 
   // sub clumps to be returned to calling class
 
-  const ClumpGrid *subClumps() { return _subClumps; }
+  const ClumpProps *subClumps() { return _subClumps; }
 
   // get grids for debug output
 
@@ -107,8 +107,8 @@ private:
   // input data
 
   PjgGridGeom _inputGeom;
+  PjgGridGeom _workGeom;
   const fl32 *_inputData;
-  int _minValidLayer;
 
   size_t _nxInput;
   size_t _nyInput;
@@ -129,7 +129,7 @@ private:
   ClumpingMgr *_clumping;
   size_t _nSubClumps;
   size_t _nSubClumpsAlloc;
-  ClumpGrid *_subClumps;
+  ClumpProps *_subClumps;
   ClumpingMgr **_subClumping;
 
   // grids
@@ -157,17 +157,17 @@ private:
   ui08 *_gridMask;
   size_t _nPtsGridMaskAlloc;
 
-  void _initWorkGrids();
+  void _initWorkGrids(const ClumpProps &primaryClump);
   void _initFileGrids();
-  void _fillComposite(const ClumpGrid &clump_grid);
-  void _updateFileGrids(const ClumpGrid &clump_grid);
-  void _updateFileComp(const ClumpGrid &clump_grid);
+  void _fillComposite(const ClumpProps &primaryClump);
+  void _updateFileGrids(const ClumpProps &primaryClump);
+  void _updateFileComp(const ClumpProps &primaryClump);
   void _loadCompIndex();
   void _growSubAreas();
   void _allocSubClumps();
-  void _computeSubClump(const ClumpGrid &clump_grid, int clump_id);
+  void _computeSubClump(const ClumpProps &primaryClump, int clump_id);
   void _initGridMask();
-  void _loadGridMask(const ClumpGrid &clump_grid, int clump_id);
+  void _loadGridMask(const ClumpProps &cprops, int clump_id);
 
 };
 

@@ -21,98 +21,78 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////
-// PjgGridGeom.cc
+/////////////////////////////////////////////////////////////
+// FmqTest.hh
 //
-// Class to represent grid geometry for PJG classes.
+// FmqTest object
 //
-// Mike Dixon, EOL, NCAR,
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2021
+// Oct 2021
 //
-//////////////////////////////////////////////////////////
-
-#include <euclid/PjgGridGeom.hh>
-
-////////////////////////
-// Default constructor
+///////////////////////////////////////////////////////////////
 //
+// FmqTest reads an input FMQ and copies the contents unchanged to an 
+// output FMQ. It is useful for reading data from a remote queue and 
+// copying it to a local queue. The clients can then read the local 
+// queue rather than all access the remote queue.
+//
+///////////////////////////////////////////////////////////////////////
 
-PjgGridGeom::PjgGridGeom()
+#ifndef FmqTest_H
+#define FmqTest_H
 
-{
-  _nx = _ny = 0;
-  _dx = _dy = 0.0;
-  _minx = _miny = 0.0;
-  _isLatLon = true;
-  _projType = PjgTypes::PROJ_LATLON;
-}
+#include <string>
+#include <dataport/port_types.h>
+#include <toolsa/TaArray.hh>
+#include <Fmq/DsFmq.hh>
+#include "Args.hh"
+#include "Params.hh"
+using namespace std;
 
-///////////////
-// Destructor
-
-PjgGridGeom::~PjgGridGeom()
-
-{
-}
-
-////////////////////////
-// Print details of grid
-
-void PjgGridGeom::print(ostream &out) const
-
-{
-  out << "============= PjgGridGeom =============" << endl;
-  out << "  nx, ny, nz: "
-      << _nx << ", " << _ny << ", " << _zKm.size() << endl;
-  out << "  dx, dy, meanDz: "
-      << _dx << ", " << _dy << ", " << meanDz() << endl;
-  out << "  minx, miny, minz: "
-      << _minx << ", " << _miny << ", " << minz() << endl;
-  out << "  zKm: ";
-  for (size_t ii = 0; ii < _zKm.size(); ii++) {
-    out << _zKm[ii];
-    if (ii != _zKm.size() - 1) {
-      out << ", ";
-    }
-  }
-  out << endl;
-  out << "  isLatLon: " << (_isLatLon? "Y":"N") << endl;
-  out << "  projType: " << PjgTypes::proj2string(_projType) << endl;
-  out << "=======================================" << endl;
-}
+class MsgLog;
 
 ////////////////////////
-// Compute delta z in km
+// This class
 
-double PjgGridGeom::dzKm(int iz) const
-
-{
+class FmqTest {
   
-  if (iz < 0 || iz > (int) _zKm.size() - 1) {
-    return 0;
-  }
+public:
 
-  if (iz == 0) {
-    if (_zKm.size() < 2) {
-      return 0;
-    } else {
-      return (_zKm[1] - _zKm[0]);
-    }
-  }
+  // constructor
 
-  if (iz == (int) _zKm.size() - 1) {
-    if (_zKm.size() < 2) {
-      return 0;
-    } else {
-      return (_zKm[_zKm.size() - 1] - _zKm[_zKm.size() - 2]);
-    }
-  }
+  FmqTest (int argc, char **argv);
 
-  return (_zKm[iz + 1] - _zKm[iz - 1]) / 2.0;
+  // destructor
+  
+  ~FmqTest();
 
-}
+  // run 
 
+  int Run();
 
+  // data members
+
+  bool isOK;
+
+protected:
+  
+private:
+
+  string _progName;
+  char *_paramsPath;
+  Args _args;
+  Params _params;
+  MsgLog *_msgLog;
+
+  DsFmq _outputFmq;
+  time_t _prevTimeForOpen;
+
+  int _run();
+  void _openOutputFmq();
+  
+};
+
+#endif
 

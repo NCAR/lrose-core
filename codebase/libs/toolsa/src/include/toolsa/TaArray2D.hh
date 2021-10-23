@@ -45,6 +45,7 @@
 #define TA_ARRAY_2D_HH
 
 #include <cstdio>
+#include <cstring>
 using namespace std;
 
 template <class T>

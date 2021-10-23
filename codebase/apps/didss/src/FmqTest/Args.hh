@@ -22,83 +22,49 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ClumpGrid.hh
-//
-// ClumpGrid class - combines a clump with grid geometry so that
-// computations may be done on the clump using that grid geometry.
+// Args.hh: Command line object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// July 2021
+// Oct 2021
 //
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-#ifndef ClumpGrid_HH
-#define ClumpGrid_HH
+#ifndef ARGS_H
+#define ARGS_H
 
-#include <euclid/clump.h>
-#include <euclid/PjgGridGeom.hh>
-#include <vector>
+#include <string>
+#include <iostream>
+#include <tdrp/tdrp.h>
 using namespace std;
 
-////////////////////////////////
-// ClumpGrid
-
-class ClumpGrid {
+class Args {
   
 public:
 
   // constructor
 
-  ClumpGrid();
-  
-  // initializer
-
-  void init(const Clump_order *clump,
-            const PjgGridGeom &grid,
-	    int start_ix, int start_iy);
+  Args();
 
   // destructor
-  
-  virtual ~ClumpGrid();
 
-  PjgGridGeom gridGeom;
+  ~Args();
 
-  vector<Interval> intervals;
-  int nIntervals;
-  int nPoints;
-  
-  int startIx, startIy;
-  double offsetX, offsetY;
-  double startX, startY;
-  int nX, nY;
-  double dX, dY;
+  // parse
 
-  double clumpSize;
-  double dVolAtCentroid;
-  double dAreaAtCentroid;
-  double dAreaEllipse;
-  double kmPerGridUnit;
+  int parse(int argc, char **argv, string &prog_name);
+
+  // public data
+
+  tdrp_override_t override;
 
 protected:
   
 private:
 
-  int _initDone;
-
-  int _minIx, _minIy;
-  int _maxIx, _maxIy;
-
-  double _dXAtEquator;
-  double _dVolFlat, _dVolAtEquator;
-  double _dAreaFlat, _dAreaAtEquator;
-
-  void _shrinkWrap(const Clump_order *clump_order);
-  void _computeGeometry();
+  void _usage(string &prog_name, ostream &out);
   
 };
 
 #endif
-
-
 

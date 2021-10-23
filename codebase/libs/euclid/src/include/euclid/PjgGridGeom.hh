@@ -58,32 +58,32 @@ public:
   /// set methods
   /// units are km
 
-  void setNx(size_t val) { _nx = val; }
-  void setNy(size_t val) { _ny = val; }
+  inline void setNx(size_t val) { _nx = val; }
+  inline void setNy(size_t val) { _ny = val; }
 
-  void setDx(double val) { _dx = val; }
-  void setDy(double val) { _dy = val; }
+  inline void setDx(double val) { _dx = val; }
+  inline void setDy(double val) { _dy = val; }
   
-  void setMinx(double val) { _minx = val; }
-  void setMiny(double val) { _miny = val; }
+  inline void setMinx(double val) { _minx = val; }
+  inline void setMiny(double val) { _miny = val; }
   
-  void setZKm(const vector<double> &val) { _zKm = val; }
-  void addZKm(double val) { _zKm.push_back(val); }
-  void clearZKm() { _zKm.clear(); }
+  inline void setZKm(const vector<double> &val) { _zKm = val; }
+  inline void addZKm(double val) { _zKm.push_back(val); }
+  inline void clearZKm() { _zKm.clear(); }
 
-  void setIsLatLon(bool val) { _isLatLon = val; }
-  void setProjType(PjgTypes::proj_type_t val) { _projType = val; }
+  inline void setIsLatLon(bool val) { _isLatLon = val; }
+  inline void setProjType(PjgTypes::proj_type_t val) { _projType = val; }
   
   /// get methods
   /// units are km
 
-  size_t nx() const { return _nx; }
-  size_t ny() const { return _ny; }
-  size_t nz() const { return _zKm.size(); }
+  inline size_t nx() const { return _nx; }
+  inline size_t ny() const { return _ny; }
+  inline size_t nz() const { return _zKm.size(); }
   
-  double dx() const { return _dx; }
-  double dy() const { return _dy; }
-  double meanDz() const {
+  inline double dx() const { return _dx; }
+  inline double dy() const { return _dy; }
+  inline double meanDz() const {
     if (_zKm.size() > 1) {
       return (_zKm[_zKm.size()-1] - _zKm[0]) / (_zKm.size() - 1);
     } else {
@@ -91,23 +91,25 @@ public:
     }
   }
   
-  double minx() const { return _minx; }
-  double miny() const { return _miny; }
-  double minz() const {
+  inline double minx() const { return _minx; }
+  inline double miny() const { return _miny; }
+  inline double minz() const {
     if (_zKm.size() > 0) {
       return _zKm[0];
     } else {
       return 0;
     }
   }
-  const vector<double> &zKm() const { return _zKm; }
+  inline const vector<double> &zKm() const { return _zKm; }
+  inline double zKm(int iz) const { return _zKm[iz]; }
+  double dzKm(int iz) const;
 
-  bool isLatLon() const { return _isLatLon; }
-  PjgTypes::proj_type_t projType() const { return _projType; }
+  inline bool isLatLon() const { return _isLatLon; }
+  inline PjgTypes::proj_type_t projType() const { return _projType; }
   
   // Print details of grid
   
-  void print(ostream &out);
+  void print(ostream &out) const;
 
 protected:
 

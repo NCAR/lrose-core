@@ -43,12 +43,11 @@
  * Returns:
  *  	the number of intervals found
  */
-int
-EG_get_intervals(unsigned char row[],
-		 int begin,
-		 int end,
-		 Interval interval_array[],
-		 int threshold)
+int EG_get_intervals(const unsigned char row[],
+                     int begin,
+                     int end,
+                     Interval interval_array[],
+                     int threshold)
 {
   int count;
   int j;
@@ -103,12 +102,11 @@ EG_get_intervals(unsigned char row[],
  * Returns:
  *  	the number of intervals found
  */
-int
-EG_get_intervals_below(unsigned char row[],
-		      int begin,
-		      int end,
-		      Interval interval_array[],
-		      int threshold)
+int EG_get_intervals_below(const unsigned char row[],
+                           int begin,
+                           int end,
+                           Interval interval_array[],
+                           int threshold)
 {
   int count;
   int j;
